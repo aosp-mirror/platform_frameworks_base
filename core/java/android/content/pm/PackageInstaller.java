@@ -3346,7 +3346,7 @@ public class PackageInstaller {
         /**
          * The label representing the app to be installed.
          */
-        private final @NonNull String mLabel;
+        private final @NonNull CharSequence mLabel;
         /**
          * The locale of the app label being used.
          */
@@ -3388,7 +3388,7 @@ public class PackageInstaller {
         @DataClass.Generated.Member
         public PreapprovalDetails(
                 @Nullable Bitmap icon,
-                @NonNull String label,
+                @NonNull CharSequence label,
                 @NonNull ULocale locale,
                 @NonNull String packageName) {
             this.mIcon = icon;
@@ -3417,7 +3417,7 @@ public class PackageInstaller {
          * The label representing the app to be installed.
          */
         @DataClass.Generated.Member
-        public @NonNull String getLabel() {
+        public @NonNull CharSequence getLabel() {
             return mLabel;
         }
 
@@ -3461,7 +3461,7 @@ public class PackageInstaller {
             if (mIcon != null) flg |= 0x1;
             dest.writeByte(flg);
             if (mIcon != null) mIcon.writeToParcel(dest, flags);
-            dest.writeString8(mLabel);
+            dest.writeCharSequence(mLabel);
             dest.writeString8(mLocale.toString());
             dest.writeString8(mPackageName);
         }
@@ -3479,7 +3479,7 @@ public class PackageInstaller {
 
             byte flg = in.readByte();
             Bitmap icon = (flg & 0x1) == 0 ? null : Bitmap.CREATOR.createFromParcel(in);
-            String label = in.readString8();
+            CharSequence label = (CharSequence) in.readCharSequence();
             ULocale locale = new ULocale(in.readString8());
             String packageName = in.readString8();
 
@@ -3519,7 +3519,7 @@ public class PackageInstaller {
         public static final class Builder {
 
             private @Nullable Bitmap mIcon;
-            private @NonNull String mLabel;
+            private @NonNull CharSequence mLabel;
             private @NonNull ULocale mLocale;
             private @NonNull String mPackageName;
 
@@ -3545,7 +3545,7 @@ public class PackageInstaller {
              * The label representing the app to be installed.
              */
             @DataClass.Generated.Member
-            public @NonNull Builder setLabel(@NonNull String value) {
+            public @NonNull Builder setLabel(@NonNull CharSequence value) {
                 checkNotUsed();
                 mBuilderFieldsSet |= 0x2;
                 mLabel = value;
@@ -3596,10 +3596,10 @@ public class PackageInstaller {
         }
 
         @DataClass.Generated(
-                time = 1664257135109L,
+                time = 1666748098353L,
                 codegenVersion = "1.0.23",
                 sourceFile = "frameworks/base/core/java/android/content/pm/PackageInstaller.java",
-                inputSignatures = "private final @android.annotation.Nullable android.graphics.Bitmap mIcon\nprivate final @android.annotation.NonNull java.lang.String mLabel\nprivate final @android.annotation.NonNull android.icu.util.ULocale mLocale\nprivate final @android.annotation.NonNull java.lang.String mPackageName\nclass PreapprovalDetails extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genParcelable=true, genHiddenConstructor=true, genBuilder=true, genToString=true)")
+                inputSignatures = "private final @android.annotation.Nullable android.graphics.Bitmap mIcon\nprivate final @android.annotation.NonNull java.lang.CharSequence mLabel\nprivate final @android.annotation.NonNull android.icu.util.ULocale mLocale\nprivate final @android.annotation.NonNull java.lang.String mPackageName\nclass PreapprovalDetails extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genParcelable=true, genHiddenConstructor=true, genBuilder=true, genToString=true)")
         @Deprecated
         private void __metadata() {}
 
