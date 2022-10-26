@@ -415,6 +415,18 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                     "Session already initialized");
             return;
         }
+        int previewSessionType = mPreviewExtender.getSessionType();
+        int imageSessionType = mImageExtender.getSessionType();
+        if (previewSessionType != imageSessionType) {
+            throw new IllegalStateException("Preview extender session type: " + previewSessionType +
+                "and image extender session type: " + imageSessionType + " mismatch!");
+        }
+        int sessionType = SessionConfiguration.SESSION_REGULAR;
+        if ((previewSessionType != -1) &&
+                (previewSessionType != SessionConfiguration.SESSION_HIGH_SPEED)) {
+            sessionType = previewSessionType;
+            Log.v(TAG, "Using session type: " + sessionType);
+        }
 
         ArrayList<CaptureStageImpl> sessionParamsList = new ArrayList<>();
         ArrayList<OutputConfiguration> outputList = new ArrayList<>();
@@ -432,7 +444,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
         }
 
         SessionConfiguration sessionConfig = new SessionConfiguration(
-                SessionConfiguration.SESSION_REGULAR,
+                sessionType,
                 outputList,
                 new CameraExtensionUtils.HandlerExecutor(mHandler),
                 new SessionStateHandler());
