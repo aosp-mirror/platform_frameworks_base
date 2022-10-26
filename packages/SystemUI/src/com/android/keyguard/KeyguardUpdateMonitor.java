@@ -2227,8 +2227,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private void updateFaceEnrolled(int userId) {
         mIsFaceEnrolled = whitelistIpcs(
                 () -> mFaceManager != null && mFaceManager.isHardwareDetected()
-                        && mFaceManager.hasEnrolledTemplates(userId)
-                        && mBiometricEnabledForUser.get(userId));
+                        && mBiometricEnabledForUser.get(userId))
+                && mAuthController.isFaceAuthEnrolled(userId);
     }
 
     public boolean isFaceSupported() {
