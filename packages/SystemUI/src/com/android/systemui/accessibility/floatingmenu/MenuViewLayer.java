@@ -100,6 +100,7 @@ class MenuViewLayer extends FrameLayout {
                 windowManager);
         mMenuView = new MenuView(context, menuViewModel, menuViewAppearance);
         mMenuAnimationController = mMenuView.getMenuAnimationController();
+        mMenuAnimationController.setDismissCallback(this::hideMenuAndShowMessage);
 
         mDismissView = new DismissView(context);
         mDismissAnimationController = new DismissAnimationController(mDismissView, mMenuView);
