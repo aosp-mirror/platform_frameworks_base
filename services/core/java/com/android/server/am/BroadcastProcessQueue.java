@@ -807,7 +807,7 @@ class BroadcastProcessQueue {
 
     @NeverCompile
     public void dumpLocked(@UptimeMillisLong long now, @NonNull IndentingPrintWriter pw) {
-        if ((mActive == null) && mPending.isEmpty()) return;
+        if ((mActive == null) && isEmpty()) return;
 
         pw.print(toShortString());
         if (isRunnable()) {
@@ -822,6 +822,10 @@ class BroadcastProcessQueue {
         pw.increaseIndent();
         if (mActive != null) {
             dumpRecord(now, pw, mActive, mActiveIndex, mActiveBlockedUntilTerminalCount);
+        }
+        for (SomeArgs args : mPendingUrgent) {
+            final BroadcastRecord r = (BroadcastRecord) args.arg1;
+            dumpRecord(now, pw, r, args.argi1, args.argi2);
         }
         for (SomeArgs args : mPending) {
             final BroadcastRecord r = (BroadcastRecord) args.arg1;
