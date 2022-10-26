@@ -57,12 +57,13 @@ import java.util.function.Supplier;
  * option is provided.
  *
  * The following is what happens within the {@link SurfaceSyncGroup}
- * 1. Each SyncTarget will get a {@link SyncTarget#onReadyToSync} callback that contains a
- * {@link SyncBufferCallback}.
- * 2. Each {@link SyncTarget} needs to invoke {@link SyncBufferCallback#onBufferReady(Transaction)}.
- * This makes sure the SurfaceSyncGroup knows when the SyncTarget is complete, allowing the
- * SurfaceSyncGroup to get the Transaction that contains the buffer.
- * 3. When the final SyncBufferCallback finishes for the SurfaceSyncGroup, in most cases the
+ * 1. Each SyncTarget will get a {@link SyncTarget#onAddedToSyncGroup} callback that contains a
+ * {@link TransactionReadyCallback}.
+ * 2. Each {@link SyncTarget} needs to invoke
+ * {@link TransactionReadyCallback#onTransactionReady(Transaction)}. This makes sure the
+ * SurfaceSyncGroup knows when the SyncTarget is complete, allowing the SurfaceSyncGroup to get the
+ * Transaction that contains the buffer.
+ * 3. When the final TransactionReadyCallback finishes for the SurfaceSyncGroup, in most cases the
  * transaction is applied and then the sync complete callbacks are invoked, letting the callers know
  * the sync is now complete.
  *
@@ -86,8 +87,6 @@ public final class SurfaceSyncGroup {
     private final Transaction mTransaction = sTransactionFactory.get();
     @GuardedBy("mLock")
     private boolean mSyncReady;
-    @GuardedBy("mLock")
-    private final Set<SyncTarget> mSyncTargets = new ArraySet<>();
 
     @GuardedBy("mLock")
     private Consumer<Transaction> mSyncRequestCompleteCallback;
@@ -197,14 +196,13 @@ public final class SurfaceSyncGroup {
      * Add a {@link SyncTarget} to a sync set. The sync set will wait for all
      * SyncableSurfaces to complete before notifying.
      *
-     * @param syncTarget A SyncableSurface that implements how to handle syncing
-     *                   buffers.
+     * @param syncTarget A SyncTarget that implements how to handle syncing transactions.
      * @return true if the SyncTarget was successfully added to the SyncGroup, false otherwise.
      */
     public boolean addToSync(SyncTarget syncTarget) {
-        SyncBufferCallback syncBufferCallback = new SyncBufferCallback() {
+        TransactionReadyCallback transactionReadyCallback = new TransactionReadyCallback() {
             @Override
-            public void onBufferReady(Transaction t) {
+            public void onTransactionReady(Transaction t) {
                 synchronized (mLock) {
                     if (t != null) {
                         mTransaction.merge(t);
@@ -221,10 +219,9 @@ public final class SurfaceSyncGroup {
                         + "SyncTargets can be added.");
                 return false;
             }
-            mPendingSyncs.add(syncBufferCallback.hashCode());
-            mSyncTargets.add(syncTarget);
+            mPendingSyncs.add(transactionReadyCallback.hashCode());
         }
-        syncTarget.onReadyToSync(syncBufferCallback);
+        syncTarget.onAddedToSyncGroup(this, transactionReadyCallback);
         return true;
     }
 
@@ -256,17 +253,13 @@ public final class SurfaceSyncGroup {
             Log.d(TAG, "Successfully finished sync id=" + this);
         }
 
-        for (SyncTarget syncTarget : mSyncTargets) {
-            syncTarget.onSyncComplete();
-        }
-        mSyncTargets.clear();
         mSyncRequestCompleteCallback.accept(mTransaction);
         mFinished = true;
     }
 
     /**
      * Add a Transaction to this sync set. This allows the caller to provide other info that
-     * should be synced with the buffers.
+     * should be synced with the transactions.
      */
     public void addTransactionToSync(Transaction t) {
         synchronized (mLock) {
@@ -334,9 +327,10 @@ public final class SurfaceSyncGroup {
         }
 
         @Override
-        public void onReadyToSync(SyncBufferCallback syncBufferCallback) {
+        public void onAddedToSyncGroup(SurfaceSyncGroup parentSyncGroup,
+                TransactionReadyCallback transactionReadyCallback) {
             mFrameCallbackConsumer.accept(
-                    () -> mSurfaceView.syncNextFrame(syncBufferCallback::onBufferReady));
+                    () -> mSurfaceView.syncNextFrame(transactionReadyCallback::onTransactionReady));
         }
     }
 
@@ -345,22 +339,19 @@ public final class SurfaceSyncGroup {
      */
     public interface SyncTarget {
         /**
-         * Called when the Syncable is ready to begin handing a sync request. When invoked, the
-         * implementor is required to call {@link SyncBufferCallback#onBufferReady(Transaction)}
-         * and {@link SyncBufferCallback#onBufferReady(Transaction)} in order for this Syncable
-         * to be marked as complete.
+         * Called when the SyncTarget has been added to a SyncGroup as is ready to begin handing a
+         * sync request. When invoked, the implementor is required to call
+         * {@link TransactionReadyCallback#onTransactionReady(Transaction)} in order for this
+         * SurfaceSyncGroup to fully complete.
          *
          * Always invoked on the thread that initiated the call to {@link #addToSync(SyncTarget)}
          *
-         * @param syncBufferCallback A SyncBufferCallback that the caller must invoke onBufferReady
+         * @param parentSyncGroup The sync group this target has been added to.
+         * @param transactionReadyCallback A TransactionReadyCallback that the caller must invoke
+         *                                 onTransactionReady
          */
-        void onReadyToSync(SyncBufferCallback syncBufferCallback);
-
-        /**
-         * There's no guarantee about the thread this callback is invoked on.
-         */
-        default void onSyncComplete() {
-        }
+        void onAddedToSyncGroup(SurfaceSyncGroup parentSyncGroup,
+                TransactionReadyCallback transactionReadyCallback);
     }
 
     /**
@@ -368,14 +359,14 @@ public final class SurfaceSyncGroup {
      * completed. The caller should invoke the calls when the rendering has started and finished a
      * frame.
      */
-    public interface SyncBufferCallback {
+    public interface TransactionReadyCallback {
         /**
-         * Invoked when the transaction contains the buffer and is ready to sync.
+         * Invoked when the transaction is ready to sync.
          *
-         * @param t The transaction that contains the buffer to be synced. This can be null if
-         *          there's nothing to sync
+         * @param t The transaction that contains the anything to be included in the synced. This
+         *          can be null if there's nothing to sync
          */
-        void onBufferReady(@Nullable Transaction t);
+        void onTransactionReady(@Nullable Transaction t);
     }
 
     /**

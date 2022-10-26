@@ -1073,7 +1073,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     private void handleSyncBufferCallback(SurfaceHolder.Callback[] callbacks,
             SyncBufferTransactionCallback syncBufferTransactionCallback) {
 
-        getViewRootImpl().addToSync(syncBufferCallback ->
+        getViewRootImpl().addToSync((parentSyncGroup, syncBufferCallback) ->
                 redrawNeededAsync(callbacks, () -> {
                     Transaction t = null;
                     if (mBlastBufferQueue != null) {
@@ -1081,7 +1081,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                         t = syncBufferTransactionCallback.waitForTransaction();
                     }
 
-                    syncBufferCallback.onBufferReady(t);
+                    syncBufferCallback.onTransactionReady(t);
                     onDrawFinished();
                 }));
     }
@@ -1092,9 +1092,9 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
             mSyncGroups.add(syncGroup);
         }
 
-        syncGroup.addToSync(syncBufferCallback -> redrawNeededAsync(callbacks,
-                () -> {
-                    syncBufferCallback.onBufferReady(null);
+        syncGroup.addToSync((parentSyncGroup, syncBufferCallback) ->
+                redrawNeededAsync(callbacks, () -> {
+                    syncBufferCallback.onTransactionReady(null);
                     onDrawFinished();
                     synchronized (mSyncGroups) {
                         mSyncGroups.remove(syncGroup);
