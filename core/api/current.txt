@@ -19727,7 +19727,7 @@ package android.location {
     method public int getConstellationType(@IntRange(from=0) int);
     method @FloatRange(from=0xffffffa6, to=90) public float getElevationDegrees(@IntRange(from=0) int);
     method @IntRange(from=0) public int getSatelliteCount();
-    method @IntRange(from=1, to=200) public int getSvid(@IntRange(from=0) int);
+    method @IntRange(from=1, to=206) public int getSvid(@IntRange(from=0) int);
     method public boolean hasAlmanacData(@IntRange(from=0) int);
     method public boolean hasBasebandCn0DbHz(@IntRange(from=0) int);
     method public boolean hasCarrierFrequencyHz(@IntRange(from=0) int);
