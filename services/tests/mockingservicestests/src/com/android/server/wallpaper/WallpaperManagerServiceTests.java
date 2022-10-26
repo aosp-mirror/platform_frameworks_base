@@ -69,8 +69,6 @@ import android.service.wallpaper.WallpaperService;
 import android.testing.TestableContext;
 import android.util.Log;
 import android.util.SparseArray;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 import android.view.Display;
 
@@ -80,6 +78,8 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.dx.mockito.inline.extended.StaticMockitoSession;
 import com.android.internal.R;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.LocalServices;
 import com.android.server.wallpaper.WallpaperManagerService.WallpaperData;
 import com.android.server.wm.WindowManagerInternal;

@@ -62,12 +62,12 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.TypedXmlPullParser;
 import android.util.Xml;
 
 import com.android.internal.R;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.XmlUtils;
+import com.android.modules.utils.TypedXmlPullParser;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.pm.KnownPackages;

@@ -44,14 +44,14 @@ import android.os.test.TestLooper;
 import android.provider.DeviceConfig;
 import android.util.AtomicFile;
 import android.util.LongArrayQueue;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import androidx.test.InstrumentationRegistry;
 
 import com.android.dx.mockito.inline.extended.ExtendedMockito;
 import com.android.internal.util.XmlUtils;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.PackageWatchdog.HealthCheckState;
 import com.android.server.PackageWatchdog.MonitoredPackage;
 import com.android.server.PackageWatchdog.PackageHealthObserver;

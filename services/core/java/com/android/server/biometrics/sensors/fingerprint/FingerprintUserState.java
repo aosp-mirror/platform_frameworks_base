@@ -19,10 +19,10 @@ package com.android.server.biometrics.sensors.fingerprint;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.fingerprint.Fingerprint;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.biometrics.sensors.BiometricUserState;
 
 import org.xmlpull.v1.XmlPullParser;

@@ -39,7 +39,6 @@ import android.view.SurfaceControl;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.internal.view.IInputMethodManager;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.sysui.ShellInit;
 
@@ -55,8 +54,6 @@ public class DisplayImeControllerTest extends ShellTestCase {
 
     @Mock
     private SurfaceControl.Transaction mT;
-    @Mock
-    private IInputMethodManager mMock;
     @Mock
     private ShellInit mShellInit;
     private DisplayImeController.PerDisplay mPerDisplay;
@@ -76,10 +73,6 @@ public class DisplayImeControllerTest extends ShellTestCase {
             public void release(SurfaceControl.Transaction t) {
             }
         }, mExecutor) {
-            @Override
-            public IInputMethodManager getImms() {
-                return mMock;
-            }
             @Override
             void removeImeSurface() { }
         }.new PerDisplay(DEFAULT_DISPLAY, ROTATION_0);

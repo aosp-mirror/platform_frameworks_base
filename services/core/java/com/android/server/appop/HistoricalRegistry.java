@@ -52,8 +52,6 @@ import android.util.ArraySet;
 import android.util.LongSparseArray;
 import android.util.Slog;
 import android.util.TimeUtils;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
@@ -62,6 +60,8 @@ import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.util.function.pooled.PooledLambda;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.FgThread;
 
 import org.xmlpull.v1.XmlPullParserException;

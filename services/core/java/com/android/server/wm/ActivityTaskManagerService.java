@@ -460,7 +460,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     KeyguardController mKeyguardController;
     private final ClientLifecycleManager mLifecycleManager;
 
-    @Nullable
     final BackNavigationController mBackNavigationController;
 
     private TaskChangeNotificationController mTaskChangeNotificationController;
@@ -847,8 +846,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         mTaskOrganizerController = mWindowOrganizerController.mTaskOrganizerController;
         mTaskFragmentOrganizerController =
                 mWindowOrganizerController.mTaskFragmentOrganizerController;
-        mBackNavigationController = BackNavigationController.isEnabled()
-                ? new BackNavigationController() : null;
+        mBackNavigationController = new BackNavigationController();
     }
 
     public void onSystemReady() {
@@ -1031,9 +1029,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             mLockTaskController.setWindowManager(wm);
             mTaskSupervisor.setWindowManager(wm);
             mRootWindowContainer.setWindowManager(wm);
-            if (mBackNavigationController != null) {
-                mBackNavigationController.setWindowManager(wm);
-            }
+            mBackNavigationController.setWindowManager(wm);
         }
     }
 
@@ -1852,9 +1848,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             IWindowFocusObserver observer, BackAnimationAdapter adapter) {
         mAmInternal.enforceCallingPermission(START_TASKS_FROM_RECENTS,
                 "startBackNavigation()");
-        if (mBackNavigationController == null) {
-            return null;
-        }
 
         return mBackNavigationController.startBackNavigation(observer, adapter);
     }

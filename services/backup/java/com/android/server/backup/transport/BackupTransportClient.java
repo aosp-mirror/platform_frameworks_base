@@ -18,10 +18,12 @@ package com.android.server.backup.transport;
 
 import android.annotation.Nullable;
 import android.app.backup.BackupTransport;
+import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.RestoreDescription;
 import android.app.backup.RestoreSet;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
+import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -360,6 +362,15 @@ public class BackupTransportClient {
         mTransportBinder.getTransportFlags(resultFuture);
         Integer result = getFutureResult(resultFuture);
         return result == null ? BackupTransport.TRANSPORT_ERROR : result;
+    }
+
+    /**
+     * See {@link IBackupTransport#getBackupManagerMonitor()}
+     */
+    public IBackupManagerMonitor getBackupManagerMonitor() throws RemoteException {
+        AndroidFuture<IBackupManagerMonitor> resultFuture = mTransportFutures.newFuture();
+        mTransportBinder.getBackupManagerMonitor(resultFuture);
+        return IBackupManagerMonitor.Stub.asInterface((IBinder) getFutureResult(resultFuture));
     }
 
     /**

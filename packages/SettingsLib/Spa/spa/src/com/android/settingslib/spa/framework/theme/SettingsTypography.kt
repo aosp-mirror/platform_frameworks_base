@@ -20,14 +20,13 @@ import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 
-private class SettingsTypography {
-    private val brand = FontFamily.Default
-    private val plain = FontFamily.Default
+private class SettingsTypography(settingsFontFamily: SettingsFontFamily) {
+    private val brand = settingsFontFamily.brand
+    private val plain = settingsFontFamily.plain
 
     val typography = Typography(
         displayLarge = TextStyle(
@@ -140,5 +139,6 @@ private class SettingsTypography {
 
 @Composable
 internal fun rememberSettingsTypography(): Typography {
-    return remember { SettingsTypography().typography }
+    val settingsFontFamily = rememberSettingsFontFamily()
+    return remember { SettingsTypography(settingsFontFamily).typography }
 }

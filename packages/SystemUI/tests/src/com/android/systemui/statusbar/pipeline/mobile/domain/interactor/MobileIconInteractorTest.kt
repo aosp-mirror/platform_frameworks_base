@@ -18,10 +18,19 @@ package com.android.systemui.statusbar.pipeline.mobile.domain.interactor
 
 import android.telephony.CellSignalStrength
 import android.telephony.SubscriptionInfo
+import android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN
 import androidx.test.filters.SmallTest
+import com.android.settingslib.SignalIcon.MobileIconGroup
+import com.android.settingslib.mobile.TelephonyIcons
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.statusbar.pipeline.mobile.data.model.DefaultNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileSubscriptionModel
-import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileSubscriptionRepository
+import com.android.systemui.statusbar.pipeline.mobile.data.model.OverrideNetworkType
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionRepository
+import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconsInteractor.Companion.FIVE_G_OVERRIDE
+import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconsInteractor.Companion.FOUR_G
+import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconsInteractor.Companion.THREE_G
+import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
@@ -29,26 +38,33 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.yield
 import org.junit.Before
 import org.junit.Test
 
 @SmallTest
 class MobileIconInteractorTest : SysuiTestCase() {
     private lateinit var underTest: MobileIconInteractor
-    private val mobileSubscriptionRepository = FakeMobileSubscriptionRepository()
-    private val sub1Flow = mobileSubscriptionRepository.getFlowForSubId(SUB_1_ID)
+    private val mobileMappingsProxy = FakeMobileMappingsProxy()
+    private val mobileIconsInteractor = FakeMobileIconsInteractor(mobileMappingsProxy)
+    private val connectionRepository = FakeMobileConnectionRepository()
 
     @Before
     fun setUp() {
-        underTest = MobileIconInteractorImpl(sub1Flow)
+        underTest =
+            MobileIconInteractorImpl(
+                mobileIconsInteractor.defaultMobileIconMapping,
+                mobileIconsInteractor.defaultMobileIconGroup,
+                mobileMappingsProxy,
+                connectionRepository,
+            )
     }
 
     @Test
     fun gsm_level_default_unknown() =
         runBlocking(IMMEDIATE) {
-            mobileSubscriptionRepository.setMobileSubscriptionModel(
+            connectionRepository.setMobileSubscriptionModel(
                 MobileSubscriptionModel(isGsm = true),
-                SUB_1_ID
             )
 
             var latest: Int? = null
@@ -62,13 +78,12 @@ class MobileIconInteractorTest : SysuiTestCase() {
     @Test
     fun gsm_usesGsmLevel() =
         runBlocking(IMMEDIATE) {
-            mobileSubscriptionRepository.setMobileSubscriptionModel(
+            connectionRepository.setMobileSubscriptionModel(
                 MobileSubscriptionModel(
                     isGsm = true,
                     primaryLevel = GSM_LEVEL,
                     cdmaLevel = CDMA_LEVEL
                 ),
-                SUB_1_ID
             )
 
             var latest: Int? = null
@@ -82,9 +97,8 @@ class MobileIconInteractorTest : SysuiTestCase() {
     @Test
     fun cdma_level_default_unknown() =
         runBlocking(IMMEDIATE) {
-            mobileSubscriptionRepository.setMobileSubscriptionModel(
+            connectionRepository.setMobileSubscriptionModel(
                 MobileSubscriptionModel(isGsm = false),
-                SUB_1_ID
             )
 
             var latest: Int? = null
@@ -97,19 +111,87 @@ class MobileIconInteractorTest : SysuiTestCase() {
     @Test
     fun cdma_usesCdmaLevel() =
         runBlocking(IMMEDIATE) {
-            mobileSubscriptionRepository.setMobileSubscriptionModel(
+            connectionRepository.setMobileSubscriptionModel(
                 MobileSubscriptionModel(
                     isGsm = false,
                     primaryLevel = GSM_LEVEL,
                     cdmaLevel = CDMA_LEVEL
                 ),
-                SUB_1_ID
             )
 
             var latest: Int? = null
             val job = underTest.level.onEach { latest = it }.launchIn(this)
 
             assertThat(latest).isEqualTo(CDMA_LEVEL)
+
+            job.cancel()
+        }
+
+    @Test
+    fun iconGroup_three_g() =
+        runBlocking(IMMEDIATE) {
+            connectionRepository.setMobileSubscriptionModel(
+                MobileSubscriptionModel(resolvedNetworkType = DefaultNetworkType(THREE_G)),
+            )
+
+            var latest: MobileIconGroup? = null
+            val job = underTest.networkTypeIconGroup.onEach { latest = it }.launchIn(this)
+
+            assertThat(latest).isEqualTo(TelephonyIcons.THREE_G)
+
+            job.cancel()
+        }
+
+    @Test
+    fun iconGroup_updates_on_change() =
+        runBlocking(IMMEDIATE) {
+            connectionRepository.setMobileSubscriptionModel(
+                MobileSubscriptionModel(resolvedNetworkType = DefaultNetworkType(THREE_G)),
+            )
+
+            var latest: MobileIconGroup? = null
+            val job = underTest.networkTypeIconGroup.onEach { latest = it }.launchIn(this)
+
+            connectionRepository.setMobileSubscriptionModel(
+                MobileSubscriptionModel(
+                    resolvedNetworkType = DefaultNetworkType(FOUR_G),
+                ),
+            )
+            yield()
+
+            assertThat(latest).isEqualTo(TelephonyIcons.FOUR_G)
+
+            job.cancel()
+        }
+
+    @Test
+    fun iconGroup_5g_override_type() =
+        runBlocking(IMMEDIATE) {
+            connectionRepository.setMobileSubscriptionModel(
+                MobileSubscriptionModel(resolvedNetworkType = OverrideNetworkType(FIVE_G_OVERRIDE)),
+            )
+
+            var latest: MobileIconGroup? = null
+            val job = underTest.networkTypeIconGroup.onEach { latest = it }.launchIn(this)
+
+            assertThat(latest).isEqualTo(TelephonyIcons.NR_5G)
+
+            job.cancel()
+        }
+
+    @Test
+    fun iconGroup_default_if_no_lookup() =
+        runBlocking(IMMEDIATE) {
+            connectionRepository.setMobileSubscriptionModel(
+                MobileSubscriptionModel(
+                    resolvedNetworkType = DefaultNetworkType(NETWORK_TYPE_UNKNOWN),
+                ),
+            )
+
+            var latest: MobileIconGroup? = null
+            val job = underTest.networkTypeIconGroup.onEach { latest = it }.launchIn(this)
+
+            assertThat(latest).isEqualTo(FakeMobileIconsInteractor.DEFAULT_ICON)
 
             job.cancel()
         }
@@ -123,9 +205,5 @@ class MobileIconInteractorTest : SysuiTestCase() {
         private const val SUB_1_ID = 1
         private val SUB_1 =
             mock<SubscriptionInfo>().also { whenever(it.subscriptionId).thenReturn(SUB_1_ID) }
-
-        private const val SUB_2_ID = 2
-        private val SUB_2 =
-            mock<SubscriptionInfo>().also { whenever(it.subscriptionId).thenReturn(SUB_2_ID) }
     }
 }

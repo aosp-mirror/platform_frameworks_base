@@ -161,8 +161,6 @@ import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 import android.view.Display;
 
@@ -181,6 +179,8 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.FunctionalUtils;
 import com.android.internal.util.Preconditions;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.permission.persistence.RuntimePermissionsPersistence;
 import com.android.server.EventLogTags;
 import com.android.server.FgThread;
@@ -493,6 +493,15 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
      * Namespace: NAMESPACE_PACKAGE_MANAGER_SERVICE
      */
     private static final String PROPERTY_KNOWN_DIGESTERS_LIST = "known_digesters_list";
+
+    /**
+     * Whether of not requesting the approval before committing sessions is available.
+     *
+     * Flag type: {@code boolean}
+     * Namespace: NAMESPACE_PACKAGE_MANAGER_SERVICE
+     */
+    private static final String PROPERTY_IS_PRE_APPROVAL_REQUEST_AVAILABLE =
+            "is_preapproval_available";
 
     /**
      * The default response for package verification timeout.
@@ -6889,6 +6898,16 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         try {
             return DeviceConfig.getString(NAMESPACE_PACKAGE_MANAGER_SERVICE,
                     PROPERTY_KNOWN_DIGESTERS_LIST, "");
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    static boolean isPreapprovalRequestAvailable() {
+        final long token = Binder.clearCallingIdentity();
+        try {
+            return DeviceConfig.getBoolean(NAMESPACE_PACKAGE_MANAGER_SERVICE,
+                    PROPERTY_IS_PRE_APPROVAL_REQUEST_AVAILABLE, true /* defaultValue */);
         } finally {
             Binder.restoreCallingIdentity(token);
         }

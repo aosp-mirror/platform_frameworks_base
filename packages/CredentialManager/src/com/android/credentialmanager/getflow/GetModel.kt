@@ -21,7 +21,7 @@ import android.graphics.drawable.Drawable
 data class ProviderInfo(
   val icon: Drawable,
   val name: String,
-  val appDomainName: String,
+  val displayName: String,
   val credentialTypeIcon: Drawable,
   val credentialOptions: List<CredentialOptionInfo>,
 )
@@ -30,8 +30,16 @@ data class CredentialOptionInfo(
   val icon: Drawable,
   val title: String,
   val subtitle: String,
-  val id: Int,
+  val entryKey: String,
+  val entrySubkey: String,
   val usageData: String
+)
+
+data class RequestDisplayInfo(
+  val userName: String,
+  val displayName: String,
+  val type: String,
+  val appDomainName: String,
 )
 
 /** The name of the current screen. */

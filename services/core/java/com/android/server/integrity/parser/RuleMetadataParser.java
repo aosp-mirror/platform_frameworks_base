@@ -17,9 +17,9 @@
 package com.android.server.integrity.parser;
 
 import android.annotation.Nullable;
-import android.util.TypedXmlPullParser;
 import android.util.Xml;
 
+import com.android.modules.utils.TypedXmlPullParser;
 import com.android.server.integrity.model.RuleMetadata;
 
 import org.xmlpull.v1.XmlPullParser;

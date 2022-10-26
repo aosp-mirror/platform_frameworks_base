@@ -37,12 +37,13 @@ import android.os.BatteryUsageStats;
 import android.os.Parcel;
 import android.os.UidBatteryConsumer;
 import android.os.UserBatteryConsumer;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
+
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

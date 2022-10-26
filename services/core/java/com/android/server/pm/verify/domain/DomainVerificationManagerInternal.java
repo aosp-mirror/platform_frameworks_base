@@ -33,9 +33,9 @@ import android.os.Binder;
 import android.os.UserHandle;
 import android.util.IndentingPrintWriter;
 import android.util.Pair;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.pm.Computer;
 import com.android.server.pm.PackageSetting;
 import com.android.server.pm.Settings;

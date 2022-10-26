@@ -66,11 +66,12 @@ fun GetCredentialScreen(
       val uiState = viewModel.uiState
       when (uiState.currentScreenState) {
         GetScreenState.CREDENTIAL_SELECTION -> CredentialSelectionCard(
+          requestDisplayInfo = uiState.requestDisplayInfo,
           providerInfo = uiState.selectedProvider!!,
-          onCancel = {viewModel.onCancel()},
-          onOptionSelected = {viewModel.onCredentailSelected(it)},
+          onCancel = viewModel::onCancel,
+          onOptionSelected = viewModel::onCredentailSelected,
           multiProvider = uiState.providers.size > 1,
-          onMoreOptionSelected = {viewModel.onMoreOptionSelected()},
+          onMoreOptionSelected = viewModel::onMoreOptionSelected,
         )
       }
     },
@@ -87,8 +88,9 @@ fun GetCredentialScreen(
 @ExperimentalMaterialApi
 @Composable
 fun CredentialSelectionCard(
+  requestDisplayInfo: RequestDisplayInfo,
   providerInfo: ProviderInfo,
-  onOptionSelected: (Int) -> Unit,
+  onOptionSelected: (String, String) -> Unit,
   onCancel: () -> Unit,
   multiProvider: Boolean,
   onMoreOptionSelected: () -> Unit,
@@ -111,7 +113,7 @@ fun CredentialSelectionCard(
           .align(alignment = Alignment.CenterHorizontally)
       )
       Text(
-        text = providerInfo.appDomainName,
+        text = requestDisplayInfo.appDomainName,
         style = Typography.body2,
         modifier = Modifier.padding(horizontal = 28.dp)
       )
@@ -163,11 +165,11 @@ fun CredentialSelectionCard(
 @Composable
 fun CredentialOptionRow(
     credentialOptionInfo: CredentialOptionInfo,
-    onOptionSelected: (Int) -> Unit
+    onOptionSelected: (String, String) -> Unit,
 ) {
   Chip(
     modifier = Modifier.fillMaxWidth(),
-    onClick = {onOptionSelected(credentialOptionInfo.id)},
+    onClick = {onOptionSelected(credentialOptionInfo.entryKey, credentialOptionInfo.entrySubkey)},
     leadingIcon = {
       Image(modifier = Modifier.size(24.dp, 24.dp).padding(start = 10.dp),
             bitmap = credentialOptionInfo.icon.toBitmap().asImageBitmap(),

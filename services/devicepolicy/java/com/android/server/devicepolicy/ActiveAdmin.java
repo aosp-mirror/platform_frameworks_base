@@ -47,11 +47,11 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.pm.UserRestrictionsUtils;
 import com.android.server.utils.Slogf;
 

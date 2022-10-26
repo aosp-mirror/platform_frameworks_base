@@ -334,6 +334,70 @@ public class TaskFragmentContainerTest {
         assertFalse(container.hasActivity(mActivity.getActivityToken()));
     }
 
+    @Test
+    public void testIsInIntermediateState() {
+        // True if no info set.
+        final TaskContainer taskContainer = createTestTaskContainer();
+        final TaskFragmentContainer container = new TaskFragmentContainer(null /* activity */,
+                mIntent, taskContainer, mController);
+        spyOn(taskContainer);
+        doReturn(true).when(taskContainer).isVisible();
+
+        assertTrue(container.isInIntermediateState());
+        assertTrue(taskContainer.isInIntermediateState());
+
+        // True if empty info set.
+        final List<IBinder> activities = new ArrayList<>();
+        doReturn(activities).when(mInfo).getActivities();
+        doReturn(true).when(mInfo).isEmpty();
+        container.setInfo(mTransaction, mInfo);
+
+        assertTrue(container.isInIntermediateState());
+        assertTrue(taskContainer.isInIntermediateState());
+
+        // False if info is not empty.
+        doReturn(false).when(mInfo).isEmpty();
+        container.setInfo(mTransaction, mInfo);
+
+        assertFalse(container.isInIntermediateState());
+        assertFalse(taskContainer.isInIntermediateState());
+
+        // True if there is pending appeared activity.
+        container.addPendingAppearedActivity(mActivity);
+
+        assertTrue(container.isInIntermediateState());
+        assertTrue(taskContainer.isInIntermediateState());
+
+        // True if the activity is finishing.
+        activities.add(mActivity.getActivityToken());
+        doReturn(true).when(mActivity).isFinishing();
+        container.setInfo(mTransaction, mInfo);
+
+        assertTrue(container.isInIntermediateState());
+        assertTrue(taskContainer.isInIntermediateState());
+
+        // False if the activity is not finishing.
+        doReturn(false).when(mActivity).isFinishing();
+        container.setInfo(mTransaction, mInfo);
+
+        assertFalse(container.isInIntermediateState());
+        assertFalse(taskContainer.isInIntermediateState());
+
+        // True if there is a token that can't find associated activity.
+        activities.clear();
+        activities.add(new Binder());
+        container.setInfo(mTransaction, mInfo);
+
+        assertTrue(container.isInIntermediateState());
+        assertTrue(taskContainer.isInIntermediateState());
+
+        // False if there is a token that can't find associated activity when the Task is invisible.
+        doReturn(false).when(taskContainer).isVisible();
+
+        assertFalse(container.isInIntermediateState());
+        assertFalse(taskContainer.isInIntermediateState());
+    }
+
     /** Creates a mock activity in the organizer process. */
     private Activity createMockActivity() {
         final Activity activity = mock(Activity.class);

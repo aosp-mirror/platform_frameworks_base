@@ -21,6 +21,7 @@ import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
 import static com.android.server.backup.BackupManagerService.TAG;
 
 import android.app.backup.BackupManager.OperationType;
+import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.RestoreSet;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -203,6 +204,14 @@ public class BackupHandler extends Handler {
                     }
                 }
 
+                // Ask the transport for a monitor that will be used to relay log events back to it.
+                IBackupManagerMonitor monitor = null;
+                try {
+                    monitor = transport.getBackupManagerMonitor();
+                } catch (RemoteException e) {
+                    Slog.i(TAG, "Failed to retrieve monitor from transport");
+                }
+
                 // At this point, we have started a new journal file, and the old
                 // file identity is being passed to the backup processing task.
                 // When it completes successfully, that old journal file will be
@@ -225,7 +234,7 @@ public class BackupHandler extends Handler {
                                 queue,
                                 oldJournal,
                                 /* observer */ null,
-                                /* monitor */ null,
+                                monitor,
                                 listener,
                                 Collections.emptyList(),
                                 /* userInitiated */ false,

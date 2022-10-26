@@ -36,14 +36,14 @@ import android.util.IntArray;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 
 import libcore.io.IoUtils;
 

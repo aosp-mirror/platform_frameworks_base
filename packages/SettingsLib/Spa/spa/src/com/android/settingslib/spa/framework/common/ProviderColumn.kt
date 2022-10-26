@@ -40,8 +40,10 @@ enum class ColumnEnum(val id: String) {
     ENTRY_START_ADB("entryStartAdb"),
 
     // Columns related to search
-    ENTRY_TITLE("entryTitle"),
-    ENTRY_SEARCH_KEYWORD("entrySearchKw"),
+    SEARCH_TITLE("searchTitle"),
+    SEARCH_KEYWORD("searchKw"),
+    SEARCH_PATH("searchPath"),
+    SEARCH_STATUS_DISABLED("searchDisabled"),
 }
 
 /**
@@ -83,32 +85,42 @@ enum class QueryEnum(
             ColumnEnum.ENTRY_NAME,
             ColumnEnum.ENTRY_ROUTE,
             ColumnEnum.ENTRY_INTENT_URI,
+            ColumnEnum.ENTRY_HIERARCHY_PATH,
         )
     ),
 
-    // Search related queries
-    SEARCH_SITEMAP_QUERY(
-        "search_sitemap", 300,
-        listOf(
-            ColumnEnum.ENTRY_ID,
-            ColumnEnum.ENTRY_HIERARCHY_PATH,
-            ColumnEnum.ENTRY_INTENT_URI,
-        )
-    ),
     SEARCH_STATIC_DATA_QUERY(
         "search_static", 301,
         listOf(
             ColumnEnum.ENTRY_ID,
-            ColumnEnum.ENTRY_TITLE,
-            ColumnEnum.ENTRY_SEARCH_KEYWORD,
+            ColumnEnum.ENTRY_INTENT_URI,
+            ColumnEnum.SEARCH_TITLE,
+            ColumnEnum.SEARCH_KEYWORD,
+            ColumnEnum.SEARCH_PATH,
         )
     ),
     SEARCH_DYNAMIC_DATA_QUERY(
         "search_dynamic", 302,
         listOf(
             ColumnEnum.ENTRY_ID,
-            ColumnEnum.ENTRY_TITLE,
-            ColumnEnum.ENTRY_SEARCH_KEYWORD,
+            ColumnEnum.ENTRY_INTENT_URI,
+            ColumnEnum.SEARCH_TITLE,
+            ColumnEnum.SEARCH_KEYWORD,
+            ColumnEnum.SEARCH_PATH,
+        )
+    ),
+    SEARCH_IMMUTABLE_STATUS_DATA_QUERY(
+        "search_immutable_status", 303,
+        listOf(
+            ColumnEnum.ENTRY_ID,
+            ColumnEnum.SEARCH_STATUS_DISABLED,
+        )
+    ),
+    SEARCH_MUTABLE_STATUS_DATA_QUERY(
+        "search_mutable_status", 304,
+        listOf(
+            ColumnEnum.ENTRY_ID,
+            ColumnEnum.SEARCH_STATUS_DISABLED,
         )
     ),
 }

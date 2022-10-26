@@ -86,8 +86,6 @@
     <string name="maximize_button_text" msgid="1650859196290301963">"Maksimer"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"Minimer"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Lukk"</string>
-    <!-- no translation found for back_button_text (1469718707134137085) -->
-    <skip />
-    <!-- no translation found for handle_text (1766582106752184456) -->
-    <skip />
+    <string name="back_button_text" msgid="1469718707134137085">"Tilbake"</string>
+    <string name="handle_text" msgid="1766582106752184456">"Håndtak"</string>
 </resources>

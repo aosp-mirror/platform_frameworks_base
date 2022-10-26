@@ -20,9 +20,9 @@ import android.content.pm.verify.domain.DomainVerificationState
 import android.os.UserHandle
 import android.util.ArrayMap
 import android.util.SparseArray
-import android.util.TypedXmlPullParser
-import android.util.TypedXmlSerializer
 import android.util.Xml
+import com.android.modules.utils.TypedXmlPullParser
+import com.android.modules.utils.TypedXmlSerializer
 import com.android.server.pm.verify.domain.DomainVerificationPersistence
 import com.android.server.pm.verify.domain.models.DomainVerificationInternalUserState
 import com.android.server.pm.verify.domain.models.DomainVerificationPkgState

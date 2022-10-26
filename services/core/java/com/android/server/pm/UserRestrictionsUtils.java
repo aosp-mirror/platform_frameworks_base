@@ -40,11 +40,11 @@ import android.telephony.SubscriptionManager;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.BundleUtils;
 import com.android.server.LocalServices;
 

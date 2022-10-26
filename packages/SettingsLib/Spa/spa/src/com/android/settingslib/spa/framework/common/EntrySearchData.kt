@@ -22,12 +22,4 @@ package com.android.settingslib.spa.framework.common
 data class EntrySearchData(
     val title: String = "",
     val keyword: List<String> = emptyList(),
-) {
-    fun format(): String {
-        val content = listOf(
-            "search_title = $title",
-            "search_keyword = $keyword",
-        )
-        return content.joinToString("\n")
-    }
-}
+)

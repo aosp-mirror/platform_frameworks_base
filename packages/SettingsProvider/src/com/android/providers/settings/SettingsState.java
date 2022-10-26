@@ -42,8 +42,6 @@ import android.util.AtomicFile;
 import android.util.Base64;
 import android.util.Slog;
 import android.util.TimeUtils;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 import android.util.proto.ProtoOutputStream;
 
@@ -51,6 +49,8 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 
 import libcore.io.IoUtils;
 
@@ -1087,6 +1087,7 @@ final class SettingsState {
             parseStateLocked(parser);
             return true;
         } catch (XmlPullParserException | IOException e) {
+            Slog.e(LOG_TAG, "parse settings xml failed", e);
             return false;
         } finally {
             IoUtils.closeQuietly(in);

@@ -25,13 +25,13 @@ import android.content.Context;
 import android.content.pm.Signature;
 import android.content.pm.SigningDetails;
 import android.platform.test.annotations.Presubmit;
-import android.util.TypedXmlPullParser;
 import android.util.Xml;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.HexDump;
+import com.android.modules.utils.TypedXmlPullParser;
 
 import org.junit.Before;
 import org.junit.Test;

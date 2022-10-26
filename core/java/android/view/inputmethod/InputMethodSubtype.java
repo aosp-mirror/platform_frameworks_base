@@ -16,6 +16,7 @@
 
 package android.view.inputmethod;
 
+import android.annotation.AnyThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -23,6 +24,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.icu.text.DisplayContext;
 import android.icu.text.LocaleDisplayNames;
+import android.icu.util.ULocale;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -74,6 +76,10 @@ public final class InputMethodSubtype implements Parcelable {
     /** {@hide} */
     public static final int SUBTYPE_ID_NONE = 0;
 
+    private static final String SUBTYPE_MODE_KEYBOARD = "keyboard";
+
+    private static final String UNDEFINED_LANGUAGE_TAG = "und";
+
     private final boolean mIsAuxiliary;
     private final boolean mOverridesImplicitlyEnabledSubtype;
     private final boolean mIsAsciiCapable;
@@ -88,6 +94,14 @@ public final class InputMethodSubtype implements Parcelable {
     private final Object mLock = new Object();
     private volatile Locale mCachedLocaleObj;
     private volatile HashMap<String, String> mExtraValueHashMapCache;
+
+    /**
+     * A volatile cache to optimize {@link #getCanonicalizedLanguageTag()}.
+     *
+     * <p>{@code null} means that the initial evaluation is not yet done.</p>
+     */
+    @Nullable
+    private volatile String mCachedCanonicalizedLanguageTag;
 
     /**
      * InputMethodSubtypeBuilder is a builder class of InputMethodSubtype.
@@ -389,6 +403,65 @@ public final class InputMethodSubtype implements Parcelable {
             }
             return mCachedLocaleObj;
         }
+    }
+
+    /**
+     * Returns a canonicalized BCP 47 Language Tag initialized with {@link #getLocaleObject()}.
+     *
+     * <p>This has an internal cache mechanism.  Subsequent calls are in general cheap and fast.</p>
+     *
+     * @return a canonicalized BCP 47 Language Tag initialized with {@link #getLocaleObject()}. An
+     *         empty string if {@link #getLocaleObject()} returns {@code null} or an empty
+     *         {@link Locale} object.
+     * @hide
+     */
+    @AnyThread
+    @NonNull
+    public String getCanonicalizedLanguageTag() {
+        final String cachedValue = mCachedCanonicalizedLanguageTag;
+        if (cachedValue != null) {
+            return cachedValue;
+        }
+
+        String result = null;
+        final Locale locale = getLocaleObject();
+        if (locale != null) {
+            final String langTag = locale.toLanguageTag();
+            if (!TextUtils.isEmpty(langTag)) {
+                result = ULocale.createCanonical(ULocale.forLanguageTag(langTag)).toLanguageTag();
+            }
+        }
+        result = TextUtils.emptyIfNull(result);
+        mCachedCanonicalizedLanguageTag = result;
+        return result;
+    }
+
+    /**
+     * Determines whether this {@link InputMethodSubtype} can be used as the key of mapping rules
+     * between {@link InputMethodSubtype} and hardware keyboard layout.
+     *
+     * <p>Note that in a future build may require different rules.  Design the system so that the
+     * system can automatically take care of any rule changes upon OTAs.</p>
+     *
+     * @return {@code true} if this {@link InputMethodSubtype} can be used as the key of mapping
+     *         rules between {@link InputMethodSubtype} and hardware keyboard layout.
+     * @hide
+     */
+    public boolean isSuitableForPhysicalKeyboardLayoutMapping() {
+        if (hashCode() == SUBTYPE_ID_NONE) {
+            return false;
+        }
+        if (!TextUtils.equals(getMode(), SUBTYPE_MODE_KEYBOARD)) {
+            return false;
+        }
+        if (isAuxiliary()) {
+            return false;
+        }
+        final String langTag = getCanonicalizedLanguageTag();
+        if (langTag.isEmpty() || TextUtils.equals(langTag, UNDEFINED_LANGUAGE_TAG)) {
+            return false;
+        }
+        return true;
     }
 
     /**

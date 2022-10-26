@@ -22,8 +22,8 @@ import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
 import android.app.BroadcastOptions;
 import android.app.trust.TrustManager;
-import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.IIntentReceiver;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.hardware.display.DisplayManagerInternal;
@@ -796,18 +796,19 @@ public class Notifier {
         }
 
         if (mActivityManagerInternal.isSystemReady()) {
-            mContext.sendOrderedBroadcastAsUser(mScreenOnIntent, UserHandle.ALL, null,
-                    AppOpsManager.OP_NONE, mScreenOnOptions, mWakeUpBroadcastDone, mHandler,
-                    0, null, null);
+            final boolean ordered = !mActivityManagerInternal.isModernQueueEnabled();
+            mActivityManagerInternal.broadcastIntent(mScreenOnIntent, mWakeUpBroadcastDone,
+                    null, ordered, UserHandle.USER_ALL, null, null, mScreenOnOptions);
         } else {
             EventLog.writeEvent(EventLogTags.POWER_SCREEN_BROADCAST_STOP, 2, 1);
             sendNextBroadcast();
         }
     }
 
-    private final BroadcastReceiver mWakeUpBroadcastDone = new BroadcastReceiver() {
+    private final IIntentReceiver mWakeUpBroadcastDone = new IIntentReceiver.Stub() {
         @Override
-        public void onReceive(Context context, Intent intent) {
+        public void performReceive(Intent intent, int resultCode, String data, Bundle extras,
+                boolean ordered, boolean sticky, int sendingUser) {
             EventLog.writeEvent(EventLogTags.POWER_SCREEN_BROADCAST_DONE, 1,
                     SystemClock.uptimeMillis() - mBroadcastStartTime, 1);
             sendNextBroadcast();
@@ -820,18 +821,19 @@ public class Notifier {
         }
 
         if (mActivityManagerInternal.isSystemReady()) {
-            mContext.sendOrderedBroadcastAsUser(mScreenOffIntent, UserHandle.ALL, null,
-                    AppOpsManager.OP_NONE, mScreenOffOptions, mGoToSleepBroadcastDone, mHandler,
-                    0, null, null);
+            final boolean ordered = !mActivityManagerInternal.isModernQueueEnabled();
+            mActivityManagerInternal.broadcastIntent(mScreenOffIntent, mGoToSleepBroadcastDone,
+                    null, ordered, UserHandle.USER_ALL, null, null, mScreenOffOptions);
         } else {
             EventLog.writeEvent(EventLogTags.POWER_SCREEN_BROADCAST_STOP, 3, 1);
             sendNextBroadcast();
         }
     }
 
-    private final BroadcastReceiver mGoToSleepBroadcastDone = new BroadcastReceiver() {
+    private final IIntentReceiver mGoToSleepBroadcastDone = new IIntentReceiver.Stub() {
         @Override
-        public void onReceive(Context context, Intent intent) {
+        public void performReceive(Intent intent, int resultCode, String data, Bundle extras,
+                boolean ordered, boolean sticky, int sendingUser) {
             EventLog.writeEvent(EventLogTags.POWER_SCREEN_BROADCAST_DONE, 0,
                     SystemClock.uptimeMillis() - mBroadcastStartTime, 1);
             sendNextBroadcast();

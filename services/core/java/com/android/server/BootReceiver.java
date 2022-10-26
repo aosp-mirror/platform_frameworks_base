@@ -38,8 +38,6 @@ import android.text.TextUtils;
 import android.util.AtomicFile;
 import android.util.EventLog;
 import android.util.Slog;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 import android.util.proto.ProtoOutputStream;
 
@@ -47,6 +45,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.XmlUtils;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.am.DropboxRateLimiter;
 
 import org.xmlpull.v1.XmlPullParser;

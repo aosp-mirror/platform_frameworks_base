@@ -45,8 +45,9 @@ import android.security.keystore.recovery.KeyChainSnapshot;
 import android.security.keystore.recovery.KeyDerivationParams;
 import android.security.keystore.recovery.WrappedApplicationKey;
 import android.util.Base64;
-import android.util.TypedXmlPullParser;
 import android.util.Xml;
+
+import com.android.modules.utils.TypedXmlPullParser;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;

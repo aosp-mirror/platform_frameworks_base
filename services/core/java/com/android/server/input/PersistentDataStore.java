@@ -21,8 +21,6 @@ import android.hardware.input.TouchCalibration;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.SparseIntArray;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 import android.view.Surface;
 
@@ -33,6 +31,9 @@ import com.android.internal.util.XmlUtils;
 import libcore.io.IoUtils;
 
 import org.xmlpull.v1.XmlPullParserException;
+
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 
 import java.io.File;
 import java.io.FileNotFoundException;

@@ -51,8 +51,6 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 import android.util.proto.ProtoInputStream;
 import android.util.proto.ProtoOutputStream;
@@ -60,6 +58,8 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IntPair;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.LocalServices;
 
 import org.xmlpull.v1.XmlPullParser;

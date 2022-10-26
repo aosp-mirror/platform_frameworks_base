@@ -30,6 +30,7 @@ import com.android.credentialmanager.common.ResultState
 data class GetCredentialUiState(
   val providers: List<ProviderInfo>,
   val currentScreenState: GetScreenState,
+  val requestDisplayInfo: RequestDisplayInfo,
   val selectedProvider: ProviderInfo? = null,
 )
 
@@ -48,11 +49,12 @@ class GetCredentialViewModel(
     return dialogResult
   }
 
-  fun onCredentailSelected(credentialId: Int) {
-    Log.d("Account Selector", "credential selected: $credentialId")
+  fun onCredentailSelected(entryKey: String, entrySubkey: String) {
+    Log.d("Account Selector", "credential selected: {key=$entryKey,subkey=$entrySubkey}")
     CredentialManagerRepo.getInstance().onOptionSelected(
       uiState.selectedProvider!!.name,
-      credentialId
+      entryKey,
+      entrySubkey
     )
     dialogResult.value = DialogResult(
       ResultState.COMPLETE,

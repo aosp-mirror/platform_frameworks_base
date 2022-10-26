@@ -65,8 +65,6 @@ import android.service.adb.AdbDebuggingManagerProto;
 import android.util.AtomicFile;
 import android.util.Base64;
 import android.util.Slog;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.R;
@@ -75,6 +73,8 @@ import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.util.dump.DualDumpOutputStream;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.FgThread;
 
 import org.xmlpull.v1.XmlPullParser;
