@@ -14,8 +14,6 @@ import com.android.internal.statusbar.LetterboxDetails
 import com.android.internal.view.AppearanceRegion
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import org.junit.Before
 import org.junit.Test
@@ -40,7 +38,6 @@ class SystemBarAttributesListenerTest : SysuiTestCase() {
     @Mock private lateinit var lightBarController: LightBarController
     @Mock private lateinit var statusBarStateController: SysuiStatusBarStateController
     @Mock private lateinit var letterboxAppearanceCalculator: LetterboxAppearanceCalculator
-    @Mock private lateinit var featureFlags: FeatureFlags
     @Mock private lateinit var centralSurfaces: CentralSurfaces
 
     private lateinit var sysBarAttrsListener: SystemBarAttributesListener
@@ -57,7 +54,6 @@ class SystemBarAttributesListenerTest : SysuiTestCase() {
         sysBarAttrsListener =
             SystemBarAttributesListener(
                 centralSurfaces,
-                featureFlags,
                 letterboxAppearanceCalculator,
                 statusBarStateController,
                 lightBarController,
@@ -74,18 +70,14 @@ class SystemBarAttributesListenerTest : SysuiTestCase() {
     }
 
     @Test
-    fun onSysBarAttrsChanged_flagTrue_forwardsLetterboxAppearanceToCentralSurfaces() {
-        whenever(featureFlags.isEnabled(Flags.STATUS_BAR_LETTERBOX_APPEARANCE)).thenReturn(true)
-
+    fun onSysBarAttrsChanged_forwardsLetterboxAppearanceToCentralSurfaces() {
         changeSysBarAttrs(TEST_APPEARANCE, TEST_LETTERBOX_DETAILS)
 
         verify(centralSurfaces).setAppearance(TEST_LETTERBOX_APPEARANCE.appearance)
     }
 
     @Test
-    fun onSysBarAttrsChanged_flagTrue_noLetterbox_forwardsOriginalAppearanceToCtrlSrfcs() {
-        whenever(featureFlags.isEnabled(Flags.STATUS_BAR_LETTERBOX_APPEARANCE)).thenReturn(true)
-
+    fun onSysBarAttrsChanged_noLetterbox_forwardsOriginalAppearanceToCtrlSrfcs() {
         changeSysBarAttrs(TEST_APPEARANCE, arrayOf<LetterboxDetails>())
 
         verify(centralSurfaces).setAppearance(TEST_APPEARANCE)
@@ -100,9 +92,7 @@ class SystemBarAttributesListenerTest : SysuiTestCase() {
     }
 
     @Test
-    fun onSysBarAttrsChanged_flagTrue_forwardsLetterboxAppearanceToStatusBarStateCtrl() {
-        whenever(featureFlags.isEnabled(Flags.STATUS_BAR_LETTERBOX_APPEARANCE)).thenReturn(true)
-
+    fun onSysBarAttrsChanged_forwardsLetterboxAppearanceToStatusBarStateCtrl() {
         changeSysBarAttrs(TEST_APPEARANCE, TEST_LETTERBOX_DETAILS)
 
         verify(statusBarStateController)
@@ -120,9 +110,7 @@ class SystemBarAttributesListenerTest : SysuiTestCase() {
     }
 
     @Test
-    fun onSysBarAttrsChanged_flagTrue_forwardsLetterboxAppearanceToLightBarController() {
-        whenever(featureFlags.isEnabled(Flags.STATUS_BAR_LETTERBOX_APPEARANCE)).thenReturn(true)
-
+    fun onSysBarAttrsChanged_forwardsLetterboxAppearanceToLightBarController() {
         changeSysBarAttrs(TEST_APPEARANCE, TEST_APPEARANCE_REGIONS, TEST_LETTERBOX_DETAILS)
 
         verify(lightBarController)
@@ -135,7 +123,6 @@ class SystemBarAttributesListenerTest : SysuiTestCase() {
 
     @Test
     fun onStatusBarBoundsChanged_forwardsLetterboxAppearanceToStatusBarStateController() {
-        whenever(featureFlags.isEnabled(Flags.STATUS_BAR_LETTERBOX_APPEARANCE)).thenReturn(true)
         changeSysBarAttrs(TEST_APPEARANCE, TEST_APPEARANCE_REGIONS, TEST_LETTERBOX_DETAILS)
         reset(centralSurfaces, lightBarController, statusBarStateController)
 
@@ -148,7 +135,6 @@ class SystemBarAttributesListenerTest : SysuiTestCase() {
 
     @Test
     fun onStatusBarBoundsChanged_forwardsLetterboxAppearanceToLightBarController() {
-        whenever(featureFlags.isEnabled(Flags.STATUS_BAR_LETTERBOX_APPEARANCE)).thenReturn(true)
         changeSysBarAttrs(TEST_APPEARANCE, TEST_APPEARANCE_REGIONS, TEST_LETTERBOX_DETAILS)
         reset(centralSurfaces, lightBarController, statusBarStateController)
 
@@ -164,7 +150,6 @@ class SystemBarAttributesListenerTest : SysuiTestCase() {
 
     @Test
     fun onStatusBarBoundsChanged_forwardsLetterboxAppearanceToCentralSurfaces() {
-        whenever(featureFlags.isEnabled(Flags.STATUS_BAR_LETTERBOX_APPEARANCE)).thenReturn(true)
         changeSysBarAttrs(TEST_APPEARANCE, TEST_APPEARANCE_REGIONS, TEST_LETTERBOX_DETAILS)
         reset(centralSurfaces, lightBarController, statusBarStateController)
 
@@ -175,19 +160,7 @@ class SystemBarAttributesListenerTest : SysuiTestCase() {
 
     @Test
     fun onStatusBarBoundsChanged_previousCallEmptyLetterbox_doesNothing() {
-        whenever(featureFlags.isEnabled(Flags.STATUS_BAR_LETTERBOX_APPEARANCE)).thenReturn(true)
         changeSysBarAttrs(TEST_APPEARANCE, TEST_APPEARANCE_REGIONS, arrayOf())
-        reset(centralSurfaces, lightBarController, statusBarStateController)
-
-        sysBarAttrsListener.onStatusBarBoundsChanged()
-
-        verifyZeroInteractions(centralSurfaces, lightBarController, statusBarStateController)
-    }
-
-    @Test
-    fun onStatusBarBoundsChanged_flagFalse_doesNothing() {
-        whenever(featureFlags.isEnabled(Flags.STATUS_BAR_LETTERBOX_APPEARANCE)).thenReturn(false)
-        changeSysBarAttrs(TEST_APPEARANCE, TEST_APPEARANCE_REGIONS, TEST_LETTERBOX_DETAILS)
         reset(centralSurfaces, lightBarController, statusBarStateController)
 
         sysBarAttrsListener.onStatusBarBoundsChanged()

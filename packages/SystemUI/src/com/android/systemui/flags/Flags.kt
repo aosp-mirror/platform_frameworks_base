@@ -162,9 +162,6 @@ object Flags {
     // TODO(b/254513246): Tracking Bug
     val STATUS_BAR_USER_SWITCHER = ResourceBooleanFlag(602, R.bool.flag_user_switcher_chip)
 
-    // TODO(b/254513025): Tracking Bug
-    val STATUS_BAR_LETTERBOX_APPEARANCE = ReleasedFlag(603, teamfood = false)
-
     // TODO(b/254512623): Tracking Bug
     @Deprecated("Replaced by mobile and wifi specific flags.")
     val NEW_STATUS_BAR_PIPELINE_BACKEND = UnreleasedFlag(604, teamfood = false)
