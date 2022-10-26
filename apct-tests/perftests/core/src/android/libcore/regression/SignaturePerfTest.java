@@ -19,12 +19,12 @@ import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
 import android.test.suitebuilder.annotation.LargeTest;
 
-import org.junit.Before;
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -37,13 +37,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 /** Tests RSA and DSA mSignature creation and verification. */
-@RunWith(Parameterized.class)
+@RunWith(JUnitParamsRunner.class)
 @LargeTest
 public class SignaturePerfTest {
     @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
-    @Parameters(name = "mAlgorithm={0}, mImplementation={1}")
-    public static Collection<Object[]> data() {
+    public static Collection<Object[]> getData() {
         return Arrays.asList(
                 new Object[][] {
                     {Algorithm.MD5WithRSA, Implementation.OpenSSL},
@@ -54,12 +53,6 @@ public class SignaturePerfTest {
                     {Algorithm.SHA1withDSA, Implementation.BouncyCastle}
                 });
     }
-
-    @Parameterized.Parameter(0)
-    public Algorithm mAlgorithm;
-
-    @Parameterized.Parameter(1)
-    public Implementation mImplementation;
 
     private static final int DATA_SIZE = 8192;
     private static final byte[] DATA = new byte[DATA_SIZE];
@@ -94,9 +87,8 @@ public class SignaturePerfTest {
     private PrivateKey mPrivateKey;
     private PublicKey mPublicKey;
 
-    @Before
-    public void setUp() throws Exception {
-        this.mSignatureAlgorithm = mAlgorithm.toString();
+    public void setUp(Algorithm algorithm) throws Exception {
+        this.mSignatureAlgorithm = algorithm.toString();
 
         String keyAlgorithm =
                 mSignatureAlgorithm.substring(
@@ -121,11 +113,13 @@ public class SignaturePerfTest {
     }
 
     @Test
-    public void timeSign() throws Exception {
+    @Parameters(method = "getData")
+    public void timeSign(Algorithm algorithm, Implementation implementation) throws Exception {
+        setUp(algorithm);
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             Signature signer;
-            switch (mImplementation) {
+            switch (implementation) {
                 case OpenSSL:
                     signer = Signature.getInstance(mSignatureAlgorithm, "AndroidOpenSSL");
                     break;
@@ -133,7 +127,7 @@ public class SignaturePerfTest {
                     signer = Signature.getInstance(mSignatureAlgorithm, "BC");
                     break;
                 default:
-                    throw new RuntimeException(mImplementation.toString());
+                    throw new RuntimeException(implementation.toString());
             }
             signer.initSign(mPrivateKey);
             signer.update(DATA);
@@ -142,11 +136,13 @@ public class SignaturePerfTest {
     }
 
     @Test
-    public void timeVerify() throws Exception {
+    @Parameters(method = "getData")
+    public void timeVerify(Algorithm algorithm, Implementation implementation) throws Exception {
+        setUp(algorithm);
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             Signature verifier;
-            switch (mImplementation) {
+            switch (implementation) {
                 case OpenSSL:
                     verifier = Signature.getInstance(mSignatureAlgorithm, "AndroidOpenSSL");
                     break;
@@ -154,7 +150,7 @@ public class SignaturePerfTest {
                     verifier = Signature.getInstance(mSignatureAlgorithm, "BC");
                     break;
                 default:
-                    throw new RuntimeException(mImplementation.toString());
+                    throw new RuntimeException(implementation.toString());
             }
             verifier.initVerify(mPublicKey);
             verifier.update(DATA);

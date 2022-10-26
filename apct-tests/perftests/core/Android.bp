@@ -44,6 +44,8 @@ android_test {
         "apct-perftests-utils",
         "collector-device-lib",
         "compatibility-device-util-axt",
+        "junit",
+        "junit-params",
         "core-tests-support",
         "guava",
     ],
