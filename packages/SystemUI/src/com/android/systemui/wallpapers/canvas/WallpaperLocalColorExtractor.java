@@ -45,14 +45,14 @@ import java.util.concurrent.Executor;
  * It uses a background executor, and uses callbacks to inform that the work is done.
  * It uses  a downscaled version of the wallpaper to extract the colors.
  */
-public class WallpaperColorExtractor {
+public class WallpaperLocalColorExtractor {
 
     private Bitmap mMiniBitmap;
 
     @VisibleForTesting
     static final int SMALL_SIDE = 128;
 
-    private static final String TAG = WallpaperColorExtractor.class.getSimpleName();
+    private static final String TAG = WallpaperLocalColorExtractor.class.getSimpleName();
     private static final @NonNull RectF LOCAL_COLOR_BOUNDS =
             new RectF(0, 0, 1, 1);
 
@@ -70,12 +70,12 @@ public class WallpaperColorExtractor {
     @Background
     private final Executor mBackgroundExecutor;
 
-    private final WallpaperColorExtractorCallback mWallpaperColorExtractorCallback;
+    private final WallpaperLocalColorExtractorCallback mWallpaperLocalColorExtractorCallback;
 
     /**
      * Interface to handle the callbacks after the different steps of the color extraction
      */
-    public interface WallpaperColorExtractorCallback {
+    public interface WallpaperLocalColorExtractorCallback {
         /**
          * Callback after the colors of new regions have been extracted
          * @param regions the list of new regions that have been processed
@@ -103,13 +103,13 @@ public class WallpaperColorExtractor {
     /**
      * Creates a new color extractor.
      * @param backgroundExecutor the executor on which the color extraction will be performed
-     * @param wallpaperColorExtractorCallback an interface to handle the callbacks from
+     * @param wallpaperLocalColorExtractorCallback an interface to handle the callbacks from
      *                                        the color extractor.
      */
-    public WallpaperColorExtractor(@Background Executor backgroundExecutor,
-            WallpaperColorExtractorCallback wallpaperColorExtractorCallback) {
+    public WallpaperLocalColorExtractor(@Background Executor backgroundExecutor,
+            WallpaperLocalColorExtractorCallback wallpaperLocalColorExtractorCallback) {
         mBackgroundExecutor = backgroundExecutor;
-        mWallpaperColorExtractorCallback = wallpaperColorExtractorCallback;
+        mWallpaperLocalColorExtractorCallback = wallpaperLocalColorExtractorCallback;
     }
 
     /**
@@ -157,7 +157,7 @@ public class WallpaperColorExtractor {
             mBitmapWidth = bitmap.getWidth();
             mBitmapHeight = bitmap.getHeight();
             mMiniBitmap = createMiniBitmap(bitmap);
-            mWallpaperColorExtractorCallback.onMiniBitmapUpdated();
+            mWallpaperLocalColorExtractorCallback.onMiniBitmapUpdated();
             recomputeColors();
         }
     }
@@ -206,7 +206,7 @@ public class WallpaperColorExtractor {
             boolean wasActive = isActive();
             mPendingRegions.addAll(regions);
             if (!wasActive && isActive()) {
-                mWallpaperColorExtractorCallback.onActivated();
+                mWallpaperLocalColorExtractorCallback.onActivated();
             }
             processColorsInternal();
         }
@@ -228,7 +228,7 @@ public class WallpaperColorExtractor {
             mPendingRegions.removeAll(regions);
             regions.forEach(mProcessedRegions::remove);
             if (wasActive && !isActive()) {
-                mWallpaperColorExtractorCallback.onDeactivated();
+                mWallpaperLocalColorExtractorCallback.onDeactivated();
             }
         }
     }
@@ -252,7 +252,7 @@ public class WallpaperColorExtractor {
     }
 
     private Bitmap createMiniBitmap(@NonNull Bitmap bitmap) {
-        Trace.beginSection("WallpaperColorExtractor#createMiniBitmap");
+        Trace.beginSection("WallpaperLocalColorExtractor#createMiniBitmap");
         // if both sides of the image are larger than SMALL_SIDE, downscale the bitmap.
         int smallestSide = Math.min(bitmap.getWidth(), bitmap.getHeight());
         float scale = Math.min(1.0f, (float) SMALL_SIDE / smallestSide);
@@ -359,7 +359,7 @@ public class WallpaperColorExtractor {
          */
         if (mDisplayWidth < 0 || mDisplayHeight < 0 || mPages < 0) return;
 
-        Trace.beginSection("WallpaperColorExtractor#processColorsInternal");
+        Trace.beginSection("WallpaperLocalColorExtractor#processColorsInternal");
         List<WallpaperColors> processedColors = new ArrayList<>();
         for (int i = 0; i < mPendingRegions.size(); i++) {
             RectF nextArea = mPendingRegions.get(i);
@@ -372,7 +372,7 @@ public class WallpaperColorExtractor {
         mPendingRegions.clear();
         Trace.endSection();
 
-        mWallpaperColorExtractorCallback.onColorsProcessed(processedRegions, processedColors);
+        mWallpaperLocalColorExtractorCallback.onColorsProcessed(processedRegions, processedColors);
     }
 
     /**

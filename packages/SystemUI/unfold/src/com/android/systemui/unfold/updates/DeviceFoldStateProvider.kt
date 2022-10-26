@@ -16,6 +16,7 @@
 package com.android.systemui.unfold.updates
 
 import android.os.Handler
+import android.os.Trace
 import android.util.Log
 import androidx.annotation.FloatRange
 import androidx.annotation.VisibleForTesting
@@ -108,6 +109,7 @@ constructor(
     private fun onHingeAngle(angle: Float) {
         if (DEBUG) {
             Log.d(TAG, "Hinge angle: $angle, lastHingeAngle: $lastHingeAngle")
+            Trace.traceCounter(Trace.TRACE_TAG_APP, "hinge_angle", angle.toInt())
         }
 
         val isClosing = angle < lastHingeAngle
@@ -115,8 +117,16 @@ constructor(
         val closingThresholdMet = closingThreshold == null || angle < closingThreshold
         val isFullyOpened = FULLY_OPEN_DEGREES - angle < FULLY_OPEN_THRESHOLD_DEGREES
         val closingEventDispatched = lastFoldUpdate == FOLD_UPDATE_START_CLOSING
+        val screenAvailableEventSent = isUnfoldHandled
 
-        if (isClosing && closingThresholdMet && !closingEventDispatched && !isFullyOpened) {
+        if (isClosing // hinge angle should be decreasing since last update
+                && closingThresholdMet // hinge angle is below certain threshold
+                && !closingEventDispatched  // we haven't sent closing event already
+                && !isFullyOpened // do not send closing event if we are in fully opened hinge
+                                  // angle range as closing threshold could overlap this range
+                && screenAvailableEventSent // do not send closing event if we are still in
+                                            // the process of turning on the inner display
+        ) {
             notifyFoldUpdate(FOLD_UPDATE_START_CLOSING)
         }
 

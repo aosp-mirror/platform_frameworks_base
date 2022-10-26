@@ -55,6 +55,11 @@ public class DreamMediaEntryComplication implements Complication {
         return mComponentFactory.create().getViewHolder();
     }
 
+    @Override
+    public int getRequiredTypeAvailability() {
+        return COMPLICATION_TYPE_MEDIA_ENTRY;
+    }
+
     /**
      * Contains values/logic associated with the dream complication view.
      */
