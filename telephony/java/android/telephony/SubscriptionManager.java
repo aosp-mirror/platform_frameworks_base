@@ -4175,18 +4175,18 @@ public class SubscriptionManager {
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.MANAGE_SUBSCRIPTION_USER_ASSOCIATION)
-    public void setUserHandle(int subscriptionId, @Nullable UserHandle userHandle) {
+    public void setSubscriptionUserHandle(int subscriptionId, @Nullable UserHandle userHandle) {
         if (!isValidSubscriptionId(subscriptionId)) {
-            throw new IllegalArgumentException("[setUserHandle]: Invalid subscriptionId: "
-                    + subscriptionId);
+            throw new IllegalArgumentException("[setSubscriptionUserHandle]: "
+                    + "Invalid subscriptionId: " + subscriptionId);
         }
 
         try {
             ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
-                iSub.setUserHandle(userHandle, subscriptionId, mContext.getOpPackageName());
+                iSub.setSubscriptionUserHandle(userHandle, subscriptionId);
             } else {
-                throw new IllegalStateException("[setUserHandle]: "
+                throw new IllegalStateException("[setSubscriptionUserHandle]: "
                         + "subscription service unavailable");
             }
         } catch (RemoteException ex) {
@@ -4211,18 +4211,18 @@ public class SubscriptionManager {
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.MANAGE_SUBSCRIPTION_USER_ASSOCIATION)
-    public @Nullable UserHandle getUserHandle(int subscriptionId) {
+    public @Nullable UserHandle getSubscriptionUserHandle(int subscriptionId) {
         if (!isValidSubscriptionId(subscriptionId)) {
-            throw new IllegalArgumentException("[getUserHandle]: Invalid subscriptionId: "
-                    + subscriptionId);
+            throw new IllegalArgumentException("[getSubscriptionUserHandle]: "
+                    + "Invalid subscriptionId: " + subscriptionId);
         }
 
         try {
             ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
-                return iSub.getUserHandle(subscriptionId, mContext.getOpPackageName());
+                return iSub.getSubscriptionUserHandle(subscriptionId);
             } else {
-                throw new IllegalStateException("[getUserHandle]: "
+                throw new IllegalStateException("[getSubscriptionUserHandle]: "
                         + "subscription service unavailable");
             }
         } catch (RemoteException ex) {

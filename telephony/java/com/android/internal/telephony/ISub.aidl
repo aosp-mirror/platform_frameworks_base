@@ -323,22 +323,20 @@ interface ISub {
       *
       * @param userHandle the user handle for this subscription
       * @param subId the unique SubscriptionInfo index in database
-      * @param callingPackage The package making the IPC.
       *
       * @throws SecurityException if doesn't have MANAGE_SUBSCRIPTION_USER_ASSOCIATION
       * @throws IllegalArgumentException if subId is invalid.
       */
-    int setUserHandle(in UserHandle userHandle, int subId, String callingPackage);
+    int setSubscriptionUserHandle(in UserHandle userHandle, int subId);
 
     /**
      * Get UserHandle for this subscription
      *
      * @param subId the unique SubscriptionInfo index in database
-     * @param callingPackage the package making the IPC
      * @return userHandle associated with this subscription.
      *
-     * @throws SecurityException if doesn't have SMANAGE_SUBSCRIPTION_USER_ASSOCIATION
+     * @throws SecurityException if doesn't have MANAGE_SUBSCRIPTION_USER_ASSOCIATION
      * @throws IllegalArgumentException if subId is invalid.
      */
-     UserHandle getUserHandle(int subId, String callingPackage);
+     UserHandle getSubscriptionUserHandle(int subId);
 }
