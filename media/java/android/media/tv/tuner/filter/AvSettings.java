@@ -38,7 +38,8 @@ public class AvSettings extends Settings {
                     VIDEO_STREAM_TYPE_MPEG1, VIDEO_STREAM_TYPE_MPEG2,
                     VIDEO_STREAM_TYPE_MPEG4P2, VIDEO_STREAM_TYPE_AVC, VIDEO_STREAM_TYPE_HEVC,
                     VIDEO_STREAM_TYPE_VC1, VIDEO_STREAM_TYPE_VP8, VIDEO_STREAM_TYPE_VP9,
-                    VIDEO_STREAM_TYPE_AV1, VIDEO_STREAM_TYPE_AVS, VIDEO_STREAM_TYPE_AVS2})
+                    VIDEO_STREAM_TYPE_AV1, VIDEO_STREAM_TYPE_AVS, VIDEO_STREAM_TYPE_AVS2,
+                    VIDEO_STREAM_TYPE_VVC})
     @Retention(RetentionPolicy.SOURCE)
     public @interface VideoStreamType {}
 
@@ -75,6 +76,10 @@ public class AvSettings extends Settings {
      * ITU-T Rec. H.265 and ISO/IEC 23008-2
      */
     public static final int VIDEO_STREAM_TYPE_HEVC = android.hardware.tv.tuner.VideoStreamType.HEVC;
+    /*
+     * ITU-T Rec. H.266 and ISO/IEC 23090-3
+     */
+    public static final int VIDEO_STREAM_TYPE_VVC = android.hardware.tv.tuner.VideoStreamType.VVC;
     /*
      * Microsoft VC.1
      */
