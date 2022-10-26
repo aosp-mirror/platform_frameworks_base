@@ -36,6 +36,7 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.AtomicFile;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -52,6 +53,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
@@ -308,48 +310,45 @@ class LockSettingsStorage {
 
     private void writeFile(File path, byte[] data) {
         synchronized (mFileWriteLock) {
-            RandomAccessFile raf = null;
+            // Use AtomicFile to guarantee atomicity of the file write, including when an existing
+            // file is replaced with a new one.  This method is usually used to create new files,
+            // but there are some edge cases in which it is used to replace an existing file.
+            AtomicFile file = new AtomicFile(path);
+            FileOutputStream out = null;
             try {
-                // Write the data to the file, requiring each write to be synchronized to the
-                // underlying storage device immediately to avoid data loss in case of power loss.
-                raf = new RandomAccessFile(path, "rws");
-                // Truncate the file if the data is empty.
-                if (data == null || data.length == 0) {
-                    raf.setLength(0);
-                } else {
-                    raf.write(data, 0, data.length);
-                }
-                raf.close();
-                fsyncDirectory(path.getParentFile());
+                out = file.startWrite();
+                out.write(data);
+                file.finishWrite(out);
+                out = null;
             } catch (IOException e) {
-                Slog.e(TAG, "Error writing to file " + e);
+                Slog.e(TAG, "Error writing file " + path, e);
             } finally {
-                if (raf != null) {
-                    try {
-                        raf.close();
-                    } catch (IOException e) {
-                        Slog.e(TAG, "Error closing file " + e);
-                    }
-                }
+                file.failWrite(out);
             }
+            // For performance reasons, AtomicFile only syncs the file itself, not also the parent
+            // directory.  The latter must be done explicitly here, as some callers need a guarantee
+            // that the file really exists on-disk when this returns.
+            fsyncDirectory(path.getParentFile());
             mCache.putFile(path, data);
         }
     }
 
     private void deleteFile(File path) {
         synchronized (mFileWriteLock) {
+            // Zeroize the file to try to make its contents unrecoverable.  This is *not* guaranteed
+            // to be effective, and in fact it usually isn't, but it doesn't hurt.  We also don't
+            // bother zeroizing |path|.new, which may exist from an interrupted AtomicFile write.
             if (path.exists()) {
-                // Zeroize the file to try to make its contents unrecoverable.  This is *not*
-                // guaranteed to be effective, and in fact it usually isn't, but it doesn't hurt.
                 try (RandomAccessFile raf = new RandomAccessFile(path, "rws")) {
                     final int fileSize = (int) raf.length();
                     raf.write(new byte[fileSize]);
                 } catch (Exception e) {
                     Slog.w(TAG, "Failed to zeroize " + path, e);
                 }
-                path.delete();
-                mCache.putFile(path, null);
             }
+            // To ensure that |path|.new is deleted if it exists, use AtomicFile.delete() here.
+            new AtomicFile(path).delete();
+            mCache.putFile(path, null);
         }
     }
 
