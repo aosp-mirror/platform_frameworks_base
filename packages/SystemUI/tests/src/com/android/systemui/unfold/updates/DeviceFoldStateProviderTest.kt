@@ -140,6 +140,40 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
     }
 
     @Test
+    fun testOnUnfold_hingeAngleDecreasesBeforeInnerScreenAvailable_emitsOnlyStartAndInnerScreenAvailableEvents() {
+        setFoldState(folded = true)
+        foldUpdates.clear()
+
+        setFoldState(folded = false)
+        screenOnStatusProvider.notifyScreenTurningOn()
+        sendHingeAngleEvent(10)
+        sendHingeAngleEvent(20)
+        sendHingeAngleEvent(10)
+        screenOnStatusProvider.notifyScreenTurnedOn()
+
+        assertThat(foldUpdates).containsExactly(FOLD_UPDATE_START_OPENING,
+                FOLD_UPDATE_UNFOLDED_SCREEN_AVAILABLE)
+    }
+
+    @Test
+    fun testOnUnfold_hingeAngleDecreasesAfterInnerScreenAvailable_emitsStartInnerScreenAvailableAndStartClosingEvents() {
+        setFoldState(folded = true)
+        foldUpdates.clear()
+
+        setFoldState(folded = false)
+        screenOnStatusProvider.notifyScreenTurningOn()
+        sendHingeAngleEvent(10)
+        sendHingeAngleEvent(20)
+        screenOnStatusProvider.notifyScreenTurnedOn()
+        sendHingeAngleEvent(30)
+        sendHingeAngleEvent(40)
+        sendHingeAngleEvent(10)
+
+        assertThat(foldUpdates).containsExactly(FOLD_UPDATE_START_OPENING,
+                FOLD_UPDATE_UNFOLDED_SCREEN_AVAILABLE, FOLD_UPDATE_START_CLOSING)
+    }
+
+    @Test
     fun testOnFolded_stopsHingeAngleProvider() {
         setFoldState(folded = true)
 
@@ -237,7 +271,7 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
     }
 
     @Test
-    fun startClosingEvent_afterTimeout_abortEmitted() {
+    fun startClosingEvent_afterTimeout_finishHalfOpenEventEmitted() {
         sendHingeAngleEvent(90)
         sendHingeAngleEvent(80)
 
@@ -269,7 +303,7 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
     }
 
     @Test
-    fun startClosingEvent_timeoutAfterTimeoutRescheduled_abortEmitted() {
+    fun startClosingEvent_timeoutAfterTimeoutRescheduled_finishHalfOpenStateEmitted() {
         sendHingeAngleEvent(180)
         sendHingeAngleEvent(90)
 
