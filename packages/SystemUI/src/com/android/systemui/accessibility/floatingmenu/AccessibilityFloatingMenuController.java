@@ -28,6 +28,7 @@ import android.os.UserHandle;
 import android.text.TextUtils;
 import android.view.Display;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityManager;
 
 import androidx.annotation.MainThread;
 
@@ -56,6 +57,7 @@ public class AccessibilityFloatingMenuController implements
     private Context mContext;
     private final WindowManager mWindowManager;
     private final DisplayManager mDisplayManager;
+    private final AccessibilityManager mAccessibilityManager;
     private final FeatureFlags mFeatureFlags;
     @VisibleForTesting
     IAccessibilityFloatingMenu mFloatingMenu;
@@ -96,6 +98,7 @@ public class AccessibilityFloatingMenuController implements
     public AccessibilityFloatingMenuController(Context context,
             WindowManager windowManager,
             DisplayManager displayManager,
+            AccessibilityManager accessibilityManager,
             AccessibilityButtonTargetsObserver accessibilityButtonTargetsObserver,
             AccessibilityButtonModeObserver accessibilityButtonModeObserver,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
@@ -103,6 +106,7 @@ public class AccessibilityFloatingMenuController implements
         mContext = context;
         mWindowManager = windowManager;
         mDisplayManager = displayManager;
+        mAccessibilityManager = accessibilityManager;
         mAccessibilityButtonTargetsObserver = accessibilityButtonTargetsObserver;
         mAccessibilityButtonModeObserver = accessibilityButtonModeObserver;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
@@ -180,7 +184,8 @@ public class AccessibilityFloatingMenuController implements
                 final Display defaultDisplay = mDisplayManager.getDisplay(DEFAULT_DISPLAY);
                 mFloatingMenu = new MenuViewLayerController(
                         mContext.createWindowContext(defaultDisplay,
-                                TYPE_NAVIGATION_BAR_PANEL, /* options= */ null), mWindowManager);
+                                TYPE_NAVIGATION_BAR_PANEL, /* options= */ null), mWindowManager,
+                        mAccessibilityManager);
             } else {
                 mFloatingMenu = new AccessibilityFloatingMenu(mContext);
             }

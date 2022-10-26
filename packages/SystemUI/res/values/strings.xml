@@ -2197,6 +2197,15 @@
     <string name="accessibility_floating_button_migration_tooltip">Tap to open accessibility features. Customize or replace this button in Settings.\n\n<annotation id="link">View settings</annotation></string>
     <!-- Message for the accessibility floating button docking tooltip. It shows when the user first time drag the button. It will tell the user about docking behavior. [CHAR LIMIT=70] -->
     <string name="accessibility_floating_button_docking_tooltip">Move button to the edge to hide it temporarily</string>
+    <!-- Text for the undo action button of the message view of the accessibility floating menu to perform undo operation. [CHAR LIMIT=30]-->
+    <string name="accessibility_floating_button_undo">Undo</string>
+
+    <!-- Text for the message view with undo action of the accessibility floating menu to show how many features shortcuts were removed. [CHAR LIMIT=30]-->
+    <string name="accessibility_floating_button_undo_message_text">{count, plural,
+        =1 {{label} shortcut removed}
+        other {# shortcuts removed}
+    }</string>
+
     <!-- Action in accessibility menu to move the accessibility floating button to the top left of the screen. [CHAR LIMIT=30] -->
     <string name="accessibility_floating_button_action_move_top_left">Move top left</string>
     <!-- Action in accessibility menu to move the accessibility floating button to the top right of the screen. [CHAR LIMIT=30] -->
