@@ -235,6 +235,7 @@ public class BroadcastOptions extends ComponentOptions {
      *
      * @hide
      */
+    @SystemApi
     public static final int DELIVERY_GROUP_POLICY_ALL = 0;
 
     /**
@@ -243,6 +244,7 @@ public class BroadcastOptions extends ComponentOptions {
      *
      * @hide
      */
+    @SystemApi
     public static final int DELIVERY_GROUP_POLICY_MOST_RECENT = 1;
 
     public static BroadcastOptions makeBasic() {
@@ -724,13 +726,32 @@ public class BroadcastOptions extends ComponentOptions {
      *
      * @hide
      */
+    @SystemApi
     public void setDeliveryGroupPolicy(@DeliveryGroupPolicy int policy) {
         mDeliveryGroupPolicy = policy;
     }
 
-    /** @hide */
+    /**
+     * Get the delivery group policy for this broadcast that specifies how multiple broadcasts
+     * belonging to the same delivery group has to be handled.
+     *
+     * @hide
+     */
+    @SystemApi
     public @DeliveryGroupPolicy int getDeliveryGroupPolicy() {
         return mDeliveryGroupPolicy;
+    }
+
+    /**
+     * Clears any previously set delivery group policies using
+     * {@link #setDeliveryGroupKey(String, String)} and resets the delivery group policy to
+     * the default value ({@link #DELIVERY_GROUP_POLICY_ALL}).
+     *
+     * @hide
+     */
+    @SystemApi
+    public void clearDeliveryGroupPolicy() {
+        mDeliveryGroupPolicy = DELIVERY_GROUP_POLICY_ALL;
     }
 
     /**
