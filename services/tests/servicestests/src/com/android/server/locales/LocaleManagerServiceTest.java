@@ -229,6 +229,29 @@ public class LocaleManagerServiceTest {
         }
     }
 
+    @Test(expected = SecurityException.class)
+    public void testGetApplicationLocales_currentImeQueryNonForegroundAppLocales_fails()
+            throws Exception {
+        doReturn(DEFAULT_UID).when(mMockPackageManager)
+                .getPackageUidAsUser(anyString(), any(), anyInt());
+        doReturn(new PackageConfig(/* nightMode = */ 0, DEFAULT_LOCALES))
+                .when(mMockActivityTaskManager).getApplicationConfig(anyString(), anyInt());
+        String imPkgName = getCurrentInputMethodPackageName();
+        doReturn(Binder.getCallingUid()).when(mMockPackageManager)
+                .getPackageUidAsUser(eq(imPkgName), any(), anyInt());
+        doReturn(false).when(mMockActivityManager).isAppForeground(anyInt());
+        setUpFailingPermissionCheckFor(Manifest.permission.READ_APP_SPECIFIC_LOCALES);
+
+        try {
+            mLocaleManagerService.getApplicationLocales(DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID);
+            fail("Expected SecurityException");
+        } finally {
+            verify(mMockContext).enforceCallingOrSelfPermission(
+                    eq(android.Manifest.permission.READ_APP_SPECIFIC_LOCALES),
+                    anyString());
+        }
+    }
+
     @Test
     public void testGetApplicationLocales_appSpecificConfigAbsent_returnsEmptyList()
             throws Exception {
@@ -307,7 +330,7 @@ public class LocaleManagerServiceTest {
     }
 
     @Test
-    public void testGetApplicationLocales_callerIsCurrentInputMethod_returnsLocales()
+    public void testGetApplicationLocales_currentImeQueryForegroundAppLocales_returnsLocales()
             throws Exception {
         doReturn(DEFAULT_UID).when(mMockPackageManager)
                 .getPackageUidAsUser(anyString(), any(), anyInt());
@@ -316,6 +339,7 @@ public class LocaleManagerServiceTest {
         String imPkgName = getCurrentInputMethodPackageName();
         doReturn(Binder.getCallingUid()).when(mMockPackageManager)
                 .getPackageUidAsUser(eq(imPkgName), any(), anyInt());
+        doReturn(true).when(mMockActivityManager).isAppForeground(anyInt());
 
         LocaleList locales =
                 mLocaleManagerService.getApplicationLocales(
