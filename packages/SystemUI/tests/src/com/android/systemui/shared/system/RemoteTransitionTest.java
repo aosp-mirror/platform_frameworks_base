@@ -25,6 +25,7 @@ import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.window.TransitionInfo.FLAG_FIRST_CUSTOM;
+import static android.window.TransitionInfo.FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_SHOW_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
@@ -69,10 +70,13 @@ public class RemoteTransitionTest extends SysuiTestCase {
         TransitionInfo combined = new TransitionInfoBuilder(TRANSIT_CLOSE)
                 .addChange(TRANSIT_CHANGE, FLAG_SHOW_WALLPAPER,
                         createTaskInfo(1 /* taskId */, ACTIVITY_TYPE_STANDARD))
+                // Embedded TaskFragment should be excluded when animated with Task.
+                .addChange(TRANSIT_CLOSE, FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY, null /* taskInfo */)
                 .addChange(TRANSIT_CLOSE, 0 /* flags */,
                         createTaskInfo(2 /* taskId */, ACTIVITY_TYPE_STANDARD))
                 .addChange(TRANSIT_OPEN, FLAG_IS_WALLPAPER, null /* taskInfo */)
-                .addChange(TRANSIT_CHANGE, FLAG_FIRST_CUSTOM, null /* taskInfo */).build();
+                .addChange(TRANSIT_CHANGE, FLAG_FIRST_CUSTOM, null /* taskInfo */)
+                .build();
         // Check apps extraction
         RemoteAnimationTarget[] wrapped = RemoteAnimationTargetCompat.wrapApps(combined,
                 mock(SurfaceControl.Transaction.class), null /* leashes */);
