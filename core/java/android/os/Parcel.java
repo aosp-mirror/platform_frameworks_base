@@ -368,6 +368,8 @@ public final class Parcel {
     @FastNative
     private static native void nativeMarkForBinder(long nativePtr, IBinder binder);
     @CriticalNative
+    private static native boolean nativeIsForRpc(long nativePtr);
+    @CriticalNative
     private static native int nativeDataSize(long nativePtr);
     @CriticalNative
     private static native int nativeDataAvail(long nativePtr);
@@ -643,6 +645,15 @@ public final class Parcel {
      */
     private void markForBinder(@NonNull IBinder binder) {
         nativeMarkForBinder(mNativePtr, binder);
+    }
+
+    /**
+     * Whether this Parcel is written for an RPC transaction.
+     *
+     * @hide
+     */
+    public final boolean isForRpc() {
+        return nativeIsForRpc(mNativePtr);
     }
 
     /** @hide */
