@@ -87,6 +87,10 @@ public class BroadcastQueueModernImplTest {
         mHandlerThread.start();
 
         mConstants = new BroadcastConstants(Settings.Global.BROADCAST_FG_CONSTANTS);
+        mConstants.DELAY_URGENT_MILLIS = -120_000;
+        mConstants.DELAY_NORMAL_MILLIS = 10_000;
+        mConstants.DELAY_CACHED_MILLIS = 120_000;
+
         mImpl = new BroadcastQueueModernImpl(mAms, mHandlerThread.getThreadHandler(),
                 mConstants, mConstants);
 

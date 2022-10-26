@@ -401,7 +401,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             mRunnableHead = removeFromRunnableList(mRunnableHead, queue);
 
             // Emit all trace events for this process into a consistent track
-            queue.traceTrackName = TAG + ".mRunning[" + queueIndex + "]";
+            queue.runningTraceTrackName = TAG + ".mRunning[" + queueIndex + "]";
+            queue.runningOomAdjusted = queue.isPendingManifest();
 
             // If we're already warm, schedule next pending broadcast now;
             // otherwise we'll wait for the cold start to circle back around
@@ -415,9 +416,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 scheduleReceiverColdLocked(queue);
             }
 
-            // We've moved at least one process into running state above, so we
-            // need to kick off an OOM adjustment pass
-            updateOomAdj = true;
+            // Only kick off an OOM adjustment pass if needed
+            updateOomAdj |= queue.runningOomAdjusted;
 
             // Move to considering next runnable queue
             queue = nextQueue;
@@ -736,7 +736,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         if (DEBUG_BROADCAST) logv("Scheduling " + r + " to warm " + app);
         setDeliveryState(queue, app, r, index, receiver, BroadcastRecord.DELIVERY_SCHEDULED);
 
-        final IApplicationThread thread = app.getThread();
+        final IApplicationThread thread = app.getOnewayThread();
         if (thread != null) {
             try {
                 if (receiver instanceof BroadcastFilter) {
@@ -777,7 +777,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     private void scheduleResultTo(@NonNull BroadcastRecord r) {
         if ((r.resultToApp == null) || (r.resultTo == null)) return;
         final ProcessRecord app = r.resultToApp;
-        final IApplicationThread thread = app.getThread();
+        final IApplicationThread thread = app.getOnewayThread();
         if (thread != null) {
             mService.mOomAdjuster.mCachedAppOptimizer.unfreezeTemporarily(
                     app, OOM_ADJ_REASON_FINISH_RECEIVER);
@@ -1245,8 +1245,6 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         if (queue.app != null) {
             queue.app.mReceivers.incrementCurReceivers();
 
-            queue.app.mState.forceProcessStateUpTo(ActivityManager.PROCESS_STATE_RECEIVER);
-
             // Don't bump its LRU position if it's in the background restricted.
             if (mService.mInternal.getRestrictionLevel(
                     queue.uid) < ActivityManager.RESTRICTION_LEVEL_RESTRICTED_BUCKET) {
@@ -1256,7 +1254,10 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             mService.mOomAdjuster.mCachedAppOptimizer.unfreezeTemporarily(queue.app,
                     OOM_ADJ_REASON_START_RECEIVER);
 
-            mService.enqueueOomAdjTargetLocked(queue.app);
+            if (queue.runningOomAdjusted) {
+                queue.app.mState.forceProcessStateUpTo(ActivityManager.PROCESS_STATE_RECEIVER);
+                mService.enqueueOomAdjTargetLocked(queue.app);
+            }
         }
     }
 
@@ -1266,10 +1267,11 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
      */
     private void notifyStoppedRunning(@NonNull BroadcastProcessQueue queue) {
         if (queue.app != null) {
-            // Update during our next pass; no need for an immediate update
-            mService.enqueueOomAdjTargetLocked(queue.app);
-
             queue.app.mReceivers.decrementCurReceivers();
+
+            if (queue.runningOomAdjusted) {
+                mService.enqueueOomAdjTargetLocked(queue.app);
+            }
         }
     }
 

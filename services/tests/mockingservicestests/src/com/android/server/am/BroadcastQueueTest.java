@@ -888,7 +888,7 @@ public class BroadcastQueueTest {
         }) {
             // Confirm expected OOM adjustments; we were invoked once to upgrade
             // and once to downgrade
-            assertEquals(ActivityManager.PROCESS_STATE_RECEIVER,
+            assertEquals(String.valueOf(receiverApp), ActivityManager.PROCESS_STATE_RECEIVER,
                     receiverApp.mState.getReportedProcState());
             verify(mAms, times(2)).enqueueOomAdjTargetLocked(eq(receiverApp));
 
@@ -897,8 +897,8 @@ public class BroadcastQueueTest {
                 // cold-started apps to be thawed, but the modern stack does
             } else {
                 // Confirm that app was thawed
-                verify(mAms.mOomAdjuster.mCachedAppOptimizer).unfreezeTemporarily(eq(receiverApp),
-                        eq(OomAdjuster.OOM_ADJ_REASON_START_RECEIVER));
+                verify(mAms.mOomAdjuster.mCachedAppOptimizer, atLeastOnce()).unfreezeTemporarily(
+                        eq(receiverApp), eq(OomAdjuster.OOM_ADJ_REASON_START_RECEIVER));
 
                 // Confirm that we added package to process
                 verify(receiverApp, atLeastOnce()).addPackage(eq(receiverApp.info.packageName),
@@ -1598,5 +1598,40 @@ public class BroadcastQueueTest {
         assertTrue(mQueue.isBeyondBarrierLocked(beforeFirst));
         assertTrue(mQueue.isBeyondBarrierLocked(afterFirst));
         assertTrue(mQueue.isBeyondBarrierLocked(afterSecond));
+    }
+
+    /**
+     * Verify that we OOM adjust for manifest receivers.
+     */
+    @Test
+    public void testOomAdjust_Manifest() throws Exception {
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+
+        final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        enqueueBroadcast(makeBroadcastRecord(airplane, callerApp,
+                List.of(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN),
+                        makeManifestReceiver(PACKAGE_GREEN, CLASS_BLUE),
+                        makeManifestReceiver(PACKAGE_GREEN, CLASS_RED))));
+
+        waitForIdle();
+        verify(mAms, atLeastOnce()).enqueueOomAdjTargetLocked(any());
+    }
+
+    /**
+     * Verify that we never OOM adjust for registered receivers.
+     */
+    @Test
+    public void testOomAdjust_Registered() throws Exception {
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+        final ProcessRecord receiverApp = makeActiveProcessRecord(PACKAGE_GREEN);
+
+        final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        enqueueBroadcast(makeBroadcastRecord(airplane, callerApp,
+                List.of(makeRegisteredReceiver(receiverApp),
+                        makeRegisteredReceiver(receiverApp),
+                        makeRegisteredReceiver(receiverApp))));
+
+        waitForIdle();
+        verify(mAms, never()).enqueueOomAdjTargetLocked(any());
     }
 }
