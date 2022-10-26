@@ -71,6 +71,7 @@ import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -82,6 +83,7 @@ import org.mockito.junit.MockitoRule;
 /**
  * Tests for {@link NotificationStackScrollLayout}.
  */
+@Ignore("b/255552856")
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
