@@ -15,6 +15,7 @@
  */
 package com.android.systemui.unfold.progress
 
+import android.os.Trace
 import android.util.Log
 import androidx.dynamicanimation.animation.DynamicAnimation
 import androidx.dynamicanimation.animation.FloatPropertyCompat
@@ -117,6 +118,7 @@ class PhysicsBasedUnfoldTransitionProgressProvider(
 
         if (DEBUG) {
             Log.d(TAG, "onFoldUpdate = $update")
+            Trace.traceCounter(Trace.TRACE_TAG_APP, "fold_update", update)
         }
     }
 
