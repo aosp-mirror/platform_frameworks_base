@@ -9239,6 +9239,7 @@ package android.os {
 
   public class Binder implements android.os.IBinder {
     method public int handleShellCommand(@NonNull android.os.ParcelFileDescriptor, @NonNull android.os.ParcelFileDescriptor, @NonNull android.os.ParcelFileDescriptor, @NonNull String[]);
+    method public final void markVintfStability();
     method public static void setProxyTransactListener(@Nullable android.os.Binder.ProxyTransactListener);
   }
 
