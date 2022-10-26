@@ -16,6 +16,13 @@
 
 package android.net.wifi.hotspot2.pps;
 
+import static android.net.wifi.hotspot2.PasspointConfiguration.MAX_HESSID_VALUE;
+import static android.net.wifi.hotspot2.PasspointConfiguration.MAX_NUMBER_OF_ENTRIES;
+import static android.net.wifi.hotspot2.PasspointConfiguration.MAX_NUMBER_OF_OI;
+import static android.net.wifi.hotspot2.PasspointConfiguration.MAX_OI_VALUE;
+import static android.net.wifi.hotspot2.PasspointConfiguration.MAX_STRING_LENGTH;
+import static android.net.wifi.hotspot2.PasspointConfiguration.MAX_URL_BYTES;
+
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -342,16 +349,86 @@ public final class HomeSp implements Parcelable {
             Log.d(TAG, "Missing FQDN");
             return false;
         }
+        if (mFqdn.getBytes(StandardCharsets.UTF_8).length > MAX_STRING_LENGTH) {
+            Log.d(TAG, "FQDN is too long");
+            return false;
+        }
         if (TextUtils.isEmpty(mFriendlyName)) {
             Log.d(TAG, "Missing friendly name");
             return false;
         }
+        if (mFriendlyName.getBytes(StandardCharsets.UTF_8).length > MAX_STRING_LENGTH) {
+            Log.d(TAG, "Friendly name is too long");
+            return false;
+        }
         // Verify SSIDs specified in the NetworkID
         if (mHomeNetworkIds != null) {
+            if (mHomeNetworkIds.size() > MAX_NUMBER_OF_ENTRIES) {
+                Log.d(TAG, "too many SSID in HomeNetworkIDs");
+                return false;
+            }
             for (Map.Entry<String, Long> entry : mHomeNetworkIds.entrySet()) {
                 if (entry.getKey() == null ||
                         entry.getKey().getBytes(StandardCharsets.UTF_8).length > MAX_SSID_BYTES) {
-                    Log.d(TAG, "Invalid SSID in HomeNetworkIDs");
+                    Log.d(TAG, "SSID is too long in HomeNetworkIDs");
+                    return false;
+                }
+                if (entry.getValue() != null
+                        && (entry.getValue() > MAX_HESSID_VALUE || entry.getValue() < 0)) {
+                    Log.d(TAG, "HESSID is out of range");
+                    return false;
+                }
+            }
+        }
+        if (mIconUrl != null && mIconUrl.getBytes(StandardCharsets.UTF_8).length > MAX_URL_BYTES) {
+            Log.d(TAG, "Icon URL is too long");
+            return false;
+        }
+        if (mMatchAllOis != null) {
+            if (mMatchAllOis.length > MAX_NUMBER_OF_OI) {
+                Log.d(TAG, "too many match all Organization Identifiers in the profile");
+                return false;
+            }
+            for (long oi : mMatchAllOis) {
+                if (oi > MAX_OI_VALUE || oi < 0) {
+                    Log.d(TAG, "Organization Identifiers is out of range");
+                    return false;
+                }
+            }
+        }
+        if (mMatchAnyOis != null) {
+            if (mMatchAnyOis.length > MAX_NUMBER_OF_OI) {
+                Log.d(TAG, "too many match any Organization Identifiers in the profile");
+                return false;
+            }
+            for (long oi : mMatchAnyOis) {
+                if (oi > MAX_OI_VALUE || oi < 0) {
+                    Log.d(TAG, "Organization Identifiers is out of range");
+                    return false;
+                }
+            }
+        }
+        if (mRoamingConsortiumOis != null) {
+            if (mRoamingConsortiumOis.length > MAX_NUMBER_OF_OI) {
+                Log.d(TAG, "too many Roaming Consortium Organization Identifiers in the "
+                        + "profile");
+                return false;
+            }
+            for (long oi : mRoamingConsortiumOis) {
+                if (oi > MAX_OI_VALUE || oi < 0) {
+                    Log.d(TAG, "Organization Identifiers is out of range");
+                    return false;
+                }
+            }
+        }
+        if (mOtherHomePartners != null) {
+            if (mOtherHomePartners.length > MAX_NUMBER_OF_ENTRIES) {
+                Log.d(TAG, "too many other home partners in the profile");
+                return false;
+            }
+            for (String fqdn : mOtherHomePartners) {
+                if (fqdn.length() > MAX_STRING_LENGTH) {
+                    Log.d(TAG, "FQDN is too long in OtherHomePartners");
                     return false;
                 }
             }
