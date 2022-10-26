@@ -58,6 +58,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
+import android.os.BundleMerger;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Process;
@@ -543,16 +544,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             }, mBroadcastConsumerSkipAndCanceled, true);
         }
 
-        final int policy = (r.options != null)
-                ? r.options.getDeliveryGroupPolicy() : BroadcastOptions.DELIVERY_GROUP_POLICY_ALL;
-        if (policy == BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT) {
-            forEachMatchingBroadcast(QUEUE_PREDICATE_ANY, (testRecord, testIndex) -> {
-                // We only allow caller to remove broadcasts they enqueued
-                return (r.callingUid == testRecord.callingUid)
-                        && (r.userId == testRecord.userId)
-                        && r.matchesDeliveryGroup(testRecord);
-            }, mBroadcastConsumerSkipAndCanceled, true);
-        }
+        applyDeliveryGroupPolicy(r);
 
         if (r.isReplacePending()) {
             // Leave the skipped broadcasts intact in queue, so that we can
@@ -607,6 +599,41 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         if (r.receivers.isEmpty()) {
             scheduleResultTo(r);
         }
+    }
+
+    private void applyDeliveryGroupPolicy(@NonNull BroadcastRecord r) {
+        final int policy = (r.options != null)
+                ? r.options.getDeliveryGroupPolicy() : BroadcastOptions.DELIVERY_GROUP_POLICY_ALL;
+        final BroadcastConsumer broadcastConsumer;
+        switch (policy) {
+            case BroadcastOptions.DELIVERY_GROUP_POLICY_ALL:
+                // Older broadcasts need to be left as is in this case, so nothing more to do.
+                return;
+            case BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT:
+                broadcastConsumer = mBroadcastConsumerSkipAndCanceled;
+                break;
+            case BroadcastOptions.DELIVERY_GROUP_POLICY_MERGED:
+                final BundleMerger extrasMerger = r.options.getDeliveryGroupExtrasMerger();
+                if (extrasMerger == null) {
+                    // Extras merger is required to be able to merge the extras. So, if it's not
+                    // supplied, then ignore the delivery group policy.
+                    return;
+                }
+                broadcastConsumer = (record, recordIndex) -> {
+                    r.intent.mergeExtras(record.intent, extrasMerger);
+                    mBroadcastConsumerSkipAndCanceled.accept(record, recordIndex);
+                };
+                break;
+            default:
+                logw("Unknown delivery group policy: " + policy);
+                return;
+        }
+        forEachMatchingBroadcast(QUEUE_PREDICATE_ANY, (testRecord, testIndex) -> {
+            // We only allow caller to remove broadcasts they enqueued
+            return (r.callingUid == testRecord.callingUid)
+                    && (r.userId == testRecord.userId)
+                    && r.matchesDeliveryGroup(testRecord);
+        }, broadcastConsumer, true);
     }
 
     /**

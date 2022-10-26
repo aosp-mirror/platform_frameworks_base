@@ -49,6 +49,7 @@ import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.BundleMerger;
 import android.os.IBinder;
 import android.os.IncidentManager;
 import android.os.Parcel;
@@ -11069,6 +11070,20 @@ public class Intent implements Parcelable, Cloneable {
             mContentUserHint = other.mContentUserHint;
         }
         return changes;
+    }
+
+    /**
+     * Merge the extras data in this intent with that of other supplied intent using the
+     * strategy specified using {@code extrasMerger}.
+     *
+     * <p> Note the extras data in this intent is treated as the {@code first} param
+     * and the extras data in {@code other} intent is treated as the {@code last} param
+     * when using the passed in {@link BundleMerger} object.
+     *
+     * @hide
+     */
+    public void mergeExtras(@NonNull Intent other, @NonNull BundleMerger extrasMerger) {
+        mExtras = extrasMerger.merge(mExtras, other.mExtras);
     }
 
     /**
