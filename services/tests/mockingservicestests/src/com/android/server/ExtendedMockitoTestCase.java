@@ -23,6 +23,7 @@ import com.android.dx.mockito.inline.extended.StaticMockitoSessionBuilder;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.mockito.MockitoSession;
 import org.mockito.quality.Strictness;
 
@@ -37,6 +38,9 @@ public abstract class ExtendedMockitoTestCase {
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private MockitoSession mSession;
+
+    @Rule
+    public final DumpableDumperRule mDumpableDumperRule = new DumpableDumperRule();
 
     @Before
     public void startSession() {

@@ -15,10 +15,18 @@
  */
 package com.android.server.pm;
 
+import static android.content.pm.UserInfo.NO_PROFILE_GROUP_ID;
+import static android.os.UserHandle.USER_CURRENT;
+import static android.os.UserHandle.USER_NULL;
+import static android.view.Display.DEFAULT_DISPLAY;
+
+import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.util.DebugUtils;
+import android.util.Dumpable;
 import android.util.IndentingPrintWriter;
 import android.util.SparseIntArray;
 import android.view.Display;
@@ -29,6 +37,8 @@ import com.android.internal.util.Preconditions;
 import com.android.server.utils.Slogf;
 
 import java.io.PrintWriter;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Class responsible for deciding whether a user is visible (or visible for a given display).
@@ -36,72 +46,146 @@ import java.io.PrintWriter;
  * <p>This class is thread safe.
  */
 // TODO(b/244644281): improve javadoc (for example, explain all cases / modes)
-public final class UserVisibilityMediator {
+public final class UserVisibilityMediator implements Dumpable {
 
     private static final boolean DBG = false; // DO NOT SUBMIT WITH TRUE
 
     private static final String TAG = UserVisibilityMediator.class.getSimpleName();
 
-    private final Object mLock = new Object();
+    private static final String PREFIX_START_USER_RESULT = "START_USER_";
 
-    // TODO(b/244644281): should not depend on service, but keep its own internal state (like
-    // current user and profile groups), but it is initially as the code was just moved from UMS
-    // "as is". Similarly, it shouldn't need to pass the SparseIntArray on constructor (which was
-    // added to UMS for testing purposes)
-    private final UserManagerService mService;
+    // NOTE: it's set as USER_CURRENT instead of USER_NULL because NO_PROFILE_GROUP_ID has the same
+    // falue of USER_NULL, which would complicate some checks (especially on unit tests)
+    @VisibleForTesting
+    static final int INITIAL_CURRENT_USER_ID = USER_CURRENT;
+
+    public static final int START_USER_RESULT_SUCCESS_VISIBLE = 1;
+    public static final int START_USER_RESULT_SUCCESS_INVISIBLE = 2;
+    public static final int START_USER_RESULT_FAILURE = -1;
+
+    @IntDef(flag = false, prefix = {PREFIX_START_USER_RESULT}, value = {
+            START_USER_RESULT_SUCCESS_VISIBLE,
+            START_USER_RESULT_SUCCESS_INVISIBLE,
+            START_USER_RESULT_FAILURE
+    })
+    public @interface StartUserResult {}
+
+    private final Object mLock = new Object();
 
     private final boolean mUsersOnSecondaryDisplaysEnabled;
 
+    @UserIdInt
+    @GuardedBy("mLock")
+    private int mCurrentUserId = INITIAL_CURRENT_USER_ID;
+
     @Nullable
     @GuardedBy("mLock")
-    private final SparseIntArray mUsersOnSecondaryDisplays;
+    private final SparseIntArray mUsersOnSecondaryDisplays = new SparseIntArray();
 
-    UserVisibilityMediator(UserManagerService service) {
-        this(service, UserManager.isUsersOnSecondaryDisplaysEnabled(),
-                /* usersOnSecondaryDisplays= */ null);
+    /**
+     * Mapping from each started user to its profile group.
+     */
+    @GuardedBy("mLock")
+    private final SparseIntArray mStartedProfileGroupIds = new SparseIntArray();
+
+    UserVisibilityMediator() {
+        this(UserManager.isUsersOnSecondaryDisplaysEnabled());
     }
 
     @VisibleForTesting
-    UserVisibilityMediator(UserManagerService service, boolean usersOnSecondaryDisplaysEnabled,
-            @Nullable SparseIntArray usersOnSecondaryDisplays) {
-        mService = service;
+    UserVisibilityMediator(boolean usersOnSecondaryDisplaysEnabled) {
         mUsersOnSecondaryDisplaysEnabled = usersOnSecondaryDisplaysEnabled;
-        if (mUsersOnSecondaryDisplaysEnabled) {
-            mUsersOnSecondaryDisplays = usersOnSecondaryDisplays == null
-                    ? new SparseIntArray() // default behavior
-                    : usersOnSecondaryDisplays; // passed by unit test
-        } else {
-            mUsersOnSecondaryDisplays = null;
+    }
+
+    /**
+     * TODO(b/244644281): merge with assignUserToDisplay() or add javadoc.
+     */
+    public @StartUserResult int startUser(@UserIdInt int userId, @UserIdInt int profileGroupId,
+            boolean foreground, int displayId) {
+        int actualProfileGroupId = profileGroupId == NO_PROFILE_GROUP_ID
+                ? userId
+                : profileGroupId;
+        if (DBG) {
+            Slogf.d(TAG, "startUser(%d, %d, %b, %d): actualProfileGroupId=%d",
+                    userId, profileGroupId, foreground, displayId, actualProfileGroupId);
+        }
+        if (foreground && displayId != DEFAULT_DISPLAY) {
+            Slogf.w(TAG, "startUser(%d, %d, %b, %d) failed: cannot start foreground user on "
+                    + "secondary display", userId, actualProfileGroupId, foreground, displayId);
+            return START_USER_RESULT_FAILURE;
+        }
+
+        int visibility;
+        synchronized (mLock) {
+            if (isProfile(userId, actualProfileGroupId)) {
+                if (displayId != DEFAULT_DISPLAY) {
+                    Slogf.w(TAG, "startUser(%d, %d, %b, %d) failed: cannot start profile user on "
+                            + "secondary display", userId, actualProfileGroupId, foreground,
+                            displayId);
+                    return START_USER_RESULT_FAILURE;
+                }
+                if (foreground) {
+                    Slogf.w(TAG, "startUser(%d, %d, %b, %d) failed: cannot start profile user in "
+                            + "foreground");
+                    return START_USER_RESULT_FAILURE;
+                } else {
+                    boolean isParentRunning = mStartedProfileGroupIds
+                            .get(actualProfileGroupId) == actualProfileGroupId;
+                    if (DBG) {
+                        Slogf.d(TAG, "profile parent running: %b", isParentRunning);
+                    }
+                    visibility = isParentRunning
+                            ? START_USER_RESULT_SUCCESS_VISIBLE
+                            : START_USER_RESULT_SUCCESS_INVISIBLE;
+                }
+            } else if (foreground) {
+                mCurrentUserId = userId;
+                visibility = START_USER_RESULT_SUCCESS_VISIBLE;
+            } else {
+                visibility = START_USER_RESULT_SUCCESS_INVISIBLE;
+            }
+            if (DBG) {
+                Slogf.d(TAG, "adding user / profile mapping (%d -> %d) and returning %s",
+                        userId, actualProfileGroupId, startUserResultToString(visibility));
+            }
+            mStartedProfileGroupIds.put(userId, actualProfileGroupId);
+        }
+        return visibility;
+    }
+
+    /**
+     * TODO(b/244644281): merge with unassignUserFromDisplay() or add javadoc (and unit tests)
+     */
+    public void stopUser(@UserIdInt int userId) {
+        if (DBG) {
+            Slogf.d(TAG, "stopUser(%d)", userId);
+        }
+        synchronized (mLock) {
+            mStartedProfileGroupIds.delete(userId);
         }
     }
 
     /**
      * See {@link UserManagerInternal#assignUserToDisplay(int, int)}.
      */
-    public void assignUserToDisplay(int userId, int displayId) {
+    public void assignUserToDisplay(int userId, int profileGroupId, int displayId) {
         if (DBG) {
-            Slogf.d(TAG, "assignUserToDisplay(%d, %d)", userId, displayId);
+            Slogf.d(TAG, "assignUserToDisplay(%d, %d): mUsersOnSecondaryDisplaysEnabled=%b",
+                    userId, displayId, mUsersOnSecondaryDisplaysEnabled);
         }
 
-        // NOTE: Using Boolean instead of boolean as it will be re-used below
-        Boolean isProfile = null;
-        if (displayId == Display.DEFAULT_DISPLAY) {
-            if (mUsersOnSecondaryDisplaysEnabled) {
-                // Profiles are only supported in the default display, but it cannot return yet
-                // as it needs to check if the parent is also assigned to the DEFAULT_DISPLAY
-                // (this is done indirectly below when it checks that the profile parent is the
-                // current user, as the current user is always assigned to the DEFAULT_DISPLAY).
-                isProfile = isProfileUnchecked(userId);
+        if (displayId == DEFAULT_DISPLAY
+                && (!mUsersOnSecondaryDisplaysEnabled || !isProfile(userId, profileGroupId))) {
+            // Don't need to do anything because methods (such as isUserVisible()) already
+            // know that the current user (and their profiles) is assigned to the default display.
+            // But on MUMD devices, it profiles are only supported in the default display, so it
+            // cannot return yet as it needs to check if the parent is also assigned to the
+            // DEFAULT_DISPLAY (this is done indirectly below when it checks that the profile parent
+            // is the current user, as the current user is always assigned to the DEFAULT_DISPLAY).
+            if (DBG) {
+                Slogf.d(TAG, "ignoring on default display");
             }
-            if (isProfile == null || !isProfile) {
-                // Don't need to do anything because methods (such as isUserVisible()) already
-                // know that the current user (and their profiles) is assigned to the default
-                // display.
-                if (DBG) {
-                    Slogf.d(TAG, "ignoring on default display");
-                }
-                return;
-            }
+            return;
         }
 
         if (!mUsersOnSecondaryDisplaysEnabled) {
@@ -119,24 +203,21 @@ public final class UserVisibilityMediator {
         Preconditions.checkArgument(userId != currentUserId,
                 "Cannot assign current user (%d) to other displays", currentUserId);
 
-        if (isProfile == null) {
-            isProfile = isProfileUnchecked(userId);
-        }
-        synchronized (mLock) {
-            if (isProfile) {
-                // Profile can only start in the same display as parent. And for simplicity,
-                // that display must be the DEFAULT_DISPLAY.
-                Preconditions.checkArgument(displayId == Display.DEFAULT_DISPLAY,
-                        "Profile user can only be started in the default display");
-                int parentUserId = getProfileParentId(userId);
-                Preconditions.checkArgument(parentUserId == currentUserId,
-                        "Only profile of current user can be assigned to a display");
-                if (DBG) {
-                    Slogf.d(TAG, "Ignoring profile user %d on default display", userId);
-                }
-                return;
+        if (isProfile(userId, profileGroupId)) {
+            // Profile can only start in the same display as parent. And for simplicity,
+            // that display must be the DEFAULT_DISPLAY.
+            Preconditions.checkArgument(displayId == Display.DEFAULT_DISPLAY,
+                    "Profile user can only be started in the default display");
+            int parentUserId = getStartedProfileGroupId(userId);
+            Preconditions.checkArgument(parentUserId == currentUserId,
+                    "Only profile of current user can be assigned to a display");
+            if (DBG) {
+                Slogf.d(TAG, "Ignoring profile user %d on default display", userId);
             }
+            return;
+        }
 
+        synchronized (mLock) {
             // Check if display is available
             for (int i = 0; i < mUsersOnSecondaryDisplays.size(); i++) {
                 int assignedUserId = mUsersOnSecondaryDisplays.keyAt(i);
@@ -289,7 +370,7 @@ public final class UserVisibilityMediator {
                     continue;
                 }
                 int userId = mUsersOnSecondaryDisplays.keyAt(i);
-                if (!isProfileUnchecked(userId)) {
+                if (!isStartedProfile(userId)) {
                     return userId;
                 } else if (DBG) {
                     Slogf.d(TAG, "getUserAssignedToDisplay(%d): skipping user %d because it's "
@@ -307,23 +388,42 @@ public final class UserVisibilityMediator {
     }
 
     private void dump(IndentingPrintWriter ipw) {
-        ipw.println("UserVisibilityManager");
+        ipw.println("UserVisibilityMediator");
         ipw.increaseIndent();
 
-        ipw.print("Supports users on secondary displays: ");
-        ipw.println(mUsersOnSecondaryDisplaysEnabled);
+        synchronized (mLock) {
+            ipw.print("Current user id: ");
+            ipw.println(mCurrentUserId);
 
-        if (mUsersOnSecondaryDisplaysEnabled) {
-            ipw.print("Users on secondary displays: ");
-            synchronized (mLock) {
-                ipw.println(mUsersOnSecondaryDisplays);
+            ipw.print("Number of started user / profile group mappings: ");
+            ipw.println(mStartedProfileGroupIds.size());
+            if (mStartedProfileGroupIds.size() > 0) {
+                ipw.increaseIndent();
+                for (int i = 0; i < mStartedProfileGroupIds.size(); i++) {
+                    ipw.print("User #");
+                    ipw.print(mStartedProfileGroupIds.keyAt(i));
+                    ipw.print(" -> profile #");
+                    ipw.println(mStartedProfileGroupIds.valueAt(i));
+                }
+                ipw.decreaseIndent();
+            }
+
+            ipw.print("Supports users on secondary displays: ");
+            ipw.println(mUsersOnSecondaryDisplaysEnabled);
+
+            if (mUsersOnSecondaryDisplaysEnabled) {
+                ipw.print("Users on secondary displays: ");
+                synchronized (mLock) {
+                    ipw.println(mUsersOnSecondaryDisplays);
+                }
             }
         }
 
         ipw.decreaseIndent();
     }
 
-    void dump(PrintWriter pw) {
+    @Override
+    public void dump(PrintWriter pw, String[] args) {
         if (pw instanceof IndentingPrintWriter) {
             dump((IndentingPrintWriter) pw);
             return;
@@ -331,20 +431,70 @@ public final class UserVisibilityMediator {
         dump(new IndentingPrintWriter(pw));
     }
 
-    // TODO(b/244644281): remove methods below once this class caches that state
-    private @UserIdInt int getCurrentUserId() {
-        return mService.getCurrentUserId();
+    @VisibleForTesting
+    Map<Integer, Integer> getUsersOnSecondaryDisplays() {
+        Map<Integer, Integer> map;
+        synchronized (mLock) {
+            int size = mUsersOnSecondaryDisplays.size();
+            map = new LinkedHashMap<>(size);
+            for (int i = 0; i < size; i++) {
+                map.put(mUsersOnSecondaryDisplays.keyAt(i), mUsersOnSecondaryDisplays.valueAt(i));
+            }
+        }
+        Slogf.v(TAG, "getUsersOnSecondaryDisplays(): returning %s", map);
+        return map;
     }
 
-    private boolean isCurrentUserOrRunningProfileOfCurrentUser(@UserIdInt int userId) {
-        return mService.isCurrentUserOrRunningProfileOfCurrentUser(userId);
+    /**
+     * Gets the user-friendly representation of the {@code result}.
+     */
+    public static String startUserResultToString(@StartUserResult int result) {
+        return DebugUtils.constantToString(UserVisibilityMediator.class, PREFIX_START_USER_RESULT,
+                result);
     }
 
-    private boolean isProfileUnchecked(@UserIdInt int userId) {
-        return mService.isProfileUnchecked(userId);
+    // TODO(b/244644281): methods below are needed because some APIs use the current users (full and
+    // profiles) state to decide whether a user is visible or not. If we decide to always store that
+    // info into intermediate maps, we should remove them.
+
+    @VisibleForTesting
+    @UserIdInt int getCurrentUserId() {
+        synchronized (mLock) {
+            return mCurrentUserId;
+        }
     }
 
-    private @UserIdInt int getProfileParentId(@UserIdInt int userId) {
-        return mService.getProfileParentId(userId);
+    @VisibleForTesting
+    boolean isCurrentUserOrRunningProfileOfCurrentUser(@UserIdInt int userId) {
+        synchronized (mLock) {
+            // Special case as NO_PROFILE_GROUP_ID == USER_NULL
+            if (userId == USER_NULL || mCurrentUserId == USER_NULL) {
+                return false;
+            }
+            if (mCurrentUserId == userId) {
+                return true;
+            }
+            return mStartedProfileGroupIds.get(userId, NO_PROFILE_GROUP_ID) == mCurrentUserId;
+        }
+    }
+
+    private static boolean isProfile(@UserIdInt int userId, @UserIdInt int profileGroupId) {
+        return profileGroupId != NO_PROFILE_GROUP_ID && profileGroupId != userId;
+    }
+
+    @VisibleForTesting
+    boolean isStartedProfile(@UserIdInt int userId) {
+        int profileGroupId;
+        synchronized (mLock) {
+            profileGroupId = mStartedProfileGroupIds.get(userId, NO_PROFILE_GROUP_ID);
+        }
+        return isProfile(userId, profileGroupId);
+    }
+
+    @VisibleForTesting
+    @UserIdInt int getStartedProfileGroupId(@UserIdInt int userId) {
+        synchronized (mLock) {
+            return mStartedProfileGroupIds.get(userId, NO_PROFILE_GROUP_ID);
+        }
     }
 }

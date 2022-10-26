@@ -283,7 +283,7 @@ public class UserControllerTest {
         assertWithMessage("wrong binder message calls").that(mInjector.mHandler.getMessageCodes())
                 .containsExactly(USER_START_MSG);
 
-        verifyUserAssignedToDisplay(TEST_PRE_CREATED_USER_ID, Display.DEFAULT_DISPLAY);
+        verifyUserNeverAssignedToDisplay();
     }
 
     private void startUserAssertions(
@@ -948,11 +948,13 @@ public class UserControllerTest {
     }
 
     private void verifyUserAssignedToDisplay(@UserIdInt int userId, int displayId) {
-        verify(mInjector.getUserManagerInternal()).assignUserToDisplay(userId, displayId);
+        verify(mInjector.getUserManagerInternal()).assignUserToDisplay(eq(userId), anyInt(),
+                anyBoolean(), eq(displayId));
     }
 
     private void verifyUserNeverAssignedToDisplay() {
-        verify(mInjector.getUserManagerInternal(), never()).assignUserToDisplay(anyInt(), anyInt());
+        verify(mInjector.getUserManagerInternal(), never()).assignUserToDisplay(anyInt(), anyInt(),
+                anyBoolean(), anyInt());
     }
 
     private void verifyUserUnassignedFromDisplay(@UserIdInt int userId) {

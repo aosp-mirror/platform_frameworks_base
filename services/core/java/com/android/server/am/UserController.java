@@ -1626,7 +1626,12 @@ class UserController implements Handler.Callback {
                 return false;
             }
 
-            mInjector.getUserManagerInternal().assignUserToDisplay(userId, displayId);
+            if (!userInfo.preCreated) {
+                // TODO(b/244644281): UMI should return whether the user is visible. And if fails,
+                // the user should not be in the mediator's started users structure
+                mInjector.getUserManagerInternal().assignUserToDisplay(userId,
+                        userInfo.profileGroupId, foreground, displayId);
+            }
 
             // TODO(b/239982558): might need something similar for bg users on secondary display
             if (foreground && isUserSwitchUiEnabled()) {
@@ -1684,6 +1689,9 @@ class UserController implements Handler.Callback {
                     userSwitchUiEnabled = mUserSwitchUiEnabled;
                 }
                 mInjector.updateUserConfiguration();
+                // TODO(b/244644281): updateProfileRelatedCaches() is called on both if and else
+                // parts, ideally it should be moved outside, but for now it's not as there are many
+                // calls to external components here afterwards
                 updateProfileRelatedCaches();
                 mInjector.getWindowManager().setCurrentUser(userId);
                 mInjector.reportCurWakefulnessUsageEvent();
