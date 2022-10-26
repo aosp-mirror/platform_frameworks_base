@@ -80,7 +80,6 @@ import android.os.IBinder;
 import android.os.IProgressListener;
 import android.os.IRemoteCallback;
 import android.os.IUserManager;
-import android.os.Looper;
 import android.os.Message;
 import android.os.PowerWhitelistManager;
 import android.os.Process;
@@ -436,6 +435,12 @@ class UserController implements Handler.Callback {
 
     /** @see #getLastUserUnlockingUptime */
     private volatile long mLastUserUnlockingUptime = 0;
+
+    /**
+     * Pending user starts waiting for shutdown step to complete.
+     */
+    @GuardedBy("mLock")
+    private final List<PendingUserStart> mPendingUserStarts = new ArrayList<>();
 
     private final UserLifecycleListener mUserLifecycleListener = new UserLifecycleListener() {
         @Override
@@ -1187,9 +1192,13 @@ class UserController implements Handler.Callback {
             } else {
                 stopped = true;
                 // User can no longer run.
+                Slogf.i(TAG, "Removing user state from UserController.mStartedUsers for user #"
+                        + userId + " as a result of user being stopped");
                 mStartedUsers.remove(userId);
+
                 mUserLru.remove(Integer.valueOf(userId));
                 updateStartedUserArrayLU();
+
                 if (allowDelayedLocking && !keyEvictedCallbacks.isEmpty()) {
                     Slogf.wtf(TAG,
                             "Delayed locking enabled while KeyEvictedCallbacks not empty, userId:"
@@ -1203,7 +1212,10 @@ class UserController implements Handler.Callback {
             }
         }
         if (stopped) {
+            Slogf.i(TAG, "Removing user state from UserManager.mUserStates for user #" + userId
+                    + " as a result of user being stopped");
             mInjector.getUserManagerInternal().removeUserState(userId);
+
             mInjector.activityManagerOnUserStopped(userId);
             // Clean up all state and processes associated with the user.
             // Kill all the processes for the user.
@@ -1231,16 +1243,44 @@ class UserController implements Handler.Callback {
                     USER_LIFECYCLE_EVENT_STATE_FINISH);
             clearSessionId(userId);
 
-            if (!lockUser) {
-                return;
+            if (lockUser) {
+                dispatchUserLocking(userIdToLock, keyEvictedCallbacks);
             }
-            dispatchUserLocking(userIdToLock, keyEvictedCallbacks);
+
+            // Resume any existing pending user start,
+            // which was paused while the SHUTDOWN flow of the user was in progress.
+            resumePendingUserStarts(userId);
         } else {
             logUserLifecycleEvent(userId, USER_LIFECYCLE_EVENT_STOP_USER,
                     USER_LIFECYCLE_EVENT_STATE_NONE);
             clearSessionId(userId);
         }
     }
+
+    /**
+     * Resume any existing pending user start for the specified userId which was paused
+     * while the shutdown flow of the user was in progress.
+     * Remove all the handled user starts from mPendingUserStarts.
+     * @param userId the id of the user
+     */
+    private void resumePendingUserStarts(@UserIdInt int userId) {
+        synchronized (mLock) {
+            final List<PendingUserStart> handledUserStarts = new ArrayList<>();
+
+            for (PendingUserStart userStart: mPendingUserStarts) {
+                if (userStart.userId == userId) {
+                    Slogf.i(TAG, "resumePendingUserStart for" + userStart);
+                    mHandler.post(() -> startUser(userStart.userId,
+                            userStart.isForeground, userStart.unlockListener));
+
+                    handledUserStarts.add(userStart);
+                }
+            }
+            // remove all the pending user starts which are now handled
+            mPendingUserStarts.removeAll(handledUserStarts);
+        }
+    }
+
 
     private void dispatchUserLocking(@UserIdInt int userId,
             @Nullable List<KeyEvictedCallback> keyEvictedCallbacks) {
@@ -1255,6 +1295,7 @@ class UserController implements Handler.Callback {
                 }
             }
             try {
+                Slogf.i(TAG, "Locking CE storage for user #" + userId);
                 mInjector.getStorageManager().lockUserKey(userId);
             } catch (RemoteException re) {
                 throw re.rethrowAsRuntimeException();
@@ -1642,10 +1683,11 @@ class UserController implements Handler.Callback {
                     updateStartedUserArrayLU();
                     needStart = true;
                     updateUmState = true;
-                } else if (uss.state == UserState.STATE_SHUTDOWN && !isCallingOnHandlerThread()) {
+                } else if (uss.state == UserState.STATE_SHUTDOWN) {
                     Slogf.i(TAG, "User #" + userId
-                            + " is shutting down - will start after full stop");
-                    mHandler.post(() -> startUser(userId, foreground, unlockListener));
+                            + " is shutting down - will start after full shutdown");
+                    mPendingUserStarts.add(new PendingUserStart(userId,
+                            foreground, unlockListener));
                     t.traceEnd(); // updateStartedUserArrayStarting
                     return true;
                 }
@@ -1801,10 +1843,6 @@ class UserController implements Handler.Callback {
         }
 
         return true;
-    }
-
-    private boolean isCallingOnHandlerThread() {
-        return Looper.myLooper() == mHandler.getLooper();
     }
 
     /**
@@ -3369,6 +3407,32 @@ class UserController implements Handler.Callback {
             } else {
                 new TimingsTraceAndSlog().logDuration("User" + id + "Unlock", unlockTime);
             }
+        }
+    }
+
+    /**
+     * Helper class for keeping track of user starts which are paused while user's
+     * shutdown is taking place.
+     */
+    private static class PendingUserStart {
+        public final @UserIdInt int userId;
+        public final boolean isForeground;
+        public final IProgressListener unlockListener;
+
+        PendingUserStart(int userId, boolean foreground,
+                IProgressListener unlockListener) {
+            this.userId = userId;
+            this.isForeground = foreground;
+            this.unlockListener = unlockListener;
+        }
+
+        @Override
+        public String toString() {
+            return "PendingUserStart{"
+                    + "userId=" + userId
+                    + ", isForeground=" + isForeground
+                    + ", unlockListener=" + unlockListener
+                    + '}';
         }
     }
 
