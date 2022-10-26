@@ -92,7 +92,7 @@ class NotificationIconContainerTest : SysuiTestCase() {
 
         iconContainer.calculateIconXTranslations()
         assertEquals(10f, iconState.xTranslation)
-        assertFalse(iconContainer.hasOverflow())
+        assertFalse(iconContainer.areIconsOverflowing())
     }
 
     @Test
@@ -121,7 +121,7 @@ class NotificationIconContainerTest : SysuiTestCase() {
         assertEquals(30f, iconContainer.getIconState(iconThree).xTranslation)
         assertEquals(40f, iconContainer.getIconState(iconFour).xTranslation)
 
-        assertFalse(iconContainer.hasOverflow())
+        assertFalse(iconContainer.areIconsOverflowing())
     }
 
     @Test
@@ -150,7 +150,7 @@ class NotificationIconContainerTest : SysuiTestCase() {
         assertEquals(10f, iconContainer.getIconState(iconOne).xTranslation)
         assertEquals(20f, iconContainer.getIconState(iconTwo).xTranslation)
         assertEquals(30f, iconContainer.getIconState(iconThree).xTranslation)
-        assertTrue(iconContainer.hasOverflow())
+        assertTrue(iconContainer.areIconsOverflowing())
     }
 
     @Test
