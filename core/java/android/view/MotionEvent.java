@@ -1294,6 +1294,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     // NOTE: If you add a new axis here you must also add it to:
     //  frameworks/native/include/android/input.h
     //  frameworks/native/libs/input/InputEventLabels.cpp
+    //  platform/cts/tests/tests/view/src/android/view/cts/MotionEventTest.java
+    //    (testAxisFromToString)
 
     // Symbolic names of all axes.
     private static final SparseArray<String> AXIS_SYMBOLIC_NAMES = new SparseArray<String>();
