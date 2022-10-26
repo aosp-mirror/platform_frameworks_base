@@ -4666,9 +4666,12 @@ public class UserManagerService extends IUserManager.Stub {
             storage.createUserKey(userId, userInfo.serialNumber, userInfo.isEphemeral());
             t.traceEnd();
 
+            // Only prepare DE storage here.  CE storage will be prepared later, when the user is
+            // unlocked.  We do this to ensure that CE storage isn't prepared before the CE key is
+            // saved to disk.  This also matches what is done for user 0.
             t.traceBegin("prepareUserData");
             mUserDataPreparer.prepareUserData(userId, userInfo.serialNumber,
-                    StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE);
+                    StorageManager.FLAG_STORAGE_DE);
             t.traceEnd();
 
             t.traceBegin("LSS.createNewUser");
