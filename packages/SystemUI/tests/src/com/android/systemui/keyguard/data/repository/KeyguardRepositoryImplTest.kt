@@ -20,6 +20,8 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.Position
 import com.android.systemui.doze.DozeHost
+import com.android.systemui.keyguard.WakefulnessLifecycle
+import com.android.systemui.keyguard.shared.model.WakefulnessModel
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.mockito.argumentCaptor
@@ -43,6 +45,7 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
     @Mock private lateinit var statusBarStateController: StatusBarStateController
     @Mock private lateinit var dozeHost: DozeHost
     @Mock private lateinit var keyguardStateController: KeyguardStateController
+    @Mock private lateinit var wakefulnessLifecycle: WakefulnessLifecycle
 
     private lateinit var underTest: KeyguardRepositoryImpl
 
@@ -55,6 +58,7 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
                 statusBarStateController,
                 keyguardStateController,
                 dozeHost,
+                wakefulnessLifecycle,
             )
     }
 
@@ -183,5 +187,34 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
 
         job.cancel()
         verify(statusBarStateController).removeCallback(captor.value)
+    }
+
+    @Test
+    fun wakefullness() = runBlockingTest {
+        val values = mutableListOf<WakefulnessModel>()
+        val job = underTest.wakefulnessState.onEach(values::add).launchIn(this)
+
+        val captor = argumentCaptor<WakefulnessLifecycle.Observer>()
+        verify(wakefulnessLifecycle).addObserver(captor.capture())
+
+        captor.value.onStartedWakingUp()
+        captor.value.onFinishedWakingUp()
+        captor.value.onStartedGoingToSleep()
+        captor.value.onFinishedGoingToSleep()
+
+        assertThat(values)
+            .isEqualTo(
+                listOf(
+                    // Initial value will be ASLEEP
+                    WakefulnessModel.ASLEEP,
+                    WakefulnessModel.STARTING_TO_WAKE,
+                    WakefulnessModel.AWAKE,
+                    WakefulnessModel.STARTING_TO_SLEEP,
+                    WakefulnessModel.ASLEEP,
+                )
+            )
+
+        job.cancel()
+        verify(wakefulnessLifecycle).removeObserver(captor.value)
     }
 }

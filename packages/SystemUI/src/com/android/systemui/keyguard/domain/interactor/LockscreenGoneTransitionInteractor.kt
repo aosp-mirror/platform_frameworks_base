@@ -20,52 +20,37 @@ import android.animation.ValueAnimator
 import com.android.systemui.animation.Interpolators
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionInfo
-import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 @SysUISingleton
-class AodLockscreenTransitionInteractor
+class LockscreenGoneTransitionInteractor
 @Inject
 constructor(
     @Application private val scope: CoroutineScope,
-    private val keyguardRepository: KeyguardRepository,
+    private val keyguardInteractor: KeyguardInteractor,
     private val keyguardTransitionRepository: KeyguardTransitionRepository,
-    private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
-) : TransitionInteractor("AOD<->LOCKSCREEN") {
+) : TransitionInteractor("LOCKSCREEN->GONE") {
 
     override fun start() {
         scope.launch {
-            keyguardRepository.isDozing
-                .sample(keyguardTransitionInteractor.finishedKeyguardState, { a, b -> Pair(a, b) })
-                .collect { pair ->
-                    val (isDozing, keyguardState) = pair
-                    if (isDozing && keyguardState == KeyguardState.LOCKSCREEN) {
-                        keyguardTransitionRepository.startTransition(
-                            TransitionInfo(
-                                name,
-                                KeyguardState.LOCKSCREEN,
-                                KeyguardState.AOD,
-                                getAnimator(),
-                            )
+            keyguardInteractor.isKeyguardShowing.collect { isShowing ->
+                if (!isShowing) {
+                    keyguardTransitionRepository.startTransition(
+                        TransitionInfo(
+                            name,
+                            KeyguardState.LOCKSCREEN,
+                            KeyguardState.GONE,
+                            getAnimator(),
                         )
-                    } else if (!isDozing && keyguardState == KeyguardState.AOD) {
-                        keyguardTransitionRepository.startTransition(
-                            TransitionInfo(
-                                name,
-                                KeyguardState.AOD,
-                                KeyguardState.LOCKSCREEN,
-                                getAnimator(),
-                            )
-                        )
-                    }
+                    )
                 }
+            }
         }
     }
 
@@ -77,6 +62,6 @@ constructor(
     }
 
     companion object {
-        private const val TRANSITION_DURATION_MS = 500L
+        private const val TRANSITION_DURATION_MS = 10L
     }
 }
