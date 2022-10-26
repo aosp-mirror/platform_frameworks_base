@@ -977,6 +977,7 @@ message UserControllerProto {
         optional int32 profile = 2;
     }
     repeated UserProfile user_profile_group_ids = 4;
+    repeated int32 visible_users_array = 5;
 }
 
 // sync with com.android.server.am.AppTimeTracker.java
