@@ -541,6 +541,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             throw new IllegalArgumentException("WC=" + this + " already child of " + mParent);
         }
 
+        // Collect before removing child from old parent, because the old parent may be removed if
+        // this is the last child in it.
+        mTransitionController.collectReparentChange(this, newParent);
+
         // The display object before reparenting as that might lead to old parent getting removed
         // from the display if it no longer has any child.
         final DisplayContent prevDc = oldParent.getDisplayContent();
