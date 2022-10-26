@@ -97,6 +97,7 @@ import com.android.systemui.util.leak.LeakDetector;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -112,6 +113,7 @@ import java.util.List;
 /**
  * Tests for {@link NotificationStackScrollLayout}.
  */
+@Ignore("b/255552856")
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
