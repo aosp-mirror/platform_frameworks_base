@@ -96,7 +96,7 @@
     <string name="screenrecord_description" msgid="1123231719680353736">"እየቀረጹ ሳለ የAndroid ስርዓት በማያ ገጽዎ ላይ የሚታይ ወይም በመሣሪያዎ ላይ የሚጫወት ማንኛውም ሚስጥራዊነት ያለው መረጃን መያዝ ይችላል። ይህ የይለፍ ቃላትን፣ የክፍያ መረጃን፣ ፎቶዎችን፣ መልዕክቶችን እና ኦዲዮን ያካትታል።"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"ኦዲዮን ቅረጽ"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"የመሣሪያ ኦዲዮ"</string>
-    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"እንደ ሙዚቃ፣ ጥሪዎች እና የጥሪ ቅላጼዎች ያሉ የመሣሪያዎ ድምጽ"</string>
+    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"እንደ ሙዚቃ፣ ጥሪዎች እና የጥሪ ቅላጼዎች ያሉ የመሣሪያዎ ድምፅ"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"ማይክሮፎን"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"የመሣሪያ ኦዲዮ እና ማይክሮፎን"</string>
     <string name="screenrecord_start" msgid="330991441575775004">"ጀምር"</string>
@@ -267,14 +267,14 @@
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"የ<xliff:g id="DATA_LIMIT">%s</xliff:g> ማስጠንቀቂያ"</string>
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"የሥራ መተግበሪያዎች"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"የምሽት ብርሃን"</string>
-    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"ጸሐይ ስትጠልቅ ይበራል"</string>
-    <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"ጸሐይ እስክትወጣ ድረስ"</string>
+    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"ፀሐይ ስትጠልቅ ይበራል"</string>
+    <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"ፀሐይ እስክትወጣ ድረስ"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"<xliff:g id="TIME">%s</xliff:g> ላይ ይበራል"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"እስከ <xliff:g id="TIME">%s</xliff:g> ድረስ"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"ጨለማ ገጽታ"</string>
     <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"ባትሪ ቆጣቢ"</string>
-    <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"ጸሐይ ስትጠልቅ ይበራል"</string>
-    <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"ጸሐይ እስክትወጣ ድረስ"</string>
+    <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"ፀሐይ ስትጠልቅ ይበራል"</string>
+    <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"ፀሐይ እስክትወጣ ድረስ"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"<xliff:g id="TIME">%s</xliff:g> ላይ ይበራል"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"እስከ <xliff:g id="TIME">%s</xliff:g> ድረስ"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at_bedtime" msgid="2274300599408864897">"በመኝታ ሰዓት ላይ"</string>
@@ -497,11 +497,11 @@
     <string name="notification_silence_title" msgid="8608090968400832335">"ፀጥ ያለ"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"ነባሪ"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"ራስ-ሰር"</string>
-    <string name="notification_channel_summary_low" msgid="4860617986908931158">"ምንም ድምጽ ወይም ንዝረት የለም"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"ምንም ድምጽ ወይም ንዝረት የለም እና በውይይት ክፍል ላይ አይታይም"</string>
+    <string name="notification_channel_summary_low" msgid="4860617986908931158">"ምንም ድምፅ ወይም ንዝረት የለም"</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"ምንም ድምፅ ወይም ንዝረት የለም እና በውይይት ክፍል ላይ አይታይም"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"በእርስዎ የስልክ ቅንብሮች የሚወሰን ሆኖ ሊደውል ወይም ሊነዝር ይችላል"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"በእርስዎ የስልክ ቅንብሮች የሚወሰን ሆኖ ሊደውል ወይም ሊነዝር ይችላል። የ<xliff:g id="APP_NAME">%1$s</xliff:g> አረፋ ውይይቶች በነባሪነት።"</string>
-    <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"ይህ ማሳወቂያ ድምጽ ወይም ንዝረት መደረግ ካለበት ስርዓቱ እንዲወሰን ያድርጉት"</string>
+    <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"ይህ ማሳወቂያ ድምፅ ወይም ንዝረት መደረግ ካለበት ስርዓቱ እንዲወሰን ያድርጉት"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;ሁኔታ:&lt;/b&gt; ለነባሪ ከፍ ተዋውቋል።"</string>
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;ሁኔታ:&lt;/b&gt; ወደ ዝምታ ዝቅ ተደርጓል"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;ሁኔታ:&lt;/b&gt; ክፍተኛ ደረጃ ተሰጥቶታል"</string>
