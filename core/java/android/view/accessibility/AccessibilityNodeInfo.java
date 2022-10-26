@@ -127,6 +127,16 @@ public class AccessibilityNodeInfo implements Parcelable {
     /** @hide */
     public static final long UNDEFINED_NODE_ID = makeNodeId(UNDEFINED_ITEM_ID, UNDEFINED_ITEM_ID);
 
+    /**
+     * The default value for {@link #getMinMillisBetweenContentChanges};
+     */
+    public static final int UNDEFINED_MIN_MILLIS_BETWEEN_CONTENT_CHANGES = -1;
+
+    /**
+     * The minimum value for {@link #setMinMillisBetweenContentChanges};
+     */
+    public static final int MINIMUM_MIN_MILLIS_BETWEEN_CONTENT_CHANGES = 100;
+
     /** @hide */
     public static final long ROOT_NODE_ID = makeNodeId(ROOT_ITEM_ID,
             AccessibilityNodeProvider.HOST_VIEW_ID);
@@ -878,6 +888,9 @@ public class AccessibilityNodeInfo implements Parcelable {
     private long mLabeledById = UNDEFINED_NODE_ID;
     private long mTraversalBefore = UNDEFINED_NODE_ID;
     private long mTraversalAfter = UNDEFINED_NODE_ID;
+
+    private int mMinMillisBetweenContentChanges =
+            UNDEFINED_MIN_MILLIS_BETWEEN_CONTENT_CHANGES;
 
     private int mBooleanProperties;
     private final Rect mBoundsInParent = new Rect();
@@ -1779,6 +1792,42 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public int getMovementGranularities() {
         return mMovementGranularities;
+    }
+
+    /**
+     * Sets the minimum time duration between two content change events, which is used in throttling
+     * content change events in accessibility services.
+     *
+     * <p>
+     * <strong>Note:</strong>
+     * This value should not be smaller than {@link #MINIMUM_MIN_MILLIS_BETWEEN_CONTENT_CHANGES},
+     * otherwise it would be ignored by accessibility services.
+     * </p>
+     *
+     * <p>
+     * Example: An app can set MinMillisBetweenContentChanges as 1 min for a view which sends
+     * content change events to accessibility services one event per second.
+     * Accessibility service will throttle those content change events and only handle one event
+     * per minute for that view.
+     * </p>
+     *
+     * @see AccessibilityEvent#getContentChangeTypes for all content change types.
+     * @param minMillisBetweenContentChanges the minimum duration between content change events.
+     */
+    public void setMinMillisBetweenContentChanges(int minMillisBetweenContentChanges) {
+        enforceNotSealed();
+        mMinMillisBetweenContentChanges = minMillisBetweenContentChanges
+                >= MINIMUM_MIN_MILLIS_BETWEEN_CONTENT_CHANGES
+                ? minMillisBetweenContentChanges
+                : UNDEFINED_MIN_MILLIS_BETWEEN_CONTENT_CHANGES;
+    }
+
+    /**
+     * Gets the minimum time duration between two content change events. This method may return
+     * {@link #UNDEFINED_MIN_MILLIS_BETWEEN_CONTENT_CHANGES}
+     */
+    public int getMinMillisBetweenContentChanges() {
+        return mMinMillisBetweenContentChanges;
     }
 
     /**
@@ -3951,6 +4000,11 @@ public class AccessibilityNodeInfo implements Parcelable {
         fieldIndex++;
         if (mTraversalAfter != DEFAULT.mTraversalAfter) nonDefaultFields |= bitAt(fieldIndex);
         fieldIndex++;
+        if (mMinMillisBetweenContentChanges
+                != DEFAULT.mMinMillisBetweenContentChanges) {
+            nonDefaultFields |= bitAt(fieldIndex);
+        }
+        fieldIndex++;
         if (mConnectionId != DEFAULT.mConnectionId) nonDefaultFields |= bitAt(fieldIndex);
         fieldIndex++;
         if (!LongArray.elementsEqual(mChildNodeIds, DEFAULT.mChildNodeIds)) {
@@ -4080,6 +4134,9 @@ public class AccessibilityNodeInfo implements Parcelable {
         if (isBitSet(nonDefaultFields, fieldIndex++)) parcel.writeLong(mLabeledById);
         if (isBitSet(nonDefaultFields, fieldIndex++)) parcel.writeLong(mTraversalBefore);
         if (isBitSet(nonDefaultFields, fieldIndex++)) parcel.writeLong(mTraversalAfter);
+        if (isBitSet(nonDefaultFields, fieldIndex++)) {
+            parcel.writeInt(mMinMillisBetweenContentChanges);
+        }
 
         if (isBitSet(nonDefaultFields, fieldIndex++)) parcel.writeInt(mConnectionId);
 
@@ -4235,6 +4292,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         mLabeledById = other.mLabeledById;
         mTraversalBefore = other.mTraversalBefore;
         mTraversalAfter = other.mTraversalAfter;
+        mMinMillisBetweenContentChanges = other.mMinMillisBetweenContentChanges;
         mWindowId = other.mWindowId;
         mConnectionId = other.mConnectionId;
         mUniqueId = other.mUniqueId;
@@ -4338,6 +4396,9 @@ public class AccessibilityNodeInfo implements Parcelable {
         if (isBitSet(nonDefaultFields, fieldIndex++)) mLabeledById = parcel.readLong();
         if (isBitSet(nonDefaultFields, fieldIndex++)) mTraversalBefore = parcel.readLong();
         if (isBitSet(nonDefaultFields, fieldIndex++)) mTraversalAfter = parcel.readLong();
+        if (isBitSet(nonDefaultFields, fieldIndex++)) {
+            mMinMillisBetweenContentChanges = parcel.readInt();
+        }
 
         if (isBitSet(nonDefaultFields, fieldIndex++)) mConnectionId = parcel.readInt();
 
@@ -4686,6 +4747,8 @@ public class AccessibilityNodeInfo implements Parcelable {
             builder.append("; mParentNodeId: 0x").append(Long.toHexString(mParentNodeId));
             builder.append("; traversalBefore: 0x").append(Long.toHexString(mTraversalBefore));
             builder.append("; traversalAfter: 0x").append(Long.toHexString(mTraversalAfter));
+            builder.append("; minMillisBetweenContentChanges: ")
+                    .append(mMinMillisBetweenContentChanges);
 
             int granularities = mMovementGranularities;
             builder.append("; MovementGranularities: [");

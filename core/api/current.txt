@@ -52350,6 +52350,7 @@ package android.view.accessibility {
     method public android.view.accessibility.AccessibilityNodeInfo getLabeledBy();
     method public int getLiveRegion();
     method public int getMaxTextLength();
+    method public int getMinMillisBetweenContentChanges();
     method public int getMovementGranularities();
     method public CharSequence getPackageName();
     method @Nullable public CharSequence getPaneTitle();
@@ -52437,6 +52438,7 @@ package android.view.accessibility {
     method public void setLiveRegion(int);
     method public void setLongClickable(boolean);
     method public void setMaxTextLength(int);
+    method public void setMinMillisBetweenContentChanges(int);
     method public void setMovementGranularities(int);
     method public void setMultiLine(boolean);
     method public void setPackageName(CharSequence);
@@ -52516,11 +52518,13 @@ package android.view.accessibility {
     field public static final int FOCUS_ACCESSIBILITY = 2; // 0x2
     field public static final int FOCUS_INPUT = 1; // 0x1
     field public static final int MAX_NUMBER_OF_PREFETCHED_NODES = 50; // 0x32
+    field public static final int MINIMUM_MIN_MILLIS_BETWEEN_CONTENT_CHANGES = 100; // 0x64
     field public static final int MOVEMENT_GRANULARITY_CHARACTER = 1; // 0x1
     field public static final int MOVEMENT_GRANULARITY_LINE = 4; // 0x4
     field public static final int MOVEMENT_GRANULARITY_PAGE = 16; // 0x10
     field public static final int MOVEMENT_GRANULARITY_PARAGRAPH = 8; // 0x8
     field public static final int MOVEMENT_GRANULARITY_WORD = 2; // 0x2
+    field public static final int UNDEFINED_MIN_MILLIS_BETWEEN_CONTENT_CHANGES = -1; // 0xffffffff
   }
 
   public static final class AccessibilityNodeInfo.AccessibilityAction implements android.os.Parcelable {
