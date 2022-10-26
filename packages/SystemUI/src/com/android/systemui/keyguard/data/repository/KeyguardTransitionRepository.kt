@@ -20,6 +20,7 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.animation.ValueAnimator.AnimatorUpdateListener
 import android.annotation.FloatRange
+import android.os.Trace
 import android.util.Log
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -157,10 +158,34 @@ class KeyguardTransitionRepository @Inject constructor() {
         value: Float,
         transitionState: TransitionState
     ) {
+        trace(info, transitionState)
+
         if (transitionState == TransitionState.FINISHED) {
             currentTransitionInfo = null
         }
         _transitions.value = TransitionStep(info.from, info.to, value, transitionState)
+    }
+
+    private fun trace(info: TransitionInfo, transitionState: TransitionState) {
+        if (
+            transitionState != TransitionState.STARTED &&
+                transitionState != TransitionState.FINISHED
+        ) {
+            return
+        }
+        val traceName =
+            "Transition: ${info.from} -> ${info.to} " +
+                if (info.animator == null) {
+                    "(manual)"
+                } else {
+                    ""
+                }
+        val traceCookie = traceName.hashCode()
+        if (transitionState == TransitionState.STARTED) {
+            Trace.beginAsyncSection(traceName, traceCookie)
+        } else if (transitionState == TransitionState.FINISHED) {
+            Trace.endAsyncSection(traceName, traceCookie)
+        }
     }
 
     companion object {
