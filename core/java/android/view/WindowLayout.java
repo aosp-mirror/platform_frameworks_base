@@ -40,6 +40,7 @@ import android.graphics.Insets;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.Log;
+import android.view.WindowInsets.Type.InsetsType;
 import android.window.ClientWindowFrames;
 
 /**
@@ -63,7 +64,7 @@ public class WindowLayout {
 
     public void computeFrames(WindowManager.LayoutParams attrs, InsetsState state,
             Rect displayCutoutSafe, Rect windowBounds, @WindowingMode int windowingMode,
-            int requestedWidth, int requestedHeight, InsetsVisibilities requestedVisibilities,
+            int requestedWidth, int requestedHeight, @InsetsType int requestedVisibleTypes,
             float compatScale, ClientWindowFrames frames) {
         final int type = attrs.type;
         final int fl = attrs.flags;
@@ -130,7 +131,7 @@ public class WindowLayout {
                     && (cutoutMode == LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT
                     || cutoutMode == LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES)) {
                 final Insets systemBarsInsets = state.calculateInsets(
-                        displayFrame, WindowInsets.Type.systemBars(), requestedVisibilities);
+                        displayFrame, WindowInsets.Type.systemBars(), requestedVisibleTypes);
                 if (systemBarsInsets.left > 0) {
                     displayCutoutSafeExceptMaybeBars.left = MIN_X;
                 }
@@ -288,7 +289,7 @@ public class WindowLayout {
                 + " displayCutoutSafe=" + displayCutoutSafe
                 + " attrs=" + attrs
                 + " state=" + state
-                + " requestedVisibilities=" + requestedVisibilities);
+                + " requestedInvisibleTypes=" + WindowInsets.Type.toString(~requestedVisibleTypes));
     }
 
     public static void extendFrameByCutout(Rect displayCutoutSafe,

@@ -352,7 +352,7 @@ public class InsetsState implements Parcelable {
     }
 
     public Insets calculateInsets(Rect frame, @InsetsType int types,
-            InsetsVisibilities overrideVisibilities) {
+            @InsetsType int requestedVisibleTypes) {
         Insets insets = Insets.NONE;
         for (int type = FIRST_TYPE; type <= LAST_TYPE; type++) {
             InsetsSource source = mSources[type];
@@ -360,10 +360,7 @@ public class InsetsState implements Parcelable {
                 continue;
             }
             int publicType = InsetsState.toPublicType(type);
-            if ((publicType & types) == 0) {
-                continue;
-            }
-            if (!overrideVisibilities.getVisibility(type)) {
+            if ((publicType & types & requestedVisibleTypes) == 0) {
                 continue;
             }
             insets = Insets.max(source.calculateInsets(frame, true), insets);

@@ -94,7 +94,6 @@ import android.view.IWindow;
 import android.view.InsetsFrameProvider;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
-import android.view.InsetsVisibilities;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
@@ -858,7 +857,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
 
             @Override
             public void topFocusedWindowChanged(ComponentName component,
-                    InsetsVisibilities requestedVisibilities) {
+                    int requestedVisibleTypes) {
             }
         };
     }

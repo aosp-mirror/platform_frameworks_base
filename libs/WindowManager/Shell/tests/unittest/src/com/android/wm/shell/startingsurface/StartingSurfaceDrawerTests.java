@@ -249,7 +249,7 @@ public class StartingSurfaceDrawerTests extends ShellTestCase {
         doReturn(WindowManagerGlobal.ADD_OKAY).when(session).addToDisplay(
                 any() /* window */, any() /* attrs */,
                 anyInt() /* viewVisibility */, anyInt() /* displayId */,
-                any() /* requestedVisibility */, any() /* outInputChannel */,
+                anyInt() /* requestedVisibleTypes */, any() /* outInputChannel */,
                 any() /* outInsetsState */, any() /* outActiveControls */,
                 any() /* outAttachedFrame */, any() /* outSizeCompatScale */);
         TaskSnapshotWindow mockSnapshotWindow = TaskSnapshotWindow.create(windowInfo,

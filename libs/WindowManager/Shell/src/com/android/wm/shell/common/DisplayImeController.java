@@ -32,10 +32,10 @@ import android.view.IWindowManager;
 import android.view.InsetsSource;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
-import android.view.InsetsVisibilities;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.WindowInsets;
+import android.view.WindowInsets.Type.InsetsType;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 
@@ -207,7 +207,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
     public class PerDisplay implements DisplayInsetsController.OnInsetsChangedListener {
         final int mDisplayId;
         final InsetsState mInsetsState = new InsetsState();
-        final InsetsVisibilities mRequestedVisibilities = new InsetsVisibilities();
+        @InsetsType int mRequestedVisibleTypes = WindowInsets.Type.defaultVisible();
         InsetsSourceControl mImeSourceControl = null;
         int mAnimationDirection = DIRECTION_NONE;
         ValueAnimator mAnimation = null;
@@ -330,8 +330,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
         }
 
         @Override
-        public void topFocusedWindowChanged(ComponentName component,
-                InsetsVisibilities requestedVisibilities) {
+        public void topFocusedWindowChanged(ComponentName component, int requestedVisibleTypes) {
             // Do nothing
         }
 
@@ -340,10 +339,12 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
          */
         private void setVisibleDirectly(boolean visible) {
             mInsetsState.getSource(InsetsState.ITYPE_IME).setVisible(visible);
-            mRequestedVisibilities.setVisibility(InsetsState.ITYPE_IME, visible);
+            mRequestedVisibleTypes = visible
+                    ? mRequestedVisibleTypes | WindowInsets.Type.ime()
+                    : mRequestedVisibleTypes & ~WindowInsets.Type.ime();
             try {
-                mWmService.updateDisplayWindowRequestedVisibilities(mDisplayId,
-                        mRequestedVisibilities);
+                mWmService.updateDisplayWindowRequestedVisibleTypes(mDisplayId,
+                        mRequestedVisibleTypes);
             } catch (RemoteException e) {
             }
         }

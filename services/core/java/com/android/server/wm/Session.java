@@ -69,10 +69,11 @@ import android.view.IWindowSessionCallback;
 import android.view.InputChannel;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
-import android.view.InsetsVisibilities;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.View;
+import android.view.WindowInsets;
+import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowManager;
 import android.window.ClientWindowFrames;
 import android.window.OnBackInvokedCallbackInfo;
@@ -117,7 +118,6 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     private float mLastReportedAnimatorScale;
     private String mPackageName;
     private String mRelayoutTag;
-    private final InsetsVisibilities mDummyRequestedVisibilities = new InsetsVisibilities();
     private final InsetsSourceControl[] mDummyControls =  new InsetsSourceControl[0];
     final boolean mSetsUnrestrictedKeepClearAreas;
 
@@ -196,23 +196,23 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 
     @Override
     public int addToDisplay(IWindow window, WindowManager.LayoutParams attrs,
-            int viewVisibility, int displayId, InsetsVisibilities requestedVisibilities,
+            int viewVisibility, int displayId, @InsetsType int requestedVisibleTypes,
             InputChannel outInputChannel, InsetsState outInsetsState,
             InsetsSourceControl[] outActiveControls, Rect outAttachedFrame,
             float[] outSizeCompatScale) {
         return mService.addWindow(this, window, attrs, viewVisibility, displayId,
-                UserHandle.getUserId(mUid), requestedVisibilities, outInputChannel, outInsetsState,
+                UserHandle.getUserId(mUid), requestedVisibleTypes, outInputChannel, outInsetsState,
                 outActiveControls, outAttachedFrame, outSizeCompatScale);
     }
 
     @Override
     public int addToDisplayAsUser(IWindow window, WindowManager.LayoutParams attrs,
-            int viewVisibility, int displayId, int userId, InsetsVisibilities requestedVisibilities,
+            int viewVisibility, int displayId, int userId, @InsetsType int requestedVisibleTypes,
             InputChannel outInputChannel, InsetsState outInsetsState,
             InsetsSourceControl[] outActiveControls, Rect outAttachedFrame,
             float[] outSizeCompatScale) {
         return mService.addWindow(this, window, attrs, viewVisibility, displayId, userId,
-                requestedVisibilities, outInputChannel, outInsetsState, outActiveControls,
+                requestedVisibleTypes, outInputChannel, outInsetsState, outActiveControls,
                 outAttachedFrame, outSizeCompatScale);
     }
 
@@ -221,8 +221,9 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
             int viewVisibility, int displayId, InsetsState outInsetsState, Rect outAttachedFrame,
             float[] outSizeCompatScale) {
         return mService.addWindow(this, window, attrs, viewVisibility, displayId,
-                UserHandle.getUserId(mUid), mDummyRequestedVisibilities, null /* outInputChannel */,
-                outInsetsState, mDummyControls, outAttachedFrame, outSizeCompatScale);
+                UserHandle.getUserId(mUid), WindowInsets.Type.defaultVisible(),
+                null /* outInputChannel */, outInsetsState, mDummyControls, outAttachedFrame,
+                outSizeCompatScale);
     }
 
     @Override
@@ -683,12 +684,12 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     }
 
     @Override
-    public void updateRequestedVisibilities(IWindow window, InsetsVisibilities visibilities) {
+    public void updateRequestedVisibleTypes(IWindow window, @InsetsType int requestedVisibleTypes) {
         synchronized (mService.mGlobalLock) {
             final WindowState windowState = mService.windowForClientLocked(this, window,
                     false /* throwOnError */);
             if (windowState != null) {
-                windowState.setRequestedVisibilities(visibilities);
+                windowState.setRequestedVisibleTypes(requestedVisibleTypes);
                 windowState.getDisplayContent().getInsetsPolicy().onInsetsModified(windowState);
             }
         }

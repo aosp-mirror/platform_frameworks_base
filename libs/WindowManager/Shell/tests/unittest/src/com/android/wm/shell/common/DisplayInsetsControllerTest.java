@@ -32,7 +32,7 @@ import android.view.IDisplayWindowInsetsController;
 import android.view.IWindowManager;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
-import android.view.InsetsVisibilities;
+import android.view.WindowInsets;
 
 import androidx.test.filters.SmallTest;
 
@@ -108,7 +108,7 @@ public class DisplayInsetsControllerTest extends ShellTestCase {
         mController.addInsetsChangedListener(SECOND_DISPLAY, secondListener);
 
         mInsetsControllersByDisplayId.get(DEFAULT_DISPLAY).topFocusedWindowChanged(null,
-                new InsetsVisibilities());
+                WindowInsets.Type.defaultVisible());
         mInsetsControllersByDisplayId.get(DEFAULT_DISPLAY).insetsChanged(null);
         mInsetsControllersByDisplayId.get(DEFAULT_DISPLAY).insetsControlChanged(null, null);
         mInsetsControllersByDisplayId.get(DEFAULT_DISPLAY).showInsets(0, false);
@@ -128,7 +128,7 @@ public class DisplayInsetsControllerTest extends ShellTestCase {
         assertTrue(secondListener.hideInsetsCount == 0);
 
         mInsetsControllersByDisplayId.get(SECOND_DISPLAY).topFocusedWindowChanged(null,
-                new InsetsVisibilities());
+                WindowInsets.Type.defaultVisible());
         mInsetsControllersByDisplayId.get(SECOND_DISPLAY).insetsChanged(null);
         mInsetsControllersByDisplayId.get(SECOND_DISPLAY).insetsControlChanged(null, null);
         mInsetsControllersByDisplayId.get(SECOND_DISPLAY).showInsets(0, false);
@@ -175,8 +175,7 @@ public class DisplayInsetsControllerTest extends ShellTestCase {
         int hideInsetsCount = 0;
 
         @Override
-        public void topFocusedWindowChanged(ComponentName component,
-                InsetsVisibilities requestedVisibilities) {
+        public void topFocusedWindowChanged(ComponentName component, int requestedVisibleTypes) {
             topFocusedWindowChangedCount++;
         }
 

@@ -123,6 +123,7 @@ import android.view.InsetsVisibilities;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewDebug;
+import android.view.WindowInsets;
 import android.view.WindowInsets.Type;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowLayout;
@@ -316,6 +317,7 @@ public class DisplayPolicy {
     private int mLastDisableFlags;
     private int mLastAppearance;
     private int mLastBehavior;
+    private int mLastRequestedVisibleTypes = Type.defaultVisible();
     private InsetsVisibilities mRequestedVisibilities = new InsetsVisibilities();
     private AppearanceRegion[] mLastStatusBarAppearanceRegions;
     private LetterboxDetails[] mLastLetterboxDetails;
@@ -1466,7 +1468,7 @@ public class DisplayPolicy {
             mWindowLayout.computeFrames(win.mAttrs.forRotation(displayFrames.mRotation),
                     displayFrames.mInsetsState, displayFrames.mDisplayCutoutSafe,
                     displayFrames.mUnrestricted, win.getWindowingMode(), UNSPECIFIED_LENGTH,
-                    UNSPECIFIED_LENGTH, win.getRequestedVisibilities(), win.mGlobalScale,
+                    UNSPECIFIED_LENGTH, win.getRequestedVisibleTypes(), win.mGlobalScale,
                     sTmpClientFrames);
             final SparseArray<InsetsSource> sources = win.getProvidedInsetsSources();
             final InsetsState state = displayFrames.mInsetsState;
@@ -1513,7 +1515,7 @@ public class DisplayPolicy {
 
         mWindowLayout.computeFrames(attrs, win.getInsetsState(), displayFrames.mDisplayCutoutSafe,
                 win.getBounds(), win.getWindowingMode(), requestedWidth, requestedHeight,
-                win.getRequestedVisibilities(), win.mGlobalScale, sTmpClientFrames);
+                win.getRequestedVisibleTypes(), win.mGlobalScale, sTmpClientFrames);
 
         win.setFrames(sTmpClientFrames, win.mRequestedWidth, win.mRequestedHeight);
     }
@@ -1776,7 +1778,7 @@ public class DisplayPolicy {
         if (mTopFullscreenOpaqueWindowState == null || mForceShowSystemBars) {
             return false;
         }
-        return !mTopFullscreenOpaqueWindowState.getRequestedVisibility(ITYPE_STATUS_BAR);
+        return !mTopFullscreenOpaqueWindowState.isRequestedVisible(Type.statusBars());
     }
 
     /**
@@ -2121,17 +2123,8 @@ public class DisplayPolicy {
             return;
         }
 
-        final @InsetsType int restorePositionTypes =
-                (controlTarget.getRequestedVisibility(ITYPE_NAVIGATION_BAR)
-                        ? Type.navigationBars() : 0)
-                | (controlTarget.getRequestedVisibility(ITYPE_STATUS_BAR)
-                        ? Type.statusBars() : 0)
-                | (mExtraNavBarAlt != null && controlTarget.getRequestedVisibility(
-                                ITYPE_EXTRA_NAVIGATION_BAR)
-                        ? Type.navigationBars() : 0)
-                | (mClimateBarAlt != null && controlTarget.getRequestedVisibility(
-                                ITYPE_CLIMATE_BAR)
-                        ? Type.statusBars() : 0);
+        final @InsetsType int restorePositionTypes = (Type.statusBars() | Type.navigationBars())
+                & controlTarget.getRequestedVisibleTypes();
 
         if (swipeTarget == mNavigationBar
                 && (restorePositionTypes & Type.navigationBars()) != 0) {
@@ -2225,8 +2218,8 @@ public class DisplayPolicy {
                 navColorWin) | opaqueAppearance;
         final int behavior = win.mAttrs.insetsFlags.behavior;
         final String focusedApp = win.mAttrs.packageName;
-        final boolean isFullscreen = !win.getRequestedVisibility(ITYPE_STATUS_BAR)
-                || !win.getRequestedVisibility(ITYPE_NAVIGATION_BAR);
+        final boolean isFullscreen = !win.isRequestedVisible(Type.statusBars())
+                || !win.isRequestedVisible(Type.navigationBars());
         final AppearanceRegion[] statusBarAppearanceRegions =
                 new AppearanceRegion[mStatusBarAppearanceRegionList.size()];
         mStatusBarAppearanceRegionList.toArray(statusBarAppearanceRegions);
@@ -2236,11 +2229,12 @@ public class DisplayPolicy {
             callStatusBarSafely(statusBar -> statusBar.setDisableFlags(displayId, disableFlags,
                     cause));
         }
+        final @InsetsType int requestedVisibleTypes = win.getRequestedVisibleTypes();
         final LetterboxDetails[] letterboxDetails = new LetterboxDetails[mLetterboxDetails.size()];
         mLetterboxDetails.toArray(letterboxDetails);
         if (mLastAppearance == appearance
                 && mLastBehavior == behavior
-                && mRequestedVisibilities.equals(win.getRequestedVisibilities())
+                && mLastRequestedVisibleTypes == requestedVisibleTypes
                 && Objects.equals(mFocusedApp, focusedApp)
                 && mLastFocusIsFullscreen == isFullscreen
                 && Arrays.equals(mLastStatusBarAppearanceRegions, statusBarAppearanceRegions)
@@ -2253,9 +2247,12 @@ public class DisplayPolicy {
                     isFullscreen || (appearance & APPEARANCE_LOW_PROFILE_BARS) != 0);
         }
         final InsetsVisibilities requestedVisibilities =
-                new InsetsVisibilities(win.getRequestedVisibilities());
+                mLastRequestedVisibleTypes == requestedVisibleTypes
+                        ? mRequestedVisibilities
+                        : toInsetsVisibilities(requestedVisibleTypes);
         mLastAppearance = appearance;
         mLastBehavior = behavior;
+        mLastRequestedVisibleTypes = requestedVisibleTypes;
         mRequestedVisibilities = requestedVisibilities;
         mFocusedApp = focusedApp;
         mLastFocusIsFullscreen = isFullscreen;
@@ -2264,6 +2261,20 @@ public class DisplayPolicy {
         callStatusBarSafely(statusBar -> statusBar.onSystemBarAttributesChanged(displayId,
                 appearance, statusBarAppearanceRegions, isNavbarColorManagedByIme, behavior,
                 requestedVisibilities, focusedApp, letterboxDetails));
+    }
+
+    // TODO (253420890): Remove this when removing mRequestedVisibilities.
+    private static InsetsVisibilities toInsetsVisibilities(@InsetsType int requestedVisibleTypes) {
+        final @InsetsType int defaultVisibleTypes = WindowInsets.Type.defaultVisible();
+        final InsetsVisibilities insetsVisibilities = new InsetsVisibilities();
+        for (@InternalInsetsType int i = InsetsState.SIZE - 1; i >= 0; i--) {
+            @InsetsType int type = InsetsState.toPublicType(i);
+            if ((type & (requestedVisibleTypes ^ defaultVisibleTypes)) != 0) {
+                // We only set the visibility if it is different from the default one.
+                insetsVisibilities.setVisibility(i, (type & requestedVisibleTypes) != 0);
+            }
+        }
+        return insetsVisibilities;
     }
 
     private void callStatusBarSafely(Consumer<StatusBarManagerInternal> consumer) {
@@ -2356,7 +2367,7 @@ public class DisplayPolicy {
         appearance = configureNavBarOpacity(appearance, multiWindowTaskVisible,
                 freeformRootTaskVisible);
 
-        final boolean requestHideNavBar = !win.getRequestedVisibility(ITYPE_NAVIGATION_BAR);
+        final boolean requestHideNavBar = !win.isRequestedVisible(Type.navigationBars());
         final long now = SystemClock.uptimeMillis();
         final boolean pendingPanic = mPendingPanicGestureUptime != 0
                 && now - mPendingPanicGestureUptime <= PANIC_GESTURE_EXPIRATION;

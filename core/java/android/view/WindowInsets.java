@@ -1429,6 +1429,8 @@ public final class WindowInsets {
         static final int LAST = GENERIC_OVERLAYS;
         static final int SIZE = 10;
 
+        static final int DEFAULT_VISIBLE = ~IME;
+
         static int indexOf(@InsetsType int type) {
             switch (type) {
                 case STATUS_BARS:
@@ -1457,7 +1459,8 @@ public final class WindowInsets {
             }
         }
 
-        static String toString(@InsetsType int types) {
+        /** @hide */
+        public static String toString(@InsetsType int types) {
             StringBuilder result = new StringBuilder();
             if ((types & STATUS_BARS) != 0) {
                 result.append("statusBars |");
@@ -1598,12 +1601,30 @@ public final class WindowInsets {
         }
 
         /**
+         * @return Default visible types.
+         *
+         * @hide
+         */
+        public static @InsetsType int defaultVisible() {
+            return DEFAULT_VISIBLE;
+        }
+
+        /**
          * @return All inset types combined.
          *
          * @hide
          */
         public static @InsetsType int all() {
             return 0xFFFFFFFF;
+        }
+
+        /**
+         * @return System bars which can be controlled by {@link View.SystemUiVisibility}.
+         *
+         * @hide
+         */
+        public static boolean hasCompatSystemBars(@InsetsType int types) {
+            return (types & (STATUS_BARS | NAVIGATION_BARS)) != 0;
         }
     }
 
