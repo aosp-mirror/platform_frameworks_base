@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.util.proto.ProtoOutputStream;
 import android.view.inputmethod.InputMethodManager;
+import android.view.inputmethod.InputMethodManagerGlobal;
 
 import java.io.PrintWriter;
 
@@ -28,7 +29,7 @@ import java.io.PrintWriter;
  */
 class ImeTracingClientImpl extends ImeTracing {
     ImeTracingClientImpl() {
-        sEnabled = IInputMethodManagerGlobal.isImeTraceEnabled();
+        sEnabled = InputMethodManagerGlobal.isImeTraceEnabled();
     }
 
     @Override
