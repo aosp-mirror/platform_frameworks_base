@@ -73,7 +73,7 @@ import com.android.systemui.statusbar.notification.collection.render.GroupMember
 import com.android.systemui.statusbar.notification.icon.IconBuilder;
 import com.android.systemui.statusbar.notification.icon.IconManager;
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
-import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow.ExpansionLogger;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow.ExpandableNotificationRowLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow.OnExpandClickListener;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
 import com.android.systemui.statusbar.phone.ConfigurationControllerImpl;
@@ -116,6 +116,7 @@ public class NotificationTestHelper {
     private final Context mContext;
     private final TestableLooper mTestLooper;
     private int mId;
+    private final ExpandableNotificationRowLogger mMockLogger;
     private final GroupMembershipManager mGroupMembershipManager;
     private final GroupExpansionManager mGroupExpansionManager;
     private ExpandableNotificationRow mRow;
@@ -139,6 +140,7 @@ public class NotificationTestHelper {
         dependency.injectMockDependency(NotificationMediaManager.class);
         dependency.injectMockDependency(NotificationShadeWindowController.class);
         dependency.injectMockDependency(MediaOutputDialogFactory.class);
+        mMockLogger = mock(ExpandableNotificationRowLogger.class);
         mStatusBarStateController = mock(StatusBarStateController.class);
         mGroupMembershipManager = mock(GroupMembershipManager.class);
         mGroupExpansionManager = mock(GroupExpansionManager.class);
@@ -195,6 +197,10 @@ public class NotificationTestHelper {
 
     public void setDefaultInflationFlags(@InflationFlag int defaultInflationFlags) {
         mDefaultInflationFlags = defaultInflationFlags;
+    }
+
+    public ExpandableNotificationRowLogger getMockLogger() {
+        return mMockLogger;
     }
 
     /**
@@ -527,7 +533,7 @@ public class NotificationTestHelper {
                 mock(RemoteInputViewSubcomponent.Factory.class),
                 APP_NAME,
                 entry.getKey(),
-                mock(ExpansionLogger.class),
+                mMockLogger,
                 mock(KeyguardBypassController.class),
                 mGroupMembershipManager,
                 mGroupExpansionManager,

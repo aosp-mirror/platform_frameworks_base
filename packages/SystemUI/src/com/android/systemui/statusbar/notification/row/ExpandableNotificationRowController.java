@@ -83,13 +83,11 @@ public class ExpandableNotificationRowController implements NotifViewController 
     private final GroupExpansionManager mGroupExpansionManager;
     private final RowContentBindStage mRowContentBindStage;
     private final NotificationLogger mNotificationLogger;
+    private final NotificationRowLogger mLogBufferLogger;
     private final HeadsUpManager mHeadsUpManager;
     private final ExpandableNotificationRow.OnExpandClickListener mOnExpandClickListener;
     private final StatusBarStateController mStatusBarStateController;
     private final MetricsLogger mMetricsLogger;
-
-    private final ExpandableNotificationRow.ExpansionLogger mExpansionLogger =
-            this::logNotificationExpansion;
     private final ExpandableNotificationRow.CoordinateOnClickListener mOnFeedbackClickListener;
     private final NotificationGutsManager mNotificationGutsManager;
     private final OnUserInteractionCallback mOnUserInteractionCallback;
@@ -101,8 +99,32 @@ public class ExpandableNotificationRowController implements NotifViewController 
     private final Optional<BubblesManager> mBubblesManagerOptional;
     private final SmartReplyConstants mSmartReplyConstants;
     private final SmartReplyController mSmartReplyController;
-
     private final ExpandableNotificationRowDragController mDragController;
+    private final ExpandableNotificationRow.ExpandableNotificationRowLogger mLoggerCallback =
+            new ExpandableNotificationRow.ExpandableNotificationRowLogger() {
+                @Override
+                public void logNotificationExpansion(String key, boolean userAction,
+                        boolean expanded) {
+                    mNotificationLogger.onExpansionChanged(key, userAction, expanded);
+                }
+
+                @Override
+                public void logKeepInParentChildDetached(
+                        NotificationEntry child,
+                        NotificationEntry oldParent
+                ) {
+                    mLogBufferLogger.logKeepInParentChildDetached(child, oldParent);
+                }
+
+                @Override
+                public void logSkipAttachingKeepInParentChild(
+                        NotificationEntry child,
+                        NotificationEntry newParent
+                ) {
+                    mLogBufferLogger.logSkipAttachingKeepInParentChild(child, newParent);
+                }
+            };
+
 
     @Inject
     public ExpandableNotificationRowController(
@@ -110,6 +132,7 @@ public class ExpandableNotificationRowController implements NotifViewController 
             ActivatableNotificationViewController activatableNotificationViewController,
             RemoteInputViewSubcomponent.Factory rivSubcomponentFactory,
             MetricsLogger metricsLogger,
+            NotificationRowLogger logBufferLogger,
             NotificationListContainer listContainer,
             NotificationMediaManager mediaManager,
             SmartReplyConstants smartReplyConstants,
@@ -163,6 +186,7 @@ public class ExpandableNotificationRowController implements NotifViewController 
         mBubblesManagerOptional = bubblesManagerOptional;
         mDragController = dragController;
         mMetricsLogger = metricsLogger;
+        mLogBufferLogger = logBufferLogger;
         mSmartReplyConstants = smartReplyConstants;
         mSmartReplyController = smartReplyController;
     }
@@ -177,7 +201,7 @@ public class ExpandableNotificationRowController implements NotifViewController 
                 mRemoteInputViewSubcomponentFactory,
                 mAppName,
                 mNotificationKey,
-                mExpansionLogger,
+                mLoggerCallback,
                 mKeyguardBypassController,
                 mGroupMembershipManager,
                 mGroupExpansionManager,
@@ -242,10 +266,6 @@ public class ExpandableNotificationRowController implements NotifViewController 
                     mView.setOnKeyguard(newState == KEYGUARD);
                 }
             };
-
-    private void logNotificationExpansion(String key, boolean userAction, boolean expanded) {
-        mNotificationLogger.onExpansionChanged(key, userAction, expanded);
-    }
 
     @Override
     @NonNull
@@ -335,5 +355,30 @@ public class ExpandableNotificationRowController implements NotifViewController 
     @Override
     public void setFeedbackIcon(@Nullable FeedbackIcon icon) {
         mView.setFeedbackIcon(icon);
+    }
+
+    @Override
+    public boolean offerToKeepInParentForAnimation() {
+        if (mFeatureFlags.isEnabled(Flags.NOTIFICATION_GROUP_DISMISSAL_ANIMATION)) {
+            mView.setKeepInParentForDismissAnimation(true);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean removeFromParentIfKeptForAnimation() {
+        ExpandableNotificationRow parent = mView.getNotificationParent();
+        if (mView.keepInParentForDismissAnimation() && parent != null) {
+            parent.removeChildNotification(mView);
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
+    public void resetKeepInParentForAnimation() {
+        mView.setKeepInParentForDismissAnimation(false);
     }
 }
