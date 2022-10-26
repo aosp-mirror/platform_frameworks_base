@@ -47,10 +47,12 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 
 /**
@@ -71,12 +73,12 @@ interface MobileConnectionRepository {
      */
     val subscriptionModelFlow: Flow<MobileSubscriptionModel>
     /** Observable tracking [TelephonyManager.isDataConnectionAllowed] */
-    val dataEnabled: Flow<Boolean>
+    val dataEnabled: StateFlow<Boolean>
     /**
      * True if this connection represents the default subscription per
      * [SubscriptionManager.getDefaultDataSubscriptionId]
      */
-    val isDefaultDataSubscription: Flow<Boolean>
+    val isDefaultDataSubscription: StateFlow<Boolean>
 }
 
 @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
@@ -86,7 +88,7 @@ class MobileConnectionRepositoryImpl(
     private val subId: Int,
     private val telephonyManager: TelephonyManager,
     private val globalSettings: GlobalSettings,
-    defaultDataSubId: Flow<Int>,
+    defaultDataSubId: StateFlow<Int>,
     globalMobileDataSettingChangedEvent: Flow<Unit>,
     bgDispatcher: CoroutineDispatcher,
     logger: ConnectivityPipelineLogger,
@@ -100,6 +102,8 @@ class MobileConnectionRepositoryImpl(
             )
         }
     }
+
+    private val telephonyCallbackEvent = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
     override val subscriptionModelFlow: StateFlow<MobileSubscriptionModel> = run {
         var state = MobileSubscriptionModel()
@@ -180,11 +184,10 @@ class MobileConnectionRepositoryImpl(
                 telephonyManager.registerTelephonyCallback(bgDispatcher.asExecutor(), callback)
                 awaitClose { telephonyManager.unregisterTelephonyCallback(callback) }
             }
+            .onEach { telephonyCallbackEvent.tryEmit(Unit) }
             .logOutputChange(logger, "MobileSubscriptionModel")
             .stateIn(scope, SharingStarted.WhileSubscribed(), state)
     }
-
-    private val telephonyCallbackEvent = subscriptionModelFlow.map {}
 
     /** Produces whenever the mobile data setting changes for this subId */
     private val localMobileDataSettingChangedEvent: Flow<Unit> = conflatedCallbackFlow {
@@ -216,11 +219,17 @@ class MobileConnectionRepositoryImpl(
             globalMobileDataSettingChangedEvent,
         )
 
-    override val dataEnabled: Flow<Boolean> = telephonyPollingEvent.map { dataConnectionAllowed() }
+    override val dataEnabled: StateFlow<Boolean> =
+        telephonyPollingEvent
+            .mapLatest { dataConnectionAllowed() }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), dataConnectionAllowed())
 
     private fun dataConnectionAllowed(): Boolean = telephonyManager.isDataConnectionAllowed
 
-    override val isDefaultDataSubscription: Flow<Boolean> = defaultDataSubId.map { it == subId }
+    override val isDefaultDataSubscription: StateFlow<Boolean> =
+        defaultDataSubId
+            .mapLatest { it == subId }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), defaultDataSubId.value == subId)
 
     class Factory
     @Inject
@@ -234,7 +243,7 @@ class MobileConnectionRepositoryImpl(
     ) {
         fun build(
             subId: Int,
-            defaultDataSubId: Flow<Int>,
+            defaultDataSubId: StateFlow<Int>,
             globalMobileDataSettingChangedEvent: Flow<Unit>,
         ): MobileConnectionRepository {
             return MobileConnectionRepositoryImpl(

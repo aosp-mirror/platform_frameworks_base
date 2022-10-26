@@ -34,6 +34,7 @@ import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsPro
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -49,10 +50,13 @@ class MobileIconInteractorTest : SysuiTestCase() {
     private val mobileIconsInteractor = FakeMobileIconsInteractor(mobileMappingsProxy)
     private val connectionRepository = FakeMobileConnectionRepository()
 
+    private val scope = CoroutineScope(IMMEDIATE)
+
     @Before
     fun setUp() {
         underTest =
             MobileIconInteractorImpl(
+                scope,
                 mobileIconsInteractor.activeDataConnectionHasDataEnabled,
                 mobileIconsInteractor.defaultMobileIconMapping,
                 mobileIconsInteractor.defaultMobileIconGroup,

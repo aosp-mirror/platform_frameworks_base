@@ -65,7 +65,7 @@ interface MobileConnectionsRepository {
     val subscriptionsFlow: Flow<List<SubscriptionInfo>>
 
     /** Observable for the subscriptionId of the current mobile data connection */
-    val activeMobileDataSubscriptionId: Flow<Int>
+    val activeMobileDataSubscriptionId: StateFlow<Int>
 
     /** Observable for [MobileMappings.Config] tracking the defaults */
     val defaultDataSubRatConfig: StateFlow<Config>

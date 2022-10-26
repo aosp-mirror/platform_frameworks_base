@@ -300,14 +300,20 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun dataEnabled_isEnabled() =
+    fun dataEnabled_initial_false() =
         runBlocking(IMMEDIATE) {
             whenever(telephonyManager.isDataConnectionAllowed).thenReturn(true)
 
-            var latest: Boolean? = null
-            val job = underTest.dataEnabled.onEach { latest = it }.launchIn(this)
+            assertThat(underTest.dataEnabled.value).isFalse()
+        }
 
-            assertThat(latest).isTrue()
+    @Test
+    fun dataEnabled_isEnabled_true() =
+        runBlocking(IMMEDIATE) {
+            whenever(telephonyManager.isDataConnectionAllowed).thenReturn(true)
+            val job = underTest.dataEnabled.launchIn(this)
+
+            assertThat(underTest.dataEnabled.value).isTrue()
 
             job.cancel()
         }
@@ -316,11 +322,9 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
     fun dataEnabled_isDisabled() =
         runBlocking(IMMEDIATE) {
             whenever(telephonyManager.isDataConnectionAllowed).thenReturn(false)
+            val job = underTest.dataEnabled.launchIn(this)
 
-            var latest: Boolean? = null
-            val job = underTest.dataEnabled.onEach { latest = it }.launchIn(this)
-
-            assertThat(latest).isFalse()
+            assertThat(underTest.dataEnabled.value).isFalse()
 
             job.cancel()
         }

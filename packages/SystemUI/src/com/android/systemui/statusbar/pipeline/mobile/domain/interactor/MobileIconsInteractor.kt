@@ -38,7 +38,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 
 /**
@@ -55,13 +55,13 @@ interface MobileIconsInteractor {
     /** List of subscriptions, potentially filtered for CBRS */
     val filteredSubscriptions: Flow<List<SubscriptionInfo>>
     /** True if the active mobile data subscription has data enabled */
-    val activeDataConnectionHasDataEnabled: Flow<Boolean>
+    val activeDataConnectionHasDataEnabled: StateFlow<Boolean>
     /** The icon mapping from network type to [MobileIconGroup] for the default subscription */
-    val defaultMobileIconMapping: Flow<Map<String, MobileIconGroup>>
+    val defaultMobileIconMapping: StateFlow<Map<String, MobileIconGroup>>
     /** Fallback [MobileIconGroup] in the case where there is no icon in the mapping */
-    val defaultMobileIconGroup: Flow<MobileIconGroup>
+    val defaultMobileIconGroup: StateFlow<MobileIconGroup>
     /** True once the user has been set up */
-    val isUserSetup: Flow<Boolean>
+    val isUserSetup: StateFlow<Boolean>
     /**
      * Vends out a [MobileIconInteractor] tracking the [MobileConnectionRepository] for the given
      * subId. Will throw if the ID is invalid
@@ -84,17 +84,21 @@ constructor(
     private val activeMobileDataSubscriptionId =
         mobileConnectionsRepo.activeMobileDataSubscriptionId
 
-    private val activeMobileDataConnectionRepo: Flow<MobileConnectionRepository?> =
-        activeMobileDataSubscriptionId.map { activeId ->
-            if (activeId == INVALID_SUBSCRIPTION_ID) {
-                null
-            } else {
-                mobileConnectionsRepo.getRepoForSubId(activeId)
+    private val activeMobileDataConnectionRepo: StateFlow<MobileConnectionRepository?> =
+        activeMobileDataSubscriptionId
+            .mapLatest { activeId ->
+                if (activeId == INVALID_SUBSCRIPTION_ID) {
+                    null
+                } else {
+                    mobileConnectionsRepo.getRepoForSubId(activeId)
+                }
             }
-        }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), null)
 
-    override val activeDataConnectionHasDataEnabled: Flow<Boolean> =
-        activeMobileDataConnectionRepo.flatMapLatest { it?.dataEnabled ?: flowOf(false) }
+    override val activeDataConnectionHasDataEnabled: StateFlow<Boolean> =
+        activeMobileDataConnectionRepo
+            .flatMapLatest { it?.dataEnabled ?: flowOf(false) }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     private val unfilteredSubscriptions: Flow<List<SubscriptionInfo>> =
         mobileConnectionsRepo.subscriptionsFlow
@@ -149,20 +153,21 @@ constructor(
      */
     override val defaultMobileIconMapping: StateFlow<Map<String, MobileIconGroup>> =
         mobileConnectionsRepo.defaultDataSubRatConfig
-            .map { mobileMappingsProxy.mapIconSets(it) }
+            .mapLatest { mobileMappingsProxy.mapIconSets(it) }
             .stateIn(scope, SharingStarted.WhileSubscribed(), initialValue = mapOf())
 
     /** If there is no mapping in [defaultMobileIconMapping], then use this default icon group */
     override val defaultMobileIconGroup: StateFlow<MobileIconGroup> =
         mobileConnectionsRepo.defaultDataSubRatConfig
-            .map { mobileMappingsProxy.getDefaultIcons(it) }
+            .mapLatest { mobileMappingsProxy.getDefaultIcons(it) }
             .stateIn(scope, SharingStarted.WhileSubscribed(), initialValue = TelephonyIcons.G)
 
-    override val isUserSetup: Flow<Boolean> = userSetupRepo.isUserSetupFlow
+    override val isUserSetup: StateFlow<Boolean> = userSetupRepo.isUserSetupFlow
 
     /** Vends out new [MobileIconInteractor] for a particular subId */
     override fun createMobileConnectionInteractorForSubId(subId: Int): MobileIconInteractor =
         MobileIconInteractorImpl(
+            scope,
             activeDataConnectionHasDataEnabled,
             defaultMobileIconMapping,
             defaultMobileIconGroup,

@@ -18,81 +18,97 @@ package com.android.systemui.statusbar.pipeline.mobile.domain.interactor
 
 import android.telephony.CarrierConfigManager
 import com.android.settingslib.SignalIcon.MobileIconGroup
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DefaultNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.OverrideNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
 import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
 import com.android.systemui.util.CarrierConfigTracker
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.stateIn
 
 interface MobileIconInteractor {
     // TODO(b/256839546): clarify naming of default vs active
     /** True if we want to consider the data connection enabled */
-    val isDefaultDataEnabled: Flow<Boolean>
+    val isDefaultDataEnabled: StateFlow<Boolean>
 
     /** Observable for the data enabled state of this connection */
-    val isDataEnabled: Flow<Boolean>
+    val isDataEnabled: StateFlow<Boolean>
 
     /** Observable for RAT type (network type) indicator */
-    val networkTypeIconGroup: Flow<MobileIconGroup>
+    val networkTypeIconGroup: StateFlow<MobileIconGroup>
 
     /** True if this line of service is emergency-only */
-    val isEmergencyOnly: Flow<Boolean>
+    val isEmergencyOnly: StateFlow<Boolean>
 
     /** Int describing the connection strength. 0-4 OR 1-5. See [numberOfLevels] */
-    val level: Flow<Int>
+    val level: StateFlow<Int>
 
     /** Based on [CarrierConfigManager.KEY_INFLATE_SIGNAL_STRENGTH_BOOL], either 4 or 5 */
-    val numberOfLevels: Flow<Int>
+    val numberOfLevels: StateFlow<Int>
 }
 
 /** Interactor for a single mobile connection. This connection _should_ have one subscription ID */
+@Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
+@OptIn(ExperimentalCoroutinesApi::class)
 class MobileIconInteractorImpl(
-    defaultSubscriptionHasDataEnabled: Flow<Boolean>,
-    defaultMobileIconMapping: Flow<Map<String, MobileIconGroup>>,
-    defaultMobileIconGroup: Flow<MobileIconGroup>,
+    @Application scope: CoroutineScope,
+    defaultSubscriptionHasDataEnabled: StateFlow<Boolean>,
+    defaultMobileIconMapping: StateFlow<Map<String, MobileIconGroup>>,
+    defaultMobileIconGroup: StateFlow<MobileIconGroup>,
     mobileMappingsProxy: MobileMappingsProxy,
     connectionRepository: MobileConnectionRepository,
 ) : MobileIconInteractor {
     private val mobileStatusInfo = connectionRepository.subscriptionModelFlow
 
-    override val isDataEnabled: Flow<Boolean> = connectionRepository.dataEnabled
+    override val isDataEnabled: StateFlow<Boolean> = connectionRepository.dataEnabled
 
     override val isDefaultDataEnabled = defaultSubscriptionHasDataEnabled
 
     /** Observable for the current RAT indicator icon ([MobileIconGroup]) */
-    override val networkTypeIconGroup: Flow<MobileIconGroup> =
+    override val networkTypeIconGroup: StateFlow<MobileIconGroup> =
         combine(
-            mobileStatusInfo,
-            defaultMobileIconMapping,
-            defaultMobileIconGroup,
-        ) { info, mapping, defaultGroup ->
-            val lookupKey =
-                when (val resolved = info.resolvedNetworkType) {
-                    is DefaultNetworkType -> mobileMappingsProxy.toIconKey(resolved.type)
-                    is OverrideNetworkType -> mobileMappingsProxy.toIconKeyOverride(resolved.type)
-                }
-            mapping[lookupKey] ?: defaultGroup
-        }
-
-    override val isEmergencyOnly: Flow<Boolean> = mobileStatusInfo.map { it.isEmergencyOnly }
-
-    override val level: Flow<Int> =
-        mobileStatusInfo.map { mobileModel ->
-            // TODO: incorporate [MobileMappings.Config.alwaysShowCdmaRssi]
-            if (mobileModel.isGsm) {
-                mobileModel.primaryLevel
-            } else {
-                mobileModel.cdmaLevel
+                mobileStatusInfo,
+                defaultMobileIconMapping,
+                defaultMobileIconGroup,
+            ) { info, mapping, defaultGroup ->
+                val lookupKey =
+                    when (val resolved = info.resolvedNetworkType) {
+                        is DefaultNetworkType -> mobileMappingsProxy.toIconKey(resolved.type)
+                        is OverrideNetworkType ->
+                            mobileMappingsProxy.toIconKeyOverride(resolved.type)
+                    }
+                mapping[lookupKey] ?: defaultGroup
             }
-        }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), defaultMobileIconGroup.value)
+
+    override val isEmergencyOnly: StateFlow<Boolean> =
+        mobileStatusInfo
+            .mapLatest { it.isEmergencyOnly }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), false)
+
+    override val level: StateFlow<Int> =
+        mobileStatusInfo
+            .mapLatest { mobileModel ->
+                // TODO: incorporate [MobileMappings.Config.alwaysShowCdmaRssi]
+                if (mobileModel.isGsm) {
+                    mobileModel.primaryLevel
+                } else {
+                    mobileModel.cdmaLevel
+                }
+            }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), 0)
 
     /**
      * This will become variable based on [CarrierConfigManager.KEY_INFLATE_SIGNAL_STRENGTH_BOOL]
      * once it's wired up inside of [CarrierConfigTracker]
      */
-    override val numberOfLevels: Flow<Int> = flowOf(4)
+    override val numberOfLevels: StateFlow<Int> = MutableStateFlow(4)
 }

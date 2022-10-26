@@ -26,7 +26,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.mapLatest
@@ -40,7 +39,7 @@ import kotlinx.coroutines.withContext
  */
 interface UserSetupRepository {
     /** Observable tracking [DeviceProvisionedController.isUserSetup] */
-    val isUserSetupFlow: Flow<Boolean>
+    val isUserSetupFlow: StateFlow<Boolean>
 }
 
 @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
