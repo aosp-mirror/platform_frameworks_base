@@ -36,7 +36,7 @@ import java.util.List;
  * Note android.app.job is the better package to put this class, but we can't move it there
  * because that'd break robolectric. Grr.
  *
- * @hide 
+ * @hide
  */
 public class JobSchedulerImpl extends JobScheduler {
     IJobScheduler mBinder;
@@ -149,7 +149,10 @@ public class JobSchedulerImpl extends JobScheduler {
             android.Manifest.permission.INTERACT_ACROSS_USERS_FULL})
     @Override
     public void registerUserVisibleJobObserver(@NonNull IUserVisibleJobObserver observer) {
-        // TODO(255767350): implement
+        try {
+            mBinder.registerUserVisibleJobObserver(observer);
+        } catch (RemoteException e) {
+        }
     }
 
     @RequiresPermission(allOf = {
@@ -157,7 +160,10 @@ public class JobSchedulerImpl extends JobScheduler {
             android.Manifest.permission.INTERACT_ACROSS_USERS_FULL})
     @Override
     public void unregisterUserVisibleJobObserver(@NonNull IUserVisibleJobObserver observer) {
-        // TODO(255767350): implement
+        try {
+            mBinder.unregisterUserVisibleJobObserver(observer);
+        } catch (RemoteException e) {
+        }
     }
 
     @RequiresPermission(allOf = {
@@ -165,6 +171,9 @@ public class JobSchedulerImpl extends JobScheduler {
             android.Manifest.permission.INTERACT_ACROSS_USERS_FULL})
     @Override
     public void stopUserVisibleJobsForUser(@NonNull String packageName, int userId) {
-        // TODO(255767350): implement
+        try {
+            mBinder.stopUserVisibleJobsForUser(packageName, userId);
+        } catch (RemoteException e) {
+        }
     }
 }

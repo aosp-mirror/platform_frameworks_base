@@ -98,6 +98,12 @@ public class JobParameters implements Parcelable {
      */
     public static final int INTERNAL_STOP_REASON_SUCCESSFUL_FINISH =
             JobProtoEnums.INTERNAL_STOP_REASON_SUCCESSFUL_FINISH; // 10.
+    /**
+     * The user stopped the job via some UI (eg. Task Manager).
+     * @hide
+     */
+    public static final int INTERNAL_STOP_REASON_USER_UI_STOP =
+            JobProtoEnums.INTERNAL_STOP_REASON_USER_UI_STOP; // 11.
 
     /**
      * All the stop reason codes. This should be regarded as an immutable array at runtime.
@@ -121,6 +127,7 @@ public class JobParameters implements Parcelable {
             INTERNAL_STOP_REASON_DATA_CLEARED,
             INTERNAL_STOP_REASON_RTC_UPDATED,
             INTERNAL_STOP_REASON_SUCCESSFUL_FINISH,
+            INTERNAL_STOP_REASON_USER_UI_STOP,
     };
 
     /**
@@ -141,6 +148,7 @@ public class JobParameters implements Parcelable {
             case INTERNAL_STOP_REASON_DATA_CLEARED: return "data_cleared";
             case INTERNAL_STOP_REASON_RTC_UPDATED: return "rtc_updated";
             case INTERNAL_STOP_REASON_SUCCESSFUL_FINISH: return "successful_finish";
+            case INTERNAL_STOP_REASON_USER_UI_STOP: return "user_ui_stop";
             default: return "unknown:" + reasonCode;
         }
     }
@@ -230,7 +238,7 @@ public class JobParameters implements Parcelable {
     public static final int STOP_REASON_APP_STANDBY = 12;
     /**
      * The user stopped the job. This can happen either through force-stop, adb shell commands,
-     * or uninstalling.
+     * uninstalling, or some other UI.
      */
     public static final int STOP_REASON_USER = 13;
     /** The system is doing some processing that requires stopping this job. */

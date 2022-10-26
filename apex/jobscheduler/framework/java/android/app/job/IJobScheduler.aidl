@@ -16,6 +16,7 @@
 
 package android.app.job;
 
+import android.app.job.IUserVisibleJobObserver;
 import android.app.job.JobInfo;
 import android.app.job.JobSnapshot;
 import android.app.job.JobWorkItem;
@@ -37,4 +38,10 @@ interface IJobScheduler {
     boolean hasRunLongJobsPermission(String packageName, int userId);
     List<JobInfo> getStartedJobs();
     ParceledListSlice getAllJobSnapshots();
+    @EnforcePermission(allOf={"MANAGE_ACTIVITY_TASKS", "INTERACT_ACROSS_USERS_FULL"})
+    void registerUserVisibleJobObserver(in IUserVisibleJobObserver observer);
+    @EnforcePermission(allOf={"MANAGE_ACTIVITY_TASKS", "INTERACT_ACROSS_USERS_FULL"})
+    void unregisterUserVisibleJobObserver(in IUserVisibleJobObserver observer);
+    @EnforcePermission(allOf={"MANAGE_ACTIVITY_TASKS", "INTERACT_ACROSS_USERS_FULL"})
+    void stopUserVisibleJobsForUser(String packageName, int userId);
 }
