@@ -60,8 +60,42 @@ public final class PasspointConfiguration implements Parcelable {
 
     /**
      * Maximum bytes for URL string.
+     * @hide
      */
-    private static final int MAX_URL_BYTES = 1023;
+    public static final int MAX_URL_BYTES = 2048;
+
+    /**
+     * Maximum size for match entry, just to limit the size of the Passpoint config.
+     * @hide
+     */
+    public static final int MAX_NUMBER_OF_ENTRIES = 16;
+
+    /**
+     * Maximum size for OI entry.
+     * The spec allows a string of up to 255 characters, with comma delimited numbers like
+     * 001122,334455. So with minimum OI size of 7, the maximum amount of OIs is 36.
+     * @hide
+     */
+    public static final int MAX_NUMBER_OF_OI = 36;
+
+
+    /**
+     * Maximum bytes for a string entry like FQDN and friendly name.
+     * @hide
+     */
+    public static final int MAX_STRING_LENGTH = 255;
+
+    /**
+     * HESSID is 48 bit.
+     * @hide
+     */
+    public static final long MAX_HESSID_VALUE = ((long) 1 << 48)  - 1;
+
+    /**
+     * Organization Identifiers is 3 or 5 Octets. 24 or 36 bit.
+     * @hide
+     */
+    public static final long MAX_OI_VALUE = ((long) 1 << 40)  - 1;
 
     /**
      * Integer value used for indicating null value in the Parcel.
@@ -760,7 +794,30 @@ public final class PasspointConfiguration implements Parcelable {
             return false;
         }
 
+        if (mAaaServerTrustedNames != null) {
+            if (mAaaServerTrustedNames.length > MAX_NUMBER_OF_ENTRIES) {
+                Log.d(TAG, "Too many AaaServerTrustedNames");
+                return false;
+            }
+            for (String fqdn : mAaaServerTrustedNames) {
+                if (fqdn.getBytes(StandardCharsets.UTF_8).length > MAX_STRING_LENGTH) {
+                    Log.d(TAG, "AaaServerTrustedNames is too long");
+                    return false;
+                }
+            }
+        }
+        if (mSubscriptionType != null) {
+            if (mSubscriptionType.getBytes(StandardCharsets.UTF_8).length > MAX_STRING_LENGTH) {
+                Log.d(TAG, "SubscriptionType is too long");
+                return false;
+            }
+        }
+
         if (mTrustRootCertList != null) {
+            if (mTrustRootCertList.size() > MAX_NUMBER_OF_ENTRIES) {
+                Log.d(TAG, "Too many TrustRootCert");
+                return false;
+            }
             for (Map.Entry<String, byte[]> entry : mTrustRootCertList.entrySet()) {
                 String url = entry.getKey();
                 byte[] certFingerprint = entry.getValue();
