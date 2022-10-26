@@ -671,10 +671,18 @@ public class BubbleController implements ConfigurationChangeListener {
             return;
         }
 
+        mAddedToWindowManager = false;
+        // Put on background for this binder call, was causing jank
+        mBackgroundExecutor.execute(() -> {
+            try {
+                mContext.unregisterReceiver(mBroadcastReceiver);
+            } catch (IllegalArgumentException e) {
+                // Not sure if this happens in production, but was happening in tests
+                // (b/253647225)
+                e.printStackTrace();
+            }
+        });
         try {
-            mAddedToWindowManager = false;
-            // Put on background for this binder call, was causing jank
-            mBackgroundExecutor.execute(() -> mContext.unregisterReceiver(mBroadcastReceiver));
             if (mStackView != null) {
                 mWindowManager.removeView(mStackView);
                 mBubbleData.getOverflow().cleanUpExpandedState();
