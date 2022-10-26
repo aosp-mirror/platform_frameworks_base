@@ -365,6 +365,13 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             BroadcastProcessQueue nextQueue = queue.runnableAtNext;
             final long runnableAt = queue.getRunnableAt();
 
+            // When broadcasts are skipped or failed during list traversal, we
+            // might encounter a queue that is no longer runnable; skip it
+            if (!queue.isRunnable()) {
+                queue = nextQueue;
+                continue;
+            }
+
             // If queues beyond this point aren't ready to run yet, schedule
             // another pass when they'll be runnable
             if (runnableAt > now && !waitingFor) {
