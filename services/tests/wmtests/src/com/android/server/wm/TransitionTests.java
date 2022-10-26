@@ -60,7 +60,9 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import android.app.ActivityManager;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.IBinder;
@@ -79,6 +81,8 @@ import android.window.TransitionInfo;
 
 import androidx.annotation.NonNull;
 import androidx.test.filters.SmallTest;
+
+import com.android.internal.graphics.ColorUtils;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -1384,6 +1388,50 @@ public class TransitionTests extends WindowTestsBase {
                 transition.mParticipants, transition.mChanges);
         assertTrue(targets.contains(embeddedTf));
         assertTrue(targets.contains(activity));
+    }
+
+    @Test
+    public void testChangeSetBackgroundColor() {
+        final Transition transition = createTestTransition(TRANSIT_CHANGE);
+        final ArrayMap<WindowContainer, Transition.ChangeInfo> changes = transition.mChanges;
+        final ArraySet<WindowContainer> participants = transition.mParticipants;
+
+        // Test background color for Activity and embedded TaskFragment.
+        final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
+        mAtm.mTaskFragmentOrganizerController.registerOrganizer(
+                ITaskFragmentOrganizer.Stub.asInterface(organizer.getOrganizerToken().asBinder()));
+        final Task task = createTask(mDisplayContent);
+        final TaskFragment embeddedTf = createTaskFragmentWithEmbeddedActivity(task, organizer);
+        final ActivityRecord embeddedActivity = embeddedTf.getTopMostActivity();
+        final ActivityRecord nonEmbeddedActivity = createActivityRecord(task);
+        final ActivityManager.TaskDescription taskDescription =
+                new ActivityManager.TaskDescription.Builder()
+                        .setBackgroundColor(Color.YELLOW)
+                        .build();
+        task.setTaskDescription(taskDescription);
+
+        // Start states:
+        embeddedActivity.mVisibleRequested = true;
+        nonEmbeddedActivity.mVisibleRequested = false;
+        changes.put(embeddedTf, new Transition.ChangeInfo(embeddedTf));
+        changes.put(nonEmbeddedActivity, new Transition.ChangeInfo(nonEmbeddedActivity));
+        // End states:
+        embeddedActivity.mVisibleRequested = false;
+        nonEmbeddedActivity.mVisibleRequested = true;
+
+        participants.add(embeddedTf);
+        participants.add(nonEmbeddedActivity);
+        final ArrayList<WindowContainer> targets = Transition.calculateTargets(
+                participants, changes);
+        final TransitionInfo info = Transition.calculateTransitionInfo(transition.mType,
+                0 /* flags */, targets, changes, mMockT);
+
+        // Background color should be set on both Activity and embedded TaskFragment.
+        final int expectedBackgroundColor = ColorUtils.setAlphaComponent(
+                taskDescription.getBackgroundColor(), 255);
+        assertEquals(2, info.getChanges().size());
+        assertEquals(expectedBackgroundColor, info.getChanges().get(0).getBackgroundColor());
+        assertEquals(expectedBackgroundColor, info.getChanges().get(1).getBackgroundColor());
     }
 
     @Test

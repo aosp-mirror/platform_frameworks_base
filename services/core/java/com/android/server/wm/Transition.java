@@ -1568,7 +1568,11 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             change.setMode(info.getTransitMode(target));
             change.setStartAbsBounds(info.mAbsoluteBounds);
             change.setFlags(info.getChangeFlags(target));
+
             final Task task = target.asTask();
+            final TaskFragment taskFragment = target.asTaskFragment();
+            final ActivityRecord activityRecord = target.asActivityRecord();
+
             if (task != null) {
                 final ActivityManager.RunningTaskInfo tinfo = new ActivityManager.RunningTaskInfo();
                 task.fillTaskInfo(tinfo);
@@ -1602,12 +1606,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             change.setEndRelOffset(bounds.left - parentBounds.left,
                     bounds.top - parentBounds.top);
             int endRotation = target.getWindowConfiguration().getRotation();
-            final ActivityRecord activityRecord = target.asActivityRecord();
             if (activityRecord != null) {
-                final Task arTask = activityRecord.getTask();
-                final int backgroundColor = ColorUtils.setAlphaComponent(
-                        arTask.getTaskDescription().getBackgroundColor(), 255);
-                change.setBackgroundColor(backgroundColor);
                 // TODO(b/227427984): Shell needs to aware letterbox.
                 // Always use parent bounds of activity because letterbox area (e.g. fixed aspect
                 // ratio or size compat mode) should be included in the animation.
@@ -1620,6 +1619,18 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             } else {
                 change.setEndAbsBounds(bounds);
             }
+
+            if (activityRecord != null || (taskFragment != null && taskFragment.isEmbedded())) {
+                // Set background color to Task theme color for activity and embedded TaskFragment
+                // in case we want to show background during the animation.
+                final Task parentTask = activityRecord != null
+                        ? activityRecord.getTask()
+                        : taskFragment.getTask();
+                final int backgroundColor = ColorUtils.setAlphaComponent(
+                        parentTask.getTaskDescription().getBackgroundColor(), 255);
+                change.setBackgroundColor(backgroundColor);
+            }
+
             change.setRotation(info.mRotation, endRotation);
             if (info.mSnapshot != null) {
                 change.setSnapshot(info.mSnapshot, info.mSnapshotLuma);
