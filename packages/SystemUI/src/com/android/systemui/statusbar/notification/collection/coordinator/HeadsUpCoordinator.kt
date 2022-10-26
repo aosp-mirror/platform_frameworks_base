@@ -33,6 +33,7 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.plugga
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender.OnEndLifetimeExtensionCallback
+import com.android.systemui.statusbar.notification.collection.provider.LaunchFullScreenIntentProvider
 import com.android.systemui.statusbar.notification.collection.render.NodeController
 import com.android.systemui.statusbar.notification.dagger.IncomingHeader
 import com.android.systemui.statusbar.notification.interruption.HeadsUpViewBinder
@@ -68,6 +69,7 @@ class HeadsUpCoordinator @Inject constructor(
     private val mHeadsUpViewBinder: HeadsUpViewBinder,
     private val mNotificationInterruptStateProvider: NotificationInterruptStateProvider,
     private val mRemoteInputManager: NotificationRemoteInputManager,
+    private val mLaunchFullScreenIntentProvider: LaunchFullScreenIntentProvider,
     @IncomingHeader private val mIncomingHeaderController: NodeController,
     @Main private val mExecutor: DelayableExecutor,
 ) : Coordinator {
@@ -373,6 +375,12 @@ class HeadsUpCoordinator @Inject constructor(
          * Notification was just added and if it should heads up, bind the view and then show it.
          */
         override fun onEntryAdded(entry: NotificationEntry) {
+            // First check whether this notification should launch a full screen intent, and
+            // launch it if needed.
+            if (mNotificationInterruptStateProvider.shouldLaunchFullScreenIntentWhenAdded(entry)) {
+                mLaunchFullScreenIntentProvider.launchFullScreenIntent(entry)
+            }
+
             // shouldHeadsUp includes check for whether this notification should be filtered
             val shouldHeadsUpEver = mNotificationInterruptStateProvider.shouldHeadsUp(entry)
             mPostedEntries[entry.key] = PostedEntry(
