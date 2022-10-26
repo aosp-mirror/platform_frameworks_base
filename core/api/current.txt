@@ -19497,7 +19497,7 @@ package android.location {
     method public boolean hasSatelliteBlocklist();
     method public boolean hasSatellitePvt();
     method public boolean hasScheduling();
-    method public boolean hasSingleShot();
+    method public boolean hasSingleShotFix();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.location.GnssCapabilities> CREATOR;
   }
@@ -19529,7 +19529,7 @@ package android.location {
     method @NonNull public android.location.GnssCapabilities.Builder setHasSatelliteBlocklist(boolean);
     method @NonNull public android.location.GnssCapabilities.Builder setHasSatellitePvt(boolean);
     method @NonNull public android.location.GnssCapabilities.Builder setHasScheduling(boolean);
-    method @NonNull public android.location.GnssCapabilities.Builder setHasSingleShot(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasSingleShotFix(boolean);
   }
 
   public final class GnssClock implements android.os.Parcelable {
