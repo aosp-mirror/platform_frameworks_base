@@ -406,6 +406,10 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
 
         verify(mHeadsUpManager, never()).showNotification(mGroupSummary)
         verify(mHeadsUpManager).showNotification(mGroupSibling1)
+
+        // In addition make sure we have explicitly marked the summary as having interrupted due
+        // to the alert being transferred
+        assertTrue(mGroupSummary.hasInterrupted())
     }
 
     @Test
@@ -424,6 +428,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
 
         verify(mHeadsUpManager, never()).showNotification(mGroupSummary)
         verify(mHeadsUpManager).showNotification(mGroupChild1)
+        assertTrue(mGroupSummary.hasInterrupted())
     }
 
     @Test
@@ -449,6 +454,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         verify(mHeadsUpManager, never()).showNotification(mGroupSummary)
         verify(mHeadsUpManager).showNotification(mGroupSibling1)
         verify(mHeadsUpManager, never()).showNotification(mGroupSibling2)
+        assertTrue(mGroupSummary.hasInterrupted())
     }
 
     @Test
@@ -474,6 +480,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         verify(mHeadsUpManager, never()).showNotification(mGroupSummary)
         verify(mHeadsUpManager).showNotification(mGroupChild1)
         verify(mHeadsUpManager, never()).showNotification(mGroupChild2)
+        assertTrue(mGroupSummary.hasInterrupted())
     }
 
     @Test
@@ -512,6 +519,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         verify(mHeadsUpManager).showNotification(mGroupPriority)
         verify(mHeadsUpManager, never()).showNotification(mGroupSibling1)
         verify(mHeadsUpManager, never()).showNotification(mGroupSibling2)
+        assertTrue(mGroupSummary.hasInterrupted())
     }
 
     @Test
@@ -548,6 +556,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         verify(mHeadsUpManager).showNotification(mGroupPriority)
         verify(mHeadsUpManager, never()).showNotification(mGroupSibling1)
         verify(mHeadsUpManager, never()).showNotification(mGroupSibling2)
+        assertTrue(mGroupSummary.hasInterrupted())
     }
 
     @Test
@@ -582,6 +591,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         verify(mHeadsUpManager).showNotification(mGroupPriority)
         verify(mHeadsUpManager, never()).showNotification(mGroupSibling1)
         verify(mHeadsUpManager, never()).showNotification(mGroupSibling2)
+        assertTrue(mGroupSummary.hasInterrupted())
     }
 
     @Test
@@ -669,6 +679,35 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         verify(mHeadsUpManager).showNotification(mGroupSummary)
         verify(mHeadsUpManager, never()).showNotification(mGroupChild1)
         verify(mHeadsUpManager, never()).showNotification(mGroupChild2)
+    }
+
+    @Test
+    fun testNoTransfer_groupSummaryNotAlerting() {
+        // When we have a group where the summary should not alert and exactly one child should
+        // alert, we should never mark the group summary as interrupted (because it doesn't).
+        setShouldHeadsUp(mGroupSummary, false)
+        setShouldHeadsUp(mGroupChild1, true)
+        setShouldHeadsUp(mGroupChild2, false)
+
+        mCollectionListener.onEntryAdded(mGroupSummary)
+        mCollectionListener.onEntryAdded(mGroupChild1)
+        mCollectionListener.onEntryAdded(mGroupChild2)
+        val groupEntry = GroupEntryBuilder()
+            .setSummary(mGroupSummary)
+            .setChildren(listOf(mGroupChild1, mGroupChild2))
+            .build()
+        mBeforeTransformGroupsListener.onBeforeTransformGroups(listOf(groupEntry))
+        verify(mHeadsUpViewBinder, never()).bindHeadsUpView(any(), any())
+        mBeforeFinalizeFilterListener.onBeforeFinalizeFilter(listOf(groupEntry))
+
+        verify(mHeadsUpViewBinder, never()).bindHeadsUpView(eq(mGroupSummary), any())
+        finishBind(mGroupChild1)
+        verify(mHeadsUpViewBinder, never()).bindHeadsUpView(eq(mGroupChild2), any())
+
+        verify(mHeadsUpManager, never()).showNotification(mGroupSummary)
+        verify(mHeadsUpManager).showNotification(mGroupChild1)
+        verify(mHeadsUpManager, never()).showNotification(mGroupChild2)
+        assertFalse(mGroupSummary.hasInterrupted())
     }
 
     @Test
