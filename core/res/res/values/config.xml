@@ -5239,7 +5239,7 @@
             but isn't supported on the device or both dark scrim alpha and blur radius aren't
             provided.
      -->
-    <color name="config_letterboxBackgroundColor">@android:color/system_neutral2_900</color>
+    <color name="config_letterboxBackgroundColor">@color/letterbox_background</color>
 
     <!-- Horizontal position of a center of the letterboxed app window.
         0 corresponds to the left side of the screen and 1 to the right side. If given value < 0
