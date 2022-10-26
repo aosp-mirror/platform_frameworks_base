@@ -920,7 +920,14 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
 
     @Override
     public String toString() {
-        return mDevice.toString();
+        return "CachedBluetoothDevice ("
+                + "anonymizedAddress="
+                + mDevice.getAnonymizedAddress()
+                + ", name="
+                + getName()
+                + ", groupId="
+                + mGroupId
+                + ")";
     }
 
     @Override
