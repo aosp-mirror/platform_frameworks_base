@@ -32,6 +32,13 @@ import com.android.internal.util.Preconditions;
 public final class Credential implements Parcelable {
 
     /**
+     * The type value for password credential related operations.
+     *
+     * @hide
+     */
+    @NonNull public static final String TYPE_PASSWORD = "android.credentials.TYPE_PASSWORD";
+
+    /**
      * The credential type.
      */
     @NonNull

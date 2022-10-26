@@ -42,11 +42,11 @@ import android.util.LogPrinter;
 import android.util.PrintStreamPrinter;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.net.NetworkPolicyManagerInternal;
 import com.android.server.pm.pkg.PackageStateInternal;
 

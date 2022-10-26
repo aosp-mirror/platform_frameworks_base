@@ -29,6 +29,7 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_APK;
 import static android.content.pm.PackageManager.INSTALL_FAILED_MEDIA_UNAVAILABLE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_MISSING_SPLIT;
+import static android.content.pm.PackageManager.INSTALL_FAILED_PRE_APPROVAL_NOT_AVAILABLE;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_NO_CERTIFICATES;
 import static android.content.pm.PackageManager.INSTALL_STAGED;
 import static android.content.pm.PackageManager.INSTALL_SUCCEEDED;
@@ -139,8 +140,6 @@ import android.util.IntArray;
 import android.util.MathUtils;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.apk.ApkSignatureVerifier;
 
 import com.android.internal.R;
@@ -156,6 +155,8 @@ import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.LocalServices;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.dex.DexManager;
@@ -4243,6 +4244,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     public void requestUserPreapproval(@NonNull PreapprovalDetails details,
             @NonNull IntentSender statusReceiver) {
         validatePreapprovalRequest(details, statusReceiver);
+
+        if (!mPm.isPreapprovalRequestAvailable()) {
+            sendUpdateToRemoteStatusReceiver(INSTALL_FAILED_PRE_APPROVAL_NOT_AVAILABLE,
+                    "Request user pre-approval is currently not available.", null /* extras */);
+            return;
+        }
+
         dispatchPreapprovalRequest();
     }
 

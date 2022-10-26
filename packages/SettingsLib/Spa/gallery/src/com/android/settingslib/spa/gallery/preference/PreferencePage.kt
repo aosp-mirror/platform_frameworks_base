@@ -27,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.android.settingslib.spa.framework.common.EntrySearchData
+import com.android.settingslib.spa.framework.common.EntryStatusData
 import com.android.settingslib.spa.framework.common.SettingsEntry
 import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
@@ -104,6 +105,7 @@ object PreferencePageProvider : SettingsPageProvider {
         entryList.add(
             createEntry(EntryEnum.DISABLED_PREFERENCE)
                 .setIsAllowSearch(true)
+                .setHasMutableStatus(true)
                 .setMacro {
                     spaLogger.message(TAG, "create macro for ${EntryEnum.DISABLED_PREFERENCE}")
                     SimplePreferenceMacro(
@@ -113,14 +115,17 @@ object PreferencePageProvider : SettingsPageProvider {
                         icon = Icons.Outlined.DisabledByDefault,
                     )
                 }
+                .setStatusDataFn { EntryStatusData(isDisabled = true) }
                 .build()
         )
         entryList.add(
             createEntry(EntryEnum.ASYNC_SUMMARY_PREFERENCE)
                 .setIsAllowSearch(true)
+                .setHasMutableStatus(true)
                 .setSearchDataFn {
                     EntrySearchData(title = ASYNC_PREFERENCE_TITLE)
                 }
+                .setStatusDataFn { EntryStatusData(isDisabled = false) }
                 .setUiLayoutFn {
                     val model = PreferencePageModel.create()
                     val asyncSummary = remember { model.getAsyncSummary() }

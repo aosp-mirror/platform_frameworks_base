@@ -221,6 +221,12 @@ public abstract class ActivityManagerInternal {
     public abstract boolean isSystemReady();
 
     /**
+     * @return {@code true} if system is using the "modern" broadcast queue,
+     *         {@code false} otherwise.
+     */
+    public abstract boolean isModernQueueEnabled();
+
+    /**
      * Returns package name given pid.
      *
      * @param pid The pid we are searching package name for.

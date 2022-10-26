@@ -82,32 +82,46 @@ public class Entry implements Parcelable {
     public static final String EXTRA_ENTRY_AUTHENTICATION_ACTION =
             "android.credentials.ui.extra.ENTRY_AUTHENTICATION_ACTION";
 
-    // TODO: change to string key + string subkey.
-    private final int mId;
+    @NonNull private final String mKey;
+    @NonNull private final String mSubkey;
 
     @NonNull
     private final Slice mSlice;
 
     protected Entry(@NonNull Parcel in) {
-        int entryId = in.readInt();
+        String key = in.readString8();
+        String subkey = in.readString8();
         Slice slice = Slice.CREATOR.createFromParcel(in);
 
-        mId = entryId;
+        mKey = key;
+        AnnotationValidations.validate(NonNull.class, null, mKey);
+        mSubkey = subkey;
+        AnnotationValidations.validate(NonNull.class, null, mSubkey);
         mSlice = slice;
         AnnotationValidations.validate(NonNull.class, null, mSlice);
     }
 
-    public Entry(int id, @NonNull Slice slice) {
-        mId = id;
+    public Entry(@NonNull String key, @NonNull String subkey, @NonNull Slice slice) {
+        mKey = key;
+        mSubkey = subkey;
         mSlice = slice;
     }
 
     /**
-    * Returns the id of this entry that's unique within the context of the CredentialManager
+    * Returns the identifier of this entry that's unique within the context of the CredentialManager
     * request.
     */
-    public int getEntryId() {
-        return mId;
+    @NonNull
+    public String getKey() {
+        return mKey;
+    }
+
+    /**
+     * Returns the sub-identifier of this entry that's unique within the context of the {@code key}.
+     */
+    @NonNull
+    public String getSubkey() {
+        return mSubkey;
     }
 
     /**
@@ -120,7 +134,8 @@ public class Entry implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeInt(mId);
+        dest.writeString8(mKey);
+        dest.writeString8(mSubkey);
         mSlice.writeToParcel(dest, flags);
     }
 

@@ -568,7 +568,6 @@ public class ScanTests {
 
     private static void assertBasicPackageScanResult(
             ScanResult scanResult, String packageName, boolean isInstant) {
-        assertThat(scanResult.mSuccess, is(true));
 
         final PackageSetting pkgSetting = scanResult.mPkgSetting;
         assertBasicPackageSetting(scanResult, packageName, isInstant, pkgSetting);

@@ -49939,10 +49939,13 @@ package android.view {
     method public void clear();
     method public void computeCurrentVelocity(int);
     method public void computeCurrentVelocity(int, float);
+    method public float getAxisVelocity(int, int);
+    method public float getAxisVelocity(int);
     method public float getXVelocity();
     method public float getXVelocity(int);
     method public float getYVelocity();
     method public float getYVelocity(int);
+    method public boolean isAxisSupported(int);
     method public static android.view.VelocityTracker obtain();
     method public void recycle();
   }

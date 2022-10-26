@@ -148,9 +148,18 @@ public final class BroadcastHelper {
                         + intent.toShortString(false, true, false, false)
                         + " " + intent.getExtras(), here);
             }
+            final boolean ordered;
+            if (mAmInternal.isModernQueueEnabled()) {
+                // When the modern broadcast stack is enabled, deliver all our
+                // broadcasts as unordered, since the modern stack has better
+                // support for sequencing cold-starts, and it supports
+                // delivering resultTo for non-ordered broadcasts
+                ordered = false;
+            } else {
+                ordered = (finishedReceiver != null);
+            }
             mAmInternal.broadcastIntent(
-                    intent, finishedReceiver, requiredPermissions,
-                    finishedReceiver != null, userId,
+                    intent, finishedReceiver, requiredPermissions, ordered, userId,
                     broadcastAllowList == null ? null : broadcastAllowList.get(userId),
                     filterExtrasForReceiver, bOptions);
         }

@@ -30,6 +30,91 @@ using android::StringPiece;
 
 namespace aapt {
 
+// This is to detect whether an <intent-filter> contains deeplink.
+// See https://developer.android.com/training/app-links/deep-linking.
+static bool HasDeepLink(xml::Element* intent_filter_el) {
+  xml::Element* action_el = intent_filter_el->FindChild({}, "action");
+  xml::Element* category_el = intent_filter_el->FindChild({}, "category");
+  xml::Element* data_el = intent_filter_el->FindChild({}, "data");
+  if (action_el == nullptr || category_el == nullptr || data_el == nullptr) {
+    return false;
+  }
+
+  // Deeplinks must specify the ACTION_VIEW intent action.
+  constexpr const char* action_view = "android.intent.action.VIEW";
+  if (intent_filter_el->FindChildWithAttribute({}, "action", xml::kSchemaAndroid, "name",
+                                               action_view) == nullptr) {
+    return false;
+  }
+
+  // Deeplinks must have scheme included in <data> tag.
+  xml::Attribute* data_scheme_attr = data_el->FindAttribute(xml::kSchemaAndroid, "scheme");
+  if (data_scheme_attr == nullptr || data_scheme_attr->value.empty()) {
+    return false;
+  }
+
+  // Deeplinks must include BROWSABLE category.
+  constexpr const char* category_browsable = "android.intent.category.BROWSABLE";
+  if (intent_filter_el->FindChildWithAttribute({}, "category", xml::kSchemaAndroid, "name",
+                                               category_browsable) == nullptr) {
+    return false;
+  }
+  return true;
+}
+
+static bool VerifyDeeplinkPathAttribute(xml::Element* data_el, android::SourcePathDiagnostics* diag,
+                                        const std::string& attr_name) {
+  xml::Attribute* attr = data_el->FindAttribute(xml::kSchemaAndroid, attr_name);
+  if (attr != nullptr && !attr->value.empty()) {
+    StringPiece attr_value = attr->value;
+    const char* startChar = attr_value.begin();
+    if (attr_name == "pathPattern") {
+      if (*startChar == '/' || *startChar == '.' || *startChar == '*') {
+        return true;
+      } else {
+        diag->Error(android::DiagMessage(data_el->line_number)
+                    << "attribute 'android:" << attr_name << "' in <" << data_el->name
+                    << "> tag has value of '" << attr_value
+                    << "', it must be in a pattern start with '.' or '*', otherwise must start "
+                       "with a leading slash '/'");
+        return false;
+      }
+    } else {
+      if (*startChar == '/') {
+        return true;
+      } else {
+        diag->Error(android::DiagMessage(data_el->line_number)
+                    << "attribute 'android:" << attr_name << "' in <" << data_el->name
+                    << "> tag has value of '" << attr_value
+                    << "', it must start with a leading slash '/'");
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+static bool VerifyDeepLinkIntentAction(xml::Element* intent_filter_el,
+                                       android::SourcePathDiagnostics* diag) {
+  if (!HasDeepLink(intent_filter_el)) {
+    return true;
+  }
+
+  xml::Element* data_el = intent_filter_el->FindChild({}, "data");
+  if (data_el != nullptr) {
+    if (!VerifyDeeplinkPathAttribute(data_el, diag, "path")) {
+      return false;
+    }
+    if (!VerifyDeeplinkPathAttribute(data_el, diag, "pathPrefix")) {
+      return false;
+    }
+    if (!VerifyDeeplinkPathAttribute(data_el, diag, "pathPattern")) {
+      return false;
+    }
+  }
+  return true;
+}
+
 static bool RequiredNameIsNotEmpty(xml::Element* el, android::SourcePathDiagnostics* diag) {
   xml::Attribute* attr = el->FindAttribute(xml::kSchemaAndroid, "name");
   if (attr == nullptr) {
@@ -323,6 +408,7 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor, android::IDiagn
 
   // Common <intent-filter> actions.
   xml::XmlNodeAction intent_filter_action;
+  intent_filter_action.Action(VerifyDeepLinkIntentAction);
   intent_filter_action["action"].Action(RequiredNameIsNotEmpty);
   intent_filter_action["category"].Action(RequiredNameIsNotEmpty);
   intent_filter_action["data"];

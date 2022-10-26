@@ -35,6 +35,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.android.settingslib.spa.R
 import com.android.settingslib.spa.framework.common.LogCategory
+import com.android.settingslib.spa.framework.common.SettingsPage
 import com.android.settingslib.spa.framework.common.SpaEnvironmentFactory
 import com.android.settingslib.spa.framework.common.createSettingsPage
 import com.android.settingslib.spa.framework.compose.LocalNavController
@@ -44,7 +45,6 @@ import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.framework.util.navRoute
 
 private const val TAG = "BrowseActivity"
-private const val NULL_PAGE_NAME = "NULL"
 
 /**
  * The Activity to render ALL SPA pages, and handles jumps between SPA pages.
@@ -81,9 +81,10 @@ open class BrowseActivity : ComponentActivity() {
     private fun MainContent() {
         val sppRepository by spaEnvironment.pageProviderRepository
         val navController = rememberNavController()
+        val nullPage = SettingsPage.createNull()
         CompositionLocalProvider(navController.localNavController()) {
-            NavHost(navController, NULL_PAGE_NAME) {
-                composable(NULL_PAGE_NAME) {}
+            NavHost(navController, nullPage.sppName) {
+                composable(nullPage.sppName) {}
                 for (spp in sppRepository.getAllProviders()) {
                     composable(
                         route = spp.name + spp.parameter.navRoute(),

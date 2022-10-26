@@ -22,6 +22,9 @@ import android.perftests.utils.PerfStatusReporter;
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.modules.utils.FastDataInput;
+import com.android.modules.utils.FastDataOutput;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -68,7 +71,7 @@ public class FastDataPerfTest {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             os.reset();
-            final FastDataOutput out = FastDataOutput.obtainUsing4ByteSequences(os);
+            final FastDataOutput out = ArtFastDataOutput.obtain(os);
             try {
                 doWrite(out);
                 out.flush();
@@ -84,7 +87,7 @@ public class FastDataPerfTest {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             os.reset();
-            final FastDataOutput out = FastDataOutput.obtainUsing3ByteSequences(os);
+            final FastDataOutput out = FastDataOutput.obtain(os);
             try {
                 doWrite(out);
                 out.flush();
@@ -116,7 +119,7 @@ public class FastDataPerfTest {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             is.reset();
-            final FastDataInput in = FastDataInput.obtainUsing4ByteSequences(is);
+            final FastDataInput in = ArtFastDataInput.obtain(is);
             try {
                 doRead(in);
             } finally {
@@ -131,7 +134,7 @@ public class FastDataPerfTest {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             is.reset();
-            final FastDataInput in = FastDataInput.obtainUsing3ByteSequences(is);
+            final FastDataInput in = FastDataInput.obtain(is);
             try {
                 doRead(in);
             } finally {

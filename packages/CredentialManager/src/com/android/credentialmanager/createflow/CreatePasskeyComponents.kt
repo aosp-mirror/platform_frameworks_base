@@ -39,6 +39,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import com.android.credentialmanager.R
+import com.android.credentialmanager.jetpack.CredentialEntryUi.Companion.TYPE_PASSWORD_CREDENTIAL
+import com.android.credentialmanager.jetpack.CredentialEntryUi.Companion.TYPE_PUBLIC_KEY_CREDENTIAL
 import com.android.credentialmanager.ui.theme.Grey100
 import com.android.credentialmanager.ui.theme.Shapes
 import com.android.credentialmanager.ui.theme.Typography
@@ -61,30 +63,32 @@ fun CreatePasskeyScreen(
       val uiState = viewModel.uiState
       when (uiState.currentScreenState) {
         CreateScreenState.PASSKEY_INTRO -> ConfirmationCard(
-          onConfirm = {viewModel.onConfirmIntro()},
-          onCancel = {viewModel.onCancel()},
+          onConfirm = viewModel::onConfirmIntro,
+          onCancel = viewModel::onCancel,
         )
         CreateScreenState.PROVIDER_SELECTION -> ProviderSelectionCard(
           providerList = uiState.providers,
-          onCancel = {viewModel.onCancel()},
-          onProviderSelected = {viewModel.onProviderSelected(it)}
+          onCancel = viewModel::onCancel,
+          onProviderSelected = viewModel::onProviderSelected
         )
         CreateScreenState.CREATION_OPTION_SELECTION -> CreationSelectionCard(
           requestDisplayInfo = uiState.requestDisplayInfo,
           providerInfo = uiState.activeEntry?.activeProvider!!,
-          onOptionSelected = {viewModel.onPrimaryCreateOptionInfoSelected()},
-          onCancel = {viewModel.onCancel()},
+          createOptionInfo = uiState.activeEntry.activeCreateOptionInfo,
+          onOptionSelected = viewModel::onPrimaryCreateOptionInfoSelected,
+          onConfirm = viewModel::onPrimaryCreateOptionInfoSelected,
+          onCancel = viewModel::onCancel,
           multiProvider = uiState.providers.size > 1,
-          onMoreOptionsSelected = {viewModel.onMoreOptionsSelected()}
+          onMoreOptionsSelected = viewModel::onMoreOptionsSelected
         )
         CreateScreenState.MORE_OPTIONS_SELECTION -> MoreOptionsSelectionCard(
             providerList = uiState.providers,
-            onBackButtonSelected = {viewModel.onBackButtonSelected()},
-            onOptionSelected = {viewModel.onMoreOptionsRowSelected(it)}
+            onBackButtonSelected = viewModel::onBackButtonSelected,
+            onOptionSelected = viewModel::onMoreOptionsRowSelected
           )
         CreateScreenState.MORE_OPTIONS_ROW_INTRO -> MoreOptionsRowIntroCard(
           providerInfo = uiState.activeEntry?.activeProvider!!,
-          onDefaultOrNotSelected = {viewModel.onDefaultOrNotSelected()}
+          onDefaultOrNotSelected = viewModel::onDefaultOrNotSelected
         )
       }
     },
@@ -294,7 +298,7 @@ fun MoreOptionsRowIntroCard(
   ) {
     Column() {
       Text(
-        text = stringResource(R.string.use_provider_for_all_title, providerInfo.name),
+        text = stringResource(R.string.use_provider_for_all_title, providerInfo.displayName),
         style = Typography.subtitle1,
         modifier = Modifier.padding(all = 24.dp).align(alignment = Alignment.CenterHorizontally)
       )
@@ -340,7 +344,7 @@ fun ProviderRow(providerInfo: ProviderInfo, onProviderSelected: (String) -> Unit
     shape = Shapes.large
   ) {
     Text(
-      text = providerInfo.name,
+      text = providerInfo.displayName,
       style = Typography.button,
       modifier = Modifier.padding(vertical = 18.dp)
     )
@@ -392,7 +396,9 @@ fun NavigationButton(
 fun CreationSelectionCard(
   requestDisplayInfo: RequestDisplayInfo,
   providerInfo: ProviderInfo,
+  createOptionInfo: CreateOptionInfo,
   onOptionSelected: () -> Unit,
+  onConfirm: () -> Unit,
   onCancel: () -> Unit,
   multiProvider: Boolean,
   onMoreOptionsSelected: () -> Unit,
@@ -405,21 +411,39 @@ fun CreationSelectionCard(
         bitmap = providerInfo.credentialTypeIcon.toBitmap().asImageBitmap(),
         contentDescription = null,
         tint = Color.Unspecified,
-        modifier = Modifier.align(alignment = Alignment.CenterHorizontally).padding(top = 24.dp)
+        modifier = Modifier.align(alignment = Alignment.CenterHorizontally).padding(all = 24.dp)
       )
       Text(
-        text = "${stringResource(R.string.choose_create_option_title)} ${providerInfo.name}",
+        text = when (requestDisplayInfo.type) {
+          TYPE_PUBLIC_KEY_CREDENTIAL -> stringResource(R.string.choose_create_option_passkey_title,
+            providerInfo.displayName)
+          TYPE_PASSWORD_CREDENTIAL -> stringResource(R.string.choose_create_option_password_title,
+            providerInfo.displayName)
+          else -> stringResource(R.string.choose_create_option_sign_in_title,
+            providerInfo.displayName)
+        },
         style = Typography.subtitle1,
-        modifier = Modifier.padding(all = 24.dp).align(alignment = Alignment.CenterHorizontally)
+        modifier = Modifier.padding(horizontal = 24.dp)
+          .align(alignment = Alignment.CenterHorizontally),
+        textAlign = TextAlign.Center,
       )
       Text(
-        text = providerInfo.appDomainName,
+        text = requestDisplayInfo.appDomainName,
         style = Typography.body2,
-        modifier = Modifier.padding(horizontal = 28.dp)
+        modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
       )
-      Divider(
-        thickness = 24.dp,
-        color = Color.Transparent
+      Text(
+        text = stringResource(
+          R.string.choose_create_option_description,
+          when (requestDisplayInfo.type) {
+            TYPE_PUBLIC_KEY_CREDENTIAL -> "passkeys"
+            TYPE_PASSWORD_CREDENTIAL -> "passwords"
+            else -> "sign-ins"
+          },
+          providerInfo.displayName,
+          createOptionInfo.title),
+        style = Typography.body1,
+        modifier = Modifier.padding(all = 24.dp).align(alignment = Alignment.CenterHorizontally)
       )
       Card(
         shape = Shapes.medium,
@@ -446,48 +470,21 @@ fun CreationSelectionCard(
         color = Color.Transparent
       )
       Row(
-        horizontalArrangement = Arrangement.Start,
+        horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
       ) {
-        CancelButton(stringResource(R.string.string_cancel), onCancel)
+        CancelButton(
+          stringResource(R.string.string_cancel),
+          onclick = onCancel
+        )
+        ConfirmButton(
+          stringResource(R.string.string_continue),
+          onclick = onConfirm
+        )
       }
       Divider(
         thickness = 18.dp,
         color = Color.Transparent,
-        modifier = Modifier.padding(bottom = 16.dp)
-      )
-    }
-  }
-}
-
-@ExperimentalMaterialApi
-@Composable
-fun CreateOptionRow(createOptionInfo: CreateOptionInfo, onOptionSelected: (Int) -> Unit) {
-  Chip(
-    modifier = Modifier.fillMaxWidth(),
-    onClick = {onOptionSelected(createOptionInfo.id)},
-    leadingIcon = {
-      Image(modifier = Modifier.size(24.dp, 24.dp).padding(start = 10.dp),
-        bitmap = createOptionInfo.icon.toBitmap().asImageBitmap(),
-            // painter = painterResource(R.drawable.ic_passkey),
-        // TODO: add description.
-            contentDescription = "")
-    },
-    colors = ChipDefaults.chipColors(
-      backgroundColor = Grey100,
-      leadingIconContentColor = Grey100
-    ),
-    shape = Shapes.large
-  ) {
-    Column() {
-      Text(
-        text = createOptionInfo.title,
-        style = Typography.h6,
-        modifier = Modifier.padding(top = 16.dp)
-      )
-      Text(
-        text = createOptionInfo.subtitle,
-        style = Typography.body2,
         modifier = Modifier.padding(bottom = 16.dp)
       )
     }
@@ -502,7 +499,7 @@ fun PrimaryCreateOptionRow(
 ) {
   Chip(
     modifier = Modifier.fillMaxWidth(),
-    onClick = {onOptionSelected()},
+    onClick = onOptionSelected,
     // TODO: Add an icon generated by provider according to requestDisplayInfo type
     colors = ChipDefaults.chipColors(
       backgroundColor = Grey100,
@@ -550,8 +547,12 @@ fun MoreOptionsInfoRow(
     ) {
         Column() {
             Text(
-                text = if (providerInfo.createOptions.size > 1)
-                {providerInfo.name + " for " + createOptionInfo.title} else { providerInfo.name},
+                text =
+                if (providerInfo.createOptions.size > 1)
+                {stringResource(R.string.more_options_title_multiple_options,
+                  providerInfo.displayName, createOptionInfo.title)} else {
+                  stringResource(R.string.more_options_title_one_option,
+                    providerInfo.displayName)},
                 style = Typography.h6,
                 modifier = Modifier.padding(top = 16.dp)
             )

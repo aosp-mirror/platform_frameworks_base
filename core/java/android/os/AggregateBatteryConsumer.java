@@ -17,9 +17,10 @@
 package android.os;
 
 import android.annotation.NonNull;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.proto.ProtoOutputStream;
+
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;

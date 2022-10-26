@@ -65,12 +65,12 @@ class BackNavigationController {
     // TODO (b/241808055) Find a appropriate time to remove during refactor
     // Execute back animation with legacy transition system. Temporary flag for easier debugging.
     static final boolean ENABLE_SHELL_TRANSITIONS = WindowManagerService.sEnableShellTransitions;
+
     /**
-     * Returns true if the back predictability feature is enabled
+     * true if the back predictability feature is enabled
      */
-    static boolean isEnabled() {
-        return SystemProperties.getInt("persist.wm.debug.predictive_back", 1) != 0;
-    }
+    static final boolean sPredictBackEnable =
+            SystemProperties.getBoolean("persist.wm.debug.predictive_back", true);
 
     static boolean isScreenshotEnabled() {
         return SystemProperties.getInt("persist.wm.debug.predictive_back_screenshot", 0) != 0;
@@ -88,6 +88,9 @@ class BackNavigationController {
     @Nullable
     BackNavigationInfo startBackNavigation(
             IWindowFocusObserver observer, BackAnimationAdapter adapter) {
+        if (!sPredictBackEnable) {
+            return null;
+        }
         final WindowManagerService wmService = mWindowManagerService;
         mFocusObserver = observer;
 

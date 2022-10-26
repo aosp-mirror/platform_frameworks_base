@@ -376,6 +376,16 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                 return;
             }
 
+            // In some cases there may not be a monitor passed in when creating this task. So, if we
+            // don't have one already we ask the transport for a monitor.
+            if (mMonitor == null) {
+                try {
+                    mMonitor = transport.getBackupManagerMonitor();
+                } catch (RemoteException e) {
+                    Slog.i(TAG, "Failed to retrieve monitor from transport");
+                }
+            }
+
             // Set up to send data to the transport
             final int N = mPackages.size();
             final byte[] buffer = new byte[8192];

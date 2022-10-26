@@ -13897,7 +13897,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (DEBUG_BROADCAST_LIGHT) Slog.v(TAG_BROADCAST,
                 (sticky ? "Broadcast sticky: ": "Broadcast: ") + intent
                 + " ordered=" + ordered + " userid=" + userId);
-        if ((resultTo != null) && !ordered) {
+        if ((resultTo != null) && !ordered && !mEnableModernQueue) {
             Slog.w(TAG, "Broadcast " + intent + " not ordered but result callback requested!");
         }
 
@@ -14459,10 +14459,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         filterNonExportedComponents(intent, callingUid, registeredReceivers,
                 mPlatformCompat, callerPackage);
         int NR = registeredReceivers != null ? registeredReceivers.size() : 0;
-        if (!ordered && NR > 0) {
+        if (!ordered && NR > 0 && !mEnableModernQueue) {
             // If we are not serializing this broadcast, then send the
             // registered receivers separately so they don't wait for the
-            // components to be launched.
+            // components to be launched. We don't do this split for the modern
+            // queue because delivery to registered receivers isn't blocked
+            // behind manifest receivers.
             if (isCallerSystem) {
                 checkBroadcastFromSystem(intent, callerApp, callerPackage, callingUid,
                         isProtectedBroadcast, registeredReceivers);
@@ -16893,6 +16895,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         public boolean isSystemReady() {
             // no need to synchronize(this) just to read & return the value
             return mSystemReady;
+        }
+
+        @Override
+        public boolean isModernQueueEnabled() {
+            return mEnableModernQueue;
         }
 
         /**

@@ -26,4 +26,5 @@ interface EntryMacro {
     @Composable
     fun UiLayout() {}
     fun getSearchData(): EntrySearchData? = null
+    fun getStatusData(): EntryStatusData? = null
 }

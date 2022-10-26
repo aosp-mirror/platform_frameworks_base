@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-package com.android.server.pm;
+package com.android.settingslib.spa.framework.compose
 
-import android.annotation.NonNull;
-
-import java.util.Map;
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.receiveAsFlow
 
 /**
- * Package state to commit to memory and disk after reconciliation has completed.
+ * A flow which result is overridable.
  */
-final class CommitRequest {
-    final Map<String, ReconciledPackage> mReconciledPackages;
-    @NonNull final int[] mAllUsers;
+class OverridableFlow<T>(flow: Flow<T>) {
+    private val overrideChannel = Channel<T>()
 
-    CommitRequest(Map<String, ReconciledPackage> reconciledPackages,
-            @NonNull int[] allUsers) {
-        mReconciledPackages = reconciledPackages;
-        mAllUsers = allUsers;
+    val flow = merge(overrideChannel.receiveAsFlow(), flow)
+
+    fun override(value: T) {
+        overrideChannel.trySend(value)
     }
 }

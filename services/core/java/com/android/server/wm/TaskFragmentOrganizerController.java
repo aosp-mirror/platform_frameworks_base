@@ -184,19 +184,30 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         }
 
         void dispose() {
-            while (!mOrganizedTaskFragments.isEmpty()) {
-                final TaskFragment taskFragment = mOrganizedTaskFragments.get(0);
-                // Cleanup before remove to prevent it from sending any additional event, such as
-                // #onTaskFragmentVanished, to the removed organizer.
+            for (int i = mOrganizedTaskFragments.size() - 1; i >= 0; i--) {
+                // Cleanup the TaskFragmentOrganizer from all TaskFragments it organized before
+                // removing the windows to prevent it from adding any additional TaskFragment
+                // pending event.
+                final TaskFragment taskFragment = mOrganizedTaskFragments.get(i);
                 taskFragment.onTaskFragmentOrganizerRemoved();
-                taskFragment.removeImmediately();
-                mOrganizedTaskFragments.remove(taskFragment);
             }
+
+            // Defer to avoid unnecessary layout when there are multiple TaskFragments removal.
+            mAtmService.deferWindowLayout();
+            try {
+                while (!mOrganizedTaskFragments.isEmpty()) {
+                    final TaskFragment taskFragment = mOrganizedTaskFragments.remove(0);
+                    taskFragment.removeImmediately();
+                }
+            } finally {
+                mAtmService.continueWindowLayout();
+            }
+
             for (int i = mDeferredTransitions.size() - 1; i >= 0; i--) {
                 // Cleanup any running transaction to unblock the current transition.
                 onTransactionFinished(mDeferredTransitions.keyAt(i));
             }
-            mOrganizer.asBinder().unlinkToDeath(this, 0 /*flags*/);
+            mOrganizer.asBinder().unlinkToDeath(this, 0 /* flags */);
         }
 
         @NonNull
@@ -426,7 +437,6 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
 
     @Override
     public void unregisterOrganizer(@NonNull ITaskFragmentOrganizer organizer) {
-        validateAndGetState(organizer);
         final int pid = Binder.getCallingPid();
         final long uid = Binder.getCallingUid();
         final long origId = Binder.clearCallingIdentity();
@@ -607,6 +617,13 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             int opType, @NonNull Throwable exception) {
         validateAndGetState(organizer);
         Slog.w(TAG, "onTaskFragmentError ", exception);
+        final PendingTaskFragmentEvent vanishedEvent = taskFragment != null
+                ? getPendingTaskFragmentEvent(taskFragment, PendingTaskFragmentEvent.EVENT_VANISHED)
+                : null;
+        if (vanishedEvent != null) {
+            // No need to notify if the TaskFragment has been removed.
+            return;
+        }
         addPendingEvent(new PendingTaskFragmentEvent.Builder(
                 PendingTaskFragmentEvent.EVENT_ERROR, organizer)
                 .setErrorCallbackToken(errorCallbackToken)
@@ -690,11 +707,17 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
     }
 
     private void removeOrganizer(@NonNull ITaskFragmentOrganizer organizer) {
-        final TaskFragmentOrganizerState state = validateAndGetState(organizer);
+        final TaskFragmentOrganizerState state = mTaskFragmentOrganizerState.get(
+                organizer.asBinder());
+        if (state == null) {
+            Slog.w(TAG, "The organizer has already been removed.");
+            return;
+        }
+        // Remove any pending event of this organizer first because state.dispose() may trigger
+        // event dispatch as result of surface placement.
+        mPendingTaskFragmentEvents.remove(organizer.asBinder());
         // remove all of the children of the organized TaskFragment
         state.dispose();
-        // Remove any pending event of this organizer.
-        mPendingTaskFragmentEvents.remove(organizer.asBinder());
         mTaskFragmentOrganizerState.remove(organizer.asBinder());
     }
 
@@ -878,23 +901,6 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         return null;
     }
 
-    private boolean shouldSendEventWhenTaskInvisible(@NonNull PendingTaskFragmentEvent event) {
-        if (event.mEventType == PendingTaskFragmentEvent.EVENT_ERROR
-                // Always send parent info changed to update task visibility
-                || event.mEventType == PendingTaskFragmentEvent.EVENT_PARENT_INFO_CHANGED) {
-            return true;
-        }
-
-        final TaskFragmentOrganizerState state =
-                mTaskFragmentOrganizerState.get(event.mTaskFragmentOrg.asBinder());
-        final TaskFragmentInfo lastInfo = state.mLastSentTaskFragmentInfos.get(event.mTaskFragment);
-        final TaskFragmentInfo info = event.mTaskFragment.getTaskFragmentInfo();
-        // Send an info changed callback if this event is for the last activities to finish in a
-        // TaskFragment so that the {@link TaskFragmentOrganizer} can delete this TaskFragment.
-        return event.mEventType == PendingTaskFragmentEvent.EVENT_INFO_CHANGED
-                && lastInfo != null && lastInfo.hasRunningActivity() && info.isEmpty();
-    }
-
     void dispatchPendingEvents() {
         if (mAtmService.mWindowManager.mWindowPlacerLocked.isLayoutDeferred()
                 || mPendingTaskFragmentEvents.isEmpty()) {
@@ -908,37 +914,19 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         }
     }
 
-    void dispatchPendingEvents(@NonNull TaskFragmentOrganizerState state,
+    private void dispatchPendingEvents(@NonNull TaskFragmentOrganizerState state,
             @NonNull List<PendingTaskFragmentEvent> pendingEvents) {
         if (pendingEvents.isEmpty()) {
             return;
         }
-
-        final ArrayList<Task> visibleTasks = new ArrayList<>();
-        final ArrayList<Task> invisibleTasks = new ArrayList<>();
-        final ArrayList<PendingTaskFragmentEvent> candidateEvents = new ArrayList<>();
-        for (int i = 0, n = pendingEvents.size(); i < n; i++) {
-            final PendingTaskFragmentEvent event = pendingEvents.get(i);
-            final Task task = event.mTaskFragment != null ? event.mTaskFragment.getTask() : null;
-            // TODO(b/251132298): move visibility check to the client side.
-            if (task != null && (task.lastActiveTime <= event.mDeferTime
-                    || !(isTaskVisible(task, visibleTasks, invisibleTasks)
-                    || shouldSendEventWhenTaskInvisible(event)))) {
-                // Defer sending events to the TaskFragment until the host task is active again.
-                event.mDeferTime = task.lastActiveTime;
-                continue;
-            }
-            candidateEvents.add(event);
-        }
-        final int numEvents = candidateEvents.size();
-        if (numEvents == 0) {
+        if (shouldDeferPendingEvents(state, pendingEvents)) {
             return;
         }
-
         mTmpTaskSet.clear();
+        final int numEvents = pendingEvents.size();
         final TaskFragmentTransaction transaction = new TaskFragmentTransaction();
         for (int i = 0; i < numEvents; i++) {
-            final PendingTaskFragmentEvent event = candidateEvents.get(i);
+            final PendingTaskFragmentEvent event = pendingEvents.get(i);
             if (event.mEventType == PendingTaskFragmentEvent.EVENT_APPEARED
                     || event.mEventType == PendingTaskFragmentEvent.EVENT_INFO_CHANGED) {
                 final Task task = event.mTaskFragment.getTask();
@@ -954,7 +942,47 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         }
         mTmpTaskSet.clear();
         state.dispatchTransaction(transaction);
-        pendingEvents.removeAll(candidateEvents);
+        pendingEvents.clear();
+    }
+
+    /**
+     * Whether or not to defer sending the events to the organizer to avoid waking the app process
+     * when it is in background. We want to either send all events or none to avoid inconsistency.
+     */
+    private boolean shouldDeferPendingEvents(@NonNull TaskFragmentOrganizerState state,
+            @NonNull List<PendingTaskFragmentEvent> pendingEvents) {
+        final ArrayList<Task> visibleTasks = new ArrayList<>();
+        final ArrayList<Task> invisibleTasks = new ArrayList<>();
+        for (int i = 0, n = pendingEvents.size(); i < n; i++) {
+            final PendingTaskFragmentEvent event = pendingEvents.get(i);
+            if (event.mEventType != PendingTaskFragmentEvent.EVENT_PARENT_INFO_CHANGED
+                    && event.mEventType != PendingTaskFragmentEvent.EVENT_INFO_CHANGED
+                    && event.mEventType != PendingTaskFragmentEvent.EVENT_APPEARED) {
+                // Send events for any other types.
+                return false;
+            }
+
+            // Check if we should send the event given the Task visibility and events.
+            final Task task;
+            if (event.mEventType == PendingTaskFragmentEvent.EVENT_PARENT_INFO_CHANGED) {
+                task = event.mTask;
+            } else {
+                task = event.mTaskFragment.getTask();
+            }
+            if (task.lastActiveTime > event.mDeferTime
+                    && isTaskVisible(task, visibleTasks, invisibleTasks)) {
+                // Send events when the app has at least one visible Task.
+                return false;
+            } else if (shouldSendEventWhenTaskInvisible(task, state, event)) {
+                // Sent events even if the Task is invisible.
+                return false;
+            }
+
+            // Defer sending events to the organizer until the host task is active (visible) again.
+            event.mDeferTime = task.lastActiveTime;
+        }
+        // Defer for invisible Task.
+        return true;
     }
 
     private static boolean isTaskVisible(@NonNull Task task,
@@ -973,6 +1001,28 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             knownInvisibleTasks.add(task);
             return false;
         }
+    }
+
+    private boolean shouldSendEventWhenTaskInvisible(@NonNull Task task,
+            @NonNull TaskFragmentOrganizerState state,
+            @NonNull PendingTaskFragmentEvent event) {
+        final TaskFragmentParentInfo lastParentInfo = state.mLastSentTaskFragmentParentInfos
+                .get(task.mTaskId);
+        if (lastParentInfo == null || lastParentInfo.isVisible()) {
+            // When the Task was visible, or when there was no Task info changed sent (in which case
+            // the organizer will consider it as visible by default), always send the event to
+            // update the Task visibility.
+            return true;
+        }
+        if (event.mEventType == PendingTaskFragmentEvent.EVENT_INFO_CHANGED) {
+            // Send info changed if the TaskFragment is becoming empty/non-empty so the
+            // organizer can choose whether or not to remove the TaskFragment.
+            final TaskFragmentInfo lastInfo = state.mLastSentTaskFragmentInfos
+                    .get(event.mTaskFragment);
+            final boolean isEmpty = event.mTaskFragment.getNonFinishingActivityCount() == 0;
+            return lastInfo == null || lastInfo.isEmpty() != isEmpty;
+        }
+        return false;
     }
 
     void dispatchPendingInfoChangedEvent(@NonNull TaskFragment taskFragment) {

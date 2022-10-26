@@ -42,7 +42,7 @@ import android.content.pm.parsing.PackageLite;
 import android.os.Environment;
 import android.os.Trace;
 import android.os.UserHandle;
-import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Pair;
 import android.util.Slog;
 
@@ -60,7 +60,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 class InstallingSession {
     final OriginInfo mOriginInfo;
@@ -599,7 +599,7 @@ class InstallingSession {
      */
     private class MultiPackageInstallingSession {
         private final List<InstallingSession> mChildInstallingSessions;
-        private final Map<InstallRequest, Integer> mCurrentState;
+        private final Set<InstallRequest> mCurrentInstallRequests;
         @NonNull
         final PackageManagerService mPm;
         final UserHandle mUser;
@@ -618,7 +618,7 @@ class InstallingSession {
                 final InstallingSession childInstallingSession = childInstallingSessions.get(i);
                 childInstallingSession.mParentInstallingSession = this;
             }
-            this.mCurrentState = new ArrayMap<>(mChildInstallingSessions.size());
+            mCurrentInstallRequests = new ArraySet<>(mChildInstallingSessions.size());
         }
 
         public void start() {
@@ -636,23 +636,24 @@ class InstallingSession {
         }
 
         public void tryProcessInstallRequest(InstallRequest request) {
-            mCurrentState.put(request, request.getReturnCode());
-            if (mCurrentState.size() != mChildInstallingSessions.size()) {
+            mCurrentInstallRequests.add(request);
+            if (mCurrentInstallRequests.size() != mChildInstallingSessions.size()) {
                 return;
             }
             int completeStatus = PackageManager.INSTALL_SUCCEEDED;
-            for (Integer status : mCurrentState.values()) {
-                if (status == PackageManager.INSTALL_UNKNOWN) {
+            for (InstallRequest installRequest : mCurrentInstallRequests) {
+                if (installRequest.getReturnCode() == PackageManager.INSTALL_UNKNOWN) {
                     return;
-                } else if (status != PackageManager.INSTALL_SUCCEEDED) {
-                    completeStatus = status;
+                } else if (installRequest.getReturnCode() != PackageManager.INSTALL_SUCCEEDED) {
+                    completeStatus = installRequest.getReturnCode();
                     break;
                 }
             }
-            final List<InstallRequest> installRequests = new ArrayList<>(mCurrentState.size());
-            for (Map.Entry<InstallRequest, Integer> entry : mCurrentState.entrySet()) {
-                entry.getKey().setReturnCode(completeStatus);
-                installRequests.add(entry.getKey());
+            final List<InstallRequest> installRequests = new ArrayList<>(
+                    mCurrentInstallRequests.size());
+            for (InstallRequest installRequest : mCurrentInstallRequests) {
+                installRequest.setReturnCode(completeStatus);
+                installRequests.add(installRequest);
             }
             int finalCompleteStatus = completeStatus;
             mPm.mHandler.post(() -> processInstallRequests(

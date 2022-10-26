@@ -54,6 +54,7 @@ import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.anyLong
 import org.mockito.Mockito.eq
 import org.mockito.Mockito.never
+import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.junit.MockitoJUnit
@@ -122,6 +123,21 @@ class AuthContainerViewTest : SysuiTestCase() {
 
         // attaching the view resets the state and allows this to happen again
         verify(callback).onDialogAnimatedIn(authContainer?.requestId ?: 0L)
+    }
+
+    @Test
+    fun testDismissBeforeIntroEnd() {
+        val container = initializeFingerprintContainer()
+        waitForIdleSync()
+
+        // STATE_ANIMATING_IN = 1
+        container?.mContainerState = 1
+
+        container.dismissWithoutCallback(false)
+
+        // the first time is triggered by initializeFingerprintContainer()
+        // the second time was triggered by dismissWithoutCallback()
+        verify(callback, times(2)).onDialogAnimatedIn(authContainer?.requestId ?: 0L)
     }
 
     @Test

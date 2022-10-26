@@ -204,5 +204,4 @@ open class ChipbarCoordinator @Inject constructor(
     }
 }
 
-const val SENDER_TAG = "MediaTapToTransferSender"
 private const val ANIMATION_DURATION = 500L

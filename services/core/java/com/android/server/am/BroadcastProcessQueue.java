@@ -668,17 +668,18 @@ class BroadcastProcessQueue {
                 return;
             }
 
-            // If we have too many broadcasts pending, bypass any delays that
-            // might have been applied above to aid draining
-            if (mPending.size() + mPendingUrgent.size() >= constants.MAX_PENDING_BROADCASTS) {
-                mRunnableAt = runnableAt;
-                mRunnableAtReason = REASON_MAX_PENDING;
-                return;
-            }
-
             if (mCountForeground > 0) {
-                mRunnableAt = runnableAt;
+                mRunnableAt = runnableAt + constants.DELAY_URGENT_MILLIS;
                 mRunnableAtReason = REASON_CONTAINS_FOREGROUND;
+            } else if (mCountInteractive > 0) {
+                mRunnableAt = runnableAt + constants.DELAY_URGENT_MILLIS;
+                mRunnableAtReason = REASON_CONTAINS_INTERACTIVE;
+            } else if (mCountInstrumented > 0) {
+                mRunnableAt = runnableAt + constants.DELAY_URGENT_MILLIS;
+                mRunnableAtReason = REASON_CONTAINS_INSTRUMENTED;
+            } else if (mProcessInstrumented) {
+                mRunnableAt = runnableAt + constants.DELAY_URGENT_MILLIS;
+                mRunnableAtReason = REASON_INSTRUMENTED;
             } else if (mCountOrdered > 0) {
                 mRunnableAt = runnableAt;
                 mRunnableAtReason = REASON_CONTAINS_ORDERED;
@@ -688,24 +689,22 @@ class BroadcastProcessQueue {
             } else if (mCountPrioritized > 0) {
                 mRunnableAt = runnableAt;
                 mRunnableAtReason = REASON_CONTAINS_PRIORITIZED;
-            } else if (mCountInteractive > 0) {
-                mRunnableAt = runnableAt;
-                mRunnableAtReason = REASON_CONTAINS_INTERACTIVE;
             } else if (mCountResultTo > 0) {
                 mRunnableAt = runnableAt;
                 mRunnableAtReason = REASON_CONTAINS_RESULT_TO;
-            } else if (mCountInstrumented > 0) {
-                mRunnableAt = runnableAt;
-                mRunnableAtReason = REASON_CONTAINS_INSTRUMENTED;
-            } else if (mProcessInstrumented) {
-                mRunnableAt = runnableAt;
-                mRunnableAtReason = REASON_INSTRUMENTED;
             } else if (mProcessCached) {
                 mRunnableAt = runnableAt + constants.DELAY_CACHED_MILLIS;
                 mRunnableAtReason = REASON_CACHED;
             } else {
                 mRunnableAt = runnableAt + constants.DELAY_NORMAL_MILLIS;
                 mRunnableAtReason = REASON_NORMAL;
+            }
+
+            // If we have too many broadcasts pending, bypass any delays that
+            // might have been applied above to aid draining
+            if (mPending.size() + mPendingUrgent.size() >= constants.MAX_PENDING_BROADCASTS) {
+                mRunnableAt = runnableAt;
+                mRunnableAtReason = REASON_MAX_PENDING;
             }
         } else {
             mRunnableAt = Long.MAX_VALUE;

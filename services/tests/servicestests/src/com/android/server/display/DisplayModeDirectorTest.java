@@ -1254,7 +1254,8 @@ public class DisplayModeDirectorTest {
         assertThat(appRequestRefreshRate.refreshRateRanges.render.min).isZero();
         assertThat(appRequestRefreshRate.refreshRateRanges.render.max).isPositiveInfinity();
         assertThat(appRequestRefreshRate.disableRefreshRateSwitching).isFalse();
-        assertThat(appRequestRefreshRate.baseModeRefreshRate).isWithin(FLOAT_TOLERANCE).of(60);
+        assertThat(appRequestRefreshRate.appRequestBaseModeRefreshRate)
+                .isWithin(FLOAT_TOLERANCE).of(60);
         assertThat(appRequestRefreshRate.height).isEqualTo(INVALID_SIZE);
         assertThat(appRequestRefreshRate.width).isEqualTo(INVALID_SIZE);
 
@@ -1265,7 +1266,7 @@ public class DisplayModeDirectorTest {
         assertThat(appRequestSize.refreshRateRanges.render.min).isZero();
         assertThat(appRequestSize.refreshRateRanges.render.max).isPositiveInfinity();
         assertThat(appRequestSize.disableRefreshRateSwitching).isFalse();
-        assertThat(appRequestSize.baseModeRefreshRate).isZero();
+        assertThat(appRequestSize.appRequestBaseModeRefreshRate).isZero();
         assertThat(appRequestSize.height).isEqualTo(1000);
         assertThat(appRequestSize.width).isEqualTo(1000);
 
@@ -1283,7 +1284,8 @@ public class DisplayModeDirectorTest {
         assertThat(appRequestRefreshRate.refreshRateRanges.render.min).isZero();
         assertThat(appRequestRefreshRate.refreshRateRanges.render.max).isPositiveInfinity();
         assertThat(appRequestRefreshRate.disableRefreshRateSwitching).isFalse();
-        assertThat(appRequestRefreshRate.baseModeRefreshRate).isWithin(FLOAT_TOLERANCE).of(90);
+        assertThat(appRequestRefreshRate.appRequestBaseModeRefreshRate)
+                .isWithin(FLOAT_TOLERANCE).of(90);
         assertThat(appRequestRefreshRate.height).isEqualTo(INVALID_SIZE);
         assertThat(appRequestRefreshRate.width).isEqualTo(INVALID_SIZE);
 
@@ -1458,7 +1460,8 @@ public class DisplayModeDirectorTest {
         assertThat(appRequestRefreshRate.refreshRateRanges.render.min).isZero();
         assertThat(appRequestRefreshRate.refreshRateRanges.render.max).isPositiveInfinity();
         assertThat(appRequestRefreshRate.disableRefreshRateSwitching).isFalse();
-        assertThat(appRequestRefreshRate.baseModeRefreshRate).isWithin(FLOAT_TOLERANCE).of(60);
+        assertThat(appRequestRefreshRate.appRequestBaseModeRefreshRate)
+                .isWithin(FLOAT_TOLERANCE).of(60);
         assertThat(appRequestRefreshRate.height).isEqualTo(INVALID_SIZE);
         assertThat(appRequestRefreshRate.width).isEqualTo(INVALID_SIZE);
 

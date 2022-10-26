@@ -27,6 +27,8 @@ import com.android.settingslib.spa.framework.util.isRuntimeParam
 import com.android.settingslib.spa.framework.util.navLink
 import com.android.settingslib.spa.framework.util.normalize
 
+private const val NULL_PAGE_NAME = "NULL"
+
 /**
  * Defines data to identify a Settings page.
  */
@@ -47,6 +49,10 @@ data class SettingsPage(
     val arguments: Bundle? = null,
 ) {
     companion object {
+        fun createNull(): SettingsPage {
+            return create(NULL_PAGE_NAME)
+        }
+
         fun create(
             name: String,
             displayName: String? = null,
@@ -78,16 +84,6 @@ data class SettingsPage(
         return sppName == SppName
     }
 
-    fun formatArguments(): String {
-        val normArguments = parameter.normalize(arguments)
-        if (normArguments == null || normArguments.isEmpty) return "[No arguments]"
-        return normArguments.toString().removeRange(0, 6)
-    }
-
-    fun formatDisplayTitle(): String {
-        return "$displayName ${formatArguments()}"
-    }
-
     fun buildRoute(): String {
         return sppName + parameter.navLink(arguments)
     }
@@ -99,12 +95,17 @@ data class SettingsPage(
         return false
     }
 
+    fun getTitle(): String? {
+        val sppRepository by SpaEnvironmentFactory.instance.pageProviderRepository
+        return sppRepository.getProviderOrNull(sppName)?.getTitle(arguments)
+    }
+
     fun enterPage() {
         SpaEnvironmentFactory.instance.logger.event(
             id,
             LogEvent.PAGE_ENTER,
             category = LogCategory.FRAMEWORK,
-            details = formatDisplayTitle()
+            details = displayName,
         )
     }
 
@@ -113,7 +114,7 @@ data class SettingsPage(
             id,
             LogEvent.PAGE_LEAVE,
             category = LogCategory.FRAMEWORK,
-            details = formatDisplayTitle()
+            details = displayName,
         )
     }
 
@@ -149,6 +150,7 @@ data class SettingsPage(
     fun isBrowsable(context: Context?, browseActivityClass: Class<out Activity>?): Boolean {
         return context != null &&
             browseActivityClass != null &&
+            !isCreateBy(NULL_PAGE_NAME) &&
             !hasRuntimeParam()
     }
 }

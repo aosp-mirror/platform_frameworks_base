@@ -146,8 +146,6 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseArrayMap;
 import android.util.TimeUtils;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 import android.util.proto.ProtoOutputStream;
 
@@ -157,6 +155,8 @@ import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.function.TriConsumer;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.AppStateTracker;
 import com.android.server.LocalServices;
 import com.android.server.SystemConfig;

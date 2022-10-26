@@ -422,15 +422,18 @@ public final class SharedLibrariesImpl implements SharedLibrariesRead, Watchable
      * Given a package scanned result of a static shared library, returns its package setting of
      * the latest version
      *
-     * @param scanResult The scanned result of a static shared library package.
+     * @param installRequest The install result of a static shared library package.
      * @return The package setting that represents the latest version of shared library info.
      */
     @Nullable
-    PackageSetting getStaticSharedLibLatestVersionSetting(@NonNull ScanResult scanResult) {
+    PackageSetting getStaticSharedLibLatestVersionSetting(@NonNull InstallRequest installRequest) {
+        if (installRequest.getParsedPackage() == null) {
+            return null;
+        }
         PackageSetting sharedLibPackage = null;
         synchronized (mPm.mLock) {
             final SharedLibraryInfo latestSharedLibraVersionLPr =
-                    getLatestStaticSharedLibraVersionLPr(scanResult.mRequest.mParsedPackage);
+                    getLatestStaticSharedLibraVersionLPr(installRequest.getParsedPackage());
             if (latestSharedLibraVersionLPr != null) {
                 sharedLibPackage = mPm.mSettings.getPackageLPr(
                         latestSharedLibraVersionLPr.getPackageName());
@@ -823,34 +826,35 @@ public final class SharedLibrariesImpl implements SharedLibrariesRead, Watchable
      * Compare the newly scanned package with current system state to see which of its declared
      * shared libraries should be allowed to be added to the system.
      */
-    List<SharedLibraryInfo> getAllowedSharedLibInfos(ScanResult scanResult) {
+    List<SharedLibraryInfo> getAllowedSharedLibInfos(InstallRequest installRequest) {
         // Let's used the parsed package as scanResult.pkgSetting may be null
-        final ParsedPackage parsedPackage = scanResult.mRequest.mParsedPackage;
-        if (scanResult.mSdkSharedLibraryInfo == null && scanResult.mStaticSharedLibraryInfo == null
-                && scanResult.mDynamicSharedLibraryInfos == null) {
+        final ParsedPackage parsedPackage = installRequest.getParsedPackage();
+        if (installRequest.getSdkSharedLibraryInfo() == null
+                && installRequest.getStaticSharedLibraryInfo() == null
+                && installRequest.getDynamicSharedLibraryInfos() == null) {
             return null;
         }
 
         // Any app can add new SDKs and static shared libraries.
-        if (scanResult.mSdkSharedLibraryInfo != null) {
-            return Collections.singletonList(scanResult.mSdkSharedLibraryInfo);
+        if (installRequest.getSdkSharedLibraryInfo() != null) {
+            return Collections.singletonList(installRequest.getSdkSharedLibraryInfo());
         }
-        if (scanResult.mStaticSharedLibraryInfo != null) {
-            return Collections.singletonList(scanResult.mStaticSharedLibraryInfo);
+        if (installRequest.getStaticSharedLibraryInfo() != null) {
+            return Collections.singletonList(installRequest.getStaticSharedLibraryInfo());
         }
-        final boolean hasDynamicLibraries = parsedPackage.isSystem()
-                && scanResult.mDynamicSharedLibraryInfos != null;
+        final boolean hasDynamicLibraries = parsedPackage != null && parsedPackage.isSystem()
+                && installRequest.getDynamicSharedLibraryInfos() != null;
         if (!hasDynamicLibraries) {
             return null;
         }
-        final boolean isUpdatedSystemApp = scanResult.mPkgSetting.getPkgState()
-                .isUpdatedSystemApp();
+        final boolean isUpdatedSystemApp = installRequest.getScannedPackageSetting() != null
+                && installRequest.getScannedPackageSetting().getPkgState().isUpdatedSystemApp();
         // We may not yet have disabled the updated package yet, so be sure to grab the
         // current setting if that's the case.
         final PackageSetting updatedSystemPs = isUpdatedSystemApp
-                ? scanResult.mRequest.mDisabledPkgSetting == null
-                ? scanResult.mRequest.mOldPkgSetting
-                : scanResult.mRequest.mDisabledPkgSetting
+                ? installRequest.getDisabledPackageSetting() == null
+                ? installRequest.getScanRequestOldPackageSetting()
+                : installRequest.getDisabledPackageSetting()
                 : null;
         if (isUpdatedSystemApp && (updatedSystemPs.getPkg() == null
                 || updatedSystemPs.getPkg().getLibraryNames() == null)) {
@@ -859,8 +863,8 @@ public final class SharedLibrariesImpl implements SharedLibrariesRead, Watchable
             return null;
         }
         final ArrayList<SharedLibraryInfo> infos =
-                new ArrayList<>(scanResult.mDynamicSharedLibraryInfos.size());
-        for (SharedLibraryInfo info : scanResult.mDynamicSharedLibraryInfos) {
+                new ArrayList<>(installRequest.getDynamicSharedLibraryInfos().size());
+        for (SharedLibraryInfo info : installRequest.getDynamicSharedLibraryInfos()) {
             final String name = info.getName();
             if (isUpdatedSystemApp) {
                 // New library entries can only be added through the

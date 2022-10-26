@@ -40,7 +40,6 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
@@ -214,6 +213,7 @@ internal fun Pager(
             horizontalAlignment = horizontalAlignment,
             reverseLayout = reverseLayout,
             contentPadding = contentPadding,
+            userScrollEnabled = false,
             modifier = modifier,
         ) {
             items(
@@ -241,6 +241,7 @@ internal fun Pager(
             horizontalArrangement = Arrangement.spacedBy(itemSpacing, horizontalAlignment),
             reverseLayout = reverseLayout,
             contentPadding = contentPadding,
+            userScrollEnabled = false,
             modifier = modifier,
         ) {
             items(

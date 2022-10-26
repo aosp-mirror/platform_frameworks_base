@@ -153,6 +153,11 @@ static jboolean android_view_VelocityTracker_nativeGetEstimator(JNIEnv* env, jcl
     return result;
 }
 
+static jboolean android_view_VelocityTracker_nativeIsAxisSupported(JNIEnv* env, jclass clazz,
+                                                                   jint axis) {
+    return VelocityTracker::isAxisSupported(axis);
+}
+
 // --- JNI Registration ---
 
 static const JNINativeMethod gVelocityTrackerMethods[] = {
@@ -167,6 +172,8 @@ static const JNINativeMethod gVelocityTrackerMethods[] = {
         {"nativeGetVelocity", "(JII)F", (void*)android_view_VelocityTracker_nativeGetVelocity},
         {"nativeGetEstimator", "(JIILandroid/view/VelocityTracker$Estimator;)Z",
          (void*)android_view_VelocityTracker_nativeGetEstimator},
+        {"nativeIsAxisSupported", "(I)Z",
+         (void*)android_view_VelocityTracker_nativeIsAxisSupported},
 };
 
 int register_android_view_VelocityTracker(JNIEnv* env) {

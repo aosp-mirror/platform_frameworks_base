@@ -239,8 +239,7 @@ class WallpaperController {
 
     private boolean isBackNavigationTarget(WindowState w) {
         // The window is in animating by back navigation and set to show wallpaper.
-        final BackNavigationController controller = mService.mAtmService.mBackNavigationController;
-        return controller != null && controller.isWallpaperVisible(w);
+        return mService.mAtmService.mBackNavigationController.isWallpaperVisible(w);
     }
 
     /**
@@ -831,9 +830,7 @@ class WallpaperController {
 
             // If there was a pending back navigation animation that would show wallpaper, start
             // the animation due to it was skipped in previous surface placement.
-            if (mService.mAtmService.mBackNavigationController != null) {
-                mService.mAtmService.mBackNavigationController.startAnimation();
-            }
+            mService.mAtmService.mBackNavigationController.startAnimation();
             return true;
         }
         return false;
