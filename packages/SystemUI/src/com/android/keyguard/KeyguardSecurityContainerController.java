@@ -59,6 +59,7 @@ import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.Gefingerpoken;
 import com.android.systemui.R;
 import com.android.systemui.biometrics.SidefpsController;
+import com.android.systemui.classifier.FalsingA11yDelegate;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
@@ -100,6 +101,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     private final FeatureFlags mFeatureFlags;
     private final SessionTracker mSessionTracker;
     private final Optional<SidefpsController> mSidefpsController;
+    private final FalsingA11yDelegate mFalsingA11yDelegate;
 
     private int mLastOrientation = Configuration.ORIENTATION_UNDEFINED;
 
@@ -288,7 +290,8 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             FeatureFlags featureFlags,
             GlobalSettings globalSettings,
             SessionTracker sessionTracker,
-            Optional<SidefpsController> sidefpsController) {
+            Optional<SidefpsController> sidefpsController,
+            FalsingA11yDelegate falsingA11yDelegate) {
         super(view);
         mLockPatternUtils = lockPatternUtils;
         mUpdateMonitor = keyguardUpdateMonitor;
@@ -309,6 +312,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         mGlobalSettings = globalSettings;
         mSessionTracker = sessionTracker;
         mSidefpsController = sidefpsController;
+        mFalsingA11yDelegate = falsingA11yDelegate;
     }
 
     @Override
@@ -625,7 +629,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
 
         mView.initMode(mode, mGlobalSettings, mFalsingManager, mUserSwitcherController,
                 () -> showMessage(getContext().getString(R.string.keyguard_unlock_to_continue),
-                        null));
+                        null), mFalsingA11yDelegate);
     }
 
     public void reportFailedUnlockAttempt(int userId, int timeoutMs) {
@@ -730,6 +734,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         private final UserSwitcherController mUserSwitcherController;
         private final SessionTracker mSessionTracker;
         private final Optional<SidefpsController> mSidefpsController;
+        private final FalsingA11yDelegate mFalsingA11yDelegate;
 
         @Inject
         Factory(KeyguardSecurityContainer view,
@@ -749,7 +754,8 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                 FeatureFlags featureFlags,
                 GlobalSettings globalSettings,
                 SessionTracker sessionTracker,
-                Optional<SidefpsController> sidefpsController) {
+                Optional<SidefpsController> sidefpsController,
+                FalsingA11yDelegate falsingA11yDelegate) {
             mView = view;
             mAdminSecondaryLockScreenControllerFactory = adminSecondaryLockScreenControllerFactory;
             mLockPatternUtils = lockPatternUtils;
@@ -767,6 +773,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             mUserSwitcherController = userSwitcherController;
             mSessionTracker = sessionTracker;
             mSidefpsController = sidefpsController;
+            mFalsingA11yDelegate = falsingA11yDelegate;
         }
 
         public KeyguardSecurityContainerController create(
@@ -777,7 +784,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                     mKeyguardStateController, securityCallback, mSecurityViewFlipperController,
                     mConfigurationController, mFalsingCollector, mFalsingManager,
                     mUserSwitcherController, mFeatureFlags, mGlobalSettings, mSessionTracker,
-                    mSidefpsController);
+                    mSidefpsController, mFalsingA11yDelegate);
         }
     }
 }
