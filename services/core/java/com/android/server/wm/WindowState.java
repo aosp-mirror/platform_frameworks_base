@@ -1842,8 +1842,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * @return {@code true} if one or more windows have been displayed, else false.
      */
     boolean hasAppShownWindows() {
-        return mActivityRecord != null
-                && (mActivityRecord.firstWindowDrawn || mActivityRecord.startingDisplayed);
+        return mActivityRecord != null && (mActivityRecord.firstWindowDrawn
+                || mActivityRecord.isStartingWindowDisplayed());
     }
 
     @Override
