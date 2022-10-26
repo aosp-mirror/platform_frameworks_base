@@ -20,16 +20,17 @@ import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
 import android.test.suitebuilder.annotation.LargeTest;
 
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
 
 import java.util.Arrays;
 import java.util.Collection;
 
-@RunWith(Parameterized.class)
+@RunWith(JUnitParamsRunner.class)
 @LargeTest
 public class StringReplacePerfTest {
     @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
@@ -64,8 +65,7 @@ public class StringReplacePerfTest {
         return stringBuilder.toString();
     }
 
-    @Parameters(name = "mStringLengths={0}")
-    public static Collection<Object[]> data() {
+    public static Collection<Object[]> getData() {
         return Arrays.asList(
                 new Object[][] {
                     {StringLengths.EMPTY},
@@ -76,54 +76,57 @@ public class StringReplacePerfTest {
                 });
     }
 
-    @Parameterized.Parameter(0)
-    public StringLengths mStringLengths;
-
     @Test
-    public void timeReplaceCharNonExistent() {
+    @Parameters(method = "getData")
+    public void timeReplaceCharNonExistent(StringLengths stringLengths) {
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
-            mStringLengths.mValue.replace('z', '0');
+            stringLengths.mValue.replace('z', '0');
         }
     }
 
     @Test
-    public void timeReplaceCharRepeated() {
+    @Parameters(method = "getData")
+    public void timeReplaceCharRepeated(StringLengths stringLengths) {
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
-            mStringLengths.mValue.replace('a', '0');
+            stringLengths.mValue.replace('a', '0');
         }
     }
 
     @Test
-    public void timeReplaceSingleChar() {
+    @Parameters(method = "getData")
+    public void timeReplaceSingleChar(StringLengths stringLengths) {
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
-            mStringLengths.mValue.replace('q', '0');
+            stringLengths.mValue.replace('q', '0');
         }
     }
 
     @Test
-    public void timeReplaceSequenceNonExistent() {
+    @Parameters(method = "getData")
+    public void timeReplaceSequenceNonExistent(StringLengths stringLengths) {
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
-            mStringLengths.mValue.replace("fish", "0");
+            stringLengths.mValue.replace("fish", "0");
         }
     }
 
     @Test
-    public void timeReplaceSequenceRepeated() {
+    @Parameters(method = "getData")
+    public void timeReplaceSequenceRepeated(StringLengths stringLengths) {
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
-            mStringLengths.mValue.replace("jklm", "0");
+            stringLengths.mValue.replace("jklm", "0");
         }
     }
 
     @Test
-    public void timeReplaceSingleSequence() {
+    @Parameters(method = "getData")
+    public void timeReplaceSingleSequence(StringLengths stringLengths) {
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
-            mStringLengths.mValue.replace("qrst", "0");
+            stringLengths.mValue.replace("qrst", "0");
         }
     }
 }
