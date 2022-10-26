@@ -26,7 +26,6 @@ import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
 import com.android.systemui.util.CarrierConfigTracker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -35,6 +34,9 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 
 interface MobileIconInteractor {
+    /** Only true if mobile is the default transport but is not validated, otherwise false */
+    val isDefaultConnectionFailed: StateFlow<Boolean>
+
     // TODO(b/256839546): clarify naming of default vs active
     /** True if we want to consider the data connection enabled */
     val isDefaultDataEnabled: StateFlow<Boolean>
@@ -63,6 +65,7 @@ class MobileIconInteractorImpl(
     defaultSubscriptionHasDataEnabled: StateFlow<Boolean>,
     defaultMobileIconMapping: StateFlow<Map<String, MobileIconGroup>>,
     defaultMobileIconGroup: StateFlow<MobileIconGroup>,
+    override val isDefaultConnectionFailed: StateFlow<Boolean>,
     mobileMappingsProxy: MobileMappingsProxy,
     connectionRepository: MobileConnectionRepository,
 ) : MobileIconInteractor {

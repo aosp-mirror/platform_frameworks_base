@@ -66,10 +66,12 @@ constructor(
 
     /** The RAT icon (LTE, 3G, 5G, etc) to be displayed. Null if we shouldn't show anything */
     val networkTypeIcon: Flow<Icon?> =
-        combine(iconInteractor.networkTypeIconGroup, iconInteractor.isDataEnabled) {
-            networkTypeIconGroup,
-            isDataEnabled ->
-            if (!isDataEnabled) {
+        combine(
+            iconInteractor.networkTypeIconGroup,
+            iconInteractor.isDataEnabled,
+            iconInteractor.isDefaultConnectionFailed
+        ) { networkTypeIconGroup, isDataEnabled, isFailedConnection ->
+            if (!isDataEnabled || isFailedConnection) {
                 null
             } else {
                 val desc =

@@ -17,6 +17,11 @@
 package com.android.systemui.statusbar.pipeline.mobile.data.repository
 
 import android.content.Intent
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED
+import android.net.NetworkCapabilities.TRANSPORT_CELLULAR
 import android.provider.Settings
 import android.telephony.SubscriptionInfo
 import android.telephony.SubscriptionManager
@@ -26,6 +31,7 @@ import android.telephony.TelephonyManager
 import androidx.test.filters.SmallTest
 import com.android.internal.telephony.PhoneConstants
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectivityModel
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
@@ -54,6 +60,7 @@ import org.mockito.MockitoAnnotations
 class MobileConnectionsRepositoryTest : SysuiTestCase() {
     private lateinit var underTest: MobileConnectionsRepositoryImpl
 
+    @Mock private lateinit var connectivityManager: ConnectivityManager
     @Mock private lateinit var subscriptionManager: SubscriptionManager
     @Mock private lateinit var telephonyManager: TelephonyManager
     @Mock private lateinit var logger: ConnectivityPipelineLogger
@@ -67,6 +74,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
 
         underTest =
             MobileConnectionsRepositoryImpl(
+                connectivityManager,
                 subscriptionManager,
                 telephonyManager,
                 logger,
@@ -236,6 +244,29 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
+    fun mobileConnectivity_default() {
+        assertThat(underTest.defaultMobileNetworkConnectivity.value)
+            .isEqualTo(MobileConnectivityModel(isConnected = false, isValidated = false))
+    }
+
+    @Test
+    fun mobileConnectivity_isConnected_isValidated() =
+        runBlocking(IMMEDIATE) {
+            val caps = createCapabilities(connected = true, validated = true)
+
+            var latest: MobileConnectivityModel? = null
+            val job =
+                underTest.defaultMobileNetworkConnectivity.onEach { latest = it }.launchIn(this)
+
+            getDefaultNetworkCallback().onCapabilitiesChanged(NETWORK, caps)
+
+            assertThat(latest)
+                .isEqualTo(MobileConnectivityModel(isConnected = true, isValidated = true))
+
+            job.cancel()
+        }
+
+    @Test
     fun globalMobileDataSettingsChangedEvent_producesOnSettingChange() =
         runBlocking(IMMEDIATE) {
             var produced = false
@@ -252,6 +283,69 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
 
             job.cancel()
         }
+
+    @Test
+    fun mobileConnectivity_isConnected_isNotValidated() =
+        runBlocking(IMMEDIATE) {
+            val caps = createCapabilities(connected = true, validated = false)
+
+            var latest: MobileConnectivityModel? = null
+            val job =
+                underTest.defaultMobileNetworkConnectivity.onEach { latest = it }.launchIn(this)
+
+            getDefaultNetworkCallback().onCapabilitiesChanged(NETWORK, caps)
+
+            assertThat(latest)
+                .isEqualTo(MobileConnectivityModel(isConnected = true, isValidated = false))
+
+            job.cancel()
+        }
+
+    @Test
+    fun mobileConnectivity_isNotConnected_isNotValidated() =
+        runBlocking(IMMEDIATE) {
+            val caps = createCapabilities(connected = false, validated = false)
+
+            var latest: MobileConnectivityModel? = null
+            val job =
+                underTest.defaultMobileNetworkConnectivity.onEach { latest = it }.launchIn(this)
+
+            getDefaultNetworkCallback().onCapabilitiesChanged(NETWORK, caps)
+
+            assertThat(latest)
+                .isEqualTo(MobileConnectivityModel(isConnected = false, isValidated = false))
+
+            job.cancel()
+        }
+
+    /** In practice, I don't think this state can ever happen (!connected, validated) */
+    @Test
+    fun mobileConnectivity_isNotConnected_isValidated() =
+        runBlocking(IMMEDIATE) {
+            val caps = createCapabilities(connected = false, validated = true)
+
+            var latest: MobileConnectivityModel? = null
+            val job =
+                underTest.defaultMobileNetworkConnectivity.onEach { latest = it }.launchIn(this)
+
+            getDefaultNetworkCallback().onCapabilitiesChanged(NETWORK, caps)
+
+            assertThat(latest).isEqualTo(MobileConnectivityModel(false, true))
+
+            job.cancel()
+        }
+
+    private fun createCapabilities(connected: Boolean, validated: Boolean): NetworkCapabilities =
+        mock<NetworkCapabilities>().also {
+            whenever(it.hasTransport(TRANSPORT_CELLULAR)).thenReturn(connected)
+            whenever(it.hasCapability(NET_CAPABILITY_VALIDATED)).thenReturn(validated)
+        }
+
+    private fun getDefaultNetworkCallback(): ConnectivityManager.NetworkCallback {
+        val callbackCaptor = argumentCaptor<ConnectivityManager.NetworkCallback>()
+        verify(connectivityManager).registerDefaultNetworkCallback(callbackCaptor.capture())
+        return callbackCaptor.value!!
+    }
 
     private fun getSubscriptionCallback(): SubscriptionManager.OnSubscriptionsChangedListener {
         val callbackCaptor = argumentCaptor<SubscriptionManager.OnSubscriptionsChangedListener>()
@@ -281,5 +375,8 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
         private const val SUB_2_ID = 2
         private val SUB_2 =
             mock<SubscriptionInfo>().also { whenever(it.subscriptionId).thenReturn(SUB_2_ID) }
+
+        private const val NET_ID = 123
+        private val NETWORK = mock<Network>().apply { whenever(getNetId()).thenReturn(NET_ID) }
     }
 }

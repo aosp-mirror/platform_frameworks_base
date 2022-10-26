@@ -60,6 +60,8 @@ interface MobileIconsInteractor {
     val defaultMobileIconMapping: StateFlow<Map<String, MobileIconGroup>>
     /** Fallback [MobileIconGroup] in the case where there is no icon in the mapping */
     val defaultMobileIconGroup: StateFlow<MobileIconGroup>
+    /** True only if the default network is mobile, and validation also failed */
+    val isDefaultConnectionFailed: StateFlow<Boolean>
     /** True once the user has been set up */
     val isUserSetup: StateFlow<Boolean>
     /**
@@ -162,6 +164,21 @@ constructor(
             .mapLatest { mobileMappingsProxy.getDefaultIcons(it) }
             .stateIn(scope, SharingStarted.WhileSubscribed(), initialValue = TelephonyIcons.G)
 
+    /**
+     * We want to show an error state when cellular has actually failed to validate, but not if some
+     * other transport type is active, because then we expect there not to be validation.
+     */
+    override val isDefaultConnectionFailed: StateFlow<Boolean> =
+        mobileConnectionsRepo.defaultMobileNetworkConnectivity
+            .mapLatest { connectivityModel ->
+                if (!connectivityModel.isConnected) {
+                    false
+                } else {
+                    !connectivityModel.isValidated
+                }
+            }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), false)
+
     override val isUserSetup: StateFlow<Boolean> = userSetupRepo.isUserSetupFlow
 
     /** Vends out new [MobileIconInteractor] for a particular subId */
@@ -171,6 +188,7 @@ constructor(
             activeDataConnectionHasDataEnabled,
             defaultMobileIconMapping,
             defaultMobileIconGroup,
+            isDefaultConnectionFailed,
             mobileMappingsProxy,
             mobileConnectionsRepo.getRepoForSubId(subId),
         )

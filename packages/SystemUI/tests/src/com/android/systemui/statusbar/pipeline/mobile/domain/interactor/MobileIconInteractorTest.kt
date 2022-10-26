@@ -60,6 +60,7 @@ class MobileIconInteractorTest : SysuiTestCase() {
                 mobileIconsInteractor.activeDataConnectionHasDataEnabled,
                 mobileIconsInteractor.defaultMobileIconMapping,
                 mobileIconsInteractor.defaultMobileIconGroup,
+                mobileIconsInteractor.isDefaultConnectionFailed,
                 mobileMappingsProxy,
                 connectionRepository,
             )
@@ -212,6 +213,20 @@ class MobileIconInteractorTest : SysuiTestCase() {
 
             mobileIconsInteractor.activeDataConnectionHasDataEnabled.value = false
             assertThat(latest).isFalse()
+
+            job.cancel()
+        }
+
+    @Test
+    fun test_isDefaultConnectionFailed_matchedParent() =
+        runBlocking(IMMEDIATE) {
+            val job = underTest.isDefaultConnectionFailed.launchIn(this)
+
+            mobileIconsInteractor.isDefaultConnectionFailed.value = false
+            assertThat(underTest.isDefaultConnectionFailed.value).isFalse()
+
+            mobileIconsInteractor.isDefaultConnectionFailed.value = true
+            assertThat(underTest.isDefaultConnectionFailed.value).isTrue()
 
             job.cancel()
         }

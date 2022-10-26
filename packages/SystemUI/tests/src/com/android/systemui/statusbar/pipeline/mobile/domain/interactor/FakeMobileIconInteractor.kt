@@ -28,6 +28,9 @@ class FakeMobileIconInteractor : MobileIconInteractor {
     private val _isEmergencyOnly = MutableStateFlow(false)
     override val isEmergencyOnly = _isEmergencyOnly
 
+    private val _isFailedConnection = MutableStateFlow(false)
+    override val isDefaultConnectionFailed = _isFailedConnection
+
     private val _isDataEnabled = MutableStateFlow(true)
     override val isDataEnabled = _isDataEnabled
 
@@ -54,6 +57,10 @@ class FakeMobileIconInteractor : MobileIconInteractor {
 
     fun setIsDefaultDataEnabled(disabled: Boolean) {
         _isDefaultDataEnabled.value = disabled
+    }
+
+    fun setIsFailedConnection(failed: Boolean) {
+        _isFailedConnection.value = failed
     }
 
     fun setLevel(level: Int) {

@@ -45,6 +45,8 @@ class FakeMobileIconsInteractor(mobileMappings: MobileMappingsProxy) : MobileIco
             FIVE_G_OVERRIDE_KEY to TelephonyIcons.NR_5G,
         )
 
+    override val isDefaultConnectionFailed = MutableStateFlow(false)
+
     private val _filteredSubscriptions = MutableStateFlow<List<SubscriptionInfo>>(listOf())
     override val filteredSubscriptions = _filteredSubscriptions
 

@@ -16,9 +16,16 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.data.repository
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.IntentFilter
 import android.database.ContentObserver
+import android.net.ConnectivityManager
+import android.net.ConnectivityManager.NetworkCallback
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED
+import android.net.NetworkCapabilities.TRANSPORT_CELLULAR
 import android.provider.Settings
 import android.provider.Settings.Global.MOBILE_DATA
 import android.telephony.CarrierConfigManager
@@ -37,6 +44,7 @@ import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCall
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectivityModel
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.util.settings.GlobalSettings
 import javax.inject.Inject
@@ -73,6 +81,9 @@ interface MobileConnectionsRepository {
     /** Tracks [SubscriptionManager.getDefaultDataSubscriptionId] */
     val defaultDataSubId: StateFlow<Int>
 
+    /** The current connectivity status for the default mobile network connection */
+    val defaultMobileNetworkConnectivity: StateFlow<MobileConnectivityModel>
+
     /** Get or create a repository for the line of service for the given subscription ID */
     fun getRepoForSubId(subId: Int): MobileConnectionRepository
 
@@ -86,6 +97,7 @@ interface MobileConnectionsRepository {
 class MobileConnectionsRepositoryImpl
 @Inject
 constructor(
+    private val connectivityManager: ConnectivityManager,
     private val subscriptionManager: SubscriptionManager,
     private val telephonyManager: TelephonyManager,
     private val logger: ConnectivityPipelineLogger,
@@ -211,6 +223,36 @@ constructor(
 
         awaitClose { context.contentResolver.unregisterContentObserver(observer) }
     }
+
+    @SuppressLint("MissingPermission")
+    override val defaultMobileNetworkConnectivity: StateFlow<MobileConnectivityModel> =
+        conflatedCallbackFlow {
+                val callback =
+                    object : NetworkCallback(FLAG_INCLUDE_LOCATION_INFO) {
+                        override fun onLost(network: Network) {
+                            // Send a disconnected model when lost. Maybe should create a sealed
+                            // type or null here?
+                            trySend(MobileConnectivityModel())
+                        }
+
+                        override fun onCapabilitiesChanged(
+                            network: Network,
+                            caps: NetworkCapabilities
+                        ) {
+                            trySend(
+                                MobileConnectivityModel(
+                                    isConnected = caps.hasTransport(TRANSPORT_CELLULAR),
+                                    isValidated = caps.hasCapability(NET_CAPABILITY_VALIDATED),
+                                )
+                            )
+                        }
+                    }
+
+                connectivityManager.registerDefaultNetworkCallback(callback)
+
+                awaitClose { connectivityManager.unregisterNetworkCallback(callback) }
+            }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), MobileConnectivityModel())
 
     private fun isValidSubId(subId: Int): Boolean {
         subscriptionsFlow.value.forEach {

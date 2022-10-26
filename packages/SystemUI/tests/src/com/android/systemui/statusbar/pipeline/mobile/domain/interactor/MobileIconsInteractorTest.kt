@@ -20,6 +20,7 @@ import android.telephony.SubscriptionInfo
 import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectivityModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeUserSetupRepository
@@ -211,6 +212,47 @@ class MobileIconsInteractorTest : SysuiTestCase() {
 
             // An invalid active subId should tell us that data is off
             assertThat(latest).isFalse()
+
+            job.cancel()
+        }
+
+    @Test
+    fun failedConnection_connected_validated_notFailed() =
+        runBlocking(IMMEDIATE) {
+            var latest: Boolean? = null
+            val job = underTest.isDefaultConnectionFailed.onEach { latest = it }.launchIn(this)
+            connectionsRepository.setMobileConnectivity(MobileConnectivityModel(true, true))
+            yield()
+
+            assertThat(latest).isFalse()
+
+            job.cancel()
+        }
+
+    @Test
+    fun failedConnection_notConnected_notValidated_notFailed() =
+        runBlocking(IMMEDIATE) {
+            var latest: Boolean? = null
+            val job = underTest.isDefaultConnectionFailed.onEach { latest = it }.launchIn(this)
+
+            connectionsRepository.setMobileConnectivity(MobileConnectivityModel(false, false))
+            yield()
+
+            assertThat(latest).isFalse()
+
+            job.cancel()
+        }
+
+    @Test
+    fun failedConnection_connected_notValidated_failed() =
+        runBlocking(IMMEDIATE) {
+            var latest: Boolean? = null
+            val job = underTest.isDefaultConnectionFailed.onEach { latest = it }.launchIn(this)
+
+            connectionsRepository.setMobileConnectivity(MobileConnectivityModel(true, false))
+            yield()
+
+            assertThat(latest).isTrue()
 
             job.cancel()
         }
