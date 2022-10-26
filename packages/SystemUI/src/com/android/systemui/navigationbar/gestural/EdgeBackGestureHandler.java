@@ -175,6 +175,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
     private final OverviewProxyService mOverviewProxyService;
     private final SysUiState mSysUiState;
     private Runnable mStateChangeCallback;
+    private Consumer<Boolean> mButtonForceVisibleCallback;
 
     private final PluginManager mPluginManager;
     private final ProtoTracer mProtoTracer;
@@ -240,6 +241,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
     private boolean mIsBackGestureAllowed;
     private boolean mGestureBlockingActivityRunning;
     private boolean mIsNewBackAffordanceEnabled;
+    private boolean mIsButtonForceVisible;
 
     private InputMonitor mInputMonitor;
     private InputChannelCompat.InputEventReceiver mInputEventReceiver;
@@ -402,12 +404,29 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
         mStateChangeCallback = callback;
     }
 
+    public void setButtonForceVisibleChangeCallback(Consumer<Boolean> callback) {
+        mButtonForceVisibleCallback = callback;
+    }
+
+    public int getEdgeWidthLeft() {
+        return mEdgeWidthLeft;
+    }
+
+    public int getEdgeWidthRight() {
+        return mEdgeWidthRight;
+    }
+
     public void updateCurrentUserResources() {
         Resources res = mNavigationModeController.getCurrentUserContext().getResources();
         mEdgeWidthLeft = mGestureNavigationSettingsObserver.getLeftSensitivity(res);
         mEdgeWidthRight = mGestureNavigationSettingsObserver.getRightSensitivity(res);
-        mIsBackGestureAllowed =
-                !mGestureNavigationSettingsObserver.areNavigationButtonForcedVisible();
+        final boolean previousForceVisible = mIsButtonForceVisible;
+        mIsButtonForceVisible =
+                mGestureNavigationSettingsObserver.areNavigationButtonForcedVisible();
+        if (previousForceVisible != mIsButtonForceVisible && mButtonForceVisibleCallback != null) {
+            mButtonForceVisibleCallback.accept(mIsButtonForceVisible);
+        }
+        mIsBackGestureAllowed = !mIsButtonForceVisible;
 
         final DisplayMetrics dm = res.getDisplayMetrics();
         final float defaultGestureHeight = res.getDimension(

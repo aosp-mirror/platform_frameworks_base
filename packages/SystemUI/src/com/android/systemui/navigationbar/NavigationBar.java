@@ -25,11 +25,16 @@ import static android.app.StatusBarManager.WindowVisibleState;
 import static android.app.StatusBarManager.windowStateToString;
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.InsetsState.ITYPE_BOTTOM_MANDATORY_GESTURES;
+import static android.view.InsetsState.ITYPE_BOTTOM_TAPPABLE_ELEMENT;
+import static android.view.InsetsState.ITYPE_LEFT_GESTURES;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
+import static android.view.InsetsState.ITYPE_RIGHT_GESTURES;
 import static android.view.InsetsState.containsType;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
 
@@ -77,6 +82,7 @@ import android.telecom.TelecomManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Display;
+import android.view.DisplayCutout;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
 import android.view.InsetsFrameProvider;
@@ -240,6 +246,12 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
 
     private boolean mTransientShown;
     private boolean mTransientShownFromGestureOnSystemBar;
+    /**
+     * This is to indicate whether the navigation bar button is forced visible. This is true
+     * when the setup wizard is on display. When that happens, the window frame should be provided
+     * as insets size directly.
+     */
+    private boolean mIsButtonForceVisible;
     private int mNavBarMode = NAV_BAR_MODE_3BUTTON;
     private LightBarController mLightBarController;
     private final LightBarController mMainLightBarController;
@@ -623,6 +635,10 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         mView.setTouchHandler(mTouchHandler);
         setNavBarMode(mNavBarMode);
         mEdgeBackGestureHandler.setStateChangeCallback(mView::updateStates);
+        mEdgeBackGestureHandler.setButtonForceVisibleChangeCallback((forceVisible) -> {
+            mIsButtonForceVisible = forceVisible;
+            repositionNavigationBar(mCurrentRotation);
+        });
         mNavigationBarTransitions.addListener(this::onBarTransition);
         mView.updateRotationButton();
 
@@ -810,7 +826,6 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
             mLayoutDirection = ld;
             refreshLayout(ld);
         }
-
         repositionNavigationBar(rotation);
         if (canShowSecondaryHandle()) {
             if (rotation != mCurrentRotation) {
@@ -1599,23 +1614,15 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
                 width,
                 height,
                 WindowManager.LayoutParams.TYPE_NAVIGATION_BAR,
-                WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING
-                        | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                         | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
                         | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
                         | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
                         | WindowManager.LayoutParams.FLAG_SLIPPERY,
                 PixelFormat.TRANSLUCENT);
         lp.gravity = gravity;
-        if (insetsHeight != -1) {
-            lp.providedInsets = new InsetsFrameProvider[] {
-                new InsetsFrameProvider(ITYPE_NAVIGATION_BAR, Insets.of(0, 0, 0, insetsHeight))
-            };
-        } else {
-            lp.providedInsets = new InsetsFrameProvider[] {
-                    new InsetsFrameProvider(ITYPE_NAVIGATION_BAR)
-            };
-        }
+        lp.providedInsets = getInsetsFrameProvider(insetsHeight, userContext);
+
         lp.token = new Binder();
         lp.accessibilityTitle = userContext.getString(R.string.nav_bar);
         lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC
@@ -1626,6 +1633,68 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         lp.setFitInsetsTypes(0 /* types */);
         lp.setTrustedOverlay();
         return lp;
+    }
+
+    private InsetsFrameProvider[] getInsetsFrameProvider(int insetsHeight, Context userContext) {
+        final InsetsFrameProvider navBarProvider;
+        if (insetsHeight != -1 && !mIsButtonForceVisible) {
+            navBarProvider = new InsetsFrameProvider(
+                    ITYPE_NAVIGATION_BAR, Insets.of(0, 0, 0, insetsHeight));
+            // Use window frame for IME.
+            navBarProvider.insetsSizeOverrides = new InsetsFrameProvider.InsetsSizeOverride[] {
+                    new InsetsFrameProvider.InsetsSizeOverride(TYPE_INPUT_METHOD, null)
+            };
+        } else {
+            navBarProvider = new InsetsFrameProvider(ITYPE_NAVIGATION_BAR);
+            navBarProvider.insetsSizeOverrides = new InsetsFrameProvider.InsetsSizeOverride[]{
+                    new InsetsFrameProvider.InsetsSizeOverride(TYPE_INPUT_METHOD, null)
+            };
+        }
+        final boolean navBarTapThrough = userContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_navBarTapThrough);
+        final InsetsFrameProvider bottomTappableProvider;
+        if (navBarTapThrough) {
+            bottomTappableProvider = new InsetsFrameProvider(ITYPE_BOTTOM_TAPPABLE_ELEMENT,
+                    Insets.of(0, 0, 0, 0));
+        } else {
+            bottomTappableProvider = new InsetsFrameProvider(ITYPE_BOTTOM_TAPPABLE_ELEMENT);
+        }
+
+        if (!mEdgeBackGestureHandler.isHandlingGestures()) {
+            // 2/3 button navigation is on. Do not provide any gesture insets here. But need to keep
+            // the provider to support runtime update.
+            return new InsetsFrameProvider[] {
+                    navBarProvider,
+                    new InsetsFrameProvider(
+                            ITYPE_BOTTOM_MANDATORY_GESTURES, Insets.NONE),
+                    new InsetsFrameProvider(ITYPE_LEFT_GESTURES, InsetsFrameProvider.SOURCE_DISPLAY,
+                            Insets.NONE, null),
+                    new InsetsFrameProvider(ITYPE_RIGHT_GESTURES,
+                            InsetsFrameProvider.SOURCE_DISPLAY,
+                            Insets.NONE, null),
+                    bottomTappableProvider
+            };
+        } else {
+            // Gesture navigation
+            final int gestureHeight = userContext.getResources().getDimensionPixelSize(
+                    com.android.internal.R.dimen.navigation_bar_gesture_height);
+            final DisplayCutout cutout = userContext.getDisplay().getCutout();
+            final int safeInsetsLeft = cutout != null ? cutout.getSafeInsetLeft() : 0;
+            final int safeInsetsRight = cutout != null ? cutout.getSafeInsetRight() : 0;
+            return new InsetsFrameProvider[] {
+                    navBarProvider,
+                    new InsetsFrameProvider(
+                            ITYPE_BOTTOM_MANDATORY_GESTURES, Insets.of(0, 0, 0, gestureHeight)),
+                    new InsetsFrameProvider(ITYPE_LEFT_GESTURES, InsetsFrameProvider.SOURCE_DISPLAY,
+                            Insets.of(safeInsetsLeft
+                                    + mEdgeBackGestureHandler.getEdgeWidthLeft(), 0, 0, 0), null),
+                    new InsetsFrameProvider(ITYPE_RIGHT_GESTURES,
+                            InsetsFrameProvider.SOURCE_DISPLAY,
+                            Insets.of(0, 0, safeInsetsRight
+                                    + mEdgeBackGestureHandler.getEdgeWidthRight(), 0), null),
+                    bottomTappableProvider
+            };
+        }
     }
 
     private boolean canShowSecondaryHandle() {

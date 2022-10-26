@@ -266,6 +266,7 @@ import android.view.InputApplicationHandle;
 import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.InputWindowHandle;
+import android.view.InsetsFrameProvider;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.InsetsVisibilities;
@@ -2276,6 +2277,27 @@ public class WindowManagerService extends IWindowManager.Stub
                                 throw new IllegalArgumentException(
                                         "Insets types can not be changed after the window is "
                                                 + "added.");
+                            }
+                            final InsetsFrameProvider.InsetsSizeOverride[] overrides =
+                                    win.mAttrs.providedInsets[i].insetsSizeOverrides;
+                            final InsetsFrameProvider.InsetsSizeOverride[] newOverrides =
+                                    attrs.providedInsets[i].insetsSizeOverrides;
+                            if (!(overrides == null && newOverrides == null)) {
+                                if (overrides == null || newOverrides == null
+                                        || (overrides.length != newOverrides.length)) {
+                                    throw new IllegalArgumentException(
+                                            "Insets override types can not be changed after the "
+                                                    + "window is added.");
+                                } else {
+                                    final int overrideTypes = overrides.length;
+                                    for (int j = 0; j < overrideTypes; j++) {
+                                        if (overrides[j].windowType != newOverrides[j].windowType) {
+                                            throw new IllegalArgumentException(
+                                                    "Insets override types can not be changed after"
+                                                            + " the window is added.");
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
