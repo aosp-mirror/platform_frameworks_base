@@ -649,37 +649,6 @@ public class NotificationIconContainer extends ViewGroup {
         return mNumDots > 0;
     }
 
-    /**
-     * If the overflow is in the range [1, max_dots - 1) (basically 1 or 2 dots), then
-     * extra padding will have to be accounted for
-     *
-     * This method has no meaning for non-static containers
-     */
-    public boolean hasPartialOverflow() {
-        return mNumDots > 0 && mNumDots < MAX_DOTS;
-    }
-
-    /**
-     * Get padding that can account for extra dots up to the max. The only valid values for
-     * this method are for 1 or 2 dots.
-     * @return only extraDotPadding or extraDotPadding * 2
-     */
-    public int getPartialOverflowExtraPadding() {
-        if (!hasPartialOverflow()) {
-            return 0;
-        }
-
-        int partialOverflowAmount = (MAX_DOTS - mNumDots) * (mStaticDotDiameter + mDotPadding);
-
-        int adjustedWidth = getFinalTranslationX() + partialOverflowAmount;
-        // In case we actually give too much padding...
-        if (adjustedWidth > getWidth()) {
-            partialOverflowAmount = getWidth() - getFinalTranslationX();
-        }
-
-        return partialOverflowAmount;
-    }
-
     // Give some extra room for btw notifications if we can
     public int getNoOverflowExtraPadding() {
         if (mNumDots != 0) {

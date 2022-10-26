@@ -161,7 +161,7 @@ class TaskFragmentAnimationSpec {
         // The position should be 0-based as we will post translate in
         // TaskFragmentAnimationAdapter#onAnimationUpdate
         final Animation endTranslate = new TranslateAnimation(startBounds.left - endBounds.left, 0,
-                0, 0);
+                startBounds.top - endBounds.top, 0);
         endTranslate.setDuration(CHANGE_ANIMATION_DURATION);
         endSet.addAnimation(endTranslate);
         // The end leash is resizing, we should update the window crop based on the clip rect.

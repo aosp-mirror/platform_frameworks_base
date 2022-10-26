@@ -57,7 +57,7 @@ object Flags {
     val INSTANT_VOICE_REPLY = UnreleasedFlag(111, teamfood = true)
 
     // TODO(b/254512425): Tracking Bug
-    val NOTIFICATION_MEMORY_MONITOR_ENABLED = UnreleasedFlag(112, teamfood = false)
+    val NOTIFICATION_MEMORY_MONITOR_ENABLED = UnreleasedFlag(112, teamfood = true)
 
     // TODO(b/254512731): Tracking Bug
     @JvmField val NOTIFICATION_DISMISSAL_FADE = UnreleasedFlag(113, teamfood = true)
@@ -138,7 +138,7 @@ object Flags {
     @Deprecated("Not needed anymore") val NEW_USER_SWITCHER = ReleasedFlag(500)
 
     // TODO(b/254512321): Tracking Bug
-    @JvmField val COMBINED_QS_HEADERS = ReleasedFlag(501, teamfood = true)
+    @JvmField val COMBINED_QS_HEADERS = UnreleasedFlag(501, teamfood = true)
     val PEOPLE_TILE = ResourceBooleanFlag(502, R.bool.flag_conversations)
     @JvmField
     val QS_USER_DETAIL_SHORTCUT =
@@ -148,7 +148,7 @@ object Flags {
     @Deprecated("Not needed anymore") val NEW_FOOTER = ReleasedFlag(504)
 
     // TODO(b/254512747): Tracking Bug
-    val NEW_HEADER = ReleasedFlag(505, teamfood = true)
+    val NEW_HEADER = UnreleasedFlag(505, teamfood = true)
 
     // TODO(b/254512383): Tracking Bug
     @JvmField
@@ -161,9 +161,6 @@ object Flags {
     // 600- status bar
     // TODO(b/254513246): Tracking Bug
     val STATUS_BAR_USER_SWITCHER = ResourceBooleanFlag(602, R.bool.flag_user_switcher_chip)
-
-    // TODO(b/254513025): Tracking Bug
-    val STATUS_BAR_LETTERBOX_APPEARANCE = ReleasedFlag(603, teamfood = false)
 
     // TODO(b/254512623): Tracking Bug
     @Deprecated("Replaced by mobile and wifi specific flags.")
@@ -327,6 +324,9 @@ object Flags {
 
     // 1800 - shade container
     @JvmField val LEAVE_SHADE_OPEN_FOR_BUGREPORT = UnreleasedFlag(1800, true)
+
+    // 1900 - note task
+    @JvmField val NOTE_TASKS = SysPropBooleanFlag(1900, "persist.sysui.debug.note_tasks")
 
     // Pay no attention to the reflection behind the curtain.
     // ========================== Curtain ==========================
