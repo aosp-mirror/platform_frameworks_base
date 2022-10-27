@@ -43,7 +43,7 @@ enum class ChipStateSender(
     @StringRes val stringResId: Int?,
     val transferStatus: TransferStatus,
     val endItem: SenderEndItem?,
-    val timeout: Long = DEFAULT_TIMEOUT_MILLIS
+    val timeout: Int = DEFAULT_TIMEOUT_MILLIS,
 ) {
     /**
      * A state representing that the two devices are close but not close enough to *start* a cast to
@@ -223,6 +223,6 @@ sealed class SenderEndItem {
 // Give the Transfer*Triggered states a longer timeout since those states represent an active
 // process and we should keep the user informed about it as long as possible (but don't allow it to
 // continue indefinitely).
-private const val TRANSFER_TRIGGERED_TIMEOUT_MILLIS = 30000L
+private const val TRANSFER_TRIGGERED_TIMEOUT_MILLIS = 30000
 
 private const val TAG = "ChipStateSender"

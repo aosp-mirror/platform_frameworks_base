@@ -135,7 +135,6 @@ import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.camera.CameraGestureHelper;
 import com.android.systemui.classifier.Classifier;
 import com.android.systemui.classifier.FalsingCollector;
-import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.DozeLog;
@@ -231,7 +230,6 @@ import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.unfold.SysUIUnfoldComponent;
 import com.android.systemui.util.Compile;
 import com.android.systemui.util.LargeScreenUtils;
-import com.android.systemui.util.ListenerSet;
 import com.android.systemui.util.Utils;
 import com.android.systemui.util.time.SystemClock;
 import com.android.wm.shell.animation.FlingAnimationUtils;
@@ -372,7 +370,6 @@ public final class NotificationPanelViewController {
     private final TapAgainViewController mTapAgainViewController;
     private final LargeScreenShadeHeaderController mLargeScreenShadeHeaderController;
     private final RecordingController mRecordingController;
-    private final PanelEventsEmitter mPanelEventsEmitter;
     private final boolean mVibrateOnOpening;
     private final VelocityTracker mVelocityTracker = VelocityTracker.obtain();
     private final FlingAnimationUtils mFlingAnimationUtilsClosing;
@@ -880,7 +877,6 @@ public final class NotificationPanelViewController {
             Provider<KeyguardBottomAreaViewController> keyguardBottomAreaViewControllerProvider,
             KeyguardUnlockAnimationController keyguardUnlockAnimationController,
             NotificationListContainer notificationListContainer,
-            PanelEventsEmitter panelEventsEmitter,
             NotificationStackSizeCalculator notificationStackSizeCalculator,
             UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
             ShadeTransitionController shadeTransitionController,
@@ -993,7 +989,6 @@ public final class NotificationPanelViewController {
         mMediaDataManager = mediaDataManager;
         mTapAgainViewController = tapAgainViewController;
         mSysUiState = sysUiState;
-        mPanelEventsEmitter = panelEventsEmitter;
         pulseExpansionHandler.setPulseExpandAbortListener(() -> {
             if (mQs != null) {
                 mQs.animateHeaderSlidingOut();
@@ -1948,7 +1943,7 @@ public final class NotificationPanelViewController {
     private void setQsExpandImmediate(boolean expandImmediate) {
         if (expandImmediate != mQsExpandImmediate) {
             mQsExpandImmediate = expandImmediate;
-            mPanelEventsEmitter.notifyExpandImmediateChange(expandImmediate);
+            mShadeExpansionStateManager.notifyExpandImmediateChange(expandImmediate);
         }
     }
 
@@ -3889,7 +3884,7 @@ public final class NotificationPanelViewController {
         boolean wasRunning = mIsLaunchAnimationRunning;
         mIsLaunchAnimationRunning = running;
         if (wasRunning != mIsLaunchAnimationRunning) {
-            mPanelEventsEmitter.notifyLaunchingActivityChanged(running);
+            mShadeExpansionStateManager.notifyLaunchingActivityChanged(running);
         }
     }
 
@@ -3898,7 +3893,7 @@ public final class NotificationPanelViewController {
         boolean wasClosing = isClosing();
         mClosing = isClosing;
         if (wasClosing != isClosing) {
-            mPanelEventsEmitter.notifyPanelCollapsingChanged(isClosing);
+            mShadeExpansionStateManager.notifyPanelCollapsingChanged(isClosing);
         }
         mAmbientState.setIsClosing(isClosing);
     }
@@ -5918,44 +5913,6 @@ public final class NotificationPanelViewController {
                     false /* animate */,
                     false /* delayed */,
                     1.0f /* speedUpFactor */);
-        }
-    }
-
-    @SysUISingleton
-    static class PanelEventsEmitter implements NotifPanelEvents {
-
-        private final ListenerSet<Listener> mListeners = new ListenerSet<>();
-
-        @Inject
-        PanelEventsEmitter() {
-        }
-
-        @Override
-        public void registerListener(@androidx.annotation.NonNull @NonNull Listener listener) {
-            mListeners.addIfAbsent(listener);
-        }
-
-        @Override
-        public void unregisterListener(@androidx.annotation.NonNull @NonNull Listener listener) {
-            mListeners.remove(listener);
-        }
-
-        private void notifyLaunchingActivityChanged(boolean isLaunchingActivity) {
-            for (Listener cb : mListeners) {
-                cb.onLaunchingActivityChanged(isLaunchingActivity);
-            }
-        }
-
-        private void notifyPanelCollapsingChanged(boolean isCollapsing) {
-            for (NotifPanelEvents.Listener cb : mListeners) {
-                cb.onPanelCollapsingChanged(isCollapsing);
-            }
-        }
-
-        private void notifyExpandImmediateChange(boolean expandImmediateEnabled) {
-            for (NotifPanelEvents.Listener cb : mListeners) {
-                cb.onExpandImmediateChanged(expandImmediateEnabled);
-            }
         }
     }
 

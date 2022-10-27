@@ -17,6 +17,7 @@
 
 package com.android.systemui.keyguard.domain.quickaffordance
 
+import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceConfig
 import dagger.Binds
 import dagger.Module
 

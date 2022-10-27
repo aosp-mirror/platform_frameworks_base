@@ -50,10 +50,10 @@ public class SystemVibrator extends Vibrator {
     private final Context mContext;
 
     @GuardedBy("mBrokenListeners")
-    private final ArrayList<AllVibratorsStateListener> mBrokenListeners = new ArrayList<>();
+    private final ArrayList<MultiVibratorStateListener> mBrokenListeners = new ArrayList<>();
 
     @GuardedBy("mRegisteredListeners")
-    private final ArrayMap<OnVibratorStateChangedListener, AllVibratorsStateListener>
+    private final ArrayMap<OnVibratorStateChangedListener, MultiVibratorStateListener>
             mRegisteredListeners = new ArrayMap<>();
 
     private final Object mLock = new Object();
@@ -147,7 +147,7 @@ public class SystemVibrator extends Vibrator {
             Log.w(TAG, "Failed to add vibrate state listener; no vibrator manager.");
             return;
         }
-        AllVibratorsStateListener delegate = null;
+        MultiVibratorStateListener delegate = null;
         try {
             synchronized (mRegisteredListeners) {
                 // If listener is already registered, reject and return.
@@ -155,7 +155,7 @@ public class SystemVibrator extends Vibrator {
                     Log.w(TAG, "Listener already registered.");
                     return;
                 }
-                delegate = new AllVibratorsStateListener(executor, listener);
+                delegate = new MultiVibratorStateListener(executor, listener);
                 delegate.register(mVibratorManager);
                 mRegisteredListeners.put(listener, delegate);
                 delegate = null;
@@ -181,7 +181,7 @@ public class SystemVibrator extends Vibrator {
         }
         synchronized (mRegisteredListeners) {
             if (mRegisteredListeners.containsKey(listener)) {
-                AllVibratorsStateListener delegate = mRegisteredListeners.get(listener);
+                MultiVibratorStateListener delegate = mRegisteredListeners.get(listener);
                 delegate.unregister(mVibratorManager);
                 mRegisteredListeners.remove(listener);
             }
@@ -238,7 +238,7 @@ public class SystemVibrator extends Vibrator {
      * Tries to unregister individual {@link android.os.Vibrator.OnVibratorStateChangedListener}
      * that were left registered to vibrators after failures to register them to all vibrators.
      *
-     * <p>This might happen if {@link AllVibratorsStateListener} fails to register to any vibrator
+     * <p>This might happen if {@link MultiVibratorStateListener} fails to register to any vibrator
      * and also fails to unregister any previously registered single listeners to other vibrators.
      *
      * <p>This method never throws {@link RuntimeException} if it fails to unregister again, it will
@@ -259,10 +259,10 @@ public class SystemVibrator extends Vibrator {
 
     /** Listener for a single vibrator state change. */
     private static class SingleVibratorStateListener implements OnVibratorStateChangedListener {
-        private final AllVibratorsStateListener mAllVibratorsListener;
+        private final MultiVibratorStateListener mAllVibratorsListener;
         private final int mVibratorIdx;
 
-        SingleVibratorStateListener(AllVibratorsStateListener listener, int vibratorIdx) {
+        SingleVibratorStateListener(MultiVibratorStateListener listener, int vibratorIdx) {
             mAllVibratorsListener = listener;
             mVibratorIdx = vibratorIdx;
         }
@@ -552,8 +552,16 @@ public class SystemVibrator extends Vibrator {
         }
     }
 
-    /** Listener for all vibrators state change. */
-    private static class AllVibratorsStateListener {
+    /**
+     * Listener for all vibrators state change.
+     *
+     * <p>This registers a listener to all vibrators to merge the callbacks into a single state
+     * that is set to true if any individual vibrator is also true, and false otherwise.
+     *
+     * @hide
+     */
+    @VisibleForTesting
+    public static class MultiVibratorStateListener {
         private final Object mLock = new Object();
         private final Executor mExecutor;
         private final OnVibratorStateChangedListener mDelegate;
@@ -567,19 +575,21 @@ public class SystemVibrator extends Vibrator {
         @GuardedBy("mLock")
         private int mVibratingMask;
 
-        AllVibratorsStateListener(@NonNull Executor executor,
+        public MultiVibratorStateListener(@NonNull Executor executor,
                 @NonNull OnVibratorStateChangedListener listener) {
             mExecutor = executor;
             mDelegate = listener;
         }
 
-        boolean hasRegisteredListeners() {
+        /** Returns true if at least one listener was registered to an individual vibrator. */
+        public boolean hasRegisteredListeners() {
             synchronized (mLock) {
                 return mVibratorListeners.size() > 0;
             }
         }
 
-        void register(VibratorManager vibratorManager) {
+        /** Registers a listener to all individual vibrators in {@link VibratorManager}. */
+        public void register(VibratorManager vibratorManager) {
             int[] vibratorIds = vibratorManager.getVibratorIds();
             synchronized (mLock) {
                 for (int i = 0; i < vibratorIds.length; i++) {
@@ -603,7 +613,8 @@ public class SystemVibrator extends Vibrator {
             }
         }
 
-        void unregister(VibratorManager vibratorManager) {
+        /** Unregisters the listeners from all individual vibrators in {@link VibratorManager}. */
+        public void unregister(VibratorManager vibratorManager) {
             synchronized (mLock) {
                 for (int i = mVibratorListeners.size(); --i >= 0; ) {
                     int vibratorId = mVibratorListeners.keyAt(i);
@@ -614,30 +625,44 @@ public class SystemVibrator extends Vibrator {
             }
         }
 
-        void onVibrating(int vibratorIdx, boolean vibrating) {
+        /** Callback triggered by {@link SingleVibratorStateListener} for each vibrator. */
+        public void onVibrating(int vibratorIdx, boolean vibrating) {
             mExecutor.execute(() -> {
-                boolean anyVibrating;
+                boolean shouldNotifyStateChange;
+                boolean isAnyVibrating;
                 synchronized (mLock) {
+                    // Bitmask indicating that all vibrators have been initialized.
                     int allInitializedMask = (1 << mVibratorListeners.size()) - 1;
-                    int vibratorMask = 1 << vibratorIdx;
-                    if ((mInitializedMask & vibratorMask) == 0) {
-                        // First state report for this vibrator, set vibrating initial value.
-                        mInitializedMask |= vibratorMask;
-                        mVibratingMask |= vibrating ? vibratorMask : 0;
-                    } else {
-                        // Flip vibrating value, if changed.
-                        boolean prevVibrating = (mVibratingMask & vibratorMask) != 0;
-                        if (prevVibrating != vibrating) {
-                            mVibratingMask ^= vibratorMask;
-                        }
+
+                    // Save current global state before processing this vibrator state change.
+                    boolean previousIsAnyVibrating = (mVibratingMask != 0);
+                    boolean previousAreAllInitialized = (mInitializedMask == allInitializedMask);
+
+                    // Mark this vibrator as initialized.
+                    int vibratorMask = (1 << vibratorIdx);
+                    mInitializedMask |= vibratorMask;
+
+                    // Flip the vibrating bit flag for this vibrator, only if the state is changing.
+                    boolean previousVibrating = (mVibratingMask & vibratorMask) != 0;
+                    if (previousVibrating != vibrating) {
+                        mVibratingMask ^= vibratorMask;
                     }
-                    if (mInitializedMask != allInitializedMask) {
-                        // Wait for all vibrators initial state to be reported before delegating.
-                        return;
-                    }
-                    anyVibrating = mVibratingMask != 0;
+
+                    // Check new global state after processing this vibrator state change.
+                    isAnyVibrating = (mVibratingMask != 0);
+                    boolean areAllInitialized = (mInitializedMask == allInitializedMask);
+
+                    // Prevent multiple triggers with the same state.
+                    // Trigger once when all vibrators have reported their state, and then only when
+                    // the merged vibrating state changes.
+                    boolean isStateChanging = (previousIsAnyVibrating != isAnyVibrating);
+                    shouldNotifyStateChange =
+                            areAllInitialized && (!previousAreAllInitialized || isStateChanging);
                 }
-                mDelegate.onVibratorStateChanged(anyVibrating);
+                // Notify delegate listener outside the lock, only if merged state is changing.
+                if (shouldNotifyStateChange) {
+                    mDelegate.onVibratorStateChanged(isAnyVibrating);
+                }
             });
         }
     }

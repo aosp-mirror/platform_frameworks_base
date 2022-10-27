@@ -22,8 +22,8 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardBottomAreaInterac
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardQuickAffordanceInteractor
 import com.android.systemui.keyguard.domain.model.KeyguardQuickAffordanceModel
-import com.android.systemui.keyguard.domain.model.KeyguardQuickAffordancePosition
-import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordanceToggleState
+import com.android.systemui.keyguard.shared.quickaffordance.ActivationState
+import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancePosition
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -118,13 +118,13 @@ constructor(
                     animateReveal = animateReveal,
                     icon = icon,
                     onClicked = { parameters ->
-                        quickAffordanceInteractor.onQuickAffordanceClicked(
+                        quickAffordanceInteractor.onQuickAffordanceTriggered(
                             configKey = parameters.configKey,
                             expandable = parameters.expandable,
                         )
                     },
                     isClickable = isClickable,
-                    isActivated = toggle is KeyguardQuickAffordanceToggleState.On,
+                    isActivated = activationState is ActivationState.Active,
                 )
             is KeyguardQuickAffordanceModel.Hidden -> KeyguardQuickAffordanceViewModel()
         }

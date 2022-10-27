@@ -12,17 +12,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
-package com.android.systemui.keyguard.shared.quickaffordance
+package com.android.systemui.temporarydisplay.dagger
 
-/** Enumerates all possible toggle states for a quick affordance on the lock-screen. */
-sealed class KeyguardQuickAffordanceToggleState {
-    /** Toggling is not supported. */
-    object NotSupported : KeyguardQuickAffordanceToggleState()
-    /** The quick affordance is on. */
-    object On : KeyguardQuickAffordanceToggleState()
-    /** The quick affordance is off. */
-    object Off : KeyguardQuickAffordanceToggleState()
-}
+import javax.inject.Qualifier
+
+/** Status bar connectivity logs in table format. */
+@Qualifier
+@MustBeDocumented
+@kotlin.annotation.Retention(AnnotationRetention.RUNTIME)
+annotation class ChipbarLog

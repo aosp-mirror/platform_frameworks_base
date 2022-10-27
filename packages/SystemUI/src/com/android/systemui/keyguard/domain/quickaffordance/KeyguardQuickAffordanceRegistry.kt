@@ -17,14 +17,17 @@
 
 package com.android.systemui.keyguard.domain.quickaffordance
 
-import com.android.systemui.keyguard.domain.model.KeyguardQuickAffordancePosition
+import com.android.systemui.keyguard.data.quickaffordance.HomeControlsKeyguardQuickAffordanceConfig
+import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceConfig
+import com.android.systemui.keyguard.data.quickaffordance.QrCodeScannerKeyguardQuickAffordanceConfig
+import com.android.systemui.keyguard.data.quickaffordance.QuickAccessWalletKeyguardQuickAffordanceConfig
+import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancePosition
 import javax.inject.Inject
-import kotlin.reflect.KClass
 
 /** Central registry of all known quick affordance configs. */
 interface KeyguardQuickAffordanceRegistry<T : KeyguardQuickAffordanceConfig> {
     fun getAll(position: KeyguardQuickAffordancePosition): List<T>
-    fun get(configClass: KClass<out T>): T
+    fun get(key: String): T
 }
 
 class KeyguardQuickAffordanceRegistryImpl
@@ -46,8 +49,8 @@ constructor(
                     qrCodeScanner,
                 ),
         )
-    private val configByClass =
-        configsByPosition.values.flatten().associateBy { config -> config::class }
+    private val configByKey =
+        configsByPosition.values.flatten().associateBy { config -> config.key }
 
     override fun getAll(
         position: KeyguardQuickAffordancePosition,
@@ -56,8 +59,8 @@ constructor(
     }
 
     override fun get(
-        configClass: KClass<out KeyguardQuickAffordanceConfig>
+        key: String,
     ): KeyguardQuickAffordanceConfig {
-        return configByClass.getValue(configClass)
+        return configByKey.getValue(key)
     }
 }

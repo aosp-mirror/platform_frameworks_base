@@ -38,8 +38,9 @@ class FeatureFlagsReleaseTest : SysuiTestCase() {
 
     @Mock private lateinit var mResources: Resources
     @Mock private lateinit var mSystemProperties: SystemPropertiesHelper
+    @Mock private lateinit var restarter: Restarter
+    private val flagMap = mutableMapOf<Int, Flag<*>>()
     private val serverFlagReader = ServerFlagReaderFake()
-
     private val deviceConfig = DeviceConfigProxyFake()
 
     @Before
@@ -49,7 +50,9 @@ class FeatureFlagsReleaseTest : SysuiTestCase() {
             mResources,
             mSystemProperties,
             deviceConfig,
-            serverFlagReader)
+            serverFlagReader,
+            flagMap,
+            restarter)
     }
 
     @Test
