@@ -101,7 +101,7 @@ public class FeatureFlagsRelease implements FeatureFlags {
 
     @Override
     public boolean isEnabled(@NotNull ReleasedFlag flag) {
-        return mServerFlagReader.readServerOverride(flag.getId(), true);
+        return mServerFlagReader.readServerOverride(flag.getNamespace(), flag.getName(), true);
     }
 
     @Override
@@ -109,18 +109,6 @@ public class FeatureFlagsRelease implements FeatureFlags {
         int cacheIndex = mBooleanCache.indexOfKey(flag.getId());
         if (cacheIndex < 0) {
             return isEnabled(flag.getId(), mResources.getBoolean(flag.getResourceId()));
-        }
-
-        return mBooleanCache.valueAt(cacheIndex);
-    }
-
-    @Override
-    public boolean isEnabled(@NonNull DeviceConfigBooleanFlag flag) {
-        int cacheIndex = mBooleanCache.indexOfKey(flag.getId());
-        if (cacheIndex < 0) {
-            boolean deviceConfigValue = mDeviceConfigProxy.getBoolean(flag.getNamespace(),
-                    flag.getName(), flag.getDefault());
-            return isEnabled(flag.getId(), deviceConfigValue);
         }
 
         return mBooleanCache.valueAt(cacheIndex);
