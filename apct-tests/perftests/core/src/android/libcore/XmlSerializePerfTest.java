@@ -20,41 +20,31 @@ import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
 import android.test.suitebuilder.annotation.LargeTest;
 
-import org.junit.Before;
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.CharArrayWriter;
 import java.lang.reflect.Constructor;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Random;
 
-@RunWith(Parameterized.class)
+@RunWith(JUnitParamsRunner.class)
 @LargeTest
 public class XmlSerializePerfTest {
     @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
-    @Parameters(name = "mDatasetAsString({0}), mSeed({1})")
-    public static Collection<Object[]> data() {
-        return Arrays.asList(
-                new Object[][] {
-                    {"0.99 0.7 0.7 0.7 0.7 0.7", 854328},
-                    {"0.999 0.3 0.3 0.95 0.9 0.9", 854328},
-                    {"0.99 0.7 0.7 0.7 0.7 0.7", 312547},
-                    {"0.999 0.3 0.3 0.95 0.9 0.9", 312547}
-                });
+    private Object[] getParams() {
+        return new Object[][] {
+            new Object[] {"0.99 0.7 0.7 0.7 0.7 0.7", 854328},
+            new Object[] {"0.999 0.3 0.3 0.95 0.9 0.9", 854328},
+            new Object[] {"0.99 0.7 0.7 0.7 0.7 0.7", 312547},
+            new Object[] {"0.999 0.3 0.3 0.95 0.9 0.9", 312547}
+        };
     }
-
-    @Parameterized.Parameter(0)
-    public String mDatasetAsString;
-
-    @Parameterized.Parameter(1)
-    public int mSeed;
 
     double[] mDataset;
     private Constructor<? extends XmlSerializer> mKxmlConstructor;
@@ -100,8 +90,7 @@ public class XmlSerializePerfTest {
     }
 
     @SuppressWarnings("unchecked")
-    @Before
-    public void setUp() throws Exception {
+    public void setUp(String datasetAsString) throws Exception {
         mKxmlConstructor =
                 (Constructor)
                         Class.forName("com.android.org.kxml2.io.KXmlSerializer").getConstructor();
@@ -109,28 +98,32 @@ public class XmlSerializePerfTest {
                 (Constructor)
                         Class.forName("com.android.internal.util.FastXmlSerializer")
                                 .getConstructor();
-        String[] splitStrings = mDatasetAsString.split(" ");
+        String[] splitStrings = datasetAsString.split(" ");
         mDataset = new double[splitStrings.length];
         for (int i = 0; i < splitStrings.length; i++) {
             mDataset[i] = Double.parseDouble(splitStrings[i]);
         }
     }
 
-    private void internalTimeSerializer(Constructor<? extends XmlSerializer> ctor)
+    private void internalTimeSerializer(Constructor<? extends XmlSerializer> ctor, int seed)
             throws Exception {
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
-            serializeRandomXml(ctor, mSeed);
+            serializeRandomXml(ctor, seed);
         }
     }
 
     @Test
-    public void timeKxml() throws Exception {
-        internalTimeSerializer(mKxmlConstructor);
+    @Parameters(method = "getParams")
+    public void timeKxml(String datasetAsString, int seed) throws Exception {
+        setUp(datasetAsString);
+        internalTimeSerializer(mKxmlConstructor, seed);
     }
 
     @Test
-    public void timeFast() throws Exception {
-        internalTimeSerializer(mFastConstructor);
+    @Parameters(method = "getParams")
+    public void timeFast(String datasetAsString, int seed) throws Exception {
+        setUp(datasetAsString);
+        internalTimeSerializer(mFastConstructor, seed);
     }
 }
