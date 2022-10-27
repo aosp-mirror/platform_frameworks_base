@@ -27,17 +27,18 @@ class RippleAnimation(private val config: RippleAnimationConfig) {
     private val animator: ValueAnimator = ValueAnimator.ofFloat(0f, 1f)
 
     init {
-        rippleShader.setCenter(config.centerX, config.centerY)
-        rippleShader.setMaxSize(config.maxWidth, config.maxHeight)
-        rippleShader.rippleFill = config.shouldFillRipple
-        rippleShader.pixelDensity = config.pixelDensity
-        rippleShader.color = ColorUtils.setAlphaComponent(config.color, config.opacity)
-        rippleShader.sparkleStrength = config.sparkleStrength
+        applyConfigToShader()
+    }
+
+    /** Updates the ripple color during the animation. */
+    fun updateColor(color: Int) {
+        config.apply { config.color = color }
+        applyConfigToShader()
     }
 
     @JvmOverloads
     fun play(onAnimationEnd: Runnable? = null) {
-        if (animator.isRunning) {
+        if (isPlaying()) {
             return // Ignore if ripple effect is already playing
         }
 
@@ -46,7 +47,7 @@ class RippleAnimation(private val config: RippleAnimationConfig) {
             val now = updateListener.currentPlayTime
             val progress = updateListener.animatedValue as Float
             rippleShader.progress = progress
-            rippleShader.distortionStrength = 1 - progress
+            rippleShader.distortionStrength = if (config.shouldDistort) 1 - progress else 0f
             rippleShader.time = now.toFloat()
         }
         animator.addListener(
@@ -61,4 +62,13 @@ class RippleAnimation(private val config: RippleAnimationConfig) {
 
     /** Indicates whether the animation is playing. */
     fun isPlaying(): Boolean = animator.isRunning
+
+    private fun applyConfigToShader() {
+        rippleShader.setCenter(config.centerX, config.centerY)
+        rippleShader.setMaxSize(config.maxWidth, config.maxHeight)
+        rippleShader.rippleFill = config.shouldFillRipple
+        rippleShader.pixelDensity = config.pixelDensity
+        rippleShader.color = ColorUtils.setAlphaComponent(config.color, config.opacity)
+        rippleShader.sparkleStrength = config.sparkleStrength
+    }
 }

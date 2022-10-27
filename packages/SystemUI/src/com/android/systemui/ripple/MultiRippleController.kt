@@ -26,6 +26,11 @@ class MultiRippleController(private val multipleRippleView: MultiRippleView) {
         @VisibleForTesting const val MAX_RIPPLE_NUMBER = 10
     }
 
+    /** Updates all the ripple colors during the animation. */
+    fun updateColor(color: Int) {
+        multipleRippleView.ripples.forEach { anim -> anim.updateColor(color) }
+    }
+
     fun play(rippleAnimation: RippleAnimation) {
         if (multipleRippleView.ripples.size >= MAX_RIPPLE_NUMBER) {
             return

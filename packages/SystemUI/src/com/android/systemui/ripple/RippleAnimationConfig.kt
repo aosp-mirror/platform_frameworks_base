@@ -5,9 +5,10 @@ import android.graphics.Color
 /**
  * A struct that holds the ripple animation configurations.
  *
- * <p>This is designed to be used only once. Create a new instance when the animation needs to
- * change, instead of modifying each parameter. This data class is pulled out to make the
- * [RippleAnimation] constructor succinct.
+ * <p>This configuration is designed to play a SINGLE animation. Do not reuse or modify the
+ * configuration parameters to play different animations, unless the value has to change within the
+ * single animation (e.g. Change color or opacity during the animation). Note that this data class
+ * is pulled out to make the [RippleAnimation] constructor succinct.
  */
 data class RippleAnimationConfig(
     val rippleShape: RippleShader.RippleShape = RippleShader.RippleShape.CIRCLE,
@@ -17,10 +18,11 @@ data class RippleAnimationConfig(
     val maxWidth: Float = 0f,
     val maxHeight: Float = 0f,
     val pixelDensity: Float = 1f,
-    val color: Int = Color.WHITE,
+    var color: Int = Color.WHITE,
     val opacity: Int = RIPPLE_DEFAULT_ALPHA,
     val shouldFillRipple: Boolean = false,
-    val sparkleStrength: Float = RIPPLE_SPARKLE_STRENGTH
+    val sparkleStrength: Float = RIPPLE_SPARKLE_STRENGTH,
+    val shouldDistort: Boolean = true
 ) {
     companion object {
         const val RIPPLE_SPARKLE_STRENGTH: Float = 0.3f

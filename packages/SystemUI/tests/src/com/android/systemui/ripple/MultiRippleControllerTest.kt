@@ -16,6 +16,7 @@
 
 package com.android.systemui.ripple
 
+import android.graphics.Color
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -43,6 +44,24 @@ class MultiRippleControllerTest : SysuiTestCase() {
         rippleAnimationConfig = RippleAnimationConfig(duration = 1000L)
         multiRippleView = MultiRippleView(context, null)
         multiRippleController = MultiRippleController(multiRippleView)
+    }
+
+    @Test
+    fun updateColor_updatesColor() {
+        val initialColor = Color.WHITE
+        val expectedColor = Color.RED
+
+        fakeExecutor.execute {
+            val rippleAnimation =
+                RippleAnimation(rippleAnimationConfig.apply { this.color = initialColor })
+
+            with(multiRippleController) {
+                play(rippleAnimation)
+                updateColor(expectedColor)
+            }
+
+            assertThat(rippleAnimationConfig.color).isEqualTo(expectedColor)
+        }
     }
 
     @Test

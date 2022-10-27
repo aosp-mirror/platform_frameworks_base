@@ -56,6 +56,23 @@ class RippleAnimationTest : SysuiTestCase() {
     }
 
     @Test
+    fun updateColor_updatesColorCorrectly() {
+        val initialColor = Color.WHITE
+        val expectedColor = Color.RED
+        val config = RippleAnimationConfig(color = initialColor)
+        val rippleAnimation = RippleAnimation(config)
+
+        fakeExecutor.execute {
+            with(rippleAnimation) {
+                play()
+                updateColor(expectedColor)
+            }
+
+            assertThat(config.color).isEqualTo(expectedColor)
+        }
+    }
+
+    @Test
     fun play_updatesIsPlaying() {
         val config = RippleAnimationConfig(duration = 1000L)
         val rippleAnimation = RippleAnimation(config)
