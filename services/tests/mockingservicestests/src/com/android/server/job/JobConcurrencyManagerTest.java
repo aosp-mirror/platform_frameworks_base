@@ -16,10 +16,19 @@
 
 package com.android.server.job;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.job.JobConcurrencyManager.KEY_PKG_CONCURRENCY_LIMIT_EJ;
 import static com.android.server.job.JobConcurrencyManager.KEY_PKG_CONCURRENCY_LIMIT_REGULAR;
+import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_BG;
+import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_BGUSER;
+import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_BGUSER_IMPORTANT;
+import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_EJ;
+import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_FGS;
+import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_NONE;
+import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_TOP;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
@@ -47,15 +56,6 @@ import android.util.ArraySet;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
-import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_BG;
-import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_BGUSER;
-import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_BGUSER_IMPORTANT;
-import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_EJ;
-import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_FGS;
-import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_NONE;
-import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_TOP;
-
 import com.android.internal.R;
 import com.android.internal.app.IBatteryStats;
 import com.android.server.LocalServices;
@@ -73,6 +73,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoSession;
 import org.mockito.quality.Strictness;
+import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -124,6 +125,7 @@ public final class JobConcurrencyManagerTest {
         mMockingSession = mockitoSession()
                 .initMocks(this)
                 .mockStatic(AppGlobals.class)
+                .spyStatic(DeviceConfig.class)
                 .strictness(Strictness.LENIENT)
                 .startMocking();
         final JobSchedulerService jobSchedulerService = mock(JobSchedulerService.class);
@@ -134,6 +136,8 @@ public final class JobConcurrencyManagerTest {
         when(mContext.getResources()).thenReturn(mResources);
         doReturn(mContext).when(jobSchedulerService).getTestableContext();
         mConfigBuilder = new DeviceConfig.Properties.Builder(DeviceConfig.NAMESPACE_JOB_SCHEDULER);
+        doAnswer((Answer<DeviceConfig.Properties>) invocationOnMock -> mConfigBuilder.build())
+                .when(() -> DeviceConfig.getProperties(eq(DeviceConfig.NAMESPACE_JOB_SCHEDULER)));
         mPendingJobQueue = new PendingJobQueue();
         doReturn(mPendingJobQueue).when(jobSchedulerService).getPendingJobQueue();
         doReturn(mIPackageManager).when(AppGlobals::getPackageManager);
@@ -595,7 +599,6 @@ public final class JobConcurrencyManagerTest {
     }
 
     private void updateDeviceConfig() throws Exception {
-        DeviceConfig.setProperties(mConfigBuilder.build());
         mJobConcurrencyManager.updateConfigLocked();
     }
 
