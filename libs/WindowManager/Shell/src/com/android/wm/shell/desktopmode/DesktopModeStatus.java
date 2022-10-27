@@ -48,7 +48,6 @@ public class DesktopModeStatus {
         try {
             int result = Settings.System.getIntForUser(context.getContentResolver(),
                     Settings.System.DESKTOP_MODE, UserHandle.USER_CURRENT);
-            ProtoLog.d(WM_SHELL_DESKTOP_MODE, "isDesktopModeEnabled=%s", result);
             return result != 0;
         } catch (Exception e) {
             ProtoLog.e(WM_SHELL_DESKTOP_MODE, "Failed to read DESKTOP_MODE setting %s", e);
