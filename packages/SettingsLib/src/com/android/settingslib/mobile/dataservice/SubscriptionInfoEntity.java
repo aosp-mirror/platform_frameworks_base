@@ -42,7 +42,7 @@ public class SubscriptionInfoEntity {
             boolean isUsableSubscription, boolean isActiveSubscriptionId,
             boolean isAvailableSubscription, boolean isDefaultVoiceSubscription,
             boolean isDefaultSmsSubscription, boolean isDefaultDataSubscription,
-            boolean isDefaultSubscription) {
+            boolean isDefaultSubscription, boolean isActiveDataSubscriptionId) {
         this.subId = subId;
         this.simSlotIndex = simSlotIndex;
         this.carrierId = carrierId;
@@ -72,6 +72,7 @@ public class SubscriptionInfoEntity {
         this.isDefaultSmsSubscription = isDefaultSmsSubscription;
         this.isDefaultDataSubscription = isDefaultDataSubscription;
         this.isDefaultSubscription = isDefaultSubscription;
+        this.isActiveDataSubscriptionId = isActiveDataSubscriptionId;
     }
 
     @PrimaryKey
@@ -165,6 +166,9 @@ public class SubscriptionInfoEntity {
     @ColumnInfo(name = DataServiceUtils.SubscriptionInfoData.COLUMN_IS_DEFAULT_SUBSCRIPTION)
     public boolean isDefaultSubscription;
 
+    @ColumnInfo(name = DataServiceUtils.SubscriptionInfoData.COLUMN_IS_ACTIVE_DATA_SUBSCRIPTION)
+    public boolean isActiveDataSubscriptionId;
+
     public int getSubId() {
         return Integer.valueOf(subId);
     }
@@ -213,6 +217,7 @@ public class SubscriptionInfoEntity {
         result = 31 * result + Boolean.hashCode(isDefaultSmsSubscription);
         result = 31 * result + Boolean.hashCode(isDefaultDataSubscription);
         result = 31 * result + Boolean.hashCode(isDefaultSubscription);
+        result = 31 * result + Boolean.hashCode(isActiveDataSubscriptionId);
         return result;
     }
 
@@ -254,7 +259,8 @@ public class SubscriptionInfoEntity {
                 && isDefaultVoiceSubscription == info.isDefaultVoiceSubscription
                 && isDefaultSmsSubscription == info.isDefaultSmsSubscription
                 && isDefaultDataSubscription == info.isDefaultDataSubscription
-                && isDefaultSubscription == info.isDefaultSubscription;
+                && isDefaultSubscription == info.isDefaultSubscription
+                && isActiveDataSubscriptionId == info.isActiveDataSubscriptionId;
     }
 
     public String toString() {
@@ -317,6 +323,8 @@ public class SubscriptionInfoEntity {
                 .append(isDefaultDataSubscription)
                 .append(", isDefaultSubscription = ")
                 .append(isDefaultSubscription)
+                .append(", isActiveDataSubscriptionId = ")
+                .append(isActiveDataSubscriptionId)
                 .append(")}");
         return builder.toString();
     }
