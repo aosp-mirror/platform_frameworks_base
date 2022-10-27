@@ -22,13 +22,14 @@ import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
+import com.android.systemui.keyguard.data.quickaffordance.BuiltInKeyguardQuickAffordanceKeys
+import com.android.systemui.keyguard.data.quickaffordance.FakeKeyguardQuickAffordanceConfig
+import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceConfig
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.domain.model.KeyguardQuickAffordanceModel
-import com.android.systemui.keyguard.domain.model.KeyguardQuickAffordancePosition
-import com.android.systemui.keyguard.domain.quickaffordance.FakeKeyguardQuickAffordanceConfig
 import com.android.systemui.keyguard.domain.quickaffordance.FakeKeyguardQuickAffordanceRegistry
-import com.android.systemui.keyguard.domain.quickaffordance.KeyguardQuickAffordanceConfig
-import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordanceToggleState
+import com.android.systemui.keyguard.shared.quickaffordance.ActivationState
+import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancePosition
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.KeyguardStateController
@@ -69,9 +70,21 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
         repository = FakeKeyguardRepository()
         repository.setKeyguardShowing(true)
 
-        homeControls = object : FakeKeyguardQuickAffordanceConfig() {}
-        quickAccessWallet = object : FakeKeyguardQuickAffordanceConfig() {}
-        qrCodeScanner = object : FakeKeyguardQuickAffordanceConfig() {}
+        homeControls =
+            object :
+                FakeKeyguardQuickAffordanceConfig(
+                    BuiltInKeyguardQuickAffordanceKeys.HOME_CONTROLS
+                ) {}
+        quickAccessWallet =
+            object :
+                FakeKeyguardQuickAffordanceConfig(
+                    BuiltInKeyguardQuickAffordanceKeys.QUICK_ACCESS_WALLET
+                ) {}
+        qrCodeScanner =
+            object :
+                FakeKeyguardQuickAffordanceConfig(
+                    BuiltInKeyguardQuickAffordanceKeys.QR_CODE_SCANNER
+                ) {}
 
         underTest =
             KeyguardQuickAffordanceInteractor(
@@ -99,11 +112,11 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
 
     @Test
     fun `quickAffordance - bottom start affordance is visible`() = runBlockingTest {
-        val configKey = homeControls::class
+        val configKey = BuiltInKeyguardQuickAffordanceKeys.HOME_CONTROLS
         homeControls.setState(
-            KeyguardQuickAffordanceConfig.State.Visible(
+            KeyguardQuickAffordanceConfig.LockScreenState.Visible(
                 icon = ICON,
-                toggle = KeyguardQuickAffordanceToggleState.On,
+                activationState = ActivationState.Active,
             )
         )
 
@@ -124,15 +137,15 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
         assertThat(visibleModel.icon).isEqualTo(ICON)
         assertThat(visibleModel.icon.contentDescription)
             .isEqualTo(ContentDescription.Resource(res = CONTENT_DESCRIPTION_RESOURCE_ID))
-        assertThat(visibleModel.toggle).isEqualTo(KeyguardQuickAffordanceToggleState.On)
+        assertThat(visibleModel.activationState).isEqualTo(ActivationState.Active)
         job.cancel()
     }
 
     @Test
     fun `quickAffordance - bottom end affordance is visible`() = runBlockingTest {
-        val configKey = quickAccessWallet::class
+        val configKey = BuiltInKeyguardQuickAffordanceKeys.QUICK_ACCESS_WALLET
         quickAccessWallet.setState(
-            KeyguardQuickAffordanceConfig.State.Visible(
+            KeyguardQuickAffordanceConfig.LockScreenState.Visible(
                 icon = ICON,
             )
         )
@@ -154,7 +167,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
         assertThat(visibleModel.icon).isEqualTo(ICON)
         assertThat(visibleModel.icon.contentDescription)
             .isEqualTo(ContentDescription.Resource(res = CONTENT_DESCRIPTION_RESOURCE_ID))
-        assertThat(visibleModel.toggle).isEqualTo(KeyguardQuickAffordanceToggleState.NotSupported)
+        assertThat(visibleModel.activationState).isEqualTo(ActivationState.NotSupported)
         job.cancel()
     }
 
@@ -162,7 +175,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
     fun `quickAffordance - bottom start affordance hidden while dozing`() = runBlockingTest {
         repository.setDozing(true)
         homeControls.setState(
-            KeyguardQuickAffordanceConfig.State.Visible(
+            KeyguardQuickAffordanceConfig.LockScreenState.Visible(
                 icon = ICON,
             )
         )
@@ -182,7 +195,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
         runBlockingTest {
             repository.setKeyguardShowing(false)
             homeControls.setState(
-                KeyguardQuickAffordanceConfig.State.Visible(
+                KeyguardQuickAffordanceConfig.LockScreenState.Visible(
                     icon = ICON,
                 )
             )

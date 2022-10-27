@@ -88,6 +88,7 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
             flagMap,
             restarter
         )
+        mFeatureFlagsDebug.init()
         verify(flagManager).onSettingsChangedAction = any()
         broadcastReceiver = withArgCaptor {
             verify(mockContext).registerReceiver(capture(), any(), nullable(), nullable(),
@@ -255,11 +256,11 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
         broadcastReceiver.onReceive(mockContext, Intent())
         broadcastReceiver.onReceive(mockContext, Intent("invalid action"))
         broadcastReceiver.onReceive(mockContext, Intent(FlagManager.ACTION_SET_FLAG))
-        setByBroadcast(0, false)     // unknown id does nothing
-        setByBroadcast(1, "string")  // wrong type does nothing
-        setByBroadcast(2, 123)       // wrong type does nothing
-        setByBroadcast(3, false)     // wrong type does nothing
-        setByBroadcast(4, 123)       // wrong type does nothing
+        setByBroadcast(0, false) // unknown id does nothing
+        setByBroadcast(1, "string") // wrong type does nothing
+        setByBroadcast(2, 123) // wrong type does nothing
+        setByBroadcast(3, false) // wrong type does nothing
+        setByBroadcast(4, 123) // wrong type does nothing
         verifyNoMoreInteractions(flagManager, secureSettings)
     }
 

@@ -1,21 +1,21 @@
 /*
- *  Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  *
  */
 
-package com.android.systemui.keyguard.domain.quickaffordance
+package com.android.systemui.keyguard.data.quickaffordance
 
 import android.content.Context
 import android.content.Intent
@@ -51,19 +51,21 @@ constructor(
 
     private val appContext = context.applicationContext
 
-    override val state: Flow<KeyguardQuickAffordanceConfig.State> =
+    override val key: String = BuiltInKeyguardQuickAffordanceKeys.HOME_CONTROLS
+
+    override val lockScreenState: Flow<KeyguardQuickAffordanceConfig.LockScreenState> =
         component.canShowWhileLockedSetting.flatMapLatest { canShowWhileLocked ->
             if (canShowWhileLocked) {
                 stateInternal(component.getControlsListingController().getOrNull())
             } else {
-                flowOf(KeyguardQuickAffordanceConfig.State.Hidden)
+                flowOf(KeyguardQuickAffordanceConfig.LockScreenState.Hidden)
             }
         }
 
-    override fun onQuickAffordanceClicked(
+    override fun onTriggered(
         expandable: Expandable?,
-    ): KeyguardQuickAffordanceConfig.OnClickedResult {
-        return KeyguardQuickAffordanceConfig.OnClickedResult.StartActivity(
+    ): KeyguardQuickAffordanceConfig.OnTriggeredResult {
+        return KeyguardQuickAffordanceConfig.OnTriggeredResult.StartActivity(
             intent =
                 Intent(appContext, ControlsActivity::class.java)
                     .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -77,9 +79,9 @@ constructor(
 
     private fun stateInternal(
         listingController: ControlsListingController?,
-    ): Flow<KeyguardQuickAffordanceConfig.State> {
+    ): Flow<KeyguardQuickAffordanceConfig.LockScreenState> {
         if (listingController == null) {
-            return flowOf(KeyguardQuickAffordanceConfig.State.Hidden)
+            return flowOf(KeyguardQuickAffordanceConfig.LockScreenState.Hidden)
         }
 
         return conflatedCallbackFlow {
@@ -114,7 +116,7 @@ constructor(
         hasServiceInfos: Boolean,
         visibility: ControlsComponent.Visibility,
         @DrawableRes iconResourceId: Int?,
-    ): KeyguardQuickAffordanceConfig.State {
+    ): KeyguardQuickAffordanceConfig.LockScreenState {
         return if (
             isFeatureEnabled &&
                 hasFavorites &&
@@ -122,7 +124,7 @@ constructor(
                 iconResourceId != null &&
                 visibility == ControlsComponent.Visibility.AVAILABLE
         ) {
-            KeyguardQuickAffordanceConfig.State.Visible(
+            KeyguardQuickAffordanceConfig.LockScreenState.Visible(
                 icon =
                     Icon.Resource(
                         res = iconResourceId,
@@ -133,7 +135,7 @@ constructor(
                     ),
             )
         } else {
-            KeyguardQuickAffordanceConfig.State.Hidden
+            KeyguardQuickAffordanceConfig.LockScreenState.Hidden
         }
     }
 

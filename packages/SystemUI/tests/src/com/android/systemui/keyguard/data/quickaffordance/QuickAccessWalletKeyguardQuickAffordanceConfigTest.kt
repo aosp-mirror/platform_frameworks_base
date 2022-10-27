@@ -1,21 +1,21 @@
 /*
- *  Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  *
  */
 
-package com.android.systemui.keyguard.domain.quickaffordance
+package com.android.systemui.keyguard.data.quickaffordance
 
 import android.graphics.drawable.Drawable
 import android.service.quickaccesswallet.GetWalletCardsResponse
@@ -67,11 +67,11 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
     @Test
     fun `affordance - keyguard showing - has wallet card - visible model`() = runBlockingTest {
         setUpState()
-        var latest: KeyguardQuickAffordanceConfig.State? = null
+        var latest: KeyguardQuickAffordanceConfig.LockScreenState? = null
 
-        val job = underTest.state.onEach { latest = it }.launchIn(this)
+        val job = underTest.lockScreenState.onEach { latest = it }.launchIn(this)
 
-        val visibleModel = latest as KeyguardQuickAffordanceConfig.State.Visible
+        val visibleModel = latest as KeyguardQuickAffordanceConfig.LockScreenState.Visible
         assertThat(visibleModel.icon)
             .isEqualTo(
                 Icon.Loaded(
@@ -88,11 +88,11 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
     @Test
     fun `affordance - wallet not enabled - model is none`() = runBlockingTest {
         setUpState(isWalletEnabled = false)
-        var latest: KeyguardQuickAffordanceConfig.State? = null
+        var latest: KeyguardQuickAffordanceConfig.LockScreenState? = null
 
-        val job = underTest.state.onEach { latest = it }.launchIn(this)
+        val job = underTest.lockScreenState.onEach { latest = it }.launchIn(this)
 
-        assertThat(latest).isEqualTo(KeyguardQuickAffordanceConfig.State.Hidden)
+        assertThat(latest).isEqualTo(KeyguardQuickAffordanceConfig.LockScreenState.Hidden)
 
         job.cancel()
     }
@@ -100,11 +100,11 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
     @Test
     fun `affordance - query not successful - model is none`() = runBlockingTest {
         setUpState(isWalletQuerySuccessful = false)
-        var latest: KeyguardQuickAffordanceConfig.State? = null
+        var latest: KeyguardQuickAffordanceConfig.LockScreenState? = null
 
-        val job = underTest.state.onEach { latest = it }.launchIn(this)
+        val job = underTest.lockScreenState.onEach { latest = it }.launchIn(this)
 
-        assertThat(latest).isEqualTo(KeyguardQuickAffordanceConfig.State.Hidden)
+        assertThat(latest).isEqualTo(KeyguardQuickAffordanceConfig.LockScreenState.Hidden)
 
         job.cancel()
     }
@@ -112,11 +112,11 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
     @Test
     fun `affordance - missing icon - model is none`() = runBlockingTest {
         setUpState(hasWalletIcon = false)
-        var latest: KeyguardQuickAffordanceConfig.State? = null
+        var latest: KeyguardQuickAffordanceConfig.LockScreenState? = null
 
-        val job = underTest.state.onEach { latest = it }.launchIn(this)
+        val job = underTest.lockScreenState.onEach { latest = it }.launchIn(this)
 
-        assertThat(latest).isEqualTo(KeyguardQuickAffordanceConfig.State.Hidden)
+        assertThat(latest).isEqualTo(KeyguardQuickAffordanceConfig.LockScreenState.Hidden)
 
         job.cancel()
     }
@@ -124,24 +124,24 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
     @Test
     fun `affordance - no selected card - model is none`() = runBlockingTest {
         setUpState(hasWalletIcon = false)
-        var latest: KeyguardQuickAffordanceConfig.State? = null
+        var latest: KeyguardQuickAffordanceConfig.LockScreenState? = null
 
-        val job = underTest.state.onEach { latest = it }.launchIn(this)
+        val job = underTest.lockScreenState.onEach { latest = it }.launchIn(this)
 
-        assertThat(latest).isEqualTo(KeyguardQuickAffordanceConfig.State.Hidden)
+        assertThat(latest).isEqualTo(KeyguardQuickAffordanceConfig.LockScreenState.Hidden)
 
         job.cancel()
     }
 
     @Test
-    fun onQuickAffordanceClicked() {
+    fun onQuickAffordanceTriggered() {
         val animationController: ActivityLaunchAnimator.Controller = mock()
         val expandable: Expandable = mock {
             whenever(this.activityLaunchController()).thenReturn(animationController)
         }
 
-        assertThat(underTest.onQuickAffordanceClicked(expandable))
-            .isEqualTo(KeyguardQuickAffordanceConfig.OnClickedResult.Handled)
+        assertThat(underTest.onTriggered(expandable))
+            .isEqualTo(KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled)
         verify(walletController)
             .startQuickAccessUiIntent(
                 activityStarter,

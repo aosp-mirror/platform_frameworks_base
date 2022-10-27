@@ -69,22 +69,28 @@ class DesktopModeTaskRepository {
 
     /**
      * Mark a task with given [taskId] as active.
+     *
+     * @return `true` if the task was not active
      */
-    fun addActiveTask(taskId: Int) {
+    fun addActiveTask(taskId: Int): Boolean {
         val added = activeTasks.add(taskId)
         if (added) {
             activeTasksListeners.onEach { it.onActiveTasksChanged() }
         }
+        return added
     }
 
     /**
      * Remove task with given [taskId] from active tasks.
+     *
+     * @return `true` if the task was active
      */
-    fun removeActiveTask(taskId: Int) {
+    fun removeActiveTask(taskId: Int): Boolean {
         val removed = activeTasks.remove(taskId)
         if (removed) {
             activeTasksListeners.onEach { it.onActiveTasksChanged() }
         }
+        return removed
     }
 
     /**

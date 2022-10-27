@@ -16,6 +16,8 @@
 
 package com.android.systemui.flags;
 
+import static com.android.systemui.flags.FlagsCommonModule.ALL_FLAGS;
+
 import androidx.annotation.NonNull;
 
 import com.android.systemui.statusbar.commandline.Command;
@@ -42,7 +44,7 @@ public class FlagCommand implements Command {
     @Inject
     FlagCommand(
             FeatureFlagsDebug featureFlags,
-            @Named(FeatureFlagsDebug.ALL_FLAGS) Map<Integer, Flag<?>> allFlags
+            @Named(ALL_FLAGS) Map<Integer, Flag<?>> allFlags
     ) {
         mFeatureFlags = featureFlags;
         mAllFlags = allFlags;
