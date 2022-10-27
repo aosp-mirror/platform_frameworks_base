@@ -311,7 +311,7 @@ object Flags {
 
     // 1500 - chooser
     // TODO(b/254512507): Tracking Bug
-    val CHOOSER_UNBUNDLED = UnreleasedFlag(1500)
+    val CHOOSER_UNBUNDLED = UnreleasedFlag(1500, true)
 
     // 1700 - clipboard
     @JvmField val CLIPBOARD_OVERLAY_REFACTOR = UnreleasedFlag(1700)
