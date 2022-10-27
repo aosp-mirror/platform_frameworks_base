@@ -349,7 +349,7 @@ public class VoiceInteractionService extends Service {
      * {@link #createAlwaysOnHotwordDetector(String, Locale, PersistableBundle, SharedMemory,
      * AlwaysOnHotwordDetector.Callback)} or {@link #createHotwordDetector(PersistableBundle,
      * SharedMemory, HotwordDetector.Callback)}, call this will throw an
-     * {@link IllegalArgumentException}.
+     * {@link IllegalStateException}.
      *
      * @param keyphrase The keyphrase that's being used, for example "Hello Android".
      * @param locale The locale for which the enrollment needs to be performed.
@@ -385,7 +385,7 @@ public class VoiceInteractionService extends Service {
      *
      * <p>Note: If there are any active detectors that are created by using
      * {@link #createAlwaysOnHotwordDetector(String, Locale, AlwaysOnHotwordDetector.Callback)},
-     * call this will throw an {@link IllegalArgumentException}.
+     * call this will throw an {@link IllegalStateException}.
      *
      * @param keyphrase The keyphrase that's being used, for example "Hello Android".
      * @param locale The locale for which the enrollment needs to be performed.
@@ -428,13 +428,18 @@ public class VoiceInteractionService extends Service {
             if (!CompatChanges.isChangeEnabled(MULTIPLE_ACTIVE_HOTWORD_DETECTORS)) {
                 // Allow only one concurrent recognition via the APIs.
                 safelyShutdownAllHotwordDetectors();
-            }
-
-            for (HotwordDetector detector : mActiveHotwordDetectors) {
-                if (detector.isUsingHotwordDetectionService() != supportHotwordDetectionService) {
-                    throw new IllegalArgumentException(
-                            "It disallows to create trusted and non-trusted detectors "
-                                    + "at the same time.");
+            } else {
+                for (HotwordDetector detector : mActiveHotwordDetectors) {
+                    if (detector.isUsingHotwordDetectionService()
+                            != supportHotwordDetectionService) {
+                        throw new IllegalStateException(
+                                "It disallows to create trusted and non-trusted detectors "
+                                        + "at the same time.");
+                    } else if (detector instanceof AlwaysOnHotwordDetector) {
+                        throw new IllegalStateException(
+                                "There is already an active AlwaysOnHotwordDetector. "
+                                        + "It must be destroyed to create a new one.");
+                    }
                 }
             }
 
@@ -442,11 +447,7 @@ public class VoiceInteractionService extends Service {
                     callback, mKeyphraseEnrollmentInfo, mSystemService,
                     getApplicationContext().getApplicationInfo().targetSdkVersion,
                     supportHotwordDetectionService);
-            if (!mActiveHotwordDetectors.add(dspDetector)) {
-                throw new IllegalArgumentException(
-                        "the keyphrase=" + keyphrase + " and locale=" + locale
-                                + " are already used by another always-on detector");
-            }
+            mActiveHotwordDetectors.add(dspDetector);
 
             try {
                 dspDetector.registerOnDestroyListener(this::onHotwordDetectorDestroyed);
@@ -480,7 +481,7 @@ public class VoiceInteractionService extends Service {
      *
      * <p>Note: If there are any active detectors that are created by using
      * {@link #createAlwaysOnHotwordDetector(String, Locale, AlwaysOnHotwordDetector.Callback)},
-     * call this will throw an {@link IllegalArgumentException}.
+     * call this will throw an {@link IllegalStateException}.
      *
      * @param options Application configuration data to be provided to the
      * {@link HotwordDetectionService}. PersistableBundle does not allow any remotable objects or
@@ -513,11 +514,11 @@ public class VoiceInteractionService extends Service {
             } else {
                 for (HotwordDetector detector : mActiveHotwordDetectors) {
                     if (!detector.isUsingHotwordDetectionService()) {
-                        throw new IllegalArgumentException(
+                        throw new IllegalStateException(
                                 "It disallows to create trusted and non-trusted detectors "
                                         + "at the same time.");
                     } else if (detector instanceof SoftwareHotwordDetector) {
-                        throw new IllegalArgumentException(
+                        throw new IllegalStateException(
                                 "There is already an active SoftwareHotwordDetector. "
                                         + "It must be destroyed to create a new one.");
                     }
@@ -527,6 +528,7 @@ public class VoiceInteractionService extends Service {
             SoftwareHotwordDetector softwareHotwordDetector =
                     new SoftwareHotwordDetector(
                             mSystemService, null, callback);
+            mActiveHotwordDetectors.add(softwareHotwordDetector);
 
             try {
                 softwareHotwordDetector.registerOnDestroyListener(
