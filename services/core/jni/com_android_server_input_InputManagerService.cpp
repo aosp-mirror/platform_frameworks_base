@@ -372,37 +372,37 @@ private:
     Mutex mLock;
     struct Locked {
         // Display size information.
-        std::vector<DisplayViewport> viewports;
+        std::vector<DisplayViewport> viewports{};
 
         // True if System UI is less noticeable.
-        bool systemUiLightsOut;
+        bool systemUiLightsOut{false};
 
         // Pointer speed.
-        int32_t pointerSpeed;
+        int32_t pointerSpeed{0};
 
         // Pointer acceleration.
-        float pointerAcceleration;
+        float pointerAcceleration{android::os::IInputConstants::DEFAULT_POINTER_ACCELERATION};
 
         // True if pointer gestures are enabled.
-        bool pointerGesturesEnabled;
+        bool pointerGesturesEnabled{true};
 
         // Show touches feature enable/disable.
-        bool showTouches;
+        bool showTouches{false};
 
         // The latest request to enable or disable Pointer Capture.
-        PointerCaptureRequest pointerCaptureRequest;
+        PointerCaptureRequest pointerCaptureRequest{};
 
         // Sprite controller singleton, created on first use.
-        sp<SpriteController> spriteController;
+        sp<SpriteController> spriteController{};
 
         // Pointer controller singleton, created and destroyed as needed.
-        std::weak_ptr<PointerController> pointerController;
+        std::weak_ptr<PointerController> pointerController{};
 
         // Input devices to be disabled
-        std::set<int32_t> disabledInputDevices;
+        std::set<int32_t> disabledInputDevices{};
 
         // Associated Pointer controller display.
-        int32_t pointerDisplayId;
+        int32_t pointerDisplayId{ADISPLAY_ID_DEFAULT};
     } mLocked GUARDED_BY(mLock);
 
     std::atomic<bool> mInteractive;
@@ -421,16 +421,6 @@ NativeInputManager::NativeInputManager(jobject serviceObj, const sp<Looper>& loo
 
     mServiceObj = env->NewGlobalRef(serviceObj);
 
-    {
-        AutoMutex _l(mLock);
-        mLocked.systemUiLightsOut = false;
-        mLocked.pointerSpeed = 0;
-        mLocked.pointerAcceleration = android::os::IInputConstants::DEFAULT_POINTER_ACCELERATION;
-        mLocked.pointerGesturesEnabled = true;
-        mLocked.showTouches = false;
-        mLocked.pointerDisplayId = ADISPLAY_ID_DEFAULT;
-    }
-    mInteractive = true;
     InputManager* im = new InputManager(this, this);
     mInputManager = im;
     defaultServiceManager()->addService(String16("inputflinger"), im);
