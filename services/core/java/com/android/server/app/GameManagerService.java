@@ -117,6 +117,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Service to manage game related features.
@@ -556,16 +557,21 @@ public final class GameManagerService extends IGameManagerService.Stub {
         private final String mPackageName;
         private final Object mModeConfigLock = new Object();
         @GuardedBy("mModeConfigLock")
-        private final ArrayMap<Integer, GameModeConfiguration> mModeConfigs;
+        private final ArrayMap<Integer, GameModeConfiguration> mModeConfigs = new ArrayMap<>();
+        // if adding new properties or make any of the below overridable, the method
+        // copyAndApplyOverride should be updated accordingly
         private boolean mPerfModeOptedIn = false;
         private boolean mBatteryModeOptedIn = false;
         private boolean mAllowDownscale = true;
         private boolean mAllowAngle = true;
         private boolean mAllowFpsOverride = true;
 
+        GamePackageConfiguration(String packageName) {
+            mPackageName = packageName;
+        }
+
         GamePackageConfiguration(String packageName, int userId) {
             mPackageName = packageName;
-            mModeConfigs = new ArrayMap<>();
 
             try {
                 final ApplicationInfo ai = mPackageManager.getApplicationInfoAsUser(packageName,
@@ -649,6 +655,13 @@ public final class GameManagerService extends IGameManagerService.Stub {
             return xmlFound;
         }
 
+        GameModeConfiguration getOrAddDefaultGameModeConfiguration(int gameMode) {
+            synchronized (mModeConfigLock) {
+                mModeConfigs.putIfAbsent(gameMode, new GameModeConfiguration(gameMode));
+                return mModeConfigs.get(gameMode);
+            }
+        }
+
         /**
          * GameModeConfiguration contains all the values for all the interventions associated with
          * a game mode.
@@ -661,14 +674,22 @@ public final class GameManagerService extends IGameManagerService.Stub {
             public static final String FPS_KEY = "fps";
             public static final String DEFAULT_SCALING = "1.0";
             public static final String DEFAULT_FPS = "";
+            public static final boolean DEFAULT_USE_ANGLE = false;
+            public static final int DEFAULT_LOADING_BOOST_DURATION = -1;
             public static final String ANGLE_KEY = "useAngle";
             public static final String LOADING_BOOST_KEY = "loadingBoost";
 
             private final @GameMode int mGameMode;
-            private String mScaling;
-            private String mFps;
+            private String mScaling = DEFAULT_SCALING;
+            private String mFps = DEFAULT_FPS;
             private final boolean mUseAngle;
             private final int mLoadingBoostDuration;
+
+            GameModeConfiguration(int gameMode) {
+                mGameMode = gameMode;
+                mUseAngle = DEFAULT_USE_ANGLE;
+                mLoadingBoostDuration = DEFAULT_LOADING_BOOST_DURATION;
+            }
 
             GameModeConfiguration(KeyValueListParser parser) {
                 mGameMode = parser.getInt(MODE_KEY, GameManager.GAME_MODE_UNSUPPORTED);
@@ -830,6 +851,42 @@ public final class GameManagerService extends IGameManagerService.Stub {
             synchronized (mModeConfigLock) {
                 return mModeConfigs.size() > 0 || mBatteryModeOptedIn || mPerfModeOptedIn;
             }
+        }
+
+        GamePackageConfiguration copyAndApplyOverride(GamePackageConfiguration overrideConfig) {
+            GamePackageConfiguration copy = new GamePackageConfiguration(mPackageName);
+            // if a game mode is overridden, we treat it with the highest priority and reset any
+            // opt-in game modes so that interventions are always executed.
+            copy.mPerfModeOptedIn = mPerfModeOptedIn && !(overrideConfig != null
+                    && overrideConfig.getGameModeConfiguration(GameManager.GAME_MODE_PERFORMANCE)
+                    != null);
+            copy.mBatteryModeOptedIn = mBatteryModeOptedIn && !(overrideConfig != null
+                    && overrideConfig.getGameModeConfiguration(GameManager.GAME_MODE_BATTERY)
+                    != null);
+
+            // if any game mode is overridden, we will consider all interventions forced-active,
+            // this can be done more granular by checking if a specific intervention is
+            // overridden under each game mode override, but only if necessary.
+            copy.mAllowDownscale = mAllowDownscale || overrideConfig != null;
+            copy.mAllowAngle = mAllowAngle || overrideConfig != null;
+            copy.mAllowFpsOverride = mAllowFpsOverride || overrideConfig != null;
+            if (overrideConfig != null) {
+                synchronized (copy.mModeConfigLock) {
+                    synchronized (mModeConfigLock) {
+                        for (Map.Entry<Integer, GameModeConfiguration> entry :
+                                mModeConfigs.entrySet()) {
+                            copy.mModeConfigs.put(entry.getKey(), entry.getValue());
+                        }
+                    }
+                    synchronized (overrideConfig.mModeConfigLock) {
+                        for (Map.Entry<Integer, GameModeConfiguration> entry :
+                                overrideConfig.mModeConfigs.entrySet()) {
+                            copy.mModeConfigs.put(entry.getKey(), entry.getValue());
+                        }
+                    }
+                }
+            }
+            return copy;
         }
 
         public String toString() {
@@ -1402,13 +1459,13 @@ public final class GameManagerService extends IGameManagerService.Stub {
             // look for the existing override GamePackageConfiguration
             overrideConfig = mOverrideConfigs.get(packageName);
             if (overrideConfig == null) {
-                overrideConfig = new GamePackageConfiguration(packageName, userId);
+                overrideConfig = new GamePackageConfiguration(packageName);
                 mOverrideConfigs.put(packageName, overrideConfig);
             }
         }
         // modify GameModeConfiguration intervention settings
         GamePackageConfiguration.GameModeConfiguration overrideModeConfig =
-                overrideConfig.getGameModeConfiguration(gameMode);
+                overrideConfig.getOrAddDefaultGameModeConfiguration(gameMode);
 
         if (fpsStr != null) {
             overrideModeConfig.setFpsStr(fpsStr);
@@ -1704,16 +1761,18 @@ public final class GameManagerService extends IGameManagerService.Stub {
      */
     @VisibleForTesting
     public GamePackageConfiguration getConfig(String packageName) {
-        GamePackageConfiguration packageConfig = null;
+        GamePackageConfiguration overrideConfig = null;
+        GamePackageConfiguration config;
+        synchronized (mDeviceConfigLock) {
+            config = mConfigs.get(packageName);
+        }
         synchronized (mOverrideConfigLock) {
-            packageConfig = mOverrideConfigs.get(packageName);
+            overrideConfig = mOverrideConfigs.get(packageName);
         }
-        if (packageConfig == null) {
-            synchronized (mDeviceConfigLock) {
-                packageConfig = mConfigs.get(packageName);
-            }
+        if (overrideConfig == null || config == null) {
+            return overrideConfig == null ? config : overrideConfig;
         }
-        return packageConfig;
+        return config.copyAndApplyOverride(overrideConfig);
     }
 
     private void registerPackageReceiver() {
