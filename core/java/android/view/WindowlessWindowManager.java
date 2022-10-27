@@ -30,6 +30,7 @@ import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.MergedConfiguration;
+import android.view.WindowInsets.Type.InsetsType;
 import android.window.ClientWindowFrames;
 import android.window.OnBackInvokedCallbackInfo;
 
@@ -147,7 +148,7 @@ public class WindowlessWindowManager implements IWindowSession {
      */
     @Override
     public int addToDisplay(IWindow window, WindowManager.LayoutParams attrs,
-            int viewVisibility, int displayId, InsetsVisibilities requestedVisibilities,
+            int viewVisibility, int displayId, @InsetsType int requestedVisibleTypes,
             InputChannel outInputChannel, InsetsState outInsetsState,
             InsetsSourceControl[] outActiveControls, Rect outAttachedFrame,
             float[] outSizeCompatScale) {
@@ -198,11 +199,11 @@ public class WindowlessWindowManager implements IWindowSession {
      */
     @Override
     public int addToDisplayAsUser(IWindow window, WindowManager.LayoutParams attrs,
-            int viewVisibility, int displayId, int userId, InsetsVisibilities requestedVisibilities,
+            int viewVisibility, int displayId, int userId, @InsetsType int requestedVisibleTypes,
             InputChannel outInputChannel, InsetsState outInsetsState,
             InsetsSourceControl[] outActiveControls, Rect outAttachedFrame,
             float[] outSizeCompatScale) {
-        return addToDisplay(window, attrs, viewVisibility, displayId, requestedVisibilities,
+        return addToDisplay(window, attrs, viewVisibility, displayId, requestedVisibleTypes,
                 outInputChannel, outInsetsState, outActiveControls, outAttachedFrame,
                 outSizeCompatScale);
     }
@@ -491,7 +492,8 @@ public class WindowlessWindowManager implements IWindowSession {
     }
 
     @Override
-    public void updateRequestedVisibilities(IWindow window, InsetsVisibilities visibilities)  {
+    public void updateRequestedVisibleTypes(IWindow window,
+            @InsetsType int requestedVisibleTypes)  {
     }
 
     @Override

@@ -183,6 +183,7 @@ public final class VelocityTracker {
     private static native float nativeGetVelocity(long ptr, int axis, int id);
     private static native boolean nativeGetEstimator(
             long ptr, int axis, int id, Estimator outEstimator);
+    private static native boolean nativeIsAxisSupported(int axis);
 
     static {
         // Strategy string and IDs mapping lookup.
@@ -305,6 +306,22 @@ public final class VelocityTracker {
     }
 
     /**
+     * Checks whether a given motion axis is supported for velocity tracking.
+     *
+     * <p>The axis values that would make sense to use for this method are the ones defined in the
+     * {@link MotionEvent} class.
+     *
+     * @param axis The axis to check for velocity support.
+     * @return {@code true} if {@code axis} is supported for velocity tracking, or {@code false}
+     * otherwise.
+     * @see #getAxisVelocity(int, int)
+     * @see #getAxisVelocity(int)
+     */
+    public boolean isAxisSupported(int axis) {
+        return nativeIsAxisSupported(axis);
+    }
+
+    /**
      * Reset the velocity tracker back to its initial state.
      */
     public void clear() {
@@ -345,7 +362,9 @@ public final class VelocityTracker {
      * {@link #getYVelocity()}.
      *
      * @param units The units you would like the velocity in.  A value of 1
-     * provides pixels per millisecond, 1000 provides pixels per second, etc.
+     * provides units per millisecond, 1000 provides units per second, etc.
+     * Note that the units referred to here are the same units with which motion is reported. For
+     * axes X and Y, the units are pixels.
      * @param maxVelocity The maximum velocity that can be computed by this method.
      * This value must be declared in the same unit as the units parameter. This value
      * must be positive.
@@ -397,6 +416,45 @@ public final class VelocityTracker {
     }
 
     /**
+     * Retrieve the last computed velocity for a given motion axis. You must first call
+     * {@link #computeCurrentVelocity(int)} or {@link #computeCurrentVelocity(int, float)} before
+     * calling this function.
+     *
+     * <p>In addition to {@link MotionEvent#AXIS_X} and {@link MotionEvent#AXIS_Y} which have been
+     * supported since the introduction of this class, the following axes are supported for this
+     * method:
+     * <ul>
+     *   <li> {@link MotionEvent#AXIS_SCROLL}: supported starting
+     *        {@link Build.VERSION_CODES#UPSIDE_DOWN_CAKE}
+     * </ul>
+     *
+     * @param axis Which axis' velocity to return.
+     * @param id Which pointer's velocity to return.
+     * @return The previously computed velocity for {@code axis} for pointer ID of {@code id} if
+     * {@code axis} is supported for velocity tracking, or 0 if velocity tracking is not supported
+     * for the axis.
+     * @see #isAxisSupported(int)
+     */
+    public float getAxisVelocity(int axis, int id) {
+        return nativeGetVelocity(mPtr, axis, id);
+    }
+
+    /**
+     * Equivalent to calling {@link #getAxisVelocity(int, int)} for {@code axis} and the active
+     * pointer.
+     *
+     * @param axis Which axis' velocity to return.
+     * @return The previously computed velocity for {@code axis} for the active pointer if
+     * {@code axis} is supported for velocity tracking, or 0 if velocity tracking is not supported
+     * for the axis.
+     * @see #isAxisSupported(int)
+     * @see #getAxisVelocity(int, int)
+     */
+    public float getAxisVelocity(int axis) {
+        return nativeGetVelocity(mPtr, axis, ACTIVE_POINTER_ID);
+    }
+
+    /**
      * Get an estimator for the movements of a pointer using past movements of the
      * pointer to predict future movements.
      *
@@ -426,8 +484,8 @@ public final class VelocityTracker {
      * Past estimated positions are at negative times and future estimated positions
      * are at positive times.
      *
-     * First coefficient is position (in pixels), second is velocity (in pixels per second),
-     * third is acceleration (in pixels per second squared).
+     * First coefficient is position (in units), second is velocity (in units per second),
+     * third is acceleration (in units per second squared).
      *
      * @hide For internal use only.  Not a final API.
      */

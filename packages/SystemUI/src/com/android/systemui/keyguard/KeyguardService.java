@@ -518,7 +518,7 @@ public class KeyguardService extends Service {
                 @PowerManager.WakeReason int pmWakeReason, boolean cameraGestureTriggered) {
             Trace.beginSection("KeyguardService.mBinder#onStartedWakingUp");
             checkPermission();
-            mKeyguardViewMediator.onStartedWakingUp(cameraGestureTriggered);
+            mKeyguardViewMediator.onStartedWakingUp(pmWakeReason, cameraGestureTriggered);
             mKeyguardLifecyclesDispatcher.dispatch(
                     KeyguardLifecyclesDispatcher.STARTED_WAKING_UP, pmWakeReason);
             Trace.endSection();

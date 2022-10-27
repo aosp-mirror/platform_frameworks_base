@@ -41,6 +41,7 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_SYNC_ENGINE;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.AppTransition.MAX_APP_TRANSITION_DURATION;
 import static com.android.server.wm.AppTransition.isActivityTransitOld;
+import static com.android.server.wm.AppTransition.isTaskFragmentTransitOld;
 import static com.android.server.wm.AppTransition.isTaskTransitOld;
 import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
 import static com.android.server.wm.IdentifierProto.HASH_CODE;
@@ -2999,10 +3000,17 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             // {@link Activity#overridePendingTransition(int, int, int)}.
             @ColorInt int backdropColor = 0;
             if (controller.isFromActivityEmbedding()) {
-                final int animAttr = AppTransition.mapOpenCloseTransitTypes(transit, enter);
-                final Animation a = animAttr != 0
-                        ? appTransition.loadAnimationAttr(lp, animAttr, transit) : null;
-                showBackdrop = a != null && a.getShowBackdrop();
+                if (isChanging) {
+                    // When there are more than one changing containers, it may leave part of the
+                    // screen empty. Show background color to cover that.
+                    showBackdrop = getDisplayContent().mChangingContainers.size() > 1;
+                } else {
+                    // Check whether or not to show backdrop for open/close transition.
+                    final int animAttr = AppTransition.mapOpenCloseTransitTypes(transit, enter);
+                    final Animation a = animAttr != 0
+                            ? appTransition.loadAnimationAttr(lp, animAttr, transit) : null;
+                    showBackdrop = a != null && a.getShowBackdrop();
+                }
                 backdropColor = appTransition.getNextAppTransitionBackgroundColor();
             }
             final Rect localBounds = new Rect(mTmpRect);
@@ -3105,9 +3113,16 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 }
             }
 
+            // Check if the animation requests to show background color for Activity and embedded
+            // TaskFragment.
             final ActivityRecord activityRecord = asActivityRecord();
-            if (activityRecord != null && isActivityTransitOld(transit)
-                    && adapter.getShowBackground()) {
+            final TaskFragment taskFragment = asTaskFragment();
+            if (adapter.getShowBackground()
+                    // Check if it is Activity transition.
+                    && ((activityRecord != null && isActivityTransitOld(transit))
+                    // Check if it is embedded TaskFragment transition.
+                    || (taskFragment != null && taskFragment.isEmbedded()
+                    && isTaskFragmentTransitOld(transit)))) {
                 final @ColorInt int backgroundColorForTransition;
                 if (adapter.getBackgroundColor() != 0) {
                     // If available use the background color provided through getBackgroundColor
@@ -3117,9 +3132,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                     // Otherwise default to the window's background color if provided through
                     // the theme as the background color for the animation - the top most window
                     // with a valid background color and showBackground set takes precedence.
-                    final Task arTask = activityRecord.getTask();
+                    final Task parentTask = activityRecord != null
+                            ? activityRecord.getTask()
+                            : taskFragment.getTask();
                     backgroundColorForTransition = ColorUtils.setAlphaComponent(
-                            arTask.getTaskDescription().getBackgroundColor(), 255);
+                            parentTask.getTaskDescription().getBackgroundColor(), 255);
                 }
                 animationRunnerBuilder.setTaskBackgroundColor(backgroundColorForTransition);
             }

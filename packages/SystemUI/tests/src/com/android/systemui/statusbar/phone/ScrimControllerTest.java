@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static com.android.systemui.statusbar.phone.ScrimController.KEYGUARD_SCRIM_ALPHA;
 import static com.android.systemui.statusbar.phone.ScrimController.OPAQUE;
 import static com.android.systemui.statusbar.phone.ScrimController.SEMI_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.ScrimController.TRANSPARENT;
@@ -58,6 +59,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.ShadeInterpolation;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
+import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.scrim.ScrimView;
 import com.android.systemui.statusbar.policy.FakeConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -117,6 +119,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     // TODO(b/204991468): Use a real PanelExpansionStateManager object once this bug is fixed. (The
     //   event-dispatch-on-registration pattern caused some of these unit tests to fail.)
     @Mock private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
+    @Mock private KeyguardViewMediator mKeyguardViewMediator;
 
     private static class AnimatorListener implements Animator.AnimatorListener {
         private int mNumStarts;
@@ -230,7 +233,8 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mDockManager, mConfigurationController, new FakeExecutor(new FakeSystemClock()),
                 mScreenOffAnimationController,
                 mKeyguardUnlockAnimationController,
-                mStatusBarKeyguardViewManager);
+                mStatusBarKeyguardViewManager,
+                mKeyguardViewMediator);
         mScrimController.setScrimVisibleListener(visible -> mScrimVisibility = visible);
         mScrimController.attachViews(mScrimBehind, mNotificationsScrim, mScrimInFront);
         mScrimController.setAnimatorListener(mAnimatorListener);
@@ -239,6 +243,8 @@ public class ScrimControllerTest extends SysuiTestCase {
         mScrimController.setWallpaperSupportsAmbientMode(false);
         mScrimController.transitionTo(ScrimState.KEYGUARD);
         finishAnimationsImmediately();
+
+        mScrimController.setLaunchingAffordanceWithPreview(false);
     }
 
     @After
@@ -852,7 +858,8 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mDockManager, mConfigurationController, new FakeExecutor(new FakeSystemClock()),
                 mScreenOffAnimationController,
                 mKeyguardUnlockAnimationController,
-                mStatusBarKeyguardViewManager);
+                mStatusBarKeyguardViewManager,
+                mKeyguardViewMediator);
         mScrimController.setScrimVisibleListener(visible -> mScrimVisibility = visible);
         mScrimController.attachViews(mScrimBehind, mNotificationsScrim, mScrimInFront);
         mScrimController.setAnimatorListener(mAnimatorListener);
@@ -1590,6 +1597,30 @@ public class ScrimControllerTest extends SysuiTestCase {
         mScrimController.setRawPanelExpansionFraction(0f);
         finishAnimationsImmediately();
         assertScrimAlpha(mScrimBehind, 0);
+    }
+
+    @Test
+    public void keyguardAlpha_whenUnlockedForOcclusion_ifPlayingOcclusionAnimation() {
+        mScrimController.transitionTo(ScrimState.KEYGUARD);
+
+        when(mKeyguardViewMediator.isOccludeAnimationPlaying()).thenReturn(true);
+
+        mScrimController.transitionTo(ScrimState.UNLOCKED);
+        finishAnimationsImmediately();
+
+        assertScrimAlpha(mNotificationsScrim, (int) (KEYGUARD_SCRIM_ALPHA * 255f));
+    }
+
+    @Test
+    public void keyguardAlpha_whenUnlockedForLaunch_ifLaunchingAffordance() {
+        mScrimController.transitionTo(ScrimState.KEYGUARD);
+        when(mKeyguardViewMediator.isOccludeAnimationPlaying()).thenReturn(true);
+        mScrimController.setLaunchingAffordanceWithPreview(true);
+
+        mScrimController.transitionTo(ScrimState.UNLOCKED);
+        finishAnimationsImmediately();
+
+        assertScrimAlpha(mNotificationsScrim, (int) (KEYGUARD_SCRIM_ALPHA * 255f));
     }
 
     private void assertAlphaAfterExpansion(ScrimView scrim, float expectedAlpha, float expansion) {

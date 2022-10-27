@@ -44,7 +44,6 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.plugins.ClockAnimations;
 import com.android.systemui.plugins.ClockController;
@@ -105,8 +104,6 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
     private FrameLayout mLargeClockFrame;
     @Mock
     private SecureSettings mSecureSettings;
-    @Mock
-    private FeatureFlags mFeatureFlags;
 
     private final View mFakeSmartspaceView = new View(mContext);
 
@@ -143,8 +140,7 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
                 mSecureSettings,
                 mExecutor,
                 mDumpManager,
-                mClockEventController,
-                mFeatureFlags
+                mClockEventController
         );
 
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE);

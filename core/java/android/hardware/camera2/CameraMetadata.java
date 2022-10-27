@@ -3201,6 +3201,49 @@ public abstract class CameraMetadata<TKey> {
     public static final int CONTROL_EXTENDED_SCENE_MODE_VENDOR_START = 0x40;
 
     //
+    // Enumeration values for CaptureRequest#CONTROL_SETTINGS_OVERRIDE
+    //
+
+    /**
+     * <p>No keys are applied sooner than the other keys when applying CaptureRequest
+     * settings to the camera device. This is the default value.</p>
+     * @see CaptureRequest#CONTROL_SETTINGS_OVERRIDE
+     */
+    public static final int CONTROL_SETTINGS_OVERRIDE_OFF = 0;
+
+    /**
+     * <p>Zoom related keys are applied sooner than the other keys in the CaptureRequest. The
+     * zoom related keys are:</p>
+     * <ul>
+     * <li>{@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio}</li>
+     * <li>{@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion}</li>
+     * <li>{@link CaptureRequest#CONTROL_AE_REGIONS android.control.aeRegions}</li>
+     * <li>{@link CaptureRequest#CONTROL_AWB_REGIONS android.control.awbRegions}</li>
+     * <li>{@link CaptureRequest#CONTROL_AF_REGIONS android.control.afRegions}</li>
+     * </ul>
+     * <p>Even though {@link CaptureRequest#CONTROL_AE_REGIONS android.control.aeRegions}, {@link CaptureRequest#CONTROL_AWB_REGIONS android.control.awbRegions},
+     * and {@link CaptureRequest#CONTROL_AF_REGIONS android.control.afRegions} are not directly zoom related, applications
+     * typically scale these regions together with {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} to have a
+     * consistent mapping within the current field of view. In this aspect, they are
+     * related to {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} and {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio}.</p>
+     *
+     * @see CaptureRequest#CONTROL_AE_REGIONS
+     * @see CaptureRequest#CONTROL_AF_REGIONS
+     * @see CaptureRequest#CONTROL_AWB_REGIONS
+     * @see CaptureRequest#CONTROL_ZOOM_RATIO
+     * @see CaptureRequest#SCALER_CROP_REGION
+     * @see CaptureRequest#CONTROL_SETTINGS_OVERRIDE
+     */
+    public static final int CONTROL_SETTINGS_OVERRIDE_ZOOM = 1;
+
+    /**
+     * <p>Vendor defined settingsOverride. These depend on vendor implementation.</p>
+     * @see CaptureRequest#CONTROL_SETTINGS_OVERRIDE
+     * @hide
+     */
+    public static final int CONTROL_SETTINGS_OVERRIDE_VENDOR_START = 0x4000;
+
+    //
     // Enumeration values for CaptureRequest#EDGE_MODE
     //
 

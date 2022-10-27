@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
+import static android.view.WindowInsets.Type.statusBars;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 
@@ -31,7 +32,6 @@ import android.graphics.Insets;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.view.InsetsSource;
-import android.view.InsetsVisibilities;
 
 import androidx.test.filters.SmallTest;
 
@@ -207,9 +207,7 @@ public class WindowContainerInsetsSourceProviderTest extends WindowTestsBase {
         statusBar.getFrame().set(0, 0, 500, 100);
         mProvider.setWindowContainer(statusBar, null, null);
         mProvider.updateControlForTarget(target, false /* force */);
-        final InsetsVisibilities requestedVisibilities = new InsetsVisibilities();
-        requestedVisibilities.setVisibility(ITYPE_STATUS_BAR, false);
-        target.setRequestedVisibilities(requestedVisibilities);
+        target.setRequestedVisibleTypes(0, statusBars());
         mProvider.updateClientVisibility(target);
         assertFalse(mSource.isVisible());
     }
@@ -220,9 +218,7 @@ public class WindowContainerInsetsSourceProviderTest extends WindowTestsBase {
         final WindowState target = createWindow(null, TYPE_APPLICATION, "target");
         statusBar.getFrame().set(0, 0, 500, 100);
         mProvider.setWindowContainer(statusBar, null, null);
-        final InsetsVisibilities requestedVisibilities = new InsetsVisibilities();
-        requestedVisibilities.setVisibility(ITYPE_STATUS_BAR, false);
-        target.setRequestedVisibilities(requestedVisibilities);
+        target.setRequestedVisibleTypes(0, statusBars());
         mProvider.updateClientVisibility(target);
         assertTrue(mSource.isVisible());
     }

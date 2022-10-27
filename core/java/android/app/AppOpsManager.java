@@ -867,7 +867,7 @@ public class AppOpsManager {
 
     // when adding one of these:
     //  - increment _NUM_OP
-    //  - define an OPSTR_* constant (marked as @SystemApi)
+    //  - define an OPSTR_* constant (and mark as @SystemApi if needed)
     //  - add row to sAppOpInfos
     //  - add descriptive strings to Settings/res/values/arrays.xml
     //  - add the op to the appropriate template in AppOpsState.OpsTemplate (settings app)

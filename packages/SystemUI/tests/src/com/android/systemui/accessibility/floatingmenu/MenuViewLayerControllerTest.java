@@ -34,6 +34,7 @@ import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowMetrics;
+import android.view.accessibility.AccessibilityManager;
 
 import androidx.test.filters.SmallTest;
 
@@ -59,6 +60,9 @@ public class MenuViewLayerControllerTest extends SysuiTestCase {
     private WindowManager mWindowManager;
 
     @Mock
+    private AccessibilityManager mAccessibilityManager;
+
+    @Mock
     private WindowMetrics mWindowMetrics;
 
     private MenuViewLayerController mMenuViewLayerController;
@@ -72,7 +76,8 @@ public class MenuViewLayerControllerTest extends SysuiTestCase {
         when(mWindowManager.getCurrentWindowMetrics()).thenReturn(mWindowMetrics);
         when(mWindowMetrics.getBounds()).thenReturn(new Rect(0, 0, 1080, 2340));
         when(mWindowMetrics.getWindowInsets()).thenReturn(stubDisplayInsets());
-        mMenuViewLayerController = new MenuViewLayerController(mContext, mWindowManager);
+        mMenuViewLayerController = new MenuViewLayerController(mContext, mWindowManager,
+                mAccessibilityManager);
     }
 
     @Test

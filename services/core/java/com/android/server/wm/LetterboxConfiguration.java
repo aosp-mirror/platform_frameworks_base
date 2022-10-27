@@ -17,14 +17,17 @@
 package com.android.server.wm;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Color;
 
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.function.Function;
 
 /** Reads letterbox configs from resources and controls their overrides at runtime. */
 final class LetterboxConfiguration {
@@ -156,34 +159,25 @@ final class LetterboxConfiguration {
     // portrait device orientation.
     private boolean mIsVerticalReachabilityEnabled;
 
-
-    // Horizontal position of a center of the letterboxed app window which is global to prevent
-    // "jumps" when switching between letterboxed apps. It's updated to reposition the app window
-    // in response to a double tap gesture (see LetterboxUiController#handleDoubleTap). Used in
-    // LetterboxUiController#getHorizontalPositionMultiplier which is called from
-    // ActivityRecord#updateResolvedBoundsPosition.
-    // TODO(b/199426138): Global reachability setting causes a jump when resuming an app from
-    // Overview after changing position in another app.
-    @LetterboxHorizontalReachabilityPosition
-    private volatile int mLetterboxPositionForHorizontalReachability;
-
-    // Vertical position of a center of the letterboxed app window which is global to prevent
-    // "jumps" when switching between letterboxed apps. It's updated to reposition the app window
-    // in response to a double tap gesture (see LetterboxUiController#handleDoubleTap). Used in
-    // LetterboxUiController#getVerticalPositionMultiplier which is called from
-    // ActivityRecord#updateResolvedBoundsPosition.
-    // TODO(b/199426138): Global reachability setting causes a jump when resuming an app from
-    // Overview after changing position in another app.
-    @LetterboxVerticalReachabilityPosition
-    private volatile int mLetterboxPositionForVerticalReachability;
-
     // Whether education is allowed for letterboxed fullscreen apps.
     private boolean mIsEducationEnabled;
 
     // Whether using split screen aspect ratio as a default aspect ratio for unresizable apps.
     private boolean mIsSplitScreenAspectRatioForUnresizableAppsEnabled;
 
+    // Responsible for the persistence of letterbox[Horizontal|Vertical]PositionMultiplier
+    @NonNull
+    private final LetterboxConfigurationPersister mLetterboxConfigurationPersister;
+
     LetterboxConfiguration(Context systemUiContext) {
+        this(systemUiContext, new LetterboxConfigurationPersister(systemUiContext,
+                () -> readLetterboxHorizontalReachabilityPositionFromConfig(systemUiContext),
+                () -> readLetterboxVerticalReachabilityPositionFromConfig(systemUiContext)));
+    }
+
+    @VisibleForTesting
+    LetterboxConfiguration(Context systemUiContext,
+            LetterboxConfigurationPersister letterboxConfigurationPersister) {
         mContext = systemUiContext;
         mFixedOrientationLetterboxAspectRatio = mContext.getResources().getFloat(
                 R.dimen.config_fixedOrientationLetterboxAspectRatio);
@@ -206,14 +200,14 @@ final class LetterboxConfiguration {
                 readLetterboxHorizontalReachabilityPositionFromConfig(mContext);
         mDefaultPositionForVerticalReachability =
                 readLetterboxVerticalReachabilityPositionFromConfig(mContext);
-        mLetterboxPositionForHorizontalReachability = mDefaultPositionForHorizontalReachability;
-        mLetterboxPositionForVerticalReachability = mDefaultPositionForVerticalReachability;
         mIsEducationEnabled = mContext.getResources().getBoolean(
                 R.bool.config_letterboxIsEducationEnabled);
         setDefaultMinAspectRatioForUnresizableApps(mContext.getResources().getFloat(
                 R.dimen.config_letterboxDefaultMinAspectRatioForUnresizableApps));
         mIsSplitScreenAspectRatioForUnresizableAppsEnabled = mContext.getResources().getBoolean(
                 R.bool.config_letterboxIsSplitScreenAspectRatioForUnresizableAppsEnabled);
+        mLetterboxConfigurationPersister = letterboxConfigurationPersister;
+        mLetterboxConfigurationPersister.start();
     }
 
     /**
@@ -653,7 +647,9 @@ final class LetterboxConfiguration {
      * <p>The position multiplier is changed after each double tap in the letterbox area.
      */
     float getHorizontalMultiplierForReachability() {
-        switch (mLetterboxPositionForHorizontalReachability) {
+        final int letterboxPositionForHorizontalReachability =
+                mLetterboxConfigurationPersister.getLetterboxPositionForHorizontalReachability();
+        switch (letterboxPositionForHorizontalReachability) {
             case LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_LEFT:
                 return 0.0f;
             case LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_CENTER:
@@ -662,10 +658,11 @@ final class LetterboxConfiguration {
                 return 1.0f;
             default:
                 throw new AssertionError(
-                    "Unexpected letterbox position type: "
-                            + mLetterboxPositionForHorizontalReachability);
+                        "Unexpected letterbox position type: "
+                                + letterboxPositionForHorizontalReachability);
         }
     }
+
     /*
      * Gets vertical position of a center of the letterboxed app window when reachability
      * is enabled specified. 0 corresponds to the top side of the screen and 1 to the bottom side.
@@ -673,7 +670,9 @@ final class LetterboxConfiguration {
      * <p>The position multiplier is changed after each double tap in the letterbox area.
      */
     float getVerticalMultiplierForReachability() {
-        switch (mLetterboxPositionForVerticalReachability) {
+        final int letterboxPositionForVerticalReachability =
+                mLetterboxConfigurationPersister.getLetterboxPositionForVerticalReachability();
+        switch (letterboxPositionForVerticalReachability) {
             case LETTERBOX_VERTICAL_REACHABILITY_POSITION_TOP:
                 return 0.0f;
             case LETTERBOX_VERTICAL_REACHABILITY_POSITION_CENTER:
@@ -683,7 +682,7 @@ final class LetterboxConfiguration {
             default:
                 throw new AssertionError(
                         "Unexpected letterbox position type: "
-                                + mLetterboxPositionForVerticalReachability);
+                                + letterboxPositionForVerticalReachability);
         }
     }
 
@@ -693,7 +692,7 @@ final class LetterboxConfiguration {
      */
     @LetterboxHorizontalReachabilityPosition
     int getLetterboxPositionForHorizontalReachability() {
-        return mLetterboxPositionForHorizontalReachability;
+        return mLetterboxConfigurationPersister.getLetterboxPositionForHorizontalReachability();
     }
 
     /*
@@ -702,7 +701,7 @@ final class LetterboxConfiguration {
      */
     @LetterboxVerticalReachabilityPosition
     int getLetterboxPositionForVerticalReachability() {
-        return mLetterboxPositionForVerticalReachability;
+        return mLetterboxConfigurationPersister.getLetterboxPositionForVerticalReachability();
     }
 
     /** Returns a string representing the given {@link LetterboxHorizontalReachabilityPosition}. */
@@ -742,9 +741,8 @@ final class LetterboxConfiguration {
      * right side.
      */
     void movePositionForHorizontalReachabilityToNextRightStop() {
-        mLetterboxPositionForHorizontalReachability = Math.min(
-                mLetterboxPositionForHorizontalReachability + 1,
-                LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_RIGHT);
+        updatePositionForHorizontalReachability(prev -> Math.min(
+                prev + 1, LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_RIGHT));
     }
 
     /**
@@ -752,8 +750,7 @@ final class LetterboxConfiguration {
      * side.
      */
     void movePositionForHorizontalReachabilityToNextLeftStop() {
-        mLetterboxPositionForHorizontalReachability =
-                Math.max(mLetterboxPositionForHorizontalReachability - 1, 0);
+        updatePositionForHorizontalReachability(prev -> Math.max(prev - 1, 0));
     }
 
     /**
@@ -761,9 +758,8 @@ final class LetterboxConfiguration {
      * side.
      */
     void movePositionForVerticalReachabilityToNextBottomStop() {
-        mLetterboxPositionForVerticalReachability = Math.min(
-                mLetterboxPositionForVerticalReachability + 1,
-                LETTERBOX_VERTICAL_REACHABILITY_POSITION_BOTTOM);
+        updatePositionForVerticalReachability(prev -> Math.min(
+                prev + 1, LETTERBOX_VERTICAL_REACHABILITY_POSITION_BOTTOM));
     }
 
     /**
@@ -771,8 +767,7 @@ final class LetterboxConfiguration {
      * side.
      */
     void movePositionForVerticalReachabilityToNextTopStop() {
-        mLetterboxPositionForVerticalReachability =
-                Math.max(mLetterboxPositionForVerticalReachability - 1, 0);
+        updatePositionForVerticalReachability(prev -> Math.max(prev - 1, 0));
     }
 
     /**
@@ -820,6 +815,28 @@ final class LetterboxConfiguration {
     void resetIsSplitScreenAspectRatioForUnresizableAppsEnabled() {
         mIsSplitScreenAspectRatioForUnresizableAppsEnabled = mContext.getResources().getBoolean(
                 R.bool.config_letterboxIsSplitScreenAspectRatioForUnresizableAppsEnabled);
+    }
+
+    /** Calculates a new letterboxPositionForHorizontalReachability value and updates the store */
+    private void updatePositionForHorizontalReachability(
+            Function<Integer, Integer> newHorizonalPositionFun) {
+        final int letterboxPositionForHorizontalReachability =
+                mLetterboxConfigurationPersister.getLetterboxPositionForHorizontalReachability();
+        final int nextHorizontalPosition = newHorizonalPositionFun.apply(
+                letterboxPositionForHorizontalReachability);
+        mLetterboxConfigurationPersister.setLetterboxPositionForHorizontalReachability(
+                nextHorizontalPosition);
+    }
+
+    /** Calculates a new letterboxPositionForVerticalReachability value and updates the store */
+    private void updatePositionForVerticalReachability(
+            Function<Integer, Integer> newVerticalPositionFun) {
+        final int letterboxPositionForVerticalReachability =
+                mLetterboxConfigurationPersister.getLetterboxPositionForVerticalReachability();
+        final int nextVerticalPosition = newVerticalPositionFun.apply(
+                letterboxPositionForVerticalReachability);
+        mLetterboxConfigurationPersister.setLetterboxPositionForVerticalReachability(
+                nextVerticalPosition);
     }
 
 }

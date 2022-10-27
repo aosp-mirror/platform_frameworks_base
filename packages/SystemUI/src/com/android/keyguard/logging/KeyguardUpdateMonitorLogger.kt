@@ -17,9 +17,12 @@
 package com.android.keyguard.logging
 
 import android.hardware.biometrics.BiometricConstants.LockoutMode
+import android.os.PowerManager
+import android.os.PowerManager.WakeReason
 import android.telephony.ServiceState
 import android.telephony.SubscriptionInfo
 import com.android.keyguard.ActiveUnlockConfig
+import com.android.keyguard.FaceAuthUiEvent
 import com.android.keyguard.KeyguardListenModel
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.plugins.log.LogBuffer
@@ -269,11 +272,19 @@ class KeyguardUpdateMonitorLogger @Inject constructor(
         logBuffer.log(TAG, VERBOSE, { int1 = subId }, { "reportSimUnlocked(subId=$int1)" })
     }
 
-    fun logStartedListeningForFace(faceRunningState: Int, faceAuthReason: String) {
+    fun logStartedListeningForFace(faceRunningState: Int, faceAuthUiEvent: FaceAuthUiEvent) {
         logBuffer.log(TAG, VERBOSE, {
             int1 = faceRunningState
-            str1 = faceAuthReason
-        }, { "startListeningForFace(): $int1, reason: $str1" })
+            str1 = faceAuthUiEvent.reason
+            str2 = faceAuthUiEvent.extraInfoToString()
+        }, { "startListeningForFace(): $int1, reason: $str1 $str2" })
+    }
+
+    fun logStartedListeningForFaceFromWakeUp(faceRunningState: Int, @WakeReason pmWakeReason: Int) {
+        logBuffer.log(TAG, VERBOSE, {
+            int1 = faceRunningState
+            str1 = PowerManager.wakeReasonToString(pmWakeReason)
+        }, { "startListeningForFace(): $int1, reason: wakeUp-$str1" })
     }
 
     fun logStoppedListeningForFace(faceRunningState: Int, faceAuthReason: String) {
@@ -382,5 +393,11 @@ class KeyguardUpdateMonitorLogger @Inject constructor(
             bool4 = trustManaged
         }, { "#update secure=$bool1 canDismissKeyguard=$bool2" +
                 " trusted=$bool3 trustManaged=$bool4" })
+    }
+
+    fun logSkipUpdateFaceListeningOnWakeup(@WakeReason pmWakeReason: Int) {
+        logBuffer.log(TAG, VERBOSE, {
+            str1 = PowerManager.wakeReasonToString(pmWakeReason)
+        }, { "Skip updating face listening state on wakeup from $str1"})
     }
 }

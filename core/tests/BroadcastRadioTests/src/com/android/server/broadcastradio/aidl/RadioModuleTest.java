@@ -21,11 +21,16 @@ import static com.google.common.truth.Truth.assertWithMessage;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.graphics.Bitmap;
 import android.hardware.broadcastradio.IBroadcastRadio;
+import android.hardware.radio.Announcement;
+import android.hardware.radio.IAnnouncementListener;
+import android.hardware.radio.ICloseHandle;
 import android.hardware.radio.RadioManager;
 import android.os.RemoteException;
 
@@ -41,13 +46,20 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public final class RadioModuleTest {
 
+    private static final int TEST_ENABLED_TYPE = Announcement.TYPE_EVENT;
+
     // Mocks
     @Mock
     private IBroadcastRadio mBroadcastRadioMock;
+    @Mock
+    private IAnnouncementListener mListenerMock;
+    @Mock
+    private android.hardware.broadcastradio.ICloseHandle mHalCloseHandleMock;
 
     private final Object mLock = new Object();
     // RadioModule under test
     private RadioModule mRadioModule;
+    private android.hardware.broadcastradio.IAnnouncementListener mHalListener;
 
     @Before
     public void setup() throws RemoteException {
@@ -62,6 +74,11 @@ public final class RadioModuleTest {
 
         // TODO(b/241118988): test non-null image for getImage method
         when(mBroadcastRadioMock.getImage(anyInt())).thenReturn(null);
+        doAnswer(invocation -> {
+            mHalListener = (android.hardware.broadcastradio.IAnnouncementListener) invocation
+                    .getArguments()[0];
+            return null;
+        }).when(mBroadcastRadioMock).registerAnnouncementListener(any(), any());
     }
 
     @Test
@@ -71,7 +88,7 @@ public final class RadioModuleTest {
     }
 
     @Test
-    public void setInternalHalCallback_callbackSetInHal() throws RemoteException {
+    public void setInternalHalCallback_callbackSetInHal() throws Exception {
         mRadioModule.setInternalHalCallback();
 
         verify(mBroadcastRadioMock).setTunerCallback(any());
@@ -96,5 +113,37 @@ public final class RadioModuleTest {
 
         assertWithMessage("Exception for getting image with invalid ID")
                 .that(thrown).hasMessageThat().contains("Image ID is missing");
+    }
+
+    @Test
+    public void addAnnouncementListener_listenerRegistered() throws Exception {
+        mRadioModule.addAnnouncementListener(mListenerMock, new int[]{TEST_ENABLED_TYPE});
+
+        verify(mBroadcastRadioMock)
+                .registerAnnouncementListener(any(), eq(new byte[]{TEST_ENABLED_TYPE}));
+    }
+
+    @Test
+    public void onListUpdate_forAnnouncementListener() throws Exception {
+        android.hardware.broadcastradio.Announcement halAnnouncement =
+                AidlTestUtils.makeAnnouncement(TEST_ENABLED_TYPE, /* selectorFreq= */ 96300);
+        mRadioModule.addAnnouncementListener(mListenerMock, new int[]{TEST_ENABLED_TYPE});
+
+        mHalListener.onListUpdated(
+                new android.hardware.broadcastradio.Announcement[]{halAnnouncement});
+
+        verify(mListenerMock).onListUpdated(any());
+    }
+
+    @Test
+    public void close_forCloseHandle() throws Exception {
+        when(mBroadcastRadioMock.registerAnnouncementListener(any(), any()))
+                .thenReturn(mHalCloseHandleMock);
+        ICloseHandle closeHandle =
+                mRadioModule.addAnnouncementListener(mListenerMock, new int[]{TEST_ENABLED_TYPE});
+
+        closeHandle.close();
+
+        verify(mHalCloseHandleMock).close();
     }
 }

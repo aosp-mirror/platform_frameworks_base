@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.server.pm;
+package com.android.systemui.notetask
 
-import android.annotation.NonNull;
+import javax.inject.Qualifier
 
-import java.util.Map;
-
-/**
- * Package state to commit to memory and disk after reconciliation has completed.
- */
-final class CommitRequest {
-    final Map<String, ReconciledPackage> mReconciledPackages;
-    @NonNull final int[] mAllUsers;
-
-    CommitRequest(Map<String, ReconciledPackage> reconciledPackages,
-            @NonNull int[] allUsers) {
-        mReconciledPackages = reconciledPackages;
-        mAllUsers = allUsers;
-    }
-}
+/** Key associated with a [Boolean] flag that enables or disables the note task feature. */
+@Qualifier internal annotation class NoteTaskEnabledKey

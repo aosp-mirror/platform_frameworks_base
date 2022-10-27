@@ -38,34 +38,44 @@ import com.android.server.utils.WatchedLongSparseArray;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Package scan results and related request details used to reconcile the potential addition of
+ * one or more packages to the system.
+ *
+ * Reconcile will take a set of package details that need to be committed to the system and make
+ * sure that they are valid in the context of the system and the other installing apps. Any
+ * invalid state or app will result in a failed reconciliation and thus whatever operation (such
+ * as install) led to the request.
+ */
 final class ReconcilePackageUtils {
     public static Map<String, ReconciledPackage> reconcilePackages(
-            final ReconcileRequest request, SharedLibrariesImpl sharedLibraries,
+            List<InstallRequest> installRequests,
+            Map<String, AndroidPackage> allPackages,
+            Map<String, Settings.VersionInfo> versionInfos,
+            SharedLibrariesImpl sharedLibraries,
             KeySetManagerService ksms, Settings settings)
             throws ReconcileFailure {
-        final Map<String, ScanResult> scannedPackages = request.mScannedPackages;
-
-        final Map<String, ReconciledPackage> result = new ArrayMap<>(scannedPackages.size());
+        final Map<String, ReconciledPackage> result = new ArrayMap<>(installRequests.size());
 
         // make a copy of the existing set of packages so we can combine them with incoming packages
         final ArrayMap<String, AndroidPackage> combinedPackages =
-                new ArrayMap<>(request.mAllPackages.size() + scannedPackages.size());
+                new ArrayMap<>(allPackages.size() + installRequests.size());
 
-        combinedPackages.putAll(request.mAllPackages);
+        combinedPackages.putAll(allPackages);
 
         final Map<String, WatchedLongSparseArray<SharedLibraryInfo>> incomingSharedLibraries =
                 new ArrayMap<>();
 
-        for (String installPackageName : scannedPackages.keySet()) {
-            final ScanResult scanResult = scannedPackages.get(installPackageName);
+        for (InstallRequest installRequest :  installRequests) {
+            final String installPackageName = installRequest.getParsedPackage().getPackageName();
 
             // add / replace existing with incoming packages
-            combinedPackages.put(scanResult.mPkgSetting.getPackageName(),
-                    scanResult.mRequest.mParsedPackage);
+            combinedPackages.put(installRequest.getScannedPackageSetting().getPackageName(),
+                    installRequest.getParsedPackage());
 
             // in the first pass, we'll build up the set of incoming shared libraries
             final List<SharedLibraryInfo> allowedSharedLibInfos =
-                    sharedLibraries.getAllowedSharedLibInfos(scanResult);
+                    sharedLibraries.getAllowedSharedLibInfos(installRequest);
             if (allowedSharedLibInfos != null) {
                 for (SharedLibraryInfo info : allowedSharedLibInfos) {
                     if (!SharedLibraryUtils.addSharedLibraryToPackageVersionMap(
@@ -76,24 +86,18 @@ final class ReconcilePackageUtils {
                 }
             }
 
-            // the following may be null if we're just reconciling on boot (and not during install)
-            final InstallRequest installRequest = request.mInstallRequests.get(installPackageName);
-            final PrepareResult prepareResult = request.mPreparedPackages.get(installPackageName);
-            final boolean isInstall = installRequest != null;
-            if (isInstall && prepareResult == null) {
-                throw new ReconcileFailure("Reconcile arguments are not balanced for "
-                        + installPackageName + "!");
-            }
+
 
             final DeletePackageAction deletePackageAction;
             // we only want to try to delete for non system apps
-            if (isInstall && prepareResult.mReplace && !prepareResult.mSystem) {
-                final boolean killApp = (scanResult.mRequest.mScanFlags & SCAN_DONT_KILL_APP) == 0;
+            if (installRequest.isReplace() && !installRequest.isSystem()) {
+                final boolean killApp = (installRequest.getScanFlags() & SCAN_DONT_KILL_APP) == 0;
                 final int deleteFlags = PackageManager.DELETE_KEEP_DATA
                         | (killApp ? 0 : PackageManager.DELETE_DONT_KILL_APP);
                 deletePackageAction = DeletePackageHelper.mayDeletePackageLocked(
                         installRequest.getRemovedInfo(),
-                        prepareResult.mOriginalPs, prepareResult.mDisabledPs,
+                        installRequest.getOriginalPackageSetting(),
+                        installRequest.getDisabledPackageSetting(),
                         deleteFlags, null /* all users */);
                 if (deletePackageAction == null) {
                     throw new ReconcileFailure(
@@ -104,21 +108,24 @@ final class ReconcilePackageUtils {
                 deletePackageAction = null;
             }
 
-            final int scanFlags = scanResult.mRequest.mScanFlags;
-            final int parseFlags = scanResult.mRequest.mParseFlags;
-            final ParsedPackage parsedPackage = scanResult.mRequest.mParsedPackage;
-
-            final PackageSetting disabledPkgSetting = scanResult.mRequest.mDisabledPkgSetting;
+            final int scanFlags = installRequest.getScanFlags();
+            final int parseFlags = installRequest.getParseFlags();
+            final ParsedPackage parsedPackage = installRequest.getParsedPackage();
+            final PackageSetting disabledPkgSetting = installRequest.getDisabledPackageSetting();
             final PackageSetting lastStaticSharedLibSetting =
-                    scanResult.mStaticSharedLibraryInfo == null ? null
-                            : sharedLibraries.getStaticSharedLibLatestVersionSetting(scanResult);
+                    installRequest.getStaticSharedLibraryInfo() == null ? null
+                            : sharedLibraries.getStaticSharedLibLatestVersionSetting(
+                                    installRequest);
             final PackageSetting signatureCheckPs =
-                    (prepareResult != null && lastStaticSharedLibSetting != null)
+                    lastStaticSharedLibSetting != null
                             ? lastStaticSharedLibSetting
-                            : scanResult.mPkgSetting;
+                            : installRequest.getScannedPackageSetting();
             boolean removeAppKeySetData = false;
             boolean sharedUserSignaturesChanged = false;
             SigningDetails signingDetails = null;
+            if (parsedPackage != null) {
+                signingDetails = parsedPackage.getSigningDetails();
+            }
             SharedUserSetting sharedUserSetting = settings.getSharedUserSettingLPr(
                     signatureCheckPs);
             if (ksms.shouldCheckUpgradeKeySetLocked(
@@ -138,28 +145,21 @@ final class ReconcilePackageUtils {
                         PackageManagerService.reportSettingsProblem(Log.WARN, msg);
                     }
                 }
-                signingDetails = parsedPackage.getSigningDetails();
             } else {
-
                 try {
-                    final Settings.VersionInfo versionInfo =
-                            request.mVersionInfos.get(installPackageName);
+                    final Settings.VersionInfo versionInfo = versionInfos.get(installPackageName);
                     final boolean compareCompat = isCompatSignatureUpdateNeeded(versionInfo);
                     final boolean compareRecover = isRecoverSignatureUpdateNeeded(versionInfo);
-                    final boolean isRollback = installRequest != null
-                            && installRequest.isRollback();
+                    final boolean isRollback = installRequest.isRollback();
                     final boolean compatMatch =
                             PackageManagerServiceUtils.verifySignatures(signatureCheckPs,
                                     sharedUserSetting, disabledPkgSetting,
-                                    parsedPackage.getSigningDetails(), compareCompat,
+                                    signingDetails, compareCompat,
                                     compareRecover, isRollback);
                     // The new KeySets will be re-added later in the scanning process.
                     if (compatMatch) {
                         removeAppKeySetData = true;
                     }
-                    // We just determined the app is signed correctly, so bring
-                    // over the latest parsed certs.
-                    signingDetails = parsedPackage.getSigningDetails();
 
                     // if this is is a sharedUser, check to see if the new package is signed by a
                     // newer
@@ -257,13 +257,12 @@ final class ReconcilePackageUtils {
             }
 
             result.put(installPackageName,
-                    new ReconciledPackage(request, installRequest, scanResult.mPkgSetting,
-                            request.mPreparedPackages.get(installPackageName), scanResult,
+                    new ReconciledPackage(installRequests, allPackages, installRequest,
                             deletePackageAction, allowedSharedLibInfos, signingDetails,
                             sharedUserSignaturesChanged, removeAppKeySetData));
         }
 
-        for (String installPackageName : scannedPackages.keySet()) {
+        for (InstallRequest installRequest : installRequests) {
             // Check all shared libraries and map to their actual file path.
             // We only do this here for apps not on a system dir, because those
             // are the only ones that can fail an install due to this.  We
@@ -271,16 +270,16 @@ final class ReconcilePackageUtils {
             // library paths after the scan is done. Also during the initial
             // scan don't update any libs as we do this wholesale after all
             // apps are scanned to avoid dependency based scanning.
-            final ScanResult scanResult = scannedPackages.get(installPackageName);
-            if ((scanResult.mRequest.mScanFlags & SCAN_BOOTING) != 0
-                    || (scanResult.mRequest.mParseFlags & ParsingPackageUtils.PARSE_IS_SYSTEM_DIR)
+            if ((installRequest.getScanFlags() & SCAN_BOOTING) != 0
+                    || (installRequest.getParseFlags() & ParsingPackageUtils.PARSE_IS_SYSTEM_DIR)
                     != 0) {
                 continue;
             }
+            final String installPackageName = installRequest.getParsedPackage().getPackageName();
             try {
                 result.get(installPackageName).mCollectedSharedLibraryInfos =
                         sharedLibraries.collectSharedLibraryInfos(
-                                scanResult.mRequest.mParsedPackage, combinedPackages,
+                                installRequest.getParsedPackage(), combinedPackages,
                                 incomingSharedLibraries);
             } catch (PackageManagerException e) {
                 throw new ReconcileFailure(e.error, e.getMessage());

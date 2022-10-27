@@ -42,7 +42,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * The menu view displays the accessibility features.
+ * The container view displays the accessibility features.
  */
 @SuppressLint("ViewConstructor")
 class MenuView extends FrameLayout implements
@@ -64,13 +64,14 @@ class MenuView extends FrameLayout implements
             this::onTargetFeaturesChanged;
     private final MenuViewAppearance mMenuViewAppearance;
 
+    private OnTargetFeaturesChangeListener mFeaturesChangeListener;
+
     MenuView(Context context, MenuViewModel menuViewModel, MenuViewAppearance menuViewAppearance) {
         super(context);
 
         mMenuViewModel = menuViewModel;
         mMenuViewAppearance = menuViewAppearance;
         mMenuAnimationController = new MenuAnimationController(this);
-
         mAdapter = new AccessibilityTargetAdapter(mTargetFeatures);
         mTargetFeaturesView = new RecyclerView(context);
         mTargetFeaturesView.setAdapter(mAdapter);
@@ -96,7 +97,9 @@ class MenuView extends FrameLayout implements
     @Override
     public void onComputeInternalInsets(ViewTreeObserver.InternalInsetsInfo inoutInfo) {
         inoutInfo.setTouchableInsets(ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION);
-        inoutInfo.touchableRegion.set(mBoundsInParent);
+        if (getVisibility() == VISIBLE) {
+            inoutInfo.touchableRegion.union(mBoundsInParent);
+        }
     }
 
     @Override
@@ -108,8 +111,16 @@ class MenuView extends FrameLayout implements
         mTargetFeaturesView.setOverScrollMode(mMenuViewAppearance.getMenuScrollMode());
     }
 
+    void setOnTargetFeaturesChangeListener(OnTargetFeaturesChangeListener listener) {
+        mFeaturesChangeListener = listener;
+    }
+
     void addOnItemTouchListenerToList(RecyclerView.OnItemTouchListener listener) {
         mTargetFeaturesView.addOnItemTouchListener(listener);
+    }
+
+    MenuAnimationController getMenuAnimationController() {
+        return mMenuAnimationController;
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -139,7 +150,7 @@ class MenuView extends FrameLayout implements
         onEdgeChanged();
     }
 
-    private void onEdgeChanged() {
+    void onEdgeChanged() {
         final int[] insets = mMenuViewAppearance.getMenuInsets();
         getContainerViewInsetLayer().setLayerInset(INDEX_MENU_ITEM, insets[0], insets[1], insets[2],
                 insets[3]);
@@ -193,6 +204,9 @@ class MenuView extends FrameLayout implements
         onEdgeChanged();
         onPositionChanged();
 
+        if (mFeaturesChangeListener != null) {
+            mFeaturesChangeListener.onChange(newTargetFeatures);
+        }
         mMenuAnimationController.fadeOutIfEnabled();
     }
 
@@ -298,5 +312,18 @@ class MenuView extends FrameLayout implements
     private void updateSystemGestureExcludeRects() {
         final ViewGroup parentView = (ViewGroup) getParent();
         parentView.setSystemGestureExclusionRects(Collections.singletonList(mBoundsInParent));
+    }
+
+    /**
+     * Interface definition for the {@link AccessibilityTarget} list changes.
+     */
+    interface OnTargetFeaturesChangeListener {
+        /**
+         * Called when the list of accessibility target features was updated. This will be
+         * invoked when the end of {@code onTargetFeaturesChanged}.
+         *
+         * @param newTargetFeatures the list related to the current accessibility features.
+         */
+        void onChange(List<AccessibilityTarget> newTargetFeatures);
     }
 }

@@ -49,6 +49,7 @@ import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 import static android.os.Process.NOBODY_UID;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.InsetsState.ITYPE_IME;
+import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
@@ -146,7 +147,6 @@ import android.view.IWindowManager;
 import android.view.IWindowSession;
 import android.view.InsetsSource;
 import android.view.InsetsState;
-import android.view.InsetsVisibilities;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationTarget;
 import android.view.Surface;
@@ -2002,7 +2002,7 @@ public class ActivityRecordTests extends WindowTestsBase {
             doReturn(WindowManagerGlobal.ADD_STARTING_NOT_NEEDED).when(session).addToDisplay(
                     any() /* window */,  any() /* attrs */,
                     anyInt() /* viewVisibility */, anyInt() /* displayId */,
-                    any() /* requestedVisibilities */, any() /* outInputChannel */,
+                    anyInt() /* requestedVisibleTypes */, any() /* outInputChannel */,
                     any() /* outInsetsState */, any() /* outActiveControls */,
                     any() /* outAttachedFrame */, any() /* outSizeCompatScale */);
             mAtm.mWindowManager.mStartingSurfaceController
@@ -3233,9 +3233,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         app2.mActivityRecord.commitVisibility(false, false);
 
         // app1 requests IME visible.
-        final InsetsVisibilities requestedVisibilities = new InsetsVisibilities();
-        requestedVisibilities.setVisibility(ITYPE_IME, true);
-        app1.setRequestedVisibilities(requestedVisibilities);
+        app1.setRequestedVisibleTypes(ime(), ime());
         mDisplayContent.getInsetsStateController().onInsetsModified(app1);
 
         // Verify app1's IME insets is visible and app2's IME insets frozen flag set.

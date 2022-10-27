@@ -34,6 +34,7 @@ import android.os.Trace;
 import android.util.proto.ProtoOutputStream;
 import android.view.InsetsSource;
 import android.view.InsetsSourceControl;
+import android.view.InsetsState;
 import android.view.WindowInsets;
 import android.window.TaskSnapshot;
 
@@ -104,7 +105,7 @@ final class ImeInsetsSourceProvider extends WindowContainerInsetsSourceProvider 
     @Override
     protected boolean updateClientVisibility(InsetsControlTarget caller) {
         boolean changed = super.updateClientVisibility(caller);
-        if (changed && caller.getRequestedVisibility(mSource.getType())) {
+        if (changed && caller.isRequestedVisible(InsetsState.toPublicType(mSource.getType()))) {
             reportImeDrawnForOrganizer(caller);
         }
         return changed;

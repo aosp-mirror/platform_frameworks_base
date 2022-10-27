@@ -15,9 +15,11 @@
  */
 package com.android.server.broadcastradio.aidl;
 
+import android.hardware.broadcastradio.IdentifierType;
 import android.hardware.broadcastradio.Metadata;
 import android.hardware.broadcastradio.ProgramIdentifier;
 import android.hardware.broadcastradio.ProgramInfo;
+import android.hardware.broadcastradio.VendorKeyValue;
 import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
 import android.hardware.radio.RadioMetadata;
@@ -42,7 +44,7 @@ final class AidlTestUtils {
         return makeProgramInfo(selector, signalQuality);
     }
 
-    static ProgramSelector makeFMSelector(long freq) {
+    static ProgramSelector makeFmSelector(long freq) {
         return makeProgramSelector(ProgramSelector.PROGRAM_TYPE_FM,
                 new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_AMFM_FREQUENCY,
                         freq));
@@ -52,6 +54,18 @@ final class AidlTestUtils {
             ProgramSelector.Identifier identifier) {
         return new ProgramSelector(programType, identifier, /* secondaryIds= */ null,
                 /* vendorIds= */ null);
+    }
+
+    static android.hardware.broadcastradio.ProgramSelector makeHalFmSelector(int freq) {
+        ProgramIdentifier halId = new ProgramIdentifier();
+        halId.type = IdentifierType.AMFM_FREQUENCY_KHZ;
+        halId.value = freq;
+
+        android.hardware.broadcastradio.ProgramSelector halSelector =
+                new android.hardware.broadcastradio.ProgramSelector();
+        halSelector.primaryId = halId;
+        halSelector.secondaryIds = new ProgramIdentifier[0];
+        return halSelector;
     }
 
     static ProgramInfo programInfoToHalProgramInfo(RadioManager.ProgramInfo info) {
@@ -69,7 +83,7 @@ final class AidlTestUtils {
         return hwInfo;
     }
 
-    static ProgramInfo makeHalProgramSelector(
+    static ProgramInfo makeHalProgramInfo(
             android.hardware.broadcastradio.ProgramSelector hwSel, int hwSignalQuality) {
         ProgramInfo hwInfo = new ProgramInfo();
         hwInfo.selector = hwSel;
@@ -79,5 +93,22 @@ final class AidlTestUtils {
         hwInfo.relatedContent = new ProgramIdentifier[]{};
         hwInfo.metadata = new Metadata[]{};
         return hwInfo;
+    }
+
+    static VendorKeyValue makeVendorKeyValue(String vendorKey, String vendorValue) {
+        VendorKeyValue vendorKeyValue = new VendorKeyValue();
+        vendorKeyValue.key = vendorKey;
+        vendorKeyValue.value = vendorValue;
+        return vendorKeyValue;
+    }
+
+    static android.hardware.broadcastradio.Announcement makeAnnouncement(int type,
+            int selectorFreq) {
+        android.hardware.broadcastradio.Announcement halAnnouncement =
+                new android.hardware.broadcastradio.Announcement();
+        halAnnouncement.type = (byte) type;
+        halAnnouncement.selector = makeHalFmSelector(selectorFreq);
+        halAnnouncement.vendorInfo = new VendorKeyValue[]{};
+        return halAnnouncement;
     }
 }

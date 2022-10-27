@@ -19,6 +19,7 @@ import android.content.ContentResolver
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.os.Handler
+import android.os.UserHandle
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -104,13 +105,14 @@ class ClockRegistryTest : SysuiTestCase() {
             mockContext,
             mockPluginManager,
             mockHandler,
-            fakeDefaultProvider
+            isEnabled = true,
+            userHandle = UserHandle.USER_ALL,
+            defaultClockProvider = fakeDefaultProvider
         ) {
             override var currentClockId: ClockId
                 get() = settingValue
                 set(value) { settingValue = value }
         }
-        registry.isEnabled = true
 
         verify(mockPluginManager)
             .addPluginListener(captor.capture(), eq(ClockProviderPlugin::class.java), eq(true))

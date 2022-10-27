@@ -60,6 +60,7 @@ import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
@@ -111,6 +112,8 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
 
     private FalsingCollectorFake mFalsingCollector;
+
+    private @Mock CentralSurfaces mCentralSurfaces;
 
     @Before
     public void setUp() throws Exception {
@@ -258,6 +261,26 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         verify(mKeyguardStateController).notifyKeyguardGoingAway(false);
     }
 
+    @Test
+    public void testUpdateIsKeyguardAfterOccludeAnimationEnds() {
+        mViewMediator.mOccludeAnimationController.onLaunchAnimationEnd(
+                false /* isExpandingFullyAbove */);
+
+        // Since the updateIsKeyguard call is delayed during the animation, ensure it's called once
+        // it ends.
+        verify(mCentralSurfaces).updateIsKeyguard();
+    }
+
+    @Test
+    public void testUpdateIsKeyguardAfterOccludeAnimationIsCancelled() {
+        mViewMediator.mOccludeAnimationController.onLaunchAnimationCancelled(
+                null /* newKeyguardOccludedState */);
+
+        // Since the updateIsKeyguard call is delayed during the animation, ensure it's called if
+        // it's cancelled.
+        verify(mCentralSurfaces).updateIsKeyguard();
+    }
+
     private void createAndStartViewMediator() {
         mViewMediator = new KeyguardViewMediator(
                 mContext,
@@ -287,5 +310,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 mNotificationShadeWindowControllerLazy,
                 () -> mActivityLaunchAnimator);
         mViewMediator.start();
+
+        mViewMediator.registerCentralSurfaces(mCentralSurfaces, null, null, null, null, null);
     }
 }

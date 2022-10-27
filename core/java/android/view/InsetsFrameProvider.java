@@ -273,6 +273,9 @@ public class InsetsFrameProvider implements Parcelable {
     /**
      * Class to describe the insets size to be provided to window with specific window type. If not
      * used, same insets size will be sent as instructed in the insetsSize and source.
+     *
+     * If the insetsSize of given type is set to {@code null}, the insets source frame will be used
+     * directly for that window type.
      */
     public static class InsetsSizeOverride implements Parcelable {
         public final int windowType;
@@ -280,7 +283,7 @@ public class InsetsFrameProvider implements Parcelable {
 
         protected InsetsSizeOverride(Parcel in) {
             windowType = in.readInt();
-            insetsSize = in.readParcelable(null, android.graphics.Insets.class);
+            insetsSize = in.readParcelable(null, Insets.class);
         }
 
         public InsetsSizeOverride(int type, Insets size) {

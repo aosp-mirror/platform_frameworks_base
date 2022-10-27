@@ -32,7 +32,6 @@ import android.view.MotionEvent;
 import android.view.WindowManager;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
-import android.view.InsetsVisibilities;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
@@ -48,15 +47,15 @@ import java.util.List;
  */
 interface IWindowSession {
     int addToDisplay(IWindow window, in WindowManager.LayoutParams attrs,
-            in int viewVisibility, in int layerStackId, in InsetsVisibilities requestedVisibilities,
+            in int viewVisibility, in int layerStackId, int requestedVisibleTypes,
             out InputChannel outInputChannel, out InsetsState insetsState,
             out InsetsSourceControl[] activeControls, out Rect attachedFrame,
             out float[] sizeCompatScale);
     int addToDisplayAsUser(IWindow window, in WindowManager.LayoutParams attrs,
-            in int viewVisibility, in int layerStackId, in int userId,
-            in InsetsVisibilities requestedVisibilities, out InputChannel outInputChannel,
-            out InsetsState insetsState, out InsetsSourceControl[] activeControls,
-            out Rect attachedFrame, out float[] sizeCompatScale);
+            in int viewVisibility, in int layerStackId, in int userId, int requestedVisibleTypes,
+            out InputChannel outInputChannel, out InsetsState insetsState,
+            out InsetsSourceControl[] activeControls, out Rect attachedFrame,
+            out float[] sizeCompatScale);
     int addToDisplayWithoutInputChannel(IWindow window, in WindowManager.LayoutParams attrs,
             in int viewVisibility, in int layerStackId, out InsetsState insetsState,
             out Rect attachedFrame, out float[] sizeCompatScale);
@@ -279,9 +278,9 @@ interface IWindowSession {
     oneway void updateTapExcludeRegion(IWindow window, in Region region);
 
     /**
-     * Updates the requested visibilities of insets.
+     * Updates the requested visible types of insets.
      */
-    oneway void updateRequestedVisibilities(IWindow window, in InsetsVisibilities visibilities);
+    oneway void updateRequestedVisibleTypes(IWindow window, int requestedVisibleTypes);
 
     /**
      * Called when the system gesture exclusion has changed.

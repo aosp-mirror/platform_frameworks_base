@@ -18,6 +18,7 @@ package com.android.server.pm;
 
 import static android.content.pm.PackageManager.INSTALL_REASON_UNKNOWN;
 import static android.content.pm.PackageManager.INSTALL_SCENARIO_DEFAULT;
+import static android.os.Process.INVALID_UID;
 
 import static com.android.server.pm.PackageManagerService.TAG;
 
@@ -29,13 +30,19 @@ import android.content.pm.DataLoaderType;
 import android.content.pm.IPackageInstallObserver2;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
+import android.content.pm.SharedLibraryInfo;
 import android.content.pm.SigningDetails;
 import android.net.Uri;
+import android.os.Build;
+import android.os.Process;
 import android.os.UserHandle;
 import android.util.ExceptionUtils;
 import android.util.Slog;
 
+import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.pkg.AndroidPackage;
+import com.android.server.pm.pkg.PackageStateInternal;
+import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -45,12 +52,58 @@ final class InstallRequest {
     private final int mUserId;
     @Nullable
     private final InstallArgs mInstallArgs;
-    @NonNull
-    private final PackageInstalledInfo mInstalledInfo;
     @Nullable
     private Runnable mPostInstallRunnable;
     @Nullable
     private PackageRemovedInfo mRemovedInfo;
+
+    private @PackageManagerService.ScanFlags int mScanFlags;
+    private @ParsingPackageUtils.ParseFlags int mParseFlags;
+    private boolean mReplace;
+
+    @Nullable /* The original Package if it is being replaced, otherwise {@code null} */
+    private AndroidPackage mExistingPackage;
+    /** parsed package to be scanned */
+    @Nullable
+    private ParsedPackage mParsedPackage;
+    private boolean mClearCodeCache;
+    private boolean mSystem;
+    @Nullable
+    private PackageSetting mOriginalPs;
+    @Nullable
+    private PackageSetting mDisabledPs;
+
+    /** Package Installed Info */
+    @Nullable
+    private String mName;
+    private int mUid = -1;
+    // The set of users that originally had this package installed.
+    @Nullable
+    private int[] mOrigUsers;
+    // The set of users that now have this package installed.
+    @Nullable
+    private int[] mNewUsers;
+    @Nullable
+    private AndroidPackage mPkg;
+    private int mReturnCode;
+    @Nullable
+    private String mReturnMsg;
+    // The set of packages consuming this shared library or null if no consumers exist.
+    @Nullable
+    private ArrayList<AndroidPackage> mLibraryConsumers;
+    @Nullable
+    private PackageFreezer mFreezer;
+    /** The package this package replaces */
+    @Nullable
+    private String mOrigPackage;
+    @Nullable
+    private String mOrigPermission;
+    // The ApexInfo returned by ApexManager#installPackage, used by rebootless APEX install
+    @Nullable
+    private ApexInfo mApexInfo;
+
+    @Nullable
+    private ScanResult mScanResult;
 
     // New install
     InstallRequest(InstallingSession params) {
@@ -63,7 +116,6 @@ final class InstallRequest {
                 params.mTraceMethod, params.mTraceCookie, params.mSigningDetails,
                 params.mInstallReason, params.mInstallScenario, params.mForceQueryableOverride,
                 params.mDataLoaderType, params.mPackageSource);
-        mInstalledInfo = new PackageInstalledInfo();
     }
 
     // Install existing package as user
@@ -71,56 +123,56 @@ final class InstallRequest {
             Runnable runnable) {
         mUserId = userId;
         mInstallArgs = null;
-        mInstalledInfo = new PackageInstalledInfo();
-        mInstalledInfo.mReturnCode = returnCode;
-        mInstalledInfo.mPkg = pkg;
-        mInstalledInfo.mNewUsers = newUsers;
+        mReturnCode = returnCode;
+        mPkg = pkg;
+        mNewUsers = newUsers;
         mPostInstallRunnable = runnable;
     }
 
-    private static class PackageInstalledInfo {
-        String mName;
-        int mUid = -1;
-        // The set of users that originally had this package installed.
-        int[] mOrigUsers;
-        // The set of users that now have this package installed.
-        int[] mNewUsers;
-        AndroidPackage mPkg;
-        int mReturnCode;
-        String mReturnMsg;
-        String mInstallerPackageName;
-        // The set of packages consuming this shared library or null if no consumers exist.
-        ArrayList<AndroidPackage> mLibraryConsumers;
-        PackageFreezer mFreezer;
-        // In some error cases we want to convey more info back to the observer
-        String mOrigPackage;
-        String mOrigPermission;
-        // The ApexInfo returned by ApexManager#installPackage, used by rebootless APEX install
-        ApexInfo mApexInfo;
+    // addForInit
+    InstallRequest(ParsedPackage parsedPackage, int parseFlags, int scanFlags,
+            @Nullable UserHandle user, ScanResult scanResult) {
+        if (user != null) {
+            mUserId = user.getIdentifier();
+        } else {
+            // APEX
+            mUserId = INVALID_UID;
+        }
+        mInstallArgs = null;
+        mParsedPackage = parsedPackage;
+        mParseFlags = parseFlags;
+        mScanFlags = scanFlags;
+        mScanResult = scanResult;
     }
 
+    @Nullable
     public String getName() {
-        return mInstalledInfo.mName;
+        return mName;
     }
 
+    @Nullable
     public String getReturnMsg() {
-        return mInstalledInfo.mReturnMsg;
+        return mReturnMsg;
     }
 
+    @Nullable
     public OriginInfo getOriginInfo() {
         return mInstallArgs == null ? null : mInstallArgs.mOriginInfo;
     }
 
+    @Nullable
     public PackageRemovedInfo getRemovedInfo() {
         return mRemovedInfo;
     }
 
+    @Nullable
     public String getOrigPackage() {
-        return mInstalledInfo.mOrigPackage;
+        return mOrigPackage;
     }
 
+    @Nullable
     public String getOrigPermission() {
-        return mInstalledInfo.mOrigPermission;
+        return mOrigPermission;
     }
 
     @Nullable
@@ -140,7 +192,7 @@ final class InstallRequest {
     }
 
     public int getReturnCode() {
-        return mInstalledInfo.mReturnCode;
+        return mReturnCode;
     }
 
     @Nullable
@@ -160,13 +212,13 @@ final class InstallRequest {
 
     @Nullable
     public String getMovePackageName() {
-        return  (mInstallArgs != null && mInstallArgs.mMoveInfo != null)
+        return (mInstallArgs != null && mInstallArgs.mMoveInfo != null)
                 ? mInstallArgs.mMoveInfo.mPackageName : null;
     }
 
     @Nullable
     public String getMoveFromCodePath() {
-        return  (mInstallArgs != null && mInstallArgs.mMoveInfo != null)
+        return (mInstallArgs != null && mInstallArgs.mMoveInfo != null)
                 ? mInstallArgs.mMoveInfo.mFromCodePath : null;
     }
 
@@ -203,8 +255,9 @@ final class InstallRequest {
         return mInstallArgs == null ? null : mInstallArgs.mVolumeUuid;
     }
 
+    @Nullable
     public AndroidPackage getPkg() {
-        return mInstalledInfo.mPkg;
+        return mPkg;
     }
 
     @Nullable
@@ -256,13 +309,15 @@ final class InstallRequest {
 
     @Nullable
     public Uri getOriginUri() {
-        return mInstallArgs == null ?  null : Uri.fromFile(mInstallArgs.mOriginInfo.mResolvedFile);
+        return mInstallArgs == null ? null : Uri.fromFile(mInstallArgs.mOriginInfo.mResolvedFile);
     }
 
+    @Nullable
     public ApexInfo getApexInfo() {
-        return mInstalledInfo.mApexInfo;
+        return mApexInfo;
     }
 
+    @Nullable
     public String getSourceInstallerPackageName() {
         return mInstallArgs.mInstallSource.installerPackageName;
     }
@@ -272,25 +327,33 @@ final class InstallRequest {
                 && mInstallArgs.mInstallReason == PackageManager.INSTALL_REASON_ROLLBACK;
     }
 
+    @Nullable
     public int[] getNewUsers() {
-        return mInstalledInfo.mNewUsers;
+        return mNewUsers;
     }
 
+    @Nullable
     public int[] getOriginUsers() {
-        return mInstalledInfo.mOrigUsers;
+        return mOrigUsers;
     }
 
     public int getUid() {
-        return mInstalledInfo.mUid;
+        return mUid;
     }
 
     @Nullable
     public String[] getInstallGrantPermissions() {
-        return mInstallArgs == null ?  null : mInstallArgs.mInstallGrantPermissions;
+        return mInstallArgs == null ? null : mInstallArgs.mInstallGrantPermissions;
     }
 
+    @Nullable
     public ArrayList<AndroidPackage> getLibraryConsumers() {
-        return mInstalledInfo.mLibraryConsumers;
+        return mLibraryConsumers;
+    }
+
+    @Nullable
+    public AndroidPackage getExistingPackage() {
+        return mExistingPackage;
     }
 
     @Nullable
@@ -312,13 +375,170 @@ final class InstallRequest {
         return mInstallArgs == null ? INSTALL_SCENARIO_DEFAULT : mInstallArgs.mInstallScenario;
     }
 
+    @Nullable
+    public ParsedPackage getParsedPackage() {
+        return mParsedPackage;
+    }
+
+    public @ParsingPackageUtils.ParseFlags int getParseFlags() {
+        return mParseFlags;
+    }
+
+    public @PackageManagerService.ScanFlags int getScanFlags() {
+        return mScanFlags;
+    }
+
+    @Nullable
+    public String getExistingPackageName() {
+        if (mExistingPackage != null) {
+            return mExistingPackage.getPackageName();
+        }
+        return null;
+    }
+
+    @Nullable
+    public AndroidPackage getScanRequestOldPackage() {
+        assertScanResultExists();
+        return mScanResult.mRequest.mOldPkg;
+    }
+
+    public boolean isClearCodeCache() {
+        return mClearCodeCache;
+    }
+
+    public boolean isReplace() {
+        return mReplace;
+    }
+
+    public boolean isSystem() {
+        return mSystem;
+    }
+
+    @Nullable
+    public PackageSetting getOriginalPackageSetting() {
+        return mOriginalPs;
+    }
+
+    @Nullable
+    public PackageSetting getDisabledPackageSetting() {
+        return mDisabledPs;
+    }
+
+    @Nullable
+    public PackageSetting getScanRequestOldPackageSetting() {
+        assertScanResultExists();
+        return mScanResult.mRequest.mOldPkgSetting;
+    }
+
+    @Nullable
+    public PackageSetting getScanRequestOriginalPackageSetting() {
+        assertScanResultExists();
+        return mScanResult.mRequest.mOriginalPkgSetting;
+    }
+
+    @Nullable
+    public PackageSetting getScanRequestPackageSetting() {
+        assertScanResultExists();
+        return mScanResult.mRequest.mPkgSetting;
+    }
+
+    @Nullable
+    public String getRealPackageName() {
+        assertScanResultExists();
+        return mScanResult.mRequest.mRealPkgName;
+    }
+
+    @Nullable
+    public List<String> getChangedAbiCodePath() {
+        assertScanResultExists();
+        return mScanResult.mChangedAbiCodePath;
+    }
+
     public boolean isForceQueryableOverride() {
         return mInstallArgs != null && mInstallArgs.mForceQueryableOverride;
     }
 
+    @Nullable
+    public SharedLibraryInfo getSdkSharedLibraryInfo() {
+        assertScanResultExists();
+        return mScanResult.mSdkSharedLibraryInfo;
+    }
+
+    @Nullable
+    public SharedLibraryInfo getStaticSharedLibraryInfo() {
+        assertScanResultExists();
+        return mScanResult.mStaticSharedLibraryInfo;
+    }
+
+    @Nullable
+    public List<SharedLibraryInfo> getDynamicSharedLibraryInfos() {
+        assertScanResultExists();
+        return mScanResult.mDynamicSharedLibraryInfos;
+    }
+
+    @Nullable
+    public PackageSetting getScannedPackageSetting() {
+        assertScanResultExists();
+        return mScanResult.mPkgSetting;
+    }
+
+    @Nullable
+    public PackageSetting getRealPackageSetting() {
+        // TODO: Fix this to have 1 mutable PackageSetting for scan/install. If the previous
+        //  setting needs to be passed to have a comparison, hide it behind an immutable
+        //  interface. There's no good reason to have 3 different ways to access the real
+        //  PackageSetting object, only one of which is actually correct.
+        PackageSetting realPkgSetting = isExistingSettingCopied()
+                ? getScanRequestPackageSetting() : getScannedPackageSetting();
+        if (realPkgSetting == null) {
+            realPkgSetting = getScannedPackageSetting();
+        }
+        return realPkgSetting;
+    }
+
+    public boolean isExistingSettingCopied() {
+        assertScanResultExists();
+        return mScanResult.mExistingSettingCopied;
+    }
+
+    /**
+     * Whether the original PackageSetting needs to be updated with
+     * a new app ID. Useful when leaving a sharedUserId.
+     */
+    public boolean needsNewAppId() {
+        assertScanResultExists();
+        return mScanResult.mPreviousAppId != Process.INVALID_UID;
+    }
+
+    public int getPreviousAppId() {
+        assertScanResultExists();
+        return mScanResult.mPreviousAppId;
+    }
+
+    public boolean isPlatformPackage() {
+        assertScanResultExists();
+        return mScanResult.mRequest.mIsPlatformPackage;
+    }
+
+    public void assertScanResultExists() {
+        if (mScanResult == null) {
+            // Should not happen. This indicates a bug in the installation code flow
+            if (Build.IS_USERDEBUG || Build.IS_ENG) {
+                throw new IllegalStateException("ScanResult cannot be null.");
+            } else {
+                Slog.e(TAG, "ScanResult is null and it should not happen");
+            }
+        }
+
+    }
+
+    public void setScanFlags(int scanFlags) {
+        mScanFlags = scanFlags;
+    }
+
     public void closeFreezer() {
-        if (mInstalledInfo.mFreezer != null) {
-            mInstalledInfo.mFreezer.close();
+        if (mFreezer != null) {
+            mFreezer.close();
         }
     }
 
@@ -341,57 +561,53 @@ final class InstallRequest {
     }
 
     public void setError(String msg, PackageManagerException e) {
-        mInstalledInfo.mReturnCode = e.error;
+        mReturnCode = e.error;
         setReturnMessage(ExceptionUtils.getCompleteMessage(msg, e));
         Slog.w(TAG, msg, e);
     }
 
     public void setReturnCode(int returnCode) {
-        mInstalledInfo.mReturnCode = returnCode;
+        mReturnCode = returnCode;
     }
 
     public void setReturnMessage(String returnMsg) {
-        mInstalledInfo.mReturnMsg = returnMsg;
+        mReturnMsg = returnMsg;
     }
 
     public void setApexInfo(ApexInfo apexInfo) {
-        mInstalledInfo.mApexInfo = apexInfo;
+        mApexInfo = apexInfo;
     }
 
     public void setPkg(AndroidPackage pkg) {
-        mInstalledInfo.mPkg = pkg;
+        mPkg = pkg;
     }
 
     public void setUid(int uid) {
-        mInstalledInfo.mUid = uid;
+        mUid = uid;
     }
 
     public void setNewUsers(int[] newUsers) {
-        mInstalledInfo.mNewUsers = newUsers;
+        mNewUsers = newUsers;
     }
 
     public void setOriginPackage(String originPackage) {
-        mInstalledInfo.mOrigPackage = originPackage;
+        mOrigPackage = originPackage;
     }
 
     public void setOriginPermission(String originPermission) {
-        mInstalledInfo.mOrigPermission = originPermission;
-    }
-
-    public void setInstallerPackageName(String installerPackageName) {
-        mInstalledInfo.mInstallerPackageName = installerPackageName;
+        mOrigPermission = originPermission;
     }
 
     public void setName(String packageName) {
-        mInstalledInfo.mName = packageName;
+        mName = packageName;
     }
 
     public void setOriginUsers(int[] userIds) {
-        mInstalledInfo.mOrigUsers = userIds;
+        mOrigUsers = userIds;
     }
 
     public void setFreezer(PackageFreezer freezer) {
-        mInstalledInfo.mFreezer = freezer;
+        mFreezer = freezer;
     }
 
     public void setRemovedInfo(PackageRemovedInfo removedInfo) {
@@ -399,6 +615,47 @@ final class InstallRequest {
     }
 
     public void setLibraryConsumers(ArrayList<AndroidPackage> libraryConsumers) {
-        mInstalledInfo.mLibraryConsumers = libraryConsumers;
+        mLibraryConsumers = libraryConsumers;
+    }
+
+    public void setPrepareResult(boolean replace, int scanFlags,
+            int parseFlags, AndroidPackage existingPackage,
+            ParsedPackage packageToScan, boolean clearCodeCache, boolean system,
+            PackageSetting originalPs, PackageSetting disabledPs) {
+        mReplace = replace;
+        mScanFlags = scanFlags;
+        mParseFlags = parseFlags;
+        mExistingPackage = existingPackage;
+        mParsedPackage = packageToScan;
+        mClearCodeCache = clearCodeCache;
+        mSystem = system;
+        mOriginalPs = originalPs;
+        mDisabledPs = disabledPs;
+    }
+
+    public void setScanResult(@NonNull ScanResult scanResult) {
+        mScanResult = scanResult;
+    }
+
+    public void setScannedPackageSettingAppId(int appId) {
+        assertScanResultExists();
+        mScanResult.mPkgSetting.setAppId(appId);
+    }
+
+    public void setScannedPackageSettingFirstInstallTimeFromReplaced(
+            @Nullable PackageStateInternal replacedPkgSetting, int[] userId) {
+        assertScanResultExists();
+        mScanResult.mPkgSetting.setFirstInstallTimeFromReplaced(replacedPkgSetting, userId);
+    }
+
+    public void setScannedPackageSettingLastUpdateTime(long lastUpdateTim) {
+        assertScanResultExists();
+        mScanResult.mPkgSetting.setLastUpdateTime(lastUpdateTim);
+    }
+
+    public void setRemovedAppId(int appId) {
+        if (mRemovedInfo != null) {
+            mRemovedInfo.mRemovedAppId = appId;
+        }
     }
 }

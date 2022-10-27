@@ -85,9 +85,16 @@ class BroadcastProcessQueue {
     @Nullable ProcessRecord app;
 
     /**
-     * Track name to use for {@link Trace} events.
+     * Track name to use for {@link Trace} events, defined as part of upgrading
+     * into a running slot.
      */
-    @Nullable String traceTrackName;
+    @Nullable String runningTraceTrackName;
+
+    /**
+     * Flag indicating if this process should be OOM adjusted, defined as part
+     * of upgrading into a running slot.
+     */
+    boolean runningOomAdjusted;
 
     /**
      * Snapshotted value of {@link ProcessRecord#getCpuDelayTime()}, typically
@@ -141,7 +148,8 @@ class BroadcastProcessQueue {
     private boolean mActiveViaColdStart;
 
     /**
-     * Count of {@link #mPending} broadcasts of these various flavors.
+     * Count of {@link #mPending} and {@link #mPendingUrgent} broadcasts of
+     * these various flavors.
      */
     private int mCountForeground;
     private int mCountOrdered;
@@ -150,6 +158,7 @@ class BroadcastProcessQueue {
     private int mCountInteractive;
     private int mCountResultTo;
     private int mCountInstrumented;
+    private int mCountManifest;
 
     private @UptimeMillisLong long mRunnableAt = Long.MAX_VALUE;
     private @Reason int mRunnableAtReason = REASON_EMPTY;
@@ -206,7 +215,7 @@ class BroadcastProcessQueue {
         // with implicit responsiveness expectations.
         final ArrayDeque<SomeArgs> queue = record.isUrgent() ? mPendingUrgent : mPending;
         queue.addLast(newBroadcastArgs);
-        onBroadcastEnqueued(record);
+        onBroadcastEnqueued(record, recordIndex);
     }
 
     /**
@@ -224,7 +233,8 @@ class BroadcastProcessQueue {
         while (it.hasNext()) {
             final SomeArgs args = it.next();
             final BroadcastRecord testRecord = (BroadcastRecord) args.arg1;
-            final Object testReceiver = testRecord.receivers.get(args.argi1);
+            final int testRecordIndex = args.argi1;
+            final Object testReceiver = testRecord.receivers.get(testRecordIndex);
             if ((record.callingUid == testRecord.callingUid)
                     && (record.userId == testRecord.userId)
                     && record.intent.filterEquals(testRecord.intent)
@@ -233,8 +243,8 @@ class BroadcastProcessQueue {
                 args.arg1 = record;
                 args.argi1 = recordIndex;
                 args.argi2 = blockedUntilTerminalCount;
-                onBroadcastDequeued(testRecord);
-                onBroadcastEnqueued(record);
+                onBroadcastDequeued(testRecord, testRecordIndex);
+                onBroadcastEnqueued(record, recordIndex);
                 return true;
             }
         }
@@ -284,13 +294,13 @@ class BroadcastProcessQueue {
         while (it.hasNext()) {
             final SomeArgs args = it.next();
             final BroadcastRecord record = (BroadcastRecord) args.arg1;
-            final int index = args.argi1;
-            if (predicate.test(record, index)) {
-                consumer.accept(record, index);
+            final int recordIndex = args.argi1;
+            if (predicate.test(record, recordIndex)) {
+                consumer.accept(record, recordIndex);
                 if (andRemove) {
                     args.recycle();
                     it.remove();
-                    onBroadcastDequeued(record);
+                    onBroadcastDequeued(record, recordIndex);
                 }
                 didSomething = true;
             }
@@ -339,7 +349,7 @@ class BroadcastProcessQueue {
      * Return if we know of an actively running "warm" process for this queue.
      */
     public boolean isProcessWarm() {
-        return (app != null) && (app.getThread() != null) && !app.isKilled();
+        return (app != null) && (app.getOnewayThread() != null) && !app.isKilled();
     }
 
     public int getPreferredSchedulingGroupLocked() {
@@ -385,7 +395,7 @@ class BroadcastProcessQueue {
         mActiveCountSinceIdle++;
         mActiveViaColdStart = false;
         next.recycle();
-        onBroadcastDequeued(mActive);
+        onBroadcastDequeued(mActive, mActiveIndex);
     }
 
     /**
@@ -403,7 +413,7 @@ class BroadcastProcessQueue {
     /**
      * Update summary statistics when the given record has been enqueued.
      */
-    private void onBroadcastEnqueued(@NonNull BroadcastRecord record) {
+    private void onBroadcastEnqueued(@NonNull BroadcastRecord record, int recordIndex) {
         if (record.isForeground()) {
             mCountForeground++;
         }
@@ -425,13 +435,16 @@ class BroadcastProcessQueue {
         if (record.callerInstrumented) {
             mCountInstrumented++;
         }
+        if (record.receivers.get(recordIndex) instanceof ResolveInfo) {
+            mCountManifest++;
+        }
         invalidateRunnableAt();
     }
 
     /**
      * Update summary statistics when the given record has been dequeued.
      */
-    private void onBroadcastDequeued(@NonNull BroadcastRecord record) {
+    private void onBroadcastDequeued(@NonNull BroadcastRecord record, int recordIndex) {
         if (record.isForeground()) {
             mCountForeground--;
         }
@@ -453,34 +466,37 @@ class BroadcastProcessQueue {
         if (record.callerInstrumented) {
             mCountInstrumented--;
         }
+        if (record.receivers.get(recordIndex) instanceof ResolveInfo) {
+            mCountManifest--;
+        }
         invalidateRunnableAt();
     }
 
     public void traceProcessStartingBegin() {
         Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
-                traceTrackName, toShortString() + " starting", hashCode());
+                runningTraceTrackName, toShortString() + " starting", hashCode());
     }
 
     public void traceProcessRunningBegin() {
         Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
-                traceTrackName, toShortString() + " running", hashCode());
+                runningTraceTrackName, toShortString() + " running", hashCode());
     }
 
     public void traceProcessEnd() {
         Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER,
-                traceTrackName, hashCode());
+                runningTraceTrackName, hashCode());
     }
 
     public void traceActiveBegin() {
         final int cookie = mActive.receivers.get(mActiveIndex).hashCode();
         Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
-                traceTrackName, mActive.toShortString() + " scheduled", cookie);
+                runningTraceTrackName, mActive.toShortString() + " scheduled", cookie);
     }
 
     public void traceActiveEnd() {
         final int cookie = mActive.receivers.get(mActiveIndex).hashCode();
         Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER,
-                traceTrackName, cookie);
+                runningTraceTrackName, cookie);
     }
 
     /**
@@ -537,6 +553,14 @@ class BroadcastProcessQueue {
     @Nullable BroadcastRecord peekNextBroadcastRecord() {
         ArrayDeque<SomeArgs> queue = queueForNextBroadcast();
         return (queue != null) ? (BroadcastRecord) queue.peekFirst().arg1 : null;
+    }
+
+    /**
+     * Quickly determine if this queue has broadcasts waiting to be delivered to
+     * manifest receivers, which indicates we should request an OOM adjust.
+     */
+    public boolean isPendingManifest() {
+        return mCountManifest > 0;
     }
 
     /**

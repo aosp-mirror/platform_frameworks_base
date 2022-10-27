@@ -35,6 +35,7 @@ import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityManager;
 
 import androidx.test.filters.SmallTest;
 
@@ -68,6 +69,7 @@ public class AccessibilityFloatingMenuControllerTest extends SysuiTestCase {
     public MockitoRule mockito = MockitoJUnit.rule();
 
     private Context mContextWrapper;
+    private AccessibilityManager mAccessibilityManager;
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private AccessibilityFloatingMenuController mController;
     private AccessibilityButtonTargetsObserver mTargetsObserver;
@@ -87,6 +89,7 @@ public class AccessibilityFloatingMenuControllerTest extends SysuiTestCase {
             }
         };
 
+        mAccessibilityManager = mContext.getSystemService(AccessibilityManager.class);
         mLastButtonTargets = Settings.Secure.getStringForUser(mContextWrapper.getContentResolver(),
                 Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS, UserHandle.USER_CURRENT);
         mLastButtonMode = Settings.Secure.getIntForUser(mContextWrapper.getContentResolver(),
@@ -348,8 +351,8 @@ public class AccessibilityFloatingMenuControllerTest extends SysuiTestCase {
         mKeyguardUpdateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
         final AccessibilityFloatingMenuController controller =
                 new AccessibilityFloatingMenuController(mContextWrapper, windowManager,
-                        displayManager, mTargetsObserver, mModeObserver, mKeyguardUpdateMonitor,
-                        featureFlags);
+                        displayManager, mAccessibilityManager, mTargetsObserver, mModeObserver,
+                        mKeyguardUpdateMonitor, featureFlags);
         controller.init();
 
         return controller;

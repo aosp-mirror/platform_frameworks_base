@@ -587,7 +587,7 @@ class TaskSnapshotController {
         final Rect systemBarInsets = getSystemBarInsets(mainWindow.getFrame(), insetsState);
         final SystemBarBackgroundPainter decorPainter = new SystemBarBackgroundPainter(attrs.flags,
                 attrs.privateFlags, attrs.insetsFlags.appearance, task.getTaskDescription(),
-                mHighResTaskSnapshotScale, insetsState);
+                mHighResTaskSnapshotScale, mainWindow.getRequestedVisibleTypes());
         final int taskWidth = taskBounds.width();
         final int taskHeight = taskBounds.height();
         final int width = (int) (taskWidth * mHighResTaskSnapshotScale);
@@ -750,12 +750,12 @@ class TaskSnapshotController {
         private final int mWindowFlags;
         private final int mWindowPrivateFlags;
         private final float mScale;
-        private final InsetsState mInsetsState;
+        private final @Type.InsetsType int mRequestedVisibleTypes;
         private final Rect mSystemBarInsets = new Rect();
 
         SystemBarBackgroundPainter(int windowFlags, int windowPrivateFlags, int appearance,
                 ActivityManager.TaskDescription taskDescription, float scale,
-                InsetsState insetsState) {
+                @Type.InsetsType int requestedVisibleTypes) {
             mWindowFlags = windowFlags;
             mWindowPrivateFlags = windowPrivateFlags;
             mScale = scale;
@@ -774,7 +774,7 @@ class TaskSnapshotController {
                             && context.getResources().getBoolean(R.bool.config_navBarNeedsScrim));
             mStatusBarPaint.setColor(mStatusBarColor);
             mNavigationBarPaint.setColor(mNavigationBarColor);
-            mInsetsState = insetsState;
+            mRequestedVisibleTypes = requestedVisibleTypes;
         }
 
         void setInsets(Rect systemBarInsets) {
@@ -785,7 +785,7 @@ class TaskSnapshotController {
             final boolean forceBarBackground =
                     (mWindowPrivateFlags & PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS) != 0;
             if (STATUS_BAR_COLOR_VIEW_ATTRIBUTES.isVisible(
-                    mInsetsState, mStatusBarColor, mWindowFlags, forceBarBackground)) {
+                    mRequestedVisibleTypes, mStatusBarColor, mWindowFlags, forceBarBackground)) {
                 return (int) (mSystemBarInsets.top * mScale);
             } else {
                 return 0;
@@ -796,7 +796,7 @@ class TaskSnapshotController {
             final boolean forceBarBackground =
                     (mWindowPrivateFlags & PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS) != 0;
             return NAVIGATION_BAR_COLOR_VIEW_ATTRIBUTES.isVisible(
-                    mInsetsState, mNavigationBarColor, mWindowFlags, forceBarBackground);
+                    mRequestedVisibleTypes, mNavigationBarColor, mWindowFlags, forceBarBackground);
         }
 
         void drawDecors(Canvas c) {

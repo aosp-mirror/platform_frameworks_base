@@ -31,6 +31,7 @@ interface IImageCaptureExtenderImpl
     @nullable CaptureStageImpl onPresetSession();
     @nullable CaptureStageImpl onEnableSession();
     @nullable CaptureStageImpl onDisableSession();
+    int getSessionType();
 
     boolean isExtensionAvailable(in String cameraId, in CameraMetadataNative chars);
     void init(in String cameraId, in CameraMetadataNative chars);

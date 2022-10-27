@@ -17,7 +17,6 @@
 package com.android.server.pm;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.SigningDetails;
 import android.util.ArrayMap;
@@ -33,12 +32,9 @@ import java.util.Map;
  * TODO: move most of the data contained here into a PackageSetting for commit.
  */
 final class ReconciledPackage {
-    public final ReconcileRequest mRequest;
-    public final PackageSetting mPkgSetting;
-    public final ScanResult mScanResult;
-    // TODO: Remove install-specific details from the reconcile result
-    @Nullable public final PrepareResult mPrepareResult;
-    @Nullable public final InstallRequest mInstallRequest;
+    private final List<InstallRequest> mInstallRequests;
+    private final Map<String, AndroidPackage> mAllPackages;
+    @NonNull public final InstallRequest mInstallRequest;
     public final DeletePackageAction mDeletePackageAction;
     public final List<SharedLibraryInfo> mAllowedSharedLibraryInfos;
     public final SigningDetails mSigningDetails;
@@ -46,21 +42,17 @@ final class ReconciledPackage {
     public ArrayList<SharedLibraryInfo> mCollectedSharedLibraryInfos;
     public final boolean mRemoveAppKeySetData;
 
-    ReconciledPackage(ReconcileRequest request,
+    ReconciledPackage(List<InstallRequest> installRequests,
+            Map<String, AndroidPackage> allPackages,
             InstallRequest installRequest,
-            PackageSetting pkgSetting,
-            PrepareResult prepareResult,
-            ScanResult scanResult,
             DeletePackageAction deletePackageAction,
             List<SharedLibraryInfo> allowedSharedLibraryInfos,
             SigningDetails signingDetails,
             boolean sharedUserSignaturesChanged,
             boolean removeAppKeySetData) {
-        mRequest = request;
+        mInstallRequests = installRequests;
+        mAllPackages = allPackages;
         mInstallRequest = installRequest;
-        mPkgSetting = pkgSetting;
-        mPrepareResult = prepareResult;
-        mScanResult = scanResult;
         mDeletePackageAction = deletePackageAction;
         mAllowedSharedLibraryInfos = allowedSharedLibraryInfos;
         mSigningDetails = signingDetails;
@@ -75,13 +67,13 @@ final class ReconciledPackage {
      */
     @NonNull Map<String, AndroidPackage> getCombinedAvailablePackages() {
         final ArrayMap<String, AndroidPackage> combined =
-                new ArrayMap<>(mRequest.mAllPackages.size() + mRequest.mScannedPackages.size());
+                new ArrayMap<>(mAllPackages.size() + mInstallRequests.size());
 
-        combined.putAll(mRequest.mAllPackages);
+        combined.putAll(mAllPackages);
 
-        for (ScanResult scanResult : mRequest.mScannedPackages.values()) {
-            combined.put(scanResult.mPkgSetting.getPackageName(),
-                    scanResult.mRequest.mParsedPackage);
+        for (InstallRequest installRequest : mInstallRequests) {
+            combined.put(installRequest.getScannedPackageSetting().getPackageName(),
+                    installRequest.getParsedPackage());
         }
 
         return combined;
