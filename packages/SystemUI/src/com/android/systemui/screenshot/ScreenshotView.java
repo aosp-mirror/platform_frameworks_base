@@ -872,6 +872,7 @@ public class ScreenshotView extends FrameLayout implements
 
     void startLongScreenshotTransition(Rect destination, Runnable onTransitionEnd,
             ScrollCaptureController.LongScreenshot longScreenshot) {
+        mPendingSharedTransition = true;
         AnimatorSet animSet = new AnimatorSet();
 
         ValueAnimator scrimAnim = ValueAnimator.ofFloat(0, 1);
