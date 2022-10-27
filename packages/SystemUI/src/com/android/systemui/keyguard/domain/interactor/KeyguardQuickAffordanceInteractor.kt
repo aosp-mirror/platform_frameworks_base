@@ -21,15 +21,14 @@ import android.content.Intent
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.animation.Expandable
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceConfig
 import com.android.systemui.keyguard.domain.model.KeyguardQuickAffordanceModel
-import com.android.systemui.keyguard.domain.model.KeyguardQuickAffordancePosition
-import com.android.systemui.keyguard.domain.quickaffordance.KeyguardQuickAffordanceConfig
 import com.android.systemui.keyguard.domain.quickaffordance.KeyguardQuickAffordanceRegistry
+import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancePosition
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import javax.inject.Inject
-import kotlin.reflect.KClass
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.onStart
@@ -70,10 +69,10 @@ constructor(
      * @param expandable An optional [Expandable] for the activity- or dialog-launch animation
      */
     fun onQuickAffordanceClicked(
-        configKey: KClass<out KeyguardQuickAffordanceConfig>,
+        configKey: String,
         expandable: Expandable?,
     ) {
-        @Suppress("UNCHECKED_CAST") val config = registry.get(configKey as KClass<Nothing>)
+        @Suppress("UNCHECKED_CAST") val config = registry.get(configKey)
         when (val result = config.onQuickAffordanceClicked(expandable)) {
             is KeyguardQuickAffordanceConfig.OnClickedResult.StartActivity ->
                 launchQuickAffordance(
@@ -102,7 +101,7 @@ constructor(
             if (index != -1) {
                 val visibleState = states[index] as KeyguardQuickAffordanceConfig.State.Visible
                 KeyguardQuickAffordanceModel.Visible(
-                    configKey = configs[index]::class,
+                    configKey = configs[index].key,
                     icon = visibleState.icon,
                     toggle = visibleState.toggle,
                 )
