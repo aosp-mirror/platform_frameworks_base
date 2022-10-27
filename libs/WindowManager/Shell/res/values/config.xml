@@ -23,6 +23,10 @@
          TODO(b/238217847): This config is temporary until we refactor the base WMComponent. -->
     <bool name="config_registerShellTaskOrganizerOnInit">true</bool>
 
+    <!-- Determines whether to register the shell transitions on init.
+         TODO(b/238217847): This config is temporary until we refactor the base WMComponent. -->
+    <bool name="config_registerShellTransitionsOnInit">true</bool>
+
     <!-- Animation duration for PIP when entering. -->
     <integer name="config_pipEnterAnimationDuration">425</integer>
 
