@@ -24,7 +24,6 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
-import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.res.Configuration.SMALLEST_SCREEN_WIDTH_DP_UNDEFINED;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
@@ -428,6 +427,11 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     /** Launches an activity into split. */
     void startIntent(PendingIntent intent, Intent fillInIntent, @SplitPosition int position,
             @Nullable Bundle options) {
+        if (!ENABLE_SHELL_TRANSITIONS) {
+            startIntentLegacy(intent, fillInIntent, position, options);
+            return;
+        }
+
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         final WindowContainerTransaction evictWct = new WindowContainerTransaction();
         prepareEvictChildTasks(position, evictWct);
@@ -441,13 +445,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         prepareEnterSplitScreen(wct, null /* taskInfo */, position);
 
         mSplitTransitions.startEnterTransition(transitType, wct, null, this,
-                aborted -> {
-                    // Switch the split position if launching as MULTIPLE_TASK failed.
-                    if (aborted && (fillInIntent.getFlags() & FLAG_ACTIVITY_MULTIPLE_TASK) != 0) {
-                        setSideStagePositionAnimated(
-                                SplitLayout.reversePosition(mSideStagePosition));
-                    }
-                } /* consumedCallback */,
+                null /* consumedCallback */,
                 (finishWct, finishT) -> {
                     if (!evictWct.isEmpty()) {
                         finishWct.merge(evictWct, true);
@@ -457,7 +455,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     /** Launches an activity into split by legacy transition. */
     void startIntentLegacy(PendingIntent intent, Intent fillInIntent,
-            @SplitPosition int position, @androidx.annotation.Nullable Bundle options) {
+            @SplitPosition int position, @Nullable Bundle options) {
         final WindowContainerTransaction evictWct = new WindowContainerTransaction();
         prepareEvictChildTasks(position, evictWct);
 
@@ -473,12 +471,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                                 exitSplitScreen(mMainStage.getChildCount() == 0
                                         ? mSideStage : mMainStage, EXIT_REASON_UNKNOWN));
                         mSplitUnsupportedToast.show();
-                    } else {
-                        // Switch the split position if launching as MULTIPLE_TASK failed.
-                        if ((fillInIntent.getFlags() & FLAG_ACTIVITY_MULTIPLE_TASK) != 0) {
-                            setSideStagePosition(SplitLayout.reversePosition(
-                                    getSideStagePosition()), null);
-                        }
                     }
 
                     // Do nothing when the animation was cancelled.
@@ -771,9 +763,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mSideStage.evictInvisibleChildren(wct);
     }
 
-    Bundle resolveStartStage(@StageType int stage,
-            @SplitPosition int position, @androidx.annotation.Nullable Bundle options,
-            @androidx.annotation.Nullable WindowContainerTransaction wct) {
+    Bundle resolveStartStage(@StageType int stage, @SplitPosition int position,
+            @Nullable Bundle options, @Nullable WindowContainerTransaction wct) {
         switch (stage) {
             case STAGE_TYPE_UNDEFINED: {
                 if (position != SPLIT_POSITION_UNDEFINED) {
@@ -844,9 +835,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 : mMainStage.getTopVisibleChildTaskId();
     }
 
-    void setSideStagePositionAnimated(@SplitPosition int sideStagePosition) {
-        if (mSideStagePosition == sideStagePosition) return;
-        SurfaceControl.Transaction t = mTransactionPool.acquire();
+    void switchSplitPosition(String reason) {
+        final SurfaceControl.Transaction t = mTransactionPool.acquire();
         mTempRect1.setEmpty();
         final StageTaskListener topLeftStage =
                 mSideStagePosition == SPLIT_POSITION_TOP_OR_LEFT ? mSideStage : mMainStage;
@@ -886,6 +876,11 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                         va.start();
                     });
                 });
+
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN, "Switch split position: %s", reason);
+        mLogger.logSwap(getMainStagePosition(), mMainStage.getTopChildTaskUid(),
+                getSideStagePosition(), mSideStage.getTopChildTaskUid(),
+                mSplitLayout.isLandscape());
     }
 
     void setSideStagePosition(@SplitPosition int sideStagePosition,
@@ -1617,10 +1612,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     @Override
     public void onDoubleTappedDivider() {
-        setSideStagePositionAnimated(SplitLayout.reversePosition(mSideStagePosition));
-        mLogger.logSwap(getMainStagePosition(), mMainStage.getTopChildTaskUid(),
-                getSideStagePosition(), mSideStage.getTopChildTaskUid(),
-                mSplitLayout.isLandscape());
+        switchSplitPosition("double tap");
     }
 
     @Override

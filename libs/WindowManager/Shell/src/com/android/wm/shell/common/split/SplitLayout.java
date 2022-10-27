@@ -600,7 +600,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         animator.start();
     }
 
-    /** Swich both surface position with animation. */
+    /** Switch both surface position with animation. */
     public void splitSwitching(SurfaceControl.Transaction t, SurfaceControl leash1,
             SurfaceControl leash2, Consumer<Rect> finishCallback) {
         final boolean isLandscape = isLandscape();
