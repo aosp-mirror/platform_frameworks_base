@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,19 +12,17 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
-package com.android.systemui.flags
+package com.android.systemui.keyguard.shared.quickaffordance
 
-import dagger.Binds
-import dagger.Module
-
-@Module(includes = [
-    FeatureFlagsReleaseStartableModule::class,
-    FlagsCommonModule::class,
-    ServerFlagReaderModule::class
-])
-abstract class FlagsModule {
-    @Binds
-    abstract fun bindsFeatureFlagRelease(impl: FeatureFlagsRelease): FeatureFlags
+/** Enumerates all possible activation states for a quick affordance on the lock-screen. */
+sealed class ActivationState {
+    /** Activation is not supported. */
+    object NotSupported : ActivationState()
+    /** The quick affordance is on. */
+    object Active : ActivationState()
+    /** The quick affordance is off. */
+    object Inactive : ActivationState()
 }

@@ -43,20 +43,21 @@ class TemporaryViewLoggerTest : SysuiTestCase() {
     }
 
     @Test
-    fun logChipAddition_bufferHasLog() {
-        logger.logChipAddition()
+    fun logViewAddition_bufferHasLog() {
+        logger.logViewAddition("Test Window Title")
 
         val stringWriter = StringWriter()
         buffer.dump(PrintWriter(stringWriter), tailLength = 0)
         val actualString = stringWriter.toString()
 
         assertThat(actualString).contains(TAG)
+        assertThat(actualString).contains("Test Window Title")
     }
 
     @Test
-    fun logChipRemoval_bufferHasTagAndReason() {
+    fun logViewRemoval_bufferHasTagAndReason() {
         val reason = "test reason"
-        logger.logChipRemoval(reason)
+        logger.logViewRemoval(reason)
 
         val stringWriter = StringWriter()
         buffer.dump(PrintWriter(stringWriter), tailLength = 0)

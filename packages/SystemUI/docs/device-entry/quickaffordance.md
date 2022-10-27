@@ -8,7 +8,7 @@ credit card, etc.
 ### Step 1: create a new quick affordance config
 * Create a new class under the [systemui/keyguard/domain/quickaffordance](../../src/com/android/systemui/keyguard/domain/quickaffordance) directory
 * Please make sure that the class is injected through the Dagger dependency injection system by using the `@Inject` annotation on its main constructor and the `@SysUISingleton` annotation at class level, to make sure only one instance of the class is ever instantiated
-* Have the class implement the [KeyguardQuickAffordanceConfig](../../src/com/android/systemui/keyguard/domain/quickaffordance/KeyguardQuickAffordanceConfig.kt) interface, notes:
+* Have the class implement the [KeyguardQuickAffordanceConfig](../../src/com/android/systemui/keyguard/data/quickaffordance/KeyguardQuickAffordanceConfig.kt) interface, notes:
   * The `state` Flow property must emit `State.Hidden` when the feature is not enabled!
   * It is safe to assume that `onQuickAffordanceClicked` will not be invoked if-and-only-if the previous rule is followed
   * When implementing `onQuickAffordanceClicked`, the implementation can do something or it can ask the framework to start an activity using an `Intent` provided by the implementation
