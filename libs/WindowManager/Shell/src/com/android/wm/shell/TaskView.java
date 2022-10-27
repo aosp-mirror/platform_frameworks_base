@@ -41,7 +41,6 @@ import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import com.android.wm.shell.common.SyncTransactionQueue;
-import com.android.wm.shell.transition.Transitions;
 
 import java.io.PrintWriter;
 import java.util.concurrent.Executor;
@@ -122,7 +121,7 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
 
     /** Until all users are converted, we may have mixed-use (eg. Car). */
     private boolean isUsingShellTransitions() {
-        return mTaskViewTransitions != null && Transitions.ENABLE_SHELL_TRANSITIONS;
+        return mTaskViewTransitions != null && mTaskViewTransitions.isEnabled();
     }
 
     /**
