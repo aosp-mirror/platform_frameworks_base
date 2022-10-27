@@ -172,9 +172,11 @@ public final class CredentialEntry implements Parcelable {
          * {@code credential}, or the {@code pendingIntent}.
          */
         public @NonNull Builder setPendingIntent(@Nullable PendingIntent pendingIntent) {
-            Preconditions.checkState(pendingIntent != null && mCredential != null,
-                    "credential is already set. Cannot set both the pendingIntent "
-                            + "and the credential");
+            if (pendingIntent != null) {
+                Preconditions.checkState(mCredential != null,
+                        "credential is already set. Cannot set both the pendingIntent "
+                                + "and the credential");
+            }
             mPendingIntent = pendingIntent;
             return this;
         }
@@ -186,9 +188,11 @@ public final class CredentialEntry implements Parcelable {
          * the {@code pendingIntent}, or the {@code credential}.
          */
         public @NonNull Builder setCredential(@Nullable Credential credential) {
-            Preconditions.checkState(credential != null && mPendingIntent != null,
-                    "pendingIntent is already set. Cannot set both the "
-                            + "pendingIntent and the credential");
+            if (credential != null) {
+                Preconditions.checkState(mPendingIntent != null,
+                        "pendingIntent is already set. Cannot set both the "
+                                + "pendingIntent and the credential");
+            }
             mCredential = credential;
             return this;
         }

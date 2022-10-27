@@ -17,16 +17,10 @@
 package android.service.credentials;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.app.slice.Slice;
-import android.credentials.Credential;
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import com.android.internal.util.Preconditions;
-
-import java.util.Objects;
 
 /**
  * An entry to be shown on the UI. This entry represents where the credential to be created will
@@ -36,13 +30,11 @@ import java.util.Objects;
  */
 public final class SaveEntry implements Parcelable {
     private final @NonNull Slice mSlice;
-    private final @Nullable PendingIntent mPendingIntent;
-    private final @Nullable Credential mCredential;
+    private final @NonNull PendingIntent mPendingIntent;
 
     private SaveEntry(@NonNull Parcel in) {
         mSlice = in.readTypedObject(Slice.CREATOR);
         mPendingIntent = in.readTypedObject(PendingIntent.CREATOR);
-        mCredential = in.readTypedObject(Credential.CREATOR);
     }
 
     public static final @NonNull Creator<SaveEntry> CREATOR = new Creator<SaveEntry>() {
@@ -66,18 +58,23 @@ public final class SaveEntry implements Parcelable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeTypedObject(mSlice, flags);
         dest.writeTypedObject(mPendingIntent, flags);
-        dest.writeTypedObject(mCredential, flags);
     }
 
-    /* package-private */ SaveEntry(
+    /**
+     * Constructs a save entry to be displayed on the UI.
+     *
+     * @param slice the display content to be displayed on the UI, along with this entry
+     * @param pendingIntent the intent to be invoked when the user selects this entry
+     */
+    public SaveEntry(
             @NonNull Slice slice,
-            @Nullable PendingIntent pendingIntent,
-            @Nullable Credential credential) {
+            @NonNull PendingIntent pendingIntent) {
         this.mSlice = slice;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mSlice);
         this.mPendingIntent = pendingIntent;
-        this.mCredential = credential;
+        com.android.internal.util.AnnotationValidations.validate(
+                NonNull.class, null, mPendingIntent);
     }
 
     /** Returns the content to be displayed with this save entry on the UI. */
@@ -86,76 +83,7 @@ public final class SaveEntry implements Parcelable {
     }
 
     /** Returns the pendingIntent to be invoked when this save entry on the UI is selectcd. */
-    public @Nullable PendingIntent getPendingIntent() {
+    public @NonNull PendingIntent getPendingIntent() {
         return mPendingIntent;
-    }
-
-    /** Returns the credential produced by the {@link CreateCredentialRequest}. */
-    public @Nullable Credential getCredential() {
-        return mCredential;
-    }
-
-    /**
-     * A builder for {@link SaveEntry}.
-     */
-    public static final class Builder {
-
-        private @NonNull Slice mSlice;
-        private @Nullable PendingIntent mPendingIntent;
-        private @Nullable Credential mCredential;
-
-        /**
-         * Builds the instance.
-         * @param slice the content to be displayed with this save entry
-         *
-         * @throws NullPointerException If {@code slice} is null.
-         */
-        public Builder(@NonNull Slice slice) {
-            mSlice = Objects.requireNonNull(slice, "slice must not be null");
-        }
-
-        /**
-         * Sets the pendingIntent to be invoked when this entry is selected by the user.
-         *
-         * @throws IllegalStateException If {@code credential} is already set. Must only set either
-         * {@code credential}, or the {@code pendingIntent}.
-         */
-        public @NonNull Builder setPendingIntent(@Nullable PendingIntent pendingIntent) {
-            Preconditions.checkState(pendingIntent != null
-                    && mCredential != null, "credential is already set. Must only set "
-                    + "either the pendingIntent or the credential");
-            mPendingIntent = pendingIntent;
-            return this;
-        }
-
-        /**
-         * Sets the credential to be returned when this entry is selected by the user.
-         *
-         * @throws IllegalStateException If {@code pendingIntent} is already set. Must only
-         * set either the {@code pendingIntent}, or {@code credential}.
-         */
-        public @NonNull Builder setCredential(@Nullable Credential credential) {
-            Preconditions.checkState(credential != null && mPendingIntent != null,
-                    "pendingIntent is already set. Must only set either the credential "
-                            + "or the pendingIntent");
-            mCredential = credential;
-            return this;
-        }
-
-        /**
-         * Builds the instance.
-         *
-         * @throws IllegalStateException if both {@code pendingIntent} and {@code credential}
-         * are null.
-         */
-        public @NonNull SaveEntry build() {
-            Preconditions.checkState(mPendingIntent == null && mCredential == null,
-                    "pendingIntent and credential both must not be null. Must set "
-                            + "either the pendingIntnet or the credential");
-            return new SaveEntry(
-                    mSlice,
-                    mPendingIntent,
-                    mCredential);
-        }
     }
 }
