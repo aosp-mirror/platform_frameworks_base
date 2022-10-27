@@ -4953,7 +4953,7 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     void reportKeepClearAreasChanged() {
-        if (!mHasPendingKeepClearAreaChange) {
+        if (!mHasPendingKeepClearAreaChange || mView == null) {
             return;
         }
         mHasPendingKeepClearAreaChange = false;
