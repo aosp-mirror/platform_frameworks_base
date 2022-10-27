@@ -1324,7 +1324,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
         try {
             final float fps = 0.0f;
             final int uid = mPackageManager.getPackageUidAsUser(packageName, userId);
-            nativeSetOverrideFrameRate(uid, fps);
+            setOverrideFrameRate(uid, fps);
         } catch (PackageManager.NameNotFoundException e) {
             return;
         }
@@ -1410,7 +1410,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
         try {
             final float fps = modeConfig.getFps();
             final int uid = mPackageManager.getPackageUidAsUser(packageName, userId);
-            nativeSetOverrideFrameRate(uid, fps);
+            setOverrideFrameRate(uid, fps);
         } catch (PackageManager.NameNotFoundException e) {
             return;
         }
@@ -1419,20 +1419,16 @@ public final class GameManagerService extends IGameManagerService.Stub {
 
     private void updateInterventions(String packageName,
             @GameMode int gameMode, @UserIdInt int userId) {
+        final GamePackageConfiguration packageConfig = getConfig(packageName);
         if (gameMode == GameManager.GAME_MODE_STANDARD
-                || gameMode == GameManager.GAME_MODE_UNSUPPORTED) {
+                || gameMode == GameManager.GAME_MODE_UNSUPPORTED || packageConfig == null
+                || packageConfig.willGamePerformOptimizations(gameMode)) {
             disableCompatScale(packageName);
             resetFps(packageName, userId);
-            return;
-        }
-        final GamePackageConfiguration packageConfig = getConfig(packageName);
-        if (packageConfig == null) {
-            disableCompatScale(packageName);
-            Slog.v(TAG, "Package configuration not found for " + packageName);
-            return;
-        }
-        if (packageConfig.willGamePerformOptimizations(gameMode)) {
-            return;
+            if (packageConfig == null) {
+                Slog.v(TAG, "Package configuration not found for " + packageName);
+                return;
+            }
         }
         updateCompatModeDownscale(packageConfig, packageName, gameMode);
         updateFps(packageConfig, packageName, gameMode, userId);
@@ -1874,6 +1870,11 @@ public final class GameManagerService extends IGameManagerService.Stub {
                 Process.THREAD_PRIORITY_BACKGROUND, true /*allowIo*/);
         handlerThread.start();
         return handlerThread;
+    }
+
+    @VisibleForTesting
+    void setOverrideFrameRate(int uid, float frameRate) {
+        nativeSetOverrideFrameRate(uid, frameRate);
     }
 
     /**
