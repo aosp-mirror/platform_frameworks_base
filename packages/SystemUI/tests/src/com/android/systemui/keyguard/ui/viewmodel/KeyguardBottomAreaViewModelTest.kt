@@ -23,14 +23,15 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.doze.util.BurnInHelperWrapper
+import com.android.systemui.keyguard.data.quickaffordance.BuiltInKeyguardQuickAffordanceKeys
+import com.android.systemui.keyguard.data.quickaffordance.FakeKeyguardQuickAffordanceConfig
+import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceConfig
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardBottomAreaInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardQuickAffordanceInteractor
-import com.android.systemui.keyguard.domain.model.KeyguardQuickAffordancePosition
-import com.android.systemui.keyguard.domain.quickaffordance.FakeKeyguardQuickAffordanceConfig
 import com.android.systemui.keyguard.domain.quickaffordance.FakeKeyguardQuickAffordanceRegistry
-import com.android.systemui.keyguard.domain.quickaffordance.KeyguardQuickAffordanceConfig
+import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancePosition
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordanceToggleState
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.settings.UserTracker
@@ -40,7 +41,6 @@ import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import kotlin.math.max
 import kotlin.math.min
-import kotlin.reflect.KClass
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.test.runBlockingTest
@@ -81,9 +81,21 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
         whenever(burnInHelperWrapper.burnInOffset(anyInt(), any()))
             .thenReturn(RETURNED_BURN_IN_OFFSET)
 
-        homeControlsQuickAffordanceConfig = object : FakeKeyguardQuickAffordanceConfig() {}
-        quickAccessWalletAffordanceConfig = object : FakeKeyguardQuickAffordanceConfig() {}
-        qrCodeScannerAffordanceConfig = object : FakeKeyguardQuickAffordanceConfig() {}
+        homeControlsQuickAffordanceConfig =
+            object :
+                FakeKeyguardQuickAffordanceConfig(
+                    BuiltInKeyguardQuickAffordanceKeys.HOME_CONTROLS
+                ) {}
+        quickAccessWalletAffordanceConfig =
+            object :
+                FakeKeyguardQuickAffordanceConfig(
+                    BuiltInKeyguardQuickAffordanceKeys.QUICK_ACCESS_WALLET
+                ) {}
+        qrCodeScannerAffordanceConfig =
+            object :
+                FakeKeyguardQuickAffordanceConfig(
+                    BuiltInKeyguardQuickAffordanceKeys.QR_CODE_SCANNER
+                ) {}
         registry =
             FakeKeyguardQuickAffordanceRegistry(
                 mapOf(
@@ -489,7 +501,7 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
     private suspend fun setUpQuickAffordanceModel(
         position: KeyguardQuickAffordancePosition,
         testConfig: TestConfig,
-    ): KClass<out FakeKeyguardQuickAffordanceConfig> {
+    ): String {
         val config =
             when (position) {
                 KeyguardQuickAffordancePosition.BOTTOM_START -> homeControlsQuickAffordanceConfig
@@ -518,13 +530,13 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
                 KeyguardQuickAffordanceConfig.State.Hidden
             }
         config.setState(state)
-        return config::class
+        return config.key
     }
 
     private fun assertQuickAffordanceViewModel(
         viewModel: KeyguardQuickAffordanceViewModel?,
         testConfig: TestConfig,
-        configKey: KClass<out FakeKeyguardQuickAffordanceConfig>,
+        configKey: String,
     ) {
         checkNotNull(viewModel)
         assertThat(viewModel.isVisible).isEqualTo(testConfig.isVisible)
