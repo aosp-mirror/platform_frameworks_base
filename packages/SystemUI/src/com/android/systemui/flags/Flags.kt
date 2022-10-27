@@ -196,7 +196,7 @@ object Flags {
 
     // 802 - wallpaper rendering
     // TODO(b/254512923): Tracking Bug
-    @JvmField val USE_CANVAS_RENDERER = ReleasedFlag(802)
+    @JvmField val USE_CANVAS_RENDERER = UnreleasedFlag(802, teamfood = true)
 
     // 803 - screen contents translation
     // TODO(b/254513187): Tracking Bug
