@@ -186,8 +186,8 @@ public class SettingsStateTest extends AndroidTestCase {
 
     public void testInsertSetting_memoryUsage() {
         final Object lock = new Object();
-	final File file = new File(getContext().getCacheDir(), "setting.xml");
-	final String settingName = "test_setting";
+        final File file = new File(getContext().getCacheDir(), "setting.xml");
+        final String settingName = "test_setting";
 
         SettingsState settingsState = new SettingsState(getContext(), lock, file, 1,
                 SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED, Looper.getMainLooper());
@@ -204,7 +204,7 @@ public class SettingsStateTest extends AndroidTestCase {
         settingsState.deleteSettingLocked(settingName);
 
         // Should not throw if usage is under the cap
-        settingsState.insertSettingLocked(settingName, Strings.repeat("A", 19999),
+        settingsState.insertSettingLocked(settingName, Strings.repeat("A", 19975),
                 null, false, "p1");
         settingsState.deleteSettingLocked(settingName);
         try {
@@ -222,5 +222,101 @@ public class SettingsStateTest extends AndroidTestCase {
             assertTrue(ex.getMessage().contains("p1"));
         }
         assertTrue(settingsState.getSettingLocked(settingName).isNull());
+        try {
+            settingsState.insertSettingLocked(Strings.repeat("A", 20001), "",
+                    null, false, "p1");
+            fail("Should throw because it exceeded per package memory usage");
+        } catch (IllegalStateException ex) {
+            assertTrue(ex.getMessage().contains("You are adding too many system settings"));
+        }
+    }
+
+    public void testMemoryUsagePerPackage() {
+        final Object lock = new Object();
+        final File file = new File(getContext().getCacheDir(), "setting.xml");
+        final String testPackage = "package";
+        SettingsState settingsState = new SettingsState(getContext(), lock, file, 1,
+                SettingsState.MAX_BYTES_PER_APP_PACKAGE_LIMITED, Looper.getMainLooper());
+
+        // Test inserting one key with default
+        final String settingName = "test_setting";
+        final String testKey1 = settingName;
+        final String testValue1 = Strings.repeat("A", 100);
+        settingsState.insertSettingLocked(testKey1, testValue1, null, true, testPackage);
+        int expectedMemUsage = testKey1.length() + testValue1.length()
+                + testValue1.length() /* size for default */;
+        assertEquals(expectedMemUsage, settingsState.getMemoryUsage(testPackage));
+
+        // Test inserting another key
+        final String testKey2 = settingName + "2";
+        settingsState.insertSettingLocked(testKey2, testValue1, null, false, testPackage);
+        expectedMemUsage += testKey2.length() + testValue1.length();
+        assertEquals(expectedMemUsage, settingsState.getMemoryUsage(testPackage));
+
+        // Test updating first key with new default
+        final String testValue2 = Strings.repeat("A", 300);
+        settingsState.insertSettingLocked(testKey1, testValue2, null, true, testPackage);
+        expectedMemUsage += (testValue2.length() - testValue1.length()) * 2;
+        assertEquals(expectedMemUsage, settingsState.getMemoryUsage(testPackage));
+
+        // Test updating first key without new default
+        final String testValue3 = Strings.repeat("A", 50);
+        settingsState.insertSettingLocked(testKey1, testValue3, null, false, testPackage);
+        expectedMemUsage -= testValue2.length() - testValue3.length();
+        assertEquals(expectedMemUsage, settingsState.getMemoryUsage(testPackage));
+
+        // Test updating second key
+        settingsState.insertSettingLocked(testKey2, testValue2, null, false, testPackage);
+        expectedMemUsage -= testValue1.length() - testValue2.length();
+        assertEquals(expectedMemUsage, settingsState.getMemoryUsage(testPackage));
+
+        // Test resetting key
+        settingsState.resetSettingLocked(testKey1);
+        expectedMemUsage += testValue2.length() - testValue3.length();
+        assertEquals(expectedMemUsage, settingsState.getMemoryUsage(testPackage));
+
+        // Test resetting default value
+        settingsState.resetSettingDefaultValueLocked(testKey1);
+        expectedMemUsage -= testValue2.length();
+        assertEquals(expectedMemUsage, settingsState.getMemoryUsage(testPackage));
+
+        // Test deletion
+        settingsState.deleteSettingLocked(testKey2);
+        expectedMemUsage -= testValue2.length() + testKey2.length() /* key is deleted too */;
+        assertEquals(expectedMemUsage, settingsState.getMemoryUsage(testPackage));
+
+        // Test another package with a different key
+        final String testPackage2 = testPackage + "2";
+        final String testKey3 = settingName + "3";
+        settingsState.insertSettingLocked(testKey3, testValue1, null, true, testPackage2);
+        assertEquals(expectedMemUsage, settingsState.getMemoryUsage(testPackage));
+        final int expectedMemUsage2 = testKey3.length() + testValue1.length() * 2;
+        assertEquals(expectedMemUsage2, settingsState.getMemoryUsage(testPackage2));
+
+        // Test system package
+        settingsState.insertSettingLocked(testKey1, testValue1, null, true, "android");
+        assertEquals(expectedMemUsage, settingsState.getMemoryUsage(testPackage));
+        assertEquals(expectedMemUsage2, settingsState.getMemoryUsage(testPackage2));
+        assertEquals(0, settingsState.getMemoryUsage("android"));
+
+        // Test invalid value
+        try {
+            settingsState.insertSettingLocked(testKey1, Strings.repeat("A", 20001), null, false,
+                    testPackage);
+            fail("Should throw because it exceeded per package memory usage");
+        } catch (IllegalStateException ex) {
+            assertTrue(ex.getMessage().contains("You are adding too many system settings"));
+        }
+        assertEquals(expectedMemUsage, settingsState.getMemoryUsage(testPackage));
+
+        // Test invalid key
+        try {
+            settingsState.insertSettingLocked(Strings.repeat("A", 20001), "", null, false,
+                    testPackage);
+            fail("Should throw because it exceeded per package memory usage");
+        } catch (IllegalStateException ex) {
+            assertTrue(ex.getMessage().contains("You are adding too many system settings"));
+        }
+        assertEquals(expectedMemUsage, settingsState.getMemoryUsage(testPackage));
     }
 }
