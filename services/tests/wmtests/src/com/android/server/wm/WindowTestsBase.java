@@ -26,6 +26,8 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.os.Process.SYSTEM_UID;
+import static android.view.InsetsState.ITYPE_BOTTOM_MANDATORY_GESTURES;
+import static android.view.InsetsState.ITYPE_BOTTOM_TAPPABLE_ELEMENT;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.InsetsState.ITYPE_TOP_MANDATORY_GESTURES;
@@ -92,7 +94,6 @@ import android.view.IWindow;
 import android.view.InsetsFrameProvider;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
-import android.view.InsetsVisibilities;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
@@ -347,6 +348,11 @@ class WindowTestsBase extends SystemServiceTestsBase {
                     LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
             mNavBarWindow.mAttrs.privateFlags |=
                     WindowManager.LayoutParams.PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT;
+            mNavBarWindow.mAttrs.providedInsets = new InsetsFrameProvider[] {
+                    new InsetsFrameProvider(ITYPE_NAVIGATION_BAR),
+                    new InsetsFrameProvider(ITYPE_BOTTOM_MANDATORY_GESTURES),
+                    new InsetsFrameProvider(ITYPE_BOTTOM_TAPPABLE_ELEMENT)
+            };
             for (int rot = Surface.ROTATION_0; rot <= Surface.ROTATION_270; rot++) {
                 mNavBarWindow.mAttrs.paramsForRotation[rot] =
                         getNavBarLayoutParamsForRotation(rot);
@@ -400,6 +406,11 @@ class WindowTestsBase extends SystemServiceTestsBase {
         lp.privateFlags |=
                 WindowManager.LayoutParams.PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT;
         lp.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+        lp.providedInsets = new InsetsFrameProvider[] {
+                new InsetsFrameProvider(ITYPE_NAVIGATION_BAR),
+                new InsetsFrameProvider(ITYPE_BOTTOM_MANDATORY_GESTURES),
+                new InsetsFrameProvider(ITYPE_BOTTOM_TAPPABLE_ELEMENT)
+        };
         return lp;
     }
 
@@ -846,7 +857,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
 
             @Override
             public void topFocusedWindowChanged(ComponentName component,
-                    InsetsVisibilities requestedVisibilities) {
+                    int requestedVisibleTypes) {
             }
         };
     }

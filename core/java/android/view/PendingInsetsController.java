@@ -45,6 +45,7 @@ public class PendingInsetsController implements WindowInsetsController {
             = new ArrayList<>();
     private int mCaptionInsetsHeight = 0;
     private WindowInsetsAnimationControlListener mLoggingListener;
+    private @InsetsType int mRequestedVisibleTypes = WindowInsets.Type.defaultVisible();
 
     @Override
     public void show(int types) {
@@ -52,6 +53,7 @@ public class PendingInsetsController implements WindowInsetsController {
             mReplayedInsetsController.show(types);
         } else {
             mRequests.add(new ShowRequest(types));
+            mRequestedVisibleTypes |= types;
         }
     }
 
@@ -61,6 +63,7 @@ public class PendingInsetsController implements WindowInsetsController {
             mReplayedInsetsController.hide(types);
         } else {
             mRequests.add(new HideRequest(types));
+            mRequestedVisibleTypes &= ~types;
         }
     }
 
@@ -122,11 +125,11 @@ public class PendingInsetsController implements WindowInsetsController {
     }
 
     @Override
-    public boolean isRequestedVisible(int type) {
-
-        // Method is only used once real insets controller is attached, so no need to traverse
-        // requests here.
-        return InsetsState.getDefaultVisibility(type);
+    public @InsetsType int getRequestedVisibleTypes() {
+        if (mReplayedInsetsController != null) {
+            return mReplayedInsetsController.getRequestedVisibleTypes();
+        }
+        return mRequestedVisibleTypes;
     }
 
     @Override
@@ -189,6 +192,7 @@ public class PendingInsetsController implements WindowInsetsController {
         mAppearanceMask = 0;
         mAnimationsDisabled = false;
         mLoggingListener = null;
+        mRequestedVisibleTypes = WindowInsets.Type.defaultVisible();
         // After replaying, we forward everything directly to the replayed instance.
         mReplayedInsetsController = controller;
     }

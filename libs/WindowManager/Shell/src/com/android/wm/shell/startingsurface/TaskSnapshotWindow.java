@@ -77,6 +77,7 @@ import android.view.SurfaceSession;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
+import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.window.ClientWindowFrames;
@@ -223,7 +224,7 @@ public class TaskSnapshotWindow {
         final TaskSnapshotWindow snapshotSurface = new TaskSnapshotWindow(
                 surfaceControl, snapshot, layoutParams.getTitle(), taskDescription, appearance,
                 windowFlags, windowPrivateFlags, taskBounds, orientation, activityType,
-                topWindowInsetsState, clearWindowHandler, splashScreenExecutor);
+                info.requestedVisibleTypes, clearWindowHandler, splashScreenExecutor);
         final Window window = snapshotSurface.mWindow;
 
         final InsetsState tmpInsetsState = new InsetsState();
@@ -233,7 +234,7 @@ public class TaskSnapshotWindow {
         try {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "TaskSnapshot#addToDisplay");
             final int res = session.addToDisplay(window, layoutParams, View.GONE, displayId,
-                    info.requestedVisibilities, tmpInputChannel, tmpInsetsState, tmpControls,
+                    info.requestedVisibleTypes, tmpInputChannel, tmpInsetsState, tmpControls,
                     new Rect(), sizeCompatScale);
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
             if (res < 0) {
@@ -263,7 +264,7 @@ public class TaskSnapshotWindow {
     public TaskSnapshotWindow(SurfaceControl surfaceControl,
             TaskSnapshot snapshot, CharSequence title, TaskDescription taskDescription,
             int appearance, int windowFlags, int windowPrivateFlags, Rect taskBounds,
-            int currentOrientation, int activityType, InsetsState topWindowInsetsState,
+            int currentOrientation, int activityType, @InsetsType int requestedVisibleTypes,
             Runnable clearWindowHandler, ShellExecutor splashScreenExecutor) {
         mSplashScreenExecutor = splashScreenExecutor;
         mSession = WindowManagerGlobal.getWindowSession();
@@ -276,7 +277,7 @@ public class TaskSnapshotWindow {
         mBackgroundPaint.setColor(backgroundColor != 0 ? backgroundColor : WHITE);
         mTaskBounds = taskBounds;
         mSystemBarBackgroundPainter = new SystemBarBackgroundPainter(windowFlags,
-                windowPrivateFlags, appearance, taskDescription, 1f, topWindowInsetsState);
+                windowPrivateFlags, appearance, taskDescription, 1f, requestedVisibleTypes);
         mStatusBarColor = taskDescription.getStatusBarColor();
         mOrientationOnCreation = currentOrientation;
         mActivityType = activityType;
@@ -569,11 +570,12 @@ public class TaskSnapshotWindow {
         private final int mWindowFlags;
         private final int mWindowPrivateFlags;
         private final float mScale;
-        private final InsetsState mInsetsState;
+        private final @InsetsType int mRequestedVisibleTypes;
         private final Rect mSystemBarInsets = new Rect();
 
         SystemBarBackgroundPainter(int windowFlags, int windowPrivateFlags, int appearance,
-                TaskDescription taskDescription, float scale, InsetsState insetsState) {
+                TaskDescription taskDescription, float scale,
+                @InsetsType int requestedVisibleTypes) {
             mWindowFlags = windowFlags;
             mWindowPrivateFlags = windowPrivateFlags;
             mScale = scale;
@@ -592,7 +594,7 @@ public class TaskSnapshotWindow {
                             && context.getResources().getBoolean(R.bool.config_navBarNeedsScrim));
             mStatusBarPaint.setColor(mStatusBarColor);
             mNavigationBarPaint.setColor(mNavigationBarColor);
-            mInsetsState = insetsState;
+            mRequestedVisibleTypes = requestedVisibleTypes;
         }
 
         void setInsets(Rect systemBarInsets) {
@@ -603,7 +605,7 @@ public class TaskSnapshotWindow {
             final boolean forceBarBackground =
                     (mWindowPrivateFlags & PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS) != 0;
             if (STATUS_BAR_COLOR_VIEW_ATTRIBUTES.isVisible(
-                    mInsetsState, mStatusBarColor, mWindowFlags, forceBarBackground)) {
+                    mRequestedVisibleTypes, mStatusBarColor, mWindowFlags, forceBarBackground)) {
                 return (int) (mSystemBarInsets.top * mScale);
             } else {
                 return 0;
@@ -614,7 +616,7 @@ public class TaskSnapshotWindow {
             final boolean forceBarBackground =
                     (mWindowPrivateFlags & PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS) != 0;
             return NAVIGATION_BAR_COLOR_VIEW_ATTRIBUTES.isVisible(
-                    mInsetsState, mNavigationBarColor, mWindowFlags, forceBarBackground);
+                    mRequestedVisibleTypes, mNavigationBarColor, mWindowFlags, forceBarBackground);
         }
 
         void drawDecors(Canvas c, @Nullable Rect alreadyDrawnFrame) {

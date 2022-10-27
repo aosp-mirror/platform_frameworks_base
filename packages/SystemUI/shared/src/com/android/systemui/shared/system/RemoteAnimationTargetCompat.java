@@ -26,6 +26,7 @@ import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
+import static android.window.TransitionInfo.FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
 
@@ -228,7 +229,8 @@ public class RemoteAnimationTargetCompat {
     public static RemoteAnimationTarget[] wrapNonApps(TransitionInfo info, boolean wallpapers,
             SurfaceControl.Transaction t, ArrayMap<SurfaceControl, SurfaceControl> leashMap) {
         return wrap(info, t, leashMap, (change, taskInfo) -> (taskInfo == null)
-                && wallpapers == ((change.getFlags() & TransitionInfo.FLAG_IS_WALLPAPER) != 0));
+                && wallpapers == change.hasFlags(FLAG_IS_WALLPAPER)
+                && !change.hasFlags(FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY));
     }
 
     private static RemoteAnimationTarget[] wrap(TransitionInfo info,

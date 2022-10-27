@@ -9268,6 +9268,7 @@ package android.content {
     field public static final int CLASSIFICATION_NOT_COMPLETE = 1; // 0x1
     field public static final int CLASSIFICATION_NOT_PERFORMED = 2; // 0x2
     field @NonNull public static final android.os.Parcelable.Creator<android.content.ClipDescription> CREATOR;
+    field public static final String EXTRA_IS_REMOTE_DEVICE = "android.content.extra.IS_REMOTE_DEVICE";
     field public static final String EXTRA_IS_SENSITIVE = "android.content.extra.IS_SENSITIVE";
     field public static final String MIMETYPE_TEXT_HTML = "text/html";
     field public static final String MIMETYPE_TEXT_INTENT = "text/vnd.android.intent";
@@ -17593,6 +17594,7 @@ package android.hardware.camera2 {
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.Capability[]> CONTROL_AVAILABLE_EXTENDED_SCENE_MODE_CAPABILITIES;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<int[]> CONTROL_AVAILABLE_MODES;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<int[]> CONTROL_AVAILABLE_SCENE_MODES;
+    field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<int[]> CONTROL_AVAILABLE_SETTINGS_OVERRIDES;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<int[]> CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<int[]> CONTROL_AWB_AVAILABLE_MODES;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Boolean> CONTROL_AWB_LOCK_AVAILABLE;
@@ -17947,6 +17949,8 @@ package android.hardware.camera2 {
     field public static final int CONTROL_SCENE_MODE_STEADYPHOTO = 11; // 0xb
     field public static final int CONTROL_SCENE_MODE_SUNSET = 10; // 0xa
     field public static final int CONTROL_SCENE_MODE_THEATRE = 7; // 0x7
+    field public static final int CONTROL_SETTINGS_OVERRIDE_OFF = 0; // 0x0
+    field public static final int CONTROL_SETTINGS_OVERRIDE_ZOOM = 1; // 0x1
     field public static final int CONTROL_VIDEO_STABILIZATION_MODE_OFF = 0; // 0x0
     field public static final int CONTROL_VIDEO_STABILIZATION_MODE_ON = 1; // 0x1
     field public static final int CONTROL_VIDEO_STABILIZATION_MODE_PREVIEW_STABILIZATION = 2; // 0x2
@@ -18145,6 +18149,7 @@ package android.hardware.camera2 {
     field @NonNull public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Integer> CONTROL_MODE;
     field @NonNull public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Integer> CONTROL_POST_RAW_SENSITIVITY_BOOST;
     field @NonNull public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Integer> CONTROL_SCENE_MODE;
+    field @NonNull public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Integer> CONTROL_SETTINGS_OVERRIDE;
     field @NonNull public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Integer> CONTROL_VIDEO_STABILIZATION_MODE;
     field @NonNull public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Float> CONTROL_ZOOM_RATIO;
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.camera2.CaptureRequest> CREATOR;
@@ -18235,6 +18240,7 @@ package android.hardware.camera2 {
     field @NonNull public static final android.hardware.camera2.CaptureResult.Key<java.lang.Integer> CONTROL_MODE;
     field @NonNull public static final android.hardware.camera2.CaptureResult.Key<java.lang.Integer> CONTROL_POST_RAW_SENSITIVITY_BOOST;
     field @NonNull public static final android.hardware.camera2.CaptureResult.Key<java.lang.Integer> CONTROL_SCENE_MODE;
+    field @NonNull public static final android.hardware.camera2.CaptureResult.Key<java.lang.Integer> CONTROL_SETTINGS_OVERRIDE;
     field @NonNull public static final android.hardware.camera2.CaptureResult.Key<java.lang.Integer> CONTROL_VIDEO_STABILIZATION_MODE;
     field @NonNull public static final android.hardware.camera2.CaptureResult.Key<java.lang.Float> CONTROL_ZOOM_RATIO;
     field @NonNull public static final android.hardware.camera2.CaptureResult.Key<java.lang.Integer> DISTORTION_CORRECTION_MODE;
@@ -19491,7 +19497,7 @@ package android.location {
     method public boolean hasSatelliteBlocklist();
     method public boolean hasSatellitePvt();
     method public boolean hasScheduling();
-    method public boolean hasSingleShot();
+    method public boolean hasSingleShotFix();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.location.GnssCapabilities> CREATOR;
   }
@@ -19523,7 +19529,7 @@ package android.location {
     method @NonNull public android.location.GnssCapabilities.Builder setHasSatelliteBlocklist(boolean);
     method @NonNull public android.location.GnssCapabilities.Builder setHasSatellitePvt(boolean);
     method @NonNull public android.location.GnssCapabilities.Builder setHasScheduling(boolean);
-    method @NonNull public android.location.GnssCapabilities.Builder setHasSingleShot(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasSingleShotFix(boolean);
   }
 
   public final class GnssClock implements android.os.Parcelable {
@@ -19721,7 +19727,7 @@ package android.location {
     method public int getConstellationType(@IntRange(from=0) int);
     method @FloatRange(from=0xffffffa6, to=90) public float getElevationDegrees(@IntRange(from=0) int);
     method @IntRange(from=0) public int getSatelliteCount();
-    method @IntRange(from=1, to=200) public int getSvid(@IntRange(from=0) int);
+    method @IntRange(from=1, to=206) public int getSvid(@IntRange(from=0) int);
     method public boolean hasAlmanacData(@IntRange(from=0) int);
     method public boolean hasBasebandCn0DbHz(@IntRange(from=0) int);
     method public boolean hasCarrierFrequencyHz(@IntRange(from=0) int);
@@ -47425,6 +47431,7 @@ package android.util {
     field public static final int DENSITY_420 = 420; // 0x1a4
     field public static final int DENSITY_440 = 440; // 0x1b8
     field public static final int DENSITY_450 = 450; // 0x1c2
+    field public static final int DENSITY_520 = 520; // 0x208
     field public static final int DENSITY_560 = 560; // 0x230
     field public static final int DENSITY_600 = 600; // 0x258
     field public static final int DENSITY_DEFAULT = 160; // 0xa0

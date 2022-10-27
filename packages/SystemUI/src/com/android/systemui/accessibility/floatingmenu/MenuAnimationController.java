@@ -47,6 +47,9 @@ class MenuAnimationController {
     private static final float MIN_PERCENT = 0.0f;
     private static final float MAX_PERCENT = 1.0f;
     private static final float COMPLETELY_OPAQUE = 1.0f;
+    private static final float COMPLETELY_TRANSPARENT = 0.0f;
+    private static final float SCALE_SHRINK = 0.0f;
+    private static final float SCALE_GROW = 1.0f;
     private static final float FLING_FRICTION_SCALAR = 1.9f;
     private static final float DEFAULT_FRICTION = 4.2f;
     private static final float SPRING_AFTER_FLING_DAMPING_RATIO = 0.85f;
@@ -295,6 +298,28 @@ class MenuAnimationController {
 
     void onDraggingStart() {
         mMenuView.onDraggingStart();
+    }
+
+    void startShrinkAnimation(Runnable endAction) {
+        mMenuView.animate().cancel();
+
+        mMenuView.animate()
+                .scaleX(SCALE_SHRINK)
+                .scaleY(SCALE_SHRINK)
+                .alpha(COMPLETELY_TRANSPARENT)
+                .translationY(mMenuView.getTranslationY())
+                .withEndAction(endAction).start();
+    }
+
+    void startGrowAnimation() {
+        mMenuView.animate().cancel();
+
+        mMenuView.animate()
+                .scaleX(SCALE_GROW)
+                .scaleY(SCALE_GROW)
+                .alpha(COMPLETELY_OPAQUE)
+                .translationY(mMenuView.getTranslationY())
+                .start();
     }
 
     private void onSpringAnimationEnd(PointF position) {

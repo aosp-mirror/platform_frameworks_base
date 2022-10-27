@@ -39,9 +39,9 @@ import android.graphics.ColorSpace;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
-import android.view.InsetsState;
 import android.view.Surface;
 import android.view.SurfaceControl;
+import android.view.WindowInsets;
 import android.window.TaskSnapshot;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -84,7 +84,8 @@ public class TaskSnapshotWindowTest extends ShellTestCase {
                 createTaskDescription(Color.WHITE, Color.RED, Color.BLUE),
                 0 /* appearance */, windowFlags /* windowFlags */, 0 /* privateWindowFlags */,
                 taskBounds, ORIENTATION_PORTRAIT, ACTIVITY_TYPE_STANDARD,
-                new InsetsState(), null /* clearWindow */, new TestShellExecutor());
+                WindowInsets.Type.defaultVisible(), null /* clearWindow */,
+                new TestShellExecutor());
     }
 
     private TaskSnapshot createTaskSnapshot(int width, int height, Point taskSize,

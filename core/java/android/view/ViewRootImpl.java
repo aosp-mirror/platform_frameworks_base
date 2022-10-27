@@ -162,7 +162,6 @@ import android.util.TimeUtils;
 import android.util.TypedValue;
 import android.util.proto.ProtoOutputStream;
 import android.view.InputDevice.InputSourceClass;
-import android.view.InsetsState.InternalInsetsType;
 import android.view.Surface.OutOfResourcesException;
 import android.view.SurfaceControl.Transaction;
 import android.view.View.AttachInfo;
@@ -1245,7 +1244,7 @@ public final class ViewRootImpl implements ViewParent,
                     final float[] sizeCompatScale = { 1f };
                     res = mWindowSession.addToDisplayAsUser(mWindow, mWindowAttributes,
                             getHostVisibility(), mDisplay.getDisplayId(), userId,
-                            mInsetsController.getRequestedVisibilities(), inputChannel, mTempInsets,
+                            mInsetsController.getRequestedVisibleTypes(), inputChannel, mTempInsets,
                             mTempControls, attachedFrame, sizeCompatScale);
                     if (!attachedFrame.isValid()) {
                         attachedFrame = null;
@@ -1284,7 +1283,7 @@ public final class ViewRootImpl implements ViewParent,
                 mWindowLayout.computeFrames(mWindowAttributes, state,
                         displayCutoutSafe, winConfig.getBounds(), winConfig.getWindowingMode(),
                         UNSPECIFIED_LENGTH, UNSPECIFIED_LENGTH,
-                        mInsetsController.getRequestedVisibilities(), 1f /* compactScale */,
+                        mInsetsController.getRequestedVisibleTypes(), 1f /* compactScale */,
                         mTmpFrames);
                 setFrame(mTmpFrames.frame);
                 registerBackCallbackOnWindow();
@@ -2376,7 +2375,7 @@ public final class ViewRootImpl implements ViewParent,
             mCompatibleVisibilityInfo.globalVisibility =
                     (mCompatibleVisibilityInfo.globalVisibility & ~View.SYSTEM_UI_FLAG_LOW_PROFILE)
                             | (mAttachInfo.mSystemUiVisibility & View.SYSTEM_UI_FLAG_LOW_PROFILE);
-            dispatchDispatchSystemUiVisibilityChanged(mCompatibleVisibilityInfo);
+            dispatchDispatchSystemUiVisibilityChanged();
             if (mAttachInfo.mKeepScreenOn != oldScreenOn
                     || mAttachInfo.mSystemUiVisibility != params.subtreeSystemUiVisibility
                     || mAttachInfo.mHasSystemUiListeners != params.hasSystemUiListeners) {
@@ -2404,24 +2403,29 @@ public final class ViewRootImpl implements ViewParent,
 
     /**
      * Update the compatible system UI visibility for dispatching it to the legacy app.
-     *
-     * @param type Indicates which type of the insets source we are handling.
-     * @param visible True if the insets source is visible.
-     * @param hasControl True if we can control the insets source.
      */
-    void updateCompatSysUiVisibility(@InternalInsetsType int type, boolean visible,
-            boolean hasControl) {
-        @InsetsType final int publicType = InsetsState.toPublicType(type);
-        if (publicType != Type.statusBars() && publicType != Type.navigationBars()) {
-            return;
-        }
+    void updateCompatSysUiVisibility(@InsetsType int visibleTypes,
+            @InsetsType int requestedVisibleTypes, @InsetsType int controllableTypes) {
+        // If a type is controllable, the visibility is overridden by the requested visibility.
+        visibleTypes =
+                (requestedVisibleTypes & controllableTypes) | (visibleTypes & ~controllableTypes);
+
+        updateCompatSystemUiVisibilityInfo(SYSTEM_UI_FLAG_FULLSCREEN, Type.statusBars(),
+                visibleTypes, controllableTypes);
+        updateCompatSystemUiVisibilityInfo(SYSTEM_UI_FLAG_HIDE_NAVIGATION, Type.navigationBars(),
+                visibleTypes, controllableTypes);
+        dispatchDispatchSystemUiVisibilityChanged();
+    }
+
+    private void updateCompatSystemUiVisibilityInfo(int systemUiFlag, @InsetsType int insetsType,
+            @InsetsType int visibleTypes, @InsetsType int controllableTypes) {
         final SystemUiVisibilityInfo info = mCompatibleVisibilityInfo;
-        final int systemUiFlag = publicType == Type.statusBars()
-                ? View.SYSTEM_UI_FLAG_FULLSCREEN
-                : View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
-        if (visible) {
+        final boolean willBeVisible = (visibleTypes & insetsType) != 0;
+        final boolean hasControl = (controllableTypes & insetsType) != 0;
+        final boolean wasInvisible = (mAttachInfo.mSystemUiVisibility & systemUiFlag) != 0;
+        if (willBeVisible) {
             info.globalVisibility &= ~systemUiFlag;
-            if (hasControl && (mAttachInfo.mSystemUiVisibility & systemUiFlag) != 0) {
+            if (hasControl && wasInvisible) {
                 // The local system UI visibility can only be cleared while we have the control.
                 info.localChanges |= systemUiFlag;
             }
@@ -2429,7 +2433,6 @@ public final class ViewRootImpl implements ViewParent,
             info.globalVisibility |= systemUiFlag;
             info.localChanges &= ~systemUiFlag;
         }
-        dispatchDispatchSystemUiVisibilityChanged(info);
     }
 
     /**
@@ -2445,25 +2448,28 @@ public final class ViewRootImpl implements ViewParent,
                 && (info.globalVisibility & SYSTEM_UI_FLAG_LOW_PROFILE) != 0) {
             info.globalVisibility &= ~SYSTEM_UI_FLAG_LOW_PROFILE;
             info.localChanges |= SYSTEM_UI_FLAG_LOW_PROFILE;
-            dispatchDispatchSystemUiVisibilityChanged(info);
+            dispatchDispatchSystemUiVisibilityChanged();
         }
     }
 
-    private void dispatchDispatchSystemUiVisibilityChanged(SystemUiVisibilityInfo args) {
-        if (mDispatchedSystemUiVisibility != args.globalVisibility) {
+    private void dispatchDispatchSystemUiVisibilityChanged() {
+        if (mDispatchedSystemUiVisibility != mCompatibleVisibilityInfo.globalVisibility) {
             mHandler.removeMessages(MSG_DISPATCH_SYSTEM_UI_VISIBILITY);
-            mHandler.sendMessage(mHandler.obtainMessage(MSG_DISPATCH_SYSTEM_UI_VISIBILITY, args));
+            mHandler.sendMessage(mHandler.obtainMessage(MSG_DISPATCH_SYSTEM_UI_VISIBILITY));
         }
     }
 
-    private void handleDispatchSystemUiVisibilityChanged(SystemUiVisibilityInfo args) {
-        if (mView == null) return;
-        if (args.localChanges != 0) {
-            mView.updateLocalSystemUiVisibility(args.localValue, args.localChanges);
-            args.localChanges = 0;
+    private void handleDispatchSystemUiVisibilityChanged() {
+        if (mView == null) {
+            return;
+        }
+        final SystemUiVisibilityInfo info = mCompatibleVisibilityInfo;
+        if (info.localChanges != 0) {
+            mView.updateLocalSystemUiVisibility(info.localValue, info.localChanges);
+            info.localChanges = 0;
         }
 
-        final int visibility = args.globalVisibility & View.SYSTEM_UI_CLEARABLE_FLAGS;
+        final int visibility = info.globalVisibility & View.SYSTEM_UI_CLEARABLE_FLAGS;
         if (mDispatchedSystemUiVisibility != visibility) {
             mDispatchedSystemUiVisibility = visibility;
             mView.dispatchSystemUiVisibilityChanged(visibility);
@@ -5728,7 +5734,7 @@ public final class ViewRootImpl implements ViewParent,
                     handleDragEvent(event);
                 } break;
                 case MSG_DISPATCH_SYSTEM_UI_VISIBILITY: {
-                    handleDispatchSystemUiVisibilityChanged((SystemUiVisibilityInfo) msg.obj);
+                    handleDispatchSystemUiVisibilityChanged();
                 } break;
                 case MSG_UPDATE_CONFIGURATION: {
                     Configuration config = (Configuration) msg.obj;
@@ -8148,7 +8154,7 @@ public final class ViewRootImpl implements ViewParent,
             state.getDisplayCutoutSafe(displayCutoutSafe);
             mWindowLayout.computeFrames(mWindowAttributes.forRotation(winConfig.getRotation()),
                     state, displayCutoutSafe, winConfig.getBounds(), winConfig.getWindowingMode(),
-                    measuredWidth, measuredHeight, mInsetsController.getRequestedVisibilities(),
+                    measuredWidth, measuredHeight, mInsetsController.getRequestedVisibleTypes(),
                     1f /* compatScale */, mTmpFrames);
             mWinFrameInScreen.set(mTmpFrames.frame);
             if (mTranslator != null) {

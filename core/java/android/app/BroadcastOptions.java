@@ -31,6 +31,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.BundleMerger;
 import android.os.PowerExemptionManager;
 import android.os.PowerExemptionManager.ReasonCode;
 import android.os.PowerExemptionManager.TempAllowListType;
@@ -67,6 +68,7 @@ public class BroadcastOptions extends ComponentOptions {
     private @Nullable IntentFilter mRemoveMatchingFilter;
     private @DeliveryGroupPolicy int mDeliveryGroupPolicy;
     private @Nullable String mDeliveryGroupKey;
+    private @Nullable BundleMerger mDeliveryGroupExtrasMerger;
 
     /**
      * Change ID which is invalid.
@@ -218,6 +220,12 @@ public class BroadcastOptions extends ComponentOptions {
             "android:broadcast.deliveryGroupKey";
 
     /**
+     * Corresponds to {@link #setDeliveryGroupExtrasMerger(BundleMerger)}.
+     */
+    private static final String KEY_DELIVERY_GROUP_EXTRAS_MERGER =
+            "android:broadcast.deliveryGroupExtrasMerger";
+
+    /**
      * The list of delivery group policies which specify how multiple broadcasts belonging to
      * the same delivery group has to be handled.
      * @hide
@@ -225,6 +233,7 @@ public class BroadcastOptions extends ComponentOptions {
     @IntDef(flag = true, prefix = { "DELIVERY_GROUP_POLICY_" }, value = {
             DELIVERY_GROUP_POLICY_ALL,
             DELIVERY_GROUP_POLICY_MOST_RECENT,
+            DELIVERY_GROUP_POLICY_MERGED,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface DeliveryGroupPolicy {}
@@ -235,6 +244,7 @@ public class BroadcastOptions extends ComponentOptions {
      *
      * @hide
      */
+    @SystemApi
     public static final int DELIVERY_GROUP_POLICY_ALL = 0;
 
     /**
@@ -243,7 +253,16 @@ public class BroadcastOptions extends ComponentOptions {
      *
      * @hide
      */
+    @SystemApi
     public static final int DELIVERY_GROUP_POLICY_MOST_RECENT = 1;
+
+    /**
+     * Delivery group policy that indicates that the extras data from the broadcasts in the
+     * delivery group need to be merged into a single broadcast and the rest can be dropped.
+     *
+     * @hide
+     */
+    public static final int DELIVERY_GROUP_POLICY_MERGED = 2;
 
     public static BroadcastOptions makeBasic() {
         BroadcastOptions opts = new BroadcastOptions();
@@ -295,6 +314,8 @@ public class BroadcastOptions extends ComponentOptions {
         mDeliveryGroupPolicy = opts.getInt(KEY_DELIVERY_GROUP_POLICY,
                 DELIVERY_GROUP_POLICY_ALL);
         mDeliveryGroupKey = opts.getString(KEY_DELIVERY_GROUP_KEY);
+        mDeliveryGroupExtrasMerger = opts.getParcelable(KEY_DELIVERY_GROUP_EXTRAS_MERGER,
+                BundleMerger.class);
     }
 
     /**
@@ -724,13 +745,32 @@ public class BroadcastOptions extends ComponentOptions {
      *
      * @hide
      */
+    @SystemApi
     public void setDeliveryGroupPolicy(@DeliveryGroupPolicy int policy) {
         mDeliveryGroupPolicy = policy;
     }
 
-    /** @hide */
+    /**
+     * Get the delivery group policy for this broadcast that specifies how multiple broadcasts
+     * belonging to the same delivery group has to be handled.
+     *
+     * @hide
+     */
+    @SystemApi
     public @DeliveryGroupPolicy int getDeliveryGroupPolicy() {
         return mDeliveryGroupPolicy;
+    }
+
+    /**
+     * Clears any previously set delivery group policies using
+     * {@link #setDeliveryGroupKey(String, String)} and resets the delivery group policy to
+     * the default value ({@link #DELIVERY_GROUP_POLICY_ALL}).
+     *
+     * @hide
+     */
+    @SystemApi
+    public void clearDeliveryGroupPolicy() {
+        mDeliveryGroupPolicy = DELIVERY_GROUP_POLICY_ALL;
     }
 
     /**
@@ -754,12 +794,35 @@ public class BroadcastOptions extends ComponentOptions {
     }
 
     /**
+     * Set the {@link BundleMerger} that specifies how to merge the extras data from
+     * broadcasts in a delivery group.
+     *
+     * <p>Note that this value will be ignored if the delivery group policy is not set as
+     * {@link #DELIVERY_GROUP_POLICY_MERGED}.
+     *
+     * @hide
+     */
+    public void setDeliveryGroupExtrasMerger(@NonNull BundleMerger extrasMerger) {
+        Preconditions.checkNotNull(extrasMerger);
+        mDeliveryGroupExtrasMerger = extrasMerger;
+    }
+
+    /** @hide */
+    public @Nullable BundleMerger getDeliveryGroupExtrasMerger() {
+        return mDeliveryGroupExtrasMerger;
+    }
+
+    /**
      * Returns the created options as a Bundle, which can be passed to
      * {@link android.content.Context#sendBroadcast(android.content.Intent)
      * Context.sendBroadcast(Intent)} and related methods.
      * Note that the returned Bundle is still owned by the BroadcastOptions
      * object; you must not modify it, but can supply it to the sendBroadcast
      * methods that take an options Bundle.
+     *
+     * @throws IllegalStateException if the broadcast option values are inconsistent. For example,
+     *                               if the delivery group policy is specified as "MERGED" but no
+     *                               extras merger is supplied.
      */
     @Override
     public Bundle toBundle() {
@@ -809,6 +872,15 @@ public class BroadcastOptions extends ComponentOptions {
         }
         if (mDeliveryGroupKey != null) {
             b.putString(KEY_DELIVERY_GROUP_KEY, mDeliveryGroupKey);
+        }
+        if (mDeliveryGroupPolicy == DELIVERY_GROUP_POLICY_MERGED) {
+            if (mDeliveryGroupExtrasMerger != null) {
+                b.putParcelable(KEY_DELIVERY_GROUP_EXTRAS_MERGER,
+                        mDeliveryGroupExtrasMerger);
+            } else {
+                throw new IllegalStateException("Extras merger cannot be empty "
+                        + "when delivery group policy is 'MERGED'");
+            }
         }
         return b.isEmpty() ? null : b;
     }

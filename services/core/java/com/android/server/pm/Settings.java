@@ -4185,15 +4185,16 @@ public final class Settings implements Watchable, Snappable {
                         // such as APEX
                         continue;
                     }
-                    // Need to create a data directory for all apps installed for this user.
-                    // Accumulate all required args and call the installer after mPackages lock
-                    // has been released
+                    // We need to create the DE data directory for all apps installed for this user.
+                    // (CE storage is not ready yet; the CE data directories will be created later,
+                    // when the user is "unlocked".)  Accumulate all required args, and call the
+                    // installer after the mPackages lock has been released.
                     final String seInfo = AndroidPackageUtils.getSeInfo(ps.getPkg(), ps);
                     final boolean usesSdk = !ps.getPkg().getUsesSdkLibraries().isEmpty();
                     final CreateAppDataArgs args = Installer.buildCreateAppDataArgs(
                             ps.getVolumeUuid(), ps.getPackageName(), userHandle,
-                            StorageManager.FLAG_STORAGE_CE | StorageManager.FLAG_STORAGE_DE,
-                            ps.getAppId(), seInfo, ps.getPkg().getTargetSdkVersion(), usesSdk);
+                            StorageManager.FLAG_STORAGE_DE, ps.getAppId(), seInfo,
+                            ps.getPkg().getTargetSdkVersion(), usesSdk);
                     batch.createAppData(args);
                 } else {
                     // Make sure the app is excluded from storage mapping for this user

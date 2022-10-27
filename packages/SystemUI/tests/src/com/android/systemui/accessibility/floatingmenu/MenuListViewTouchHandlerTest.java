@@ -21,6 +21,8 @@ import static android.view.View.OVER_SCROLL_NEVER;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.anyFloat;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -36,6 +38,7 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.accessibility.dialog.AccessibilityTarget;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.accessibility.MotionEventHelper;
+import com.android.wm.shell.bubbles.DismissView;
 
 import org.junit.After;
 import org.junit.Before;
@@ -57,7 +60,9 @@ public class MenuListViewTouchHandlerTest extends SysuiTestCase {
     private MenuView mStubMenuView;
     private MenuListViewTouchHandler mTouchHandler;
     private MenuAnimationController mMenuAnimationController;
+    private DismissAnimationController mDismissAnimationController;
     private RecyclerView mStubListView;
+    private DismissView mDismissView;
 
     @Before
     public void setUp() throws Exception {
@@ -69,7 +74,11 @@ public class MenuListViewTouchHandlerTest extends SysuiTestCase {
         mStubMenuView.setTranslationX(0);
         mStubMenuView.setTranslationY(0);
         mMenuAnimationController = spy(new MenuAnimationController(mStubMenuView));
-        mTouchHandler = new MenuListViewTouchHandler(mMenuAnimationController);
+        mDismissView = spy(new DismissView(mContext));
+        mDismissAnimationController =
+                spy(new DismissAnimationController(mDismissView, mStubMenuView));
+        mTouchHandler = new MenuListViewTouchHandler(mMenuAnimationController,
+                mDismissAnimationController);
         final AccessibilityTargetAdapter stubAdapter = new AccessibilityTargetAdapter(mStubTargets);
         mStubListView = (RecyclerView) mStubMenuView.getChildAt(0);
         mStubListView.setAdapter(stubAdapter);
@@ -88,7 +97,9 @@ public class MenuListViewTouchHandlerTest extends SysuiTestCase {
     }
 
     @Test
-    public void onActionMoveEvent_shouldMoveToPosition() {
+    public void onActionMoveEvent_notConsumedEvent_shouldMoveToPosition() {
+        doReturn(false).when(mDismissAnimationController).maybeConsumeMoveMotionEvent(
+                any(MotionEvent.class));
         final int offset = 100;
         final MotionEvent stubDownEvent =
                 mMotionEventHelper.obtainMotionEvent(/* downTime= */ 0, /* eventTime= */ 1,
@@ -105,6 +116,24 @@ public class MenuListViewTouchHandlerTest extends SysuiTestCase {
 
         assertThat(mStubMenuView.getTranslationX()).isEqualTo(offset);
         assertThat(mStubMenuView.getTranslationY()).isEqualTo(offset);
+    }
+
+    @Test
+    public void onActionMoveEvent_shouldShowDismissView() {
+        final int offset = 100;
+        final MotionEvent stubDownEvent =
+                mMotionEventHelper.obtainMotionEvent(/* downTime= */ 0, /* eventTime= */ 1,
+                        MotionEvent.ACTION_DOWN, mStubMenuView.getTranslationX(),
+                        mStubMenuView.getTranslationY());
+        final MotionEvent stubMoveEvent =
+                mMotionEventHelper.obtainMotionEvent(/* downTime= */ 0, /* eventTime= */ 3,
+                        MotionEvent.ACTION_MOVE, mStubMenuView.getTranslationX() + offset,
+                        mStubMenuView.getTranslationY() + offset);
+
+        mTouchHandler.onInterceptTouchEvent(mStubListView, stubDownEvent);
+        mTouchHandler.onInterceptTouchEvent(mStubListView, stubMoveEvent);
+
+        verify(mDismissView).show();
     }
 
     @Test

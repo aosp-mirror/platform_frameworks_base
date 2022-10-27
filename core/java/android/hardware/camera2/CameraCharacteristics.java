@@ -1286,6 +1286,30 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
             new Key<android.hardware.camera2.params.HighSpeedVideoConfiguration[]>("android.control.availableHighSpeedVideoConfigurationsMaximumResolution", android.hardware.camera2.params.HighSpeedVideoConfiguration[].class);
 
     /**
+     * <p>List of available settings overrides supported by the camera device that can
+     * be used to speed up certain controls.</p>
+     * <p>When not all controls within a CaptureRequest are required to take effect
+     * at the same time on the outputs, the camera device may apply certain request keys sooner
+     * to improve latency. This list contains such supported settings overrides. Each settings
+     * override corresponds to a set of CaptureRequest keys that can be sped up when applying.</p>
+     * <p>A supported settings override can be passed in via
+     * {@link android.hardware.camera2.CaptureRequest#CONTROL_SETTINGS_OVERRIDE }, and the
+     * CaptureRequest keys corresponding to the override are applied as soon as possible, not
+     * bound by per-frame synchronization. See {@link CaptureRequest#CONTROL_SETTINGS_OVERRIDE android.control.settingsOverride} for the
+     * CaptureRequest keys for each override.</p>
+     * <p>OFF is always included in this list.</p>
+     * <p><b>Range of valid values:</b><br>
+     * Any value listed in {@link CaptureRequest#CONTROL_SETTINGS_OVERRIDE android.control.settingsOverride}</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#CONTROL_SETTINGS_OVERRIDE
+     */
+    @PublicKey
+    @NonNull
+    public static final Key<int[]> CONTROL_AVAILABLE_SETTINGS_OVERRIDES =
+            new Key<int[]>("android.control.availableSettingsOverrides", int[].class);
+
+    /**
      * <p>List of edge enhancement modes for {@link CaptureRequest#EDGE_MODE android.edge.mode} that are supported by this camera
      * device.</p>
      * <p>Full-capability camera devices must always support OFF; camera devices that support

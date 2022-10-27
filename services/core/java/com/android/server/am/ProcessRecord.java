@@ -54,6 +54,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.procstats.ProcessState;
 import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.os.Zygote;
+import com.android.server.FgThread;
 import com.android.server.wm.WindowProcessController;
 import com.android.server.wm.WindowProcessListener;
 
@@ -141,6 +142,13 @@ class ProcessRecord implements WindowProcessListener {
      */
     @CompositeRWLock({"mService", "mProcLock"})
     private IApplicationThread mThread;
+
+    /**
+     * Instance of {@link #mThread} that will always meet the {@code oneway}
+     * contract, possibly by using {@link SameProcessApplicationThread}.
+     */
+    @CompositeRWLock({"mService", "mProcLock"})
+    private IApplicationThread mOnewayThread;
 
     /**
      * Always keep this application running?
@@ -603,16 +611,27 @@ class ProcessRecord implements WindowProcessListener {
         return mThread;
     }
 
+    @GuardedBy(anyOf = {"mService", "mProcLock"})
+    IApplicationThread getOnewayThread() {
+        return mOnewayThread;
+    }
+
     @GuardedBy({"mService", "mProcLock"})
     public void makeActive(IApplicationThread thread, ProcessStatsService tracker) {
         mProfile.onProcessActive(thread, tracker);
         mThread = thread;
+        if (mPid == Process.myPid()) {
+            mOnewayThread = new SameProcessApplicationThread(thread, FgThread.getHandler());
+        } else {
+            mOnewayThread = thread;
+        }
         mWindowProcessController.setThread(thread);
     }
 
     @GuardedBy({"mService", "mProcLock"})
     public void makeInactive(ProcessStatsService tracker) {
         mThread = null;
+        mOnewayThread = null;
         mWindowProcessController.setThread(null);
         mProfile.onProcessInactive(tracker);
     }

@@ -371,7 +371,7 @@ public class DisplayPolicyTests extends WindowTestsBase {
         final InsetsControlTarget controlTarget = mock(InsetsControlTarget.class);
         when(provider.getControlTarget()).thenReturn(controlTarget);
         when(windowState.getControllableInsetProvider()).thenReturn(provider);
-        when(controlTarget.getRequestedVisibility(anyInt())).thenReturn(true);
+        when(controlTarget.isRequestedVisible(anyInt())).thenReturn(true);
 
         displayPolicy.setCanSystemBarsBeShownByUser(false);
         displayPolicy.requestTransientBars(windowState, true);

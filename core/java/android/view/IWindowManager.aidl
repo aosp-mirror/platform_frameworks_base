@@ -721,7 +721,7 @@ interface IWindowManager
      * Called when a remote process updates the requested visibilities of insets on a display window
      * container.
      */
-    void updateDisplayWindowRequestedVisibilities(int displayId, in InsetsVisibilities vis);
+    void updateDisplayWindowRequestedVisibleTypes(int displayId, int requestedVisibleTypes);
 
     /**
      * Called to get the expected window insets.
