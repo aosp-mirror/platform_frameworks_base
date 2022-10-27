@@ -137,6 +137,10 @@ class RunningTasks {
         task.fillTaskInfo(rti, !mKeepIntentExtra);
         // Fill in some deprecated values
         rti.id = rti.taskId;
+
+        if (!mAllowed) {
+            Task.trimIneffectiveInfo(task, rti);
+        }
         return rti;
     }
 }
