@@ -31,7 +31,7 @@ constructor(
     dumpManager: DumpManager,
     private val commandRegistry: CommandRegistry,
     private val flagCommand: FlagCommand,
-    featureFlags: FeatureFlags
+    private val featureFlags: FeatureFlagsDebug
 ) : CoreStartable {
 
     init {
@@ -41,6 +41,7 @@ constructor(
     }
 
     override fun start() {
+        featureFlags.init()
         commandRegistry.registerCommand(FlagCommand.FLAG_COMMAND) { flagCommand }
     }
 }
