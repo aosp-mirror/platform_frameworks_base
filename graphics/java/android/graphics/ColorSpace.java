@@ -199,6 +199,8 @@ public abstract class ColorSpace {
 
     private static final float[] SRGB_PRIMARIES = { 0.640f, 0.330f, 0.300f, 0.600f, 0.150f, 0.060f };
     private static final float[] NTSC_1953_PRIMARIES = { 0.67f, 0.33f, 0.21f, 0.71f, 0.14f, 0.08f };
+    private static final float[] BT2020_PRIMARIES =
+            { 0.708f, 0.292f, 0.170f, 0.797f, 0.131f, 0.046f };
     /**
      * A gray color space does not have meaningful primaries, so we use this arbitrary set.
      */
@@ -208,6 +210,12 @@ public abstract class ColorSpace {
 
     private static final Rgb.TransferParameters SRGB_TRANSFER_PARAMETERS =
             new Rgb.TransferParameters(1 / 1.055, 0.055 / 1.055, 1 / 12.92, 0.04045, 2.4);
+    private static final Rgb.TransferParameters BT2020_HLG_TRANSFER_PARAMETERS =
+            new Rgb.TransferParameters(2.0f, 2.0f, 1 / 0.17883277f,
+                0.28466892f, 0.5599107f, 0.0f, -3.0f, true);
+    private static final Rgb.TransferParameters BT2020_PQ_TRANSFER_PARAMETERS =
+            new Rgb.TransferParameters(107 / 128.0f, 1.0f, 32 / 2523.0f,
+                2413 / 128.0f, -2392 / 128.0f, 8192 / 1305.0f, -2.0f, true);
 
     // See static initialization block next to #get(Named)
     private static final ColorSpace[] sNamedColorSpaces = new ColorSpace[Named.values().length];
@@ -703,7 +711,29 @@ public abstract class ColorSpace {
          *     <tr><td>Range</td><td colspan="4">\(L: [0.0, 100.0], a: [-128, 128], b: [-128, 128]\)</td></tr>
          * </table>
          */
-        CIE_LAB
+        CIE_LAB,
+        /**
+         * <p>{@link ColorSpace.Rgb RGB} color space BT.2100 standardized as
+         * Hybrid Log Gamma encoding.</p>
+         * <table summary="Color space definition">
+         *     <tr><th>Property</th><th colspan="4">Value</th></tr>
+         *     <tr><td>Name</td><td colspan="4">Hybrid Log Gamma encoding</td></tr>
+         *     <tr><td>CIE standard illuminant</td><td colspan="4">D65</td></tr>
+         *     <tr><td>Range</td><td colspan="4">\([0..1]\)</td></tr>
+         * </table>
+         */
+        BT2020_HLG,
+        /**
+         * <p>{@link ColorSpace.Rgb RGB} color space BT.2100 standardized as
+         * Perceptual Quantizer encoding.</p>
+         * <table summary="Color space definition">
+         *     <tr><th>Property</th><th colspan="4">Value</th></tr>
+         *     <tr><td>Name</td><td colspan="4">Perceptual Quantizer encoding</td></tr>
+         *     <tr><td>CIE standard illuminant</td><td colspan="4">D65</td></tr>
+         *     <tr><td>Range</td><td colspan="4">\([0..1]\)</td></tr>
+         * </table>
+         */
+        BT2020_PQ
         // Update the initialization block next to #get(Named) when adding new values
     }
 
@@ -1534,7 +1564,7 @@ public abstract class ColorSpace {
         sDataToColorSpaces.put(DataSpace.DATASPACE_BT709, Named.BT709.ordinal());
         sNamedColorSpaces[Named.BT2020.ordinal()] = new ColorSpace.Rgb(
                 "Rec. ITU-R BT.2020-1",
-                new float[] { 0.708f, 0.292f, 0.170f, 0.797f, 0.131f, 0.046f },
+                BT2020_PRIMARIES,
                 ILLUMINANT_D65,
                 null,
                 new Rgb.TransferParameters(1 / 1.0993, 0.0993 / 1.0993, 1 / 4.5, 0.08145, 1 / 0.45),
@@ -1616,6 +1646,70 @@ public abstract class ColorSpace {
                 "Generic L*a*b*",
                 Named.CIE_LAB.ordinal()
         );
+        sNamedColorSpaces[Named.BT2020_HLG.ordinal()] = new ColorSpace.Rgb(
+                "Hybrid Log Gamma encoding",
+                BT2020_PRIMARIES,
+                ILLUMINANT_D65,
+                null,
+                x -> transferHLGOETF(x),
+                x -> transferHLGEOTF(x),
+                0.0f, 1.0f,
+                BT2020_HLG_TRANSFER_PARAMETERS,
+                Named.BT2020_HLG.ordinal()
+        );
+        sDataToColorSpaces.put(DataSpace.DATASPACE_BT2020_HLG, Named.BT2020_HLG.ordinal());
+        sNamedColorSpaces[Named.BT2020_PQ.ordinal()] = new ColorSpace.Rgb(
+                "Perceptual Quantizer encoding",
+                BT2020_PRIMARIES,
+                ILLUMINANT_D65,
+                null,
+                x -> transferST2048OETF(x),
+                x -> transferST2048EOTF(x),
+                0.0f, 1.0f,
+                BT2020_PQ_TRANSFER_PARAMETERS,
+                Named.BT2020_PQ.ordinal()
+        );
+        sDataToColorSpaces.put(DataSpace.DATASPACE_BT2020_PQ, Named.BT2020_PQ.ordinal());
+    }
+
+    private static double transferHLGOETF(double x) {
+        double a = 0.17883277;
+        double b = 0.28466892;
+        double c = 0.55991073;
+        double r = 0.5;
+        return x > 1.0 ? a * Math.log(x - b) + c : r * Math.sqrt(x);
+    }
+
+    private static double transferHLGEOTF(double x) {
+        double a = 0.17883277;
+        double b = 0.28466892;
+        double c = 0.55991073;
+        double r = 0.5;
+        return x <= 0.5 ? (x * x) / (r * r) : Math.exp((x - c) / a + b);
+    }
+
+    private static double transferST2048OETF(double x) {
+        double m1 = (2610.0 / 4096.0) / 4.0;
+        double m2 = (2523.0 / 4096.0) * 128.0;
+        double c1 = (3424.0 / 4096.0);
+        double c2 = (2413.0 / 4096.0) * 32.0;
+        double c3 = (2392.0 / 4096.0) * 32.0;
+
+        double tmp = Math.pow(x, m1);
+        tmp = (c1 + c2 * tmp) / (1.0 + c3 * tmp);
+        return Math.pow(tmp, m2);
+    }
+
+    private static double transferST2048EOTF(double x) {
+        double m1 = (2610.0 / 4096.0) / 4.0;
+        double m2 = (2523.0 / 4096.0) * 128.0;
+        double c1 = (3424.0 / 4096.0);
+        double c2 = (2413.0 / 4096.0) * 32.0;
+        double c3 = (2392.0 / 4096.0) * 32.0;
+
+        double tmp = Math.pow(Math.min(Math.max(x, 0.0), 1.0), 1.0 / m2);
+        tmp = Math.max(tmp - c1, 0.0) / (c2 - c3 * tmp);
+        return Math.pow(tmp, 1.0 / m1);
     }
 
     // Reciprocal piecewise gamma response
@@ -2197,6 +2291,58 @@ public abstract class ColorSpace {
             /** Variable \(g\) in the equation of the EOTF described above. */
             public final double g;
 
+            private TransferParameters(double a, double b, double c, double d, double e,
+                    double f, double g, boolean nonCurveTransferParameters) {
+                // nonCurveTransferParameters correspondes to a "special" transfer function
+                if (!nonCurveTransferParameters) {
+                    if (Double.isNaN(a) || Double.isNaN(b) || Double.isNaN(c)
+                            || Double.isNaN(d) || Double.isNaN(e) || Double.isNaN(f)
+                            || Double.isNaN(g)) {
+                        throw new IllegalArgumentException("Parameters cannot be NaN");
+                    }
+
+                    // Next representable float after 1.0
+                    // We use doubles here but the representation inside our native code
+                    // is often floats
+                    if (!(d >= 0.0 && d <= 1.0f + Math.ulp(1.0f))) {
+                        throw new IllegalArgumentException(
+                            "Parameter d must be in the range [0..1], " + "was " + d);
+                    }
+
+                    if (d == 0.0 && (a == 0.0 || g == 0.0)) {
+                        throw new IllegalArgumentException(
+                            "Parameter a or g is zero, the transfer function is constant");
+                    }
+
+                    if (d >= 1.0 && c == 0.0) {
+                        throw new IllegalArgumentException(
+                            "Parameter c is zero, the transfer function is constant");
+                    }
+
+                    if ((a == 0.0 || g == 0.0) && c == 0.0) {
+                        throw new IllegalArgumentException("Parameter a or g is zero,"
+                            + " and c is zero, the transfer function is constant");
+                    }
+
+                    if (c < 0.0) {
+                        throw new IllegalArgumentException(
+                            "The transfer function must be increasing");
+                    }
+
+                    if (a < 0.0 || g < 0.0) {
+                        throw new IllegalArgumentException(
+                            "The transfer function must be positive or increasing");
+                    }
+                }
+                this.a = a;
+                this.b = b;
+                this.c = c;
+                this.d = d;
+                this.e = e;
+                this.f = f;
+                this.g = g;
+            }
+
             /**
              * <p>Defines the parameters for the ICC parametric curve type 3, as
              * defined in ICC.1:2004-10, section 10.15.</p>
@@ -2219,7 +2365,7 @@ public abstract class ColorSpace {
              * @throws IllegalArgumentException If the parameters form an invalid transfer function
              */
             public TransferParameters(double a, double b, double c, double d, double g) {
-                this(a, b, c, d, 0.0, 0.0, g);
+                this(a, b, c, d, 0.0, 0.0, g, false);
             }
 
             /**
@@ -2238,51 +2384,7 @@ public abstract class ColorSpace {
              */
             public TransferParameters(double a, double b, double c, double d, double e,
                     double f, double g) {
-
-                if (Double.isNaN(a) || Double.isNaN(b) || Double.isNaN(c) ||
-                        Double.isNaN(d) || Double.isNaN(e) || Double.isNaN(f) ||
-                        Double.isNaN(g)) {
-                    throw new IllegalArgumentException("Parameters cannot be NaN");
-                }
-
-                // Next representable float after 1.0
-                // We use doubles here but the representation inside our native code is often floats
-                if (!(d >= 0.0 && d <= 1.0f + Math.ulp(1.0f))) {
-                    throw new IllegalArgumentException("Parameter d must be in the range [0..1], " +
-                            "was " + d);
-                }
-
-                if (d == 0.0 && (a == 0.0 || g == 0.0)) {
-                    throw new IllegalArgumentException(
-                            "Parameter a or g is zero, the transfer function is constant");
-                }
-
-                if (d >= 1.0 && c == 0.0) {
-                    throw new IllegalArgumentException(
-                            "Parameter c is zero, the transfer function is constant");
-                }
-
-                if ((a == 0.0 || g == 0.0) && c == 0.0) {
-                    throw new IllegalArgumentException("Parameter a or g is zero," +
-                            " and c is zero, the transfer function is constant");
-                }
-
-                if (c < 0.0) {
-                    throw new IllegalArgumentException("The transfer function must be increasing");
-                }
-
-                if (a < 0.0 || g < 0.0) {
-                    throw new IllegalArgumentException("The transfer function must be " +
-                            "positive or increasing");
-                }
-
-                this.a = a;
-                this.b = b;
-                this.c = c;
-                this.d = d;
-                this.e = e;
-                this.f = f;
-                this.g = g;
+                this(a, b, c, d, e, f, g, false);
             }
 
             @SuppressWarnings("SimplifiableIfStatement")
@@ -2356,6 +2458,36 @@ public abstract class ColorSpace {
         private static native long nativeGetNativeFinalizer();
         private static native long nativeCreate(float a, float b, float c, float d,
                 float e, float f, float g, float[] xyz);
+
+        private static DoubleUnaryOperator generateOETF(TransferParameters function) {
+            boolean isNonCurveTransferParameters = function.equals(BT2020_HLG_TRANSFER_PARAMETERS)
+                    || function.equals(BT2020_PQ_TRANSFER_PARAMETERS);
+            if (isNonCurveTransferParameters) {
+                return function.f == 0.0 && function.g < 0.0 ? x -> transferHLGOETF(x)
+                    : x -> transferST2048OETF(x);
+            } else {
+                return function.e == 0.0 && function.f == 0.0
+                    ? x -> rcpResponse(x, function.a, function.b,
+                    function.c, function.d, function.g)
+                    : x -> rcpResponse(x, function.a, function.b, function.c,
+                        function.d, function.e, function.f, function.g);
+            }
+        }
+
+        private static DoubleUnaryOperator generateEOTF(TransferParameters function) {
+            boolean isNonCurveTransferParameters = function.equals(BT2020_HLG_TRANSFER_PARAMETERS)
+                    || function.equals(BT2020_PQ_TRANSFER_PARAMETERS);
+            if (isNonCurveTransferParameters) {
+                return function.f == 0.0 && function.g < 0.0 ? x -> transferHLGEOTF(x)
+                    : x -> transferST2048EOTF(x);
+            } else {
+                return function.e == 0.0 && function.f == 0.0
+                    ? x -> response(x, function.a, function.b,
+                    function.c, function.d, function.g)
+                    : x -> response(x, function.a, function.b, function.c,
+                        function.d, function.e, function.f, function.g);
+            }
+        }
 
         /**
          * <p>Creates a new RGB color space using a 3x3 column-major transform matrix.
@@ -2553,16 +2685,8 @@ public abstract class ColorSpace {
                 @NonNull TransferParameters function,
                 @IntRange(from = MIN_ID, to = MAX_ID) int id) {
             this(name, primaries, whitePoint, transform,
-                    function.e == 0.0 && function.f == 0.0 ?
-                            x -> rcpResponse(x, function.a, function.b,
-                                    function.c, function.d, function.g) :
-                            x -> rcpResponse(x, function.a, function.b, function.c,
-                                    function.d, function.e, function.f, function.g),
-                    function.e == 0.0 && function.f == 0.0 ?
-                            x -> response(x, function.a, function.b,
-                                    function.c, function.d, function.g) :
-                            x -> response(x, function.a, function.b, function.c,
-                                    function.d, function.e, function.f, function.g),
+                    generateOETF(function),
+                    generateEOTF(function),
                     0.0f, 1.0f, function, id);
         }
 
@@ -3063,7 +3187,12 @@ public abstract class ColorSpace {
          */
         @Nullable
         public TransferParameters getTransferParameters() {
-            return mTransferParameters;
+            if (mTransferParameters != null
+                    && !mTransferParameters.equals(BT2020_PQ_TRANSFER_PARAMETERS)
+                    && !mTransferParameters.equals(BT2020_HLG_TRANSFER_PARAMETERS)) {
+                return mTransferParameters;
+            }
+            return null;
         }
 
         @Override
