@@ -22,8 +22,6 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
 import com.android.systemui.classifier.FalsingCollector
-import com.android.systemui.media.taptotransfer.common.MediaTttLogger
-import com.android.systemui.media.taptotransfer.receiver.MediaTttReceiverLogger
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.ConfigurationController
@@ -33,7 +31,7 @@ import com.android.systemui.util.view.ViewUtil
 /** A fake implementation of [ChipbarCoordinator] for testing. */
 class FakeChipbarCoordinator(
     context: Context,
-    @MediaTttReceiverLogger logger: MediaTttLogger,
+    logger: ChipbarLogger,
     windowManager: WindowManager,
     mainExecutor: DelayableExecutor,
     accessibilityManager: AccessibilityManager,
