@@ -26,6 +26,7 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -44,6 +45,7 @@ import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerGlobal;
 import android.os.Handler;
+import android.os.UserHandle;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.Display;
@@ -135,9 +137,10 @@ public class ImageWallpaperTest extends SysuiTestCase {
         when(mWallpaperBitmap.getHeight()).thenReturn(mBitmapHeight);
 
         // set up wallpaper manager
-        when(mWallpaperManager.peekBitmapDimensions()).thenReturn(
-                new Rect(0, 0, mBitmapWidth, mBitmapHeight));
-        when(mWallpaperManager.getBitmap(false)).thenReturn(mWallpaperBitmap);
+        when(mWallpaperManager.peekBitmapDimensions())
+                .thenReturn(new Rect(0, 0, mBitmapWidth, mBitmapHeight));
+        when(mWallpaperManager.getBitmapAsUser(eq(UserHandle.USER_CURRENT), anyBoolean()))
+                .thenReturn(mWallpaperBitmap);
         when(mMockContext.getSystemService(WallpaperManager.class)).thenReturn(mWallpaperManager);
 
         // set up surface

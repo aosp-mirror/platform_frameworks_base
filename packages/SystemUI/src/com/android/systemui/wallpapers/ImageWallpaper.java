@@ -31,6 +31,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.SystemClock;
 import android.os.Trace;
+import android.os.UserHandle;
 import android.service.wallpaper.WallpaperService;
 import android.util.ArraySet;
 import android.util.Log;
@@ -738,7 +739,7 @@ public class ImageWallpaper extends WallpaperService {
             boolean loadSuccess = false;
             Bitmap bitmap;
             try {
-                bitmap = mWallpaperManager.getBitmap(false);
+                bitmap = mWallpaperManager.getBitmapAsUser(UserHandle.USER_CURRENT, false);
                 if (bitmap != null
                         && bitmap.getByteCount() > RecordingCanvas.MAX_BITMAP_SIZE) {
                     throw new RuntimeException("Wallpaper is too large to draw!");
@@ -757,7 +758,7 @@ public class ImageWallpaper extends WallpaperService {
                 }
 
                 try {
-                    bitmap = mWallpaperManager.getBitmap(false);
+                    bitmap = mWallpaperManager.getBitmapAsUser(UserHandle.USER_CURRENT, false);
                 } catch (RuntimeException | OutOfMemoryError e) {
                     Log.w(TAG, "Unable to load default wallpaper!", e);
                     bitmap = null;
