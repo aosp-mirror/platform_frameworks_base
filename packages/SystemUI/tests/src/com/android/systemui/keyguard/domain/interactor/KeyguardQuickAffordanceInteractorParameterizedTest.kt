@@ -213,10 +213,7 @@ class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
         whenever(expandable.activityLaunchController()).thenReturn(animationController)
 
         homeControls =
-            object :
-                FakeKeyguardQuickAffordanceConfig(
-                    BuiltInKeyguardQuickAffordanceKeys.HOME_CONTROLS
-                ) {}
+            FakeKeyguardQuickAffordanceConfig(BuiltInKeyguardQuickAffordanceKeys.HOME_CONTROLS)
         underTest =
             KeyguardQuickAffordanceInteractor(
                 keyguardInteractor = KeyguardInteractor(repository = FakeKeyguardRepository()),
@@ -229,14 +226,12 @@ class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
                                 ),
                             KeyguardQuickAffordancePosition.BOTTOM_END to
                                 listOf(
-                                    object :
-                                        FakeKeyguardQuickAffordanceConfig(
-                                            BuiltInKeyguardQuickAffordanceKeys.QUICK_ACCESS_WALLET
-                                        ) {},
-                                    object :
-                                        FakeKeyguardQuickAffordanceConfig(
-                                            BuiltInKeyguardQuickAffordanceKeys.QR_CODE_SCANNER
-                                        ) {},
+                                    FakeKeyguardQuickAffordanceConfig(
+                                        BuiltInKeyguardQuickAffordanceKeys.QUICK_ACCESS_WALLET
+                                    ),
+                                    FakeKeyguardQuickAffordanceConfig(
+                                        BuiltInKeyguardQuickAffordanceKeys.QR_CODE_SCANNER
+                                    ),
                                 ),
                         ),
                     ),

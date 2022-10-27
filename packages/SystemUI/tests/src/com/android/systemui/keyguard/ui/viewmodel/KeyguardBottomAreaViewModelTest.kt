@@ -82,20 +82,13 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
             .thenReturn(RETURNED_BURN_IN_OFFSET)
 
         homeControlsQuickAffordanceConfig =
-            object :
-                FakeKeyguardQuickAffordanceConfig(
-                    BuiltInKeyguardQuickAffordanceKeys.HOME_CONTROLS
-                ) {}
+            FakeKeyguardQuickAffordanceConfig(BuiltInKeyguardQuickAffordanceKeys.HOME_CONTROLS)
         quickAccessWalletAffordanceConfig =
-            object :
-                FakeKeyguardQuickAffordanceConfig(
-                    BuiltInKeyguardQuickAffordanceKeys.QUICK_ACCESS_WALLET
-                ) {}
+            FakeKeyguardQuickAffordanceConfig(
+                BuiltInKeyguardQuickAffordanceKeys.QUICK_ACCESS_WALLET
+            )
         qrCodeScannerAffordanceConfig =
-            object :
-                FakeKeyguardQuickAffordanceConfig(
-                    BuiltInKeyguardQuickAffordanceKeys.QR_CODE_SCANNER
-                ) {}
+            FakeKeyguardQuickAffordanceConfig(BuiltInKeyguardQuickAffordanceKeys.QR_CODE_SCANNER)
         registry =
             FakeKeyguardQuickAffordanceRegistry(
                 mapOf(

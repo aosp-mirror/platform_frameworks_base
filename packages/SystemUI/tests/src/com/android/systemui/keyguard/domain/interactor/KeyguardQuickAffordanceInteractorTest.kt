@@ -71,20 +71,13 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
         repository.setKeyguardShowing(true)
 
         homeControls =
-            object :
-                FakeKeyguardQuickAffordanceConfig(
-                    BuiltInKeyguardQuickAffordanceKeys.HOME_CONTROLS
-                ) {}
+            FakeKeyguardQuickAffordanceConfig(BuiltInKeyguardQuickAffordanceKeys.HOME_CONTROLS)
         quickAccessWallet =
-            object :
-                FakeKeyguardQuickAffordanceConfig(
-                    BuiltInKeyguardQuickAffordanceKeys.QUICK_ACCESS_WALLET
-                ) {}
+            FakeKeyguardQuickAffordanceConfig(
+                BuiltInKeyguardQuickAffordanceKeys.QUICK_ACCESS_WALLET
+            )
         qrCodeScanner =
-            object :
-                FakeKeyguardQuickAffordanceConfig(
-                    BuiltInKeyguardQuickAffordanceKeys.QR_CODE_SCANNER
-                ) {}
+            FakeKeyguardQuickAffordanceConfig(BuiltInKeyguardQuickAffordanceKeys.QR_CODE_SCANNER)
 
         underTest =
             KeyguardQuickAffordanceInteractor(
