@@ -15,10 +15,10 @@
  *
  */
 
-package com.android.systemui.keyguard.domain.quickaffordance
+package com.android.systemui.keyguard.data.quickaffordance
 
 import com.android.systemui.animation.Expandable
-import com.android.systemui.keyguard.domain.quickaffordance.KeyguardQuickAffordanceConfig.OnClickedResult
+import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceConfig.OnClickedResult
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.yield
@@ -29,7 +29,9 @@ import kotlinx.coroutines.yield
  * This class is abstract to force tests to provide extensions of it as the system that references
  * these configs uses each implementation's class type to refer to them.
  */
-abstract class FakeKeyguardQuickAffordanceConfig : KeyguardQuickAffordanceConfig {
+abstract class FakeKeyguardQuickAffordanceConfig(
+    override val key: String,
+) : KeyguardQuickAffordanceConfig {
 
     var onClickedResult: OnClickedResult = OnClickedResult.Handled
 
