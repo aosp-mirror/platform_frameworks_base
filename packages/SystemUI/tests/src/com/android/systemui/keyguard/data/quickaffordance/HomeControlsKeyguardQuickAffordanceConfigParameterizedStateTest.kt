@@ -122,8 +122,8 @@ class HomeControlsKeyguardQuickAffordanceConfigParameterizedStateTest : SysuiTes
                     emptyList()
                 }
             )
-        val values = mutableListOf<KeyguardQuickAffordanceConfig.State>()
-        val job = underTest.state.onEach(values::add).launchIn(this)
+        val values = mutableListOf<KeyguardQuickAffordanceConfig.LockScreenState>()
+        val job = underTest.lockScreenState.onEach(values::add).launchIn(this)
 
         if (canShowWhileLocked) {
             verify(controlsListingController).addCallback(callbackCaptor.capture())
@@ -139,9 +139,9 @@ class HomeControlsKeyguardQuickAffordanceConfigParameterizedStateTest : SysuiTes
         assertThat(values.last())
             .isInstanceOf(
                 if (isVisibleExpected) {
-                    KeyguardQuickAffordanceConfig.State.Visible::class.java
+                    KeyguardQuickAffordanceConfig.LockScreenState.Visible::class.java
                 } else {
-                    KeyguardQuickAffordanceConfig.State.Hidden::class.java
+                    KeyguardQuickAffordanceConfig.LockScreenState.Hidden::class.java
                 }
             )
         job.cancel()

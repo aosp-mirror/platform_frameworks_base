@@ -39,46 +39,47 @@ constructor(
 
     override val key: String = BuiltInKeyguardQuickAffordanceKeys.QR_CODE_SCANNER
 
-    override val state: Flow<KeyguardQuickAffordanceConfig.State> = conflatedCallbackFlow {
-        val callback =
-            object : QRCodeScannerController.Callback {
-                override fun onQRCodeScannerActivityChanged() {
-                    trySendWithFailureLogging(state(), TAG)
+    override val lockScreenState: Flow<KeyguardQuickAffordanceConfig.LockScreenState> =
+        conflatedCallbackFlow {
+            val callback =
+                object : QRCodeScannerController.Callback {
+                    override fun onQRCodeScannerActivityChanged() {
+                        trySendWithFailureLogging(state(), TAG)
+                    }
+                    override fun onQRCodeScannerPreferenceChanged() {
+                        trySendWithFailureLogging(state(), TAG)
+                    }
                 }
-                override fun onQRCodeScannerPreferenceChanged() {
-                    trySendWithFailureLogging(state(), TAG)
-                }
-            }
 
-        controller.addCallback(callback)
-        controller.registerQRCodeScannerChangeObservers(
-            QRCodeScannerController.DEFAULT_QR_CODE_SCANNER_CHANGE,
-            QRCodeScannerController.QR_CODE_SCANNER_PREFERENCE_CHANGE
-        )
-        // Registering does not push an initial update.
-        trySendWithFailureLogging(state(), "initial state", TAG)
-
-        awaitClose {
-            controller.unregisterQRCodeScannerChangeObservers(
+            controller.addCallback(callback)
+            controller.registerQRCodeScannerChangeObservers(
                 QRCodeScannerController.DEFAULT_QR_CODE_SCANNER_CHANGE,
                 QRCodeScannerController.QR_CODE_SCANNER_PREFERENCE_CHANGE
             )
-            controller.removeCallback(callback)
-        }
-    }
+            // Registering does not push an initial update.
+            trySendWithFailureLogging(state(), "initial state", TAG)
 
-    override fun onQuickAffordanceClicked(
+            awaitClose {
+                controller.unregisterQRCodeScannerChangeObservers(
+                    QRCodeScannerController.DEFAULT_QR_CODE_SCANNER_CHANGE,
+                    QRCodeScannerController.QR_CODE_SCANNER_PREFERENCE_CHANGE
+                )
+                controller.removeCallback(callback)
+            }
+        }
+
+    override fun onTriggered(
         expandable: Expandable?,
-    ): KeyguardQuickAffordanceConfig.OnClickedResult {
-        return KeyguardQuickAffordanceConfig.OnClickedResult.StartActivity(
+    ): KeyguardQuickAffordanceConfig.OnTriggeredResult {
+        return KeyguardQuickAffordanceConfig.OnTriggeredResult.StartActivity(
             intent = controller.intent,
             canShowWhileLocked = true,
         )
     }
 
-    private fun state(): KeyguardQuickAffordanceConfig.State {
+    private fun state(): KeyguardQuickAffordanceConfig.LockScreenState {
         return if (controller.isEnabledForLockScreenButton) {
-            KeyguardQuickAffordanceConfig.State.Visible(
+            KeyguardQuickAffordanceConfig.LockScreenState.Visible(
                 icon =
                     Icon.Resource(
                         res = R.drawable.ic_qr_code_scanner,
@@ -89,7 +90,7 @@ constructor(
                     ),
             )
         } else {
-            KeyguardQuickAffordanceConfig.State.Hidden
+            KeyguardQuickAffordanceConfig.LockScreenState.Hidden
         }
     }
 
