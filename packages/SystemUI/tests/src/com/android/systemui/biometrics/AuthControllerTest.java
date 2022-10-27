@@ -89,6 +89,8 @@ import com.android.internal.R;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.biometrics.domain.interactor.BiometricPromptCredentialInteractor;
+import com.android.systemui.biometrics.ui.viewmodel.CredentialViewModel;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
@@ -165,6 +167,11 @@ public class AuthControllerTest extends SysuiTestCase {
     private UdfpsLogger mUdfpsLogger;
     @Mock
     private InteractionJankMonitor mInteractionJankMonitor;
+    @Mock
+    private BiometricPromptCredentialInteractor mBiometricPromptCredentialInteractor;
+    @Mock
+    private CredentialViewModel mCredentialViewModel;
+
     @Captor
     private ArgumentCaptor<IFingerprintAuthenticatorsRegisteredCallback> mFpAuthenticatorsRegisteredCaptor;
     @Captor
@@ -1009,6 +1016,7 @@ public class AuthControllerTest extends SysuiTestCase {
                     fingerprintManager, faceManager, udfpsControllerFactory,
                     sidefpsControllerFactory, mDisplayManager, mWakefulnessLifecycle,
                     mUserManager, mLockPatternUtils, mUdfpsLogger, statusBarStateController,
+                    () -> mBiometricPromptCredentialInteractor, () -> mCredentialViewModel,
                     mInteractionJankMonitor, mHandler, mBackgroundExecutor, vibratorHelper);
         }
 

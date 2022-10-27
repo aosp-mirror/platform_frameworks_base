@@ -41,10 +41,15 @@ import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.biometrics.data.repository.FakePromptRepository
+import com.android.systemui.biometrics.domain.interactor.FakeCredentialInteractor
+import com.android.systemui.biometrics.domain.interactor.BiometricPromptCredentialInteractor
+import com.android.systemui.biometrics.ui.viewmodel.CredentialViewModel
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.Dispatchers
 import org.junit.After
 import org.junit.Rule
 import org.junit.Test
@@ -79,6 +84,15 @@ class AuthContainerViewTest : SysuiTestCase() {
     lateinit var windowToken: IBinder
     @Mock
     lateinit var interactionJankMonitor: InteractionJankMonitor
+
+    private val biometricPromptRepository = FakePromptRepository()
+    private val credentialInteractor = FakeCredentialInteractor()
+    private val bpCredentialInteractor = BiometricPromptCredentialInteractor(
+        Dispatchers.Main.immediate,
+        biometricPromptRepository,
+        credentialInteractor
+    )
+    private val credentialViewModel = CredentialViewModel(mContext, bpCredentialInteractor)
 
     private var authContainer: TestAuthContainerView? = null
 
@@ -466,6 +480,8 @@ class AuthContainerViewTest : SysuiTestCase() {
         userManager,
         lockPatternUtils,
         interactionJankMonitor,
+        { bpCredentialInteractor },
+        { credentialViewModel },
         Handler(TestableLooper.get(this).looper),
         FakeExecutor(FakeSystemClock())
     ) {

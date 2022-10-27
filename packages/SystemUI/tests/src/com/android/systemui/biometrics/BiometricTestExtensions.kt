@@ -22,12 +22,11 @@ import android.hardware.biometrics.BiometricManager
 import android.hardware.biometrics.ComponentInfoInternal
 import android.hardware.biometrics.PromptInfo
 import android.hardware.biometrics.SensorProperties
-import android.hardware.face.FaceSensorPropertiesInternal
 import android.hardware.face.FaceSensorProperties
+import android.hardware.face.FaceSensorPropertiesInternal
 import android.hardware.fingerprint.FingerprintSensorProperties
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal
 import android.os.Bundle
-
 import android.testing.ViewUtils
 import android.view.LayoutInflater
 
@@ -83,26 +82,31 @@ internal fun AuthBiometricView?.destroyDialog() {
 internal fun fingerprintSensorPropertiesInternal(
     ids: List<Int> = listOf(0)
 ): List<FingerprintSensorPropertiesInternal> {
-    val componentInfo = listOf(
+    val componentInfo =
+        listOf(
             ComponentInfoInternal(
-                    "fingerprintSensor" /* componentId */,
-                    "vendor/model/revision" /* hardwareVersion */, "1.01" /* firmwareVersion */,
-                    "00000001" /* serialNumber */, "" /* softwareVersion */
+                "fingerprintSensor" /* componentId */,
+                "vendor/model/revision" /* hardwareVersion */,
+                "1.01" /* firmwareVersion */,
+                "00000001" /* serialNumber */,
+                "" /* softwareVersion */
             ),
             ComponentInfoInternal(
-                    "matchingAlgorithm" /* componentId */,
-                    "" /* hardwareVersion */, "" /* firmwareVersion */, "" /* serialNumber */,
-                    "vendor/version/revision" /* softwareVersion */
+                "matchingAlgorithm" /* componentId */,
+                "" /* hardwareVersion */,
+                "" /* firmwareVersion */,
+                "" /* serialNumber */,
+                "vendor/version/revision" /* softwareVersion */
             )
-    )
+        )
     return ids.map { id ->
         FingerprintSensorPropertiesInternal(
-                id,
-                SensorProperties.STRENGTH_STRONG,
-                5 /* maxEnrollmentsPerUser */,
-                componentInfo,
-                FingerprintSensorProperties.TYPE_REAR,
-                false /* resetLockoutRequiresHardwareAuthToken */
+            id,
+            SensorProperties.STRENGTH_STRONG,
+            5 /* maxEnrollmentsPerUser */,
+            componentInfo,
+            FingerprintSensorProperties.TYPE_REAR,
+            false /* resetLockoutRequiresHardwareAuthToken */
         )
     }
 }
@@ -111,28 +115,53 @@ internal fun fingerprintSensorPropertiesInternal(
 internal fun faceSensorPropertiesInternal(
     ids: List<Int> = listOf(1)
 ): List<FaceSensorPropertiesInternal> {
-    val componentInfo = listOf(
+    val componentInfo =
+        listOf(
             ComponentInfoInternal(
-                    "faceSensor" /* componentId */,
-                    "vendor/model/revision" /* hardwareVersion */, "1.01" /* firmwareVersion */,
-                    "00000001" /* serialNumber */, "" /* softwareVersion */
+                "faceSensor" /* componentId */,
+                "vendor/model/revision" /* hardwareVersion */,
+                "1.01" /* firmwareVersion */,
+                "00000001" /* serialNumber */,
+                "" /* softwareVersion */
             ),
             ComponentInfoInternal(
-                    "matchingAlgorithm" /* componentId */,
-                    "" /* hardwareVersion */, "" /* firmwareVersion */, "" /* serialNumber */,
-                    "vendor/version/revision" /* softwareVersion */
+                "matchingAlgorithm" /* componentId */,
+                "" /* hardwareVersion */,
+                "" /* firmwareVersion */,
+                "" /* serialNumber */,
+                "vendor/version/revision" /* softwareVersion */
             )
-    )
+        )
     return ids.map { id ->
         FaceSensorPropertiesInternal(
-                id,
-                SensorProperties.STRENGTH_STRONG,
-                2 /* maxEnrollmentsPerUser */,
-                componentInfo,
-                FaceSensorProperties.TYPE_RGB,
-                true /* supportsFaceDetection */,
-                true /* supportsSelfIllumination */,
-                false /* resetLockoutRequiresHardwareAuthToken */
+            id,
+            SensorProperties.STRENGTH_STRONG,
+            2 /* maxEnrollmentsPerUser */,
+            componentInfo,
+            FaceSensorProperties.TYPE_RGB,
+            true /* supportsFaceDetection */,
+            true /* supportsSelfIllumination */,
+            false /* resetLockoutRequiresHardwareAuthToken */
         )
     }
+}
+
+internal fun promptInfo(
+    title: String = "title",
+    subtitle: String = "sub",
+    description: String = "desc",
+    credentialTitle: String? = "cred title",
+    credentialSubtitle: String? = "cred sub",
+    credentialDescription: String? = "cred desc",
+    negativeButton: String = "neg",
+): PromptInfo {
+    val info = PromptInfo()
+    info.title = title
+    info.subtitle = subtitle
+    info.description = description
+    credentialTitle?.let { info.deviceCredentialTitle = it }
+    credentialSubtitle?.let { info.deviceCredentialSubtitle = it }
+    credentialDescription?.let { info.deviceCredentialDescription = it }
+    info.negativeButtonText = negativeButton
+    return info
 }
