@@ -46,63 +46,64 @@ constructor(
 
     override val key: String = BuiltInKeyguardQuickAffordanceKeys.QUICK_ACCESS_WALLET
 
-    override val state: Flow<KeyguardQuickAffordanceConfig.State> = conflatedCallbackFlow {
-        val callback =
-            object : QuickAccessWalletClient.OnWalletCardsRetrievedCallback {
-                override fun onWalletCardsRetrieved(response: GetWalletCardsResponse?) {
-                    trySendWithFailureLogging(
-                        state(
-                            isFeatureEnabled = walletController.isWalletEnabled,
-                            hasCard = response?.walletCards?.isNotEmpty() == true,
-                            tileIcon = walletController.walletClient.tileIcon,
-                        ),
-                        TAG,
-                    )
+    override val lockScreenState: Flow<KeyguardQuickAffordanceConfig.LockScreenState> =
+        conflatedCallbackFlow {
+            val callback =
+                object : QuickAccessWalletClient.OnWalletCardsRetrievedCallback {
+                    override fun onWalletCardsRetrieved(response: GetWalletCardsResponse?) {
+                        trySendWithFailureLogging(
+                            state(
+                                isFeatureEnabled = walletController.isWalletEnabled,
+                                hasCard = response?.walletCards?.isNotEmpty() == true,
+                                tileIcon = walletController.walletClient.tileIcon,
+                            ),
+                            TAG,
+                        )
+                    }
+
+                    override fun onWalletCardRetrievalError(error: GetWalletCardsError?) {
+                        Log.e(TAG, "Wallet card retrieval error, message: \"${error?.message}\"")
+                        trySendWithFailureLogging(
+                            KeyguardQuickAffordanceConfig.LockScreenState.Hidden,
+                            TAG,
+                        )
+                    }
                 }
 
-                override fun onWalletCardRetrievalError(error: GetWalletCardsError?) {
-                    Log.e(TAG, "Wallet card retrieval error, message: \"${error?.message}\"")
-                    trySendWithFailureLogging(
-                        KeyguardQuickAffordanceConfig.State.Hidden,
-                        TAG,
-                    )
-                }
-            }
-
-        walletController.setupWalletChangeObservers(
-            callback,
-            QuickAccessWalletController.WalletChangeEvent.WALLET_PREFERENCE_CHANGE,
-            QuickAccessWalletController.WalletChangeEvent.DEFAULT_PAYMENT_APP_CHANGE
-        )
-        walletController.updateWalletPreference()
-        walletController.queryWalletCards(callback)
-
-        awaitClose {
-            walletController.unregisterWalletChangeObservers(
+            walletController.setupWalletChangeObservers(
+                callback,
                 QuickAccessWalletController.WalletChangeEvent.WALLET_PREFERENCE_CHANGE,
                 QuickAccessWalletController.WalletChangeEvent.DEFAULT_PAYMENT_APP_CHANGE
             )
-        }
-    }
+            walletController.updateWalletPreference()
+            walletController.queryWalletCards(callback)
 
-    override fun onQuickAffordanceClicked(
+            awaitClose {
+                walletController.unregisterWalletChangeObservers(
+                    QuickAccessWalletController.WalletChangeEvent.WALLET_PREFERENCE_CHANGE,
+                    QuickAccessWalletController.WalletChangeEvent.DEFAULT_PAYMENT_APP_CHANGE
+                )
+            }
+        }
+
+    override fun onTriggered(
         expandable: Expandable?,
-    ): KeyguardQuickAffordanceConfig.OnClickedResult {
+    ): KeyguardQuickAffordanceConfig.OnTriggeredResult {
         walletController.startQuickAccessUiIntent(
             activityStarter,
             expandable?.activityLaunchController(),
             /* hasCard= */ true,
         )
-        return KeyguardQuickAffordanceConfig.OnClickedResult.Handled
+        return KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled
     }
 
     private fun state(
         isFeatureEnabled: Boolean,
         hasCard: Boolean,
         tileIcon: Drawable?,
-    ): KeyguardQuickAffordanceConfig.State {
+    ): KeyguardQuickAffordanceConfig.LockScreenState {
         return if (isFeatureEnabled && hasCard && tileIcon != null) {
-            KeyguardQuickAffordanceConfig.State.Visible(
+            KeyguardQuickAffordanceConfig.LockScreenState.Visible(
                 icon =
                     Icon.Loaded(
                         drawable = tileIcon,
@@ -113,7 +114,7 @@ constructor(
                     ),
             )
         } else {
-            KeyguardQuickAffordanceConfig.State.Hidden
+            KeyguardQuickAffordanceConfig.LockScreenState.Hidden
         }
     }
 
