@@ -315,7 +315,7 @@ object Flags {
     val CHOOSER_UNBUNDLED = UnreleasedFlag(1500, teamfood = true)
 
     // 1700 - clipboard
-    @JvmField val CLIPBOARD_OVERLAY_REFACTOR = UnreleasedFlag(1700)
+    @JvmField val CLIPBOARD_OVERLAY_REFACTOR = UnreleasedFlag(1700, true)
     @JvmField val CLIPBOARD_REMOTE_BEHAVIOR = UnreleasedFlag(1701)
 
     // 1800 - shade container
