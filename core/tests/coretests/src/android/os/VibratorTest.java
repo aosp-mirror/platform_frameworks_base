@@ -21,12 +21,17 @@ import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.assertEquals;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.content.ContentResolver;
@@ -34,6 +39,7 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.hardware.vibrator.IVibrator;
 import android.media.AudioAttributes;
+import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.InstrumentationRegistry;
@@ -46,6 +52,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.junit.MockitoJUnitRunner;
 
 /**
@@ -65,6 +72,7 @@ public class VibratorTest {
 
     private Context mContextSpy;
     private Vibrator mVibratorSpy;
+    private TestLooper mTestLooper;
 
     @Before
     public void setUp() {
@@ -73,6 +81,7 @@ public class VibratorTest {
         ContentResolver contentResolver = mSettingsProviderRule.mockContentResolver(mContextSpy);
         when(mContextSpy.getContentResolver()).thenReturn(contentResolver);
         mVibratorSpy = spy(new SystemVibrator(mContextSpy));
+        mTestLooper = new TestLooper();
     }
 
     @Test
@@ -392,6 +401,108 @@ public class VibratorTest {
         assertEquals(
                 new VibratorInfo.FrequencyProfile(11, 10.5f, 0.5f, new float[] { 0.8f, 1, 0.5f }),
                 info.getFrequencyProfile());
+    }
+
+    @Test
+    public void onVibratorStateChanged_noVibrator_registersNoListenerToVibratorManager() {
+        VibratorManager mockVibratorManager = mock(VibratorManager.class);
+        when(mockVibratorManager.getVibratorIds()).thenReturn(new int[0]);
+
+        Vibrator.OnVibratorStateChangedListener mockListener =
+                mock(Vibrator.OnVibratorStateChangedListener.class);
+        SystemVibrator.MultiVibratorStateListener multiVibratorListener =
+                new SystemVibrator.MultiVibratorStateListener(
+                        mTestLooper.getNewExecutor(), mockListener);
+
+        multiVibratorListener.register(mockVibratorManager);
+
+        // Never tries to register a listener to an individual vibrator.
+        assertFalse(multiVibratorListener.hasRegisteredListeners());
+        verify(mockVibratorManager, never()).getVibrator(anyInt());
+    }
+
+    @Test
+    public void onVibratorStateChanged_singleVibrator_forwardsAllCallbacks() {
+        VibratorManager mockVibratorManager = mock(VibratorManager.class);
+        when(mockVibratorManager.getVibratorIds()).thenReturn(new int[] { 1 });
+        when(mockVibratorManager.getVibrator(anyInt())).thenReturn(NullVibrator.getInstance());
+
+        Vibrator.OnVibratorStateChangedListener mockListener =
+                mock(Vibrator.OnVibratorStateChangedListener.class);
+        SystemVibrator.MultiVibratorStateListener multiVibratorListener =
+                new SystemVibrator.MultiVibratorStateListener(
+                        mTestLooper.getNewExecutor(), mockListener);
+
+        multiVibratorListener.register(mockVibratorManager);
+        assertTrue(multiVibratorListener.hasRegisteredListeners());
+
+        multiVibratorListener.onVibrating(/* vibratorIdx= */ 0, /* vibrating= */ false);
+        multiVibratorListener.onVibrating(/* vibratorIdx= */ 0, /* vibrating= */ true);
+        multiVibratorListener.onVibrating(/* vibratorIdx= */ 0, /* vibrating= */ false);
+
+        mTestLooper.dispatchAll();
+
+        InOrder inOrder = inOrder(mockListener);
+        inOrder.verify(mockListener).onVibratorStateChanged(eq(false));
+        inOrder.verify(mockListener).onVibratorStateChanged(eq(true));
+        inOrder.verify(mockListener).onVibratorStateChanged(eq(false));
+        inOrder.verifyNoMoreInteractions();
+    }
+
+    @Test
+    public void onVibratorStateChanged_multipleVibrators_triggersOnlyWhenAllVibratorsInitialized() {
+        VibratorManager mockVibratorManager = mock(VibratorManager.class);
+        when(mockVibratorManager.getVibratorIds()).thenReturn(new int[] { 1, 2 });
+        when(mockVibratorManager.getVibrator(anyInt())).thenReturn(NullVibrator.getInstance());
+
+        Vibrator.OnVibratorStateChangedListener mockListener =
+                mock(Vibrator.OnVibratorStateChangedListener.class);
+        SystemVibrator.MultiVibratorStateListener multiVibratorListener =
+                new SystemVibrator.MultiVibratorStateListener(
+                        mTestLooper.getNewExecutor(), mockListener);
+
+        multiVibratorListener.register(mockVibratorManager);
+        assertTrue(multiVibratorListener.hasRegisteredListeners());
+
+        multiVibratorListener.onVibrating(/* vibratorIdx= */ 0, /* vibrating= */ false);
+        mTestLooper.dispatchAll();
+        verify(mockListener, never()).onVibratorStateChanged(anyBoolean());
+
+        multiVibratorListener.onVibrating(/* vibratorIdx= */ 1, /* vibrating= */ false);
+        mTestLooper.dispatchAll();
+        verify(mockListener).onVibratorStateChanged(eq(false));
+        verifyNoMoreInteractions(mockListener);
+    }
+
+    @Test
+    public void onVibratorStateChanged_multipleVibrators_stateChangeIsDeduped() {
+        VibratorManager mockVibratorManager = mock(VibratorManager.class);
+        when(mockVibratorManager.getVibratorIds()).thenReturn(new int[] { 1, 2 });
+        when(mockVibratorManager.getVibrator(anyInt())).thenReturn(NullVibrator.getInstance());
+
+        Vibrator.OnVibratorStateChangedListener mockListener =
+                mock(Vibrator.OnVibratorStateChangedListener.class);
+        SystemVibrator.MultiVibratorStateListener multiVibratorListener =
+                new SystemVibrator.MultiVibratorStateListener(
+                        mTestLooper.getNewExecutor(), mockListener);
+
+        multiVibratorListener.register(mockVibratorManager);
+        assertTrue(multiVibratorListener.hasRegisteredListeners());
+
+        multiVibratorListener.onVibrating(/* vibratorIdx= */ 0, /* vibrating= */ false); // none
+        multiVibratorListener.onVibrating(/* vibratorIdx= */ 1, /* vibrating= */ false); // false
+        multiVibratorListener.onVibrating(/* vibratorIdx= */ 0, /* vibrating= */ true);  // true
+        multiVibratorListener.onVibrating(/* vibratorIdx= */ 1, /* vibrating= */ true);  // true
+        multiVibratorListener.onVibrating(/* vibratorIdx= */ 0, /* vibrating= */ false); // true
+        multiVibratorListener.onVibrating(/* vibratorIdx= */ 1, /* vibrating= */ false); // false
+
+        mTestLooper.dispatchAll();
+
+        InOrder inOrder = inOrder(mockListener);
+        inOrder.verify(mockListener).onVibratorStateChanged(eq(false));
+        inOrder.verify(mockListener).onVibratorStateChanged(eq(true));
+        inOrder.verify(mockListener).onVibratorStateChanged(eq(false));
+        inOrder.verifyNoMoreInteractions();
     }
 
     @Test
