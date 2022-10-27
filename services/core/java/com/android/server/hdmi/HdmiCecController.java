@@ -70,6 +70,10 @@ import java.util.function.Predicate;
  * <p>It can be created only by {@link HdmiCecController#create}
  *
  * <p>Declared as package-private, accessed by {@link HdmiControlService} only.
+ *
+ * <p>Also manages HDMI HAL methods that are shared between CEC and eARC. To make eARC
+ * fully independent of the presence of a CEC HAL, we should split this class into HdmiCecController
+ * and HdmiController TODO(b/255751565).
  */
 final class HdmiCecController {
     private static final String TAG = "HdmiCecController";
@@ -1066,6 +1070,8 @@ final class HdmiCecController {
                 HdmiPortInfo[] hdmiPortInfo = new HdmiPortInfo[hdmiPortInfos.length];
                 int i = 0;
                 for (android.hardware.tv.hdmi.HdmiPortInfo portInfo : hdmiPortInfos) {
+                    // TODO: the earc argument is stubbed for now.
+                    // To be replaced by portInfo.earcSupported.
                     hdmiPortInfo[i] =
                             new HdmiPortInfo(
                                     portInfo.portId,
@@ -1073,7 +1079,8 @@ final class HdmiCecController {
                                     portInfo.physicalAddress,
                                     portInfo.cecSupported,
                                     false,
-                                    portInfo.arcSupported);
+                                    portInfo.arcSupported,
+                                    false);
                     i++;
                 }
                 return hdmiPortInfo;
@@ -1234,7 +1241,8 @@ final class HdmiCecController {
                             portInfo.physicalAddress,
                             portInfo.cecSupported,
                             false,
-                            portInfo.arcSupported);
+                            portInfo.arcSupported,
+                            false);
                     i++;
                 }
                 return hdmiPortInfo;
@@ -1415,7 +1423,8 @@ final class HdmiCecController {
                             portInfo.physicalAddress,
                             portInfo.cecSupported,
                             false,
-                            portInfo.arcSupported);
+                            portInfo.arcSupported,
+                            false);
                     i++;
                 }
                 return hdmiPortInfo;

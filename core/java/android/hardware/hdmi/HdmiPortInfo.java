@@ -23,7 +23,7 @@ import android.os.Parcelable;
 
 /**
  * A class to encapsulate HDMI port information. Contains the capability of the ports such as
- * HDMI-CEC, MHL, ARC(Audio Return Channel), and physical address assigned to each port.
+ * HDMI-CEC, MHL, ARC(Audio Return Channel), eARC and physical address assigned to each port.
  *
  * @hide
  */
@@ -40,6 +40,7 @@ public final class HdmiPortInfo implements Parcelable {
     private final int mAddress;
     private final boolean mCecSupported;
     private final boolean mArcSupported;
+    private final boolean mEarcSupported;
     private final boolean mMhlSupported;
 
     /**
@@ -53,11 +54,28 @@ public final class HdmiPortInfo implements Parcelable {
      * @param arc {@code true} if audio return channel is supported on the port
      */
     public HdmiPortInfo(int id, int type, int address, boolean cec, boolean mhl, boolean arc) {
+        this(id, type, address, cec, mhl, arc, false);
+    }
+
+    /**
+     * Constructor.
+     *
+     * @param id identifier assigned to each port. 1 for HDMI port 1
+     * @param type HDMI port input/output type
+     * @param address physical address of the port
+     * @param cec {@code true} if HDMI-CEC is supported on the port
+     * @param mhl {@code true} if MHL is supported on the port
+     * @param arc {@code true} if audio return channel is supported on the port
+     * @param earc {@code true} if eARC is supported on the port
+     */
+    public HdmiPortInfo(int id, int type, int address,
+            boolean cec, boolean mhl, boolean arc, boolean earc) {
         mId = id;
         mType = type;
         mAddress = address;
         mCecSupported = cec;
         mArcSupported = arc;
+        mEarcSupported = earc;
         mMhlSupported = mhl;
     }
 
@@ -116,6 +134,15 @@ public final class HdmiPortInfo implements Parcelable {
     }
 
     /**
+     * Returns {@code true} if the port supports eARC.
+     *
+     * @return {@code true} if the port supports eARC.
+     */
+    public boolean isEarcSupported() {
+        return mEarcSupported;
+    }
+
+    /**
      * Describes the kinds of special objects contained in this Parcelable's
      * marshalled representation.
      */
@@ -138,7 +165,8 @@ public final class HdmiPortInfo implements Parcelable {
                     boolean cec = (source.readInt() == 1);
                     boolean arc = (source.readInt() == 1);
                     boolean mhl = (source.readInt() == 1);
-                    return new HdmiPortInfo(id, type, address, cec, mhl, arc);
+                    boolean earc = (source.readInt() == 1);
+                    return new HdmiPortInfo(id, type, address, cec, mhl, arc, earc);
                 }
 
                 @Override
@@ -164,6 +192,7 @@ public final class HdmiPortInfo implements Parcelable {
         dest.writeInt(mCecSupported ? 1 : 0);
         dest.writeInt(mArcSupported ? 1 : 0);
         dest.writeInt(mMhlSupported ? 1 : 0);
+        dest.writeInt(mEarcSupported ? 1 : 0);
     }
 
     @NonNull
@@ -175,7 +204,8 @@ public final class HdmiPortInfo implements Parcelable {
         s.append("address: ").append(String.format("0x%04x", mAddress)).append(", ");
         s.append("cec: ").append(mCecSupported).append(", ");
         s.append("arc: ").append(mArcSupported).append(", ");
-        s.append("mhl: ").append(mMhlSupported);
+        s.append("mhl: ").append(mMhlSupported).append(", ");
+        s.append("earc: ").append(mEarcSupported);
         return s.toString();
     }
 
@@ -187,12 +217,12 @@ public final class HdmiPortInfo implements Parcelable {
         final HdmiPortInfo other = (HdmiPortInfo) o;
         return mId == other.mId && mType == other.mType && mAddress == other.mAddress
                 && mCecSupported == other.mCecSupported && mArcSupported == other.mArcSupported
-                && mMhlSupported == other.mMhlSupported;
+                && mMhlSupported == other.mMhlSupported && mEarcSupported == other.mEarcSupported;
     }
 
     @Override
     public int hashCode() {
         return java.util.Objects.hash(
-                mId, mType, mAddress, mCecSupported, mArcSupported, mMhlSupported);
+                mId, mType, mAddress, mCecSupported, mArcSupported, mMhlSupported, mEarcSupported);
     }
 }
