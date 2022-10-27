@@ -1,6 +1,7 @@
 package com.android.systemui.biometrics.domain.model
 
 import androidx.test.filters.SmallTest
+import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.promptInfo
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
@@ -12,7 +13,7 @@ private const val OPERATION_ID = 8L
 
 @SmallTest
 @RunWith(JUnit4::class)
-class BiometricPromptRequestTest {
+class BiometricPromptRequestTest : SysuiTestCase() {
 
     @Test
     fun biometricRequestFromPromptInfo() {
