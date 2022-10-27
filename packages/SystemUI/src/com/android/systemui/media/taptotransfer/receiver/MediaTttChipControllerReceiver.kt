@@ -40,7 +40,6 @@ import com.android.systemui.media.taptotransfer.common.MediaTttLogger
 import com.android.systemui.media.taptotransfer.common.MediaTttUtils
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.policy.ConfigurationController
-import com.android.systemui.temporarydisplay.DEFAULT_TIMEOUT_MILLIS
 import com.android.systemui.temporarydisplay.TemporaryViewDisplayController
 import com.android.systemui.temporarydisplay.TemporaryViewInfo
 import com.android.systemui.util.animation.AnimationUtil.Companion.frames
@@ -78,8 +77,6 @@ class MediaTttChipControllerReceiver @Inject constructor(
         configurationController,
         powerManager,
         R.layout.media_ttt_chip_receiver,
-        MediaTttUtils.WINDOW_TITLE,
-        MediaTttUtils.WAKE_REASON,
 ) {
     @SuppressLint("WrongConstant") // We're allowed to use LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
     override val windowLayoutParams = commonWindowLayoutParams.apply {
@@ -231,7 +228,7 @@ class MediaTttChipControllerReceiver @Inject constructor(
 data class ChipReceiverInfo(
     val routeInfo: MediaRoute2Info,
     val appIconDrawableOverride: Drawable?,
-    val appNameOverride: CharSequence?
-) : TemporaryViewInfo {
-    override fun getTimeoutMs() = DEFAULT_TIMEOUT_MILLIS
-}
+    val appNameOverride: CharSequence?,
+    override val windowTitle: String = MediaTttUtils.WINDOW_TITLE_RECEIVER,
+    override val wakeReason: String = MediaTttUtils.WAKE_REASON_RECEIVER,
+) : TemporaryViewInfo()

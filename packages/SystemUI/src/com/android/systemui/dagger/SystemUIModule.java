@@ -84,6 +84,7 @@ import com.android.systemui.statusbar.policy.dagger.SmartRepliesInflationModule;
 import com.android.systemui.statusbar.policy.dagger.StatusBarPolicyModule;
 import com.android.systemui.statusbar.window.StatusBarWindowModule;
 import com.android.systemui.telephony.data.repository.TelephonyRepositoryModule;
+import com.android.systemui.temporarydisplay.dagger.TemporaryDisplayModule;
 import com.android.systemui.tuner.dagger.TunerModule;
 import com.android.systemui.unfold.SysUIUnfoldModule;
 import com.android.systemui.user.UserModule;
@@ -150,6 +151,7 @@ import dagger.Provides;
             SysUIConcurrencyModule.class,
             SysUIUnfoldModule.class,
             TelephonyRepositoryModule.class,
+            TemporaryDisplayModule.class,
             TunerModule.class,
             UserModule.class,
             UtilModule.class,
