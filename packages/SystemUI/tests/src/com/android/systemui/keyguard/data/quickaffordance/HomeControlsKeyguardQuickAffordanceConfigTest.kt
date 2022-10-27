@@ -1,21 +1,21 @@
 /*
- *  Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  *
  */
 
-package com.android.systemui.keyguard.domain.quickaffordance
+package com.android.systemui.keyguard.data.quickaffordance
 
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
@@ -23,7 +23,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.Expandable
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.dagger.ControlsComponent
-import com.android.systemui.keyguard.domain.quickaffordance.KeyguardQuickAffordanceConfig.OnClickedResult
+import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceConfig.OnTriggeredResult
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import java.util.Optional
@@ -72,11 +72,11 @@ class HomeControlsKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
         whenever(component.getVisibility()).thenReturn(ControlsComponent.Visibility.AVAILABLE)
         whenever(controlsController.getFavorites()).thenReturn(listOf(mock()))
 
-        val values = mutableListOf<KeyguardQuickAffordanceConfig.State>()
-        val job = underTest.state.onEach(values::add).launchIn(this)
+        val values = mutableListOf<KeyguardQuickAffordanceConfig.LockScreenState>()
+        val job = underTest.lockScreenState.onEach(values::add).launchIn(this)
 
         assertThat(values.last())
-            .isInstanceOf(KeyguardQuickAffordanceConfig.State.Hidden::class.java)
+            .isInstanceOf(KeyguardQuickAffordanceConfig.LockScreenState.Hidden::class.java)
         job.cancel()
     }
 
@@ -91,31 +91,32 @@ class HomeControlsKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
         whenever(component.getVisibility()).thenReturn(ControlsComponent.Visibility.AVAILABLE)
         whenever(controlsController.getFavorites()).thenReturn(listOf(mock()))
 
-        val values = mutableListOf<KeyguardQuickAffordanceConfig.State>()
-        val job = underTest.state.onEach(values::add).launchIn(this)
+        val values = mutableListOf<KeyguardQuickAffordanceConfig.LockScreenState>()
+        val job = underTest.lockScreenState.onEach(values::add).launchIn(this)
 
         assertThat(values.last())
-            .isInstanceOf(KeyguardQuickAffordanceConfig.State.Hidden::class.java)
+            .isInstanceOf(KeyguardQuickAffordanceConfig.LockScreenState.Hidden::class.java)
         job.cancel()
     }
 
     @Test
-    fun `onQuickAffordanceClicked - canShowWhileLockedSetting is true`() = runBlockingTest {
+    fun `onQuickAffordanceTriggered - canShowWhileLockedSetting is true`() = runBlockingTest {
         whenever(component.canShowWhileLockedSetting).thenReturn(MutableStateFlow(true))
 
-        val onClickedResult = underTest.onQuickAffordanceClicked(expandable)
+        val onClickedResult = underTest.onTriggered(expandable)
 
-        assertThat(onClickedResult).isInstanceOf(OnClickedResult.StartActivity::class.java)
-        assertThat((onClickedResult as OnClickedResult.StartActivity).canShowWhileLocked).isTrue()
+        assertThat(onClickedResult).isInstanceOf(OnTriggeredResult.StartActivity::class.java)
+        assertThat((onClickedResult as OnTriggeredResult.StartActivity).canShowWhileLocked).isTrue()
     }
 
     @Test
-    fun `onQuickAffordanceClicked - canShowWhileLockedSetting is false`() = runBlockingTest {
+    fun `onQuickAffordanceTriggered - canShowWhileLockedSetting is false`() = runBlockingTest {
         whenever(component.canShowWhileLockedSetting).thenReturn(MutableStateFlow(false))
 
-        val onClickedResult = underTest.onQuickAffordanceClicked(expandable)
+        val onClickedResult = underTest.onTriggered(expandable)
 
-        assertThat(onClickedResult).isInstanceOf(OnClickedResult.StartActivity::class.java)
-        assertThat((onClickedResult as OnClickedResult.StartActivity).canShowWhileLocked).isFalse()
+        assertThat(onClickedResult).isInstanceOf(OnTriggeredResult.StartActivity::class.java)
+        assertThat((onClickedResult as OnTriggeredResult.StartActivity).canShowWhileLocked)
+            .isFalse()
     }
 }

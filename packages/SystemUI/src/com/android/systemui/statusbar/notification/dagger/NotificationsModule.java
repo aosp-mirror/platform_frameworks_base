@@ -32,8 +32,8 @@ import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.people.widget.PeopleSpaceWidgetManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.settings.UserContextProvider;
-import com.android.systemui.shade.NotifPanelEventsModule;
 import com.android.systemui.shade.ShadeController;
+import com.android.systemui.shade.ShadeEventsModule;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.notification.AssistantFeedbackController;
 import com.android.systemui.statusbar.notification.collection.NotifInflaterImpl;
@@ -93,7 +93,7 @@ import dagger.Provides;
 @Module(includes = {
         CoordinatorsModule.class,
         KeyguardNotificationVisibilityProviderModule.class,
-        NotifPanelEventsModule.class,
+        ShadeEventsModule.class,
         NotifPipelineChoreographerModule.class,
         NotificationSectionHeadersModule.class,
 })

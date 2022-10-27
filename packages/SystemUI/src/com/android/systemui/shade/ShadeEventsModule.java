@@ -14,10 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.systemui.keyguard.domain.model
+package com.android.systemui.shade;
 
-/** Enumerates all possible positions for quick affordances that can appear on the lock-screen. */
-enum class KeyguardQuickAffordancePosition {
-    BOTTOM_START,
-    BOTTOM_END,
+import com.android.systemui.dagger.SysUISingleton;
+
+import dagger.Binds;
+import dagger.Module;
+
+/** Provides a {@link ShadeStateEvents} in {@link SysUISingleton} scope. */
+@Module
+public abstract class ShadeEventsModule {
+    @Binds
+    abstract ShadeStateEvents bindShadeEvents(ShadeExpansionStateManager impl);
 }

@@ -16,27 +16,25 @@
 
 package com.android.systemui.shade
 
-/** Provides certain notification panel events.  */
-interface NotifPanelEvents {
+/** Provides certain notification panel events. */
+interface ShadeStateEvents {
 
-    /** Registers callbacks to be invoked when notification panel events occur.  */
-    fun registerListener(listener: Listener)
+    /** Registers callbacks to be invoked when notification panel events occur. */
+    fun addShadeStateEventsListener(listener: ShadeStateEventsListener)
 
-    /** Unregisters callbacks previously registered via [registerListener]  */
-    fun unregisterListener(listener: Listener)
+    /** Unregisters callbacks previously registered via [addShadeStateEventsListener] */
+    fun removeShadeStateEventsListener(listener: ShadeStateEventsListener)
 
     /** Callbacks for certain notification panel events. */
-    interface Listener {
+    interface ShadeStateEventsListener {
 
         /** Invoked when the notification panel starts or stops collapsing. */
-        @JvmDefault
-        fun onPanelCollapsingChanged(isCollapsing: Boolean) {}
+        @JvmDefault fun onPanelCollapsingChanged(isCollapsing: Boolean) {}
 
         /**
          * Invoked when the notification panel starts or stops launching an [android.app.Activity].
          */
-        @JvmDefault
-        fun onLaunchingActivityChanged(isLaunchingActivity: Boolean) {}
+        @JvmDefault fun onLaunchingActivityChanged(isLaunchingActivity: Boolean) {}
 
         /**
          * Invoked when the "expand immediate" attribute changes.
@@ -47,7 +45,6 @@ interface NotifPanelEvents {
          * Another example is when full QS is showing, and we swipe up from the bottom. Instead of
          * going to QQS, the panel fully collapses.
          */
-        @JvmDefault
-        fun onExpandImmediateChanged(isExpandImmediateEnabled: Boolean) {}
+        @JvmDefault fun onExpandImmediateChanged(isExpandImmediateEnabled: Boolean) {}
     }
 }

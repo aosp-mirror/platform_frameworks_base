@@ -438,8 +438,6 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         when(mSysUiState.setFlag(anyInt(), anyBoolean())).thenReturn(mSysUiState);
 
         mMainHandler = new Handler(Looper.getMainLooper());
-        NotificationPanelViewController.PanelEventsEmitter panelEventsEmitter =
-                new NotificationPanelViewController.PanelEventsEmitter();
 
         mNotificationPanelViewController = new NotificationPanelViewController(
                 mView,
@@ -495,7 +493,6 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 () -> mKeyguardBottomAreaViewController,
                 mKeyguardUnlockAnimationController,
                 mNotificationListContainer,
-                panelEventsEmitter,
                 mNotificationStackSizeCalculator,
                 mUnlockedScreenOffAnimationController,
                 mShadeTransitionController,
