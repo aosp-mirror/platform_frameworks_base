@@ -21,10 +21,9 @@ import com.android.systemui.dagger.SysUISingleton;
 import dagger.Binds;
 import dagger.Module;
 
-/** Provides a {@link NotifPanelEvents} in {@link SysUISingleton} scope. */
+/** Provides a {@link ShadeStateEvents} in {@link SysUISingleton} scope. */
 @Module
-public abstract class NotifPanelEventsModule {
+public abstract class ShadeEventsModule {
     @Binds
-    abstract NotifPanelEvents bindPanelEvents(
-            NotificationPanelViewController.PanelEventsEmitter impl);
+    abstract ShadeStateEvents bindShadeEvents(ShadeExpansionStateManager impl);
 }
