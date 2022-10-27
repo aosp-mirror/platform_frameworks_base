@@ -164,7 +164,7 @@ class SoundEffectsHelper {
     }
 
     private void logEvent(String msg) {
-        mSfxLogger.log(new EventLogger.StringEvent(msg));
+        mSfxLogger.enqueue(new EventLogger.StringEvent(msg));
     }
 
     // All the methods below run on the worker thread

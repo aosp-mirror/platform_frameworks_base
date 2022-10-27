@@ -43,7 +43,7 @@ public class EventLogger {
     /**
      * The maximum number of events to keep in {@code mEvents}.
      *
-     * <p>Calling {@link #log} when the size of {@link #mEvents} matches the threshold will
+     * <p>Calling {@link #enqueue} when the size of {@link #mEvents} matches the threshold will
      * cause the oldest event to be evicted.
      */
     private final int mMemSize;
@@ -60,7 +60,7 @@ public class EventLogger {
     }
 
     /** Enqueues {@code event} to be logged. */
-    public synchronized void log(Event event) {
+    public synchronized void enqueue(Event event) {
         if (mEvents.size() >= mMemSize) {
             mEvents.removeLast();
         }
@@ -69,24 +69,14 @@ public class EventLogger {
     }
 
     /**
-     * Add a string-based event to the log, and print it to logcat as info.
-     * @param msg the message for the logs
-     * @param tag the logcat tag to use
-     */
-    public synchronized void loglogi(String msg, String tag) {
-        final Event event = new StringEvent(msg);
-        log(event.printLog(tag));
-    }
-
-    /**
-     * Same as {@link #loglogi(String, String)} but specifying the logcat type
+     * Add a string-based event to the log, and print it to logcat with a specific severity.
      * @param msg the message for the logs
      * @param logType the type of logcat entry
      * @param tag the logcat tag to use
      */
-    public synchronized void loglog(String msg, @Event.LogType int logType, String tag) {
+    public synchronized void enqueueAndLog(String msg, @Event.LogType int logType, String tag) {
         final Event event = new StringEvent(msg);
-        log(event.printLog(logType, tag));
+        enqueue(event.printLog(logType, tag));
     }
 
     /** Dumps events using {@link PrintWriter}. */

@@ -132,7 +132,7 @@ class MediaRouter2ServiceImpl {
                 }
             }
 
-            mEventLogger.log(new EventLogger.StringEvent("mScreenOnOffReceiver", null));
+            mEventLogger.enqueue(new EventLogger.StringEvent("mScreenOnOffReceiver", null));
         }
     };
 
@@ -634,7 +634,7 @@ class MediaRouter2ServiceImpl {
     /* package */ void updateRunningUserAndProfiles(int newActiveUserId) {
         synchronized (mLock) {
             if (mCurrentActiveUserId != newActiveUserId) {
-                mEventLogger.log(
+                mEventLogger.enqueue(
                         EventLogger.StringEvent.from("switchUser",
                                 "userId: %d", newActiveUserId));
 
@@ -705,7 +705,7 @@ class MediaRouter2ServiceImpl {
                 obtainMessage(UserHandler::notifyRouterRegistered,
                         userRecord.mHandler, routerRecord));
 
-        mEventLogger.log(EventLogger.StringEvent.from("registerRouter2",
+        mEventLogger.enqueue(EventLogger.StringEvent.from("registerRouter2",
                 "package: %s, uid: %d, pid: %d, router id: %d",
                 packageName, uid, pid, routerRecord.mRouterId));
     }
@@ -718,7 +718,7 @@ class MediaRouter2ServiceImpl {
             return;
         }
 
-        mEventLogger.log(
+        mEventLogger.enqueue(
                 EventLogger.StringEvent.from(
                         "unregisterRouter2",
                         "package: %s, router id: %d",
@@ -744,7 +744,7 @@ class MediaRouter2ServiceImpl {
             return;
         }
 
-        mEventLogger.log(EventLogger.StringEvent.from(
+        mEventLogger.enqueue(EventLogger.StringEvent.from(
                 "setDiscoveryRequestWithRouter2",
                 "router id: %d, discovery request: %s",
                 routerRecord.mRouterId, discoveryRequest.toString()));
@@ -766,7 +766,7 @@ class MediaRouter2ServiceImpl {
         RouterRecord routerRecord = mAllRouterRecords.get(binder);
 
         if (routerRecord != null) {
-            mEventLogger.log(EventLogger.StringEvent.from(
+            mEventLogger.enqueue(EventLogger.StringEvent.from(
                     "setRouteVolumeWithRouter2",
                     "router id: %d, volume: %d",
                     routerRecord.mRouterId, volume));
@@ -851,7 +851,7 @@ class MediaRouter2ServiceImpl {
             return;
         }
 
-        mEventLogger.log(EventLogger.StringEvent.from(
+        mEventLogger.enqueue(EventLogger.StringEvent.from(
                 "selectRouteWithRouter2",
                 "router id: %d, route: %s",
                 routerRecord.mRouterId, route.getId()));
@@ -871,7 +871,7 @@ class MediaRouter2ServiceImpl {
             return;
         }
 
-        mEventLogger.log(EventLogger.StringEvent.from(
+        mEventLogger.enqueue(EventLogger.StringEvent.from(
                 "deselectRouteWithRouter2",
                 "router id: %d, route: %s",
                 routerRecord.mRouterId, route.getId()));
@@ -891,7 +891,7 @@ class MediaRouter2ServiceImpl {
             return;
         }
 
-        mEventLogger.log(EventLogger.StringEvent.from(
+        mEventLogger.enqueue(EventLogger.StringEvent.from(
                 "transferToRouteWithRouter2",
                 "router id: %d, route: %s",
                 routerRecord.mRouterId, route.getId()));
@@ -921,7 +921,7 @@ class MediaRouter2ServiceImpl {
             return;
         }
 
-        mEventLogger.log(EventLogger.StringEvent.from(
+        mEventLogger.enqueue(EventLogger.StringEvent.from(
                 "setSessionVolumeWithRouter2",
                 "router id: %d, session: %s, volume: %d",
                 routerRecord.mRouterId,  uniqueSessionId, volume));
@@ -941,7 +941,7 @@ class MediaRouter2ServiceImpl {
             return;
         }
 
-        mEventLogger.log(EventLogger.StringEvent.from(
+        mEventLogger.enqueue(EventLogger.StringEvent.from(
                 "releaseSessionWithRouter2",
                 "router id: %d, session: %s",
                 routerRecord.mRouterId,  uniqueSessionId));
@@ -983,7 +983,7 @@ class MediaRouter2ServiceImpl {
             return;
         }
 
-        mEventLogger.log(
+        mEventLogger.enqueue(
                 EventLogger.StringEvent.from("registerManager",
                         "uid: %d, pid: %d, package: %s, userId: %d",
                         uid, pid, packageName, userId));
@@ -1025,7 +1025,7 @@ class MediaRouter2ServiceImpl {
         }
         UserRecord userRecord = managerRecord.mUserRecord;
 
-        mEventLogger.log(
+        mEventLogger.enqueue(
                 EventLogger.StringEvent.from(
                         "unregisterManager",
                         "package: %s, userId: %d, managerId: %d",
@@ -1045,7 +1045,7 @@ class MediaRouter2ServiceImpl {
             return;
         }
 
-        mEventLogger.log(
+        mEventLogger.enqueue(
                 EventLogger.StringEvent.from("startScan",
                         "manager: %d", managerRecord.mManagerId));
 
@@ -1059,7 +1059,7 @@ class MediaRouter2ServiceImpl {
             return;
         }
 
-        mEventLogger.log(
+        mEventLogger.enqueue(
                 EventLogger.StringEvent.from("stopScan",
                         "manager: %d", managerRecord.mManagerId));
 
@@ -1076,7 +1076,7 @@ class MediaRouter2ServiceImpl {
             return;
         }
 
-        mEventLogger.log(
+        mEventLogger.enqueue(
                 EventLogger.StringEvent.from("setRouteVolumeWithManager",
                         "managerId: %d, routeId: %s, volume: %d",
                         managerRecord.mManagerId, route.getId(), volume));
@@ -1096,7 +1096,7 @@ class MediaRouter2ServiceImpl {
             return;
         }
 
-        mEventLogger.log(
+        mEventLogger.enqueue(
                 EventLogger.StringEvent.from("requestCreateSessionWithManager",
                         "managerId: %d, routeId: %s",
                         managerRecord.mManagerId, route.getId()));
@@ -1146,7 +1146,7 @@ class MediaRouter2ServiceImpl {
             return;
         }
 
-        mEventLogger.log(
+        mEventLogger.enqueue(
                 EventLogger.StringEvent.from("selectRouteWithManager",
                         "managerId: %d, session: %s, routeId: %s",
                         managerRecord.mManagerId, uniqueSessionId, route.getId()));
@@ -1172,7 +1172,7 @@ class MediaRouter2ServiceImpl {
             return;
         }
 
-        mEventLogger.log(
+        mEventLogger.enqueue(
                 EventLogger.StringEvent.from("deselectRouteWithManager",
                         "managerId: %d, session: %s, routeId: %s",
                         managerRecord.mManagerId, uniqueSessionId, route.getId()));
@@ -1198,7 +1198,7 @@ class MediaRouter2ServiceImpl {
             return;
         }
 
-        mEventLogger.log(
+        mEventLogger.enqueue(
                 EventLogger.StringEvent.from("transferToRouteWithManager",
                         "managerId: %d, session: %s, routeId: %s",
                         managerRecord.mManagerId, uniqueSessionId, route.getId()));
@@ -1224,7 +1224,7 @@ class MediaRouter2ServiceImpl {
             return;
         }
 
-        mEventLogger.log(
+        mEventLogger.enqueue(
                 EventLogger.StringEvent.from("setSessionVolumeWithManager",
                         "managerId: %d, session: %s, volume: %d",
                         managerRecord.mManagerId, uniqueSessionId, volume));
@@ -1245,7 +1245,7 @@ class MediaRouter2ServiceImpl {
             return;
         }
 
-        mEventLogger.log(
+        mEventLogger.enqueue(
                 EventLogger.StringEvent.from("releaseSessionWithManager",
                         "managerId: %d, session: %s",
                         managerRecord.mManagerId, uniqueSessionId));

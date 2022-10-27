@@ -1708,11 +1708,11 @@ public class SpatializerHelper {
 
 
     private static void loglogi(String msg) {
-        AudioService.sSpatialLogger.loglogi(msg, TAG);
+        AudioService.sSpatialLogger.enqueueAndLog(msg, EventLogger.Event.ALOGI, TAG);
     }
 
     private static String logloge(String msg) {
-        AudioService.sSpatialLogger.loglog(msg, EventLogger.Event.ALOGE, TAG);
+        AudioService.sSpatialLogger.enqueueAndLog(msg, EventLogger.Event.ALOGE, TAG);
         return msg;
     }
 
