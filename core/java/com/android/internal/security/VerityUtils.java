@@ -90,8 +90,15 @@ public abstract class VerityUtils {
         return (retval == 1);
     }
 
-    /** Returns hash of a root node for the fs-verity enabled file. */
-    public static byte[] getFsverityRootHash(@NonNull String filePath) {
+    /**
+     * Returns fs-verity digest for the file if enabled, otherwise returns null. The digest is a
+     * hash of root hash of fs-verity's Merkle tree with extra metadata.
+     *
+     * @see <a href="https://www.kernel.org/doc/html/latest/filesystems/fsverity.html#file-digest-computation">
+     *      File digest computation in Linux kernel documentation</a>
+     * @return Bytes of fs-verity digest
+     */
+    public static byte[] getFsverityDigest(@NonNull String filePath) {
         byte[] result = new byte[HASH_SIZE_BYTES];
         int retval = measureFsverityNative(filePath, result);
         if (retval < 0) {
