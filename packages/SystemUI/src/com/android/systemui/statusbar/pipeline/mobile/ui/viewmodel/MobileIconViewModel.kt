@@ -68,10 +68,11 @@ constructor(
     val networkTypeIcon: Flow<Icon?> =
         combine(
             iconInteractor.networkTypeIconGroup,
+            iconInteractor.isDataConnected,
             iconInteractor.isDataEnabled,
-            iconInteractor.isDefaultConnectionFailed
-        ) { networkTypeIconGroup, isDataEnabled, isFailedConnection ->
-            if (!isDataEnabled || isFailedConnection) {
+            iconInteractor.isDefaultConnectionFailed,
+        ) { networkTypeIconGroup, dataConnected, dataEnabled, failedConnection ->
+            if (!dataConnected || !dataEnabled || failedConnection) {
                 null
             } else {
                 val desc =

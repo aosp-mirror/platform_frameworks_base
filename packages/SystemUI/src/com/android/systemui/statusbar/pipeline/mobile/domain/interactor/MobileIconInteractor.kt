@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.pipeline.mobile.domain.interactor
 import android.telephony.CarrierConfigManager
 import com.android.settingslib.SignalIcon.MobileIconGroup
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState.Connected
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DefaultNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.OverrideNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
@@ -36,6 +37,9 @@ import kotlinx.coroutines.flow.stateIn
 interface MobileIconInteractor {
     /** Only true if mobile is the default transport but is not validated, otherwise false */
     val isDefaultConnectionFailed: StateFlow<Boolean>
+
+    /** True when telephony tells us that the data state is CONNECTED */
+    val isDataConnected: StateFlow<Boolean>
 
     // TODO(b/256839546): clarify naming of default vs active
     /** True if we want to consider the data connection enabled */
@@ -114,4 +118,9 @@ class MobileIconInteractorImpl(
      * once it's wired up inside of [CarrierConfigTracker]
      */
     override val numberOfLevels: StateFlow<Int> = MutableStateFlow(4)
+
+    override val isDataConnected: StateFlow<Boolean> =
+        mobileStatusInfo
+            .mapLatest { subscriptionModel -> subscriptionModel.dataConnectionState == Connected }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 }

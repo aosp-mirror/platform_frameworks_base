@@ -23,6 +23,7 @@ import androidx.test.filters.SmallTest
 import com.android.settingslib.SignalIcon.MobileIconGroup
 import com.android.settingslib.mobile.TelephonyIcons
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DefaultNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileSubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.OverrideNetworkType
@@ -227,6 +228,37 @@ class MobileIconInteractorTest : SysuiTestCase() {
 
             mobileIconsInteractor.isDefaultConnectionFailed.value = true
             assertThat(underTest.isDefaultConnectionFailed.value).isTrue()
+
+            job.cancel()
+        }
+
+    @Test
+    fun dataState_connected() =
+        runBlocking(IMMEDIATE) {
+            var latest: Boolean? = null
+            val job = underTest.isDataConnected.onEach { latest = it }.launchIn(this)
+
+            connectionRepository.setMobileSubscriptionModel(
+                MobileSubscriptionModel(dataConnectionState = DataConnectionState.Connected)
+            )
+            yield()
+
+            assertThat(latest).isTrue()
+
+            job.cancel()
+        }
+
+    @Test
+    fun dataState_notConnected() =
+        runBlocking(IMMEDIATE) {
+            var latest: Boolean? = null
+            val job = underTest.isDataConnected.onEach { latest = it }.launchIn(this)
+
+            connectionRepository.setMobileSubscriptionModel(
+                MobileSubscriptionModel(dataConnectionState = DataConnectionState.Disconnected)
+            )
+
+            assertThat(latest).isFalse()
 
             job.cancel()
         }

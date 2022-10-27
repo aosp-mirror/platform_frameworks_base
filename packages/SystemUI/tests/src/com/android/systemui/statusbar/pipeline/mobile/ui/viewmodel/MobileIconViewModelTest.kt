@@ -51,6 +51,7 @@ class MobileIconViewModelTest : SysuiTestCase() {
             setIconGroup(THREE_G)
             setIsEmergencyOnly(false)
             setNumberOfLevels(4)
+            isDataConnected.value = true
         }
         underTest = MobileIconViewModel(SUB_1_ID, interactor, logger)
     }
@@ -120,6 +121,30 @@ class MobileIconViewModelTest : SysuiTestCase() {
             interactor.setIsFailedConnection(true)
             var latest: Icon? = null
             val job = underTest.networkTypeIcon.onEach { latest = it }.launchIn(this)
+
+            assertThat(latest).isNull()
+
+            job.cancel()
+        }
+
+    @Test
+    fun networkType_nullWhenDataDisconnects() =
+        runBlocking(IMMEDIATE) {
+            val initial =
+                Icon.Resource(
+                    THREE_G.dataType,
+                    ContentDescription.Resource(THREE_G.dataContentDescription)
+                )
+
+            interactor.setIconGroup(THREE_G)
+            var latest: Icon? = null
+            val job = underTest.networkTypeIcon.onEach { latest = it }.launchIn(this)
+
+            interactor.setIconGroup(THREE_G)
+            assertThat(latest).isEqualTo(initial)
+
+            interactor.isDataConnected.value = false
+            yield()
 
             assertThat(latest).isNull()
 
