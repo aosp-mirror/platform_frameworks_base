@@ -20,51 +20,91 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.role.RoleManagerLocal;
 import com.android.server.LocalManagerRegistry;
 
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+/**
+ * {@code EnforcingAdmins} can have the following authority types:
+ *
+ * <ul>
+ *     <li> {@link #DPC_AUTHORITY} meaning it's an enterprise admin (e.g. PO, DO, COPE)
+ *     <li> {@link #DEVICE_ADMIN_AUTHORITY} which is a legacy non enterprise admin
+ *     <li> Or a role authority, in which case {@link #mAuthorities} contains a list of all roles
+ *     held by the given {@code packageName}
+ * </ul>
+ *
+ */
 final class EnforcingAdmin {
     static final String ROLE_AUTHORITY_PREFIX = "role:";
     static final String DPC_AUTHORITY = "enterprise";
     static final String DEVICE_ADMIN_AUTHORITY = "device_admin";
     static final String DEFAULT_AUTHORITY = "default";
 
+    private static final String ATTR_PACKAGE_NAME = "package-name";
+    private static final String ATTR_CLASS_NAME = "class-name";
+    private static final String ATTR_AUTHORITIES = "authorities";
+    private static final String ATTR_AUTHORITIES_SEPARATOR = ";";
+    private static final String ATTR_USER_ID = "user-id";
+    private static final String ATTR_IS_ROLE = "is-role";
+
     private final String mPackageName;
-    // This is needed for DPCs and device admins
-    @Nullable private final ComponentName mComponentName;
-    // TODO: implement lazy loading for authorities
-    private final Set<String> mAuthorities;
+    // This is needed for DPCs and active admins
+    private final ComponentName mComponentName;
+    private Set<String> mAuthorities;
+    private final int mUserId;
+    private final boolean mIsRoleAuthority;
 
     static EnforcingAdmin createEnforcingAdmin(@NonNull String packageName, int userId) {
         Objects.requireNonNull(packageName);
-        return new EnforcingAdmin(packageName, getRoleAuthoritiesOrDefault(packageName, userId));
+        return new EnforcingAdmin(packageName, userId);
     }
 
-    static EnforcingAdmin createEnterpriseEnforcingAdmin(ComponentName componentName) {
+    static EnforcingAdmin createEnterpriseEnforcingAdmin(@NonNull ComponentName componentName) {
         Objects.requireNonNull(componentName);
-        return new EnforcingAdmin(componentName, Set.of(DPC_AUTHORITY));
+        return new EnforcingAdmin(
+                componentName.getPackageName(), componentName, Set.of(DPC_AUTHORITY));
     }
 
     static EnforcingAdmin createDeviceAdminEnforcingAdmin(ComponentName componentName) {
         Objects.requireNonNull(componentName);
-        return new EnforcingAdmin(componentName, Set.of(DEVICE_ADMIN_AUTHORITY));
+        return new EnforcingAdmin(
+                componentName.getPackageName(), componentName, Set.of(DEVICE_ADMIN_AUTHORITY));
     }
 
-    private EnforcingAdmin(String packageName, Set<String> authorities) {
+    private EnforcingAdmin(
+            String packageName, ComponentName componentName, Set<String> authorities) {
+        Objects.requireNonNull(packageName);
+        Objects.requireNonNull(componentName);
+        Objects.requireNonNull(authorities);
+
+        // Role authorities should not be using this constructor
+        mIsRoleAuthority = false;
         mPackageName = packageName;
-        mComponentName = null;
-        mAuthorities = new HashSet<>(authorities);
-    }
-
-    private EnforcingAdmin(ComponentName componentName, Set<String> authorities) {
-        mPackageName = componentName.getPackageName();
         mComponentName = componentName;
         mAuthorities = new HashSet<>(authorities);
+        mUserId = -1; // not needed for non role authorities
+    }
+
+    private EnforcingAdmin(String packageName, int userId) {
+        Objects.requireNonNull(packageName);
+
+        // Only role authorities use this constructor.
+        mIsRoleAuthority = true;
+        mPackageName = packageName;
+        mUserId = userId;
+        mComponentName = null;
+        // authorities will be loaded when needed
+        mAuthorities = null;
     }
 
     private static Set<String> getRoleAuthoritiesOrDefault(String packageName, int userId) {
@@ -90,8 +130,15 @@ final class EnforcingAdmin {
         return roles;
     }
 
+    private Set<String> getAuthorities() {
+        if (mAuthorities == null) {
+            mAuthorities = getRoleAuthoritiesOrDefault(mPackageName, mUserId);
+        }
+        return mAuthorities;
+    }
+
     boolean hasAuthority(String authority) {
-        return mAuthorities.contains(authority);
+        return getAuthorities().contains(authority);
     }
 
     /**
@@ -113,24 +160,56 @@ final class EnforcingAdmin {
         EnforcingAdmin other = (EnforcingAdmin) o;
         return Objects.equals(mPackageName, other.mPackageName)
                 && Objects.equals(mComponentName, other.mComponentName)
+                && Objects.equals(mIsRoleAuthority, other.mIsRoleAuthority)
                 && hasMatchingAuthorities(this, other);
     }
 
     private static boolean hasMatchingAuthorities(EnforcingAdmin admin1, EnforcingAdmin admin2) {
-        if (admin1.mAuthorities.equals(admin2.mAuthorities)) {
+        if (admin1.mIsRoleAuthority && admin2.mIsRoleAuthority) {
             return true;
         }
-        return !admin1.hasAuthority(DPC_AUTHORITY) && !admin1.hasAuthority(DEVICE_ADMIN_AUTHORITY)
-                && !admin2.hasAuthority(DPC_AUTHORITY) && !admin2.hasAuthority(
-                DEVICE_ADMIN_AUTHORITY);
+        return admin1.getAuthorities().equals(admin2.getAuthorities());
     }
 
     @Override
     public int hashCode() {
-        if (mAuthorities.contains(DPC_AUTHORITY) || mAuthorities.contains(DEVICE_ADMIN_AUTHORITY)) {
-            return Objects.hash(mComponentName, mAuthorities);
-        } else {
+        if (mIsRoleAuthority) {
+            // TODO(b/256854977): should we add UserId?
             return Objects.hash(mPackageName);
+        } else {
+            return Objects.hash(mComponentName, getAuthorities());
+        }
+    }
+
+    void saveToXml(TypedXmlSerializer serializer) throws IOException {
+        serializer.attribute(/* namespace= */ null, ATTR_PACKAGE_NAME, mPackageName);
+        serializer.attributeBoolean(/* namespace= */ null, ATTR_IS_ROLE, mIsRoleAuthority);
+        if (mIsRoleAuthority) {
+            serializer.attributeInt(/* namespace= */ null, ATTR_USER_ID, mUserId);
+        } else {
+            serializer.attribute(
+                    /* namespace= */ null, ATTR_CLASS_NAME, mComponentName.getClassName());
+            serializer.attribute(
+                    /* namespace= */ null,
+                    ATTR_AUTHORITIES,
+                    String.join(ATTR_AUTHORITIES_SEPARATOR, getAuthorities()));
+        }
+    }
+
+    static EnforcingAdmin readFromXml(TypedXmlPullParser parser)
+            throws XmlPullParserException {
+        String packageName = parser.getAttributeValue(/* namespace= */ null, ATTR_PACKAGE_NAME);
+        boolean isRoleAuthority = parser.getAttributeBoolean(/* namespace= */ null, ATTR_IS_ROLE);
+        String authoritiesStr = parser.getAttributeValue(/* namespace= */ null, ATTR_AUTHORITIES);
+
+        if (isRoleAuthority) {
+            int userId = parser.getAttributeInt(/* namespace= */ null, ATTR_USER_ID);
+            return new EnforcingAdmin(packageName, userId);
+        } else {
+            String className = parser.getAttributeValue(/* namespace= */ null, ATTR_CLASS_NAME);
+            ComponentName componentName = new ComponentName(packageName, className);
+            Set<String> authorities = Set.of(authoritiesStr.split(ATTR_AUTHORITIES_SEPARATOR));
+            return new EnforcingAdmin(packageName, componentName, authorities);
         }
     }
 }

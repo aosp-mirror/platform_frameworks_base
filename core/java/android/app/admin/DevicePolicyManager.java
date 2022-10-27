@@ -3920,6 +3920,11 @@ public class DevicePolicyManager {
      */
     public static final String AUTO_TIMEZONE_POLICY = "autoTimezone";
 
+    /**
+     * @hide
+     */
+    public static final String PERMISSION_GRANT_POLICY_KEY = "permissionGrant";
+
     // TODO: Expose this as SystemAPI once we add the query API
     /**
      * @hide
@@ -3928,7 +3933,7 @@ public class DevicePolicyManager {
             @NonNull String packageName, @NonNull String permission) {
         Objects.requireNonNull(packageName);
         Objects.requireNonNull(permission);
-        return "permissionGrant_" + packageName + "_" + permission;
+        return PERMISSION_GRANT_POLICY_KEY + "_" + packageName + "_" + permission;
     }
 
     /**

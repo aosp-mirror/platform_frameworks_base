@@ -22,12 +22,19 @@ import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 
 import com.android.internal.util.function.QuadFunction;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 final class PolicyDefinition<V> {
     private static final int POLICY_FLAG_NONE = 0;
+
     // Only use this flag if a policy can not be applied locally.
     private static final int POLICY_FLAG_GLOBAL_ONLY_POLICY = 1;
 
@@ -37,39 +44,66 @@ final class PolicyDefinition<V> {
     private static final MostRestrictive<Boolean> FALSE_MORE_RESTRICTIVE = new MostRestrictive<>(
             List.of(false, true));
 
+    private static final String ATTR_POLICY_KEY = "policy-key";
+    private static final String ATTR_POLICY_DEFINITION_KEY = "policy-type-key";
+    private static final String ATTR_CALLBACK_ARGS = "callback-args";
+    private static final String ATTR_CALLBACK_ARGS_SEPARATOR = ";";
+
+
     static PolicyDefinition<Boolean> AUTO_TIMEZONE = new PolicyDefinition<>(
             DevicePolicyManager.AUTO_TIMEZONE_POLICY,
             // auto timezone is enabled by default, hence disabling it is more restrictive.
             FALSE_MORE_RESTRICTIVE,
             POLICY_FLAG_GLOBAL_ONLY_POLICY,
             (Boolean value, Context context, Integer userId, String[] args) ->
-                    PolicyEnforcerCallbacks.setAutoTimezoneEnabled(value, context));
+                    PolicyEnforcerCallbacks.setAutoTimezoneEnabled(value, context),
+            new BooleanPolicySerializer());
+
+    // This is saved in the static map sPolicyDefinitions so that we're able to reconstruct the
+    // actual permission grant policy with the correct arguments (packageName and permission name)
+    // when reading the policies from xml.
+    private static final PolicyDefinition<Integer> PERMISSION_GRANT_NO_ARGS =
+            new PolicyDefinition<>(DevicePolicyManager.PERMISSION_GRANT_POLICY_KEY,
+                    // TODO: is this really the best mechanism, what makes denied more
+                    //  restrictive than
+                    //  granted?
+                    new MostRestrictive<>(
+                            List.of(DevicePolicyManager.PERMISSION_GRANT_STATE_DENIED,
+                                    DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED,
+                                    DevicePolicyManager.PERMISSION_GRANT_STATE_DEFAULT)),
+                    POLICY_FLAG_LOCAL_ONLY_POLICY,
+                    PolicyEnforcerCallbacks::setPermissionGrantState,
+                    new IntegerPolicySerializer());
 
     static PolicyDefinition<Integer> PERMISSION_GRANT(
             @NonNull String packageName, @NonNull String permission) {
-        return new PolicyDefinition<>(
+        return PERMISSION_GRANT_NO_ARGS.setArgs(
                 DevicePolicyManager.PERMISSION_GRANT_POLICY(packageName, permission),
-                // TODO: is this really the best mechanism, what makes denied more restrictive than
-                //  granted?
-                new MostRestrictive<>(
-                        List.of(DevicePolicyManager.PERMISSION_GRANT_STATE_DENIED,
-                                DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED,
-                                DevicePolicyManager.PERMISSION_GRANT_STATE_DEFAULT)),
-                POLICY_FLAG_LOCAL_ONLY_POLICY,
-                PolicyEnforcerCallbacks::setPermissionGrantState,
                 new String[]{packageName, permission});
     }
 
-    private final String mKey;
+    private static Map<String, PolicyDefinition<?>> sPolicyDefinitions = Map.of(
+            DevicePolicyManager.AUTO_TIMEZONE_POLICY, AUTO_TIMEZONE,
+            DevicePolicyManager.PERMISSION_GRANT_POLICY_KEY, PERMISSION_GRANT_NO_ARGS
+    );
+
+    private final String mPolicyKey;
+    private final String mPolicyDefinitionKey;
     private final ResolutionMechanism<V> mResolutionMechanism;
     private final int mPolicyFlags;
     // A function that accepts  policy to apple, context, userId, callback arguments, and returns
     // true if the policy has been enforced successfully.
     private final QuadFunction<V, Context, Integer, String[], Boolean> mPolicyEnforcerCallback;
     private final String[] mCallbackArgs;
+    private final PolicySerializer<V> mPolicySerializer;
 
-    String getKey() {
-        return mKey;
+    private PolicyDefinition<V> setArgs(String key, String[] callbackArgs) {
+        return new PolicyDefinition<>(key, mPolicyDefinitionKey, mResolutionMechanism,
+                mPolicyFlags, mPolicyEnforcerCallback, mPolicySerializer, callbackArgs);
+    }
+
+    String getPolicyKey() {
+        return mPolicyKey;
     }
 
     /**
@@ -97,55 +131,90 @@ final class PolicyDefinition<V> {
 
     /**
      * Callers must ensure that {@code policyType} have implemented an appropriate
-     * {@link Object#equals)} implementation.
+     * {@link Object#equals} implementation.
      */
     private PolicyDefinition(
             String key,
             ResolutionMechanism<V> resolutionMechanism,
             QuadFunction<V, Context, Integer, String[], Boolean> policyEnforcerCallback,
-            String[] callbackArgs) {
-        this(key, resolutionMechanism, POLICY_FLAG_NONE, policyEnforcerCallback,
-                callbackArgs);
+            PolicySerializer<V> policySerializer) {
+        this(key, resolutionMechanism, POLICY_FLAG_NONE, policyEnforcerCallback, policySerializer);
     }
 
     /**
      * Callers must ensure that {@code policyType} have implemented an appropriate
-     * {@link Object#equals)} implementation.
-     */
-    private PolicyDefinition(
-            String key,
-            ResolutionMechanism<V> resolutionMechanism,
-            QuadFunction<V, Context, Integer, String[], Boolean> policyEnforcerCallback) {
-        this(key, resolutionMechanism, policyEnforcerCallback, /* callbackArgs= */ null);
-    }
-
-    /**
-     * Callers must ensure that {@code policyType} have implemented an appropriate
-     * {@link Object#equals)} implementation.
+     * {@link Object#equals} implementation.
      */
     private PolicyDefinition(
             String key,
             ResolutionMechanism<V> resolutionMechanism,
             int policyFlags,
             QuadFunction<V, Context, Integer, String[], Boolean> policyEnforcerCallback,
+            PolicySerializer<V> policySerializer) {
+        this(key, key, resolutionMechanism, policyFlags, policyEnforcerCallback,
+                policySerializer, /* callbackArs= */ null);
+    }
+
+    /**
+     * Callers must ensure that {@code policyType} have implemented an appropriate
+     * {@link Object#equals} implementation.
+     */
+    private PolicyDefinition(
+            String policyKey,
+            String policyDefinitionKey,
+            ResolutionMechanism<V> resolutionMechanism,
+            int policyFlags,
+            QuadFunction<V, Context, Integer, String[], Boolean> policyEnforcerCallback,
+            PolicySerializer<V> policySerializer,
             String[] callbackArgs) {
-        mKey = key;
+        mPolicyKey = policyKey;
+        mPolicyDefinitionKey = policyDefinitionKey;
         mResolutionMechanism = resolutionMechanism;
         mPolicyFlags = policyFlags;
         mPolicyEnforcerCallback = policyEnforcerCallback;
+        mPolicySerializer = policySerializer;
         mCallbackArgs = callbackArgs;
+
+        // TODO: maybe use this instead of manually adding to the map
+//        sPolicyDefinitions.put(policyDefinitionKey, this);
     }
 
-    /**
-     * Callers must ensure that {@code policyType} have implemented an appropriate
-     * {@link Object#equals)} implementation.
-     */
-    private PolicyDefinition(
-            String key,
-            ResolutionMechanism<V> resolutionMechanism,
-            int policyFlags,
-            QuadFunction<V, Context, Integer, String[], Boolean> policyEnforcerCallback) {
-        this(key, resolutionMechanism, policyFlags, policyEnforcerCallback,
-                /* callbackArgs= */ null);
+    void saveToXml(TypedXmlSerializer serializer) throws IOException {
+        serializer.attribute(/* namespace= */ null, ATTR_POLICY_KEY, mPolicyKey);
+        serializer.attribute(
+                /* namespace= */ null, ATTR_POLICY_DEFINITION_KEY, mPolicyDefinitionKey);
+        if (mCallbackArgs != null) {
+            serializer.attribute(/* namespace= */ null, ATTR_CALLBACK_ARGS,
+                    String.join(ATTR_CALLBACK_ARGS_SEPARATOR, mCallbackArgs));
+        }
+    }
+
+    static <V> PolicyDefinition<V> readFromXml(TypedXmlPullParser parser) {
+        String policyKey = parser.getAttributeValue(/* namespace= */ null, ATTR_POLICY_KEY);
+        String policyDefinitionKey = parser.getAttributeValue(
+                /* namespace= */ null, ATTR_POLICY_DEFINITION_KEY);
+        String callbackArgsStr = parser.getAttributeValue(
+                /* namespace= */ null, ATTR_CALLBACK_ARGS);
+        String[] callbackArgs = callbackArgsStr == null
+                ? null
+                : callbackArgsStr.split(ATTR_CALLBACK_ARGS_SEPARATOR);
+
+        // TODO: can we avoid casting?
+        if (callbackArgs == null) {
+            return (PolicyDefinition<V>) sPolicyDefinitions.get(policyDefinitionKey);
+        } else {
+            return (PolicyDefinition<V>) sPolicyDefinitions.get(policyDefinitionKey).setArgs(
+                    policyKey, callbackArgs);
+        }
+    }
+
+    void savePolicyValueToXml(TypedXmlSerializer serializer, String attributeName, V value)
+            throws IOException {
+        mPolicySerializer.saveToXml(serializer, attributeName, value);
+    }
+
+    V readPolicyValueFromXml(TypedXmlPullParser parser, String attributeName)
+            throws XmlPullParserException {
+        return mPolicySerializer.readFromXml(parser, attributeName);
     }
 }
