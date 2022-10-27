@@ -82,6 +82,7 @@ android_test {
 
     resource_dirs: ["res"],
     resource_zips: [":FrameworksCoreTests_apks_as_resources"],
+    java_resources: [":ApkVerityTestCertDer"],
 
     data: [
         ":BstatsTestApp",
