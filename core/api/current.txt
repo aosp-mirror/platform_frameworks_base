@@ -20371,6 +20371,8 @@ package android.media {
     field @NonNull public static final android.os.Parcelable.Creator<android.media.AudioDescriptor> CREATOR;
     field public static final int STANDARD_EDID = 1; // 0x1
     field public static final int STANDARD_NONE = 0; // 0x0
+    field public static final int STANDARD_SADB = 2; // 0x2
+    field public static final int STANDARD_VSADB = 3; // 0x3
   }
 
   public abstract class AudioDeviceCallback {

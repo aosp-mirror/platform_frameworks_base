@@ -21,8 +21,6 @@ import android.os.Looper;
 
 import com.android.internal.annotations.VisibleForTesting;
 
-import java.util.List;
-
 final class HdmiEarcController {
     private static final String TAG = "HdmiEarcController";
 
@@ -109,9 +107,9 @@ final class HdmiEarcController {
                     () -> mService.handleEarcStateChange(status, portId));
         }
 
-        public void onCapabilitiesReported(List<byte[]> capabilities, int portId) {
+        public void onCapabilitiesReported(byte[] rawCapabilities, int portId) {
             runOnServiceThread(
-                    () -> mService.handleEarcCapabilitiesReported(capabilities, portId));
+                    () -> mService.handleEarcCapabilitiesReported(rawCapabilities, portId));
         }
     }
 

@@ -4527,7 +4527,7 @@ public class HdmiControlService extends SystemService {
     }
 
     @ServiceThreadOnly
-    void handleEarcCapabilitiesReported(List<byte[]> capabilities, int portId) {
+    void handleEarcCapabilitiesReported(byte[] rawCapabilities, int portId) {
         assertRunOnServiceThread();
         if (!getPortInfo(portId).isEarcSupported()) {
             Slog.w(TAG,
@@ -4537,7 +4537,7 @@ public class HdmiControlService extends SystemService {
         // If eARC is disabled, the local device is null. In this case, the HAL shouldn't have
         // reported eARC capabilities, but even if it did, it won't take effect.
         if (mEarcLocalDevice != null) {
-            mEarcLocalDevice.handleEarcCapabilitiesReported(capabilities);
+            mEarcLocalDevice.handleEarcCapabilitiesReported(rawCapabilities);
         }
     }
 }
