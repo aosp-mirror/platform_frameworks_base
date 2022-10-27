@@ -33,6 +33,7 @@ import android.hardware.biometrics.common.OperationContext;
 import android.hardware.biometrics.fingerprint.PointerContext;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.ISidefpsController;
+import android.hardware.fingerprint.IUdfpsOverlay;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.Build;
 import android.os.Handler;
@@ -118,6 +119,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<AidlSession>
             @NonNull LockoutCache lockoutCache,
             @Nullable IUdfpsOverlayController udfpsOverlayController,
             @Nullable ISidefpsController sidefpsController,
+            @Nullable IUdfpsOverlay udfpsOverlay,
             boolean allowBackgroundAuthentication,
             @NonNull FingerprintSensorPropertiesInternal sensorProps,
             @NonNull Handler handler,
@@ -145,7 +147,8 @@ class FingerprintAuthenticationClient extends AuthenticationClient<AidlSession>
                 false /* isKeyguardBypassEnabled */);
         setRequestId(requestId);
         mLockoutCache = lockoutCache;
-        mSensorOverlays = new SensorOverlays(udfpsOverlayController, sidefpsController);
+        mSensorOverlays = new SensorOverlays(udfpsOverlayController,
+                sidefpsController, udfpsOverlay);
         mSensorProps = sensorProps;
         mALSProbeCallback = getLogger().getAmbientLightProbe(false /* startWithClient */);
         mHandler = handler;
@@ -248,8 +251,8 @@ class FingerprintAuthenticationClient extends AuthenticationClient<AidlSession>
                     if (authenticated && mSensorProps.isAnySidefpsType()) {
                         if (mHandler.hasMessages(MESSAGE_IGNORE_AUTH)) {
                             Slog.i(TAG, "(sideFPS) Ignoring auth due to recent power press");
-                            onErrorInternal(BiometricConstants.BIOMETRIC_ERROR_POWER_PRESSED, 0,
-                                    true);
+                            onErrorInternal(BiometricConstants.BIOMETRIC_ERROR_POWER_PRESSED,
+                                    0, true);
                             return;
                         }
                         delay = isKeyguard() ? mWaitForAuthKeyguard : mWaitForAuthBp;

@@ -62,7 +62,6 @@ class UdfpsShell @Inject constructor(
         if (args.size == 1 && args[0] == "hide") {
             hideOverlay()
         } else if (args.size == 2 && args[0] == "udfpsOverlay" && args[1] == "show") {
-            hideOverlay()
             showUdfpsOverlay()
         } else if (args.size == 2 && args[0] == "udfpsOverlay" && args[1] == "hide") {
             hideUdfpsOverlay()
