@@ -979,7 +979,7 @@
     <string name="keyguard_accessibility_unlock_area_collapsed" msgid="4729922043778400434">"Pinaliit ang bahagi ng pag-unlock."</string>
     <string name="keyguard_accessibility_widget" msgid="6776892679715699875">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> widget."</string>
     <string name="keyguard_accessibility_user_selector" msgid="1466067610235696600">"Tagapili ng user"</string>
-    <string name="keyguard_accessibility_status" msgid="6792745049712397237">"Katayuan"</string>
+    <string name="keyguard_accessibility_status" msgid="6792745049712397237">"Status"</string>
     <string name="keyguard_accessibility_camera" msgid="7862557559464986528">"Camera"</string>
     <string name="keygaurd_accessibility_media_controls" msgid="2267379779900620614">"Mga kontrol ng media"</string>
     <string name="keyguard_accessibility_widget_reorder_start" msgid="7066213328912939191">"Nagsimula na ang pagbabago ng ayos ng widget."</string>
@@ -1420,7 +1420,7 @@
     <string name="ext_media_browse_action" msgid="344865351947079139">"I-explore"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"Ilipat ang output"</string>
     <string name="ext_media_missing_title" msgid="3209472091220515046">"Nawawala ang <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_missing_message" msgid="4408988706227922909">"Ikabit muli ang device"</string>
+    <string name="ext_media_missing_message" msgid="4408988706227922909">"Ikabit ulit ang device"</string>
     <string name="ext_media_move_specific_title" msgid="8492118544775964250">"Inililipat ang <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_move_title" msgid="2682741525619033637">"Naglilipat ng data"</string>
     <string name="ext_media_move_success_title" msgid="4901763082647316767">"Tapos na ang paglipat ng content"</string>

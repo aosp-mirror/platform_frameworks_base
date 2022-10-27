@@ -554,8 +554,8 @@
     <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"مرکز"</string>
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Space"</string>
-    <string name="keyboard_key_enter" msgid="8633362970109751646">"ورود"</string>
-    <string name="keyboard_key_backspace" msgid="4095278312039628074">"پس‌بر"</string>
+    <string name="keyboard_key_enter" msgid="8633362970109751646">"Enter"</string>
+    <string name="keyboard_key_backspace" msgid="4095278312039628074">"Backspace"</string>
     <string name="keyboard_key_media_play_pause" msgid="8389984232732277478">"پخش/مکث"</string>
     <string name="keyboard_key_media_stop" msgid="1509943745250377699">"متوقف کردن"</string>
     <string name="keyboard_key_media_next" msgid="8502476691227914952">"بعدی"</string>
@@ -566,9 +566,9 @@
     <string name="keyboard_key_page_down" msgid="9035902490071829731">"صفحه قبل"</string>
     <string name="keyboard_key_forward_del" msgid="5325501825762733459">"حذف"</string>
     <string name="keyboard_key_move_home" msgid="3496502501803911971">"ابتدا"</string>
-    <string name="keyboard_key_move_end" msgid="99190401463834854">"انتها"</string>
-    <string name="keyboard_key_insert" msgid="4621692715704410493">"درج"</string>
-    <string name="keyboard_key_num_lock" msgid="7209960042043090548">"قفل اعداد"</string>
+    <string name="keyboard_key_move_end" msgid="99190401463834854">"End"</string>
+    <string name="keyboard_key_insert" msgid="4621692715704410493">"Insert"</string>
+    <string name="keyboard_key_num_lock" msgid="7209960042043090548">"Num Lock"</string>
     <string name="keyboard_key_numpad_template" msgid="7316338238459991821">"صفحه‌کلید عددی <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="notif_inline_reply_remove_attachment_description" msgid="7954075334095405429">"برداشتن پیوست"</string>
     <string name="keyboard_shortcut_group_system" msgid="1583416273777875970">"سیستم"</string>

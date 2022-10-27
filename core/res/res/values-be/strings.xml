@@ -195,7 +195,7 @@
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Ваша арганізацыя кіруе гэтай прыладай і можа сачыць за сеткавым трафікам. Дакраніцеся для атрымання дадатковай інфармацыі."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Праграмы могуць атрымліваць даныя пра ваша месцазнаходжанне"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"Каб даведацца больш, звярніцеся да ІТ-адміністратара"</string>
-    <string name="geofencing_service" msgid="3826902410740315456">"Служба вызначэння геаперыметра"</string>
+    <string name="geofencing_service" msgid="3826902410740315456">"Сэрвіс геазаніравання"</string>
     <string name="country_detector" msgid="7023275114706088854">"Дэтэктар краіны"</string>
     <string name="location_service" msgid="2439187616018455546">"Служба геалакацыі"</string>
     <string name="gnss_service" msgid="8907781262179951385">"Служба GNSS"</string>
