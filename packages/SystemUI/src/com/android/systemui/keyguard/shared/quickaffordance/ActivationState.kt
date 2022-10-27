@@ -17,12 +17,12 @@
 
 package com.android.systemui.keyguard.shared.quickaffordance
 
-/** Enumerates all possible toggle states for a quick affordance on the lock-screen. */
-sealed class KeyguardQuickAffordanceToggleState {
-    /** Toggling is not supported. */
-    object NotSupported : KeyguardQuickAffordanceToggleState()
+/** Enumerates all possible activation states for a quick affordance on the lock-screen. */
+sealed class ActivationState {
+    /** Activation is not supported. */
+    object NotSupported : ActivationState()
     /** The quick affordance is on. */
-    object On : KeyguardQuickAffordanceToggleState()
+    object Active : ActivationState()
     /** The quick affordance is off. */
-    object Off : KeyguardQuickAffordanceToggleState()
+    object Inactive : ActivationState()
 }

@@ -18,7 +18,7 @@
 package com.android.systemui.keyguard.data.quickaffordance
 
 import com.android.systemui.animation.Expandable
-import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceConfig.OnClickedResult
+import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceConfig.OnTriggeredResult
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.yield
@@ -33,22 +33,23 @@ abstract class FakeKeyguardQuickAffordanceConfig(
     override val key: String,
 ) : KeyguardQuickAffordanceConfig {
 
-    var onClickedResult: OnClickedResult = OnClickedResult.Handled
+    var onTriggeredResult: OnTriggeredResult = OnTriggeredResult.Handled
 
-    private val _state =
-        MutableStateFlow<KeyguardQuickAffordanceConfig.State>(
-            KeyguardQuickAffordanceConfig.State.Hidden
+    private val _lockScreenState =
+        MutableStateFlow<KeyguardQuickAffordanceConfig.LockScreenState>(
+            KeyguardQuickAffordanceConfig.LockScreenState.Hidden
         )
-    override val state: Flow<KeyguardQuickAffordanceConfig.State> = _state
+    override val lockScreenState: Flow<KeyguardQuickAffordanceConfig.LockScreenState> =
+        _lockScreenState
 
-    override fun onQuickAffordanceClicked(
+    override fun onTriggered(
         expandable: Expandable?,
-    ): OnClickedResult {
-        return onClickedResult
+    ): OnTriggeredResult {
+        return onTriggeredResult
     }
 
-    suspend fun setState(state: KeyguardQuickAffordanceConfig.State) {
-        _state.value = state
+    suspend fun setState(lockScreenState: KeyguardQuickAffordanceConfig.LockScreenState) {
+        _lockScreenState.value = lockScreenState
         // Yield to allow the test's collection coroutine to "catch up" and collect this value
         // before the test continues to the next line.
         // TODO(b/239834928): once coroutines.test is updated, switch to the approach described in
