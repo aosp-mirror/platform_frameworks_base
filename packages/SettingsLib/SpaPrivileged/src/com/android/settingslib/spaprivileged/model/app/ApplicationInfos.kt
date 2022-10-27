@@ -35,6 +35,9 @@ val ApplicationInfo.userHandle: UserHandle
 /** Checks whether a flag is associated with the application. */
 fun ApplicationInfo.hasFlag(flag: Int): Boolean = (flags and flag) > 0
 
+/** Checks whether the application is currently installed. */
+val ApplicationInfo.installed: Boolean get() = hasFlag(ApplicationInfo.FLAG_INSTALLED)
+
 /** Checks whether the application is disabled until used. */
 val ApplicationInfo.isDisabledUntilUsed: Boolean
     get() = enabledSetting == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED
