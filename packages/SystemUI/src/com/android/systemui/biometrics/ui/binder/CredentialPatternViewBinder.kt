@@ -9,7 +9,6 @@ import com.android.systemui.biometrics.ui.CredentialPatternView
 import com.android.systemui.biometrics.ui.CredentialView
 import com.android.systemui.biometrics.ui.viewmodel.CredentialViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 /** Sub-binder for the [CredentialPatternView]. */
@@ -30,7 +29,7 @@ object CredentialPatternViewBinder {
                     viewModel.header.collect { header ->
                         lockPatternView.setOnPatternListener(
                             OnPatternDetectedListener { pattern ->
-                                if (pattern.isPatternLongEnough()) {
+                                if (pattern.isPatternTooShort()) {
                                     // Pattern size is less than the minimum
                                     // do not count it as a failed attempt
                                     viewModel.showPatternTooShortError()
@@ -71,5 +70,5 @@ private class OnPatternDetectedListener(
     }
 }
 
-private fun List<LockPatternView.Cell>.isPatternLongEnough(): Boolean =
+private fun List<LockPatternView.Cell>.isPatternTooShort(): Boolean =
     size < LockPatternUtils.MIN_PATTERN_REGISTER_FAIL
