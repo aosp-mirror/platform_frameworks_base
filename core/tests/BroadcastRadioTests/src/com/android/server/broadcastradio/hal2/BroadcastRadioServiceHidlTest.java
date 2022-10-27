@@ -43,6 +43,7 @@ import android.os.RemoteException;
 
 import com.android.dx.mockito.inline.extended.StaticMockitoSessionBuilder;
 import com.android.server.broadcastradio.ExtendedRadioMockitoTestCase;
+import com.android.server.broadcastradio.RadioServiceUserController;
 
 import org.junit.Test;
 import org.mockito.Mock;
@@ -92,7 +93,8 @@ public final class BroadcastRadioServiceHidlTest extends ExtendedRadioMockitoTes
 
     @Override
     protected void initializeSession(StaticMockitoSessionBuilder builder) {
-        builder.spyStatic(RadioModule.class);
+        builder.spyStatic(RadioModule.class)
+                .spyStatic(RadioServiceUserController.class);
     }
 
     @Test
@@ -181,6 +183,8 @@ public final class BroadcastRadioServiceHidlTest extends ExtendedRadioMockitoTes
     }
 
     private void createBroadcastRadioService() throws RemoteException {
+        doReturn(true).when(() -> RadioServiceUserController.isCurrentOrSystemUser());
+
         mockServiceManager();
         mBroadcastRadioService = new BroadcastRadioService(/* nextModuleId= */ FM_RADIO_MODULE_ID,
                 mLock, mServiceManagerMock);

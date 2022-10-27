@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-class ProgramInfoCache {
+final class ProgramInfoCache {
     // Maximum number of RadioManager.ProgramInfo elements that will be put into a
     // ProgramList.Chunk.mModified array. Used to try to ensure a single ProgramList.Chunk stays
     // within the AIDL data size limit.

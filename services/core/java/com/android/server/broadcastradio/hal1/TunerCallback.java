@@ -34,7 +34,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 class TunerCallback implements ITunerCallback {
-    private static final String TAG = "BroadcastRadioService.TunerCallback";
+
+    private static final String TAG = "BcRadio1Srv.TunerCallback";
 
     /**
      * This field is used by native code, do not access or modify.

@@ -53,7 +53,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-class RadioModule {
+final class RadioModule {
     private static final String TAG = "BcRadio2Srv.module";
     private static final int RADIO_EVENT_LOGGER_QUEUE_SIZE = 25;
 
@@ -143,7 +143,8 @@ class RadioModule {
         mEventLogger = new RadioEventLogger(TAG, RADIO_EVENT_LOGGER_QUEUE_SIZE);
     }
 
-    public static @Nullable RadioModule tryLoadingModule(int idx, @NonNull String fqName,
+    @Nullable
+    static RadioModule tryLoadingModule(int idx, @NonNull String fqName,
             Object lock) {
         try {
             Slog.i(TAG, "Try loading module for idx " + idx + ", fqName " + fqName);
@@ -173,7 +174,8 @@ class RadioModule {
         }
     }
 
-    public @NonNull IBroadcastRadio getService() {
+    @NonNull
+    IBroadcastRadio getService() {
         return mService;
     }
 
@@ -181,7 +183,7 @@ class RadioModule {
         return mProperties;
     }
 
-    public @NonNull TunerSession openSession(@NonNull android.hardware.radio.ITunerCallback userCb)
+    TunerSession openSession(@NonNull android.hardware.radio.ITunerCallback userCb)
             throws RemoteException {
         mEventLogger.logRadioEvent("Open TunerSession");
         synchronized (mLock) {
@@ -211,7 +213,7 @@ class RadioModule {
         }
     }
 
-    public void closeSessions(Integer error) {
+    void closeSessions(Integer error) {
         // Copy the contents of mAidlTunerSessions into a local array because TunerSession.close()
         // must be called without mAidlTunerSessions locked because it can call
         // onTunerSessionClosed().
@@ -227,7 +229,8 @@ class RadioModule {
         }
     }
 
-    private @Nullable android.hardware.radio.ProgramList.Filter
+    @Nullable
+    private android.hardware.radio.ProgramList.Filter
             buildUnionOfTunerSessionFiltersLocked() {
         Set<Integer> idTypes = null;
         Set<android.hardware.radio.ProgramSelector.Identifier> ids = null;
@@ -378,8 +381,8 @@ class RadioModule {
         }
     }
 
-    public android.hardware.radio.ICloseHandle addAnnouncementListener(@NonNull int[] enabledTypes,
-            @NonNull android.hardware.radio.IAnnouncementListener listener) throws RemoteException {
+    android.hardware.radio.ICloseHandle addAnnouncementListener(int[] enabledTypes,
+            android.hardware.radio.IAnnouncementListener listener) throws RemoteException {
         mEventLogger.logRadioEvent("Add AnnouncementListener");
         ArrayList<Byte> enabledList = new ArrayList<>();
         for (int type : enabledTypes) {
