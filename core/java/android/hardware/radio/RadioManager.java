@@ -921,7 +921,10 @@ public class RadioManager {
         @NonNull final BandDescriptor mDescriptor;
 
         BandConfig(BandDescriptor descriptor) {
-            mDescriptor = Objects.requireNonNull(descriptor);
+            Objects.requireNonNull(descriptor, "Descriptor cannot be null");
+            mDescriptor = new BandDescriptor(descriptor.getRegion(), descriptor.getType(),
+                    descriptor.getLowerLimit(), descriptor.getUpperLimit(),
+                    descriptor.getSpacing());
         }
 
         BandConfig(int region, int type, int lowerLimit, int upperLimit, int spacing) {
