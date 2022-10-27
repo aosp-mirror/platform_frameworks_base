@@ -47,6 +47,14 @@ public abstract class DreamOverlayModule {
     public static final String BURN_IN_PROTECTION_UPDATE_INTERVAL =
             "burn_in_protection_update_interval";
     public static final String MILLIS_UNTIL_FULL_JITTER = "millis_until_full_jitter";
+    public static final String DREAM_IN_BLUR_ANIMATION_DURATION = "dream_in_blur_anim_duration";
+    public static final String DREAM_IN_BLUR_ANIMATION_DELAY = "dream_in_blur_anim_delay";
+    public static final String DREAM_IN_COMPLICATIONS_ANIMATION_DURATION =
+            "dream_in_complications_anim_duration";
+    public static final String DREAM_IN_TOP_COMPLICATIONS_ANIMATION_DELAY =
+            "dream_in_top_complications_anim_delay";
+    public static final String DREAM_IN_BOTTOM_COMPLICATIONS_ANIMATION_DELAY =
+            "dream_in_bottom_complications_anim_delay";
 
     /** */
     @Provides
@@ -112,6 +120,51 @@ public abstract class DreamOverlayModule {
     @Named(MILLIS_UNTIL_FULL_JITTER)
     static long providesMillisUntilFullJitter(@Main Resources resources) {
         return resources.getInteger(R.integer.config_dreamOverlayMillisUntilFullJitter);
+    }
+
+    /**
+     * Duration in milliseconds of the dream in un-blur animation.
+     */
+    @Provides
+    @Named(DREAM_IN_BLUR_ANIMATION_DURATION)
+    static int providesDreamInBlurAnimationDuration(@Main Resources resources) {
+        return resources.getInteger(R.integer.config_dreamOverlayInBlurDurationMs);
+    }
+
+    /**
+     * Delay in milliseconds of the dream in un-blur animation.
+     */
+    @Provides
+    @Named(DREAM_IN_BLUR_ANIMATION_DELAY)
+    static int providesDreamInBlurAnimationDelay(@Main Resources resources) {
+        return resources.getInteger(R.integer.config_dreamOverlayInBlurDelayMs);
+    }
+
+    /**
+     * Duration in milliseconds of the dream in complications fade-in animation.
+     */
+    @Provides
+    @Named(DREAM_IN_COMPLICATIONS_ANIMATION_DURATION)
+    static int providesDreamInComplicationsAnimationDuration(@Main Resources resources) {
+        return resources.getInteger(R.integer.config_dreamOverlayInComplicationsDurationMs);
+    }
+
+    /**
+     * Delay in milliseconds of the dream in top complications fade-in animation.
+     */
+    @Provides
+    @Named(DREAM_IN_TOP_COMPLICATIONS_ANIMATION_DELAY)
+    static int providesDreamInTopComplicationsAnimationDelay(@Main Resources resources) {
+        return resources.getInteger(R.integer.config_dreamOverlayInTopComplicationsDelayMs);
+    }
+
+    /**
+     * Delay in milliseconds of the dream in bottom complications fade-in animation.
+     */
+    @Provides
+    @Named(DREAM_IN_BOTTOM_COMPLICATIONS_ANIMATION_DELAY)
+    static int providesDreamInBottomComplicationsAnimationDelay(@Main Resources resources) {
+        return resources.getInteger(R.integer.config_dreamOverlayInBottomComplicationsDelayMs);
     }
 
     @Provides
