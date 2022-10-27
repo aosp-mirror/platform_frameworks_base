@@ -39,7 +39,7 @@ import libcore.util.NativeAllocationRegistry;
  * @hide
  */
 public class MeshSpecification {
-    private long mNativeMeshSpec;
+    long mNativeMeshSpec;
 
     /**
      * Constants for {@link #make(Attribute[], int, Varying[], String, String, ColorSpace, int)}
