@@ -43,7 +43,7 @@ class SearchScaffoldTest {
     @Test
     fun initialState_titleIsDisplayed() {
         composeTestRule.setContent {
-            SearchScaffold(title = TITLE) {}
+            SearchScaffold(title = TITLE) { _, _ -> }
         }
 
         composeTestRule.onNodeWithText(TITLE).assertIsDisplayed()
@@ -116,7 +116,7 @@ class SearchScaffoldTest {
     private fun setContent(): State<String> {
         lateinit var actualSearchQuery: State<String>
         composeTestRule.setContent {
-            SearchScaffold(title = TITLE) { searchQuery ->
+            SearchScaffold(title = TITLE) { _, searchQuery ->
                 SideEffect {
                     actualSearchQuery = searchQuery
                 }
