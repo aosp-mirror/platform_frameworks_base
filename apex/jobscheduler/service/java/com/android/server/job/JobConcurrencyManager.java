@@ -460,14 +460,14 @@ class JobConcurrencyManager {
                     if (mPowerManager != null && mPowerManager.isDeviceIdleMode()) {
                         synchronized (mLock) {
                             stopUnexemptedJobsForDoze();
-                            stopLongRunningJobsLocked("deep doze");
+                            stopOvertimeJobsLocked("deep doze");
                         }
                     }
                     break;
                 case PowerManager.ACTION_POWER_SAVE_MODE_CHANGED:
                     if (mPowerManager != null && mPowerManager.isPowerSaveMode()) {
                         synchronized (mLock) {
-                            stopLongRunningJobsLocked("battery saver");
+                            stopOvertimeJobsLocked("battery saver");
                         }
                     }
                     break;
@@ -555,7 +555,7 @@ class JobConcurrencyManager {
      * execution guarantee.
      */
     @GuardedBy("mLock")
-    boolean isJobLongRunningLocked(@NonNull JobStatus job) {
+    boolean isJobInOvertimeLocked(@NonNull JobStatus job) {
         if (!mRunningJobs.contains(job)) {
             return false;
         }
@@ -1043,7 +1043,7 @@ class JobConcurrencyManager {
     }
 
     @GuardedBy("mLock")
-    private void stopLongRunningJobsLocked(@NonNull String debugReason) {
+    private void stopOvertimeJobsLocked(@NonNull String debugReason) {
         for (int i = 0; i < mActiveServices.size(); ++i) {
             final JobServiceContext jsc = mActiveServices.get(i);
             final JobStatus jobStatus = jsc.getRunningJobLocked();
@@ -1060,7 +1060,7 @@ class JobConcurrencyManager {
      * restricted by the given {@link JobRestriction}.
      */
     @GuardedBy("mLock")
-    void maybeStopLongRunningJobsLocked(@NonNull JobRestriction restriction) {
+    void maybeStopOvertimeJobsLocked(@NonNull JobRestriction restriction) {
         for (int i = mActiveServices.size() - 1; i >= 0; --i) {
             final JobServiceContext jsc = mActiveServices.get(i);
             final JobStatus jobStatus = jsc.getRunningJobLocked();
