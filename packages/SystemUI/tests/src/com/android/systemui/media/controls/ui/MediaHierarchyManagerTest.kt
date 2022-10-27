@@ -31,7 +31,7 @@ import com.android.systemui.dreams.DreamOverlayStateController
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.media.dream.MediaDreamComplication
 import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.shade.testing.FakeNotifPanelEvents
+import com.android.systemui.shade.ShadeExpansionStateManager
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.phone.KeyguardBypassController
@@ -89,7 +89,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     private lateinit var mediaHierarchyManager: MediaHierarchyManager
     private lateinit var mediaFrame: ViewGroup
     private val configurationController = FakeConfigurationController()
-    private val notifPanelEvents = FakeNotifPanelEvents()
+    private val notifPanelEvents = ShadeExpansionStateManager()
     private val settings = FakeSettings()
     private lateinit var testableLooper: TestableLooper
     private lateinit var fakeHandler: FakeHandler
@@ -346,7 +346,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
 
     @Test
     fun isCurrentlyInGuidedTransformation_hostsVisible_expandImmediateEnabled_returnsFalse() {
-        notifPanelEvents.changeExpandImmediate(expandImmediate = true)
+        notifPanelEvents.notifyExpandImmediateChange(true)
         goToLockscreen()
         enterGuidedTransformation()
         whenever(lockHost.visible).thenReturn(true)
