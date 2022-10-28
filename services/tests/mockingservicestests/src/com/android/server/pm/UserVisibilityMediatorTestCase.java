@@ -20,11 +20,11 @@ import static android.os.UserHandle.USER_NULL;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 
+import static com.android.server.pm.UserManagerInternal.USER_ASSIGNMENT_RESULT_FAILURE;
+import static com.android.server.pm.UserManagerInternal.USER_ASSIGNMENT_RESULT_SUCCESS_INVISIBLE;
+import static com.android.server.pm.UserManagerInternal.USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE;
+import static com.android.server.pm.UserManagerInternal.userAssignmentResultToString;
 import static com.android.server.pm.UserVisibilityMediator.INITIAL_CURRENT_USER_ID;
-import static com.android.server.pm.UserVisibilityMediator.START_USER_RESULT_FAILURE;
-import static com.android.server.pm.UserVisibilityMediator.START_USER_RESULT_SUCCESS_INVISIBLE;
-import static com.android.server.pm.UserVisibilityMediator.START_USER_RESULT_SUCCESS_VISIBLE;
-import static com.android.server.pm.UserVisibilityMediator.startUserResultToString;
 
 import static com.google.common.truth.Truth.assertWithMessage;
 
@@ -100,79 +100,92 @@ abstract class UserVisibilityMediatorTestCase extends ExtendedMockitoTestCase {
 
     @Test
     public final void testStartUser_currentUser() {
-        int result = mMediator.startUser(USER_ID, USER_ID, FG, DEFAULT_DISPLAY);
-        assertStartUserResult(result, START_USER_RESULT_SUCCESS_VISIBLE);
+        int result = mMediator.startOnly(USER_ID, USER_ID, FG, DEFAULT_DISPLAY);
+        assertStartUserResult(result, USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE);
 
         assertCurrentUser(USER_ID);
         assertIsCurrentUserOrRunningProfileOfCurrentUser(USER_ID);
         assertStartedProfileGroupIdOf(USER_ID, USER_ID);
+
+        stopUserAndAssertState(USER_ID);
     }
 
     @Test
     public final void testStartUser_currentUserSecondaryDisplay() {
-        int result = mMediator.startUser(USER_ID, USER_ID, FG, SECONDARY_DISPLAY_ID);
-        assertStartUserResult(result, START_USER_RESULT_FAILURE);
+        int result = mMediator.startOnly(USER_ID, USER_ID, FG, SECONDARY_DISPLAY_ID);
+        assertStartUserResult(result, USER_ASSIGNMENT_RESULT_FAILURE);
 
         assertCurrentUser(INITIAL_CURRENT_USER_ID);
         assertIsNotCurrentUserOrRunningProfileOfCurrentUser(USER_ID);
         assertStartedProfileGroupIdOf(USER_ID, NO_PROFILE_GROUP_ID);
+
+        stopUserAndAssertState(USER_ID);
     }
 
     @Test
     public final void testStartUser_profileBg_parentStarted() {
         mockCurrentUser(PARENT_USER_ID);
 
-        int result = mMediator.startUser(PROFILE_USER_ID, PARENT_USER_ID, BG, DEFAULT_DISPLAY);
-        assertStartUserResult(result, START_USER_RESULT_SUCCESS_VISIBLE);
+        int result = mMediator.startOnly(PROFILE_USER_ID, PARENT_USER_ID, BG, DEFAULT_DISPLAY);
+        assertStartUserResult(result, USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE);
 
         assertCurrentUser(PARENT_USER_ID);
         assertIsCurrentUserOrRunningProfileOfCurrentUser(PROFILE_USER_ID);
         assertStartedProfileGroupIdOf(PROFILE_USER_ID, PARENT_USER_ID);
-        assertIsStartedProfile(PROFILE_USER_ID);
+        assertProfileIsStarted(PROFILE_USER_ID);
+
+        stopUserAndAssertState(USER_ID);
     }
 
     @Test
     public final void testStartUser_profileBg_parentNotStarted() {
-        int result = mMediator.startUser(PROFILE_USER_ID, PARENT_USER_ID, BG, DEFAULT_DISPLAY);
-        assertStartUserResult(result, START_USER_RESULT_SUCCESS_INVISIBLE);
+        int result = mMediator.startOnly(PROFILE_USER_ID, PARENT_USER_ID, BG, DEFAULT_DISPLAY);
+        assertStartUserResult(result, USER_ASSIGNMENT_RESULT_SUCCESS_INVISIBLE);
 
         assertCurrentUser(INITIAL_CURRENT_USER_ID);
         assertIsNotCurrentUserOrRunningProfileOfCurrentUser(PROFILE_USER_ID);
         assertStartedProfileGroupIdOf(PROFILE_USER_ID, PARENT_USER_ID);
-        assertIsStartedProfile(PROFILE_USER_ID);
+        assertProfileIsStarted(PROFILE_USER_ID);
+
+        stopUserAndAssertState(USER_ID);
     }
 
     @Test
     public final void testStartUser_profileBg_secondaryDisplay() {
-        int result = mMediator.startUser(PROFILE_USER_ID, PARENT_USER_ID, BG, SECONDARY_DISPLAY_ID);
-        assertStartUserResult(result, START_USER_RESULT_FAILURE);
+        int result = mMediator.startOnly(PROFILE_USER_ID, PARENT_USER_ID, BG, SECONDARY_DISPLAY_ID);
+        assertStartUserResult(result, USER_ASSIGNMENT_RESULT_FAILURE);
 
         assertCurrentUser(INITIAL_CURRENT_USER_ID);
         assertIsNotCurrentUserOrRunningProfileOfCurrentUser(PROFILE_USER_ID);
+
+        stopUserAndAssertState(USER_ID);
     }
 
     @Test
     public final void testStartUser_profileFg() {
-        int result = mMediator.startUser(PROFILE_USER_ID, PARENT_USER_ID, FG, DEFAULT_DISPLAY);
-        assertStartUserResult(result, START_USER_RESULT_FAILURE);
+        int result = mMediator.startOnly(PROFILE_USER_ID, PARENT_USER_ID, FG, DEFAULT_DISPLAY);
+        assertStartUserResult(result, USER_ASSIGNMENT_RESULT_FAILURE);
 
         assertCurrentUser(INITIAL_CURRENT_USER_ID);
         assertIsNotCurrentUserOrRunningProfileOfCurrentUser(PROFILE_USER_ID);
-        assertStartedProfileGroupIdOf(PROFILE_USER_ID, NO_PROFILE_GROUP_ID);
+
+        stopUserAndAssertState(USER_ID);
     }
 
     @Test
     public final void testStartUser_profileFgSecondaryDisplay() {
-        int result = mMediator.startUser(PROFILE_USER_ID, PARENT_USER_ID, FG, SECONDARY_DISPLAY_ID);
+        int result = mMediator.startOnly(PROFILE_USER_ID, PARENT_USER_ID, FG, SECONDARY_DISPLAY_ID);
 
-        assertStartUserResult(result, START_USER_RESULT_FAILURE);
+        assertStartUserResult(result, USER_ASSIGNMENT_RESULT_FAILURE);
         assertCurrentUser(INITIAL_CURRENT_USER_ID);
+
+        stopUserAndAssertState(USER_ID);
     }
 
     @Test
     public final void testGetStartedProfileGroupId_whenStartedWithNoProfileGroupId() {
-        int result = mMediator.startUser(USER_ID, NO_PROFILE_GROUP_ID, FG, DEFAULT_DISPLAY);
-        assertStartUserResult(result, START_USER_RESULT_SUCCESS_VISIBLE);
+        int result = mMediator.startOnly(USER_ID, NO_PROFILE_GROUP_ID, FG, DEFAULT_DISPLAY);
+        assertStartUserResult(result, USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE);
 
         assertWithMessage("shit").that(mMediator.getStartedProfileGroupId(USER_ID))
                 .isEqualTo(USER_ID);
@@ -386,59 +399,78 @@ abstract class UserVisibilityMediatorTestCase extends ExtendedMockitoTestCase {
                 .isEqualTo(USER_ID);
     }
 
+    /**
+     * Stops the given user and assert the proper state is set.
+     *
+     * <p>This method should be called at the end of tests that starts a user, so it can test
+     * {@code stopUser()} as well (technically speaking, {@code stopUser()} should be tested on its
+     * own methods, but it depends on the user being started at first place, so pragmatically
+     * speaking, it's better to "reuse" such tests for both (start and stop)
+     */
+    private void stopUserAndAssertState(@UserIdInt int userId) {
+        mMediator.stopUser(userId);
+
+        assertUserIsStopped(userId);
+        assertNoUserAssignedToDisplay();
+    }
+
     // TODO(b/244644281): remove if start & assign are merged; if they aren't, add a note explaining
     // it's not meant to be used to test startUser() itself.
     protected void mockCurrentUser(@UserIdInt int userId) {
         Log.d(TAG, "mockCurrentUser(" + userId + ")");
-        int result = mMediator.startUser(userId, userId, FG, DEFAULT_DISPLAY);
-        if (result != START_USER_RESULT_SUCCESS_VISIBLE) {
+        int result = mMediator.startOnly(userId, userId, FG, DEFAULT_DISPLAY);
+        if (result != USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE) {
             throw new IllegalStateException("Failed to mock current user " + userId
-                    + ": mediator returned " + startUserResultToString(result));
+                    + ": mediator returned " + userAssignmentResultToString(result));
         }
     }
 
-    // TODO(b/244644281): remove if start & assign are merged; if they aren't, add a note explaining
+    // TODO(b/244644281): remove when start & assign are merged; or add a note explaining
     // it's not meant to be used to test startUser() itself.
     protected void startDefaultProfile() {
         mockCurrentUser(PARENT_USER_ID);
         Log.d(TAG, "starting default profile (" + PROFILE_USER_ID + ") in background after starting"
                 + " its parent (" + PARENT_USER_ID + ") on foreground");
 
-        int result = mMediator.startUser(PROFILE_USER_ID, PARENT_USER_ID, BG, DEFAULT_DISPLAY);
-        if (result != START_USER_RESULT_SUCCESS_VISIBLE) {
+        int result = mMediator.startOnly(PROFILE_USER_ID, PARENT_USER_ID, BG, DEFAULT_DISPLAY);
+        if (result != USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE) {
             throw new IllegalStateException("Failed to start profile user " + PROFILE_USER_ID
-                    + ": mediator returned " + startUserResultToString(result));
+                    + ": mediator returned " + userAssignmentResultToString(result));
         }
     }
 
-    // TODO(b/244644281): remove if start & assign are merged; if they aren't, add a note explaining
+    // TODO(b/244644281): remove when start & assign are merged; or add a note explaining
     // it's not meant to be used to test stopUser() itself.
     protected void stopDefaultProfile() {
         Log.d(TAG, "stopping default profile");
         mMediator.stopUser(PROFILE_USER_ID);
     }
 
-    // TODO(b/244644281): remove if start & assign are merged; if they aren't, add a note explaining
+    // TODO(b/244644281): remove when start & assign are merged; or add a note explaining
     // it's not meant to be used to test assignUserToDisplay() itself.
     protected final void assignUserToDisplay(@UserIdInt int userId, int displayId) {
         Log.d(TAG, "assignUserToDisplay(" + userId + ", " + displayId + ")");
-        int result = mMediator.startUser(userId, userId, BG, displayId);
-        if (result != START_USER_RESULT_SUCCESS_INVISIBLE) {
+        int result = mMediator.startOnly(userId, userId, BG, displayId);
+        if (result != USER_ASSIGNMENT_RESULT_SUCCESS_INVISIBLE) {
             throw new IllegalStateException("Failed to startuser " + userId
-                    + " on background: mediator returned " + startUserResultToString(result));
+                    + " on background: mediator returned " + userAssignmentResultToString(result));
         }
         mMediator.assignUserToDisplay(userId, userId, displayId);
 
     }
 
+    // TODO(b/244644281): remove when start & assign are merged; or rename to
+    // assertNoUserAssignedToSecondaryDisplays
     protected final void assertNoUserAssignedToDisplay() {
-        assertWithMessage("uses on secondary displays")
+        assertWithMessage("users on secondary displays")
                 .that(mMediator.getUsersOnSecondaryDisplays())
                 .isEmpty();
     }
 
+    // TODO(b/244644281): remove when start & assign are merged; or rename to
+    // assertUserAssignedToSecondaryDisplay
     protected final void assertUserAssignedToDisplay(@UserIdInt int userId, int displayId) {
-        assertWithMessage("uses on secondary displays")
+        assertWithMessage("users on secondary displays")
                 .that(mMediator.getUsersOnSecondaryDisplays())
                 .containsExactly(userId, displayId);
     }
@@ -446,24 +478,44 @@ abstract class UserVisibilityMediatorTestCase extends ExtendedMockitoTestCase {
     private void assertCurrentUser(@UserIdInt int userId) {
         assertWithMessage("mediator.getCurrentUserId()").that(mMediator.getCurrentUserId())
                 .isEqualTo(userId);
+        if (userId != INITIAL_CURRENT_USER_ID) {
+            assertUserIsStarted(userId);
+        }
     }
 
-    private void assertIsStartedProfile(@UserIdInt int userId) {
+    private void assertUserIsStarted(@UserIdInt int userId) {
+        assertWithMessage("mediator.isStarted(%s)", userId).that(mMediator.isStartedUser(userId))
+                .isTrue();
+    }
+
+    private void assertUserIsStopped(@UserIdInt int userId) {
+        assertWithMessage("mediator.isStarted(%s)", userId).that(mMediator.isStartedUser(userId))
+                .isFalse();
+    }
+
+    private void assertProfileIsStarted(@UserIdInt int userId) {
         assertWithMessage("mediator.isStartedProfile(%s)", userId)
                 .that(mMediator.isStartedProfile(userId))
                 .isTrue();
+        assertUserIsStarted(userId);
     }
 
-    private void assertStartedProfileGroupIdOf(@UserIdInt int profileId, @UserIdInt int parentId) {
-        assertWithMessage("mediator.getStartedProfileGroupId(%s)", profileId)
-                .that(mMediator.getStartedProfileGroupId(profileId))
-                .isEqualTo(parentId);
+    private void assertStartedProfileGroupIdOf(@UserIdInt int userId,
+            @UserIdInt int profileGroupId) {
+        assertWithMessage("mediator.getStartedProfileGroupId(%s)", userId)
+                .that(mMediator.getStartedProfileGroupId(userId))
+                .isEqualTo(profileGroupId);
     }
 
-    private void assertIsCurrentUserOrRunningProfileOfCurrentUser(int userId) {
+    private void assertIsCurrentUserOrRunningProfileOfCurrentUser(@UserIdInt int userId) {
         assertWithMessage("mediator.isCurrentUserOrRunningProfileOfCurrentUser(%s)", userId)
                 .that(mMediator.isCurrentUserOrRunningProfileOfCurrentUser(userId))
                 .isTrue();
+        if (mMediator.getCurrentUserId() == userId) {
+            assertUserIsStarted(userId);
+        } else {
+            assertProfileIsStarted(userId);
+        }
     }
 
     private void assertIsNotCurrentUserOrRunningProfileOfCurrentUser(int userId) {
@@ -474,8 +526,8 @@ abstract class UserVisibilityMediatorTestCase extends ExtendedMockitoTestCase {
 
     private void assertStartUserResult(int actualResult, int expectedResult) {
         assertWithMessage("startUser() result (where %s=%s and %s=%s)",
-                actualResult, startUserResultToString(actualResult),
-                expectedResult, startUserResultToString(expectedResult))
+                actualResult, userAssignmentResultToString(actualResult),
+                expectedResult, userAssignmentResultToString(expectedResult))
                         .that(actualResult).isEqualTo(expectedResult);
     }
 }

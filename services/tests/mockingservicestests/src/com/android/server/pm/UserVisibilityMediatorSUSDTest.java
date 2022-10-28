@@ -15,8 +15,6 @@
  */
 package com.android.server.pm;
 
-import static android.os.UserHandle.USER_SYSTEM;
-
 import static org.junit.Assert.assertThrows;
 
 import org.junit.Test;
@@ -33,6 +31,9 @@ public final class UserVisibilityMediatorSUSDTest extends UserVisibilityMediator
     public UserVisibilityMediatorSUSDTest() {
         super(/* usersOnSecondaryDisplaysEnabled= */ false);
     }
+
+    // TODO(b/244644281): when start & assign are merged, rename tests below and also call
+    // stopUserAndAssertState() at the end of them
 
     @Test
     public void testAssignUserToDisplay_otherDisplay_currentUser() {
@@ -58,16 +59,5 @@ public final class UserVisibilityMediatorSUSDTest extends UserVisibilityMediator
 
         assertThrows(UnsupportedOperationException.class, () -> mMediator
                 .assignUserToDisplay(PROFILE_USER_ID, PARENT_USER_ID, SECONDARY_DISPLAY_ID));
-    }
-
-    @Test
-    public void testUnassignUserFromDisplay_ignored() {
-        mockCurrentUser(USER_ID);
-
-        mMediator.unassignUserFromDisplay(USER_SYSTEM);
-        mMediator.unassignUserFromDisplay(USER_ID);
-        mMediator.unassignUserFromDisplay(OTHER_USER_ID);
-
-        assertNoUserAssignedToDisplay();
     }
 }
