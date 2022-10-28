@@ -248,7 +248,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Φωτεινότητα"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Αντιστροφή χρωμάτων"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Διόρθωση χρωμάτων"</string>
-    <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Ρυθμίσεις χρήστη"</string>
+    <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Διαχείριση χρηστών"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Τέλος"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Κλείσιμο"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Συνδέθηκε"</string>
