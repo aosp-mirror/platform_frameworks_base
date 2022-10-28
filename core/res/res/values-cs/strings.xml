@@ -74,6 +74,10 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Ve výchozím nastavení není funkce ID volajícího omezena. Příští hovor: Neomezeno"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Služba není zřízena."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Nastavení ID volajícího nesmíte měnit."</string>
+    <!-- no translation found for auto_data_switch_title (3286350716870518297) -->
+    <skip />
+    <!-- no translation found for auto_data_switch_content (803557715007110959) -->
+    <skip />
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Není k dispozici žádná mobilní datová služba"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Tísňová volání jsou nedostupná"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Hlasová volání nejsou k dispozici"</string>

@@ -72,6 +72,10 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"কলাৰ আইডি সীমিত নকৰিবলৈ পূর্বনির্ধাৰণ কৰা হৈছে। পৰৱৰ্তী কল: সীমিত কৰা হোৱা নাই"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"সুবিধা যোগান ধৰা হোৱা নাই।"</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"আপুনি কলাৰ আইডি ছেটিং সলনি কৰিব নোৱাৰে।"</string>
+    <!-- no translation found for auto_data_switch_title (3286350716870518297) -->
+    <skip />
+    <!-- no translation found for auto_data_switch_content (803557715007110959) -->
+    <skip />
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"কোনো ম’বাইল ডেটা সেৱা নাই"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"জৰুৰীকালীন কল কৰাৰ সুবিধা উপলব্ধ নহয়"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"কোনো ভইচ সেৱা নাই"</string>

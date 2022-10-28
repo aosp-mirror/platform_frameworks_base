@@ -73,6 +73,10 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Par défaut, les numéros des appelants ne sont pas restreints. Appel suivant : non restreint"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Ce service n\'est pas pris en charge."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Impossible de modifier le paramètre relatif au numéro de l\'appelant."</string>
+    <!-- no translation found for auto_data_switch_title (3286350716870518297) -->
+    <skip />
+    <!-- no translation found for auto_data_switch_content (803557715007110959) -->
+    <skip />
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Aucun service de données mobiles"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Appels d\'urgence non disponibles"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Aucun service vocal"</string>

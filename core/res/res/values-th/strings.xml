@@ -72,6 +72,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"หมายเลขผู้โทรได้รับการตั้งค่าเริ่มต้นเป็นไม่จำกัด การโทรครั้งต่อไป: ไม่จำกัด"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"ไม่มีการนำเสนอบริการ"</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"คุณไม่สามารถเปลี่ยนการตั้งค่าหมายเลขผู้โทร"</string>
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"เปลี่ยนไปใช้อินเทอร์เน็ตมือถือของ <xliff:g id="CARRIERDISPLAY">%s</xliff:g> แล้ว"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"คุณเปลี่ยนตัวเลือกนี้ได้ทุกเมื่อในการตั้งค่า"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"ไม่มีบริการเน็ตมือถือ"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"หมายเลขฉุกเฉินไม่พร้อมใช้งาน"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"ไม่มีบริการเสียง"</string>

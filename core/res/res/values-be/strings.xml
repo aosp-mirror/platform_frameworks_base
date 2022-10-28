@@ -74,6 +74,10 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Налады ідэнтыфікатару АВН па змаўчанні: не абмяжавана. Наступны выклік: не абмежавана"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Служба не прадастаўляецца."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Вы не можаце змяніць налады ідэнтыфікатара абанента, якi тэлефануе."</string>
+    <!-- no translation found for auto_data_switch_title (3286350716870518297) -->
+    <skip />
+    <!-- no translation found for auto_data_switch_content (803557715007110959) -->
+    <skip />
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Мабільная перадача даных недаступная"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Экстранныя выклікі недаступныя"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Няма сэрвісу галасавых выклікаў"</string>

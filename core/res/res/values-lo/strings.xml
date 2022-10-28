@@ -72,6 +72,10 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"ໝາຍເລກຜູ່ໂທ ໄດ້ຮັບການຕັ້ງຄ່າເລີ່ມຕົ້ນເປັນ ບໍ່ຖືກຈຳກັດ. ການໂທຄັ້ງຕໍ່ໄປ: ບໍ່ຖືກຈຳກັດ."</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"ບໍ່ໄດ້ເປີດໃຊ້ບໍລິການ."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"ທ່ານບໍ່ສາມາດປ່ຽນແປງການຕັ້ງຄ່າ Caller ID"</string>
+    <!-- no translation found for auto_data_switch_title (3286350716870518297) -->
+    <skip />
+    <!-- no translation found for auto_data_switch_content (803557715007110959) -->
+    <skip />
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"ບໍ່ມີບໍລິການອິນເຕີເນັດມືຖື"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"ບໍ່ສາມາດໃຊ້ການໂທສຸກເສີນໄດ້"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"ບໍ່ມີບໍລິການໂທສຽງ"</string>

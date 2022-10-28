@@ -72,6 +72,10 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"ਪ੍ਰਤਿਬੰਧਿਤ ਨਾ ਕਰਨ ਲਈ ਕਾਲਰ ਆਈ.ਡੀ. ਪੂਰਵ-ਨਿਰਧਾਰਤ। ਅਗਲੀ ਕਾਲ: ਪ੍ਰਤਿਬੰਧਿਤ ਨਹੀਂ"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"ਸੇਵਾ ਪ੍ਰਬੰਧਿਤ ਨਹੀਂ ਹੈ।"</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"ਤੁਸੀਂ ਕਾਲਰ ਆਈ.ਡੀ. ਸੈਟਿੰਗ ਨਹੀਂ ਬਦਲ ਸਕਦੇ।"</string>
+    <!-- no translation found for auto_data_switch_title (3286350716870518297) -->
+    <skip />
+    <!-- no translation found for auto_data_switch_content (803557715007110959) -->
+    <skip />
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"ਕੋਈ ਮੋਬਾਈਲ ਡਾਟਾ ਸੇਵਾ ਨਹੀਂ"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"ਸੰਕਟਕਾਲੀਨ ਕਾਲਿੰਗ ਉਪਲਬਧ ਨਹੀਂ"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"ਕੋਈ ਆਵਾਜ਼ੀ ਸੇਵਾ ਨਹੀਂ"</string>

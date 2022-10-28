@@ -72,6 +72,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"നിയന്ത്രിക്കേണ്ടതല്ലാത്ത സ്ഥിര കോളർ ഐഡികൾ. അടുത്ത കോൾ: നിയന്ത്രിച്ചിട്ടില്ല"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"സേവനം വ്യവസ്ഥ ചെയ്‌തിട്ടില്ല."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"വിളിച്ച നമ്പർ ക്രമീകരണം നിങ്ങൾക്ക് മാറ്റാനാവില്ല."</string>
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"<xliff:g id="CARRIERDISPLAY">%s</xliff:g> എന്നതിലേക്ക് ഡാറ്റ മാറ്റി"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"നിങ്ങൾക്ക് ക്രമീകരണത്തിൽ ഏതുസമയത്തും ഇത് മാറ്റാം"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"മൊബൈൽ ഡാറ്റാ സേവനമില്ല"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"എമർജൻസി കോളിംഗ് ലഭ്യമല്ല"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"വോയ്സ് സേവനമില്ല"</string>

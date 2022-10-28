@@ -72,6 +72,10 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"ডিফল্টরূপে কলার আইডি সীমাবদ্ধ করা থাকে না৷ পরবর্তী কল: সীমাবদ্ধ নয়"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"পরিষেবা প্রস্তুত নয়৷"</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"আপনি কলার আইডি এর সেটিংস পরিবর্তন করতে পারবেন না৷"</string>
+    <!-- no translation found for auto_data_switch_title (3286350716870518297) -->
+    <skip />
+    <!-- no translation found for auto_data_switch_content (803557715007110959) -->
+    <skip />
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"মোবাইল ডেটা পরিষেবা নেই"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"জরুরি কল করা যাবে না"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"ভয়েস পরিষেবা নেই"</string>
