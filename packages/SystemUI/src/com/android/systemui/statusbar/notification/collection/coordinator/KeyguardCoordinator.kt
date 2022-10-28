@@ -13,28 +13,46 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.android.systemui.statusbar.notification.collection.coordinator
 
-import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope
-import com.android.systemui.statusbar.notification.interruption.KeyguardNotificationVisibilityProvider
-import com.android.systemui.statusbar.notification.collection.provider.SectionHeaderVisibilityProvider
+import androidx.annotation.VisibleForTesting
+import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.StatusBarState
+import com.android.systemui.statusbar.notification.NotifPipelineFlags
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
-import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter
+import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
+import com.android.systemui.statusbar.notification.collection.provider.SectionHeaderVisibilityProvider
+import com.android.systemui.statusbar.notification.interruption.KeyguardNotificationVisibilityProvider
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 /**
  * Filters low priority and privacy-sensitive notifications from the lockscreen, and hides section
  * headers on the lockscreen.
  */
 @CoordinatorScope
-class KeyguardCoordinator @Inject constructor(
+class KeyguardCoordinator
+@Inject
+constructor(
     private val keyguardNotificationVisibilityProvider: KeyguardNotificationVisibilityProvider,
+    private val keyguardRepository: KeyguardRepository,
+    private val notifPipelineFlags: NotifPipelineFlags,
+    @Application private val scope: CoroutineScope,
     private val sectionHeaderVisibilityProvider: SectionHeaderVisibilityProvider,
-    private val statusBarStateController: StatusBarStateController
+    private val statusBarStateController: StatusBarStateController,
 ) : Coordinator {
+
+    private val unseenNotifications = mutableSetOf<NotificationEntry>()
 
     override fun attach(pipeline: NotifPipeline) {
         setupInvalidateNotifListCallbacks()
@@ -42,12 +60,69 @@ class KeyguardCoordinator @Inject constructor(
         pipeline.addFinalizeFilter(notifFilter)
         keyguardNotificationVisibilityProvider.addOnStateChangedListener(::invalidateListFromFilter)
         updateSectionHeadersVisibility()
+        if (notifPipelineFlags.shouldFilterUnseenNotifsOnKeyguard) {
+            attachUnseenFilter(pipeline)
+        }
     }
 
-    private val notifFilter: NotifFilter = object : NotifFilter(TAG) {
-        override fun shouldFilterOut(entry: NotificationEntry, now: Long): Boolean =
-            keyguardNotificationVisibilityProvider.shouldHideNotification(entry)
+    private fun attachUnseenFilter(pipeline: NotifPipeline) {
+        pipeline.addFinalizeFilter(unseenNotifFilter)
+        pipeline.addCollectionListener(collectionListener)
+        scope.launch { clearUnseenWhenKeyguardIsDismissed() }
     }
+
+    private suspend fun clearUnseenWhenKeyguardIsDismissed() {
+        // Use collectLatest so that the suspending block is cancelled if isKeyguardShowing changes
+        // during the timeout period
+        keyguardRepository.isKeyguardShowing.collectLatest { isKeyguardShowing ->
+            if (!isKeyguardShowing) {
+                unseenNotifFilter.invalidateList("keyguard no longer showing")
+                delay(SEEN_TIMEOUT)
+                unseenNotifications.clear()
+            }
+        }
+    }
+
+    private val collectionListener =
+        object : NotifCollectionListener {
+            override fun onEntryAdded(entry: NotificationEntry) {
+                if (keyguardRepository.isKeyguardShowing()) {
+                    unseenNotifications.add(entry)
+                }
+            }
+
+            override fun onEntryUpdated(entry: NotificationEntry) {
+                if (keyguardRepository.isKeyguardShowing()) {
+                    unseenNotifications.add(entry)
+                }
+            }
+
+            override fun onEntryRemoved(entry: NotificationEntry, reason: Int) {
+                unseenNotifications.remove(entry)
+            }
+        }
+
+    @VisibleForTesting
+    internal val unseenNotifFilter =
+        object : NotifFilter("$TAG-unseen") {
+            override fun shouldFilterOut(entry: NotificationEntry, now: Long): Boolean =
+                when {
+                    // Don't apply filter if the keyguard isn't currently showing
+                    !keyguardRepository.isKeyguardShowing() -> false
+                    // Don't apply the filter if the notification is unseen
+                    unseenNotifications.contains(entry) -> false
+                    // Don't apply the filter to (non-promoted) group summaries
+                    //  - summary will be pruned if necessary, depending on if children are filtered
+                    entry.parent?.summary == entry -> false
+                    else -> true
+                }
+        }
+
+    private val notifFilter: NotifFilter =
+        object : NotifFilter(TAG) {
+            override fun shouldFilterOut(entry: NotificationEntry, now: Long): Boolean =
+                keyguardNotificationVisibilityProvider.shouldHideNotification(entry)
+        }
 
     // TODO(b/206118999): merge this class with SensitiveContentCoordinator which also depends on
     //  these same updates
@@ -67,5 +142,6 @@ class KeyguardCoordinator @Inject constructor(
 
     companion object {
         private const val TAG = "KeyguardCoordinator"
+        private val SEEN_TIMEOUT = 5.seconds
     }
 }
