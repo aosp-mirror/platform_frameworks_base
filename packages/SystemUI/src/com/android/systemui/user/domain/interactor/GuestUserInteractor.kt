@@ -208,7 +208,12 @@ constructor(
             if (newGuestId == UserHandle.USER_NULL) {
                 Log.e(TAG, "Could not create new guest, switching back to system user")
                 switchUser(UserHandle.USER_SYSTEM)
-                withContext(backgroundDispatcher) { manager.removeUser(currentUser.id) }
+                withContext(backgroundDispatcher) {
+                    manager.removeUserWhenPossible(
+                        UserHandle.of(currentUser.id),
+                        /* overrideDevicePolicy= */ false
+                    )
+                }
                 try {
                     WindowManagerGlobal.getWindowManagerService().lockNow(/* options= */ null)
                 } catch (e: RemoteException) {
@@ -222,13 +227,21 @@ constructor(
 
             switchUser(newGuestId)
 
-            withContext(backgroundDispatcher) { manager.removeUser(currentUser.id) }
+            withContext(backgroundDispatcher) {
+                manager.removeUserWhenPossible(
+                    UserHandle.of(currentUser.id),
+                    /* overrideDevicePolicy= */ false
+                )
+            }
         } else {
             if (repository.isGuestUserAutoCreated) {
                 repository.isGuestUserResetting = true
             }
             switchUser(targetUserId)
-            manager.removeUser(currentUser.id)
+            manager.removeUserWhenPossible(
+                UserHandle.of(currentUser.id),
+                /* overrideDevicePolicy= */ false
+            )
         }
     }
 
