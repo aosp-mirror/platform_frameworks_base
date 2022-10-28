@@ -480,7 +480,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         } else if (mKeyguardStateController.isShowing()  && !hideBouncerOverDream) {
             if (!isWakeAndUnlocking()
                     && !(mBiometricUnlockController.getMode() == MODE_DISMISS_BOUNCER)
-                    && !mCentralSurfaces.isInLaunchTransition()
+                    && !mNotificationPanelViewController.isLaunchTransitionFinished()
                     && !isUnlockCollapsing()) {
                 if (mBouncer != null) {
                     mBouncer.setExpansion(fraction);
@@ -849,7 +849,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         if (isShowing && isOccluding) {
             SysUiStatsLog.write(SysUiStatsLog.KEYGUARD_STATE_CHANGED,
                     SysUiStatsLog.KEYGUARD_STATE_CHANGED__STATE__OCCLUDED);
-            if (mCentralSurfaces.isInLaunchTransition()) {
+            if (mNotificationPanelViewController.isLaunchTransitionFinished()) {
                 final Runnable endRunnable = new Runnable() {
                     @Override
                     public void run() {
@@ -903,7 +903,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             } else {
                 mBouncerInteractor.startDisappearAnimation(finishRunnable);
             }
-            mCentralSurfaces.onBouncerPreHideAnimation();
+            mNotificationPanelViewController.startBouncerPreHideAnimation();
 
             // We update the state (which will show the keyguard) only if an animation will run on
             // the keyguard. If there is no animation, we wait before updating the state so that we
@@ -935,7 +935,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         long uptimeMillis = SystemClock.uptimeMillis();
         long delay = Math.max(0, startTime + HIDE_TIMING_CORRECTION_MS - uptimeMillis);
 
-        if (mCentralSurfaces.isInLaunchTransition()
+        if (mNotificationPanelViewController.isLaunchTransitionFinished()
                 || mKeyguardStateController.isFlingingToDismissKeyguard()) {
             final boolean wasFlingingToDismissKeyguard =
                     mKeyguardStateController.isFlingingToDismissKeyguard();
@@ -1313,7 +1313,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     @Override
     public boolean shouldDisableWindowAnimationsForUnlock() {
-        return mCentralSurfaces.isInLaunchTransition();
+        return mNotificationPanelViewController.isLaunchTransitionFinished();
     }
 
     @Override
