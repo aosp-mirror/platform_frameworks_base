@@ -599,7 +599,6 @@ public class ImageWallpaper extends WallpaperService {
             getDisplayContext().getSystemService(DisplayManager.class)
                     .unregisterDisplayListener(this);
             mWallpaperLocalColorExtractor.cleanUp();
-            unloadBitmap();
         }
 
         @Override
@@ -677,9 +676,14 @@ public class ImageWallpaper extends WallpaperService {
         void drawFrameOnCanvas(Bitmap bitmap) {
             Trace.beginSection("ImageWallpaper.CanvasEngine#drawFrame");
             Surface surface = mSurfaceHolder.getSurface();
-            Canvas canvas = mWideColorGamut
-                    ? surface.lockHardwareWideColorGamutCanvas()
-                    : surface.lockHardwareCanvas();
+            Canvas canvas = null;
+            try {
+                canvas = mWideColorGamut
+                        ? surface.lockHardwareWideColorGamutCanvas()
+                        : surface.lockHardwareCanvas();
+            } catch (IllegalStateException e) {
+                Log.w(TAG, "Unable to lock canvas", e);
+            }
             if (canvas != null) {
                 Rect dest = mSurfaceHolder.getSurfaceFrame();
                 try {
@@ -707,17 +711,6 @@ public class ImageWallpaper extends WallpaperService {
                     mBitmapUsages = 0;
                     unloadBitmapInternal();
                 }
-            }
-        }
-
-        private void unloadBitmap() {
-            mBackgroundExecutor.execute(this::unloadBitmapSynchronized);
-        }
-
-        private void unloadBitmapSynchronized() {
-            synchronized (mLock) {
-                mBitmapUsages = 0;
-                unloadBitmapInternal();
             }
         }
 
