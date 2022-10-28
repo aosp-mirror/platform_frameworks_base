@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.credentialmanager.jetpack
+package com.android.credentialmanager.jetpack.provider
 
 import android.app.slice.Slice
-import android.credentials.ui.Entry
 import android.graphics.drawable.Icon
 
 /**
@@ -25,29 +24,23 @@ import android.graphics.drawable.Icon
  *
  * TODO: move to jetpack.
  */
-class ActionUi(
-  val icon: Icon,
-  val text: CharSequence,
-  val subtext: CharSequence?,
+abstract class CredentialEntryUi(
+  val credentialTypeIcon: Icon,
+  val profileIcon: Icon?,
+  val lastUsedTimeMillis: Long?,
+  val note: CharSequence?,
 ) {
   companion object {
-    fun fromSlice(slice: Slice): ActionUi {
-      var icon: Icon? = null
-      var text: CharSequence? = null
-      var subtext: CharSequence? = null
-
-      val items = slice.items
-      items.forEach {
-        if (it.hasHint(Entry.HINT_ACTION_ICON)) {
-          icon = it.icon
-        } else if (it.hasHint(Entry.HINT_ACTION_TITLE)) {
-          text = it.text
-        } else if (it.hasHint(Entry.HINT_ACTION_SUBTEXT)) {
-          subtext = it.text
-        }
+    fun fromSlice(slice: Slice): CredentialEntryUi {
+      return when (slice.spec?.type) {
+        TYPE_PUBLIC_KEY_CREDENTIAL -> PasskeyCredentialEntryUi.fromSlice(slice)
+        TYPE_PASSWORD_CREDENTIAL -> PasswordCredentialEntryUi.fromSlice(slice)
+        else -> throw IllegalArgumentException("Unexpected type: ${slice.spec?.type}")
       }
-      // TODO: fail NPE more elegantly.
-      return ActionUi(icon!!, text!!, subtext)
     }
+
+    const val TYPE_PUBLIC_KEY_CREDENTIAL: String =
+      "androidx.credentials.TYPE_PUBLIC_KEY_CREDENTIAL"
+    const val TYPE_PASSWORD_CREDENTIAL: String = "androidx.credentials.TYPE_PASSWORD"
   }
 }
