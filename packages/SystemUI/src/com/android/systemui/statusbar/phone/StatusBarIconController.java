@@ -382,15 +382,18 @@ public interface StatusBarIconController {
             mIconSize = mContext.getResources().getDimensionPixelSize(
                     com.android.internal.R.dimen.status_bar_icon_size);
 
-            if (statusBarPipelineFlags.useNewMobileIcons()) {
-                // This starts the flow for the new pipeline, and will notify us of changes
+            if (statusBarPipelineFlags.runNewMobileIconsBackend()) {
+                // This starts the flow for the new pipeline, and will notify us of changes if
+                // {@link StatusBarPipelineFlags#useNewMobileIcons} is also true.
                 mMobileIconsViewModel = mobileUiAdapter.createMobileIconsViewModel();
                 MobileIconsBinder.bind(mGroup, mMobileIconsViewModel);
             } else {
                 mMobileIconsViewModel = null;
             }
 
-            if (statusBarPipelineFlags.useNewWifiIcon()) {
+            if (statusBarPipelineFlags.runNewWifiIconBackend()) {
+                // This starts the flow for the new pipeline, and will notify us of changes if
+                // {@link StatusBarPipelineFlags#useNewWifiIcon} is also true.
                 mWifiViewModel = wifiUiAdapter.bindGroup(mGroup, location);
             } else {
                 mWifiViewModel = null;

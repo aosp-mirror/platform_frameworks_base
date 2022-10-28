@@ -23,6 +23,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.statusbar.phone.StatusBarIconController
 import com.android.systemui.statusbar.phone.StatusBarLocation
+import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
 import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.LocationBasedWifiViewModel
 import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.WifiViewModel
 import javax.inject.Inject
@@ -43,6 +44,7 @@ class WifiUiAdapter
 constructor(
     private val iconController: StatusBarIconController,
     private val wifiViewModel: WifiViewModel,
+    private val statusBarPipelineFlags: StatusBarPipelineFlags,
 ) {
     /**
      * Binds the container for all the status bar icons to a view model, so that we inflate the wifi
@@ -67,7 +69,11 @@ constructor(
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
                     locationViewModel.wifiIcon.collect { wifiIcon ->
-                        if (wifiIcon != null) {
+                        // Only notify the icon controller if we want to *render* the new icon.
+                        // Note that this flow may still run if
+                        // [statusBarPipelineFlags.runNewWifiIconBackend] is true because we may
+                        // want to get the logging data without rendering.
+                        if (wifiIcon != null && statusBarPipelineFlags.useNewWifiIcon()) {
                             iconController.setNewWifiIcon()
                         }
                     }
