@@ -331,6 +331,10 @@ void PointerController::dump(std::string& dump) {
     for (const auto& info : mLocked.mDisplayInfos) {
         info.dump(dump, INDENT3);
     }
+    dump += INDENT2 "Spot Controllers:\n";
+    for (const auto& [_, spotController] : mLocked.spotControllers) {
+        spotController.dump(dump, INDENT3);
+    }
 }
 
 } // namespace android
