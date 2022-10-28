@@ -60,6 +60,10 @@ object ProgressBarPageProvider : SettingsPageProvider {
             }
     }
 
+    override fun getTitle(arguments: Bundle?): String {
+        return TITLE
+    }
+
     @Composable
     override fun Page(arguments: Bundle?) {
         // Mocks a loading time of 2 seconds.
@@ -69,7 +73,7 @@ object ProgressBarPageProvider : SettingsPageProvider {
             loading = false
         }
 
-        RegularScaffold(title = TITLE) {
+        RegularScaffold(title = getTitle(arguments)) {
             // Auto update the progress and finally jump tp 0.4f.
             var progress by remember { mutableStateOf(0f) }
             LaunchedEffect(Unit) {

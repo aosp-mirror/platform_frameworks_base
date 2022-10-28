@@ -19,6 +19,7 @@ package com.android.settingslib.spa.framework.common
 import android.os.Bundle
 import androidx.compose.runtime.Composable
 import androidx.navigation.NamedNavArgument
+import com.android.settingslib.spa.widget.scaffold.RegularScaffold
 
 /**
  * An SettingsPageProvider which is used to create Settings page instances.
@@ -36,13 +37,19 @@ interface SettingsPageProvider {
     val parameter: List<NamedNavArgument>
         get() = emptyList()
 
-    /** The [Composable] used to render this page. */
-    @Composable
-    fun Page(arguments: Bundle?)
+    fun getTitle(arguments: Bundle?): String = displayName ?: name
 
     fun buildEntry(arguments: Bundle?): List<SettingsEntry> = emptyList()
 
-    fun getTitle(arguments: Bundle?): String = displayName ?: name
+    /** The [Composable] used to render this page. */
+    @Composable
+    fun Page(arguments: Bundle?) {
+        RegularScaffold(title = getTitle(arguments)) {
+            for (entry in buildEntry(arguments)) {
+                entry.UiLayout()
+            }
+        }
+    }
 }
 
 fun SettingsPageProvider.createSettingsPage(arguments: Bundle? = null): SettingsPage {

@@ -48,41 +48,40 @@ object CategoryPageProvider : SettingsPageProvider {
             }
     }
 
+    override fun getTitle(arguments: Bundle?): String {
+        return TITLE
+    }
+
     @Composable
     override fun Page(arguments: Bundle?) {
-        CategoryPage()
-    }
-}
-
-@Composable
-private fun CategoryPage() {
-    RegularScaffold(title = TITLE) {
-        CategoryTitle("Category A")
-        Preference(remember {
-            object : PreferenceModel {
-                override val title = "Preference 1"
-                override val summary = stateOf("Summary 1")
-            }
-        })
-        Preference(remember {
-            object : PreferenceModel {
-                override val title = "Preference 2"
-                override val summary = stateOf("Summary 2")
-            }
-        })
-        Category("Category B") {
+        RegularScaffold(title = getTitle(arguments)) {
+            CategoryTitle("Category A")
             Preference(remember {
                 object : PreferenceModel {
-                    override val title = "Preference 3"
-                    override val summary = stateOf("Summary 3")
+                    override val title = "Preference 1"
+                    override val summary = stateOf("Summary 1")
                 }
             })
             Preference(remember {
                 object : PreferenceModel {
-                    override val title = "Preference 4"
-                    override val summary = stateOf("Summary 4")
+                    override val title = "Preference 2"
+                    override val summary = stateOf("Summary 2")
                 }
             })
+            Category("Category B") {
+                Preference(remember {
+                    object : PreferenceModel {
+                        override val title = "Preference 3"
+                        override val summary = stateOf("Summary 3")
+                    }
+                })
+                Preference(remember {
+                    object : PreferenceModel {
+                        override val title = "Preference 4"
+                        override val summary = stateOf("Summary 4")
+                    }
+                })
+            }
         }
     }
 }

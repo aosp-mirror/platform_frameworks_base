@@ -49,9 +49,13 @@ object SettingsPagerPageProvider : SettingsPageProvider {
             }
     }
 
+    override fun getTitle(arguments: Bundle?): String {
+        return TITLE
+    }
+
     @Composable
     override fun Page(arguments: Bundle?) {
-        SettingsScaffold(title = TITLE) { paddingValues ->
+        SettingsScaffold(title = getTitle(arguments)) { paddingValues ->
             Box(Modifier.padding(paddingValues)) {
                 SettingsPager(listOf("Personal", "Work")) {
                     PlaceholderTitle("Page $it")
