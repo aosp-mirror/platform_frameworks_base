@@ -2072,7 +2072,7 @@
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"కెమెరా"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"మైక్రోఫోన్"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"మీ స్క్రీన్‌పై ఇతర యాప్‌ల ద్వారా ప్రదర్శించబడుతోంది"</string>
-    <string name="notification_feedback_indicator" msgid="663476517711323016">"ఫీడ్‌బ్యాక్‌ను అందించండి"</string>
+    <string name="notification_feedback_indicator" msgid="663476517711323016">"ఫీడ్‌బ్యాక్ ఇవ్వండి"</string>
     <string name="notification_feedback_indicator_alerted" msgid="6552871804121942099">"ఈ నోటిఫికేషన్, ఆటోమేటిక్ సెట్టింగ్‌కు ప్రమోట్ చేయబడింది. ఫీడ్‌బ్యాక్‌ను అందించడానికి ట్యాప్ చేయండి."</string>
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"ఈ నోటిఫికేషన్ స్థాయి నిశ్శబ్దంగా ఉండేలా తగ్గించబడింది. ఫీడ్‌బ్యాక్‌ను అందించడానికి ట్యాప్ చేయండి."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"ఈ నోటిఫికేషన్‌కు ఎక్కువ ర్యాంక్ ఇవ్వబడింది. ఫీడ్‌బ్యాక్‌ను అందించడానికి ట్యాప్ చేయండి."</string>
