@@ -31,7 +31,9 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DefaultNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileSubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.OverrideNetworkType
+import com.android.systemui.statusbar.pipeline.mobile.data.model.toDataConnectionType
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
+import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger.Companion.logOutputChange
 import java.lang.IllegalStateException
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -42,7 +44,7 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 /**
@@ -62,13 +64,15 @@ interface MobileConnectionRepository {
      * listener + model.
      */
     val subscriptionModelFlow: Flow<MobileSubscriptionModel>
+    /** Observable tracking [TelephonyManager.isDataConnectionAllowed] */
+    val dataEnabled: Flow<Boolean>
 }
 
 @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
 @OptIn(ExperimentalCoroutinesApi::class)
 class MobileConnectionRepositoryImpl(
     private val subId: Int,
-    telephonyManager: TelephonyManager,
+    private val telephonyManager: TelephonyManager,
     bgDispatcher: CoroutineDispatcher,
     logger: ConnectivityPipelineLogger,
     scope: CoroutineScope,
@@ -127,7 +131,8 @@ class MobileConnectionRepositoryImpl(
                             dataState: Int,
                             networkType: Int
                         ) {
-                            state = state.copy(dataConnectionState = dataState)
+                            state =
+                                state.copy(dataConnectionState = dataState.toDataConnectionType())
                             trySend(state)
                         }
 
@@ -160,9 +165,20 @@ class MobileConnectionRepositoryImpl(
                 telephonyManager.registerTelephonyCallback(bgDispatcher.asExecutor(), callback)
                 awaitClose { telephonyManager.unregisterTelephonyCallback(callback) }
             }
-            .onEach { logger.logOutputChange("mobileSubscriptionModel", it.toString()) }
+            .logOutputChange(logger, "MobileSubscriptionModel")
             .stateIn(scope, SharingStarted.WhileSubscribed(), state)
     }
+
+    /**
+     * There are a few cases where we will need to poll [TelephonyManager] so we can update some
+     * internal state where callbacks aren't provided. Any of those events should be merged into
+     * this flow, which can be used to trigger the polling.
+     */
+    private val telephonyPollingEvent: Flow<Unit> = subscriptionModelFlow.map {}
+
+    override val dataEnabled: Flow<Boolean> = telephonyPollingEvent.map { dataConnectionAllowed() }
+
+    private fun dataConnectionAllowed(): Boolean = telephonyManager.isDataConnectionAllowed
 
     class Factory
     @Inject
