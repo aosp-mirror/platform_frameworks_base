@@ -161,4 +161,11 @@ interface IInputManager {
     void registerBatteryListener(int deviceId, IInputDeviceBatteryListener listener);
 
     void unregisterBatteryListener(int deviceId, IInputDeviceBatteryListener listener);
+
+    // Get the bluetooth address of an input device if known, returning null if it either is not
+    // connected via bluetooth or if the address cannot be determined.
+    @EnforcePermission("BLUETOOTH")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.BLUETOOTH)")
+    String getInputDeviceBluetoothAddress(int deviceId);
 }

@@ -371,6 +371,17 @@ final class BatteryController {
         }
     }
 
+    public void notifyStylusGestureStarted(int deviceId, long eventTime) {
+        synchronized (mLock) {
+            final DeviceMonitor monitor = mDeviceMonitors.get(deviceId);
+            if (monitor == null) {
+                return;
+            }
+
+            monitor.onStylusGestureStarted(eventTime);
+        }
+    }
+
     public void dump(PrintWriter pw, String prefix) {
         synchronized (mLock) {
             final String indent = prefix + "  ";
@@ -557,6 +568,8 @@ final class BatteryController {
 
         public void onTimeout(long eventTime) {}
 
+        public void onStylusGestureStarted(long eventTime) {}
+
         // Returns the current battery state that can be used to notify listeners BatteryController.
         public State getBatteryStateForReporting() {
             return new State(mState);
@@ -595,6 +608,22 @@ final class BatteryController {
         public void onUEvent(long eventTime) {
             processChangesAndNotify(eventTime, (time) -> {
                 updateBatteryStateFromNative(time);
+                markUsiBatteryValid();
+            });
+        }
+
+        @Override
+        public void onStylusGestureStarted(long eventTime) {
+            processChangesAndNotify(eventTime, (time) -> {
+                final boolean wasValid = mValidityTimeoutCallback != null;
+                if (!wasValid && mState.capacity == 0.f) {
+                    // Handle a special case where the USI device reports a battery capacity of 0
+                    // at boot until the first battery update. To avoid wrongly sending out a
+                    // battery capacity of 0 if we detect stylus presence before the capacity
+                    // is first updated, do not validate the battery state when the state is not
+                    // valid and the capacity is 0.
+                    return;
+                }
                 markUsiBatteryValid();
             });
         }

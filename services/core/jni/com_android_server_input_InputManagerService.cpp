@@ -107,6 +107,7 @@ static struct {
     jmethodID notifyFocusChanged;
     jmethodID notifySensorEvent;
     jmethodID notifySensorAccuracy;
+    jmethodID notifyStylusGestureStarted;
     jmethodID notifyVibratorState;
     jmethodID filterInputEvent;
     jmethodID interceptKeyBeforeQueueing;
@@ -299,6 +300,7 @@ public:
     void requestPointerCapture(const sp<IBinder>& windowToken, bool enabled);
     void setCustomPointerIcon(const SpriteIcon& icon);
     void setMotionClassifierEnabled(bool enabled);
+    std::optional<std::string> getBluetoothAddress(int32_t deviceId);
 
     /* --- InputReaderPolicyInterface implementation --- */
 
@@ -312,6 +314,7 @@ public:
                                                            int32_t surfaceRotation) override;
 
     TouchAffineTransformation getTouchAffineTransformation(JNIEnv* env, jfloatArray matrixArr);
+    void notifyStylusGestureStarted(int32_t deviceId, nsecs_t eventTime) override;
 
     /* --- InputDispatcherPolicyInterface implementation --- */
 
@@ -370,37 +373,37 @@ private:
     Mutex mLock;
     struct Locked {
         // Display size information.
-        std::vector<DisplayViewport> viewports;
+        std::vector<DisplayViewport> viewports{};
 
         // True if System UI is less noticeable.
-        bool systemUiLightsOut;
+        bool systemUiLightsOut{false};
 
         // Pointer speed.
-        int32_t pointerSpeed;
+        int32_t pointerSpeed{0};
 
         // Pointer acceleration.
-        float pointerAcceleration;
+        float pointerAcceleration{android::os::IInputConstants::DEFAULT_POINTER_ACCELERATION};
 
         // True if pointer gestures are enabled.
-        bool pointerGesturesEnabled;
+        bool pointerGesturesEnabled{true};
 
         // Show touches feature enable/disable.
-        bool showTouches;
+        bool showTouches{false};
 
         // The latest request to enable or disable Pointer Capture.
-        PointerCaptureRequest pointerCaptureRequest;
+        PointerCaptureRequest pointerCaptureRequest{};
 
         // Sprite controller singleton, created on first use.
-        sp<SpriteController> spriteController;
+        sp<SpriteController> spriteController{};
 
         // Pointer controller singleton, created and destroyed as needed.
-        std::weak_ptr<PointerController> pointerController;
+        std::weak_ptr<PointerController> pointerController{};
 
         // Input devices to be disabled
-        std::set<int32_t> disabledInputDevices;
+        std::set<int32_t> disabledInputDevices{};
 
         // Associated Pointer controller display.
-        int32_t pointerDisplayId;
+        int32_t pointerDisplayId{ADISPLAY_ID_DEFAULT};
     } mLocked GUARDED_BY(mLock);
 
     std::atomic<bool> mInteractive;
@@ -419,16 +422,6 @@ NativeInputManager::NativeInputManager(jobject serviceObj, const sp<Looper>& loo
 
     mServiceObj = env->NewGlobalRef(serviceObj);
 
-    {
-        AutoMutex _l(mLock);
-        mLocked.systemUiLightsOut = false;
-        mLocked.pointerSpeed = 0;
-        mLocked.pointerAcceleration = android::os::IInputConstants::DEFAULT_POINTER_ACCELERATION;
-        mLocked.pointerGesturesEnabled = true;
-        mLocked.showTouches = false;
-        mLocked.pointerDisplayId = ADISPLAY_ID_DEFAULT;
-    }
-    mInteractive = true;
     InputManager* im = new InputManager(this, this);
     mInputManager = im;
     defaultServiceManager()->addService(String16("inputflinger"), im);
@@ -1177,6 +1170,13 @@ TouchAffineTransformation NativeInputManager::getTouchAffineTransformation(
     return transform;
 }
 
+void NativeInputManager::notifyStylusGestureStarted(int32_t deviceId, nsecs_t eventTime) {
+    JNIEnv* env = jniEnv();
+    env->CallVoidMethod(mServiceObj, gServiceClassInfo.notifyStylusGestureStarted, deviceId,
+                        eventTime);
+    checkAndClearExceptionFromCallback(env, "notifyStylusGestureStarted");
+}
+
 bool NativeInputManager::filterInputEvent(const InputEvent* inputEvent, uint32_t policyFlags) {
     ATRACE_CALL();
     jobject inputEventObj;
@@ -1485,6 +1485,10 @@ PointerIconStyle NativeInputManager::getCustomPointerIconId() {
 
 void NativeInputManager::setMotionClassifierEnabled(bool enabled) {
     mInputManager->getProcessor().setMotionClassifierEnabled(enabled);
+}
+
+std::optional<std::string> NativeInputManager::getBluetoothAddress(int32_t deviceId) {
+    return mInputManager->getReader().getBluetoothAddress(deviceId);
 }
 
 bool NativeInputManager::isPerDisplayTouchModeEnabled() {
@@ -2326,6 +2330,12 @@ static void nativeSetPointerDisplayId(JNIEnv* env, jobject nativeImplObj, jint d
     im->setPointerDisplayId(displayId);
 }
 
+static jstring nativeGetBluetoothAddress(JNIEnv* env, jobject nativeImplObj, jint deviceId) {
+    NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
+    const auto address = im->getBluetoothAddress(deviceId);
+    return address ? env->NewStringUTF(address->c_str()) : nullptr;
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gInputManagerMethods[] = {
@@ -2408,6 +2418,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"flushSensor", "(II)Z", (void*)nativeFlushSensor},
         {"cancelCurrentTouch", "()V", (void*)nativeCancelCurrentTouch},
         {"setPointerDisplayId", "(I)V", (void*)nativeSetPointerDisplayId},
+        {"getBluetoothAddress", "(I)Ljava/lang/String;", (void*)nativeGetBluetoothAddress},
 };
 
 #define FIND_CLASS(var, className) \
@@ -2468,6 +2479,9 @@ int register_android_server_InputManager(JNIEnv* env) {
     GET_METHOD_ID(gServiceClassInfo.notifySensorEvent, clazz, "notifySensorEvent", "(IIIJ[F)V");
 
     GET_METHOD_ID(gServiceClassInfo.notifySensorAccuracy, clazz, "notifySensorAccuracy", "(III)V");
+
+    GET_METHOD_ID(gServiceClassInfo.notifyStylusGestureStarted, clazz, "notifyStylusGestureStarted",
+                  "(IJ)V");
 
     GET_METHOD_ID(gServiceClassInfo.notifyVibratorState, clazz, "notifyVibratorState", "(IZ)V");
 

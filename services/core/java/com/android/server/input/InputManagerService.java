@@ -19,6 +19,8 @@ package com.android.server.input;
 import static android.provider.DeviceConfig.NAMESPACE_INPUT_NATIVE_BOOT;
 import static android.view.KeyEvent.KEYCODE_UNKNOWN;
 
+import android.Manifest;
+import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManagerInternal;
@@ -2671,6 +2673,12 @@ public class InputManagerService extends IInputManager.Stub
         mBatteryController.unregisterBatteryListener(deviceId, listener, Binder.getCallingPid());
     }
 
+    @EnforcePermission(Manifest.permission.BLUETOOTH)
+    @Override
+    public String getInputDeviceBluetoothAddress(int deviceId) {
+        return mNative.getBluetoothAddress(deviceId);
+    }
+
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
@@ -3050,6 +3058,12 @@ public class InputManagerService extends IInputManager.Stub
     private boolean isPerDisplayTouchModeEnabled() {
         return mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_perDisplayFocusEnabled);
+    }
+
+    // Native callback.
+    @SuppressWarnings("unused")
+    private void notifyStylusGestureStarted(int deviceId, long eventTime) {
+        mBatteryController.notifyStylusGestureStarted(deviceId, eventTime);
     }
 
     /**

@@ -1481,6 +1481,24 @@ public final class InputManager {
     }
 
     /**
+     * Returns the Bluetooth address of this input device, if known.
+     *
+     * The returned string is always null if this input device is not connected
+     * via Bluetooth, or if the Bluetooth address of the device cannot be
+     * determined. The returned address will look like: "11:22:33:44:55:66".
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @Nullable
+    public String getInputDeviceBluetoothAddress(int deviceId) {
+        try {
+            return mIm.getInputDeviceBluetoothAddress(deviceId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Gets a vibrator service associated with an input device, always creates a new instance.
      * @return The vibrator, never null.
      * @hide
