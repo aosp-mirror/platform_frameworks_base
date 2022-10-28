@@ -16,32 +16,45 @@
 
 package com.android.systemui.biometrics.dagger
 
+import com.android.systemui.biometrics.data.repository.PromptRepository
+import com.android.systemui.biometrics.data.repository.PromptRepositoryImpl
+import com.android.systemui.biometrics.domain.interactor.CredentialInteractor
+import com.android.systemui.biometrics.domain.interactor.CredentialInteractorImpl
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.util.concurrency.ThreadFactory
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import java.util.concurrent.Executor
 import javax.inject.Qualifier
 
-/**
- * Dagger module for all things biometric.
- */
+/** Dagger module for all things biometric. */
 @Module
-object BiometricsModule {
+interface BiometricsModule {
 
-    /** Background [Executor] for HAL related operations. */
-    @Provides
+    @Binds
     @SysUISingleton
-    @JvmStatic
-    @BiometricsBackground
-    fun providesPluginExecutor(threadFactory: ThreadFactory): Executor =
-        threadFactory.buildExecutorOnNewThread("biometrics")
+    fun biometricPromptRepository(impl: PromptRepositoryImpl): PromptRepository
+
+    @Binds
+    @SysUISingleton
+    fun providesCredentialInteractor(impl: CredentialInteractorImpl): CredentialInteractor
+
+    companion object {
+        /** Background [Executor] for HAL related operations. */
+        @Provides
+        @SysUISingleton
+        @JvmStatic
+        @BiometricsBackground
+        fun providesPluginExecutor(threadFactory: ThreadFactory): Executor =
+            threadFactory.buildExecutorOnNewThread("biometrics")
+    }
 }
 
 /**
- * Background executor for HAL operations that are latency sensitive but too
- * slow to run on the main thread. Prefer the shared executors, such as
- * [com.android.systemui.dagger.qualifiers.Background] when a HAL is not directly involved.
+ * Background executor for HAL operations that are latency sensitive but too slow to run on the main
+ * thread. Prefer the shared executors, such as [com.android.systemui.dagger.qualifiers.Background]
+ * when a HAL is not directly involved.
  */
 @Qualifier
 @MustBeDocumented

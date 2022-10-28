@@ -59,9 +59,9 @@ dependencies {
     api "androidx.compose.material:material-icons-extended:$jetpack_compose_version"
     api "androidx.compose.runtime:runtime-livedata:$jetpack_compose_version"
     api "androidx.compose.ui:ui-tooling-preview:$jetpack_compose_version"
-    api "androidx.lifecycle:lifecycle-livedata-ktx:2.6.0-alpha02"
+    api "androidx.lifecycle:lifecycle-livedata-ktx:2.6.0-alpha03"
     api "androidx.navigation:navigation-compose:2.5.0"
-    api "com.google.android.material:material:1.6.1"
+    api "com.google.android.material:material:1.7.0-alpha03"
     debugApi "androidx.compose.ui:ui-tooling:$jetpack_compose_version"
     implementation "com.airbnb.android:lottie-compose:5.2.0"
 }

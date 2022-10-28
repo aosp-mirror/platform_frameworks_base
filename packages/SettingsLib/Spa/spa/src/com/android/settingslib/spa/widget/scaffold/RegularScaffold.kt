@@ -19,7 +19,7 @@ package com.android.settingslib.spa.widget.scaffold
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
@@ -27,6 +27,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.android.settingslib.spa.framework.theme.SettingsTheme
+import com.android.settingslib.spa.widget.preference.Preference
+import com.android.settingslib.spa.widget.preference.PreferenceModel
 
 /**
  * A [Scaffold] which content is scrollable and wrapped in a [Column].
@@ -42,8 +44,9 @@ fun RegularScaffold(
 ) {
     SettingsScaffold(title, actions) { paddingValues ->
         Column(Modifier.verticalScroll(rememberScrollState())) {
-            Spacer(Modifier.padding(paddingValues))
+            Spacer(Modifier.height(paddingValues.calculateTopPadding()))
             content()
+            Spacer(Modifier.height(paddingValues.calculateBottomPadding()))
         }
     }
 }
@@ -52,6 +55,13 @@ fun RegularScaffold(
 @Composable
 private fun RegularScaffoldPreview() {
     SettingsTheme {
-        RegularScaffold(title = "Display") {}
+        RegularScaffold(title = "Display") {
+            Preference(object : PreferenceModel {
+                override val title = "Item 1"
+            })
+            Preference(object : PreferenceModel {
+                override val title = "Item 2"
+            })
+        }
     }
 }

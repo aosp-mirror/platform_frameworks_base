@@ -52,7 +52,7 @@ fun <T : AppRecord> AppListPage(
         actions = {
             ShowSystemAction(showSystem.value) { showSystem.value = it }
         },
-    ) { searchQuery ->
+    ) { bottomPadding, searchQuery ->
         WorkProfilePager(primaryUserOnly) { userInfo ->
             Column(Modifier.fillMaxSize()) {
                 val options = remember { listModel.getSpinnerOptions() }
@@ -68,6 +68,7 @@ fun <T : AppRecord> AppListPage(
                     option = selectedOption,
                     searchQuery = searchQuery,
                     appItem = appItem,
+                    bottomPadding = bottomPadding,
                 )
             }
         }

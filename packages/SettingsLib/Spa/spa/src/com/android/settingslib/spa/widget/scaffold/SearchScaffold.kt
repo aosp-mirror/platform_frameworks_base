@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package com.android.settingslib.spa.widget.scaffold
 
 import androidx.activity.compose.BackHandler
 import androidx.appcompat.R
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,10 +30,13 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
@@ -48,45 +50,57 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.settingslib.spa.framework.compose.hideKeyboardAction
+import com.android.settingslib.spa.framework.compose.horizontalValues
 import com.android.settingslib.spa.framework.theme.SettingsOpacity
 import com.android.settingslib.spa.framework.theme.SettingsTheme
+import com.android.settingslib.spa.widget.preference.Preference
+import com.android.settingslib.spa.widget.preference.PreferenceModel
 
 /**
  * A [Scaffold] which content is can be full screen, and with a search feature built-in.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScaffold(
     title: String,
     actions: @Composable RowScope.() -> Unit = {},
-    content: @Composable (searchQuery: State<String>) -> Unit,
+    content: @Composable (bottomPadding: Dp, searchQuery: State<String>) -> Unit,
 ) {
     val viewModel: SearchScaffoldViewModel = viewModel()
 
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             SearchableTopAppBar(
                 title = title,
                 actions = actions,
+                scrollBehavior = scrollBehavior,
                 searchQuery = viewModel.searchQuery,
             ) { viewModel.searchQuery = it }
         },
     ) { paddingValues ->
         Box(
             Modifier
-                .padding(paddingValues)
-                .fillMaxSize()
+                .padding(paddingValues.horizontalValues())
+                .padding(top = paddingValues.calculateTopPadding())
+                .fillMaxSize(),
         ) {
-            val searchQuery = remember {
-                derivedStateOf { viewModel.searchQuery?.text ?: "" }
-            }
-            content(searchQuery)
+            content(
+                bottomPadding = paddingValues.calculateBottomPadding(),
+                searchQuery = remember {
+                    derivedStateOf { viewModel.searchQuery?.text ?: "" }
+                },
+            )
         }
     }
 }
@@ -95,10 +109,12 @@ internal class SearchScaffoldViewModel : ViewModel() {
     var searchQuery: TextFieldValue? by mutableStateOf(null)
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SearchableTopAppBar(
     title: String,
     actions: @Composable RowScope.() -> Unit,
+    scrollBehavior: TopAppBarScrollBehavior,
     searchQuery: TextFieldValue?,
     onSearchQueryChange: (TextFieldValue?) -> Unit,
 ) {
@@ -110,13 +126,17 @@ private fun SearchableTopAppBar(
             actions = actions,
         )
     } else {
-        SettingsTopAppBar(title) {
-            SearchAction { onSearchQueryChange(TextFieldValue()) }
+        SettingsTopAppBar(title, scrollBehavior) {
+            SearchAction {
+                scrollBehavior.collapse()
+                onSearchQueryChange(TextFieldValue())
+            }
             actions()
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SearchTopAppBar(
     query: TextFieldValue,
@@ -124,21 +144,24 @@ private fun SearchTopAppBar(
     onClose: () -> Unit,
     actions: @Composable RowScope.() -> Unit = {},
 ) {
-    TopAppBar(
-        title = { SearchBox(query, onQueryChange) },
-        modifier = Modifier.statusBarsPadding(),
-        navigationIcon = { CollapseAction(onClose) },
-        actions = {
-            if (query.text.isNotEmpty()) {
-                ClearAction { onQueryChange(TextFieldValue()) }
-            }
-            actions()
-        },
-        colors = settingsTopAppBarColors(),
-    )
+    Surface(color = SettingsTheme.colorScheme.surfaceHeader) {
+        TopAppBar(
+            title = { SearchBox(query, onQueryChange) },
+            modifier = Modifier.statusBarsPadding(),
+            navigationIcon = { CollapseAction(onClose) },
+            actions = {
+                if (query.text.isNotEmpty()) {
+                    ClearAction { onQueryChange(TextFieldValue()) }
+                }
+                actions()
+            },
+            colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = Color.Transparent),
+        )
+    }
     BackHandler { onClose() }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SearchBox(query: TextFieldValue, onQueryChange: (TextFieldValue) -> Unit) {
     val focusRequester = remember { FocusRequester() }
@@ -184,6 +207,15 @@ private fun SearchTopAppBarPreview() {
 @Composable
 private fun SearchScaffoldPreview() {
     SettingsTheme {
-        SearchScaffold(title = "App notifications") {}
+        SearchScaffold(title = "App notifications") { _, _ ->
+            Column {
+                Preference(object : PreferenceModel {
+                    override val title = "Item 1"
+                })
+                Preference(object : PreferenceModel {
+                    override val title = "Item 2"
+                })
+            }
+        }
     }
 }

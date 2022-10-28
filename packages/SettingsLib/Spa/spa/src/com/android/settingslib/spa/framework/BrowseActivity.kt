@@ -27,6 +27,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -66,8 +67,9 @@ open class BrowseActivity : ComponentActivity() {
     private val spaEnvironment get() = SpaEnvironmentFactory.instance
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        setTheme(R.style.Theme_SpaLib_DayNight)
+        setTheme(R.style.Theme_SpaLib)
         super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         spaEnvironment.logger.message(TAG, "onCreate", category = LogCategory.FRAMEWORK)
 
         setContent {
@@ -83,41 +85,47 @@ open class BrowseActivity : ComponentActivity() {
         val navController = rememberNavController()
         val nullPage = SettingsPage.createNull()
         CompositionLocalProvider(navController.localNavController()) {
-            NavHost(navController, nullPage.sppName) {
+            NavHost(
+                navController = navController,
+                startDestination = nullPage.sppName,
+            ) {
                 composable(nullPage.sppName) {}
                 for (spp in sppRepository.getAllProviders()) {
                     composable(
                         route = spp.name + spp.parameter.navRoute(),
                         arguments = spp.parameter,
                     ) { navBackStackEntry ->
-                        val lifecycleOwner = LocalLifecycleOwner.current
-                        val sp = remember(navBackStackEntry.arguments) {
+                        PageLogger(remember(navBackStackEntry.arguments) {
                             spp.createSettingsPage(arguments = navBackStackEntry.arguments)
-                        }
-
-                        DisposableEffect(lifecycleOwner) {
-                            val observer = LifecycleEventObserver { _, event ->
-                                if (event == Lifecycle.Event.ON_START) {
-                                    sp.enterPage()
-                                } else if (event == Lifecycle.Event.ON_STOP) {
-                                    sp.leavePage()
-                                }
-                            }
-
-                            // Add the observer to the lifecycle
-                            lifecycleOwner.lifecycle.addObserver(observer)
-
-                            // When the effect leaves the Composition, remove the observer
-                            onDispose {
-                                lifecycleOwner.lifecycle.removeObserver(observer)
-                            }
-                        }
+                        })
 
                         spp.Page(navBackStackEntry.arguments)
                     }
                 }
             }
             InitialDestinationNavigator()
+        }
+    }
+
+    @Composable
+    private fun PageLogger(settingsPage: SettingsPage) {
+        val lifecycleOwner = LocalLifecycleOwner.current
+        DisposableEffect(lifecycleOwner) {
+            val observer = LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_START) {
+                    settingsPage.enterPage()
+                } else if (event == Lifecycle.Event.ON_STOP) {
+                    settingsPage.leavePage()
+                }
+            }
+
+            // Add the observer to the lifecycle
+            lifecycleOwner.lifecycle.addObserver(observer)
+
+            // When the effect leaves the Composition, remove the observer
+            onDispose {
+                lifecycleOwner.lifecycle.removeObserver(observer)
+            }
         }
     }
 

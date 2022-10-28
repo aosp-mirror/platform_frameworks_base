@@ -16,13 +16,23 @@
 
 package com.android.settingslib.spa.widget.scaffold
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.tooling.preview.Preview
+import com.android.settingslib.spa.framework.compose.horizontalValues
+import com.android.settingslib.spa.framework.compose.verticalValues
 import com.android.settingslib.spa.framework.theme.SettingsTheme
+import com.android.settingslib.spa.widget.preference.Preference
+import com.android.settingslib.spa.widget.preference.PreferenceModel
 
 /**
  * A [Scaffold] which content is can be full screen when needed.
@@ -34,16 +44,30 @@ fun SettingsScaffold(
     actions: @Composable RowScope.() -> Unit = {},
     content: @Composable (PaddingValues) -> Unit,
 ) {
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     Scaffold(
-        topBar = { SettingsTopAppBar(title, actions) },
-        content = content,
-    )
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        topBar = { SettingsTopAppBar(title, scrollBehavior, actions) },
+    ) { paddingValues ->
+        Box(Modifier.padding(paddingValues.horizontalValues())) {
+            content(paddingValues.verticalValues())
+        }
+    }
 }
 
 @Preview
 @Composable
 private fun SettingsScaffoldPreview() {
     SettingsTheme {
-        SettingsScaffold(title = "Display") {}
+        SettingsScaffold(title = "Display") { paddingValues ->
+            Column(Modifier.padding(paddingValues)) {
+                Preference(object : PreferenceModel {
+                    override val title = "Item 1"
+                })
+                Preference(object : PreferenceModel {
+                    override val title = "Item 2"
+                })
+            }
+        }
     }
 }

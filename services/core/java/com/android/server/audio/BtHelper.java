@@ -263,20 +263,20 @@ public class BtHelper {
     /*package*/ synchronized void setAvrcpAbsoluteVolumeIndex(int index) {
         if (mA2dp == null) {
             if (AudioService.DEBUG_VOL) {
-                AudioService.sVolumeLogger.log(new EventLogger.StringEvent(
+                AudioService.sVolumeLogger.enqueue(new EventLogger.StringEvent(
                         "setAvrcpAbsoluteVolumeIndex: bailing due to null mA2dp").printLog(TAG));
                 return;
             }
         }
         if (!mAvrcpAbsVolSupported) {
-            AudioService.sVolumeLogger.log(new EventLogger.StringEvent(
+            AudioService.sVolumeLogger.enqueue(new EventLogger.StringEvent(
                     "setAvrcpAbsoluteVolumeIndex: abs vol not supported ").printLog(TAG));
             return;
         }
         if (AudioService.DEBUG_VOL) {
             Log.i(TAG, "setAvrcpAbsoluteVolumeIndex index=" + index);
         }
-        AudioService.sVolumeLogger.log(new AudioServiceEvents.VolumeEvent(
+        AudioService.sVolumeLogger.enqueue(new AudioServiceEvents.VolumeEvent(
                 AudioServiceEvents.VolumeEvent.VOL_SET_AVRCP_VOL, index));
         mA2dp.setAvrcpAbsoluteVolume(index);
     }
@@ -393,14 +393,14 @@ public class BtHelper {
     @GuardedBy("AudioDeviceBroker.mDeviceStateLock")
     /*package*/ synchronized boolean startBluetoothSco(int scoAudioMode,
                 @NonNull String eventSource) {
-        AudioService.sDeviceLogger.log(new EventLogger.StringEvent(eventSource));
+        AudioService.sDeviceLogger.enqueue(new EventLogger.StringEvent(eventSource));
         return requestScoState(BluetoothHeadset.STATE_AUDIO_CONNECTED, scoAudioMode);
     }
 
     // @GuardedBy("AudioDeviceBroker.mSetModeLock")
     @GuardedBy("AudioDeviceBroker.mDeviceStateLock")
     /*package*/ synchronized boolean stopBluetoothSco(@NonNull String eventSource) {
-        AudioService.sDeviceLogger.log(new EventLogger.StringEvent(eventSource));
+        AudioService.sDeviceLogger.enqueue(new EventLogger.StringEvent(eventSource));
         return requestScoState(BluetoothHeadset.STATE_AUDIO_DISCONNECTED, SCO_MODE_VIRTUAL_CALL);
     }
 
@@ -418,7 +418,7 @@ public class BtHelper {
             Log.i(TAG, "setLeAudioVolume: calling mLeAudio.setVolume idx="
                     + index + " volume=" + volume);
         }
-        AudioService.sVolumeLogger.log(new AudioServiceEvents.VolumeEvent(
+        AudioService.sVolumeLogger.enqueue(new AudioServiceEvents.VolumeEvent(
                 AudioServiceEvents.VolumeEvent.VOL_SET_LE_AUDIO_VOL, index, maxIndex));
         mLeAudio.setVolume(volume);
     }
@@ -443,7 +443,7 @@ public class BtHelper {
         }
         // do not log when hearing aid is not connected to avoid confusion when reading dumpsys
         if (isHeadAidConnected) {
-            AudioService.sVolumeLogger.log(new AudioServiceEvents.VolumeEvent(
+            AudioService.sVolumeLogger.enqueue(new AudioServiceEvents.VolumeEvent(
                     AudioServiceEvents.VolumeEvent.VOL_SET_HEARING_AID_VOL, index, gainDB));
         }
         mHearingAid.setVolume(gainDB);
@@ -675,7 +675,7 @@ public class BtHelper {
                         case BluetoothProfile.HEADSET:
                         case BluetoothProfile.HEARING_AID:
                         case BluetoothProfile.LE_AUDIO:
-                            AudioService.sDeviceLogger.log(new EventLogger.StringEvent(
+                            AudioService.sDeviceLogger.enqueue(new EventLogger.StringEvent(
                                     "BT profile service: connecting "
                                     + BluetoothProfile.getProfileName(profile) + " profile"));
                             mDeviceBroker.postBtProfileConnected(profile, proxy);

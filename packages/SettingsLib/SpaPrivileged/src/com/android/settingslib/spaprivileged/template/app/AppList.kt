@@ -25,12 +25,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.settingslib.spa.framework.compose.LogCompositions
 import com.android.settingslib.spa.framework.compose.TimeMeasurer.Companion.rememberTimeMeasurer
 import com.android.settingslib.spa.framework.compose.rememberLazyListStateAndHideKeyboardWhenStartScroll
 import com.android.settingslib.spa.framework.compose.toState
-import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.widget.ui.PlaceholderTitle
 import com.android.settingslib.spaprivileged.R
 import com.android.settingslib.spaprivileged.model.app.AppListConfig
@@ -55,10 +55,11 @@ internal fun <T : AppRecord> AppList(
     option: State<Int>,
     searchQuery: State<String>,
     appItem: @Composable (itemState: AppListItemModel<T>) -> Unit,
+    bottomPadding: Dp,
 ) {
     LogCompositions(TAG, appListConfig.userId.toString())
     val appListData = loadAppEntries(appListConfig, listModel, showSystem, option, searchQuery)
-    AppListWidget(appListData, listModel, appItem)
+    AppListWidget(appListData, listModel, appItem, bottomPadding)
 }
 
 @Composable
@@ -66,6 +67,7 @@ private fun <T : AppRecord> AppListWidget(
     appListData: State<AppListData<T>?>,
     listModel: AppListModel<T>,
     appItem: @Composable (itemState: AppListItemModel<T>) -> Unit,
+    bottomPadding: Dp,
 ) {
     val timeMeasurer = rememberTimeMeasurer(TAG)
     appListData.value?.let { (list, option) ->
@@ -77,7 +79,7 @@ private fun <T : AppRecord> AppListWidget(
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             state = rememberLazyListStateAndHideKeyboardWhenStartScroll(),
-            contentPadding = PaddingValues(bottom = SettingsDimension.itemPaddingVertical),
+            contentPadding = PaddingValues(bottom = bottomPadding),
         ) {
             items(count = list.size, key = { option to list[it].record.app.packageName }) {
                 val appEntry = list[it]

@@ -122,6 +122,8 @@ public class Transitions implements RemoteCallable<Transitions> {
     private final ShellController mShellController;
     private final ShellTransitionImpl mImpl = new ShellTransitionImpl();
 
+    private boolean mIsRegistered = false;
+
     /** List of possible handlers. Ordered by specificity (eg. tapped back to front). */
     private final ArrayList<TransitionHandler> mHandlers = new ArrayList<>();
 
@@ -163,19 +165,18 @@ public class Transitions implements RemoteCallable<Transitions> {
                 displayController, pool, mainExecutor, mainHandler, animExecutor);
         mRemoteTransitionHandler = new RemoteTransitionHandler(mMainExecutor);
         mShellController = shellController;
-        shellInit.addInitCallback(this::onInit, this);
-    }
-
-    private void onInit() {
-        mShellController.addExternalInterface(KEY_EXTRA_SHELL_SHELL_TRANSITIONS,
-                this::createExternalInterface, this);
-
         // The very last handler (0 in the list) should be the default one.
         mHandlers.add(mDefaultTransitionHandler);
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "addHandler: Default");
         // Next lowest priority is remote transitions.
         mHandlers.add(mRemoteTransitionHandler);
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "addHandler: Remote");
+        shellInit.addInitCallback(this::onInit, this);
+    }
+
+    private void onInit() {
+        mShellController.addExternalInterface(KEY_EXTRA_SHELL_SHELL_TRANSITIONS,
+                this::createExternalInterface, this);
 
         ContentResolver resolver = mContext.getContentResolver();
         mTransitionAnimationScaleSetting = getTransitionAnimationScaleSetting();
@@ -186,11 +187,21 @@ public class Transitions implements RemoteCallable<Transitions> {
                 new SettingsObserver());
 
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+            mIsRegistered = true;
             // Register this transition handler with Core
-            mOrganizer.registerTransitionPlayer(mPlayerImpl);
+            try {
+                mOrganizer.registerTransitionPlayer(mPlayerImpl);
+            } catch (RuntimeException e) {
+                mIsRegistered = false;
+                throw e;
+            }
             // Pre-load the instance.
             TransitionMetrics.getInstance();
         }
+    }
+
+    public boolean isRegistered() {
+        return mIsRegistered;
     }
 
     private float getTransitionAnimationScaleSetting() {

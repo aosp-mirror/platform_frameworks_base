@@ -21,6 +21,7 @@ import static com.android.systemui.flags.FlagManager.ACTION_SET_FLAG;
 import static com.android.systemui.flags.FlagManager.EXTRA_FLAGS;
 import static com.android.systemui.flags.FlagManager.EXTRA_ID;
 import static com.android.systemui.flags.FlagManager.EXTRA_VALUE;
+import static com.android.systemui.flags.FlagsCommonModule.ALL_FLAGS;
 
 import static java.util.Objects.requireNonNull;
 
@@ -59,20 +60,20 @@ import javax.inject.Named;
  *
  * Flags can be set (or unset) via the following adb command:
  *
- *   adb shell cmd statusbar flag <id> <on|off|toggle|erase>
+ * adb shell cmd statusbar flag <id> <on|off|toggle|erase>
  *
- *  Alternatively, you can change flags via a broadcast intent:
+ * Alternatively, you can change flags via a broadcast intent:
  *
- *   adb shell am broadcast -a com.android.systemui.action.SET_FLAG --ei id <id> [--ez value <0|1>]
+ * adb shell am broadcast -a com.android.systemui.action.SET_FLAG --ei id <id> [--ez value <0|1>]
  *
  * To restore a flag back to its default, leave the `--ez value <0|1>` off of the command.
  */
 @SysUISingleton
 public class FeatureFlagsDebug implements FeatureFlags {
     static final String TAG = "SysUIFlags";
-    static final String ALL_FLAGS = "all_flags";
 
     private final FlagManager mFlagManager;
+    private final Context mContext;
     private final SecureSettings mSecureSettings;
     private final Resources mResources;
     private final SystemPropertiesHelper mSystemProperties;
@@ -82,6 +83,14 @@ public class FeatureFlagsDebug implements FeatureFlags {
     private final Map<Integer, Boolean> mBooleanFlagCache = new TreeMap<>();
     private final Map<Integer, String> mStringFlagCache = new TreeMap<>();
     private final Restarter mRestarter;
+
+    private final ServerFlagReader.ChangeListener mOnPropertiesChanged =
+            new ServerFlagReader.ChangeListener() {
+                @Override
+                public void onChange() {
+                    mRestarter.restart();
+                }
+            };
 
     @Inject
     public FeatureFlagsDebug(
@@ -93,23 +102,28 @@ public class FeatureFlagsDebug implements FeatureFlags {
             DeviceConfigProxy deviceConfigProxy,
             ServerFlagReader serverFlagReader,
             @Named(ALL_FLAGS) Map<Integer, Flag<?>> allFlags,
-            Restarter barService) {
+            Restarter restarter) {
         mFlagManager = flagManager;
+        mContext = context;
         mSecureSettings = secureSettings;
         mResources = resources;
         mSystemProperties = systemProperties;
         mDeviceConfigProxy = deviceConfigProxy;
         mServerFlagReader = serverFlagReader;
         mAllFlags = allFlags;
-        mRestarter = barService;
+        mRestarter = restarter;
+    }
 
+    /** Call after construction to setup listeners. */
+    void init() {
         IntentFilter filter = new IntentFilter();
         filter.addAction(ACTION_SET_FLAG);
         filter.addAction(ACTION_GET_FLAGS);
-        flagManager.setOnSettingsChangedAction(this::restartSystemUI);
-        flagManager.setClearCacheAction(this::removeFromCache);
-        context.registerReceiver(mReceiver, filter, null, null,
+        mFlagManager.setOnSettingsChangedAction(this::restartSystemUI);
+        mFlagManager.setClearCacheAction(this::removeFromCache);
+        mContext.registerReceiver(mReceiver, filter, null, null,
                 Context.RECEIVER_EXPORTED_UNAUDITED);
+        mServerFlagReader.listenForChanges(mAllFlags.values(), mOnPropertiesChanged);
     }
 
     @Override
@@ -196,7 +210,7 @@ public class FeatureFlagsDebug implements FeatureFlags {
         return mStringFlagCache.get(id);
     }
 
-    /** Specific override for Boolean flags that checks against the teamfood list.*/
+    /** Specific override for Boolean flags that checks against the teamfood list. */
     private boolean readFlagValue(int id, boolean defaultValue) {
         Boolean result = readBooleanFlagOverride(id);
         boolean hasServerOverride = mServerFlagReader.hasOverride(id);
@@ -273,6 +287,7 @@ public class FeatureFlagsDebug implements FeatureFlags {
     private void dispatchListenersAndMaybeRestart(int id, Consumer<Boolean> restartAction) {
         mFlagManager.dispatchListenersAndMaybeRestart(id, restartAction);
     }
+
     /** Works just like {@link #eraseFlag(int)} except that it doesn't restart SystemUI. */
     private void eraseInternal(int id) {
         // We can't actually "erase" things from sysprops, but we can set them to empty!
@@ -358,7 +373,7 @@ public class FeatureFlagsDebug implements FeatureFlags {
                     }
                 }
 
-                Bundle extras =  getResultExtras(true);
+                Bundle extras = getResultExtras(true);
                 if (extras != null) {
                     extras.putParcelableArrayList(EXTRA_FLAGS, pFlags);
                 }

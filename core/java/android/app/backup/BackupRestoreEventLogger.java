@@ -19,10 +19,15 @@ package android.app.backup;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.util.Slog;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.Collections;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -38,6 +43,8 @@ import java.util.Map;
  * @hide
  */
 public class BackupRestoreEventLogger {
+    private static final String TAG = "BackupRestoreEventLogger";
+
     /**
      * Max number of unique data types for which an instance of this logger can store info. Attempts
      * to use more distinct data type values will be rejected.
@@ -72,6 +79,8 @@ public class BackupRestoreEventLogger {
     public @interface BackupRestoreError {}
 
     private final int mOperationType;
+    private final Map<String, DataTypeResult> mResults = new HashMap<>();
+    private final MessageDigest mHashDigest;
 
     /**
      * @param operationType type of the operation for which logging will be performed. See
@@ -81,6 +90,14 @@ public class BackupRestoreEventLogger {
      */
     public BackupRestoreEventLogger(@OperationType int operationType) {
         mOperationType = operationType;
+
+        MessageDigest hashDigest = null;
+        try {
+            hashDigest = MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException e) {
+            Slog.w("Couldn't create MessageDigest for hash computation", e);
+        }
+        mHashDigest = hashDigest;
     }
 
     /**
@@ -98,7 +115,7 @@ public class BackupRestoreEventLogger {
      * @return boolean, indicating whether the log has been accepted.
      */
     public boolean logItemsBackedUp(@NonNull @BackupRestoreDataType String dataType, int count) {
-        return true;
+        return logSuccess(OperationType.BACKUP, dataType, count);
     }
 
     /**
@@ -118,7 +135,7 @@ public class BackupRestoreEventLogger {
      */
     public boolean logItemsBackupFailed(@NonNull @BackupRestoreDataType String dataType, int count,
             @Nullable @BackupRestoreError String error) {
-        return true;
+        return logFailure(OperationType.BACKUP, dataType, count, error);
     }
 
     /**
@@ -139,7 +156,7 @@ public class BackupRestoreEventLogger {
      */
     public boolean logBackupMetaData(@NonNull @BackupRestoreDataType String dataType,
             @NonNull String metaData) {
-        return true;
+        return logMetaData(OperationType.BACKUP, dataType, metaData);
     }
 
     /**
@@ -159,7 +176,7 @@ public class BackupRestoreEventLogger {
      * @return boolean, indicating whether the log has been accepted.
      */
     public boolean logItemsRestored(@NonNull @BackupRestoreDataType String dataType, int count) {
-        return true;
+        return logSuccess(OperationType.RESTORE, dataType, count);
     }
 
     /**
@@ -181,7 +198,7 @@ public class BackupRestoreEventLogger {
      */
     public boolean logItemsRestoreFailed(@NonNull @BackupRestoreDataType String dataType, int count,
             @Nullable @BackupRestoreError String error) {
-        return true;
+        return logFailure(OperationType.RESTORE, dataType, count, error);
     }
 
     /**
@@ -204,7 +221,7 @@ public class BackupRestoreEventLogger {
      */
     public boolean logRestoreMetadata(@NonNull @BackupRestoreDataType String dataType,
             @NonNull  String metadata) {
-        return true;
+        return logMetaData(OperationType.RESTORE, dataType, metadata);
     }
 
     /**
@@ -214,7 +231,7 @@ public class BackupRestoreEventLogger {
      * @hide
      */
     public List<DataTypeResult> getLoggingResults() {
-        return Collections.emptyList();
+        return new ArrayList<>(mResults.values());
     }
 
     /**
@@ -227,22 +244,97 @@ public class BackupRestoreEventLogger {
         return mOperationType;
     }
 
+    private boolean logSuccess(@OperationType int operationType,
+            @BackupRestoreDataType String dataType, int count) {
+        DataTypeResult dataTypeResult = getDataTypeResult(operationType, dataType);
+        if (dataTypeResult == null) {
+            return false;
+        }
+
+        dataTypeResult.mSuccessCount += count;
+        mResults.put(dataType, dataTypeResult);
+
+        return true;
+    }
+
+    private boolean logFailure(@OperationType int operationType,
+            @NonNull @BackupRestoreDataType String dataType, int count,
+            @Nullable @BackupRestoreError String error) {
+        DataTypeResult dataTypeResult = getDataTypeResult(operationType, dataType);
+        if (dataTypeResult == null) {
+            return false;
+        }
+
+        dataTypeResult.mFailCount += count;
+        if (error != null) {
+            dataTypeResult.mErrors.merge(error, count, Integer::sum);
+        }
+
+        return true;
+    }
+
+    private boolean logMetaData(@OperationType int operationType,
+            @NonNull @BackupRestoreDataType String dataType, @NonNull String metaData) {
+        if (mHashDigest == null) {
+            return false;
+        }
+        DataTypeResult dataTypeResult = getDataTypeResult(operationType, dataType);
+        if (dataTypeResult == null) {
+            return false;
+        }
+
+        dataTypeResult.mMetadataHash = getMetaDataHash(metaData);
+
+        return true;
+    }
+
+    /**
+     * Get the result container for the given data type.
+     *
+     * @return {@code DataTypeResult} object corresponding to the given {@code dataType} or
+     *         {@code null} if the logger can't accept logs for the given data type.
+     */
+    @Nullable
+    private DataTypeResult getDataTypeResult(@OperationType int operationType,
+            @BackupRestoreDataType String dataType) {
+        if (operationType != mOperationType) {
+            // Operation type for which we're trying to record logs doesn't match the operation
+            // type for which this logger instance was created.
+            Slog.d(TAG, "Operation type mismatch: logger created for " + mOperationType
+                    + ", trying to log for " + operationType);
+            return null;
+        }
+
+        if (!mResults.containsKey(dataType)) {
+            if (mResults.keySet().size() == DATA_TYPES_ALLOWED) {
+                // This is a new data type and we're already at capacity.
+                Slog.d(TAG, "Logger is full, ignoring new data type");
+                return null;
+            }
+
+            mResults.put(dataType,  new DataTypeResult(dataType));
+        }
+
+        return mResults.get(dataType);
+    }
+
+    private byte[] getMetaDataHash(String metaData) {
+        return mHashDigest.digest(metaData.getBytes(StandardCharsets.UTF_8));
+    }
+
     /**
      * Encapsulate logging results for a single data type.
      */
     public static class DataTypeResult {
         @BackupRestoreDataType
         private final String mDataType;
-        private final int mSuccessCount;
-        private final Map<String, Integer> mErrors;
-        private final byte[] mMetadataHash;
+        private int mSuccessCount;
+        private int mFailCount;
+        private final Map<String, Integer> mErrors = new HashMap<>();
+        private byte[] mMetadataHash;
 
-        public DataTypeResult(String dataType, int successCount,
-                Map<String, Integer> errors, byte[] metadataHash) {
+        public DataTypeResult(String dataType) {
             mDataType = dataType;
-            mSuccessCount = successCount;
-            mErrors = errors;
-            mMetadataHash = metadataHash;
         }
 
         @NonNull
@@ -257,6 +349,13 @@ public class BackupRestoreEventLogger {
          */
         public int getSuccessCount() {
             return mSuccessCount;
+        }
+
+        /**
+         * @return number of items of the given data type that have failed to back up or restore.
+         */
+        public int getFailCount() {
+            return mFailCount;
         }
 
         /**

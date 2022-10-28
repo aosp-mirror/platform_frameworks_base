@@ -35,6 +35,8 @@ import androidx.dynamicanimation.animation.SpringAnimation;
 import androidx.dynamicanimation.animation.SpringForce;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.internal.util.Preconditions;
+
 import java.util.HashMap;
 
 /**
@@ -64,6 +66,7 @@ class MenuAnimationController {
     private final Handler mHandler;
     private boolean mIsMovedToEdge;
     private boolean mIsFadeEffectEnabled;
+    private DismissAnimationController.DismissCallback mDismissCallback;
 
     // Cache the animations state of {@link DynamicAnimation.TRANSLATION_X} and {@link
     // DynamicAnimation.TRANSLATION_Y} to be well controlled by the touch handler
@@ -102,6 +105,11 @@ class MenuAnimationController {
         }
     }
 
+    void setDismissCallback(
+            DismissAnimationController.DismissCallback dismissCallback) {
+        mDismissCallback = dismissCallback;
+    }
+
     void moveToTopLeftPosition() {
         mIsMovedToEdge = false;
         final Rect draggableBounds = mMenuView.getMenuDraggableBounds();
@@ -130,6 +138,13 @@ class MenuAnimationController {
         moveToPosition(position);
         mMenuView.onBoundsInParentChanged((int) position.x, (int) position.y);
         constrainPositionAndUpdate(position);
+    }
+
+    void removeMenu() {
+        Preconditions.checkArgument(mDismissCallback != null,
+                "The dismiss callback should be initialized first.");
+
+        mDismissCallback.onDismiss();
     }
 
     void flingMenuThenSpringToEdge(float x, float velocityX, float velocityY) {

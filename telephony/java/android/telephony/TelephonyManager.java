@@ -3323,15 +3323,14 @@ public class TelephonyManager {
             case NETWORK_TYPE_TD_SCDMA:
                 return NETWORK_TYPE_BITMASK_TD_SCDMA;
             case NETWORK_TYPE_LTE:
-                return NETWORK_TYPE_BITMASK_LTE;
             case NETWORK_TYPE_LTE_CA:
-                return NETWORK_TYPE_BITMASK_LTE_CA;
+                return NETWORK_TYPE_BITMASK_LTE;
             case NETWORK_TYPE_NR:
                 return NETWORK_TYPE_BITMASK_NR;
             case NETWORK_TYPE_IWLAN:
                 return NETWORK_TYPE_BITMASK_IWLAN;
             case NETWORK_TYPE_IDEN:
-                return (1 << (NETWORK_TYPE_IDEN - 1));
+                return NETWORK_TYPE_BITMASK_IDEN;
             default:
                 return NETWORK_TYPE_BITMASK_UNKNOWN;
         }
@@ -13911,7 +13910,8 @@ public class TelephonyManager {
                     NETWORK_TYPE_BITMASK_LTE,
                     NETWORK_TYPE_BITMASK_LTE_CA,
                     NETWORK_TYPE_BITMASK_NR,
-                    NETWORK_TYPE_BITMASK_IWLAN
+                    NETWORK_TYPE_BITMASK_IWLAN,
+                    NETWORK_TYPE_BITMASK_IDEN
             })
     public @interface NetworkTypeBitMask {}
 
@@ -13971,6 +13971,10 @@ public class TelephonyManager {
      */
     public static final long NETWORK_TYPE_BITMASK_HSPA = (1 << (NETWORK_TYPE_HSPA -1));
     /**
+     * network type bitmask indicating the support of radio tech iDen.
+     */
+    public static final long NETWORK_TYPE_BITMASK_IDEN = (1 << (NETWORK_TYPE_IDEN - 1));
+    /**
      * network type bitmask indicating the support of radio tech HSPAP.
      */
     public static final long NETWORK_TYPE_BITMASK_HSPAP = (1 << (NETWORK_TYPE_HSPAP -1));
@@ -13988,12 +13992,13 @@ public class TelephonyManager {
      */
     public static final long NETWORK_TYPE_BITMASK_LTE = (1 << (NETWORK_TYPE_LTE -1));
     /**
-     * NOT USED; this bitmask is exposed accidentally, will be deprecated in U.
+     * NOT USED; this bitmask is exposed accidentally.
      * If used, will be converted to {@link #NETWORK_TYPE_BITMASK_LTE}.
      * network type bitmask indicating the support of radio tech LTE CA (carrier aggregation).
      *
-     * @see #NETWORK_TYPE_BITMASK_LTE
+     * @deprecated Please use {@link #NETWORK_TYPE_BITMASK_LTE} instead.
      */
+    @Deprecated
     public static final long NETWORK_TYPE_BITMASK_LTE_CA = (1 << (NETWORK_TYPE_LTE_CA -1));
 
     /**

@@ -125,7 +125,7 @@ public class EventLoggerTest {
         @Test
         public void testThatLoggingWorksAsExpected() {
             for (EventLogger.Event event: mEventsToInsert) {
-                mEventLogger.log(event);
+                mEventLogger.enqueue(event);
             }
 
             mEventLogger.dump(mTestPrintWriter);
