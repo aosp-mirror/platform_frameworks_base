@@ -138,6 +138,7 @@ public final class GnssCapabilities implements Parcelable {
             @SubHalMeasurementCorrectionsCapabilityFlags int measurementCorrectionsFlags,
             @SubHalPowerCapabilityFlags int powerFlags,
             @NonNull List<GnssSignalType> gnssSignalTypes) {
+        Objects.requireNonNull(gnssSignalTypes);
         mTopFlags = topFlags;
         mMeasurementCorrectionsFlags = measurementCorrectionsFlags;
         mPowerFlags = powerFlags;
@@ -186,6 +187,21 @@ public final class GnssCapabilities implements Parcelable {
         } else {
             return new GnssCapabilities(mTopFlags, mMeasurementCorrectionsFlags, flags,
                     new ArrayList<>(mGnssSignalTypes));
+        }
+    }
+
+    /**
+     * Returns a new GnssCapabilities object with a list of GnssSignalType.
+     *
+     * @hide
+     */
+    public GnssCapabilities withSignalTypes(@NonNull List<GnssSignalType> gnssSignalTypes) {
+        Objects.requireNonNull(gnssSignalTypes);
+        if (mGnssSignalTypes.equals(gnssSignalTypes)) {
+            return this;
+        } else {
+            return new GnssCapabilities(mTopFlags, mMeasurementCorrectionsFlags, mPowerFlags,
+                    new ArrayList<>(gnssSignalTypes));
         }
     }
 
@@ -452,7 +468,8 @@ public final class GnssCapabilities implements Parcelable {
         GnssCapabilities that = (GnssCapabilities) o;
         return mTopFlags == that.mTopFlags
                 && mMeasurementCorrectionsFlags == that.mMeasurementCorrectionsFlags
-                && mPowerFlags == that.mPowerFlags;
+                && mPowerFlags == that.mPowerFlags
+                && mGnssSignalTypes.equals(that.mGnssSignalTypes);
     }
 
     @Override

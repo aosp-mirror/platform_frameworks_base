@@ -25,6 +25,7 @@ import android.location.GnssCapabilities;
 import android.location.GnssMeasurementCorrections;
 import android.location.GnssMeasurementsEvent;
 import android.location.GnssNavigationMessage;
+import android.location.GnssSignalType;
 import android.location.GnssStatus;
 import android.location.Location;
 import android.os.Binder;
@@ -1141,6 +1142,13 @@ public class GnssNative {
             @GnssCapabilities.SubHalPowerCapabilityFlags int capabilities) {
         GnssCapabilities oldCapabilities = mCapabilities;
         mCapabilities = oldCapabilities.withSubHalPowerFlags(capabilities);
+        onCapabilitiesChanged(oldCapabilities, mCapabilities);
+    }
+
+    @NativeEntryPoint
+    void setSignalTypeCapabilities(List<GnssSignalType> signalTypes) {
+        GnssCapabilities oldCapabilities = mCapabilities;
+        mCapabilities = oldCapabilities.withSignalTypes(signalTypes);
         onCapabilitiesChanged(oldCapabilities, mCapabilities);
     }
 
