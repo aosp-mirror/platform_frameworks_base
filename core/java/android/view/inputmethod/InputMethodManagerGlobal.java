@@ -14,64 +14,31 @@
  * limitations under the License.
  */
 
-package com.android.internal.inputmethod;
+package android.view.inputmethod;
 
 import android.annotation.AnyThread;
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresNoPermission;
 import android.annotation.RequiresPermission;
-import android.content.Context;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 
+import com.android.internal.inputmethod.ImeTracing;
 import com.android.internal.view.IInputMethodManager;
 
 import java.util.function.Consumer;
 
 /**
- * A global wrapper to directly invoke {@link IInputMethodManager} IPCs.
+ * Defines a set of static methods that can be used globally by framework classes.
  *
- * <p>All public static methods are guaranteed to be thread-safe.</p>
- *
- * <p>All public methods are guaranteed to do nothing when {@link IInputMethodManager} is
- * unavailable.</p>
+ * @hide
  */
-public final class IInputMethodManagerGlobal {
-    @Nullable
-    private static volatile IInputMethodManager sServiceCache = null;
-
+public class InputMethodManagerGlobal {
     /**
-     * @return {@code true} if {@link IInputMethodManager} is available.
+     * @return {@code true} if IME tracing is currently is available.
      */
     @AnyThread
-    public static boolean isAvailable() {
-        return getService() != null;
-    }
-
-    @AnyThread
-    @Nullable
-    private static IInputMethodManager getService() {
-        IInputMethodManager service = sServiceCache;
-        if (service == null) {
-            service = IInputMethodManager.Stub.asInterface(
-                    ServiceManager.getService(Context.INPUT_METHOD_SERVICE));
-            if (service == null) {
-                return null;
-            }
-            sServiceCache = service;
-        }
-        return service;
-    }
-
-    @AnyThread
-    private static void handleRemoteExceptionOrRethrow(@NonNull RemoteException e,
-            @Nullable Consumer<RemoteException> exceptionHandler) {
-        if (exceptionHandler != null) {
-            exceptionHandler.accept(e);
-        } else {
-            throw e.rethrowFromSystemServer();
-        }
+    public static boolean isImeTraceAvailable() {
+        return IInputMethodManagerGlobalInvoker.isAvailable();
     }
 
     /**
@@ -88,15 +55,7 @@ public final class IInputMethodManagerGlobal {
     @AnyThread
     public static void startProtoDump(byte[] protoDump, int source, String where,
             @Nullable Consumer<RemoteException> exceptionHandler) {
-        final IInputMethodManager service = getService();
-        if (service == null) {
-            return;
-        }
-        try {
-            service.startProtoDump(protoDump, source, where);
-        } catch (RemoteException e) {
-            handleRemoteExceptionOrRethrow(e, exceptionHandler);
-        }
+        IInputMethodManagerGlobalInvoker.startProtoDump(protoDump, source, where, exceptionHandler);
     }
 
     /**
@@ -107,15 +66,7 @@ public final class IInputMethodManagerGlobal {
     @RequiresPermission(android.Manifest.permission.CONTROL_UI_TRACING)
     @AnyThread
     public static void startImeTrace(@Nullable Consumer<RemoteException> exceptionHandler) {
-        final IInputMethodManager service = getService();
-        if (service == null) {
-            return;
-        }
-        try {
-            service.startImeTrace();
-        } catch (RemoteException e) {
-            handleRemoteExceptionOrRethrow(e, exceptionHandler);
-        }
+        IInputMethodManagerGlobalInvoker.startImeTrace(exceptionHandler);
     }
 
     /**
@@ -126,15 +77,7 @@ public final class IInputMethodManagerGlobal {
     @RequiresPermission(android.Manifest.permission.CONTROL_UI_TRACING)
     @AnyThread
     public static void stopImeTrace(@Nullable Consumer<RemoteException> exceptionHandler) {
-        final IInputMethodManager service = getService();
-        if (service == null) {
-            return;
-        }
-        try {
-            service.stopImeTrace();
-        } catch (RemoteException e) {
-            handleRemoteExceptionOrRethrow(e, exceptionHandler);
-        }
+        IInputMethodManagerGlobalInvoker.stopImeTrace(exceptionHandler);
     }
 
     /**
@@ -145,31 +88,17 @@ public final class IInputMethodManagerGlobal {
     @RequiresNoPermission
     @AnyThread
     public static boolean isImeTraceEnabled() {
-        final IInputMethodManager service = getService();
-        if (service == null) {
-            return false;
-        }
-        try {
-            return service.isImeTraceEnabled();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return IInputMethodManagerGlobalInvoker.isImeTraceEnabled();
     }
 
     /**
      * Invokes {@link IInputMethodManager#removeImeSurface()}
+     *
+     * @param exceptionHandler an optional {@link RemoteException} handler.
      */
     @RequiresPermission(android.Manifest.permission.INTERNAL_SYSTEM_WINDOW)
     @AnyThread
     public static void removeImeSurface(@Nullable Consumer<RemoteException> exceptionHandler) {
-        final IInputMethodManager service = getService();
-        if (service == null) {
-            return;
-        }
-        try {
-            service.removeImeSurface();
-        } catch (RemoteException e) {
-            handleRemoteExceptionOrRethrow(e, exceptionHandler);
-        }
+        IInputMethodManagerGlobalInvoker.removeImeSurface(exceptionHandler);
     }
 }

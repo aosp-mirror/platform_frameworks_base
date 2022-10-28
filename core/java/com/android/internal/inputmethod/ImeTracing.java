@@ -22,6 +22,7 @@ import android.app.ActivityThread;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 import android.view.inputmethod.InputMethodManager;
+import android.view.inputmethod.InputMethodManagerGlobal;
 
 import java.io.PrintWriter;
 
@@ -44,7 +45,7 @@ public abstract class ImeTracing {
     private static ImeTracing sInstance;
     static boolean sEnabled = false;
 
-    private final boolean mIsAvailable = IInputMethodManagerGlobal.isAvailable();
+    private final boolean mIsAvailable = InputMethodManagerGlobal.isImeTraceAvailable();
 
     protected boolean mDumpInProgress;
     protected final Object mDumpInProgressLock = new Object();
@@ -81,7 +82,7 @@ public abstract class ImeTracing {
      * @param where
      */
     public void sendToService(byte[] protoDump, int source, String where) {
-        IInputMethodManagerGlobal.startProtoDump(protoDump, source, where,
+        InputMethodManagerGlobal.startProtoDump(protoDump, source, where,
                 e -> Log.e(TAG, "Exception while sending ime-related dump to server", e));
     }
 
@@ -90,7 +91,7 @@ public abstract class ImeTracing {
      */
     @RequiresPermission(android.Manifest.permission.CONTROL_UI_TRACING)
     public final void startImeTrace() {
-        IInputMethodManagerGlobal.startImeTrace(e -> Log.e(TAG, "Could not start ime trace.", e));
+        InputMethodManagerGlobal.startImeTrace(e -> Log.e(TAG, "Could not start ime trace.", e));
     }
 
     /**
@@ -98,7 +99,7 @@ public abstract class ImeTracing {
      */
     @RequiresPermission(android.Manifest.permission.CONTROL_UI_TRACING)
     public final void stopImeTrace() {
-        IInputMethodManagerGlobal.stopImeTrace(e -> Log.e(TAG, "Could not stop ime trace.", e));
+        InputMethodManagerGlobal.stopImeTrace(e -> Log.e(TAG, "Could not stop ime trace.", e));
     }
 
     /**
