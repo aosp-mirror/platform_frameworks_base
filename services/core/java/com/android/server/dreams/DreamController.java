@@ -245,6 +245,7 @@ final class DreamController {
 
                 if (mSentStartBroadcast) {
                     mContext.sendBroadcastAsUser(mDreamingStoppedIntent, UserHandle.ALL);
+                    mSentStartBroadcast = false;
                 }
 
                 mActivityTaskManager.removeRootTasksWithActivityTypes(
