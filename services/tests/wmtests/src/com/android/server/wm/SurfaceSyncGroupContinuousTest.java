@@ -28,6 +28,8 @@ import android.window.SurfaceSyncGroup;
 
 import androidx.test.rule.ActivityTestRule;
 
+import com.android.server.wm.scvh.SyncValidatorSCVHTestCase;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -56,11 +58,21 @@ public class SurfaceSyncGroupContinuousTest {
             pressWakeupButton();
             pressUnlockButton();
         }
+        SurfaceSyncGroup.setTransactionFactory(SurfaceControl.Transaction::new);
     }
 
     @Test
     public void testSurfaceViewSyncDuringResize() throws Throwable {
-        SurfaceSyncGroup.setTransactionFactory(SurfaceControl.Transaction::new);
         mCapturedActivity.verifyTest(new SurfaceSyncGroupValidatorTestCase(), mName);
+    }
+
+    @Test
+    public void testSurfaceControlViewHostIPCSync_Fast() throws Throwable {
+        mCapturedActivity.verifyTest(new SyncValidatorSCVHTestCase(0 /* delayMs */), mName);
+    }
+
+    @Test
+    public void testSurfaceControlViewHostIPCSync_Slow() throws Throwable {
+        mCapturedActivity.verifyTest(new SyncValidatorSCVHTestCase(100 /* delayMs */), mName);
     }
 }

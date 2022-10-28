@@ -56,7 +56,7 @@ public class SurfaceSyncGroupTest {
         syncGroup.addSyncCompleteCallback(mExecutor, finishedLatch::countDown);
         SyncTarget syncTarget = new SyncTarget();
         syncGroup.addToSync(syncTarget, false /* parentSyncGroupMerge */);
-        syncGroup.onTransactionReady(null);
+        syncGroup.markSyncReady();
 
         syncTarget.onBufferReady();
 
@@ -76,7 +76,7 @@ public class SurfaceSyncGroupTest {
         syncGroup.addToSync(syncTarget1, false /* parentSyncGroupMerge */);
         syncGroup.addToSync(syncTarget2, false /* parentSyncGroupMerge */);
         syncGroup.addToSync(syncTarget3, false /* parentSyncGroupMerge */);
-        syncGroup.onTransactionReady(null);
+        syncGroup.markSyncReady();
 
         syncTarget1.onBufferReady();
         assertNotEquals(0, finishedLatch.getCount());
@@ -98,7 +98,7 @@ public class SurfaceSyncGroupTest {
         SyncTarget syncTarget2 = new SyncTarget();
 
         assertTrue(syncGroup.addToSync(syncTarget1, false /* parentSyncGroupMerge */));
-        syncGroup.onTransactionReady(null);
+        syncGroup.markSyncReady();
         // Adding to a sync that has been completed is also invalid since the sync id has been
         // cleared.
         assertFalse(syncGroup.addToSync(syncTarget2, false /* parentSyncGroupMerge */));
@@ -119,8 +119,8 @@ public class SurfaceSyncGroupTest {
 
         assertTrue(syncGroup1.addToSync(syncTarget1, false /* parentSyncGroupMerge */));
         assertTrue(syncGroup2.addToSync(syncTarget2, false /* parentSyncGroupMerge */));
-        syncGroup1.onTransactionReady(null);
-        syncGroup2.onTransactionReady(null);
+        syncGroup1.markSyncReady();
+        syncGroup2.markSyncReady();
 
         syncTarget1.onBufferReady();
 
@@ -149,9 +149,9 @@ public class SurfaceSyncGroupTest {
 
         assertTrue(syncGroup1.addToSync(syncTarget1, false /* parentSyncGroupMerge */));
         assertTrue(syncGroup2.addToSync(syncTarget2, false /* parentSyncGroupMerge */));
-        syncGroup1.onTransactionReady(null);
+        syncGroup1.markSyncReady();
         syncGroup2.addToSync(syncGroup1, false /* parentSyncGroupMerge */);
-        syncGroup2.onTransactionReady(null);
+        syncGroup2.markSyncReady();
 
         // Finish syncTarget2 first to test that the syncGroup is not complete until the merged sync
         // is also done.
@@ -185,7 +185,7 @@ public class SurfaceSyncGroupTest {
 
         assertTrue(syncGroup1.addToSync(syncTarget1, false /* parentSyncGroupMerge */));
         assertTrue(syncGroup2.addToSync(syncTarget2, false /* parentSyncGroupMerge */));
-        syncGroup1.onTransactionReady(null);
+        syncGroup1.markSyncReady();
         syncTarget1.onBufferReady();
 
         // The first sync will still get a callback when it's sync requirements are done.
@@ -193,7 +193,7 @@ public class SurfaceSyncGroupTest {
         assertEquals(0, finishedLatch1.getCount());
 
         syncGroup2.addToSync(syncGroup1, false /* parentSyncGroupMerge */);
-        syncGroup2.onTransactionReady(null);
+        syncGroup2.markSyncReady();
         syncTarget2.onBufferReady();
 
         // Verify that the second sync will receive complete since the merged sync was already
@@ -223,8 +223,8 @@ public class SurfaceSyncGroupTest {
         assertTrue(syncGroup2.addToSync(syncTarget1, false /* parentSyncGroupMerge */));
         assertTrue(syncGroup2.addToSync(syncTarget3, false /* parentSyncGroupMerge */));
 
-        syncGroup1.onTransactionReady(null);
-        syncGroup2.onTransactionReady(null);
+        syncGroup1.markSyncReady();
+        syncGroup2.markSyncReady();
 
         // Make target1 and target3 ready, but not target2. SyncGroup2 should not be ready since
         // SyncGroup2 also waits for all of SyncGroup1 to finish, which includes target2
@@ -269,8 +269,8 @@ public class SurfaceSyncGroupTest {
         assertTrue(syncGroup2.addToSync(syncTarget1, false /* parentSyncGroupMerge */));
         assertTrue(syncGroup2.addToSync(syncTarget3, false /* parentSyncGroupMerge */));
 
-        syncGroup1.onTransactionReady(null);
-        syncGroup2.onTransactionReady(null);
+        syncGroup1.markSyncReady();
+        syncGroup2.markSyncReady();
 
         syncTarget1.onBufferReady();
 
@@ -304,7 +304,7 @@ public class SurfaceSyncGroupTest {
 
         SyncTarget syncTarget = new SyncTarget();
         assertTrue(syncGroup.addToSync(syncTarget, true /* parentSyncGroupMerge */));
-        syncTarget.onTransactionReady(null);
+        syncTarget.markSyncReady();
 
         // When parentSyncGroupMerge is true, the transaction passed in merges the main SyncGroup
         // transaction first because it knows the previous parentSyncGroup is older so it should
@@ -329,7 +329,7 @@ public class SurfaceSyncGroupTest {
 
         SyncTarget syncTarget = new SyncTarget();
         assertTrue(syncGroup.addToSync(syncTarget, false /* parentSyncGroupMerge */));
-        syncTarget.onTransactionReady(null);
+        syncTarget.markSyncReady();
 
         // When parentSyncGroupMerge is false, the transaction passed in should not merge
         // the main SyncGroup since we don't need to change the transaction order
@@ -346,7 +346,7 @@ public class SurfaceSyncGroupTest {
         syncGroup.addToSync(syncTarget, false /* parentSyncGroupMerge */);
         // Add the syncTarget to the same syncGroup and ensure it doesn't crash.
         syncGroup.addToSync(syncTarget, false /* parentSyncGroupMerge */);
-        syncGroup.onTransactionReady(null);
+        syncGroup.markSyncReady();
 
         syncTarget.onBufferReady();
 
@@ -364,8 +364,7 @@ public class SurfaceSyncGroupTest {
         }
 
         void onBufferReady() {
-            SurfaceControl.Transaction t = new StubTransaction();
-            onTransactionReady(t);
+            markSyncReady();
         }
     }
 }

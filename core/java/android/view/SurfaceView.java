@@ -1091,7 +1091,8 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                 t = syncBufferTransactionCallback.waitForTransaction();
             }
 
-            surfaceSyncGroup.onTransactionReady(t);
+            surfaceSyncGroup.addTransactionToSync(t);
+            surfaceSyncGroup.markSyncReady();
             onDrawFinished();
         });
     }
@@ -1106,7 +1107,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
             synchronized (mSyncGroups) {
                 mSyncGroups.remove(surfaceSyncGroup);
             }
-            surfaceSyncGroup.onTransactionReady(null);
+            surfaceSyncGroup.markSyncReady();
             onDrawFinished();
         });
 

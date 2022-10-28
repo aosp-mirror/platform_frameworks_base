@@ -231,6 +231,7 @@ import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 /**
  * The top of a view hierarchy, implementing the needed protocol between View
@@ -862,6 +863,8 @@ public final class ViewRootImpl implements ViewParent,
     // done at a global level per process. If any VRI syncs are in progress, we can't enable RT
     // animations until all are done.
     private static int sNumSyncsInProgress = 0;
+
+    private int mNumPausedForSync = 0;
 
     private HashSet<ScrollCaptureCallback> mRootScrollCaptureCallbacks;
 
@@ -2811,6 +2814,19 @@ public final class ViewRootImpl implements ViewParent,
             return;
         }
 
+        if (mNumPausedForSync > 0) {
+            if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
+                Trace.instant(Trace.TRACE_TAG_VIEW,
+                        TextUtils.formatSimple("performTraversals#mNumPausedForSync=%d",
+                                mNumPausedForSync));
+            }
+            if (DEBUG_BLAST) {
+                Log.d(mTag, "Skipping traversal due to sync " + mNumPausedForSync);
+            }
+            mLastPerformTraversalsSkipDrawReason = "paused_for_sync";
+            return;
+        }
+
         mIsInTraversal = true;
         mWillDrawSoon = true;
         boolean cancelDraw = false;
@@ -3677,7 +3693,7 @@ public final class ViewRootImpl implements ViewParent,
             }
 
             if (mActiveSurfaceSyncGroup != null) {
-                mActiveSurfaceSyncGroup.onTransactionReady(null);
+                mActiveSurfaceSyncGroup.markSyncReady();
             }
         } else if (cancelAndRedraw) {
             mLastPerformTraversalsSkipDrawReason = cancelDueToPreDrawListener
@@ -3693,7 +3709,7 @@ public final class ViewRootImpl implements ViewParent,
                 mPendingTransitions.clear();
             }
             if (!performDraw() && mActiveSurfaceSyncGroup != null) {
-                mActiveSurfaceSyncGroup.onTransactionReady(null);
+                mActiveSurfaceSyncGroup.markSyncReady();
             }
         }
 
@@ -3710,7 +3726,7 @@ public final class ViewRootImpl implements ViewParent,
             mActiveSurfaceSyncGroup = null;
             mSyncBuffer = false;
             if (isInWMSRequestedSync()) {
-                mWmsRequestSyncGroup.onTransactionReady(null);
+                mWmsRequestSyncGroup.markSyncReady();
                 mWmsRequestSyncGroup = null;
                 mWmsRequestSyncGroupState = WMS_SYNC_NONE;
             }
@@ -4553,7 +4569,7 @@ public final class ViewRootImpl implements ViewParent,
             if (mSurfaceHolder != null && mSurface.isValid()) {
                 final SurfaceSyncGroup surfaceSyncGroup = mActiveSurfaceSyncGroup;
                 SurfaceCallbackHelper sch = new SurfaceCallbackHelper(() ->
-                        mHandler.post(() -> surfaceSyncGroup.onTransactionReady(null)));
+                        mHandler.post(() -> surfaceSyncGroup.markSyncReady()));
                 mActiveSurfaceSyncGroup = null;
 
                 SurfaceHolder.Callback callbacks[] = mSurfaceHolder.getCallbacks();
@@ -4566,7 +4582,7 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
         if (mActiveSurfaceSyncGroup != null && !usingAsyncReport) {
-            mActiveSurfaceSyncGroup.onTransactionReady(null);
+            mActiveSurfaceSyncGroup.markSyncReady();
         }
         if (mPerformContentCapture) {
             performContentCaptureInitialReport();
@@ -11281,8 +11297,9 @@ public final class ViewRootImpl implements ViewParent,
                 // pendingDrawFinished.
                 if ((syncResult
                         & (SYNC_LOST_SURFACE_REWARD_IF_FOUND | SYNC_CONTEXT_IS_STOPPED)) != 0) {
-                    surfaceSyncGroup.onTransactionReady(
+                    surfaceSyncGroup.addTransactionToSync(
                             mBlastBufferQueue.gatherPendingTransactions(frame));
+                    surfaceSyncGroup.markSyncReady();
                     return null;
                 }
 
@@ -11291,8 +11308,13 @@ public final class ViewRootImpl implements ViewParent,
                 }
 
                 if (syncBuffer) {
-                    mBlastBufferQueue.syncNextTransaction(
-                            surfaceSyncGroup::onTransactionReady);
+                    mBlastBufferQueue.syncNextTransaction(new Consumer<Transaction>() {
+                        @Override
+                        public void accept(Transaction transaction) {
+                            surfaceSyncGroup.addTransactionToSync(transaction);
+                            surfaceSyncGroup.markSyncReady();
+                        }
+                    });
                 }
 
                 return didProduceBuffer -> {
@@ -11312,8 +11334,9 @@ public final class ViewRootImpl implements ViewParent,
                         // since the frame didn't draw on this vsync. It's possible the frame will
                         // draw later, but it's better to not be sync than to block on a frame that
                         // may never come.
-                        surfaceSyncGroup.onTransactionReady(
+                        surfaceSyncGroup.addTransactionToSync(
                                 mBlastBufferQueue.gatherPendingTransactions(frame));
+                        surfaceSyncGroup.markSyncReady();
                         return;
                     }
 
@@ -11321,22 +11344,41 @@ public final class ViewRootImpl implements ViewParent,
                     // syncNextTransaction callback. Instead, just report back to the Syncer so it
                     // knows that this sync request is complete.
                     if (!syncBuffer) {
-                        surfaceSyncGroup.onTransactionReady(null);
+                        surfaceSyncGroup.markSyncReady();
                     }
                 };
             }
         });
     }
 
+    private class VRISurfaceSyncGroup extends SurfaceSyncGroup {
+        VRISurfaceSyncGroup(String name) {
+            super(name);
+        }
+
+        @Override
+        public void onSyncReady() {
+            Runnable runnable = () -> {
+                mNumPausedForSync--;
+                if (!mIsInTraversal && mNumPausedForSync == 0) {
+                    scheduleTraversals();
+                }
+            };
+
+            if (Thread.currentThread() == mThread) {
+                runnable.run();
+            } else {
+                mHandler.post(runnable);
+            }
+        }
+    }
+
     @Override
     public SurfaceSyncGroup getOrCreateSurfaceSyncGroup() {
         boolean newSyncGroup = false;
         if (mActiveSurfaceSyncGroup == null) {
-            mActiveSurfaceSyncGroup = new SurfaceSyncGroup(mTag);
+            mActiveSurfaceSyncGroup = new VRISurfaceSyncGroup(mTag);
             updateSyncInProgressCount(mActiveSurfaceSyncGroup);
-            if (!mIsInTraversal && !mTraversalScheduled) {
-                scheduleTraversals();
-            }
             newSyncGroup = true;
         }
 
@@ -11352,6 +11394,7 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
 
+        mNumPausedForSync++;
         return mActiveSurfaceSyncGroup;
     };
 
