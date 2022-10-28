@@ -28,7 +28,6 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -289,9 +288,6 @@ public class ImageWallpaperTest extends SysuiTestCase {
         testMinSurfaceHelper(8, 8);
         testMinSurfaceHelper(100, 2000);
         testMinSurfaceHelper(200, 1);
-        testMinSurfaceHelper(0, 1);
-        testMinSurfaceHelper(1, 0);
-        testMinSurfaceHelper(0, 0);
     }
 
     private void testMinSurfaceHelper(int bitmapWidth, int bitmapHeight) {
@@ -307,28 +303,6 @@ public class ImageWallpaperTest extends SysuiTestCase {
         verify(mSurfaceHolder, times(1)).setFixedSize(
                 intThat(greaterThanOrEqualTo(ImageWallpaper.CanvasEngine.MIN_SURFACE_WIDTH)),
                 intThat(greaterThanOrEqualTo(ImageWallpaper.CanvasEngine.MIN_SURFACE_HEIGHT)));
-    }
-
-    @Test
-    public void testZeroBitmap() {
-        // test that a frame is never drawn with a 0 bitmap
-        testZeroBitmapHelper(0, 1);
-        testZeroBitmapHelper(1, 0);
-        testZeroBitmapHelper(0, 0);
-    }
-
-    private void testZeroBitmapHelper(int bitmapWidth, int bitmapHeight) {
-
-        clearInvocations(mSurfaceHolder);
-        setBitmapDimensions(bitmapWidth, bitmapHeight);
-
-        ImageWallpaper imageWallpaper = createImageWallpaperCanvas();
-        ImageWallpaper.CanvasEngine engine =
-                (ImageWallpaper.CanvasEngine) imageWallpaper.onCreateEngine();
-        ImageWallpaper.CanvasEngine spyEngine = spy(engine);
-        spyEngine.onCreate(mSurfaceHolder);
-        spyEngine.onSurfaceRedrawNeeded(mSurfaceHolder);
-        verify(spyEngine, never()).drawFrameOnCanvas(any());
     }
 
     @Test

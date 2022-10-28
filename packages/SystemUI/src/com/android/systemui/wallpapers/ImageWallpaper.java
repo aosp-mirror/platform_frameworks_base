@@ -764,9 +764,6 @@ public class ImageWallpaper extends WallpaperService {
                 Log.e(TAG, "Attempt to load a recycled bitmap");
             } else if (mBitmap == bitmap) {
                 Log.e(TAG, "Loaded a bitmap that was already loaded");
-            } else if (bitmap.getWidth() < 1 || bitmap.getHeight() < 1) {
-                Log.e(TAG, "Attempt to load an invalid wallpaper of length "
-                        + bitmap.getWidth() + "x" + bitmap.getHeight());
             } else {
                 // at this point, loading is done correctly.
                 loadSuccess = true;
