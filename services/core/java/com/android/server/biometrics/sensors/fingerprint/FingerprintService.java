@@ -332,8 +332,8 @@ public class FingerprintService extends SystemService {
             if (!isKeyguard && !Utils.isSettings(getContext(), opPackageName)
                     && sensorProps != null && sensorProps.isAnyUdfpsType()) {
                 try {
-                    return authenticateWithPrompt(operationId, sensorProps, userId, receiver,
-                            opPackageName);
+                    return authenticateWithPrompt(operationId, sensorProps, callingUid,
+                            callingUserId, receiver, opPackageName);
                 } catch (PackageManager.NameNotFoundException e) {
                     Slog.e(TAG, "Invalid package", e);
                     return -1;
@@ -347,13 +347,14 @@ public class FingerprintService extends SystemService {
         private long authenticateWithPrompt(
                 final long operationId,
                 @NonNull final FingerprintSensorPropertiesInternal props,
+                final int uId,
                 final int userId,
                 final IFingerprintServiceReceiver receiver,
                 final String opPackageName) throws PackageManager.NameNotFoundException {
 
             final Context context = getUiContext();
             final Context promptContext = context.createPackageContextAsUser(
-                    opPackageName, 0 /* flags */, UserHandle.getUserHandleForUid(userId));
+                    opPackageName, 0 /* flags */, UserHandle.getUserHandleForUid(uId));
             final Executor executor = context.getMainExecutor();
 
             final BiometricPrompt biometricPrompt = new BiometricPrompt.Builder(promptContext)
