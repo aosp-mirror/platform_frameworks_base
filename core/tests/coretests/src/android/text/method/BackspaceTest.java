@@ -193,8 +193,12 @@ public class BackspaceTest {
         backspace(state, 0);
         state.assertEquals("|");
 
-        // Emoji modifier can be appended to the first emoji.
+        // Emoji modifier can be appended to each emoji.
         state.setByString("U+1F469 U+1F3FB U+200D U+1F4BC |");
+        backspace(state, 0);
+        state.assertEquals("|");
+
+        state.setByString("U+1F468 U+1F3FF U+200D U+2764 U+FE0F U+200D U+1F468 U+1F3FB |");
         backspace(state, 0);
         state.assertEquals("|");
 
