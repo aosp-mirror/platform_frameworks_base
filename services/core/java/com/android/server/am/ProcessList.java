@@ -814,7 +814,14 @@ public final class ProcessList {
                                                 < LmkdStatsReporter.KILL_OCCURRED_MSG_SIZE) {
                                             return false;
                                         }
-                                        LmkdStatsReporter.logKillOccurred(inputData);
+                                        // Note: directly access
+                                        // ActiveServices.sNumForegroundServices, do not try to
+                                        // hold AMS lock here, otherwise it is a potential deadlock.
+                                        Pair<Integer, Integer> foregroundServices =
+                                                ActiveServices.sNumForegroundServices.get();
+                                        LmkdStatsReporter.logKillOccurred(inputData,
+                                                foregroundServices.first,
+                                                foregroundServices.second);
                                         return true;
                                     case LMK_STATE_CHANGED:
                                         if (receivedLen
@@ -2269,7 +2276,9 @@ public final class ProcessList {
                 final boolean inBgRestricted = ast.isAppBackgroundRestricted(
                         app.info.uid, app.info.packageName);
                 if (inBgRestricted) {
-                    mAppsInBackgroundRestricted.add(app);
+                    synchronized (mService) {
+                        mAppsInBackgroundRestricted.add(app);
+                    }
                 }
                 app.mState.setBackgroundRestricted(inBgRestricted);
             }
@@ -5119,6 +5128,26 @@ public final class ProcessList {
                 }
             }
         }
+    }
+
+    /**
+     * Get the number of foreground services in all processes and number of processes that have
+     * foreground service within.
+     */
+    Pair<Integer, Integer> getNumForegroundServices() {
+        int numForegroundServices = 0;
+        int procs = 0;
+        synchronized (mService) {
+            for (int i = 0, size = mLruProcesses.size(); i < size; i++) {
+                ProcessRecord pr = mLruProcesses.get(i);
+                int numFgs = pr.mServices.getNumForegroundServices();
+                if (numFgs > 0) {
+                    numForegroundServices += numFgs;
+                    procs++;
+                }
+            }
+        }
+        return new Pair<>(numForegroundServices, procs);
     }
 
     private final class ImperceptibleKillRunner extends IUidObserver.Stub {

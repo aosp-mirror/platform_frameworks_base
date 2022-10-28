@@ -25,9 +25,10 @@ import android.os.PowerManager
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.View
+import android.view.ViewGroup
 import android.view.WindowManager
+import android.view.accessibility.AccessibilityManager
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.testing.UiEventLoggerFake
@@ -36,13 +37,11 @@ import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.media.taptotransfer.common.MediaTttLogger
 import com.android.systemui.statusbar.CommandQueue
-import com.android.systemui.statusbar.gesture.TapGestureDetector
+import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
-import com.android.systemui.util.view.ViewUtil
-
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -67,11 +66,13 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
     @Mock
     private lateinit var logger: MediaTttLogger
     @Mock
+    private lateinit var accessibilityManager: AccessibilityManager
+    @Mock
+    private lateinit var configurationController: ConfigurationController
+    @Mock
     private lateinit var powerManager: PowerManager
     @Mock
     private lateinit var windowManager: WindowManager
-    @Mock
-    private lateinit var viewUtil: ViewUtil
     @Mock
     private lateinit var commandQueue: CommandQueue
     private lateinit var commandQueueCallback: CommandQueue.Callbacks
@@ -95,17 +96,20 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
 
         fakeClock = FakeSystemClock()
         fakeExecutor = FakeExecutor(fakeClock)
+
         uiEventLoggerFake = UiEventLoggerFake()
         senderUiEventLogger = MediaTttSenderUiEventLogger(uiEventLoggerFake)
+
+        whenever(accessibilityManager.getRecommendedTimeoutMillis(any(), any())).thenReturn(TIMEOUT)
 
         controllerSender = MediaTttChipControllerSender(
             commandQueue,
             context,
             logger,
             windowManager,
-            viewUtil,
             fakeExecutor,
-            TapGestureDetector(context),
+            accessibilityManager,
+            configurationController,
             powerManager,
             senderUiEventLogger
         )
@@ -295,13 +299,13 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
             null
         )
 
-        verify(logger).logStateChange(any(), any())
+        verify(logger).logStateChange(any(), any(), any())
     }
 
     @Test
     fun almostCloseToStartCast_appIcon_deviceName_noLoadingIcon_noUndo_noFailureIcon() {
         val state = almostCloseToStartCast()
-        controllerSender.displayChip(state)
+        controllerSender.displayView(state)
 
         val chipView = getChipView()
         assertThat(chipView.getAppIconView().drawable).isEqualTo(fakeAppIconDrawable)
@@ -317,7 +321,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
     @Test
     fun almostCloseToEndCast_appIcon_deviceName_noLoadingIcon_noUndo_noFailureIcon() {
         val state = almostCloseToEndCast()
-        controllerSender.displayChip(state)
+        controllerSender.displayView(state)
 
         val chipView = getChipView()
         assertThat(chipView.getAppIconView().drawable).isEqualTo(fakeAppIconDrawable)
@@ -333,7 +337,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
     @Test
     fun transferToReceiverTriggered_appIcon_loadingIcon_noUndo_noFailureIcon() {
         val state = transferToReceiverTriggered()
-        controllerSender.displayChip(state)
+        controllerSender.displayView(state)
 
         val chipView = getChipView()
         assertThat(chipView.getAppIconView().drawable).isEqualTo(fakeAppIconDrawable)
@@ -349,7 +353,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
     @Test
     fun transferToThisDeviceTriggered_appIcon_loadingIcon_noUndo_noFailureIcon() {
         val state = transferToThisDeviceTriggered()
-        controllerSender.displayChip(state)
+        controllerSender.displayView(state)
 
         val chipView = getChipView()
         assertThat(chipView.getAppIconView().drawable).isEqualTo(fakeAppIconDrawable)
@@ -365,7 +369,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
     @Test
     fun transferToReceiverSucceeded_appIcon_deviceName_noLoadingIcon_noFailureIcon() {
         val state = transferToReceiverSucceeded()
-        controllerSender.displayChip(state)
+        controllerSender.displayView(state)
 
         val chipView = getChipView()
         assertThat(chipView.getAppIconView().drawable).isEqualTo(fakeAppIconDrawable)
@@ -379,7 +383,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
 
     @Test
     fun transferToReceiverSucceeded_nullUndoRunnable_noUndo() {
-        controllerSender.displayChip(transferToReceiverSucceeded(undoCallback = null))
+        controllerSender.displayView(transferToReceiverSucceeded(undoCallback = null))
 
         val chipView = getChipView()
         assertThat(chipView.getUndoButton().visibility).isEqualTo(View.GONE)
@@ -390,7 +394,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         val undoCallback = object : IUndoMediaTransferCallback.Stub() {
             override fun onUndoTriggered() {}
         }
-        controllerSender.displayChip(transferToReceiverSucceeded(undoCallback))
+        controllerSender.displayView(transferToReceiverSucceeded(undoCallback))
 
         val chipView = getChipView()
         assertThat(chipView.getUndoButton().visibility).isEqualTo(View.VISIBLE)
@@ -406,7 +410,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
             }
         }
 
-        controllerSender.displayChip(transferToReceiverSucceeded(undoCallback))
+        controllerSender.displayView(transferToReceiverSucceeded(undoCallback))
         getChipView().getUndoButton().performClick()
 
         assertThat(undoCallbackCalled).isTrue()
@@ -417,7 +421,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         val undoCallback = object : IUndoMediaTransferCallback.Stub() {
             override fun onUndoTriggered() {}
         }
-        controllerSender.displayChip(transferToReceiverSucceeded(undoCallback))
+        controllerSender.displayView(transferToReceiverSucceeded(undoCallback))
 
         getChipView().getUndoButton().performClick()
 
@@ -432,7 +436,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
     @Test
     fun transferToThisDeviceSucceeded_appIcon_deviceName_noLoadingIcon_noFailureIcon() {
         val state = transferToThisDeviceSucceeded()
-        controllerSender.displayChip(state)
+        controllerSender.displayView(state)
 
         val chipView = getChipView()
         assertThat(chipView.getAppIconView().drawable).isEqualTo(fakeAppIconDrawable)
@@ -446,7 +450,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
 
     @Test
     fun transferToThisDeviceSucceeded_nullUndoRunnable_noUndo() {
-        controllerSender.displayChip(transferToThisDeviceSucceeded(undoCallback = null))
+        controllerSender.displayView(transferToThisDeviceSucceeded(undoCallback = null))
 
         val chipView = getChipView()
         assertThat(chipView.getUndoButton().visibility).isEqualTo(View.GONE)
@@ -457,7 +461,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         val undoCallback = object : IUndoMediaTransferCallback.Stub() {
             override fun onUndoTriggered() {}
         }
-        controllerSender.displayChip(transferToThisDeviceSucceeded(undoCallback))
+        controllerSender.displayView(transferToThisDeviceSucceeded(undoCallback))
 
         val chipView = getChipView()
         assertThat(chipView.getUndoButton().visibility).isEqualTo(View.VISIBLE)
@@ -473,7 +477,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
             }
         }
 
-        controllerSender.displayChip(transferToThisDeviceSucceeded(undoCallback))
+        controllerSender.displayView(transferToThisDeviceSucceeded(undoCallback))
         getChipView().getUndoButton().performClick()
 
         assertThat(undoCallbackCalled).isTrue()
@@ -484,7 +488,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         val undoCallback = object : IUndoMediaTransferCallback.Stub() {
             override fun onUndoTriggered() {}
         }
-        controllerSender.displayChip(transferToThisDeviceSucceeded(undoCallback))
+        controllerSender.displayView(transferToThisDeviceSucceeded(undoCallback))
 
         getChipView().getUndoButton().performClick()
 
@@ -499,7 +503,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
     @Test
     fun transferToReceiverFailed_appIcon_noDeviceName_noLoadingIcon_noUndo_failureIcon() {
         val state = transferToReceiverFailed()
-        controllerSender.displayChip(state)
+        controllerSender.displayView(state)
 
         val chipView = getChipView()
         assertThat(chipView.getAppIconView().drawable).isEqualTo(fakeAppIconDrawable)
@@ -515,7 +519,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
     @Test
     fun transferToThisDeviceFailed_appIcon_noDeviceName_noLoadingIcon_noUndo_failureIcon() {
         val state = transferToThisDeviceFailed()
-        controllerSender.displayChip(state)
+        controllerSender.displayView(state)
 
         val chipView = getChipView()
         assertThat(chipView.getAppIconView().drawable).isEqualTo(fakeAppIconDrawable)
@@ -530,24 +534,24 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
 
     @Test
     fun changeFromAlmostCloseToStartToTransferTriggered_loadingIconAppears() {
-        controllerSender.displayChip(almostCloseToStartCast())
-        controllerSender.displayChip(transferToReceiverTriggered())
+        controllerSender.displayView(almostCloseToStartCast())
+        controllerSender.displayView(transferToReceiverTriggered())
 
         assertThat(getChipView().getLoadingIconVisibility()).isEqualTo(View.VISIBLE)
     }
 
     @Test
     fun changeFromTransferTriggeredToTransferSucceeded_loadingIconDisappears() {
-        controllerSender.displayChip(transferToReceiverTriggered())
-        controllerSender.displayChip(transferToReceiverSucceeded())
+        controllerSender.displayView(transferToReceiverTriggered())
+        controllerSender.displayView(transferToReceiverSucceeded())
 
         assertThat(getChipView().getLoadingIconVisibility()).isEqualTo(View.GONE)
     }
 
     @Test
     fun changeFromTransferTriggeredToTransferSucceeded_undoButtonAppears() {
-        controllerSender.displayChip(transferToReceiverTriggered())
-        controllerSender.displayChip(
+        controllerSender.displayView(transferToReceiverTriggered())
+        controllerSender.displayView(
             transferToReceiverSucceeded(
                 object : IUndoMediaTransferCallback.Stub() {
                     override fun onUndoTriggered() {}
@@ -560,82 +564,182 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
 
     @Test
     fun changeFromTransferSucceededToAlmostCloseToStart_undoButtonDisappears() {
-        controllerSender.displayChip(transferToReceiverSucceeded())
-        controllerSender.displayChip(almostCloseToStartCast())
+        controllerSender.displayView(transferToReceiverSucceeded())
+        controllerSender.displayView(almostCloseToStartCast())
 
         assertThat(getChipView().getUndoButton().visibility).isEqualTo(View.GONE)
     }
 
     @Test
     fun changeFromTransferTriggeredToTransferFailed_failureIconAppears() {
-        controllerSender.displayChip(transferToReceiverTriggered())
-        controllerSender.displayChip(transferToReceiverFailed())
+        controllerSender.displayView(transferToReceiverTriggered())
+        controllerSender.displayView(transferToReceiverFailed())
 
         assertThat(getChipView().getFailureIcon().visibility).isEqualTo(View.VISIBLE)
     }
 
     @Test
-    fun transferToReceiverTriggeredThenRemoveChip_chipStillDisplayed() {
-        controllerSender.displayChip(transferToReceiverTriggered())
+    fun transferToReceiverTriggeredThenRemoveView_viewStillDisplayed() {
+        controllerSender.displayView(transferToReceiverTriggered())
         fakeClock.advanceTime(1000L)
 
-        controllerSender.removeChip("fakeRemovalReason")
+        controllerSender.removeView("fakeRemovalReason")
         fakeExecutor.runAllReady()
 
         verify(windowManager, never()).removeView(any())
+        verify(logger).logRemovalBypass(any(), any())
     }
 
     @Test
-    fun transferToReceiverTriggeredThenFarFromReceiver_eventuallyTimesOut() {
-        val state = transferToReceiverTriggered()
-        controllerSender.displayChip(state)
-        fakeClock.advanceTime(1000L)
-        controllerSender.removeChip("fakeRemovalReason")
+    fun transferToReceiverTriggeredThenFarFromReceiver_viewStillDisplayed() {
+        controllerSender.displayView(transferToReceiverTriggered())
 
-        fakeClock.advanceTime(state.state.timeout + 1)
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_FAR_FROM_RECEIVER,
+            routeInfo,
+            null
+        )
+        fakeExecutor.runAllReady()
+
+        verify(windowManager, never()).removeView(any())
+        verify(logger).logRemovalBypass(any(), any())
+    }
+
+    @Test
+    fun transferToReceiverTriggeredThenRemoveView_eventuallyTimesOut() {
+        controllerSender.displayView(transferToReceiverTriggered())
+
+        controllerSender.removeView("fakeRemovalReason")
+        fakeClock.advanceTime(TIMEOUT + 1L)
 
         verify(windowManager).removeView(any())
     }
 
     @Test
-    fun transferToThisDeviceTriggeredThenRemoveChip_chipStillDisplayed() {
-        controllerSender.displayChip(transferToThisDeviceTriggered())
+    fun transferToThisDeviceTriggeredThenRemoveView_viewStillDisplayed() {
+        controllerSender.displayView(transferToThisDeviceTriggered())
         fakeClock.advanceTime(1000L)
 
-        controllerSender.removeChip("fakeRemovalReason")
+        controllerSender.removeView("fakeRemovalReason")
         fakeExecutor.runAllReady()
 
         verify(windowManager, never()).removeView(any())
+        verify(logger).logRemovalBypass(any(), any())
     }
 
     @Test
-    fun transferToThisDeviceTriggeredThenFarFromReceiver_eventuallyTimesOut() {
-        val state = transferToThisDeviceTriggered()
-        controllerSender.displayChip(state)
-        fakeClock.advanceTime(1000L)
-        controllerSender.removeChip("fakeRemovalReason")
+    fun transferToThisDeviceTriggeredThenRemoveView_eventuallyTimesOut() {
+        controllerSender.displayView(transferToThisDeviceTriggered())
 
-        fakeClock.advanceTime(state.state.timeout + 1)
+        controllerSender.removeView("fakeRemovalReason")
+        fakeClock.advanceTime(TIMEOUT + 1L)
 
         verify(windowManager).removeView(any())
     }
 
-    private fun LinearLayout.getAppIconView() = this.requireViewById<ImageView>(R.id.app_icon)
+    @Test
+    fun transferToThisDeviceTriggeredThenFarFromReceiver_viewStillDisplayed() {
+        controllerSender.displayView(transferToThisDeviceTriggered())
 
-    private fun LinearLayout.getChipText(): String =
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_FAR_FROM_RECEIVER,
+            routeInfo,
+            null
+        )
+        fakeExecutor.runAllReady()
+
+        verify(windowManager, never()).removeView(any())
+        verify(logger).logRemovalBypass(any(), any())
+    }
+
+    @Test
+    fun transferToReceiverSucceededThenRemoveView_viewStillDisplayed() {
+        controllerSender.displayView(transferToReceiverSucceeded())
+
+        controllerSender.removeView("fakeRemovalReason")
+        fakeExecutor.runAllReady()
+
+        verify(windowManager, never()).removeView(any())
+        verify(logger).logRemovalBypass(any(), any())
+    }
+
+    @Test
+    fun transferToReceiverSucceededThenRemoveView_eventuallyTimesOut() {
+        controllerSender.displayView(transferToReceiverSucceeded())
+
+        controllerSender.removeView("fakeRemovalReason")
+        fakeClock.advanceTime(TIMEOUT + 1L)
+
+        verify(windowManager).removeView(any())
+    }
+
+    @Test
+    fun transferToReceiverSucceededThenFarFromReceiver_viewStillDisplayed() {
+        controllerSender.displayView(transferToReceiverSucceeded())
+
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_FAR_FROM_RECEIVER,
+            routeInfo,
+            null
+        )
+        fakeExecutor.runAllReady()
+
+        verify(windowManager, never()).removeView(any())
+        verify(logger).logRemovalBypass(any(), any())
+    }
+
+    @Test
+    fun transferToThisDeviceSucceededThenRemoveView_viewStillDisplayed() {
+        controllerSender.displayView(transferToThisDeviceSucceeded())
+
+        controllerSender.removeView("fakeRemovalReason")
+        fakeExecutor.runAllReady()
+
+        verify(windowManager, never()).removeView(any())
+        verify(logger).logRemovalBypass(any(), any())
+    }
+
+    @Test
+    fun transferToThisDeviceSucceededThenRemoveView_eventuallyTimesOut() {
+        controllerSender.displayView(transferToThisDeviceSucceeded())
+
+        controllerSender.removeView("fakeRemovalReason")
+        fakeClock.advanceTime(TIMEOUT + 1L)
+
+        verify(windowManager).removeView(any())
+    }
+
+    @Test
+    fun transferToThisDeviceSucceededThenFarFromReceiver_viewStillDisplayed() {
+        controllerSender.displayView(transferToThisDeviceSucceeded())
+
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_FAR_FROM_RECEIVER,
+            routeInfo,
+            null
+        )
+        fakeExecutor.runAllReady()
+
+        verify(windowManager, never()).removeView(any())
+        verify(logger).logRemovalBypass(any(), any())
+    }
+
+    private fun ViewGroup.getAppIconView() = this.requireViewById<ImageView>(R.id.app_icon)
+
+    private fun ViewGroup.getChipText(): String =
         (this.requireViewById<TextView>(R.id.text)).text as String
 
-    private fun LinearLayout.getLoadingIconVisibility(): Int =
+    private fun ViewGroup.getLoadingIconVisibility(): Int =
         this.requireViewById<View>(R.id.loading).visibility
 
-    private fun LinearLayout.getUndoButton(): View = this.requireViewById(R.id.undo)
+    private fun ViewGroup.getUndoButton(): View = this.requireViewById(R.id.undo)
 
-    private fun LinearLayout.getFailureIcon(): View = this.requireViewById(R.id.failure_icon)
+    private fun ViewGroup.getFailureIcon(): View = this.requireViewById(R.id.failure_icon)
 
-    private fun getChipView(): LinearLayout {
+    private fun getChipView(): ViewGroup {
         val viewCaptor = ArgumentCaptor.forClass(View::class.java)
         verify(windowManager).addView(viewCaptor.capture(), any())
-        return viewCaptor.value as LinearLayout
+        return viewCaptor.value as ViewGroup
     }
 
     /** Helper method providing default parameters to not clutter up the tests. */
@@ -674,8 +778,9 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
 private const val APP_NAME = "Fake app name"
 private const val OTHER_DEVICE_NAME = "My Tablet"
 private const val PACKAGE_NAME = "com.android.systemui"
+private const val TIMEOUT = 10000
 
 private val routeInfo = MediaRoute2Info.Builder("id", OTHER_DEVICE_NAME)
     .addFeature("feature")
-    .setPackageName(PACKAGE_NAME)
+    .setClientPackageName(PACKAGE_NAME)
     .build()

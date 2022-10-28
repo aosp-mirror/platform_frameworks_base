@@ -33,17 +33,18 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.controls.ControlsServiceInfo
+import com.android.systemui.controls.controller.ControlInfo
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.controller.StructureInfo
 import com.android.systemui.controls.dagger.ControlsComponent
 import com.android.systemui.controls.management.ControlsListingController
+import com.android.systemui.controls.ui.ControlsActivity
 import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
-import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
@@ -57,13 +58,13 @@ import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.Captor
 import org.mockito.Mock
+import org.mockito.MockitoAnnotations
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.doNothing
 import org.mockito.Mockito.nullable
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyZeroInteractions
-import org.mockito.MockitoAnnotations
 import java.util.Optional
 
 @SmallTest
@@ -93,8 +94,6 @@ class DeviceControlsTileTest : SysuiTestCase() {
     private lateinit var serviceInfo: ControlsServiceInfo
     @Mock
     private lateinit var uiEventLogger: UiEventLogger
-    @Mock
-    private lateinit var keyguardStateController: KeyguardStateController
     @Captor
     private lateinit var listingCallbackCaptor:
             ArgumentCaptor<ControlsListingController.ControlsListingCallback>
@@ -119,7 +118,6 @@ class DeviceControlsTileTest : SysuiTestCase() {
         `when`(qsHost.context).thenReturn(spiedContext)
         `when`(qsHost.uiEventLogger).thenReturn(uiEventLogger)
         `when`(controlsComponent.isEnabled()).thenReturn(true)
-        `when`(keyguardStateController.isUnlocked()).thenReturn(true)
         `when`(controlsController.getPreferredStructure())
                 .thenReturn(StructureInfo(ComponentName("pkg", "cls"), "structure", listOf()))
         secureSettings.putInt(Settings.Secure.LOCKSCREEN_SHOW_CONTROLS, 1)
@@ -222,17 +220,40 @@ class DeviceControlsTileTest : SysuiTestCase() {
     }
 
     @Test
-    fun testStateAvailableIfListings() {
+    fun testStateActiveIfListingsHasControlsFavorited() {
         verify(controlsListingController).observe(
                 any(LifecycleOwner::class.java),
                 capture(listingCallbackCaptor)
         )
         `when`(controlsComponent.getVisibility()).thenReturn(ControlsComponent.Visibility.AVAILABLE)
+        `when`(controlsController.getPreferredStructure()).thenReturn(
+            StructureInfo(
+                ComponentName("pkg", "cls"),
+                "structure",
+                listOf(ControlInfo("id", "title", "subtitle", 1))
+            )
+        )
 
         listingCallbackCaptor.value.onServicesUpdated(listOf(serviceInfo))
         testableLooper.processAllMessages()
 
         assertThat(tile.state.state).isEqualTo(Tile.STATE_ACTIVE)
+    }
+
+    @Test
+    fun testStateInactiveIfListingsHasNoControlsFavorited() {
+        verify(controlsListingController).observe(
+                any(LifecycleOwner::class.java),
+                capture(listingCallbackCaptor)
+        )
+        `when`(controlsComponent.getVisibility()).thenReturn(ControlsComponent.Visibility.AVAILABLE)
+        `when`(controlsController.getPreferredStructure())
+                .thenReturn(StructureInfo(ComponentName("pkg", "cls"), "structure", listOf()))
+
+        listingCallbackCaptor.value.onServicesUpdated(listOf(serviceInfo))
+        testableLooper.processAllMessages()
+
+        assertThat(tile.state.state).isEqualTo(Tile.STATE_INACTIVE)
     }
 
     @Test
@@ -281,7 +302,14 @@ class DeviceControlsTileTest : SysuiTestCase() {
                 capture(listingCallbackCaptor)
         )
         `when`(controlsComponent.getVisibility()).thenReturn(ControlsComponent.Visibility.AVAILABLE)
-        `when`(keyguardStateController.isUnlocked).thenReturn(true)
+        `when`(controlsUiController.resolveActivity()).thenReturn(ControlsActivity::class.java)
+        `when`(controlsController.getPreferredStructure()).thenReturn(
+            StructureInfo(
+                ComponentName("pkg", "cls"),
+                "structure",
+                listOf(ControlInfo("id", "title", "subtitle", 1))
+            )
+        )
 
         listingCallbackCaptor.value.onServicesUpdated(listOf(serviceInfo))
         testableLooper.processAllMessages()
@@ -305,7 +333,14 @@ class DeviceControlsTileTest : SysuiTestCase() {
         )
         `when`(controlsComponent.getVisibility())
             .thenReturn(ControlsComponent.Visibility.AVAILABLE_AFTER_UNLOCK)
-        `when`(keyguardStateController.isUnlocked).thenReturn(false)
+        `when`(controlsUiController.resolveActivity()).thenReturn(ControlsActivity::class.java)
+        `when`(controlsController.getPreferredStructure()).thenReturn(
+            StructureInfo(
+                ComponentName("pkg", "cls"),
+                "structure",
+                listOf(ControlInfo("id", "title", "subtitle", 1))
+            )
+        )
 
         listingCallbackCaptor.value.onServicesUpdated(listOf(serviceInfo))
         testableLooper.processAllMessages()
@@ -345,8 +380,7 @@ class DeviceControlsTileTest : SysuiTestCase() {
                 statusBarStateController,
                 activityStarter,
                 qsLogger,
-                controlsComponent,
-                keyguardStateController
+                controlsComponent
         ).also {
             it.initialize()
             testableLooper.processAllMessages()

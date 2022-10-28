@@ -180,6 +180,16 @@ final class ProcessServiceRecord {
         mRepFgServiceTypes = foregroundServiceTypes;
     }
 
+    int getNumForegroundServices() {
+        int count = 0;
+        for (int i = 0, serviceCount = mServices.size(); i < serviceCount; i++) {
+            if (mServices.valueAt(i).isForeground) {
+                count++;
+            }
+        }
+        return count;
+    }
+
     void updateHasTopStartedAlmostPerceptibleServices() {
         mHasTopStartedAlmostPerceptibleServices = false;
         mLastTopStartedAlmostPerceptibleBindRequestUptimeMs = 0;

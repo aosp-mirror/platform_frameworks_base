@@ -56,10 +56,12 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.proto.ProtoOutputStream;
+import android.view.Display;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
+import com.android.server.companion.virtual.VirtualDeviceManagerInternal;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -157,6 +159,7 @@ final class VibrationSettings {
     final UidObserver mUidObserver;
     @VisibleForTesting
     final SettingsBroadcastReceiver mSettingChangeReceiver;
+    final VirtualDeviceListener mVirtualDeviceListener;
 
     @GuardedBy("mLock")
     private final List<OnVibratorSettingsChanged> mListeners = new ArrayList<>();
@@ -193,6 +196,7 @@ final class VibrationSettings {
         mSettingObserver = new SettingsContentObserver(handler);
         mUidObserver = new UidObserver();
         mSettingChangeReceiver = new SettingsBroadcastReceiver();
+        mVirtualDeviceListener = new VirtualDeviceListener();
 
         mSystemUiPackage = LocalServices.getService(PackageManagerInternal.class)
                 .getSystemUiServiceComponent().getPackageName();
@@ -256,6 +260,13 @@ final class VibrationSettings {
                         }
                     }
                 });
+
+        VirtualDeviceManagerInternal vdm = LocalServices.getService(
+                VirtualDeviceManagerInternal.class);
+        if (vdm != null) {
+            vdm.registerVirtualDisplayListener(mVirtualDeviceListener);
+            vdm.registerAppsOnVirtualDeviceListener(mVirtualDeviceListener);
+        }
 
         registerSettingsChangeReceiver(USER_SWITCHED_INTENT_FILTER);
         registerSettingsChangeReceiver(INTERNAL_RINGER_MODE_CHANGED_INTENT_FILTER);
@@ -364,12 +375,16 @@ final class VibrationSettings {
      * null otherwise.
      */
     @Nullable
-    public Vibration.Status shouldIgnoreVibration(int uid, VibrationAttributes attrs) {
+    public Vibration.Status shouldIgnoreVibration(int uid, int displayId,
+            VibrationAttributes attrs) {
         final int usage = attrs.getUsage();
         synchronized (mLock) {
             if (!mUidObserver.isUidForeground(uid)
                     && !BACKGROUND_PROCESS_USAGE_ALLOWLIST.contains(usage)) {
                 return Vibration.Status.IGNORED_BACKGROUND;
+            }
+            if (mVirtualDeviceListener.isAppOrDisplayOnAnyVirtualDevice(uid, displayId)) {
+                return Vibration.Status.IGNORED_FROM_VIRTUAL_DEVICE;
             }
 
             if (mBatterySaverMode && !BATTERY_SAVER_USAGE_ALLOWLIST.contains(usage)) {
@@ -740,5 +755,74 @@ final class VibrationSettings {
         @Override
         public void onUidProcAdjChanged(int uid) {
         }
+    }
+
+    /**
+     * Implementation of Virtual Device listeners for the changes of virtual displays and of apps
+     * running on any virtual device.
+     */
+    final class VirtualDeviceListener implements
+            VirtualDeviceManagerInternal.VirtualDisplayListener,
+            VirtualDeviceManagerInternal.AppsOnVirtualDeviceListener {
+        @GuardedBy("mLock")
+        private final Set<Integer> mVirtualDisplays = new HashSet<>();
+        @GuardedBy("mLock")
+        private final Set<Integer> mAppsOnVirtualDevice = new HashSet<>();
+
+
+        @Override
+        public void onVirtualDisplayCreated(int displayId) {
+            synchronized (mLock) {
+                mVirtualDisplays.add(displayId);
+            }
+        }
+
+        @Override
+        public void onVirtualDisplayRemoved(int displayId) {
+            synchronized (mLock) {
+                mVirtualDisplays.remove(displayId);
+            }
+        }
+
+
+        @Override
+        public void onAppsOnAnyVirtualDeviceChanged(Set<Integer> allRunningUids) {
+            synchronized (mLock) {
+                mAppsOnVirtualDevice.clear();
+                mAppsOnVirtualDevice.addAll(allRunningUids);
+            }
+        }
+
+        /**
+         * @param uid:       uid of the calling app.
+         * @param displayId: the id of a Display.
+         * @return Returns true if:
+         * <ul>
+         *   <li> the displayId is valid, and it's owned by a virtual device.</li>
+         *   <li> the displayId is invalid, and the calling app (uid) is running on a virtual
+         *        device.</li>
+         * </ul>
+         */
+        public boolean isAppOrDisplayOnAnyVirtualDevice(int uid, int displayId) {
+            if (displayId == Display.DEFAULT_DISPLAY) {
+                // The default display is the primary physical display on the phone.
+                return false;
+            }
+
+            synchronized (mLock) {
+                if (displayId == Display.INVALID_DISPLAY) {
+                    // There is no Display object associated with the Context of calling
+                    // {@link SystemVibratorManager}, checking the calling UID instead.
+                    return mAppsOnVirtualDevice.contains(uid);
+                } else {
+                    // Other valid display IDs representing valid logical displays will be
+                    // checked
+                    // against the active virtual displays set built with the registered
+                    // {@link VirtualDisplayListener}.
+                    return mVirtualDisplays.contains(displayId);
+                }
+            }
+        }
+
     }
 }

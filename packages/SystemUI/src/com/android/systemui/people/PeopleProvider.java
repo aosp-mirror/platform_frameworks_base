@@ -29,7 +29,8 @@ import android.os.UserHandle;
 import android.util.Log;
 import android.widget.RemoteViews;
 
-import com.android.systemui.SystemUIAppComponentFactory;
+import com.android.systemui.SystemUIAppComponentFactoryBase.ContextAvailableCallback;
+import com.android.systemui.SystemUIAppComponentFactoryBase.ContextInitializer;
 import com.android.systemui.people.widget.PeopleSpaceWidgetManager;
 import com.android.systemui.shared.system.PeopleProviderUtils;
 
@@ -37,11 +38,11 @@ import javax.inject.Inject;
 
 /** API that returns a People Tile preview. */
 public class PeopleProvider extends ContentProvider implements
-        SystemUIAppComponentFactory.ContextInitializer {
+        ContextInitializer {
     private static final String TAG = "PeopleProvider";
     private static final boolean DEBUG = PeopleSpaceUtils.DEBUG;
     private static final String EMPTY_STRING = "";
-    private SystemUIAppComponentFactory.ContextAvailableCallback mCallback;
+    private ContextAvailableCallback mCallback;
 
     @Inject
     PeopleSpaceWidgetManager mPeopleSpaceWidgetManager;
@@ -144,7 +145,7 @@ public class PeopleProvider extends ContentProvider implements
 
     @Override
     public void setContextAvailableCallback(
-            SystemUIAppComponentFactory.ContextAvailableCallback callback) {
+            ContextAvailableCallback callback) {
         mCallback = callback;
     }
 }

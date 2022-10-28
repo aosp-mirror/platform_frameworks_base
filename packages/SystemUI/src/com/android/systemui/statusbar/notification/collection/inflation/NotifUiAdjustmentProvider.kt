@@ -16,12 +16,18 @@
 
 package com.android.systemui.statusbar.notification.collection.inflation
 
+import android.database.ContentObserver
+import android.os.Handler
+import android.os.UserHandle
+import android.provider.Settings.Secure.SHOW_NOTIFICATION_SNOOZE
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
-import com.android.systemui.statusbar.notification.SectionClassifier
 import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.statusbar.notification.collection.provider.SectionStyleProvider
 import com.android.systemui.util.ListenerSet
+import com.android.systemui.util.settings.SecureSettings
 import javax.inject.Inject
 
 /**
@@ -30,14 +36,23 @@ import javax.inject.Inject
  */
 @SysUISingleton
 class NotifUiAdjustmentProvider @Inject constructor(
+    @Main private val handler: Handler,
+    private val secureSettings: SecureSettings,
     private val lockscreenUserManager: NotificationLockscreenUserManager,
-    private val sectionClassifier: SectionClassifier,
+    private val sectionStyleProvider: SectionStyleProvider
 ) {
     private val dirtyListeners = ListenerSet<Runnable>()
+    private var isSnoozeEnabled = false
 
     fun addDirtyListener(listener: Runnable) {
         if (dirtyListeners.isEmpty()) {
             lockscreenUserManager.addNotificationStateChangedListener(notifStateChangedListener)
+            updateSnoozeEnabled()
+            secureSettings.registerContentObserverForUser(
+                SHOW_NOTIFICATION_SNOOZE,
+                settingsObserver,
+                UserHandle.USER_ALL
+            )
         }
         dirtyListeners.addIfAbsent(listener)
     }
@@ -46,6 +61,7 @@ class NotifUiAdjustmentProvider @Inject constructor(
         dirtyListeners.remove(listener)
         if (dirtyListeners.isEmpty()) {
             lockscreenUserManager.removeNotificationStateChangedListener(notifStateChangedListener)
+            secureSettings.unregisterContentObserver(settingsObserver)
         }
     }
 
@@ -54,10 +70,21 @@ class NotifUiAdjustmentProvider @Inject constructor(
             dirtyListeners.forEach(Runnable::run)
         }
 
+    private val settingsObserver = object : ContentObserver(handler) {
+        override fun onChange(selfChange: Boolean) {
+            updateSnoozeEnabled()
+            dirtyListeners.forEach(Runnable::run)
+        }
+    }
+
+    private fun updateSnoozeEnabled() {
+        isSnoozeEnabled = secureSettings.getInt(SHOW_NOTIFICATION_SNOOZE, 0) == 1
+    }
+
     private fun isEntryMinimized(entry: NotificationEntry): Boolean {
         val section = entry.section ?: error("Entry must have a section to determine if minimized")
         val parent = entry.parent ?: error("Entry must have a parent to determine if minimized")
-        val isMinimizedSection = sectionClassifier.isMinimizedSection(section)
+        val isMinimizedSection = sectionStyleProvider.isMinimizedSection(section)
         val isTopLevelEntry = parent == GroupEntry.ROOT_ENTRY
         val isGroupSummary = parent.summary == entry
         return isMinimizedSection && (isTopLevelEntry || isGroupSummary)
@@ -73,6 +100,7 @@ class NotifUiAdjustmentProvider @Inject constructor(
         smartActions = entry.ranking.smartActions,
         smartReplies = entry.ranking.smartReplies,
         isConversation = entry.ranking.isConversation,
+        isSnoozeEnabled = isSnoozeEnabled,
         isMinimized = isEntryMinimized(entry),
         needsRedaction = lockscreenUserManager.needsRedaction(entry),
     )

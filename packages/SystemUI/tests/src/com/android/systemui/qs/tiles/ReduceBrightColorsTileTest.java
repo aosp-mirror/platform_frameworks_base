@@ -32,13 +32,16 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
 import com.android.internal.logging.MetricsLogger;
+import com.android.systemui.R.drawable;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.qs.ReduceBrightColorsController;
 import com.android.systemui.qs.logging.QSLogger;
+import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.settings.UserTracker;
 
 import org.junit.Before;
@@ -128,6 +131,28 @@ public class ReduceBrightColorsTileTest extends SysuiTestCase {
 
         verify(mReduceBrightColorsController, times(1))
                 .setReduceBrightColorsActivated(eq(true));
+    }
+
+    @Test
+    public void testIcon_whenTileEnabled_isOnState() {
+        when(mReduceBrightColorsController.isReduceBrightColorsActivated()).thenReturn(true);
+        mTile.refreshState();
+        QSTile.BooleanState state = new QSTile.BooleanState();
+
+        mTile.handleUpdateState(state, /* arg= */ null);
+
+        assertEquals(state.icon, QSTileImpl.ResourceIcon.get(drawable.qs_extra_dim_icon_on));
+    }
+
+    @Test
+    public void testIcon_whenTileDisabled_isOffState() {
+        when(mReduceBrightColorsController.isReduceBrightColorsActivated()).thenReturn(false);
+        mTile.refreshState();
+        QSTile.BooleanState state = new QSTile.BooleanState();
+
+        mTile.handleUpdateState(state, /* arg= */ null);
+
+        assertEquals(state.icon, QSTileImpl.ResourceIcon.get(drawable.qs_extra_dim_icon_off));
     }
 
 }

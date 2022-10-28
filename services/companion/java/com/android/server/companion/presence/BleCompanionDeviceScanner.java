@@ -184,12 +184,20 @@ class BleCompanionDeviceScanner implements AssociationStore.OnChangeListener {
     @MainThread
     private void startScan() {
         enforceInitialized();
-        // This method should not be called if scan is already in progress.
-        if (mScanning) throw new IllegalStateException("Scan is already in progress.");
-        // Neither should this method be called if the adapter is not available.
-        if (mBleScanner == null) throw new IllegalStateException("BLE is not available.");
 
         if (DEBUG) Log.i(TAG, "startScan()");
+
+        // This method should not be called if scan is already in progress.
+        if (mScanning) {
+            Slog.w(TAG, "Scan is already in progress.");
+            return;
+        }
+
+        // Neither should this method be called if the adapter is not available.
+        if (mBleScanner == null) {
+            Slog.w(TAG, "BLE is not available.");
+            return;
+        }
 
         // Collect MAC addresses from all associations.
         final Set<String> macAddresses = new HashSet<>();
@@ -221,8 +229,18 @@ class BleCompanionDeviceScanner implements AssociationStore.OnChangeListener {
             filters.add(filter);
         }
 
-        mBleScanner.startScan(filters, SCAN_SETTINGS, mScanCallback);
-        mScanning = true;
+        // BluetoothLeScanner will throw an IllegalStateException if startScan() is called while LE
+        // is not enabled.
+        if (mBtAdapter.isLeEnabled()) {
+            try {
+                mBleScanner.startScan(filters, SCAN_SETTINGS, mScanCallback);
+                mScanning = true;
+            } catch (IllegalStateException e) {
+                Slog.w(TAG, "Exception while starting BLE scanning", e);
+            }
+        } else {
+            Slog.w(TAG, "BLE scanning is not turned on");
+        }
     }
 
     private void stopScanIfNeeded() {
@@ -240,11 +258,11 @@ class BleCompanionDeviceScanner implements AssociationStore.OnChangeListener {
         if (mBtAdapter.isLeEnabled()) {
             try {
                 mBleScanner.stopScan(mScanCallback);
-            } catch (RuntimeException e) {
-                // Just to be sure not to crash system server here if BluetoothLeScanner throws
-                // another RuntimeException.
+            } catch (IllegalStateException e) {
                 Slog.w(TAG, "Exception while stopping BLE scanning", e);
             }
+        } else {
+            Slog.w(TAG, "BLE scanning is not turned on");
         }
 
         mScanning = false;

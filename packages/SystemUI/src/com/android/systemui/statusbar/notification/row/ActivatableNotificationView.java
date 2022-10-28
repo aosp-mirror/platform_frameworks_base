@@ -151,6 +151,10 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
                 R.color.notification_ripple_tinted_color);
         mNormalRippleColor = mContext.getColor(
                 R.color.notification_ripple_untinted_color);
+        // Reset background color tint and override tint, as they are from an old theme
+        mBgTint = NO_COLOR;
+        mOverrideTint = NO_COLOR;
+        mOverrideAmount = 0.0f;
     }
 
     /**

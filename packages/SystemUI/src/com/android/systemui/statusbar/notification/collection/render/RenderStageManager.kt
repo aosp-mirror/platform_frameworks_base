@@ -20,6 +20,8 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.statusbar.notification.collection.PipelineDumpable
+import com.android.systemui.statusbar.notification.collection.PipelineDumper
 import com.android.systemui.statusbar.notification.collection.ShadeListBuilder
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnAfterRenderEntryListener
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnAfterRenderGroupListener
@@ -33,7 +35,7 @@ import javax.inject.Inject
  * provided to [setViewRenderer].
  */
 @SysUISingleton
-class RenderStageManager @Inject constructor() {
+class RenderStageManager @Inject constructor() : PipelineDumpable {
     private val onAfterRenderListListeners = mutableListOf<OnAfterRenderListListener>()
     private val onAfterRenderGroupListeners = mutableListOf<OnAfterRenderGroupListener>()
     private val onAfterRenderEntryListeners = mutableListOf<OnAfterRenderEntryListener>()
@@ -73,6 +75,13 @@ class RenderStageManager @Inject constructor() {
     /** Adds a listener that will get a callback for each entry rendered. */
     fun addOnAfterRenderEntryListener(listener: OnAfterRenderEntryListener) {
         onAfterRenderEntryListeners.add(listener)
+    }
+
+    override fun dumpPipeline(d: PipelineDumper) = with(d) {
+        dump("viewRenderer", viewRenderer)
+        dump("onAfterRenderListListeners", onAfterRenderListListeners)
+        dump("onAfterRenderGroupListeners", onAfterRenderGroupListeners)
+        dump("onAfterRenderEntryListeners", onAfterRenderEntryListeners)
     }
 
     private fun dispatchOnAfterRenderList(

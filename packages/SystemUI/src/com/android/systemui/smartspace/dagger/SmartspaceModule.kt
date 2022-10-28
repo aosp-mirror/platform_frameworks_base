@@ -18,7 +18,7 @@ package com.android.systemui.smartspace.dagger
 import com.android.systemui.plugins.BcSmartspaceDataPlugin
 import com.android.systemui.smartspace.SmartspacePrecondition
 import com.android.systemui.smartspace.SmartspaceTargetFilter
-import com.android.systemui.smartspace.filters.LockscreenTargetFilter
+import com.android.systemui.smartspace.filters.LockscreenAndDreamTargetFilter
 import com.android.systemui.smartspace.preconditions.LockscreenPrecondition
 import dagger.Binds
 import dagger.BindsOptionalOf
@@ -61,7 +61,7 @@ abstract class SmartspaceModule {
     @Binds
     @Named(LOCKSCREEN_SMARTSPACE_TARGET_FILTER)
     abstract fun provideLockscreenSmartspaceTargetFilter(
-        filter: LockscreenTargetFilter?
+        filter: LockscreenAndDreamTargetFilter?
     ): SmartspaceTargetFilter?
 
     @Binds

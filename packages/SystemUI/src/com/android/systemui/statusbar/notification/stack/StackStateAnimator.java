@@ -25,6 +25,7 @@ import android.view.View;
 import com.android.keyguard.KeyguardSliceView;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
+import com.android.systemui.shared.clocks.AnimatableClockView;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -52,7 +53,8 @@ public class StackStateAnimator {
     public static final int ANIMATION_DURATION_CLOSE_REMOTE_INPUT = 150;
     public static final int ANIMATION_DURATION_HEADS_UP_APPEAR = 400;
     public static final int ANIMATION_DURATION_HEADS_UP_DISAPPEAR = 400;
-    public static final int ANIMATION_DURATION_FOLD_TO_AOD = 600;
+    public static final int ANIMATION_DURATION_FOLD_TO_AOD =
+            AnimatableClockView.ANIMATION_DURATION_FOLD_TO_AOD;
     public static final int ANIMATION_DURATION_PULSE_APPEAR =
             KeyguardSliceView.DEFAULT_ANIM_DURATION;
     public static final int ANIMATION_DURATION_BLOCKING_HELPER_FADE = 240;

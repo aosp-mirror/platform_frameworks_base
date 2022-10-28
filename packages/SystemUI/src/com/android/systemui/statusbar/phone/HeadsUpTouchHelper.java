@@ -21,6 +21,7 @@ import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 
 import com.android.systemui.Gefingerpoken;
+import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
@@ -114,9 +115,7 @@ public class HeadsUpTouchHelper implements Gefingerpoken {
                     mInitialTouchY = y;
                     int startHeight = (int) (mPickedChild.getActualHeight()
                                                 + mPickedChild.getTranslationY());
-                    float maxPanelHeight = mPanel.getMaxPanelHeight();
-                    mPanel.setPanelScrimMinFraction(maxPanelHeight > 0f
-                            ? (float) startHeight / maxPanelHeight : 0f);
+                    mPanel.setHeadsUpDraggingStartingHeight(startHeight);
                     mPanel.startExpandMotion(x, y, true /* startTracking */, startHeight);
                     // This call needs to be after the expansion start otherwise we will get a
                     // flicker of one frame as it's not expanded yet.

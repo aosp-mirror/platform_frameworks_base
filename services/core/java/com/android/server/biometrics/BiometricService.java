@@ -958,7 +958,7 @@ public class BiometricService extends SystemService {
 
         public boolean isCoexFaceNonBypassHapticsDisabled(Context context) {
             return Settings.Secure.getInt(context.getContentResolver(),
-                    CoexCoordinator.FACE_HAPTIC_DISABLE, 1) != 0;
+                    CoexCoordinator.FACE_HAPTIC_DISABLE, 0) != 0;
         }
 
         public Supplier<Long> getRequestGenerator() {

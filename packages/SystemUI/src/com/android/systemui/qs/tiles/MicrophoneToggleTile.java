@@ -72,9 +72,9 @@ public class MicrophoneToggleTile extends SensorPrivacyToggleTile {
     @Override
     public @DrawableRes int getIconRes(boolean isBlocked) {
         if (isBlocked) {
-            return com.android.internal.R.drawable.ic_mic_blocked;
+            return R.drawable.qs_mic_access_off;
         } else {
-            return com.android.internal.R.drawable.ic_mic_allowed;
+            return R.drawable.qs_mic_access_on;
         }
     }
 

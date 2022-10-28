@@ -69,36 +69,72 @@ class QSLogger @Inject constructor(
         })
     }
 
-    fun logTileClick(tileSpec: String, statusBarState: Int, state: Int) {
+    fun logTileClick(tileSpec: String, statusBarState: Int, state: Int, eventId: Int) {
         log(DEBUG, {
             str1 = tileSpec
-            int1 = statusBarState
+            int1 = eventId
             str2 = StatusBarState.toString(statusBarState)
             str3 = toStateString(state)
         }, {
-            "[$str1] Tile clicked. StatusBarState=$str2. TileState=$str3"
+            "[$str1][$int1] Tile clicked. StatusBarState=$str2. TileState=$str3"
         })
     }
 
-    fun logTileSecondaryClick(tileSpec: String, statusBarState: Int, state: Int) {
+    fun logHandleClick(tileSpec: String, eventId: Int) {
         log(DEBUG, {
             str1 = tileSpec
-            int1 = statusBarState
-            str2 = StatusBarState.toString(statusBarState)
-            str3 = toStateString(state)
+            int1 = eventId
         }, {
-            "[$str1] Tile long clicked. StatusBarState=$str2. TileState=$str3"
+            "[$str1][$int1] Tile handling click."
         })
     }
 
-    fun logTileLongClick(tileSpec: String, statusBarState: Int, state: Int) {
+    fun logTileSecondaryClick(tileSpec: String, statusBarState: Int, state: Int, eventId: Int) {
         log(DEBUG, {
             str1 = tileSpec
-            int1 = statusBarState
+            int1 = eventId
             str2 = StatusBarState.toString(statusBarState)
             str3 = toStateString(state)
         }, {
-            "[$str1] Tile long clicked. StatusBarState=$str2. TileState=$str3"
+            "[$str1][$int1] Tile secondary clicked. StatusBarState=$str2. TileState=$str3"
+        })
+    }
+
+    fun logHandleSecondaryClick(tileSpec: String, eventId: Int) {
+        log(DEBUG, {
+            str1 = tileSpec
+            int1 = eventId
+        }, {
+            "[$str1][$int1] Tile handling secondary click."
+        })
+    }
+
+    fun logTileLongClick(tileSpec: String, statusBarState: Int, state: Int, eventId: Int) {
+        log(DEBUG, {
+            str1 = tileSpec
+            int1 = eventId
+            str2 = StatusBarState.toString(statusBarState)
+            str3 = toStateString(state)
+        }, {
+            "[$str1][$int1] Tile long clicked. StatusBarState=$str2. TileState=$str3"
+        })
+    }
+
+    fun logHandleLongClick(tileSpec: String, eventId: Int) {
+        log(DEBUG, {
+            str1 = tileSpec
+            int1 = eventId
+        }, {
+            "[$str1][$int1] Tile handling long click."
+        })
+    }
+
+    fun logInternetTileUpdate(lastType: Int, callback: String) {
+        log(VERBOSE, {
+            int1 = lastType
+            str1 = callback
+        }, {
+            "mLastTileState=$int1, Callback=$str1."
         })
     }
 
@@ -125,6 +161,54 @@ class QSLogger @Inject constructor(
             bool1 = expanded
         }, {
             "$str1 expanded=$bool1"
+        })
+    }
+
+    fun logOnViewAttached(orientation: Int, containerName: String) {
+        log(DEBUG, {
+            str1 = containerName
+            int1 = orientation
+        }, {
+            "onViewAttached: $str1 orientation $int1"
+        })
+    }
+
+    fun logOnViewDetached(orientation: Int, containerName: String) {
+        log(DEBUG, {
+            str1 = containerName
+            int1 = orientation
+        }, {
+            "onViewDetached: $str1 orientation $int1"
+        })
+    }
+
+    fun logOnConfigurationChanged(
+        lastOrientation: Int,
+        newOrientation: Int,
+        containerName: String
+    ) {
+        log(DEBUG, {
+            str1 = containerName
+            int1 = lastOrientation
+            int2 = newOrientation
+        }, {
+            "configuration change: $str1 orientation was $int1, now $int2"
+        })
+    }
+
+    fun logSwitchTileLayout(
+        after: Boolean,
+        before: Boolean,
+        force: Boolean,
+        containerName: String
+    ) {
+        log(DEBUG, {
+            str1 = containerName
+            bool1 = after
+            bool2 = before
+            bool3 = force
+        }, {
+            "change tile layout: $str1 horizontal=$bool1 (was $bool2), force? $bool3"
         })
     }
 

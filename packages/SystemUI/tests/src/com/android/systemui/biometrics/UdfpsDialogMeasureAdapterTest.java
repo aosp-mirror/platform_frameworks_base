@@ -70,7 +70,7 @@ public class UdfpsDialogMeasureAdapterTest extends SysuiTestCase {
         assertEquals(970,
                 UdfpsDialogMeasureAdapter.calculateBottomSpacerHeightForPortrait(
                         props, displayHeightPx, textIndicatorHeightPx, buttonBarHeightPx,
-                        dialogBottomMarginPx, navbarHeightPx
+                        dialogBottomMarginPx, navbarHeightPx, 1.0f /* resolutionScale */
                 ));
     }
 
@@ -135,6 +135,7 @@ public class UdfpsDialogMeasureAdapterTest extends SysuiTestCase {
 
         assertEquals(1205,
                 UdfpsDialogMeasureAdapter.calculateHorizontalSpacerWidthForLandscape(
-                        props, displayWidthPx, dialogMarginPx, navbarHorizontalInsetPx));
+                        props, displayWidthPx, dialogMarginPx, navbarHorizontalInsetPx,
+                        1.0f /* resolutionScale */));
     }
 }

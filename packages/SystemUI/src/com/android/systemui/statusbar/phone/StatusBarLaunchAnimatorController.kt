@@ -51,7 +51,7 @@ class StatusBarLaunchAnimatorController(
         centralSurfaces.notificationPanelViewController.applyLaunchAnimationProgress(linearProgress)
     }
 
-    override fun onLaunchAnimationCancelled() {
+    override fun onLaunchAnimationCancelled(newKeyguardOccludedState: Boolean?) {
         delegate.onLaunchAnimationCancelled()
         centralSurfaces.notificationPanelViewController.setIsLaunchAnimationRunning(false)
         centralSurfaces.onLaunchAnimationCancelled(isLaunchForActivity)

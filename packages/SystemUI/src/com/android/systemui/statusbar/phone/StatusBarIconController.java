@@ -33,21 +33,23 @@ import android.widget.LinearLayout.LayoutParams;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.statusbar.StatusBarIcon;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.demomode.DemoModeCommandReceiver;
-import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
+import com.android.systemui.statusbar.BaseStatusBarWifiView;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.StatusBarMobileView;
 import com.android.systemui.statusbar.StatusBarWifiView;
 import com.android.systemui.statusbar.StatusIconDisplayable;
+import com.android.systemui.statusbar.connectivity.ui.MobileContextProvider;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.CallIndicatorIconState;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.MobileIconState;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.WifiIconState;
+import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags;
+import com.android.systemui.statusbar.pipeline.wifi.ui.view.ModernStatusBarWifiView;
+import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.WifiViewModel;
 import com.android.systemui.util.Assert;
 
 import java.util.ArrayList;
@@ -67,6 +69,7 @@ public interface StatusBarIconController {
     void addIconGroup(IconManager iconManager);
     /** */
     void removeIconGroup(IconManager iconManager);
+
     /** Refresh the state of an IconManager by recreating the views */
     void refreshIconGroup(IconManager iconManager);
     /** */
@@ -79,21 +82,25 @@ public interface StatusBarIconController {
     void setSignalIcon(String slot, WifiIconState state);
     /** */
     void setMobileIcons(String slot, List<MobileIconState> states);
+
     /**
      * Display the no calling & SMS icons.
      */
     void setCallStrengthIcons(String slot, List<CallIndicatorIconState> states);
+
     /**
      * Display the no calling & SMS icons.
      */
     void setNoCallingIcons(String slot, List<CallIndicatorIconState> states);
+
     public void setIconVisibility(String slot, boolean b);
 
     /**
      * Sets the live region mode for the icon
-     * @see android.view.View#setAccessibilityLiveRegion(int)
-     * @param slot Icon slot to set region for
+     *
+     * @param slot                    Icon slot to set region for
      * @param accessibilityLiveRegion live region mode for the icon
+     * @see android.view.View#setAccessibilityLiveRegion(int)
      */
     void setIconAccessibilityLiveRegion(String slot, int accessibilityLiveRegion);
 
@@ -112,8 +119,8 @@ public interface StatusBarIconController {
     static ArraySet<String> getIconHideList(Context context, String hideListStr) {
         ArraySet<String> ret = new ArraySet<>();
         String[] hideList = hideListStr == null
-            ? context.getResources().getStringArray(R.array.config_statusBarIconsToExclude)
-            : hideListStr.split(",");
+                ? context.getResources().getStringArray(R.array.config_statusBarIconsToExclude)
+                : hideListStr.split(",");
         for (String slot : hideList) {
             if (!TextUtils.isEmpty(slot)) {
                 ret.add(slot);
@@ -129,11 +136,21 @@ public interface StatusBarIconController {
         private final DarkIconDispatcher mDarkIconDispatcher;
         private int mIconHPadding;
 
-        public DarkIconManager(LinearLayout linearLayout, FeatureFlags featureFlags) {
-            super(linearLayout, featureFlags);
+        public DarkIconManager(
+                LinearLayout linearLayout,
+                StatusBarLocation location,
+                StatusBarPipelineFlags statusBarPipelineFlags,
+                WifiViewModel wifiViewModel,
+                MobileContextProvider mobileContextProvider,
+                DarkIconDispatcher darkIconDispatcher) {
+            super(linearLayout,
+                    location,
+                    statusBarPipelineFlags,
+                    wifiViewModel,
+                    mobileContextProvider);
             mIconHPadding = mContext.getResources().getDimensionPixelSize(
                     R.dimen.status_bar_icon_padding);
-            mDarkIconDispatcher = Dependency.get(DarkIconDispatcher.class);
+            mDarkIconDispatcher = darkIconDispatcher;
         }
 
         @Override
@@ -184,14 +201,55 @@ public interface StatusBarIconController {
             mDarkIconDispatcher.removeDarkReceiver(mDemoStatusIcons);
             super.exitDemoMode();
         }
+
+        @SysUISingleton
+        public static class Factory {
+            private final StatusBarPipelineFlags mStatusBarPipelineFlags;
+            private final WifiViewModel mWifiViewModel;
+            private final MobileContextProvider mMobileContextProvider;
+            private final DarkIconDispatcher mDarkIconDispatcher;
+
+            @Inject
+            public Factory(
+                    StatusBarPipelineFlags statusBarPipelineFlags,
+                    WifiViewModel wifiViewModel,
+                    MobileContextProvider mobileContextProvider,
+                    DarkIconDispatcher darkIconDispatcher) {
+                mStatusBarPipelineFlags = statusBarPipelineFlags;
+                mWifiViewModel = wifiViewModel;
+                mMobileContextProvider = mobileContextProvider;
+                mDarkIconDispatcher = darkIconDispatcher;
+            }
+
+            public DarkIconManager create(LinearLayout group, StatusBarLocation location) {
+                return new DarkIconManager(
+                        group,
+                        location,
+                        mStatusBarPipelineFlags,
+                        mWifiViewModel,
+                        mMobileContextProvider,
+                        mDarkIconDispatcher);
+            }
+        }
     }
 
-    /** */
+    /**
+     *
+     */
     class TintedIconManager extends IconManager {
         private int mColor;
 
-        public TintedIconManager(ViewGroup group, FeatureFlags featureFlags) {
-            super(group, featureFlags);
+        public TintedIconManager(
+                ViewGroup group,
+                StatusBarLocation location,
+                StatusBarPipelineFlags statusBarPipelineFlags,
+                WifiViewModel wifiViewModel,
+                MobileContextProvider mobileContextProvider) {
+            super(group,
+                    location,
+                    statusBarPipelineFlags,
+                    wifiViewModel,
+                    mobileContextProvider);
         }
 
         @Override
@@ -223,15 +281,27 @@ public interface StatusBarIconController {
 
         @SysUISingleton
         public static class Factory {
-            private final FeatureFlags mFeatureFlags;
+            private final StatusBarPipelineFlags mStatusBarPipelineFlags;
+            private final WifiViewModel mWifiViewModel;
+            private final MobileContextProvider mMobileContextProvider;
 
             @Inject
-            public Factory(FeatureFlags featureFlags) {
-                mFeatureFlags = featureFlags;
+            public Factory(
+                    StatusBarPipelineFlags statusBarPipelineFlags,
+                    WifiViewModel wifiViewModel,
+                    MobileContextProvider mobileContextProvider) {
+                mStatusBarPipelineFlags = statusBarPipelineFlags;
+                mWifiViewModel = wifiViewModel;
+                mMobileContextProvider = mobileContextProvider;
             }
 
-            public TintedIconManager create(ViewGroup group) {
-                return new TintedIconManager(group, mFeatureFlags);
+            public TintedIconManager create(ViewGroup group, StatusBarLocation location) {
+                return new TintedIconManager(
+                        group,
+                        location,
+                        mStatusBarPipelineFlags,
+                        mWifiViewModel,
+                        mMobileContextProvider);
             }
         }
     }
@@ -240,8 +310,11 @@ public interface StatusBarIconController {
      * Turns info from StatusBarIconController into ImageViews in a ViewGroup.
      */
     class IconManager implements DemoModeCommandReceiver {
-        private final FeatureFlags mFeatureFlags;
         protected final ViewGroup mGroup;
+        private final StatusBarLocation mLocation;
+        private final StatusBarPipelineFlags mStatusBarPipelineFlags;
+        private final WifiViewModel mWifiViewModel;
+        private final MobileContextProvider mMobileContextProvider;
         protected final Context mContext;
         protected final int mIconSize;
         // Whether or not these icons show up in dumpsys
@@ -255,9 +328,17 @@ public interface StatusBarIconController {
 
         protected ArrayList<String> mBlockList = new ArrayList<>();
 
-        public IconManager(ViewGroup group, FeatureFlags featureFlags) {
-            mFeatureFlags = featureFlags;
+        public IconManager(
+                ViewGroup group,
+                StatusBarLocation location,
+                StatusBarPipelineFlags statusBarPipelineFlags,
+                WifiViewModel wifiViewModel,
+                MobileContextProvider mobileContextProvider) {
             mGroup = group;
+            mLocation = location;
+            mStatusBarPipelineFlags = statusBarPipelineFlags;
+            mWifiViewModel = wifiViewModel;
+            mMobileContextProvider = mobileContextProvider;
             mContext = group.getContext();
             mIconSize = mContext.getResources().getDimensionPixelSize(
                     com.android.internal.R.dimen.status_bar_icon_size);
@@ -309,7 +390,7 @@ public interface StatusBarIconController {
                     return addIcon(index, slot, blocked, holder.getIcon());
 
                 case TYPE_WIFI:
-                    return addSignalIcon(index, slot, holder.getWifiState());
+                    return addWifiIcon(index, slot, holder.getWifiState());
 
                 case TYPE_MOBILE:
                     return addMobileIcon(index, slot, holder.getMobileState());
@@ -328,9 +409,17 @@ public interface StatusBarIconController {
         }
 
         @VisibleForTesting
-        protected StatusBarWifiView addSignalIcon(int index, String slot, WifiIconState state) {
-            StatusBarWifiView view = onCreateStatusBarWifiView(slot);
-            view.applyWifiState(state);
+        protected StatusIconDisplayable addWifiIcon(int index, String slot, WifiIconState state) {
+            final BaseStatusBarWifiView view;
+            if (mStatusBarPipelineFlags.isNewPipelineFrontendEnabled()) {
+                view = onCreateModernStatusBarWifiView(slot);
+                // When [ModernStatusBarWifiView] is created, it will automatically apply the
+                // correct view state so we don't need to call applyWifiState.
+            } else {
+                StatusBarWifiView wifiView = onCreateStatusBarWifiView(slot);
+                wifiView.applyWifiState(state);
+                view = wifiView;
+            }
             mGroup.addView(view, index, onCreateLayoutParams());
 
             if (mIsInDemoMode) {
@@ -341,12 +430,15 @@ public interface StatusBarIconController {
 
         @VisibleForTesting
         protected StatusBarMobileView addMobileIcon(int index, String slot, MobileIconState state) {
-            StatusBarMobileView view = onCreateStatusBarMobileView(slot);
+            // Use the `subId` field as a key to query for the correct context
+            StatusBarMobileView view = onCreateStatusBarMobileView(state.subId, slot);
             view.applyMobileState(state);
             mGroup.addView(view, index, onCreateLayoutParams());
 
             if (mIsInDemoMode) {
-                mDemoStatusIcons.addMobileView(state);
+                Context mobileContext = mMobileContextProvider
+                        .getMobileContextForSub(state.subId, mContext);
+                mDemoStatusIcons.addMobileView(state, mobileContext);
             }
             return view;
         }
@@ -360,10 +452,15 @@ public interface StatusBarIconController {
             return view;
         }
 
-        private StatusBarMobileView onCreateStatusBarMobileView(String slot) {
-            StatusBarMobileView view = StatusBarMobileView.fromContext(
-                            mContext, slot,
-                    mFeatureFlags.isEnabled(Flags.COMBINED_STATUS_BAR_SIGNAL_ICONS));
+        private ModernStatusBarWifiView onCreateModernStatusBarWifiView(String slot) {
+            return ModernStatusBarWifiView.constructAndBind(
+                    mContext, slot, mWifiViewModel, mLocation);
+        }
+
+        private StatusBarMobileView onCreateStatusBarMobileView(int subId, String slot) {
+            Context mobileContext = mMobileContextProvider.getMobileContextForSub(subId, mContext);
+            StatusBarMobileView view = StatusBarMobileView
+                    .fromContext(mobileContext, slot);
             return view;
         }
 
@@ -418,9 +515,8 @@ public interface StatusBarIconController {
                     onSetIcon(viewIndex, holder.getIcon());
                     return;
                 case TYPE_WIFI:
-                    onSetSignalIcon(viewIndex, holder.getWifiState());
+                    onSetWifiIcon(viewIndex, holder.getWifiState());
                     return;
-
                 case TYPE_MOBILE:
                     onSetMobileIcon(viewIndex, holder.getMobileState());
                 default:
@@ -428,10 +524,16 @@ public interface StatusBarIconController {
             }
         }
 
-        public void onSetSignalIcon(int viewIndex, WifiIconState state) {
-            StatusBarWifiView wifiView = (StatusBarWifiView) mGroup.getChildAt(viewIndex);
-            if (wifiView != null) {
-                wifiView.applyWifiState(state);
+        public void onSetWifiIcon(int viewIndex, WifiIconState state) {
+            View view = mGroup.getChildAt(viewIndex);
+            if (view instanceof StatusBarWifiView) {
+                ((StatusBarWifiView) view).applyWifiState(state);
+            } else if (view instanceof ModernStatusBarWifiView) {
+                // ModernStatusBarWifiView will automatically apply state based on its callbacks, so
+                // we don't need to call applyWifiState.
+            } else {
+                throw new IllegalStateException("View at " + viewIndex + " must be of type "
+                        + "StatusBarWifiView or ModernStatusBarWifiView");
             }
 
             if (mIsInDemoMode) {
@@ -446,7 +548,9 @@ public interface StatusBarIconController {
             }
 
             if (mIsInDemoMode) {
-                mDemoStatusIcons.updateMobileState(state);
+                Context mobileContext = mMobileContextProvider
+                        .getMobileContextForSub(state.subId, mContext);
+                mDemoStatusIcons.updateMobileState(state, mobileContext);
             }
         }
 
@@ -483,7 +587,7 @@ public interface StatusBarIconController {
         }
 
         protected DemoStatusIcons createDemoStatusIcons() {
-            return new DemoStatusIcons((LinearLayout) mGroup, mIconSize, mFeatureFlags);
+            return new DemoStatusIcons((LinearLayout) mGroup, mIconSize);
         }
     }
 }

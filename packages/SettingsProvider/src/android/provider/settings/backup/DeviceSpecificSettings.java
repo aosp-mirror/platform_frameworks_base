@@ -32,5 +32,6 @@ public class DeviceSpecificSettings {
      */
     public static final String[] DEVICE_SPECIFIC_SETTINGS_TO_BACKUP = {
             Settings.Secure.DISPLAY_DENSITY_FORCED,
+            Settings.Secure.DEVICE_STATE_ROTATION_LOCK
     };
 }

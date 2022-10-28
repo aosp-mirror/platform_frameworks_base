@@ -1369,6 +1369,8 @@ public class NotificationContentView extends FrameLayout implements Notification
         }
         ImageView bubbleButton = layout.findViewById(com.android.internal.R.id.bubble_button);
         View actionContainer = layout.findViewById(com.android.internal.R.id.actions_container);
+        LinearLayout actionListMarginTarget = layout.findViewById(
+                com.android.internal.R.id.notification_action_list_margin_target);
         if (bubbleButton == null || actionContainer == null) {
             return;
         }
@@ -1393,6 +1395,16 @@ public class NotificationContentView extends FrameLayout implements Notification
             bubbleButton.setOnClickListener(mContainingNotification.getBubbleClickListener());
             bubbleButton.setVisibility(VISIBLE);
             actionContainer.setVisibility(VISIBLE);
+            // Set notification_action_list_margin_target's bottom margin to 0 when showing bubble
+            if (actionListMarginTarget != null) {
+                ViewGroup.LayoutParams lp = actionListMarginTarget.getLayoutParams();
+                if (lp instanceof ViewGroup.MarginLayoutParams) {
+                    final ViewGroup.MarginLayoutParams mlp = (ViewGroup.MarginLayoutParams) lp;
+                    if (mlp.bottomMargin > 0) {
+                        mlp.setMargins(mlp.leftMargin, mlp.topMargin, mlp.rightMargin, 0);
+                    }
+                }
+            }
         } else  {
             bubbleButton.setVisibility(GONE);
         }

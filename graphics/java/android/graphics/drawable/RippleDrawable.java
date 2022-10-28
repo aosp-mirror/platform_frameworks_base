@@ -321,6 +321,7 @@ public class RippleDrawable extends LayerDrawable {
         boolean pressed = false;
         boolean focused = false;
         boolean hovered = false;
+        boolean windowFocused = false;
 
         for (int state : stateSet) {
             if (state == R.attr.state_enabled) {
@@ -331,10 +332,12 @@ public class RippleDrawable extends LayerDrawable {
                 pressed = true;
             } else if (state == R.attr.state_hovered) {
                 hovered = true;
+            } else if (state == R.attr.state_window_focused) {
+                windowFocused = true;
             }
         }
         setRippleActive(enabled && pressed);
-        setBackgroundActive(hovered, focused, pressed);
+        setBackgroundActive(hovered, focused, pressed, windowFocused);
 
         return changed;
     }
@@ -358,7 +361,8 @@ public class RippleDrawable extends LayerDrawable {
         }
     }
 
-    private void setBackgroundActive(boolean hovered, boolean focused, boolean pressed) {
+    private void setBackgroundActive(boolean hovered, boolean focused, boolean pressed,
+            boolean windowFocused) {
         if (mState.mRippleStyle == STYLE_SOLID) {
             if (mBackground == null && (hovered || focused)) {
                 mBackground = new RippleBackground(this, mHotspotBounds, isBounded());
@@ -370,7 +374,7 @@ public class RippleDrawable extends LayerDrawable {
         } else {
             if (focused || hovered) {
                 if (!pressed) {
-                    enterPatternedBackgroundAnimation(focused, hovered);
+                    enterPatternedBackgroundAnimation(focused, hovered, windowFocused);
                 }
             } else {
                 exitPatternedBackgroundAnimation();
@@ -840,9 +844,14 @@ public class RippleDrawable extends LayerDrawable {
         invalidateSelf(false);
     }
 
-    private void enterPatternedBackgroundAnimation(boolean focused, boolean hovered) {
+    private void enterPatternedBackgroundAnimation(boolean focused, boolean hovered,
+            boolean windowFocused) {
         mBackgroundOpacity = 0;
-        mTargetBackgroundOpacity = focused ? .6f : hovered ? .2f : 0f;
+        if (focused) {
+            mTargetBackgroundOpacity = windowFocused ? .6f : .2f;
+        } else {
+            mTargetBackgroundOpacity = hovered ? .2f : 0f;
+        }
         if (mBackgroundAnimation != null) mBackgroundAnimation.cancel();
         // after cancel
         mRunBackgroundAnimation = true;

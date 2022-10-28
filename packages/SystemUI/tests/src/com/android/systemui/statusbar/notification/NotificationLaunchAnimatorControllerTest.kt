@@ -6,11 +6,11 @@ import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.shade.NotificationShadeWindowViewController
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone
-import com.android.systemui.statusbar.phone.NotificationShadeWindowViewController
 import com.android.systemui.statusbar.policy.HeadsUpUtil
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
@@ -19,8 +19,8 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.junit.MockitoJUnit
 
 @SmallTest

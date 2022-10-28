@@ -58,6 +58,9 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Build.VERSION_CODES.O_MR1;
 import static android.os.Build.VERSION_CODES.P;
 import static android.os.UserHandle.USER_SYSTEM;
+import static android.os.UserManager.USER_TYPE_FULL_SECONDARY;
+import static android.os.UserManager.USER_TYPE_PROFILE_CLONE;
+import static android.os.UserManager.USER_TYPE_PROFILE_MANAGED;
 import static android.service.notification.Adjustment.KEY_IMPORTANCE;
 import static android.service.notification.Adjustment.KEY_USER_SENTIMENT;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_ALERTING;
@@ -150,6 +153,7 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.Icon;
 import android.media.AudioManager;
+import android.media.IRingtonePlayer;
 import android.media.session.MediaSession;
 import android.net.Uri;
 import android.os.Binder;
@@ -211,6 +215,7 @@ import com.android.server.lights.LogicalLight;
 import com.android.server.notification.NotificationManagerService.NotificationAssistants;
 import com.android.server.notification.NotificationManagerService.NotificationListeners;
 import com.android.server.pm.PackageManagerService;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.policy.PermissionPolicyInternal;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.uri.UriGrantsManagerInternal;
@@ -352,6 +357,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Mock
     UserManager mUm;
     @Mock
+    UserManagerInternal mUmInternal;
+    @Mock
     NotificationHistoryManager mHistoryManager;
     @Mock
     StatsManager mStatsManager;
@@ -393,6 +400,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         DeviceIdleInternal deviceIdleInternal = mock(DeviceIdleInternal.class);
         when(deviceIdleInternal.getNotificationAllowlistDuration()).thenReturn(3000L);
 
+        LocalServices.removeServiceForTest(UserManagerInternal.class);
+        LocalServices.addService(UserManagerInternal.class, mUmInternal);
         LocalServices.removeServiceForTest(UriGrantsManagerInternal.class);
         LocalServices.addService(UriGrantsManagerInternal.class, mUgmInternal);
         LocalServices.removeServiceForTest(WindowManagerInternal.class);
@@ -4238,6 +4247,59 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testSubstituteAppName_hasPermission() throws RemoteException {
+        String subName = "Substitute Name";
+        when(mPackageManager.checkPermission(
+                eq(android.Manifest.permission.SUBSTITUTE_NOTIFICATION_APP_NAME), any(), anyInt()))
+                .thenReturn(PERMISSION_GRANTED);
+        Bundle extras = new Bundle();
+        extras.putString(Notification.EXTRA_SUBSTITUTE_APP_NAME, subName);
+        Notification.Builder nb = new Notification.Builder(mContext,
+                mTestNotificationChannel.getId())
+                .addExtras(extras);
+        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 1,
+                "testSubstituteAppNamePermission", mUid, 0,
+                nb.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
+        NotificationRecord nr = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, sbn.getTag(),
+                nr.getSbn().getId(), nr.getSbn().getNotification(), nr.getSbn().getUserId());
+        waitForIdle();
+        NotificationRecord posted = mService.findNotificationLocked(
+                PKG, nr.getSbn().getTag(), nr.getSbn().getId(), nr.getSbn().getUserId());
+
+        assertTrue(posted.getNotification().extras
+                .containsKey(Notification.EXTRA_SUBSTITUTE_APP_NAME));
+        assertEquals(posted.getNotification().extras
+                .getString(Notification.EXTRA_SUBSTITUTE_APP_NAME), subName);
+    }
+
+    @Test
+    public void testSubstituteAppName_noPermission() throws RemoteException {
+        when(mPackageManager.checkPermission(
+                eq(android.Manifest.permission.SUBSTITUTE_NOTIFICATION_APP_NAME), any(), anyInt()))
+                .thenReturn(PERMISSION_DENIED);
+        Bundle extras = new Bundle();
+        extras.putString(Notification.EXTRA_SUBSTITUTE_APP_NAME, "Substitute Name");
+        Notification.Builder nb = new Notification.Builder(mContext,
+                mTestNotificationChannel.getId())
+                .addExtras(extras);
+        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 1,
+                "testSubstituteAppNamePermission", mUid, 0,
+                nb.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
+        NotificationRecord nr = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, sbn.getTag(),
+                nr.getSbn().getId(), nr.getSbn().getNotification(), nr.getSbn().getUserId());
+        waitForIdle();
+        NotificationRecord posted = mService.findNotificationLocked(
+                PKG, nr.getSbn().getTag(), nr.getSbn().getId(), nr.getSbn().getUserId());
+
+        assertFalse(posted.getNotification().extras
+                .containsKey(Notification.EXTRA_SUBSTITUTE_APP_NAME));
+    }
+
+    @Test
     public void testGetNotificationCountLocked() {
         String sampleTagToExclude = null;
         int sampleIdToExclude = 0;
@@ -4410,6 +4472,33 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testReadPolicyXml_doesNotRestoreManagedServicesForCloneUser() throws Exception {
+        final String policyXml = "<notification-policy version=\"1\">"
+                + "<ranking></ranking>"
+                + "<enabled_listeners>"
+                + "<service_listing approved=\"test\" user=\"10\" primary=\"true\" />"
+                + "</enabled_listeners>"
+                + "<enabled_assistants>"
+                + "<service_listing approved=\"test\" user=\"10\" primary=\"true\" />"
+                + "</enabled_assistants>"
+                + "<dnd_apps>"
+                + "<service_listing approved=\"test\" user=\"10\" primary=\"true\" />"
+                + "</dnd_apps>"
+                + "</notification-policy>";
+        UserInfo ui = new UserInfo();
+        ui.id = 10;
+        ui.userType = USER_TYPE_PROFILE_CLONE;
+        when(mUmInternal.getUserInfo(10)).thenReturn(ui);
+        mService.readPolicyXml(
+                new BufferedInputStream(new ByteArrayInputStream(policyXml.getBytes())),
+                true,
+                10);
+        verify(mListeners, never()).readXml(any(), any(), eq(true), eq(10));
+        verify(mConditionProviders, never()).readXml(any(), any(), eq(true), eq(10));
+        verify(mAssistants, never()).readXml(any(), any(), eq(true), eq(10));
+    }
+
+    @Test
     public void testReadPolicyXml_doesNotRestoreManagedServicesForManagedUser() throws Exception {
         final String policyXml = "<notification-policy version=\"1\">"
                 + "<ranking></ranking>"
@@ -4423,7 +4512,10 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 + "<service_listing approved=\"test\" user=\"10\" primary=\"true\" />"
                 + "</dnd_apps>"
                 + "</notification-policy>";
-        when(mUm.isManagedProfile(10)).thenReturn(true);
+        UserInfo ui = new UserInfo();
+        ui.id = 10;
+        ui.userType = USER_TYPE_PROFILE_MANAGED;
+        when(mUmInternal.getUserInfo(10)).thenReturn(ui);
         mService.readPolicyXml(
                 new BufferedInputStream(new ByteArrayInputStream(policyXml.getBytes())),
                 true,
@@ -4447,7 +4539,10 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 + "<service_listing approved=\"test\" user=\"10\" primary=\"true\" />"
                 + "</dnd_apps>"
                 + "</notification-policy>";
-        when(mUm.isManagedProfile(10)).thenReturn(false);
+        UserInfo ui = new UserInfo();
+        ui.id = 10;
+        ui.userType = USER_TYPE_FULL_SECONDARY;
+        when(mUmInternal.getUserInfo(10)).thenReturn(ui);
         mService.readPolicyXml(
                 new BufferedInputStream(new ByteArrayInputStream(policyXml.getBytes())),
                 true,
@@ -7775,6 +7870,34 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testOnBubbleMetadataChangedToSuppressNotification_soundStopped()
+            throws RemoteException {
+        IRingtonePlayer mockPlayer = mock(IRingtonePlayer.class);
+        when(mAudioManager.getRingtonePlayer()).thenReturn(mockPlayer);
+        // Set up volume to be above 0 for the sound to actually play
+        when(mAudioManager.getStreamVolume(anyInt())).thenReturn(10);
+
+        setUpPrefsForBubbles(PKG, mUid,
+                true /* global */,
+                BUBBLE_PREFERENCE_ALL /* app */,
+                true /* channel */);
+
+        // Post a bubble notification
+        NotificationRecord nr = generateMessageBubbleNotifRecord(mTestNotificationChannel, "tag");
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, nr.getSbn().getTag(),
+                nr.getSbn().getId(), nr.getSbn().getNotification(), nr.getSbn().getUserId());
+        waitForIdle();
+
+        // Test: suppress notification via bubble metadata update
+        mService.mNotificationDelegate.onBubbleMetadataFlagChanged(nr.getKey(),
+                Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION);
+        waitForIdle();
+
+        // Check audio is stopped
+        verify(mockPlayer).stopAsync();
+    }
+
+    @Test
     public void testGrantInlineReplyUriPermission_recordExists() throws Exception {
         int userId = UserManager.isHeadlessSystemUserMode()
                 ? UserHandle.getUserId(UID_HEADLESS)
@@ -8406,7 +8529,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testOnUnlockUser() {
         UserInfo ui = new UserInfo();
         ui.id = 10;
-        mService.onUserUnlocking(new TargetUser(ui));
+        mService.onUserUnlocked(new TargetUser(ui));
         waitForIdle();
 
         verify(mHistoryManager, timeout(MAX_POST_DELAY).times(1)).onUserUnlocked(ui.id);

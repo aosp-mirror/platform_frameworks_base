@@ -72,7 +72,7 @@ public class WindowLayoutTests {
     private static final Insets WATERFALL_INSETS = Insets.of(6, 0, 12, 0);
 
     private final WindowLayout mWindowLayout = new WindowLayout();
-    private final ClientWindowFrames mOutFrames = new ClientWindowFrames();
+    private final ClientWindowFrames mFrames = new ClientWindowFrames();
 
     private WindowManager.LayoutParams mAttrs;
     private InsetsState mState;
@@ -82,7 +82,6 @@ public class WindowLayoutTests {
     private int mRequestedWidth;
     private int mRequestedHeight;
     private InsetsVisibilities mRequestedVisibilities;
-    private Rect mAttachedWindowFrame;
     private float mCompatScale;
 
     @Before
@@ -100,14 +99,14 @@ public class WindowLayoutTests {
         mRequestedWidth = DISPLAY_WIDTH;
         mRequestedHeight = DISPLAY_HEIGHT;
         mRequestedVisibilities = new InsetsVisibilities();
-        mAttachedWindowFrame = null;
         mCompatScale = 1f;
+        mFrames.attachedFrame = null;
     }
 
     private void computeFrames() {
         mWindowLayout.computeFrames(mAttrs, mState, mDisplayCutoutSafe, mWindowBounds,
                 mWindowingMode, mRequestedWidth, mRequestedHeight, mRequestedVisibilities,
-                mAttachedWindowFrame, mCompatScale, mOutFrames);
+                mCompatScale, mFrames);
     }
 
     private void addDisplayCutout() {
@@ -145,9 +144,9 @@ public class WindowLayoutTests {
     public void defaultParams() {
         computeFrames();
 
-        assertInsetByTopBottom(STATUS_BAR_HEIGHT, NAVIGATION_BAR_HEIGHT, mOutFrames.displayFrame);
-        assertInsetByTopBottom(STATUS_BAR_HEIGHT, NAVIGATION_BAR_HEIGHT, mOutFrames.parentFrame);
-        assertInsetByTopBottom(STATUS_BAR_HEIGHT, NAVIGATION_BAR_HEIGHT, mOutFrames.frame);
+        assertInsetByTopBottom(STATUS_BAR_HEIGHT, NAVIGATION_BAR_HEIGHT, mFrames.displayFrame);
+        assertInsetByTopBottom(STATUS_BAR_HEIGHT, NAVIGATION_BAR_HEIGHT, mFrames.parentFrame);
+        assertInsetByTopBottom(STATUS_BAR_HEIGHT, NAVIGATION_BAR_HEIGHT, mFrames.frame);
     }
 
     @Test
@@ -156,9 +155,9 @@ public class WindowLayoutTests {
         mRequestedHeight = UNSPECIFIED_LENGTH;
         computeFrames();
 
-        assertInsetByTopBottom(STATUS_BAR_HEIGHT, NAVIGATION_BAR_HEIGHT, mOutFrames.displayFrame);
-        assertInsetByTopBottom(STATUS_BAR_HEIGHT, NAVIGATION_BAR_HEIGHT, mOutFrames.parentFrame);
-        assertInsetByTopBottom(STATUS_BAR_HEIGHT, NAVIGATION_BAR_HEIGHT, mOutFrames.frame);
+        assertInsetByTopBottom(STATUS_BAR_HEIGHT, NAVIGATION_BAR_HEIGHT, mFrames.displayFrame);
+        assertInsetByTopBottom(STATUS_BAR_HEIGHT, NAVIGATION_BAR_HEIGHT, mFrames.parentFrame);
+        assertInsetByTopBottom(STATUS_BAR_HEIGHT, NAVIGATION_BAR_HEIGHT, mFrames.frame);
     }
 
     @Test
@@ -172,9 +171,9 @@ public class WindowLayoutTests {
         mAttrs.gravity = Gravity.LEFT | Gravity.TOP;
         computeFrames();
 
-        assertInsetByTopBottom(STATUS_BAR_HEIGHT, NAVIGATION_BAR_HEIGHT, mOutFrames.displayFrame);
-        assertInsetByTopBottom(STATUS_BAR_HEIGHT, NAVIGATION_BAR_HEIGHT, mOutFrames.parentFrame);
-        assertRect(0, STATUS_BAR_HEIGHT, width, STATUS_BAR_HEIGHT + height, mOutFrames.frame);
+        assertInsetByTopBottom(STATUS_BAR_HEIGHT, NAVIGATION_BAR_HEIGHT, mFrames.displayFrame);
+        assertInsetByTopBottom(STATUS_BAR_HEIGHT, NAVIGATION_BAR_HEIGHT, mFrames.parentFrame);
+        assertRect(0, STATUS_BAR_HEIGHT, width, STATUS_BAR_HEIGHT + height, mFrames.frame);
     }
 
     @Test
@@ -186,11 +185,24 @@ public class WindowLayoutTests {
         computeFrames();
 
         assertRect(0, top, DISPLAY_WIDTH, DISPLAY_HEIGHT - NAVIGATION_BAR_HEIGHT,
-                mOutFrames.displayFrame);
+                mFrames.displayFrame);
         assertRect(0, top, DISPLAY_WIDTH, DISPLAY_HEIGHT - NAVIGATION_BAR_HEIGHT,
-                mOutFrames.parentFrame);
+                mFrames.parentFrame);
         assertRect(0, top, DISPLAY_WIDTH, DISPLAY_HEIGHT - NAVIGATION_BAR_HEIGHT,
-                mOutFrames.frame);
+                mFrames.frame);
+    }
+
+    @Test
+    public void attachedFrame() {
+        final int bottom = (DISPLAY_HEIGHT - STATUS_BAR_HEIGHT - NAVIGATION_BAR_HEIGHT) / 2;
+        mFrames.attachedFrame = new Rect(0, STATUS_BAR_HEIGHT, DISPLAY_WIDTH, bottom);
+        mRequestedWidth = UNSPECIFIED_LENGTH;
+        mRequestedHeight = UNSPECIFIED_LENGTH;
+        computeFrames();
+
+        assertInsetByTopBottom(STATUS_BAR_HEIGHT, NAVIGATION_BAR_HEIGHT, mFrames.displayFrame);
+        assertEquals(mFrames.attachedFrame, mFrames.parentFrame);
+        assertEquals(mFrames.attachedFrame, mFrames.frame);
     }
 
     @Test
@@ -198,9 +210,9 @@ public class WindowLayoutTests {
         mAttrs.setFitInsetsTypes(WindowInsets.Type.statusBars());
         computeFrames();
 
-        assertInsetByTopBottom(STATUS_BAR_HEIGHT, 0, mOutFrames.displayFrame);
-        assertInsetByTopBottom(STATUS_BAR_HEIGHT, 0, mOutFrames.parentFrame);
-        assertInsetByTopBottom(STATUS_BAR_HEIGHT, 0, mOutFrames.frame);
+        assertInsetByTopBottom(STATUS_BAR_HEIGHT, 0, mFrames.displayFrame);
+        assertInsetByTopBottom(STATUS_BAR_HEIGHT, 0, mFrames.parentFrame);
+        assertInsetByTopBottom(STATUS_BAR_HEIGHT, 0, mFrames.frame);
     }
 
     @Test
@@ -208,9 +220,9 @@ public class WindowLayoutTests {
         mAttrs.setFitInsetsTypes(WindowInsets.Type.navigationBars());
         computeFrames();
 
-        assertInsetByTopBottom(0, NAVIGATION_BAR_HEIGHT, mOutFrames.displayFrame);
-        assertInsetByTopBottom(0, NAVIGATION_BAR_HEIGHT, mOutFrames.parentFrame);
-        assertInsetByTopBottom(0, NAVIGATION_BAR_HEIGHT, mOutFrames.frame);
+        assertInsetByTopBottom(0, NAVIGATION_BAR_HEIGHT, mFrames.displayFrame);
+        assertInsetByTopBottom(0, NAVIGATION_BAR_HEIGHT, mFrames.parentFrame);
+        assertInsetByTopBottom(0, NAVIGATION_BAR_HEIGHT, mFrames.frame);
     }
 
     @Test
@@ -218,9 +230,9 @@ public class WindowLayoutTests {
         mAttrs.setFitInsetsTypes(0);
         computeFrames();
 
-        assertInsetByTopBottom(0, 0, mOutFrames.displayFrame);
-        assertInsetByTopBottom(0, 0, mOutFrames.parentFrame);
-        assertInsetByTopBottom(0, 0, mOutFrames.frame);
+        assertInsetByTopBottom(0, 0, mFrames.displayFrame);
+        assertInsetByTopBottom(0, 0, mFrames.parentFrame);
+        assertInsetByTopBottom(0, 0, mFrames.frame);
     }
 
     @Test
@@ -228,9 +240,9 @@ public class WindowLayoutTests {
         mAttrs.setFitInsetsSides(WindowInsets.Side.all());
         computeFrames();
 
-        assertInsetByTopBottom(STATUS_BAR_HEIGHT, NAVIGATION_BAR_HEIGHT, mOutFrames.displayFrame);
-        assertInsetByTopBottom(STATUS_BAR_HEIGHT, NAVIGATION_BAR_HEIGHT, mOutFrames.parentFrame);
-        assertInsetByTopBottom(STATUS_BAR_HEIGHT, NAVIGATION_BAR_HEIGHT, mOutFrames.frame);
+        assertInsetByTopBottom(STATUS_BAR_HEIGHT, NAVIGATION_BAR_HEIGHT, mFrames.displayFrame);
+        assertInsetByTopBottom(STATUS_BAR_HEIGHT, NAVIGATION_BAR_HEIGHT, mFrames.parentFrame);
+        assertInsetByTopBottom(STATUS_BAR_HEIGHT, NAVIGATION_BAR_HEIGHT, mFrames.frame);
     }
 
     @Test
@@ -238,9 +250,9 @@ public class WindowLayoutTests {
         mAttrs.setFitInsetsSides(WindowInsets.Side.TOP);
         computeFrames();
 
-        assertInsetByTopBottom(STATUS_BAR_HEIGHT, 0, mOutFrames.displayFrame);
-        assertInsetByTopBottom(STATUS_BAR_HEIGHT, 0, mOutFrames.parentFrame);
-        assertInsetByTopBottom(STATUS_BAR_HEIGHT, 0, mOutFrames.frame);
+        assertInsetByTopBottom(STATUS_BAR_HEIGHT, 0, mFrames.displayFrame);
+        assertInsetByTopBottom(STATUS_BAR_HEIGHT, 0, mFrames.parentFrame);
+        assertInsetByTopBottom(STATUS_BAR_HEIGHT, 0, mFrames.frame);
     }
 
     @Test
@@ -248,9 +260,9 @@ public class WindowLayoutTests {
         mAttrs.setFitInsetsSides(0);
         computeFrames();
 
-        assertInsetByTopBottom(0, 0, mOutFrames.displayFrame);
-        assertInsetByTopBottom(0, 0, mOutFrames.parentFrame);
-        assertInsetByTopBottom(0, 0, mOutFrames.frame);
+        assertInsetByTopBottom(0, 0, mFrames.displayFrame);
+        assertInsetByTopBottom(0, 0, mFrames.parentFrame);
+        assertInsetByTopBottom(0, 0, mFrames.frame);
     }
 
     @Test
@@ -259,9 +271,9 @@ public class WindowLayoutTests {
         mState.getSource(ITYPE_NAVIGATION_BAR).setVisible(false);
         computeFrames();
 
-        assertInsetByTopBottom(0, 0, mOutFrames.displayFrame);
-        assertInsetByTopBottom(0, 0, mOutFrames.parentFrame);
-        assertInsetByTopBottom(0, 0, mOutFrames.frame);
+        assertInsetByTopBottom(0, 0, mFrames.displayFrame);
+        assertInsetByTopBottom(0, 0, mFrames.parentFrame);
+        assertInsetByTopBottom(0, 0, mFrames.frame);
     }
 
     @Test
@@ -271,9 +283,9 @@ public class WindowLayoutTests {
         mAttrs.setFitInsetsIgnoringVisibility(true);
         computeFrames();
 
-        assertInsetByTopBottom(STATUS_BAR_HEIGHT, NAVIGATION_BAR_HEIGHT, mOutFrames.displayFrame);
-        assertInsetByTopBottom(STATUS_BAR_HEIGHT, NAVIGATION_BAR_HEIGHT, mOutFrames.parentFrame);
-        assertInsetByTopBottom(STATUS_BAR_HEIGHT, NAVIGATION_BAR_HEIGHT, mOutFrames.frame);
+        assertInsetByTopBottom(STATUS_BAR_HEIGHT, NAVIGATION_BAR_HEIGHT, mFrames.displayFrame);
+        assertInsetByTopBottom(STATUS_BAR_HEIGHT, NAVIGATION_BAR_HEIGHT, mFrames.parentFrame);
+        assertInsetByTopBottom(STATUS_BAR_HEIGHT, NAVIGATION_BAR_HEIGHT, mFrames.frame);
     }
 
     @Test
@@ -284,9 +296,9 @@ public class WindowLayoutTests {
         mAttrs.privateFlags |= PRIVATE_FLAG_INSET_PARENT_FRAME_BY_IME;
         computeFrames();
 
-        assertInsetByTopBottom(STATUS_BAR_HEIGHT, NAVIGATION_BAR_HEIGHT, mOutFrames.displayFrame);
-        assertInsetByTopBottom(STATUS_BAR_HEIGHT, IME_HEIGHT, mOutFrames.parentFrame);
-        assertInsetByTopBottom(STATUS_BAR_HEIGHT, IME_HEIGHT, mOutFrames.frame);
+        assertInsetByTopBottom(STATUS_BAR_HEIGHT, NAVIGATION_BAR_HEIGHT, mFrames.displayFrame);
+        assertInsetByTopBottom(STATUS_BAR_HEIGHT, IME_HEIGHT, mFrames.parentFrame);
+        assertInsetByTopBottom(STATUS_BAR_HEIGHT, IME_HEIGHT, mFrames.frame);
     }
 
     @Test
@@ -297,11 +309,11 @@ public class WindowLayoutTests {
         computeFrames();
 
         assertInsetBy(WATERFALL_INSETS.left, DISPLAY_CUTOUT_HEIGHT, WATERFALL_INSETS.right, 0,
-                mOutFrames.displayFrame);
+                mFrames.displayFrame);
         assertInsetBy(WATERFALL_INSETS.left, DISPLAY_CUTOUT_HEIGHT, WATERFALL_INSETS.right, 0,
-                mOutFrames.parentFrame);
+                mFrames.parentFrame);
         assertInsetBy(WATERFALL_INSETS.left, DISPLAY_CUTOUT_HEIGHT, WATERFALL_INSETS.right, 0,
-                mOutFrames.frame);
+                mFrames.frame);
     }
 
     @Test
@@ -312,11 +324,11 @@ public class WindowLayoutTests {
         computeFrames();
 
         assertInsetBy(WATERFALL_INSETS.left, STATUS_BAR_HEIGHT, WATERFALL_INSETS.right, 0,
-                mOutFrames.displayFrame);
+                mFrames.displayFrame);
         assertInsetBy(WATERFALL_INSETS.left, STATUS_BAR_HEIGHT, WATERFALL_INSETS.right, 0,
-                mOutFrames.parentFrame);
+                mFrames.parentFrame);
         assertInsetBy(WATERFALL_INSETS.left, STATUS_BAR_HEIGHT, WATERFALL_INSETS.right, 0,
-                mOutFrames.frame);
+                mFrames.frame);
     }
 
     @Test
@@ -327,9 +339,9 @@ public class WindowLayoutTests {
         mAttrs.setFitInsetsTypes(0);
         computeFrames();
 
-        assertInsetBy(WATERFALL_INSETS.left, 0, WATERFALL_INSETS.right, 0, mOutFrames.displayFrame);
-        assertInsetBy(WATERFALL_INSETS.left, 0, WATERFALL_INSETS.right, 0, mOutFrames.parentFrame);
-        assertInsetBy(WATERFALL_INSETS.left, 0, WATERFALL_INSETS.right, 0, mOutFrames.frame);
+        assertInsetBy(WATERFALL_INSETS.left, 0, WATERFALL_INSETS.right, 0, mFrames.displayFrame);
+        assertInsetBy(WATERFALL_INSETS.left, 0, WATERFALL_INSETS.right, 0, mFrames.parentFrame);
+        assertInsetBy(WATERFALL_INSETS.left, 0, WATERFALL_INSETS.right, 0, mFrames.frame);
     }
 
     @Test
@@ -344,9 +356,9 @@ public class WindowLayoutTests {
         mAttrs.privateFlags |= PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT;
         computeFrames();
 
-        assertRect(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT, mOutFrames.displayFrame);
-        assertRect(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT, mOutFrames.parentFrame);
-        assertRect(0, 0, DISPLAY_WIDTH, height + DISPLAY_CUTOUT_HEIGHT, mOutFrames.frame);
+        assertRect(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT, mFrames.displayFrame);
+        assertRect(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT, mFrames.parentFrame);
+        assertRect(0, 0, DISPLAY_WIDTH, height + DISPLAY_CUTOUT_HEIGHT, mFrames.frame);
     }
 
     @Test
@@ -359,11 +371,11 @@ public class WindowLayoutTests {
         computeFrames();
 
         assertInsetBy(WATERFALL_INSETS.left, STATUS_BAR_HEIGHT, WATERFALL_INSETS.right, 0,
-                mOutFrames.displayFrame);
+                mFrames.displayFrame);
         assertInsetBy(WATERFALL_INSETS.left, STATUS_BAR_HEIGHT, WATERFALL_INSETS.right, 0,
-                mOutFrames.parentFrame);
+                mFrames.parentFrame);
         assertInsetBy(WATERFALL_INSETS.left, STATUS_BAR_HEIGHT, WATERFALL_INSETS.right, 0,
-                mOutFrames.frame);
+                mFrames.frame);
     }
 
     @Test
@@ -373,9 +385,9 @@ public class WindowLayoutTests {
         mAttrs.setFitInsetsTypes(0);
         computeFrames();
 
-        assertInsetBy(WATERFALL_INSETS.left, 0, WATERFALL_INSETS.right, 0, mOutFrames.displayFrame);
-        assertInsetBy(WATERFALL_INSETS.left, 0, WATERFALL_INSETS.right, 0, mOutFrames.parentFrame);
-        assertInsetBy(WATERFALL_INSETS.left, 0, WATERFALL_INSETS.right, 0, mOutFrames.frame);
+        assertInsetBy(WATERFALL_INSETS.left, 0, WATERFALL_INSETS.right, 0, mFrames.displayFrame);
+        assertInsetBy(WATERFALL_INSETS.left, 0, WATERFALL_INSETS.right, 0, mFrames.parentFrame);
+        assertInsetBy(WATERFALL_INSETS.left, 0, WATERFALL_INSETS.right, 0, mFrames.frame);
     }
 
     @Test
@@ -386,11 +398,11 @@ public class WindowLayoutTests {
         computeFrames();
 
         assertInsetBy(WATERFALL_INSETS.left, STATUS_BAR_HEIGHT, WATERFALL_INSETS.right, 0,
-                mOutFrames.displayFrame);
+                mFrames.displayFrame);
         assertInsetBy(WATERFALL_INSETS.left, STATUS_BAR_HEIGHT, WATERFALL_INSETS.right, 0,
-                mOutFrames.parentFrame);
+                mFrames.parentFrame);
         assertInsetBy(WATERFALL_INSETS.left, STATUS_BAR_HEIGHT, WATERFALL_INSETS.right, 0,
-                mOutFrames.frame);
+                mFrames.frame);
     }
 
     @Test
@@ -400,8 +412,8 @@ public class WindowLayoutTests {
         mAttrs.setFitInsetsTypes(0);
         computeFrames();
 
-        assertInsetByTopBottom(0, 0, mOutFrames.displayFrame);
-        assertInsetByTopBottom(0, 0, mOutFrames.parentFrame);
-        assertInsetByTopBottom(0, 0, mOutFrames.frame);
+        assertInsetByTopBottom(0, 0, mFrames.displayFrame);
+        assertInsetByTopBottom(0, 0, mFrames.parentFrame);
+        assertInsetByTopBottom(0, 0, mFrames.frame);
     }
 }

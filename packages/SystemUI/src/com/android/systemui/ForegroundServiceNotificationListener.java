@@ -23,14 +23,10 @@ import android.os.Bundle;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
 
-import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.statusbar.notification.NotificationEntryListener;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
-import com.android.systemui.util.time.SystemClock;
 
 import javax.inject.Inject;
 
@@ -43,42 +39,20 @@ public class ForegroundServiceNotificationListener {
 
     private final Context mContext;
     private final ForegroundServiceController mForegroundServiceController;
-    private final NotificationEntryManager mEntryManager;
+    private final NotifPipeline mNotifPipeline;
 
     @Inject
     public ForegroundServiceNotificationListener(Context context,
             ForegroundServiceController foregroundServiceController,
-            NotificationEntryManager notificationEntryManager,
-            NotifPipeline notifPipeline,
-            SystemClock systemClock) {
+            NotifPipeline notifPipeline) {
         mContext = context;
         mForegroundServiceController = foregroundServiceController;
+        mNotifPipeline = notifPipeline;
+    }
 
-        // TODO: (b/145659174) remove mEntryManager when moving to NewNotifPipeline. Replaced by
-        //  ForegroundCoordinator
-        mEntryManager = notificationEntryManager;
-        mEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
-            @Override
-            public void onPendingEntryAdded(NotificationEntry entry) {
-                addNotification(entry, entry.getImportance());
-            }
-
-            @Override
-            public void onPreEntryUpdated(NotificationEntry entry) {
-                updateNotification(entry, entry.getImportance());
-            }
-
-            @Override
-            public void onEntryRemoved(
-                    NotificationEntry entry,
-                    NotificationVisibility visibility,
-                    boolean removedByUser,
-                    int reason) {
-                removeNotification(entry.getSbn());
-            }
-        });
-
-        notifPipeline.addCollectionListener(new NotifCollectionListener() {
+    /** Initializes this listener by connecting it to the notification pipeline. */
+    public void init() {
+        mNotifPipeline.addCollectionListener(new NotifCollectionListener() {
             @Override
             public void onEntryAdded(NotificationEntry entry) {
                 addNotification(entry, entry.getImportance());

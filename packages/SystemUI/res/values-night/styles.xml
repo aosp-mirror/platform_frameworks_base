@@ -44,7 +44,6 @@
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:windowLightNavigationBar">false</item>
         <item name="android:navigationBarColor">?android:attr/colorBackgroundFloating</item>
-        <item name="android:textColorSecondary">?android:attr/textColorPrimaryInverse</item>
     </style>
 
     <style name="FloatingOverlay" parent="@android:style/Theme.DeviceDefault.DayNight">

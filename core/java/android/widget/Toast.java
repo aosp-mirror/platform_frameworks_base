@@ -32,6 +32,7 @@ import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
@@ -494,19 +495,39 @@ public class Toast {
      */
     public static Toast makeText(@NonNull Context context, @Nullable Looper looper,
             @NonNull CharSequence text, @Duration int duration) {
-        if (Compatibility.isChangeEnabled(CHANGE_TEXT_TOASTS_IN_THE_SYSTEM)) {
-            Toast result = new Toast(context, looper);
-            result.mText = text;
-            result.mDuration = duration;
-            return result;
-        } else {
-            Toast result = new Toast(context, looper);
-            View v = ToastPresenter.getTextToastView(context, text);
-            result.mNextView = v;
-            result.mDuration = duration;
+        Toast result = new Toast(context, looper);
 
-            return result;
+        if (Compatibility.isChangeEnabled(CHANGE_TEXT_TOASTS_IN_THE_SYSTEM)) {
+            result.mText = text;
+        } else {
+            result.mNextView = ToastPresenter.getTextToastView(context, text);
         }
+
+        result.mDuration = duration;
+        return result;
+    }
+
+    /**
+     * Make a standard toast with an icon to display using the specified looper.
+     * If looper is null, Looper.myLooper() is used.
+     *
+     * The toast will be a custom view that's rendered by the app (instead of by SystemUI).
+     * In Android version R and above, non-system apps can only render the toast
+     * when it's in the foreground.
+     *
+     * @hide
+     */
+    public static Toast makeCustomToastWithIcon(@NonNull Context context, @Nullable Looper looper,
+            @NonNull CharSequence text, @Duration int duration, @NonNull Drawable icon) {
+        if (icon == null) {
+            throw new IllegalArgumentException("Drawable icon should not be null "
+                    + "for makeCustomToastWithIcon");
+        }
+
+        Toast result = new Toast(context, looper);
+        result.mNextView = ToastPresenter.getTextToastViewWithIcon(context, text, icon);
+        result.mDuration = duration;
+        return result;
     }
 
     /**

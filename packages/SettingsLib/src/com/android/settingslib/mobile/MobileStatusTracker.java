@@ -44,6 +44,8 @@ public class MobileStatusTracker {
     private final Handler mReceiverHandler;
     private final MobileTelephonyCallback mTelephonyCallback;
 
+    private boolean mListening = false;
+
     /**
      * MobileStatusTracker constructors
      *
@@ -76,11 +78,19 @@ public class MobileStatusTracker {
      * Config the MobileStatusTracker to start or stop monitoring platform signals.
      */
     public void setListening(boolean listening) {
+        if (mListening == listening) {
+            return;
+        }
+        mListening = listening;
         if (listening) {
             mPhone.registerTelephonyCallback(mReceiverHandler::post, mTelephonyCallback);
         } else {
             mPhone.unregisterTelephonyCallback(mTelephonyCallback);
         }
+    }
+
+    public boolean isListening() {
+        return mListening;
     }
 
     private void updateDataSim() {

@@ -1283,9 +1283,6 @@ public class ResolverActivity extends Activity implements
         }
 
         if (target != null) {
-            if (intent != null && isLaunchingTargetInOtherProfile()) {
-                prepareIntentForCrossProfileLaunch(intent);
-            }
             safelyStartActivity(target);
 
             // Rely on the ActivityManager to pop up a dialog regarding app suspension
@@ -1298,15 +1295,6 @@ public class ResolverActivity extends Activity implements
         return true;
     }
 
-    private void prepareIntentForCrossProfileLaunch(Intent intent) {
-        intent.fixUris(UserHandle.myUserId());
-    }
-
-    private boolean isLaunchingTargetInOtherProfile() {
-        return mMultiProfilePagerAdapter.getCurrentUserHandle().getIdentifier()
-                != UserHandle.myUserId();
-    }
-
     @VisibleForTesting
     public void safelyStartActivity(TargetInfo cti) {
         // We're dispatching intents that might be coming from legacy apps, so
@@ -1314,7 +1302,7 @@ public class ResolverActivity extends Activity implements
         StrictMode.disableDeathOnFileUriExposure();
         try {
             UserHandle currentUserHandle = mMultiProfilePagerAdapter.getCurrentUserHandle();
-            safelyStartActivityInternal(cti, currentUserHandle);
+            safelyStartActivityInternal(cti, currentUserHandle, null);
         } finally {
             StrictMode.enableDeathOnFileUriExposure();
         }
@@ -1327,18 +1315,23 @@ public class ResolverActivity extends Activity implements
      */
     @VisibleForTesting
     public void safelyStartActivityAsUser(TargetInfo cti, UserHandle user) {
+        safelyStartActivityAsUser(cti, user, null);
+    }
+
+    protected void safelyStartActivityAsUser(
+            TargetInfo cti, UserHandle user, @Nullable Bundle options) {
         // We're dispatching intents that might be coming from legacy apps, so
         // don't kill ourselves.
         StrictMode.disableDeathOnFileUriExposure();
         try {
-            safelyStartActivityInternal(cti, user);
+            safelyStartActivityInternal(cti, user, options);
         } finally {
             StrictMode.enableDeathOnFileUriExposure();
         }
     }
 
-
-    private void safelyStartActivityInternal(TargetInfo cti, UserHandle user) {
+    private void safelyStartActivityInternal(
+            TargetInfo cti, UserHandle user, @Nullable Bundle options) {
         // If the target is suspended, the activity will not be successfully launched.
         // Do not unregister from package manager updates in this case
         if (!cti.isSuspended() && mRegistered) {
@@ -1356,14 +1349,14 @@ public class ResolverActivity extends Activity implements
             Toast.makeText(this, mProfileSwitchMessage, Toast.LENGTH_LONG).show();
         }
         if (!mSafeForwardingMode) {
-            if (cti.startAsUser(this, null, user)) {
+            if (cti.startAsUser(this, options, user)) {
                 onActivityStarted(cti);
                 maybeLogCrossProfileTargetLaunch(cti, user);
             }
             return;
         }
         try {
-            if (cti.startAsCaller(this, null, user.getIdentifier())) {
+            if (cti.startAsCaller(this, options, user.getIdentifier())) {
                 onActivityStarted(cti);
                 maybeLogCrossProfileTargetLaunch(cti, user);
             }
@@ -1508,9 +1501,6 @@ public class ResolverActivity extends Activity implements
 
         findViewById(R.id.button_open).setOnClickListener(v -> {
             Intent intent = otherProfileResolveInfo.getResolvedIntent();
-            if (intent != null) {
-                prepareIntentForCrossProfileLaunch(intent);
-            }
             safelyStartActivityAsUser(otherProfileResolveInfo,
                     inactiveAdapter.mResolverListController.getUserHandle());
             finish();

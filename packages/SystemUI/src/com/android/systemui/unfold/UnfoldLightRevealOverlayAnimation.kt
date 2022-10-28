@@ -138,7 +138,7 @@ constructor(
 
         ensureOverlayRemoved()
 
-        val newRoot = SurfaceControlViewHost(context, context.display!!, wwm, false)
+        val newRoot = SurfaceControlViewHost(context, context.display!!, wwm)
         val newView =
             LightRevealScrim(context, null).apply {
                 revealEffect = createLightRevealEffect()

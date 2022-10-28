@@ -18,6 +18,7 @@ package com.android.keyguard;
 
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
+import android.text.TextUtils;
 
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
@@ -25,11 +26,14 @@ import com.android.systemui.util.ViewController;
 
 import javax.inject.Inject;
 
-/** Controller for a {@link KeyguardMessageAreaController}. */
-public class KeyguardMessageAreaController extends ViewController<KeyguardMessageArea> {
+/**
+ * Controller for a {@link KeyguardMessageAreaController}.
+ * @param <T> A subclass of KeyguardMessageArea.
+ */
+public class KeyguardMessageAreaController<T extends KeyguardMessageArea>
+        extends ViewController<T> {
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final ConfigurationController mConfigurationController;
-    private boolean mAltBouncerShowing;
 
     private KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
         public void onFinishedGoingToSleep(int why) {
@@ -58,7 +62,7 @@ public class KeyguardMessageAreaController extends ViewController<KeyguardMessag
         }
     };
 
-    private KeyguardMessageAreaController(KeyguardMessageArea view,
+    protected KeyguardMessageAreaController(T view,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             ConfigurationController configurationController) {
         super(view);
@@ -82,17 +86,10 @@ public class KeyguardMessageAreaController extends ViewController<KeyguardMessag
     }
 
     /**
-     * Set whether alt bouncer is showing
+     * Indicate that view is visible and can display messages.
      */
-    public void setAltBouncerShowing(boolean showing) {
-        mView.setAltBouncerShowing(showing);
-    }
-
-    /**
-     * Set bouncer is fully showing
-     */
-    public void setBouncerShowing(boolean showing) {
-        mView.setBouncerShowing(showing);
+    public void setIsVisible(boolean isVisible) {
+        mView.setIsVisible(isVisible);
     }
 
     public void setMessage(CharSequence s) {
@@ -101,6 +98,15 @@ public class KeyguardMessageAreaController extends ViewController<KeyguardMessag
 
     public void setMessage(int resId) {
         mView.setMessage(resId);
+    }
+
+    /**
+     * Set Text if KeyguardMessageArea is empty.
+     */
+    public void setMessageIfEmpty(int resId) {
+        if (TextUtils.isEmpty(mView.getText())) {
+            setMessage(resId);
+        }
     }
 
     public void setNextMessageColor(ColorStateList colorState) {

@@ -17,7 +17,6 @@
 package com.android.systemui.media.dialog;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
@@ -42,7 +41,7 @@ public class MediaOutputDialog extends MediaOutputBaseDialog {
             MediaOutputController mediaOutputController, UiEventLogger uiEventLogger) {
         super(context, broadcastSender, mediaOutputController);
         mUiEventLogger = uiEventLogger;
-        mAdapter = new MediaOutputAdapter(mMediaOutputController, this);
+        mAdapter = new MediaOutputAdapter(mMediaOutputController);
         if (!aboveStatusbar) {
             getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
         }
@@ -81,8 +80,8 @@ public class MediaOutputDialog extends MediaOutputBaseDialog {
     }
 
     @Override
-    Drawable getAppSourceIcon() {
-        return mMediaOutputController.getAppSourceIcon();
+    IconCompat getAppSourceIcon() {
+        return mMediaOutputController.getNotificationSmallIcon();
     }
 
     @Override
@@ -99,12 +98,17 @@ public class MediaOutputDialog extends MediaOutputBaseDialog {
 
     @Override
     public boolean isBroadcastSupported() {
-        return mMediaOutputController.isBroadcastSupported();
+        boolean isBluetoothLeDevice = false;
+        if (mMediaOutputController.getCurrentConnectedMediaDevice() != null) {
+            isBluetoothLeDevice = mMediaOutputController.isBluetoothLeDevice(
+                    mMediaOutputController.getCurrentConnectedMediaDevice());
+        }
+        return mMediaOutputController.isBroadcastSupported() && isBluetoothLeDevice;
     }
 
     @Override
     public CharSequence getStopButtonText() {
-        int resId = R.string.media_output_dialog_button_stop_casting;
+        int resId = R.string.keyboard_key_media_stop;
         if (isBroadcastSupported() && mMediaOutputController.isPlaying()
                 && !mMediaOutputController.isBluetoothLeBroadcastEnabled()) {
             resId = R.string.media_output_broadcast;
@@ -127,6 +131,17 @@ public class MediaOutputDialog extends MediaOutputBaseDialog {
             mMediaOutputController.releaseSession();
             dismiss();
         }
+    }
+
+    @Override
+    public int getBroadcastIconVisibility() {
+        return (isBroadcastSupported() && mMediaOutputController.isBluetoothLeBroadcastEnabled())
+                ? View.VISIBLE : View.GONE;
+    }
+
+    @Override
+    public void onBroadcastIconClick() {
+        startLeBroadcastDialog();
     }
 
     @VisibleForTesting

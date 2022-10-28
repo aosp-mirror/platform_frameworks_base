@@ -23,10 +23,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -290,6 +292,17 @@ public class WindowMagnificationManagerTest {
 
         assertEquals(mWindowMagnificationManager.getScale(TEST_DISPLAY),
                 MagnificationScaleProvider.MAX_SCALE);
+    }
+
+    @Test
+    public void logTrackingTypingFocus_processScroll_logDuration() {
+        WindowMagnificationManager spyWindowMagnificationManager = spy(mWindowMagnificationManager);
+        spyWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY, 3.0f, 50f, 50f);
+        spyWindowMagnificationManager.onImeWindowVisibilityChanged(TEST_DISPLAY, /* shown */ true);
+
+        spyWindowMagnificationManager.processScroll(TEST_DISPLAY, 10f, 10f);
+
+        verify(spyWindowMagnificationManager).logTrackingTypingFocus(anyLong());
     }
 
     @Test

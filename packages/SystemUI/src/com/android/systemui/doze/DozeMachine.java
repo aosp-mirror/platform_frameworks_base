@@ -20,6 +20,8 @@ import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_AWA
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_WAKING;
 
 import android.annotation.MainThread;
+import android.app.UiModeManager;
+import android.content.res.Configuration;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.Trace;
 import android.os.UserHandle;
@@ -33,7 +35,6 @@ import com.android.systemui.doze.dagger.WrappedService;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle.Wakefulness;
 import com.android.systemui.statusbar.phone.DozeParameters;
-import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.util.Assert;
 import com.android.systemui.util.wakelock.WakeLock;
 
@@ -66,6 +67,8 @@ public class DozeMachine {
         INITIALIZED,
         /** Regular doze. Device is asleep and listening for pulse triggers. */
         DOZE,
+        /** Deep doze. Device is asleep and is not listening for pulse triggers. */
+        DOZE_SUSPEND_TRIGGERS,
         /** Always-on doze. Device is asleep, showing UI and listening for pulse triggers. */
         DOZE_AOD,
         /** Pulse has been requested. Device is awake and preparing UI */
@@ -125,6 +128,7 @@ public class DozeMachine {
                             : Display.STATE_ON;
                 case DOZE_AOD_PAUSED:
                 case DOZE:
+                case DOZE_SUSPEND_TRIGGERS:
                     return Display.STATE_OFF;
                 case DOZE_PULSING:
                 case DOZE_PULSING_BRIGHT:
@@ -143,26 +147,27 @@ public class DozeMachine {
     private final WakeLock mWakeLock;
     private final AmbientDisplayConfiguration mConfig;
     private final WakefulnessLifecycle mWakefulnessLifecycle;
-    private final BatteryController mBatteryController;
     private final DozeHost mDozeHost;
-    private Part[] mParts;
+    private final UiModeManager mUiModeManager;
+    private final DockManager mDockManager;
+    private final Part[] mParts;
 
     private final ArrayList<State> mQueuedRequests = new ArrayList<>();
     private State mState = State.UNINITIALIZED;
     private int mPulseReason;
     private boolean mWakeLockHeldForCurrentState = false;
-    private DockManager mDockManager;
 
     @Inject
     public DozeMachine(@WrappedService Service service, AmbientDisplayConfiguration config,
             WakeLock wakeLock, WakefulnessLifecycle wakefulnessLifecycle,
-            BatteryController batteryController, DozeLog dozeLog, DockManager dockManager,
+            UiModeManager uiModeManager,
+            DozeLog dozeLog, DockManager dockManager,
             DozeHost dozeHost, Part[] parts) {
         mDozeService = service;
         mConfig = config;
         mWakefulnessLifecycle = wakefulnessLifecycle;
         mWakeLock = wakeLock;
-        mBatteryController = batteryController;
+        mUiModeManager = uiModeManager;
         mDozeLog = dozeLog;
         mDockManager = dockManager;
         mDozeHost = dozeHost;
@@ -244,7 +249,7 @@ public class DozeMachine {
         Assert.isMainThread();
         if (isExecutingTransition()) {
             throw new IllegalStateException("Cannot get state because there were pending "
-                    + "transitions: " + mQueuedRequests.toString());
+                    + "transitions: " + mQueuedRequests);
         }
         return mState;
     }
@@ -264,9 +269,10 @@ public class DozeMachine {
         return mPulseReason;
     }
 
-    /** Requests the PowerManager to wake up now. */
-    public void wakeUp() {
-        mDozeService.requestWakeUp();
+    /** Requests the PowerManager to wake up now.
+     * @param reason {@link DozeLog.Reason} that woke up the device.*/
+    public void wakeUp(@DozeLog.Reason int reason) {
+        mDozeService.requestWakeUp(reason);
     }
 
     public boolean isExecutingTransition() {
@@ -313,11 +319,8 @@ public class DozeMachine {
         }
         mDozeLog.traceDozeStateSendComplete(newState);
 
-        switch (newState) {
-            case FINISH:
-                mDozeService.finish();
-                break;
-            default:
+        if (newState == State.FINISH) {
+            mDozeService.finish();
         }
     }
 
@@ -356,6 +359,12 @@ public class DozeMachine {
     private State transitionPolicy(State requestedState) {
         if (mState == State.FINISH) {
             return State.FINISH;
+        }
+        if (mUiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_CAR
+                && (requestedState.canPulse() || requestedState.staysAwake())) {
+            Log.i(TAG, "Doze is suppressed with all triggers disabled as car mode is active");
+            mDozeLog.traceCarModeStarted();
+            return State.DOZE_SUSPEND_TRIGGERS;
         }
         if (mDozeHost.isAlwaysOnSuppressed() && requestedState.isAlwaysOn()) {
             Log.i(TAG, "Doze is suppressed by an app. Suppressing state: " + requestedState);
@@ -461,7 +470,7 @@ public class DozeMachine {
         void setDozeScreenState(int state);
 
         /** Request waking up. */
-        void requestWakeUp();
+        void requestWakeUp(@DozeLog.Reason int reason);
 
         /** Set screen brightness */
         void setDozeScreenBrightness(int brightness);
@@ -484,8 +493,8 @@ public class DozeMachine {
             }
 
             @Override
-            public void requestWakeUp() {
-                mDelegate.requestWakeUp();
+            public void requestWakeUp(@DozeLog.Reason int reason) {
+                mDelegate.requestWakeUp(reason);
             }
 
             @Override

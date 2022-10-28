@@ -3,6 +3,7 @@ package com.android.systemui.statusbar.notification.stack
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogLevel
 import com.android.systemui.log.dagger.NotificationHeadsUpLog
+import com.android.systemui.statusbar.notification.logKey
 import javax.inject.Inject
 
 class StackStateLogger @Inject constructor(
@@ -10,7 +11,7 @@ class StackStateLogger @Inject constructor(
 ) {
     fun logHUNViewDisappearing(key: String) {
         buffer.log(TAG, LogLevel.INFO, {
-            str1 = key
+            str1 = logKey(key)
         }, {
             "Heads up view disappearing $str1 "
         })
@@ -18,7 +19,7 @@ class StackStateLogger @Inject constructor(
 
     fun logHUNViewAppearing(key: String) {
         buffer.log(TAG, LogLevel.INFO, {
-            str1 = key
+            str1 = logKey(key)
         }, {
             "Heads up notification view appearing $str1 "
         })
@@ -26,7 +27,7 @@ class StackStateLogger @Inject constructor(
 
     fun logHUNViewDisappearingWithRemoveEvent(key: String) {
         buffer.log(TAG, LogLevel.ERROR, {
-            str1 = key
+            str1 = logKey(key)
         }, {
             "Heads up view disappearing $str1 for ANIMATION_TYPE_REMOVE"
         })
@@ -34,7 +35,7 @@ class StackStateLogger @Inject constructor(
 
     fun logHUNViewAppearingWithAddEvent(key: String) {
         buffer.log(TAG, LogLevel.ERROR, {
-            str1 = key
+            str1 = logKey(key)
         }, {
             "Heads up view disappearing $str1 for ANIMATION_TYPE_ADD"
         })
@@ -42,7 +43,7 @@ class StackStateLogger @Inject constructor(
 
     fun disappearAnimationEnded(key: String) {
         buffer.log(TAG, LogLevel.INFO, {
-            str1 = key
+            str1 = logKey(key)
         }, {
             "Heads up notification disappear animation ended $str1 "
         })
@@ -50,7 +51,7 @@ class StackStateLogger @Inject constructor(
 
     fun appearAnimationEnded(key: String) {
         buffer.log(TAG, LogLevel.INFO, {
-            str1 = key
+            str1 = logKey(key)
         }, {
             "Heads up notification appear animation ended $str1 "
         })

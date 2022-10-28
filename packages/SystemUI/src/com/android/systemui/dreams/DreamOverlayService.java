@@ -16,6 +16,7 @@
 
 package com.android.systemui.dreams;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.drawable.ColorDrawable;
 import android.util.Log;
@@ -26,11 +27,13 @@ import android.view.WindowInsets;
 import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleRegistry;
 import androidx.lifecycle.ViewModelStore;
 
+import com.android.dream.lowlight.dagger.LowLightDreamModule;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.policy.PhoneWindow;
@@ -44,6 +47,7 @@ import com.android.systemui.dreams.touch.DreamOverlayTouchMonitor;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 /**
  * The {@link DreamOverlayService} is responsible for placing an overlay on top of a dream. The
@@ -62,6 +66,8 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
     // content area).
     private final DreamOverlayContainerViewController mDreamOverlayContainerViewController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    @Nullable
+    private final ComponentName mLowLightDreamComponent;
     private final UiEventLogger mUiEventLogger;
 
     // A reference to the {@link Window} used to hold the dream overlay.
@@ -125,10 +131,13 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
             DreamOverlayComponent.Factory dreamOverlayComponentFactory,
             DreamOverlayStateController stateController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
-            UiEventLogger uiEventLogger) {
+            UiEventLogger uiEventLogger,
+            @Nullable @Named(LowLightDreamModule.LOW_LIGHT_DREAM_COMPONENT)
+                    ComponentName lowLightDreamComponent) {
         mContext = context;
         mExecutor = executor;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
+        mLowLightDreamComponent = lowLightDreamComponent;
         mKeyguardUpdateMonitor.registerCallback(mKeyguardCallback);
         mStateController = stateController;
         mUiEventLogger = uiEventLogger;
@@ -155,6 +164,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
             windowManager.removeView(mWindow.getDecorView());
         }
         mStateController.setOverlayActive(false);
+        mStateController.setLowLightActive(false);
         mDestroyed = true;
         super.onDestroy();
     }
@@ -163,6 +173,9 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
     public void onStartDream(@NonNull WindowManager.LayoutParams layoutParams) {
         mUiEventLogger.log(DreamOverlayEvent.DREAM_OVERLAY_ENTER_START);
         setCurrentState(Lifecycle.State.STARTED);
+        final ComponentName dreamComponent = getDreamComponent();
+        mStateController.setLowLightActive(
+                dreamComponent != null && dreamComponent.equals(mLowLightDreamComponent));
         mExecutor.execute(() -> {
             if (mDestroyed) {
                 // The task could still be executed after the service has been destroyed. Bail if

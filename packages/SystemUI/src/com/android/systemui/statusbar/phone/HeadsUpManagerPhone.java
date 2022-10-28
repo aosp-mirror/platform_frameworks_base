@@ -21,14 +21,17 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Region;
+import android.os.Handler;
 import android.util.Pools;
 
 import androidx.collection.ArraySet;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.policy.SystemBarUtils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.statusbar.StatusBarState;
@@ -37,6 +40,7 @@ import com.android.systemui.statusbar.notification.collection.provider.OnReorder
 import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.HeadsUpManagerLogger;
@@ -104,8 +108,11 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
             KeyguardBypassController bypassController,
             GroupMembershipManager groupMembershipManager,
             VisualStabilityProvider visualStabilityProvider,
-            ConfigurationController configurationController) {
-        super(context, logger);
+            ConfigurationController configurationController,
+            @Main Handler handler,
+            AccessibilityManagerWrapper accessibilityManagerWrapper,
+            UiEventLogger uiEventLogger) {
+        super(context, logger, handler, accessibilityManagerWrapper, uiEventLogger);
         Resources resources = mContext.getResources();
         mExtensionTime = resources.getInteger(R.integer.ambient_notification_extension_time);
         statusBarStateController.addCallback(mStatusBarStateListener);
@@ -217,8 +224,9 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
      * Notify that the status bar panel gets expanded or collapsed.
      *
      * @param isExpanded True to notify expanded, false to notify collapsed.
+     * TODO(b/237811427) replace with a listener
      */
-    void setIsPanelExpanded(boolean isExpanded) {
+    public void setIsPanelExpanded(boolean isExpanded) {
         if (isExpanded != mIsExpanded) {
             mIsExpanded = isExpanded;
             if (isExpanded) {
@@ -323,14 +331,6 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
     public void dump(PrintWriter pw, String[] args) {
         pw.println("HeadsUpManagerPhone state:");
         dumpInternal(pw, args);
-    }
-
-    @Override
-    public boolean shouldExtendLifetime(NotificationEntry entry) {
-        // We should not defer the removal if reordering isn't allowed since otherwise
-        // these won't disappear until reordering is allowed again, which happens only once
-        // the notification panel is collapsed again.
-        return mVisualStabilityProvider.isReorderingAllowed() && super.shouldExtendLifetime(entry);
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////

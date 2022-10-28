@@ -19,6 +19,8 @@ package com.android.systemui.statusbar.notification.row
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogLevel.INFO
 import com.android.systemui.log.dagger.NotificationLog
+import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.statusbar.notification.logKey
 import javax.inject.Inject
 
 class NotifBindPipelineLogger @Inject constructor(
@@ -32,41 +34,41 @@ class NotifBindPipelineLogger @Inject constructor(
         })
     }
 
-    fun logManagedRow(notifKey: String) {
+    fun logManagedRow(entry: NotificationEntry) {
         buffer.log(TAG, INFO, {
-            str1 = notifKey
+            str1 = entry.logKey
         }, {
             "Row set for notif: $str1"
         })
     }
 
-    fun logRequestPipelineRun(notifKey: String) {
+    fun logRequestPipelineRun(entry: NotificationEntry) {
         buffer.log(TAG, INFO, {
-            str1 = notifKey
+            str1 = entry.logKey
         }, {
             "Request pipeline run for notif: $str1"
         })
     }
 
-    fun logRequestPipelineRowNotSet(notifKey: String) {
+    fun logRequestPipelineRowNotSet(entry: NotificationEntry) {
         buffer.log(TAG, INFO, {
-            str1 = notifKey
+            str1 = entry.logKey
         }, {
             "Row is not set so pipeline will not run. notif = $str1"
         })
     }
 
-    fun logStartPipeline(notifKey: String) {
+    fun logStartPipeline(entry: NotificationEntry) {
         buffer.log(TAG, INFO, {
-            str1 = notifKey
+            str1 = entry.logKey
         }, {
             "Start pipeline for notif: $str1"
         })
     }
 
-    fun logFinishedPipeline(notifKey: String, numCallbacks: Int) {
+    fun logFinishedPipeline(entry: NotificationEntry, numCallbacks: Int) {
         buffer.log(TAG, INFO, {
-            str1 = notifKey
+            str1 = entry.logKey
             int1 = numCallbacks
         }, {
             "Finished pipeline for notif $str1 with $int1 callbacks"

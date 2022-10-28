@@ -16,53 +16,79 @@
 
 package com.android.server.pm;
 
+import static android.os.UserManager.DISALLOW_USER_SWITCH;
+
+import static com.google.common.truth.Truth.assertThat;
+
+import android.app.ActivityManager;
+import android.app.PropertyInvalidatedCache;
+import android.content.Context;
 import android.content.pm.UserInfo;
 import android.os.Bundle;
 import android.os.FileUtils;
+import android.os.Looper;
 import android.os.Parcelable;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.platform.test.annotations.Postsubmit;
 import android.support.test.uiautomator.UiDevice;
-import android.test.AndroidTestCase;
-import android.text.TextUtils;
 import android.util.AtomicFile;
 
 import androidx.test.InstrumentationRegistry;
-import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
+
+import com.android.server.LocalServices;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 
+/** Test {@link UserManagerService} functionality. */
 @Postsubmit
-@SmallTest
-public class UserManagerServiceTest extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+public class UserManagerServiceTest {
     private static String[] STRING_ARRAY = new String[] {"<tag", "<![CDATA["};
     private File restrictionsFile;
     private int tempUserId = UserHandle.USER_NULL;
+    private final Context mContext = InstrumentationRegistry.getInstrumentation().getContext();
+    private UserManagerService mUserManagerService;
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setup() throws Exception {
+        // Currently UserManagerService cannot be instantiated twice inside a VM without a cleanup
+        // TODO: Remove once UMS supports proper dependency injection
+        if (Looper.myLooper() == null) {
+            Looper.prepare();
+        }
+        // Disable binder caches in this process.
+        PropertyInvalidatedCache.disableForTestMode();
+
+        LocalServices.removeServiceForTest(UserManagerInternal.class);
+        mUserManagerService = new UserManagerService(InstrumentationRegistry.getContext());
+
         restrictionsFile = new File(mContext.getCacheDir(), "restrictions.xml");
         restrictionsFile.delete();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void teardown() throws Exception {
         restrictionsFile.delete();
         if (tempUserId != UserHandle.USER_NULL) {
             UserManager.get(mContext).removeUser(tempUserId);
         }
-        super.tearDown();
     }
 
+    @Test
     public void testWriteReadApplicationRestrictions() throws IOException {
         AtomicFile atomicFile = new AtomicFile(restrictionsFile);
         Bundle bundle = createBundle();
         UserManagerService.writeApplicationRestrictionsLAr(bundle, atomicFile);
-        assertTrue(atomicFile.getBaseFile().exists());
+        assertThat(atomicFile.getBaseFile().exists()).isTrue();
         String s = FileUtils.readTextFile(restrictionsFile, 10000, "");
         System.out.println("restrictionsFile: " + s);
         bundle = UserManagerService.readApplicationRestrictionsLAr(atomicFile);
@@ -70,22 +96,22 @@ public class UserManagerServiceTest extends AndroidTestCase {
         assertBundle(bundle);
     }
 
+    @Test
     public void testAddUserWithAccount() {
         UserManager um = UserManager.get(mContext);
         UserInfo user = um.createUser("Test User", 0);
-        assertNotNull(user);
+        assertThat(user).isNotNull();
         tempUserId = user.id;
         String accountName = "Test Account";
         um.setUserAccount(tempUserId, accountName);
-        assertEquals(accountName, um.getUserAccount(tempUserId));
+        assertThat(um.getUserAccount(tempUserId)).isEqualTo(accountName);
     }
 
+    @Test
     public void testUserSystemPackageWhitelist() throws Exception {
         String cmd = "cmd user report-system-user-package-whitelist-problems --critical-only";
         final String result = runShellCommand(cmd);
-        if (!TextUtils.isEmpty(result)) {
-            fail("Command '" + cmd + " reported errors:\n" + result);
-        }
+        assertThat(result).isEmpty();
     }
 
     private Bundle createBundle() {
@@ -114,26 +140,141 @@ public class UserManagerServiceTest extends AndroidTestCase {
     }
 
     private void assertBundle(Bundle bundle) {
-        assertFalse(bundle.getBoolean("boolean_0"));
-        assertTrue(bundle.getBoolean("boolean_1"));
-        assertEquals(100, bundle.getInt("integer"));
-        assertEquals("", bundle.getString("empty"));
-        assertEquals("text", bundle.getString("string"));
-        assertEquals(Arrays.asList(STRING_ARRAY), Arrays.asList(bundle.getStringArray("string[]")));
+        assertThat(bundle.getBoolean("boolean_0")).isFalse();
+        assertThat(bundle.getBoolean("boolean_1")).isTrue();
+        assertThat(bundle.getInt("integer")).isEqualTo(100);
+        assertThat(bundle.getString("empty")).isEqualTo("");
+        assertThat(bundle.getString("string")).isEqualTo("text");
+        assertThat(Arrays.asList(bundle.getStringArray("string[]")))
+                .isEqualTo(Arrays.asList(STRING_ARRAY));
         Parcelable[] bundle_array = bundle.getParcelableArray("bundle_array");
-        assertEquals(2, bundle_array.length);
+        assertThat(bundle_array.length).isEqualTo(2);
         Bundle bundle1 = (Bundle) bundle_array[0];
-        assertEquals("bundle_array_string", bundle1.getString("bundle_array_string"));
-        assertNotNull(bundle1.getBundle("bundle_array_bundle"));
+        assertThat(bundle1.getString("bundle_array_string"))
+                .isEqualTo("bundle_array_string");
+        assertThat(bundle1.getBundle("bundle_array_bundle")).isNotNull();
         Bundle bundle2 = (Bundle) bundle_array[1];
-        assertEquals("bundle_array_string2", bundle2.getString("bundle_array_string2"));
+        assertThat(bundle2.getString("bundle_array_string2"))
+                .isEqualTo("bundle_array_string2");
         Bundle childBundle = bundle.getBundle("bundle");
-        assertEquals("bundle_string", childBundle.getString("bundle_string"));
-        assertEquals(1, childBundle.getInt("bundle_int"));
+        assertThat(childBundle.getString("bundle_string"))
+                .isEqualTo("bundle_string");
+        assertThat(childBundle.getInt("bundle_int")).isEqualTo(1);
     }
+
+    @Test
+    public void assertHasUserRestriction() throws Exception {
+        int userId = ActivityManager.getCurrentUser();
+
+        mUserManagerService.setUserRestriction(DISALLOW_USER_SWITCH, true, userId);
+        assertThat(mUserManagerService.hasUserRestriction(DISALLOW_USER_SWITCH, userId)).isTrue();
+
+        mUserManagerService.setUserRestriction(DISALLOW_USER_SWITCH, false, userId);
+        assertThat(mUserManagerService.hasUserRestriction(DISALLOW_USER_SWITCH, userId)).isFalse();
+    }
+
+    @Test
+    public void assertIsUserSwitcherEnabledOnMultiUserSettings() throws Exception {
+        int userId = ActivityManager.getCurrentUser();
+        resetUserSwitcherEnabled();
+
+        setUserSwitch(false);
+        assertThat(mUserManagerService.isUserSwitcherEnabled(userId)).isFalse();
+
+        setUserSwitch(true);
+        assertThat(mUserManagerService.isUserSwitcherEnabled(userId)).isTrue();
+    }
+
+    @Test
+    public void assertIsUserSwitcherEnabledOnMaxSupportedUsers()  throws Exception {
+        int userId = ActivityManager.getCurrentUser();
+        setMaxSupportedUsers(1);
+
+        assertThat(UserManager.supportsMultipleUsers()).isFalse();
+        assertThat(mUserManagerService.isUserSwitcherEnabled(userId)).isFalse();
+
+        setMaxSupportedUsers(8);
+
+        assertThat(UserManager.supportsMultipleUsers()).isTrue();
+        assertThat(mUserManagerService.isUserSwitcherEnabled(userId)).isTrue();
+    }
+
+
+    @Test
+    public void assertIsUserSwitcherEnabledOnShowMultiuserUI()  throws Exception {
+        int userId = ActivityManager.getCurrentUser();
+        setShowMultiuserUI(false);
+
+        assertThat(UserManager.supportsMultipleUsers()).isFalse();
+        assertThat(mUserManagerService.isUserSwitcherEnabled(userId)).isFalse();
+
+        setShowMultiuserUI(true);
+
+        assertThat(UserManager.supportsMultipleUsers()).isTrue();
+        assertThat(mUserManagerService.isUserSwitcherEnabled(userId)).isTrue();
+    }
+
+    @Test
+    public void assertIsUserSwitcherEnabledOnUserRestrictions() throws Exception {
+        int userId = ActivityManager.getCurrentUser();
+        resetUserSwitcherEnabled();
+
+        mUserManagerService.setUserRestriction(DISALLOW_USER_SWITCH, true, userId);
+        assertThat(mUserManagerService.isUserSwitcherEnabled(userId)).isFalse();
+
+        mUserManagerService.setUserRestriction(DISALLOW_USER_SWITCH, false, userId);
+        assertThat(mUserManagerService.isUserSwitcherEnabled(userId)).isTrue();
+    }
+
+    @Test
+    public void assertIsUserSwitcherEnabledOnDemoMode()  throws Exception {
+        int userId = ActivityManager.getCurrentUser();
+        resetUserSwitcherEnabled();
+
+        setDeviceDemoMode(true);
+        assertThat(mUserManagerService.isUserSwitcherEnabled(userId)).isFalse();
+
+        setDeviceDemoMode(false);
+        assertThat(mUserManagerService.isUserSwitcherEnabled(userId)).isTrue();
+    }
+
+    private void resetUserSwitcherEnabled() throws Exception {
+        int userId = ActivityManager.getCurrentUser();
+        setUserSwitch(true);
+        setShowMultiuserUI(true);
+        setDeviceDemoMode(false);
+        setMaxSupportedUsers(8);
+        mUserManagerService.setUserRestriction(DISALLOW_USER_SWITCH, false, userId);
+    }
+
+    private void setUserSwitch(boolean enabled) {
+        android.provider.Settings.Global.putInt(mContext.getContentResolver(),
+                android.provider.Settings.Global.USER_SWITCHER_ENABLED, enabled ? 1 : 0);
+    }
+
+    private void setDeviceDemoMode(boolean enabled) {
+        android.provider.Settings.Global.putInt(mContext.getContentResolver(),
+                android.provider.Settings.Global.DEVICE_DEMO_MODE, enabled ? 1 : 0);
+    }
+
 
     private static String runShellCommand(String cmd) throws Exception {
         return UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
                 .executeShellCommand(cmd);
+    }
+
+    private static String setSystemProperty(String name, String value) throws Exception {
+        final String oldValue = runShellCommand("getprop " + name);
+        assertThat(runShellCommand("setprop " + name + " " + value))
+                .isEqualTo("");
+        return oldValue;
+    }
+
+    private static void setMaxSupportedUsers(int max) throws Exception {
+        setSystemProperty("fw.max_users", String.valueOf(max));
+    }
+
+    public static void setShowMultiuserUI(boolean show) throws Exception {
+        setSystemProperty("fw.show_multiuserui", String.valueOf(show));
     }
 }

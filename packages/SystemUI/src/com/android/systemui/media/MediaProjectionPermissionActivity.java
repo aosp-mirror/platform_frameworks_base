@@ -40,7 +40,10 @@ import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.Window;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.util.Utils;
 
@@ -53,6 +56,7 @@ public class MediaProjectionPermissionActivity extends Activity
     private String mPackageName;
     private int mUid;
     private IMediaProjectionManager mService;
+    private FeatureFlags mFeatureFlags;
 
     private AlertDialog mDialog;
 
@@ -60,6 +64,7 @@ public class MediaProjectionPermissionActivity extends Activity
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
 
+        mFeatureFlags = Dependency.get(FeatureFlags.class);
         mPackageName = getCallingPackage();
         IBinder b = ServiceManager.getService(MEDIA_PROJECTION_SERVICE);
         mService = IMediaProjectionManager.Stub.asInterface(b);
@@ -141,14 +146,22 @@ public class MediaProjectionPermissionActivity extends Activity
             dialogTitle = getString(R.string.media_projection_dialog_title, appName);
         }
 
-        mDialog = new AlertDialog.Builder(this, R.style.Theme_SystemUI_Dialog)
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this,
+                R.style.Theme_SystemUI_Dialog)
                 .setTitle(dialogTitle)
                 .setIcon(R.drawable.ic_media_projection_permission)
                 .setMessage(dialogText)
                 .setPositiveButton(R.string.media_projection_action_text, this)
                 .setNeutralButton(android.R.string.cancel, this)
-                .setOnCancelListener(this)
-                .create();
+                .setOnCancelListener(this);
+
+        if (isPartialScreenSharingEnabled()) {
+            // This is a temporary entry point before we have a new permission dialog
+            // TODO(b/233183090): this activity should be redesigned to have a dropdown selector
+            dialogBuilder.setNegativeButton("App", this);
+        }
+
+        mDialog = dialogBuilder.create();
 
         SystemUIDialog.registerDismissListener(mDialog);
         SystemUIDialog.applyFlags(mDialog);
@@ -177,6 +190,15 @@ public class MediaProjectionPermissionActivity extends Activity
             if (which == AlertDialog.BUTTON_POSITIVE) {
                 setResult(RESULT_OK, getMediaProjectionIntent(mUid, mPackageName));
             }
+
+            if (isPartialScreenSharingEnabled() && which == AlertDialog.BUTTON_NEGATIVE) {
+                IMediaProjection projection = createProjection(mUid, mPackageName);
+                final Intent intent = new Intent(this, MediaProjectionAppSelectorActivity.class);
+                intent.putExtra(MediaProjectionManager.EXTRA_MEDIA_PROJECTION,
+                        projection.asBinder());
+                intent.setFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT);
+                startActivity(intent);
+            }
         } catch (RemoteException e) {
             Log.e(TAG, "Error granting projection permission", e);
             setResult(RESULT_CANCELED);
@@ -188,10 +210,14 @@ public class MediaProjectionPermissionActivity extends Activity
         }
     }
 
+    private IMediaProjection createProjection(int uid, String packageName) throws RemoteException {
+        return mService.createProjection(uid, packageName,
+                MediaProjectionManager.TYPE_SCREEN_CAPTURE, false /* permanentGrant */);
+    }
+
     private Intent getMediaProjectionIntent(int uid, String packageName)
             throws RemoteException {
-        IMediaProjection projection = mService.createProjection(uid, packageName,
-                MediaProjectionManager.TYPE_SCREEN_CAPTURE, false /* permanentGrant */);
+        IMediaProjection projection = createProjection(uid, packageName);
         Intent intent = new Intent();
         intent.putExtra(MediaProjectionManager.EXTRA_MEDIA_PROJECTION, projection.asBinder());
         return intent;
@@ -200,5 +226,9 @@ public class MediaProjectionPermissionActivity extends Activity
     @Override
     public void onCancel(DialogInterface dialog) {
         finish();
+    }
+
+    private boolean isPartialScreenSharingEnabled() {
+        return mFeatureFlags.isEnabled(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING);
     }
 }

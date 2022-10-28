@@ -22,6 +22,7 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_SYNC_ENGINE;
 import static com.android.server.wm.WindowState.BLAST_TIMEOUT_DURATION;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Trace;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -63,6 +64,15 @@ import java.util.ArrayList;
 class BLASTSyncEngine {
     private static final String TAG = "BLASTSyncEngine";
 
+    /** No specific method. Used by override specifiers. */
+    public static final int METHOD_UNDEFINED = -1;
+
+    /** No sync method. Apps will draw/present internally and just report. */
+    public static final int METHOD_NONE = 0;
+
+    /** Sync with BLAST. Apps will draw and then send the buffer to be applied in sync. */
+    public static final int METHOD_BLAST = 1;
+
     interface TransactionReadyListener {
         void onTransactionReady(int mSyncId, SurfaceControl.Transaction transaction);
     }
@@ -85,6 +95,7 @@ class BLASTSyncEngine {
      */
     class SyncGroup {
         final int mSyncId;
+        final int mSyncMethod;
         final TransactionReadyListener mListener;
         final Runnable mOnTimeout;
         boolean mReady = false;
@@ -92,8 +103,9 @@ class BLASTSyncEngine {
         private SurfaceControl.Transaction mOrphanTransaction = null;
         private String mTraceName;
 
-        private SyncGroup(TransactionReadyListener listener, int id, String name) {
+        private SyncGroup(TransactionReadyListener listener, int id, String name, int method) {
             mSyncId = id;
+            mSyncMethod = method;
             mListener = listener;
             mOnTimeout = () -> {
                 Slog.w(TAG, "Sync group " + mSyncId + " timeout");
@@ -236,11 +248,17 @@ class BLASTSyncEngine {
 
         private void onTimeout() {
             if (!mActiveSyncs.contains(mSyncId)) return;
+            boolean allFinished = true;
             for (int i = mRootMembers.size() - 1; i >= 0; --i) {
                 final WindowContainer<?> wc = mRootMembers.valueAt(i);
                 if (!wc.isSyncFinished()) {
+                    allFinished = false;
                     Slog.i(TAG, "Unfinished container: " + wc);
                 }
+            }
+            if (allFinished && !mReady) {
+                Slog.w(TAG, "Sync group " + mSyncId + " timed-out because not ready. If you see "
+                        + "this, please file a bug.");
             }
             finishNow();
         }
@@ -265,16 +283,13 @@ class BLASTSyncEngine {
      * Prepares a {@link SyncGroup} that is not active yet. Caller must call {@link #startSyncSet}
      * before calling {@link #addToSyncSet(int, WindowContainer)} on any {@link WindowContainer}.
      */
-    SyncGroup prepareSyncSet(TransactionReadyListener listener, String name) {
-        return new SyncGroup(listener, mNextSyncId++, name);
+    SyncGroup prepareSyncSet(TransactionReadyListener listener, String name, int method) {
+        return new SyncGroup(listener, mNextSyncId++, name, method);
     }
 
-    int startSyncSet(TransactionReadyListener listener) {
-        return startSyncSet(listener, BLAST_TIMEOUT_DURATION, "");
-    }
-
-    int startSyncSet(TransactionReadyListener listener, long timeoutMs, String name) {
-        final SyncGroup s = prepareSyncSet(listener, name);
+    int startSyncSet(TransactionReadyListener listener, long timeoutMs, String name,
+            int method) {
+        final SyncGroup s = prepareSyncSet(listener, name, method);
         startSyncSet(s, timeoutMs);
         return s.mSyncId;
     }
@@ -294,6 +309,11 @@ class BLASTSyncEngine {
         ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "SyncGroup %d: Started for listener: %s",
                 s.mSyncId, s.mListener);
         scheduleTimeout(s, timeoutMs);
+    }
+
+    @Nullable
+    SyncGroup getSyncSet(int id) {
+        return mActiveSyncs.get(id);
     }
 
     boolean hasActiveSync() {

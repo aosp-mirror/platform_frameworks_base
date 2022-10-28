@@ -885,7 +885,7 @@ final class WifiDisplayController implements DumpUtils.Dump {
                     }
                 });
             }
-        } else {
+        } else if (!networkInfo.isConnectedOrConnecting()) {
             mConnectedDeviceGroupInfo = null;
 
             // Disconnect if we lost the network while connecting or connected to a display.

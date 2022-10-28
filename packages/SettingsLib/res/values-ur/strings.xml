@@ -117,17 +117,17 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"فائل کی منتقلی"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"ان پٹ آلہ"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"انٹرنیٹ تک رسائی"</string>
-    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"رابطہ کا اشتراک"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"رابطہ کے اشتراک کیلئے استعمال کریں"</string>
+    <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"رابطے اور کال کی سرگزشت کا اشتراک"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"رابطے اور کال کی سرگزشت کے اشتراک کے لیے استعمال کریں"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"انٹرنیٹ کنکشن کا اشتراک کرنا"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"ٹیکسٹ پیغامات"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"‏SIM رسائی"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"‏HD آڈیو: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"‏HD آڈیو"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"سماعتی آلات"</string>
-    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
+    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"‏LE آڈیو"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"سماعتی آلات سے منسلک ہے"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"‏LE_AUDIO سے منسلک ہے"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"‏LE آڈیو سے منسلک ہے"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"میڈیا آڈیو سے مربوط"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"فون آڈیو سے مربوط"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"فائل منتقلی سرور سے مربوط ہو گیا ہے"</string>
@@ -232,9 +232,9 @@
     <string name="vpn_settings_not_available" msgid="2894137119965668920">"‏VPN ترتیبات اس صارف کیلئے دستیاب نہیں ہیں"</string>
     <string name="tethering_settings_not_available" msgid="266821736434699780">"ٹیدرنگ ترتیبات اس صارف کیلئے دستیاب نہیں ہیں"</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"رسائی کی جگہ کے نام کی ترتیبات اس صارف کیلئے دستیاب نہیں ہیں"</string>
-    <string name="enable_adb" msgid="8072776357237289039">"‏USB ڈیبگ کرنا"</string>
+    <string name="enable_adb" msgid="8072776357237289039">"‏USB ڈیبگنگ"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"‏USB مربوط ہونے پر ڈيبگ کرنے کی وضع"</string>
-    <string name="clear_adb_keys" msgid="3010148733140369917">"‏USB ڈیبگ کرنے کی اجازت دہندگیوں کو منسوخ کریں"</string>
+    <string name="clear_adb_keys" msgid="3010148733140369917">"‏USB ڈیبگنگ کی اجازت دہندگیوں کو منسوخ کریں"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"وائرلیس ڈیبگنگ"</string>
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"‏Wi-Fi سے منسلک ہونے پر ڈیبگ موڈ"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"خرابی"</string>
@@ -408,6 +408,7 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"مینی فیسٹ اقدار سے قطع نظر، ملٹی ونڈو کیلئے تمام سرگرمیوں کو ری سائز ایبل بنائیں۔"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"‏freeform ونڈوز فعال کریں"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"تجرباتی فری فارم ونڈوز کیلئے سپورٹ فعال کریں۔"</string>
+    <string name="desktop_mode" msgid="2389067840550544462">"ڈیسک ٹاپ موڈ"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"ڈیسک ٹاپ کا بیک اپ پاس ورڈ"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"ڈیسک ٹاپ کے مکمل بیک اپس فی الحال محفوظ کیے ہوئے نہیں ہیں"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"ڈیسک ٹاپ کے مکمل بیک اپس کیلئے پاس ورڈ کو تبدیل کرنے یا ہٹانے کیلئے تھپتھپائیں"</string>
@@ -476,12 +477,13 @@
     <string name="power_charging" msgid="6727132649743436802">"‎<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>‎"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"مکمل چارج ہونے میں <xliff:g id="TIME">%1$s</xliff:g> باقی ہے"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"مکمل چارج ہونے میں <xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> باقی ہے"</string>
-    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> • چارجنگ عارضی طور پر محدود ہے"</string>
+    <string name="power_charging_limited" msgid="6971664137170239141">"<xliff:g id="LEVEL">%1$s</xliff:g> - چارجنگ موقوف ہے"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"نامعلوم"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"چارج ہو رہا ہے"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"تیزی سے چارج ہو رہا ہے"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"آہستہ چارج ہو رہی ہے"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"وائرلیس طریقے سے چارج ہو رہی ہے"</string>
+    <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"چارج ہو رہی ہے"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"چارج نہیں ہو رہا ہے"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"منسلک ہے، چارج نہیں ہو رہی ہے"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"چارج ہو گئی"</string>
@@ -598,6 +600,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"ری سیٹ کریں"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"ہٹائیں"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"مہمان کو ری سیٹ کرنا…"</string>
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"مہمان سیشن کو ری سیٹ کریں؟"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"اس سے ایک نیا مہمان سیشن شروع ہو گا اور موجودہ سیشن سے تمام ایپس اور ڈیٹا حذف ہو جائے گا"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"مہمان وضع سے باہر نکلیں؟"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"یہ موجودہ مہمان سیشن سے ایپس اور ڈیٹا کو حذف کر دے گا"</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"باہر نکلیں"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"مہمان کی سرگرمی محفوظ کریں؟"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"آپ موجودہ سیشن سے سرگرمی کو محفوظ یا تمام ایپس اور ڈیٹا کو حذف کر سکتے ہیں"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"حذف کریں"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"محفوظ کریں"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"مہمان وضع سے باہر نکلیں"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"مہمان سیشن کو ری سیٹ کریں"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"مہمان وضع سے باہر نکلیں"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"باہر نکلنے پر تمام سرگرمیاں حذف کر دی جائیں گی"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"باہر نکلنے پر آپ اپنی سرگرمی کو محفوظ یا حذف کر سکتے ہیں"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"سیشن کی سرگرمی کو ابھی حذف کرنے کے لیے ری سیٹ کریں، یا باہر نکلنے پر آپ اپنی سرگرمی کو محفوظ یا حذف کر سکتے ہیں"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"ایک تصویر لیں"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"ایک تصویر منتخب کریں"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"تصویر منتخب کریں"</string>
@@ -639,11 +656,6 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"ایتھرنیٹ منقطع ہے۔"</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"ایتھرنیٹ۔"</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"کوئی کالنگ نہیں ہے۔"</string>
-    <string name="dream_complication_title_time" msgid="701747800712893499">"وقت"</string>
-    <string name="dream_complication_title_date" msgid="8661176085446135789">"تاریخ"</string>
-    <string name="dream_complication_title_weather" msgid="598609151677172783">"موسم"</string>
-    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"ہوا کا معیار"</string>
-    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"کاسٹ کرنے کی معلومات"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"پروفائل کی تصویر منتخب کریں"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"ڈیفالٹ صارف کا آئیکن"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"فزیکل کی بورڈ"</string>

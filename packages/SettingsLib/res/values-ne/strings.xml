@@ -117,17 +117,17 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"फाइल स्थानान्तरण"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"इनपुट उपकरण"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"इन्टरनेट पहुँच"</string>
-    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"कन्ट्याक्ट सेयरिङ"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"सम्पर्क साझेदारीका लागि प्रयोग"</string>
+    <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"कन्ट्याक्ट र कलको इतिहास सेयर गर्ने"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"कन्ट्याक्ट र कलको इतिहास सेयर गर्न प्रयोग गरियोस्"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"इन्टरनेट जडान साझेदारी गर्दै"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"टेक्स्ट म्यासेजहरू"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"SIM पहुँच"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD अडियो: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD अडियो"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"श्रवण यन्त्रहरू"</string>
-    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
+    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE अडियो"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"श्रवण यन्त्रहरूमा जडान गरियो"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"LE_AUDIO मा कनेक्ट गरिएको छ"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"LE अडियोमा कनेक्ट गरिएको छ"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"मिडिया अडियोसँग जडित"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"फोन अडियोमा जडान गरियो"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"फाइल ट्रान्सफर सर्भरमा जडान गरियो"</string>
@@ -408,6 +408,7 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"तोकिएको नियमको ख्याल नगरी एपलाई एकभन्दा बढी विन्डोमा रिसाइज गर्न सकिने बनाइयोस्।"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"फ्रिफर्म विन्डोहरू अन गरियोस्"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"प्रयोगात्मक फ्रिफर्म विन्डोहरू चल्ने बनाइयोस्"</string>
+    <string name="desktop_mode" msgid="2389067840550544462">"डेस्कटप मोड"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"डेस्कटप ब्याकअप पासवर्ड"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"हाल डेस्कटपका सबै ब्याकअप पासवर्ड सुरक्षित छैनन्"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"डेस्कटप पूर्ण ब्याकअपको लागि पासवर्ड बदल्न वा हटाउन ट्याप गर्नुहोस्"</string>
@@ -476,12 +477,13 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"पूरा चार्ज हुन <xliff:g id="TIME">%1$s</xliff:g> लाग्ने छ"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - पूरा चार्ज हुन <xliff:g id="TIME">%2$s</xliff:g> लाग्ने छ"</string>
-    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - चार्जिङ केही समयका लागि सीमित पारिएको छ"</string>
+    <string name="power_charging_limited" msgid="6971664137170239141">"<xliff:g id="LEVEL">%1$s</xliff:g> - चार्ज गर्ने प्रक्रिया रोकिएको छ"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"अज्ञात"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"चार्ज हुँदै छ"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"द्रुत गतिमा चार्ज गरिँदै छ"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"ढिलो चार्ज हुँदै छ"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"वायरलेस तरिकाले चार्ज गरिँदै छ"</string>
+    <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"चार्ज हुँदै छ"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"चार्ज भइरहेको छैन"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"कनेक्ट गरिएको छ, चार्ज भइरहेको छैन"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"चार्ज भयो"</string>
@@ -598,6 +600,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"रिसेट गर्नुहोस्"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"हटाउनुहोस्"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"अतिथिका रूपमा ब्राउज गर्ने सेसन रिसेट गरिँदै छ…"</string>
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"अतिथि सत्र रिसेट गर्ने हो?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"यसो गर्नाले नयाँ अतिथि सत्र सुरु हुने छ र हालको अतिथि सत्रका सबै एप तथा डेटा मेटिने छ"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"अतिथि मोडबाट बाहिरिने हो?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"यसो गर्नाले हालको अतिथि सत्रका एप तथा डेटा मेटिने छ"</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"बाहिरिनुहोस्"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"अतिथि सत्रमा गरिएका क्रियाकलाप सेभ गर्ने हो?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"तपाईं हालको सत्रमा गरिएका क्रियाकलाप सेभ गर्न वा सबै एप तथा डेटा मेटाउन सक्नुहुन्छ"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"मेटाउनुहोस्"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"सेभ गर्नुहोस्"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"अतिथि मोडबाट बाहिरिनुहोस्"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"अतिथि सत्र रिसेट गर्नुहोस्"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"अतिथि मोडबाट बाहिरिनुहोस्"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"अतिथि मोडबाट बाहिरिँदा सबै क्रियाकलाप मेटाइने छ"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"तपाईं अतिथि मोडबाट बाहिरिँदा आफ्ना क्रियाकलाप सेभ गर्ने वा मेटाउने विकल्प रोज्न सक्नुहुन्छ"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"यो सत्रमा गरिएका क्रियाकलाप अहिले नै मेटाउन रिसेट गर्नुहोस्, अथवा तपाईं अतिथि मोडबाट बाहिरिँदा आफ्ना क्रियाकलाप सेभ गर्ने वा मेटाउने विकल्प रोज्न सक्नुहुन्छ"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"फोटो खिच्नुहोस्"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"कुनै फोटो छनौट गर्नुहोस्"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"फोटो चयन गर्नुहोस्"</string>
@@ -639,11 +656,6 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"इथरनेट विच्छेद भयो।"</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"इथरनेट।"</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"कल गर्ने सुविधा उपलब्ध छैन।"</string>
-    <string name="dream_complication_title_time" msgid="701747800712893499">"समय"</string>
-    <string name="dream_complication_title_date" msgid="8661176085446135789">"मिति"</string>
-    <string name="dream_complication_title_weather" msgid="598609151677172783">"मौसम"</string>
-    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"वायुको गुणस्तर"</string>
-    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"कास्टसम्बन्धी जानकारी"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"प्रोफाइल फोटो छान्नुहोस्"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"प्रयोगकर्ताको डिफल्ट आइकन"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"भौतिक किबोर्ड"</string>

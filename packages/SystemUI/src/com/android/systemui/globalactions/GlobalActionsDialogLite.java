@@ -54,6 +54,7 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -89,6 +90,8 @@ import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.ListPopupWindow;
 import android.widget.TextView;
+import android.window.OnBackInvokedCallback;
+import android.window.OnBackInvokedDispatcher;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.Lifecycle;
@@ -99,6 +102,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.internal.colorextraction.ColorExtractor.GradientColors;
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
@@ -110,6 +114,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.MultiListLayout;
 import com.android.systemui.MultiListLayout.MultiListAdapter;
+import com.android.systemui.animation.DialogCuj;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -152,7 +157,11 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
     public static final String SYSTEM_DIALOG_REASON_GLOBAL_ACTIONS = "globalactions";
     public static final String SYSTEM_DIALOG_REASON_DREAM = "dream";
 
+    private static final boolean DEBUG = false;
+
     private static final String TAG = "GlobalActionsDialogLite";
+
+    private static final String INTERACTION_JANK_TAG = "global_actions";
 
     private static final boolean SHOW_SILENT_TOGGLE = true;
 
@@ -499,7 +508,9 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         mDialog.getWindow().addFlags(FLAG_ALT_FOCUSABLE_IM);
 
         if (view != null) {
-            mDialogLaunchAnimator.showFromView(mDialog, view);
+            mDialogLaunchAnimator.showFromView(mDialog, view,
+                    new DialogCuj(InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
+                            INTERACTION_JANK_TAG));
         } else {
             mDialog.show();
         }
@@ -940,7 +951,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             mHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    mScreenshotHelper.takeScreenshot(TAKE_SCREENSHOT_FULLSCREEN, true, true,
+                    mScreenshotHelper.takeScreenshot(TAKE_SCREENSHOT_FULLSCREEN,
                             SCREENSHOT_GLOBAL_ACTIONS, mHandler, null);
                     mMetricsLogger.action(MetricsEvent.ACTION_SCREENSHOT_POWER_MENU);
                     mUiEventLogger.log(GlobalActionsEvent.GA_SCREENSHOT_PRESS);
@@ -1038,7 +1049,8 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
 
         @Override
         public boolean showBeforeProvisioning() {
-            return false;
+            return Build.isDebuggable() && mGlobalSettings.getInt(
+                    Settings.Global.BUGREPORT_IN_POWER_MENU, 0) != 0;
         }
     }
 
@@ -2169,6 +2181,11 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
 
         protected ViewGroup mContainer;
 
+        private final OnBackInvokedCallback mOnBackInvokedCallback = () -> {
+            logOnBackInvocation();
+            dismiss();
+        };
+
         @VisibleForTesting
         protected GestureDetector.SimpleOnGestureListener mGestureListener =
                 new GestureDetector.SimpleOnGestureListener() {
@@ -2213,6 +2230,16 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
                     }
                 };
 
+
+        // this exists so that we can point it to a mock during Unit Testing
+        private OnBackInvokedDispatcher mOverriddenBackDispatcher;
+
+        // the following method exists so that a Unit Test can supply a `OnBackInvokedDispatcher`
+        @VisibleForTesting
+        void setBackDispatcherOverride(OnBackInvokedDispatcher mockDispatcher) {
+            mOverriddenBackDispatcher = mockDispatcher;
+        }
+
         ActionsDialogLite(Context context, int themeRes, MyAdapter adapter,
                 MyOverflowAdapter overflowAdapter,
                 SysuiColorExtractor sysuiColorExtractor, IStatusBarService statusBarService,
@@ -2246,6 +2273,22 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             super.onCreate(savedInstanceState);
             initializeLayout();
             mWindowDimAmount = getWindow().getAttributes().dimAmount;
+            getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
+                    OnBackInvokedDispatcher.PRIORITY_DEFAULT, mOnBackInvokedCallback);
+            if (DEBUG) Log.d(TAG, "OnBackInvokedCallback handler registered");
+        }
+
+        @VisibleForTesting
+        @Override
+        public OnBackInvokedDispatcher getOnBackInvokedDispatcher() {
+            if (mOverriddenBackDispatcher != null) return mOverriddenBackDispatcher;
+            else return super.getOnBackInvokedDispatcher();
+        }
+
+        @Override
+        public void onDetachedFromWindow() {
+            getOnBackInvokedDispatcher().unregisterOnBackInvokedCallback(mOnBackInvokedCallback);
+            if (DEBUG) Log.d(TAG, "OnBackInvokedCallback handler unregistered");
         }
 
         @Override
@@ -2445,7 +2488,12 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         @Override
         public void onBackPressed() {
             super.onBackPressed();
+            logOnBackInvocation();
+        }
+
+        private void logOnBackInvocation() {
             mUiEventLogger.log(GlobalActionsEvent.GA_CLOSE_BACK);
+            if (DEBUG) Log.d(TAG, "onBack invoked");
         }
 
         @Override

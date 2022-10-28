@@ -207,6 +207,23 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
         return false;
     }
 
+    @Override
+    public void setAlwaysOnTop(boolean alwaysOnTop) {
+        if (isAlwaysOnTop() == alwaysOnTop) {
+            return;
+        }
+        super.setAlwaysOnTop(alwaysOnTop);
+        // positionChildAtTop() must be called even when always on top gets turned off because
+        // we need to make sure that the display area is moved from among always on top containers
+        // to below other always on top containers. Since the position the display area should be
+        // inserted into is calculated properly in {@link DisplayContent#getTopInsertPosition()}
+        // in both cases, we can just request that the root task is put at top here.
+        if (getParent().asDisplayArea() != null) {
+            getParent().asDisplayArea().positionChildAt(POSITION_TOP, this,
+                    false /* includingParents */);
+        }
+    }
+
     boolean getIgnoreOrientationRequest() {
         // Adding an exception for when ignoreOrientationRequest is overridden at runtime for all
         // DisplayArea-s. For example, this is needed for the Kids Mode since many Kids apps aren't
@@ -234,6 +251,18 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
         // The min possible position we can insert the child at.
         int minPosition = findMinPositionForChildDisplayArea(child);
 
+        // Place all non-always-on-top containers below always-on-top ones.
+        int alwaysOnTopCount = 0;
+        for (int i = minPosition; i <= maxPosition; i++) {
+            if (mChildren.get(i).isAlwaysOnTop()) {
+                alwaysOnTopCount++;
+            }
+        }
+        if (child.isAlwaysOnTop()) {
+            minPosition = maxPosition - alwaysOnTopCount + 1;
+        } else {
+            maxPosition -= alwaysOnTopCount;
+        }
         return Math.max(Math.min(requestPosition, maxPosition), minPosition);
     }
 
@@ -475,6 +504,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
 
     @Override
     public void onConfigurationChanged(Configuration newParentConfig) {
+        mTransitionController.collectForDisplayAreaChange(this);
         mTmpConfiguration.setTo(getConfiguration());
         super.onConfigurationChanged(newParentConfig);
 

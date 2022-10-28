@@ -69,7 +69,7 @@ public class ComplicationTypesUpdater extends CoreStartable {
         };
 
         mSecureSettings.registerContentObserverForUser(
-                Settings.Secure.SCREENSAVER_ENABLED_COMPLICATIONS,
+                Settings.Secure.SCREENSAVER_COMPLICATIONS_ENABLED,
                 settingsObserver,
                 UserHandle.myUserId());
         settingsObserver.onChange(false);

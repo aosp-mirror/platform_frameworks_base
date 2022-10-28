@@ -140,21 +140,25 @@ public class DisplayPolicyInsetsTests extends DisplayPolicyTestsBase {
         verifyConsistency(di);
     }
 
-    private void verifyStableInsets(DisplayInfo di, int left, int top, int right, int bottom) {
-        mErrorCollector.checkThat("stableInsets", getStableInsetsLw(di), equalTo(new Rect(
-                left, top, right, bottom)));
+    private void verifyStableInsets(DisplayInfo di, int left, int top,
+            int right, int bottom) {
+        mErrorCollector.checkThat("stableInsets", getStableInsets(di),
+                equalTo(new Rect(left, top, right, bottom)));
     }
 
-    private void verifyNonDecorInsets(DisplayInfo di, int left, int top, int right, int bottom) {
-        mErrorCollector.checkThat("nonDecorInsets", getNonDecorInsetsLw(di), equalTo(new Rect(
-                left, top, right, bottom)));
+    private void verifyNonDecorInsets(DisplayInfo di, int left, int top,
+            int right, int bottom) {
+        mErrorCollector.checkThat("nonDecorInsets",
+                getNonDecorInsets(di), equalTo(new Rect(left, top, right, bottom)));
     }
 
-    private void verifyConsistency(DisplayInfo di) {
-        verifyConsistency("configDisplay", di, getStableInsetsLw(di),
-                getConfigDisplayWidth(di), getConfigDisplayHeight(di));
-        verifyConsistency("nonDecorDisplay", di, getNonDecorInsetsLw(di),
-                getNonDecorDisplayWidth(di), getNonDecorDisplayHeight(di));
+    private void verifyConsistency(DisplayInfo  di) {
+        final DisplayPolicy.DecorInsets.Info info = mDisplayPolicy.getDecorInsetsInfo(
+                di.rotation, di.logicalWidth, di.logicalHeight);
+        verifyConsistency("configDisplay", di, info.mConfigInsets,
+                info.mConfigFrame.width(), info.mConfigFrame.height());
+        verifyConsistency("nonDecorDisplay", di, info.mNonDecorInsets,
+                info.mNonDecorFrame.width(), info.mNonDecorFrame.height());
     }
 
     private void verifyConsistency(String what, DisplayInfo di, Rect insets, int width,
@@ -165,39 +169,18 @@ public class DisplayPolicyInsetsTests extends DisplayPolicyTestsBase {
                 equalTo(di.logicalHeight - insets.top - insets.bottom));
     }
 
-    private Rect getStableInsetsLw(DisplayInfo di) {
-        Rect result = new Rect();
-        mDisplayPolicy.getStableInsetsLw(di.rotation, di.displayCutout, result);
-        return result;
+    private Rect getStableInsets(DisplayInfo di) {
+        return mDisplayPolicy.getDecorInsetsInfo(
+                di.rotation, di.logicalWidth, di.logicalHeight).mConfigInsets;
     }
 
-    private Rect getNonDecorInsetsLw(DisplayInfo di) {
-        Rect result = new Rect();
-        mDisplayPolicy.getNonDecorInsetsLw(di.rotation, di.displayCutout, result);
-        return result;
+    private Rect getNonDecorInsets(DisplayInfo di) {
+        return mDisplayPolicy.getDecorInsetsInfo(
+                di.rotation, di.logicalWidth, di.logicalHeight).mNonDecorInsets;
     }
 
-    private int getNonDecorDisplayWidth(DisplayInfo di) {
-        return mDisplayPolicy.getNonDecorDisplayWidth(di.logicalWidth, di.logicalHeight,
-                di.rotation, 0 /* ui */, di.displayCutout);
-    }
-
-    private int getNonDecorDisplayHeight(DisplayInfo di) {
-        return mDisplayPolicy.getNonDecorDisplayHeight(di.logicalHeight, di.rotation,
-                di.displayCutout);
-    }
-
-    private int getConfigDisplayWidth(DisplayInfo di) {
-        return mDisplayPolicy.getConfigDisplayWidth(di.logicalWidth, di.logicalHeight,
-                di.rotation, 0 /* ui */, di.displayCutout);
-    }
-
-    private int getConfigDisplayHeight(DisplayInfo di) {
-        return mDisplayPolicy.getConfigDisplayHeight(di.logicalWidth, di.logicalHeight,
-                di.rotation, 0 /* ui */, di.displayCutout);
-    }
-
-    private static DisplayInfo displayInfoForRotation(int rotation, boolean withDisplayCutout) {
-        return displayInfoAndCutoutForRotation(rotation, withDisplayCutout, false).first;
+    private DisplayInfo displayInfoForRotation(int rotation, boolean withDisplayCutout) {
+        return displayInfoAndCutoutForRotation(
+                rotation, withDisplayCutout, false /* isLongEdgeCutout */);
     }
 }

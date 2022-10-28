@@ -18,6 +18,7 @@ package android.app.ambientcontext;
 
 import android.app.PendingIntent;
 import android.app.ambientcontext.AmbientContextEventRequest;
+import android.app.ambientcontext.IAmbientContextObserver;
 import android.os.RemoteCallback;
 
 /**
@@ -29,6 +30,11 @@ interface IAmbientContextManager {
     void registerObserver(in AmbientContextEventRequest request,
         in PendingIntent resultPendingIntent,
         in RemoteCallback statusCallback);
+
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.ACCESS_AMBIENT_CONTEXT_EVENT)")
+    void registerObserverWithCallback(in AmbientContextEventRequest request,
+        String packageName,
+        in IAmbientContextObserver observer);
     void unregisterObserver(in String callingPackage);
     void queryServiceStatus(in int[] eventTypes, in String callingPackage,
         in RemoteCallback statusCallback);

@@ -8,7 +8,7 @@
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distriZenbuted on an "AS IS" BASIS,
+ * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
@@ -397,10 +397,10 @@ public class ZenModeFilteringTest extends UiServiceTestCase {
         Bundle inputWrong = makeExtrasBundleWithPeople(new String[]{"mailto:nope"});
         assertTrue(ZenModeFiltering.matchesCallFilter(mContext, ZEN_MODE_IMPORTANT_INTERRUPTIONS,
                 policy, UserHandle.SYSTEM,
-                inputMatches, null, 0, 0));
+                inputMatches, null, 0, 0, 0));
         assertFalse(ZenModeFiltering.matchesCallFilter(mContext, ZEN_MODE_IMPORTANT_INTERRUPTIONS,
                 policy, UserHandle.SYSTEM,
-                inputWrong, null, 0, 0));
+                inputWrong, null, 0, 0, 0));
     }
 
     @Test
@@ -428,19 +428,19 @@ public class ZenModeFilteringTest extends UiServiceTestCase {
         assertTrue("identical numbers should match",
                 ZenModeFiltering.matchesCallFilter(mContext, ZEN_MODE_IMPORTANT_INTERRUPTIONS,
                 policy, UserHandle.SYSTEM,
-                identical, null, 0, 0));
+                identical, null, 0, 0, 0));
         assertTrue("equivalent but non-identical numbers should match",
                 ZenModeFiltering.matchesCallFilter(mContext, ZEN_MODE_IMPORTANT_INTERRUPTIONS,
                 policy, UserHandle.SYSTEM,
-                same, null, 0, 0));
+                same, null, 0, 0, 0));
         assertFalse("non-equivalent numbers should not match",
                 ZenModeFiltering.matchesCallFilter(mContext, ZEN_MODE_IMPORTANT_INTERRUPTIONS,
                 policy, UserHandle.SYSTEM,
-                different, null, 0, 0));
+                different, null, 0, 0, 0));
         assertFalse("non-tel strings should not match",
                 ZenModeFiltering.matchesCallFilter(mContext, ZEN_MODE_IMPORTANT_INTERRUPTIONS,
                 policy, UserHandle.SYSTEM,
-                garbage, null, 0, 0));
+                garbage, null, 0, 0, 0));
     }
 
     @Test
@@ -469,23 +469,23 @@ public class ZenModeFilteringTest extends UiServiceTestCase {
         assertTrue("same number 1 should match",
                 ZenModeFiltering.matchesCallFilter(mContext, ZEN_MODE_IMPORTANT_INTERRUPTIONS,
                         policy, UserHandle.SYSTEM,
-                        same1, null, 0, 0));
+                        same1, null, 0, 0, 0));
         assertTrue("same number 2 should match",
                 ZenModeFiltering.matchesCallFilter(mContext, ZEN_MODE_IMPORTANT_INTERRUPTIONS,
                         policy, UserHandle.SYSTEM,
-                        same2, null, 0, 0));
+                        same2, null, 0, 0, 0));
         assertTrue("same number 3 should match",
                 ZenModeFiltering.matchesCallFilter(mContext, ZEN_MODE_IMPORTANT_INTERRUPTIONS,
                         policy, UserHandle.SYSTEM,
-                        same3, null, 0, 0));
+                        same3, null, 0, 0, 0));
         assertFalse("different number 1 should not match",
                 ZenModeFiltering.matchesCallFilter(mContext, ZEN_MODE_IMPORTANT_INTERRUPTIONS,
                         policy, UserHandle.SYSTEM,
-                        different1, null, 0, 0));
+                        different1, null, 0, 0, 0));
         assertFalse("different number 2 should not match",
                 ZenModeFiltering.matchesCallFilter(mContext, ZEN_MODE_IMPORTANT_INTERRUPTIONS,
                         policy, UserHandle.SYSTEM,
-                        different2, null, 0, 0));
+                        different2, null, 0, 0, 0));
     }
 
     @Test
@@ -516,14 +516,14 @@ public class ZenModeFilteringTest extends UiServiceTestCase {
         assertTrue("contact number 1 should match",
                 ZenModeFiltering.matchesCallFilter(mContext, ZEN_MODE_IMPORTANT_INTERRUPTIONS,
                         policy, UserHandle.SYSTEM,
-                        tel1, null, 0, 0));
+                        tel1, null, 0, 0, 0));
         assertTrue("contact number 2 should match",
                 ZenModeFiltering.matchesCallFilter(mContext, ZEN_MODE_IMPORTANT_INTERRUPTIONS,
                         policy, UserHandle.SYSTEM,
-                        tel2, null, 0, 0));
+                        tel2, null, 0, 0, 0));
         assertFalse("different number should not match",
                 ZenModeFiltering.matchesCallFilter(mContext, ZEN_MODE_IMPORTANT_INTERRUPTIONS,
                         policy, UserHandle.SYSTEM,
-                        different, null, 0, 0));
+                        different, null, 0, 0, 0));
     }
 }

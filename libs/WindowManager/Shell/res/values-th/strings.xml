@@ -72,13 +72,16 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"บับเบิล"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"จัดการ"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"ปิดบับเบิลแล้ว"</string>
-    <string name="restart_button_description" msgid="5887656107651190519">"แตะเพื่อรีสตาร์ทแอปนี้และแสดงแบบเต็มหน้าจอ"</string>
+    <string name="restart_button_description" msgid="6712141648865547958">"แตะเพื่อรีสตาร์ทแอปนี้และรับมุมมองที่ดียิ่งขึ้น"</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"หากพบปัญหากับกล้อง\nแตะเพื่อแก้ไข"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"หากไม่ได้แก้ไข\nแตะเพื่อเปลี่ยนกลับ"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"หากไม่พบปัญหากับกล้อง แตะเพื่อปิด"</string>
-    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"บางแอปทำงานได้ดีที่สุดในแนวตั้ง"</string>
-    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"ลองใช้หนึ่งในตัวเลือกเหล่านี้เพื่อให้ได้ประโยชน์สูงสุดจากพื้นที่ว่าง"</string>
-    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"หมุนอุปกรณ์ให้แสดงเต็มหน้าจอ"</string>
-    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"แตะสองครั้งข้างแอปเพื่อเปลี่ยนตำแหน่ง"</string>
+    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"รับชมและทำสิ่งต่างๆ ได้มากขึ้น"</string>
+    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"ลากไปไว้ในแอปอื่นเพื่อแยกหน้าจอ"</string>
+    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"แตะสองครั้งด้านนอกแอปเพื่อเปลี่ยนตำแหน่ง"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"รับทราบ"</string>
+    <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"ขยายเพื่อดูข้อมูลเพิ่มเติม"</string>
+    <string name="maximize_button_text" msgid="1650859196290301963">"ขยายใหญ่สุด"</string>
+    <string name="minimize_button_text" msgid="271592547935841753">"ย่อ"</string>
+    <string name="close_button_text" msgid="2913281996024033299">"ปิด"</string>
 </resources>

@@ -72,13 +72,16 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"ပူဖောင်းဖောက်သံ"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"စီမံရန်"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"ပူဖောင်းကွက် ဖယ်လိုက်သည်။"</string>
-    <string name="restart_button_description" msgid="5887656107651190519">"ဤအက်ပ်ကို ပြန်စပြီး ဖန်သားပြင်အပြည့်လုပ်ရန် တို့ပါ။"</string>
+    <string name="restart_button_description" msgid="6712141648865547958">"ပိုကောင်းသောမြင်ကွင်းအတွက် ဤအက်ပ်ပြန်စရန် တို့နိုင်သည်။"</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"ကင်မရာပြဿနာလား။\nပြင်ဆင်ရန် တို့ပါ"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"ကောင်းမသွားဘူးလား။\nပြန်ပြောင်းရန် တို့ပါ"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"ကင်မရာပြဿနာ မရှိဘူးလား။ ပယ်ရန် တို့ပါ။"</string>
-    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"အချို့အက်ပ်များသည် ဒေါင်လိုက်တွင် အကောင်းဆုံးလုပ်ဆောင်သည်"</string>
-    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"သင့်နေရာကို အကောင်းဆုံးအသုံးပြုနိုင်ရန် ဤရွေးစရာများထဲမှ တစ်ခုကို စမ်းကြည့်ပါ"</string>
-    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"ဖန်သားပြင်အပြည့်လုပ်ရန် သင့်စက်ကို လှည့်နိုင်သည်"</string>
-    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"အက်ပ်နေရာပြန်ချရန် ၎င်းဘေးတွင် နှစ်ချက်တို့နိုင်သည်"</string>
+    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"ကြည့်ပြီး ပိုမိုလုပ်ဆောင်ပါ"</string>
+    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"မျက်နှာပြင် ခွဲ၍ပြသနိုင်ရန် နောက်အက်ပ်တစ်ခုကို ဖိဆွဲပါ"</string>
+    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"နေရာပြန်ချရန် အက်ပ်အပြင်ဘက်ကို နှစ်ချက်တို့ပါ"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"ရပြီ"</string>
+    <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"နောက်ထပ်အချက်အလက်များအတွက် ချဲ့နိုင်သည်။"</string>
+    <string name="maximize_button_text" msgid="1650859196290301963">"ချဲ့ရန်"</string>
+    <string name="minimize_button_text" msgid="271592547935841753">"ချုံ့ရန်"</string>
+    <string name="close_button_text" msgid="2913281996024033299">"ပိတ်ရန်"</string>
 </resources>

@@ -137,7 +137,8 @@ public class SystemVibratorManager extends VibratorManager {
             return;
         }
         try {
-            mService.vibrate(uid, opPkg, effect, attributes, reason, mToken);
+            mService.vibrate(uid, mContext.getAssociatedDisplayId(), opPkg, effect, attributes,
+                    reason, mToken);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to vibrate.", e);
         }

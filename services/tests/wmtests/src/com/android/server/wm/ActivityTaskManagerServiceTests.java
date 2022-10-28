@@ -21,7 +21,6 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
@@ -42,8 +41,8 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doCallRealMethod;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 import android.annotation.Nullable;
@@ -60,7 +59,6 @@ import android.graphics.Rect;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.LocaleList;
-import android.os.PowerManager;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.view.Display;
@@ -136,7 +134,7 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         assertNull(transaction.getLifecycleStateRequest());
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testOnPictureInPictureRequested_cannotEnterPip() throws RemoteException {
         final Task stack = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
         final ActivityRecord activity = stack.getBottomMostTask().getTopNonFinishingActivity();
@@ -146,11 +144,16 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
 
         mAtm.mActivityClientController.requestPictureInPictureMode(activity);
 
-        // Check enter no transactions with enter pip requests are made.
-        verify(lifecycleManager, times(0)).scheduleTransaction(any());
+        verify(lifecycleManager, atLeast(0))
+                .scheduleTransaction(mClientTransactionCaptor.capture());
+        final ClientTransaction transaction = mClientTransactionCaptor.getValue();
+        // Check that none are enter pip request items.
+        transaction.getCallbacks().forEach(clientTransactionItem -> {
+            assertFalse(clientTransactionItem instanceof EnterPipRequestedItem);
+        });
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testOnPictureInPictureRequested_alreadyInPIPMode() throws RemoteException {
         final Task stack = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
         final ActivityRecord activity = stack.getBottomMostTask().getTopNonFinishingActivity();
@@ -159,8 +162,13 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
 
         mAtm.mActivityClientController.requestPictureInPictureMode(activity);
 
-        // Check that no transactions with enter pip requests are made.
-        verify(lifecycleManager, times(0)).scheduleTransaction(any());
+        verify(lifecycleManager, atLeast(0))
+                .scheduleTransaction(mClientTransactionCaptor.capture());
+        final ClientTransaction transaction = mClientTransactionCaptor.getValue();
+        // Check that none are enter pip request items.
+        transaction.getCallbacks().forEach(clientTransactionItem -> {
+            assertFalse(clientTransactionItem instanceof EnterPipRequestedItem);
+        });
     }
 
     @Test
@@ -212,10 +220,7 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         // Check that changes are reported
         Configuration c = new Configuration(newDisp1.getRequestedOverrideConfiguration());
         c.windowConfiguration.setBounds(new Rect(0, 0, 1000, 1300));
-        newDisp1.onRequestedOverrideConfigurationChanged(c);
-        mAtm.mRootWindowContainer.ensureVisibilityAndConfig(null /* starting */,
-                newDisp1.mDisplayId, false /* markFrozenIfConfigChanged */,
-                false /* deferResume */);
+        newDisp1.performDisplayOverrideConfigUpdate(c);
         assertEquals(0, added.size());
         assertEquals(1, changed.size());
         assertEquals(0, removed.size());

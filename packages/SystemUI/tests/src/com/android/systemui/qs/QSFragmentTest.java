@@ -45,12 +45,15 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiBaseFragmentTest;
 import com.android.systemui.animation.ShadeInterpolation;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FakeFeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.media.MediaHost;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.dagger.QSFragmentComponent;
 import com.android.systemui.qs.external.TileServiceRequestController;
+import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
@@ -91,6 +94,7 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
     @Mock private QSPanel.QSTileLayout mQQsTileLayout;
     @Mock private QSAnimator mQSAnimator;
     @Mock private StatusBarStateController mStatusBarStateController;
+    @Mock private QSSquishinessController mSquishinessController;
     private View mQsFragmentView;
 
     public QSFragmentTest() {
@@ -136,13 +140,15 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
     }
 
     @Test
-    public void transitionToFullShade_inSplitShade_setsAlphaBasedOnProgress() {
+    public void transitionToFullShade_setsAlphaUsingShadeInterpolator() {
         QSFragment fragment = resumeAndGetFragment();
-        enableSplitShade();
-        int transitionPxAmount = 123;
+        setStatusBarState(StatusBarState.SHADE);
+        boolean isTransitioningToFullShade = true;
         float transitionProgress = 0.5f;
+        float squishinessFraction = 0.5f;
 
-        fragment.setTransitionToFullShadeAmount(transitionPxAmount, transitionProgress);
+        fragment.setTransitionToFullShadeProgress(isTransitioningToFullShade, transitionProgress,
+                squishinessFraction);
 
         assertThat(mQsFragmentView.getAlpha())
                 .isEqualTo(ShadeInterpolation.getContentAlpha(transitionProgress));
@@ -150,31 +156,32 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
 
     @Test
     public void
-            transitionToFullShade_inSplitShade_onKeyguard_bouncerNotActive_usesShadeInterpolator() {
+            transitionToFullShade_onKeyguard_noBouncer_setsAlphaUsingLinearInterpolator() {
         QSFragment fragment = resumeAndGetFragment();
-        enableSplitShade();
         setStatusBarState(StatusBarState.KEYGUARD);
         when(mQSPanelController.isBouncerInTransit()).thenReturn(false);
-        int transitionPxAmount = 123;
+        boolean isTransitioningToFullShade = true;
         float transitionProgress = 0.5f;
+        float squishinessFraction = 0.5f;
 
-        fragment.setTransitionToFullShadeAmount(transitionPxAmount, transitionProgress);
+        fragment.setTransitionToFullShadeProgress(isTransitioningToFullShade, transitionProgress,
+                squishinessFraction);
 
-        assertThat(mQsFragmentView.getAlpha())
-                .isEqualTo(ShadeInterpolation.getContentAlpha(transitionProgress));
+        assertThat(mQsFragmentView.getAlpha()).isEqualTo(transitionProgress);
     }
 
     @Test
     public void
-            transitionToFullShade_inSplitShade_onKeyguard_bouncerActive_usesBouncerInterpolator() {
+            transitionToFullShade_onKeyguard_bouncerActive_setsAlphaUsingBouncerInterpolator() {
         QSFragment fragment = resumeAndGetFragment();
-        enableSplitShade();
         setStatusBarState(StatusBarState.KEYGUARD);
         when(mQSPanelController.isBouncerInTransit()).thenReturn(true);
-        int transitionPxAmount = 123;
+        boolean isTransitioningToFullShade = true;
         float transitionProgress = 0.5f;
+        float squishinessFraction = 0.5f;
 
-        fragment.setTransitionToFullShadeAmount(transitionPxAmount, transitionProgress);
+        fragment.setTransitionToFullShadeProgress(isTransitioningToFullShade, transitionProgress,
+                squishinessFraction);
 
         assertThat(mQsFragmentView.getAlpha())
                 .isEqualTo(
@@ -183,25 +190,75 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
     }
 
     @Test
-    public void transitionToFullShade_notInSplitShade_alwaysSetsAlphaTo1() {
+    public void transitionToFullShade_inFullWidth_alwaysSetsAlphaTo1() {
+        QSFragment fragment = resumeAndGetFragment();
+        fragment.setIsNotificationPanelFullWidth(true);
+
+        boolean isTransitioningToFullShade = true;
+        float transitionProgress = 0.1f;
+        float squishinessFraction = 0.5f;
+        fragment.setTransitionToFullShadeProgress(isTransitioningToFullShade, transitionProgress,
+                squishinessFraction);
+        assertThat(mQsFragmentView.getAlpha()).isEqualTo(1);
+
+        transitionProgress = 0.5f;
+        fragment.setTransitionToFullShadeProgress(isTransitioningToFullShade, transitionProgress,
+                squishinessFraction);
+        assertThat(mQsFragmentView.getAlpha()).isEqualTo(1);
+        assertThat(mQsFragmentView.getAlpha()).isEqualTo(1);
+
+        transitionProgress = 0.7f;
+        fragment.setTransitionToFullShadeProgress(isTransitioningToFullShade, transitionProgress,
+                squishinessFraction);
+        assertThat(mQsFragmentView.getAlpha()).isEqualTo(1);
+    }
+
+    @Test
+    public void transitionToFullShade_setsSquishinessOnController() {
+        QSFragment fragment = resumeAndGetFragment();
+        boolean isTransitioningToFullShade = true;
+        float transitionProgress = 0.123f;
+        float squishinessFraction = 0.456f;
+
+        fragment.setTransitionToFullShadeProgress(isTransitioningToFullShade, transitionProgress,
+                squishinessFraction);
+
+        verify(mQsFragmentComponent.getQSSquishinessController())
+                .setSquishiness(squishinessFraction);
+    }
+
+    @Test
+    public void setQsExpansion_inSplitShade_setsFooterActionsExpansion_basedOnPanelExpFraction() {
+        // Random test values without any meaning. They just have to be different from each other.
+        float expansion = 0.123f;
+        float panelExpansionFraction = 0.321f;
+        float proposedTranslation = 456f;
+        float squishinessFraction = 0.987f;
+
+        QSFragment fragment = resumeAndGetFragment();
+        enableSplitShade();
+
+        fragment.setQsExpansion(expansion, panelExpansionFraction, proposedTranslation,
+                squishinessFraction);
+
+        verify(mQSFooterActionController).setExpansion(panelExpansionFraction);
+    }
+
+    @Test
+    public void setQsExpansion_notInSplitShade_setsFooterActionsExpansion_basedOnExpansion() {
+        // Random test values without any meaning. They just have to be different from each other.
+        float expansion = 0.123f;
+        float panelExpansionFraction = 0.321f;
+        float proposedTranslation = 456f;
+        float squishinessFraction = 0.987f;
+
         QSFragment fragment = resumeAndGetFragment();
         disableSplitShade();
 
-        int transitionPxAmount = 12;
-        float transitionProgress = 0.1f;
-        fragment.setTransitionToFullShadeAmount(transitionPxAmount, transitionProgress);
-        assertThat(mQsFragmentView.getAlpha()).isEqualTo(1);
+        fragment.setQsExpansion(expansion, panelExpansionFraction, proposedTranslation,
+                squishinessFraction);
 
-        transitionPxAmount = 123;
-        transitionProgress = 0.5f;
-        fragment.setTransitionToFullShadeAmount(transitionPxAmount, transitionProgress);
-        assertThat(mQsFragmentView.getAlpha()).isEqualTo(1);
-        assertThat(mQsFragmentView.getAlpha()).isEqualTo(1);
-
-        transitionPxAmount = 234;
-        transitionProgress = 0.7f;
-        fragment.setTransitionToFullShadeAmount(transitionPxAmount, transitionProgress);
-        assertThat(mQsFragmentView.getAlpha()).isEqualTo(1);
+        verify(mQSFooterActionController).setExpansion(expansion);
     }
 
     @Test
@@ -356,6 +413,8 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
         setUpMedia();
         setUpOther();
 
+        FakeFeatureFlags featureFlags = new FakeFeatureFlags();
+        featureFlags.set(Flags.NEW_FOOTER_ACTIONS, false);
         return new QSFragment(
                 new RemoteInputQuickSettingsDisabler(
                         context, commandQueue, mock(ConfigurationController.class)),
@@ -368,7 +427,10 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
                 mQsComponentFactory,
                 mock(QSFragmentDisableFlagsLogger.class),
                 mFalsingManager,
-                mock(DumpManager.class));
+                mock(DumpManager.class),
+                featureFlags,
+                mock(NewFooterActionsController.class),
+                mock(FooterActionsViewModel.Factory.class));
     }
 
     private void setUpOther() {
@@ -411,6 +473,7 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
         when(mQsFragmentComponent.getQSFooterActionController())
                 .thenReturn(mQSFooterActionController);
         when(mQsFragmentComponent.getQSAnimator()).thenReturn(mQSAnimator);
+        when(mQsFragmentComponent.getQSSquishinessController()).thenReturn(mSquishinessController);
     }
 
     private QSFragment getFragment() {

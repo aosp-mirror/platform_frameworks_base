@@ -80,11 +80,6 @@ interface IRecentsAnimationController {
     void setAnimationTargetsBehindSystemBars(boolean behindSystemBars);
 
     /**
-     * Hides the current input method if one is showing.
-     */
-    void hideCurrentInputMethod();
-
-    /**
      * Clean up the screenshot of previous task which was created during recents animation that
      * was cancelled by a stack order change.
      *

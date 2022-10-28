@@ -19,7 +19,6 @@ package com.android.wm.shell.hidedisplaycutout;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.SystemProperties;
-import android.util.Slog;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -27,20 +26,23 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.ShellExecutor;
+import com.android.wm.shell.sysui.ConfigurationChangeListener;
+import com.android.wm.shell.sysui.ShellCommandHandler;
+import com.android.wm.shell.sysui.ShellController;
+import com.android.wm.shell.sysui.ShellInit;
 
 import java.io.PrintWriter;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Manages the hide display cutout status.
  */
-public class HideDisplayCutoutController {
+public class HideDisplayCutoutController implements ConfigurationChangeListener {
     private static final String TAG = "HideDisplayCutoutController";
 
     private final Context mContext;
+    private final ShellCommandHandler mShellCommandHandler;
+    private final ShellController mShellController;
     private final HideDisplayCutoutOrganizer mOrganizer;
-    private final ShellExecutor mMainExecutor;
-    private final HideDisplayCutoutImpl mImpl = new HideDisplayCutoutImpl();
     @VisibleForTesting
     boolean mEnabled;
 
@@ -49,8 +51,12 @@ public class HideDisplayCutoutController {
      * supported.
      */
     @Nullable
-    public static HideDisplayCutoutController create(
-            Context context, DisplayController displayController, ShellExecutor mainExecutor) {
+    public static HideDisplayCutoutController create(Context context,
+            ShellInit shellInit,
+            ShellCommandHandler shellCommandHandler,
+            ShellController shellController,
+            DisplayController displayController,
+            ShellExecutor mainExecutor) {
         // The SystemProperty is set for devices that support this feature and is used to control
         // whether to create the HideDisplayCutout instance.
         // It's defined in the device.mk (e.g. device/google/crosshatch/device.mk).
@@ -60,19 +66,26 @@ public class HideDisplayCutoutController {
 
         HideDisplayCutoutOrganizer organizer =
                 new HideDisplayCutoutOrganizer(context, displayController, mainExecutor);
-        return new HideDisplayCutoutController(context, organizer, mainExecutor);
+        return new HideDisplayCutoutController(context, shellInit, shellCommandHandler,
+                shellController, organizer);
     }
 
-    HideDisplayCutoutController(Context context, HideDisplayCutoutOrganizer organizer,
-            ShellExecutor mainExecutor) {
+    HideDisplayCutoutController(Context context,
+            ShellInit shellInit,
+            ShellCommandHandler shellCommandHandler,
+            ShellController shellController,
+            HideDisplayCutoutOrganizer organizer) {
         mContext = context;
+        mShellCommandHandler = shellCommandHandler;
+        mShellController = shellController;
         mOrganizer = organizer;
-        mMainExecutor = mainExecutor;
-        updateStatus();
+        shellInit.addInitCallback(this::onInit, this);
     }
 
-    public HideDisplayCutout asHideDisplayCutout() {
-        return mImpl;
+    private void onInit() {
+        mShellCommandHandler.addDumpCallback(this::dump, this);
+        updateStatus();
+        mShellController.addConfigurationChangeListener(this);
     }
 
     @VisibleForTesting
@@ -94,26 +107,18 @@ public class HideDisplayCutoutController {
         }
     }
 
-    private void onConfigurationChanged(Configuration newConfig) {
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
         updateStatus();
     }
 
-    public void dump(@NonNull PrintWriter pw) {
-        final String prefix = "  ";
+    public void dump(@NonNull PrintWriter pw, String prefix) {
+        final String innerPrefix = "  ";
         pw.print(TAG);
         pw.println(" states: ");
-        pw.print(prefix);
+        pw.print(innerPrefix);
         pw.print("mEnabled=");
         pw.println(mEnabled);
         mOrganizer.dump(pw);
-    }
-
-    private class HideDisplayCutoutImpl implements HideDisplayCutout {
-        @Override
-        public void onConfigurationChanged(Configuration newConfig) {
-            mMainExecutor.execute(() -> {
-                HideDisplayCutoutController.this.onConfigurationChanged(newConfig);
-            });
-        }
     }
 }

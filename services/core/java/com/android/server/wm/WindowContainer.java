@@ -48,6 +48,7 @@ import static com.android.server.wm.IdentifierProto.TITLE;
 import static com.android.server.wm.IdentifierProto.USER_ID;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_ALL;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
@@ -342,6 +343,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     BLASTSyncEngine.SyncGroup mSyncGroup = null;
     final SurfaceControl.Transaction mSyncTransaction;
     @SyncState int mSyncState = SYNC_STATE_NONE;
+    int mSyncMethodOverride = BLASTSyncEngine.METHOD_UNDEFINED;
 
     private final List<WindowContainerListener> mListeners = new ArrayList<>();
 
@@ -428,6 +430,13 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         if (insetsTypes == null || insetsTypes.length == 0) {
             throw new IllegalArgumentException("Insets type not specified.");
         }
+        if (mDisplayContent == null) {
+            // This is possible this container is detached when WM shell is responding to a previous
+            // request. WM shell will be updated when this container is attached again and the
+            // insets need to be updated.
+            Slog.w(TAG, "Can't add local rect insets source provider when detached. " + this);
+            return;
+        }
         if (mLocalInsetsSourceProviders == null) {
             mLocalInsetsSourceProviders = new SparseArray<>();
         }
@@ -468,7 +477,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             }
             mLocalInsetsSourceProviders.remove(insetsTypes[i]);
         }
-        mDisplayContent.getInsetsStateController().updateAboveInsetsState(true);
+        // Update insets if this window is attached.
+        if (mDisplayContent != null) {
+            mDisplayContent.getInsetsStateController().updateAboveInsetsState(true);
+        }
     }
 
     /**
@@ -1010,6 +1022,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         if (dc != null && dc != this) {
             dc.getPendingTransaction().merge(mPendingTransaction);
         }
+        if (dc != this && mLocalInsetsSourceProviders != null) {
+            mLocalInsetsSourceProviders.clear();
+        }
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowContainer child = mChildren.get(i);
             child.onDisplayChanged(dc);
@@ -1159,6 +1174,19 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     /**
+     * Returns {@code true} if self or the parent container of the window is in transition, e.g.
+     * the app or recents transition. This method is only used when legacy and shell transition
+     * have the same condition to check the animation state.
+     */
+    boolean inTransitionSelfOrParent() {
+        if (!mTransitionController.isShellTransitionsEnabled()) {
+            return isAnimating(PARENTS | TRANSITION,
+                    ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_RECENTS);
+        }
+        return inTransition();
+    }
+
+    /**
      * @return Whether our own container running an animation at the moment.
      */
     final boolean isAnimating() {
@@ -1180,7 +1208,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         if (!mTransitionController.isShellTransitionsEnabled()) {
             return isAnimating(TRANSITION | CHILDREN, WindowState.EXIT_ANIMATING_TYPES);
         }
-        if (mTransitionController.isCollecting(this)) {
+        // Only check leaf containers because inTransition() includes parent.
+        if (mChildren.isEmpty() && inTransition()) {
             return true;
         }
 
@@ -1808,6 +1837,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return null;
     }
 
+    int getDistanceFromTop(WindowContainer child) {
+        int idx = mChildren.indexOf(child);
+        return idx < 0 ? -1 : mChildren.size() - 1 - idx;
+    }
+
     private ActivityRecord processGetActivityWithBoundary(Predicate<ActivityRecord> callback,
             WindowContainer boundary, boolean includeBoundary, boolean traverseTopToBottom,
             boolean[] boundaryFound, WindowContainer wc) {
@@ -2161,6 +2195,17 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 callback, boundary, includeBoundary, traverseTopToBottom, boundaryFound);
     }
 
+    @Nullable
+    TaskFragment getTaskFragment(Predicate<TaskFragment> callback) {
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            final TaskFragment tf = mChildren.get(i).getTaskFragment(callback);
+            if (tf != null) {
+                return tf;
+            }
+        }
+        return null;
+    }
+
     WindowState getWindow(Predicate<WindowState> callback) {
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowState w = mChildren.get(i).getWindow(callback);
@@ -2458,7 +2503,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     void assignLayer(Transaction t, int layer) {
         // Don't assign layers while a transition animation is playing
         // TODO(b/173528115): establish robust best-practices around z-order fighting.
-        if (mTransitionController.isPlaying()) return;
+        if (!mTransitionController.canAssignLayers()) return;
         final boolean changed = layer != mLastLayer || mLastRelativeToLayer != null;
         if (mSurfaceControl != null && changed) {
             setLayer(t, layer);
@@ -2679,9 +2724,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * will be applied.
      */
     void scheduleAnimation() {
-        if (mParent != null) {
-            mParent.scheduleAnimation();
-        }
+        mWmService.scheduleAnimationLocked();
     }
 
     /**
@@ -2801,6 +2844,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      *                     snapshot from {@link #getFreezeSnapshotTarget()}.
      */
     void initializeChangeTransition(Rect startBounds, @Nullable SurfaceControl freezeTarget) {
+        if (mDisplayContent.mTransitionController.isShellTransitionsEnabled()) {
+            mDisplayContent.mTransitionController.collectVisibleChange(this);
+            return;
+        }
         mDisplayContent.prepareAppTransition(TRANSIT_CHANGE);
         mDisplayContent.mChangingContainers.add(this);
         // Calculate the relative position in parent container.
@@ -2925,18 +2972,34 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         getAnimationPosition(mTmpPoint);
         mTmpRect.offsetTo(0, 0);
 
-        final RemoteAnimationController controller =
-                getDisplayContent().mAppTransition.getRemoteAnimationController();
+        final AppTransition appTransition = getDisplayContent().mAppTransition;
+        final RemoteAnimationController controller = appTransition.getRemoteAnimationController();
         final boolean isChanging = AppTransition.isChangeTransitOld(transit) && enter
                 && isChangingAppTransition();
 
         // Delaying animation start isn't compatible with remote animations at all.
         if (controller != null && !mSurfaceAnimator.isAnimationStartDelayed()) {
+            // Here we load App XML in order to read com.android.R.styleable#Animation_showBackdrop.
+            boolean showBackdrop = false;
+            // Optionally set backdrop color if App explicitly provides it through
+            // {@link Activity#overridePendingTransition(int, int, int)}.
+            @ColorInt int backdropColor = 0;
+            if (controller.isFromActivityEmbedding()) {
+                final int animAttr = AppTransition.mapOpenCloseTransitTypes(transit, enter);
+                final Animation a = animAttr != 0
+                        ? appTransition.loadAnimationAttr(lp, animAttr, transit) : null;
+                showBackdrop = a != null && a.getShowBackdrop();
+                backdropColor = appTransition.getNextAppTransitionBackgroundColor();
+            }
             final Rect localBounds = new Rect(mTmpRect);
             localBounds.offsetTo(mTmpPoint.x, mTmpPoint.y);
             final RemoteAnimationController.RemoteAnimationRecord adapters =
-                    controller.createRemoteAnimationRecord(this, mTmpPoint, localBounds,
-                            screenBounds, (isChanging ? mSurfaceFreezer.mFreezeBounds : null));
+                    controller.createRemoteAnimationRecord(
+                            this, mTmpPoint, localBounds, screenBounds,
+                            (isChanging ? mSurfaceFreezer.mFreezeBounds : null), showBackdrop);
+            if (backdropColor != 0) {
+                adapters.setBackDropColor(backdropColor);
+            }
             if (!isChanging) {
                 adapters.setMode(enter
                         ? RemoteAnimationTarget.MODE_OPENING
@@ -2972,6 +3035,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 final float windowCornerRadius = !inMultiWindowMode()
                         ? getDisplayContent().getWindowCornerRadius()
                         : 0;
+                if (asActivityRecord() != null
+                        && asActivityRecord().isNeedsLetterboxedAnimation()) {
+                    asActivityRecord().getLetterboxInnerBounds(mTmpRect);
+                }
                 AnimationAdapter adapter = new LocalAnimationAdapter(
                         new WindowAnimationSpec(a, mTmpPoint, mTmpRect,
                                 getDisplayContent().mAppTransition.canSkipFirstFrame(),
@@ -3183,6 +3250,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     void resetSurfacePositionForAnimationLeash(Transaction t) {
         t.setPosition(mSurfaceControl, 0, 0);
+        if (mSyncState != SYNC_STATE_NONE && t != mSyncTransaction) {
+            // Avoid restoring to old position if the sync transaction is applied later.
+            mSyncTransaction.setPosition(mSurfaceControl, 0, 0);
+        }
         mLastSurfacePosition.set(0, 0);
     }
 
@@ -3345,6 +3416,13 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         if (mLastOrientationSource != null && this == mDisplayContent) {
             pw.println(prefix + "mLastOrientationSource=" + mLastOrientationSource);
             pw.println(prefix + "deepestLastOrientationSource=" + getLastOrientationSource());
+        }
+        if (mLocalInsetsSourceProviders != null && mLocalInsetsSourceProviders.size() != 0) {
+            pw.println(prefix + mLocalInsetsSourceProviders.size() + " LocalInsetsSourceProviders");
+            final String childPrefix = prefix + "  ";
+            for (int i = 0; i < mLocalInsetsSourceProviders.size(); ++i) {
+                mLocalInsetsSourceProviders.valueAt(i).dump(pw, childPrefix);
+            }
         }
     }
 
@@ -3608,6 +3686,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     boolean onSyncFinishedDrawing() {
         if (mSyncState == SYNC_STATE_NONE) return false;
         mSyncState = SYNC_STATE_READY;
+        mSyncMethodOverride = BLASTSyncEngine.METHOD_UNDEFINED;
         mWmService.mWindowPlacerLocked.requestTraversal();
         ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "onSyncFinishedDrawing %s", this);
         return true;
@@ -3624,6 +3703,13 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             }
         }
         mSyncGroup = group;
+    }
+
+    @Nullable
+    BLASTSyncEngine.SyncGroup getSyncGroup() {
+        if (mSyncGroup != null) return mSyncGroup;
+        if (mParent != null) return mParent.getSyncGroup();
+        return null;
     }
 
     /**
@@ -3664,11 +3750,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             mChildren.get(i).finishSync(outMergedTransaction, cancel);
         }
         if (cancel && mSyncGroup != null) mSyncGroup.onCancelSync(this);
-        clearSyncState();
-    }
-
-    void clearSyncState() {
         mSyncState = SYNC_STATE_NONE;
+        mSyncMethodOverride = BLASTSyncEngine.METHOD_UNDEFINED;
         mSyncGroup = null;
     }
 
@@ -3727,6 +3810,15 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * hierarchy change implies a configuration change.
      */
     private void onSyncReparent(WindowContainer oldParent, WindowContainer newParent) {
+        // Check if this is changing displays. If so, mark the old display as "ready" for
+        // transitions. This is to work around the problem where setting readiness against this
+        // container will only set the new display as ready and leave the old display as unready.
+        if (mSyncState != SYNC_STATE_NONE && oldParent != null && newParent != null
+                && oldParent.getDisplayContent() != null && newParent.getDisplayContent() != null
+                && oldParent.getDisplayContent() != newParent.getDisplayContent()) {
+            mTransitionController.setReady(oldParent.getDisplayContent());
+        }
+
         if (newParent == null || newParent.mSyncState == SYNC_STATE_NONE) {
             if (mSyncState == SYNC_STATE_NONE) {
                 return;
@@ -3762,6 +3854,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         // disable this when shell transitions is disabled.
         if (mTransitionController.isShellTransitionsEnabled()) {
             mSyncState = SYNC_STATE_NONE;
+            mSyncMethodOverride = BLASTSyncEngine.METHOD_UNDEFINED;
         }
         prepareSync();
     }

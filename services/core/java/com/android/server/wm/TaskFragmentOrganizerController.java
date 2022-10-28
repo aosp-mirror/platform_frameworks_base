@@ -16,11 +16,20 @@
 
 package com.android.server.wm;
 
-import static android.window.TaskFragmentOrganizer.putExceptionInBundle;
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
+import static android.window.TaskFragmentOrganizer.putErrorInfoInBundle;
+import static android.window.TaskFragmentTransaction.TYPE_ACTIVITY_REPARENTED_TO_TASK;
+import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_APPEARED;
+import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_ERROR;
+import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_INFO_CHANGED;
+import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_PARENT_INFO_CHANGED;
+import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_VANISHED;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_ORGANIZER;
 import static com.android.server.wm.TaskFragment.EMBEDDING_ALLOWED;
 import static com.android.server.wm.WindowOrganizerController.configurationsAreEqualForOrganizer;
+
+import static java.util.Objects.requireNonNull;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -32,18 +41,25 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.RemoteAnimationDefinition;
+import android.view.WindowManager;
 import android.window.ITaskFragmentOrganizer;
 import android.window.ITaskFragmentOrganizerController;
 import android.window.TaskFragmentInfo;
+import android.window.TaskFragmentParentInfo;
+import android.window.TaskFragmentTransaction;
+import android.window.WindowContainerTransaction;
 
+import com.android.internal.protolog.ProtoLogGroup;
 import com.android.internal.protolog.common.ProtoLog;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 
@@ -56,6 +72,8 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
 
     private final ActivityTaskManagerService mAtmService;
     private final WindowManagerGlobalLock mGlobalLock;
+    private final WindowOrganizerController mWindowOrganizerController;
+
     /**
      * A Map which manages the relationship between
      * {@link ITaskFragmentOrganizer} and {@link TaskFragmentOrganizerState}
@@ -63,14 +81,18 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
     private final ArrayMap<IBinder, TaskFragmentOrganizerState> mTaskFragmentOrganizerState =
             new ArrayMap<>();
     /**
-     * A List which manages the TaskFragment pending event {@link PendingTaskFragmentEvent}
+     * Map from {@link ITaskFragmentOrganizer} to a list of related {@link PendingTaskFragmentEvent}
      */
-    private final ArrayList<PendingTaskFragmentEvent> mPendingTaskFragmentEvents =
-            new ArrayList<>();
+    private final ArrayMap<IBinder, List<PendingTaskFragmentEvent>> mPendingTaskFragmentEvents =
+            new ArrayMap<>();
 
-    TaskFragmentOrganizerController(ActivityTaskManagerService atm) {
-        mAtmService = atm;
+    private final ArraySet<Task> mTmpTaskSet = new ArraySet<>();
+
+    TaskFragmentOrganizerController(@NonNull ActivityTaskManagerService atm,
+            @NonNull WindowOrganizerController windowOrganizerController) {
+        mAtmService = requireNonNull(atm);
         mGlobalLock = atm.mGlobalLock;
+        mWindowOrganizerController = requireNonNull(windowOrganizerController);
     }
 
     /**
@@ -82,10 +104,30 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         private final ITaskFragmentOrganizer mOrganizer;
         private final int mOrganizerPid;
         private final int mOrganizerUid;
+
+        /**
+         * Map from {@link TaskFragment} to the last {@link TaskFragmentInfo} sent to the
+         * organizer.
+         */
         private final Map<TaskFragment, TaskFragmentInfo> mLastSentTaskFragmentInfos =
                 new WeakHashMap<>();
-        private final Map<TaskFragment, Configuration> mLastSentTaskFragmentParentConfigs =
-                new WeakHashMap<>();
+
+        /**
+         * Map from {@link TaskFragment} to its leaf {@link Task#mTaskId}. Embedded
+         * {@link TaskFragment} will not be reparented until it is removed.
+         */
+        private final Map<TaskFragment, Integer> mTaskFragmentTaskIds = new WeakHashMap<>();
+
+        /**
+         * Map from {@link Task#mTaskId} to the last {@link TaskFragmentParentInfo} sent to the
+         * organizer.
+         */
+        private final SparseArray<TaskFragmentParentInfo> mLastSentTaskFragmentParentInfos =
+                new SparseArray<>();
+
+        /**
+         * Map from temporary activity token to the corresponding {@link ActivityRecord}.
+         */
         private final Map<IBinder, ActivityRecord> mTemporaryActivityTokens =
                 new WeakHashMap<>();
 
@@ -96,6 +138,14 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
          */
         private final SparseArray<RemoteAnimationDefinition> mRemoteAnimationDefinitions =
                 new SparseArray<>();
+
+        /**
+         * Map from {@link TaskFragmentTransaction#getTransactionToken()} to the
+         * {@link Transition#getSyncId()} that has been deferred. {@link TransitionController} will
+         * wait until the organizer finished handling the {@link TaskFragmentTransaction}.
+         * @see #onTransactionFinished(IBinder)
+         */
+        private final ArrayMap<IBinder, Integer> mDeferredTransitions = new ArrayMap<>();
 
         TaskFragmentOrganizerState(ITaskFragmentOrganizer organizer, int pid, int uid) {
             mOrganizer = organizer;
@@ -136,110 +186,135 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         void dispose() {
             while (!mOrganizedTaskFragments.isEmpty()) {
                 final TaskFragment taskFragment = mOrganizedTaskFragments.get(0);
+                // Cleanup before remove to prevent it from sending any additional event, such as
+                // #onTaskFragmentVanished, to the removed organizer.
+                taskFragment.onTaskFragmentOrganizerRemoved();
                 taskFragment.removeImmediately();
                 mOrganizedTaskFragments.remove(taskFragment);
+            }
+            for (int i = mDeferredTransitions.size() - 1; i >= 0; i--) {
+                // Cleanup any running transaction to unblock the current transition.
+                onTransactionFinished(mDeferredTransitions.keyAt(i));
             }
             mOrganizer.asBinder().unlinkToDeath(this, 0 /*flags*/);
         }
 
-        void onTaskFragmentAppeared(TaskFragment tf) {
+        @NonNull
+        TaskFragmentTransaction.Change prepareTaskFragmentAppeared(@NonNull TaskFragment tf) {
             ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "TaskFragment appeared name=%s", tf.getName());
             final TaskFragmentInfo info = tf.getTaskFragmentInfo();
-            try {
-                mOrganizer.onTaskFragmentAppeared(info);
-                mLastSentTaskFragmentInfos.put(tf, info);
-                tf.mTaskFragmentAppearedSent = true;
-            } catch (RemoteException e) {
-                Slog.d(TAG, "Exception sending onTaskFragmentAppeared callback", e);
-            }
-            onTaskFragmentParentInfoChanged(tf);
+            final int taskId = tf.getTask().mTaskId;
+            tf.mTaskFragmentAppearedSent = true;
+            mLastSentTaskFragmentInfos.put(tf, info);
+            mTaskFragmentTaskIds.put(tf, taskId);
+            return new TaskFragmentTransaction.Change(
+                    TYPE_TASK_FRAGMENT_APPEARED)
+                    .setTaskFragmentToken(tf.getFragmentToken())
+                    .setTaskFragmentInfo(info)
+                    .setTaskId(taskId);
         }
 
-        void onTaskFragmentVanished(TaskFragment tf) {
+        @NonNull
+        TaskFragmentTransaction.Change prepareTaskFragmentVanished(@NonNull TaskFragment tf) {
             ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "TaskFragment vanished name=%s", tf.getName());
-            try {
-                mOrganizer.onTaskFragmentVanished(tf.getTaskFragmentInfo());
-            } catch (RemoteException e) {
-                Slog.d(TAG, "Exception sending onTaskFragmentVanished callback", e);
-            }
             tf.mTaskFragmentAppearedSent = false;
             mLastSentTaskFragmentInfos.remove(tf);
-            mLastSentTaskFragmentParentConfigs.remove(tf);
+
+            // Cleanup TaskFragmentParentConfig if this is the last TaskFragment in the Task.
+            final int taskId;
+            if (mTaskFragmentTaskIds.containsKey(tf)) {
+                taskId = mTaskFragmentTaskIds.remove(tf);
+                if (!mTaskFragmentTaskIds.containsValue(taskId)) {
+                    // No more TaskFragment in the Task.
+                    mLastSentTaskFragmentParentInfos.remove(taskId);
+                }
+            } else {
+                // This can happen if the appeared wasn't sent before remove.
+                taskId = INVALID_TASK_ID;
+            }
+
+            return new TaskFragmentTransaction.Change(TYPE_TASK_FRAGMENT_VANISHED)
+                    .setTaskFragmentToken(tf.getFragmentToken())
+                    .setTaskFragmentInfo(tf.getTaskFragmentInfo())
+                    .setTaskId(taskId);
         }
 
-        void onTaskFragmentInfoChanged(TaskFragment tf) {
-            // Parent config may have changed. The controller will check if there is any important
-            // config change for the organizer.
-            onTaskFragmentParentInfoChanged(tf);
-
+        @Nullable
+        TaskFragmentTransaction.Change prepareTaskFragmentInfoChanged(
+                @NonNull TaskFragment tf) {
             // Check if the info is different from the last reported info.
             final TaskFragmentInfo info = tf.getTaskFragmentInfo();
             final TaskFragmentInfo lastInfo = mLastSentTaskFragmentInfos.get(tf);
             if (info.equalsForTaskFragmentOrganizer(lastInfo) && configurationsAreEqualForOrganizer(
                     info.getConfiguration(), lastInfo.getConfiguration())) {
-                return;
+                return null;
             }
+
             ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "TaskFragment info changed name=%s",
                     tf.getName());
-            try {
-                mOrganizer.onTaskFragmentInfoChanged(info);
-                mLastSentTaskFragmentInfos.put(tf, info);
-            } catch (RemoteException e) {
-                Slog.d(TAG, "Exception sending onTaskFragmentInfoChanged callback", e);
-            }
+            mLastSentTaskFragmentInfos.put(tf, info);
+            return new TaskFragmentTransaction.Change(
+                    TYPE_TASK_FRAGMENT_INFO_CHANGED)
+                    .setTaskFragmentToken(tf.getFragmentToken())
+                    .setTaskFragmentInfo(info)
+                    .setTaskId(tf.getTask().mTaskId);
         }
 
-        void onTaskFragmentParentInfoChanged(TaskFragment tf) {
+        @Nullable
+        TaskFragmentTransaction.Change prepareTaskFragmentParentInfoChanged(@NonNull Task task) {
+            final int taskId = task.mTaskId;
             // Check if the parent info is different from the last reported parent info.
-            if (tf.getParent() == null || tf.getParent().asTask() == null) {
-                mLastSentTaskFragmentParentConfigs.remove(tf);
-                return;
+            final TaskFragmentParentInfo parentInfo = task.getTaskFragmentParentInfo();
+            final TaskFragmentParentInfo lastParentInfo = mLastSentTaskFragmentParentInfos
+                    .get(taskId);
+            final Configuration lastParentConfig = lastParentInfo != null
+                    ? lastParentInfo.getConfiguration() : null;
+            if (parentInfo.equalsForTaskFragmentOrganizer(lastParentInfo)
+                    && configurationsAreEqualForOrganizer(parentInfo.getConfiguration(),
+                            lastParentConfig)) {
+                return null;
             }
-            final Task parent = tf.getParent().asTask();
-            final Configuration parentConfig = parent.getConfiguration();
-            final Configuration lastParentConfig = mLastSentTaskFragmentParentConfigs.get(tf);
-            if (configurationsAreEqualForOrganizer(parentConfig, lastParentConfig)
-                    && parentConfig.windowConfiguration.getWindowingMode()
-                    == lastParentConfig.windowConfiguration.getWindowingMode()) {
-                return;
-            }
+
             ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER,
                     "TaskFragment parent info changed name=%s parentTaskId=%d",
-                    tf.getName(), parent.mTaskId);
-            try {
-                mOrganizer.onTaskFragmentParentInfoChanged(tf.getFragmentToken(), parentConfig);
-                mLastSentTaskFragmentParentConfigs.put(tf, new Configuration(parentConfig));
-            } catch (RemoteException e) {
-                Slog.d(TAG, "Exception sending onTaskFragmentParentInfoChanged callback", e);
-            }
+                    task.getName(), taskId);
+            mLastSentTaskFragmentParentInfos.put(taskId, new TaskFragmentParentInfo(parentInfo));
+            return new TaskFragmentTransaction.Change(TYPE_TASK_FRAGMENT_PARENT_INFO_CHANGED)
+                    .setTaskId(taskId)
+                    .setTaskFragmentParentInfo(parentInfo);
         }
 
-        void onTaskFragmentError(IBinder errorCallbackToken, Throwable exception) {
+        @NonNull
+        TaskFragmentTransaction.Change prepareTaskFragmentError(
+                @Nullable IBinder errorCallbackToken, @Nullable TaskFragment taskFragment,
+                int opType, @NonNull Throwable exception) {
             ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER,
                     "Sending TaskFragment error exception=%s", exception.toString());
-            final Bundle exceptionBundle = putExceptionInBundle(exception);
-            try {
-                mOrganizer.onTaskFragmentError(errorCallbackToken, exceptionBundle);
-            } catch (RemoteException e) {
-                Slog.d(TAG, "Exception sending onTaskFragmentError callback", e);
-            }
+            final TaskFragmentInfo info =
+                    taskFragment != null ? taskFragment.getTaskFragmentInfo() : null;
+            final Bundle errorBundle = putErrorInfoInBundle(exception, info, opType);
+            return new TaskFragmentTransaction.Change(TYPE_TASK_FRAGMENT_ERROR)
+                    .setErrorCallbackToken(errorCallbackToken)
+                    .setErrorBundle(errorBundle);
         }
 
-        void onActivityReparentToTask(ActivityRecord activity) {
+        @Nullable
+        TaskFragmentTransaction.Change prepareActivityReparentedToTask(
+                @NonNull ActivityRecord activity) {
             if (activity.finishing) {
                 Slog.d(TAG, "Reparent activity=" + activity.token + " is finishing");
-                return;
+                return null;
             }
             final Task task = activity.getTask();
             if (task == null || task.effectiveUid != mOrganizerUid) {
                 Slog.d(TAG, "Reparent activity=" + activity.token
                         + " is not in a task belong to the organizer app.");
-                return;
+                return null;
             }
             if (task.isAllowedToEmbedActivity(activity, mOrganizerUid) != EMBEDDING_ALLOWED) {
                 Slog.d(TAG, "Reparent activity=" + activity.token
                         + " is not allowed to be embedded.");
-                return;
+                return null;
             }
 
             final IBinder activityToken;
@@ -262,11 +337,59 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             }
             ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "Activity=%s reparent to taskId=%d",
                     activity.token, task.mTaskId);
-            try {
-                mOrganizer.onActivityReparentToTask(task.mTaskId, activity.intent, activityToken);
-            } catch (RemoteException e) {
-                Slog.d(TAG, "Exception sending onActivityReparentToTask callback", e);
+            return new TaskFragmentTransaction.Change(TYPE_ACTIVITY_REPARENTED_TO_TASK)
+                    .setTaskId(task.mTaskId)
+                    .setActivityIntent(activity.intent)
+                    .setActivityToken(activityToken);
+        }
+
+        void dispatchTransaction(@NonNull TaskFragmentTransaction transaction) {
+            if (transaction.isEmpty()) {
+                return;
             }
+            try {
+                mOrganizer.onTransactionReady(transaction);
+            } catch (RemoteException e) {
+                Slog.d(TAG, "Exception sending TaskFragmentTransaction", e);
+                return;
+            }
+            onTransactionStarted(transaction.getTransactionToken());
+        }
+
+        /** Called when the transaction is sent to the organizer. */
+        void onTransactionStarted(@NonNull IBinder transactionToken) {
+            if (!mWindowOrganizerController.getTransitionController().isCollecting()) {
+                return;
+            }
+            final int transitionId = mWindowOrganizerController.getTransitionController()
+                    .getCollectingTransitionId();
+            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
+                    "Defer transition id=%d for TaskFragmentTransaction=%s", transitionId,
+                    transactionToken);
+            mDeferredTransitions.put(transactionToken, transitionId);
+            mWindowOrganizerController.getTransitionController().deferTransitionReady();
+        }
+
+        /** Called when the transaction is finished. */
+        void onTransactionFinished(@NonNull IBinder transactionToken) {
+            if (!mDeferredTransitions.containsKey(transactionToken)) {
+                return;
+            }
+            final int transitionId = mDeferredTransitions.remove(transactionToken);
+            if (!mWindowOrganizerController.getTransitionController().isCollecting()
+                    || mWindowOrganizerController.getTransitionController()
+                    .getCollectingTransitionId() != transitionId) {
+                // This can happen when the transition is timeout or abort.
+                ProtoLog.w(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
+                        "Deferred transition id=%d has been continued before the"
+                                + " TaskFragmentTransaction=%s is finished",
+                        transitionId, transactionToken);
+                return;
+            }
+            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
+                    "Continue transition id=%d for TaskFragmentTransaction=%s", transitionId,
+                    transactionToken);
+            mWindowOrganizerController.getTransitionController().continueTransitionReady();
         }
     }
 
@@ -284,7 +407,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
     }
 
     @Override
-    public void registerOrganizer(ITaskFragmentOrganizer organizer) {
+    public void registerOrganizer(@NonNull ITaskFragmentOrganizer organizer) {
         final int pid = Binder.getCallingPid();
         final int uid = Binder.getCallingUid();
         synchronized (mGlobalLock) {
@@ -297,11 +420,12 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             }
             mTaskFragmentOrganizerState.put(organizer.asBinder(),
                     new TaskFragmentOrganizerState(organizer, pid, uid));
+            mPendingTaskFragmentEvents.put(organizer.asBinder(), new ArrayList<>());
         }
     }
 
     @Override
-    public void unregisterOrganizer(ITaskFragmentOrganizer organizer) {
+    public void unregisterOrganizer(@NonNull ITaskFragmentOrganizer organizer) {
         validateAndGetState(organizer);
         final int pid = Binder.getCallingPid();
         final long uid = Binder.getCallingUid();
@@ -319,8 +443,8 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
     }
 
     @Override
-    public void registerRemoteAnimations(ITaskFragmentOrganizer organizer, int taskId,
-            RemoteAnimationDefinition definition) {
+    public void registerRemoteAnimations(@NonNull ITaskFragmentOrganizer organizer, int taskId,
+            @NonNull RemoteAnimationDefinition definition) {
         final int pid = Binder.getCallingPid();
         final int uid = Binder.getCallingUid();
         synchronized (mGlobalLock) {
@@ -345,7 +469,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
     }
 
     @Override
-    public void unregisterRemoteAnimations(ITaskFragmentOrganizer organizer, int taskId) {
+    public void unregisterRemoteAnimations(@NonNull ITaskFragmentOrganizer organizer, int taskId) {
         final int pid = Binder.getCallingPid();
         final long uid = Binder.getCallingUid();
         synchronized (mGlobalLock) {
@@ -363,13 +487,39 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         }
     }
 
+    @Override
+    public void onTransactionHandled(@NonNull IBinder transactionToken,
+            @NonNull WindowContainerTransaction wct,
+            @WindowManager.TransitionType int transitionType, boolean shouldApplyIndependently) {
+        // Keep the calling identity to avoid unsecure change.
+        synchronized (mGlobalLock) {
+            applyTransaction(wct, transitionType, shouldApplyIndependently);
+            final TaskFragmentOrganizerState state = validateAndGetState(
+                    wct.getTaskFragmentOrganizer());
+            state.onTransactionFinished(transactionToken);
+        }
+    }
+
+    @Override
+    public void applyTransaction(@NonNull WindowContainerTransaction wct,
+            @WindowManager.TransitionType int transitionType, boolean shouldApplyIndependently) {
+        // Keep the calling identity to avoid unsecure change.
+        synchronized (mGlobalLock) {
+            if (wct.isEmpty()) {
+                return;
+            }
+            mWindowOrganizerController.applyTaskFragmentTransactionLocked(wct, transitionType,
+                    shouldApplyIndependently);
+        }
+    }
+
     /**
      * Gets the {@link RemoteAnimationDefinition} set on the given organizer if exists. Returns
      * {@code null} if it doesn't, or if the organizer has activity(ies) embedded in untrusted mode.
      */
     @Nullable
     public RemoteAnimationDefinition getRemoteAnimationDefinition(
-            ITaskFragmentOrganizer organizer, int taskId) {
+            @NonNull ITaskFragmentOrganizer organizer, int taskId) {
         synchronized (mGlobalLock) {
             final TaskFragmentOrganizerState organizerState =
                     mTaskFragmentOrganizerState.get(organizer.asBinder());
@@ -379,12 +529,18 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         }
     }
 
-    int getTaskFragmentOrganizerUid(ITaskFragmentOrganizer organizer) {
+    int getTaskFragmentOrganizerUid(@NonNull ITaskFragmentOrganizer organizer) {
         final TaskFragmentOrganizerState state = validateAndGetState(organizer);
         return state.mOrganizerUid;
     }
 
-    void onTaskFragmentAppeared(ITaskFragmentOrganizer organizer, TaskFragment taskFragment) {
+    void onTaskFragmentAppeared(@NonNull ITaskFragmentOrganizer organizer,
+            @NonNull TaskFragment taskFragment) {
+        if (taskFragment.getTask() == null) {
+            Slog.w(TAG, "onTaskFragmentAppeared failed because it is not attached tf="
+                    + taskFragment);
+            return;
+        }
         final TaskFragmentOrganizerState state = validateAndGetState(organizer);
         if (!state.addTaskFragment(taskFragment)) {
             return;
@@ -392,27 +548,15 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         PendingTaskFragmentEvent pendingEvent = getPendingTaskFragmentEvent(taskFragment,
                 PendingTaskFragmentEvent.EVENT_APPEARED);
         if (pendingEvent == null) {
-            pendingEvent = new PendingTaskFragmentEvent.Builder(
+            addPendingEvent(new PendingTaskFragmentEvent.Builder(
                     PendingTaskFragmentEvent.EVENT_APPEARED, organizer)
                     .setTaskFragment(taskFragment)
-                    .build();
-            mPendingTaskFragmentEvents.add(pendingEvent);
+                    .build());
         }
     }
 
-    void onTaskFragmentInfoChanged(ITaskFragmentOrganizer organizer, TaskFragment taskFragment) {
-        handleTaskFragmentInfoChanged(organizer, taskFragment,
-                PendingTaskFragmentEvent.EVENT_INFO_CHANGED);
-    }
-
-    void onTaskFragmentParentInfoChanged(ITaskFragmentOrganizer organizer,
-            TaskFragment taskFragment) {
-        handleTaskFragmentInfoChanged(organizer, taskFragment,
-                PendingTaskFragmentEvent.EVENT_PARENT_INFO_CHANGED);
-    }
-
-    private void handleTaskFragmentInfoChanged(ITaskFragmentOrganizer organizer,
-            TaskFragment taskFragment, int eventType) {
+    void onTaskFragmentInfoChanged(@NonNull ITaskFragmentOrganizer organizer,
+            @NonNull TaskFragment taskFragment) {
         validateAndGetState(organizer);
         if (!taskFragment.mTaskFragmentAppearedSent) {
             // Skip if TaskFragment still not appeared.
@@ -420,60 +564,61 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         }
         PendingTaskFragmentEvent pendingEvent = getLastPendingLifecycleEvent(taskFragment);
         if (pendingEvent == null) {
-            pendingEvent = new PendingTaskFragmentEvent.Builder(eventType, organizer)
-                            .setTaskFragment(taskFragment)
-                            .build();
+            pendingEvent = new PendingTaskFragmentEvent.Builder(
+                    PendingTaskFragmentEvent.EVENT_INFO_CHANGED, organizer)
+                    .setTaskFragment(taskFragment)
+                    .build();
         } else {
             if (pendingEvent.mEventType == PendingTaskFragmentEvent.EVENT_VANISHED) {
                 // Skipped the info changed event if vanished event is pending.
                 return;
             }
             // Remove and add for re-ordering.
-            mPendingTaskFragmentEvents.remove(pendingEvent);
+            removePendingEvent(pendingEvent);
             // Reset the defer time when TaskFragment is changed, so that it can check again if
             // the event should be sent to the organizer, for example the TaskFragment may become
             // empty.
             pendingEvent.mDeferTime = 0;
         }
-        mPendingTaskFragmentEvents.add(pendingEvent);
+        addPendingEvent(pendingEvent);
     }
 
-    void onTaskFragmentVanished(ITaskFragmentOrganizer organizer, TaskFragment taskFragment) {
+    void onTaskFragmentVanished(@NonNull ITaskFragmentOrganizer organizer,
+            @NonNull TaskFragment taskFragment) {
         final TaskFragmentOrganizerState state = validateAndGetState(organizer);
-        for (int i = mPendingTaskFragmentEvents.size() - 1; i >= 0; i--) {
-            PendingTaskFragmentEvent entry = mPendingTaskFragmentEvents.get(i);
-            if (taskFragment == entry.mTaskFragment) {
-                mPendingTaskFragmentEvents.remove(i);
-                if (entry.mEventType == PendingTaskFragmentEvent.EVENT_APPEARED) {
-                    // If taskFragment appeared callback is pending, ignore the vanished request.
-                    return;
-                }
+        final List<PendingTaskFragmentEvent> pendingEvents = mPendingTaskFragmentEvents
+                .get(organizer.asBinder());
+        // Remove any pending events since this TaskFragment is being removed.
+        for (int i = pendingEvents.size() - 1; i >= 0; i--) {
+            final PendingTaskFragmentEvent event = pendingEvents.get(i);
+            if (taskFragment == event.mTaskFragment) {
+                pendingEvents.remove(i);
             }
         }
-        if (!taskFragment.mTaskFragmentAppearedSent) {
-            return;
-        }
-        final PendingTaskFragmentEvent pendingEvent = new PendingTaskFragmentEvent.Builder(
+        addPendingEvent(new PendingTaskFragmentEvent.Builder(
                 PendingTaskFragmentEvent.EVENT_VANISHED, organizer)
                 .setTaskFragment(taskFragment)
-                .build();
-        mPendingTaskFragmentEvents.add(pendingEvent);
+                .build());
         state.removeTaskFragment(taskFragment);
     }
 
-    void onTaskFragmentError(ITaskFragmentOrganizer organizer, IBinder errorCallbackToken,
-            Throwable exception) {
+    void onTaskFragmentError(@NonNull ITaskFragmentOrganizer organizer,
+            @Nullable IBinder errorCallbackToken, @Nullable TaskFragment taskFragment,
+            int opType, @NonNull Throwable exception) {
         validateAndGetState(organizer);
         Slog.w(TAG, "onTaskFragmentError ", exception);
-        final PendingTaskFragmentEvent pendingEvent = new PendingTaskFragmentEvent.Builder(
+        addPendingEvent(new PendingTaskFragmentEvent.Builder(
                 PendingTaskFragmentEvent.EVENT_ERROR, organizer)
                 .setErrorCallbackToken(errorCallbackToken)
+                .setTaskFragment(taskFragment)
                 .setException(exception)
-                .build();
-        mPendingTaskFragmentEvents.add(pendingEvent);
+                .setOpType(opType)
+                .build());
+        // Make sure the error event will be dispatched if there are no other changes.
+        mAtmService.mWindowManager.mWindowPlacerLocked.requestTraversal();
     }
 
-    void onActivityReparentToTask(ActivityRecord activity) {
+    void onActivityReparentedToTask(@NonNull ActivityRecord activity) {
         final ITaskFragmentOrganizer organizer;
         if (activity.mLastTaskFragmentOrganizerBeforePip != null) {
             // If the activity is previously embedded in an organized TaskFragment.
@@ -498,17 +643,58 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             Slog.w(TAG, "The last TaskFragmentOrganizer no longer exists");
             return;
         }
-        final PendingTaskFragmentEvent pendingEvent = new PendingTaskFragmentEvent.Builder(
-                PendingTaskFragmentEvent.EVENT_ACTIVITY_REPARENT_TO_TASK, organizer)
+        addPendingEvent(new PendingTaskFragmentEvent.Builder(
+                PendingTaskFragmentEvent.EVENT_ACTIVITY_REPARENTED_TO_TASK, organizer)
                 .setActivity(activity)
-                .build();
-        mPendingTaskFragmentEvents.add(pendingEvent);
+                .build());
     }
 
-    private void removeOrganizer(ITaskFragmentOrganizer organizer) {
+    void onTaskFragmentParentInfoChanged(@NonNull ITaskFragmentOrganizer organizer,
+            @NonNull Task task) {
+        validateAndGetState(organizer);
+        final PendingTaskFragmentEvent pendingEvent = getLastPendingParentInfoChangedEvent(
+                organizer, task);
+        if (pendingEvent == null) {
+            addPendingEvent(new PendingTaskFragmentEvent.Builder(
+                    PendingTaskFragmentEvent.EVENT_PARENT_INFO_CHANGED, organizer)
+                    .setTask(task)
+                    .build());
+        }
+    }
+
+    @Nullable
+    private PendingTaskFragmentEvent getLastPendingParentInfoChangedEvent(
+            @NonNull ITaskFragmentOrganizer organizer, @NonNull Task task) {
+        final List<PendingTaskFragmentEvent> events = mPendingTaskFragmentEvents
+                .get(organizer.asBinder());
+        for (int i = events.size() - 1; i >= 0; i--) {
+            final PendingTaskFragmentEvent event = events.get(i);
+            if (task == event.mTask
+                    && event.mEventType == PendingTaskFragmentEvent.EVENT_PARENT_INFO_CHANGED) {
+                return event;
+            }
+        }
+        return null;
+    }
+
+    private void addPendingEvent(@NonNull PendingTaskFragmentEvent event) {
+        mPendingTaskFragmentEvents.get(event.mTaskFragmentOrg.asBinder()).add(event);
+    }
+
+    private void removePendingEvent(@NonNull PendingTaskFragmentEvent event) {
+        mPendingTaskFragmentEvents.get(event.mTaskFragmentOrg.asBinder()).remove(event);
+    }
+
+    boolean isOrganizerRegistered(@NonNull ITaskFragmentOrganizer organizer) {
+        return mTaskFragmentOrganizerState.containsKey(organizer.asBinder());
+    }
+
+    private void removeOrganizer(@NonNull ITaskFragmentOrganizer organizer) {
         final TaskFragmentOrganizerState state = validateAndGetState(organizer);
         // remove all of the children of the organized TaskFragment
         state.dispose();
+        // Remove any pending event of this organizer.
+        mPendingTaskFragmentEvents.remove(organizer.asBinder());
         mTaskFragmentOrganizerState.remove(organizer.asBinder());
     }
 
@@ -518,7 +704,9 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
      * we wouldn't register {@link DeathRecipient} for the organizer, and might not remove the
      * {@link TaskFragment} after the organizer process died.
      */
-    private TaskFragmentOrganizerState validateAndGetState(ITaskFragmentOrganizer organizer) {
+    @NonNull
+    private TaskFragmentOrganizerState validateAndGetState(
+            @NonNull ITaskFragmentOrganizer organizer) {
         final TaskFragmentOrganizerState state =
                 mTaskFragmentOrganizerState.get(organizer.asBinder());
         if (state == null) {
@@ -538,7 +726,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         static final int EVENT_INFO_CHANGED = 2;
         static final int EVENT_PARENT_INFO_CHANGED = 3;
         static final int EVENT_ERROR = 4;
-        static final int EVENT_ACTIVITY_REPARENT_TO_TASK = 5;
+        static final int EVENT_ACTIVITY_REPARENTED_TO_TASK = 5;
 
         @IntDef(prefix = "EVENT_", value = {
                 EVENT_APPEARED,
@@ -546,7 +734,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                 EVENT_INFO_CHANGED,
                 EVENT_PARENT_INFO_CHANGED,
                 EVENT_ERROR,
-                EVENT_ACTIVITY_REPARENT_TO_TASK
+                EVENT_ACTIVITY_REPARENTED_TO_TASK
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface EventType {}
@@ -562,22 +750,29 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         private final Throwable mException;
         @Nullable
         private final ActivityRecord mActivity;
+        @Nullable
+        private final Task mTask;
         // Set when the event is deferred due to the host task is invisible. The defer time will
         // be the last active time of the host task.
         private long mDeferTime;
+        private int mOpType;
 
         private PendingTaskFragmentEvent(@EventType int eventType,
                 ITaskFragmentOrganizer taskFragmentOrg,
                 @Nullable TaskFragment taskFragment,
                 @Nullable IBinder errorCallbackToken,
                 @Nullable Throwable exception,
-                @Nullable ActivityRecord activity) {
+                @Nullable ActivityRecord activity,
+                @Nullable Task task,
+                int opType) {
             mEventType = eventType;
             mTaskFragmentOrg = taskFragmentOrg;
             mTaskFragment = taskFragment;
             mErrorCallbackToken = errorCallbackToken;
             mException = exception;
             mActivity = activity;
+            mTask = task;
+            mOpType = opType;
         }
 
         /**
@@ -608,10 +803,13 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             private Throwable mException;
             @Nullable
             private ActivityRecord mActivity;
+            @Nullable
+            private Task mTask;
+            private int mOpType;
 
-            Builder(@EventType int eventType, ITaskFragmentOrganizer taskFragmentOrg) {
+            Builder(@EventType int eventType, @NonNull ITaskFragmentOrganizer taskFragmentOrg) {
                 mEventType = eventType;
-                mTaskFragmentOrg = taskFragmentOrg;
+                mTaskFragmentOrg = requireNonNull(taskFragmentOrg);
             }
 
             Builder setTaskFragment(@Nullable TaskFragment taskFragment) {
@@ -624,47 +822,69 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                 return this;
             }
 
-            Builder setException(@Nullable Throwable exception) {
-                mException = exception;
+            Builder setException(@NonNull Throwable exception) {
+                mException = requireNonNull(exception);
                 return this;
             }
 
-            Builder setActivity(@Nullable ActivityRecord activity) {
-                mActivity = activity;
+            Builder setActivity(@NonNull ActivityRecord activity) {
+                mActivity = requireNonNull(activity);
+                return this;
+            }
+
+            Builder setTask(@NonNull Task task) {
+                mTask = requireNonNull(task);
+                return this;
+            }
+
+            Builder setOpType(int opType) {
+                mOpType = opType;
                 return this;
             }
 
             PendingTaskFragmentEvent build() {
                 return new PendingTaskFragmentEvent(mEventType, mTaskFragmentOrg, mTaskFragment,
-                        mErrorCallbackToken, mException, mActivity);
+                        mErrorCallbackToken, mException, mActivity, mTask, mOpType);
             }
         }
     }
 
     @Nullable
-    private PendingTaskFragmentEvent getLastPendingLifecycleEvent(TaskFragment tf) {
-        for (int i = mPendingTaskFragmentEvents.size() - 1; i >= 0; i--) {
-            PendingTaskFragmentEvent entry = mPendingTaskFragmentEvents.get(i);
-            if (tf == entry.mTaskFragment && entry.isLifecycleEvent()) {
-                return entry;
+    private PendingTaskFragmentEvent getLastPendingLifecycleEvent(@NonNull TaskFragment tf) {
+        final ITaskFragmentOrganizer organizer = tf.getTaskFragmentOrganizer();
+        final List<PendingTaskFragmentEvent> events = mPendingTaskFragmentEvents
+                .get(organizer.asBinder());
+        for (int i = events.size() - 1; i >= 0; i--) {
+            final PendingTaskFragmentEvent event = events.get(i);
+            if (tf == event.mTaskFragment && event.isLifecycleEvent()) {
+                return event;
             }
         }
         return null;
     }
 
     @Nullable
-    private PendingTaskFragmentEvent getPendingTaskFragmentEvent(TaskFragment taskFragment,
+    private PendingTaskFragmentEvent getPendingTaskFragmentEvent(@NonNull TaskFragment taskFragment,
             int type) {
-        for (int i = mPendingTaskFragmentEvents.size() - 1; i >= 0; i--) {
-            PendingTaskFragmentEvent entry = mPendingTaskFragmentEvents.get(i);
-            if (taskFragment == entry.mTaskFragment && type == entry.mEventType) {
-                return entry;
+        final ITaskFragmentOrganizer organizer = taskFragment.getTaskFragmentOrganizer();
+        final List<PendingTaskFragmentEvent> events = mPendingTaskFragmentEvents
+                .get(organizer.asBinder());
+        for (int i = events.size() - 1; i >= 0; i--) {
+            final PendingTaskFragmentEvent event = events.get(i);
+            if (taskFragment == event.mTaskFragment && type == event.mEventType) {
+                return event;
             }
         }
         return null;
     }
 
     private boolean shouldSendEventWhenTaskInvisible(@NonNull PendingTaskFragmentEvent event) {
+        if (event.mEventType == PendingTaskFragmentEvent.EVENT_ERROR
+                // Always send parent info changed to update task visibility
+                || event.mEventType == PendingTaskFragmentEvent.EVENT_PARENT_INFO_CHANGED) {
+            return true;
+        }
+
         final TaskFragmentOrganizerState state =
                 mTaskFragmentOrganizerState.get(event.mTaskFragmentOrg.asBinder());
         final TaskFragmentInfo lastInfo = state.mLastSentTaskFragmentInfos.get(event.mTaskFragment);
@@ -680,12 +900,25 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                 || mPendingTaskFragmentEvents.isEmpty()) {
             return;
         }
+        final int organizerNum = mPendingTaskFragmentEvents.size();
+        for (int i = 0; i < organizerNum; i++) {
+            final TaskFragmentOrganizerState state =
+                    mTaskFragmentOrganizerState.get(mPendingTaskFragmentEvents.keyAt(i));
+            dispatchPendingEvents(state, mPendingTaskFragmentEvents.valueAt(i));
+        }
+    }
+
+    void dispatchPendingEvents(@NonNull TaskFragmentOrganizerState state,
+            @NonNull List<PendingTaskFragmentEvent> pendingEvents) {
+        if (pendingEvents.isEmpty()) {
+            return;
+        }
 
         final ArrayList<Task> visibleTasks = new ArrayList<>();
         final ArrayList<Task> invisibleTasks = new ArrayList<>();
         final ArrayList<PendingTaskFragmentEvent> candidateEvents = new ArrayList<>();
-        for (int i = 0, n = mPendingTaskFragmentEvents.size(); i < n; i++) {
-            final PendingTaskFragmentEvent event = mPendingTaskFragmentEvents.get(i);
+        for (int i = 0, n = pendingEvents.size(); i < n; i++) {
+            final PendingTaskFragmentEvent event = pendingEvents.get(i);
             final Task task = event.mTaskFragment != null ? event.mTaskFragment.getTask() : null;
             if (task != null && (task.lastActiveTime <= event.mDeferTime
                     || !(isTaskVisible(task, visibleTasks, invisibleTasks)
@@ -697,16 +930,35 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             candidateEvents.add(event);
         }
         final int numEvents = candidateEvents.size();
+        if (numEvents == 0) {
+            return;
+        }
+
+        mTmpTaskSet.clear();
+        final TaskFragmentTransaction transaction = new TaskFragmentTransaction();
         for (int i = 0; i < numEvents; i++) {
-            dispatchEvent(candidateEvents.get(i));
+            final PendingTaskFragmentEvent event = candidateEvents.get(i);
+            if (event.mEventType == PendingTaskFragmentEvent.EVENT_APPEARED
+                    || event.mEventType == PendingTaskFragmentEvent.EVENT_INFO_CHANGED) {
+                final Task task = event.mTaskFragment.getTask();
+                if (mTmpTaskSet.add(task)) {
+                    // Make sure the organizer know about the Task config.
+                    transaction.addChange(prepareChange(new PendingTaskFragmentEvent.Builder(
+                            PendingTaskFragmentEvent.EVENT_PARENT_INFO_CHANGED, state.mOrganizer)
+                            .setTask(task)
+                            .build()));
+                }
+            }
+            transaction.addChange(prepareChange(event));
         }
-        if (numEvents > 0) {
-            mPendingTaskFragmentEvents.removeAll(candidateEvents);
-        }
+        mTmpTaskSet.clear();
+        state.dispatchTransaction(transaction);
+        pendingEvents.removeAll(candidateEvents);
     }
 
-    private static boolean isTaskVisible(Task task, ArrayList<Task> knownVisibleTasks,
-            ArrayList<Task> knownInvisibleTasks) {
+    private static boolean isTaskVisible(@NonNull Task task,
+            @NonNull ArrayList<Task> knownVisibleTasks,
+            @NonNull ArrayList<Task> knownInvisibleTasks) {
         if (knownVisibleTasks.contains(task)) {
             return true;
         }
@@ -722,43 +974,52 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         }
     }
 
-    void dispatchPendingInfoChangedEvent(TaskFragment taskFragment) {
-        PendingTaskFragmentEvent event = getPendingTaskFragmentEvent(taskFragment,
+    void dispatchPendingInfoChangedEvent(@NonNull TaskFragment taskFragment) {
+        final PendingTaskFragmentEvent event = getPendingTaskFragmentEvent(taskFragment,
                 PendingTaskFragmentEvent.EVENT_INFO_CHANGED);
         if (event == null) {
             return;
         }
 
-        dispatchEvent(event);
-        mPendingTaskFragmentEvents.remove(event);
+        final ITaskFragmentOrganizer organizer = taskFragment.getTaskFragmentOrganizer();
+        final TaskFragmentOrganizerState state = validateAndGetState(organizer);
+        final TaskFragmentTransaction transaction = new TaskFragmentTransaction();
+        // Make sure the organizer know about the Task config.
+        transaction.addChange(prepareChange(new PendingTaskFragmentEvent.Builder(
+                PendingTaskFragmentEvent.EVENT_PARENT_INFO_CHANGED, organizer)
+                .setTask(taskFragment.getTask())
+                .build()));
+        transaction.addChange(prepareChange(event));
+        state.dispatchTransaction(transaction);
+        mPendingTaskFragmentEvents.get(organizer.asBinder()).remove(event);
     }
 
-    private void dispatchEvent(PendingTaskFragmentEvent event) {
+    @Nullable
+    private TaskFragmentTransaction.Change prepareChange(
+            @NonNull PendingTaskFragmentEvent event) {
         final ITaskFragmentOrganizer taskFragmentOrg = event.mTaskFragmentOrg;
         final TaskFragment taskFragment = event.mTaskFragment;
         final TaskFragmentOrganizerState state =
                 mTaskFragmentOrganizerState.get(taskFragmentOrg.asBinder());
         if (state == null) {
-            return;
+            return null;
         }
         switch (event.mEventType) {
             case PendingTaskFragmentEvent.EVENT_APPEARED:
-                state.onTaskFragmentAppeared(taskFragment);
-                break;
+                return state.prepareTaskFragmentAppeared(taskFragment);
             case PendingTaskFragmentEvent.EVENT_VANISHED:
-                state.onTaskFragmentVanished(taskFragment);
-                break;
+                return state.prepareTaskFragmentVanished(taskFragment);
             case PendingTaskFragmentEvent.EVENT_INFO_CHANGED:
-                state.onTaskFragmentInfoChanged(taskFragment);
-                break;
+                return state.prepareTaskFragmentInfoChanged(taskFragment);
             case PendingTaskFragmentEvent.EVENT_PARENT_INFO_CHANGED:
-                state.onTaskFragmentParentInfoChanged(taskFragment);
-                break;
+                return state.prepareTaskFragmentParentInfoChanged(event.mTask);
             case PendingTaskFragmentEvent.EVENT_ERROR:
-                state.onTaskFragmentError(event.mErrorCallbackToken, event.mException);
-                break;
-            case PendingTaskFragmentEvent.EVENT_ACTIVITY_REPARENT_TO_TASK:
-                state.onActivityReparentToTask(event.mActivity);
+                return state.prepareTaskFragmentError(event.mErrorCallbackToken, taskFragment,
+                        event.mOpType, event.mException);
+            case PendingTaskFragmentEvent.EVENT_ACTIVITY_REPARENTED_TO_TASK:
+                return state.prepareActivityReparentedToTask(event.mActivity);
+            default:
+                throw new IllegalArgumentException("Unknown TaskFragmentEvent=" + event.mEventType);
         }
     }
 

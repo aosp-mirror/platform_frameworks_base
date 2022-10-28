@@ -64,4 +64,9 @@ public class ComplicationViewModel extends ViewModel {
     public void exitDream() {
         mHost.requestExitDream();
     }
+
+    @Override
+    public String toString() {
+        return mId + "=" + mComplication.toString();
+    }
 }

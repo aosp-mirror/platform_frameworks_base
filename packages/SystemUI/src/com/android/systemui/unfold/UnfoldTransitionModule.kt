@@ -20,6 +20,7 @@ import android.content.Context
 import android.view.IWindowManager
 import com.android.systemui.keyguard.LifecycleScreenStatusProvider
 import com.android.systemui.unfold.config.UnfoldTransitionConfig
+import com.android.systemui.unfold.system.SystemUnfoldSharedModule
 import com.android.systemui.unfold.updates.FoldStateProvider
 import com.android.systemui.unfold.updates.screen.ScreenStatusProvider
 import com.android.systemui.unfold.util.NaturalRotationUnfoldProgressProvider
@@ -34,7 +35,7 @@ import java.util.Optional
 import javax.inject.Named
 import javax.inject.Singleton
 
-@Module(includes = [UnfoldSharedModule::class])
+@Module(includes = [UnfoldSharedModule::class, SystemUnfoldSharedModule::class])
 class UnfoldTransitionModule {
 
     @Provides @UnfoldTransitionATracePrefix fun tracingTagPrefix() = "systemui"
@@ -59,11 +60,6 @@ class UnfoldTransitionModule {
         optionalFoldStateLoggingProvider.map { FoldStateLoggingProvider ->
             FoldStateLogger(FoldStateLoggingProvider)
         }
-
-    @Provides
-    @Singleton
-    fun provideUnfoldTransitionConfig(context: Context): UnfoldTransitionConfig =
-        createConfig(context)
 
     @Provides
     @Singleton

@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.Manifest.permission.HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 import static android.Manifest.permission.HIDE_OVERLAY_WINDOWS;
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
+import static android.Manifest.permission.SET_UNRESTRICTED_GESTURE_EXCLUSION;
 import static android.Manifest.permission.SET_UNRESTRICTED_KEEP_CLEAR_AREAS;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.Manifest.permission.SYSTEM_APPLICATION_OVERLAY;
@@ -109,14 +110,13 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 
     final boolean mCanCreateSystemApplicationOverlay;
     final boolean mCanHideNonSystemOverlayWindows;
+    final boolean mCanSetUnrestrictedGestureExclusion;
     private AlertWindowNotification mAlertWindowNotification;
     private boolean mShowingAlertWindowNotificationAllowed;
     private boolean mClientDead = false;
     private float mLastReportedAnimatorScale;
     private String mPackageName;
     private String mRelayoutTag;
-    private String mUpdateViewVisibilityTag;
-    private String mUpdateWindowLayoutTag;
     private final InsetsVisibilities mDummyRequestedVisibilities = new InsetsVisibilities();
     private final InsetsSourceControl[] mDummyControls =  new InsetsSourceControl[0];
     final boolean mSetsUnrestrictedKeepClearAreas;
@@ -140,6 +140,9 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
                 START_TASKS_FROM_RECENTS) == PERMISSION_GRANTED;
         mSetsUnrestrictedKeepClearAreas =
                 service.mContext.checkCallingOrSelfPermission(SET_UNRESTRICTED_KEEP_CLEAR_AREAS)
+                        == PERMISSION_GRANTED;
+        mCanSetUnrestrictedGestureExclusion =
+                service.mContext.checkCallingOrSelfPermission(SET_UNRESTRICTED_GESTURE_EXCLUSION)
                         == PERMISSION_GRANTED;
         mShowingAlertWindowNotificationAllowed = mService.mShowAlertWindowNotifications;
         mDragDropController = mService.mDragDropController;
@@ -195,27 +198,31 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     public int addToDisplay(IWindow window, WindowManager.LayoutParams attrs,
             int viewVisibility, int displayId, InsetsVisibilities requestedVisibilities,
             InputChannel outInputChannel, InsetsState outInsetsState,
-            InsetsSourceControl[] outActiveControls) {
+            InsetsSourceControl[] outActiveControls, Rect outAttachedFrame,
+            float[] outSizeCompatScale) {
         return mService.addWindow(this, window, attrs, viewVisibility, displayId,
                 UserHandle.getUserId(mUid), requestedVisibilities, outInputChannel, outInsetsState,
-                outActiveControls);
+                outActiveControls, outAttachedFrame, outSizeCompatScale);
     }
 
     @Override
     public int addToDisplayAsUser(IWindow window, WindowManager.LayoutParams attrs,
             int viewVisibility, int displayId, int userId, InsetsVisibilities requestedVisibilities,
             InputChannel outInputChannel, InsetsState outInsetsState,
-            InsetsSourceControl[] outActiveControls) {
+            InsetsSourceControl[] outActiveControls, Rect outAttachedFrame,
+            float[] outSizeCompatScale) {
         return mService.addWindow(this, window, attrs, viewVisibility, displayId, userId,
-                requestedVisibilities, outInputChannel, outInsetsState, outActiveControls);
+                requestedVisibilities, outInputChannel, outInsetsState, outActiveControls,
+                outAttachedFrame, outSizeCompatScale);
     }
 
     @Override
     public int addToDisplayWithoutInputChannel(IWindow window, WindowManager.LayoutParams attrs,
-            int viewVisibility, int displayId, InsetsState outInsetsState) {
+            int viewVisibility, int displayId, InsetsState outInsetsState, Rect outAttachedFrame,
+            float[] outSizeCompatScale) {
         return mService.addWindow(this, window, attrs, viewVisibility, displayId,
                 UserHandle.getUserId(mUid), mDummyRequestedVisibilities, null /* outInputChannel */,
-                outInsetsState, mDummyControls);
+                outInsetsState, mDummyControls, outAttachedFrame, outSizeCompatScale);
     }
 
     @Override
@@ -224,48 +231,43 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     }
 
     @Override
-    public int updateVisibility(IWindow client, WindowManager.LayoutParams attrs,
-            int viewVisibility, MergedConfiguration outMergedConfiguration,
-            SurfaceControl outSurfaceControl, InsetsState outInsetsState,
-            InsetsSourceControl[] outActiveControls) {
-        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, mUpdateViewVisibilityTag);
-        int res = mService.updateViewVisibility(this, client, attrs, viewVisibility,
-                outMergedConfiguration, outSurfaceControl, outInsetsState, outActiveControls);
-        Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
-        return res;
-    }
-
-    @Override
-    public void updateLayout(IWindow window, WindowManager.LayoutParams attrs, int flags,
-            ClientWindowFrames clientFrames, int requestedWidth, int requestedHeight) {
-        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, mUpdateWindowLayoutTag);
-        mService.updateWindowLayout(this, window, attrs, flags, clientFrames, requestedWidth,
-                requestedHeight);
-        Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
-    }
-
-    @Override
     public void prepareToReplaceWindows(IBinder appToken, boolean childrenOnly) {
         mService.setWillReplaceWindows(appToken, childrenOnly);
     }
 
     @Override
+    public boolean cancelDraw(IWindow window) {
+        return mService.cancelDraw(this, window);
+    }
+
+    @Override
     public int relayout(IWindow window, WindowManager.LayoutParams attrs,
-            int requestedWidth, int requestedHeight, int viewFlags, int flags,
-            ClientWindowFrames outFrames, MergedConfiguration mergedConfiguration,
-            SurfaceControl outSurfaceControl, InsetsState outInsetsState,
-            InsetsSourceControl[] outActiveControls, Bundle outSyncSeqIdBundle) {
+            int requestedWidth, int requestedHeight, int viewFlags, int flags, int seq,
+            int lastSyncSeqId, ClientWindowFrames outFrames,
+            MergedConfiguration mergedConfiguration, SurfaceControl outSurfaceControl,
+            InsetsState outInsetsState, InsetsSourceControl[] outActiveControls,
+            Bundle outSyncSeqIdBundle) {
         if (false) Slog.d(TAG_WM, ">>>>>> ENTERED relayout from "
                 + Binder.getCallingPid());
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, mRelayoutTag);
         int res = mService.relayoutWindow(this, window, attrs,
-                requestedWidth, requestedHeight, viewFlags, flags,
-                outFrames, mergedConfiguration, outSurfaceControl, outInsetsState,
+                requestedWidth, requestedHeight, viewFlags, flags, seq,
+                lastSyncSeqId, outFrames, mergedConfiguration, outSurfaceControl, outInsetsState,
                 outActiveControls, outSyncSeqIdBundle);
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         if (false) Slog.d(TAG_WM, "<<<<<< EXITING relayout to "
                 + Binder.getCallingPid());
         return res;
+    }
+
+    @Override
+    public void relayoutAsync(IWindow window, WindowManager.LayoutParams attrs,
+            int requestedWidth, int requestedHeight, int viewFlags, int flags, int seq,
+            int lastSyncSeqId) {
+        relayout(window, attrs, requestedWidth, requestedHeight, viewFlags, flags, seq,
+                lastSyncSeqId, null /* outFrames */, null /* mergedConfiguration */,
+                null /* outSurfaceControl */, null /* outInsetsState */,
+                null /* outActiveControls */, null /* outSyncIdBundle */);
     }
 
     @Override
@@ -711,8 +713,6 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
             if (wpc != null) {
                 mPackageName = wpc.mInfo.packageName;
                 mRelayoutTag = "relayoutWindow: " + mPackageName;
-                mUpdateViewVisibilityTag = "updateVisibility: " + mPackageName;
-                mUpdateWindowLayoutTag = "updateLayout: " + mPackageName;
             } else {
                 Slog.e(TAG_WM, "Unknown process pid=" + mPid);
             }

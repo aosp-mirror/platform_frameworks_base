@@ -17,6 +17,11 @@
 package com.android.wm.shell.recents;
 
 import com.android.wm.shell.common.annotations.ExternalThread;
+import com.android.wm.shell.util.GroupedRecentTaskInfo;
+
+import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 /**
  * Interface for interacting with the recent tasks.
@@ -28,5 +33,12 @@ public interface RecentTasks {
      */
     default IRecentTasks createExternalInterface() {
         return null;
+    }
+
+    /**
+     * Gets the set of recent tasks.
+     */
+    default void getRecentTasks(int maxNum, int flags, int userId, Executor callbackExecutor,
+            Consumer<List<GroupedRecentTaskInfo>> callback) {
     }
 }

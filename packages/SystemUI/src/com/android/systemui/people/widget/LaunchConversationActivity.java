@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.LauncherApps;
 import android.os.Bundle;
+import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -34,6 +35,7 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.UiEventLoggerImpl;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.people.PeopleSpaceUtils;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -43,6 +45,7 @@ import com.android.systemui.wmshell.BubblesManager;
 import com.android.wm.shell.bubbles.Bubble;
 
 import java.util.Optional;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
@@ -58,6 +61,7 @@ public class LaunchConversationActivity extends Activity {
     private boolean mIsForTesting;
     private IStatusBarService mIStatusBarService;
     private CommandQueue mCommandQueue;
+    private Executor mBgExecutor;
     private Bubble mBubble;
     private NotificationEntry mEntryToBubble;
 
@@ -67,7 +71,8 @@ public class LaunchConversationActivity extends Activity {
             CommonNotifCollection commonNotifCollection,
             Optional<BubblesManager> bubblesManagerOptional,
             UserManager userManager,
-            CommandQueue commandQueue
+            CommandQueue commandQueue,
+            @Background Executor bgExecutor
     ) {
         super();
         mVisibilityProvider = visibilityProvider;
@@ -91,6 +96,7 @@ public class LaunchConversationActivity extends Activity {
                 mCommandQueue.removeCallback(this);
             }
         });
+        mBgExecutor = bgExecutor;
     }
 
     @Override
@@ -172,34 +178,36 @@ public class LaunchConversationActivity extends Activity {
             return;
         }
 
-        try {
-            if (mIStatusBarService == null || mCommonNotifCollection == null) {
-                if (DEBUG) {
-                    Log.d(TAG, "Skipping clear notification: null services, key: " + notifKey);
-                }
-                return;
+        if (mIStatusBarService == null || mCommonNotifCollection == null) {
+            if (DEBUG) {
+                Log.d(TAG, "Skipping clear notification: null services, key: " + notifKey);
             }
-
-            NotificationEntry entry = mCommonNotifCollection.getEntry(notifKey);
-            if (entry == null || entry.getRanking() == null) {
-                if (DEBUG) {
-                    Log.d(TAG, "Skipping clear notification: NotificationEntry or its Ranking"
-                            + " is null, key: " + notifKey);
-                }
-                return;
-            }
-
-            NotificationVisibility notifVisibility = mVisibilityProvider.obtain(entry, true);
-            int rank = notifVisibility.rank;
-
-            if (DEBUG) Log.d(TAG, "Clearing notification, key: " + notifKey + ", rank: " + rank);
-            mIStatusBarService.onNotificationClear(
-                    packageName, userHandle.getIdentifier(), notifKey,
-                    NotificationStats.DISMISSAL_OTHER,
-                    NotificationStats.DISMISS_SENTIMENT_POSITIVE, notifVisibility);
-        } catch (Exception e) {
-            Log.e(TAG, "Exception cancelling notification:" + e);
+            return;
         }
+
+        NotificationEntry entry = mCommonNotifCollection.getEntry(notifKey);
+        if (entry == null || entry.getRanking() == null) {
+            if (DEBUG) {
+                Log.d(TAG, "Skipping clear notification: NotificationEntry or its Ranking"
+                        + " is null, key: " + notifKey);
+            }
+            return;
+        }
+
+        NotificationVisibility notifVisibility = mVisibilityProvider.obtain(entry, true);
+        int rank = notifVisibility.rank;
+
+        if (DEBUG) Log.d(TAG, "Clearing notification, key: " + notifKey + ", rank: " + rank);
+        mBgExecutor.execute(() -> {
+            try {
+                mIStatusBarService.onNotificationClear(
+                        packageName, userHandle.getIdentifier(), notifKey,
+                        NotificationStats.DISMISSAL_OTHER,
+                        NotificationStats.DISMISS_SENTIMENT_POSITIVE, notifVisibility);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Exception cancelling notification:" + e);
+            }
+        });
     }
 
     @VisibleForTesting

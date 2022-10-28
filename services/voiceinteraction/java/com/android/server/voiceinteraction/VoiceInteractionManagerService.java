@@ -95,6 +95,7 @@ import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.LatencyTracker;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -102,6 +103,7 @@ import com.android.server.UiThread;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.permission.LegacyPermissionManagerInternal;
 import com.android.server.soundtrigger.SoundTriggerInternal;
+import com.android.server.utils.Slogf;
 import com.android.server.utils.TimingsTraceAndSlog;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
@@ -134,18 +136,21 @@ public class VoiceInteractionManagerService extends SystemService {
     private final RemoteCallbackList<IVoiceInteractionSessionListener>
             mVoiceInteractionSessionListeners = new RemoteCallbackList<>();
 
+    // TODO(b/226201975): remove once RoleService supports pre-created users
+    private final ArrayList<UserHandle> mIgnoredPreCreatedUsers = new ArrayList<>();
+
     public VoiceInteractionManagerService(Context context) {
         super(context);
         mContext = context;
         mResolver = context.getContentResolver();
+        mUserManagerInternal = Objects.requireNonNull(
+                LocalServices.getService(UserManagerInternal.class));
         mDbHelper = new DatabaseHelper(context);
         mServiceStub = new VoiceInteractionManagerServiceStub();
         mAmInternal = Objects.requireNonNull(
                 LocalServices.getService(ActivityManagerInternal.class));
         mAtmInternal = Objects.requireNonNull(
                 LocalServices.getService(ActivityTaskManagerInternal.class));
-        mUserManagerInternal = Objects.requireNonNull(
-                LocalServices.getService(UserManagerInternal.class));
 
         LegacyPermissionManagerInternal permissionManagerInternal = LocalServices.getService(
                 LegacyPermissionManagerInternal.class);
@@ -187,6 +192,8 @@ public class VoiceInteractionManagerService extends SystemService {
             mSoundTriggerInternal = LocalServices.getService(SoundTriggerInternal.class);
         } else if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
             mServiceStub.systemRunning(isSafeMode());
+        } else if (phase == PHASE_BOOT_COMPLETED) {
+            mServiceStub.registerVoiceInteractionSessionListener(mLatencyLoggingListener);
         }
     }
 
@@ -300,6 +307,25 @@ public class VoiceInteractionManagerService extends SystemService {
             }
             return hotwordDetectionConnection.mIdentity;
         }
+
+        @Override
+        public void onPreCreatedUserConversion(int userId) {
+            Slogf.d(TAG, "onPreCreatedUserConversion(%d)", userId);
+
+            for (int i = 0; i < mIgnoredPreCreatedUsers.size(); i++) {
+                UserHandle preCreatedUser = mIgnoredPreCreatedUsers.get(i);
+                if (preCreatedUser.getIdentifier() == userId) {
+                    Slogf.d(TAG, "Updating role on pre-created user %d", userId);
+                    mServiceStub.mRoleObserver.onRoleHoldersChanged(RoleManager.ROLE_ASSISTANT,
+                            preCreatedUser);
+                    mIgnoredPreCreatedUsers.remove(i);
+                    return;
+                }
+            }
+            Slogf.w(TAG, "onPreCreatedUserConversion(%d): not available on "
+                    + "mIgnoredPreCreatedUserIds (%s)", userId, mIgnoredPreCreatedUsers);
+        }
+
     }
 
     // implementation entry point and binder service
@@ -317,10 +343,12 @@ public class VoiceInteractionManagerService extends SystemService {
         private boolean mTemporarilyDisabled;
 
         private final boolean mEnableService;
+        // TODO(b/226201975): remove reference once RoleService supports pre-created users
+        private final RoleObserver mRoleObserver;
 
         VoiceInteractionManagerServiceStub() {
             mEnableService = shouldEnableService(mContext);
-            new RoleObserver(mContext.getMainExecutor());
+            mRoleObserver = new RoleObserver(mContext.getMainExecutor());
         }
 
         void handleUserStop(String packageName, int userHandle) {
@@ -1884,6 +1912,7 @@ public class VoiceInteractionManagerService extends SystemService {
                 pw.println("  mTemporarilyDisabled: " + mTemporarilyDisabled);
                 pw.println("  mCurUser: " + mCurUser);
                 pw.println("  mCurUserSupported: " + mCurUserSupported);
+                pw.println("  mIgnoredPreCreatedUsers: " + mIgnoredPreCreatedUsers);
                 dumpSupportedUsers(pw, "  ");
                 mDbHelper.dump(pw);
                 if (mImpl == null) {
@@ -1996,6 +2025,23 @@ public class VoiceInteractionManagerService extends SystemService {
                 }
 
                 List<String> roleHolders = mRm.getRoleHoldersAsUser(roleName, user);
+
+                // TODO(b/226201975): this method is beling called when a pre-created user is added,
+                // at which point it doesn't have any role holders. But it's not called again when
+                // the actual user is added (i.e., when the  pre-created user is converted), so we
+                // need to save the user id and call this method again when it's converted
+                // (at onPreCreatedUserConversion()).
+                // Once RoleService properly handles pre-created users, this workaround should be
+                // removed.
+                if (roleHolders.isEmpty()) {
+                    UserInfo userInfo = mUserManagerInternal.getUserInfo(user.getIdentifier());
+                    if (userInfo != null && userInfo.preCreated) {
+                        Slogf.d(TAG, "onRoleHoldersChanged(): ignoring pre-created user %s for now",
+                                userInfo.toFullString());
+                        mIgnoredPreCreatedUsers.add(user);
+                        return;
+                    }
+                }
 
                 int userId = user.getIdentifier();
                 if (roleHolders.isEmpty()) {
@@ -2291,4 +2337,36 @@ public class VoiceInteractionManagerService extends SystemService {
             }
         };
     }
+
+    /**
+     * End the latency tracking log for keyphrase hotword invocation.
+     * The measurement covers from when the SoundTrigger HAL emits an event, captured in
+     * {@link com.android.server.soundtrigger_middleware.SoundTriggerMiddlewareLogging}
+     * to when the {@link android.service.voice.VoiceInteractionSession} system UI view is shown.
+     */
+    private final IVoiceInteractionSessionListener mLatencyLoggingListener =
+            new IVoiceInteractionSessionListener.Stub() {
+                @Override
+                public void onVoiceSessionShown() throws RemoteException {}
+
+                @Override
+                public void onVoiceSessionHidden() throws RemoteException {}
+
+                @Override
+                public void onVoiceSessionWindowVisibilityChanged(boolean visible)
+                        throws RemoteException {
+                    if (visible) {
+                        LatencyTracker.getInstance(mContext)
+                                .onActionEnd(LatencyTracker.ACTION_SHOW_VOICE_INTERACTION);
+                    }
+                }
+
+                @Override
+                public void onSetUiHints(Bundle args) throws RemoteException {}
+
+                @Override
+                public IBinder asBinder() {
+                    return mServiceStub;
+                }
+            };
 }

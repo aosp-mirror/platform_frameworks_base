@@ -17,7 +17,7 @@
 <!-- Long screenshot edit FAB background -->
 <ripple xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
-        android:color="?android:textColorPrimary">
+        android:color="@color/overlay_button_ripple">
     <item android:id="@android:id/background">
         <shape android:shape="rectangle">
             <solid android:color="?androidprv:attr/colorAccentPrimary"/>

@@ -26,7 +26,6 @@ import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.colorextraction.SysuiColorExtractor
 import com.android.systemui.demomode.DemoModeController
 import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.qs.carrier.QSCarrierGroup
 import com.android.systemui.qs.carrier.QSCarrierGroupController
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
@@ -46,10 +45,10 @@ import org.junit.runner.RunWith
 import org.mockito.Answers
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.anyBoolean
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @SmallTest
@@ -94,6 +93,10 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
     private lateinit var featureFlags: FeatureFlags
     @Mock
     private lateinit var insetsProvider: StatusBarContentInsetsProvider
+    @Mock
+    private lateinit var iconManagerFactory: StatusBarIconController.TintedIconManager.Factory
+    @Mock
+    private lateinit var iconManager: StatusBarIconController.TintedIconManager
 
     private val qsExpansionPathInterpolator = QSExpansionPathInterpolator()
 
@@ -107,6 +110,7 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
         `when`(qsCarrierGroupControllerBuilder.build()).thenReturn(qsCarrierGroupController)
         `when`(variableDateViewControllerFactory.create(any()))
                 .thenReturn(variableDateViewController)
+        `when`(iconManagerFactory.create(any(), any())).thenReturn(iconManager)
         `when`(view.resources).thenReturn(mContext.resources)
         `when`(view.isAttachedToWindow).thenReturn(true)
         `when`(view.context).thenReturn(context)
@@ -123,7 +127,8 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
                 featureFlags,
                 variableDateViewControllerFactory,
                 batteryMeterViewController,
-                insetsProvider
+                insetsProvider,
+                iconManagerFactory,
         )
     }
 
@@ -162,7 +167,6 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
 
     @Test
     fun testRSSISlot_notCombined() {
-        `when`(featureFlags.isEnabled(Flags.COMBINED_STATUS_BAR_SIGNAL_ICONS)).thenReturn(false)
         controller.init()
 
         val captor = argumentCaptor<List<String>>()
@@ -170,20 +174,6 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
 
         assertThat(captor.value).containsExactly(
             mContext.getString(com.android.internal.R.string.status_bar_mobile)
-        )
-    }
-
-    @Test
-    fun testRSSISlot_combined() {
-        `when`(featureFlags.isEnabled(Flags.COMBINED_STATUS_BAR_SIGNAL_ICONS)).thenReturn(true)
-        controller.init()
-
-        val captor = argumentCaptor<List<String>>()
-        verify(view).onAttach(any(), any(), capture(captor), any(), anyBoolean())
-
-        assertThat(captor.value).containsExactly(
-            mContext.getString(com.android.internal.R.string.status_bar_no_calling),
-            mContext.getString(com.android.internal.R.string.status_bar_call_strength)
         )
     }
 
@@ -200,6 +190,14 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
 
         captor.value.onSingleCarrierChanged(false)
         verify(view).setIsSingleCarrier(false)
+    }
+
+    @Test
+    fun testAlarmIconIgnored() {
+        controller.init()
+
+        verify(iconContainer).addIgnoredSlot(
+                mContext.getString(com.android.internal.R.string.status_bar_alarm_clock))
     }
 
     private fun stubViews() {

@@ -89,28 +89,6 @@ public class KeyguardStatusViewControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void timeFormatUpdateNotifiesClockSwitchController() {
-        mController.onViewAttached();
-
-        verify(mKeyguardUpdateMonitor).registerCallback(
-                mKeyguardUpdateMonitorCallbackCaptor.capture());
-
-        mKeyguardUpdateMonitorCallbackCaptor.getValue().onTimeFormatChanged("");
-        verify(mKeyguardClockSwitchController).refreshFormat();
-    }
-
-    @Test
-    public void userChangeNotifiesClockSwitchController() {
-        mController.onViewAttached();
-
-        verify(mKeyguardUpdateMonitor).registerCallback(
-                mKeyguardUpdateMonitorCallbackCaptor.capture());
-
-        mKeyguardUpdateMonitorCallbackCaptor.getValue().onUserSwitchComplete(0);
-        verify(mKeyguardClockSwitchController).refreshFormat();
-    }
-
-    @Test
     public void setTranslationYExcludingMedia_forwardsCallToView() {
         float translationY = 123f;
 

@@ -23,6 +23,7 @@ import android.hardware.radio.V1_5.AccessNetwork;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Locale;
 
 /**
  * Contains access network related constants.
@@ -114,16 +115,16 @@ public final class AccessNetworkConstants {
 
         /** @hide */
         public static @RadioAccessNetworkType int fromString(@NonNull String str) {
-            switch (str.toUpperCase()) {
-                case "GERAN" : return GERAN;
-                case "UTRAN" : return UTRAN;
-                case "EUTRAN" : return EUTRAN;
-                case "CDMA2000" : return CDMA2000;
-                case "IWLAN" : return IWLAN;
-                case "NGRAN" : return NGRAN;
+            switch (str.toUpperCase(Locale.ROOT)) {
+                case "UNKNOWN": return UNKNOWN;
+                case "GERAN": return GERAN;
+                case "UTRAN": return UTRAN;
+                case "EUTRAN": return EUTRAN;
+                case "CDMA2000": return CDMA2000;
+                case "IWLAN": return IWLAN;
+                case "NGRAN": return NGRAN;
                 default:
-                    Rlog.e(TAG, "Invalid access network type " + str);
-                    return UNKNOWN;
+                    throw new IllegalArgumentException("Invalid access network type " + str);
             }
         }
     }

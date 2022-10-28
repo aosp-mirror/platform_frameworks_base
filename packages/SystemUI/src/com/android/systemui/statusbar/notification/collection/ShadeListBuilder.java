@@ -38,6 +38,7 @@ import android.os.Trace;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
@@ -87,7 +88,7 @@ import javax.inject.Inject;
  */
 @MainThread
 @SysUISingleton
-public class ShadeListBuilder implements Dumpable {
+public class ShadeListBuilder implements Dumpable, PipelineDumpable {
     private final SystemClock mSystemClock;
     private final ShadeListBuilderLogger mLogger;
     private final NotificationInteractionTracker mInteractionTracker;
@@ -125,6 +126,9 @@ public class ShadeListBuilder implements Dumpable {
     private List<ListEntry> mReadOnlyNotifList = Collections.unmodifiableList(mNotifList);
     private List<ListEntry> mReadOnlyNewNotifList = Collections.unmodifiableList(mNewNotifList);
     private final NotifPipelineChoreographer mChoreographer;
+
+    private int mConsecutiveReentrantRebuilds = 0;
+    @VisibleForTesting public static final int MAX_CONSECUTIVE_REENTRANT_REBUILDS = 3;
 
     @Inject
     public ShadeListBuilder(
@@ -304,70 +308,72 @@ public class ShadeListBuilder implements Dumpable {
     private final CollectionReadyForBuildListener mReadyForBuildListener =
             new CollectionReadyForBuildListener() {
                 @Override
-                public void onBuildList(Collection<NotificationEntry> entries) {
+                public void onBuildList(Collection<NotificationEntry> entries, String reason) {
                     Assert.isMainThread();
                     mPipelineState.requireIsBefore(STATE_BUILD_STARTED);
 
-                    mLogger.logOnBuildList();
+                    mLogger.logOnBuildList(reason);
                     mAllEntries = entries;
-                    mChoreographer.schedule();
+                    scheduleRebuild(/* reentrant = */ false);
                 }
             };
 
-    private void onPreRenderInvalidated(Invalidator invalidator) {
+    private void onPreRenderInvalidated(Invalidator invalidator, @Nullable String reason) {
         Assert.isMainThread();
 
-        mLogger.logPreRenderInvalidated(invalidator.getName(), mPipelineState.getState());
+        mLogger.logPreRenderInvalidated(invalidator, mPipelineState.getState(), reason);
 
         rebuildListIfBefore(STATE_FINALIZING);
     }
 
-    private void onPreGroupFilterInvalidated(NotifFilter filter) {
+    private void onPreGroupFilterInvalidated(NotifFilter filter, @Nullable String reason) {
         Assert.isMainThread();
 
-        mLogger.logPreGroupFilterInvalidated(filter.getName(), mPipelineState.getState());
+        mLogger.logPreGroupFilterInvalidated(filter, mPipelineState.getState(), reason);
 
         rebuildListIfBefore(STATE_PRE_GROUP_FILTERING);
     }
 
-    private void onReorderingAllowedInvalidated(NotifStabilityManager stabilityManager) {
+    private void onReorderingAllowedInvalidated(NotifStabilityManager stabilityManager,
+            @Nullable String reason) {
         Assert.isMainThread();
 
         mLogger.logReorderingAllowedInvalidated(
-                stabilityManager.getName(),
-                mPipelineState.getState());
+                stabilityManager,
+                mPipelineState.getState(),
+                reason);
 
         rebuildListIfBefore(STATE_GROUPING);
     }
 
-    private void onPromoterInvalidated(NotifPromoter promoter) {
+    private void onPromoterInvalidated(NotifPromoter promoter, @Nullable String reason) {
         Assert.isMainThread();
 
-        mLogger.logPromoterInvalidated(promoter.getName(), mPipelineState.getState());
+        mLogger.logPromoterInvalidated(promoter, mPipelineState.getState(), reason);
 
         rebuildListIfBefore(STATE_TRANSFORMING);
     }
 
-    private void onNotifSectionInvalidated(NotifSectioner section) {
+    private void onNotifSectionInvalidated(NotifSectioner section, @Nullable String reason) {
         Assert.isMainThread();
 
-        mLogger.logNotifSectionInvalidated(section.getName(), mPipelineState.getState());
+        mLogger.logNotifSectionInvalidated(section, mPipelineState.getState(), reason);
 
         rebuildListIfBefore(STATE_SORTING);
     }
 
-    private void onFinalizeFilterInvalidated(NotifFilter filter) {
+    private void onFinalizeFilterInvalidated(NotifFilter filter, @Nullable String reason) {
         Assert.isMainThread();
 
-        mLogger.logFinalizeFilterInvalidated(filter.getName(), mPipelineState.getState());
+        mLogger.logFinalizeFilterInvalidated(filter, mPipelineState.getState(), reason);
 
         rebuildListIfBefore(STATE_FINALIZE_FILTERING);
     }
 
-    private void onNotifComparatorInvalidated(NotifComparator comparator) {
+    private void onNotifComparatorInvalidated(NotifComparator comparator, @Nullable String reason) {
         Assert.isMainThread();
 
-        mLogger.logNotifComparatorInvalidated(comparator.getName(), mPipelineState.getState());
+        mLogger.logNotifComparatorInvalidated(comparator, mPipelineState.getState(), reason);
 
         rebuildListIfBefore(STATE_SORTING);
     }
@@ -456,7 +462,8 @@ public class ShadeListBuilder implements Dumpable {
         mLogger.logEndBuildList(
                 mIterationCount,
                 mReadOnlyNotifList.size(),
-                countChildren(mReadOnlyNotifList));
+                countChildren(mReadOnlyNotifList),
+                /* enforcedVisualStability */ !mNotifStabilityManager.isEveryChangeAllowed());
         if (mAlwaysLogList || mIterationCount % 10 == 0) {
             Trace.beginSection("ShadeListBuilder.logFinalList");
             mLogger.logFinalList(mNotifList);
@@ -579,11 +586,7 @@ public class ShadeListBuilder implements Dumpable {
                     if (existingSummary == null) {
                         group.setSummary(entry);
                     } else {
-                        mLogger.logDuplicateSummary(
-                                mIterationCount,
-                                group.getKey(),
-                                existingSummary.getKey(),
-                                entry.getKey());
+                        mLogger.logDuplicateSummary(mIterationCount, group, existingSummary, entry);
 
                         // Use whichever one was posted most recently
                         if (entry.getSbn().getPostTime()
@@ -955,9 +958,7 @@ public class ShadeListBuilder implements Dumpable {
      * filtered out during any of the filtering steps.
      */
     private void annulAddition(ListEntry entry) {
-        entry.setParent(null);
-        entry.getAttachState().setSection(null);
-        entry.getAttachState().setPromoter(null);
+        entry.getAttachState().detach();
     }
 
     private void assignSections() {
@@ -990,7 +991,7 @@ public class ShadeListBuilder implements Dumpable {
         // Check for suppressed order changes
         if (!getStabilityManager().isEveryChangeAllowed()) {
             mForceReorderable = true;
-            boolean isSorted = isSorted(mNotifList, mTopLevelComparator);
+            boolean isSorted = isShadeSorted();
             mForceReorderable = false;
             if (!isSorted) {
                 getStabilityManager().onEntryReorderSuppressed();
@@ -999,9 +1000,23 @@ public class ShadeListBuilder implements Dumpable {
         Trace.endSection();
     }
 
+    private boolean isShadeSorted() {
+        if (!isSorted(mNotifList, mTopLevelComparator)) {
+            return false;
+        }
+        for (ListEntry entry : mNotifList) {
+            if (entry instanceof GroupEntry) {
+                if (!isSorted(((GroupEntry) entry).getChildren(), mGroupChildrenComparator)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     /** Determine whether the items in the list are sorted according to the comparator */
     @VisibleForTesting
-    public static <T> boolean isSorted(List<T> items, Comparator<T> comparator) {
+    public static <T> boolean isSorted(List<T> items, Comparator<? super T> comparator) {
         if (items.size() <= 1) {
             return true;
         }
@@ -1070,7 +1085,7 @@ public class ShadeListBuilder implements Dumpable {
         if (!Objects.equals(curr, prev)) {
             mLogger.logEntryAttachStateChanged(
                     mIterationCount,
-                    entry.getKey(),
+                    entry,
                     prev.getParent(),
                     curr.getParent());
 
@@ -1181,9 +1196,9 @@ public class ShadeListBuilder implements Dumpable {
                 o2.getSectionIndex());
         if (cmp != 0) return cmp;
 
-        int index1 = canReorder(o1) ? -1 : o1.getPreviousAttachState().getStableIndex();
-        int index2 = canReorder(o2) ? -1 : o2.getPreviousAttachState().getStableIndex();
-        cmp = Integer.compare(index1, index2);
+        cmp = Integer.compare(
+                getStableOrderIndex(o1),
+                getStableOrderIndex(o2));
         if (cmp != 0) return cmp;
 
         NotifComparator sectionComparator = getSectionComparator(o1, o2);
@@ -1197,31 +1212,32 @@ public class ShadeListBuilder implements Dumpable {
             if (cmp != 0) return cmp;
         }
 
-        final NotificationEntry rep1 = o1.getRepresentativeEntry();
-        final NotificationEntry rep2 = o2.getRepresentativeEntry();
-            cmp = rep1.getRanking().getRank() - rep2.getRanking().getRank();
+        cmp = Integer.compare(
+                o1.getRepresentativeEntry().getRanking().getRank(),
+                o2.getRepresentativeEntry().getRanking().getRank());
         if (cmp != 0) return cmp;
 
-        cmp = Long.compare(
-                rep2.getSbn().getNotification().when,
-                rep1.getSbn().getNotification().when);
+        cmp = -1 * Long.compare(
+                o1.getRepresentativeEntry().getSbn().getNotification().when,
+                o2.getRepresentativeEntry().getSbn().getNotification().when);
         return cmp;
     };
 
 
-    private final Comparator<ListEntry> mGroupChildrenComparator = (o1, o2) -> {
-        int index1 = canReorder(o1) ? -1 : o1.getPreviousAttachState().getStableIndex();
-        int index2 = canReorder(o2) ? -1 : o2.getPreviousAttachState().getStableIndex();
-        int cmp = Integer.compare(index1, index2);
+    private final Comparator<NotificationEntry> mGroupChildrenComparator = (o1, o2) -> {
+        int cmp = Integer.compare(
+                getStableOrderIndex(o1),
+                getStableOrderIndex(o2));
         if (cmp != 0) return cmp;
 
-        cmp = o1.getRepresentativeEntry().getRanking().getRank()
-                - o2.getRepresentativeEntry().getRanking().getRank();
+        cmp = Integer.compare(
+                o1.getRepresentativeEntry().getRanking().getRank(),
+                o2.getRepresentativeEntry().getRanking().getRank());
         if (cmp != 0) return cmp;
 
-        cmp = Long.compare(
-                o2.getRepresentativeEntry().getSbn().getNotification().when,
-                o1.getRepresentativeEntry().getSbn().getNotification().when);
+        cmp = -1 * Long.compare(
+                o1.getRepresentativeEntry().getSbn().getNotification().when,
+                o2.getRepresentativeEntry().getSbn().getNotification().when);
         return cmp;
     };
 
@@ -1231,8 +1247,16 @@ public class ShadeListBuilder implements Dumpable {
      */
     private boolean mForceReorderable = false;
 
-    private boolean canReorder(ListEntry entry) {
-        return mForceReorderable || getStabilityManager().isEntryReorderingAllowed(entry);
+    private int getStableOrderIndex(ListEntry entry) {
+        if (mForceReorderable) {
+            // this is used to determine if the list is correctly sorted
+            return -1;
+        }
+        if (getStabilityManager().isEntryReorderingAllowed(entry)) {
+            // let the stability manager constrain or allow reordering
+            return -1;
+        }
+        return entry.getPreviousAttachState().getStableIndex();
     }
 
     private boolean applyFilters(NotificationEntry entry, long now, List<NotifFilter> filters) {
@@ -1319,11 +1343,64 @@ public class ShadeListBuilder implements Dumpable {
         throw new RuntimeException("Missing default sectioner!");
     }
 
-    private void rebuildListIfBefore(@PipelineState.StateName int state) {
-        mPipelineState.requireIsBefore(state);
-        if (mPipelineState.is(STATE_IDLE)) {
-            mChoreographer.schedule();
+    private void rebuildListIfBefore(@PipelineState.StateName int rebuildState) {
+        final @PipelineState.StateName int currentState = mPipelineState.getState();
+
+        // If the pipeline is idle, requesting an invalidation is always okay, and starts a new run.
+        if (currentState == STATE_IDLE) {
+            scheduleRebuild(/* reentrant = */ false, rebuildState);
+            return;
         }
+
+        // If the pipeline is running, it is okay to request an invalidation of a *later* stage.
+        // Since the current pipeline run hasn't run it yet, no new pipeline run is needed.
+        if (rebuildState > currentState) {
+            return;
+        }
+
+        // If the pipeline is running, it is bad to request an invalidation of *earlier* stages or
+        // the *current* stage; this will run the pipeline more often than needed, and may even
+        // cause an infinite loop of pipeline runs.
+        //
+        // Unfortunately, there are some unfixed bugs that cause reentrant pipeline runs, so we keep
+        // a counter and allow a few reentrant runs in a row between any two non-reentrant runs.
+        //
+        // It is technically possible for a *pair* of invalidations, one reentrant and one not, to
+        // trigger *each other*, alternating responsibility for pipeline runs in an infinite loop
+        // but constantly resetting the reentrant run counter. Hopefully that doesn't happen.
+        scheduleRebuild(/* reentrant = */ true, rebuildState);
+    }
+
+    private void scheduleRebuild(boolean reentrant) {
+        scheduleRebuild(reentrant, STATE_IDLE);
+    }
+
+    private void scheduleRebuild(boolean reentrant, @PipelineState.StateName int rebuildState) {
+        if (!reentrant) {
+            mConsecutiveReentrantRebuilds = 0;
+            mChoreographer.schedule();
+            return;
+        }
+
+        final @PipelineState.StateName int currentState = mPipelineState.getState();
+
+        final String rebuildStateName = PipelineState.getStateName(rebuildState);
+        final String currentStateName = PipelineState.getStateName(currentState);
+        final IllegalStateException exception = new IllegalStateException(
+                "Reentrant notification pipeline rebuild of state " + rebuildStateName
+                        + " while pipeline in state " + currentStateName + ".");
+
+        mConsecutiveReentrantRebuilds++;
+
+        if (mConsecutiveReentrantRebuilds > MAX_CONSECUTIVE_REENTRANT_REBUILDS) {
+            Log.e(TAG, "Crashing after more than " + MAX_CONSECUTIVE_REENTRANT_REBUILDS
+                    + " consecutive reentrant notification pipeline rebuilds.", exception);
+            throw exception;
+        }
+
+        Log.e(TAG, "Allowing " + mConsecutiveReentrantRebuilds
+                + " consecutive reentrant notification pipeline rebuild(s).", exception);
+        mChoreographer.schedule();
     }
 
     private static int countChildren(List<ListEntry> entries) {
@@ -1381,6 +1458,21 @@ public class ShadeListBuilder implements Dumpable {
                 mInteractionTracker,
                 true,
                 "\t\t"));
+    }
+
+    @Override
+    public void dumpPipeline(@NonNull PipelineDumper d) {
+        d.dump("choreographer", mChoreographer);
+        d.dump("notifPreGroupFilters", mNotifPreGroupFilters);
+        d.dump("onBeforeTransformGroupsListeners", mOnBeforeTransformGroupsListeners);
+        d.dump("notifPromoters", mNotifPromoters);
+        d.dump("onBeforeSortListeners", mOnBeforeSortListeners);
+        d.dump("notifSections", mNotifSections);
+        d.dump("notifComparators", mNotifComparators);
+        d.dump("onBeforeFinalizeFilterListeners", mOnBeforeFinalizeFilterListeners);
+        d.dump("notifFinalizeFilters", mNotifFinalizeFilters);
+        d.dump("onBeforeRenderListListeners", mOnBeforeRenderListListeners);
+        d.dump("onRenderListListener", mOnRenderListListener);
     }
 
     /** See {@link #setOnRenderListListener(OnRenderListListener)} */

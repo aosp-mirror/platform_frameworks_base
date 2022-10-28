@@ -27,7 +27,6 @@ data class CellSignalState(
     @JvmField val contentDescription: String? = null,
     @JvmField val typeContentDescription: String? = null,
     @JvmField val roaming: Boolean = false,
-    @JvmField val providerModelBehavior: Boolean = false
 ) {
     /**
      * Changes the visibility of this state by returning a copy with the visibility changed.

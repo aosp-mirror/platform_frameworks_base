@@ -30,6 +30,7 @@ import com.android.systemui.qs.carrier.QSCarrierGroupController;
 import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
+import com.android.systemui.statusbar.phone.StatusBarLocation;
 import com.android.systemui.statusbar.phone.StatusIconContainer;
 import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.policy.VariableDateViewController;
@@ -80,7 +81,8 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
             FeatureFlags featureFlags,
             VariableDateViewController.Factory variableDateViewControllerFactory,
             BatteryMeterViewController batteryMeterViewController,
-            StatusBarContentInsetsProvider statusBarContentInsetsProvider) {
+            StatusBarContentInsetsProvider statusBarContentInsetsProvider,
+            StatusBarIconController.TintedIconManager.Factory tintedIconManagerFactory) {
         super(view);
         mPrivacyIconsController = headerPrivacyIconsController;
         mStatusBarIconController = statusBarIconController;
@@ -103,7 +105,7 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
                 mView.requireViewById(R.id.date_clock)
         );
 
-        mIconManager = new StatusBarIconController.TintedIconManager(mIconContainer, featureFlags);
+        mIconManager = tintedIconManagerFactory.create(mIconContainer, StatusBarLocation.QS);
         mDemoModeReceiver = new ClockDemoModeReceiver(mClockView);
         mColorExtractor = colorExtractor;
         mOnColorsChangedListener = (extractor, which) -> {
@@ -127,6 +129,8 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
         mPrivacyIconsController.setChipVisibilityListener(this);
         mIconContainer.addIgnoredSlot(
                 getResources().getString(com.android.internal.R.string.status_bar_managed_profile));
+        mIconContainer.addIgnoredSlot(
+                getResources().getString(com.android.internal.R.string.status_bar_alarm_clock));
         mIconContainer.setShouldRestrictIcons(false);
         mStatusBarIconController.addIconGroup(mIconManager);
 
@@ -134,18 +138,9 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
         mQSCarrierGroupController
                 .setOnSingleCarrierChangedListener(mView::setIsSingleCarrier);
 
-        List<String> rssiIgnoredSlots;
-
-        if (mFeatureFlags.isEnabled(Flags.COMBINED_STATUS_BAR_SIGNAL_ICONS)) {
-            rssiIgnoredSlots = List.of(
-                    getResources().getString(com.android.internal.R.string.status_bar_no_calling),
-                    getResources().getString(com.android.internal.R.string.status_bar_call_strength)
-            );
-        } else {
-            rssiIgnoredSlots = List.of(
-                    getResources().getString(com.android.internal.R.string.status_bar_mobile)
-            );
-        }
+        List<String> rssiIgnoredSlots = List.of(
+                getResources().getString(com.android.internal.R.string.status_bar_mobile)
+        );
 
         mView.onAttach(mIconManager, mQSExpansionPathInterpolator, rssiIgnoredSlots,
                 mInsetsProvider, mFeatureFlags.isEnabled(Flags.COMBINED_QS_HEADERS));

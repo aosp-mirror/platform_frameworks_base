@@ -30,6 +30,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.activity.ComponentActivity
 import com.android.systemui.R
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.controls.ControlsServiceInfo
@@ -38,14 +39,13 @@ import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.ui.RenderInfo
 import com.android.systemui.settings.CurrentUserTracker
 import com.android.systemui.statusbar.phone.SystemUIDialog
-import com.android.systemui.util.LifecycleActivity
 import javax.inject.Inject
 
 open class ControlsRequestDialog @Inject constructor(
     private val controller: ControlsController,
     private val broadcastDispatcher: BroadcastDispatcher,
     private val controlsListingController: ControlsListingController
-) : LifecycleActivity(), DialogInterface.OnClickListener, DialogInterface.OnCancelListener {
+) : ComponentActivity(), DialogInterface.OnClickListener, DialogInterface.OnCancelListener {
 
     companion object {
         private const val TAG = "ControlsRequestDialog"

@@ -66,7 +66,7 @@ public class SideStageTests extends ShellTestCase {
         MockitoAnnotations.initMocks(this);
         mRootTask = new TestRunningTaskInfoBuilder().build();
         mSideStage = new SideStage(mContext, mTaskOrganizer, DEFAULT_DISPLAY, mCallbacks,
-                mSyncQueue, mSurfaceSession, mIconProvider, null);
+                mSyncQueue, mSurfaceSession, mIconProvider);
         mSideStage.onTaskAppeared(mRootTask, mRootLeash);
     }
 

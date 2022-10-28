@@ -52,7 +52,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
-import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
 import android.view.InsetsState.InternalInsetsType;
@@ -66,6 +65,7 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.statusbar.IAddTileResultCallback;
 import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.IUndoMediaTransferCallback;
+import com.android.internal.statusbar.LetterboxDetails;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.GcUtils;
 import com.android.internal.view.AppearanceRegion;
@@ -75,7 +75,6 @@ import com.android.systemui.statusbar.policy.CallbackController;
 import com.android.systemui.tracing.ProtoTracer;
 
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
@@ -151,7 +150,6 @@ public class CommandQueue extends IStatusBar.Stub implements
     private static final int MSG_TRACING_STATE_CHANGED             = 54 << MSG_SHIFT;
     private static final int MSG_SUPPRESS_AMBIENT_DISPLAY          = 55 << MSG_SHIFT;
     private static final int MSG_REQUEST_WINDOW_MAGNIFICATION_CONNECTION = 56 << MSG_SHIFT;
-    private static final int MSG_HANDLE_WINDOW_MANAGER_LOGGING_COMMAND = 57 << MSG_SHIFT;
     //TODO(b/169175022) Update name and when feature name is locked.
     private static final int MSG_EMERGENCY_ACTION_LAUNCH_GESTURE      = 58 << MSG_SHIFT;
     private static final int MSG_SET_NAVIGATION_BAR_LUMA_SAMPLING_ENABLED = 59 << MSG_SHIFT;
@@ -361,7 +359,7 @@ public class CommandQueue extends IStatusBar.Stub implements
         default void onSystemBarAttributesChanged(int displayId, @Appearance int appearance,
                 AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
                 @Behavior int behavior, InsetsVisibilities requestedVisibilities,
-                String packageName) { }
+                String packageName, LetterboxDetails[] letterboxDetails) { }
 
         /**
          * @see IStatusBar#showTransient(int, int[], boolean).
@@ -422,11 +420,6 @@ public class CommandQueue extends IStatusBar.Stub implements
          * @param connect {@code true} if needs connection, otherwise set the connection to null.
          */
         default void requestWindowMagnificationConnection(boolean connect) { }
-
-        /**
-         * Handles a window manager shell logging command.
-         */
-        default void handleWindowManagerLoggingCommand(String[] args, ParcelFileDescriptor outFd) {}
 
         /**
          * @see IStatusBar#setNavigationBarLumaSamplingEnabled(int, boolean)
@@ -1090,7 +1083,8 @@ public class CommandQueue extends IStatusBar.Stub implements
     @Override
     public void onSystemBarAttributesChanged(int displayId, @Appearance int appearance,
             AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
-            @Behavior int behavior, InsetsVisibilities requestedVisibilities, String packageName) {
+            @Behavior int behavior, InsetsVisibilities requestedVisibilities, String packageName,
+            LetterboxDetails[] letterboxDetails) {
         synchronized (mLock) {
             SomeArgs args = SomeArgs.obtain();
             args.argi1 = displayId;
@@ -1100,6 +1094,7 @@ public class CommandQueue extends IStatusBar.Stub implements
             args.argi4 = behavior;
             args.arg2 = requestedVisibilities;
             args.arg3 = packageName;
+            args.arg4 = letterboxDetails;
             mHandler.obtainMessage(MSG_SYSTEM_BAR_CHANGED, args).sendToTarget();
         }
     }
@@ -1136,17 +1131,6 @@ public class CommandQueue extends IStatusBar.Stub implements
                 mProtoTracer.stop();
             }
             mHandler.obtainMessage(MSG_TRACING_STATE_CHANGED, false).sendToTarget();
-        }
-    }
-
-    @Override
-    public void handleWindowManagerLoggingCommand(String[] args, ParcelFileDescriptor outFd) {
-        synchronized (mLock) {
-            SomeArgs internalArgs = SomeArgs.obtain();
-            internalArgs.arg1 = args;
-            internalArgs.arg2 = outFd;
-            mHandler.obtainMessage(MSG_HANDLE_WINDOW_MANAGER_LOGGING_COMMAND, internalArgs)
-                    .sendToTarget();
         }
     }
 
@@ -1561,7 +1545,8 @@ public class CommandQueue extends IStatusBar.Stub implements
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         mCallbacks.get(i).onSystemBarAttributesChanged(args.argi1, args.argi2,
                                 (AppearanceRegion[]) args.arg1, args.argi3 == 1, args.argi4,
-                                (InsetsVisibilities) args.arg2, (String) args.arg3);
+                                (InsetsVisibilities) args.arg2, (String) args.arg3,
+                                (LetterboxDetails[]) args.arg4);
                     }
                     args.recycle();
                     break;
@@ -1632,18 +1617,6 @@ public class CommandQueue extends IStatusBar.Stub implements
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         mCallbacks.get(i).requestWindowMagnificationConnection((Boolean) msg.obj);
                     }
-                    break;
-                case MSG_HANDLE_WINDOW_MANAGER_LOGGING_COMMAND:
-                    args = (SomeArgs) msg.obj;
-                    try (ParcelFileDescriptor pfd = (ParcelFileDescriptor) args.arg2) {
-                        for (int i = 0; i < mCallbacks.size(); i++) {
-                            mCallbacks.get(i).handleWindowManagerLoggingCommand(
-                                    (String[]) args.arg1, pfd);
-                        }
-                    } catch (IOException e) {
-                        Log.e(TAG, "Failed to handle logging command", e);
-                    }
-                    args.recycle();
                     break;
                 case MSG_SET_NAVIGATION_BAR_LUMA_SAMPLING_ENABLED:
                     for (int i = 0; i < mCallbacks.size(); i++) {

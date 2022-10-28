@@ -18,7 +18,7 @@
 -->
 
 <!-- This is the notification shade window. -->
-<com.android.systemui.statusbar.phone.NotificationShadeWindowView
+<com.android.systemui.shade.NotificationShadeWindowView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:sysui="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -88,7 +88,7 @@
         android:layout_marginTop="@dimen/status_bar_height"
         android:layout_gravity="top|center_horizontal"
         android:gravity="center_horizontal">
-        <com.android.keyguard.KeyguardMessageArea
+        <com.android.keyguard.AuthKeyguardMessageArea
             android:id="@+id/keyguard_message_area"
             style="@style/Keyguard.TextView"
             android:layout_width="wrap_content"
@@ -103,6 +103,7 @@
                      android:layout_width="match_parent"
                      android:layout_weight="1"
                      android:background="@android:color/transparent"
+                     android:visibility="invisible"
                      android:clipChildren="false"
                      android:clipToPadding="false" />
     </LinearLayout>
@@ -114,4 +115,4 @@
         android:importantForAccessibility="no"
         sysui:ignoreRightInset="true"
     />
-</com.android.systemui.statusbar.phone.NotificationShadeWindowView>
+</com.android.systemui.shade.NotificationShadeWindowView>

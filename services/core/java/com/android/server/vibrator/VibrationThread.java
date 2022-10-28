@@ -76,7 +76,7 @@ final class VibrationThread extends Thread {
          * cleanup tasks, and should not be given new work until {@link #onVibrationThreadReleased}
          * is called.
          */
-        void onVibrationCompleted(long vibrationId, Vibration.Status status);
+        void onVibrationCompleted(long vibrationId, @NonNull Vibration.EndInfo vibrationEndInfo);
 
         /**
          * Tells the manager that the VibrationThread is finished with the previous vibration and
@@ -237,7 +237,8 @@ final class VibrationThread extends Thread {
             try {
                 runCurrentVibrationWithWakeLockAndDeathLink();
             } finally {
-                clientVibrationCompleteIfNotAlready(Vibration.Status.FINISHED_UNEXPECTED);
+                clientVibrationCompleteIfNotAlready(
+                        new Vibration.EndInfo(Vibration.Status.FINISHED_UNEXPECTED));
             }
         } finally {
             mWakeLock.release();
@@ -255,7 +256,8 @@ final class VibrationThread extends Thread {
             vibrationBinderToken.linkToDeath(mExecutingConductor, 0);
         } catch (RemoteException e) {
             Slog.e(TAG, "Error linking vibration to token death", e);
-            clientVibrationCompleteIfNotAlready(Vibration.Status.IGNORED_ERROR_TOKEN);
+            clientVibrationCompleteIfNotAlready(
+                    new Vibration.EndInfo(Vibration.Status.IGNORED_ERROR_TOKEN));
             return;
         }
         // Ensure that the unlink always occurs now.
@@ -274,11 +276,11 @@ final class VibrationThread extends Thread {
     // Indicate that the vibration is complete. This can be called multiple times only for
     // convenience of handling error conditions - an error after the client is complete won't
     // affect the status.
-    private void clientVibrationCompleteIfNotAlready(Vibration.Status completedStatus) {
+    private void clientVibrationCompleteIfNotAlready(@NonNull Vibration.EndInfo vibrationEndInfo) {
         if (!mCalledVibrationCompleteCallback) {
             mCalledVibrationCompleteCallback = true;
             mVibratorManagerHooks.onVibrationCompleted(
-                    mExecutingConductor.getVibration().id, completedStatus);
+                    mExecutingConductor.getVibration().id, vibrationEndInfo);
         }
     }
 
@@ -298,12 +300,15 @@ final class VibrationThread extends Thread {
                     mExecutingConductor.runNextStep();
                 }
 
-                Vibration.Status status = mExecutingConductor.calculateVibrationStatus();
-                // This block can only run once due to mCalledVibrationCompleteCallback.
-                if (status != Vibration.Status.RUNNING && !mCalledVibrationCompleteCallback) {
-                    // First time vibration stopped running, start clean-up tasks and notify
-                    // callback immediately.
-                    clientVibrationCompleteIfNotAlready(status);
+                if (!mCalledVibrationCompleteCallback) {
+                    // This block can only run once due to mCalledVibrationCompleteCallback.
+                    Vibration.EndInfo vibrationEndInfo =
+                            mExecutingConductor.calculateVibrationEndInfo();
+                    if (vibrationEndInfo != null) {
+                        // First time vibration stopped running, start clean-up tasks and notify
+                        // callback immediately.
+                        clientVibrationCompleteIfNotAlready(vibrationEndInfo);
+                    }
                 }
             }
         } finally {

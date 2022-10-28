@@ -72,9 +72,9 @@ public class CameraToggleTile extends SensorPrivacyToggleTile {
     @Override
     public @DrawableRes int getIconRes(boolean isBlocked) {
         if (isBlocked) {
-            return com.android.internal.R.drawable.ic_camera_blocked;
+            return R.drawable.qs_camera_access_icon_off;
         } else {
-            return com.android.internal.R.drawable.ic_camera_allowed;
+            return R.drawable.qs_camera_access_icon_on;
         }
     }
 

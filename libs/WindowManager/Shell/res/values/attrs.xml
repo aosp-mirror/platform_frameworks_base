@@ -19,4 +19,8 @@
         <attr name="icon" format="reference" />
         <attr name="text" format="string" />
     </declare-styleable>
+
+    <declare-styleable name="MessageState">
+        <attr name="state_task_focused" format="boolean"/>
+    </declare-styleable>
 </resources>

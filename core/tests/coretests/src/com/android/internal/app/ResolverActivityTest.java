@@ -96,6 +96,7 @@ public class ResolverActivityTest {
 
         when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
                 Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
                 Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
 
         final ResolverWrapperActivity activity = mActivityRule.launchActivity(sendIntent);
@@ -126,6 +127,7 @@ public class ResolverActivityTest {
         List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
 
         when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
                 Mockito.anyBoolean(),
                 Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
         waitForIdle();
@@ -171,6 +173,7 @@ public class ResolverActivityTest {
 
         when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
                 Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
                 Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
         waitForIdle();
 
@@ -202,6 +205,7 @@ public class ResolverActivityTest {
         ResolveInfo toChoose = resolvedComponentInfos.get(0).getResolveInfoAt(0);
 
         when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
                 Mockito.anyBoolean(),
                 Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
         when(sOverrides.resolverListController.getLastChosen())
@@ -273,6 +277,7 @@ public class ResolverActivityTest {
 
         when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
                 Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
                 Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
 
         final ResolverWrapperActivity activity = mActivityRule.launchActivity(sendIntent);
@@ -316,6 +321,7 @@ public class ResolverActivityTest {
         ResolveInfo toChoose = resolvedComponentInfos.get(1).getResolveInfoAt(0);
 
         when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
                 Mockito.anyBoolean(),
                 Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
         when(sOverrides.resolverListController.getLastChosen())
@@ -807,6 +813,7 @@ public class ResolverActivityTest {
                 createResolvedComponentsForTestWithOtherProfile(2, /* userId */ 10);
         when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
                 Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
                 Mockito.isA(List.class)))
                 .thenReturn(new ArrayList<>(personalResolvedComponentInfos));
         Intent sendIntent = createSendImageIntent();
@@ -830,6 +837,7 @@ public class ResolverActivityTest {
         List<ResolvedComponentInfo> personalResolvedComponentInfos =
                 createResolvedComponentsForTest(1);
         when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
                 Mockito.anyBoolean(),
                 Mockito.isA(List.class)))
                 .thenReturn(new ArrayList<>(personalResolvedComponentInfos));
@@ -887,6 +895,7 @@ public class ResolverActivityTest {
                 createResolvedComponentsForTest(2);
 
         when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
                 Mockito.anyBoolean(),
                 Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
         when(sOverrides.resolverListController.getLastChosen())
@@ -965,12 +974,15 @@ public class ResolverActivityTest {
             List<ResolvedComponentInfo> workResolvedComponentInfos) {
         when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
                 Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
                 Mockito.isA(List.class)))
                 .thenReturn(new ArrayList<>(personalResolvedComponentInfos));
         when(sOverrides.workResolverListController.getResolversForIntent(Mockito.anyBoolean(),
                 Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
                 Mockito.isA(List.class))).thenReturn(workResolvedComponentInfos);
         when(sOverrides.workResolverListController.getResolversForIntentAsUser(Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
                 Mockito.anyBoolean(),
                 Mockito.isA(List.class),
                 eq(UserHandle.SYSTEM)))

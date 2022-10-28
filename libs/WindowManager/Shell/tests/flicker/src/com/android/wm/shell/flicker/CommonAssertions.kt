@@ -43,6 +43,84 @@ fun FlickerTestParameter.appPairsDividerBecomesVisible() {
     }
 }
 
+fun FlickerTestParameter.splitScreenDividerBecomesVisible() {
+    layerBecomesVisible(SPLIT_SCREEN_DIVIDER_COMPONENT)
+}
+
+fun FlickerTestParameter.layerBecomesVisible(
+    component: FlickerComponentName
+) {
+    assertLayers {
+        this.isInvisible(component)
+            .then()
+            .isVisible(component)
+    }
+}
+
+fun FlickerTestParameter.layerIsVisibleAtEnd(
+    component: FlickerComponentName
+) {
+    assertLayersEnd {
+        this.isVisible(component)
+    }
+}
+
+fun FlickerTestParameter.splitAppLayerBoundsBecomesVisible(
+    rotation: Int,
+    component: FlickerComponentName,
+    splitLeftTop: Boolean
+) {
+    assertLayers {
+        val dividerRegion = this.last().layer(SPLIT_SCREEN_DIVIDER_COMPONENT).visibleRegion.region
+        this.isInvisible(component)
+            .then()
+            .invoke("splitAppLayerBoundsBecomesVisible") {
+                it.visibleRegion(component).overlaps(
+                    if (splitLeftTop) {
+                        getSplitLeftTopRegion(dividerRegion, rotation)
+                    } else {
+                        getSplitRightBottomRegion(dividerRegion, rotation)
+                    }
+                )
+            }
+    }
+}
+
+fun FlickerTestParameter.splitAppLayerBoundsIsVisibleAtEnd(
+    rotation: Int,
+    component: FlickerComponentName,
+    splitLeftTop: Boolean
+) {
+    assertLayersEnd {
+        val dividerRegion = layer(SPLIT_SCREEN_DIVIDER_COMPONENT).visibleRegion.region
+        visibleRegion(component).overlaps(
+            if (splitLeftTop) {
+                getSplitLeftTopRegion(dividerRegion, rotation)
+            } else {
+                getSplitRightBottomRegion(dividerRegion, rotation)
+            }
+        )
+    }
+}
+
+fun FlickerTestParameter.appWindowBecomesVisible(
+    component: FlickerComponentName
+) {
+    assertWm {
+        this.isAppWindowInvisible(component)
+            .then()
+            .isAppWindowVisible(component)
+    }
+}
+
+fun FlickerTestParameter.appWindowIsVisibleAtEnd(
+    component: FlickerComponentName
+) {
+    assertWmEnd {
+        this.isAppWindowVisible(component)
+    }
+}
+
 fun FlickerTestParameter.dockedStackDividerIsVisibleAtEnd() {
     assertLayersEnd {
         this.isVisible(DOCKED_STACK_DIVIDER_COMPONENT)
@@ -118,21 +196,53 @@ fun FlickerTestParameter.dockedStackSecondaryBoundsIsVisibleAtEnd(
 fun getPrimaryRegion(dividerRegion: Region, rotation: Int): Region {
     val displayBounds = WindowUtils.getDisplayBounds(rotation)
     return if (rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_180) {
-        Region.from(0, 0, displayBounds.bounds.right,
-            dividerRegion.bounds.top + WindowUtils.dockedStackDividerInset)
+        Region.from(
+            0, 0, displayBounds.bounds.right,
+            dividerRegion.bounds.top + WindowUtils.dockedStackDividerInset
+        )
     } else {
-        Region.from(0, 0, dividerRegion.bounds.left + WindowUtils.dockedStackDividerInset,
-            displayBounds.bounds.bottom)
+        Region.from(
+            0, 0, dividerRegion.bounds.left + WindowUtils.dockedStackDividerInset,
+            displayBounds.bounds.bottom
+        )
     }
 }
 
 fun getSecondaryRegion(dividerRegion: Region, rotation: Int): Region {
     val displayBounds = WindowUtils.getDisplayBounds(rotation)
     return if (rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_180) {
-        Region.from(0, dividerRegion.bounds.bottom - WindowUtils.dockedStackDividerInset,
-            displayBounds.bounds.right, displayBounds.bounds.bottom)
+        Region.from(
+            0, dividerRegion.bounds.bottom - WindowUtils.dockedStackDividerInset,
+            displayBounds.bounds.right, displayBounds.bounds.bottom
+        )
     } else {
-        Region.from(dividerRegion.bounds.right - WindowUtils.dockedStackDividerInset, 0,
-            displayBounds.bounds.right, displayBounds.bounds.bottom)
+        Region.from(
+            dividerRegion.bounds.right - WindowUtils.dockedStackDividerInset, 0,
+            displayBounds.bounds.right, displayBounds.bounds.bottom
+        )
+    }
+}
+
+fun getSplitLeftTopRegion(dividerRegion: Region, rotation: Int): Region {
+    val displayBounds = WindowUtils.getDisplayBounds(rotation)
+    return if (displayBounds.width > displayBounds.height) {
+        Region.from(0, 0, dividerRegion.bounds.left, displayBounds.bounds.bottom)
+    } else {
+        Region.from(0, 0, displayBounds.bounds.right, dividerRegion.bounds.top)
+    }
+}
+
+fun getSplitRightBottomRegion(dividerRegion: Region, rotation: Int): Region {
+    val displayBounds = WindowUtils.getDisplayBounds(rotation)
+    return if (displayBounds.width > displayBounds.height) {
+        Region.from(
+            dividerRegion.bounds.right, 0, displayBounds.bounds.right,
+            displayBounds.bounds.bottom
+        )
+    } else {
+        Region.from(
+            0, dividerRegion.bounds.bottom, displayBounds.bounds.right,
+            displayBounds.bounds.bottom
+        )
     }
 }

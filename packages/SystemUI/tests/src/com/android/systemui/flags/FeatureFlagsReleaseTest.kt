@@ -20,6 +20,7 @@ import android.content.res.Resources
 import android.test.suitebuilder.annotation.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.util.DeviceConfigProxyFake
 import com.android.systemui.util.mockito.any
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
@@ -29,8 +30,8 @@ import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
-import org.mockito.MockitoAnnotations
 import org.mockito.Mockito.`when` as whenever
+import org.mockito.MockitoAnnotations
 
 /**
  * NOTE: This test is for the version of FeatureFlagManager in src-release, which should not allow
@@ -43,11 +44,19 @@ class FeatureFlagsReleaseTest : SysuiTestCase() {
     @Mock private lateinit var mResources: Resources
     @Mock private lateinit var mSystemProperties: SystemPropertiesHelper
     @Mock private lateinit var mDumpManager: DumpManager
+    private val serverFlagReader = ServerFlagReaderFake()
+
+    private val deviceConfig = DeviceConfigProxyFake()
 
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        mFeatureFlagsRelease = FeatureFlagsRelease(mResources, mSystemProperties, mDumpManager)
+        mFeatureFlagsRelease = FeatureFlagsRelease(
+            mResources,
+            mSystemProperties,
+            deviceConfig,
+            serverFlagReader,
+            mDumpManager)
     }
 
     @After
@@ -85,6 +94,21 @@ class FeatureFlagsReleaseTest : SysuiTestCase() {
     }
 
     @Test
+    fun testReadDeviceConfigBooleanFlag() {
+        val namespace = "test_namespace"
+        deviceConfig.setProperty(namespace, "a", "true", false)
+        deviceConfig.setProperty(namespace, "b", "false", false)
+        deviceConfig.setProperty(namespace, "c", null, false)
+
+        assertThat(mFeatureFlagsRelease.isEnabled(DeviceConfigBooleanFlag(1, "a", namespace)))
+            .isTrue()
+        assertThat(mFeatureFlagsRelease.isEnabled(DeviceConfigBooleanFlag(2, "b", namespace)))
+            .isFalse()
+        assertThat(mFeatureFlagsRelease.isEnabled(DeviceConfigBooleanFlag(3, "c", namespace)))
+            .isFalse()
+    }
+
+    @Test
     fun testSysPropBooleanFlag() {
         val flagId = 213
         val flagName = "sys_prop_flag"
@@ -93,5 +117,23 @@ class FeatureFlagsReleaseTest : SysuiTestCase() {
         val flag = SysPropBooleanFlag(flagId, flagName, flagDefault)
         whenever(mSystemProperties.getBoolean(flagName, flagDefault)).thenReturn(flagDefault)
         assertThat(mFeatureFlagsRelease.isEnabled(flag)).isEqualTo(flagDefault)
+    }
+
+    @Test
+    fun serverSide_OverridesReleased_MakesFalse() {
+        val flag = ReleasedFlag(100)
+
+        serverFlagReader.setFlagValue(flag.id, false)
+
+        assertThat(mFeatureFlagsRelease.isEnabled(flag)).isFalse()
+    }
+
+    @Test
+    fun serverSide_OverridesUnreleased_Ignored() {
+        val flag = UnreleasedFlag(100)
+
+        serverFlagReader.setFlagValue(flag.id, true)
+
+        assertThat(mFeatureFlagsRelease.isEnabled(flag)).isFalse()
     }
 }

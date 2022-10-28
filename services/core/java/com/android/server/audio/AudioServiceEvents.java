@@ -16,7 +16,9 @@
 
 package com.android.server.audio;
 
+import android.annotation.NonNull;
 import android.media.AudioAttributes;
+import android.media.AudioDeviceAttributes;
 import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.media.MediaMetrics;
@@ -142,6 +144,43 @@ public class AudioServiceEvents {
                     .append(AudioSystem.forceUseUsageToString(mUsage))
                     .append(", ").append(AudioSystem.forceUseConfigToString(mConfig))
                     .append(") due to ").append(mReason).toString();
+        }
+    }
+
+    static final class DeviceVolumeEvent extends AudioEventLogger.Event {
+        final int mStream;
+        final int mVolIndex;
+        final String mDeviceNativeType;
+        final String mDeviceAddress;
+        final String mCaller;
+
+        DeviceVolumeEvent(int streamType, int index, @NonNull AudioDeviceAttributes device,
+                String callingPackage) {
+            mStream = streamType;
+            mVolIndex = index;
+            mDeviceNativeType = "0x" + Integer.toHexString(device.getInternalType());
+            mDeviceAddress = device.getAddress();
+            mCaller = callingPackage;
+            // log metrics
+            new MediaMetrics.Item(MediaMetrics.Name.AUDIO_VOLUME_EVENT)
+                    .set(MediaMetrics.Property.EVENT, "setDeviceVolume")
+                    .set(MediaMetrics.Property.STREAM_TYPE,
+                            AudioSystem.streamToString(mStream))
+                    .set(MediaMetrics.Property.INDEX, mVolIndex)
+                    .set(MediaMetrics.Property.DEVICE, mDeviceNativeType)
+                    .set(MediaMetrics.Property.ADDRESS, mDeviceAddress)
+                    .set(MediaMetrics.Property.CALLING_PACKAGE, mCaller)
+                    .record();
+        }
+
+        @Override
+        public String eventToString() {
+            return new StringBuilder("setDeviceVolume(stream:")
+                    .append(AudioSystem.streamToString(mStream))
+                    .append(" index:").append(mVolIndex)
+                    .append(" device:").append(mDeviceNativeType)
+                    .append(" addr:").append(mDeviceAddress)
+                    .append(") from ").append(mCaller).toString();
         }
     }
 
@@ -394,7 +433,7 @@ public class AudioServiceEvents {
                 case VOL_SET_LE_AUDIO_VOL:
                     return new StringBuilder("setLeAudioVolume:")
                             .append(" index:").append(mVal1)
-                            .append(" gain dB:").append(mVal2)
+                            .append(" maxIndex:").append(mVal2)
                             .toString();
                 case VOL_SET_AVRCP_VOL:
                     return new StringBuilder("setAvrcpVolume:")

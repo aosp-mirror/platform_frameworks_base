@@ -16,8 +16,6 @@
 
 package com.android.server.accessibility;
 
-import static android.view.WindowManager.ScreenshotSource.SCREENSHOT_ACCESSIBILITY_ACTIONS;
-
 import android.accessibilityservice.AccessibilityService;
 import android.app.PendingIntent;
 import android.app.RemoteAction;
@@ -34,6 +32,7 @@ import android.util.Slog;
 import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
+import android.view.WindowManager;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 
 import com.android.internal.R;
@@ -392,8 +391,8 @@ public class SystemActionPerformer {
     private boolean takeScreenshot() {
         ScreenshotHelper screenshotHelper = (mScreenshotHelperSupplier != null)
                 ? mScreenshotHelperSupplier.get() : new ScreenshotHelper(mContext);
-        screenshotHelper.takeScreenshot(android.view.WindowManager.TAKE_SCREENSHOT_FULLSCREEN,
-                true, true, SCREENSHOT_ACCESSIBILITY_ACTIONS,
+        screenshotHelper.takeScreenshot(WindowManager.TAKE_SCREENSHOT_FULLSCREEN,
+                WindowManager.ScreenshotSource.SCREENSHOT_ACCESSIBILITY_ACTIONS,
                 new Handler(Looper.getMainLooper()), null);
         return true;
     }

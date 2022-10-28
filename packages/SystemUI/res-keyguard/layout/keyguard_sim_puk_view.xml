@@ -27,12 +27,12 @@
         android:layout_height="match_parent"
         androidprv:layout_maxWidth="@dimen/keyguard_security_width"
         android:layout_gravity="center_horizontal|bottom">
+    <include layout="@layout/keyguard_bouncer_message_area"/>
 
-  <Space
-      android:layout_width="match_parent"
-      android:layout_height="0dp"
-      android:layout_weight="1"
-      />
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
 
     <ImageView
             android:id="@+id/keyguard_sim"
@@ -51,8 +51,7 @@
         <include layout="@layout/keyguard_esim_area"
             android:id="@+id/keyguard_esim_area"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/eca_overlap" />
+            android:layout_height="wrap_content" />
 
         <RelativeLayout
                 android:id="@+id/row0"

@@ -37,10 +37,12 @@ import android.os.RemoteException;
 import android.text.SpannableStringBuilder;
 import android.text.style.BulletSpan;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
@@ -54,7 +56,6 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.shared.system.QuickStepContract;
-import com.android.systemui.shared.system.WindowManagerWrapper;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.util.leak.RotationUtils;
 
@@ -67,6 +68,7 @@ import dagger.Lazy;
 
 public class ScreenPinningRequest implements View.OnClickListener,
         NavigationModeController.ModeChangedListener {
+    private static final String TAG = "ScreenPinningRequest";
 
     private final Context mContext;
     private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
@@ -248,9 +250,8 @@ public class ScreenPinningRequest implements View.OnClickListener,
             mLayout.findViewById(R.id.screen_pinning_text_area)
                     .setLayoutDirection(View.LAYOUT_DIRECTION_LOCALE);
             View buttons = mLayout.findViewById(R.id.screen_pinning_buttons);
-            WindowManagerWrapper wm = WindowManagerWrapper.getInstance();
             if (!QuickStepContract.isGesturalMode(mNavBarMode)
-            	    && wm.hasSoftNavigationBar(mContext.getDisplayId()) && !isTablet(mContext)) {
+            	    && hasSoftNavigationBar(mContext.getDisplayId()) && !isTablet(mContext)) {
                 buttons.setLayoutDirection(View.LAYOUT_DIRECTION_LOCALE);
                 swapChildrenIfRtlAndVertical(buttons);
             } else {
@@ -319,6 +320,20 @@ public class ScreenPinningRequest implements View.OnClickListener,
             mLayout.findViewById(R.id.screen_pinning_back_bg_light).setVisibility(backBgVisibility);
 
             addView(mLayout, getRequestLayoutParams(rotation));
+        }
+
+        /**
+         * @param displayId the id of display to check if there is a software navigation bar.
+         *
+         * @return whether there is a soft nav bar on specific display.
+         */
+        private boolean hasSoftNavigationBar(int displayId) {
+            try {
+                return WindowManagerGlobal.getWindowManagerService().hasNavigationBar(displayId);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to check soft navigation bar", e);
+                return false;
+            }
         }
 
         private void swapChildrenIfRtlAndVertical(View group) {

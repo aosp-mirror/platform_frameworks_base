@@ -18,7 +18,7 @@ package com.android.systemui.biometrics
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.util.Log
-import android.widget.ImageView
+import com.airbnb.lottie.LottieAnimationView
 import com.android.systemui.R
 import com.android.systemui.biometrics.AuthBiometricView.BiometricState
 import com.android.systemui.biometrics.AuthBiometricView.STATE_AUTHENTICATED
@@ -33,8 +33,8 @@ private const val TAG = "AuthBiometricFaceIconController"
 
 /** Face only icon animator for BiometricPrompt. */
 class AuthBiometricFaceIconController(
-    context: Context,
-    iconView: ImageView
+        context: Context,
+        iconView: LottieAnimationView
 ) : AuthIconController(context, iconView) {
 
     // false = dark to light, true = light to dark
@@ -76,44 +76,44 @@ class AuthBiometricFaceIconController(
         if (newState == STATE_AUTHENTICATING_ANIMATING_IN) {
             showStaticDrawable(R.drawable.face_dialog_pulse_dark_to_light)
             iconView.contentDescription = context.getString(
-                R.string.biometric_dialog_face_icon_description_authenticating
+                    R.string.biometric_dialog_face_icon_description_authenticating
             )
         } else if (newState == STATE_AUTHENTICATING) {
             startPulsing()
             iconView.contentDescription = context.getString(
-                R.string.biometric_dialog_face_icon_description_authenticating
+                    R.string.biometric_dialog_face_icon_description_authenticating
             )
         } else if (oldState == STATE_PENDING_CONFIRMATION && newState == STATE_AUTHENTICATED) {
             animateIconOnce(R.drawable.face_dialog_dark_to_checkmark)
             iconView.contentDescription = context.getString(
-                R.string.biometric_dialog_face_icon_description_confirmed
+                    R.string.biometric_dialog_face_icon_description_confirmed
             )
         } else if (lastStateIsErrorIcon && newState == STATE_IDLE) {
             animateIconOnce(R.drawable.face_dialog_error_to_idle)
             iconView.contentDescription = context.getString(
-                R.string.biometric_dialog_face_icon_description_idle
+                    R.string.biometric_dialog_face_icon_description_idle
             )
         } else if (lastStateIsErrorIcon && newState == STATE_AUTHENTICATED) {
             animateIconOnce(R.drawable.face_dialog_dark_to_checkmark)
             iconView.contentDescription = context.getString(
-                R.string.biometric_dialog_face_icon_description_authenticated
+                    R.string.biometric_dialog_face_icon_description_authenticated
             )
         } else if (newState == STATE_ERROR && oldState != STATE_ERROR) {
             animateIconOnce(R.drawable.face_dialog_dark_to_error)
         } else if (oldState == STATE_AUTHENTICATING && newState == STATE_AUTHENTICATED) {
             animateIconOnce(R.drawable.face_dialog_dark_to_checkmark)
             iconView.contentDescription = context.getString(
-                R.string.biometric_dialog_face_icon_description_authenticated
+                    R.string.biometric_dialog_face_icon_description_authenticated
             )
         } else if (newState == STATE_PENDING_CONFIRMATION) {
             animateIconOnce(R.drawable.face_dialog_wink_from_dark)
             iconView.contentDescription = context.getString(
-                R.string.biometric_dialog_face_icon_description_authenticated
+                    R.string.biometric_dialog_face_icon_description_authenticated
             )
         } else if (newState == STATE_IDLE) {
             showStaticDrawable(R.drawable.face_dialog_idle_static)
             iconView.contentDescription = context.getString(
-                R.string.biometric_dialog_face_icon_description_idle
+                    R.string.biometric_dialog_face_icon_description_idle
             )
         } else {
             Log.w(TAG, "Unhandled state: $newState")

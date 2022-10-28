@@ -51,6 +51,8 @@ public final class PictureInPictureSurfaceTransaction implements Parcelable {
 
     private final Rect mWindowCrop;
 
+    private boolean mShouldDisableCanAffectSystemUiFlags;
+
     private PictureInPictureSurfaceTransaction(Parcel in) {
         mAlpha = in.readFloat();
         mPosition = in.readTypedObject(PointF.CREATOR);
@@ -60,6 +62,7 @@ public final class PictureInPictureSurfaceTransaction implements Parcelable {
         mCornerRadius = in.readFloat();
         mShadowRadius = in.readFloat();
         mWindowCrop = in.readTypedObject(Rect.CREATOR);
+        mShouldDisableCanAffectSystemUiFlags = in.readBoolean();
     }
 
     private PictureInPictureSurfaceTransaction(float alpha, @Nullable PointF position,
@@ -84,6 +87,7 @@ public final class PictureInPictureSurfaceTransaction implements Parcelable {
         this(other.mAlpha, other.mPosition,
                 other.mFloat9, other.mRotation, other.mCornerRadius, other.mShadowRadius,
                 other.mWindowCrop);
+        mShouldDisableCanAffectSystemUiFlags = other.mShouldDisableCanAffectSystemUiFlags;
     }
 
     /** @return {@link Matrix} from {@link #mFloat9} */
@@ -103,6 +107,16 @@ public final class PictureInPictureSurfaceTransaction implements Parcelable {
         return mShadowRadius > 0;
     }
 
+    /** Sets the internal {@link #mShouldDisableCanAffectSystemUiFlags}. */
+    public void setShouldDisableCanAffectSystemUiFlags(boolean shouldDisable) {
+        mShouldDisableCanAffectSystemUiFlags = shouldDisable;
+    }
+
+    /** @return {@code true} if we should disable Task#setCanAffectSystemUiFlags. */
+    public boolean getShouldDisableCanAffectSystemUiFlags() {
+        return mShouldDisableCanAffectSystemUiFlags;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -114,13 +128,16 @@ public final class PictureInPictureSurfaceTransaction implements Parcelable {
                 && Objects.equals(mRotation, that.mRotation)
                 && Objects.equals(mCornerRadius, that.mCornerRadius)
                 && Objects.equals(mShadowRadius, that.mShadowRadius)
-                && Objects.equals(mWindowCrop, that.mWindowCrop);
+                && Objects.equals(mWindowCrop, that.mWindowCrop)
+                && mShouldDisableCanAffectSystemUiFlags
+                == that.mShouldDisableCanAffectSystemUiFlags;
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(mAlpha, mPosition, Arrays.hashCode(mFloat9),
-                mRotation, mCornerRadius, mShadowRadius, mWindowCrop);
+                mRotation, mCornerRadius, mShadowRadius, mWindowCrop,
+                mShouldDisableCanAffectSystemUiFlags);
     }
 
     @Override
@@ -137,6 +154,7 @@ public final class PictureInPictureSurfaceTransaction implements Parcelable {
         out.writeFloat(mCornerRadius);
         out.writeFloat(mShadowRadius);
         out.writeTypedObject(mWindowCrop, 0 /* flags */);
+        out.writeBoolean(mShouldDisableCanAffectSystemUiFlags);
     }
 
     @Override
@@ -150,6 +168,7 @@ public final class PictureInPictureSurfaceTransaction implements Parcelable {
                 + " cornerRadius=" + mCornerRadius
                 + " shadowRadius=" + mShadowRadius
                 + " crop=" + mWindowCrop
+                + " shouldDisableCanAffectSystemUiFlags" + mShouldDisableCanAffectSystemUiFlags
                 + ")";
     }
 

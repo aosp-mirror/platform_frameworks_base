@@ -95,12 +95,13 @@ public class InsetsAnimationControlImplTest {
                 () -> mMockTransaction, mMockController);
         topConsumer.setControl(
                 new InsetsSourceControl(
-                        ITYPE_STATUS_BAR, mTopLeash, new Point(0, 0), Insets.of(0, 100, 0, 0)),
+                        ITYPE_STATUS_BAR, mTopLeash, true, new Point(0, 0),
+                        Insets.of(0, 100, 0, 0)),
                 new int[1], new int[1]);
 
         InsetsSourceConsumer navConsumer = new InsetsSourceConsumer(ITYPE_NAVIGATION_BAR,
                 mInsetsState, () -> mMockTransaction, mMockController);
-        navConsumer.setControl(new InsetsSourceControl(ITYPE_NAVIGATION_BAR, mNavLeash,
+        navConsumer.setControl(new InsetsSourceControl(ITYPE_NAVIGATION_BAR, mNavLeash, true,
                 new Point(400, 0), Insets.of(0, 0, 100, 0)), new int[1], new int[1]);
         navConsumer.hide();
 

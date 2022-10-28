@@ -39,9 +39,11 @@ import com.android.wm.shell.common.DisplayInsetsController.OnInsetsChangedListen
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
-import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.compatui.CompatUIWindowManager.CompatUIHintsState;
 import com.android.wm.shell.compatui.letterboxedu.LetterboxEduWindowManager;
+import com.android.wm.shell.sysui.KeyguardChangeListener;
+import com.android.wm.shell.sysui.ShellController;
+import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 
 import java.lang.ref.WeakReference;
@@ -58,7 +60,7 @@ import dagger.Lazy;
  * activities are in compatibility mode.
  */
 public class CompatUIController implements OnDisplaysChangedListener,
-        DisplayImeController.ImePositionProcessor {
+        DisplayImeController.ImePositionProcessor, KeyguardChangeListener {
 
     /** Callback for compat UI interaction. */
     public interface CompatUICallback {
@@ -100,13 +102,13 @@ public class CompatUIController implements OnDisplaysChangedListener,
     private final SparseArray<WeakReference<Context>> mDisplayContextCache = new SparseArray<>(0);
 
     private final Context mContext;
+    private final ShellController mShellController;
     private final DisplayController mDisplayController;
     private final DisplayInsetsController mDisplayInsetsController;
     private final DisplayImeController mImeController;
     private final SyncTransactionQueue mSyncQueue;
     private final ShellExecutor mMainExecutor;
     private final Lazy<Transitions> mTransitionsLazy;
-    private final CompatUIImpl mImpl = new CompatUIImpl();
 
     private CompatUICallback mCallback;
 
@@ -118,6 +120,8 @@ public class CompatUIController implements OnDisplaysChangedListener,
     private boolean mKeyguardShowing;
 
     public CompatUIController(Context context,
+            ShellInit shellInit,
+            ShellController shellController,
             DisplayController displayController,
             DisplayInsetsController displayInsetsController,
             DisplayImeController imeController,
@@ -125,20 +129,21 @@ public class CompatUIController implements OnDisplaysChangedListener,
             ShellExecutor mainExecutor,
             Lazy<Transitions> transitionsLazy) {
         mContext = context;
+        mShellController = shellController;
         mDisplayController = displayController;
         mDisplayInsetsController = displayInsetsController;
         mImeController = imeController;
         mSyncQueue = syncQueue;
         mMainExecutor = mainExecutor;
         mTransitionsLazy = transitionsLazy;
-        mDisplayController.addDisplayWindowListener(this);
-        mImeController.addPositionProcessor(this);
         mCompatUIHintsState = new CompatUIHintsState();
+        shellInit.addInitCallback(this::onInit, this);
     }
 
-    /** Returns implementation of {@link CompatUI}. */
-    public CompatUI asCompatUI() {
-        return mImpl;
+    private void onInit() {
+        mShellController.addKeyguardChangeListener(this);
+        mDisplayController.addDisplayWindowListener(this);
+        mImeController.addPositionProcessor(this);
     }
 
     /** Sets the callback for UI interactions. */
@@ -223,9 +228,10 @@ public class CompatUIController implements OnDisplaysChangedListener,
                 layout -> layout.updateVisibility(showOnDisplay(displayId)));
     }
 
-    @VisibleForTesting
-    void onKeyguardShowingChanged(boolean showing) {
-        mKeyguardShowing = showing;
+    @Override
+    public void onKeyguardVisibilityChanged(boolean visible, boolean occluded,
+            boolean animatingDismiss) {
+        mKeyguardShowing = visible;
         // Hide the compat UIs when keyguard is showing.
         forAllLayouts(layout -> layout.updateVisibility(showOnDisplay(layout.getDisplayId())));
     }
@@ -370,19 +376,6 @@ public class CompatUIController implements OnDisplaysChangedListener,
         }
         if (mActiveLetterboxEduLayout != null && condition.test(mActiveLetterboxEduLayout)) {
             callback.accept(mActiveLetterboxEduLayout);
-        }
-    }
-
-    /**
-     * The interface for calls from outside the Shell, within the host process.
-     */
-    @ExternalThread
-    private class CompatUIImpl implements CompatUI {
-        @Override
-        public void onKeyguardShowingChanged(boolean showing) {
-            mMainExecutor.execute(() -> {
-                CompatUIController.this.onKeyguardShowingChanged(showing);
-            });
         }
     }
 

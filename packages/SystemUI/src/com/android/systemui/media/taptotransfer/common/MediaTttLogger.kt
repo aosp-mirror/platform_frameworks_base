@@ -18,38 +18,56 @@ package com.android.systemui.media.taptotransfer.common
 
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogLevel
-import com.android.systemui.log.dagger.MediaTttSenderLogBuffer
+import com.android.systemui.temporarydisplay.TemporaryViewLogger
 
 /**
  * A logger for media tap-to-transfer events.
  *
- * @property deviceTypeTag the type of device triggering the logs -- "Sender" or "Receiver".
+ * @param deviceTypeTag the type of device triggering the logs -- "Sender" or "Receiver".
  */
 class MediaTttLogger(
-    private val deviceTypeTag: String,
-    @MediaTttSenderLogBuffer private val buffer: LogBuffer
-){
+    deviceTypeTag: String,
+    buffer: LogBuffer
+) : TemporaryViewLogger(buffer, BASE_TAG + deviceTypeTag) {
     /** Logs a change in the chip state for the given [mediaRouteId]. */
-    fun logStateChange(stateName: String, mediaRouteId: String) {
+    fun logStateChange(stateName: String, mediaRouteId: String, packageName: String?) {
         buffer.log(
-            BASE_TAG + deviceTypeTag,
+            tag,
             LogLevel.DEBUG,
             {
                 str1 = stateName
                 str2 = mediaRouteId
+                str3 = packageName
             },
-            { "State changed to $str1 for ID=$str2" }
+            { "State changed to $str1 for ID=$str2 package=$str3" }
         )
     }
 
-    /** Logs that we removed the chip for the given [reason]. */
-    fun logChipRemoval(reason: String) {
+    /** Logs that we couldn't find information for [packageName]. */
+    fun logPackageNotFound(packageName: String) {
         buffer.log(
-            BASE_TAG + deviceTypeTag,
+            tag,
             LogLevel.DEBUG,
-            { str1 = reason },
-            { "Chip removed due to $str1" }
+            { str1 = packageName },
+            { "Package $str1 could not be found" }
         )
+    }
+
+    /**
+     * Logs that a removal request has been bypassed (ignored).
+     *
+     * @param removalReason the reason that the chip removal was requested.
+     * @param bypassReason the reason that the request was bypassed.
+     */
+    fun logRemovalBypass(removalReason: String, bypassReason: String) {
+        buffer.log(
+            tag,
+            LogLevel.DEBUG,
+            {
+                str1 = removalReason
+                str2 = bypassReason
+            },
+            { "Chip removal requested due to $str1; however, removal was ignored because $str2" })
     }
 }
 

@@ -49,6 +49,7 @@ import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.UserAvatarView;
+import com.android.systemui.user.data.source.UserRecord;
 import com.android.systemui.util.ViewController;
 
 import javax.inject.Inject;
@@ -68,7 +69,7 @@ public class KeyguardQsUserSwitchController extends ViewController<FrameLayout> 
     private final Context mContext;
     private Resources mResources;
     private final UserSwitcherController mUserSwitcherController;
-    private UserSwitcherController.BaseUserAdapter mAdapter;
+    private BaseUserSwitcherAdapter mAdapter;
     private final KeyguardStateController mKeyguardStateController;
     private final FalsingManager mFalsingManager;
     protected final SysuiStatusBarStateController mStatusBarStateController;
@@ -79,7 +80,7 @@ public class KeyguardQsUserSwitchController extends ViewController<FrameLayout> 
     @VisibleForTesting
     UserAvatarView mUserAvatarView;
     private View mUserAvatarViewWithBackground;
-    UserSwitcherController.UserRecord mCurrentUser;
+    UserRecord mCurrentUser;
     private boolean mIsKeyguardShowing;
 
     // State info for the user switch and keyguard
@@ -170,7 +171,7 @@ public class KeyguardQsUserSwitchController extends ViewController<FrameLayout> 
         mUserAvatarView = mView.findViewById(R.id.kg_multi_user_avatar);
         mUserAvatarViewWithBackground = mView.findViewById(
                 R.id.kg_multi_user_avatar_with_background);
-        mAdapter = new UserSwitcherController.BaseUserAdapter(mUserSwitcherController) {
+        mAdapter = new BaseUserSwitcherAdapter(mUserSwitcherController) {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
                 return null;
@@ -269,10 +270,10 @@ public class KeyguardQsUserSwitchController extends ViewController<FrameLayout> 
      * @return true if the current user has changed
      */
     private boolean updateCurrentUser() {
-        UserSwitcherController.UserRecord previousUser = mCurrentUser;
+        UserRecord previousUser = mCurrentUser;
         mCurrentUser = null;
         for (int i = 0; i < mAdapter.getCount(); i++) {
-            UserSwitcherController.UserRecord r = mAdapter.getItem(i);
+            UserRecord r = mAdapter.getItem(i);
             if (r.isCurrent) {
                 mCurrentUser = r;
                 return !mCurrentUser.equals(previousUser);

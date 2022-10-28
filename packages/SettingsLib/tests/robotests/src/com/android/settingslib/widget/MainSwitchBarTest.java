@@ -16,6 +16,8 @@
 
 package com.android.settingslib.widget;
 
+import static android.graphics.text.LineBreakConfig.LINE_BREAK_WORD_STYLE_PHRASE;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import android.content.Context;
@@ -96,5 +98,15 @@ public class MainSwitchBarTest {
         mBar.hide();
 
         assertThat(mBar.getVisibility()).isEqualTo(View.GONE);
+    }
+
+    @Test
+    public void setTitle_shouldSetCorrectLineBreakStyle() {
+        final String title = "title";
+
+        mBar.setTitle(title);
+        final TextView textView = ((TextView) mBar.findViewById(R.id.switch_text));
+
+        assertThat(textView.getLineBreakWordStyle()).isEqualTo(LINE_BREAK_WORD_STYLE_PHRASE);
     }
 }

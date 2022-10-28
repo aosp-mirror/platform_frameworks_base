@@ -246,9 +246,9 @@
     <!-- Bluetooth settings. The user-visible string that is used whenever referring to the PAN profile (accessing Internet through remote device). [CHAR LIMIT=40] -->
     <string name="bluetooth_profile_pan">Internet access</string>
     <!-- Bluetooth settings. The user-visible string that is used whenever referring to the PBAP profile. [CHAR LIMIT=40] -->
-    <string name="bluetooth_profile_pbap">Contact sharing</string>
+    <string name="bluetooth_profile_pbap">Contacts and call history sharing</string>
     <!-- Bluetooth settings. The user-visible summary string that is used whenever referring to the PBAP profile (sharing contacts). [CHAR LIMIT=60] -->
-    <string name="bluetooth_profile_pbap_summary">Use for contact sharing</string>
+    <string name="bluetooth_profile_pbap_summary">Use for contacts and call history sharing</string>
     <!-- Bluetooth settings. The user-visible string that is used whenever referring to the PAN profile (sharing this device's Internet connection). [CHAR LIMIT=40] -->
     <string name="bluetooth_profile_pan_nap">Internet connection sharing</string>
     <!-- Bluetooth settings. The user-visible string that is used whenever referring to the map profile. -->
@@ -264,12 +264,12 @@
 
     <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the Hearing Aid profile. -->
     <string name="bluetooth_profile_hearing_aid">Hearing Aids</string>
-    <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the LE_AUDIO profile. -->
-    <string name="bluetooth_profile_le_audio">LE_AUDIO</string>
+    <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the LE audio profile. -->
+    <string name="bluetooth_profile_le_audio">LE audio</string>
     <!-- Bluetooth settings.  Connection options screen.  The summary for the Hearing Aid checkbox preference when Hearing Aid is connected. -->
     <string name="bluetooth_hearing_aid_profile_summary_connected">Connected to Hearing Aids</string>
-    <!-- Bluetooth settings.  Connection options screen.  The summary for the LE_AUDIO checkbox preference when LE_AUDIO is connected. -->
-    <string name="bluetooth_le_audio_profile_summary_connected">Connected to LE_AUDIO</string>
+    <!-- Bluetooth settings.  Connection options screen.  The summary for the LE audio checkbox preference when LE audio is connected. -->
+    <string name="bluetooth_le_audio_profile_summary_connected">Connected to LE audio</string>
 
     <!-- Bluetooth settings.  Connection options screen.  The summary for the A2DP checkbox preference when A2DP is connected. -->
     <string name="bluetooth_a2dp_profile_summary_connected">Connected to media audio</string>
@@ -962,6 +962,9 @@
     <!-- UI debug setting: enable freeform window support summary [CHAR LIMIT=150] -->
     <string name="enable_freeform_support_summary">Enable support for experimental freeform windows.</string>
 
+    <!-- UI debug setting: enable desktop mode [CHAR LIMIT=25] -->
+    <string name="desktop_mode">Desktop mode</string>
+
     <!-- Local (desktop) backup password menu title [CHAR LIMIT=25] -->
     <string name="local_backup_password_title">Desktop backup password</string>
     <!-- Summary text of the "local backup password" setting when the user has not supplied a password -->
@@ -1122,7 +1125,7 @@
     <!-- [CHAR_LIMIT=40] Label for battery level chart when charging with duration -->
     <string name="power_charging_duration"><xliff:g id="level">%1$s</xliff:g> - <xliff:g id="time">%2$s</xliff:g> left until full</string>
     <!-- [CHAR_LIMIT=80] Label for battery level chart when charge been limited -->
-    <string name="power_charging_limited"><xliff:g id="level">%1$s</xliff:g> - Charging temporarily limited</string>
+    <string name="power_charging_limited"><xliff:g id="level">%1$s</xliff:g> - Charging is paused</string>
 
     <!-- Battery Info screen. Value for a status item.  Used for diagnostic info screens, precise translation isn't needed -->
     <string name="battery_info_status_unknown">Unknown</string>
@@ -1134,6 +1137,8 @@
     <string name="battery_info_status_charging_slow">Charging slowly</string>
     <!-- [CHAR_LIMIT=20] Battery use screen.  Battery status shown in chart label when charging wirelessly.  -->
     <string name="battery_info_status_charging_wireless">Charging wirelessly</string>
+    <!-- [CHAR_LIMIT=20] Battery use screen.  Battery status shown in chart label when the device is dock charging.  -->
+    <string name="battery_info_status_charging_dock">Charging</string>
     <!-- Battery Info screen. Value for a status item.  Used for diagnostic info screens, precise translation isn't needed -->
     <string name="battery_info_status_discharging">Not charging</string>
     <!-- Battery Info screen. Value for a status item. A state which device is connected with any charger(e.g. USB, Adapter or Wireless) but not charging yet. Used for diagnostic info screens, precise translation isn't needed -->
@@ -1438,6 +1443,44 @@
     <string name="guest_remove_guest_confirm_button">Remove</string>
     <!-- Status message indicating the device is in the process of resetting the guest user. [CHAR_LIMIT=NONE] -->
     <string name="guest_resetting">Resetting guest\u2026</string>
+    <!-- Dialog title on action reset and restart guest [CHAR LIMIT=60] -->
+    <string name="guest_reset_and_restart_dialog_title">Reset guest session?</string>
+    <!-- Dialog message on action reset and restart guest [CHAR LIMIT=160] -->
+    <string name="guest_reset_and_restart_dialog_message">This will start a new guest
+        session and delete all apps and data from the current session</string>
+    <!-- Dialog title on action exit guest (ephemeral guest) [CHAR LIMIT=32] -->
+    <string name="guest_exit_dialog_title">Exit guest mode?</string>
+    <!-- Dialog message on action exit guest (ephemeral guest) [CHAR LIMIT=80] -->
+    <string name="guest_exit_dialog_message">This will delete
+        apps and data from the current guest session</string>
+    <!-- Dialog button on action exit guest (ephemeral guest) [CHAR LIMIT=80] -->
+    <string name="guest_exit_dialog_button">Exit</string>
+    <!-- Dialog title on action exit guest (non-ephemeral guest) [CHAR LIMIT=32] -->
+    <string name="guest_exit_dialog_title_non_ephemeral">Save guest activity?</string>
+    <!-- Dialog message on action exit guest (non-ephemeral guest) [CHAR LIMIT=80] -->
+    <string name="guest_exit_dialog_message_non_ephemeral">You can save activity from
+        the current session or delete all apps and data</string>
+    <!-- Button on guest exit, clear data (non-ephemeral guest) [CHAR LIMIT=80] -->
+    <string name="guest_exit_clear_data_button">Delete</string>
+    <!-- Button on guest exit, save data (non-ephemeral guest) [CHAR LIMIT=80] -->
+    <string name="guest_exit_save_data_button">Save</string>
+    <!-- Label for button in confirmation dialog when exiting guest user [CHAR LIMIT=35] -->
+    <string name="guest_exit_button">Exit guest mode</string>
+    <!-- Label for button in confirmation dialog when resetting guest user [CHAR LIMIT=35] -->
+    <string name="guest_reset_button">Reset guest session</string>
+    <!-- Label for guest icon in quick settings user switcher [CHAR LIMIT=35] -->
+    <string name="guest_exit_quick_settings_button">Exit guest</string>
+    <!-- Message of the notification when guest mode is entered
+         and it's a ephemeral guest [CHAR LIMIT=60] -->
+    <string name="guest_notification_ephemeral">All activity will be deleted on exit</string>
+    <!-- Message of the notification when guest mode is entered
+         and it's not a ephemeral guest and it's a first time guest login [CHAR LIMIT=60] -->
+    <string name="guest_notification_non_ephemeral">You can save or delete your activity on exit</string>
+    <!-- Message of the notification when guest mode is entered
+         and it's not a ephemeral guest and it's not a first time guest login [CHAR LIMIT=NONE] -->
+    <string name="guest_notification_non_ephemeral_non_first_login">Reset to delete session
+        activity now, or you can save or delete activity on exit</string>
+
     <!-- An option in a photo selection dialog to take a new photo [CHAR LIMIT=50] -->
     <string name="user_image_take_photo">Take a photo</string>
     <!-- An option in a photo selection dialog to choose a pre-existing image [CHAR LIMIT=50] -->
@@ -1558,16 +1601,6 @@
     <!-- Content description of the no calling for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_no_calling">No calling.</string>
 
-    <!-- Screensaver overlay which displays the time. [CHAR LIMIT=20] -->
-    <string name="dream_complication_title_time">Time</string>
-    <!-- Screensaver overlay which displays the date. [CHAR LIMIT=20] -->
-    <string name="dream_complication_title_date">Date</string>
-    <!-- Screensaver overlay which displays the weather. [CHAR LIMIT=20] -->
-    <string name="dream_complication_title_weather">Weather</string>
-    <!-- Screensaver overlay which displays air quality. [CHAR LIMIT=20] -->
-    <string name="dream_complication_title_aqi">Air Quality</string>
-    <!-- Screensaver overlay which displays cast info. [CHAR LIMIT=20] -->
-    <string name="dream_complication_title_cast_info">Cast Info</string>
 
     <!-- Title for a screen allowing the user to choose a profile picture. [CHAR LIMIT=NONE] -->
     <string name="avatar_picker_title">Choose a profile picture</string>

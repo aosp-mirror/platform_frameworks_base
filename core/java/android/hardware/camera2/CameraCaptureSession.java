@@ -1234,6 +1234,42 @@ public abstract class CameraCaptureSession implements AutoCloseable {
         }
 
         /**
+         * This method is called when the camera device has started reading out the output
+         * image for the request, at the beginning of the sensor image readout.
+         *
+         * <p>For a capture request, this callback is invoked right after
+         * {@link #onCaptureStarted}. Unlike {@link #onCaptureStarted}, instead of passing
+         * a timestamp of start of exposure, this callback passes a timestamp of start of
+         * camera data readout. This is useful because for a camera running at fixed frame
+         * rate, the start of readout is at fixed interval, which is not necessarily true for
+         * the start of exposure, particularly when autoexposure is changing exposure duration
+         * between frames.</p>
+         *
+         * <p>This timestamp may not match {@link CaptureResult#SENSOR_TIMESTAMP the result
+         * timestamp field}. It will, however, match the timestamp of buffers sent to the
+         * output surfaces with {@link OutputConfiguration#TIMESTAMP_BASE_READOUT_SENSOR}
+         * timestamp base.</p>
+         *
+         * <p>This callback will be called only if {@link
+         * CameraCharacteristics#SENSOR_READOUT_TIMESTAMP} is
+         * {@link CameraMetadata#SENSOR_READOUT_TIMESTAMP_HARDWARE}, and it's called
+         * right after {@link #onCaptureStarted}.</p>
+         *
+         * @param session the session returned by {@link CameraDevice#createCaptureSession}
+         * @param request the request for the readout that just began
+         * @param timestamp the timestamp at start of readout for a regular request, or
+         *                  the timestamp at the input image's start of readout for a
+         *                  reprocess request, in nanoseconds.
+         * @param frameNumber the frame number for this capture
+         *
+         * @hide
+         */
+        public void onReadoutStarted(@NonNull CameraCaptureSession session,
+                @NonNull CaptureRequest request, long timestamp, long frameNumber) {
+            // default empty implementation
+        }
+
+        /**
          * This method is called when some results from an image capture are
          * available.
          *

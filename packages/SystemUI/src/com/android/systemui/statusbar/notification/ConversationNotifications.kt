@@ -31,7 +31,6 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.inflation.BindEventManager
-import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
@@ -129,11 +128,9 @@ class AnimatedImageNotificationManager @Inject constructor(
  */
 @SysUISingleton
 class ConversationNotificationManager @Inject constructor(
-    private val bindEventManager: BindEventManager,
-    private val notificationGroupManager: NotificationGroupManagerLegacy,
+    bindEventManager: BindEventManager,
     private val context: Context,
     private val notifCollection: CommonNotifCollection,
-    private val featureFlags: NotifPipelineFlags,
     @Main private val mainHandler: Handler
 ) {
     // Need this state to be thread safe, since it's accessed from the ui thread
@@ -172,12 +169,10 @@ class ConversationNotificationManager @Inject constructor(
                                 layout.setIsImportantConversation(important, false)
                             }
                         }
-                if (changed && !featureFlags.isNewPipelineEnabled()) {
-                    notificationGroupManager.updateIsolation(entry)
-                }
             }
         }
     }
+
     fun onEntryViewBound(entry: NotificationEntry) {
         if (!entry.ranking.isConversation) {
             return
