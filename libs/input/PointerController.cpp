@@ -32,6 +32,7 @@
 
 #define INDENT "  "
 #define INDENT2 "    "
+#define INDENT3 "      "
 
 namespace android {
 
@@ -326,6 +327,10 @@ void PointerController::dump(std::string& dump) {
     dump += StringPrintf(INDENT2 "Presentation: %s\n",
                          ftl::enum_string(mLocked.presentation).c_str());
     dump += StringPrintf(INDENT2 "Pointer Display ID: %" PRIu32 "\n", mLocked.pointerDisplayId);
+    dump += StringPrintf(INDENT2 "Viewports:\n");
+    for (const auto& info : mLocked.mDisplayInfos) {
+        info.dump(dump, INDENT3);
+    }
 }
 
 } // namespace android
