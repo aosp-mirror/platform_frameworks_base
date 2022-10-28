@@ -363,7 +363,16 @@ public final class JobServiceContext implements ServiceConnection {
                     job.getJob().isPrefetch(),
                     job.getJob().getPriority(),
                     job.getEffectivePriority(),
-                    job.getNumPreviousAttempts());
+                    job.getNumPreviousAttempts(),
+                    job.getJob().getMaxExecutionDelayMillis(),
+                    isDeadlineExpired,
+                    job.isConstraintSatisfied(JobInfo.CONSTRAINT_FLAG_CHARGING),
+                    job.isConstraintSatisfied(JobInfo.CONSTRAINT_FLAG_BATTERY_NOT_LOW),
+                    job.isConstraintSatisfied(JobInfo.CONSTRAINT_FLAG_STORAGE_NOT_LOW),
+                    job.isConstraintSatisfied(JobStatus.CONSTRAINT_TIMING_DELAY),
+                    job.isConstraintSatisfied(JobInfo.CONSTRAINT_FLAG_DEVICE_IDLE),
+                    job.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY),
+                    job.isConstraintSatisfied(JobStatus.CONSTRAINT_CONTENT_TRIGGER));
             if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
                 // Use the context's ID to distinguish traces since there'll only be one job
                 // running per context.
@@ -1032,7 +1041,16 @@ public final class JobServiceContext implements ServiceConnection {
                 completedJob.getJob().isPrefetch(),
                 completedJob.getJob().getPriority(),
                 completedJob.getEffectivePriority(),
-                completedJob.getNumPreviousAttempts());
+                completedJob.getNumPreviousAttempts(),
+                completedJob.getJob().getMaxExecutionDelayMillis(),
+                mParams.isOverrideDeadlineExpired(),
+                completedJob.isConstraintSatisfied(JobInfo.CONSTRAINT_FLAG_CHARGING),
+                completedJob.isConstraintSatisfied(JobInfo.CONSTRAINT_FLAG_BATTERY_NOT_LOW),
+                completedJob.isConstraintSatisfied(JobInfo.CONSTRAINT_FLAG_STORAGE_NOT_LOW),
+                completedJob.isConstraintSatisfied(JobStatus.CONSTRAINT_TIMING_DELAY),
+                completedJob.isConstraintSatisfied(JobInfo.CONSTRAINT_FLAG_DEVICE_IDLE),
+                completedJob.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY),
+                completedJob.isConstraintSatisfied(JobStatus.CONSTRAINT_CONTENT_TRIGGER));
         if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
             Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_SYSTEM_SERVER, "JobScheduler",
                     completedJob.getTag(), getId());

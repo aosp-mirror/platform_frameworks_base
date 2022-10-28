@@ -95,11 +95,11 @@ public final class JobStatus {
     static final int CONSTRAINT_IDLE = JobInfo.CONSTRAINT_FLAG_DEVICE_IDLE;  // 1 << 2
     static final int CONSTRAINT_BATTERY_NOT_LOW = JobInfo.CONSTRAINT_FLAG_BATTERY_NOT_LOW; // 1 << 1
     static final int CONSTRAINT_STORAGE_NOT_LOW = JobInfo.CONSTRAINT_FLAG_STORAGE_NOT_LOW; // 1 << 3
-    static final int CONSTRAINT_TIMING_DELAY = 1<<31;
-    static final int CONSTRAINT_DEADLINE = 1<<30;
-    static final int CONSTRAINT_CONNECTIVITY = 1 << 28;
+    public static final int CONSTRAINT_TIMING_DELAY = 1 << 31;
+    public static final int CONSTRAINT_DEADLINE = 1 << 30;
+    public static final int CONSTRAINT_CONNECTIVITY = 1 << 28;
     static final int CONSTRAINT_TARE_WEALTH = 1 << 27; // Implicit constraint
-    static final int CONSTRAINT_CONTENT_TRIGGER = 1<<26;
+    public static final int CONSTRAINT_CONTENT_TRIGGER = 1 << 26;
     static final int CONSTRAINT_DEVICE_NOT_DOZING = 1 << 25; // Implicit constraint
     static final int CONSTRAINT_WITHIN_QUOTA = 1 << 24;      // Implicit constraint
     static final int CONSTRAINT_PREFETCH = 1 << 23;
@@ -1599,7 +1599,8 @@ public final class JobStatus {
         }
     }
 
-    boolean isConstraintSatisfied(int constraint) {
+    /** @return whether or not the @param constraint is satisfied */
+    public boolean isConstraintSatisfied(int constraint) {
         return (satisfiedConstraints&constraint) != 0;
     }
 

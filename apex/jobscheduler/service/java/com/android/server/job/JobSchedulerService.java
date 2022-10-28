@@ -1290,7 +1290,16 @@ public class JobSchedulerService extends com.android.server.SystemService
                     jobStatus.getJob().isPrefetch(),
                     jobStatus.getJob().getPriority(),
                     jobStatus.getEffectivePriority(),
-                    jobStatus.getNumPreviousAttempts());
+                    jobStatus.getNumPreviousAttempts(),
+                    jobStatus.getJob().getMaxExecutionDelayMillis(),
+                    /* isDeadlineConstraintSatisfied */ false,
+                    /* isCharging */ false,
+                    /* batteryNotLow */ false,
+                    /* storageNotLow */false,
+                    /* timingDelayConstraintSatisfied */ false,
+                    /* isDeviceIdle */ false,
+                    /* hasConnectivityConstraintSatisfied */ false,
+                    /* hasContentTriggerConstraintSatisfied */ false);
 
             // If the job is immediately ready to run, then we can just immediately
             // put it in the pending list and try to schedule it.  This is especially
@@ -1489,7 +1498,16 @@ public class JobSchedulerService extends com.android.server.SystemService
                     cancelled.getJob().isPrefetch(),
                     cancelled.getJob().getPriority(),
                     cancelled.getEffectivePriority(),
-                    cancelled.getNumPreviousAttempts());
+                    cancelled.getNumPreviousAttempts(),
+                    cancelled.getJob().getMaxExecutionDelayMillis(),
+                    cancelled.isConstraintSatisfied(JobStatus.CONSTRAINT_DEADLINE),
+                    cancelled.isConstraintSatisfied(JobInfo.CONSTRAINT_FLAG_CHARGING),
+                    cancelled.isConstraintSatisfied(JobInfo.CONSTRAINT_FLAG_BATTERY_NOT_LOW),
+                    cancelled.isConstraintSatisfied(JobInfo.CONSTRAINT_FLAG_STORAGE_NOT_LOW),
+                    cancelled.isConstraintSatisfied(JobStatus.CONSTRAINT_TIMING_DELAY),
+                    cancelled.isConstraintSatisfied(JobInfo.CONSTRAINT_FLAG_DEVICE_IDLE),
+                    cancelled.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY),
+                    cancelled.isConstraintSatisfied(JobStatus.CONSTRAINT_CONTENT_TRIGGER));
         }
         // If this is a replacement, bring in the new version of the job
         if (incomingJob != null) {
