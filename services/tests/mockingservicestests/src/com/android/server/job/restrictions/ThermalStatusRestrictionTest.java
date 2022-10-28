@@ -184,8 +184,10 @@ public class ThermalStatusRestrictionTest {
         when(mJobSchedulerService.isCurrentlyRunningLocked(jobLowPriorityRunning)).thenReturn(true);
         when(mJobSchedulerService.isCurrentlyRunningLocked(jobHighPriorityRunning))
                 .thenReturn(true);
-        when(mJobSchedulerService.isLongRunningLocked(jobLowPriorityRunningLong)).thenReturn(true);
-        when(mJobSchedulerService.isLongRunningLocked(jobHighPriorityRunningLong)).thenReturn(true);
+        when(mJobSchedulerService.isJobInOvertimeLocked(jobLowPriorityRunningLong))
+                .thenReturn(true);
+        when(mJobSchedulerService.isJobInOvertimeLocked(jobHighPriorityRunningLong))
+                .thenReturn(true);
 
         assertFalse(mThermalStatusRestriction.isJobRestricted(jobMinPriority));
         assertFalse(mThermalStatusRestriction.isJobRestricted(jobLowPriority));

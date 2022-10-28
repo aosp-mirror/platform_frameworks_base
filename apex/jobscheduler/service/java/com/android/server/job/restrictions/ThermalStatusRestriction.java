@@ -90,11 +90,11 @@ public class ThermalStatusRestriction extends JobRestriction {
         final int priority = job.getEffectivePriority();
         if (mThermalStatus >= HIGHER_PRIORITY_THRESHOLD) {
             // For moderate throttling, only let expedited jobs and high priority regular jobs that
-            // haven't been running for long run.
+            // haven't been running for a long time run.
             return !job.shouldTreatAsExpeditedJob()
                     && !(priority == JobInfo.PRIORITY_HIGH
                         && mService.isCurrentlyRunningLocked(job)
-                        && !mService.isLongRunningLocked(job));
+                        && !mService.isJobInOvertimeLocked(job));
         }
         if (mThermalStatus >= LOW_PRIORITY_THRESHOLD) {
             // For light throttling, throttle all min priority jobs and all low priority jobs that
@@ -102,7 +102,7 @@ public class ThermalStatusRestriction extends JobRestriction {
             return priority == JobInfo.PRIORITY_MIN
                     || (priority == JobInfo.PRIORITY_LOW
                         && (!mService.isCurrentlyRunningLocked(job)
-                            || mService.isLongRunningLocked(job)));
+                            || mService.isJobInOvertimeLocked(job)));
         }
         return false;
     }
