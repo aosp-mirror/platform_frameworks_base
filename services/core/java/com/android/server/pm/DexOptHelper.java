@@ -62,6 +62,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
 import com.android.server.LocalManagerRegistry;
 import com.android.server.art.ArtManagerLocal;
+import com.android.server.art.DexUseManagerLocal;
 import com.android.server.art.model.ArtFlags;
 import com.android.server.art.model.OptimizeParams;
 import com.android.server.art.model.OptimizeResult;
@@ -932,9 +933,23 @@ public final class DexOptHelper {
     }
 
     /**
-     * Returns {@link ArtManagerLocal} if one is found and should be used for package optimization.
+     * Returns {@link DexUseManagerLocal} if ART Service should be used for package optimization.
      */
-    private @Nullable ArtManagerLocal getArtManagerLocal() {
+    public static @Nullable DexUseManagerLocal getDexUseManagerLocal() {
+        if (!"true".equals(SystemProperties.get("dalvik.vm.useartservice", ""))) {
+            return null;
+        }
+        try {
+            return LocalManagerRegistry.getManagerOrThrow(DexUseManagerLocal.class);
+        } catch (ManagerNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Returns {@link ArtManagerLocal} if ART Service should be used for package optimization.
+     */
+    private static @Nullable ArtManagerLocal getArtManagerLocal() {
         if (!"true".equals(SystemProperties.get("dalvik.vm.useartservice", ""))) {
             return null;
         }
