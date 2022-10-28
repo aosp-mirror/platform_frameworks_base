@@ -3344,9 +3344,26 @@ public final class Settings {
                     }
                 }
 
-                // Fetch all flags for the namespace at once for caching purposes
-                Bundle b = cp.call(cr.getAttributionSource(),
-                        mProviderHolder.mUri.getAuthority(), mCallListCommand, null, args);
+                Bundle b;
+                // b/252663068: if we're in system server and the caller did not call
+                // clearCallingIdentity, the read would fail due to mismatched AttributionSources.
+                // TODO(b/256013480): remove this bypass after fixing the callers in system server.
+                if (namespace.equals(DeviceConfig.NAMESPACE_DEVICE_POLICY_MANAGER)
+                        && Settings.isInSystemServer()
+                        && Binder.getCallingUid() != Process.myUid()) {
+                    final long token = Binder.clearCallingIdentity();
+                    try {
+                        // Fetch all flags for the namespace at once for caching purposes
+                        b = cp.call(cr.getAttributionSource(),
+                                mProviderHolder.mUri.getAuthority(), mCallListCommand, null, args);
+                    } finally {
+                        Binder.restoreCallingIdentity(token);
+                    }
+                } else {
+                    // Fetch all flags for the namespace at once for caching purposes
+                    b = cp.call(cr.getAttributionSource(),
+                            mProviderHolder.mUri.getAuthority(), mCallListCommand, null, args);
+                }
                 if (b == null) {
                     // Invalid response, return an empty map
                     return keyValues;
