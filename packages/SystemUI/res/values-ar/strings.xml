@@ -21,7 +21,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4811759950673118541">"واجهة مستخدم النظام"</string>
     <string name="battery_low_title" msgid="5319680173344341779">"هل تريد تفعيل ميزة \"توفير شحن البطارية\"؟"</string>
-    <string name="battery_low_description" msgid="3282977755476423966">"يتبقى لديك <xliff:g id="PERCENTAGE">%s</xliff:g> من شحن البطارية. يؤدي استخدام ميزة \"توفير شحن البطارية\" إلى تفعيل وضع \"المظهر الداكن\" وتقييد الأنشطة في الخلفية وتأخير الإشعارات."</string>
+    <string name="battery_low_description" msgid="3282977755476423966">"يتبقى لديك <xliff:g id="PERCENTAGE">%s</xliff:g> من شحن البطارية. يؤدي استخدام ميزة \"توفير شحن البطارية\" إلى تفعيل وضع \"المظهر الداكن\" وحظر الأنشطة في الخلفية وتأخير الإشعارات."</string>
     <string name="battery_low_intro" msgid="5148725009653088790">"يؤدي استخدام ميزة \"توفير شحن البطارية\" إلى تفعيل وضع \"المظهر الداكن\" وتقييد الأنشطة في الخلفية وتأخير الإشعارات."</string>
     <string name="battery_low_percent_format" msgid="4276661262843170964">"متبقي <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"‏يتعذّر الشحن باستخدام USB."</string>
