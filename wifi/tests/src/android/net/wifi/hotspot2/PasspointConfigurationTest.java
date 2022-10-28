@@ -41,7 +41,7 @@ import java.util.Map;
  */
 @SmallTest
 public class PasspointConfigurationTest {
-    private static final int MAX_URL_BYTES = 1023;
+    private static final int MAX_URL_BYTES = 2048;
     private static final int CERTIFICATE_FINGERPRINT_BYTES = 32;
 
     /**
