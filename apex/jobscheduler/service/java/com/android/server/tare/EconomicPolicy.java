@@ -232,15 +232,21 @@ public abstract class EconomicPolicy {
      * Returns the maximum number of cakes that should be consumed during a full 100% discharge
      * cycle. This is the initial limit. The system may choose to increase the limit over time,
      * but the increased limit should never exceed the value returned from
-     * {@link #getHardSatiatedConsumptionLimit()}.
+     * {@link #getMaxSatiatedConsumptionLimit()}.
      */
     abstract long getInitialSatiatedConsumptionLimit();
 
     /**
-     * Returns the maximum number of cakes that should be consumed during a full 100% discharge
-     * cycle. This is the hard limit that should never be exceeded.
+     * Returns the minimum number of cakes that should be available for consumption during a full
+     * 100% discharge cycle.
      */
-    abstract long getHardSatiatedConsumptionLimit();
+    abstract long getMinSatiatedConsumptionLimit();
+
+    /**
+     * Returns the maximum number of cakes that should be available for consumption during a full
+     * 100% discharge cycle.
+     */
+    abstract long getMaxSatiatedConsumptionLimit();
 
     /** Return the set of modifiers that should apply to this policy's costs. */
     @NonNull

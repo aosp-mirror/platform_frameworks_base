@@ -43,7 +43,8 @@ public class CompleteEconomicPolicy extends EconomicPolicy {
     private int mEnabledEconomicPolicyIds = 0;
     private int[] mCostModifiers = EmptyArray.INT;
     private long mInitialConsumptionLimit;
-    private long mHardConsumptionLimit;
+    private long mMinConsumptionLimit;
+    private long mMaxConsumptionLimit;
 
     CompleteEconomicPolicy(@NonNull InternalResourceService irs) {
         this(irs, new CompleteInjector());
@@ -100,14 +101,17 @@ public class CompleteEconomicPolicy extends EconomicPolicy {
 
     private void updateLimits() {
         long initialConsumptionLimit = 0;
-        long hardConsumptionLimit = 0;
+        long minConsumptionLimit = 0;
+        long maxConsumptionLimit = 0;
         for (int i = 0; i < mEnabledEconomicPolicies.size(); ++i) {
             final EconomicPolicy economicPolicy = mEnabledEconomicPolicies.valueAt(i);
             initialConsumptionLimit += economicPolicy.getInitialSatiatedConsumptionLimit();
-            hardConsumptionLimit += economicPolicy.getHardSatiatedConsumptionLimit();
+            minConsumptionLimit += economicPolicy.getMinSatiatedConsumptionLimit();
+            maxConsumptionLimit += economicPolicy.getMaxSatiatedConsumptionLimit();
         }
         mInitialConsumptionLimit = initialConsumptionLimit;
-        mHardConsumptionLimit = hardConsumptionLimit;
+        mMinConsumptionLimit = minConsumptionLimit;
+        mMaxConsumptionLimit = maxConsumptionLimit;
     }
 
     @Override
@@ -134,8 +138,13 @@ public class CompleteEconomicPolicy extends EconomicPolicy {
     }
 
     @Override
-    long getHardSatiatedConsumptionLimit() {
-        return mHardConsumptionLimit;
+    long getMinSatiatedConsumptionLimit() {
+        return mMinConsumptionLimit;
+    }
+
+    @Override
+    long getMaxSatiatedConsumptionLimit() {
+        return mMaxConsumptionLimit;
     }
 
     @NonNull
