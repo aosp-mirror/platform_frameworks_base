@@ -17,6 +17,7 @@
 package com.android.settingslib.spa.framework.common
 
 import android.app.Activity
+import android.content.Context
 import android.util.Log
 
 private const val TAG = "SpaEnvironment"
@@ -37,7 +38,7 @@ object SpaEnvironmentFactory {
         }
 }
 
-abstract class SpaEnvironment {
+abstract class SpaEnvironment(val context: Context) {
     abstract val pageProviderRepository: Lazy<SettingsPageProviderRepository>
 
     val entryRepository = lazy { SettingsEntryRepository(pageProviderRepository.value) }

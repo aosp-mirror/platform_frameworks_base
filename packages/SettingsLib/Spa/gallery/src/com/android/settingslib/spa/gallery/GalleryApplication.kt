@@ -22,6 +22,6 @@ import com.android.settingslib.spa.framework.common.SpaEnvironmentFactory
 class GalleryApplication : Application() {
     override fun onCreate() {
         super.onCreate()
-        SpaEnvironmentFactory.reset(GallerySpaEnvironment)
+        SpaEnvironmentFactory.reset(GallerySpaEnvironment(this))
     }
 }
