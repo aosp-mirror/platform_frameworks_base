@@ -78,12 +78,9 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"重启设备后需要绘制解锁图案"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"重启设备后需要输入 PIN 码"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"重启设备后需要输入密码"</string>
-    <!-- no translation found for kg_prompt_reason_timeout_pattern (5514969660010197363) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_timeout_pin (4227962059353859376) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_timeout_password (8810879144143933690) -->
-    <skip />
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"为增强安全性，请改用图案"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"为增强安全性，请改用 PIN 码"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"为增强安全性，请改用密码"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"管理员已锁定设备"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"此设备已手动锁定"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"无法识别"</string>
@@ -93,6 +90,5 @@
     <string name="clock_title_default" msgid="6342735240617459864">"默认"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"泡泡"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"指针"</string>
-    <!-- no translation found for keyguard_unlock_to_continue (7509503484250597743) -->
-    <skip />
+    <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"解锁设备才能继续操作"</string>
 </resources>
