@@ -13865,6 +13865,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             @Nullable IBinder backgroundActivityStartsToken,
             @Nullable int[] broadcastAllowList,
             @Nullable BiFunction<Integer, Bundle, Bundle> filterExtrasForReceiver) {
+        // Ensure all internal loopers are registered for idle checks
+        BroadcastLoopers.addMyLooper();
+
         if ((resultTo != null) && (resultToApp == null)) {
             if (resultTo.asBinder() instanceof BinderProxy) {
                 // Warn when requesting results without a way to deliver them
@@ -18115,6 +18118,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     public void waitForBroadcastIdle(@Nullable PrintWriter pw) {
         enforceCallingPermission(permission.DUMP, "waitForBroadcastIdle()");
+        BroadcastLoopers.waitForIdle(pw);
         for (BroadcastQueue queue : mBroadcastQueues) {
             queue.waitForIdle(pw);
         }
@@ -18126,6 +18130,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     public void waitForBroadcastBarrier(@Nullable PrintWriter pw) {
         enforceCallingPermission(permission.DUMP, "waitForBroadcastBarrier()");
+        BroadcastLoopers.waitForIdle(pw);
         for (BroadcastQueue queue : mBroadcastQueues) {
             queue.waitForBarrier(pw);
         }
