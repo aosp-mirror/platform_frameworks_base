@@ -7115,6 +7115,7 @@ package android.media.tv.tuner {
 
   public class Tuner implements java.lang.AutoCloseable {
     ctor @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public Tuner(@NonNull android.content.Context, @Nullable String, int);
+    method public int applyFrontend(@NonNull android.media.tv.tuner.frontend.FrontendInfo);
     method public int cancelScanning();
     method public int cancelTuning();
     method public void clearOnTuneEventListener();
@@ -7145,7 +7146,6 @@ package android.media.tv.tuner {
     method @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_TV_SHARED_FILTER) public static android.media.tv.tuner.filter.SharedFilter openSharedFilter(@NonNull android.content.Context, @NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.media.tv.tuner.filter.SharedFilterCallback);
     method @Nullable public android.media.tv.tuner.filter.TimeFilter openTimeFilter();
     method public int removeOutputPid(@IntRange(from=0) int);
-    method public int requestFrontendById(int);
     method public int scan(@NonNull android.media.tv.tuner.frontend.FrontendSettings, int, @NonNull java.util.concurrent.Executor, @NonNull android.media.tv.tuner.frontend.ScanCallback);
     method public int setLnaEnabled(boolean);
     method public int setMaxNumberOfFrontends(int, @IntRange(from=0) int);
