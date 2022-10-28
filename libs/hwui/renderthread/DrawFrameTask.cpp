@@ -19,6 +19,7 @@
 #include <dlfcn.h>
 #include <gui/TraceUtils.h>
 #include <utils/Log.h>
+
 #include <algorithm>
 
 #include "../DeferredLayerUpdater.h"
@@ -28,6 +29,7 @@
 #include "CanvasContext.h"
 #include "RenderThread.h"
 #include "thread/CommonPool.h"
+#include "utils/TimeUtils.h"
 
 namespace android {
 namespace uirenderer {
@@ -146,6 +148,7 @@ void DrawFrameTask::run() {
 
     bool canUnblockUiThread;
     bool canDrawThisFrame;
+    bool didDraw = false;
     {
         TreeInfo info(TreeInfo::MODE_FULL, *mContext);
         info.forceDrawFrame = mForceDrawFrame;
@@ -188,7 +191,9 @@ void DrawFrameTask::run() {
 
     nsecs_t dequeueBufferDuration = 0;
     if (CC_LIKELY(canDrawThisFrame)) {
-        dequeueBufferDuration = context->draw();
+        std::optional<nsecs_t> drawResult = context->draw();
+        didDraw = drawResult.has_value();
+        dequeueBufferDuration = drawResult.value_or(0);
     } else {
         // Do a flush in case syncFrameState performed any texture uploads. Since we skipped
         // the draw() call, those uploads (or deletes) will end up sitting in the queue.
@@ -209,8 +214,9 @@ void DrawFrameTask::run() {
     }
 
     if (!mHintSessionWrapper) mHintSessionWrapper.emplace(mUiThreadId, mRenderThreadId);
-    constexpr int64_t kSanityCheckLowerBound = 100000;       // 0.1ms
-    constexpr int64_t kSanityCheckUpperBound = 10000000000;  // 10s
+
+    constexpr int64_t kSanityCheckLowerBound = 100_us;
+    constexpr int64_t kSanityCheckUpperBound = 10_s;
     int64_t targetWorkDuration = frameDeadline - intendedVsync;
     targetWorkDuration = targetWorkDuration * Properties::targetCpuTimePercentage / 100;
     if (targetWorkDuration > kSanityCheckLowerBound &&
@@ -219,12 +225,15 @@ void DrawFrameTask::run() {
         mLastTargetWorkDuration = targetWorkDuration;
         mHintSessionWrapper->updateTargetWorkDuration(targetWorkDuration);
     }
-    int64_t frameDuration = systemTime(SYSTEM_TIME_MONOTONIC) - frameStartTime;
-    int64_t actualDuration = frameDuration -
-                             (std::min(syncDelayDuration, mLastDequeueBufferDuration)) -
-                             dequeueBufferDuration;
-    if (actualDuration > kSanityCheckLowerBound && actualDuration < kSanityCheckUpperBound) {
-        mHintSessionWrapper->reportActualWorkDuration(actualDuration);
+
+    if (didDraw) {
+        int64_t frameDuration = systemTime(SYSTEM_TIME_MONOTONIC) - frameStartTime;
+        int64_t actualDuration = frameDuration -
+                                 (std::min(syncDelayDuration, mLastDequeueBufferDuration)) -
+                                 dequeueBufferDuration;
+        if (actualDuration > kSanityCheckLowerBound && actualDuration < kSanityCheckUpperBound) {
+            mHintSessionWrapper->reportActualWorkDuration(actualDuration);
+        }
     }
 
     mLastDequeueBufferDuration = dequeueBufferDuration;
