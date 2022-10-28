@@ -35,7 +35,7 @@ class WifiConstants @Inject constructor(
         dumpManager: DumpManager,
 ) : Dumpable {
     init {
-        dumpManager.registerDumpable("$SB_LOGGING_TAG:WifiConstants", this)
+        dumpManager.registerDumpable("${SB_LOGGING_TAG}WifiConstants", this)
     }
 
     /** True if we should show the activityIn/activityOut icons and false otherwise. */
