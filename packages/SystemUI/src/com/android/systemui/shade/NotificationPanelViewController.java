@@ -2669,8 +2669,8 @@ public final class NotificationPanelViewController {
 
         // When expanding QS, let's authenticate the user if possible,
         // this will speed up notification actions.
-        if (height == 0) {
-            mCentralSurfaces.requestFaceAuth(false, FaceAuthApiRequestReason.QS_EXPANDED);
+        if (height == 0 && !mKeyguardStateController.canDismissLockScreen()) {
+            mUpdateMonitor.requestFaceAuth(FaceAuthApiRequestReason.QS_EXPANDED);
         }
     }
 
@@ -3928,7 +3928,7 @@ public final class NotificationPanelViewController {
                     mShadeLog.v("onMiddleClicked on Keyguard, mDozingOnDown: false");
                     // Try triggering face auth, this "might" run. Check
                     // KeyguardUpdateMonitor#shouldListenForFace to see when face auth won't run.
-                    boolean didFaceAuthRun = mUpdateMonitor.requestFaceAuth(true,
+                    boolean didFaceAuthRun = mUpdateMonitor.requestFaceAuth(
                             FaceAuthApiRequestReason.NOTIFICATION_PANEL_CLICKED);
 
                     if (didFaceAuthRun) {

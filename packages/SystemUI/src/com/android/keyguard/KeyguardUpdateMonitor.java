@@ -1615,7 +1615,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 @Override
                 public void onUdfpsPointerDown(int sensorId) {
                     mLogger.logUdfpsPointerDown(sensorId);
-                    requestFaceAuth(true, FaceAuthApiRequestReason.UDFPS_POINTER_DOWN);
+                    requestFaceAuth(FaceAuthApiRequestReason.UDFPS_POINTER_DOWN);
                 }
 
                 /**
@@ -2357,14 +2357,12 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     /**
      * Requests face authentication if we're on a state where it's allowed.
      * This will re-trigger auth in case it fails.
-     * @param userInitiatedRequest true if the user explicitly requested face auth
      * @param reason One of the reasons {@link FaceAuthApiRequestReason} on why this API is being
      * invoked.
      * @return current face auth detection state, true if it is running.
      */
-    public boolean requestFaceAuth(boolean userInitiatedRequest,
-            @FaceAuthApiRequestReason String reason) {
-        mLogger.logFaceAuthRequested(userInitiatedRequest, reason);
+    public boolean requestFaceAuth(@FaceAuthApiRequestReason String reason) {
+        mLogger.logFaceAuthRequested(reason);
         updateFaceListeningState(BIOMETRIC_ACTION_START, apiRequestReasonToUiEvent(reason));
         return isFaceDetectionRunning();
     }
