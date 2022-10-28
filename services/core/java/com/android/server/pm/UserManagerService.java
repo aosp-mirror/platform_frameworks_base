@@ -1644,8 +1644,7 @@ public class UserManagerService extends IUserManager.Stub {
         return isProfileUnchecked(userId);
     }
 
-    // TODO(b/244644281): make it private once UserVisibilityMediator don't use it anymore
-    boolean isProfileUnchecked(@UserIdInt int userId) {
+    private boolean isProfileUnchecked(@UserIdInt int userId) {
         synchronized (mUsersLock) {
             UserInfo userInfo = getUserInfoLU(userId);
             return userInfo != null && userInfo.isProfile();
