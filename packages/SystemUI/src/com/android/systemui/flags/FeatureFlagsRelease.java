@@ -16,6 +16,8 @@
 
 package com.android.systemui.flags;
 
+import static com.android.systemui.flags.FlagsCommonModule.ALL_FLAGS;
+
 import static java.util.Objects.requireNonNull;
 
 import android.content.res.Resources;
@@ -34,6 +36,7 @@ import java.io.PrintWriter;
 import java.util.Map;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 /**
  * Default implementation of the a Flag manager that returns default values for release builds
@@ -49,26 +52,47 @@ public class FeatureFlagsRelease implements FeatureFlags {
     private final SystemPropertiesHelper mSystemProperties;
     private final DeviceConfigProxy mDeviceConfigProxy;
     private final ServerFlagReader mServerFlagReader;
+    private final Restarter mRestarter;
+    private final Map<Integer, Flag<?>> mAllFlags;
     SparseBooleanArray mBooleanCache = new SparseBooleanArray();
     SparseArray<String> mStringCache = new SparseArray<>();
+
+    private final ServerFlagReader.ChangeListener mOnPropertiesChanged =
+            new ServerFlagReader.ChangeListener() {
+                @Override
+                public void onChange() {
+                    mRestarter.restart();
+                }
+            };
 
     @Inject
     public FeatureFlagsRelease(
             @Main Resources resources,
             SystemPropertiesHelper systemProperties,
             DeviceConfigProxy deviceConfigProxy,
-            ServerFlagReader serverFlagReader) {
+            ServerFlagReader serverFlagReader,
+            @Named(ALL_FLAGS) Map<Integer, Flag<?>> allFlags,
+            Restarter restarter) {
         mResources = resources;
         mSystemProperties = systemProperties;
         mDeviceConfigProxy = deviceConfigProxy;
         mServerFlagReader = serverFlagReader;
+        mAllFlags = allFlags;
+        mRestarter = restarter;
+    }
+
+    /** Call after construction to setup listeners. */
+    void init() {
+        mServerFlagReader.listenForChanges(mAllFlags.values(), mOnPropertiesChanged);
     }
 
     @Override
-    public void addListener(@NonNull Flag<?> flag, @NonNull Listener listener) {}
+    public void addListener(@NonNull Flag<?> flag, @NonNull Listener listener) {
+    }
 
     @Override
-    public void removeListener(@NonNull Listener listener) {}
+    public void removeListener(@NonNull Listener listener) {
+    }
 
     @Override
     public boolean isEnabled(@NotNull UnreleasedFlag flag) {

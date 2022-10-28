@@ -20,25 +20,40 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.Point
 import android.graphics.RectF
 import android.util.AttributeSet
+import android.view.MotionEvent
 import android.widget.FrameLayout
 
 private const val TAG = "UdfpsOverlayView"
+private const val POINT_SIZE = 10f
 
 class UdfpsOverlayView(context: Context, attrs: AttributeSet?) : FrameLayout(context, attrs) {
-
-    private val sensorRect = RectF()
     var overlayParams = UdfpsOverlayParams()
     private var mUdfpsDisplayMode: UdfpsDisplayMode? = null
 
+    var debugOverlay = false
+
     var overlayPaint = Paint()
     var sensorPaint = Paint()
+    var touchPaint = Paint()
+    var pointPaint = Paint()
     val centerPaint = Paint()
+
+    var oval = RectF()
 
     /** True after the call to [configureDisplay] and before the call to [unconfigureDisplay]. */
     var isDisplayConfigured: Boolean = false
         private set
+
+    var touchX: Float = 0f
+    var touchY: Float = 0f
+    var touchMinor: Float = 0f
+    var touchMajor: Float = 0f
+    var touchOrientation: Double = 0.0
+
+    var sensorPoints: Array<Point>? = null
 
     init {
         this.setWillNotDraw(false)
@@ -47,24 +62,60 @@ class UdfpsOverlayView(context: Context, attrs: AttributeSet?) : FrameLayout(con
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
 
-        overlayPaint.color = Color.argb(120, 255, 0, 0)
+        overlayPaint.color = Color.argb(100, 255, 0, 0)
         overlayPaint.style = Paint.Style.FILL
+
+        touchPaint.color = Color.argb(200, 255, 255, 255)
+        touchPaint.style = Paint.Style.FILL
 
         sensorPaint.color = Color.argb(150, 134, 204, 255)
         sensorPaint.style = Paint.Style.FILL
+
+        pointPaint.color = Color.WHITE
+        pointPaint.style = Paint.Style.FILL
     }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
-        canvas.drawRect(overlayParams.overlayBounds, overlayPaint)
-        canvas.drawRect(overlayParams.sensorBounds, sensorPaint)
+        if (debugOverlay) {
+            // Draw overlay and sensor bounds
+            canvas.drawRect(overlayParams.overlayBounds, overlayPaint)
+            canvas.drawRect(overlayParams.sensorBounds, sensorPaint)
+        }
+
+        // Draw sensor circle
         canvas.drawCircle(
             overlayParams.sensorBounds.exactCenterX(),
             overlayParams.sensorBounds.exactCenterY(),
             overlayParams.sensorBounds.width().toFloat() / 2,
             centerPaint
         )
+
+        if (debugOverlay) {
+            // Draw Points
+            sensorPoints?.forEach {
+                canvas.drawCircle(it.x.toFloat(), it.y.toFloat(), POINT_SIZE, pointPaint)
+            }
+
+            // Draw touch oval
+            canvas.save()
+            canvas.rotate(Math.toDegrees(touchOrientation).toFloat(), touchX, touchY)
+
+            oval.setEmpty()
+            oval.set(
+                touchX - touchMinor / 2,
+                touchY + touchMajor / 2,
+                touchX + touchMinor / 2,
+                touchY - touchMajor / 2
+            )
+
+            canvas.drawOval(oval, touchPaint)
+
+            // Draw center point
+            canvas.drawCircle(touchX, touchY, POINT_SIZE, centerPaint)
+            canvas.restore()
+        }
     }
 
     fun setUdfpsDisplayMode(udfpsDisplayMode: UdfpsDisplayMode?) {
@@ -79,5 +130,13 @@ class UdfpsOverlayView(context: Context, attrs: AttributeSet?) : FrameLayout(con
     fun unconfigureDisplay() {
         isDisplayConfigured = false
         mUdfpsDisplayMode?.disable(null /* onDisabled */)
+    }
+
+    fun processMotionEvent(event: MotionEvent) {
+        touchX = event.rawX
+        touchY = event.rawY
+        touchMinor = event.touchMinor
+        touchMajor = event.touchMajor
+        touchOrientation = event.orientation.toDouble()
     }
 }

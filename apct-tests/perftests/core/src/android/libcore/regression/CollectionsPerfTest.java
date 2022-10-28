@@ -20,11 +20,12 @@ import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
 import android.test.suitebuilder.annotation.LargeTest;
 
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,18 +36,14 @@ import java.util.List;
 import java.util.Random;
 import java.util.Vector;
 
-@RunWith(Parameterized.class)
+@RunWith(JUnitParamsRunner.class)
 @LargeTest
 public class CollectionsPerfTest {
     @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
-    @Parameters(name = "mArrayListLength({0})")
-    public static Collection<Object[]> data() {
+    public static Collection<Object[]> getData() {
         return Arrays.asList(new Object[][] {{4}, {16}, {64}, {256}, {1024}});
     }
-
-    @Parameterized.Parameter(0)
-    public int arrayListLength;
 
     public static Comparator<Integer> REVERSE =
             new Comparator<Integer>() {
@@ -59,7 +56,8 @@ public class CollectionsPerfTest {
             };
 
     @Test
-    public void timeSort_arrayList() throws Exception {
+    @Parameters(method = "getData")
+    public void timeSort_arrayList(int arrayListLength) throws Exception {
         List<Integer> input = buildList(arrayListLength, ArrayList.class);
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
@@ -68,7 +66,8 @@ public class CollectionsPerfTest {
     }
 
     @Test
-    public void timeSortWithComparator_arrayList() throws Exception {
+    @Parameters(method = "getData")
+    public void timeSortWithComparator_arrayList(int arrayListLength) throws Exception {
         List<Integer> input = buildList(arrayListLength, ArrayList.class);
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
@@ -77,7 +76,8 @@ public class CollectionsPerfTest {
     }
 
     @Test
-    public void timeSort_vector() throws Exception {
+    @Parameters(method = "getData")
+    public void timeSort_vector(int arrayListLength) throws Exception {
         List<Integer> input = buildList(arrayListLength, Vector.class);
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
@@ -86,7 +86,8 @@ public class CollectionsPerfTest {
     }
 
     @Test
-    public void timeSortWithComparator_vector() throws Exception {
+    @Parameters(method = "getData")
+    public void timeSortWithComparator_vector(int arrayListLength) throws Exception {
         List<Integer> input = buildList(arrayListLength, Vector.class);
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {

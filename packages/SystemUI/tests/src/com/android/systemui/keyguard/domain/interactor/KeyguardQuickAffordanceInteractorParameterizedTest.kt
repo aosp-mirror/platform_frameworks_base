@@ -25,11 +25,12 @@ import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
+import com.android.systemui.keyguard.data.quickaffordance.BuiltInKeyguardQuickAffordanceKeys
+import com.android.systemui.keyguard.data.quickaffordance.FakeKeyguardQuickAffordanceConfig
+import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceConfig
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
-import com.android.systemui.keyguard.domain.model.KeyguardQuickAffordancePosition
-import com.android.systemui.keyguard.domain.quickaffordance.FakeKeyguardQuickAffordanceConfig
 import com.android.systemui.keyguard.domain.quickaffordance.FakeKeyguardQuickAffordanceRegistry
-import com.android.systemui.keyguard.domain.quickaffordance.KeyguardQuickAffordanceConfig
+import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancePosition
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.KeyguardStateController
@@ -211,7 +212,11 @@ class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         whenever(expandable.activityLaunchController()).thenReturn(animationController)
 
-        homeControls = object : FakeKeyguardQuickAffordanceConfig() {}
+        homeControls =
+            object :
+                FakeKeyguardQuickAffordanceConfig(
+                    BuiltInKeyguardQuickAffordanceKeys.HOME_CONTROLS
+                ) {}
         underTest =
             KeyguardQuickAffordanceInteractor(
                 keyguardInteractor = KeyguardInteractor(repository = FakeKeyguardRepository()),
@@ -224,8 +229,14 @@ class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
                                 ),
                             KeyguardQuickAffordancePosition.BOTTOM_END to
                                 listOf(
-                                    object : FakeKeyguardQuickAffordanceConfig() {},
-                                    object : FakeKeyguardQuickAffordanceConfig() {},
+                                    object :
+                                        FakeKeyguardQuickAffordanceConfig(
+                                            BuiltInKeyguardQuickAffordanceKeys.QUICK_ACCESS_WALLET
+                                        ) {},
+                                    object :
+                                        FakeKeyguardQuickAffordanceConfig(
+                                            BuiltInKeyguardQuickAffordanceKeys.QR_CODE_SCANNER
+                                        ) {},
                                 ),
                         ),
                     ),
@@ -237,30 +248,30 @@ class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
     }
 
     @Test
-    fun onQuickAffordanceClicked() = runBlockingTest {
+    fun onQuickAffordanceTriggered() = runBlockingTest {
         setUpMocks(
             needStrongAuthAfterBoot = needStrongAuthAfterBoot,
             keyguardIsUnlocked = keyguardIsUnlocked,
         )
 
         homeControls.setState(
-            state =
-                KeyguardQuickAffordanceConfig.State.Visible(
+            lockScreenState =
+                KeyguardQuickAffordanceConfig.LockScreenState.Visible(
                     icon = DRAWABLE,
                 )
         )
-        homeControls.onClickedResult =
+        homeControls.onTriggeredResult =
             if (startActivity) {
-                KeyguardQuickAffordanceConfig.OnClickedResult.StartActivity(
+                KeyguardQuickAffordanceConfig.OnTriggeredResult.StartActivity(
                     intent = INTENT,
                     canShowWhileLocked = canShowWhileLocked,
                 )
             } else {
-                KeyguardQuickAffordanceConfig.OnClickedResult.Handled
+                KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled
             }
 
-        underTest.onQuickAffordanceClicked(
-            configKey = homeControls::class,
+        underTest.onQuickAffordanceTriggered(
+            configKey = BuiltInKeyguardQuickAffordanceKeys.HOME_CONTROLS,
             expandable = expandable,
         )
 

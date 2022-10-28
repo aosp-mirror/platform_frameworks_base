@@ -357,5 +357,12 @@ public class DataServiceUtils {
          * {@link SubscriptionManager#getDefaultSubscriptionId()}.
          */
         public static final String COLUMN_IS_DEFAULT_SUBSCRIPTION = "isDefaultSubscription";
+
+        /**
+         * The name of the active data subscription state column, see
+         * {@link SubscriptionManager#getActiveDataSubscriptionId()}.
+         */
+        public static final String COLUMN_IS_ACTIVE_DATA_SUBSCRIPTION =
+                "isActiveDataSubscriptionId";
     }
 }

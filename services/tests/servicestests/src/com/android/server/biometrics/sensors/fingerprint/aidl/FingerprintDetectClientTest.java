@@ -118,6 +118,6 @@ public class FingerprintDetectClientTest {
         return new FingerprintDetectClient(mContext, () -> aidl, mToken,
                 6 /* requestId */, mClientMonitorCallbackConverter, 2 /* userId */,
                 "a-test", 1 /* sensorId */, mBiometricLogger, mBiometricContext,
-                mUdfpsOverlayController, true /* isStrongBiometric */);
+                mUdfpsOverlayController, null, true /* isStrongBiometric */);
     }
 }

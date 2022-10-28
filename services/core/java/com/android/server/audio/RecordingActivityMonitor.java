@@ -164,7 +164,7 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
         }
         if (MediaRecorder.isSystemOnlyAudioSource(source)) {
             // still want to log event, it just won't appear in recording configurations;
-            sEventLogger.log(new RecordingEvent(event, riid, config).printLog(TAG));
+            sEventLogger.enqueue(new RecordingEvent(event, riid, config).printLog(TAG));
             return;
         }
         dispatchCallbacks(updateSnapshot(event, riid, config));
@@ -204,7 +204,7 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
                 ? AudioManager.RECORD_CONFIG_EVENT_STOP : AudioManager.RECORD_CONFIG_EVENT_NONE;
         if (riid == AudioManager.RECORD_RIID_INVALID
                 || configEvent == AudioManager.RECORD_CONFIG_EVENT_NONE) {
-            sEventLogger.log(new RecordingEvent(event, riid, null).printLog(TAG));
+            sEventLogger.enqueue(new RecordingEvent(event, riid, null).printLog(TAG));
             return;
         }
         dispatchCallbacks(updateSnapshot(configEvent, riid, null));
@@ -301,7 +301,7 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
                 if (!state.hasDeathHandler()) {
                     if (state.isActiveConfiguration()) {
                         configChanged = true;
-                        sEventLogger.log(new RecordingEvent(
+                        sEventLogger.enqueue(new RecordingEvent(
                                         AudioManager.RECORD_CONFIG_EVENT_RELEASE,
                                         state.getRiid(), state.getConfig()));
                     }
@@ -486,7 +486,7 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
                     configChanged = false;
             }
             if (configChanged) {
-                sEventLogger.log(new RecordingEvent(event, riid, state.getConfig()));
+                sEventLogger.enqueue(new RecordingEvent(event, riid, state.getConfig()));
                 configs = getActiveRecordingConfigurations(true /*isPrivileged*/);
             }
         }

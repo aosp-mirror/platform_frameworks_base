@@ -1,0 +1,92 @@
+package com.android.systemui.biometrics.domain.model
+
+import androidx.test.filters.SmallTest
+import com.android.systemui.biometrics.promptInfo
+import com.google.common.truth.Truth.assertThat
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.junit.runners.JUnit4
+
+private const val USER_ID = 2
+private const val OPERATION_ID = 8L
+
+@SmallTest
+@RunWith(JUnit4::class)
+class BiometricPromptRequestTest {
+
+    @Test
+    fun biometricRequestFromPromptInfo() {
+        val title = "what"
+        val subtitle = "a"
+        val description = "request"
+
+        val request =
+            BiometricPromptRequest.Biometric(
+                promptInfo(title = title, subtitle = subtitle, description = description),
+                BiometricUserInfo(USER_ID),
+                BiometricOperationInfo(OPERATION_ID)
+            )
+
+        assertThat(request.title).isEqualTo(title)
+        assertThat(request.subtitle).isEqualTo(subtitle)
+        assertThat(request.description).isEqualTo(description)
+        assertThat(request.userInfo).isEqualTo(BiometricUserInfo(USER_ID))
+        assertThat(request.operationInfo).isEqualTo(BiometricOperationInfo(OPERATION_ID))
+    }
+
+    @Test
+    fun credentialRequestFromPromptInfo() {
+        val title = "what"
+        val subtitle = "a"
+        val description = "request"
+        val stealth = true
+
+        val toCheck =
+            listOf(
+                BiometricPromptRequest.Credential.Pin(
+                    promptInfo(
+                        title = title,
+                        subtitle = subtitle,
+                        description = description,
+                        credentialTitle = null,
+                        credentialSubtitle = null,
+                        credentialDescription = null
+                    ),
+                    BiometricUserInfo(USER_ID),
+                    BiometricOperationInfo(OPERATION_ID)
+                ),
+                BiometricPromptRequest.Credential.Password(
+                    promptInfo(
+                        credentialTitle = title,
+                        credentialSubtitle = subtitle,
+                        credentialDescription = description
+                    ),
+                    BiometricUserInfo(USER_ID),
+                    BiometricOperationInfo(OPERATION_ID)
+                ),
+                BiometricPromptRequest.Credential.Pattern(
+                    promptInfo(
+                        subtitle = subtitle,
+                        description = description,
+                        credentialTitle = title,
+                        credentialSubtitle = null,
+                        credentialDescription = null
+                    ),
+                    BiometricUserInfo(USER_ID),
+                    BiometricOperationInfo(OPERATION_ID),
+                    stealth
+                )
+            )
+
+        for (request in toCheck) {
+            assertThat(request.title).isEqualTo(title)
+            assertThat(request.subtitle).isEqualTo(subtitle)
+            assertThat(request.description).isEqualTo(description)
+            assertThat(request.userInfo).isEqualTo(BiometricUserInfo(USER_ID))
+            assertThat(request.operationInfo).isEqualTo(BiometricOperationInfo(OPERATION_ID))
+            if (request is BiometricPromptRequest.Credential.Pattern) {
+                assertThat(request.stealthMode).isEqualTo(stealth)
+            }
+        }
+    }
+}

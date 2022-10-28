@@ -19497,7 +19497,7 @@ package android.location {
     method public boolean hasSatelliteBlocklist();
     method public boolean hasSatellitePvt();
     method public boolean hasScheduling();
-    method public boolean hasSingleShot();
+    method public boolean hasSingleShotFix();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.location.GnssCapabilities> CREATOR;
   }
@@ -19529,7 +19529,7 @@ package android.location {
     method @NonNull public android.location.GnssCapabilities.Builder setHasSatelliteBlocklist(boolean);
     method @NonNull public android.location.GnssCapabilities.Builder setHasSatellitePvt(boolean);
     method @NonNull public android.location.GnssCapabilities.Builder setHasScheduling(boolean);
-    method @NonNull public android.location.GnssCapabilities.Builder setHasSingleShot(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasSingleShotFix(boolean);
   }
 
   public final class GnssClock implements android.os.Parcelable {
@@ -19727,7 +19727,7 @@ package android.location {
     method public int getConstellationType(@IntRange(from=0) int);
     method @FloatRange(from=0xffffffa6, to=90) public float getElevationDegrees(@IntRange(from=0) int);
     method @IntRange(from=0) public int getSatelliteCount();
-    method @IntRange(from=1, to=200) public int getSvid(@IntRange(from=0) int);
+    method @IntRange(from=1, to=206) public int getSvid(@IntRange(from=0) int);
     method public boolean hasAlmanacData(@IntRange(from=0) int);
     method public boolean hasBasebandCn0DbHz(@IntRange(from=0) int);
     method public boolean hasCarrierFrequencyHz(@IntRange(from=0) int);
@@ -44006,9 +44006,10 @@ package android.telephony {
     field public static final long NETWORK_TYPE_BITMASK_HSPA = 512L; // 0x200L
     field public static final long NETWORK_TYPE_BITMASK_HSPAP = 16384L; // 0x4000L
     field public static final long NETWORK_TYPE_BITMASK_HSUPA = 256L; // 0x100L
+    field public static final long NETWORK_TYPE_BITMASK_IDEN = 1024L; // 0x400L
     field public static final long NETWORK_TYPE_BITMASK_IWLAN = 131072L; // 0x20000L
     field public static final long NETWORK_TYPE_BITMASK_LTE = 4096L; // 0x1000L
-    field public static final long NETWORK_TYPE_BITMASK_LTE_CA = 262144L; // 0x40000L
+    field @Deprecated public static final long NETWORK_TYPE_BITMASK_LTE_CA = 262144L; // 0x40000L
     field public static final long NETWORK_TYPE_BITMASK_NR = 524288L; // 0x80000L
     field public static final long NETWORK_TYPE_BITMASK_TD_SCDMA = 65536L; // 0x10000L
     field public static final long NETWORK_TYPE_BITMASK_UMTS = 4L; // 0x4L
@@ -47431,6 +47432,7 @@ package android.util {
     field public static final int DENSITY_420 = 420; // 0x1a4
     field public static final int DENSITY_440 = 440; // 0x1b8
     field public static final int DENSITY_450 = 450; // 0x1c2
+    field public static final int DENSITY_520 = 520; // 0x208
     field public static final int DENSITY_560 = 560; // 0x230
     field public static final int DENSITY_600 = 600; // 0x258
     field public static final int DENSITY_DEFAULT = 160; // 0xa0

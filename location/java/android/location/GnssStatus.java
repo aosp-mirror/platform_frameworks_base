@@ -199,15 +199,15 @@ public final class GnssStatus implements Parcelable {
      * <li>93-106 as the frequency channel number (FCN) (-7 to +6) plus 100.
      * i.e. encode FCN of -7 as 93, 0 as 100, and +6 as 106</li>
      * </ul></li>
-     * <li>QZSS: 193-200</li>
+     * <li>QZSS: 183-206</li>
      * <li>Galileo: 1-36</li>
-     * <li>Beidou: 1-37</li>
+     * <li>Beidou: 1-63</li>
      * <li>IRNSS: 1-14</li>
      * </ul>
      *
      * @param satelliteIndex An index from zero to {@link #getSatelliteCount()} - 1
      */
-    @IntRange(from = 1, to = 200)
+    @IntRange(from = 1, to = 206)
     public int getSvid(@IntRange(from = 0) int satelliteIndex) {
         return mSvidWithFlags[satelliteIndex] >> SVID_SHIFT_WIDTH;
     }

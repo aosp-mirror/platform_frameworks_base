@@ -24,6 +24,8 @@ import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.testapp.ActivityOptions
 import com.android.server.wm.traces.common.ComponentNameMatcher
+import com.android.server.wm.traces.common.Condition
+import com.android.server.wm.traces.common.DeviceStateDump
 import com.android.server.wm.traces.parser.toFlickerComponent
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import java.util.regex.Pattern
@@ -47,9 +49,10 @@ constructor(
         wmHelper: WindowManagerStateHelper,
         expectedWindowName: String,
         action: String?,
-        stringExtras: Map<String, String>
+        stringExtras: Map<String, String>,
+        waitConditions: Array<Condition<DeviceStateDump>>
     ) {
-        super.launchViaIntent(wmHelper, expectedWindowName, action, stringExtras)
+        super.launchViaIntent(wmHelper, expectedWindowName, action, stringExtras, waitConditions)
         waitIMEShown(wmHelper)
     }
 

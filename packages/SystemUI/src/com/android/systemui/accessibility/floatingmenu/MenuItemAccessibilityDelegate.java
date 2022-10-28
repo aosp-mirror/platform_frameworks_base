@@ -84,6 +84,12 @@ class MenuItemAccessibilityDelegate extends RecyclerViewAccessibilityDelegate.It
                 new AccessibilityNodeInfoCompat.AccessibilityActionCompat(moveEdgeId,
                         res.getString(moveEdgeTextResId));
         info.addAction(moveToOrOutEdge);
+
+        final AccessibilityNodeInfoCompat.AccessibilityActionCompat removeMenu =
+                new AccessibilityNodeInfoCompat.AccessibilityActionCompat(
+                        R.id.action_remove_menu,
+                        res.getString(R.string.accessibility_floating_button_action_remove_menu));
+        info.addAction(removeMenu);
     }
 
     @Override
@@ -123,6 +129,11 @@ class MenuItemAccessibilityDelegate extends RecyclerViewAccessibilityDelegate.It
 
         if (action == R.id.action_move_out_edge_and_show) {
             mAnimationController.moveOutEdgeAndShow();
+            return true;
+        }
+
+        if (action == R.id.action_remove_menu) {
+            mAnimationController.removeMenu();
             return true;
         }
 

@@ -19,25 +19,39 @@ package com.android.systemui.biometrics
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.PixelFormat
+import android.graphics.Point
 import android.graphics.Rect
+import android.hardware.biometrics.BiometricOverlayConstants
 import android.hardware.fingerprint.FingerprintManager
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal
 import android.hardware.fingerprint.IFingerprintAuthenticatorsRegisteredCallback
+import android.hardware.fingerprint.IUdfpsOverlay
 import android.os.Handler
+import android.provider.Settings
 import android.view.MotionEvent
-import android.view.View
 import android.view.WindowManager
 import android.view.WindowManager.LayoutParams.INPUT_FEATURE_SPY
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.concurrency.Execution
-import java.util.*
+import java.util.Optional
 import java.util.concurrent.Executor
 import javax.inject.Inject
+import kotlin.math.cos
+import kotlin.math.pow
+import kotlin.math.sin
 
 private const val TAG = "UdfpsOverlay"
+
+const val SETTING_OVERLAY_DEBUG = "udfps_overlay_debug"
+
+// Number of sensor points needed inside ellipse for good overlap
+private const val NEEDED_POINTS = 2
 
 @SuppressLint("ClickableViewAccessibility")
 @SysUISingleton
@@ -51,10 +65,11 @@ constructor(
     private val handler: Handler,
     private val biometricExecutor: Executor,
     private val alternateTouchProvider: Optional<AlternateUdfpsTouchProvider>,
-    private val fgExecutor: DelayableExecutor,
+    @Main private val fgExecutor: DelayableExecutor,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     private val authController: AuthController,
-    private val udfpsLogger: UdfpsLogger
+    private val udfpsLogger: UdfpsLogger,
+    private var featureFlags: FeatureFlags
 ) : CoreStartable {
 
     /** The view, when [isShowing], or null. */
@@ -64,7 +79,11 @@ constructor(
     private var requestId: Long = 0
     private var onFingerDown = false
     val size = windowManager.maximumWindowMetrics.bounds
+
     val udfpsProps: MutableList<FingerprintSensorPropertiesInternal> = mutableListOf()
+    var points: Array<Point> = emptyArray()
+    var processedMotionEvent = false
+    var isShowing = false
 
     private var params: UdfpsOverlayParams = UdfpsOverlayParams()
 
@@ -87,41 +106,140 @@ constructor(
                 inputFeatures = INPUT_FEATURE_SPY
             }
 
-    fun onTouch(v: View, event: MotionEvent): Boolean {
-        val view = v as UdfpsOverlayView
+    fun onTouch(event: MotionEvent): Boolean {
+        val view = overlayView!!
 
         return when (event.action) {
             MotionEvent.ACTION_DOWN,
             MotionEvent.ACTION_MOVE -> {
                 onFingerDown = true
                 if (!view.isDisplayConfigured && alternateTouchProvider.isPresent) {
-                    biometricExecutor.execute {
-                        alternateTouchProvider
-                            .get()
-                            .onPointerDown(
-                                requestId,
-                                event.x.toInt(),
-                                event.y.toInt(),
-                                event.touchMinor,
-                                event.touchMajor
-                            )
-                    }
-                    fgExecutor.execute {
-                        if (keyguardUpdateMonitor.isFingerprintDetectionRunning) {
-                            keyguardUpdateMonitor.onUdfpsPointerDown(requestId.toInt())
+                    view.processMotionEvent(event)
+
+                    val goodOverlap =
+                        if (featureFlags.isEnabled(Flags.NEW_ELLIPSE_DETECTION)) {
+                            isGoodEllipseOverlap(event)
+                        } else {
+                            isGoodCentroidOverlap(event)
+                        }
+
+                    if (!processedMotionEvent && goodOverlap) {
+                        biometricExecutor.execute {
+                            alternateTouchProvider
+                                .get()
+                                .onPointerDown(
+                                    requestId,
+                                    event.rawX.toInt(),
+                                    event.rawY.toInt(),
+                                    event.touchMinor,
+                                    event.touchMajor
+                                )
+                        }
+                        fgExecutor.execute {
+                            if (keyguardUpdateMonitor.isFingerprintDetectionRunning) {
+                                keyguardUpdateMonitor.onUdfpsPointerDown(requestId.toInt())
+                            }
+
+                            view.configureDisplay {
+                                biometricExecutor.execute {
+                                    alternateTouchProvider.get().onUiReady()
+                                }
+                            }
+
+                            processedMotionEvent = true
                         }
                     }
 
-                    view.configureDisplay {
-                        biometricExecutor.execute { alternateTouchProvider.get().onUiReady() }
-                    }
+                    view.invalidate()
                 }
-
                 true
             }
             MotionEvent.ACTION_UP,
             MotionEvent.ACTION_CANCEL -> {
-                if (onFingerDown && alternateTouchProvider.isPresent) {
+                if (processedMotionEvent && alternateTouchProvider.isPresent) {
+                    biometricExecutor.execute {
+                        alternateTouchProvider.get().onPointerUp(requestId)
+                    }
+                    fgExecutor.execute {
+                        if (keyguardUpdateMonitor.isFingerprintDetectionRunning) {
+                            keyguardUpdateMonitor.onUdfpsPointerUp(requestId.toInt())
+                        }
+                    }
+
+                    processedMotionEvent = false
+                }
+
+                if (view.isDisplayConfigured) {
+                    view.unconfigureDisplay()
+                }
+
+                view.invalidate()
+                true
+            }
+            else -> false
+        }
+    }
+
+    fun isGoodEllipseOverlap(event: MotionEvent): Boolean {
+        return points.count { checkPoint(event, it) } >= NEEDED_POINTS
+    }
+
+    fun isGoodCentroidOverlap(event: MotionEvent): Boolean {
+        return params.sensorBounds.contains(event.rawX.toInt(), event.rawY.toInt())
+    }
+
+    fun checkPoint(event: MotionEvent, point: Point): Boolean {
+        // Calculate if sensor point is within ellipse
+        // Formula: ((cos(o)(xE - xS) + sin(o)(yE - yS))^2 / a^2) + ((sin(o)(xE - xS) + cos(o)(yE -
+        // yS))^2 / b^2) <= 1
+        val a: Float = cos(event.orientation) * (point.x - event.rawX)
+        val b: Float = sin(event.orientation) * (point.y - event.rawY)
+        val c: Float = sin(event.orientation) * (point.x - event.rawX)
+        val d: Float = cos(event.orientation) * (point.y - event.rawY)
+        val result =
+            (a + b).pow(2) / (event.touchMinor / 2).pow(2) +
+                (c - d).pow(2) / (event.touchMajor / 2).pow(2)
+
+        return result <= 1
+    }
+
+    fun show(requestId: Long) {
+        if (!featureFlags.isEnabled(Flags.NEW_UDFPS_OVERLAY)) {
+            return
+        }
+
+        this.requestId = requestId
+        fgExecutor.execute {
+            if (overlayView == null && alternateTouchProvider.isPresent) {
+                UdfpsOverlayView(context, null).let {
+                    it.overlayParams = params
+                    it.setUdfpsDisplayMode(
+                        UdfpsDisplayMode(context, execution, authController, udfpsLogger)
+                    )
+                    it.setOnTouchListener { _, event -> onTouch(event) }
+                    it.sensorPoints = points
+                    it.debugOverlay =
+                        Settings.Global.getInt(
+                            context.contentResolver,
+                            SETTING_OVERLAY_DEBUG,
+                            0 /* def */
+                        ) != 0
+                    overlayView = it
+                }
+                windowManager.addView(overlayView, coreLayoutParams)
+                isShowing = true
+            }
+        }
+    }
+
+    fun hide() {
+        if (!featureFlags.isEnabled(Flags.NEW_UDFPS_OVERLAY)) {
+            return
+        }
+
+        fgExecutor.execute {
+            if (overlayView != null && isShowing && alternateTouchProvider.isPresent) {
+                if (processedMotionEvent) {
                     biometricExecutor.execute {
                         alternateTouchProvider.get().onPointerUp(requestId)
                     }
@@ -131,42 +249,21 @@ constructor(
                         }
                     }
                 }
-                onFingerDown = false
-                if (view.isDisplayConfigured) {
-                    view.unconfigureDisplay()
+
+                if (overlayView!!.isDisplayConfigured) {
+                    overlayView!!.unconfigureDisplay()
                 }
 
-                true
+                overlayView?.apply {
+                    windowManager.removeView(this)
+                    setOnTouchListener(null)
+                }
+
+                isShowing = false
+                overlayView = null
+                processedMotionEvent = false
             }
-            else -> false
         }
-    }
-
-    fun show(requestId: Long): Boolean {
-        this.requestId = requestId
-        if (overlayView == null && alternateTouchProvider.isPresent) {
-            UdfpsOverlayView(context, null).let {
-                it.overlayParams = params
-                it.setUdfpsDisplayMode(
-                    UdfpsDisplayMode(context, execution, authController, udfpsLogger)
-                )
-                it.setOnTouchListener { v, event -> onTouch(v, event) }
-                overlayView = it
-            }
-            windowManager.addView(overlayView, coreLayoutParams)
-            return true
-        }
-
-        return false
-    }
-
-    fun hide() {
-        overlayView?.apply {
-            windowManager.removeView(this)
-            setOnTouchListener(null)
-        }
-
-        overlayView = null
     }
 
     @Override
@@ -178,6 +275,18 @@ constructor(
                 ) {
                     handler.post { handleAllFingerprintAuthenticatorsRegistered(sensors) }
                 }
+            }
+        )
+
+        fingerprintManager?.setUdfpsOverlay(
+            object : IUdfpsOverlay.Stub() {
+                override fun show(
+                    requestId: Long,
+                    sensorId: Int,
+                    @BiometricOverlayConstants.ShowReason reason: Int
+                ) = show(requestId)
+
+                override fun hide(sensorId: Int) = hide()
             }
         )
     }
@@ -200,6 +309,24 @@ constructor(
                     naturalDisplayWidth = size.width(),
                     naturalDisplayHeight = size.height(),
                     scaleFactor = 1f
+                )
+
+            val sensorX = params.sensorBounds.centerX()
+            val sensorY = params.sensorBounds.centerY()
+            val cornerOffset: Int = params.sensorBounds.width() / 4
+            val sideOffset: Int = params.sensorBounds.width() / 3
+
+            points =
+                arrayOf(
+                    Point(sensorX - cornerOffset, sensorY - cornerOffset),
+                    Point(sensorX, sensorY - sideOffset),
+                    Point(sensorX + cornerOffset, sensorY - cornerOffset),
+                    Point(sensorX - sideOffset, sensorY),
+                    Point(sensorX, sensorY),
+                    Point(sensorX + sideOffset, sensorY),
+                    Point(sensorX - cornerOffset, sensorY + cornerOffset),
+                    Point(sensorX, sensorY + sideOffset),
+                    Point(sensorX + cornerOffset, sensorY + cornerOffset)
                 )
         }
     }
