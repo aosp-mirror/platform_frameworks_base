@@ -6713,7 +6713,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 mRemoteInsetsController.insetsControlChanged(stateController.getRawInsetsState(),
                         stateController.getControlsForDispatch(this));
             } catch (RemoteException e) {
-                Slog.w(TAG, "Failed to deliver inset state change", e);
+                Slog.w(TAG, "Failed to deliver inset control state change", e);
             }
         }
 
@@ -6722,21 +6722,26 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 @Nullable ImeTracker.Token statsToken) {
             try {
                 ImeTracker.get().onProgress(statsToken,
-                        ImeTracker.PHASE_WM_REMOTE_INSETS_CONTROL_TARGET);
+                        ImeTracker.PHASE_WM_REMOTE_INSETS_CONTROL_TARGET_SHOW_INSETS);
                 mRemoteInsetsController.showInsets(types, fromIme, statsToken);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Failed to deliver showInsets", e);
                 ImeTracker.get().onFailed(statsToken,
-                        ImeTracker.PHASE_WM_REMOTE_INSETS_CONTROL_TARGET);
+                        ImeTracker.PHASE_WM_REMOTE_INSETS_CONTROL_TARGET_SHOW_INSETS);
             }
         }
 
         @Override
-        public void hideInsets(@InsetsType int types, boolean fromIme) {
+        public void hideInsets(@InsetsType int types, boolean fromIme,
+                @Nullable ImeTracker.Token statsToken) {
             try {
-                mRemoteInsetsController.hideInsets(types, fromIme);
+                ImeTracker.get().onProgress(statsToken,
+                        ImeTracker.PHASE_WM_REMOTE_INSETS_CONTROL_TARGET_HIDE_INSETS);
+                mRemoteInsetsController.hideInsets(types, fromIme, statsToken);
             } catch (RemoteException e) {
-                Slog.w(TAG, "Failed to deliver showInsets", e);
+                Slog.w(TAG, "Failed to deliver hideInsets", e);
+                ImeTracker.get().onFailed(statsToken,
+                        ImeTracker.PHASE_WM_REMOTE_INSETS_CONTROL_TARGET_HIDE_INSETS);
             }
         }
 

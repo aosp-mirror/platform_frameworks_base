@@ -54,5 +54,5 @@ oneway interface IDisplayWindowInsetsController {
     /**
      * @see IWindow#hideInsets
      */
-    void hideInsets(int types, boolean fromIme);
+    void hideInsets(int types, boolean fromIme, in @nullable ImeTracker.Token statsToken);
 }

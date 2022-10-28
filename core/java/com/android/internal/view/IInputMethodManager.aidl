@@ -58,7 +58,8 @@ interface IInputMethodManager {
     boolean showSoftInput(in IInputMethodClient client, @nullable IBinder windowToken,
             in @nullable ImeTracker.Token statsToken, int flags, int lastClickToolType,
             in @nullable ResultReceiver resultReceiver, int reason);
-    boolean hideSoftInput(in IInputMethodClient client, @nullable IBinder windowToken, int flags,
+    boolean hideSoftInput(in IInputMethodClient client, @nullable IBinder windowToken,
+            in @nullable ImeTracker.Token statsToken, int flags,
             in @nullable ResultReceiver resultReceiver, int reason);
     // If windowToken is null, this just does startInput().  Otherwise this reports that a window
     // has gained focus, and if 'editorInfo' is non-null then also does startInput.

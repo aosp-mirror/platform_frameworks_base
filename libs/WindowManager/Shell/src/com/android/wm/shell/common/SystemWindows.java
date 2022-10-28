@@ -356,7 +356,7 @@ public class SystemWindows {
         public void showInsets(int types, boolean fromIme, @Nullable ImeTracker.Token statsToken) {}
 
         @Override
-        public void hideInsets(int types, boolean fromIme) {}
+        public void hideInsets(int types, boolean fromIme, @Nullable ImeTracker.Token statsToken) {}
 
         @Override
         public void moved(int newX, int newY) {}

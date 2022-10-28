@@ -339,11 +339,12 @@ public interface InputMethod {
      * @param hideInputToken an opaque {@link android.os.Binder} token to identify which API call
      *         of {@link InputMethodManager#hideSoftInputFromWindow(IBinder, int)}} is associated
      *         with this callback.
+     * @param statsToken the token tracking the current IME hide request or {@code null} otherwise.
      * @hide
      */
     @MainThread
     public void hideSoftInputWithToken(int flags, ResultReceiver resultReceiver,
-            IBinder hideInputToken);
+            IBinder hideInputToken, @Nullable ImeTracker.Token statsToken);
 
     /**
      * Request that any soft input part of the input method be hidden from the user.

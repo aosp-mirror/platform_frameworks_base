@@ -73,7 +73,8 @@ oneway interface IInputMethod {
     void showSoftInput(in IBinder showInputToken, in @nullable ImeTracker.Token statsToken,
             int flags, in ResultReceiver resultReceiver);
 
-    void hideSoftInput(in IBinder hideInputToken, int flags, in ResultReceiver resultReceiver);
+    void hideSoftInput(in IBinder hideInputToken, in @nullable ImeTracker.Token statsToken,
+            int flags, in ResultReceiver resultReceiver);
 
     void updateEditorToolType(int toolType);
 
