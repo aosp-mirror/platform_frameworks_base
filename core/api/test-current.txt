@@ -3252,6 +3252,7 @@ package android.widget {
 
   public class Spinner extends android.widget.AbsSpinner implements android.content.DialogInterface.OnClickListener {
     method public boolean isPopupShowing();
+    method public void onClick(int);
   }
 
   @android.widget.RemoteViews.RemoteView public class TextClock extends android.widget.TextView {
