@@ -18,8 +18,10 @@ package com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel
 
 import androidx.test.filters.SmallTest
 import com.android.settingslib.graph.SignalDrawable
-import com.android.settingslib.mobile.TelephonyIcons
+import com.android.settingslib.mobile.TelephonyIcons.THREE_G
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.common.shared.model.ContentDescription
+import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconInteractor
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.google.common.truth.Truth.assertThat
@@ -27,6 +29,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.yield
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
@@ -44,7 +47,7 @@ class MobileIconViewModelTest : SysuiTestCase() {
         interactor.apply {
             setLevel(1)
             setCutOut(false)
-            setIconGroup(TelephonyIcons.THREE_G)
+            setIconGroup(THREE_G)
             setIsEmergencyOnly(false)
             setNumberOfLevels(4)
         }
@@ -58,6 +61,60 @@ class MobileIconViewModelTest : SysuiTestCase() {
             val job = underTest.iconId.onEach { latest = it }.launchIn(this)
 
             assertThat(latest).isEqualTo(SignalDrawable.getState(1, 4, false))
+
+            job.cancel()
+        }
+
+    @Test
+    fun networkType_dataEnabled_groupIsRepresented() =
+        runBlocking(IMMEDIATE) {
+            val expected =
+                Icon.Resource(
+                    THREE_G.dataType,
+                    ContentDescription.Resource(THREE_G.dataContentDescription)
+                )
+            interactor.setIconGroup(THREE_G)
+
+            var latest: Icon? = null
+            val job = underTest.networkTypeIcon.onEach { latest = it }.launchIn(this)
+
+            assertThat(latest).isEqualTo(expected)
+
+            job.cancel()
+        }
+
+    @Test
+    fun networkType_nullWhenDisabled() =
+        runBlocking(IMMEDIATE) {
+            interactor.setIconGroup(THREE_G)
+            interactor.setIsDataEnabled(false)
+            var latest: Icon? = null
+            val job = underTest.networkTypeIcon.onEach { latest = it }.launchIn(this)
+
+            assertThat(latest).isNull()
+
+            job.cancel()
+        }
+
+    @Test
+    fun networkType_null_changeToDisabled() =
+        runBlocking(IMMEDIATE) {
+            val expected =
+                Icon.Resource(
+                    THREE_G.dataType,
+                    ContentDescription.Resource(THREE_G.dataContentDescription)
+                )
+            interactor.setIconGroup(THREE_G)
+            interactor.setIsDataEnabled(true)
+            var latest: Icon? = null
+            val job = underTest.networkTypeIcon.onEach { latest = it }.launchIn(this)
+
+            assertThat(latest).isEqualTo(expected)
+
+            interactor.setIsDataEnabled(false)
+            yield()
+
+            assertThat(latest).isNull()
 
             job.cancel()
         }

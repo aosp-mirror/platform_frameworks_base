@@ -859,9 +859,7 @@ public class UdfpsController implements DozeReceiver {
             playStartHaptic();
 
             if (!mKeyguardUpdateMonitor.isFaceDetectionRunning()) {
-                mKeyguardUpdateMonitor.requestFaceAuth(
-                        /* userInitiatedRequest */ false,
-                        FaceAuthApiRequestReason.UDFPS_POINTER_DOWN);
+                mKeyguardUpdateMonitor.requestFaceAuth(FaceAuthApiRequestReason.UDFPS_POINTER_DOWN);
             }
         }
         mOnFingerDown = true;
