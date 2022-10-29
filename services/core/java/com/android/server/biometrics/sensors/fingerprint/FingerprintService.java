@@ -52,6 +52,7 @@ import android.hardware.fingerprint.IFingerprintClientActiveCallback;
 import android.hardware.fingerprint.IFingerprintService;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
 import android.hardware.fingerprint.ISidefpsController;
+import android.hardware.fingerprint.IUdfpsOverlay;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.Binder;
 import android.os.Build;
@@ -869,6 +870,14 @@ public class FingerprintService extends SystemService {
         public void setSidefpsController(@NonNull ISidefpsController controller) {
             for (ServiceProvider provider : mRegistry.getProviders()) {
                 provider.setSidefpsController(controller);
+            }
+        }
+
+        @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
+        @Override
+        public void setUdfpsOverlay(@NonNull IUdfpsOverlay controller) {
+            for (ServiceProvider provider : mRegistry.getProviders()) {
+                provider.setUdfpsOverlay(controller);
             }
         }
 

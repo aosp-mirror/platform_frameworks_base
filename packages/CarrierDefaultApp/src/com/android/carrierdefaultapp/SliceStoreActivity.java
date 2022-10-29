@@ -85,7 +85,7 @@ public class SliceStoreActivity extends Activity {
 
         SliceStoreBroadcastReceiver.updateSliceStoreActivity(mCapability, this);
 
-        mWebView = new WebView(getApplicationContext());
+        mWebView = new WebView(this);
         setContentView(mWebView);
         mWebView.loadUrl(mUrl.toString());
         // TODO(b/245882601): Get back response from WebView

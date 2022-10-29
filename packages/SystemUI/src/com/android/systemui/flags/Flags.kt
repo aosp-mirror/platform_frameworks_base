@@ -318,7 +318,7 @@ object Flags {
 
     // 1500 - chooser
     // TODO(b/254512507): Tracking Bug
-    val CHOOSER_UNBUNDLED = UnreleasedFlag(1500)
+    val CHOOSER_UNBUNDLED = UnreleasedFlag(1500, true)
 
     // 1600 - accessibility
     @JvmField val A11Y_FLOATING_MENU_FLING_SPRING_ANIMATIONS = UnreleasedFlag(1600)

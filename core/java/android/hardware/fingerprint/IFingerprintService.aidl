@@ -26,6 +26,7 @@ import android.hardware.fingerprint.IFingerprintAuthenticatorsRegisteredCallback
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.hardware.fingerprint.ISidefpsController;
+import android.hardware.fingerprint.IUdfpsOverlay;
 import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import java.util.List;
@@ -200,6 +201,10 @@ interface IFingerprintService {
     // Sets the controller for managing the SideFPS overlay.
     @EnforcePermission("USE_BIOMETRIC_INTERNAL")
     void setSidefpsController(in ISidefpsController controller);
+
+    // Sets the controller for managing the UDFPS overlay.
+    @EnforcePermission("USE_BIOMETRIC_INTERNAL")
+    void setUdfpsOverlay(in IUdfpsOverlay controller);
 
     // Registers BiometricStateListener.
     @EnforcePermission("USE_BIOMETRIC_INTERNAL")

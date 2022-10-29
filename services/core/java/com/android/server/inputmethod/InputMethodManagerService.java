@@ -4601,12 +4601,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             }
             if (!setVisible) {
                 if (mCurClient != null) {
-                    // IMMS only knows of focused window, not the actual IME target.
-                    // e.g. it isn't aware of any window that has both
-                    // NOT_FOCUSABLE, ALT_FOCUSABLE_IM flags set and can the IME target.
-                    // Send it to window manager to hide IME from IME target window.
-                    // TODO(b/139861270): send to mCurClient.client once IMMS is aware of
-                    // actual IME target.
                     mWindowManagerInternal.hideIme(
                             mHideRequestWindowMap.get(windowToken),
                             mCurClient.mSelfReportedDisplayId);

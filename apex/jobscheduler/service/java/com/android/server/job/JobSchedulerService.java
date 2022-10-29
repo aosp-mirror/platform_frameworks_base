@@ -1870,10 +1870,10 @@ public class JobSchedulerService extends com.android.server.SystemService
         return mConcurrencyManager.isJobRunningLocked(job);
     }
 
-    /** @see JobConcurrencyManager#isJobLongRunningLocked(JobStatus) */
+    /** @see JobConcurrencyManager#isJobInOvertimeLocked(JobStatus) */
     @GuardedBy("mLock")
-    public boolean isLongRunningLocked(JobStatus job) {
-        return mConcurrencyManager.isJobLongRunningLocked(job);
+    public boolean isJobInOvertimeLocked(JobStatus job) {
+        return mConcurrencyManager.isJobInOvertimeLocked(job);
     }
 
     private void noteJobPending(JobStatus job) {
@@ -2155,11 +2155,11 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     @Override
     public void onRestrictionStateChanged(@NonNull JobRestriction restriction,
-            boolean stopLongRunningJobs) {
+            boolean stopOvertimeJobs) {
         mHandler.obtainMessage(MSG_CHECK_JOB).sendToTarget();
-        if (stopLongRunningJobs) {
+        if (stopOvertimeJobs) {
             synchronized (mLock) {
-                mConcurrencyManager.maybeStopLongRunningJobsLocked(restriction);
+                mConcurrencyManager.maybeStopOvertimeJobsLocked(restriction);
             }
         }
     }

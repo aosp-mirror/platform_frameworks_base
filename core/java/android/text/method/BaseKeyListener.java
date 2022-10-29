@@ -229,6 +229,8 @@ public abstract class BaseKeyListener extends MetaKeyKeyListener
                         break;
                     } else if (Emoji.isEmojiModifierBase(codePoint)) {
                         deleteCharCount += Character.charCount(codePoint);
+                        state = STATE_BEFORE_EMOJI;
+                        break;
                     }
                     state = STATE_FINISHED;
                     break;

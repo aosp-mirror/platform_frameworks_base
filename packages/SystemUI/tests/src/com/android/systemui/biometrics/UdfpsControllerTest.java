@@ -69,6 +69,7 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -169,6 +170,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
     private FakeExecutor mFgExecutor;
     @Mock
     private UdfpsDisplayMode mUdfpsDisplayMode;
+    @Mock
+    private FeatureFlags mFeatureFlags;
 
     // Stuff for configuring mocks
     @Mock
@@ -250,6 +253,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mStatusBarKeyguardViewManager,
                 mDumpManager,
                 mKeyguardUpdateMonitor,
+                mFeatureFlags,
                 mFalsingManager,
                 mPowerManager,
                 mAccessibilityManager,

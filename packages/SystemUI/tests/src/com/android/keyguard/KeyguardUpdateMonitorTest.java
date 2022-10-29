@@ -676,7 +676,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         bouncerFullyVisibleAndNotGoingToSleep();
         mTestableLooper.processAllMessages();
 
-        boolean didFaceAuthRun = mKeyguardUpdateMonitor.requestFaceAuth(true,
+        boolean didFaceAuthRun = mKeyguardUpdateMonitor.requestFaceAuth(
                 NOTIFICATION_PANEL_CLICKED);
 
         assertThat(didFaceAuthRun).isTrue();
@@ -688,7 +688,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         biometricsDisabledForCurrentUser();
         mTestableLooper.processAllMessages();
 
-        boolean didFaceAuthRun = mKeyguardUpdateMonitor.requestFaceAuth(true,
+        boolean didFaceAuthRun = mKeyguardUpdateMonitor.requestFaceAuth(
                 NOTIFICATION_PANEL_CLICKED);
 
         assertThat(didFaceAuthRun).isFalse();
@@ -707,8 +707,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         // Stop scanning when bouncer becomes visible
         setKeyguardBouncerVisibility(true);
         clearInvocations(mFaceManager);
-        mKeyguardUpdateMonitor.requestFaceAuth(true,
-                FaceAuthApiRequestReason.UDFPS_POINTER_DOWN);
+        mKeyguardUpdateMonitor.requestFaceAuth(FaceAuthApiRequestReason.UDFPS_POINTER_DOWN);
         verify(mFaceManager, never()).authenticate(any(), any(), any(), any(), anyInt(),
                 anyBoolean());
     }
@@ -1695,7 +1694,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     private void triggerSuccessfulFaceAuth() {
-        mKeyguardUpdateMonitor.requestFaceAuth(true, FaceAuthApiRequestReason.UDFPS_POINTER_DOWN);
+        mKeyguardUpdateMonitor.requestFaceAuth(FaceAuthApiRequestReason.UDFPS_POINTER_DOWN);
         verify(mFaceManager).authenticate(any(),
                 any(),
                 mAuthenticationCallbackCaptor.capture(),

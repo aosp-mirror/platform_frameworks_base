@@ -60,6 +60,8 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.DozeReceiver;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -119,6 +121,7 @@ public class UdfpsController implements DozeReceiver {
     @NonNull private final SystemUIDialogManager mDialogManager;
     @NonNull private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @NonNull private final VibratorHelper mVibrator;
+    @NonNull private final FeatureFlags mFeatureFlags;
     @NonNull private final FalsingManager mFalsingManager;
     @NonNull private final PowerManager mPowerManager;
     @NonNull private final AccessibilityManager mAccessibilityManager;
@@ -202,6 +205,10 @@ public class UdfpsController implements DozeReceiver {
         @Override
         public void showUdfpsOverlay(long requestId, int sensorId, int reason,
                 @NonNull IUdfpsOverlayControllerCallback callback) {
+            if (mFeatureFlags.isEnabled(Flags.NEW_UDFPS_OVERLAY)) {
+                return;
+            }
+
             mFgExecutor.execute(() -> UdfpsController.this.showUdfpsOverlay(
                     new UdfpsControllerOverlay(mContext, mFingerprintManager, mInflater,
                             mWindowManager, mAccessibilityManager, mStatusBarStateController,
@@ -217,6 +224,10 @@ public class UdfpsController implements DozeReceiver {
 
         @Override
         public void hideUdfpsOverlay(int sensorId) {
+            if (mFeatureFlags.isEnabled(Flags.NEW_UDFPS_OVERLAY)) {
+                return;
+            }
+
             mFgExecutor.execute(() -> {
                 if (mKeyguardUpdateMonitor.isFingerprintDetectionRunning()) {
                     // if we get here, we expect keyguardUpdateMonitor's fingerprintRunningState
@@ -590,6 +601,7 @@ public class UdfpsController implements DozeReceiver {
             @NonNull StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             @NonNull DumpManager dumpManager,
             @NonNull KeyguardUpdateMonitor keyguardUpdateMonitor,
+            @NonNull FeatureFlags featureFlags,
             @NonNull FalsingManager falsingManager,
             @NonNull PowerManager powerManager,
             @NonNull AccessibilityManager accessibilityManager,
@@ -625,6 +637,7 @@ public class UdfpsController implements DozeReceiver {
         mDumpManager = dumpManager;
         mDialogManager = dialogManager;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
+        mFeatureFlags = featureFlags;
         mFalsingManager = falsingManager;
         mPowerManager = powerManager;
         mAccessibilityManager = accessibilityManager;
@@ -859,9 +872,7 @@ public class UdfpsController implements DozeReceiver {
             playStartHaptic();
 
             if (!mKeyguardUpdateMonitor.isFaceDetectionRunning()) {
-                mKeyguardUpdateMonitor.requestFaceAuth(
-                        /* userInitiatedRequest */ false,
-                        FaceAuthApiRequestReason.UDFPS_POINTER_DOWN);
+                mKeyguardUpdateMonitor.requestFaceAuth(FaceAuthApiRequestReason.UDFPS_POINTER_DOWN);
             }
         }
         mOnFingerDown = true;

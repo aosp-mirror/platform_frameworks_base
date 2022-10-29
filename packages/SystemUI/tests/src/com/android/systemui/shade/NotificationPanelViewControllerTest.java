@@ -1594,7 +1594,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         mTouchHandler.onTouch(mock(View.class), mDownMotionEvent);
         mEmptySpaceClickListenerCaptor.getValue().onEmptySpaceClicked(0, 0);
 
-        verify(mUpdateMonitor).requestFaceAuth(true,
+        verify(mUpdateMonitor).requestFaceAuth(
                 FaceAuthApiRequestReason.NOTIFICATION_PANEL_CLICKED);
     }
 
@@ -1604,7 +1604,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mNotificationPanelViewController.mStatusBarStateListener;
         statusBarStateListener.onStateChanged(KEYGUARD);
         mNotificationPanelViewController.setDozing(false, false);
-        when(mUpdateMonitor.requestFaceAuth(true, NOTIFICATION_PANEL_CLICKED)).thenReturn(false);
+        when(mUpdateMonitor.requestFaceAuth(NOTIFICATION_PANEL_CLICKED)).thenReturn(false);
 
         // This sets the dozing state that is read when onMiddleClicked is eventually invoked.
         mTouchHandler.onTouch(mock(View.class), mDownMotionEvent);
@@ -1619,7 +1619,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mNotificationPanelViewController.mStatusBarStateListener;
         statusBarStateListener.onStateChanged(KEYGUARD);
         mNotificationPanelViewController.setDozing(false, false);
-        when(mUpdateMonitor.requestFaceAuth(true, NOTIFICATION_PANEL_CLICKED)).thenReturn(true);
+        when(mUpdateMonitor.requestFaceAuth(NOTIFICATION_PANEL_CLICKED)).thenReturn(true);
 
         // This sets the dozing state that is read when onMiddleClicked is eventually invoked.
         mTouchHandler.onTouch(mock(View.class), mDownMotionEvent);
@@ -1639,7 +1639,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         mTouchHandler.onTouch(mock(View.class), mDownMotionEvent);
         mEmptySpaceClickListenerCaptor.getValue().onEmptySpaceClicked(0, 0);
 
-        verify(mUpdateMonitor, never()).requestFaceAuth(anyBoolean(), anyString());
+        verify(mUpdateMonitor, never()).requestFaceAuth(anyString());
     }
 
     @Test
@@ -1650,7 +1650,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
 
         mEmptySpaceClickListenerCaptor.getValue().onEmptySpaceClicked(0, 0);
 
-        verify(mUpdateMonitor, never()).requestFaceAuth(anyBoolean(), anyString());
+        verify(mUpdateMonitor, never()).requestFaceAuth(anyString());
 
     }
 

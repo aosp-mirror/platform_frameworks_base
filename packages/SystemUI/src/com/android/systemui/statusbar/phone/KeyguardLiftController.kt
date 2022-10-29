@@ -73,7 +73,6 @@ class KeyguardLiftController @Inject constructor(
             isListening = false
             updateListeningState()
             keyguardUpdateMonitor.requestFaceAuth(
-                true,
                 FaceAuthApiRequestReason.PICK_UP_GESTURE_TRIGGERED
             )
             keyguardUpdateMonitor.requestActiveUnlock(
