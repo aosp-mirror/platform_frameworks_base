@@ -321,7 +321,13 @@ static jobject Bitmap_creator(JNIEnv* env, jobject, jintArray jColors,
     if (colorType == kAlpha_8_SkColorType) {
         colorSpace = nullptr;
     } else {
-        colorSpace = GraphicsJNI::getNativeColorSpace(colorSpacePtr);
+        int robolectricApiLevel = GetRobolectricApiLevel(env);
+        // In SDK 28 and below, a null colorSpacePtr is interpreted as SRGB.
+        if (colorSpacePtr == 0 && robolectricApiLevel <= 28) {
+            colorSpace = SkColorSpace::MakeSRGB();
+        } else {
+            colorSpace = GraphicsJNI::getNativeColorSpace(colorSpacePtr);
+        }
     }
 
     SkBitmap bitmap;
