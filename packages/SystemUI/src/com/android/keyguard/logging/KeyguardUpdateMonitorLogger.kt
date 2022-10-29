@@ -111,11 +111,10 @@ class KeyguardUpdateMonitorLogger @Inject constructor(
                 }, { "Face help received, msgId: $int1 msg: $str1" })
     }
 
-    fun logFaceAuthRequested(userInitiatedRequest: Boolean, reason: String?) {
+    fun logFaceAuthRequested(reason: String?) {
         logBuffer.log(TAG, DEBUG, {
-            bool1 = userInitiatedRequest
             str1 = reason
-        }, { "requestFaceAuth() userInitiated=$bool1 reason=$str1" })
+        }, { "requestFaceAuth() reason=$str1" })
     }
 
     fun logFaceAuthSuccess(userId: Int) {
