@@ -1316,7 +1316,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 mAppSwitchesState = APP_SWITCH_ALLOW;
             }
         }
-        return pir.sendInner(0, fillInIntent, resolvedType, allowlistToken, null, null,
+        return pir.sendInner(caller, 0, fillInIntent, resolvedType, allowlistToken, null, null,
                 resultTo, resultWho, requestCode, flagsMask, flagsValues, bOptions);
     }
 
