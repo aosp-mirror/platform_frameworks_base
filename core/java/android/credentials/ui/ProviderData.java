@@ -43,10 +43,10 @@ public class ProviderData implements Parcelable {
             "android.credentials.ui.extra.PROVIDER_DATA_LIST";
 
     @NonNull
-    private final String mProviderId;
+    private final String mProviderFlattenedComponentName;
     @NonNull
     private final String mProviderDisplayName;
-    @NonNull
+    @Nullable
     private final Icon mIcon;
     @NonNull
     private final List<Entry> mCredentialEntries;
@@ -58,11 +58,11 @@ public class ProviderData implements Parcelable {
     private final @CurrentTimeMillisLong long mLastUsedTimeMillis;
 
     public ProviderData(
-            @NonNull String providerId, @NonNull String providerDisplayName,
-            @NonNull Icon icon, @NonNull List<Entry> credentialEntries,
+            @NonNull String providerFlattenedComponentName, @NonNull String providerDisplayName,
+            @Nullable Icon icon, @NonNull List<Entry> credentialEntries,
             @NonNull List<Entry> actionChips, @Nullable Entry authenticationEntry,
             @CurrentTimeMillisLong long lastUsedTimeMillis) {
-        mProviderId = providerId;
+        mProviderFlattenedComponentName = providerFlattenedComponentName;
         mProviderDisplayName = providerDisplayName;
         mIcon = icon;
         mCredentialEntries = credentialEntries;
@@ -73,8 +73,8 @@ public class ProviderData implements Parcelable {
 
     /** Returns the unique provider id. */
     @NonNull
-    public String getProviderId() {
-        return mProviderId;
+    public String getProviderFlattenedComponentName() {
+        return mProviderFlattenedComponentName;
     }
 
     @NonNull
@@ -82,7 +82,7 @@ public class ProviderData implements Parcelable {
         return mProviderDisplayName;
     }
 
-    @NonNull
+    @Nullable
     public Icon getIcon() {
         return mIcon;
     }
@@ -108,9 +108,9 @@ public class ProviderData implements Parcelable {
     }
 
     protected ProviderData(@NonNull Parcel in) {
-        String providerId = in.readString8();
-        mProviderId = providerId;
-        AnnotationValidations.validate(NonNull.class, null, mProviderId);
+        String providerFlattenedComponentName = in.readString8();
+        mProviderFlattenedComponentName = providerFlattenedComponentName;
+        AnnotationValidations.validate(NonNull.class, null, mProviderFlattenedComponentName);
 
         String providerDisplayName = in.readString8();
         mProviderDisplayName = providerDisplayName;
@@ -118,7 +118,6 @@ public class ProviderData implements Parcelable {
 
         Icon icon = in.readTypedObject(Icon.CREATOR);
         mIcon = icon;
-        AnnotationValidations.validate(NonNull.class, null, mIcon);
 
         List<Entry> credentialEntries = new ArrayList<>();
         in.readTypedList(credentialEntries, Entry.CREATOR);
@@ -139,7 +138,7 @@ public class ProviderData implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeString8(mProviderId);
+        dest.writeString8(mProviderFlattenedComponentName);
         dest.writeString8(mProviderDisplayName);
         dest.writeTypedObject(mIcon, flags);
         dest.writeTypedList(mCredentialEntries);
@@ -171,26 +170,27 @@ public class ProviderData implements Parcelable {
      * @hide
      */
     public static class Builder {
-        private @NonNull String mProviderId;
+        private @NonNull String mProviderFlattenedComponentName;
         private @NonNull String mProviderDisplayName;
-        private @NonNull Icon mIcon;
+        private @Nullable Icon mIcon;
         private @NonNull List<Entry> mCredentialEntries = new ArrayList<>();
         private @NonNull List<Entry> mActionChips = new ArrayList<>();
         private @Nullable Entry mAuthenticationEntry = null;
         private @CurrentTimeMillisLong long mLastUsedTimeMillis = 0L;
 
         /** Constructor with required properties. */
-        public Builder(@NonNull String providerId, @NonNull String providerDisplayName,
-                @NonNull Icon icon) {
-            mProviderId = providerId;
+        public Builder(@NonNull String providerFlattenedComponentName,
+                @NonNull String providerDisplayName,
+                @Nullable Icon icon) {
+            mProviderFlattenedComponentName = providerFlattenedComponentName;
             mProviderDisplayName = providerDisplayName;
             mIcon = icon;
         }
 
         /** Sets the unique provider id. */
         @NonNull
-        public Builder setProviderId(@NonNull String providerId) {
-            mProviderId = providerId;
+        public Builder setProviderFlattenedComponentName(@NonNull String providerFlattenedComponentName) {
+            mProviderFlattenedComponentName = providerFlattenedComponentName;
             return this;
         }
 
@@ -239,7 +239,8 @@ public class ProviderData implements Parcelable {
         /** Builds a {@link ProviderData}. */
         @NonNull
         public ProviderData build() {
-            return new ProviderData(mProviderId, mProviderDisplayName, mIcon, mCredentialEntries,
+            return new ProviderData(mProviderFlattenedComponentName, mProviderDisplayName,
+                    mIcon, mCredentialEntries,
                 mActionChips, mAuthenticationEntry, mLastUsedTimeMillis);
         }
     }

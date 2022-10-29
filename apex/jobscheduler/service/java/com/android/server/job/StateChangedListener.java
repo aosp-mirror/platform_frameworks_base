@@ -41,11 +41,11 @@ public interface StateChangedListener {
      * Called by a {@link com.android.server.job.restrictions.JobRestriction} to notify the
      * JobScheduler that it should check on the state of all jobs.
      *
-     * @param stopLongRunningJobs Whether to stop any jobs that have run for more than their minimum
-     *                            execution guarantee and are restricted by the changed restriction
+     * @param stopOvertimeJobs Whether to stop any jobs that have run for more than their minimum
+     *                         execution guarantee and are restricted by the changed restriction
      */
     void onRestrictionStateChanged(@NonNull JobRestriction restriction,
-            boolean stopLongRunningJobs);
+            boolean stopOvertimeJobs);
 
     /**
      * Called by the controller to notify the JobManager that regardless of the state of the task,

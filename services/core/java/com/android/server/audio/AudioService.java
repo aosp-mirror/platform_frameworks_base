@@ -8768,13 +8768,21 @@ public class AudioService extends IAudioService.Stub
                     UserInfo userInfo = UserManagerService.getInstance().getUserInfo(userId);
                     killBackgroundUserProcessesWithRecordAudioPermission(userInfo);
                 }
-                UserManagerService.getInstance().setUserRestriction(
-                        UserManager.DISALLOW_RECORD_AUDIO, true, userId);
+                try {
+                    UserManagerService.getInstance().setUserRestriction(
+                            UserManager.DISALLOW_RECORD_AUDIO, true, userId);
+                } catch (IllegalArgumentException e) {
+                    Slog.w(TAG, "Failed to apply DISALLOW_RECORD_AUDIO restriction: " + e);
+                }
             } else if (action.equals(Intent.ACTION_USER_FOREGROUND)) {
                 // Enable audio recording for foreground user/profile
                 int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
-                UserManagerService.getInstance().setUserRestriction(
-                        UserManager.DISALLOW_RECORD_AUDIO, false, userId);
+                try {
+                    UserManagerService.getInstance().setUserRestriction(
+                            UserManager.DISALLOW_RECORD_AUDIO, false, userId);
+                } catch (IllegalArgumentException e) {
+                    Slog.w(TAG, "Failed to apply DISALLOW_RECORD_AUDIO restriction: " + e);
+                }
             } else if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
                 state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1);
                 if (state == BluetoothAdapter.STATE_OFF ||

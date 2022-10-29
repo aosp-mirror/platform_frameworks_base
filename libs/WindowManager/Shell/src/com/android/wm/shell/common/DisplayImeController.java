@@ -38,10 +38,10 @@ import android.view.WindowInsets;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
+import android.view.inputmethod.InputMethodManagerGlobal;
 
 import androidx.annotation.VisibleForTesting;
 
-import com.android.internal.inputmethod.IInputMethodManagerGlobal;
 import com.android.wm.shell.sysui.ShellInit;
 
 import java.util.ArrayList;
@@ -515,7 +515,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
     void removeImeSurface() {
         // Remove the IME surface to make the insets invisible for
         // non-client controlled insets.
-        IInputMethodManagerGlobal.removeImeSurface(
+        InputMethodManagerGlobal.removeImeSurface(
                 e -> Slog.e(TAG, "Failed to remove IME surface.", e));
     }
 

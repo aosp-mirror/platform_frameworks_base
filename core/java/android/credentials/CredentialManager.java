@@ -85,7 +85,7 @@ public final class CredentialManager {
         ICancellationSignal cancelRemote = null;
         try {
             cancelRemote = mService.executeGetCredential(request,
-                    new GetCredentialTransport(executor, callback));
+                    new GetCredentialTransport(executor, callback), mContext.getOpPackageName());
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
@@ -124,7 +124,8 @@ public final class CredentialManager {
         ICancellationSignal cancelRemote = null;
         try {
             cancelRemote = mService.executeCreateCredential(request,
-                    new CreateCredentialTransport(executor, callback));
+                    new CreateCredentialTransport(executor, callback),
+                    mContext.getOpPackageName());
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }

@@ -70,6 +70,8 @@ jobject android_view_InputDevice_create(JNIEnv* env, const InputDeviceInfo& devi
                                           deviceInfo.hasMic(), deviceInfo.hasButtonUnderPad(),
                                           deviceInfo.hasSensor(), deviceInfo.hasBattery(),
                                           deviceInfo.supportsUsi()));
+    // Note: We do not populate the Bluetooth address into the InputDevice object to avoid leaking
+    // it to apps that do not have the Bluetooth permission.
 
     const std::vector<InputDeviceInfo::MotionRange>& ranges = deviceInfo.getMotionRanges();
     for (const InputDeviceInfo::MotionRange& range: ranges) {

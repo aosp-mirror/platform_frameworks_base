@@ -16,21 +16,42 @@
 
 package com.android.settingslib.spa.widget.util
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.repeatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import com.android.settingslib.spa.framework.common.LocalEntryDataProvider
+import com.android.settingslib.spa.framework.theme.SettingsTheme
 
 @Composable
 internal fun EntryHighlight(UiLayoutFn: @Composable () -> Unit) {
     val entryData = LocalEntryDataProvider.current
-    val isHighlighted = rememberSaveable { entryData.isHighlighted }
-    val backgroundColor =
-        if (isHighlighted) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent
+    var isHighlighted by rememberSaveable { mutableStateOf(false) }
+    SideEffect {
+        isHighlighted = entryData.isHighlighted
+    }
+
+    val backgroundColor by animateColorAsState(
+        targetValue = when {
+            isHighlighted -> MaterialTheme.colorScheme.surfaceVariant
+            else -> SettingsTheme.colorScheme.background
+        },
+        animationSpec = repeatable(
+            iterations = 3,
+            animation = tween(durationMillis = 500),
+            repeatMode = RepeatMode.Restart
+        )
+    )
     Box(modifier = Modifier.background(color = backgroundColor)) {
         UiLayoutFn()
     }

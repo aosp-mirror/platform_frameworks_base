@@ -1353,9 +1353,16 @@ public class AppOpsManager {
     public static final int OP_RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO =
             AppProtoEnums.APP_OP_RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO;
 
+    /**
+     * App can schedule long running jobs.
+     *
+     * @hide
+     */
+    public static final int OP_RUN_LONG_JOBS = AppProtoEnums.APP_OP_RUN_LONG_JOBS;
+
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int _NUM_OP = 122;
+    public static final int _NUM_OP = 123;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -1839,6 +1846,13 @@ public class AppOpsManager {
     public static final String OPSTR_RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO =
             "android:receive_explicit_user_interaction_audio";
 
+    /**
+     * App can schedule long running jobs.
+     *
+     * @hide
+     */
+    public static final String OPSTR_RUN_LONG_JOBS = "android:run_long_jobs";
+
     /** {@link #sAppOpsToNote} not initialized yet for this op */
     private static final byte SHOULD_COLLECT_NOTE_OP_NOT_INITIALIZED = 0;
     /** Should not collect noting of this app-op in {@link #sAppOpsToNote} */
@@ -1933,6 +1947,7 @@ public class AppOpsManager {
             OP_SCHEDULE_EXACT_ALARM,
             OP_MANAGE_MEDIA,
             OP_TURN_SCREEN_ON,
+            OP_RUN_LONG_JOBS,
     };
 
     static final AppOpInfo[] sAppOpInfos = new AppOpInfo[]{
@@ -2312,7 +2327,9 @@ public class AppOpsManager {
         new AppOpInfo.Builder(OP_RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO,
                 OPSTR_RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO,
                 "RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO").setDefaultMode(
-                AppOpsManager.MODE_ALLOWED).build()
+                AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_RUN_LONG_JOBS, OPSTR_RUN_LONG_JOBS, "RUN_LONG_JOBS")
+                .setPermission(Manifest.permission.RUN_LONG_JOBS).build()
     };
 
     /**

@@ -204,6 +204,9 @@ interface NativeInputManagerService {
     /** Set the displayId on which the mouse cursor should be shown. */
     void setPointerDisplayId(int displayId);
 
+    /** Get the bluetooth address of an input device if known, otherwise return null. */
+    String getBluetoothAddress(int deviceId);
+
     /** The native implementation of InputManagerService methods. */
     class NativeImpl implements NativeInputManagerService {
         /** Pointer to native input manager service object, used by native code. */
@@ -418,5 +421,8 @@ interface NativeInputManagerService {
 
         @Override
         public native void setPointerDisplayId(int displayId);
+
+        @Override
+        public native String getBluetoothAddress(int deviceId);
     }
 }

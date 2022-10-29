@@ -204,6 +204,7 @@ public class ImsService extends Service {
 
     private IImsServiceControllerListener mListener;
     private final Object mListenerLock = new Object();
+    private final Object mExecutorLock = new Object();
     private Executor mExecutor;
 
     /**
@@ -214,10 +215,6 @@ public class ImsService extends Service {
      * vendor use Runnable::run.
      */
     public ImsService() {
-        mExecutor = ImsService.this.getExecutor();
-        if (mExecutor == null) {
-            mExecutor = Runnable::run;
-        }
     }
 
     /**
@@ -356,7 +353,7 @@ public class ImsService extends Service {
                 ImsConfigImplBase c =
                         ImsService.this.getConfigForSubscription(slotId, subId);
                 if (c != null) {
-                    c.setDefaultExecutor(mExecutor);
+                    c.setDefaultExecutor(getCachedExecutor());
                     return c.getIImsConfig();
                 } else {
                     return null;
@@ -370,7 +367,7 @@ public class ImsService extends Service {
                 ImsRegistrationImplBase r =
                         ImsService.this.getRegistrationForSubscription(slotId, subId);
                 if (r != null) {
-                    r.setDefaultExecutor(mExecutor);
+                    r.setDefaultExecutor(getCachedExecutor());
                     return r.getBinder();
                 } else {
                     return null;
@@ -383,7 +380,7 @@ public class ImsService extends Service {
             return executeMethodAsyncForResult(() -> {
                 SipTransportImplBase s =  ImsService.this.getSipTransport(slotId);
                 if (s != null) {
-                    s.setDefaultExecutor(mExecutor);
+                    s.setDefaultExecutor(getCachedExecutor());
                     return s.getBinder();
                 } else {
                     return null;
@@ -427,11 +424,21 @@ public class ImsService extends Service {
         return null;
     }
 
+    private Executor getCachedExecutor() {
+        synchronized (mExecutorLock) {
+            if (mExecutor == null) {
+                Executor e = ImsService.this.getExecutor();
+                mExecutor = (e != null) ? e : Runnable::run;
+            }
+            return mExecutor;
+        }
+    }
+
     private IImsMmTelFeature createMmTelFeatureInternal(int slotId, int subscriptionId) {
         MmTelFeature f = createMmTelFeatureForSubscription(slotId, subscriptionId);
         if (f != null) {
             setupFeature(f, slotId, ImsFeature.FEATURE_MMTEL);
-            f.setDefaultExecutor(mExecutor);
+            f.setDefaultExecutor(getCachedExecutor());
             return f.getBinder();
         } else {
             Log.e(LOG_TAG, "createMmTelFeatureInternal: null feature returned.");
@@ -443,7 +450,7 @@ public class ImsService extends Service {
         MmTelFeature f = createEmergencyOnlyMmTelFeature(slotId);
         if (f != null) {
             setupFeature(f, slotId, ImsFeature.FEATURE_MMTEL);
-            f.setDefaultExecutor(mExecutor);
+            f.setDefaultExecutor(getCachedExecutor());
             return f.getBinder();
         } else {
             Log.e(LOG_TAG, "createEmergencyOnlyMmTelFeatureInternal: null feature returned.");
@@ -454,7 +461,7 @@ public class ImsService extends Service {
     private IImsRcsFeature createRcsFeatureInternal(int slotId, int subI) {
         RcsFeature f = createRcsFeatureForSubscription(slotId, subI);
         if (f != null) {
-            f.setDefaultExecutor(mExecutor);
+            f.setDefaultExecutor(getCachedExecutor());
             setupFeature(f, slotId, ImsFeature.FEATURE_RCS);
             return f.getBinder();
         } else {
@@ -609,7 +616,8 @@ public class ImsService extends Service {
     private void executeMethodAsync(Runnable r, String errorLogName) {
         try {
             CompletableFuture.runAsync(
-                    () -> TelephonyUtils.runWithCleanCallingIdentity(r), mExecutor).join();
+                    () -> TelephonyUtils.runWithCleanCallingIdentity(r),
+                    getCachedExecutor()).join();
         } catch (CancellationException | CompletionException e) {
             Log.w(LOG_TAG, "ImsService Binder - " + errorLogName + " exception: "
                     + e.getMessage());
@@ -618,7 +626,7 @@ public class ImsService extends Service {
 
     private <T> T executeMethodAsyncForResult(Supplier<T> r, String errorLogName) {
         CompletableFuture<T> future = CompletableFuture.supplyAsync(
-                () -> TelephonyUtils.runWithCleanCallingIdentity(r), mExecutor);
+                () -> TelephonyUtils.runWithCleanCallingIdentity(r), getCachedExecutor());
         try {
             return future.get();
         } catch (ExecutionException | InterruptedException e) {

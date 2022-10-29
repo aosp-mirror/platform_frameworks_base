@@ -30,6 +30,22 @@ import java.lang.annotation.RetentionPolicy;
 public class CredentialProviderException extends Exception {
     public static final int ERROR_UNKNOWN = 0;
 
+    /**
+     * For internal use only.
+     * Error code to be used when the provider request times out.
+     *
+     * @hide
+     */
+    public static final int ERROR_TIMEOUT = 1;
+
+    /**
+     * For internal use only.
+     * Error code to be used when the async task is canceled internally.
+     *
+     * @hide
+     */
+    public static final int ERROR_TASK_CANCELED = 2;
+
     private final int mErrorCode;
 
     /**
@@ -37,6 +53,8 @@ public class CredentialProviderException extends Exception {
      */
     @IntDef(prefix = {"ERROR_"}, value = {
             ERROR_UNKNOWN,
+            ERROR_TIMEOUT,
+            ERROR_TASK_CANCELED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CredentialProviderError { }

@@ -35,7 +35,7 @@ class GetFlowUtils {
         ProviderInfo(
           // TODO: replace to extract from the service data structure when available
           icon = context.getDrawable(R.drawable.ic_passkey)!!,
-          name = it.providerId,
+          name = it.providerFlattenedComponentName,
           displayName = it.providerDisplayName,
           credentialTypeIcon = context.getDrawable(R.drawable.ic_passkey)!!,
           credentialOptions = toCredentialOptionInfoList(it.credentialEntries, context)
@@ -79,7 +79,7 @@ class CreateFlowUtils {
         com.android.credentialmanager.createflow.ProviderInfo(
           // TODO: replace to extract from the service data structure when available
           icon = context.getDrawable(R.drawable.ic_passkey)!!,
-          name = it.providerId,
+          name = it.providerFlattenedComponentName,
           displayName = it.providerDisplayName,
           credentialTypeIcon = context.getDrawable(R.drawable.ic_passkey)!!,
           createOptions = toCreationOptionInfoList(it.credentialEntries, context),

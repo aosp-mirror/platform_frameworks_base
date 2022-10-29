@@ -18,16 +18,21 @@ package android.service.credentials;
 
 import android.Manifest;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.AppGlobals;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.os.RemoteException;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
 
@@ -48,19 +53,21 @@ public final class CredentialProviderInfo {
     @NonNull
     private final List<String> mCapabilities;
 
-    // TODO: Move the two strings below to CredentialProviderService when ready.
-    private static final String CAPABILITY_META_DATA_KEY = "android.credentials.capabilities";
-    private static final String SERVICE_INTERFACE =
-            "android.service.credentials.CredentialProviderService";
-
+    @NonNull
+    private final Context mContext;
+    @Nullable
+    private final Drawable mIcon;
+    @Nullable
+    private final CharSequence mLabel;
 
     /**
      * Constructs an information instance of the credential provider.
      *
-     * @param context The context object
-     * @param serviceComponent The serviceComponent of the provider service
-     * @param userId The android userId for which the current process is running
+     * @param context the context object
+     * @param serviceComponent the serviceComponent of the provider service
+     * @param userId the android userId for which the current process is running
      * @throws PackageManager.NameNotFoundException If provider service is not found
+     * @throws SecurityException If provider does not require the relevant permission
      */
     public CredentialProviderInfo(@NonNull Context context,
             @NonNull ComponentName serviceComponent, int userId)
@@ -68,7 +75,13 @@ public final class CredentialProviderInfo {
         this(context, getServiceInfoOrThrow(serviceComponent, userId));
     }
 
-    private CredentialProviderInfo(@NonNull Context context, @NonNull ServiceInfo serviceInfo) {
+    /**
+     * Constructs an information instance of the credential provider.
+     * @param context the context object
+     * @param serviceInfo the service info for the provider app. This must be retrieved from the
+     *                    {@code PackageManager}
+     */
+    public CredentialProviderInfo(@NonNull Context context, @NonNull ServiceInfo serviceInfo) {
         if (!Manifest.permission.BIND_CREDENTIAL_PROVIDER_SERVICE.equals(serviceInfo.permission)) {
             Log.i(TAG, "Credential Provider Service from : " + serviceInfo.packageName
                     + "does not require permission"
@@ -76,32 +89,43 @@ public final class CredentialProviderInfo {
             throw new SecurityException("Service does not require the expected permission : "
                     + Manifest.permission.BIND_CREDENTIAL_PROVIDER_SERVICE);
         }
+        mContext = context;
         mServiceInfo = serviceInfo;
         mCapabilities = new ArrayList<>();
-        populateProviderCapabilities(context);
+        mIcon = mServiceInfo.loadIcon(mContext.getPackageManager());
+        mLabel = mServiceInfo.loadSafeLabel(
+                mContext.getPackageManager(), 0 /* do not ellipsize */,
+                TextUtils.SAFE_STRING_FLAG_FIRST_LINE | TextUtils.SAFE_STRING_FLAG_TRIM);
+        populateProviderCapabilities(context, serviceInfo);
     }
 
-    private void populateProviderCapabilities(@NonNull Context context) {
-        if (mServiceInfo.applicationInfo.metaData == null) {
-            return;
-        }
+    private void populateProviderCapabilities(@NonNull Context context, ServiceInfo serviceInfo) {
+        final PackageManager pm = context.getPackageManager();
         try {
-            final int resourceId = mServiceInfo.applicationInfo.metaData.getInt(
-                    CAPABILITY_META_DATA_KEY);
-            String[] capabilities = context.getResources().getStringArray(resourceId);
-            if (capabilities == null) {
-                Log.w(TAG, "No capabilities found for provider: " + mServiceInfo.packageName);
+            Bundle metadata = serviceInfo.metaData;
+            Resources resources = pm.getResourcesForApplication(serviceInfo.applicationInfo);
+            if (metadata == null || resources == null) {
+                Log.i(TAG, "populateProviderCapabilities - metadata or resources is null");
                 return;
             }
+
+            String[] capabilities = resources.getStringArray(metadata.getInt(
+                    CredentialProviderService.CAPABILITY_META_DATA_KEY));
+            if (capabilities == null || capabilities.length == 0) {
+                Slog.i(TAG, "No capabilities found for provider:" + serviceInfo.packageName);
+                return;
+            }
+
             for (String capability : capabilities) {
                 if (capability.isEmpty()) {
-                    Log.w(TAG, "Skipping empty capability");
+                    Slog.i(TAG, "Skipping empty capability");
                     continue;
                 }
+                Slog.i(TAG, "Capabilities found for provider: " + capability);
                 mCapabilities.add(capability);
             }
-        } catch (Resources.NotFoundException e) {
-            Log.w(TAG, "Exception while populating provider capabilities: " + e.getMessage());
+        } catch (PackageManager.NameNotFoundException e) {
+            Slog.i(TAG, e.getMessage());
         }
     }
 
@@ -135,6 +159,18 @@ public final class CredentialProviderInfo {
         return mServiceInfo;
     }
 
+    /** Returns the service icon. */
+    @Nullable
+    public Drawable getServiceIcon() {
+        return mIcon;
+    }
+
+    /** Returns the service label. */
+    @Nullable
+    public CharSequence getServiceLabel() {
+        return mLabel;
+    }
+
     /** Returns an immutable list of capabilities this provider service can support. */
     @NonNull
     public List<String> getCapabilities() {
@@ -145,14 +181,15 @@ public final class CredentialProviderInfo {
      * Returns the valid credential provider services available for the user with the
      * given {@code userId}.
      */
+    @NonNull
     public static List<CredentialProviderInfo> getAvailableServices(@NonNull Context context,
             @UserIdInt int userId) {
         final List<CredentialProviderInfo> services = new ArrayList<>();
 
         final List<ResolveInfo> resolveInfos =
                 context.getPackageManager().queryIntentServicesAsUser(
-                        new Intent(SERVICE_INTERFACE),
-                        PackageManager.GET_META_DATA,
+                        new Intent(CredentialProviderService.SERVICE_INTERFACE),
+                        PackageManager.ResolveInfoFlags.of(PackageManager.GET_META_DATA),
                         userId);
         for (ResolveInfo resolveInfo : resolveInfos) {
             final ServiceInfo serviceInfo = resolveInfo.serviceInfo;
@@ -169,8 +206,9 @@ public final class CredentialProviderInfo {
      * Returns the valid credential provider services available for the user, that can
      * support the given {@code credentialType}.
      */
+    @NonNull
     public static List<CredentialProviderInfo> getAvailableServicesForCapability(
-            Context context, @UserIdInt int userId, String credentialType) {
+            @NonNull Context context, @UserIdInt int userId, @NonNull String credentialType) {
         List<CredentialProviderInfo> servicesForCapability = new ArrayList<>();
         final List<CredentialProviderInfo> services = getAvailableServices(context, userId);
 

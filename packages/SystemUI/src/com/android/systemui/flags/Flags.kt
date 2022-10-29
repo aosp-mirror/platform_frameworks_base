@@ -200,7 +200,7 @@ object Flags {
 
     // 802 - wallpaper rendering
     // TODO(b/254512923): Tracking Bug
-    @JvmField val USE_CANVAS_RENDERER = ReleasedFlag(802)
+    @JvmField val USE_CANVAS_RENDERER = UnreleasedFlag(802, teamfood = true)
 
     // 803 - screen contents translation
     // TODO(b/254513187): Tracking Bug
@@ -318,7 +318,7 @@ object Flags {
 
     // 1500 - chooser
     // TODO(b/254512507): Tracking Bug
-    val CHOOSER_UNBUNDLED = UnreleasedFlag(1500)
+    val CHOOSER_UNBUNDLED = UnreleasedFlag(1500, true)
 
     // 1600 - accessibility
     @JvmField val A11Y_FLOATING_MENU_FLING_SPRING_ANIMATIONS = UnreleasedFlag(1600)

@@ -472,11 +472,11 @@ void CanvasContext::notifyFramePending() {
     mRenderThread.pushBackFrameCallback(this);
 }
 
-nsecs_t CanvasContext::draw() {
+std::optional<nsecs_t> CanvasContext::draw() {
     if (auto grContext = getGrContext()) {
         if (grContext->abandoned()) {
             LOG_ALWAYS_FATAL("GrContext is abandoned/device lost at start of CanvasContext::draw");
-            return 0;
+            return std::nullopt;
         }
     }
     SkRect dirty;
@@ -498,7 +498,7 @@ nsecs_t CanvasContext::draw() {
             std::invoke(func, false /* didProduceBuffer */);
         }
         mFrameCommitCallbacks.clear();
-        return 0;
+        return std::nullopt;
     }
 
     ScopedActiveContext activeContext(this);
@@ -543,6 +543,8 @@ nsecs_t CanvasContext::draw() {
     }
 
     bool requireSwap = false;
+    bool didDraw = false;
+
     int error = OK;
     bool didSwap = mRenderPipeline->swapBuffers(frame, drawResult.success, windowDirty,
                                                 mCurrentFrameInfo, &requireSwap);
@@ -553,7 +555,7 @@ nsecs_t CanvasContext::draw() {
     mIsDirty = false;
 
     if (requireSwap) {
-        bool didDraw = true;
+        didDraw = true;
         // Handle any swapchain errors
         error = mNativeSurface->getAndClearError();
         if (error == TIMED_OUT) {
@@ -649,7 +651,9 @@ nsecs_t CanvasContext::draw() {
     }
 
     mRenderThread.cacheManager().onFrameCompleted();
-    return mCurrentFrameInfo->get(FrameInfoIndex::DequeueBufferDuration);
+    return didDraw ? std::make_optional(
+                             mCurrentFrameInfo->get(FrameInfoIndex::DequeueBufferDuration))
+                   : std::nullopt;
 }
 
 void CanvasContext::reportMetricsWithPresentTime() {

@@ -364,16 +364,19 @@ public class LocaleManagerService extends SystemService {
         // 1.) A normal, non-privileged app querying its own locale.
         // 2.) The installer of the given app querying locales of a package installed by said
         // installer.
-        // 3.) The current input method querying locales of another package.
+        // 3.) The current input method querying locales of the current foreground app.
         // 4.) A privileged system service querying locales of another package.
         // The least privileged case is a normal app performing a query, so check that first and get
         // locales if the package name is owned by the app. Next check if the calling app is the
         // installer of the given app and get locales. Finally check if the calling app is the
-        // current input method. If neither conditions matched, check if the caller has the
-        // necessary permission and fetch locales.
+        // current input method, and that app is querying locales of the current foreground app. If
+        // neither conditions matched, check if the caller has the necessary permission and fetch
+        // locales.
         if (!isPackageOwnedByCaller(appPackageName, userId)
                 && !isCallerInstaller(appPackageName, userId)
-                && !isCallerFromCurrentInputMethod(userId)) {
+                && !(isCallerFromCurrentInputMethod(userId)
+                    && mActivityManagerInternal.isAppForeground(
+                            getPackageUid(appPackageName, userId)))) {
             enforceReadAppSpecificLocalesPermission();
         }
         final long token = Binder.clearCallingIdentity();

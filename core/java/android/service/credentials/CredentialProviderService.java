@@ -42,6 +42,9 @@ import java.util.Objects;
  */
 public abstract class CredentialProviderService extends Service {
     private static final String TAG = "CredProviderService";
+
+    public static final String CAPABILITY_META_DATA_KEY = "android.credentials.capabilities";
+
     private Handler mHandler;
 
     /**
@@ -71,11 +74,12 @@ public abstract class CredentialProviderService extends Service {
 
     private final ICredentialProviderService mInterface = new ICredentialProviderService.Stub() {
         @Override
-        public void onGetCredentials(GetCredentialsRequest request, ICancellationSignal transport,
+        public ICancellationSignal onGetCredentials(GetCredentialsRequest request,
                 IGetCredentialsCallback callback) {
             Objects.requireNonNull(request);
-            Objects.requireNonNull(transport);
             Objects.requireNonNull(callback);
+
+            ICancellationSignal transport = CancellationSignal.createTransport();
 
             mHandler.sendMessage(obtainMessage(
                     CredentialProviderService::onGetCredentials,
@@ -100,14 +104,16 @@ public abstract class CredentialProviderService extends Service {
                         }
                     }
             ));
+            return transport;
         }
 
         @Override
-        public void onCreateCredential(CreateCredentialRequest request,
-                ICancellationSignal transport, ICreateCredentialCallback callback) {
+        public ICancellationSignal onCreateCredential(CreateCredentialRequest request,
+                ICreateCredentialCallback callback) {
             Objects.requireNonNull(request);
-            Objects.requireNonNull(transport);
             Objects.requireNonNull(callback);
+
+            ICancellationSignal transport = CancellationSignal.createTransport();
 
             mHandler.sendMessage(obtainMessage(
                     CredentialProviderService::onCreateCredential,
@@ -132,6 +138,7 @@ public abstract class CredentialProviderService extends Service {
                         }
                     }
             ));
+            return transport;
         }
     };
 

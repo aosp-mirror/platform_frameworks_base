@@ -154,6 +154,7 @@ import com.android.server.os.SchedulingPolicyService;
 import com.android.server.people.PeopleService;
 import com.android.server.pm.ApexManager;
 import com.android.server.pm.ApexSystemServiceInfo;
+import com.android.server.pm.BackgroundInstallControlService;
 import com.android.server.pm.CrossProfileAppsService;
 import com.android.server.pm.DataLoaderManagerService;
 import com.android.server.pm.DynamicCodeLoggingService;
@@ -2468,6 +2469,10 @@ public final class SystemServer implements Dumpable {
 
             t.traceBegin("StartMediaMetricsManager");
             mSystemServiceManager.startService(MediaMetricsManagerService.class);
+            t.traceEnd();
+
+            t.traceBegin("StartBackgroundInstallControlService");
+            mSystemServiceManager.startService(BackgroundInstallControlService.class);
             t.traceEnd();
         }
 

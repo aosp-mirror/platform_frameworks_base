@@ -29,7 +29,7 @@ import android.os.ICancellationSignal;
  */
 interface ICredentialManager {
 
-    @nullable ICancellationSignal executeGetCredential(in GetCredentialRequest request, in IGetCredentialCallback callback);
+    @nullable ICancellationSignal executeGetCredential(in GetCredentialRequest request, in IGetCredentialCallback callback, String callingPackage);
 
-    @nullable ICancellationSignal executeCreateCredential(in CreateCredentialRequest request, in ICreateCredentialCallback callback);
+    @nullable ICancellationSignal executeCreateCredential(in CreateCredentialRequest request, in ICreateCredentialCallback callback, String callingPackage);
 }
