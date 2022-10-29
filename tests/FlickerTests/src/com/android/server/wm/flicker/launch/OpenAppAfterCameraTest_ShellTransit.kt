@@ -44,7 +44,7 @@ class OpenAppAfterCameraTest_ShellTransit(testSpec: FlickerTestParameter) :
     OpenAppAfterCameraTest(testSpec) {
     @Before
     override fun before() {
-        Assume.assumeFalse(isShellTransitionsEnabled)
+        Assume.assumeTrue(isShellTransitionsEnabled)
     }
 
     @FlakyTest
