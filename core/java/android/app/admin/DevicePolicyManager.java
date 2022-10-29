@@ -3864,6 +3864,56 @@ public class DevicePolicyManager {
     public static final String EXTRA_RESOURCE_IDS =
             "android.app.extra.RESOURCE_IDS";
 
+    /** Allow the user to choose whether to enable MTE on the device. */
+    public static final int MTE_NOT_CONTROLLED_BY_POLICY = 0;
+
+    /**
+     * Require that MTE be enabled on the device, if supported. Can be set by a device owner or a
+     * profile owner of an organization-owned managed profile.
+     */
+    public static final int MTE_ENABLED = 1;
+
+    /** Require that MTE be disabled on the device. Can be set by a device owner. */
+    public static final int MTE_DISABLED = 2;
+
+    /** @hide */
+    @IntDef(
+            prefix = {"MTE_"},
+            value = {MTE_ENABLED, MTE_DISABLED, MTE_NOT_CONTROLLED_BY_POLICY})
+    @Retention(RetentionPolicy.SOURCE)
+    public static @interface MtePolicy {}
+
+    /**
+     * Set MTE policy for device. MTE_ENABLED does not necessarily enable MTE if set on a device
+     * that does not support MTE.
+     *
+     * The default policy is MTE_NOT_CONTROLLED_BY_POLICY.
+     *
+     * Memory Tagging Extension (MTE) is a CPU extension that allows to protect against certain
+     * classes of security problems at a small runtime performance cost overhead.
+     *
+     * @param policy the policy to be set
+     */
+    public void setMtePolicy(@MtePolicy int policy) {
+        // TODO(b/244290023): implement
+        // This is SecurityException to temporarily make ParentProfileTest happy.
+        // This is not used.
+        throw new SecurityException("not implemented");
+    }
+
+    /**
+     * Get currently set MTE policy. This is not necessarily the same as the state of MTE on the
+     * device, as the device might not support MTE.
+     *
+     * @return the currently set policy
+     */
+    public @MtePolicy int getMtePolicy() {
+        // TODO(b/244290023): implement
+        // This is SecurityException to temporarily make ParentProfileTest happy.
+        // This is not used.
+        throw new SecurityException("not implemented");
+    }
+
     /**
      * This object is a single place to tack on invalidation and disable calls.  All
      * binder caches in this class derive from this Config, so all can be invalidated or
