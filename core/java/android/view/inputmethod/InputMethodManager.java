@@ -3459,6 +3459,7 @@ public final class InputMethodManager {
      * @hide
      */
     @TestApi
+    @RequiresPermission(Manifest.permission.TEST_INPUT_METHOD)
     public boolean isInputMethodPickerShown() {
         return IInputMethodManagerGlobalInvoker.isInputMethodPickerShownForTest();
     }
