@@ -489,6 +489,7 @@ final class IInputMethodManagerGlobalInvoker {
     }
 
     @AnyThread
+    @RequiresPermission(Manifest.permission.TEST_INPUT_METHOD)
     static void addVirtualStylusIdForTestSession(IInputMethodClient client) {
         final IInputMethodManager service = getService();
         if (service == null) {
