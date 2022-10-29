@@ -2394,7 +2394,7 @@ class ActivityStarter {
                             mStartActivity.mUserId);
             if (act != null) {
                 final Task task = act.getTask();
-                boolean actuallyMoved = task.moveActivityToFrontLocked(act);
+                boolean actuallyMoved = task.moveActivityToFront(act);
                 if (actuallyMoved) {
                     // Only record if the activity actually moved.
                     mMovedToTopActivity = act;
