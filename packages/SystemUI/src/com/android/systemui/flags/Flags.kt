@@ -63,7 +63,7 @@ object Flags {
     @JvmField val NOTIFICATION_DISMISSAL_FADE = UnreleasedFlag(113, teamfood = true)
     val STABILITY_INDEX_FIX = UnreleasedFlag(114, teamfood = true)
     val SEMI_STABLE_SORT = UnreleasedFlag(115, teamfood = true)
-    @JvmField val NOTIFICATION_GROUP_CORNER = UnreleasedFlag(116, true)
+    @JvmField val NOTIFICATION_GROUP_CORNER = UnreleasedFlag(116, teamfood = true)
     // next id: 117
 
     // 200 - keyguard/lockscreen
@@ -170,9 +170,9 @@ object Flags {
     @Deprecated("Replaced by mobile and wifi specific flags.")
     val NEW_STATUS_BAR_PIPELINE_FRONTEND = UnreleasedFlag(605, teamfood = false)
 
-    val NEW_STATUS_BAR_MOBILE_ICONS = UnreleasedFlag(606, false)
+    val NEW_STATUS_BAR_MOBILE_ICONS = UnreleasedFlag(606)
 
-    val NEW_STATUS_BAR_WIFI_ICON = UnreleasedFlag(607, false)
+    val NEW_STATUS_BAR_WIFI_ICON = UnreleasedFlag(607)
 
     // 700 - dialer/calls
     // TODO(b/254512734): Tracking Bug
@@ -311,13 +311,13 @@ object Flags {
 
     // 1500 - chooser
     // TODO(b/254512507): Tracking Bug
-    val CHOOSER_UNBUNDLED = UnreleasedFlag(1500, true)
+    val CHOOSER_UNBUNDLED = UnreleasedFlag(1500, teamfood = true)
 
     // 1700 - clipboard
     @JvmField val CLIPBOARD_OVERLAY_REFACTOR = UnreleasedFlag(1700)
 
     // 1800 - shade container
-    @JvmField val LEAVE_SHADE_OPEN_FOR_BUGREPORT = UnreleasedFlag(1800, true)
+    @JvmField val LEAVE_SHADE_OPEN_FOR_BUGREPORT = UnreleasedFlag(1800, teamfood = true)
 
     // 1900 - note task
     @JvmField val NOTE_TASKS = SysPropBooleanFlag(1900, "persist.sysui.debug.note_tasks")
