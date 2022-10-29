@@ -50,7 +50,7 @@ class FakeMobileConnectionsRepository : MobileConnectionsRepository {
         _activeMobileDataSubscriptionId.value = subId
     }
 
-    fun setMobileConnectionRepositoryForId(subId: Int, repo: MobileConnectionRepository) {
-        subIdRepos[subId] = repo
+    fun setMobileConnectionRepositoryMap(connections: Map<Int, MobileConnectionRepository>) {
+        connections.forEach { entry -> subIdRepos[entry.key] = entry.value }
     }
 }
