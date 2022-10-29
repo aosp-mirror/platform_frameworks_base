@@ -486,7 +486,7 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
 
         registeredSwipeListener.onSwipeUp();
 
-        verify(mKeyguardUpdateMonitor).requestFaceAuth(true,
+        verify(mKeyguardUpdateMonitor).requestFaceAuth(
                 FaceAuthApiRequestReason.SWIPE_UP_ON_BOUNCER);
     }
 
@@ -499,16 +499,15 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
         registeredSwipeListener.onSwipeUp();
 
         verify(mKeyguardUpdateMonitor, never())
-                .requestFaceAuth(true,
-                        FaceAuthApiRequestReason.SWIPE_UP_ON_BOUNCER);
+                .requestFaceAuth(FaceAuthApiRequestReason.SWIPE_UP_ON_BOUNCER);
     }
 
     @Test
     public void onSwipeUp_whenFaceDetectionIsTriggered_hidesBouncerMessage() {
         KeyguardSecurityContainer.SwipeListener registeredSwipeListener =
                 getRegisteredSwipeListener();
-        when(mKeyguardUpdateMonitor.requestFaceAuth(true,
-                FaceAuthApiRequestReason.SWIPE_UP_ON_BOUNCER)).thenReturn(true);
+        when(mKeyguardUpdateMonitor.requestFaceAuth(FaceAuthApiRequestReason.SWIPE_UP_ON_BOUNCER))
+                .thenReturn(true);
         setupGetSecurityView();
 
         registeredSwipeListener.onSwipeUp();
@@ -520,8 +519,8 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
     public void onSwipeUp_whenFaceDetectionIsNotTriggered_retainsBouncerMessage() {
         KeyguardSecurityContainer.SwipeListener registeredSwipeListener =
                 getRegisteredSwipeListener();
-        when(mKeyguardUpdateMonitor.requestFaceAuth(true,
-                FaceAuthApiRequestReason.SWIPE_UP_ON_BOUNCER)).thenReturn(false);
+        when(mKeyguardUpdateMonitor.requestFaceAuth(FaceAuthApiRequestReason.SWIPE_UP_ON_BOUNCER))
+                .thenReturn(false);
         setupGetSecurityView();
 
         registeredSwipeListener.onSwipeUp();

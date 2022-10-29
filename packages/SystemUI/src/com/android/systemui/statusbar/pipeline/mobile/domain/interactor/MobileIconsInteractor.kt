@@ -23,12 +23,14 @@ import com.android.settingslib.SignalIcon.MobileIconGroup
 import com.android.settingslib.mobile.TelephonyIcons
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.UserSetupRepository
 import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
 import com.android.systemui.util.CarrierConfigTracker
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -47,28 +49,38 @@ import kotlinx.coroutines.flow.stateIn
  * icon
  */
 interface MobileIconsInteractor {
+    /** List of subscriptions, potentially filtered for CBRS */
     val filteredSubscriptions: Flow<List<SubscriptionInfo>>
+    /** The icon mapping from network type to [MobileIconGroup] for the default subscription */
     val defaultMobileIconMapping: Flow<Map<String, MobileIconGroup>>
+    /** Fallback [MobileIconGroup] in the case where there is no icon in the mapping */
     val defaultMobileIconGroup: Flow<MobileIconGroup>
+    /** True once the user has been set up */
     val isUserSetup: Flow<Boolean>
+    /**
+     * Vends out a [MobileIconInteractor] tracking the [MobileConnectionRepository] for the given
+     * subId. Will throw if the ID is invalid
+     */
     fun createMobileConnectionInteractorForSubId(subId: Int): MobileIconInteractor
 }
 
+@Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
+@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class MobileIconsInteractorImpl
 @Inject
 constructor(
-    private val mobileSubscriptionRepo: MobileConnectionsRepository,
+    private val mobileConnectionsRepo: MobileConnectionsRepository,
     private val carrierConfigTracker: CarrierConfigTracker,
     private val mobileMappingsProxy: MobileMappingsProxy,
     userSetupRepo: UserSetupRepository,
     @Application private val scope: CoroutineScope,
 ) : MobileIconsInteractor {
     private val activeMobileDataSubscriptionId =
-        mobileSubscriptionRepo.activeMobileDataSubscriptionId
+        mobileConnectionsRepo.activeMobileDataSubscriptionId
 
     private val unfilteredSubscriptions: Flow<List<SubscriptionInfo>> =
-        mobileSubscriptionRepo.subscriptionsFlow
+        mobileConnectionsRepo.subscriptionsFlow
 
     /**
      * Generally, SystemUI wants to show iconography for each subscription that is listed by
@@ -119,13 +131,13 @@ constructor(
      * subscription Id. This mapping is the same for every subscription.
      */
     override val defaultMobileIconMapping: StateFlow<Map<String, MobileIconGroup>> =
-        mobileSubscriptionRepo.defaultDataSubRatConfig
+        mobileConnectionsRepo.defaultDataSubRatConfig
             .map { mobileMappingsProxy.mapIconSets(it) }
             .stateIn(scope, SharingStarted.WhileSubscribed(), initialValue = mapOf())
 
     /** If there is no mapping in [defaultMobileIconMapping], then use this default icon group */
     override val defaultMobileIconGroup: StateFlow<MobileIconGroup> =
-        mobileSubscriptionRepo.defaultDataSubRatConfig
+        mobileConnectionsRepo.defaultDataSubRatConfig
             .map { mobileMappingsProxy.getDefaultIcons(it) }
             .stateIn(scope, SharingStarted.WhileSubscribed(), initialValue = TelephonyIcons.G)
 
@@ -137,6 +149,6 @@ constructor(
             defaultMobileIconMapping,
             defaultMobileIconGroup,
             mobileMappingsProxy,
-            mobileSubscriptionRepo.getRepoForSubId(subId),
+            mobileConnectionsRepo.getRepoForSubId(subId),
         )
 }
