@@ -28,6 +28,7 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
+import android.app.AppOpsManager;
 import android.app.IUidObserver;
 import android.app.compat.CompatChanges;
 import android.app.job.IJobScheduler;
@@ -304,6 +305,7 @@ public class JobSchedulerService extends com.android.server.SystemService
     final JobHandler mHandler;
     final JobSchedulerStub mJobSchedulerStub;
 
+    private AppOpsManager mAppOps;
     PackageManagerInternal mLocalPM;
     ActivityManagerInternal mActivityManagerInternal;
     DeviceIdleInternal mLocalDeviceIdleController;
@@ -1803,6 +1805,8 @@ public class JobSchedulerService extends com.android.server.SystemService
             for (StateController controller : mControllers) {
                 controller.onSystemServicesReady();
             }
+
+            mAppOps = (AppOpsManager) getContext().getSystemService(Context.APP_OPS_SERVICE);
 
             mAppStateTracker = (AppStateTrackerImpl) Objects.requireNonNull(
                     LocalServices.getService(AppStateTracker.class));
@@ -3407,6 +3411,21 @@ public class JobSchedulerService extends com.android.server.SystemService
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
+        }
+
+        @Override
+        public boolean hasRunLongJobsPermission(@NonNull String packageName,
+                @UserIdInt int userId) {
+            final int uid = mLocalPM.getPackageUid(packageName, 0, userId);
+            final int callingUid = Binder.getCallingUid();
+            if (callingUid != uid && !UserHandle.isCore(callingUid)) {
+                throw new SecurityException("Uid " + callingUid
+                        + " cannot query canRunLongJobs for package " + packageName);
+            }
+
+            final int mode = mAppOps.checkOpNoThrow(AppOpsManager.OP_RUN_LONG_JOBS, uid,
+                    packageName);
+            return mode == AppOpsManager.MODE_ALLOWED || mode == AppOpsManager.MODE_DEFAULT;
         }
 
         /**
