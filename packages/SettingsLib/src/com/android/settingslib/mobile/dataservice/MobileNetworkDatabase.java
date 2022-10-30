@@ -20,6 +20,7 @@ import android.content.Context;
 import android.util.Log;
 
 import java.util.List;
+import java.util.Objects;
 
 import androidx.lifecycle.LiveData;
 import androidx.room.Database;
@@ -39,17 +40,27 @@ public abstract class MobileNetworkDatabase extends RoomDatabase {
 
     public abstract MobileNetworkInfoDao mMobileNetworkInfoDao();
 
+    private static MobileNetworkDatabase sInstance;
+    private static final Object sLOCK = new Object();
+
+
     /**
      * Create the MobileNetworkDatabase.
      *
      * @param context The context.
      * @return The MobileNetworkDatabase.
      */
-    public static MobileNetworkDatabase createDatabase(Context context) {
-        return Room.inMemoryDatabaseBuilder(context, MobileNetworkDatabase.class)
-                .fallbackToDestructiveMigration()
-                .enableMultiInstanceInvalidation()
-                .build();
+    public static MobileNetworkDatabase getInstance(Context context) {
+        synchronized (sLOCK) {
+            if (Objects.isNull(sInstance)) {
+                Log.d(TAG, "createDatabase.");
+                sInstance = Room.inMemoryDatabaseBuilder(context, MobileNetworkDatabase.class)
+                        .fallbackToDestructiveMigration()
+                        .enableMultiInstanceInvalidation()
+                        .build();
+            }
+        }
+        return sInstance;
     }
 
     /**
@@ -93,7 +104,7 @@ public abstract class MobileNetworkDatabase extends RoomDatabase {
      * Query the subscription info by the subscription ID from the SubscriptionInfoEntity
      * table.
      */
-    public LiveData<SubscriptionInfoEntity> querySubInfoById(String id) {
+    public SubscriptionInfoEntity querySubInfoById(String id) {
         return mSubscriptionInfoDao().querySubInfoById(id);
     }
 

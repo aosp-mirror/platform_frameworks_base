@@ -37,7 +37,7 @@ public interface SubscriptionInfoDao {
 
     @Query("SELECT * FROM " + DataServiceUtils.SubscriptionInfoData.TABLE_NAME + " WHERE "
             + DataServiceUtils.SubscriptionInfoData.COLUMN_ID + " = :subId")
-    LiveData<SubscriptionInfoEntity> querySubInfoById(String subId);
+    SubscriptionInfoEntity querySubInfoById(String subId);
 
     @Query("SELECT * FROM " + DataServiceUtils.SubscriptionInfoData.TABLE_NAME + " WHERE "
             + DataServiceUtils.SubscriptionInfoData.COLUMN_IS_ACTIVE_SUBSCRIPTION_ID
