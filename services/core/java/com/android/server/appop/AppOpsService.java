@@ -2795,7 +2795,11 @@ public class AppOpsService extends IAppOpsService.Stub {
         try {
             pvr = verifyAndGetBypass(uid, packageName, null);
         } catch (SecurityException e) {
-            Slog.e(TAG, "Cannot setMode", e);
+            if (Process.isIsolated(uid)) {
+                Slog.e(TAG, "Cannot setMode: isolated process");
+            } else {
+                Slog.e(TAG, "Cannot setMode", e);
+            }
             return;
         }
 
@@ -3250,7 +3254,11 @@ public class AppOpsService extends IAppOpsService.Stub {
         try {
             pvr = verifyAndGetBypass(uid, packageName, null);
         } catch (SecurityException e) {
-            Slog.e(TAG, "checkOperation", e);
+            if (Process.isIsolated(uid)) {
+                Slog.e(TAG, "Cannot checkOperation: isolated process");
+            } else {
+                Slog.e(TAG, "Cannot checkOperation", e);
+            }
             return AppOpsManager.opToDefaultMode(code);
         }
 
@@ -3456,7 +3464,11 @@ public class AppOpsService extends IAppOpsService.Stub {
                 attributionTag = null;
             }
         } catch (SecurityException e) {
-            Slog.e(TAG, "noteOperation", e);
+            if (Process.isIsolated(uid)) {
+                Slog.e(TAG, "Cannot noteOperation: isolated process");
+            } else {
+                Slog.e(TAG, "Cannot noteOperation", e);
+            }
             return new SyncNotedAppOp(AppOpsManager.MODE_ERRORED, code, attributionTag,
                     packageName);
         }
@@ -3972,7 +3984,11 @@ public class AppOpsService extends IAppOpsService.Stub {
                 attributionTag = null;
             }
         } catch (SecurityException e) {
-            Slog.e(TAG, "startOperation", e);
+            if (Process.isIsolated(uid)) {
+                Slog.e(TAG, "Cannot startOperation: isolated process");
+            } else {
+                Slog.e(TAG, "Cannot startOperation", e);
+            }
             return new SyncNotedAppOp(AppOpsManager.MODE_ERRORED, code, attributionTag,
                     packageName);
         }
@@ -4146,7 +4162,11 @@ public class AppOpsService extends IAppOpsService.Stub {
                 attributionTag = null;
             }
         } catch (SecurityException e) {
-            Slog.e(TAG, "Cannot finishOperation", e);
+            if (Process.isIsolated(uid)) {
+                Slog.e(TAG, "Cannot finishOperation: isolated process");
+            } else {
+                Slog.e(TAG, "Cannot finishOperation", e);
+            }
             return;
         }
 
