@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.app.trust.TrustManager;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.hardware.biometrics.fingerprint.PointerContext;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintManager.AuthenticationCallback;
 import android.hardware.fingerprint.FingerprintManager.AuthenticationResult;
@@ -441,8 +442,7 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
     }
 
     @Override
-    public void onPointerDown(long requestId, int sensorId, int x, int y, float minor,
-            float major) {
+    public void onPointerDown(long requestId, int sensorId, PointerContext pc) {
         mHandler.post(() -> {
             Slog.d(TAG, "onFingerDown");
             final AuthenticationConsumer lastAuthenticatedConsumer =
@@ -489,7 +489,7 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
     }
 
     @Override
-    public void onPointerUp(long requestId, int sensorId) {
+    public void onPointerUp(long requestId, int sensorId, PointerContext pc) {
         mHandler.post(() -> {
             Slog.d(TAG, "onFingerUp");
 
