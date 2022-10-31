@@ -48,7 +48,8 @@ import com.android.systemui.plugins.BcSmartspaceDataPlugin.SmartspaceView
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.settings.UserTracker
-import com.android.systemui.shared.regionsampling.RegionSamplingInstance
+import com.android.systemui.shared.regionsampling.RegionSampler
+import com.android.systemui.shared.regionsampling.UpdateColorCallback
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
@@ -90,8 +91,8 @@ class LockscreenSmartspaceController @Inject constructor(
 
     // Smartspace can be used on multiple displays, such as when the user casts their screen
     private var smartspaceViews = mutableSetOf<SmartspaceView>()
-    private var regionSamplingInstances =
-            mutableMapOf<SmartspaceView, RegionSamplingInstance>()
+    private var regionSamplers =
+            mutableMapOf<SmartspaceView, RegionSampler>()
 
     private val regionSamplingEnabled =
             featureFlags.isEnabled(Flags.REGION_SAMPLING)
@@ -101,26 +102,22 @@ class LockscreenSmartspaceController @Inject constructor(
     private var showSensitiveContentForManagedUser = false
     private var managedUserHandle: UserHandle? = null
 
-    private val updateFun = object : RegionSamplingInstance.UpdateColorCallback {
-        override fun updateColors() {
-            updateTextColorFromRegionSampler()
-        }
-    }
+    private val updateFun: UpdateColorCallback = { updateTextColorFromRegionSampler() }
 
     var stateChangeListener = object : View.OnAttachStateChangeListener {
         override fun onViewAttachedToWindow(v: View) {
             smartspaceViews.add(v as SmartspaceView)
 
-            var regionSamplingInstance = RegionSamplingInstance(
+            var regionSampler = RegionSampler(
                     v,
                     uiExecutor,
                     bgExecutor,
                     regionSamplingEnabled,
                     updateFun
             )
-            initializeTextColors(regionSamplingInstance)
-            regionSamplingInstance.startRegionSampler()
-            regionSamplingInstances.put(v, regionSamplingInstance)
+            initializeTextColors(regionSampler)
+            regionSampler.startRegionSampler()
+            regionSamplers.put(v, regionSampler)
             connectSession()
 
             updateTextColorFromWallpaper()
@@ -130,9 +127,9 @@ class LockscreenSmartspaceController @Inject constructor(
         override fun onViewDetachedFromWindow(v: View) {
             smartspaceViews.remove(v as SmartspaceView)
 
-            var regionSamplingInstance = regionSamplingInstances.getValue(v)
-            regionSamplingInstance.stopRegionSampler()
-            regionSamplingInstances.remove(v)
+            var regionSampler = regionSamplers.getValue(v)
+            regionSampler.stopRegionSampler()
+            regionSamplers.remove(v)
 
             if (smartspaceViews.isEmpty()) {
                 disconnect()
@@ -362,19 +359,19 @@ class LockscreenSmartspaceController @Inject constructor(
         }
     }
 
-    private fun initializeTextColors(regionSamplingInstance: RegionSamplingInstance) {
+    private fun initializeTextColors(regionSampler: RegionSampler) {
         val lightThemeContext = ContextThemeWrapper(context, R.style.Theme_SystemUI_LightWallpaper)
         val darkColor = Utils.getColorAttrDefaultColor(lightThemeContext, R.attr.wallpaperTextColor)
 
         val darkThemeContext = ContextThemeWrapper(context, R.style.Theme_SystemUI)
         val lightColor = Utils.getColorAttrDefaultColor(darkThemeContext, R.attr.wallpaperTextColor)
 
-        regionSamplingInstance.setForegroundColors(lightColor, darkColor)
+        regionSampler.setForegroundColors(lightColor, darkColor)
     }
 
     private fun updateTextColorFromRegionSampler() {
         smartspaceViews.forEach {
-            val textColor = regionSamplingInstances.getValue(it).currentForegroundColor()
+            val textColor = regionSamplers.getValue(it).currentForegroundColor()
             it.setPrimaryTextColor(textColor)
         }
     }

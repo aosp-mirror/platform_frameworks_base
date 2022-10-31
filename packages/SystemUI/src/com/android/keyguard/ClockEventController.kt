@@ -38,21 +38,21 @@ import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.log.dagger.KeyguardClockLog
 import com.android.systemui.plugins.ClockController
 import com.android.systemui.plugins.log.LogBuffer
-import com.android.systemui.shared.regionsampling.RegionSamplingInstance
+import com.android.systemui.shared.regionsampling.RegionSampler
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback
 import com.android.systemui.statusbar.policy.ConfigurationController
-import java.io.PrintWriter
-import java.util.Locale
-import java.util.TimeZone
-import java.util.concurrent.Executor
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
+import java.io.PrintWriter
+import java.util.Locale
+import java.util.TimeZone
+import java.util.concurrent.Executor
+import javax.inject.Inject
 
 /**
  * Controller for a Clock provided by the registry and used on the keyguard. Instantiated by
@@ -142,21 +142,17 @@ open class ClockEventController @Inject constructor(
             bgExecutor: Executor?,
             regionSamplingEnabled: Boolean,
             updateColors: () -> Unit
-    ): RegionSamplingInstance {
-        return RegionSamplingInstance(
+    ): RegionSampler {
+        return RegionSampler(
             sampledView,
             mainExecutor,
             bgExecutor,
             regionSamplingEnabled,
-            object : RegionSamplingInstance.UpdateColorCallback {
-                override fun updateColors() {
-                    updateColors()
-                }
-            })
+            updateFun = { updateColors() } )
     }
 
-    var smallRegionSampler: RegionSamplingInstance? = null
-    var largeRegionSampler: RegionSamplingInstance? = null
+    var smallRegionSampler: RegionSampler? = null
+    var largeRegionSampler: RegionSampler? = null
 
     private var smallClockIsDark = true
     private var largeClockIsDark = true
