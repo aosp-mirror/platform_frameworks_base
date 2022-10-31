@@ -29,6 +29,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.ActivityManager;
 import android.content.res.Resources;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.Handler;
@@ -44,6 +45,7 @@ import com.android.systemui.doze.AlwaysOnDisplayPolicy;
 import com.android.systemui.doze.DozeScreenState;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -82,6 +84,7 @@ public class DozeParametersTest extends SysuiTestCase {
     @Mock private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock private StatusBarStateController mStatusBarStateController;
     @Mock private ConfigurationController mConfigurationController;
+    @Mock private UserTracker mUserTracker;
     @Captor private ArgumentCaptor<BatteryStateChangeCallback> mBatteryStateChangeCallback;
 
     /**
@@ -107,6 +110,7 @@ public class DozeParametersTest extends SysuiTestCase {
 
         when(mSysUIUnfoldComponent.getFoldAodAnimationController())
                 .thenReturn(mFoldAodAnimationController);
+        when(mUserTracker.getUserId()).thenReturn(ActivityManager.getCurrentUser());
 
         mDozeParameters = new DozeParameters(
             mContext,
@@ -123,7 +127,8 @@ public class DozeParametersTest extends SysuiTestCase {
             mUnlockedScreenOffAnimationController,
             mKeyguardUpdateMonitor,
             mConfigurationController,
-            mStatusBarStateController
+            mStatusBarStateController,
+            mUserTracker
         );
 
         verify(mBatteryController).addCallback(mBatteryStateChangeCallback.capture());

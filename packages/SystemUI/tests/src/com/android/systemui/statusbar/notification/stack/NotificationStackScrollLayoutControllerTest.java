@@ -78,6 +78,7 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.tuner.TunerService;
+import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -135,6 +136,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     @Mock private ShadeTransitionController mShadeTransitionController;
     @Mock private FeatureFlags mFeatureFlags;
     @Mock private NotificationTargetsHelper mNotificationTargetsHelper;
+    @Mock private SecureSettings mSecureSettings;
 
     @Captor
     private ArgumentCaptor<StatusBarStateController.StateListener> mStateListenerArgumentCaptor;
@@ -187,7 +189,8 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
                 mLogger,
                 mNotificationStackSizeCalculator,
                 mFeatureFlags,
-                mNotificationTargetsHelper
+                mNotificationTargetsHelper,
+                mSecureSettings
         );
 
         when(mNotificationStackScrollLayout.isAttachedToWindow()).thenReturn(true);
