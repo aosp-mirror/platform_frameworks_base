@@ -104,8 +104,8 @@ public final class MediaRouter2 {
     private final String mPackageName;
 
     /**
-     * Stores the latest copy of all routes received from {@link MediaRouter2ServiceImpl}, without
-     * any filtering, sorting, or deduplication.
+     * Stores the latest copy of all routes received from the system server, without any filtering,
+     * sorting, or deduplication.
      *
      * <p>Uses {@link MediaRoute2Info#getId()} to set each entry's key.
      */
