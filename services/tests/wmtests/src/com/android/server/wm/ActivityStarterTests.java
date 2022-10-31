@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.app.Activity.RESULT_CANCELED;
+import static android.app.ActivityManager.PROCESS_STATE_BOUND_TOP;
 import static android.app.ActivityManager.PROCESS_STATE_TOP;
 import static android.app.ActivityManager.START_ABORTED;
 import static android.app.ActivityManager.START_CANCELED;
@@ -608,10 +609,9 @@ public class ActivityStarterTests extends WindowTestsBase {
     @Test
     public void testBackgroundActivityStartsAllowed_noStartsAborted() {
         doReturn(true).when(mAtm).isBackgroundActivityStartsEnabled();
-
         runAndVerifyBackgroundActivityStartsSubtest("allowed_noStartsAborted", false,
-                UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1,
-                UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
+                UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
+                UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
                 false, false, false, false, false);
     }
 
@@ -620,97 +620,220 @@ public class ActivityStarterTests extends WindowTestsBase {
      * disallowed.
      */
     @Test
-    public void testBackgroundActivityStartsDisallowed_unsupportedStartsAborted() {
+    public void testBackgroundActivityStartsDisallowed_unsupportedUsecaseAborted() {
         doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
-
         runAndVerifyBackgroundActivityStartsSubtest(
                 "disallowed_unsupportedUsecase_aborted", true,
-                UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1,
-                UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
+                UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
+                UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
                 false, false, false, false, false);
+    }
+
+    /**
+     * This test ensures that unsupported usecases are aborted when background starts are
+     * disallowed.
+     */
+    @Test
+    public void testBackgroundActivityStartsDisallowed_callingUidProcessStateTopAborted() {
+        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
         runAndVerifyBackgroundActivityStartsSubtest(
                 "disallowed_callingUidProcessStateTop_aborted", true,
                 UNIMPORTANT_UID, false, PROCESS_STATE_TOP,
-                UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
+                UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
                 false, false, false, false, false);
+    }
+
+    /**
+     * This test ensures that unsupported usecases are aborted when background starts are
+     * disallowed.
+     */
+    @Test
+    public void testBackgroundActivityStartsDisallowed_realCallingUidProcessStateTopAborted() {
+        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
         runAndVerifyBackgroundActivityStartsSubtest(
                 "disallowed_realCallingUidProcessStateTop_aborted", true,
-                UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1,
+                UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
                 UNIMPORTANT_UID2, false, PROCESS_STATE_TOP,
                 false, false, false, false, false);
+    }
+
+    /**
+     * This test ensures that unsupported usecases are aborted when background starts are
+     * disallowed.
+     */
+    @Test
+    public void testBackgroundActivityStartsDisallowed_hasForegroundActivitiesAborted() {
+        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
         runAndVerifyBackgroundActivityStartsSubtest(
                 "disallowed_hasForegroundActivities_aborted", true,
-                UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1,
-                UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
+                UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
+                UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
                 true, false, false, false, false);
+    }
+
+    /**
+     * This test ensures that unsupported usecases are aborted when background starts are
+     * disallowed.
+     */
+    @Test
+    public void testBackgroundActivityStartsDisallowed_pinnedSingleInstanceAborted() {
+        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
         runAndVerifyBackgroundActivityStartsSubtest(
                 "disallowed_pinned_singleinstance_aborted", true,
-                UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1,
-                UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
+                UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
+                UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
                 false, false, false, false, false, true);
-
     }
 
     /**
      * This test ensures that supported usecases aren't aborted when background starts are
-     * disallowed.
-     * The scenarios each have only one condition that makes them supported.
+     * disallowed. Each scenarios tests one condition that makes them supported in isolation. In
+     * this case the calling process runs as ROOT_UID.
      */
     @Test
-    public void testBackgroundActivityStartsDisallowed_supportedStartsNotAborted() {
+    public void testBackgroundActivityStartsDisallowed_rootUidNotAborted() {
         doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
-
         runAndVerifyBackgroundActivityStartsSubtest("disallowed_rootUid_notAborted", false,
-                Process.ROOT_UID, false, PROCESS_STATE_TOP + 1,
-                UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
+                Process.ROOT_UID, false, PROCESS_STATE_BOUND_TOP,
+                UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
                 false, false, false, false, false);
+    }
+
+    /**
+     * This test ensures that supported usecases aren't aborted when background starts are
+     * disallowed. Each scenarios tests one condition that makes them supported in isolation. In
+     * this case the calling process is running as SYSTEM_UID.
+     */
+    @Test
+    public void testBackgroundActivityStartsDisallowed_systemUidNotAborted() {
+        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
         runAndVerifyBackgroundActivityStartsSubtest("disallowed_systemUid_notAborted", false,
-                Process.SYSTEM_UID, false, PROCESS_STATE_TOP + 1,
-                UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
+                Process.SYSTEM_UID, false, PROCESS_STATE_BOUND_TOP,
+                UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
                 false, false, false, false, false);
+    }
+
+    /**
+     * This test ensures that supported usecases aren't aborted when background starts are
+     * disallowed. Each scenarios tests one condition that makes them supported in isolation. In
+     * this case the calling process is running as NFC_UID.
+     */
+    @Test
+    public void testBackgroundActivityStartsDisallowed_nfcUidNotAborted() {
+        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
         runAndVerifyBackgroundActivityStartsSubtest("disallowed_nfcUid_notAborted", false,
-                Process.NFC_UID, false, PROCESS_STATE_TOP + 1,
-                UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
+                Process.NFC_UID, false, PROCESS_STATE_BOUND_TOP,
+                UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
                 false, false, false, false, false);
+    }
+
+    /**
+     * This test ensures that supported usecases aren't aborted when background starts are
+     * disallowed. Each scenarios tests one condition that makes them supported in isolation. In
+     * this case the calling process has a visible window.
+     */
+    @Test
+    public void testBackgroundActivityStartsDisallowed_callingUidHasVisibleWindowNotAborted() {
+        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
         runAndVerifyBackgroundActivityStartsSubtest(
                 "disallowed_callingUidHasVisibleWindow_notAborted", false,
-                UNIMPORTANT_UID, true, PROCESS_STATE_TOP + 1,
-                UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
+                UNIMPORTANT_UID, true, PROCESS_STATE_BOUND_TOP,
+                UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
                 false, false, false, false, false);
+    }
+
+    /**
+     * This test ensures that supported usecases aren't aborted when background starts are
+     * disallowed. Each scenarios tests one condition that makes them supported in isolation. In
+     * this case the real calling process (pending intent) has a visible window.
+     */
+    @Test
+    public void
+            testBackgroundActivityStartsDisallowed_realCallingUidHasVisibleWindowNotAborted() {
+        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
         runAndVerifyBackgroundActivityStartsSubtest(
                 "disallowed_realCallingUidHasVisibleWindow_notAborted", false,
-                UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1,
-                UNIMPORTANT_UID2, true, PROCESS_STATE_TOP + 1,
-                false, false, false, false, false);
+                UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
+                UNIMPORTANT_UID2, true, PROCESS_STATE_BOUND_TOP,
+                false, false, false, false, false, false);
+    }
+
+    /**
+     * This test ensures that supported usecases aren't aborted when background starts are
+     * disallowed. Each scenarios tests one condition that makes them supported in isolation. In
+     * this case the caller is in the recent activity list.
+     */
+    @Test
+    public void testBackgroundActivityStartsDisallowed_callerIsRecentsNotAborted() {
+        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
         runAndVerifyBackgroundActivityStartsSubtest(
                 "disallowed_callerIsRecents_notAborted", false,
-                UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1,
-                UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
+                UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
+                UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
                 false, true, false, false, false);
+    }
+
+    /**
+     * This test ensures that supported usecases aren't aborted when background starts are
+     * disallowed. Each scenarios tests one condition that makes them supported in isolation. In
+     * this case the caller is temporarily (10s) allowed to start.
+     */
+    @Test
+    public void testBackgroundActivityStartsDisallowed_callerIsAllowedNotAborted() {
+        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
         runAndVerifyBackgroundActivityStartsSubtest(
                 "disallowed_callerIsAllowed_notAborted", false,
-                UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1,
-                UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
+                UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
+                UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
                 false, false, true, false, false);
+    }
+
+    /**
+     * This test ensures that supported usecases aren't aborted when background starts are
+     * disallowed. Each scenarios tests one condition that makes them supported in isolation. In
+     * this case the caller explicitly has background activity start privilege.
+     */
+    @Test
+    public void testBackgroundActivityStartsDisallowed_callerIsInstrumentingWithBASPnotAborted() {
+        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
         runAndVerifyBackgroundActivityStartsSubtest(
                 "disallowed_callerIsInstrumentingWithBackgroundActivityStartPrivileges_notAborted",
                 false,
-                UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1,
-                UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
+                UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
+                UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
                 false, false, false, true, false);
+    }
+
+    /**
+     * This test ensures that supported usecases aren't aborted when background starts are
+     * disallowed. Each scenarios tests one condition that makes them supported in isolation. In
+     * this case the caller is a device owner.
+     */
+    @Test
+    public void
+            testBackgroundActivityStartsDisallowed_callingPackageNameIsDeviceOwnerNotAborted() {
+        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
         runAndVerifyBackgroundActivityStartsSubtest(
                 "disallowed_callingPackageNameIsDeviceOwner_notAborted", false,
-                UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1,
-                UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
+                UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
+                UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
                 false, false, false, false, true);
+    }
 
+    /**
+     * This test ensures that supported usecases aren't aborted when background starts are
+     * disallowed. Each scenarios tests one condition that makes them supported in isolation. In
+     * this case the caller is an IME.
+     */
+    @Test
+    public void testBackgroundActivityStartsDisallowed_callingPackageNameIsImeNotAborted() {
+        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
         setupImeWindow();
         runAndVerifyBackgroundActivityStartsSubtest(
                 "disallowed_callingPackageNameIsIme_notAborted", false,
-                CURRENT_IME_UID, false, PROCESS_STATE_TOP + 1,
-                UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
+                CURRENT_IME_UID, false, PROCESS_STATE_BOUND_TOP,
+                UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
                 false, false, false, false, false);
-
     }
 
     private void runAndVerifyBackgroundActivityStartsSubtest(String name, boolean shouldHaveAborted,
