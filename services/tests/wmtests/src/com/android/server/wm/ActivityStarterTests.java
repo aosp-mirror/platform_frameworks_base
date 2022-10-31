@@ -81,6 +81,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.notNull;
 
 import android.app.ActivityOptions;
+import android.app.BackgroundStartPrivileges;
 import android.app.IApplicationThread;
 import android.app.PictureInPictureParams;
 import android.content.ComponentName;
@@ -886,7 +887,8 @@ public class ActivityStarterTests extends WindowTestsBase {
         doReturn(callerIsRecents).when(recentTasks).isCallerRecents(callingUid);
         // caller is temp allowed
         if (callerIsTempAllowed) {
-            callerApp.addOrUpdateAllowBackgroundActivityStartsToken(new Binder(), null);
+            callerApp.addOrUpdateBackgroundStartPrivileges(new Binder(),
+                    BackgroundStartPrivileges.ALLOW_BAL);
         }
         // caller is instrumenting with background activity starts privileges
         callerApp.setInstrumenting(callerIsInstrumentingWithBackgroundActivityStartPrivileges,

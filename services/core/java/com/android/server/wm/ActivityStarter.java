@@ -95,6 +95,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
+import android.app.BackgroundStartPrivileges;
 import android.app.IApplicationThread;
 import android.app.PendingIntent;
 import android.app.ProfilerInfo;
@@ -389,7 +390,8 @@ class ActivityStarter {
         WaitResult waitResult;
         int filterCallingUid;
         PendingIntentRecord originatingPendingIntent;
-        boolean allowBackgroundActivityStart;
+        BackgroundStartPrivileges backgroundStartPrivileges;
+
         /**
          * The error callback token passed in {@link android.window.WindowContainerTransaction}
          * for TaskFragment operation error handling via
@@ -449,7 +451,7 @@ class ActivityStarter {
             allowPendingRemoteAnimationRegistryLookup = true;
             filterCallingUid = UserHandle.USER_NULL;
             originatingPendingIntent = null;
-            allowBackgroundActivityStart = false;
+            backgroundStartPrivileges = BackgroundStartPrivileges.NONE;
             errorCallbackToken = null;
         }
 
@@ -492,7 +494,7 @@ class ActivityStarter {
                     = request.allowPendingRemoteAnimationRegistryLookup;
             filterCallingUid = request.filterCallingUid;
             originatingPendingIntent = request.originatingPendingIntent;
-            allowBackgroundActivityStart = request.allowBackgroundActivityStart;
+            backgroundStartPrivileges = request.backgroundStartPrivileges;
             errorCallbackToken = request.errorCallbackToken;
         }
 
@@ -1060,7 +1062,7 @@ class ActivityStarter {
                                 realCallingPid,
                                 callerApp,
                                 request.originatingPendingIntent,
-                                request.allowBackgroundActivityStart,
+                                request.backgroundStartPrivileges,
                                 intent,
                                 checkedOptions);
             } finally {
@@ -3182,8 +3184,9 @@ class ActivityStarter {
         return this;
     }
 
-    ActivityStarter setAllowBackgroundActivityStart(boolean allowBackgroundActivityStart) {
-        mRequest.allowBackgroundActivityStart = allowBackgroundActivityStart;
+    ActivityStarter setBackgroundStartPrivileges(
+            BackgroundStartPrivileges backgroundStartPrivileges) {
+        mRequest.backgroundStartPrivileges = backgroundStartPrivileges;
         return this;
     }
 

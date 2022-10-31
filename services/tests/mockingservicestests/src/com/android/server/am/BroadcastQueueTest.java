@@ -49,6 +49,7 @@ import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
+import android.app.BackgroundStartPrivileges;
 import android.app.BroadcastOptions;
 import android.app.IApplicationThread;
 import android.app.ReceiverInfo;
@@ -634,8 +635,8 @@ public class BroadcastQueueTest {
         return new BroadcastRecord(mQueue, intent, callerApp, callerApp.info.packageName, null,
                 callerApp.getPid(), callerApp.info.uid, false, null, null, null, null,
                 AppOpsManager.OP_NONE, options, receivers, callerApp, resultTo,
-                Activity.RESULT_OK, null, resultExtras, ordered, false, false, userId, false, null,
-                false, null);
+                Activity.RESULT_OK, null, resultExtras, ordered, false, false, userId,
+                BackgroundStartPrivileges.NONE, false, null);
     }
 
     private static Map<String, Object> asMap(Bundle bundle) {
@@ -1626,20 +1627,21 @@ public class BroadcastQueueTest {
         final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
         final ProcessRecord receiverApp = makeActiveProcessRecord(PACKAGE_GREEN);
 
-        final Binder backgroundActivityStartsToken = new Binder();
+        final BackgroundStartPrivileges backgroundStartPrivileges =
+                BackgroundStartPrivileges.allowBackgroundActivityStarts(new Binder());
         final Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         final BroadcastRecord r = new BroadcastRecord(mQueue, intent, callerApp,
                 callerApp.info.packageName, null, callerApp.getPid(), callerApp.info.uid, false,
                 null, null, null, null, AppOpsManager.OP_NONE, BroadcastOptions.makeBasic(),
                 List.of(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN)), null, null,
-                Activity.RESULT_OK, null, null, false, false, false, UserHandle.USER_SYSTEM, true,
-                backgroundActivityStartsToken, false, null);
+                Activity.RESULT_OK, null, null, false, false, false, UserHandle.USER_SYSTEM,
+                backgroundStartPrivileges, false, null);
         enqueueBroadcast(r);
 
         waitForIdle();
-        verify(receiverApp).addOrUpdateAllowBackgroundActivityStartsToken(eq(r),
-                eq(backgroundActivityStartsToken));
-        verify(receiverApp).removeAllowBackgroundActivityStartsToken(eq(r));
+        verify(receiverApp).addOrUpdateBackgroundStartPrivileges(eq(r),
+                eq(backgroundStartPrivileges));
+        verify(receiverApp).removeBackgroundStartPrivileges(eq(r));
     }
 
     @Test

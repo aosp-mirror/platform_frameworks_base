@@ -33,6 +33,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
+import android.app.BackgroundStartPrivileges;
 import android.app.IApplicationThread;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -277,7 +278,7 @@ public class ActivityStartController {
             String resolvedType, IBinder resultTo, String resultWho, int requestCode,
             int startFlags, SafeActivityOptions options, int userId, Task inTask, String reason,
             boolean validateIncomingUser, PendingIntentRecord originatingPendingIntent,
-            boolean allowBackgroundActivityStart) {
+            BackgroundStartPrivileges backgroundStartPrivileges) {
 
         userId = checkTargetUser(userId, validateIncomingUser, realCallingPid, realCallingUid,
                 reason);
@@ -298,7 +299,7 @@ public class ActivityStartController {
                 .setUserId(userId)
                 .setInTask(inTask)
                 .setOriginatingPendingIntent(originatingPendingIntent)
-                .setAllowBackgroundActivityStart(allowBackgroundActivityStart)
+                .setBackgroundStartPrivileges(backgroundStartPrivileges)
                 .execute();
     }
 
@@ -317,10 +318,11 @@ public class ActivityStartController {
     final int startActivitiesInPackage(int uid, String callingPackage,
             @Nullable String callingFeatureId, Intent[] intents, String[] resolvedTypes,
             IBinder resultTo, SafeActivityOptions options, int userId, boolean validateIncomingUser,
-            PendingIntentRecord originatingPendingIntent, boolean allowBackgroundActivityStart) {
+            PendingIntentRecord originatingPendingIntent,
+            BackgroundStartPrivileges backgroundStartPrivileges) {
         return startActivitiesInPackage(uid, 0 /* realCallingPid */, -1 /* realCallingUid */,
                 callingPackage, callingFeatureId, intents, resolvedTypes, resultTo, options, userId,
-                validateIncomingUser, originatingPendingIntent, allowBackgroundActivityStart);
+                validateIncomingUser, originatingPendingIntent, backgroundStartPrivileges);
     }
 
     /**
@@ -340,7 +342,7 @@ public class ActivityStartController {
             String callingPackage, @Nullable String callingFeatureId, Intent[] intents,
             String[] resolvedTypes, IBinder resultTo, SafeActivityOptions options, int userId,
             boolean validateIncomingUser, PendingIntentRecord originatingPendingIntent,
-            boolean allowBackgroundActivityStart) {
+            BackgroundStartPrivileges backgroundStartPrivileges) {
 
         final String reason = "startActivityInPackage";
 
@@ -350,14 +352,14 @@ public class ActivityStartController {
         // TODO: Switch to user app stacks here.
         return startActivities(null, uid, realCallingPid, realCallingUid, callingPackage,
                 callingFeatureId, intents, resolvedTypes, resultTo, options, userId, reason,
-                originatingPendingIntent, allowBackgroundActivityStart);
+                originatingPendingIntent, backgroundStartPrivileges);
     }
 
     int startActivities(IApplicationThread caller, int callingUid, int incomingRealCallingPid,
             int incomingRealCallingUid, String callingPackage, @Nullable String callingFeatureId,
             Intent[] intents, String[] resolvedTypes, IBinder resultTo, SafeActivityOptions options,
             int userId, String reason, PendingIntentRecord originatingPendingIntent,
-            boolean allowBackgroundActivityStart) {
+            BackgroundStartPrivileges backgroundStartPrivileges) {
         if (intents == null) {
             throw new NullPointerException("intents is null");
         }
@@ -465,7 +467,7 @@ public class ActivityStartController {
                         // top one as otherwise an activity below might consume it.
                         .setAllowPendingRemoteAnimationRegistryLookup(top /* allowLookup*/)
                         .setOriginatingPendingIntent(originatingPendingIntent)
-                        .setAllowBackgroundActivityStart(allowBackgroundActivityStart);
+                        .setBackgroundStartPrivileges(backgroundStartPrivileges);
             }
             // Log if the activities to be started have different uids.
             if (startingUidPkgs.size() > 1) {

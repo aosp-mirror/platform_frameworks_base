@@ -36,6 +36,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 
 import android.app.ActivityManagerInternal;
+import android.app.BackgroundStartPrivileges;
 import android.app.BroadcastOptions;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -695,8 +696,7 @@ public class BroadcastRecordTest {
                 false /* sticky */,
                 false /* initialSticky */,
                 userId,
-                false /* allowBackgroundActivityStarts */,
-                null /* activityStartsToken */,
+                BackgroundStartPrivileges.NONE,
                 false /* timeoutExempt */,
                 filterExtrasForReceiver);
     }
