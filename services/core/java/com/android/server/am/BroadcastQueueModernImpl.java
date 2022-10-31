@@ -412,20 +412,23 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             queue.runningTraceTrackName = TAG + ".mRunning[" + queueIndex + "]";
             queue.runningOomAdjusted = queue.isPendingManifest();
 
+            // If already warm, we can make OOM adjust request immediately;
+            // otherwise we need to wait until process becomes warm
+            if (processWarm) {
+                notifyStartedRunning(queue);
+                updateOomAdj |= queue.runningOomAdjusted;
+            }
+
             // If we're already warm, schedule next pending broadcast now;
             // otherwise we'll wait for the cold start to circle back around
             queue.makeActiveNextPending();
             if (processWarm) {
                 queue.traceProcessRunningBegin();
-                notifyStartedRunning(queue);
                 scheduleReceiverWarmLocked(queue);
             } else {
                 queue.traceProcessStartingBegin();
                 scheduleReceiverColdLocked(queue);
             }
-
-            // Only kick off an OOM adjustment pass if needed
-            updateOomAdj |= queue.runningOomAdjusted;
 
             // Move to considering next runnable queue
             queue = nextQueue;
@@ -464,9 +467,13 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             // now; dispatch its next broadcast and clear the slot
             mRunningColdStart = null;
 
+            // Now that we're running warm, we can finally request that OOM
+            // adjust we've been waiting for
+            notifyStartedRunning(queue);
+            mService.updateOomAdjPendingTargetsLocked(OOM_ADJ_REASON_START_RECEIVER);
+
             queue.traceProcessEnd();
             queue.traceProcessRunningBegin();
-            notifyStartedRunning(queue);
             scheduleReceiverWarmLocked(queue);
 
             // We might be willing to kick off another cold start
@@ -809,9 +816,9 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
      * ordered broadcast; assumes the sender is still a warm process.
      */
     private void scheduleResultTo(@NonNull BroadcastRecord r) {
-        if ((r.resultToApp == null) || (r.resultTo == null)) return;
+        if (r.resultTo == null) return;
         final ProcessRecord app = r.resultToApp;
-        final IApplicationThread thread = app.getOnewayThread();
+        final IApplicationThread thread = (app != null) ? app.getOnewayThread() : null;
         if (thread != null) {
             mService.mOomAdjuster.mCachedAppOptimizer.unfreezeTemporarily(
                     app, OOM_ADJ_REASON_FINISH_RECEIVER);

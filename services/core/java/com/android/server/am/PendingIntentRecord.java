@@ -490,6 +490,11 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
 
             final IApplicationThread finishedReceiverThread = caller;
             boolean sendFinish = finishedReceiver != null;
+            if ((finishedReceiver != null) && (finishedReceiverThread == null)) {
+                Slog.w(TAG, "Sending of " + intent + " from " + Binder.getCallingUid()
+                        + " requested resultTo without an IApplicationThread!", new Throwable());
+            }
+
             int userId = key.userId;
             if (userId == UserHandle.USER_CURRENT) {
                 userId = controller.mUserController.getCurrentOrTargetUserId();
