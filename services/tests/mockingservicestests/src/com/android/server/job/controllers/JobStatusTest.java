@@ -248,20 +248,32 @@ public class JobStatusTest {
 
         // Less than 2 failures, priority shouldn't be affected.
         assertEquals(JobInfo.PRIORITY_MAX, job.getEffectivePriority());
-        int backoffAttempt = 1;
-        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, backoffAttempt, 0, 0);
+        int numFailures = 1;
+        int numSystemStops = 0;
+        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, numFailures,
+                numSystemStops, 0, 0);
         assertEquals(JobInfo.PRIORITY_MAX, job.getEffectivePriority());
 
         // 2+ failures, priority should be lowered as much as possible.
-        backoffAttempt = 2;
-        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, backoffAttempt, 0, 0);
+        numFailures = 2;
+        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, numFailures,
+                numSystemStops, 0, 0);
         assertEquals(JobInfo.PRIORITY_HIGH, job.getEffectivePriority());
-        backoffAttempt = 5;
-        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, backoffAttempt, 0, 0);
+        numFailures = 5;
+        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, numFailures,
+                numSystemStops, 0, 0);
         assertEquals(JobInfo.PRIORITY_HIGH, job.getEffectivePriority());
-        backoffAttempt = 8;
-        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, backoffAttempt, 0, 0);
+        numFailures = 8;
+        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, numFailures,
+                numSystemStops, 0, 0);
         assertEquals(JobInfo.PRIORITY_HIGH, job.getEffectivePriority());
+
+        // System stops shouldn't factor in the downgrade.
+        numSystemStops = 10;
+        numFailures = 0;
+        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, numFailures,
+                numSystemStops, 0, 0);
+        assertEquals(JobInfo.PRIORITY_MAX, job.getEffectivePriority());
     }
 
     @Test
@@ -274,33 +286,48 @@ public class JobStatusTest {
 
         // Less than 2 failures, priority shouldn't be affected.
         assertEquals(JobInfo.PRIORITY_HIGH, job.getEffectivePriority());
-        int backoffAttempt = 1;
-        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, backoffAttempt, 0, 0);
+        int numFailures = 1;
+        int numSystemStops = 0;
+        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, numFailures,
+                numSystemStops, 0, 0);
         assertEquals(JobInfo.PRIORITY_HIGH, job.getEffectivePriority());
 
         // Failures in [2,4), priority should be lowered slightly.
-        backoffAttempt = 2;
-        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, backoffAttempt, 0, 0);
+        numFailures = 2;
+        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, numFailures,
+                numSystemStops, 0, 0);
         assertEquals(JobInfo.PRIORITY_DEFAULT, job.getEffectivePriority());
-        backoffAttempt = 3;
-        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, backoffAttempt, 0, 0);
+        numFailures = 3;
+        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, numFailures,
+                numSystemStops, 0, 0);
         assertEquals(JobInfo.PRIORITY_DEFAULT, job.getEffectivePriority());
 
         // Failures in [4,6), priority should be lowered more.
-        backoffAttempt = 4;
-        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, backoffAttempt, 0, 0);
+        numFailures = 4;
+        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, numFailures,
+                numSystemStops, 0, 0);
         assertEquals(JobInfo.PRIORITY_LOW, job.getEffectivePriority());
-        backoffAttempt = 5;
-        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, backoffAttempt, 0, 0);
+        numFailures = 5;
+        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, numFailures,
+                numSystemStops, 0, 0);
         assertEquals(JobInfo.PRIORITY_LOW, job.getEffectivePriority());
 
         // 6+ failures, priority should be lowered as much as possible.
-        backoffAttempt = 6;
-        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, backoffAttempt, 0, 0);
+        numFailures = 6;
+        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, numFailures,
+                numSystemStops, 0, 0);
         assertEquals(JobInfo.PRIORITY_MIN, job.getEffectivePriority());
-        backoffAttempt = 12;
-        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, backoffAttempt, 0, 0);
+        numFailures = 12;
+        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, numFailures,
+                numSystemStops, 0, 0);
         assertEquals(JobInfo.PRIORITY_MIN, job.getEffectivePriority());
+
+        // System stops shouldn't factor in the downgrade.
+        numSystemStops = 10;
+        numFailures = 0;
+        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, numFailures,
+                numSystemStops, 0, 0);
+        assertEquals(JobInfo.PRIORITY_HIGH, job.getEffectivePriority());
     }
 
     /**
@@ -317,23 +344,36 @@ public class JobStatusTest {
 
         // Less than 6 failures, priority shouldn't be affected.
         assertEquals(JobInfo.PRIORITY_LOW, job.getEffectivePriority());
-        int backoffAttempt = 1;
-        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, backoffAttempt, 0, 0);
+        int numFailures = 1;
+        int numSystemStops = 0;
+        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, numFailures,
+                numSystemStops, 0, 0);
         assertEquals(JobInfo.PRIORITY_LOW, job.getEffectivePriority());
-        backoffAttempt = 4;
-        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, backoffAttempt, 0, 0);
+        numFailures = 4;
+        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, numFailures,
+                numSystemStops, 0, 0);
         assertEquals(JobInfo.PRIORITY_LOW, job.getEffectivePriority());
-        backoffAttempt = 5;
-        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, backoffAttempt, 0, 0);
+        numFailures = 5;
+        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, numFailures,
+                numSystemStops, 0, 0);
         assertEquals(JobInfo.PRIORITY_LOW, job.getEffectivePriority());
 
         // 6+ failures, priority should be lowered as much as possible.
-        backoffAttempt = 6;
-        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, backoffAttempt, 0, 0);
+        numFailures = 6;
+        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, numFailures,
+                numSystemStops, 0, 0);
         assertEquals(JobInfo.PRIORITY_MIN, job.getEffectivePriority());
-        backoffAttempt = 12;
-        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, backoffAttempt, 0, 0);
+        numFailures = 12;
+        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, numFailures,
+                numSystemStops, 0, 0);
         assertEquals(JobInfo.PRIORITY_MIN, job.getEffectivePriority());
+
+        // System stops shouldn't factor in the downgrade.
+        numSystemStops = 10;
+        numFailures = 0;
+        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, numFailures,
+                numSystemStops, 0, 0);
+        assertEquals(JobInfo.PRIORITY_LOW, job.getEffectivePriority());
     }
 
     /**

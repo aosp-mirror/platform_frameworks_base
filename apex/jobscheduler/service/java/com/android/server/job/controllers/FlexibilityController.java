@@ -342,10 +342,10 @@ public final class FlexibilityController extends StateController {
             // There is no deadline and no estimated launch time.
             return NO_LIFECYCLE_END;
         }
-        if (js.getNumFailures() > 1) {
-            // Number of failures will not equal one as per restriction in JobStatus constructor.
+        // Increase the flex deadline for jobs rescheduled more than once.
+        if (js.getNumPreviousAttempts() > 1) {
             return earliest + Math.min(
-                    (long) Math.scalb(mRescheduledJobDeadline, js.getNumFailures() - 2),
+                    (long) Math.scalb(mRescheduledJobDeadline, js.getNumPreviousAttempts() - 2),
                     mMaxRescheduledDeadline);
         }
         return js.getLatestRunTimeElapsed() == JobStatus.NO_LATEST_RUNTIME

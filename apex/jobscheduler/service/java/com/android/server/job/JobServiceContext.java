@@ -363,7 +363,7 @@ public final class JobServiceContext implements ServiceConnection {
                     job.getJob().isPrefetch(),
                     job.getJob().getPriority(),
                     job.getEffectivePriority(),
-                    job.getNumFailures());
+                    job.getNumPreviousAttempts());
             if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
                 // Use the context's ID to distinguish traces since there'll only be one job
                 // running per context.
@@ -1032,7 +1032,7 @@ public final class JobServiceContext implements ServiceConnection {
                 completedJob.getJob().isPrefetch(),
                 completedJob.getJob().getPriority(),
                 completedJob.getEffectivePriority(),
-                completedJob.getNumFailures());
+                completedJob.getNumPreviousAttempts());
         if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
             Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_SYSTEM_SERVER, "JobScheduler",
                     completedJob.getTag(), getId());
