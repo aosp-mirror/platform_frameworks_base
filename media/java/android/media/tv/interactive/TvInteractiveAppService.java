@@ -942,6 +942,33 @@ public abstract class TvInteractiveAppService extends Service {
         }
 
         /**
+         * Requests starting of recording
+         *
+         * <p> This is used to request the active {@link android.media.tv.TvRecordingClient} to
+         * call {@link android.media.tv.TvRecordingClient#stopRecording()}.
+         * @see android.media.tv.TvRecordingClient#stopRecording()
+         *
+         * @hide
+         */
+        @CallSuper
+        public void requestStopRecording(@NonNull String recordingId) {
+            executeOrPostRunnableOnMainThread(() -> {
+                try {
+                    if (DEBUG) {
+                        Log.d(TAG, "requestStopRecording");
+                    }
+                    if (mSessionCallback != null) {
+                        mSessionCallback.onRequestStopRecording(recordingId);
+                    }
+                } catch (RemoteException e) {
+                    Log.w(TAG, "error in requestStopRecording", e);
+                }
+            });
+        }
+
+
+
+        /**
          * Requests signing of the given data.
          *
          * <p>This is used when the corresponding server of the broadcast-independent interactive
