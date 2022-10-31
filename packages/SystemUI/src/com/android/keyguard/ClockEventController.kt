@@ -69,14 +69,17 @@ open class ClockEventController @Inject constructor(
     private val context: Context,
     @Main private val mainExecutor: Executor,
     @Background private val bgExecutor: Executor,
-    @KeyguardClockLog private val logBuffer: LogBuffer,
+    @KeyguardClockLog private val logBuffer: LogBuffer?,
     private val featureFlags: FeatureFlags
 ) {
     var clock: ClockController? = null
         set(value) {
             field = value
             if (value != null) {
-                value.setLogBuffer(logBuffer)
+                if (logBuffer != null) {
+                    value.setLogBuffer(logBuffer)
+                }
+
                 value.initialize(resources, dozeAmount, 0f)
                 updateRegionSamplers(value)
             }
