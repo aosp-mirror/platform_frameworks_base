@@ -92,7 +92,6 @@ public class HdmiControlServiceTest {
 
         HdmiCecConfig hdmiCecConfig = new FakeHdmiCecConfig(mContextSpy);
         mLocalDeviceTypes.add(HdmiDeviceInfo.DEVICE_PLAYBACK);
-        mLocalDeviceTypes.add(DEVICE_AUDIO_SYSTEM);
 
         mHdmiControlServiceSpy = spy(new HdmiControlService(mContextSpy, mLocalDeviceTypes,
                 new FakeAudioDeviceVolumeManagerWrapper()));
@@ -480,6 +479,7 @@ public class HdmiControlServiceTest {
                 HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION,
                 HdmiControlManager.HDMI_CEC_VERSION_2_0);
         mHdmiControlServiceSpy.setControlEnabled(HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
+        mHdmiControlServiceSpy.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mTestLooper.dispatchAll();
 
         mNativeWrapper.onCecMessage(HdmiCecMessageBuilder.buildGiveFeatures(Constants.ADDR_TV,
@@ -501,6 +501,7 @@ public class HdmiControlServiceTest {
                 HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION,
                 HdmiControlManager.HDMI_CEC_VERSION_1_4_B);
         mHdmiControlServiceSpy.setControlEnabled(HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
+        mHdmiControlServiceSpy.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mTestLooper.dispatchAll();
 
         HdmiCecMessage reportFeatures = ReportFeaturesMessage.build(
@@ -517,6 +518,7 @@ public class HdmiControlServiceTest {
                 HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION,
                 HdmiControlManager.HDMI_CEC_VERSION_2_0);
         mHdmiControlServiceSpy.setControlEnabled(HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
+        mHdmiControlServiceSpy.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mTestLooper.dispatchAll();
 
         HdmiCecMessage reportFeatures = ReportFeaturesMessage.build(
