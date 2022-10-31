@@ -39,8 +39,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import com.android.credentialmanager.R
-import com.android.credentialmanager.jetpack.CredentialEntryUi.Companion.TYPE_PASSWORD_CREDENTIAL
-import com.android.credentialmanager.jetpack.CredentialEntryUi.Companion.TYPE_PUBLIC_KEY_CREDENTIAL
+import com.android.credentialmanager.jetpack.provider.CredentialEntryUi.Companion.TYPE_PASSWORD_CREDENTIAL
+import com.android.credentialmanager.jetpack.provider.CredentialEntryUi.Companion.TYPE_PUBLIC_KEY_CREDENTIAL
 import com.android.credentialmanager.ui.theme.Grey100
 import com.android.credentialmanager.ui.theme.Shapes
 import com.android.credentialmanager.ui.theme.Typography
