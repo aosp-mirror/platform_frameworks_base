@@ -339,10 +339,6 @@ package android.os {
     method public boolean shouldBypassCache(@NonNull Q);
   }
 
-  public interface Parcelable {
-    method public default int getStability();
-  }
-
   public class Process {
     method public static final int getAppUidForSdkSandboxUid(int);
     method public static final boolean isSdkSandboxUid(int);
