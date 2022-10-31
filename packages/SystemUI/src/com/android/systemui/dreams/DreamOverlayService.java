@@ -90,13 +90,15 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
             new KeyguardUpdateMonitorCallback() {
                 @Override
                 public void onShadeExpandedChanged(boolean expanded) {
-                    if (mLifecycleRegistry.getCurrentState() != Lifecycle.State.RESUMED
-                            && mLifecycleRegistry.getCurrentState() != Lifecycle.State.STARTED) {
-                        return;
-                    }
+                    mExecutor.execute(() -> {
+                        if (getCurrentStateLocked() != Lifecycle.State.RESUMED
+                                && getCurrentStateLocked() != Lifecycle.State.STARTED) {
+                            return;
+                        }
 
-                    mLifecycleRegistry.setCurrentState(
-                            expanded ? Lifecycle.State.STARTED : Lifecycle.State.RESUMED);
+                        setCurrentStateLocked(
+                                expanded ? Lifecycle.State.STARTED : Lifecycle.State.RESUMED);
+                    });
                 }
             };
 
@@ -146,29 +148,30 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
                 () -> mExecutor.execute(DreamOverlayService.this::requestExit);
         mDreamOverlayComponent = dreamOverlayComponentFactory.create(viewModelStore, host);
         mLifecycleRegistry = mDreamOverlayComponent.getLifecycleRegistry();
-        setCurrentState(Lifecycle.State.CREATED);
-    }
 
-    private void setCurrentState(Lifecycle.State state) {
-        mExecutor.execute(() -> mLifecycleRegistry.setCurrentState(state));
+        mExecutor.execute(() -> setCurrentStateLocked(Lifecycle.State.CREATED));
     }
 
     @Override
     public void onDestroy() {
         mKeyguardUpdateMonitor.removeCallback(mKeyguardCallback);
-        setCurrentState(Lifecycle.State.DESTROYED);
 
-        resetCurrentDreamOverlay();
+        mExecutor.execute(() -> {
+            setCurrentStateLocked(Lifecycle.State.DESTROYED);
 
-        mDestroyed = true;
+            resetCurrentDreamOverlayLocked();
+
+            mDestroyed = true;
+        });
+
         super.onDestroy();
     }
 
     @Override
     public void onStartDream(@NonNull WindowManager.LayoutParams layoutParams) {
-        setCurrentState(Lifecycle.State.STARTED);
-
         mExecutor.execute(() -> {
+            setCurrentStateLocked(Lifecycle.State.STARTED);
+
             mUiEventLogger.log(DreamOverlayEvent.DREAM_OVERLAY_ENTER_START);
 
             if (mDestroyed) {
@@ -181,7 +184,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
                 // Reset the current dream overlay before starting a new one. This can happen
                 // when two dreams overlap (briefly, for a smoother dream transition) and both
                 // dreams are bound to the dream overlay service.
-                resetCurrentDreamOverlay();
+                resetCurrentDreamOverlayLocked();
             }
 
             mDreamOverlayContainerViewController =
@@ -191,7 +194,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
 
             mStateController.setShouldShowComplications(shouldShowComplications());
             addOverlayWindowLocked(layoutParams);
-            setCurrentState(Lifecycle.State.RESUMED);
+            setCurrentStateLocked(Lifecycle.State.RESUMED);
             mStateController.setOverlayActive(true);
             final ComponentName dreamComponent = getDreamComponent();
             mStateController.setLowLightActive(
@@ -200,6 +203,14 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
 
             mStarted = true;
         });
+    }
+
+    private Lifecycle.State getCurrentStateLocked() {
+        return mLifecycleRegistry.getCurrentState();
+    }
+
+    private void setCurrentStateLocked(Lifecycle.State state) {
+        mLifecycleRegistry.setCurrentState(state);
     }
 
     /**
@@ -231,13 +242,13 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         // Make extra sure the container view has been removed from its old parent (otherwise we
         // risk an IllegalStateException in some cases when setting the container view as the
         // window's content view and the container view hasn't been properly removed previously).
-        removeContainerViewFromParent();
+        removeContainerViewFromParentLocked();
         mWindow.setContentView(mDreamOverlayContainerViewController.getContainerView());
 
         mWindowManager.addView(mWindow.getDecorView(), mWindow.getAttributes());
     }
 
-    private void removeContainerViewFromParent() {
+    private void removeContainerViewFromParentLocked() {
         View containerView = mDreamOverlayContainerViewController.getContainerView();
         if (containerView == null) {
             return;
@@ -250,7 +261,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         parentView.removeView(containerView);
     }
 
-    private void resetCurrentDreamOverlay() {
+    private void resetCurrentDreamOverlayLocked() {
         if (mStarted && mWindow != null) {
             mWindowManager.removeView(mWindow.getDecorView());
         }

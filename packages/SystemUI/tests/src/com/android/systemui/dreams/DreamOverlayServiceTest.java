@@ -273,24 +273,28 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
 
     @Test
     public void testDecorViewNotAddedToWindowAfterDestroy() throws Exception {
-        when(mDreamOverlayContainerView.getParent())
-                .thenReturn(mDreamOverlayContainerViewParent)
-                .thenReturn(null);
-
         final IBinder proxy = mService.onBind(new Intent());
         final IDreamOverlay overlay = IDreamOverlay.Stub.asInterface(proxy);
+
+        // Destroy the service.
+        mService.onDestroy();
+        mMainExecutor.runAllReady();
 
         // Inform the overlay service of dream starting.
         overlay.startDream(mWindowParams, mDreamOverlayCallback, DREAM_COMPONENT,
                 false /*shouldShowComplication*/);
-
-        // Destroy the service.
-        mService.onDestroy();
-
-        // Run executor tasks.
         mMainExecutor.runAllReady();
 
         verify(mWindowManager, never()).addView(any(), any());
+    }
+
+    @Test
+    public void testNeverRemoveDecorViewIfNotAdded() {
+        // Service destroyed before dream started.
+        mService.onDestroy();
+        mMainExecutor.runAllReady();
+
+        verify(mWindowManager, never()).removeView(any());
     }
 
     @Test
