@@ -110,6 +110,11 @@ public class LocationEventLog extends LocalEventLog<Object> {
         addLog(new UserSwitchedEvent(userIdFrom, userIdTo));
     }
 
+    /** Logs a user visibility changed event. */
+    public void logUserVisibilityChanged(int userId, boolean visible) {
+        addLog(new UserVisibilityChangedEvent(userId, visible));
+    }
+
     /** Logs a location enabled/disabled event. */
     public void logLocationEnabled(int userId, boolean enabled) {
         addLog(new LocationEnabledEvent(userId, enabled));
@@ -472,6 +477,22 @@ public class LocationEventLog extends LocalEventLog<Object> {
         @Override
         public String toString() {
             return "current user switched from u" + mUserIdFrom + " to u" + mUserIdTo;
+        }
+    }
+
+    private static final class UserVisibilityChangedEvent {
+
+        private final int mUserId;
+        private final boolean mVisible;
+
+        UserVisibilityChangedEvent(int userId, boolean visible) {
+            mUserId = userId;
+            mVisible = visible;
+        }
+
+        @Override
+        public String toString() {
+            return "[u" + mUserId + "] " + (mVisible ? "visible" : "invisible");
         }
     }
 

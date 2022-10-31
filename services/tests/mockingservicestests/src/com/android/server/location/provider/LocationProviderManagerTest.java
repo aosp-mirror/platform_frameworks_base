@@ -175,7 +175,9 @@ public class LocationProviderManagerTest {
         doReturn(mWakeLock).when(mPowerManager).newWakeLock(anyInt(), anyString());
 
         mInjector = new TestInjector(mContext);
+        mInjector.getUserInfoHelper().setUserVisible(CURRENT_USER, true);
         mInjector.getUserInfoHelper().startUser(OTHER_USER);
+        mInjector.getUserInfoHelper().setUserVisible(OTHER_USER, true);
 
         mPassive = new PassiveLocationProviderManager(mContext, mInjector);
         mPassive.startManager(null);
@@ -328,6 +330,20 @@ public class LocationProviderManagerTest {
                 IDENTITY, PERMISSION_COARSE);
         assertThat(coarse).isNotEqualTo(loc);
         assertThat(coarse).isNearby(loc, 5000);
+    }
+
+    @Test
+    public void testGetLastLocation_InvisibleUser() {
+        Location loc = createLocation(NAME, mRandom);
+        mProvider.setProviderLocation(loc);
+
+        mInjector.getUserInfoHelper().setUserVisible(CURRENT_USER, false);
+        assertThat(mManager.getLastLocation(new LastLocationRequest.Builder().build(), IDENTITY,
+                PERMISSION_FINE)).isNull();
+
+        mInjector.getUserInfoHelper().setUserVisible(CURRENT_USER, true);
+        assertThat(mManager.getLastLocation(new LastLocationRequest.Builder().build(), IDENTITY,
+                PERMISSION_FINE)).isEqualTo(loc);
     }
 
     @Test
@@ -569,6 +585,25 @@ public class LocationProviderManagerTest {
     }
 
     @Test
+    public void testRegisterListener_InvisibleUser() throws Exception {
+        ILocationListener listener = createMockLocationListener();
+        LocationRequest request = new LocationRequest.Builder(0)
+                .setWorkSource(WORK_SOURCE)
+                .build();
+        mManager.registerLocationRequest(request, IDENTITY, PERMISSION_FINE, listener);
+
+        mInjector.getUserInfoHelper().setUserVisible(CURRENT_USER, false);
+        mProvider.setProviderLocation(createLocationResult(NAME, mRandom));
+        verify(listener, never()).onLocationChanged(any(List.class),
+                nullable(IRemoteCallback.class));
+
+        mInjector.getUserInfoHelper().setUserVisible(CURRENT_USER, true);
+        LocationResult loc = createLocationResult(NAME, mRandom);
+        mProvider.setProviderLocation(loc);
+        verify(listener).onLocationChanged(eq(loc.asList()), nullable(IRemoteCallback.class));
+    }
+
+    @Test
     public void testRegisterListener_ExpiringAlarm() throws Exception {
         ILocationListener listener = createMockLocationListener();
         LocationRequest request = new LocationRequest.Builder(0)
@@ -799,6 +834,17 @@ public class LocationProviderManagerTest {
     }
 
     @Test
+    public void testGetCurrentLocation_InvisibleUser() throws Exception {
+        mInjector.getUserInfoHelper().setUserVisible(CURRENT_USER, false);
+
+        ILocationCallback listener = createMockGetCurrentLocationListener();
+        LocationRequest request = new LocationRequest.Builder(0).setWorkSource(WORK_SOURCE).build();
+        mManager.getCurrentLocation(request, IDENTITY, PERMISSION_FINE, listener);
+
+        verify(listener).onLocation(isNull());
+    }
+
+    @Test
     public void testFlush() throws Exception {
         ILocationListener listener = createMockLocationListener();
         mManager.registerLocationRequest(
@@ -1005,6 +1051,21 @@ public class LocationProviderManagerTest {
         mInjector.getAppForegroundHelper().setAppForeground(IDENTITY.getUid(), false);
         assertThat(mProvider.getRequest().getIntervalMillis()).isEqualTo(
                 mInjector.getSettingsHelper().getBackgroundThrottleIntervalMs());
+    }
+
+    @Test
+    public void testProviderRequest_InvisibleUser() {
+        ILocationListener listener = createMockLocationListener();
+        LocationRequest request = new LocationRequest.Builder(5)
+                .setWorkSource(WORK_SOURCE)
+                .build();
+        mManager.registerLocationRequest(request, IDENTITY, PERMISSION_FINE, listener);
+
+        mInjector.getUserInfoHelper().setUserVisible(CURRENT_USER, false);
+        assertThat(mProvider.getRequest().isActive()).isFalse();
+
+        mInjector.getUserInfoHelper().setUserVisible(CURRENT_USER, true);
+        assertThat(mProvider.getRequest().isActive()).isTrue();
     }
 
     @Test

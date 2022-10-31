@@ -387,7 +387,7 @@ public class GeofenceManager extends
             if (!mSettingsHelper.isLocationEnabled(identity.getUserId())) {
                 return false;
             }
-            if (!mUserInfoHelper.isCurrentUserId(identity.getUserId())) {
+            if (!mUserInfoHelper.isVisibleUserId(identity.getUserId())) {
                 return false;
             }
             if (mSettingsHelper.isLocationPackageBlacklisted(identity.getUserId(),
@@ -534,7 +534,10 @@ public class GeofenceManager extends
     }
 
     void onUserChanged(int userId, int change) {
-        if (change == UserListener.CURRENT_USER_CHANGED) {
+        // current user changes affect whether system server location requests are allowed to access
+        // location, and visibility changes affect whether any given user may access location.
+        if (change == UserListener.CURRENT_USER_CHANGED
+                || change == UserListener.USER_VISIBILITY_CHANGED) {
             updateRegistrations(registration -> registration.getIdentity().getUserId() == userId);
         }
     }
