@@ -37,6 +37,8 @@ import static org.mockito.Mockito.when;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.view.WindowManager;
@@ -223,10 +225,15 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         CountDownLatch systemLatch = new CountDownLatch(1);
         CountDownLatch appLatch = new CountDownLatch(1);
 
+        final ApplicationInfo info = mock(ApplicationInfo.class);
+        final Context context = mock(Context.class);
+        Mockito.doReturn(true).when(info).isOnBackInvokedCallbackEnabled();
+        Mockito.doReturn(info).when(context).getApplicationInfo();
+
         Task task = createTopTaskWithActivity();
         WindowState appWindow = task.getTopVisibleAppMainWindow();
         WindowOnBackInvokedDispatcher dispatcher =
-                new WindowOnBackInvokedDispatcher(true /* applicationCallbackEnabled */);
+                new WindowOnBackInvokedDispatcher(context);
         doAnswer(invocation -> {
             appWindow.setOnBackInvokedCallbackInfo(invocation.getArgument(1));
             return null;

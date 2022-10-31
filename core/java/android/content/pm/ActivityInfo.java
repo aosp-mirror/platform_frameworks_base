@@ -39,6 +39,7 @@ import android.os.Parcelable;
 import android.os.UserHandle;
 import android.util.ArraySet;
 import android.util.Printer;
+import android.window.OnBackInvokedCallback;
 
 import com.android.internal.util.Parcelling;
 
@@ -624,7 +625,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * See {@link android.R.attr#inheritShowWhenLocked}.
      * @hide
      */
-    public static final int FLAG_INHERIT_SHOW_WHEN_LOCKED = 0x1;
+    public static final int FLAG_INHERIT_SHOW_WHEN_LOCKED = 1 << 0;
 
     /**
      * Bit in {@link #privateFlags} indicating whether a home sound effect should be played if the
@@ -632,13 +633,34 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * Set from the {@link android.R.attr#playHomeTransitionSound} attribute.
      * @hide
      */
-    public static final int PRIVATE_FLAG_HOME_TRANSITION_SOUND = 0x2;
+    public static final int PRIVATE_FLAG_HOME_TRANSITION_SOUND = 1 << 1;
+
+    /**
+     * Bit in {@link #privateFlags} indicating {@link android.view.KeyEvent#KEYCODE_BACK} related
+     * events will be replaced by a call to {@link OnBackInvokedCallback#onBackInvoked()} on the
+     * focused window.
+     * @hide
+     * @see android.R.styleable.AndroidManifestActivity_enableOnBackInvokedCallback
+     */
+    public static final int PRIVATE_FLAG_ENABLE_ON_BACK_INVOKED_CALLBACK = 1 << 2;
+
+    /**
+     * Bit in {@link #privateFlags} indicating {@link android.view.KeyEvent#KEYCODE_BACK} related
+     * events will be forwarded to the Activity and its dialogs and views and
+     * the {@link android.app.Activity#onBackPressed()}, {@link android.app.Dialog#onBackPressed}
+     * will be called.
+     * @hide
+     * @see android.R.styleable.AndroidManifestActivity_enableOnBackInvokedCallback
+     */
+    public static final int PRIVATE_FLAG_DISABLE_ON_BACK_INVOKED_CALLBACK = 1 << 3;
 
     /**
      * Options that have been set in the activity declaration in the manifest.
      * These include:
      * {@link #FLAG_INHERIT_SHOW_WHEN_LOCKED},
      * {@link #PRIVATE_FLAG_HOME_TRANSITION_SOUND}.
+     * {@link #PRIVATE_FLAG_ENABLE_ON_BACK_INVOKED_CALLBACK}
+     * {@link #PRIVATE_FLAG_DISABLE_ON_BACK_INVOKED_CALLBACK}
      * @hide
      */
     public int privateFlags;
@@ -1616,6 +1638,32 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      */
     public boolean shouldCheckMinWidthHeightForMultiWindow() {
         return isChangeEnabled(CHECK_MIN_WIDTH_HEIGHT_FOR_MULTI_WINDOW);
+    }
+
+    /**
+     * Returns whether the activity will set the
+     * {@link R.styleable.AndroidManifestActivity_enableOnBackInvokedCallback} attribute.
+     *
+     * @hide
+     */
+    public boolean hasOnBackInvokedCallbackEnabled() {
+        return (privateFlags & (PRIVATE_FLAG_ENABLE_ON_BACK_INVOKED_CALLBACK
+                | PRIVATE_FLAG_DISABLE_ON_BACK_INVOKED_CALLBACK)) != 0;
+    }
+
+    /**
+     * Returns whether the activity will use the {@link android.window.OnBackInvokedCallback}
+     * navigation system instead of the {@link android.view.KeyEvent#KEYCODE_BACK} and related
+     * callbacks.
+     *
+     * Valid when the {@link R.styleable.AndroidManifestActivity_enableOnBackInvokedCallback}
+     * attribute has been set, or it won't indicate if the activity should use the
+     * navigation system and the {@link hasOnBackInvokedCallbackEnabled} will return false.
+     * @hide
+     */
+    public boolean isOnBackInvokedCallbackEnabled() {
+        return hasOnBackInvokedCallbackEnabled()
+                && (privateFlags & PRIVATE_FLAG_ENABLE_ON_BACK_INVOKED_CALLBACK) != 0;
     }
 
     public void dump(Printer pw, String prefix) {
