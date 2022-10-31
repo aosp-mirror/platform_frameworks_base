@@ -270,15 +270,6 @@ object Flags {
 
     @JvmField
     @Keep
-    val FLOATING_TASKS_ENABLED = SysPropBooleanFlag(1106, "persist.wm.debug.floating_tasks", false)
-
-    @JvmField
-    @Keep
-    val SHOW_FLOATING_TASKS_AS_BUBBLES =
-        SysPropBooleanFlag(1107, "persist.wm.debug.floating_tasks_as_bubbles", false)
-
-    @JvmField
-    @Keep
     val ENABLE_FLING_TO_DISMISS_BUBBLE =
         SysPropBooleanFlag(1108, "persist.wm.debug.fling_to_dismiss_bubble", true)
 
