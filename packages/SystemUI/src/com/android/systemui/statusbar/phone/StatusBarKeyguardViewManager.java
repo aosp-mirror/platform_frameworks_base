@@ -476,7 +476,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         } else if (mKeyguardStateController.isShowing()  && !hideBouncerOverDream) {
             if (!isWakeAndUnlocking()
                     && !(mBiometricUnlockController.getMode() == MODE_DISMISS_BOUNCER)
-                    && !mNotificationPanelViewController.isLaunchTransitionFinished()
                     && !isUnlockCollapsing()) {
                 if (mBouncer != null) {
                     mBouncer.setExpansion(fraction);
@@ -845,21 +844,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         if (isShowing && isOccluding) {
             SysUiStatsLog.write(SysUiStatsLog.KEYGUARD_STATE_CHANGED,
                     SysUiStatsLog.KEYGUARD_STATE_CHANGED__STATE__OCCLUDED);
-            if (mNotificationPanelViewController.isLaunchTransitionFinished()) {
-                final Runnable endRunnable = new Runnable() {
-                    @Override
-                    public void run() {
-                        mNotificationShadeWindowController.setKeyguardOccluded(isOccluded);
-                        reset(true /* hideBouncerWhenShowing */);
-                    }
-                };
-                mCentralSurfaces.fadeKeyguardAfterLaunchTransition(
-                        null /* beforeFading */,
-                        endRunnable,
-                        endRunnable);
-                return;
-            }
-
             if (mCentralSurfaces.isLaunchingActivityOverLockscreen()) {
                 // When isLaunchingActivityOverLockscreen() is true, we know for sure that the post
                 // collapse runnables will be run.
@@ -931,8 +915,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         long uptimeMillis = SystemClock.uptimeMillis();
         long delay = Math.max(0, startTime + HIDE_TIMING_CORRECTION_MS - uptimeMillis);
 
-        if (mNotificationPanelViewController.isLaunchTransitionFinished()
-                || mKeyguardStateController.isFlingingToDismissKeyguard()) {
+        if (mKeyguardStateController.isFlingingToDismissKeyguard()) {
             final boolean wasFlingingToDismissKeyguard =
                     mKeyguardStateController.isFlingingToDismissKeyguard();
             mCentralSurfaces.fadeKeyguardAfterLaunchTransition(new Runnable() {
@@ -1309,7 +1292,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     @Override
     public boolean shouldDisableWindowAnimationsForUnlock() {
-        return mNotificationPanelViewController.isLaunchTransitionFinished();
+        return false;
     }
 
     @Override
