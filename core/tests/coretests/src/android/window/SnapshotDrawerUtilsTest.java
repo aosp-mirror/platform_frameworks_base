@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.startingsurface;
+package android.window;
 
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
 
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
-
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager.TaskDescription;
 import android.content.ComponentName;
@@ -42,33 +40,28 @@ import android.hardware.HardwareBuffer;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.WindowInsets;
-import android.window.TaskSnapshot;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
-
-import com.android.wm.shell.ShellTestCase;
-import com.android.wm.shell.TestShellExecutor;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
- * Test class for {@link TaskSnapshotWindow}.
- *
+ * Test class for {@link SnapshotDrawerUtils}.
  */
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class TaskSnapshotWindowTest extends ShellTestCase {
+public class SnapshotDrawerUtilsTest {
 
-    private TaskSnapshotWindow mWindow;
+    private SnapshotDrawerUtils.SnapshotSurface mSnapshotSurface;
 
     private void setupSurface(int width, int height) {
-        setupSurface(width, height, new Rect(), 0, FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS,
+        setupSurface(width, height, new Rect(), FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS,
                 new Rect(0, 0, width, height));
     }
 
-    private void setupSurface(int width, int height, Rect contentInsets, int sysuiVis,
+    private void setupSurface(int width, int height, Rect contentInsets,
             int windowFlags, Rect taskBounds) {
         // Previously when constructing TaskSnapshots for this test, scale was 1.0f, so to mimic
         // this behavior set the taskSize to be the same as the taskBounds width and height. The
@@ -80,12 +73,13 @@ public class TaskSnapshotWindowTest extends ShellTestCase {
         Point taskSize = new Point(taskBounds.width(), taskBounds.height());
 
         final TaskSnapshot snapshot = createTaskSnapshot(width, height, taskSize, contentInsets);
-        mWindow = new TaskSnapshotWindow(new SurfaceControl(), snapshot, "Test",
-                createTaskDescription(Color.WHITE, Color.RED, Color.BLUE),
-                0 /* appearance */, windowFlags /* windowFlags */, 0 /* privateWindowFlags */,
-                taskBounds, ORIENTATION_PORTRAIT, ACTIVITY_TYPE_STANDARD,
-                WindowInsets.Type.defaultVisible(), null /* clearWindow */,
-                new TestShellExecutor());
+        TaskDescription taskDescription = createTaskDescription(Color.WHITE,
+                Color.RED, Color.BLUE);
+
+        mSnapshotSurface = new SnapshotDrawerUtils.SnapshotSurface(
+                new SurfaceControl(), snapshot, "Test", taskBounds);
+        mSnapshotSurface.initiateSystemBarPainter(windowFlags, 0, 0,
+                taskDescription, WindowInsets.Type.defaultVisible());
     }
 
     private TaskSnapshot createTaskSnapshot(int width, int height, Point taskSize,
@@ -101,8 +95,8 @@ public class TaskSnapshotWindowTest extends ShellTestCase {
                 0 /* systemUiVisibility */, false /* isTranslucent */, false /* hasImeSurface */);
     }
 
-    private static TaskDescription createTaskDescription(int background, int statusBar,
-            int navigationBar) {
+    private static TaskDescription createTaskDescription(int background,
+            int statusBar, int navigationBar) {
         final TaskDescription td = new TaskDescription();
         td.setBackgroundColor(background);
         td.setStatusBarColor(statusBar);
@@ -116,7 +110,7 @@ public class TaskSnapshotWindowTest extends ShellTestCase {
         final Canvas mockCanvas = mock(Canvas.class);
         when(mockCanvas.getWidth()).thenReturn(200);
         when(mockCanvas.getHeight()).thenReturn(100);
-        mWindow.drawBackgroundAndBars(mockCanvas, new Rect(0, 0, 100, 200));
+        mSnapshotSurface.drawBackgroundAndBars(mockCanvas, new Rect(0, 0, 100, 200));
         verify(mockCanvas).drawRect(eq(100.0f), eq(0.0f), eq(200.0f), eq(100.0f), any());
     }
 
@@ -126,7 +120,7 @@ public class TaskSnapshotWindowTest extends ShellTestCase {
         final Canvas mockCanvas = mock(Canvas.class);
         when(mockCanvas.getWidth()).thenReturn(100);
         when(mockCanvas.getHeight()).thenReturn(200);
-        mWindow.drawBackgroundAndBars(mockCanvas, new Rect(0, 0, 200, 100));
+        mSnapshotSurface.drawBackgroundAndBars(mockCanvas, new Rect(0, 0, 200, 100));
         verify(mockCanvas).drawRect(eq(0.0f), eq(100.0f), eq(100.0f), eq(200.0f), any());
     }
 
@@ -136,7 +130,7 @@ public class TaskSnapshotWindowTest extends ShellTestCase {
         final Canvas mockCanvas = mock(Canvas.class);
         when(mockCanvas.getWidth()).thenReturn(200);
         when(mockCanvas.getHeight()).thenReturn(200);
-        mWindow.drawBackgroundAndBars(mockCanvas, new Rect(0, 0, 100, 100));
+        mSnapshotSurface.drawBackgroundAndBars(mockCanvas, new Rect(0, 0, 100, 100));
         verify(mockCanvas).drawRect(eq(100.0f), eq(0.0f), eq(200.0f), eq(100.0f), any());
         verify(mockCanvas).drawRect(eq(0.0f), eq(100.0f), eq(200.0f), eq(200.0f), any());
     }
@@ -147,7 +141,7 @@ public class TaskSnapshotWindowTest extends ShellTestCase {
         final Canvas mockCanvas = mock(Canvas.class);
         when(mockCanvas.getWidth()).thenReturn(100);
         when(mockCanvas.getHeight()).thenReturn(100);
-        mWindow.drawBackgroundAndBars(mockCanvas, new Rect(0, 0, 100, 100));
+        mSnapshotSurface.drawBackgroundAndBars(mockCanvas, new Rect(0, 0, 100, 100));
         verify(mockCanvas, never()).drawRect(anyInt(), anyInt(), anyInt(), anyInt(), any());
     }
 
@@ -157,76 +151,76 @@ public class TaskSnapshotWindowTest extends ShellTestCase {
         final Canvas mockCanvas = mock(Canvas.class);
         when(mockCanvas.getWidth()).thenReturn(100);
         when(mockCanvas.getHeight()).thenReturn(100);
-        mWindow.drawBackgroundAndBars(mockCanvas, new Rect(0, 0, 200, 200));
+        mSnapshotSurface.drawBackgroundAndBars(mockCanvas, new Rect(0, 0, 200, 200));
         verify(mockCanvas, never()).drawRect(anyInt(), anyInt(), anyInt(), anyInt(), any());
     }
 
     @Test
     public void testCalculateSnapshotCrop() {
-        setupSurface(100, 100, new Rect(0, 10, 0, 10), 0, 0, new Rect(0, 0, 100, 100));
-        assertEquals(new Rect(0, 0, 100, 90), mWindow.calculateSnapshotCrop());
+        setupSurface(100, 100, new Rect(0, 10, 0, 10), 0, new Rect(0, 0, 100, 100));
+        assertEquals(new Rect(0, 0, 100, 90), mSnapshotSurface.calculateSnapshotCrop());
     }
 
     @Test
     public void testCalculateSnapshotCrop_taskNotOnTop() {
-        setupSurface(100, 100, new Rect(0, 10, 0, 10), 0, 0, new Rect(0, 50, 100, 150));
-        assertEquals(new Rect(0, 10, 100, 90), mWindow.calculateSnapshotCrop());
+        setupSurface(100, 100, new Rect(0, 10, 0, 10), 0, new Rect(0, 50, 100, 150));
+        assertEquals(new Rect(0, 10, 100, 90), mSnapshotSurface.calculateSnapshotCrop());
     }
 
     @Test
     public void testCalculateSnapshotCrop_navBarLeft() {
-        setupSurface(100, 100, new Rect(10, 10, 0, 0), 0, 0, new Rect(0, 0, 100, 100));
-        assertEquals(new Rect(10, 0, 100, 100), mWindow.calculateSnapshotCrop());
+        setupSurface(100, 100, new Rect(10, 10, 0, 0), 0, new Rect(0, 0, 100, 100));
+        assertEquals(new Rect(10, 0, 100, 100), mSnapshotSurface.calculateSnapshotCrop());
     }
 
     @Test
     public void testCalculateSnapshotCrop_navBarRight() {
-        setupSurface(100, 100, new Rect(0, 10, 10, 0), 0, 0, new Rect(0, 0, 100, 100));
-        assertEquals(new Rect(0, 0, 90, 100), mWindow.calculateSnapshotCrop());
+        setupSurface(100, 100, new Rect(0, 10, 10, 0), 0, new Rect(0, 0, 100, 100));
+        assertEquals(new Rect(0, 0, 90, 100), mSnapshotSurface.calculateSnapshotCrop());
     }
 
     @Test
     public void testCalculateSnapshotCrop_waterfall() {
-        setupSurface(100, 100, new Rect(5, 10, 5, 10), 0, 0, new Rect(0, 0, 100, 100));
-        assertEquals(new Rect(5, 0, 95, 90), mWindow.calculateSnapshotCrop());
+        setupSurface(100, 100, new Rect(5, 10, 5, 10), 0, new Rect(0, 0, 100, 100));
+        assertEquals(new Rect(5, 0, 95, 90), mSnapshotSurface.calculateSnapshotCrop());
     }
 
     @Test
     public void testCalculateSnapshotFrame() {
         setupSurface(100, 100);
         final Rect insets = new Rect(0, 10, 0, 10);
-        mWindow.setFrames(new Rect(0, 0, 100, 100), insets);
+        mSnapshotSurface.setFrames(new Rect(0, 0, 100, 100), insets);
         assertEquals(new Rect(0, 0, 100, 80),
-                mWindow.calculateSnapshotFrame(new Rect(0, 10, 100, 90)));
+                mSnapshotSurface.calculateSnapshotFrame(new Rect(0, 10, 100, 90)));
     }
 
     @Test
     public void testCalculateSnapshotFrame_navBarLeft() {
         setupSurface(100, 100);
         final Rect insets = new Rect(10, 10, 0, 0);
-        mWindow.setFrames(new Rect(0, 0, 100, 100), insets);
+        mSnapshotSurface.setFrames(new Rect(0, 0, 100, 100), insets);
         assertEquals(new Rect(10, 0, 100, 90),
-                mWindow.calculateSnapshotFrame(new Rect(10, 10, 100, 100)));
+                mSnapshotSurface.calculateSnapshotFrame(new Rect(10, 10, 100, 100)));
     }
 
     @Test
     public void testCalculateSnapshotFrame_waterfall() {
-        setupSurface(100, 100, new Rect(5, 10, 5, 10), 0, 0, new Rect(0, 0, 100, 100));
+        setupSurface(100, 100, new Rect(5, 10, 5, 10), 0, new Rect(0, 0, 100, 100));
         final Rect insets = new Rect(0, 10, 0, 10);
-        mWindow.setFrames(new Rect(5, 0, 95, 100), insets);
+        mSnapshotSurface.setFrames(new Rect(5, 0, 95, 100), insets);
         assertEquals(new Rect(0, 0, 90, 90),
-                mWindow.calculateSnapshotFrame(new Rect(5, 0, 95, 90)));
+                mSnapshotSurface.calculateSnapshotFrame(new Rect(5, 0, 95, 90)));
     }
 
     @Test
     public void testDrawStatusBarBackground() {
         setupSurface(100, 100);
         final Rect insets = new Rect(0, 10, 10, 0);
-        mWindow.setFrames(new Rect(0, 0, 100, 100), insets);
+        mSnapshotSurface.setFrames(new Rect(0, 0, 100, 100), insets);
         final Canvas mockCanvas = mock(Canvas.class);
         when(mockCanvas.getWidth()).thenReturn(100);
         when(mockCanvas.getHeight()).thenReturn(100);
-        mWindow.drawStatusBarBackground(mockCanvas, new Rect(0, 0, 50, 100));
+        mSnapshotSurface.drawStatusBarBackground(mockCanvas, new Rect(0, 0, 50, 100));
         verify(mockCanvas).drawRect(eq(50.0f), eq(0.0f), eq(90.0f), eq(10.0f), any());
     }
 
@@ -234,11 +228,11 @@ public class TaskSnapshotWindowTest extends ShellTestCase {
     public void testDrawStatusBarBackground_nullFrame() {
         setupSurface(100, 100);
         final Rect insets = new Rect(0, 10, 10, 0);
-        mWindow.setFrames(new Rect(0, 0, 100, 100), insets);
+        mSnapshotSurface.setFrames(new Rect(0, 0, 100, 100), insets);
         final Canvas mockCanvas = mock(Canvas.class);
         when(mockCanvas.getWidth()).thenReturn(100);
         when(mockCanvas.getHeight()).thenReturn(100);
-        mWindow.drawStatusBarBackground(mockCanvas, null);
+        mSnapshotSurface.drawStatusBarBackground(mockCanvas, null);
         verify(mockCanvas).drawRect(eq(0.0f), eq(0.0f), eq(90.0f), eq(10.0f), any());
     }
 
@@ -246,50 +240,50 @@ public class TaskSnapshotWindowTest extends ShellTestCase {
     public void testDrawStatusBarBackground_nope() {
         setupSurface(100, 100);
         final Rect insets = new Rect(0, 10, 10, 0);
-        mWindow.setFrames(new Rect(0, 0, 100, 100), insets);
+        mSnapshotSurface.setFrames(new Rect(0, 0, 100, 100), insets);
         final Canvas mockCanvas = mock(Canvas.class);
         when(mockCanvas.getWidth()).thenReturn(100);
         when(mockCanvas.getHeight()).thenReturn(100);
-        mWindow.drawStatusBarBackground(mockCanvas, new Rect(0, 0, 100, 100));
+        mSnapshotSurface.drawStatusBarBackground(mockCanvas, new Rect(0, 0, 100, 100));
         verify(mockCanvas, never()).drawRect(anyInt(), anyInt(), anyInt(), anyInt(), any());
     }
 
     @Test
     public void testDrawNavigationBarBackground() {
         final Rect insets = new Rect(0, 10, 0, 10);
-        setupSurface(100, 100, insets, 0, FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS,
+        setupSurface(100, 100, insets, FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS,
                 new Rect(0, 0, 100, 100));
-        mWindow.setFrames(new Rect(0, 0, 100, 100), insets);
+        mSnapshotSurface.setFrames(new Rect(0, 0, 100, 100), insets);
         final Canvas mockCanvas = mock(Canvas.class);
         when(mockCanvas.getWidth()).thenReturn(100);
         when(mockCanvas.getHeight()).thenReturn(100);
-        mWindow.drawNavigationBarBackground(mockCanvas);
+        mSnapshotSurface.drawNavigationBarBackground(mockCanvas);
         verify(mockCanvas).drawRect(eq(new Rect(0, 90, 100, 100)), any());
     }
 
     @Test
     public void testDrawNavigationBarBackground_left() {
         final Rect insets = new Rect(10, 10, 0, 0);
-        setupSurface(100, 100, insets, 0, FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS,
+        setupSurface(100, 100, insets, FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS,
                 new Rect(0, 0, 100, 100));
-        mWindow.setFrames(new Rect(0, 0, 100, 100), insets);
+        mSnapshotSurface.setFrames(new Rect(0, 0, 100, 100), insets);
         final Canvas mockCanvas = mock(Canvas.class);
         when(mockCanvas.getWidth()).thenReturn(100);
         when(mockCanvas.getHeight()).thenReturn(100);
-        mWindow.drawNavigationBarBackground(mockCanvas);
+        mSnapshotSurface.drawNavigationBarBackground(mockCanvas);
         verify(mockCanvas).drawRect(eq(new Rect(0, 0, 10, 100)), any());
     }
 
     @Test
     public void testDrawNavigationBarBackground_right() {
         final Rect insets = new Rect(0, 10, 10, 0);
-        setupSurface(100, 100, insets, 0, FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS,
+        setupSurface(100, 100, insets, FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS,
                 new Rect(0, 0, 100, 100));
-        mWindow.setFrames(new Rect(0, 0, 100, 100), insets);
+        mSnapshotSurface.setFrames(new Rect(0, 0, 100, 100), insets);
         final Canvas mockCanvas = mock(Canvas.class);
         when(mockCanvas.getWidth()).thenReturn(100);
         when(mockCanvas.getHeight()).thenReturn(100);
-        mWindow.drawNavigationBarBackground(mockCanvas);
+        mSnapshotSurface.drawNavigationBarBackground(mockCanvas);
         verify(mockCanvas).drawRect(eq(new Rect(90, 0, 100, 100)), any());
     }
 }
