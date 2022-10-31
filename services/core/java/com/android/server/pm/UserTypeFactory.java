@@ -260,7 +260,8 @@ public final class UserTypeFactory {
     private static UserTypeDetails.Builder getDefaultTypeFullSystem() {
         return new UserTypeDetails.Builder()
                 .setName(USER_TYPE_FULL_SYSTEM)
-                .setBaseType(FLAG_SYSTEM | FLAG_FULL);
+                .setBaseType(FLAG_SYSTEM | FLAG_FULL)
+                .setDefaultUserInfoPropertyFlags(UserInfo.FLAG_MAIN);
     }
 
     /**

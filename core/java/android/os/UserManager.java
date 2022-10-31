@@ -2306,12 +2306,18 @@ public class UserManager {
     }
 
     /**
-     * Used to check if the context user is the primary user. The primary user
-     * is the first human user on a device. This is not supported in headless system user mode.
+     * Used to check if the context user is the primary user. The primary user is the first human
+     * user on a device. This is not supported in headless system user mode.
      *
      * @return whether the context user is the primary user.
+     *
+     * @deprecated This method always returns true for the system user, who may not be a full user
+     * if {@link #isHeadlessSystemUserMode} is true. Use {@link #isSystemUser}, {@link #isAdminUser}
+     * or {@link #isMainUser} instead.
+     *
      * @hide
      */
+    @Deprecated
     @SystemApi
     @RequiresPermission(anyOf = {
             Manifest.permission.MANAGE_USERS,
@@ -2333,6 +2339,29 @@ public class UserManager {
     @UserHandleAware(enabledSinceTargetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     public boolean isSystemUser() {
         return getContextUserIfAppropriate() == UserHandle.USER_SYSTEM;
+    }
+
+    /**
+     * Returns true if the context user is the designated "main user" of the device. This user may
+     * have access to certain features which are limited to at most one user.
+     *
+     * <p>Currently, the first human user on the device will be the main user; in the future, the
+     * concept may be transferable, so a different user (or even no user at all) may be designated
+     * the main user instead.
+     *
+     * <p>Note that this will be the not be the system user on devices for which
+     * {@link #isHeadlessSystemUserMode()} returns true.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(anyOf = {
+            Manifest.permission.MANAGE_USERS,
+            Manifest.permission.CREATE_USERS,
+            Manifest.permission.QUERY_USERS})
+    @UserHandleAware
+    public boolean isMainUser() {
+        final UserInfo user = getUserInfo(mUserId);
+        return user != null && user.isMain();
     }
 
     /**
