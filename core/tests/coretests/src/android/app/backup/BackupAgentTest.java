@@ -46,6 +46,7 @@ import java.util.Set;
 public class BackupAgentTest {
     // An arbitrary user.
     private static final UserHandle USER_HANDLE = new UserHandle(15);
+    private static final String DATA_TYPE_BACKED_UP = "test data type";
 
     @Mock FullBackup.BackupScheme mBackupScheme;
 
@@ -73,6 +74,42 @@ public class BackupAgentTest {
         assertThat(rules).isEqualTo(expectedRules);
     }
 
+    @Test
+    public void getBackupRestoreEventLogger_beforeOnCreate_isNull() {
+        BackupAgent agent = new TestFullBackupAgent();
+
+        assertThat(agent.getBackupRestoreEventLogger()).isNull();
+    }
+
+    @Test
+    public void getBackupRestoreEventLogger_afterOnCreateForBackup_initializedForBackup() {
+        BackupAgent agent = new TestFullBackupAgent();
+        agent.onCreate(USER_HANDLE, OperationType.BACKUP); // TODO: pass in new operation type
+
+        assertThat(agent.getBackupRestoreEventLogger().getOperationType()).isEqualTo(1);
+    }
+
+    @Test
+    public void getBackupRestoreEventLogger_afterOnCreateForRestore_initializedForRestore() {
+        BackupAgent agent = new TestFullBackupAgent();
+        agent.onCreate(USER_HANDLE, OperationType.BACKUP); // TODO: pass in new operation type
+
+        assertThat(agent.getBackupRestoreEventLogger().getOperationType()).isEqualTo(1);
+    }
+
+    @Test
+    public void getBackupRestoreEventLogger_afterBackup_containsLogsLoggedByAgent()
+            throws Exception {
+        BackupAgent agent = new TestFullBackupAgent();
+        agent.onCreate(USER_HANDLE, OperationType.BACKUP); // TODO: pass in new operation type
+
+        // TestFullBackupAgent logs DATA_TYPE_BACKED_UP when onFullBackup is called.
+        agent.onFullBackup(new FullBackupDataOutput(/* quota = */ 0));
+
+        assertThat(agent.getBackupRestoreEventLogger().getLoggingResults().get(0).getDataType())
+                .isEqualTo(DATA_TYPE_BACKED_UP);
+    }
+
     private BackupAgent getAgentForOperationType(@OperationType int operationType) {
         BackupAgent agent = new TestFullBackupAgent();
         agent.onCreate(USER_HANDLE, operationType);
@@ -85,6 +122,11 @@ public class BackupAgentTest {
         public void onBackup(ParcelFileDescriptor oldState, BackupDataOutput data,
                 ParcelFileDescriptor newState) throws IOException {
             // Left empty as this is a full backup agent.
+        }
+
+        @Override
+        public void onFullBackup(FullBackupDataOutput data) {
+            getBackupRestoreEventLogger().logItemsBackedUp(DATA_TYPE_BACKED_UP, 1);
         }
 
         @Override

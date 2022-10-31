@@ -19,6 +19,10 @@ package android.app.backup;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.util.ArrayMap;
 import android.util.Slog;
 
 import java.lang.annotation.Retention;
@@ -325,7 +329,7 @@ public class BackupRestoreEventLogger {
     /**
      * Encapsulate logging results for a single data type.
      */
-    public static class DataTypeResult {
+    public static class DataTypeResult implements Parcelable {
         @BackupRestoreDataType
         private final String mDataType;
         private int mSuccessCount;
@@ -375,5 +379,57 @@ public class BackupRestoreEventLogger {
         public byte[] getMetadataHash() {
             return mMetadataHash;
         }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeString(mDataType);
+
+            dest.writeInt(mSuccessCount);
+
+            dest.writeInt(mFailCount);
+
+            Bundle errorsBundle = new Bundle();
+            for (Map.Entry<String, Integer> e : mErrors.entrySet()) {
+                errorsBundle.putInt(e.getKey(), e.getValue());
+            }
+            dest.writeBundle(errorsBundle);
+
+            dest.writeByteArray(mMetadataHash);
+        }
+
+        public static final Parcelable.Creator<DataTypeResult> CREATOR =
+                new Parcelable.Creator<>() {
+                    public DataTypeResult createFromParcel(Parcel in) {
+                        String dataType = in.readString();
+
+                        int successCount = in.readInt();
+
+                        int failCount = in.readInt();
+
+                        Map<String, Integer> errors = new ArrayMap<>();
+                        Bundle errorsBundle = in.readBundle(getClass().getClassLoader());
+                        for (String key : errorsBundle.keySet()) {
+                            errors.put(key, errorsBundle.getInt(key));
+                        }
+
+                        byte[] metadataHash = in.createByteArray();
+
+                        DataTypeResult result = new DataTypeResult(dataType);
+                        result.mSuccessCount = successCount;
+                        result.mFailCount = failCount;
+                        result.mErrors.putAll(errors);
+                        result.mMetadataHash = metadataHash;
+                        return result;
+                    }
+
+                    public DataTypeResult[] newArray(int size) {
+                        return new DataTypeResult[size];
+                    }
+                };
     }
 }
