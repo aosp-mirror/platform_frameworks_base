@@ -27,8 +27,6 @@
 -packages/SystemUI/shared/src/com/android/systemui/shared/clocks/AnimatableClockView.kt
 -packages/SystemUI/shared/src/com/android/systemui/shared/clocks/ClockRegistry.kt
 -packages/SystemUI/shared/src/com/android/systemui/shared/clocks/DefaultClockProvider.kt
--packages/SystemUI/shared/src/com/android/systemui/shared/regionsampling/RegionDarkness.kt
--packages/SystemUI/shared/src/com/android/systemui/shared/regionsampling/RegionSamplingInstance.kt
 -packages/SystemUI/shared/src/com/android/systemui/shared/rotation/FloatingRotationButtonPositionCalculator.kt
 -packages/SystemUI/shared/src/com/android/systemui/shared/system/UncaughtExceptionPreHandlerManager.kt
 -packages/SystemUI/shared/src/com/android/systemui/shared/system/smartspace/SmartspaceState.kt
@@ -683,8 +681,6 @@
 -packages/SystemUI/tests/src/com/android/systemui/shared/animation/UnfoldConstantTranslateAnimatorTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/shared/animation/UnfoldMoveFromCenterAnimatorTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/shared/clocks/ClockRegistryTest.kt
--packages/SystemUI/tests/src/com/android/systemui/shared/navigationbar/RegionSamplingHelperTest.kt
--packages/SystemUI/tests/src/com/android/systemui/shared/regionsampling/RegionSamplingInstanceTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/shared/rotation/RotationButtonControllerTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/shared/system/UncaughtExceptionPreHandlerTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/smartspace/DreamSmartspaceControllerTest.kt
