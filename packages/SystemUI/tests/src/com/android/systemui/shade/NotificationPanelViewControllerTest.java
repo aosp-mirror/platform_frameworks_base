@@ -1680,6 +1680,15 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         inOrder.verify(mNotificationStackScrollLayoutController).onExpansionStopped();
     }
 
+    @Test
+    public void inUnlockedSplitShade_transitioningMaxTransitionDistance_makesShadeFullyExpanded() {
+        mStatusBarStateController.setState(SHADE);
+        enableSplitShade(true);
+        int transitionDistance = mNotificationPanelViewController.getMaxPanelTransitionDistance();
+        mNotificationPanelViewController.setExpandedHeight(transitionDistance);
+        assertThat(mNotificationPanelViewController.isFullyExpanded()).isTrue();
+    }
+
     private static MotionEvent createMotionEvent(int x, int y, int action) {
         return MotionEvent.obtain(
                 /* downTime= */ 0, /* eventTime= */ 0, action, x, y, /* metaState= */ 0);
