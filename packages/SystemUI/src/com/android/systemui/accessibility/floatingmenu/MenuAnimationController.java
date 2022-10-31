@@ -345,7 +345,7 @@ class MenuAnimationController {
     }
 
     private void constrainPositionAndUpdate(PointF position) {
-        final Rect draggableBounds = mMenuView.getMenuDraggableBounds();
+        final Rect draggableBounds = mMenuView.getMenuDraggableBoundsExcludeIme();
         // Have the space gap margin between the top bound and the menu view, so actually the
         // position y range needs to cut the margin.
         position.offset(-draggableBounds.left, -draggableBounds.top);

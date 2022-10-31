@@ -219,6 +219,14 @@ class MenuView extends FrameLayout implements
         return mMenuViewAppearance.getMenuDraggableBounds();
     }
 
+    Rect getMenuDraggableBoundsExcludeIme() {
+        return mMenuViewAppearance.getMenuDraggableBoundsExcludeIme();
+    }
+
+    int getMenuHeight() {
+        return mMenuViewAppearance.getMenuHeight();
+    }
+
     void persistPositionAndUpdateEdge(Position percentagePosition) {
         mMenuViewModel.updateMenuSavingPosition(percentagePosition);
         mMenuViewAppearance.setPercentagePosition(percentagePosition);
