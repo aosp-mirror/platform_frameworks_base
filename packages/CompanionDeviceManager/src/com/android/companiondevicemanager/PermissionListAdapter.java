@@ -27,6 +27,7 @@ import android.util.ArrayMap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -37,37 +38,58 @@ import java.util.Map;
 
 class PermissionListAdapter extends RecyclerView.Adapter<PermissionListAdapter.ViewHolder> {
     private final Context mContext;
-
     private List<Integer> mPermissions;
+    // Add the expand buttons if permissions are more than PERMISSION_SIZE in the permission list.
+    private static final int PERMISSION_SIZE = 2;
 
-    static final int TYPE_NOTIFICATION = 0;
-    static final int TYPE_STORAGE = 1;
-    static final int TYPE_APPS = 2;
+    static final int PERMISSION_NOTIFICATION = 0;
+    static final int PERMISSION_STORAGE = 1;
+    static final int PERMISSION_APP_STREAMING = 2;
+    static final int PERMISSION_PHONE = 3;
+    static final int PERMISSION_SMS = 4;
+    static final int PERMISSION_CONTACTS = 5;
+    static final int PERMISSION_CALENDAR = 6;
+    static final int PERMISSION_NEARBY_DEVICES = 7;
 
     private static final Map<Integer, Integer> sTitleMap;
     static {
         final Map<Integer, Integer> map = new ArrayMap<>();
-        map.put(TYPE_NOTIFICATION, R.string.permission_notification);
-        map.put(TYPE_STORAGE, R.string.permission_storage);
-        map.put(TYPE_APPS, R.string.permission_apps);
+        map.put(PERMISSION_NOTIFICATION, R.string.permission_notification);
+        map.put(PERMISSION_STORAGE, R.string.permission_storage);
+        map.put(PERMISSION_APP_STREAMING, R.string.permission_app_streaming);
+        map.put(PERMISSION_PHONE, R.string.permission_phone);
+        map.put(PERMISSION_SMS, R.string.permission_sms);
+        map.put(PERMISSION_CONTACTS, R.string.permission_contacts);
+        map.put(PERMISSION_CALENDAR, R.string.permission_calendar);
+        map.put(PERMISSION_NEARBY_DEVICES, R.string.permission_nearby_devices);
         sTitleMap = unmodifiableMap(map);
     }
 
     private static final Map<Integer, Integer> sSummaryMap;
     static {
         final Map<Integer, Integer> map = new ArrayMap<>();
-        map.put(TYPE_NOTIFICATION, R.string.permission_notification_summary);
-        map.put(TYPE_STORAGE, R.string.permission_storage_summary);
-        map.put(TYPE_APPS, R.string.permission_apps_summary);
+        map.put(PERMISSION_NOTIFICATION, R.string.permission_notification_summary);
+        map.put(PERMISSION_STORAGE, R.string.permission_storage_summary);
+        map.put(PERMISSION_APP_STREAMING, R.string.permission_app_streaming_summary);
+        map.put(PERMISSION_PHONE, R.string.permission_phone_summary);
+        map.put(PERMISSION_SMS, R.string.permission_sms_summary);
+        map.put(PERMISSION_CONTACTS, R.string.permission_contacts_summary);
+        map.put(PERMISSION_CALENDAR, R.string.permission_calendar_summary);
+        map.put(PERMISSION_NEARBY_DEVICES, R.string.permission_nearby_devices_summary);
         sSummaryMap = unmodifiableMap(map);
     }
 
     private static final Map<Integer, Integer> sIconMap;
     static {
         final Map<Integer, Integer> map = new ArrayMap<>();
-        map.put(TYPE_NOTIFICATION, R.drawable.ic_notifications);
-        map.put(TYPE_STORAGE, R.drawable.ic_storage);
-        map.put(TYPE_APPS, R.drawable.ic_apps);
+        map.put(PERMISSION_NOTIFICATION, R.drawable.ic_permission_notifications);
+        map.put(PERMISSION_STORAGE, R.drawable.ic_permission_storage);
+        map.put(PERMISSION_APP_STREAMING, R.drawable.ic_permission_app_streaming);
+        map.put(PERMISSION_PHONE, R.drawable.ic_permission_phone);
+        map.put(PERMISSION_SMS, R.drawable.ic_permission_sms);
+        map.put(PERMISSION_CONTACTS, R.drawable.ic_permission_contacts);
+        map.put(PERMISSION_CALENDAR, R.drawable.ic_permission_calendar);
+        map.put(PERMISSION_NEARBY_DEVICES, R.drawable.ic_permission_nearby_devices);
         sIconMap = unmodifiableMap(map);
     }
 
@@ -82,6 +104,29 @@ class PermissionListAdapter extends RecyclerView.Adapter<PermissionListAdapter.V
         ViewHolder viewHolder = new ViewHolder(view);
         viewHolder.mPermissionIcon.setImageDrawable(getIcon(mContext, sIconMap.get(viewType)));
 
+        if (viewHolder.mExpandButton.getTag() == null) {
+            viewHolder.mExpandButton.setTag(R.drawable.btn_expand_more);
+        }
+        // Add expand buttons if the permissions are more than PERMISSION_SIZE in this list.
+        if (mPermissions.size() > PERMISSION_SIZE) {
+            view.setOnClickListener(v -> {
+                if ((Integer) viewHolder.mExpandButton.getTag() == R.drawable.btn_expand_more) {
+                    viewHolder.mExpandButton.setImageResource(R.drawable.btn_expand_less);
+
+                    if (viewHolder.mSummary != null) {
+                        viewHolder.mPermissionSummary.setText(viewHolder.mSummary);
+                    }
+
+                    viewHolder.mPermissionSummary.setVisibility(View.VISIBLE);
+                    viewHolder.mExpandButton.setTag(R.drawable.btn_expand_less);
+                } else {
+                    viewHolder.mExpandButton.setImageResource(R.drawable.btn_expand_more);
+                    viewHolder.mPermissionSummary.setVisibility(View.GONE);
+                    viewHolder.mExpandButton.setTag(R.drawable.btn_expand_more);
+                }
+            });
+        }
+
         return viewHolder;
     }
 
@@ -91,8 +136,15 @@ class PermissionListAdapter extends RecyclerView.Adapter<PermissionListAdapter.V
         final Spanned title = getHtmlFromResources(mContext, sTitleMap.get(type));
         final Spanned summary = getHtmlFromResources(mContext, sSummaryMap.get(type));
 
+        holder.mSummary = summary;
         holder.mPermissionName.setText(title);
-        holder.mPermissionSummary.setText(summary);
+
+        if (mPermissions.size() <= PERMISSION_SIZE) {
+            holder.mPermissionSummary.setText(summary);
+            holder.mExpandButton.setVisibility(View.GONE);
+        } else {
+            holder.mPermissionSummary.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -114,11 +166,14 @@ class PermissionListAdapter extends RecyclerView.Adapter<PermissionListAdapter.V
         private final TextView mPermissionName;
         private final TextView mPermissionSummary;
         private final ImageView mPermissionIcon;
+        private final ImageButton mExpandButton;
+        private Spanned mSummary = null;
         ViewHolder(View itemView) {
             super(itemView);
             mPermissionName = itemView.findViewById(R.id.permission_name);
             mPermissionSummary = itemView.findViewById(R.id.permission_summary);
             mPermissionIcon = itemView.findViewById(R.id.permission_icon);
+            mExpandButton = itemView.findViewById(R.id.permission_expand_button);
         }
     }
 

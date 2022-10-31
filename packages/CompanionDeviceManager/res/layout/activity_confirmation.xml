@@ -57,36 +57,39 @@
                 android:layout_height="0dp"
                 android:layout_weight="1">
 
-                <LinearLayout
-                    android:id="@+id/multiple_device_list"
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    xmlns:app="http://schemas.android.com/apk/res-auto"
+                    android:id="@+id/constraint_list"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:layout_marginBottom="12dp"
-                    android:orientation="vertical"
                     android:visibility="gone">
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/device_list"
+                        android:layout_width="match_parent"
+                        android:layout_height="200dp"
+                        android:scrollbars="vertical"
+                        android:visibility="gone" />
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/permission_list"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:scrollbars="vertical"
+                        android:fadeScrollbars="false"
+                        app:layout_constraintHeight_max="220dp"
+                        android:visibility="gone" />
 
                     <View
                         android:id="@+id/border_top"
                         style="@style/DeviceListBorder" />
 
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/device_list"
-                        android:layout_width="match_parent"
-                        android:scrollbars="vertical"
-                        android:layout_marginBottom="12dp"
-                        android:layout_height="200dp" />
-
                     <View
                         android:id="@+id/border_bottom"
+                        app:layout_constraintBottom_toBottomOf="parent"
                         style="@style/DeviceListBorder" />
 
-                </LinearLayout>
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/permission_list"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <ProgressBar
                     android:id="@+id/spinner_multiple_device"
@@ -132,6 +135,8 @@
                     style="@style/NegativeButtonMultipleDevices"
                     android:textColor="?android:textColorPrimary"
                     android:visibility="gone"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="12dp"
                     android:text="@string/consent_no" />
             </LinearLayout>
 

@@ -30,9 +30,14 @@ import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTE
 
 import static com.android.companiondevicemanager.CompanionDeviceDiscoveryService.DiscoveryState;
 import static com.android.companiondevicemanager.CompanionDeviceDiscoveryService.DiscoveryState.FINISHED_TIMEOUT;
-import static com.android.companiondevicemanager.PermissionListAdapter.TYPE_APPS;
-import static com.android.companiondevicemanager.PermissionListAdapter.TYPE_NOTIFICATION;
-import static com.android.companiondevicemanager.PermissionListAdapter.TYPE_STORAGE;
+import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_APP_STREAMING;
+import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_CALENDAR;
+import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_CONTACTS;
+import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_NEARBY_DEVICES;
+import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_NOTIFICATION;
+import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_PHONE;
+import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_SMS;
+import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_STORAGE;
 import static com.android.companiondevicemanager.Utils.getApplicationLabel;
 import static com.android.companiondevicemanager.Utils.getHtmlFromResources;
 import static com.android.companiondevicemanager.Utils.getIcon;
@@ -54,6 +59,9 @@ import android.companion.IAssociationRequestCallback;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.BlendMode;
+import android.graphics.BlendModeColorFilter;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.MacAddress;
 import android.os.Bundle;
@@ -63,6 +71,7 @@ import android.os.ResultReceiver;
 import android.text.Spanned;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -71,12 +80,14 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -139,8 +150,14 @@ public class CompanionDeviceActivity extends FragmentActivity implements
     // Present for multiple devices' association requests only.
     private Button mButtonNotAllowMultipleDevices;
 
+    // Present for top and bottom borders for permissions list and device list.
+    private View mBorderTop;
+    private View mBorderBottom;
+
     private LinearLayout mAssociationConfirmationDialog;
-    private LinearLayout mMultipleDeviceList;
+    // Contains device list, permission list and top/bottom borders.
+    private ConstraintLayout mConstraintList;
+    // Only present for self-managed association requests.
     private RelativeLayout mVendorHeader;
 
     // The recycler view is only shown for multiple-device regular association request, after
@@ -149,7 +166,7 @@ public class CompanionDeviceActivity extends FragmentActivity implements
     private @Nullable DeviceListAdapter mDeviceAdapter;
 
 
-    // The recycler view is only shown for selfManaged association request.
+    // The recycler view is only shown for selfManaged and singleDevice  association request.
     private @Nullable RecyclerView mPermissionListRecyclerView;
     private @Nullable PermissionListAdapter mPermissionListAdapter;
 
@@ -162,6 +179,8 @@ public class CompanionDeviceActivity extends FragmentActivity implements
     private @Nullable DeviceFilterPair<?> mSelectedDevice;
 
     private @Nullable List<Integer> mPermissionTypes;
+
+    private LinearLayoutManager mPermissionsLayoutManager = new LinearLayoutManager(this);
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -210,7 +229,6 @@ public class CompanionDeviceActivity extends FragmentActivity implements
         boolean forCancelDialog = intent.getBooleanExtra(EXTRA_FORCE_CANCEL_CONFIRMATION, false);
 
         if (forCancelDialog) {
-
             Log.i(TAG, "Cancelling the user confirmation");
 
             cancel(false, false);
@@ -281,9 +299,12 @@ public class CompanionDeviceActivity extends FragmentActivity implements
 
         setContentView(R.layout.activity_confirmation);
 
-        mMultipleDeviceList = findViewById(R.id.multiple_device_list);
+        mConstraintList = findViewById(R.id.constraint_list);
         mAssociationConfirmationDialog = findViewById(R.id.association_confirmation);
         mVendorHeader = findViewById(R.id.vendor_header);
+
+        mBorderTop = findViewById(R.id.border_top);
+        mBorderBottom = findViewById(R.id.border_bottom);
 
         mTitle = findViewById(R.id.title);
         mSummary = findViewById(R.id.summary);
@@ -452,10 +473,11 @@ public class CompanionDeviceActivity extends FragmentActivity implements
             return;
         }
 
+        // TODO(b/253644212): Add maps for profile -> title, summary, permissions
         switch (deviceProfile) {
             case DEVICE_PROFILE_APP_STREAMING:
                 title = getHtmlFromResources(this, R.string.title_app_streaming, deviceName);
-                mPermissionTypes.add(TYPE_APPS);
+                mPermissionTypes.add(PERMISSION_APP_STREAMING);
                 break;
 
             case DEVICE_PROFILE_AUTOMOTIVE_PROJECTION:
@@ -465,25 +487,27 @@ public class CompanionDeviceActivity extends FragmentActivity implements
 
             case DEVICE_PROFILE_COMPUTER:
                 title = getHtmlFromResources(this, R.string.title_computer, deviceName);
-                mPermissionTypes.add(TYPE_NOTIFICATION);
-                mPermissionTypes.add(TYPE_STORAGE);
+                mPermissionTypes.addAll(Arrays.asList(PERMISSION_NOTIFICATION, PERMISSION_STORAGE));
                 break;
 
             default:
                 throw new RuntimeException("Unsupported profile " + deviceProfile);
         }
 
+        // Summary is not needed for selfManaged dialog.
         mSummary.setVisibility(View.GONE);
 
-        mPermissionListAdapter.setPermissionType(mPermissionTypes);
-        mPermissionListRecyclerView.setAdapter(mPermissionListAdapter);
-        mPermissionListRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        setupPermissionList();
 
         mTitle.setText(title);
         mVendorHeaderName.setText(vendorName);
-        mDeviceListRecyclerView.setVisibility(View.GONE);
-        mProfileIcon.setVisibility(View.GONE);
         mVendorHeader.setVisibility(View.VISIBLE);
+        mVendorHeader.setVisibility(View.VISIBLE);
+        mProfileIcon.setVisibility(View.GONE);
+        mDeviceListRecyclerView.setVisibility(View.GONE);
+        // Top and bottom borders should be gone for selfManaged dialog.
+        mBorderTop.setVisibility(View.GONE);
+        mBorderBottom.setVisibility(View.GONE);
     }
 
     private void initUiForSingleDevice(CharSequence appLabel) {
@@ -491,11 +515,15 @@ public class CompanionDeviceActivity extends FragmentActivity implements
 
         final String deviceProfile = mRequest.getDeviceProfile();
 
+        mPermissionTypes = new ArrayList<>();
+
         CompanionDeviceDiscoveryService.getScanResult().observe(this,
                 deviceFilterPairs -> updateSingleDeviceUi(
                         deviceFilterPairs, deviceProfile, appLabel));
 
         mSingleDeviceSpinner.setVisibility(View.VISIBLE);
+        // Hide permission list and confirmation dialog first before the
+        // first matched device is found.
         mPermissionListRecyclerView.setVisibility(View.GONE);
         mDeviceListRecyclerView.setVisibility(View.GONE);
         mAssociationConfirmationDialog.setVisibility(View.GONE);
@@ -526,11 +554,20 @@ public class CompanionDeviceActivity extends FragmentActivity implements
             title = getHtmlFromResources(this, R.string.confirmation_title, appLabel, deviceName);
             summary = getHtmlFromResources(this, R.string.summary_generic);
             profileIcon = getIcon(this, R.drawable.ic_device_other);
+            // Summary is not needed for null profile.
             mSummary.setVisibility(View.GONE);
+            mConstraintList.setVisibility(View.GONE);
         } else if (deviceProfile.equals(DEVICE_PROFILE_WATCH)) {
-            title = getHtmlFromResources(this, R.string.confirmation_title, appLabel, profileName);
-            summary = getHtmlFromResources(this, R.string.summary_watch, deviceName, appLabel);
+            title = getHtmlFromResources(this, R.string.confirmation_title, appLabel, deviceName);
+            summary = getHtmlFromResources(
+                    this, R.string.summary_watch_single_device, profileName, appLabel);
             profileIcon = getIcon(this, R.drawable.ic_watch);
+
+            mPermissionTypes.addAll(Arrays.asList(
+                    PERMISSION_NOTIFICATION, PERMISSION_PHONE, PERMISSION_SMS, PERMISSION_CONTACTS,
+                    PERMISSION_CALENDAR, PERMISSION_NEARBY_DEVICES));
+
+            setupPermissionList();
         } else {
             throw new RuntimeException("Unsupported profile " + deviceProfile);
         }
@@ -585,8 +622,9 @@ public class CompanionDeviceActivity extends FragmentActivity implements
         // "Remove" consent button: users would need to click on the list item.
         mButtonAllow.setVisibility(View.GONE);
         mButtonNotAllow.setVisibility(View.GONE);
+        mDeviceListRecyclerView.setVisibility(View.VISIBLE);
         mButtonNotAllowMultipleDevices.setVisibility(View.VISIBLE);
-        mMultipleDeviceList.setVisibility(View.VISIBLE);
+        mConstraintList.setVisibility(View.VISIBLE);
         mMultipleDeviceSpinner.setVisibility(View.VISIBLE);
     }
 
@@ -641,6 +679,80 @@ public class CompanionDeviceActivity extends FragmentActivity implements
 
     private boolean isDone() {
         return mApproved || mCancelled;
+    }
+
+    // Set up the mPermissionListRecyclerView, including set up the adapter,
+    // initiate the layoutManager for the recyclerview, add listeners for monitoring the scrolling
+    // and when mPermissionListRecyclerView is fully populated.
+    // Lastly, disable the Allow and Don't allow buttons.
+    private void setupPermissionList() {
+        mPermissionListAdapter.setPermissionType(mPermissionTypes);
+        mPermissionListRecyclerView.setAdapter(mPermissionListAdapter);
+        mPermissionListRecyclerView.setLayoutManager(mPermissionsLayoutManager);
+
+        disableButtons();
+
+        // Enable buttons once users scroll down to the bottom of the permission list.
+        mPermissionListRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                if (!recyclerView.canScrollVertically(1)) {
+                    enableButtons();
+                }
+            }
+        });
+        // Enable buttons if last item in the permission list is visible to the users when
+        // mPermissionListRecyclerView is fully populated.
+        mPermissionListRecyclerView.getViewTreeObserver().addOnGlobalLayoutListener(
+                new ViewTreeObserver.OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+                        LinearLayoutManager layoutManager =
+                                (LinearLayoutManager) mPermissionListRecyclerView
+                                        .getLayoutManager();
+                        int lastVisibleItemPosition =
+                                layoutManager.findLastCompletelyVisibleItemPosition();
+                        int numItems = mPermissionListRecyclerView.getAdapter().getItemCount();
+
+                        if (lastVisibleItemPosition >= numItems - 1) {
+                            enableButtons();
+                        }
+
+                        mPermissionListRecyclerView.getViewTreeObserver()
+                                .removeOnGlobalLayoutListener(this);
+                    }
+                });
+
+        mConstraintList.setVisibility(View.VISIBLE);
+        mPermissionListRecyclerView.setVisibility(View.VISIBLE);
+    }
+
+    // Disable and grey out the Allow and Don't allow buttons if the last permission in the
+    // permission list is not visible to the users.
+    private void disableButtons() {
+        mButtonAllow.setEnabled(false);
+        mButtonNotAllow.setEnabled(false);
+        mButtonAllow.setTextColor(
+                getResources().getColor(android.R.color.system_neutral1_400, null));
+        mButtonNotAllow.setTextColor(
+                getResources().getColor(android.R.color.system_neutral1_400, null));
+        mButtonAllow.getBackground().setColorFilter(
+                (new BlendModeColorFilter(Color.LTGRAY,  BlendMode.DARKEN)));
+        mButtonNotAllow.getBackground().setColorFilter(
+                (new BlendModeColorFilter(Color.LTGRAY,  BlendMode.DARKEN)));
+    }
+    // Enable and restore the color for the Allow and Don't allow buttons if the last permission in
+    // the permission list is visible to the users.
+    private void enableButtons() {
+        mButtonAllow.setEnabled(true);
+        mButtonNotAllow.setEnabled(true);
+        mButtonAllow.getBackground().setColorFilter(null);
+        mButtonNotAllow.getBackground().setColorFilter(null);
+        mButtonAllow.setTextColor(
+                getResources().getColor(android.R.color.system_neutral1_900, null));
+        mButtonNotAllow.setTextColor(
+                getResources().getColor(android.R.color.system_neutral1_900, null));
     }
 
     private final ResultReceiver mOnAssociationCreatedReceiver =

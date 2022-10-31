@@ -39,6 +39,6 @@
         android:layout_height="wrap_content"
         android:paddingStart="24dp"
         android:paddingEnd="24dp"
-        android:textAppearance="?android:attr/textAppearanceListItemSmall"/>
+        style="@style/TextAppearance"/>
 
 </LinearLayout>
