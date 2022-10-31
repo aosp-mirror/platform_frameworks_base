@@ -45,6 +45,7 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.systemui.dagger.GlobalRootComponent;
 import com.android.systemui.dagger.SysUIComponent;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.NotificationChannels;
 
 import java.util.Comparator;
@@ -146,7 +147,7 @@ public class SystemUIApplication extends Application implements
                     if (mServicesStarted) {
                         final int N = mServices.length;
                         for (int i = 0; i < N; i++) {
-                            mServices[i].onBootCompleted();
+                            notifyBootCompleted(mServices[i]);
                         }
                     }
                 }
@@ -265,7 +266,7 @@ public class SystemUIApplication extends Application implements
 
         for (i = 0; i < mServices.length; i++) {
             if (mBootCompleteCache.isBootComplete()) {
-                mServices[i].onBootCompleted();
+                notifyBootCompleted(mServices[i]);
             }
 
             mDumpManager.registerDumpable(mServices[i].getClass().getName(), mServices[i]);
@@ -276,7 +277,13 @@ public class SystemUIApplication extends Application implements
         mServicesStarted = true;
     }
 
-    private void timeInitialization(String clsName, Runnable init, TimingsTraceLog log,
+    private static void notifyBootCompleted(CoreStartable coreStartable) {
+        Trace.beginSection(coreStartable.getClass().getSimpleName() + ".onBootCompleted()");
+        coreStartable.onBootCompleted();
+        Trace.endSection();
+    }
+
+    private static void timeInitialization(String clsName, Runnable init, TimingsTraceLog log,
             String metricsPrefix) {
         long ti = System.currentTimeMillis();
         log.traceBegin(metricsPrefix + " " + clsName);
@@ -290,11 +297,13 @@ public class SystemUIApplication extends Application implements
         }
     }
 
-    private CoreStartable startAdditionalStartable(String clsName) {
+    private static CoreStartable startAdditionalStartable(String clsName) {
         CoreStartable startable;
         if (DEBUG) Log.d(TAG, "loading: " + clsName);
         try {
+            Trace.beginSection(clsName + ".newInstance()");
             startable = (CoreStartable) Class.forName(clsName).newInstance();
+            Trace.endSection();
         } catch (ClassNotFoundException
                 | IllegalAccessException
                 | InstantiationException ex) {
@@ -304,14 +313,19 @@ public class SystemUIApplication extends Application implements
         return startStartable(startable);
     }
 
-    private CoreStartable startStartable(String clsName, Provider<CoreStartable> provider) {
+    private static CoreStartable startStartable(String clsName, Provider<CoreStartable> provider) {
         if (DEBUG) Log.d(TAG, "loading: " + clsName);
-        return startStartable(provider.get());
+        Trace.beginSection("Provider<" + clsName + ">.get()");
+        CoreStartable startable = provider.get();
+        Trace.endSection();
+        return startStartable(startable);
     }
 
-    private CoreStartable startStartable(CoreStartable startable) {
+    private static CoreStartable startStartable(CoreStartable startable) {
         if (DEBUG) Log.d(TAG, "running: " + startable);
+        Trace.beginSection(startable.getClass().getSimpleName() + ".start()");
         startable.start();
+        Trace.endSection();
 
         return startable;
     }
@@ -349,11 +363,18 @@ public class SystemUIApplication extends Application implements
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         if (mServicesStarted) {
-            mSysUIComponent.getConfigurationController().onConfigurationChanged(newConfig);
+            ConfigurationController configController = mSysUIComponent.getConfigurationController();
+            Trace.beginSection(
+                    configController.getClass().getSimpleName() + ".onConfigurationChanged()");
+            configController.onConfigurationChanged(newConfig);
+            Trace.endSection();
             int len = mServices.length;
             for (int i = 0; i < len; i++) {
                 if (mServices[i] != null) {
+                    Trace.beginSection(
+                            mServices[i].getClass().getSimpleName() + ".onConfigurationChanged()");
                     mServices[i].onConfigurationChanged(newConfig);
+                    Trace.endSection();
                 }
             }
         }
