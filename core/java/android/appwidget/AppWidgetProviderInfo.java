@@ -355,6 +355,9 @@ public class AppWidgetProviderInfo implements Parcelable {
     @UnsupportedAppUsage
     public ActivityInfo providerInfo;
 
+    /** @hide */
+    public boolean isExtendedFromAppWidgetProvider;
+
     public AppWidgetProviderInfo() {
 
     }
@@ -387,6 +390,7 @@ public class AppWidgetProviderInfo implements Parcelable {
         this.providerInfo = in.readTypedObject(ActivityInfo.CREATOR);
         this.widgetFeatures = in.readInt();
         this.descriptionRes = in.readInt();
+        this.isExtendedFromAppWidgetProvider = in.readBoolean();
     }
 
     /**
@@ -510,6 +514,7 @@ public class AppWidgetProviderInfo implements Parcelable {
         out.writeTypedObject(this.providerInfo, flags);
         out.writeInt(this.widgetFeatures);
         out.writeInt(this.descriptionRes);
+        out.writeBoolean(this.isExtendedFromAppWidgetProvider);
     }
 
     @Override
@@ -539,6 +544,7 @@ public class AppWidgetProviderInfo implements Parcelable {
         that.providerInfo = this.providerInfo;
         that.widgetFeatures = this.widgetFeatures;
         that.descriptionRes = this.descriptionRes;
+        that.isExtendedFromAppWidgetProvider = this.isExtendedFromAppWidgetProvider;
         return that;
     }
 
