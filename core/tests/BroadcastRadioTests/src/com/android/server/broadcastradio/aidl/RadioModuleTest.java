@@ -47,6 +47,15 @@ import org.mockito.junit.MockitoJUnitRunner;
 public final class RadioModuleTest {
 
     private static final int TEST_ENABLED_TYPE = Announcement.TYPE_EVENT;
+    private static final RadioManager.ModuleProperties TEST_MODULE_PROPERTIES =
+            new RadioManager.ModuleProperties(/* id= */ 0, /* serviceName= */ "", /* classId= */ 0,
+                    /* implementor= */ "", /* product= */ "", /* version= */ "",
+                    /* serial= */ "", /* numTuners= */ 0, /* numAudioSources= */ 0,
+                    /* isInitializationRequired= */ false, /* isCaptureSupported= */ false,
+                    /* bands= */ null, /* isBgScanSupported= */ false,
+                    /* supportedProgramTypes= */ new int[]{},
+                    /* supportedIdentifierTypes */ new int[]{},
+                    /* dabFrequencyTable= */ null, /* vendorInfo= */ null);
 
     // Mocks
     @Mock
@@ -63,14 +72,7 @@ public final class RadioModuleTest {
 
     @Before
     public void setup() throws RemoteException {
-        mRadioModule = new RadioModule(mBroadcastRadioMock, new RadioManager.ModuleProperties(
-                /* id= */ 0, /* serviceName= */ "", /* classId= */ 0, /* implementor= */ "",
-                /* product= */ "", /* version= */ "", /* serial= */ "", /* numTuners= */ 0,
-                /* numAudioSources= */ 0, /* isInitializationRequired= */ false,
-                /* isCaptureSupported= */ false, /* bands= */ null, /* isBgScanSupported= */ false,
-                /* supportedProgramTypes= */ new int[]{},
-                /* supportedIdentifierTypes */ new int[]{},
-                /* dabFrequencyTable= */ null, /* vendorInfo= */ null), mLock);
+        mRadioModule = new RadioModule(mBroadcastRadioMock, TEST_MODULE_PROPERTIES, mLock);
 
         // TODO(b/241118988): test non-null image for getImage method
         when(mBroadcastRadioMock.getImage(anyInt())).thenReturn(null);
@@ -85,6 +87,12 @@ public final class RadioModuleTest {
     public void getService() {
         assertWithMessage("Service of radio module")
                 .that(mRadioModule.getService()).isEqualTo(mBroadcastRadioMock);
+    }
+
+    @Test
+    public void getProperties() {
+        assertWithMessage("Module properties of radio module")
+                .that(mRadioModule.getProperties()).isEqualTo(TEST_MODULE_PROPERTIES);
     }
 
     @Test
