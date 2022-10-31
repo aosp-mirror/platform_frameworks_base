@@ -217,6 +217,7 @@ object PreferencePageProvider : SettingsPageProvider {
 @Preview(showBackground = true)
 @Composable
 private fun PreferencePagePreview() {
+    SpaEnvironmentFactory.resetForPreview()
     SettingsTheme {
         PreferencePageProvider.Page(null)
     }
