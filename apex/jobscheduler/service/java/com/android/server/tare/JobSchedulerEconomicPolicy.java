@@ -38,9 +38,10 @@ import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_MIN_START_BA
 import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_MIN_START_CTP_CAKES;
 import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_TIMEOUT_PENALTY_BASE_PRICE_CAKES;
 import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_TIMEOUT_PENALTY_CTP_CAKES;
-import static android.app.tare.EconomyManager.DEFAULT_JS_HARD_CONSUMPTION_LIMIT_CAKES;
 import static android.app.tare.EconomyManager.DEFAULT_JS_INITIAL_CONSUMPTION_LIMIT_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_JS_MAX_CONSUMPTION_LIMIT_CAKES;
 import static android.app.tare.EconomyManager.DEFAULT_JS_MAX_SATIATED_BALANCE_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_JS_MIN_CONSUMPTION_LIMIT_CAKES;
 import static android.app.tare.EconomyManager.DEFAULT_JS_MIN_SATIATED_BALANCE_EXEMPTED_CAKES;
 import static android.app.tare.EconomyManager.DEFAULT_JS_MIN_SATIATED_BALANCE_INCREMENT_APP_UPDATER_CAKES;
 import static android.app.tare.EconomyManager.DEFAULT_JS_MIN_SATIATED_BALANCE_OTHER_APP_CAKES;
@@ -84,9 +85,10 @@ import static android.app.tare.EconomyManager.KEY_JS_ACTION_JOB_MIN_START_BASE_P
 import static android.app.tare.EconomyManager.KEY_JS_ACTION_JOB_MIN_START_CTP;
 import static android.app.tare.EconomyManager.KEY_JS_ACTION_JOB_TIMEOUT_PENALTY_BASE_PRICE;
 import static android.app.tare.EconomyManager.KEY_JS_ACTION_JOB_TIMEOUT_PENALTY_CTP;
-import static android.app.tare.EconomyManager.KEY_JS_HARD_CONSUMPTION_LIMIT;
 import static android.app.tare.EconomyManager.KEY_JS_INITIAL_CONSUMPTION_LIMIT;
+import static android.app.tare.EconomyManager.KEY_JS_MAX_CONSUMPTION_LIMIT;
 import static android.app.tare.EconomyManager.KEY_JS_MAX_SATIATED_BALANCE;
+import static android.app.tare.EconomyManager.KEY_JS_MIN_CONSUMPTION_LIMIT;
 import static android.app.tare.EconomyManager.KEY_JS_MIN_SATIATED_BALANCE_EXEMPTED;
 import static android.app.tare.EconomyManager.KEY_JS_MIN_SATIATED_BALANCE_INCREMENT_APP_UPDATER;
 import static android.app.tare.EconomyManager.KEY_JS_MIN_SATIATED_BALANCE_OTHER_APP;
@@ -159,7 +161,8 @@ public class JobSchedulerEconomicPolicy extends EconomicPolicy {
     private long mMinSatiatedBalanceIncrementalAppUpdater;
     private long mMaxSatiatedBalance;
     private long mInitialSatiatedConsumptionLimit;
-    private long mHardSatiatedConsumptionLimit;
+    private long mMinSatiatedConsumptionLimit;
+    private long mMaxSatiatedConsumptionLimit;
 
     private final KeyValueListParser mParser = new KeyValueListParser(',');
     private final Injector mInjector;
@@ -216,8 +219,13 @@ public class JobSchedulerEconomicPolicy extends EconomicPolicy {
     }
 
     @Override
-    long getHardSatiatedConsumptionLimit() {
-        return mHardSatiatedConsumptionLimit;
+    long getMinSatiatedConsumptionLimit() {
+        return mMinSatiatedConsumptionLimit;
+    }
+
+    @Override
+    long getMaxSatiatedConsumptionLimit() {
+        return mMaxSatiatedConsumptionLimit;
     }
 
     @NonNull
@@ -260,12 +268,15 @@ public class JobSchedulerEconomicPolicy extends EconomicPolicy {
         mMaxSatiatedBalance = getConstantAsCake(mParser, properties,
             KEY_JS_MAX_SATIATED_BALANCE, DEFAULT_JS_MAX_SATIATED_BALANCE_CAKES,
             Math.max(arcToCake(1), mMinSatiatedBalanceExempted));
+        mMinSatiatedConsumptionLimit = getConstantAsCake(mParser, properties,
+                KEY_JS_MIN_CONSUMPTION_LIMIT, DEFAULT_JS_MIN_CONSUMPTION_LIMIT_CAKES,
+                arcToCake(1));
         mInitialSatiatedConsumptionLimit = getConstantAsCake(mParser, properties,
-            KEY_JS_INITIAL_CONSUMPTION_LIMIT, DEFAULT_JS_INITIAL_CONSUMPTION_LIMIT_CAKES,
-            arcToCake(1));
-        mHardSatiatedConsumptionLimit = getConstantAsCake(mParser, properties,
-            KEY_JS_HARD_CONSUMPTION_LIMIT, DEFAULT_JS_HARD_CONSUMPTION_LIMIT_CAKES,
-            mInitialSatiatedConsumptionLimit);
+                KEY_JS_INITIAL_CONSUMPTION_LIMIT, DEFAULT_JS_INITIAL_CONSUMPTION_LIMIT_CAKES,
+                mMinSatiatedConsumptionLimit);
+        mMaxSatiatedConsumptionLimit = getConstantAsCake(mParser, properties,
+                KEY_JS_MAX_CONSUMPTION_LIMIT, DEFAULT_JS_MAX_CONSUMPTION_LIMIT_CAKES,
+                mInitialSatiatedConsumptionLimit);
 
         mActions.put(ACTION_JOB_MAX_START, new Action(ACTION_JOB_MAX_START,
                 getConstantAsCake(mParser, properties,
@@ -420,9 +431,11 @@ public class JobSchedulerEconomicPolicy extends EconomicPolicy {
         pw.decreaseIndent();
         pw.print("Max satiated balance", cakeToString(mMaxSatiatedBalance)).println();
         pw.print("Consumption limits: [");
+        pw.print(cakeToString(mMinSatiatedConsumptionLimit));
+        pw.print(", ");
         pw.print(cakeToString(mInitialSatiatedConsumptionLimit));
         pw.print(", ");
-        pw.print(cakeToString(mHardSatiatedConsumptionLimit));
+        pw.print(cakeToString(mMaxSatiatedConsumptionLimit));
         pw.println("]");
 
         pw.println();

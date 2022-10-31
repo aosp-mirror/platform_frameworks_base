@@ -33,9 +33,10 @@ import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_INEXACT_NO
 import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_INEXACT_NONWAKEUP_CTP_CAKES;
 import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_INEXACT_WAKEUP_BASE_PRICE_CAKES;
 import static android.app.tare.EconomyManager.DEFAULT_AM_ACTION_ALARM_INEXACT_WAKEUP_CTP_CAKES;
-import static android.app.tare.EconomyManager.DEFAULT_AM_HARD_CONSUMPTION_LIMIT_CAKES;
 import static android.app.tare.EconomyManager.DEFAULT_AM_INITIAL_CONSUMPTION_LIMIT_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_AM_MAX_CONSUMPTION_LIMIT_CAKES;
 import static android.app.tare.EconomyManager.DEFAULT_AM_MAX_SATIATED_BALANCE_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_AM_MIN_CONSUMPTION_LIMIT_CAKES;
 import static android.app.tare.EconomyManager.DEFAULT_AM_MIN_SATIATED_BALANCE_EXEMPTED_CAKES;
 import static android.app.tare.EconomyManager.DEFAULT_AM_MIN_SATIATED_BALANCE_OTHER_APP_CAKES;
 import static android.app.tare.EconomyManager.DEFAULT_AM_REWARD_NOTIFICATION_INTERACTION_INSTANT_CAKES;
@@ -71,9 +72,10 @@ import static android.app.tare.EconomyManager.KEY_AM_ACTION_ALARM_INEXACT_NONWAK
 import static android.app.tare.EconomyManager.KEY_AM_ACTION_ALARM_INEXACT_NONWAKEUP_CTP;
 import static android.app.tare.EconomyManager.KEY_AM_ACTION_ALARM_INEXACT_WAKEUP_BASE_PRICE;
 import static android.app.tare.EconomyManager.KEY_AM_ACTION_ALARM_INEXACT_WAKEUP_CTP;
-import static android.app.tare.EconomyManager.KEY_AM_HARD_CONSUMPTION_LIMIT;
 import static android.app.tare.EconomyManager.KEY_AM_INITIAL_CONSUMPTION_LIMIT;
+import static android.app.tare.EconomyManager.KEY_AM_MAX_CONSUMPTION_LIMIT;
 import static android.app.tare.EconomyManager.KEY_AM_MAX_SATIATED_BALANCE;
+import static android.app.tare.EconomyManager.KEY_AM_MIN_CONSUMPTION_LIMIT;
 import static android.app.tare.EconomyManager.KEY_AM_MIN_SATIATED_BALANCE_EXEMPTED;
 import static android.app.tare.EconomyManager.KEY_AM_MIN_SATIATED_BALANCE_OTHER_APP;
 import static android.app.tare.EconomyManager.KEY_AM_REWARD_NOTIFICATION_INTERACTION_INSTANT;
@@ -146,7 +148,8 @@ public class AlarmManagerEconomicPolicy extends EconomicPolicy {
     private long mMinSatiatedBalanceOther;
     private long mMaxSatiatedBalance;
     private long mInitialSatiatedConsumptionLimit;
-    private long mHardSatiatedConsumptionLimit;
+    private long mMinSatiatedConsumptionLimit;
+    private long mMaxSatiatedConsumptionLimit;
 
     private final KeyValueListParser mParser = new KeyValueListParser(',');
     private final Injector mInjector;
@@ -199,8 +202,13 @@ public class AlarmManagerEconomicPolicy extends EconomicPolicy {
     }
 
     @Override
-    long getHardSatiatedConsumptionLimit() {
-        return mHardSatiatedConsumptionLimit;
+    long getMinSatiatedConsumptionLimit() {
+        return mMinSatiatedConsumptionLimit;
+    }
+
+    @Override
+    long getMaxSatiatedConsumptionLimit() {
+        return mMaxSatiatedConsumptionLimit;
     }
 
     @NonNull
@@ -240,12 +248,15 @@ public class AlarmManagerEconomicPolicy extends EconomicPolicy {
         mMaxSatiatedBalance = getConstantAsCake(mParser, properties,
             KEY_AM_MAX_SATIATED_BALANCE, DEFAULT_AM_MAX_SATIATED_BALANCE_CAKES,
             Math.max(arcToCake(1), mMinSatiatedBalanceExempted));
+        mMinSatiatedConsumptionLimit = getConstantAsCake(mParser, properties,
+                KEY_AM_MIN_CONSUMPTION_LIMIT, DEFAULT_AM_MIN_CONSUMPTION_LIMIT_CAKES,
+                arcToCake(1));
         mInitialSatiatedConsumptionLimit = getConstantAsCake(mParser, properties,
-            KEY_AM_INITIAL_CONSUMPTION_LIMIT, DEFAULT_AM_INITIAL_CONSUMPTION_LIMIT_CAKES,
-            arcToCake(1));
-        mHardSatiatedConsumptionLimit = getConstantAsCake(mParser, properties,
-            KEY_AM_HARD_CONSUMPTION_LIMIT, DEFAULT_AM_HARD_CONSUMPTION_LIMIT_CAKES,
-            mInitialSatiatedConsumptionLimit);
+                KEY_AM_INITIAL_CONSUMPTION_LIMIT, DEFAULT_AM_INITIAL_CONSUMPTION_LIMIT_CAKES,
+                mMinSatiatedConsumptionLimit);
+        mMaxSatiatedConsumptionLimit = getConstantAsCake(mParser, properties,
+                KEY_AM_MAX_CONSUMPTION_LIMIT, DEFAULT_AM_MAX_CONSUMPTION_LIMIT_CAKES,
+                mInitialSatiatedConsumptionLimit);
 
         final long exactAllowWhileIdleWakeupBasePrice = getConstantAsCake(mParser, properties,
                 KEY_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_WAKEUP_BASE_PRICE,
@@ -396,9 +407,11 @@ public class AlarmManagerEconomicPolicy extends EconomicPolicy {
         pw.decreaseIndent();
         pw.print("Max satiated balance", cakeToString(mMaxSatiatedBalance)).println();
         pw.print("Consumption limits: [");
+        pw.print(cakeToString(mMinSatiatedConsumptionLimit));
+        pw.print(", ");
         pw.print(cakeToString(mInitialSatiatedConsumptionLimit));
         pw.print(", ");
-        pw.print(cakeToString(mHardSatiatedConsumptionLimit));
+        pw.print(cakeToString(mMaxSatiatedConsumptionLimit));
         pw.println("]");
 
         pw.println();

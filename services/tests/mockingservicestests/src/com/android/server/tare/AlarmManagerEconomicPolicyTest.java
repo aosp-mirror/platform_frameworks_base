@@ -132,8 +132,10 @@ public class AlarmManagerEconomicPolicyTest {
     public void testDefaults() {
         assertEquals(EconomyManager.DEFAULT_AM_INITIAL_CONSUMPTION_LIMIT_CAKES,
                 mEconomicPolicy.getInitialSatiatedConsumptionLimit());
-        assertEquals(EconomyManager.DEFAULT_AM_HARD_CONSUMPTION_LIMIT_CAKES,
-                mEconomicPolicy.getHardSatiatedConsumptionLimit());
+        assertEquals(EconomyManager.DEFAULT_AM_MIN_CONSUMPTION_LIMIT_CAKES,
+                mEconomicPolicy.getMinSatiatedConsumptionLimit());
+        assertEquals(EconomyManager.DEFAULT_AM_MAX_CONSUMPTION_LIMIT_CAKES,
+                mEconomicPolicy.getMaxSatiatedConsumptionLimit());
         final String pkgRestricted = "com.pkg.restricted";
         when(mIrs.isPackageRestricted(anyInt(), eq(pkgRestricted))).thenReturn(true);
         assertEquals(0, mEconomicPolicy.getMaxSatiatedBalance(0, pkgRestricted));
@@ -150,13 +152,15 @@ public class AlarmManagerEconomicPolicyTest {
     @Test
     public void testConstantsUpdating_ValidValues() {
         setDeviceConfigCakes(EconomyManager.KEY_AM_INITIAL_CONSUMPTION_LIMIT, arcToCake(5));
-        setDeviceConfigCakes(EconomyManager.KEY_AM_HARD_CONSUMPTION_LIMIT, arcToCake(25));
+        setDeviceConfigCakes(EconomyManager.KEY_AM_MIN_CONSUMPTION_LIMIT, arcToCake(3));
+        setDeviceConfigCakes(EconomyManager.KEY_AM_MAX_CONSUMPTION_LIMIT, arcToCake(25));
         setDeviceConfigCakes(EconomyManager.KEY_AM_MAX_SATIATED_BALANCE, arcToCake(10));
         setDeviceConfigCakes(EconomyManager.KEY_AM_MIN_SATIATED_BALANCE_EXEMPTED, arcToCake(9));
         setDeviceConfigCakes(EconomyManager.KEY_AM_MIN_SATIATED_BALANCE_OTHER_APP, arcToCake(7));
 
         assertEquals(arcToCake(5), mEconomicPolicy.getInitialSatiatedConsumptionLimit());
-        assertEquals(arcToCake(25), mEconomicPolicy.getHardSatiatedConsumptionLimit());
+        assertEquals(arcToCake(3), mEconomicPolicy.getMinSatiatedConsumptionLimit());
+        assertEquals(arcToCake(25), mEconomicPolicy.getMaxSatiatedConsumptionLimit());
         final String pkgRestricted = "com.pkg.restricted";
         when(mIrs.isPackageRestricted(anyInt(), eq(pkgRestricted))).thenReturn(true);
         assertEquals(arcToCake(0), mEconomicPolicy.getMaxSatiatedBalance(0, pkgRestricted));
@@ -171,13 +175,15 @@ public class AlarmManagerEconomicPolicyTest {
     public void testConstantsUpdating_InvalidValues() {
         // Test negatives.
         setDeviceConfigCakes(EconomyManager.KEY_AM_INITIAL_CONSUMPTION_LIMIT, arcToCake(-5));
-        setDeviceConfigCakes(EconomyManager.KEY_AM_HARD_CONSUMPTION_LIMIT, arcToCake(-5));
+        setDeviceConfigCakes(EconomyManager.KEY_AM_MIN_CONSUMPTION_LIMIT, arcToCake(-5));
+        setDeviceConfigCakes(EconomyManager.KEY_AM_MAX_CONSUMPTION_LIMIT, arcToCake(-5));
         setDeviceConfigCakes(EconomyManager.KEY_AM_MAX_SATIATED_BALANCE, arcToCake(-1));
         setDeviceConfigCakes(EconomyManager.KEY_AM_MIN_SATIATED_BALANCE_EXEMPTED, arcToCake(-2));
         setDeviceConfigCakes(EconomyManager.KEY_AM_MIN_SATIATED_BALANCE_OTHER_APP, arcToCake(-3));
 
         assertEquals(arcToCake(1), mEconomicPolicy.getInitialSatiatedConsumptionLimit());
-        assertEquals(arcToCake(1), mEconomicPolicy.getHardSatiatedConsumptionLimit());
+        assertEquals(arcToCake(1), mEconomicPolicy.getMinSatiatedConsumptionLimit());
+        assertEquals(arcToCake(1), mEconomicPolicy.getMaxSatiatedConsumptionLimit());
         final String pkgRestricted = "com.pkg.restricted";
         when(mIrs.isPackageRestricted(anyInt(), eq(pkgRestricted))).thenReturn(true);
         assertEquals(arcToCake(0), mEconomicPolicy.getMaxSatiatedBalance(0, pkgRestricted));
@@ -188,14 +194,16 @@ public class AlarmManagerEconomicPolicyTest {
         assertEquals(arcToCake(0), mEconomicPolicy.getMinSatiatedBalance(0, "com.any.other.app"));
 
         // Test min+max reversed.
-        setDeviceConfigCakes(EconomyManager.KEY_AM_INITIAL_CONSUMPTION_LIMIT, arcToCake(5));
-        setDeviceConfigCakes(EconomyManager.KEY_AM_HARD_CONSUMPTION_LIMIT, arcToCake(3));
+        setDeviceConfigCakes(EconomyManager.KEY_AM_MIN_CONSUMPTION_LIMIT, arcToCake(5));
+        setDeviceConfigCakes(EconomyManager.KEY_AM_INITIAL_CONSUMPTION_LIMIT, arcToCake(4));
+        setDeviceConfigCakes(EconomyManager.KEY_AM_MAX_CONSUMPTION_LIMIT, arcToCake(3));
         setDeviceConfigCakes(EconomyManager.KEY_AM_MAX_SATIATED_BALANCE, arcToCake(10));
         setDeviceConfigCakes(EconomyManager.KEY_AM_MIN_SATIATED_BALANCE_EXEMPTED, arcToCake(11));
         setDeviceConfigCakes(EconomyManager.KEY_AM_MIN_SATIATED_BALANCE_OTHER_APP, arcToCake(13));
 
         assertEquals(arcToCake(5), mEconomicPolicy.getInitialSatiatedConsumptionLimit());
-        assertEquals(arcToCake(5), mEconomicPolicy.getHardSatiatedConsumptionLimit());
+        assertEquals(arcToCake(5), mEconomicPolicy.getMinSatiatedConsumptionLimit());
+        assertEquals(arcToCake(5), mEconomicPolicy.getMaxSatiatedConsumptionLimit());
         assertEquals(arcToCake(0), mEconomicPolicy.getMaxSatiatedBalance(0, pkgRestricted));
         assertEquals(arcToCake(13), mEconomicPolicy.getMaxSatiatedBalance(0, "com.any.other.app"));
         assertEquals(arcToCake(13), mEconomicPolicy.getMinSatiatedBalance(0, pkgExempted));
