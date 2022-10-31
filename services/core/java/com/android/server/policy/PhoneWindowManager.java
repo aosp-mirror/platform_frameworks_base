@@ -208,7 +208,6 @@ import com.android.internal.policy.LogDecelerateInterpolator;
 import com.android.internal.policy.PhoneWindow;
 import com.android.internal.policy.TransitionAnimation;
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.AccessibilityManagerInternal;
 import com.android.server.ExtconStateObserver;
@@ -339,6 +338,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // The config value can be overridden using Settings.Global.STEM_PRIMARY_BUTTON_SHORT_PRESS
     static final int SHORT_PRESS_PRIMARY_NOTHING = 0;
     static final int SHORT_PRESS_PRIMARY_LAUNCH_ALL_APPS = 1;
+    static final int SHORT_PRESS_PRIMARY_LAUNCH_TARGET_ACTIVITY = 2;
 
     // Must match: config_longPressOnStemPrimaryBehavior in config.xml
     // The config value can be overridden using Settings.Global.STEM_PRIMARY_BUTTON_LONG_PRESS
@@ -609,6 +609,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     // What we do when the user double-taps on home
     private int mDoubleTapOnHomeBehavior;
+
+    // Must match config_primaryShortPressTargetActivity in config.xml
+    ComponentName mPrimaryShortPressTargetActivity;
 
     // Whether to lock the device after the next dreaming transition has finished.
     private boolean mLockAfterDreamingTransitionFinished;
@@ -1415,23 +1418,59 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void stemPrimarySinglePressAction(int behavior) {
+        if (DEBUG_INPUT) {
+            Slog.d(TAG, "stemPrimarySinglePressAction: behavior=" + behavior);
+        }
+        if (behavior == SHORT_PRESS_PRIMARY_NOTHING) return;
+
+        final boolean keyguardActive = mKeyguardDelegate != null && mKeyguardDelegate.isShowing();
+        if (keyguardActive) {
+            // If keyguarded then notify the keyguard.
+            mKeyguardDelegate.onSystemKeyPressed(KeyEvent.KEYCODE_STEM_PRIMARY);
+            return;
+        }
         switch (behavior) {
-            case SHORT_PRESS_PRIMARY_NOTHING:
-                break;
             case SHORT_PRESS_PRIMARY_LAUNCH_ALL_APPS:
                 if (DEBUG_INPUT) {
                     Slog.d(TAG, "Executing stem primary short press action behavior.");
                 }
-                final boolean keyguardActive =
-                        mKeyguardDelegate != null && mKeyguardDelegate.isShowing();
-                if (!keyguardActive) {
-                    Intent intent = new Intent(Intent.ACTION_ALL_APPS);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                            | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
-                    startActivityAsUser(intent, UserHandle.CURRENT_OR_SELF);
+                Intent allAppsIntent = new Intent(Intent.ACTION_ALL_APPS);
+                allAppsIntent.addFlags(
+                        Intent.FLAG_ACTIVITY_NEW_TASK
+                                | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+                startActivityAsUser(allAppsIntent, UserHandle.CURRENT_OR_SELF);
+                break;
+            case SHORT_PRESS_PRIMARY_LAUNCH_TARGET_ACTIVITY:
+                if (DEBUG_INPUT) {
+                    Slog.d(
+                            TAG,
+                            "Executing stem primary short press action behavior for launching "
+                                    + "target activity.");
+                }
+                if (mPrimaryShortPressTargetActivity != null) {
+                    Intent targetActivityIntent = new Intent();
+                    targetActivityIntent.setComponent(mPrimaryShortPressTargetActivity);
+                    ResolveInfo resolveInfo =
+                            mContext.getPackageManager()
+                                    .resolveActivity(targetActivityIntent, /* flags= */ 0);
+                    if (resolveInfo != null) {
+                        targetActivityIntent.addFlags(
+                                Intent.FLAG_ACTIVITY_NEW_TASK
+                                        | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
+                                        | Intent.FLAG_ACTIVITY_TASK_ON_HOME);
+                        startActivityAsUser(targetActivityIntent, UserHandle.CURRENT_OR_SELF);
+                    } else {
+                        Slog.wtf(
+                                TAG,
+                                "Could not resolve activity with : "
+                                        + mPrimaryShortPressTargetActivity.flattenToString()
+                                        + " name.");
+                    }
                 } else {
-                    // If keyguarded then notify the keyguard.
-                    mKeyguardDelegate.onSystemKeyPressed(KeyEvent.KEYCODE_STEM_PRIMARY);
+                    Slog.wtf(
+                            TAG,
+                            "mPrimaryShortPressTargetActivity must not be null and correctly"
+                                + " specified");
                 }
                 break;
         }
@@ -2244,6 +2283,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mPowerDoublePressTargetActivity = ComponentName.unflattenFromString(
             mContext.getResources().getString(
                 com.android.internal.R.string.config_doublePressOnPowerTargetActivity));
+        mPrimaryShortPressTargetActivity = ComponentName.unflattenFromString(
+            mContext.getResources().getString(
+                com.android.internal.R.string.config_primaryShortPressTargetActivity));
         mShortPressOnSleepBehavior = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_shortPressOnSleepBehavior);
         mAllowStartActivityForLongPressOnPowerDuringSetup = mContext.getResources().getBoolean(
@@ -6417,6 +6459,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 return "SHORT_PRESS_PRIMARY_NOTHING";
             case SHORT_PRESS_PRIMARY_LAUNCH_ALL_APPS:
                 return "SHORT_PRESS_PRIMARY_LAUNCH_ALL_APPS";
+            case SHORT_PRESS_PRIMARY_LAUNCH_TARGET_ACTIVITY:
+                return "SHORT_PRESS_PRIMARY_LAUNCH_TARGET_ACTIVITY";
             default:
                 return Integer.toString(behavior);
         }

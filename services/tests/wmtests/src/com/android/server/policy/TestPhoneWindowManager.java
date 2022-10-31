@@ -59,9 +59,11 @@ import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
 import android.app.NotificationManager;
 import android.app.SearchManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.hardware.SensorPrivacyManager;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerInternal;
@@ -433,6 +435,12 @@ class TestPhoneWindowManager {
         doReturn(isShowing).when(mKeyguardServiceDelegate).isShowing();
     }
 
+    void assumeResolveActivityNotNull() {
+        ResolveInfo resolveInfo = new ResolveInfo();
+        doReturn(resolveInfo).when(mPackageManager).resolveActivity(any(), anyInt());
+        doReturn(mPackageManager).when(mContext).getPackageManager();
+    }
+
     void overrideKeyEventSource(int vendorId, int productId) {
         InputDevice device = new InputDevice.Builder().setId(1).setVendorId(vendorId).setProductId(
                 productId).setSources(InputDevice.SOURCE_KEYBOARD).setKeyboardType(
@@ -456,6 +464,10 @@ class TestPhoneWindowManager {
 
     void overrideUserSetupComplete() {
         doReturn(true).when(mPhoneWindowManager).isUserSetupComplete();
+    }
+
+    void overrideStemPressTargetActivity(ComponentName component) {
+        mPhoneWindowManager.mPrimaryShortPressTargetActivity = component;
     }
 
     /**
@@ -611,6 +623,14 @@ class TestPhoneWindowManager {
         waitForIdle();
         verify(mContext, after(TEST_SINGLE_KEY_DELAY_MILLIS).never())
                 .startActivityAsUser(any(Intent.class), any(), any(UserHandle.class));
+    }
+
+    void assertActivityTargetLaunched(ComponentName targetActivity) {
+        waitForIdle();
+        ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
+        verify(mContext, timeout(TEST_SINGLE_KEY_DELAY_MILLIS))
+                .startActivityAsUser(intentCaptor.capture(), isNull(), any(UserHandle.class));
+        Assert.assertEquals(targetActivity, intentCaptor.getValue().getComponent());
     }
 
     void assertShortcutLogged(int vendorId, int productId, KeyboardLogEvent logEvent,

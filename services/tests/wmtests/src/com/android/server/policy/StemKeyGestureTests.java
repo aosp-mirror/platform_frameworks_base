@@ -20,7 +20,9 @@ import static android.provider.Settings.Global.STEM_PRIMARY_BUTTON_SHORT_PRESS;
 import static android.view.KeyEvent.KEYCODE_STEM_PRIMARY;
 
 import static com.android.server.policy.PhoneWindowManager.SHORT_PRESS_PRIMARY_LAUNCH_ALL_APPS;
+import static com.android.server.policy.PhoneWindowManager.SHORT_PRESS_PRIMARY_LAUNCH_TARGET_ACTIVITY;
 
+import android.content.ComponentName;
 import android.provider.Settings;
 
 import org.junit.Test;
@@ -32,6 +34,9 @@ import org.junit.Test;
  * atest WmTests:StemKeyGestureTests
  */
 public class StemKeyGestureTests extends ShortcutKeyTestBase {
+
+    private static final String TEST_TARGET_ACTIVITY = "com.android.server.policy/.TestActivity";
+
     /**
      * Stem single key should not launch behavior during set up.
      */
@@ -61,6 +66,28 @@ public class StemKeyGestureTests extends ShortcutKeyTestBase {
         sendKey(KEYCODE_STEM_PRIMARY);
 
         mPhoneWindowManager.assertOpenAllAppView();
+    }
+
+    /**
+     * Stem single key should not launch behavior during set up.
+     */
+    @Test
+    public void stemSingleKey_launchTargetActivity() {
+        overrideBehavior(
+                STEM_PRIMARY_BUTTON_SHORT_PRESS,
+                SHORT_PRESS_PRIMARY_LAUNCH_TARGET_ACTIVITY);
+        setUpPhoneWindowManager(/* supportSettingsUpdate= */ true);
+        mPhoneWindowManager.overrideStartActivity();
+        mPhoneWindowManager.setKeyguardServiceDelegateIsShowing(false);
+        mPhoneWindowManager.overrideIsUserSetupComplete(true);
+        mPhoneWindowManager.assumeResolveActivityNotNull();
+
+        ComponentName targetComponent = ComponentName.unflattenFromString(TEST_TARGET_ACTIVITY);
+        mPhoneWindowManager.overrideStemPressTargetActivity(targetComponent);
+
+        sendKey(KEYCODE_STEM_PRIMARY);
+
+        mPhoneWindowManager.assertActivityTargetLaunched(targetComponent);
     }
 
     private void overrideBehavior(String key, int expectedBehavior) {
