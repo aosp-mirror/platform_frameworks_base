@@ -40,6 +40,7 @@ import com.android.systemui.accessibility.AccessibilityButtonModeObserver.Access
 import com.android.systemui.accessibility.AccessibilityButtonTargetsObserver;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.util.settings.SecureSettings;
 
 import javax.inject.Inject;
 
@@ -59,6 +60,7 @@ public class AccessibilityFloatingMenuController implements
     private final DisplayManager mDisplayManager;
     private final AccessibilityManager mAccessibilityManager;
     private final FeatureFlags mFeatureFlags;
+    private final SecureSettings mSecureSettings;
     @VisibleForTesting
     IAccessibilityFloatingMenu mFloatingMenu;
     private int mBtnMode;
@@ -102,7 +104,8 @@ public class AccessibilityFloatingMenuController implements
             AccessibilityButtonTargetsObserver accessibilityButtonTargetsObserver,
             AccessibilityButtonModeObserver accessibilityButtonModeObserver,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
-            FeatureFlags featureFlags) {
+            FeatureFlags featureFlags,
+            SecureSettings secureSettings) {
         mContext = context;
         mWindowManager = windowManager;
         mDisplayManager = displayManager;
@@ -111,6 +114,7 @@ public class AccessibilityFloatingMenuController implements
         mAccessibilityButtonModeObserver = accessibilityButtonModeObserver;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mFeatureFlags = featureFlags;
+        mSecureSettings = secureSettings;
 
         mIsKeyguardVisible = false;
     }
@@ -185,9 +189,9 @@ public class AccessibilityFloatingMenuController implements
                 final Context windowContext = mContext.createWindowContext(defaultDisplay,
                         TYPE_NAVIGATION_BAR_PANEL, /* options= */ null);
                 mFloatingMenu = new MenuViewLayerController(windowContext, mWindowManager,
-                        mAccessibilityManager);
+                        mAccessibilityManager, mSecureSettings);
             } else {
-                mFloatingMenu = new AccessibilityFloatingMenu(mContext);
+                mFloatingMenu = new AccessibilityFloatingMenu(mContext, mSecureSettings);
             }
         }
 

@@ -23,6 +23,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.android.internal.accessibility.dialog.AccessibilityTarget;
+import com.android.systemui.util.settings.SecureSettings;
 
 import java.util.List;
 
@@ -42,9 +43,10 @@ class MenuViewModel implements MenuInfoRepository.OnSettingsContentsChanged {
     private final MutableLiveData<Position> mPercentagePositionData = new MutableLiveData<>();
     private final MenuInfoRepository mInfoRepository;
 
-    MenuViewModel(Context context, AccessibilityManager accessibilityManager) {
+    MenuViewModel(Context context, AccessibilityManager accessibilityManager,
+            SecureSettings secureSettings) {
         mInfoRepository = new MenuInfoRepository(context,
-                accessibilityManager, /* settingsContentsChanged= */ this);
+                accessibilityManager, /* settingsContentsChanged= */ this, secureSettings);
     }
 
     @Override

@@ -46,6 +46,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -70,6 +71,8 @@ public class WindowMagnificationTest extends SysuiTestCase {
     private IWindowMagnificationConnectionCallback mConnectionCallback;
     @Mock
     private OverviewProxyService mOverviewProxyService;
+    @Mock
+    private SecureSettings mSecureSettings;
 
     private CommandQueue mCommandQueue;
     private WindowMagnification mWindowMagnification;
@@ -90,7 +93,7 @@ public class WindowMagnificationTest extends SysuiTestCase {
         mCommandQueue = new CommandQueue(getContext());
         mWindowMagnification = new WindowMagnification(getContext(),
                 getContext().getMainThreadHandler(), mCommandQueue, mModeSwitchesController,
-                mSysUiState, mOverviewProxyService);
+                mSysUiState, mOverviewProxyService, mSecureSettings);
         mWindowMagnification.start();
 
         final ArgumentCaptor<OverviewProxyListener> listenerArgumentCaptor =

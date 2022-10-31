@@ -172,7 +172,7 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
         verify(mDumpManager).registerDumpable(any(), any());
         verify(mDeviceProvisionedController).addCallback(mDeviceProvisionedListener.capture());
         verify(mSecureSettings).registerContentObserverForUser(
-                eq(Settings.Secure.getUriFor(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES)),
+                eq(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES),
                 eq(false), mSettingsObserver.capture(), eq(UserHandle.USER_ALL)
         );
     }

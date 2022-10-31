@@ -199,7 +199,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         }
 
         mSecureSettings.registerContentObserverForUser(
-                Settings.Secure.getUriFor(Settings.Secure.LOCKSCREEN_USE_DOUBLE_LINE_CLOCK),
+                Settings.Secure.LOCKSCREEN_USE_DOUBLE_LINE_CLOCK,
                 false, /* notifyForDescendants */
                 mDoubleLineClockObserver,
                 UserHandle.USER_ALL
