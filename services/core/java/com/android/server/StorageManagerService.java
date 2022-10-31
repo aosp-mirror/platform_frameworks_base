@@ -381,7 +381,7 @@ class StorageManagerService extends IStorageManager.Stub
     private volatile boolean mChargingRequired;
     private volatile int mMinGCSleepTime;
     private volatile int mTargetDirtyRatio;
-    private volatile boolean mNeedGC;
+    private volatile boolean mNeedGC = true;
 
     private volatile boolean mPassedLifetimeThresh;
     // Tracking storage write amounts in one period
