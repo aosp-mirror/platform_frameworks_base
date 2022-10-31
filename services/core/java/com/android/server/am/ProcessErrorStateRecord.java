@@ -62,6 +62,8 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicLong;
+
 /**
  * The error state of the process, such as if it's crashing/ANR etc.
  */
@@ -458,10 +460,10 @@ class ProcessErrorStateRecord {
         // avoid spending 1/2 second collecting stats to rank lastPids.
         StringWriter tracesFileException = new StringWriter();
         // To hold the start and end offset to the ANR trace file respectively.
-        final long[] offsets = new long[2];
+        final AtomicLong firstPidEndOffset = new AtomicLong(-1);
         File tracesFile = ActivityManagerService.dumpStackTraces(firstPids,
                 isSilentAnr ? null : processCpuTracker, isSilentAnr ? null : lastPids,
-                nativePids, tracesFileException, offsets, annotation, criticalEventLog,
+                nativePids, tracesFileException, firstPidEndOffset, annotation, criticalEventLog,
                 latencyTracker);
 
         if (isMonitorCpuUsage()) {
@@ -478,10 +480,14 @@ class ProcessErrorStateRecord {
         if (tracesFile == null) {
             // There is no trace file, so dump (only) the alleged culprit's threads to the log
             Process.sendSignal(pid, Process.SIGNAL_QUIT);
-        } else if (offsets[1] > 0) {
+        } else if (firstPidEndOffset.get() > 0) {
             // We've dumped into the trace file successfully
+            // We pass the start and end offsets of the first section of
+            // the ANR file (the headers and first process dump)
+            final long startOffset = 0L;
+            final long endOffset = firstPidEndOffset.get();
             mService.mProcessList.mAppExitInfoTracker.scheduleLogAnrTrace(
-                    pid, mApp.uid, mApp.getPackageList(), tracesFile, offsets[0], offsets[1]);
+                    pid, mApp.uid, mApp.getPackageList(), tracesFile, startOffset, endOffset);
         }
 
         // Check if package is still being loaded
