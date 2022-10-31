@@ -226,9 +226,7 @@ public class AccessibilityShortcutController {
         Slog.d(TAG, "Accessibility shortcut activated");
         final ContentResolver cr = mContext.getContentResolver();
         final int userId = ActivityManager.getCurrentUser();
-        final int dialogAlreadyShown = Settings.Secure.getIntForUser(
-                cr, Settings.Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN, DialogStatus.NOT_SHOWN,
-                userId);
+
         // Play a notification vibration
         Vibrator vibrator = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
         if ((vibrator != null) && vibrator.hasVibrator()) {
@@ -239,7 +237,7 @@ public class AccessibilityShortcutController {
             vibrator.vibrate(vibePattern, -1, VIBRATION_ATTRIBUTES);
         }
 
-        if (dialogAlreadyShown == DialogStatus.NOT_SHOWN) {
+        if (shouldShowDialog()) {
             // The first time, we show a warning rather than toggle the service to give the user a
             // chance to turn off this feature before stuff gets enabled.
             mAlertDialog = createShortcutWarningDialog(userId);
@@ -267,6 +265,20 @@ public class AccessibilityShortcutController {
             mFrameworkObjectProvider.getAccessibilityManagerInstance(mContext)
                     .performAccessibilityShortcut();
         }
+    }
+
+    /** Whether the warning dialog should be shown instead of performing the shortcut. */
+    private boolean shouldShowDialog() {
+        if (hasFeatureLeanback()) {
+            // Never show the dialog on TV, instead always perform the shortcut directly.
+            return false;
+        }
+        final ContentResolver cr = mContext.getContentResolver();
+        final int userId = ActivityManager.getCurrentUser();
+        final int dialogAlreadyShown = Settings.Secure.getIntForUser(cr,
+                Settings.Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN, DialogStatus.NOT_SHOWN,
+                userId);
+        return dialogAlreadyShown == DialogStatus.NOT_SHOWN;
     }
 
     /**
