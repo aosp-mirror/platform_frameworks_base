@@ -419,7 +419,7 @@ package android.app {
   }
 
   public final class SyncNotedAppOp implements android.os.Parcelable {
-    ctor public SyncNotedAppOp(int, @IntRange(from=0L) int, @Nullable String, @NonNull String);
+    ctor public SyncNotedAppOp(int, @IntRange(from=0L) int, @Nullable String, @Nullable String);
   }
 
   public class TaskInfo {
