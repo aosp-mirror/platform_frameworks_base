@@ -982,62 +982,9 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
 
     @Dispatching(cancellable = true)
     @Override
-    public void performHandwritingSelectGesture(
-            InputConnectionCommandHeader header, SelectGesture gesture,
+    public void performHandwritingGesture(
+            InputConnectionCommandHeader header, ParcelableHandwritingGesture gestureContainer,
             ResultReceiver resultReceiver) {
-        performHandwritingGestureInternal(header, gesture, resultReceiver);
-    }
-
-    @Dispatching(cancellable = true)
-    @Override
-    public void performHandwritingSelectRangeGesture(
-            InputConnectionCommandHeader header, SelectRangeGesture gesture,
-            ResultReceiver resultReceiver) {
-        performHandwritingGestureInternal(header, gesture, resultReceiver);
-    }
-
-    @Dispatching(cancellable = true)
-    @Override
-    public void performHandwritingInsertGesture(
-            InputConnectionCommandHeader header, InsertGesture gesture,
-            ResultReceiver resultReceiver) {
-        performHandwritingGestureInternal(header, gesture, resultReceiver);
-    }
-
-    @Dispatching(cancellable = true)
-    @Override
-    public void performHandwritingDeleteGesture(
-            InputConnectionCommandHeader header, DeleteGesture gesture,
-            ResultReceiver resultReceiver) {
-        performHandwritingGestureInternal(header, gesture, resultReceiver);
-    }
-
-    @Dispatching(cancellable = true)
-    @Override
-    public void performHandwritingDeleteRangeGesture(
-            InputConnectionCommandHeader header, DeleteRangeGesture gesture,
-            ResultReceiver resultReceiver) {
-        performHandwritingGestureInternal(header, gesture, resultReceiver);
-    }
-
-    @Dispatching(cancellable = true)
-    @Override
-    public void performHandwritingRemoveSpaceGesture(
-            InputConnectionCommandHeader header, RemoveSpaceGesture gesture,
-            ResultReceiver resultReceiver) {
-        performHandwritingGestureInternal(header, gesture, resultReceiver);
-    }
-
-    @Dispatching(cancellable = true)
-    @Override
-    public void performHandwritingJoinOrSplitGesture(
-            InputConnectionCommandHeader header, JoinOrSplitGesture gesture,
-            ResultReceiver resultReceiver) {
-        performHandwritingGestureInternal(header, gesture, resultReceiver);
-    }
-
-    private <T extends HandwritingGesture> void performHandwritingGestureInternal(
-            InputConnectionCommandHeader header,  T gesture, ResultReceiver resultReceiver) {
         dispatchWithTracing("performHandwritingGesture", () -> {
             if (header.mSessionId != mCurrentSessionId.get()) {
                 if (resultReceiver != null) {
@@ -1059,7 +1006,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
             // TODO(210039666): implement Cleaner to return HANDWRITING_GESTURE_RESULT_UNKNOWN if
             //  editor doesn't return any type.
             ic.performHandwritingGesture(
-                    gesture,
+                    gestureContainer.get(),
                     resultReceiver != null ? Runnable::run : null,
                     resultReceiver != null
                             ? (resultCode) -> resultReceiver.send(resultCode, null /* resultData */)
