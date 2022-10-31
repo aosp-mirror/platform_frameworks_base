@@ -219,6 +219,7 @@ class GuestUserInteractorTest : SysuiTestCase() {
             repository.setUserInfos(listOf(NON_GUEST_USER_INFO, EPHEMERAL_GUEST_USER_INFO))
             repository.setSelectedUserInfo(EPHEMERAL_GUEST_USER_INFO)
             val targetUserId = NON_GUEST_USER_INFO.id
+            val ephemeralGuestUserHandle = UserHandle.of(EPHEMERAL_GUEST_USER_INFO.id)
 
             underTest.exit(
                 guestUserId = GUEST_USER_INFO.id,
@@ -230,7 +231,7 @@ class GuestUserInteractorTest : SysuiTestCase() {
             )
 
             verify(manager).markGuestForDeletion(EPHEMERAL_GUEST_USER_INFO.id)
-            verify(manager).removeUser(EPHEMERAL_GUEST_USER_INFO.id)
+            verify(manager).removeUserWhenPossible(ephemeralGuestUserHandle, false)
             verify(switchUser).invoke(targetUserId)
         }
 
@@ -240,6 +241,7 @@ class GuestUserInteractorTest : SysuiTestCase() {
             whenever(manager.markGuestForDeletion(anyInt())).thenReturn(true)
             repository.setSelectedUserInfo(GUEST_USER_INFO)
             val targetUserId = NON_GUEST_USER_INFO.id
+            val guestUserHandle = UserHandle.of(GUEST_USER_INFO.id)
 
             underTest.exit(
                 guestUserId = GUEST_USER_INFO.id,
@@ -251,7 +253,7 @@ class GuestUserInteractorTest : SysuiTestCase() {
             )
 
             verify(manager).markGuestForDeletion(GUEST_USER_INFO.id)
-            verify(manager).removeUser(GUEST_USER_INFO.id)
+            verify(manager).removeUserWhenPossible(guestUserHandle, false)
             verify(switchUser).invoke(targetUserId)
         }
 
@@ -296,6 +298,7 @@ class GuestUserInteractorTest : SysuiTestCase() {
             repository.setSelectedUserInfo(GUEST_USER_INFO)
 
             val targetUserId = NON_GUEST_USER_INFO.id
+            val guestUserHandle = UserHandle.of(GUEST_USER_INFO.id)
             underTest.remove(
                 guestUserId = GUEST_USER_INFO.id,
                 targetUserId = targetUserId,
@@ -305,7 +308,7 @@ class GuestUserInteractorTest : SysuiTestCase() {
             )
 
             verify(manager).markGuestForDeletion(GUEST_USER_INFO.id)
-            verify(manager).removeUser(GUEST_USER_INFO.id)
+            verify(manager).removeUserWhenPossible(guestUserHandle, false)
             verify(switchUser).invoke(targetUserId)
         }
 
