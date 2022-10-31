@@ -160,6 +160,7 @@ open class ClockEventController @Inject constructor(
     private val configListener = object : ConfigurationController.ConfigurationListener {
         override fun onThemeChanged() {
             clock?.events?.onColorPaletteChanged(resources)
+            updateColors()
         }
 
         override fun onDensityOrFontScaleChanged() {
