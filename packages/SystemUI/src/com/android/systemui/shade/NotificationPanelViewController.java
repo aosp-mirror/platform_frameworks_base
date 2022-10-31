@@ -5035,7 +5035,7 @@ public final class NotificationPanelViewController {
     }
 
     public boolean isFullyExpanded() {
-        return mExpandedHeight >= getMaxPanelHeight();
+        return mExpandedHeight >= getMaxPanelTransitionDistance();
     }
 
     public boolean isFullyCollapsed() {
