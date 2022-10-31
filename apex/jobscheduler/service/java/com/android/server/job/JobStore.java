@@ -203,13 +203,12 @@ public final class JobStore {
     }
 
     /**
-     * Add a job to the master list, persisting it if necessary. If the JobStatus already exists,
-     * it will be replaced.
+     * Add a job to the master list, persisting it if necessary.
+     * Similar jobs to the new job will not be removed.
+     *
      * @param jobStatus Job to add.
-     * @return Whether or not an equivalent JobStatus was replaced by this operation.
      */
-    public boolean add(JobStatus jobStatus) {
-        boolean replaced = mJobSet.remove(jobStatus);
+    public void add(JobStatus jobStatus) {
         mJobSet.add(jobStatus);
         if (jobStatus.isPersisted()) {
             maybeWriteStatusToDiskAsync();
@@ -217,7 +216,6 @@ public final class JobStore {
         if (DEBUG) {
             Slog.d(TAG, "Added job status to store: " + jobStatus);
         }
-        return replaced;
     }
 
     /**

@@ -1820,12 +1820,13 @@ public class JobSchedulerService extends com.android.server.SystemService
             Slog.wtf(TAG, "Not yet prepared when started tracking: " + jobStatus);
         }
         jobStatus.enqueueTime = sElapsedRealtimeClock.millis();
-        final boolean update = mJobs.add(jobStatus);
+        final boolean update = lastJob != null;
+        mJobs.add(jobStatus);
         if (mReadyToRock) {
             for (int i = 0; i < mControllers.size(); i++) {
                 StateController controller = mControllers.get(i);
                 if (update) {
-                    controller.maybeStopTrackingJobLocked(jobStatus, null, true);
+                    controller.maybeStopTrackingJobLocked(jobStatus, null);
                 }
                 controller.maybeStartTrackingJobLocked(jobStatus, lastJob);
             }
@@ -1858,7 +1859,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         if (mReadyToRock) {
             for (int i = 0; i < mControllers.size(); i++) {
                 StateController controller = mControllers.get(i);
-                controller.maybeStopTrackingJobLocked(jobStatus, incomingJob, false);
+                controller.maybeStopTrackingJobLocked(jobStatus, incomingJob);
             }
         }
         return removed;

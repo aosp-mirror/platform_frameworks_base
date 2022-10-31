@@ -76,8 +76,7 @@ public final class IdleController extends RestrictingController implements Idlen
     }
 
     @Override
-    public void maybeStopTrackingJobLocked(JobStatus taskStatus, JobStatus incomingJob,
-            boolean forUpdate) {
+    public void maybeStopTrackingJobLocked(JobStatus taskStatus, JobStatus incomingJob) {
         if (taskStatus.clearTrackingController(JobStatus.TRACKING_IDLE)) {
             mTrackedTasks.remove(taskStatus);
         }
@@ -86,7 +85,7 @@ public final class IdleController extends RestrictingController implements Idlen
     @Override
     public void stopTrackingRestrictedJobLocked(JobStatus jobStatus) {
         if (!jobStatus.hasIdleConstraint()) {
-            maybeStopTrackingJobLocked(jobStatus, null, false);
+            maybeStopTrackingJobLocked(jobStatus, null);
         }
     }
 

@@ -167,8 +167,7 @@ public class PrefetchController extends StateController {
 
     @Override
     @GuardedBy("mLock")
-    public void maybeStopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob,
-            boolean forUpdate) {
+    public void maybeStopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob) {
         final int userId = jobStatus.getSourceUserId();
         final String pkgName = jobStatus.getSourcePackageName();
         final ArraySet<JobStatus> jobs = mTrackedJobs.get(userId, pkgName);

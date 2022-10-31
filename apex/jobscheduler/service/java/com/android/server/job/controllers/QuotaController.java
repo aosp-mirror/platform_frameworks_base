@@ -673,8 +673,7 @@ public final class QuotaController extends StateController {
 
     @Override
     @GuardedBy("mLock")
-    public void maybeStopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob,
-            boolean forUpdate) {
+    public void maybeStopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob) {
         if (jobStatus.clearTrackingController(JobStatus.TRACKING_QUOTA)) {
             unprepareFromExecutionLocked(jobStatus);
             final int userId = jobStatus.getSourceUserId();
