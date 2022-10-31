@@ -17,6 +17,7 @@ package com.android.systemui.battery
 
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
+import android.widget.ImageView
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.battery.BatteryMeterView.BatteryEstimateFetcher
@@ -56,6 +57,45 @@ class BatteryMeterViewTest : SysuiTestCase() {
 
         mBatteryMeterView.updatePercentText()
         // No assert needed
+    }
+
+    @Test
+    fun isOverheatedChanged_true_drawableGetsTrue() {
+        mBatteryMeterView.setDisplayShieldEnabled(true)
+        val drawable = getBatteryDrawable()
+
+        mBatteryMeterView.onIsOverheatedChanged(true)
+
+        assertThat(drawable.displayShield).isTrue()
+    }
+
+    @Test
+    fun isOverheatedChanged_false_drawableGetsFalse() {
+        mBatteryMeterView.setDisplayShieldEnabled(true)
+        val drawable = getBatteryDrawable()
+
+        // Start as true
+        mBatteryMeterView.onIsOverheatedChanged(true)
+
+        // Update to false
+        mBatteryMeterView.onIsOverheatedChanged(false)
+
+        assertThat(drawable.displayShield).isFalse()
+    }
+
+    @Test
+    fun isOverheatedChanged_true_featureflagOff_drawableGetsFalse() {
+        mBatteryMeterView.setDisplayShieldEnabled(false)
+        val drawable = getBatteryDrawable()
+
+        mBatteryMeterView.onIsOverheatedChanged(true)
+
+        assertThat(drawable.displayShield).isFalse()
+    }
+
+    private fun getBatteryDrawable(): AccessorizedBatteryDrawable {
+        return (mBatteryMeterView.getChildAt(0) as ImageView)
+                .drawable as AccessorizedBatteryDrawable
     }
 
     private class Fetcher : BatteryEstimateFetcher {

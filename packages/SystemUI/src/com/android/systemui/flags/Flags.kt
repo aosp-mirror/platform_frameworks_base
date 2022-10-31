@@ -233,6 +233,9 @@ object Flags {
     // TODO(b/256613548): Tracking Bug
     val NEW_STATUS_BAR_WIFI_ICON_BACKEND = unreleasedFlag(609, "new_status_bar_wifi_icon_backend")
 
+    // TODO(b/256623670): Tracking Bug
+    @JvmField val BATTERY_SHIELD_ICON = unreleasedFlag(610, "battery_shield_icon")
+
     // 700 - dialer/calls
     // TODO(b/254512734): Tracking Bug
     val ONGOING_CALL_STATUS_BAR_CHIP = releasedFlag(700, "ongoing_call_status_bar_chip")

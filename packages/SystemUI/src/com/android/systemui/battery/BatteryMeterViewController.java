@@ -29,6 +29,8 @@ import android.view.View;
 
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.settings.CurrentUserTracker;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -84,6 +86,11 @@ public class BatteryMeterViewController extends ViewController<BatteryMeterView>
                 public void onBatteryUnknownStateChanged(boolean isUnknown) {
                     mView.onBatteryUnknownStateChanged(isUnknown);
                 }
+
+                @Override
+                public void onIsOverheatedChanged(boolean isOverheated) {
+                    mView.onIsOverheatedChanged(isOverheated);
+                }
             };
 
     // Some places may need to show the battery conditionally, and not obey the tuner
@@ -98,6 +105,7 @@ public class BatteryMeterViewController extends ViewController<BatteryMeterView>
             BroadcastDispatcher broadcastDispatcher,
             @Main Handler mainHandler,
             ContentResolver contentResolver,
+            FeatureFlags featureFlags,
             BatteryController batteryController) {
         super(view);
         mConfigurationController = configurationController;
@@ -106,6 +114,7 @@ public class BatteryMeterViewController extends ViewController<BatteryMeterView>
         mBatteryController = batteryController;
 
         mView.setBatteryEstimateFetcher(mBatteryController::getEstimatedTimeRemainingString);
+        mView.setDisplayShieldEnabled(featureFlags.isEnabled(Flags.BATTERY_SHIELD_ICON));
 
         mSlotBattery = getResources().getString(com.android.internal.R.string.status_bar_battery);
         mSettingObserver = new SettingObserver(mainHandler);

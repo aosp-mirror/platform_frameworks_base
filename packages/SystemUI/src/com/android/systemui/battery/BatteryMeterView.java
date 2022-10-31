@@ -45,7 +45,6 @@ import android.widget.TextView;
 import androidx.annotation.StyleRes;
 import androidx.annotation.VisibleForTesting;
 
-import com.android.settingslib.graph.ThemedBatteryDrawable;
 import com.android.systemui.DualToneHandler;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
@@ -68,7 +67,7 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
     public static final int MODE_OFF = 2;
     public static final int MODE_ESTIMATE = 3;
 
-    private final ThemedBatteryDrawable mDrawable;
+    private final AccessorizedBatteryDrawable mDrawable;
     private final ImageView mBatteryIconView;
     private TextView mBatteryPercentView;
 
@@ -78,6 +77,8 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
     private int mShowPercentMode = MODE_DEFAULT;
     private boolean mShowPercentAvailable;
     private boolean mCharging;
+    private boolean mDisplayShield;
+    private boolean mDisplayShieldEnabled;
     // Error state where we know nothing about the current battery state
     private boolean mBatteryStateUnknown;
     // Lazily-loaded since this is expected to be a rare-if-ever state
@@ -106,7 +107,7 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
         final int frameColor = atts.getColor(R.styleable.BatteryMeterView_frameColor,
                 context.getColor(R.color.meter_background_color));
         mPercentageStyleId = atts.getResourceId(R.styleable.BatteryMeterView_textAppearance, 0);
-        mDrawable = new ThemedBatteryDrawable(context, frameColor);
+        mDrawable = new AccessorizedBatteryDrawable(context, frameColor);
         atts.recycle();
 
         mShowPercentAvailable = context.getResources().getBoolean(
@@ -203,6 +204,19 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
         mDrawable.setPowerSaveEnabled(isPowerSave);
     }
 
+    void onIsOverheatedChanged(boolean isOverheated) {
+        // The battery drawable is a different size depending on whether it's currently overheated
+        // or not, so we need to re-scale the view when overheated changes.
+        boolean requiresScaling = mDisplayShield != isOverheated;
+        // If the battery is marked as overheated, we should display a shield indicating that the
+        // battery is being "defended".
+        mDisplayShield = isOverheated;
+        if (requiresScaling) {
+            scaleBatteryMeterViews();
+        }
+        // TODO(b/255625888): We should also update the content description.
+    }
+
     private TextView loadPercentView() {
         return (TextView) LayoutInflater.from(getContext())
                 .inflate(R.layout.battery_percentage_view, null);
@@ -225,6 +239,10 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
      */
     void setBatteryEstimateFetcher(BatteryEstimateFetcher fetcher) {
         mBatteryEstimateFetcher = fetcher;
+    }
+
+    void setDisplayShieldEnabled(boolean displayShieldEnabled) {
+        mDisplayShieldEnabled = displayShieldEnabled;
     }
 
     void updatePercentText() {
@@ -349,15 +367,29 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
         res.getValue(R.dimen.status_bar_icon_scale_factor, typedValue, true);
         float iconScaleFactor = typedValue.getFloat();
 
-        int batteryHeight = res.getDimensionPixelSize(R.dimen.status_bar_battery_icon_height);
-        int batteryWidth = res.getDimensionPixelSize(R.dimen.status_bar_battery_icon_width);
+        float mainBatteryHeight =
+                res.getDimensionPixelSize(R.dimen.status_bar_battery_icon_height) * iconScaleFactor;
+        float mainBatteryWidth =
+                res.getDimensionPixelSize(R.dimen.status_bar_battery_icon_width) * iconScaleFactor;
+
+        boolean displayShield = mDisplayShieldEnabled && mDisplayShield;
+        float fullBatteryIconHeight =
+                BatterySpecs.getFullBatteryHeight(mainBatteryHeight, displayShield);
+        float fullBatteryIconWidth =
+                BatterySpecs.getFullBatteryWidth(mainBatteryWidth, displayShield);
+
+        // TODO(b/255625888): Add some marginTop so that, even when the battery icon has the shield,
+        //   the bottom of the main icon is still aligned with the bottom of all the other icons.
         int marginBottom = res.getDimensionPixelSize(R.dimen.battery_margin_bottom);
 
         LinearLayout.LayoutParams scaledLayoutParams = new LinearLayout.LayoutParams(
-                (int) (batteryWidth * iconScaleFactor), (int) (batteryHeight * iconScaleFactor));
+                Math.round(fullBatteryIconWidth),
+                Math.round(fullBatteryIconHeight));
         scaledLayoutParams.setMargins(0, 0, 0, marginBottom);
 
+        mDrawable.setDisplayShield(displayShield);
         mBatteryIconView.setLayoutParams(scaledLayoutParams);
+        mBatteryIconView.invalidateDrawable(mDrawable);
     }
 
     @Override
