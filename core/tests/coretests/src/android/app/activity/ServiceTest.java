@@ -172,7 +172,7 @@ public class ServiceTest extends TestCase {
                 pidResult.complete(intent.getIntExtra(EXTRA_PID, NOT_STARTED));
                 mContext.unregisterReceiver(this);
             }
-        }, new IntentFilter(ACTION_SERVICE_STARTED));
+        }, new IntentFilter(ACTION_SERVICE_STARTED), Context.RECEIVER_EXPORTED_UNAUDITED);
 
         serviceTrigger.run();
         try {
