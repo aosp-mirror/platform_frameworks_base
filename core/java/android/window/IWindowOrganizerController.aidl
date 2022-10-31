@@ -105,4 +105,7 @@ interface IWindowOrganizerController {
 
     /** @return An interface enabling the transition players to report its metrics. */
     ITransitionMetricsReporter getTransitionMetricsReporter();
+
+    /** @return The transaction queue token used by WM. */
+    IBinder getApplyToken();
 }
