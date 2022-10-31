@@ -1470,6 +1470,7 @@ package android.app.backup {
   public class BackupManagerMonitor {
     ctor public BackupManagerMonitor();
     method public void onEvent(android.os.Bundle);
+    field public static final String EXTRA_LOG_AGENT_LOGGING_RESULTS = "android.app.backup.extra.LOG_AGENT_LOGGING_RESULTS";
     field public static final String EXTRA_LOG_CANCEL_ALL = "android.app.backup.extra.LOG_CANCEL_ALL";
     field public static final String EXTRA_LOG_EVENT_CATEGORY = "android.app.backup.extra.LOG_EVENT_CATEGORY";
     field public static final String EXTRA_LOG_EVENT_ID = "android.app.backup.extra.LOG_EVENT_ID";
@@ -1488,6 +1489,7 @@ package android.app.backup {
     field public static final int LOG_EVENT_CATEGORY_AGENT = 2; // 0x2
     field public static final int LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY = 3; // 0x3
     field public static final int LOG_EVENT_CATEGORY_TRANSPORT = 1; // 0x1
+    field public static final int LOG_EVENT_ID_AGENT_LOGGING_RESULTS = 52; // 0x34
     field public static final int LOG_EVENT_ID_APK_NOT_INSTALLED = 40; // 0x28
     field public static final int LOG_EVENT_ID_APP_HAS_NO_AGENT = 28; // 0x1c
     field public static final int LOG_EVENT_ID_BACKUP_DISABLED = 13; // 0xd

@@ -885,6 +885,10 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                             OpType.RESTORE_WAIT);
             mAgent.doRestoreFinished(mEphemeralOpToken,
                     backupManagerService.getBackupManagerBinder());
+
+            // Ask the agent for logs after doRestoreFinished() to allow it to finalize its logs.
+            BackupManagerMonitorUtils.monitorAgentLoggingResults(mMonitor, mCurrentPackage, mAgent);
+
             // If we get this far, the callback or timeout will schedule the
             // next restore state, so we're done
         } catch (Exception e) {
