@@ -1289,8 +1289,15 @@ public final class NotificationPanelViewController {
 
         mLargeScreenShadeHeaderHeight =
                 mResources.getDimensionPixelSize(R.dimen.large_screen_shade_header_height);
-        mQuickQsHeaderHeight = mUseLargeScreenShadeHeader ? mLargeScreenShadeHeaderHeight :
-                SystemBarUtils.getQuickQsOffsetHeight(mView.getContext());
+        // TODO: When the flag is eventually removed, it means that we have a single view that is
+        // the same height in QQS and in Large Screen (large_screen_shade_header_height). Eventually
+        // the concept of largeScreenHeader or quickQsHeader will disappear outside of the class
+        // that controls the view as the offset needs to be the same regardless.
+        if (mUseLargeScreenShadeHeader || mFeatureFlags.isEnabled(Flags.COMBINED_QS_HEADERS)) {
+            mQuickQsHeaderHeight = mLargeScreenShadeHeaderHeight;
+        } else {
+            mQuickQsHeaderHeight = SystemBarUtils.getQuickQsOffsetHeight(mView.getContext());
+        }
         int topMargin = mUseLargeScreenShadeHeader ? mLargeScreenShadeHeaderHeight :
                 mResources.getDimensionPixelSize(R.dimen.notification_panel_margin_top);
         mLargeScreenShadeHeaderController.setLargeScreenActive(mUseLargeScreenShadeHeader);
