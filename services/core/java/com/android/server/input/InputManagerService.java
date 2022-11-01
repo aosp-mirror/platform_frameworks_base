@@ -91,6 +91,7 @@ import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -2689,74 +2690,78 @@ public class InputManagerService extends IInputManager.Stub
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
+        IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
 
-        pw.println("INPUT MANAGER (dumpsys input)\n");
+        ipw.println("INPUT MANAGER (dumpsys input)\n");
         String dumpStr = mNative.dump();
         if (dumpStr != null) {
             pw.println(dumpStr);
         }
 
-        pw.println("Input Manager Service (Java) State:");
-        dumpAssociations(pw, "  " /*prefix*/);
-        dumpSpyWindowGestureMonitors(pw, "  " /*prefix*/);
-        dumpDisplayInputPropertiesValues(pw, "  " /*prefix*/);
-        mBatteryController.dump(pw, "  " /*prefix*/);
-        mKeyboardBacklightController.dump(pw, "  " /*prefix*/);
+        ipw.println("Input Manager Service (Java) State:");
+        ipw.increaseIndent();
+        dumpAssociations(ipw);
+        dumpSpyWindowGestureMonitors(ipw);
+        dumpDisplayInputPropertiesValues(ipw);
+        mBatteryController.dump(ipw);
+        mKeyboardBacklightController.dump(ipw);
     }
 
-    private void dumpAssociations(PrintWriter pw, String prefix) {
+    private void dumpAssociations(IndentingPrintWriter pw) {
         if (!mStaticAssociations.isEmpty()) {
-            pw.println(prefix + "Static Associations:");
+            pw.println("Static Associations:");
             mStaticAssociations.forEach((k, v) -> {
-                pw.print(prefix + "  port: " + k);
+                pw.print("  port: " + k);
                 pw.println("  display: " + v);
             });
         }
 
         synchronized (mAssociationsLock) {
             if (!mRuntimeAssociations.isEmpty()) {
-                pw.println(prefix + "Runtime Associations:");
+                pw.println("Runtime Associations:");
                 mRuntimeAssociations.forEach((k, v) -> {
-                    pw.print(prefix + "  port: " + k);
+                    pw.print("  port: " + k);
                     pw.println("  display: " + v);
                 });
             }
             if (!mUniqueIdAssociations.isEmpty()) {
-                pw.println(prefix + "Unique Id Associations:");
+                pw.println("Unique Id Associations:");
                 mUniqueIdAssociations.forEach((k, v) -> {
-                    pw.print(prefix + "  port: " + k);
+                    pw.print("  port: " + k);
                     pw.println("  uniqueId: " + v);
                 });
             }
         }
     }
 
-    private void dumpSpyWindowGestureMonitors(PrintWriter pw, String prefix) {
+    private void dumpSpyWindowGestureMonitors(IndentingPrintWriter pw) {
         synchronized (mInputMonitors) {
             if (mInputMonitors.isEmpty()) return;
-            pw.println(prefix + "Gesture Monitors (implemented as spy windows):");
+            pw.println("Gesture Monitors (implemented as spy windows):");
             int i = 0;
             for (final GestureMonitorSpyWindow monitor : mInputMonitors.values()) {
-                pw.append(prefix + "  " + i++ + ": ").println(monitor.dump());
+                pw.append("  " + i++ + ": ").println(monitor.dump());
             }
         }
     }
 
-    private void dumpDisplayInputPropertiesValues(PrintWriter pw, String prefix) {
+    private void dumpDisplayInputPropertiesValues(IndentingPrintWriter pw) {
         synchronized (mAdditionalDisplayInputPropertiesLock) {
             if (mAdditionalDisplayInputProperties.size() != 0) {
-                pw.println(prefix + "mAdditionalDisplayInputProperties:");
+                pw.println("mAdditionalDisplayInputProperties:");
+                pw.increaseIndent();
                 for (int i = 0; i < mAdditionalDisplayInputProperties.size(); i++) {
-                    pw.println(prefix + "  displayId: "
+                    pw.println("displayId: "
                             + mAdditionalDisplayInputProperties.keyAt(i));
                     final AdditionalDisplayInputProperties properties =
                             mAdditionalDisplayInputProperties.valueAt(i);
-                    pw.println(prefix + "  pointerAcceleration: " + properties.pointerAcceleration);
-                    pw.println(prefix + "  pointerIconVisible: " + properties.pointerIconVisible);
+                    pw.println("pointerAcceleration: " + properties.pointerAcceleration);
+                    pw.println("pointerIconVisible: " + properties.pointerIconVisible);
                 }
+                pw.decreaseIndent();
             }
             if (mOverriddenPointerDisplayId != Display.INVALID_DISPLAY) {
-                pw.println(prefix + "mOverriddenPointerDisplayId: " + mOverriddenPointerDisplayId);
+                pw.println("mOverriddenPointerDisplayId: " + mOverriddenPointerDisplayId);
             }
         }
     }
