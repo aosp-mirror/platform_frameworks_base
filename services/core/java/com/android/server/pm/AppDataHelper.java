@@ -61,7 +61,7 @@ import java.util.concurrent.Future;
 /**
  * Prepares app data for users
  */
-final class AppDataHelper {
+public class AppDataHelper {
     private static final boolean DEBUG_APP_DATA = false;
 
     private final PackageManagerService mPm;
