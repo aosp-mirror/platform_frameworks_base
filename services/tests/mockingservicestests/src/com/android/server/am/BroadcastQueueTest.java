@@ -280,13 +280,13 @@ public class BroadcastQueueTest {
         constants.TIMEOUT = 100;
         constants.ALLOW_BG_ACTIVITY_START_TIMEOUT = 0;
         final BroadcastSkipPolicy emptySkipPolicy = new BroadcastSkipPolicy(mAms) {
-            public boolean shouldSkip(BroadcastRecord r, Object o) {
+            public boolean shouldSkip(BroadcastRecord r, ResolveInfo info) {
                 // Ignored
                 return false;
             }
-            public String shouldSkipMessage(BroadcastRecord r, Object o) {
+            public boolean shouldSkip(BroadcastRecord r, BroadcastFilter filter) {
                 // Ignored
-                return null;
+                return false;
             }
         };
         final BroadcastHistory emptyHistory = new BroadcastHistory(constants) {
