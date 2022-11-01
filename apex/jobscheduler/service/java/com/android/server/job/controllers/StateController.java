@@ -85,8 +85,7 @@ public abstract class StateController {
     /**
      * Remove task - this will happen if the task is cancelled, completed, etc.
      */
-    public abstract void maybeStopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob,
-            boolean forUpdate);
+    public abstract void maybeStopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob);
 
     /**
      * Called when a new job is being created to reschedule an old failed job.

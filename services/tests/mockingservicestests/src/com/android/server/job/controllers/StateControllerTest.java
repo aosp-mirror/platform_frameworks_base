@@ -81,8 +81,7 @@ public class StateControllerTest {
         public void maybeStartTrackingJobLocked(JobStatus jobStatus, JobStatus lastJob) {
         }
 
-        public void maybeStopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob,
-                boolean forUpdate) {
+        public void maybeStopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob) {
         }
 
         public void dumpControllerStateLocked(IndentingPrintWriter pw,

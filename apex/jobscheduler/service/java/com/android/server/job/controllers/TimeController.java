@@ -79,7 +79,7 @@ public final class TimeController extends StateController {
     @Override
     public void maybeStartTrackingJobLocked(JobStatus job, JobStatus lastJob) {
         if (job.hasTimingDelayConstraint() || job.hasDeadlineConstraint()) {
-            maybeStopTrackingJobLocked(job, null, false);
+            maybeStopTrackingJobLocked(job, null);
 
             // First: check the constraints now, because if they are already satisfied
             // then there is no need to track it.  This gives us a fast path for a common
@@ -134,8 +134,7 @@ public final class TimeController extends StateController {
      * tracking was the one our alarms were based off of.
      */
     @Override
-    public void maybeStopTrackingJobLocked(JobStatus job, JobStatus incomingJob,
-            boolean forUpdate) {
+    public void maybeStopTrackingJobLocked(JobStatus job, JobStatus incomingJob) {
         if (job.clearTrackingController(JobStatus.TRACKING_TIME)) {
             if (mTrackedJobs.remove(job)) {
                 checkExpiredDelaysAndResetAlarm();

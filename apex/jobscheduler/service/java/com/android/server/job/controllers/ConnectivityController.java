@@ -290,8 +290,7 @@ public final class ConnectivityController extends RestrictingController implemen
 
     @GuardedBy("mLock")
     @Override
-    public void maybeStopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob,
-            boolean forUpdate) {
+    public void maybeStopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob) {
         if (jobStatus.clearTrackingController(JobStatus.TRACKING_CONNECTIVITY)) {
             ArraySet<JobStatus> jobs = mTrackedJobs.get(jobStatus.getSourceUid());
             if (jobs != null) {
