@@ -66,9 +66,9 @@ import java.util.Objects;
 
 /**
  * Class to notify the user of events that happen.  This is how you tell
- * the user that something has happened in the background. {@more}
+ * the user that something has happened in the background.
  *
- * Notifications can take different forms:
+ * <p>Notifications can take different forms:
  * <ul>
  *      <li>A persistent icon that goes in the status bar and is accessible
  *          through the launcher, (when the user selects it, a designated Intent
