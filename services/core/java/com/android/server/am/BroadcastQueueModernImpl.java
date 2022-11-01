@@ -736,10 +736,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             return;
         }
 
-        // Skip ANR tracking early during boot, when requested, or when we
-        // immediately assume delivery success
-        final boolean assumeDelivered = (receiver instanceof BroadcastFilter) && !r.ordered;
-        if (mService.mProcessesReady && !r.timeoutExempt && !assumeDelivered) {
+        if (mService.mProcessesReady && !r.timeoutExempt) {
             queue.lastCpuDelayTime = queue.app.getCpuDelayTime();
 
             final long timeout = r.isForeground() ? mFgConstants.TIMEOUT : mBgConstants.TIMEOUT;
@@ -782,7 +779,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
                     // TODO: consider making registered receivers of unordered
                     // broadcasts report results to detect ANRs
-                    if (assumeDelivered) {
+                    if (!r.ordered) {
                         finishReceiverLocked(queue, BroadcastRecord.DELIVERY_DELIVERED,
                                 "assuming delivered");
                     }
