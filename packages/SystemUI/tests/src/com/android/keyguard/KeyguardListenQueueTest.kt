@@ -72,7 +72,6 @@ private fun fingerprintModel(user: Int) = KeyguardFingerprintListenModel(
     keyguardOccluded = false,
     occludingAppRequestingFp = false,
     primaryUser = false,
-    shouldListenSfpsState = false,
     shouldListenForFingerprintAssistant = false,
     switchingUser = false,
     udfps = false,

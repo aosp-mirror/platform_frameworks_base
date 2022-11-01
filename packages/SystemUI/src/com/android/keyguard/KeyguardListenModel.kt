@@ -35,7 +35,6 @@ data class KeyguardFingerprintListenModel(
     val keyguardOccluded: Boolean,
     val occludingAppRequestingFp: Boolean,
     val primaryUser: Boolean,
-    val shouldListenSfpsState: Boolean,
     val shouldListenForFingerprintAssistant: Boolean,
     val switchingUser: Boolean,
     val udfps: Boolean,
