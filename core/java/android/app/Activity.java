@@ -8364,11 +8364,17 @@ public class Activity extends ContextThemeWrapper
     }
 
     final void performNewIntent(@NonNull Intent intent) {
+        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "performNewIntent");
         mCanEnterPictureInPicture = true;
         onNewIntent(intent);
+        Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
     }
 
     final void performStart(String reason) {
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_WINDOW_MANAGER)) {
+            Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "performStart:"
+                    + mComponent.getClassName());
+        }
         dispatchActivityPreStarted();
         mActivityTransitionState.setEnterActivityOptions(this, getActivityOptions());
         mFragments.noteStateNotSaved();
@@ -8415,6 +8421,7 @@ public class Activity extends ContextThemeWrapper
 
         mActivityTransitionState.enterReady(this);
         dispatchActivityPostStarted();
+        Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
     }
 
     /**
@@ -8424,6 +8431,7 @@ public class Activity extends ContextThemeWrapper
      *              multiple lifecycle transitions is in progress.
      */
     final void performRestart(boolean start, String reason) {
+        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "performRestart");
         mCanEnterPictureInPicture = true;
         mFragments.noteStateNotSaved();
 
@@ -8469,6 +8477,7 @@ public class Activity extends ContextThemeWrapper
                 performStart(reason);
             }
         }
+        Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
     }
 
     final void performResume(boolean followedByPause, String reason) {
