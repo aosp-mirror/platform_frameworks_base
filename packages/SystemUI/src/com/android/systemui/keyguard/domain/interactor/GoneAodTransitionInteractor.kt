@@ -20,10 +20,10 @@ import android.animation.ValueAnimator
 import com.android.systemui.animation.Interpolators
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionInfo
+import com.android.systemui.keyguard.shared.model.WakefulnessModel
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -31,36 +31,30 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 @SysUISingleton
-class AodLockscreenTransitionInteractor
+class GoneAodTransitionInteractor
 @Inject
 constructor(
     @Application private val scope: CoroutineScope,
-    private val keyguardRepository: KeyguardRepository,
+    private val keyguardInteractor: KeyguardInteractor,
     private val keyguardTransitionRepository: KeyguardTransitionRepository,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
-) : TransitionInteractor("AOD<->LOCKSCREEN") {
+) : TransitionInteractor("GONE->AOD") {
 
     override fun start() {
         scope.launch {
-            keyguardRepository.isDozing
+            keyguardInteractor.wakefulnessState
                 .sample(keyguardTransitionInteractor.finishedKeyguardState, { a, b -> Pair(a, b) })
                 .collect { pair ->
-                    val (isDozing, keyguardState) = pair
-                    if (isDozing && keyguardState == KeyguardState.LOCKSCREEN) {
+                    val (wakefulnessState, keyguardState) = pair
+                    if (
+                        keyguardState == KeyguardState.GONE &&
+                            wakefulnessState == WakefulnessModel.STARTING_TO_SLEEP
+                    ) {
                         keyguardTransitionRepository.startTransition(
                             TransitionInfo(
                                 name,
-                                KeyguardState.LOCKSCREEN,
+                                KeyguardState.GONE,
                                 KeyguardState.AOD,
-                                getAnimator(),
-                            )
-                        )
-                    } else if (!isDozing && keyguardState == KeyguardState.AOD) {
-                        keyguardTransitionRepository.startTransition(
-                            TransitionInfo(
-                                name,
-                                KeyguardState.AOD,
-                                KeyguardState.LOCKSCREEN,
                                 getAnimator(),
                             )
                         )

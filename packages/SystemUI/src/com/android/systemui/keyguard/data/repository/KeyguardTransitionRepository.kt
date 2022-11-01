@@ -29,27 +29,33 @@ import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import java.util.UUID
 import javax.inject.Inject
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 
-@SysUISingleton
-class KeyguardTransitionRepository @Inject constructor() {
-    /*
-     * Each transition between [KeyguardState]s will have an associated Flow.
-     * In order to collect these events, clients should call [transition].
+/**
+ * The source of truth for all keyguard transitions.
+ *
+ * While the keyguard component is visible, it can undergo a number of transitions between different
+ * UI screens, such as AOD (Always-on Display), Bouncer, and others mentioned in [KeyguardState].
+ * These UI elements should listen to events emitted by [transitions], to ensure a centrally
+ * coordinated experience.
+ *
+ * To create or modify logic that controls when and how transitions get created, look at
+ * [TransitionInteractor]. These interactors will call [startTransition] and [updateTransition] on
+ * this repository.
+ */
+interface KeyguardTransitionRepository {
+    /**
+     * All events regarding transitions, as they start, run, and complete. [TransitionStep#value] is
+     * a float between [0, 1] representing progress towards completion. If this is a user driven
+     * transition, that value may not be a monotonic progression, as the user may swipe in any
+     * direction.
      */
-    private val _transitions = MutableStateFlow(TransitionStep())
-    val transitions = _transitions.asStateFlow()
-
-    /* Information about the active transition. */
-    private var currentTransitionInfo: TransitionInfo? = null
-    /*
-     * When manual control of the transition is requested, a unique [UUID] is used as the handle
-     * to permit calls to [updateTransition]
-     */
-    private var updateTransitionId: UUID? = null
+    val transitions: Flow<TransitionStep>
 
     /**
      * Interactors that require information about changes between [KeyguardState]s will call this to
@@ -60,65 +66,10 @@ class KeyguardTransitionRepository @Inject constructor() {
     }
 
     /**
-     * Begin a transition from one state to another. The [info.from] must match
-     * [currentTransitionInfo.to], or the request will be denied. This is enforced to avoid
-     * unplanned transitions.
+     * Begin a transition from one state to another. Will not start if another transition is in
+     * progress.
      */
-    fun startTransition(info: TransitionInfo): UUID? {
-        if (currentTransitionInfo != null) {
-            // Open questions:
-            // * Queue of transitions? buffer of 1?
-            // * Are transitions cancellable if a new one is triggered?
-            // * What validation does this need to do?
-            Log.wtf(TAG, "Transition still active: $currentTransitionInfo")
-            return null
-        }
-        currentTransitionInfo?.animator?.cancel()
-
-        currentTransitionInfo = info
-        info.animator?.let { animator ->
-            // An animator was provided, so use it to run the transition
-            animator.setFloatValues(0f, 1f)
-            val updateListener =
-                object : AnimatorUpdateListener {
-                    override fun onAnimationUpdate(animation: ValueAnimator) {
-                        emitTransition(
-                            info,
-                            (animation.getAnimatedValue() as Float),
-                            TransitionState.RUNNING
-                        )
-                    }
-                }
-            val adapter =
-                object : AnimatorListenerAdapter() {
-                    override fun onAnimationStart(animation: Animator) {
-                        Log.i(TAG, "Starting transition: $info")
-                        emitTransition(info, 0f, TransitionState.STARTED)
-                    }
-                    override fun onAnimationCancel(animation: Animator) {
-                        Log.i(TAG, "Cancelling transition: $info")
-                    }
-                    override fun onAnimationEnd(animation: Animator) {
-                        Log.i(TAG, "Ending transition: $info")
-                        emitTransition(info, 1f, TransitionState.FINISHED)
-                        animator.removeListener(this)
-                        animator.removeUpdateListener(updateListener)
-                    }
-                }
-            animator.addListener(adapter)
-            animator.addUpdateListener(updateListener)
-            animator.start()
-            return@startTransition null
-        }
-            ?: run {
-                Log.i(TAG, "Starting transition (manual): $info")
-                emitTransition(info, 0f, TransitionState.STARTED)
-
-                // No animator, so it's manual. Provide a mechanism to callback
-                updateTransitionId = UUID.randomUUID()
-                return@startTransition updateTransitionId
-            }
-    }
+    fun startTransition(info: TransitionInfo): UUID?
 
     /**
      * Allows manual control of a transition. When calling [startTransition], the consumer must pass
@@ -132,58 +83,127 @@ class KeyguardTransitionRepository @Inject constructor() {
         transitionId: UUID,
         @FloatRange(from = 0.0, to = 1.0) value: Float,
         state: TransitionState
+    )
+}
+
+@SysUISingleton
+class KeyguardTransitionRepositoryImpl @Inject constructor() : KeyguardTransitionRepository {
+    /*
+     * Each transition between [KeyguardState]s will have an associated Flow.
+     * In order to collect these events, clients should call [transition].
+     */
+    private val _transitions =
+        MutableSharedFlow<TransitionStep>(
+            extraBufferCapacity = 10,
+            onBufferOverflow = BufferOverflow.DROP_OLDEST
+        )
+    override val transitions = _transitions.asSharedFlow().distinctUntilChanged()
+    private var lastStep: TransitionStep = TransitionStep()
+
+    /*
+     * When manual control of the transition is requested, a unique [UUID] is used as the handle
+     * to permit calls to [updateTransition]
+     */
+    private var updateTransitionId: UUID? = null
+
+    override fun startTransition(info: TransitionInfo): UUID? {
+        if (lastStep.transitionState != TransitionState.FINISHED) {
+            // Open questions:
+            // * Queue of transitions? buffer of 1?
+            // * Are transitions cancellable if a new one is triggered?
+            // * What validation does this need to do?
+            Log.wtf(TAG, "Transition still active: $lastStep")
+            return null
+        }
+
+        info.animator?.let { animator ->
+            // An animator was provided, so use it to run the transition
+            animator.setFloatValues(0f, 1f)
+            val updateListener =
+                object : AnimatorUpdateListener {
+                    override fun onAnimationUpdate(animation: ValueAnimator) {
+                        emitTransition(
+                            TransitionStep(
+                                info,
+                                (animation.getAnimatedValue() as Float),
+                                TransitionState.RUNNING
+                            )
+                        )
+                    }
+                }
+            val adapter =
+                object : AnimatorListenerAdapter() {
+                    override fun onAnimationStart(animation: Animator) {
+                        emitTransition(TransitionStep(info, 0f, TransitionState.STARTED))
+                    }
+                    override fun onAnimationCancel(animation: Animator) {
+                        Log.i(TAG, "Cancelling transition: $info")
+                    }
+                    override fun onAnimationEnd(animation: Animator) {
+                        emitTransition(TransitionStep(info, 1f, TransitionState.FINISHED))
+                        animator.removeListener(this)
+                        animator.removeUpdateListener(updateListener)
+                    }
+                }
+            animator.addListener(adapter)
+            animator.addUpdateListener(updateListener)
+            animator.start()
+            return@startTransition null
+        }
+            ?: run {
+                emitTransition(TransitionStep(info, 0f, TransitionState.STARTED))
+
+                // No animator, so it's manual. Provide a mechanism to callback
+                updateTransitionId = UUID.randomUUID()
+                return@startTransition updateTransitionId
+            }
+    }
+
+    override fun updateTransition(
+        transitionId: UUID,
+        @FloatRange(from = 0.0, to = 1.0) value: Float,
+        state: TransitionState
     ) {
         if (updateTransitionId != transitionId) {
             Log.wtf(TAG, "Attempting to update with old/invalid transitionId: $transitionId")
             return
         }
 
-        if (currentTransitionInfo == null) {
-            Log.wtf(TAG, "Attempting to update with null 'currentTransitionInfo'")
-            return
+        if (state == TransitionState.FINISHED) {
+            updateTransitionId = null
         }
 
-        currentTransitionInfo?.let { info ->
-            if (state == TransitionState.FINISHED) {
-                updateTransitionId = null
-                Log.i(TAG, "Ending transition: $info")
-            }
-
-            emitTransition(info, value, state)
-        }
+        val nextStep = lastStep.copy(value = value, transitionState = state)
+        emitTransition(nextStep, isManual = true)
     }
 
-    private fun emitTransition(
-        info: TransitionInfo,
-        value: Float,
-        transitionState: TransitionState
-    ) {
-        trace(info, transitionState)
-
-        if (transitionState == TransitionState.FINISHED) {
-            currentTransitionInfo = null
+    private fun emitTransition(nextStep: TransitionStep, isManual: Boolean = false) {
+        trace(nextStep, isManual)
+        val emitted = _transitions.tryEmit(nextStep)
+        if (!emitted) {
+            Log.w(TAG, "Failed to emit next value without suspending")
         }
-        _transitions.value = TransitionStep(info.from, info.to, value, transitionState)
+        lastStep = nextStep
     }
 
-    private fun trace(info: TransitionInfo, transitionState: TransitionState) {
+    private fun trace(step: TransitionStep, isManual: Boolean) {
         if (
-            transitionState != TransitionState.STARTED &&
-                transitionState != TransitionState.FINISHED
+            step.transitionState != TransitionState.STARTED &&
+                step.transitionState != TransitionState.FINISHED
         ) {
             return
         }
         val traceName =
-            "Transition: ${info.from} -> ${info.to} " +
-                if (info.animator == null) {
+            "Transition: ${step.from} -> ${step.to} " +
+                if (isManual) {
                     "(manual)"
                 } else {
                     ""
                 }
         val traceCookie = traceName.hashCode()
-        if (transitionState == TransitionState.STARTED) {
+        if (step.transitionState == TransitionState.STARTED) {
             Trace.beginAsyncSection(traceName, traceCookie)
-        } else if (transitionState == TransitionState.FINISHED) {
+        } else if (step.transitionState == TransitionState.FINISHED) {
             Trace.endAsyncSection(traceName, traceCookie)
         }
     }
