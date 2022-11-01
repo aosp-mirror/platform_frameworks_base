@@ -18,6 +18,7 @@ package android.telephony;
 
 import static android.text.TextUtils.formatSimple;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -694,6 +695,15 @@ public class SubscriptionInfo implements Parcelable {
             merged.addAll(Arrays.asList(mCarrierConfigAccessRules));
         }
         return merged.isEmpty() ? null : merged;
+    }
+
+    /**
+     * @hide
+     * @return mCarrierConfigAccessRules associated with this subscription.
+     */
+    public @NonNull List<UiccAccessRule> getCarrierConfigAccessRules() {
+        return mCarrierConfigAccessRules == null ? Collections.emptyList() :
+            Arrays.asList(mCarrierConfigAccessRules);
     }
 
     /**
