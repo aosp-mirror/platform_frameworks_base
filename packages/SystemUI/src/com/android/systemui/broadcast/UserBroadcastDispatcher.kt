@@ -21,6 +21,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
+import android.os.Trace
 import android.os.UserHandle
 import android.util.ArrayMap
 import android.util.ArraySet
@@ -126,6 +127,7 @@ open class UserBroadcastDispatcher(
                 action,
                 userId,
                 {
+                    Trace.beginSection("registerReceiver act=$action user=$userId")
                     context.registerReceiverAsUser(
                             this,
                             UserHandle.of(userId),
@@ -134,11 +136,14 @@ open class UserBroadcastDispatcher(
                             workerHandler,
                             flags
                     )
+                    Trace.endSection()
                     logger.logContextReceiverRegistered(userId, flags, it)
                 },
                 {
                     try {
+                        Trace.beginSection("unregisterReceiver act=$action user=$userId")
                         context.unregisterReceiver(this)
+                        Trace.endSection()
                         logger.logContextReceiverUnregistered(userId, action)
                     } catch (e: IllegalArgumentException) {
                         Log.e(TAG, "Trying to unregister unregistered receiver for user $userId, " +
