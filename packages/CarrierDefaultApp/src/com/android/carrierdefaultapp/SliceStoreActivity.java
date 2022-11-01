@@ -20,47 +20,63 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.webkit.WebView;
 
 import com.android.phone.slicestore.SliceStore;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Activity that launches when the user clicks on the network boost notification.
+ * This will open a {@link WebView} for the carrier website to allow the user to complete the
+ * premium capability purchase.
+ * The carrier website can get the requested premium capability using the JavaScript interface
+ * method {@code SliceStoreWebInterface.getRequestedCapability()}.
+ * If the purchase is successful, the carrier website shall notify SliceStore using the JavaScript
+ * interface method {@code SliceStoreWebInterface.notifyPurchaseSuccessful(duration)}, where
+ * {@code duration} is the duration of the network boost.
+ * If the purchase was not successful, the carrier website shall notify SliceStore using the
+ * JavaScript interface method {@code SliceStoreWebInterface.notifyPurchaseFailed()}.
+ * If either of these notification methods are not called, the purchase cannot be completed
+ * successfully and the purchase request will eventually time out.
  */
 public class SliceStoreActivity extends Activity {
     private static final String TAG = "SliceStoreActivity";
 
-    private URL mUrl;
-    private WebView mWebView;
-    private int mPhoneId;
+    private @NonNull WebView mWebView;
+    private @NonNull Context mApplicationContext;
     private int mSubId;
-    private @TelephonyManager.PremiumCapability int mCapability;
+    @TelephonyManager.PremiumCapability protected int mCapability;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Intent intent = getIntent();
-        mPhoneId = intent.getIntExtra(SliceStore.EXTRA_PHONE_ID,
-                SubscriptionManager.INVALID_PHONE_INDEX);
         mSubId = intent.getIntExtra(SliceStore.EXTRA_SUB_ID,
                 SubscriptionManager.INVALID_SUBSCRIPTION_ID);
         mCapability = intent.getIntExtra(SliceStore.EXTRA_PREMIUM_CAPABILITY,
                 SliceStore.PREMIUM_CAPABILITY_INVALID);
-        mUrl = getUrl();
-        logd("onCreate: mPhoneId=" + mPhoneId + ", mSubId=" + mSubId + ", mCapability="
+        mApplicationContext = getApplicationContext();
+        URL url = getUrl();
+        logd("onCreate: subId=" + mSubId + ", capability="
                 + TelephonyManager.convertPremiumCapabilityToString(mCapability)
-                + ", mUrl=" + mUrl);
-        getApplicationContext().getSystemService(NotificationManager.class)
+                + ", url=" + url);
+
+        // Cancel network boost notification
+        mApplicationContext.getSystemService(NotificationManager.class)
                 .cancel(SliceStoreBroadcastReceiver.NETWORK_BOOST_NOTIFICATION_TAG, mCapability);
+
+        // Verify intent and values are valid
         if (!SliceStoreBroadcastReceiver.isIntentValid(intent)) {
             loge("Not starting SliceStoreActivity with an invalid Intent: " + intent);
             SliceStoreBroadcastReceiver.sendSliceStoreResponse(
@@ -68,10 +84,15 @@ public class SliceStoreActivity extends Activity {
             finishAndRemoveTask();
             return;
         }
-        if (mUrl == null) {
-            loge("Unable to create a URL from carrier configs.");
-            SliceStoreBroadcastReceiver.sendSliceStoreResponse(
-                    intent, SliceStore.EXTRA_INTENT_CARRIER_ERROR);
+        if (url == null) {
+            String error = "Unable to create a URL from carrier configs.";
+            loge(error);
+            Intent data = new Intent();
+            data.putExtra(SliceStore.EXTRA_FAILURE_CODE,
+                    SliceStore.FAILURE_CODE_CARRIER_URL_UNAVAILABLE);
+            data.putExtra(SliceStore.EXTRA_FAILURE_REASON, error);
+            SliceStoreBroadcastReceiver.sendSliceStoreResponseWithData(
+                    mApplicationContext, getIntent(), SliceStore.EXTRA_INTENT_CARRIER_ERROR, data);
             finishAndRemoveTask();
             return;
         }
@@ -83,12 +104,53 @@ public class SliceStoreActivity extends Activity {
             return;
         }
 
+        // Create a reference to this activity in SliceStoreBroadcastReceiver
         SliceStoreBroadcastReceiver.updateSliceStoreActivity(mCapability, this);
 
+        // Create and configure WebView
         mWebView = new WebView(this);
+        // Enable JavaScript for the carrier purchase website to send results back to SliceStore
+        mWebView.getSettings().setJavaScriptEnabled(true);
+        mWebView.addJavascriptInterface(new SliceStoreWebInterface(this), "SliceStoreWebInterface");
+
+        // Display WebView
         setContentView(mWebView);
-        mWebView.loadUrl(mUrl.toString());
-        // TODO(b/245882601): Get back response from WebView
+        mWebView.loadUrl(url.toString());
+    }
+
+    protected void onPurchaseSuccessful(long duration) {
+        logd("onPurchaseSuccessful: Carrier website indicated successfully purchased premium "
+                + "capability " + TelephonyManager.convertPremiumCapabilityToString(mCapability)
+                + " for " + TimeUnit.MILLISECONDS.toMinutes(duration) + " minutes.");
+        Intent intent = new Intent();
+        intent.putExtra(SliceStore.EXTRA_PURCHASE_DURATION, duration);
+        SliceStoreBroadcastReceiver.sendSliceStoreResponseWithData(
+                mApplicationContext, getIntent(), SliceStore.EXTRA_INTENT_SUCCESS, intent);
+        finishAndRemoveTask();
+    }
+
+    protected void onPurchaseFailed(@SliceStore.FailureCode int failureCode,
+            @Nullable String failureReason) {
+        logd("onPurchaseFailed: Carrier website indicated purchase failed for premium capability "
+                + TelephonyManager.convertPremiumCapabilityToString(mCapability) + " with code: "
+                + SliceStore.convertFailureCodeToString(failureCode) + " and reason: "
+                + failureReason);
+        Intent data = new Intent();
+        data.putExtra(SliceStore.EXTRA_FAILURE_CODE, failureCode);
+        data.putExtra(SliceStore.EXTRA_FAILURE_REASON, failureReason);
+        SliceStoreBroadcastReceiver.sendSliceStoreResponseWithData(
+                mApplicationContext, getIntent(), SliceStore.EXTRA_INTENT_CARRIER_ERROR, data);
+        finishAndRemoveTask();
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, @NonNull KeyEvent event) {
+        // Pressing back in the WebView will go to the previous page instead of closing SliceStore.
+        if ((keyCode == KeyEvent.KEYCODE_BACK) && mWebView.canGoBack()) {
+            mWebView.goBack();
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
     }
 
     @Override
@@ -100,8 +162,8 @@ public class SliceStoreActivity extends Activity {
         super.onDestroy();
     }
 
-    private @Nullable URL getUrl() {
-        String url = getApplicationContext().getSystemService(CarrierConfigManager.class)
+    @Nullable private URL getUrl() {
+        String url = mApplicationContext.getSystemService(CarrierConfigManager.class)
                 .getConfigForSubId(mSubId).getString(
                         CarrierConfigManager.KEY_PREMIUM_CAPABILITY_PURCHASE_URL_STRING);
         try {

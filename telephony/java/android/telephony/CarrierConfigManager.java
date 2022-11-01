@@ -8774,6 +8774,22 @@ public class CarrierConfigManager {
             "premium_capability_purchase_condition_backoff_hysteresis_time_millis_long";
 
     /**
+     * The amount of time in milliseconds within which the network must set up a slicing
+     * configuration for the premium capability after
+     * {@link TelephonyManager#purchasePremiumCapability(int, Executor, Consumer)}
+     * returns {@link TelephonyManager#PURCHASE_PREMIUM_CAPABILITY_RESULT_SUCCESS}.
+     * During the setup time, calls to
+     * {@link TelephonyManager#purchasePremiumCapability(int, Executor, Consumer)} will return
+     * {@link TelephonyManager#PURCHASE_PREMIUM_CAPABILITY_RESULT_PENDING_NETWORK_SETUP}.
+     * If the network fails set up a slicing configuration for the premium capability within the
+     * setup time, subsequent purchase requests will be allowed to go through again.
+     *
+     * The default value is 5 minutes.
+     */
+    public static final String KEY_PREMIUM_CAPABILITY_NETWORK_SETUP_TIME_MILLIS_LONG =
+            "premium_capability_network_setup_time_millis_long";
+
+    /**
      * The URL to redirect to when the user clicks on the notification for a network boost via
      * premium capabilities after applications call
      * {@link TelephonyManager#purchasePremiumCapability(int, Executor, Consumer)}.
@@ -9496,6 +9512,8 @@ public class CarrierConfigManager {
         sDefaults.putLong(
                 KEY_PREMIUM_CAPABILITY_PURCHASE_CONDITION_BACKOFF_HYSTERESIS_TIME_MILLIS_LONG,
                 TimeUnit.MINUTES.toMillis(30));
+        sDefaults.putLong(KEY_PREMIUM_CAPABILITY_NETWORK_SETUP_TIME_MILLIS_LONG,
+                TimeUnit.MINUTES.toMillis(5));
         sDefaults.putString(KEY_PREMIUM_CAPABILITY_PURCHASE_URL_STRING, null);
         sDefaults.putBoolean(KEY_PREMIUM_CAPABILITY_SUPPORTED_ON_LTE_BOOL, false);
         sDefaults.putStringArray(KEY_IWLAN_HANDOVER_POLICY_STRING_ARRAY, new String[]{
