@@ -78,12 +78,9 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"Iphethini iyadingeka ngemuva kokuqala kabusha kwedivayisi"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"Iphinikhodi iyadingeka ngemuva kokuqala kabusha kwedivayisi"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"Iphasiwedi iyadingeka ngemuva kokuqala kabusha kwedivayisi"</string>
-    <!-- no translation found for kg_prompt_reason_timeout_pattern (5514969660010197363) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_timeout_pin (4227962059353859376) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_timeout_password (8810879144143933690) -->
-    <skip />
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Ukuze uthole ukuvikeleka okwengeziwe, sebenzisa iphetheni esikhundleni salokho"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Ukuze uthole ukuvikeleka okwengeziwe, sebenzisa i-PIN esikhundleni salokho"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Ukuze uthole ukuvikeleka okwengeziwe, sebenzisa iphasiwedi esikhundleni salokho"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Idivayisi ikhiywe ngumlawuli"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Idivayisi ikhiywe ngokwenza"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Akwaziwa"</string>
@@ -93,6 +90,5 @@
     <string name="clock_title_default" msgid="6342735240617459864">"Okuzenzekelayo"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Ibhamuza"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"I-Analog"</string>
-    <!-- no translation found for keyguard_unlock_to_continue (7509503484250597743) -->
-    <skip />
+    <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Vula idivayisi yakho ukuze uqhubeke"</string>
 </resources>

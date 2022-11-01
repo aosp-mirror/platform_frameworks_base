@@ -77,4 +77,50 @@ class ShadeLogger @Inject constructor(@ShadeLog private val buffer: LogBuffer) {
             }
         )
     }
+
+    fun logExpansionChanged(
+            message: String,
+            fraction: Float,
+            expanded: Boolean,
+            tracking: Boolean,
+            dragDownPxAmount: Float,
+    ) {
+        log(LogLevel.VERBOSE, {
+            str1 = message
+            double1 = fraction.toDouble()
+            bool1 = expanded
+            bool2 = tracking
+            long1 = dragDownPxAmount.toLong()
+        }, {
+            "$str1 fraction=$double1,expanded=$bool1," +
+                    "tracking=$bool2," + "dragDownPxAmount=$dragDownPxAmount"
+        })
+    }
+
+    fun logQsExpansionChanged(
+            message: String,
+            qsExpanded: Boolean,
+            qsMinExpansionHeight: Int,
+            qsMaxExpansionHeight: Int,
+            stackScrollerOverscrolling: Boolean,
+            dozing: Boolean,
+            qsAnimatorExpand: Boolean,
+            animatingQs: Boolean
+    ) {
+        log(LogLevel.VERBOSE, {
+            str1 = message
+            bool1 = qsExpanded
+            int1 = qsMinExpansionHeight
+            int2 = qsMaxExpansionHeight
+            bool2 = stackScrollerOverscrolling
+            bool3 = dozing
+            bool4 = qsAnimatorExpand
+            // 0 = false, 1 = true
+            long1 = animatingQs.compareTo(false).toLong()
+        }, {
+            "$str1 qsExpanded=$bool1,qsMinExpansionHeight=$int1,qsMaxExpansionHeight=$int2," +
+                    "stackScrollerOverscrolling=$bool2,dozing=$bool3,qsAnimatorExpand=$bool4," +
+                    "animatingQs=$long1"
+        })
+    }
 }

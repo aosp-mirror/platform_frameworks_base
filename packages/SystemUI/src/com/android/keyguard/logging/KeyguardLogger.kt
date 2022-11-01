@@ -21,6 +21,7 @@ import com.android.systemui.plugins.log.LogBuffer
 import com.android.systemui.plugins.log.LogLevel
 import com.android.systemui.plugins.log.LogLevel.DEBUG
 import com.android.systemui.plugins.log.LogLevel.ERROR
+import com.android.systemui.plugins.log.LogLevel.INFO
 import com.android.systemui.plugins.log.LogLevel.VERBOSE
 import com.android.systemui.plugins.log.LogLevel.WARNING
 import com.android.systemui.plugins.log.MessageInitializer
@@ -48,6 +49,14 @@ class KeyguardLogger @Inject constructor(@KeyguardLog private val buffer: LogBuf
 
     private fun debugLog(messageInitializer: MessageInitializer, messagePrinter: MessagePrinter) {
         buffer.log(TAG, DEBUG, messageInitializer, messagePrinter)
+    }
+
+    fun v(msg: String, arg: Any) {
+        buffer.log(TAG, VERBOSE, { str1 = arg.toString() }, { "$msg: $str1" })
+    }
+
+    fun i(msg: String, arg: Any) {
+        buffer.log(TAG, INFO, { str1 = arg.toString() }, { "$msg: $str1" })
     }
 
     // TODO: remove after b/237743330 is fixed

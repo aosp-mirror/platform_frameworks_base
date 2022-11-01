@@ -248,7 +248,8 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"ప్రకాశం"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"కలర్ మార్పిడి"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"కలర్ కరెక్షన్"</string>
-    <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"యూజర్ సెట్టింగ్‌లు"</string>
+    <!-- no translation found for quick_settings_more_user_settings (7634653308485206306) -->
+    <skip />
     <string name="quick_settings_done" msgid="2163641301648855793">"పూర్తయింది"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"మూసివేయి"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"కనెక్ట్ చేయబడినది"</string>

@@ -59,6 +59,8 @@ import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.bluetooth.BroadcastDialogController
 import com.android.systemui.broadcast.BroadcastSender
+import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.media.controls.MediaTestUtils
 import com.android.systemui.media.controls.models.GutsViewHolder
 import com.android.systemui.media.controls.models.player.MediaAction
@@ -76,6 +78,7 @@ import com.android.systemui.media.controls.util.MediaUiEventLogger
 import com.android.systemui.media.dialog.MediaOutputDialogFactory
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.ripple.MultiRippleView
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.animation.TransitionLayout
@@ -174,6 +177,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     private lateinit var cancelText: TextView
     private lateinit var dismiss: FrameLayout
     private lateinit var dismissText: TextView
+    private lateinit var multiRippleView: MultiRippleView
 
     private lateinit var session: MediaSession
     private lateinit var device: MediaDeviceData
@@ -205,6 +209,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
     private lateinit var recSubtitle2: TextView
     private lateinit var recSubtitle3: TextView
     private var shouldShowBroadcastButton: Boolean = false
+    private val fakeFeatureFlag =
+        FakeFeatureFlags().apply { this.set(Flags.UMO_SURFACE_RIPPLE, false) }
 
     @JvmField @Rule val mockito = MockitoJUnit.rule()
 
@@ -244,7 +250,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
                     keyguardStateController,
                     activityIntentHelper,
                     lockscreenUserManager,
-                    broadcastDialogController
+                    broadcastDialogController,
+                    fakeFeatureFlag
                 ) {
                 override fun loadAnimator(
                     animId: Int,
@@ -374,6 +381,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
                     )
             }
 
+        multiRippleView = MultiRippleView(context, null)
+
         whenever(viewHolder.player).thenReturn(view)
         whenever(viewHolder.appIcon).thenReturn(appIcon)
         whenever(viewHolder.albumView).thenReturn(albumView)
@@ -414,6 +423,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
         whenever(viewHolder.getAction(R.id.action4)).thenReturn(action4)
 
         whenever(viewHolder.actionsTopBarrier).thenReturn(actionsTopBarrier)
+
+        whenever(viewHolder.multiRippleView).thenReturn(multiRippleView)
     }
 
     /** Initialize elements for the recommendation view holder */
@@ -1971,6 +1982,50 @@ public class MediaControlPanelTest : SysuiTestCase() {
         assertThat(expandedSet.getVisibility(recSubtitle1.id)).isEqualTo(ConstraintSet.GONE)
         assertThat(expandedSet.getVisibility(recSubtitle2.id)).isEqualTo(ConstraintSet.GONE)
         assertThat(expandedSet.getVisibility(recSubtitle3.id)).isEqualTo(ConstraintSet.GONE)
+    }
+
+    @Test
+    fun onButtonClick_touchRippleFlagEnabled_playsTouchRipple() {
+        fakeFeatureFlag.set(Flags.UMO_SURFACE_RIPPLE, true)
+        val semanticActions =
+            MediaButton(
+                playOrPause =
+                    MediaAction(
+                        icon = null,
+                        action = {},
+                        contentDescription = "play",
+                        background = null
+                    )
+            )
+        val data = mediaData.copy(semanticActions = semanticActions)
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(data, KEY)
+
+        viewHolder.actionPlayPause.callOnClick()
+
+        assertThat(viewHolder.multiRippleView.ripples.size).isEqualTo(1)
+    }
+
+    @Test
+    fun onButtonClick_touchRippleFlagDisabled_doesNotPlayTouchRipple() {
+        fakeFeatureFlag.set(Flags.UMO_SURFACE_RIPPLE, false)
+        val semanticActions =
+            MediaButton(
+                playOrPause =
+                    MediaAction(
+                        icon = null,
+                        action = {},
+                        contentDescription = "play",
+                        background = null
+                    )
+            )
+        val data = mediaData.copy(semanticActions = semanticActions)
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(data, KEY)
+
+        viewHolder.actionPlayPause.callOnClick()
+
+        assertThat(viewHolder.multiRippleView.ripples.size).isEqualTo(0)
     }
 
     private fun getScrubbingChangeListener(): SeekBarViewModel.ScrubbingChangeListener =

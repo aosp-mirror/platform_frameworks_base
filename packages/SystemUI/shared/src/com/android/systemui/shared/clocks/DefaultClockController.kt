@@ -237,6 +237,9 @@ class DefaultClockController(
     ) {
         var isActive: Boolean = fraction < 0.5f
         fun update(newFraction: Float): Pair<Boolean, Boolean> {
+            if (newFraction == fraction) {
+                return Pair(isActive, false)
+            }
             val wasActive = isActive
             val hasJumped =
                 (fraction == 0f && newFraction == 1f) || (fraction == 1f && newFraction == 0f)

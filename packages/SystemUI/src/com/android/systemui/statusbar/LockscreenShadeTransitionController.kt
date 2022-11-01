@@ -663,7 +663,7 @@ class LockscreenShadeTransitionController @Inject constructor(
         } else {
             pulseHeight = height
             val overflow = nsslController.setPulseHeight(height)
-            notificationPanelController.setOverStrechAmount(overflow)
+            notificationPanelController.setOverStretchAmount(overflow)
             val transitionHeight = if (keyguardBypassController.bypassEnabled) height else 0.0f
             transitionToShadeAmountCommon(transitionHeight)
         }
