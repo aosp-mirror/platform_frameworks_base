@@ -200,16 +200,17 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
 
         final Rect taskBounds = taskConfig.windowConfiguration.getBounds();
         final Resources resources = mDecorWindowContext.getResources();
-        final int decorContainerOffsetX = -loadDimensionPixelSize(resources, params.mOutsetLeftId);
-        final int decorContainerOffsetY = -loadDimensionPixelSize(resources, params.mOutsetTopId);
+        outResult.mDecorContainerOffsetX = -loadDimensionPixelSize(resources, params.mOutsetLeftId);
+        outResult.mDecorContainerOffsetY = -loadDimensionPixelSize(resources, params.mOutsetTopId);
         outResult.mWidth = taskBounds.width()
                 + loadDimensionPixelSize(resources, params.mOutsetRightId)
-                - decorContainerOffsetX;
+                - outResult.mDecorContainerOffsetX;
         outResult.mHeight = taskBounds.height()
                 + loadDimensionPixelSize(resources, params.mOutsetBottomId)
-                - decorContainerOffsetY;
+                - outResult.mDecorContainerOffsetY;
         startT.setPosition(
-                        mDecorationContainerSurface, decorContainerOffsetX, decorContainerOffsetY)
+                        mDecorationContainerSurface,
+                        outResult.mDecorContainerOffsetX, outResult.mDecorContainerOffsetY)
                 .setWindowCrop(mDecorationContainerSurface,
                         outResult.mWidth, outResult.mHeight)
                 // TODO(b/244455401): Change the z-order when it's better organized
@@ -252,14 +253,11 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         final int captionHeight = loadDimensionPixelSize(resources, params.mCaptionHeightId);
         final int captionWidth = loadDimensionPixelSize(resources, params.mCaptionWidthId);
 
-        //Prevent caption from going offscreen if task is too high up
-        final int captionYPos = taskBounds.top <= captionHeight / 2 ? 0 : captionHeight / 2;
-
         startT.setPosition(
-                        mCaptionContainerSurface, -decorContainerOffsetX
-                                + taskBounds.width() / 2 - captionWidth / 2,
-                        -decorContainerOffsetY - captionYPos)
-                .setWindowCrop(mCaptionContainerSurface, taskBounds.width(), captionHeight)
+                        mCaptionContainerSurface,
+                        -outResult.mDecorContainerOffsetX + params.mCaptionX,
+                        -outResult.mDecorContainerOffsetY + params.mCaptionY)
+                .setWindowCrop(mCaptionContainerSurface, captionWidth, captionHeight)
                 .show(mCaptionContainerSurface);
 
         if (mCaptionWindowManager == null) {
@@ -292,7 +290,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             // Caption insets
             mCaptionInsetsRect.set(taskBounds);
             mCaptionInsetsRect.bottom =
-                    mCaptionInsetsRect.top + captionHeight - captionYPos;
+                    mCaptionInsetsRect.top + captionHeight + params.mCaptionY;
             wct.addRectInsetsProvider(mTaskInfo.token, mCaptionInsetsRect,
                     CAPTION_INSETS_TYPES);
         } else {
@@ -302,10 +300,10 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         // Task surface itself
         Point taskPosition = mTaskInfo.positionInParent;
         mTaskSurfaceCrop.set(
-                decorContainerOffsetX,
-                decorContainerOffsetY,
-                outResult.mWidth + decorContainerOffsetX,
-                outResult.mHeight + decorContainerOffsetY);
+                outResult.mDecorContainerOffsetX,
+                outResult.mDecorContainerOffsetY,
+                outResult.mWidth + outResult.mDecorContainerOffsetX,
+                outResult.mHeight + outResult.mDecorContainerOffsetY);
         startT.show(mTaskSurface);
         finishT.setPosition(mTaskSurface, taskPosition.x, taskPosition.y)
                 .setCrop(mTaskSurface, mTaskSurfaceCrop);
@@ -326,7 +324,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         return true;
     }
 
-    private void releaseViews() {
+    void releaseViews() {
         if (mViewHost != null) {
             mViewHost.release();
             mViewHost = null;
@@ -369,18 +367,58 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         releaseViews();
     }
 
-    private static int loadDimensionPixelSize(Resources resources, int resourceId) {
+    static int loadDimensionPixelSize(Resources resources, int resourceId) {
         if (resourceId == Resources.ID_NULL) {
             return 0;
         }
         return resources.getDimensionPixelSize(resourceId);
     }
 
-    private static float loadDimension(Resources resources, int resourceId) {
+    static float loadDimension(Resources resources, int resourceId) {
         if (resourceId == Resources.ID_NULL) {
             return 0;
         }
         return resources.getDimension(resourceId);
+    }
+
+    /**
+     * Create a window associated with this WindowDecoration.
+     * Note that subclass must dispose of this when the task is hidden/closed.
+     * @param layoutId layout to make the window from
+     * @param t the transaction to apply
+     * @param xPos x position of new window
+     * @param yPos y position of new window
+     * @param width width of new window
+     * @param height height of new window
+     * @return
+     */
+    AdditionalWindow addWindow(int layoutId, String namePrefix,
+            SurfaceControl.Transaction t, int xPos, int yPos, int width, int height) {
+        final SurfaceControl.Builder builder = mSurfaceControlBuilderSupplier.get();
+        SurfaceControl windowSurfaceControl = builder
+                .setName(namePrefix + " of Task=" + mTaskInfo.taskId)
+                .setContainerLayer()
+                .setParent(mDecorationContainerSurface)
+                .build();
+        View v = LayoutInflater.from(mDecorWindowContext).inflate(layoutId, null);
+
+        t.setPosition(
+                windowSurfaceControl, xPos, yPos)
+                .setWindowCrop(windowSurfaceControl, width, height)
+                .show(windowSurfaceControl);
+        final WindowManager.LayoutParams lp =
+                new WindowManager.LayoutParams(width, height,
+                        WindowManager.LayoutParams.TYPE_APPLICATION,
+                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, PixelFormat.TRANSPARENT);
+        lp.setTitle("Additional window of Task=" + mTaskInfo.taskId);
+        lp.setTrustedOverlay();
+        WindowlessWindowManager windowManager = new WindowlessWindowManager(mTaskInfo.configuration,
+                windowSurfaceControl, null /* hostInputToken */);
+        SurfaceControlViewHost viewHost = mSurfaceControlViewHostFactory
+                .create(mDecorWindowContext, mDisplay, windowManager);
+        viewHost.setView(v, lp);
+        return new AdditionalWindow(windowSurfaceControl, viewHost,
+                mSurfaceControlTransactionSupplier);
     }
 
     static class RelayoutParams{
@@ -395,11 +433,19 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         int mOutsetLeftId;
         int mOutsetRightId;
 
+        int mCaptionX;
+        int mCaptionY;
+
         void setOutsets(int leftId, int topId, int rightId, int bottomId) {
             mOutsetLeftId = leftId;
             mOutsetTopId = topId;
             mOutsetRightId = rightId;
             mOutsetBottomId = bottomId;
+        }
+
+        void setCaptionPosition(int left, int top) {
+            mCaptionX = left;
+            mCaptionY = top;
         }
 
         void reset() {
@@ -412,6 +458,9 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             mOutsetBottomId = Resources.ID_NULL;
             mOutsetLeftId = Resources.ID_NULL;
             mOutsetRightId = Resources.ID_NULL;
+
+            mCaptionX = 0;
+            mCaptionY = 0;
         }
     }
 
@@ -419,10 +468,14 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         int mWidth;
         int mHeight;
         T mRootView;
+        int mDecorContainerOffsetX;
+        int mDecorContainerOffsetY;
 
         void reset() {
             mWidth = 0;
             mHeight = 0;
+            mDecorContainerOffsetX = 0;
+            mDecorContainerOffsetY = 0;
             mRootView = null;
         }
     }
@@ -430,6 +483,43 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
     interface SurfaceControlViewHostFactory {
         default SurfaceControlViewHost create(Context c, Display d, WindowlessWindowManager wmm) {
             return new SurfaceControlViewHost(c, d, wmm);
+        }
+    }
+
+    /**
+     * Subclass for additional windows associated with this WindowDecoration
+     */
+    static class AdditionalWindow {
+        SurfaceControl mWindowSurface;
+        SurfaceControlViewHost mWindowViewHost;
+        Supplier<SurfaceControl.Transaction> mTransactionSupplier;
+
+        private AdditionalWindow(SurfaceControl surfaceControl,
+                SurfaceControlViewHost surfaceControlViewHost,
+                Supplier<SurfaceControl.Transaction> transactionSupplier) {
+            mWindowSurface = surfaceControl;
+            mWindowViewHost = surfaceControlViewHost;
+            mTransactionSupplier = transactionSupplier;
+        }
+
+        void releaseView() {
+            WindowlessWindowManager windowManager = mWindowViewHost.getWindowlessWM();
+
+            if (mWindowViewHost != null) {
+                mWindowViewHost.release();
+                mWindowViewHost = null;
+            }
+            windowManager = null;
+            final SurfaceControl.Transaction t = mTransactionSupplier.get();
+            boolean released = false;
+            if (mWindowSurface != null) {
+                t.remove(mWindowSurface);
+                mWindowSurface = null;
+                released = true;
+            }
+            if (released) {
+                t.apply();
+            }
         }
     }
 }
