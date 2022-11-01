@@ -2185,6 +2185,8 @@ class UserController implements Handler.Callback {
         mHandler.sendMessage(mHandler.obtainMessage(COMPLETE_USER_SWITCH_MSG, newUserId, 0));
 
         uss.switching = false;
+        mHandler.removeMessages(REPORT_USER_SWITCH_COMPLETE_MSG);
+        mHandler.sendMessage(mHandler.obtainMessage(REPORT_USER_SWITCH_COMPLETE_MSG, newUserId, 0));
         stopGuestOrEphemeralUserIfBackground(oldUserId);
         stopUserOnSwitchIfEnforced(oldUserId);
         if (oldUserId == UserHandle.USER_SYSTEM) {
@@ -2198,20 +2200,20 @@ class UserController implements Handler.Callback {
 
     @VisibleForTesting
     void completeUserSwitch(int newUserId) {
-        final Runnable runnable = () -> {
-            unfreezeScreen();
-            mHandler.removeMessages(REPORT_USER_SWITCH_COMPLETE_MSG);
-            mHandler.sendMessage(mHandler.obtainMessage(
-                    REPORT_USER_SWITCH_COMPLETE_MSG, newUserId, 0));
-        };
-
         if (isUserSwitchUiEnabled()) {
             // If there is no challenge set, dismiss the keyguard right away
             if (!mInjector.getKeyguardManager().isDeviceSecure(newUserId)) {
                 // Wait until the keyguard is dismissed to unfreeze
-                mInjector.dismissKeyguard(runnable, "User Switch");
+                mInjector.dismissKeyguard(
+                        new Runnable() {
+                            public void run() {
+                                unfreezeScreen();
+                            }
+                        },
+                        "User Switch");
+                return;
             } else {
-                runnable.run();
+                unfreezeScreen();
             }
         }
     }
