@@ -22,8 +22,6 @@ import android.os.Looper;
 import android.os.Process;
 import android.os.StrictMode;
 
-import com.android.server.am.BroadcastLoopers;
-
 /**
  * Special handler thread that we create for system services that require their own loopers.
  */
@@ -46,14 +44,6 @@ public class ServiceThread extends HandlerThread {
         }
 
         super.run();
-    }
-
-    @Override
-    protected void onLooperPrepared() {
-        // Almost all service threads are used for dispatching broadcast
-        // intents, so register ourselves to ensure that "wait-for-broadcast"
-        // shell commands are able to drain any pending broadcasts
-        BroadcastLoopers.addLooper(getLooper());
     }
 
     protected static Handler makeSharedHandler(Looper looper) {

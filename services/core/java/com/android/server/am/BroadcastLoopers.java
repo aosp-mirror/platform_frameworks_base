@@ -25,8 +25,6 @@ import android.os.SystemClock;
 import android.util.ArraySet;
 import android.util.Slog;
 
-import com.android.internal.annotations.GuardedBy;
-
 import java.io.PrintWriter;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
@@ -39,7 +37,6 @@ import java.util.concurrent.CountDownLatch;
 public class BroadcastLoopers {
     private static final String TAG = "BroadcastLoopers";
 
-    @GuardedBy("sLoopers")
     private static final ArraySet<Looper> sLoopers = new ArraySet<>();
 
     /**
