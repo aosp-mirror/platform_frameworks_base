@@ -2690,6 +2690,9 @@ public final class NotificationPanelViewController {
                 navigationBarView.onStatusBarPanelStateChanged();
             }
             mShadeExpansionStateManager.onQsExpansionChanged(expanded);
+            mShadeLog.logQsExpansionChanged("QS Expansion Changed.", expanded,
+                    mQsMinExpansionHeight, mQsMaxExpansionHeight, mStackScrollerOverscrolling,
+                    mDozing, mQsAnimatorExpand, mAnimatingQS);
         }
     }
 
@@ -3439,6 +3442,13 @@ public final class NotificationPanelViewController {
     }
 
     private void onHeightUpdated(float expandedHeight) {
+        if (expandedHeight <= 0) {
+            mShadeLog.logExpansionChanged("onHeightUpdated: fully collapsed.",
+                    mExpandedFraction, isExpanded(), mTracking, mExpansionDragDownAmountPx);
+        } else if (isFullyExpanded()) {
+            mShadeLog.logExpansionChanged("onHeightUpdated: fully expanded.",
+                    mExpandedFraction, isExpanded(), mTracking, mExpansionDragDownAmountPx);
+        }
         if (!mQsExpanded || mQsExpandImmediate || mIsExpanding && mQsExpandedWhenExpandingStarted) {
             // Updating the clock position will set the top padding which might
             // trigger a new panel height and re-position the clock.
@@ -6175,6 +6185,7 @@ public final class NotificationPanelViewController {
 
             switch (event.getActionMasked()) {
                 case MotionEvent.ACTION_DOWN:
+                    mShadeLog.logMotionEvent(event, "onTouch: down action");
                     startExpandMotion(x, y, false /* startTracking */, mExpandedHeight);
                     mMinExpandHeight = 0.0f;
                     mPanelClosedOnDown = isFullyCollapsed();
@@ -6263,6 +6274,7 @@ public final class NotificationPanelViewController {
 
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL:
+                    mShadeLog.logMotionEvent(event, "onTouch: up/cancel action");
                     addMovement(event);
                     endMotionEvent(event, x, y, false /* forceCancel */);
                     // mHeightAnimator is null, there is no remaining frame, ends instrumenting.
