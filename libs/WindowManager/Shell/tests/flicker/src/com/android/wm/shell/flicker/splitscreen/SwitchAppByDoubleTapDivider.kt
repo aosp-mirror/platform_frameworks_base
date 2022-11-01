@@ -145,15 +145,19 @@ class SwitchAppByDoubleTapDivider(testSpec: FlickerTestParameter) : SplitScreenB
         // robust enough to get the correct end state.
     }
 
+    @Presubmit
     @Test
     fun splitScreenDividerKeepVisible() = testSpec.layerKeepVisible(SPLIT_SCREEN_DIVIDER_COMPONENT)
 
+    @Presubmit
     @Test
     fun primaryAppLayerIsVisibleAtEnd() = testSpec.layerIsVisibleAtEnd(primaryApp)
 
+    @Presubmit
     @Test
     fun secondaryAppLayerIsVisibleAtEnd() = testSpec.layerIsVisibleAtEnd(secondaryApp)
 
+    @Presubmit
     @Test
     fun primaryAppBoundsIsVisibleAtEnd() = testSpec.splitAppLayerBoundsIsVisibleAtEnd(
         primaryApp,
@@ -161,6 +165,7 @@ class SwitchAppByDoubleTapDivider(testSpec: FlickerTestParameter) : SplitScreenB
         portraitPosTop = true
     )
 
+    @Presubmit
     @Test
     fun secondaryAppBoundsIsVisibleAtEnd() = testSpec.splitAppLayerBoundsIsVisibleAtEnd(
         secondaryApp,
@@ -168,9 +173,11 @@ class SwitchAppByDoubleTapDivider(testSpec: FlickerTestParameter) : SplitScreenB
         portraitPosTop = false
     )
 
+    @Presubmit
     @Test
     fun primaryAppWindowIsVisibleAtEnd() = testSpec.appWindowIsVisibleAtEnd(primaryApp)
 
+    @Presubmit
     @Test
     fun secondaryAppWindowIsVisibleAtEnd() = testSpec.appWindowIsVisibleAtEnd(secondaryApp)
 
