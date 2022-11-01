@@ -1921,6 +1921,67 @@ public final class AccessibilityManager {
         }
     }
 
+    /**
+     * Registers an {@link AccessibilityDisplayProxy}, so this proxy can access UI content specific
+     * to its display.
+     *
+     * @param proxy the {@link AccessibilityDisplayProxy} to register.
+     * @return {@code true} if the proxy is successfully registered.
+     *
+     * @throws IllegalArgumentException if the proxy's display is not currently tracked by a11y, is
+     * {@link android.view.Display#DEFAULT_DISPLAY}, is or lower than
+     * {@link android.view.Display#INVALID_DISPLAY}, or is already being proxy-ed.
+     *
+     * @throws SecurityException if the app does not hold the
+     * {@link Manifest.permission#MANAGE_ACCESSIBILITY} permission.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.MANAGE_ACCESSIBILITY)
+    public boolean registerDisplayProxy(@NonNull AccessibilityDisplayProxy proxy) {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return false;
+            }
+        }
+
+        try {
+            return service.registerProxyForDisplay(proxy.mServiceClient, proxy.getDisplayId());
+        }  catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Unregisters an {@link AccessibilityDisplayProxy}.
+     *
+     * @return {@code true} if the proxy is successfully unregistered.
+     *
+     * @throws SecurityException if the app does not hold the
+     * {@link Manifest.permission#MANAGE_ACCESSIBILITY} permission.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.MANAGE_ACCESSIBILITY)
+    public boolean unregisterDisplayProxy(@NonNull AccessibilityDisplayProxy proxy)  {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return false;
+            }
+        }
+        try {
+            return service.unregisterProxyForDisplay(proxy.getDisplayId());
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
     private IAccessibilityManager getServiceLocked() {
         if (mService == null) {
             tryConnectToServiceLocked(null);

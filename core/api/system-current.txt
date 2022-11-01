@@ -15924,10 +15924,17 @@ package android.view {
 
 package android.view.accessibility {
 
+  public abstract class AccessibilityDisplayProxy {
+    ctor public AccessibilityDisplayProxy(int, @NonNull java.util.concurrent.Executor, @NonNull java.util.List<android.accessibilityservice.AccessibilityServiceInfo>);
+    method public int getDisplayId();
+  }
+
   public final class AccessibilityManager {
     method public int getAccessibilityWindowId(@Nullable android.os.IBinder);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACCESSIBILITY) public void performAccessibilityShortcut();
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ACCESSIBILITY) public boolean registerDisplayProxy(@NonNull android.view.accessibility.AccessibilityDisplayProxy);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACCESSIBILITY) public void registerSystemAction(@NonNull android.app.RemoteAction, int);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ACCESSIBILITY) public boolean unregisterDisplayProxy(@NonNull android.view.accessibility.AccessibilityDisplayProxy);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACCESSIBILITY) public void unregisterSystemAction(int);
   }
 
