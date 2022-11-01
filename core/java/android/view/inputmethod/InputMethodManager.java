@@ -1902,8 +1902,11 @@ public final class InputMethodManager {
      * a result receiver: explicitly request that the current input method's
      * soft input area be shown to the user, if needed.
      *
-     * @param view The currently focused view, which would like to receive
-     * soft keyboard input.
+     * @param view The currently focused view, which would like to receive soft keyboard input.
+     *             Note that this view is only considered focused here if both it itself has
+     *             {@link View#isFocused view focus}, and its containing window has
+     *             {@link View#hasWindowFocus window focus}. Otherwise the call fails and
+     *             returns {@code false}.
      * @param flags Provides additional operating flags.  Currently may be
      * 0 or have the {@link #SHOW_IMPLICIT} bit set.
      */
@@ -1965,8 +1968,11 @@ public final class InputMethodManager {
      * can be garbage collected regardless of the lifetime of
      * {@link ResultReceiver}.
      *
-     * @param view The currently focused view, which would like to receive
-     * soft keyboard input.
+     * @param view The currently focused view, which would like to receive soft keyboard input.
+     *             Note that this view is only considered focused here if both it itself has
+     *             {@link View#isFocused view focus}, and its containing window has
+     *             {@link View#hasWindowFocus window focus}. Otherwise the call fails and
+     *             returns {@code false}.
      * @param flags Provides additional operating flags.  Currently may be
      * 0 or have the {@link #SHOW_IMPLICIT} bit set.
      * @param resultReceiver If non-null, this will be called by the IME when
