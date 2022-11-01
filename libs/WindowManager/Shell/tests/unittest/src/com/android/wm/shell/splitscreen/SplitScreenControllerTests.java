@@ -39,6 +39,7 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 
+import androidx.test.annotation.UiThreadTest;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
@@ -110,6 +111,7 @@ public class SplitScreenControllerTests extends ShellTestCase {
     }
 
     @Test
+    @UiThreadTest
     public void instantiateController_registerDumpCallback() {
         doReturn(mMainExecutor).when(mTaskOrganizer).getExecutor();
         when(mDisplayController.getDisplayLayout(anyInt())).thenReturn(new DisplayLayout());
@@ -118,6 +120,7 @@ public class SplitScreenControllerTests extends ShellTestCase {
     }
 
     @Test
+    @UiThreadTest
     public void instantiateController_registerCommandCallback() {
         doReturn(mMainExecutor).when(mTaskOrganizer).getExecutor();
         when(mDisplayController.getDisplayLayout(anyInt())).thenReturn(new DisplayLayout());
@@ -126,6 +129,7 @@ public class SplitScreenControllerTests extends ShellTestCase {
     }
 
     @Test
+    @UiThreadTest
     public void testControllerRegistersKeyguardChangeListener() {
         doReturn(mMainExecutor).when(mTaskOrganizer).getExecutor();
         when(mDisplayController.getDisplayLayout(anyInt())).thenReturn(new DisplayLayout());
@@ -134,6 +138,7 @@ public class SplitScreenControllerTests extends ShellTestCase {
     }
 
     @Test
+    @UiThreadTest
     public void instantiateController_addExternalInterface() {
         doReturn(mMainExecutor).when(mTaskOrganizer).getExecutor();
         when(mDisplayController.getDisplayLayout(anyInt())).thenReturn(new DisplayLayout());

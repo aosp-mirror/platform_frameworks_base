@@ -28,10 +28,6 @@ import android.view.View
 import androidx.core.graphics.ColorUtils
 import com.android.systemui.ripple.RippleShader.RippleShape
 
-private const val RIPPLE_SPARKLE_STRENGTH: Float = 0.3f
-private const val RIPPLE_DEFAULT_COLOR: Int = 0xffffffff.toInt()
-const val RIPPLE_DEFAULT_ALPHA: Int = 45
-
 /**
  * A generic expanding ripple effect.
  *
@@ -45,8 +41,8 @@ open class RippleView(context: Context?, attrs: AttributeSet?) : View(context, a
         private set
 
     private val ripplePaint = Paint()
+    private val animator = ValueAnimator.ofFloat(0f, 1f)
 
-    var rippleInProgress: Boolean = false
     var duration: Long = 1750
 
     private var maxWidth: Float = 0.0f
@@ -80,9 +76,9 @@ open class RippleView(context: Context?, attrs: AttributeSet?) : View(context, a
         this.rippleShape = rippleShape
         rippleShader = RippleShader(rippleShape)
 
-        rippleShader.color = RIPPLE_DEFAULT_COLOR
+        rippleShader.color = RippleAnimationConfig.RIPPLE_DEFAULT_COLOR
         rippleShader.progress = 0f
-        rippleShader.sparkleStrength = RIPPLE_SPARKLE_STRENGTH
+        rippleShader.sparkleStrength = RippleAnimationConfig.RIPPLE_SPARKLE_STRENGTH
         rippleShader.pixelDensity = resources.displayMetrics.density
 
         ripplePaint.shader = rippleShader
@@ -90,10 +86,9 @@ open class RippleView(context: Context?, attrs: AttributeSet?) : View(context, a
 
     @JvmOverloads
     fun startRipple(onAnimationEnd: Runnable? = null) {
-        if (rippleInProgress) {
+        if (animator.isRunning) {
             return // Ignore if ripple effect is already playing
         }
-        val animator = ValueAnimator.ofFloat(0f, 1f)
         animator.duration = duration
         animator.addUpdateListener { updateListener ->
             val now = updateListener.currentPlayTime
@@ -105,19 +100,17 @@ open class RippleView(context: Context?, attrs: AttributeSet?) : View(context, a
         }
         animator.addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationEnd(animation: Animator?) {
-                rippleInProgress = false
                 onAnimationEnd?.run()
             }
         })
         animator.start()
-        rippleInProgress = true
     }
 
     /** Set the color to be used for the ripple.
      *
      * The alpha value of the color will be applied to the ripple. The alpha range is [0-100].
      */
-    fun setColor(color: Int, alpha: Int = RIPPLE_DEFAULT_ALPHA) {
+    fun setColor(color: Int, alpha: Int = RippleAnimationConfig.RIPPLE_DEFAULT_ALPHA) {
         rippleShader.color = ColorUtils.setAlphaComponent(color, alpha)
     }
 
@@ -136,6 +129,9 @@ open class RippleView(context: Context?, attrs: AttributeSet?) : View(context, a
     fun setSparkleStrength(strength: Float) {
         rippleShader.sparkleStrength = strength
     }
+
+    /** Indicates whether the ripple animation is playing. */
+    fun rippleInProgress(): Boolean = animator.isRunning
 
     override fun onDraw(canvas: Canvas?) {
         if (canvas == null || !canvas.isHardwareAccelerated) {

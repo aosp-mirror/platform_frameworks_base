@@ -96,7 +96,6 @@ public class BrightLineFalsingManagerTest extends SysuiTestCase {
         assertThat(mBrightLineFalsingManager.isFalseTap(1)).isFalse();
     }
 
-
     @Test
     public void testA11yDisablesTap() {
         assertThat(mBrightLineFalsingManager.isFalseTouch(Classifier.GENERIC)).isTrue();
@@ -158,5 +157,12 @@ public class BrightLineFalsingManagerTest extends SysuiTestCase {
             }
         });
         assertThat(mBrightLineFalsingManager.isProximityNear()).isFalse();
+    }
+
+    @Test
+    public void testA11yAction() {
+        assertThat(mBrightLineFalsingManager.isFalseTap(1)).isTrue();
+        when(mFalsingDataProvider.isA11yAction()).thenReturn(true);
+        assertThat(mBrightLineFalsingManager.isFalseTap(1)).isFalse();
     }
 }

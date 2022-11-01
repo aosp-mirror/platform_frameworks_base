@@ -1383,7 +1383,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             if (height < minExpansionHeight) {
                 mClipRect.left = 0;
                 mClipRect.right = getWidth();
-                mClipRect.top = 0;
+                mClipRect.top = getNotificationsClippingTopBound();
                 mClipRect.bottom = (int) height;
                 height = minExpansionHeight;
                 setRequestedClipBounds(mClipRect);
@@ -1444,6 +1444,17 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         notifyAppearChangedListeners();
     }
 
+    private int getNotificationsClippingTopBound() {
+        if (isHeadsUpTransition()) {
+            // HUN in split shade can go higher than bottom of NSSL when swiping up so we want
+            // to give it extra clipping margin. Because clipping has rounded corners, we also
+            // need to account for that corner clipping.
+            return -mAmbientState.getStackTopMargin() - mCornerRadius;
+        } else {
+            return 0;
+        }
+    }
+
     private void notifyAppearChangedListeners() {
         float appear;
         float expandAmount;
@@ -1482,7 +1493,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     public void updateClipping() {
         boolean clipped = mRequestedClipBounds != null && !mInHeadsUpPinnedMode
                 && !mHeadsUpAnimatingAway;
-        boolean clipToOutline = false;
         if (mIsClipped != clipped) {
             mIsClipped = clipped;
         }
@@ -1498,7 +1508,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             setClipBounds(null);
         }
 
-        setClipToOutline(clipToOutline);
+        setClipToOutline(false);
     }
 
     /**

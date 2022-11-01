@@ -141,6 +141,10 @@ public final class TransitionInfo implements Parcelable {
     /** The first unused bit. This can be used by remotes to attach custom flags to this change. */
     public static final int FLAG_FIRST_CUSTOM = 1 << 17;
 
+    /** The change belongs to a window that won't contain activities. */
+    public static final int FLAGS_IS_NON_APP_WINDOW =
+            FLAG_IS_WALLPAPER | FLAG_IS_INPUT_METHOD | FLAG_IS_SYSTEM_WINDOW;
+
     /** @hide */
     @IntDef(prefix = { "FLAG_" }, value = {
             FLAG_NONE,
@@ -579,9 +583,14 @@ public final class TransitionInfo implements Parcelable {
             return mFlags;
         }
 
-        /** Whether the given change flags has included in this change. */
+        /** Whether this change contains any of the given change flags. */
         public boolean hasFlags(@ChangeFlags int flags) {
             return (mFlags & flags) != 0;
+        }
+
+        /** Whether this change contains all of the given change flags. */
+        public boolean hasAllFlags(@ChangeFlags int flags) {
+            return (mFlags & flags) == flags;
         }
 
         /**
