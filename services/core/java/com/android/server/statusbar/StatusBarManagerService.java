@@ -1299,7 +1299,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
      */
     private boolean checkCanCollapseStatusBar(String method) {
         int uid = Binder.getCallingUid();
-        int pid = Binder.getCallingUid();
+        int pid = Binder.getCallingPid();
         if (CompatChanges.isChangeEnabled(LOCK_DOWN_COLLAPSE_STATUS_BAR, uid)) {
             enforceStatusBar();
         } else {
