@@ -13874,6 +13874,29 @@ public class ActivityManagerService extends IActivityManager.Stub
             @Nullable IBinder backgroundActivityStartsToken,
             @Nullable int[] broadcastAllowList,
             @Nullable BiFunction<Integer, Bundle, Bundle> filterExtrasForReceiver) {
+        final int cookie = BroadcastQueue.traceBegin("broadcastIntentLockedTraced");
+        final int res = broadcastIntentLockedTraced(callerApp, callerPackage, callerFeatureId,
+                intent, resolvedType, resultToApp, resultTo, resultCode, resultData, resultExtras,
+                requiredPermissions, excludedPermissions, excludedPackages, appOp, bOptions,
+                ordered, sticky, callingPid, callingUid, realCallingUid, realCallingPid, userId,
+                allowBackgroundActivityStarts, backgroundActivityStartsToken, broadcastAllowList,
+                filterExtrasForReceiver);
+        BroadcastQueue.traceEnd(cookie);
+        return res;
+    }
+
+    @GuardedBy("this")
+    final int broadcastIntentLockedTraced(ProcessRecord callerApp, String callerPackage,
+            @Nullable String callerFeatureId, Intent intent, String resolvedType,
+            ProcessRecord resultToApp, IIntentReceiver resultTo, int resultCode, String resultData,
+            Bundle resultExtras, String[] requiredPermissions,
+            String[] excludedPermissions, String[] excludedPackages, int appOp, Bundle bOptions,
+            boolean ordered, boolean sticky, int callingPid, int callingUid,
+            int realCallingUid, int realCallingPid, int userId,
+            boolean allowBackgroundActivityStarts,
+            @Nullable IBinder backgroundActivityStartsToken,
+            @Nullable int[] broadcastAllowList,
+            @Nullable BiFunction<Integer, Bundle, Bundle> filterExtrasForReceiver) {
         // Ensure all internal loopers are registered for idle checks
         BroadcastLoopers.addMyLooper();
 
@@ -14425,6 +14448,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         // Figure out who all will receive this broadcast.
+        final int cookie = BroadcastQueue.traceBegin("queryReceivers");
         List receivers = null;
         List<BroadcastFilter> registeredReceivers = null;
         // Need to resolve the intent to interested receivers...
@@ -14455,6 +14479,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         resolvedType, false /*defaultOnly*/, userId);
             }
         }
+        BroadcastQueue.traceEnd(cookie);
 
         final boolean replacePending =
                 (intent.getFlags()&Intent.FLAG_RECEIVER_REPLACE_PENDING) != 0;

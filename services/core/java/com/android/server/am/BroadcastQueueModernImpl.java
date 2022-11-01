@@ -64,7 +64,6 @@ import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.os.Trace;
 import android.os.UserHandle;
 import android.text.format.DateUtils;
 import android.util.IndentingPrintWriter;
@@ -322,6 +321,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             return;
         }
 
+        final int cookie = traceBegin("updateRunnableList");
         final boolean wantQueue = queue.isRunnable();
         final boolean inQueue = (queue == mRunnableHead) || (queue.runnableAtPrev != null)
                 || (queue.runnableAtNext != null);
@@ -348,6 +348,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         if (queue.isEmpty() && !queue.isActive() && !queue.isProcessWarm()) {
             removeProcessQueue(queue.processName, queue.uid);
         }
+
+        traceEnd(cookie);
     }
 
     /**
@@ -362,7 +364,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         int avail = mRunning.length - getRunningSize();
         if (avail == 0) return;
 
-        final int cookie = traceBegin(TAG, "updateRunningList");
+        final int cookie = traceBegin("updateRunningList");
         final long now = SystemClock.uptimeMillis();
 
         // If someone is waiting for a state, everything is runnable now
@@ -462,7 +464,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             });
         }
 
-        traceEnd(TAG, cookie);
+        traceEnd(cookie);
     }
 
     @Override
@@ -558,6 +560,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     public void enqueueBroadcastLocked(@NonNull BroadcastRecord r) {
         if (DEBUG_BROADCAST) logv("Enqueuing " + r + " for " + r.receivers.size() + " receivers");
 
+        final int cookie = traceBegin("enqueueBroadcast");
         r.applySingletonPolicy(mService);
 
         final IntentFilter removeMatchingFilter = (r.options != null)
@@ -627,6 +630,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         if (r.receivers.isEmpty()) {
             scheduleResultTo(r);
         }
+
+        traceEnd(cookie);
     }
 
     private void applyDeliveryGroupPolicy(@NonNull BroadcastRecord r) {
@@ -912,6 +917,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
     private boolean finishReceiverLocked(@NonNull BroadcastProcessQueue queue,
             @DeliveryState int deliveryState, @NonNull String reason) {
+        final int cookie = traceBegin("finishReceiver");
         checkState(queue.isActive(), "isActive");
 
         final ProcessRecord app = queue.app;
@@ -938,11 +944,12 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         final boolean shouldRetire =
                 (queue.getActiveCountSinceIdle() >= mConstants.MAX_RUNNING_ACTIVE_BROADCASTS);
 
+        final boolean res;
         if (queue.isRunnable() && queue.isProcessWarm() && !shouldRetire) {
             // We're on a roll; move onto the next broadcast for this process
             queue.makeActiveNextPending();
             scheduleReceiverWarmLocked(queue);
-            return true;
+            res = true;
         } else {
             // We've drained running broadcasts; maybe move back to runnable
             queue.makeActiveIdle();
@@ -956,8 +963,10 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             // Tell other OS components that app is not actively running, giving
             // a chance to update OOM adjustment
             notifyStoppedRunning(queue);
-            return false;
+            res = false;
         }
+        traceEnd(cookie);
+        return res;
     }
 
     /**
@@ -967,6 +976,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     private void setDeliveryState(@Nullable BroadcastProcessQueue queue,
             @Nullable ProcessRecord app, @NonNull BroadcastRecord r, int index,
             @NonNull Object receiver, @DeliveryState int newDeliveryState, String reason) {
+        final int cookie = traceBegin("setDeliveryState");
         final int oldDeliveryState = getDeliveryState(r, index);
 
         // Only apply state when we haven't already reached a terminal state;
@@ -1024,6 +1034,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 enqueueUpdateRunningList();
             }
         }
+
+        traceEnd(cookie);
     }
 
     private @DeliveryState int getDeliveryState(@NonNull BroadcastRecord r, int index) {
@@ -1284,18 +1296,6 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             Slog.wtf(TAG, e);
             dumpToDropBoxLocked(e.toString());
         }
-    }
-
-    private int traceBegin(String trackName, String methodName) {
-        final int cookie = methodName.hashCode();
-        Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
-                trackName, methodName, cookie);
-        return cookie;
-    }
-
-    private void traceEnd(String trackName, int cookie) {
-        Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER,
-                trackName, cookie);
     }
 
     private void updateWarmProcess(@NonNull BroadcastProcessQueue queue) {
