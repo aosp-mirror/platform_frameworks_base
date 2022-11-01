@@ -617,6 +617,10 @@ final class BroadcastRecord extends Binder {
         return (intent.getFlags() & Intent.FLAG_RECEIVER_NO_ABORT) != 0;
     }
 
+    boolean isOffload() {
+        return (intent.getFlags() & Intent.FLAG_RECEIVER_OFFLOAD) != 0;
+    }
+
     /**
      * Core policy determination about this broadcast's delivery prioritization
      */

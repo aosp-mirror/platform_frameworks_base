@@ -114,7 +114,14 @@ class BroadcastProcessQueue {
      * dispatched to this process, in the same representation as
      * {@link #mPending}.
      */
-    private final ArrayDeque<SomeArgs> mPendingUrgent = new ArrayDeque<>();
+    private final ArrayDeque<SomeArgs> mPendingUrgent = new ArrayDeque<>(4);
+
+    /**
+     * Ordered collection of "offload" broadcasts that are waiting to be
+     * dispatched to this process, in the same representation as
+     * {@link #mPending}.
+     */
+    private final ArrayDeque<SomeArgs> mPendingOffload = new ArrayDeque<>(4);
 
     /**
      * Broadcast actively being dispatched to this process.
@@ -148,8 +155,7 @@ class BroadcastProcessQueue {
     private boolean mActiveViaColdStart;
 
     /**
-     * Count of {@link #mPending} and {@link #mPendingUrgent} broadcasts of
-     * these various flavors.
+     * Count of pending broadcasts of these various flavors.
      */
     private int mCountForeground;
     private int mCountOrdered;
@@ -177,6 +183,16 @@ class BroadcastProcessQueue {
         this.uid = uid;
     }
 
+    private @NonNull ArrayDeque<SomeArgs> getQueueForBroadcast(@NonNull BroadcastRecord record) {
+        if (record.isUrgent()) {
+            return mPendingUrgent;
+        } else if (record.isOffload()) {
+            return mPendingOffload;
+        } else {
+            return mPending;
+        }
+    }
+
     /**
      * Enqueue the given broadcast to be dispatched to this process at some
      * future point in time. The target receiver is indicated by the given index
@@ -193,10 +209,12 @@ class BroadcastProcessQueue {
     public void enqueueOrReplaceBroadcast(@NonNull BroadcastRecord record, int recordIndex,
             int blockedUntilTerminalCount) {
         if (record.isReplacePending()) {
-            boolean didReplace = replaceBroadcastInQueue(mPending,
-                    record, recordIndex, blockedUntilTerminalCount)
-                    || replaceBroadcastInQueue(mPendingUrgent,
-                    record, recordIndex, blockedUntilTerminalCount);
+            boolean didReplace = replaceBroadcastInQueue(mPending, record, recordIndex,
+                    blockedUntilTerminalCount)
+                    || replaceBroadcastInQueue(mPendingUrgent, record, recordIndex,
+                            blockedUntilTerminalCount)
+                    || replaceBroadcastInQueue(mPendingOffload, record, recordIndex,
+                            blockedUntilTerminalCount);
             if (didReplace) {
                 return;
             }
@@ -213,8 +231,7 @@ class BroadcastProcessQueue {
         // issued ahead of others that are already pending, for example if this new
         // broadcast is in a different delivery class or is tied to a direct user interaction
         // with implicit responsiveness expectations.
-        final ArrayDeque<SomeArgs> queue = record.isUrgent() ? mPendingUrgent : mPending;
-        queue.addLast(newBroadcastArgs);
+        getQueueForBroadcast(record).addLast(newBroadcastArgs);
         onBroadcastEnqueued(record, recordIndex);
     }
 
@@ -227,7 +244,7 @@ class BroadcastProcessQueue {
      * {@code false} otherwise.
      */
     private boolean replaceBroadcastInQueue(@NonNull ArrayDeque<SomeArgs> queue,
-            @NonNull BroadcastRecord record, int recordIndex,  int blockedUntilTerminalCount) {
+            @NonNull BroadcastRecord record, int recordIndex, int blockedUntilTerminalCount) {
         final Iterator<SomeArgs> it = queue.descendingIterator();
         final Object receiver = record.receivers.get(recordIndex);
         while (it.hasNext()) {
@@ -279,9 +296,12 @@ class BroadcastProcessQueue {
      */
     public boolean forEachMatchingBroadcast(@NonNull BroadcastPredicate predicate,
             @NonNull BroadcastConsumer consumer, boolean andRemove) {
-        boolean didSomething = forEachMatchingBroadcastInQueue(mPending,
+        boolean didSomething = false;
+        didSomething |= forEachMatchingBroadcastInQueue(mPending,
                 predicate, consumer, andRemove);
         didSomething |= forEachMatchingBroadcastInQueue(mPendingUrgent,
+                predicate, consumer, andRemove);
+        didSomething |= forEachMatchingBroadcastInQueue(mPendingOffload,
                 predicate, consumer, andRemove);
         return didSomething;
     }
@@ -516,7 +536,7 @@ class BroadcastProcessQueue {
     }
 
     public boolean isEmpty() {
-        return mPending.isEmpty() && mPendingUrgent.isEmpty();
+        return mPending.isEmpty() && mPendingUrgent.isEmpty() && mPendingOffload.isEmpty();
     }
 
     public boolean isActive() {
@@ -537,6 +557,8 @@ class BroadcastProcessQueue {
             return mPendingUrgent;
         } else if (!mPending.isEmpty()) {
             return mPending;
+        } else if (!mPendingOffload.isEmpty()) {
+            return mPendingOffload;
         }
         return null;
     }
@@ -581,12 +603,15 @@ class BroadcastProcessQueue {
         }
         final SomeArgs next = mPending.peekFirst();
         final SomeArgs nextUrgent = mPendingUrgent.peekFirst();
+        final SomeArgs nextOffload = mPendingOffload.peekFirst();
         // Empty queue is past any barrier
-        final boolean nextLater = next == null
+        final boolean nextLater = (next == null)
                 || ((BroadcastRecord) next.arg1).enqueueTime > barrierTime;
-        final boolean nextUrgentLater = nextUrgent == null
+        final boolean nextUrgentLater = (nextUrgent == null)
                 || ((BroadcastRecord) nextUrgent.arg1).enqueueTime > barrierTime;
-        return nextLater && nextUrgentLater;
+        final boolean nextOffloadLater = (nextOffload == null)
+                || ((BroadcastRecord) nextOffload.arg1).enqueueTime > barrierTime;
+        return nextLater && nextUrgentLater && nextOffloadLater;
     }
 
     public boolean isRunnable() {
@@ -726,8 +751,9 @@ class BroadcastProcessQueue {
 
             // If we have too many broadcasts pending, bypass any delays that
             // might have been applied above to aid draining
-            if (mPending.size() + mPendingUrgent.size() >= constants.MAX_PENDING_BROADCASTS) {
-                mRunnableAt = runnableAt;
+            if (mPending.size() + mPendingUrgent.size()
+                    + mPendingOffload.size() >= constants.MAX_PENDING_BROADCASTS) {
+                mRunnableAt = Math.min(mRunnableAt, runnableAt);
                 mRunnableAtReason = REASON_MAX_PENDING;
             }
         } else {
@@ -845,23 +871,28 @@ class BroadcastProcessQueue {
         pw.println();
         pw.increaseIndent();
         if (mActive != null) {
-            dumpRecord(now, pw, mActive, mActiveIndex, mActiveBlockedUntilTerminalCount);
+            dumpRecord("ACTIVE", now, pw, mActive, mActiveIndex, mActiveBlockedUntilTerminalCount);
         }
         for (SomeArgs args : mPendingUrgent) {
             final BroadcastRecord r = (BroadcastRecord) args.arg1;
-            dumpRecord(now, pw, r, args.argi1, args.argi2);
+            dumpRecord("URGENT", now, pw, r, args.argi1, args.argi2);
         }
         for (SomeArgs args : mPending) {
             final BroadcastRecord r = (BroadcastRecord) args.arg1;
-            dumpRecord(now, pw, r, args.argi1, args.argi2);
+            dumpRecord(null, now, pw, r, args.argi1, args.argi2);
+        }
+        for (SomeArgs args : mPendingOffload) {
+            final BroadcastRecord r = (BroadcastRecord) args.arg1;
+            dumpRecord("OFFLOAD", now, pw, r, args.argi1, args.argi2);
         }
         pw.decreaseIndent();
         pw.println();
     }
 
     @NeverCompile
-    private void dumpRecord(@UptimeMillisLong long now, @NonNull IndentingPrintWriter pw,
-            @NonNull BroadcastRecord record, int recordIndex, int blockedUntilTerminalCount) {
+    private void dumpRecord(@Nullable String flavor, @UptimeMillisLong long now,
+            @NonNull IndentingPrintWriter pw, @NonNull BroadcastRecord record, int recordIndex,
+            int blockedUntilTerminalCount) {
         TimeUtils.formatDuration(record.enqueueTime, now, pw);
         pw.print(' ');
         pw.println(record.toShortString());
@@ -871,6 +902,10 @@ class BroadcastProcessQueue {
         if (deliveryState == BroadcastRecord.DELIVERY_SCHEDULED) {
             pw.print(" at ");
             TimeUtils.formatDuration(record.scheduledTime[recordIndex], now, pw);
+        }
+        if (flavor != null) {
+            pw.print(' ');
+            pw.print(flavor);
         }
         final Object receiver = record.receivers.get(recordIndex);
         if (receiver instanceof BroadcastFilter) {
