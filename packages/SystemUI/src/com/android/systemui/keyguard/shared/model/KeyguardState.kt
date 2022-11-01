@@ -17,7 +17,10 @@ package com.android.systemui.keyguard.shared.model
 
 /** List of all possible states to transition to/from */
 enum class KeyguardState {
-    /** For initialization only */
+    /**
+     * For initialization as well as when the security method is set to NONE, indicating that
+     * the keyguard should never be shown.
+     */
     NONE,
     /* Always-on Display. The device is in a low-power mode with a minimal UI visible */
     AOD,
@@ -31,4 +34,11 @@ enum class KeyguardState {
      * unlocked if SWIPE security method is used, or if face lockscreen bypass is false.
      */
     LOCKSCREEN,
+
+    /*
+     * Keyguard is no longer visible. In most cases the user has just authenticated and keyguard
+     * is being removed, but there are other cases where the user is swiping away keyguard, such as
+     * with SWIPE security method or face unlock without bypass.
+     */
+    GONE,
 }
