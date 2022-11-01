@@ -129,7 +129,7 @@ public class ContextHubService extends IContextHubService.Stub {
             new RemoteCallbackList<>();
 
     // Proxy object to communicate with the Context Hub HAL
-    private IContextHubWrapper mContextHubWrapper;
+    private final IContextHubWrapper mContextHubWrapper;
 
     // The manager for transaction queue
     private ContextHubTransactionManager mTransactionManager;
@@ -210,8 +210,24 @@ public class ContextHubService extends IContextHubService.Stub {
     }
 
     public ContextHubService(Context context, IContextHubWrapper contextHubWrapper) {
+        Log.i(TAG, "Starting Context Hub Service init");
         mContext = context;
-        init(contextHubWrapper, /* isFirstInit= */ true);
+        long startTimeNs = SystemClock.elapsedRealtimeNanos();
+        mContextHubWrapper = contextHubWrapper;
+        if (!initContextHubServiceState(startTimeNs)) {
+            Log.e(TAG, "Failed to initialize the Context Hub Service");
+            return;
+        }
+        initDefaultClientMap();
+
+        initLocationSettingNotifications();
+        initWifiSettingNotifications();
+        initAirplaneModeSettingNotifications();
+        initMicrophoneSettingNotifications();
+        initBtSettingNotifications();
+
+        scheduleDailyMetricSnapshot();
+        Log.i(TAG, "Finished Context Hub Service init");
     }
 
     /**
@@ -293,11 +309,10 @@ public class ContextHubService extends IContextHubService.Stub {
      * Initializes the private state of the ContextHubService
      *
      * @param startTimeNs               the start time when init was called
-     * @param isFirstInit               if true, this is the first time init is called - boot time
      *
      * @return      if mContextHubWrapper is not null and a full state init was done
      */
-    private boolean initContextHubServiceState(long startTimeNs, boolean isFirstInit) {
+    private boolean initContextHubServiceState(long startTimeNs) {
         if (mContextHubWrapper == null) {
             mTransactionManager = null;
             mClientManager = null;
@@ -317,12 +332,10 @@ public class ContextHubService extends IContextHubService.Stub {
             hubInfo = new Pair(Collections.emptyList(), Collections.emptyList());
         }
 
-        if (isFirstInit) {
-            long bootTimeNs = SystemClock.elapsedRealtimeNanos() - startTimeNs;
-            int numContextHubs = hubInfo.first.size();
-            ContextHubStatsLog.write(ContextHubStatsLog.CONTEXT_HUB_BOOTED, bootTimeNs,
-                    numContextHubs);
-        }
+        long bootTimeNs = SystemClock.elapsedRealtimeNanos() - startTimeNs;
+        int numContextHubs = hubInfo.first.size();
+        ContextHubStatsLog.write(ContextHubStatsLog.CONTEXT_HUB_BOOTED, bootTimeNs,
+                numContextHubs);
 
         mContextHubIdToInfoMap = Collections.unmodifiableMap(
                 ContextHubServiceUtil.createContextHubInfoMap(hubInfo.first));
@@ -746,31 +759,6 @@ public class ContextHubService extends IContextHubService.Stub {
         }
 
         return success ? 0 : -1;
-    }
-
-    /**
-     * Handles a service restart or service init for the first time
-     *
-     * @param contextHubWrapper         the Context Hub wrapper
-     * @param isFirstInit               if true, this is the first time init is called - boot time
-     */
-    private void init(IContextHubWrapper contextHubWrapper, boolean isFirstInit) {
-        Log.i(TAG, "Starting Context Hub Service init");
-        long startTimeNs = SystemClock.elapsedRealtimeNanos();
-        mContextHubWrapper = contextHubWrapper;
-        if (!initContextHubServiceState(startTimeNs, isFirstInit)) {
-            Log.e(TAG, "Failed to initialize the Context Hub Service");
-            return;
-        }
-        initDefaultClientMap();
-
-        initLocationSettingNotifications();
-        initWifiSettingNotifications();
-        initAirplaneModeSettingNotifications();
-        initMicrophoneSettingNotifications();
-        initBtSettingNotifications();
-
-        scheduleDailyMetricSnapshot();
     }
 
     /**
