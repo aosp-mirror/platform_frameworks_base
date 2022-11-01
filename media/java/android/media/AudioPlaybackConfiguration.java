@@ -569,6 +569,17 @@ public final class AudioPlaybackConfiguration implements Parcelable {
         }
     }
 
+    private boolean isMuteAffectingActiveState() {
+        if (mMutedState == PLAYER_MUTE_INVALID) {
+            // mute state is not set, therefore it will not affect the active state
+            return false;
+        }
+
+        return (mMutedState & PLAYER_MUTE_CLIENT_VOLUME) != 0
+                || (mMutedState & PLAYER_MUTE_VOLUME_SHAPER) != 0
+                || (mMutedState & PLAYER_MUTE_PLAYBACK_RESTRICTED) != 0;
+    }
+
     /**
      * @hide
      * Returns true if the player is considered "active", i.e. actively playing with unmuted
@@ -580,8 +591,7 @@ public final class AudioPlaybackConfiguration implements Parcelable {
     public boolean isActive() {
         switch (mPlayerState) {
             case PLAYER_STATE_STARTED:
-                return mMutedState == 0
-                        || mMutedState == PLAYER_MUTE_INVALID;  // only send true if not muted
+                return !isMuteAffectingActiveState();
             case PLAYER_STATE_UNKNOWN:
             case PLAYER_STATE_RELEASED:
             case PLAYER_STATE_IDLE:
