@@ -3041,11 +3041,23 @@ public final class NotificationPanelViewController {
         // relative to NotificationStackScrollLayout
         int nsslLeft = left - mNotificationStackScrollLayoutController.getLeft();
         int nsslRight = right - mNotificationStackScrollLayoutController.getLeft();
-        int nsslTop = top - mNotificationStackScrollLayoutController.getTop();
+        int nsslTop = getNotificationsClippingTopBounds(top);
         int nsslBottom = bottom - mNotificationStackScrollLayoutController.getTop();
         int bottomRadius = mSplitShadeEnabled ? radius : 0;
+        int topRadius = mSplitShadeEnabled && mExpandingFromHeadsUp ? 0 : radius;
         mNotificationStackScrollLayoutController.setRoundedClippingBounds(
-                nsslLeft, nsslTop, nsslRight, nsslBottom, radius, bottomRadius);
+                nsslLeft, nsslTop, nsslRight, nsslBottom, topRadius, bottomRadius);
+    }
+
+    private int getNotificationsClippingTopBounds(int qsTop) {
+        if (mSplitShadeEnabled && mExpandingFromHeadsUp) {
+            // in split shade nssl has extra top margin so clipping at top 0 is not enough, we need
+            // to set top clipping bound to negative value to allow HUN to go up to the top edge of
+            // the screen without clipping.
+            return -mAmbientState.getStackTopMargin();
+        } else {
+            return qsTop - mNotificationStackScrollLayoutController.getTop();
+        }
     }
 
     private float getQSEdgePosition() {
