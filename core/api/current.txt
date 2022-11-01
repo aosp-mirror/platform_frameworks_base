@@ -11654,7 +11654,7 @@ package android.content.pm {
   public static final class PackageInstaller.PreapprovalDetails implements android.os.Parcelable {
     method public int describeContents();
     method @Nullable public android.graphics.Bitmap getIcon();
-    method @NonNull public String getLabel();
+    method @NonNull public CharSequence getLabel();
     method @NonNull public android.icu.util.ULocale getLocale();
     method @NonNull public String getPackageName();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
@@ -11665,7 +11665,7 @@ package android.content.pm {
     ctor public PackageInstaller.PreapprovalDetails.Builder();
     method @NonNull public android.content.pm.PackageInstaller.PreapprovalDetails build();
     method @NonNull public android.content.pm.PackageInstaller.PreapprovalDetails.Builder setIcon(@NonNull android.graphics.Bitmap);
-    method @NonNull public android.content.pm.PackageInstaller.PreapprovalDetails.Builder setLabel(@NonNull String);
+    method @NonNull public android.content.pm.PackageInstaller.PreapprovalDetails.Builder setLabel(@NonNull CharSequence);
     method @NonNull public android.content.pm.PackageInstaller.PreapprovalDetails.Builder setLocale(@NonNull android.icu.util.ULocale);
     method @NonNull public android.content.pm.PackageInstaller.PreapprovalDetails.Builder setPackageName(@NonNull String);
   }

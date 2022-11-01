@@ -3326,7 +3326,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     "Failure to obtain package info.");
         }
         final List<String> filePaths = packageLite.getAllApkPaths();
-        final String appLabel = mPreapprovalDetails.getLabel();
+        final CharSequence appLabel = mPreapprovalDetails.getLabel();
         final ULocale appLocale = mPreapprovalDetails.getLocale();
         final ApplicationInfo appInfo = packageInfo.applicationInfo;
         boolean appLabelMatched = false;
