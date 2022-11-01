@@ -22,8 +22,6 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Trace;
 
-import com.android.server.am.BroadcastLoopers;
-
 import java.util.concurrent.Executor;
 
 /**
@@ -47,7 +45,6 @@ public final class JobSchedulerBackgroundThread extends HandlerThread {
             sInstance = new JobSchedulerBackgroundThread();
             sInstance.start();
             final Looper looper = sInstance.getLooper();
-            BroadcastLoopers.addLooper(looper);
             looper.setTraceTag(Trace.TRACE_TAG_SYSTEM_SERVER);
             looper.setSlowLogThresholdMs(
                     SLOW_DISPATCH_THRESHOLD_MS, SLOW_DELIVERY_THRESHOLD_MS);
