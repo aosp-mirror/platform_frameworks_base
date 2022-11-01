@@ -28,6 +28,7 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 import android.annotation.AnyThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.graphics.RectF;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -1090,6 +1091,36 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
             mHasPendingImmediateCursorAnchorInfoUpdate.set(result && hasImmediate);
             mIsCursorAnchorInfoMonitoring.set(result && hasMonitoring);
         }
+    }
+
+    @Dispatching(cancellable = true)
+    @Override
+    public void requestTextBoundsInfo(
+            InputConnectionCommandHeader header, RectF rectF,
+            @NonNull ResultReceiver resultReceiver) {
+        dispatchWithTracing("requestTextBoundsInfo", () -> {
+            if (header.mSessionId != mCurrentSessionId.get()) {
+                resultReceiver.send(TextBoundsInfoResult.CODE_CANCELLED, null);
+                return;  // cancelled
+            }
+            InputConnection ic = getInputConnection();
+            if (ic == null || !isActive()) {
+                Log.w(TAG, "requestTextBoundsInfo on inactive InputConnection");
+                resultReceiver.send(TextBoundsInfoResult.CODE_CANCELLED, null);
+                return;
+            }
+
+            ic.requestTextBoundsInfo(
+                    rectF,
+                    Runnable::run,
+                    (textBoundsInfoResult) -> {
+                        final int resultCode = textBoundsInfoResult.getResultCode();
+                        final TextBoundsInfo textBoundsInfo =
+                                textBoundsInfoResult.getTextBoundsInfo();
+                        resultReceiver.send(resultCode,
+                                textBoundsInfo == null ? null : textBoundsInfo.toBundle());
+                    });
+        });
     }
 
     @Dispatching(cancellable = true)

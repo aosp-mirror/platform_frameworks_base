@@ -45582,6 +45582,14 @@ package android.text {
     field public static final int DONE = -1; // 0xffffffff
   }
 
+  public static class SegmentFinder.DefaultSegmentFinder extends android.text.SegmentFinder {
+    ctor public SegmentFinder.DefaultSegmentFinder(@NonNull int[]);
+    method public int nextEndBoundary(@IntRange(from=0) int);
+    method public int nextStartBoundary(@IntRange(from=0) int);
+    method public int previousEndBoundary(@IntRange(from=0) int);
+    method public int previousStartBoundary(@IntRange(from=0) int);
+  }
+
   public class Selection {
     method public static boolean extendDown(android.text.Spannable, android.text.Layout);
     method public static boolean extendLeft(android.text.Spannable, android.text.Layout);
@@ -53603,6 +53611,7 @@ package android.view.inputmethod {
     method public boolean reportFullscreenMode(boolean);
     method public boolean requestCursorUpdates(int);
     method public default boolean requestCursorUpdates(int, int);
+    method public default void requestTextBoundsInfo(@NonNull android.graphics.RectF, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.view.inputmethod.TextBoundsInfoResult>);
     method public boolean sendKeyEvent(android.view.KeyEvent);
     method public boolean setComposingRegion(int, int);
     method public default boolean setComposingRegion(int, int, @Nullable android.view.inputmethod.TextAttribute);
@@ -53930,6 +53939,50 @@ package android.view.inputmethod {
     method @NonNull public android.view.inputmethod.TextAttribute build();
     method @NonNull public android.view.inputmethod.TextAttribute.Builder setExtras(@NonNull android.os.PersistableBundle);
     method @NonNull public android.view.inputmethod.TextAttribute.Builder setTextConversionSuggestions(@NonNull java.util.List<java.lang.String>);
+  }
+
+  public final class TextBoundsInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method @IntRange(from=0, to=125) public int getCharacterBidiLevel(int);
+    method @NonNull public android.graphics.RectF getCharacterBounds(int);
+    method public int getCharacterFlags(int);
+    method public int getEnd();
+    method @NonNull public android.text.SegmentFinder getGraphemeSegmentFinder();
+    method @NonNull public android.text.SegmentFinder getLineSegmentFinder();
+    method @NonNull public android.graphics.Matrix getMatrix();
+    method public int getStart();
+    method @NonNull public android.text.SegmentFinder getWordSegmentFinder();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.view.inputmethod.TextBoundsInfo> CREATOR;
+    field public static final int FLAG_CHARACTER_LINEFEED = 2; // 0x2
+    field public static final int FLAG_CHARACTER_PUNCTUATION = 4; // 0x4
+    field public static final int FLAG_CHARACTER_WHITESPACE = 1; // 0x1
+    field public static final int FLAG_LINE_IS_RTL = 8; // 0x8
+  }
+
+  public static final class TextBoundsInfo.Builder {
+    ctor public TextBoundsInfo.Builder();
+    method @NonNull public android.view.inputmethod.TextBoundsInfo build();
+    method @NonNull public android.view.inputmethod.TextBoundsInfo.Builder clear();
+    method @NonNull public android.view.inputmethod.TextBoundsInfo.Builder setCharacterBidiLevel(@NonNull int[]);
+    method @NonNull public android.view.inputmethod.TextBoundsInfo.Builder setCharacterBounds(@NonNull float[]);
+    method @NonNull public android.view.inputmethod.TextBoundsInfo.Builder setCharacterFlags(@NonNull int[]);
+    method @NonNull public android.view.inputmethod.TextBoundsInfo.Builder setGraphemeSegmentFinder(@NonNull android.text.SegmentFinder);
+    method @NonNull public android.view.inputmethod.TextBoundsInfo.Builder setLineSegmentFinder(@NonNull android.text.SegmentFinder);
+    method @NonNull public android.view.inputmethod.TextBoundsInfo.Builder setMatrix(@NonNull android.graphics.Matrix);
+    method @NonNull public android.view.inputmethod.TextBoundsInfo.Builder setStartAndEnd(@IntRange(from=0) int, @IntRange(from=0) int);
+    method @NonNull public android.view.inputmethod.TextBoundsInfo.Builder setWordSegmentFinder(@NonNull android.text.SegmentFinder);
+  }
+
+  public final class TextBoundsInfoResult {
+    ctor public TextBoundsInfoResult(int);
+    ctor public TextBoundsInfoResult(int, @NonNull android.view.inputmethod.TextBoundsInfo);
+    method public int getResultCode();
+    method @Nullable public android.view.inputmethod.TextBoundsInfo getTextBoundsInfo();
+    field public static final int CODE_CANCELLED = 3; // 0x3
+    field public static final int CODE_FAILED = 2; // 0x2
+    field public static final int CODE_SUCCESS = 1; // 0x1
+    field public static final int CODE_UNSUPPORTED = 0; // 0x0
   }
 
   public final class TextSnapshot {

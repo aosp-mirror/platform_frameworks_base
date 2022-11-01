@@ -16,10 +16,13 @@
 
 package android.inputmethodservice;
 
+import static android.view.inputmethod.TextBoundsInfoResult.CODE_CANCELLED;
+
 import android.annotation.AnyThread;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.graphics.RectF;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
@@ -34,6 +37,8 @@ import android.view.inputmethod.InputContentInfo;
 import android.view.inputmethod.ParcelableHandwritingGesture;
 import android.view.inputmethod.SurroundingText;
 import android.view.inputmethod.TextAttribute;
+import android.view.inputmethod.TextBoundsInfo;
+import android.view.inputmethod.TextBoundsInfoResult;
 
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.inputmethod.IRemoteInputConnection;
@@ -41,6 +46,7 @@ import com.android.internal.inputmethod.InputConnectionCommandHeader;
 
 import java.util.Objects;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 
 /**
@@ -90,6 +96,44 @@ final class IRemoteInputConnectionInvoker {
             mConsumer = null;
         }
     };
+
+    /**
+     * Subclass of {@link ResultReceiver} used by
+     * {@link #requestTextBoundsInfo(RectF, Executor, Consumer)} for providing
+     * callback.
+     */
+    private static final class TextBoundsInfoResultReceiver extends ResultReceiver {
+        @Nullable
+        private Consumer<TextBoundsInfoResult> mConsumer;
+        @Nullable
+        private Executor mExecutor;
+
+        TextBoundsInfoResultReceiver(@NonNull Executor executor,
+                @NonNull Consumer<TextBoundsInfoResult> consumer) {
+            super(null);
+            mExecutor = executor;
+            mConsumer = consumer;
+        }
+
+        @Override
+        protected void onReceiveResult(@TextBoundsInfoResult.ResultCode int resultCode,
+                @Nullable Bundle resultData) {
+            synchronized (this) {
+                if (mExecutor != null && mConsumer != null) {
+                    final TextBoundsInfoResult textBoundsInfoResult = new TextBoundsInfoResult(
+                            resultCode, TextBoundsInfo.createFromBundle(resultData));
+                    mExecutor.execute(() -> mConsumer.accept(textBoundsInfoResult));
+                    // provide callback only once.
+                    clear();
+                }
+            }
+        }
+
+        private void clear() {
+            mExecutor = null;
+            mConsumer = null;
+        }
+    }
 
     /**
      * Creates a new instance of {@link IRemoteInputConnectionInvoker} for the given
@@ -696,6 +740,28 @@ final class IRemoteInputConnectionInvoker {
             future.completeExceptionally(e);
         }
         return future;
+    }
+
+    /**
+     * Invokes {@link IRemoteInputConnection#requestTextBoundsInfo(InputConnectionCommandHeader,
+     * RectF, ResultReceiver)}
+     * @param rectF {@code rectF} parameter to be passed.
+     * @param executor {@code Executor} parameter to be passed.
+     * @param consumer {@code Consumer} parameter to be passed.
+     */
+    @AnyThread
+    public void requestTextBoundsInfo(
+            @NonNull RectF rectF, @NonNull @CallbackExecutor Executor executor,
+            @NonNull Consumer<TextBoundsInfoResult> consumer) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(consumer);
+
+        final ResultReceiver resultReceiver = new TextBoundsInfoResultReceiver(executor, consumer);
+        try {
+            mConnection.requestTextBoundsInfo(createHeader(), rectF, resultReceiver);
+        } catch (RemoteException e) {
+            executor.execute(() -> consumer.accept(new TextBoundsInfoResult(CODE_CANCELLED)));
+        }
     }
 
     /**

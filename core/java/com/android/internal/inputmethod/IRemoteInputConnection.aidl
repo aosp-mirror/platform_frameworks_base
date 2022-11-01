@@ -16,6 +16,7 @@
 
 package com.android.internal.inputmethod;
 
+import android.graphics.RectF;
 import android.os.Bundle;
 import android.os.ResultReceiver;
 import android.view.KeyEvent;
@@ -105,6 +106,9 @@ import com.android.internal.inputmethod.InputConnectionCommandHeader;
     void requestCursorUpdatesWithFilter(in InputConnectionCommandHeader header,
                 int cursorUpdateMode, int cursorUpdateFilter, int imeDisplayId,
                  in AndroidFuture future /* T=Boolean */);
+
+    void requestTextBoundsInfo(in InputConnectionCommandHeader header, in RectF rect,
+           in ResultReceiver resultReceiver /* T=TextBoundsInfoResult */);
 
     void commitContent(in InputConnectionCommandHeader header, in InputContentInfo inputContentInfo,
             int flags, in Bundle opts, in AndroidFuture future /* T=Boolean */);

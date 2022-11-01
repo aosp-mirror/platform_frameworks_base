@@ -20,6 +20,7 @@ import android.annotation.CallbackExecutor;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.graphics.RectF;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.KeyEvent;
@@ -27,6 +28,7 @@ import android.view.KeyEvent;
 import com.android.internal.util.Preconditions;
 
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 
 /**
@@ -340,6 +342,17 @@ public class InputConnectionWrapper implements InputConnection {
     @Override
     public boolean requestCursorUpdates(int cursorUpdateMode) {
         return mTarget.requestCursorUpdates(cursorUpdateMode);
+    }
+
+    /**
+     * {@inheritDoc}
+     * @throws NullPointerException if the target is {@code null}.
+     */
+    @Override
+    public void requestTextBoundsInfo(
+            @NonNull RectF rectF, @NonNull @CallbackExecutor Executor executor,
+            @NonNull Consumer<TextBoundsInfoResult> consumer) {
+        mTarget.requestTextBoundsInfo(rectF, executor, consumer);
     }
 
     /**

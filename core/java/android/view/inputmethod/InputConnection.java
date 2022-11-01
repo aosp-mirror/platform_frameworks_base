@@ -16,11 +16,14 @@
 
 package android.view.inputmethod;
 
+import static android.view.inputmethod.TextBoundsInfoResult.CODE_UNSUPPORTED;
+
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.graphics.RectF;
 import android.inputmethodservice.InputMethodService;
 import android.os.Bundle;
 import android.os.Handler;
@@ -32,7 +35,9 @@ import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Objects;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 
 /**
@@ -1203,6 +1208,40 @@ public interface InputConnection {
             return requestCursorUpdates(cursorUpdateMode);
         }
         return false;
+    }
+
+
+    /**
+     * Called by input method to request the {@link TextBoundsInfo} for a range of text which is
+     * covered by or in vicinity of the given {@code RectF}. It can be used as a supplementary
+     * method to implement the handwriting gesture API -
+     * {@link #performHandwritingGesture(HandwritingGesture, Executor, IntConsumer)}.
+     *
+     * <p><strong>Editor authors</strong>: It's preferred that the editor returns a
+     * {@link TextBoundsInfo} of all the text lines whose bounds intersect with the given
+     * {@code rectF}.
+     * </p>
+     *
+     * <p><strong>IME authors</strong>: This method is expensive when the text is long. Please
+     * consider that both the text bounds computation and IPC round-trip to send the data are time
+     * consuming. It's preferable to only request text bounds in smaller areas.
+     * </p>
+     *
+     * @param rectF the interested area where the text bounds are requested, in the screen
+     *              coordinates.
+     * @param executor the executor to run the callback.
+     * @param consumer the callback invoked by editor to return the result. It must return a
+     *                 non-null object.
+     *
+     * @see TextBoundsInfo
+     * @see android.view.inputmethod.TextBoundsInfoResult
+     */
+    default void requestTextBoundsInfo(
+            @NonNull RectF rectF, @NonNull @CallbackExecutor Executor executor,
+            @NonNull Consumer<TextBoundsInfoResult> consumer) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(consumer);
+        executor.execute(() -> consumer.accept(new TextBoundsInfoResult(CODE_UNSUPPORTED)));
     }
 
     /**
