@@ -20,6 +20,7 @@ import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.content.Context;
@@ -459,7 +460,11 @@ public class RcsUceAdapter {
          * The pending request has completed successfully due to all requested contacts information
          * being delivered. The callback {@link #onCapabilitiesReceived(List)}
          * for each contacts is required to be called before {@link #onComplete} is called.
+         *
+         * @deprecated Replaced by {@link #onComplete(SipDetails)}, deprecated for
+         * SIP information.
          */
+        @Deprecated
         void onComplete();
 
         /**
@@ -468,8 +473,36 @@ public class RcsUceAdapter {
          * @param errorCode The reason for the framework being unable to process the request.
          * @param retryIntervalMillis The time in milliseconds the requesting application should
          * wait before retrying, if non-zero.
+         *
+         * @deprecated Replaced by {@link #onError(int, long, SipDetails)}, deprecated for
+         * SIP information.
          */
+        @Deprecated
         void onError(@ErrorCode int errorCode, long retryIntervalMillis);
+
+        /**
+         * The pending request has completed successfully due to all requested contacts information
+         * being delivered. The callback {@link #onCapabilitiesReceived(List)}
+         * for each contacts is required to be called before {@link #onComplete} is called.
+         *
+         * @param details The SIP information related to this request.
+         */
+        default void onComplete(@Nullable SipDetails details) {
+            onComplete();
+        };
+
+        /**
+         * The pending request has resulted in an error and may need to be retried, depending on the
+         * error code.
+         * @param errorCode The reason for the framework being unable to process the request.
+         * @param retryIntervalMillis The time in milliseconds the requesting application should
+         * wait before retrying, if non-zero.
+         * @param details The SIP information related to this request.
+         */
+        default void onError(@ErrorCode int errorCode, long retryIntervalMillis,
+                @Nullable SipDetails details) {
+            onError(errorCode, retryIntervalMillis);
+        };
     }
 
     private final Context mContext;
@@ -554,19 +587,20 @@ public class RcsUceAdapter {
                 }
             }
             @Override
-            public void onComplete() {
+            public void onComplete(@Nullable SipDetails details) {
                 final long callingIdentity = Binder.clearCallingIdentity();
                 try {
-                    executor.execute(() -> c.onComplete());
+                    executor.execute(() -> c.onComplete(details));
                 } finally {
                     restoreCallingIdentity(callingIdentity);
                 }
             }
             @Override
-            public void onError(int errorCode, long retryAfterMilliseconds) {
+            public void onError(int errorCode, long retryAfterMilliseconds,
+                    @Nullable SipDetails details) {
                 final long callingIdentity = Binder.clearCallingIdentity();
                 try {
-                    executor.execute(() -> c.onError(errorCode, retryAfterMilliseconds));
+                    executor.execute(() -> c.onError(errorCode, retryAfterMilliseconds, details));
                 } finally {
                     restoreCallingIdentity(callingIdentity);
                 }
@@ -650,19 +684,20 @@ public class RcsUceAdapter {
                 }
             }
             @Override
-            public void onComplete() {
+            public void onComplete(@Nullable SipDetails details) {
                 final long callingIdentity = Binder.clearCallingIdentity();
                 try {
-                    executor.execute(() -> c.onComplete());
+                    executor.execute(() -> c.onComplete(details));
                 } finally {
                     restoreCallingIdentity(callingIdentity);
                 }
             }
             @Override
-            public void onError(int errorCode, long retryAfterMilliseconds) {
+            public void onError(int errorCode, long retryAfterMilliseconds,
+                    @Nullable SipDetails details) {
                 final long callingIdentity = Binder.clearCallingIdentity();
                 try {
-                    executor.execute(() -> c.onError(errorCode, retryAfterMilliseconds));
+                    executor.execute(() -> c.onError(errorCode, retryAfterMilliseconds, details));
                 } finally {
                     restoreCallingIdentity(callingIdentity);
                 }
