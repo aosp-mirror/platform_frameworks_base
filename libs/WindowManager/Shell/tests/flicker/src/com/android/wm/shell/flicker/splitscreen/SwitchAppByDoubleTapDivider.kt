@@ -56,7 +56,7 @@ class SwitchAppByDoubleTapDivider(testSpec: FlickerTestParameter) : SplitScreenB
         get() = {
             super.transition(this)
             setup {
-                SplitScreenUtils.enterSplit(wmHelper, tapl, primaryApp, secondaryApp)
+                SplitScreenUtils.enterSplit(wmHelper, tapl, device, primaryApp, secondaryApp)
             }
             transitions {
                 SplitScreenUtils.doubleTapDividerToSwitch(device)
