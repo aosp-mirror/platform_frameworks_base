@@ -80,7 +80,7 @@ class AutoEnterPipOnGoToHomeTest(testSpec: FlickerTestParameter) : EnterPipTest(
             transitions { tapl.goHome() }
         }
 
-    @FlakyTest
+    @FlakyTest(bugId = 256863309)
     @Test
     override fun pipLayerReduces() {
         testSpec.assertLayers {
@@ -107,14 +107,6 @@ class AutoEnterPipOnGoToHomeTest(testSpec: FlickerTestParameter) : EnterPipTest(
             }
         }
     }
-
-    @FlakyTest(bugId = 239807171)
-    @Test
-    override fun pipAppLayerAlwaysVisible() = super.pipAppLayerAlwaysVisible()
-
-    @FlakyTest(bugId = 239807171)
-    @Test
-    override fun pipLayerRemainInsideVisibleBounds() = super.pipLayerRemainInsideVisibleBounds()
 
     @Presubmit
     @Test
