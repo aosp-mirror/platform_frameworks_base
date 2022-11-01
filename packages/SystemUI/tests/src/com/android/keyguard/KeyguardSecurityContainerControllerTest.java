@@ -194,6 +194,15 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void onInitConfiguresViewMode() {
+        mKeyguardSecurityContainerController.onInit();
+        verify(mView).initMode(eq(MODE_DEFAULT), eq(mGlobalSettings), eq(mFalsingManager),
+                eq(mUserSwitcherController),
+                any(KeyguardSecurityContainer.UserSwitcherViewMode.UserSwitcherCallback.class),
+                eq(mFalsingA11yDelegate));
+    }
+
+    @Test
     public void showSecurityScreen_canInflateAllModes() {
         SecurityMode[] modes = SecurityMode.values();
         for (SecurityMode mode : modes) {
