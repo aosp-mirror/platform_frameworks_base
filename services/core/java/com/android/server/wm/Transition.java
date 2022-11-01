@@ -872,8 +872,8 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     void abort() {
         // This calls back into itself via controller.abort, so just early return here.
         if (mState == STATE_ABORT) return;
-        if (mState != STATE_COLLECTING) {
-            throw new IllegalStateException("Too late to abort.");
+        if (mState != STATE_COLLECTING && mState != STATE_STARTED) {
+            throw new IllegalStateException("Too late to abort. state=" + mState);
         }
         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Aborting Transition: %d", mSyncId);
         mState = STATE_ABORT;
