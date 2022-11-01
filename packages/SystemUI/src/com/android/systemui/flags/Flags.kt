@@ -308,7 +308,7 @@ object Flags {
 
     // 1300 - screenshots
     // TODO(b/254512719): Tracking Bug
-    @JvmField val SCREENSHOT_REQUEST_PROCESSOR = UnreleasedFlag(1300)
+    @JvmField val SCREENSHOT_REQUEST_PROCESSOR = UnreleasedFlag(1300, true)
 
     // TODO(b/254513155): Tracking Bug
     @JvmField val SCREENSHOT_WORK_PROFILE_POLICY = UnreleasedFlag(1301)
