@@ -407,16 +407,14 @@ public class PowerGroup {
         return mDisplayPowerRequest.policy;
     }
 
-    boolean updateLocked(float screenBrightnessOverride, boolean autoBrightness,
-            boolean useProximitySensor, boolean boostScreenBrightness, int dozeScreenState,
-            float dozeScreenBrightness, boolean overrideDrawWakeLock,
-            PowerSaveState powerSaverState, boolean quiescent, boolean dozeAfterScreenOff,
-            boolean bootCompleted, boolean screenBrightnessBoostInProgress,
-            boolean waitForNegativeProximity) {
+    boolean updateLocked(float screenBrightnessOverride, boolean useProximitySensor,
+            boolean boostScreenBrightness, int dozeScreenState, float dozeScreenBrightness,
+            boolean overrideDrawWakeLock, PowerSaveState powerSaverState, boolean quiescent,
+            boolean dozeAfterScreenOff, boolean bootCompleted,
+            boolean screenBrightnessBoostInProgress, boolean waitForNegativeProximity) {
         mDisplayPowerRequest.policy = getDesiredScreenPolicyLocked(quiescent, dozeAfterScreenOff,
                 bootCompleted, screenBrightnessBoostInProgress);
         mDisplayPowerRequest.screenBrightnessOverride = screenBrightnessOverride;
-        mDisplayPowerRequest.useAutoBrightness = autoBrightness;
         mDisplayPowerRequest.useProximitySensor = useProximitySensor;
         mDisplayPowerRequest.boostScreenBrightness = boostScreenBrightness;
 
