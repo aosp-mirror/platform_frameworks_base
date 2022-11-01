@@ -47,7 +47,7 @@ public class HandwritingDelegateConfiguration {
      * @param delegatorViewId identifier of the delegator editor view for which handwriting mode
      *     should be initiated
      * @param initiationCallback callback called when a stylus {@link MotionEvent} occurs within
-     *     this view's bounds
+     *     this view's bounds. This will be called from the UI thread.
      */
     public HandwritingDelegateConfiguration(
             @IdRes int delegatorViewId, @NonNull Runnable initiationCallback) {
@@ -65,7 +65,7 @@ public class HandwritingDelegateConfiguration {
 
     /**
      * Returns the callback which should be called when a stylus {@link MotionEvent} occurs within
-     * the delegate view's bounds.
+     * the delegate view's bounds. The callback should only be called from the UI thread.
      */
     @NonNull
     public Runnable getInitiationCallback() {
