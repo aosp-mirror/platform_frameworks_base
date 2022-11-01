@@ -1549,13 +1549,16 @@ public final class InputMethodManager {
     /**
      * Returns the list of installed input methods for the specified user.
      *
+     * <p>{@link Manifest.permission#INTERACT_ACROSS_USERS_FULL} is required when and only when
+     * {@code userId} is different from the user id of the current process.</p>
+     *
      * @param userId user ID to query
      * @return {@link List} of {@link InputMethodInfo}.
      * @hide
      */
     @TestApi
-    @RequiresPermission(INTERACT_ACROSS_USERS_FULL)
     @NonNull
+    @RequiresPermission(value = Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)
     public List<InputMethodInfo> getInputMethodListAsUser(@UserIdInt int userId) {
         return IInputMethodManagerGlobalInvoker.getInputMethodList(userId,
                 DirectBootAwareness.AUTO);

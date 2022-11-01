@@ -212,6 +212,7 @@ final class IInputMethodManagerGlobalInvoker {
 
     @AnyThread
     @NonNull
+    @RequiresPermission(value = Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)
     static List<InputMethodInfo> getInputMethodList(@UserIdInt int userId,
             @DirectBootAwareness int directBootAwareness) {
         final IInputMethodManager service = getService();
