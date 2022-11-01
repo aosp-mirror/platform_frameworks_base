@@ -28,7 +28,7 @@
     <dimen name="pip_menu_background_corner_radius">6dp</dimen>
     <dimen name="pip_menu_border_width">4dp</dimen>
     <dimen name="pip_menu_outer_space">24dp</dimen>
-    <dimen name="pip_menu_button_wrapper_margin">26dp</dimen>
+    <dimen name="pip_menu_button_start_end_offset">30dp</dimen>
 
     <!-- outer space minus border width -->
     <dimen name="pip_menu_outer_space_frame">20dp</dimen>

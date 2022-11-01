@@ -146,7 +146,7 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
         int pipMenuBorderWidth = mContext.getResources()
                 .getDimensionPixelSize(R.dimen.pip_menu_border_width);
         mTvPipBoundsState.setPipMenuPermanentDecorInsets(Insets.of(-pipMenuBorderWidth,
-                    -pipMenuBorderWidth, -pipMenuBorderWidth, -pipMenuBorderWidth));
+                -pipMenuBorderWidth, -pipMenuBorderWidth, -pipMenuBorderWidth));
         mTvPipBoundsState.setPipMenuTemporaryDecorInsets(Insets.of(0, 0, 0, -pipEduTextHeight));
     }
 
@@ -221,7 +221,7 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
         if (mInMoveMode) {
             mPipMenuView.showMoveMenu(mDelegate.getPipGravity());
         } else {
-            mPipMenuView.showButtonsMenu();
+            mPipMenuView.showButtonsMenu(/* exitingMoveMode= */ false);
         }
         mPipMenuView.updateBounds(mTvPipBoundsState.getBounds());
     }
@@ -294,7 +294,7 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
         }
         if (mInMoveMode) {
             setInMoveMode(false);
-            mPipMenuView.showButtonsMenu();
+            mPipMenuView.showButtonsMenu(/* exitingMoveMode= */ true);
             return true;
         }
         return false;
@@ -360,9 +360,9 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
             return;
         }
         if (!mAppActions.isEmpty()) {
-            mPipMenuView.setAdditionalActions(mAppActions, mCloseAction, mMainHandler);
+            mPipMenuView.setAdditionalActions(mAppActions, mCloseAction);
         } else {
-            mPipMenuView.setAdditionalActions(mMediaActions, mCloseAction, mMainHandler);
+            mPipMenuView.setAdditionalActions(mMediaActions, mCloseAction);
         }
     }
 

@@ -19,6 +19,8 @@ package com.android.wm.shell.common;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
+import android.os.Handler;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,11 +32,11 @@ import com.android.wm.shell.R;
 /**
  * A common action button for TV window menu layouts.
  */
-public class TvWindowMenuActionButton extends RelativeLayout implements View.OnClickListener {
+public class TvWindowMenuActionButton extends RelativeLayout {
     private final ImageView mIconImageView;
     private final View mButtonBackgroundView;
-    private final View mButtonView;
-    private OnClickListener mOnClickListener;
+
+    private Icon mCurrentIcon;
 
     public TvWindowMenuActionButton(Context context) {
         this(context, null, 0, 0);
@@ -56,7 +58,6 @@ public class TvWindowMenuActionButton extends RelativeLayout implements View.OnC
         inflater.inflate(R.layout.tv_window_menu_action_button, this);
 
         mIconImageView = findViewById(R.id.icon);
-        mButtonView = findViewById(R.id.button);
         mButtonBackgroundView = findViewById(R.id.background);
 
         final int[] values = new int[]{android.R.attr.src, android.R.attr.text};
@@ -69,23 +70,6 @@ public class TvWindowMenuActionButton extends RelativeLayout implements View.OnC
             setTextAndDescription(textResId);
         }
         typedArray.recycle();
-    }
-
-    @Override
-    public void setOnClickListener(OnClickListener listener) {
-        // We do not want to set an OnClickListener to the TvWindowMenuActionButton itself, but only
-        // to the ImageView. So let's "cash" the listener we've been passed here and set a "proxy"
-        // listener to the ImageView.
-        mOnClickListener = listener;
-        mButtonView.setOnClickListener(listener != null ? this : null);
-    }
-
-    @Override
-    public void onClick(View v) {
-        if (mOnClickListener != null) {
-            // Pass the correct view - this.
-            mOnClickListener.onClick(this);
-        }
     }
 
     /**
@@ -104,11 +88,24 @@ public class TvWindowMenuActionButton extends RelativeLayout implements View.OnC
         }
     }
 
+    public void setImageIconAsync(Icon icon, Handler handler) {
+        mCurrentIcon = icon;
+        // Remove old image while waiting for the new one to load.
+        mIconImageView.setImageDrawable(null);
+        icon.loadDrawableAsync(mContext, d -> {
+            // The image hasn't been set any other way and the drawable belongs to the most
+            // recently set Icon.
+            if (mIconImageView.getDrawable() == null && mCurrentIcon == icon) {
+                mIconImageView.setImageDrawable(d);
+            }
+        }, handler);
+    }
+
     /**
      * Sets the text for description the with the given string.
      */
     public void setTextAndDescription(CharSequence text) {
-        mButtonView.setContentDescription(text);
+        setContentDescription(text);
     }
 
     /**
@@ -116,16 +113,6 @@ public class TvWindowMenuActionButton extends RelativeLayout implements View.OnC
      */
     public void setTextAndDescription(int resId) {
         setTextAndDescription(getContext().getString(resId));
-    }
-
-    @Override
-    public void setEnabled(boolean enabled) {
-        mButtonView.setEnabled(enabled);
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return mButtonView.isEnabled();
     }
 
     /**
@@ -147,10 +134,10 @@ public class TvWindowMenuActionButton extends RelativeLayout implements View.OnC
 
     @Override
     public String toString() {
-        if (mButtonView.getContentDescription() == null) {
+        if (getContentDescription() == null) {
             return TvWindowMenuActionButton.class.getSimpleName();
         }
-        return mButtonView.getContentDescription().toString();
+        return getContentDescription().toString();
     }
 
 }
