@@ -1282,7 +1282,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         mNotificationPanelViewController.expandWithQs();
 
         verify(mLockscreenShadeTransitionController).goToLockedShade(
-                /* expandedView= */null, /* needsQSAnimation= */false);
+                /* expandedView= */null, /* needsQSAnimation= */true);
     }
 
     @Test

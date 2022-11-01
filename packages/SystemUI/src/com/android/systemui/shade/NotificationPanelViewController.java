@@ -2015,7 +2015,7 @@ public final class NotificationPanelViewController {
             // case but currently motion in portrait looks worse than when using flingSettings.
             // TODO: make below function transitioning smoothly also in portrait with null target
             mLockscreenShadeTransitionController.goToLockedShade(
-                    /* expandedView= */null, /* needsQSAnimation= */false);
+                    /* expandedView= */null, /* needsQSAnimation= */true);
         } else if (isFullyCollapsed()) {
             expand(true /* animate */);
         } else {
