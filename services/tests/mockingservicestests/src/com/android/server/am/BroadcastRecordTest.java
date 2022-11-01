@@ -24,9 +24,10 @@ import static android.content.Intent.ACTION_TIME_CHANGED;
 import static com.android.server.am.BroadcastConstants.DEFER_BOOT_COMPLETED_BROADCAST_ALL;
 import static com.android.server.am.BroadcastConstants.DEFER_BOOT_COMPLETED_BROADCAST_BACKGROUND_RESTRICTED_ONLY;
 import static com.android.server.am.BroadcastConstants.DEFER_BOOT_COMPLETED_BROADCAST_NONE;
-import static com.android.server.am.BroadcastRecord.isPrioritized;
+import static com.android.server.am.BroadcastRecord.calculateBlockedUntilTerminalCount;
 import static com.android.server.am.BroadcastRecord.isReceiverEquals;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -99,6 +100,16 @@ public class BroadcastRecordTest {
         assertFalse(isPrioritized(List.of(createResolveInfo(PACKAGE1, getAppId(1), 0))));
         assertFalse(isPrioritized(List.of(createResolveInfo(PACKAGE1, getAppId(1), -10))));
         assertFalse(isPrioritized(List.of(createResolveInfo(PACKAGE1, getAppId(1), 10))));
+
+        assertArrayEquals(new int[] {-1},
+                calculateBlockedUntilTerminalCount(List.of(
+                        createResolveInfo(PACKAGE1, getAppId(1), 0)), false));
+        assertArrayEquals(new int[] {-1},
+                calculateBlockedUntilTerminalCount(List.of(
+                        createResolveInfo(PACKAGE1, getAppId(1), -10)), false));
+        assertArrayEquals(new int[] {-1},
+                calculateBlockedUntilTerminalCount(List.of(
+                        createResolveInfo(PACKAGE1, getAppId(1), 10)), false));
     }
 
     @Test
@@ -111,6 +122,17 @@ public class BroadcastRecordTest {
                 createResolveInfo(PACKAGE1, getAppId(1), 10),
                 createResolveInfo(PACKAGE2, getAppId(2), 10),
                 createResolveInfo(PACKAGE3, getAppId(3), 10))));
+
+        assertArrayEquals(new int[] {-1,-1,-1},
+                calculateBlockedUntilTerminalCount(List.of(
+                        createResolveInfo(PACKAGE1, getAppId(1), 0),
+                        createResolveInfo(PACKAGE2, getAppId(2), 0),
+                        createResolveInfo(PACKAGE3, getAppId(3), 0)), false));
+        assertArrayEquals(new int[] {-1,-1,-1},
+                calculateBlockedUntilTerminalCount(List.of(
+                        createResolveInfo(PACKAGE1, getAppId(1), 10),
+                        createResolveInfo(PACKAGE2, getAppId(2), 10),
+                        createResolveInfo(PACKAGE3, getAppId(3), 10)), false));
     }
 
     @Test
@@ -123,6 +145,19 @@ public class BroadcastRecordTest {
                 createResolveInfo(PACKAGE1, getAppId(1), 0),
                 createResolveInfo(PACKAGE2, getAppId(2), 0),
                 createResolveInfo(PACKAGE3, getAppId(3), 10))));
+
+        assertArrayEquals(new int[] {0,1,2},
+                calculateBlockedUntilTerminalCount(List.of(
+                        createResolveInfo(PACKAGE1, getAppId(1), -10),
+                        createResolveInfo(PACKAGE2, getAppId(2), 0),
+                        createResolveInfo(PACKAGE3, getAppId(3), 10)), false));
+        assertArrayEquals(new int[] {0,0,2,3,3},
+                calculateBlockedUntilTerminalCount(List.of(
+                        createResolveInfo(PACKAGE1, getAppId(1), 0),
+                        createResolveInfo(PACKAGE2, getAppId(2), 0),
+                        createResolveInfo(PACKAGE3, getAppId(3), 10),
+                        createResolveInfo(PACKAGE3, getAppId(3), 20),
+                        createResolveInfo(PACKAGE3, getAppId(3), 20)), false));
     }
 
     @Test
@@ -542,5 +577,10 @@ public class BroadcastRecordTest {
 
     private static int getAppId(int i) {
         return Process.FIRST_APPLICATION_UID + i;
+    }
+
+    private static boolean isPrioritized(List<Object> receivers) {
+        return BroadcastRecord.isPrioritized(
+                calculateBlockedUntilTerminalCount(receivers, false), false);
     }
 }

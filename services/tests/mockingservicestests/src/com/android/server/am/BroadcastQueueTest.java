@@ -503,6 +503,11 @@ public class BroadcastQueueTest {
         return ai;
     }
 
+    static ResolveInfo withPriority(ResolveInfo info, int priority) {
+        info.priority = priority;
+        return info;
+    }
+
     static ResolveInfo makeManifestReceiver(String packageName, String name) {
         return makeManifestReceiver(packageName, name, UserHandle.USER_SYSTEM);
     }
