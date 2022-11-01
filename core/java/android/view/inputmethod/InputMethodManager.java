@@ -2596,6 +2596,7 @@ public final class InputMethodManager {
      * @hide
      */
     @TestApi
+    @RequiresPermission(Manifest.permission.TEST_INPUT_METHOD)
     public void addVirtualStylusIdForTestSession() {
         synchronized (mH) {
             IInputMethodManagerGlobalInvoker.addVirtualStylusIdForTestSession(mClient);
