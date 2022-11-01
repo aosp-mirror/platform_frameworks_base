@@ -9358,7 +9358,8 @@ public class TelephonyManager {
             ALLOWED_NETWORK_TYPES_REASON_USER,
             ALLOWED_NETWORK_TYPES_REASON_POWER,
             ALLOWED_NETWORK_TYPES_REASON_CARRIER,
-            ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G
+            ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G,
+            ALLOWED_NETWORK_TYPES_REASON_USER_RESTRICTIONS,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface AllowedNetworkTypesReason {
@@ -9395,6 +9396,15 @@ public class TelephonyManager {
      */
     @SystemApi
     public static final int ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G = 3;
+
+    /**
+     * To indicate allowed network type change is requested by an update to the
+     * {@link android.os.UserManager.DISALLOW_CELLULAR_2G} user restriction.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int ALLOWED_NETWORK_TYPES_REASON_USER_RESTRICTIONS = 4;
 
     /**
      * Set the allowed network types of the device and provide the reason triggering the allowed
@@ -9488,6 +9498,7 @@ public class TelephonyManager {
             case TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_POWER:
             case TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_CARRIER:
             case TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G:
+            case ALLOWED_NETWORK_TYPES_REASON_USER_RESTRICTIONS:
                 return true;
         }
         return false;
