@@ -44,6 +44,15 @@
         android:background="@drawable/qs_media_outline_album_bg"
         />
 
+    <com.android.systemui.ripple.MultiRippleView
+        android:id="@+id/touch_ripple_view"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/qs_media_session_height_expanded"
+        app:layout_constraintStart_toStartOf="@id/album_art"
+        app:layout_constraintEnd_toEndOf="@id/album_art"
+        app:layout_constraintTop_toTopOf="@id/album_art"
+        app:layout_constraintBottom_toBottomOf="@id/album_art" />
+
     <!-- Guideline for output switcher -->
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/center_vertical_guideline"
