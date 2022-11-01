@@ -23,11 +23,13 @@ import static org.junit.Assert.assertThrows;
 import android.annotation.Nullable;
 import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
+import android.os.Parcel;
 
 import org.junit.Test;
 
 public final class ProgramSelectorTest {
 
+    private static final int CREATOR_ARRAY_SIZE = 2;
     private static final int FM_PROGRAM_TYPE = ProgramSelector.PROGRAM_TYPE_FM;
     private static final int DAB_PROGRAM_TYPE = ProgramSelector.PROGRAM_TYPE_DAB;
     private static final long FM_FREQUENCY = 88500;
@@ -94,6 +96,33 @@ public final class ProgramSelectorTest {
 
         assertWithMessage("Identifier of the same identifier")
                 .that(FM_IDENTIFIER).isEqualTo(fmIdentifierSame);
+    }
+
+    @Test
+    public void describeContents_forIdentifier() {
+        assertWithMessage("FM identifier contents")
+                .that(FM_IDENTIFIER.describeContents()).isEqualTo(0);
+    }
+
+    @Test
+    public void newArray_forIdentifierCreator() {
+        ProgramSelector.Identifier[] identifiers =
+                ProgramSelector.Identifier.CREATOR.newArray(CREATOR_ARRAY_SIZE);
+
+        assertWithMessage("Identifiers").that(identifiers).hasLength(CREATOR_ARRAY_SIZE);
+    }
+
+    @Test
+    public void writeToParcel_forIdentifier() {
+        Parcel parcel = Parcel.obtain();
+
+        FM_IDENTIFIER.writeToParcel(parcel, /* flags= */ 0);
+        parcel.setDataPosition(0);
+
+        ProgramSelector.Identifier identifierFromParcel =
+                ProgramSelector.Identifier.CREATOR.createFromParcel(parcel);
+        assertWithMessage("Identifier created from parcel")
+                .that(identifierFromParcel).isEqualTo(FM_IDENTIFIER);
     }
 
     @Test
@@ -392,6 +421,34 @@ public final class ProgramSelectorTest {
         assertWithMessage(
                 "Whether two selectors with different secondary id orders are strictly equal")
                 .that(selector1.strictEquals(selector2)).isTrue();
+    }
+
+    @Test
+    public void describeContents_forProgramSelector() {
+        assertWithMessage("FM selector contents")
+                .that(getFmSelector(/* secondaryIds= */ null, /* vendorIds= */ null)
+                        .describeContents()).isEqualTo(0);
+    }
+
+    @Test
+    public void newArray_forProgramSelectorCreator() {
+        ProgramSelector[] programSelectors = ProgramSelector.CREATOR.newArray(CREATOR_ARRAY_SIZE);
+
+        assertWithMessage("Program selectors").that(programSelectors).hasLength(CREATOR_ARRAY_SIZE);
+    }
+
+    @Test
+    public void writeToParcel_forProgramSelector() {
+        ProgramSelector selectorExpected =
+                getFmSelector(/* secondaryIds= */ null, /* vendorIds= */ null);
+        Parcel parcel = Parcel.obtain();
+
+        selectorExpected.writeToParcel(parcel, /* flags= */ 0);
+        parcel.setDataPosition(0);
+
+        ProgramSelector selectorFromParcel = ProgramSelector.CREATOR.createFromParcel(parcel);
+        assertWithMessage("Program selector created from parcel")
+                .that(selectorFromParcel).isEqualTo(selectorExpected);
     }
 
     private ProgramSelector getFmSelector(@Nullable ProgramSelector.Identifier[] secondaryIds,

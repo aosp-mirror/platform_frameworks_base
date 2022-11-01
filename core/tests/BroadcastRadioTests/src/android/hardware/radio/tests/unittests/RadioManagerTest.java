@@ -33,6 +33,7 @@ import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
 import android.hardware.radio.RadioMetadata;
 import android.hardware.radio.RadioTuner;
+import android.os.Parcel;
 import android.os.RemoteException;
 import android.util.ArrayMap;
 
@@ -79,6 +80,8 @@ public final class RadioManagerTest {
             ProgramSelector.PROGRAM_TYPE_AM, ProgramSelector.PROGRAM_TYPE_FM};
     private static final int[] SUPPORTED_IDENTIFIERS_TYPES = new int[]{
             ProgramSelector.IDENTIFIER_TYPE_AMFM_FREQUENCY, ProgramSelector.IDENTIFIER_TYPE_RDS_PI};
+
+    private static final int CREATOR_ARRAY_SIZE = 3;
 
     private static final RadioManager.FmBandDescriptor FM_BAND_DESCRIPTOR =
             createFmBandDescriptor();
@@ -173,6 +176,22 @@ public final class RadioManagerTest {
     }
 
     @Test
+    public void describeContents_forBandDescriptor() {
+        RadioManager.BandDescriptor bandDescriptor = createFmBandDescriptor();
+
+        assertWithMessage("Band Descriptor contents")
+                .that(bandDescriptor.describeContents()).isEqualTo(0);
+    }
+
+    @Test
+    public void newArray_forBandDescriptorCreator() {
+        RadioManager.BandDescriptor[] bandDescriptors =
+                RadioManager.BandDescriptor.CREATOR.newArray(CREATOR_ARRAY_SIZE);
+
+        assertWithMessage("Band Descriptors").that(bandDescriptors).hasLength(CREATOR_ARRAY_SIZE);
+    }
+
+    @Test
     public void isAmBand_forAmBandDescriptor_returnsTrue() {
         RadioManager.BandDescriptor bandDescriptor = createAmBandDescriptor();
 
@@ -219,18 +238,73 @@ public final class RadioManagerTest {
     }
 
     @Test
+    public void describeContents_forFmBandDescriptor() {
+        assertWithMessage("FM Band Descriptor contents")
+                .that(FM_BAND_DESCRIPTOR.describeContents()).isEqualTo(0);
+    }
+
+    @Test
+    public void writeToParcel_forFmBandDescriptor() {
+        Parcel parcel = Parcel.obtain();
+
+        FM_BAND_DESCRIPTOR.writeToParcel(parcel, /* flags= */ 0);
+        parcel.setDataPosition(0);
+
+        RadioManager.FmBandDescriptor fmBandDescriptorFromParcel =
+                RadioManager.FmBandDescriptor.CREATOR.createFromParcel(parcel);
+        assertWithMessage("FM Band Descriptor created from parcel")
+                .that(fmBandDescriptorFromParcel).isEqualTo(FM_BAND_DESCRIPTOR);
+    }
+
+    @Test
+    public void newArray_forFmBandDescriptorCreator() {
+        RadioManager.FmBandDescriptor[] fmBandDescriptors =
+                RadioManager.FmBandDescriptor.CREATOR.newArray(CREATOR_ARRAY_SIZE);
+
+        assertWithMessage("FM Band Descriptors")
+                .that(fmBandDescriptors).hasLength(CREATOR_ARRAY_SIZE);
+    }
+
+    @Test
     public void isStereoSupported_forAmBandDescriptor() {
         assertWithMessage("AM Band Descriptor stereo")
                 .that(AM_BAND_DESCRIPTOR.isStereoSupported()).isEqualTo(STEREO_SUPPORTED);
     }
 
     @Test
+    public void describeContents_forAmBandDescriptor() {
+        assertWithMessage("AM Band Descriptor contents")
+                .that(AM_BAND_DESCRIPTOR.describeContents()).isEqualTo(0);
+    }
+
+    @Test
+    public void writeToParcel_forAmBandDescriptor() {
+        Parcel parcel = Parcel.obtain();
+
+        AM_BAND_DESCRIPTOR.writeToParcel(parcel, /* flags= */ 0);
+        parcel.setDataPosition(0);
+
+        RadioManager.AmBandDescriptor amBandDescriptorFromParcel =
+                RadioManager.AmBandDescriptor.CREATOR.createFromParcel(parcel);
+        assertWithMessage("FM Band Descriptor created from parcel")
+                .that(amBandDescriptorFromParcel).isEqualTo(AM_BAND_DESCRIPTOR);
+    }
+
+    @Test
+    public void newArray_forAmBandDescriptorCreator() {
+        RadioManager.AmBandDescriptor[] amBandDescriptors =
+                RadioManager.AmBandDescriptor.CREATOR.newArray(CREATOR_ARRAY_SIZE);
+
+        assertWithMessage("AM Band Descriptors")
+                .that(amBandDescriptors).hasLength(CREATOR_ARRAY_SIZE);
+    }
+
+    @Test
     public void equals_withSameFmBandDescriptors_returnsTrue() {
-        RadioManager.FmBandDescriptor fmBandDescriptor1 = createFmBandDescriptor();
-        RadioManager.FmBandDescriptor fmBandDescriptor2 = createFmBandDescriptor();
+        RadioManager.FmBandDescriptor fmBandDescriptorCompared = createFmBandDescriptor();
 
         assertWithMessage("The same FM Band Descriptor")
-                .that(fmBandDescriptor1).isEqualTo(fmBandDescriptor2);
+                .that(FM_BAND_DESCRIPTOR).isEqualTo(fmBandDescriptorCompared);
     }
 
     @Test
@@ -255,6 +329,44 @@ public final class RadioManagerTest {
     public void equals_withAmAndFmBandDescriptors_returnsFalse() {
         assertWithMessage("AM Band Descriptor")
                 .that(AM_BAND_DESCRIPTOR).isNotEqualTo(FM_BAND_DESCRIPTOR);
+    }
+
+    @Test
+    public void hashCode_withSameFmBandDescriptors_equals() {
+        RadioManager.FmBandDescriptor fmBandDescriptorCompared = createFmBandDescriptor();
+
+        assertWithMessage("Hash code of the same FM Band Descriptor")
+                .that(fmBandDescriptorCompared.hashCode()).isEqualTo(FM_BAND_DESCRIPTOR.hashCode());
+    }
+
+    @Test
+    public void hashCode_withSameAmBandDescriptors_equals() {
+        RadioManager.AmBandDescriptor amBandDescriptorCompared = createAmBandDescriptor();
+
+        assertWithMessage("Hash code of the same AM Band Descriptor")
+                .that(amBandDescriptorCompared.hashCode()).isEqualTo(AM_BAND_DESCRIPTOR.hashCode());
+    }
+
+    @Test
+    public void hashCode_withFmBandDescriptorsOfDifferentAfSupports_notEquals() {
+        RadioManager.FmBandDescriptor fmBandDescriptorCompared = new RadioManager.FmBandDescriptor(
+                REGION, RadioManager.BAND_FM, FM_LOWER_LIMIT, FM_UPPER_LIMIT, FM_SPACING,
+                STEREO_SUPPORTED, RDS_SUPPORTED, TA_SUPPORTED, !AF_SUPPORTED, EA_SUPPORTED);
+
+        assertWithMessage("Hash code of FM Band Descriptor of different spacing")
+                .that(fmBandDescriptorCompared.hashCode())
+                .isNotEqualTo(FM_BAND_DESCRIPTOR.hashCode());
+    }
+
+    @Test
+    public void hashCode_withAmBandDescriptorsOfDifferentSpacings_notEquals() {
+        RadioManager.AmBandDescriptor amBandDescriptorCompared =
+                new RadioManager.AmBandDescriptor(REGION, RadioManager.BAND_AM, AM_LOWER_LIMIT,
+                        AM_UPPER_LIMIT, AM_SPACING * 2, STEREO_SUPPORTED);
+
+        assertWithMessage("Hash code of AM Band Descriptor of different spacing")
+                .that(amBandDescriptorCompared.hashCode())
+                .isNotEqualTo(AM_BAND_DESCRIPTOR.hashCode());
     }
 
     @Test
@@ -298,8 +410,24 @@ public final class RadioManagerTest {
     }
 
     @Test
+    public void describeContents_forBandConfig() {
+        RadioManager.BandConfig bandConfig = createFmBandConfig();
+
+        assertWithMessage("FM Band Config contents")
+                .that(bandConfig.describeContents()).isEqualTo(0);
+    }
+
+    @Test
+    public void newArray_forBandConfigCreator() {
+        RadioManager.BandConfig[] bandConfigs =
+                RadioManager.BandConfig.CREATOR.newArray(CREATOR_ARRAY_SIZE);
+
+        assertWithMessage("Band Configs").that(bandConfigs).hasLength(CREATOR_ARRAY_SIZE);
+    }
+
+    @Test
     public void getStereo_forFmBandConfig() {
-        assertWithMessage("FM Band Config stereo ")
+        assertWithMessage("FM Band Config stereo")
                 .that(FM_BAND_CONFIG.getStereo()).isEqualTo(STEREO_SUPPORTED);
     }
 
@@ -328,9 +456,63 @@ public final class RadioManagerTest {
     }
 
     @Test
+    public void describeContents_forFmBandConfig() {
+        assertWithMessage("FM Band Config contents")
+                .that(FM_BAND_CONFIG.describeContents()).isEqualTo(0);
+    }
+
+    @Test
+    public void writeToParcel_forFmBandConfig() {
+        Parcel parcel = Parcel.obtain();
+
+        FM_BAND_CONFIG.writeToParcel(parcel, /* flags= */ 0);
+        parcel.setDataPosition(0);
+
+        RadioManager.FmBandConfig fmBandConfigFromParcel =
+                RadioManager.FmBandConfig.CREATOR.createFromParcel(parcel);
+        assertWithMessage("FM Band Config created from parcel")
+                .that(fmBandConfigFromParcel).isEqualTo(FM_BAND_CONFIG);
+    }
+
+    @Test
+    public void newArray_forFmBandConfigCreator() {
+        RadioManager.FmBandConfig[] fmBandConfigs =
+                RadioManager.FmBandConfig.CREATOR.newArray(CREATOR_ARRAY_SIZE);
+
+        assertWithMessage("FM Band Configs").that(fmBandConfigs).hasLength(CREATOR_ARRAY_SIZE);
+    }
+
+    @Test
     public void getStereo_forAmBandConfig() {
         assertWithMessage("AM Band Config stereo")
                 .that(AM_BAND_CONFIG.getStereo()).isEqualTo(STEREO_SUPPORTED);
+    }
+
+    @Test
+    public void describeContents_forAmBandConfig() {
+        assertWithMessage("AM Band Config contents")
+                .that(AM_BAND_CONFIG.describeContents()).isEqualTo(0);
+    }
+
+    @Test
+    public void writeToParcel_forAmBandConfig() {
+        Parcel parcel = Parcel.obtain();
+
+        AM_BAND_CONFIG.writeToParcel(parcel, /* flags= */ 0);
+        parcel.setDataPosition(0);
+
+        RadioManager.AmBandConfig amBandConfigFromParcel =
+                RadioManager.AmBandConfig.CREATOR.createFromParcel(parcel);
+        assertWithMessage("AM Band Config created from parcel")
+                .that(amBandConfigFromParcel).isEqualTo(AM_BAND_CONFIG);
+    }
+
+    @Test
+    public void newArray_forAmBandConfigCreator() {
+        RadioManager.AmBandConfig[] amBandConfigs =
+                RadioManager.AmBandConfig.CREATOR.newArray(CREATOR_ARRAY_SIZE);
+
+        assertWithMessage("AM Band Configs").that(amBandConfigs).hasLength(CREATOR_ARRAY_SIZE);
     }
 
     @Test
@@ -384,6 +566,43 @@ public final class RadioManagerTest {
 
         assertWithMessage("AM Band Config of different stereo value")
                 .that(AM_BAND_CONFIG).isNotEqualTo(amBandConfigFromBuilder);
+    }
+
+    @Test
+    public void hashCode_withSameFmBandConfigs_equals() {
+        RadioManager.FmBandConfig fmBandConfigCompared = createFmBandConfig();
+
+        assertWithMessage("Hash code of the same FM Band Config")
+                .that(FM_BAND_CONFIG.hashCode()).isEqualTo(fmBandConfigCompared.hashCode());
+    }
+
+    @Test
+    public void hashCode_withSameAmBandConfigs_equals() {
+        RadioManager.AmBandConfig amBandConfigCompared = createAmBandConfig();
+
+        assertWithMessage("Hash code of the same AM Band Config")
+                .that(amBandConfigCompared.hashCode()).isEqualTo(AM_BAND_CONFIG.hashCode());
+    }
+
+    @Test
+    public void hashCode_withFmBandConfigsOfDifferentTypes_notEquals() {
+        RadioManager.FmBandConfig fmBandConfigCompared = new RadioManager.FmBandConfig(
+                new RadioManager.FmBandDescriptor(REGION, RadioManager.BAND_FM_HD, FM_LOWER_LIMIT,
+                        FM_UPPER_LIMIT, FM_SPACING, STEREO_SUPPORTED, RDS_SUPPORTED, TA_SUPPORTED,
+                        AF_SUPPORTED, EA_SUPPORTED));
+
+        assertWithMessage("Hash code of FM Band Config with different type")
+                .that(fmBandConfigCompared.hashCode()).isNotEqualTo(FM_BAND_CONFIG.hashCode());
+    }
+
+    @Test
+    public void hashCode_withAmBandConfigsOfDifferentStereoSupports_notEquals() {
+        RadioManager.AmBandConfig amBandConfigCompared = new RadioManager.AmBandConfig(
+                new RadioManager.AmBandDescriptor(REGION, RadioManager.BAND_AM, AM_LOWER_LIMIT,
+                        AM_UPPER_LIMIT, AM_SPACING, !STEREO_SUPPORTED));
+
+        assertWithMessage("Hash code of AM Band Config with different stereo support")
+                .that(amBandConfigCompared.hashCode()).isNotEqualTo(AM_BAND_CONFIG.hashCode());
     }
 
     @Test
@@ -509,6 +728,12 @@ public final class RadioManagerTest {
     }
 
     @Test
+    public void describeContents_forModuleProperties() {
+        assertWithMessage("Module properties contents")
+                .that(AMFM_PROPERTIES.describeContents()).isEqualTo(0);
+    }
+
+    @Test
     public void equals_withSameProperties_returnsTrue() {
         RadioManager.ModuleProperties propertiesCompared = createAmFmProperties();
 
@@ -527,6 +752,23 @@ public final class RadioManagerTest {
 
         assertWithMessage("Module properties of different id")
                 .that(AMFM_PROPERTIES).isNotEqualTo(propertiesDab);
+    }
+
+    @Test
+    public void hashCode_withSameModuleProperties_equals() {
+        RadioManager.ModuleProperties propertiesCompared = createAmFmProperties();
+
+        assertWithMessage("Hash code of the same module properties")
+                .that(propertiesCompared.hashCode()).isEqualTo(AMFM_PROPERTIES.hashCode());
+    }
+
+    @Test
+    public void newArray_forModulePropertiesCreator() {
+        RadioManager.ModuleProperties[] modulePropertiesArray =
+                RadioManager.ModuleProperties.CREATOR.newArray(CREATOR_ARRAY_SIZE);
+
+        assertWithMessage("Module properties array")
+                .that(modulePropertiesArray).hasLength(CREATOR_ARRAY_SIZE);
     }
 
     @Test
@@ -549,7 +791,7 @@ public final class RadioManagerTest {
 
     @Test
     public void getRelatedContent_forProgramInfo() {
-        assertWithMessage("Related contents of DAB program info")
+        assertWithMessage("DAB program info contents")
                 .that(DAB_PROGRAM_INFO.getRelatedContent())
                 .containsExactly(DAB_SID_EXT_IDENTIFIER_RELATED);
     }
@@ -624,6 +866,33 @@ public final class RadioManagerTest {
     public void getVendorInfo_forProgramInfo() {
         assertWithMessage("Vendor info of DAB program info")
                 .that(DAB_PROGRAM_INFO.getVendorInfo()).isEmpty();
+    }
+
+    @Test
+    public void describeContents_forProgramInfo() {
+        assertWithMessage("Program info contents")
+                .that(DAB_PROGRAM_INFO.describeContents()).isEqualTo(0);
+    }
+
+    @Test
+    public void newArray_forProgramInfoCreator() {
+        RadioManager.ProgramInfo[] programInfoArray =
+                RadioManager.ProgramInfo.CREATOR.newArray(CREATOR_ARRAY_SIZE);
+
+        assertWithMessage("Program infos").that(programInfoArray).hasLength(CREATOR_ARRAY_SIZE);
+    }
+
+    @Test
+    public void writeToParcel_forProgramInfo() {
+        Parcel parcel = Parcel.obtain();
+
+        DAB_PROGRAM_INFO.writeToParcel(parcel, /* flags= */ 0);
+        parcel.setDataPosition(0);
+
+        RadioManager.ProgramInfo programInfoFromParcel =
+                RadioManager.ProgramInfo.CREATOR.createFromParcel(parcel);
+        assertWithMessage("Program info created from parcel")
+                .that(programInfoFromParcel).isEqualTo(DAB_PROGRAM_INFO);
     }
 
     @Test

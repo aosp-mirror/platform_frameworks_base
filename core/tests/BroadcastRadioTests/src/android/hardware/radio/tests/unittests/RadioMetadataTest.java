@@ -20,17 +20,62 @@ import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.junit.Assert.assertThrows;
 
+import android.graphics.Bitmap;
 import android.hardware.radio.RadioMetadata;
+import android.os.Parcel;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.Set;
 
+@RunWith(MockitoJUnitRunner.class)
 public final class RadioMetadataTest {
 
+    private static final int CREATOR_ARRAY_SIZE = 3;
     private static final int INT_KEY_VALUE = 1;
+    private static final long TEST_UTC_SECOND_SINCE_EPOCH = 200;
+    private static final int TEST_TIME_ZONE_OFFSET_MINUTES = 1;
 
     private final RadioMetadata.Builder mBuilder = new RadioMetadata.Builder();
+
+    @Mock
+    private Bitmap mBitmapValue;
+
+    @Test
+    public void describeContents_forClock() {
+        RadioMetadata.Clock clock = new RadioMetadata.Clock(TEST_UTC_SECOND_SINCE_EPOCH,
+                TEST_TIME_ZONE_OFFSET_MINUTES);
+
+        assertWithMessage("Describe contents for metadata clock")
+                .that(clock.describeContents()).isEqualTo(0);
+    }
+
+    @Test
+    public void newArray_forClockCreator() {
+        RadioMetadata.Clock[] clocks = RadioMetadata.Clock.CREATOR.newArray(CREATOR_ARRAY_SIZE);
+
+        assertWithMessage("Clock array size").that(clocks.length).isEqualTo(CREATOR_ARRAY_SIZE);
+    }
+
+    @Test
+    public void writeToParcel_forClock() {
+        RadioMetadata.Clock clockExpected = new RadioMetadata.Clock(TEST_UTC_SECOND_SINCE_EPOCH,
+                TEST_TIME_ZONE_OFFSET_MINUTES);
+        Parcel parcel = Parcel.obtain();
+
+        clockExpected.writeToParcel(parcel, /* flags= */ 0);
+        parcel.setDataPosition(0);
+
+        RadioMetadata.Clock clockFromParcel = RadioMetadata.Clock.CREATOR.createFromParcel(parcel);
+        assertWithMessage("UTC second since epoch of metadata clock created from parcel")
+                .that(clockFromParcel.getUtcEpochSeconds()).isEqualTo(TEST_UTC_SECOND_SINCE_EPOCH);
+        assertWithMessage("Time zone offset minutes of metadata clock created from parcel")
+                .that(clockFromParcel.getTimezoneOffsetMinutes())
+                .isEqualTo(TEST_TIME_ZONE_OFFSET_MINUTES);
+    }
 
     @Test
     public void putString_withIllegalKey() {
@@ -129,22 +174,56 @@ public final class RadioMetadataTest {
     }
 
     @Test
+    public void getBitmap_withKeyInMetadata() {
+        String key = RadioMetadata.METADATA_KEY_ICON;
+        RadioMetadata metadata = mBuilder.putBitmap(key, mBitmapValue).build();
+
+        assertWithMessage("Bitmap value for key %s in metadata", key)
+                .that(metadata.getBitmap(key)).isEqualTo(mBitmapValue);
+    }
+
+    @Test
+    public void getBitmap_withKeyNotInMetadata() {
+        String key = RadioMetadata.METADATA_KEY_ICON;
+        RadioMetadata metadata = mBuilder.build();
+
+        assertWithMessage("Bitmap value for key %s not in metadata", key)
+                .that(metadata.getBitmap(key)).isNull();
+    }
+
+    @Test
+    public void getBitmapId_withKeyInMetadata() {
+        String key = RadioMetadata.METADATA_KEY_ART;
+        RadioMetadata metadata = mBuilder.putInt(key, INT_KEY_VALUE).build();
+
+        assertWithMessage("Bitmap id value for key %s in metadata", key)
+                .that(metadata.getBitmapId(key)).isEqualTo(INT_KEY_VALUE);
+    }
+
+    @Test
+    public void getBitmapId_withKeyNotInMetadata() {
+        String key = RadioMetadata.METADATA_KEY_ART;
+        RadioMetadata metadata = mBuilder.build();
+
+        assertWithMessage("Bitmap id value for key %s not in metadata", key)
+                .that(metadata.getBitmapId(key)).isEqualTo(0);
+    }
+
+    @Test
     public void getClock_withKeyInMetadata() {
         String key = RadioMetadata.METADATA_KEY_CLOCK;
-        long utcSecondsSinceEpochExpected = 200;
-        int timezoneOffsetMinutesExpected = 1;
         RadioMetadata metadata = mBuilder
-                .putClock(key, utcSecondsSinceEpochExpected, timezoneOffsetMinutesExpected)
+                .putClock(key, TEST_UTC_SECOND_SINCE_EPOCH, TEST_TIME_ZONE_OFFSET_MINUTES)
                 .build();
 
         RadioMetadata.Clock clockExpected = metadata.getClock(key);
 
         assertWithMessage("Number of seconds since epoch of value for key %s in metadata", key)
                 .that(clockExpected.getUtcEpochSeconds())
-                .isEqualTo(utcSecondsSinceEpochExpected);
+                .isEqualTo(TEST_UTC_SECOND_SINCE_EPOCH);
         assertWithMessage("Offset of timezone in minutes of value for key %s in metadata", key)
                 .that(clockExpected.getTimezoneOffsetMinutes())
-                .isEqualTo(timezoneOffsetMinutesExpected);
+                .isEqualTo(TEST_TIME_ZONE_OFFSET_MINUTES);
     }
 
     @Test
@@ -180,12 +259,13 @@ public final class RadioMetadataTest {
         RadioMetadata metadata = mBuilder
                 .putInt(RadioMetadata.METADATA_KEY_RDS_PI, INT_KEY_VALUE)
                 .putString(RadioMetadata.METADATA_KEY_ARTIST, "artistTest")
+                .putBitmap(RadioMetadata.METADATA_KEY_ICON, mBitmapValue)
                 .build();
 
         Set<String> metadataSet = metadata.keySet();
 
         assertWithMessage("Metadata set of non-empty metadata")
-                .that(metadataSet).containsExactly(
+                .that(metadataSet).containsExactly(RadioMetadata.METADATA_KEY_ICON,
                         RadioMetadata.METADATA_KEY_RDS_PI, RadioMetadata.METADATA_KEY_ARTIST);
     }
 
@@ -208,4 +288,46 @@ public final class RadioMetadataTest {
                 .that(key).isEqualTo(RadioMetadata.METADATA_KEY_RDS_PI);
     }
 
+    @Test
+    public void equals_forMetadataWithSameContents_returnsTrue() {
+        RadioMetadata metadata = mBuilder
+                .putInt(RadioMetadata.METADATA_KEY_RDS_PI, INT_KEY_VALUE)
+                .putString(RadioMetadata.METADATA_KEY_ARTIST, "artistTest")
+                .build();
+        RadioMetadata.Builder copyBuilder = new RadioMetadata.Builder(metadata);
+        RadioMetadata metadataCopied = copyBuilder.build();
+
+        assertWithMessage("Metadata with the same contents")
+                .that(metadataCopied).isEqualTo(metadata);
+    }
+
+    @Test
+    public void describeContents_forMetadata() {
+        RadioMetadata metadata = mBuilder.build();
+
+        assertWithMessage("Metadata contents").that(metadata.describeContents()).isEqualTo(0);
+    }
+
+    @Test
+    public void newArray_forRadioMetadataCreator() {
+        RadioMetadata[] metadataArray = RadioMetadata.CREATOR.newArray(CREATOR_ARRAY_SIZE);
+
+        assertWithMessage("Radio metadata array").that(metadataArray).hasLength(CREATOR_ARRAY_SIZE);
+    }
+
+    @Test
+    public void writeToParcel_forRadioMetadata() {
+        RadioMetadata metadataExpected = mBuilder
+                .putInt(RadioMetadata.METADATA_KEY_RDS_PI, INT_KEY_VALUE)
+                .putString(RadioMetadata.METADATA_KEY_ARTIST, "artistTest")
+                .build();
+        Parcel parcel = Parcel.obtain();
+
+        metadataExpected.writeToParcel(parcel, /* flags= */ 0);
+        parcel.setDataPosition(0);
+
+        RadioMetadata metadataFromParcel = RadioMetadata.CREATOR.createFromParcel(parcel);
+        assertWithMessage("Radio metadata created from parcel")
+                .that(metadataFromParcel).isEqualTo(metadataExpected);
+    }
 }
