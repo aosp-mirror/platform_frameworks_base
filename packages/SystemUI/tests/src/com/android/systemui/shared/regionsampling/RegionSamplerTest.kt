@@ -21,61 +21,55 @@ import org.mockito.junit.MockitoJUnit
 
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
-class RegionSamplingInstanceTest : SysuiTestCase() {
+class RegionSamplerTest : SysuiTestCase() {
 
-    @JvmField @Rule
-    val mockito = MockitoJUnit.rule()
+    @JvmField @Rule val mockito = MockitoJUnit.rule()
 
     @Mock private lateinit var sampledView: View
     @Mock private lateinit var mainExecutor: Executor
     @Mock private lateinit var bgExecutor: Executor
     @Mock private lateinit var regionSampler: RegionSamplingHelper
-    @Mock private lateinit var updateFun: RegionSamplingInstance.UpdateColorCallback
     @Mock private lateinit var pw: PrintWriter
     @Mock private lateinit var callback: RegionSamplingHelper.SamplingCallback
 
-    private lateinit var regionSamplingInstance: RegionSamplingInstance
+    private lateinit var mRegionSampler: RegionSampler
+    private var updateFun: UpdateColorCallback = {}
 
     @Before
     fun setUp() {
         whenever(sampledView.isAttachedToWindow).thenReturn(true)
-        whenever(regionSampler.callback).thenReturn(this@RegionSamplingInstanceTest.callback)
+        whenever(regionSampler.callback).thenReturn(this@RegionSamplerTest.callback)
 
-        regionSamplingInstance = object : RegionSamplingInstance(
-                sampledView,
-                mainExecutor,
-                bgExecutor,
-                true,
-                updateFun
-        ) {
-            override fun createRegionSamplingHelper(
+        mRegionSampler =
+            object : RegionSampler(sampledView, mainExecutor, bgExecutor, true, updateFun) {
+                override fun createRegionSamplingHelper(
                     sampledView: View,
                     callback: RegionSamplingHelper.SamplingCallback,
                     mainExecutor: Executor?,
                     bgExecutor: Executor?
-            ): RegionSamplingHelper {
-                return this@RegionSamplingInstanceTest.regionSampler
+                ): RegionSamplingHelper {
+                    return this@RegionSamplerTest.regionSampler
+                }
             }
-        }
     }
 
     @Test
     fun testStartRegionSampler() {
-        regionSamplingInstance.startRegionSampler()
+        mRegionSampler.startRegionSampler()
 
         verify(regionSampler).start(Rect(0, 0, 0, 0))
     }
 
     @Test
     fun testStopRegionSampler() {
-        regionSamplingInstance.stopRegionSampler()
+        mRegionSampler.stopRegionSampler()
 
         verify(regionSampler).stop()
     }
 
     @Test
     fun testDump() {
-        regionSamplingInstance.dump(pw)
+        mRegionSampler.dump(pw)
 
         verify(regionSampler).dump(pw)
     }
@@ -91,23 +85,18 @@ class RegionSamplingInstanceTest : SysuiTestCase() {
 
     @Test
     fun testFlagFalse() {
-        regionSamplingInstance = object : RegionSamplingInstance(
-                sampledView,
-                mainExecutor,
-                bgExecutor,
-                false,
-                updateFun
-        ) {
-            override fun createRegionSamplingHelper(
+        mRegionSampler =
+            object : RegionSampler(sampledView, mainExecutor, bgExecutor, false, updateFun) {
+                override fun createRegionSamplingHelper(
                     sampledView: View,
                     callback: RegionSamplingHelper.SamplingCallback,
                     mainExecutor: Executor?,
                     bgExecutor: Executor?
-            ): RegionSamplingHelper {
-                return this@RegionSamplingInstanceTest.regionSampler
+                ): RegionSamplingHelper {
+                    return this@RegionSamplerTest.regionSampler
+                }
             }
-        }
 
-        Assert.assertEquals(regionSamplingInstance.regionSampler, null)
+        Assert.assertEquals(mRegionSampler.regionSampler, null)
     }
 }

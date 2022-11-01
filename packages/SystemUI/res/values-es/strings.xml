@@ -248,7 +248,8 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Brillo"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Invertir colores"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Corrección de color"</string>
-    <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Ajustes de usuario"</string>
+    <!-- no translation found for quick_settings_more_user_settings (7634653308485206306) -->
+    <skip />
     <string name="quick_settings_done" msgid="2163641301648855793">"Hecho"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Cerrar"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Conectado"</string>
@@ -823,7 +824,7 @@
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="ELAPSED_TIME">%1$s</xliff:g> de <xliff:g id="TOTAL_TIME">%2$s</xliff:g>"</string>
     <string name="controls_media_button_play" msgid="2705068099607410633">"Reproducir"</string>
     <string name="controls_media_button_pause" msgid="8614887780950376258">"Pausar"</string>
-    <string name="controls_media_button_prev" msgid="8126822360056482970">"Pista anterior"</string>
+    <string name="controls_media_button_prev" msgid="8126822360056482970">"Canción anterior"</string>
     <string name="controls_media_button_next" msgid="6662636627525947610">"Siguiente pista"</string>
     <string name="controls_media_button_connecting" msgid="3138354625847598095">"Conectando"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"Reproducir"</string>

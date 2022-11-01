@@ -19,7 +19,9 @@ package com.android.systemui.clipboardoverlay;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_DISMISS_TAPPED;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_SHARE_TAPPED;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_SWIPE_DISMISSED;
+import static com.android.systemui.flags.Flags.CLIPBOARD_REMOTE_BEHAVIOR;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -37,6 +39,7 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastSender;
+import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.screenshot.TimeoutHandler;
 
 import org.junit.After;
@@ -62,7 +65,10 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
     @Mock
     private TimeoutHandler mTimeoutHandler;
     @Mock
+    private ClipboardOverlayUtils mClipboardUtils;
+    @Mock
     private UiEventLogger mUiEventLogger;
+    private FakeFeatureFlags mFeatureFlags = new FakeFeatureFlags();
 
     @Mock
     private Animator mAnimator;
@@ -72,7 +78,6 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
     @Captor
     private ArgumentCaptor<ClipboardOverlayView.ClipboardOverlayCallbacks> mOverlayCallbacksCaptor;
     private ClipboardOverlayView.ClipboardOverlayCallbacks mCallbacks;
-
 
     @Before
     public void setup() {
@@ -84,6 +89,8 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
         mSampleClipData = new ClipData("Test", new String[]{"text/plain"},
                 new ClipData.Item("Test Item"));
 
+        mFeatureFlags.set(CLIPBOARD_REMOTE_BEHAVIOR, false);
+
         mOverlayController = new ClipboardOverlayController(
                 mContext,
                 mClipboardOverlayView,
@@ -91,6 +98,8 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
                 getFakeBroadcastDispatcher(),
                 mBroadcastSender,
                 mTimeoutHandler,
+                mFeatureFlags,
+                mClipboardUtils,
                 mUiEventLogger);
         verify(mClipboardOverlayView).setCallbacks(mOverlayCallbacksCaptor.capture());
         mCallbacks = mOverlayCallbacksCaptor.getValue();
@@ -185,5 +194,34 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
 
         verify(mUiEventLogger, times(1)).log(CLIPBOARD_OVERLAY_SWIPE_DISMISSED);
         verify(mUiEventLogger, never()).log(CLIPBOARD_OVERLAY_DISMISS_TAPPED);
+    }
+
+    @Test
+    public void test_remoteCopy_withFlagOn() {
+        mFeatureFlags.set(CLIPBOARD_REMOTE_BEHAVIOR, true);
+        when(mClipboardUtils.isRemoteCopy(any(), any(), any())).thenReturn(true);
+
+        mOverlayController.setClipData(mSampleClipData, "");
+
+        verify(mTimeoutHandler, never()).resetTimeout();
+    }
+
+    @Test
+    public void test_remoteCopy_withFlagOff() {
+        when(mClipboardUtils.isRemoteCopy(any(), any(), any())).thenReturn(true);
+
+        mOverlayController.setClipData(mSampleClipData, "");
+
+        verify(mTimeoutHandler).resetTimeout();
+    }
+
+    @Test
+    public void test_nonRemoteCopy() {
+        mFeatureFlags.set(CLIPBOARD_REMOTE_BEHAVIOR, true);
+        when(mClipboardUtils.isRemoteCopy(any(), any(), any())).thenReturn(false);
+
+        mOverlayController.setClipData(mSampleClipData, "");
+
+        verify(mTimeoutHandler).resetTimeout();
     }
 }

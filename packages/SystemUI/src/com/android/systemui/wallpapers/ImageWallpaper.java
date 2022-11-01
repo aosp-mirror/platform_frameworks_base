@@ -31,6 +31,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.SystemClock;
 import android.os.Trace;
+import android.os.UserHandle;
 import android.service.wallpaper.WallpaperService;
 import android.util.ArraySet;
 import android.util.Log;
@@ -598,7 +599,6 @@ public class ImageWallpaper extends WallpaperService {
             getDisplayContext().getSystemService(DisplayManager.class)
                     .unregisterDisplayListener(this);
             mWallpaperLocalColorExtractor.cleanUp();
-            unloadBitmap();
         }
 
         @Override
@@ -676,9 +676,14 @@ public class ImageWallpaper extends WallpaperService {
         void drawFrameOnCanvas(Bitmap bitmap) {
             Trace.beginSection("ImageWallpaper.CanvasEngine#drawFrame");
             Surface surface = mSurfaceHolder.getSurface();
-            Canvas canvas = mWideColorGamut
-                    ? surface.lockHardwareWideColorGamutCanvas()
-                    : surface.lockHardwareCanvas();
+            Canvas canvas = null;
+            try {
+                canvas = mWideColorGamut
+                        ? surface.lockHardwareWideColorGamutCanvas()
+                        : surface.lockHardwareCanvas();
+            } catch (IllegalStateException e) {
+                Log.w(TAG, "Unable to lock canvas", e);
+            }
             if (canvas != null) {
                 Rect dest = mSurfaceHolder.getSurfaceFrame();
                 try {
@@ -709,17 +714,6 @@ public class ImageWallpaper extends WallpaperService {
             }
         }
 
-        private void unloadBitmap() {
-            mBackgroundExecutor.execute(this::unloadBitmapSynchronized);
-        }
-
-        private void unloadBitmapSynchronized() {
-            synchronized (mLock) {
-                mBitmapUsages = 0;
-                unloadBitmapInternal();
-            }
-        }
-
         private void unloadBitmapInternal() {
             Trace.beginSection("ImageWallpaper.CanvasEngine#unloadBitmap");
             if (mBitmap != null) {
@@ -738,7 +732,7 @@ public class ImageWallpaper extends WallpaperService {
             boolean loadSuccess = false;
             Bitmap bitmap;
             try {
-                bitmap = mWallpaperManager.getBitmap(false);
+                bitmap = mWallpaperManager.getBitmapAsUser(UserHandle.USER_CURRENT, false);
                 if (bitmap != null
                         && bitmap.getByteCount() > RecordingCanvas.MAX_BITMAP_SIZE) {
                     throw new RuntimeException("Wallpaper is too large to draw!");
@@ -757,7 +751,7 @@ public class ImageWallpaper extends WallpaperService {
                 }
 
                 try {
-                    bitmap = mWallpaperManager.getBitmap(false);
+                    bitmap = mWallpaperManager.getBitmapAsUser(UserHandle.USER_CURRENT, false);
                 } catch (RuntimeException | OutOfMemoryError e) {
                     Log.w(TAG, "Unable to load default wallpaper!", e);
                     bitmap = null;
@@ -770,9 +764,6 @@ public class ImageWallpaper extends WallpaperService {
                 Log.e(TAG, "Attempt to load a recycled bitmap");
             } else if (mBitmap == bitmap) {
                 Log.e(TAG, "Loaded a bitmap that was already loaded");
-            } else if (bitmap.getWidth() < 1 || bitmap.getHeight() < 1) {
-                Log.e(TAG, "Attempt to load an invalid wallpaper of length "
-                        + bitmap.getWidth() + "x" + bitmap.getHeight());
             } else {
                 // at this point, loading is done correctly.
                 loadSuccess = true;

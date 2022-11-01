@@ -78,12 +78,9 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"Pärast seadme taaskäivitamist tuleb sisestada muster"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"Pärast seadme taaskäivitamist tuleb sisestada PIN-kood"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"Pärast seadme taaskäivitamist tuleb sisestada parool"</string>
-    <!-- no translation found for kg_prompt_reason_timeout_pattern (5514969660010197363) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_timeout_pin (4227962059353859376) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_timeout_password (8810879144143933690) -->
-    <skip />
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Kasutage tugevama turvalisuse huvides hoopis mustrit"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Kasutage tugevama turvalisuse huvides hoopis PIN-koodi"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Kasutage tugevama turvalisuse huvides hoopis parooli"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Administraator lukustas seadme"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Seade lukustati käsitsi"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Ei tuvastatud"</string>
@@ -93,6 +90,5 @@
     <string name="clock_title_default" msgid="6342735240617459864">"Vaikenumbrilaud"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Mull"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Analoog"</string>
-    <!-- no translation found for keyguard_unlock_to_continue (7509503484250597743) -->
-    <skip />
+    <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Jätkamiseks avage oma seade"</string>
 </resources>

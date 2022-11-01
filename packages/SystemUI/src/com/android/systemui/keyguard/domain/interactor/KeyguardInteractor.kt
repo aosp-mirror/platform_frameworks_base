@@ -19,6 +19,7 @@ package com.android.systemui.keyguard.domain.interactor
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
+import com.android.systemui.keyguard.shared.model.WakefulnessModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 
@@ -40,6 +41,8 @@ constructor(
     val isDozing: Flow<Boolean> = repository.isDozing
     /** Whether the keyguard is showing to not. */
     val isKeyguardShowing: Flow<Boolean> = repository.isKeyguardShowing
+    /** The device wake/sleep state */
+    val wakefulnessState: Flow<WakefulnessModel> = repository.wakefulnessState
 
     fun isKeyguardShowing(): Boolean {
         return repository.isKeyguardShowing()

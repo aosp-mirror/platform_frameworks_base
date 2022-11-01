@@ -19,6 +19,7 @@ package com.android.systemui.keyguard.data.repository
 
 import com.android.systemui.common.shared.model.Position
 import com.android.systemui.keyguard.shared.model.StatusBarState
+import com.android.systemui.keyguard.shared.model.WakefulnessModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -47,6 +48,9 @@ class FakeKeyguardRepository : KeyguardRepository {
 
     private val _statusBarState = MutableStateFlow(StatusBarState.SHADE)
     override val statusBarState: Flow<StatusBarState> = _statusBarState
+
+    private val _wakefulnessState = MutableStateFlow(WakefulnessModel.ASLEEP)
+    override val wakefulnessState: Flow<WakefulnessModel> = _wakefulnessState
 
     override fun isKeyguardShowing(): Boolean {
         return _isKeyguardShowing.value

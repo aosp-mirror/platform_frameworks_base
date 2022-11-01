@@ -122,7 +122,8 @@ object Flags {
      * Migration from the legacy isDozing/dozeAmount paths to the new KeyguardTransitionRepository
      * will occur in stages. This is one stage of many to come.
      */
-    @JvmField val DOZING_MIGRATION_1 = UnreleasedFlag(213, teamfood = true)
+    // TODO(b/255607168): Tracking Bug
+    @JvmField val DOZING_MIGRATION_1 = UnreleasedFlag(213)
 
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
@@ -222,7 +223,7 @@ object Flags {
     @JvmField val DREAM_MEDIA_TAP_TO_OPEN = UnreleasedFlag(906)
 
     // TODO(b/254513168): Tracking Bug
-    val UMO_SURFACE_RIPPLE = UnreleasedFlag(907)
+    @JvmField val UMO_SURFACE_RIPPLE = UnreleasedFlag(907)
 
     // 1000 - dock
     val SIMULATE_DOCK_THROUGH_CHARGING = ReleasedFlag(1000)
@@ -315,6 +316,7 @@ object Flags {
 
     // 1700 - clipboard
     @JvmField val CLIPBOARD_OVERLAY_REFACTOR = UnreleasedFlag(1700)
+    @JvmField val CLIPBOARD_REMOTE_BEHAVIOR = UnreleasedFlag(1701)
 
     // 1800 - shade container
     @JvmField val LEAVE_SHADE_OPEN_FOR_BUGREPORT = UnreleasedFlag(1800, teamfood = true)
