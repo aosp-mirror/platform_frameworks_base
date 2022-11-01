@@ -3438,8 +3438,17 @@ public final class NotificationPanelViewController {
                 positionClockAndNotifications();
             }
         }
-        if (mQsExpandImmediate || (mQsExpanded && !mQsTracking && mQsExpansionAnimator == null
-                && !mQsExpansionFromOverscroll)) {
+        // Below is true when QS are expanded and we swipe up from the same bottom of panel to
+        // close the whole shade with one motion. Also this will be always true when closing
+        // split shade as there QS are always expanded so every collapsing motion is motion from
+        // expanded QS to closed panel
+        boolean collapsingShadeFromExpandedQs = mQsExpanded && !mQsTracking
+                && mQsExpansionAnimator == null && !mQsExpansionFromOverscroll;
+        boolean goingBetweenClosedShadeAndExpandedQs =
+                mQsExpandImmediate || collapsingShadeFromExpandedQs;
+        // we don't want to update QS expansion when HUN is visible because then the whole shade is
+        // initially hidden, even though it has non-zero height
+        if (goingBetweenClosedShadeAndExpandedQs && !mHeadsUpManager.isTrackingHeadsUp()) {
             float qsExpansionFraction;
             if (mSplitShadeEnabled) {
                 qsExpansionFraction = 1;
