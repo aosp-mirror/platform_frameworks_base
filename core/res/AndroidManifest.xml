@@ -4133,7 +4133,8 @@
         android:protectionLevel="signature" />
 
     <!-- Allows access to Test APIs defined in {@link android.view.inputmethod.InputMethodManager}.
-         @hide -->
+         @hide
+         @TestApi -->
     <permission android:name="android.permission.TEST_INPUT_METHOD"
         android:protectionLevel="signature" />
 
