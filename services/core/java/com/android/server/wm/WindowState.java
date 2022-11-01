@@ -5713,6 +5713,15 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return super.getAnimationLeashParent();
     }
 
+    @Override
+    public void onAnimationLeashCreated(Transaction t, SurfaceControl leash) {
+        super.onAnimationLeashCreated(t, leash);
+        if (isStartingWindowAssociatedToTask()) {
+            // Make sure the animation leash is still on top of the task.
+            t.setLayer(leash, Integer.MAX_VALUE);
+        }
+    }
+
     // TODO(b/70040778): We should aim to eliminate the last user of TYPE_APPLICATION_MEDIA
     // then we can drop all negative layering on the windowing side and simply inherit
     // the default implementation here.
