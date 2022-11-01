@@ -89,6 +89,7 @@ import com.android.settingslib.Utils;
 import com.android.systemui.Gefingerpoken;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
+import com.android.systemui.classifier.FalsingA11yDelegate;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.policy.BaseUserSwitcherAdapter;
@@ -136,6 +137,7 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
     private GlobalSettings mGlobalSettings;
     private FalsingManager mFalsingManager;
     private UserSwitcherController mUserSwitcherController;
+    private FalsingA11yDelegate mFalsingA11yDelegate;
     private AlertDialog mAlertDialog;
     private boolean mSwipeUpToRetry;
 
@@ -318,7 +320,8 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
 
     void initMode(@Mode int mode, GlobalSettings globalSettings, FalsingManager falsingManager,
             UserSwitcherController userSwitcherController,
-            UserSwitcherViewMode.UserSwitcherCallback userSwitcherCallback) {
+            UserSwitcherViewMode.UserSwitcherCallback userSwitcherCallback,
+            FalsingA11yDelegate falsingA11yDelegate) {
         if (mCurrentMode == mode) return;
         Log.i(TAG, "Switching mode from " + modeToString(mCurrentMode) + " to "
                 + modeToString(mode));
@@ -337,6 +340,7 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
         }
         mGlobalSettings = globalSettings;
         mFalsingManager = falsingManager;
+        mFalsingA11yDelegate = falsingA11yDelegate;
         mUserSwitcherController = userSwitcherController;
         setupViewMode();
     }
@@ -361,7 +365,7 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
         }
 
         mViewMode.init(this, mGlobalSettings, mSecurityViewFlipper, mFalsingManager,
-                mUserSwitcherController);
+                mUserSwitcherController, mFalsingA11yDelegate);
     }
 
     @Mode int getMode() {
@@ -723,7 +727,8 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
         default void init(@NonNull ConstraintLayout v, @NonNull GlobalSettings globalSettings,
                 @NonNull KeyguardSecurityViewFlipper viewFlipper,
                 @NonNull FalsingManager falsingManager,
-                @NonNull UserSwitcherController userSwitcherController) {};
+                @NonNull UserSwitcherController userSwitcherController,
+                @NonNull FalsingA11yDelegate falsingA11yDelegate) {};
 
         /** Reinitialize the location */
         default void updateSecurityViewLocation() {};
@@ -828,7 +833,8 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
         public void init(@NonNull ConstraintLayout v, @NonNull GlobalSettings globalSettings,
                 @NonNull KeyguardSecurityViewFlipper viewFlipper,
                 @NonNull FalsingManager falsingManager,
-                @NonNull UserSwitcherController userSwitcherController) {
+                @NonNull UserSwitcherController userSwitcherController,
+                @NonNull FalsingA11yDelegate falsingA11yDelegate) {
             mView = v;
             mViewFlipper = viewFlipper;
 
@@ -865,6 +871,7 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
                 this::setupUserSwitcher;
 
         private UserSwitcherCallback mUserSwitcherCallback;
+        private FalsingA11yDelegate mFalsingA11yDelegate;
 
         UserSwitcherViewMode(UserSwitcherCallback userSwitcherCallback) {
             mUserSwitcherCallback = userSwitcherCallback;
@@ -874,13 +881,15 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
         public void init(@NonNull ConstraintLayout v, @NonNull GlobalSettings globalSettings,
                 @NonNull KeyguardSecurityViewFlipper viewFlipper,
                 @NonNull FalsingManager falsingManager,
-                @NonNull UserSwitcherController userSwitcherController) {
+                @NonNull UserSwitcherController userSwitcherController,
+                @NonNull FalsingA11yDelegate falsingA11yDelegate) {
             init(v, viewFlipper, globalSettings, /* leftAlignedByDefault= */false);
             mView = v;
             mViewFlipper = viewFlipper;
             mFalsingManager = falsingManager;
             mUserSwitcherController = userSwitcherController;
             mResources = v.getContext().getResources();
+            mFalsingA11yDelegate = falsingA11yDelegate;
 
             if (mUserSwitcherViewGroup == null) {
                 LayoutInflater.from(v.getContext()).inflate(
@@ -978,6 +987,7 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
             mUserSwitcher.setText(currentUserName);
 
             KeyguardUserSwitcherAnchor anchor = mView.findViewById(R.id.user_switcher_anchor);
+            anchor.setAccessibilityDelegate(mFalsingA11yDelegate);
 
             BaseUserSwitcherAdapter adapter = new BaseUserSwitcherAdapter(mUserSwitcherController) {
                 @Override
@@ -1048,7 +1058,7 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
 
             anchor.setOnClickListener((v) -> {
                 if (mFalsingManager.isFalseTap(LOW_PENALTY)) return;
-                mPopup = new KeyguardUserSwitcherPopupMenu(v.getContext(), mFalsingManager);
+                mPopup = new KeyguardUserSwitcherPopupMenu(mView.getContext(), mFalsingManager);
                 mPopup.setAnchorView(anchor);
                 mPopup.setAdapter(adapter);
                 mPopup.setOnItemClickListener((parent, view, pos, id) -> {
@@ -1137,7 +1147,8 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
         public void init(@NonNull ConstraintLayout v, @NonNull GlobalSettings globalSettings,
                 @NonNull KeyguardSecurityViewFlipper viewFlipper,
                 @NonNull FalsingManager falsingManager,
-                @NonNull UserSwitcherController userSwitcherController) {
+                @NonNull UserSwitcherController userSwitcherController,
+                @NonNull FalsingA11yDelegate falsingA11yDelegate) {
             init(v, viewFlipper, globalSettings, /* leftAlignedByDefault= */true);
             mView = v;
             mViewFlipper = viewFlipper;

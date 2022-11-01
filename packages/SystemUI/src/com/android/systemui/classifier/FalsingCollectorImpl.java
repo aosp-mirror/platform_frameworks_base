@@ -375,6 +375,15 @@ class FalsingCollectorImpl implements FalsingCollector {
         mHistoryTracker.addResults(Collections.singleton(result), mSystemClock.uptimeMillis());
     }
 
+    @Override
+    public void onA11yAction() {
+        if (mPendingDownEvent != null) {
+            mPendingDownEvent.recycle();
+            mPendingDownEvent = null;
+        }
+        mFalsingDataProvider.onA11yAction();
+    }
+
     private boolean shouldSessionBeActive() {
         return mScreenOn && (mState == StatusBarState.KEYGUARD) && !mShowingAod;
     }
