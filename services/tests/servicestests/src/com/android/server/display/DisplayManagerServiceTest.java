@@ -407,6 +407,75 @@ public class DisplayManagerServiceTest {
         assertTrue((ddi.flags & DisplayDeviceInfo.FLAG_ROTATES_WITH_CONTENT) != 0);
     }
 
+    @Test
+    public void testCreateVirtualDisplayOwnFocus() {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mBasicInjector);
+        registerDefaultDisplays(displayManager);
+
+        // This is effectively the DisplayManager service published to ServiceManager.
+        DisplayManagerService.BinderService bs = displayManager.new BinderService();
+
+        String uniqueId = "uniqueId --- Own Focus Test";
+        int width = 600;
+        int height = 800;
+        int dpi = 320;
+        int flags = DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_FOCUS
+                | DisplayManager.VIRTUAL_DISPLAY_FLAG_TRUSTED;
+
+        when(mContext.checkCallingPermission(ADD_TRUSTED_DISPLAY)).thenReturn(
+                PackageManager.PERMISSION_GRANTED);
+        when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
+        final VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(
+                VIRTUAL_DISPLAY_NAME, width, height, dpi);
+        builder.setFlags(flags);
+        builder.setUniqueId(uniqueId);
+        int displayId = bs.createVirtualDisplay(builder.build(), /* callback= */ mMockAppToken,
+                /* projection= */ null, PACKAGE_NAME);
+
+        displayManager.performTraversalInternal(mock(SurfaceControl.Transaction.class));
+
+        // flush the handler
+        displayManager.getDisplayHandler().runWithScissors(() -> {}, /* now= */ 0);
+
+        DisplayDeviceInfo ddi = displayManager.getDisplayDeviceInfoInternal(displayId);
+        assertNotNull(ddi);
+        assertTrue((ddi.flags & DisplayDeviceInfo.FLAG_OWN_FOCUS) != 0);
+    }
+
+    @Test
+    public void testCreateVirtualDisplayOwnFocus_nonTrustedDisplay() {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mBasicInjector);
+        registerDefaultDisplays(displayManager);
+
+        // This is effectively the DisplayManager service published to ServiceManager.
+        DisplayManagerService.BinderService bs = displayManager.new BinderService();
+
+        String uniqueId = "uniqueId --- Own Focus Test -- nonTrustedDisplay";
+        int width = 600;
+        int height = 800;
+        int dpi = 320;
+        int flags = DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_FOCUS;
+
+        when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
+        final VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(
+                VIRTUAL_DISPLAY_NAME, width, height, dpi);
+        builder.setFlags(flags);
+        builder.setUniqueId(uniqueId);
+        int displayId = bs.createVirtualDisplay(builder.build(), /* callback= */ mMockAppToken,
+                /* projection= */ null, PACKAGE_NAME);
+
+        displayManager.performTraversalInternal(mock(SurfaceControl.Transaction.class));
+
+        // flush the handler
+        displayManager.getDisplayHandler().runWithScissors(() -> {}, /* now= */ 0);
+
+        DisplayDeviceInfo ddi = displayManager.getDisplayDeviceInfoInternal(displayId);
+        assertNotNull(ddi);
+        assertTrue((ddi.flags & DisplayDeviceInfo.FLAG_OWN_FOCUS) == 0);
+    }
+
     /**
      * Tests that the virtual display is created along-side the default display.
      */

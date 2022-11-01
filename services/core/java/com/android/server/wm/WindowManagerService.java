@@ -3826,6 +3826,11 @@ public class WindowManagerService extends IWindowManager.Stub
                     || displayContent.isInTouchMode() == inTouch)) {
                 return;
             }
+            final boolean displayHasOwnTouchMode =
+                    displayContent != null && displayContent.hasOwnFocus();
+            if (displayHasOwnTouchMode && displayContent.isInTouchMode() == inTouch) {
+                return;
+            }
             final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();
             final boolean hasPermission =
@@ -3834,17 +3839,17 @@ public class WindowManagerService extends IWindowManager.Stub
                             /* printlog= */ false);
             final long token = Binder.clearCallingIdentity();
             try {
-                // If perDisplayFocusEnabled is set, then just update the display pointed by
-                // displayId
-                if (perDisplayFocusEnabled) {
+                // If perDisplayFocusEnabled is set or the display maintains its own touch mode,
+                // then just update the display pointed by displayId
+                if (perDisplayFocusEnabled || displayHasOwnTouchMode) {
                     if (mInputManager.setInTouchMode(inTouch, pid, uid, hasPermission, displayId)) {
                         displayContent.setInTouchMode(inTouch);
                     }
-                } else {  // Otherwise update all displays
+                } else {  // Otherwise update all displays that do not maintain their own touch mode
                     final int displayCount = mRoot.mChildren.size();
                     for (int i = 0; i < displayCount; ++i) {
                         DisplayContent dc = mRoot.mChildren.get(i);
-                        if (dc.isInTouchMode() == inTouch) {
+                        if (dc.isInTouchMode() == inTouch || dc.hasOwnFocus()) {
                             continue;
                         }
                         if (mInputManager.setInTouchMode(inTouch, pid, uid, hasPermission,

@@ -137,7 +137,8 @@ public final class DisplayManager {
             VIRTUAL_DISPLAY_FLAG_TRUSTED,
             VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP,
             VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED,
-            VIRTUAL_DISPLAY_FLAG_TOUCH_FEEDBACK_DISABLED
+            VIRTUAL_DISPLAY_FLAG_TOUCH_FEEDBACK_DISABLED,
+            VIRTUAL_DISPLAY_FLAG_OWN_FOCUS,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface VirtualDisplayFlag {}
@@ -402,6 +403,22 @@ public final class DisplayManager {
      * @hide
      */
     public static final int VIRTUAL_DISPLAY_FLAG_TOUCH_FEEDBACK_DISABLED = 1 << 13;
+
+    /**
+     * Virtual display flags: Indicates that the display maintains its own focus and touch mode.
+     *
+     * This flag is similar to {@link com.android.internal.R.bool.config_perDisplayFocusEnabled} in
+     * behavior, but only applies to the specific display instead of system-wide to all displays.
+     *
+     * Note: The display must be trusted in order to have its own focus.
+     *
+     * @see #createVirtualDisplay
+     * @see #VIRTUAL_DISPLAY_FLAG_TRUSTED
+     * @hide
+     */
+    @TestApi
+    public static final int VIRTUAL_DISPLAY_FLAG_OWN_FOCUS = 1 << 14;
+
 
     /** @hide */
     @IntDef(prefix = {"MATCH_CONTENT_FRAMERATE_"}, value = {
