@@ -69,6 +69,7 @@ public class RequestInfo implements Parcelable {
 
     private final boolean mIsFirstUsage;
 
+    // TODO: change to package name
     @NonNull
     private final String mAppDisplayName;
 

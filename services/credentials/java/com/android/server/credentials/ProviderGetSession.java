@@ -20,7 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.slice.Slice;
 import android.credentials.ui.Entry;
-import android.credentials.ui.ProviderData;
+import android.credentials.ui.GetCredentialProviderData;
 import android.service.credentials.Action;
 import android.service.credentials.CredentialEntry;
 import android.service.credentials.CredentialProviderInfo;
@@ -117,7 +117,7 @@ public final class ProviderGetSession extends ProviderSession<GetCredentialsResp
     }
 
     @Override
-    protected final ProviderData prepareUiData() throws IllegalArgumentException {
+    protected GetCredentialProviderData prepareUiData() throws IllegalArgumentException {
         Log.i(TAG, "In prepareUiData");
         if (!ProviderSession.isCompletionStatus(getStatus())) {
             Log.i(TAG, "In prepareUiData not complete");
@@ -147,7 +147,7 @@ public final class ProviderGetSession extends ProviderSession<GetCredentialsResp
      * To be called by {@link ProviderGetSession} when the UI is to be invoked.
      */
     @Nullable
-    private ProviderData prepareUiProviderDataWithCredentials(@NonNull
+    private GetCredentialProviderData prepareUiProviderDataWithCredentials(@NonNull
             CredentialsDisplayContent content) {
         Log.i(TAG, "in prepareUiProviderData");
         List<Entry> credentialEntries = new ArrayList<>();
@@ -173,15 +173,10 @@ public final class ProviderGetSession extends ProviderSession<GetCredentialsResp
                     action.getSlice()));
         }
 
-        // TODO : Set the correct last used time
-        return new ProviderData.Builder(mComponentName.flattenToString(),
-                mProviderInfo.getServiceLabel() == null ? "" :
-                        mProviderInfo.getServiceLabel().toString(),
-                /*icon=*/null)
+        return new GetCredentialProviderData.Builder(mComponentName.flattenToString())
                 .setCredentialEntries(credentialEntries)
                 .setActionChips(actionChips)
                 .setAuthenticationEntry(authenticationEntry)
-                .setLastUsedTimeMillis(0)
                 .build();
     }
 
@@ -189,7 +184,7 @@ public final class ProviderGetSession extends ProviderSession<GetCredentialsResp
      * To be called by {@link ProviderGetSession} when the UI is to be invoked.
      */
     @Nullable
-    private ProviderData prepareUiProviderDataWithAuthentication(@NonNull
+    private GetCredentialProviderData prepareUiProviderDataWithAuthentication(@NonNull
             Action authenticationEntry) {
         // TODO : Implement authentication flow
         return null;

@@ -23,6 +23,8 @@ import android.content.Intent
 import android.credentials.CreateCredentialRequest
 import android.credentials.ui.Constants
 import android.credentials.ui.Entry
+import android.credentials.ui.CreateCredentialProviderData
+import android.credentials.ui.GetCredentialProviderData
 import android.credentials.ui.ProviderData
 import android.credentials.ui.RequestInfo
 import android.credentials.ui.BaseDialogResult
@@ -54,10 +56,22 @@ class CredentialManagerRepo(
       RequestInfo::class.java
     ) ?: testRequestInfo()
 
-    providerList = intent.extras?.getParcelableArrayList(
-      ProviderData.EXTRA_PROVIDER_DATA_LIST,
-      ProviderData::class.java
-    ) ?: testProviderList()
+    providerList = when (requestInfo.type) {
+      RequestInfo.TYPE_CREATE ->
+        intent.extras?.getParcelableArrayList(
+                ProviderData.EXTRA_ENABLED_PROVIDER_DATA_LIST,
+                CreateCredentialProviderData::class.java
+        ) ?: testCreateCredentialProviderList()
+      RequestInfo.TYPE_GET ->
+        intent.extras?.getParcelableArrayList(
+          ProviderData.EXTRA_ENABLED_PROVIDER_DATA_LIST,
+          GetCredentialProviderData::class.java
+        ) ?: testGetCredentialProviderList()
+      else -> {
+        // TODO: fail gracefully
+        throw IllegalStateException("Unrecognized request type: ${requestInfo.type}")
+      }
+    }
 
     resultReceiver = intent.getParcelableExtra(
       Constants.EXTRA_RESULT_RECEIVER,
@@ -84,7 +98,9 @@ class CredentialManagerRepo(
   }
 
   fun getCredentialInitialUiState(): GetCredentialUiState {
-    val providerList = GetFlowUtils.toProviderList(providerList, context)
+    val providerList = GetFlowUtils.toProviderList(
+      // TODO: handle runtime cast error
+      providerList as List<GetCredentialProviderData>, context)
     // TODO: covert from real requestInfo
     val requestDisplayInfo = com.android.credentialmanager.getflow.RequestDisplayInfo(
       "Elisa Beckett",
@@ -100,7 +116,9 @@ class CredentialManagerRepo(
   }
 
   fun createPasskeyInitialUiState(): CreatePasskeyUiState {
-    val providerList = CreateFlowUtils.toProviderList(providerList, context)
+    val providerList = CreateFlowUtils.toProviderList(
+      // Handle runtime cast error
+      providerList as List<CreateCredentialProviderData>, context)
     // TODO: covert from real requestInfo
     val requestDisplayInfo = RequestDisplayInfo(
       "Elisa Beckett",
@@ -130,32 +148,29 @@ class CredentialManagerRepo(
   }
 
   // TODO: below are prototype functionalities. To be removed for productionization.
-  private fun testProviderList(): List<ProviderData> {
+  private fun testCreateCredentialProviderList(): List<CreateCredentialProviderData> {
     return listOf(
-      ProviderData.Builder(
-        "com.google",
-        "Google Password Manager",
-        Icon.createWithResource(context, R.drawable.ic_launcher_foreground))
-        .setCredentialEntries(
+      CreateCredentialProviderData.Builder("com.google/com.google.CredentialManagerService")
+        .setSaveEntries(
           listOf<Entry>(
             newEntry("key1", "subkey-1", "elisa.beckett@gmail.com",
               "Elisa Backett", "20 passwords and 7 passkeys saved"),
             newEntry("key1", "subkey-2", "elisa.work@google.com",
               "Elisa Backett Work", "20 passwords and 7 passkeys saved"),
           )
-        ).setActionChips(
+        )
+        .setActionChips(
           listOf<Entry>(
             newEntry("key2", "subkey-1", "Go to Settings", "",
                      "20 passwords and 7 passkeys saved"),
             newEntry("key2", "subkey-2", "Switch Account", "",
                      "20 passwords and 7 passkeys saved"),
           ),
-        ).build(),
-      ProviderData.Builder(
-        "com.dashlane",
-        "Dashlane",
-        Icon.createWithResource(context, R.drawable.ic_launcher_foreground))
-        .setCredentialEntries(
+        )
+        .setIsDefaultProvider(true)
+        .build(),
+      CreateCredentialProviderData.Builder("com.dashlane/com.dashlane.CredentialManagerService")
+        .setSaveEntries(
           listOf<Entry>(
             newEntry("key1", "subkey-3", "elisa.beckett@dashlane.com",
               "Elisa Backett", "20 passwords and 7 passkeys saved"),
@@ -167,6 +182,42 @@ class CredentialManagerRepo(
             newEntry("key2", "subkey-3", "Manage Accounts",
               "Manage your accounts in the dashlane app",
                      "20 passwords and 7 passkeys saved"),
+          ),
+        ).build(),
+    )
+  }
+
+  private fun testGetCredentialProviderList(): List<GetCredentialProviderData> {
+    return listOf(
+      GetCredentialProviderData.Builder("com.google/com.google.CredentialManagerService")
+        .setCredentialEntries(
+          listOf<Entry>(
+            newEntry("key1", "subkey-1", "elisa.beckett@gmail.com",
+              "Elisa Backett", "20 passwords and 7 passkeys saved"),
+            newEntry("key1", "subkey-2", "elisa.work@google.com",
+              "Elisa Backett Work", "20 passwords and 7 passkeys saved"),
+          )
+        ).setActionChips(
+          listOf<Entry>(
+            newEntry("key2", "subkey-1", "Go to Settings", "",
+              "20 passwords and 7 passkeys saved"),
+            newEntry("key2", "subkey-2", "Switch Account", "",
+              "20 passwords and 7 passkeys saved"),
+          ),
+        ).build(),
+      GetCredentialProviderData.Builder("com.dashlane/com.dashlane.CredentialManagerService")
+        .setCredentialEntries(
+          listOf<Entry>(
+            newEntry("key1", "subkey-3", "elisa.beckett@dashlane.com",
+              "Elisa Backett", "20 passwords and 7 passkeys saved"),
+            newEntry("key1", "subkey-4", "elisa.work@dashlane.com",
+              "Elisa Backett Work", "20 passwords and 7 passkeys saved"),
+          )
+        ).setActionChips(
+          listOf<Entry>(
+            newEntry("key2", "subkey-3", "Manage Accounts",
+              "Manage your accounts in the dashlane app",
+              "20 passwords and 7 passkeys saved"),
           ),
         ).build(),
     )
