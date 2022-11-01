@@ -67,6 +67,7 @@ final class ReconcilePackageUtils {
                 new ArrayMap<>();
 
         for (InstallRequest installRequest :  installRequests) {
+            installRequest.onReconcileStarted();
             final String installPackageName = installRequest.getParsedPackage().getPackageName();
 
             // add / replace existing with incoming packages
@@ -90,7 +91,7 @@ final class ReconcilePackageUtils {
 
             final DeletePackageAction deletePackageAction;
             // we only want to try to delete for non system apps
-            if (installRequest.isReplace() && !installRequest.isSystem()) {
+            if (installRequest.isInstallReplace() && !installRequest.isInstallSystem()) {
                 final boolean killApp = (installRequest.getScanFlags() & SCAN_DONT_KILL_APP) == 0;
                 final int deleteFlags = PackageManager.DELETE_KEEP_DATA
                         | (killApp ? 0 : PackageManager.DELETE_DONT_KILL_APP);
@@ -284,6 +285,10 @@ final class ReconcilePackageUtils {
             } catch (PackageManagerException e) {
                 throw new ReconcileFailure(e.error, e.getMessage());
             }
+        }
+
+        for (InstallRequest installRequest : installRequests) {
+            installRequest.onReconcileFinished();
         }
 
         return result;
