@@ -384,6 +384,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     protected Handler getHandler() {
         return mHandler;
     }
+
     private final Handler mHandler;
 
     private final IBiometricEnabledOnKeyguardCallback mBiometricEnabledCallback =
@@ -708,6 +709,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
     /**
      * Request to listen for face authentication when an app is occluding keyguard.
+     *
      * @param request if true and mKeyguardOccluded, request face auth listening, else default
      *                to normal behavior.
      *                See {@link KeyguardUpdateMonitor#shouldListenForFace()}
@@ -720,6 +722,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
     /**
      * Request to listen for fingerprint when an app is occluding keyguard.
+     *
      * @param request if true and mKeyguardOccluded, request fingerprint listening, else default
      *                to normal behavior.
      *                See {@link KeyguardUpdateMonitor#shouldListenForFingerprint(boolean)}
@@ -2225,22 +2228,20 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 Settings.System.getUriFor(Settings.System.TIME_12_24),
                 false, mTimeFormatChangeObserver, UserHandle.USER_ALL);
 
-        if (isSfpsSupported() && isSfpsEnrolled()) {
-            updateSfpsRequireScreenOnToAuthPref();
-            mSfpsRequireScreenOnToAuthPrefObserver = new ContentObserver(mHandler) {
-                @Override
-                public void onChange(boolean selfChange) {
-                    updateSfpsRequireScreenOnToAuthPref();
-                }
-            };
+        updateSfpsRequireScreenOnToAuthPref();
+        mSfpsRequireScreenOnToAuthPrefObserver = new ContentObserver(mHandler) {
+            @Override
+            public void onChange(boolean selfChange) {
+                updateSfpsRequireScreenOnToAuthPref();
+            }
+        };
 
-            mContext.getContentResolver().registerContentObserver(
-                    mSecureSettings.getUriFor(
+        mContext.getContentResolver().registerContentObserver(
+                mSecureSettings.getUriFor(
                         Settings.Secure.SFPS_REQUIRE_SCREEN_ON_TO_AUTH_ENABLED),
-                    false,
-                    mSfpsRequireScreenOnToAuthPrefObserver,
-                    getCurrentUser());
-        }
+                false,
+                mSfpsRequireScreenOnToAuthPrefObserver,
+                getCurrentUser());
     }
 
     protected void updateSfpsRequireScreenOnToAuthPref() {
@@ -2635,27 +2636,21 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 !(mFingerprintLockedOut && mBouncerIsOrWillBeShowing && mCredentialAttempted);
 
         final boolean isEncryptedOrLockdownForUser = isEncryptedOrLockdown(user);
+
         final boolean shouldListenUdfpsState = !isUdfps
                 || (!userCanSkipBouncer
-                    && !isEncryptedOrLockdownForUser
-                    && userDoesNotHaveTrust);
+                && !isEncryptedOrLockdownForUser
+                && userDoesNotHaveTrust);
 
-        boolean shouldListenSfpsState = true;
-        // If mSfpsRequireScreenOnToAuthPrefEnabled, require screen on to listen to SFPS
-        if (isSfpsSupported() && isSfpsEnrolled() && mSfpsRequireScreenOnToAuthPrefEnabled) {
-            shouldListenSfpsState = isDeviceInteractive();
+        boolean shouldListenSideFpsState = true;
+        if (isSfpsSupported() && isSfpsEnrolled()) {
+            shouldListenSideFpsState =
+                    mSfpsRequireScreenOnToAuthPrefEnabled ? isDeviceInteractive() : true;
         }
 
         boolean shouldListen = shouldListenKeyguardState && shouldListenUserState
-                && shouldListenBouncerState && !isFingerprintLockedOut();
-
-        if (isUdfpsSupported()) {
-            shouldListen = shouldListen && shouldListenUdfpsState;
-        }
-
-        if (isSfpsSupported()) {
-            shouldListen = shouldListen && shouldListenSfpsState;
-        }
+                && shouldListenBouncerState && shouldListenUdfpsState && !isFingerprintLockedOut()
+                && shouldListenSideFpsState;
 
         maybeLogListenerModelData(
                 new KeyguardFingerprintListenModel(
@@ -2677,7 +2672,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     mKeyguardOccluded,
                     mOccludingAppRequestingFp,
                     mIsPrimaryUser,
-                    shouldListenSfpsState,
+                    shouldListenSideFpsState,
                     shouldListenForFingerprintAssistant,
                     mSwitchingUser,
                     isUdfps,
