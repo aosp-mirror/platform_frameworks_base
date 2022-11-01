@@ -8956,9 +8956,18 @@ package android.appwidget {
 
 package android.companion {
 
+  public final class AssociatedDevice implements android.os.Parcelable {
+    method public int describeContents();
+    method @Nullable public android.bluetooth.le.ScanResult getBleDevice();
+    method @Nullable public android.bluetooth.BluetoothDevice getBluetoothDevice();
+    method @Nullable public android.net.wifi.ScanResult getWifiDevice();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.companion.AssociatedDevice> CREATOR;
+  }
+
   public final class AssociationInfo implements android.os.Parcelable {
     method public int describeContents();
-    method @Nullable public android.os.Parcelable getAssociatedDevice();
+    method @Nullable public android.companion.AssociatedDevice getAssociatedDevice();
     method @Nullable public android.net.MacAddress getDeviceMacAddress();
     method @Nullable public String getDeviceProfile();
     method @Nullable public CharSequence getDisplayName();
