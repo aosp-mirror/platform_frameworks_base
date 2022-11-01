@@ -2725,6 +2725,7 @@
   <java-symbol type="array" name="config_face_acquire_vendor_biometricprompt_ignorelist" />
   <java-symbol type="bool" name="config_faceAuthSupportsSelfIllumination" />
   <java-symbol type="bool" name="config_faceAuthDismissesKeyguard" />
+  <java-symbol type="bool" name="config_requireScreenOnToAuthEnabled" />
 
   <!-- Face config -->
   <java-symbol type="integer" name="config_faceMaxTemplatesPerUser" />

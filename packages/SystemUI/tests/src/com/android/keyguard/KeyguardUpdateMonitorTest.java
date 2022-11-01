@@ -21,6 +21,7 @@ import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRIN
 import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_START;
 import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ERROR_LOCKOUT;
 import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ERROR_LOCKOUT_PERMANENT;
+import static android.hardware.fingerprint.FingerprintSensorProperties.TYPE_POWER_BUTTON;
 import static android.telephony.SubscriptionManager.DATA_ROAMING_DISABLE;
 import static android.telephony.SubscriptionManager.NAME_SOURCE_CARRIER_ID;
 
@@ -39,6 +40,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -54,6 +56,7 @@ import android.app.trust.IStrongAuthTracker;
 import android.app.trust.TrustManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -61,18 +64,21 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
+import android.database.ContentObserver;
 import android.hardware.SensorPrivacyManager;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.biometrics.ComponentInfoInternal;
 import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
+import android.hardware.biometrics.SensorProperties;
 import android.hardware.face.FaceManager;
 import android.hardware.face.FaceSensorProperties;
 import android.hardware.face.FaceSensorPropertiesInternal;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorProperties;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
+import android.net.Uri;
 import android.nfc.NfcAdapter;
 import android.os.Bundle;
 import android.os.CancellationSignal;
@@ -111,6 +117,7 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.telephony.TelephonyListenerManager;
 import com.android.systemui.util.settings.GlobalSettings;
+import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -182,6 +189,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     @Mock
     private BroadcastDispatcher mBroadcastDispatcher;
     @Mock
+    private SecureSettings mSecureSettings;
+    @Mock
     private TelephonyManager mTelephonyManager;
     @Mock
     private SensorPrivacyManager mSensorPrivacyManager;
@@ -215,6 +224,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     private GlobalSettings mGlobalSettings;
     private FaceWakeUpTriggersConfig mFaceWakeUpTriggersConfig;
 
+
     private final int mCurrentUserId = 100;
     private final UserInfo mCurrentUserInfo = new UserInfo(mCurrentUserId, "Test user", 0);
 
@@ -223,6 +233,9 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
             mBiometricEnabledCallbackArgCaptor;
     @Captor
     private ArgumentCaptor<FaceManager.AuthenticationCallback> mAuthenticationCallbackCaptor;
+
+    @Mock
+    private Uri mURI;
 
     // Direct executor
     private final Executor mBackgroundExecutor = Runnable::run;
@@ -305,6 +318,15 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
         mTestableLooper = TestableLooper.get(this);
         allowTestableLooperAsMainThread();
+
+        when(mSecureSettings.getUriFor(anyString())).thenReturn(mURI);
+
+        final ContentResolver contentResolver = mContext.getContentResolver();
+        ExtendedMockito.spyOn(contentResolver);
+        doNothing().when(contentResolver)
+                .registerContentObserver(any(Uri.class), anyBoolean(), any(ContentObserver.class),
+                        anyInt());
+
         mKeyguardUpdateMonitor = new TestableKeyguardUpdateMonitor(mContext);
 
         verify(mBiometricManager)
@@ -1136,6 +1158,67 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     @Test
+    public void testStartsListeningForSfps_whenKeyguardIsVisible_ifRequireScreenOnToAuthEnabled()
+            throws RemoteException {
+        // SFPS supported and enrolled
+        setup_SfpsProps();
+
+        // WHEN require screen on to auth is disabled, and keyguard is not awake
+        when(mSecureSettings.getIntForUser(anyString(), anyInt(), anyInt())).thenReturn(0);
+        mKeyguardUpdateMonitor.updateSfpsRequireScreenOnToAuthPref();
+
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.bool.config_requireScreenOnToAuthEnabled, true);
+
+        // Preconditions for sfps auth to run
+        keyguardNotGoingAway();
+        currentUserIsPrimary();
+        currentUserDoesNotHaveTrust();
+        biometricsNotDisabledThroughDevicePolicyManager();
+        biometricsEnabledForCurrentUser();
+        userNotCurrentlySwitching();
+
+        statusBarShadeIsLocked();
+        mTestableLooper.processAllMessages();
+
+        // THEN we should listen for sfps when screen off, because require screen on is disabled
+        assertThat(mKeyguardUpdateMonitor.shouldListenForFingerprint(false)).isTrue();
+
+        // WHEN require screen on to auth is enabled, and keyguard is not awake
+        when(mSecureSettings.getIntForUser(anyString(), anyInt(), anyInt())).thenReturn(1);
+        mKeyguardUpdateMonitor.updateSfpsRequireScreenOnToAuthPref();
+
+        // THEN we shouldn't listen for sfps when screen off, because require screen on is enabled
+        assertThat(mKeyguardUpdateMonitor.shouldListenForFingerprint(false)).isFalse();
+
+        // Device now awake & keyguard is now interactive
+        deviceNotGoingToSleep();
+        deviceIsInteractive();
+        keyguardIsVisible();
+
+        // THEN we should listen for sfps when screen on, and require screen on is enabled
+        assertThat(mKeyguardUpdateMonitor.shouldListenForFingerprint(false)).isTrue();
+    }
+
+    private void setup_SfpsProps() {
+        final ArrayList<FingerprintSensorPropertiesInternal> props = new ArrayList<>();
+        props.add(newFingerprintSensorPropertiesInternal(TYPE_POWER_BUTTON));
+        when(mAuthController.getSfpsProps()).thenReturn(props);
+        when(mAuthController.isSfpsEnrolled(anyInt())).thenReturn(true);
+    }
+
+    private FingerprintSensorPropertiesInternal newFingerprintSensorPropertiesInternal(
+            @FingerprintSensorProperties.SensorType int sensorType) {
+        return new FingerprintSensorPropertiesInternal(
+                0 /* sensorId */,
+                SensorProperties.STRENGTH_STRONG,
+                1 /* maxEnrollmentsPerUser */,
+                new ArrayList<ComponentInfoInternal>(),
+                sensorType,
+                true /* resetLockoutRequiresHardwareAuthToken */);
+    }
+
+    @Test
     public void testShouldNotListenForUdfps_whenTrustEnabled() {
         // GIVEN a "we should listen for udfps" state
         mStatusBarStateListener.onStateChanged(StatusBarState.KEYGUARD);
@@ -1804,7 +1887,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         protected TestableKeyguardUpdateMonitor(Context context) {
             super(context,
                     TestableLooper.get(KeyguardUpdateMonitorTest.this).getLooper(),
-                    mBroadcastDispatcher, mDumpManager,
+                    mBroadcastDispatcher, mSecureSettings, mDumpManager,
                     mBackgroundExecutor, mMainExecutor,
                     mStatusBarStateController, mLockPatternUtils,
                     mAuthController, mTelephonyListenerManager,
