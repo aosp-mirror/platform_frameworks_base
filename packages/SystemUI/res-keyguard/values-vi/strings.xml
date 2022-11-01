@@ -78,12 +78,9 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"Yêu cầu hình mở khóa sau khi thiết bị khởi động lại"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"Yêu cầu mã PIN sau khi thiết bị khởi động lại"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"Yêu cầu mật khẩu sau khi thiết bị khởi động lại"</string>
-    <!-- no translation found for kg_prompt_reason_timeout_pattern (5514969660010197363) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_timeout_pin (4227962059353859376) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_timeout_password (8810879144143933690) -->
-    <skip />
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Để tăng cường bảo mật, hãy sử dụng hình mở khoá"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Để tăng cường bảo mật, hãy sử dụng mã PIN"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Để tăng cường bảo mật, hãy sử dụng mật khẩu"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Thiết bị đã bị quản trị viên khóa"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Thiết bị đã bị khóa theo cách thủ công"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Không nhận dạng được"</string>
@@ -93,6 +90,5 @@
     <string name="clock_title_default" msgid="6342735240617459864">"Mặc định"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Bong bóng"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Đồng hồ kim"</string>
-    <!-- no translation found for keyguard_unlock_to_continue (7509503484250597743) -->
-    <skip />
+    <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Mở khoá thiết bị của bạn để tiếp tục"</string>
 </resources>
