@@ -432,6 +432,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                             break;
                         case Constants.KEY_MIN_LINEAR_BACKOFF_TIME_MS:
                         case Constants.KEY_MIN_EXP_BACKOFF_TIME_MS:
+                        case Constants.KEY_SYSTEM_STOP_TO_FAILURE_RATIO:
                             mConstants.updateBackoffConstantsLocked();
                             break;
                         case Constants.KEY_CONN_CONGESTION_DELAY_FRAC:
@@ -509,6 +510,8 @@ public class JobSchedulerService extends com.android.server.SystemService
 
         private static final String KEY_MIN_LINEAR_BACKOFF_TIME_MS = "min_linear_backoff_time_ms";
         private static final String KEY_MIN_EXP_BACKOFF_TIME_MS = "min_exp_backoff_time_ms";
+        private static final String KEY_SYSTEM_STOP_TO_FAILURE_RATIO =
+                "system_stop_to_failure_ratio";
         private static final String KEY_CONN_CONGESTION_DELAY_FRAC = "conn_congestion_delay_frac";
         private static final String KEY_CONN_PREFETCH_RELAX_FRAC = "conn_prefetch_relax_frac";
         private static final String KEY_CONN_USE_CELL_SIGNAL_STRENGTH =
@@ -540,6 +543,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         private static final float DEFAULT_MODERATE_USE_FACTOR = .5f;
         private static final long DEFAULT_MIN_LINEAR_BACKOFF_TIME_MS = JobInfo.MIN_BACKOFF_MILLIS;
         private static final long DEFAULT_MIN_EXP_BACKOFF_TIME_MS = JobInfo.MIN_BACKOFF_MILLIS;
+        private static final int DEFAULT_SYSTEM_STOP_TO_FAILURE_RATIO = 3;
         private static final float DEFAULT_CONN_CONGESTION_DELAY_FRAC = 0.5f;
         private static final float DEFAULT_CONN_PREFETCH_RELAX_FRAC = 0.5f;
         private static final boolean DEFAULT_CONN_USE_CELL_SIGNAL_STRENGTH = true;
@@ -589,6 +593,11 @@ public class JobSchedulerService extends com.android.server.SystemService
          * The minimum backoff time to allow for exponential backoff.
          */
         long MIN_EXP_BACKOFF_TIME_MS = DEFAULT_MIN_EXP_BACKOFF_TIME_MS;
+        /**
+         * The ratio to use to convert number of times a job was stopped by JobScheduler to an
+         * incremental failure in the backoff policy calculation.
+         */
+        int SYSTEM_STOP_TO_FAILURE_RATIO = DEFAULT_SYSTEM_STOP_TO_FAILURE_RATIO;
 
         /**
          * The fraction of a job's running window that must pass before we
@@ -700,6 +709,9 @@ public class JobSchedulerService extends com.android.server.SystemService
             MIN_EXP_BACKOFF_TIME_MS = DeviceConfig.getLong(DeviceConfig.NAMESPACE_JOB_SCHEDULER,
                     KEY_MIN_EXP_BACKOFF_TIME_MS,
                     DEFAULT_MIN_EXP_BACKOFF_TIME_MS);
+            SYSTEM_STOP_TO_FAILURE_RATIO = DeviceConfig.getInt(DeviceConfig.NAMESPACE_JOB_SCHEDULER,
+                    KEY_SYSTEM_STOP_TO_FAILURE_RATIO,
+                    DEFAULT_SYSTEM_STOP_TO_FAILURE_RATIO);
         }
 
         private void updateConnectivityConstantsLocked() {
@@ -797,6 +809,7 @@ public class JobSchedulerService extends com.android.server.SystemService
 
             pw.print(KEY_MIN_LINEAR_BACKOFF_TIME_MS, MIN_LINEAR_BACKOFF_TIME_MS).println();
             pw.print(KEY_MIN_EXP_BACKOFF_TIME_MS, MIN_EXP_BACKOFF_TIME_MS).println();
+            pw.print(KEY_SYSTEM_STOP_TO_FAILURE_RATIO, SYSTEM_STOP_TO_FAILURE_RATIO).println();
             pw.print(KEY_CONN_CONGESTION_DELAY_FRAC, CONN_CONGESTION_DELAY_FRAC).println();
             pw.print(KEY_CONN_PREFETCH_RELAX_FRAC, CONN_PREFETCH_RELAX_FRAC).println();
             pw.print(KEY_CONN_USE_CELL_SIGNAL_STRENGTH, CONN_USE_CELL_SIGNAL_STRENGTH).println();
@@ -1277,7 +1290,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     jobStatus.getJob().isPrefetch(),
                     jobStatus.getJob().getPriority(),
                     jobStatus.getEffectivePriority(),
-                    jobStatus.getNumFailures());
+                    jobStatus.getNumPreviousAttempts());
 
             // If the job is immediately ready to run, then we can just immediately
             // put it in the pending list and try to schedule it.  This is especially
@@ -1476,7 +1489,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     cancelled.getJob().isPrefetch(),
                     cancelled.getJob().getPriority(),
                     cancelled.getEffectivePriority(),
-                    cancelled.getNumFailures());
+                    cancelled.getNumPreviousAttempts());
         }
         // If this is a replacement, bring in the new version of the job
         if (incomingJob != null) {
@@ -1903,7 +1916,7 @@ public class JobSchedulerService extends com.android.server.SystemService
      * Reschedules the given job based on the job's backoff policy. It doesn't make sense to
      * specify an override deadline on a failed job (the failed job will run even though it's not
      * ready), so we reschedule it with {@link JobStatus#NO_LATEST_RUNTIME}, but specify that any
-     * ready job with {@link JobStatus#getNumFailures()} > 0 will be executed.
+     * ready job with {@link JobStatus#getNumPreviousAttempts()} > 0 will be executed.
      *
      * @param failureToReschedule Provided job status that we will reschedule.
      * @return A newly instantiated JobStatus with the same constraints as the last job except
@@ -1911,12 +1924,24 @@ public class JobSchedulerService extends com.android.server.SystemService
      * @see #maybeQueueReadyJobsForExecutionLocked
      */
     @VisibleForTesting
-    JobStatus getRescheduleJobForFailureLocked(JobStatus failureToReschedule) {
+    JobStatus getRescheduleJobForFailureLocked(JobStatus failureToReschedule,
+            int internalStopReason) {
         final long elapsedNowMillis = sElapsedRealtimeClock.millis();
         final JobInfo job = failureToReschedule.getJob();
 
         final long initialBackoffMillis = job.getInitialBackoffMillis();
-        final int backoffAttempts = failureToReschedule.getNumFailures() + 1;
+        int numFailures = failureToReschedule.getNumFailures();
+        int numSystemStops = failureToReschedule.getNumSystemStops();
+        // We should back off slowly if JobScheduler keeps stopping the job,
+        // but back off immediately if the issue appeared to be the app's fault.
+        if (internalStopReason == JobParameters.INTERNAL_STOP_REASON_SUCCESSFUL_FINISH
+                || internalStopReason == JobParameters.INTERNAL_STOP_REASON_TIMEOUT) {
+            numFailures++;
+        } else {
+            numSystemStops++;
+        }
+        final int backoffAttempts = Math.max(1,
+                numFailures + numSystemStops / mConstants.SYSTEM_STOP_TO_FAILURE_RATIO);
         long delayMillis;
 
         switch (job.getBackoffPolicy()) {
@@ -1943,7 +1968,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                 Math.min(delayMillis, JobInfo.MAX_BACKOFF_DELAY_MILLIS);
         JobStatus newJob = new JobStatus(failureToReschedule,
                 elapsedNowMillis + delayMillis,
-                JobStatus.NO_LATEST_RUNTIME, backoffAttempts,
+                JobStatus.NO_LATEST_RUNTIME, numFailures, numSystemStops,
                 failureToReschedule.getLastSuccessfulRunTime(), sSystemClock.millis());
         if (job.isPeriodic()) {
             newJob.setOriginalLatestRunTimeElapsed(
@@ -2034,7 +2059,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     + newLatestRuntimeElapsed);
             return new JobStatus(periodicToReschedule,
                     elapsedNow + period - flex, elapsedNow + period,
-                    0 /* backoffAttempt */,
+                    0 /* numFailures */, 0 /* numSystemStops */,
                     sSystemClock.millis() /* lastSuccessfulRunTime */,
                     periodicToReschedule.getLastFailedRunTime());
         }
@@ -2049,7 +2074,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
         return new JobStatus(periodicToReschedule,
                 newEarliestRunTimeElapsed, newLatestRuntimeElapsed,
-                0 /* backoffAttempt */,
+                0 /* numFailures */, 0 /* numSystemStops */,
                 sSystemClock.millis() /* lastSuccessfulRunTime */,
                 periodicToReschedule.getLastFailedRunTime());
     }
@@ -2093,7 +2118,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         // job so we can transfer any appropriate state over from the previous job when
         // we stop it.
         final JobStatus rescheduledJob = needsReschedule
-                ? getRescheduleJobForFailureLocked(jobStatus) : null;
+                ? getRescheduleJobForFailureLocked(jobStatus, debugStopReason) : null;
         if (rescheduledJob != null
                 && (debugStopReason == JobParameters.INTERNAL_STOP_REASON_TIMEOUT
                 || debugStopReason == JobParameters.INTERNAL_STOP_REASON_PREEMPT)) {
@@ -2427,7 +2452,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     shouldForceBatchJob =
                             mPrefetchController.getNextEstimatedLaunchTimeLocked(job)
                                     > relativelySoonCutoffTime;
-                } else if (job.getNumFailures() > 0) {
+                } else if (job.getNumPreviousAttempts() > 0) {
                     shouldForceBatchJob = false;
                 } else {
                     final long nowElapsed = sElapsedRealtimeClock.millis();

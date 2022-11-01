@@ -65,7 +65,6 @@ import org.mockito.junit.MockitoJUnit
 class ClockEventControllerTest : SysuiTestCase() {
 
     @JvmField @Rule val mockito = MockitoJUnit.rule()
-    @Mock private lateinit var keyguardInteractor: KeyguardInteractor
     @Mock private lateinit var broadcastDispatcher: BroadcastDispatcher
     @Mock private lateinit var batteryController: BatteryController
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor

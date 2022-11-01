@@ -17,7 +17,10 @@
 package com.android.settingslib.spa.framework.common
 
 import android.app.Activity
+import android.content.Context
 import android.util.Log
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 
 private const val TAG = "SpaEnvironment"
 
@@ -29,6 +32,20 @@ object SpaEnvironmentFactory {
         Log.d(TAG, "reset")
     }
 
+    @Composable
+    fun resetForPreview() {
+        val context = LocalContext.current
+        spaEnvironment = object : SpaEnvironment(context) {
+            override val pageProviderRepository = lazy {
+                SettingsPageProviderRepository(
+                    allPageProviders = emptyList(),
+                    rootPages = emptyList()
+                )
+            }
+        }
+        Log.d(TAG, "resetForPreview")
+    }
+
     val instance: SpaEnvironment
         get() {
             if (spaEnvironment == null)
@@ -37,10 +54,12 @@ object SpaEnvironmentFactory {
         }
 }
 
-abstract class SpaEnvironment {
+abstract class SpaEnvironment(context: Context) {
     abstract val pageProviderRepository: Lazy<SettingsPageProviderRepository>
 
     val entryRepository = lazy { SettingsEntryRepository(pageProviderRepository.value) }
+
+    val appContext: Context = context.applicationContext
 
     open val browseActivityClass: Class<out Activity>? = null
 

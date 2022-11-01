@@ -73,7 +73,12 @@ public class AgentTrendCalculatorTest {
         }
 
         @Override
-        long getHardSatiatedConsumptionLimit() {
+        long getMinSatiatedConsumptionLimit() {
+            return 0;
+        }
+
+        @Override
+        long getMaxSatiatedConsumptionLimit() {
             return 0;
         }
 

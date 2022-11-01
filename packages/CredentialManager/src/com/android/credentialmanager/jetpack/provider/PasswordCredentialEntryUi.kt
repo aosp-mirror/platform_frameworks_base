@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.credentialmanager.jetpack
+package com.android.credentialmanager.jetpack.provider
 
 import android.app.slice.Slice
 import android.credentials.ui.Entry

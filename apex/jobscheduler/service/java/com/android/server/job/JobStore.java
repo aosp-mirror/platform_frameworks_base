@@ -194,7 +194,7 @@ public final class JobStore {
                         convertRtcBoundsToElapsed(utcTimes, elapsedNow);
                 JobStatus newJob = new JobStatus(job,
                         elapsedRuntimes.first, elapsedRuntimes.second,
-                        0, job.getLastSuccessfulRunTime(), job.getLastFailedRunTime());
+                        0, 0, job.getLastSuccessfulRunTime(), job.getLastFailedRunTime());
                 newJob.prepareLocked();
                 toAdd.add(newJob);
                 toRemove.add(job);

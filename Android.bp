@@ -214,6 +214,7 @@ java_library {
         "android.hardware.radio-V1.5-java",
         "android.hardware.radio-V1.6-java",
         "android.hardware.radio.data-V1-java",
+        "android.hardware.radio.ims-V1-java",
         "android.hardware.radio.messaging-V1-java",
         "android.hardware.radio.modem-V1-java",
         "android.hardware.radio.network-V2-java",

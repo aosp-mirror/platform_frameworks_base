@@ -113,7 +113,9 @@ public class EconomyManager {
     /** @hide */
     public static final String KEY_AM_INITIAL_CONSUMPTION_LIMIT = "am_initial_consumption_limit";
     /** @hide */
-    public static final String KEY_AM_HARD_CONSUMPTION_LIMIT = "am_hard_consumption_limit";
+    public static final String KEY_AM_MIN_CONSUMPTION_LIMIT = "am_minimum_consumption_limit";
+    /** @hide */
+    public static final String KEY_AM_MAX_CONSUMPTION_LIMIT = "am_maximum_consumption_limit";
     // TODO: Add AlarmManager modifier keys
     /** @hide */
     public static final String KEY_AM_REWARD_TOP_ACTIVITY_INSTANT =
@@ -242,7 +244,9 @@ public class EconomyManager {
     /** @hide */
     public static final String KEY_JS_INITIAL_CONSUMPTION_LIMIT = "js_initial_consumption_limit";
     /** @hide */
-    public static final String KEY_JS_HARD_CONSUMPTION_LIMIT = "js_hard_consumption_limit";
+    public static final String KEY_JS_MIN_CONSUMPTION_LIMIT = "js_minimum_consumption_limit";
+    /** @hide */
+    public static final String KEY_JS_MAX_CONSUMPTION_LIMIT = "js_maximum_consumption_limit";
     // TODO: Add JobScheduler modifier keys
     /** @hide */
     public static final String KEY_JS_REWARD_APP_INSTALL_INSTANT =
@@ -371,7 +375,9 @@ public class EconomyManager {
     /** @hide */
     public static final long DEFAULT_AM_INITIAL_CONSUMPTION_LIMIT_CAKES = arcToCake(2880);
     /** @hide */
-    public static final long DEFAULT_AM_HARD_CONSUMPTION_LIMIT_CAKES = arcToCake(15_000);
+    public static final long DEFAULT_AM_MIN_CONSUMPTION_LIMIT_CAKES = arcToCake(1440);
+    /** @hide */
+    public static final long DEFAULT_AM_MAX_CONSUMPTION_LIMIT_CAKES = arcToCake(15_000);
     // TODO: add AlarmManager modifier default values
     /** @hide */
     public static final long DEFAULT_AM_REWARD_TOP_ACTIVITY_INSTANT_CAKES = arcToCake(0);
@@ -478,8 +484,10 @@ public class EconomyManager {
     /** @hide */
     public static final long DEFAULT_JS_INITIAL_CONSUMPTION_LIMIT_CAKES = arcToCake(29_000);
     /** @hide */
-    // TODO: set hard limit based on device type (phone vs tablet vs etc) + battery size
-    public static final long DEFAULT_JS_HARD_CONSUMPTION_LIMIT_CAKES = arcToCake(250_000);
+    public static final long DEFAULT_JS_MIN_CONSUMPTION_LIMIT_CAKES = arcToCake(17_000);
+    /** @hide */
+    // TODO: set maximum limit based on device type (phone vs tablet vs etc) + battery size
+    public static final long DEFAULT_JS_MAX_CONSUMPTION_LIMIT_CAKES = arcToCake(250_000);
     // TODO: add JobScheduler modifier default values
     /** @hide */
     public static final long DEFAULT_JS_REWARD_APP_INSTALL_INSTANT_CAKES = arcToCake(408);

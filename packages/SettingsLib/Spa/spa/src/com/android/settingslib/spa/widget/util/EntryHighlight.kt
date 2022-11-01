@@ -36,14 +36,15 @@ import com.android.settingslib.spa.framework.theme.SettingsTheme
 @Composable
 internal fun EntryHighlight(UiLayoutFn: @Composable () -> Unit) {
     val entryData = LocalEntryDataProvider.current
-    var isHighlighted by rememberSaveable { mutableStateOf(false) }
+    val entryIsHighlighted = rememberSaveable { entryData.isHighlighted }
+    var localHighlighted by rememberSaveable { mutableStateOf(false) }
     SideEffect {
-        isHighlighted = entryData.isHighlighted
+        localHighlighted = entryIsHighlighted
     }
 
     val backgroundColor by animateColorAsState(
         targetValue = when {
-            isHighlighted -> MaterialTheme.colorScheme.surfaceVariant
+            localHighlighted -> MaterialTheme.colorScheme.surfaceVariant
             else -> SettingsTheme.colorScheme.background
         },
         animationSpec = repeatable(

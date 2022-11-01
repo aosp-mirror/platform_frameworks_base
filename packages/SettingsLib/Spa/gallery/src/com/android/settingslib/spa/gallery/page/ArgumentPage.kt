@@ -23,6 +23,7 @@ import com.android.settingslib.spa.framework.common.SettingsEntry
 import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
 import com.android.settingslib.spa.framework.common.SettingsPage
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
+import com.android.settingslib.spa.framework.common.SpaEnvironmentFactory
 import com.android.settingslib.spa.framework.common.createSettingsPage
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.gallery.SettingsPageProviderEnum
@@ -115,6 +116,7 @@ object ArgumentPageProvider : SettingsPageProvider {
 @Preview(showBackground = true)
 @Composable
 private fun ArgumentPagePreview() {
+    SpaEnvironmentFactory.resetForPreview()
     SettingsTheme {
         ArgumentPageProvider.Page(
             ArgumentPageModel.buildArgument(stringParam = "foo", intParam = 0)
