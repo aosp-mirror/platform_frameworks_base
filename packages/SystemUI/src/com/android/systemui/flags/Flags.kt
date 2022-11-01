@@ -122,7 +122,8 @@ object Flags {
      * Migration from the legacy isDozing/dozeAmount paths to the new KeyguardTransitionRepository
      * will occur in stages. This is one stage of many to come.
      */
-    @JvmField val DOZING_MIGRATION_1 = UnreleasedFlag(213, teamfood = true)
+    // TODO(b/255607168): Tracking Bug
+    @JvmField val DOZING_MIGRATION_1 = UnreleasedFlag(213)
 
     @JvmField val NEW_ELLIPSE_DETECTION = UnreleasedFlag(214)
 

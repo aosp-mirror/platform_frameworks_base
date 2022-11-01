@@ -34,6 +34,7 @@ import com.android.systemui.flags.Flags.DOZING_MIGRATION_1
 import com.android.systemui.flags.Flags.REGION_SAMPLING
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.log.dagger.KeyguardClockLog
 import com.android.systemui.plugins.ClockController
@@ -47,6 +48,7 @@ import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import java.io.PrintWriter
 import java.util.Locale
@@ -186,8 +188,10 @@ open class ClockEventController @Inject constructor(
     private val keyguardUpdateMonitorCallback = object : KeyguardUpdateMonitorCallback() {
         override fun onKeyguardVisibilityChanged(visible: Boolean) {
             isKeyguardVisible = visible
-            if (!isKeyguardVisible) {
-                clock?.animations?.doze(if (isDozing) 1f else 0f)
+            if (!featureFlags.isEnabled(DOZING_MIGRATION_1)) {
+                if (!isKeyguardVisible) {
+                    clock?.animations?.doze(if (isDozing) 1f else 0f)
+                }
             }
         }
 
@@ -224,6 +228,7 @@ open class ClockEventController @Inject constructor(
                 listenForDozing(this)
                 if (featureFlags.isEnabled(DOZING_MIGRATION_1)) {
                     listenForDozeAmountTransition(this)
+                    listenForGoneToAodTransition(this)
                 } else {
                     listenForDozeAmount(this)
                 }
@@ -271,6 +276,22 @@ open class ClockEventController @Inject constructor(
         return scope.launch {
             keyguardTransitionInteractor.dozeAmountTransition.collect {
                 dozeAmount = it.value
+                clock?.animations?.doze(dozeAmount)
+            }
+        }
+    }
+
+    /**
+     * When keyguard is displayed again after being gone, the clock must be reset to full
+     * dozing.
+     */
+    @VisibleForTesting
+    internal fun listenForGoneToAodTransition(scope: CoroutineScope): Job {
+        return scope.launch {
+            keyguardTransitionInteractor.goneToAodTransition.filter {
+                it.transitionState == TransitionState.STARTED
+            }.collect {
+                dozeAmount = 1f
                 clock?.animations?.doze(dozeAmount)
             }
         }

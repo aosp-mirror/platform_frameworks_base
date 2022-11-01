@@ -63,7 +63,7 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        underTest = KeyguardTransitionRepository()
+        underTest = KeyguardTransitionRepositoryImpl()
         wtfHandler = WtfHandler()
         oldWtfHandler = Log.setWtfHandler(wtfHandler)
     }
@@ -174,9 +174,6 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
     }
 
     private fun assertSteps(steps: List<TransitionStep>, fractions: List<BigDecimal>) {
-        // + 2 accounts for start and finish of automated transition
-        assertThat(steps.size).isEqualTo(fractions.size + 2)
-
         assertThat(steps[0]).isEqualTo(TransitionStep(AOD, LOCKSCREEN, 0f, TransitionState.STARTED))
         fractions.forEachIndexed { index, fraction ->
             assertThat(steps[index + 1])

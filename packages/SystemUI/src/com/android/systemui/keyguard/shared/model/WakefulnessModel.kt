@@ -11,20 +11,18 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License.
+ * limitations under the License
  */
+package com.android.systemui.keyguard.shared.model
 
-package com.android.systemui.keyguard.data.repository
-
-import dagger.Binds
-import dagger.Module
-
-@Module
-interface KeyguardRepositoryModule {
-    @Binds fun keyguardRepository(impl: KeyguardRepositoryImpl): KeyguardRepository
-
-    @Binds
-    fun keyguardTransitionRepository(
-        impl: KeyguardTransitionRepositoryImpl
-    ): KeyguardTransitionRepository
+/** Model device wakefulness states. */
+enum class WakefulnessModel {
+    /** The device is asleep and not interactive. */
+    ASLEEP,
+    /** Received a signal that the device is beginning to wake up. */
+    STARTING_TO_WAKE,
+    /** Device is now fully awake and interactive. */
+    AWAKE,
+    /** Signal that the device is now going to sleep. */
+    STARTING_TO_SLEEP,
 }
