@@ -795,6 +795,71 @@ public class DisplayModeDirectorTest {
     }
 
     @Test
+    @Parameters({
+            "true",
+            "false"
+    })
+    public void testVotingWithSwitchingTypeRenderFrameRateOnly(boolean frameRateIsRefreshRate) {
+        when(mInjector.renderFrameRateIsPhysicalRefreshRate()).thenReturn(frameRateIsRefreshRate);
+        DisplayModeDirector director = createDirectorFromFpsRange(0, 90);
+        SparseArray<Vote> votes = new SparseArray<>();
+        SparseArray<SparseArray<Vote>> votesByDisplay = new SparseArray<>();
+        votesByDisplay.put(DISPLAY_ID, votes);
+        votes.put(Vote.PRIORITY_USER_SETTING_MIN_RENDER_FRAME_RATE,
+                Vote.forRenderFrameRates(30, 90));
+        votes.put(Vote.PRIORITY_LOW_POWER_MODE, Vote.forRenderFrameRates(0, 60));
+
+        director.injectVotesByDisplay(votesByDisplay);
+        assertThat(director.getModeSwitchingType())
+                .isNotEqualTo(DisplayManager.SWITCHING_TYPE_NONE);
+        DesiredDisplayModeSpecs desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
+
+        assertThat(desiredSpecs.primary.physical.min).isWithin(FLOAT_TOLERANCE).of(30);
+        if (frameRateIsRefreshRate) {
+            assertThat(desiredSpecs.primary.physical.max).isWithin(FLOAT_TOLERANCE).of(60);
+        } else {
+            assertThat(desiredSpecs.primary.physical.max).isPositiveInfinity();
+        }
+        assertThat(desiredSpecs.primary.render.min).isWithin(FLOAT_TOLERANCE).of(30);
+        assertThat(desiredSpecs.primary.render.max).isWithin(FLOAT_TOLERANCE).of(60);
+        assertThat(desiredSpecs.appRequest.physical.min).isWithin(FLOAT_TOLERANCE).of(0);
+        if (frameRateIsRefreshRate) {
+            assertThat(desiredSpecs.appRequest.physical.max).isWithin(FLOAT_TOLERANCE).of(
+                    60);
+        } else {
+            assertThat(desiredSpecs.appRequest.physical.max).isPositiveInfinity();
+        }
+        assertThat(desiredSpecs.appRequest.render.min).isWithin(FLOAT_TOLERANCE).of(0);
+        assertThat(desiredSpecs.appRequest.render.max).isWithin(FLOAT_TOLERANCE).of(60);
+        assertThat(desiredSpecs.baseModeId).isEqualTo(30);
+
+        director.setModeSwitchingType(DisplayManager.SWITCHING_TYPE_RENDER_FRAME_RATE_ONLY);
+        assertThat(director.getModeSwitchingType())
+                .isEqualTo(DisplayManager.SWITCHING_TYPE_RENDER_FRAME_RATE_ONLY);
+
+        desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
+        assertThat(desiredSpecs.primary.physical.min).isWithin(FLOAT_TOLERANCE).of(30);
+        assertThat(desiredSpecs.primary.physical.max).isWithin(FLOAT_TOLERANCE).of(30);
+        assertThat(desiredSpecs.primary.render.min).isWithin(FLOAT_TOLERANCE).of(30);
+        if (frameRateIsRefreshRate) {
+            assertThat(desiredSpecs.primary.render.max).isWithin(FLOAT_TOLERANCE).of(30);
+        } else {
+            assertThat(desiredSpecs.primary.render.max).isWithin(FLOAT_TOLERANCE).of(60);
+        }
+        assertThat(desiredSpecs.appRequest.physical.min).isWithin(FLOAT_TOLERANCE).of(30);
+        assertThat(desiredSpecs.appRequest.physical.max).isWithin(FLOAT_TOLERANCE).of(30);
+        if (frameRateIsRefreshRate) {
+            assertThat(desiredSpecs.appRequest.render.min).isWithin(FLOAT_TOLERANCE).of(30);
+            assertThat(desiredSpecs.appRequest.render.max).isWithin(FLOAT_TOLERANCE).of(30);
+        } else {
+            assertThat(desiredSpecs.appRequest.render.min).isWithin(FLOAT_TOLERANCE).of(0);
+            assertThat(desiredSpecs.appRequest.render.max).isWithin(FLOAT_TOLERANCE).of(60);
+        }
+
+        assertThat(desiredSpecs.baseModeId).isEqualTo(30);
+    }
+
+    @Test
     public void testVotingWithSwitchingTypeWithinGroups() {
         DisplayModeDirector director = createDirectorFromFpsRange(0, 90);
 
