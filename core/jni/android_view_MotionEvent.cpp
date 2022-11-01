@@ -299,8 +299,9 @@ static void pointerPropertiesToNative(JNIEnv* env, jobject pointerPropertiesObj,
     outPointerProperties->clear();
     outPointerProperties->id = env->GetIntField(pointerPropertiesObj,
             gPointerPropertiesClassInfo.id);
-    outPointerProperties->toolType = env->GetIntField(pointerPropertiesObj,
+    const int32_t toolType = env->GetIntField(pointerPropertiesObj,
             gPointerPropertiesClassInfo.toolType);
+    outPointerProperties->toolType = static_cast<ToolType>(toolType);
 }
 
 static void pointerPropertiesFromNative(JNIEnv* env, const PointerProperties* pointerProperties,
@@ -308,7 +309,7 @@ static void pointerPropertiesFromNative(JNIEnv* env, const PointerProperties* po
     env->SetIntField(outPointerPropertiesObj, gPointerPropertiesClassInfo.id,
             pointerProperties->id);
     env->SetIntField(outPointerPropertiesObj, gPointerPropertiesClassInfo.toolType,
-            pointerProperties->toolType);
+            static_cast<int32_t>(pointerProperties->toolType));
 }
 
 
@@ -513,7 +514,7 @@ static jint android_view_MotionEvent_nativeGetToolType(JNIEnv* env, jclass clazz
     if (!validatePointerIndex(env, pointerIndex, *event)) {
         return -1;
     }
-    return event->getToolType(pointerIndex);
+    return static_cast<jint>(event->getToolType(pointerIndex));
 }
 
 static jlong android_view_MotionEvent_nativeGetEventTimeNanos(JNIEnv* env, jclass clazz,
