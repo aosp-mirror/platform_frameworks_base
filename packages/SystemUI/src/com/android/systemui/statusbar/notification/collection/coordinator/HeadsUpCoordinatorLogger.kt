@@ -69,4 +69,13 @@ class HeadsUpCoordinatorLogger constructor(
             "updating entry via ranking applied: $str1 updated shouldHeadsUp=$bool1"
         })
     }
+
+    fun logSummaryMarkedInterrupted(summaryKey: String, childKey: String) {
+        buffer.log(TAG, LogLevel.DEBUG, {
+            str1 = summaryKey
+            str2 = childKey
+        }, {
+            "marked group summary as interrupted: $str1 for alert transfer to child: $str2"
+        })
+    }
 }
