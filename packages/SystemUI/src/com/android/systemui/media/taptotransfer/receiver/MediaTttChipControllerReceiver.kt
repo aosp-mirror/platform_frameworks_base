@@ -189,7 +189,7 @@ class MediaTttChipControllerReceiver @Inject constructor(
     }
 
     private fun startRipple(rippleView: ReceiverChipRippleView) {
-        if (rippleView.rippleInProgress) {
+        if (rippleView.rippleInProgress()) {
             // Skip if ripple is still playing
             return
         }

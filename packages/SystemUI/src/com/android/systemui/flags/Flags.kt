@@ -230,7 +230,7 @@ object Flags {
     @JvmField val DREAM_MEDIA_TAP_TO_OPEN = UnreleasedFlag(906)
 
     // TODO(b/254513168): Tracking Bug
-    val UMO_SURFACE_RIPPLE = UnreleasedFlag(907)
+    @JvmField val UMO_SURFACE_RIPPLE = UnreleasedFlag(907)
 
     // 1000 - dock
     val SIMULATE_DOCK_THROUGH_CHARGING = ReleasedFlag(1000)
