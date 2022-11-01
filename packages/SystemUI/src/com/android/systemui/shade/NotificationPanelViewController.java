@@ -41,7 +41,6 @@ import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_N
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_QUICK_SETTINGS_EXPANDED;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
-import static com.android.systemui.statusbar.StatusBarState.SHADE_LOCKED;
 import static com.android.systemui.statusbar.VibratorHelper.TOUCH_VIBRATION_ATTRIBUTES;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_ALL;
 import static com.android.systemui.statusbar.notification.stack.StackStateAnimator.ANIMATION_DURATION_FOLD_TO_AOD;
@@ -1954,7 +1953,7 @@ public final class NotificationPanelViewController {
 
     public void closeQs() {
         cancelQsAnimation();
-        setQsExpansion(mQsMinExpansionHeight);
+        setQsExpansionHeight(mQsMinExpansionHeight);
     }
 
     @VisibleForTesting
@@ -1992,7 +1991,7 @@ public final class NotificationPanelViewController {
             }
             float height = mQsExpansionHeight;
             mQsExpansionAnimator.cancel();
-            setQsExpansion(height);
+            setQsExpansionHeight(height);
         }
         flingSettings(0 /* vel */, animateAway ? FLING_HIDE : FLING_COLLAPSE);
     }
@@ -2205,7 +2204,7 @@ public final class NotificationPanelViewController {
                     // Already tracking because onOverscrolled was called. We need to update here
                     // so we don't stop for a frame until the next touch event gets handled in
                     // onTouchEvent.
-                    setQsExpansion(h + mInitialHeightOnTouch);
+                    setQsExpansionHeight(h + mInitialHeightOnTouch);
                     trackMovement(event);
                     return true;
                 } else {
@@ -2616,7 +2615,7 @@ public final class NotificationPanelViewController {
             case MotionEvent.ACTION_MOVE:
                 if (DEBUG_LOGCAT) Log.d(TAG, "onQSTouch move");
                 mShadeLog.logMotionEvent(event, "onQsTouch: move action, setting QS expansion");
-                setQsExpansion(h + mInitialHeightOnTouch);
+                setQsExpansionHeight(h + mInitialHeightOnTouch);
                 if (h >= getFalsingThreshold()) {
                     mQsTouchAboveFalsingThreshold = true;
                 }
@@ -2663,7 +2662,7 @@ public final class NotificationPanelViewController {
 
         // Reset scroll position and apply that position to the expanded height.
         float height = mQsExpansionHeight;
-        setQsExpansion(height);
+        setQsExpansionHeight(height);
         updateExpandedHeightToMaxHeight();
         mNotificationStackScrollLayoutController.checkSnoozeLeavebehind();
 
@@ -2735,7 +2734,7 @@ public final class NotificationPanelViewController {
         mQs.setExpanded(mQsExpanded);
     }
 
-    void setQsExpansion(float height) {
+    void setQsExpansionHeight(float height) {
         height = Math.min(Math.max(height, mQsMinExpansionHeight), mQsMaxExpansionHeight);
         mQsFullyExpanded = height == mQsMaxExpansionHeight && mQsMaxExpansionHeight != 0;
         boolean qsAnimatingAway = !mQsAnimatorExpand && mAnimatingQS;
@@ -3157,12 +3156,13 @@ public final class NotificationPanelViewController {
                     delay);
             mIsQsTranslationResetAnimator = mQsTranslationForFullShadeTransition > 0.0f;
         }
-
-        if (mSplitShadeEnabled) {
-            updateQsExpansionForLockscreenToShadeTransition(pxAmount);
-        }
         float endPosition = 0;
         if (pxAmount > 0.0f) {
+            if (mSplitShadeEnabled) {
+                float qsHeight = MathUtils.lerp(mQsMinExpansionHeight, mQsMaxExpansionHeight,
+                        mLockscreenShadeTransitionController.getQSDragProgress());
+                setQsExpansionHeight(qsHeight);
+            }
             if (mNotificationStackScrollLayoutController.getVisibleNotificationCount() == 0
                     && !mMediaDataManager.hasActiveMediaOrRecommendation()) {
                 // No notifications are visible, let's animate to the height of qs instead
@@ -3198,18 +3198,6 @@ public final class NotificationPanelViewController {
         }
         mTransitionToFullShadeQSPosition = position;
         updateQsExpansion();
-    }
-
-    private void updateQsExpansionForLockscreenToShadeTransition(float pxAmount) {
-        float qsExpansion = 0;
-        if (pxAmount > 0.0f) {
-            qsExpansion = MathUtils.lerp(mQsMinExpansionHeight, mQsMaxExpansionHeight,
-                    mLockscreenShadeTransitionController.getQSDragProgress());
-        }
-        // SHADE_LOCKED means transition is over and we don't want further updates
-        if (mBarState != SHADE_LOCKED) {
-            setQsExpansion(qsExpansion);
-        }
     }
 
     /**
@@ -3329,7 +3317,7 @@ public final class NotificationPanelViewController {
             animator.setDuration(350);
         }
         animator.addUpdateListener(
-                animation -> setQsExpansion((Float) animation.getAnimatedValue()));
+                animation -> setQsExpansionHeight((Float) animation.getAnimatedValue()));
         animator.addListener(new AnimatorListenerAdapter() {
             private boolean mIsCanceled;
 
@@ -3470,7 +3458,7 @@ public final class NotificationPanelViewController {
             }
             float targetHeight = mQsMinExpansionHeight
                     + qsExpansionFraction * (mQsMaxExpansionHeight - mQsMinExpansionHeight);
-            setQsExpansion(targetHeight);
+            setQsExpansionHeight(targetHeight);
         }
         updateExpandedHeight(expandedHeight);
         updateHeader();
@@ -5339,7 +5327,7 @@ public final class NotificationPanelViewController {
             mQsExpansionFromOverscroll = rounded != 0f;
             mLastOverscroll = rounded;
             updateQsState();
-            setQsExpansion(mQsMinExpansionHeight + rounded);
+            setQsExpansionHeight(mQsMinExpansionHeight + rounded);
         }
 
         @Override
@@ -5356,7 +5344,7 @@ public final class NotificationPanelViewController {
                 // make sure we can expand
                 setOverScrolling(false);
             }
-            setQsExpansion(mQsExpansionHeight);
+            setQsExpansionHeight(mQsExpansionHeight);
             boolean canExpand = isQsExpansionEnabled();
             flingSettings(!canExpand && open ? 0f : velocity,
                     open && canExpand ? FLING_EXPAND : FLING_COLLAPSE, () -> {
@@ -5549,7 +5537,7 @@ public final class NotificationPanelViewController {
                 }
             } else {
                 // this else branch means we are doing one of:
-                //  - from KEYGUARD and SHADE (but not expanded shade)
+                //  - from KEYGUARD to SHADE (but not fully expanded as when swiping from the top)
                 //  - from SHADE to KEYGUARD
                 //  - from SHADE_LOCKED to SHADE
                 //  - getting notified again about the current SHADE or KEYGUARD state
@@ -5718,7 +5706,7 @@ public final class NotificationPanelViewController {
                     startQsSizeChangeAnimation(oldMaxHeight, mQsMaxExpansionHeight);
                 }
             } else if (!mQsExpanded && mQsExpansionAnimator == null) {
-                setQsExpansion(mQsMinExpansionHeight + mLastOverscroll);
+                setQsExpansionHeight(mQsMinExpansionHeight + mLastOverscroll);
             } else {
                 mShadeLog.v("onLayoutChange: qs expansion not set");
             }
