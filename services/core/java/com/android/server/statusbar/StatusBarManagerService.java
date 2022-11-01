@@ -16,12 +16,15 @@
 
 package com.android.server.statusbar;
 
+import static android.Manifest.permission.INTERACT_ACROSS_USERS;
+import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.app.StatusBarManager.DISABLE2_GLOBAL_ACTIONS;
 import static android.app.StatusBarManager.DISABLE2_NOTIFICATION_SHADE;
 import static android.app.StatusBarManager.NAV_BAR_MODE_DEFAULT;
 import static android.app.StatusBarManager.NAV_BAR_MODE_KIDS;
 import static android.app.StatusBarManager.NavBarMode;
 import static android.app.StatusBarManager.SessionFlags;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY;
 
@@ -1304,6 +1307,11 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
                 "StatusBarManagerService");
     }
 
+    private boolean doesCallerHoldInteractAcrossUserPermission() {
+        return mContext.checkCallingPermission(INTERACT_ACROSS_USERS_FULL) == PERMISSION_GRANTED
+                || mContext.checkCallingPermission(INTERACT_ACROSS_USERS) == PERMISSION_GRANTED;
+    }
+
     /**
      *  For targetSdk S+ we require STATUS_BAR. For targetSdk < S, we only require EXPAND_STATUS_BAR
      *  but also require that it falls into one of the allowed use-cases to lock down abuse vector.
@@ -1315,7 +1323,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
             enforceStatusBar();
         } else {
             if (mContext.checkPermission(Manifest.permission.STATUS_BAR, pid, uid)
-                    != PackageManager.PERMISSION_GRANTED) {
+                    != PERMISSION_GRANTED) {
                 enforceExpandStatusBar();
                 if (!mActivityTaskManager.canCloseSystemDialogs(pid, uid)) {
                     Slog.e(TAG, "Permission Denial: Method " + method + "() requires permission "
@@ -2021,6 +2029,11 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         }
 
         final int userId = mCurrentUserId;
+        final int callingUserId = UserHandle.getUserId(Binder.getCallingUid());
+        if (mCurrentUserId != callingUserId && !doesCallerHoldInteractAcrossUserPermission()) {
+            throw new SecurityException("Calling user id: " + callingUserId
+                    + ", cannot call on behalf of current user id: " + mCurrentUserId + ".");
+        }
         final long userIdentity = Binder.clearCallingIdentity();
         try {
             Settings.Secure.putIntForUser(mContext.getContentResolver(),
