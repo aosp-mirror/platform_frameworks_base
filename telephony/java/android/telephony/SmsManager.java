@@ -2268,7 +2268,21 @@ public final class SmsManager {
             RESULT_RIL_SIM_ABSENT,
             RESULT_RIL_SIMULTANEOUS_SMS_AND_CALL_NOT_ALLOWED,
             RESULT_RIL_ACCESS_BARRED,
-            RESULT_RIL_BLOCKED_DUE_TO_CALL
+            RESULT_RIL_BLOCKED_DUE_TO_CALL,
+            RESULT_RIL_GENERIC_ERROR,
+            RESULT_RIL_INVALID_RESPONSE,
+            RESULT_RIL_SIM_PIN2,
+            RESULT_RIL_SIM_PUK2,
+            RESULT_RIL_SUBSCRIPTION_NOT_AVAILABLE,
+            RESULT_RIL_SIM_ERROR,
+            RESULT_RIL_INVALID_SIM_STATE,
+            RESULT_RIL_NO_SMS_TO_ACK,
+            RESULT_RIL_SIM_BUSY,
+            RESULT_RIL_SIM_FULL,
+            RESULT_RIL_NO_SUBSCRIPTION,
+            RESULT_RIL_NO_NETWORK_FOUND,
+            RESULT_RIL_DEVICE_IN_USE,
+            RESULT_RIL_ABORTED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Result {}
@@ -2534,7 +2548,7 @@ public final class SmsManager {
     public static final int RESULT_RIL_SIM_ABSENT = 120;
 
     /**
-     * 1X voice and SMS are not allowed simulteneously.
+     * 1X voice and SMS are not allowed simultaneously.
      */
     public static final int RESULT_RIL_SIMULTANEOUS_SMS_AND_CALL_NOT_ALLOWED = 121;
 
@@ -2552,6 +2566,73 @@ public final class SmsManager {
      * A RIL error occurred during the SMS send.
      */
     public static final int RESULT_RIL_GENERIC_ERROR = 124;
+
+    /**
+     * A RIL internal error when one of the RIL layers receives an unrecognized response from a
+     * lower layer.
+     */
+    public static final int RESULT_RIL_INVALID_RESPONSE = 125;
+
+    /**
+     * Operation requires SIM PIN2 to be entered
+     */
+    public static final int RESULT_RIL_SIM_PIN2 = 126;
+
+    /**
+     * Operation requires SIM PUK2 to be entered
+     */
+    public static final int RESULT_RIL_SIM_PUK2 = 127;
+
+    /**
+     * Fail to find CDMA subscription from specified location
+     */
+    public static final int RESULT_RIL_SUBSCRIPTION_NOT_AVAILABLE = 128;
+
+    /**
+     * Received error from SIM card
+     */
+    public static final int RESULT_RIL_SIM_ERROR = 129;
+
+    /**
+     * Cannot process the request in current SIM state
+     */
+    public static final int RESULT_RIL_INVALID_SIM_STATE = 130;
+
+    /**
+     * ACK received when there is no SMS to ack
+     */
+    public static final int RESULT_RIL_NO_SMS_TO_ACK = 131;
+
+    /**
+     * SIM is busy
+     */
+    public static final int RESULT_RIL_SIM_BUSY = 132;
+
+    /**
+     * The target EF is full
+     */
+    public static final int RESULT_RIL_SIM_FULL = 133;
+
+    /**
+     * Device does not have subscription
+     */
+    public static final int RESULT_RIL_NO_SUBSCRIPTION = 134;
+
+    /**
+     * Network cannot be found
+     */
+    public static final int RESULT_RIL_NO_NETWORK_FOUND = 135;
+
+    /**
+     * Operation cannot be performed because the device is currently in use
+     */
+    public static final int RESULT_RIL_DEVICE_IN_USE = 136;
+
+    /**
+     * Operation aborted
+     */
+    public static final int RESULT_RIL_ABORTED = 137;
+
 
     // SMS receiving results sent as a "result" extra in {@link Intents.SMS_REJECTED_ACTION}
 

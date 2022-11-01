@@ -16,6 +16,7 @@
 
 package com.android.settingslib.spa.gallery
 
+import android.content.Context
 import com.android.settingslib.spa.framework.common.LocalLogger
 import com.android.settingslib.spa.framework.common.SettingsPageProviderRepository
 import com.android.settingslib.spa.framework.common.SpaEnvironment
@@ -49,7 +50,7 @@ enum class SettingsPageProviderEnum(val displayName: String) {
     // Add your SPPs
 }
 
-object GallerySpaEnvironment : SpaEnvironment() {
+class GallerySpaEnvironment(context: Context) : SpaEnvironment(context) {
     override val pageProviderRepository = lazy {
         SettingsPageProviderRepository(
             allPageProviders = listOf(

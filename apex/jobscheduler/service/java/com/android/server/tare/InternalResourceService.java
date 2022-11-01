@@ -670,7 +670,7 @@ public class InternalResourceService extends SystemService {
         final long shortfall = (mCurrentBatteryLevel - QUANTITATIVE_EASING_BATTERY_THRESHOLD)
                 * currentConsumptionLimit / 100;
         final long newConsumptionLimit = Math.min(currentConsumptionLimit + shortfall,
-                mCompleteEconomicPolicy.getHardSatiatedConsumptionLimit());
+                mCompleteEconomicPolicy.getMaxSatiatedConsumptionLimit());
         if (newConsumptionLimit != currentConsumptionLimit) {
             Slog.i(TAG, "Increasing consumption limit from " + cakeToString(currentConsumptionLimit)
                     + " to " + cakeToString(newConsumptionLimit));
@@ -720,12 +720,12 @@ public class InternalResourceService extends SystemService {
             // The stock is too low. We're doing pretty well. We can increase the stock slightly
             // to let apps do more work in the background.
             newConsumptionLimit = Math.min((long) (currentConsumptionLimit * 1.01),
-                    mCompleteEconomicPolicy.getHardSatiatedConsumptionLimit());
+                    mCompleteEconomicPolicy.getMaxSatiatedConsumptionLimit());
         } else if (percentageOfTarget < 100) {
             // The stock is too high IMO. We're below the target. Decrease the stock to reduce
             // background work.
             newConsumptionLimit = Math.max((long) (currentConsumptionLimit * .98),
-                    mCompleteEconomicPolicy.getInitialSatiatedConsumptionLimit());
+                    mCompleteEconomicPolicy.getMinSatiatedConsumptionLimit());
         } else {
             // The stock is just right.
             return;
@@ -957,9 +957,9 @@ public class InternalResourceService extends SystemService {
             } else {
                 mScribe.loadFromDiskLocked();
                 if (mScribe.getSatiatedConsumptionLimitLocked()
-                        < mCompleteEconomicPolicy.getInitialSatiatedConsumptionLimit()
+                        < mCompleteEconomicPolicy.getMinSatiatedConsumptionLimit()
                         || mScribe.getSatiatedConsumptionLimitLocked()
-                        > mCompleteEconomicPolicy.getHardSatiatedConsumptionLimit()) {
+                        > mCompleteEconomicPolicy.getMaxSatiatedConsumptionLimit()) {
                     // Reset the consumption limit since several factors may have changed.
                     mScribe.setConsumptionLimitLocked(
                             mCompleteEconomicPolicy.getInitialSatiatedConsumptionLimit());
@@ -1442,17 +1442,16 @@ public class InternalResourceService extends SystemService {
 
         private void updateEconomicPolicy() {
             synchronized (mLock) {
-                final long initialLimit =
-                        mCompleteEconomicPolicy.getInitialSatiatedConsumptionLimit();
-                final long hardLimit = mCompleteEconomicPolicy.getHardSatiatedConsumptionLimit();
+                final long minLimit = mCompleteEconomicPolicy.getMinSatiatedConsumptionLimit();
+                final long maxLimit = mCompleteEconomicPolicy.getMaxSatiatedConsumptionLimit();
                 final int oldEnabledPolicies = mCompleteEconomicPolicy.getEnabledPolicyIds();
                 mCompleteEconomicPolicy.tearDown();
                 mCompleteEconomicPolicy = new CompleteEconomicPolicy(InternalResourceService.this);
                 if (mIsEnabled && mBootPhase >= PHASE_THIRD_PARTY_APPS_CAN_START) {
                     mCompleteEconomicPolicy.setup(getAllDeviceConfigProperties());
-                    if (initialLimit != mCompleteEconomicPolicy.getInitialSatiatedConsumptionLimit()
-                            || hardLimit
-                            != mCompleteEconomicPolicy.getHardSatiatedConsumptionLimit()) {
+                    if (minLimit != mCompleteEconomicPolicy.getMinSatiatedConsumptionLimit()
+                            || maxLimit
+                            != mCompleteEconomicPolicy.getMaxSatiatedConsumptionLimit()) {
                         // Reset the consumption limit since several factors may have changed.
                         mScribe.setConsumptionLimitLocked(
                                 mCompleteEconomicPolicy.getInitialSatiatedConsumptionLimit());

@@ -36,7 +36,8 @@ public final class Credential implements Parcelable {
      *
      * @hide
      */
-    @NonNull public static final String TYPE_PASSWORD = "android.credentials.TYPE_PASSWORD";
+    @NonNull public static final String TYPE_PASSWORD_CREDENTIAL =
+            "android.credentials.TYPE_PASSWORD_CREDENTIAL";
 
     /**
      * The credential type.

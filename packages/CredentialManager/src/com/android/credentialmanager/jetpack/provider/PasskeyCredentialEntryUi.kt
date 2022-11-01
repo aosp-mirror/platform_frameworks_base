@@ -14,59 +14,49 @@
  * limitations under the License.
  */
 
-package com.android.credentialmanager.jetpack
+package com.android.credentialmanager.jetpack.provider
 
 import android.app.slice.Slice
 import android.credentials.ui.Entry
 import android.graphics.drawable.Icon
 
-/**
- * UI representation for a save entry used during the create credential flow.
- *
- * TODO: move to jetpack.
- */
-class SaveEntryUi(
-  val userProviderAccountName: CharSequence,
-  val credentialTypeIcon: Icon?,
-  val profileIcon: Icon?,
-  val passwordCount: Int?,
-  val passkeyCount: Int?,
-  val totalCredentialCount: Int?,
-  val lastUsedTimeMillis: Long?,
-) {
+class PasskeyCredentialEntryUi(
+  val userName: CharSequence,
+  val userDisplayName: CharSequence?,
+  credentialTypeIcon: Icon,
+  profileIcon: Icon?,
+  lastUsedTimeMillis: Long?,
+  note: CharSequence?,
+) : CredentialEntryUi(credentialTypeIcon, profileIcon, lastUsedTimeMillis, note) {
   companion object {
-    fun fromSlice(slice: Slice): SaveEntryUi {
-      var userProviderAccountName: CharSequence? = null
+    fun fromSlice(slice: Slice): CredentialEntryUi {
+      var userName: CharSequence? = null
+      var userDisplayName: CharSequence? = null
       var credentialTypeIcon: Icon? = null
       var profileIcon: Icon? = null
-      var passwordCount: Int? = null
-      var passkeyCount: Int? = null
-      var totalCredentialCount: Int? = null
       var lastUsedTimeMillis: Long? = null
-
+      var note: CharSequence? = null
 
       val items = slice.items
       items.forEach {
-        if (it.hasHint(Entry.HINT_USER_PROVIDER_ACCOUNT_NAME)) {
-          userProviderAccountName = it.text
+        if (it.hasHint(Entry.HINT_USER_NAME)) {
+          userName = it.text
+        } else if (it.hasHint(Entry.HINT_PASSKEY_USER_DISPLAY_NAME)) {
+          userDisplayName = it.text
         } else if (it.hasHint(Entry.HINT_CREDENTIAL_TYPE_ICON)) {
           credentialTypeIcon = it.icon
         } else if (it.hasHint(Entry.HINT_PROFILE_ICON)) {
           profileIcon = it.icon
-        } else if (it.hasHint(Entry.HINT_PASSWORD_COUNT)) {
-          passwordCount = it.int
-        } else if (it.hasHint(Entry.HINT_PASSKEY_COUNT)) {
-          passkeyCount = it.int
-        } else if (it.hasHint(Entry.HINT_TOTAL_CREDENTIAL_COUNT)) {
-          totalCredentialCount = it.int
         } else if (it.hasHint(Entry.HINT_LAST_USED_TIME_MILLIS)) {
           lastUsedTimeMillis = it.long
+        } else if (it.hasHint(Entry.HINT_NOTE)) {
+          note = it.text
         }
       }
       // TODO: fail NPE more elegantly.
-      return SaveEntryUi(
-        userProviderAccountName!!, credentialTypeIcon, profileIcon,
-        passwordCount, passkeyCount, totalCredentialCount, lastUsedTimeMillis,
+      return PasskeyCredentialEntryUi(
+        userName!!, userDisplayName, credentialTypeIcon!!,
+        profileIcon, lastUsedTimeMillis, note,
       )
     }
   }

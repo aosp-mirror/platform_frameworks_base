@@ -36,7 +36,7 @@ import com.android.credentialmanager.createflow.CreateScreenState
 import com.android.credentialmanager.createflow.RequestDisplayInfo
 import com.android.credentialmanager.getflow.GetCredentialUiState
 import com.android.credentialmanager.getflow.GetScreenState
-import com.android.credentialmanager.jetpack.CredentialEntryUi.Companion.TYPE_PUBLIC_KEY_CREDENTIAL
+import com.android.credentialmanager.jetpack.provider.CredentialEntryUi.Companion.TYPE_PUBLIC_KEY_CREDENTIAL
 
 // Consider repo per screen, similar to view model?
 class CredentialManagerRepo(

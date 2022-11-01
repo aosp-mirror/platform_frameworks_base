@@ -489,19 +489,22 @@ public class FlexibilityControllerTest {
         JobInfo.Builder jb = createJob(0).setOverrideDeadline(1000L);
         JobStatus js = createJobStatus("time", jb);
         js = new JobStatus(
-                js, FROZEN_TIME, NO_LATEST_RUNTIME, /* numFailures */ 2, FROZEN_TIME, FROZEN_TIME);
+                js, FROZEN_TIME, NO_LATEST_RUNTIME, /* numFailures */ 2, /* numSystemStops */ 0,
+                FROZEN_TIME, FROZEN_TIME);
 
         assertEquals(mFcConfig.RESCHEDULED_JOB_DEADLINE_MS,
                 mFlexibilityController.getLifeCycleEndElapsedLocked(js, 0));
 
         js = new JobStatus(
-                js, FROZEN_TIME, NO_LATEST_RUNTIME, /* numFailures */ 3, FROZEN_TIME, FROZEN_TIME);
+                js, FROZEN_TIME, NO_LATEST_RUNTIME, /* numFailures */ 2, /* numSystemStops */ 1,
+                FROZEN_TIME, FROZEN_TIME);
 
         assertEquals(2 * mFcConfig.RESCHEDULED_JOB_DEADLINE_MS,
                 mFlexibilityController.getLifeCycleEndElapsedLocked(js, 0));
 
         js = new JobStatus(
-                js, FROZEN_TIME, NO_LATEST_RUNTIME, /* numFailures */ 10, FROZEN_TIME, FROZEN_TIME);
+                js, FROZEN_TIME, NO_LATEST_RUNTIME, /* numFailures */ 0, /* numSystemStops */ 10,
+                FROZEN_TIME, FROZEN_TIME);
         assertEquals(mFcConfig.MAX_RESCHEDULED_DEADLINE_MS,
                 mFlexibilityController.getLifeCycleEndElapsedLocked(js, 0));
     }
@@ -637,7 +640,12 @@ public class FlexibilityControllerTest {
         JobInfo.Builder jb = createJob(0);
         JobStatus js = createJobStatus("time", jb);
         js = new JobStatus(
-                js, FROZEN_TIME, NO_LATEST_RUNTIME, /* numFailures */ 1, FROZEN_TIME, FROZEN_TIME);
+                js, FROZEN_TIME, NO_LATEST_RUNTIME, /* numFailures */ 1, /* numSystemStops */ 0,
+                FROZEN_TIME, FROZEN_TIME);
+        assertFalse(js.hasFlexibilityConstraint());
+        js = new JobStatus(
+                js, FROZEN_TIME, NO_LATEST_RUNTIME, /* numFailures */ 0, /* numSystemStops */ 1,
+                FROZEN_TIME, FROZEN_TIME);
         assertFalse(js.hasFlexibilityConstraint());
     }
 

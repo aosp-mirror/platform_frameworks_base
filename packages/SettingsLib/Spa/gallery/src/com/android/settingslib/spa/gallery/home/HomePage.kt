@@ -22,6 +22,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.android.settingslib.spa.framework.common.SettingsEntry
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
+import com.android.settingslib.spa.framework.common.SpaEnvironmentFactory
 import com.android.settingslib.spa.framework.common.createSettingsPage
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.gallery.R
@@ -76,6 +77,7 @@ object HomePageProvider : SettingsPageProvider {
 @Preview(showBackground = true)
 @Composable
 private fun HomeScreenPreview() {
+    SpaEnvironmentFactory.resetForPreview()
     SettingsTheme {
         HomePageProvider.Page(null)
     }
