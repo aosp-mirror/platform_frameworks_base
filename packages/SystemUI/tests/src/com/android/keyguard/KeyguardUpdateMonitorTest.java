@@ -1162,7 +1162,10 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     public void testStartsListeningForSfps_whenKeyguardIsVisible_ifRequireScreenOnToAuthEnabled()
             throws RemoteException {
         // SFPS supported and enrolled
-        setup_SfpsProps();
+        final ArrayList<FingerprintSensorPropertiesInternal> props = new ArrayList<>();
+        props.add(newFingerprintSensorPropertiesInternal(TYPE_POWER_BUTTON));
+        when(mAuthController.getSfpsProps()).thenReturn(props);
+        when(mAuthController.isSfpsEnrolled(anyInt())).thenReturn(true);
 
         // WHEN require screen on to auth is disabled, and keyguard is not awake
         when(mSecureSettings.getIntForUser(anyString(), anyInt(), anyInt())).thenReturn(0);
@@ -1201,12 +1204,6 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         assertThat(mKeyguardUpdateMonitor.shouldListenForFingerprint(false)).isTrue();
     }
 
-    private void setup_SfpsProps() {
-        final ArrayList<FingerprintSensorPropertiesInternal> props = new ArrayList<>();
-        props.add(newFingerprintSensorPropertiesInternal(TYPE_POWER_BUTTON));
-        when(mAuthController.getSfpsProps()).thenReturn(props);
-        when(mAuthController.isSfpsEnrolled(anyInt())).thenReturn(true);
-    }
 
     private FingerprintSensorPropertiesInternal newFingerprintSensorPropertiesInternal(
             @FingerprintSensorProperties.SensorType int sensorType) {
