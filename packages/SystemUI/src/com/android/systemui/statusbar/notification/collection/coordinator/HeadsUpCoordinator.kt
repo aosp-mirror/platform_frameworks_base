@@ -198,6 +198,13 @@ class HeadsUpCoordinator @Inject constructor(
             // At this point we just need to initiate the transfer
             val summaryUpdate = mPostedEntries[logicalSummary.key]
 
+            // Because we now know for certain that some child is going to alert for this summary
+            // (as we have found a child to transfer the alert to), mark the group as having
+            // interrupted. This will allow us to know in the future that the "should heads up"
+            // state of this group has already been handled, just not via the summary entry itself.
+            logicalSummary.setInterruption()
+            mLogger.logSummaryMarkedInterrupted(logicalSummary.key, childToReceiveParentAlert.key)
+
             // If the summary was not attached, then remove the alert from the detached summary.
             // Otherwise we can simply ignore its posted update.
             if (!isSummaryAttached) {
