@@ -1933,6 +1933,11 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. "shared storage" refers to a storage space on the device that all apps with this permission can read from. [CHAR LIMIT=none] -->
     <string name="permdesc_readMediaImages">Allows the app to read image files from your shared storage.</string>
 
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. "shared storage" refers to a storage space on the device that all apps with this permission can read from. [CHAR LIMIT=none] -->
+    <string name="permlab_readVisualUserSelect">read user selected image and video files from shared storage</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. "shared storage" refers to a storage space on the device that all apps with this permission can read from. [CHAR LIMIT=none] -->
+    <string name="permdesc_readVisualUserSelect">Allows the app to read image and video files that you select from your shared storage.</string>
+
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. "shared storage" refers to a storage space on the device that all apps with this permission can write to. [CHAR LIMIT=none] -->
     <string name="permlab_sdcardWrite">modify or delete the contents of your shared storage</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. "shared storage" refers to a storage space on the device that all apps with this permission can write to. [CHAR LIMIT=none] -->

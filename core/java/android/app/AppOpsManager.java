@@ -1360,9 +1360,17 @@ public class AppOpsManager {
      */
     public static final int OP_RUN_LONG_JOBS = AppProtoEnums.APP_OP_RUN_LONG_JOBS;
 
+    /**
+     * Notify apps that they have been granted URI permission photos
+     *
+     * @hide
+     */
+    public static final int OP_READ_MEDIA_VISUAL_USER_SELECTED =
+            AppProtoEnums.APP_OP_READ_MEDIA_VISUAL_USER_SELECTED;
+
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int _NUM_OP = 123;
+    public static final int _NUM_OP = 124;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -1833,6 +1841,14 @@ public class AppOpsManager {
     @SystemApi
     public static final String OPSTR_RECEIVE_AMBIENT_TRIGGER_AUDIO =
             "android:receive_ambient_trigger_audio";
+    /**
+     * Notify apps that they have been granted URI permission photos
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String OPSTR_READ_MEDIA_VISUAL_USER_SELECTED =
+            "android:read_media_visual_user_selected";
 
     /**
      * Record audio from near-field microphone (ie. TV remote)
@@ -1948,6 +1964,7 @@ public class AppOpsManager {
             OP_MANAGE_MEDIA,
             OP_TURN_SCREEN_ON,
             OP_RUN_LONG_JOBS,
+            OP_READ_MEDIA_VISUAL_USER_SELECTED,
     };
 
     static final AppOpInfo[] sAppOpInfos = new AppOpInfo[]{
@@ -2329,7 +2346,11 @@ public class AppOpsManager {
                 "RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO").setDefaultMode(
                 AppOpsManager.MODE_ALLOWED).build(),
         new AppOpInfo.Builder(OP_RUN_LONG_JOBS, OPSTR_RUN_LONG_JOBS, "RUN_LONG_JOBS")
-                .setPermission(Manifest.permission.RUN_LONG_JOBS).build()
+                .setPermission(Manifest.permission.RUN_LONG_JOBS).build(),
+            new AppOpInfo.Builder(OP_READ_MEDIA_VISUAL_USER_SELECTED,
+                    OPSTR_READ_MEDIA_VISUAL_USER_SELECTED, "READ_MEDIA_VISUAL_USER_SELECTED")
+                    .setPermission(Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED)
+                    .setDefaultMode(AppOpsManager.MODE_ALLOWED).build()
     };
 
     /**
