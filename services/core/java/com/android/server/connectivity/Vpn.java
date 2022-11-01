@@ -28,6 +28,7 @@ import static android.net.VpnManager.NOTIFICATION_CHANNEL_VPN;
 import static android.os.PowerWhitelistManager.REASON_VPN;
 import static android.os.UserHandle.PER_USER_RANGE;
 
+import static com.android.net.module.util.NetworkStackConstants.IPV6_MIN_MTU;
 import static com.android.server.vcn.util.PersistableBundleUtils.STRING_DESERIALIZER;
 
 import static java.util.Objects.requireNonNull;
@@ -84,6 +85,7 @@ import android.net.VpnManager;
 import android.net.VpnProfileState;
 import android.net.VpnService;
 import android.net.VpnTransportInfo;
+import android.net.ipsec.ike.ChildSaProposal;
 import android.net.ipsec.ike.ChildSessionCallback;
 import android.net.ipsec.ike.ChildSessionConfiguration;
 import android.net.ipsec.ike.ChildSessionParams;
@@ -93,6 +95,7 @@ import android.net.ipsec.ike.IkeSessionConfiguration;
 import android.net.ipsec.ike.IkeSessionConnectionInfo;
 import android.net.ipsec.ike.IkeSessionParams;
 import android.net.ipsec.ike.IkeTunnelConnectionParams;
+import android.net.ipsec.ike.exceptions.IkeIOException;
 import android.net.ipsec.ike.exceptions.IkeNetworkLostException;
 import android.net.ipsec.ike.exceptions.IkeNonProtocolException;
 import android.net.ipsec.ike.exceptions.IkeProtocolException;
@@ -140,6 +143,7 @@ import com.android.net.module.util.NetworkStackConstants;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.LocalServices;
 import com.android.server.net.BaseNetworkObserver;
+import com.android.server.vcn.util.MtuUtils;
 import com.android.server.vcn.util.PersistableBundleUtils;
 
 import libcore.io.IoUtils;
@@ -152,6 +156,8 @@ import java.io.OutputStream;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
@@ -165,6 +171,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -550,6 +557,24 @@ public class Vpn {
             } else {
                 return DATA_STALL_RESET_DELAYS_SEC[count];
             }
+        }
+
+        /** Gets the MTU of an interface using Java NetworkInterface primitives */
+        public int getJavaNetworkInterfaceMtu(@Nullable String iface, int defaultValue)
+                throws SocketException {
+            if (iface == null) return defaultValue;
+
+            final NetworkInterface networkInterface = NetworkInterface.getByName(iface);
+            return networkInterface == null ? defaultValue : networkInterface.getMTU();
+        }
+
+        /** Calculates the VPN Network's max MTU based on underlying network and configuration */
+        public int calculateVpnMtu(
+                @NonNull List<ChildSaProposal> childProposals,
+                int maxMtu,
+                int underlyingMtu,
+                boolean isIpv4) {
+            return MtuUtils.getMtu(childProposals, maxMtu, underlyingMtu, isIpv4);
         }
     }
 
@@ -1397,6 +1422,11 @@ public class Vpn {
     }
 
     private LinkProperties makeLinkProperties() {
+        // The design of disabling IPv6 is only enabled for IKEv2 VPN because it needs additional
+        // logic to handle IPv6 only VPN, and the IPv6 only VPN may be restarted when its MTU
+        // is lower than 1280. The logic is controlled by IKEv2VpnRunner, so the design is only
+        // enabled for IKEv2 VPN.
+        final boolean disableIPV6 = (isIkev2VpnRunner() && mConfig.mtu < IPV6_MIN_MTU);
         boolean allowIPv4 = mConfig.allowIPv4;
         boolean allowIPv6 = mConfig.allowIPv6;
 
@@ -1406,6 +1436,7 @@ public class Vpn {
 
         if (mConfig.addresses != null) {
             for (LinkAddress address : mConfig.addresses) {
+                if (disableIPV6 && address.isIpv6()) continue;
                 lp.addLinkAddress(address);
                 allowIPv4 |= address.getAddress() instanceof Inet4Address;
                 allowIPv6 |= address.getAddress() instanceof Inet6Address;
@@ -1414,8 +1445,9 @@ public class Vpn {
 
         if (mConfig.routes != null) {
             for (RouteInfo route : mConfig.routes) {
+                final InetAddress address = route.getDestination().getAddress();
+                if (disableIPV6 && address instanceof Inet6Address) continue;
                 lp.addRoute(route);
-                InetAddress address = route.getDestination().getAddress();
 
                 if (route.getType() == RouteInfo.RTN_UNICAST) {
                     allowIPv4 |= address instanceof Inet4Address;
@@ -1426,7 +1458,8 @@ public class Vpn {
 
         if (mConfig.dnsServers != null) {
             for (String dnsServer : mConfig.dnsServers) {
-                InetAddress address = InetAddresses.parseNumericAddress(dnsServer);
+                final InetAddress address = InetAddresses.parseNumericAddress(dnsServer);
+                if (disableIPV6 && address instanceof Inet6Address) continue;
                 lp.addDnsServer(address);
                 allowIPv4 |= address instanceof Inet4Address;
                 allowIPv6 |= address instanceof Inet6Address;
@@ -1440,7 +1473,7 @@ public class Vpn {
                     NetworkStackConstants.IPV4_ADDR_ANY, 0), null /*gateway*/,
                     null /*iface*/, RTN_UNREACHABLE));
         }
-        if (!allowIPv6) {
+        if (!allowIPv6 || disableIPV6) {
             lp.addRoute(new RouteInfo(new IpPrefix(
                     NetworkStackConstants.IPV6_ADDR_ANY, 0), null /*gateway*/,
                     null /*iface*/, RTN_UNREACHABLE));
@@ -1576,6 +1609,18 @@ public class Vpn {
         updateState(DetailedState.DISCONNECTED, "agentDisconnect");
     }
 
+    @GuardedBy("this")
+    private void startNewNetworkAgent(NetworkAgent oldNetworkAgent, String reason) {
+        // Initialize the state for a new agent, while keeping the old one connected
+        // in case this new connection fails.
+        mNetworkAgent = null;
+        updateState(DetailedState.CONNECTING, reason);
+        // Bringing up a new NetworkAgent to prevent the data leakage before tearing down the old
+        // NetworkAgent.
+        agentConnect();
+        agentDisconnect(oldNetworkAgent);
+    }
+
     /**
      * Establish a VPN network and return the file descriptor of the VPN interface. This methods
      * returns {@code null} if the application is revoked or not prepared.
@@ -1665,16 +1710,7 @@ public class Vpn {
                     setUnderlyingNetworks(config.underlyingNetworks);
                 }
             } else {
-                // Initialize the state for a new agent, while keeping the old one connected
-                // in case this new connection fails.
-                mNetworkAgent = null;
-                updateState(DetailedState.CONNECTING, "establish");
-                // Set up forwarding and DNS rules.
-                agentConnect();
-                // Remove the old tun's user forwarding rules
-                // The new tun's user rules have already been added above so they will take over
-                // as rules are deleted. This prevents data leakage as the rules are moved over.
-                agentDisconnect(oldNetworkAgent);
+                startNewNetworkAgent(oldNetworkAgent, "establish");
             }
 
             if (oldConnection != null) {
@@ -2711,6 +2747,17 @@ public class Vpn {
         void onSessionLost(int token, @Nullable Exception exception);
     }
 
+    private static boolean isIPv6Only(List<LinkAddress> linkAddresses) {
+        boolean hasIPV6 = false;
+        boolean hasIPV4 = false;
+        for (final LinkAddress address : linkAddresses) {
+            hasIPV6 |= address.isIpv6();
+            hasIPV4 |= address.isIpv4();
+        }
+
+        return hasIPV6 && !hasIPV4;
+    }
+
     /**
      * Internal class managing IKEv2/IPsec VPN connectivity
      *
@@ -2924,15 +2971,27 @@ public class Vpn {
 
             try {
                 final String interfaceName = mTunnelIface.getInterfaceName();
-                final int maxMtu = mProfile.getMaxMtu();
                 final List<LinkAddress> internalAddresses = childConfig.getInternalAddresses();
                 final List<String> dnsAddrStrings = new ArrayList<>();
+                int vpnMtu;
+                vpnMtu = calculateVpnMtu();
+
+                // If the VPN is IPv6 only and its MTU is lower than 1280, mark the network as lost
+                // and send the VpnManager event to the VPN app.
+                if (isIPv6Only(internalAddresses) && vpnMtu < IPV6_MIN_MTU) {
+                    onSessionLost(
+                            token,
+                            new IkeIOException(
+                                    new IOException("No valid addresses for MTU < 1280")));
+                    return;
+                }
 
                 final Collection<RouteInfo> newRoutes = VpnIkev2Utils.getRoutesFromTrafficSelectors(
                         childConfig.getOutboundTrafficSelectors());
                 for (final LinkAddress address : internalAddresses) {
                     mTunnelIface.addAddress(address.getAddress(), address.getPrefixLength());
                 }
+
                 for (InetAddress addr : childConfig.getInternalDnsServers()) {
                     dnsAddrStrings.add(addr.getHostAddress());
                 }
@@ -2950,7 +3009,7 @@ public class Vpn {
                     if (mVpnRunner != this) return;
 
                     mInterface = interfaceName;
-                    mConfig.mtu = maxMtu;
+                    mConfig.mtu = vpnMtu;
                     mConfig.interfaze = mInterface;
 
                     mConfig.addresses.clear();
@@ -3053,12 +3112,54 @@ public class Vpn {
                     // Ignore stale runner.
                     if (mVpnRunner != this) return;
 
+                    final LinkProperties oldLp = makeLinkProperties();
+
+                    final boolean underlyingNetworkHasChanged =
+                            !Arrays.equals(mConfig.underlyingNetworks, new Network[]{network});
                     mConfig.underlyingNetworks = new Network[] {network};
-                    mNetworkCapabilities =
-                            new NetworkCapabilities.Builder(mNetworkCapabilities)
-                                    .setUnderlyingNetworks(Collections.singletonList(network))
-                                    .build();
-                    doSetUnderlyingNetworks(mNetworkAgent, Collections.singletonList(network));
+                    mConfig.mtu = calculateVpnMtu();
+
+                    final LinkProperties newLp = makeLinkProperties();
+
+                    // If MTU is < 1280, IPv6 addresses will be removed. If there are no addresses
+                    // left (e.g. IPv6-only VPN network), mark VPN as having lost the session.
+                    if (newLp.getLinkAddresses().isEmpty()) {
+                        onSessionLost(
+                                token,
+                                new IkeIOException(
+                                        new IOException("No valid addresses for MTU < 1280")));
+                        return;
+                    }
+
+                    final Set<LinkAddress> removedAddrs = new HashSet<>(oldLp.getLinkAddresses());
+                    removedAddrs.removeAll(newLp.getLinkAddresses());
+
+                    // If addresses were removed despite no IKE config change, IPv6 addresses must
+                    // have been removed due to MTU size. Restart the VPN to ensure all IPv6
+                    // unconnected sockets on the new VPN network are closed and retried on the new
+                    // VPN network.
+                    if (!removedAddrs.isEmpty()) {
+                        startNewNetworkAgent(
+                                mNetworkAgent, "MTU too low for IPv6; restarting network agent");
+
+                        for (LinkAddress removed : removedAddrs) {
+                            mTunnelIface.removeAddress(
+                                    removed.getAddress(), removed.getPrefixLength());
+                        }
+                    } else {
+                        // Put below 3 updates into else block is because agentConnect() will do
+                        // those things, so there is no need to do the redundant work.
+                        if (!newLp.equals(oldLp)) doSendLinkProperties(mNetworkAgent, newLp);
+                        if (underlyingNetworkHasChanged) {
+                            mNetworkCapabilities =
+                                    new NetworkCapabilities.Builder(mNetworkCapabilities)
+                                            .setUnderlyingNetworks(
+                                                    Collections.singletonList(network))
+                                            .build();
+                            doSetUnderlyingNetworks(mNetworkAgent,
+                                    Collections.singletonList(network));
+                        }
+                    }
                 }
 
                 mTunnelIface.setUnderlyingNetwork(network);
@@ -3106,6 +3207,60 @@ public class Vpn {
             mRetryCount = 0;
 
             startOrMigrateIkeSession(network);
+        }
+
+        @NonNull
+        private IkeSessionParams getIkeSessionParams(@NonNull Network underlyingNetwork) {
+            final IkeTunnelConnectionParams ikeTunConnParams =
+                    mProfile.getIkeTunnelConnectionParams();
+            if (ikeTunConnParams != null) {
+                final IkeSessionParams.Builder builder =
+                        new IkeSessionParams.Builder(ikeTunConnParams.getIkeSessionParams())
+                                .setNetwork(underlyingNetwork);
+                return builder.build();
+            } else {
+                return VpnIkev2Utils.buildIkeSessionParams(mContext, mProfile, underlyingNetwork);
+            }
+        }
+
+        @NonNull
+        private ChildSessionParams getChildSessionParams() {
+            final IkeTunnelConnectionParams ikeTunConnParams =
+                    mProfile.getIkeTunnelConnectionParams();
+            if (ikeTunConnParams != null) {
+                return ikeTunConnParams.getTunnelModeChildSessionParams();
+            } else {
+                return VpnIkev2Utils.buildChildSessionParams(mProfile.getAllowedAlgorithms());
+            }
+        }
+
+        private int calculateVpnMtu() {
+            final Network underlyingNetwork = mIkeConnectionInfo.getNetwork();
+            final LinkProperties lp = mConnectivityManager.getLinkProperties(underlyingNetwork);
+            if (underlyingNetwork == null || lp == null) {
+                // Return the max MTU defined in VpnProfile as the fallback option when there is no
+                // underlying network or LinkProperties is null.
+                return mProfile.getMaxMtu();
+            }
+
+            int underlyingMtu = lp.getMtu();
+
+            // Try to get MTU from kernel if MTU is not set in LinkProperties.
+            if (underlyingMtu == 0) {
+                try {
+                    underlyingMtu = mDeps.getJavaNetworkInterfaceMtu(lp.getInterfaceName(),
+                            mProfile.getMaxMtu());
+                } catch (SocketException e) {
+                    Log.d(TAG, "Got a SocketException when getting MTU from kernel: " + e);
+                    return mProfile.getMaxMtu();
+                }
+            }
+
+            return mDeps.calculateVpnMtu(
+                    getChildSessionParams().getSaProposals(),
+                    mProfile.getMaxMtu(),
+                    underlyingMtu,
+                    mIkeConnectionInfo.getLocalAddress() instanceof Inet4Address);
         }
 
         /**
@@ -3158,24 +3313,6 @@ public class Vpn {
                 // (non-default) network, and start the new one.
                 resetIkeState();
 
-                // Get Ike options from IkeTunnelConnectionParams if it's available in the
-                // profile.
-                final IkeTunnelConnectionParams ikeTunConnParams =
-                        mProfile.getIkeTunnelConnectionParams();
-                final IkeSessionParams ikeSessionParams;
-                final ChildSessionParams childSessionParams;
-                if (ikeTunConnParams != null) {
-                    final IkeSessionParams.Builder builder = new IkeSessionParams.Builder(
-                            ikeTunConnParams.getIkeSessionParams()).setNetwork(underlyingNetwork);
-                    ikeSessionParams = builder.build();
-                    childSessionParams = ikeTunConnParams.getTunnelModeChildSessionParams();
-                } else {
-                    ikeSessionParams = VpnIkev2Utils.buildIkeSessionParams(
-                            mContext, mProfile, underlyingNetwork);
-                    childSessionParams = VpnIkev2Utils.buildChildSessionParams(
-                            mProfile.getAllowedAlgorithms());
-                }
-
                 // TODO: Remove the need for adding two unused addresses with
                 // IPsec tunnels.
                 final InetAddress address = InetAddress.getLocalHost();
@@ -3193,8 +3330,8 @@ public class Vpn {
                 mSession =
                         mIkev2SessionCreator.createIkeSession(
                                 mContext,
-                                ikeSessionParams,
-                                childSessionParams,
+                                getIkeSessionParams(underlyingNetwork),
+                                getChildSessionParams(),
                                 mExecutor,
                                 new VpnIkev2Utils.IkeSessionCallbackImpl(
                                         TAG, IkeV2VpnRunner.this, token),
