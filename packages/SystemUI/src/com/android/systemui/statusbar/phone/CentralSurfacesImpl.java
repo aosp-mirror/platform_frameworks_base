@@ -3488,10 +3488,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mNavigationBarController.showPinningEscapeToast(mDisplayId);
     }
 
-    /**
-     * TODO: Remove this method. Views should not be passed forward. Will cause theme issues.
-     * @return bottom area view
-     */
+    //TODO(b/254875405): this should be removed.
     @Override
     public KeyguardBottomAreaView getKeyguardBottomAreaView() {
         return mNotificationPanelViewController.getKeyguardBottomAreaView();
@@ -4204,7 +4201,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
      */
     @Override
     public void onBouncerPreHideAnimation() {
-        mNotificationPanelViewController.onBouncerPreHideAnimation();
+        mNotificationPanelViewController.startBouncerPreHideAnimation();
 
     }
 
