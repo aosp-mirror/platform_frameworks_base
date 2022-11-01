@@ -97,8 +97,8 @@ open class OpenAppFromLockNotificationCold(testSpec: FlickerTestParameter) :
         super.statusBarLayerPositionAtEnd()
 
     /** {@inheritDoc} */
-    @Postsubmit
     @Test
+    @Ignore("Not applicable to this CUJ. Display starts locked and app is full screen at the end")
     override fun navBarLayerIsVisibleAtStartAndEnd() = super.navBarLayerIsVisibleAtStartAndEnd()
 
     /** {@inheritDoc} */
