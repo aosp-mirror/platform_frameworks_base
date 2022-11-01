@@ -69,6 +69,7 @@ import com.android.wm.shell.common.InteractionJankMonitorUtils;
 import com.android.wm.shell.common.split.SplitScreenConstants.SplitPosition;
 
 import java.io.PrintWriter;
+import java.util.function.Consumer;
 
 /**
  * Records and handles layout of splits. Helps to calculate proper bounds when configuration or
@@ -599,7 +600,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
 
     /** Swich both surface position with animation. */
     public void splitSwitching(SurfaceControl.Transaction t, SurfaceControl leash1,
-            SurfaceControl leash2, Runnable finishCallback) {
+            SurfaceControl leash2, Consumer<Rect> finishCallback) {
         final boolean isLandscape = isLandscape();
         final Rect insets = getDisplayInsets(mContext);
         insets.set(isLandscape ? insets.left : 0, isLandscape ? 0 : insets.top,
@@ -617,18 +618,13 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         distBounds1.offset(-mRootBounds.left, -mRootBounds.top);
         distBounds2.offset(-mRootBounds.left, -mRootBounds.top);
         distDividerBounds.offset(-mRootBounds.left, -mRootBounds.top);
-        // DO NOT move to insets area for smooth animation.
-        distBounds1.set(distBounds1.left, distBounds1.top,
-                distBounds1.right - insets.right, distBounds1.bottom - insets.bottom);
-        distBounds2.set(distBounds2.left + insets.left, distBounds2.top + insets.top,
-                distBounds2.right, distBounds2.bottom);
 
         ValueAnimator animator1 = moveSurface(t, leash1, getRefBounds1(), distBounds1,
-                false /* alignStart */);
+                -insets.left, -insets.top);
         ValueAnimator animator2 = moveSurface(t, leash2, getRefBounds2(), distBounds2,
-                true /* alignStart */);
+                insets.left, insets.top);
         ValueAnimator animator3 = moveSurface(t, getDividerLeash(), getRefDividerBounds(),
-                distDividerBounds, true /* alignStart */);
+                distDividerBounds, 0 /* offsetX */, 0 /* offsetY */);
 
         AnimatorSet set = new AnimatorSet();
         set.playTogether(animator1, animator2, animator3);
@@ -638,14 +634,14 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
             public void onAnimationEnd(Animator animation) {
                 mDividePosition = dividerPos;
                 updateBounds(mDividePosition);
-                finishCallback.run();
+                finishCallback.accept(insets);
             }
         });
         set.start();
     }
 
     private ValueAnimator moveSurface(SurfaceControl.Transaction t, SurfaceControl leash,
-            Rect start, Rect end, boolean alignStart) {
+            Rect start, Rect end, float offsetX, float offsetY) {
         Rect tempStart = new Rect(start);
         Rect tempEnd = new Rect(end);
         final float diffX = tempEnd.left - tempStart.left;
@@ -661,15 +657,15 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
             final float distY = tempStart.top + scale * diffY;
             final int width = (int) (tempStart.width() + scale * diffWidth);
             final int height = (int) (tempStart.height() + scale * diffHeight);
-            if (alignStart) {
+            if (offsetX == 0 && offsetY == 0) {
                 t.setPosition(leash, distX, distY);
                 t.setWindowCrop(leash, width, height);
             } else {
-                final int offsetX = width - tempStart.width();
-                final int offsetY = height - tempStart.height();
-                t.setPosition(leash, distX + offsetX, distY + offsetY);
+                final int diffOffsetX = (int) (scale * offsetX);
+                final int diffOffsetY = (int) (scale * offsetY);
+                t.setPosition(leash, distX + diffOffsetX, distY + diffOffsetY);
                 mTempRect.set(0, 0, width, height);
-                mTempRect.offsetTo(-offsetX, -offsetY);
+                mTempRect.offsetTo(-diffOffsetX, -diffOffsetY);
                 t.setCrop(leash, mTempRect);
             }
             t.apply();
