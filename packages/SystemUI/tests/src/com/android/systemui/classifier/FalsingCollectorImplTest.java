@@ -267,4 +267,10 @@ public class FalsingCollectorImplTest extends SysuiTestCase {
         mFalsingCollector.onTouchEvent(up);
         verify(mFalsingDataProvider, times(2)).onMotionEvent(any(MotionEvent.class));
     }
+
+    @Test
+    public void testOnA11yAction() {
+        mFalsingCollector.onA11yAction();
+        verify(mFalsingDataProvider).onA11yAction();
+    }
 }
