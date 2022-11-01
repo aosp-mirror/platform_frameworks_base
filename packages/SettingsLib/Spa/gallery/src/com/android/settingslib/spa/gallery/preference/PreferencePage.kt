@@ -127,11 +127,11 @@ object PreferencePageProvider : SettingsPageProvider {
                 .setStatusDataFn { EntryStatusData(isDisabled = false) }
                 .setUiLayoutFn {
                     val model = PreferencePageModel.create()
-                    val asyncSummary = remember { model.getAsyncSummary() }
                     Preference(
                         object : PreferenceModel {
                             override val title = ASYNC_PREFERENCE_TITLE
-                            override val summary = asyncSummary
+                            override val summary = model.asyncSummary
+                            override val enabled = model.asyncEnable
                         }
                     )
                 }.build()
