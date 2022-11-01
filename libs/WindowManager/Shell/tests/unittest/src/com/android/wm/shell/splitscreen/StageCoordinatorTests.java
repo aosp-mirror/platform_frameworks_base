@@ -50,6 +50,7 @@ import android.view.SurfaceSession;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
+import androidx.test.annotation.UiThreadTest;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
@@ -113,6 +114,7 @@ public class StageCoordinatorTests extends ShellTestCase {
     private StageCoordinator mStageCoordinator;
 
     @Before
+    @UiThreadTest
     public void setup() {
         MockitoAnnotations.initMocks(this);
         mStageCoordinator = spy(new StageCoordinator(mContext, DEFAULT_DISPLAY, mSyncQueue,
