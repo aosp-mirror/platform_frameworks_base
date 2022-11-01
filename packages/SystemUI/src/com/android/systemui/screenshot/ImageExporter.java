@@ -38,6 +38,8 @@ import androidx.concurrent.futures.CallbackToFutureAdapter;
 import androidx.exifinterface.media.ExifInterface;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -85,10 +87,12 @@ class ImageExporter {
     private final ContentResolver mResolver;
     private CompressFormat mCompressFormat = CompressFormat.PNG;
     private int mQuality = 100;
+    private final FeatureFlags mFlags;
 
     @Inject
-    ImageExporter(ContentResolver resolver) {
+    ImageExporter(ContentResolver resolver, FeatureFlags flags) {
         mResolver = resolver;
+        mFlags = flags;
     }
 
     /**
@@ -161,7 +165,7 @@ class ImageExporter {
             ZonedDateTime captureTime, UserHandle owner) {
 
         final Task task = new Task(mResolver, requestId, bitmap, captureTime, mCompressFormat,
-                mQuality, /* publish */ true, owner);
+                mQuality, /* publish */ true, owner, mFlags);
 
         return CallbackToFutureAdapter.getFuture(
                 (completer) -> {
@@ -209,9 +213,11 @@ class ImageExporter {
         private final UserHandle mOwner;
         private final String mFileName;
         private final boolean mPublish;
+        private final FeatureFlags mFlags;
 
         Task(ContentResolver resolver, UUID requestId, Bitmap bitmap, ZonedDateTime captureTime,
-                CompressFormat format, int quality, boolean publish, UserHandle owner) {
+                CompressFormat format, int quality, boolean publish, UserHandle owner,
+                FeatureFlags flags) {
             mResolver = resolver;
             mRequestId = requestId;
             mBitmap = bitmap;
@@ -221,6 +227,7 @@ class ImageExporter {
             mOwner = owner;
             mFileName = createFilename(mCaptureTime, mFormat);
             mPublish = publish;
+            mFlags = flags;
         }
 
         public Result execute() throws ImageExportException, InterruptedException {
@@ -234,7 +241,7 @@ class ImageExporter {
                     start = Instant.now();
                 }
 
-                uri = createEntry(mResolver, mFormat, mCaptureTime, mFileName, mOwner);
+                uri = createEntry(mResolver, mFormat, mCaptureTime, mFileName, mOwner, mFlags);
                 throwIfInterrupted();
 
                 writeImage(mResolver, mBitmap, mFormat, mQuality, uri);
@@ -278,13 +285,15 @@ class ImageExporter {
     }
 
     private static Uri createEntry(ContentResolver resolver, CompressFormat format,
-            ZonedDateTime time, String fileName, UserHandle owner) throws ImageExportException {
+            ZonedDateTime time, String fileName, UserHandle owner, FeatureFlags flags)
+            throws ImageExportException {
         Trace.beginSection("ImageExporter_createEntry");
         try {
             final ContentValues values = createMetadata(time, format, fileName);
 
             Uri baseUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-            if (UserHandle.myUserId() != owner.getIdentifier()) {
+            if (flags.isEnabled(Flags.SCREENSHOT_WORK_PROFILE_POLICY)
+                    && UserHandle.myUserId() != owner.getIdentifier()) {
                 baseUri = ContentProvider.maybeAddUserId(baseUri, owner.getIdentifier());
             }
             Uri uri = resolver.insert(baseUri, values);
