@@ -48571,6 +48571,12 @@ package android.view {
     field public static final int VERTICAL_GRAVITY_MASK = 112; // 0x70
   }
 
+  public class HandwritingDelegateConfiguration {
+    ctor public HandwritingDelegateConfiguration(@IdRes int, @NonNull Runnable);
+    method public int getDelegatorViewId();
+    method @NonNull public Runnable getInitiationCallback();
+  }
+
   public class HapticFeedbackConstants {
     field public static final int CLOCK_TICK = 4; // 0x4
     field public static final int CONFIRM = 16; // 0x10
@@ -50187,6 +50193,7 @@ package android.view {
     method public float getHandwritingBoundsOffsetLeft();
     method public float getHandwritingBoundsOffsetRight();
     method public float getHandwritingBoundsOffsetTop();
+    method @Nullable public android.view.HandwritingDelegateConfiguration getHandwritingDelegateConfiguration();
     method public final boolean getHasOverlappingRendering();
     method public final int getHeight();
     method public void getHitRect(android.graphics.Rect);
@@ -50553,6 +50560,7 @@ package android.view {
     method public void setForegroundTintList(@Nullable android.content.res.ColorStateList);
     method public void setForegroundTintMode(@Nullable android.graphics.PorterDuff.Mode);
     method public void setHandwritingBoundsOffsets(float, float, float, float);
+    method public void setHandwritingDelegateConfiguration(@Nullable android.view.HandwritingDelegateConfiguration);
     method public void setHapticFeedbackEnabled(boolean);
     method public void setHasTransientState(boolean);
     method public void setHorizontalFadingEdgeEnabled(boolean);
