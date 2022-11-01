@@ -341,6 +341,15 @@ public class Transitions implements RemoteCallable<Transitions> {
             final SurfaceControl leash = change.getLeash();
             final int mode = info.getChanges().get(i).getMode();
 
+            if (mode == TRANSIT_TO_FRONT
+                    && ((change.getStartAbsBounds().height() != change.getEndAbsBounds().height()
+                    || change.getStartAbsBounds().width() != change.getEndAbsBounds().width()))) {
+                // When the window is moved to front with a different size, make sure the crop is
+                // updated to prevent it from using the old crop.
+                t.setWindowCrop(leash, change.getEndAbsBounds().width(),
+                        change.getEndAbsBounds().height());
+            }
+
             // Don't move anything that isn't independent within its parents
             if (!TransitionInfo.isIndependent(change, info)) {
                 if (mode == TRANSIT_OPEN || mode == TRANSIT_TO_FRONT || mode == TRANSIT_CHANGE) {
