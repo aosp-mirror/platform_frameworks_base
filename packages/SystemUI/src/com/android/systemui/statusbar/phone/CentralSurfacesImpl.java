@@ -281,6 +281,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     // 1020-1040 reserved for BaseStatusBar
 
     /**
+     * TODO(b/249277686) delete this
      * The delay to reset the hint text when the hint animation is finished running.
      */
     private static final int HINT_RESET_DELAY_MS = 1200;
@@ -1800,11 +1801,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     @Override
     public boolean isWakeUpComingFromTouch() {
         return mWakeUpComingFromTouch;
-    }
-
-    @Override
-    public boolean isFalsingThresholdNeeded() {
-        return true;
     }
 
     /**
@@ -3411,22 +3407,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         }
     }
 
-    @Override
-    public void onUnlockHintStarted() {
-        mFalsingCollector.onUnlockHintStarted();
-        mKeyguardIndicationController.showActionToUnlock();
-    }
-
-    @Override
-    public void onHintFinished() {
-        // Delay the reset a bit so the user can read the text.
-        mKeyguardIndicationController.hideTransientIndicationDelayed(HINT_RESET_DELAY_MS);
-    }
-
-    @Override
-    public void onTrackingStopped(boolean expand) {
-    }
-
     // TODO: Figure out way to remove these.
     @Override
     public NavigationBarView getNavigationBarView() {
@@ -4156,11 +4136,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     }
 
     // End Extra BaseStatusBarMethods.
-
-    @Override
-    public NotificationGutsManager getGutsManager() {
-        return mGutsManager;
-    }
 
     boolean isTransientShown() {
         return mTransientShown;
