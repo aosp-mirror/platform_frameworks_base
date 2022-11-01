@@ -4729,8 +4729,6 @@ public final class NotificationPanelViewController {
 
     private void startOpening(MotionEvent event) {
         updatePanelExpansionAndVisibility();
-        // Reset at start so haptic can be triggered as soon as panel starts to open.
-        mHasVibratedOnOpen = false;
         //TODO: keyguard opens QS a different way; log that too?
 
         // Log the position of the swipe that opened the panel
@@ -6214,6 +6212,10 @@ public final class NotificationPanelViewController {
                     }
                     break;
                 case MotionEvent.ACTION_MOVE:
+                    if (isFullyCollapsed()) {
+                        // If panel is fully collapsed, reset haptic effect before adding movement.
+                        mHasVibratedOnOpen = false;
+                    }
                     addMovement(event);
                     if (!isFullyCollapsed()) {
                         maybeVibrateOnOpening(true /* openingWithTouch */);
