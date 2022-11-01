@@ -59,7 +59,6 @@ import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.BiometricScheduler;
 import com.android.server.biometrics.sensors.EnumerateConsumer;
 import com.android.server.biometrics.sensors.ErrorConsumer;
-import com.android.server.biometrics.sensors.Interruptable;
 import com.android.server.biometrics.sensors.LockoutCache;
 import com.android.server.biometrics.sensors.LockoutConsumer;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
@@ -638,7 +637,7 @@ public class Sensor {
 
     public void onBinderDied() {
         final BaseClientMonitor client = mScheduler.getCurrentClient();
-        if (client instanceof Interruptable) {
+        if (client.isInterruptable()) {
             Slog.e(mTag, "Sending ERROR_HW_UNAVAILABLE for client: " + client);
             final ErrorConsumer errorConsumer = (ErrorConsumer) client;
             errorConsumer.onError(FaceManager.FACE_ERROR_HW_UNAVAILABLE,

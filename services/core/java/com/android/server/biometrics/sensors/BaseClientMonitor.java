@@ -193,9 +193,9 @@ public abstract class BaseClientMonitor implements IBinder.DeathRecipient {
         }
 
         // If the current client dies we should cancel the current operation.
-        if (this instanceof Interruptable) {
+        if (this.isInterruptable()) {
             Slog.e(TAG, "Binder died, cancelling client");
-            ((Interruptable) this).cancel();
+            this.cancel();
         }
         mToken = null;
         if (clearListener) {
@@ -319,5 +319,13 @@ public abstract class BaseClientMonitor implements IBinder.DeathRecipient {
             Slog.w(TAG, "Failed to invoke sendError", e);
         }
         callback.onClientFinished(this, true /* success */);
+    }
+
+    /**
+     * Checks if other client monitor can interrupt current client monitor
+     * @return if current client can be interrupted
+     */
+    public boolean isInterruptable() {
+        return false;
     }
 }
