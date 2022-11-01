@@ -62,7 +62,7 @@ import org.mockito.Mockito.verifyZeroInteractions
 import org.mockito.Mockito.`when` as whenever
 
 private const val USER_ID = 1
-private const val TASK_ID = 1
+private const val TASK_ID = 11
 
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
