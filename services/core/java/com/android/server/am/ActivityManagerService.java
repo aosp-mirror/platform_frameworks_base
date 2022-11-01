@@ -13828,6 +13828,25 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    // Apply permission policy around the use of specific broadcast options
+    void enforceBroadcastOptionPermissionsInternal(@Nullable Bundle options, int callingUid) {
+        if (options != null && callingUid != Process.SYSTEM_UID) {
+            if (options.containsKey(BroadcastOptions.KEY_ALARM_BROADCAST)) {
+                if (DEBUG_BROADCAST_LIGHT) {
+                    Slog.w(TAG, "Non-system caller " + callingUid
+                            + " may not flag broadcast as alarm");
+                }
+                throw new SecurityException(
+                        "Non-system callers may not flag broadcasts as alarm");
+            }
+            if (options.containsKey(BroadcastOptions.KEY_INTERACTIVE_BROADCAST)) {
+                enforceCallingPermission(
+                        android.Manifest.permission.BROADCAST_OPTION_INTERACTIVE,
+                        "setInteractiveBroadcast");
+            }
+        }
+    }
+
     @GuardedBy("this")
     final int broadcastIntentLocked(ProcessRecord callerApp,
             String callerPackage, String callerFeatureId, Intent intent, String resolvedType,
@@ -14695,19 +14714,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             // We're delivering the result to the caller
             final ProcessRecord resultToApp = callerApp;
 
-            // Non-system callers can't declare that a broadcast is alarm-related.
-            // The PendingIntent invocation case is handled in PendingIntentRecord.
-            if (bOptions != null && callingUid != SYSTEM_UID) {
-                if (bOptions.containsKey(BroadcastOptions.KEY_ALARM_BROADCAST)
-                        || bOptions.containsKey(BroadcastOptions.KEY_INTERACTIVE_BROADCAST)) {
-                    if (DEBUG_BROADCAST) {
-                        Slog.w(TAG, "Non-system caller " + callingUid
-                                + " may not flag broadcast as alarm or interactive");
-                    }
-                    throw new SecurityException(
-                            "Non-system callers may not flag broadcasts as alarm or interactive");
-                }
-            }
+            // Permission regimes around sender-supplied broadcast options.
+            enforceBroadcastOptionPermissionsInternal(bOptions, callingUid);
 
             final long origId = Binder.clearCallingIdentity();
             try {
@@ -16899,6 +16907,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public boolean isModernQueueEnabled() {
             return mEnableModernQueue;
+        }
+
+        @Override
+        public void enforceBroadcastOptionsPermissions(Bundle options, int callingUid) {
+            enforceBroadcastOptionPermissionsInternal(options, callingUid);
         }
 
         /**

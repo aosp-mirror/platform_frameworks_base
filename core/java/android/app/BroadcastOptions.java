@@ -636,6 +636,7 @@ public class BroadcastOptions extends ComponentOptions {
      * @param broadcastIsInteractive
      * @see #isInteractiveBroadcast()
      */
+    @RequiresPermission(android.Manifest.permission.BROADCAST_OPTION_INTERACTIVE)
     public void setInteractiveBroadcast(boolean broadcastIsInteractive) {
         mIsInteractiveBroadcast = broadcastIsInteractive;
     }
