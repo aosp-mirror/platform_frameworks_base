@@ -476,6 +476,48 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     }
 
     /**
+     * Records that a particular container has been reparented. This only effects windows that have
+     * already been collected in the transition. This should be called before reparenting because
+     * the old parent may be removed during reparenting, for example:
+     * {@link Task#shouldRemoveSelfOnLastChildRemoval}
+     */
+    void collectReparentChange(@NonNull WindowContainer wc, @NonNull WindowContainer newParent) {
+        if (!mChanges.containsKey(wc)) {
+            // #collectReparentChange() will be called when the window is reparented. Skip if it is
+            // a window that has not been collected, which means we don't care about this window for
+            // the current transition.
+            return;
+        }
+        final ChangeInfo change = mChanges.get(wc);
+        // Use the current common ancestor if there are multiple reparent, and the original parent
+        // has been detached. Otherwise, use the original parent before the transition.
+        final WindowContainer prevParent =
+                change.mStartParent == null || change.mStartParent.isAttached()
+                        ? change.mStartParent
+                        : change.mCommonAncestor;
+        if (prevParent == null || !prevParent.isAttached()) {
+            Slog.w(TAG, "Trying to collect reparenting of a window after the previous parent has"
+                    + " been detached: " + wc);
+            return;
+        }
+        if (prevParent == newParent) {
+            Slog.w(TAG, "Trying to collect reparenting of a window that has not been reparented: "
+                    + wc);
+            return;
+        }
+        if (!newParent.isAttached()) {
+            Slog.w(TAG, "Trying to collect reparenting of a window that is not attached after"
+                    + " reparenting: " + wc);
+            return;
+        }
+        WindowContainer ancestor = newParent;
+        while (prevParent != ancestor && !prevParent.isDescendantOf(ancestor)) {
+            ancestor = ancestor.getParent();
+        }
+        change.mCommonAncestor = ancestor;
+    }
+
+    /**
      * @return {@code true} if `wc` is a participant or is a descendant of one.
      */
     boolean isInTransition(WindowContainer wc) {
@@ -1558,20 +1600,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             return out;
         }
 
-        // Find the top-most shared ancestor of app targets.
-        WindowContainer<?> ancestor = topApp.getParent();
-        // Go up ancestor parent chain until all targets are descendants.
-        ancestorLoop:
-        while (ancestor != null) {
-            for (int i = sortedTargets.size() - 1; i >= 0; --i) {
-                final WindowContainer wc = sortedTargets.get(i);
-                if (!isWallpaper(wc) && !wc.isDescendantOf(ancestor)) {
-                    ancestor = ancestor.getParent();
-                    continue ancestorLoop;
-                }
-            }
-            break;
-        }
+        WindowContainer<?> ancestor = findCommonAncestor(sortedTargets, changes, topApp);
 
         // make leash based on highest (z-order) direct child of ancestor with a participant.
         WindowContainer leashReference = sortedTargets.get(0);
@@ -1686,6 +1715,46 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         }
 
         return out;
+    }
+
+    /**
+     * Finds the top-most common ancestor of app targets.
+     *
+     * Makes sure that the previous parent is also a descendant to make sure the animation won't
+     * be covered by other windows below the previous parent. For example, when reparenting an
+     * activity from PiP Task to split screen Task.
+     */
+    @NonNull
+    private static WindowContainer<?> findCommonAncestor(
+            @NonNull ArrayList<WindowContainer> targets,
+            @NonNull ArrayMap<WindowContainer, ChangeInfo> changes,
+            @NonNull WindowContainer<?> topApp) {
+        WindowContainer<?> ancestor = topApp.getParent();
+        // Go up ancestor parent chain until all targets are descendants. Ancestor should never be
+        // null because all targets are attached.
+        for (int i = targets.size() - 1; i >= 0; i--) {
+            final WindowContainer wc = targets.get(i);
+            if (isWallpaper(wc)) {
+                // Skip the non-app window.
+                continue;
+            }
+            while (!wc.isDescendantOf(ancestor)) {
+                ancestor = ancestor.getParent();
+            }
+
+            // Make sure the previous parent is also a descendant to make sure the animation won't
+            // be covered by other windows below the previous parent. For example, when reparenting
+            // an activity from PiP Task to split screen Task.
+            final ChangeInfo change = changes.get(wc);
+            final WindowContainer prevParent = change.mCommonAncestor;
+            if (prevParent == null || !prevParent.isAttached()) {
+                continue;
+            }
+            while (prevParent != ancestor && !prevParent.isDescendantOf(ancestor)) {
+                ancestor = ancestor.getParent();
+            }
+        }
+        return ancestor;
     }
 
     private static WindowManager.LayoutParams getLayoutParamsForAnimationsStyle(int type,
@@ -1806,10 +1875,19 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         @Retention(RetentionPolicy.SOURCE)
         @interface Flag {}
 
-        // Usually "post" change state.
+        /**
+         * "Parent" that is also included in the transition. When populating the parent changes, we
+         * may skip the intermediate parents, so this may not be the actual parent in the hierarchy.
+         */
         WindowContainer mEndParent;
-        // Parent before change state.
+        /** Actual parent window before change state. */
         WindowContainer mStartParent;
+        /**
+         * When the window is reparented during the transition, this is the common ancestor window
+         * of the {@link #mStartParent} and the current parent. This is needed because the
+         * {@link #mStartParent} may have been detached when the transition starts.
+         */
+        WindowContainer mCommonAncestor;
 
         // State tracking
         boolean mExistenceChanged = false;
