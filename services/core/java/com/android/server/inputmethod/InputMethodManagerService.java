@@ -3204,7 +3204,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     void setInputMethodLocked(String id, int subtypeId) {
         InputMethodInfo info = mMethodMap.get(id);
         if (info == null) {
-            throw new IllegalArgumentException("Unknown id: " + id);
+            throw getExceptionForUnknownImeId(id);
         }
 
         // See if we need to notify a subtype change within the same IME.
@@ -3943,11 +3943,24 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
+    @NonNull
+    private static IllegalArgumentException getExceptionForUnknownImeId(
+            @Nullable String imeId) {
+        return new IllegalArgumentException("Unknown id: " + imeId);
+    }
+
     @BinderThread
     private void setInputMethod(@NonNull IBinder token, String id) {
+        final int callingUid = Binder.getCallingUid();
+        final int userId = UserHandle.getUserId(callingUid);
         synchronized (ImfLock.class) {
             if (!calledWithValidTokenLocked(token)) {
                 return;
+            }
+            final InputMethodInfo imi = mMethodMap.get(id);
+            if (imi == null || !canCallerAccessInputMethod(
+                    imi.getPackageName(), callingUid, userId, mSettings)) {
+                throw getExceptionForUnknownImeId(id);
             }
             setInputMethodWithSubtypeIdLocked(token, id, NOT_A_SUBTYPE_ID);
         }
@@ -3956,14 +3969,20 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @BinderThread
     private void setInputMethodAndSubtype(@NonNull IBinder token, String id,
             InputMethodSubtype subtype) {
+        final int callingUid = Binder.getCallingUid();
+        final int userId = UserHandle.getUserId(callingUid);
         synchronized (ImfLock.class) {
             if (!calledWithValidTokenLocked(token)) {
                 return;
             }
+            final InputMethodInfo imi = mMethodMap.get(id);
+            if (imi == null || !canCallerAccessInputMethod(
+                    imi.getPackageName(), callingUid, userId, mSettings)) {
+                throw getExceptionForUnknownImeId(id);
+            }
             if (subtype != null) {
                 setInputMethodWithSubtypeIdLocked(token, id,
-                        SubtypeUtils.getSubtypeIdFromHashCode(mMethodMap.get(id),
-                                subtype.hashCode()));
+                        SubtypeUtils.getSubtypeIdFromHashCode(imi, subtype.hashCode()));
             } else {
                 setInputMethod(token, id);
             }
