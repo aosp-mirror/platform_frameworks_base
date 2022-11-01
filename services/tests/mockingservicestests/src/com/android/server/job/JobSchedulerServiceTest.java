@@ -197,7 +197,7 @@ public class JobSchedulerServiceTest {
     private JobStatus createJobStatus(String testTag, JobInfo.Builder jobInfoBuilder,
             int callingUid) {
         return JobStatus.createFromJobInfo(
-                jobInfoBuilder.build(), callingUid, "com.android.test", 0, testTag);
+                jobInfoBuilder.build(), callingUid, "com.android.test", 0, "JSSTest", testTag);
     }
 
     private void grantRunLongJobsPermission(boolean grant) {
@@ -1115,7 +1115,7 @@ public class JobSchedulerServiceTest {
                     i < 300 ? JobScheduler.RESULT_SUCCESS : JobScheduler.RESULT_FAILURE;
             assertEquals("Got unexpected result for schedule #" + (i + 1),
                     expected,
-                    mService.scheduleAsPackage(job, null, 10123, null, 0, ""));
+                    mService.scheduleAsPackage(job, null, 10123, null, 0, "JSSTest", ""));
         }
     }
 
@@ -1136,7 +1136,7 @@ public class JobSchedulerServiceTest {
         for (int i = 0; i < 500; ++i) {
             assertEquals("Got unexpected result for schedule #" + (i + 1),
                     JobScheduler.RESULT_SUCCESS,
-                    mService.scheduleAsPackage(job, null, 10123, null, 0, ""));
+                    mService.scheduleAsPackage(job, null, 10123, null, 0, "JSSTest", ""));
         }
     }
 
@@ -1157,7 +1157,8 @@ public class JobSchedulerServiceTest {
         for (int i = 0; i < 500; ++i) {
             assertEquals("Got unexpected result for schedule #" + (i + 1),
                     JobScheduler.RESULT_SUCCESS,
-                    mService.scheduleAsPackage(job, null, 10123, "proxied.package", 0, ""));
+                    mService.scheduleAsPackage(job, null, 10123, "proxied.package", 0, "JSSTest",
+                            ""));
         }
     }
 
@@ -1181,7 +1182,7 @@ public class JobSchedulerServiceTest {
             assertEquals("Got unexpected result for schedule #" + (i + 1),
                     expected,
                     mService.scheduleAsPackage(job, null, 10123, job.getService().getPackageName(),
-                            0, ""));
+                            0, "JSSTest", ""));
         }
     }
 }

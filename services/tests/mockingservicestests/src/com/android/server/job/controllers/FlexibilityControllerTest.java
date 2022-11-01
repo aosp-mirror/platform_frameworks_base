@@ -195,7 +195,7 @@ public class FlexibilityControllerTest {
     private JobStatus createJobStatus(String testTag, JobInfo.Builder job) {
         JobInfo jobInfo = job.build();
         JobStatus js = JobStatus.createFromJobInfo(
-                jobInfo, 1000, SOURCE_PACKAGE, SOURCE_USER_ID, testTag);
+                jobInfo, 1000, SOURCE_PACKAGE, SOURCE_USER_ID, "FCTest", testTag);
         js.enqueueTime = FROZEN_TIME;
         return js;
     }

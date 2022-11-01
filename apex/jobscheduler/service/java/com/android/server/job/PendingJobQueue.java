@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.PriorityQueue;
 
 /**
@@ -280,12 +281,14 @@ class PendingJobQueue {
                 return job1EJ ? -1 : 1;
             }
 
-            final int job1Priority = job1.getEffectivePriority();
-            final int job2Priority = job2.getEffectivePriority();
-            if (job1Priority != job2Priority) {
-                // Use the priority set by an app for intra-app job ordering. Higher
-                // priority should be before lower priority.
-                return Integer.compare(job2Priority, job1Priority);
+            if (Objects.equals(job1.getNamespace(), job2.getNamespace())) {
+                final int job1Priority = job1.getEffectivePriority();
+                final int job2Priority = job2.getEffectivePriority();
+                if (job1Priority != job2Priority) {
+                    // Use the priority set by an app for intra-app job ordering. Higher
+                    // priority should be before lower priority.
+                    return Integer.compare(job2Priority, job1Priority);
+                }
             }
 
             if (job1.lastEvaluatedBias != job2.lastEvaluatedBias) {

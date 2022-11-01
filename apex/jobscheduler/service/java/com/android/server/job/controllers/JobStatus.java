@@ -30,6 +30,7 @@ import static com.android.server.job.controllers.FlexibilityController.SYSTEM_WI
 
 import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.AppGlobals;
 import android.app.job.JobInfo;
 import android.app.job.JobParameters;
@@ -70,6 +71,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.function.Predicate;
 
 /**
@@ -225,6 +227,8 @@ public final class JobStatus {
     final int sourceUserId;
     final int sourceUid;
     final String sourceTag;
+    @Nullable
+    private final String mNamespace;
 
     final String tag;
 
@@ -515,6 +519,7 @@ public final class JobStatus {
      * @param standbyBucket The standby bucket that the source package is currently assigned to,
      *     cached here for speed of handling during runnability evaluations (and updated when bucket
      *     assignments are changed)
+     * @param namespace The custom namespace the app put this job in.
      * @param tag A string associated with the job for debugging/logging purposes.
      * @param numFailures Count of how many times this job has requested a reschedule because
      *     its work was not yet finished.
@@ -529,13 +534,15 @@ public final class JobStatus {
      * @param internalFlags Non-API property flags about this job
      */
     private JobStatus(JobInfo job, int callingUid, String sourcePackageName,
-            int sourceUserId, int standbyBucket, String tag, int numFailures, int numSystemStops,
+            int sourceUserId, int standbyBucket, @Nullable String namespace, String tag,
+            int numFailures, int numSystemStops,
             long earliestRunTimeElapsedMillis, long latestRunTimeElapsedMillis,
             long lastSuccessfulRunTime, long lastFailedRunTime, int internalFlags,
             int dynamicConstraints) {
         this.job = job;
         this.callingUid = callingUid;
         this.standbyBucket = standbyBucket;
+        mNamespace = namespace;
 
         int tempSourceUid = -1;
         if (sourceUserId != -1 && sourcePackageName != null) {
@@ -658,7 +665,7 @@ public final class JobStatus {
     public JobStatus(JobStatus jobStatus) {
         this(jobStatus.getJob(), jobStatus.getUid(),
                 jobStatus.getSourcePackageName(), jobStatus.getSourceUserId(),
-                jobStatus.getStandbyBucket(),
+                jobStatus.getStandbyBucket(), jobStatus.getNamespace(),
                 jobStatus.getSourceTag(), jobStatus.getNumFailures(), jobStatus.getNumSystemStops(),
                 jobStatus.getEarliestRunTime(), jobStatus.getLatestRunTimeElapsed(),
                 jobStatus.getLastSuccessfulRunTime(), jobStatus.getLastFailedRunTime(),
@@ -680,13 +687,13 @@ public final class JobStatus {
      * standby bucket is whatever the OS thinks it should be at this moment.
      */
     public JobStatus(JobInfo job, int callingUid, String sourcePkgName, int sourceUserId,
-            int standbyBucket, String sourceTag,
+            int standbyBucket, @Nullable String namespace, String sourceTag,
             long earliestRunTimeElapsedMillis, long latestRunTimeElapsedMillis,
             long lastSuccessfulRunTime, long lastFailedRunTime,
             Pair<Long, Long> persistedExecutionTimesUTC,
             int innerFlags, int dynamicConstraints) {
         this(job, callingUid, sourcePkgName, sourceUserId,
-                standbyBucket,
+                standbyBucket, namespace,
                 sourceTag, /* numFailures */ 0, /* numSystemStops */ 0,
                 earliestRunTimeElapsedMillis, latestRunTimeElapsedMillis,
                 lastSuccessfulRunTime, lastFailedRunTime, innerFlags, dynamicConstraints);
@@ -710,7 +717,7 @@ public final class JobStatus {
             long lastSuccessfulRunTime, long lastFailedRunTime) {
         this(rescheduling.job, rescheduling.getUid(),
                 rescheduling.getSourcePackageName(), rescheduling.getSourceUserId(),
-                rescheduling.getStandbyBucket(),
+                rescheduling.getStandbyBucket(), rescheduling.getNamespace(),
                 rescheduling.getSourceTag(), numFailures, numSystemStops,
                 newEarliestRuntimeElapsedMillis,
                 newLatestRuntimeElapsedMillis,
@@ -727,7 +734,7 @@ public final class JobStatus {
      *     caller.
      */
     public static JobStatus createFromJobInfo(JobInfo job, int callingUid, String sourcePkg,
-            int sourceUserId, String tag) {
+            int sourceUserId, @Nullable String namespace, String tag) {
         final long elapsedNow = sElapsedRealtimeClock.millis();
         final long earliestRunTimeElapsedMillis, latestRunTimeElapsedMillis;
         if (job.isPeriodic()) {
@@ -749,7 +756,7 @@ public final class JobStatus {
         int standbyBucket = JobSchedulerService.standbyBucketForPackage(jobPackage,
                 sourceUserId, elapsedNow);
         return new JobStatus(job, callingUid, sourcePkg, sourceUserId,
-                standbyBucket, tag, /* numFailures */ 0, /* numSystemStops */ 0,
+                standbyBucket, namespace, tag, /* numFailures */ 0, /* numSystemStops */ 0,
                 earliestRunTimeElapsedMillis, latestRunTimeElapsedMillis,
                 0 /* lastSuccessfulRunTime */, 0 /* lastFailedRunTime */,
                 /*innerFlags=*/ 0, /* dynamicConstraints */ 0);
@@ -897,6 +904,12 @@ public final class JobStatus {
     }
 
     public void printUniqueId(PrintWriter pw) {
+        if (mNamespace != null) {
+            pw.print(mNamespace);
+            pw.print(":");
+        } else {
+            pw.print("#");
+        }
         UserHandle.formatUid(pw, callingUid);
         pw.print("/");
         pw.print(job.getId());
@@ -1034,6 +1047,10 @@ public final class JobStatus {
         }
         mHasMediaBackupExemption = hasMediaExemption;
         return true;
+    }
+
+    public String getNamespace() {
+        return mNamespace;
     }
 
     public String getSourceTag() {
@@ -1362,7 +1379,8 @@ public final class JobStatus {
     public UserVisibleJobSummary getUserVisibleJobSummary() {
         if (mUserVisibleJobSummary == null) {
             mUserVisibleJobSummary = new UserVisibleJobSummary(
-                    callingUid, getSourceUserId(), getSourcePackageName(), getJobId());
+                    callingUid, getSourceUserId(), getSourcePackageName(),
+                    getNamespace(), getJobId());
         }
         return mUserVisibleJobSummary;
     }
@@ -1989,8 +2007,12 @@ public final class JobStatus {
         return (sat & mRequiredConstraintsOfInterest) == mRequiredConstraintsOfInterest;
     }
 
-    public boolean matches(int uid, int jobId) {
-        return this.job.getId() == jobId && this.callingUid == uid;
+    /**
+     * Returns true if the given parameters match this job's unique identifier.
+     */
+    public boolean matches(int uid, @Nullable String namespace, int jobId) {
+        return this.job.getId() == jobId && this.callingUid == uid
+                && Objects.equals(mNamespace, namespace);
     }
 
     @Override
@@ -1998,7 +2020,13 @@ public final class JobStatus {
         StringBuilder sb = new StringBuilder(128);
         sb.append("JobStatus{");
         sb.append(Integer.toHexString(System.identityHashCode(this)));
-        sb.append(" #");
+        if (mNamespace != null) {
+            sb.append(" ");
+            sb.append(mNamespace);
+            sb.append(":");
+        } else {
+            sb.append(" #");
+        }
         UserHandle.formatUid(sb, callingUid);
         sb.append("/");
         sb.append(job.getId());
@@ -2087,6 +2115,9 @@ public final class JobStatus {
     public String toShortString() {
         StringBuilder sb = new StringBuilder();
         sb.append(Integer.toHexString(System.identityHashCode(this)));
+        if (mNamespace != null) {
+            sb.append(" {").append(mNamespace).append("}");
+        }
         sb.append(" #");
         UserHandle.formatUid(sb, callingUid);
         sb.append("/");
