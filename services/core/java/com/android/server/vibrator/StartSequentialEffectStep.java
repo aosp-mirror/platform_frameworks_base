@@ -93,10 +93,8 @@ final class StartSequentialEffectStep extends Step {
             }
 
             mVibratorsOnMaxDuration = startVibrating(effectMapping, nextSteps);
-            if (mVibratorsOnMaxDuration > 0) {
-                conductor.vibratorManagerHooks.noteVibratorOn(conductor.getVibration().uid,
-                        mVibratorsOnMaxDuration);
-            }
+            conductor.vibratorManagerHooks.noteVibratorOn(conductor.getVibration().uid,
+                    mVibratorsOnMaxDuration);
         } finally {
             if (mVibratorsOnMaxDuration >= 0) {
                 // It least one vibrator was started then add a finish step to wait for all

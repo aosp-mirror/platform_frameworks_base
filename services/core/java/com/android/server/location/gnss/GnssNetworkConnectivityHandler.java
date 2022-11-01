@@ -190,7 +190,7 @@ class GnssNetworkConnectivityHandler {
         mContext = context;
         mGnssNetworkListener = gnssNetworkListener;
 
-    SubscriptionManager subManager = mContext.getSystemService(SubscriptionManager.class);
+        SubscriptionManager subManager = mContext.getSystemService(SubscriptionManager.class);
         if (subManager != null) {
             subManager.addOnSubscriptionsChangedListener(mOnSubscriptionsChangeListener);
         }
@@ -308,6 +308,13 @@ class GnssNetworkConnectivityHandler {
     boolean isDataNetworkConnected() {
         NetworkInfo activeNetworkInfo = mConnMgr.getActiveNetworkInfo();
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
+
+    /**
+     * Returns the active Sub ID for emergency SUPL connection.
+     */
+    int getActiveSubId() {
+        return mActiveSubId;
     }
 
     /**

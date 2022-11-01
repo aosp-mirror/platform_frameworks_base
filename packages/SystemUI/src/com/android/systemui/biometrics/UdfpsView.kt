@@ -36,12 +36,12 @@ private const val TAG = "UdfpsView"
 class UdfpsView(
     context: Context,
     attrs: AttributeSet?
-) : FrameLayout(context, attrs), DozeReceiver, UdfpsIlluminator {
+) : FrameLayout(context, attrs), DozeReceiver {
 
     // sensorRect may be bigger than the sensor. True sensor dimensions are defined in
     // overlayParams.sensorBounds
     private val sensorRect = RectF()
-    private var hbmProvider: UdfpsHbmProvider? = null
+    private var mUdfpsDisplayMode: UdfpsDisplayModeProvider? = null
     private val debugTextPaint = Paint().apply {
         isAntiAlias = true
         color = Color.BLUE
@@ -56,18 +56,11 @@ class UdfpsView(
             a.getFloat(R.styleable.UdfpsView_sensorTouchAreaCoefficient, 0f)
         }
 
-    private val onIlluminatedDelayMs = context.resources.getInteger(
-        com.android.internal.R.integer.config_udfps_illumination_transition_ms
-    ).toLong()
-
     /** View controller (can be different for enrollment, BiometricPrompt, Keyguard, etc.). */
     var animationViewController: UdfpsAnimationViewController<*>? = null
 
     /** Parameters that affect the position and size of the overlay. */
     var overlayParams = UdfpsOverlayParams()
-
-    /** Whether the HAL is responsible for enabling and disabling of LHBM. */
-    var halControlsIllumination: Boolean = true
 
     /** Debug message. */
     var debugMessage: String? = null
@@ -76,12 +69,12 @@ class UdfpsView(
             postInvalidate()
         }
 
-    /** When [startIllumination] has been called but not stopped via [stopIllumination]. */
-    var isIlluminationRequested: Boolean = false
+    /** True after the call to [configureDisplay] and before the call to [unconfigureDisplay]. */
+    var isDisplayConfigured: Boolean = false
         private set
 
-    override fun setHbmProvider(provider: UdfpsHbmProvider?) {
-        hbmProvider = provider
+    fun setUdfpsDisplayModeProvider(udfpsDisplayModeProvider: UdfpsDisplayModeProvider?) {
+        mUdfpsDisplayMode = udfpsDisplayModeProvider
     }
 
     // Don't propagate any touch events to the child views.
@@ -124,7 +117,7 @@ class UdfpsView(
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        if (!isIlluminationRequested) {
+        if (!isDisplayConfigured) {
             if (!debugMessage.isNullOrEmpty()) {
                 canvas.drawText(debugMessage!!, 0f, 160f, debugTextPaint)
             }
@@ -147,36 +140,15 @@ class UdfpsView(
             !(animationViewController?.shouldPauseAuth() ?: false)
     }
 
-    /**
-     * Start and run [onIlluminatedRunnable] when the first illumination frame reaches the panel.
-     */
-    override fun startIllumination(onIlluminatedRunnable: Runnable?) {
-        isIlluminationRequested = true
-        animationViewController?.onIlluminationStarting()
-        doIlluminate(onIlluminatedRunnable)
+    fun configureDisplay(onDisplayConfigured: Runnable) {
+        isDisplayConfigured = true
+        animationViewController?.onDisplayConfiguring()
+        mUdfpsDisplayMode?.enable(onDisplayConfigured)
     }
 
-    private fun doIlluminate(onIlluminatedRunnable: Runnable?) {
-        // TODO(b/231335067): enableHbm with halControlsIllumination=true shouldn't make sense.
-        // This only makes sense now because vendor code may rely on the side effects of enableHbm.
-        hbmProvider?.enableHbm(halControlsIllumination) {
-            if (onIlluminatedRunnable != null) {
-                if (halControlsIllumination) {
-                    onIlluminatedRunnable.run()
-                } else {
-                    // No framework API can reliably tell when a frame reaches the panel. A timeout
-                    // is the safest solution.
-                    postDelayed(onIlluminatedRunnable, onIlluminatedDelayMs)
-                }
-            } else {
-                Log.w(TAG, "doIlluminate | onIlluminatedRunnable is null")
-            }
-        }
-    }
-
-    override fun stopIllumination() {
-        isIlluminationRequested = false
-        animationViewController?.onIlluminationStopped()
-        hbmProvider?.disableHbm(null /* onHbmDisabled */)
+    fun unconfigureDisplay() {
+        isDisplayConfigured = false
+        animationViewController?.onDisplayUnconfigured()
+        mUdfpsDisplayMode?.disable(null /* onDisabled */)
     }
 }

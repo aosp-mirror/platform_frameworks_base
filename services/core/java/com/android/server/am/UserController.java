@@ -106,6 +106,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.internal.util.Preconditions;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.FactoryResetter;
 import com.android.server.FgThread;
@@ -368,6 +369,11 @@ class UserController implements Handler.Callback {
     private boolean mDelayUserDataLocking;
 
     /**
+     * Users are only allowed to be unlocked after boot complete.
+     */
+    private volatile boolean mAllowUserUnlocking;
+
+    /**
      * Keep track of last active users for mDelayUserDataLocking.
      * The latest stopped user is placed in front while the least recently stopped user in back.
      */
@@ -426,6 +432,11 @@ class UserController implements Handler.Callback {
         mUserLru.add(UserHandle.USER_SYSTEM);
         mLockPatternUtils = mInjector.getLockPatternUtils();
         updateStartedUserArrayLU();
+
+        // TODO(b/232452368): currently mAllowUserUnlocking is only used on devices with HSUM
+        // (Headless System User Mode), but on master it will be used by all devices (and hence this
+        // initial assignment should be removed).
+        mAllowUserUnlocking = !UserManager.isHeadlessSystemUserMode();
     }
 
     void setInitialConfig(boolean userSwitchUiEnabled, int maxRunningUsers,
@@ -1742,6 +1753,22 @@ class UserController implements Handler.Callback {
 
     private boolean unlockUserCleared(final @UserIdInt int userId, byte[] secret,
             IProgressListener listener) {
+        // Delay user unlocking for headless system user mode until the system boot
+        // completes. When the system boot completes, the {@link #onBootCompleted()}
+        // method unlocks all started users for headless system user mode. This is done
+        // to prevent unlocking the users too early during the system boot up.
+        // Otherwise, emulated volumes are mounted too early during the system
+        // boot up. When vold is reset on boot complete, vold kills all apps/services
+        // (that use these emulated volumes) before unmounting the volumes(b/241929666).
+        // In the past, these killings have caused the system to become too unstable on
+        // some occasions.
+        // Any unlocks that get delayed by this will be done by onBootComplete() instead.
+        if (!mAllowUserUnlocking) {
+            Slogf.i(TAG, "Not unlocking user %d yet because boot hasn't completed", userId);
+            notifyFinished(userId, listener);
+            return false;
+        }
+
         UserState uss;
         if (!StorageManager.isUserKeyUnlocked(userId)) {
             final UserInfo userInfo = getUserInfo(userId);
@@ -2331,7 +2358,44 @@ class UserController implements Handler.Callback {
         }
     }
 
+    @VisibleForTesting
+    void setAllowUserUnlocking(boolean allowed) {
+        mAllowUserUnlocking = allowed;
+        if (DEBUG_MU) {
+            // TODO(b/245335748): use Slogf.d instead
+            // Slogf.d(TAG, new Exception(), "setAllowUserUnlocking(%b)", allowed);
+            android.util.Slog.d(TAG, "setAllowUserUnlocking():" + allowed, new Exception());
+        }
+    }
+
+    /**
+     * @deprecated TODO(b/232452368): this logic will be merged into sendBootCompleted
+     */
+    @Deprecated
+    private void onBootCompletedOnHeadlessSystemUserModeDevices() {
+        setAllowUserUnlocking(true);
+
+        // Get a copy of mStartedUsers to use outside of lock.
+        SparseArray<UserState> startedUsers;
+        synchronized (mLock) {
+            startedUsers = mStartedUsers.clone();
+        }
+        // USER_SYSTEM must be processed first.  It will be first in the array, as its ID is lowest.
+        Preconditions.checkArgument(startedUsers.keyAt(0) == UserHandle.USER_SYSTEM);
+        for (int i = 0; i < startedUsers.size(); i++) {
+            UserState uss = startedUsers.valueAt(i);
+            int userId = uss.mHandle.getIdentifier();
+            Slogf.i(TAG, "Attempting to unlock user %d on boot complete", userId);
+            maybeUnlockUser(userId);
+        }
+    }
+
     void sendBootCompleted(IIntentReceiver resultTo) {
+        if (UserManager.isHeadlessSystemUserMode()) {
+            // Unlocking users is delayed until boot complete for headless system user mode.
+            onBootCompletedOnHeadlessSystemUserModeDevices();
+        }
+
         // Get a copy of mStartedUsers to use outside of lock
         SparseArray<UserState> startedUsers;
         synchronized (mLock) {
@@ -2773,6 +2837,7 @@ class UserController implements Handler.Callback {
             pw.println("  mTargetUserId:" + mTargetUserId);
             pw.println("  mLastActiveUsers:" + mLastActiveUsers);
             pw.println("  mDelayUserDataLocking:" + mDelayUserDataLocking);
+            pw.println("  mAllowUserUnlocking:" + mAllowUserUnlocking);
             pw.println("  shouldStopUserOnSwitch():" + shouldStopUserOnSwitch());
             pw.println("  mStopUserOnSwitch:" + mStopUserOnSwitch);
             pw.println("  mMaxRunningUsers:" + mMaxRunningUsers);

@@ -36,6 +36,7 @@ public class BlockedAppStreamingActivity extends AlertActivity {
     private static final String EXTRA_BLOCKED_ACTIVITY_INFO =
             PACKAGE_NAME + ".extra.BLOCKED_ACTIVITY_INFO";
     private static final String EXTRA_STREAMED_DEVICE = PACKAGE_NAME + ".extra.STREAMED_DEVICE";
+    private static final String BLOCKED_COMPONENT_PLAYSTORE = "com.android.vending";
     private static final String BLOCKED_COMPONENT_SETTINGS = "com.android.settings";
 
     @Override
@@ -62,21 +63,25 @@ public class BlockedAppStreamingActivity extends AlertActivity {
                 mAlertParams.mTitle =
                         getString(R.string.app_streaming_blocked_title_for_permission_dialog);
                 mAlertParams.mMessage =
-                        getString(R.string.app_streaming_blocked_message_for_permission_dialog,
-                                streamedDeviceName);
+                        getString(R.string.app_streaming_blocked_message, streamedDeviceName);
+            } else if (TextUtils.equals(activityInfo.packageName, BLOCKED_COMPONENT_PLAYSTORE)) {
+                mAlertParams.mTitle =
+                        getString(R.string.app_streaming_blocked_title_for_playstore_dialog);
+                mAlertParams.mMessage =
+                        getString(R.string.app_streaming_blocked_message, streamedDeviceName);
             } else if (TextUtils.equals(activityInfo.packageName, BLOCKED_COMPONENT_SETTINGS)) {
                 mAlertParams.mTitle =
                         getString(R.string.app_streaming_blocked_title_for_settings_dialog);
                 mAlertParams.mMessage =
-                        getString(R.string.app_streaming_blocked_message, streamedDeviceName);
+                        getString(R.string.app_streaming_blocked_message_for_settings_dialog,
+                                streamedDeviceName);
             } else {
-                mAlertParams.mTitle =
-                        getString(R.string.app_streaming_blocked_title, appLabel);
+                // No title required
                 mAlertParams.mMessage =
                         getString(R.string.app_streaming_blocked_message, streamedDeviceName);
             }
         } else {
-            mAlertParams.mTitle = getString(R.string.app_blocked_title);
+            // No title required
             mAlertParams.mMessage = getString(R.string.app_blocked_message, appLabel);
         }
         mAlertParams.mPositiveButtonText = getString(android.R.string.ok);

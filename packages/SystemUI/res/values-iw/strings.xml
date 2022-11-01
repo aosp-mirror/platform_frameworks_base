@@ -124,9 +124,6 @@
     <string name="accessibility_lock_icon" msgid="661492842417875775">"המכשיר נעול"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"סורק פנים"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"שליחה"</string>
-    <string name="phone_label" msgid="5715229948920451352">"פתיחת הטלפון"</string>
-    <string name="voice_assist_label" msgid="3725967093735929020">"פתיחת האסיסטנט"</string>
-    <string name="camera_label" msgid="8253821920931143699">"פתיחת המצלמה"</string>
     <string name="cancel" msgid="1089011503403416730">"ביטול"</string>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"אישור"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"ניסיון נוסף"</string>
@@ -137,6 +134,9 @@
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"יש אישור"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"יש להקיש על \'אישור\' לסיום התהליך"</string>
     <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"הנעילה בוטלה בזיהוי פנים. להמשך, לוחצים על סמל ביטול הנעילה."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"הנעילה בוטלה באמצעות זיהוי הפנים. יש ללחוץ כדי להמשיך."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"הפנים זוהו. יש ללחוץ כדי להמשיך."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"הפנים זוהו. להמשך יש ללחוץ על סמל ביטול הנעילה."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"מאומת"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"שימוש בקוד אימות"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"שימוש בקו ביטול נעילה"</string>
@@ -161,6 +161,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"לא ניתן לזהות את הפנים. יש להשתמש בטביעת אצבע במקום."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
+    <string name="keyguard_face_failed" msgid="9044619102286917151">"לא ניתן לזהות את הפנים"</string>
+    <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"שימוש בטביעת אצבע במקום זאת"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"‏Bluetooth מחובר."</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"אחוז טעינת הסוללה לא ידוע."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"התבצע חיבור אל <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
@@ -202,12 +204,7 @@
     <string name="accessibility_sensors_off_active" msgid="2619725434618911551">"ההגדרה \'חיישנים כבויים\' פעילה"</string>
     <string name="accessibility_clear_all" msgid="970525598287244592">"הסרת כל ההתראות."</string>
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <plurals name="notification_group_overflow_description" formatted="false" msgid="91483442850649192">
-      <item quantity="two">עוד <xliff:g id="NUMBER_1">%s</xliff:g> התראות נוספות.</item>
-      <item quantity="many">עוד <xliff:g id="NUMBER_1">%s</xliff:g> התראות.</item>
-      <item quantity="other">עוד <xliff:g id="NUMBER_1">%s</xliff:g> התראות נוספות.</item>
-      <item quantity="one">יש התראה נוספת.<xliff:g id="NUMBER_0">%s</xliff:g>.</item>
-    </plurals>
+    <string name="notification_group_overflow_description" msgid="7176322877233433278">"{count,plural, =1{עוד התראה אחת (#) בקבוצה.}two{עוד # התראות בקבוצה.}many{עוד # התראות בקבוצה.}other{עוד # התראות בקבוצה.}}"</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="936972553861524360">"המסך נעול עכשיו לרוחב."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="2356633398683813837">"המסך נעול כעת לאורך."</string>
     <string name="dessert_case" msgid="9104973640704357717">"מזנון קינוחים"</string>
@@ -225,6 +222,7 @@
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"סיבוב אוטומטי"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"סיבוב אוטומטי של המסך"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"מיקום"</string>
+    <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"שומר מסך"</string>
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"גישה למצלמה"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"גישה למיקרופון"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"יש גישה"</string>
@@ -254,12 +252,7 @@
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"‏נקודת אינטרנט (hotspot)"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"ההפעלה מתבצעת…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"חוסך הנתונים פועל"</string>
-    <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="3142308865165871976">
-      <item quantity="two">‏%d מכשירים</item>
-      <item quantity="many">‏%d מכשירים</item>
-      <item quantity="other">‏%d מכשירים</item>
-      <item quantity="one">מכשיר אחד</item>
-    </plurals>
+    <string name="quick_settings_hotspot_secondary_label_num_devices" msgid="7536823087501239457">"{count,plural, =1{מכשיר אחד (#)}two{# מכשירים}many{# מכשירים}other{# מכשירים}}"</string>
     <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"פנס"</string>
     <string name="quick_settings_flashlight_camera_in_use" msgid="4820591564526512571">"המצלמה בשימוש"</string>
     <string name="quick_settings_cellular_detail_title" msgid="792977203299358893">"חבילת גלישה"</string>
@@ -316,7 +309,13 @@
     <string name="tap_again" msgid="1315420114387908655">"צריך להקיש פעם נוספת"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"צריך להחליק כדי לפתוח"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"לפתיחה, לוחצים על סמל ביטול הנעילה"</string>
+    <string name="keyguard_face_successful_unlock_swipe" msgid="6180997591385846073">"הנעילה בוטלה באמצעות זיהוי הפנים. צריך להחליק כדי לפתוח."</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"הנעילה בוטלה בזיהוי פנים. פותחים בלחיצה על סמל ביטול הנעילה."</string>
+    <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"הנעילה בוטלה באמצעות זיהוי הפנים. יש ללחוץ כדי לפתוח."</string>
+    <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"הפנים זוהו. יש ללחוץ כדי לפתוח."</string>
+    <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"הפנים זוהו. יש ללחוץ על סמל ביטול הנעילה כדי לפתוח."</string>
+    <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"הנעילה בוטלה באמצעות זיהוי הפנים"</string>
+    <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"הפנים זוהו"</string>
   <string-array name="udfps_accessibility_touch_hints">
     <item msgid="1901953991150295169">"הזזה שמאלה"</item>
     <item msgid="5558598599408514296">"הזזה למטה"</item>
@@ -342,20 +341,19 @@
     <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • בטעינה • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> עד לסיום"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • בטעינה מהירה • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> עד לסיום"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • בטעינה איטית • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> עד לסיום"</string>
-    <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • אביזר העגינה בטעינה • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> עד לסיום"</string>
+    <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • בטעינה • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> עד לסיום"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"החלפת משתמש"</string>
+    <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"תפריט במשיכה למטה"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"כל האפליקציות והנתונים בסשן הזה יימחקו."</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"שמחים לראותך שוב!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"האם ברצונך להמשיך בפעילות באתר?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"סשן חדש"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"כן, להמשיך"</string>
+    <string name="guest_notification_app_name" msgid="2110425506754205509">"מצב אורח"</string>
+    <string name="guest_notification_session_active" msgid="5567273684713471450">"התחברת במצב אורח"</string>
+    <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"הוספת משתמש חדש תגרום ליציאה ממצב האורח ותמחק את כל האפליקציות והנתונים מהגלישה הנוכחית כאורח."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"הגעת למגבלת המשתמשים שניתן להוסיף"</string>
-    <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
-      <item quantity="two">ניתן להוסיף עד <xliff:g id="COUNT">%d</xliff:g> משתמשים.</item>
-      <item quantity="many">ניתן להוסיף עד <xliff:g id="COUNT">%d</xliff:g> משתמשים.</item>
-      <item quantity="other">ניתן להוסיף עד <xliff:g id="COUNT">%d</xliff:g> משתמשים.</item>
-      <item quantity="one">ניתן ליצור רק משתמש אחד.</item>
-    </plurals>
+    <string name="user_limit_reached_message" msgid="1070703858915935796">"{count,plural, =1{ניתן ליצור רק משתמש אחד.}two{אפשר להוסיף עד # משתמשים.}many{אפשר להוסיף עד # משתמשים.}other{אפשר להוסיף עד # משתמשים.}}"</string>
     <string name="user_remove_user_title" msgid="9124124694835811874">"להסיר את המשתמש?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"כל האפליקציות והנתונים של המשתמש הזה יימחקו."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"הסרה"</string>
@@ -367,7 +365,7 @@
     <string name="manage_notifications_text" msgid="6885645344647733116">"ניהול"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"היסטוריה"</string>
     <string name="notification_section_header_incoming" msgid="850925217908095197">"התראות חדשות"</string>
-    <string name="notification_section_header_gentle" msgid="6804099527336337197">"שקט"</string>
+    <string name="notification_section_header_gentle" msgid="6804099527336337197">"שקטות"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"התראות"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"שיחות"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"ניקוי כל ההתראות השקטות"</string>
@@ -423,6 +421,8 @@
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"שכבת-על לכיתוב"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"הפעלה"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"השבתה"</string>
+    <string name="sound_settings" msgid="8874581353127418308">"צליל ורטט"</string>
+    <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"הגדרות"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"האפליקציה מוצמדת"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"נשאר בתצוגה עד לביטול ההצמדה. יש ללחוץ לחיצה ארוכה על הלחצנים \'הקודם\' ו\'סקירה\' כדי לבטל את ההצמדה."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"נשאר בתצוגה עד לביטול ההצמדה. יש ללחוץ לחיצה ארוכה על הלחצנים \'הקודם\' ו\'דף הבית\' כדי לבטל את ההצמדה."</string>
@@ -541,18 +541,8 @@
     <string name="notification_menu_snooze_action" msgid="5415729610393475019">"אשמח לקבל תזכורת"</string>
     <string name="snooze_undo" msgid="2738844148845992103">"ביטול"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"נדחה לטיפול בעוד <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
-    <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
-      <item quantity="two">שעתיים</item>
-      <item quantity="many">‏%d שעות</item>
-      <item quantity="other">‏%d שעות</item>
-      <item quantity="one">שעה</item>
-    </plurals>
-    <plurals name="snoozeMinuteOptions" formatted="false" msgid="8998483159208055980">
-      <item quantity="two">‏%d דקות</item>
-      <item quantity="many">‏%d דקות</item>
-      <item quantity="other">‏%d דקות</item>
-      <item quantity="one">דקה</item>
-    </plurals>
+    <string name="snoozeHourOptions" msgid="2332819756222425558">"{count,plural, =1{שעה}=2{שעתיים}many{# שעות}other{# שעות}}"</string>
+    <string name="snoozeMinuteOptions" msgid="2222082405822030979">"{count,plural, =1{דקה}two{# דקות}many{# דקות}other{# דקות}}"</string>
     <string name="battery_detail_switch_title" msgid="6940976502957380405">"חיסכון בסוללה"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"לחצן <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"דף הבית"</string>
@@ -608,7 +598,7 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"פועל"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"כבוי"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"לא זמין"</string>
-    <string name="tile_disabled" msgid="373212051546573069">"מושבת"</string>
+    <string name="accessibility_tile_disabled_by_policy_action_description" msgid="6958422730461646926">"מידע נוסף"</string>
     <string name="nav_bar" msgid="4642708685386136807">"סרגל הניווט"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"פריסה"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"סוג נוסף של לחצן שמאלי"</string>
@@ -681,8 +671,8 @@
     <string name="high_temp_notif_message" msgid="1277346543068257549">"חלק מהתכונות מוגבלות כל עוד הטלפון מתקרר.\nיש להקיש כדי להציג מידע נוסף"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"קירור הטלפון ייעשה באופן אוטומטי. ניתן עדיין להשתמש בטלפון, אבל ייתכן שהוא יפעל לאט יותר.\n\nהטלפון יחזור לפעול כרגיל לאחר שיתקרר."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"לצפייה בשלבי הטיפול"</string>
-    <string name="high_temp_alarm_title" msgid="2359958549570161495">"יש לנתק את המטען"</string>
-    <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"יש בעיה עם הטעינה של המכשיר הזה. צריך לנתק את מתאם המתח בזהירות כי הכבל עלול להיות חם."</string>
+    <string name="high_temp_alarm_title" msgid="8654754369605452169">"ניתוק המכשיר"</string>
+    <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"‏המכשיר שלך מתחמם בקרבת יציאת הטעינה. אם המכשיר מחובר למטען או לאביזר בחיבור USB, צריך לנתק אותו בזהירות כיוון שגם הכבל עלול להיות חם."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"לצפייה בשלבי הטיפול"</string>
     <string name="lockscreen_shortcut_left" msgid="1238765178956067599">"קיצור דרך שמאלי"</string>
     <string name="lockscreen_shortcut_right" msgid="4138414674531853719">"קיצור דרך ימני"</string>
@@ -701,7 +691,8 @@
     <string name="notification_channel_alerts" msgid="3385787053375150046">"התראות"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"סוללה"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"צילומי מסך"</string>
-    <string name="notification_channel_general" msgid="4384774889645929705">"הודעות כלליות"</string>
+    <string name="notification_channel_instant" msgid="7556135423486752680">"אפליקציות ללא התקנה"</string>
+    <string name="notification_channel_setup" msgid="7660580986090760350">"הגדרה"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"אחסון"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"טיפים"</string>
     <string name="instant_apps" msgid="8337185853050247304">"אפליקציות ללא התקנה"</string>
@@ -775,12 +766,7 @@
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"החלפת מצב"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"פקדי מכשירים"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"יש לבחור אפליקציה כדי להוסיף פקדים"</string>
-    <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
-      <item quantity="two">נוספו <xliff:g id="NUMBER_1">%s</xliff:g> פקדים.</item>
-      <item quantity="many">נוספו <xliff:g id="NUMBER_1">%s</xliff:g> פקדים.</item>
-      <item quantity="other">נוספו <xliff:g id="NUMBER_1">%s</xliff:g> פקדים.</item>
-      <item quantity="one">נוסף פקד אחד (<xliff:g id="NUMBER_0">%s</xliff:g>).</item>
-    </plurals>
+    <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{נוסף אמצעי בקרה אחד (#).}two{נוספו # אמצעי בקרה.}many{נוספו # אמצעי בקרה.}other{נוספו # אמצעי בקרה.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"הוסר"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"סומן כמועדף"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"סומן כמועדף, במיקום <xliff:g id="NUMBER">%d</xliff:g>"</string>
@@ -852,7 +838,7 @@
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"נבחרו <xliff:g id="COUNT">%1$d</xliff:g> מכשירים"</string>
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(מנותק)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"לא ניתן להחליף. צריך להקיש כדי לנסות שוב."</string>
-    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"התאמה של מכשיר חדש"</string>
+    <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"חיבור מכשיר"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"‏כדי להעביר (cast) את הסשן הזה, צריך לפתוח את האפליקציה."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"אפליקציה לא ידועה"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"‏עצירת ההעברה (casting)"</string>
@@ -937,12 +923,7 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"הוספת אריח"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"לא להוסיף אריח"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"בחירת משתמש"</string>
-    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
-      <item quantity="two"><xliff:g id="COUNT_1">%s</xliff:g> אפליקציות פעילות</item>
-      <item quantity="many"><xliff:g id="COUNT_1">%s</xliff:g> אפליקציות פעילות</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> אפליקציות פעילות</item>
-      <item quantity="one">אפליקציה אחת (<xliff:g id="COUNT_0">%s</xliff:g>) פעילה</item>
-    </plurals>
+    <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{אפליקציה אחת (#) פעילה}two{# אפליקציות פעילות}many{# אפליקציות פעילות}other{# אפליקציות פעילות}}"</string>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"מידע חדש"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"אפליקציות פעילות"</string>
     <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"האפליקציות האלה פעילות גם כשלא משתמשים בהן. הפעולה של האפליקציות משפרת את הפונקציונליות שלהן, אבל היא עשויה גם להשפיע על חיי הסוללה."</string>
@@ -969,6 +950,18 @@
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"‏Wi‑Fi לא זמין"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"מצב עדיפות"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"ההתראה מוגדרת"</string>
+    <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"המצלמה כבויה"</string>
+    <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"המיקרופון כבוי"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"המצלמה והמיקרופון כבויים"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{התראה אחת}two{# התראות}many{# התראות}other{# התראות}}"</string>
+    <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
+    <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"שידור"</string>
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"האם להפסיק לשדר את התוכן מאפליקציית <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"אם משדרים את התוכן מאפליקציית <xliff:g id="SWITCHAPP">%1$s</xliff:g> או משנים את הפלט, השידור הנוכחי יפסיק לפעול"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"שידור תוכן מאפליקציית <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"שינוי הפלט"</string>
+    <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"לא ידוע"</string>
+    <string name="dream_date_complication_date_format" msgid="8191225366513860104">"‏יום EEE,‏ d בMMM"</string>
+    <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
+    <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
 </resources>

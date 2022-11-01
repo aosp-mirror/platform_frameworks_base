@@ -44,6 +44,7 @@ import com.android.systemui.statusbar.phone.panelstate.PanelExpansionChangeEvent
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
 import java.util.Optional;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 

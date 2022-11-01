@@ -18,6 +18,9 @@ package com.android.systemui.dagger;
 
 import android.content.Context;
 
+import com.android.systemui.dagger.qualifiers.InstrumentationTest;
+import com.android.systemui.util.InitializationChecker;
+
 import javax.inject.Singleton;
 
 import dagger.BindsInstance;
@@ -37,7 +40,8 @@ public interface GlobalRootComponent {
     interface Builder {
         @BindsInstance
         Builder context(Context context);
-
+        @BindsInstance
+        Builder instrumentationTest(@InstrumentationTest boolean test);
         GlobalRootComponent build();
     }
 
@@ -50,4 +54,9 @@ public interface GlobalRootComponent {
      * Builder for a {@link SysUIComponent}, which makes it a subcomponent of this class.
      */
     SysUIComponent.Builder getSysUIComponent();
+
+    /**
+     * Returns an {@link InitializationChecker}.
+     */
+    InitializationChecker getInitializationChecker();
 }

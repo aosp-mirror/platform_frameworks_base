@@ -1050,4 +1050,99 @@ public class CachedBluetoothDeviceTest {
 
         assertThat(mCachedDevice.mDrawableCache.size()).isEqualTo(0);
     }
+
+    @Test
+    public void switchMemberDeviceContent_switchMainDevice_switchesSuccessful() {
+        mCachedDevice.mRssi = RSSI_1;
+        mCachedDevice.mJustDiscovered = JUSTDISCOVERED_1;
+        mSubCachedDevice.mRssi = RSSI_2;
+        mSubCachedDevice.mJustDiscovered = JUSTDISCOVERED_2;
+        mCachedDevice.addMemberDevice(mSubCachedDevice);
+
+        mCachedDevice.switchMemberDeviceContent(mSubCachedDevice);
+
+        assertThat(mCachedDevice.mRssi).isEqualTo(RSSI_2);
+        assertThat(mCachedDevice.mJustDiscovered).isEqualTo(JUSTDISCOVERED_2);
+        assertThat(mCachedDevice.mDevice).isEqualTo(mSubDevice);
+        assertThat(mSubCachedDevice.mRssi).isEqualTo(RSSI_1);
+        assertThat(mSubCachedDevice.mJustDiscovered).isEqualTo(JUSTDISCOVERED_1);
+        assertThat(mSubCachedDevice.mDevice).isEqualTo(mDevice);
+        assertThat(mCachedDevice.getMemberDevice().contains(mSubCachedDevice)).isTrue();
+    }
+
+    @Test
+    public void isBusy_mainDeviceIsConnecting_returnsBusy() {
+        mCachedDevice.addMemberDevice(mSubCachedDevice);
+        updateProfileStatus(mA2dpProfile, BluetoothProfile.STATE_CONNECTED);
+        updateSubDeviceProfileStatus(mA2dpProfile, BluetoothProfile.STATE_CONNECTED);
+        when(mDevice.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
+        when(mSubDevice.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
+
+        updateProfileStatus(mA2dpProfile, BluetoothProfile.STATE_CONNECTING);
+
+        assertThat(mCachedDevice.getMemberDevice().contains(mSubCachedDevice)).isTrue();
+        assertThat(mCachedDevice.getProfiles().contains(mA2dpProfile)).isTrue();
+        assertThat(mSubCachedDevice.getProfiles().contains(mA2dpProfile)).isTrue();
+        assertThat(mCachedDevice.isBusy()).isTrue();
+    }
+
+    @Test
+    public void isBusy_mainDeviceIsBonding_returnsBusy() {
+        mCachedDevice.addMemberDevice(mSubCachedDevice);
+        updateProfileStatus(mA2dpProfile, BluetoothProfile.STATE_CONNECTED);
+        updateSubDeviceProfileStatus(mA2dpProfile, BluetoothProfile.STATE_CONNECTED);
+        when(mSubDevice.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
+
+        when(mDevice.getBondState()).thenReturn(BluetoothDevice.BOND_BONDING);
+
+        assertThat(mCachedDevice.getMemberDevice().contains(mSubCachedDevice)).isTrue();
+        assertThat(mCachedDevice.getProfiles().contains(mA2dpProfile)).isTrue();
+        assertThat(mSubCachedDevice.getProfiles().contains(mA2dpProfile)).isTrue();
+        assertThat(mCachedDevice.isBusy()).isTrue();
+    }
+
+    @Test
+    public void isBusy_memberDeviceIsConnecting_returnsBusy() {
+        mCachedDevice.addMemberDevice(mSubCachedDevice);
+        updateProfileStatus(mA2dpProfile, BluetoothProfile.STATE_CONNECTED);
+        updateSubDeviceProfileStatus(mA2dpProfile, BluetoothProfile.STATE_CONNECTED);
+        when(mDevice.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
+        when(mSubDevice.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
+
+        updateSubDeviceProfileStatus(mA2dpProfile, BluetoothProfile.STATE_CONNECTING);
+
+        assertThat(mCachedDevice.getMemberDevice().contains(mSubCachedDevice)).isTrue();
+        assertThat(mCachedDevice.getProfiles().contains(mA2dpProfile)).isTrue();
+        assertThat(mSubCachedDevice.getProfiles().contains(mA2dpProfile)).isTrue();
+        assertThat(mCachedDevice.isBusy()).isTrue();
+    }
+
+    @Test
+    public void isBusy_memberDeviceIsBonding_returnsBusy() {
+        mCachedDevice.addMemberDevice(mSubCachedDevice);
+        updateProfileStatus(mA2dpProfile, BluetoothProfile.STATE_CONNECTED);
+        updateSubDeviceProfileStatus(mA2dpProfile, BluetoothProfile.STATE_CONNECTED);
+        when(mDevice.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
+
+        when(mSubDevice.getBondState()).thenReturn(BluetoothDevice.BOND_BONDING);
+
+        assertThat(mCachedDevice.getMemberDevice().contains(mSubCachedDevice)).isTrue();
+        assertThat(mCachedDevice.getProfiles().contains(mA2dpProfile)).isTrue();
+        assertThat(mSubCachedDevice.getProfiles().contains(mA2dpProfile)).isTrue();
+        assertThat(mCachedDevice.isBusy()).isTrue();
+    }
+
+    @Test
+    public void isBusy_allDevicesAreNotBusy_returnsNotBusy() {
+        mCachedDevice.addMemberDevice(mSubCachedDevice);
+        updateProfileStatus(mA2dpProfile, BluetoothProfile.STATE_CONNECTED);
+        updateSubDeviceProfileStatus(mA2dpProfile, BluetoothProfile.STATE_CONNECTED);
+        when(mDevice.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
+        when(mSubDevice.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
+
+        assertThat(mCachedDevice.getMemberDevice().contains(mSubCachedDevice)).isTrue();
+        assertThat(mCachedDevice.getProfiles().contains(mA2dpProfile)).isTrue();
+        assertThat(mSubCachedDevice.getProfiles().contains(mA2dpProfile)).isTrue();
+        assertThat(mCachedDevice.isBusy()).isFalse();
+    }
 }

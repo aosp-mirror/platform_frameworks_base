@@ -480,8 +480,9 @@ public class RingtoneManager {
         if (mStopPreviousRingtone && mPreviousRingtone != null) {
             mPreviousRingtone.stop();
         }
-        
-        mPreviousRingtone = getRingtone(mContext, getRingtoneUri(position), inferStreamType());
+
+        mPreviousRingtone =
+                getRingtone(mContext, getRingtoneUri(position), inferStreamType(), true);
         return mPreviousRingtone;
     }
 
@@ -677,7 +678,7 @@ public class RingtoneManager {
      */
     public static Ringtone getRingtone(final Context context, Uri ringtoneUri) {
         // Don't set the stream type
-        return getRingtone(context, ringtoneUri, -1);
+        return getRingtone(context, ringtoneUri, -1, true);
     }
 
     /**
@@ -698,7 +699,34 @@ public class RingtoneManager {
             final Context context, Uri ringtoneUri,
             @Nullable VolumeShaper.Configuration volumeShaperConfig) {
         // Don't set the stream type
-        return getRingtone(context, ringtoneUri, -1 /* streamType */, volumeShaperConfig);
+        return getRingtone(context, ringtoneUri, -1 /* streamType */, volumeShaperConfig, true);
+    }
+
+    /**
+     * @hide
+     */
+    public static Ringtone getRingtone(final Context context, Uri ringtoneUri,
+            @Nullable VolumeShaper.Configuration volumeShaperConfig,
+            boolean createLocalMediaPlayer) {
+        // Don't set the stream type
+        return getRingtone(context, ringtoneUri, -1 /* streamType */, volumeShaperConfig,
+                createLocalMediaPlayer);
+    }
+
+    /**
+     * @hide
+     */
+    public static Ringtone getRingtone(final Context context, Uri ringtoneUri,
+            @Nullable VolumeShaper.Configuration volumeShaperConfig,
+            AudioAttributes audioAttributes) {
+        // Don't set the stream type
+        Ringtone ringtone =
+                getRingtone(context, ringtoneUri, -1 /* streamType */, volumeShaperConfig, false);
+        if (ringtone != null) {
+            ringtone.setAudioAttributesField(audioAttributes);
+            ringtone.createLocalMediaPlayer();
+        }
+        return ringtone;
     }
 
     //FIXME bypass the notion of stream types within the class
@@ -707,14 +735,19 @@ public class RingtoneManager {
      * type. Normally, if you change the stream type on the returned
      * {@link Ringtone}, it will re-create the {@link MediaPlayer}. This is just
      * an optimized route to avoid that.
-     * 
+     *
      * @param streamType The stream type for the ringtone, or -1 if it should
      *            not be set (and the default used instead).
+     * @param createLocalMediaPlayer when true, the ringtone returned will be fully
+     *      created otherwise, it will require the caller to create the media player manually
+     *      {@link Ringtone#createLocalMediaPlayer()} in order to play the Ringtone.
      * @see #getRingtone(Context, Uri)
      */
     @UnsupportedAppUsage
-    private static Ringtone getRingtone(final Context context, Uri ringtoneUri, int streamType) {
-        return getRingtone(context, ringtoneUri, streamType, null /* volumeShaperConfig */);
+    private static Ringtone getRingtone(final Context context, Uri ringtoneUri, int streamType,
+            boolean createLocalMediaPlayer) {
+        return getRingtone(context, ringtoneUri, streamType, null /* volumeShaperConfig */,
+                createLocalMediaPlayer);
     }
 
     //FIXME bypass the notion of stream types within the class
@@ -730,16 +763,21 @@ public class RingtoneManager {
      * @see #getRingtone(Context, Uri)
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    private static Ringtone getRingtone(
-            final Context context, Uri ringtoneUri, int streamType,
-            @Nullable VolumeShaper.Configuration volumeShaperConfig) {
+    private static Ringtone getRingtone(final Context context, Uri ringtoneUri, int streamType,
+            @Nullable VolumeShaper.Configuration volumeShaperConfig,
+            boolean createLocalMediaPlayer) {
         try {
             final Ringtone r = new Ringtone(context, true);
             if (streamType >= 0) {
                 //FIXME deprecated call
                 r.setStreamType(streamType);
             }
+
+            r.setVolumeShaperConfig(volumeShaperConfig);
             r.setUri(ringtoneUri, volumeShaperConfig);
+            if (createLocalMediaPlayer) {
+                r.createLocalMediaPlayer();
+            }
             return r;
         } catch (Exception ex) {
             Log.e(TAG, "Failed to open ringtone " + ringtoneUri + ": " + ex);

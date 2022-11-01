@@ -214,7 +214,7 @@ public class ScrollCaptureConnection extends IScrollCaptureConnection.Stub imple
 
     @BinderThread
     @Override
-    public void close() {
+    public synchronized void close() {
         Trace.instantForTrack(TRACE_TAG_GRAPHICS, TRACE_TRACK, "close");
         if (mActive) {
             Log.w(TAG, "close(): capture session still active! Ending now.");

@@ -15,12 +15,18 @@
  */
 package com.android.server.audio;
 
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import android.app.AppOpsManager;
 import android.content.Context;
+import android.media.AudioSystem;
 import android.os.Looper;
 import android.os.UserHandle;
 import android.util.Log;
@@ -33,6 +39,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Spy;
 
 @MediumTest
@@ -46,6 +53,7 @@ public class AudioServiceTest {
     private AudioSystemAdapter mAudioSystem;
     @Spy private SystemServerAdapter mSpySystemServer;
     private SettingsAdapter mSettingsAdapter;
+    @Mock private AppOpsManager mMockAppOpsManager;
     // the class being unit-tested here
     private AudioService mAudioService;
 
@@ -61,8 +69,11 @@ public class AudioServiceTest {
         mAudioSystem = new NoOpAudioSystemAdapter();
         mSpySystemServer = spy(new NoOpSystemServerAdapter());
         mSettingsAdapter = new NoOpSettingsAdapter();
+        mMockAppOpsManager = mock(AppOpsManager.class);
+        when(mMockAppOpsManager.noteOp(anyInt(), anyInt(), anyString(), anyString(), anyString()))
+                .thenReturn(AppOpsManager.MODE_ALLOWED);
         mAudioService = new AudioService(mContext, mAudioSystem, mSpySystemServer,
-                mSettingsAdapter, null);
+                mSettingsAdapter, null, mMockAppOpsManager);
     }
 
     /**
@@ -112,5 +123,34 @@ public class AudioServiceTest {
                     .sendMicrophoneMuteChangedIntent();
             reset(mSpySystemServer);
         }
+    }
+
+    @Test
+    public void testRingNotifAlias() throws Exception {
+        Log.i(TAG, "running testRingNotifAlias");
+        Assert.assertNotNull(mAudioService);
+        // TODO add initialization message that can be caught here instead of sleeping
+        Thread.sleep(MAX_MESSAGE_HANDLING_DELAY_MS); // wait for full AudioService initialization
+
+        // test with aliasing RING and NOTIFICATION
+        mAudioService.setNotifAliasRingForTest(true);
+        final int ringMaxVol = mAudioService.getStreamMaxVolume(AudioSystem.STREAM_RING);
+        final int ringMinVol = mAudioService.getStreamMinVolume(AudioSystem.STREAM_RING);
+        final int ringVol = ringMinVol + 1;
+        // set a value for NOTIFICATION so it's not at the target test value (ringMaxVol)
+        mAudioService.setStreamVolume(AudioSystem.STREAM_NOTIFICATION,
+                ringVol, 0, "bla");
+        mAudioService.setStreamVolume(AudioSystem.STREAM_RING, ringMaxVol, 0, "bla");
+        Thread.sleep(MAX_MESSAGE_HANDLING_DELAY_MS);
+        Assert.assertEquals(ringMaxVol,
+                mAudioService.getStreamVolume(AudioSystem.STREAM_NOTIFICATION));
+
+        // test with no aliasing between RING and NOTIFICATION
+        mAudioService.setNotifAliasRingForTest(false);
+        mAudioService.setStreamVolume(AudioSystem.STREAM_RING, ringVol, 0, "bla");
+        mAudioService.setStreamVolume(AudioSystem.STREAM_NOTIFICATION, ringMaxVol, 0, "bla");
+        Assert.assertEquals(ringVol, mAudioService.getStreamVolume(AudioSystem.STREAM_RING));
+        Assert.assertEquals(ringMaxVol, mAudioService.getStreamVolume(
+                AudioSystem.STREAM_NOTIFICATION));
     }
 }

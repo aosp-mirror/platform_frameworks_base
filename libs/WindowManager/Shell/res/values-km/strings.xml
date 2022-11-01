@@ -72,13 +72,16 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"ពពុះ"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"គ្រប់គ្រង"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"បានច្រានចោល​សារលេចឡើង។"</string>
-    <string name="restart_button_description" msgid="5887656107651190519">"ចុចដើម្បី​ចាប់ផ្ដើម​កម្មវិធី​នេះឡើងវិញ រួចចូលប្រើ​ពេញអេក្រង់។"</string>
+    <string name="restart_button_description" msgid="6712141648865547958">"ចុចដើម្បី​ចាប់ផ្ដើម​កម្មវិធី​នេះឡើងវិញសម្រាប់ទិដ្ឋភាពកាន់តែប្រសើរ។"</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"មានបញ្ហា​ពាក់ព័ន្ធនឹង​កាមេរ៉ាឬ?\nចុចដើម្បី​ដោះស្រាយ"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"មិនបាន​ដោះស្រាយ​បញ្ហានេះទេឬ?\nចុចដើម្បី​ត្រឡប់"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"មិនមាន​បញ្ហាពាក់ព័ន្ធនឹង​កាមេរ៉ាទេឬ? ចុចដើម្បី​ច្រានចោល។"</string>
-    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"កម្មវិធីមួយចំនួនដំណើរការបានប្រសើរបំផុតក្នុងទិសដៅបញ្ឈរ"</string>
-    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"សាកល្បងជម្រើសមួយក្នុងចំណោមទាំងនេះ ដើម្បីទទួលបានអត្ថប្រយោជន៍ច្រើនបំផុតពីកន្លែងទំនេររបស់អ្នក"</string>
-    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"បង្វិលឧបករណ៍របស់អ្នក ដើម្បីចូលប្រើអេក្រង់ពេញ"</string>
-    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"ចុចពីរដងនៅជាប់កម្មវិធីណាមួយ ដើម្បីប្ដូរទីតាំងកម្មវិធីនោះ"</string>
+    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"មើលឃើញ និងធ្វើបានកាន់តែច្រើន"</string>
+    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"អូស​កម្មវិធី​មួយ​ទៀត​ចូល ដើម្បី​ប្រើ​មុខងារ​បំបែកអេក្រង់"</string>
+    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"ចុចពីរដង​នៅ​ក្រៅ​កម្មវិធី ដើម្បី​ប្ដូរ​ទីតាំង​កម្មវិធី​នោះ"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"យល់ហើយ"</string>
+    <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"ពង្រីកដើម្បីទទួលបានព័ត៌មានបន្ថែម។"</string>
+    <string name="maximize_button_text" msgid="1650859196290301963">"ពង្រីក"</string>
+    <string name="minimize_button_text" msgid="271592547935841753">"បង្រួម"</string>
+    <string name="close_button_text" msgid="2913281996024033299">"បិទ"</string>
 </resources>

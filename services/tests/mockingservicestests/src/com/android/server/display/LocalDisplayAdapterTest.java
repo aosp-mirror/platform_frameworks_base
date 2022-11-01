@@ -149,6 +149,12 @@ public class LocalDisplayAdapterTest {
                 .thenReturn(mockArray);
         when(mMockedResources.obtainTypedArray(R.array.config_roundedCornerBottomRadiusArray))
                 .thenReturn(mockArray);
+        when(mMockedResources.obtainTypedArray(
+                com.android.internal.R.array.config_autoBrightnessDisplayValuesNits))
+                .thenReturn(mockArray);
+        when(mMockedResources.getIntArray(
+                com.android.internal.R.array.config_autoBrightnessLevels))
+                .thenReturn(new int[]{});
     }
 
     @After

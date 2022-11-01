@@ -44,6 +44,7 @@ import static com.android.server.am.ActivityManagerService.appendMemInfo;
 import static com.android.server.am.ActivityManagerService.getKsmInfo;
 import static com.android.server.am.ActivityManagerService.stringifyKBSize;
 import static com.android.server.am.LowMemDetector.ADJ_MEM_FACTOR_NOTHING;
+import static com.android.server.am.OomAdjuster.OOM_ADJ_REASON_NONE;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
 import static com.android.server.wm.ActivityTaskManagerService.DUMP_ACTIVITIES_CMD;
 
@@ -1047,17 +1048,7 @@ public class AppProfiler {
                 }
                 trimMemoryUiHiddenIfNecessaryLSP(app);
                 if (curProcState >= ActivityManager.PROCESS_STATE_HOME && !app.isKilledByAm()) {
-                    if (trimMemoryLevel < curLevel[0] && (thread = app.getThread()) != null) {
-                        try {
-                            if (DEBUG_SWITCH || DEBUG_OOM_ADJ) {
-                                Slog.v(TAG_OOM_ADJ,
-                                        "Trimming memory of " + app.processName
-                                        + " to " + curLevel[0]);
-                            }
-                            thread.scheduleTrimMemory(curLevel[0]);
-                        } catch (RemoteException e) {
-                        }
-                    }
+                    scheduleTrimMemoryLSP(app, curLevel[0], "Trimming memory of ");
                     profile.setTrimMemoryLevel(curLevel[0]);
                     step[0]++;
                     if (step[0] >= actualFactor) {
@@ -1073,31 +1064,11 @@ public class AppProfiler {
                     }
                 } else if (curProcState == ActivityManager.PROCESS_STATE_HEAVY_WEIGHT
                         && !app.isKilledByAm()) {
-                    if (trimMemoryLevel < ComponentCallbacks2.TRIM_MEMORY_BACKGROUND
-                            && (thread = app.getThread()) != null) {
-                        try {
-                            if (DEBUG_SWITCH || DEBUG_OOM_ADJ) {
-                                Slog.v(TAG_OOM_ADJ,
-                                        "Trimming memory of heavy-weight " + app.processName
-                                        + " to " + ComponentCallbacks2.TRIM_MEMORY_BACKGROUND);
-                            }
-                            thread.scheduleTrimMemory(
-                                    ComponentCallbacks2.TRIM_MEMORY_BACKGROUND);
-                        } catch (RemoteException e) {
-                        }
-                    }
+                    scheduleTrimMemoryLSP(app, ComponentCallbacks2.TRIM_MEMORY_BACKGROUND,
+                            "Trimming memory of heavy-weight ");
                     profile.setTrimMemoryLevel(ComponentCallbacks2.TRIM_MEMORY_BACKGROUND);
                 } else {
-                    if (trimMemoryLevel < fgTrimLevel && (thread = app.getThread()) != null) {
-                        try {
-                            if (DEBUG_SWITCH || DEBUG_OOM_ADJ) {
-                                Slog.v(TAG_OOM_ADJ, "Trimming memory of fg " + app.processName
-                                        + " to " + fgTrimLevel);
-                            }
-                            thread.scheduleTrimMemory(fgTrimLevel);
-                        } catch (RemoteException e) {
-                        }
-                    }
+                    scheduleTrimMemoryLSP(app, fgTrimLevel, "Trimming memory of fg ");
                     profile.setTrimMemoryLevel(fgTrimLevel);
                 }
             });
@@ -1128,19 +1099,25 @@ public class AppProfiler {
             // If this application is now in the background and it
             // had done UI, then give it the special trim level to
             // have it free UI resources.
-            final int level = ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN;
-            IApplicationThread thread;
-            if (app.mProfile.getTrimMemoryLevel() < level && (thread = app.getThread()) != null) {
-                try {
-                    if (DEBUG_SWITCH || DEBUG_OOM_ADJ) {
-                        Slog.v(TAG_OOM_ADJ, "Trimming memory of bg-ui "
-                                + app.processName + " to " + level);
-                    }
-                    thread.scheduleTrimMemory(level);
-                } catch (RemoteException e) {
-                }
-            }
+            scheduleTrimMemoryLSP(app, ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN,
+                    "Trimming memory of bg-ui ");
             app.mProfile.setPendingUiClean(false);
+        }
+    }
+
+    @GuardedBy({"mService", "mProcLock"})
+    private void scheduleTrimMemoryLSP(ProcessRecord app, int level, String msg) {
+        IApplicationThread thread;
+        if (app.mProfile.getTrimMemoryLevel() < level && (thread = app.getThread()) != null) {
+            try {
+                if (DEBUG_SWITCH || DEBUG_OOM_ADJ) {
+                    Slog.v(TAG_OOM_ADJ, msg + app.processName + " to " + level);
+                }
+                mService.mOomAdjuster.mCachedAppOptimizer.unfreezeTemporarily(app,
+                        OOM_ADJ_REASON_NONE);
+                thread.scheduleTrimMemory(level);
+            } catch (RemoteException e) {
+            }
         }
     }
 

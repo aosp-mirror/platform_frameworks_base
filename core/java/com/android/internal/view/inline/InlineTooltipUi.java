@@ -170,9 +170,9 @@ public final class InlineTooltipUi extends PopupWindow implements AutoCloseable 
 
             int delayTimeMs = mShowDelayConfigMs;
             try {
-                final float scale = Settings.Global.getFloat(
+                final float scale = WindowManager.fixScale(Settings.Global.getFloat(
                         anchor.getContext().getContentResolver(),
-                        Settings.Global.ANIMATOR_DURATION_SCALE);
+                        Settings.Global.ANIMATOR_DURATION_SCALE));
                 delayTimeMs *= scale;
             } catch (Settings.SettingNotFoundException e) {
                 // do nothing

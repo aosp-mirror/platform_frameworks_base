@@ -53,6 +53,7 @@ public class BroadcastOptions extends ComponentOptions {
     private String[] mRequireNoneOfPermissions;
     private long mRequireCompatChangeId = CHANGE_INVALID;
     private boolean mRequireCompatChangeEnabled = true;
+    private boolean mIsAlarmBroadcast = false;
     private long mIdForResponseEvent;
 
     /**
@@ -149,6 +150,13 @@ public class BroadcastOptions extends ComponentOptions {
             "android:broadcast.requireCompatChangeEnabled";
 
     /**
+     * Corresponds to {@link #setAlarmBroadcast(boolean)}
+     * @hide
+     */
+    public static final String KEY_ALARM_BROADCAST =
+            "android:broadcast.is_alarm";
+
+    /**
      * @hide
      * @deprecated Use {@link android.os.PowerExemptionManager#
      * TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED} instead.
@@ -207,6 +215,7 @@ public class BroadcastOptions extends ComponentOptions {
         mRequireCompatChangeId = opts.getLong(KEY_REQUIRE_COMPAT_CHANGE_ID, CHANGE_INVALID);
         mRequireCompatChangeEnabled = opts.getBoolean(KEY_REQUIRE_COMPAT_CHANGE_ENABLED, true);
         mIdForResponseEvent = opts.getLong(KEY_ID_FOR_RESPONSE_EVENT);
+        mIsAlarmBroadcast = opts.getBoolean(KEY_ALARM_BROADCAST, false);
     }
 
     /**
@@ -498,6 +507,49 @@ public class BroadcastOptions extends ComponentOptions {
         mRequireCompatChangeEnabled = true;
     }
 
+    /**
+     * When set, this broadcast will be understood as having originated from an
+     * alarm going off.  Only the OS itself can use this option; uses by other
+     * senders will be ignored.
+     * @hide
+     *
+     * @param senderIsAlarm Whether the broadcast is alarm-triggered.
+     */
+    public void setAlarmBroadcast(boolean senderIsAlarm) {
+        mIsAlarmBroadcast = senderIsAlarm;
+    }
+
+    /**
+     * Did this broadcast originate from an alarm triggering?
+     * @return true if this broadcast is an alarm message, false otherwise
+     * @hide
+     */
+    public boolean isAlarmBroadcast() {
+        return mIsAlarmBroadcast;
+    }
+
+    /**
+     * Did this broadcast originate from a push message from the server?
+     *
+     * @return true if this broadcast is a push message, false otherwise.
+     * @hide
+     */
+    public boolean isPushMessagingBroadcast() {
+        return mTemporaryAppAllowlistReasonCode == PowerExemptionManager.REASON_PUSH_MESSAGING;
+    }
+
+    /**
+     * Did this broadcast originate from a push message from the server which was over the allowed
+     * quota?
+     *
+     * @return true if this broadcast is a push message over quota, false otherwise.
+     * @hide
+     */
+    public boolean isPushMessagingOverQuotaBroadcast() {
+        return mTemporaryAppAllowlistReasonCode
+                == PowerExemptionManager.REASON_PUSH_MESSAGING_OVER_QUOTA;
+    }
+
     /** {@hide} */
     public long getRequireCompatChangeId() {
         return mRequireCompatChangeId;
@@ -559,6 +611,9 @@ public class BroadcastOptions extends ComponentOptions {
             b.putInt(KEY_TEMPORARY_APP_ALLOWLIST_TYPE, mTemporaryAppAllowlistType);
             b.putInt(KEY_TEMPORARY_APP_ALLOWLIST_REASON_CODE, mTemporaryAppAllowlistReasonCode);
             b.putString(KEY_TEMPORARY_APP_ALLOWLIST_REASON, mTemporaryAppAllowlistReason);
+        }
+        if (mIsAlarmBroadcast) {
+            b.putBoolean(KEY_ALARM_BROADCAST, true);
         }
         if (mMinManifestReceiverApiLevel != 0) {
             b.putInt(KEY_MIN_MANIFEST_RECEIVER_API_LEVEL, mMinManifestReceiverApiLevel);

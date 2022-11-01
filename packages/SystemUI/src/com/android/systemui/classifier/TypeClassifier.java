@@ -24,7 +24,8 @@ import static com.android.systemui.classifier.Classifier.NOTIFICATION_DISMISS;
 import static com.android.systemui.classifier.Classifier.NOTIFICATION_DRAG_DOWN;
 import static com.android.systemui.classifier.Classifier.PULSE_EXPAND;
 import static com.android.systemui.classifier.Classifier.QS_COLLAPSE;
-import static com.android.systemui.classifier.Classifier.QS_SWIPE;
+import static com.android.systemui.classifier.Classifier.QS_SWIPE_NESTED;
+import static com.android.systemui.classifier.Classifier.QS_SWIPE_SIDE;
 import static com.android.systemui.classifier.Classifier.QUICK_SETTINGS;
 import static com.android.systemui.classifier.Classifier.RIGHT_AFFORDANCE;
 import static com.android.systemui.classifier.Classifier.SHADE_DRAG;
@@ -86,8 +87,11 @@ public class TypeClassifier extends FalsingClassifier {
             case QS_COLLAPSE:
                 wrongDirection = !vertical || !up;
                 break;
-            case QS_SWIPE:
+            case QS_SWIPE_SIDE:
                 wrongDirection = vertical;
+                break;
+            case QS_SWIPE_NESTED:
+                wrongDirection = !vertical;
                 break;
             default:
                 wrongDirection = true;

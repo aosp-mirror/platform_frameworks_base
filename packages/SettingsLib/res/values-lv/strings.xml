@@ -117,17 +117,17 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Failu pārsūtīšana"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Ievades ierīce"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Interneta piekļuve"</string>
-    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"Kontaktpersonas informācijas kopīgošana"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"Izmantot kontaktpersonas informācijas kopīgošanai"</string>
+    <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"Kontaktpersonu un zvanu vēst. kopīgošana"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"Paredzēts kontaktpersonu un zvanu vēstures kopīgošanai"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Interneta savienojuma koplietošana"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Īsziņas"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Piekļuve SIM kartei"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD audio: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD audio"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Dzirdes aparāti"</string>
-    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO profils"</string>
+    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE Audio"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Izveidots savienojums ar dzirdes aparātiem"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"Izveidots savienojums ar LE_AUDIO"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Izveidots savienojums ar LE Audio"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Savienots ar multivides audio"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Savienots ar tālruņa audio"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Savienots ar failu pārsūtīšanas serveri"</string>
@@ -408,6 +408,7 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Pielāgot visas darbības vairāku logu režīmam neatkarīgi no vērtībām manifestā."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Iespējot brīvās formas logus"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Iespējot eksperimentālo brīvās formas logu atbalstu."</string>
+    <string name="desktop_mode" msgid="2389067840550544462">"Darbvirsmas režīms"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Datora dublējuma parole"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Darbvirsmas pilnie dublējumi pašlaik nav aizsargāti."</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Pieskarieties, lai mainītu vai noņemtu paroli pilniem datora dublējumiem."</string>
@@ -476,12 +477,13 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> — <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> līdz pilnai uzlādei"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> — <xliff:g id="TIME">%2$s</xliff:g> līdz pilnai uzlādei"</string>
-    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> — uzlāde īslaicīgi ierobežota"</string>
+    <string name="power_charging_limited" msgid="6971664137170239141">"<xliff:g id="LEVEL">%1$s</xliff:g> — uzlāde ir pārtraukta"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Nezināms"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Uzlāde"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Notiek ātrā uzlāde"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Notiek lēnā uzlāde"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Bezvadu uzlāde"</string>
+    <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Notiek uzlāde"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Nenotiek uzlāde"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Ierīce pievienota, uzlāde nenotiek"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Uzlādēts"</string>
@@ -598,6 +600,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Atiestatīt"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Noņemt"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Notiek viesa sesijas atiestatīšana…"</string>
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Vai atiestatīt viesa sesiju?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Tādējādi tiks sākta jauna viesa sesijas un visas pašreizējās sesijas lietotnes un dati tiks dzēsti"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Vai iziet no viesa režīma?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Tādējādi tiks dzēstas pašreizējās viesa sesijas lietotnes un dati."</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Iziet"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Vai saglabāt viesa darbības?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Varat saglabāt pašreizējās sesijas darbības vai dzēst visas lietotnes un datus"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Dzēst"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Saglabāt"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"Iziet no viesa režīma"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"Atiestatīt viesa sesiju"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Iziet no viesa režīma"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Izejot tiks dzēstas visas darbības"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Izejot varat saglabāt vai dzēst savas darbības"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Atiestatiet, lai tagad dzēstu sesijas darbības. Izejot varēsiet saglabāt vai dzēst darbības."</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Uzņemt fotoattēlu"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Izvēlēties attēlu"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Atlasīt fotoattēlu"</string>
@@ -639,11 +656,6 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Pārtraukts savienojums ar tīklu Ethernet."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Tīkls Ethernet"</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Zvanīšana nav pieejama."</string>
-    <string name="dream_complication_title_time" msgid="701747800712893499">"Laiks"</string>
-    <string name="dream_complication_title_date" msgid="8661176085446135789">"Datums"</string>
-    <string name="dream_complication_title_weather" msgid="598609151677172783">"Laikapstākļi"</string>
-    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"Gaisa kvalitāte"</string>
-    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"Apraides informācija"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"Profila attēla izvēle"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"Noklusējuma lietotāja ikona"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Fiziskā tastatūra"</string>

@@ -16,19 +16,26 @@
 
 package com.android.systemui.qs.carrier;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Handler;
+import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.View;
@@ -37,7 +44,6 @@ import android.widget.TextView;
 import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.CarrierTextManager;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.connectivity.IconState;
 import com.android.systemui.statusbar.connectivity.MobileDataIndicators;
@@ -50,6 +56,7 @@ import com.android.systemui.utils.os.FakeHandler;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -80,11 +87,11 @@ public class QSCarrierGroupControllerTest extends LeakCheckedTest {
     @Mock
     private QSCarrier mQSCarrier3;
     private TestableLooper mTestableLooper;
-    @Mock private FeatureFlags mFeatureFlags;
     @Mock
     private QSCarrierGroupController.OnSingleCarrierChangedListener mOnSingleCarrierChangedListener;
 
     private FakeSlotIndexResolver mSlotIndexResolver;
+    private ClickListenerTextView mNoCarrierTextView;
 
     @Before
     public void setup() throws Exception {
@@ -108,7 +115,8 @@ public class QSCarrierGroupControllerTest extends LeakCheckedTest {
                 .when(mCarrierTextManager)
                 .setListening(any(CarrierTextManager.CarrierTextCallback.class));
 
-        when(mQSCarrierGroup.getNoSimTextView()).thenReturn(new TextView(mContext));
+        mNoCarrierTextView = new ClickListenerTextView(mContext);
+        when(mQSCarrierGroup.getNoSimTextView()).thenReturn(mNoCarrierTextView);
         when(mQSCarrierGroup.getCarrier1View()).thenReturn(mQSCarrier1);
         when(mQSCarrierGroup.getCarrier2View()).thenReturn(mQSCarrier2);
         when(mQSCarrierGroup.getCarrier3View()).thenReturn(mQSCarrier3);
@@ -120,7 +128,7 @@ public class QSCarrierGroupControllerTest extends LeakCheckedTest {
         mQSCarrierGroupController = new QSCarrierGroupController.Builder(
                 mActivityStarter, handler, TestableLooper.get(this).getLooper(),
                 mNetworkController, mCarrierTextControllerBuilder, mContext, mCarrierConfigTracker,
-                mFeatureFlags, mSlotIndexResolver)
+                mSlotIndexResolver)
                 .setQSCarrierGroup(mQSCarrierGroup)
                 .build();
 
@@ -376,12 +384,71 @@ public class QSCarrierGroupControllerTest extends LeakCheckedTest {
         verify(mOnSingleCarrierChangedListener, never()).onSingleCarrierChanged(anyBoolean());
     }
 
+    @Test
+    public void testOnlyInternalViewsHaveClickableListener() {
+        ArgumentCaptor<View.OnClickListener> captor =
+                ArgumentCaptor.forClass(View.OnClickListener.class);
+
+        verify(mQSCarrier1).setOnClickListener(captor.capture());
+        verify(mQSCarrier2).setOnClickListener(captor.getValue());
+        verify(mQSCarrier3).setOnClickListener(captor.getValue());
+
+        assertThat(mNoCarrierTextView.getOnClickListener()).isSameInstanceAs(captor.getValue());
+        verify(mQSCarrierGroup, never()).setOnClickListener(any());
+    }
+
+    @Test
+    public void testOnClickListenerDoesntStartActivityIfViewNotVisible() {
+        ArgumentCaptor<View.OnClickListener> captor =
+                ArgumentCaptor.forClass(View.OnClickListener.class);
+
+        verify(mQSCarrier1).setOnClickListener(captor.capture());
+        when(mQSCarrier1.isVisibleToUser()).thenReturn(false);
+
+        captor.getValue().onClick(mQSCarrier1);
+        verifyZeroInteractions(mActivityStarter);
+    }
+
+    @Test
+    public void testOnClickListenerLaunchesActivityIfViewVisible() {
+        ArgumentCaptor<View.OnClickListener> listenerCaptor =
+                ArgumentCaptor.forClass(View.OnClickListener.class);
+        ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
+
+        verify(mQSCarrier1).setOnClickListener(listenerCaptor.capture());
+        when(mQSCarrier1.isVisibleToUser()).thenReturn(true);
+
+        listenerCaptor.getValue().onClick(mQSCarrier1);
+        verify(mActivityStarter)
+                .postStartActivityDismissingKeyguard(intentCaptor.capture(), anyInt());
+        assertThat(intentCaptor.getValue().getAction())
+                .isEqualTo(Settings.ACTION_WIRELESS_SETTINGS);
+    }
+
     private class FakeSlotIndexResolver implements QSCarrierGroupController.SlotIndexResolver {
         public boolean overrideInvalid;
 
         @Override
         public int getSlotIndex(int subscriptionId) {
             return overrideInvalid ? -1 : subscriptionId;
+        }
+    }
+
+    private class ClickListenerTextView extends TextView {
+        View.OnClickListener mListener = null;
+
+        ClickListenerTextView(Context context) {
+            super(context);
+        }
+
+        @Override
+        public void setOnClickListener(OnClickListener l) {
+            super.setOnClickListener(l);
+            mListener = l;
+        }
+
+        View.OnClickListener getOnClickListener() {
+            return mListener;
         }
     }
 }

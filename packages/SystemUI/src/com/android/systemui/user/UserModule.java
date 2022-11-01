@@ -19,6 +19,7 @@ package com.android.systemui.user;
 import android.app.Activity;
 
 import com.android.settingslib.users.EditUserInfoController;
+import com.android.systemui.user.data.repository.UserRepositoryModule;
 
 import dagger.Binds;
 import dagger.Module;
@@ -29,7 +30,11 @@ import dagger.multibindings.IntoMap;
 /**
  * Dagger module for User related classes.
  */
-@Module
+@Module(
+        includes = {
+                UserRepositoryModule.class,
+        }
+)
 public abstract class UserModule {
 
     private static final String FILE_PROVIDER_AUTHORITY = "com.android.systemui.fileprovider";

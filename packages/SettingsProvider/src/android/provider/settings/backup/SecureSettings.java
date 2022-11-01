@@ -37,6 +37,7 @@ public class SecureSettings {
         Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED,
         Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED,
         Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED,
+        Settings.Secure.ADAPTIVE_CHARGING_ENABLED,
         Settings.Secure.ADAPTIVE_SLEEP,
         Settings.Secure.CAMERA_AUTOROTATE,
         Settings.Secure.AUTOFILL_SERVICE,
@@ -117,6 +118,10 @@ public class SecureSettings {
         Settings.Secure.FACE_UNLOCK_DISMISSES_KEYGUARD,
         Settings.Secure.FACE_UNLOCK_APP_ENABLED,
         Settings.Secure.FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION,
+        Settings.Secure.FINGERPRINT_SIDE_FPS_KG_POWER_WINDOW,
+        Settings.Secure.FINGERPRINT_SIDE_FPS_BP_POWER_WINDOW,
+        Settings.Secure.FINGERPRINT_SIDE_FPS_ENROLL_TAP_WINDOW,
+        Settings.Secure.FINGERPRINT_SIDE_FPS_AUTH_DOWNTIME,
         Settings.Secure.ACTIVE_UNLOCK_ON_WAKE,
         Settings.Secure.ACTIVE_UNLOCK_ON_UNLOCK_INTENT,
         Settings.Secure.ACTIVE_UNLOCK_ON_BIOMETRIC_FAIL,
@@ -177,6 +182,7 @@ public class SecureSettings {
         Settings.Secure.PEOPLE_STRIP,
         Settings.Secure.MEDIA_CONTROLS_RESUME,
         Settings.Secure.MEDIA_CONTROLS_RECOMMENDATION,
+        Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN,
         Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE,
         Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS,
         Settings.Secure.ACCESSIBILITY_MAGNIFICATION_CAPABILITY,
@@ -204,6 +210,11 @@ public class SecureSettings {
         Settings.Secure.LOCKSCREEN_SHOW_WALLET,
         Settings.Secure.LOCK_SCREEN_SHOW_QR_CODE_SCANNER,
         Settings.Secure.LOCKSCREEN_USE_DOUBLE_LINE_CLOCK,
-        Settings.Secure.STATUS_BAR_SHOW_VIBRATE_ICON
+        Settings.Secure.STATUS_BAR_SHOW_VIBRATE_ICON,
+        Settings.Secure.ASSIST_TOUCH_GESTURE_ENABLED,
+        Settings.Secure.ASSIST_LONG_PRESS_HOME_ENABLED,
+        Settings.Secure.BLUETOOTH_LE_BROADCAST_PROGRAM_INFO,
+        Settings.Secure.BLUETOOTH_LE_BROADCAST_CODE,
+        Settings.Secure.BLUETOOTH_LE_BROADCAST_APP_SOURCE_NAME
     };
 }

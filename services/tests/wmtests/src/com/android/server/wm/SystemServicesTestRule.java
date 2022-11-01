@@ -43,12 +43,14 @@ import static org.mockito.Mockito.withSettings;
 
 import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
+import android.app.IApplicationThread;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.database.ContentObserver;
@@ -66,7 +68,6 @@ import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.util.Log;
 import android.view.InputChannel;
-import android.view.Surface;
 import android.view.SurfaceControl;
 
 import com.android.dx.mockito.inline.extended.StaticMockitoSession;
@@ -77,7 +78,6 @@ import com.android.server.LockGuard;
 import com.android.server.UiThread;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityManagerService;
-import com.android.server.appop.AppOpsService;
 import com.android.server.display.color.ColorDisplayService;
 import com.android.server.firewall.IntentFirewall;
 import com.android.server.input.InputManagerService;
@@ -94,10 +94,8 @@ import org.mockito.MockSettings;
 import org.mockito.Mockito;
 import org.mockito.quality.Strictness;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Supplier;
 
 /**
  * JUnit test rule to correctly setting up system services like {@link WindowManagerService}
@@ -125,13 +123,11 @@ public class SystemServicesTestRule implements TestRule {
     private Description mDescription;
     private Context mContext;
     private StaticMockitoSession mMockitoSession;
-    private ActivityManagerService mAmService;
     private ActivityTaskManagerService mAtmService;
     private WindowManagerService mWmService;
     private WindowState.PowerManagerWrapper mPowerManagerWrapper;
     private InputManagerService mImService;
     private InputChannel mInputChannel;
-    private Supplier<Surface> mSurfaceFactory = () -> mock(Surface.class);
     /**
      * Spied {@link SurfaceControl.Transaction} class than can be used to verify calls.
      */
@@ -239,6 +235,7 @@ public class SystemServicesTestRule implements TestRule {
         doReturn(pm).when(mContext).getSystemService(eq(Context.POWER_SERVICE));
         mStubbedWakeLock = createStubbedWakeLock(false /* needVerification */);
         doReturn(mStubbedWakeLock).when(pm).newWakeLock(anyInt(), anyString());
+        doReturn(mStubbedWakeLock).when(pm).newWakeLock(anyInt(), anyString(), anyInt());
 
         // DisplayManagerInternal
         final DisplayManagerInternal dmi = mock(DisplayManagerInternal.class);
@@ -289,29 +286,9 @@ public class SystemServicesTestRule implements TestRule {
     }
 
     private void setUpActivityTaskManagerService() {
-        // ActivityManagerService
-        mAmService = new ActivityManagerService(new AMTestInjector(mContext), null /* thread */);
-        spyOn(mAmService);
-        doReturn(mock(IPackageManager.class)).when(mAmService).getPackageManager();
-        doNothing().when(mAmService).grantImplicitAccess(
-                anyInt(), any(), anyInt(), anyInt());
-
         // ActivityManagerInternal
-        final ActivityManagerInternal amInternal = mAmService.mInternal;
-        spyOn(amInternal);
-        doNothing().when(amInternal).trimApplications();
-        doNothing().when(amInternal).scheduleAppGcs();
-        doNothing().when(amInternal).updateCpuStats();
-        doNothing().when(amInternal).updateOomAdj();
-        doNothing().when(amInternal).updateBatteryStats(any(), anyInt(), anyInt(), anyBoolean());
-        doNothing().when(amInternal).updateActivityUsageStats(
-                any(), anyInt(), anyInt(), any(), any());
-        doNothing().when(amInternal).startProcess(
-                any(), any(), anyBoolean(), anyBoolean(), any(), any());
-        doNothing().when(amInternal).updateOomLevelsForDisplay(anyInt());
-        doNothing().when(amInternal).broadcastGlobalConfigurationChanged(anyInt(), anyBoolean());
-        doNothing().when(amInternal).cleanUpServices(anyInt(), any(), any());
-        doNothing().when(amInternal).reportCurKeyguardUsageEvent(anyBoolean());
+        final ActivityManagerInternal amInternal =
+                mock(ActivityManagerInternal.class, withSettings().stubOnly());
         doReturn(UserHandle.USER_SYSTEM).when(amInternal).getCurrentUserId();
         doReturn(TEST_USER_PROFILE_IDS).when(amInternal).getCurrentProfileIds();
         doReturn(true).when(amInternal).isUserRunning(anyInt(), anyInt());
@@ -320,7 +297,9 @@ public class SystemServicesTestRule implements TestRule {
         doReturn(false).when(amInternal).isActivityStartsLoggingEnabled();
         LocalServices.addService(ActivityManagerInternal.class, amInternal);
 
-        mAtmService = new TestActivityTaskManagerService(mContext, mAmService);
+        final ActivityManagerService amService =
+                mock(ActivityManagerService.class, withSettings().stubOnly());
+        mAtmService = new TestActivityTaskManagerService(mContext, amService);
         LocalServices.addService(ActivityTaskManagerInternal.class, mAtmService.getAtmInternal());
     }
 
@@ -334,7 +313,7 @@ public class SystemServicesTestRule implements TestRule {
         mWmService = WindowManagerService.main(
                 mContext, mImService, false, false, wmPolicy, mAtmService,
                 testDisplayWindowSettingsProvider, StubTransaction::new,
-                () -> mSurfaceFactory.get(), (unused) -> new MockSurfaceControlBuilder());
+                (unused) -> new MockSurfaceControlBuilder());
         spyOn(mWmService);
         spyOn(mWmService.mRoot);
         // Invoked during {@link ActivityStack} creation.
@@ -355,7 +334,7 @@ public class SystemServicesTestRule implements TestRule {
                 null, null, mTransaction, mWmService.mPowerManagerInternal);
 
         mWmService.onInitReady();
-        mAmService.setWindowManager(mWmService);
+        mAtmService.setWindowManager(mWmService);
         mWmService.mDisplayEnabled = true;
         mWmService.mDisplayReady = true;
         // Set configuration for default display
@@ -366,7 +345,7 @@ public class SystemServicesTestRule implements TestRule {
         // Set default display to be in fullscreen mode. Devices with PC feature may start their
         // default display in freeform mode but some of tests in WmTests have implicit assumption on
         // that the default display is in fullscreen mode.
-        display.setDisplayWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        display.getDefaultTaskDisplayArea().setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         spyOn(display);
         final TaskDisplayArea taskDisplayArea = display.getDefaultTaskDisplayArea();
 
@@ -454,8 +433,32 @@ public class SystemServicesTestRule implements TestRule {
                 .spiedInstance(sWakeLock).stubOnly());
     }
 
-    void setSurfaceFactory(Supplier<Surface> factory) {
-        mSurfaceFactory = factory;
+    WindowProcessController addProcess(String pkgName, String procName, int pid, int uid) {
+        return addProcess(mAtmService, pkgName, procName, pid, uid);
+    }
+
+    static WindowProcessController addProcess(ActivityTaskManagerService atmService, String pkgName,
+            String procName, int pid, int uid) {
+        final ApplicationInfo info = new ApplicationInfo();
+        info.uid = uid;
+        info.packageName = pkgName;
+        return addProcess(atmService, info, procName, pid);
+    }
+
+    static WindowProcessController addProcess(ActivityTaskManagerService atmService,
+            ApplicationInfo info, String procName, int pid) {
+        final WindowProcessListener mockListener = mock(WindowProcessListener.class,
+                withSettings().stubOnly());
+        final int uid = info.uid;
+        final WindowProcessController proc = new WindowProcessController(atmService,
+                info, procName, uid, UserHandle.getUserId(uid), mockListener, mockListener);
+        proc.setThread(mock(IApplicationThread.class, withSettings().stubOnly()));
+        atmService.mProcessNames.put(procName, uid, proc);
+        if (pid > 0) {
+            proc.setPid(pid);
+            atmService.mProcessMap.put(pid, proc);
+        }
+        return proc;
     }
 
     void cleanupWindowManagerHandlers() {
@@ -616,34 +619,6 @@ public class SystemServicesTestRule implements TestRule {
             final KeyguardController controller = getKeyguardController();
             spyOn(controller);
             doReturn(true).when(controller).checkKeyguardVisibility(any());
-        }
-    }
-
-    // TODO: Can we just mock this?
-    private static class AMTestInjector extends ActivityManagerService.Injector {
-
-        AMTestInjector(Context context) {
-            super(context);
-        }
-
-        @Override
-        public Context getContext() {
-            return getInstrumentation().getTargetContext();
-        }
-
-        @Override
-        public AppOpsService getAppOpsService(File file, Handler handler) {
-            return null;
-        }
-
-        @Override
-        public Handler getUiHandler(ActivityManagerService service) {
-            return UiThread.getHandler();
-        }
-
-        @Override
-        public boolean isNetworkRestrictedForUid(int uid) {
-            return false;
         }
     }
 }

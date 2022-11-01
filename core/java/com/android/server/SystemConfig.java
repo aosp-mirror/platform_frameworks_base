@@ -339,6 +339,8 @@ public class SystemConfig {
     // A map from package name of vendor APEXes that can be updated to an installer package name
     // allowed to install updates for it.
     private final ArrayMap<String, String> mAllowedVendorApexes = new ArrayMap<>();
+    // A set of package names that are allowed to use <install-constraints> manifest tag.
+    private final Set<String> mInstallConstraintsAllowlist = new ArraySet<>();
 
     private String mModulesInstallerPackageName;
 
@@ -533,6 +535,10 @@ public class SystemConfig {
 
     public Map<String, String> getAllowedVendorApexes() {
         return mAllowedVendorApexes;
+    }
+
+    public Set<String> getInstallConstraintsAllowlist() {
+        return mInstallConstraintsAllowlist;
     }
 
     public String getModulesInstallerPackageName() {
@@ -1449,6 +1455,20 @@ public class SystemConfig {
                             }
                             if (pkgName != null && installerPkgName != null) {
                                 mAllowedVendorApexes.put(pkgName, installerPkgName);
+                            }
+                        } else {
+                            logNotAllowedInPartition(name, permFile, parser);
+                        }
+                        XmlUtils.skipCurrentTag(parser);
+                    } break;
+                    case "install-constraints-allowed": {
+                        if (allowAppConfigs) {
+                            String packageName = parser.getAttributeValue(null, "package");
+                            if (packageName == null) {
+                                Slog.w(TAG, "<" + name + "> without package in " + permFile
+                                        + " at " + parser.getPositionDescription());
+                            } else {
+                                mInstallConstraintsAllowlist.add(packageName);
                             }
                         } else {
                             logNotAllowedInPartition(name, permFile, parser);

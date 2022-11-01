@@ -47,10 +47,17 @@ android_library {
     ],
     static_libs: [
         "PluginCoreLib",
+        "SystemUIAnimationLib",
+        "SystemUIPluginLib",
+        "SystemUIUnfoldLib",
         "androidx.dynamicanimation_dynamicanimation",
         "androidx.concurrent_concurrent-futures",
+        "gson-prebuilt-jar",
         "dagger2",
         "jsr330",
+    ],
+    resource_dirs: [
+        "res",
     ],
     java_version: "1.8",
     min_sdk_version: "current",

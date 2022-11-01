@@ -20,7 +20,6 @@ import android.annotation.NonNull;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 
-import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationListener.NotificationHandler;
@@ -33,13 +32,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
-import javax.inject.Inject;
-
 /***
  * {@link DreamOverlayNotificationCountProvider} provides the current notification count to
- * registered callbacks.
+ * registered callbacks. Ongoing notifications are not included in the count.
  */
-@SysUISingleton
 public class DreamOverlayNotificationCountProvider
         implements CallbackController<DreamOverlayNotificationCountProvider.Callback> {
     private final Set<String> mNotificationKeys = new HashSet<>();
@@ -49,6 +45,10 @@ public class DreamOverlayNotificationCountProvider
         @Override
         public void onNotificationPosted(
                 StatusBarNotification sbn, NotificationListenerService.RankingMap rankingMap) {
+            if (sbn.isOngoing()) {
+                // Don't count ongoing notifications.
+                return;
+            }
             mNotificationKeys.add(sbn.getKey());
             reportNotificationCountChanged();
         }
@@ -78,7 +78,6 @@ public class DreamOverlayNotificationCountProvider
         }
     };
 
-    @Inject
     public DreamOverlayNotificationCountProvider(
             NotificationListener notificationListener,
             @Background Executor bgExecutor) {

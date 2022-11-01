@@ -20,6 +20,7 @@ class MediaTestUtils {
             device = null,
             active = true,
             resumeAction = null,
+            isPlaying = false,
             instanceId = InstanceId.fakeInstanceId(-1),
             appUid = -1)
     }

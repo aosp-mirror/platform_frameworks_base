@@ -72,13 +72,16 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Bulle"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Gérer"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Bulle fermée."</string>
-    <string name="restart_button_description" msgid="5887656107651190519">"Appuyez pour redémarrer cette application et activer le mode plein écran."</string>
+    <string name="restart_button_description" msgid="6712141648865547958">"Appuyez pour redémarrer cette appli et avoir une meilleure vue."</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Problèmes d\'appareil photo ?\nAppuyez pour réajuster"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Problème non résolu ?\nAppuyez pour rétablir"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Aucun problème d\'appareil photo ? Appuyez pour ignorer."</string>
-    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"Certaines applis fonctionnent mieux en mode Portrait"</string>
-    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"Essayez l\'une de ces options pour exploiter pleinement l\'espace"</string>
-    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"Faites pivoter l\'appareil pour passer en plein écran"</string>
-    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"Appuyez deux fois à côté d\'une appli pour la repositionner"</string>
+    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Voir et interagir plus"</string>
+    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"Faites glisser une autre appli pour utiliser l\'écran partagé"</string>
+    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Appuyez deux fois en dehors d\'une appli pour la repositionner"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"OK"</string>
+    <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Développez pour obtenir plus d\'informations"</string>
+    <string name="maximize_button_text" msgid="1650859196290301963">"Agrandir"</string>
+    <string name="minimize_button_text" msgid="271592547935841753">"Réduire"</string>
+    <string name="close_button_text" msgid="2913281996024033299">"Fermer"</string>
 </resources>

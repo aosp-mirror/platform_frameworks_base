@@ -51,14 +51,12 @@ import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.hardware.power.Boost;
 import android.os.Handler;
-import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Slog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
-import android.view.IDisplayWindowRotationCallback;
 import android.view.IWindowManager;
 import android.view.Surface;
 import android.window.TransitionRequestInfo;
@@ -67,7 +65,6 @@ import android.window.WindowContainerTransaction;
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
-import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
 import com.android.server.UiThread;
 import com.android.server.policy.WindowManagerPolicy;
@@ -210,31 +207,6 @@ public class DisplayRotation {
     private int mDemoRotation;
     private boolean mDemoHdmiRotationLock;
     private boolean mDemoRotationLock;
-
-    private static final int REMOTE_ROTATION_TIMEOUT_MS = 800;
-
-    private boolean mIsWaitingForRemoteRotation = false;
-
-    private final Runnable mDisplayRotationHandlerTimeout =
-            new Runnable() {
-                @Override
-                public void run() {
-                    continueRotation(mRotation, null /* transaction */);
-                }
-            };
-
-    private final IDisplayWindowRotationCallback mRemoteRotationCallback =
-            new IDisplayWindowRotationCallback.Stub() {
-                @Override
-                public void continueRotateDisplay(int targetRotation,
-                        WindowContainerTransaction t) {
-                    synchronized (mService.getWindowManagerLock()) {
-                        mService.mH.sendMessage(PooledLambda.obtainMessage(
-                                DisplayRotation::continueRotation, DisplayRotation.this,
-                                targetRotation, t));
-                    }
-                }
-            };
 
     DisplayRotation(WindowManagerService service, DisplayContent displayContent) {
         this(service, displayContent, displayContent.getDisplayPolicy(),
@@ -427,9 +399,8 @@ public class DisplayRotation {
                 return false;
             }
 
-            final ScreenRotationAnimation screenRotationAnimation =
-                    mDisplayContent.getRotationAnimation();
-            if (screenRotationAnimation != null && screenRotationAnimation.isAnimating()) {
+            if (mDisplayContent.inTransition()
+                    && !mDisplayContent.mTransitionController.useShellTransitionsRotation()) {
                 // Rotation updates cannot be performed while the previous rotation change animation
                 // is still in progress. Skip this update. We will try updating again after the
                 // animation is finished and the display is unfrozen.
@@ -511,6 +482,7 @@ public class DisplayRotation {
             final TransitionRequestInfo.DisplayChange change = wasCollecting ? null
                     : new TransitionRequestInfo.DisplayChange(mDisplayContent.getDisplayId(),
                             oldRotation, mRotation);
+
             mDisplayContent.requestChangeTransitionIfNeeded(
                     ActivityInfo.CONFIG_WINDOW_CONFIGURATION, change);
             if (wasCollecting) {
@@ -541,74 +513,34 @@ public class DisplayRotation {
         return true;
     }
 
-    /**
-     * Utility to get a rotating displaycontent from a Transition.
-     * @return null if the transition doesn't contain a rotating display.
-     */
-    static DisplayContent getDisplayFromTransition(Transition transition) {
-        for (int i = transition.mParticipants.size() - 1; i >= 0; --i) {
-            final WindowContainer wc = transition.mParticipants.valueAt(i);
-            if (!(wc instanceof DisplayContent)) continue;
-            return (DisplayContent) wc;
-        }
-        return null;
-    }
-
-    /**
-     * A Remote rotation is when we are waiting for some registered (remote)
-     * {@link IDisplayWindowRotationController} to calculate and return some hierarchy operations
-     *  to perform in sync with the rotation.
-     */
-    boolean isWaitingForRemoteRotation() {
-        return mIsWaitingForRemoteRotation;
-    }
-
     private void startRemoteRotation(int fromRotation, int toRotation) {
-        if (mService.mDisplayRotationController == null) {
-            return;
-        }
-        mIsWaitingForRemoteRotation = true;
-        try {
-            mService.mDisplayRotationController.onRotateDisplay(mDisplayContent.getDisplayId(),
-                    fromRotation, toRotation, mRemoteRotationCallback);
-            mService.mH.removeCallbacks(mDisplayRotationHandlerTimeout);
-            mService.mH.postDelayed(mDisplayRotationHandlerTimeout, REMOTE_ROTATION_TIMEOUT_MS);
-        } catch (RemoteException e) {
-            mIsWaitingForRemoteRotation = false;
-            return;
-        }
+        mDisplayContent.mRemoteDisplayChangeController.performRemoteDisplayChange(
+                fromRotation, toRotation, null /* newDisplayAreaInfo */,
+                (transaction) -> continueRotation(toRotation, transaction)
+        );
     }
 
     private void continueRotation(int targetRotation, WindowContainerTransaction t) {
-        synchronized (mService.mGlobalLock) {
-            if (targetRotation != mRotation || !mIsWaitingForRemoteRotation) {
-                // Drop it, this is either coming from an outdated remote rotation; or, we've
-                // already moved on.
-                return;
-            }
-            mService.mH.removeCallbacks(mDisplayRotationHandlerTimeout);
-            mIsWaitingForRemoteRotation = false;
+        if (targetRotation != mRotation) {
+            // Drop it, this is either coming from an outdated remote rotation; or, we've
+            // already moved on.
+            return;
+        }
 
-            if (mDisplayContent.mTransitionController.isShellTransitionsEnabled()) {
-                if (!mDisplayContent.mTransitionController.isCollecting()) {
-                    throw new IllegalStateException("Trying to rotate outside a transition");
-                }
-                mDisplayContent.mTransitionController.collect(mDisplayContent);
-                // Go through all tasks and collect them before the rotation
-                // TODO(shell-transitions): move collect() to onConfigurationChange once wallpaper
-                //       handling is synchronized.
-                mDisplayContent.mTransitionController.collectForDisplayChange(mDisplayContent,
-                        null /* use collecting transition */);
+        if (mDisplayContent.mTransitionController.isShellTransitionsEnabled()) {
+            if (!mDisplayContent.mTransitionController.isCollecting()) {
+                throw new IllegalStateException("Trying to rotate outside a transition");
             }
-            mService.mAtmService.deferWindowLayout();
-            try {
-                mDisplayContent.sendNewConfiguration();
-                if (t != null) {
-                    mService.mAtmService.mWindowOrganizerController.applyTransaction(t);
-                }
-            } finally {
-                mService.mAtmService.continueWindowLayout();
+            mDisplayContent.mTransitionController.collect(mDisplayContent);
+        }
+        mService.mAtmService.deferWindowLayout();
+        try {
+            mDisplayContent.sendNewConfiguration();
+            if (t != null) {
+                mService.mAtmService.mWindowOrganizerController.applyTransaction(t);
             }
+        } finally {
+            mService.mAtmService.continueWindowLayout();
         }
     }
 
@@ -669,7 +601,8 @@ public class DisplayRotation {
         // We only enable seamless rotation if the top window has requested it and is in the
         // fullscreen opaque state. Seamless rotation requires freezing various Surface states and
         // won't work well with animations, so we disable it in the animation case for now.
-        if (w.getAttrs().rotationAnimation != ROTATION_ANIMATION_SEAMLESS || w.isAnimatingLw()) {
+        if (w.getAttrs().rotationAnimation != ROTATION_ANIMATION_SEAMLESS || w.inMultiWindowMode()
+                || w.isAnimatingLw()) {
             return false;
         }
 
@@ -1571,8 +1504,8 @@ public class DisplayRotation {
         }
 
         @Override
-        public boolean isKeyguardLocked() {
-            return mService.isKeyguardLocked();
+        public boolean isKeyguardShowingAndNotOccluded() {
+            return mService.isKeyguardShowingAndNotOccluded();
         }
 
         @Override
@@ -1684,7 +1617,9 @@ public class DisplayRotation {
                 final WindowContainer<?> source = dc.getLastOrientationSource();
                 if (source != null) {
                     mLastOrientationSource = source.toString();
-                    mSourceOrientation = source.mOrientation;
+                    final WindowState w = source.asWindowState();
+                    mSourceOrientation =
+                            w != null ? w.mAttrs.screenOrientation : source.mOrientation;
                 } else {
                     mLastOrientationSource = null;
                     mSourceOrientation = SCREEN_ORIENTATION_UNSET;

@@ -16,7 +16,6 @@
 
 package com.android.server.am;
 
-import android.content.Context;
 import android.os.SystemClock;
 import android.util.Pair;
 import android.util.Slog;
@@ -40,11 +39,6 @@ final class PendingStartActivityUids {
     // Key is uid, value is Pair of pid and SystemClock.elapsedRealtime() when the
     // uid is added.
     private final SparseArray<Pair<Integer, Long>> mPendingUids = new SparseArray();
-    private Context mContext;
-
-    PendingStartActivityUids(Context context) {
-        mContext = context;
-    }
 
     /** Returns {@code true} if the uid is put to the pending array. Otherwise it existed. */
     synchronized boolean add(int uid, int pid) {

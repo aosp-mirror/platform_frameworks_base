@@ -29,11 +29,12 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.RemoteException;
+import android.os.Trace;
 import android.provider.MediaStore;
 import android.provider.MediaStore.MediaColumns;
 import android.provider.Settings;
 import android.util.Log;
-
+import com.android.internal.annotations.VisibleForTesting;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -136,13 +137,73 @@ public class Ringtone {
      */
     public void setAudioAttributes(AudioAttributes attributes)
             throws IllegalArgumentException {
+        setAudioAttributesField(attributes);
+        // The audio attributes have to be set before the media player is prepared.
+        // Re-initialize it.
+        setUri(mUri, mVolumeShaperConfig);
+        createLocalMediaPlayer();
+    }
+
+    /**
+     * Same as {@link #setAudioAttributes(AudioAttributes)} except this one does not create
+     * the media player.
+     * @hide
+     */
+    public void setAudioAttributesField(@Nullable AudioAttributes attributes) {
         if (attributes == null) {
             throw new IllegalArgumentException("Invalid null AudioAttributes for Ringtone");
         }
         mAudioAttributes = attributes;
-        // The audio attributes have to be set before the media player is prepared.
-        // Re-initialize it.
-        setUri(mUri, mVolumeShaperConfig);
+    }
+
+    /**
+     * Creates a local media player for the ringtone using currently set attributes.
+     * @hide
+     */
+    public void createLocalMediaPlayer() {
+        Trace.beginSection("createLocalMediaPlayer");
+        if (mUri == null) {
+            Log.e(TAG, "Could not create media player as no URI was provided.");
+            return;
+        }
+        destroyLocalPlayer();
+        // try opening uri locally before delegating to remote player
+        mLocalPlayer = new MediaPlayer();
+        try {
+            mLocalPlayer.setDataSource(mContext, mUri);
+            mLocalPlayer.setAudioAttributes(mAudioAttributes);
+            synchronized (mPlaybackSettingsLock) {
+                applyPlaybackProperties_sync();
+            }
+            if (mVolumeShaperConfig != null) {
+                mVolumeShaper = mLocalPlayer.createVolumeShaper(mVolumeShaperConfig);
+            }
+            mLocalPlayer.prepare();
+
+        } catch (SecurityException | IOException e) {
+            destroyLocalPlayer();
+            if (!mAllowRemote) {
+                Log.w(TAG, "Remote playback not allowed: " + e);
+            }
+        }
+
+        if (LOGD) {
+            if (mLocalPlayer != null) {
+                Log.d(TAG, "Successfully created local player");
+            } else {
+                Log.d(TAG, "Problem opening; delegating to remote player");
+            }
+        }
+        Trace.endSection();
+    }
+
+    /**
+     * Returns whether a local player has been created for this ringtone.
+     * @hide
+     */
+    @VisibleForTesting
+    public boolean hasLocalPlayer() {
+        return mLocalPlayer != null;
     }
 
     /**
@@ -336,8 +397,7 @@ public class Ringtone {
     }
 
     /**
-     * Set {@link Uri} to be used for ringtone playback. Attempts to open
-     * locally, otherwise will delegate playback to remote
+     * Set {@link Uri} to be used for ringtone playback.
      * {@link IRingtonePlayer}.
      *
      * @hide
@@ -345,6 +405,13 @@ public class Ringtone {
     @UnsupportedAppUsage
     public void setUri(Uri uri) {
         setUri(uri, null);
+    }
+
+    /**
+     * @hide
+     */
+    public void setVolumeShaperConfig(@Nullable VolumeShaper.Configuration volumeShaperConfig) {
+        mVolumeShaperConfig = volumeShaperConfig;
     }
 
     /**
@@ -356,41 +423,10 @@ public class Ringtone {
      */
     public void setUri(Uri uri, @Nullable VolumeShaper.Configuration volumeShaperConfig) {
         mVolumeShaperConfig = volumeShaperConfig;
-        destroyLocalPlayer();
 
         mUri = uri;
         if (mUri == null) {
-            return;
-        }
-
-        // TODO: detect READ_EXTERNAL and specific content provider case, instead of relying on throwing
-
-        // try opening uri locally before delegating to remote player
-        mLocalPlayer = new MediaPlayer();
-        try {
-            mLocalPlayer.setDataSource(mContext, mUri);
-            mLocalPlayer.setAudioAttributes(mAudioAttributes);
-            synchronized (mPlaybackSettingsLock) {
-                applyPlaybackProperties_sync();
-            }
-            if (mVolumeShaperConfig != null) {
-                mVolumeShaper = mLocalPlayer.createVolumeShaper(mVolumeShaperConfig);
-            }
-            mLocalPlayer.prepare();
-
-        } catch (SecurityException | IOException e) {
             destroyLocalPlayer();
-            if (!mAllowRemote) {
-                Log.w(TAG, "Remote playback not allowed: " + e);
-            }
-        }
-
-        if (LOGD) {
-            if (mLocalPlayer != null) {
-                Log.d(TAG, "Successfully created local player");
-            } else {
-                Log.d(TAG, "Problem opening; delegating to remote player");
-            }
         }
     }
 

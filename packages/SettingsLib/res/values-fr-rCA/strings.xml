@@ -117,17 +117,17 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Transfert de fichier"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Périphérique d\'entrée"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Accès Internet"</string>
-    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"Partage de contacts"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"Utiliser pour le partage de contacts"</string>
+    <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"Partage des contacts et des appels"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"Sert à partager des contacts et l\'historique des appels"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Partage de connexion Internet"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Messages texte"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Accès à la carte SIM"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"Audio HD : <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"Audio HD"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Prothèses auditives"</string>
-    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
+    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE Audio"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Connecté aux prothèses auditives"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"Connecté à LE_AUDIO"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Connecté par LE Audio"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Connecté aux paramètres audio du média"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Connecté à l\'audio du téléphone"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Connexion au serveur de transfert de fichiers"</string>
@@ -273,9 +273,9 @@
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Autoriser le déverrouillage du fichier d\'amorce"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"Permettre le déverrouillage par le fabricant?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"AVERTISSEMENT : Les fonctionnalités de protection de l\'appareil ne fonctionneront pas sur cet appareil lorsque ce paramètre est activé."</string>
-    <string name="mock_location_app" msgid="6269380172542248304">"Sélectionner l\'application de localisation factice"</string>
-    <string name="mock_location_app_not_set" msgid="6972032787262831155">"Aucune application de localisation factice définie"</string>
-    <string name="mock_location_app_set" msgid="4706722469342913843">"Application de localisation factice : <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="mock_location_app" msgid="6269380172542248304">"Sélectionner l\'application de position fictive"</string>
+    <string name="mock_location_app_not_set" msgid="6972032787262831155">"Aucune application de position fictive définie"</string>
+    <string name="mock_location_app_set" msgid="4706722469342913843">"Application de position fictive : <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"Réseautage"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"Certification de l\'affichage sans fil"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Autoriser enreg. données Wi-Fi détaillées"</string>
@@ -408,6 +408,7 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Permet de redimensionner toutes les activités pour le mode multi-fenêtre, indépendamment des valeurs du fichier manifeste."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Activer les fenêtres de forme libre"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Activer la compatibilité avec les fenêtres de forme libre expérimentales."</string>
+    <string name="desktop_mode" msgid="2389067840550544462">"Mode Bureau"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Mot de passe sauvegarde PC"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Les sauvegardes complètes sur PC ne sont pas protégées actuellement"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Touchez pour modifier ou supprimer le mot de passe utilisé pour les sauvegardes complètes sur ordinateur."</string>
@@ -476,12 +477,13 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> jusqu\'à la recharge complète"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> (<xliff:g id="TIME">%2$s</xliff:g> jusqu\'à la recharge complète)"</string>
-    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> : recharge temporairement limitée"</string>
+    <string name="power_charging_limited" msgid="6971664137170239141">"<xliff:g id="LEVEL">%1$s</xliff:g> - La recharge est interrompue"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Inconnu"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Charge en cours…"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Recharge rapide"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Recharge lente"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"En recharge sans fil"</string>
+    <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Recharge en cours…"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"N\'est pas en charge"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Connecté, pas en charge"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Chargée"</string>
@@ -598,6 +600,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Réinitialiser"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Retirer"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Réinitialisation de la session Invité en cours…"</string>
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Réinitialiser la session d\'invité?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Une nouvelle session d\'invité sera lancée, et toutes les applications et données de la session en cours seront supprimées"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Quitter le mode Invité?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Les applications et les données de la session d\'invité en cours seront supprimées"</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Quitter"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Enregistrer l\'activité d\'invité?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Vous pouvez enregistrer l\'activité de session ou supprimer les applis et données"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Supprimer"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Enregistrer"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"Quitter le mode Invité"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"Réinitialiser la session d\'invité"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Quitter la session d\'invité"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Toute l\'activité sera supprimée à la fin de la session"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Vous pouvez enregistrer ou supprimer votre activité à la fin"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Réinitialisez pour supprimer l\'activité de la session maintenant, ou vous pouvez enregistrer ou supprimer l\'activité à la fin de la session"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Prendre une photo"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Sélectionner une image"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Sélectionnez une photo"</string>
@@ -639,11 +656,6 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Ethernet déconnecté."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Aucun appel."</string>
-    <string name="dream_complication_title_time" msgid="701747800712893499">"Heure"</string>
-    <string name="dream_complication_title_date" msgid="8661176085446135789">"Date"</string>
-    <string name="dream_complication_title_weather" msgid="598609151677172783">"Météo"</string>
-    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"Qualité de l\'air"</string>
-    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"Info diffusion"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"Choisir une photo de profil"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"Icône d\'utilisateur par défaut"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Clavier physique"</string>

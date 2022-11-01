@@ -4432,6 +4432,12 @@ public class BatteryStatsImpl extends BatteryStats {
                     + Integer.toHexString(diffStates2) + " lastDiff2="
                     + Integer.toHexString(lastDiffStates2));
         }
+
+        mBatteryStatsHistory.recordTraceEvents(cur.eventCode, cur.eventTag);
+        mBatteryStatsHistory.recordTraceCounters(mHistoryLastWritten.states,
+                cur.states & mActiveHistoryStates, BatteryStats.HISTORY_STATE_DESCRIPTIONS);
+        mBatteryStatsHistory.recordTraceCounters(mHistoryLastWritten.states2,
+                cur.states2 & mActiveHistoryStates2, BatteryStats.HISTORY_STATE2_DESCRIPTIONS);
         if (mHistoryBufferLastPos >= 0 && mHistoryLastWritten.cmd == HistoryItem.CMD_UPDATE
                 && timeDiffMs < 1000 && (diffStates & lastDiffStates) == 0
                 && (diffStates2&lastDiffStates2) == 0

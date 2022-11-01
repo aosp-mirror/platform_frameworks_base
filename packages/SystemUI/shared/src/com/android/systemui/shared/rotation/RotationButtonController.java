@@ -20,6 +20,7 @@ import static android.content.pm.PackageManager.FEATURE_PC;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.internal.view.RotationPolicy.NATURAL_ROTATION;
+import static com.android.systemui.shared.system.QuickStepContract.isGesturalMode;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -48,6 +49,7 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.UiEventLoggerImpl;
@@ -97,6 +99,8 @@ public class RotationButtonController {
     @SuppressLint("InlinedApi")
     private @WindowInsetsController.Behavior
     int mBehavior = WindowInsetsController.BEHAVIOR_DEFAULT;
+    private int mNavBarMode;
+    private boolean mTaskBarVisible = false;
     private boolean mSkipOverrideUserLockPrefsOnce;
     private final int mLightIconColor;
     private final int mDarkIconColor;
@@ -397,6 +401,10 @@ public class RotationButtonController {
         if (rotateSuggestionsDisabled) onRotationSuggestionsDisabled();
     }
 
+    public void onNavigationModeChanged(int mode) {
+        mNavBarMode = mode;
+    }
+
     public void onBehaviorChanged(int displayId, @WindowInsetsController.Behavior int behavior) {
         if (DEFAULT_DISPLAY != displayId) {
             return;
@@ -416,6 +424,7 @@ public class RotationButtonController {
     }
 
     public void onTaskbarStateChange(boolean visible, boolean stashed) {
+        mTaskBarVisible = visible;
         if (getRotationButton() == null) {
             return;
         }
@@ -432,8 +441,12 @@ public class RotationButtonController {
      * Return true when either the task bar is visible or it's in visual immersive mode.
      */
     @SuppressLint("InlinedApi")
-    private boolean canShowRotationButton() {
-        return mIsNavigationBarShowing || mBehavior == WindowInsetsController.BEHAVIOR_DEFAULT;
+    @VisibleForTesting
+    boolean canShowRotationButton() {
+        return mIsNavigationBarShowing
+            || mBehavior == WindowInsetsController.BEHAVIOR_DEFAULT
+            || isGesturalMode(mNavBarMode)
+            || mTaskBarVisible;
     }
 
     @DrawableRes
@@ -617,4 +630,3 @@ public class RotationButtonController {
         }
     }
 }
-

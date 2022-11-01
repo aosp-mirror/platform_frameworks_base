@@ -46,6 +46,7 @@ import android.annotation.Nullable;
 import android.app.ActivityTaskManager;
 import android.app.StatusBarManager;
 import android.app.WindowConfiguration;
+import android.content.ComponentName;
 import android.content.res.Resources;
 import android.graphics.Rect;
 import android.util.ArrayMap;
@@ -55,6 +56,7 @@ import android.view.InsetsAnimationControlCallbacks;
 import android.view.InsetsAnimationControlImpl;
 import android.view.InsetsAnimationControlRunner;
 import android.view.InsetsController;
+import android.view.InsetsFrameProvider;
 import android.view.InsetsSource;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
@@ -264,7 +266,7 @@ class InsetsPolicy {
             state = originalState;
         }
         state = adjustVisibilityForIme(target, state, state == originalState);
-        return adjustInsetsForRoundedCorners(target, state, state == originalState);
+        return adjustInsetsForRoundedCorners(target.mToken, state, state == originalState);
     }
 
     InsetsState adjustInsetsForWindow(WindowState target, InsetsState originalState) {
@@ -288,8 +290,9 @@ class InsetsPolicy {
         // contains all insets types.
         final InsetsState originalState = mDisplayContent.getInsetsPolicy()
                 .enforceInsetsPolicyForTarget(type, WINDOWING_MODE_FULLSCREEN, alwaysOnTop,
-                        mStateController.getRawInsetsState());
-        return adjustVisibilityForTransientTypes(originalState);
+                        attrs.type, mStateController.getRawInsetsState());
+        InsetsState state = adjustVisibilityForTransientTypes(originalState);
+        return adjustInsetsForRoundedCorners(token, state, state == originalState);
     }
 
     /**
@@ -322,14 +325,14 @@ class InsetsPolicy {
         }
 
         // If not one of the types above, check whether an internal inset mapping is specified.
-        if (attrs.providesInsetsTypes != null) {
-            for (@InternalInsetsType int insetsType : attrs.providesInsetsTypes) {
-                switch (insetsType) {
+        if (attrs.providedInsets != null) {
+            for (InsetsFrameProvider provider : attrs.providedInsets) {
+                switch (provider.type) {
                     case ITYPE_STATUS_BAR:
                     case ITYPE_NAVIGATION_BAR:
                     case ITYPE_CLIMATE_BAR:
                     case ITYPE_EXTRA_NAVIGATION_BAR:
-                        return insetsType;
+                        return provider.type;
                 }
             }
         }
@@ -349,12 +352,13 @@ class InsetsPolicy {
      * @param type the inset type provided by the target
      * @param windowingMode the windowing mode of the target
      * @param isAlwaysOnTop is the target always on top
+     * @param windowType the type of the target
      * @param state the input inset state containing all the sources
      * @return The state stripped of the necessary information.
      */
     InsetsState enforceInsetsPolicyForTarget(@InternalInsetsType int type,
             @WindowConfiguration.WindowingMode int windowingMode, boolean isAlwaysOnTop,
-            InsetsState state) {
+            int windowType, InsetsState state) {
         boolean stateCopied = false;
 
         if (type != ITYPE_INVALID) {
@@ -375,21 +379,20 @@ class InsetsPolicy {
             if (type == ITYPE_STATUS_BAR || type == ITYPE_CLIMATE_BAR) {
                 state.removeSource(ITYPE_CAPTION_BAR);
             }
-
-            // IME needs different frames for certain cases (e.g. navigation bar in gesture nav).
-            if (type == ITYPE_IME) {
-                ArrayMap<Integer, WindowContainerInsetsSourceProvider> providers = mStateController
-                        .getSourceProviders();
-                for (int i = providers.size() - 1; i >= 0; i--) {
-                    WindowContainerInsetsSourceProvider otherProvider = providers.valueAt(i);
-                    if (otherProvider.overridesImeFrame()) {
-                        InsetsSource override =
-                                new InsetsSource(
-                                        state.getSource(otherProvider.getSource().getType()));
-                        override.setFrame(otherProvider.getImeOverrideFrame());
-                        state.addSource(override);
-                    }
+        }
+        ArrayMap<Integer, WindowContainerInsetsSourceProvider> providers = mStateController
+                .getSourceProviders();
+        for (int i = providers.size() - 1; i >= 0; i--) {
+            WindowContainerInsetsSourceProvider otherProvider = providers.valueAt(i);
+            if (otherProvider.overridesFrame(windowType)) {
+                if (!stateCopied) {
+                    state = new InsetsState(state);
+                    stateCopied = true;
                 }
+                InsetsSource override =
+                        new InsetsSource(state.getSource(otherProvider.getSource().getType()));
+                override.setFrame(otherProvider.getOverriddenFrame(windowType));
+                state.addSource(override);
             }
         }
 
@@ -464,15 +467,19 @@ class InsetsPolicy {
         return originalState;
     }
 
-    private InsetsState adjustInsetsForRoundedCorners(WindowState w, InsetsState originalState,
+    private InsetsState adjustInsetsForRoundedCorners(WindowToken token, InsetsState originalState,
             boolean copyState) {
-        final Task task = w.getTask();
-        if (task != null && !task.getWindowConfiguration().tasksAreFloating()) {
-            // Use task bounds to calculating rounded corners if the task is not floating.
-            final Rect roundedCornerFrame = new Rect(task.getBounds());
-            final InsetsState state = copyState ? new InsetsState(originalState) : originalState;
-            state.setRoundedCornerFrame(roundedCornerFrame);
-            return state;
+        if (token != null) {
+            final ActivityRecord activityRecord = token.asActivityRecord();
+            final Task task = activityRecord != null ? activityRecord.getTask() : null;
+            if (task != null && !task.getWindowConfiguration().tasksAreFloating()) {
+                // Use task bounds to calculating rounded corners if the task is not floating.
+                final Rect roundedCornerFrame = new Rect(task.getBounds());
+                final InsetsState state = copyState ? new InsetsState(originalState)
+                        : originalState;
+                state.setRoundedCornerFrame(roundedCornerFrame);
+                return state;
+            }
         }
         return originalState;
     }
@@ -542,8 +549,10 @@ class InsetsPolicy {
             return focusedWin;
         }
         if (remoteInsetsControllerControlsSystemBars(focusedWin)) {
+            ComponentName component = focusedWin.mActivityRecord != null
+                    ? focusedWin.mActivityRecord.mActivityComponent : null;
             mDisplayContent.mRemoteInsetsControlTarget.topFocusedWindowChanged(
-                    focusedWin.mAttrs.packageName, focusedWin.getRequestedVisibilities());
+                    component, focusedWin.getRequestedVisibilities());
             return mDisplayContent.mRemoteInsetsControlTarget;
         }
         if (mPolicy.areSystemBarsForcedShownLw()) {
@@ -600,8 +609,10 @@ class InsetsPolicy {
             return null;
         }
         if (remoteInsetsControllerControlsSystemBars(focusedWin)) {
+            ComponentName component = focusedWin.mActivityRecord != null
+                    ? focusedWin.mActivityRecord.mActivityComponent : null;
             mDisplayContent.mRemoteInsetsControlTarget.topFocusedWindowChanged(
-                    focusedWin.mAttrs.packageName, focusedWin.getRequestedVisibilities());
+                    component, focusedWin.getRequestedVisibilities());
             return mDisplayContent.mRemoteInsetsControlTarget;
         }
         if (mPolicy.areSystemBarsForcedShownLw()) {
@@ -748,7 +759,7 @@ class InsetsPolicy {
 
         InsetsPolicyAnimationControlListener(boolean show, Runnable finishCallback, int types) {
             super(show, false /* hasCallbacks */, types, BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE,
-                    false /* disable */, 0 /* floatingImeBottomInsets */);
+                    false /* disable */, 0 /* floatingImeBottomInsets */, null);
             mFinishCallback = finishCallback;
             mControlCallbacks = new InsetsPolicyAnimationControlCallbacks(this);
         }

@@ -35,6 +35,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Switch
@@ -44,6 +45,7 @@ import com.android.settingslib.Utils
 import com.android.systemui.FontSizeUtils
 import com.android.systemui.R
 import com.android.systemui.animation.LaunchableView
+import com.android.systemui.animation.LaunchableViewDelegate
 import com.android.systemui.plugins.qs.QSIconView
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.qs.QSTile.BooleanState
@@ -98,14 +100,15 @@ open class QSTileViewImpl @JvmOverloads constructor(
             Utils.getColorAttrDefaultColor(context, com.android.internal.R.attr.textColorOnAccent)
     private val colorLabelInactive =
             Utils.getColorAttrDefaultColor(context, android.R.attr.textColorPrimary)
-    private val colorLabelUnavailable = Utils.applyAlpha(UNAVAILABLE_ALPHA, colorLabelInactive)
+    private val colorLabelUnavailable =
+        Utils.getColorAttrDefaultColor(context, com.android.internal.R.attr.textColorTertiary)
 
     private val colorSecondaryLabelActive =
             Utils.getColorAttrDefaultColor(context, android.R.attr.textColorSecondaryInverse)
     private val colorSecondaryLabelInactive =
             Utils.getColorAttrDefaultColor(context, android.R.attr.textColorSecondary)
     private val colorSecondaryLabelUnavailable =
-            Utils.applyAlpha(UNAVAILABLE_ALPHA, colorSecondaryLabelInactive)
+        Utils.getColorAttrDefaultColor(context, com.android.internal.R.attr.textColorTertiary)
 
     private lateinit var label: TextView
     protected lateinit var secondaryLabel: TextView
@@ -138,8 +141,12 @@ open class QSTileViewImpl @JvmOverloads constructor(
     private var lastStateDescription: CharSequence? = null
     private var tileState = false
     private var lastState = INVALID
-    private var blockVisibilityChanges = false
-    private var lastVisibility = View.VISIBLE
+    private val launchableViewDelegate = LaunchableViewDelegate(
+        this,
+        superSetVisibility = { super.setVisibility(it) },
+        superSetTransitionVisibility = { super.setTransitionVisibility(it) },
+    )
+    private var lastDisabledByPolicy = false
 
     private val locInScreen = IntArray(2)
 
@@ -343,33 +350,15 @@ open class QSTileViewImpl @JvmOverloads constructor(
     }
 
     override fun setShouldBlockVisibilityChanges(block: Boolean) {
-        blockVisibilityChanges = block
-
-        if (block) {
-            lastVisibility = visibility
-        } else {
-            visibility = lastVisibility
-        }
+        launchableViewDelegate.setShouldBlockVisibilityChanges(block)
     }
 
     override fun setVisibility(visibility: Int) {
-        if (blockVisibilityChanges) {
-            lastVisibility = visibility
-            return
-        }
-
-        super.setVisibility(visibility)
+        launchableViewDelegate.setVisibility(visibility)
     }
 
     override fun setTransitionVisibility(visibility: Int) {
-        if (blockVisibilityChanges) {
-            // View.setTransitionVisibility just sets the visibility flag, so we don't have to save
-            // the transition visibility separately from the normal visibility.
-            lastVisibility = visibility
-            return
-        }
-
-        super.setTransitionVisibility(visibility)
+        launchableViewDelegate.setTransitionVisibility(visibility)
     }
 
     // Accessibility
@@ -390,8 +379,22 @@ open class QSTileViewImpl @JvmOverloads constructor(
         super.onInitializeAccessibilityNodeInfo(info)
         // Clear selected state so it is not announce by talkback.
         info.isSelected = false
+        if (lastDisabledByPolicy) {
+            info.addAction(
+                    AccessibilityNodeInfo.AccessibilityAction(
+                            AccessibilityNodeInfo.AccessibilityAction.ACTION_CLICK.id,
+                            resources.getString(
+                                R.string.accessibility_tile_disabled_by_policy_action_description
+                            )
+                    )
+            )
+        }
         if (!TextUtils.isEmpty(accessibilityClass)) {
-            info.className = accessibilityClass
+            info.className = if (lastDisabledByPolicy) {
+                Button::class.java.name
+            } else {
+                accessibilityClass
+            }
             if (Switch::class.java.name == accessibilityClass) {
                 val label = resources.getString(
                         if (tileState) R.string.switch_bar_on else R.string.switch_bar_off)
@@ -444,6 +447,10 @@ open class QSTileViewImpl @JvmOverloads constructor(
                 state.secondaryLabel = stateText
             }
         }
+        if (state.disabledByPolicy && state.state != Tile.STATE_UNAVAILABLE) {
+            stateDescription.append(", ")
+            stateDescription.append(getUnavailableText(state.spec))
+        }
         if (!TextUtils.isEmpty(state.stateDescription)) {
             stateDescription.append(", ")
             stateDescription.append(state.stateDescription)
@@ -484,38 +491,38 @@ open class QSTileViewImpl @JvmOverloads constructor(
         }
 
         // Colors
-        if (state.state != lastState) {
+        if (state.state != lastState || state.disabledByPolicy || lastDisabledByPolicy) {
             singleAnimator.cancel()
             if (allowAnimations) {
                 singleAnimator.setValues(
                         colorValuesHolder(
                                 BACKGROUND_NAME,
                                 paintColor,
-                                getBackgroundColorForState(state.state)
+                                getBackgroundColorForState(state.state, state.disabledByPolicy)
                         ),
                         colorValuesHolder(
                                 LABEL_NAME,
                                 label.currentTextColor,
-                                getLabelColorForState(state.state)
+                                getLabelColorForState(state.state, state.disabledByPolicy)
                         ),
                         colorValuesHolder(
                                 SECONDARY_LABEL_NAME,
                                 secondaryLabel.currentTextColor,
-                                getSecondaryLabelColorForState(state.state)
+                                getSecondaryLabelColorForState(state.state, state.disabledByPolicy)
                         ),
                         colorValuesHolder(
                                 CHEVRON_NAME,
                                 chevronView.imageTintList?.defaultColor ?: 0,
-                                getChevronColorForState(state.state)
+                                getChevronColorForState(state.state, state.disabledByPolicy)
                         )
                     )
                 singleAnimator.start()
             } else {
                 setAllColors(
-                    getBackgroundColorForState(state.state),
-                    getLabelColorForState(state.state),
-                    getSecondaryLabelColorForState(state.state),
-                    getChevronColorForState(state.state)
+                    getBackgroundColorForState(state.state, state.disabledByPolicy),
+                    getLabelColorForState(state.state, state.disabledByPolicy),
+                    getSecondaryLabelColorForState(state.state, state.disabledByPolicy),
+                    getChevronColorForState(state.state, state.disabledByPolicy)
                 )
             }
         }
@@ -526,6 +533,7 @@ open class QSTileViewImpl @JvmOverloads constructor(
         label.isEnabled = !state.disabledByPolicy
 
         lastState = state.state
+        lastDisabledByPolicy = state.disabledByPolicy
     }
 
     private fun setAllColors(
@@ -573,13 +581,14 @@ open class QSTileViewImpl @JvmOverloads constructor(
         }
     }
 
-    private fun getStateText(state: QSTile.State): String {
-        if (state.disabledByPolicy) {
-            return context.getString(R.string.tile_disabled)
-        }
+    private fun getUnavailableText(spec: String?): String {
+        val arrayResId = SubtitleArrayMapping.getSubtitleId(spec)
+        return resources.getStringArray(arrayResId)[Tile.STATE_UNAVAILABLE]
+    }
 
+    private fun getStateText(state: QSTile.State): String {
         return if (state.state == Tile.STATE_UNAVAILABLE || state is BooleanState) {
-            var arrayResId = SubtitleArrayMapping.getSubtitleId(state.spec)
+            val arrayResId = SubtitleArrayMapping.getSubtitleId(state.spec)
             val array = resources.getStringArray(arrayResId)
             array[state.state]
         } else {
@@ -601,11 +610,11 @@ open class QSTileViewImpl @JvmOverloads constructor(
         return locInScreen.get(1) >= -height
     }
 
-    private fun getBackgroundColorForState(state: Int): Int {
-        return when (state) {
-            Tile.STATE_ACTIVE -> colorActive
-            Tile.STATE_INACTIVE -> colorInactive
-            Tile.STATE_UNAVAILABLE -> colorUnavailable
+    private fun getBackgroundColorForState(state: Int, disabledByPolicy: Boolean = false): Int {
+        return when {
+            state == Tile.STATE_UNAVAILABLE || disabledByPolicy -> colorUnavailable
+            state == Tile.STATE_ACTIVE -> colorActive
+            state == Tile.STATE_INACTIVE -> colorInactive
             else -> {
                 Log.e(TAG, "Invalid state $state")
                 0
@@ -613,11 +622,11 @@ open class QSTileViewImpl @JvmOverloads constructor(
         }
     }
 
-    private fun getLabelColorForState(state: Int): Int {
-        return when (state) {
-            Tile.STATE_ACTIVE -> colorLabelActive
-            Tile.STATE_INACTIVE -> colorLabelInactive
-            Tile.STATE_UNAVAILABLE -> colorLabelUnavailable
+    private fun getLabelColorForState(state: Int, disabledByPolicy: Boolean = false): Int {
+        return when {
+            state == Tile.STATE_UNAVAILABLE || disabledByPolicy -> colorLabelUnavailable
+            state == Tile.STATE_ACTIVE -> colorLabelActive
+            state == Tile.STATE_INACTIVE -> colorLabelInactive
             else -> {
                 Log.e(TAG, "Invalid state $state")
                 0
@@ -625,11 +634,11 @@ open class QSTileViewImpl @JvmOverloads constructor(
         }
     }
 
-    private fun getSecondaryLabelColorForState(state: Int): Int {
-        return when (state) {
-            Tile.STATE_ACTIVE -> colorSecondaryLabelActive
-            Tile.STATE_INACTIVE -> colorSecondaryLabelInactive
-            Tile.STATE_UNAVAILABLE -> colorSecondaryLabelUnavailable
+    private fun getSecondaryLabelColorForState(state: Int, disabledByPolicy: Boolean = false): Int {
+        return when {
+            state == Tile.STATE_UNAVAILABLE || disabledByPolicy -> colorSecondaryLabelUnavailable
+            state == Tile.STATE_ACTIVE -> colorSecondaryLabelActive
+            state == Tile.STATE_INACTIVE -> colorSecondaryLabelInactive
             else -> {
                 Log.e(TAG, "Invalid state $state")
                 0
@@ -637,7 +646,16 @@ open class QSTileViewImpl @JvmOverloads constructor(
         }
     }
 
-    private fun getChevronColorForState(state: Int): Int = getSecondaryLabelColorForState(state)
+    private fun getChevronColorForState(state: Int, disabledByPolicy: Boolean = false): Int =
+            getSecondaryLabelColorForState(state, disabledByPolicy)
+
+    @VisibleForTesting
+    internal fun getCurrentColors(): List<Int> = listOf(
+            paintColor,
+            label.currentTextColor,
+            secondaryLabel.currentTextColor,
+            chevronView.imageTintList?.defaultColor ?: 0
+    )
 }
 
 @VisibleForTesting
@@ -670,7 +688,8 @@ internal object SubtitleArrayMapping {
         "qr_code_scanner" to R.array.tile_states_qr_code_scanner,
         "alarm" to R.array.tile_states_alarm,
         "onehanded" to R.array.tile_states_onehanded,
-        "color_correction" to R.array.tile_states_color_correction
+        "color_correction" to R.array.tile_states_color_correction,
+        "dream" to R.array.tile_states_dream
     )
 
     fun getSubtitleId(spec: String?): Int {

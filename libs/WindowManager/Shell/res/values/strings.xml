@@ -157,7 +157,7 @@
     <string name="accessibility_bubble_dismissed">Bubble dismissed.</string>
 
     <!-- Description of the restart button in the hint of size compatibility mode. [CHAR LIMIT=NONE] -->
-    <string name="restart_button_description">Tap to restart this app and go full screen.</string>
+    <string name="restart_button_description">Tap to restart this app for a better view.</string>
 
     <!-- Description of the camera compat button for applying stretched issues treatment in the hint for
          compatibility control. [CHAR LIMIT=NONE] -->
@@ -172,18 +172,25 @@
     <string name="camera_compat_dismiss_button_description">No camera issues? Tap to dismiss.</string>
 
     <!-- The title of the letterbox education dialog. [CHAR LIMIT=NONE] -->
-    <string name="letterbox_education_dialog_title">Some apps work best in portrait</string>
+    <string name="letterbox_education_dialog_title">See and do more</string>
 
-    <!-- The subtext of the letterbox education dialog. [CHAR LIMIT=NONE] -->
-    <string name="letterbox_education_dialog_subtext">Try one of these options to make the most of your space</string>
-
-    <!-- Description of the rotate screen action. [CHAR LIMIT=NONE] -->
-    <string name="letterbox_education_screen_rotation_text">Rotate your device to go full screen</string>
+    <!-- Description of the split screen action. [CHAR LIMIT=NONE] -->
+    <string name="letterbox_education_split_screen_text">Drag in another app for split-screen</string>
 
     <!-- Description of the reposition app action. [CHAR LIMIT=NONE] -->
-    <string name="letterbox_education_reposition_text">Double-tap next to an app to reposition it</string>
+    <string name="letterbox_education_reposition_text">Double-tap outside an app to reposition it</string>
 
     <!-- Button text for dismissing the letterbox education dialog. [CHAR LIMIT=20] -->
     <string name="letterbox_education_got_it">Got it</string>
 
+    <!-- Accessibility description of the letterbox education toast expand to dialog button. [CHAR LIMIT=NONE] -->
+    <string name="letterbox_education_expand_button_description">Expand for more information.</string>
+
+    <!-- Freeform window caption strings -->
+    <!-- Accessibility text for the maximize window button [CHAR LIMIT=NONE] -->
+    <string name="maximize_button_text">Maximize</string>
+     <!-- Accessibility text for the minimize window button [CHAR LIMIT=NONE] -->
+     <string name="minimize_button_text">Minimize</string>
+    <!-- Accessibility text for the close window button [CHAR LIMIT=NONE] -->
+    <string name="close_button_text">Close</string>
 </resources>

@@ -218,8 +218,8 @@ public final class GameServiceProviderInstanceImplTest {
         }).when(mMockWindowManagerInternal).unregisterTaskSystemBarsListener(any());
 
         mRunningTaskInfos = new ArrayList<>();
-        when(mMockActivityTaskManager.getTasks(anyInt(), anyBoolean(), anyBoolean())).thenReturn(
-                mRunningTaskInfos);
+        when(mMockActivityTaskManager.getTasks(anyInt(), anyBoolean(), anyBoolean(), anyInt()))
+                .thenReturn(mRunningTaskInfos);
 
 
         final UserHandle userHandle = new UserHandle(USER_ID);

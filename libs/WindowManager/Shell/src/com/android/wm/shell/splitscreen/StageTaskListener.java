@@ -17,12 +17,13 @@
 package com.android.wm.shell.splitscreen;
 
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.view.RemoteAnimationTarget.MODE_OPENING;
 
+import static com.android.wm.shell.common.split.SplitScreenConstants.CONTROLLED_ACTIVITY_TYPES;
+import static com.android.wm.shell.common.split.SplitScreenConstants.CONTROLLED_WINDOWING_MODES_WHEN_ACTIVE;
 import static com.android.wm.shell.transition.Transitions.ENABLE_SHELL_TRANSITIONS;
 
 import android.annotation.CallSuper;
@@ -31,7 +32,10 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.os.IBinder;
+import android.util.Slog;
 import android.util.SparseArray;
+import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.window.WindowContainerToken;
@@ -39,6 +43,7 @@ import android.window.WindowContainerTransaction;
 
 import androidx.annotation.NonNull;
 
+import com.android.internal.util.ArrayUtils;
 import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.SurfaceUtils;
@@ -47,6 +52,7 @@ import com.android.wm.shell.common.split.SplitDecorManager;
 import com.android.wm.shell.splitscreen.SplitScreen.StageType;
 
 import java.io.PrintWriter;
+import java.util.function.Predicate;
 
 /**
  * Base class that handle common task org. related for split-screen stages.
@@ -60,12 +66,6 @@ import java.io.PrintWriter;
 class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     private static final String TAG = StageTaskListener.class.getSimpleName();
 
-    protected static final int[] CONTROLLED_ACTIVITY_TYPES = {ACTIVITY_TYPE_STANDARD};
-    protected static final int[] CONTROLLED_WINDOWING_MODES =
-            {WINDOWING_MODE_FULLSCREEN, WINDOWING_MODE_UNDEFINED};
-    protected static final int[] CONTROLLED_WINDOWING_MODES_WHEN_ACTIVE =
-            {WINDOWING_MODE_FULLSCREEN, WINDOWING_MODE_UNDEFINED, WINDOWING_MODE_MULTI_WINDOW};
-
     /** Callback interface for listening to changes in a split-screen stage. */
     public interface StageListenerCallbacks {
         void onRootTaskAppeared();
@@ -74,7 +74,7 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
 
         void onChildTaskStatusChanged(int taskId, boolean present, boolean visible);
 
-        void onChildTaskEnterPip(int taskId);
+        void onChildTaskEnterPip();
 
         void onRootTaskVanished();
 
@@ -95,18 +95,14 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     // TODO(b/204308910): Extracts SplitDecorManager related code to common package.
     private SplitDecorManager mSplitDecorManager;
 
-    private final StageTaskUnfoldController mStageTaskUnfoldController;
-
     StageTaskListener(Context context, ShellTaskOrganizer taskOrganizer, int displayId,
             StageListenerCallbacks callbacks, SyncTransactionQueue syncQueue,
-            SurfaceSession surfaceSession, IconProvider iconProvider,
-            @Nullable StageTaskUnfoldController stageTaskUnfoldController) {
+            SurfaceSession surfaceSession, IconProvider iconProvider) {
         mContext = context;
         mCallbacks = callbacks;
         mSyncQueue = syncQueue;
         mSurfaceSession = surfaceSession;
         mIconProvider = iconProvider;
-        mStageTaskUnfoldController = stageTaskUnfoldController;
         taskOrganizer.createRootTask(displayId, WINDOWING_MODE_MULTI_WINDOW, this);
     }
 
@@ -119,63 +115,53 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     }
 
     boolean containsToken(WindowContainerToken token) {
-        if (token.equals(mRootTaskInfo.token)) {
-            return true;
-        }
+        return contains(t -> t.token.equals(token));
+    }
 
-        for (int i = mChildrenTaskInfo.size() - 1; i >= 0; --i) {
-            if (token.equals(mChildrenTaskInfo.valueAt(i).token)) {
-                return true;
-            }
-        }
-
-        return false;
+    boolean containsContainer(IBinder binder) {
+        return contains(t -> t.token.asBinder() == binder);
     }
 
     /**
      * Returns the top visible child task's id.
      */
     int getTopVisibleChildTaskId() {
-        for (int i = mChildrenTaskInfo.size() - 1; i >= 0; --i) {
-            final ActivityManager.RunningTaskInfo info = mChildrenTaskInfo.valueAt(i);
-            if (info.isVisible) {
-                return info.taskId;
-            }
-        }
-        return INVALID_TASK_ID;
+        final ActivityManager.RunningTaskInfo taskInfo = getChildTaskInfo(t -> t.isVisible);
+        return taskInfo != null ? taskInfo.taskId : INVALID_TASK_ID;
     }
 
     /**
      * Returns the top activity uid for the top child task.
      */
     int getTopChildTaskUid() {
-        for (int i = mChildrenTaskInfo.size() - 1; i >= 0; --i) {
-            final ActivityManager.RunningTaskInfo info = mChildrenTaskInfo.valueAt(i);
-            if (info.topActivityInfo == null) {
-                continue;
-            }
-            return info.topActivityInfo.applicationInfo.uid;
-        }
-        return 0;
+        final ActivityManager.RunningTaskInfo taskInfo =
+                getChildTaskInfo(t -> t.topActivityInfo != null);
+        return taskInfo != null ? taskInfo.topActivityInfo.applicationInfo.uid : 0;
     }
 
     /** @return {@code true} if this listener contains the currently focused task. */
     boolean isFocused() {
-        if (mRootTaskInfo == null) {
-            return false;
-        }
+        return contains(t -> t.isFocused);
+    }
 
-        if (mRootTaskInfo.isFocused) {
+    private boolean contains(Predicate<ActivityManager.RunningTaskInfo> predicate) {
+        if (mRootTaskInfo != null && predicate.test(mRootTaskInfo)) {
             return true;
         }
 
+        return getChildTaskInfo(predicate) != null;
+    }
+
+    @Nullable
+    private ActivityManager.RunningTaskInfo getChildTaskInfo(
+            Predicate<ActivityManager.RunningTaskInfo> predicate) {
         for (int i = mChildrenTaskInfo.size() - 1; i >= 0; --i) {
-            if (mChildrenTaskInfo.valueAt(i).isFocused) {
-                return true;
+            final ActivityManager.RunningTaskInfo taskInfo = mChildrenTaskInfo.valueAt(i);
+            if (predicate.test(taskInfo)) {
+                return taskInfo;
             }
         }
-
-        return false;
+        return null;
     }
 
     @Override
@@ -207,20 +193,11 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
             throw new IllegalArgumentException(this + "\n Unknown task: " + taskInfo
                     + "\n mRootTaskInfo: " + mRootTaskInfo);
         }
-
-        if (mStageTaskUnfoldController != null) {
-            mStageTaskUnfoldController.onTaskAppeared(taskInfo, leash);
-        }
     }
 
     @Override
     @CallSuper
     public void onTaskInfoChanged(ActivityManager.RunningTaskInfo taskInfo) {
-        if (!taskInfo.supportsMultiWindow) {
-            // Leave split screen if the task no longer supports multi window.
-            mCallbacks.onNoLongerSupportMultiWindow();
-            return;
-        }
         if (mRootTaskInfo.taskId == taskInfo.taskId) {
             // Inflates split decor view only when the root task is visible.
             if (mRootTaskInfo.isVisible != taskInfo.isVisible) {
@@ -233,6 +210,15 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
             }
             mRootTaskInfo = taskInfo;
         } else if (taskInfo.parentTaskId == mRootTaskInfo.taskId) {
+            if (!taskInfo.supportsMultiWindow
+                    || !ArrayUtils.contains(CONTROLLED_ACTIVITY_TYPES, taskInfo.getActivityType())
+                    || !ArrayUtils.contains(CONTROLLED_WINDOWING_MODES_WHEN_ACTIVE,
+                    taskInfo.getWindowingMode())) {
+                // Leave split screen if the task no longer supports multi window or have
+                // uncontrolled task.
+                mCallbacks.onNoLongerSupportMultiWindow();
+                return;
+            }
             mChildrenTaskInfo.put(taskInfo.taskId, taskInfo);
             mCallbacks.onChildTaskStatusChanged(taskInfo.taskId, true /* present */,
                     taskInfo.isVisible);
@@ -258,6 +244,7 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         if (mRootTaskInfo.taskId == taskId) {
             mCallbacks.onRootTaskVanished();
             mRootTaskInfo = null;
+            mRootLeash = null;
             mSyncQueue.runInSync(t -> {
                 t.remove(mDimLayer);
                 mSplitDecorManager.release(t);
@@ -266,21 +253,17 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
             mChildrenTaskInfo.remove(taskId);
             mChildrenLeashes.remove(taskId);
             mCallbacks.onChildTaskStatusChanged(taskId, false /* present */, taskInfo.isVisible);
-            if (taskInfo.getWindowingMode() == WINDOWING_MODE_PINNED) {
-                mCallbacks.onChildTaskEnterPip(taskId);
-            }
             if (ENABLE_SHELL_TRANSITIONS) {
                 // Status is managed/synchronized by the transition lifecycle.
                 return;
+            }
+            if (taskInfo.getWindowingMode() == WINDOWING_MODE_PINNED) {
+                mCallbacks.onChildTaskEnterPip();
             }
             sendStatusChanged();
         } else {
             throw new IllegalArgumentException(this + "\n Unknown task: " + taskInfo
                     + "\n mRootTaskInfo: " + mRootTaskInfo);
-        }
-
-        if (mStageTaskUnfoldController != null) {
-            mStageTaskUnfoldController.onTaskVanished(taskInfo);
         }
     }
 
@@ -305,15 +288,23 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         }
     }
 
-    void onResizing(Rect newBounds, SurfaceControl.Transaction t) {
+    void onResizing(Rect newBounds, Rect sideBounds, SurfaceControl.Transaction t) {
         if (mSplitDecorManager != null && mRootTaskInfo != null) {
-            mSplitDecorManager.onResizing(mRootTaskInfo, newBounds, t);
+            mSplitDecorManager.onResizing(mRootTaskInfo, newBounds, sideBounds, t);
         }
     }
 
     void onResized(SurfaceControl.Transaction t) {
         if (mSplitDecorManager != null) {
             mSplitDecorManager.onResized(t);
+        }
+    }
+
+    void fadeOutDecor(Runnable finishedCallback) {
+        if (mSplitDecorManager != null) {
+            mSplitDecorManager.fadeOutDecor(finishedCallback);
+        } else {
+            finishedCallback.run();
         }
     }
 
@@ -341,6 +332,19 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         }
     }
 
+    void evictNonOpeningChildren(RemoteAnimationTarget[] apps, WindowContainerTransaction wct) {
+        final SparseArray<ActivityManager.RunningTaskInfo> toBeEvict = mChildrenTaskInfo.clone();
+        for (int i = 0; i < apps.length; i++) {
+            if (apps[i].mode == MODE_OPENING) {
+                toBeEvict.remove(apps[i].taskId);
+            }
+        }
+        for (int i = toBeEvict.size() - 1; i >= 0; i--) {
+            final ActivityManager.RunningTaskInfo taskInfo = toBeEvict.valueAt(i);
+            wct.reparent(taskInfo.token, null /* parent */, false /* onTop */);
+        }
+    }
+
     void evictInvisibleChildren(WindowContainerTransaction wct) {
         for (int i = mChildrenTaskInfo.size() - 1; i >= 0; i--) {
             final ActivityManager.RunningTaskInfo taskInfo = mChildrenTaskInfo.valueAt(i);
@@ -348,6 +352,11 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
                 wct.reparent(taskInfo.token, null /* parent */, false /* onTop */);
             }
         }
+    }
+
+    void resetBounds(WindowContainerTransaction wct) {
+        wct.setBounds(mRootTaskInfo.token, null);
+        wct.setAppBounds(mRootTaskInfo.token, null);
     }
 
     void onSplitScreenListenerRegistered(SplitScreen.SplitScreenListener listener,
@@ -363,7 +372,13 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
             SurfaceControl leash, boolean firstAppeared) {
         final Point taskPositionInParent = taskInfo.positionInParent;
         mSyncQueue.runInSync(t -> {
-            t.setWindowCrop(leash, null);
+            // The task surface might be released before running in the sync queue for the case like
+            // trampoline launch, so check if the surface is valid before processing it.
+            if (!leash.isValid()) {
+                Slog.w(TAG, "Skip updating invalid child task surface of task#" + taskInfo.taskId);
+                return;
+            }
+            t.setCrop(leash, null);
             t.setPosition(leash, taskPositionInParent.x, taskPositionInParent.y);
             if (firstAppeared && !ENABLE_SHELL_TRANSITIONS) {
                 t.setAlpha(leash, 1f);

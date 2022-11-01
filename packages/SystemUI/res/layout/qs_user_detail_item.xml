@@ -49,7 +49,8 @@
                 android:id="@+id/user_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="center_horizontal" />
+                android:gravity="center_horizontal"
+                android:hyphenationFrequency="full"/>
         <ImageView
                 android:id="@+id/restricted_padlock"
                 android:layout_width="@dimen/qs_tile_text_size"

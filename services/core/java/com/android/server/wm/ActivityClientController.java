@@ -43,6 +43,7 @@ import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_N
 import static com.android.server.wm.ActivityTaskManagerService.TAG_SWITCH;
 import static com.android.server.wm.ActivityTaskManagerService.enforceNotIsolatedCaller;
 
+import android.Manifest;
 import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -462,8 +463,8 @@ class ActivityClientController extends IActivityClientController.Stub {
                     // Explicitly dismissing the activity so reset its relaunch flag.
                     r.mRelaunchReason = RELAUNCH_REASON_NONE;
                 } else {
-                    r.finishIfPossible(resultCode, resultData, resultGrants,
-                            "app-request", true /* oomAdj */);
+                    r.finishIfPossible(resultCode, resultData, resultGrants, "app-request",
+                            true /* oomAdj */);
                     res = r.finishing;
                     if (!res) {
                         Slog.i(TAG, "Failed to finish by app-request");
@@ -525,6 +526,23 @@ class ActivityClientController extends IActivityClientController.Stub {
     }
 
     @Override
+    public void setForceSendResultForMediaProjection(IBinder token) {
+        // Require that this is invoked only during MediaProjection setup.
+        mService.mAmInternal.enforceCallingPermission(
+                Manifest.permission.MANAGE_MEDIA_PROJECTION,
+                "setForceSendResultForMediaProjection");
+
+        final ActivityRecord r;
+        synchronized (mGlobalLock) {
+            r = ActivityRecord.isInRootTaskLocked(token);
+            if (r == null || !r.isInHistory()) {
+                return;
+            }
+            r.setForceSendResultForMediaProjection();
+        }
+    }
+
+    @Override
     public boolean isTopOfTask(IBinder token) {
         synchronized (mGlobalLock) {
             final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
@@ -556,6 +574,21 @@ class ActivityClientController extends IActivityClientController.Stub {
     public int getTaskForActivity(IBinder token, boolean onlyRoot) {
         synchronized (mGlobalLock) {
             return ActivityRecord.getTaskForActivityLocked(token, onlyRoot);
+        }
+    }
+
+    /**
+     * Returns the windowing mode of the task that hosts the activity, or {@code -1} if task is not
+     * found.
+     */
+    @Override
+    public int getTaskWindowingMode(IBinder activityToken) {
+        synchronized (mGlobalLock) {
+            final ActivityRecord ar = ActivityRecord.isInAnyTask(activityToken);
+            if (ar == null) {
+                return -1;
+            }
+            return ar.getTask().getWindowingMode();
         }
     }
 
@@ -737,7 +770,7 @@ class ActivityClientController extends IActivityClientController.Stub {
             synchronized (mGlobalLock) {
                 final ActivityRecord r = ensureValidPictureInPictureActivityParams(
                         "enterPictureInPictureMode", token, params);
-                return mService.enterPictureInPictureMode(r, params);
+                return mService.enterPictureInPictureMode(r, params, true /* fromClient */);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -853,22 +886,23 @@ class ActivityClientController extends IActivityClientController.Stub {
     /**
      * Requests that an activity should enter picture-in-picture mode if possible. This method may
      * be used by the implementation of non-phone form factors.
+     *
+     * @return false if the activity cannot enter PIP mode.
      */
-    void requestPictureInPictureMode(@NonNull ActivityRecord r) {
+    boolean requestPictureInPictureMode(@NonNull ActivityRecord r) {
         if (r.inPinnedWindowingMode()) {
-            throw new IllegalStateException("Activity is already in PIP mode");
+            return false;
         }
 
         final boolean canEnterPictureInPicture = r.checkEnterPictureInPictureState(
                 "requestPictureInPictureMode", /* beforeStopping */ false);
         if (!canEnterPictureInPicture) {
-            throw new IllegalStateException(
-                    "Requested PIP on an activity that doesn't support it");
+            return false;
         }
 
         if (r.pictureInPictureArgs.isAutoEnterEnabled()) {
-            mService.enterPictureInPictureMode(r, r.pictureInPictureArgs);
-            return;
+            return mService.enterPictureInPictureMode(r, r.pictureInPictureArgs,
+                    false /* fromClient */);
         }
 
         try {
@@ -876,9 +910,11 @@ class ActivityClientController extends IActivityClientController.Stub {
                     r.app.getThread(), r.token);
             transaction.addCallback(EnterPipRequestedItem.obtain());
             mService.getLifecycleManager().scheduleTransaction(transaction);
+            return true;
         } catch (Exception e) {
             Slog.w(TAG, "Failed to send enter pip requested item: "
                     + r.intent.getComponent(), e);
+            return false;
         }
     }
 
@@ -928,6 +964,7 @@ class ActivityClientController extends IActivityClientController.Stub {
 
                 if (rootTask.inFreeformWindowingMode()) {
                     rootTask.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+                    rootTask.setBounds(null);
                 } else if (!r.supportsFreeform()) {
                     throw new IllegalStateException(
                             "This activity is currently not freeform-enabled");

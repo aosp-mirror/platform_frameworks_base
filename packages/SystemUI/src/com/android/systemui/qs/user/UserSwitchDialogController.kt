@@ -25,8 +25,10 @@ import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import androidx.annotation.VisibleForTesting
+import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.R
+import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.plugins.ActivityStarter
@@ -67,6 +69,7 @@ class UserSwitchDialogController @VisibleForTesting constructor(
     )
 
     companion object {
+        private const val INTERACTION_JANK_TAG = "switch_user"
         private val USER_SETTINGS_INTENT = Intent(Settings.ACTION_USER_SETTINGS)
     }
 
@@ -89,14 +92,16 @@ class UserSwitchDialogController @VisibleForTesting constructor(
                 if (!falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
                     uiEventLogger.log(QSUserSwitcherEvent.QS_USER_MORE_SETTINGS)
                     val controller = dialogLaunchAnimator.createActivityLaunchController(
-                        getButton(BUTTON_NEUTRAL))
+                        getButton(BUTTON_NEUTRAL)
+                    )
 
                     if (controller == null) {
                         dismiss()
                     }
 
                     activityStarter.postStartActivityDismissingKeyguard(
-                        USER_SETTINGS_INTENT, 0, controller)
+                        USER_SETTINGS_INTENT, 0, controller
+                    )
                 }
             }, false /* dismissOnClick */)
             val gridFrame = LayoutInflater.from(this.context)
@@ -107,7 +112,13 @@ class UserSwitchDialogController @VisibleForTesting constructor(
 
             adapter.linkToViewGroup(gridFrame.findViewById(R.id.grid))
 
-            dialogLaunchAnimator.showFromView(this, view)
+            dialogLaunchAnimator.showFromView(
+                this, view,
+                cuj = DialogCuj(
+                    InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
+                    INTERACTION_JANK_TAG
+                )
+            )
             uiEventLogger.log(QSUserSwitcherEvent.QS_USER_DETAIL_OPEN)
             adapter.injectDialogShower(DialogShowerImpl(this, dialogLaunchAnimator))
         }
@@ -117,15 +128,16 @@ class UserSwitchDialogController @VisibleForTesting constructor(
         private val animateFrom: Dialog,
         private val dialogLaunchAnimator: DialogLaunchAnimator
     ) : DialogInterface by animateFrom, DialogShower {
-        override fun showDialog(dialog: Dialog) {
+        override fun showDialog(dialog: Dialog, cuj: DialogCuj) {
             dialogLaunchAnimator.showFromDialog(
                 dialog,
-                animateFrom = animateFrom
+                animateFrom = animateFrom,
+                cuj
             )
         }
     }
 
     interface DialogShower : DialogInterface {
-        fun showDialog(dialog: Dialog)
+        fun showDialog(dialog: Dialog, cuj: DialogCuj)
     }
 }

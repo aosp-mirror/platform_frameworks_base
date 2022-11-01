@@ -107,9 +107,10 @@ public class RootWindowContainerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testUpdateDefaultDisplayWindowingModeOnSettingsRetrieved() {
+    public void testUpdateDefaultTaskDisplayAreaWindowingModeOnSettingsRetrieved() {
         assertEquals(WindowConfiguration.WINDOWING_MODE_FULLSCREEN,
-                mWm.getDefaultDisplayContentLocked().getWindowingMode());
+                mWm.getDefaultDisplayContentLocked().getDefaultTaskDisplayArea()
+                        .getWindowingMode());
 
         mWm.mIsPc = true;
         mWm.mAtmService.mSupportsFreeformWindowManagement = true;
@@ -117,7 +118,8 @@ public class RootWindowContainerTests extends WindowTestsBase {
         mWm.mRoot.onSettingsRetrieved();
 
         assertEquals(WindowConfiguration.WINDOWING_MODE_FREEFORM,
-                mWm.getDefaultDisplayContentLocked().getWindowingMode());
+                mWm.getDefaultDisplayContentLocked().getDefaultTaskDisplayArea()
+                        .getWindowingMode());
     }
 
     /**
@@ -657,7 +659,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
 
         doReturn(true).when(mRootWindowContainer).resumeHomeActivity(any(), any(), any());
 
-        mAtm.setBooted(true);
+        setBooted(mAtm);
 
         // Trigger resume on all displays
         mRootWindowContainer.resumeFocusedTasksTopActivities();
@@ -685,7 +687,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
 
         doReturn(true).when(mRootWindowContainer).resumeHomeActivity(any(), any(), any());
 
-        mAtm.setBooted(true);
+        setBooted(mAtm);
 
         // Trigger resume on all displays
         mRootWindowContainer.resumeFocusedTasksTopActivities();
@@ -771,17 +773,10 @@ public class RootWindowContainerTests extends WindowTestsBase {
     @Test
     public void testNotStartHomeBeforeBoot() {
         final int displayId = 1;
-        final boolean isBooting = mAtm.mAmInternal.isBooting();
-        final boolean isBooted = mAtm.mAmInternal.isBooted();
-        try {
-            mAtm.mAmInternal.setBooting(false);
-            mAtm.mAmInternal.setBooted(false);
-            mRootWindowContainer.onDisplayAdded(displayId);
-            verify(mRootWindowContainer, never()).startHomeOnDisplay(anyInt(), any(), anyInt());
-        } finally {
-            mAtm.mAmInternal.setBooting(isBooting);
-            mAtm.mAmInternal.setBooted(isBooted);
-        }
+        doReturn(false).when(mAtm).isBooting();
+        doReturn(false).when(mAtm).isBooted();
+        mRootWindowContainer.onDisplayAdded(displayId);
+        verify(mRootWindowContainer, never()).startHomeOnDisplay(anyInt(), any(), anyInt());
     }
 
     /**

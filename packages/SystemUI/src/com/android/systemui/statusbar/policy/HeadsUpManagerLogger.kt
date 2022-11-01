@@ -20,6 +20,8 @@ import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogLevel.INFO
 import com.android.systemui.log.LogLevel.VERBOSE
 import com.android.systemui.log.dagger.NotificationHeadsUpLog
+import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.statusbar.notification.logKey
 import javax.inject.Inject
 
 /** Logger for [HeadsUpManager]. */
@@ -56,9 +58,9 @@ class HeadsUpManagerLogger @Inject constructor(
         })
     }
 
-    fun logShowNotification(key: String) {
+    fun logShowNotification(entry: NotificationEntry) {
         buffer.log(TAG, INFO, {
-            str1 = key
+            str1 = entry.logKey
         }, {
             "show notification $str1"
         })
@@ -66,16 +68,16 @@ class HeadsUpManagerLogger @Inject constructor(
 
     fun logRemoveNotification(key: String, releaseImmediately: Boolean) {
         buffer.log(TAG, INFO, {
-            str1 = key
+            str1 = logKey(key)
             bool1 = releaseImmediately
         }, {
             "remove notification $str1 releaseImmediately: $bool1"
         })
     }
 
-    fun logNotificationActuallyRemoved(key: String) {
+    fun logNotificationActuallyRemoved(entry: NotificationEntry) {
         buffer.log(TAG, INFO, {
-            str1 = key
+            str1 = entry.logKey
         }, {
             "notification removed $str1 "
         })
@@ -83,7 +85,7 @@ class HeadsUpManagerLogger @Inject constructor(
 
     fun logUpdateNotification(key: String, alert: Boolean, hasEntry: Boolean) {
         buffer.log(TAG, INFO, {
-            str1 = key
+            str1 = logKey(key)
             bool1 = alert
             bool2 = hasEntry
         }, {
@@ -91,12 +93,12 @@ class HeadsUpManagerLogger @Inject constructor(
         })
     }
 
-    fun logUpdateEntry(key: String, updatePostTime: Boolean) {
+    fun logUpdateEntry(entry: NotificationEntry, updatePostTime: Boolean) {
         buffer.log(TAG, INFO, {
-            str1 = key
+            str1 = entry.logKey
             bool1 = updatePostTime
         }, {
-            "update entry $key updatePostTime: $bool1"
+            "update entry $str1 updatePostTime: $bool1"
         })
     }
 
@@ -108,9 +110,9 @@ class HeadsUpManagerLogger @Inject constructor(
         })
     }
 
-    fun logSetEntryPinned(key: String, isPinned: Boolean) {
+    fun logSetEntryPinned(entry: NotificationEntry, isPinned: Boolean) {
         buffer.log(TAG, VERBOSE, {
-            str1 = key
+            str1 = entry.logKey
             bool1 = isPinned
         }, {
             "set entry pinned $str1 pinned: $bool1"

@@ -17,6 +17,7 @@
 package com.android.wm.shell.pip;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.view.WindowManager.TRANSIT_PIP;
 
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_REMOVE_STACK;
 import static com.android.wm.shell.pip.PipAnimationController.isInPipDirection;
@@ -27,12 +28,17 @@ import android.app.TaskInfo;
 import android.content.ComponentName;
 import android.content.pm.ActivityInfo;
 import android.graphics.Rect;
-import android.os.Handler;
-import android.os.Looper;
+import android.os.IBinder;
 import android.view.SurfaceControl;
+import android.view.WindowManager;
+import android.window.TransitionInfo;
+import android.window.TransitionRequestInfo;
 import android.window.WindowContainerTransaction;
 
+import androidx.annotation.NonNull;
+
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 
 import java.util.ArrayList;
@@ -49,7 +55,6 @@ public abstract class PipTransitionController implements Transitions.TransitionH
     protected final ShellTaskOrganizer mShellTaskOrganizer;
     protected final PipMenuController mPipMenuController;
     protected final Transitions mTransitions;
-    private final Handler mMainHandler;
     private final List<PipTransitionCallback> mPipTransitionCallbacks = new ArrayList<>();
     protected PipTaskOrganizer mPipOrganizer;
 
@@ -127,20 +132,26 @@ public abstract class PipTransitionController implements Transitions.TransitionH
     public void onFixedRotationStarted() {
     }
 
-    public PipTransitionController(PipBoundsState pipBoundsState,
+    public PipTransitionController(
+            @NonNull ShellInit shellInit,
+            @NonNull ShellTaskOrganizer shellTaskOrganizer,
+            @NonNull Transitions transitions,
+            PipBoundsState pipBoundsState,
             PipMenuController pipMenuController, PipBoundsAlgorithm pipBoundsAlgorithm,
-            PipAnimationController pipAnimationController, Transitions transitions,
-            @android.annotation.NonNull ShellTaskOrganizer shellTaskOrganizer) {
+            PipAnimationController pipAnimationController) {
         mPipBoundsState = pipBoundsState;
         mPipMenuController = pipMenuController;
         mShellTaskOrganizer = shellTaskOrganizer;
         mPipBoundsAlgorithm = pipBoundsAlgorithm;
         mPipAnimationController = pipAnimationController;
         mTransitions = transitions;
-        mMainHandler = new Handler(Looper.getMainLooper());
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            transitions.addHandler(this);
+            shellInit.addInitCallback(this::onInit, this);
         }
+    }
+
+    private void onInit() {
+        mTransitions.addHandler(this);
     }
 
     void setPipOrganizer(PipTaskOrganizer pto) {
@@ -204,6 +215,34 @@ public abstract class PipTransitionController implements Transitions.TransitionH
     public boolean handleRotateDisplay(int startRotation, int endRotation,
             WindowContainerTransaction wct) {
         return false;
+    }
+
+    /** @return whether the transition-request represents a pip-entry. */
+    public boolean requestHasPipEnter(@NonNull TransitionRequestInfo request) {
+        return request.getType() == TRANSIT_PIP;
+    }
+
+    /** Whether a particular change is a window that is entering pip. */
+    public boolean isEnteringPip(@NonNull TransitionInfo.Change change,
+            @WindowManager.TransitionType int transitType) {
+        return false;
+    }
+
+    /** Add PiP-related changes to `outWCT` for the given request. */
+    public void augmentRequest(@NonNull IBinder transition,
+            @NonNull TransitionRequestInfo request, @NonNull WindowContainerTransaction outWCT) {
+        throw new IllegalStateException("Request isn't entering PiP");
+    }
+
+    /** Play a transition animation for entering PiP on a specific PiP change. */
+    public void startEnterAnimation(@NonNull final TransitionInfo.Change pipChange,
+            @NonNull final SurfaceControl.Transaction startTransaction,
+            @NonNull final SurfaceControl.Transaction finishTransaction,
+            @NonNull final Transitions.TransitionFinishCallback finishCallback) {
+    }
+
+    /** End the currently-playing PiP animation. */
+    public void end() {
     }
 
     /**

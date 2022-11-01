@@ -81,7 +81,6 @@ class NotificationShadeDepthController @Inject constructor(
     }
 
     lateinit var root: View
-    private var blurRoot: View? = null
     private var keyguardAnimator: Animator? = null
     private var notificationAnimator: Animator? = null
     private var updateScheduled: Boolean = false
@@ -235,7 +234,7 @@ class NotificationShadeDepthController @Inject constructor(
 
         val opaque = scrimsVisible && !blursDisabledForAppLaunch
         Trace.traceCounter(Trace.TRACE_TAG_APP, "shade_blur_radius", blur)
-        blurUtils.applyBlur(blurRoot?.viewRootImpl ?: root.viewRootImpl, blur, opaque)
+        blurUtils.applyBlur(root.viewRootImpl, blur, opaque)
         lastAppliedBlur = blur
         wallpaperController.setNotificationShadeZoom(zoomOut)
         listeners.forEach {
@@ -271,7 +270,6 @@ class NotificationShadeDepthController @Inject constructor(
                     override fun onAnimationEnd(animation: Animator?) {
                         keyguardAnimator = null
                         wakeAndUnlockBlurRadius = 0f
-                        scheduleUpdate()
                     }
                 })
                 start()
@@ -302,7 +300,6 @@ class NotificationShadeDepthController @Inject constructor(
 
         override fun onDozeAmountChanged(linear: Float, eased: Float) {
             wakeAndUnlockBlurRadius = blurUtils.blurRadiusOfRatio(eased)
-            scheduleUpdate()
         }
     }
 
@@ -439,12 +436,11 @@ class NotificationShadeDepthController @Inject constructor(
         shadeAnimation.animateTo(blurUtils.blurRadiusOfRatio(targetBlurNormalized).toInt())
     }
 
-    private fun scheduleUpdate(viewToBlur: View? = null) {
+    private fun scheduleUpdate() {
         if (updateScheduled) {
             return
         }
         updateScheduled = true
-        blurRoot = viewToBlur
         choreographer.postFrameCallback(updateBlurCallback)
     }
 
@@ -495,16 +491,11 @@ class NotificationShadeDepthController @Inject constructor(
          */
         private var pendingRadius = -1
 
-        /**
-         * View on {@link Surface} that wants depth.
-         */
-        private var view: View? = null
-
         private var springAnimation = SpringAnimation(this, object :
                 FloatPropertyCompat<DepthAnimation>("blurRadius") {
             override fun setValue(rect: DepthAnimation?, value: Float) {
                 radius = value
-                scheduleUpdate(view)
+                scheduleUpdate()
             }
 
             override fun getValue(rect: DepthAnimation?): Float {
@@ -519,11 +510,10 @@ class NotificationShadeDepthController @Inject constructor(
             springAnimation.addEndListener { _, _, _, _ -> pendingRadius = -1 }
         }
 
-        fun animateTo(newRadius: Int, viewToBlur: View? = null) {
-            if (pendingRadius == newRadius && view == viewToBlur) {
+        fun animateTo(newRadius: Int) {
+            if (pendingRadius == newRadius) {
                 return
             }
-            view = viewToBlur
             pendingRadius = newRadius
             springAnimation.animateToFinalPosition(newRadius.toFloat())
         }

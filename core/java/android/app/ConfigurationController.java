@@ -124,12 +124,6 @@ class ConfigurationController {
      * @param config The new configuration.
      */
     void handleConfigurationChanged(@NonNull Configuration config) {
-        if (mActivityThread.isCachedProcessState()) {
-            updatePendingConfiguration(config);
-            // If the process is in a cached state, delay the handling until the process is no
-            // longer cached.
-            return;
-        }
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "configChanged");
         handleConfigurationChanged(config, null /* compat */);
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);

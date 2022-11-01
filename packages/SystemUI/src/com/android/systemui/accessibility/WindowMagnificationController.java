@@ -69,7 +69,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.systemui.R;
 import com.android.systemui.model.SysUiState;
-import com.android.systemui.shared.system.WindowManagerWrapper;
 
 import java.io.PrintWriter;
 import java.text.NumberFormat;
@@ -634,13 +633,32 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
      * child of the surfaceView.
      */
     private void createMirror() {
-        mMirrorSurface = WindowManagerWrapper.getInstance().mirrorDisplay(mDisplayId);
+        mMirrorSurface = mirrorDisplay(mDisplayId);
         if (!mMirrorSurface.isValid()) {
             return;
         }
         mTransaction.show(mMirrorSurface)
                 .reparent(mMirrorSurface, mMirrorSurfaceView.getSurfaceControl());
         modifyWindowMagnification(false);
+    }
+
+    /**
+     * Mirrors a specified display. The SurfaceControl returned is the root of the mirrored
+     * hierarchy.
+     *
+     * @param displayId The id of the display to mirror
+     * @return The SurfaceControl for the root of the mirrored hierarchy.
+     */
+    private SurfaceControl mirrorDisplay(final int displayId) {
+        try {
+            SurfaceControl outSurfaceControl = new SurfaceControl();
+            WindowManagerGlobal.getWindowManagerService().mirrorDisplay(displayId,
+                    outSurfaceControl);
+            return outSurfaceControl;
+        } catch (RemoteException e) {
+            Log.e(TAG, "Unable to reach window manager", e);
+        }
+        return null;
     }
 
     private void addDragTouchListeners() {

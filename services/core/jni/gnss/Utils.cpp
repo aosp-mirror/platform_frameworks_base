@@ -195,6 +195,8 @@ jobject translateGnssLocation(JNIEnv* env, const android::hardware::gnss::GnssLo
     flags = static_cast<uint32_t>(location.elapsedRealtime.flags);
     if (flags & android::hardware::gnss::ElapsedRealtime::HAS_TIMESTAMP_NS) {
         SET(ElapsedRealtimeNanos, location.elapsedRealtime.timestampNs);
+    } else {
+        SET(ElapsedRealtimeNanos, android::elapsedRealtimeNano());
     }
     if (flags & android::hardware::gnss::ElapsedRealtime::HAS_TIME_UNCERTAINTY_NS) {
         SET(ElapsedRealtimeUncertaintyNanos,

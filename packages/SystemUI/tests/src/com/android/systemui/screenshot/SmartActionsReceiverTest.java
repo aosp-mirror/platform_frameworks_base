@@ -74,6 +74,6 @@ public class SmartActionsReceiverTest extends SysuiTestCase {
         verify(mMockPendingIntent).send(
                 eq(mContext), eq(0), isNull(), isNull(), isNull(), isNull(), any(Bundle.class));
         verify(mMockScreenshotSmartActions).notifyScreenshotAction(
-                mContext, testId, testActionType, true, intent);
+                testId, testActionType, true, intent);
     }
 }

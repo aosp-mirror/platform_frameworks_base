@@ -171,4 +171,9 @@
     <item msgid="146088982397753810">"Naka-off"</item>
     <item msgid="460891964396502657">"Naka-on"</item>
   </string-array>
+  <string-array name="tile_states_dream">
+    <item msgid="6184819793571079513">"Hindi available"</item>
+    <item msgid="8014986104355098744">"Naka-off"</item>
+    <item msgid="5966994759929723339">"Naka-on"</item>
+  </string-array>
 </resources>

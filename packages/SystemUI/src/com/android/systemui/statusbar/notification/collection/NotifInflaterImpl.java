@@ -75,8 +75,13 @@ public class NotifInflaterImpl implements NotifInflater {
     }
 
     @Override
-    public void abortInflation(NotificationEntry entry) {
-        entry.abortTask();
+    public boolean abortInflation(NotificationEntry entry) {
+        return entry.abortTask();
+    }
+
+    @Override
+    public void releaseViews(@NonNull NotificationEntry entry) {
+        requireBinder().releaseViews(entry);
     }
 
     private NotificationContentInflater.InflationCallback wrapInflationCallback(

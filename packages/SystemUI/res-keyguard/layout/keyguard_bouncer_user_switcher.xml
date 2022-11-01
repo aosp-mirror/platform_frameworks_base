@@ -35,7 +35,7 @@
 
     <!-- need to keep this outer view in order to have a correctly sized anchor
          for the dropdown menu, as well as dropdown background in the right place -->
-    <LinearLayout
+    <com.android.keyguard.KeyguardUserSwitcherAnchor
         android:id="@+id/user_switcher_anchor"
         android:orientation="horizontal"
         android:layout_height="wrap_content"
@@ -45,9 +45,10 @@
           style="@style/Bouncer.UserSwitcher.Spinner.Header"
           android:clickable="false"
           android:id="@+id/user_switcher_header"
+          android:textDirection="locale"
           android:layout_width="@dimen/bouncer_user_switcher_width"
           android:layout_height="wrap_content" />
-    </LinearLayout>>
+    </com.android.keyguard.KeyguardUserSwitcherAnchor>
 
 </LinearLayout>
 

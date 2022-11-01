@@ -101,6 +101,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     private static final int MSG_FINGERPRINT_DETECTED = 107;
     private static final int MSG_UDFPS_POINTER_DOWN = 108;
     private static final int MSG_UDFPS_POINTER_UP = 109;
+    private static final int MSG_POWER_BUTTON_PRESSED = 110;
 
     /**
      * @hide
@@ -984,6 +985,16 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     }
 
     /**
+     * This is triggered by SideFpsEventHandler
+     * @hide
+     */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    public void onPowerPressed() {
+        Slog.i(TAG, "onPowerPressed");
+        mHandler.obtainMessage(MSG_POWER_BUTTON_PRESSED).sendToTarget();
+    }
+
+    /**
      * Determine if there is at least one fingerprint enrolled.
      *
      * @return true if at least one fingerprint is enrolled, false otherwise
@@ -1196,6 +1207,9 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
                 case MSG_UDFPS_POINTER_UP:
                     sendUdfpsPointerUp(msg.arg1 /* sensorId */);
                     break;
+                case MSG_POWER_BUTTON_PRESSED:
+                    sendPowerPressed();
+                    break;
                 default:
                     Slog.w(TAG, "Unknown message: " + msg.what);
 
@@ -1325,6 +1339,14 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         mAuthenticationCallback.onUdfpsPointerUp(sensorId);
     }
 
+    private void sendPowerPressed() {
+        try {
+            mService.onPowerPressed();
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Error sending power press", e);
+        }
+    }
+
     /**
      * @hide
      */
@@ -1411,10 +1433,17 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     }
 
     @NonNull
-    private static float[] createEnrollStageThresholds(@NonNull Context context) {
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    private float[] createEnrollStageThresholds(@NonNull Context context) {
         // TODO(b/200604947): Fetch this value from FingerprintService, rather than internal config
-        final String[] enrollStageThresholdStrings = context.getResources().getStringArray(
-                com.android.internal.R.array.config_udfps_enroll_stage_thresholds);
+        final String[] enrollStageThresholdStrings;
+        if (isPowerbuttonFps()) {
+            enrollStageThresholdStrings = context.getResources().getStringArray(
+                    com.android.internal.R.array.config_sfps_enroll_stage_thresholds);
+        } else {
+            enrollStageThresholdStrings = context.getResources().getStringArray(
+                    com.android.internal.R.array.config_udfps_enroll_stage_thresholds);
+        }
 
         final float[] enrollStageThresholds = new float[enrollStageThresholdStrings.length];
         for (int i = 0; i < enrollStageThresholds.length; i++) {
@@ -1461,6 +1490,9 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
             case FINGERPRINT_ERROR_BAD_CALIBRATION:
                 return context.getString(
                             com.android.internal.R.string.fingerprint_error_bad_calibration);
+            case BIOMETRIC_ERROR_POWER_PRESSED:
+                return context.getString(
+                    com.android.internal.R.string.fingerprint_error_power_pressed);
             case FINGERPRINT_ERROR_VENDOR: {
                 String[] msgArray = context.getResources().getStringArray(
                         com.android.internal.R.array.fingerprint_error_vendor);
@@ -1506,6 +1538,9 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
             case FINGERPRINT_ACQUIRED_TOO_BRIGHT:
                 return context.getString(
                    com.android.internal.R.string.fingerprint_acquired_too_bright);
+            case FINGERPRINT_ACQUIRED_POWER_PRESSED:
+                return context.getString(
+                        com.android.internal.R.string.fingerprint_acquired_power_press);
             case FINGERPRINT_ACQUIRED_VENDOR: {
                 String[] msgArray = context.getResources().getStringArray(
                         com.android.internal.R.array.fingerprint_acquired_vendor);

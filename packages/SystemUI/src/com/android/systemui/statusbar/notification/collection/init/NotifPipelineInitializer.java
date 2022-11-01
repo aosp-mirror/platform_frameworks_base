@@ -18,20 +18,24 @@ package com.android.systemui.statusbar.notification.collection.init;
 
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.NotificationListener;
-import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifInflaterImpl;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
+import com.android.systemui.statusbar.notification.collection.PipelineDumpable;
+import com.android.systemui.statusbar.notification.collection.PipelineDumper;
 import com.android.systemui.statusbar.notification.collection.ShadeListBuilder;
 import com.android.systemui.statusbar.notification.collection.coalescer.GroupCoalescer;
 import com.android.systemui.statusbar.notification.collection.coordinator.NotifCoordinators;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinderImpl;
 import com.android.systemui.statusbar.notification.collection.render.NotifStackController;
 import com.android.systemui.statusbar.notification.collection.render.RenderStageManager;
+import com.android.systemui.statusbar.notification.collection.render.ShadeViewManager;
 import com.android.systemui.statusbar.notification.collection.render.ShadeViewManagerFactory;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 
@@ -43,7 +47,7 @@ import javax.inject.Inject;
  * Initialization code for the new notification pipeline.
  */
 @SysUISingleton
-public class NotifPipelineInitializer implements Dumpable {
+public class NotifPipelineInitializer implements Dumpable, PipelineDumpable {
     private final NotifPipeline mPipelineWrapper;
     private final GroupCoalescer mGroupCoalescer;
     private final NotifCollection mNotifCollection;
@@ -53,8 +57,10 @@ public class NotifPipelineInitializer implements Dumpable {
     private final NotifInflaterImpl mNotifInflater;
     private final DumpManager mDumpManager;
     private final ShadeViewManagerFactory mShadeViewManagerFactory;
-    private final NotifPipelineFlags mNotifPipelineFlags;
 
+    /* These are saved just for dumping. */
+    private ShadeViewManager mShadeViewManager;
+    private NotificationListener mNotificationService;
 
     @Inject
     public NotifPipelineInitializer(
@@ -66,8 +72,7 @@ public class NotifPipelineInitializer implements Dumpable {
             NotifCoordinators notifCoordinators,
             NotifInflaterImpl notifInflater,
             DumpManager dumpManager,
-            ShadeViewManagerFactory shadeViewManagerFactory,
-            NotifPipelineFlags notifPipelineFlags
+            ShadeViewManagerFactory shadeViewManagerFactory
     ) {
         mPipelineWrapper = pipelineWrapper;
         mGroupCoalescer = groupCoalescer;
@@ -78,7 +83,6 @@ public class NotifPipelineInitializer implements Dumpable {
         mDumpManager = dumpManager;
         mNotifInflater = notifInflater;
         mShadeViewManagerFactory = shadeViewManagerFactory;
-        mNotifPipelineFlags = notifPipelineFlags;
     }
 
     /** Hooks the new pipeline up to NotificationManager */
@@ -87,36 +91,61 @@ public class NotifPipelineInitializer implements Dumpable {
             NotificationRowBinderImpl rowBinder,
             NotificationListContainer listContainer,
             NotifStackController stackController) {
-
         mDumpManager.registerDumpable("NotifPipeline", this);
 
+        mNotificationService = notificationService;
+
         // Setup inflation
-        if (mNotifPipelineFlags.isNewPipelineEnabled()) {
-            mNotifInflater.setRowBinder(rowBinder);
-        }
+        mNotifInflater.setRowBinder(rowBinder);
 
         // Wire up coordinators
         mNotifPluggableCoordinators.attach(mPipelineWrapper);
 
         // Wire up pipeline
-        if (mNotifPipelineFlags.isNewPipelineEnabled()) {
-            mShadeViewManagerFactory
-                    .create(listContainer, stackController)
-                    .attach(mRenderStageManager);
-        }
+        mShadeViewManager = mShadeViewManagerFactory.create(listContainer, stackController);
+        mShadeViewManager.attach(mRenderStageManager);
         mRenderStageManager.attach(mListBuilder);
         mListBuilder.attach(mNotifCollection);
         mNotifCollection.attach(mGroupCoalescer);
-        mGroupCoalescer.attach(notificationService);
+        mGroupCoalescer.attach(mNotificationService);
 
         Log.d(TAG, "Notif pipeline initialized."
-                + " rendering=" + mNotifPipelineFlags.isNewPipelineEnabled());
+                + " rendering=" + true);
     }
 
     @Override
     public void dump(PrintWriter pw, String[] args) {
-        mNotifPluggableCoordinators.dump(pw, args);
-        mGroupCoalescer.dump(pw, args);
+        dumpPipeline(new PipelineDumper(pw));
+    }
+
+    @Override
+    public void dumpPipeline(@NonNull PipelineDumper d) {
+        d.println("STAGE 0: SETUP");
+        d.dump("notifPluggableCoordinators", mNotifPluggableCoordinators);
+        d.println("");
+
+        d.println("STAGE 1: LISTEN");
+        d.dump("notificationService", mNotificationService);
+        d.println("");
+
+        d.println("STAGE 2: BATCH EVENTS");
+        d.dump("groupCoalescer", mGroupCoalescer);
+        d.println("");
+
+        d.println("STAGE 3: COLLECT");
+        d.dump("notifCollection", mNotifCollection);
+        d.println("");
+
+        d.println("STAGE 4: BUILD LIST");
+        d.dump("listBuilder", mListBuilder);
+        d.println("");
+
+        d.println("STAGE 5: DISPATCH RENDER");
+        d.dump("renderStageManager", mRenderStageManager);
+        d.println("");
+
+        d.println("STAGE 6: UPDATE SHADE");
+        d.dump("shadeViewManager", mShadeViewManager);
     }
 
     private static final String TAG = "NotifPipeline";

@@ -80,12 +80,6 @@ public class KeyguardUpdateMonitorCallback {
      */
     public void onKeyguardVisibilityChanged(boolean showing) { }
 
-    /**
-     * Called when the keyguard occluded state changes.
-     * @param occluded Indicates if the keyguard is now occluded.
-     */
-    public void onKeyguardOccludedChanged(boolean occluded) { }
-
     public void onKeyguardVisibilityChangedRaw(boolean showing) {
         final long now = SystemClock.elapsedRealtime();
         if (showing == mShowing
@@ -117,12 +111,6 @@ public class KeyguardUpdateMonitorCallback {
     public void onKeyguardDismissAnimationFinished() { }
 
     /**
-     * Called when visibility of lockscreen clock changes, such as when
-     * obscured by a widget.
-     */
-    public void onClockVisibilityChanged() { }
-
-    /**
      * Called when the device becomes provisioned
      */
     public void onDeviceProvisioned() { }
@@ -149,11 +137,6 @@ public class KeyguardUpdateMonitorCallback {
      * @param simState
      */
     public void onSimStateChanged(int subId, int slotId, int simState) { }
-
-    /**
-     * Called when the user's info changed.
-     */
-    public void onUserInfoChanged(int userId) { }
 
     /**
      * Called when a user got unlocked.
@@ -260,11 +243,6 @@ public class KeyguardUpdateMonitorCallback {
             BiometricSourceType biometricSourceType) { }
 
     /**
-     * Called when the state of face unlock changed.
-     */
-    public void onFaceUnlockStateChanged(boolean running, int userId) { }
-
-    /**
      * Called when biometric running state changed.
      */
     public void onBiometricRunningStateChanged(boolean running,
@@ -293,7 +271,7 @@ public class KeyguardUpdateMonitorCallback {
      * like fingerprint authentication errors.
      *
      * @param message Message that indicates an error.
-     * @see KeyguardIndicationController.BaseKeyguardCallback#HIDE_DELAY_MS
+     * @see KeyguardIndicationController#DEFAULT_HIDE_DELAY_MS
      * @see KeyguardIndicationController#showTransientIndication(CharSequence)
      */
     public void onTrustAgentErrorMessage(CharSequence message) { }

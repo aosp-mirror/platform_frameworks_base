@@ -35,6 +35,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.complication.ComplicationHostViewController;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
 import com.android.systemui.dreams.dagger.DreamOverlayModule;
+import com.android.systemui.keyguard.domain.interactor.BouncerCallbackInteractor;
 import com.android.systemui.statusbar.BlurUtils;
 import com.android.systemui.statusbar.phone.KeyguardBouncer;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
@@ -73,6 +74,7 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
     // Main thread handler used to schedule periodic tasks (e.g. burn-in protection updates).
     private final Handler mHandler;
     private final int mDreamOverlayMaxTranslationY;
+    private final BouncerCallbackInteractor mBouncerCallbackInteractor;
 
     private long mJitterStartTimeMillis;
 
@@ -131,7 +133,8 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
             @Named(DreamOverlayModule.MAX_BURN_IN_OFFSET) int maxBurnInOffset,
             @Named(DreamOverlayModule.BURN_IN_PROTECTION_UPDATE_INTERVAL) long
                     burnInProtectionUpdateInterval,
-            @Named(DreamOverlayModule.MILLIS_UNTIL_FULL_JITTER) long millisUntilFullJitter) {
+            @Named(DreamOverlayModule.MILLIS_UNTIL_FULL_JITTER) long millisUntilFullJitter,
+            BouncerCallbackInteractor bouncerCallbackInteractor) {
         super(containerView);
         mDreamOverlayContentView = contentView;
         mStatusBarViewController = statusBarViewController;
@@ -151,6 +154,7 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
         mMaxBurnInOffset = maxBurnInOffset;
         mBurnInProtectionUpdateInterval = burnInProtectionUpdateInterval;
         mMillisUntilFullJitter = millisUntilFullJitter;
+        mBouncerCallbackInteractor = bouncerCallbackInteractor;
     }
 
     @Override
@@ -167,6 +171,7 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
         if (bouncer != null) {
             bouncer.addBouncerExpansionCallback(mBouncerExpansionCallback);
         }
+        mBouncerCallbackInteractor.addBouncerExpansionCallback(mBouncerExpansionCallback);
     }
 
     @Override
@@ -176,6 +181,7 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
         if (bouncer != null) {
             bouncer.removeBouncerExpansionCallback(mBouncerExpansionCallback);
         }
+        mBouncerCallbackInteractor.removeBouncerExpansionCallback(mBouncerExpansionCallback);
     }
 
     View getContainerView() {
@@ -183,22 +189,22 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
     }
 
     private void updateBurnInOffsets() {
-        int burnInOffset = mMaxBurnInOffset;
-
         // Make sure the offset starts at zero, to avoid a big jump in the overlay when it first
         // appears.
-        long millisSinceStart = System.currentTimeMillis() - mJitterStartTimeMillis;
+        final long millisSinceStart = System.currentTimeMillis() - mJitterStartTimeMillis;
+        final int burnInOffset;
         if (millisSinceStart < mMillisUntilFullJitter) {
             float lerpAmount = (float) millisSinceStart / (float) mMillisUntilFullJitter;
-            burnInOffset = Math.round(MathUtils.lerp(0f, burnInOffset, lerpAmount));
+            burnInOffset = Math.round(MathUtils.lerp(0f, mMaxBurnInOffset, lerpAmount));
+        } else {
+            burnInOffset = mMaxBurnInOffset;
         }
 
         // These translation values change slowly, and the set translation methods are idempotent,
         // so no translation occurs when the values don't change.
-        int burnInOffsetX = getBurnInOffset(burnInOffset * 2, true)
-                - burnInOffset;
-        int burnInOffsetY = getBurnInOffset(burnInOffset * 2, false)
-                - burnInOffset;
+        final int halfBurnInOffset = burnInOffset / 2;
+        final int burnInOffsetX = getBurnInOffset(burnInOffset, true) - halfBurnInOffset;
+        final int burnInOffsetY = getBurnInOffset(burnInOffset, false) - halfBurnInOffset;
         mView.setTranslationX(burnInOffsetX);
         mView.setTranslationY(burnInOffsetY);
 

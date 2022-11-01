@@ -497,6 +497,7 @@ final class ProcessStateRecord {
     @GuardedBy({"mService", "mProcLock"})
     void setCurAdj(int curAdj) {
         mCurAdj = curAdj;
+        mApp.getWindowProcessController().setCurrentAdj(curAdj);
     }
 
     @GuardedBy(anyOf = {"mService", "mProcLock"})

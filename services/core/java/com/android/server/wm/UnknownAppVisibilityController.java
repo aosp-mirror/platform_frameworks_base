@@ -69,6 +69,10 @@ class UnknownAppVisibilityController {
         return mUnknownApps.isEmpty();
     }
 
+    boolean isVisibilityUnknown(ActivityRecord r) {
+        return mUnknownApps.containsKey(r);
+    }
+
     void clear() {
         mUnknownApps.clear();
     }

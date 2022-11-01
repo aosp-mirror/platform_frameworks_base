@@ -16,15 +16,15 @@
 
 package com.android.systemui.statusbar.notification.collection.coordinator;
 
-import com.android.keyguard.KeyguardUpdateMonitor;
+import androidx.annotation.NonNull;
+
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.notification.SectionHeaderVisibilityProvider;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
-import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
+import com.android.systemui.statusbar.notification.collection.provider.SectionHeaderVisibilityProvider;
 import com.android.systemui.statusbar.notification.interruption.KeyguardNotificationVisibilityProvider;
 
 import javax.inject.Inject;
@@ -36,27 +36,18 @@ import javax.inject.Inject;
 @CoordinatorScope
 public class KeyguardCoordinator implements Coordinator {
     private static final String TAG = "KeyguardCoordinator";
-    private final StatusBarStateController mStatusBarStateController;
-    private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
-    private final HighPriorityProvider mHighPriorityProvider;
-    private final SectionHeaderVisibilityProvider mSectionHeaderVisibilityProvider;
     private final KeyguardNotificationVisibilityProvider mKeyguardNotificationVisibilityProvider;
-    private final SharedCoordinatorLogger mLogger;
+    private final SectionHeaderVisibilityProvider mSectionHeaderVisibilityProvider;
+    private final StatusBarStateController mStatusBarStateController;
 
     @Inject
     public KeyguardCoordinator(
-            StatusBarStateController statusBarStateController,
-            KeyguardUpdateMonitor keyguardUpdateMonitor,
-            HighPriorityProvider highPriorityProvider,
-            SectionHeaderVisibilityProvider sectionHeaderVisibilityProvider,
             KeyguardNotificationVisibilityProvider keyguardNotificationVisibilityProvider,
-            SharedCoordinatorLogger logger) {
-        mStatusBarStateController = statusBarStateController;
-        mKeyguardUpdateMonitor = keyguardUpdateMonitor;
-        mHighPriorityProvider = highPriorityProvider;
-        mSectionHeaderVisibilityProvider = sectionHeaderVisibilityProvider;
+            SectionHeaderVisibilityProvider sectionHeaderVisibilityProvider,
+            StatusBarStateController statusBarStateController) {
         mKeyguardNotificationVisibilityProvider = keyguardNotificationVisibilityProvider;
-        mLogger = logger;
+        mSectionHeaderVisibilityProvider = sectionHeaderVisibilityProvider;
+        mStatusBarStateController = statusBarStateController;
     }
 
     @Override
@@ -72,7 +63,7 @@ public class KeyguardCoordinator implements Coordinator {
 
     private final NotifFilter mNotifFilter = new NotifFilter(TAG) {
         @Override
-        public boolean shouldFilterOut(NotificationEntry entry, long now) {
+        public boolean shouldFilterOut(@NonNull NotificationEntry entry, long now) {
             return mKeyguardNotificationVisibilityProvider.shouldHideNotification(entry);
         }
     };
@@ -84,9 +75,8 @@ public class KeyguardCoordinator implements Coordinator {
     }
 
     private void invalidateListFromFilter(String reason) {
-        mLogger.logKeyguardCoordinatorInvalidated(reason);
         updateSectionHeadersVisibility();
-        mNotifFilter.invalidateList();
+        mNotifFilter.invalidateList(reason);
     }
 
     private void updateSectionHeadersVisibility() {

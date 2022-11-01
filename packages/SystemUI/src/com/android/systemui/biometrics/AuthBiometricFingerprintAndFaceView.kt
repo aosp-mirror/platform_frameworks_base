@@ -39,5 +39,5 @@ class AuthBiometricFingerprintAndFaceView(
     override fun onPointerDown(failedModalities: Set<Int>) = failedModalities.contains(TYPE_FACE)
 
     override fun createIconController(): AuthIconController =
-        AuthBiometricFingerprintAndFaceIconController(mContext, mIconView)
+        AuthBiometricFingerprintAndFaceIconController(mContext, mIconView, mIconViewOverlay)
 }

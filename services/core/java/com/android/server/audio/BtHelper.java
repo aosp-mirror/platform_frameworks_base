@@ -53,6 +53,8 @@ public class BtHelper {
 
     private static final String TAG = "AS.BtHelper";
 
+    private static final int SOURCE_CODEC_TYPE_OPUS = 6; // TODO remove in U
+
     private final @NonNull AudioDeviceBroker mDeviceBroker;
 
     BtHelper(@NonNull AudioDeviceBroker broker) {
@@ -410,9 +412,8 @@ public class BtHelper {
             }
             return;
         }
-        /* leaudio expect volume value in range 0 to 255
-         */
-        int volume = (index * (BT_LE_AUDIO_MAX_VOL - BT_LE_AUDIO_MIN_VOL)) / maxIndex ;
+        /* leaudio expect volume value in range 0 to 255 */
+        int volume = (int) Math.round((double) index * BT_LE_AUDIO_MAX_VOL / maxIndex);
 
         if (AudioService.DEBUG_VOL) {
             Log.i(TAG, "setLeAudioVolume: calling mLeAudio.setVolume idx="
@@ -907,6 +908,8 @@ public class BtHelper {
                 return "ENCODING_APTX_HD";
             case BluetoothCodecConfig.SOURCE_CODEC_TYPE_LDAC:
                 return "ENCODING_LDAC";
+            case SOURCE_CODEC_TYPE_OPUS: // TODO update in U
+                return "ENCODING_OPUS";
             default:
                 return "ENCODING_BT_CODEC_TYPE(" + btCodecType + ")";
         }

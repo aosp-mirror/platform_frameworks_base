@@ -235,7 +235,8 @@ public class TransactionParcelTests {
     public void testPause() {
         // Write to parcel
         PauseActivityItem item = PauseActivityItem.obtain(true /* finished */,
-                true /* userLeaving */, 135 /* configChanges */, true /* dontReport */);
+                true /* userLeaving */, 135 /* configChanges */, true /* dontReport */,
+                true /* autoEnteringPip */);
         writeAndPrepareForReading(item);
 
         // Read from parcel and assert

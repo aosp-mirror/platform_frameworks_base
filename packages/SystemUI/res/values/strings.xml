@@ -313,13 +313,6 @@
     <string name="accessibility_scanning_face">Scanning face</string>
     <!-- Click action label for accessibility for the smart reply buttons (not shown on-screen).". [CHAR LIMIT=NONE] -->
     <string name="accessibility_send_smart_reply">Send</string>
-    <!-- Content description of the manage notification button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <!-- Click action label for accessibility for the phone button. [CHAR LIMIT=NONE] -->
-    <string name="phone_label">open phone</string>
-    <!-- Click action label for accessibility for the voice assist button. This is not shown on-screen and is an accessibility label for the icon which launches the voice assist from the lock screen.[CHAR LIMIT=NONE] -->
-    <string name="voice_assist_label">open voice assist</string>
-    <!-- Click action label for accessibility for the phone button. [CHAR LIMIT=NONE] -->
-    <string name="camera_label">open camera</string>
     <!-- Button name for "Cancel". [CHAR LIMIT=NONE] -->
     <string name="cancel">Cancel</string>
 
@@ -341,6 +334,12 @@
     <string name="biometric_dialog_tap_confirm">Tap Confirm to complete</string>
     <!-- Message shown when a biometric has authenticated with a user's face and is waiting for the user to confirm authentication [CHAR LIMIT=60]-->
     <string name="biometric_dialog_tap_confirm_with_face">Unlocked by face. Press the unlock icon to continue.</string>
+    <!-- Message shown when a biometric has authenticated with a user's face and is waiting for the user to confirm authentication [CHAR LIMIT=60]-->
+    <string name="biometric_dialog_tap_confirm_with_face_alt_1">Unlocked by face. Press to continue.</string>
+    <!-- Message shown when a biometric has authenticated with a user's face and is waiting for the user to confirm authentication [CHAR LIMIT=60]-->
+    <string name="biometric_dialog_tap_confirm_with_face_alt_2">Face recognized. Press to continue.</string>
+    <!-- Message shown when a biometric has authenticated with a user's face and is waiting for the user to confirm authentication [CHAR LIMIT=60]-->
+    <string name="biometric_dialog_tap_confirm_with_face_alt_3">Face recognized. Press the unlock icon to continue.</string>
     <!-- Talkback string when a biometric is authenticated [CHAR LIMIT=NONE] -->
     <string name="biometric_dialog_authenticated">Authenticated</string>
 
@@ -390,6 +389,10 @@
     <string name="fingerprint_dialog_use_fingerprint_instead">Can\u2019t recognize face. Use fingerprint instead.</string>
     <!-- Message shown to inform the user a face cannot be recognized and fingerprint should instead be used.[CHAR LIMIT=50] -->
     <string name="keyguard_face_failed_use_fp">@string/fingerprint_dialog_use_fingerprint_instead</string>
+    <!-- Message shown to inform the user a face cannot be recognized. [CHAR LIMIT=25] -->
+    <string name="keyguard_face_failed">Can\u2019t recognize face</string>
+    <!-- Message shown to suggest using fingerprint sensor to authenticate after another biometric failed. [CHAR LIMIT=25] -->
+    <string name="keyguard_suggest_fingerprint">Use fingerprint instead</string>
 
     <!-- Content description of the bluetooth icon when connected for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_bluetooth_connected">Bluetooth connected.</string>
@@ -499,10 +502,10 @@
     <string name="notification_group_overflow_indicator">+ <xliff:g id="number" example="3">%s</xliff:g></string>
 
     <!-- Content description describing how many more notifications are in a group [CHAR LIMIT=NONE] -->
-    <plurals name="notification_group_overflow_description">
-        <item quantity="one"><xliff:g id="number" example="1">%s</xliff:g> more notification inside.</item>
-        <item quantity="other"><xliff:g id="number" example="3">%s</xliff:g> more notifications inside.</item>
-    </plurals>
+    <string name="notification_group_overflow_description">{count, plural,
+        =1 {# more notification inside.}
+        other {# more notifications inside.}
+    }</string>
 
     <!-- Format to use to summarize a message from a contact in a single line of text. For example: "Julia: How's it going?". [CHAR LIMIT=NONE] -->
 
@@ -572,6 +575,8 @@
     <!-- QuickSettings: Location [CHAR LIMIT=NONE] -->
     <string name="quick_settings_location_label">Location</string>
     <!-- QuickSettings: Location (Off) [CHAR LIMIT=NONE] -->
+    <!-- QuickSettings: Screen saver [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_screensaver_label">Screen saver</string>
     <!-- QuickSettings: Camera [CHAR LIMIT=NONE] -->
     <string name="quick_settings_camera_label">Camera access</string>
     <!-- QuickSettings: Microphone [CHAR LIMIT=NONE] -->
@@ -646,10 +651,10 @@
          the user why they can't toggle the hotspot tile. [CHAR LIMIT=20] -->
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled">Data Saver is on</string>
     <!-- QuickSettings: Hotspot: Secondary label for how many devices are connected to the hotspot [CHAR LIMIT=NONE] -->
-    <plurals name="quick_settings_hotspot_secondary_label_num_devices">
-        <item quantity="one">%d device</item>
-        <item quantity="other">%d devices</item>
-    </plurals>
+    <string name="quick_settings_hotspot_secondary_label_num_devices">{count, plural,
+        =1 {# device}
+        other {# devices}
+    }</string>
     <!-- QuickSettings: Notifications [CHAR LIMIT=NONE] -->
     <!-- QuickSettings: Flashlight [CHAR LIMIT=NONE] -->
     <string name="quick_settings_flashlight_label">Flashlight</string>
@@ -798,11 +803,24 @@
     <!-- Message shown when lock screen is tapped or face authentication fails. [CHAR LIMIT=60] -->
     <string name="keyguard_unlock">Swipe up to open</string>
 
-    <!-- Message shown when lock screen is unlocked (ie: by trust agent) and the user taps the empty space on the lock screen and UDFPS is supported. Provides extra instructions for how the user can enter their device [CHAR LIMIT=60] -->
+    <!-- Message shown when lock screen is unlocked (ie: by trust agent or face auth). Provides extra instructions for how the user can enter their device [CHAR LIMIT=60] -->
     <string name="keyguard_unlock_press">Press the unlock icon to open</string>
 
+    <!-- Message shown when non-bypass face authentication succeeds. Provides extra instructions for how the user can enter their device [CHAR LIMIT=60] -->
+    <string name="keyguard_face_successful_unlock_swipe">Unlocked by face. Swipe up to open.</string>
     <!-- Message shown when non-bypass face authentication succeeds and UDFPS is supported. Provides extra instructions for how the user can enter their device [CHAR LIMIT=60] -->
     <string name="keyguard_face_successful_unlock_press">Unlocked by face. Press the unlock icon to open.</string>
+    <!-- Message shown when non-bypass face authentication succeeds and UDFPS is supported. Provides extra instructions for how the user can enter their device [CHAR LIMIT=60] -->
+    <string name="keyguard_face_successful_unlock_press_alt_1">Unlocked by face. Press to open.</string>
+    <!-- Message shown when non-bypass face authentication succeeds and UDFPS is supported. Provides extra instructions for how the user can enter their device [CHAR LIMIT=60] -->
+    <string name="keyguard_face_successful_unlock_press_alt_2">Face recognized. Press to open.</string>
+    <!-- Message shown when non-bypass face authentication succeeds and UDFPS is supported. Provides extra instructions for how the user can enter their device [CHAR LIMIT=60] -->
+    <string name="keyguard_face_successful_unlock_press_alt_3">Face recognized. Press the unlock icon to open.</string>
+
+    <!-- Message shown when non-bypass face authentication succeeds. [CHAR LIMIT=60] -->
+    <string name="keyguard_face_successful_unlock">Unlocked by face</string>
+    <!-- Message shown when non-bypass face authentication succeeds. [CHAR LIMIT=60] -->
+    <string name="keyguard_face_successful_unlock_alt1">Face recognized</string>
 
     <!-- Messages shown when users press outside of udfps region during -->
     <string-array name="udfps_accessibility_touch_hints">
@@ -870,14 +888,15 @@
     <string name="keyguard_indication_charging_time_slowly"><xliff:g id="percentage">%2$s</xliff:g> • Charging slowly • Full in <xliff:g id="charging_time_left" example="4 hr, 2 min">%1$s</xliff:g></string>
 
     <!-- Indication on the keyguard that is shown when the device is dock charging. [CHAR LIMIT=80]-->
-    <string name="keyguard_indication_charging_time_dock"><xliff:g id="percentage" example="20%">%2$s</xliff:g> • Charging Dock • Full in <xliff:g id="charging_time_left" example="4 hr, 2 min">%1$s</xliff:g></string>
+    <string name="keyguard_indication_charging_time_dock"><xliff:g id="percentage" example="20%">%2$s</xliff:g> • Charging • Full in <xliff:g id="charging_time_left" example="4 hr, 2 min">%1$s</xliff:g></string>
 
     <!-- Related to user switcher --><skip/>
 
     <!-- Accessibility label for the button that opens the user switcher. -->
     <string name="accessibility_multi_user_switch_switcher">Switch user</string>
 
-    <!-- Accessibility label for the button that opens the user switcher and announces the current user. -->
+    <!-- Accessibility role description for the element that opens the user switcher list. -->
+    <string name="accessibility_multi_user_list_switcher">pulldown menu</string>
 
     <!-- Accessibility label for the user icon on the lock screen. -->
 
@@ -898,14 +917,25 @@
     <!-- Notification when resuming an existing guest session: Action that continues with the current session [CHAR LIMIT=35] -->
     <string name="guest_wipe_session_dontwipe">Yes, continue</string>
 
+    <!-- App name of the notification when guest mode is entered [CHAR LIMIT=35] -->
+    <string name="guest_notification_app_name">Guest mode</string>
+    <!-- Title of the notification when guest mode is entered [CHAR LIMIT=35] -->
+    <string name="guest_notification_session_active">You are in guest mode</string>
+
+    <!-- Additional message for add user confirmation dialog that is appended when current user is
+         guest and guest is ephemeral. This is to warn users that current guest session
+         would get removed after a new user is added and switched to [CHAR LIMIT=none] -->
+    <string name="user_add_user_message_guest_remove">\n\nAdding a new user will exit guest mode
+        and delete all apps and data from the current guest session.</string>
+
     <!-- Title for the dialog that lets users know that the maximum allowed number of users on the device has been reached. [CHAR LIMIT=35]-->
     <string name="user_limit_reached_title">User limit reached</string>
 
     <!-- Message that tells people what's the maximum number of uses allowed on the device. [CHAR_LIMIT=NONE]-->
-    <plurals name="user_limit_reached_message">
-        <item quantity="one">Only one user can be created.</item>
-        <item quantity="other">You can add up to <xliff:g id="count" example="3">%d</xliff:g> users.</item>
-    </plurals>
+    <string name="user_limit_reached_message">{count, plural,
+        =1 {Only one user can be created.}
+        other {You can add up to # users.}
+    }</string>
 
     <!-- Title of the confirmation dialog for deleting a user [CHAR LIMIT=NONE] -->
     <string name="user_remove_user_title">Remove user?</string>
@@ -1112,6 +1142,11 @@
     <string name="volume_odi_captions_hint_enable">enable</string>
     <!-- Content description for accessibility: Hint if click will disable. [CHAR LIMIT=NONE] -->
     <string name="volume_odi_captions_hint_disable">disable</string>
+
+    <!-- Sound and vibration settings dialog title. [CHAR LIMIT=30] -->
+    <string name="sound_settings">Sound &amp; vibration</string>
+    <!-- Label for button to go to sound settings screen [CHAR_LIMIT=30] -->
+    <string name="volume_panel_dialog_settings_button">Settings</string>
 
     <!-- content description for audio output chooser [CHAR LIMIT=NONE]-->
 
@@ -1460,20 +1495,20 @@
     <!-- Notification: Snooze panel: message indicating how long the notification was snoozed for. [CHAR LIMIT=100]-->
     <string name="snoozed_for_time">Snoozed for <xliff:g id="time_amount" example="15 minutes">%1$s</xliff:g></string>
 
-    <!-- Notification:Snooze panel: Snooze options for hours -->
-    <plurals name="snoozeHourOptions">
-        <item quantity="one">%d hour</item>
-        <item quantity="two">%d hours</item>
-        <item quantity="few">%d hours</item>
-        <item quantity="other">%d hours</item>
-    </plurals>
+    <!-- Notification:Snooze panel: Snooze options for hours [CHAR LIMIT=NONE]-->
+    <string name="snoozeHourOptions">{count, plural,
+        =1 {# hour}
+        =2 {# hours}
+        few {# hours}
+        other {# hours}
+    }</string>
 
-   <!--  Notification: Snooze panel: Snooze options for minutes -->
-   <plurals name="snoozeMinuteOptions">
-        <item quantity="one">%d minute</item>
-        <item quantity="few">%d minutes</item>
-        <item quantity="other">%d minutes</item>
-    </plurals>
+   <!--  Notification: Snooze panel: Snooze options for minutes [CHAR LIMIT=NONE]-->
+   <string name="snoozeMinuteOptions">{count, plural,
+        =1 {# minute}
+        few {# minutes}
+        other {# minutes}
+    }</string>
 
     <!-- Summary of battery saver not available [CHAR LIMIT=NONE] -->
 
@@ -1609,8 +1644,9 @@
     <!-- The tile in quick settings is unavailable. [CHAR LIMIT=32] -->
     <string name="tile_unavailable">Unavailable</string>
 
-    <!-- The tile in quick settings is disabled by a device administration policy [CHAR LIMIT=32] -->
-    <string name="tile_disabled">Disabled</string>
+    <!-- Accessibility text for the click action on a tile that is disabled by policy. This will
+         be used following "Double-tap to..." [CHAR LIMIT=NONE] -->
+    <string name="accessibility_tile_disabled_by_policy_action_description">learn more</string>
 
     <!-- SysUI Tuner: Button that leads to the navigation bar customization screen [CHAR LIMIT=60] -->
     <string name="nav_bar">Navigation bar</string>
@@ -1826,10 +1862,10 @@
     <!-- URL for care instructions for overheating devices -->
     <string name="high_temp_dialog_help_url" translatable="false"></string>
 
-    <!-- Title for alarm dialog alerting user the usb adapter has reached a certain temperature that should disconnect charging cable immediately. [CHAR LIMIT=30] -->
-    <string name="high_temp_alarm_title">Unplug charger</string>
-    <!-- Text body for dialog alerting user the usb adapter has reached a certain temperature that should disconnect charging cable immediately. [CHAR LIMIT=300] -->
-    <string name="high_temp_alarm_notify_message">There\u2019s an issue charging this device. Unplug the power adapter, and take care as the cable may be warm.</string>
+    <!-- Title for alarm dialog alerting user the usb charger or accessorry has reached a certain temperature that should unplug the device immediately. [CHAR LIMIT=30] -->
+    <string name="high_temp_alarm_title">Unplug your device</string>
+    <!-- Text body for dialog alerting user the usb charger or accessorry has reached a certain temperature that should unplug the device immediately. [CHAR LIMIT=300] -->
+    <string name="high_temp_alarm_notify_message">Your device is getting warm near the charging port. If it\u2019s connected to a charger or USB accessory, unplug it, and take care as the cable may also be warm.</string>
     <!-- Text for See care steps button [CHAR LIMIT=300] -->
     <string name="high_temp_alarm_help_care_steps">See care steps</string>
     <!-- Text link directs to usb overheat help page. -->
@@ -1883,8 +1919,10 @@
     <string name="notification_channel_battery">Battery</string>
     <!-- Title for the notification channel dedicated to screenshot progress. [CHAR LIMIT=NONE] -->
     <string name="notification_channel_screenshot">Screenshots</string>
-    <!-- Title for the notification channel for miscellaneous notices. [CHAR LIMIT=NONE] -->
-    <string name="notification_channel_general">General Messages</string>
+    <!-- Title for the notification channel for instant app notices. [CHAR LIMIT=NONE] -->
+    <string name="notification_channel_instant">Instant Apps</string>
+    <!-- Title for the notification channel for setup notices. [CHAR LIMIT=NONE] -->
+    <string name="notification_channel_setup">Setup</string>
     <!-- Title for the notification channel for problems with storage (i.e. low disk). [CHAR LIMIT=NONE] -->
     <string name="notification_channel_storage">Storage</string>
     <!-- Title for the notification channel for hints and suggestions. [CHAR LIMIT=NONE] -->
@@ -2108,10 +2146,10 @@
     <!-- Controls management providers screen title [CHAR LIMIT=60]-->
     <string name="controls_providers_title">Choose app to add controls</string>
     <!-- Number of favorites for controls management screen [CHAR LIMIT=NONE]-->
-    <plurals name="controls_number_of_favorites">
-        <item quantity="one"><xliff:g id="number" example="1">%s</xliff:g> control added.</item>
-        <item quantity="other"><xliff:g id="number" example="3">%s</xliff:g> controls added.</item>
-    </plurals>
+    <string name="controls_number_of_favorites">{count, plural,
+        =1 {# control added.}
+        other {# controls added.}
+    }</string>
 
     <!-- Removed control in management screen [CHAR LIMIT=20] -->
     <string name="controls_removed">Removed</string>
@@ -2274,8 +2312,8 @@
     <string name="media_output_dialog_disconnected">(disconnected)</string>
     <!-- Summary for connecting error message [CHAR LIMIT=NONE] -->
     <string name="media_output_dialog_connect_failed">Can\'t switch. Tap to try again.</string>
-    <!-- Title for pairing item [CHAR LIMIT=60] -->
-    <string name="media_output_dialog_pairing_new">Pair new device</string>
+    <!-- Title for connecting item [CHAR LIMIT=60] -->
+    <string name="media_output_dialog_pairing_new">Connect a device</string>
     <!-- Title for launch app [CHAR LIMIT=60] -->
     <string name="media_output_dialog_launch_app_text">To cast this session, please open the app.</string>
     <!-- App name when can't get app name [CHAR LIMIT=60] -->
@@ -2467,10 +2505,10 @@
     <string name="qs_user_switch_dialog_title">Select user</string>
 
     <!-- Label for the entry point to open the dialog which shows currently running applications [CHAR LIMIT=NONE]-->
-    <plurals name="fgs_manager_footer_label">
-        <item quantity="one"><xliff:g id="count" example="1">%s</xliff:g> app is active</item>
-        <item quantity="other"><xliff:g id="count" example="2">%s</xliff:g> apps are active</item>
-    </plurals>
+    <string name="fgs_manager_footer_label">{count, plural,
+        =1 {# app is active}
+        other {# apps are active}
+    }</string>
     <!-- Content description for a dot indicator in the running application indicating that there
     is new information [CHAR LIMIT=NONE] -->
     <string name="fgs_dot_content_description">New information</string>
@@ -2532,6 +2570,10 @@
     <string name="dream_overlay_status_bar_priority_mode">Priority mode</string>
     <!-- Content description for the alarm set icon in the dream overlay status bar [CHAR LIMIT=NONE] -->
     <string name="dream_overlay_status_bar_alarm_set">Alarm set</string>
+    <!-- Content description for the camera off icon in the dream overlay status bar [CHAR LIMIT=NONE] -->
+    <string name="dream_overlay_status_bar_camera_off">Camera is off</string>
+    <!-- Content description for the mic off icon in the dream overlay status bar [CHAR LIMIT=NONE] -->
+    <string name="dream_overlay_status_bar_mic_off">Mic is off</string>
     <!-- Content description for the camera and mic off icon in the dream overlay status bar [CHAR LIMIT=NONE] -->
     <string name="dream_overlay_status_bar_camera_mic_off">Camera and mic are off</string>
     <!-- Content description for the notifications indicator icon in the dream overlay status bar [CHAR LIMIT=NONE] -->
@@ -2539,4 +2581,30 @@
     =1 {# notification}
     other {# notifications}
     }</string>
+    <!-- Accessibility label for weather complication on dreams with weather condition and temperature [CHAR_LIMIT=200] -->
+    <string name="dream_overlay_weather_complication_desc">
+        <xliff:g id="weather_condition" example="Partly cloudy">%1$s</xliff:g>, <xliff:g id="temperature" example="7°C">%2$s</xliff:g>
+    </string>
+
+    <!-- [CHAR LIMIT=NONE] Le audio broadcast dialog, media app is broadcasting -->
+    <string name="broadcasting_description_is_broadcasting">Broadcasting</string>
+    <!-- [CHAR LIMIT=NONE] Le audio broadcast dialog, title -->
+    <string name="bt_le_audio_broadcast_dialog_title">Stop broadcasting <xliff:g id="app_name" example="App Name 1">%1$s</xliff:g>?</string>
+    <!-- [CHAR LIMIT=NONE] Le audio broadcast dialog, sub-title -->
+    <string name="bt_le_audio_broadcast_dialog_sub_title">If you broadcast <xliff:g id="switchApp" example="App Name 2">%1$s</xliff:g> or change the output, your current broadcast will stop</string>
+    <!-- [CHAR LIMIT=NONE] Le audio broadcast dialog, switch to others app. -->
+    <string name="bt_le_audio_broadcast_dialog_switch_app">Broadcast <xliff:g id="switchApp" example="App Name 2">%1$s</xliff:g></string>
+    <!-- [CHAR LIMIT=NONE] Le audio broadcast dialog, different output. -->
+    <string name="bt_le_audio_broadcast_dialog_different_output">Change output</string>
+    <!-- [CHAR LIMIT=NONE] Le audio broadcast dialog, media app is unknown -->
+    <string name="bt_le_audio_broadcast_dialog_unknown_name">Unknown</string>
+
+    <!-- Date format for the Dream Date Complication [CHAR LIMIT=NONE] -->
+    <string name="dream_date_complication_date_format">EEE, MMM d</string>
+
+    <!-- Time format for the Dream Time Complication for 12-hour time format [CHAR LIMIT=NONE] -->
+    <string name="dream_time_complication_12_hr_time_format">h:mm</string>
+
+    <!-- Time format for the Dream Time Complication for 24-hour time format [CHAR LIMIT=NONE] -->
+    <string name="dream_time_complication_24_hr_time_format">kk:mm</string>
 </resources>

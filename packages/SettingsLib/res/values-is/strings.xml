@@ -117,17 +117,17 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Skráaflutningur"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Inntakstæki"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Internetaðgangur"</string>
-    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"Deiling tengiliða"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"Nota til að deila tengiliðum"</string>
+    <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"Deiling tengiliða og símtalaferils"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"Nota til að deila tengiliðum og símtalaferli"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Deiling nettengingar"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Textaskilaboð"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Aðgangur að SIM-korti"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD-hljóð: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD-hljóð"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Heyrnartæki"</string>
-    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
+    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE-hljóð"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Tengt við heyrnartæki"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"Tengt við LE_AUDIO"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Tengt við LE-hljóð"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Tengt við hljóðspilun efnis"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Tengt við hljóð símans"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Tengt við skráaflutningsþjón"</string>
@@ -408,6 +408,7 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Gera stærð allrar virkni breytanlega svo að hún henti fyrir marga glugga, óháð gildum í upplýsingaskrá."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Virkja glugga með frjálsu sniði"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Virkja stuðning við glugga með frjálsu sniði á tilraunastigi."</string>
+    <string name="desktop_mode" msgid="2389067840550544462">"Skjáborðsstilling"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Aðgangsorð tölvuafritunar"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Heildarafritun á tölvu er ekki varin sem stendur."</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Ýttu til að breyta eða fjarlægja aðgangsorðið fyrir heildarafritun á tölvu"</string>
@@ -476,12 +477,13 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> fram að fullri hleðslu"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> fram að fullri hleðslu"</string>
-    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> – Hleðsla takmörkuð tímabundið"</string>
+    <string name="power_charging_limited" msgid="6971664137170239141">"<xliff:g id="LEVEL">%1$s</xliff:g> - Hlé var gert á hleðslu"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Óþekkt"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Í hleðslu"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Hröð hleðsla"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Hæg hleðsla"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Hleður þráðlaust"</string>
+    <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Í hleðslu"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Ekki í hleðslu"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Tengt, ekki í hleðslu"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Fullhlaðin"</string>
@@ -598,6 +600,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Endurstilla"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Fjarlægja"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Endurstillir gest…"</string>
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Endurstilla gestalotu?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Þetta opnar nýja gestalotu og eyðir öllum forritum og gögnum úr núverandi lotu"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Loka gestastillingu?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Þetta eyðir forritum og gögnum úr núverandi gestalotu"</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Hætta"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Vista aðgerðir úr gestalotu?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Þú getur vistað aðgerðir úr núverandi lotu eða eytt öllum forritum og gögnum"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Eyða"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Vista"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"Loka gestastillingu"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"Endurstilla gestalotu"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Loka gestastillingu"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Öllum aðgerðum verður eytt þegar lotu er lokað"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Þú getur vistað eða eytt aðgerðum þegar þú lokar"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Endurstilltu til að eyða aðgerðum lotu núna, eða vistaðu eða eyddu aðgerðum þegar þú lokar"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Taka mynd"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Velja mynd"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Velja mynd"</string>
@@ -639,11 +656,6 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Ethernet aftengt."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Engin símtöl."</string>
-    <string name="dream_complication_title_time" msgid="701747800712893499">"Tími"</string>
-    <string name="dream_complication_title_date" msgid="8661176085446135789">"Dagsetning"</string>
-    <string name="dream_complication_title_weather" msgid="598609151677172783">"Veður"</string>
-    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"Loftgæði"</string>
-    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"Útsendingaruppl."</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"Veldu prófílmynd"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"Tákn sjálfgefins notanda"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Vélbúnaðarlyklaborð"</string>

@@ -21,6 +21,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="config_pdp_reject_dialog_title" msgid="41208110171880430"></string>
     <string name="config_pdp_reject_user_authentication_failed" msgid="4683454131283459978">"ਪ੍ਰਮਾਣੀਕਰਨ ਅਸਫਲ -29-"</string>
-    <string name="config_pdp_reject_service_not_subscribed" msgid="9021140729932308119">"ਸੇਵਾ ਦੀ ਗਾਹਕੀ ਨਹੀਂ ਲਈ -33-"</string>
+    <string name="config_pdp_reject_service_not_subscribed" msgid="9021140729932308119">"ਸੇਵਾ ਨੂੰ ਸਬਸਕ੍ਰਾਈਬ ਨਹੀਂ ਕੀਤਾ -33-"</string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="3838388706348367865">"ਕਿਸੇ ਵੀ APN ਲਈ ਇੱਕ ਤੋਂ ਵੱਧ PDN ਕਨੈਕਸ਼ਨਾਂ ਦੀ ਆਗਿਆ ਨਹੀਂ ਹੈ -55-"</string>
 </resources>

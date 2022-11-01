@@ -1,5 +1,6 @@
 package com.android.systemui.media
 
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
@@ -176,6 +177,7 @@ class MediaCarouselController @Inject constructor(
      * It will be called when the container is out of view.
      */
     lateinit var updateUserVisibility: () -> Unit
+    lateinit var updateHostVisibility: () -> Unit
 
     private val isReorderingAllowed: Boolean
         get() = visualStabilityProvider.isReorderingAllowed
@@ -199,7 +201,13 @@ class MediaCarouselController @Inject constructor(
                 reorderAllPlayers(previousVisiblePlayerKey = null)
             }
 
-            keysNeedRemoval.forEach { removePlayer(it) }
+            keysNeedRemoval.forEach {
+                removePlayer(it)
+            }
+            if (keysNeedRemoval.size > 0) {
+                // Carousel visibility may need to be updated after late removals
+                updateHostVisibility()
+            }
             keysNeedRemoval.clear()
 
             // Update user visibility so that no extra impression will be logged when
@@ -221,6 +229,7 @@ class MediaCarouselController @Inject constructor(
                 receivedSmartspaceCardLatency: Int,
                 isSsReactivated: Boolean
             ) {
+                debugLogger.logMediaLoaded(key)
                 if (addOrUpdatePlayer(key, oldKey, data, isSsReactivated)) {
                     // Log card received if a new resumable media card is added
                     MediaPlayerData.getMediaPlayer(key)?.let {
@@ -289,7 +298,7 @@ class MediaCarouselController @Inject constructor(
                 data: SmartspaceMediaData,
                 shouldPrioritize: Boolean
             ) {
-                if (DEBUG) Log.d(TAG, "Loading Smartspace media update")
+                debugLogger.logRecommendationLoaded(key)
                 // Log the case where the hidden media carousel with the existed inactive resume
                 // media is shown by the Smartspace signal.
                 if (data.isActive) {
@@ -344,13 +353,21 @@ class MediaCarouselController @Inject constructor(
             }
 
             override fun onMediaDataRemoved(key: String) {
+                debugLogger.logMediaRemoved(key)
                 removePlayer(key)
             }
 
             override fun onSmartspaceMediaDataRemoved(key: String, immediately: Boolean) {
-                if (DEBUG) Log.d(TAG, "My Smartspace media removal request is received")
+                debugLogger.logRecommendationRemoved(key, immediately)
                 if (immediately || isReorderingAllowed) {
-                    onMediaDataRemoved(key)
+                    removePlayer(key)
+                    if (!immediately) {
+                        // Although it wasn't requested, we were able to process the removal
+                        // immediately since reordering is allowed. So, notify hosts to update
+                        if (this@MediaCarouselController::updateHostVisibility.isInitialized) {
+                            updateHostVisibility()
+                        }
+                    }
                 } else {
                     keysNeedRemoval.add(key)
                 }
@@ -432,6 +449,7 @@ class MediaCarouselController @Inject constructor(
         val existingPlayer = MediaPlayerData.getMediaPlayer(key)
         val curVisibleMediaKey = MediaPlayerData.playerKeys()
                 .elementAtOrNull(mediaCarouselScrollHandler.visibleMediaIndex)
+        val isCurVisibleMediaPlaying = MediaPlayerData.getMediaData(curVisibleMediaKey)?.isPlaying
         if (existingPlayer == null) {
             val newPlayer = mediaControlPanelFactory.get()
             newPlayer.attachPlayer(MediaViewHolder.create(
@@ -446,13 +464,23 @@ class MediaCarouselController @Inject constructor(
                 key, data, newPlayer, systemClock, isSsReactivated, debugLogger
             )
             updatePlayerToState(newPlayer, noAnimation = true)
-            reorderAllPlayers(curVisibleMediaKey)
+            if (data.active) {
+                reorderAllPlayers(curVisibleMediaKey)
+            } else {
+                needsReordering = true
+            }
         } else {
             existingPlayer.bindPlayer(data, key)
             MediaPlayerData.addMediaPlayer(
                 key, data, existingPlayer, systemClock, isSsReactivated, debugLogger
             )
-            if (isReorderingAllowed || shouldScrollToActivePlayer) {
+            // Check the playing status of both current visible and new media players
+            // To make sure we scroll to the active playing media card.
+            if (isReorderingAllowed ||
+                    shouldScrollToActivePlayer &&
+                    data.isPlaying == true &&
+                    isCurVisibleMediaPlaying == false
+            ) {
                 reorderAllPlayers(curVisibleMediaKey)
             } else {
                 needsReordering = true
@@ -892,6 +920,11 @@ class MediaCarouselController @Inject constructor(
         mediaManager.onSwipeToDismiss()
     }
 
+    fun getCurrentVisibleMediaContentIntent(): PendingIntent? {
+        return MediaPlayerData.playerKeys()
+                .elementAtOrNull(mediaCarouselScrollHandler.visibleMediaIndex)?.data?.clickIntent
+    }
+
     override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.apply {
             println("keysNeedRemoval: $keysNeedRemoval")
@@ -1007,6 +1040,15 @@ internal object MediaPlayerData {
             removedPlayer?.run { debugLogger?.logPotentialMemoryLeak(newKey) }
             mediaData.put(newKey, it)
         }
+    }
+
+    fun getMediaData(mediaSortKey: MediaSortKey?): MediaData? {
+        mediaData.forEach { (key, value) ->
+            if (value == mediaSortKey) {
+                return mediaData[key]?.data
+            }
+        }
+        return null
     }
 
     fun getMediaPlayer(key: String): MediaControlPanel? {

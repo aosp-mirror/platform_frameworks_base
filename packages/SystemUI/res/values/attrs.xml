@@ -108,12 +108,6 @@
         <attr name="android:layout" />
     </declare-styleable>
 
-    <declare-styleable name="HybridNotificationTheme">
-        <attr name="hybridNotificationStyle" format="reference" />
-        <attr name="hybridNotificationTitleStyle" format="reference" />
-        <attr name="hybridNotificationTextStyle" format="reference" />
-    </declare-styleable>
-
     <declare-styleable name="PluginInflateContainer">
         <attr name="viewType" format="string" />
     </declare-styleable>
@@ -192,6 +186,10 @@
 
     <declare-styleable name="DreamOverlayDotImageView">
         <attr name="dotColor" format="color" />
+    </declare-styleable>
+
+    <declare-styleable name="DelayableMarqueeTextView">
+        <attr name="marqueeDelay" format="integer" />
     </declare-styleable>
 </resources>
 

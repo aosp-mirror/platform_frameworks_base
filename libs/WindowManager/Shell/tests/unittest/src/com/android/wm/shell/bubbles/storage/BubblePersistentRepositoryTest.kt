@@ -25,6 +25,7 @@ import com.android.wm.shell.bubbles.storage.BubbleXmlHelperTest.Companion.sparse
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertNotNull
 import junit.framework.Assert.assertTrue
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -59,6 +60,12 @@ class BubblePersistentRepositoryTest : ShellTestCase() {
         repository = BubblePersistentRepository(mContext)
         bubbles.put(0, user0Bubbles)
         bubbles.put(1, user1Bubbles)
+    }
+
+    @After
+    fun teardown() {
+        // Clean up the any persisted bubbles for the next run
+        repository.persistsToDisk(SparseArray())
     }
 
     @Test

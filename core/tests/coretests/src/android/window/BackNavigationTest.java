@@ -91,7 +91,8 @@ public class BackNavigationTest {
     private void assertCallbackIsCalled(CountDownLatch latch) {
         try {
             mInstrumentation.getUiAutomation().waitForIdle(500, 1000);
-            BackNavigationInfo info = ActivityTaskManager.getService().startBackNavigation(true);
+            BackNavigationInfo info = ActivityTaskManager.getService()
+                    .startBackNavigation(true, null, null);
             assertNotNull("BackNavigationInfo is null", info);
             assertNotNull("OnBackInvokedCallback is null", info.getOnBackInvokedCallback());
             info.getOnBackInvokedCallback().onBackInvoked();

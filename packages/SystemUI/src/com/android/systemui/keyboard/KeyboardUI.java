@@ -42,6 +42,8 @@ import android.util.Pair;
 import android.util.Slog;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+
 import com.android.settingslib.bluetooth.BluetoothCallback;
 import com.android.settingslib.bluetooth.BluetoothUtils;
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
@@ -50,7 +52,6 @@ import com.android.settingslib.bluetooth.LocalBluetoothAdapter;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.bluetooth.LocalBluetoothProfileManager;
 import com.android.systemui.CoreStartable;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 
@@ -61,6 +62,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 /** */
 @SysUISingleton
@@ -106,6 +108,8 @@ public class KeyboardUI extends CoreStartable implements InputManager.OnTabletMo
 
     protected volatile Context mContext;
 
+    private final Provider<LocalBluetoothManager> mBluetoothManagerProvider;
+
     private boolean mEnabled;
     private String mKeyboardName;
     private CachedBluetoothDeviceManager mCachedDeviceManager;
@@ -122,8 +126,9 @@ public class KeyboardUI extends CoreStartable implements InputManager.OnTabletMo
     private int mState;
 
     @Inject
-    public KeyboardUI(Context context) {
+    public KeyboardUI(Context context, Provider<LocalBluetoothManager> bluetoothManagerProvider) {
         super(context);
+        this.mBluetoothManagerProvider = bluetoothManagerProvider;
     }
 
     @Override
@@ -181,7 +186,7 @@ public class KeyboardUI extends CoreStartable implements InputManager.OnTabletMo
             return;
         }
 
-        LocalBluetoothManager bluetoothManager = Dependency.get(LocalBluetoothManager.class);
+        LocalBluetoothManager bluetoothManager = mBluetoothManagerProvider.get();
         if (bluetoothManager == null)  {
             if (DEBUG) {
                 Slog.e(TAG, "Failed to retrieve LocalBluetoothManager instance");
@@ -598,13 +603,14 @@ public class KeyboardUI extends CoreStartable implements InputManager.OnTabletMo
 
     private final class BluetoothCallbackHandler implements BluetoothCallback {
         @Override
-        public void onBluetoothStateChanged(int bluetoothState) {
+        public void onBluetoothStateChanged(@BluetoothCallback.AdapterState int bluetoothState) {
             mHandler.obtainMessage(MSG_ON_BLUETOOTH_STATE_CHANGED,
                     bluetoothState, 0).sendToTarget();
         }
 
         @Override
-        public void onDeviceBondStateChanged(CachedBluetoothDevice cachedDevice, int bondState) {
+        public void onDeviceBondStateChanged(
+                @NonNull CachedBluetoothDevice cachedDevice, int bondState) {
             mHandler.obtainMessage(MSG_ON_DEVICE_BOND_STATE_CHANGED,
                     bondState, 0, cachedDevice).sendToTarget();
         }

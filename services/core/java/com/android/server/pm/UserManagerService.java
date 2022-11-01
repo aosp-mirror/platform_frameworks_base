@@ -18,6 +18,7 @@ package com.android.server.pm;
 
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+import static android.os.UserManager.DISALLOW_USER_SWITCH;
 
 import android.Manifest;
 import android.accounts.Account;
@@ -88,11 +89,13 @@ import android.os.storage.StorageManagerInternal;
 import android.provider.Settings;
 import android.security.GateKeeper;
 import android.service.gatekeeper.IGateKeeperService;
+import android.service.voice.VoiceInteractionManagerInternal;
 import android.stats.devicepolicy.DevicePolicyEnums;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
+import android.util.EventLog;
 import android.util.IndentingPrintWriter;
 import android.util.IntArray;
 import android.util.Slog;
@@ -1759,6 +1762,19 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
+    public boolean isUserSwitcherEnabled(@UserIdInt int mUserId) {
+        boolean multiUserSettingOn = Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.USER_SWITCHER_ENABLED,
+                Resources.getSystem().getBoolean(com.android.internal
+                        .R.bool.config_showUserSwitcherByDefault) ? 1 : 0) != 0;
+
+        return UserManager.supportsMultipleUsers()
+                && !hasUserRestriction(DISALLOW_USER_SWITCH, mUserId)
+                && !UserManager.isDeviceInDemoMode(mContext)
+                && multiUserSettingOn;
+    }
+
+    @Override
     public boolean isRestricted(@UserIdInt int userId) {
         if (userId != UserHandle.getCallingUserId()) {
             checkCreateUsersPermission("query isRestricted for user " + userId);
@@ -1875,6 +1891,44 @@ public class UserManagerService extends IUserManager.Stub {
                 Binder.restoreCallingIdentity(ident);
             }
         }
+    }
+
+    @Override
+    public boolean setUserEphemeral(@UserIdInt int userId, boolean enableEphemeral) {
+        checkCreateUsersPermission("update ephemeral user flag");
+        UserData userToUpdate = null;
+        synchronized (mPackagesLock) {
+            synchronized (mUsersLock) {
+                final UserData userData = mUsers.get(userId);
+                if (userData == null) {
+                    Slog.e(LOG_TAG, "User not found for setting ephemeral mode: u" + userId);
+                    return false;
+                }
+                boolean isEphemeralUser = (userData.info.flags & UserInfo.FLAG_EPHEMERAL) != 0;
+                boolean isEphemeralOnCreateUser =
+                        (userData.info.flags & UserInfo.FLAG_EPHEMERAL_ON_CREATE) != 0;
+                // when user is created in ephemeral mode via FLAG_EPHEMERAL
+                // its state cannot be changed to non ephemeral.
+                // FLAG_EPHEMERAL_ON_CREATE is used to keep track of this state
+                if (isEphemeralOnCreateUser && !enableEphemeral) {
+                    Slog.e(LOG_TAG, "Failed to change user state to non-ephemeral for user "
+                            + userId);
+                    return false;
+                }
+                if (isEphemeralUser != enableEphemeral) {
+                    if (enableEphemeral) {
+                        userData.info.flags |= UserInfo.FLAG_EPHEMERAL;
+                    } else {
+                        userData.info.flags &= ~UserInfo.FLAG_EPHEMERAL;
+                    }
+                    userToUpdate = userData;
+                }
+            }
+            if (userToUpdate != null) {
+                writeUserLP(userToUpdate);
+            }
+        }
+        return true;
     }
 
     @Override
@@ -2010,7 +2064,6 @@ public class UserManagerService extends IUserManager.Stub {
                     originatingUserId, local);
             localChanged = updateLocalRestrictionsForTargetUsersLR(originatingUserId, local,
                     updatedLocalTargetUserIds);
-
             if (isDeviceOwner) {
                 // Remember the global restriction owner userId to be able to make a distinction
                 // in getUserRestrictionSource on who set local policies.
@@ -3984,6 +4037,10 @@ public class UserManagerService extends IUserManager.Stub {
                         flags &= ~UserInfo.FLAG_EPHEMERAL;
                     }
 
+                    if ((flags & UserInfo.FLAG_EPHEMERAL) != 0) {
+                        flags |= UserInfo.FLAG_EPHEMERAL_ON_CREATE;
+                    }
+
                     userInfo = new UserInfo(userId, name, null, flags, userType);
                     userInfo.serialNumber = mNextSerialNumber++;
                     userInfo.creationTime = getCreationTime();
@@ -4210,6 +4267,11 @@ public class UserManagerService extends IUserManager.Stub {
         Binder.withCleanCallingIdentity(() -> {
             mPm.onNewUserCreated(preCreatedUser.id, /* convertedFromPreCreated= */ true);
             dispatchUserAdded(preCreatedUser, token);
+            VoiceInteractionManagerInternal vimi = LocalServices
+                    .getService(VoiceInteractionManagerInternal.class);
+            if (vimi != null) {
+                vimi.onPreCreatedUserConversion(preCreatedUser.id);
+            }
         });
         return preCreatedUser;
     }
@@ -4384,44 +4446,59 @@ public class UserManagerService extends IUserManager.Stub {
                 null, // use default PullAtomMetadata values
                 BackgroundThread.getExecutor(),
                 this::onPullAtom);
+        statsManager.setPullAtomCallback(
+                FrameworkStatsLog.MULTI_USER_INFO,
+                null, // use default PullAtomMetadata values
+                BackgroundThread.getExecutor(),
+                this::onPullAtom);
     }
 
     /** Writes a UserInfo pulled atom for each user on the device. */
     private int onPullAtom(int atomTag, List<StatsEvent> data) {
-        if (atomTag != FrameworkStatsLog.USER_INFO) {
+        if (atomTag == FrameworkStatsLog.USER_INFO) {
+            final List<UserInfo> users = getUsersInternal(true, true, true);
+            final int size = users.size();
+            if (size > 1) {
+                for (int idx = 0; idx < size; idx++) {
+                    final UserInfo user = users.get(idx);
+                    final int userTypeStandard = UserManager.getUserTypeForStatsd(user.userType);
+                    final String userTypeCustom = (userTypeStandard == FrameworkStatsLog
+                            .USER_LIFECYCLE_JOURNEY_REPORTED__USER_TYPE__TYPE_UNKNOWN)
+                            ?
+                            user.userType : null;
+
+                    boolean isUserRunningUnlocked;
+                    synchronized (mUserStates) {
+                        isUserRunningUnlocked =
+                                mUserStates.get(user.id, -1) == UserState.STATE_RUNNING_UNLOCKED;
+                    }
+
+                    data.add(FrameworkStatsLog.buildStatsEvent(FrameworkStatsLog.USER_INFO,
+                            user.id,
+                            userTypeStandard,
+                            userTypeCustom,
+                            user.flags,
+                            user.creationTime,
+                            user.lastLoggedInTime,
+                            isUserRunningUnlocked
+                    ));
+                }
+            }
+        } else if (atomTag == FrameworkStatsLog.MULTI_USER_INFO) {
+            if (UserManager.getMaxSupportedUsers() > 1) {
+                int deviceOwnerUserId = UserHandle.USER_NULL;
+
+                synchronized (mRestrictionsLock) {
+                    deviceOwnerUserId = mDeviceOwnerUserId;
+                }
+
+                data.add(FrameworkStatsLog.buildStatsEvent(FrameworkStatsLog.MULTI_USER_INFO,
+                        UserManager.getMaxSupportedUsers(),
+                        isUserSwitcherEnabled(deviceOwnerUserId)));
+            }
+        } else {
             Slogf.e(LOG_TAG, "Unexpected atom tag: %d", atomTag);
             return android.app.StatsManager.PULL_SKIP;
-        }
-        final List<UserInfo> users = getUsersInternal(true, true, true);
-        final int size = users.size();
-        for (int idx = 0; idx < size; idx++) {
-            final UserInfo user = users.get(idx);
-            if (user.id == UserHandle.USER_SYSTEM) {
-                // Skip user 0. It's not interesting. We already know it exists, is running, and (if
-                // we know the device configuration) its userType.
-                continue;
-            }
-
-            final int userTypeStandard = UserManager.getUserTypeForStatsd(user.userType);
-            final String userTypeCustom = (userTypeStandard ==
-                    FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__USER_TYPE__TYPE_UNKNOWN) ?
-                    user.userType : null;
-
-            boolean isUserRunningUnlocked;
-            synchronized (mUserStates) {
-                isUserRunningUnlocked =
-                        mUserStates.get(user.id, -1) == UserState.STATE_RUNNING_UNLOCKED;
-            }
-
-            data.add(FrameworkStatsLog.buildStatsEvent(FrameworkStatsLog.USER_INFO,
-                    user.id,
-                    userTypeStandard,
-                    userTypeCustom,
-                    user.flags,
-                    user.creationTime,
-                    user.lastLoggedInTime,
-                    isUserRunningUnlocked
-            ));
         }
         return android.app.StatsManager.PULL_SUCCESS;
     }
@@ -4894,6 +4971,13 @@ public class UserManagerService extends IUserManager.Stub {
     public void setApplicationRestrictions(String packageName, Bundle restrictions,
             @UserIdInt int userId) {
         checkSystemOrRoot("set application restrictions");
+        String validationResult = validateName(packageName);
+        if (validationResult != null) {
+            if (packageName.contains("../")) {
+                EventLog.writeEvent(0x534e4554, "239701237", -1, "");
+            }
+            throw new IllegalArgumentException("Invalid package name: " + validationResult);
+        }
         if (restrictions != null) {
             restrictions.setDefusable(true);
         }
@@ -4918,6 +5002,39 @@ public class UserManagerService extends IUserManager.Stub {
         changeIntent.setPackage(packageName);
         changeIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
         mContext.sendBroadcastAsUser(changeIntent, UserHandle.of(userId));
+    }
+
+    /**
+     * Check if the given name is valid.
+     *
+     * Note: the logic is taken from FrameworkParsingPackageUtils in master, edited to remove
+     * unnecessary parts. Copied here for a security fix.
+     *
+     * @param name The name to check.
+     * @return null if it's valid, error message if not
+     */
+    @VisibleForTesting
+    static String validateName(String name) {
+        final int n = name.length();
+        boolean front = true;
+        for (int i = 0; i < n; i++) {
+            final char c = name.charAt(i);
+            if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
+                front = false;
+                continue;
+            }
+            if (!front) {
+                if ((c >= '0' && c <= '9') || c == '_') {
+                    continue;
+                }
+                if (c == '.') {
+                    front = true;
+                    continue;
+                }
+            }
+            return "bad character '" + c + "'";
+        }
+        return null;
     }
 
     private int getUidForPackage(String packageName) {

@@ -27,6 +27,7 @@ import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
+import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcherListView;
 
 /**
@@ -309,9 +310,12 @@ public class KeyguardClockPositionAlgorithm {
      */
     private float getClockAlpha(int y) {
         float alphaKeyguard = Math.max(0, y / Math.max(1f, getClockY(1f, mDarkAmount)));
-        float qsAlphaFactor = MathUtils.saturate(mQsExpansion / 0.3f);
-        qsAlphaFactor = 1f - qsAlphaFactor;
-        alphaKeyguard *= qsAlphaFactor;
+        if (!mIsSplitShade) {
+            // in split shade QS are always expanded so this factor shouldn't apply
+            float qsAlphaFactor = MathUtils.saturate(mQsExpansion / 0.3f);
+            qsAlphaFactor = 1f - qsAlphaFactor;
+            alphaKeyguard *= qsAlphaFactor;
+        }
         alphaKeyguard = Interpolators.ACCELERATE.getInterpolation(alphaKeyguard);
         return MathUtils.lerp(alphaKeyguard, 1f, mDarkAmount);
     }

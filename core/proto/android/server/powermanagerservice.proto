@@ -238,6 +238,7 @@ message PowerServiceSettingsAndConfigurationDumpProto {
         optional bool is_stay_on_while_plugged_in_ac = 1;
         optional bool is_stay_on_while_plugged_in_usb = 2;
         optional bool is_stay_on_while_plugged_in_wireless = 3;
+        optional bool is_stay_on_while_plugged_in_dock = 4;
     }
     message ScreenBrightnessSettingLimitsProto {
         option (.android.msg_privacy).dest = DEST_AUTOMATIC;

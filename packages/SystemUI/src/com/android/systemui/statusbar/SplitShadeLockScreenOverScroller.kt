@@ -9,6 +9,7 @@ import android.view.animation.PathInterpolator
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.R
 import com.android.systemui.animation.Interpolators
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.qs.QS
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.phone.ScrimController
@@ -16,16 +17,18 @@ import com.android.systemui.statusbar.policy.ConfigurationController
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import java.io.PrintWriter
 
 class SplitShadeLockScreenOverScroller
 @AssistedInject
 constructor(
     configurationController: ConfigurationController,
+    dumpManager: DumpManager,
     private val context: Context,
     private val scrimController: ScrimController,
     private val statusBarStateController: SysuiStatusBarStateController,
-    @Assisted private val qS: QS,
-    @Assisted private val nsslController: NotificationStackScrollLayoutController
+    @Assisted private val qSProvider: () -> QS,
+    @Assisted private val nsslControllerProvider: () -> NotificationStackScrollLayoutController
 ) : LockScreenShadeOverScroller {
 
     private var releaseOverScrollAnimator: Animator? = null
@@ -33,6 +36,12 @@ constructor(
     private var releaseOverScrollDuration = 0L
     private var maxOverScrollAmount = 0
     private var previousOverscrollAmount = 0
+
+    private val qS: QS
+        get() = qSProvider()
+
+    private val nsslController: NotificationStackScrollLayoutController
+        get() = nsslControllerProvider()
 
     init {
         updateResources()
@@ -42,6 +51,9 @@ constructor(
                     updateResources()
                 }
             })
+        dumpManager.registerDumpable("SplitShadeLockscreenOverScroller") { printWriter, _ ->
+            dump(printWriter)
+        }
     }
 
     private fun updateResources() {
@@ -114,11 +126,25 @@ constructor(
         releaseOverScrollAnimator = null
     }
 
+    private fun dump(printWriter: PrintWriter) {
+        printWriter.println(
+            """
+            SplitShadeLockScreenOverScroller:
+                Resources:
+                    transitionToFullShadeDistance: $transitionToFullShadeDistance
+                    maxOverScrollAmount: $maxOverScrollAmount
+                    releaseOverScrollDuration: $releaseOverScrollDuration
+                State:
+                    previousOverscrollAmount: $previousOverscrollAmount
+                    expansionDragDownAmount: $expansionDragDownAmount
+            """.trimIndent())
+    }
+
     @AssistedFactory
     fun interface Factory {
         fun create(
-            qS: QS,
-            nsslController: NotificationStackScrollLayoutController
+            qSProvider: () -> QS,
+            nsslControllerProvider: () -> NotificationStackScrollLayoutController
         ): SplitShadeLockScreenOverScroller
     }
 

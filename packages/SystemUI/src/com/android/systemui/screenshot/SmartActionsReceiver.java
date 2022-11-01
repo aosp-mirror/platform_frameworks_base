@@ -60,7 +60,7 @@ public class SmartActionsReceiver extends BroadcastReceiver {
         }
 
         mScreenshotSmartActions.notifyScreenshotAction(
-                context, intent.getStringExtra(EXTRA_ID), actionType, true,
+                intent.getStringExtra(EXTRA_ID), actionType, true,
                 pendingIntent.getIntent());
     }
 }

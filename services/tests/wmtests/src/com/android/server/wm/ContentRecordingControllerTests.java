@@ -87,7 +87,7 @@ public class ContentRecordingControllerTests extends WindowTestsBase {
     @Test
     public void testSetContentRecordingSessionLocked_invalidToken_notAccepted() {
         ContentRecordingController controller = new ContentRecordingController();
-        // GIVEN an invalid display session (null token).
+        // GIVEN a session with a null token.
         ContentRecordingSession session = ContentRecordingSession.createDisplaySession(null);
         session.setDisplayId(DEFAULT_DISPLAY);
         // WHEN updating the session.

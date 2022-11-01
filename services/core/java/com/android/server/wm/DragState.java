@@ -31,6 +31,8 @@ import static com.android.server.wm.DragDropController.MSG_TEAR_DOWN_DRAG_AND_DR
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DRAG;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+import static com.android.server.wm.WindowManagerService.MY_PID;
+import static com.android.server.wm.WindowManagerService.MY_UID;
 
 import android.animation.Animator;
 import android.animation.PropertyValuesHolder;
@@ -45,7 +47,6 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.InputConfig;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -208,8 +209,6 @@ class DragState {
 
         // Send drag end broadcast if drag start has been sent.
         if (mDragInProgress) {
-            final int myPid = Process.myPid();
-
             if (DEBUG_DRAG) {
                 Slog.d(TAG_WM, "broadcasting DRAG_ENDED");
             }
@@ -237,7 +236,7 @@ class DragState {
                 }
                 // if the current window is in the same process,
                 // the dispatch has already recycled the event
-                if (myPid != ws.mSession.mPid) {
+                if (MY_PID != ws.mSession.mPid) {
                     event.recycle();
                 }
             }
@@ -321,7 +320,6 @@ class DragState {
                 mData.fixUris(mSourceUserId);
             }
         }
-        final int myPid = Process.myPid();
         final IBinder clientToken = touchedWin.mClient.asBinder();
         final DragEvent event = obtainDragEvent(DragEvent.ACTION_DROP, x, y,
                 mData, targetInterceptsGlobalDrag(touchedWin),
@@ -337,7 +335,7 @@ class DragState {
             endDragLocked();
             return false;
         } finally {
-            if (myPid != touchedWin.mSession.mPid) {
+            if (MY_PID != touchedWin.mSession.mPid) {
                 event.recycle();
             }
         }
@@ -365,8 +363,8 @@ class DragState {
             mDragWindowHandle.token = mClientChannel.getToken();
             mDragWindowHandle.layoutParamsType = WindowManager.LayoutParams.TYPE_DRAG;
             mDragWindowHandle.dispatchingTimeoutMillis = DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
-            mDragWindowHandle.ownerPid = Process.myPid();
-            mDragWindowHandle.ownerUid = Process.myUid();
+            mDragWindowHandle.ownerPid = MY_PID;
+            mDragWindowHandle.ownerUid = MY_UID;
             mDragWindowHandle.scaleFactor = 1.0f;
 
             // Keep the default behavior of this window to be focusable, which allows the system
@@ -478,7 +476,7 @@ class DragState {
                 Slog.w(TAG_WM, "Unable to drag-start window " + newWin);
             } finally {
                 // if the callee was local, the dispatch has already recycled the event
-                if (Process.myPid() != newWin.mSession.mPid) {
+                if (MY_PID != newWin.mSession.mPid) {
                     event.recycle();
                 }
             }

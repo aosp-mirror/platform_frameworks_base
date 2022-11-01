@@ -16,6 +16,8 @@
 # Sony Playstation(R) DualSense Controller
 #
 
+# Only use this key layout if we have HID_PLAYSTATION!
+requires_kernel_config CONFIG_HID_PLAYSTATION
 
 # Mapping according to https://developer.android.com/training/game-controllers/controller-input.html
 

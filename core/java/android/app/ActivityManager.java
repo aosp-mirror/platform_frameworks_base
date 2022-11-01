@@ -2210,7 +2210,6 @@ public class ActivityManager {
             pw.print(((baseIntent.getFlags() & FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS) != 0));
             pw.print(" activityType="); pw.print(activityTypeToString(getActivityType()));
             pw.print(" windowingMode="); pw.print(windowingModeToString(getWindowingMode()));
-            pw.print(" supportsSplitScreenMultiWindow="); pw.print(supportsSplitScreenMultiWindow);
             pw.print(" supportsMultiWindow=");
             pw.println(supportsMultiWindow);
             if (taskDescription != null) {
@@ -5125,7 +5124,7 @@ public class ActivityManager {
         Preconditions.checkNotNull(listener);
         Preconditions.checkNotNull(executor);
         try {
-            listener.init(mContext, executor, this);
+            listener.init(mContext, executor);
             getService().registerProcessObserver(listener.mObserver);
             // Notify upon first registration.
             executor.execute(() ->

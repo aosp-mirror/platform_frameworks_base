@@ -43,7 +43,6 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
-import android.window.BackEvent;
 
 import androidx.core.graphics.ColorUtils;
 import androidx.dynamicanimation.animation.DynamicAnimation;
@@ -59,7 +58,6 @@ import com.android.systemui.animation.Interpolators;
 import com.android.systemui.plugins.NavigationEdgeBackPlugin;
 import com.android.systemui.shared.navigationbar.RegionSamplingHelper;
 import com.android.systemui.statusbar.VibratorHelper;
-import com.android.wm.shell.back.BackAnimation;
 
 import java.io.PrintWriter;
 import java.util.concurrent.Executor;
@@ -283,14 +281,11 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
                 }
             };
     private BackCallback mBackCallback;
-    private BackAnimation mBackAnimation;
 
-    public NavigationBarEdgePanel(Context context,
-            BackAnimation backAnimation, LatencyTracker latencyTracker) {
+    public NavigationBarEdgePanel(Context context, LatencyTracker latencyTracker) {
         super(context);
 
         mWindowManager = context.getSystemService(WindowManager.class);
-        mBackAnimation = backAnimation;
         mVibratorHelper = Dependency.get(VibratorHelper.class);
 
         mDensity = context.getResources().getDisplayMetrics().density;
@@ -360,7 +355,6 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
                 .getDimension(R.dimen.navigation_edge_action_drag_threshold);
         mSwipeProgressThreshold = context.getResources()
                 .getDimension(R.dimen.navigation_edge_action_progress_threshold);
-        initializeBackAnimation();
 
         setVisibility(GONE);
 
@@ -386,17 +380,6 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
         mRegionSamplingHelper.setWindowVisible(true);
         mShowProtection = !isPrimaryDisplay;
         mLatencyTracker = latencyTracker;
-    }
-
-    public void setBackAnimation(BackAnimation backAnimation) {
-        mBackAnimation = backAnimation;
-        initializeBackAnimation();
-    }
-
-    private void initializeBackAnimation() {
-        if (mBackAnimation != null) {
-            mBackAnimation.setSwipeThresholds(mSwipeTriggerThreshold, mSwipeProgressThreshold);
-        }
     }
 
     @Override
@@ -484,12 +467,6 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
 
     @Override
     public void onMotionEvent(MotionEvent event) {
-        if (mBackAnimation != null) {
-            mBackAnimation.onBackMotion(
-                    event.getX(), event.getY(),
-                    event.getActionMasked(),
-                    mIsLeftPanel ? BackEvent.EDGE_LEFT : BackEvent.EDGE_RIGHT);
-        }
         if (mVelocityTracker == null) {
             mVelocityTracker = VelocityTracker.obtain();
         }
@@ -903,9 +880,7 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
             // Whenever the trigger back state changes the existing translation animation should be
             // cancelled
             mTranslationAnimation.cancel();
-            if (mBackAnimation != null) {
-                mBackAnimation.setTriggerBack(triggerBack);
-            }
+            mBackCallback.setTriggerBack(mTriggerBack);
         }
     }
 

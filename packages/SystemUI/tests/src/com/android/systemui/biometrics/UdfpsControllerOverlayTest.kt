@@ -17,23 +17,13 @@
 package com.android.systemui.biometrics
 
 import android.graphics.Rect
-import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_BP
-import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_KEYGUARD
-import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_OTHER
-import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_SETTINGS
-import android.hardware.biometrics.BiometricOverlayConstants.REASON_ENROLL_ENROLLING
-import android.hardware.biometrics.BiometricOverlayConstants.REASON_ENROLL_FIND_SENSOR
-import android.hardware.biometrics.BiometricOverlayConstants.ShowReason
+import android.hardware.biometrics.BiometricOverlayConstants.*
 import android.hardware.fingerprint.FingerprintManager
 import android.hardware.fingerprint.IUdfpsOverlayControllerCallback
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
-import android.view.LayoutInflater
-import android.view.MotionEvent
-import android.view.View
-import android.view.Surface
+import android.view.*
 import android.view.Surface.Rotation
-import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardUpdateMonitor
@@ -65,7 +55,6 @@ import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
 import org.mockito.Mockito.`when` as whenever
 
-private const val HAL_CONTROLS_ILLUMINATION = true
 private const val REQUEST_ID = 2L
 
 // Dimensions for the current display resolution.
@@ -95,8 +84,9 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
     @Mock private lateinit var configurationController: ConfigurationController
     @Mock private lateinit var systemClock: SystemClock
     @Mock private lateinit var keyguardStateController: KeyguardStateController
-    @Mock private lateinit var unlockedScreenOffAnimationController: UnlockedScreenOffAnimationController
-    @Mock private lateinit var hbmProvider: UdfpsHbmProvider
+    @Mock private lateinit var unlockedScreenOffAnimationController:
+            UnlockedScreenOffAnimationController
+    @Mock private lateinit var udfpsDisplayMode: UdfpsDisplayModeProvider
     @Mock private lateinit var controllerCallback: IUdfpsOverlayControllerCallback
     @Mock private lateinit var udfpsController: UdfpsController
     @Mock private lateinit var udfpsView: UdfpsView
@@ -130,8 +120,9 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
             statusBarStateController, panelExpansionStateManager, statusBarKeyguardViewManager,
             keyguardUpdateMonitor, dialogManager, dumpManager, transitionController,
             configurationController, systemClock, keyguardStateController,
-            unlockedScreenOffAnimationController, HAL_CONTROLS_ILLUMINATION, hbmProvider,
-            REQUEST_ID, reason, controllerCallback, onTouch, activityLaunchAnimator)
+            unlockedScreenOffAnimationController, udfpsDisplayMode, REQUEST_ID, reason,
+            controllerCallback, onTouch, activityLaunchAnimator
+        )
         block()
     }
 
@@ -246,7 +237,7 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
         val didShow = controllerOverlay.show(udfpsController, overlayParams)
 
         verify(windowManager).addView(eq(controllerOverlay.overlayView), any())
-        verify(udfpsView).setHbmProvider(eq(hbmProvider))
+        verify(udfpsView).setUdfpsDisplayModeProvider(eq(udfpsDisplayMode))
         verify(udfpsView).animationViewController = any()
         verify(udfpsView).addView(any())
 
@@ -351,12 +342,12 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
     }
 
     @Test
-    fun stopIlluminatingOnHide() = withReason(REASON_AUTH_BP) {
-        whenever(udfpsView.isIlluminationRequested).thenReturn(true)
+    fun unconfigureDisplayOnHide() = withReason(REASON_AUTH_BP) {
+        whenever(udfpsView.isDisplayConfigured).thenReturn(true)
 
         controllerOverlay.show(udfpsController, overlayParams)
         controllerOverlay.hide()
-        verify(udfpsView).stopIllumination()
+        verify(udfpsView).unconfigureDisplay()
     }
 
     @Test

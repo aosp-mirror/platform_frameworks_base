@@ -199,8 +199,9 @@ public class SystemActions extends CoreStartable {
         mNotificationShadeController = notificationShadeController;
         // Saving in instance variable since to prevent GC since
         // NotificationShadeWindowController.registerCallback() only keeps weak references.
-        mNotificationShadeCallback = (keyguardShowing, keyguardOccluded, bouncerShowing, mDozing) ->
-                registerOrUnregisterDismissNotificationShadeAction();
+        mNotificationShadeCallback =
+                (keyguardShowing, keyguardOccluded, bouncerShowing, mDozing, panelExpanded) ->
+                        registerOrUnregisterDismissNotificationShadeAction();
         mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
     }
 
@@ -499,7 +500,7 @@ public class SystemActions extends CoreStartable {
 
     private void handleTakeScreenshot() {
         ScreenshotHelper screenshotHelper = new ScreenshotHelper(mContext);
-        screenshotHelper.takeScreenshot(WindowManager.TAKE_SCREENSHOT_FULLSCREEN, true, true,
+        screenshotHelper.takeScreenshot(WindowManager.TAKE_SCREENSHOT_FULLSCREEN,
                 SCREENSHOT_ACCESSIBILITY_ACTIONS, new Handler(Looper.getMainLooper()), null);
     }
 

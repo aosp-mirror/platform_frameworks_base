@@ -112,6 +112,7 @@ import com.android.internal.app.IBatteryStats;
 import com.android.internal.display.BrightnessSynchronizer;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.util.Preconditions;
 import com.android.server.EventLogTags;
@@ -4800,6 +4801,11 @@ public final class PowerManagerService extends SystemService
                             .IS_STAY_ON_WHILE_PLUGGED_IN_WIRELESS,
                     ((mStayOnWhilePluggedInSetting & BatteryManager.BATTERY_PLUGGED_WIRELESS)
                             != 0));
+            proto.write(
+                    PowerServiceSettingsAndConfigurationDumpProto.StayOnWhilePluggedInProto
+                            .IS_STAY_ON_WHILE_PLUGGED_IN_DOCK,
+                    ((mStayOnWhilePluggedInSetting & BatteryManager.BATTERY_PLUGGED_DOCK)
+                            != 0));
             proto.end(stayOnWhilePluggedInToken);
 
             proto.write(
@@ -4960,6 +4966,7 @@ public final class PowerManagerService extends SystemService
                 int dockState = intent.getIntExtra(Intent.EXTRA_DOCK_STATE,
                         Intent.EXTRA_DOCK_STATE_UNDOCKED);
                 if (mDockState != dockState) {
+                    FrameworkStatsLog.write(FrameworkStatsLog.DOCK_STATE_CHANGED, dockState);
                     mDockState = dockState;
                     mDirty |= DIRTY_DOCK_STATE;
                     updatePowerStateLocked();

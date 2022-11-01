@@ -49,7 +49,6 @@ import javax.inject.Named;
 public class ReduceBrightColorsTile extends QSTileImpl<QSTile.BooleanState>
         implements ReduceBrightColorsController.Listener{
 
-    private final Icon mIcon = ResourceIcon.get(drawable.ic_reduce_bright_colors);
     private final boolean mIsAvailable;
     private final ReduceBrightColorsController mReduceBrightColorsController;
     private boolean mIsListening;
@@ -111,7 +110,9 @@ public class ReduceBrightColorsTile extends QSTileImpl<QSTile.BooleanState>
         state.label = mContext.getString(R.string.reduce_bright_colors_feature_name);
         state.expandedAccessibilityClassName = Switch.class.getName();
         state.contentDescription = state.label;
-        state.icon = mIcon;
+        state.icon = ResourceIcon.get(state.value
+                ? drawable.qs_extra_dim_icon_on
+                : drawable.qs_extra_dim_icon_off);
     }
 
     @Override

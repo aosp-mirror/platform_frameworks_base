@@ -31,7 +31,7 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
 
     private final float mIconAlphaWhenOpaque;
 
-    private View mLeftSide, mStatusIcons, mBattery;
+    private View mStartSide, mStatusIcons, mBattery;
     private Animator mCurrentAnimation;
 
     /**
@@ -41,7 +41,7 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
         super(backgroundView, R.drawable.status_background);
         final Resources res = statusBarView.getContext().getResources();
         mIconAlphaWhenOpaque = res.getFraction(R.dimen.status_bar_icon_drawing_alpha, 1, 1);
-        mLeftSide = statusBarView.findViewById(R.id.status_bar_left_side);
+        mStartSide = statusBarView.findViewById(R.id.status_bar_start_side_except_heads_up);
         mStatusIcons = statusBarView.findViewById(R.id.statusIcons);
         mBattery = statusBarView.findViewById(R.id.battery);
         applyModeBackground(-1, getMode(), false /*animate*/);
@@ -75,7 +75,7 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
     }
 
     private void applyMode(int mode, boolean animate) {
-        if (mLeftSide == null) return; // pre-init
+        if (mStartSide == null) return; // pre-init
         float newAlpha = getNonBatteryClockAlphaFor(mode);
         float newAlphaBC = getBatteryClockAlpha(mode);
         if (mCurrentAnimation != null) {
@@ -84,7 +84,7 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
         if (animate) {
             AnimatorSet anims = new AnimatorSet();
             anims.playTogether(
-                    animateTransitionTo(mLeftSide, newAlpha),
+                    animateTransitionTo(mStartSide, newAlpha),
                     animateTransitionTo(mStatusIcons, newAlpha),
                     animateTransitionTo(mBattery, newAlphaBC)
                     );
@@ -94,7 +94,7 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
             anims.start();
             mCurrentAnimation = anims;
         } else {
-            mLeftSide.setAlpha(newAlpha);
+            mStartSide.setAlpha(newAlpha);
             mStatusIcons.setAlpha(newAlpha);
             mBattery.setAlpha(newAlphaBC);
         }

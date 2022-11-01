@@ -230,6 +230,15 @@ public class KeyguardBouncerTest extends SysuiTestCase {
     }
 
     @Test
+    public void show_notifiesKeyguardViewController() {
+        mBouncer.ensureView();
+
+        mBouncer.show(/* resetSecuritySelection= */ false);
+
+        verify(mKeyguardHostViewController).onBouncerVisibilityChanged(View.VISIBLE);
+    }
+
+    @Test
     public void testHide_notifiesFalsingManager() {
         mBouncer.hide(false);
         verify(mFalsingCollector).onBouncerHidden();
@@ -401,9 +410,28 @@ public class KeyguardBouncerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShow_delaysIfFaceAuthIsRunning_unlessBypass() {
+    public void testShow_doesNotDelaysIfFaceAuthIsLockedOut() {
+        when(mKeyguardStateController.isFaceAuthEnabled()).thenReturn(true);
+        when(mKeyguardUpdateMonitor.isFaceLockedOut()).thenReturn(true);
+        mBouncer.show(true /* reset */);
+
+        verify(mHandler, never()).postDelayed(any(), anyLong());
+    }
+
+    @Test
+    public void testShow_delaysIfFaceAuthIsRunning_unlessBypassEnabled() {
         when(mKeyguardStateController.isFaceAuthEnabled()).thenReturn(true);
         when(mKeyguardBypassController.getBypassEnabled()).thenReturn(true);
+        mBouncer.show(true /* reset */);
+
+        verify(mHandler, never()).postDelayed(any(), anyLong());
+    }
+
+    @Test
+    public void testShow_delaysIfFaceAuthIsRunning_unlessFingerprintEnrolled() {
+        when(mKeyguardStateController.isFaceAuthEnabled()).thenReturn(true);
+        when(mKeyguardUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(0))
+                .thenReturn(true);
         mBouncer.show(true /* reset */);
 
         verify(mHandler, never()).postDelayed(any(), anyLong());

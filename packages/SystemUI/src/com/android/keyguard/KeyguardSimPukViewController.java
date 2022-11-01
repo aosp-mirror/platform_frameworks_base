@@ -30,7 +30,6 @@ import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
-import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
@@ -108,6 +107,14 @@ public class KeyguardSimPukViewController
     }
 
     @Override
+    public void onResume(int reason) {
+        super.onResume(reason);
+        if (mShowDefaultMessage) {
+            showDefaultMessage();
+        }
+    }
+
+    @Override
     void resetState() {
         super.resetState();
         mStateMachine.reset();
@@ -173,11 +180,9 @@ public class KeyguardSimPukViewController
             if (mShowDefaultMessage) {
                 showDefaultMessage();
             }
-            boolean isEsimLocked = KeyguardEsimArea.isEsimLocked(mView.getContext(), mSubId);
 
-            KeyguardEsimArea esimButton = mView.findViewById(R.id.keyguard_esim_area);
-            esimButton.setSubscriptionId(mSubId);
-            esimButton.setVisibility(isEsimLocked ? View.VISIBLE : View.GONE);
+            mView.setESimLocked(KeyguardEsimArea.isEsimLocked(mView.getContext(), mSubId), mSubId);
+
             mPasswordEntry.requestFocus();
         }
     }

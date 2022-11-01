@@ -72,13 +72,16 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"ബബിൾ"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"മാനേജ് ചെയ്യുക"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"ബബിൾ ഡിസ്മിസ് ചെയ്തു."</string>
-    <string name="restart_button_description" msgid="5887656107651190519">"ഈ ആപ്പ് റീസ്‌റ്റാർട്ട് ചെയ്‌ത് പൂർണ്ണ സ്ക്രീനിലേക്ക് മാറാൻ ടാപ്പ് ചെയ്യുക."</string>
+    <string name="restart_button_description" msgid="6712141648865547958">"മികച്ച കാഴ്‌ചയ്‌ക്കായി ഈ ആപ്പ് റീസ്‌റ്റാർട്ട് ചെയ്യാൻ ടാപ്പ് ചെയ്യുക."</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"ക്യാമറ പ്രശ്നങ്ങളുണ്ടോ?\nശരിയാക്കാൻ ടാപ്പ് ചെയ്യുക"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"അത് പരിഹരിച്ചില്ലേ?\nപുനഃസ്ഥാപിക്കാൻ ടാപ്പ് ചെയ്യുക"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"ക്യാമറാ പ്രശ്നങ്ങളൊന്നുമില്ലേ? നിരസിക്കാൻ ടാപ്പ് ചെയ്യുക."</string>
-    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"ചില ആപ്പുകൾ പോർട്രെയ്റ്റിൽ മികച്ച രീതിയിൽ പ്രവർത്തിക്കുന്നു"</string>
-    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"നിങ്ങളുടെ ഇടം പരമാവധി പ്രയോജനപ്പെടുത്താൻ ഈ ഓപ്ഷനുകളിലൊന്ന് പരീക്ഷിക്കുക"</string>
-    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"പൂർണ്ണ സ്ക്രീനിലേക്ക് മാറാൻ ഈ ഉപകരണം റൊട്ടേറ്റ് ചെയ്യുക"</string>
-    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"ഒരു ആപ്പിന്റെ സ്ഥാനം മാറ്റാൻ, അതിന് തൊട്ടടുത്ത് ഡബിൾ ടാപ്പ് ചെയ്യുക"</string>
+    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"കൂടുതൽ കാണുക, ചെയ്യുക"</string>
+    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"സ്‌ക്രീൻ വിഭജന മോഡിന്, മറ്റൊരു ആപ്പ് വലിച്ചിടുക"</string>
+    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"ആപ്പിന്റെ സ്ഥാനം മാറ്റാൻ അതിന് പുറത്ത് ഡബിൾ ടാപ്പ് ചെയ്യുക"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"മനസ്സിലായി"</string>
+    <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"കൂടുതൽ വിവരങ്ങൾക്ക് വികസിപ്പിക്കുക."</string>
+    <string name="maximize_button_text" msgid="1650859196290301963">"വലുതാക്കുക"</string>
+    <string name="minimize_button_text" msgid="271592547935841753">"ചെറുതാക്കുക"</string>
+    <string name="close_button_text" msgid="2913281996024033299">"അടയ്ക്കുക"</string>
 </resources>

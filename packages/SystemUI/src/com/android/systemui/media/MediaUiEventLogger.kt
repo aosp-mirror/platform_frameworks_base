@@ -176,6 +176,11 @@ class MediaUiEventLogger @Inject constructor(private val logger: UiEventLogger) 
         logger.logWithInstanceId(MediaUiEvent.MEDIA_RECOMMENDATION_CARD_TAP, 0, packageName,
             instanceId)
     }
+
+    fun logOpenBroadcastDialog(uid: Int, packageName: String, instanceId: InstanceId) {
+        logger.logWithInstanceId(MediaUiEvent.MEDIA_OPEN_BROADCAST_DIALOG, uid, packageName,
+            instanceId)
+    }
 }
 
 enum class MediaUiEvent(val metricId: Int) : UiEventLogger.UiEventEnum {
@@ -273,7 +278,10 @@ enum class MediaUiEvent(val metricId: Int) : UiEventLogger.UiEventEnum {
     MEDIA_RECOMMENDATION_ITEM_TAP(1044),
 
     @UiEvent(doc = "User tapped on a media recommendation card")
-    MEDIA_RECOMMENDATION_CARD_TAP(1045);
+    MEDIA_RECOMMENDATION_CARD_TAP(1045),
+
+    @UiEvent(doc = "User opened the broadcast dialog from a media control")
+    MEDIA_OPEN_BROADCAST_DIALOG(1079);
 
     override fun getId() = metricId
 }

@@ -17,6 +17,7 @@
 package android.app;
 
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -184,6 +185,15 @@ public class ActivityClient {
         }
     }
 
+    @RequiresPermission(android.Manifest.permission.MANAGE_MEDIA_PROJECTION)
+    void setForceSendResultForMediaProjection(IBinder token) {
+        try {
+            getActivityClientController().setForceSendResultForMediaProjection(token);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     public boolean isTopOfTask(IBinder token) {
         try {
             return getActivityClientController().isTopOfTask(token);
@@ -211,6 +221,18 @@ public class ActivityClient {
     public int getTaskForActivity(IBinder token, boolean onlyRoot) {
         try {
             return getActivityClientController().getTaskForActivity(token, onlyRoot);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the windowing mode of the task that hosts the activity, or {@code -1} if task is not
+     * found.
+     */
+    public int getTaskWindowingMode(IBinder activityToken) {
+        try {
+            return getActivityClientController().getTaskWindowingMode(activityToken);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

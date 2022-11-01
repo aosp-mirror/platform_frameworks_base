@@ -171,4 +171,9 @@
     <item msgid="146088982397753810">"Mati"</item>
     <item msgid="460891964396502657">"Hidup"</item>
   </string-array>
+  <string-array name="tile_states_dream">
+    <item msgid="6184819793571079513">"Tidak tersedia"</item>
+    <item msgid="8014986104355098744">"Mati"</item>
+    <item msgid="5966994759929723339">"Hidup"</item>
+  </string-array>
 </resources>

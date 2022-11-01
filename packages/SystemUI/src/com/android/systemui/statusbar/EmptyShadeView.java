@@ -24,6 +24,8 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+
 import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.row.StackScrollerDecorView;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
@@ -73,6 +75,7 @@ public class EmptyShadeView extends StackScrollerDecorView {
     }
 
     @Override
+    @NonNull
     public ExpandableViewState createExpandableViewState() {
         return new EmptyShadeViewState();
     }

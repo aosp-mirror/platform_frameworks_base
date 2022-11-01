@@ -21,6 +21,7 @@ import static android.app.ActivityManager.START_TASK_TO_FRONT;
 import static android.app.ITaskStackListener.FORCED_RESIZEABLE_REASON_SECONDARY_DISPLAY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.reset;
@@ -34,6 +35,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -226,7 +228,7 @@ public class ActivityTaskSupervisorTests extends WindowTestsBase {
                 mAtm.getTaskChangeNotificationController();
         spyOn(taskChangeNotifier);
 
-        mAtm.setResumedActivityUncheckLocked(fullScreenActivityA, "resumeA");
+        mAtm.setLastResumedActivityUncheckLocked(fullScreenActivityA, "resumeA");
         verify(taskChangeNotifier).notifyTaskFocusChanged(eq(taskA.mTaskId) /* taskId */,
                 eq(true) /* focused */);
         reset(taskChangeNotifier);
@@ -235,7 +237,7 @@ public class ActivityTaskSupervisorTests extends WindowTestsBase {
                 .build();
         final Task taskB = fullScreenActivityB.getTask();
 
-        mAtm.setResumedActivityUncheckLocked(fullScreenActivityB, "resumeB");
+        mAtm.setLastResumedActivityUncheckLocked(fullScreenActivityB, "resumeB");
         verify(taskChangeNotifier).notifyTaskFocusChanged(eq(taskA.mTaskId) /* taskId */,
                 eq(false) /* focused */);
         verify(taskChangeNotifier).notifyTaskFocusChanged(eq(taskB.mTaskId) /* taskId */,
@@ -284,11 +286,16 @@ public class ActivityTaskSupervisorTests extends WindowTestsBase {
                 .setCreateActivity(true).build().getTopMostActivity();
         activity2.getTask().setResumedActivity(activity2, "test");
 
-        mAtm.mAmInternal.deletePendingTopUid(activity1.getUid(), Long.MAX_VALUE);
+        final int[] pendingTopUid = new int[1];
+        doAnswer(invocation -> {
+            pendingTopUid[0] = invocation.getArgument(0);
+            return null;
+        }).when(mAtm.mAmInternal).addPendingTopUid(anyInt(), anyInt(), any());
         clearInvocations(mAtm);
         activity1.moveFocusableActivityToTop("test");
-        assertTrue(mAtm.mAmInternal.isPendingTopUid(activity1.getUid()));
+        assertEquals(activity1.getUid(), pendingTopUid[0]);
         verify(mAtm).updateOomAdj();
+        verify(mAtm).setLastResumedActivityUncheckLocked(any(), eq("test"));
     }
 
     /**

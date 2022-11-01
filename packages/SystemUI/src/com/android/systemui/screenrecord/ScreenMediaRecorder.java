@@ -40,6 +40,7 @@ import android.media.projection.IMediaProjectionManager;
 import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
 import android.net.Uri;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -50,17 +51,21 @@ import android.util.Size;
 import android.view.Surface;
 import android.view.WindowManager;
 
+import com.android.systemui.media.MediaProjectionCaptureTarget;
 import java.io.File;
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Recording screen and mic/internal audio
  */
-public class ScreenMediaRecorder {
+public class ScreenMediaRecorder extends MediaProjection.Callback {
     private static final int TOTAL_NUM_TRACKS = 1;
     private static final int VIDEO_FRAME_RATE = 30;
     private static final int VIDEO_FRAME_RATE_TO_RESOLUTION_RATIO = 6;
@@ -81,15 +86,20 @@ public class ScreenMediaRecorder {
     private ScreenRecordingMuxer mMuxer;
     private ScreenInternalAudioRecorder mAudio;
     private ScreenRecordingAudioSource mAudioSource;
+    private final MediaProjectionCaptureTarget mCaptureRegion;
+    private final Handler mHandler;
 
     private Context mContext;
-    MediaRecorder.OnInfoListener mListener;
+    ScreenMediaRecorderListener mListener;
 
-    public ScreenMediaRecorder(Context context,
+    public ScreenMediaRecorder(Context context, Handler handler,
             int user, ScreenRecordingAudioSource audioSource,
-            MediaRecorder.OnInfoListener listener) {
+            MediaProjectionCaptureTarget captureRegion,
+            ScreenMediaRecorderListener listener) {
         mContext = context;
+        mHandler = handler;
         mUser = user;
+        mCaptureRegion = captureRegion;
         mListener = listener;
         mAudioSource = audioSource;
     }
@@ -102,9 +112,12 @@ public class ScreenMediaRecorder {
         IMediaProjection proj = null;
         proj = mediaService.createProjection(mUser, mContext.getPackageName(),
                     MediaProjectionManager.TYPE_SCREEN_CAPTURE, false);
-        IBinder projection = proj.asBinder();
-        mMediaProjection = new MediaProjection(mContext,
-                IMediaProjection.Stub.asInterface(projection));
+        IMediaProjection projection = IMediaProjection.Stub.asInterface(proj.asBinder());
+        if (mCaptureRegion != null) {
+            projection.setLaunchCookie(mCaptureRegion.getLaunchCookie());
+        }
+        mMediaProjection = new MediaProjection(mContext, projection);
+        mMediaProjection.registerCallback(this, mHandler);
 
         File cacheDir = mContext.getCacheDir();
         cacheDir.mkdirs();
@@ -162,10 +175,15 @@ public class ScreenMediaRecorder {
                 metrics.densityDpi,
                 DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
                 mInputSurface,
-                null,
-                null);
+                new VirtualDisplay.Callback() {
+                    @Override
+                    public void onStopped() {
+                        onStop();
+                    }
+                },
+                mHandler);
 
-        mMediaRecorder.setOnInfoListener(mListener);
+        mMediaRecorder.setOnInfoListener((mr, what, extra) -> mListener.onInfo(mr, what, extra));
         if (mAudioSource == INTERNAL ||
                 mAudioSource == MIC_AND_INTERNAL) {
             mTempAudioFile = File.createTempFile("temp", ".aac",
@@ -259,19 +277,32 @@ public class ScreenMediaRecorder {
     }
 
     /**
-     * End screen recording
+     * End screen recording, throws an exception if stopping recording failed
      */
-    void end() {
-        mMediaRecorder.stop();
-        mMediaRecorder.release();
-        mInputSurface.release();
-        mVirtualDisplay.release();
-        mMediaProjection.stop();
+    void end() throws IOException {
+        Closer closer = new Closer();
+
+        // MediaRecorder might throw RuntimeException if stopped immediately after starting
+        // We should remove the recording in this case as it will be invalid
+        closer.register(mMediaRecorder::stop);
+        closer.register(mMediaRecorder::release);
+        closer.register(mInputSurface::release);
+        closer.register(mVirtualDisplay::release);
+        closer.register(mMediaProjection::stop);
+        closer.register(this::stopInternalAudioRecording);
+
+        closer.close();
+
         mMediaRecorder = null;
         mMediaProjection = null;
-        stopInternalAudioRecording();
 
         Log.d(TAG, "end recording");
+    }
+
+    @Override
+    public void onStop() {
+        Log.d(TAG, "The system notified about stopping the projection");
+        mListener.onStopped();
     }
 
     private void stopInternalAudioRecording() {
@@ -337,6 +368,18 @@ public class ScreenMediaRecorder {
     }
 
     /**
+     * Release the resources without saving the data
+     */
+    protected void release() {
+        if (mTempVideoFile != null) {
+            mTempVideoFile.delete();
+        }
+        if (mTempAudioFile != null) {
+            mTempAudioFile.delete();
+        }
+    }
+
+    /**
     * Object representing the recording
     */
     public class SavedRecording {
@@ -360,6 +403,68 @@ public class ScreenMediaRecorder {
 
         public @Nullable Bitmap getThumbnail() {
             return mThumbnailBitmap;
+        }
+    }
+
+    interface ScreenMediaRecorderListener {
+        /**
+         * Called to indicate an info or a warning during recording.
+         * See {@link MediaRecorder.OnInfoListener} for the full description.
+         */
+        void onInfo(MediaRecorder mr, int what, int extra);
+
+        /**
+         * Called when the recording stopped by the system.
+         * For example, this might happen when doing partial screen sharing of an app
+         * and the app that is being captured is closed.
+         */
+        void onStopped();
+    }
+
+    /**
+     * Allows to register multiple {@link Closeable} objects and close them all by calling
+     * {@link Closer#close}. If there is an exception thrown during closing of one
+     * of the registered closeables it will continue trying closing the rest closeables.
+     * If there are one or more exceptions thrown they will be re-thrown at the end.
+     * In case of multiple exceptions only the first one will be thrown and all the rest
+     * will be printed.
+     */
+    private static class Closer implements Closeable {
+        private final List<Closeable> mCloseables = new ArrayList<>();
+
+        void register(Closeable closeable) {
+            mCloseables.add(closeable);
+        }
+
+        @Override
+        public void close() throws IOException {
+            Throwable throwable = null;
+
+            for (int i = 0; i < mCloseables.size(); i++) {
+                Closeable closeable = mCloseables.get(i);
+
+                try {
+                    closeable.close();
+                } catch (Throwable e) {
+                    if (throwable == null) {
+                        throwable = e;
+                    } else {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            if (throwable != null) {
+                if (throwable instanceof IOException) {
+                    throw (IOException) throwable;
+                }
+
+                if (throwable instanceof RuntimeException) {
+                    throw (RuntimeException) throwable;
+                }
+
+                throw (Error) throwable;
+            }
         }
     }
 }

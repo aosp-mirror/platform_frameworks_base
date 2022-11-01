@@ -59,6 +59,7 @@ import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 import java.util.ArrayList
+import java.util.function.Consumer
 import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
@@ -75,6 +76,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
     private lateinit var mBeforeFinalizeFilterListener: OnBeforeFinalizeFilterListener
     private lateinit var mOnHeadsUpChangedListener: OnHeadsUpChangedListener
     private lateinit var mNotifSectioner: NotifSectioner
+    private lateinit var mActionPressListener: Consumer<NotificationEntry>
 
     private val mNotifPipeline: NotifPipeline = mock()
     private val mLogger = HeadsUpCoordinatorLogger(logcatLogBuffer(), verbose = true)
@@ -130,6 +132,9 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         }
         mOnHeadsUpChangedListener = withArgCaptor {
             verify(mHeadsUpManager).addListener(capture())
+        }
+        mActionPressListener = withArgCaptor {
+            verify(mRemoteInputManager).addActionPressListener(capture())
         }
         given(mHeadsUpManager.allEntries).willAnswer { mHuns.stream() }
         given(mHeadsUpManager.isAlerting(anyString())).willAnswer { invocation ->
@@ -196,6 +201,19 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         mExecutor.advanceClockToLast()
         mExecutor.runAllReady()
         verify(mHeadsUpManager, times(0)).removeNotification(anyString(), any())
+    }
+
+    @Test
+    fun hunExtensionCancelledWhenHunActionPressed() {
+        whenever(mHeadsUpManager.isSticky(anyString())).thenReturn(true)
+        addHUN(mEntry)
+        whenever(mHeadsUpManager.canRemoveImmediately(anyString())).thenReturn(false)
+        whenever(mHeadsUpManager.getEarliestRemovalTime(anyString())).thenReturn(1000L)
+        assertTrue(mNotifLifetimeExtender.maybeExtendLifetime(mEntry, 0))
+        mActionPressListener.accept(mEntry)
+        mExecutor.advanceClockToLast()
+        mExecutor.runAllReady()
+        verify(mHeadsUpManager, times(1)).removeNotification(eq(mEntry.key), eq(true))
     }
 
     @Test
