@@ -20,6 +20,7 @@
 #include <android/api-level.h>
 #else
 #define __ANDROID_API_P__ 28
+#define __ANDROID_API_U__ 34
 #endif
 #include <androidfw/ResourceTypes.h>
 #include <hwui/Canvas.h>
@@ -30,8 +31,9 @@
 #include <nativehelper/ScopedPrimitiveArray.h>
 #include <nativehelper/ScopedStringChars.h>
 
-#include "FontUtils.h"
 #include "Bitmap.h"
+#include "FontUtils.h"
+#include "SkAndroidFrameworkUtils.h"
 #include "SkBitmap.h"
 #include "SkBlendMode.h"
 #include "SkClipOp.h"
@@ -42,10 +44,10 @@
 #include "SkMatrix.h"
 #include "SkPath.h"
 #include "SkPoint.h"
+#include "SkRRect.h"
 #include "SkRect.h"
 #include "SkRefCnt.h"
 #include "SkRegion.h"
-#include "SkRRect.h"
 #include "SkScalar.h"
 #include "SkVertices.h"
 
@@ -710,6 +712,9 @@ static void freeTextLayoutCaches(JNIEnv* env, jobject) {
 
 static void setCompatibilityVersion(JNIEnv* env, jobject, jint apiLevel) {
     Canvas::setCompatibilityVersion(apiLevel);
+    if (apiLevel < __ANDROID_API_U__) {
+        SkAndroidFrameworkUtils::UseLegacyLocalMatrixConcatenation();
+    }
 }
 
 static void punchHole(JNIEnv* env, jobject, jlong canvasPtr, jfloat left, jfloat top, jfloat right,
@@ -800,7 +805,6 @@ int register_android_graphics_Canvas(JNIEnv* env) {
     ret |= RegisterMethodsOrDie(env, "android/graphics/BaseCanvas", gDrawMethods, NELEM(gDrawMethods));
     ret |= RegisterMethodsOrDie(env, "android/graphics/BaseRecordingCanvas", gDrawMethods, NELEM(gDrawMethods));
     return ret;
-
 }
 
 }; // namespace android
