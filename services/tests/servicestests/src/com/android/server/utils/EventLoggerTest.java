@@ -29,8 +29,10 @@ import org.junit.runners.Parameterized;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 @SmallTest
 @RunWith(Enclosed.class)
@@ -51,17 +53,25 @@ public class EventLoggerTest {
         private StringWriter mTestStringWriter;
         private PrintWriter mTestPrintWriter;
 
+        private TestDumpSink mTestConsumer;
         private EventLogger mEventLogger;
 
         @Before
         public void setUp() {
             mTestStringWriter = new StringWriter();
             mTestPrintWriter = new PrintWriter(mTestStringWriter);
+            mTestConsumer = new TestDumpSink();
             mEventLogger = new EventLogger(EVENTS_LOGGER_SIZE, EVENTS_LOGGER_TAG);
         }
 
         @Test
-        public void testThatConsumeOfEmptyLoggerProducesEmptyList() {
+        public void testThatConsumerProducesEmptyListFromEmptyLog() {
+            mEventLogger.dump(mTestConsumer);
+            assertThat(mTestConsumer.getLastKnownConsumedEvents()).isEmpty();
+        }
+
+        @Test
+        public void testThatPrintWriterProducesEmptyListFromEmptyLog() {
             mEventLogger.dump(mTestPrintWriter);
             assertThat(mTestStringWriter.toString()).isEmpty();
         }
@@ -102,10 +112,12 @@ public class EventLoggerTest {
             });
         }
 
+        private TestDumpSink mTestConsumer;
         private EventLogger mEventLogger;
 
         private final StringWriter mTestStringWriter;
         private final PrintWriter mTestPrintWriter;
+
         private final EventLogger.Event[] mEventsToInsert;
         private final EventLogger.Event[] mExpectedEvents;
 
@@ -119,11 +131,25 @@ public class EventLoggerTest {
 
         @Before
         public void setUp() {
+            mTestConsumer = new TestDumpSink();
             mEventLogger = new EventLogger(EVENTS_LOGGER_SIZE, EVENTS_LOGGER_TAG);
         }
 
         @Test
-        public void testThatLoggingWorksAsExpected() {
+        public void testThatConsumerDumpsEventsAsExpected() {
+            for (EventLogger.Event event: mEventsToInsert) {
+                mEventLogger.enqueue(event);
+            }
+
+            mEventLogger.dump(mTestConsumer);
+
+            assertThat(mTestConsumer.getLastKnownConsumedEvents())
+                    .containsExactlyElementsIn(mExpectedEvents);
+        }
+
+
+        @Test
+        public void testThatPrintWriterDumpsEventsAsExpected() {
             for (EventLogger.Event event: mEventsToInsert) {
                 mEventLogger.enqueue(event);
             }
@@ -149,11 +175,27 @@ public class EventLoggerTest {
         return stringWriter.toString();
     }
 
-    private static class TestEvent extends EventLogger.Event {
+
+    private static final class TestEvent extends EventLogger.Event {
 
         @Override
         public String eventToString() {
             return getClass().getName() + "@" + Integer.toHexString(hashCode());
+        }
+    }
+
+    private static final class TestDumpSink implements EventLogger.DumpSink {
+
+        private final ArrayList<EventLogger.Event> mEvents = new ArrayList<>();
+
+        @Override
+        public void sink(String tag, List<EventLogger.Event> events) {
+            mEvents.clear();
+            mEvents.addAll(events);
+        }
+
+        public ArrayList<EventLogger.Event> getLastKnownConsumedEvents() {
+            return new ArrayList<>(mEvents);
         }
     }
 }
