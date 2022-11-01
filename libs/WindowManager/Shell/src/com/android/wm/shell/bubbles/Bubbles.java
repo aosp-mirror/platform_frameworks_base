@@ -242,6 +242,11 @@ public interface Bubbles {
      */
     void onUserRemoved(int removedUserId);
 
+    /**
+     * Sets whether bubble bar should be enabled or not.
+     */
+    void setBubbleBarEnabled(boolean enabled);
+
     /** Listener to find out about stack expansion / collapse events. */
     interface BubbleExpandListener {
         /**

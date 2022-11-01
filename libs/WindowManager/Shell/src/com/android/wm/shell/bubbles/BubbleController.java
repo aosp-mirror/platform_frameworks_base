@@ -150,6 +150,9 @@ public class BubbleController implements ConfigurationChangeListener {
 
     private final ShellExecutor mBackgroundExecutor;
 
+    // Whether or not we should show bubbles pinned at the bottom of the screen.
+    private boolean mIsBubbleBarEnabled;
+
     private BubbleLogger mLogger;
     private BubbleData mBubbleData;
     @Nullable private BubbleStackView mStackView;
@@ -210,7 +213,6 @@ public class BubbleController implements ConfigurationChangeListener {
     /** Drag and drop controller to register listener for onDragStarted. */
     private DragAndDropController mDragAndDropController;
 
-  
     public BubbleController(Context context,
             ShellInit shellInit,
             ShellCommandHandler shellCommandHandler,
@@ -526,6 +528,12 @@ public class BubbleController implements ConfigurationChangeListener {
         mDataRepository.removeBubblesForUser(removedUserId, parentUserId);
     }
 
+    // TODO(b/256873975): Should pass this into the constructor once flags are available to shell.
+    /** Sets whether the bubble bar is enabled (i.e. bubbles pinned to bottom on large screens). */
+    public void setBubbleBarEnabled(boolean enabled) {
+        mIsBubbleBarEnabled = enabled;
+    }
+
     /** Whether this userId belongs to the current user. */
     private boolean isCurrentProfile(int userId) {
         return userId == UserHandle.USER_ALL
@@ -590,6 +598,12 @@ public class BubbleController implements ConfigurationChangeListener {
                 mStackView.setExpandListener(mExpandListener);
             }
             mStackView.setUnbubbleConversationCallback(mSysuiProxy::onUnbubbleConversation);
+        }
+
+        if (mIsBubbleBarEnabled && mBubblePositioner.isLargeScreen()) {
+            mBubblePositioner.setUsePinnedLocation(true);
+        } else {
+            mBubblePositioner.setUsePinnedLocation(false);
         }
 
         addToWindowManagerMaybe();
@@ -1791,6 +1805,13 @@ public class BubbleController implements ConfigurationChangeListener {
         public void onUserRemoved(int removedUserId) {
             mMainExecutor.execute(() -> {
                 BubbleController.this.onUserRemoved(removedUserId);
+            });
+        }
+
+        @Override
+        public void setBubbleBarEnabled(boolean enabled) {
+            mMainExecutor.execute(() -> {
+                BubbleController.this.setBubbleBarEnabled(enabled);
             });
         }
 

@@ -283,6 +283,9 @@ object Flags {
     val ENABLE_PIP_KEEP_CLEAR_ALGORITHM =
         SysPropBooleanFlag(1110, "persist.wm.debug.enable_pip_keep_clear_algorithm", false)
 
+    // TODO(b/256873975): Tracking Bug
+    @JvmField @Keep val WM_BUBBLE_BAR = UnreleasedFlag(1111)
+
     // 1200 - predictive back
     @JvmField
     @Keep
