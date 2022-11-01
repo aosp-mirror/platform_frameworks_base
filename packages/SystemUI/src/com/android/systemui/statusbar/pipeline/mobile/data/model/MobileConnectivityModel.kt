@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.pipeline.mobile.data.repository
+package com.android.systemui.statusbar.pipeline.mobile.data.model
 
-import kotlinx.coroutines.flow.MutableStateFlow
+import android.net.NetworkCapabilities
 
-/** Defaults to `true` */
-class FakeUserSetupRepository : UserSetupRepository {
-    private val _isUserSetup: MutableStateFlow<Boolean> = MutableStateFlow(true)
-    override val isUserSetupFlow = _isUserSetup
-
-    fun setUserSetup(setup: Boolean) {
-        _isUserSetup.value = setup
-    }
-}
+/** Provides information about a mobile network connection */
+data class MobileConnectivityModel(
+    /** Whether mobile is the connected transport see [NetworkCapabilities.TRANSPORT_CELLULAR] */
+    val isConnected: Boolean = false,
+    /** Whether the mobile transport is validated [NetworkCapabilities.NET_CAPABILITY_VALIDATED] */
+    val isValidated: Boolean = false,
+)
