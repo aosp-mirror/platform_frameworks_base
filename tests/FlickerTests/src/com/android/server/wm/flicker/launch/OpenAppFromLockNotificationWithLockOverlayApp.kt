@@ -16,6 +16,7 @@
 
 package com.android.server.wm.flicker.launch
 
+import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresDevice
@@ -71,7 +72,7 @@ class OpenAppFromLockNotificationWithLockOverlayApp(testSpec: FlickerTestParamet
         }
 
     @Test
-    @Postsubmit
+    @FlakyTest(bugId = 227143265)
     fun showWhenLockedAppWindowBecomesVisible() {
         testSpec.assertWm {
             this.hasNoVisibleAppWindow()
@@ -83,7 +84,7 @@ class OpenAppFromLockNotificationWithLockOverlayApp(testSpec: FlickerTestParamet
     }
 
     @Test
-    @Postsubmit
+    @FlakyTest(bugId = 227143265)
     fun showWhenLockedAppLayerBecomesVisible() {
         testSpec.assertLayers {
             this.isInvisible(showWhenLockedApp)
@@ -98,10 +99,16 @@ class OpenAppFromLockNotificationWithLockOverlayApp(testSpec: FlickerTestParamet
     @Presubmit @Test override fun appLayerBecomesVisible() = super.appLayerBecomesVisible()
 
     /** {@inheritDoc} */
-    @Postsubmit
+    @FlakyTest(bugId = 227143265)
     @Test
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
         super.visibleLayersShownMoreThanOneConsecutiveEntry()
+
+    /** {@inheritDoc} */
+    @FlakyTest(bugId = 209599395)
+    @Test
+    override fun navBarLayerIsVisibleAtStartAndEnd() =
+        super.navBarLayerIsVisibleAtStartAndEnd()
 
     companion object {
         /**
