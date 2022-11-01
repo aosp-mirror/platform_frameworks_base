@@ -998,6 +998,7 @@ public class Tuner implements AutoCloseable  {
     private native int nativeScan(int settingsType, FrontendSettings settings, int scanType);
     private native int nativeStopScan();
     private native int nativeSetLnb(Lnb lnb);
+    private native boolean nativeIsLnaSupported();
     private native int nativeSetLna(boolean enable);
     private native FrontendStatus nativeGetFrontendStatus(int[] statusTypes);
     private native Integer nativeGetAvSyncHwId(Filter filter);
@@ -1382,11 +1383,32 @@ public class Tuner implements AutoCloseable  {
     }
 
     /**
+     * Is Low Noise Amplifier (LNA) supported by the Tuner.
+     *
+     * <p>This API is only supported by Tuner HAL 3.0 or higher.
+     * Unsupported version would throw UnsupportedOperationException. Use
+     * {@link TunerVersionChecker#getTunerVersion()} to check the version.
+     *
+     * @return {@code true} if supported, otherwise {@code false}.
+     * @throws UnsupportedOperationException if the Tuner HAL version is lower than 3.0
+     * @see android.media.tv.tuner.TunerVersionChecker#TUNER_VERSION_3_0
+     */
+    public boolean isLnaSupported() {
+        if (!TunerVersionChecker.checkHigherOrEqualVersionTo(
+                TunerVersionChecker.TUNER_VERSION_3_0, "isLnaSupported")) {
+            throw new UnsupportedOperationException("Tuner HAL version "
+                    + TunerVersionChecker.getTunerVersion() + " doesn't support this method.");
+        }
+        return nativeIsLnaSupported();
+    }
+
+    /**
      * Enable or Disable Low Noise Amplifier (LNA).
      *
      * @param enable {@code true} to activate LNA module; {@code false} to deactivate LNA.
      *
-     * @return result status of the operation.
+     * @return result status of the operation. {@link #RESULT_UNAVAILABLE} if the device doesn't
+     *         support LNA.
      */
     @Result
     public int setLnaEnabled(boolean enable) {

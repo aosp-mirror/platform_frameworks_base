@@ -1785,6 +1785,13 @@ int JTuner::setLnb(sp<LnbClient> lnbClient) {
     return (int)result;
 }
 
+bool JTuner::isLnaSupported() {
+    if (sTunerClient == nullptr) {
+        return (int)Result::NOT_INITIALIZED;
+    }
+    return sTunerClient->isLnaSupported();
+}
+
 int JTuner::setLna(bool enable) {
     if (sTunerClient == nullptr) {
         return (int)Result::NOT_INITIALIZED;
@@ -3482,6 +3489,11 @@ static int android_media_tv_Tuner_set_lnb(JNIEnv *env, jobject thiz, jobject lnb
     return tuner->setLnb(lnbClient);
 }
 
+static bool android_media_tv_Tuner_is_lna_supported(JNIEnv *env, jobject thiz) {
+    sp<JTuner> tuner = getTuner(env, thiz);
+    return tuner->isLnaSupported();
+}
+
 static int android_media_tv_Tuner_set_lna(JNIEnv *env, jobject thiz, jboolean enable) {
     sp<JTuner> tuner = getTuner(env, thiz);
     return tuner->setLna(enable);
@@ -4730,6 +4742,7 @@ static const JNINativeMethod gTunerMethods[] = {
             (void *)android_media_tv_Tuner_scan },
     { "nativeStopScan", "()I", (void *)android_media_tv_Tuner_stop_scan },
     { "nativeSetLnb", "(Landroid/media/tv/tuner/Lnb;)I", (void *)android_media_tv_Tuner_set_lnb },
+    { "nativeIsLnaSupported", "()Z", (void *)android_media_tv_Tuner_is_lna_supported },
     { "nativeSetLna", "(Z)I", (void *)android_media_tv_Tuner_set_lna },
     { "nativeGetFrontendStatus", "([I)Landroid/media/tv/tuner/frontend/FrontendStatus;",
             (void *)android_media_tv_Tuner_get_frontend_status },

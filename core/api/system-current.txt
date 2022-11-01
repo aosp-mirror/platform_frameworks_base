@@ -7175,6 +7175,7 @@ package android.media.tv.tuner {
     method @NonNull public java.util.List<android.media.tv.tuner.frontend.FrontendStatusReadiness> getFrontendStatusReadiness(@NonNull int[]);
     method @IntRange(from=0xffffffff) public int getMaxNumberOfFrontends(int);
     method @RequiresPermission("android.permission.TUNER_RESOURCE_ACCESS") public boolean hasUnusedFrontend(int);
+    method public boolean isLnaSupported();
     method public boolean isLowestPriority(int);
     method @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_TV_DESCRAMBLER) public android.media.tv.tuner.Descrambler openDescrambler();
     method @Nullable public android.media.tv.tuner.dvr.DvrPlayback openDvrPlayback(long, @NonNull java.util.concurrent.Executor, @NonNull android.media.tv.tuner.dvr.OnPlaybackStatusChangedListener);
