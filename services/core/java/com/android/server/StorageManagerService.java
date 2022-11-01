@@ -147,6 +147,7 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
+import com.android.server.am.BroadcastLoopers;
 import com.android.server.pm.Installer;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.storage.AppFuseBridge;
@@ -1809,6 +1810,7 @@ class StorageManagerService extends IStorageManager.Stub
 
         HandlerThread hthread = new HandlerThread(TAG);
         hthread.start();
+        BroadcastLoopers.addLooper(hthread.getLooper());
         mHandler = new StorageManagerServiceHandler(hthread.getLooper());
 
         // Add OBB Action Handler to StorageManagerService thread.
