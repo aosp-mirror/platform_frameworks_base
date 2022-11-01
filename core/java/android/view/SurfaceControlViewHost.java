@@ -159,9 +159,11 @@ public class SurfaceControlViewHost {
         }
 
         /**
-         * Use {@link SurfaceView#setChildSurfacePackage} or manually fix
-         * accessibility (see SurfaceView implementation).
-         * @hide
+         * Returns the {@link android.view.SurfaceControl} associated with this SurfacePackage for
+         * cases where more control is required.
+         *
+         * @return the SurfaceControl associated with this SurfacePackage and its containing
+         *     SurfaceControlViewHost
          */
         public @NonNull SurfaceControl getSurfaceControl() {
             return mSurfaceControl;
