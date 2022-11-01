@@ -248,7 +248,8 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"ஒளிர்வு"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"கலர் இன்வெர்ஷன்"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"கலர் கரெக்‌ஷன்"</string>
-    <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"பயனர் அமைப்புகள்"</string>
+    <!-- no translation found for quick_settings_more_user_settings (7634653308485206306) -->
+    <skip />
     <string name="quick_settings_done" msgid="2163641301648855793">"முடிந்தது"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"மூடுக"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"இணைக்கப்பட்டது"</string>
