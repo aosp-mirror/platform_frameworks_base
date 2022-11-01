@@ -67,7 +67,7 @@ public class DeviceControlsControllerImpl @Inject constructor(
         internal const val QS_DEFAULT_POSITION = 7
 
         internal const val PREFS_CONTROLS_SEEDING_COMPLETED = "SeedingCompleted"
-        internal const val PREFS_CONTROLS_FILE = "controls_prefs"
+        const val PREFS_CONTROLS_FILE = "controls_prefs"
         internal const val PREFS_SETTINGS_DIALOG_ATTEMPTS = "show_settings_attempts"
         private const val SEEDING_MAX = 2
     }

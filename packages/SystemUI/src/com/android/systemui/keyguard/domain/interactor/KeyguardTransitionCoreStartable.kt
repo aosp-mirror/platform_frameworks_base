@@ -26,6 +26,7 @@ class KeyguardTransitionCoreStartable
 @Inject
 constructor(
     private val interactors: Set<TransitionInteractor>,
+    private val auditLogger: KeyguardTransitionAuditLogger,
 ) : CoreStartable {
 
     override fun start() {
@@ -38,9 +39,12 @@ constructor(
                 when (it) {
                     is LockscreenBouncerTransitionInteractor -> Log.d(TAG, "Started $it")
                     is AodLockscreenTransitionInteractor -> Log.d(TAG, "Started $it")
+                    is GoneAodTransitionInteractor -> Log.d(TAG, "Started $it")
+                    is LockscreenGoneTransitionInteractor -> Log.d(TAG, "Started $it")
                 }
             it.start()
         }
+        auditLogger.start()
     }
 
     companion object {

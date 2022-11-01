@@ -29,6 +29,7 @@ import com.android.internal.annotations.VisibleForTesting
 import com.android.settingslib.Utils
 import com.android.systemui.media.controls.models.player.MediaViewHolder
 import com.android.systemui.monet.ColorScheme
+import com.android.systemui.ripple.MultiRippleController
 
 /**
  * A [ColorTransition] is an object that updates the colors of views each time [updateColorScheme]
@@ -100,12 +101,14 @@ class ColorSchemeTransition
 internal constructor(
     private val context: Context,
     private val mediaViewHolder: MediaViewHolder,
+    private val multiRippleController: MultiRippleController,
     animatingColorTransitionFactory: AnimatingColorTransitionFactory
 ) {
     constructor(
         context: Context,
-        mediaViewHolder: MediaViewHolder
-    ) : this(context, mediaViewHolder, ::AnimatingColorTransition)
+        mediaViewHolder: MediaViewHolder,
+        multiRippleController: MultiRippleController,
+    ) : this(context, mediaViewHolder, multiRippleController, ::AnimatingColorTransition)
 
     val bgColor = context.getColor(com.android.systemui.R.color.material_dynamic_secondary95)
     val surfaceColor =
@@ -125,6 +128,7 @@ internal constructor(
             val accentColorList = ColorStateList.valueOf(accentPrimary)
             mediaViewHolder.actionPlayPause.backgroundTintList = accentColorList
             mediaViewHolder.gutsViewHolder.setAccentPrimaryColor(accentPrimary)
+            multiRippleController.updateColor(accentPrimary)
         }
 
     val accentSecondary =

@@ -76,6 +76,8 @@ import com.android.systemui.bluetooth.BroadcastDialogController;
 import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.media.controls.models.GutsViewHolder;
 import com.android.systemui.media.controls.models.player.MediaAction;
 import com.android.systemui.media.controls.models.player.MediaButton;
@@ -95,6 +97,10 @@ import com.android.systemui.monet.ColorScheme;
 import com.android.systemui.monet.Style;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
+import com.android.systemui.ripple.MultiRippleController;
+import com.android.systemui.ripple.RippleAnimation;
+import com.android.systemui.ripple.RippleAnimationConfig;
+import com.android.systemui.ripple.RippleShader;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -209,6 +215,8 @@ public class MediaControlPanel {
     private boolean mIsCurrentBroadcastedApp = false;
     private boolean mShowBroadcastDialogButton = false;
     private String mSwitchBroadcastApp;
+    private MultiRippleController mMultiRippleController;
+    private FeatureFlags mFeatureFlags;
 
     /**
      * Initialize a new control panel
@@ -236,7 +244,9 @@ public class MediaControlPanel {
             KeyguardStateController keyguardStateController,
             ActivityIntentHelper activityIntentHelper,
             NotificationLockscreenUserManager lockscreenUserManager,
-            BroadcastDialogController broadcastDialogController) {
+            BroadcastDialogController broadcastDialogController,
+            FeatureFlags featureFlags
+    ) {
         mContext = context;
         mBackgroundExecutor = backgroundExecutor;
         mMainExecutor = mainExecutor;
@@ -262,6 +272,8 @@ public class MediaControlPanel {
             logSmartspaceCardReported(SMARTSPACE_CARD_CLICK_EVENT);
             return Unit.INSTANCE;
         });
+
+        mFeatureFlags = featureFlags;
     }
 
     /**
@@ -381,7 +393,9 @@ public class MediaControlPanel {
         AnimatorSet exit = loadAnimator(R.anim.media_metadata_exit,
                 Interpolators.EMPHASIZED_ACCELERATE, titleText, artistText);
 
-        mColorSchemeTransition = new ColorSchemeTransition(mContext, mMediaViewHolder);
+        mMultiRippleController = new MultiRippleController(vh.getMultiRippleView());
+        mColorSchemeTransition = new ColorSchemeTransition(
+                mContext, mMediaViewHolder, mMultiRippleController);
         mMetadataAnimationHandler = new MetadataAnimationHandler(exit, enter);
     }
 
@@ -982,6 +996,9 @@ public class MediaControlPanel {
                         mLogger.logTapAction(button.getId(), mUid, mPackageName, mInstanceId);
                         logSmartspaceCardReported(SMARTSPACE_CARD_CLICK_EVENT);
                         action.run();
+                        if (mFeatureFlags.isEnabled(Flags.UMO_SURFACE_RIPPLE)) {
+                            mMultiRippleController.play(createTouchRippleAnimation(button));
+                        }
 
                         if (icon instanceof Animatable) {
                             ((Animatable) icon).start();
@@ -995,6 +1012,26 @@ public class MediaControlPanel {
         } else {
             clearButton(button);
         }
+    }
+
+    private RippleAnimation createTouchRippleAnimation(ImageButton button) {
+        float maxSize = mMediaViewHolder.getMultiRippleView().getWidth() * 2;
+        return new RippleAnimation(
+                new RippleAnimationConfig(
+                        RippleShader.RippleShape.CIRCLE,
+                        /* duration= */ 1500L,
+                        /* centerX= */ button.getX() + button.getWidth() * 0.5f,
+                        /* centerY= */ button.getY() + button.getHeight() * 0.5f,
+                        /* maxWidth= */ maxSize,
+                        /* maxHeight= */ maxSize,
+                        /* pixelDensity= */ getContext().getResources().getDisplayMetrics().density,
+                        mColorSchemeTransition.getAccentPrimary().getTargetColor(),
+                        /* opacity= */ 100,
+                        /* shouldFillRipple= */ false,
+                        /* sparkleStrength= */ 0f,
+                        /* shouldDistort= */ false
+                )
+        );
     }
 
     private void clearButton(final ImageButton button) {

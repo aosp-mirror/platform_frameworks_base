@@ -1043,8 +1043,13 @@ public class ScreenshotController {
     }
 
     private boolean isUserSetupComplete(UserHandle owner) {
-        return Settings.Secure.getInt(mContext.createContextAsUser(owner, 0)
-                .getContentResolver(), SETTINGS_SECURE_USER_SETUP_COMPLETE, 0) == 1;
+        if (mFlags.isEnabled(SCREENSHOT_WORK_PROFILE_POLICY)) {
+            return Settings.Secure.getInt(mContext.createContextAsUser(owner, 0)
+                    .getContentResolver(), SETTINGS_SECURE_USER_SETUP_COMPLETE, 0) == 1;
+        } else {
+            return Settings.Secure.getInt(mContext.getContentResolver(),
+                    SETTINGS_SECURE_USER_SETUP_COMPLETE, 0) == 1;
+        }
     }
 
     /**

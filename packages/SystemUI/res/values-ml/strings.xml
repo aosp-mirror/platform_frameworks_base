@@ -248,7 +248,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"തെളിച്ചം"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"നിറം വിപരീതമാക്കൽ"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"നിറം ശരിയാക്കൽ"</string>
-    <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"ഉപയോക്തൃ ക്രമീകരണം"</string>
+    <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"ഉപയോക്താക്കളെ മാനേജ് ചെയ്യുക"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"പൂർത്തിയാക്കി"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"അടയ്ക്കുക"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"കണക്‌റ്റുചെയ്‌തു"</string>

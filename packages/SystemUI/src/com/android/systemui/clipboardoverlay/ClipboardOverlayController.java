@@ -31,6 +31,7 @@ import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBO
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_SWIPE_DISMISSED;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_TAP_OUTSIDE;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_TIMED_OUT;
+import static com.android.systemui.flags.Flags.CLIPBOARD_REMOTE_BEHAVIOR;
 
 import static java.util.Objects.requireNonNull;
 
@@ -73,6 +74,7 @@ import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.clipboardoverlay.dagger.ClipboardOverlayModule.OverlayWindowContext;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.screenshot.TimeoutHandler;
 
 import java.io.IOException;
@@ -101,6 +103,8 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
     private final ClipboardOverlayWindow mWindow;
     private final TimeoutHandler mTimeoutHandler;
     private final TextClassifier mTextClassifier;
+    private final ClipboardOverlayUtils mClipboardUtils;
+    private final FeatureFlags mFeatureFlags;
 
     private final ClipboardOverlayView mView;
 
@@ -119,11 +123,15 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
     private Animator mExitAnimator;
     private Animator mEnterAnimator;
 
+    private Runnable mOnUiUpdate;
+
     private final ClipboardOverlayView.ClipboardOverlayCallbacks mClipboardCallbacks =
             new ClipboardOverlayView.ClipboardOverlayCallbacks() {
                 @Override
                 public void onInteraction() {
-                    mTimeoutHandler.resetTimeout();
+                    if (mOnUiUpdate != null) {
+                        mOnUiUpdate.run();
+                    }
                 }
 
                 @Override
@@ -178,7 +186,10 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
             ClipboardOverlayWindow clipboardOverlayWindow,
             BroadcastDispatcher broadcastDispatcher,
             BroadcastSender broadcastSender,
-            TimeoutHandler timeoutHandler, UiEventLogger uiEventLogger) {
+            TimeoutHandler timeoutHandler,
+            FeatureFlags featureFlags,
+            ClipboardOverlayUtils clipboardUtils,
+            UiEventLogger uiEventLogger) {
         mBroadcastDispatcher = broadcastDispatcher;
         mDisplayManager = requireNonNull(context.getSystemService(DisplayManager.class));
         final Context displayContext = context.createDisplayContext(getDefaultDisplay());
@@ -198,6 +209,9 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
 
         mTimeoutHandler = timeoutHandler;
         mTimeoutHandler.setDefaultTimeoutMillis(CLIPBOARD_DEFAULT_TIMEOUT_MILLIS);
+
+        mFeatureFlags = featureFlags;
+        mClipboardUtils = clipboardUtils;
 
         mView.setCallbacks(mClipboardCallbacks);
 
@@ -257,11 +271,13 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
         boolean isSensitive = clipData != null && clipData.getDescription().getExtras() != null
                 && clipData.getDescription().getExtras()
                 .getBoolean(ClipDescription.EXTRA_IS_SENSITIVE);
+        boolean isRemote = mFeatureFlags.isEnabled(CLIPBOARD_REMOTE_BEHAVIOR)
+                && mClipboardUtils.isRemoteCopy(mContext, clipData, clipSource);
         if (clipData == null || clipData.getItemCount() == 0) {
             mView.showDefaultTextPreview();
         } else if (!TextUtils.isEmpty(clipData.getItemAt(0).getText())) {
             ClipData.Item item = clipData.getItemAt(0);
-            if (DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_SYSTEMUI,
+            if (isRemote || DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_SYSTEMUI,
                     CLIPBOARD_OVERLAY_SHOW_ACTIONS, false)) {
                 if (item.getTextLinks() != null) {
                     AsyncTask.execute(() -> classifyText(clipData.getItemAt(0), clipSource));
@@ -287,7 +303,13 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
         maybeShowRemoteCopy(clipData);
         animateIn();
         mView.announceForAccessibility(accessibilityAnnouncement);
-        mTimeoutHandler.resetTimeout();
+        if (isRemote) {
+            mTimeoutHandler.cancelTimeout();
+            mOnUiUpdate = null;
+        } else {
+            mOnUiUpdate = mTimeoutHandler::resetTimeout;
+            mOnUiUpdate.run();
+        }
     }
 
     private void maybeShowRemoteCopy(ClipData clipData) {
@@ -427,7 +449,9 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
-                mTimeoutHandler.resetTimeout();
+                if (mOnUiUpdate != null) {
+                    mOnUiUpdate.run();
+                }
             }
         });
         mEnterAnimator.start();

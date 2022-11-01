@@ -62,6 +62,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
 /**
@@ -136,7 +137,7 @@ constructor(
     private val isNewImpl: Boolean
         get() = !featureFlags.isEnabled(Flags.USER_INTERACTOR_AND_REPO_USE_CONTROLLER)
 
-    private val _userSwitcherSettings = MutableStateFlow<UserSwitcherSettingsModel?>(null)
+    private val _userSwitcherSettings = MutableStateFlow(runBlocking { getSettings() })
     override val userSwitcherSettings: Flow<UserSwitcherSettingsModel> =
         _userSwitcherSettings.asStateFlow().filterNotNull()
 
@@ -235,7 +236,7 @@ constructor(
     }
 
     override fun isSimpleUserSwitcher(): Boolean {
-        return checkNotNull(_userSwitcherSettings.value?.isSimpleUserSwitcher)
+        return _userSwitcherSettings.value.isSimpleUserSwitcher
     }
 
     private fun observeSelectedUser() {

@@ -22,4 +22,9 @@ import dagger.Module
 @Module
 interface KeyguardRepositoryModule {
     @Binds fun keyguardRepository(impl: KeyguardRepositoryImpl): KeyguardRepository
+
+    @Binds
+    fun keyguardTransitionRepository(
+        impl: KeyguardTransitionRepositoryImpl
+    ): KeyguardTransitionRepository
 }
