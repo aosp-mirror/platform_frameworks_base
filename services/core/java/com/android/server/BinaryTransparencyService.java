@@ -26,9 +26,15 @@ import android.app.job.JobService;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.InstallSourceInfo;
 import android.content.pm.ModuleInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.Signature;
+import android.content.pm.SigningDetails;
+import android.content.pm.SigningInfo;
+import android.content.pm.parsing.result.ParseResult;
+import android.content.pm.parsing.result.ParseTypeImpl;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -39,13 +45,19 @@ import android.os.ShellCommand;
 import android.os.SystemProperties;
 import android.util.PackageUtils;
 import android.util.Slog;
+import android.util.apk.ApkSignatureVerifier;
+import android.util.apk.ApkSigningBlockUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.IBinaryTransparencyService;
 import com.android.internal.util.FrameworkStatsLog;
 
+import libcore.util.HexEncoding;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.security.PublicKey;
+import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -151,6 +163,117 @@ public class BinaryTransparencyService extends SystemService {
                     return 0;
                 }
 
+                private void printPackageMeasurements(PackageInfo packageInfo,
+                                                      final PrintWriter pw) {
+                    pw.print(mBinaryHashes.get(packageInfo.packageName) + ",");
+                    // TODO: To be moved to somewhere more suitable
+                    final ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
+                    ParseResult<ApkSignatureVerifier.SigningDetailsWithDigests> parseResult =
+                            ApkSignatureVerifier.verifySignaturesInternal(input,
+                                    packageInfo.applicationInfo.sourceDir,
+                                    SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3, false);
+                    if (parseResult.isError()) {
+                        pw.println("ERROR: Failed to compute package content digest for "
+                                + packageInfo.applicationInfo.sourceDir + "due to: "
+                                + parseResult.getErrorMessage());
+                    } else {
+                        ApkSignatureVerifier.SigningDetailsWithDigests signingDetails =
+                                parseResult.getResult();
+                        Map<Integer, byte[]> contentDigests = signingDetails.contentDigests;
+                        for (Map.Entry<Integer, byte[]> entry : contentDigests.entrySet()) {
+                            Integer algorithmId = entry.getKey();
+                            byte[] cDigest = entry.getValue();
+                            //pw.print("Content digest algorithm: ");
+                            switch (algorithmId) {
+                                case ApkSigningBlockUtils.CONTENT_DIGEST_CHUNKED_SHA256:
+                                    pw.print("CHUNKED_SHA256:");
+                                    break;
+                                case ApkSigningBlockUtils.CONTENT_DIGEST_CHUNKED_SHA512:
+                                    pw.print("CHUNKED_SHA512:");
+                                    break;
+                                case ApkSigningBlockUtils.CONTENT_DIGEST_VERITY_CHUNKED_SHA256:
+                                    pw.print("VERITY_CHUNKED_SHA256:");
+                                    break;
+                                case ApkSigningBlockUtils.CONTENT_DIGEST_SHA256:
+                                    pw.print("SHA256:");
+                                    break;
+                                default:
+                                    pw.print("UNKNOWN:");
+                            }
+                            pw.print(HexEncoding.encodeToString(cDigest, false));
+                        }
+                    }
+                }
+
+                private void printPackageInstallationInfo(PackageInfo packageInfo,
+                                                          final PrintWriter pw) {
+                    pw.println("--- Package Installation Info ---");
+                    pw.println("Current install location: "
+                            + packageInfo.applicationInfo.sourceDir);
+                    if (packageInfo.applicationInfo.sourceDir.startsWith("/data/apex/")) {
+                        String origPackageFilepath = getOriginalPreinstalledLocation(
+                                packageInfo.packageName, packageInfo.applicationInfo.sourceDir);
+                        pw.println("|--> Package pre-installed location: " + origPackageFilepath);
+                        String digest = mBinaryHashes.get(origPackageFilepath);
+                        if (digest == null) {
+                            pw.println("ERROR finding SHA256-digest from cache...");
+                        } else {
+                            pw.println("|--> Pre-installed package SHA256-digest: " + digest);
+                        }
+                    }
+                    pw.println("First install time (ms): " + packageInfo.firstInstallTime);
+                    pw.println("Last update time (ms): " + packageInfo.lastUpdateTime);
+                    boolean isPreloaded = (packageInfo.firstInstallTime
+                            == packageInfo.lastUpdateTime);
+                    pw.println("Is preloaded: " + isPreloaded);
+
+                    InstallSourceInfo installSourceInfo = getInstallSourceInfo(
+                            packageInfo.packageName);
+                    if (installSourceInfo == null) {
+                        pw.println("ERROR: Unable to obtain installSourceInfo of "
+                                + packageInfo.packageName);
+                    } else {
+                        pw.println("Installation initiated by: "
+                                + installSourceInfo.getInitiatingPackageName());
+                        pw.println("Installation done by: "
+                                + installSourceInfo.getInstallingPackageName());
+                        pw.println("Installation originating from: "
+                                + installSourceInfo.getOriginatingPackageName());
+                    }
+
+                    if (packageInfo.isApex) {
+                        pw.println("Is an active APEX: " + packageInfo.isActiveApex);
+                    }
+                }
+
+                private void printPackageSignerDetails(SigningInfo signerInfo,
+                                                       final PrintWriter pw) {
+                    if (signerInfo == null) {
+                        pw.println("ERROR: Package's signingInfo is null.");
+                        return;
+                    }
+                    pw.println("--- Package Signer Info ---");
+                    pw.println("Has multiple signers: " + signerInfo.hasMultipleSigners());
+                    Signature[] packageSigners = signerInfo.getApkContentsSigners();
+                    for (Signature packageSigner : packageSigners) {
+                        byte[] packageSignerDigestBytes =
+                                PackageUtils.computeSha256DigestBytes(packageSigner.toByteArray());
+                        String packageSignerDigestHextring =
+                                HexEncoding.encodeToString(packageSignerDigestBytes, false);
+                        pw.println("Signer cert's SHA256-digest: " + packageSignerDigestHextring);
+                        try {
+                            PublicKey publicKey = packageSigner.getPublicKey();
+                            pw.println("Signing key algorithm: " + publicKey.getAlgorithm());
+                        } catch (CertificateException e) {
+                            Slog.e(TAG,
+                                    "Failed to obtain public key of signer for cert with hash: "
+                                    + packageSignerDigestHextring);
+                            e.printStackTrace();
+                        }
+                    }
+
+                }
+
                 private void printModuleDetails(ModuleInfo moduleInfo, final PrintWriter pw) {
                     pw.println("--- Module Details ---");
                     pw.println("Module name: " + moduleInfo.getName());
@@ -190,28 +313,35 @@ public class BinaryTransparencyService extends SystemService {
                         return -1;
                     }
 
-                    pw.println("APEX Info:");
+                    if (!verbose) {
+                        pw.println("APEX Info [Format: package_name,package_version,"
+                                + "package_sha256_digest,"
+                                + "content_digest_algorithm:content_digest]:");
+                    }
                     for (PackageInfo packageInfo : getInstalledApexs()) {
+                        if (verbose) {
+                            pw.println("APEX Info [Format: package_name,package_version,"
+                                    + "package_sha256_digest,"
+                                    + "content_digest_algorithm:content_digest]:");
+                        }
                         String packageName = packageInfo.packageName;
-                        pw.println(packageName + ";"
-                                + packageInfo.getLongVersionCode() + ":"
-                                + mBinaryHashes.get(packageName).toLowerCase());
+                        pw.print(packageName + ","
+                                + packageInfo.getLongVersionCode() + ",");
+                        printPackageMeasurements(packageInfo, pw);
+                        pw.print("\n");
 
                         if (verbose) {
-                            pw.println("Install location: "
-                                    + packageInfo.applicationInfo.sourceDir);
-                            pw.println("Last Update Time (ms): " + packageInfo.lastUpdateTime);
-
                             ModuleInfo moduleInfo;
                             try {
                                 moduleInfo = pm.getModuleInfo(packageInfo.packageName, 0);
+                                pw.println("Is a module: true");
+                                printModuleDetails(moduleInfo, pw);
                             } catch (PackageManager.NameNotFoundException e) {
-                                pw.println("Is A Module: False");
-                                pw.println("");
-                                continue;
+                                pw.println("Is a module: false");
                             }
-                            pw.println("Is A Module: True");
-                            printModuleDetails(moduleInfo, pw);
+
+                            printPackageInstallationInfo(packageInfo, pw);
+                            printPackageSignerDetails(packageInfo.signingInfo, pw);
                             pw.println("");
                         }
                     }
@@ -250,25 +380,37 @@ public class BinaryTransparencyService extends SystemService {
                         return -1;
                     }
 
-                    pw.println("Module Info:");
+                    if (!verbose) {
+                        pw.println("Module Info [Format: package_name,package_version,"
+                                + "package_sha256_digest,"
+                                + "content_digest_algorithm:content_digest]:");
+                    }
                     for (ModuleInfo module : pm.getInstalledModules(PackageManager.MATCH_ALL)) {
                         String packageName = module.getPackageName();
+                        if (verbose) {
+                            pw.println("Module Info [Format: package_name,package_version,"
+                                    + "package_sha256_digest,"
+                                    + "content_digest_algorithm:content_digest]:");
+                        }
                         try {
                             PackageInfo packageInfo = pm.getPackageInfo(packageName,
-                                    PackageManager.MATCH_APEX);
-                            pw.println(packageInfo.packageName + ";"
-                                    + packageInfo.getLongVersionCode() + ":"
-                                    + mBinaryHashes.get(packageName).toLowerCase());
+                                    PackageManager.MATCH_APEX
+                                            | PackageManager.GET_SIGNING_CERTIFICATES);
+                            //pw.print("package:");
+                            pw.print(packageInfo.packageName + ",");
+                            pw.print(packageInfo.getLongVersionCode() + ",");
+                            printPackageMeasurements(packageInfo, pw);
+                            pw.print("\n");
 
                             if (verbose) {
-                                pw.println("Install location: "
-                                        + packageInfo.applicationInfo.sourceDir);
                                 printModuleDetails(module, pw);
+                                printPackageInstallationInfo(packageInfo, pw);
+                                printPackageSignerDetails(packageInfo.signingInfo, pw);
                                 pw.println("");
                             }
                         } catch (PackageManager.NameNotFoundException e) {
                             pw.println(packageName
-                                    + ";ERROR:Unable to find PackageInfo for this module.");
+                                    + ",ERROR:Unable to find PackageInfo for this module.");
                             if (verbose) {
                                 printModuleDetails(module, pw);
                                 pw.println("");
@@ -468,7 +610,8 @@ public class BinaryTransparencyService extends SystemService {
             return results;
         }
         List<PackageInfo> allPackages = pm.getInstalledPackages(
-                PackageManager.PackageInfoFlags.of(PackageManager.MATCH_APEX));
+                PackageManager.PackageInfoFlags.of(PackageManager.MATCH_APEX
+                        | PackageManager.GET_SIGNING_CERTIFICATES));
         if (allPackages == null) {
             Slog.e(TAG, "Error obtaining installed packages (including APEX)");
             return results;
@@ -476,6 +619,21 @@ public class BinaryTransparencyService extends SystemService {
 
         results = allPackages.stream().filter(p -> p.isApex).collect(Collectors.toList());
         return results;
+    }
+
+    @Nullable
+    private InstallSourceInfo getInstallSourceInfo(String packageName) {
+        PackageManager pm = mContext.getPackageManager();
+        if (pm == null) {
+            Slog.e(TAG, "Error obtaining an instance of PackageManager.");
+            return null;
+        }
+        try {
+            return pm.getInstallSourceInfo(packageName);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
 
@@ -539,6 +697,14 @@ public class BinaryTransparencyService extends SystemService {
         return true;
     }
 
+    private String getOriginalPreinstalledLocation(String packageName,
+                                                   String currentInstalledLocation) {
+        if (currentInstalledLocation.contains("/decompressed/")) {
+            return "/system/apex/" + packageName + ".capex";
+        }
+        return "/system/apex" + packageName + "apex";
+    }
+
     private void doFreshBinaryMeasurements() {
         PackageManager pm = mContext.getPackageManager();
         Slog.d(TAG, "Obtained package manager");
@@ -565,6 +731,27 @@ public class BinaryTransparencyService extends SystemService {
             Slog.d(TAG, String.format("Last update time for %s: %d", packageInfo.packageName,
                     packageInfo.lastUpdateTime));
             mBinaryLastUpdateTimes.put(packageInfo.packageName, packageInfo.lastUpdateTime);
+        }
+
+        for (PackageInfo packageInfo : getInstalledApexs()) {
+            ApplicationInfo appInfo = packageInfo.applicationInfo;
+            if (!appInfo.sourceDir.startsWith("/data/")) {
+                continue;
+            }
+            String origInstallPath = getOriginalPreinstalledLocation(packageInfo.packageName,
+                                                                     appInfo.sourceDir);
+
+            // compute SHA256 for the orig /system APEXs
+            String sha256digest = PackageUtils.computeSha256DigestForLargeFile(origInstallPath,
+                                                                               largeFileBuffer);
+            if (sha256digest == null) {
+                Slog.e(TAG, String.format("Failed to compute SHA256 digest for file at %s",
+                                          origInstallPath));
+                mBinaryHashes.put(origInstallPath, BINARY_HASH_ERROR);
+            } else {
+                mBinaryHashes.put(origInstallPath, sha256digest);
+            }
+            // there'd be no entry into mBinaryLastUpdateTimes
         }
 
         // Next, get all installed modules from PackageManager - skip over those APEXs we've
