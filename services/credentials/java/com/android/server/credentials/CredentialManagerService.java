@@ -24,6 +24,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.credentials.CreateCredentialRequest;
 import android.credentials.GetCredentialRequest;
+import android.credentials.IClearCredentialSessionCallback;
 import android.credentials.ICreateCredentialCallback;
 import android.credentials.ICredentialManager;
 import android.credentials.IGetCredentialCallback;
@@ -152,6 +153,15 @@ public final class CredentialManagerService extends
                 String callingPackage) {
             // TODO: implement.
             Log.i(TAG, "executeCreateCredential");
+            ICancellationSignal cancelTransport = CancellationSignal.createTransport();
+            return cancelTransport;
+        }
+
+        @Override
+        public ICancellationSignal clearCredentialSession(
+                IClearCredentialSessionCallback callback, String callingPackage) {
+            // TODO: implement.
+            Log.i(TAG, "clearCredentialSession");
             ICancellationSignal cancelTransport = CancellationSignal.createTransport();
             return cancelTransport;
         }
