@@ -30,15 +30,20 @@ import java.util.ArrayList;
  */
 public class IntentFactory {
     /** Generate a new launch intent to the . */
-    public static Intent newIntent(RequestInfo requestInfo,
-            ArrayList<ProviderData> providerDataList, ResultReceiver resultReceiver) {
+    public static Intent newIntent(
+            RequestInfo requestInfo,
+            ArrayList<ProviderData> enabledProviderDataList,
+            ArrayList<DisabledProviderData> disabledProviderDataList,
+            ResultReceiver resultReceiver) {
         Intent intent = new Intent();
         // TODO: define these as proper config strings.
         String activityName = "com.android.credentialmanager/.CredentialSelectorActivity";
         intent.setComponent(ComponentName.unflattenFromString(activityName));
 
         intent.putParcelableArrayListExtra(
-                ProviderData.EXTRA_PROVIDER_DATA_LIST, providerDataList);
+                ProviderData.EXTRA_ENABLED_PROVIDER_DATA_LIST, enabledProviderDataList);
+        intent.putParcelableArrayListExtra(
+                ProviderData.EXTRA_DISABLED_PROVIDER_DATA_LIST, disabledProviderDataList);
         intent.putExtra(RequestInfo.EXTRA_REQUEST_INFO, requestInfo);
         intent.putExtra(Constants.EXTRA_RESULT_RECEIVER,
                 toIpcFriendlyResultReceiver(resultReceiver));

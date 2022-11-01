@@ -83,8 +83,9 @@ public class CredentialManagerUi {
      */
     public void show(RequestInfo requestInfo, ArrayList<ProviderData> providerDataList) {
         Log.i(TAG, "In show");
-        Intent intent = IntentFactory.newIntent(requestInfo, providerDataList,
-                mResultReceiver);
+        Intent intent = IntentFactory.newIntent(
+                requestInfo, providerDataList,
+                new ArrayList<>(), mResultReceiver);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         mContext.startActivity(intent);
     }
