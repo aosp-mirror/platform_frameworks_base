@@ -73,6 +73,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"ID do autor da chamada é predefinido com não restrito. Chamada seguinte: Não restrita"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Serviço não fornecido."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Não pode alterar a definição da identificação de chamadas."</string>
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"Os dados móveis foram alterados para o operador <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"Pode alterar isto em qualquer altura nas Definições"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Sem serviço de dados móveis"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Chamadas de emergência indisponíveis"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Sem serviço de voz"</string>

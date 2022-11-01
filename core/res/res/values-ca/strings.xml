@@ -72,6 +72,10 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"El valor predeterminat de l\'identificador de trucada és no restringit. Trucada següent: no restringit"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"No s\'ha proveït el servei."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"No pots canviar la configuració de l\'identificador de trucada."</string>
+    <!-- no translation found for auto_data_switch_title (3286350716870518297) -->
+    <skip />
+    <!-- no translation found for auto_data_switch_content (803557715007110959) -->
+    <skip />
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"No hi ha servei de dades mòbils"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Les trucades d\'emergència no estan disponibles"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Sense servei de veu"</string>

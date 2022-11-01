@@ -72,6 +72,10 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"ಕರೆಮಾಡುವವರ ID ಅನ್ನು ನಿರ್ಬಂಧಿಸದಿರುವಂತೆ ಡಿಫಾಲ್ಟ್ ಮಾಡಲಾಗಿದೆ. ಮುಂದಿನ ಕರೆ: ನಿರ್ಬಂಧಿಸಲಾಗಿಲ್ಲ"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"ಸೇವೆಯನ್ನು ಪೂರೈಸಲಾಗಿಲ್ಲ."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"ನೀವು ಕಾಲರ್‌ ID ಸೆಟ್ಟಿಂಗ್‌ ಬದಲಾಯಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ."</string>
+    <!-- no translation found for auto_data_switch_title (3286350716870518297) -->
+    <skip />
+    <!-- no translation found for auto_data_switch_content (803557715007110959) -->
+    <skip />
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"ಮೊಬೈಲ್ ಡೇಟಾ ಸೇವೆಯಿಲ್ಲ"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"ತುರ್ತು ಕರೆ ಲಭ್ಯವಿಲ್ಲ"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"ಧ್ವನಿ ಸೇವೆಯಿಲ್ಲ"</string>

@@ -74,6 +74,10 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"ID klicatelja je ponastavljen na neomejeno. Naslednji klic: ni omejeno"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Storitev ni nastavljena in omogočena."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Ne morete spremeniti nastavitve ID-ja klicatelja."</string>
+    <!-- no translation found for auto_data_switch_title (3286350716870518297) -->
+    <skip />
+    <!-- no translation found for auto_data_switch_content (803557715007110959) -->
+    <skip />
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Ni mobilne podatkovne storitve"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Klicanje v sili ni na voljo"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Ni storitve za glasovne klice"</string>

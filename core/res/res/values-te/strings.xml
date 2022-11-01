@@ -72,6 +72,10 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"కాలర్ ID ఆటోమేటిక్‌లపై పరిమితి లేదు. తర్వాత కాల్: పరిమితి లేదు"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"సేవ కేటాయించబడలేదు."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"మీరు కాలర్ ID సెట్టింగ్‌ను మార్చలేరు."</string>
+    <!-- no translation found for auto_data_switch_title (3286350716870518297) -->
+    <skip />
+    <!-- no translation found for auto_data_switch_content (803557715007110959) -->
+    <skip />
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"మొబైల్ డేటా సేవ లేదు"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"అత్యవసర కాలింగ్ అందుబాటులో లేదు"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"వాయిస్ సర్వీస్ లేదు"</string>
@@ -2071,7 +2075,7 @@
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"కెమెరా"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"మైక్రోఫోన్"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"మీ స్క్రీన్‌పై ఇతర యాప్‌ల ద్వారా ప్రదర్శించబడుతోంది"</string>
-    <string name="notification_feedback_indicator" msgid="663476517711323016">"ఫీడ్‌బ్యాక్‌ను అందించండి"</string>
+    <string name="notification_feedback_indicator" msgid="663476517711323016">"ఫీడ్‌బ్యాక్ ఇవ్వండి"</string>
     <string name="notification_feedback_indicator_alerted" msgid="6552871804121942099">"ఈ నోటిఫికేషన్, ఆటోమేటిక్ సెట్టింగ్‌కు ప్రమోట్ చేయబడింది. ఫీడ్‌బ్యాక్‌ను అందించడానికి ట్యాప్ చేయండి."</string>
     <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"ఈ నోటిఫికేషన్ స్థాయి నిశ్శబ్దంగా ఉండేలా తగ్గించబడింది. ఫీడ్‌బ్యాక్‌ను అందించడానికి ట్యాప్ చేయండి."</string>
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"ఈ నోటిఫికేషన్‌కు ఎక్కువ ర్యాంక్ ఇవ్వబడింది. ఫీడ్‌బ్యాక్‌ను అందించడానికి ట్యాప్ చేయండి."</string>

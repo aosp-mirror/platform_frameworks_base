@@ -72,6 +72,10 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"‏کالر ID کی ڈیفالٹ ترتیب غیر محدود کردہ ہے۔ اگلی کال: غیر محدود کردہ"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"سروس فراہم نہیں کی گئی۔"</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"‏آپ کالر ID کی ترتیبات تبدیل نہیں کر سکتے ہیں۔"</string>
+    <!-- no translation found for auto_data_switch_title (3286350716870518297) -->
+    <skip />
+    <!-- no translation found for auto_data_switch_content (803557715007110959) -->
+    <skip />
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"کوئی موبائل ڈیٹا سروس دستیاب نہیں ہے"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"ہنگامی کالنگ دستیاب نہیں ہے"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"کوئی صوتی سروس نہیں"</string>
