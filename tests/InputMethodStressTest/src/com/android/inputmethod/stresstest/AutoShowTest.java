@@ -16,24 +16,32 @@
 
 package com.android.inputmethod.stresstest;
 
-import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
-
+import static com.android.inputmethod.stresstest.ImeStressTestUtil.REQUEST_FOCUS_ON_CREATE;
+import static com.android.inputmethod.stresstest.ImeStressTestUtil.TestActivity;
+import static com.android.inputmethod.stresstest.ImeStressTestUtil.TestActivity.createIntent;
+import static com.android.inputmethod.stresstest.ImeStressTestUtil.UNFOCUSABLE_VIEW;
+import static com.android.inputmethod.stresstest.ImeStressTestUtil.callOnMainSync;
+import static com.android.inputmethod.stresstest.ImeStressTestUtil.getWindowAndSoftInputFlagParameters;
+import static com.android.inputmethod.stresstest.ImeStressTestUtil.hasUnfocusableWindowFlags;
+import static com.android.inputmethod.stresstest.ImeStressTestUtil.verifyImeAlwaysHiddenWithWindowFlagSet;
 import static com.android.inputmethod.stresstest.ImeStressTestUtil.verifyImeIsAlwaysHidden;
-import static com.android.inputmethod.stresstest.ImeStressTestUtil.waitOnMainUntil;
+import static com.android.inputmethod.stresstest.ImeStressTestUtil.verifyWindowAndViewFocus;
 import static com.android.inputmethod.stresstest.ImeStressTestUtil.waitOnMainUntilImeIsShown;
 
-import android.app.Activity;
+import static com.google.common.truth.Truth.assertThat;
+
 import android.app.Instrumentation;
 import android.content.Intent;
-import android.os.Bundle;
+import android.os.SystemClock;
 import android.platform.test.annotations.RootPermissionTest;
 import android.platform.test.rule.UnlockScreenRule;
+import android.support.test.uiautomator.By;
+import android.support.test.uiautomator.UiDevice;
+import android.support.test.uiautomator.UiObject2;
+import android.support.test.uiautomator.Until;
 import android.view.WindowManager;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 
-import androidx.annotation.Nullable;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import org.junit.Rule;
@@ -41,135 +49,428 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
- * Tests to verify the "auto show" behavior in {@code InputMethodManagerService} when the window
+ * Tests to verify the "auto-show" behavior in {@code InputMethodManagerService} when the window
  * gaining the focus to start the input.
  */
 @RootPermissionTest
 @RunWith(Parameterized.class)
 public final class AutoShowTest {
 
-    @Rule
-    public UnlockScreenRule mUnlockScreenRule = new UnlockScreenRule();
+    @Rule public UnlockScreenRule mUnlockScreenRule = new UnlockScreenRule();
 
     @Rule
     public ScreenCaptureRule mScreenCaptureRule =
             new ScreenCaptureRule("/sdcard/InputMethodStressTest");
 
-    private static final int[] SOFT_INPUT_VISIBILITY_FLAGS =
-            new int[] {
-                WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED,
-                WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN,
-                WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN,
-                WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE,
-                WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE,
-            };
-
-    private static final int[] SOFT_INPUT_ADJUST_FLAGS =
-            new int[] {
-                WindowManager.LayoutParams.SOFT_INPUT_ADJUST_UNSPECIFIED,
-                WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE,
-                WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN,
-                WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING
-            };
-
     // TODO(b/240359838): add test case {@code Configuration.SCREENLAYOUT_SIZE_LARGE}.
     @Parameterized.Parameters(
-            name =
-                    "softInputVisibility={0}, softInputAdjustment={1},"
-                            + " softInputModeIsForwardNavigation={2}")
-    public static List<Object[]> softInputModeConfigs() {
-        ArrayList<Object[]> params = new ArrayList<>();
-        for (int softInputVisibility : SOFT_INPUT_VISIBILITY_FLAGS) {
-            for (int softInputAdjust : SOFT_INPUT_ADJUST_FLAGS) {
-                params.add(new Object[] {softInputVisibility, softInputAdjust, true});
-                params.add(new Object[] {softInputVisibility, softInputAdjust, false});
-            }
-        }
-        return params;
+            name = "windowFocusFlags={0}, softInputVisibility={1}, softInputAdjustment={2}")
+    public static List<Object[]> windowAndSoftInputFlagParameters() {
+        return getWindowAndSoftInputFlagParameters();
     }
 
-    private static final String SOFT_INPUT_FLAGS = "soft_input_flags";
+    private final int mSoftInputFlags;
+    private final int mWindowFocusFlags;
+    private final Instrumentation mInstrumentation;
 
-    private final int mSoftInputVisibility;
-    private final int mSoftInputAdjustment;
-    private final boolean mSoftInputIsForwardNavigation;
+    public AutoShowTest(int windowFocusFlags, int softInputVisibility, int softInputAdjustment) {
+        mSoftInputFlags = softInputVisibility | softInputAdjustment;
+        mWindowFocusFlags = windowFocusFlags;
+        mInstrumentation = InstrumentationRegistry.getInstrumentation();
+    }
 
-    public AutoShowTest(
-            int softInputVisibility,
-            int softInputAdjustment,
-            boolean softInputIsForwardNavigation) {
-        mSoftInputVisibility = softInputVisibility;
-        mSoftInputAdjustment = softInputAdjustment;
-        mSoftInputIsForwardNavigation = softInputIsForwardNavigation;
+    /**
+     * Test auto-show IME behavior when the {@link EditText} is focusable ({@link
+     * EditText#isFocusableInTouchMode} is {@code true}) and has called {@link
+     * EditText#requestFocus}.
+     */
+    @Test
+    public void autoShow_hasFocusedView_requestFocus() {
+        // request focus at onCreate()
+        Intent intent =
+                createIntent(
+                        mWindowFocusFlags,
+                        mSoftInputFlags,
+                        Collections.singletonList(REQUEST_FOCUS_ON_CREATE));
+        TestActivity activity = TestActivity.start(intent);
+
+        verifyAutoShowBehavior_forwardWithKeyboardOff(activity);
+    }
+
+    /**
+     * Test auto-show IME behavior when the {@link EditText} is focusable ({@link
+     * EditText#isFocusableInTouchMode} is {@code true}) and {@link EditText#requestFocus} is not
+     * called. The IME should never be shown because there is no focused editor in the window.
+     */
+    @Test
+    public void autoShow_hasFocusedView_notRequestFocus() {
+        // request focus not set
+        Intent intent = createIntent(mWindowFocusFlags, mSoftInputFlags, Collections.emptyList());
+        TestActivity activity = TestActivity.start(intent);
+        EditText editText = activity.getEditText();
+
+        int windowFlags = activity.getWindow().getAttributes().flags;
+        if ((windowFlags & WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE) != 0) {
+            // When FLAG_NOT_FOCUSABLE is set true, the view will never gain window focus.
+            verifyWindowAndViewFocus(
+                    editText, /*expectWindowFocus*/ false, /*expectViewFocus*/ false);
+        } else {
+            verifyWindowAndViewFocus(
+                    editText, /*expectWindowFocus*/ true, /*expectViewFocus*/ false);
+        }
+        // IME is always hidden because there is no view focus.
+        verifyImeIsAlwaysHidden(editText);
+    }
+
+    /**
+     * Test auto-show IME behavior when the {@link EditText} is not focusable ({@link
+     * EditText#isFocusableInTouchMode} is {@code false}) and {@link EditText#requestFocus} is not
+     * called. The IME should never be shown because there is no focusable editor in the window.
+     */
+    @Test
+    public void autoShow_notFocusedView_notRequestFocus() {
+        // Unfocusable view, request focus not set
+        Intent intent =
+                createIntent(
+                        mWindowFocusFlags,
+                        mSoftInputFlags,
+                        Collections.singletonList(UNFOCUSABLE_VIEW));
+        TestActivity activity = TestActivity.start(intent);
+        EditText editText = activity.getEditText();
+
+        int windowFlags = activity.getWindow().getAttributes().flags;
+        if ((windowFlags & WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE) != 0) {
+            // When FLAG_NOT_FOCUSABLE is set true, the view will never gain window focus.
+            verifyWindowAndViewFocus(
+                    editText, /*expectWindowFocus*/ false, /*expectViewFocus*/ false);
+        } else {
+            verifyWindowAndViewFocus(
+                    editText, /*expectWindowFocus*/ true, /*expectViewFocus*/ false);
+        }
+        // IME is always hidden because there is no focused view.
+        verifyImeIsAlwaysHidden(editText);
+    }
+
+    /**
+     * Test auto-show IME behavior when the activity is navigated forward from another activity with
+     * keyboard off.
+     */
+    @Test
+    public void autoShow_forwardWithKeyboardOff() {
+        // Create first activity with keyboard off
+        Intent intent1 =
+                createIntent(
+                        0x0 /* No window focus flags */,
+                        WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED
+                                | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE,
+                        Collections.emptyList());
+        TestActivity firstActivity = TestActivity.start(intent1);
+
+        // Create second activity with parameterized flags:
+        Intent intent2 =
+                createIntent(
+                        mWindowFocusFlags,
+                        mSoftInputFlags,
+                        Collections.singletonList(REQUEST_FOCUS_ON_CREATE));
+        TestActivity secondActivity = firstActivity.startSecondTestActivity(intent2);
+
+        // The auto-show behavior should be the same as opening the app
+        verifyAutoShowBehavior_forwardWithKeyboardOff(secondActivity);
+    }
+
+    /**
+     * Test auto-show IME behavior when the activity is navigated forward from another activity with
+     * keyboard on.
+     */
+    @Test
+    public void autoShow_forwardWithKeyboardOn() {
+        // Create first activity with keyboard on
+        Intent intent1 =
+                createIntent(
+                        0x0 /* No window focus flags */,
+                        WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED
+                                | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE,
+                        Collections.singletonList(REQUEST_FOCUS_ON_CREATE));
+        TestActivity firstActivity = TestActivity.start(intent1);
+        // Show Ime with InputMethodManager to ensure the keyboard is on.
+        boolean succ = callOnMainSync(firstActivity::showImeWithInputMethodManager);
+        assertThat(succ).isTrue();
+        SystemClock.sleep(1000);
+        mInstrumentation.waitForIdleSync();
+
+        // Create second activity with parameterized flags:
+        Intent intent2 =
+                createIntent(
+                        mWindowFocusFlags,
+                        mSoftInputFlags,
+                        Collections.singletonList(REQUEST_FOCUS_ON_CREATE));
+        TestActivity secondActivity = firstActivity.startSecondTestActivity(intent2);
+
+        // The auto-show behavior should be the same as open app
+        verifyAutoShowBehavior_forwardWithKeyboardOn(secondActivity);
+    }
+
+    /**
+     * Test auto-show IME behavior when the activity is navigated back from another activity with
+     * keyboard off.
+     */
+    @Test
+    public void autoShow_backwardWithKeyboardOff() {
+        // Not request focus at onCreate() to avoid triggering auto-show behavior
+        Intent intent1 = createIntent(mWindowFocusFlags, mSoftInputFlags, Collections.emptyList());
+        TestActivity firstActivity = TestActivity.start(intent1);
+        // Request view focus after app starts
+        mInstrumentation.runOnMainSync(firstActivity::requestFocus);
+
+        Intent intent2 =
+                createIntent(
+                        0x0 /* No window focus flags */,
+                        WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED
+                                | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE,
+                        Collections.emptyList());
+        TestActivity secondActivity = firstActivity.startSecondTestActivity(intent2);
+        secondActivity.finish();
+        mInstrumentation.waitForIdleSync();
+
+        // When activity is navigated back from another activity with keyboard off, the keyboard
+        // will not show except when soft input visibility flag is SOFT_INPUT_STATE_ALWAYS_VISIBLE.
+        verifyAutoShowBehavior_backwardWithKeyboardOff(firstActivity);
+    }
+
+    /**
+     * Test auto-show IME behavior when the activity is navigated back from another activity with
+     * keyboard on.
+     */
+    @Test
+    public void autoShow_backwardWithKeyboardOn() {
+        // Not request focus at onCreate() to avoid triggering auto-show behavior
+        Intent intent1 = createIntent(mWindowFocusFlags, mSoftInputFlags, Collections.emptyList());
+        TestActivity activity = TestActivity.start(intent1);
+        // Request view focus after app starts
+        mInstrumentation.runOnMainSync(activity::requestFocus);
+
+        // Create second TestActivity
+        Intent intent2 =
+                createIntent(
+                        0x0 /* No window focus flags */,
+                        WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED
+                                | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE,
+                        Collections.singletonList(REQUEST_FOCUS_ON_CREATE));
+        ImeStressTestUtil.TestActivity secondActivity = activity.startSecondTestActivity(intent2);
+        // Show Ime with InputMethodManager to ensure the keyboard is shown on the second activity
+        boolean succ = callOnMainSync(secondActivity::showImeWithInputMethodManager);
+        assertThat(succ).isTrue();
+        SystemClock.sleep(1000);
+        mInstrumentation.waitForIdleSync();
+        // Close the second activity
+        secondActivity.finish();
+        SystemClock.sleep(1000);
+        mInstrumentation.waitForIdleSync();
+        // When activity is navigated back from another activity with keyboard on, the keyboard
+        // will not hide except when soft input visibility flag is SOFT_INPUT_STATE_ALWAYS_HIDDEN.
+        verifyAutoShowBehavior_backwardWithKeyboardOn(activity);
     }
 
     @Test
-    public void autoShow() {
-        Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
-        int flags = mSoftInputVisibility | mSoftInputAdjustment;
-        if (mSoftInputIsForwardNavigation) {
-            flags |= WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION;
+    public void clickFocusableView_requestFocus() {
+        if ((mWindowFocusFlags & WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE) != 0) {
+            // UiAutomator cannot get UiObject if FLAG_NOT_FOCUSABLE is set
+            return;
+        }
+        Intent intent = createIntent(mWindowFocusFlags, mSoftInputFlags, Collections.emptyList());
+        TestActivity activity = TestActivity.start(intent);
+        // Request view focus after app starts
+        mInstrumentation.runOnMainSync(activity::requestFocus);
+
+        // Find the editText and click it
+        UiObject2 editTextUiObject =
+                UiDevice.getInstance(mInstrumentation)
+                        .wait(Until.findObject(By.clazz(EditText.class)), 5000);
+        assertThat(editTextUiObject).isNotNull();
+        editTextUiObject.click();
+
+        // Ime will show unless window flag is set
+        verifyClickBehavior(activity);
+    }
+
+    @Test
+    public void clickFocusableView_notRequestFocus() {
+        if ((mWindowFocusFlags & WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE) != 0) {
+            // UiAutomator cannot get UiObject if FLAG_NOT_FOCUSABLE is set
+            return;
+        }
+        // Not request focus
+        Intent intent1 = createIntent(mWindowFocusFlags, mSoftInputFlags, Collections.emptyList());
+        TestActivity activity = TestActivity.start(intent1);
+
+        // Find the editText and click it
+        UiObject2 editTextUiObject =
+                UiDevice.getInstance(mInstrumentation)
+                        .wait(Until.findObject(By.clazz(EditText.class)), 5000);
+        assertThat(editTextUiObject).isNotNull();
+        editTextUiObject.click();
+
+        // Ime will show unless window flag is set
+        verifyClickBehavior(activity);
+    }
+
+    public static void verifyAutoShowBehavior_forwardWithKeyboardOff(TestActivity activity) {
+        // public: also used by ImeOpenCloseStressTest
+        if (hasUnfocusableWindowFlags(activity)) {
+            verifyImeAlwaysHiddenWithWindowFlagSet(activity);
+            return;
         }
 
-        Intent intent =
-                new Intent()
-                        .setAction(Intent.ACTION_MAIN)
-                        .setClass(instrumentation.getContext(), TestActivity.class)
-                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                        .putExtra(SOFT_INPUT_FLAGS, flags);
-        TestActivity activity = (TestActivity) instrumentation.startActivitySync(intent);
+        int softInputMode = activity.getWindow().getAttributes().softInputMode;
+        int softInputVisibility = softInputMode & WindowManager.LayoutParams.SOFT_INPUT_MASK_STATE;
+        int softInputAdjustment = softInputMode & WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
         EditText editText = activity.getEditText();
-        waitOnMainUntil("activity should gain focus", editText::hasWindowFocus);
 
-        if (mSoftInputVisibility == WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE
-                || mSoftInputVisibility
-                        == WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE) {
-            // IME will be auto-shown if softInputMode is set with flag:
-            // SOFT_INPUT_STATE_VISIBLE or SOFT_INPUT_STATE_ALWAYS_VISIBLE
-            waitOnMainUntilImeIsShown(editText);
-        } else if (mSoftInputVisibility == WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN
-                || mSoftInputVisibility
-                        == WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN) {
-            // IME will be not be shown if softInputMode is set with flag:
-            // SOFT_INPUT_STATE_HIDDEN or SOFT_INPUT_STATE_ALWAYS_HIDDEN
-            verifyImeIsAlwaysHidden(editText);
-        } else {
-            // The current system behavior will choose to show IME automatically when navigating
-            // forward to an app that has no visibility state specified  (i.e.
-            // SOFT_INPUT_STATE_UNSPECIFIED) with set SOFT_INPUT_ADJUST_RESIZE flag.
-            if (mSoftInputVisibility == WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED
-                    && mSoftInputAdjustment == WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
-                    && mSoftInputIsForwardNavigation) {
+        verifyWindowAndViewFocus(editText, /*expectWindowFocus*/ true, /*expectViewFocus*/ true);
+        switch (softInputVisibility) {
+            case WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE:
+            case WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE: {
+                // IME will be auto-shown if softInputMode is set with flag:
+                // SOFT_INPUT_STATE_VISIBLE or SOFT_INPUT_STATE_ALWAYS_VISIBLE
                 waitOnMainUntilImeIsShown(editText);
+                break;
             }
+            case WindowManager.LayoutParams.SOFT_INPUT_STATE_UNCHANGED:
+            case WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN:
+            case WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN: {
+                // IME will be not be auto-shown if softInputMode is set with flag:
+                // SOFT_INPUT_STATE_HIDDEN or SOFT_INPUT_STATE_ALWAYS_HIDDEN,
+                // or stay unchanged if set SOFT_INPUT_STATE_UNCHANGED
+                verifyImeIsAlwaysHidden(editText);
+                break;
+            }
+            case WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED: {
+                if (softInputAdjustment
+                        == WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE) {
+                    // The current system behavior will choose to show IME automatically when
+                    // navigating forward to an app that has no visibility state specified
+                    // (i.e. SOFT_INPUT_STATE_UNSPECIFIED) with set SOFT_INPUT_ADJUST_RESIZE
+                    // flag.
+                    waitOnMainUntilImeIsShown(editText);
+                } else {
+                    verifyImeIsAlwaysHidden(editText);
+                }
+                break;
+            }
+            default:
+                break;
         }
     }
 
-    public static class TestActivity extends Activity {
-        private EditText mEditText;
+    private static void verifyAutoShowBehavior_forwardWithKeyboardOn(TestActivity activity) {
+        int windowFlags = activity.getWindow().getAttributes().flags;
+        int softInputMode = activity.getWindow().getAttributes().softInputMode;
+        int softInputVisibility = softInputMode & WindowManager.LayoutParams.SOFT_INPUT_MASK_STATE;
+        int softInputAdjustment = softInputMode & WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
+        EditText editText = activity.getEditText();
 
-        @Override
-        protected void onCreate(@Nullable Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            int flags = getIntent().getIntExtra(SOFT_INPUT_FLAGS, 0);
-            getWindow().setSoftInputMode(flags);
-            LinearLayout rootView = new LinearLayout(this);
-            rootView.setOrientation(LinearLayout.VERTICAL);
-            mEditText = new EditText(this);
-            rootView.addView(mEditText, new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT));
-            setContentView(rootView);
-            // Ensure the focused view is a text editor (View#onCheckIsTextEditor() returns true) to
-            // automatically display a soft input window.
-            mEditText.requestFocus();
+        if ((windowFlags & WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE) != 0) {
+            // When FLAG_NOT_FOCUSABLE is set true, the view will never gain window focus. The IME
+            // will always be hidden even though the view can get focus itself.
+            verifyWindowAndViewFocus(
+                    editText, /*expectWindowFocus*/ false, /*expectViewFocus*/ true);
+            // TODO(b/252192121): Ime should be hidden but is shown.
+            // waitOnMainUntilImeIsHidden(editText);
+            return;
+        } else if ((windowFlags & WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM) != 0
+                || (windowFlags & WindowManager.LayoutParams.FLAG_LOCAL_FOCUS_MODE) != 0) {
+            // When FLAG_ALT_FOCUSABLE_IM or FLAG_LOCAL_FOCUS_MODE is set, the view can gain both
+            // window focus and view focus but not IME focus. The IME will always be hidden.
+            verifyWindowAndViewFocus(
+                    editText, /*expectWindowFocus*/ true, /*expectViewFocus*/ true);
+            // TODO(b/252192121): Ime should be hidden but is shown.
+            // waitOnMainUntilImeIsHidden(editText);
+            return;
         }
+        verifyWindowAndViewFocus(editText, /*expectWindowFocus*/ true, /*expectViewFocus*/ true);
+        switch (softInputVisibility) {
+            case WindowManager.LayoutParams.SOFT_INPUT_STATE_UNCHANGED:
+            case WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE:
+            case WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE: {
+                // IME will be auto-shown if softInputMode is set with flag:
+                // SOFT_INPUT_STATE_VISIBLE or SOFT_INPUT_STATE_ALWAYS_VISIBLE
+                waitOnMainUntilImeIsShown(editText);
+                break;
+            }
+            case WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN:
+            case WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN: {
+                // IME will be not be auto-shown if softInputMode is set with flag:
+                // SOFT_INPUT_STATE_HIDDEN or SOFT_INPUT_STATE_ALWAYS_HIDDEN
+                // or stay unchanged if set SOFT_INPUT_STATE_UNCHANGED
+                verifyImeIsAlwaysHidden(editText);
+                break;
+            }
+            case WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED: {
+                if (softInputAdjustment
+                        == WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE) {
+                    // The current system behavior will choose to show IME automatically when
+                    // navigating
+                    // forward to an app that has no visibility state specified  (i.e.
+                    // SOFT_INPUT_STATE_UNSPECIFIED) with set SOFT_INPUT_ADJUST_RESIZE flag.
+                    waitOnMainUntilImeIsShown(editText);
+                } else {
+                    verifyImeIsAlwaysHidden(editText);
+                }
+                break;
+            }
+            default:
+                break;
+        }
+    }
 
-        public EditText getEditText() {
-            return mEditText;
+    private static void verifyAutoShowBehavior_backwardWithKeyboardOff(TestActivity activity) {
+        if (hasUnfocusableWindowFlags(activity)) {
+            verifyImeAlwaysHiddenWithWindowFlagSet(activity);
+            return;
+        }
+        int softInputMode = activity.getWindow().getAttributes().softInputMode;
+        int softInputVisibility = softInputMode & WindowManager.LayoutParams.SOFT_INPUT_MASK_STATE;
+        EditText editText = activity.getEditText();
+
+        verifyWindowAndViewFocus(editText, /*expectWindowFocus*/ true, /*expectViewFocus*/ true);
+        if (softInputVisibility == WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE) {
+            waitOnMainUntilImeIsShown(editText);
+        } else {
+            verifyImeIsAlwaysHidden(editText);
+        }
+    }
+
+    private static void verifyAutoShowBehavior_backwardWithKeyboardOn(TestActivity activity) {
+        if (hasUnfocusableWindowFlags(activity)) {
+            verifyImeAlwaysHiddenWithWindowFlagSet(activity);
+            return;
+        }
+        int softInputMode = activity.getWindow().getAttributes().softInputMode;
+        int softInputVisibility = softInputMode & WindowManager.LayoutParams.SOFT_INPUT_MASK_STATE;
+        EditText editText = activity.getEditText();
+
+        verifyWindowAndViewFocus(editText, /*expectWindowFocus*/ true, /*expectViewFocus*/ true);
+        if (softInputVisibility == WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN) {
+            verifyImeIsAlwaysHidden(editText);
+        } else {
+            waitOnMainUntilImeIsShown(editText);
+        }
+    }
+
+    private static void verifyClickBehavior(TestActivity activity) {
+        int windowFlags = activity.getWindow().getAttributes().flags;
+        EditText editText = activity.getEditText();
+
+        verifyWindowAndViewFocus(editText, /*expectWindowFocus*/ true, /*expectViewFocus*/ true);
+        if ((windowFlags & WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM) != 0
+                || (windowFlags & WindowManager.LayoutParams.FLAG_LOCAL_FOCUS_MODE) != 0) {
+            verifyImeIsAlwaysHidden(editText);
+        } else {
+            waitOnMainUntilImeIsShown(editText);
         }
     }
 }
