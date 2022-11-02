@@ -5055,8 +5055,11 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     "getUnsuspendablePackagesForUser");
             final int callingUid = Binder.getCallingUid();
             if (UserHandle.getUserId(callingUid) != userId) {
-                throw new SecurityException("Calling uid " + callingUid
-                        + " cannot query getUnsuspendablePackagesForUser for user " + userId);
+                mContext.enforceCallingOrSelfPermission(
+                        Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                        "Calling uid " + callingUid
+                                + " cannot query getUnsuspendablePackagesForUser for user "
+                                + userId);
             }
             return mSuspendPackageHelper.getUnsuspendablePackagesForUser(snapshotComputer(),
                     packageNames, userId, callingUid);
