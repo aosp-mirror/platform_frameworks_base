@@ -72,7 +72,6 @@ import java.util.function.Supplier;
 class FingerprintAuthenticationClient extends AuthenticationClient<AidlSession>
         implements Udfps, LockoutConsumer, PowerPressHandler {
     private static final String TAG = "FingerprintAuthenticationClient";
-    private static final int MESSAGE_IGNORE_AUTH = 1;
     private static final int MESSAGE_AUTH_SUCCESS = 2;
     private static final int MESSAGE_FINGER_UP = 3;
     @NonNull
@@ -249,12 +248,6 @@ class FingerprintAuthenticationClient extends AuthenticationClient<AidlSession>
                 () -> {
                     long delay = 0;
                     if (authenticated && mSensorProps.isAnySidefpsType()) {
-                        if (mHandler.hasMessages(MESSAGE_IGNORE_AUTH)) {
-                            Slog.i(TAG, "(sideFPS) Ignoring auth due to recent power press");
-                            onErrorInternal(BiometricConstants.BIOMETRIC_ERROR_POWER_PRESSED,
-                                    0, true);
-                            return;
-                        }
                         delay = isKeyguard() ? mWaitForAuthKeyguard : mWaitForAuthBp;
 
                         if (mSideFpsLastAcquireStartTime != -1) {
@@ -515,18 +508,15 @@ class FingerprintAuthenticationClient extends AuthenticationClient<AidlSession>
         if (mSensorProps.isAnySidefpsType()) {
             Slog.i(TAG, "(sideFPS): onPowerPressed");
             mHandler.post(() -> {
-                if (mHandler.hasMessages(MESSAGE_AUTH_SUCCESS)) {
-                    Slog.i(TAG, "(sideFPS): Ignoring auth in queue");
-                    mHandler.removeMessages(MESSAGE_AUTH_SUCCESS);
-                    // Do not call onError() as that will send an additional callback to coex.
-                    onErrorInternal(BiometricConstants.BIOMETRIC_ERROR_POWER_PRESSED, 0, true);
-                    mAuthSessionCoordinator.authEndedFor(getTargetUserId(),
-                            mBiometricStrength, getSensorId(), getRequestId());
-                }
-                mHandler.removeMessages(MESSAGE_IGNORE_AUTH);
-                mHandler.postDelayed(() -> {
-                }, MESSAGE_IGNORE_AUTH, mIgnoreAuthFor);
-
+                Slog.i(TAG, "(sideFPS): finishing auth");
+                // Ignore auths after a power has been detected
+                mHandler.removeMessages(MESSAGE_AUTH_SUCCESS);
+                // Do not call onError() as that will send an additional callback to coex.
+                onErrorInternal(BiometricConstants.BIOMETRIC_ERROR_POWER_PRESSED,
+                        0, true);
+                mSensorOverlays.hide(getSensorId());
+                mAuthSessionCoordinator.authEndedFor(getTargetUserId(),
+                        mBiometricStrength, getSensorId(), getRequestId());
             });
         }
     }
