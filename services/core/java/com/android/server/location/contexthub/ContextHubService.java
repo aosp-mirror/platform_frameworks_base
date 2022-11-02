@@ -207,6 +207,14 @@ public class ContextHubService extends IContextHubService.Stub {
             handleClientMessageCallback(mContextHubId, hostEndpointId, message, nanoappPermissions,
                     messagePermissions);
         }
+
+        @Override
+        public void handleServiceRestart() {
+            Log.i(TAG, "Starting Context Hub Service restart");
+            initExistingCallbacks();
+            resetSettings();
+            Log.i(TAG, "Finished Context Hub Service restart");
+        }
     }
 
     public ContextHubService(Context context, IContextHubWrapper contextHubWrapper) {
@@ -381,6 +389,20 @@ public class ContextHubService extends IContextHubService.Stub {
     }
 
     /**
+     * Initializes existing callbacks with the mContextHubWrapper for every context hub
+     */
+    private void initExistingCallbacks() {
+        for (int contextHubId : mContextHubIdToInfoMap.keySet()) {
+            try {
+                mContextHubWrapper.registerExistingCallback(contextHubId);
+            } catch (RemoteException e) {
+                Log.e(TAG, "RemoteException while registering existing service callback for hub "
+                        + "(ID = " + contextHubId + ")", e);
+            }
+        }
+    }
+
+    /**
      * Handles the initialization of location settings notifications
      */
     private void initLocationSettingNotifications() {
@@ -506,6 +528,17 @@ public class ContextHubService extends IContextHubService.Stub {
         filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
         filter.addAction(BluetoothAdapter.ACTION_BLE_STATE_CHANGED);
         mContext.registerReceiver(btReceiver, filter);
+    }
+
+    /**
+     * Resets the settings. Called when a context hub restarts or the AIDL HAL dies
+     */
+    private void resetSettings() {
+        sendLocationSettingUpdate();
+        sendWifiSettingUpdate(/* forceUpdate= */ true);
+        sendAirplaneModeSettingUpdate();
+        sendMicrophoneDisableSettingUpdateForCurrentUser();
+        sendBtSettingUpdate(/* forceUpdate= */ true);
     }
 
     @Override
@@ -859,11 +892,7 @@ public class ContextHubService extends IContextHubService.Stub {
 
             ContextHubEventLogger.getInstance().logContextHubRestart(contextHubId);
 
-            sendLocationSettingUpdate();
-            sendWifiSettingUpdate(/* forceUpdate= */ true);
-            sendAirplaneModeSettingUpdate();
-            sendMicrophoneDisableSettingUpdateForCurrentUser();
-            sendBtSettingUpdate(/* forceUpdate= */ true);
+            resetSettings();
 
             mTransactionManager.onHubReset();
             queryNanoAppsInternal(contextHubId);
