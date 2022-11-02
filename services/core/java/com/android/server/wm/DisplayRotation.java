@@ -1578,7 +1578,9 @@ public class DisplayRotation {
                         false /* forceRelayout */);
             } else {
                 // Revert the rotation to our saved value if we transition from HALF_FOLDED.
-                mRotation = mHalfFoldSavedRotation;
+                if (mHalfFoldSavedRotation != -1) {
+                    mRotation = mHalfFoldSavedRotation;
+                }
                 // Tell the device to update its orientation (mFoldState is still HALF_FOLDED here
                 // so we will override USER_ROTATION_LOCKED and allow a rotation).
                 mService.updateRotation(false /* alwaysSendConfiguration */,
