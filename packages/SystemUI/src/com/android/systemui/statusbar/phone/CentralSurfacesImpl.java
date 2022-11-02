@@ -483,7 +483,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private final Lazy<BiometricUnlockController> mBiometricUnlockControllerLazy;
     private final CentralSurfacesComponent.Factory mCentralSurfacesComponentFactory;
     private final PluginManager mPluginManager;
-    private final com.android.systemui.shade.ShadeController mShadeController;
+    private final ShadeController mShadeController;
     private final InitController mInitController;
 
     private final PluginDependencyProvider mPluginDependencyProvider;
@@ -496,9 +496,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private final StatusBarSignalPolicy mStatusBarSignalPolicy;
     private final StatusBarHideIconsForBouncerManager mStatusBarHideIconsForBouncerManager;
 
-    // expanded notifications
-    // the sliding/resizing panel within the notification window
-    protected NotificationPanelViewController mNotificationPanelViewController;
+    /** Controller for the Shade. */
+    @VisibleForTesting
+    NotificationPanelViewController mNotificationPanelViewController;
 
     // settings
     private QSPanelController mQSPanelController;
@@ -1169,7 +1169,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         initializer.initializeStatusBar(mCentralSurfacesComponent);
 
         mStatusBarTouchableRegionManager.setup(this, mNotificationShadeWindowView);
-        mHeadsUpManager.addListener(mNotificationPanelViewController.getOnHeadsUpChangedListener());
         mNotificationPanelViewController.setHeadsUpManager(mHeadsUpManager);
 
         createNavigationBar(result);
@@ -1177,9 +1176,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         if (ENABLE_LOCKSCREEN_WALLPAPER && mWallpaperSupported) {
             mLockscreenWallpaper = mLockscreenWallpaperLazy.get();
         }
-
-        mNotificationPanelViewController.setKeyguardIndicationController(
-                mKeyguardIndicationController);
 
         mAmbientIndicationContainer = mNotificationShadeWindowView.findViewById(
                 R.id.ambient_indication_container);
@@ -2021,8 +2017,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     }
 
     void makeExpandedInvisible() {
-        if (SPEW) Log.d(TAG, "makeExpandedInvisible: mExpandedVisible=" + mExpandedVisible
-                + " mExpandedVisible=" + mExpandedVisible);
+        if (SPEW) Log.d(TAG, "makeExpandedInvisible: mExpandedVisible=" + mExpandedVisible);
 
         if (!mExpandedVisible || mNotificationShadeWindowView == null) {
             return;
@@ -2196,12 +2191,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         }
         mNavigationBarController.checkNavBarModes(mDisplayId);
         mNoAnimationOnNextBarModeChange = false;
-    }
-
-    // Called by NavigationBarFragment
-    @Override
-    public void setQsScrimEnabled(boolean scrimEnabled) {
-        mNotificationPanelViewController.setQsScrimEnabled(scrimEnabled);
     }
 
     /** Temporarily hides Bubbles if the status bar is hidden. */
@@ -2579,14 +2568,11 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                                 CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL,
                                 true /* force */, true /* delayed*/);
                     } else {
-
                         // Do it after DismissAction has been processed to conserve the needed
                         // ordering.
                         mMainExecutor.execute(mShadeController::runPostCollapseRunnables);
                     }
-                } else if (CentralSurfacesImpl.this.isInLaunchTransition()
-                        && mNotificationPanelViewController.isLaunchTransitionFinished()) {
-
+                } else if (mNotificationPanelViewController.isLaunchTransitionFinished()) {
                     // We are not dismissing the shade, but the launch transition is already
                     // finished,
                     // so nobody will call readyForKeyguardDone anymore. Post it such that
@@ -3008,11 +2994,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mPresenter.updateMediaMetaData(true /* metaDataChanged */, true);
     }
 
-    @Override
-    public boolean isInLaunchTransition() {
-        return mNotificationPanelViewController.isLaunchTransitionFinished();
-    }
-
     /**
      * Fades the content of the keyguard away after the launch transition is done.
      *
@@ -3393,12 +3374,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         }
     }
 
-    /** Collapse the panel. The collapsing will be animated for the given {@code duration}. */
-    @Override
-    public void collapsePanelWithDuration(int duration) {
-        mNotificationPanelViewController.collapseWithDuration(duration);
-    }
-
     /**
      * Updates the light reveal effect to reflect the reason we're waking or sleeping (for example,
      * from the power button).
@@ -3486,12 +3461,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     @Override
     public void showPinningEscapeToast() {
         mNavigationBarController.showPinningEscapeToast(mDisplayId);
-    }
-
-    //TODO(b/254875405): this should be removed.
-    @Override
-    public KeyguardBottomAreaView getKeyguardBottomAreaView() {
-        return mNotificationPanelViewController.getKeyguardBottomAreaView();
     }
 
     protected ViewRootImpl getViewRootImpl()  {
@@ -4196,23 +4165,11 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         return mBouncerShowingOverDream;
     }
 
-    /**
-     * When {@link KeyguardBouncer} starts to be dismissed, playing its animation.
-     */
-    @Override
-    public void onBouncerPreHideAnimation() {
-        mNotificationPanelViewController.startBouncerPreHideAnimation();
-
-    }
-
     @Override
     public boolean isKeyguardSecure() {
         return mStatusBarKeyguardViewManager.isSecure();
     }
-    @Override
-    public NotificationPanelViewController getPanelController() {
-        return mNotificationPanelViewController;
-    }
+
     // End Extra BaseStatusBarMethods.
 
     @Override

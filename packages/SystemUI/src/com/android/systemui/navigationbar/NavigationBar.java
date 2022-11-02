@@ -693,7 +693,8 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         final Display display = mView.getDisplay();
         mView.setComponents(mRecentsOptional);
         if (mCentralSurfacesOptionalLazy.get().isPresent()) {
-            mView.setComponents(mCentralSurfacesOptionalLazy.get().get().getPanelController());
+            mView.setComponents(
+                    mCentralSurfacesOptionalLazy.get().get().getNotificationPanelViewController());
         }
         mView.setDisabledFlags(mDisabledFlags1, mSysUiFlagsContainer);
         mView.setOnVerticalChangedListener(this::onVerticalChanged);
@@ -1282,8 +1283,8 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     }
 
     private void onVerticalChanged(boolean isVertical) {
-        mCentralSurfacesOptionalLazy.get().ifPresent(
-                statusBar -> statusBar.setQsScrimEnabled(!isVertical));
+        mCentralSurfacesOptionalLazy.get().ifPresent(statusBar ->
+                statusBar.getNotificationPanelViewController().setQsScrimEnabled(!isVertical));
     }
 
     private boolean onNavigationTouch(View v, MotionEvent event) {

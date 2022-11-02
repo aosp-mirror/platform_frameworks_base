@@ -196,8 +196,6 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
 
     void collapsePanelOnMainThread();
 
-    void collapsePanelWithDuration(int duration);
-
     void togglePanel();
 
     void start();
@@ -305,9 +303,6 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
 
     void checkBarModes();
 
-    // Called by NavigationBarFragment
-    void setQsScrimEnabled(boolean scrimEnabled);
-
     void updateBubblesVisibility();
 
     void setInteracting(int barWindow, boolean interacting);
@@ -379,8 +374,6 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
 
     void showKeyguardImpl();
 
-    boolean isInLaunchTransition();
-
     void fadeKeyguardAfterLaunchTransition(Runnable beforeFading,
             Runnable endRunnable, Runnable cancelRunnable);
 
@@ -436,8 +429,6 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
     void showPinningEnterExitToast(boolean entering);
 
     void showPinningEscapeToast();
-
-    KeyguardBottomAreaView getKeyguardBottomAreaView();
 
     void setBouncerShowing(boolean bouncerShowing);
 
@@ -505,11 +496,7 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
 
     boolean isBouncerShowingOverDream();
 
-    void onBouncerPreHideAnimation();
-
     boolean isKeyguardSecure();
-
-    NotificationPanelViewController getPanelController();
 
     NotificationGutsManager getGutsManager();
 
