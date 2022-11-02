@@ -135,6 +135,8 @@ class BiometricTestSessionImpl extends ITestSession.Stub {
     @Override
     public void setTestHalEnabled(boolean enabled) {
 
+        super.setTestHalEnabled_enforcePermission();
+
         mProvider.setTestHalEnabled(enabled);
         mSensor.setTestHalEnabled(enabled);
     }
@@ -143,6 +145,8 @@ class BiometricTestSessionImpl extends ITestSession.Stub {
     @Override
     public void startEnroll(int userId) {
 
+        super.startEnroll_enforcePermission();
+
         mProvider.scheduleEnroll(mSensorId, new Binder(), new byte[69], userId, mReceiver,
                 mContext.getOpPackageName(), FingerprintManager.ENROLL_ENROLL);
     }
@@ -150,6 +154,8 @@ class BiometricTestSessionImpl extends ITestSession.Stub {
     @android.annotation.EnforcePermission(android.Manifest.permission.TEST_BIOMETRIC)
     @Override
     public void finishEnroll(int userId) {
+
+        super.finishEnroll_enforcePermission();
 
         int nextRandomId = mRandom.nextInt();
         while (mEnrollmentIds.contains(nextRandomId)) {
@@ -166,6 +172,8 @@ class BiometricTestSessionImpl extends ITestSession.Stub {
     public void acceptAuthentication(int userId)  {
 
         // Fake authentication with any of the existing fingers
+        super.acceptAuthentication_enforcePermission();
+
         List<Fingerprint> fingerprints = FingerprintUtils.getInstance(mSensorId)
                 .getBiometricsForUser(mContext, userId);
         if (fingerprints.isEmpty()) {
@@ -181,12 +189,16 @@ class BiometricTestSessionImpl extends ITestSession.Stub {
     @Override
     public void rejectAuthentication(int userId)  {
 
+        super.rejectAuthentication_enforcePermission();
+
         mSensor.getSessionForUser(userId).getHalSessionCallback().onAuthenticationFailed();
     }
 
     @android.annotation.EnforcePermission(android.Manifest.permission.TEST_BIOMETRIC)
     @Override
     public void notifyAcquired(int userId, int acquireInfo)  {
+
+        super.notifyAcquired_enforcePermission();
 
         mSensor.getSessionForUser(userId).getHalSessionCallback()
                 .onAcquired((byte) acquireInfo, 0 /* vendorCode */);
@@ -196,6 +208,8 @@ class BiometricTestSessionImpl extends ITestSession.Stub {
     @Override
     public void notifyError(int userId, int errorCode)  {
 
+        super.notifyError_enforcePermission();
+
         mSensor.getSessionForUser(userId).getHalSessionCallback().onError((byte) errorCode,
                 0 /* vendorCode */);
     }
@@ -203,6 +217,8 @@ class BiometricTestSessionImpl extends ITestSession.Stub {
     @android.annotation.EnforcePermission(android.Manifest.permission.TEST_BIOMETRIC)
     @Override
     public void cleanupInternalState(int userId)  {
+
+        super.cleanupInternalState_enforcePermission();
 
         Slog.d(TAG, "cleanupInternalState: " + userId);
         mProvider.scheduleInternalCleanup(mSensorId, userId, new ClientMonitorCallback() {
