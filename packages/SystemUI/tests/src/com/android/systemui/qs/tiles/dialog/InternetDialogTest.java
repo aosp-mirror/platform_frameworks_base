@@ -42,6 +42,7 @@ import com.android.wifitrackerlib.WifiEntry;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -52,6 +53,7 @@ import org.mockito.MockitoSession;
 
 import java.util.List;
 
+@Ignore("b/257089187")
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
