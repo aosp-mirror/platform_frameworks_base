@@ -288,6 +288,15 @@
                       targetSdk="33">
         <new-permission name="android.permission.READ_MEDIA_IMAGES" />
     </split-permission>
+    <split-permission name="android.permission.READ_MEDIA_IMAGES">
+        <new-permission name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED" />
+    </split-permission>
+    <split-permission name="android.permission.READ_MEDIA_VIDEO">
+        <new-permission name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED" />
+    </split-permission>
+    <split-permission name="android.permission.ACCESS_MEDIA_LOCATION">
+        <new-permission name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED" />
+    </split-permission>
 
     <!-- This is a list of all the libraries available for application
          code to link against. -->

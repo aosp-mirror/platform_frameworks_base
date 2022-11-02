@@ -1153,8 +1153,16 @@
     <!-- Allows an application to read image or video files from external storage that a user has
       selected via the permission prompt photo picker. Apps can check this permission to verify that
       a user has decided to use the photo picker, instead of granting access to
-      {@link #READ_MEDIA_IMAGES or #READ_MEDIA_VIDEO}. It does not prevent apps from accessing the
-      standard photo picker manually.
+      {@link #READ_MEDIA_IMAGES} or {@link #READ_MEDIA_VIDEO}. It does not prevent apps from
+      accessing the standard photo picker manually. This permission should be requested alongside
+      {@link #READ_MEDIA_IMAGES} and/or {@link #READ_MEDIA_VIDEO}, depending on which type of media
+      is desired.
+      <p> This permission will be automatically added to an app's manifest if the app requests
+      {@link #READ_MEDIA_IMAGES}, {@link #READ_MEDIA_VIDEO}, or {@link #ACCESS_MEDIA_LOCATION}
+      regardless of target SDK. If an app does not request this permission, then the grant dialog
+      will return `PERMISSION_GRANTED` for {@link #READ_MEDIA_IMAGES} and/or
+      {@link #READ_MEDIA_VIDEO}, but the app will only have access to the media selected by the
+      user. This false grant state will persist until the app goes into the background.
    <p>Protection level: dangerous -->
     <permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED"
         android:permissionGroup="android.permission-group.UNDEFINED"

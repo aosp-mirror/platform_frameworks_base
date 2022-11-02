@@ -231,6 +231,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         READ_MEDIA_VISUAL_PERMISSIONS.add(Manifest.permission.READ_MEDIA_VIDEO);
         READ_MEDIA_VISUAL_PERMISSIONS.add(Manifest.permission.READ_MEDIA_IMAGES);
         READ_MEDIA_VISUAL_PERMISSIONS.add(Manifest.permission.ACCESS_MEDIA_LOCATION);
+        READ_MEDIA_VISUAL_PERMISSIONS.add(Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED);
         NEARBY_DEVICES_PERMISSIONS.add(Manifest.permission.BLUETOOTH_ADVERTISE);
         NEARBY_DEVICES_PERMISSIONS.add(Manifest.permission.BLUETOOTH_CONNECT);
         NEARBY_DEVICES_PERMISSIONS.add(Manifest.permission.BLUETOOTH_SCAN);
