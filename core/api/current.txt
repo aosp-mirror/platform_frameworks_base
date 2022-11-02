@@ -19490,6 +19490,7 @@ package android.location {
 
   public final class GnssCapabilities implements android.os.Parcelable {
     method public int describeContents();
+    method @NonNull public java.util.List<android.location.GnssSignalType> getGnssSignalTypes();
     method public boolean hasAntennaInfo();
     method public boolean hasGeofencing();
     method @Deprecated public boolean hasGnssAntennaInfo();
@@ -19523,6 +19524,7 @@ package android.location {
     ctor public GnssCapabilities.Builder();
     ctor public GnssCapabilities.Builder(@NonNull android.location.GnssCapabilities);
     method @NonNull public android.location.GnssCapabilities build();
+    method @NonNull public android.location.GnssCapabilities.Builder setGnssSignalTypes(@NonNull java.util.List<android.location.GnssSignalType>);
     method @NonNull public android.location.GnssCapabilities.Builder setHasAntennaInfo(boolean);
     method @NonNull public android.location.GnssCapabilities.Builder setHasGeofencing(boolean);
     method @NonNull public android.location.GnssCapabilities.Builder setHasLowPowerMode(boolean);
@@ -19733,6 +19735,16 @@ package android.location {
     field @Deprecated public static final int STATUS_LOCATION_DISABLED = 2; // 0x2
     field @Deprecated public static final int STATUS_NOT_SUPPORTED = 0; // 0x0
     field @Deprecated public static final int STATUS_READY = 1; // 0x1
+  }
+
+  public final class GnssSignalType implements android.os.Parcelable {
+    method @NonNull public static android.location.GnssSignalType create(int, @FloatRange(from=0.0f, fromInclusive=false) double, @NonNull String);
+    method public int describeContents();
+    method @FloatRange(from=0.0f, fromInclusive=false) public double getCarrierFrequencyHz();
+    method @NonNull public String getCodeType();
+    method public int getConstellationType();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.location.GnssSignalType> CREATOR;
   }
 
   public final class GnssStatus implements android.os.Parcelable {
