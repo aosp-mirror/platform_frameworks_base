@@ -620,6 +620,20 @@ public class FingerprintAuthenticationClientTest {
         verify(mCallback).onClientFinished(any(), eq(true));
     }
 
+    @Test
+    public void sideFpsPowerPressCancelsIsntantly() throws Exception {
+        when(mSensorProps.isAnySidefpsType()).thenReturn(true);
+
+        final FingerprintAuthenticationClient client = createClient(1);
+        client.start(mCallback);
+
+        client.onPowerPressed();
+        mLooper.dispatchAll();
+
+        verify(mCallback, never()).onClientFinished(any(), eq(true));
+        verify(mCallback).onClientFinished(any(), eq(false));
+    }
+
     private FingerprintAuthenticationClient createClient() throws RemoteException {
         return createClient(100 /* version */, true /* allowBackgroundAuthentication */);
     }
