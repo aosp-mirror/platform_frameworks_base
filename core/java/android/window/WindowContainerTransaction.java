@@ -827,6 +827,26 @@ public final class WindowContainerTransaction implements Parcelable {
     }
 
     /**
+     * Sets/removes the reparent leaf task flag for this {@code windowContainer}.
+     * When this is set, the server side will try to reparent the leaf task to task display area
+     * if there is an existing activity in history during the activity launch. This operation only
+     * support on the organized root task.
+     * @hide
+     */
+    @NonNull
+    public WindowContainerTransaction setReparentLeafTaskIfRelaunch(
+            @NonNull WindowContainerToken windowContainer, boolean reparentLeafTaskIfRelaunch) {
+        final HierarchyOp hierarchyOp =
+                new HierarchyOp.Builder(
+                        HierarchyOp.HIERARCHY_OP_TYPE_SET_REPARENT_LEAF_TASK_IF_RELAUNCH)
+                        .setContainer(windowContainer.asBinder())
+                        .setReparentLeafTaskIfRelaunch(reparentLeafTaskIfRelaunch)
+                        .build();
+        mHierarchyOps.add(hierarchyOp);
+        return this;
+    }
+
+    /**
      * Merges another WCT into this one.
      * @param transfer When true, this will transfer everything from other potentially leaving
      *                 other in an unusable state. When false, other is left alone, but
@@ -1241,6 +1261,7 @@ public final class WindowContainerTransaction implements Parcelable {
         public static final int HIERARCHY_OP_TYPE_REMOVE_TASK = 20;
         public static final int HIERARCHY_OP_TYPE_FINISH_ACTIVITY = 21;
         public static final int HIERARCHY_OP_TYPE_SET_COMPANION_TASK_FRAGMENT = 22;
+        public static final int HIERARCHY_OP_TYPE_SET_REPARENT_LEAF_TASK_IF_RELAUNCH = 23;
 
         // The following key(s) are for use with mLaunchOptions:
         // When launching a task (eg. from recents), this is the taskId to be launched.
@@ -1292,6 +1313,8 @@ public final class WindowContainerTransaction implements Parcelable {
         private ShortcutInfo mShortcutInfo;
 
         private boolean mAlwaysOnTop;
+
+        private boolean mReparentLeafTaskIfRelaunch;
 
         public static HierarchyOp createForReparent(
                 @NonNull IBinder container, @Nullable IBinder reparent, boolean toTop) {
@@ -1398,6 +1421,7 @@ public final class WindowContainerTransaction implements Parcelable {
             mPendingIntent = copy.mPendingIntent;
             mShortcutInfo = copy.mShortcutInfo;
             mAlwaysOnTop = copy.mAlwaysOnTop;
+            mReparentLeafTaskIfRelaunch = copy.mReparentLeafTaskIfRelaunch;
         }
 
         protected HierarchyOp(Parcel in) {
@@ -1420,6 +1444,7 @@ public final class WindowContainerTransaction implements Parcelable {
             mPendingIntent = in.readTypedObject(PendingIntent.CREATOR);
             mShortcutInfo = in.readTypedObject(ShortcutInfo.CREATOR);
             mAlwaysOnTop = in.readBoolean();
+            mReparentLeafTaskIfRelaunch = in.readBoolean();
         }
 
         public int getType() {
@@ -1492,6 +1517,10 @@ public final class WindowContainerTransaction implements Parcelable {
 
         public boolean isAlwaysOnTop() {
             return mAlwaysOnTop;
+        }
+
+        public boolean isReparentLeafTaskIfRelaunch() {
+            return mReparentLeafTaskIfRelaunch;
         }
 
         @Nullable
@@ -1572,6 +1601,9 @@ public final class WindowContainerTransaction implements Parcelable {
                 case HIERARCHY_OP_TYPE_SET_COMPANION_TASK_FRAGMENT:
                     return "{setCompanionTaskFragment: container = " + mContainer + " companion = "
                             + mReparent + "}";
+                case HIERARCHY_OP_TYPE_SET_REPARENT_LEAF_TASK_IF_RELAUNCH:
+                    return "{setReparentLeafTaskIfRelaunch: container= " + mContainer
+                            + " reparentLeafTaskIfRelaunch= " + mReparentLeafTaskIfRelaunch + "}";
                 default:
                     return "{mType=" + mType + " container=" + mContainer + " reparent=" + mReparent
                             + " mToTop=" + mToTop
@@ -1602,6 +1634,7 @@ public final class WindowContainerTransaction implements Parcelable {
             dest.writeTypedObject(mPendingIntent, flags);
             dest.writeTypedObject(mShortcutInfo, flags);
             dest.writeBoolean(mAlwaysOnTop);
+            dest.writeBoolean(mReparentLeafTaskIfRelaunch);
         }
 
         @Override
@@ -1661,6 +1694,8 @@ public final class WindowContainerTransaction implements Parcelable {
             private ShortcutInfo mShortcutInfo;
 
             private boolean mAlwaysOnTop;
+
+            private boolean mReparentLeafTaskIfRelaunch;
 
             Builder(int type) {
                 mType = type;
@@ -1732,6 +1767,11 @@ public final class WindowContainerTransaction implements Parcelable {
                 return this;
             }
 
+            Builder setReparentLeafTaskIfRelaunch(boolean reparentLeafTaskIfRelaunch) {
+                mReparentLeafTaskIfRelaunch = reparentLeafTaskIfRelaunch;
+                return this;
+            }
+
             Builder setShortcutInfo(@Nullable ShortcutInfo shortcutInfo) {
                 mShortcutInfo = shortcutInfo;
                 return this;
@@ -1757,6 +1797,7 @@ public final class WindowContainerTransaction implements Parcelable {
                 hierarchyOp.mAlwaysOnTop = mAlwaysOnTop;
                 hierarchyOp.mTaskFragmentCreationOptions = mTaskFragmentCreationOptions;
                 hierarchyOp.mShortcutInfo = mShortcutInfo;
+                hierarchyOp.mReparentLeafTaskIfRelaunch = mReparentLeafTaskIfRelaunch;
 
                 return hierarchyOp;
             }
