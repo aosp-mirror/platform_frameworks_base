@@ -47,8 +47,10 @@ import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.BundleMerger;
 import android.os.HandlerThread;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.util.IndentingPrintWriter;
 
 import androidx.test.filters.SmallTest;
 
@@ -60,6 +62,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintWriter;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
@@ -375,6 +379,55 @@ public class BroadcastQueueModernImplTest {
         queue.invalidateRunnableAt();
         assertThat(queue.getRunnableAt()).isAtMost(airplaneRecord.enqueueTime);
         assertEquals(BroadcastProcessQueue.REASON_MAX_PENDING, queue.getRunnableAtReason());
+    }
+
+    /**
+     * Confirm that we always prefer running pending items marked as "urgent",
+     * then "normal", then "offload", dispatching by the relative ordering
+     * within each of those clustering groups.
+     */
+    @Test
+    public void testMakeActiveNextPending() {
+        BroadcastProcessQueue queue = new BroadcastProcessQueue(mConstants,
+                PACKAGE_GREEN, getUidForPackage(PACKAGE_GREEN));
+
+        queue.enqueueOrReplaceBroadcast(
+                makeBroadcastRecord(new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED)
+                        .addFlags(Intent.FLAG_RECEIVER_OFFLOAD)), 0);
+        queue.enqueueOrReplaceBroadcast(
+                makeBroadcastRecord(new Intent(Intent.ACTION_TIMEZONE_CHANGED)), 0);
+        queue.enqueueOrReplaceBroadcast(
+                makeBroadcastRecord(new Intent(Intent.ACTION_LOCKED_BOOT_COMPLETED)
+                        .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)), 0);
+        queue.enqueueOrReplaceBroadcast(
+                makeBroadcastRecord(new Intent(Intent.ACTION_ALARM_CHANGED)
+                        .addFlags(Intent.FLAG_RECEIVER_OFFLOAD)), 0);
+        queue.enqueueOrReplaceBroadcast(
+                makeBroadcastRecord(new Intent(Intent.ACTION_TIME_TICK)), 0);
+        queue.enqueueOrReplaceBroadcast(
+                makeBroadcastRecord(new Intent(Intent.ACTION_LOCALE_CHANGED)
+                        .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)), 0);
+
+        queue.makeActiveNextPending();
+        assertEquals(Intent.ACTION_LOCKED_BOOT_COMPLETED, queue.getActive().intent.getAction());
+
+        // To maximize test coverage, dump current state; we're not worried
+        // about the actual output, just that we don't crash
+        queue.getActive().setDeliveryState(0, BroadcastRecord.DELIVERY_SCHEDULED);
+        queue.dumpLocked(SystemClock.uptimeMillis(),
+                new IndentingPrintWriter(new PrintWriter(new ByteArrayOutputStream())));
+
+        queue.makeActiveNextPending();
+        assertEquals(Intent.ACTION_LOCALE_CHANGED, queue.getActive().intent.getAction());
+        queue.makeActiveNextPending();
+        assertEquals(Intent.ACTION_TIMEZONE_CHANGED, queue.getActive().intent.getAction());
+        queue.makeActiveNextPending();
+        assertEquals(Intent.ACTION_TIME_TICK, queue.getActive().intent.getAction());
+        queue.makeActiveNextPending();
+        assertEquals(Intent.ACTION_AIRPLANE_MODE_CHANGED, queue.getActive().intent.getAction());
+        queue.makeActiveNextPending();
+        assertEquals(Intent.ACTION_ALARM_CHANGED, queue.getActive().intent.getAction());
+        assertTrue(queue.isEmpty());
     }
 
     /**
