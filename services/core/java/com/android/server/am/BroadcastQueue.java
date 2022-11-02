@@ -77,6 +77,18 @@ public abstract class BroadcastQueue {
         }
     }
 
+    static void checkState(boolean expression, @NonNull String msg) {
+        if (!expression) {
+            throw new IllegalStateException(msg);
+        }
+    }
+
+    static void checkStateWtf(boolean expression, @NonNull String msg) {
+        if (!expression) {
+            Slog.wtf(TAG, new IllegalStateException(msg));
+        }
+    }
+
     static int traceBegin(@NonNull String methodName) {
         final int cookie = methodName.hashCode();
         Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
