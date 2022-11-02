@@ -3708,12 +3708,14 @@ public final class ActivityThread extends ClientTransactionHandler
         // Call postOnCreate()
         if (pendingActions.shouldCallOnPostCreate()) {
             activity.mCalled = false;
+            Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "onPostCreate");
             if (r.isPersistable()) {
                 mInstrumentation.callActivityOnPostCreate(activity, r.state,
                         r.persistentState);
             } else {
                 mInstrumentation.callActivityOnPostCreate(activity, r.state);
             }
+            Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
             if (!activity.mCalled) {
                 throw new SuperNotCalledException(
                         "Activity " + r.intent.getComponent().toShortString()
