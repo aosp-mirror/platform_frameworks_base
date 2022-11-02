@@ -5681,6 +5681,7 @@ public final class NotificationPanelViewController {
 
         /** @see ViewGroup#onInterceptTouchEvent(MotionEvent) */
         public boolean onInterceptTouchEvent(MotionEvent event) {
+            mShadeLog.logMotionEvent(event, "NPVC onInterceptTouchEvent");
             if (SPEW_LOGCAT) {
                 Log.v(TAG,
                         "NPVC onInterceptTouchEvent (" + event.getId() + "): (" + event.getX()
@@ -5693,6 +5694,8 @@ public final class NotificationPanelViewController {
             // Do not let touches go to shade or QS if the bouncer is visible,
             // but still let user swipe down to expand the panel, dismissing the bouncer.
             if (mCentralSurfaces.isBouncerShowing()) {
+                mShadeLog.v("NotificationPanelViewController MotionEvent intercepted: "
+                        + "bouncer is showing");
                 return true;
             }
             if (mCommandQueue.panelsEnabled()
@@ -5700,15 +5703,21 @@ public final class NotificationPanelViewController {
                     && mHeadsUpTouchHelper.onInterceptTouchEvent(event)) {
                 mMetricsLogger.count(COUNTER_PANEL_OPEN, 1);
                 mMetricsLogger.count(COUNTER_PANEL_OPEN_PEEK, 1);
+                mShadeLog.v("NotificationPanelViewController MotionEvent intercepted: "
+                        + "HeadsUpTouchHelper");
                 return true;
             }
             if (!shouldQuickSettingsIntercept(mDownX, mDownY, 0)
                     && mPulseExpansionHandler.onInterceptTouchEvent(event)) {
+                mShadeLog.v("NotificationPanelViewController MotionEvent intercepted: "
+                        + "PulseExpansionHandler");
                 return true;
             }
 
             if (!isFullyCollapsed() && onQsIntercept(event)) {
                 debugLog("onQsIntercept true");
+                mShadeLog.v("NotificationPanelViewController MotionEvent intercepted: "
+                        + "QsIntercept");
                 return true;
             }
             if (mInstantExpanding || !mNotificationsDragEnabled || mTouchDisabled || (mMotionAborted
@@ -5739,6 +5748,9 @@ public final class NotificationPanelViewController {
                     if (mAnimatingOnDown && mClosing && !mHintAnimationRunning) {
                         cancelHeightAnimator();
                         mTouchSlopExceeded = true;
+                        mShadeLog.v("NotificationPanelViewController MotionEvent intercepted:"
+                                + " mAnimatingOnDown: true, mClosing: true, mHintAnimationRunning:"
+                                + " false");
                         return true;
                     }
                     mInitialExpandY = y;
@@ -5783,6 +5795,8 @@ public final class NotificationPanelViewController {
                                 && hAbs > Math.abs(x - mInitialExpandX)) {
                             cancelHeightAnimator();
                             startExpandMotion(x, y, true /* startTracking */, mExpandedHeight);
+                            mShadeLog.v("NotificationPanelViewController MotionEvent"
+                                    + " intercepted: startExpandMotion");
                             return true;
                         }
                     }
