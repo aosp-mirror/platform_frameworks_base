@@ -135,14 +135,6 @@ class BroadcastProcessQueue {
     private int mActiveIndex;
 
     /**
-     * When defined, the receiver actively being dispatched into this process
-     * was considered "blocked" until at least the given count of other
-     * receivers have reached a terminal state; typically used for ordered
-     * broadcasts and priority traunches.
-     */
-    private int mActiveBlockedUntilTerminalCount;
-
-    /**
      * Count of {@link #mActive} broadcasts that have been dispatched since this
      * queue was last idle.
      */
@@ -206,15 +198,11 @@ class BroadcastProcessQueue {
      * given count of other receivers have reached a terminal state; typically
      * used for ordered broadcasts and priority traunches.
      */
-    public void enqueueOrReplaceBroadcast(@NonNull BroadcastRecord record, int recordIndex,
-            int blockedUntilTerminalCount) {
+    public void enqueueOrReplaceBroadcast(@NonNull BroadcastRecord record, int recordIndex) {
         if (record.isReplacePending()) {
-            boolean didReplace = replaceBroadcastInQueue(mPending, record, recordIndex,
-                    blockedUntilTerminalCount)
-                    || replaceBroadcastInQueue(mPendingUrgent, record, recordIndex,
-                            blockedUntilTerminalCount)
-                    || replaceBroadcastInQueue(mPendingOffload, record, recordIndex,
-                            blockedUntilTerminalCount);
+            boolean didReplace = replaceBroadcastInQueue(mPending, record, recordIndex)
+                    || replaceBroadcastInQueue(mPendingUrgent, record, recordIndex)
+                    || replaceBroadcastInQueue(mPendingOffload, record, recordIndex);
             if (didReplace) {
                 return;
             }
@@ -225,7 +213,6 @@ class BroadcastProcessQueue {
         SomeArgs newBroadcastArgs = SomeArgs.obtain();
         newBroadcastArgs.arg1 = record;
         newBroadcastArgs.argi1 = recordIndex;
-        newBroadcastArgs.argi2 = blockedUntilTerminalCount;
 
         // Cross-broadcast prioritization policy:  some broadcasts might warrant being
         // issued ahead of others that are already pending, for example if this new
@@ -244,7 +231,7 @@ class BroadcastProcessQueue {
      * {@code false} otherwise.
      */
     private boolean replaceBroadcastInQueue(@NonNull ArrayDeque<SomeArgs> queue,
-            @NonNull BroadcastRecord record, int recordIndex, int blockedUntilTerminalCount) {
+            @NonNull BroadcastRecord record, int recordIndex) {
         final Iterator<SomeArgs> it = queue.descendingIterator();
         final Object receiver = record.receivers.get(recordIndex);
         while (it.hasNext()) {
@@ -259,7 +246,6 @@ class BroadcastProcessQueue {
                 // Exact match found; perform in-place swap
                 args.arg1 = record;
                 args.argi1 = recordIndex;
-                args.argi2 = blockedUntilTerminalCount;
                 onBroadcastDequeued(testRecord, testRecordIndex);
                 onBroadcastEnqueued(record, recordIndex);
                 return true;
@@ -411,7 +397,6 @@ class BroadcastProcessQueue {
         final SomeArgs next = removeNextBroadcast();
         mActive = (BroadcastRecord) next.arg1;
         mActiveIndex = next.argi1;
-        mActiveBlockedUntilTerminalCount = next.argi2;
         mActiveCountSinceIdle++;
         mActiveViaColdStart = false;
         next.recycle();
@@ -424,7 +409,6 @@ class BroadcastProcessQueue {
     public void makeActiveIdle() {
         mActive = null;
         mActiveIndex = 0;
-        mActiveBlockedUntilTerminalCount = -1;
         mActiveCountSinceIdle = 0;
         mActiveViaColdStart = false;
         invalidateRunnableAt();
@@ -705,7 +689,7 @@ class BroadcastProcessQueue {
         if (next != null) {
             final BroadcastRecord r = (BroadcastRecord) next.arg1;
             final int index = next.argi1;
-            final int blockedUntilTerminalCount = next.argi2;
+            final int blockedUntilTerminalCount = r.blockedUntilTerminalCount[index];
             final long runnableAt = r.enqueueTime;
 
             // We might be blocked waiting for other receivers to finish,
@@ -871,19 +855,19 @@ class BroadcastProcessQueue {
         pw.println();
         pw.increaseIndent();
         if (mActive != null) {
-            dumpRecord("ACTIVE", now, pw, mActive, mActiveIndex, mActiveBlockedUntilTerminalCount);
+            dumpRecord("ACTIVE", now, pw, mActive, mActiveIndex);
         }
         for (SomeArgs args : mPendingUrgent) {
             final BroadcastRecord r = (BroadcastRecord) args.arg1;
-            dumpRecord("URGENT", now, pw, r, args.argi1, args.argi2);
+            dumpRecord("URGENT", now, pw, r, args.argi1);
         }
         for (SomeArgs args : mPending) {
             final BroadcastRecord r = (BroadcastRecord) args.arg1;
-            dumpRecord(null, now, pw, r, args.argi1, args.argi2);
+            dumpRecord(null, now, pw, r, args.argi1);
         }
         for (SomeArgs args : mPendingOffload) {
             final BroadcastRecord r = (BroadcastRecord) args.arg1;
-            dumpRecord("OFFLOAD", now, pw, r, args.argi1, args.argi2);
+            dumpRecord("OFFLOAD", now, pw, r, args.argi1);
         }
         pw.decreaseIndent();
         pw.println();
@@ -891,8 +875,7 @@ class BroadcastProcessQueue {
 
     @NeverCompile
     private void dumpRecord(@Nullable String flavor, @UptimeMillisLong long now,
-            @NonNull IndentingPrintWriter pw, @NonNull BroadcastRecord record, int recordIndex,
-            int blockedUntilTerminalCount) {
+            @NonNull IndentingPrintWriter pw, @NonNull BroadcastRecord record, int recordIndex) {
         TimeUtils.formatDuration(record.enqueueTime, now, pw);
         pw.print(' ');
         pw.println(record.toShortString());
@@ -918,6 +901,7 @@ class BroadcastProcessQueue {
             pw.print(info.activityInfo.name);
         }
         pw.println();
+        final int blockedUntilTerminalCount = record.blockedUntilTerminalCount[recordIndex];
         if (blockedUntilTerminalCount != -1) {
             pw.print("    blocked until ");
             pw.print(blockedUntilTerminalCount);

@@ -31,7 +31,6 @@ import static com.android.server.am.BroadcastProcessQueue.reasonToString;
 import static com.android.server.am.BroadcastProcessQueue.removeFromRunnableList;
 import static com.android.server.am.BroadcastRecord.deliveryStateToString;
 import static com.android.server.am.BroadcastRecord.getReceiverPackageName;
-import static com.android.server.am.BroadcastRecord.getReceiverPriority;
 import static com.android.server.am.BroadcastRecord.getReceiverProcessName;
 import static com.android.server.am.BroadcastRecord.getReceiverUid;
 import static com.android.server.am.BroadcastRecord.isDeliveryStateTerminal;
@@ -320,7 +319,6 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             return;
         }
 
-        final int cookie = traceBegin("updateRunnableList");
         final boolean wantQueue = queue.isRunnable();
         final boolean inQueue = (queue == mRunnableHead) || (queue.runnableAtPrev != null)
                 || (queue.runnableAtNext != null);
@@ -347,8 +345,6 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         if (queue.isEmpty() && !queue.isActive() && !queue.isProcessWarm()) {
             removeProcessQueue(queue.processName, queue.uid);
         }
-
-        traceEnd(cookie);
     }
 
     /**
@@ -591,36 +587,11 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         r.enqueueRealTime = SystemClock.elapsedRealtime();
         r.enqueueClockTime = System.currentTimeMillis();
 
-        int lastPriority = 0;
-        int lastPriorityIndex = 0;
-
         for (int i = 0; i < r.receivers.size(); i++) {
             final Object receiver = r.receivers.get(i);
             final BroadcastProcessQueue queue = getOrCreateProcessQueue(
                     getReceiverProcessName(receiver), getReceiverUid(receiver));
-
-            final int blockedUntilTerminalCount;
-            if (r.ordered) {
-                // When sending an ordered broadcast, we need to block this
-                // receiver until all previous receivers have terminated
-                blockedUntilTerminalCount = i;
-            } else if (r.prioritized) {
-                // When sending a prioritized broadcast, we only need to wait
-                // for the previous traunch of receivers to be terminated
-                final int thisPriority = getReceiverPriority(receiver);
-                if ((i == 0) || (thisPriority != lastPriority)) {
-                    lastPriority = thisPriority;
-                    lastPriorityIndex = i;
-                    blockedUntilTerminalCount = i;
-                } else {
-                    blockedUntilTerminalCount = lastPriorityIndex;
-                }
-            } else {
-                // Otherwise we don't need to block at all
-                blockedUntilTerminalCount = -1;
-            }
-
-            queue.enqueueOrReplaceBroadcast(r, i, blockedUntilTerminalCount);
+            queue.enqueueOrReplaceBroadcast(r, i);
             updateRunnableList(queue);
             enqueueUpdateRunningList();
         }
@@ -1431,6 +1402,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
         final boolean recordFinished = (r.terminalCount == r.receivers.size());
         if (recordFinished) {
+            mService.notifyBroadcastFinishedLocked(r);
             mHistory.addBroadcastToHistoryLocked(r);
 
             r.finishTime = SystemClock.uptimeMillis();
