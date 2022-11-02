@@ -41,6 +41,7 @@ import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusIconContainer;
 import com.android.systemui.statusbar.policy.Clock;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.util.ViewController;
 
 import java.util.List;
@@ -70,11 +71,13 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
     private final PrivacyDialogController mPrivacyDialogController;
     private final QSExpansionPathInterpolator mQSExpansionPathInterpolator;
     private final FeatureFlags mFeatureFlags;
+    private final DeviceProvisionedController mDeviceProvisionedController;
 
     private boolean mListening;
     private boolean mMicCameraIndicatorsEnabled;
     private boolean mLocationIndicatorsEnabled;
     private boolean mPrivacyChipLogged;
+    private volatile boolean mDeviceProvisioned;
     private final String mCameraSlot;
     private final String mMicSlot;
     private final String mLocationSlot;
@@ -115,12 +118,21 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
         @Override
         public void onClick(View v) {
             if (v == mPrivacyChip) {
+                if (!mDeviceProvisioned) return;
                 // If the privacy chip is visible, it means there were some indicators
                 mUiEventLogger.log(PrivacyChipEvent.ONGOING_INDICATORS_CHIP_CLICK);
                 mPrivacyDialogController.showDialog(getContext());
             }
         }
     };
+
+    private DeviceProvisionedController.DeviceProvisionedListener mDeviceProvisionedListener =
+            new DeviceProvisionedController.DeviceProvisionedListener() {
+                @Override
+                public void onDeviceProvisionedChanged() {
+                    mDeviceProvisioned = mDeviceProvisionedController.isDeviceProvisioned();
+                }
+            };
 
     @Inject
     QuickStatusBarHeaderController(QuickStatusBarHeader view,
@@ -134,7 +146,8 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
             SysuiColorExtractor colorExtractor,
             PrivacyDialogController privacyDialogController,
             QSExpansionPathInterpolator qsExpansionPathInterpolator,
-            FeatureFlags featureFlags) {
+            FeatureFlags featureFlags,
+            DeviceProvisionedController deviceProvisionedController) {
         super(view);
         mPrivacyItemController = privacyItemController;
         mActivityStarter = activityStarter;
@@ -146,6 +159,7 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
         mPrivacyDialogController = privacyDialogController;
         mQSExpansionPathInterpolator = qsExpansionPathInterpolator;
         mFeatureFlags = featureFlags;
+        mDeviceProvisionedController = deviceProvisionedController;
 
         mQSCarrierGroupController = qsCarrierGroupControllerBuilder
                 .setQSCarrierGroup(mView.findViewById(R.id.carrier_group))
@@ -171,6 +185,7 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
 
     @Override
     protected void onViewAttached() {
+        mDeviceProvisionedController.addCallback(mDeviceProvisionedListener);
         mPrivacyChip.setOnClickListener(mOnClickListener);
 
         mMicCameraIndicatorsEnabled = mPrivacyItemController.getMicCameraAvailable();
@@ -210,6 +225,7 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
     @Override
     protected void onViewDetached() {
         mColorExtractor.removeOnColorsChangedListener(mOnColorsChangedListener);
+        mDeviceProvisionedController.removeCallback(mDeviceProvisionedListener);
         mPrivacyChip.setOnClickListener(null);
         mStatusBarIconController.removeIconGroup(mIconManager);
         mQSCarrierGroupController.setOnSingleCarrierChangedListener(null);
