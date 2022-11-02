@@ -346,13 +346,14 @@ final class IInputMethodManagerGlobalInvoker {
 
     @AnyThread
     @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
-    static void showInputMethodPickerFromSystem(int auxiliarySubtypeMode, int displayId) {
+    static void showInputMethodPickerFromSystem(@NonNull IInputMethodClient client,
+            int auxiliarySubtypeMode, int displayId) {
         final IInputMethodManager service = getService();
         if (service == null) {
             return;
         }
         try {
-            service.showInputMethodPickerFromSystem(auxiliarySubtypeMode, displayId);
+            service.showInputMethodPickerFromSystem(client, auxiliarySubtypeMode, displayId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
