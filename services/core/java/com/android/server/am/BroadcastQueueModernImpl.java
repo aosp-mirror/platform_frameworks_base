@@ -320,7 +320,6 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             return;
         }
 
-        final int cookie = traceBegin("updateRunnableList");
         final boolean wantQueue = queue.isRunnable();
         final boolean inQueue = (queue == mRunnableHead) || (queue.runnableAtPrev != null)
                 || (queue.runnableAtNext != null);
@@ -347,8 +346,6 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         if (queue.isEmpty() && !queue.isActive() && !queue.isProcessWarm()) {
             removeProcessQueue(queue.processName, queue.uid);
         }
-
-        traceEnd(cookie);
     }
 
     /**
