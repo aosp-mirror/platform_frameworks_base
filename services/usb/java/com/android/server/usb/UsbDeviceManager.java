@@ -91,6 +91,7 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.util.dump.DualDumpOutputStream;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
+import com.android.server.utils.EventLogger;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.io.File;
@@ -213,7 +214,7 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
     private static Set<Integer> sDenyInterfaces;
     private HashMap<Long, FileDescriptor> mControlFds;
 
-    private static UsbDeviceLogger sEventLogger;
+    private static EventLogger sEventLogger;
 
     static {
         sDenyInterfaces = new HashSet<>();
@@ -238,7 +239,7 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
         public void onUEvent(UEventObserver.UEvent event) {
             if (DEBUG) Slog.v(TAG, "USB UEVENT: " + event.toString());
             if (sEventLogger != null) {
-                sEventLogger.log(new UsbDeviceLogger.StringEvent("USB UEVENT: "
+                sEventLogger.enqueue(new EventLogger.StringEvent("USB UEVENT: "
                         + event.toString()));
             } else {
                 if (DEBUG) Slog.d(TAG, "sEventLogger == null");
@@ -395,7 +396,7 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
         mUEventObserver.startObserving(USB_STATE_MATCH);
         mUEventObserver.startObserving(ACCESSORY_START_MATCH);
 
-        sEventLogger = new UsbDeviceLogger(DUMPSYS_LOG_BUFFER, "UsbDeviceManager activity");
+        sEventLogger = new EventLogger(DUMPSYS_LOG_BUFFER, "UsbDeviceManager activity");
     }
 
     UsbProfileGroupSettingsManager getCurrentSettings() {
@@ -837,7 +838,7 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
 
         protected void sendStickyBroadcast(Intent intent) {
             mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
-            sEventLogger.log(new UsbDeviceLogger.StringEvent("USB intent: " + intent));
+            sEventLogger.enqueue(new EventLogger.StringEvent("USB intent: " + intent));
         }
 
         private void updateUsbFunctions() {
@@ -2350,7 +2351,7 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
 
         if (mHandler != null) {
             mHandler.dump(dump, "handler", UsbDeviceManagerProto.HANDLER);
-            sEventLogger.dump(dump, UsbHandlerProto.UEVENT);
+            sEventLogger.dump(new DualOutputStreamDumpSink(dump, UsbHandlerProto.UEVENT));
         }
 
         dump.end(token);
