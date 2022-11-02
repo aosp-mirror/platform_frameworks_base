@@ -152,7 +152,7 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
 
         // WHEN showing alt auth, not dozing, drag down helper doesn't want to intercept
         when(mStatusBarStateController.isDozing()).thenReturn(false);
-        when(mStatusBarKeyguardViewManager.isShowingAlternateAuthOrAnimating()).thenReturn(true);
+        when(mStatusBarKeyguardViewManager.isShowingAlternateAuth()).thenReturn(true);
         when(mDragDownHelper.onInterceptTouchEvent(any())).thenReturn(false);
 
         // THEN we should intercept touch
@@ -165,7 +165,7 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
 
         // WHEN not showing alt auth, not dozing, drag down helper doesn't want to intercept
         when(mStatusBarStateController.isDozing()).thenReturn(false);
-        when(mStatusBarKeyguardViewManager.isShowingAlternateAuthOrAnimating()).thenReturn(false);
+        when(mStatusBarKeyguardViewManager.isShowingAlternateAuth()).thenReturn(false);
         when(mDragDownHelper.onInterceptTouchEvent(any())).thenReturn(false);
 
         // THEN we shouldn't intercept touch
@@ -178,7 +178,7 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
 
         // WHEN showing alt auth, not dozing, drag down helper doesn't want to intercept
         when(mStatusBarStateController.isDozing()).thenReturn(false);
-        when(mStatusBarKeyguardViewManager.isShowingAlternateAuthOrAnimating()).thenReturn(true);
+        when(mStatusBarKeyguardViewManager.isShowingAlternateAuth()).thenReturn(true);
         when(mDragDownHelper.onInterceptTouchEvent(any())).thenReturn(false);
 
         // THEN we should handle the touch
