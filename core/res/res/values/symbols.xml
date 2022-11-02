@@ -3466,6 +3466,9 @@
   <!-- Captive Portal Login -->
   <java-symbol type="string" name="config_defaultCaptivePortalLoginPackageName" />
 
+  <!-- Dock Manager -->
+  <java-symbol type="string" name="config_defaultDockManagerPackageName" />
+
   <!-- Optional IPsec algorithms -->
   <java-symbol type="array" name="config_optionalIpSecAlgorithms" />
 
