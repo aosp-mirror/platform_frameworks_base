@@ -1267,7 +1267,7 @@
     <string name="volume_ringtone" msgid="134784084629229029">"ରିଙ୍ଗର୍‌ ଭଲ୍ୟୁମ୍"</string>
     <string name="volume_music" msgid="7727274216734955095">"ମିଡିଆ ଭଲ୍ୟୁମ୍‌"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="2614142915948898228">"ବ୍ଲୁଟୂଥ୍‍ ମାଧ୍ୟମରେ ଚାଲୁଛି"</string>
-    <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"ରିଙ୍ଗଟୋନ୍‍‍କୁ ନିରବ ଭାବେ ସେଟ୍ କରାଯାଇଛି"</string>
+    <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"ସାଇଲେଣ୍ଟ ରିଂଟୋନ ସେଟ ହୋଇଛି"</string>
     <string name="volume_call" msgid="7625321655265747433">"ଇନ୍‍-କଲ୍‍ ଭଲ୍ୟୁମ୍‌"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"ବ୍ଲୁଟୂଥ୍‍ ଇନ୍-କଲ୍ ଭଲ୍ୟୁମ୍‌"</string>
     <string name="volume_alarm" msgid="4486241060751798448">"ଆଲାରାମ୍ ଭଲ୍ୟୁମ୍‌"</string>

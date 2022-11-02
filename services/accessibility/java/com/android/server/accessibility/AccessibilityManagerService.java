@@ -657,24 +657,26 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     userState.mBindingServices.removeIf(filter);
                     userState.mCrashedServices.removeIf(filter);
                     final Iterator<ComponentName> it = userState.mEnabledServices.iterator();
+                    boolean anyServiceRemoved = false;
                     while (it.hasNext()) {
                         final ComponentName comp = it.next();
                         final String compPkg = comp.getPackageName();
                         if (compPkg.equals(packageName)) {
                             it.remove();
-                            // Update the enabled services setting.
-                            persistComponentNamesToSettingLocked(
-                                    Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
-                                    userState.mEnabledServices, userId);
-                            // Update the touch exploration granted services setting.
                             userState.mTouchExplorationGrantedServices.remove(comp);
-                            persistComponentNamesToSettingLocked(
-                                    Settings.Secure.
-                                    TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES,
-                                    userState.mTouchExplorationGrantedServices, userId);
-                            onUserStateChangedLocked(userState);
-                            return;
+                            anyServiceRemoved = true;
                         }
+                    }
+                    if (anyServiceRemoved) {
+                        // Update the enabled services setting.
+                        persistComponentNamesToSettingLocked(
+                                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
+                                userState.mEnabledServices, userId);
+                        // Update the touch exploration granted services setting.
+                        persistComponentNamesToSettingLocked(
+                                Settings.Secure.TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES,
+                                userState.mTouchExplorationGrantedServices, userId);
+                        onUserStateChangedLocked(userState);
                     }
                 }
             }
@@ -1109,7 +1111,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             final List<AccessibilityServiceInfo> result = new ArrayList<>(serviceCount);
             for (int i = 0; i < serviceCount; ++i) {
                 final AccessibilityServiceConnection service = services.get(i);
-                if ((service.mFeedbackType & feedbackType) != 0) {
+                if ((service.mFeedbackType & feedbackType) != 0
+                        || feedbackType == AccessibilityServiceInfo.FEEDBACK_ALL_MASK) {
                     result.add(service.getServiceInfo());
                 }
             }
