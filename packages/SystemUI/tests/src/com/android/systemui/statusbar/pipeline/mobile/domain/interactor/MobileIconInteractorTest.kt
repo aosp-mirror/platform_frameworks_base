@@ -23,6 +23,7 @@ import androidx.test.filters.SmallTest
 import com.android.settingslib.SignalIcon.MobileIconGroup
 import com.android.settingslib.mobile.TelephonyIcons
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DefaultNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileSubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.OverrideNetworkType
@@ -34,6 +35,7 @@ import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsPro
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -49,12 +51,17 @@ class MobileIconInteractorTest : SysuiTestCase() {
     private val mobileIconsInteractor = FakeMobileIconsInteractor(mobileMappingsProxy)
     private val connectionRepository = FakeMobileConnectionRepository()
 
+    private val scope = CoroutineScope(IMMEDIATE)
+
     @Before
     fun setUp() {
         underTest =
             MobileIconInteractorImpl(
+                scope,
+                mobileIconsInteractor.activeDataConnectionHasDataEnabled,
                 mobileIconsInteractor.defaultMobileIconMapping,
                 mobileIconsInteractor.defaultMobileIconGroup,
+                mobileIconsInteractor.isDefaultConnectionFailed,
                 mobileMappingsProxy,
                 connectionRepository,
             )
@@ -192,6 +199,66 @@ class MobileIconInteractorTest : SysuiTestCase() {
             val job = underTest.networkTypeIconGroup.onEach { latest = it }.launchIn(this)
 
             assertThat(latest).isEqualTo(FakeMobileIconsInteractor.DEFAULT_ICON)
+
+            job.cancel()
+        }
+
+    @Test
+    fun test_isDefaultDataEnabled_matchesParent() =
+        runBlocking(IMMEDIATE) {
+            var latest: Boolean? = null
+            val job = underTest.isDefaultDataEnabled.onEach { latest = it }.launchIn(this)
+
+            mobileIconsInteractor.activeDataConnectionHasDataEnabled.value = true
+            assertThat(latest).isTrue()
+
+            mobileIconsInteractor.activeDataConnectionHasDataEnabled.value = false
+            assertThat(latest).isFalse()
+
+            job.cancel()
+        }
+
+    @Test
+    fun test_isDefaultConnectionFailed_matchedParent() =
+        runBlocking(IMMEDIATE) {
+            val job = underTest.isDefaultConnectionFailed.launchIn(this)
+
+            mobileIconsInteractor.isDefaultConnectionFailed.value = false
+            assertThat(underTest.isDefaultConnectionFailed.value).isFalse()
+
+            mobileIconsInteractor.isDefaultConnectionFailed.value = true
+            assertThat(underTest.isDefaultConnectionFailed.value).isTrue()
+
+            job.cancel()
+        }
+
+    @Test
+    fun dataState_connected() =
+        runBlocking(IMMEDIATE) {
+            var latest: Boolean? = null
+            val job = underTest.isDataConnected.onEach { latest = it }.launchIn(this)
+
+            connectionRepository.setMobileSubscriptionModel(
+                MobileSubscriptionModel(dataConnectionState = DataConnectionState.Connected)
+            )
+            yield()
+
+            assertThat(latest).isTrue()
+
+            job.cancel()
+        }
+
+    @Test
+    fun dataState_notConnected() =
+        runBlocking(IMMEDIATE) {
+            var latest: Boolean? = null
+            val job = underTest.isDataConnected.onEach { latest = it }.launchIn(this)
+
+            connectionRepository.setMobileSubscriptionModel(
+                MobileSubscriptionModel(dataConnectionState = DataConnectionState.Disconnected)
+            )
+
+            assertThat(latest).isFalse()
 
             job.cancel()
         }

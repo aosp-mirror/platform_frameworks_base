@@ -500,7 +500,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mKeyguardVieMediatorCallback);
 
         // TODO: we should be able to call mCentralSurfaces.start() and have all the below values
-        // initialized automatically.
+        // initialized automatically and make NPVC private.
         mCentralSurfaces.mNotificationShadeWindowView = mNotificationShadeWindowView;
         mCentralSurfaces.mNotificationPanelViewController = mNotificationPanelViewController;
         mCentralSurfaces.mDozeScrimController = mDozeScrimController;

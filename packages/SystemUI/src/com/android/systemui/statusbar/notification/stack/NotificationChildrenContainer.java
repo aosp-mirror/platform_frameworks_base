@@ -44,6 +44,7 @@ import com.android.internal.widget.NotificationExpandButton;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.NotificationGroupingUtil;
+import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.notification.FeedbackIcon;
 import com.android.systemui.statusbar.notification.NotificationFadeAware;
 import com.android.systemui.statusbar.notification.NotificationUtils;
@@ -308,6 +309,11 @@ public class NotificationChildrenContainer extends ViewGroup
 
         row.setContentTransformationAmount(0, false /* isLastChild */);
         row.setNotificationFaded(mContainingNotificationIsFaded);
+
+        // This is a workaround, the NotificationShelf should be the owner of `OnScroll` roundness.
+        // Here we should reset the `OnScroll` roundness only on top-level rows.
+        NotificationShelf.resetOnScrollRoundness(row);
+
         // It doesn't make sense to keep old animations around, lets cancel them!
         ExpandableViewState viewState = row.getViewState();
         if (viewState != null) {
@@ -1377,8 +1383,12 @@ public class NotificationChildrenContainer extends ViewGroup
             if (child.getVisibility() == View.GONE) {
                 continue;
             }
+            child.requestTopRoundness(
+                    /* value = */ 0f,
+                    /* animate = */ isShown(),
+                    SourceType.DefaultValue);
             child.requestBottomRoundness(
-                    last ? getBottomRoundness() : 0f,
+                    /* value = */ last ? getBottomRoundness() : 0f,
                     /* animate = */ isShown(),
                     SourceType.DefaultValue);
             last = false;
