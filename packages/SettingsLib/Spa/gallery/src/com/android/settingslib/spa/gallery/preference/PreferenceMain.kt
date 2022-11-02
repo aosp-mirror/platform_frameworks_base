@@ -17,7 +17,6 @@
 package com.android.settingslib.spa.gallery.preference
 
 import android.os.Bundle
-import androidx.compose.runtime.Composable
 import com.android.settingslib.spa.framework.common.SettingsEntry
 import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
@@ -25,7 +24,6 @@ import com.android.settingslib.spa.framework.common.createSettingsPage
 import com.android.settingslib.spa.framework.compose.navigator
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
-import com.android.settingslib.spa.widget.scaffold.RegularScaffold
 
 private const val TITLE = "Category: Preference"
 
@@ -54,12 +52,7 @@ object PreferenceMainPageProvider : SettingsPageProvider {
             }
     }
 
-    @Composable
-    override fun Page(arguments: Bundle?) {
-        RegularScaffold(title = TITLE) {
-            for (entry in buildEntry(arguments)) {
-                entry.UiLayout()
-            }
-        }
+    override fun getTitle(arguments: Bundle?): String {
+        return TITLE
     }
 }

@@ -28,6 +28,7 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 import android.annotation.AnyThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.graphics.RectF;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -982,62 +983,9 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
 
     @Dispatching(cancellable = true)
     @Override
-    public void performHandwritingSelectGesture(
-            InputConnectionCommandHeader header, SelectGesture gesture,
+    public void performHandwritingGesture(
+            InputConnectionCommandHeader header, ParcelableHandwritingGesture gestureContainer,
             ResultReceiver resultReceiver) {
-        performHandwritingGestureInternal(header, gesture, resultReceiver);
-    }
-
-    @Dispatching(cancellable = true)
-    @Override
-    public void performHandwritingSelectRangeGesture(
-            InputConnectionCommandHeader header, SelectRangeGesture gesture,
-            ResultReceiver resultReceiver) {
-        performHandwritingGestureInternal(header, gesture, resultReceiver);
-    }
-
-    @Dispatching(cancellable = true)
-    @Override
-    public void performHandwritingInsertGesture(
-            InputConnectionCommandHeader header, InsertGesture gesture,
-            ResultReceiver resultReceiver) {
-        performHandwritingGestureInternal(header, gesture, resultReceiver);
-    }
-
-    @Dispatching(cancellable = true)
-    @Override
-    public void performHandwritingDeleteGesture(
-            InputConnectionCommandHeader header, DeleteGesture gesture,
-            ResultReceiver resultReceiver) {
-        performHandwritingGestureInternal(header, gesture, resultReceiver);
-    }
-
-    @Dispatching(cancellable = true)
-    @Override
-    public void performHandwritingDeleteRangeGesture(
-            InputConnectionCommandHeader header, DeleteRangeGesture gesture,
-            ResultReceiver resultReceiver) {
-        performHandwritingGestureInternal(header, gesture, resultReceiver);
-    }
-
-    @Dispatching(cancellable = true)
-    @Override
-    public void performHandwritingRemoveSpaceGesture(
-            InputConnectionCommandHeader header, RemoveSpaceGesture gesture,
-            ResultReceiver resultReceiver) {
-        performHandwritingGestureInternal(header, gesture, resultReceiver);
-    }
-
-    @Dispatching(cancellable = true)
-    @Override
-    public void performHandwritingJoinOrSplitGesture(
-            InputConnectionCommandHeader header, JoinOrSplitGesture gesture,
-            ResultReceiver resultReceiver) {
-        performHandwritingGestureInternal(header, gesture, resultReceiver);
-    }
-
-    private <T extends HandwritingGesture> void performHandwritingGestureInternal(
-            InputConnectionCommandHeader header,  T gesture, ResultReceiver resultReceiver) {
         dispatchWithTracing("performHandwritingGesture", () -> {
             if (header.mSessionId != mCurrentSessionId.get()) {
                 if (resultReceiver != null) {
@@ -1059,7 +1007,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
             // TODO(210039666): implement Cleaner to return HANDWRITING_GESTURE_RESULT_UNKNOWN if
             //  editor doesn't return any type.
             ic.performHandwritingGesture(
-                    gesture,
+                    gestureContainer.get(),
                     resultReceiver != null ? Runnable::run : null,
                     resultReceiver != null
                             ? (resultCode) -> resultReceiver.send(resultCode, null /* resultData */)
@@ -1143,6 +1091,36 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
             mHasPendingImmediateCursorAnchorInfoUpdate.set(result && hasImmediate);
             mIsCursorAnchorInfoMonitoring.set(result && hasMonitoring);
         }
+    }
+
+    @Dispatching(cancellable = true)
+    @Override
+    public void requestTextBoundsInfo(
+            InputConnectionCommandHeader header, RectF rectF,
+            @NonNull ResultReceiver resultReceiver) {
+        dispatchWithTracing("requestTextBoundsInfo", () -> {
+            if (header.mSessionId != mCurrentSessionId.get()) {
+                resultReceiver.send(TextBoundsInfoResult.CODE_CANCELLED, null);
+                return;  // cancelled
+            }
+            InputConnection ic = getInputConnection();
+            if (ic == null || !isActive()) {
+                Log.w(TAG, "requestTextBoundsInfo on inactive InputConnection");
+                resultReceiver.send(TextBoundsInfoResult.CODE_CANCELLED, null);
+                return;
+            }
+
+            ic.requestTextBoundsInfo(
+                    rectF,
+                    Runnable::run,
+                    (textBoundsInfoResult) -> {
+                        final int resultCode = textBoundsInfoResult.getResultCode();
+                        final TextBoundsInfo textBoundsInfo =
+                                textBoundsInfoResult.getTextBoundsInfo();
+                        resultReceiver.send(resultCode,
+                                textBoundsInfo == null ? null : textBoundsInfo.toBundle());
+                    });
+        });
     }
 
     @Dispatching(cancellable = true)

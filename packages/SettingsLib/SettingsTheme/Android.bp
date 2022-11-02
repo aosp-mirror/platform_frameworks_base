@@ -24,5 +24,6 @@ android_library {
         "com.android.permission",
         "com.android.adservices",
         "com.android.healthconnect",
+        "com.android.mediaprovider",
     ],
 }

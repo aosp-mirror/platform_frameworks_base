@@ -213,7 +213,7 @@ public final class FlexibilityController extends StateController {
 
     @Override
     @GuardedBy("mLock")
-    public void maybeStopTrackingJobLocked(JobStatus js, JobStatus incomingJob, boolean forUpdate) {
+    public void maybeStopTrackingJobLocked(JobStatus js, JobStatus incomingJob) {
         if (js.clearTrackingController(JobStatus.TRACKING_FLEXIBILITY)) {
             mFlexibilityAlarmQueue.removeAlarmForKey(js);
             mFlexibilityTracker.remove(js);

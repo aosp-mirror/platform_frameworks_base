@@ -19,11 +19,11 @@ package com.android.server.wm.flicker.launch
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.RequiresDevice
 import android.view.Surface
+import android.view.WindowManagerPolicyConstants
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.rules.RemoveAllTasksButHomeRule
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -68,7 +68,6 @@ class OpenAppColdFromIcon(testSpec: FlickerTestParameter) :
                     tapl.setExpectedRotation(Surface.ROTATION_0)
                 }
                 RemoveAllTasksButHomeRule.removeAllTasksButHome()
-                this.setRotation(testSpec.startRotation)
             }
             transitions {
                 tapl
@@ -187,7 +186,13 @@ class OpenAppColdFromIcon(testSpec: FlickerTestParameter) :
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): Collection<FlickerTestParameter> {
-            return FlickerTestParameterFactory.getInstance().getConfigNonRotationTests()
+            return FlickerTestParameterFactory.getInstance()
+                // TAPL fails on landscape mode b/240916028
+                .getConfigNonRotationTests(
+                    supportedNavigationModes = listOf(
+                        WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY
+                    )
+                )
         }
     }
 }

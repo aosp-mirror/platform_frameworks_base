@@ -74,6 +74,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"זיהוי מתקשר עובר כברירת מחדל למצב לא מוגבל. השיחה הבאה: לא מוגבלת"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"השירות לא הוקצה."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"אינך יכול לשנות את הגדרת זיהוי המתקשר."</string>
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"הנתונים עברו אל <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"תמיד אפשר לשנות זאת ב\'הגדרות\'"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"אין שירות של חבילת גלישה"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"שיחות חירום לא זמינות"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"אין אפשרות לבצע שיחות רגילות"</string>

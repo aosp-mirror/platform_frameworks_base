@@ -72,6 +72,10 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"既定: 発信者番号通知、次の発信: 通知"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"提供可能なサービスがありません。"</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"発信者番号の設定は変更できません。"</string>
+    <!-- no translation found for auto_data_switch_title (3286350716870518297) -->
+    <skip />
+    <!-- no translation found for auto_data_switch_content (803557715007110959) -->
+    <skip />
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"モバイルデータ サービスのブロック"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"緊急通報のブロック"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"音声通話サービス停止"</string>

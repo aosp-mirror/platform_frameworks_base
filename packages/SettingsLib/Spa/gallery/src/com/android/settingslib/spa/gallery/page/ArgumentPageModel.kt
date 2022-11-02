@@ -81,6 +81,10 @@ class ArgumentPageModel : PageModel() {
             return EntrySearchData(title = PAGE_TITLE, keyword = ARGUMENT_PAGE_KEYWORDS)
         }
 
+        fun genPageTitle(): String {
+            return PAGE_TITLE
+        }
+
         @Composable
         fun create(arguments: Bundle?): ArgumentPageModel {
             val pageModel: ArgumentPageModel = viewModel(key = arguments.toString())
@@ -89,7 +93,6 @@ class ArgumentPageModel : PageModel() {
         }
     }
 
-    private val title = PAGE_TITLE
     private var arguments: Bundle? = null
     private var stringParam: String? = null
     private var intParam: Int? = null
@@ -101,11 +104,6 @@ class ArgumentPageModel : PageModel() {
         this.arguments = arguments
         stringParam = parameter.getStringArg(STRING_PARAM_NAME, arguments)
         intParam = parameter.getIntArg(INT_PARAM_NAME, arguments)
-    }
-
-    @Composable
-    fun genPageTitle(): String {
-        return title
     }
 
     @Composable
@@ -131,7 +129,7 @@ class ArgumentPageModel : PageModel() {
             "$INT_PARAM_NAME=" + intParam!!
         )
         return object : PreferenceModel {
-            override val title = genPageTitle()
+            override val title = PAGE_TITLE
             override val summary = stateOf(summaryArray.joinToString(", "))
             override val onClick = navigator(
                 SettingsPageProviderEnum.ARGUMENT.displayName + parameter.navLink(arguments)

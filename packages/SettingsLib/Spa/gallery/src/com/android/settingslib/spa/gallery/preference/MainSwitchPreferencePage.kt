@@ -33,7 +33,6 @@ import com.android.settingslib.spa.widget.preference.MainSwitchPreference
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
 import com.android.settingslib.spa.widget.preference.SwitchPreferenceModel
-import com.android.settingslib.spa.widget.scaffold.RegularScaffold
 
 private const val TITLE = "Sample MainSwitchPreference"
 
@@ -72,13 +71,8 @@ object MainSwitchPreferencePageProvider : SettingsPageProvider {
             }
     }
 
-    @Composable
-    override fun Page(arguments: Bundle?) {
-        RegularScaffold(title = TITLE) {
-            for (entry in buildEntry(arguments)) {
-                entry.UiLayout()
-            }
-        }
+    override fun getTitle(arguments: Bundle?): String {
+        return TITLE
     }
 }
 

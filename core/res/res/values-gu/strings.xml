@@ -72,6 +72,10 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"કૉલર ID પ્રતિબંધિત નહીં પર ડિફોલ્ટ છે. આગલો કૉલ: પ્રતિબંધિત નહીં"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"સેવાની જોગવાઈ કરી નથી."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"તમે કૉલર ID સેટિંગ બદલી શકતાં નથી."</string>
+    <!-- no translation found for auto_data_switch_title (3286350716870518297) -->
+    <skip />
+    <!-- no translation found for auto_data_switch_content (803557715007110959) -->
+    <skip />
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"કોઈ મોબાઇલ ડેટા સેવા નથી"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"કોટોકટીની કૉલિંગ સેવા અનુપલબ્ધ"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"કોઈ વૉઇસ સેવા નથી"</string>

@@ -103,6 +103,25 @@ public class FeatureFlagUtils {
     public static final String SETTINGS_NEW_KEYBOARD_UI = "settings_new_keyboard_ui";
 
     /**
+     * Enable new shortcut list UI
+     * @hide
+     */
+    public static final String SETTINGS_NEW_KEYBOARD_SHORTCUT = "settings_new_keyboard_shortcut";
+
+    /**
+     * Enable new modifier key settings UI
+     * @hide
+     */
+    public static final String SETTINGS_NEW_KEYBOARD_MODIFIER_KEY =
+            "settings_new_keyboard_modifier_key";
+
+    /**
+     * Enable new trackpad settings UI
+     * @hide
+     */
+    public static final String SETTINGS_NEW_KEYBOARD_TRACKPAD = "settings_new_keyboard_trackpad";
+
+    /**
      * Enable the new pages which is implemented with SPA.
      * @hide
      */
@@ -143,6 +162,9 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(SETTINGS_HIDE_SECOND_LAYER_PAGE_NAVIGATE_UP_BUTTON_IN_TWO_PANE, "true");
         DEFAULT_FLAGS.put(SETTINGS_AUTO_TEXT_WRAPPING, "false");
         DEFAULT_FLAGS.put(SETTINGS_NEW_KEYBOARD_UI, "false");
+        DEFAULT_FLAGS.put(SETTINGS_NEW_KEYBOARD_SHORTCUT, "false");
+        DEFAULT_FLAGS.put(SETTINGS_NEW_KEYBOARD_MODIFIER_KEY, "false");
+        DEFAULT_FLAGS.put(SETTINGS_NEW_KEYBOARD_TRACKPAD, "false");
         DEFAULT_FLAGS.put(SETTINGS_ENABLE_SPA, "false");
         DEFAULT_FLAGS.put(SETTINGS_ADB_METRICS_WRITER, "false");
     }
@@ -158,6 +180,9 @@ public class FeatureFlagUtils {
         PERSISTENT_FLAGS.add(SETTINGS_HIDE_SECOND_LAYER_PAGE_NAVIGATE_UP_BUTTON_IN_TWO_PANE);
         PERSISTENT_FLAGS.add(SETTINGS_AUTO_TEXT_WRAPPING);
         PERSISTENT_FLAGS.add(SETTINGS_NEW_KEYBOARD_UI);
+        PERSISTENT_FLAGS.add(SETTINGS_NEW_KEYBOARD_SHORTCUT);
+        PERSISTENT_FLAGS.add(SETTINGS_NEW_KEYBOARD_MODIFIER_KEY);
+        PERSISTENT_FLAGS.add(SETTINGS_NEW_KEYBOARD_TRACKPAD);
     }
 
     /**

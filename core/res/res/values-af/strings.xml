@@ -72,6 +72,10 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Beller-ID se verstek is nie beperk nie. Volgende oproep: nie beperk nie"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Diens nie verskaf nie."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Jy kan nie die beller-ID-instelling verander nie."</string>
+    <!-- no translation found for auto_data_switch_title (3286350716870518297) -->
+    <skip />
+    <!-- no translation found for auto_data_switch_content (803557715007110959) -->
+    <skip />
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Geen mobiele datadiens nie"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Noodoproepe is onbeskikbaar"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Geen stemdiens nie"</string>

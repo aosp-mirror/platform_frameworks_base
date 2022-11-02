@@ -72,6 +72,10 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"預設顯示本機號碼，下一通電話也繼續顯示。"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"無法提供此服務。"</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"你無法變更來電顯示設定。"</string>
+    <!-- no translation found for auto_data_switch_title (3286350716870518297) -->
+    <skip />
+    <!-- no translation found for auto_data_switch_content (803557715007110959) -->
+    <skip />
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"沒有行動數據傳輸服務"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"無法撥打緊急電話"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"無法使用語音通話服務"</string>

@@ -16,30 +16,29 @@
 
 package android.inputmethodservice;
 
+import static android.view.inputmethod.TextBoundsInfoResult.CODE_CANCELLED;
+
 import android.annotation.AnyThread;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.graphics.RectF;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.view.KeyEvent;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CorrectionInfo;
-import android.view.inputmethod.DeleteGesture;
-import android.view.inputmethod.DeleteRangeGesture;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.HandwritingGesture;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputContentInfo;
-import android.view.inputmethod.InsertGesture;
-import android.view.inputmethod.JoinOrSplitGesture;
-import android.view.inputmethod.RemoveSpaceGesture;
-import android.view.inputmethod.SelectGesture;
-import android.view.inputmethod.SelectRangeGesture;
+import android.view.inputmethod.ParcelableHandwritingGesture;
 import android.view.inputmethod.SurroundingText;
 import android.view.inputmethod.TextAttribute;
+import android.view.inputmethod.TextBoundsInfo;
+import android.view.inputmethod.TextBoundsInfoResult;
 
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.inputmethod.IRemoteInputConnection;
@@ -47,6 +46,7 @@ import com.android.internal.inputmethod.InputConnectionCommandHeader;
 
 import java.util.Objects;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 
 /**
@@ -96,6 +96,44 @@ final class IRemoteInputConnectionInvoker {
             mConsumer = null;
         }
     };
+
+    /**
+     * Subclass of {@link ResultReceiver} used by
+     * {@link #requestTextBoundsInfo(RectF, Executor, Consumer)} for providing
+     * callback.
+     */
+    private static final class TextBoundsInfoResultReceiver extends ResultReceiver {
+        @Nullable
+        private Consumer<TextBoundsInfoResult> mConsumer;
+        @Nullable
+        private Executor mExecutor;
+
+        TextBoundsInfoResultReceiver(@NonNull Executor executor,
+                @NonNull Consumer<TextBoundsInfoResult> consumer) {
+            super(null);
+            mExecutor = executor;
+            mConsumer = consumer;
+        }
+
+        @Override
+        protected void onReceiveResult(@TextBoundsInfoResult.ResultCode int resultCode,
+                @Nullable Bundle resultData) {
+            synchronized (this) {
+                if (mExecutor != null && mConsumer != null) {
+                    final TextBoundsInfoResult textBoundsInfoResult = new TextBoundsInfoResult(
+                            resultCode, TextBoundsInfo.createFromBundle(resultData));
+                    mExecutor.execute(() -> mConsumer.accept(textBoundsInfoResult));
+                    // provide callback only once.
+                    clear();
+                }
+            }
+        }
+
+        private void clear() {
+            mExecutor = null;
+            mConsumer = null;
+        }
+    }
 
     /**
      * Creates a new instance of {@link IRemoteInputConnectionInvoker} for the given
@@ -637,50 +675,19 @@ final class IRemoteInputConnectionInvoker {
     }
 
     /**
-     * Invokes one of {@link IRemoteInputConnection#performHandwritingSelectGesture},
-     * {@link IRemoteInputConnection#performHandwritingSelectRangeGesture},
-     * {@link IRemoteInputConnection#performHandwritingDeleteGesture},
-     * {@link IRemoteInputConnection#performHandwritingDeleteRangeGesture},
-     * {@link IRemoteInputConnection#performHandwritingInsertGesture},
-     * {@link IRemoteInputConnection#performHandwritingRemoveSpaceGesture},
-     * {@link IRemoteInputConnection#performHandwritingJoinOrSplitGesture}.
+     * Invokes {@link IRemoteInputConnection#performHandwritingGesture(
+     * InputConnectionCommandHeader, ParcelableHandwritingGesture, ResultReceiver)}.
      */
     @AnyThread
-    public void performHandwritingGesture(
-            @NonNull HandwritingGesture gesture, @Nullable @CallbackExecutor Executor executor,
-            @Nullable IntConsumer consumer) {
-
+    public void performHandwritingGesture(@NonNull ParcelableHandwritingGesture gesture,
+            @Nullable @CallbackExecutor Executor executor, @Nullable IntConsumer consumer) {
         ResultReceiver resultReceiver = null;
         if (consumer != null) {
             Objects.requireNonNull(executor);
             resultReceiver = new IntResultReceiver(executor, consumer);
         }
         try {
-            if (gesture instanceof SelectGesture) {
-                mConnection.performHandwritingSelectGesture(
-                        createHeader(), (SelectGesture) gesture, resultReceiver);
-            } else if (gesture instanceof SelectRangeGesture) {
-                mConnection.performHandwritingSelectRangeGesture(
-                        createHeader(), (SelectRangeGesture) gesture, resultReceiver);
-            } else if (gesture instanceof InsertGesture) {
-                mConnection.performHandwritingInsertGesture(
-                        createHeader(), (InsertGesture) gesture, resultReceiver);
-            } else if (gesture instanceof DeleteGesture) {
-                mConnection.performHandwritingDeleteGesture(
-                        createHeader(), (DeleteGesture) gesture, resultReceiver);
-            } else if (gesture instanceof DeleteRangeGesture) {
-                mConnection.performHandwritingDeleteRangeGesture(
-                        createHeader(), (DeleteRangeGesture) gesture, resultReceiver);
-            } else if (gesture instanceof RemoveSpaceGesture) {
-                mConnection.performHandwritingRemoveSpaceGesture(
-                        createHeader(), (RemoveSpaceGesture) gesture, resultReceiver);
-            } else if (gesture instanceof JoinOrSplitGesture) {
-                mConnection.performHandwritingJoinOrSplitGesture(
-                        createHeader(), (JoinOrSplitGesture) gesture, resultReceiver);
-            } else if (consumer != null && executor != null) {
-                executor.execute(()
-                        -> consumer.accept(InputConnection.HANDWRITING_GESTURE_RESULT_UNSUPPORTED));
-            }
+            mConnection.performHandwritingGesture(createHeader(), gesture, resultReceiver);
         } catch (RemoteException e) {
             if (consumer != null && executor != null) {
                 executor.execute(() -> consumer.accept(
@@ -733,6 +740,28 @@ final class IRemoteInputConnectionInvoker {
             future.completeExceptionally(e);
         }
         return future;
+    }
+
+    /**
+     * Invokes {@link IRemoteInputConnection#requestTextBoundsInfo(InputConnectionCommandHeader,
+     * RectF, ResultReceiver)}
+     * @param rectF {@code rectF} parameter to be passed.
+     * @param executor {@code Executor} parameter to be passed.
+     * @param consumer {@code Consumer} parameter to be passed.
+     */
+    @AnyThread
+    public void requestTextBoundsInfo(
+            @NonNull RectF rectF, @NonNull @CallbackExecutor Executor executor,
+            @NonNull Consumer<TextBoundsInfoResult> consumer) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(consumer);
+
+        final ResultReceiver resultReceiver = new TextBoundsInfoResultReceiver(executor, consumer);
+        try {
+            mConnection.requestTextBoundsInfo(createHeader(), rectF, resultReceiver);
+        } catch (RemoteException e) {
+            executor.execute(() -> consumer.accept(new TextBoundsInfoResult(CODE_CANCELLED)));
+        }
     }
 
     /**

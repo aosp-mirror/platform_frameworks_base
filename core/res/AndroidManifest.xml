@@ -3152,6 +3152,12 @@
     <permission android:name="android.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND"
                 android:protectionLevel="signature|privileged|vendorPrivileged|oem|verifier|role"/>
 
+    <!-- Allows an application to hint that a broadcast is associated with an
+         "interactive" usage scenario
+         @hide -->
+    <permission android:name="android.permission.BROADCAST_OPTION_INTERACTIVE"
+                android:protectionLevel="signature|privileged" />
+
     <!-- @SystemApi Must be required by activities that handle the intent action
          {@link Intent#ACTION_SEND_SHOW_SUSPENDED_APP_DETAILS}. This is for use by apps that
          hold {@link Manifest.permission#SUSPEND_APPS} to interact with the system.
@@ -4127,7 +4133,8 @@
         android:protectionLevel="signature" />
 
     <!-- Allows access to Test APIs defined in {@link android.view.inputmethod.InputMethodManager}.
-         @hide -->
+         @hide
+         @TestApi -->
     <permission android:name="android.permission.TEST_INPUT_METHOD"
         android:protectionLevel="signature" />
 

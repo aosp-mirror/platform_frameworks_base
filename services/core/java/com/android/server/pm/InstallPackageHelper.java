@@ -463,7 +463,8 @@ final class InstallPackageHelper {
 
             final Computer snapshot = mPm.snapshotComputer();
             mPm.mComponentResolver.addAllComponents(pkg, chatty, mPm.mSetupWizardPackage, snapshot);
-            mPm.mAppsFilter.addPackage(snapshot, pkgSetting, isReplace);
+            mPm.mAppsFilter.addPackage(snapshot, pkgSetting, isReplace,
+                    (scanFlags & SCAN_DONT_KILL_APP) != 0 /* retainImplicitGrantOnReplace */);
             mPm.addAllPackageProperties(pkg);
 
             if (oldPkgSetting == null || oldPkgSetting.getPkg() == null) {

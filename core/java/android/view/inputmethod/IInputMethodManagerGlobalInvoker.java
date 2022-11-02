@@ -16,6 +16,7 @@
 
 package android.view.inputmethod;
 
+import android.Manifest;
 import android.annotation.AnyThread;
 import android.annotation.DurationMillisLong;
 import android.annotation.NonNull;
@@ -353,6 +354,7 @@ final class IInputMethodManagerGlobalInvoker {
     }
 
     @AnyThread
+    @RequiresPermission(Manifest.permission.TEST_INPUT_METHOD)
     static boolean isInputMethodPickerShownForTest() {
         final IInputMethodManager service = getService();
         if (service == null) {
@@ -487,6 +489,7 @@ final class IInputMethodManagerGlobalInvoker {
     }
 
     @AnyThread
+    @RequiresPermission(Manifest.permission.TEST_INPUT_METHOD)
     static void addVirtualStylusIdForTestSession(IInputMethodClient client) {
         final IInputMethodManager service = getService();
         if (service == null) {

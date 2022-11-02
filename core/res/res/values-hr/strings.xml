@@ -73,6 +73,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Zadana postavka ID-a pozivatelja nema ograničenje. Sljedeći poziv: Nije ograničen"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Usluga nije rezervirana."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Ne možete promijeniti postavku ID-a pozivatelja."</string>
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"Podaci su prebačeni na <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"To uvijek možete promijeniti u postavkama"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Nema podatkovne mobilne usluge"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Hitni pozivi nisu dostupni"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Nema glasovnih usluga"</string>

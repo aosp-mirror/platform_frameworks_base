@@ -72,6 +72,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Naka-default na hindi pinaghihigpitan ang Caller ID. Susunod na tawag: Hindi pinaghihigpitan"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Hindi naprobisyon ang serbisyo."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Hindi mo mababago ang setting ng caller ID."</string>
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"Nailipat sa <xliff:g id="CARRIERDISPLAY">%s</xliff:g> ang data"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"Puwede mo itong baguhin anumang oras sa Mga Setting"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Walang serbisyo ng data sa mobile"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Hindi available ang pang-emergency na pagtawag"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Walang serbisyo para sa boses"</string>

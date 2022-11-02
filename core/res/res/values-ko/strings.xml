@@ -72,6 +72,10 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"발신자 번호가 기본적으로 제한되지 않음으로 설정됩니다. 다음 통화: 제한되지 않음"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"서비스가 준비되지 않았습니다."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"발신자 번호 설정을 변경할 수 없습니다."</string>
+    <!-- no translation found for auto_data_switch_title (3286350716870518297) -->
+    <skip />
+    <!-- no translation found for auto_data_switch_content (803557715007110959) -->
+    <skip />
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"모바일 데이터 서비스가 차단됨"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"긴급 전화를 사용할 수 없음"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"음성 서비스를 이용할 수 없음"</string>

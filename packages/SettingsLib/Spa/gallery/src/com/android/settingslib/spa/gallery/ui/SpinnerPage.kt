@@ -49,9 +49,13 @@ object SpinnerPageProvider : SettingsPageProvider {
             }
     }
 
+    override fun getTitle(arguments: Bundle?): String {
+        return TITLE
+    }
+
     @Composable
     override fun Page(arguments: Bundle?) {
-        RegularScaffold(title = TITLE) {
+        RegularScaffold(title = getTitle(arguments)) {
             val selectedIndex = rememberSaveable { mutableStateOf(0) }
             Spinner(
                 options = (1..3).map { "Option $it" },

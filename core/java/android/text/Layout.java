@@ -3000,6 +3000,18 @@ public abstract class Layout {
         }
 
         /**
+         * Returns the BiDi level of this run.
+         *
+         * @param runIndex the index of the BiDi run
+         * @return the BiDi level of this run.
+         * @hide
+         */
+        @IntRange(from = 0)
+        public int getRunLevel(int runIndex) {
+            return (mDirections[runIndex * 2 + 1] >>> RUN_LEVEL_SHIFT) & RUN_LEVEL_MASK;
+        }
+
+        /**
          * Returns true if the BiDi run is RTL.
          *
          * @param runIndex the index of the BiDi run

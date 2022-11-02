@@ -69,6 +69,7 @@ import android.graphics.BaseCanvas;
 import android.graphics.BlendMode;
 import android.graphics.Canvas;
 import android.graphics.Insets;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Paint.FontMetricsInt;
 import android.graphics.Path;
@@ -200,6 +201,7 @@ import android.view.inputmethod.JoinOrSplitGesture;
 import android.view.inputmethod.RemoveSpaceGesture;
 import android.view.inputmethod.SelectGesture;
 import android.view.inputmethod.SelectRangeGesture;
+import android.view.inputmethod.TextBoundsInfo;
 import android.view.inspector.InspectableProperty;
 import android.view.inspector.InspectableProperty.EnumEntry;
 import android.view.inspector.InspectableProperty.FlagEntry;
@@ -12953,18 +12955,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         getLocalVisibleRect(rect);
         final RectF visibleRect = new RectF(rect);
 
-        final float[] characterBounds = new float[4 * (endIndex - startIndex)];
-        mLayout.fillCharacterBounds(startIndex, endIndex, characterBounds, 0);
+
+        final float[] characterBounds = getCharacterBounds(startIndex, endIndex,
+                viewportToContentHorizontalOffset, viewportToContentVerticalOffset);
         final int limit = endIndex - startIndex;
         for (int offset = 0; offset < limit; ++offset) {
-            final float left =
-                    characterBounds[offset * 4] + viewportToContentHorizontalOffset;
-            final float top =
-                    characterBounds[offset * 4 + 1] + viewportToContentVerticalOffset;
-            final float right =
-                    characterBounds[offset * 4 + 2] + viewportToContentHorizontalOffset;
-            final float bottom =
-                    characterBounds[offset * 4 + 3] + viewportToContentVerticalOffset;
+            final float left = characterBounds[offset * 4];
+            final float top = characterBounds[offset * 4 + 1];
+            final float right = characterBounds[offset * 4 + 2];
+            final float bottom = characterBounds[offset * 4 + 3];
 
             final boolean hasVisibleRegion = visibleRect.intersects(left, top, right, bottom);
             final boolean hasInVisibleRegion = !visibleRect.contains(left, top, right, bottom);
@@ -12982,6 +12981,149 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             builder.addCharacterBounds(offset + startIndex, left, top, right, bottom,
                     characterBoundsFlags);
         }
+    }
+
+    /**
+     * Return the bounds of the characters in the given range, in TextView's coordinates.
+     *
+     * @param start the start index of the interested text range, inclusive.
+     * @param end the end index of the interested text range, exclusive.
+     * @param layoutLeft the left of the given {@code layout} in the editor view's coordinates.
+     * @param layoutTop  the top of the given {@code layout} in the editor view's coordinates.
+     * @return the character bounds stored in a flattened array, in the editor view's coordinates.
+     */
+    private float[] getCharacterBounds(int start, int end, float layoutLeft, float layoutTop) {
+        final float[] characterBounds = new float[4 * (end - start)];
+        mLayout.fillCharacterBounds(start, end, characterBounds, 0);
+        for (int offset = 0; offset < end - start; ++offset) {
+            characterBounds[4 * offset] += layoutLeft;
+            characterBounds[4 * offset + 1] += layoutTop;
+            characterBounds[4 * offset + 2] += layoutLeft;
+            characterBounds[4 * offset + 3] += layoutTop;
+        }
+        return characterBounds;
+    }
+
+    /**
+     * Creates the {@link TextBoundsInfo} for the text lines that intersects with the {@code rectF}.
+     * @hide
+     */
+    public TextBoundsInfo getTextBoundsInfo(@NonNull RectF rectF) {
+        final Layout layout = getLayout();
+        if (layout == null) {
+            // No valid text layout, return null.
+            return null;
+        }
+        final CharSequence text = layout.getText();
+        if (text == null) {
+            // It's impossible that a layout has no text. Check here to avoid NPE.
+            return null;
+        }
+
+        final Matrix localToGlobalMatrix = new Matrix();
+        transformMatrixToGlobal(localToGlobalMatrix);
+        final Matrix globalToLocalMatrix = new Matrix();
+        if (!localToGlobalMatrix.invert(globalToLocalMatrix)) {
+            // Can't map global rectF to local coordinates, this is almost impossible in practice.
+            return null;
+        }
+
+        final float layoutLeft = viewportToContentHorizontalOffset();
+        final float layoutTop = viewportToContentVerticalOffset();
+
+        final RectF localRectF = new RectF(rectF);
+        globalToLocalMatrix.mapRect(localRectF);
+        localRectF.offset(-layoutLeft, -layoutTop);
+
+        // Text length is 0. There is no character bounds, return empty TextBoundsInfo.
+        // rectF doesn't intersect with the layout, return empty TextBoundsInfo.
+        if (!localRectF.intersects(0f, 0f, layout.getWidth(), layout.getHeight())
+                || text.length() == 0) {
+            final TextBoundsInfo.Builder builder = new TextBoundsInfo.Builder();
+            final SegmentFinder emptySegmentFinder =
+                    new SegmentFinder.DefaultSegmentFinder(new int[0]);
+            builder.setStartAndEnd(0, 0)
+                    .setMatrix(localToGlobalMatrix)
+                    .setCharacterBounds(new float[0])
+                    .setCharacterBidiLevel(new int[0])
+                    .setCharacterFlags(new int[0])
+                    .setGraphemeSegmentFinder(emptySegmentFinder)
+                    .setLineSegmentFinder(emptySegmentFinder)
+                    .setWordSegmentFinder(emptySegmentFinder);
+            return  builder.build();
+        }
+
+        final int startLine = layout.getLineForVertical((int) Math.floor(localRectF.top));
+        final int endLine = layout.getLineForVertical((int) Math.floor(localRectF.bottom));
+        final int start = layout.getLineStart(startLine);
+        final int end = layout.getLineEnd(endLine);
+
+        // Compute character bounds.
+        final float[] characterBounds = getCharacterBounds(start, end, layoutLeft, layoutTop);
+
+        // Compute character flags and BiDi levels.
+        final int[] characterFlags = new int[end - start];
+        final int[] characterBidiLevels = new int[end - start];
+        for (int line = startLine; line <= endLine; ++line) {
+            final int lineStart = layout.getLineStart(line);
+            final int lineEnd = layout.getLineEnd(line);
+            final Layout.Directions directions = layout.getLineDirections(line);
+            for (int i = 0; i < directions.getRunCount(); ++i) {
+                final int runStart = directions.getRunStart(i) + lineStart;
+                final int runEnd = Math.min(runStart + directions.getRunLength(i), lineEnd);
+                final int runLevel = directions.getRunLevel(i);
+                Arrays.fill(characterBidiLevels, runStart - start, runEnd - start, runLevel);
+            }
+
+            final boolean lineIsRtl =
+                    layout.getParagraphDirection(line) == Layout.DIR_RIGHT_TO_LEFT;
+            for (int index = lineStart; index < lineEnd; ++index) {
+                int flags = 0;
+                if (TextUtils.isWhitespace(text.charAt(index))) {
+                    flags |= TextBoundsInfo.FLAG_CHARACTER_WHITESPACE;
+                }
+                if (TextUtils.isPunctuation(Character.codePointAt(text, index))) {
+                    flags |= TextBoundsInfo.FLAG_CHARACTER_PUNCTUATION;
+                }
+                if (TextUtils.isNewline(Character.codePointAt(text, index))) {
+                    flags |= TextBoundsInfo.FLAG_CHARACTER_LINEFEED;
+                }
+                if (lineIsRtl) {
+                    flags |= TextBoundsInfo.FLAG_LINE_IS_RTL;
+                }
+                characterFlags[index - start] = flags;
+            }
+        }
+
+        // Create grapheme SegmentFinder.
+        final SegmentFinder graphemeSegmentFinder =
+                new GraphemeClusterSegmentFinder(text, layout.getPaint());
+
+        // Create word SegmentFinder.
+        final WordIterator wordIterator = getWordIterator();
+        wordIterator.setCharSequence(text, 0, text.length());
+        final SegmentFinder wordSegmentFinder = new WordSegmentFinder(text, wordIterator);
+
+        // Create line SegmentFinder.
+        final int lineCount = endLine - startLine + 1;
+        final int[] lineRanges = new int[2 * lineCount];
+        for (int line = startLine; line <= endLine; ++line) {
+            final int offset = line - startLine;
+            lineRanges[2 * offset] = layout.getLineStart(line);
+            lineRanges[2 * offset + 1] = layout.getLineEnd(line);
+        }
+        final SegmentFinder lineSegmentFinder = new SegmentFinder.DefaultSegmentFinder(lineRanges);
+
+        final TextBoundsInfo.Builder builder = new TextBoundsInfo.Builder();
+        builder.setStartAndEnd(start, end)
+                .setMatrix(localToGlobalMatrix)
+                .setCharacterBounds(characterBounds)
+                .setCharacterBidiLevel(characterBidiLevels)
+                .setCharacterFlags(characterFlags)
+                .setGraphemeSegmentFinder(graphemeSegmentFinder)
+                .setLineSegmentFinder(lineSegmentFinder)
+                .setWordSegmentFinder(wordSegmentFinder);
+        return  builder.build();
     }
 
     /**

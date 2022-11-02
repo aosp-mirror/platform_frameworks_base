@@ -1282,7 +1282,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         mNotificationPanelViewController.expandWithQs();
 
         verify(mLockscreenShadeTransitionController).goToLockedShade(
-                /* expandedView= */null, /* needsQSAnimation= */false);
+                /* expandedView= */null, /* needsQSAnimation= */true);
     }
 
     @Test
@@ -1552,7 +1552,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 /* delay= */ 0
         );
 
-        mNotificationPanelViewController.setQsExpansion(/* height= */ 123);
+        mNotificationPanelViewController.setQsExpansionHeight(/* height= */ 123);
 
         // First for setTransitionToFullShadeAmount and then setQsExpansion
         verify(mQs, times(2)).setQsExpansion(
@@ -1573,7 +1573,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         when(mNotificationStackScrollLayoutController.getNotificationSquishinessFraction())
                 .thenReturn(nsslSquishinessFraction);
 
-        mNotificationPanelViewController.setQsExpansion(/* height= */ 123);
+        mNotificationPanelViewController.setQsExpansionHeight(/* height= */ 123);
 
         verify(mQs).setQsExpansion(
                 /* expansion= */ anyFloat(),

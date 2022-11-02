@@ -2456,7 +2456,12 @@ public class WallpaperManager {
 
         public void waitForCompletion() {
             try {
-                mLatch.await(30, TimeUnit.SECONDS);
+                final boolean completed = mLatch.await(30, TimeUnit.SECONDS);
+                if (completed) {
+                    Log.d(TAG, "Wallpaper set completion.");
+                } else {
+                    Log.d(TAG, "Timeout waiting for wallpaper set completion!");
+                }
             } catch (InterruptedException e) {
                 // This might be legit: the crop may take a very long time. Don't sweat
                 // it in that case; we are okay with display lagging behind in order to

@@ -4604,23 +4604,24 @@ package android.app {
 
   public class AlarmManager {
     method public boolean canScheduleExactAlarms();
-    method public void cancel(android.app.PendingIntent);
-    method public void cancel(android.app.AlarmManager.OnAlarmListener);
+    method public void cancel(@NonNull android.app.PendingIntent);
+    method public void cancel(@NonNull android.app.AlarmManager.OnAlarmListener);
     method public void cancelAll();
     method public android.app.AlarmManager.AlarmClockInfo getNextAlarmClock();
-    method public void set(int, long, android.app.PendingIntent);
-    method public void set(int, long, String, android.app.AlarmManager.OnAlarmListener, android.os.Handler);
-    method @RequiresPermission(android.Manifest.permission.SCHEDULE_EXACT_ALARM) public void setAlarmClock(android.app.AlarmManager.AlarmClockInfo, android.app.PendingIntent);
-    method public void setAndAllowWhileIdle(int, long, android.app.PendingIntent);
-    method @RequiresPermission(value=android.Manifest.permission.SCHEDULE_EXACT_ALARM, conditional=true) public void setExact(int, long, android.app.PendingIntent);
-    method @RequiresPermission(value=android.Manifest.permission.SCHEDULE_EXACT_ALARM, conditional=true) public void setExact(int, long, String, android.app.AlarmManager.OnAlarmListener, android.os.Handler);
-    method @RequiresPermission(value=android.Manifest.permission.SCHEDULE_EXACT_ALARM, conditional=true) public void setExactAndAllowWhileIdle(int, long, android.app.PendingIntent);
-    method public void setInexactRepeating(int, long, long, android.app.PendingIntent);
-    method public void setRepeating(int, long, long, android.app.PendingIntent);
+    method public void set(int, long, @NonNull android.app.PendingIntent);
+    method public void set(int, long, @Nullable String, @NonNull android.app.AlarmManager.OnAlarmListener, @Nullable android.os.Handler);
+    method @RequiresPermission(android.Manifest.permission.SCHEDULE_EXACT_ALARM) public void setAlarmClock(@NonNull android.app.AlarmManager.AlarmClockInfo, @NonNull android.app.PendingIntent);
+    method public void setAndAllowWhileIdle(int, long, @NonNull android.app.PendingIntent);
+    method @RequiresPermission(value=android.Manifest.permission.SCHEDULE_EXACT_ALARM, conditional=true) public void setExact(int, long, @NonNull android.app.PendingIntent);
+    method @RequiresPermission(value=android.Manifest.permission.SCHEDULE_EXACT_ALARM, conditional=true) public void setExact(int, long, @Nullable String, @NonNull android.app.AlarmManager.OnAlarmListener, @Nullable android.os.Handler);
+    method @RequiresPermission(value=android.Manifest.permission.SCHEDULE_EXACT_ALARM, conditional=true) public void setExactAndAllowWhileIdle(int, long, @NonNull android.app.PendingIntent);
+    method public void setInexactRepeating(int, long, long, @NonNull android.app.PendingIntent);
+    method public void setRepeating(int, long, long, @NonNull android.app.PendingIntent);
     method @RequiresPermission(android.Manifest.permission.SET_TIME) public void setTime(long);
     method @RequiresPermission(android.Manifest.permission.SET_TIME_ZONE) public void setTimeZone(String);
-    method public void setWindow(int, long, long, android.app.PendingIntent);
-    method public void setWindow(int, long, long, String, android.app.AlarmManager.OnAlarmListener, android.os.Handler);
+    method public void setWindow(int, long, long, @NonNull android.app.PendingIntent);
+    method public void setWindow(int, long, long, @Nullable String, @NonNull android.app.AlarmManager.OnAlarmListener, @Nullable android.os.Handler);
+    method public void setWindow(int, long, long, @Nullable String, @NonNull java.util.concurrent.Executor, @NonNull android.app.AlarmManager.OnAlarmListener);
     field public static final String ACTION_NEXT_ALARM_CLOCK_CHANGED = "android.app.action.NEXT_ALARM_CLOCK_CHANGED";
     field public static final String ACTION_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED = "android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED";
     field public static final int ELAPSED_REALTIME = 3; // 0x3
@@ -11654,7 +11655,7 @@ package android.content.pm {
   public static final class PackageInstaller.PreapprovalDetails implements android.os.Parcelable {
     method public int describeContents();
     method @Nullable public android.graphics.Bitmap getIcon();
-    method @NonNull public String getLabel();
+    method @NonNull public CharSequence getLabel();
     method @NonNull public android.icu.util.ULocale getLocale();
     method @NonNull public String getPackageName();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
@@ -11665,7 +11666,7 @@ package android.content.pm {
     ctor public PackageInstaller.PreapprovalDetails.Builder();
     method @NonNull public android.content.pm.PackageInstaller.PreapprovalDetails build();
     method @NonNull public android.content.pm.PackageInstaller.PreapprovalDetails.Builder setIcon(@NonNull android.graphics.Bitmap);
-    method @NonNull public android.content.pm.PackageInstaller.PreapprovalDetails.Builder setLabel(@NonNull String);
+    method @NonNull public android.content.pm.PackageInstaller.PreapprovalDetails.Builder setLabel(@NonNull CharSequence);
     method @NonNull public android.content.pm.PackageInstaller.PreapprovalDetails.Builder setLocale(@NonNull android.icu.util.ULocale);
     method @NonNull public android.content.pm.PackageInstaller.PreapprovalDetails.Builder setPackageName(@NonNull String);
   }
@@ -32545,6 +32546,7 @@ package android.os {
     field public static final String DISALLOW_BLUETOOTH = "no_bluetooth";
     field public static final String DISALLOW_BLUETOOTH_SHARING = "no_bluetooth_sharing";
     field public static final String DISALLOW_CAMERA_TOGGLE = "disallow_camera_toggle";
+    field public static final String DISALLOW_CELLULAR_2G = "no_cellular_2g";
     field public static final String DISALLOW_CHANGE_WIFI_STATE = "no_change_wifi_state";
     field public static final String DISALLOW_CONFIG_BLUETOOTH = "no_config_bluetooth";
     field public static final String DISALLOW_CONFIG_BRIGHTNESS = "no_config_brightness";
@@ -41591,7 +41593,7 @@ package android.telephony {
     field public static final String KEY_CARRIER_CONFIG_APPLIED_BOOL = "carrier_config_applied_bool";
     field public static final String KEY_CARRIER_CONFIG_VERSION_STRING = "carrier_config_version_string";
     field public static final String KEY_CARRIER_CROSS_SIM_IMS_AVAILABLE_BOOL = "carrier_cross_sim_ims_available_bool";
-    field public static final String KEY_CARRIER_DATA_CALL_PERMANENT_FAILURE_STRINGS = "carrier_data_call_permanent_failure_strings";
+    field @Deprecated public static final String KEY_CARRIER_DATA_CALL_PERMANENT_FAILURE_STRINGS = "carrier_data_call_permanent_failure_strings";
     field public static final String KEY_CARRIER_DEFAULT_ACTIONS_ON_DCFAILURE_STRING_ARRAY = "carrier_default_actions_on_dcfailure_string_array";
     field public static final String KEY_CARRIER_DEFAULT_ACTIONS_ON_DEFAULT_NETWORK_AVAILABLE = "carrier_default_actions_on_default_network_available_string_array";
     field public static final String KEY_CARRIER_DEFAULT_ACTIONS_ON_REDIRECTION_STRING_ARRAY = "carrier_default_actions_on_redirection_string_array";
@@ -45582,6 +45584,14 @@ package android.text {
     field public static final int DONE = -1; // 0xffffffff
   }
 
+  public static class SegmentFinder.DefaultSegmentFinder extends android.text.SegmentFinder {
+    ctor public SegmentFinder.DefaultSegmentFinder(@NonNull int[]);
+    method public int nextEndBoundary(@IntRange(from=0) int);
+    method public int nextStartBoundary(@IntRange(from=0) int);
+    method public int previousEndBoundary(@IntRange(from=0) int);
+    method public int previousStartBoundary(@IntRange(from=0) int);
+  }
+
   public class Selection {
     method public static boolean extendDown(android.text.Spannable, android.text.Layout);
     method public static boolean extendLeft(android.text.Spannable, android.text.Layout);
@@ -48571,6 +48581,12 @@ package android.view {
     field public static final int VERTICAL_GRAVITY_MASK = 112; // 0x70
   }
 
+  public class HandwritingDelegateConfiguration {
+    ctor public HandwritingDelegateConfiguration(@IdRes int, @NonNull Runnable);
+    method public int getDelegatorViewId();
+    method @NonNull public Runnable getInitiationCallback();
+  }
+
   public class HapticFeedbackConstants {
     field public static final int CLOCK_TICK = 4; // 0x4
     field public static final int CONFIRM = 16; // 0x10
@@ -50187,6 +50203,7 @@ package android.view {
     method public float getHandwritingBoundsOffsetLeft();
     method public float getHandwritingBoundsOffsetRight();
     method public float getHandwritingBoundsOffsetTop();
+    method @Nullable public android.view.HandwritingDelegateConfiguration getHandwritingDelegateConfiguration();
     method public final boolean getHasOverlappingRendering();
     method public final int getHeight();
     method public void getHitRect(android.graphics.Rect);
@@ -50553,6 +50570,7 @@ package android.view {
     method public void setForegroundTintList(@Nullable android.content.res.ColorStateList);
     method public void setForegroundTintMode(@Nullable android.graphics.PorterDuff.Mode);
     method public void setHandwritingBoundsOffsets(float, float, float, float);
+    method public void setHandwritingDelegateConfiguration(@Nullable android.view.HandwritingDelegateConfiguration);
     method public void setHapticFeedbackEnabled(boolean);
     method public void setHasTransientState(boolean);
     method public void setHorizontalFadingEdgeEnabled(boolean);
@@ -53595,6 +53613,7 @@ package android.view.inputmethod {
     method public boolean reportFullscreenMode(boolean);
     method public boolean requestCursorUpdates(int);
     method public default boolean requestCursorUpdates(int, int);
+    method public default void requestTextBoundsInfo(@NonNull android.graphics.RectF, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.view.inputmethod.TextBoundsInfoResult>);
     method public boolean sendKeyEvent(android.view.KeyEvent);
     method public boolean setComposingRegion(int, int);
     method public default boolean setComposingRegion(int, int, @Nullable android.view.inputmethod.TextAttribute);
@@ -53922,6 +53941,50 @@ package android.view.inputmethod {
     method @NonNull public android.view.inputmethod.TextAttribute build();
     method @NonNull public android.view.inputmethod.TextAttribute.Builder setExtras(@NonNull android.os.PersistableBundle);
     method @NonNull public android.view.inputmethod.TextAttribute.Builder setTextConversionSuggestions(@NonNull java.util.List<java.lang.String>);
+  }
+
+  public final class TextBoundsInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method @IntRange(from=0, to=125) public int getCharacterBidiLevel(int);
+    method @NonNull public android.graphics.RectF getCharacterBounds(int);
+    method public int getCharacterFlags(int);
+    method public int getEnd();
+    method @NonNull public android.text.SegmentFinder getGraphemeSegmentFinder();
+    method @NonNull public android.text.SegmentFinder getLineSegmentFinder();
+    method @NonNull public android.graphics.Matrix getMatrix();
+    method public int getStart();
+    method @NonNull public android.text.SegmentFinder getWordSegmentFinder();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.view.inputmethod.TextBoundsInfo> CREATOR;
+    field public static final int FLAG_CHARACTER_LINEFEED = 2; // 0x2
+    field public static final int FLAG_CHARACTER_PUNCTUATION = 4; // 0x4
+    field public static final int FLAG_CHARACTER_WHITESPACE = 1; // 0x1
+    field public static final int FLAG_LINE_IS_RTL = 8; // 0x8
+  }
+
+  public static final class TextBoundsInfo.Builder {
+    ctor public TextBoundsInfo.Builder();
+    method @NonNull public android.view.inputmethod.TextBoundsInfo build();
+    method @NonNull public android.view.inputmethod.TextBoundsInfo.Builder clear();
+    method @NonNull public android.view.inputmethod.TextBoundsInfo.Builder setCharacterBidiLevel(@NonNull int[]);
+    method @NonNull public android.view.inputmethod.TextBoundsInfo.Builder setCharacterBounds(@NonNull float[]);
+    method @NonNull public android.view.inputmethod.TextBoundsInfo.Builder setCharacterFlags(@NonNull int[]);
+    method @NonNull public android.view.inputmethod.TextBoundsInfo.Builder setGraphemeSegmentFinder(@NonNull android.text.SegmentFinder);
+    method @NonNull public android.view.inputmethod.TextBoundsInfo.Builder setLineSegmentFinder(@NonNull android.text.SegmentFinder);
+    method @NonNull public android.view.inputmethod.TextBoundsInfo.Builder setMatrix(@NonNull android.graphics.Matrix);
+    method @NonNull public android.view.inputmethod.TextBoundsInfo.Builder setStartAndEnd(@IntRange(from=0) int, @IntRange(from=0) int);
+    method @NonNull public android.view.inputmethod.TextBoundsInfo.Builder setWordSegmentFinder(@NonNull android.text.SegmentFinder);
+  }
+
+  public final class TextBoundsInfoResult {
+    ctor public TextBoundsInfoResult(int);
+    ctor public TextBoundsInfoResult(int, @NonNull android.view.inputmethod.TextBoundsInfo);
+    method public int getResultCode();
+    method @Nullable public android.view.inputmethod.TextBoundsInfo getTextBoundsInfo();
+    field public static final int CODE_CANCELLED = 3; // 0x3
+    field public static final int CODE_FAILED = 2; // 0x2
+    field public static final int CODE_SUCCESS = 1; // 0x1
+    field public static final int CODE_UNSUPPORTED = 0; // 0x0
   }
 
   public final class TextSnapshot {

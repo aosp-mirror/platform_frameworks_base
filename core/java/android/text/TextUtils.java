@@ -2331,7 +2331,8 @@ public class TextUtils {
         return trimmed;
     }
 
-    private static boolean isNewline(int codePoint) {
+    /** @hide */
+    public static boolean isNewline(int codePoint) {
         int type = Character.getType(codePoint);
         return type == Character.PARAGRAPH_SEPARATOR || type == Character.LINE_SEPARATOR
                 || codePoint == LINE_FEED_CODE_POINT;

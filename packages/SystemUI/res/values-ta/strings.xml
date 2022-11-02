@@ -248,7 +248,8 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"ஒளிர்வு"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"கலர் இன்வெர்ஷன்"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"கலர் கரெக்‌ஷன்"</string>
-    <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"பயனர் அமைப்புகள்"</string>
+    <!-- no translation found for quick_settings_more_user_settings (7634653308485206306) -->
+    <skip />
     <string name="quick_settings_done" msgid="2163641301648855793">"முடிந்தது"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"மூடுக"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"இணைக்கப்பட்டது"</string>
@@ -727,6 +728,14 @@
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"மொபைல் டேட்டாவை ஆஃப் செய்யவா?"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"<xliff:g id="CARRIER">%s</xliff:g> மூலம் டேட்டா அல்லது இணையத்தை உங்களால் பயன்படுத்த முடியாது. வைஃபை வழியாக மட்டுமே இணையத்தைப் பயன்படுத்த முடியும்."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"உங்கள் மொபைல் நிறுவனம்"</string>
+    <!-- no translation found for auto_data_switch_disable_title (5146527155665190652) -->
+    <skip />
+    <!-- no translation found for auto_data_switch_disable_message (5885533647399535852) -->
+    <skip />
+    <!-- no translation found for auto_data_switch_dialog_negative_button (2370876875999891444) -->
+    <skip />
+    <!-- no translation found for auto_data_switch_dialog_positive_button (8531782041263087564) -->
+    <skip />
     <string name="touch_filtered_warning" msgid="8119511393338714836">"அனுமதிக் கோரிக்கையை ஆப்ஸ் மறைப்பதால், அமைப்புகளால் உங்கள் பதிலைச் சரிபார்க்க முடியாது."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"<xliff:g id="APP_0">%1$s</xliff:g> ஆப்ஸை, <xliff:g id="APP_2">%2$s</xliff:g> ஆப்ஸின் விழிப்பூட்டல்களைக் காண்பிக்க அனுமதிக்கவா?"</string>
     <string name="slice_permission_text_1" msgid="6675965177075443714">"- இது, <xliff:g id="APP">%1$s</xliff:g> பயன்பாட்டிலிருந்து தகவலைப் படிக்கும்"</string>
@@ -785,12 +794,18 @@
     <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"சாளரத்தைப் பெரிதாக்கும் கருவிக்கான அமைப்புகள்"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"அணுகல்தன்மை அம்சத்தை திறக்க தட்டவும். அமைப்பில் பட்டனை பிரத்தியேகமாக்கலாம்/மாற்றலாம்.\n\n"<annotation id="link">"அமைப்பில் காண்க"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"பட்டனைத் தற்காலிகமாக மறைக்க ஓரத்திற்கு நகர்த்தும்"</string>
+    <!-- no translation found for accessibility_floating_button_undo (511112888715708241) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_undo_message_text (3044079592757099698) -->
+    <skip />
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"மேலே இடதுபுறத்திற்கு நகர்த்து"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"மேலே வலதுபுறத்திற்கு நகர்த்து"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"கீழே இடதுபுறத்திற்கு நகர்த்து"</string>
     <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"கீழே வலதுபுறத்திற்கு நகர்த்து"</string>
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"ஓரத்திற்கு நகர்த்தி மறை"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"ஓரத்திற்கு நகர்த்தி, காட்டு"</string>
+    <!-- no translation found for accessibility_floating_button_action_remove_menu (6730432848162552135) -->
+    <skip />
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"நிலைமாற்று"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"சாதனக் கட்டுப்பாடுகள்"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"கட்டுப்பாடுகளைச் சேர்க்க வேண்டிய ஆப்ஸைத் தேர்ந்தெடுங்கள்"</string>
@@ -933,6 +948,10 @@
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"மொபைல் டேட்டா"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"இணைக்கப்பட்டது"</string>
+    <!-- no translation found for mobile_data_temp_connection_active (4590222725908806824) -->
+    <skip />
+    <!-- no translation found for mobile_data_poor_connection (819617772268371434) -->
+    <skip />
     <string name="mobile_data_off_summary" msgid="3663995422004150567">"மொபைல் டேட்டாவுடன் தானாக இணைக்காது"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"இணைப்பு இல்லை"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"வேறு நெட்வொர்க்குகள் எதுவும் கிடைக்கவில்லை"</string>

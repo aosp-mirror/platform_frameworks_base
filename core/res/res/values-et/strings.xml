@@ -72,6 +72,10 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Helistaja ID pole vaikimisi piiratud. Järgmine kõne: pole piiratud"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Teenus pole ette valmistatud."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Helistaja ID seadet ei saa muuta."</string>
+    <!-- no translation found for auto_data_switch_title (3286350716870518297) -->
+    <skip />
+    <!-- no translation found for auto_data_switch_content (803557715007110959) -->
+    <skip />
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Mobiilne andmesideteenus puudub"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Hädaabikõned pole saadaval"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Häälkõned pole saadaval"</string>

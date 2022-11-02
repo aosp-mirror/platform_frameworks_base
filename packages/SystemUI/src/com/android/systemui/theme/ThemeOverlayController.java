@@ -115,7 +115,6 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
     private final SecureSettings mSecureSettings;
     private final Executor mMainExecutor;
     private final Handler mBgHandler;
-    private final boolean mIsMonochromaticEnabled;
     private final Context mContext;
     private final boolean mIsMonetEnabled;
     private final UserTracker mUserTracker;
@@ -365,7 +364,6 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
             UserTracker userTracker, DumpManager dumpManager, FeatureFlags featureFlags,
             @Main Resources resources, WakefulnessLifecycle wakefulnessLifecycle) {
         mContext = context;
-        mIsMonochromaticEnabled = featureFlags.isEnabled(Flags.MONOCHROMATIC_THEMES);
         mIsMonetEnabled = featureFlags.isEnabled(Flags.MONET);
         mDeviceProvisionedController = deviceProvisionedController;
         mBroadcastDispatcher = broadcastDispatcher;
@@ -669,11 +667,8 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
         // used as a system-wide theme.
         // - Content intentionally excluded, intended for media player, not system-wide
         List<Style> validStyles = new ArrayList<>(Arrays.asList(Style.EXPRESSIVE, Style.SPRITZ,
-                Style.TONAL_SPOT, Style.FRUIT_SALAD, Style.RAINBOW, Style.VIBRANT));
-
-        if (mIsMonochromaticEnabled) {
-            validStyles.add(Style.MONOCHROMATIC);
-        }
+                Style.TONAL_SPOT, Style.FRUIT_SALAD, Style.RAINBOW, Style.VIBRANT,
+                Style.MONOCHROMATIC));
 
         Style style = mThemeStyle;
         final String overlayPackageJson = mSecureSettings.getStringForUser(

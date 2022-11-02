@@ -110,4 +110,9 @@ oneway interface IOverviewProxy {
       * Sent when screen started turning off.
       */
      void onScreenTurningOff() = 24;
+
+     /**
+      * Sent when split keyboard shortcut is triggered to enter stage split.
+      */
+     void enterStageSplitFromRunningApp(boolean leftOrTop) = 25;
 }

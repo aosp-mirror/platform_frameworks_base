@@ -67,9 +67,13 @@ object FooterPageProvider : SettingsPageProvider {
             }
     }
 
+    override fun getTitle(arguments: Bundle?): String {
+        return TITLE
+    }
+
     @Composable
     override fun Page(arguments: Bundle?) {
-        RegularScaffold(title = TITLE) {
+        RegularScaffold(title = getTitle(arguments)) {
             for (entry in buildEntry(arguments)) {
                 entry.UiLayout()
             }

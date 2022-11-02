@@ -72,6 +72,10 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"कॉलर आयडी डीफॉल्‍ट रूपात प्रतिबंधित नाही वर सेट असतो. पुढील कॉल: प्रतिबंधित नाही"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"सेवेची तरतूद केलेली नाही."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"तुम्ही कॉलर आयडी सेटिंग बदलू शकत नाही."</string>
+    <!-- no translation found for auto_data_switch_title (3286350716870518297) -->
+    <skip />
+    <!-- no translation found for auto_data_switch_content (803557715007110959) -->
+    <skip />
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"मोबाइल डेटा सेवा नाही"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"आणीबाणी कॉलिंग अनुपलब्‍ध आहे"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"व्हॉइस सेवा नाही"</string>

@@ -99,9 +99,13 @@ object ArgumentPageProvider : SettingsPageProvider {
             }
     }
 
+    override fun getTitle(arguments: Bundle?): String {
+        return ArgumentPageModel.genPageTitle()
+    }
+
     @Composable
     override fun Page(arguments: Bundle?) {
-        RegularScaffold(title = ArgumentPageModel.create(arguments).genPageTitle()) {
+        RegularScaffold(title = getTitle(arguments)) {
             for (entry in buildEntry(arguments)) {
                 if (entry.toPage != null) {
                     entry.UiLayout(ArgumentPageModel.buildNextArgument(arguments))

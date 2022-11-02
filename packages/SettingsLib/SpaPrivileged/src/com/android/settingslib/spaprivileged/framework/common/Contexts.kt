@@ -22,6 +22,7 @@ import android.app.admin.DevicePolicyManager
 import android.app.usage.StorageStatsManager
 import android.apphibernation.AppHibernationManager
 import android.content.Context
+import android.content.pm.CrossProfileApps
 import android.content.pm.verify.domain.DomainVerificationManager
 import android.os.UserHandle
 import android.os.UserManager
@@ -35,6 +36,9 @@ val Context.appHibernationManager get() = getSystemService(AppHibernationManager
 
 /** The [AppOpsManager] instance. */
 val Context.appOpsManager get() = getSystemService(AppOpsManager::class.java)!!
+
+/** The [CrossProfileApps] instance. */
+val Context.crossProfileApps get() = getSystemService(CrossProfileApps::class.java)!!
 
 /** The [DevicePolicyManager] instance. */
 val Context.devicePolicyManager get() = getSystemService(DevicePolicyManager::class.java)!!
