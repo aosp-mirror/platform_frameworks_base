@@ -89,7 +89,7 @@ object Flags {
      * replacement of KeyguardBouncer.java.
      */
     // TODO(b/254512385): Tracking Bug
-    @JvmField val MODERN_BOUNCER = UnreleasedFlag(208)
+    @JvmField val MODERN_BOUNCER = ReleasedFlag(208)
 
     /**
      * Whether the user interactor and repository should use `UserSwitcherController`.
