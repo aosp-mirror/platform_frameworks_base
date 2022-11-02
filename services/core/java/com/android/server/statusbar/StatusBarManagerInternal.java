@@ -18,7 +18,7 @@ package com.android.server.statusbar;
 
 import android.annotation.Nullable;
 import android.app.ITransientNotificationCallback;
-import android.hardware.fingerprint.IUdfpsHbmListener;
+import android.hardware.fingerprint.IUdfpsRefreshRateRequestCallback;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.view.InsetsState.InternalInsetsType;
@@ -192,9 +192,10 @@ public interface StatusBarManagerInternal {
     void setNavigationBarLumaSamplingEnabled(int displayId, boolean enable);
 
     /**
-     * Sets the system-wide listener for UDFPS HBM status changes.
+     * Sets the system-wide callback for UDFPS refresh rate changes.
      *
-     * @see com.android.internal.statusbar.IStatusBar#setUdfpsHbmListener(IUdfpsHbmListener)
+     * @see com.android.internal.statusbar.IStatusBar#setUdfpsRefreshRateCallback
+     * (IUdfpsRefreshRateRequestCallback)
      */
-    void setUdfpsHbmListener(IUdfpsHbmListener listener);
+    void setUdfpsRefreshRateCallback(IUdfpsRefreshRateRequestCallback callback);
 }

@@ -39,7 +39,7 @@ import android.hardware.biometrics.IBiometricContextListener;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.display.DisplayManager;
-import android.hardware.fingerprint.IUdfpsHbmListener;
+import android.hardware.fingerprint.IUdfpsRefreshRateRequestCallback;
 import android.inputmethodservice.InputMethodService.BackDispositionMode;
 import android.media.INearbyMediaDevicesProvider;
 import android.media.MediaRoute2Info;
@@ -154,7 +154,7 @@ public class CommandQueue extends IStatusBar.Stub implements
     //TODO(b/169175022) Update name and when feature name is locked.
     private static final int MSG_EMERGENCY_ACTION_LAUNCH_GESTURE      = 58 << MSG_SHIFT;
     private static final int MSG_SET_NAVIGATION_BAR_LUMA_SAMPLING_ENABLED = 59 << MSG_SHIFT;
-    private static final int MSG_SET_UDFPS_HBM_LISTENER = 60 << MSG_SHIFT;
+    private static final int MSG_SET_UDFPS_REFRESH_RATE_CALLBACK = 60 << MSG_SHIFT;
     private static final int MSG_TILE_SERVICE_REQUEST_ADD = 61 << MSG_SHIFT;
     private static final int MSG_TILE_SERVICE_REQUEST_CANCEL = 62 << MSG_SHIFT;
     private static final int MSG_SET_BIOMETRICS_LISTENER = 63 << MSG_SHIFT;
@@ -333,9 +333,9 @@ public class CommandQueue extends IStatusBar.Stub implements
         }
 
         /**
-         * @see IStatusBar#setUdfpsHbmListener(IUdfpsHbmListener)
+         * @see IStatusBar#setUdfpsRefreshRateCallback(IUdfpsRefreshRateRequestCallback)
          */
-        default void setUdfpsHbmListener(IUdfpsHbmListener listener) {
+        default void setUdfpsRefreshRateCallback(IUdfpsRefreshRateRequestCallback callback) {
         }
 
         /**
@@ -1017,9 +1017,9 @@ public class CommandQueue extends IStatusBar.Stub implements
     }
 
     @Override
-    public void setUdfpsHbmListener(IUdfpsHbmListener listener) {
+    public void setUdfpsRefreshRateCallback(IUdfpsRefreshRateRequestCallback callback) {
         synchronized (mLock) {
-            mHandler.obtainMessage(MSG_SET_UDFPS_HBM_LISTENER, listener).sendToTarget();
+            mHandler.obtainMessage(MSG_SET_UDFPS_REFRESH_RATE_CALLBACK, callback).sendToTarget();
         }
     }
 
@@ -1546,9 +1546,10 @@ public class CommandQueue extends IStatusBar.Stub implements
                                 (IBiometricContextListener) msg.obj);
                     }
                     break;
-                case MSG_SET_UDFPS_HBM_LISTENER:
+                case MSG_SET_UDFPS_REFRESH_RATE_CALLBACK:
                     for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).setUdfpsHbmListener((IUdfpsHbmListener) msg.obj);
+                        mCallbacks.get(i).setUdfpsRefreshRateCallback(
+                                (IUdfpsRefreshRateRequestCallback) msg.obj);
                     }
                     break;
                 case MSG_SHOW_CHARGING_ANIMATION:

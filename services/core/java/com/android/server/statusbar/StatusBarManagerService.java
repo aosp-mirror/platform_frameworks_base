@@ -56,7 +56,7 @@ import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
-import android.hardware.fingerprint.IUdfpsHbmListener;
+import android.hardware.fingerprint.IUdfpsRefreshRateRequestCallback;
 import android.media.INearbyMediaDevicesProvider;
 import android.media.MediaRoute2Info;
 import android.net.Uri;
@@ -175,7 +175,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
     private final SparseArray<UiState> mDisplayUiState = new SparseArray<>();
     @GuardedBy("mLock")
-    private IUdfpsHbmListener mUdfpsHbmListener;
+    private IUdfpsRefreshRateRequestCallback mUdfpsRefreshRateRequestCallback;
     @GuardedBy("mLock")
     private IBiometricContextListener mBiometricContextListener;
 
@@ -694,13 +694,13 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         }
 
         @Override
-        public void setUdfpsHbmListener(IUdfpsHbmListener listener) {
+        public void setUdfpsRefreshRateCallback(IUdfpsRefreshRateRequestCallback callback) {
             synchronized (mLock) {
-                mUdfpsHbmListener = listener;
+                mUdfpsRefreshRateRequestCallback = callback;
             }
             if (mBar != null) {
                 try {
-                    mBar.setUdfpsHbmListener(listener);
+                    mBar.setUdfpsRefreshRateCallback(callback);
                 } catch (RemoteException ex) { }
             }
         }
@@ -944,11 +944,11 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     }
 
     @Override
-    public void setUdfpsHbmListener(IUdfpsHbmListener listener) {
+    public void setUdfpsRefreshRateCallback(IUdfpsRefreshRateRequestCallback callback) {
         enforceStatusBarService();
         if (mBar != null) {
             try {
-                mBar.setUdfpsHbmListener(listener);
+                mBar.setUdfpsRefreshRateCallback(callback);
             } catch (RemoteException ex) {
             }
         }
@@ -1374,11 +1374,11 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
             mGlobalActionListener.onGlobalActionsAvailableChanged(mBar != null);
         });
         // If StatusBarService dies, system_server doesn't get killed with it, so we need to make
-        // sure the UDFPS listener is refreshed as well. Deferring to the handler just so to avoid
+        // sure the UDFPS callback is refreshed as well. Deferring to the handler just so to avoid
         // making registerStatusBar re-entrant.
         mHandler.post(() -> {
             synchronized (mLock) {
-                setUdfpsHbmListener(mUdfpsHbmListener);
+                setUdfpsRefreshRateCallback(mUdfpsRefreshRateRequestCallback);
                 setBiometicContextListener(mBiometricContextListener);
             }
         });

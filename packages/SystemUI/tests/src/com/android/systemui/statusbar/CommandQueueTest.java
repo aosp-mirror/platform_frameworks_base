@@ -33,7 +33,7 @@ import android.graphics.Rect;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
-import android.hardware.fingerprint.IUdfpsHbmListener;
+import android.hardware.fingerprint.IUdfpsRefreshRateRequestCallback;
 import android.os.Bundle;
 import android.view.InsetsVisibilities;
 import android.view.WindowInsetsController.Appearance;
@@ -492,11 +492,12 @@ public class CommandQueueTest extends SysuiTestCase {
     }
 
     @Test
-    public void testSetUdfpsHbmListener() {
-        final IUdfpsHbmListener listener = mock(IUdfpsHbmListener.class);
-        mCommandQueue.setUdfpsHbmListener(listener);
+    public void testSetUdfpsRefreshRateCallback() {
+        final IUdfpsRefreshRateRequestCallback callback =
+                mock(IUdfpsRefreshRateRequestCallback.class);
+        mCommandQueue.setUdfpsRefreshRateCallback(callback);
         waitForIdleSync();
-        verify(mCallbacks).setUdfpsHbmListener(eq(listener));
+        verify(mCallbacks).setUdfpsRefreshRateCallback(eq(callback));
     }
 
     @Test
