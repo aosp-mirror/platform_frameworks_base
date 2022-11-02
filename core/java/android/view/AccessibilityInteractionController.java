@@ -21,6 +21,8 @@ import static android.view.accessibility.AccessibilityNodeInfo.ACTION_ARGUMENT_A
 import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_REQUESTED_KEY;
 import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY;
 
+import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
+
 import android.accessibilityservice.AccessibilityService;
 import android.annotation.NonNull;
 import android.graphics.Matrix;
@@ -1959,6 +1961,25 @@ public final class AccessibilityInteractionController {
                     deque.push(new VirtualNode(childNodeId, mProvider));
                 }
             }
+        }
+    }
+
+    /** Attaches an accessibility overlay to the specified window. */
+    public void attachAccessibilityOverlayToWindowClientThread(SurfaceControl sc) {
+        mHandler.sendMessage(
+                obtainMessage(
+                        AccessibilityInteractionController
+                                ::attachAccessibilityOverlayToWindowUiThread,
+                        this,
+                        sc));
+    }
+
+    private void attachAccessibilityOverlayToWindowUiThread(SurfaceControl sc) {
+        SurfaceControl parent = mViewRootImpl.getSurfaceControl();
+        if (parent.isValid()) {
+            SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+            t.reparent(sc, parent).apply();
+            t.close();
         }
     }
 }

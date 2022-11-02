@@ -3091,6 +3091,7 @@ package android.accessibilityservice {
   public abstract class AccessibilityService extends android.app.Service {
     ctor public AccessibilityService();
     method public void attachAccessibilityOverlayToDisplay(int, @NonNull android.view.SurfaceControl);
+    method public void attachAccessibilityOverlayToWindow(int, @NonNull android.view.SurfaceControl);
     method public boolean clearCache();
     method public boolean clearCachedSubtree(@NonNull android.view.accessibility.AccessibilityNodeInfo);
     method public final void disableSelf();

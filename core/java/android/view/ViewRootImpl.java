@@ -10810,6 +10810,15 @@ public final class ViewRootImpl implements ViewParent,
                 }
             }
         }
+
+        public void attachAccessibilityOverlayToWindow(SurfaceControl sc) {
+            ViewRootImpl viewRootImpl = mViewRootImpl.get();
+            if (viewRootImpl != null) {
+                viewRootImpl
+                        .getAccessibilityInteractionController()
+                        .attachAccessibilityOverlayToWindowClientThread(sc);
+            }
+        }
     }
 
     /**
