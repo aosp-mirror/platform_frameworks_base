@@ -2881,7 +2881,6 @@ public class Vpn {
                     ikeConfiguration.isIkeExtensionEnabled(
                             IkeSessionConfiguration.EXTENSION_TYPE_MOBIKE);
             onIkeConnectionInfoChanged(token, ikeConfiguration.getIkeSessionConnectionInfo());
-            mRetryCount = 0;
         }
 
         /**
@@ -2989,6 +2988,7 @@ public class Vpn {
                 }
 
                 doSendLinkProperties(networkAgent, lp);
+                mRetryCount = 0;
             } catch (Exception e) {
                 Log.d(TAG, "Error in ChildOpened for token " + token, e);
                 onSessionLost(token, e);
@@ -3208,6 +3208,10 @@ public class Vpn {
         }
 
         private void scheduleRetryNewIkeSession() {
+            if (mScheduledHandleRetryIkeSessionFuture != null) {
+                Log.d(TAG, "There is a pending retrying task, skip the new retrying task");
+                return;
+            }
             final long retryDelay = mDeps.getNextRetryDelaySeconds(mRetryCount++);
             Log.d(TAG, "Retry new IKE session after " + retryDelay + " seconds.");
             // If the default network is lost during the retry delay, the mActiveNetwork will be
