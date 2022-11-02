@@ -91,7 +91,6 @@ import java.util.Set;
 public class UserManager {
 
     private static final String TAG = "UserManager";
-    private static final boolean VERBOSE = false;
 
     @UnsupportedAppUsage
     private final IUserManager mService;
@@ -103,6 +102,9 @@ public class UserManager {
 
     /** The userType of UserHandle.myUserId(); empty string if not a profile; null until cached. */
     private String mProfileTypeOfProcessUser = null;
+
+    /** Whether the device is in headless system user mode; null until cached. */
+    private static Boolean sIsHeadlessSystemUser = null;
 
     /**
      * User type representing a {@link UserHandle#USER_SYSTEM system} user that is a human user.
@@ -2068,28 +2070,20 @@ public class UserManager {
      * @return whether the device is running in a headless system user mode.
      */
     public static boolean isHeadlessSystemUserMode() {
-        final boolean realMode = RoSystemProperties.MULTIUSER_HEADLESS_SYSTEM_USER;
-        if (!Build.isDebuggable()) {
-            return realMode;
+        // No need for synchronization.  Once it becomes non-null, it'll be non-null forever.
+        // (Its value is determined when UMS is constructed and cannot change.)
+        // Worst case we might end up calling the AIDL method multiple times but that's fine.
+        if (sIsHeadlessSystemUser == null) {
+            // Unfortunately this API is static, but the property no longer is. So go fetch the UMS.
+            try {
+                final IUserManager service = IUserManager.Stub.asInterface(
+                        ServiceManager.getService(Context.USER_SERVICE));
+                sIsHeadlessSystemUser = service.isHeadlessSystemUserMode();
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
         }
-
-        final String emulatedMode = SystemProperties.get(SYSTEM_USER_MODE_EMULATION_PROPERTY);
-        switch (emulatedMode) {
-            case SYSTEM_USER_MODE_EMULATION_FULL:
-                if (VERBOSE) Log.v(TAG, "isHeadlessSystemUserMode(): emulating as false");
-                return false;
-            case SYSTEM_USER_MODE_EMULATION_HEADLESS:
-                if (VERBOSE) Log.v(TAG, "isHeadlessSystemUserMode(): emulating as true");
-                return true;
-            case SYSTEM_USER_MODE_EMULATION_DEFAULT:
-            case "": // property not set
-                return realMode;
-            default:
-                Log.wtf(TAG, "isHeadlessSystemUserMode(): invalid value of property "
-                        + SYSTEM_USER_MODE_EMULATION_PROPERTY + " (" + emulatedMode + "); using"
-                                + " default value (headless=" + realMode + ")");
-                return realMode;
-        }
+        return sIsHeadlessSystemUser;
     }
 
     /**
