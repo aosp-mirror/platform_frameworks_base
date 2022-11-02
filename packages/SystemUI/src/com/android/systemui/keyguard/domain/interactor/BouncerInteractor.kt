@@ -40,6 +40,7 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
@@ -77,7 +78,7 @@ constructor(
             KeyguardBouncerModel(
                 promptReason = repository.bouncerPromptReason ?: 0,
                 errorMessage = repository.bouncerErrorMessage,
-                expansionAmount = repository.expansionAmount.value
+                expansionAmount = repository.panelExpansionAmount.value
             )
         )
         repository.setShowingSoon(false)
@@ -90,7 +91,6 @@ constructor(
     val startingToHide: Flow<Unit> = repository.startingToHide.filter { it }.map {}
     val isVisible: Flow<Boolean> = repository.isVisible
     val isBackButtonEnabled: Flow<Boolean> = repository.isBackButtonEnabled.filterNotNull()
-    val expansionAmount: Flow<Float> = repository.expansionAmount
     val showMessage: Flow<BouncerShowMessageModel> = repository.showMessage.filterNotNull()
     val startingDisappearAnimation: Flow<Runnable> =
         repository.startingDisappearAnimation.filterNotNull()
@@ -98,6 +98,17 @@ constructor(
         repository.onDismissAction.filterNotNull()
     val resourceUpdateRequests: Flow<Boolean> = repository.resourceUpdateRequests.filter { it }
     val keyguardPosition: Flow<Float> = repository.keyguardPosition
+    val panelExpansionAmount: Flow<Float> = repository.panelExpansionAmount
+    /** 0f = bouncer fully hidden. 1f = bouncer fully visible. */
+    val bouncerExpansion: Flow<Float> = //
+        combine(repository.panelExpansionAmount, repository.isVisible) { expansionAmount, isVisible
+            ->
+            if (isVisible) {
+                1f - expansionAmount
+            } else {
+                0f
+            }
+        }
 
     // TODO(b/243685699): Move isScrimmed logic to data layer.
     // TODO(b/243695312): Encapsulate all of the show logic for the bouncer.
@@ -128,7 +139,7 @@ constructor(
         Trace.beginSection("KeyguardBouncer#show")
         repository.setScrimmed(isScrimmed)
         if (isScrimmed) {
-            setExpansion(KeyguardBouncer.EXPANSION_VISIBLE)
+            setPanelExpansion(KeyguardBouncer.EXPANSION_VISIBLE)
         }
 
         if (resumeBouncer) {
@@ -176,14 +187,17 @@ constructor(
     }
 
     /**
-     * Sets the panel expansion which is calculated further upstream. Expansion is from 0f to 1f
-     * where 0f => showing and 1f => hiding
+     * Sets the panel expansion which is calculated further upstream. Panel expansion is from 0f
+     * (panel fully hidden) to 1f (panel fully showing). As the panel shows (from 0f => 1f), the
+     * bouncer hides and as the panel becomes hidden (1f => 0f), the bouncer starts to show.
+     * Therefore, a panel expansion of 1f represents the bouncer fully hidden and a panel expansion
+     * of 0f represents the bouncer fully showing.
      */
-    fun setExpansion(expansion: Float) {
-        val oldExpansion = repository.expansionAmount.value
+    fun setPanelExpansion(expansion: Float) {
+        val oldExpansion = repository.panelExpansionAmount.value
         val expansionChanged = oldExpansion != expansion
         if (repository.startingDisappearAnimation.value == null) {
-            repository.setExpansion(expansion)
+            repository.setPanelExpansion(expansion)
         }
 
         if (
@@ -282,7 +296,7 @@ constructor(
     /** Returns whether bouncer is fully showing. */
     fun isFullyShowing(): Boolean {
         return (repository.showingSoon.value || repository.isVisible.value) &&
-            repository.expansionAmount.value == KeyguardBouncer.EXPANSION_VISIBLE &&
+            repository.panelExpansionAmount.value == KeyguardBouncer.EXPANSION_VISIBLE &&
             repository.startingDisappearAnimation.value == null
     }
 
@@ -294,8 +308,8 @@ constructor(
     /** If bouncer expansion is between 0f and 1f non-inclusive. */
     fun isInTransit(): Boolean {
         return repository.showingSoon.value ||
-            repository.expansionAmount.value != KeyguardBouncer.EXPANSION_HIDDEN &&
-                repository.expansionAmount.value != KeyguardBouncer.EXPANSION_VISIBLE
+            repository.panelExpansionAmount.value != KeyguardBouncer.EXPANSION_HIDDEN &&
+                repository.panelExpansionAmount.value != KeyguardBouncer.EXPANSION_VISIBLE
     }
 
     /** Return whether bouncer is animating away. */
