@@ -16,6 +16,10 @@ class ShadeLogger @Inject constructor(@ShadeLog private val buffer: LogBuffer) {
         buffer.log(TAG, LogLevel.VERBOSE, msg)
     }
 
+    fun d(@CompileTimeConstant msg: String) {
+        buffer.log(TAG, LogLevel.DEBUG, msg)
+    }
+
     private inline fun log(
         logLevel: LogLevel,
         initializer: LogMessage.() -> Unit,
@@ -121,6 +125,27 @@ class ShadeLogger @Inject constructor(@ShadeLog private val buffer: LogBuffer) {
             "$str1 qsExpanded=$bool1,qsMinExpansionHeight=$int1,qsMaxExpansionHeight=$int2," +
                     "stackScrollerOverscrolling=$bool2,dozing=$bool3,qsAnimatorExpand=$bool4," +
                     "animatingQs=$long1"
+        })
+    }
+
+    fun logSingleTapUp(isDozing: Boolean, singleTapEnabled: Boolean, isNotDocked: Boolean) {
+        log(LogLevel.DEBUG, {
+            bool1 = isDozing
+            bool2 = singleTapEnabled
+            bool3 = isNotDocked
+        }, {
+            "PulsingGestureListener#onSingleTapUp all of this must true for single " +
+              "tap to be detected: isDozing: $bool1, singleTapEnabled: $bool2, isNotDocked: $bool3"
+        })
+    }
+
+    fun logSingleTapUpFalsingState(proximityIsNotNear: Boolean, isNotFalseTap: Boolean) {
+        log(LogLevel.DEBUG, {
+            bool1 = proximityIsNotNear
+            bool2 = isNotFalseTap
+        }, {
+            "PulsingGestureListener#onSingleTapUp all of this must true for single " +
+                    "tap to be detected: proximityIsNotNear: $bool1, isNotFalseTap: $bool2"
         })
     }
 }

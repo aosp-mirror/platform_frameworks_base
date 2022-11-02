@@ -52,6 +52,7 @@ class PulsingGestureListener @Inject constructor(
         private val centralSurfaces: CentralSurfaces,
         private val ambientDisplayConfiguration: AmbientDisplayConfiguration,
         private val statusBarStateController: StatusBarStateController,
+        private val shadeLogger: ShadeLogger,
         tunerService: TunerService,
         dumpManager: DumpManager
 ) : GestureDetector.SimpleOnGestureListener(), Dumpable {
@@ -77,18 +78,23 @@ class PulsingGestureListener @Inject constructor(
     }
 
     override fun onSingleTapUp(e: MotionEvent): Boolean {
-        if (statusBarStateController.isDozing &&
-                singleTapEnabled &&
-                !dockManager.isDocked &&
-                !falsingManager.isProximityNear &&
-                !falsingManager.isFalseTap(LOW_PENALTY)
-        ) {
-            centralSurfaces.wakeUpIfDozing(
+        val isNotDocked = !dockManager.isDocked
+        shadeLogger.logSingleTapUp(statusBarStateController.isDozing, singleTapEnabled, isNotDocked)
+        if (statusBarStateController.isDozing && singleTapEnabled && isNotDocked) {
+            val proximityIsNotNear = !falsingManager.isProximityNear
+            val isNotAFalseTap = !falsingManager.isFalseTap(LOW_PENALTY)
+            shadeLogger.logSingleTapUpFalsingState(proximityIsNotNear, isNotAFalseTap)
+            if (proximityIsNotNear && isNotAFalseTap) {
+                shadeLogger.d("Single tap handled, requesting centralSurfaces.wakeUpIfDozing")
+                centralSurfaces.wakeUpIfDozing(
                     SystemClock.uptimeMillis(),
                     notificationShadeWindowView,
-                    "PULSING_SINGLE_TAP")
+                    "PULSING_SINGLE_TAP"
+                )
+            }
             return true
         }
+        shadeLogger.d("onSingleTapUp event ignored")
         return false
     }
 
