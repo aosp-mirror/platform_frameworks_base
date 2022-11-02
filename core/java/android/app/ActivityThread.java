@@ -5281,7 +5281,7 @@ public final class ActivityThread extends ClientTransactionHandler
     private void onCoreSettingsChange() {
         if (updateDebugViewAttributeState()) {
             // request all activities to relaunch for the changes to take place
-            relaunchAllActivities(false /* preserveWindows */, "onCoreSettingsChange");
+            relaunchAllActivities(true /* preserveWindows */, "onCoreSettingsChange");
         }
     }
 
