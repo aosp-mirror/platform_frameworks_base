@@ -33,6 +33,7 @@ android_library {
         "androidx.navigation_navigation-compose",
         "com.google.android.material_material",
         "lottie_compose",
+        "MPAndroidChart",
     ],
     kotlincflags: [
         "-Xjvm-default=all",

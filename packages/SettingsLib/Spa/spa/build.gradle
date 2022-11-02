@@ -64,4 +64,5 @@ dependencies {
     api "com.google.android.material:material:1.7.0-alpha03"
     debugApi "androidx.compose.ui:ui-tooling:$jetpack_compose_version"
     implementation "com.airbnb.android:lottie-compose:5.2.0"
+    implementation "com.github.PhilJay:MPAndroidChart:v3.1.0-alpha"
 }
