@@ -382,14 +382,14 @@ static jfieldID sNativeInstanceField;
 
 int register_android_graphics_Matrix(JNIEnv* env) {
     int result = RegisterMethodsOrDie(env, "android/graphics/Matrix", methods, NELEM(methods));
-
-    jclass clazz = FindClassOrDie(env, "android/graphics/Matrix");
-    sNativeInstanceField = GetFieldIDOrDie(env, clazz, "native_instance", "J");
-
     return result;
 }
 
 SkMatrix* android_graphics_Matrix_getSkMatrix(JNIEnv* env, jobject matrixObj) {
+    if (sNativeInstanceField == nullptr) {
+        jclass clazz = FindClassOrDie(env, "android/graphics/Matrix");
+        sNativeInstanceField = GetFieldIDOrDie(env, clazz, "native_instance", "J");
+    }
     return reinterpret_cast<SkMatrix*>(env->GetLongField(matrixObj, sNativeInstanceField));
 }
 
