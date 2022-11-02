@@ -15,19 +15,19 @@
  */
 
 function testGetRequestedCapability() {
-    let capability = SliceStoreWebInterface.getRequestedCapability();
+    let capability = SlicePurchaseWebInterface.getRequestedCapability();
     document.getElementById("requested_capability").innerHTML =
             "Premium capability requested: " + capability;
 }
 
 function testNotifyPurchaseSuccessful(duration_ms_long = 0) {
-    SliceStoreWebInterface.notifyPurchaseSuccessful(duration);
+    SlicePurchaseWebInterface.notifyPurchaseSuccessful(duration_ms_long);
     document.getElementById("purchase_successful").innerHTML =
-            "Notified purchase success for duration: " + duration;
+            "Notified purchase success for duration: " + duration_ms_long;
 }
 
-function testNotifyPurchaseFailed() {
-    SliceStoreWebInterface.notifyPurchaseFailed();
+function testNotifyPurchaseFailed(failure_code = 0, failure_reason = "unknown") {
+    SlicePurchaseWebInterface.notifyPurchaseFailed(failure_code, failure_reason);
     document.getElementById("purchase_failed").innerHTML =
             "Notified purchase failed.";
 }

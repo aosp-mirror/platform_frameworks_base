@@ -73,16 +73,16 @@
             </intent-filter>
         </activity-alias>
 
-        <receiver android:name="com.android.carrierdefaultapp.SliceStoreBroadcastReceiver"
+        <receiver android:name="com.android.carrierdefaultapp.SlicePurchaseBroadcastReceiver"
                   android:exported="true">
             <intent-filter>
-                <action android:name="com.android.phone.slicestore.action.START_SLICE_STORE" />
-                <action android:name="com.android.phone.slicestore.action.SLICE_STORE_RESPONSE_TIMEOUT" />
-                <action android:name="com.android.phone.slicestore.action.NOTIFICATION_CANCELED" />
+                <action android:name="com.android.phone.slice.action.START_SLICE_PURCHASE_APP" />
+                <action android:name="com.android.phone.slice.action.SLICE_PURCHASE_APP_RESPONSE_TIMEOUT" />
+                <action android:name="com.android.phone.slice.action.NOTIFICATION_CANCELED" />
             </intent-filter>
         </receiver>
-        <activity android:name="com.android.carrierdefaultapp.SliceStoreActivity"
-                  android:label="@string/slice_store_label"
+        <activity android:name="com.android.carrierdefaultapp.SlicePurchaseActivity"
+                  android:label="@string/slice_purchase_app_label"
                   android:exported="true"
                   android:configChanges="keyboardHidden|orientation|screenSize">
             <intent-filter>

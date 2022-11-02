@@ -17226,12 +17226,13 @@ public class TelephonyManager {
      * #KEY_PREMIUM_CAPABILITY_PURCHASE_CONDITION_BACKOFF_HYSTERESIS_TIME_MILLIS_LONG}.
      * If displaying the network boost notification is throttled, it will be for the amount of time
      * specified by {@link CarrierConfigManager
-     * #KEY_PREMIUM_CAPABILITY_NOTIFICATION_BACKOFF_HYSTERESIS_TIME_INT_ARRAY}.
+     * #KEY_PREMIUM_CAPABILITY_NOTIFICATION_BACKOFF_HYSTERESIS_TIME_MILLIS_LONG}.
      * If a foreground application requests premium capabilities, the network boost notification
      * will be displayed to the user regardless of the throttled status.
      * We will show the network boost notification to the user up to the daily and monthly maximum
-     * number of times specified by {@link CarrierConfigManager
-     * #KEY_PREMIUM_CAPABILITY_MAXIMUM_NOTIFICATION_COUNT_INT_ARRAY}.
+     * number of times specified by
+     * {@link CarrierConfigManager#KEY_PREMIUM_CAPABILITY_MAXIMUM_DAILY_NOTIFICATION_COUNT_INT} and
+     * {@link CarrierConfigManager#KEY_PREMIUM_CAPABILITY_MAXIMUM_MONTHLY_NOTIFICATION_COUNT_INT}.
      * Subsequent attempts will return the same error until the request is no longer throttled
      * or throttling conditions change.
      */
@@ -17333,7 +17334,7 @@ public class TelephonyManager {
      * Subsequent attempts will return the same error until the request is made on the default
      * data subscription.
      */
-    public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_NOT_DEFAULT_DATA = 14;
+    public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_NOT_DEFAULT_DATA_SUB = 14;
 
     /**
      * Purchase premium capability was successful and is waiting for the network to setup the
@@ -17341,7 +17342,7 @@ public class TelephonyManager {
      * {@link CarrierConfigManager#KEY_PREMIUM_CAPABILITY_NETWORK_SETUP_TIME_MILLIS_LONG},
      * subsequent requests will return {@link #PURCHASE_PREMIUM_CAPABILITY_RESULT_ALREADY_PURCHASED}
      * until the purchase expires. If the setup is not complete within the time specified above,
-     * applications can reques the premium capability again.
+     * applications can request the premium capability again.
      */
     public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_PENDING_NETWORK_SETUP = 15;
 
@@ -17363,7 +17364,7 @@ public class TelephonyManager {
             PURCHASE_PREMIUM_CAPABILITY_RESULT_FEATURE_NOT_SUPPORTED,
             PURCHASE_PREMIUM_CAPABILITY_RESULT_NETWORK_NOT_AVAILABLE,
             PURCHASE_PREMIUM_CAPABILITY_RESULT_NETWORK_CONGESTED,
-            PURCHASE_PREMIUM_CAPABILITY_RESULT_NOT_DEFAULT_DATA,
+            PURCHASE_PREMIUM_CAPABILITY_RESULT_NOT_DEFAULT_DATA_SUB,
             PURCHASE_PREMIUM_CAPABILITY_RESULT_PENDING_NETWORK_SETUP})
     public @interface PurchasePremiumCapabilityResult {}
 
@@ -17403,8 +17404,8 @@ public class TelephonyManager {
                 return "NETWORK_NOT_AVAILABLE";
             case PURCHASE_PREMIUM_CAPABILITY_RESULT_NETWORK_CONGESTED:
                 return "NETWORK_CONGESTED";
-            case PURCHASE_PREMIUM_CAPABILITY_RESULT_NOT_DEFAULT_DATA:
-                return "NOT_DEFAULT_DATA";
+            case PURCHASE_PREMIUM_CAPABILITY_RESULT_NOT_DEFAULT_DATA_SUB:
+                return "NOT_DEFAULT_DATA_SUB";
             case PURCHASE_PREMIUM_CAPABILITY_RESULT_PENDING_NETWORK_SETUP:
                 return "PENDING_NETWORK_SETUP";
             default:
