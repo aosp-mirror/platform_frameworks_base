@@ -49,6 +49,7 @@ import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -62,6 +63,7 @@ public class AnrHelperTest {
     private AnrHelper mAnrHelper;
 
     private ProcessRecord mAnrApp;
+    private ExecutorService mExecutorService;
 
     @Rule
     public ServiceThreadRule mServiceThreadRule = new ServiceThreadRule();
@@ -88,7 +90,9 @@ public class AnrHelperTest {
                         return mServiceThreadRule.getThread().getThreadHandler();
                     }
                 }, mServiceThreadRule.getThread());
-            mAnrHelper = new AnrHelper(service);
+            mExecutorService = mock(ExecutorService.class);
+
+            mAnrHelper = new AnrHelper(service, mExecutorService);
         });
     }
 
@@ -119,7 +123,7 @@ public class AnrHelperTest {
 
         verify(mAnrApp.mErrorState, timeout(TIMEOUT_MS)).appNotResponding(
                 eq(activityShortComponentName), eq(appInfo), eq(parentShortComponentName),
-                eq(parentProcess), eq(aboveSystem), eq(timeoutRecord),
+                eq(parentProcess), eq(aboveSystem), eq(timeoutRecord), eq(mExecutorService),
                 eq(false) /* onlyDumpSelf */);
     }
 
@@ -133,7 +137,7 @@ public class AnrHelperTest {
             processingLatch.await();
             return null;
         }).when(mAnrApp.mErrorState).appNotResponding(anyString(), any(), any(), any(),
-                anyBoolean(), any(), anyBoolean());
+                anyBoolean(), any(), any(), anyBoolean());
         final ApplicationInfo appInfo = new ApplicationInfo();
         final TimeoutRecord timeoutRecord = TimeoutRecord.forInputDispatchWindowUnresponsive(
                 "annotation");
@@ -155,6 +159,7 @@ public class AnrHelperTest {
         processingLatch.countDown();
         // There is only one ANR reported.
         verify(mAnrApp.mErrorState, timeout(TIMEOUT_MS).only()).appNotResponding(
-                anyString(), any(), any(), any(), anyBoolean(), any(), anyBoolean());
+                anyString(), any(), any(), any(), anyBoolean(), any(), eq(mExecutorService),
+                anyBoolean());
     }
 }
