@@ -61,6 +61,7 @@ import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewRootImpl;
 import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
 import android.view.WindowManager;
@@ -201,6 +202,8 @@ public class NavigationBarTest extends SysuiTestCase {
     private WakefulnessLifecycle mWakefulnessLifecycle;
     @Mock
     private Resources mResources;
+    @Mock
+    private ViewRootImpl mViewRootImpl;
     private FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
     private DeviceConfigProxyFake mDeviceConfigProxyFake = new DeviceConfigProxyFake();
 
@@ -227,6 +230,7 @@ public class NavigationBarTest extends SysuiTestCase {
         when(mUserContextProvider.createCurrentUserContext(any(Context.class)))
                 .thenReturn(mContext);
         when(mNavigationBarView.getResources()).thenReturn(mResources);
+        when(mNavigationBarView.getViewRootImpl()).thenReturn(mViewRootImpl);
         setupSysuiDependency();
         // This class inflates views that call Dependency.get, thus these injections are still
         // necessary.

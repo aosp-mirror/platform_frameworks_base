@@ -16,26 +16,33 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.data.repository
 
+import android.content.Intent
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED
+import android.net.NetworkCapabilities.TRANSPORT_CELLULAR
+import android.provider.Settings
 import android.telephony.SubscriptionInfo
 import android.telephony.SubscriptionManager
 import android.telephony.TelephonyCallback
 import android.telephony.TelephonyCallback.ActiveDataSubscriptionIdListener
 import android.telephony.TelephonyManager
 import androidx.test.filters.SmallTest
+import com.android.internal.telephony.PhoneConstants
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.broadcast.BroadcastDispatcher
+import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectivityModel
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.mock
-import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.mockito.whenever
+import com.android.systemui.util.settings.FakeSettings
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runBlocking
@@ -43,7 +50,6 @@ import org.junit.After
 import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
-import org.mockito.ArgumentMatchers
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
@@ -54,32 +60,26 @@ import org.mockito.MockitoAnnotations
 class MobileConnectionsRepositoryTest : SysuiTestCase() {
     private lateinit var underTest: MobileConnectionsRepositoryImpl
 
+    @Mock private lateinit var connectivityManager: ConnectivityManager
     @Mock private lateinit var subscriptionManager: SubscriptionManager
     @Mock private lateinit var telephonyManager: TelephonyManager
     @Mock private lateinit var logger: ConnectivityPipelineLogger
-    @Mock private lateinit var broadcastDispatcher: BroadcastDispatcher
 
     private val scope = CoroutineScope(IMMEDIATE)
+    private val globalSettings = FakeSettings()
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        whenever(
-                broadcastDispatcher.broadcastFlow(
-                    any(),
-                    nullable(),
-                    ArgumentMatchers.anyInt(),
-                    nullable(),
-                )
-            )
-            .thenReturn(flowOf(Unit))
 
         underTest =
             MobileConnectionsRepositoryImpl(
+                connectivityManager,
                 subscriptionManager,
                 telephonyManager,
                 logger,
-                broadcastDispatcher,
+                fakeBroadcastDispatcher,
+                globalSettings,
                 context,
                 IMMEDIATE,
                 scope,
@@ -214,6 +214,139 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
             job.cancel()
         }
 
+    @Test
+    fun testDefaultDataSubId_updatesOnBroadcast() =
+        runBlocking(IMMEDIATE) {
+            var latest: Int? = null
+            val job = underTest.defaultDataSubId.onEach { latest = it }.launchIn(this)
+
+            fakeBroadcastDispatcher.registeredReceivers.forEach { receiver ->
+                receiver.onReceive(
+                    context,
+                    Intent(TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED)
+                        .putExtra(PhoneConstants.SUBSCRIPTION_KEY, SUB_2_ID)
+                )
+            }
+
+            assertThat(latest).isEqualTo(SUB_2_ID)
+
+            fakeBroadcastDispatcher.registeredReceivers.forEach { receiver ->
+                receiver.onReceive(
+                    context,
+                    Intent(TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED)
+                        .putExtra(PhoneConstants.SUBSCRIPTION_KEY, SUB_1_ID)
+                )
+            }
+
+            assertThat(latest).isEqualTo(SUB_1_ID)
+
+            job.cancel()
+        }
+
+    @Test
+    fun mobileConnectivity_default() {
+        assertThat(underTest.defaultMobileNetworkConnectivity.value)
+            .isEqualTo(MobileConnectivityModel(isConnected = false, isValidated = false))
+    }
+
+    @Test
+    fun mobileConnectivity_isConnected_isValidated() =
+        runBlocking(IMMEDIATE) {
+            val caps = createCapabilities(connected = true, validated = true)
+
+            var latest: MobileConnectivityModel? = null
+            val job =
+                underTest.defaultMobileNetworkConnectivity.onEach { latest = it }.launchIn(this)
+
+            getDefaultNetworkCallback().onCapabilitiesChanged(NETWORK, caps)
+
+            assertThat(latest)
+                .isEqualTo(MobileConnectivityModel(isConnected = true, isValidated = true))
+
+            job.cancel()
+        }
+
+    @Test
+    fun globalMobileDataSettingsChangedEvent_producesOnSettingChange() =
+        runBlocking(IMMEDIATE) {
+            var produced = false
+            val job =
+                underTest.globalMobileDataSettingChangedEvent
+                    .onEach { produced = true }
+                    .launchIn(this)
+
+            assertThat(produced).isFalse()
+
+            globalSettings.putInt(Settings.Global.MOBILE_DATA, 0)
+
+            assertThat(produced).isTrue()
+
+            job.cancel()
+        }
+
+    @Test
+    fun mobileConnectivity_isConnected_isNotValidated() =
+        runBlocking(IMMEDIATE) {
+            val caps = createCapabilities(connected = true, validated = false)
+
+            var latest: MobileConnectivityModel? = null
+            val job =
+                underTest.defaultMobileNetworkConnectivity.onEach { latest = it }.launchIn(this)
+
+            getDefaultNetworkCallback().onCapabilitiesChanged(NETWORK, caps)
+
+            assertThat(latest)
+                .isEqualTo(MobileConnectivityModel(isConnected = true, isValidated = false))
+
+            job.cancel()
+        }
+
+    @Test
+    fun mobileConnectivity_isNotConnected_isNotValidated() =
+        runBlocking(IMMEDIATE) {
+            val caps = createCapabilities(connected = false, validated = false)
+
+            var latest: MobileConnectivityModel? = null
+            val job =
+                underTest.defaultMobileNetworkConnectivity.onEach { latest = it }.launchIn(this)
+
+            getDefaultNetworkCallback().onCapabilitiesChanged(NETWORK, caps)
+
+            assertThat(latest)
+                .isEqualTo(MobileConnectivityModel(isConnected = false, isValidated = false))
+
+            job.cancel()
+        }
+
+    /** In practice, I don't think this state can ever happen (!connected, validated) */
+    @Test
+    fun mobileConnectivity_isNotConnected_isValidated() =
+        runBlocking(IMMEDIATE) {
+            val caps = createCapabilities(connected = false, validated = true)
+
+            var latest: MobileConnectivityModel? = null
+            val job =
+                underTest.defaultMobileNetworkConnectivity.onEach { latest = it }.launchIn(this)
+
+            getDefaultNetworkCallback().onCapabilitiesChanged(NETWORK, caps)
+
+            assertThat(latest).isEqualTo(MobileConnectivityModel(false, true))
+
+            job.cancel()
+        }
+
+    private fun createCapabilities(connected: Boolean, validated: Boolean): NetworkCapabilities =
+        mock<NetworkCapabilities>().also {
+            whenever(it.hasTransport(TRANSPORT_CELLULAR)).thenReturn(connected)
+            whenever(it.hasCapability(NET_CAPABILITY_VALIDATED)).thenReturn(validated)
+        }
+
+    private fun getDefaultNetworkCallback(): ConnectivityManager.NetworkCallback {
+        val callbackCaptor = argumentCaptor<ConnectivityManager.NetworkCallback>()
+        verify(connectivityManager).registerDefaultNetworkCallback(callbackCaptor.capture())
+        return callbackCaptor.value!!
+    }
+
     private fun getSubscriptionCallback(): SubscriptionManager.OnSubscriptionsChangedListener {
         val callbackCaptor = argumentCaptor<SubscriptionManager.OnSubscriptionsChangedListener>()
         verify(subscriptionManager)
@@ -242,5 +375,8 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
         private const val SUB_2_ID = 2
         private val SUB_2 =
             mock<SubscriptionInfo>().also { whenever(it.subscriptionId).thenReturn(SUB_2_ID) }
+
+        private const val NET_ID = 123
+        private val NETWORK = mock<Network>().apply { whenever(getNetId()).thenReturn(NET_ID) }
     }
 }

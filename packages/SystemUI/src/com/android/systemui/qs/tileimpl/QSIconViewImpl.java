@@ -140,7 +140,7 @@ public class QSIconViewImpl extends QSIconView {
             iv.setTag(R.id.qs_icon_tag, icon);
             iv.setTag(R.id.qs_slash_tag, state.slash);
             iv.setPadding(0, padding, 0, padding);
-            if (d instanceof Animatable2) {
+            if (shouldAnimate && d instanceof Animatable2) {
                 Animatable2 a = (Animatable2) d;
                 a.start();
                 if (state.isTransient) {

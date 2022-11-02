@@ -85,7 +85,11 @@ import android.view.InsetsVisibilities;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.Surface;
+import android.view.SurfaceControl;
+import android.view.SurfaceControl.Transaction;
 import android.view.View;
+import android.view.ViewRootImpl;
+import android.view.ViewRootImpl.SurfaceChangedCallback;
 import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.InternalInsetsInfo;
 import android.view.ViewTreeObserver.OnComputeInternalInsetsListener;
@@ -354,15 +358,6 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         }
 
         @Override
-        public void onQuickStepStarted() {
-            // Use navbar dragging as a signal to hide the rotate button
-            mView.getRotationButtonController().setRotateSuggestionButtonState(false);
-
-            // Hide the notifications panel when quick step starts
-            mShadeController.collapsePanel(true /* animate */);
-        }
-
-        @Override
         public void onPrioritizedRotation(@Surface.Rotation int rotation) {
             mStartingQuickSwitchRotation = rotation;
             if (rotation == -1) {
@@ -474,6 +469,24 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
                     mRegionSamplingHelper.stop();
                 }
             };
+
+    private final ViewRootImpl.SurfaceChangedCallback mSurfaceChangedCallback =
+            new SurfaceChangedCallback() {
+            @Override
+            public void surfaceCreated(Transaction t) {
+                notifyNavigationBarSurface();
+            }
+
+            @Override
+            public void surfaceDestroyed() {
+                notifyNavigationBarSurface();
+            }
+
+            @Override
+            public void surfaceReplaced(Transaction t) {
+                notifyNavigationBarSurface();
+            }
+    };
 
     @Inject
     NavigationBar(
@@ -680,7 +693,8 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         final Display display = mView.getDisplay();
         mView.setComponents(mRecentsOptional);
         if (mCentralSurfacesOptionalLazy.get().isPresent()) {
-            mView.setComponents(mCentralSurfacesOptionalLazy.get().get().getPanelController());
+            mView.setComponents(
+                    mCentralSurfacesOptionalLazy.get().get().getNotificationPanelViewController());
         }
         mView.setDisabledFlags(mDisabledFlags1, mSysUiFlagsContainer);
         mView.setOnVerticalChangedListener(this::onVerticalChanged);
@@ -701,6 +715,8 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
 
         mView.getViewTreeObserver().addOnComputeInternalInsetsListener(
                 mOnComputeInternalInsetsListener);
+        mView.getViewRootImpl().addSurfaceChangedCallback(mSurfaceChangedCallback);
+        notifyNavigationBarSurface();
 
         mNavBarHelper.registerNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
 
@@ -779,6 +795,10 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         mHandler.removeCallbacks(mEnableLayoutTransitions);
         mNavBarHelper.removeNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
         mPipOptional.ifPresent(mView::removePipExclusionBoundsChangeListener);
+        ViewRootImpl viewRoot = mView.getViewRootImpl();
+        if (viewRoot != null) {
+            viewRoot.removeSurfaceChangedCallback(mSurfaceChangedCallback);
+        }
         mFrame = null;
         mOrientationHandle = null;
     }
@@ -930,6 +950,12 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
             mView.getHomeButton().getCurrentView().setHapticFeedbackEnabled(true);
             mView.getHomeButton().setOnLongClickListener(this::onHomeLongClick);
         }
+    }
+
+    private void notifyNavigationBarSurface() {
+        ViewRootImpl viewRoot = mView.getViewRootImpl();
+        SurfaceControl surface = viewRoot != null ? viewRoot.getSurfaceControl() : null;
+        mOverviewProxyService.onNavigationBarSurfaceChanged(surface);
     }
 
     private int deltaRotation(int oldRotation, int newRotation) {
@@ -1257,8 +1283,8 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     }
 
     private void onVerticalChanged(boolean isVertical) {
-        mCentralSurfacesOptionalLazy.get().ifPresent(
-                statusBar -> statusBar.setQsScrimEnabled(!isVertical));
+        mCentralSurfacesOptionalLazy.get().ifPresent(statusBar ->
+                statusBar.getNotificationPanelViewController().setQsScrimEnabled(!isVertical));
     }
 
     private boolean onNavigationTouch(View v, MotionEvent event) {

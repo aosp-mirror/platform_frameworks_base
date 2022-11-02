@@ -19,6 +19,7 @@ package com.android.systemui.qs.carrier;
 import android.annotation.StyleRes;
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.content.res.Configuration;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
@@ -33,6 +34,7 @@ import com.android.settingslib.Utils;
 import com.android.settingslib.graph.SignalDrawable;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
+import com.android.systemui.util.LargeScreenUtils;
 
 import java.util.Objects;
 
@@ -72,6 +74,7 @@ public class QSCarrier extends LinearLayout {
         mMobileSignal = findViewById(R.id.mobile_signal);
         mCarrierText = findViewById(R.id.qs_carrier_text);
         mSpacer = findViewById(R.id.spacer);
+        updateResources();
     }
 
     /**
@@ -141,5 +144,21 @@ public class QSCarrier extends LinearLayout {
 
     public void updateTextAppearance(@StyleRes int resId) {
         FontSizeUtils.updateFontSizeFromStyle(mCarrierText, resId);
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        updateResources();
+    }
+
+    private void updateResources() {
+        boolean useLargeScreenHeader =
+                LargeScreenUtils.shouldUseLargeScreenShadeHeader(getResources());
+        mCarrierText.setMaxEms(
+                useLargeScreenHeader
+                        ? Integer.MAX_VALUE
+                        : getResources().getInteger(R.integer.qs_carrier_max_em)
+        );
     }
 }

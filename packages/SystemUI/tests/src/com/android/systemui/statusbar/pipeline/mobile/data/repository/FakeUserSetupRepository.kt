@@ -16,13 +16,12 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.data.repository
 
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
 /** Defaults to `true` */
 class FakeUserSetupRepository : UserSetupRepository {
     private val _isUserSetup: MutableStateFlow<Boolean> = MutableStateFlow(true)
-    override val isUserSetupFlow: Flow<Boolean> = _isUserSetup
+    override val isUserSetupFlow = _isUserSetup
 
     fun setUserSetup(setup: Boolean) {
         _isUserSetup.value = setup

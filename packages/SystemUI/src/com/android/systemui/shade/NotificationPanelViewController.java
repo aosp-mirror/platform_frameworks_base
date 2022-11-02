@@ -531,7 +531,7 @@ public final class NotificationPanelViewController {
     private final NavigationBarController mNavigationBarController;
     private final int mDisplayId;
 
-    private KeyguardIndicationController mKeyguardIndicationController;
+    private final KeyguardIndicationController mKeyguardIndicationController;
     private int mHeadsUpInset;
     private boolean mHeadsUpPinnedMode;
     private boolean mAllowExpandForSmallExpansion;
@@ -743,6 +743,7 @@ public final class NotificationPanelViewController {
             SysUiState sysUiState,
             Provider<KeyguardBottomAreaViewController> keyguardBottomAreaViewControllerProvider,
             KeyguardUnlockAnimationController keyguardUnlockAnimationController,
+            KeyguardIndicationController keyguardIndicationController,
             NotificationListContainer notificationListContainer,
             NotificationStackSizeCalculator notificationStackSizeCalculator,
             UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
@@ -779,6 +780,7 @@ public final class NotificationPanelViewController {
 
         mResources = mView.getResources();
         mKeyguardStateController = keyguardStateController;
+        mKeyguardIndicationController = keyguardIndicationController;
         mStatusBarStateController = (SysuiStatusBarStateController) statusBarStateController;
         mNotificationShadeWindowController = notificationShadeWindowController;
         FlingAnimationUtils.Builder fauBuilder = flingAnimationUtilsBuilder.get();
@@ -1020,7 +1022,7 @@ public final class NotificationPanelViewController {
         mNotificationStackScrollLayoutController.setOnEmptySpaceClickListener(
                 mOnEmptySpaceClickListener);
         addTrackingHeadsUpListener(mNotificationStackScrollLayoutController::setTrackingHeadsUp);
-        mKeyguardBottomArea = mView.findViewById(R.id.keyguard_bottom_area);
+        setKeyguardBottomArea(mView.findViewById(R.id.keyguard_bottom_area));
 
         initBottomArea();
 
@@ -1264,7 +1266,7 @@ public final class NotificationPanelViewController {
         int index = mView.indexOfChild(mKeyguardBottomArea);
         mView.removeView(mKeyguardBottomArea);
         KeyguardBottomAreaView oldBottomArea = mKeyguardBottomArea;
-        mKeyguardBottomArea = mKeyguardBottomAreaViewControllerProvider.get().getView();
+        setKeyguardBottomArea(mKeyguardBottomAreaViewControllerProvider.get().getView());
         mKeyguardBottomArea.initFrom(oldBottomArea);
         mView.addView(mKeyguardBottomArea, index);
         initBottomArea();
@@ -1343,8 +1345,8 @@ public final class NotificationPanelViewController {
         return mHintAnimationRunning || mUnlockedScreenOffAnimationController.isAnimationPlaying();
     }
 
-    public void setKeyguardIndicationController(KeyguardIndicationController indicationController) {
-        mKeyguardIndicationController = indicationController;
+    private void setKeyguardBottomArea(KeyguardBottomAreaView keyguardBottomArea) {
+        mKeyguardBottomArea = keyguardBottomArea;
         mKeyguardIndicationController.setIndicationArea(mKeyguardBottomArea);
     }
 
@@ -3880,6 +3882,7 @@ public final class NotificationPanelViewController {
 
     public void setHeadsUpManager(HeadsUpManagerPhone headsUpManager) {
         mHeadsUpManager = headsUpManager;
+        mHeadsUpManager.addListener(mOnHeadsUpChangedListener);
         mHeadsUpTouchHelper = new HeadsUpTouchHelper(headsUpManager,
                 mNotificationStackScrollLayoutController.getHeadsUpCallback(),
                 NotificationPanelViewController.this);
@@ -4361,10 +4364,6 @@ public final class NotificationPanelViewController {
         mView.getViewTreeObserver().removeOnGlobalLayoutListener(listener);
     }
 
-    public ShadeHeadsUpChangedListener getOnHeadsUpChangedListener() {
-        return mOnHeadsUpChangedListener;
-    }
-
     public void setHeaderDebugInfo(String text) {
         if (DEBUG_DRAWABLE) mHeaderDebugInfo = text;
     }
@@ -4644,7 +4643,7 @@ public final class NotificationPanelViewController {
                 mUpdateFlingVelocity = vel;
             }
         } else if (!mCentralSurfaces.isBouncerShowing()
-                && !mStatusBarKeyguardViewManager.isShowingAlternateAuthOrAnimating()
+                && !mStatusBarKeyguardViewManager.isShowingAlternateAuth()
                 && !mKeyguardStateController.isKeyguardGoingAway()) {
             onEmptySpaceClick();
             onTrackingStopped(true);
@@ -5682,6 +5681,7 @@ public final class NotificationPanelViewController {
 
         /** @see ViewGroup#onInterceptTouchEvent(MotionEvent) */
         public boolean onInterceptTouchEvent(MotionEvent event) {
+            mShadeLog.logMotionEvent(event, "NPVC onInterceptTouchEvent");
             if (SPEW_LOGCAT) {
                 Log.v(TAG,
                         "NPVC onInterceptTouchEvent (" + event.getId() + "): (" + event.getX()
@@ -5694,6 +5694,8 @@ public final class NotificationPanelViewController {
             // Do not let touches go to shade or QS if the bouncer is visible,
             // but still let user swipe down to expand the panel, dismissing the bouncer.
             if (mCentralSurfaces.isBouncerShowing()) {
+                mShadeLog.v("NotificationPanelViewController MotionEvent intercepted: "
+                        + "bouncer is showing");
                 return true;
             }
             if (mCommandQueue.panelsEnabled()
@@ -5701,15 +5703,21 @@ public final class NotificationPanelViewController {
                     && mHeadsUpTouchHelper.onInterceptTouchEvent(event)) {
                 mMetricsLogger.count(COUNTER_PANEL_OPEN, 1);
                 mMetricsLogger.count(COUNTER_PANEL_OPEN_PEEK, 1);
+                mShadeLog.v("NotificationPanelViewController MotionEvent intercepted: "
+                        + "HeadsUpTouchHelper");
                 return true;
             }
             if (!shouldQuickSettingsIntercept(mDownX, mDownY, 0)
                     && mPulseExpansionHandler.onInterceptTouchEvent(event)) {
+                mShadeLog.v("NotificationPanelViewController MotionEvent intercepted: "
+                        + "PulseExpansionHandler");
                 return true;
             }
 
             if (!isFullyCollapsed() && onQsIntercept(event)) {
                 debugLog("onQsIntercept true");
+                mShadeLog.v("NotificationPanelViewController MotionEvent intercepted: "
+                        + "QsIntercept");
                 return true;
             }
             if (mInstantExpanding || !mNotificationsDragEnabled || mTouchDisabled || (mMotionAborted
@@ -5740,6 +5748,9 @@ public final class NotificationPanelViewController {
                     if (mAnimatingOnDown && mClosing && !mHintAnimationRunning) {
                         cancelHeightAnimator();
                         mTouchSlopExceeded = true;
+                        mShadeLog.v("NotificationPanelViewController MotionEvent intercepted:"
+                                + " mAnimatingOnDown: true, mClosing: true, mHintAnimationRunning:"
+                                + " false");
                         return true;
                     }
                     mInitialExpandY = y;
@@ -5784,6 +5795,8 @@ public final class NotificationPanelViewController {
                                 && hAbs > Math.abs(x - mInitialExpandX)) {
                             cancelHeightAnimator();
                             startExpandMotion(x, y, true /* startTracking */, mExpandedHeight);
+                            mShadeLog.v("NotificationPanelViewController MotionEvent"
+                                    + " intercepted: startExpandMotion");
                             return true;
                         }
                     }

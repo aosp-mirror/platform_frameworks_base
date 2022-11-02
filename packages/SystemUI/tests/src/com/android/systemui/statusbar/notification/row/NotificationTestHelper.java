@@ -22,6 +22,7 @@ import static android.app.NotificationManager.IMPORTANCE_HIGH;
 
 import static com.android.systemui.statusbar.NotificationEntryHelper.modifyRanking;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -60,6 +61,7 @@ import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.notification.ConversationNotificationProcessor;
+import com.android.systemui.statusbar.notification.SourceType;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
@@ -191,6 +193,25 @@ public class NotificationTestHelper {
 
     public void setDefaultInflationFlags(@InflationFlag int defaultInflationFlags) {
         mDefaultInflationFlags = defaultInflationFlags;
+    }
+
+    /**
+     * Creates a generic row with rounded border.
+     *
+     * @return a generic row with the set roundness.
+     * @throws Exception
+     */
+    public ExpandableNotificationRow createRowWithRoundness(
+            float topRoundness,
+            float bottomRoundness,
+            SourceType sourceType
+    ) throws Exception {
+        ExpandableNotificationRow row = createRow();
+        row.requestTopRoundness(topRoundness, false, sourceType);
+        row.requestBottomRoundness(bottomRoundness, /*animate = */ false, sourceType);
+        assertEquals(topRoundness, row.getTopRoundness(), /* delta = */ 0f);
+        assertEquals(bottomRoundness, row.getBottomRoundness(), /* delta = */ 0f);
+        return row;
     }
 
     /**
