@@ -30,7 +30,6 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.BouncerView
 import com.android.systemui.keyguard.data.repository.KeyguardBouncerRepository
-import com.android.systemui.keyguard.shared.model.BouncerCallbackActionsModel
 import com.android.systemui.keyguard.shared.model.BouncerShowMessageModel
 import com.android.systemui.keyguard.shared.model.KeyguardBouncerModel
 import com.android.systemui.plugins.ActivityStarter
@@ -94,8 +93,6 @@ constructor(
     val showMessage: Flow<BouncerShowMessageModel> = repository.showMessage.filterNotNull()
     val startingDisappearAnimation: Flow<Runnable> =
         repository.startingDisappearAnimation.filterNotNull()
-    val onDismissAction: Flow<BouncerCallbackActionsModel> =
-        repository.onDismissAction.filterNotNull()
     val resourceUpdateRequests: Flow<Boolean> = repository.resourceUpdateRequests.filter { it }
     val keyguardPosition: Flow<Float> = repository.keyguardPosition
     val panelExpansionAmount: Flow<Float> = repository.panelExpansionAmount
@@ -160,7 +157,6 @@ constructor(
         }
         keyguardStateController.notifyBouncerShowing(true)
         callbackInteractor.dispatchStartingToShow()
-
         Trace.endSection()
     }
 
@@ -179,7 +175,6 @@ constructor(
         keyguardStateController.notifyBouncerShowing(false /* showing */)
         cancelShowRunnable()
         repository.setShowingSoon(false)
-        repository.setOnDismissAction(null)
         repository.setVisible(false)
         repository.setHide(true)
         repository.setShow(null)
@@ -241,7 +236,7 @@ constructor(
         onDismissAction: ActivityStarter.OnDismissAction?,
         cancelAction: Runnable?
     ) {
-        repository.setOnDismissAction(BouncerCallbackActionsModel(onDismissAction, cancelAction))
+        bouncerView.delegate?.setDismissAction(onDismissAction, cancelAction)
     }
 
     /** Update the resources of the views. */
@@ -319,7 +314,7 @@ constructor(
 
     /** Return whether bouncer will dismiss with actions */
     fun willDismissWithAction(): Boolean {
-        return repository.onDismissAction.value?.onDismissAction != null
+        return bouncerView.delegate?.willDismissWithActions() == true
     }
 
     /** Returns whether the bouncer should be full screen. */
