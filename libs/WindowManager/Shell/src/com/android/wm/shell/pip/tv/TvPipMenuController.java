@@ -421,6 +421,18 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
     }
 
     @Override
+    public void runWithNextFrame(Runnable runnable) {
+        if (mPipMenuView == null || mPipMenuView.getViewRootImpl() == null) {
+            runnable.run();
+        }
+
+        mPipMenuView.getViewRootImpl().registerRtFrameCallback(frame -> {
+            mMainHandler.post(runnable);
+        });
+        mPipMenuView.invalidate();
+    }
+
+    @Override
     public void movePipMenu(SurfaceControl pipLeash, SurfaceControl.Transaction transaction,
             Rect pipDestBounds) {
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
