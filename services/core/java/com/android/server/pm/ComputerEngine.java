@@ -460,7 +460,7 @@ public class ComputerEngine implements Computer {
         mBackgroundDexOptService = args.service.mBackgroundDexOptService;
         mExternalSourcesPolicy = args.service.mExternalSourcesPolicy;
         mCrossProfileIntentResolverEngine = new CrossProfileIntentResolverEngine(
-                mUserManager, mDomainVerificationManager, mDefaultAppProvider);
+                mUserManager, mDomainVerificationManager, mDefaultAppProvider, mContext);
 
         // Used to reference PMS attributes that are primitives and which are not
         // updated under control of the PMS lock.
