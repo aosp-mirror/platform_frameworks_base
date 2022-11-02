@@ -180,7 +180,7 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
                 }
             };
             mShadeController.postOnShadeExpanded(clickPendingViewRunnable);
-            mShadeController.instantExpandNotificationsPanel();
+            mShadeController.instantExpandShade();
         }
     }
 
