@@ -86,9 +86,9 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     private static final int FLING_ENTER_DURATION = 350;
     private static final int FLING_EXIT_DURATION = 350;
 
-    private final int mDividerWindowWidth;
-    private final int mDividerInsets;
-    private final int mDividerSize;
+    private int mDividerWindowWidth;
+    private int mDividerInsets;
+    private int mDividerSize;
 
     private final Rect mTempRect = new Rect();
     private final Rect mRootBounds = new Rect();
@@ -131,6 +131,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         mContext = context.createConfigurationContext(configuration);
         mOrientation = configuration.orientation;
         mRotation = configuration.windowConfiguration.getRotation();
+        mDensity = configuration.densityDpi;
         mSplitLayoutHandler = splitLayoutHandler;
         mDisplayImeController = displayImeController;
         mSplitWindowManager = new SplitWindowManager(windowName, mContext, configuration,
@@ -139,24 +140,22 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         mImePositionProcessor = new ImePositionProcessor(mContext.getDisplayId());
         mSurfaceEffectPolicy = new ResizingEffectPolicy(parallaxType);
 
-        final Resources resources = context.getResources();
-        mDividerSize = resources.getDimensionPixelSize(R.dimen.split_divider_bar_width);
-        mDividerInsets = getDividerInsets(resources, context.getDisplay());
-        mDividerWindowWidth = mDividerSize + 2 * mDividerInsets;
+        updateDividerConfig(mContext);
 
         mRootBounds.set(configuration.windowConfiguration.getBounds());
         mDividerSnapAlgorithm = getSnapAlgorithm(mContext, mRootBounds, null);
         resetDividerPosition();
 
-        mDimNonImeSide = resources.getBoolean(R.bool.config_dimNonImeAttachedSide);
+        mDimNonImeSide = mContext.getResources().getBoolean(R.bool.config_dimNonImeAttachedSide);
 
         updateInvisibleRect();
     }
 
-    private int getDividerInsets(Resources resources, Display display) {
+    private void updateDividerConfig(Context context) {
+        final Resources resources = context.getResources();
+        final Display display = context.getDisplay();
         final int dividerInset = resources.getDimensionPixelSize(
                 com.android.internal.R.dimen.docked_stack_divider_insets);
-
         int radius = 0;
         RoundedCorner corner = display.getRoundedCorner(RoundedCorner.POSITION_TOP_LEFT);
         radius = corner != null ? Math.max(radius, corner.getRadius()) : radius;
@@ -167,7 +166,9 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         corner = display.getRoundedCorner(RoundedCorner.POSITION_BOTTOM_LEFT);
         radius = corner != null ? Math.max(radius, corner.getRadius()) : radius;
 
-        return Math.max(dividerInset, radius);
+        mDividerInsets = Math.max(dividerInset, radius);
+        mDividerSize = resources.getDimensionPixelSize(R.dimen.split_divider_bar_width);
+        mDividerWindowWidth = mDividerSize + 2 * mDividerInsets;
     }
 
     /** Gets bounds of the primary split with screen based coordinate. */
@@ -309,6 +310,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         mRotation = rotation;
         mDensity = density;
         mDividerSnapAlgorithm = getSnapAlgorithm(mContext, mRootBounds, null);
+        updateDividerConfig(mContext);
         initDividerPosition(mTempRect);
         updateInvisibleRect();
 
