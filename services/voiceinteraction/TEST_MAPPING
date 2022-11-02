@@ -23,6 +23,14 @@
           "exclude-annotation": "androidx.test.filters.FlakyTest"
         }
       ]
+    },
+    {
+      "name": "CtsLocalVoiceInteraction",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
     }
   ]
 }

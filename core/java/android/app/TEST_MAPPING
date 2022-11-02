@@ -115,6 +115,15 @@
             "file_patterns": ["(/|^)VoiceInteract[^/]*"]
         },
         {
+            "name": "CtsLocalVoiceInteraction",
+            "options": [
+                {
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
+                }
+            ],
+            "file_patterns": ["(/|^)VoiceInteract[^/]*"]
+        },
+        {
             "name": "CtsOsTestCases",
             "options": [
                 {
