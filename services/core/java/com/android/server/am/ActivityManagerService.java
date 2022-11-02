@@ -17328,6 +17328,21 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
+        public int broadcastIntentWithCallback(Intent intent,
+                IIntentReceiver resultTo,
+                String[] requiredPermissions,
+                int userId, int[] appIdAllowList,
+                @Nullable BiFunction<Integer, Bundle, Bundle> filterExtrasForReceiver,
+                @Nullable Bundle bOptions) {
+            // Sending broadcasts with a finish callback without the need for the broadcasts
+            // delivery to be serialized is only supported by modern queue. So, when modern
+            // queue is disabled, we continue to send broadcasts in a serialized fashion.
+            final boolean serialized = !isModernQueueEnabled();
+            return broadcastIntent(intent, resultTo, requiredPermissions, serialized, userId,
+                    appIdAllowList, filterExtrasForReceiver, bOptions);
+        }
+
+        @Override
         public ComponentName startServiceInPackage(int uid, Intent service, String resolvedType,
                 boolean fgRequired, String callingPackage, @Nullable String callingFeatureId,
                 int userId, boolean allowBackgroundActivityStarts,
