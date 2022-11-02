@@ -21,45 +21,51 @@ package com.android.settingslib.spa.framework.theme
 import android.annotation.SuppressLint
 import android.content.Context
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.font.DeviceFontFamilyName
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import com.android.settingslib.spa.framework.compose.rememberContext
 
 internal data class SettingsFontFamily(
-    val brand: FontFamily = FontFamily.Default,
-    val plain: FontFamily = FontFamily.Default,
+    val brand: FontFamily,
+    val plain: FontFamily,
 )
 
-private fun Context.getSettingsFontFamily(inInspection: Boolean): SettingsFontFamily {
-    if (inInspection) {
-        return SettingsFontFamily()
-    }
+private fun Context.getSettingsFontFamily(): SettingsFontFamily {
     return SettingsFontFamily(
-        brand = FontFamily(
-            Font(getFontFamilyName("config_headlineFontFamily"), FontWeight.Normal),
-            Font(getFontFamilyName("config_headlineFontFamilyMedium"), FontWeight.Medium),
+        brand = getFontFamily(
+            configFontFamilyNormal = "config_headlineFontFamily",
+            configFontFamilyMedium = "config_headlineFontFamilyMedium",
         ),
-        plain = FontFamily(
-            Font(getFontFamilyName("config_bodyFontFamily"), FontWeight.Normal),
-            Font(getFontFamilyName("config_bodyFontFamilyMedium"), FontWeight.Medium),
+        plain = getFontFamily(
+            configFontFamilyNormal = "config_bodyFontFamily",
+            configFontFamilyMedium = "config_bodyFontFamilyMedium",
         ),
     )
 }
 
-private fun Context.getFontFamilyName(configName: String): DeviceFontFamilyName {
+private fun Context.getFontFamily(
+    configFontFamilyNormal: String,
+    configFontFamilyMedium: String,
+): FontFamily {
+    val fontFamilyNormal = getAndroidConfig(configFontFamilyNormal)
+    val fontFamilyMedium = getAndroidConfig(configFontFamilyMedium)
+    if (fontFamilyNormal.isEmpty() || fontFamilyMedium.isEmpty()) return FontFamily.Default
+    return FontFamily(
+        Font(DeviceFontFamilyName(fontFamilyNormal), FontWeight.Normal),
+        Font(DeviceFontFamilyName(fontFamilyMedium), FontWeight.Medium),
+    )
+}
+
+private fun Context.getAndroidConfig(configName: String): String {
     @SuppressLint("DiscouragedApi")
     val configId = resources.getIdentifier(configName, "string", "android")
-    return DeviceFontFamilyName(resources.getString(configId))
+    return resources.getString(configId)
 }
 
 @Composable
 internal fun rememberSettingsFontFamily(): SettingsFontFamily {
-    val context = LocalContext.current
-    val inInspection = LocalInspectionMode.current
-    return remember { context.getSettingsFontFamily(inInspection) }
+    return rememberContext(Context::getSettingsFontFamily)
 }
