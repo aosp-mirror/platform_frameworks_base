@@ -52430,7 +52430,9 @@ package android.view {
     method public int getScaledHoverSlop();
     method public int getScaledMaximumDrawingCacheSize();
     method public int getScaledMaximumFlingVelocity();
+    method public int getScaledMaximumFlingVelocity(int, int, int);
     method public int getScaledMinimumFlingVelocity();
+    method public int getScaledMinimumFlingVelocity(int, int, int);
     method public int getScaledMinimumScalingSpan();
     method public int getScaledOverflingDistance();
     method public int getScaledOverscrollDistance();

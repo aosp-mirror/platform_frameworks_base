@@ -2674,6 +2674,14 @@
     <!-- Maximum velocity to initiate a fling, as measured in dips per second. -->
     <dimen name="config_viewMaxFlingVelocity">8000dp</dimen>
 
+    <!-- Minimum velocity (absolute value) to initiate a fling from a rotary encoder device, as
+         measured in dips per second. Setting this to -1dp disables rotary encoder fling.  -->
+    <dimen name="config_viewMinRotaryEncoderFlingVelocity">-1dp</dimen>
+
+    <!-- Maximum velocity (absolute value) to initiate a fling from a rotary encoder device, as
+         measured in dips per second. Setting this to -1dp disables rotary encoder fling.  -->
+    <dimen name="config_viewMaxRotaryEncoderFlingVelocity">-1dp</dimen>
+
     <!-- Amount of time in ms the user needs to press the relevant key to bring up the
          global actions dialog -->
     <integer name="config_globalActionsKeyTimeout">500</integer>
