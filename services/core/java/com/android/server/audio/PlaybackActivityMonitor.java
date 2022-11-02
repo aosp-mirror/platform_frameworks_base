@@ -17,12 +17,12 @@
 package com.android.server.audio;
 
 import static android.media.AudioPlaybackConfiguration.EXTRA_PLAYER_EVENT_MUTE;
-import static android.media.AudioPlaybackConfiguration.PLAYER_MUTE_CLIENT_VOLUME;
-import static android.media.AudioPlaybackConfiguration.PLAYER_MUTE_MASTER;
-import static android.media.AudioPlaybackConfiguration.PLAYER_MUTE_PLAYBACK_RESTRICTED;
-import static android.media.AudioPlaybackConfiguration.PLAYER_MUTE_STREAM_MUTED;
-import static android.media.AudioPlaybackConfiguration.PLAYER_MUTE_STREAM_VOLUME;
-import static android.media.AudioPlaybackConfiguration.PLAYER_MUTE_VOLUME_SHAPER;
+import static android.media.AudioPlaybackConfiguration.MUTED_BY_APP_OPS;
+import static android.media.AudioPlaybackConfiguration.MUTED_BY_CLIENT_VOLUME;
+import static android.media.AudioPlaybackConfiguration.MUTED_BY_MASTER;
+import static android.media.AudioPlaybackConfiguration.MUTED_BY_STREAM_MUTED;
+import static android.media.AudioPlaybackConfiguration.MUTED_BY_STREAM_VOLUME;
+import static android.media.AudioPlaybackConfiguration.MUTED_BY_VOLUME_SHAPER;
 import static android.media.AudioPlaybackConfiguration.PLAYER_PIID_INVALID;
 import static android.media.AudioPlaybackConfiguration.PLAYER_UPDATE_MUTED;
 
@@ -1155,22 +1155,22 @@ public final class PlaybackActivityMonitor
                     if (mEventValue <= 0) {
                         builder.append("none ");
                     } else {
-                        if ((mEventValue & PLAYER_MUTE_MASTER) != 0) {
+                        if ((mEventValue & MUTED_BY_MASTER) != 0) {
                             builder.append("masterMute ");
                         }
-                        if ((mEventValue & PLAYER_MUTE_STREAM_VOLUME) != 0) {
+                        if ((mEventValue & MUTED_BY_STREAM_VOLUME) != 0) {
                             builder.append("streamVolume ");
                         }
-                        if ((mEventValue & PLAYER_MUTE_STREAM_MUTED) != 0) {
+                        if ((mEventValue & MUTED_BY_STREAM_MUTED) != 0) {
                             builder.append("streamMute ");
                         }
-                        if ((mEventValue & PLAYER_MUTE_PLAYBACK_RESTRICTED) != 0) {
-                            builder.append("playbackRestricted ");
+                        if ((mEventValue & MUTED_BY_APP_OPS) != 0) {
+                            builder.append("appOps ");
                         }
-                        if ((mEventValue & PLAYER_MUTE_CLIENT_VOLUME) != 0) {
+                        if ((mEventValue & MUTED_BY_CLIENT_VOLUME) != 0) {
                             builder.append("clientVolume ");
                         }
-                        if ((mEventValue & PLAYER_MUTE_VOLUME_SHAPER) != 0) {
+                        if ((mEventValue & MUTED_BY_VOLUME_SHAPER) != 0) {
                             builder.append("volumeShaper ");
                         }
                     }
