@@ -289,8 +289,6 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
                         mBackAnimation.setTriggerBack(true);
                     }
 
-                    mOverviewProxyService.notifyBackAction(true, (int) mDownPoint.x,
-                            (int) mDownPoint.y, false /* isButton */, !mIsOnLeftEdge);
                     logGesture(mInRejectedExclusion
                             ? SysUiStatsLog.BACK_GESTURE__TYPE__COMPLETED_REJECTED
                             : SysUiStatsLog.BACK_GESTURE__TYPE__COMPLETED);
@@ -302,8 +300,6 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
                         mBackAnimation.setTriggerBack(false);
                     }
                     logGesture(SysUiStatsLog.BACK_GESTURE__TYPE__INCOMPLETE);
-                    mOverviewProxyService.notifyBackAction(false, (int) mDownPoint.x,
-                            (int) mDownPoint.y, false /* isButton */, !mIsOnLeftEdge);
                 }
 
                 @Override
@@ -804,9 +800,6 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
 
         if (mExcludeRegion.contains(x, y)) {
             if (withinRange) {
-                // Log as exclusion only if it is in acceptable range in the first place.
-                mOverviewProxyService.notifyBackAction(
-                        false /* completed */, -1, -1, false /* isButton */, !mIsOnLeftEdge);
                 // We don't have the end point for logging purposes.
                 mEndPoint.x = -1;
                 mEndPoint.y = -1;
