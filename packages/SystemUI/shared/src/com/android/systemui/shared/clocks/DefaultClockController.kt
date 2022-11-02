@@ -20,6 +20,7 @@ import android.graphics.Rect
 import android.icu.text.NumberFormat
 import android.util.TypedValue
 import android.view.LayoutInflater
+import android.view.View
 import android.widget.FrameLayout
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.plugins.ClockAnimations
@@ -80,7 +81,7 @@ class DefaultClockController(
     }
 
     override fun initialize(resources: Resources, dozeFraction: Float, foldFraction: Float) {
-        largeClock.recomputePadding()
+        largeClock.recomputePadding(null)
         animations = DefaultClockAnimations(dozeFraction, foldFraction)
         events.onColorPaletteChanged(resources)
         events.onTimeZoneChanged(TimeZone.getDefault())
@@ -101,6 +102,7 @@ class DefaultClockController(
         // MAGENTA is a placeholder, and will be assigned correctly in initialize
         private var currentColor = Color.MAGENTA
         private var isRegionDark = false
+        protected var targetRegion: Rect? = null
 
         init {
             view.setColors(currentColor, currentColor)
@@ -112,7 +114,19 @@ class DefaultClockController(
                     this@DefaultClockFaceController.isRegionDark = isRegionDark
                     updateColor()
                 }
+
+                override fun onTargetRegionChanged(targetRegion: Rect?) {
+                    this@DefaultClockFaceController.targetRegion = targetRegion
+                    recomputePadding(targetRegion)
+                }
+
+                override fun onFontSettingChanged(fontSizePx: Float) {
+                    view.setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSizePx)
+                    recomputePadding(targetRegion)
+                }
             }
+
+        open fun recomputePadding(targetRegion: Rect?) {}
 
         fun updateColor() {
             val color =
@@ -135,9 +149,16 @@ class DefaultClockController(
     inner class LargeClockFaceController(
         view: AnimatableClockView,
     ) : DefaultClockFaceController(view) {
-        fun recomputePadding() {
+        override fun recomputePadding(targetRegion: Rect?) {
+            // We center the view within the targetRegion instead of within the parent
+            // view by computing the difference and adding that to the padding.
+            val parent = view.parent
+            val yDiff =
+                if (targetRegion != null && parent is View && parent.isLaidOut())
+                    targetRegion.centerY() - parent.height / 2f
+                else 0f
             val lp = view.getLayoutParams() as FrameLayout.LayoutParams
-            lp.topMargin = (-0.5f * view.bottom).toInt()
+            lp.topMargin = (-0.5f * view.bottom + yDiff).toInt()
             view.setLayoutParams(lp)
         }
 
@@ -154,18 +175,6 @@ class DefaultClockController(
 
         override fun onTimeZoneChanged(timeZone: TimeZone) =
             clocks.forEach { it.onTimeZoneChanged(timeZone) }
-
-        override fun onFontSettingChanged() {
-            smallClock.view.setTextSize(
-                TypedValue.COMPLEX_UNIT_PX,
-                resources.getDimensionPixelSize(R.dimen.small_clock_text_size).toFloat()
-            )
-            largeClock.view.setTextSize(
-                TypedValue.COMPLEX_UNIT_PX,
-                resources.getDimensionPixelSize(R.dimen.large_clock_text_size).toFloat()
-            )
-            largeClock.recomputePadding()
-        }
 
         override fun onColorPaletteChanged(resources: Resources) {
             largeClock.updateColor()

@@ -155,7 +155,8 @@ class ClockEventControllerTest : SysuiTestCase() {
         verify(configurationController).addCallback(capture(captor))
         captor.value.onDensityOrFontScaleChanged()
 
-        verify(events).onFontSettingChanged()
+        verify(smallClockEvents, times(2)).onFontSettingChanged(anyFloat())
+        verify(largeClockEvents, times(2)).onFontSettingChanged(anyFloat())
     }
 
     @Test

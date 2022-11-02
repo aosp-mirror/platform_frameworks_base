@@ -77,7 +77,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     @KeyguardClockSwitch.ClockSize
     private int mCurrentClockSize = SMALL;
 
-    private int mKeyguardClockTopMargin = 0;
+    private int mKeyguardSmallClockTopMargin = 0;
     private final ClockRegistry.ClockChangeListener mClockChangedListener;
 
     private ViewGroup mStatusArea;
@@ -162,7 +162,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mClockRegistry.registerClockChangeListener(mClockChangedListener);
         setClock(mClockRegistry.createCurrentClock());
         mClockEventController.registerListeners(mView);
-        mKeyguardClockTopMargin =
+        mKeyguardSmallClockTopMargin =
                 mView.getResources().getDimensionPixelSize(R.dimen.keyguard_clock_top_margin);
 
         if (mOnlyClock) {
@@ -244,9 +244,11 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
      */
     public void onDensityOrFontScaleChanged() {
         mView.onDensityOrFontScaleChanged();
-        mKeyguardClockTopMargin =
+        mKeyguardSmallClockTopMargin =
                 mView.getResources().getDimensionPixelSize(R.dimen.keyguard_clock_top_margin);
+        mView.updateClockTargetRegions();
     }
+
 
     /**
      * Set which clock should be displayed on the keyguard. The other one will be automatically
@@ -327,7 +329,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             return frameHeight / 2 + clockHeight / 2;
         } else {
             int clockHeight = clock.getSmallClock().getView().getHeight();
-            return clockHeight + statusBarHeaderHeight + mKeyguardClockTopMargin;
+            return clockHeight + statusBarHeaderHeight + mKeyguardSmallClockTopMargin;
         }
     }
 
