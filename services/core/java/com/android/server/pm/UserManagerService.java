@@ -52,6 +52,7 @@ import android.content.pm.PackagePartitions;
 import android.content.pm.ShortcutServiceInternal;
 import android.content.pm.UserInfo;
 import android.content.pm.UserInfo.UserInfoFlag;
+import android.content.pm.UserPackage;
 import android.content.pm.UserProperties;
 import android.content.pm.parsing.FrameworkParsingPackageUtils;
 import android.content.res.Configuration;
@@ -5848,6 +5849,7 @@ public class UserManagerService extends IUserManager.Stub {
                 Slog.d(LOG_TAG, "updateUserIds(): userIds= " + Arrays.toString(mUserIds)
                         + " includingPreCreated=" + Arrays.toString(mUserIdsIncludingPreCreated));
             }
+            UserPackage.setValidUserIds(mUserIds);
         }
     }
 

@@ -55,6 +55,7 @@ import android.content.om.OverlayableInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.UserInfo;
+import android.content.pm.UserPackage;
 import android.content.pm.overlay.OverlayPaths;
 import android.content.res.ApkAssets;
 import android.net.Uri;
@@ -887,7 +888,7 @@ public final class OverlayManagerService extends SystemService {
             }
         }
 
-        private Set<PackageAndUser> executeRequest(
+        private Set<UserPackage> executeRequest(
                 @NonNull final OverlayManagerTransaction.Request request)
                 throws OperationFailedException {
             Objects.requireNonNull(request, "Transaction contains a null request");
@@ -932,7 +933,7 @@ public final class OverlayManagerService extends SystemService {
             try {
                 switch (request.type) {
                     case TYPE_SET_ENABLED:
-                        Set<PackageAndUser> result = null;
+                        Set<UserPackage> result = null;
                         result = CollectionUtils.addAll(result,
                                 mImpl.setEnabled(request.overlay, true, realUserId));
                         result = CollectionUtils.addAll(result,
@@ -973,7 +974,7 @@ public final class OverlayManagerService extends SystemService {
 
             synchronized (mLock) {
                 // execute the requests (as calling user)
-                Set<PackageAndUser> affectedPackagesToUpdate = null;
+                Set<UserPackage> affectedPackagesToUpdate = null;
                 for (final OverlayManagerTransaction.Request request : transaction) {
                     affectedPackagesToUpdate = CollectionUtils.addAll(affectedPackagesToUpdate,
                             executeRequest(request));
@@ -1370,13 +1371,13 @@ public final class OverlayManagerService extends SystemService {
         }
     }
 
-    private void updateTargetPackagesLocked(@Nullable PackageAndUser updatedTarget) {
+    private void updateTargetPackagesLocked(@Nullable UserPackage updatedTarget) {
         if (updatedTarget != null) {
             updateTargetPackagesLocked(Set.of(updatedTarget));
         }
     }
 
-    private void updateTargetPackagesLocked(@Nullable Set<PackageAndUser> updatedTargets) {
+    private void updateTargetPackagesLocked(@Nullable Set<UserPackage> updatedTargets) {
         if (CollectionUtils.isEmpty(updatedTargets)) {
             return;
         }
@@ -1405,7 +1406,7 @@ public final class OverlayManagerService extends SystemService {
 
     @Nullable
     private static SparseArray<ArraySet<String>> groupTargetsByUserId(
-            @Nullable final Set<PackageAndUser> targetsAndUsers) {
+            @Nullable final Set<UserPackage> targetsAndUsers) {
         final SparseArray<ArraySet<String>> userTargets = new SparseArray<>();
         CollectionUtils.forEach(targetsAndUsers, target -> {
             ArraySet<String> targets = userTargets.get(target.userId);
@@ -1472,7 +1473,7 @@ public final class OverlayManagerService extends SystemService {
 
     @NonNull
     private SparseArray<List<String>> updatePackageManagerLocked(
-            @Nullable Set<PackageAndUser> targets) {
+            @Nullable Set<UserPackage> targets) {
         if (CollectionUtils.isEmpty(targets)) {
             return new SparseArray<>();
         }

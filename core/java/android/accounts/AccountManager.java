@@ -27,7 +27,6 @@ import android.annotation.Size;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.UserHandleAware;
-import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.PropertyInvalidatedCache;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -37,6 +36,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
+import android.content.pm.UserPackage;
 import android.content.res.Resources;
 import android.database.SQLException;
 import android.os.Build;
@@ -348,43 +348,11 @@ public class AccountManager {
     */
     public static final int CACHE_ACCOUNTS_DATA_SIZE = 4;
 
-    private static final class UserIdPackage
-    {
-        @UserIdInt
-        public int userId;
-        public String packageName;
-
-        public UserIdPackage(int UserId, String PackageName) {
-            this.userId = UserId;
-            this.packageName = PackageName;
-        }
-
-        @Override
-        public boolean equals(@Nullable Object o) {
-            if (o == null) {
-                return false;
-            }
-            if (o == this) {
-                return true;
-            }
-            if (o.getClass() != getClass()) {
-                return false;
-            }
-            UserIdPackage e = (UserIdPackage) o;
-            return e.userId == userId && e.packageName.equals(packageName);
-        }
-
-        @Override
-        public int hashCode() {
-            return userId ^ packageName.hashCode();
-        }
-    }
-
-    PropertyInvalidatedCache<UserIdPackage, Account[]> mAccountsForUserCache =
-                new PropertyInvalidatedCache<UserIdPackage, Account[]>(
+    PropertyInvalidatedCache<UserPackage, Account[]> mAccountsForUserCache =
+                new PropertyInvalidatedCache<UserPackage, Account[]>(
                 CACHE_ACCOUNTS_DATA_SIZE, CACHE_KEY_ACCOUNTS_DATA_PROPERTY) {
         @Override
-        public Account[] recompute(UserIdPackage userAndPackage) {
+        public Account[] recompute(UserPackage userAndPackage) {
             try {
                 return mService.getAccountsAsUser(null, userAndPackage.userId, userAndPackage.packageName);
             } catch (RemoteException e) {
@@ -392,7 +360,7 @@ public class AccountManager {
             }
         }
         @Override
-        public boolean bypass(UserIdPackage query) {
+        public boolean bypass(UserPackage query) {
             return query.userId < 0;
         }
         @Override
@@ -731,7 +699,7 @@ public class AccountManager {
      */
     @NonNull
     public Account[] getAccountsAsUser(int userId) {
-        UserIdPackage userAndPackage = new UserIdPackage(userId, mContext.getOpPackageName());
+        UserPackage userAndPackage = UserPackage.of(userId, mContext.getOpPackageName());
         return mAccountsForUserCache.query(userAndPackage);
     }
 

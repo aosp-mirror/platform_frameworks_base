@@ -21,7 +21,6 @@ import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 import static com.android.server.job.JobSchedulerService.sSystemClock;
-import static com.android.server.job.controllers.Package.packageToString;
 
 import android.annotation.CurrentTimeMillisLong;
 import android.annotation.ElapsedRealtimeLong;
@@ -31,6 +30,7 @@ import android.app.usage.UsageStatsManagerInternal;
 import android.app.usage.UsageStatsManagerInternal.EstimatedLaunchTimeChangedListener;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
+import android.content.pm.UserPackage;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -172,7 +172,7 @@ public class PrefetchController extends StateController {
         final String pkgName = jobStatus.getSourcePackageName();
         final ArraySet<JobStatus> jobs = mTrackedJobs.get(userId, pkgName);
         if (jobs != null && jobs.remove(jobStatus) && jobs.size() == 0) {
-            mThresholdAlarmListener.removeAlarmForKey(new Package(userId, pkgName));
+            mThresholdAlarmListener.removeAlarmForKey(UserPackage.of(userId, pkgName));
         }
     }
 
@@ -186,7 +186,7 @@ public class PrefetchController extends StateController {
         final int userId = UserHandle.getUserId(uid);
         mTrackedJobs.delete(userId, packageName);
         mEstimatedLaunchTimes.delete(userId, packageName);
-        mThresholdAlarmListener.removeAlarmForKey(new Package(userId, packageName));
+        mThresholdAlarmListener.removeAlarmForKey(UserPackage.of(userId, packageName));
     }
 
     @Override
@@ -354,7 +354,7 @@ public class PrefetchController extends StateController {
             @CurrentTimeMillisLong long now, @ElapsedRealtimeLong long nowElapsed) {
         final ArraySet<JobStatus> jobs = mTrackedJobs.get(userId, pkgName);
         if (jobs == null || jobs.size() == 0) {
-            mThresholdAlarmListener.removeAlarmForKey(new Package(userId, pkgName));
+            mThresholdAlarmListener.removeAlarmForKey(UserPackage.of(userId, pkgName));
             return;
         }
 
@@ -365,10 +365,10 @@ public class PrefetchController extends StateController {
             // Set alarm to be notified when this crosses the threshold.
             final long timeToCrossThresholdMs =
                     nextEstimatedLaunchTime - (now + mLaunchTimeThresholdMs);
-            mThresholdAlarmListener.addAlarm(new Package(userId, pkgName),
+            mThresholdAlarmListener.addAlarm(UserPackage.of(userId, pkgName),
                     nowElapsed + timeToCrossThresholdMs);
         } else {
-            mThresholdAlarmListener.removeAlarmForKey(new Package(userId, pkgName));
+            mThresholdAlarmListener.removeAlarmForKey(UserPackage.of(userId, pkgName));
         }
     }
 
@@ -427,25 +427,25 @@ public class PrefetchController extends StateController {
     }
 
     /** Track when apps will cross the "will run soon" threshold. */
-    private class ThresholdAlarmListener extends AlarmQueue<Package> {
+    private class ThresholdAlarmListener extends AlarmQueue<UserPackage> {
         private ThresholdAlarmListener(Context context, Looper looper) {
             super(context, looper, "*job.prefetch*", "Prefetch threshold", false,
                     PcConstants.DEFAULT_LAUNCH_TIME_THRESHOLD_MS / 10);
         }
 
         @Override
-        protected boolean isForUser(@NonNull Package key, int userId) {
+        protected boolean isForUser(@NonNull UserPackage key, int userId) {
             return key.userId == userId;
         }
 
         @Override
-        protected void processExpiredAlarms(@NonNull ArraySet<Package> expired) {
+        protected void processExpiredAlarms(@NonNull ArraySet<UserPackage> expired) {
             final ArraySet<JobStatus> changedJobs = new ArraySet<>();
             synchronized (mLock) {
                 final long now = sSystemClock.millis();
                 final long nowElapsed = sElapsedRealtimeClock.millis();
                 for (int i = 0; i < expired.size(); ++i) {
-                    Package p = expired.valueAt(i);
+                    UserPackage p = expired.valueAt(i);
                     if (!willBeLaunchedSoonLocked(p.userId, p.packageName, now)) {
                         Slog.e(TAG, "Alarm expired for "
                                 + packageToString(p.userId, p.packageName) + " at the wrong time");
