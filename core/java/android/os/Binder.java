@@ -911,11 +911,15 @@ public class Binder implements IBinder {
             final String transactionName = getTransactionName(transactionCode);
             final StringBuffer buf = new StringBuffer();
 
+            // Keep trace name consistent with cpp trace name in:
+            // system/tools/aidl/generate_cpp.cpp
+            buf.append("AIDL::java::");
             if (transactionName != null) {
-                buf.append(mSimpleDescriptor).append(":").append(transactionName);
+                buf.append(mSimpleDescriptor).append("::").append(transactionName);
             } else {
-                buf.append(mSimpleDescriptor).append("#").append(transactionCode);
+                buf.append(mSimpleDescriptor).append("::#").append(transactionCode);
             }
+            buf.append("::server");
 
             transactionTraceName = buf.toString();
             mTransactionTraceNames.setRelease(index, transactionTraceName);
