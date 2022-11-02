@@ -24,6 +24,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
 import android.service.quicksettings.Tile;
 import android.testing.AndroidTestingRunner;
@@ -134,6 +135,20 @@ public class QSIconViewImplTest extends SysuiTestCase {
         s2.state = Tile.STATE_UNAVAILABLE;
 
         assertEquals(mIconView.getColor(s1), mIconView.getColor(s2));
+    }
+
+    @Test
+    public void testIconNotAnimatedWhenAllowAnimationsFalse() {
+        ImageView iv = new ImageView(mContext);
+        AnimatedVectorDrawable d = mock(AnimatedVectorDrawable.class);
+        State s = new State();
+        s.icon = mock(Icon.class);
+        when(s.icon.getDrawable(any())).thenReturn(d);
+        when(s.icon.getInvisibleDrawable(any())).thenReturn(d);
+
+        mIconView.updateIcon(iv, s, false);
+
+        verify(d, never()).start();
     }
 
     private static Drawable.ConstantState fakeConstantState(Drawable otherDrawable) {

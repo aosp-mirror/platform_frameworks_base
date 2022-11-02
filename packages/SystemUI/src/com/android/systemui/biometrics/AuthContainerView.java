@@ -120,7 +120,7 @@ public class AuthContainerView extends LinearLayout
     @VisibleForTesting final BiometricCallback mBiometricCallback;
 
     @Nullable private AuthBiometricView mBiometricView;
-    @Nullable private AuthCredentialView mCredentialView;
+    @VisibleForTesting @Nullable AuthCredentialView mCredentialView;
     private final AuthPanelController mPanelController;
     private final FrameLayout mFrameLayout;
     private final ImageView mBackgroundView;
@@ -761,6 +761,12 @@ public class AuthContainerView extends LinearLayout
             return;
         }
         mContainerState = STATE_ANIMATING_OUT;
+
+        // Request hiding soft-keyboard before animating away credential UI, in case IME insets
+        // animation get delayed by dismissing animation.
+        if (isAttachedToWindow() && getRootWindowInsets().isVisible(WindowInsets.Type.ime())) {
+            getWindowInsetsController().hide(WindowInsets.Type.ime());
+        }
 
         if (sendReason) {
             mPendingCallbackReason = reason;

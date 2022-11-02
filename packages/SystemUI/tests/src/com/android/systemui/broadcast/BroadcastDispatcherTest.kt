@@ -40,6 +40,7 @@ import java.util.concurrent.Executor
 import junit.framework.Assert.assertSame
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Before
 import org.junit.Test

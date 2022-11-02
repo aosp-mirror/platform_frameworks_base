@@ -232,11 +232,13 @@ object Flags {
     @JvmField val ROUNDED_BOX_RIPPLE = ReleasedFlag(1002)
 
     // 1100 - windowing
+    @JvmField
     @Keep
     val WM_ENABLE_SHELL_TRANSITIONS =
         SysPropBooleanFlag(1100, "persist.wm.debug.shell_transit", false)
 
     /** b/170163464: animate bubbles expanded view collapse with home gesture */
+    @JvmField
     @Keep
     val BUBBLES_HOME_GESTURE =
         SysPropBooleanFlag(1101, "persist.wm.debug.bubbles_home_gesture", true)
@@ -258,40 +260,50 @@ object Flags {
     @Keep
     val HIDE_NAVBAR_WINDOW = SysPropBooleanFlag(1103, "persist.wm.debug.hide_navbar_window", false)
 
+    @JvmField
     @Keep
     val WM_DESKTOP_WINDOWING = SysPropBooleanFlag(1104, "persist.wm.debug.desktop_mode", false)
 
+    @JvmField
     @Keep
     val WM_CAPTION_ON_SHELL = SysPropBooleanFlag(1105, "persist.wm.debug.caption_on_shell", false)
 
+    @JvmField
     @Keep
     val FLOATING_TASKS_ENABLED = SysPropBooleanFlag(1106, "persist.wm.debug.floating_tasks", false)
 
+    @JvmField
     @Keep
     val SHOW_FLOATING_TASKS_AS_BUBBLES =
         SysPropBooleanFlag(1107, "persist.wm.debug.floating_tasks_as_bubbles", false)
 
+    @JvmField
     @Keep
     val ENABLE_FLING_TO_DISMISS_BUBBLE =
         SysPropBooleanFlag(1108, "persist.wm.debug.fling_to_dismiss_bubble", true)
 
+    @JvmField
     @Keep
     val ENABLE_FLING_TO_DISMISS_PIP =
         SysPropBooleanFlag(1109, "persist.wm.debug.fling_to_dismiss_pip", true)
 
+    @JvmField
     @Keep
     val ENABLE_PIP_KEEP_CLEAR_ALGORITHM =
         SysPropBooleanFlag(1110, "persist.wm.debug.enable_pip_keep_clear_algorithm", false)
 
     // 1200 - predictive back
+    @JvmField
     @Keep
     val WM_ENABLE_PREDICTIVE_BACK =
         SysPropBooleanFlag(1200, "persist.wm.debug.predictive_back", true)
 
+    @JvmField
     @Keep
     val WM_ENABLE_PREDICTIVE_BACK_ANIM =
         SysPropBooleanFlag(1201, "persist.wm.debug.predictive_back_anim", false)
 
+    @JvmField
     @Keep
     val WM_ALWAYS_ENFORCE_PREDICTIVE_BACK =
         SysPropBooleanFlag(1202, "persist.wm.debug.predictive_back_always_enforce", false)
@@ -301,7 +313,7 @@ object Flags {
 
     // 1300 - screenshots
     // TODO(b/254512719): Tracking Bug
-    @JvmField val SCREENSHOT_REQUEST_PROCESSOR = UnreleasedFlag(1300)
+    @JvmField val SCREENSHOT_REQUEST_PROCESSOR = UnreleasedFlag(1300, true)
 
     // TODO(b/254513155): Tracking Bug
     @JvmField val SCREENSHOT_WORK_PROFILE_POLICY = UnreleasedFlag(1301)
@@ -315,7 +327,7 @@ object Flags {
     val CHOOSER_UNBUNDLED = UnreleasedFlag(1500, teamfood = true)
 
     // 1700 - clipboard
-    @JvmField val CLIPBOARD_OVERLAY_REFACTOR = UnreleasedFlag(1700)
+    @JvmField val CLIPBOARD_OVERLAY_REFACTOR = UnreleasedFlag(1700, true)
     @JvmField val CLIPBOARD_REMOTE_BEHAVIOR = UnreleasedFlag(1701)
 
     // 1800 - shade container

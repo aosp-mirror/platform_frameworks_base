@@ -47,6 +47,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.StringRes;
+import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.VerifyCredentialResponse;
@@ -98,7 +99,7 @@ public abstract class AuthCredentialView extends LinearLayout {
     protected int mUserId;
     protected long mOperationId;
     protected int mEffectiveUserId;
-    protected ErrorTimer mErrorTimer;
+    @VisibleForTesting ErrorTimer mErrorTimer;
 
     protected @Background DelayableExecutor mBackgroundExecutor;
 

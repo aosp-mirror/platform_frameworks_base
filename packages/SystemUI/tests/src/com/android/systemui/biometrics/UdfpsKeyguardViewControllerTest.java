@@ -25,124 +25,51 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.content.Context;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.systemui.SysuiTestCase;
-import com.android.systemui.animation.ActivityLaunchAnimator;
-import com.android.systemui.dump.DumpManager;
-import com.android.systemui.keyguard.KeyguardViewMediator;
-import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.shade.ShadeExpansionChangeEvent;
 import com.android.systemui.shade.ShadeExpansionListener;
-import com.android.systemui.shade.ShadeExpansionStateManager;
-import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
-import com.android.systemui.statusbar.phone.SystemUIDialogManager;
-import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
-import com.android.systemui.statusbar.policy.ConfigurationController;
-import com.android.systemui.statusbar.policy.KeyguardStateController;
-import com.android.systemui.util.concurrency.DelayableExecutor;
-import com.android.systemui.util.time.FakeSystemClock;
+import com.android.systemui.statusbar.phone.KeyguardBouncer;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
-import java.util.List;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
-public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
-    // Dependencies
-    @Mock
-    private UdfpsKeyguardView mView;
-    @Mock
-    private Context mResourceContext;
-    @Mock
-    private StatusBarStateController mStatusBarStateController;
-    @Mock
-    private ShadeExpansionStateManager mShadeExpansionStateManager;
-    @Mock
-    private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
-    @Mock
-    private LockscreenShadeTransitionController mLockscreenShadeTransitionController;
-    @Mock
-    private DumpManager mDumpManager;
-    @Mock
-    private DelayableExecutor mExecutor;
-    @Mock
-    private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
-    @Mock
-    private KeyguardStateController mKeyguardStateController;
-    @Mock
-    private KeyguardViewMediator mKeyguardViewMediator;
-    @Mock
-    private ConfigurationController mConfigurationController;
-    @Mock
-    private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
-    @Mock
-    private SystemUIDialogManager mDialogManager;
-    @Mock
-    private UdfpsController mUdfpsController;
-    @Mock
-    private ActivityLaunchAnimator mActivityLaunchAnimator;
-    private FakeSystemClock mSystemClock = new FakeSystemClock();
+public class UdfpsKeyguardViewControllerTest extends UdfpsKeyguardViewControllerBaseTest {
+    private @Captor ArgumentCaptor<KeyguardBouncer.BouncerExpansionCallback>
+            mBouncerExpansionCallbackCaptor;
+    private KeyguardBouncer.BouncerExpansionCallback mBouncerExpansionCallback;
 
-    private UdfpsKeyguardViewController mController;
-
-    // Capture listeners so that they can be used to send events
-    @Captor private ArgumentCaptor<StatusBarStateController.StateListener> mStateListenerCaptor;
-    private StatusBarStateController.StateListener mStatusBarStateListener;
-
-    @Captor private ArgumentCaptor<ShadeExpansionListener> mExpansionListenerCaptor;
-    private List<ShadeExpansionListener> mExpansionListeners;
-
-    @Captor private ArgumentCaptor<StatusBarKeyguardViewManager.AlternateAuthInterceptor>
-            mAltAuthInterceptorCaptor;
-    private StatusBarKeyguardViewManager.AlternateAuthInterceptor mAltAuthInterceptor;
-
-    @Captor private ArgumentCaptor<KeyguardStateController.Callback>
-            mKeyguardStateControllerCallbackCaptor;
-    private KeyguardStateController.Callback mKeyguardStateControllerCallback;
-
-    @Before
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
-        when(mView.getContext()).thenReturn(mResourceContext);
-        when(mResourceContext.getString(anyInt())).thenReturn("test string");
-        when(mKeyguardViewMediator.isAnimatingScreenOff()).thenReturn(false);
-        when(mView.getUnpausedAlpha()).thenReturn(255);
-        mController = new UdfpsKeyguardViewController(
-                mView,
-                mStatusBarStateController,
-                mShadeExpansionStateManager,
-                mStatusBarKeyguardViewManager,
-                mKeyguardUpdateMonitor,
-                mDumpManager,
-                mLockscreenShadeTransitionController,
-                mConfigurationController,
-                mSystemClock,
-                mKeyguardStateController,
-                mUnlockedScreenOffAnimationController,
-                mDialogManager,
-                mUdfpsController,
-                mActivityLaunchAnimator);
+    @Override
+    public UdfpsKeyguardViewController createUdfpsKeyguardViewController() {
+        return createUdfpsKeyguardViewController(/* useModernBouncer */ false);
     }
+
+    @Test
+    public void testShouldPauseAuth_bouncerShowing() {
+        mController.onViewAttached();
+        captureStatusBarStateListeners();
+        sendStatusBarStateChanged(StatusBarState.KEYGUARD);
+
+        captureBouncerExpansionCallback();
+        when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(true);
+        when(mStatusBarKeyguardViewManager.bouncerIsOrWillBeShowing()).thenReturn(true);
+        mBouncerExpansionCallback.onVisibilityChanged(true);
+
+        assertTrue(mController.shouldPauseAuth());
+    }
+
+
 
     @Test
     public void testRegistersExpansionChangedListenerOnAttached() {
@@ -199,20 +126,6 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
 
         verify(mView).onDozeAmountChanged(linear, eased,
                 UdfpsKeyguardView.ANIMATION_BETWEEN_AOD_AND_LOCKSCREEN);
-    }
-
-    @Test
-    public void testShouldPauseAuthBouncerShowing() {
-        mController.onViewAttached();
-        captureStatusBarStateListeners();
-        sendStatusBarStateChanged(StatusBarState.KEYGUARD);
-
-        captureAltAuthInterceptor();
-        when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(true);
-        when(mStatusBarKeyguardViewManager.bouncerIsOrWillBeShowing()).thenReturn(true);
-        mAltAuthInterceptor.onBouncerVisibilityChanged();
-
-        assertTrue(mController.shouldPauseAuth());
     }
 
     @Test
@@ -503,41 +416,8 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
         verify(mView, atLeastOnce()).setPauseAuth(false);
     }
 
-    private void sendStatusBarStateChanged(int statusBarState) {
-        mStatusBarStateListener.onStateChanged(statusBarState);
-    }
-
-    private void captureStatusBarStateListeners() {
-        verify(mStatusBarStateController).addCallback(mStateListenerCaptor.capture());
-        mStatusBarStateListener = mStateListenerCaptor.getValue();
-    }
-
-    private void captureStatusBarExpansionListeners() {
-        verify(mShadeExpansionStateManager, times(2))
-                .addExpansionListener(mExpansionListenerCaptor.capture());
-        // first (index=0) is from super class, UdfpsAnimationViewController.
-        // second (index=1) is from UdfpsKeyguardViewController
-        mExpansionListeners = mExpansionListenerCaptor.getAllValues();
-    }
-
-    private void updateStatusBarExpansion(float fraction, boolean expanded) {
-        ShadeExpansionChangeEvent event =
-                new ShadeExpansionChangeEvent(
-                        fraction, expanded, /* tracking= */ false, /* dragDownPxAmount= */ 0f);
-        for (ShadeExpansionListener listener : mExpansionListeners) {
-            listener.onPanelExpansionChanged(event);
-        }
-    }
-
-    private void captureAltAuthInterceptor() {
-        verify(mStatusBarKeyguardViewManager).setAlternateAuthInterceptor(
-                mAltAuthInterceptorCaptor.capture());
-        mAltAuthInterceptor = mAltAuthInterceptorCaptor.getValue();
-    }
-
-    private void captureKeyguardStateControllerCallback() {
-        verify(mKeyguardStateController).addCallback(
-                mKeyguardStateControllerCallbackCaptor.capture());
-        mKeyguardStateControllerCallback = mKeyguardStateControllerCallbackCaptor.getValue();
+    private void captureBouncerExpansionCallback() {
+        verify(mBouncer).addBouncerExpansionCallback(mBouncerExpansionCallbackCaptor.capture());
+        mBouncerExpansionCallback = mBouncerExpansionCallbackCaptor.getValue();
     }
 }

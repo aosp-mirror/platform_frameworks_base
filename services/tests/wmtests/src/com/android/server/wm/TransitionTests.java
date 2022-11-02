@@ -1517,6 +1517,29 @@ public class TransitionTests extends WindowTestsBase {
         transition.abort();
     }
 
+    @Test
+    public void testCollectReparentChange() {
+        registerTestTransitionPlayer();
+
+        // Reparent activity in transition.
+        final Task lastParent = createTask(mDisplayContent);
+        final Task newParent = createTask(mDisplayContent);
+        final ActivityRecord activity = createActivityRecord(lastParent);
+        doReturn(true).when(lastParent).shouldRemoveSelfOnLastChildRemoval();
+        doNothing().when(activity).setDropInputMode(anyInt());
+        activity.mVisibleRequested = true;
+
+        final Transition transition = new Transition(TRANSIT_CHANGE, 0 /* flags */,
+                activity.mTransitionController, mWm.mSyncEngine);
+        activity.mTransitionController.moveToCollecting(transition);
+        transition.collect(activity);
+        activity.reparent(newParent, POSITION_TOP);
+
+        // ChangeInfo#mCommonAncestor should be set after reparent.
+        final Transition.ChangeInfo change = transition.mChanges.get(activity);
+        assertEquals(newParent.getDisplayArea(), change.mCommonAncestor);
+    }
+
     private static void makeTaskOrganized(Task... tasks) {
         final ITaskOrganizer organizer = mock(ITaskOrganizer.class);
         for (Task t : tasks) {

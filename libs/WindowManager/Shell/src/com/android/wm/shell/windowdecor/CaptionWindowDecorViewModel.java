@@ -26,11 +26,16 @@ import android.app.ActivityTaskManager;
 import android.content.Context;
 import android.hardware.input.InputManager;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.SystemClock;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Choreographer;
+import android.view.InputChannel;
 import android.view.InputDevice;
+import android.view.InputEvent;
+import android.view.InputEventReceiver;
+import android.view.InputMonitor;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -64,8 +69,11 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
     private final SyncTransactionQueue mSyncQueue;
     private FreeformTaskTransitionStarter mTransitionStarter;
     private DesktopModeController mDesktopModeController;
+    private EventReceiver mEventReceiver;
+    private InputMonitor mInputMonitor;
 
     private final SparseArray<CaptionWindowDecoration> mWindowDecorByTaskId = new SparseArray<>();
+    private final DragStartListenerImpl mDragStartListener = new DragStartListenerImpl();
 
     public CaptionWindowDecorViewModel(
             Context context,
@@ -108,12 +116,19 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
                 mSyncQueue);
         mWindowDecorByTaskId.put(taskInfo.taskId, windowDecoration);
 
-        TaskPositioner taskPositioner = new TaskPositioner(mTaskOrganizer, windowDecoration);
+        TaskPositioner taskPositioner = new TaskPositioner(mTaskOrganizer, windowDecoration,
+                mDragStartListener);
         CaptionTouchEventListener touchEventListener =
                 new CaptionTouchEventListener(taskInfo, taskPositioner);
         windowDecoration.setCaptionListeners(touchEventListener, touchEventListener);
         windowDecoration.setDragResizeCallback(taskPositioner);
         setupWindowDecorationForTransition(taskInfo, startT, finishT);
+        if (mInputMonitor == null) {
+            mInputMonitor = InputManager.getInstance().monitorGestureInput(
+                    "caption-touch", mContext.getDisplayId());
+            mEventReceiver = new EventReceiver(
+                    mInputMonitor.getInputChannel(), Looper.myLooper());
+        }
         return true;
     }
 
@@ -165,6 +180,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
 
         @Override
         public void onClick(View v) {
+            CaptionWindowDecoration decoration = mWindowDecorByTaskId.get(mTaskId);
             final int id = v.getId();
             if (id == R.id.close_window) {
                 WindowContainerTransaction wct = new WindowContainerTransaction();
@@ -176,6 +192,15 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
                 }
             } else if (id == R.id.back_button) {
                 injectBackKey();
+            } else if (id == R.id.caption_handle) {
+                decoration.createHandleMenu();
+            } else if (id == R.id.desktop_button) {
+                mDesktopModeController.setDesktopModeActive(true);
+                decoration.closeHandleMenu();
+            } else if (id == R.id.fullscreen_button) {
+                mDesktopModeController.setDesktopModeActive(false);
+                decoration.closeHandleMenu();
+                decoration.setButtonVisibility();
             }
         }
         private void injectBackKey() {
@@ -257,11 +282,48 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
         }
     }
 
+    // InputEventReceiver to listen for touch input outside of caption bounds
+    private class EventReceiver extends InputEventReceiver {
+        EventReceiver(InputChannel channel, Looper looper) {
+            super(channel, looper);
+        }
+
+        @Override
+        public void onInputEvent(InputEvent event) {
+            boolean handled = false;
+            if (event instanceof MotionEvent
+                    && ((MotionEvent) event).getActionMasked() == MotionEvent.ACTION_UP) {
+                handled = true;
+                CaptionWindowDecorViewModel.this.handleMotionEvent((MotionEvent) event);
+            }
+            finishInputEvent(event, handled);
+        }
+    }
+
+    // If any input received is outside of caption bounds, turn off handle menu
+    private void handleMotionEvent(MotionEvent ev) {
+        int size = mWindowDecorByTaskId.size();
+        for (int i = 0; i < size; i++) {
+            CaptionWindowDecoration decoration = mWindowDecorByTaskId.valueAt(i);
+            if (decoration != null) {
+                decoration.closeHandleMenuIfNeeded(ev);
+            }
+        }
+    }
+
+
     private boolean shouldShowWindowDecor(RunningTaskInfo taskInfo) {
         if (taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM) return true;
         return DesktopModeStatus.IS_SUPPORTED
                 && taskInfo.getActivityType() == ACTIVITY_TYPE_STANDARD
                 && mDisplayController.getDisplayContext(taskInfo.displayId)
                 .getResources().getConfiguration().smallestScreenWidthDp >= 600;
+    }
+
+    private class DragStartListenerImpl implements TaskPositioner.DragStartListener{
+        @Override
+        public void onDragStart(int taskId) {
+            mWindowDecorByTaskId.get(taskId).closeHandleMenu();
+        }
     }
 }

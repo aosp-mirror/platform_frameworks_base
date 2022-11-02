@@ -46,10 +46,12 @@ class MobileIconViewModelTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         interactor.apply {
             setLevel(1)
-            setCutOut(false)
+            setIsDefaultDataEnabled(true)
+            setIsFailedConnection(false)
             setIconGroup(THREE_G)
             setIsEmergencyOnly(false)
             setNumberOfLevels(4)
+            isDataConnected.value = true
         }
         underTest = MobileIconViewModel(SUB_1_ID, interactor, logger)
     }
@@ -59,8 +61,23 @@ class MobileIconViewModelTest : SysuiTestCase() {
         runBlocking(IMMEDIATE) {
             var latest: Int? = null
             val job = underTest.iconId.onEach { latest = it }.launchIn(this)
+            val expected = defaultSignal()
 
-            assertThat(latest).isEqualTo(SignalDrawable.getState(1, 4, false))
+            assertThat(latest).isEqualTo(expected)
+
+            job.cancel()
+        }
+
+    @Test
+    fun iconId_cutout_whenDefaultDataDisabled() =
+        runBlocking(IMMEDIATE) {
+            interactor.setIsDefaultDataEnabled(false)
+
+            var latest: Int? = null
+            val job = underTest.iconId.onEach { latest = it }.launchIn(this)
+            val expected = defaultSignal(level = 1, connected = false)
+
+            assertThat(latest).isEqualTo(expected)
 
             job.cancel()
         }
@@ -97,6 +114,44 @@ class MobileIconViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    fun networkType_nullWhenFailedConnection() =
+        runBlocking(IMMEDIATE) {
+            interactor.setIconGroup(THREE_G)
+            interactor.setIsDataEnabled(true)
+            interactor.setIsFailedConnection(true)
+            var latest: Icon? = null
+            val job = underTest.networkTypeIcon.onEach { latest = it }.launchIn(this)
+
+            assertThat(latest).isNull()
+
+            job.cancel()
+        }
+
+    @Test
+    fun networkType_nullWhenDataDisconnects() =
+        runBlocking(IMMEDIATE) {
+            val initial =
+                Icon.Resource(
+                    THREE_G.dataType,
+                    ContentDescription.Resource(THREE_G.dataContentDescription)
+                )
+
+            interactor.setIconGroup(THREE_G)
+            var latest: Icon? = null
+            val job = underTest.networkTypeIcon.onEach { latest = it }.launchIn(this)
+
+            interactor.setIconGroup(THREE_G)
+            assertThat(latest).isEqualTo(initial)
+
+            interactor.isDataConnected.value = false
+            yield()
+
+            assertThat(latest).isNull()
+
+            job.cancel()
+        }
+
+    @Test
     fun networkType_null_changeToDisabled() =
         runBlocking(IMMEDIATE) {
             val expected =
@@ -118,6 +173,14 @@ class MobileIconViewModelTest : SysuiTestCase() {
 
             job.cancel()
         }
+
+    /** Convenience constructor for these tests */
+    private fun defaultSignal(
+        level: Int = 1,
+        connected: Boolean = true,
+    ): Int {
+        return SignalDrawable.getState(level, /* numLevels */ 4, !connected)
+    }
 
     companion object {
         private val IMMEDIATE = Dispatchers.Main.immediate

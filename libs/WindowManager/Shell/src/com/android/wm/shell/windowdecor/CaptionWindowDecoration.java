@@ -20,10 +20,14 @@ import android.app.ActivityManager;
 import android.app.WindowConfiguration;
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.Point;
+import android.graphics.Rect;
 import android.graphics.drawable.VectorDrawable;
 import android.os.Handler;
 import android.view.Choreographer;
+import android.view.MotionEvent;
 import android.view.SurfaceControl;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -57,6 +61,8 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
             new WindowDecoration.RelayoutResult<>();
 
     private boolean mDesktopActive;
+
+    private AdditionalWindow mHandleMenu;
 
     CaptionWindowDecoration(
             Context context,
@@ -123,7 +129,20 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         if (isDragResizeable) {
             mRelayoutParams.setOutsets(outsetLeftId, outsetTopId, outsetRightId, outsetBottomId);
         }
+        final Resources resources = mDecorWindowContext.getResources();
+        final Rect taskBounds = taskInfo.configuration.windowConfiguration.getBounds();
+        final int captionHeight = loadDimensionPixelSize(resources,
+                mRelayoutParams.mCaptionHeightId);
+        final int captionWidth = loadDimensionPixelSize(resources,
+                mRelayoutParams.mCaptionWidthId);
+        final int captionLeft = taskBounds.width() / 2
+                - captionWidth / 2;
+        final int captionTop = taskBounds.top
+                <= captionHeight / 2 ? 0 : -captionHeight / 2;
+        mRelayoutParams.setCaptionPosition(captionLeft, captionTop);
+
         relayout(mRelayoutParams, startT, finishT, wct, oldRootView, mResult);
+        taskInfo = null; // Clear it just in case we use it accidentally
 
         mTaskOrganizer.applyTransaction(wct);
 
@@ -137,15 +156,14 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         }
 
         // If this task is not focused, do not show caption.
-        setCaptionVisibility(taskInfo.isFocused);
+        setCaptionVisibility(mTaskInfo.isFocused);
 
         // Only handle should show if Desktop Mode is inactive.
         boolean desktopCurrentStatus = DesktopModeStatus.isActive(mContext);
-        if (mDesktopActive != desktopCurrentStatus && taskInfo.isFocused) {
+        if (mDesktopActive != desktopCurrentStatus && mTaskInfo.isFocused) {
             mDesktopActive = desktopCurrentStatus;
             setButtonVisibility();
         }
-        taskInfo = null; // Clear it just in case we use it accidentally
 
         if (!isDragResizeable) {
             closeDragResizeListener();
@@ -184,7 +202,20 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         back.setOnClickListener(mOnCaptionButtonClickListener);
         View handle = caption.findViewById(R.id.caption_handle);
         handle.setOnTouchListener(mOnCaptionTouchListener);
+        handle.setOnClickListener(mOnCaptionButtonClickListener);
         setButtonVisibility();
+    }
+
+    private void setupHandleMenu() {
+        View menu = mHandleMenu.mWindowViewHost.getView();
+        View fullscreen = menu.findViewById(R.id.fullscreen_button);
+        fullscreen.setOnClickListener(mOnCaptionButtonClickListener);
+        View desktop = menu.findViewById(R.id.desktop_button);
+        desktop.setOnClickListener(mOnCaptionButtonClickListener);
+        View split = menu.findViewById(R.id.split_screen_button);
+        split.setOnClickListener(mOnCaptionButtonClickListener);
+        View more = menu.findViewById(R.id.more_button);
+        more.setOnClickListener(mOnCaptionButtonClickListener);
     }
 
     /**
@@ -194,8 +225,9 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
      */
     private void setCaptionVisibility(boolean visible) {
         int v = visible ? View.VISIBLE : View.GONE;
-        View caption = mResult.mRootView.findViewById(R.id.caption);
-        caption.setVisibility(v);
+        View captionView = mResult.mRootView.findViewById(R.id.caption);
+        captionView.setVisibility(v);
+        if (!visible) closeHandleMenu();
     }
 
     /**
@@ -203,6 +235,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
      *
      */
     public void setButtonVisibility() {
+        mDesktopActive = DesktopModeStatus.isActive(mContext);
         int v = mDesktopActive ? View.VISIBLE : View.GONE;
         View caption = mResult.mRootView.findViewById(R.id.caption);
         View back = caption.findViewById(R.id.back_button);
@@ -220,6 +253,10 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         caption.getBackground().setTint(v == View.VISIBLE ? Color.WHITE : Color.TRANSPARENT);
     }
 
+    public boolean isHandleMenuActive() {
+        return mHandleMenu != null;
+    }
+
     private void closeDragResizeListener() {
         if (mDragResizeListener == null) {
             return;
@@ -228,9 +265,67 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         mDragResizeListener = null;
     }
 
+    /**
+     * Create and display handle menu window
+     */
+    public void createHandleMenu() {
+        SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+        final Resources resources = mDecorWindowContext.getResources();
+        int x = mRelayoutParams.mCaptionX;
+        int y = mRelayoutParams.mCaptionY;
+        int width = loadDimensionPixelSize(resources, mRelayoutParams.mCaptionWidthId);
+        int height = loadDimensionPixelSize(resources, mRelayoutParams.mCaptionHeightId);
+        String namePrefix = "Caption Menu";
+        mHandleMenu = addWindow(R.layout.caption_handle_menu, namePrefix, t,
+                x - mResult.mDecorContainerOffsetX, y - mResult.mDecorContainerOffsetY,
+                width, height);
+        mSyncQueue.runInSync(transaction -> {
+            transaction.merge(t);
+            t.close();
+        });
+        setupHandleMenu();
+    }
+
+    /**
+     * Close the handle menu window
+     */
+    public void closeHandleMenu() {
+        if (!isHandleMenuActive()) return;
+        mHandleMenu.releaseView();
+        mHandleMenu = null;
+    }
+
+    @Override
+    void releaseViews() {
+        closeHandleMenu();
+        super.releaseViews();
+    }
+
+    /**
+     * Close an open handle menu if input is outside of menu coordinates
+     * @param ev the tapped point to compare against
+     * @return
+     */
+    public void closeHandleMenuIfNeeded(MotionEvent ev) {
+        if (mHandleMenu != null) {
+            Point positionInParent = mTaskOrganizer.getRunningTaskInfo(mTaskInfo.taskId)
+                    .positionInParent;
+            final Resources resources = mDecorWindowContext.getResources();
+            ev.offsetLocation(-mRelayoutParams.mCaptionX, -mRelayoutParams.mCaptionY);
+            ev.offsetLocation(-positionInParent.x, -positionInParent.y);
+            int width = loadDimensionPixelSize(resources, mRelayoutParams.mCaptionWidthId);
+            int height = loadDimensionPixelSize(resources, mRelayoutParams.mCaptionHeightId);
+            if (!(ev.getX() >= 0 && ev.getY()  >= 0
+                    && ev.getX()  <= width && ev.getY()  <= height)) {
+                closeHandleMenu();
+            }
+        }
+    }
+
     @Override
     public void close() {
         closeDragResizeListener();
+        closeHandleMenu();
         super.close();
     }
 }

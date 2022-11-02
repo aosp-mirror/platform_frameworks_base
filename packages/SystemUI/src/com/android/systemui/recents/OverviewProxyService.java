@@ -64,6 +64,7 @@ import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.Surface;
+import android.view.SurfaceControl;
 import android.view.accessibility.AccessibilityManager;
 import android.view.inputmethod.InputMethodManager;
 
@@ -149,6 +150,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
     private final UiEventLogger mUiEventLogger;
 
     private Region mActiveNavBarRegion;
+    private SurfaceControl mNavigationBarSurface;
 
     private IOverviewProxy mOverviewProxy;
     private int mConnectionBackoffAttempts;
@@ -190,7 +192,8 @@ public class OverviewProxyService extends CurrentUserTracker implements
                 // TODO move this logic to message queue
                 mCentralSurfacesOptionalLazy.get().ifPresent(centralSurfaces -> {
                     if (event.getActionMasked() == ACTION_DOWN) {
-                        centralSurfaces.getPanelController().startExpandLatencyTracking();
+                        centralSurfaces.getNotificationPanelViewController()
+                                        .startExpandLatencyTracking();
                     }
                     mHandler.post(() -> {
                         int action = event.getActionMasked();
@@ -217,17 +220,15 @@ public class OverviewProxyService extends CurrentUserTracker implements
         }
 
         @Override
-        public void onBackPressed() throws RemoteException {
+        public void onBackPressed() {
             verifyCallerAndClearCallingIdentityPostMain("onBackPressed", () -> {
                 sendEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BACK);
                 sendEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_BACK);
-
-                notifyBackAction(true, -1, -1, true, false);
             });
         }
 
         @Override
-        public void onImeSwitcherPressed() throws RemoteException {
+        public void onImeSwitcherPressed() {
             // TODO(b/204901476) We're intentionally using DEFAULT_DISPLAY for now since
             // Launcher/Taskbar isn't display aware.
             mContext.getSystemService(InputMethodManager.class)
@@ -313,12 +314,6 @@ public class OverviewProxyService extends CurrentUserTracker implements
                                 Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         mContext.startActivityAsUser(intent, UserHandle.CURRENT);
                     });
-        }
-
-        @Override
-        public void notifySwipeUpGestureStarted() {
-            verifyCallerAndClearCallingIdentityPostMain("notifySwipeUpGestureStarted", () ->
-                    notifySwipeUpGestureStartedInternal());
         }
 
         @Override
@@ -443,6 +438,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
                 Log.e(TAG_OPS, "Failed to call onInitialize()", e);
             }
             dispatchNavButtonBounds();
+            dispatchNavigationBarSurface();
 
             // Force-update the systemui state flags
             updateSystemUiStateFlags();
@@ -597,11 +593,18 @@ public class OverviewProxyService extends CurrentUserTracker implements
                 .commitUpdate(mContext.getDisplayId());
     }
 
-    public void notifyBackAction(boolean completed, int downX, int downY, boolean isButton,
-            boolean gestureSwipeLeft) {
+    /**
+     * Called when the navigation bar surface is created or changed
+     */
+    public void onNavigationBarSurfaceChanged(SurfaceControl navbarSurface) {
+        mNavigationBarSurface = navbarSurface;
+        dispatchNavigationBarSurface();
+    }
+
+    private void dispatchNavigationBarSurface() {
         try {
             if (mOverviewProxy != null) {
-                mOverviewProxy.onBackAction(completed, downX, downY, isButton, gestureSwipeLeft);
+                mOverviewProxy.onNavigationBarSurface(mNavigationBarSurface);
             }
         } catch (RemoteException e) {
             Log.e(TAG_OPS, "Failed to notify back action", e);
@@ -614,7 +617,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
         final NavigationBarView navBarView =
                 mNavBarControllerLazy.get().getNavigationBarView(mContext.getDisplayId());
         final NotificationPanelViewController panelController =
-                mCentralSurfacesOptionalLazy.get().get().getPanelController();
+                mCentralSurfacesOptionalLazy.get().get().getNotificationPanelViewController();
         if (SysUiState.DEBUG) {
             Log.d(TAG_OPS, "Updating sysui state flags: navBarFragment=" + navBarFragment
                     + " navBarView=" + navBarView + " panelController=" + panelController);
@@ -800,21 +803,9 @@ public class OverviewProxyService extends CurrentUserTracker implements
         }
     }
 
-    public void notifyQuickStepStarted() {
-        for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
-            mConnectionCallbacks.get(i).onQuickStepStarted();
-        }
-    }
-
     private void notifyPrioritizedRotationInternal(@Surface.Rotation int rotation) {
         for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
             mConnectionCallbacks.get(i).onPrioritizedRotation(rotation);
-        }
-    }
-
-    public void notifyQuickScrubStarted() {
-        for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
-            mConnectionCallbacks.get(i).onQuickScrubStarted();
         }
     }
 
@@ -833,12 +824,6 @@ public class OverviewProxyService extends CurrentUserTracker implements
     private void notifyStartAssistant(Bundle bundle) {
         for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
             mConnectionCallbacks.get(i).startAssistant(bundle);
-        }
-    }
-
-    private void notifySwipeUpGestureStartedInternal() {
-        for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
-            mConnectionCallbacks.get(i).onSwipeUpGestureStarted();
         }
     }
 
@@ -1005,23 +990,20 @@ public class OverviewProxyService extends CurrentUserTracker implements
         pw.print("  mWindowCornerRadius="); pw.println(mWindowCornerRadius);
         pw.print("  mSupportsRoundedCornersOnWindows="); pw.println(mSupportsRoundedCornersOnWindows);
         pw.print("  mActiveNavBarRegion="); pw.println(mActiveNavBarRegion);
+        pw.print("  mNavigationBarSurface="); pw.println(mNavigationBarSurface);
         pw.print("  mNavBarMode="); pw.println(mNavBarMode);
         mSysUiState.dump(pw, args);
     }
 
     public interface OverviewProxyListener {
         default void onConnectionChanged(boolean isConnected) {}
-        default void onQuickStepStarted() {}
-        default void onSwipeUpGestureStarted() {}
         default void onPrioritizedRotation(@Surface.Rotation int rotation) {}
         default void onOverviewShown(boolean fromHome) {}
-        default void onQuickScrubStarted() {}
         /** Notify the recents app (overview) is started by 3-button navigation. */
         default void onToggleRecentApps() {}
         default void onHomeRotationEnabled(boolean enabled) {}
         default void onTaskbarStatusUpdated(boolean visible, boolean stashed) {}
         default void onTaskbarAutohideSuspend(boolean suspend) {}
-        default void onSystemUiStateChanged(int sysuiStateFlags) {}
         default void onAssistantProgress(@FloatRange(from = 0.0, to = 1.0) float progress) {}
         default void onAssistantGestureCompletion(float velocity) {}
         default void startAssistant(Bundle bundle) {}
