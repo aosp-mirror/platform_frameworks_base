@@ -86,8 +86,10 @@ import com.android.systemui.unfold.SysUIUnfoldComponent;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -166,9 +168,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
         @Override
         public void onExpansionChanged(float expansion) {
-            if (mAlternateAuthInterceptor != null) {
-                mAlternateAuthInterceptor.setBouncerExpansionChanged(expansion);
-            }
             if (mBouncerAnimating) {
                 mCentralSurfaces.setBouncerHiddenFraction(expansion);
             }
@@ -183,9 +182,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
             if (!isVisible) {
                 mCentralSurfaces.setBouncerHiddenFraction(KeyguardBouncer.EXPANSION_HIDDEN);
-            }
-            if (mAlternateAuthInterceptor != null) {
-                mAlternateAuthInterceptor.onBouncerVisibilityChanged();
             }
 
             /* Register predictive back callback when keyguard becomes visible, and unregister
@@ -252,6 +248,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private int mLastBiometricMode;
     private boolean mLastScreenOffAnimationPlaying;
     private float mQsExpansion;
+    final Set<KeyguardViewManagerCallback> mCallbacks = new HashSet<>();
     private boolean mIsModernBouncerEnabled;
 
     private OnDismissAction mAfterKeyguardGoneAction;
@@ -465,7 +462,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             if (mBouncer != null) {
                 mBouncer.setExpansion(KeyguardBouncer.EXPANSION_HIDDEN);
             } else {
-                mBouncerInteractor.setExpansion(KeyguardBouncer.EXPANSION_HIDDEN);
+                mBouncerInteractor.setPanelExpansion(KeyguardBouncer.EXPANSION_HIDDEN);
             }
         } else if (mStatusBarStateController.getState() == StatusBarState.SHADE_LOCKED) {
             // Don't expand to the bouncer. Instead transition back to the lock screen (see
@@ -475,7 +472,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             if (mBouncer != null) {
                 mBouncer.setExpansion(KeyguardBouncer.EXPANSION_VISIBLE);
             } else {
-                mBouncerInteractor.setExpansion(KeyguardBouncer.EXPANSION_VISIBLE);
+                mBouncerInteractor.setPanelExpansion(KeyguardBouncer.EXPANSION_VISIBLE);
             }
         } else if (mKeyguardStateController.isShowing()  && !hideBouncerOverDream) {
             if (!isWakeAndUnlocking()
@@ -485,7 +482,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                 if (mBouncer != null) {
                     mBouncer.setExpansion(fraction);
                 } else {
-                    mBouncerInteractor.setExpansion(fraction);
+                    mBouncerInteractor.setPanelExpansion(fraction);
                 }
             }
             if (fraction != KeyguardBouncer.EXPANSION_HIDDEN && tracking
@@ -504,7 +501,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             if (mBouncer != null) {
                 mBouncer.setExpansion(KeyguardBouncer.EXPANSION_HIDDEN);
             } else {
-                mBouncerInteractor.setExpansion(KeyguardBouncer.EXPANSION_HIDDEN);
+                mBouncerInteractor.setPanelExpansion(KeyguardBouncer.EXPANSION_HIDDEN);
             }
         } else if (mPulsing && fraction == KeyguardBouncer.EXPANSION_VISIBLE) {
             // Panel expanded while pulsing but didn't translate the bouncer (because we are
@@ -1355,7 +1352,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             mBouncerInteractor.notifyKeyguardAuthenticated(strongAuth);
         }
 
-        if (mAlternateAuthInterceptor != null && isShowingAlternateAuthOrAnimating()) {
+        if (mAlternateAuthInterceptor != null && isShowingAlternateAuth()) {
             resetAlternateAuth(false);
             executeAfterKeyguardGoneAction();
         }
@@ -1441,6 +1438,10 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         pw.println("  mPendingWakeupAction: " + mPendingWakeupAction);
         pw.println("  isBouncerShowing(): " + isBouncerShowing());
         pw.println("  bouncerIsOrWillBeShowing(): " + bouncerIsOrWillBeShowing());
+        pw.println("  Registered KeyguardViewManagerCallbacks:");
+        for (KeyguardViewManagerCallback callback : mCallbacks) {
+            pw.println("      " + callback);
+        }
 
         if (mBouncer != null) {
             mBouncer.dump(pw);
@@ -1465,6 +1466,20 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     /**
+     * Add a callback to listen for changes
+     */
+    public void addCallback(KeyguardViewManagerCallback callback) {
+        mCallbacks.add(callback);
+    }
+
+    /**
+     * Removes callback to stop receiving updates
+     */
+    public void removeCallback(KeyguardViewManagerCallback callback) {
+        mCallbacks.remove(callback);
+    }
+
+    /**
      * Whether qs is currently expanded.
      */
     public float getQsExpansion() {
@@ -1476,8 +1491,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
      */
     public void setQsExpansion(float qsExpansion) {
         mQsExpansion = qsExpansion;
-        if (mAlternateAuthInterceptor != null) {
-            mAlternateAuthInterceptor.setQsExpansion(qsExpansion);
+        for (KeyguardViewManagerCallback callback : mCallbacks) {
+            callback.onQSExpansionChanged(mQsExpansion);
         }
     }
 
@@ -1491,21 +1506,13 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                 && mAlternateAuthInterceptor.isShowingAlternateAuthBouncer();
     }
 
-    public boolean isShowingAlternateAuthOrAnimating() {
-        return mAlternateAuthInterceptor != null
-                && (mAlternateAuthInterceptor.isShowingAlternateAuthBouncer()
-                || mAlternateAuthInterceptor.isAnimating());
-    }
-
     /**
-     * Forward touches to any alternate authentication affordances.
+     * Forward touches to callbacks.
      */
-    public boolean onTouch(MotionEvent event) {
-        if (mAlternateAuthInterceptor == null) {
-            return false;
+    public void onTouch(MotionEvent event) {
+        for (KeyguardViewManagerCallback callback: mCallbacks) {
+            callback.onTouch(event);
         }
-
-        return mAlternateAuthInterceptor.onTouch(event);
     }
 
     /** Update keyguard position based on a tapped X coordinate. */
@@ -1639,38 +1646,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         boolean isShowingAlternateAuthBouncer();
 
         /**
-         * print information for the alternate auth interceptor registered
-         */
-        void dump(PrintWriter pw);
-
-        /**
-         * @return true if the new auth method bouncer is currently animating in or out.
-         */
-        boolean isAnimating();
-
-        /**
-         * How much QS is fully expanded where 0f is not showing and 1f is fully expanded.
-         */
-        void setQsExpansion(float qsExpansion);
-
-        /**
-         * Forward potential touches to authentication interceptor
-         * @return true if event was handled
-         */
-        boolean onTouch(MotionEvent event);
-
-        /**
-         * Update pin/pattern/password bouncer expansion amount where 0 is visible and 1 is fully
-         * hidden
-         */
-        void setBouncerExpansionChanged(float expansion);
-
-        /**
-         *  called when the bouncer view visibility has changed.
-         */
-        void onBouncerVisibilityChanged();
-
-        /**
          * Use when an app occluding the keyguard would like to give the user ability to
          * unlock the device using udfps.
          *
@@ -1679,5 +1654,25 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
          */
         void requestUdfps(boolean requestUdfps, int color);
 
+        /**
+         * print information for the alternate auth interceptor registered
+         */
+        void dump(PrintWriter pw);
+    }
+
+    /**
+     * Callback for KeyguardViewManager state changes.
+     */
+    public interface KeyguardViewManagerCallback {
+        /**
+         * Set the amount qs is expanded. For example, swipe down from the top of the
+         * lock screen to start the full QS expansion.
+         */
+        default void onQSExpansionChanged(float qsExpansion) { }
+
+        /**
+         * Forward touch events to callbacks
+         */
+        default void onTouch(MotionEvent event) { }
     }
 }
