@@ -53362,6 +53362,7 @@ package android.view.inputmethod {
     method public android.graphics.Matrix getMatrix();
     method public int getSelectionEnd();
     method public int getSelectionStart();
+    method @Nullable public android.view.inputmethod.TextAppearanceInfo getTextAppearanceInfo();
     method @NonNull public java.util.List<android.graphics.RectF> getVisibleLineBounds();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.inputmethod.CursorAnchorInfo> CREATOR;
@@ -53382,6 +53383,7 @@ package android.view.inputmethod {
     method public android.view.inputmethod.CursorAnchorInfo.Builder setInsertionMarkerLocation(float, float, float, float, int);
     method public android.view.inputmethod.CursorAnchorInfo.Builder setMatrix(android.graphics.Matrix);
     method public android.view.inputmethod.CursorAnchorInfo.Builder setSelectionRange(int, int);
+    method @NonNull public android.view.inputmethod.CursorAnchorInfo.Builder setTextAppearanceInfo(@Nullable android.view.inputmethod.TextAppearanceInfo);
   }
 
   public final class DeleteGesture extends android.view.inputmethod.HandwritingGesture implements android.os.Parcelable {
@@ -53637,6 +53639,7 @@ package android.view.inputmethod {
     field public static final int CURSOR_UPDATE_FILTER_CHARACTER_BOUNDS = 8; // 0x8
     field public static final int CURSOR_UPDATE_FILTER_EDITOR_BOUNDS = 4; // 0x4
     field public static final int CURSOR_UPDATE_FILTER_INSERTION_MARKER = 16; // 0x10
+    field public static final int CURSOR_UPDATE_FILTER_TEXT_APPEARANCE = 64; // 0x40
     field public static final int CURSOR_UPDATE_FILTER_VISIBLE_LINE_BOUNDS = 32; // 0x20
     field public static final int CURSOR_UPDATE_IMMEDIATE = 1; // 0x1
     field public static final int CURSOR_UPDATE_MONITOR = 2; // 0x2
@@ -53938,6 +53941,35 @@ package android.view.inputmethod {
     method @NonNull public CharSequence getText();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.inputmethod.SurroundingText> CREATOR;
+  }
+
+  public final class TextAppearanceInfo implements android.os.Parcelable {
+    ctor public TextAppearanceInfo(@NonNull android.widget.TextView);
+    method public int describeContents();
+    method @Nullable public String getFontFamilyName();
+    method @Nullable public String getFontFeatureSettings();
+    method @Nullable public String getFontVariationSettings();
+    method public float getLetterSpacing();
+    method public int getLineBreakStyle();
+    method public int getLineBreakWordStyle();
+    method public int getMaxLength();
+    method @Px public float getShadowDx();
+    method @Px public float getShadowDy();
+    method @Px public float getShadowRadius();
+    method @ColorInt public int getTextColor();
+    method @ColorInt public int getTextColorHighlight();
+    method @ColorInt public int getTextColorHint();
+    method @Nullable public android.content.res.ColorStateList getTextColorLink();
+    method @IntRange(from=0xffffffff, to=android.graphics.fonts.FontStyle.FONT_WEIGHT_MAX) public int getTextFontWeight();
+    method @NonNull public android.os.LocaleList getTextLocales();
+    method public float getTextScaleX();
+    method @Px public float getTextSize();
+    method public int getTextStyle();
+    method public boolean isAllCaps();
+    method public boolean isElegantTextHeight();
+    method public boolean isFallbackLineSpacing();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.view.inputmethod.TextAppearanceInfo> CREATOR;
   }
 
   public final class TextAttribute implements android.os.Parcelable {
