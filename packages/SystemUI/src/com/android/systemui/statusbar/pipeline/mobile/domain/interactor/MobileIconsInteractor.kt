@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.pipeline.mobile.domain.interactor
 import android.telephony.CarrierConfigManager
 import android.telephony.SubscriptionInfo
 import android.telephony.SubscriptionManager
+import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
 import com.android.settingslib.SignalIcon.MobileIconGroup
 import com.android.settingslib.mobile.TelephonyIcons
 import com.android.systemui.dagger.SysUISingleton
@@ -35,7 +36,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 
 /**
@@ -51,12 +54,16 @@ import kotlinx.coroutines.flow.stateIn
 interface MobileIconsInteractor {
     /** List of subscriptions, potentially filtered for CBRS */
     val filteredSubscriptions: Flow<List<SubscriptionInfo>>
+    /** True if the active mobile data subscription has data enabled */
+    val activeDataConnectionHasDataEnabled: StateFlow<Boolean>
     /** The icon mapping from network type to [MobileIconGroup] for the default subscription */
-    val defaultMobileIconMapping: Flow<Map<String, MobileIconGroup>>
+    val defaultMobileIconMapping: StateFlow<Map<String, MobileIconGroup>>
     /** Fallback [MobileIconGroup] in the case where there is no icon in the mapping */
-    val defaultMobileIconGroup: Flow<MobileIconGroup>
+    val defaultMobileIconGroup: StateFlow<MobileIconGroup>
+    /** True only if the default network is mobile, and validation also failed */
+    val isDefaultConnectionFailed: StateFlow<Boolean>
     /** True once the user has been set up */
-    val isUserSetup: Flow<Boolean>
+    val isUserSetup: StateFlow<Boolean>
     /**
      * Vends out a [MobileIconInteractor] tracking the [MobileConnectionRepository] for the given
      * subId. Will throw if the ID is invalid
@@ -78,6 +85,22 @@ constructor(
 ) : MobileIconsInteractor {
     private val activeMobileDataSubscriptionId =
         mobileConnectionsRepo.activeMobileDataSubscriptionId
+
+    private val activeMobileDataConnectionRepo: StateFlow<MobileConnectionRepository?> =
+        activeMobileDataSubscriptionId
+            .mapLatest { activeId ->
+                if (activeId == INVALID_SUBSCRIPTION_ID) {
+                    null
+                } else {
+                    mobileConnectionsRepo.getRepoForSubId(activeId)
+                }
+            }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), null)
+
+    override val activeDataConnectionHasDataEnabled: StateFlow<Boolean> =
+        activeMobileDataConnectionRepo
+            .flatMapLatest { it?.dataEnabled ?: flowOf(false) }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     private val unfilteredSubscriptions: Flow<List<SubscriptionInfo>> =
         mobileConnectionsRepo.subscriptionsFlow
@@ -132,22 +155,40 @@ constructor(
      */
     override val defaultMobileIconMapping: StateFlow<Map<String, MobileIconGroup>> =
         mobileConnectionsRepo.defaultDataSubRatConfig
-            .map { mobileMappingsProxy.mapIconSets(it) }
+            .mapLatest { mobileMappingsProxy.mapIconSets(it) }
             .stateIn(scope, SharingStarted.WhileSubscribed(), initialValue = mapOf())
 
     /** If there is no mapping in [defaultMobileIconMapping], then use this default icon group */
     override val defaultMobileIconGroup: StateFlow<MobileIconGroup> =
         mobileConnectionsRepo.defaultDataSubRatConfig
-            .map { mobileMappingsProxy.getDefaultIcons(it) }
+            .mapLatest { mobileMappingsProxy.getDefaultIcons(it) }
             .stateIn(scope, SharingStarted.WhileSubscribed(), initialValue = TelephonyIcons.G)
 
-    override val isUserSetup: Flow<Boolean> = userSetupRepo.isUserSetupFlow
+    /**
+     * We want to show an error state when cellular has actually failed to validate, but not if some
+     * other transport type is active, because then we expect there not to be validation.
+     */
+    override val isDefaultConnectionFailed: StateFlow<Boolean> =
+        mobileConnectionsRepo.defaultMobileNetworkConnectivity
+            .mapLatest { connectivityModel ->
+                if (!connectivityModel.isConnected) {
+                    false
+                } else {
+                    !connectivityModel.isValidated
+                }
+            }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), false)
+
+    override val isUserSetup: StateFlow<Boolean> = userSetupRepo.isUserSetupFlow
 
     /** Vends out new [MobileIconInteractor] for a particular subId */
     override fun createMobileConnectionInteractorForSubId(subId: Int): MobileIconInteractor =
         MobileIconInteractorImpl(
+            scope,
+            activeDataConnectionHasDataEnabled,
             defaultMobileIconMapping,
             defaultMobileIconGroup,
+            isDefaultConnectionFailed,
             mobileMappingsProxy,
             mobileConnectionsRepo.getRepoForSubId(subId),
         )

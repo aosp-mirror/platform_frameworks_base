@@ -35,6 +35,8 @@ import android.view.WindowInsets
 import android.view.WindowManager
 import android.widget.ScrollView
 import androidx.test.filters.SmallTest
+import com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn
+import com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.R
@@ -154,6 +156,35 @@ class AuthContainerViewTest : SysuiTestCase() {
                 eq(AuthDialogCallback.DISMISSED_USER_CANCELED),
                 eq<ByteArray?>(null), /* credentialAttestation */
                 eq(requestID)
+        )
+        assertThat(container.parent).isNull()
+    }
+
+    @Test
+    fun testDismissesOnFocusLoss_hidesKeyboardWhenVisible() {
+        val container = initializeFingerprintContainer(
+            authenticators = BiometricManager.Authenticators.DEVICE_CREDENTIAL
+        )
+        waitForIdleSync()
+
+        val requestID = authContainer?.requestId ?: 0L
+
+        // Simulate keyboard was shown on the credential view
+        val windowInsetsController = container.windowInsetsController
+        spyOn(windowInsetsController)
+        spyOn(container.rootWindowInsets)
+        doReturn(true).`when`(container.rootWindowInsets).isVisible(WindowInsets.Type.ime())
+
+        container.onWindowFocusChanged(false)
+        waitForIdleSync()
+
+        // Expect hiding IME request will be invoked when dismissing the view
+        verify(windowInsetsController)?.hide(WindowInsets.Type.ime())
+
+        verify(callback).onDismissed(
+            eq(AuthDialogCallback.DISMISSED_USER_CANCELED),
+            eq<ByteArray?>(null), /* credentialAttestation */
+            eq(requestID)
         )
         assertThat(container.parent).isNull()
     }

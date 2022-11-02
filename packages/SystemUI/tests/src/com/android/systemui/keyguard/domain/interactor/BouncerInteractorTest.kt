@@ -27,8 +27,8 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.BouncerView
+import com.android.systemui.keyguard.data.BouncerViewDelegate
 import com.android.systemui.keyguard.data.repository.KeyguardBouncerRepository
-import com.android.systemui.keyguard.shared.model.BouncerCallbackActionsModel
 import com.android.systemui.keyguard.shared.model.BouncerShowMessageModel
 import com.android.systemui.keyguard.shared.model.KeyguardBouncerModel
 import com.android.systemui.plugins.ActivityStarter
@@ -57,6 +57,7 @@ class BouncerInteractorTest : SysuiTestCase() {
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private lateinit var repository: KeyguardBouncerRepository
     @Mock(answer = Answers.RETURNS_DEEP_STUBS) private lateinit var bouncerView: BouncerView
+    @Mock private lateinit var bouncerViewDelegate: BouncerViewDelegate
     @Mock private lateinit var keyguardStateController: KeyguardStateController
     @Mock private lateinit var keyguardSecurityModel: KeyguardSecurityModel
     @Mock private lateinit var bouncerCallbackInteractor: BouncerCallbackInteractor
@@ -86,6 +87,7 @@ class BouncerInteractorTest : SysuiTestCase() {
             )
         `when`(repository.startingDisappearAnimation.value).thenReturn(null)
         `when`(repository.show.value).thenReturn(null)
+        `when`(bouncerView.delegate).thenReturn(bouncerViewDelegate)
     }
 
     @Test
@@ -97,7 +99,7 @@ class BouncerInteractorTest : SysuiTestCase() {
         verify(repository).setHide(false)
         verify(repository).setStartingToHide(false)
         verify(repository).setScrimmed(true)
-        verify(repository).setExpansion(EXPANSION_VISIBLE)
+        verify(repository).setPanelExpansion(EXPANSION_VISIBLE)
         verify(repository).setShowingSoon(true)
         verify(keyguardStateController).notifyBouncerShowing(true)
         verify(bouncerCallbackInteractor).dispatchStartingToShow()
@@ -108,7 +110,7 @@ class BouncerInteractorTest : SysuiTestCase() {
 
     @Test
     fun testShow_isNotScrimmed() {
-        verify(repository, never()).setExpansion(EXPANSION_VISIBLE)
+        verify(repository, never()).setPanelExpansion(EXPANSION_VISIBLE)
     }
 
     @Test
@@ -124,7 +126,6 @@ class BouncerInteractorTest : SysuiTestCase() {
         verify(falsingCollector).onBouncerHidden()
         verify(keyguardStateController).notifyBouncerShowing(false)
         verify(repository).setShowingSoon(false)
-        verify(repository).setOnDismissAction(null)
         verify(repository).setVisible(false)
         verify(repository).setHide(true)
         verify(repository).setShow(null)
@@ -132,26 +133,26 @@ class BouncerInteractorTest : SysuiTestCase() {
 
     @Test
     fun testExpansion() {
-        `when`(repository.expansionAmount.value).thenReturn(0.5f)
-        bouncerInteractor.setExpansion(0.6f)
-        verify(repository).setExpansion(0.6f)
+        `when`(repository.panelExpansionAmount.value).thenReturn(0.5f)
+        bouncerInteractor.setPanelExpansion(0.6f)
+        verify(repository).setPanelExpansion(0.6f)
         verify(bouncerCallbackInteractor).dispatchExpansionChanged(0.6f)
     }
 
     @Test
     fun testExpansion_fullyShown() {
-        `when`(repository.expansionAmount.value).thenReturn(0.5f)
+        `when`(repository.panelExpansionAmount.value).thenReturn(0.5f)
         `when`(repository.startingDisappearAnimation.value).thenReturn(null)
-        bouncerInteractor.setExpansion(EXPANSION_VISIBLE)
+        bouncerInteractor.setPanelExpansion(EXPANSION_VISIBLE)
         verify(falsingCollector).onBouncerShown()
         verify(bouncerCallbackInteractor).dispatchFullyShown()
     }
 
     @Test
     fun testExpansion_fullyHidden() {
-        `when`(repository.expansionAmount.value).thenReturn(0.5f)
+        `when`(repository.panelExpansionAmount.value).thenReturn(0.5f)
         `when`(repository.startingDisappearAnimation.value).thenReturn(null)
-        bouncerInteractor.setExpansion(EXPANSION_HIDDEN)
+        bouncerInteractor.setPanelExpansion(EXPANSION_HIDDEN)
         verify(repository).setVisible(false)
         verify(repository).setShow(null)
         verify(falsingCollector).onBouncerHidden()
@@ -161,8 +162,8 @@ class BouncerInteractorTest : SysuiTestCase() {
 
     @Test
     fun testExpansion_startingToHide() {
-        `when`(repository.expansionAmount.value).thenReturn(EXPANSION_VISIBLE)
-        bouncerInteractor.setExpansion(0.1f)
+        `when`(repository.panelExpansionAmount.value).thenReturn(EXPANSION_VISIBLE)
+        bouncerInteractor.setPanelExpansion(0.1f)
         verify(repository).setStartingToHide(true)
         verify(bouncerCallbackInteractor).dispatchStartingToHide()
     }
@@ -178,8 +179,7 @@ class BouncerInteractorTest : SysuiTestCase() {
         val onDismissAction = mock(ActivityStarter.OnDismissAction::class.java)
         val cancelAction = mock(Runnable::class.java)
         bouncerInteractor.setDismissAction(onDismissAction, cancelAction)
-        verify(repository)
-            .setOnDismissAction(BouncerCallbackActionsModel(onDismissAction, cancelAction))
+        verify(bouncerViewDelegate).setDismissAction(onDismissAction, cancelAction)
     }
 
     @Test
@@ -234,7 +234,7 @@ class BouncerInteractorTest : SysuiTestCase() {
     @Test
     fun testIsFullShowing() {
         `when`(repository.isVisible.value).thenReturn(true)
-        `when`(repository.expansionAmount.value).thenReturn(EXPANSION_VISIBLE)
+        `when`(repository.panelExpansionAmount.value).thenReturn(EXPANSION_VISIBLE)
         `when`(repository.startingDisappearAnimation.value).thenReturn(null)
         assertThat(bouncerInteractor.isFullyShowing()).isTrue()
         `when`(repository.isVisible.value).thenReturn(false)
@@ -255,7 +255,7 @@ class BouncerInteractorTest : SysuiTestCase() {
         assertThat(bouncerInteractor.isInTransit()).isTrue()
         `when`(repository.showingSoon.value).thenReturn(false)
         assertThat(bouncerInteractor.isInTransit()).isFalse()
-        `when`(repository.expansionAmount.value).thenReturn(0.5f)
+        `when`(repository.panelExpansionAmount.value).thenReturn(0.5f)
         assertThat(bouncerInteractor.isInTransit()).isTrue()
     }
 
@@ -269,10 +269,9 @@ class BouncerInteractorTest : SysuiTestCase() {
 
     @Test
     fun testWillDismissWithAction() {
-        `when`(repository.onDismissAction.value?.onDismissAction)
-            .thenReturn(mock(ActivityStarter.OnDismissAction::class.java))
+        `when`(bouncerViewDelegate.willDismissWithActions()).thenReturn(true)
         assertThat(bouncerInteractor.willDismissWithAction()).isTrue()
-        `when`(repository.onDismissAction.value?.onDismissAction).thenReturn(null)
+        `when`(bouncerViewDelegate.willDismissWithActions()).thenReturn(false)
         assertThat(bouncerInteractor.willDismissWithAction()).isFalse()
     }
 }

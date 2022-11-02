@@ -29,6 +29,7 @@ import com.android.keyguard.dagger.KeyguardBouncerComponent
 import com.android.systemui.keyguard.data.BouncerViewDelegate
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBouncerViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.phone.KeyguardBouncer.EXPANSION_VISIBLE
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.collect
@@ -75,6 +76,17 @@ object KeyguardBouncerViewBinder {
                     hostViewController.showPrimarySecurityScreen()
                     hostViewController.onResume()
                 }
+
+                override fun setDismissAction(
+                    onDismissAction: ActivityStarter.OnDismissAction?,
+                    cancelAction: Runnable?
+                ) {
+                    hostViewController.setOnDismissAction(onDismissAction, cancelAction)
+                }
+
+                override fun willDismissWithActions(): Boolean {
+                    return hostViewController.hasDismissActions()
+                }
             }
         view.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -119,15 +131,6 @@ object KeyguardBouncerViewBinder {
 
                     launch {
                         viewModel.startingToHide.collect { hostViewController.onStartingToHide() }
-                    }
-
-                    launch {
-                        viewModel.setDismissAction.collect {
-                            hostViewController.setOnDismissAction(
-                                it.onDismissAction,
-                                it.cancelAction
-                            )
-                        }
                     }
 
                     launch {

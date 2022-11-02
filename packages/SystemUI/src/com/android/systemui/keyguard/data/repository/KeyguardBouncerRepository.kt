@@ -21,10 +21,9 @@ import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.keyguard.ViewMediatorCallback
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.keyguard.shared.model.BouncerCallbackActionsModel
 import com.android.systemui.keyguard.shared.model.BouncerShowMessageModel
 import com.android.systemui.keyguard.shared.model.KeyguardBouncerModel
-import com.android.systemui.statusbar.phone.KeyguardBouncer.EXPANSION_HIDDEN
+import com.android.systemui.statusbar.phone.KeyguardBouncer
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -41,9 +40,15 @@ constructor(
     /** Determines if we want to instantaneously show the bouncer instead of translating. */
     private val _isScrimmed = MutableStateFlow(false)
     val isScrimmed = _isScrimmed.asStateFlow()
-    /** Set amount of how much of the bouncer is showing on the screen */
-    private val _expansionAmount = MutableStateFlow(EXPANSION_HIDDEN)
-    val expansionAmount = _expansionAmount.asStateFlow()
+    /**
+     * Set how much of the panel is showing on the screen.
+     * ```
+     *      0f = panel fully hidden = bouncer fully showing
+     *      1f = panel fully showing = bouncer fully hidden
+     * ```
+     */
+    private val _panelExpansionAmount = MutableStateFlow(KeyguardBouncer.EXPANSION_HIDDEN)
+    val panelExpansionAmount = _panelExpansionAmount.asStateFlow()
     private val _isVisible = MutableStateFlow(false)
     val isVisible = _isVisible.asStateFlow()
     private val _show = MutableStateFlow<KeyguardBouncerModel?>(null)
@@ -54,8 +59,6 @@ constructor(
     val hide = _hide.asStateFlow()
     private val _startingToHide = MutableStateFlow(false)
     val startingToHide = _startingToHide.asStateFlow()
-    private val _onDismissAction = MutableStateFlow<BouncerCallbackActionsModel?>(null)
-    val onDismissAction = _onDismissAction.asStateFlow()
     private val _disappearAnimation = MutableStateFlow<Runnable?>(null)
     val startingDisappearAnimation = _disappearAnimation.asStateFlow()
     private val _keyguardPosition = MutableStateFlow(0f)
@@ -96,8 +99,8 @@ constructor(
         _isScrimmed.value = isScrimmed
     }
 
-    fun setExpansion(expansion: Float) {
-        _expansionAmount.value = expansion
+    fun setPanelExpansion(panelExpansion: Float) {
+        _panelExpansionAmount.value = panelExpansion
     }
 
     fun setVisible(isVisible: Boolean) {
@@ -118,10 +121,6 @@ constructor(
 
     fun setStartingToHide(startingToHide: Boolean) {
         _startingToHide.value = startingToHide
-    }
-
-    fun setOnDismissAction(bouncerCallbackActionsModel: BouncerCallbackActionsModel?) {
-        _onDismissAction.value = bouncerCallbackActionsModel
     }
 
     fun setStartDisappearAnimation(runnable: Runnable?) {

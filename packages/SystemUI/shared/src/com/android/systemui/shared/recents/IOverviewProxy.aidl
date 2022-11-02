@@ -20,6 +20,7 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Bundle;
 import android.view.MotionEvent;
+import android.view.SurfaceControl;
 import com.android.systemui.shared.recents.ISystemUiProxy;
 
 oneway interface IOverviewProxy {
@@ -44,12 +45,6 @@ oneway interface IOverviewProxy {
     void onOverviewHidden(boolean triggeredFromAltTab, boolean triggeredFromHomeKey) = 8;
 
     /**
-     * Sent when there was an action on one of the onboarding tips view.
-     * TODO: Move this implementation to SystemUI completely
-     */
-    void onTip(int actionType, int viewType) = 10;
-
-    /**
      * Sent when device assistant changes its default assistant whether it is available or not.
      */
     void onAssistantAvailable(boolean available) = 13;
@@ -58,13 +53,6 @@ oneway interface IOverviewProxy {
      * Sent when the assistant changes how visible it is to the user.
      */
     void onAssistantVisibilityChanged(float visibility) = 14;
-
-    /**
-     * Sent when back is triggered.
-     * TODO: Move this implementation to SystemUI completely
-     */
-    void onBackAction(boolean completed, int downX, int downY, boolean isButton,
-            boolean gestureSwipeLeft) = 15;
 
     /**
      * Sent when some system ui state changes.
@@ -115,4 +103,9 @@ oneway interface IOverviewProxy {
       * Sent when split keyboard shortcut is triggered to enter stage split.
       */
      void enterStageSplitFromRunningApp(boolean leftOrTop) = 25;
+
+     /**
+      * Sent when the surface for navigation bar is created or changed
+      */
+     void onNavigationBarSurface(in SurfaceControl surface) = 26;
 }

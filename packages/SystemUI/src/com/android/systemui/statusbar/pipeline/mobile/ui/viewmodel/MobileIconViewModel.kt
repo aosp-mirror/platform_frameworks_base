@@ -24,10 +24,12 @@ import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIc
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractor
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger.Companion.logOutputChange
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.mapLatest
 
 /**
  * View model for the state of a single mobile icon. Each [MobileIconViewModel] will keep watch over
@@ -39,29 +41,38 @@ import kotlinx.coroutines.flow.flowOf
  *
  * TODO: figure out where carrier merged and VCN models go (probably here?)
  */
+@Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
+@OptIn(ExperimentalCoroutinesApi::class)
 class MobileIconViewModel
 constructor(
     val subscriptionId: Int,
     iconInteractor: MobileIconInteractor,
     logger: ConnectivityPipelineLogger,
 ) {
+    /** Whether or not to show the error state of [SignalDrawable] */
+    private val showExclamationMark: Flow<Boolean> =
+        iconInteractor.isDefaultDataEnabled.mapLatest { !it }
+
     /** An int consumable by [SignalDrawable] for display */
-    var iconId: Flow<Int> =
-        combine(iconInteractor.level, iconInteractor.numberOfLevels, iconInteractor.cutOut) {
+    val iconId: Flow<Int> =
+        combine(iconInteractor.level, iconInteractor.numberOfLevels, showExclamationMark) {
                 level,
                 numberOfLevels,
-                cutOut ->
-                SignalDrawable.getState(level, numberOfLevels, cutOut)
+                showExclamationMark ->
+                SignalDrawable.getState(level, numberOfLevels, showExclamationMark)
             }
             .distinctUntilChanged()
             .logOutputChange(logger, "iconId($subscriptionId)")
 
     /** The RAT icon (LTE, 3G, 5G, etc) to be displayed. Null if we shouldn't show anything */
-    var networkTypeIcon: Flow<Icon?> =
-        combine(iconInteractor.networkTypeIconGroup, iconInteractor.isDataEnabled) {
-            networkTypeIconGroup,
-            isDataEnabled ->
-            if (!isDataEnabled) {
+    val networkTypeIcon: Flow<Icon?> =
+        combine(
+            iconInteractor.networkTypeIconGroup,
+            iconInteractor.isDataConnected,
+            iconInteractor.isDataEnabled,
+            iconInteractor.isDefaultConnectionFailed,
+        ) { networkTypeIconGroup, dataConnected, dataEnabled, failedConnection ->
+            if (!dataConnected || !dataEnabled || failedConnection) {
                 null
             } else {
                 val desc =
@@ -72,5 +83,5 @@ constructor(
             }
         }
 
-    var tint: Flow<Int> = flowOf(Color.CYAN)
+    val tint: Flow<Int> = flowOf(Color.CYAN)
 }

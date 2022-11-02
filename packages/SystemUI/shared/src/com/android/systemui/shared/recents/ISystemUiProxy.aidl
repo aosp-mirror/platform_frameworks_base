@@ -106,9 +106,6 @@ interface ISystemUiProxy {
     /** Sets home rotation enabled. */
     void setHomeRotationEnabled(boolean enabled) = 45;
 
-    /** Notifies that a swipe-up gesture has started */
-    oneway void notifySwipeUpGestureStarted() = 46;
-
     /** Notifies when taskbar status updated */
     oneway void notifyTaskbarStatus(boolean visible, boolean stashed) = 47;
 
