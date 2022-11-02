@@ -35,18 +35,22 @@ import java.util.Objects;
 public final class CreateCredentialResponse implements Parcelable {
     private final @Nullable CharSequence mHeader;
     private final @NonNull List<SaveEntry> mSaveEntries;
+    private final @Nullable Action mRemoteSaveEntry;
+    //TODO : Add actions if needed
 
     private CreateCredentialResponse(@NonNull Parcel in) {
         mHeader = in.readCharSequence();
         List<SaveEntry> saveEntries = new ArrayList<>();
         in.readTypedList(saveEntries, SaveEntry.CREATOR);
         mSaveEntries = saveEntries;
+        mRemoteSaveEntry = in.readTypedObject(Action.CREATOR);
     }
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeCharSequence(mHeader);
         dest.writeTypedList(mSaveEntries);
+        dest.writeTypedObject(mRemoteSaveEntry, flags);
     }
 
     @Override
@@ -69,11 +73,13 @@ public final class CreateCredentialResponse implements Parcelable {
 
     /* package-private */ CreateCredentialResponse(
             @Nullable CharSequence header,
-            @NonNull List<SaveEntry> saveEntries) {
+            @NonNull List<SaveEntry> saveEntries,
+            @Nullable Action remoteSaveEntry) {
         this.mHeader = header;
         this.mSaveEntries = saveEntries;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mSaveEntries);
+        this.mRemoteSaveEntry = remoteSaveEntry;
     }
 
     /** Returns the header to be displayed on the UI. */
@@ -86,6 +92,11 @@ public final class CreateCredentialResponse implements Parcelable {
         return mSaveEntries;
     }
 
+    /** Returns the remote save entry to be displayed on the UI. */
+    public @NonNull Action getRemoteSaveEntry() {
+        return mRemoteSaveEntry;
+    }
+
     /**
      * A builder for {@link CreateCredentialResponse}
      */
@@ -94,6 +105,7 @@ public final class CreateCredentialResponse implements Parcelable {
 
         private @Nullable CharSequence mHeader;
         private @NonNull List<SaveEntry> mSaveEntries = new ArrayList<>();
+        private @Nullable Action mRemoteSaveEntry;
 
         /** Sets the header to be displayed on the UI. */
         public @NonNull Builder setHeader(@Nullable CharSequence header) {
@@ -126,6 +138,14 @@ public final class CreateCredentialResponse implements Parcelable {
         }
 
         /**
+         * Sets a remote save entry to be shown on the UI.
+         */
+        public @NonNull Builder setRemoteSaveEntry(@Nullable Action remoteSaveEntry) {
+            mRemoteSaveEntry = remoteSaveEntry;
+            return this;
+        }
+
+        /**
          * Builds the instance.
          *
          * @throws IllegalArgumentException If {@code saveEntries} is empty.
@@ -135,7 +155,8 @@ public final class CreateCredentialResponse implements Parcelable {
                     + "not be empty");
             return new CreateCredentialResponse(
                     mHeader,
-                    mSaveEntries);
+                    mSaveEntries,
+                    mRemoteSaveEntry);
         }
     }
 }
