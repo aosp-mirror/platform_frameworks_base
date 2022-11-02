@@ -25,6 +25,7 @@ import android.view.View;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.notification.SourceType;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
 
@@ -150,5 +151,38 @@ public class NotificationChildrenContainerTest extends SysuiTestCase {
         mChildrenContainer.recreateNotificationHeader(null, false);
         Assert.assertNotNull("Children container must have a header after recreation",
                 mChildrenContainer.getCurrentHeaderView());
+    }
+
+    @Test
+    public void addNotification_shouldResetOnScrollRoundness() throws Exception {
+        ExpandableNotificationRow row = mNotificationTestHelper.createRowWithRoundness(
+                /* topRoundness = */ 1f,
+                /* bottomRoundness = */ 1f,
+                /* sourceType = */ SourceType.OnScroll);
+
+        mChildrenContainer.addNotification(row, 0);
+
+        Assert.assertEquals(0f, row.getTopRoundness(), /* delta = */ 0f);
+        Assert.assertEquals(0f, row.getBottomRoundness(), /* delta = */ 0f);
+    }
+
+    @Test
+    public void addNotification_shouldNotResetOtherRoundness() throws Exception {
+        ExpandableNotificationRow row1 = mNotificationTestHelper.createRowWithRoundness(
+                /* topRoundness = */ 1f,
+                /* bottomRoundness = */ 1f,
+                /* sourceType = */ SourceType.DefaultValue);
+        ExpandableNotificationRow row2 = mNotificationTestHelper.createRowWithRoundness(
+                /* topRoundness = */ 1f,
+                /* bottomRoundness = */ 1f,
+                /* sourceType = */ SourceType.OnDismissAnimation);
+
+        mChildrenContainer.addNotification(row1, 0);
+        mChildrenContainer.addNotification(row2, 0);
+
+        Assert.assertEquals(1f, row1.getTopRoundness(), /* delta = */ 0f);
+        Assert.assertEquals(1f, row1.getBottomRoundness(), /* delta = */ 0f);
+        Assert.assertEquals(1f, row2.getTopRoundness(), /* delta = */ 0f);
+        Assert.assertEquals(1f, row2.getBottomRoundness(), /* delta = */ 0f);
     }
 }

@@ -496,9 +496,6 @@ public class NotificationShelf extends ActivatableNotificationView implements
             return;
         }
 
-        final float smallCornerRadius =
-                getResources().getDimension(R.dimen.notification_corner_radius_small)
-                /  getResources().getDimension(R.dimen.notification_corner_radius);
         final float viewEnd = viewStart + anv.getActualHeight();
         final float cornerAnimationDistance = mCornerAnimationDistance
                 * mAmbientState.getExpansionFraction();
@@ -509,7 +506,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
             final float changeFraction = MathUtils.saturate(
                     (viewEnd - cornerAnimationTop) / cornerAnimationDistance);
             anv.requestBottomRoundness(
-                    anv.isLastInSection() ? 1f : changeFraction,
+                    /* value = */ anv.isLastInSection() ? 1f : changeFraction,
                     /* animate = */ false,
                     SourceType.OnScroll);
 
@@ -517,7 +514,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
             // Fast scroll skips frames and leaves corners with unfinished rounding.
             // Reset top and bottom corners outside of animation bounds.
             anv.requestBottomRoundness(
-                    anv.isLastInSection() ? 1f : smallCornerRadius,
+                    /* value = */ anv.isLastInSection() ? 1f : 0f,
                     /* animate = */ false,
                     SourceType.OnScroll);
         }
@@ -527,16 +524,16 @@ public class NotificationShelf extends ActivatableNotificationView implements
             final float changeFraction = MathUtils.saturate(
                     (viewStart - cornerAnimationTop) / cornerAnimationDistance);
             anv.requestTopRoundness(
-                    anv.isFirstInSection() ? 1f : changeFraction,
-                    false,
+                    /* value = */ anv.isFirstInSection() ? 1f : changeFraction,
+                    /* animate = */ false,
                     SourceType.OnScroll);
 
         } else if (viewStart < cornerAnimationTop) {
             // Fast scroll skips frames and leaves corners with unfinished rounding.
             // Reset top and bottom corners outside of animation bounds.
             anv.requestTopRoundness(
-                    anv.isFirstInSection() ? 1f : smallCornerRadius,
-                    false,
+                    /* value = */ anv.isFirstInSection() ? 1f : 0f,
+                    /* animate = */ false,
                     SourceType.OnScroll);
         }
     }
@@ -974,6 +971,16 @@ public class NotificationShelf extends ActivatableNotificationView implements
 
     public void setIndexOfFirstViewInShelf(ExpandableView firstViewInShelf) {
         mIndexOfFirstViewInShelf = mHostLayoutController.indexOfChild(firstViewInShelf);
+    }
+
+    /**
+     * This method resets the OnScroll roundness of a view to 0f
+     *
+     * Note: This should be the only class that handles roundness {@code SourceType.OnScroll}
+     */
+    public static void resetOnScrollRoundness(ExpandableView expandableView) {
+        expandableView.requestTopRoundness(0f, false, SourceType.OnScroll);
+        expandableView.requestBottomRoundness(0f, false, SourceType.OnScroll);
     }
 
     public class ShelfState extends ExpandableViewState {
