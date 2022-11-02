@@ -128,6 +128,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 /**
@@ -3619,6 +3620,32 @@ public final class InputMethodManager {
             publicAlternatives = "Use {@link android.view.WindowInsets} instead")
     public int getInputMethodWindowVisibleHeight() {
         return IInputMethodManagerGlobalInvoker.getInputMethodWindowVisibleHeight(mClient);
+    }
+
+    /**
+     * {@code true} means that
+     * {@link RemoteInputConnectionImpl#requestCursorUpdatesInternal(int, int, int)} returns
+     * {@code false} when the IME client and the IME run in different displays.
+     */
+    final AtomicBoolean mRequestCursorUpdateDisplayIdCheck = new AtomicBoolean(true);
+
+    /**
+     * Controls the display ID mismatch validation in
+     * {@link RemoteInputConnectionImpl#requestCursorUpdatesInternal(int, int, int)}.
+     *
+     * <p>{@link #updateCursorAnchorInfo(View, CursorAnchorInfo)} is not guaranteed to work
+     * correctly when the IME client and the IME run in different displays.  This is why
+     * {@link RemoteInputConnectionImpl#requestCursorUpdatesInternal(int, int, int)} returns
+     * {@code false} by default when the display ID does not match. This method allows special apps
+     * to override this behavior when they are sure that it should work.</p>
+     *
+     * <p>By default the validation is enabled.</p>
+     *
+     * @param enabled {@code false} to disable the display ID validation.
+     * @hide
+     */
+    public void setRequestCursorUpdateDisplayIdCheck(boolean enabled) {
+        mRequestCursorUpdateDisplayIdCheck.set(enabled);
     }
 
     /**
