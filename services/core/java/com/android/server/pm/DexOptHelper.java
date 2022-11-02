@@ -124,16 +124,17 @@ public final class DexOptHelper {
      * which are (in order) {@code numberOfPackagesOptimized}, {@code numberOfPackagesSkipped}
      * and {@code numberOfPackagesFailed}.
      */
-    public int[] performDexOptUpgrade(List<AndroidPackage> pkgs, boolean showDialog,
+    public int[] performDexOptUpgrade(List<PackageStateInternal> packageStates, boolean showDialog,
             final int compilationReason, boolean bootComplete) {
 
         int numberOfPackagesVisited = 0;
         int numberOfPackagesOptimized = 0;
         int numberOfPackagesSkipped = 0;
         int numberOfPackagesFailed = 0;
-        final int numberOfPackagesToDexopt = pkgs.size();
+        final int numberOfPackagesToDexopt = packageStates.size();
 
-        for (AndroidPackage pkg : pkgs) {
+        for (var packageState : packageStates) {
+            var pkg = packageState.getAndroidPackage();
             numberOfPackagesVisited++;
 
             boolean useProfileForDexopt = false;
@@ -234,7 +235,7 @@ public final class DexOptHelper {
             }
 
             if (SystemProperties.getBoolean(mPm.PRECOMPILE_LAYOUTS, false)) {
-                mPm.mArtManagerService.compileLayouts(pkg);
+                mPm.mArtManagerService.compileLayouts(packageState, pkg);
             }
 
             int dexoptFlags = bootComplete ? DexoptOptions.DEXOPT_BOOT_COMPLETE : 0;
@@ -369,13 +370,8 @@ public final class DexOptHelper {
         List<PackageStateInternal> pkgSettings =
                 getPackagesForDexopt(snapshot.getPackageStates().values(), mPm);
 
-        List<AndroidPackage> pkgs = new ArrayList<>(pkgSettings.size());
-        for (int index = 0; index < pkgSettings.size(); index++) {
-            pkgs.add(pkgSettings.get(index).getPkg());
-        }
-
         final long startTime = System.nanoTime();
-        final int[] stats = performDexOptUpgrade(pkgs, mPm.isPreNUpgrade() /* showDialog */,
+        final int[] stats = performDexOptUpgrade(pkgSettings, mPm.isPreNUpgrade() /* showDialog */,
                 causeFirstBoot ? REASON_FIRST_BOOT : REASON_BOOT_AFTER_OTA,
                 false /* bootComplete */);
 

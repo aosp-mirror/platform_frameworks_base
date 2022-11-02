@@ -312,4 +312,60 @@ public class AndroidPackageUtils {
         info.versionCode = ((ParsingPackageHidden) pkg).getVersionCode();
         info.versionCodeMajor = ((ParsingPackageHidden) pkg).getVersionCodeMajor();
     }
+
+    /**
+     * @deprecated Use {@link PackageState#isSystem}
+     */
+    @Deprecated
+    public static boolean isSystem(@NonNull AndroidPackage pkg) {
+        return ((AndroidPackageHidden) pkg).isSystem();
+    }
+
+    /**
+     * @deprecated Use {@link PackageState#isSystemExt}
+     */
+    @Deprecated
+    public static boolean isSystemExt(@NonNull AndroidPackage pkg) {
+        return ((AndroidPackageHidden) pkg).isSystemExt();
+    }
+
+    /**
+     * @deprecated Use {@link PackageState#isPrivileged}
+     */
+    @Deprecated
+    public static boolean isPrivileged(@NonNull AndroidPackage pkg) {
+        return ((AndroidPackageHidden) pkg).isPrivileged();
+    }
+
+    /**
+     * @deprecated Use {@link PackageState#isOem}
+     */
+    @Deprecated
+    public static boolean isOem(@NonNull AndroidPackage pkg) {
+        return ((AndroidPackageHidden) pkg).isOem();
+    }
+
+    /**
+     * @deprecated Use {@link PackageState#isVendor}
+     */
+    @Deprecated
+    public static boolean isVendor(@NonNull AndroidPackage pkg) {
+        return ((AndroidPackageHidden) pkg).isVendor();
+    }
+
+    /**
+     * @deprecated Use {@link PackageState#isProduct}
+     */
+    @Deprecated
+    public static boolean isProduct(@NonNull AndroidPackage pkg) {
+        return ((AndroidPackageHidden) pkg).isProduct();
+    }
+
+    /**
+     * @deprecated Use {@link PackageState#isOdm}
+     */
+    @Deprecated
+    public static boolean isOdm(@NonNull AndroidPackage pkg) {
+        return ((AndroidPackageHidden) pkg).isOdm();
+    }
 }

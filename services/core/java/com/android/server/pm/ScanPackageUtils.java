@@ -265,7 +265,7 @@ final class ScanPackageUtils {
             pkgSetting.getPkgState().setUpdatedSystemApp(true);
         }
 
-        pkgSetting.getTransientState().setSeInfo(SELinuxMMAC.getSeInfo(parsedPackage,
+        pkgSetting.getTransientState().setSeInfo(SELinuxMMAC.getSeInfo(pkgSetting, parsedPackage,
                 sharedUserSetting, injector.getCompatibility()));
 
         if (parsedPackage.isSystem()) {
@@ -428,8 +428,8 @@ final class ScanPackageUtils {
         pkgSetting.setLastModifiedTime(scanFileTime);
         // TODO(b/135203078): Remove, move to constructor
         pkgSetting.setPkg(parsedPackage)
-                .setPkgFlags(PackageInfoUtils.appInfoFlags(parsedPackage, pkgSetting),
-                        PackageInfoUtils.appInfoPrivateFlags(parsedPackage, pkgSetting));
+                .setFlags(PackageInfoUtils.appInfoFlags(parsedPackage, pkgSetting))
+                .setPrivateFlags(PackageInfoUtils.appInfoPrivateFlags(parsedPackage, pkgSetting));
         if (parsedPackage.getLongVersionCode() != pkgSetting.getVersionCode()) {
             pkgSetting.setLongVersionCode(parsedPackage.getLongVersionCode());
         }

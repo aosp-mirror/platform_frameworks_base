@@ -1057,7 +1057,8 @@ public final class Settings implements Watchable, Snappable {
                     // Update new package state.
                     .setLastModifiedTime(codePath.lastModified())
                     .setDomainSetId(domainSetId);
-            pkgSetting.setPkgFlags(pkgFlags, pkgPrivateFlags);
+            pkgSetting.setFlags(pkgFlags)
+                    .setPrivateFlags(pkgPrivateFlags);
         } else {
             pkgSetting = new PackageSetting(pkgName, realPkgName, codePath,
                     legacyNativeLibraryPath, primaryCpuAbi, secondaryCpuAbi,
@@ -1251,7 +1252,7 @@ public final class Settings implements Watchable, Snappable {
         newPkgFlags &= ~ApplicationInfo.FLAG_SYSTEM;
         newPkgFlags |= pkgFlags & ApplicationInfo.FLAG_SYSTEM;
         // Only set pkgFlags.
-        pkgSetting.setPkgFlags(newPkgFlags, pkgSetting.getPrivateFlags());
+        pkgSetting.setFlags(newPkgFlags);
 
         boolean wasRequiredForSystemUser = (pkgSetting.getPrivateFlags()
                 & ApplicationInfo.PRIVATE_FLAG_REQUIRED_FOR_SYSTEM_USER) != 0;

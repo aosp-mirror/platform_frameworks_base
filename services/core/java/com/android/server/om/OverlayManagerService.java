@@ -90,7 +90,7 @@ import com.android.server.SystemConfig;
 import com.android.server.SystemService;
 import com.android.server.pm.KnownPackages;
 import com.android.server.pm.UserManagerService;
-import com.android.server.pm.pkg.AndroidPackage;
+import com.android.server.pm.pkg.PackageState;
 
 import libcore.util.EmptyArray;
 
@@ -424,9 +424,9 @@ public final class OverlayManagerService extends SystemService {
                 traceBegin(TRACE_TAG_RRO, "OMS#onPackageAdded " + packageName);
                 for (final int userId : userIds) {
                     synchronized (mLock) {
-                        final AndroidPackage pkg = mPackageManager.onPackageAdded(
-                                packageName, userId);
-                        if (pkg != null && !mPackageManager.isInstantApp(packageName, userId)) {
+                        var packageState = mPackageManager.onPackageAdded(packageName, userId);
+                        if (packageState != null && !mPackageManager.isInstantApp(packageName,
+                                userId)) {
                             try {
                                 updateTargetPackagesLocked(
                                         mImpl.onPackageAdded(packageName, userId));
@@ -447,9 +447,9 @@ public final class OverlayManagerService extends SystemService {
                 traceBegin(TRACE_TAG_RRO, "OMS#onPackageChanged " + packageName);
                 for (int userId : userIds) {
                     synchronized (mLock) {
-                        final AndroidPackage pkg = mPackageManager.onPackageUpdated(
-                                packageName, userId);
-                        if (pkg != null && !mPackageManager.isInstantApp(packageName, userId)) {
+                        var packageState = mPackageManager.onPackageUpdated(packageName, userId);
+                        if (packageState != null && !mPackageManager.isInstantApp(packageName,
+                                userId)) {
                             try {
                                 updateTargetPackagesLocked(
                                         mImpl.onPackageChanged(packageName, userId));
@@ -470,9 +470,9 @@ public final class OverlayManagerService extends SystemService {
                 traceBegin(TRACE_TAG_RRO, "OMS#onPackageReplacing " + packageName);
                 for (int userId : userIds) {
                     synchronized (mLock) {
-                        final AndroidPackage pkg = mPackageManager.onPackageUpdated(
-                                packageName, userId);
-                        if (pkg != null && !mPackageManager.isInstantApp(packageName, userId)) {
+                        var packageState = mPackageManager.onPackageUpdated(packageName, userId);
+                        if (packageState != null && !mPackageManager.isInstantApp(packageName,
+                                userId)) {
                             try {
                                 updateTargetPackagesLocked(mImpl.onPackageReplacing(packageName,
                                         systemUpdateUninstall, userId));
@@ -493,9 +493,9 @@ public final class OverlayManagerService extends SystemService {
                 traceBegin(TRACE_TAG_RRO, "OMS#onPackageReplaced " + packageName);
                 for (int userId : userIds) {
                     synchronized (mLock) {
-                        final AndroidPackage pkg = mPackageManager.onPackageUpdated(
-                                packageName, userId);
-                        if (pkg != null && !mPackageManager.isInstantApp(packageName, userId)) {
+                        var packageState = mPackageManager.onPackageUpdated(packageName, userId);
+                        if (packageState != null && !mPackageManager.isInstantApp(packageName,
+                                userId)) {
                             try {
                                 updateTargetPackagesLocked(
                                         mImpl.onPackageReplaced(packageName, userId));
@@ -1120,11 +1120,11 @@ public final class OverlayManagerService extends SystemService {
     };
 
     private static final class PackageManagerHelperImpl implements PackageManagerHelper {
-        private static class AndroidPackageUsers {
-            private AndroidPackage mPackage;
+        private static class PackageStateUsers {
+            private PackageState mPackageState;
             private final Set<Integer> mInstalledUsers = new ArraySet<>();
-            private AndroidPackageUsers(@NonNull AndroidPackage pkg) {
-                this.mPackage = pkg;
+            private PackageStateUsers(@NonNull PackageState packageState) {
+                this.mPackageState = packageState;
             }
         }
         private final Context mContext;
@@ -1136,7 +1136,7 @@ public final class OverlayManagerService extends SystemService {
         // intent, querying the PackageManagerService for the actual current
         // state may lead to contradictions within OMS. Better then to lag
         // behind until all pending intents have been processed.
-        private final ArrayMap<String, AndroidPackageUsers> mCache = new ArrayMap<>();
+        private final ArrayMap<String, PackageStateUsers> mCache = new ArrayMap<>();
         private final Set<Integer> mInitializedUsers = new ArraySet<>();
 
         PackageManagerHelperImpl(Context context) {
@@ -1152,18 +1152,22 @@ public final class OverlayManagerService extends SystemService {
          * @return a map of package name to all packages installed in the user
          */
         @NonNull
-        public ArrayMap<String, AndroidPackage> initializeForUser(final int userId) {
+        public ArrayMap<String, PackageState> initializeForUser(final int userId) {
             if (!mInitializedUsers.contains(userId)) {
                 mInitializedUsers.add(userId);
-                mPackageManagerInternal.forEachInstalledPackage(
-                        (pkg) -> addPackageUser(pkg, userId), userId);
+                mPackageManagerInternal.forEachPackageState((packageState -> {
+                    if (packageState.getPkg() != null
+                            && packageState.getUserStateOrDefault(userId).isInstalled()) {
+                        addPackageUser(packageState, userId);
+                    }
+                }));
             }
 
-            final ArrayMap<String, AndroidPackage> userPackages = new ArrayMap<>();
+            final ArrayMap<String, PackageState> userPackages = new ArrayMap<>();
             for (int i = 0, n = mCache.size(); i < n; i++) {
-                final AndroidPackageUsers pkg = mCache.valueAt(i);
+                final PackageStateUsers pkg = mCache.valueAt(i);
                 if (pkg.mInstalledUsers.contains(userId)) {
-                    userPackages.put(mCache.keyAt(i), pkg.mPackage);
+                    userPackages.put(mCache.keyAt(i), pkg.mPackageState);
                 }
             }
             return userPackages;
@@ -1171,11 +1175,11 @@ public final class OverlayManagerService extends SystemService {
 
         @Override
         @Nullable
-        public AndroidPackage getPackageForUser(@NonNull final String packageName,
+        public PackageState getPackageStateForUser(@NonNull final String packageName,
                 final int userId) {
-            final AndroidPackageUsers pkg = mCache.get(packageName);
+            final PackageStateUsers pkg = mCache.get(packageName);
             if (pkg != null && pkg.mInstalledUsers.contains(userId)) {
-                return pkg.mPackage;
+                return pkg.mPackageState;
             }
             try {
                 if (!mPackageManager.isPackageAvailable(packageName, userId)) {
@@ -1190,9 +1194,9 @@ public final class OverlayManagerService extends SystemService {
         }
 
         @NonNull
-        private AndroidPackage addPackageUser(@NonNull final String packageName,
+        private PackageState addPackageUser(@NonNull final String packageName,
                 final int user) {
-            final AndroidPackage pkg = mPackageManagerInternal.getPackage(packageName);
+            final PackageState pkg = mPackageManagerInternal.getPackageStateInternal(packageName);
             if (pkg == null) {
                 Slog.w(TAG, "Android package for '" + packageName + "' could not be found;"
                         + " continuing as if package was never added", new Throwable());
@@ -1202,23 +1206,23 @@ public final class OverlayManagerService extends SystemService {
         }
 
         @NonNull
-        private AndroidPackage addPackageUser(@NonNull final AndroidPackage pkg,
+        private PackageState addPackageUser(@NonNull final PackageState pkg,
                 final int user) {
-            AndroidPackageUsers pkgUsers = mCache.get(pkg.getPackageName());
+            PackageStateUsers pkgUsers = mCache.get(pkg.getPackageName());
             if (pkgUsers == null) {
-                pkgUsers = new AndroidPackageUsers(pkg);
+                pkgUsers = new PackageStateUsers(pkg);
                 mCache.put(pkg.getPackageName(), pkgUsers);
             } else {
-                pkgUsers.mPackage = pkg;
+                pkgUsers.mPackageState = pkg;
             }
             pkgUsers.mInstalledUsers.add(user);
-            return pkgUsers.mPackage;
+            return pkgUsers.mPackageState;
         }
 
 
         @NonNull
         private void removePackageUser(@NonNull final String packageName, final int user) {
-            final AndroidPackageUsers pkgUsers = mCache.get(packageName);
+            final PackageStateUsers pkgUsers = mCache.get(packageName);
             if (pkgUsers == null) {
                 return;
             }
@@ -1226,20 +1230,20 @@ public final class OverlayManagerService extends SystemService {
         }
 
         @NonNull
-        private void removePackageUser(@NonNull final AndroidPackageUsers pkg, final int user) {
+        private void removePackageUser(@NonNull final PackageStateUsers pkg, final int user) {
             pkg.mInstalledUsers.remove(user);
             if (pkg.mInstalledUsers.isEmpty()) {
-                mCache.remove(pkg.mPackage.getPackageName());
+                mCache.remove(pkg.mPackageState.getPackageName());
             }
         }
 
         @Nullable
-        public AndroidPackage onPackageAdded(@NonNull final String packageName, final int userId) {
+        public PackageState onPackageAdded(@NonNull final String packageName, final int userId) {
             return addPackageUser(packageName, userId);
         }
 
         @Nullable
-        public AndroidPackage onPackageUpdated(@NonNull final String packageName,
+        public PackageState onPackageUpdated(@NonNull final String packageName,
                 final int userId) {
             return addPackageUser(packageName, userId);
         }
@@ -1286,14 +1290,15 @@ public final class OverlayManagerService extends SystemService {
         public OverlayableInfo getOverlayableForTarget(@NonNull String packageName,
                 @NonNull String targetOverlayableName, int userId)
                 throws IOException {
-            final AndroidPackage packageInfo = getPackageForUser(packageName, userId);
-            if (packageInfo == null) {
+            var packageState = getPackageStateForUser(packageName, userId);
+            var pkg = packageState == null ? null : packageState.getAndroidPackage();
+            if (pkg == null) {
                 throw new IOException("Unable to get target package");
             }
 
             ApkAssets apkAssets = null;
             try {
-                apkAssets = ApkAssets.loadFromPath(packageInfo.getBaseApkPath());
+                apkAssets = ApkAssets.loadFromPath(pkg.getSplits().get(0).getPath());
                 return apkAssets.getOverlayableInfo(targetOverlayableName);
             } finally {
                 if (apkAssets != null) {
@@ -1308,14 +1313,15 @@ public final class OverlayManagerService extends SystemService {
         @Override
         public boolean doesTargetDefineOverlayable(String targetPackageName, int userId)
                 throws IOException {
-            AndroidPackage packageInfo = getPackageForUser(targetPackageName, userId);
-            if (packageInfo == null) {
+            var packageState = getPackageStateForUser(targetPackageName, userId);
+            var pkg = packageState == null ? null : packageState.getAndroidPackage();
+            if (pkg == null) {
                 throw new IOException("Unable to get target package");
             }
 
             ApkAssets apkAssets = null;
             try {
-                apkAssets = ApkAssets.loadFromPath(packageInfo.getBaseApkPath());
+                apkAssets = ApkAssets.loadFromPath(pkg.getSplits().get(0).getPath());
                 return apkAssets.definesOverlayable();
             } finally {
                 if (apkAssets != null) {
@@ -1367,8 +1373,8 @@ public final class OverlayManagerService extends SystemService {
 
             for (int i = 0, n = mCache.size(); i < n; i++) {
                 final String packageName = mCache.keyAt(i);
-                final AndroidPackageUsers pkg = mCache.valueAt(i);
-                pw.print(TAB1 + packageName + ": " + pkg.mPackage + " users=");
+                final PackageStateUsers pkg = mCache.valueAt(i);
+                pw.print(TAB1 + packageName + ": " + pkg.mPackageState + " users=");
                 pw.println(TextUtils.join(", ", pkg.mInstalledUsers));
             }
         }

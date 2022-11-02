@@ -57,6 +57,7 @@ import com.android.dx.mockito.inline.extended.StaticMockitoSession;
 import com.android.server.LocalServices;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
+import com.android.server.testutils.MockitoUtilsKt;
 
 import org.junit.After;
 import org.junit.Before;
@@ -137,11 +138,12 @@ public class AppOpsServiceTest {
         // Mock LocalServices.getService(PackageManagerInternal.class).getPackageStateInternal
         // and getPackage dependency needed by AppOpsService
         PackageManagerInternal mockPackageManagerInternal = mock(PackageManagerInternal.class);
-        PackageStateInternal mockMyPSInternal = mock(PackageStateInternal.class);
         AndroidPackage mockMyPkg = mock(AndroidPackage.class);
-        when(mockMyPkg.isPrivileged()).thenReturn(false);
-        when(mockMyPkg.getUid()).thenReturn(mMyUid);
         when(mockMyPkg.getAttributions()).thenReturn(Collections.emptyList());
+        PackageStateInternal mockMyPSInternal = mock(PackageStateInternal.class);
+        when(mockMyPSInternal.isPrivileged()).thenReturn(false);
+        when(mockMyPSInternal.getAppId()).thenReturn(mMyUid);
+        when(mockMyPSInternal.getAndroidPackage()).thenReturn(mockMyPkg);
 
         when(mockPackageManagerInternal.getPackageStateInternal(sMyPackageName))
                 .thenReturn(mockMyPSInternal);

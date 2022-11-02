@@ -784,14 +784,13 @@ class UidPermissionPolicy : SchemePolicy() {
         if (packageState.packageName == PLATFORM_PACKAGE_NAME) {
             return true
         }
-        val androidPackage = packageState.androidPackage!!
-        if (!androidPackage.isPrivileged) {
+        if (!packageState.isPrivileged) {
             return true
         }
         if (permission.packageName !in newState.systemState.privilegedPermissionAllowlistPackages) {
             return true
         }
-        val allowlistState = getPrivilegedPermissionAllowlistState(androidPackage, permission.name)
+        val allowlistState = getPrivilegedPermissionAllowlistState(packageState, permission.name)
         if (allowlistState != null) {
             return allowlistState
         }
@@ -808,23 +807,23 @@ class UidPermissionPolicy : SchemePolicy() {
      * allowlist, or `null` if it's not in the allowlist.
      */
     private fun MutateStateScope.getPrivilegedPermissionAllowlistState(
-        androidPackage: AndroidPackage,
+        packageState: PackageState,
         permissionName: String
     ): Boolean? {
         val permissionAllowlist = newState.systemState.permissionAllowlist
         // TODO(b/261913353): STOPSHIP: Add AndroidPackage.apexModuleName. The below is only for
         //  passing compilation but won't actually work.
         // val apexModuleName = androidPackage.apexModuleName
-        val apexModuleName = androidPackage.packageName
-        val packageName = androidPackage.packageName
+        val apexModuleName = packageState.packageName
+        val packageName = packageState.packageName
         return when {
-            androidPackage.isVendor -> permissionAllowlist.getVendorPrivilegedAppAllowlistState(
+            packageState.isVendor -> permissionAllowlist.getVendorPrivilegedAppAllowlistState(
                 packageName, permissionName
             )
-            androidPackage.isProduct -> permissionAllowlist.getProductPrivilegedAppAllowlistState(
+            packageState.isProduct -> permissionAllowlist.getProductPrivilegedAppAllowlistState(
                 packageName, permissionName
             )
-            androidPackage.isSystemExt ->
+            packageState.isSystemExt ->
                 permissionAllowlist.getSystemExtPrivilegedAppAllowlistState(
                     packageName, permissionName
                 )
@@ -898,13 +897,14 @@ class UidPermissionPolicy : SchemePolicy() {
             val shouldGrant = if (packageState.isUpdatedSystemApp) {
                 // For updated system applications, a privileged/oem permission
                 // is granted only if it had been defined by the original application.
-                val disabledSystemPackage = newState.systemState
-                    .disabledSystemPackageStates[packageState.packageName]?.androidPackage
+                val disabledSystemPackageState = newState.systemState
+                    .disabledSystemPackageStates[packageState.packageName]
+                val disabledSystemPackage = disabledSystemPackageState?.androidPackage
                 disabledSystemPackage != null &&
                     permission.name in disabledSystemPackage.requestedPermissions &&
-                    shouldGrantPrivilegedOrOemPermission(disabledSystemPackage, permission)
+                    shouldGrantPrivilegedOrOemPermission(disabledSystemPackageState, permission)
             } else {
-                shouldGrantPrivilegedOrOemPermission(androidPackage, permission)
+                shouldGrantPrivilegedOrOemPermission(packageState, permission)
             }
             if (shouldGrant) {
                 return true
@@ -989,18 +989,18 @@ class UidPermissionPolicy : SchemePolicy() {
     }
 
     private fun MutateStateScope.shouldGrantPrivilegedOrOemPermission(
-        androidPackage: AndroidPackage,
+        packageState: PackageState,
         permission: Permission
     ): Boolean {
         val permissionName = permission.name
-        val packageName = androidPackage.packageName
+        val packageName = packageState.packageName
         when {
             permission.isPrivileged -> {
-                if (androidPackage.isPrivileged) {
+                if (packageState.isPrivileged) {
                     // In any case, don't grant a privileged permission to privileged vendor apps,
                     // if the permission's protectionLevel does not have the extra vendorPrivileged
                     // flag.
-                    if (androidPackage.isVendor && !permission.isVendorPrivileged) {
+                    if (packageState.isVendor && !permission.isVendorPrivileged) {
                         Log.w(
                             LOG_TAG, "Permission $permissionName cannot be granted to privileged" +
                             " vendor app $packageName because it isn't a vendorPrivileged" +
@@ -1012,7 +1012,7 @@ class UidPermissionPolicy : SchemePolicy() {
                 }
             }
             permission.isOem -> {
-                if (androidPackage.isOem) {
+                if (packageState.isOem) {
                     val allowlistState = newState.systemState.permissionAllowlist
                         .getOemAppAllowlistState(packageName, permissionName)
                     checkNotNull(allowlistState) {

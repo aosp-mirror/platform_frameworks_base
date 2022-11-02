@@ -934,12 +934,12 @@ public class PackageInfoUtils {
                 | flag(pkg.isCantSaveState(), ApplicationInfo.PRIVATE_FLAG_CANT_SAVE_STATE)
                 | flag(pkg.isResizeableActivityViaSdkVersion(), ApplicationInfo.PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION)
                 | flag(pkg.isAllowNativeHeapPointerTagging(), ApplicationInfo.PRIVATE_FLAG_ALLOW_NATIVE_HEAP_POINTER_TAGGING)
-                | flag(pkg.isSystemExt(), ApplicationInfo.PRIVATE_FLAG_SYSTEM_EXT)
-                | flag(pkg.isPrivileged(), ApplicationInfo.PRIVATE_FLAG_PRIVILEGED)
-                | flag(pkg.isOem(), ApplicationInfo.PRIVATE_FLAG_OEM)
-                | flag(pkg.isVendor(), ApplicationInfo.PRIVATE_FLAG_VENDOR)
-                | flag(pkg.isProduct(), ApplicationInfo.PRIVATE_FLAG_PRODUCT)
-                | flag(pkg.isOdm(), ApplicationInfo.PRIVATE_FLAG_ODM)
+                | flag(AndroidPackageUtils.isSystemExt(pkg), ApplicationInfo.PRIVATE_FLAG_SYSTEM_EXT)
+                | flag(AndroidPackageUtils.isPrivileged(pkg), ApplicationInfo.PRIVATE_FLAG_PRIVILEGED)
+                | flag(AndroidPackageUtils.isOem(pkg), ApplicationInfo.PRIVATE_FLAG_OEM)
+                | flag(AndroidPackageUtils.isVendor(pkg), ApplicationInfo.PRIVATE_FLAG_VENDOR)
+                | flag(AndroidPackageUtils.isProduct(pkg), ApplicationInfo.PRIVATE_FLAG_PRODUCT)
+                | flag(AndroidPackageUtils.isOdm(pkg), ApplicationInfo.PRIVATE_FLAG_ODM)
                 | flag(pkg.isSignedWithPlatformKey(), ApplicationInfo.PRIVATE_FLAG_SIGNED_WITH_PLATFORM_KEY);
 
         Boolean resizeableActivity = pkg.getResizeableActivity();

@@ -1574,7 +1574,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     Slog.e(TAG, "Failed to find package " + packageName);
                     return;
                 }
-                final String newSeInfo = SELinuxMMAC.getSeInfo(pkg, sharedUser,
+                final String newSeInfo = SELinuxMMAC.getSeInfo(packageState, pkg, sharedUser,
                         m.mInjector.getCompatibility());
 
                 if (!newSeInfo.equals(oldSeInfo)) {

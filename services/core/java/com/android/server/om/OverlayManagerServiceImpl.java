@@ -50,6 +50,7 @@ import android.util.Slog;
 import com.android.internal.content.om.OverlayConfig;
 import com.android.internal.util.CollectionUtils;
 import com.android.server.pm.pkg.AndroidPackage;
+import com.android.server.pm.pkg.PackageState;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -72,7 +73,7 @@ import java.util.function.Predicate;
  */
 final class OverlayManagerServiceImpl {
     /**
-     * @deprecated Not used. See {@link android.content.om.OverlayInfo#STATE_TARGET_UPGRADING}.
+     * @deprecated Not used. See {@link OverlayInfo#STATE_TARGET_IS_BEING_REPLACED}.
      */
     @Deprecated
     private static final int FLAG_TARGET_IS_BEING_REPLACED = 1 << 0;
@@ -164,14 +165,15 @@ final class OverlayManagerServiceImpl {
 
         // Remove the settings of all overlays that are no longer installed for this user.
         final ArraySet<UserPackage> updatedTargets = new ArraySet<>();
-        final ArrayMap<String, AndroidPackage> userPackages = mPackageManager.initializeForUser(
+        final ArrayMap<String, PackageState> userPackages = mPackageManager.initializeForUser(
                 newUserId);
         CollectionUtils.addAll(updatedTargets, removeOverlaysForUser(
                 (info) -> !userPackages.containsKey(info.packageName), newUserId));
 
         final ArraySet<String> overlaidByOthers = new ArraySet<>();
-        for (AndroidPackage androidPackage : userPackages.values()) {
-            final String overlayTarget = androidPackage.getOverlayTarget();
+        for (PackageState packageState : userPackages.values()) {
+            var pkg = packageState.getAndroidPackage();
+            final String overlayTarget = pkg == null ? null : pkg.getOverlayTarget();
             if (!TextUtils.isEmpty(overlayTarget)) {
                 overlaidByOthers.add(overlayTarget);
             }
@@ -180,18 +182,24 @@ final class OverlayManagerServiceImpl {
         // Update the state of all installed packages containing overlays, and initialize new
         // overlays that are not currently in the settings.
         for (int i = 0, n = userPackages.size(); i < n; i++) {
-            final AndroidPackage pkg = userPackages.valueAt(i);
+            final PackageState packageState = userPackages.valueAt(i);
+            var pkg = packageState.getAndroidPackage();
+            if (pkg == null) {
+                continue;
+            }
+
+            var packageName = packageState.getPackageName();
             try {
                 CollectionUtils.addAll(updatedTargets,
                         updatePackageOverlays(pkg, newUserId, 0 /* flags */));
 
                 // When a new user is switched to for the first time, package manager must be
                 // informed of the overlay paths for all overlaid packages installed in the user.
-                if (overlaidByOthers.contains(pkg.getPackageName())) {
-                    updatedTargets.add(UserPackage.of(newUserId, pkg.getPackageName()));
+                if (overlaidByOthers.contains(packageName)) {
+                    updatedTargets.add(UserPackage.of(newUserId, packageName));
                 }
             } catch (OperationFailedException e) {
-                Slog.e(TAG, "failed to initialize overlays of '" + pkg.getPackageName()
+                Slog.e(TAG, "failed to initialize overlays of '" + packageName
                         + "' for user " + newUserId + "", e);
             }
         }
@@ -364,7 +372,7 @@ final class OverlayManagerServiceImpl {
                 }
 
                 currentInfo = mSettings.init(overlay, userId, pkg.getOverlayTarget(),
-                        pkg.getOverlayTargetOverlayableName(), pkg.getBaseApkPath(),
+                        pkg.getOverlayTargetOverlayableName(), pkg.getSplits().get(0).getPath(),
                         isPackageConfiguredMutable(pkg),
                         isPackageConfiguredEnabled(pkg),
                         getPackageConfiguredPriority(pkg), pkg.getOverlayCategory(),
@@ -401,7 +409,8 @@ final class OverlayManagerServiceImpl {
                 updateOverlaysForTarget(pkgName, userId, flags));
 
         // Realign the overlay settings with PackageManager's view of the package.
-        final AndroidPackage pkg = mPackageManager.getPackageForUser(pkgName, userId);
+        final PackageState packageState = mPackageManager.getPackageStateForUser(pkgName, userId);
+        var pkg = packageState == null ? null : packageState.getAndroidPackage();
         if (pkg == null) {
             return onPackageRemoved(pkgName, userId);
         }
@@ -790,10 +799,15 @@ final class OverlayManagerServiceImpl {
     private boolean updateState(@NonNull final CriticalOverlayInfo info,
             final int userId, final int flags) throws OverlayManagerSettings.BadKeyException {
         final OverlayIdentifier overlay = info.getOverlayIdentifier();
-        final AndroidPackage targetPackage = mPackageManager.getPackageForUser(
-                info.getTargetPackageName(), userId);
-        final AndroidPackage overlayPackage = mPackageManager.getPackageForUser(
-                info.getPackageName(), userId);
+        var targetPackageState =
+                mPackageManager.getPackageStateForUser(info.getTargetPackageName(), userId);
+        var targetPackage =
+                targetPackageState == null ? null : targetPackageState.getAndroidPackage();
+
+        var overlayPackageState =
+                mPackageManager.getPackageStateForUser(info.getPackageName(), userId);
+        var overlayPackage =
+                overlayPackageState == null ? null : overlayPackageState.getAndroidPackage();
 
         boolean modified = false;
         if (overlayPackage == null) {
@@ -803,7 +817,8 @@ final class OverlayManagerServiceImpl {
 
         modified |= mSettings.setCategory(overlay, userId, overlayPackage.getOverlayCategory());
         if (!info.isFabricated()) {
-            modified |= mSettings.setBaseCodePath(overlay, userId, overlayPackage.getBaseApkPath());
+            modified |= mSettings.setBaseCodePath(overlay, userId,
+                    overlayPackage.getSplits().get(0).getPath());
         }
 
         // Immutable RROs targeting to "android", ie framework-res.apk, are handled by native
@@ -812,7 +827,7 @@ final class OverlayManagerServiceImpl {
         @IdmapManager.IdmapStatus int idmapStatus = IDMAP_NOT_EXIST;
         if (targetPackage != null && !("android".equals(info.getTargetPackageName())
                 && !isPackageConfiguredMutable(overlayPackage))) {
-            idmapStatus = mIdmapManager.createIdmap(targetPackage,
+            idmapStatus = mIdmapManager.createIdmap(targetPackage, overlayPackageState,
                     overlayPackage, updatedOverlayInfo.baseCodePath, overlay.getOverlayName(),
                     userId);
             modified |= (idmapStatus & IDMAP_IS_MODIFIED) != 0;

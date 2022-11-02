@@ -56,6 +56,7 @@ import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.PackageManagerServiceCompilerMapping;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.pkg.AndroidPackage;
+import com.android.server.pm.pkg.PackageState;
 
 import dalvik.system.DexFile;
 import dalvik.system.VMRuntime;
@@ -487,14 +488,14 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
     /**
      * Compile layout resources in a given package.
      */
-    public boolean compileLayouts(AndroidPackage pkg) {
+    public boolean compileLayouts(@NonNull PackageState packageState, @NonNull AndroidPackage pkg) {
         try {
             final String packageName = pkg.getPackageName();
-            final String apkPath = pkg.getBaseApkPath();
+            final String apkPath = pkg.getSplits().get(0).getPath();
             // TODO(b/143971007): Use a cross-user directory
             File dataDir = PackageInfoUtils.getDataDir(pkg, UserHandle.myUserId());
             final String outDexFile = dataDir.getAbsolutePath() + "/code_cache/compiled_view.dex";
-            if (pkg.isPrivileged() || pkg.isUseEmbeddedDex()
+            if (packageState.isPrivileged() || pkg.isUseEmbeddedDex()
                     || pkg.isDefaultToDeviceProtectedStorage()) {
                 // Privileged apps prefer to load trusted code so they don't use compiled views.
                 // If the app is not privileged but prefers code integrity, also avoid compiling

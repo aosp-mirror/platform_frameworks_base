@@ -249,8 +249,12 @@ public interface AndroidPackage {
     /**
      * @see ApplicationInfo#sourceDir
      * @see ApplicationInfo#getBaseCodePath
+     *
+     * @deprecated Use {@link #getSplits()}[0].{@link AndroidPackageSplit#getPath() getPath()}
+     *
      * @hide
      */
+    @Deprecated
     @NonNull
     String getBaseApkPath();
 
@@ -1337,18 +1341,6 @@ public interface AndroidPackage {
     boolean isNativeLibraryRootRequiresIsa();
 
     /**
-     * @see ApplicationInfo#PRIVATE_FLAG_ODM
-     * @hide
-     */
-    boolean isOdm();
-
-    /**
-     * @see ApplicationInfo#PRIVATE_FLAG_OEM
-     * @hide
-     */
-    boolean isOem();
-
-    /**
      * @see R.styleable#AndroidManifestApplication_enableOnBackInvokedCallback
      * @hide
      */
@@ -1384,18 +1376,6 @@ public interface AndroidPackage {
      * @hide
      */
     boolean isPersistent();
-
-    /**
-     * @see ApplicationInfo#PRIVATE_FLAG_PRIVILEGED
-     * @hide
-     */
-    boolean isPrivileged();
-
-    /**
-     * @see ApplicationInfo#PRIVATE_FLAG_PRODUCT
-     * @hide
-     */
-    boolean isProduct();
 
     /**
      * @see ApplicationInfo#PRIVATE_FLAG_EXT_PROFILEABLE
@@ -1525,18 +1505,6 @@ public interface AndroidPackage {
     boolean isSupportsSmallScreens();
 
     /**
-     * @see ApplicationInfo#FLAG_SYSTEM
-     * @hide
-     */
-    boolean isSystem();
-
-    /**
-     * @see ApplicationInfo#PRIVATE_FLAG_SYSTEM_EXT
-     * @hide
-     */
-    boolean isSystemExt();
-
-    /**
      * @see ApplicationInfo#FLAG_TEST_ONLY
      * @see R.styleable#AndroidManifestApplication_testOnly
      * @hide
@@ -1561,12 +1529,6 @@ public interface AndroidPackage {
     boolean isUsesCleartextTraffic();
 
     /**
-     * @see ApplicationInfo#PRIVATE_FLAG_VENDOR
-     * @hide
-     */
-    boolean isVendor();
-
-    /**
      * Set if the any of components are visible to instant applications.
      *
      * @see R.styleable#AndroidManifestActivity_visibleToInstantApps
@@ -1575,4 +1537,10 @@ public interface AndroidPackage {
      * @hide
      */
     boolean isVisibleToInstantApps();
+
+    /**
+     * @see ApplicationInfo#FLAG_SYSTEM
+     * @hide
+     */
+    boolean isSystem();
 }

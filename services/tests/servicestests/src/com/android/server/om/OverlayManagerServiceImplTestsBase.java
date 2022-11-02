@@ -40,6 +40,8 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.content.om.OverlayConfig;
 import com.android.server.pm.pkg.AndroidPackage;
+import com.android.server.pm.pkg.AndroidPackageSplit;
+import com.android.server.pm.pkg.PackageState;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -357,18 +359,24 @@ class OverlayManagerServiceImplTestsBase {
             }
 
             @Nullable
-            private AndroidPackage getPackageForUser(int user) {
+            private PackageState getPackageForUser(int user) {
                 if (!installedUserIds.contains(user)) {
                     return null;
                 }
                 final AndroidPackage pkg = Mockito.mock(AndroidPackage.class);
                 when(pkg.getPackageName()).thenReturn(packageName);
-                when(pkg.getBaseApkPath()).thenReturn(apkPath);
                 when(pkg.getLongVersionCode()).thenReturn((long) versionCode);
                 when(pkg.getOverlayTarget()).thenReturn(targetPackageName);
                 when(pkg.getOverlayTargetOverlayableName()).thenReturn(targetOverlayableName);
                 when(pkg.getOverlayCategory()).thenReturn("Fake-category-" + targetPackageName);
-                return pkg;
+                var baseSplit = mock(AndroidPackageSplit.class);
+                when(baseSplit.getPath()).thenReturn(apkPath);
+                when(pkg.getSplits()).thenReturn(List.of(baseSplit));
+
+                var pkgState = Mockito.mock(PackageState.class);
+                when(pkgState.getPackageName()).thenReturn(packageName);
+                when(pkgState.getAndroidPackage()).thenReturn(pkg);
+                return pkgState;
             }
         }
     }
@@ -382,10 +390,10 @@ class OverlayManagerServiceImplTestsBase {
 
         @NonNull
         @Override
-        public ArrayMap<String, AndroidPackage> initializeForUser(int userId) {
-            final ArrayMap<String, AndroidPackage> packages = new ArrayMap<>();
+        public ArrayMap<String, PackageState> initializeForUser(int userId) {
+            final ArrayMap<String, PackageState> packages = new ArrayMap<>();
             mState.mPackages.forEach((key, value) -> {
-                final AndroidPackage pkg = value.getPackageForUser(userId);
+                final PackageState pkg = value.getPackageForUser(userId);
                 if (pkg != null) {
                     packages.put(key, pkg);
                 }
@@ -395,7 +403,7 @@ class OverlayManagerServiceImplTestsBase {
 
         @Nullable
         @Override
-        public AndroidPackage getPackageForUser(@NonNull String packageName, int userId) {
+        public PackageState getPackageStateForUser(@NonNull String packageName, int userId) {
             final FakeDeviceState.Package pkgState = mState.select(packageName, userId);
             return pkgState == null ? null : pkgState.getPackageForUser(userId);
         }
@@ -466,7 +474,7 @@ class OverlayManagerServiceImplTestsBase {
 
         private int getCrc(@NonNull final String path) {
             final FakeDeviceState.Package pkg = mState.selectFromPath(path);
-            Assert.assertNotNull(pkg);
+            Assert.assertNotNull("path = " + path, pkg);
             return pkg.versionCode;
         }
 

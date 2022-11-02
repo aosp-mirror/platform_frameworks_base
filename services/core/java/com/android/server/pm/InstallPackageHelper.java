@@ -168,6 +168,7 @@ import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.permission.Permission;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.pm.pkg.AndroidPackage;
+import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.SharedLibraryWrapper;
 import com.android.server.pm.pkg.component.ComponentMutateUtils;
@@ -1443,6 +1444,7 @@ final class InstallPackageHelper {
                 freezePackageForInstall(pkgName, installFlags, "installPackageLI");
         boolean shouldCloseFreezerBeforeReturn = true;
         try {
+            final PackageState oldPackageState;
             final AndroidPackage oldPackage;
             String renamedPackage;
             boolean sysPkg = false;
@@ -1454,8 +1456,9 @@ final class InstallPackageHelper {
             if (replace) {
                 final String pkgName11 = parsedPackage.getPackageName();
                 synchronized (mPm.mLock) {
-                    oldPackage = mPm.mPackages.get(pkgName11);
+                    oldPackageState = mPm.mSettings.getPackageLPr(pkgName11);
                 }
+                oldPackage = oldPackageState.getAndroidPackage();
                 if (parsedPackage.isStaticSharedLibrary()) {
                     // Static libs have a synthetic package name containing the version
                     // and cannot be updated as an update would get a new package name,
@@ -1611,15 +1614,15 @@ final class InstallPackageHelper {
                 removedInfo.mRemovedPackageVersionCode = oldPackage.getLongVersionCode();
                 request.setRemovedInfo(removedInfo);
 
-                sysPkg = oldPackage.isSystem();
+                sysPkg = oldPackageState.isSystem();
                 if (sysPkg) {
                     // Set the system/privileged/oem/vendor/product flags as needed
-                    final boolean privileged = oldPackage.isPrivileged();
-                    final boolean oem = oldPackage.isOem();
-                    final boolean vendor = oldPackage.isVendor();
-                    final boolean product = oldPackage.isProduct();
-                    final boolean odm = oldPackage.isOdm();
-                    final boolean systemExt = oldPackage.isSystemExt();
+                    final boolean privileged = oldPackageState.isPrivileged();
+                    final boolean oem = oldPackageState.isOem();
+                    final boolean vendor = oldPackageState.isVendor();
+                    final boolean product = oldPackageState.isProduct();
+                    final boolean odm = oldPackageState.isOdm();
+                    final boolean systemExt = oldPackageState.isSystemExt();
                     final @ParsingPackageUtils.ParseFlags int systemParseFlags = parseFlags;
                     final @PackageManagerService.ScanFlags int systemScanFlags = scanFlags
                             | SCAN_AS_SYSTEM
@@ -4433,7 +4436,7 @@ final class InstallPackageHelper {
 
     private void assertPackageWithSharedUserIdIsPrivileged(AndroidPackage pkg)
             throws PackageManagerException {
-        if (!pkg.isPrivileged() && (pkg.getSharedUserId() != null)) {
+        if (!AndroidPackageUtils.isPrivileged(pkg) && (pkg.getSharedUserId() != null)) {
             SharedUserSetting sharedUserSetting = null;
             try {
                 synchronized (mPm.mLock) {
@@ -4461,16 +4464,17 @@ final class InstallPackageHelper {
 
     private @PackageManagerService.ScanFlags int adjustScanFlags(
             @PackageManagerService.ScanFlags int scanFlags,
-            PackageSetting pkgSetting, PackageSetting disabledPkgSetting, UserHandle user,
-            AndroidPackage pkg) {
-        scanFlags = ScanPackageUtils.adjustScanFlagsWithPackageSetting(scanFlags, pkgSetting,
+            @Nullable PackageSetting existingPkgSetting,
+            @Nullable PackageSetting disabledPkgSetting, UserHandle user,
+            @NonNull AndroidPackage pkg) {
+        scanFlags = ScanPackageUtils.adjustScanFlagsWithPackageSetting(scanFlags, existingPkgSetting,
                 disabledPkgSetting, user);
 
         // Exception for privileged apps that share a user with a priv-app.
         final boolean skipVendorPrivilegeScan = ((scanFlags & SCAN_AS_VENDOR) != 0)
                 && ScanPackageUtils.getVendorPartitionVersion() < 28;
         if (((scanFlags & SCAN_AS_PRIVILEGED) == 0)
-                && !pkg.isPrivileged()
+                && !AndroidPackageUtils.isPrivileged(pkg)
                 && (pkg.getSharedUserId() != null)
                 && !skipVendorPrivilegeScan) {
             SharedUserSetting sharedUserSetting = null;
