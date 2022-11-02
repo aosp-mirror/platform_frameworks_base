@@ -531,7 +531,7 @@ public final class NotificationPanelViewController {
     private final NavigationBarController mNavigationBarController;
     private final int mDisplayId;
 
-    private KeyguardIndicationController mKeyguardIndicationController;
+    private final KeyguardIndicationController mKeyguardIndicationController;
     private int mHeadsUpInset;
     private boolean mHeadsUpPinnedMode;
     private boolean mAllowExpandForSmallExpansion;
@@ -743,6 +743,7 @@ public final class NotificationPanelViewController {
             SysUiState sysUiState,
             Provider<KeyguardBottomAreaViewController> keyguardBottomAreaViewControllerProvider,
             KeyguardUnlockAnimationController keyguardUnlockAnimationController,
+            KeyguardIndicationController keyguardIndicationController,
             NotificationListContainer notificationListContainer,
             NotificationStackSizeCalculator notificationStackSizeCalculator,
             UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
@@ -779,6 +780,7 @@ public final class NotificationPanelViewController {
 
         mResources = mView.getResources();
         mKeyguardStateController = keyguardStateController;
+        mKeyguardIndicationController = keyguardIndicationController;
         mStatusBarStateController = (SysuiStatusBarStateController) statusBarStateController;
         mNotificationShadeWindowController = notificationShadeWindowController;
         FlingAnimationUtils.Builder fauBuilder = flingAnimationUtilsBuilder.get();
@@ -1020,7 +1022,7 @@ public final class NotificationPanelViewController {
         mNotificationStackScrollLayoutController.setOnEmptySpaceClickListener(
                 mOnEmptySpaceClickListener);
         addTrackingHeadsUpListener(mNotificationStackScrollLayoutController::setTrackingHeadsUp);
-        mKeyguardBottomArea = mView.findViewById(R.id.keyguard_bottom_area);
+        setKeyguardBottomArea(mView.findViewById(R.id.keyguard_bottom_area));
 
         initBottomArea();
 
@@ -1264,7 +1266,7 @@ public final class NotificationPanelViewController {
         int index = mView.indexOfChild(mKeyguardBottomArea);
         mView.removeView(mKeyguardBottomArea);
         KeyguardBottomAreaView oldBottomArea = mKeyguardBottomArea;
-        mKeyguardBottomArea = mKeyguardBottomAreaViewControllerProvider.get().getView();
+        setKeyguardBottomArea(mKeyguardBottomAreaViewControllerProvider.get().getView());
         mKeyguardBottomArea.initFrom(oldBottomArea);
         mView.addView(mKeyguardBottomArea, index);
         initBottomArea();
@@ -1343,8 +1345,8 @@ public final class NotificationPanelViewController {
         return mHintAnimationRunning || mUnlockedScreenOffAnimationController.isAnimationPlaying();
     }
 
-    public void setKeyguardIndicationController(KeyguardIndicationController indicationController) {
-        mKeyguardIndicationController = indicationController;
+    private void setKeyguardBottomArea(KeyguardBottomAreaView keyguardBottomArea) {
+        mKeyguardBottomArea = keyguardBottomArea;
         mKeyguardIndicationController.setIndicationArea(mKeyguardBottomArea);
     }
 
@@ -3880,6 +3882,7 @@ public final class NotificationPanelViewController {
 
     public void setHeadsUpManager(HeadsUpManagerPhone headsUpManager) {
         mHeadsUpManager = headsUpManager;
+        mHeadsUpManager.addListener(mOnHeadsUpChangedListener);
         mHeadsUpTouchHelper = new HeadsUpTouchHelper(headsUpManager,
                 mNotificationStackScrollLayoutController.getHeadsUpCallback(),
                 NotificationPanelViewController.this);
@@ -4359,10 +4362,6 @@ public final class NotificationPanelViewController {
 
     void removeOnGlobalLayoutListener(ViewTreeObserver.OnGlobalLayoutListener listener) {
         mView.getViewTreeObserver().removeOnGlobalLayoutListener(listener);
-    }
-
-    public ShadeHeadsUpChangedListener getOnHeadsUpChangedListener() {
-        return mOnHeadsUpChangedListener;
     }
 
     public void setHeaderDebugInfo(String text) {

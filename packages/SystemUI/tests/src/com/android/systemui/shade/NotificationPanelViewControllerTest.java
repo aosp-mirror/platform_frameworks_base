@@ -486,6 +486,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mSysUiState,
                 () -> mKeyguardBottomAreaViewController,
                 mKeyguardUnlockAnimationController,
+                mKeyguardIndicationController,
                 mNotificationListContainer,
                 mNotificationStackSizeCalculator,
                 mUnlockedScreenOffAnimationController,
@@ -499,8 +500,6 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 () -> {},
                 mNotificationShelfController);
         mNotificationPanelViewController.setHeadsUpManager(mHeadsUpManager);
-        mNotificationPanelViewController.setKeyguardIndicationController(
-                mKeyguardIndicationController);
         ArgumentCaptor<View.OnAttachStateChangeListener> onAttachStateChangeListenerArgumentCaptor =
                 ArgumentCaptor.forClass(View.OnAttachStateChangeListener.class);
         verify(mView, atLeast(1)).addOnAttachStateChangeListener(
