@@ -224,10 +224,10 @@ void RenderNodeDrawable::drawContent(SkCanvas* canvas) const {
     // TODO should we let the bound of the drawable do this for us?
     const SkRect bounds = SkRect::MakeWH(properties.getWidth(), properties.getHeight());
     bool quickRejected = properties.getClipToBounds() && canvas->quickReject(bounds);
-    auto clipBounds = canvas->getLocalClipBounds();
-    SkIRect srcBounds = SkIRect::MakeWH(bounds.width(), bounds.height());
-    SkIPoint offset = SkIPoint::Make(0.0f, 0.0f);
     if (!quickRejected) {
+        auto clipBounds = canvas->getLocalClipBounds();
+        SkIRect srcBounds = SkIRect::MakeWH(bounds.width(), bounds.height());
+        SkIPoint offset = SkIPoint::Make(0.0f, 0.0f);
         SkiaDisplayList* displayList = renderNode->getDisplayList().asSkiaDl();
         const LayerProperties& layerProperties = properties.layerProperties();
         // composing a hardware layer
