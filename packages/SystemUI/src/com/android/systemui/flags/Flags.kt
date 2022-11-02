@@ -337,7 +337,7 @@ object Flags {
     @JvmField val A11Y_FLOATING_MENU_FLING_SPRING_ANIMATIONS = UnreleasedFlag(1600)
 
     // 1700 - clipboard
-    @JvmField val CLIPBOARD_OVERLAY_REFACTOR = UnreleasedFlag(1700)
+    @JvmField val CLIPBOARD_OVERLAY_REFACTOR = UnreleasedFlag(1700, true)
     @JvmField val CLIPBOARD_REMOTE_BEHAVIOR = UnreleasedFlag(1701)
 
     // 1800 - shade container
