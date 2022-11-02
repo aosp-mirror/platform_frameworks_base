@@ -62,6 +62,8 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
 
     private boolean mDesktopActive;
 
+    private DragDetector mDragDetector;
+
     private AdditionalWindow mHandleMenu;
 
     CaptionWindowDecoration(
@@ -79,6 +81,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         mChoreographer = choreographer;
         mSyncQueue = syncQueue;
         mDesktopActive = DesktopModeStatus.isActive(mContext);
+        mDragDetector = new DragDetector(ViewConfiguration.get(context).getScaledTouchSlop());
     }
 
     void setCaptionListeners(
@@ -90,6 +93,10 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
 
     void setDragResizeCallback(DragResizeCallback dragResizeCallback) {
         mDragResizeCallback = dragResizeCallback;
+    }
+
+    DragDetector getDragDetector() {
+        return mDragDetector;
     }
 
     @Override
@@ -182,6 +189,8 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         }
 
         int touchSlop = ViewConfiguration.get(mResult.mRootView.getContext()).getScaledTouchSlop();
+        mDragDetector.setTouchSlop(touchSlop);
+
         int resize_handle = mResult.mRootView.getResources()
                 .getDimensionPixelSize(R.dimen.freeform_resize_handle);
         int resize_corner = mResult.mRootView.getResources()
