@@ -1639,4 +1639,22 @@ public class BroadcastQueueTest {
         waitForIdle();
         verify(mAms, never()).enqueueOomAdjTargetLocked(any());
     }
+
+    /**
+     * Verify that expected events are triggered when a broadcast is finished.
+     */
+    @Test
+    public void testNotifyFinished() throws Exception {
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+
+        final Intent intent = new Intent(Intent.ACTION_TIMEZONE_CHANGED);
+        final BroadcastRecord record = makeBroadcastRecord(intent, callerApp,
+                List.of(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN)));
+        enqueueBroadcast(record);
+
+        waitForIdle();
+        verify(mAms).notifyBroadcastFinishedLocked(eq(record));
+        verify(mAms).addBroadcastStatLocked(eq(Intent.ACTION_TIMEZONE_CHANGED), eq(PACKAGE_RED),
+                eq(1), eq(0), anyLong());
+    }
 }

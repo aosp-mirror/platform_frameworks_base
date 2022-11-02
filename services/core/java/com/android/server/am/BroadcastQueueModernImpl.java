@@ -1403,6 +1403,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
         final boolean recordFinished = (r.terminalCount == r.receivers.size());
         if (recordFinished) {
+            mService.notifyBroadcastFinishedLocked(r);
             mHistory.addBroadcastToHistoryLocked(r);
 
             r.finishTime = SystemClock.uptimeMillis();

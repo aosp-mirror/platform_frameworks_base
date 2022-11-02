@@ -1690,13 +1690,7 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                 System.identityHashCode(original));
         }
 
-        final ApplicationInfo info = original.callerApp != null ? original.callerApp.info : null;
-        final String callerPackage = info != null ? info.packageName : original.callerPackage;
-        if (callerPackage != null) {
-            mService.mHandler.obtainMessage(ActivityManagerService.DISPATCH_SENDING_BROADCAST_EVENT,
-                    original.callingUid, 0, callerPackage).sendToTarget();
-        }
-
+        mService.notifyBroadcastFinishedLocked(original);
         mHistory.addBroadcastToHistoryLocked(original);
     }
 

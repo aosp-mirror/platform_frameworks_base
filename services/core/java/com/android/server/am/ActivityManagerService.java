@@ -14723,6 +14723,15 @@ public class ActivityManagerService extends IActivityManager.Stub
         mCurBroadcastStats.addBackgroundCheckViolation(action, targetPackage);
     }
 
+    final void notifyBroadcastFinishedLocked(@NonNull BroadcastRecord original) {
+        final ApplicationInfo info = original.callerApp != null ? original.callerApp.info : null;
+        final String callerPackage = info != null ? info.packageName : original.callerPackage;
+        if (callerPackage != null) {
+            mHandler.obtainMessage(ActivityManagerService.DISPATCH_SENDING_BROADCAST_EVENT,
+                    original.callingUid, 0, callerPackage).sendToTarget();
+        }
+    }
+
     final Intent verifyBroadcastLocked(Intent intent) {
         // Refuse possible leaked file descriptors
         if (intent != null && intent.hasFileDescriptors() == true) {
