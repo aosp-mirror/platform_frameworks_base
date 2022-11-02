@@ -5264,7 +5264,7 @@ public final class ActivityThread extends ClientTransactionHandler
     @Override
     public void performRestartActivity(ActivityClientRecord r, boolean start) {
         if (r.stopped) {
-            r.activity.performRestart(start, "performRestartActivity");
+            r.activity.performRestart(start);
             if (start) {
                 r.setState(ON_START);
             }
