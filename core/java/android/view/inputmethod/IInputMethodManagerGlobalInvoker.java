@@ -107,8 +107,8 @@ final class IInputMethodManagerGlobalInvoker {
      * @param where where the information is coming from.
      * @param exceptionHandler an optional {@link RemoteException} handler.
      */
-    @RequiresNoPermission
     @AnyThread
+    @RequiresNoPermission
     static void startProtoDump(byte[] protoDump, int source, String where,
             @Nullable Consumer<RemoteException> exceptionHandler) {
         final IInputMethodManager service = getService();
@@ -127,8 +127,8 @@ final class IInputMethodManagerGlobalInvoker {
      *
      * @param exceptionHandler an optional {@link RemoteException} handler.
      */
-    @RequiresPermission(android.Manifest.permission.CONTROL_UI_TRACING)
     @AnyThread
+    @RequiresPermission(Manifest.permission.CONTROL_UI_TRACING)
     static void startImeTrace(@Nullable Consumer<RemoteException> exceptionHandler) {
         final IInputMethodManager service = getService();
         if (service == null) {
@@ -146,8 +146,8 @@ final class IInputMethodManagerGlobalInvoker {
      *
      * @param exceptionHandler an optional {@link RemoteException} handler.
      */
-    @RequiresPermission(android.Manifest.permission.CONTROL_UI_TRACING)
     @AnyThread
+    @RequiresPermission(Manifest.permission.CONTROL_UI_TRACING)
     static void stopImeTrace(@Nullable Consumer<RemoteException> exceptionHandler) {
         final IInputMethodManager service = getService();
         if (service == null) {
@@ -165,8 +165,8 @@ final class IInputMethodManagerGlobalInvoker {
      *
      * @return The return value of {@link IInputMethodManager#isImeTraceEnabled()}.
      */
-    @RequiresNoPermission
     @AnyThread
+    @RequiresNoPermission
     static boolean isImeTraceEnabled() {
         final IInputMethodManager service = getService();
         if (service == null) {
@@ -182,8 +182,8 @@ final class IInputMethodManagerGlobalInvoker {
     /**
      * Invokes {@link IInputMethodManager#removeImeSurface()}
      */
-    @RequiresPermission(android.Manifest.permission.INTERNAL_SYSTEM_WINDOW)
     @AnyThread
+    @RequiresPermission(Manifest.permission.INTERNAL_SYSTEM_WINDOW)
     static void removeImeSurface(@Nullable Consumer<RemoteException> exceptionHandler) {
         final IInputMethodManager service = getService();
         if (service == null) {
@@ -228,6 +228,7 @@ final class IInputMethodManagerGlobalInvoker {
 
     @AnyThread
     @NonNull
+    @RequiresPermission(value = Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)
     static List<InputMethodInfo> getEnabledInputMethodList(@UserIdInt int userId) {
         final IInputMethodManager service = getService();
         if (service == null) {
@@ -242,6 +243,7 @@ final class IInputMethodManagerGlobalInvoker {
 
     @AnyThread
     @NonNull
+    @RequiresPermission(value = Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)
     static List<InputMethodSubtype> getEnabledInputMethodSubtypeList(@Nullable String imiId,
             boolean allowsImplicitlyEnabledSubtypes, @UserIdInt int userId) {
         final IInputMethodManager service = getService();
@@ -258,6 +260,7 @@ final class IInputMethodManagerGlobalInvoker {
 
     @AnyThread
     @Nullable
+    @RequiresPermission(value = Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)
     static InputMethodSubtype getLastInputMethodSubtype(@UserIdInt int userId) {
         final IInputMethodManager service = getService();
         if (service == null) {
@@ -303,6 +306,7 @@ final class IInputMethodManagerGlobalInvoker {
 
     @AnyThread
     @NonNull
+    @RequiresPermission(value = Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)
     static InputBindResult startInputOrWindowGainedFocus(@StartInputReason int startInputReason,
             @NonNull IInputMethodClient client, @Nullable IBinder windowToken,
             @StartInputFlags int startInputFlags,
@@ -341,6 +345,7 @@ final class IInputMethodManagerGlobalInvoker {
     }
 
     @AnyThread
+    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
     static void showInputMethodPickerFromSystem(@NonNull IInputMethodClient client,
             int auxiliarySubtypeMode, int displayId) {
         final IInputMethodManager service = getService();
@@ -370,6 +375,7 @@ final class IInputMethodManagerGlobalInvoker {
 
     @AnyThread
     @Nullable
+    @RequiresPermission(value = Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)
     static InputMethodSubtype getCurrentInputMethodSubtype(@UserIdInt int userId) {
         final IInputMethodManager service = getService();
         if (service == null) {
@@ -383,6 +389,7 @@ final class IInputMethodManagerGlobalInvoker {
     }
 
     @AnyThread
+    @RequiresPermission(value = Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)
     static void setAdditionalInputMethodSubtypes(@NonNull String imeId,
             @NonNull InputMethodSubtype[] subtypes, @UserIdInt int userId) {
         final IInputMethodManager service = getService();
@@ -397,6 +404,7 @@ final class IInputMethodManagerGlobalInvoker {
     }
 
     @AnyThread
+    @RequiresPermission(value = Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)
     static void setExplicitlyEnabledInputMethodSubtypes(@NonNull String imeId,
             @NonNull int[] subtypeHashCodes, @UserIdInt int userId) {
         final IInputMethodManager service = getService();
@@ -477,6 +485,7 @@ final class IInputMethodManagerGlobalInvoker {
     }
 
     @AnyThread
+    @RequiresPermission(value = Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)
     static boolean isStylusHandwritingAvailableAsUser(@UserIdInt int userId) {
         final IInputMethodManager service = getService();
         if (service == null) {
@@ -504,6 +513,7 @@ final class IInputMethodManagerGlobalInvoker {
     }
 
     @AnyThread
+    @RequiresPermission(Manifest.permission.TEST_INPUT_METHOD)
     static void setStylusWindowIdleTimeoutForTest(
             IInputMethodClient client, @DurationMillisLong long timeout) {
         final IInputMethodManager service = getService();
