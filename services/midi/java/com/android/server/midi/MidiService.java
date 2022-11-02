@@ -23,7 +23,6 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-// import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -31,6 +30,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.res.XmlResourceParser;
+import android.media.MediaMetrics;
 import android.media.midi.IBluetoothMidiService;
 import android.media.midi.IMidiDeviceListener;
 import android.media.midi.IMidiDeviceOpenCallback;
@@ -63,12 +63,16 @@ import org.xmlpull.v1.XmlPullParser;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 // NOTE about locking order:
 // if there is a path that syncs on BOTH mDevicesByInfo AND mDeviceConnections,
@@ -359,6 +363,17 @@ public class MidiService extends IMidiManager.Stub {
         private final ArrayList<DeviceConnection> mDeviceConnections
                 = new ArrayList<DeviceConnection>();
 
+        // Keep track of number of added and removed collections for logging
+        private AtomicInteger mDeviceConnectionsAdded = new AtomicInteger();
+        private AtomicInteger mDeviceConnectionsRemoved = new AtomicInteger();
+
+        // Keep track of total time with at least one active connection
+        private AtomicLong mTotalTimeConnectedNs = new AtomicLong();
+        private Instant mPreviousCounterInstant = null;
+
+        private AtomicInteger mTotalInputBytes = new AtomicInteger();
+        private AtomicInteger mTotalOutputBytes = new AtomicInteger();
+
         public Device(IMidiDeviceServer server, MidiDeviceInfo deviceInfo,
                 ServiceInfo serviceInfo, int uid) {
             mDeviceInfo = deviceInfo;
@@ -460,6 +475,11 @@ public class MidiService extends IMidiManager.Stub {
         public void addDeviceConnection(DeviceConnection connection) {
             Log.d(TAG, "addDeviceConnection() [A] connection:" + connection);
             synchronized (mDeviceConnections) {
+                mDeviceConnectionsAdded.incrementAndGet();
+                if (mPreviousCounterInstant == null) {
+                    mPreviousCounterInstant = Instant.now();
+                }
+
                 Log.d(TAG, "  mServer:" + mServer);
                 if (mServer != null) {
                     Log.i(TAG, "++++ A");
@@ -533,6 +553,20 @@ public class MidiService extends IMidiManager.Stub {
         public void removeDeviceConnection(DeviceConnection connection) {
             synchronized (mDevicesByInfo) {
                 synchronized (mDeviceConnections) {
+                    int numRemovedConnections = mDeviceConnectionsRemoved.incrementAndGet();
+                    if (mPreviousCounterInstant != null) {
+                        mTotalTimeConnectedNs.addAndGet(Duration.between(
+                                mPreviousCounterInstant, Instant.now()).toNanos());
+                    }
+                    // Stop the clock if all devices have been removed.
+                    // Otherwise, start the clock from the current instant.
+                    if (numRemovedConnections >= mDeviceConnectionsAdded.get()) {
+                        mPreviousCounterInstant = null;
+                    } else {
+                        mPreviousCounterInstant = Instant.now();
+                    }
+                    logMetrics(false /* isDeviceDisconnected */);
+
                     mDeviceConnections.remove(connection);
 
                     if (connection.getDevice().getDeviceInfo().getType()
@@ -569,6 +603,16 @@ public class MidiService extends IMidiManager.Stub {
                     connection.getClient().removeDeviceConnection(connection);
                 }
                 mDeviceConnections.clear();
+
+                // If the timer is still going, some clients have not closed the connection yet.
+                if (mPreviousCounterInstant != null) {
+                    Instant currentInstant = Instant.now();
+                    mTotalTimeConnectedNs.addAndGet(Duration.between(
+                            mPreviousCounterInstant, currentInstant).toNanos());
+                    mPreviousCounterInstant = currentInstant;
+                }
+
+                logMetrics(true /* isDeviceDisconnected */);
             }
             setDeviceServer(null);
 
@@ -585,12 +629,46 @@ public class MidiService extends IMidiManager.Stub {
             }
         }
 
+        private void logMetrics(boolean isDeviceDisconnected) {
+            // Only log metrics if the device was used in a connection
+            int numDeviceConnectionAdded = mDeviceConnectionsAdded.get();
+            if (mDeviceInfo != null && numDeviceConnectionAdded > 0) {
+                new MediaMetrics.Item(MediaMetrics.Name.AUDIO_MIDI)
+                    .setUid(mUid)
+                    .set(MediaMetrics.Property.DEVICE_ID, mDeviceInfo.getId())
+                    .set(MediaMetrics.Property.INPUT_PORT_COUNT, mDeviceInfo.getInputPortCount())
+                    .set(MediaMetrics.Property.OUTPUT_PORT_COUNT,
+                            mDeviceInfo.getOutputPortCount())
+                    .set(MediaMetrics.Property.HARDWARE_TYPE, mDeviceInfo.getType())
+                    .set(MediaMetrics.Property.DURATION_NS, mTotalTimeConnectedNs.get())
+                    .set(MediaMetrics.Property.OPENED_COUNT, numDeviceConnectionAdded)
+                    .set(MediaMetrics.Property.CLOSED_COUNT, mDeviceConnectionsRemoved.get())
+                    .set(MediaMetrics.Property.DEVICE_DISCONNECTED,
+                            isDeviceDisconnected ? "true" : "false")
+                    .set(MediaMetrics.Property.IS_SHARED,
+                            !mDeviceInfo.isPrivate() ? "true" : "false")
+                    .set(MediaMetrics.Property.SUPPORTS_MIDI_UMP, mDeviceInfo.getDefaultProtocol()
+                             != MidiDeviceInfo.PROTOCOL_UNKNOWN ? "true" : "false")
+                    .set(MediaMetrics.Property.USING_ALSA, mDeviceInfo.getProperties().get(
+                            MidiDeviceInfo.PROPERTY_ALSA_CARD) != null ? "true" : "false")
+                    .set(MediaMetrics.Property.EVENT, "deviceClosed")
+                    .set(MediaMetrics.Property.TOTAL_INPUT_BYTES, mTotalInputBytes.get())
+                    .set(MediaMetrics.Property.TOTAL_OUTPUT_BYTES, mTotalOutputBytes.get())
+                    .record();
+            }
+        }
+
         @Override
         public void binderDied() {
             Log.d(TAG, "Device died: " + this);
             synchronized (mDevicesByInfo) {
                 closeLocked();
             }
+        }
+
+        public void updateTotalBytes(int totalInputBytes, int totalOutputBytes) {
+            mTotalInputBytes.set(totalInputBytes);
+            mTotalOutputBytes.set(totalOutputBytes);
         }
 
         @Override
@@ -1368,6 +1446,17 @@ public class MidiService extends IMidiManager.Stub {
                     iterator.remove();
                     removeDeviceLocked(device);
                 }
+            }
+        }
+    }
+
+    @Override
+    public void updateTotalBytes(IMidiDeviceServer server, int totalInputBytes,
+            int totalOutputBytes) {
+        synchronized (mDevicesByInfo) {
+            Device device = mDevicesByServer.get(server.asBinder());
+            if (device != null) {
+                device.updateTotalBytes(totalInputBytes, totalOutputBytes);
             }
         }
     }
