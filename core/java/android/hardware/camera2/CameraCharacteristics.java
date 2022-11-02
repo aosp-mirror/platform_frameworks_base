@@ -4613,7 +4613,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>This key is available on all devices.</p>
      * @see #SENSOR_READOUT_TIMESTAMP_NOT_SUPPORTED
      * @see #SENSOR_READOUT_TIMESTAMP_HARDWARE
-     * @hide
      */
     @PublicKey
     @NonNull
@@ -5566,6 +5565,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     /*~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~
      * End generated code
      *~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~O@*/
+
+
 
 
 
