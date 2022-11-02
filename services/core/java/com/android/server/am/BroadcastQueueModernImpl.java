@@ -25,7 +25,6 @@ import static com.android.internal.util.FrameworkStatsLog.BROADCAST_DELIVERY_EVE
 import static com.android.internal.util.FrameworkStatsLog.BROADCAST_DELIVERY_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM;
 import static com.android.internal.util.FrameworkStatsLog.BROADCAST_DELIVERY_EVENT_REPORTED__RECEIVER_TYPE__MANIFEST;
 import static com.android.internal.util.FrameworkStatsLog.BROADCAST_DELIVERY_EVENT_REPORTED__RECEIVER_TYPE__RUNTIME;
-import static com.android.internal.util.Preconditions.checkState;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BROADCAST;
 import static com.android.server.am.BroadcastProcessQueue.insertIntoRunnableList;
 import static com.android.server.am.BroadcastProcessQueue.reasonToString;
@@ -757,7 +756,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         }
         final Intent receiverIntent = r.getReceiverIntent(receiver);
         if (receiverIntent == null) {
-            enqueueFinishReceiver(queue, BroadcastRecord.DELIVERY_SKIPPED, "isInFullBackup");
+            enqueueFinishReceiver(queue, BroadcastRecord.DELIVERY_SKIPPED, "getReceiverIntent");
             return;
         }
 
@@ -917,9 +916,12 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
     private boolean finishReceiverLocked(@NonNull BroadcastProcessQueue queue,
             @DeliveryState int deliveryState, @NonNull String reason) {
-        final int cookie = traceBegin("finishReceiver");
-        checkState(queue.isActive(), "isActive");
+        if (!queue.isActive()) {
+            logw("Ignoring finish; no active broadcast for " + queue);
+            return false;
+        }
 
+        final int cookie = traceBegin("finishReceiver");
         final ProcessRecord app = queue.app;
         final BroadcastRecord r = queue.getActive();
         final int index = queue.getActiveIndex();
