@@ -259,6 +259,7 @@ import android.content.pm.ServiceInfo;
 import android.content.pm.Signature;
 import android.content.pm.StringParceledListSlice;
 import android.content.pm.UserInfo;
+import android.content.pm.UserPackage;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.database.Cursor;
@@ -710,8 +711,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      * Contains (package-user) pairs to remove. An entry (p, u) implies that removal of package p
      * is requested for user u.
      */
-    private final Set<Pair<String, Integer>> mPackagesToRemove =
-            new ArraySet<Pair<String, Integer>>();
+    private final Set<UserPackage> mPackagesToRemove = new ArraySet<>();
 
     final LocalService mLocalService;
 
@@ -15043,7 +15043,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkCallAuthorization(
                 hasCallingOrSelfPermission(permission.MANAGE_DEVICE_ADMINS));
 
-        Pair<String, Integer> packageUserPair = new Pair<>(packageName, caller.getUserId());
+        UserPackage packageUserPair = UserPackage.of(caller.getUserId(), packageName);
         synchronized (getLockObject()) {
             return mPackagesToRemove.contains(packageUserPair);
         }
@@ -15071,7 +15071,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             throw new IllegalArgumentException("Cannot uninstall a package with a device owner");
         }
 
-        final Pair<String, Integer> packageUserPair = new Pair<>(packageName, userId);
+        final UserPackage packageUserPair = UserPackage.of(userId, packageName);
         synchronized (getLockObject()) {
             mPackagesToRemove.add(packageUserPair);
         }
@@ -15131,7 +15131,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     private void startUninstallIntent(final String packageName, final int userId) {
-        final Pair<String, Integer> packageUserPair = new Pair<>(packageName, userId);
+        final UserPackage packageUserPair = UserPackage.of(userId, packageName);
         synchronized (getLockObject()) {
             if (!mPackagesToRemove.contains(packageUserPair)) {
                 // Do nothing if uninstall was not requested or was already started.
