@@ -22,6 +22,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <inttypes.h>
+#include <linux/fs.h>
 #include <nativehelper/ScopedUtfChars.h>
 #include <stdlib.h>
 #include <string.h>
@@ -248,6 +249,16 @@ copyFileIfChanged(JNIEnv *env, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntr
     if (fd < 0) {
         ALOGE("Couldn't open temporary file name: %s: %s\n", localTmpFileName, strerror(errno));
         return INSTALL_FAILED_CONTAINER_ERROR;
+    }
+
+    // If a filesystem like f2fs supports per-file compression, set the compression bit before data
+    // writes
+    unsigned int flags;
+    if (ioctl(fd, FS_IOC_GETFLAGS, &flags) == -1) {
+        ALOGE("Failed to call FS_IOC_GETFLAGS on %s: %s\n", localTmpFileName, strerror(errno));
+    } else if ((flags & FS_COMPR_FL) == 0) {
+        flags |= FS_COMPR_FL;
+        ioctl(fd, FS_IOC_SETFLAGS, &flags);
     }
 
     if (!zipFile->uncompressEntry(zipEntry, fd)) {
