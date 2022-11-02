@@ -29,4 +29,5 @@ android_app {
     resource_dirs: ["res"],
     certificate: "platform",
     sdk_version: "system_current",
+    min_sdk_version: "29",
 }
