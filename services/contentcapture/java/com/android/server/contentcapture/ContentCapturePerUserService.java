@@ -728,7 +728,7 @@ final class ContentCapturePerUserService
             if (oldList != null && adding != null) {
                 adding.removeAll(oldList);
             }
-
+            addingCount = CollectionUtils.size(adding);
             EventLog.writeEvent(EventLogTags.CC_UPDATE_OPTIONS, mUserId, addingCount);
             for (int i = 0; i < addingCount; i++) {
                 String packageName = adding.valueAt(i);
