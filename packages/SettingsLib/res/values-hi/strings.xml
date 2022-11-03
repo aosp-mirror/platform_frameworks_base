@@ -273,8 +273,8 @@
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"बूटलोडर को अनलाॅक किए जाने की अनुमति दें"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"OEM अनलॉक करने की अनुमति दें?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"चेतावनी: इस सेटिंग के चालू रहने पर डिवाइस सुरक्षा सुविधाएं इस डिवाइस पर काम नहीं करेंगी."</string>
-    <string name="mock_location_app" msgid="6269380172542248304">"जगह की दिखावटी जानकारी देने के लिए ऐप्लिकेशन चुनें"</string>
-    <string name="mock_location_app_not_set" msgid="6972032787262831155">"जगह की दिखावटी जानकारी देने के लिए ऐप सेट नहीं है"</string>
+    <string name="mock_location_app" msgid="6269380172542248304">"मॉक लोकेशन के लिए ऐप्लिकेशन चुनें"</string>
+    <string name="mock_location_app_not_set" msgid="6972032787262831155">"मॉक लोकेशन के लिए ऐप्लिकेशन सेट नहीं है"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"जगह की दिखावटी जानकारी देने वाला ऐप: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"नेटवर्किंग"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"वायरलेस डिसप्ले सर्टिफ़िकेशन"</string>
@@ -338,7 +338,7 @@
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"यूएसबी पर ऐप्लिकेशन की पुष्टि करें"</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"नुकसान पहुंचाने वाली गतिविधियों के लिए ADB/ADT से इंस्टॉल किए गए ऐप्लिकेशन जांचें."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"बिना नाम वाले ब्लूटूथ डिवाइस (सिर्फ़ MAC पते वाले) दिखाए जाएंगे"</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"दूर के डिवाइस पर आवाज़ बहुत बढ़ जाने या उससे कंट्रोल हटने जैसी समस्याएं होने पर, यह ब्लूटूथ के ज़रिए आवाज़ के कंट्रोल की सुविधा रोक देता है."</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"रिमोट डिवाइस पर आवाज़ बहुत बढ़ जाने या उससे कंट्रोल हटने जैसी समस्याएं होने पर, यह ब्लूटूथ के ज़रिए आवाज़ के कंट्रोल की सुविधा रोक देता है."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"ब्लूटूथ सेटिंग में Gabeldorsche सुविधा को चालू करता है."</string>
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"कनेक्टिविटी बेहतर बनाने की सुविधा को चालू करें"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"स्थानीय टर्मिनल"</string>
@@ -491,7 +491,7 @@
     <string name="disabled" msgid="8017887509554714950">"बंद किया गया"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"अनुमति है"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"अनुमति नहीं है"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"अनजान ऐप्लिकेशन इंस्टॉल करने का ऐक्सेस"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"अनजान ऐप्लिकेशन इंस्टॉल करने की अनुमति देना"</string>
     <string name="home" msgid="973834627243661438">"सेटिंग का होम पेज"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0%"</item>

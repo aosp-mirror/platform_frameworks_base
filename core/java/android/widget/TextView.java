@@ -4877,20 +4877,28 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Set the line break style for text wrapping.
+     * Sets the line-break style for text wrapping.
      *
-     * The line break style to indicates the line break strategies can be used when
-     * calculating the text wrapping. The line break style affects rule-based breaking. It
-     * specifies the strictness of line-breaking rules.
-     * There are several types for the line break style:
-     * {@link LineBreakConfig#LINE_BREAK_STYLE_LOOSE},
-     * {@link LineBreakConfig#LINE_BREAK_STYLE_NORMAL} and
-     * {@link LineBreakConfig#LINE_BREAK_STYLE_STRICT}. The default values of the line break style
-     * is {@link LineBreakConfig#LINE_BREAK_STYLE_NONE}, indicating no breaking rule is specified.
-     * See <a href="https://www.w3.org/TR/css-text-3/#line-break-property">
-     *         the line-break property</a>
+     * <p>Line-break style specifies the line-break strategies that can be used
+     * for text wrapping. The line-break style affects rule-based line breaking
+     * by specifying the strictness of line-breaking rules.
      *
-     * @param lineBreakStyle the line break style for the text.
+     * <p>The following are types of line-break styles:
+     * <ul>
+     *   <li>{@link LineBreakConfig#LINE_BREAK_STYLE_LOOSE}
+     *   <li>{@link LineBreakConfig#LINE_BREAK_STYLE_NORMAL}
+     *   <li>{@link LineBreakConfig#LINE_BREAK_STYLE_STRICT}
+     * </ul>
+     *
+     * <p>The default line-break style is
+     * {@link LineBreakConfig#LINE_BREAK_STYLE_NONE}, which specifies that no
+     * line-breaking rules are used.
+     *
+     * <p>See the
+     * <a href="https://www.w3.org/TR/css-text-3/#line-break-property" class="external">
+     * line-break property</a> for more information.
+     *
+     * @param lineBreakStyle The line-break style for the text.
      */
     public void setLineBreakStyle(@LineBreakConfig.LineBreakStyle int lineBreakStyle) {
         if (mLineBreakStyle != lineBreakStyle) {
@@ -4904,17 +4912,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Set the line break word style for text wrapping.
+     * Sets the line-break word style for text wrapping.
      *
-     * The line break word style affects dictionary-based breaking and provide phrase-based
-     * breaking opportunities. The type for the line break word style is
-     * {@link LineBreakConfig#LINE_BREAK_WORD_STYLE_PHRASE}. The default values of the line break
-     * word style is {@link LineBreakConfig#LINE_BREAK_WORD_STYLE_NONE}, indicating no breaking rule
-     * is specified.
-     * See <a href="https://www.w3.org/TR/css-text-3/#word-break-property">
-     *         the word-break property</a>
+     * <p>The line-break word style affects dictionary-based line breaking by
+     * providing phrase-based line-breaking opportunities. Use
+     * {@link LineBreakConfig#LINE_BREAK_WORD_STYLE_PHRASE} to specify
+     * phrase-based line breaking.
      *
-     * @param lineBreakWordStyle the line break word style for the tet
+     * <p>The default line-break word style is
+     * {@link LineBreakConfig#LINE_BREAK_WORD_STYLE_NONE}, which specifies that
+     * no line-breaking word style is used.
+     *
+     * <p>See the
+     * <a href="https://www.w3.org/TR/css-text-3/#word-break-property" class="external">
+     * word-break property</a> for more information.
+     *
+     * @param lineBreakWordStyle The line-break word style for the text.
      */
     public void setLineBreakWordStyle(@LineBreakConfig.LineBreakWordStyle int lineBreakWordStyle) {
         if (mLineBreakWordStyle != lineBreakWordStyle) {
@@ -4928,18 +4941,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Get the current line break style for text wrapping.
+     * Gets the current line-break style for text wrapping.
      *
-     * @return the current line break style to be used for text wrapping.
+     * @return The line-break style to be used for text wrapping.
      */
     public @LineBreakConfig.LineBreakStyle int getLineBreakStyle() {
         return mLineBreakStyle;
     }
 
     /**
-     * Get the current line word break style for text wrapping.
+     * Gets the current line-break word style for text wrapping.
      *
-     * @return the current line break word style to be used for text wrapping.
+     * @return The line-break word style to be used for text wrapping.
      */
     public @LineBreakConfig.LineBreakWordStyle int getLineBreakWordStyle() {
         return mLineBreakWordStyle;

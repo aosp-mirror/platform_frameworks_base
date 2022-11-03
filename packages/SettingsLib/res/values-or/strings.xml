@@ -233,10 +233,10 @@
     <string name="tethering_settings_not_available" msgid="266821736434699780">"ଏହି ଉପଯୋଗକର୍ତ୍ତାଙ୍କ ପାଇଁ ଟିଥରିଂ ସେଟିଂସ ଉପଲବ୍ଧ ନାହିଁ"</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"ଆକ୍ସେସ ପଏଣ୍ଟ ନାମର ସେଟିଂସ ଏହି ଉପଯୋଗକର୍ତ୍ତାଙ୍କ ପାଇଁ ଉପଲବ୍ଧ ନାହିଁ"</string>
     <string name="enable_adb" msgid="8072776357237289039">"USB ଡିବଗିଂ"</string>
-    <string name="enable_adb_summary" msgid="3711526030096574316">"USB ସଂଯୁକ୍ତ ହେବାବେଳେ ଡିବଗ୍‌ ମୋଡ୍‌"</string>
+    <string name="enable_adb_summary" msgid="3711526030096574316">"USB କନେକ୍ଟ ହେବାବେଳେ ଡିବଗ ମୋଡ"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"USB ଡିବଗିଂ ଅଧିକାରକୁ ବାତିଲ୍ କରନ୍ତୁ"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"ୱାୟାରଲେସ୍ ଡିବଗିଂ"</string>
-    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"ୱାଇ-ଫାଇ ସଂଯୁକ୍ତ ଥିବା ବେଳେ ଡିବଗ୍ ମୋଡ୍"</string>
+    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"ୱାଇ-ଫାଇ କନେକ୍ଟ ଥିବା ବେଳେ ଡିବଗ ମୋଡ"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"ତ୍ରୁଟି"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"ୱାୟାରଲେସ୍ ଡିବଗିଂ"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"ଉପଲବ୍ଧ ଡିଭାଇସଗୁଡ଼ିକୁ ଦେଖିବାକୁ ଏବଂ ବ୍ୟବହାର କରିବାକୁ ୱାୟାରଲେସ୍ ଡିବଗିଂ ଚାଲୁ କରନ୍ତୁ"</string>
@@ -273,8 +273,8 @@
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"bootloaderକୁ ଅନ୍‌ଲକ୍‌ ହେବାର ଅନୁମତି ଦିଅନ୍ତୁ"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"OEM ଅନଲକ୍‌ କରିବା ଅନୁମତି ଦେବେ?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"ଚେତାବନୀ: ଏହି ସେଟିଙ୍ଗ ଚାଲୁ ଥିବାବେଳେ ଡିଭାଇସ୍‌ର ସୁରକ୍ଷା ବୈଶିଷ୍ଟ୍ୟ କାମ କରିବ ନାହିଁ"</string>
-    <string name="mock_location_app" msgid="6269380172542248304">"ମକ୍ ଲୋକେସନ୍‌ ଆପ୍‌ର ଚୟନ କରନ୍ତୁ"</string>
-    <string name="mock_location_app_not_set" msgid="6972032787262831155">"କୌଣସି ମକ୍ ଲୋକେସନ ଆପ୍ ସେଟ୍ କରାଯାଇନାହିଁ"</string>
+    <string name="mock_location_app" msgid="6269380172542248304">"ମକ ଲୋକେସନ ଆପ ଚୟନ କରନ୍ତୁ"</string>
+    <string name="mock_location_app_not_set" msgid="6972032787262831155">"କୌଣସି ମକ ଲୋକେସନ ଆପ ସେଟ କରାଯାଇନାହିଁ"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"ମକ୍ ଲୋକେସନ୍‌ ଆପ୍‌: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"ନେଟ୍‌ୱର୍କିଙ୍ଗ"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"ୱାୟରଲେସ୍‌ ଡିସ୍‌ପ୍ଲେ ସାର୍ଟିଫିକେସନ୍"</string>
@@ -283,10 +283,10 @@
     <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"ୱାଇ-ଫାଇ ଅଣ-ଅବିରତ MAC ରେଣ୍ଡମାଇଜେସନ୍"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"ମୋବାଇଲ୍‌ ଡାଟା ସର୍ବଦା ସକ୍ରିୟ"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"ଟିଥରିଙ୍ଗ ହାର୍ଡୱେର ଆକ୍ସିଲିରେସନ୍"</string>
-    <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"ବ୍ଲୁଟୂଥ୍‍‌ ଡିଭାଇସ୍‌ଗୁଡ଼ିକୁ ନାମ ବିନା ଦେଖନ୍ତୁ"</string>
+    <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"ବ୍ଲୁଟୂଥ ଡିଭାଇସଗୁଡ଼ିକୁ ନାମ ବିନା ଦେଖାନ୍ତୁ"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"ପୂର୍ଣ୍ଣ ଭଲ୍ୟୁମ୍‌ ଅକ୍ଷମ କରନ୍ତୁ"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"ଗାବେଲ୍‌ଡୋର୍ସ ସକ୍ରିୟ କରନ୍ତୁ"</string>
-    <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"ବ୍ଲୁଟୂଥ୍‌ AVRCP ଭର୍ସନ୍"</string>
+    <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"ବ୍ଲୁଟୂଥ୍‌ AVRCP ସଂସ୍କରଣ"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"ବ୍ଲୁଟୂଥ୍‍‌ AVRCP ଭର୍ସନ୍‌"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"ବ୍ଲୁଟୁଥ୍ MAP ସଂସ୍କରଣ"</string>
     <string name="bluetooth_select_map_version_dialog_title" msgid="7085934373987428460">"ବ୍ଲୁଟୁଥ୍ MAP ସଂସ୍କରଣ ଚୟନ କରନ୍ତୁ"</string>

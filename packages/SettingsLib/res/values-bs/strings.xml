@@ -233,10 +233,10 @@
     <string name="tethering_settings_not_available" msgid="266821736434699780">"Postavke dijeljenja internetske veze nisu dostupne za ovog korisnika"</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"Postavke za ime pristupne tačke nisu dostupne za ovog korisnika"</string>
     <string name="enable_adb" msgid="8072776357237289039">"Otklanjanje grešaka putem USB-a"</string>
-    <string name="enable_adb_summary" msgid="3711526030096574316">"Način rada za uklanjanje grešaka kada je povezan USB"</string>
+    <string name="enable_adb_summary" msgid="3711526030096574316">"Način rada za otklanjanje grešaka kada je povezan USB"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"Ukinite odobrenja otklanjanja grešaka putem USB-a"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"Bežično otklanjanje grešaka"</string>
-    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Način rada otklanjanja grešaka kada je WiFi mreža povezana"</string>
+    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Način rada za otklanjanje grešaka kada je povezan WiFi"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Greška"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Bežično otklanjanje grešaka"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Da vidite i koristite dostupne uređaje, uključite bežično otklanjanje grešaka"</string>

@@ -37,6 +37,7 @@ import androidx.test.core.app.ApplicationProvider;
 import androidx.test.filters.MediumTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.adservices.service.js.IsolateSettings;
 import com.android.adservices.service.js.JSScriptArgument;
 import com.android.adservices.service.js.JSScriptArrayArgument;
 import com.android.adservices.service.js.JSScriptEngine;
@@ -314,7 +315,11 @@ public class JSScriptEnginePerfTests {
             @NonNull CountDownLatch resultLatch) {
         Objects.requireNonNull(engine);
         Objects.requireNonNull(resultLatch);
-        ListenableFuture<String> result = engine.evaluate(jsScript, args, functionName);
+        ListenableFuture<String> result = engine.evaluate(
+                jsScript,
+                args,
+                functionName,
+                IsolateSettings.forMaxHeapSizeEnforcementDisabled());
         result.addListener(resultLatch::countDown, sExecutorService);
         return result;
     }
@@ -328,7 +333,12 @@ public class JSScriptEnginePerfTests {
             @NonNull CountDownLatch resultLatch) {
         Objects.requireNonNull(engine);
         Objects.requireNonNull(resultLatch);
-        ListenableFuture<String> result = engine.evaluate(jsScript, wasmScript, args, functionName);
+        ListenableFuture<String> result = engine.evaluate(
+                jsScript,
+                wasmScript,
+                args,
+                functionName,
+                IsolateSettings.forMaxHeapSizeEnforcementDisabled());
         result.addListener(resultLatch::countDown, sExecutorService);
         return result;
     }

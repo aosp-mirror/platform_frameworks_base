@@ -116,7 +116,7 @@
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"المكالمات الهاتفية"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"نقل الملف"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"جهاز الإرسال"</string>
-    <string name="bluetooth_profile_pan" msgid="1006235139308318188">"استخدام الإنترنت"</string>
+    <string name="bluetooth_profile_pan" msgid="1006235139308318188">"الوصول إلى الإنترنت"</string>
     <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"مشاركة جهات الاتصال"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"استخدام مع مشاركة جهة الاتصال"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"مشاركة اتصال الإنترنت"</string>
@@ -184,7 +184,7 @@
     <string name="launch_defaults_some" msgid="3631650616557252926">"تم ضبط بعض الإعدادات التلقائية"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"لم يتم ضبط إعدادات تلقائية"</string>
     <string name="tts_settings" msgid="8130616705989351312">"إعدادات تحويل النص إلى كلام"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"تحويل النص إلى كلام"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"إخراج النص إلى كلام"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"معدل سرعة الكلام"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"سرعة قول الكلام"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"درجة الصوت"</string>
