@@ -115,11 +115,9 @@ import android.view.InsetsFrameProvider;
 import android.view.InsetsSource;
 import android.view.InsetsState;
 import android.view.InsetsState.InternalInsetsType;
-import android.view.InsetsVisibilities;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewDebug;
-import android.view.WindowInsets;
 import android.view.WindowInsets.Type;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowLayout;
@@ -314,7 +312,6 @@ public class DisplayPolicy {
     private int mLastAppearance;
     private int mLastBehavior;
     private int mLastRequestedVisibleTypes = Type.defaultVisible();
-    private InsetsVisibilities mRequestedVisibilities = new InsetsVisibilities();
     private AppearanceRegion[] mLastStatusBarAppearanceRegions;
     private LetterboxDetails[] mLastLetterboxDetails;
 
@@ -2158,35 +2155,16 @@ public class DisplayPolicy {
             mService.mInputManager.setSystemUiLightsOut(
                     isFullscreen || (appearance & APPEARANCE_LOW_PROFILE_BARS) != 0);
         }
-        final InsetsVisibilities requestedVisibilities =
-                mLastRequestedVisibleTypes == requestedVisibleTypes
-                        ? mRequestedVisibilities
-                        : toInsetsVisibilities(requestedVisibleTypes);
         mLastAppearance = appearance;
         mLastBehavior = behavior;
         mLastRequestedVisibleTypes = requestedVisibleTypes;
-        mRequestedVisibilities = requestedVisibilities;
         mFocusedApp = focusedApp;
         mLastFocusIsFullscreen = isFullscreen;
         mLastStatusBarAppearanceRegions = statusBarAppearanceRegions;
         mLastLetterboxDetails = letterboxDetails;
         callStatusBarSafely(statusBar -> statusBar.onSystemBarAttributesChanged(displayId,
                 appearance, statusBarAppearanceRegions, isNavbarColorManagedByIme, behavior,
-                requestedVisibilities, focusedApp, letterboxDetails));
-    }
-
-    // TODO (253420890): Remove this when removing mRequestedVisibilities.
-    private static InsetsVisibilities toInsetsVisibilities(@InsetsType int requestedVisibleTypes) {
-        final @InsetsType int defaultVisibleTypes = WindowInsets.Type.defaultVisible();
-        final InsetsVisibilities insetsVisibilities = new InsetsVisibilities();
-        for (@InternalInsetsType int i = InsetsState.SIZE - 1; i >= 0; i--) {
-            @InsetsType int type = InsetsState.toPublicType(i);
-            if ((type & (requestedVisibleTypes ^ defaultVisibleTypes)) != 0) {
-                // We only set the visibility if it is different from the default one.
-                insetsVisibilities.setVisibility(i, (type & requestedVisibleTypes) != 0);
-            }
-        }
-        return insetsVisibilities;
+                requestedVisibleTypes, focusedApp, letterboxDetails));
     }
 
     private void callStatusBarSafely(Consumer<StatusBarManagerInternal> consumer) {

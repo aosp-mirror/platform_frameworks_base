@@ -21,7 +21,6 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArrayMap;
-import android.view.InsetsVisibilities;
 
 import com.android.internal.view.AppearanceRegion;
 
@@ -40,7 +39,7 @@ public final class RegisterStatusBarResult implements Parcelable {
     public final IBinder mImeToken;
     public final boolean mNavbarColorManagedByIme;
     public final int mBehavior;
-    public final InsetsVisibilities mRequestedVisibilities;
+    public final int mRequestedVisibleTypes;
     public final String mPackageName;
     public final int[] mTransientBarTypes;
     public final LetterboxDetails[] mLetterboxDetails;
@@ -48,7 +47,7 @@ public final class RegisterStatusBarResult implements Parcelable {
     public RegisterStatusBarResult(ArrayMap<String, StatusBarIcon> icons, int disabledFlags1,
             int appearance, AppearanceRegion[] appearanceRegions, int imeWindowVis,
             int imeBackDisposition, boolean showImeSwitcher, int disabledFlags2, IBinder imeToken,
-            boolean navbarColorManagedByIme, int behavior, InsetsVisibilities requestedVisibilities,
+            boolean navbarColorManagedByIme, int behavior, int requestedVisibleTypes,
             String packageName, @NonNull int[] transientBarTypes,
             LetterboxDetails[] letterboxDetails) {
         mIcons = new ArrayMap<>(icons);
@@ -62,7 +61,7 @@ public final class RegisterStatusBarResult implements Parcelable {
         mImeToken = imeToken;
         mNavbarColorManagedByIme = navbarColorManagedByIme;
         mBehavior = behavior;
-        mRequestedVisibilities = requestedVisibilities;
+        mRequestedVisibleTypes = requestedVisibleTypes;
         mPackageName = packageName;
         mTransientBarTypes = transientBarTypes;
         mLetterboxDetails = letterboxDetails;
@@ -86,7 +85,7 @@ public final class RegisterStatusBarResult implements Parcelable {
         dest.writeStrongBinder(mImeToken);
         dest.writeBoolean(mNavbarColorManagedByIme);
         dest.writeInt(mBehavior);
-        dest.writeTypedObject(mRequestedVisibilities, 0);
+        dest.writeInt(mRequestedVisibleTypes);
         dest.writeString(mPackageName);
         dest.writeIntArray(mTransientBarTypes);
         dest.writeParcelableArray(mLetterboxDetails, flags);
@@ -112,8 +111,7 @@ public final class RegisterStatusBarResult implements Parcelable {
                     final IBinder imeToken = source.readStrongBinder();
                     final boolean navbarColorManagedByIme = source.readBoolean();
                     final int behavior = source.readInt();
-                    final InsetsVisibilities requestedVisibilities =
-                            source.readTypedObject(InsetsVisibilities.CREATOR);
+                    final int requestedVisibleTypes = source.readInt();
                     final String packageName = source.readString();
                     final int[] transientBarTypes = source.createIntArray();
                     final LetterboxDetails[] letterboxDetails =
@@ -121,7 +119,7 @@ public final class RegisterStatusBarResult implements Parcelable {
                     return new RegisterStatusBarResult(icons, disabledFlags1, appearance,
                             appearanceRegions, imeWindowVis, imeBackDisposition, showImeSwitcher,
                             disabledFlags2, imeToken, navbarColorManagedByIme, behavior,
-                            requestedVisibilities, packageName, transientBarTypes,
+                            requestedVisibleTypes, packageName, transientBarTypes,
                             letterboxDetails);
                 }
 

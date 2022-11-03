@@ -53,7 +53,7 @@ import android.os.RemoteException;
 import android.util.Pair;
 import android.util.SparseArray;
 import android.view.InsetsState.InternalInsetsType;
-import android.view.InsetsVisibilities;
+import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsController.Appearance;
 import android.view.WindowInsetsController.Behavior;
 
@@ -356,11 +356,11 @@ public class CommandQueue extends IStatusBar.Stub implements
         default void onRecentsAnimationStateChanged(boolean running) { }
 
         /**
-         * @see IStatusBar#onSystemBarAttributesChanged.
+         * @see IStatusBar#onSystemBarAttributesChanged
          */
         default void onSystemBarAttributesChanged(int displayId, @Appearance int appearance,
                 AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
-                @Behavior int behavior, InsetsVisibilities requestedVisibilities,
+                @Behavior int behavior, @InsetsType int requestedVisibleTypes,
                 String packageName, LetterboxDetails[] letterboxDetails) { }
 
         /**
@@ -1090,7 +1090,7 @@ public class CommandQueue extends IStatusBar.Stub implements
     @Override
     public void onSystemBarAttributesChanged(int displayId, @Appearance int appearance,
             AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
-            @Behavior int behavior, InsetsVisibilities requestedVisibilities, String packageName,
+            @Behavior int behavior, @InsetsType int requestedVisibleTypes, String packageName,
             LetterboxDetails[] letterboxDetails) {
         synchronized (mLock) {
             SomeArgs args = SomeArgs.obtain();
@@ -1099,7 +1099,7 @@ public class CommandQueue extends IStatusBar.Stub implements
             args.argi3 = navbarColorManagedByIme ? 1 : 0;
             args.arg1 = appearanceRegions;
             args.argi4 = behavior;
-            args.arg2 = requestedVisibilities;
+            args.argi5 = requestedVisibleTypes;
             args.arg3 = packageName;
             args.arg4 = letterboxDetails;
             mHandler.obtainMessage(MSG_SYSTEM_BAR_CHANGED, args).sendToTarget();
@@ -1582,8 +1582,7 @@ public class CommandQueue extends IStatusBar.Stub implements
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         mCallbacks.get(i).onSystemBarAttributesChanged(args.argi1, args.argi2,
                                 (AppearanceRegion[]) args.arg1, args.argi3 == 1, args.argi4,
-                                (InsetsVisibilities) args.arg2, (String) args.arg3,
-                                (LetterboxDetails[]) args.arg4);
+                                args.argi5, (String) args.arg3, (LetterboxDetails[]) args.arg4);
                     }
                     args.recycle();
                     break;
