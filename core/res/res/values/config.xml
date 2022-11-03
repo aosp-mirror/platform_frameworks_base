@@ -2456,8 +2456,10 @@
          assistant activities (ACTIVITY_TYPE_ASSISTANT) -->
     <bool name="config_dismissDreamOnActivityStart">false</bool>
 
-    <!-- The prefix of dream component names that are loggable. If empty, logs "other" for all. -->
-    <string name="config_loggable_dream_prefix" translatable="false"></string>
+    <!-- The prefixes of dream component names that are loggable.
+         Matched against ComponentName#flattenToString() for dream components.
+         If empty, logs "other" for all. -->
+    <string-array name="config_loggable_dream_prefixes"></string-array>
 
     <!-- ComponentName of a dream to show whenever the system would otherwise have
          gone to sleep.  When the PowerManager is asked to go to sleep, it will instead
