@@ -321,7 +321,6 @@ public class AppTransitionTests extends WindowTestsBase {
         final ActivityRecord activity2 = createActivityRecord(dc2);
 
         activity1.allDrawn = true;
-        activity1.startingDisplayed = true;
         activity1.startingMoved = true;
 
         // Simulate activity resume / finish flows to prepare app transition & set visibility,

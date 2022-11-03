@@ -1229,11 +1229,11 @@ public class AppTransitionController {
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
                     "Check opening app=%s: allDrawn=%b startingDisplayed=%b "
                             + "startingMoved=%b isRelaunching()=%b startingWindow=%s",
-                    activity, activity.allDrawn, activity.startingDisplayed,
+                    activity, activity.allDrawn, activity.isStartingWindowDisplayed(),
                     activity.startingMoved, activity.isRelaunching(),
                     activity.mStartingWindow);
             final boolean allDrawn = activity.allDrawn && !activity.isRelaunching();
-            if (!allDrawn && !activity.startingDisplayed && !activity.startingMoved) {
+            if (!allDrawn && !activity.isStartingWindowDisplayed() && !activity.startingMoved) {
                 return false;
             }
             if (allDrawn) {
