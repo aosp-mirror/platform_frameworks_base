@@ -18,19 +18,30 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import android.content.Intent
+import android.util.Log
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.animation.Expandable
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceConfig
+import com.android.systemui.keyguard.data.repository.KeyguardQuickAffordanceRepository
 import com.android.systemui.keyguard.domain.model.KeyguardQuickAffordanceModel
 import com.android.systemui.keyguard.domain.quickaffordance.KeyguardQuickAffordanceRegistry
+import com.android.systemui.keyguard.shared.model.KeyguardQuickAffordancePickerRepresentation
+import com.android.systemui.keyguard.shared.model.KeyguardSlotPickerRepresentation
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancePosition
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.shared.keyguard.shared.model.KeyguardQuickAffordanceSlots
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 
 @SysUISingleton
@@ -43,7 +54,12 @@ constructor(
     private val keyguardStateController: KeyguardStateController,
     private val userTracker: UserTracker,
     private val activityStarter: ActivityStarter,
+    private val featureFlags: FeatureFlags,
+    private val repository: Lazy<KeyguardQuickAffordanceRepository>,
 ) {
+    private val isUsingRepository: Boolean
+        get() = featureFlags.isEnabled(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES)
+
     /** Returns an observable for the quick affordance at the given position. */
     fun quickAffordance(
         position: KeyguardQuickAffordancePosition
@@ -72,7 +88,19 @@ constructor(
         configKey: String,
         expandable: Expandable?,
     ) {
-        @Suppress("UNCHECKED_CAST") val config = registry.get(configKey)
+        @Suppress("UNCHECKED_CAST")
+        val config =
+            if (isUsingRepository) {
+                val (slotId, decodedConfigKey) = configKey.decode()
+                repository.get().selections.value[slotId]?.find { it.key == decodedConfigKey }
+            } else {
+                registry.get(configKey)
+            }
+        if (config == null) {
+            Log.e(TAG, "Affordance config with key of \"$configKey\" not found!")
+            return
+        }
+
         when (val result = config.onTriggered(expandable)) {
             is KeyguardQuickAffordanceConfig.OnTriggeredResult.StartActivity ->
                 launchQuickAffordance(
@@ -84,28 +112,138 @@ constructor(
         }
     }
 
+    /**
+     * Selects an affordance with the given ID on the slot with the given ID.
+     *
+     * @return `true` if the affordance was selected successfully; `false` otherwise.
+     */
+    suspend fun select(slotId: String, affordanceId: String): Boolean {
+        check(isUsingRepository)
+
+        val slots = repository.get().getSlotPickerRepresentations()
+        val slot = slots.find { it.id == slotId } ?: return false
+        val selections =
+            repository.get().getSelections().getOrDefault(slotId, emptyList()).toMutableList()
+        val alreadySelected = selections.remove(affordanceId)
+        if (!alreadySelected) {
+            while (selections.size > 0 && selections.size >= slot.maxSelectedAffordances) {
+                selections.removeAt(0)
+            }
+        }
+
+        selections.add(affordanceId)
+
+        repository
+            .get()
+            .setSelections(
+                slotId = slotId,
+                affordanceIds = selections,
+            )
+
+        return true
+    }
+
+    /**
+     * Unselects one or all affordances from the slot with the given ID.
+     *
+     * @param slotId The ID of the slot.
+     * @param affordanceId The ID of the affordance to remove; if `null`, removes all affordances
+     * from the slot.
+     * @return `true` if the affordance was successfully removed; `false` otherwise (for example, if
+     * the affordance was not on the slot to begin with).
+     */
+    suspend fun unselect(slotId: String, affordanceId: String?): Boolean {
+        check(isUsingRepository)
+
+        val slots = repository.get().getSlotPickerRepresentations()
+        if (slots.find { it.id == slotId } == null) {
+            return false
+        }
+
+        if (affordanceId.isNullOrEmpty()) {
+            return if (
+                repository.get().getSelections().getOrDefault(slotId, emptyList()).isEmpty()
+            ) {
+                false
+            } else {
+                repository.get().setSelections(slotId = slotId, affordanceIds = emptyList())
+                true
+            }
+        }
+
+        val selections =
+            repository.get().getSelections().getOrDefault(slotId, emptyList()).toMutableList()
+        return if (selections.remove(affordanceId)) {
+            repository
+                .get()
+                .setSelections(
+                    slotId = slotId,
+                    affordanceIds = selections,
+                )
+            true
+        } else {
+            false
+        }
+    }
+
+    /** Returns affordance IDs indexed by slot ID, for all known slots. */
+    suspend fun getSelections(): Map<String, List<String>> {
+        check(isUsingRepository)
+
+        val selections = repository.get().getSelections()
+        return repository.get().getSlotPickerRepresentations().associate { slotRepresentation ->
+            slotRepresentation.id to (selections[slotRepresentation.id] ?: emptyList())
+        }
+    }
+
     private fun quickAffordanceInternal(
         position: KeyguardQuickAffordancePosition
     ): Flow<KeyguardQuickAffordanceModel> {
-        val configs = registry.getAll(position)
+        return if (isUsingRepository) {
+            repository
+                .get()
+                .selections
+                .map { it[position.toSlotId()] ?: emptyList() }
+                .flatMapLatest { configs -> combinedConfigs(position, configs) }
+        } else {
+            combinedConfigs(position, registry.getAll(position))
+        }
+    }
+
+    private fun combinedConfigs(
+        position: KeyguardQuickAffordancePosition,
+        configs: List<KeyguardQuickAffordanceConfig>,
+    ): Flow<KeyguardQuickAffordanceModel> {
+        if (configs.isEmpty()) {
+            return flowOf(KeyguardQuickAffordanceModel.Hidden)
+        }
+
         return combine(
             configs.map { config ->
-                // We emit an initial "Hidden" value to make sure that there's always an initial
-                // value and avoid subtle bugs where the downstream isn't receiving any values
-                // because one config implementation is not emitting an initial value. For example,
-                // see b/244296596.
+                // We emit an initial "Hidden" value to make sure that there's always an
+                // initial value and avoid subtle bugs where the downstream isn't receiving
+                // any values because one config implementation is not emitting an initial
+                // value. For example, see b/244296596.
                 config.lockScreenState.onStart {
                     emit(KeyguardQuickAffordanceConfig.LockScreenState.Hidden)
                 }
             }
         ) { states ->
             val index =
-                states.indexOfFirst { it is KeyguardQuickAffordanceConfig.LockScreenState.Visible }
+                states.indexOfFirst { state ->
+                    state is KeyguardQuickAffordanceConfig.LockScreenState.Visible
+                }
             if (index != -1) {
                 val visibleState =
                     states[index] as KeyguardQuickAffordanceConfig.LockScreenState.Visible
+                val configKey = configs[index].key
                 KeyguardQuickAffordanceModel.Visible(
-                    configKey = configs[index].key,
+                    configKey =
+                        if (isUsingRepository) {
+                            configKey.encode(position.toSlotId())
+                        } else {
+                            configKey
+                        },
                     icon = visibleState.icon,
                     activationState = visibleState.activationState,
                 )
@@ -144,5 +282,40 @@ constructor(
                 true /* showOverLockscreenWhenLocked */,
             )
         }
+    }
+
+    private fun KeyguardQuickAffordancePosition.toSlotId(): String {
+        return when (this) {
+            KeyguardQuickAffordancePosition.BOTTOM_START ->
+                KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START
+            KeyguardQuickAffordancePosition.BOTTOM_END ->
+                KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_END
+        }
+    }
+
+    private fun String.encode(slotId: String): String {
+        return "$slotId$DELIMITER$this"
+    }
+
+    private fun String.decode(): Pair<String, String> {
+        val splitUp = this.split(DELIMITER)
+        return Pair(splitUp[0], splitUp[1])
+    }
+
+    fun getAffordancePickerRepresentations(): List<KeyguardQuickAffordancePickerRepresentation> {
+        check(isUsingRepository)
+
+        return repository.get().getAffordancePickerRepresentations()
+    }
+
+    fun getSlotPickerRepresentations(): List<KeyguardSlotPickerRepresentation> {
+        check(isUsingRepository)
+
+        return repository.get().getSlotPickerRepresentations()
+    }
+
+    companion object {
+        private const val TAG = "KeyguardQuickAffordanceInteractor"
+        private const val DELIMITER = "::"
     }
 }

@@ -17,6 +17,7 @@
 
 package com.android.systemui.keyguard.data.quickaffordance
 
+import android.content.Context
 import com.android.systemui.R
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
@@ -24,6 +25,7 @@ import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCall
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.qrcodescanner.controller.QRCodeScannerController
 import javax.inject.Inject
 import kotlinx.coroutines.channels.awaitClose
@@ -34,10 +36,15 @@ import kotlinx.coroutines.flow.Flow
 class QrCodeScannerKeyguardQuickAffordanceConfig
 @Inject
 constructor(
+    @Application context: Context,
     private val controller: QRCodeScannerController,
 ) : KeyguardQuickAffordanceConfig {
 
     override val key: String = BuiltInKeyguardQuickAffordanceKeys.QR_CODE_SCANNER
+
+    override val pickerName = context.getString(R.string.qr_code_scanner_title)
+
+    override val pickerIconResourceId = R.drawable.ic_qr_code_scanner
 
     override val lockScreenState: Flow<KeyguardQuickAffordanceConfig.LockScreenState> =
         conflatedCallbackFlow {
