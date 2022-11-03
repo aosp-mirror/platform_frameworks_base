@@ -41,11 +41,13 @@ constructor(
         }
 
         scope.launch {
-            interactor.finishedKeyguardState.collect { logger.i("Finished transition to", it) }
+            interactor.finishedKeyguardTransitionStep.collect {
+                logger.i("Finished transition", it)
+            }
         }
 
         scope.launch {
-            interactor.startedKeyguardState.collect { logger.i("Started transition to", it) }
+            interactor.startedKeyguardTransitionStep.collect { logger.i("Started transition", it) }
         }
     }
 }

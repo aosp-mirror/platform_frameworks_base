@@ -228,7 +228,7 @@ open class ClockEventController @Inject constructor(
                 listenForDozing(this)
                 if (featureFlags.isEnabled(DOZING_MIGRATION_1)) {
                     listenForDozeAmountTransition(this)
-                    listenForGoneToAodTransition(this)
+                    listenForAnyStateToAodTransition(this)
                 } else {
                     listenForDozeAmount(this)
                 }
@@ -286,10 +286,10 @@ open class ClockEventController @Inject constructor(
      * dozing.
      */
     @VisibleForTesting
-    internal fun listenForGoneToAodTransition(scope: CoroutineScope): Job {
+    internal fun listenForAnyStateToAodTransition(scope: CoroutineScope): Job {
         return scope.launch {
-            keyguardTransitionInteractor.goneToAodTransition.filter {
-                it.transitionState == TransitionState.STARTED
+            keyguardTransitionInteractor.anyStateToAodTransition.filter {
+                it.transitionState == TransitionState.FINISHED
             }.collect {
                 dozeAmount = 1f
                 clock?.animations?.doze(dozeAmount)
