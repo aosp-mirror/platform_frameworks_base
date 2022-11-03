@@ -393,7 +393,7 @@ public class HdmiControlService extends SystemService {
     // and the eARC HAL is present.
     @GuardedBy("mLock")
     @VisibleForTesting
-    protected boolean mEarcSupported;
+    private boolean mEarcSupported;
 
     // Set to true while the eARC feature is enabled.
     @GuardedBy("mLock")
@@ -726,7 +726,7 @@ public class HdmiControlService extends SystemService {
             if (isEarcEnabled()) {
                 initializeEarc(INITIATED_BY_BOOT_UP);
             } else {
-                setEarcEnabledInHal(false);
+                setEarcEnabledInHal(false, false);
             }
         }
 
@@ -3522,7 +3522,7 @@ public class HdmiControlService extends SystemService {
                 }
                 initializeEarc(startReason);
             } else {
-                setEarcEnabledInHal(false);
+                setEarcEnabledInHal(false, false);
             }
         }
         // TODO: Initialize MHL local devices.
@@ -4418,8 +4418,17 @@ public class HdmiControlService extends SystemService {
 
     private void initializeEarc(int initiatedBy) {
         Slog.i(TAG, "eARC initialized, reason = " + initiatedBy);
-        setEarcEnabledInHal(true);
         initializeEarcLocalDevice(initiatedBy);
+
+        if (initiatedBy == INITIATED_BY_ENABLE_EARC) {
+            // Since ARC and eARC cannot be connected simultaneously, we need to terminate ARC
+            // before even enabling eARC.
+            setEarcEnabledInHal(true, true);
+        } else {
+            // On boot, wake-up, and hotplug in, eARC will always be attempted before ARC.
+            // So there is no need to explicitly terminate ARC before enabling eARC.
+            setEarcEnabledInHal(true, false);
+        }
     }
 
     @ServiceThreadOnly
@@ -4475,7 +4484,7 @@ public class HdmiControlService extends SystemService {
     @ServiceThreadOnly
     private void onDisableEarc() {
         disableEarcLocalDevice();
-        setEarcEnabledInHal(false);
+        setEarcEnabledInHal(false, false);
         clearEarcLocalDevice();
     }
 
@@ -4509,12 +4518,28 @@ public class HdmiControlService extends SystemService {
 
     @ServiceThreadOnly
     @VisibleForTesting
-    protected void setEarcEnabledInHal(boolean enabled) {
+    protected void setEarcEnabledInHal(boolean enabled, boolean terminateArcFirst) {
         assertRunOnServiceThread();
-        mEarcController.setEarcEnabled(enabled);
-        mCecController.setHpdSignalType(
-                enabled ? Constants.HDMI_HPD_TYPE_STATUS_BIT : Constants.HDMI_HPD_TYPE_PHYSICAL,
-                mEarcPortId);
+        if (terminateArcFirst) {
+            startArcAction(false, new IHdmiControlCallback.Stub() {
+                @Override
+                public void onComplete(int result) throws RemoteException {
+                    // Independently of the result (i.e. independently of whether the ARC RX device
+                    // responded with <Terminate ARC> or not), we always end up terminating ARC in
+                    // the HAL. As soon as we do that, we can enable eARC in the HAL.
+                    mEarcController.setEarcEnabled(enabled);
+                    mCecController.setHpdSignalType(
+                            enabled ? Constants.HDMI_HPD_TYPE_STATUS_BIT
+                                    : Constants.HDMI_HPD_TYPE_PHYSICAL,
+                            mEarcPortId);
+                }
+            });
+        } else {
+            mEarcController.setEarcEnabled(enabled);
+            mCecController.setHpdSignalType(
+                    enabled ? Constants.HDMI_HPD_TYPE_STATUS_BIT : Constants.HDMI_HPD_TYPE_PHYSICAL,
+                    mEarcPortId);
+        }
     }
 
     @ServiceThreadOnly

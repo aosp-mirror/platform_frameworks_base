@@ -1504,4 +1504,49 @@ public class HdmiCecLocalDeviceTvTest {
 
         assertThat(callback.getResult()).isEqualTo(HdmiControlManager.RESULT_SUCCESS);
     }
+
+    @Test
+    public void enableEarc_terminateArc() {
+        // Emulate Audio device on port 0x2000 (supports ARC and eARC)
+        mNativeWrapper.setPortConnectionStatus(2, true);
+        HdmiCecMessage reportPhysicalAddress =
+                HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
+                        ADDR_AUDIO_SYSTEM, 0x2000, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
+        mNativeWrapper.onCecMessage(reportPhysicalAddress);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage initiateArc = HdmiCecMessageBuilder.buildInitiateArc(
+                ADDR_AUDIO_SYSTEM,
+                ADDR_TV);
+
+        mNativeWrapper.onCecMessage(initiateArc);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage reportArcInitiated = HdmiCecMessageBuilder.buildReportArcInitiated(
+                ADDR_TV,
+                ADDR_AUDIO_SYSTEM);
+        // <Report ARC Initiated> should only be sent after SAD querying is done
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(reportArcInitiated);
+
+        // Finish querying SADs
+        assertThat(mNativeWrapper.getResultMessages()).contains(SAD_QUERY);
+        mNativeWrapper.clearResultMessages();
+        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
+        mTestLooper.dispatchAll();
+        assertThat(mNativeWrapper.getResultMessages()).contains(SAD_QUERY);
+        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
+        mTestLooper.dispatchAll();
+
+        assertThat(mNativeWrapper.getResultMessages()).contains(reportArcInitiated);
+        mNativeWrapper.clearResultMessages();
+
+        mHdmiControlService.setEarcEnabled(HdmiControlManager.EARC_FEATURE_ENABLED);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage requestArcTermination = HdmiCecMessageBuilder.buildRequestArcTermination(
+                ADDR_TV,
+                ADDR_AUDIO_SYSTEM);
+
+        assertThat(mNativeWrapper.getResultMessages()).contains(requestArcTermination);
+    }
 }
