@@ -41,6 +41,13 @@ import com.android.settingslib.spaprivileged.model.app.AppRecord
 import kotlinx.coroutines.Dispatchers
 
 private const val TAG = "AppList"
+private const val CONTENT_TYPE_HEADER = "header"
+
+internal data class AppListState(
+    val showSystem: State<Boolean>,
+    val option: State<Int>,
+    val searchQuery: State<String>,
+)
 
 /**
  * The template to render an App List.
@@ -49,23 +56,26 @@ private const val TAG = "AppList"
  */
 @Composable
 internal fun <T : AppRecord> AppList(
-    appListConfig: AppListConfig,
+    config: AppListConfig,
     listModel: AppListModel<T>,
-    showSystem: State<Boolean>,
-    option: State<Int>,
-    searchQuery: State<String>,
+    state: AppListState,
+    header: @Composable () -> Unit,
     appItem: @Composable (itemState: AppListItemModel<T>) -> Unit,
     bottomPadding: Dp,
+    appListDataSupplier: @Composable () -> State<AppListData<T>?> = {
+        loadAppListData(config, listModel, state)
+    },
 ) {
-    LogCompositions(TAG, appListConfig.userId.toString())
-    val appListData = loadAppEntries(appListConfig, listModel, showSystem, option, searchQuery)
-    AppListWidget(appListData, listModel, appItem, bottomPadding)
+    LogCompositions(TAG, config.userId.toString())
+    val appListData = appListDataSupplier()
+    AppListWidget(appListData, listModel, header, appItem, bottomPadding)
 }
 
 @Composable
 private fun <T : AppRecord> AppListWidget(
     appListData: State<AppListData<T>?>,
     listModel: AppListModel<T>,
+    header: @Composable () -> Unit,
     appItem: @Composable (itemState: AppListItemModel<T>) -> Unit,
     bottomPadding: Dp,
 ) {
@@ -81,6 +91,10 @@ private fun <T : AppRecord> AppListWidget(
             state = rememberLazyListStateAndHideKeyboardWhenStartScroll(),
             contentPadding = PaddingValues(bottom = bottomPadding),
         ) {
+            item(contentType = CONTENT_TYPE_HEADER) {
+                header()
+            }
+
             items(count = list.size, key = { option to list[it].record.app.packageName }) {
                 val appEntry = list[it]
                 val summary = listModel.getSummary(option, appEntry.record) ?: "".toState()
@@ -94,19 +108,17 @@ private fun <T : AppRecord> AppListWidget(
 }
 
 @Composable
-private fun <T : AppRecord> loadAppEntries(
-    appListConfig: AppListConfig,
+private fun <T : AppRecord> loadAppListData(
+    config: AppListConfig,
     listModel: AppListModel<T>,
-    showSystem: State<Boolean>,
-    option: State<Int>,
-    searchQuery: State<String>,
+    state: AppListState,
 ): State<AppListData<T>?> {
-    val viewModel: AppListViewModel<T> = viewModel(key = appListConfig.userId.toString())
-    viewModel.appListConfig.setIfAbsent(appListConfig)
+    val viewModel: AppListViewModel<T> = viewModel(key = config.userId.toString())
+    viewModel.appListConfig.setIfAbsent(config)
     viewModel.listModel.setIfAbsent(listModel)
-    viewModel.showSystem.Sync(showSystem)
-    viewModel.option.Sync(option)
-    viewModel.searchQuery.Sync(searchQuery)
+    viewModel.showSystem.Sync(state.showSystem)
+    viewModel.option.Sync(state.option)
+    viewModel.searchQuery.Sync(state.searchQuery)
 
     return viewModel.appListDataFlow.collectAsState(null, Dispatchers.Default)
 }
