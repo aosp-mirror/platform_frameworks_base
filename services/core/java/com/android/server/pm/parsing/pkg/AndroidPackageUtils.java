@@ -321,8 +321,4 @@ public class AndroidPackageUtils {
         info.versionCode = ((ParsingPackageHidden) pkg).getVersionCode();
         info.versionCodeMajor = ((ParsingPackageHidden) pkg).getVersionCodeMajor();
     }
-
-    public static ApplicationInfo toAppInfoWithoutState(AndroidPackage pkg) {
-        return ((ParsingPackageHidden) pkg).toAppInfoWithoutState();
-    }
 }

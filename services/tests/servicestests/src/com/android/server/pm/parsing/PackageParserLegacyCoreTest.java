@@ -20,21 +20,16 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import android.apex.ApexInfo;
 import android.content.Context;
 import android.content.IntentFilter;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PermissionInfo;
-import android.content.pm.SigningDetails;
 import android.content.pm.parsing.FrameworkParsingPackageUtils;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.FileUtils;
-import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 import android.util.Pair;
 import android.util.SparseIntArray;
@@ -53,7 +48,6 @@ import com.android.server.pm.pkg.component.ParsedComponent;
 import com.android.server.pm.pkg.component.ParsedIntentInfo;
 import com.android.server.pm.pkg.component.ParsedPermission;
 import com.android.server.pm.pkg.component.ParsedPermissionUtils;
-import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 
 import com.google.common.truth.Expect;
 
@@ -63,7 +57,6 @@ import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.io.InputStream;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -564,54 +557,6 @@ public class PackageParserLegacyCoreTest {
                 intentFilter.countMimeGroups());
         assertTrue("Did not find expected mime group 'mime_group_1'",
                 intentFilter.hasMimeGroup("mime_group_1"));
-    }
-
-    @Test
-    public void testApexPackageInfoGeneration() throws Exception {
-        String apexModuleName = "com.android.tzdata.apex";
-        File apexFile = copyRawResourceToFile(apexModuleName,
-                R.raw.com_android_tzdata);
-        ApexInfo apexInfo = new ApexInfo();
-        apexInfo.isActive = true;
-        apexInfo.isFactory = false;
-        apexInfo.moduleName = apexModuleName;
-        apexInfo.modulePath = apexFile.getPath();
-        apexInfo.versionCode = 191000070;
-        int flags = PackageManager.GET_META_DATA | PackageManager.GET_SIGNING_CERTIFICATES;
-
-        ParseResult<ParsedPackage> result = ParsingPackageUtils.parseDefaultOneTime(apexFile,
-                flags, Collections.emptyList(), false /*collectCertificates*/);
-        if (result.isError()) {
-            throw new IllegalStateException(result.getErrorMessage(), result.getException());
-        }
-
-        ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
-        ParsedPackage pkg = result.getResult();
-        ParseResult<SigningDetails> ret = ParsingPackageUtils.getSigningDetails(
-                input, pkg, false /*skipVerify*/);
-        if (ret.isError()) {
-            throw new IllegalStateException(ret.getErrorMessage(), ret.getException());
-        }
-        pkg.setSigningDetails(ret.getResult());
-        PackageInfo pi = PackageInfoUtils.generate(pkg.setApex(true).hideAsFinal(), apexInfo,
-                flags, null, UserHandle.USER_SYSTEM);
-
-        assertEquals("com.google.android.tzdata", pi.applicationInfo.packageName);
-        assertTrue(pi.applicationInfo.enabled);
-        assertEquals(28, pi.applicationInfo.targetSdkVersion);
-        assertEquals(191000070, pi.applicationInfo.longVersionCode);
-        assertNotNull(pi.applicationInfo.metaData);
-        assertEquals(apexFile.getPath(), pi.applicationInfo.sourceDir);
-        assertEquals("Bundle[{com.android.vending.derived.apk.id=1}]",
-                pi.applicationInfo.metaData.toString());
-
-        assertEquals("com.google.android.tzdata", pi.packageName);
-        assertEquals(191000070, pi.getLongVersionCode());
-        assertNotNull(pi.signingInfo);
-        assertTrue(pi.signingInfo.getApkContentsSigners().length > 0);
-        assertTrue(pi.isApex);
-        assertTrue((pi.applicationInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0);
-        assertTrue((pi.applicationInfo.flags & ApplicationInfo.FLAG_INSTALLED) != 0);
     }
 
     @Test
