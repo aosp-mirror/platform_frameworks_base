@@ -61,10 +61,10 @@ class ZipFileCollectionIterator : public IFileCollectionIterator {
 // An IFileCollection that represents a ZIP archive and the entries within it.
 class ZipFileCollection : public IFileCollection {
  public:
-  static std::unique_ptr<ZipFileCollection> Create(const android::StringPiece& path,
+  static std::unique_ptr<ZipFileCollection> Create(android::StringPiece path,
                                                    std::string* outError);
 
-  io::IFile* FindFile(const android::StringPiece& path) override;
+  io::IFile* FindFile(android::StringPiece path) override;
   std::unique_ptr<IFileCollectionIterator> Iterator() override;
   char GetDirSeparator() override;
 
@@ -76,7 +76,7 @@ class ZipFileCollection : public IFileCollection {
 
   ZipArchiveHandle handle_;
   std::vector<std::unique_ptr<IFile>> files_;
-  std::map<std::string, IFile*> files_by_name_;
+  std::map<std::string, IFile*, std::less<>> files_by_name_;
 };
 
 }  // namespace io

@@ -317,7 +317,7 @@ const std::unordered_map<std::string, std::string>*
   return &loaded_package->GetOverlayableMap();
 }
 
-bool AssetManager2::GetOverlayablesToString(const android::StringPiece& package_name,
+bool AssetManager2::GetOverlayablesToString(android::StringPiece package_name,
                                             std::string* out) const {
   uint8_t package_id = 0U;
   for (const auto& apk_assets : apk_assets_) {
@@ -492,7 +492,7 @@ std::unique_ptr<AssetDir> AssetManager2::OpenDir(const std::string& dirname) con
       continue;
     }
 
-    auto func = [&](const StringPiece& name, FileType type) {
+    auto func = [&](StringPiece name, FileType type) {
       AssetDir::FileInfo info;
       info.setFileName(String8(name.data(), name.size()));
       info.setFileType(type);
@@ -1271,7 +1271,7 @@ base::expected<const ResolvedBag*, NullOrIOError> AssetManager2::GetBag(
   return result;
 }
 
-static bool Utf8ToUtf16(const StringPiece& str, std::u16string* out) {
+static bool Utf8ToUtf16(StringPiece str, std::u16string* out) {
   ssize_t len =
       utf8_to_utf16_length(reinterpret_cast<const uint8_t*>(str.data()), str.size(), false);
   if (len < 0) {

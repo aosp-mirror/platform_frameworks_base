@@ -646,8 +646,8 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor, android::IDiagn
   return true;
 }
 
-static void FullyQualifyClassName(const StringPiece& package, const StringPiece& attr_ns,
-                                  const StringPiece& attr_name, xml::Element* el) {
+static void FullyQualifyClassName(StringPiece package, StringPiece attr_ns, StringPiece attr_name,
+                                  xml::Element* el) {
   xml::Attribute* attr = el->FindAttribute(attr_ns, attr_name);
   if (attr != nullptr) {
     if (std::optional<std::string> new_value =
@@ -657,7 +657,7 @@ static void FullyQualifyClassName(const StringPiece& package, const StringPiece&
   }
 }
 
-static bool RenameManifestPackage(const StringPiece& package_override, xml::Element* manifest_el) {
+static bool RenameManifestPackage(StringPiece package_override, xml::Element* manifest_el) {
   xml::Attribute* attr = manifest_el->FindAttribute({}, "package");
 
   // We've already verified that the manifest element is present, with a package
@@ -665,7 +665,7 @@ static bool RenameManifestPackage(const StringPiece& package_override, xml::Elem
   CHECK(attr != nullptr);
 
   std::string original_package = std::move(attr->value);
-  attr->value = package_override.to_string();
+  attr->value.assign(package_override);
 
   xml::Element* application_el = manifest_el->FindChild({}, "application");
   if (application_el != nullptr) {

@@ -79,7 +79,7 @@ class XmlFlattenerVisitor : public xml::ConstVisitor {
   }
 
   void Visit(const xml::Text* node) override {
-    std::string text = util::TrimWhitespace(node->text).to_string();
+    std::string text(util::TrimWhitespace(node->text));
 
     // Skip whitespace only text nodes.
     if (text.empty()) {
@@ -88,10 +88,10 @@ class XmlFlattenerVisitor : public xml::ConstVisitor {
 
     // Compact leading and trailing whitespace into a single space
     if (isspace(node->text[0])) {
-      text = ' ' + text;
+      text.insert(text.begin(), ' ');
     }
-    if (isspace(node->text[node->text.length() - 1])) {
-      text = text + ' ';
+    if (isspace(node->text.back())) {
+      text += ' ';
     }
 
     ChunkWriter writer(buffer_);
@@ -165,7 +165,7 @@ class XmlFlattenerVisitor : public xml::ConstVisitor {
   // We are adding strings to a StringPool whose strings will be sorted and merged with other
   // string pools. That means we can't encode the ID of a string directly. Instead, we defer the
   // writing of the ID here, until after the StringPool is merged and sorted.
-  void AddString(const StringPiece& str, uint32_t priority, android::ResStringPool_ref* dest,
+  void AddString(StringPiece str, uint32_t priority, android::ResStringPool_ref* dest,
                  bool treat_empty_string_as_null = false) {
     if (str.empty() && treat_empty_string_as_null) {
       // Some parts of the runtime treat null differently than empty string.

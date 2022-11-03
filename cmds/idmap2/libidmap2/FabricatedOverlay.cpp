@@ -101,10 +101,10 @@ FabricatedOverlay::Builder& FabricatedOverlay::Builder::SetResourceValue(
 }
 
 Result<FabricatedOverlay> FabricatedOverlay::Builder::Build() {
-  using ConfigMap = std::map<std::string, TargetValue>;
-  using EntryMap = std::map<std::string, ConfigMap>;
-  using TypeMap = std::map<std::string, EntryMap>;
-  using PackageMap = std::map<std::string, TypeMap>;
+  using ConfigMap = std::map<std::string, TargetValue, std::less<>>;
+  using EntryMap = std::map<std::string, ConfigMap, std::less<>>;
+  using TypeMap = std::map<std::string, EntryMap, std::less<>>;
+  using PackageMap = std::map<std::string, TypeMap, std::less<>>;
   PackageMap package_map;
   android::StringPool string_pool;
   for (const auto& res_entry : entries_) {
@@ -116,8 +116,7 @@ Result<FabricatedOverlay> FabricatedOverlay::Builder::Build() {
       return Error("failed to parse resource name '%s'", res_entry.resource_name.c_str());
     }
 
-    std::string package_name =
-        package_substr.empty() ? target_package_name_ : package_substr.to_string();
+    std::string_view package_name = package_substr.empty() ? target_package_name_ : package_substr;
     if (type_name.empty()) {
       return Error("resource name '%s' missing type name", res_entry.resource_name.c_str());
     }
@@ -133,17 +132,14 @@ Result<FabricatedOverlay> FabricatedOverlay::Builder::Build() {
                     .first;
     }
 
-    auto type = package->second.find(type_name.to_string());
+    auto type = package->second.find(type_name);
     if (type == package->second.end()) {
-      type =
-          package->second
-              .insert(std::make_pair(type_name.to_string(), EntryMap()))
-              .first;
+      type = package->second.insert(std::make_pair(type_name, EntryMap())).first;
     }
 
-    auto entry = type->second.find(entry_name.to_string());
+    auto entry = type->second.find(entry_name);
     if (entry == type->second.end()) {
-      entry = type->second.insert(std::make_pair(entry_name.to_string(), ConfigMap())).first;
+      entry = type->second.insert(std::make_pair(entry_name, ConfigMap())).first;
     }
 
     auto value = entry->second.find(res_entry.configuration);

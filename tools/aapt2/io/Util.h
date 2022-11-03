@@ -17,12 +17,11 @@
 #ifndef AAPT_IO_UTIL_H
 #define AAPT_IO_UTIL_H
 
-#include <string>
-
-#include "google/protobuf/message.h"
-#include "google/protobuf/io/coded_stream.h"
+#include <string_view>
 
 #include "format/Archive.h"
+#include "google/protobuf/io/coded_stream.h"
+#include "google/protobuf/message.h"
 #include "io/File.h"
 #include "io/Io.h"
 #include "process/IResourceTableConsumer.h"
@@ -30,23 +29,23 @@
 namespace aapt {
 namespace io {
 
-bool CopyInputStreamToArchive(IAaptContext* context, InputStream* in, const std::string& out_path,
+bool CopyInputStreamToArchive(IAaptContext* context, InputStream* in, std::string_view out_path,
                               uint32_t compression_flags, IArchiveWriter* writer);
 
-bool CopyFileToArchive(IAaptContext* context, IFile* file, const std::string& out_path,
+bool CopyFileToArchive(IAaptContext* context, IFile* file, std::string_view out_path,
                        uint32_t compression_flags, IArchiveWriter* writer);
 
 bool CopyFileToArchivePreserveCompression(IAaptContext* context, IFile* file,
-                                          const std::string& out_path, IArchiveWriter* writer);
+                                          std::string_view out_path, IArchiveWriter* writer);
 
 bool CopyProtoToArchive(IAaptContext* context, ::google::protobuf::Message* proto_msg,
-                        const std::string& out_path, uint32_t compression_flags,
+                        std::string_view out_path, uint32_t compression_flags,
                         IArchiveWriter* writer);
 
 // Copies the data from in to out. Returns false if there was an error.
 // If there was an error, check the individual streams' HadError/GetError methods.
 bool Copy(OutputStream* out, InputStream* in);
-bool Copy(OutputStream* out, const ::android::StringPiece& in);
+bool Copy(OutputStream* out, android::StringPiece in);
 bool Copy(::google::protobuf::io::ZeroCopyOutputStream* out, InputStream* in);
 
 class OutputStreamAdaptor : public io::OutputStream {

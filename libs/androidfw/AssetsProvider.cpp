@@ -211,8 +211,7 @@ std::unique_ptr<Asset> ZipAssetsProvider::OpenInternal(const std::string& path,
 }
 
 bool ZipAssetsProvider::ForEachFile(const std::string& root_path,
-                                    const std::function<void(const StringPiece&, FileType)>& f)
-                                    const {
+                                    const std::function<void(StringPiece, FileType)>& f) const {
     std::string root_path_full = root_path;
     if (root_path_full.back() != '/') {
       root_path_full += '/';
@@ -238,8 +237,7 @@ bool ZipAssetsProvider::ForEachFile(const std::string& root_path,
       if (!leaf_file_path.empty()) {
         auto iter = std::find(leaf_file_path.begin(), leaf_file_path.end(), '/');
         if (iter != leaf_file_path.end()) {
-          std::string dir =
-              leaf_file_path.substr(0, std::distance(leaf_file_path.begin(), iter)).to_string();
+          std::string dir(leaf_file_path.substr(0, std::distance(leaf_file_path.begin(), iter)));
           dirs.insert(std::move(dir));
         } else {
           f(leaf_file_path, kFileTypeRegular);
@@ -324,8 +322,7 @@ std::unique_ptr<Asset> DirectoryAssetsProvider::OpenInternal(const std::string& 
 
 bool DirectoryAssetsProvider::ForEachFile(
     const std::string& /* root_path */,
-    const std::function<void(const StringPiece&, FileType)>& /* f */)
-    const {
+    const std::function<void(StringPiece, FileType)>& /* f */) const {
   return true;
 }
 
@@ -373,8 +370,7 @@ std::unique_ptr<Asset> MultiAssetsProvider::OpenInternal(const std::string& path
 }
 
 bool MultiAssetsProvider::ForEachFile(const std::string& root_path,
-                                      const std::function<void(const StringPiece&, FileType)>& f)
-                                      const {
+                                      const std::function<void(StringPiece, FileType)>& f) const {
   return primary_->ForEachFile(root_path, f) && secondary_->ForEachFile(root_path, f);
 }
 
@@ -412,7 +408,7 @@ std::unique_ptr<Asset> EmptyAssetsProvider::OpenInternal(const std::string& /* p
 
 bool EmptyAssetsProvider::ForEachFile(
     const std::string& /* root_path */,
-    const std::function<void(const StringPiece&, FileType)>& /* f */) const {
+    const std::function<void(StringPiece, FileType)>& /* f */) const {
   return true;
 }
 

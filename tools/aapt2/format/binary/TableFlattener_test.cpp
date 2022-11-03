@@ -84,7 +84,7 @@ class TableFlattenerTest : public ::testing::Test {
     return ::testing::AssertionSuccess();
   }
 
-  ::testing::AssertionResult Exists(ResTable* table, const StringPiece& expected_name,
+  ::testing::AssertionResult Exists(ResTable* table, StringPiece expected_name,
                                     const ResourceId& expected_id,
                                     const ConfigDescription& expected_config,
                                     const uint8_t expected_data_type, const uint32_t expected_data,

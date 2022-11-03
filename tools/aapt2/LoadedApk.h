@@ -45,7 +45,7 @@ class LoadedApk {
   virtual ~LoadedApk() = default;
 
   // Loads both binary and proto APKs from disk.
-  static std::unique_ptr<LoadedApk> LoadApkFromPath(const ::android::StringPiece& path,
+  static std::unique_ptr<LoadedApk> LoadApkFromPath(android::StringPiece path,
                                                     android::IDiagnostics* diag);
 
   // Loads a proto APK from the given file collection.

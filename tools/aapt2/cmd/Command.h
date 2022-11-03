@@ -30,13 +30,10 @@ namespace aapt {
 
 class Command {
  public:
-  explicit Command(const android::StringPiece& name)
-      : name_(name.to_string()), full_subcommand_name_(name.to_string()){};
+  explicit Command(android::StringPiece name) : name_(name), full_subcommand_name_(name){};
 
-  explicit Command(const android::StringPiece& name, const android::StringPiece& short_name)
-      : name_(name.to_string()),
-        short_name_(short_name.to_string()),
-        full_subcommand_name_(name.to_string()){};
+  explicit Command(android::StringPiece name, android::StringPiece short_name)
+      : name_(name), short_name_(short_name), full_subcommand_name_(name){};
 
   Command(Command&&) = default;
   Command& operator=(Command&&) = default;
@@ -52,30 +49,26 @@ class Command {
     kPath = 1 << 0,
   };
 
-  void AddRequiredFlag(const android::StringPiece& name, const android::StringPiece& description,
+  void AddRequiredFlag(android::StringPiece name, android::StringPiece description,
                        std::string* value, uint32_t flags = 0);
 
-  void AddRequiredFlagList(const android::StringPiece& name,
-                           const android::StringPiece& description, std::vector<std::string>* value,
-                           uint32_t flags = 0);
+  void AddRequiredFlagList(android::StringPiece name, android::StringPiece description,
+                           std::vector<std::string>* value, uint32_t flags = 0);
 
-  void AddOptionalFlag(const android::StringPiece& name, const android::StringPiece& description,
+  void AddOptionalFlag(android::StringPiece name, android::StringPiece description,
                        std::optional<std::string>* value, uint32_t flags = 0);
 
-  void AddOptionalFlagList(const android::StringPiece& name,
-                           const android::StringPiece& description, std::vector<std::string>* value,
-                           uint32_t flags = 0);
+  void AddOptionalFlagList(android::StringPiece name, android::StringPiece description,
+                           std::vector<std::string>* value, uint32_t flags = 0);
 
-  void AddOptionalFlagList(const android::StringPiece& name,
-                           const android::StringPiece& description,
+  void AddOptionalFlagList(android::StringPiece name, android::StringPiece description,
                            std::unordered_set<std::string>* value);
 
-  void AddOptionalSwitch(const android::StringPiece& name, const android::StringPiece& description,
-                         bool* value);
+  void AddOptionalSwitch(android::StringPiece name, android::StringPiece description, bool* value);
 
   void AddOptionalSubcommand(std::unique_ptr<Command>&& subcommand, bool experimental = false);
 
-  void SetDescription(const android::StringPiece& name);
+  void SetDescription(android::StringPiece name);
 
   // Prints the help menu of the command.
   void Usage(std::ostream* out);
@@ -90,17 +83,21 @@ class Command {
 
  private:
   struct Flag {
-    explicit Flag(const android::StringPiece& name, const android::StringPiece& description,
+    explicit Flag(android::StringPiece name, android::StringPiece description,
                   const bool is_required, const size_t num_args,
-                  std::function<bool(const android::StringPiece& value)>&& action)
-        : name(name.to_string()), description(description.to_string()), is_required(is_required),
-          num_args(num_args), action(std::move(action)) {}
+                  std::function<bool(android::StringPiece value)>&& action)
+        : name(name),
+          description(description),
+          is_required(is_required),
+          num_args(num_args),
+          action(std::move(action)) {
+    }
 
     const std::string name;
     const std::string description;
     const bool is_required;
     const size_t num_args;
-    const std::function<bool(const android::StringPiece& value)> action;
+    const std::function<bool(android::StringPiece value)> action;
     bool found = false;
   };
 

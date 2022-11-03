@@ -35,7 +35,7 @@ struct DiagMessage {
  public:
   DiagMessage() = default;
 
-  explicit DiagMessage(const android::StringPiece& src) : source_(src) {
+  explicit DiagMessage(android::StringPiece src) : source_(src) {
   }
 
   explicit DiagMessage(const Source& src) : source_(src) {
@@ -61,7 +61,7 @@ struct DiagMessage {
 
 template <>
 inline DiagMessage& DiagMessage::operator<<(const ::std::u16string& value) {
-  message_ << android::StringPiece16(value);
+  message_ << value;
   return *this;
 }
 

@@ -34,15 +34,14 @@ struct Source {
 
   Source() = default;
 
-  inline Source(const android::StringPiece& path) : path(path.to_string()) {  // NOLINT(implicit)
+  inline Source(android::StringPiece path) : path(path) {  // NOLINT(implicit)
   }
 
-  inline Source(const android::StringPiece& path, const android::StringPiece& archive)
-      : path(path.to_string()), archive(archive.to_string()) {
+  inline Source(android::StringPiece path, android::StringPiece archive)
+      : path(path), archive(archive) {
   }
 
-  inline Source(const android::StringPiece& path, size_t line)
-      : path(path.to_string()), line(line) {
+  inline Source(android::StringPiece path, size_t line) : path(path), line(line) {
   }
 
   inline Source WithLine(size_t line) const {

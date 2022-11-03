@@ -373,7 +373,7 @@ bool BinaryResourceParser::ParseType(const ResourceTablePackage* package,
   std::optional<ResourceNamedTypeRef> parsed_type = ParseResourceNamedType(type_str);
   if (!parsed_type) {
     diag_->Warn(android::DiagMessage(source_)
-                << "invalid type name '" << type_str << "' for type with ID " << type->id);
+                << "invalid type name '" << type_str << "' for type with ID " << int(type->id));
     return true;
   }
 

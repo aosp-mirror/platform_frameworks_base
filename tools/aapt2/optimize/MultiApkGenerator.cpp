@@ -113,12 +113,12 @@ class ContextWrapper : public IAaptContext {
 };
 
 class SignatureFilter : public IPathFilter {
-  bool Keep(const std::string& path) override {
+  bool Keep(std::string_view path) override {
     static std::regex signature_regex(R"regex(^META-INF/.*\.(RSA|DSA|EC|SF)$)regex");
-    if (std::regex_search(path, signature_regex)) {
+    if (std::regex_search(path.begin(), path.end(), signature_regex)) {
       return false;
     }
-    return !(path == "META-INF/MANIFEST.MF");
+    return path != "META-INF/MANIFEST.MF";
   }
 };
 

@@ -65,11 +65,11 @@ class ResourceParserTest : public ::testing::Test {
     context_ = test::ContextBuilder().Build();
   }
 
-  ::testing::AssertionResult TestParse(const StringPiece& str) {
+  ::testing::AssertionResult TestParse(StringPiece str) {
     return TestParse(str, ConfigDescription{});
   }
 
-  ::testing::AssertionResult TestParse(const StringPiece& str, const ConfigDescription& config) {
+  ::testing::AssertionResult TestParse(StringPiece str, const ConfigDescription& config) {
     ResourceParserOptions parserOptions;
     ResourceParser parser(context_->GetDiagnostics(), &table_, android::Source{"test"}, config,
                           parserOptions);

@@ -34,13 +34,13 @@ namespace aapt {
 
 // Parses a configuration density (ex. hdpi, xxhdpi, 234dpi, anydpi, etc).
 // Returns Nothing and logs a human friendly error message if the string was not legal.
-std::optional<uint16_t> ParseTargetDensityParameter(const android::StringPiece& arg,
+std::optional<uint16_t> ParseTargetDensityParameter(android::StringPiece arg,
                                                     android::IDiagnostics* diag);
 
 // Parses a string of the form 'path/to/output.apk:<config>[,<config>...]' and fills in
 // `out_path` with the path and `out_split` with the set of ConfigDescriptions.
 // Returns false and logs a human friendly error message if the string was not legal.
-bool ParseSplitParameter(const android::StringPiece& arg, android::IDiagnostics* diag,
+bool ParseSplitParameter(android::StringPiece arg, android::IDiagnostics* diag,
                          std::string* out_path, SplitConstraints* out_split);
 
 // Parses a set of config filter strings of the form 'en,fr-rFR' and returns an IConfigFilter.
