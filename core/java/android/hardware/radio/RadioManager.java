@@ -251,7 +251,8 @@ public class RadioManager {
                     Objects.requireNonNull(entry.getValue());
                 }
             }
-            mDabFrequencyTable = dabFrequencyTable;
+            mDabFrequencyTable = (dabFrequencyTable == null || dabFrequencyTable.isEmpty())
+                    ? null : dabFrequencyTable;
             mVendorInfo = (vendorInfo == null) ? new HashMap<>() : vendorInfo;
         }
 
@@ -446,7 +447,8 @@ public class RadioManager {
             mIsBgScanSupported = in.readInt() == 1;
             mSupportedProgramTypes = arrayToSet(in.createIntArray());
             mSupportedIdentifierTypes = arrayToSet(in.createIntArray());
-            mDabFrequencyTable = Utils.readStringIntMap(in);
+            Map<String, Integer> dabFrequencyTableIn = Utils.readStringIntMap(in);
+            mDabFrequencyTable = (dabFrequencyTableIn.isEmpty()) ? null : dabFrequencyTableIn;
             mVendorInfo = Utils.readStringMap(in);
         }
 

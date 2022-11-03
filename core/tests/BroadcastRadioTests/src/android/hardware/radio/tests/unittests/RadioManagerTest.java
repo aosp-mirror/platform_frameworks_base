@@ -24,6 +24,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.radio.Announcement;
 import android.hardware.radio.IAnnouncementListener;
@@ -46,6 +47,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -89,7 +91,8 @@ public final class RadioManagerTest {
             createAmBandDescriptor();
     private static final RadioManager.FmBandConfig FM_BAND_CONFIG = createFmBandConfig();
     private static final RadioManager.AmBandConfig AM_BAND_CONFIG = createAmBandConfig();
-    private static final RadioManager.ModuleProperties AMFM_PROPERTIES = createAmFmProperties();
+    private static final RadioManager.ModuleProperties AMFM_PROPERTIES =
+            createAmFmProperties(/* dabFrequencyTable= */ null);
 
     /**
      * Info flags with live, tuned and stereo enabled
@@ -709,9 +712,17 @@ public final class RadioManagerTest {
     }
 
     @Test
-    public void getDabFrequencyTable_forModuleProperties() {
+    public void getDabFrequencyTable_forModulePropertiesInitializedWithNullTable() {
         assertWithMessage("Properties DAB frequency table")
                 .that(AMFM_PROPERTIES.getDabFrequencyTable()).isNull();
+    }
+
+    @Test
+    public void getDabFrequencyTable_forModulePropertiesInitializedWithEmptyTable() {
+        RadioManager.ModuleProperties properties = createAmFmProperties(new ArrayMap<>());
+
+        assertWithMessage("Properties DAB frequency table")
+                .that(properties.getDabFrequencyTable()).isNull();
     }
 
     @Test
@@ -734,8 +745,37 @@ public final class RadioManagerTest {
     }
 
     @Test
+    public void writeToParcel_forModulePropertiesWithNullDabFrequencyTable() {
+        Parcel parcel = Parcel.obtain();
+
+        AMFM_PROPERTIES.writeToParcel(parcel, /* flags= */ 0);
+        parcel.setDataPosition(0);
+
+        RadioManager.ModuleProperties modulePropertiesFromParcel =
+                RadioManager.ModuleProperties.CREATOR.createFromParcel(parcel);
+        assertWithMessage("Module properties created from parcel")
+                .that(modulePropertiesFromParcel).isEqualTo(AMFM_PROPERTIES);
+    }
+
+    @Test
+    public void writeToParcel_forModulePropertiesWithNonnullDabFrequencyTable() {
+        Parcel parcel = Parcel.obtain();
+        RadioManager.ModuleProperties propertiesToParcel = createAmFmProperties(
+                Map.of("5A", 174928, "12D", 229072));
+
+        propertiesToParcel.writeToParcel(parcel, /* flags= */ 0);
+        parcel.setDataPosition(0);
+
+        RadioManager.ModuleProperties modulePropertiesFromParcel =
+                RadioManager.ModuleProperties.CREATOR.createFromParcel(parcel);
+        assertWithMessage("Module properties created from parcel")
+                .that(modulePropertiesFromParcel).isEqualTo(propertiesToParcel);
+    }
+
+    @Test
     public void equals_withSameProperties_returnsTrue() {
-        RadioManager.ModuleProperties propertiesCompared = createAmFmProperties();
+        RadioManager.ModuleProperties propertiesCompared =
+                createAmFmProperties(/* dabFrequencyTable= */ null);
 
         assertWithMessage("The same module properties")
                 .that(AMFM_PROPERTIES).isEqualTo(propertiesCompared);
@@ -747,7 +787,7 @@ public final class RadioManagerTest {
                 PROPERTIES_ID + 1, SERVICE_NAME, CLASS_ID, IMPLEMENTOR, PRODUCT, VERSION,
                 SERIAL, NUM_TUNERS, NUM_AUDIO_SOURCES, IS_INITIALIZATION_REQUIRED,
                 IS_CAPTURE_SUPPORTED, /* bands= */ null, IS_BG_SCAN_SUPPORTED,
-                SUPPORTED_PROGRAM_TYPES, SUPPORTED_IDENTIFIERS_TYPES, /* dabFrequencyTable= */ null,
+                SUPPORTED_PROGRAM_TYPES, SUPPORTED_IDENTIFIERS_TYPES, Map.of("5A", 174928),
                 /* vendorInfo= */ null);
 
         assertWithMessage("Module properties of different id")
@@ -756,7 +796,8 @@ public final class RadioManagerTest {
 
     @Test
     public void hashCode_withSameModuleProperties_equals() {
-        RadioManager.ModuleProperties propertiesCompared = createAmFmProperties();
+        RadioManager.ModuleProperties propertiesCompared =
+                createAmFmProperties(/* dabFrequencyTable= */ null);
 
         assertWithMessage("Hash code of the same module properties")
                 .that(propertiesCompared.hashCode()).isEqualTo(AMFM_PROPERTIES.hashCode());
@@ -989,13 +1030,14 @@ public final class RadioManagerTest {
         verify(mCloseHandleMock).close();
     }
 
-    private static RadioManager.ModuleProperties createAmFmProperties() {
+    private static RadioManager.ModuleProperties createAmFmProperties(
+            @Nullable Map<String, Integer>  dabFrequencyTable) {
         return new RadioManager.ModuleProperties(PROPERTIES_ID, SERVICE_NAME, CLASS_ID,
                 IMPLEMENTOR, PRODUCT, VERSION, SERIAL, NUM_TUNERS, NUM_AUDIO_SOURCES,
                 IS_INITIALIZATION_REQUIRED, IS_CAPTURE_SUPPORTED,
                 new RadioManager.BandDescriptor[]{AM_BAND_DESCRIPTOR, FM_BAND_DESCRIPTOR},
                 IS_BG_SCAN_SUPPORTED, SUPPORTED_PROGRAM_TYPES, SUPPORTED_IDENTIFIERS_TYPES,
-                /* dabFrequencyTable= */ null, /* vendorInfo= */ null);
+                dabFrequencyTable, /* vendorInfo= */ null);
     }
 
     private static RadioManager.FmBandDescriptor createFmBandDescriptor() {
