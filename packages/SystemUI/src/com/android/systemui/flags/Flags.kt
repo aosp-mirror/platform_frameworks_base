@@ -57,7 +57,7 @@ object Flags {
     val INSTANT_VOICE_REPLY = UnreleasedFlag(111, teamfood = true)
 
     // TODO(b/254512425): Tracking Bug
-    val NOTIFICATION_MEMORY_MONITOR_ENABLED = UnreleasedFlag(112, teamfood = true)
+    val NOTIFICATION_MEMORY_MONITOR_ENABLED = ReleasedFlag(112)
 
     // TODO(b/254512731): Tracking Bug
     @JvmField val NOTIFICATION_DISMISSAL_FADE = UnreleasedFlag(113, teamfood = true)
