@@ -374,13 +374,6 @@ class WindowStateAnimator {
     }
 
     void destroySurfaceLocked(SurfaceControl.Transaction t) {
-        final ActivityRecord activity = mWin.mActivityRecord;
-        if (activity != null) {
-            if (mWin == activity.mStartingWindow) {
-                activity.startingDisplayed = false;
-            }
-        }
-
         if (mSurfaceController == null) {
             return;
         }
