@@ -740,8 +740,7 @@ final class IRemoteInputConnectionInvoker {
     }
 
     /**
-     * Invokes {@code IRemoteInputConnection#replaceText(InputConnectionCommandHeader, int, int,
-     * CharSequence, TextAttribute)}.
+     * Replaces the specific range in the current input field with suggested text.
      *
      * @param start the character index where the replacement should start.
      * @param end the character index where the replacement should end.
@@ -751,8 +750,9 @@ final class IRemoteInputConnectionInvoker {
      *     that this means you can't position the cursor within the text.
      * @param text the text to replace. This may include styles.
      * @param textAttribute The extra information about the text. This value may be null.
-     * @return {@code true} if the invocation is completed without {@link RemoteException}, {@code
-     *     false} otherwise.
+     * @return {@code true} if the specific range is replaced successfully, {@code false} otherwise.
+     * @see android.view.inputmethod.InputConnection#replaceText(int, int, CharSequence, int,
+     *     TextAttribute)
      */
     @AnyThread
     public boolean replaceText(

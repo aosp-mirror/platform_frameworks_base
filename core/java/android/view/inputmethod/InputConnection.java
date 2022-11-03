@@ -1352,6 +1352,8 @@ public interface InputConnection {
      *     that this means you can't position the cursor within the text.
      * @param text the text to replace. This may include styles.
      * @param textAttribute The extra information about the text. This value may be null.
+     * @return {@code true} if the replace command was sent to the associated editor (regardless of
+     *     whether the replacement is success or not), {@code false} otherwise.
      */
     default boolean replaceText(
             @IntRange(from = 0) int start,
