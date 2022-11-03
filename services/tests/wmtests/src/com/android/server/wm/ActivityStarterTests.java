@@ -98,6 +98,7 @@ import android.service.voice.IVoiceInteractionSession;
 import android.util.Pair;
 import android.util.Size;
 import android.view.Gravity;
+import android.view.RemoteAnimationAdapter;
 import android.window.TaskFragmentOrganizerToken;
 
 import androidx.test.filters.SmallTest;
@@ -1312,6 +1313,32 @@ public class ActivityStarterTests extends WindowTestsBase {
 
         // Verify the cookie is updated
         assertTrue(mRootWindowContainer.topRunningActivity().mLaunchCookie == newCookie);
+    }
+
+    @Test
+    public void testRemoteAnimation_appliesToExistingTask() {
+        final ActivityStarter starter = prepareStarter(0, false);
+
+        // Put an activity on default display as the top focused activity.
+        ActivityRecord r = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final Intent intent = new Intent();
+        intent.setComponent(ActivityBuilder.getDefaultComponent());
+        starter.setReason("testRemoteAnimation_newTask")
+                .setIntent(intent)
+                .execute();
+
+        assertNull(mRootWindowContainer.topRunningActivity().mPendingRemoteAnimation);
+
+        // Relaunch the activity with remote animation indicated in options.
+        final RemoteAnimationAdapter adaptor = mock(RemoteAnimationAdapter.class);
+        final ActivityOptions options = ActivityOptions.makeRemoteAnimation(adaptor);
+        starter.setReason("testRemoteAnimation_existingTask")
+                .setIntent(intent)
+                .setActivityOptions(options.toBundle())
+                .execute();
+
+        // Verify the remote animation is updated.
+        assertEquals(adaptor, mRootWindowContainer.topRunningActivity().mPendingRemoteAnimation);
     }
 
     @Test

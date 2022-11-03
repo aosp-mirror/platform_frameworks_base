@@ -23,9 +23,12 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.doze.DozeHost
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.keyguard.WakefulnessLifecycle.Wakefulness
+import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.WakefulnessModel
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.statusbar.phone.BiometricUnlockController
+import com.android.systemui.statusbar.phone.BiometricUnlockController.WakeAndUnlockMode
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import javax.inject.Inject
 import kotlinx.coroutines.channels.awaitClose
@@ -65,6 +68,9 @@ interface KeyguardRepository {
      */
     val isKeyguardShowing: Flow<Boolean>
 
+    /** Observable for whether the bouncer is showing. */
+    val isBouncerShowing: Flow<Boolean>
+
     /**
      * Observable for whether we are in doze state.
      *
@@ -94,6 +100,9 @@ interface KeyguardRepository {
 
     /** Observable for device wake/sleep state */
     val wakefulnessState: Flow<WakefulnessModel>
+
+    /** Observable for biometric unlock modes */
+    val biometricUnlockState: Flow<BiometricUnlockModel>
 
     /**
      * Returns `true` if the keyguard is showing; `false` otherwise.
@@ -125,6 +134,7 @@ constructor(
     private val keyguardStateController: KeyguardStateController,
     dozeHost: DozeHost,
     wakefulnessLifecycle: WakefulnessLifecycle,
+    biometricUnlockController: BiometricUnlockController,
 ) : KeyguardRepository {
     private val _animateBottomAreaDozingTransitions = MutableStateFlow(false)
     override val animateBottomAreaDozingTransitions =
@@ -154,6 +164,29 @@ constructor(
             keyguardStateController.isShowing,
             TAG,
             "initial isKeyguardShowing"
+        )
+
+        awaitClose { keyguardStateController.removeCallback(callback) }
+    }
+
+    override val isBouncerShowing: Flow<Boolean> = conflatedCallbackFlow {
+        val callback =
+            object : KeyguardStateController.Callback {
+                override fun onBouncerShowingChanged() {
+                    trySendWithFailureLogging(
+                        keyguardStateController.isBouncerShowing,
+                        TAG,
+                        "updated isBouncerShowing"
+                    )
+                }
+            }
+
+        keyguardStateController.addCallback(callback)
+        // Adding the callback does not send an initial update.
+        trySendWithFailureLogging(
+            keyguardStateController.isBouncerShowing,
+            TAG,
+            "initial isBouncerShowing"
         )
 
         awaitClose { keyguardStateController.removeCallback(callback) }
@@ -248,6 +281,24 @@ constructor(
         awaitClose { wakefulnessLifecycle.removeObserver(callback) }
     }
 
+    override val biometricUnlockState: Flow<BiometricUnlockModel> = conflatedCallbackFlow {
+        val callback =
+            object : BiometricUnlockController.BiometricModeListener {
+                override fun onModeChanged(@WakeAndUnlockMode mode: Int) {
+                    trySendWithFailureLogging(biometricModeIntToObject(mode), TAG, "biometric mode")
+                }
+            }
+
+        biometricUnlockController.addBiometricModeListener(callback)
+        trySendWithFailureLogging(
+            biometricModeIntToObject(biometricUnlockController.getMode()),
+            TAG,
+            "initial biometric mode"
+        )
+
+        awaitClose { biometricUnlockController.removeBiometricModeListener(callback) }
+    }
+
     override fun setAnimateDozingTransitions(animate: Boolean) {
         _animateBottomAreaDozingTransitions.value = animate
     }
@@ -276,6 +327,20 @@ constructor(
             2 -> WakefulnessModel.AWAKE
             3 -> WakefulnessModel.STARTING_TO_SLEEP
             else -> throw IllegalArgumentException("Invalid Wakefulness value: $value")
+        }
+    }
+
+    private fun biometricModeIntToObject(@WakeAndUnlockMode value: Int): BiometricUnlockModel {
+        return when (value) {
+            0 -> BiometricUnlockModel.NONE
+            1 -> BiometricUnlockModel.WAKE_AND_UNLOCK
+            2 -> BiometricUnlockModel.WAKE_AND_UNLOCK_PULSING
+            3 -> BiometricUnlockModel.SHOW_BOUNCER
+            4 -> BiometricUnlockModel.ONLY_WAKE
+            5 -> BiometricUnlockModel.UNLOCK_COLLAPSING
+            6 -> BiometricUnlockModel.WAKE_AND_UNLOCK_FROM_DREAM
+            7 -> BiometricUnlockModel.DISMISS_BOUNCER
+            else -> throw IllegalArgumentException("Invalid BiometricUnlockModel value: $value")
         }
     }
 

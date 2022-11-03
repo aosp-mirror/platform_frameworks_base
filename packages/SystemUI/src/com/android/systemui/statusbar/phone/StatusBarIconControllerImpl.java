@@ -195,12 +195,13 @@ public class StatusBarIconControllerImpl implements Tunable,
         }
     }
 
-    /**
-     * Signal icons need to be handled differently, because they can be
-     * composite views
-     */
     @Override
-    public void setSignalIcon(String slot, WifiIconState state) {
+    public void setWifiIcon(String slot, WifiIconState state) {
+        if (mStatusBarPipelineFlags.useNewWifiIcon()) {
+            Log.d(TAG, "ignoring old pipeline callback because the new wifi icon is enabled");
+            return;
+        }
+
         if (state == null) {
             removeIcon(slot, 0);
             return;
@@ -216,6 +217,24 @@ public class StatusBarIconControllerImpl implements Tunable,
         }
     }
 
+
+    @Override
+    public void setNewWifiIcon() {
+        if (!mStatusBarPipelineFlags.useNewWifiIcon()) {
+            Log.d(TAG, "ignoring new pipeline callback because the new wifi icon is disabled");
+            return;
+        }
+
+        String slot = mContext.getString(com.android.internal.R.string.status_bar_wifi);
+        StatusBarIconHolder holder = mStatusBarIconList.getIconHolder(slot, /* tag= */ 0);
+        if (holder == null) {
+            holder = StatusBarIconHolder.forNewWifiIcon();
+            setIcon(slot, holder);
+        } else {
+            // Don't have to do anything in the new world
+        }
+    }
+
     /**
      * Accept a list of MobileIconStates, which all live in the same slot(?!), and then are sorted
      * by subId. Don't worry this definitely makes sense and works.
@@ -225,7 +244,7 @@ public class StatusBarIconControllerImpl implements Tunable,
     @Override
     public void setMobileIcons(String slot, List<MobileIconState> iconStates) {
         if (mStatusBarPipelineFlags.useNewMobileIcons()) {
-            Log.d(TAG, "ignoring old pipeline callbacks, because the new "
+            Log.d(TAG, "ignoring old pipeline callbacks, because the new mobile "
                     + "icons are enabled");
             return;
         }
@@ -251,10 +270,11 @@ public class StatusBarIconControllerImpl implements Tunable,
     public void setNewMobileIconSubIds(List<Integer> subIds) {
         if (!mStatusBarPipelineFlags.useNewMobileIcons()) {
             Log.d(TAG, "ignoring new pipeline callback, "
-                    + "since the new icons are disabled");
+                    + "since the new mobile icons are disabled");
             return;
         }
-        Slot mobileSlot = mStatusBarIconList.getSlot("mobile");
+        String slotName = mContext.getString(com.android.internal.R.string.status_bar_mobile);
+        Slot mobileSlot = mStatusBarIconList.getSlot(slotName);
 
         Collections.reverse(subIds);
 
@@ -262,7 +282,7 @@ public class StatusBarIconControllerImpl implements Tunable,
             StatusBarIconHolder holder = mobileSlot.getHolderForTag(subId);
             if (holder == null) {
                 holder = StatusBarIconHolder.fromSubIdForModernMobileIcon(subId);
-                setIcon("mobile", holder);
+                setIcon(slotName, holder);
             } else {
                 // Don't have to do anything in the new world
             }

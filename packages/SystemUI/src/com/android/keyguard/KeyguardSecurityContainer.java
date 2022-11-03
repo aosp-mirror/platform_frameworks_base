@@ -106,8 +106,9 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
     static final int USER_TYPE_WORK_PROFILE = 2;
     static final int USER_TYPE_SECONDARY_USER = 3;
 
-    @IntDef({MODE_DEFAULT, MODE_ONE_HANDED, MODE_USER_SWITCHER})
+    @IntDef({MODE_UNINITIALIZED, MODE_DEFAULT, MODE_ONE_HANDED, MODE_USER_SWITCHER})
     public @interface Mode {}
+    static final int MODE_UNINITIALIZED = -1;
     static final int MODE_DEFAULT = 0;
     static final int MODE_ONE_HANDED = 1;
     static final int MODE_USER_SWITCHER = 2;
@@ -154,7 +155,11 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
     private boolean mDisappearAnimRunning;
     private SwipeListener mSwipeListener;
     private ViewMode mViewMode = new DefaultViewMode();
-    private @Mode int mCurrentMode = MODE_DEFAULT;
+    /*
+     * Using MODE_UNINITIALIZED to mean the view mode is set to DefaultViewMode, but init() has not
+     * yet been called on it. This will happen when the ViewController is initialized.
+     */
+    private @Mode int mCurrentMode = MODE_UNINITIALIZED;
     private int mWidth = -1;
 
     private final WindowInsetsAnimation.Callback mWindowInsetsAnimationCallback =
@@ -347,6 +352,8 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
 
     private String modeToString(@Mode int mode) {
         switch (mode) {
+            case MODE_UNINITIALIZED:
+                return "Uninitialized";
             case MODE_DEFAULT:
                 return "Default";
             case MODE_ONE_HANDED:

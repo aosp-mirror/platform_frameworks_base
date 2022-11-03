@@ -23,6 +23,8 @@ import android.graphics.drawable.Drawable
 import android.os.UserManager
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
+import com.android.systemui.GuestResetOrExitSessionReceiver
+import com.android.systemui.GuestResumeSessionReceiver
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.flags.FakeFeatureFlags
@@ -69,6 +71,8 @@ class UserSwitcherViewModelTest : SysuiTestCase() {
     @Mock private lateinit var deviceProvisionedController: DeviceProvisionedController
     @Mock private lateinit var devicePolicyManager: DevicePolicyManager
     @Mock private lateinit var uiEventLogger: UiEventLogger
+    @Mock private lateinit var resumeSessionReceiver: GuestResumeSessionReceiver
+    @Mock private lateinit var resetOrExitSessionReceiver: GuestResetOrExitSessionReceiver
 
     private lateinit var underTest: UserSwitcherViewModel
 
@@ -104,6 +108,8 @@ class UserSwitcherViewModelTest : SysuiTestCase() {
                 devicePolicyManager = devicePolicyManager,
                 refreshUsersScheduler = refreshUsersScheduler,
                 uiEventLogger = uiEventLogger,
+                resumeSessionReceiver = resumeSessionReceiver,
+                resetOrExitSessionReceiver = resetOrExitSessionReceiver,
             )
 
         underTest =

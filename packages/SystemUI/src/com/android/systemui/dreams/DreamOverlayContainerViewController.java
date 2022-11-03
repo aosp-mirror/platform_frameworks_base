@@ -54,6 +54,8 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
     private final DreamOverlayStatusBarViewController mStatusBarViewController;
     private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private final BlurUtils mBlurUtils;
+    private final DreamOverlayAnimationsController mDreamOverlayAnimationsController;
+    private final DreamOverlayStateController mStateController;
 
     private final ComplicationHostViewController mComplicationHostViewController;
 
@@ -134,12 +136,16 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
             @Named(DreamOverlayModule.BURN_IN_PROTECTION_UPDATE_INTERVAL) long
                     burnInProtectionUpdateInterval,
             @Named(DreamOverlayModule.MILLIS_UNTIL_FULL_JITTER) long millisUntilFullJitter,
-            BouncerCallbackInteractor bouncerCallbackInteractor) {
+            BouncerCallbackInteractor bouncerCallbackInteractor,
+            DreamOverlayAnimationsController animationsController,
+            DreamOverlayStateController stateController) {
         super(containerView);
         mDreamOverlayContentView = contentView;
         mStatusBarViewController = statusBarViewController;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mBlurUtils = blurUtils;
+        mDreamOverlayAnimationsController = animationsController;
+        mStateController = stateController;
 
         mComplicationHostViewController = complicationHostViewController;
         mDreamOverlayMaxTranslationY = resources.getDimensionPixelSize(
@@ -172,6 +178,11 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
             bouncer.addBouncerExpansionCallback(mBouncerExpansionCallback);
         }
         mBouncerCallbackInteractor.addBouncerExpansionCallback(mBouncerExpansionCallback);
+
+        // Start dream entry animations. Skip animations for low light clock.
+        if (!mStateController.isLowLightActive()) {
+            mDreamOverlayAnimationsController.startEntryAnimations(mView);
+        }
     }
 
     @Override
@@ -182,6 +193,8 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
             bouncer.removeBouncerExpansionCallback(mBouncerExpansionCallback);
         }
         mBouncerCallbackInteractor.removeBouncerExpansionCallback(mBouncerExpansionCallback);
+
+        mDreamOverlayAnimationsController.cancelRunningEntryAnimations();
     }
 
     View getContainerView() {

@@ -171,7 +171,10 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        Trace.beginSection("DozeScreenBrightness.onSensorChanged" + event.values[0]);
+        if (Trace.isEnabled()) {
+            Trace.traceBegin(
+                    Trace.TRACE_TAG_APP, "DozeScreenBrightness.onSensorChanged" + event.values[0]);
+        }
         try {
             if (mRegistered) {
                 mLastSensorValue = (int) event.values[0];

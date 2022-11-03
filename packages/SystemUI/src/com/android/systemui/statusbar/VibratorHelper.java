@@ -19,6 +19,7 @@ package com.android.systemui.statusbar;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.media.AudioAttributes;
+import android.os.Process;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
@@ -33,6 +34,7 @@ import java.util.concurrent.Executor;
 import javax.inject.Inject;
 
 /**
+ *
  */
 @SysUISingleton
 public class VibratorHelper {
@@ -40,9 +42,18 @@ public class VibratorHelper {
     private final Vibrator mVibrator;
     public static final VibrationAttributes TOUCH_VIBRATION_ATTRIBUTES =
             VibrationAttributes.createForUsage(VibrationAttributes.USAGE_TOUCH);
+
+    private static final VibrationEffect BIOMETRIC_SUCCESS_VIBRATION_EFFECT =
+            VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
+    private static final VibrationEffect BIOMETRIC_ERROR_VIBRATION_EFFECT =
+            VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK);
+    private static final VibrationAttributes HARDWARE_FEEDBACK_VIBRATION_ATTRIBUTES =
+            VibrationAttributes.createForUsage(VibrationAttributes.USAGE_HARDWARE_FEEDBACK);
+
     private final Executor mExecutor;
 
     /**
+     *
      */
     @Inject
     public VibratorHelper(@Nullable Vibrator vibrator, @Background Executor executor) {
@@ -108,5 +119,24 @@ public class VibratorHelper {
             return;
         }
         mExecutor.execute(mVibrator::cancel);
+    }
+
+    /**
+     * Perform vibration when biometric authentication success
+     */
+    public void vibrateAuthSuccess(String reason) {
+        vibrate(Process.myUid(),
+                "com.android.systemui",
+                BIOMETRIC_SUCCESS_VIBRATION_EFFECT, reason,
+                HARDWARE_FEEDBACK_VIBRATION_ATTRIBUTES);
+    }
+
+    /**
+     * Perform vibration when biometric authentication error
+     */
+    public void vibrateAuthError(String reason) {
+        vibrate(Process.myUid(), "com.android.systemui",
+                BIOMETRIC_ERROR_VIBRATION_EFFECT, reason,
+                HARDWARE_FEEDBACK_VIBRATION_ATTRIBUTES);
     }
 }
