@@ -184,12 +184,12 @@ fun CredentialOptionRow(
   ) {
     Column() {
       Text(
-        text = credentialOptionInfo.title,
+        text = credentialOptionInfo.entryKey,
         style = Typography.h6,
         modifier = Modifier.padding(top = 16.dp)
       )
       Text(
-        text = credentialOptionInfo.subtitle,
+        text = credentialOptionInfo.entrySubkey,
         style = Typography.body2,
         modifier = Modifier.padding(bottom = 16.dp)
       )
