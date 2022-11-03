@@ -56,6 +56,7 @@ import android.content.pm.overlay.OverlayPaths;
 import android.content.res.ApkAssets;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Environment;
 import android.os.FabricatedOverlayInternal;
 import android.os.HandlerThread;
@@ -876,7 +877,7 @@ public final class OverlayManagerService extends SystemService {
                     }
                     Slog.d(TAG, "commit failed: " + e.getMessage(), e);
                     throw new SecurityException("commit failed"
-                            + (DEBUG ? ": " + e.getMessage() : ""));
+                            + (DEBUG || Build.IS_DEBUGGABLE ? ": " + e.getMessage() : ""));
                 }
             } finally {
                 traceEnd(TRACE_TAG_RRO);
