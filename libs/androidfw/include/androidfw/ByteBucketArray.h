@@ -31,9 +31,15 @@ namespace android {
 template <typename T>
 class ByteBucketArray {
  public:
-  ByteBucketArray() : default_() { memset(buckets_, 0, sizeof(buckets_)); }
+  ByteBucketArray() {
+    memset(buckets_, 0, sizeof(buckets_));
+  }
 
   ~ByteBucketArray() {
+    clear();
+  }
+
+  void clear() {
     for (size_t i = 0; i < kNumBuckets; i++) {
       if (buckets_[i] != NULL) {
         delete[] buckets_[i];
@@ -84,7 +90,7 @@ class ByteBucketArray {
   enum { kNumBuckets = 16, kBucketSize = 16 };
 
   T* buckets_[kNumBuckets];
-  T default_;
+  static inline const T default_ = {};
 };
 
 }  // namespace android

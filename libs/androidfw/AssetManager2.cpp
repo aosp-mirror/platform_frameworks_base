@@ -22,6 +22,7 @@
 #include <iterator>
 #include <map>
 #include <set>
+#include <span>
 
 #include "android-base/logging.h"
 #include "android-base/stringprintf.h"
@@ -207,23 +208,30 @@ void AssetManager2::BuildDynamicRefTable() {
   }
 
   // Now assign the runtime IDs so that we have a build-time to runtime ID map.
-  const auto package_groups_end = package_groups_.end();
-  for (auto iter = package_groups_.begin(); iter != package_groups_end; ++iter) {
-    const std::string& package_name = iter->packages_[0].loaded_package_->GetPackageName();
-    for (auto iter2 = package_groups_.begin(); iter2 != package_groups_end; ++iter2) {
-      iter2->dynamic_ref_table->addMapping(String16(package_name.c_str(), package_name.size()),
-                                           iter->dynamic_ref_table->mAssignedPackageId);
-
-      // Add the alias resources to the dynamic reference table of every package group. Since
-      // staging aliases can only be defined by the framework package (which is not a shared
-      // library), the compile-time package id of the framework is the same across all packages
-      // that compile against the framework.
-      for (const auto& package : iter->packages_) {
-        for (const auto& entry : package.loaded_package_->GetAliasResourceIdMap()) {
-          iter2->dynamic_ref_table->addAlias(entry.first, entry.second);
-        }
-      }
+  DynamicRefTable::AliasMap aliases;
+  for (const auto& group : package_groups_) {
+    const std::string& package_name = group.packages_[0].loaded_package_->GetPackageName();
+    const auto name_16 = String16(package_name.c_str(), package_name.size());
+    for (auto&& inner_group : package_groups_) {
+      inner_group.dynamic_ref_table->addMapping(name_16,
+                                                group.dynamic_ref_table->mAssignedPackageId);
     }
+
+    for (const auto& package : group.packages_) {
+      const auto& package_aliases = package.loaded_package_->GetAliasResourceIdMap();
+      aliases.insert(package_aliases.begin(), package_aliases.end());
+    }
+  }
+
+  if (!aliases.empty()) {
+    // Add the alias resources to the dynamic reference table of every package group. Since
+    // staging aliases can only be defined by the framework package (which is not a shared
+    // library), the compile-time package id of the framework is the same across all packages
+    // that compile against the framework.
+    for (auto& group : std::span(package_groups_.data(), package_groups_.size() - 1)) {
+      group.dynamic_ref_table->setAliases(aliases);
+    }
+    package_groups_.back().dynamic_ref_table->setAliases(std::move(aliases));
   }
 }
 
@@ -1347,18 +1355,17 @@ base::expected<uint32_t, NullOrIOError> AssetManager2::GetResourceId(
 void AssetManager2::RebuildFilterList() {
   for (PackageGroup& group : package_groups_) {
     for (ConfiguredPackage& impl : group.packages_) {
-      // Destroy it.
-      impl.filtered_configs_.~ByteBucketArray();
-
-      // Re-create it.
-      new (&impl.filtered_configs_) ByteBucketArray<FilteredConfigGroup>();
+      impl.filtered_configs_.clear();
 
       // Create the filters here.
       impl.loaded_package_->ForEachTypeSpec([&](const TypeSpec& type_spec, uint8_t type_id) {
-        FilteredConfigGroup& group = impl.filtered_configs_.editItemAt(type_id - 1);
+        FilteredConfigGroup* group = nullptr;
         for (const auto& type_entry : type_spec.type_entries) {
           if (type_entry.config.match(configuration_)) {
-            group.type_entries.push_back(&type_entry);
+            if (!group) {
+              group = &impl.filtered_configs_.editItemAt(type_id - 1);
+            }
+            group->type_entries.push_back(&type_entry);
           }
         }
       });
