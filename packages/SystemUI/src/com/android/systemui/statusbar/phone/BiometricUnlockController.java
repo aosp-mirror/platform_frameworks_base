@@ -27,11 +27,8 @@ import android.hardware.fingerprint.FingerprintManager;
 import android.metrics.LogMaker;
 import android.os.Handler;
 import android.os.PowerManager;
-import android.os.Process;
 import android.os.SystemClock;
 import android.os.Trace;
-import android.os.VibrationAttributes;
-import android.os.VibrationEffect;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
@@ -87,12 +84,6 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
     private static final String BIOMETRIC_WAKE_LOCK_NAME = "wake-and-unlock:wakelock";
     private static final UiEventLogger UI_EVENT_LOGGER = new UiEventLoggerImpl();
     private static final int UDFPS_ATTEMPTS_BEFORE_SHOW_BOUNCER = 3;
-    private static final VibrationEffect SUCCESS_VIBRATION_EFFECT =
-            VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
-    private static final VibrationEffect ERROR_VIBRATION_EFFECT =
-            VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK);
-    private static final VibrationAttributes HARDWARE_FEEDBACK_VIBRATION_ATTRIBUTES =
-            VibrationAttributes.createForUsage(VibrationAttributes.USAGE_HARDWARE_FEEDBACK);
 
     @IntDef(prefix = { "MODE_" }, value = {
             MODE_NONE,
@@ -167,7 +158,6 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
     private final NotificationShadeWindowController mNotificationShadeWindowController;
     private final SessionTracker mSessionTracker;
     private final int mConsecutiveFpFailureThreshold;
-    private final boolean mShouldVibrate;
     private int mMode;
     private BiometricSourceType mBiometricType;
     private KeyguardViewController mKeyguardViewController;
@@ -307,8 +297,6 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         mHandler = handler;
         mConsecutiveFpFailureThreshold = resources.getInteger(
                 R.integer.fp_consecutive_failure_time_ms);
-        mShouldVibrate = !(resources.getBoolean(
-                com.android.internal.R.bool.system_server_plays_face_haptics));
         mKeyguardBypassController = keyguardBypassController;
         mKeyguardBypassController.setUnlockController(this);
         mMetricsLogger = metricsLogger;
@@ -423,10 +411,10 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
     public void startWakeAndUnlock(BiometricSourceType biometricSourceType,
                                    boolean isStrongBiometric) {
         int mode = calculateMode(biometricSourceType, isStrongBiometric);
-        if (BiometricSourceType.FACE == biometricSourceType && (mode == MODE_WAKE_AND_UNLOCK
+        if (mode == MODE_WAKE_AND_UNLOCK
                 || mode == MODE_WAKE_AND_UNLOCK_PULSING || mode == MODE_UNLOCK_COLLAPSING
-                || mode == MODE_WAKE_AND_UNLOCK_FROM_DREAM || mode == MODE_DISMISS_BOUNCER)) {
-            vibrateSuccess();
+                || mode == MODE_WAKE_AND_UNLOCK_FROM_DREAM || mode == MODE_DISMISS_BOUNCER) {
+            vibrateSuccess(biometricSourceType);
         }
         startWakeAndUnlock(mode);
     }
@@ -659,10 +647,11 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         }
 
         // Suppress all face auth errors if fingerprint can be used to authenticate
-        if (biometricSourceType == BiometricSourceType.FACE
+        if ((biometricSourceType == BiometricSourceType.FACE
                 && !mUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(
-                KeyguardUpdateMonitor.getCurrentUser())) {
-            vibrateError();
+                KeyguardUpdateMonitor.getCurrentUser()))
+                || (biometricSourceType == BiometricSourceType.FINGERPRINT)) {
+            vibrateError(biometricSourceType);
         }
 
         cleanup();
@@ -688,24 +677,15 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         cleanup();
     }
 
-    private void vibrateSuccess() {
-        if (mShouldVibrate) {
-            mVibratorHelper.vibrate(Process.myUid(),
-                    "com.android.systemui",
-                    SUCCESS_VIBRATION_EFFECT,
-                    getClass().getSimpleName() + "::success",
-                    HARDWARE_FEEDBACK_VIBRATION_ATTRIBUTES);
-        }
+    //these haptics are for device-entry only
+    private void vibrateSuccess(BiometricSourceType type) {
+        mVibratorHelper.vibrateAuthSuccess(
+                getClass().getSimpleName() + ", type =" + type + "device-entry::success");
     }
 
-    private void vibrateError() {
-        if (mShouldVibrate) {
-            mVibratorHelper.vibrate(Process.myUid(),
-                    "com.android.systemui",
-                    ERROR_VIBRATION_EFFECT,
-                    getClass().getSimpleName() + "::error",
-                    HARDWARE_FEEDBACK_VIBRATION_ATTRIBUTES);
-        }
+    private void vibrateError(BiometricSourceType type) {
+        mVibratorHelper.vibrateAuthError(
+                getClass().getSimpleName() + ", type =" + type + "device-entry::error");
     }
 
     private void cleanup() {
