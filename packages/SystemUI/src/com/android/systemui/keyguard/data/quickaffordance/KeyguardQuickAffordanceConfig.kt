@@ -29,6 +29,10 @@ interface KeyguardQuickAffordanceConfig {
     /** Unique identifier for this quick affordance. It must be globally unique. */
     val key: String
 
+    val pickerName: String
+
+    val pickerIconResourceId: Int
+
     /**
      * The ever-changing state of the affordance.
      *

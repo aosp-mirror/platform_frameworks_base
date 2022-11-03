@@ -129,6 +129,14 @@ object Flags {
 
     @JvmField val NEW_UDFPS_OVERLAY = UnreleasedFlag(215)
 
+    /**
+     * Whether to enable the code powering customizable lock screen quick affordances.
+     *
+     * Note that this flag does not enable individual implementations of quick affordances like the
+     * new camera quick affordance. Look for individual flags for those.
+     */
+    @JvmField val CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES = UnreleasedFlag(216, teamfood = false)
+
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
     @JvmField val POWER_MENU_LITE = ReleasedFlag(300)

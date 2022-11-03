@@ -23,10 +23,14 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.doze.util.BurnInHelperWrapper
+import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.quickaffordance.BuiltInKeyguardQuickAffordanceKeys
 import com.android.systemui.keyguard.data.quickaffordance.FakeKeyguardQuickAffordanceConfig
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceConfig
+import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceSelectionManager
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
+import com.android.systemui.keyguard.data.repository.KeyguardQuickAffordanceRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardBottomAreaInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardQuickAffordanceInteractor
@@ -41,6 +45,8 @@ import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import kotlin.math.max
 import kotlin.math.min
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.test.runBlockingTest
@@ -82,20 +88,13 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
             .thenReturn(RETURNED_BURN_IN_OFFSET)
 
         homeControlsQuickAffordanceConfig =
-            object :
-                FakeKeyguardQuickAffordanceConfig(
-                    BuiltInKeyguardQuickAffordanceKeys.HOME_CONTROLS
-                ) {}
+            FakeKeyguardQuickAffordanceConfig(BuiltInKeyguardQuickAffordanceKeys.HOME_CONTROLS)
         quickAccessWalletAffordanceConfig =
-            object :
-                FakeKeyguardQuickAffordanceConfig(
-                    BuiltInKeyguardQuickAffordanceKeys.QUICK_ACCESS_WALLET
-                ) {}
+            FakeKeyguardQuickAffordanceConfig(
+                BuiltInKeyguardQuickAffordanceKeys.QUICK_ACCESS_WALLET
+            )
         qrCodeScannerAffordanceConfig =
-            object :
-                FakeKeyguardQuickAffordanceConfig(
-                    BuiltInKeyguardQuickAffordanceKeys.QR_CODE_SCANNER
-                ) {}
+            FakeKeyguardQuickAffordanceConfig(BuiltInKeyguardQuickAffordanceKeys.QR_CODE_SCANNER)
         registry =
             FakeKeyguardQuickAffordanceRegistry(
                 mapOf(
@@ -116,6 +115,18 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
         whenever(userTracker.userHandle).thenReturn(mock())
         whenever(lockPatternUtils.getStrongAuthForUser(anyInt()))
             .thenReturn(LockPatternUtils.StrongAuthTracker.STRONG_AUTH_NOT_REQUIRED)
+        val quickAffordanceRepository =
+            KeyguardQuickAffordanceRepository(
+                scope = CoroutineScope(IMMEDIATE),
+                backgroundDispatcher = IMMEDIATE,
+                selectionManager = KeyguardQuickAffordanceSelectionManager(),
+                configs =
+                    setOf(
+                        homeControlsQuickAffordanceConfig,
+                        quickAccessWalletAffordanceConfig,
+                        qrCodeScannerAffordanceConfig,
+                    ),
+            )
         underTest =
             KeyguardBottomAreaViewModel(
                 keyguardInteractor = keyguardInteractor,
@@ -127,6 +138,11 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
                         keyguardStateController = keyguardStateController,
                         userTracker = userTracker,
                         activityStarter = activityStarter,
+                        featureFlags =
+                            FakeFeatureFlags().apply {
+                                set(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES, false)
+                            },
+                        repository = { quickAffordanceRepository },
                     ),
                 bottomAreaInteractor = KeyguardBottomAreaInteractor(repository = repository),
                 burnInHelperWrapper = burnInHelperWrapper,
@@ -576,5 +592,6 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
     companion object {
         private const val DEFAULT_BURN_IN_OFFSET = 5
         private const val RETURNED_BURN_IN_OFFSET = 3
+        private val IMMEDIATE = Dispatchers.Main.immediate
     }
 }
