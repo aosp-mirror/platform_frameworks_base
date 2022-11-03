@@ -21,8 +21,10 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.Position
 import com.android.systemui.doze.DozeHost
 import com.android.systemui.keyguard.WakefulnessLifecycle
+import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.WakefulnessModel
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.statusbar.phone.BiometricUnlockController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.whenever
@@ -46,6 +48,7 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
     @Mock private lateinit var dozeHost: DozeHost
     @Mock private lateinit var keyguardStateController: KeyguardStateController
     @Mock private lateinit var wakefulnessLifecycle: WakefulnessLifecycle
+    @Mock private lateinit var biometricUnlockController: BiometricUnlockController
 
     private lateinit var underTest: KeyguardRepositoryImpl
 
@@ -59,6 +62,7 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
                 keyguardStateController,
                 dozeHost,
                 wakefulnessLifecycle,
+                biometricUnlockController,
             )
     }
 
@@ -190,7 +194,7 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
     }
 
     @Test
-    fun wakefullness() = runBlockingTest {
+    fun wakefulness() = runBlockingTest {
         val values = mutableListOf<WakefulnessModel>()
         val job = underTest.wakefulnessState.onEach(values::add).launchIn(this)
 
@@ -216,5 +220,64 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
 
         job.cancel()
         verify(wakefulnessLifecycle).removeObserver(captor.value)
+    }
+
+    @Test
+    fun isBouncerShowing() = runBlockingTest {
+        whenever(keyguardStateController.isBouncerShowing).thenReturn(false)
+        var latest: Boolean? = null
+        val job = underTest.isBouncerShowing.onEach { latest = it }.launchIn(this)
+
+        assertThat(latest).isFalse()
+
+        val captor = argumentCaptor<KeyguardStateController.Callback>()
+        verify(keyguardStateController).addCallback(captor.capture())
+
+        whenever(keyguardStateController.isBouncerShowing).thenReturn(true)
+        captor.value.onBouncerShowingChanged()
+        assertThat(latest).isTrue()
+
+        whenever(keyguardStateController.isBouncerShowing).thenReturn(false)
+        captor.value.onBouncerShowingChanged()
+        assertThat(latest).isFalse()
+
+        job.cancel()
+    }
+
+    @Test
+    fun biometricUnlockState() = runBlockingTest {
+        val values = mutableListOf<BiometricUnlockModel>()
+        val job = underTest.biometricUnlockState.onEach(values::add).launchIn(this)
+
+        val captor = argumentCaptor<BiometricUnlockController.BiometricModeListener>()
+        verify(biometricUnlockController).addBiometricModeListener(captor.capture())
+
+        captor.value.onModeChanged(BiometricUnlockController.MODE_NONE)
+        captor.value.onModeChanged(BiometricUnlockController.MODE_WAKE_AND_UNLOCK)
+        captor.value.onModeChanged(BiometricUnlockController.MODE_WAKE_AND_UNLOCK_PULSING)
+        captor.value.onModeChanged(BiometricUnlockController.MODE_SHOW_BOUNCER)
+        captor.value.onModeChanged(BiometricUnlockController.MODE_ONLY_WAKE)
+        captor.value.onModeChanged(BiometricUnlockController.MODE_UNLOCK_COLLAPSING)
+        captor.value.onModeChanged(BiometricUnlockController.MODE_DISMISS_BOUNCER)
+        captor.value.onModeChanged(BiometricUnlockController.MODE_WAKE_AND_UNLOCK_FROM_DREAM)
+
+        assertThat(values)
+            .isEqualTo(
+                listOf(
+                    // Initial value will be NONE, followed by onModeChanged() call
+                    BiometricUnlockModel.NONE,
+                    BiometricUnlockModel.NONE,
+                    BiometricUnlockModel.WAKE_AND_UNLOCK,
+                    BiometricUnlockModel.WAKE_AND_UNLOCK_PULSING,
+                    BiometricUnlockModel.SHOW_BOUNCER,
+                    BiometricUnlockModel.ONLY_WAKE,
+                    BiometricUnlockModel.UNLOCK_COLLAPSING,
+                    BiometricUnlockModel.DISMISS_BOUNCER,
+                    BiometricUnlockModel.WAKE_AND_UNLOCK_FROM_DREAM,
+                )
+            )
+
+        job.cancel()
+        verify(biometricUnlockController).removeBiometricModeListener(captor.value)
     }
 }

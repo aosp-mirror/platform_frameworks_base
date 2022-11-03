@@ -128,11 +128,15 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
 
             assertThat(steps.size).isEqualTo(3)
             assertThat(steps[0])
-                .isEqualTo(TransitionStep(AOD, LOCKSCREEN, 0f, TransitionState.STARTED))
+                .isEqualTo(TransitionStep(AOD, LOCKSCREEN, 0f, TransitionState.STARTED, OWNER_NAME))
             assertThat(steps[1])
-                .isEqualTo(TransitionStep(AOD, LOCKSCREEN, 0.5f, TransitionState.RUNNING))
+                .isEqualTo(
+                    TransitionStep(AOD, LOCKSCREEN, 0.5f, TransitionState.RUNNING, OWNER_NAME)
+                )
             assertThat(steps[2])
-                .isEqualTo(TransitionStep(AOD, LOCKSCREEN, 1f, TransitionState.FINISHED))
+                .isEqualTo(
+                    TransitionStep(AOD, LOCKSCREEN, 1f, TransitionState.FINISHED, OWNER_NAME)
+                )
             job.cancel()
         }
 
@@ -174,15 +178,22 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
     }
 
     private fun assertSteps(steps: List<TransitionStep>, fractions: List<BigDecimal>) {
-        assertThat(steps[0]).isEqualTo(TransitionStep(AOD, LOCKSCREEN, 0f, TransitionState.STARTED))
+        assertThat(steps[0])
+            .isEqualTo(TransitionStep(AOD, LOCKSCREEN, 0f, TransitionState.STARTED, OWNER_NAME))
         fractions.forEachIndexed { index, fraction ->
             assertThat(steps[index + 1])
                 .isEqualTo(
-                    TransitionStep(AOD, LOCKSCREEN, fraction.toFloat(), TransitionState.RUNNING)
+                    TransitionStep(
+                        AOD,
+                        LOCKSCREEN,
+                        fraction.toFloat(),
+                        TransitionState.RUNNING,
+                        OWNER_NAME
+                    )
                 )
         }
         assertThat(steps[steps.size - 1])
-            .isEqualTo(TransitionStep(AOD, LOCKSCREEN, 1f, TransitionState.FINISHED))
+            .isEqualTo(TransitionStep(AOD, LOCKSCREEN, 1f, TransitionState.FINISHED, OWNER_NAME))
 
         assertThat(wtfHandler.failed).isFalse()
     }
