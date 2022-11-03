@@ -914,7 +914,15 @@ public abstract class TvInteractiveAppService extends Service {
         /**
          * Requests starting of recording
          *
-         * @hide
+         * <p> This is used to request the active {@link android.media.tv.TvRecordingClient} to
+         * call {@link android.media.tv.TvRecordingClient#startRecording(Uri)} with the provided
+         * {@code programUri}.
+         * A non-null {@code programUri} implies the started recording should be of that specific
+         * program, whereas null {@code programUri} does not impose such a requirement and the
+         * recording can span across multiple TV programs.
+         *
+         * @param programUri The URI for the TV program to record.
+         * @see android.media.tv.TvRecordingClient#startRecording(Uri)
          */
         @CallSuper
         public void requestStartRecording(@Nullable Uri programUri) {
