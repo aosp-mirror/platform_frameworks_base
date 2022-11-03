@@ -96,19 +96,11 @@ class StatusBarNotificationActivityStarterLogger @Inject constructor(
         })
     }
 
-    fun logFullScreenIntentSuppressedByDnD(entry: NotificationEntry) {
+    fun logFullScreenIntentSuppressedByVR(entry: NotificationEntry) {
         buffer.log(TAG, DEBUG, {
             str1 = entry.logKey
         }, {
-            "No Fullscreen intent: suppressed by DND: $str1"
-        })
-    }
-
-    fun logFullScreenIntentNotImportantEnough(entry: NotificationEntry) {
-        buffer.log(TAG, DEBUG, {
-            str1 = entry.logKey
-        }, {
-            "No Fullscreen intent: not important enough: $str1"
+            "No Fullscreen intent: suppressed by VR mode: $str1"
         })
     }
 
