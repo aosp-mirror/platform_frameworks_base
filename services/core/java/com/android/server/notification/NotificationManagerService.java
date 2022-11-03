@@ -3796,13 +3796,13 @@ public class NotificationManagerService extends SystemService {
         }
 
         private void createNotificationChannelsImpl(String pkg, int uid,
-                ParceledListSlice channelsList) {
-            createNotificationChannelsImpl(pkg, uid, channelsList,
+                ParceledListSlice channelsList, boolean fromTargetApp) {
+            createNotificationChannelsImpl(pkg, uid, channelsList, fromTargetApp,
                     ActivityTaskManager.INVALID_TASK_ID);
         }
 
         private void createNotificationChannelsImpl(String pkg, int uid,
-                ParceledListSlice channelsList, int startingTaskId) {
+                ParceledListSlice channelsList, boolean fromTargetApp, int startingTaskId) {
             List<NotificationChannel> channels = channelsList.getList();
             final int channelsSize = channels.size();
             ParceledListSlice<NotificationChannel> oldChannels =
@@ -3814,7 +3814,7 @@ public class NotificationManagerService extends SystemService {
                 final NotificationChannel channel = channels.get(i);
                 Objects.requireNonNull(channel, "channel in list is null");
                 needsPolicyFileChange = mPreferencesHelper.createNotificationChannel(pkg, uid,
-                        channel, true /* fromTargetApp */,
+                        channel, fromTargetApp,
                         mConditionProviders.isPackageOrComponentAllowed(
                                 pkg, UserHandle.getUserId(uid)));
                 if (needsPolicyFileChange) {
@@ -3850,6 +3850,7 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void createNotificationChannels(String pkg, ParceledListSlice channelsList) {
             checkCallerIsSystemOrSameApp(pkg);
+            boolean fromTargetApp = !isCallerSystemOrPhone();  // if not system, it's from the app
             int taskId = ActivityTaskManager.INVALID_TASK_ID;
             try {
                 int uid = mPackageManager.getPackageUid(pkg, 0,
@@ -3858,14 +3859,15 @@ public class NotificationManagerService extends SystemService {
             } catch (RemoteException e) {
                 // Do nothing
             }
-            createNotificationChannelsImpl(pkg, Binder.getCallingUid(), channelsList, taskId);
+            createNotificationChannelsImpl(pkg, Binder.getCallingUid(), channelsList, fromTargetApp,
+                    taskId);
         }
 
         @Override
         public void createNotificationChannelsForPackage(String pkg, int uid,
                 ParceledListSlice channelsList) {
             enforceSystemOrSystemUI("only system can call this");
-            createNotificationChannelsImpl(pkg, uid, channelsList);
+            createNotificationChannelsImpl(pkg, uid, channelsList, false /* fromTargetApp */);
         }
 
         @Override
@@ -3880,7 +3882,8 @@ public class NotificationManagerService extends SystemService {
                     CONVERSATION_CHANNEL_ID_FORMAT, parentId, conversationId));
             conversationChannel.setConversationId(parentId, conversationId);
             createNotificationChannelsImpl(
-                    pkg, uid, new ParceledListSlice(Arrays.asList(conversationChannel)));
+                    pkg, uid, new ParceledListSlice(Arrays.asList(conversationChannel)),
+                    false /* fromTargetApp */);
             mRankingHandler.requestSort();
             handleSavePolicyFile();
         }
