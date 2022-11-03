@@ -26,6 +26,8 @@ import android.text.TextUtils;
 
 import com.android.internal.annotations.GuardedBy;
 
+import dalvik.annotation.optimization.CriticalNative;
+
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -459,7 +461,7 @@ public final class ApkAssets {
     private static native @NonNull String nativeGetAssetPath(long ptr);
     private static native @NonNull String nativeGetDebugName(long ptr);
     private static native long nativeGetStringBlock(long ptr);
-    private static native boolean nativeIsUpToDate(long ptr);
+    @CriticalNative private static native boolean nativeIsUpToDate(long ptr);
     private static native long nativeOpenXml(long ptr, @NonNull String fileName) throws IOException;
     private static native @Nullable OverlayableInfo nativeGetOverlayableInfo(long ptr,
             String overlayableName) throws IOException;
