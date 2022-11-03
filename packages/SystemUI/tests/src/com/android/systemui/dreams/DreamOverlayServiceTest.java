@@ -253,6 +253,7 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
         verify(mLifecycleRegistry).setCurrentState(Lifecycle.State.DESTROYED);
         verify(mStateController).setOverlayActive(false);
         verify(mStateController).setLowLightActive(false);
+        verify(mStateController).setEntryAnimationsFinished(false);
     }
 
     @Test
