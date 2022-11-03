@@ -358,6 +358,13 @@ class Task extends TaskFragment {
 
     int mLockTaskUid = -1;  // The uid of the application that called startLockTask().
 
+    /**
+     * If non-null, the starting window should cover the associated task. It is assigned when the
+     * parent activity of starting window is put in a partial area of the task. This field will be
+     * cleared when all visible activities in this task are drawn.
+     */
+    StartingData mSharedStartingData;
+
     /** The process that had previously hosted the root activity of this task.
      * Used to know that we should try harder to keep this process around, in case the
      * user wants to return to it. */
@@ -3688,6 +3695,9 @@ class Task extends TaskFragment {
         }
         if (mRootProcess != null) {
             pw.print(prefix); pw.print("mRootProcess="); pw.println(mRootProcess);
+        }
+        if (mSharedStartingData != null) {
+            pw.println(prefix + "mSharedStartingData=" + mSharedStartingData);
         }
         pw.print(prefix); pw.print("taskId=" + mTaskId);
         pw.println(" rootTaskId=" + getRootTaskId());
