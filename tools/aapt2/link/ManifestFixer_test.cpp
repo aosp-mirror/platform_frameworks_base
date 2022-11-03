@@ -1408,5 +1408,24 @@ TEST_F(ManifestFixerTest, IntentFilterPathMustStartWithLeadingSlashOnDeepLinks) 
       </application>
     </manifest>)";
   EXPECT_THAT(Verify(input), NotNull());
+
+  // DeepLink with string reference as a path.
+  input = R"(
+    <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="android">
+      <application>
+        <activity android:name=".MainActivity">
+          <intent-filter>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.DEFAULT" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="http"
+                          android:host="www.example.com"
+                          android:path="@string/startup_uri" />
+          </intent-filter>
+        </activity>
+      </application>
+    </manifest>)";
+  EXPECT_THAT(Verify(input), NotNull());
 }
 }  // namespace aapt
