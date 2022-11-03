@@ -1873,6 +1873,11 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         @Override
         public void onActivityPreCreated(@NonNull Activity activity,
                 @Nullable Bundle savedInstanceState) {
+            if (activity.isChild()) {
+                // Skip Activity that is child of another Activity (ActivityGroup) because it's
+                // window will just be a child of the parent Activity window.
+                return;
+            }
             synchronized (mLock) {
                 final IBinder activityToken = activity.getActivityToken();
                 final IBinder initialTaskFragmentToken =
@@ -1904,6 +1909,11 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         @Override
         public void onActivityPostCreated(@NonNull Activity activity,
                 @Nullable Bundle savedInstanceState) {
+            if (activity.isChild()) {
+                // Skip Activity that is child of another Activity (ActivityGroup) because it's
+                // window will just be a child of the parent Activity window.
+                return;
+            }
             // Calling after Activity#onCreate is complete to allow the app launch something
             // first. In case of a configured placeholder activity we want to make sure
             // that we don't launch it if an activity itself already requested something to be
@@ -1921,6 +1931,11 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
 
         @Override
         public void onActivityConfigurationChanged(@NonNull Activity activity) {
+            if (activity.isChild()) {
+                // Skip Activity that is child of another Activity (ActivityGroup) because it's
+                // window will just be a child of the parent Activity window.
+                return;
+            }
             synchronized (mLock) {
                 final TransactionRecord transactionRecord = mTransactionManager
                         .startNewTransaction();
@@ -1934,6 +1949,11 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
 
         @Override
         public void onActivityPostDestroyed(@NonNull Activity activity) {
+            if (activity.isChild()) {
+                // Skip Activity that is child of another Activity (ActivityGroup) because it's
+                // window will just be a child of the parent Activity window.
+                return;
+            }
             synchronized (mLock) {
                 SplitController.this.onActivityDestroyed(activity);
             }
@@ -1969,7 +1989,11 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             if (who instanceof Activity) {
                 // We will check if the new activity should be split with the activity that launched
                 // it.
-                launchingActivity = (Activity) who;
+                final Activity activity = (Activity) who;
+                // For Activity that is child of another Activity (ActivityGroup), treat the parent
+                // Activity as the launching one because it's window will just be a child of the
+                // parent Activity window.
+                launchingActivity = activity.isChild() ? activity.getParent() : activity;
                 if (isInPictureInPicture(launchingActivity)) {
                     // We don't embed activity when it is in PIP.
                     return super.onStartActivity(who, intent, options);
