@@ -78,6 +78,7 @@ import com.android.systemui.doze.DozeReceiver;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.Execution;
 
@@ -150,6 +151,7 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
     @Nullable private List<FingerprintSensorPropertiesInternal> mSidefpsProps;
 
     @NonNull private final SparseBooleanArray mUdfpsEnrolledForUser;
+    @NonNull private final SparseBooleanArray mSfpsEnrolledForUser;
     @NonNull private final SensorPrivacyManager mSensorPrivacyManager;
     private final WakefulnessLifecycle mWakefulnessLifecycle;
     private boolean mAllFingerprintAuthenticatorsRegistered;
@@ -158,6 +160,19 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
     @NonNull private final InteractionJankMonitor mInteractionJankMonitor;
     private final @Background DelayableExecutor mBackgroundExecutor;
     private final DisplayInfo mCachedDisplayInfo = new DisplayInfo();
+
+
+    private final VibratorHelper mVibratorHelper;
+
+    private void vibrateSuccess(int modality) {
+        mVibratorHelper.vibrateAuthSuccess(
+                getClass().getSimpleName() + ", modality = " + modality + "BP::success");
+    }
+
+    private void vibrateError(int modality) {
+        mVibratorHelper.vibrateAuthError(
+                getClass().getSimpleName() + ", modality = " + modality + "BP::error");
+    }
 
     @VisibleForTesting
     final TaskStackListener mTaskStackListener = new TaskStackListener() {
@@ -322,6 +337,16 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
             for (FingerprintSensorPropertiesInternal prop : mUdfpsProps) {
                 if (prop.sensorId == sensorId) {
                     mUdfpsEnrolledForUser.put(userId, hasEnrollments);
+                }
+            }
+        }
+
+        if (mSidefpsProps == null) {
+            Log.d(TAG, "handleEnrollmentsChanged, mSidefpsProps is null");
+        } else {
+            for (FingerprintSensorPropertiesInternal prop : mSidefpsProps) {
+                if (prop.sensorId == sensorId) {
+                    mSfpsEnrolledForUser.put(userId, hasEnrollments);
                 }
             }
         }
@@ -660,7 +685,8 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
             @NonNull StatusBarStateController statusBarStateController,
             @NonNull InteractionJankMonitor jankMonitor,
             @Main Handler handler,
-            @Background DelayableExecutor bgExecutor) {
+            @Background DelayableExecutor bgExecutor,
+            @NonNull VibratorHelper vibrator) {
         mContext = context;
         mExecution = execution;
         mUserManager = userManager;
@@ -677,6 +703,8 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
         mWindowManager = windowManager;
         mInteractionJankMonitor = jankMonitor;
         mUdfpsEnrolledForUser = new SparseBooleanArray();
+        mSfpsEnrolledForUser = new SparseBooleanArray();
+        mVibratorHelper = vibrator;
 
         mOrientationListener = new BiometricDisplayListener(
                 context,
@@ -866,6 +894,8 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
     public void onBiometricAuthenticated(@Modality int modality) {
         if (DEBUG) Log.d(TAG, "onBiometricAuthenticated: ");
 
+        vibrateSuccess(modality);
+
         if (mCurrentDialog != null) {
             mCurrentDialog.onAuthenticationSucceeded(modality);
         } else {
@@ -887,6 +917,11 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
     @Nullable
     public List<FingerprintSensorPropertiesInternal> getUdfpsProps() {
         return mUdfpsProps;
+    }
+
+    @Nullable
+    public List<FingerprintSensorPropertiesInternal> getSfpsProps() {
+        return mSidefpsProps;
     }
 
     private String getErrorString(@Modality int modality, int error, int vendorCode) {
@@ -912,6 +947,8 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
         if (DEBUG) {
             Log.d(TAG, String.format("onBiometricError(%d, %d, %d)", modality, error, vendorCode));
         }
+
+        vibrateError(modality);
 
         final boolean isLockout = (error == BiometricConstants.BIOMETRIC_ERROR_LOCKOUT)
                 || (error == BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT);
@@ -1011,6 +1048,17 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
         }
 
         return mUdfpsEnrolledForUser.get(userId);
+    }
+
+    /**
+     * Whether the passed userId has enrolled SFPS.
+     */
+    public boolean isSfpsEnrolled(int userId) {
+        if (mSidefpsController == null) {
+            return false;
+        }
+
+        return mSfpsEnrolledForUser.get(userId);
     }
 
     private void showDialog(SomeArgs args, boolean skipAnimation, Bundle savedState) {

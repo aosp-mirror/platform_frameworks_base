@@ -318,6 +318,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     @Override
     public void onInit() {
         mSecurityViewFlipperController.init();
+        configureMode();
     }
 
     @Override

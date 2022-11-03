@@ -54,9 +54,11 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
     @Test
     fun `transition collectors receives only appropriate events`() =
         runBlocking(IMMEDIATE) {
-            var goneToAodSteps = mutableListOf<TransitionStep>()
+            var lockscreenToAodSteps = mutableListOf<TransitionStep>()
             val job1 =
-                underTest.goneToAodTransition.onEach { goneToAodSteps.add(it) }.launchIn(this)
+                underTest.lockscreenToAodTransition
+                    .onEach { lockscreenToAodSteps.add(it) }
+                    .launchIn(this)
 
             var aodToLockscreenSteps = mutableListOf<TransitionStep>()
             val job2 =
@@ -70,14 +72,14 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
             steps.add(TransitionStep(AOD, LOCKSCREEN, 0f, STARTED))
             steps.add(TransitionStep(AOD, LOCKSCREEN, 0.5f, RUNNING))
             steps.add(TransitionStep(AOD, LOCKSCREEN, 1f, FINISHED))
-            steps.add(TransitionStep(GONE, AOD, 0f, STARTED))
-            steps.add(TransitionStep(GONE, AOD, 0.1f, RUNNING))
-            steps.add(TransitionStep(GONE, AOD, 0.2f, RUNNING))
+            steps.add(TransitionStep(LOCKSCREEN, AOD, 0f, STARTED))
+            steps.add(TransitionStep(LOCKSCREEN, AOD, 0.1f, RUNNING))
+            steps.add(TransitionStep(LOCKSCREEN, AOD, 0.2f, RUNNING))
 
             steps.forEach { repository.sendTransitionStep(it) }
 
             assertThat(aodToLockscreenSteps).isEqualTo(steps.subList(2, 5))
-            assertThat(goneToAodSteps).isEqualTo(steps.subList(5, 8))
+            assertThat(lockscreenToAodSteps).isEqualTo(steps.subList(5, 8))
 
             job1.cancel()
             job2.cancel()
@@ -119,10 +121,8 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
     fun keyguardStateTests() =
         runBlocking(IMMEDIATE) {
             var finishedSteps = mutableListOf<KeyguardState>()
-            val job1 =
+            val job =
                 underTest.finishedKeyguardState.onEach { finishedSteps.add(it) }.launchIn(this)
-            var startedSteps = mutableListOf<KeyguardState>()
-            val job2 = underTest.startedKeyguardState.onEach { startedSteps.add(it) }.launchIn(this)
 
             val steps = mutableListOf<TransitionStep>()
 
@@ -137,10 +137,60 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
             steps.forEach { repository.sendTransitionStep(it) }
 
             assertThat(finishedSteps).isEqualTo(listOf(LOCKSCREEN, AOD))
-            assertThat(startedSteps).isEqualTo(listOf(LOCKSCREEN, AOD, GONE))
 
-            job1.cancel()
-            job2.cancel()
+            job.cancel()
+        }
+
+    @Test
+    fun finishedKeyguardTransitionStepTests() =
+        runBlocking(IMMEDIATE) {
+            var finishedSteps = mutableListOf<TransitionStep>()
+            val job =
+                underTest.finishedKeyguardTransitionStep
+                    .onEach { finishedSteps.add(it) }
+                    .launchIn(this)
+
+            val steps = mutableListOf<TransitionStep>()
+
+            steps.add(TransitionStep(AOD, LOCKSCREEN, 0f, STARTED))
+            steps.add(TransitionStep(AOD, LOCKSCREEN, 0.5f, RUNNING))
+            steps.add(TransitionStep(AOD, LOCKSCREEN, 1f, FINISHED))
+            steps.add(TransitionStep(LOCKSCREEN, AOD, 0f, STARTED))
+            steps.add(TransitionStep(LOCKSCREEN, AOD, 0.9f, RUNNING))
+            steps.add(TransitionStep(LOCKSCREEN, AOD, 1f, FINISHED))
+            steps.add(TransitionStep(AOD, GONE, 1f, STARTED))
+
+            steps.forEach { repository.sendTransitionStep(it) }
+
+            assertThat(finishedSteps).isEqualTo(listOf(steps[2], steps[5]))
+
+            job.cancel()
+        }
+
+    @Test
+    fun startedKeyguardTransitionStepTests() =
+        runBlocking(IMMEDIATE) {
+            var startedSteps = mutableListOf<TransitionStep>()
+            val job =
+                underTest.startedKeyguardTransitionStep
+                    .onEach { startedSteps.add(it) }
+                    .launchIn(this)
+
+            val steps = mutableListOf<TransitionStep>()
+
+            steps.add(TransitionStep(AOD, LOCKSCREEN, 0f, STARTED))
+            steps.add(TransitionStep(AOD, LOCKSCREEN, 0.5f, RUNNING))
+            steps.add(TransitionStep(AOD, LOCKSCREEN, 1f, FINISHED))
+            steps.add(TransitionStep(LOCKSCREEN, AOD, 0f, STARTED))
+            steps.add(TransitionStep(LOCKSCREEN, AOD, 0.9f, RUNNING))
+            steps.add(TransitionStep(LOCKSCREEN, AOD, 1f, FINISHED))
+            steps.add(TransitionStep(AOD, GONE, 1f, STARTED))
+
+            steps.forEach { repository.sendTransitionStep(it) }
+
+            assertThat(startedSteps).isEqualTo(listOf(steps[0], steps[3], steps[6]))
+
+            job.cancel()
         }
 
     companion object {

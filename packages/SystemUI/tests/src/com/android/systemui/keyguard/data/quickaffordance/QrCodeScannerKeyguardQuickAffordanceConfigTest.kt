@@ -50,7 +50,7 @@ class QrCodeScannerKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         whenever(controller.intent).thenReturn(INTENT_1)
 
-        underTest = QrCodeScannerKeyguardQuickAffordanceConfig(controller)
+        underTest = QrCodeScannerKeyguardQuickAffordanceConfig(mock(), controller)
     }
 
     @Test

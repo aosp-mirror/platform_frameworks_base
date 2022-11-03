@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,8 +12,16 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
-package com.android.systemui.shared.system;
+package com.android.systemui.shared.keyguard.shared.model
 
-parcelable RemoteTransitionCompat;
+/**
+ * Collection of all supported "slots", placements where keyguard quick affordances can appear on
+ * the lock screen.
+ */
+object KeyguardQuickAffordanceSlots {
+    const val SLOT_ID_BOTTOM_START = "bottom_start"
+    const val SLOT_ID_BOTTOM_END = "bottom_end"
+}
