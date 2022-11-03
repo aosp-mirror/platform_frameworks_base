@@ -314,6 +314,10 @@
 
         <!-- Needed for MediaRoute chooser dialog -->
         <item name="*android:isLightTheme">false</item>
+
+        <!-- Biometrics enroll color style -->
+        <item name="biometricsEnrollStyle">@style/BiometricsEnrollStyle</item>
+
     </style>
 
     <style name="Theme.SystemUI.LightWallpaper">
@@ -1281,7 +1285,6 @@
         <item name="android:textSize">@dimen/broadcast_dialog_btn_text_size</item>
     </style>
 
-
     <!-- The style for log access consent dialog -->
     <style name="LogAccessDialogTheme" parent="@style/Theme.SystemUI.Dialog.Alert">
         <item name="permissionGrantButtonTopStyle">@style/PermissionGrantButtonTop</item>
@@ -1320,5 +1323,14 @@
         <item name="android:layout_marginTop">2dp</item>
         <item name="android:layout_marginBottom">2dp</item>
         <item name="android:background">@drawable/grant_permissions_buttons_bottom</item>
+    </style>
+
+    <style name="BiometricsEnrollStyle">
+        <item name="biometricsEnrollIcon">@color/udfps_enroll_icon</item>
+        <item name="biometricsMovingTargetFill">@color/udfps_moving_target_fill</item>
+        <item name="biometricsMovingTargetFillError">@color/udfps_moving_target_fill_error</item>
+        <item name="biometricsEnrollProgress">@color/udfps_enroll_progress</item>
+        <item name="biometricsEnrollProgressHelp">@color/udfps_enroll_progress_help</item>
+        <item name="biometricsEnrollProgressHelpWithTalkback">@color/udfps_enroll_progress_help_with_talkback</item>
     </style>
 </resources>
