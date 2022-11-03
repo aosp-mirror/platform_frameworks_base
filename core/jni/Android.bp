@@ -34,6 +34,8 @@ cc_library_shared {
         "-Wno-error=deprecated-declarations",
         "-Wunused",
         "-Wunreachable-code",
+
+        "-DNAMESPACE_FOR_HASH_FUNCTIONS=farmhash",
     ],
 
     cppflags: ["-Wno-conversion-null"],
@@ -211,6 +213,7 @@ cc_library_shared {
                 "android_content_res_Configuration.cpp",
                 "android_security_Scrypt.cpp",
                 "com_android_internal_content_om_OverlayConfig.cpp",
+                "com_android_internal_expresslog_Counter.cpp",
                 "com_android_internal_net_NetworkUtilsInternal.cpp",
                 "com_android_internal_os_ClassLoaderFactory.cpp",
                 "com_android_internal_os_FuseAppLoop.cpp",
@@ -244,6 +247,7 @@ cc_library_shared {
                 "libscrypt_static",
                 "libstatssocket_lazy",
                 "libskia",
+                "libtextclassifier_hash_static",
             ],
 
             shared_libs: [
@@ -326,6 +330,7 @@ cc_library_shared {
             header_libs: [
                 "bionic_libc_platform_headers",
                 "dnsproxyd_protocol_headers",
+                "libtextclassifier_hash_headers",
             ],
         },
         host: {
