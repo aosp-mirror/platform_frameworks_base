@@ -26,9 +26,8 @@ import com.android.systemui.statusbar.BaseStatusBarFrameLayout
 import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.StatusBarIconView.STATE_DOT
 import com.android.systemui.statusbar.StatusBarIconView.STATE_HIDDEN
-import com.android.systemui.statusbar.phone.StatusBarLocation
 import com.android.systemui.statusbar.pipeline.wifi.ui.binder.WifiViewBinder
-import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.WifiViewModel
+import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.LocationBasedWifiViewModel
 
 /**
  * A new and more modern implementation of [com.android.systemui.statusbar.StatusBarWifiView] that
@@ -81,12 +80,11 @@ class ModernStatusBarWifiView(
 
     private fun initView(
         slotName: String,
-        wifiViewModel: WifiViewModel,
-        location: StatusBarLocation,
+        wifiViewModel: LocationBasedWifiViewModel,
     ) {
         slot = slotName
         initDotView()
-        binding = WifiViewBinder.bind(this, wifiViewModel, location)
+        binding = WifiViewBinder.bind(this, wifiViewModel)
     }
 
     // Mostly duplicated from [com.android.systemui.statusbar.StatusBarWifiView].
@@ -116,14 +114,13 @@ class ModernStatusBarWifiView(
         fun constructAndBind(
             context: Context,
             slot: String,
-            wifiViewModel: WifiViewModel,
-            location: StatusBarLocation,
+            wifiViewModel: LocationBasedWifiViewModel,
         ): ModernStatusBarWifiView {
             return (
                 LayoutInflater.from(context).inflate(R.layout.new_status_bar_wifi_group, null)
                     as ModernStatusBarWifiView
                 ).also {
-                    it.initView(slot, wifiViewModel, location)
+                    it.initView(slot, wifiViewModel)
                 }
         }
     }
