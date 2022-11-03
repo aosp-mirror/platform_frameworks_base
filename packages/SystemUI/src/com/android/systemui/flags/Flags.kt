@@ -354,6 +354,9 @@ object Flags {
     // 1900 - note task
     @JvmField val NOTE_TASKS = SysPropBooleanFlag(1900, "persist.sysui.debug.note_tasks")
 
+    // 2000 - device controls
+    @Keep val USE_APP_PANELS = UnreleasedFlag(2000, true)
+
     // Pay no attention to the reflection behind the curtain.
     // ========================== Curtain ==========================
     // |                                                           |
