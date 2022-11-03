@@ -71,62 +71,6 @@ TEST(LoadedArscTest, LoadSinglePackageArsc) {
   ASSERT_TRUE(LoadedPackage::GetEntry(type.type, entry_index).has_value());
 }
 
-TEST(LoadedArscTest, LoadSparseEntryApp) {
-  std::string contents;
-  ASSERT_TRUE(ReadFileFromZipToString(GetTestDataPath() + "/sparse/sparse.apk", "resources.arsc",
-                                      &contents));
-
-  std::unique_ptr<const LoadedArsc> loaded_arsc = LoadedArsc::Load(contents.data(),
-                                                                   contents.length());
-  ASSERT_THAT(loaded_arsc, NotNull());
-
-  const LoadedPackage* package =
-      loaded_arsc->GetPackageById(get_package_id(sparse::R::integer::foo_9));
-  ASSERT_THAT(package, NotNull());
-
-  const uint8_t type_index = get_type_id(sparse::R::integer::foo_9) - 1;
-  const uint16_t entry_index = get_entry_id(sparse::R::integer::foo_9);
-
-  const TypeSpec* type_spec = package->GetTypeSpecByTypeIndex(type_index);
-  ASSERT_THAT(type_spec, NotNull());
-  ASSERT_THAT(type_spec->type_entries.size(), Ge(1u));
-
-  auto type = type_spec->type_entries[0];
-  ASSERT_TRUE(LoadedPackage::GetEntry(type.type, entry_index).has_value());
-}
-
-TEST(LoadedArscTest, FindSparseEntryApp) {
-  std::string contents;
-  ASSERT_TRUE(ReadFileFromZipToString(GetTestDataPath() + "/sparse/sparse.apk", "resources.arsc",
-                                      &contents));
-
-  std::unique_ptr<const LoadedArsc> loaded_arsc = LoadedArsc::Load(contents.data(),
-                                                                   contents.length());
-  ASSERT_THAT(loaded_arsc, NotNull());
-
-  const LoadedPackage* package =
-      loaded_arsc->GetPackageById(get_package_id(sparse::R::string::only_v26));
-  ASSERT_THAT(package, NotNull());
-
-  const uint8_t type_index = get_type_id(sparse::R::string::only_v26) - 1;
-  const uint16_t entry_index = get_entry_id(sparse::R::string::only_v26);
-
-  const TypeSpec* type_spec = package->GetTypeSpecByTypeIndex(type_index);
-  ASSERT_THAT(type_spec, NotNull());
-  ASSERT_THAT(type_spec->type_entries.size(), Ge(1u));
-
-  // Ensure that AAPT2 sparsely encoded the v26 config as expected.
-  auto type_entry = std::find_if(
-    type_spec->type_entries.begin(), type_spec->type_entries.end(),
-    [](const TypeSpec::TypeEntry& x) { return x.config.sdkVersion == 26; });
-  ASSERT_NE(type_entry, type_spec->type_entries.end());
-  ASSERT_NE(type_entry->type->flags & ResTable_type::FLAG_SPARSE, 0);
-
-  // Test fetching a resource with only sparsely encoded configs by name.
-  auto id = package->FindEntryByName(u"string", u"only_v26");
-  ASSERT_EQ(id.value(), fix_package_id(sparse::R::string::only_v26, 0));
-}
-
 TEST(LoadedArscTest, LoadSharedLibrary) {
   std::string contents;
   ASSERT_TRUE(ReadFileFromZipToString(GetTestDataPath() + "/lib_one/lib_one.apk", "resources.arsc",
@@ -403,5 +347,85 @@ TEST(LoadedArscTest, LoadCustomLoader) {
 // backwards and forwards compatible (aka checking the size field against
 // sizeof(Res_value) might not be backwards compatible.
 // TEST(LoadedArscTest, LoadingShouldBeForwardsAndBackwardsCompatible) { ASSERT_TRUE(false); }
+
+class LoadedArscParameterizedTest :
+    public testing::TestWithParam<std::string> {
+};
+
+TEST_P(LoadedArscParameterizedTest, LoadSparseEntryApp) {
+  std::string contents;
+  ASSERT_TRUE(ReadFileFromZipToString(GetParam(), "resources.arsc", &contents));
+
+  std::unique_ptr<const LoadedArsc> loaded_arsc = LoadedArsc::Load(contents.data(),
+                                                                   contents.length());
+  ASSERT_THAT(loaded_arsc, NotNull());
+
+  const LoadedPackage* package =
+      loaded_arsc->GetPackageById(get_package_id(sparse::R::integer::foo_9));
+  ASSERT_THAT(package, NotNull());
+
+  const uint8_t type_index = get_type_id(sparse::R::integer::foo_9) - 1;
+  const uint16_t entry_index = get_entry_id(sparse::R::integer::foo_9);
+
+  const TypeSpec* type_spec = package->GetTypeSpecByTypeIndex(type_index);
+  ASSERT_THAT(type_spec, NotNull());
+  ASSERT_THAT(type_spec->type_entries.size(), Ge(1u));
+
+  auto type = type_spec->type_entries[0];
+  ASSERT_TRUE(LoadedPackage::GetEntry(type.type, entry_index).has_value());
+}
+
+TEST_P(LoadedArscParameterizedTest, FindSparseEntryApp) {
+  std::string contents;
+  ASSERT_TRUE(ReadFileFromZipToString(GetParam(), "resources.arsc", &contents));
+
+  std::unique_ptr<const LoadedArsc> loaded_arsc = LoadedArsc::Load(contents.data(),
+                                                                   contents.length());
+  ASSERT_THAT(loaded_arsc, NotNull());
+
+  const LoadedPackage* package =
+      loaded_arsc->GetPackageById(get_package_id(sparse::R::string::only_land));
+  ASSERT_THAT(package, NotNull());
+
+  const uint8_t type_index = get_type_id(sparse::R::string::only_land) - 1;
+
+  const TypeSpec* type_spec = package->GetTypeSpecByTypeIndex(type_index);
+  ASSERT_THAT(type_spec, NotNull());
+  ASSERT_THAT(type_spec->type_entries.size(), Ge(1u));
+
+  // Type Entry with default orientation is not sparse encoded because the ratio of
+  // populated entries to total entries is above threshold.
+  // Only find out default locale because Soong build system will introduce pseudo
+  // locales for the apk generated at runtime.
+  auto type_entry_default = std::find_if(
+    type_spec->type_entries.begin(), type_spec->type_entries.end(),
+    [] (const TypeSpec::TypeEntry& x) { return x.config.orientation == 0 &&
+                                               x.config.locale == 0; });
+  ASSERT_NE(type_entry_default, type_spec->type_entries.end());
+  ASSERT_EQ(type_entry_default->type->flags & ResTable_type::FLAG_SPARSE, 0);
+
+  // Type Entry with land orientation is sparse encoded as expected.
+  // Only find out default locale because Soong build system will introduce pseudo
+  // locales for the apk generated at runtime.
+  auto type_entry_land = std::find_if(
+    type_spec->type_entries.begin(), type_spec->type_entries.end(),
+    [](const TypeSpec::TypeEntry& x) { return x.config.orientation ==
+                                              ResTable_config::ORIENTATION_LAND &&
+                                              x.config.locale == 0; });
+  ASSERT_NE(type_entry_land, type_spec->type_entries.end());
+  ASSERT_NE(type_entry_land->type->flags & ResTable_type::FLAG_SPARSE, 0);
+
+  // Test fetching a resource with only sparsely encoded configs by name.
+  auto id = package->FindEntryByName(u"string", u"only_land");
+  ASSERT_EQ(id.value(), fix_package_id(sparse::R::string::only_land, 0));
+}
+
+INSTANTIATE_TEST_SUITE_P(
+        FrameWorkResourcesLoadedArscTests,
+        LoadedArscParameterizedTest,
+        ::testing::Values(
+          base::GetExecutableDirectory() + "/tests/data/sparse/sparse.apk",
+          base::GetExecutableDirectory() + "/FrameworkResourcesSparseTestApp.apk"
+        ));
 
 }  // namespace android

@@ -211,6 +211,8 @@ cc_test {
         "tests/data/**/*.apk",
         "tests/data/**/*.arsc",
         "tests/data/**/*.idmap",
+        ":FrameworkResourcesSparseTestApp",
+        ":FrameworkResourcesNotSparseTestApp",
     ],
     test_suites: ["device-tests"],
 }
