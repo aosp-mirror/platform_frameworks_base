@@ -23,7 +23,6 @@ import static com.android.systemui.statusbar.phone.CentralSurfaces.getActivityOp
 import android.app.ActivityManager;
 import android.app.KeyguardManager;
 import android.app.Notification;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
 import android.content.Context;
@@ -60,9 +59,8 @@ import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorControllerProvider;
-import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
+import com.android.systemui.statusbar.notification.collection.provider.LaunchFullScreenIntentProvider;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -126,7 +124,6 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
             Context context,
             Handler mainThreadHandler,
             Executor uiBgExecutor,
-            NotifPipeline notifPipeline,
             NotificationVisibilityProvider visibilityProvider,
             HeadsUpManagerPhone headsUpManager,
             ActivityStarter activityStarter,
@@ -151,7 +148,8 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
             NotificationPresenter presenter,
             NotificationPanelViewController panel,
             ActivityLaunchAnimator activityLaunchAnimator,
-            NotificationLaunchAnimatorControllerProvider notificationAnimationProvider) {
+            NotificationLaunchAnimatorControllerProvider notificationAnimationProvider,
+            LaunchFullScreenIntentProvider launchFullScreenIntentProvider) {
         mContext = context;
         mMainThreadHandler = mainThreadHandler;
         mUiBgExecutor = uiBgExecutor;
@@ -182,12 +180,7 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
         mActivityLaunchAnimator = activityLaunchAnimator;
         mNotificationAnimationProvider = notificationAnimationProvider;
 
-        notifPipeline.addCollectionListener(new NotifCollectionListener() {
-            @Override
-            public void onEntryAdded(NotificationEntry entry) {
-                handleFullScreenIntent(entry);
-            }
-        });
+        launchFullScreenIntentProvider.registerListener(entry -> launchFullScreenIntent(entry));
     }
 
     /**
@@ -549,38 +542,36 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
     }
 
     @VisibleForTesting
-    void handleFullScreenIntent(NotificationEntry entry) {
-        if (mNotificationInterruptStateProvider.shouldLaunchFullScreenIntentWhenAdded(entry)) {
-            if (shouldSuppressFullScreenIntent(entry)) {
-                mLogger.logFullScreenIntentSuppressedByDnD(entry);
-            } else if (entry.getImportance() < NotificationManager.IMPORTANCE_HIGH) {
-                mLogger.logFullScreenIntentNotImportantEnough(entry);
-            } else {
-                // Stop screensaver if the notification has a fullscreen intent.
-                // (like an incoming phone call)
-                mUiBgExecutor.execute(() -> {
-                    try {
-                        mDreamManager.awaken();
-                    } catch (RemoteException e) {
-                        e.printStackTrace();
-                    }
-                });
+    void launchFullScreenIntent(NotificationEntry entry) {
+        // Skip if device is in VR mode.
+        if (mPresenter.isDeviceInVrMode()) {
+            mLogger.logFullScreenIntentSuppressedByVR(entry);
+            return;
+        }
 
-                // not immersive & a fullscreen alert should be shown
-                final PendingIntent fullscreenIntent =
-                        entry.getSbn().getNotification().fullScreenIntent;
-                mLogger.logSendingFullScreenIntent(entry, fullscreenIntent);
-                try {
-                    EventLog.writeEvent(EventLogTags.SYSUI_FULLSCREEN_NOTIFICATION,
-                            entry.getKey());
-                    mCentralSurfaces.wakeUpForFullScreenIntent();
-                    fullscreenIntent.send();
-                    entry.notifyFullScreenIntentLaunched();
-                    mMetricsLogger.count("note_fullscreen", 1);
-                } catch (PendingIntent.CanceledException e) {
-                    // ignore
-                }
+        // Stop screensaver if the notification has a fullscreen intent.
+        // (like an incoming phone call)
+        mUiBgExecutor.execute(() -> {
+            try {
+                mDreamManager.awaken();
+            } catch (RemoteException e) {
+                e.printStackTrace();
             }
+        });
+
+        // not immersive & a fullscreen alert should be shown
+        final PendingIntent fullscreenIntent =
+                entry.getSbn().getNotification().fullScreenIntent;
+        mLogger.logSendingFullScreenIntent(entry, fullscreenIntent);
+        try {
+            EventLog.writeEvent(EventLogTags.SYSUI_FULLSCREEN_NOTIFICATION,
+                    entry.getKey());
+            mCentralSurfaces.wakeUpForFullScreenIntent();
+            fullscreenIntent.send();
+            entry.notifyFullScreenIntentLaunched();
+            mMetricsLogger.count("note_fullscreen", 1);
+        } catch (PendingIntent.CanceledException e) {
+            // ignore
         }
     }
 
@@ -606,13 +597,5 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
         } else {
             mMainThreadHandler.post(mShadeController::collapsePanel);
         }
-    }
-
-    private boolean shouldSuppressFullScreenIntent(NotificationEntry entry) {
-        if (mPresenter.isDeviceInVrMode()) {
-            return true;
-        }
-
-        return entry.shouldSuppressFullScreenIntent();
     }
 }
