@@ -1510,11 +1510,12 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     protected void startKeyguard() {
         Trace.beginSection("CentralSurfaces#startKeyguard");
         mBiometricUnlockController = mBiometricUnlockControllerLazy.get();
-        mBiometricUnlockController.setBiometricModeListener(
+        mBiometricUnlockController.addBiometricModeListener(
                 new BiometricUnlockController.BiometricModeListener() {
                     @Override
                     public void onResetMode() {
                         setWakeAndUnlocking(false);
+                        notifyBiometricAuthModeChanged();
                     }
 
                     @Override
@@ -1525,11 +1526,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                             case BiometricUnlockController.MODE_WAKE_AND_UNLOCK:
                                 setWakeAndUnlocking(true);
                         }
-                    }
-
-                    @Override
-                    public void notifyBiometricAuthModeChanged() {
-                        CentralSurfacesImpl.this.notifyBiometricAuthModeChanged();
+                        notifyBiometricAuthModeChanged();
                     }
 
                     private void setWakeAndUnlocking(boolean wakeAndUnlocking) {

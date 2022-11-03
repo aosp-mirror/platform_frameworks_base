@@ -64,8 +64,10 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -163,7 +165,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
     private PendingAuthenticated mPendingAuthenticated = null;
     private boolean mHasScreenTurnedOnSinceAuthenticating;
     private boolean mFadedAwayAfterWakeAndUnlock;
-    private BiometricModeListener mBiometricModeListener;
+    private Set<BiometricModeListener> mBiometricModeListeners = new HashSet<>();
 
     private final MetricsLogger mMetricsLogger;
     private final AuthController mAuthController;
@@ -305,9 +307,14 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         mKeyguardViewController = keyguardViewController;
     }
 
-    /** Sets a {@link BiometricModeListener}. */
-    public void setBiometricModeListener(BiometricModeListener biometricModeListener) {
-        mBiometricModeListener = biometricModeListener;
+    /** Adds a {@link BiometricModeListener}. */
+    public void addBiometricModeListener(BiometricModeListener listener) {
+        mBiometricModeListeners.add(listener);
+    }
+
+    /** Removes a {@link BiometricModeListener}. */
+    public void removeBiometricModeListener(BiometricModeListener listener) {
+        mBiometricModeListeners.remove(listener);
     }
 
     private final Runnable mReleaseBiometricWakeLockRunnable = new Runnable() {
@@ -481,15 +488,12 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
                 break;
         }
         onModeChanged(mMode);
-        if (mBiometricModeListener != null) {
-            mBiometricModeListener.notifyBiometricAuthModeChanged();
-        }
         Trace.endSection();
     }
 
     private void onModeChanged(@WakeAndUnlockMode int mode) {
-        if (mBiometricModeListener != null) {
-            mBiometricModeListener.onModeChanged(mode);
+        for (BiometricModeListener listener : mBiometricModeListeners) {
+            listener.onModeChanged(mode);
         }
     }
 
@@ -696,9 +700,8 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         mMode = MODE_NONE;
         mBiometricType = null;
         mNotificationShadeWindowController.setForceDozeBrightness(false);
-        if (mBiometricModeListener != null) {
-            mBiometricModeListener.onResetMode();
-            mBiometricModeListener.notifyBiometricAuthModeChanged();
+        for (BiometricModeListener listener : mBiometricModeListeners) {
+            listener.onResetMode();
         }
         mNumConsecutiveFpFailures = 0;
         mLastFpFailureUptimeMillis = 0;
@@ -807,10 +810,8 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
     /** An interface to interact with the {@link BiometricUnlockController}. */
     public interface BiometricModeListener {
         /** Called when {@code mMode} is reset to {@link #MODE_NONE}. */
-        void onResetMode();
+        default void onResetMode() {}
         /** Called when {@code mMode} has changed in {@link #startWakeAndUnlock(int)}. */
-        void onModeChanged(@WakeAndUnlockMode int mode);
-        /** Called after processing {@link #onModeChanged(int)}. */
-        void notifyBiometricAuthModeChanged();
+        default void onModeChanged(@WakeAndUnlockMode int mode) {}
     }
 }

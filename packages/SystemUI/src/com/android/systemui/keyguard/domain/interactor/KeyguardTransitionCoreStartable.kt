@@ -41,6 +41,7 @@ constructor(
                     is AodLockscreenTransitionInteractor -> Log.d(TAG, "Started $it")
                     is GoneAodTransitionInteractor -> Log.d(TAG, "Started $it")
                     is LockscreenGoneTransitionInteractor -> Log.d(TAG, "Started $it")
+                    is AodToGoneTransitionInteractor -> Log.d(TAG, "Started $it")
                 }
             it.start()
         }
