@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright (C) 2020 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -14,15 +14,12 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
+
+<!-- Intended for wide devices that are currently oriented with a lot of available height,
+     such as tablets. 'hxxxdp' is used instead of 'port' in order to avoid this being applied
+     to wide devices that are shorter in height, like foldables. -->
 <resources>
-    <dimen name="notification_panel_margin_horizontal">48dp</dimen>
-    <dimen name="status_view_margin_horizontal">62dp</dimen>
-    <dimen name="bouncer_user_switcher_y_trans">20dp</dimen>
-
-    <!-- qs_tiles_page_horizontal_margin should be margin / 2, otherwise full space between two
-         pages is margin * 2, and that makes tiles page not appear immediately after user swipes to
-         the side -->
-    <dimen name="qs_tiles_page_horizontal_margin">32dp</dimen>
-
-    <dimen name="qqs_layout_padding_bottom">16dp</dimen>
+    <!-- Space between status view and notification shelf -->
+    <dimen name="keyguard_status_view_bottom_margin">35dp</dimen>
+    <dimen name="keyguard_clock_top_margin">40dp</dimen>
 </resources>
