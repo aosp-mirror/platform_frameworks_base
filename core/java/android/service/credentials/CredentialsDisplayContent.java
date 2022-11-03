@@ -43,12 +43,17 @@ public final class CredentialsDisplayContent implements Parcelable {
     /** List of provider actions to be displayed on the UI. */
     private final @NonNull List<Action> mActions;
 
+    /** Remote credential entry to get the response from a different device. */
+    private final @Nullable Action mRemoteCredentialEntry;
+
     private CredentialsDisplayContent(@Nullable CharSequence header,
             @NonNull List<CredentialEntry> credentialEntries,
-            @NonNull List<Action> actions) {
+            @NonNull List<Action> actions,
+            @Nullable Action remoteCredentialEntry) {
         mHeader = header;
         mCredentialEntries = credentialEntries;
         mActions = actions;
+        mRemoteCredentialEntry = remoteCredentialEntry;
     }
 
     private CredentialsDisplayContent(@NonNull Parcel in) {
@@ -59,6 +64,7 @@ public final class CredentialsDisplayContent implements Parcelable {
         List<Action> actions = new ArrayList<>();
         in.readTypedList(actions, Action.CREATOR);
         mActions = actions;
+        mRemoteCredentialEntry = in.readTypedObject(Action.CREATOR);
     }
 
     public static final @NonNull Creator<CredentialsDisplayContent> CREATOR =
@@ -84,6 +90,7 @@ public final class CredentialsDisplayContent implements Parcelable {
         dest.writeCharSequence(mHeader);
         dest.writeTypedList(mCredentialEntries, flags);
         dest.writeTypedList(mActions, flags);
+        dest.writeTypedObject(mRemoteCredentialEntry, flags);
     }
 
     /**
@@ -108,18 +115,34 @@ public final class CredentialsDisplayContent implements Parcelable {
     }
 
     /**
+     * Returns the remote credential entry to be displayed on the UI.
+     */
+    public @Nullable Action getRemoteCredentialEntry() {
+        return mRemoteCredentialEntry;
+    }
+
+    /**
      * Builds an instance of {@link CredentialsDisplayContent}.
      */
     public static final class Builder {
-        private CharSequence mHeader = null;
+        private CharSequence mHeader;
         private List<CredentialEntry> mCredentialEntries = new ArrayList<>();
         private List<Action> mActions = new ArrayList<>();
+        private Action mRemoteCredentialEntry;
 
         /**
          * Sets the header to be displayed on the UI.
          */
         public @NonNull Builder setHeader(@Nullable CharSequence header) {
             mHeader = header;
+            return this;
+        }
+
+        /**
+         * Sets the remote credential entry to be displayed on the UI.
+         */
+        public @NonNull Builder setRemoteCredentialEntry(@Nullable Action remoteCredentialEntry) {
+            mRemoteCredentialEntry = remoteCredentialEntry;
             return this;
         }
 
@@ -185,7 +208,8 @@ public final class CredentialsDisplayContent implements Parcelable {
                 throw new IllegalStateException("credentialEntries and actions must not both "
                         + "be empty");
             }
-            return new CredentialsDisplayContent(mHeader, mCredentialEntries, mActions);
+            return new CredentialsDisplayContent(mHeader, mCredentialEntries, mActions,
+                    mRemoteCredentialEntry);
         }
     }
 }

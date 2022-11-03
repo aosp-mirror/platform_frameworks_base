@@ -243,16 +243,22 @@ class BackNavigationController {
             } else if (currentActivity.isRootOfTask()) {
                 // TODO(208789724): Create single source of truth for this, maybe in
                 //  RootWindowContainer
-                // TODO: Also check Task.shouldUpRecreateTaskLocked() for prevActivity logic
                 prevTask = currentTask.mRootWindowContainer.getTaskBelow(currentTask);
                 removedWindowContainer = currentTask;
-                prevActivity = prevTask.getTopNonFinishingActivity();
-                if (prevTask.isActivityTypeHome()) {
-                    backType = BackNavigationInfo.TYPE_RETURN_TO_HOME;
+                // If it reaches the top activity, we will check the below task from parent.
+                // If it's null or multi-window, fallback the type to TYPE_CALLBACK.
+                // or set the type to proper value when it's return to home or another task.
+                if (prevTask == null || prevTask.inMultiWindowMode()) {
+                    backType = BackNavigationInfo.TYPE_CALLBACK;
                 } else {
-                    backType = BackNavigationInfo.TYPE_CROSS_TASK;
+                    prevActivity = prevTask.getTopNonFinishingActivity();
+                    if (prevTask.isActivityTypeHome()) {
+                        backType = BackNavigationInfo.TYPE_RETURN_TO_HOME;
+                        mShowWallpaper = true;
+                    } else {
+                        backType = BackNavigationInfo.TYPE_CROSS_TASK;
+                    }
                 }
-                mShowWallpaper = true;
             }
             infoBuilder.setType(backType);
 
@@ -263,8 +269,10 @@ class BackNavigationController {
                     removedWindowContainer,
                     BackNavigationInfo.typeToString(backType));
 
-            // For now, we only animate when going home.
-            boolean prepareAnimation = backType == BackNavigationInfo.TYPE_RETURN_TO_HOME
+            // For now, we only animate when going home and cross task.
+            boolean prepareAnimation =
+                    (backType == BackNavigationInfo.TYPE_RETURN_TO_HOME
+                            || backType == BackNavigationInfo.TYPE_CROSS_TASK)
                     && adapter != null;
 
             // Only prepare animation if no leash has been created (no animation is running).

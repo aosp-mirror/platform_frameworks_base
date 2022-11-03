@@ -48,6 +48,8 @@ import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.R
 import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.keyguard.domain.interactor.BouncerInteractor
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.shade.ShadeExpansionStateManager
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
@@ -70,29 +72,31 @@ const val SETTING_REMOVE_ENROLLMENT_UI = "udfps_overlay_remove_enrollment_ui"
  */
 @UiThread
 class UdfpsControllerOverlay @JvmOverloads constructor(
-    private val context: Context,
-    fingerprintManager: FingerprintManager,
-    private val inflater: LayoutInflater,
-    private val windowManager: WindowManager,
-    private val accessibilityManager: AccessibilityManager,
-    private val statusBarStateController: StatusBarStateController,
-    private val shadeExpansionStateManager: ShadeExpansionStateManager,
-    private val statusBarKeyguardViewManager: StatusBarKeyguardViewManager,
-    private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
-    private val dialogManager: SystemUIDialogManager,
-    private val dumpManager: DumpManager,
-    private val transitionController: LockscreenShadeTransitionController,
-    private val configurationController: ConfigurationController,
-    private val systemClock: SystemClock,
-    private val keyguardStateController: KeyguardStateController,
-    private val unlockedScreenOffAnimationController: UnlockedScreenOffAnimationController,
-    private var udfpsDisplayModeProvider: UdfpsDisplayModeProvider,
-    val requestId: Long,
-    @ShowReason val requestReason: Int,
-    private val controllerCallback: IUdfpsOverlayControllerCallback,
-    private val onTouch: (View, MotionEvent, Boolean) -> Boolean,
-    private val activityLaunchAnimator: ActivityLaunchAnimator,
-    private val isDebuggable: Boolean = Build.IS_DEBUGGABLE
+        private val context: Context,
+        fingerprintManager: FingerprintManager,
+        private val inflater: LayoutInflater,
+        private val windowManager: WindowManager,
+        private val accessibilityManager: AccessibilityManager,
+        private val statusBarStateController: StatusBarStateController,
+        private val shadeExpansionStateManager: ShadeExpansionStateManager,
+        private val statusBarKeyguardViewManager: StatusBarKeyguardViewManager,
+        private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
+        private val dialogManager: SystemUIDialogManager,
+        private val dumpManager: DumpManager,
+        private val transitionController: LockscreenShadeTransitionController,
+        private val configurationController: ConfigurationController,
+        private val systemClock: SystemClock,
+        private val keyguardStateController: KeyguardStateController,
+        private val unlockedScreenOffAnimationController: UnlockedScreenOffAnimationController,
+        private var udfpsDisplayModeProvider: UdfpsDisplayModeProvider,
+        val requestId: Long,
+        @ShowReason val requestReason: Int,
+        private val controllerCallback: IUdfpsOverlayControllerCallback,
+        private val onTouch: (View, MotionEvent, Boolean) -> Boolean,
+        private val activityLaunchAnimator: ActivityLaunchAnimator,
+        private val featureFlags: FeatureFlags,
+        private val bouncerInteractor: BouncerInteractor,
+        private val isDebuggable: Boolean = Build.IS_DEBUGGABLE
 ) {
     /** The view, when [isShowing], or null. */
     var overlayView: UdfpsView? = null
@@ -246,7 +250,9 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
                     unlockedScreenOffAnimationController,
                     dialogManager,
                     controller,
-                    activityLaunchAnimator
+                    activityLaunchAnimator,
+                    featureFlags,
+                    bouncerInteractor
                 )
             }
             REASON_AUTH_BP -> {

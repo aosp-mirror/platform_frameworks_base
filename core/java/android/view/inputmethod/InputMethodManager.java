@@ -16,8 +16,6 @@
 
 package android.view.inputmethod;
 
-import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
-import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
 import static android.view.inputmethod.InputConnection.CURSOR_UPDATE_IMMEDIATE;
 import static android.view.inputmethod.InputConnection.CURSOR_UPDATE_MONITOR;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.DISPLAY_ID;
@@ -128,6 +126,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 /**
@@ -1525,12 +1524,18 @@ public final class InputMethodManager {
     /**
      * Returns {@code true} if currently selected IME supports Stylus handwriting & is enabled for
      * the given userId.
-     * If the method returns {@code false}, {@link #startStylusHandwriting(View)} shouldn't be
-     * called and Stylus touch should continue as normal touch input.
+     *
+     * <p>If the method returns {@code false}, {@link #startStylusHandwriting(View)} shouldn't be
+     * called and Stylus touch should continue as normal touch input.</p>
+     *
+     * <p>{@link Manifest.permission#INTERACT_ACROSS_USERS_FULL} is required when and only when
+     * {@code userId} is different from the user id of the current process.</p>
+     *
      * @see #startStylusHandwriting(View)
      * @param userId user ID to query.
      * @hide
      */
+    @RequiresPermission(value = Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)
     public boolean isStylusHandwritingAvailableAsUser(@UserIdInt int userId) {
         final Context fallbackContext = ActivityThread.currentApplication();
         if (fallbackContext == null) {
@@ -1549,13 +1554,16 @@ public final class InputMethodManager {
     /**
      * Returns the list of installed input methods for the specified user.
      *
+     * <p>{@link Manifest.permission#INTERACT_ACROSS_USERS_FULL} is required when and only when
+     * {@code userId} is different from the user id of the current process.</p>
+     *
      * @param userId user ID to query
      * @return {@link List} of {@link InputMethodInfo}.
      * @hide
      */
     @TestApi
-    @RequiresPermission(INTERACT_ACROSS_USERS_FULL)
     @NonNull
+    @RequiresPermission(value = Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)
     public List<InputMethodInfo> getInputMethodListAsUser(@UserIdInt int userId) {
         return IInputMethodManagerGlobalInvoker.getInputMethodList(userId,
                 DirectBootAwareness.AUTO);
@@ -1564,14 +1572,17 @@ public final class InputMethodManager {
     /**
      * Returns the list of installed input methods for the specified user.
      *
+     * <p>{@link Manifest.permission#INTERACT_ACROSS_USERS_FULL} is required when and only when
+     * {@code userId} is different from the user id of the current process.</p>
+     *
      * @param userId user ID to query
      * @param directBootAwareness {@code true} if caller want to query installed input methods list
      * on user locked state.
      * @return {@link List} of {@link InputMethodInfo}.
      * @hide
      */
-    @RequiresPermission(INTERACT_ACROSS_USERS_FULL)
     @NonNull
+    @RequiresPermission(value = Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)
     public List<InputMethodInfo> getInputMethodListAsUser(@UserIdInt int userId,
             @DirectBootAwareness int directBootAwareness) {
         return IInputMethodManagerGlobalInvoker.getInputMethodList(userId, directBootAwareness);
@@ -1595,11 +1606,14 @@ public final class InputMethodManager {
     /**
      * Returns the list of enabled input methods for the specified user.
      *
+     * <p>{@link Manifest.permission#INTERACT_ACROSS_USERS_FULL} is required when and only when
+     * {@code userId} is different from the user id of the current process.</p>
+     *
      * @param userId user ID to query
      * @return {@link List} of {@link InputMethodInfo}.
      * @hide
      */
-    @RequiresPermission(INTERACT_ACROSS_USERS_FULL)
+    @RequiresPermission(value = Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)
     public List<InputMethodInfo> getEnabledInputMethodListAsUser(@UserIdInt int userId) {
         return IInputMethodManagerGlobalInvoker.getEnabledInputMethodList(userId);
     }
@@ -2352,7 +2366,11 @@ public final class InputMethodManager {
      * Starts an input connection from the served view that gains the window focus.
      * Note that this method should *NOT* be called inside of {@code mH} lock to prevent start input
      * background thread may blocked by other methods which already inside {@code mH} lock.
+     *
+     * <p>{@link Manifest.permission#INTERACT_ACROSS_USERS_FULL} is required when and only when
+     * {@code userId} is different from the user id of the current process.</p>
      */
+    @RequiresPermission(value = Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)
     private boolean startInputInner(@StartInputReason int startInputReason,
             @Nullable IBinder windowGainingFocus, @StartInputFlags int startInputFlags,
             @SoftInputModeFlags int softInputMode, int windowFlags) {
@@ -2609,8 +2627,8 @@ public final class InputMethodManager {
      * @param timeout to set in milliseconds. To reset to default, use a value <= zero.
      * @hide
      */
-    @RequiresPermission(Manifest.permission.TEST_INPUT_METHOD)
     @TestApi
+    @RequiresPermission(Manifest.permission.TEST_INPUT_METHOD)
     public void setStylusWindowIdleTimeoutForTest(@DurationMillisLong long timeout) {
         synchronized (mH) {
             IInputMethodManagerGlobalInvoker.setStylusWindowIdleTimeoutForTest(mClient, timeout);
@@ -3089,7 +3107,7 @@ public final class InputMethodManager {
      *
      * <p>On Android {@link Build.VERSION_CODES#Q} and later devices, the undocumented behavior that
      * token can be {@code null} when the caller has
-     * {@link android.Manifest.permission#WRITE_SECURE_SETTINGS} is deprecated. Instead, update
+     * {@link Manifest.permission#WRITE_SECURE_SETTINGS} is deprecated. Instead, update
      * {@link android.provider.Settings.Secure#DEFAULT_INPUT_METHOD} and
      * {@link android.provider.Settings.Secure#SELECTED_INPUT_METHOD_SUBTYPE} directly.</p>
      *
@@ -3121,7 +3139,7 @@ public final class InputMethodManager {
             if (fallbackContext == null) {
                 return;
             }
-            if (fallbackContext.checkSelfPermission(WRITE_SECURE_SETTINGS)
+            if (fallbackContext.checkSelfPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
                     != PackageManager.PERMISSION_GRANTED) {
                 return;
             }
@@ -3158,7 +3176,7 @@ public final class InputMethodManager {
      * from an application or a service which has a token of the currently active input method.
      *
      * <p>On Android {@link Build.VERSION_CODES#Q} and later devices, {@code token} cannot be
-     * {@code null} even with {@link android.Manifest.permission#WRITE_SECURE_SETTINGS}. Instead,
+     * {@code null} even with {@link Manifest.permission#WRITE_SECURE_SETTINGS}. Instead,
      * update {@link android.provider.Settings.Secure#DEFAULT_INPUT_METHOD} and
      * {@link android.provider.Settings.Secure#SELECTED_INPUT_METHOD_SUBTYPE} directly.</p>
      *
@@ -3440,12 +3458,12 @@ public final class InputMethodManager {
      * @param displayId The ID of the display where the chooser dialog should be shown.
      * @hide
      */
-    @RequiresPermission(WRITE_SECURE_SETTINGS)
+    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
     public void showInputMethodPickerFromSystem(boolean showAuxiliarySubtypes, int displayId) {
         final int mode = showAuxiliarySubtypes
                 ? SHOW_IM_PICKER_MODE_INCLUDE_AUXILIARY_SUBTYPES
                 : SHOW_IM_PICKER_MODE_EXCLUDE_AUXILIARY_SUBTYPES;
-        IInputMethodManagerGlobalInvoker.showInputMethodPickerFromSystem(mClient, mode, displayId);
+        IInputMethodManagerGlobalInvoker.showInputMethodPickerFromSystem(mode, displayId);
     }
 
     @GuardedBy("mH")
@@ -3519,11 +3537,11 @@ public final class InputMethodManager {
      *             {@link InputMethodService#switchInputMethod(String, InputMethodSubtype)}, which
      *             does not require any permission as long as the caller is the current IME.
      *             If the calling process is some privileged app that already has
-     *             {@link android.Manifest.permission#WRITE_SECURE_SETTINGS} permission, just
+     *             {@link Manifest.permission#WRITE_SECURE_SETTINGS} permission, just
      *             directly update {@link Settings.Secure#SELECTED_INPUT_METHOD_SUBTYPE}.
      */
     @Deprecated
-    @RequiresPermission(WRITE_SECURE_SETTINGS)
+    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
     public boolean setCurrentInputMethodSubtype(InputMethodSubtype subtype) {
         if (Process.myUid() == Process.SYSTEM_UID) {
             Log.w(TAG, "System process should not call setCurrentInputMethodSubtype() because "
@@ -3540,7 +3558,7 @@ public final class InputMethodManager {
         if (fallbackContext == null) {
             return false;
         }
-        if (fallbackContext.checkSelfPermission(WRITE_SECURE_SETTINGS)
+        if (fallbackContext.checkSelfPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
                 != PackageManager.PERMISSION_GRANTED) {
             return false;
         }
@@ -3619,6 +3637,32 @@ public final class InputMethodManager {
             publicAlternatives = "Use {@link android.view.WindowInsets} instead")
     public int getInputMethodWindowVisibleHeight() {
         return IInputMethodManagerGlobalInvoker.getInputMethodWindowVisibleHeight(mClient);
+    }
+
+    /**
+     * {@code true} means that
+     * {@link RemoteInputConnectionImpl#requestCursorUpdatesInternal(int, int, int)} returns
+     * {@code false} when the IME client and the IME run in different displays.
+     */
+    final AtomicBoolean mRequestCursorUpdateDisplayIdCheck = new AtomicBoolean(true);
+
+    /**
+     * Controls the display ID mismatch validation in
+     * {@link RemoteInputConnectionImpl#requestCursorUpdatesInternal(int, int, int)}.
+     *
+     * <p>{@link #updateCursorAnchorInfo(View, CursorAnchorInfo)} is not guaranteed to work
+     * correctly when the IME client and the IME run in different displays.  This is why
+     * {@link RemoteInputConnectionImpl#requestCursorUpdatesInternal(int, int, int)} returns
+     * {@code false} by default when the display ID does not match. This method allows special apps
+     * to override this behavior when they are sure that it should work.</p>
+     *
+     * <p>By default the validation is enabled.</p>
+     *
+     * @param enabled {@code false} to disable the display ID validation.
+     * @hide
+     */
+    public void setRequestCursorUpdateDisplayIdCheck(boolean enabled) {
+        mRequestCursorUpdateDisplayIdCheck.set(enabled);
     }
 
     /**

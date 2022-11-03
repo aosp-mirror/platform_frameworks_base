@@ -114,6 +114,8 @@ import com.android.systemui.util.Assert;
 import com.android.systemui.util.DumpUtilsKt;
 import com.android.systemui.util.LargeScreenUtils;
 
+import com.google.errorprone.annotations.CompileTimeConstant;
+
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.util.ArrayList;
@@ -3693,6 +3695,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     @ShadeViewRefactor(RefactorComponent.INPUT)
     void handleEmptySpaceClick(MotionEvent ev) {
+        logEmptySpaceClick(ev, isBelowLastNotification(mInitialTouchX, mInitialTouchY),
+                mStatusBarState, mTouchIsClick);
         switch (ev.getActionMasked()) {
             case MotionEvent.ACTION_MOVE:
                 final float touchSlop = getTouchSlop(ev);
@@ -3704,10 +3708,32 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             case MotionEvent.ACTION_UP:
                 if (mStatusBarState != StatusBarState.KEYGUARD && mTouchIsClick &&
                         isBelowLastNotification(mInitialTouchX, mInitialTouchY)) {
+                    debugLog("handleEmptySpaceClick: touch event propagated further");
                     mOnEmptySpaceClickListener.onEmptySpaceClicked(mInitialTouchX, mInitialTouchY);
                 }
                 break;
+            default:
+                debugLog("handleEmptySpaceClick: MotionEvent ignored");
         }
+    }
+
+    private void debugLog(@CompileTimeConstant String s) {
+        if (mLogger == null) {
+            return;
+        }
+        mLogger.d(s);
+    }
+
+    private void logEmptySpaceClick(MotionEvent ev, boolean isTouchBelowLastNotification,
+            int statusBarState, boolean touchIsClick) {
+        if (mLogger == null) {
+            return;
+        }
+        mLogger.logEmptySpaceClick(
+                isTouchBelowLastNotification,
+                statusBarState,
+                touchIsClick,
+                MotionEvent.actionToString(ev.getActionMasked()));
     }
 
     @ShadeViewRefactor(RefactorComponent.INPUT)

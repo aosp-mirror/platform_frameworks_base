@@ -164,20 +164,19 @@ public final class AssociationInfo implements Parcelable {
 
     /**
      * Companion device that was associated. Note that this field is not persisted across sessions.
-     *
-     * Cast to expected device type before use:
+     * Device can be one of the following types:
      *
      * <ul>
-     *     <li>for classic Bluetooth - {@link android.bluetooth.BluetoothDevice}</li>
-     *     <li>for Bluetooth LE - {@link android.bluetooth.le.ScanResult}</li>
-     *     <li>for WiFi - {@link android.net.wifi.ScanResult}</li>
+     *     <li>for classic Bluetooth - {@link AssociatedDevice#getBluetoothDevice()}</li>
+     *     <li>for Bluetooth LE - {@link AssociatedDevice#getBleDevice()}</li>
+     *     <li>for WiFi - {@link AssociatedDevice#getWifiDevice()}</li>
      * </ul>
      *
      * @return the companion device that was associated, or {@code null} if the device is
-     *         self-managed.
+     *         self-managed or this association info was retrieved from persistent storage.
      */
-    public @Nullable Parcelable getAssociatedDevice() {
-        return mAssociatedDevice == null ? null : mAssociatedDevice.getDevice();
+    public @Nullable AssociatedDevice getAssociatedDevice() {
+        return mAssociatedDevice;
     }
 
     /**

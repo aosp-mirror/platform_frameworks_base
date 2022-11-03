@@ -30,7 +30,6 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.BouncerView
 import com.android.systemui.keyguard.data.repository.KeyguardBouncerRepository
-import com.android.systemui.keyguard.shared.model.BouncerCallbackActionsModel
 import com.android.systemui.keyguard.shared.model.BouncerShowMessageModel
 import com.android.systemui.keyguard.shared.model.KeyguardBouncerModel
 import com.android.systemui.plugins.ActivityStarter
@@ -40,6 +39,7 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
@@ -77,7 +77,7 @@ constructor(
             KeyguardBouncerModel(
                 promptReason = repository.bouncerPromptReason ?: 0,
                 errorMessage = repository.bouncerErrorMessage,
-                expansionAmount = repository.expansionAmount.value
+                expansionAmount = repository.panelExpansionAmount.value
             )
         )
         repository.setShowingSoon(false)
@@ -90,14 +90,22 @@ constructor(
     val startingToHide: Flow<Unit> = repository.startingToHide.filter { it }.map {}
     val isVisible: Flow<Boolean> = repository.isVisible
     val isBackButtonEnabled: Flow<Boolean> = repository.isBackButtonEnabled.filterNotNull()
-    val expansionAmount: Flow<Float> = repository.expansionAmount
     val showMessage: Flow<BouncerShowMessageModel> = repository.showMessage.filterNotNull()
     val startingDisappearAnimation: Flow<Runnable> =
         repository.startingDisappearAnimation.filterNotNull()
-    val onDismissAction: Flow<BouncerCallbackActionsModel> =
-        repository.onDismissAction.filterNotNull()
     val resourceUpdateRequests: Flow<Boolean> = repository.resourceUpdateRequests.filter { it }
     val keyguardPosition: Flow<Float> = repository.keyguardPosition
+    val panelExpansionAmount: Flow<Float> = repository.panelExpansionAmount
+    /** 0f = bouncer fully hidden. 1f = bouncer fully visible. */
+    val bouncerExpansion: Flow<Float> = //
+        combine(repository.panelExpansionAmount, repository.isVisible) { expansionAmount, isVisible
+            ->
+            if (isVisible) {
+                1f - expansionAmount
+            } else {
+                0f
+            }
+        }
 
     // TODO(b/243685699): Move isScrimmed logic to data layer.
     // TODO(b/243695312): Encapsulate all of the show logic for the bouncer.
@@ -128,7 +136,7 @@ constructor(
         Trace.beginSection("KeyguardBouncer#show")
         repository.setScrimmed(isScrimmed)
         if (isScrimmed) {
-            setExpansion(KeyguardBouncer.EXPANSION_VISIBLE)
+            setPanelExpansion(KeyguardBouncer.EXPANSION_VISIBLE)
         }
 
         if (resumeBouncer) {
@@ -149,7 +157,6 @@ constructor(
         }
         keyguardStateController.notifyBouncerShowing(true)
         callbackInteractor.dispatchStartingToShow()
-
         Trace.endSection()
     }
 
@@ -168,7 +175,6 @@ constructor(
         keyguardStateController.notifyBouncerShowing(false /* showing */)
         cancelShowRunnable()
         repository.setShowingSoon(false)
-        repository.setOnDismissAction(null)
         repository.setVisible(false)
         repository.setHide(true)
         repository.setShow(null)
@@ -176,14 +182,17 @@ constructor(
     }
 
     /**
-     * Sets the panel expansion which is calculated further upstream. Expansion is from 0f to 1f
-     * where 0f => showing and 1f => hiding
+     * Sets the panel expansion which is calculated further upstream. Panel expansion is from 0f
+     * (panel fully hidden) to 1f (panel fully showing). As the panel shows (from 0f => 1f), the
+     * bouncer hides and as the panel becomes hidden (1f => 0f), the bouncer starts to show.
+     * Therefore, a panel expansion of 1f represents the bouncer fully hidden and a panel expansion
+     * of 0f represents the bouncer fully showing.
      */
-    fun setExpansion(expansion: Float) {
-        val oldExpansion = repository.expansionAmount.value
+    fun setPanelExpansion(expansion: Float) {
+        val oldExpansion = repository.panelExpansionAmount.value
         val expansionChanged = oldExpansion != expansion
         if (repository.startingDisappearAnimation.value == null) {
-            repository.setExpansion(expansion)
+            repository.setPanelExpansion(expansion)
         }
 
         if (
@@ -227,7 +236,7 @@ constructor(
         onDismissAction: ActivityStarter.OnDismissAction?,
         cancelAction: Runnable?
     ) {
-        repository.setOnDismissAction(BouncerCallbackActionsModel(onDismissAction, cancelAction))
+        bouncerView.delegate?.setDismissAction(onDismissAction, cancelAction)
     }
 
     /** Update the resources of the views. */
@@ -282,7 +291,7 @@ constructor(
     /** Returns whether bouncer is fully showing. */
     fun isFullyShowing(): Boolean {
         return (repository.showingSoon.value || repository.isVisible.value) &&
-            repository.expansionAmount.value == KeyguardBouncer.EXPANSION_VISIBLE &&
+            repository.panelExpansionAmount.value == KeyguardBouncer.EXPANSION_VISIBLE &&
             repository.startingDisappearAnimation.value == null
     }
 
@@ -294,8 +303,8 @@ constructor(
     /** If bouncer expansion is between 0f and 1f non-inclusive. */
     fun isInTransit(): Boolean {
         return repository.showingSoon.value ||
-            repository.expansionAmount.value != KeyguardBouncer.EXPANSION_HIDDEN &&
-                repository.expansionAmount.value != KeyguardBouncer.EXPANSION_VISIBLE
+            repository.panelExpansionAmount.value != KeyguardBouncer.EXPANSION_HIDDEN &&
+                repository.panelExpansionAmount.value != KeyguardBouncer.EXPANSION_VISIBLE
     }
 
     /** Return whether bouncer is animating away. */
@@ -305,7 +314,7 @@ constructor(
 
     /** Return whether bouncer will dismiss with actions */
     fun willDismissWithAction(): Boolean {
-        return repository.onDismissAction.value?.onDismissAction != null
+        return bouncerView.delegate?.willDismissWithActions() == true
     }
 
     /** Returns whether the bouncer should be full screen. */

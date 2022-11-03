@@ -22,6 +22,7 @@ import static org.junit.Assert.assertThrows;
 
 import android.hardware.radio.Announcement;
 import android.hardware.radio.ProgramSelector;
+import android.os.Parcel;
 import android.util.ArrayMap;
 
 import org.junit.Test;
@@ -82,5 +83,36 @@ public final class RadioAnnouncementTest {
         Map<String, String> vendorInfo = new ArrayMap<>();
         vendorInfo.put("vendorKeyMock", "vendorValueMock");
         return vendorInfo;
+    }
+
+    @Test
+    public void describeContents_forAnnouncement() {
+        assertWithMessage("Radio announcement contents")
+                .that(TEST_ANNOUNCEMENT.describeContents()).isEqualTo(0);
+    }
+
+    @Test
+    public void newArray_forAnnouncementCreator() {
+        int sizeExpected = 2;
+
+        Announcement[] announcements = Announcement.CREATOR.newArray(sizeExpected);
+
+        assertWithMessage("Announcements").that(announcements).hasLength(sizeExpected);
+    }
+
+    @Test
+    public void writeToParcel_forAnnouncement() {
+        Parcel parcel = Parcel.obtain();
+
+        TEST_ANNOUNCEMENT.writeToParcel(parcel, /* flags= */ 0);
+        parcel.setDataPosition(0);
+
+        Announcement announcementFromParcel = Announcement.CREATOR.createFromParcel(parcel);
+        assertWithMessage("Selector of announcement created from parcel")
+                .that(announcementFromParcel.getSelector()).isEqualTo(FM_PROGRAM_SELECTOR);
+        assertWithMessage("Type of announcement created from parcel")
+                .that(announcementFromParcel.getType()).isEqualTo(TRAFFIC_ANNOUNCEMENT_TYPE);
+        assertWithMessage("Vendor info of announcement created from parcel")
+                .that(announcementFromParcel.getVendorInfo()).isEqualTo(VENDOR_INFO);
     }
 }

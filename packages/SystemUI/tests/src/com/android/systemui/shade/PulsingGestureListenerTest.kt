@@ -66,6 +66,8 @@ class PulsingGestureListenerTest : SysuiTestCase() {
     private lateinit var dumpManager: DumpManager
     @Mock
     private lateinit var statusBarStateController: StatusBarStateController
+    @Mock
+    private lateinit var shadeLogger: ShadeLogger
 
     private lateinit var tunableCaptor: ArgumentCaptor<Tunable>
     private lateinit var underTest: PulsingGestureListener
@@ -81,6 +83,7 @@ class PulsingGestureListenerTest : SysuiTestCase() {
                 centralSurfaces,
                 ambientDisplayConfiguration,
                 statusBarStateController,
+                shadeLogger,
                 tunerService,
                 dumpManager
         )

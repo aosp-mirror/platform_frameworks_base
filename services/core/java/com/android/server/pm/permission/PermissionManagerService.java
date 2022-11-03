@@ -406,6 +406,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_ONE_TIME_PERMISSION_SESSIONS)
     @Override
     public void stopOneTimePermissionSession(String packageName, @UserIdInt int userId) {
+        super.stopOneTimePermissionSession_enforcePermission();
+
         Objects.requireNonNull(packageName);
 
         final long token = Binder.clearCallingIdentity();

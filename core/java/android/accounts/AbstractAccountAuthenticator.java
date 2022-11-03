@@ -154,6 +154,8 @@ public abstract class AbstractAccountAuthenticator {
         public void addAccount(IAccountAuthenticatorResponse response, String accountType,
                 String authTokenType, String[] features, Bundle options)
                 throws RemoteException {
+            super.addAccount_enforcePermission();
+
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 Log.v(TAG, "addAccount: accountType " + accountType
                         + ", authTokenType " + authTokenType
@@ -184,6 +186,8 @@ public abstract class AbstractAccountAuthenticator {
         @Override
         public void confirmCredentials(IAccountAuthenticatorResponse response,
                 Account account, Bundle options) throws RemoteException {
+            super.confirmCredentials_enforcePermission();
+
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 Log.v(TAG, "confirmCredentials: " + account);
             }
@@ -210,6 +214,8 @@ public abstract class AbstractAccountAuthenticator {
         public void getAuthTokenLabel(IAccountAuthenticatorResponse response,
                 String authTokenType)
                 throws RemoteException {
+            super.getAuthTokenLabel_enforcePermission();
+
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 Log.v(TAG, "getAuthTokenLabel: authTokenType " + authTokenType);
             }
@@ -235,6 +241,8 @@ public abstract class AbstractAccountAuthenticator {
         public void getAuthToken(IAccountAuthenticatorResponse response,
                 Account account, String authTokenType, Bundle loginOptions)
                 throws RemoteException {
+            super.getAuthToken_enforcePermission();
+
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 Log.v(TAG, "getAuthToken: " + account
                         + ", authTokenType " + authTokenType);
@@ -262,6 +270,8 @@ public abstract class AbstractAccountAuthenticator {
         @Override
         public void updateCredentials(IAccountAuthenticatorResponse response, Account account,
                 String authTokenType, Bundle loginOptions) throws RemoteException {
+            super.updateCredentials_enforcePermission();
+
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 Log.v(TAG, "updateCredentials: " + account
                         + ", authTokenType " + authTokenType);
@@ -291,6 +301,8 @@ public abstract class AbstractAccountAuthenticator {
         @Override
         public void editProperties(IAccountAuthenticatorResponse response,
                 String accountType) throws RemoteException {
+            super.editProperties_enforcePermission();
+
             try {
                 final Bundle result = AbstractAccountAuthenticator.this.editProperties(
                     new AccountAuthenticatorResponse(response), accountType);
@@ -306,6 +318,8 @@ public abstract class AbstractAccountAuthenticator {
         @Override
         public void hasFeatures(IAccountAuthenticatorResponse response,
                 Account account, String[] features) throws RemoteException {
+            super.hasFeatures_enforcePermission();
+
             try {
                 final Bundle result = AbstractAccountAuthenticator.this.hasFeatures(
                     new AccountAuthenticatorResponse(response), account, features);
@@ -321,6 +335,8 @@ public abstract class AbstractAccountAuthenticator {
         @Override
         public void getAccountRemovalAllowed(IAccountAuthenticatorResponse response,
                 Account account) throws RemoteException {
+            super.getAccountRemovalAllowed_enforcePermission();
+
             try {
                 final Bundle result = AbstractAccountAuthenticator.this.getAccountRemovalAllowed(
                     new AccountAuthenticatorResponse(response), account);
@@ -336,6 +352,8 @@ public abstract class AbstractAccountAuthenticator {
         @Override
         public void getAccountCredentialsForCloning(IAccountAuthenticatorResponse response,
                 Account account) throws RemoteException {
+            super.getAccountCredentialsForCloning_enforcePermission();
+
             try {
                 final Bundle result =
                         AbstractAccountAuthenticator.this.getAccountCredentialsForCloning(
@@ -353,6 +371,8 @@ public abstract class AbstractAccountAuthenticator {
         public void addAccountFromCredentials(IAccountAuthenticatorResponse response,
                 Account account,
                 Bundle accountCredentials) throws RemoteException {
+            super.addAccountFromCredentials_enforcePermission();
+
             try {
                 final Bundle result =
                         AbstractAccountAuthenticator.this.addAccountFromCredentials(
@@ -371,6 +391,8 @@ public abstract class AbstractAccountAuthenticator {
         public void startAddAccountSession(IAccountAuthenticatorResponse response,
                 String accountType, String authTokenType, String[] features, Bundle options)
                 throws RemoteException {
+            super.startAddAccountSession_enforcePermission();
+
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 Log.v(TAG,
                         "startAddAccountSession: accountType " + accountType
@@ -403,6 +425,8 @@ public abstract class AbstractAccountAuthenticator {
                 Account account,
                 String authTokenType,
                 Bundle loginOptions) throws RemoteException {
+            super.startUpdateCredentialsSession_enforcePermission();
+
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 Log.v(TAG, "startUpdateCredentialsSession: "
                         + account
@@ -441,6 +465,8 @@ public abstract class AbstractAccountAuthenticator {
                 IAccountAuthenticatorResponse response,
                 String accountType,
                 Bundle sessionBundle) throws RemoteException {
+            super.finishSession_enforcePermission();
+
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 Log.v(TAG, "finishSession: accountType " + accountType);
             }
@@ -468,6 +494,8 @@ public abstract class AbstractAccountAuthenticator {
                 IAccountAuthenticatorResponse response,
                 Account account,
                 String statusToken) throws RemoteException {
+            super.isCredentialsUpdateSuggested_enforcePermission();
+
             try {
                 final Bundle result = AbstractAccountAuthenticator.this
                         .isCredentialsUpdateSuggested(

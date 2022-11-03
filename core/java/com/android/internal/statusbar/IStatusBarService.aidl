@@ -23,7 +23,7 @@ import android.graphics.Rect;
 import android.hardware.biometrics.IBiometricContextListener;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
-import android.hardware.fingerprint.IUdfpsHbmListener;
+import android.hardware.fingerprint.IUdfpsRefreshRateRequestCallback;
 import android.media.INearbyMediaDevicesProvider;
 import android.media.MediaRoute2Info;
 import android.net.Uri;
@@ -136,9 +136,9 @@ interface IStatusBarService
     void setBiometicContextListener(in IBiometricContextListener listener);
 
     /**
-     * Sets an instance of IUdfpsHbmListener for UdfpsController.
+     * Sets an instance of IUdfpsRefreshRateRequestCallback for UdfpsController.
      */
-    void setUdfpsHbmListener(in IUdfpsHbmListener listener);
+    void setUdfpsRefreshRateCallback(in IUdfpsRefreshRateRequestCallback callback);
 
     /**
      * Show a warning that the device is about to go to sleep due to user inactivity.

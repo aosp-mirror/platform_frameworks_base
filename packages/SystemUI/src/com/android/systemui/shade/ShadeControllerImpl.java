@@ -224,6 +224,6 @@ public class ShadeControllerImpl implements ShadeController {
     }
 
     private NotificationPanelViewController getNotificationPanelViewController() {
-        return getCentralSurfaces().getPanelController();
+        return getCentralSurfaces().getNotificationPanelViewController();
     }
 }

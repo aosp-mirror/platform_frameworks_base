@@ -34,6 +34,7 @@ import android.graphics.Rect;
 import android.os.Binder;
 import android.util.Slog;
 import android.view.ContextThemeWrapper;
+import android.view.Display;
 import android.view.IWindow;
 import android.view.LayoutInflater;
 import android.view.SurfaceControl;
@@ -47,6 +48,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.wm.shell.R;
+import com.android.wm.shell.RootDisplayAreaOrganizer;
 import com.android.wm.shell.common.DisplayLayout;
 
 import java.io.PrintWriter;
@@ -67,11 +69,14 @@ public final class BackgroundWindowManager extends WindowlessWindowManager {
     private SurfaceControl mLeash;
     private View mBackgroundView;
     private @OneHandedState.State int mCurrentState;
+    private RootDisplayAreaOrganizer mRootDisplayAreaOrganizer;
 
-    public BackgroundWindowManager(Context context) {
+    public BackgroundWindowManager(Context context,
+            RootDisplayAreaOrganizer rootDisplayAreaOrganizer) {
         super(context.getResources().getConfiguration(), null /* rootSurface */,
                 null /* hostInputToken */);
         mContext = context;
+        mRootDisplayAreaOrganizer = rootDisplayAreaOrganizer;
         mTransactionFactory = SurfaceControl.Transaction::new;
     }
 
@@ -112,6 +117,7 @@ public final class BackgroundWindowManager extends WindowlessWindowManager {
                 .setOpaque(true)
                 .setName(TAG)
                 .setCallsite("BackgroundWindowManager#attachToParentSurface");
+        mRootDisplayAreaOrganizer.attachToDisplayArea(Display.DEFAULT_DISPLAY, builder);
         mLeash = builder.build();
         b.setParent(mLeash);
     }

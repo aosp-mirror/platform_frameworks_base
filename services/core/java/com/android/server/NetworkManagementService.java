@@ -867,6 +867,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     public void shutdown() {
         // TODO: remove from aidl if nobody calls externally
 
+        super.shutdown_enforcePermission();
+
         Slog.i(TAG, "Shutting down");
     }
 
@@ -1206,6 +1208,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     @android.annotation.EnforcePermission(android.Manifest.permission.NETWORK_SETTINGS)
     @Override
     public boolean setDataSaverModeEnabled(boolean enable) {
+
+        super.setDataSaverModeEnabled_enforcePermission();
 
         if (DBG) Log.d(TAG, "setDataSaverMode: " + enable);
         synchronized (mQuotaLock) {
@@ -1744,6 +1748,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     @android.annotation.EnforcePermission(android.Manifest.permission.OBSERVE_NETWORK_POLICY)
     @Override
     public boolean isNetworkRestricted(int uid) {
+        super.isNetworkRestricted_enforcePermission();
+
         return isNetworkRestrictedInternal(uid);
     }
 

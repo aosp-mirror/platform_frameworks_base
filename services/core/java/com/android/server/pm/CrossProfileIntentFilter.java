@@ -46,6 +46,9 @@ class CrossProfileIntentFilter extends WatchedIntentFilter {
     private static final String ATTR_FILTER = "filter";
     private static final String ATTR_ACCESS_CONTROL = "accessControl";
 
+    //flag to decide if intent needs to be resolved cross profile if pkgName is already defined
+    public static final int FLAG_IS_PACKAGE_FOR_FILTER = 0x00000008;
+
     private static final String TAG = "CrossProfileIntentFilter";
 
     /**

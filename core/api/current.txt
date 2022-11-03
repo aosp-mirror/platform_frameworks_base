@@ -143,6 +143,7 @@ package android {
     field public static final String READ_MEDIA_AUDIO = "android.permission.READ_MEDIA_AUDIO";
     field public static final String READ_MEDIA_IMAGES = "android.permission.READ_MEDIA_IMAGES";
     field public static final String READ_MEDIA_VIDEO = "android.permission.READ_MEDIA_VIDEO";
+    field public static final String READ_MEDIA_VISUAL_USER_SELECTED = "android.permission.READ_MEDIA_VISUAL_USER_SELECTED";
     field public static final String READ_NEARBY_STREAMING_POLICY = "android.permission.READ_NEARBY_STREAMING_POLICY";
     field public static final String READ_PHONE_NUMBERS = "android.permission.READ_PHONE_NUMBERS";
     field public static final String READ_PHONE_STATE = "android.permission.READ_PHONE_STATE";
@@ -8955,9 +8956,18 @@ package android.appwidget {
 
 package android.companion {
 
+  public final class AssociatedDevice implements android.os.Parcelable {
+    method public int describeContents();
+    method @Nullable public android.bluetooth.le.ScanResult getBleDevice();
+    method @Nullable public android.bluetooth.BluetoothDevice getBluetoothDevice();
+    method @Nullable public android.net.wifi.ScanResult getWifiDevice();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.companion.AssociatedDevice> CREATOR;
+  }
+
   public final class AssociationInfo implements android.os.Parcelable {
     method public int describeContents();
-    method @Nullable public android.os.Parcelable getAssociatedDevice();
+    method @Nullable public android.companion.AssociatedDevice getAssociatedDevice();
     method @Nullable public android.net.MacAddress getDeviceMacAddress();
     method @Nullable public String getDeviceProfile();
     method @Nullable public CharSequence getDisplayName();
@@ -19480,6 +19490,7 @@ package android.location {
 
   public final class GnssCapabilities implements android.os.Parcelable {
     method public int describeContents();
+    method @NonNull public java.util.List<android.location.GnssSignalType> getGnssSignalTypes();
     method public boolean hasAntennaInfo();
     method public boolean hasGeofencing();
     method @Deprecated public boolean hasGnssAntennaInfo();
@@ -19513,6 +19524,7 @@ package android.location {
     ctor public GnssCapabilities.Builder();
     ctor public GnssCapabilities.Builder(@NonNull android.location.GnssCapabilities);
     method @NonNull public android.location.GnssCapabilities build();
+    method @NonNull public android.location.GnssCapabilities.Builder setGnssSignalTypes(@NonNull java.util.List<android.location.GnssSignalType>);
     method @NonNull public android.location.GnssCapabilities.Builder setHasAntennaInfo(boolean);
     method @NonNull public android.location.GnssCapabilities.Builder setHasGeofencing(boolean);
     method @NonNull public android.location.GnssCapabilities.Builder setHasLowPowerMode(boolean);
@@ -19723,6 +19735,16 @@ package android.location {
     field @Deprecated public static final int STATUS_LOCATION_DISABLED = 2; // 0x2
     field @Deprecated public static final int STATUS_NOT_SUPPORTED = 0; // 0x0
     field @Deprecated public static final int STATUS_READY = 1; // 0x1
+  }
+
+  public final class GnssSignalType implements android.os.Parcelable {
+    method @NonNull public static android.location.GnssSignalType create(int, @FloatRange(from=0.0f, fromInclusive=false) double, @NonNull String);
+    method public int describeContents();
+    method @FloatRange(from=0.0f, fromInclusive=false) public double getCarrierFrequencyHz();
+    method @NonNull public String getCodeType();
+    method public int getConstellationType();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.location.GnssSignalType> CREATOR;
   }
 
   public final class GnssStatus implements android.os.Parcelable {
@@ -41762,6 +41784,7 @@ package android.telephony {
     field public static final String KEY_PING_TEST_BEFORE_DATA_SWITCH_BOOL = "ping_test_before_data_switch_bool";
     field public static final String KEY_PREFER_2G_BOOL = "prefer_2g_bool";
     field public static final String KEY_PREMIUM_CAPABILITY_MAXIMUM_NOTIFICATION_COUNT_INT_ARRAY = "premium_capability_maximum_notification_count_int_array";
+    field public static final String KEY_PREMIUM_CAPABILITY_NETWORK_SETUP_TIME_MILLIS_LONG = "premium_capability_network_setup_time_millis_long";
     field public static final String KEY_PREMIUM_CAPABILITY_NOTIFICATION_BACKOFF_HYSTERESIS_TIME_MILLIS_LONG = "premium_capability_notification_backoff_hysteresis_time_millis_long";
     field public static final String KEY_PREMIUM_CAPABILITY_NOTIFICATION_DISPLAY_TIMEOUT_MILLIS_LONG = "premium_capability_notification_display_timeout_millis_long";
     field public static final String KEY_PREMIUM_CAPABILITY_PURCHASE_CONDITION_BACKOFF_HYSTERESIS_TIME_MILLIS_LONG = "premium_capability_purchase_condition_backoff_hysteresis_time_millis_long";
@@ -44069,6 +44092,7 @@ package android.telephony {
     field public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_NETWORK_NOT_AVAILABLE = 12; // 0xc
     field public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_NOT_DEFAULT_DATA = 14; // 0xe
     field public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_OVERRIDDEN = 5; // 0x5
+    field public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_PENDING_NETWORK_SETUP = 15; // 0xf
     field public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_REQUEST_FAILED = 11; // 0xb
     field public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_SUCCESS = 1; // 0x1
     field public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_THROTTLED = 2; // 0x2
@@ -53350,6 +53374,7 @@ package android.view.inputmethod {
     method public android.graphics.Matrix getMatrix();
     method public int getSelectionEnd();
     method public int getSelectionStart();
+    method @Nullable public android.view.inputmethod.TextAppearanceInfo getTextAppearanceInfo();
     method @NonNull public java.util.List<android.graphics.RectF> getVisibleLineBounds();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.inputmethod.CursorAnchorInfo> CREATOR;
@@ -53370,6 +53395,7 @@ package android.view.inputmethod {
     method public android.view.inputmethod.CursorAnchorInfo.Builder setInsertionMarkerLocation(float, float, float, float, int);
     method public android.view.inputmethod.CursorAnchorInfo.Builder setMatrix(android.graphics.Matrix);
     method public android.view.inputmethod.CursorAnchorInfo.Builder setSelectionRange(int, int);
+    method @NonNull public android.view.inputmethod.CursorAnchorInfo.Builder setTextAppearanceInfo(@Nullable android.view.inputmethod.TextAppearanceInfo);
   }
 
   public final class DeleteGesture extends android.view.inputmethod.HandwritingGesture implements android.os.Parcelable {
@@ -53625,6 +53651,7 @@ package android.view.inputmethod {
     field public static final int CURSOR_UPDATE_FILTER_CHARACTER_BOUNDS = 8; // 0x8
     field public static final int CURSOR_UPDATE_FILTER_EDITOR_BOUNDS = 4; // 0x4
     field public static final int CURSOR_UPDATE_FILTER_INSERTION_MARKER = 16; // 0x10
+    field public static final int CURSOR_UPDATE_FILTER_TEXT_APPEARANCE = 64; // 0x40
     field public static final int CURSOR_UPDATE_FILTER_VISIBLE_LINE_BOUNDS = 32; // 0x20
     field public static final int CURSOR_UPDATE_IMMEDIATE = 1; // 0x1
     field public static final int CURSOR_UPDATE_MONITOR = 2; // 0x2
@@ -53926,6 +53953,35 @@ package android.view.inputmethod {
     method @NonNull public CharSequence getText();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.inputmethod.SurroundingText> CREATOR;
+  }
+
+  public final class TextAppearanceInfo implements android.os.Parcelable {
+    ctor public TextAppearanceInfo(@NonNull android.widget.TextView);
+    method public int describeContents();
+    method @Nullable public String getFontFamilyName();
+    method @Nullable public String getFontFeatureSettings();
+    method @Nullable public String getFontVariationSettings();
+    method public float getLetterSpacing();
+    method public int getLineBreakStyle();
+    method public int getLineBreakWordStyle();
+    method public int getMaxLength();
+    method @Px public float getShadowDx();
+    method @Px public float getShadowDy();
+    method @Px public float getShadowRadius();
+    method @ColorInt public int getTextColor();
+    method @ColorInt public int getTextColorHighlight();
+    method @ColorInt public int getTextColorHint();
+    method @Nullable public android.content.res.ColorStateList getTextColorLink();
+    method @IntRange(from=0xffffffff, to=android.graphics.fonts.FontStyle.FONT_WEIGHT_MAX) public int getTextFontWeight();
+    method @NonNull public android.os.LocaleList getTextLocales();
+    method public float getTextScaleX();
+    method @Px public float getTextSize();
+    method public int getTextStyle();
+    method public boolean isAllCaps();
+    method public boolean isElegantTextHeight();
+    method public boolean isFallbackLineSpacing();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.view.inputmethod.TextAppearanceInfo> CREATOR;
   }
 
   public final class TextAttribute implements android.os.Parcelable {

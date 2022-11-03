@@ -25,6 +25,7 @@ import static com.android.server.am.BroadcastQueueTest.PACKAGE_RED;
 import static com.android.server.am.BroadcastQueueTest.PACKAGE_YELLOW;
 import static com.android.server.am.BroadcastQueueTest.getUidForPackage;
 import static com.android.server.am.BroadcastQueueTest.makeManifestReceiver;
+import static com.android.server.am.BroadcastQueueTest.withPriority;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -46,8 +47,10 @@ import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.BundleMerger;
 import android.os.HandlerThread;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.util.IndentingPrintWriter;
 
 import androidx.test.filters.SmallTest;
 
@@ -59,6 +62,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintWriter;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
@@ -283,7 +288,7 @@ public class BroadcastQueueModernImplTest {
 
         final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         final BroadcastRecord airplaneRecord = makeBroadcastRecord(airplane);
-        queue.enqueueOrReplaceBroadcast(airplaneRecord, 0, 0);
+        queue.enqueueOrReplaceBroadcast(airplaneRecord, 0);
 
         queue.setProcessCached(false);
         final long notCachedRunnableAt = queue.getRunnableAt();
@@ -305,12 +310,12 @@ public class BroadcastQueueModernImplTest {
         // enqueue a bg-priority broadcast then a fg-priority one
         final Intent timezone = new Intent(Intent.ACTION_TIMEZONE_CHANGED);
         final BroadcastRecord timezoneRecord = makeBroadcastRecord(timezone);
-        queue.enqueueOrReplaceBroadcast(timezoneRecord, 0, 0);
+        queue.enqueueOrReplaceBroadcast(timezoneRecord, 0);
 
         final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         airplane.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         final BroadcastRecord airplaneRecord = makeBroadcastRecord(airplane);
-        queue.enqueueOrReplaceBroadcast(airplaneRecord, 0, 0);
+        queue.enqueueOrReplaceBroadcast(airplaneRecord, 0);
 
         // verify that:
         // (a) the queue is immediately runnable by existence of a fg-priority broadcast
@@ -339,9 +344,9 @@ public class BroadcastQueueModernImplTest {
 
         final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         final BroadcastRecord airplaneRecord = makeBroadcastRecord(airplane, null,
-                List.of(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN),
-                        makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN)), true);
-        queue.enqueueOrReplaceBroadcast(airplaneRecord, 1, 1);
+                List.of(withPriority(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN), 10),
+                        withPriority(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN), 0)), true);
+        queue.enqueueOrReplaceBroadcast(airplaneRecord, 1);
 
         assertFalse(queue.isRunnable());
         assertEquals(BroadcastProcessQueue.REASON_BLOCKED, queue.getRunnableAtReason());
@@ -363,7 +368,7 @@ public class BroadcastQueueModernImplTest {
 
         final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         final BroadcastRecord airplaneRecord = makeBroadcastRecord(airplane);
-        queue.enqueueOrReplaceBroadcast(airplaneRecord, 0, 0);
+        queue.enqueueOrReplaceBroadcast(airplaneRecord, 0);
 
         mConstants.MAX_PENDING_BROADCASTS = 128;
         queue.invalidateRunnableAt();
@@ -374,6 +379,55 @@ public class BroadcastQueueModernImplTest {
         queue.invalidateRunnableAt();
         assertThat(queue.getRunnableAt()).isAtMost(airplaneRecord.enqueueTime);
         assertEquals(BroadcastProcessQueue.REASON_MAX_PENDING, queue.getRunnableAtReason());
+    }
+
+    /**
+     * Confirm that we always prefer running pending items marked as "urgent",
+     * then "normal", then "offload", dispatching by the relative ordering
+     * within each of those clustering groups.
+     */
+    @Test
+    public void testMakeActiveNextPending() {
+        BroadcastProcessQueue queue = new BroadcastProcessQueue(mConstants,
+                PACKAGE_GREEN, getUidForPackage(PACKAGE_GREEN));
+
+        queue.enqueueOrReplaceBroadcast(
+                makeBroadcastRecord(new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED)
+                        .addFlags(Intent.FLAG_RECEIVER_OFFLOAD)), 0);
+        queue.enqueueOrReplaceBroadcast(
+                makeBroadcastRecord(new Intent(Intent.ACTION_TIMEZONE_CHANGED)), 0);
+        queue.enqueueOrReplaceBroadcast(
+                makeBroadcastRecord(new Intent(Intent.ACTION_LOCKED_BOOT_COMPLETED)
+                        .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)), 0);
+        queue.enqueueOrReplaceBroadcast(
+                makeBroadcastRecord(new Intent(Intent.ACTION_ALARM_CHANGED)
+                        .addFlags(Intent.FLAG_RECEIVER_OFFLOAD)), 0);
+        queue.enqueueOrReplaceBroadcast(
+                makeBroadcastRecord(new Intent(Intent.ACTION_TIME_TICK)), 0);
+        queue.enqueueOrReplaceBroadcast(
+                makeBroadcastRecord(new Intent(Intent.ACTION_LOCALE_CHANGED)
+                        .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)), 0);
+
+        queue.makeActiveNextPending();
+        assertEquals(Intent.ACTION_LOCKED_BOOT_COMPLETED, queue.getActive().intent.getAction());
+
+        // To maximize test coverage, dump current state; we're not worried
+        // about the actual output, just that we don't crash
+        queue.getActive().setDeliveryState(0, BroadcastRecord.DELIVERY_SCHEDULED);
+        queue.dumpLocked(SystemClock.uptimeMillis(),
+                new IndentingPrintWriter(new PrintWriter(new ByteArrayOutputStream())));
+
+        queue.makeActiveNextPending();
+        assertEquals(Intent.ACTION_LOCALE_CHANGED, queue.getActive().intent.getAction());
+        queue.makeActiveNextPending();
+        assertEquals(Intent.ACTION_TIMEZONE_CHANGED, queue.getActive().intent.getAction());
+        queue.makeActiveNextPending();
+        assertEquals(Intent.ACTION_TIME_TICK, queue.getActive().intent.getAction());
+        queue.makeActiveNextPending();
+        assertEquals(Intent.ACTION_AIRPLANE_MODE_CHANGED, queue.getActive().intent.getAction());
+        queue.makeActiveNextPending();
+        assertEquals(Intent.ACTION_ALARM_CHANGED, queue.getActive().intent.getAction());
+        assertTrue(queue.isEmpty());
     }
 
     /**

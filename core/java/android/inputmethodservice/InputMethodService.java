@@ -1774,16 +1774,13 @@ public class InputMethodService extends AbstractInputMethodService {
     }
 
     /**
-     * Implement to return our standard {@link InputMethodImpl}.  Subclasses
-     * can override to provide their own customized version.
+     * Implement to return our standard {@link InputMethodImpl}.
      *
-     * @deprecated IME developers don't need to override this method to get callbacks information.
-     * Most methods in {@link InputMethodImpl} have corresponding callbacks.
-     * Use {@link InputMethodService#onBindInput()}, {@link InputMethodService#onUnbindInput()},
-     * {@link InputMethodService#onWindowShown()}, {@link InputMethodService#onWindowHidden()}, etc.
-     *
-     * <p>Starting from Android U and later, override this method won't guarantee that IME works
-     * as previous platform behavior.</p>
+     * @deprecated Overriding or calling this method is strongly discouraged. A future version of
+     * Android will remove the ability to use this method. Use the callbacks on
+     * {@link InputMethodService} as {@link InputMethodService#onBindInput()},
+     * {@link InputMethodService#onUnbindInput()}, {@link InputMethodService#onWindowShown()},
+     * {@link InputMethodService#onWindowHidden()}, etc.
      */
     @Deprecated
     @Override
@@ -1792,18 +1789,17 @@ public class InputMethodService extends AbstractInputMethodService {
     }
     
     /**
-     * Implement to return our standard {@link InputMethodSessionImpl}.  Subclasses
-     * can override to provide their own customized version.
+     * Implement to return our standard {@link InputMethodSessionImpl}.
      *
-     * @deprecated IME developers don't need to override this method to get callbacks information.
+     * <p>IMEs targeting on Android U and above cannot override this method, or an
+     * {@link LinkageError} would be thrown.</p>
+     *
+     * @deprecated Overriding or calling this method is strongly discouraged.
      * Most methods in {@link InputMethodSessionImpl} have corresponding callbacks.
      * Use {@link InputMethodService#onFinishInput()},
      * {@link InputMethodService#onDisplayCompletions(CompletionInfo[])},
      * {@link InputMethodService#onUpdateExtractedText(int, ExtractedText)},
      * {@link InputMethodService#onUpdateSelection(int, int, int, int, int, int)} instead.
-     *
-     * <p>IMEs targeting on Android U and above cannot override this method, or an
-     * {@link LinkageError} would be thrown.</p>
      */
     @Deprecated
     @Override

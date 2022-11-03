@@ -533,6 +533,17 @@ class TransitionController {
         mCollectingTransition.collectVisibleChange(wc);
     }
 
+    /**
+     * Records that a particular container has been reparented. This only effects windows that have
+     * already been collected in the transition. This should be called before reparenting because
+     * the old parent may be removed during reparenting, for example:
+     * {@link Task#shouldRemoveSelfOnLastChildRemoval}
+     */
+    void collectReparentChange(@NonNull WindowContainer wc, @NonNull WindowContainer newParent) {
+        if (!isCollecting()) return;
+        mCollectingTransition.collectReparentChange(wc, newParent);
+    }
+
     /** @see Transition#mStatusBarTransitionDelay */
     void setStatusBarTransitionDelay(long delay) {
         if (mCollectingTransition == null) return;

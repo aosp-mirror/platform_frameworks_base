@@ -202,4 +202,14 @@
     <string name="back_button_text">Back</string>
     <!-- Accessibility text for the caption handle [CHAR LIMIT=NONE] -->
     <string name="handle_text">Handle</string>
+    <!-- Accessibility text for the handle fullscreen button [CHAR LIMIT=NONE] -->
+    <string name="fullscreen_text">Fullscreen</string>
+    <!-- Accessibility text for the handle desktop button [CHAR LIMIT=NONE] -->
+    <string name="desktop_text">Desktop Mode</string>
+    <!-- Accessibility text for the handle split screen button [CHAR LIMIT=NONE] -->
+    <string name="split_screen_text">Split Screen</string>
+    <!-- Accessibility text for the handle more options button [CHAR LIMIT=NONE] -->
+    <string name="more_button_text">More</string>
+    <!-- Accessibility text for the handle floating window button [CHAR LIMIT=NONE] -->
+    <string name="float_button_text">Float</string>
 </resources>

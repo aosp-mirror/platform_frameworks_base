@@ -25,6 +25,7 @@ import android.view.ViewConfiguration
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.BySelector
 import androidx.test.uiautomator.UiDevice
+import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.Until
 import com.android.launcher3.tapl.LauncherInstrumentation
 import com.android.server.wm.flicker.helpers.ImeAppHelper
@@ -38,13 +39,16 @@ import com.android.server.wm.traces.common.IComponentMatcher
 import com.android.server.wm.traces.common.IComponentNameMatcher
 import com.android.server.wm.traces.parser.toFlickerComponent
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
+import com.android.wm.shell.flicker.LAUNCHER_UI_PACKAGE_NAME
 import com.android.wm.shell.flicker.SYSTEM_UI_PACKAGE_NAME
+import java.util.Collections
 
 internal object SplitScreenUtils {
     private const val TIMEOUT_MS = 3_000L
     private const val DRAG_DURATION_MS = 1_000L
     private const val NOTIFICATION_SCROLLER = "notification_stack_scroller"
     private const val DIVIDER_BAR = "docked_divider_handle"
+    private const val OVERVIEW_SNAPSHOT = "snapshot"
     private const val GESTURE_STEP_MS = 16L
     private const val LONG_PRESS_TIME_MS = 100L
     private val SPLIT_DECOR_MANAGER = ComponentNameMatcher("", "SplitDecorManager#")
@@ -55,6 +59,8 @@ internal object SplitScreenUtils {
         get() = By.text("Flicker Test Notification")
     private val dividerBarSelector: BySelector
         get() = By.res(SYSTEM_UI_PACKAGE_NAME, DIVIDER_BAR)
+    private val overviewSnapshotSelector: BySelector
+        get() = By.res(LAUNCHER_UI_PACKAGE_NAME, OVERVIEW_SNAPSHOT)
 
     fun getPrimary(instrumentation: Instrumentation): StandardAppHelper =
         SimpleAppHelper(
@@ -94,24 +100,39 @@ internal object SplitScreenUtils {
     fun enterSplit(
         wmHelper: WindowManagerStateHelper,
         tapl: LauncherInstrumentation,
+        device: UiDevice,
         primaryApp: StandardAppHelper,
         secondaryApp: StandardAppHelper
     ) {
-        tapl.workspace.switchToOverview().dismissAllTasks()
         primaryApp.launchViaIntent(wmHelper)
         secondaryApp.launchViaIntent(wmHelper)
         tapl.goHome()
         wmHelper.StateSyncBuilder().withHomeActivityVisible().waitForAndVerify()
-        splitFromOverview(tapl)
+        splitFromOverview(tapl, device)
         waitForSplitComplete(wmHelper, primaryApp, secondaryApp)
     }
 
-    fun splitFromOverview(tapl: LauncherInstrumentation) {
+    fun splitFromOverview(tapl: LauncherInstrumentation, device: UiDevice) {
         // Note: The initial split position in landscape is different between tablet and phone.
         // In landscape, tablet will let the first app split to right side, and phone will
         // split to left side.
         if (tapl.isTablet) {
-            tapl.workspace.switchToOverview().overviewActions.clickSplit().currentTask.open()
+            // TAPL's currentTask on tablet is sometimes not what we expected if the overview
+            // contains more than 3 task views. We need to use uiautomator directly to find the
+            // second task to split.
+            tapl.workspace.switchToOverview().overviewActions.clickSplit()
+            val snapshots = device.wait(Until.findObjects(overviewSnapshotSelector), TIMEOUT_MS)
+            if (snapshots == null || snapshots.size < 1) {
+                error("Fail to find a overview snapshot to split.")
+            }
+
+            // Find the second task in the upper right corner in split select mode by sorting
+            // 'left' in descending order and 'top' in ascending order.
+            Collections.sort(snapshots, { t1: UiObject2, t2: UiObject2 ->
+                t2.getVisibleBounds().left - t1.getVisibleBounds().left})
+            Collections.sort(snapshots, { t1: UiObject2, t2: UiObject2 ->
+                t1.getVisibleBounds().top - t2.getVisibleBounds().top})
+            snapshots[0].click()
         } else {
             tapl.workspace
                 .switchToOverview()

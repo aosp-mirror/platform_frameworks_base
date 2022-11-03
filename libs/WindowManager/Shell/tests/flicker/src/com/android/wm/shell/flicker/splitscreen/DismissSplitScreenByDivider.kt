@@ -55,7 +55,7 @@ class DismissSplitScreenByDivider (testSpec: FlickerTestParameter) : SplitScreen
         get() = {
             super.transition(this)
             setup {
-                SplitScreenUtils.enterSplit(wmHelper, tapl, primaryApp, secondaryApp)
+                SplitScreenUtils.enterSplit(wmHelper, tapl, device, primaryApp, secondaryApp)
             }
             transitions {
                 if (tapl.isTablet) {

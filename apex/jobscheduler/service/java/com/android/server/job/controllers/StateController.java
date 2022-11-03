@@ -186,4 +186,11 @@ public abstract class StateController {
     /** Dump any internal constants the Controller may have. */
     public void dumpConstants(ProtoOutputStream proto) {
     }
+
+    /**
+     * Standardize the output of userId-packageName combo.
+     */
+    static String packageToString(int userId, String packageName) {
+        return "<" + userId + ">" + packageName;
+    }
 }

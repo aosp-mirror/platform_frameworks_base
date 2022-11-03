@@ -64,6 +64,11 @@ public class KeyguardBouncer {
     private static final String TAG = "KeyguardBouncer";
     static final long BOUNCER_FACE_DELAY = 1200;
     public static final float ALPHA_EXPANSION_THRESHOLD = 0.95f;
+    /**
+     * Values for the bouncer expansion represented as the panel expansion.
+     * Panel expansion 1f = panel fully showing = bouncer fully hidden
+     * Panel expansion 0f = panel fully hiding = bouncer fully showing
+     */
     public static final float EXPANSION_HIDDEN = 1f;
     public static final float EXPANSION_VISIBLE = 0f;
 
@@ -140,6 +145,14 @@ public class KeyguardBouncer {
         mKeyguardUpdateMonitor.registerCallback(mUpdateMonitorCallback);
         mKeyguardBypassController = keyguardBypassController;
         mExpansionCallbacks.add(expansionCallback);
+    }
+
+    /**
+     * Get the KeyguardBouncer expansion
+     * @return 1=HIDDEN, 0=SHOWING, in between 0 and 1 means the bouncer is in transition.
+     */
+    public float getExpansion() {
+        return mExpansion;
     }
 
     /**

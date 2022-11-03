@@ -1752,6 +1752,8 @@ public class TrustManagerService extends SystemService {
         @android.annotation.EnforcePermission(android.Manifest.permission.TRUST_LISTENER)
         @Override
         public boolean isTrustUsuallyManaged(int userId) {
+            super.isTrustUsuallyManaged_enforcePermission();
+
             return isTrustUsuallyManagedInternal(userId);
         }
 

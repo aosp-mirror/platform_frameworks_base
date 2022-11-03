@@ -95,6 +95,8 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     @Override
     @EnforcePermission(LOG_COMPAT_CHANGE)
     public void reportChange(long changeId, ApplicationInfo appInfo) {
+        super.reportChange_enforcePermission();
+
         reportChangeInternal(changeId, appInfo.uid, ChangeReporter.STATE_LOGGED);
     }
 
@@ -102,6 +104,8 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     @EnforcePermission(LOG_COMPAT_CHANGE)
     public void reportChangeByPackageName(long changeId, String packageName,
             @UserIdInt int userId) {
+        super.reportChangeByPackageName_enforcePermission();
+
         ApplicationInfo appInfo = getApplicationInfo(packageName, userId);
         if (appInfo != null) {
             reportChangeInternal(changeId, appInfo.uid, ChangeReporter.STATE_LOGGED);
@@ -111,6 +115,8 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     @Override
     @EnforcePermission(LOG_COMPAT_CHANGE)
     public void reportChangeByUid(long changeId, int uid) {
+        super.reportChangeByUid_enforcePermission();
+
         reportChangeInternal(changeId, uid, ChangeReporter.STATE_LOGGED);
     }
 
@@ -121,6 +127,8 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     @Override
     @EnforcePermission(allOf = {LOG_COMPAT_CHANGE, READ_COMPAT_CHANGE_CONFIG})
     public boolean isChangeEnabled(long changeId, ApplicationInfo appInfo) {
+        super.isChangeEnabled_enforcePermission();
+
         return isChangeEnabledInternal(changeId, appInfo);
     }
 
@@ -128,6 +136,8 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     @EnforcePermission(allOf = {LOG_COMPAT_CHANGE, READ_COMPAT_CHANGE_CONFIG})
     public boolean isChangeEnabledByPackageName(long changeId, String packageName,
             @UserIdInt int userId) {
+        super.isChangeEnabledByPackageName_enforcePermission();
+
         ApplicationInfo appInfo = getApplicationInfo(packageName, userId);
         if (appInfo == null) {
             return mCompatConfig.willChangeBeEnabled(changeId, packageName);
@@ -138,6 +148,8 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     @Override
     @EnforcePermission(allOf = {LOG_COMPAT_CHANGE, READ_COMPAT_CHANGE_CONFIG})
     public boolean isChangeEnabledByUid(long changeId, int uid) {
+        super.isChangeEnabledByUid_enforcePermission();
+
         String[] packages = mContext.getPackageManager().getPackagesForUid(uid);
         if (packages == null || packages.length == 0) {
             return mCompatConfig.defaultChangeIdValue(changeId);
@@ -199,6 +211,8 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     @Override
     @EnforcePermission(OVERRIDE_COMPAT_CHANGE_CONFIG)
     public void setOverrides(CompatibilityChangeConfig overrides, String packageName) {
+        super.setOverrides_enforcePermission();
+
         Map<Long, PackageOverride> overridesMap = new HashMap<>();
         for (long change : overrides.enabledChanges()) {
             overridesMap.put(change, new PackageOverride.Builder().setEnabled(true).build());
@@ -215,6 +229,8 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     @Override
     @EnforcePermission(OVERRIDE_COMPAT_CHANGE_CONFIG)
     public void setOverridesForTest(CompatibilityChangeConfig overrides, String packageName) {
+        super.setOverridesForTest_enforcePermission();
+
         Map<Long, PackageOverride> overridesMap = new HashMap<>();
         for (long change : overrides.enabledChanges()) {
             overridesMap.put(change, new PackageOverride.Builder().setEnabled(true).build());
@@ -231,6 +247,8 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     @EnforcePermission(OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD)
     public void putAllOverridesOnReleaseBuilds(
             CompatibilityOverridesByPackageConfig overridesByPackage) {
+        super.putAllOverridesOnReleaseBuilds_enforcePermission();
+
         for (CompatibilityOverrideConfig overrides :
                 overridesByPackage.packageNameToOverrides.values()) {
             checkAllCompatOverridesAreOverridable(overrides.overrides.keySet());
@@ -242,6 +260,8 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     @EnforcePermission(OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD)
     public void putOverridesOnReleaseBuilds(CompatibilityOverrideConfig overrides,
             String packageName) {
+        super.putOverridesOnReleaseBuilds_enforcePermission();
+
         checkAllCompatOverridesAreOverridable(overrides.overrides.keySet());
         mCompatConfig.addPackageOverrides(overrides, packageName, /* skipUnknownChangeIds= */ true);
     }
@@ -249,6 +269,8 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     @Override
     @EnforcePermission(OVERRIDE_COMPAT_CHANGE_CONFIG)
     public int enableTargetSdkChanges(String packageName, int targetSdkVersion) {
+        super.enableTargetSdkChanges_enforcePermission();
+
         int numChanges =
                 mCompatConfig.enableTargetSdkChangesForPackage(packageName, targetSdkVersion);
         killPackage(packageName);
@@ -258,6 +280,8 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     @Override
     @EnforcePermission(OVERRIDE_COMPAT_CHANGE_CONFIG)
     public int disableTargetSdkChanges(String packageName, int targetSdkVersion) {
+        super.disableTargetSdkChanges_enforcePermission();
+
         int numChanges =
                 mCompatConfig.disableTargetSdkChangesForPackage(packageName, targetSdkVersion);
         killPackage(packageName);
@@ -267,6 +291,8 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     @Override
     @EnforcePermission(OVERRIDE_COMPAT_CHANGE_CONFIG)
     public void clearOverrides(String packageName) {
+        super.clearOverrides_enforcePermission();
+
         mCompatConfig.removePackageOverrides(packageName);
         killPackage(packageName);
     }
@@ -274,12 +300,16 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     @Override
     @EnforcePermission(OVERRIDE_COMPAT_CHANGE_CONFIG)
     public void clearOverridesForTest(String packageName) {
+        super.clearOverridesForTest_enforcePermission();
+
         mCompatConfig.removePackageOverrides(packageName);
     }
 
     @Override
     @EnforcePermission(OVERRIDE_COMPAT_CHANGE_CONFIG)
     public boolean clearOverride(long changeId, String packageName) {
+        super.clearOverride_enforcePermission();
+
         boolean existed = mCompatConfig.removeOverride(changeId, packageName);
         killPackage(packageName);
         return existed;
@@ -288,6 +318,8 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     @Override
     @EnforcePermission(OVERRIDE_COMPAT_CHANGE_CONFIG)
     public boolean clearOverrideForTest(long changeId, String packageName) {
+        super.clearOverrideForTest_enforcePermission();
+
         return mCompatConfig.removeOverride(changeId, packageName);
     }
 
@@ -295,6 +327,8 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     @EnforcePermission(OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD)
     public void removeAllOverridesOnReleaseBuilds(
             CompatibilityOverridesToRemoveByPackageConfig overridesToRemoveByPackage) {
+        super.removeAllOverridesOnReleaseBuilds_enforcePermission();
+
         for (CompatibilityOverridesToRemoveConfig overridesToRemove :
                 overridesToRemoveByPackage.packageNameToOverridesToRemove.values()) {
             checkAllCompatOverridesAreOverridable(overridesToRemove.changeIds);
@@ -307,6 +341,8 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     public void removeOverridesOnReleaseBuilds(
             CompatibilityOverridesToRemoveConfig overridesToRemove,
             String packageName) {
+        super.removeOverridesOnReleaseBuilds_enforcePermission();
+
         checkAllCompatOverridesAreOverridable(overridesToRemove.changeIds);
         mCompatConfig.removePackageOverrides(overridesToRemove, packageName);
     }
@@ -314,12 +350,16 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     @Override
     @EnforcePermission(allOf = {LOG_COMPAT_CHANGE, READ_COMPAT_CHANGE_CONFIG})
     public CompatibilityChangeConfig getAppConfig(ApplicationInfo appInfo) {
+        super.getAppConfig_enforcePermission();
+
         return mCompatConfig.getAppConfig(appInfo);
     }
 
     @Override
     @EnforcePermission(READ_COMPAT_CHANGE_CONFIG)
     public CompatibilityChangeInfo[] listAllChanges() {
+        super.listAllChanges_enforcePermission();
+
         return mCompatConfig.dumpChanges();
     }
 

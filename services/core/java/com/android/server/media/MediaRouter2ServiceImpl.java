@@ -131,8 +131,6 @@ class MediaRouter2ServiceImpl {
                             UserHandler::updateDiscoveryPreferenceOnHandler, userHandler));
                 }
             }
-
-            mEventLogger.enqueue(new EventLogger.StringEvent("mScreenOnOffReceiver", null));
         }
     };
 

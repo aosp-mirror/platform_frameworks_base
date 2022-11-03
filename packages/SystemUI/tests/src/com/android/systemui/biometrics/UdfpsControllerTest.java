@@ -71,6 +71,7 @@ import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.ScreenLifecycle;
+import com.android.systemui.keyguard.domain.interactor.BouncerInteractor;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shade.ShadeExpansionStateManager;
@@ -192,6 +193,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
     private ActivityLaunchAnimator mActivityLaunchAnimator;
     @Mock
     private AlternateUdfpsTouchProvider mAlternateTouchProvider;
+    @Mock
+    private BouncerInteractor mBouncerInteractor;
 
     // Capture listeners so that they can be used to send events
     @Captor private ArgumentCaptor<IUdfpsOverlayController> mOverlayCaptor;
@@ -272,7 +275,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mLatencyTracker,
                 mActivityLaunchAnimator,
                 Optional.of(mAlternateTouchProvider),
-                mBiometricsExecutor);
+                mBiometricsExecutor,
+                mBouncerInteractor);
         verify(mFingerprintManager).setUdfpsOverlayController(mOverlayCaptor.capture());
         mOverlayController = mOverlayCaptor.getValue();
         verify(mScreenLifecycle).addObserver(mScreenObserverCaptor.capture());

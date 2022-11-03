@@ -3651,6 +3651,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             throw new IllegalArgumentException("The display " + displayId + " does not exist or is"
                     + " not tracked by accessibility.");
         }
+        if (mProxyManager.isProxyed(displayId)) {
+            throw new IllegalArgumentException("The display " + displayId + " is already being"
+                    + "proxy-ed");
+        }
 
         mProxyManager.registerProxy(client, displayId);
         return true;

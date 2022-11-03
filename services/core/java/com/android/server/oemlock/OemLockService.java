@@ -120,6 +120,8 @@ public class OemLockService extends SystemService {
         @Nullable
         @EnforcePermission(MANAGE_CARRIER_OEM_UNLOCK_STATE)
         public String getLockName() {
+            super.getLockName_enforcePermission();
+
             final long token = Binder.clearCallingIdentity();
             try {
                 return mOemLock.getLockName();
@@ -131,6 +133,8 @@ public class OemLockService extends SystemService {
         @Override
         @EnforcePermission(MANAGE_CARRIER_OEM_UNLOCK_STATE)
         public void setOemUnlockAllowedByCarrier(boolean allowed, @Nullable byte[] signature) {
+            super.setOemUnlockAllowedByCarrier_enforcePermission();
+
             enforceUserIsAdmin();
 
             final long token = Binder.clearCallingIdentity();
@@ -144,6 +148,8 @@ public class OemLockService extends SystemService {
         @Override
         @EnforcePermission(MANAGE_CARRIER_OEM_UNLOCK_STATE)
         public boolean isOemUnlockAllowedByCarrier() {
+            super.isOemUnlockAllowedByCarrier_enforcePermission();
+
             final long token = Binder.clearCallingIdentity();
             try {
               return mOemLock.isOemUnlockAllowedByCarrier();
@@ -157,6 +163,8 @@ public class OemLockService extends SystemService {
         @Override
         @EnforcePermission(MANAGE_USER_OEM_UNLOCK_STATE)
         public void setOemUnlockAllowedByUser(boolean allowedByUser) {
+            super.setOemUnlockAllowedByUser_enforcePermission();
+
             if (ActivityManager.isUserAMonkey()) {
                 // Prevent a monkey from changing this
                 return;
@@ -183,6 +191,8 @@ public class OemLockService extends SystemService {
         @Override
         @EnforcePermission(MANAGE_USER_OEM_UNLOCK_STATE)
         public boolean isOemUnlockAllowedByUser() {
+            super.isOemUnlockAllowedByUser_enforcePermission();
+
             final long token = Binder.clearCallingIdentity();
             try {
                 return mOemLock.isOemUnlockAllowedByDevice();
@@ -199,6 +209,8 @@ public class OemLockService extends SystemService {
         @Override
         @EnforcePermission(anyOf = {READ_OEM_UNLOCK_STATE, OEM_UNLOCK_STATE})
         public boolean isOemUnlockAllowed() {
+            super.isOemUnlockAllowed_enforcePermission();
+
             final long token = Binder.clearCallingIdentity();
             try {
                 boolean allowed = mOemLock.isOemUnlockAllowedByCarrier()
@@ -213,6 +225,8 @@ public class OemLockService extends SystemService {
         @Override
         @EnforcePermission(anyOf = {READ_OEM_UNLOCK_STATE, OEM_UNLOCK_STATE})
         public boolean isDeviceOemUnlocked() {
+            super.isDeviceOemUnlocked_enforcePermission();
+
             String locked = SystemProperties.get(FLASH_LOCK_PROP);
             switch (locked) {
                 case FLASH_LOCK_UNLOCKED:

@@ -83,6 +83,7 @@ import android.content.pm.LauncherApps.ShortcutQuery;
 import android.content.pm.PackageInfo;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
+import android.content.pm.UserPackage;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
@@ -107,7 +108,6 @@ import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.pm.ShortcutService.ConfigConstants;
 import com.android.server.pm.ShortcutService.FileOutputStreamWithPath;
-import com.android.server.pm.ShortcutUser.PackageWithUser;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -4081,12 +4081,12 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         assertEquals(set(CALLING_PACKAGE_1, CALLING_PACKAGE_2),
                 hashSet(user10.getAllPackagesForTest().keySet()));
         assertEquals(
-                set(PackageWithUser.of(USER_0, LAUNCHER_1),
-                        PackageWithUser.of(USER_0, LAUNCHER_2)),
+                set(UserPackage.of(USER_0, LAUNCHER_1),
+                        UserPackage.of(USER_0, LAUNCHER_2)),
                 hashSet(user0.getAllLaunchersForTest().keySet()));
         assertEquals(
-                set(PackageWithUser.of(USER_10, LAUNCHER_1),
-                        PackageWithUser.of(USER_10, LAUNCHER_2)),
+                set(UserPackage.of(USER_10, LAUNCHER_1),
+                        UserPackage.of(USER_10, LAUNCHER_2)),
                 hashSet(user10.getAllLaunchersForTest().keySet()));
         assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_1, USER_0),
                 "s0_1", "s0_2");
@@ -4113,12 +4113,12 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         assertEquals(set(CALLING_PACKAGE_1, CALLING_PACKAGE_2),
                 hashSet(user10.getAllPackagesForTest().keySet()));
         assertEquals(
-                set(PackageWithUser.of(USER_0, LAUNCHER_1),
-                        PackageWithUser.of(USER_0, LAUNCHER_2)),
+                set(UserPackage.of(USER_0, LAUNCHER_1),
+                        UserPackage.of(USER_0, LAUNCHER_2)),
                 hashSet(user0.getAllLaunchersForTest().keySet()));
         assertEquals(
-                set(PackageWithUser.of(USER_10, LAUNCHER_1),
-                        PackageWithUser.of(USER_10, LAUNCHER_2)),
+                set(UserPackage.of(USER_10, LAUNCHER_1),
+                        UserPackage.of(USER_10, LAUNCHER_2)),
                 hashSet(user10.getAllLaunchersForTest().keySet()));
         assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_1, USER_0),
                 "s0_1", "s0_2");
@@ -4145,12 +4145,12 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         assertEquals(set(CALLING_PACKAGE_1, CALLING_PACKAGE_2),
                 hashSet(user10.getAllPackagesForTest().keySet()));
         assertEquals(
-                set(PackageWithUser.of(USER_0, LAUNCHER_1),
-                        PackageWithUser.of(USER_0, LAUNCHER_2)),
+                set(UserPackage.of(USER_0, LAUNCHER_1),
+                        UserPackage.of(USER_0, LAUNCHER_2)),
                 hashSet(user0.getAllLaunchersForTest().keySet()));
         assertEquals(
-                set(PackageWithUser.of(USER_10, LAUNCHER_1),
-                        PackageWithUser.of(USER_10, LAUNCHER_2)),
+                set(UserPackage.of(USER_10, LAUNCHER_1),
+                        UserPackage.of(USER_10, LAUNCHER_2)),
                 hashSet(user10.getAllLaunchersForTest().keySet()));
         assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_1, USER_0),
                 "s0_2");
@@ -4176,11 +4176,11 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         assertEquals(set(CALLING_PACKAGE_1, CALLING_PACKAGE_2),
                 hashSet(user10.getAllPackagesForTest().keySet()));
         assertEquals(
-                set(PackageWithUser.of(USER_0, LAUNCHER_1),
-                        PackageWithUser.of(USER_0, LAUNCHER_2)),
+                set(UserPackage.of(USER_0, LAUNCHER_1),
+                        UserPackage.of(USER_0, LAUNCHER_2)),
                 hashSet(user0.getAllLaunchersForTest().keySet()));
         assertEquals(
-                set(PackageWithUser.of(USER_10, LAUNCHER_2)),
+                set(UserPackage.of(USER_10, LAUNCHER_2)),
                 hashSet(user10.getAllLaunchersForTest().keySet()));
         assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_1, USER_0),
                 "s0_2");
@@ -4205,11 +4205,11 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         assertEquals(set(CALLING_PACKAGE_1),
                 hashSet(user10.getAllPackagesForTest().keySet()));
         assertEquals(
-                set(PackageWithUser.of(USER_0, LAUNCHER_1),
-                        PackageWithUser.of(USER_0, LAUNCHER_2)),
+                set(UserPackage.of(USER_0, LAUNCHER_1),
+                        UserPackage.of(USER_0, LAUNCHER_2)),
                 hashSet(user0.getAllLaunchersForTest().keySet()));
         assertEquals(
-                set(PackageWithUser.of(USER_10, LAUNCHER_2)),
+                set(UserPackage.of(USER_10, LAUNCHER_2)),
                 hashSet(user10.getAllLaunchersForTest().keySet()));
         assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_1, USER_0),
                 "s0_2");
@@ -4234,8 +4234,8 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         assertEquals(set(CALLING_PACKAGE_1),
                 hashSet(user10.getAllPackagesForTest().keySet()));
         assertEquals(
-                set(PackageWithUser.of(USER_0, LAUNCHER_1),
-                        PackageWithUser.of(USER_0, LAUNCHER_2)),
+                set(UserPackage.of(USER_0, LAUNCHER_1),
+                        UserPackage.of(USER_0, LAUNCHER_2)),
                 hashSet(user0.getAllLaunchersForTest().keySet()));
         assertEquals(
                 set(),
@@ -4263,8 +4263,8 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         assertEquals(set(),
                 hashSet(user10.getAllPackagesForTest().keySet()));
         assertEquals(
-                set(PackageWithUser.of(USER_0, LAUNCHER_1),
-                        PackageWithUser.of(USER_0, LAUNCHER_2)),
+                set(UserPackage.of(USER_0, LAUNCHER_1),
+                        UserPackage.of(USER_0, LAUNCHER_2)),
                 hashSet(user0.getAllLaunchersForTest().keySet()));
         assertEquals(set(),
                 hashSet(user10.getAllLaunchersForTest().keySet()));
@@ -5584,12 +5584,12 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
         assertExistsAndShadow(user0.getAllPackagesForTest().get(CALLING_PACKAGE_3));
         assertExistsAndShadow(user0.getAllLaunchersForTest().get(
-                PackageWithUser.of(USER_0, LAUNCHER_1)));
+                UserPackage.of(USER_0, LAUNCHER_1)));
         assertExistsAndShadow(user0.getAllLaunchersForTest().get(
-                PackageWithUser.of(USER_0, LAUNCHER_2)));
+                UserPackage.of(USER_0, LAUNCHER_2)));
 
-        assertNull(user0.getAllLaunchersForTest().get(PackageWithUser.of(USER_0, LAUNCHER_3)));
-        assertNull(user0.getAllLaunchersForTest().get(PackageWithUser.of(USER_P0, LAUNCHER_1)));
+        assertNull(user0.getAllLaunchersForTest().get(UserPackage.of(USER_0, LAUNCHER_3)));
+        assertNull(user0.getAllLaunchersForTest().get(UserPackage.of(USER_P0, LAUNCHER_1)));
 
         doReturn(true).when(mMockPackageManagerInternal).isDataRestoreSafe(any(byte[].class),
                 anyString());
@@ -6146,12 +6146,12 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         assertExistsAndShadow(user0.getAllPackagesForTest().get(CALLING_PACKAGE_2));
         assertExistsAndShadow(user0.getAllPackagesForTest().get(CALLING_PACKAGE_3));
         assertExistsAndShadow(user0.getAllLaunchersForTest().get(
-                PackageWithUser.of(USER_0, LAUNCHER_1)));
+                UserPackage.of(USER_0, LAUNCHER_1)));
         assertExistsAndShadow(user0.getAllLaunchersForTest().get(
-                PackageWithUser.of(USER_0, LAUNCHER_2)));
+                UserPackage.of(USER_0, LAUNCHER_2)));
 
-        assertNull(user0.getAllLaunchersForTest().get(PackageWithUser.of(USER_0, LAUNCHER_3)));
-        assertNull(user0.getAllLaunchersForTest().get(PackageWithUser.of(USER_P0, LAUNCHER_1)));
+        assertNull(user0.getAllLaunchersForTest().get(UserPackage.of(USER_0, LAUNCHER_3)));
+        assertNull(user0.getAllLaunchersForTest().get(UserPackage.of(USER_P0, LAUNCHER_1)));
 
         doReturn(true).when(mMockPackageManagerInternal).isDataRestoreSafe(any(byte[].class),
                 anyString());

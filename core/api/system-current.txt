@@ -587,6 +587,7 @@ package android.app {
     field public static final String OPSTR_READ_MEDIA_AUDIO = "android:read_media_audio";
     field public static final String OPSTR_READ_MEDIA_IMAGES = "android:read_media_images";
     field public static final String OPSTR_READ_MEDIA_VIDEO = "android:read_media_video";
+    field public static final String OPSTR_READ_MEDIA_VISUAL_USER_SELECTED = "android:read_media_visual_user_selected";
     field public static final String OPSTR_RECEIVE_AMBIENT_TRIGGER_AUDIO = "android:receive_ambient_trigger_audio";
     field public static final String OPSTR_RECEIVE_EMERGENCY_BROADCAST = "android:receive_emergency_broadcast";
     field public static final String OPSTR_RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO = "android:receive_explicit_user_interaction_audio";
@@ -6345,12 +6346,21 @@ package android.media {
   public final class AudioPlaybackConfiguration implements android.os.Parcelable {
     method public int getClientPid();
     method public int getClientUid();
+    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int getMutedBy();
     method public int getPlayerInterfaceId();
     method public android.media.PlayerProxy getPlayerProxy();
     method public int getPlayerState();
     method public int getPlayerType();
     method @IntRange(from=0) public int getSessionId();
     method public boolean isActive();
+    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public boolean isMuted();
+    field @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static final int MUTED_BY_APP_OPS = 8; // 0x8
+    field @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static final int MUTED_BY_CLIENT_VOLUME = 16; // 0x10
+    field @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static final int MUTED_BY_MASTER = 1; // 0x1
+    field @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static final int MUTED_BY_STREAM_MUTED = 4; // 0x4
+    field @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static final int MUTED_BY_STREAM_VOLUME = 2; // 0x2
+    field @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static final int MUTED_BY_UNKNOWN = -1; // 0xffffffff
+    field @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static final int MUTED_BY_VOLUME_SHAPER = 32; // 0x20
     field public static final int PLAYER_STATE_IDLE = 1; // 0x1
     field public static final int PLAYER_STATE_PAUSED = 3; // 0x3
     field public static final int PLAYER_STATE_RELEASED = 0; // 0x0
@@ -15924,10 +15934,17 @@ package android.view {
 
 package android.view.accessibility {
 
+  public abstract class AccessibilityDisplayProxy {
+    ctor public AccessibilityDisplayProxy(int, @NonNull java.util.concurrent.Executor, @NonNull java.util.List<android.accessibilityservice.AccessibilityServiceInfo>);
+    method public int getDisplayId();
+  }
+
   public final class AccessibilityManager {
     method public int getAccessibilityWindowId(@Nullable android.os.IBinder);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACCESSIBILITY) public void performAccessibilityShortcut();
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ACCESSIBILITY) public boolean registerDisplayProxy(@NonNull android.view.accessibility.AccessibilityDisplayProxy);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACCESSIBILITY) public void registerSystemAction(@NonNull android.app.RemoteAction, int);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ACCESSIBILITY) public boolean unregisterDisplayProxy(@NonNull android.view.accessibility.AccessibilityDisplayProxy);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACCESSIBILITY) public void unregisterSystemAction(int);
   }
 

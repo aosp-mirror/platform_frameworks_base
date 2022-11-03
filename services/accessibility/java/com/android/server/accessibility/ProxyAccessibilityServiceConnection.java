@@ -32,6 +32,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteCallback;
 import android.view.KeyEvent;
+import android.view.accessibility.AccessibilityDisplayProxy;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import androidx.annotation.Nullable;
@@ -44,7 +45,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Represents the system connection to an {@link android.view.accessibility.AccessibilityProxy}.
+ * Represents the system connection to an {@link AccessibilityDisplayProxy}.
  *
  * <p>Most methods are no-ops since this connection does not need to capture input or listen to
  * hardware-related changes.

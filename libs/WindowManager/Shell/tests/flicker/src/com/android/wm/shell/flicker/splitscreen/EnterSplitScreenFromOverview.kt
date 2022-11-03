@@ -34,7 +34,6 @@ import com.android.wm.shell.flicker.splitAppLayerBoundsIsVisibleAtEnd
 import com.android.wm.shell.flicker.splitScreenDividerBecomesVisible
 import com.android.wm.shell.flicker.splitScreenEntered
 import org.junit.Assume
-import org.junit.Before
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -55,7 +54,6 @@ class EnterSplitScreenFromOverview(testSpec: FlickerTestParameter) : SplitScreen
         get() = {
             super.transition(this)
             setup {
-                tapl.workspace.switchToOverview().dismissAllTasks()
                 primaryApp.launchViaIntent(wmHelper)
                 secondaryApp.launchViaIntent(wmHelper)
                 tapl.goHome()
@@ -65,7 +63,7 @@ class EnterSplitScreenFromOverview(testSpec: FlickerTestParameter) : SplitScreen
                     .waitForAndVerify()
             }
             transitions {
-                SplitScreenUtils.splitFromOverview(tapl)
+                SplitScreenUtils.splitFromOverview(tapl, device)
                 SplitScreenUtils.waitForSplitComplete(wmHelper, primaryApp, secondaryApp)
             }
         }

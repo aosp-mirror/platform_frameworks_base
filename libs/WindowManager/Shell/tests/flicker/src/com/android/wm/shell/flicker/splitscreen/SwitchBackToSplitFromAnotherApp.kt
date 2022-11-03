@@ -52,7 +52,7 @@ class SwitchBackToSplitFromAnotherApp(testSpec: FlickerTestParameter) : SplitScr
         get() = {
             super.transition(this)
             setup {
-                SplitScreenUtils.enterSplit(wmHelper, tapl, primaryApp, secondaryApp)
+                SplitScreenUtils.enterSplit(wmHelper, tapl, device, primaryApp, secondaryApp)
 
                 thirdApp.launchViaIntent(wmHelper)
                 wmHelper.StateSyncBuilder().withWindowSurfaceAppeared(thirdApp).waitForAndVerify()

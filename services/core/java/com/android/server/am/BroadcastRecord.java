@@ -96,6 +96,7 @@ final class BroadcastRecord extends Binder {
     final @Nullable BroadcastOptions options; // BroadcastOptions supplied by caller
     final @NonNull List<Object> receivers;   // contains BroadcastFilter and ResolveInfo
     final @DeliveryState int[] delivery;   // delivery state of each receiver
+    final int[] blockedUntilTerminalCount; // blocked until count of each receiver
     @Nullable ProcessRecord resultToApp; // who receives final result if non-null
     @Nullable IIntentReceiver resultTo; // who receives final result if non-null
     boolean deferred;
@@ -375,6 +376,7 @@ final class BroadcastRecord extends Binder {
         options = _options;
         receivers = (_receivers != null) ? _receivers : EMPTY_RECEIVERS;
         delivery = new int[_receivers != null ? _receivers.size() : 0];
+        blockedUntilTerminalCount = calculateBlockedUntilTerminalCount(receivers, _serialized);
         scheduledTime = new long[delivery.length];
         terminalTime = new long[delivery.length];
         resultToApp = _resultToApp;
@@ -385,7 +387,7 @@ final class BroadcastRecord extends Binder {
         ordered = _serialized;
         sticky = _sticky;
         initialSticky = _initialSticky;
-        prioritized = isPrioritized(receivers);
+        prioritized = isPrioritized(blockedUntilTerminalCount, _serialized);
         userId = _userId;
         nextReceiver = 0;
         state = IDLE;
@@ -427,6 +429,7 @@ final class BroadcastRecord extends Binder {
         options = from.options;
         receivers = from.receivers;
         delivery = from.delivery;
+        blockedUntilTerminalCount = from.blockedUntilTerminalCount;
         scheduledTime = from.scheduledTime;
         terminalTime = from.terminalTime;
         resultToApp = from.resultToApp;
@@ -617,6 +620,10 @@ final class BroadcastRecord extends Binder {
         return (intent.getFlags() & Intent.FLAG_RECEIVER_NO_ABORT) != 0;
     }
 
+    boolean isOffload() {
+        return (intent.getFlags() & Intent.FLAG_RECEIVER_OFFLOAD) != 0;
+    }
+
     /**
      * Core policy determination about this broadcast's delivery prioritization
      */
@@ -686,22 +693,60 @@ final class BroadcastRecord extends Binder {
     }
 
     /**
-     * Return if given receivers list has more than one traunch of priorities.
+     * Determine if the result of {@link #calculateBlockedUntilTerminalCount}
+     * has prioritized tranches of receivers.
      */
     @VisibleForTesting
-    static boolean isPrioritized(@NonNull List<Object> receivers) {
-        int firstPriority = 0;
-        for (int i = 0; i < receivers.size(); i++) {
-            final int thisPriority = getReceiverPriority(receivers.get(i));
-            if (i == 0) {
-                firstPriority = thisPriority;
-            } else if (thisPriority != firstPriority) {
-                return true;
-            }
-        }
-        return false;
+    static boolean isPrioritized(@NonNull int[] blockedUntilTerminalCount,
+            boolean ordered) {
+        return !ordered && (blockedUntilTerminalCount.length > 0)
+                && (blockedUntilTerminalCount[0] != -1);
     }
 
+    /**
+     * Calculate the {@link #terminalCount} that each receiver should be
+     * considered blocked until.
+     * <p>
+     * For example, in an ordered broadcast, receiver {@code N} is blocked until
+     * receiver {@code N-1} reaches a terminal state. Similarly, in a
+     * prioritized broadcast, receiver {@code N} is blocked until all receivers
+     * of a higher priority reach a terminal state.
+     * <p>
+     * When there are no terminal count constraints, the blocked value for each
+     * receiver is {@code -1}.
+     */
+    @VisibleForTesting
+    static @NonNull int[] calculateBlockedUntilTerminalCount(
+            @NonNull List<Object> receivers, boolean ordered) {
+        final int N = receivers.size();
+        final int[] blockedUntilTerminalCount = new int[N];
+        int lastPriority = 0;
+        int lastPriorityIndex = 0;
+        for (int i = 0; i < N; i++) {
+            if (ordered) {
+                // When sending an ordered broadcast, we need to block this
+                // receiver until all previous receivers have terminated
+                blockedUntilTerminalCount[i] = i;
+            } else {
+                // When sending a prioritized broadcast, we only need to wait
+                // for the previous tranche of receivers to be terminated
+                final int thisPriority = getReceiverPriority(receivers.get(i));
+                if ((i == 0) || (thisPriority != lastPriority)) {
+                    lastPriority = thisPriority;
+                    lastPriorityIndex = i;
+                    blockedUntilTerminalCount[i] = i;
+                } else {
+                    blockedUntilTerminalCount[i] = lastPriorityIndex;
+                }
+            }
+        }
+        // If the entire list is in the same priority tranche, mark as -1 to
+        // indicate that none of them need to wait
+        if (N > 0 && blockedUntilTerminalCount[N - 1] == 0) {
+            Arrays.fill(blockedUntilTerminalCount, -1);
+        }
+        return blockedUntilTerminalCount;
+    }
 
     static int getReceiverUid(@NonNull Object receiver) {
         if (receiver instanceof BroadcastFilter) {

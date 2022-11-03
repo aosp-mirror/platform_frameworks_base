@@ -427,7 +427,7 @@ public class PipTouchHandler {
         // If this is from an IME or shelf adjustment, then we should move the PiP so that it is not
         // occluded by the IME or shelf.
         if (fromImeAdjustment || fromShelfAdjustment) {
-            if (mTouchState.isUserInteracting()) {
+            if (mTouchState.isUserInteracting() && mTouchState.isDragging()) {
                 // Defer the update of the current movement bounds until after the user finishes
                 // touching the screen
             } else if (ENABLE_PIP_KEEP_CLEAR_ALGORITHM) {

@@ -17206,7 +17206,13 @@ public class TelephonyManager {
     }
 
     /**
-     * Purchase premium capability request was successful. Subsequent attempts will return
+     * Purchase premium capability request was successful.
+     * Once the purchase result is successful, the network must set up a slicing configuration
+     * for the purchased premium capability within the timeout specified by
+     * {@link CarrierConfigManager#KEY_PREMIUM_CAPABILITY_NETWORK_SETUP_TIME_MILLIS_LONG}.
+     * During the setup time, subsequent attempts will return
+     * {@link #PURCHASE_PREMIUM_CAPABILITY_RESULT_PENDING_NETWORK_SETUP}.
+     * After setup is complete, subsequent attempts will return
      * {@link #PURCHASE_PREMIUM_CAPABILITY_RESULT_ALREADY_PURCHASED} until the booster expires.
      * The expiry time is determined by the type or duration of boost purchased from the carrier,
      * provided at {@link CarrierConfigManager#KEY_PREMIUM_CAPABILITY_PURCHASE_URL_STRING}.
@@ -17330,6 +17336,16 @@ public class TelephonyManager {
     public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_NOT_DEFAULT_DATA = 14;
 
     /**
+     * Purchase premium capability was successful and is waiting for the network to setup the
+     * slicing configuration. If the setup is complete within the time specified by
+     * {@link CarrierConfigManager#KEY_PREMIUM_CAPABILITY_NETWORK_SETUP_TIME_MILLIS_LONG},
+     * subsequent requests will return {@link #PURCHASE_PREMIUM_CAPABILITY_RESULT_ALREADY_PURCHASED}
+     * until the purchase expires. If the setup is not complete within the time specified above,
+     * applications can reques the premium capability again.
+     */
+    public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_PENDING_NETWORK_SETUP = 15;
+
+    /**
      * Results of the purchase premium capability request.
      * @hide
      */
@@ -17347,7 +17363,8 @@ public class TelephonyManager {
             PURCHASE_PREMIUM_CAPABILITY_RESULT_FEATURE_NOT_SUPPORTED,
             PURCHASE_PREMIUM_CAPABILITY_RESULT_NETWORK_NOT_AVAILABLE,
             PURCHASE_PREMIUM_CAPABILITY_RESULT_NETWORK_CONGESTED,
-            PURCHASE_PREMIUM_CAPABILITY_RESULT_NOT_DEFAULT_DATA})
+            PURCHASE_PREMIUM_CAPABILITY_RESULT_NOT_DEFAULT_DATA,
+            PURCHASE_PREMIUM_CAPABILITY_RESULT_PENDING_NETWORK_SETUP})
     public @interface PurchasePremiumCapabilityResult {}
 
     /**
@@ -17388,6 +17405,8 @@ public class TelephonyManager {
                 return "NETWORK_CONGESTED";
             case PURCHASE_PREMIUM_CAPABILITY_RESULT_NOT_DEFAULT_DATA:
                 return "NOT_DEFAULT_DATA";
+            case PURCHASE_PREMIUM_CAPABILITY_RESULT_PENDING_NETWORK_SETUP:
+                return "PENDING_NETWORK_SETUP";
             default:
                 return "UNKNOWN (" + result + ")";
         }

@@ -57,6 +57,7 @@ import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
 import android.content.pm.ShortcutServiceInternal;
 import android.content.pm.ShortcutServiceInternal.ShortcutChangeListener;
+import android.content.pm.UserPackage;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.Bitmap;
@@ -118,7 +119,6 @@ import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
-import com.android.server.pm.ShortcutUser.PackageWithUser;
 import com.android.server.uri.UriGrantsManagerInternal;
 
 import libcore.io.IoUtils;
@@ -3774,7 +3774,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
         final long start = getStatStartTime();
         try {
-            final ArrayList<PackageWithUser> gonePackages = new ArrayList<>();
+            final ArrayList<UserPackage> gonePackages = new ArrayList<>();
 
             synchronized (mLock) {
                 final ShortcutUser user = getUserShortcutsLocked(ownerUserId);
@@ -3789,13 +3789,14 @@ public class ShortcutService extends IShortcutService.Stub {
                             Slog.d(TAG, "Uninstalled: " + spi.getPackageName()
                                     + " user " + spi.getPackageUserId());
                         }
-                        gonePackages.add(PackageWithUser.of(spi));
+                        gonePackages.add(
+                                UserPackage.of(spi.getPackageUserId(), spi.getPackageName()));
                     }
                 });
                 if (gonePackages.size() > 0) {
                     for (int i = gonePackages.size() - 1; i >= 0; i--) {
-                        final PackageWithUser pu = gonePackages.get(i);
-                        cleanUpPackageLocked(pu.packageName, ownerUserId, pu.userId,
+                        final UserPackage up = gonePackages.get(i);
+                        cleanUpPackageLocked(up.packageName, ownerUserId, up.userId,
                                 /* appStillExists = */ false);
                     }
                 }
@@ -5274,7 +5275,7 @@ public class ShortcutService extends IShortcutService.Stub {
             final ShortcutUser user = mUsers.get(userId);
             if (user == null) return null;
 
-            return user.getAllLaunchersForTest().get(PackageWithUser.of(userId, packageName));
+            return user.getAllLaunchersForTest().get(UserPackage.of(userId, packageName));
         }
     }
 

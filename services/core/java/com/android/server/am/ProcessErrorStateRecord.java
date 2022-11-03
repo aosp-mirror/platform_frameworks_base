@@ -44,7 +44,7 @@ import android.os.incremental.IncrementalMetrics;
 import android.provider.Settings;
 import android.util.EventLog;
 import android.util.Slog;
-import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 
 import com.android.internal.annotations.CompositeRWLock;
 import com.android.internal.annotations.GuardedBy;
@@ -62,7 +62,11 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
+
 
 /**
  * The error state of the process, such as if it's crashing/ANR etc.
@@ -259,12 +263,13 @@ class ProcessErrorStateRecord {
     void appNotResponding(String activityShortComponentName, ApplicationInfo aInfo,
             String parentShortComponentName, WindowProcessController parentProcess,
             boolean aboveSystem, TimeoutRecord timeoutRecord,
-            boolean onlyDumpSelf) {
+            ExecutorService auxiliaryTaskExecutor, boolean onlyDumpSelf) {
         String annotation = timeoutRecord.mReason;
         AnrLatencyTracker latencyTracker = timeoutRecord.mLatencyTracker;
+        Future<?> updateCpuStatsNowFirstCall = null;
 
         ArrayList<Integer> firstPids = new ArrayList<>(5);
-        SparseArray<Boolean> lastPids = new SparseArray<>(20);
+        SparseBooleanArray lastPids = new SparseBooleanArray(20);
 
         mApp.getWindowProcessController().appEarlyNotResponding(annotation, () -> {
             latencyTracker.waitingOnAMSLockStarted();
@@ -277,10 +282,15 @@ class ProcessErrorStateRecord {
         });
 
         long anrTime = SystemClock.uptimeMillis();
+
         if (isMonitorCpuUsage()) {
-            latencyTracker.updateCpuStatsNowCalled();
-            mService.updateCpuStatsNow();
-            latencyTracker.updateCpuStatsNowReturned();
+            updateCpuStatsNowFirstCall = auxiliaryTaskExecutor.submit(
+                    () -> {
+                    latencyTracker.updateCpuStatsNowCalled();
+                    mService.updateCpuStatsNow();
+                    latencyTracker.updateCpuStatsNowReturned();
+                });
+
         }
 
         final boolean isSilentAnr;
@@ -369,7 +379,7 @@ class ProcessErrorStateRecord {
                                 firstPids.add(myPid);
                                 if (DEBUG_ANR) Slog.i(TAG, "Adding likely IME: " + r);
                             } else {
-                                lastPids.put(myPid, Boolean.TRUE);
+                                lastPids.put(myPid, true);
                                 if (DEBUG_ANR) Slog.i(TAG, "Adding ANR proc: " + r);
                             }
                         }
@@ -432,30 +442,40 @@ class ProcessErrorStateRecord {
         report.append(currentPsiState);
         ProcessCpuTracker processCpuTracker = new ProcessCpuTracker(true);
 
-        latencyTracker.nativePidCollectionStarted();
-        // don't dump native PIDs for background ANRs unless it is the process of interest
-        String[] nativeProcs = null;
-        if (isSilentAnr || onlyDumpSelf) {
-            for (int i = 0; i < NATIVE_STACKS_OF_INTEREST.length; i++) {
-                if (NATIVE_STACKS_OF_INTEREST[i].equals(mApp.processName)) {
-                    nativeProcs = new String[] { mApp.processName };
-                    break;
-                }
-            }
-        } else {
-            nativeProcs = NATIVE_STACKS_OF_INTEREST;
-        }
+        // We push the native pids collection task to the helper thread through
+        // the Anr auxiliary task executor, and wait on it later after dumping the first pids
+        Future<ArrayList<Integer>> nativePidsFuture =
+                auxiliaryTaskExecutor.submit(
+                    () -> {
+                        latencyTracker.nativePidCollectionStarted();
+                        // don't dump native PIDs for background ANRs unless
+                        // it is the process of interest
+                        String[] nativeProcs = null;
+                        if (isSilentAnr || onlyDumpSelf) {
+                            for (int i = 0; i < NATIVE_STACKS_OF_INTEREST.length; i++) {
+                                if (NATIVE_STACKS_OF_INTEREST[i].equals(mApp.processName)) {
+                                    nativeProcs = new String[] { mApp.processName };
+                                    break;
+                                }
+                            }
+                        } else {
+                            nativeProcs = NATIVE_STACKS_OF_INTEREST;
+                        }
 
-        int[] pids = nativeProcs == null ? null : Process.getPidsForCommands(nativeProcs);
-        ArrayList<Integer> nativePids = null;
+                        int[] pids = nativeProcs == null
+                                ? null : Process.getPidsForCommands(nativeProcs);
+                        ArrayList<Integer> nativePids = null;
 
-        if (pids != null) {
-            nativePids = new ArrayList<>(pids.length);
-            for (int i : pids) {
-                nativePids.add(i);
-            }
-        }
-        latencyTracker.nativePidCollectionEnded();
+                        if (pids != null) {
+                            nativePids = new ArrayList<>(pids.length);
+                            for (int i : pids) {
+                                nativePids.add(i);
+                            }
+                        }
+                        latencyTracker.nativePidCollectionEnded();
+                        return nativePids;
+                    });
+
         // For background ANRs, don't pass the ProcessCpuTracker to
         // avoid spending 1/2 second collecting stats to rank lastPids.
         StringWriter tracesFileException = new StringWriter();
@@ -463,10 +483,18 @@ class ProcessErrorStateRecord {
         final AtomicLong firstPidEndOffset = new AtomicLong(-1);
         File tracesFile = ActivityManagerService.dumpStackTraces(firstPids,
                 isSilentAnr ? null : processCpuTracker, isSilentAnr ? null : lastPids,
-                nativePids, tracesFileException, firstPidEndOffset, annotation, criticalEventLog,
-                latencyTracker);
+                nativePidsFuture, tracesFileException, firstPidEndOffset, annotation,
+                criticalEventLog, auxiliaryTaskExecutor, latencyTracker);
 
         if (isMonitorCpuUsage()) {
+            // Wait for the first call to finish
+            try {
+                updateCpuStatsNowFirstCall.get();
+            } catch (ExecutionException e) {
+                Slog.w(TAG, "Failed to update the CPU stats", e.getCause());
+            } catch (InterruptedException e) {
+                Slog.w(TAG, "Interrupted while updating the CPU stats", e);
+            }
             mService.updateCpuStatsNow();
             mService.mAppProfiler.printCurrentCpuState(report, anrTime);
             info.append(processCpuTracker.printCurrentLoad());

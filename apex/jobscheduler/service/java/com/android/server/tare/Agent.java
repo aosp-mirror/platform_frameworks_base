@@ -36,6 +36,7 @@ import static com.android.server.tare.TareUtils.getCurrentTimeMillis;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.pm.UserPackage;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -824,7 +825,7 @@ class Agent {
     void onPackageRemovedLocked(final int userId, @NonNull final String pkgName) {
         mScribe.discardLedgerLocked(userId, pkgName);
         mCurrentOngoingEvents.delete(userId, pkgName);
-        mBalanceThresholdAlarmQueue.removeAlarmForKey(new Package(userId, pkgName));
+        mBalanceThresholdAlarmQueue.removeAlarmForKey(UserPackage.of(userId, pkgName));
     }
 
     @GuardedBy("mLock")
@@ -959,7 +960,7 @@ class Agent {
                 mCurrentOngoingEvents.get(userId, pkgName);
         if (ongoingEvents == null || mIrs.isVip(userId, pkgName)) {
             // No ongoing transactions. No reason to schedule
-            mBalanceThresholdAlarmQueue.removeAlarmForKey(new Package(userId, pkgName));
+            mBalanceThresholdAlarmQueue.removeAlarmForKey(UserPackage.of(userId, pkgName));
             return;
         }
         mTrendCalculator.reset(getBalanceLocked(userId, pkgName),
@@ -972,7 +973,7 @@ class Agent {
         if (lowerTimeMs == TrendCalculator.WILL_NOT_CROSS_THRESHOLD) {
             if (upperTimeMs == TrendCalculator.WILL_NOT_CROSS_THRESHOLD) {
                 // Will never cross a threshold based on current events.
-                mBalanceThresholdAlarmQueue.removeAlarmForKey(new Package(userId, pkgName));
+                mBalanceThresholdAlarmQueue.removeAlarmForKey(UserPackage.of(userId, pkgName));
                 return;
             }
             timeToThresholdMs = upperTimeMs;
@@ -980,7 +981,7 @@ class Agent {
             timeToThresholdMs = (upperTimeMs == TrendCalculator.WILL_NOT_CROSS_THRESHOLD)
                     ? lowerTimeMs : Math.min(lowerTimeMs, upperTimeMs);
         }
-        mBalanceThresholdAlarmQueue.addAlarm(new Package(userId, pkgName),
+        mBalanceThresholdAlarmQueue.addAlarm(UserPackage.of(userId, pkgName),
                 SystemClock.elapsedRealtime() + timeToThresholdMs);
     }
 
@@ -1071,57 +1072,22 @@ class Agent {
 
     private final OngoingEventUpdater mOngoingEventUpdater = new OngoingEventUpdater();
 
-    private static final class Package {
-        public final String packageName;
-        public final int userId;
-
-        Package(int userId, String packageName) {
-            this.userId = userId;
-            this.packageName = packageName;
-        }
-
-        @Override
-        public String toString() {
-            return appToString(userId, packageName);
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj == null) {
-                return false;
-            }
-            if (this == obj) {
-                return true;
-            }
-            if (obj instanceof Package) {
-                Package other = (Package) obj;
-                return userId == other.userId && Objects.equals(packageName, other.packageName);
-            }
-            return false;
-        }
-
-        @Override
-        public int hashCode() {
-            return packageName.hashCode() + userId;
-        }
-    }
-
     /** Track when apps will cross the closest affordability threshold (in both directions). */
-    private class BalanceThresholdAlarmQueue extends AlarmQueue<Package> {
+    private class BalanceThresholdAlarmQueue extends AlarmQueue<UserPackage> {
         private BalanceThresholdAlarmQueue(Context context, Looper looper) {
             super(context, looper, ALARM_TAG_AFFORDABILITY_CHECK, "Affordability check", true,
                     15_000L);
         }
 
         @Override
-        protected boolean isForUser(@NonNull Package key, int userId) {
+        protected boolean isForUser(@NonNull UserPackage key, int userId) {
             return key.userId == userId;
         }
 
         @Override
-        protected void processExpiredAlarms(@NonNull ArraySet<Package> expired) {
+        protected void processExpiredAlarms(@NonNull ArraySet<UserPackage> expired) {
             for (int i = 0; i < expired.size(); ++i) {
-                Package p = expired.valueAt(i);
+                UserPackage p = expired.valueAt(i);
                 mHandler.obtainMessage(
                         MSG_CHECK_INDIVIDUAL_AFFORDABILITY, p.userId, 0, p.packageName)
                         .sendToTarget();

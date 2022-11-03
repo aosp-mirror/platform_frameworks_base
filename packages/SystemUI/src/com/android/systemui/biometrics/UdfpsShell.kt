@@ -17,6 +17,7 @@
 package com.android.systemui.biometrics
 
 import android.content.Context
+import android.graphics.Rect
 import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_BP
 import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_KEYGUARD
 import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_OTHER
@@ -27,6 +28,11 @@ import android.hardware.biometrics.BiometricOverlayConstants.REASON_UNKNOWN
 import android.hardware.fingerprint.IUdfpsOverlayControllerCallback
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.MotionEvent
+import android.view.MotionEvent.ACTION_DOWN
+import android.view.MotionEvent.ACTION_MOVE
+import android.view.MotionEvent.ACTION_UP
+import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.commandline.Command
 import com.android.systemui.statusbar.commandline.CommandRegistry
@@ -36,6 +42,8 @@ import javax.inject.Inject
 private const val TAG = "UdfpsShell"
 private const val REQUEST_ID = 2L
 private const val SENSOR_ID = 0
+private const val MINOR = 10F
+private const val MAJOR = 10F
 
 /**
  * Used to show and hide the UDFPS overlay with statusbar commands.
@@ -67,6 +75,12 @@ class UdfpsShell @Inject constructor(
             hideUdfpsOverlay()
         } else if (args.size == 2 && args[0] == "show") {
             showOverlay(getEnrollmentReason(args[1]))
+        } else if (args.size == 1 && args[0] == "onUiReady") {
+            onUiReady()
+        } else if (args.size == 1 && args[0] == "simFingerDown") {
+            simFingerDown()
+        } else if (args.size == 1 && args[0] == "simFingerUp") {
+            simFingerUp()
         } else {
             invalidCommand(pw)
         }
@@ -80,6 +94,11 @@ class UdfpsShell @Inject constructor(
                             "auth-keyguard, auth-other, auth-settings]")
         pw.println("    -> reason otherwise defaults to unknown")
         pw.println("  - hide")
+        pw.println("  - onUiReady")
+        pw.println("  - simFingerDown")
+        pw.println("    -> Simulates onFingerDown on sensor")
+        pw.println("  - simFingerUp")
+        pw.println("    -> Simulates onFingerUp on sensor")
     }
 
     private fun invalidCommand(pw: PrintWriter) {
@@ -124,5 +143,55 @@ class UdfpsShell @Inject constructor(
 
     private fun hideOverlay() {
         udfpsOverlayController?.hideUdfpsOverlay(SENSOR_ID)
+    }
+
+
+    @VisibleForTesting
+    fun onUiReady() {
+        udfpsOverlayController?.debugOnUiReady(REQUEST_ID, SENSOR_ID)
+    }
+
+    @VisibleForTesting
+    fun simFingerDown() {
+        val sensorBounds: Rect = udfpsOverlayController!!.sensorBounds
+
+        val downEvent: MotionEvent? = obtainMotionEvent(ACTION_DOWN, sensorBounds.exactCenterX(),
+                sensorBounds.exactCenterY(), MINOR, MAJOR)
+        udfpsOverlayController?.debugOnTouch(REQUEST_ID, downEvent)
+
+        val moveEvent: MotionEvent? = obtainMotionEvent(ACTION_MOVE, sensorBounds.exactCenterX(),
+                sensorBounds.exactCenterY(), MINOR, MAJOR)
+        udfpsOverlayController?.debugOnTouch(REQUEST_ID, moveEvent)
+
+        downEvent?.recycle()
+        moveEvent?.recycle()
+    }
+
+    @VisibleForTesting
+    fun simFingerUp() {
+        val sensorBounds: Rect = udfpsOverlayController!!.sensorBounds
+
+        val upEvent: MotionEvent? = obtainMotionEvent(ACTION_UP, sensorBounds.exactCenterX(),
+                sensorBounds.exactCenterY(), MINOR, MAJOR)
+        udfpsOverlayController?.debugOnTouch(REQUEST_ID, upEvent)
+        upEvent?.recycle()
+    }
+
+    private fun obtainMotionEvent(
+            action: Int,
+            x: Float,
+            y: Float,
+            minor: Float,
+            major: Float
+    ): MotionEvent? {
+        val pp = MotionEvent.PointerProperties()
+        pp.id = 1
+        val pc = MotionEvent.PointerCoords()
+        pc.x = x
+        pc.y = y
+        pc.touchMinor = minor
+        pc.touchMajor = major
+        return MotionEvent.obtain(0, 0, action, 1, arrayOf(pp), arrayOf(pc),
+                0, 0, 1f, 1f, 0, 0, 0, 0)
     }
 }
