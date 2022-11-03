@@ -18,6 +18,7 @@
 package com.android.systemui.keyguard.data.repository
 
 import com.android.systemui.common.shared.model.Position
+import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.WakefulnessModel
 import kotlinx.coroutines.flow.Flow
@@ -51,6 +52,12 @@ class FakeKeyguardRepository : KeyguardRepository {
 
     private val _wakefulnessState = MutableStateFlow(WakefulnessModel.ASLEEP)
     override val wakefulnessState: Flow<WakefulnessModel> = _wakefulnessState
+
+    private val _isBouncerShowing = MutableStateFlow(false)
+    override val isBouncerShowing: Flow<Boolean> = _isBouncerShowing
+
+    private val _biometricUnlockState = MutableStateFlow(BiometricUnlockModel.NONE)
+    override val biometricUnlockState: Flow<BiometricUnlockModel> = _biometricUnlockState
 
     override fun isKeyguardShowing(): Boolean {
         return _isKeyguardShowing.value

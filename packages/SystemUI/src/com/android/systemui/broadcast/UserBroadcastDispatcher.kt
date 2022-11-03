@@ -127,7 +127,10 @@ open class UserBroadcastDispatcher(
                 action,
                 userId,
                 {
-                    Trace.beginSection("registerReceiver act=$action user=$userId")
+                    if (Trace.isEnabled()) {
+                        Trace.traceBegin(
+                                Trace.TRACE_TAG_APP, "registerReceiver act=$action user=$userId")
+                    }
                     context.registerReceiverAsUser(
                             this,
                             UserHandle.of(userId),
@@ -141,7 +144,11 @@ open class UserBroadcastDispatcher(
                 },
                 {
                     try {
-                        Trace.beginSection("unregisterReceiver act=$action user=$userId")
+                        if (Trace.isEnabled()) {
+                            Trace.traceBegin(
+                                    Trace.TRACE_TAG_APP,
+                                    "unregisterReceiver act=$action user=$userId")
+                        }
                         context.unregisterReceiver(this)
                         Trace.endSection()
                         logger.logContextReceiverUnregistered(userId, action)

@@ -34,6 +34,7 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.plugga
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender.OnEndLifetimeExtensionCallback
+import com.android.systemui.statusbar.notification.collection.provider.LaunchFullScreenIntentProvider
 import com.android.systemui.statusbar.notification.collection.render.NodeController
 import com.android.systemui.statusbar.notification.interruption.HeadsUpViewBinder
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider
@@ -86,6 +87,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
     private val mRemoteInputManager: NotificationRemoteInputManager = mock()
     private val mEndLifetimeExtension: OnEndLifetimeExtensionCallback = mock()
     private val mHeaderController: NodeController = mock()
+    private val mLaunchFullScreenIntentProvider: LaunchFullScreenIntentProvider = mock()
 
     private lateinit var mEntry: NotificationEntry
     private lateinit var mGroupSummary: NotificationEntry
@@ -110,6 +112,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
             mHeadsUpViewBinder,
             mNotificationInterruptStateProvider,
             mRemoteInputManager,
+            mLaunchFullScreenIntentProvider,
             mHeaderController,
             mExecutor)
         mCoordinator.attach(mNotifPipeline)
@@ -239,6 +242,20 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         mExecutor.runAllReady()
         verify(mHeadsUpManager, times(1)).removeNotification(anyString(), eq(false))
         verify(mHeadsUpManager, times(0)).removeNotification(anyString(), eq(true))
+    }
+
+    @Test
+    fun testOnEntryAdded_shouldFullScreen() {
+        setShouldFullScreen(mEntry)
+        mCollectionListener.onEntryAdded(mEntry)
+        verify(mLaunchFullScreenIntentProvider).launchFullScreenIntent(mEntry)
+    }
+
+    @Test
+    fun testOnEntryAdded_shouldNotFullScreen() {
+        setShouldFullScreen(mEntry, should = false)
+        mCollectionListener.onEntryAdded(mEntry)
+        verify(mLaunchFullScreenIntentProvider, never()).launchFullScreenIntent(any())
     }
 
     @Test
@@ -792,6 +809,11 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         whenever(mNotificationInterruptStateProvider.shouldHeadsUp(entry)).thenReturn(should)
         whenever(mNotificationInterruptStateProvider.checkHeadsUp(eq(entry), any()))
                 .thenReturn(should)
+    }
+
+    private fun setShouldFullScreen(entry: NotificationEntry, should: Boolean = true) {
+        whenever(mNotificationInterruptStateProvider.shouldLaunchFullScreenIntentWhenAdded(entry))
+            .thenReturn(should)
     }
 
     private fun finishBind(entry: NotificationEntry) {

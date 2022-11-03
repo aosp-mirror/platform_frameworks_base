@@ -227,7 +227,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         final TaskFragmentContainer curSecondaryContainer = mController.getContainerWithActivity(
                 secondaryActivity);
         TaskFragmentContainer containerToAvoid = primaryContainer;
-        if (curSecondaryContainer != null
+        if (curSecondaryContainer != null && curSecondaryContainer != primaryContainer
                 && (rule.shouldClearTop() || primaryContainer.isAbove(curSecondaryContainer))) {
             // Do not reuse the current TaskFragment if the rule is to clear top, or if it is below
             // the primary TaskFragment.

@@ -17,6 +17,7 @@
 
 package com.android.systemui.keyguard.data.quickaffordance
 
+import android.content.Context
 import android.graphics.drawable.Drawable
 import android.service.quickaccesswallet.GetWalletCardsError
 import android.service.quickaccesswallet.GetWalletCardsResponse
@@ -29,6 +30,7 @@ import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCall
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.wallet.controller.QuickAccessWalletController
 import javax.inject.Inject
@@ -40,11 +42,16 @@ import kotlinx.coroutines.flow.Flow
 class QuickAccessWalletKeyguardQuickAffordanceConfig
 @Inject
 constructor(
+    @Application context: Context,
     private val walletController: QuickAccessWalletController,
     private val activityStarter: ActivityStarter,
 ) : KeyguardQuickAffordanceConfig {
 
     override val key: String = BuiltInKeyguardQuickAffordanceKeys.QUICK_ACCESS_WALLET
+
+    override val pickerName = context.getString(R.string.accessibility_wallet_button)
+
+    override val pickerIconResourceId = R.drawable.ic_wallet_lockscreen
 
     override val lockScreenState: Flow<KeyguardQuickAffordanceConfig.LockScreenState> =
         conflatedCallbackFlow {

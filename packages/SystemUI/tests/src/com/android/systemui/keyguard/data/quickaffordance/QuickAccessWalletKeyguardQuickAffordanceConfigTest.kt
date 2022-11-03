@@ -59,6 +59,7 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
 
         underTest =
             QuickAccessWalletKeyguardQuickAffordanceConfig(
+                mock(),
                 walletController,
                 activityStarter,
             )

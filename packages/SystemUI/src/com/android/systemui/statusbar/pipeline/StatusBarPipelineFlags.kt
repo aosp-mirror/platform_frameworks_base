@@ -27,11 +27,26 @@ class StatusBarPipelineFlags @Inject constructor(private val featureFlags: Featu
     /** True if we should display the mobile icons using the new status bar data pipeline. */
     fun useNewMobileIcons(): Boolean = featureFlags.isEnabled(Flags.NEW_STATUS_BAR_MOBILE_ICONS)
 
+    /**
+     * True if we should run the new mobile icons backend to get the logging.
+     *
+     * Does *not* affect whether we render the mobile icons using the new backend data. See
+     * [useNewMobileIcons] for that.
+     */
+    fun runNewMobileIconsBackend(): Boolean =
+        featureFlags.isEnabled(Flags.NEW_STATUS_BAR_MOBILE_ICONS_BACKEND) || useNewMobileIcons()
+
     /** True if we should display the wifi icon using the new status bar data pipeline. */
     fun useNewWifiIcon(): Boolean = featureFlags.isEnabled(Flags.NEW_STATUS_BAR_WIFI_ICON)
 
-    // TODO(b/238425913): Add flags to only run the mobile backend or wifi backend so we get the
-    //   logging without getting the UI effects.
+    /**
+     * True if we should run the new wifi icon backend to get the logging.
+     *
+     * Does *not* affect whether we render the wifi icon using the new backend data. See
+     * [useNewWifiIcon] for that.
+     */
+    fun runNewWifiIconBackend(): Boolean =
+        featureFlags.isEnabled(Flags.NEW_STATUS_BAR_WIFI_ICON_BACKEND) || useNewWifiIcon()
 
     /**
      * Returns true if we should apply some coloring to the wifi icon that was rendered with the new
