@@ -231,7 +231,12 @@ public class RescueParty {
             String namespaceToReset = namespaceIt.next();
             Properties properties = new Properties.Builder(namespaceToReset).build();
             try {
-                DeviceConfig.setProperties(properties);
+                if (!DeviceConfig.setProperties(properties)) {
+                    logCriticalInfo(Log.ERROR, "Failed to clear properties under "
+                            + namespaceToReset
+                            + ". Running `device_config get_sync_disabled_for_tests` will confirm"
+                            + " if config-bulk-update is enabled.");
+                }
             } catch (DeviceConfig.BadConfigException exception) {
                 logCriticalInfo(Log.WARN, "namespace " + namespaceToReset
                         + " is already banned, skip reset.");
