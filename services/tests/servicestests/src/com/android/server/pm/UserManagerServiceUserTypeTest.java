@@ -347,6 +347,7 @@ public class UserManagerServiceUserTypeTest {
         UserTypeDetails details = builders.get(userTypeFull).createUserTypeDetails();
         assertEquals(UNLIMITED_NUMBER_OF_USERS, details.getMaxAllowedPerParent());
         assertFalse(details.isEnabled());
+        assertEquals(17, details.getMaxAllowed());
         assertTrue(UserRestrictionsUtils.areEqual(
                 makeRestrictionsBundle("no_remove_user", "no_bluetooth"),
                 details.getDefaultRestrictions()));
