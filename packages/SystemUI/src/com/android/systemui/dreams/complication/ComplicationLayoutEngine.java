@@ -21,12 +21,9 @@ import static com.android.systemui.dreams.complication.dagger.ComplicationHostVi
 import static com.android.systemui.dreams.complication.dagger.ComplicationHostViewModule.COMPLICATION_MARGIN_DEFAULT;
 import static com.android.systemui.dreams.complication.dagger.ComplicationHostViewModule.SCOPED_COMPLICATIONS_LAYOUT;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewPropertyAnimator;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.Constraints;
@@ -34,6 +31,7 @@ import androidx.constraintlayout.widget.Constraints;
 import com.android.systemui.R;
 import com.android.systemui.dreams.complication.ComplicationLayoutParams.Position;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
+import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.touch.TouchInsetManager;
 
 import java.util.ArrayList;
@@ -481,7 +479,6 @@ public class ComplicationLayoutEngine implements Complication.VisibilityControll
     private final TouchInsetManager.TouchInsetSession mSession;
     private final int mFadeInDuration;
     private final int mFadeOutDuration;
-    private ViewPropertyAnimator mViewPropertyAnimator;
 
     /** */
     @Inject
@@ -498,26 +495,16 @@ public class ComplicationLayoutEngine implements Complication.VisibilityControll
     }
 
     @Override
-    public void setVisibility(int visibility, boolean animate) {
-        final boolean appearing = visibility == View.VISIBLE;
-
-        if (mViewPropertyAnimator != null) {
-            mViewPropertyAnimator.cancel();
+    public void setVisibility(int visibility) {
+        if (visibility == View.VISIBLE) {
+            CrossFadeHelper.fadeIn(mLayout, mFadeInDuration, /* delay= */ 0);
+        } else {
+            CrossFadeHelper.fadeOut(
+                    mLayout,
+                    mFadeOutDuration,
+                    /* delay= */ 0,
+                    /* endRunnable= */ null);
         }
-
-        if (appearing) {
-            mLayout.setVisibility(View.VISIBLE);
-        }
-
-        mViewPropertyAnimator = mLayout.animate()
-                .alpha(appearing ? 1f : 0f)
-                .setDuration(appearing ? mFadeInDuration : mFadeOutDuration)
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        mLayout.setVisibility(visibility);
-                    }
-                });
     }
 
     /**

@@ -2485,7 +2485,7 @@
     <!-- The duration in milliseconds of the dream opening animation.  -->
     <integer name="config_dreamOpenAnimationDuration">250</integer>
     <!-- The duration in milliseconds of the dream closing animation.  -->
-    <integer name="config_dreamCloseAnimationDuration">100</integer>
+    <integer name="config_dreamCloseAnimationDuration">300</integer>
 
     <!-- Whether to dismiss the active dream when an activity is started. Doesn't apply to
          assistant activities (ACTIVITY_TYPE_ASSISTANT) -->

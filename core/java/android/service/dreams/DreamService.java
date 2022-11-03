@@ -312,7 +312,14 @@ public class DreamService extends Service implements Window.Callback {
         @Override
         public void onExitRequested() {
             // Simply finish dream when exit is requested.
-            finish();
+            mHandler.post(() -> finish());
+        }
+
+        @Override
+        public void onWakeUpComplete() {
+            // Finish the dream once overlay animations are complete. Execute on handler since
+            // this is coming in on the overlay binder.
+            mHandler.post(() -> finish());
         }
     };
 
@@ -975,7 +982,18 @@ public class DreamService extends Service implements Window.Callback {
      * </p>
      */
     public void onWakeUp() {
-        finish();
+        if (mOverlayConnection != null) {
+            mOverlayConnection.addConsumer(overlay -> {
+                try {
+                    overlay.wakeUp();
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Error waking the overlay service", e);
+                    finish();
+                }
+            });
+        } else {
+            finish();
+        }
     }
 
     /** {@inheritDoc} */

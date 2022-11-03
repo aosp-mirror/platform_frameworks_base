@@ -29,6 +29,8 @@ import android.util.MathUtils;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
+
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -42,6 +44,7 @@ import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.util.ViewController;
 
 import java.util.Arrays;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -194,7 +197,7 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
         }
         mPrimaryBouncerCallbackInteractor.removeBouncerExpansionCallback(mBouncerExpansionCallback);
 
-        mDreamOverlayAnimationsController.cancelRunningEntryAnimations();
+        mDreamOverlayAnimationsController.cancelAnimations();
     }
 
     View getContainerView() {
@@ -250,5 +253,18 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
                 position == POSITION_TOP ? getDreamYPositionScaledExpansion(expansion)
                         : aboutToShowBouncerProgress(expansion + 0.03f));
         return MathUtils.lerp(-mDreamOverlayMaxTranslationY, 0, fraction);
+    }
+
+    /**
+     * Handle the dream waking up and run any necessary animations.
+     *
+     * @param onAnimationEnd Callback to trigger once animations are finished.
+     * @param callbackExecutor Executor to execute the callback on.
+     */
+    public void wakeUp(@NonNull Runnable onAnimationEnd, @NonNull Executor callbackExecutor) {
+        mDreamOverlayAnimationsController.startExitAnimations(mView, () -> {
+            callbackExecutor.execute(onAnimationEnd);
+            return null;
+        });
     }
 }

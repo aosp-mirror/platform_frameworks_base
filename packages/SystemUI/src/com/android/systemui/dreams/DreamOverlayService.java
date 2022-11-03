@@ -213,6 +213,15 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         mLifecycleRegistry.setCurrentState(state);
     }
 
+    @Override
+    public void onWakeUp(@NonNull Runnable onCompletedCallback) {
+        mExecutor.execute(() -> {
+            if (mDreamOverlayContainerViewController != null) {
+                mDreamOverlayContainerViewController.wakeUp(onCompletedCallback, mExecutor);
+            }
+        });
+    }
+
     /**
      * Inserts {@link Window} to host the dream overlay into the dream's parent window. Must be
      * called from the main executing thread. The window attributes closely mirror those that are

@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -336,5 +337,29 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
         // are created.
         verify(mDreamOverlayComponent).getDreamOverlayContainerViewController();
         verify(mDreamOverlayComponent).getDreamOverlayTouchMonitor();
+    }
+
+    @Test
+    public void testWakeUp() throws RemoteException {
+        final IBinder proxy = mService.onBind(new Intent());
+        final IDreamOverlay overlay = IDreamOverlay.Stub.asInterface(proxy);
+
+        // Inform the overlay service of dream starting.
+        overlay.startDream(mWindowParams, mDreamOverlayCallback, DREAM_COMPONENT,
+                true /*shouldShowComplication*/);
+        mMainExecutor.runAllReady();
+
+        final Runnable callback = mock(Runnable.class);
+        mService.onWakeUp(callback);
+        mMainExecutor.runAllReady();
+        verify(mDreamOverlayContainerViewController).wakeUp(callback, mMainExecutor);
+    }
+
+    @Test
+    public void testWakeUpBeforeStartDoesNothing() {
+        final Runnable callback = mock(Runnable.class);
+        mService.onWakeUp(callback);
+        mMainExecutor.runAllReady();
+        verify(mDreamOverlayContainerViewController, never()).wakeUp(callback, mMainExecutor);
     }
 }
