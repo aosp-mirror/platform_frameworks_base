@@ -19,6 +19,7 @@ package android.service.voice;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -71,6 +72,8 @@ import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -143,6 +146,25 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
      * from an Android automotive system UI.
      */
     public static final int SHOW_SOURCE_AUTOMOTIVE_SYSTEM_UI = 1 << 7;
+
+    /** @hide */
+    public static final int VOICE_INTERACTION_ACTIVITY_EVENT_START = 1;
+    /** @hide */
+    public static final int VOICE_INTERACTION_ACTIVITY_EVENT_RESUME = 2;
+    /** @hide */
+    public static final int VOICE_INTERACTION_ACTIVITY_EVENT_PAUSE = 3;
+    /** @hide */
+    public static final int VOICE_INTERACTION_ACTIVITY_EVENT_STOP = 4;
+
+    /** @hide */
+    @IntDef(prefix = { "VOICE_INTERACTION_ACTIVITY_EVENT_" }, value = {
+            VOICE_INTERACTION_ACTIVITY_EVENT_START,
+            VOICE_INTERACTION_ACTIVITY_EVENT_RESUME,
+            VOICE_INTERACTION_ACTIVITY_EVENT_PAUSE,
+            VOICE_INTERACTION_ACTIVITY_EVENT_STOP
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface VoiceInteractionActivityEventType{}
 
     final Context mContext;
     final HandlerCaller mHandlerCaller;
