@@ -1300,6 +1300,8 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         activity.allDrawn = true;
         // Skip manipulate the SurfaceControl.
         doNothing().when(activity).setDropInputMode(anyInt());
+        // Assume the activity contains a window.
+        doReturn(true).when(activity).hasChild();
         // Make sure activity can create remote animation target.
         doReturn(mock(RemoteAnimationTarget.class)).when(activity).createRemoteAnimationTarget(
                 any());

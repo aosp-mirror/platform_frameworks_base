@@ -53,6 +53,10 @@ constructor(
 
     override val key: String = BuiltInKeyguardQuickAffordanceKeys.HOME_CONTROLS
 
+    override val pickerName: String by lazy { context.getString(component.getTileTitleId()) }
+
+    override val pickerIconResourceId: Int by lazy { component.getTileImageId() }
+
     override val lockScreenState: Flow<KeyguardQuickAffordanceConfig.LockScreenState> =
         component.canShowWhileLockedSetting.flatMapLatest { canShowWhileLocked ->
             if (canShowWhileLocked) {

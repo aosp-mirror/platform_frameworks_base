@@ -188,13 +188,10 @@ class DefaultClockController(
         dozeFraction: Float,
         foldFraction: Float,
     ) : ClockAnimations {
-        private var foldState = AnimationState(0f)
-        private var dozeState = AnimationState(0f)
+        private val dozeState = AnimationState(dozeFraction)
+        private val foldState = AnimationState(foldFraction)
 
         init {
-            dozeState = AnimationState(dozeFraction)
-            foldState = AnimationState(foldFraction)
-
             if (foldState.isActive) {
                 clocks.forEach { it.animateFoldAppear(false) }
             } else {
@@ -235,7 +232,7 @@ class DefaultClockController(
     private class AnimationState(
         var fraction: Float,
     ) {
-        var isActive: Boolean = fraction < 0.5f
+        var isActive: Boolean = fraction > 0.5f
         fun update(newFraction: Float): Pair<Boolean, Boolean> {
             if (newFraction == fraction) {
                 return Pair(isActive, false)

@@ -143,7 +143,7 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
                 mAuthController, mStatusBarStateController, mKeyguardUnlockAnimationController,
                 mSessionTracker, mLatencyTracker, mScreenOffAnimationController, mVibratorHelper);
         mBiometricUnlockController.setKeyguardViewController(mStatusBarKeyguardViewManager);
-        mBiometricUnlockController.setBiometricModeListener(mBiometricModeListener);
+        mBiometricUnlockController.addBiometricModeListener(mBiometricModeListener);
     }
 
     @Test

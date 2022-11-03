@@ -2947,9 +2947,13 @@ class ActivityStarter {
             }
         }
 
-        // Update the target's launch cookie to those specified in the options if set
+        // Update the target's launch cookie and pending remote animation to those specified in the
+        // options if set.
         if (mStartActivity.mLaunchCookie != null) {
             intentActivity.mLaunchCookie = mStartActivity.mLaunchCookie;
+        }
+        if (mStartActivity.mPendingRemoteAnimation != null) {
+            intentActivity.mPendingRemoteAnimation = mStartActivity.mPendingRemoteAnimation;
         }
 
         // Need to update mTargetRootTask because if task was moved out of it, the original root

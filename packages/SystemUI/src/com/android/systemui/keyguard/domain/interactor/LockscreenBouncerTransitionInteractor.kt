@@ -16,14 +16,16 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
+import android.animation.ValueAnimator
+import com.android.systemui.animation.Interpolators
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.StatusBarState.SHADE_LOCKED
 import com.android.systemui.keyguard.shared.model.TransitionInfo
 import com.android.systemui.keyguard.shared.model.TransitionState
+import com.android.systemui.keyguard.shared.model.WakefulnessModel
 import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.util.kotlin.sample
 import java.util.UUID
@@ -38,7 +40,7 @@ class LockscreenBouncerTransitionInteractor
 @Inject
 constructor(
     @Application private val scope: CoroutineScope,
-    private val keyguardRepository: KeyguardRepository,
+    private val keyguardInteractor: KeyguardInteractor,
     private val shadeRepository: ShadeRepository,
     private val keyguardTransitionRepository: KeyguardTransitionRepository,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor
@@ -47,12 +49,47 @@ constructor(
     private var transitionId: UUID? = null
 
     override fun start() {
+        listenForDraggingUpToBouncer()
+        listenForBouncerHiding()
+    }
+
+    private fun listenForBouncerHiding() {
+        scope.launch {
+            keyguardInteractor.isBouncerShowing
+                .sample(keyguardInteractor.wakefulnessState, { a, b -> Pair(a, b) })
+                .collect { pair ->
+                    val (isBouncerShowing, wakefulnessState) = pair
+                    if (!isBouncerShowing) {
+                        val to =
+                            if (
+                                wakefulnessState == WakefulnessModel.STARTING_TO_SLEEP ||
+                                    wakefulnessState == WakefulnessModel.ASLEEP
+                            ) {
+                                KeyguardState.AOD
+                            } else {
+                                KeyguardState.LOCKSCREEN
+                            }
+                        keyguardTransitionRepository.startTransition(
+                            TransitionInfo(
+                                ownerName = name,
+                                from = KeyguardState.BOUNCER,
+                                to = to,
+                                animator = getAnimator(),
+                            )
+                        )
+                    }
+                }
+        }
+    }
+
+    /* Starts transitions when manually dragging up the bouncer from the lockscreen. */
+    private fun listenForDraggingUpToBouncer() {
         scope.launch {
             shadeRepository.shadeModel
                 .sample(
                     combine(
                         keyguardTransitionInteractor.finishedKeyguardState,
-                        keyguardRepository.statusBarState,
+                        keyguardInteractor.statusBarState,
                     ) { keyguardState, statusBarState ->
                         Pair(keyguardState, statusBarState)
                     },
@@ -99,5 +136,16 @@ constructor(
                     }
                 }
         }
+    }
+
+    private fun getAnimator(): ValueAnimator {
+        return ValueAnimator().apply {
+            setInterpolator(Interpolators.LINEAR)
+            setDuration(TRANSITION_DURATION_MS)
+        }
+    }
+
+    companion object {
+        private const val TRANSITION_DURATION_MS = 300L
     }
 }

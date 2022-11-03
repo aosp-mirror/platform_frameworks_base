@@ -125,6 +125,7 @@ android_library {
         "jsr330",
         "lottie",
         "LowLightDreamLib",
+        "motion_tool_lib",
     ],
     manifest: "AndroidManifest.xml",
 
@@ -229,6 +230,7 @@ android_library {
         "jsr330",
         "WindowManager-Shell",
         "LowLightDreamLib",
+        "motion_tool_lib",
     ],
     libs: [
         "android.test.runner",
