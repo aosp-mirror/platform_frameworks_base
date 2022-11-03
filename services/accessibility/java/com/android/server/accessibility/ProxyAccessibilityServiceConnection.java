@@ -16,8 +16,12 @@
 
 package com.android.server.accessibility;
 
+import static com.android.server.accessibility.ProxyManager.PROXY_COMPONENT_CLASS_NAME;
+import static com.android.server.accessibility.ProxyManager.PROXY_COMPONENT_PACKAGE_NAME;
+
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.AccessibilityTrace;
+import android.accessibilityservice.IAccessibilityServiceClient;
 import android.accessibilityservice.MagnificationConfig;
 import android.annotation.NonNull;
 import android.content.ComponentName;
@@ -31,6 +35,7 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteCallback;
+import android.os.RemoteException;
 import android.view.KeyEvent;
 import android.view.accessibility.AccessibilityDisplayProxy;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -53,10 +58,6 @@ import java.util.Set;
  * TODO(241429275): Initialize this when a proxy is registered.
  */
 public class ProxyAccessibilityServiceConnection extends AccessibilityServiceConnection {
-    // Names used to populate ComponentName and ResolveInfo
-    private static final String PROXY_COMPONENT_PACKAGE_NAME = "ProxyPackage";
-    private static final String PROXY_COMPONENT_CLASS_NAME = "ProxyClass";
-
     private int mDisplayId;
     private List<AccessibilityServiceInfo> mInstalledAndEnabledServices;
 
@@ -76,6 +77,16 @@ public class ProxyAccessibilityServiceConnection extends AccessibilityServiceCon
     }
 
     /**
+     * Called when the proxy is registered.
+     */
+    void initializeServiceInterface(IAccessibilityServiceClient serviceInterface)
+            throws RemoteException {
+        mServiceInterface = serviceInterface;
+        mService = serviceInterface.asBinder();
+        mServiceInterface.init(this, mId, this.mOverlayWindowTokens.get(mDisplayId));
+    }
+
+    /**
      * Keeps mAccessibilityServiceInfo in sync with the proxy's list of AccessibilityServiceInfos.
      *
      * <p>This also sets the properties that are assumed to be populated by installed packages.
@@ -89,7 +100,7 @@ public class ProxyAccessibilityServiceConnection extends AccessibilityServiceCon
             synchronized (mLock) {
                 mInstalledAndEnabledServices = infos;
                 final AccessibilityServiceInfo proxyInfo = mAccessibilityServiceInfo;
-                // Reset values.
+                // Reset values. mAccessibilityServiceInfo is not completely reset since it is final
                 proxyInfo.flags = 0;
                 proxyInfo.eventTypes = 0;
                 proxyInfo.notificationTimeout = 0;

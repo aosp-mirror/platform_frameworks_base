@@ -859,7 +859,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     Slog.i(LOG_TAG, "Added global client for pid:" + Binder.getCallingPid());
                 }
                 return IntPair.of(
-                        getClientStateLocked(userState),
+                        combineUserStateAndProxyState(getClientStateLocked(userState),
+                                mProxyManager.getStateLocked()),
                         client.mLastSentRelevantEventTypes);
             } else {
                 userState.mUserClients.register(callback, client);
@@ -871,7 +872,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                             + " and userId:" + mCurrentUserId);
                 }
                 return IntPair.of(
-                        (resolvedUserId == mCurrentUserId) ? getClientStateLocked(userState) : 0,
+                        (resolvedUserId == mCurrentUserId) ? combineUserStateAndProxyState(
+                                getClientStateLocked(userState), mProxyManager.getStateLocked())
+                                : 0,
                         client.mLastSentRelevantEventTypes);
             }
         }
@@ -1002,6 +1005,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         notifyAccessibilityServicesDelayedLocked(event, false);
         notifyAccessibilityServicesDelayedLocked(event, true);
         mUiAutomationManager.sendAccessibilityEventLocked(event);
+        mProxyManager.sendAccessibilityEvent(event);
     }
 
     private void sendAccessibilityEventToInputFilter(AccessibilityEvent event) {
@@ -1142,9 +1146,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             }
             List<AccessibilityServiceConnection> services =
                     getUserStateLocked(resolvedUserId).mBoundServices;
-            int numServices = services.size();
+            int numServices = services.size() + mProxyManager.getNumProxys();
             interfacesToInterrupt = new ArrayList<>(numServices);
-            for (int i = 0; i < numServices; i++) {
+            for (int i = 0; i < services.size(); i++) {
                 AccessibilityServiceConnection service = services.get(i);
                 IBinder a11yServiceBinder = service.mService;
                 IAccessibilityServiceClient a11yServiceInterface = service.mServiceInterface;
@@ -1152,6 +1156,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     interfacesToInterrupt.add(a11yServiceInterface);
                 }
             }
+            mProxyManager.addServiceInterfaces(interfacesToInterrupt);
         }
         for (int i = 0, count = interfacesToInterrupt.size(); i < count; i++) {
             try {
@@ -1940,6 +1945,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 mUiAutomationManager.getServiceInfo(), client)
                 ? mUiAutomationManager.getRelevantEventTypes()
                 : 0;
+        relevantEventTypes |= mProxyManager.getRelevantEventTypes();
         return relevantEventTypes;
     }
 
@@ -2177,21 +2183,25 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         updateAccessibilityEnabledSettingLocked(userState);
     }
 
-    void scheduleUpdateClientsIfNeeded(AccessibilityUserState userState) {
-        synchronized (mLock) {
-            scheduleUpdateClientsIfNeededLocked(userState);
-        }
+    private int combineUserStateAndProxyState(int userState, int proxyState) {
+        return userState | proxyState;
     }
 
     void scheduleUpdateClientsIfNeededLocked(AccessibilityUserState userState) {
         final int clientState = getClientStateLocked(userState);
-        if (userState.getLastSentClientStateLocked() != clientState
+        final int proxyState = mProxyManager.getStateLocked();
+        if ((userState.getLastSentClientStateLocked() != clientState
+                || mProxyManager.getLastSentStateLocked() != proxyState)
                 && (mGlobalClients.getRegisteredCallbackCount() > 0
-                        || userState.mUserClients.getRegisteredCallbackCount() > 0)) {
+                || userState.mUserClients.getRegisteredCallbackCount() > 0)) {
             userState.setLastSentClientStateLocked(clientState);
+            mProxyManager.setLastStateLocked(proxyState);
+            // Send both the user and proxy state to the app for now.
+            // TODO(b/250929565): Send proxy state to proxy clients
             mMainHandler.sendMessage(obtainMessage(
                     AccessibilityManagerService::sendStateToAllClients,
-                    this, clientState, userState.mUserId));
+                    this, combineUserStateAndProxyState(clientState, proxyState),
+                    userState.mUserId));
         }
     }
 
@@ -2433,7 +2443,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         // binding we do an update pass after each bind event, so we run this
         // code and register the callback if needed.
 
-        boolean observingWindows = mUiAutomationManager.canRetrieveInteractiveWindowsLocked();
+        boolean observingWindows = mUiAutomationManager.canRetrieveInteractiveWindowsLocked()
+                || mProxyManager.canRetrieveInteractiveWindowsLocked();
         List<AccessibilityServiceConnection> boundServices = userState.mBoundServices;
         final int boundServiceCount = boundServices.size();
         for (int i = 0; !observingWindows && (i < boundServiceCount); i++) {
@@ -3656,7 +3667,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     + "proxy-ed");
         }
 
-        mProxyManager.registerProxy(client, displayId);
+        mProxyManager.registerProxy(client, displayId, mContext,
+                sIdCounter++, mMainHandler, mSecurityPolicy, this, getTraceManager(),
+                mWindowManagerService, mA11yWindowManager);
         return true;
     }
 
