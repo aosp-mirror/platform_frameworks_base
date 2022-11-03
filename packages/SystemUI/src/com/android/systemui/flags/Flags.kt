@@ -186,9 +186,17 @@ object Flags {
     @Deprecated("Replaced by mobile and wifi specific flags.")
     val NEW_STATUS_BAR_PIPELINE_FRONTEND = UnreleasedFlag(605, teamfood = false)
 
+    // TODO(b/256614753): Tracking Bug
     val NEW_STATUS_BAR_MOBILE_ICONS = UnreleasedFlag(606)
 
+    // TODO(b/256614210): Tracking Bug
     val NEW_STATUS_BAR_WIFI_ICON = UnreleasedFlag(607)
+
+    // TODO(b/256614751): Tracking Bug
+    val NEW_STATUS_BAR_MOBILE_ICONS_BACKEND = UnreleasedFlag(608)
+
+    // TODO(b/256613548): Tracking Bug
+    val NEW_STATUS_BAR_WIFI_ICON_BACKEND = UnreleasedFlag(609)
 
     // 700 - dialer/calls
     // TODO(b/254512734): Tracking Bug
