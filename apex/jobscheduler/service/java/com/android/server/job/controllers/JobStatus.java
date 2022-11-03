@@ -1094,27 +1094,41 @@ public final class JobStatus {
 
     private void updateNetworkBytesLocked() {
         mTotalNetworkDownloadBytes = job.getEstimatedNetworkDownloadBytes();
+        if (mTotalNetworkDownloadBytes < 0) {
+            // Legacy apps may have provided invalid negative values. Ignore invalid values.
+            mTotalNetworkDownloadBytes = JobInfo.NETWORK_BYTES_UNKNOWN;
+        }
         mTotalNetworkUploadBytes = job.getEstimatedNetworkUploadBytes();
+        if (mTotalNetworkUploadBytes < 0) {
+            // Legacy apps may have provided invalid negative values. Ignore invalid values.
+            mTotalNetworkUploadBytes = JobInfo.NETWORK_BYTES_UNKNOWN;
+        }
+        // Minimum network chunk bytes has had data validation since its introduction, so no
+        // need to do validation again.
         mMinimumNetworkChunkBytes = job.getMinimumNetworkChunkBytes();
 
         if (pendingWork != null) {
             for (int i = 0; i < pendingWork.size(); i++) {
-                if (mTotalNetworkDownloadBytes != JobInfo.NETWORK_BYTES_UNKNOWN) {
-                    // If any component of the job has unknown usage, we don't have a
-                    // complete picture of what data will be used, and we have to treat the
-                    // entire up/download as unknown.
-                    long downloadBytes = pendingWork.get(i).getEstimatedNetworkDownloadBytes();
-                    if (downloadBytes != JobInfo.NETWORK_BYTES_UNKNOWN) {
+                long downloadBytes = pendingWork.get(i).getEstimatedNetworkDownloadBytes();
+                if (downloadBytes != JobInfo.NETWORK_BYTES_UNKNOWN && downloadBytes > 0) {
+                    // If any component of the job has unknown usage, we won't have a
+                    // complete picture of what data will be used. However, we use what we are given
+                    // to get us as close to the complete picture as possible.
+                    if (mTotalNetworkDownloadBytes != JobInfo.NETWORK_BYTES_UNKNOWN) {
                         mTotalNetworkDownloadBytes += downloadBytes;
+                    } else {
+                        mTotalNetworkDownloadBytes = downloadBytes;
                     }
                 }
-                if (mTotalNetworkUploadBytes != JobInfo.NETWORK_BYTES_UNKNOWN) {
-                    // If any component of the job has unknown usage, we don't have a
-                    // complete picture of what data will be used, and we have to treat the
-                    // entire up/download as unknown.
-                    long uploadBytes = pendingWork.get(i).getEstimatedNetworkUploadBytes();
-                    if (uploadBytes != JobInfo.NETWORK_BYTES_UNKNOWN) {
+                long uploadBytes = pendingWork.get(i).getEstimatedNetworkUploadBytes();
+                if (uploadBytes != JobInfo.NETWORK_BYTES_UNKNOWN && uploadBytes > 0) {
+                    // If any component of the job has unknown usage, we won't have a
+                    // complete picture of what data will be used. However, we use what we are given
+                    // to get us as close to the complete picture as possible.
+                    if (mTotalNetworkUploadBytes != JobInfo.NETWORK_BYTES_UNKNOWN) {
                         mTotalNetworkUploadBytes += uploadBytes;
+                    } else {
+                        mTotalNetworkUploadBytes = uploadBytes;
                     }
                 }
                 final long chunkBytes = pendingWork.get(i).getMinimumNetworkChunkBytes();
