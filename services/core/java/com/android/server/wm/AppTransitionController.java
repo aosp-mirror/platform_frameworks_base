@@ -294,8 +294,8 @@ public class AppTransitionController {
             final int flags = appTransition.getTransitFlags();
             layoutRedo = appTransition.goodToGo(transit, topOpeningApp);
             appTransition.postAnimationCallback();
-            appTransition.clear();
         } finally {
+            appTransition.clear();
             mService.mSurfaceAnimationRunner.continueStartingAnimations();
         }
 
