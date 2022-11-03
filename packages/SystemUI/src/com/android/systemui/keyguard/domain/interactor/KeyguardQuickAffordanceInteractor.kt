@@ -28,11 +28,13 @@ import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanc
 import com.android.systemui.keyguard.data.repository.KeyguardQuickAffordanceRepository
 import com.android.systemui.keyguard.domain.model.KeyguardQuickAffordanceModel
 import com.android.systemui.keyguard.domain.quickaffordance.KeyguardQuickAffordanceRegistry
+import com.android.systemui.keyguard.shared.model.KeyguardPickerFlag
 import com.android.systemui.keyguard.shared.model.KeyguardQuickAffordancePickerRepresentation
 import com.android.systemui.keyguard.shared.model.KeyguardSlotPickerRepresentation
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancePosition
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.shared.keyguard.data.content.KeyguardQuickAffordanceProviderContract
 import com.android.systemui.shared.keyguard.shared.model.KeyguardQuickAffordanceSlots
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import dagger.Lazy
@@ -312,6 +314,15 @@ constructor(
         check(isUsingRepository)
 
         return repository.get().getSlotPickerRepresentations()
+    }
+
+    fun getPickerFlags(): List<KeyguardPickerFlag> {
+        return listOf(
+            KeyguardPickerFlag(
+                name = KeyguardQuickAffordanceProviderContract.FlagsTable.FLAG_NAME_FEATURE_ENABLED,
+                value = featureFlags.isEnabled(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES),
+            )
+        )
     }
 
     companion object {
