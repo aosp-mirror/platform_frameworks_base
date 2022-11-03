@@ -234,4 +234,20 @@ public class DreamOverlayStateControllerTest extends SysuiTestCase {
         verify(mCallback, times(1)).onStateChanged();
         assertThat(stateController.isLowLightActive()).isTrue();
     }
+
+    @Test
+    public void testNotifyEntryAnimationsFinishedChanged() {
+        final DreamOverlayStateController stateController =
+                new DreamOverlayStateController(mExecutor);
+
+        stateController.addCallback(mCallback);
+        mExecutor.runAllReady();
+        assertThat(stateController.areEntryAnimationsFinished()).isFalse();
+
+        stateController.setEntryAnimationsFinished(true);
+        mExecutor.runAllReady();
+
+        verify(mCallback, times(1)).onStateChanged();
+        assertThat(stateController.areEntryAnimationsFinished()).isTrue();
+    }
 }
