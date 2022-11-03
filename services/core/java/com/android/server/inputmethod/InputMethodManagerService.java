@@ -3925,8 +3925,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
     @EnforcePermission(Manifest.permission.WRITE_SECURE_SETTINGS)
     @Override
-    public void showInputMethodPickerFromSystem(IInputMethodClient client, int auxiliarySubtypeMode,
-            int displayId) {
+    public void showInputMethodPickerFromSystem(int auxiliarySubtypeMode, int displayId) {
         // Always call subtype picker, because subtype picker is a superset of input method
         // picker.
         super.showInputMethodPickerFromSystem_enforcePermission();

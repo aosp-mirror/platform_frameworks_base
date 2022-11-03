@@ -3463,7 +3463,7 @@ public final class InputMethodManager {
         final int mode = showAuxiliarySubtypes
                 ? SHOW_IM_PICKER_MODE_INCLUDE_AUXILIARY_SUBTYPES
                 : SHOW_IM_PICKER_MODE_EXCLUDE_AUXILIARY_SUBTYPES;
-        IInputMethodManagerGlobalInvoker.showInputMethodPickerFromSystem(mClient, mode, displayId);
+        IInputMethodManagerGlobalInvoker.showInputMethodPickerFromSystem(mode, displayId);
     }
 
     @GuardedBy("mH")
