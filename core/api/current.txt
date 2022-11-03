@@ -7480,9 +7480,9 @@ package android.app.admin {
     method @Nullable public String getAlwaysOnVpnPackage(@NonNull android.content.ComponentName);
     method @NonNull @WorkerThread public android.os.Bundle getApplicationRestrictions(@Nullable android.content.ComponentName, String);
     method @Deprecated @Nullable public String getApplicationRestrictionsManagingPackage(@NonNull android.content.ComponentName);
-    method public boolean getAutoTimeEnabled(@NonNull android.content.ComponentName);
+    method @RequiresPermission(anyOf={android.Manifest.permission.SET_TIME, "android.permission.QUERY_ADMIN_POLICY"}, conditional=true) public boolean getAutoTimeEnabled(@NonNull android.content.ComponentName);
     method @Deprecated public boolean getAutoTimeRequired();
-    method public boolean getAutoTimeZoneEnabled(@NonNull android.content.ComponentName);
+    method @RequiresPermission(anyOf={android.Manifest.permission.SET_TIME_ZONE, "android.permission.QUERY_ADMIN_POLICY"}, conditional=true) public boolean getAutoTimeZoneEnabled(@NonNull android.content.ComponentName);
     method @NonNull public java.util.List<android.os.UserHandle> getBindDeviceAdminTargetUsers(@NonNull android.content.ComponentName);
     method public boolean getBluetoothContactSharingDisabled(@NonNull android.content.ComponentName);
     method public boolean getCameraDisabled(@Nullable android.content.ComponentName);
@@ -7627,9 +7627,9 @@ package android.app.admin {
     method public boolean setApplicationHidden(@NonNull android.content.ComponentName, String, boolean);
     method @WorkerThread public void setApplicationRestrictions(@Nullable android.content.ComponentName, String, android.os.Bundle);
     method @Deprecated public void setApplicationRestrictionsManagingPackage(@NonNull android.content.ComponentName, @Nullable String) throws android.content.pm.PackageManager.NameNotFoundException;
-    method public void setAutoTimeEnabled(@NonNull android.content.ComponentName, boolean);
+    method @RequiresPermission(value=android.Manifest.permission.SET_TIME, conditional=true) public void setAutoTimeEnabled(@NonNull android.content.ComponentName, boolean);
     method @Deprecated public void setAutoTimeRequired(@NonNull android.content.ComponentName, boolean);
-    method public void setAutoTimeZoneEnabled(@NonNull android.content.ComponentName, boolean);
+    method @RequiresPermission(value=android.Manifest.permission.SET_TIME_ZONE, conditional=true) public void setAutoTimeZoneEnabled(@NonNull android.content.ComponentName, boolean);
     method public void setBackupServiceEnabled(@NonNull android.content.ComponentName, boolean);
     method public void setBluetoothContactSharingDisabled(@NonNull android.content.ComponentName, boolean);
     method public void setCameraDisabled(@NonNull android.content.ComponentName, boolean);
@@ -7706,8 +7706,8 @@ package android.app.admin {
     method @Deprecated public int setStorageEncryption(@NonNull android.content.ComponentName, boolean);
     method public void setSystemSetting(@NonNull android.content.ComponentName, @NonNull String, String);
     method public void setSystemUpdatePolicy(@NonNull android.content.ComponentName, android.app.admin.SystemUpdatePolicy);
-    method public boolean setTime(@NonNull android.content.ComponentName, long);
-    method public boolean setTimeZone(@NonNull android.content.ComponentName, String);
+    method @RequiresPermission(value=android.Manifest.permission.SET_TIME, conditional=true) public boolean setTime(@NonNull android.content.ComponentName, long);
+    method @RequiresPermission(value=android.Manifest.permission.SET_TIME_ZONE, conditional=true) public boolean setTimeZone(@NonNull android.content.ComponentName, String);
     method public void setTrustAgentConfiguration(@NonNull android.content.ComponentName, @NonNull android.content.ComponentName, android.os.PersistableBundle);
     method public void setUninstallBlocked(@Nullable android.content.ComponentName, String, boolean);
     method public void setUsbDataSignalingEnabled(boolean);
