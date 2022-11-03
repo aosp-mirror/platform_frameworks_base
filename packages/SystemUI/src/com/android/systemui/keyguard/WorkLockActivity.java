@@ -33,6 +33,8 @@ import android.os.Bundle;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.widget.ImageView;
+import android.window.OnBackInvokedCallback;
+import android.window.OnBackInvokedDispatcher;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
@@ -61,6 +63,7 @@ public class WorkLockActivity extends Activity {
     private UserManager mUserManager;
     private PackageManager mPackageManager;
     private final BroadcastDispatcher mBroadcastDispatcher;
+    private final OnBackInvokedCallback mBackCallback = this::onBackInvoked;
 
     @Inject
     public WorkLockActivity(BroadcastDispatcher broadcastDispatcher, UserManager userManager,
@@ -95,6 +98,10 @@ public class WorkLockActivity extends Activity {
         if (badgedIcon != null) {
             ((ImageView) findViewById(R.id.icon)).setImageDrawable(badgedIcon);
         }
+
+        getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
+                OnBackInvokedDispatcher.PRIORITY_DEFAULT,
+                mBackCallback);
     }
 
     @VisibleForTesting
@@ -134,11 +141,16 @@ public class WorkLockActivity extends Activity {
     @Override
     public void onDestroy() {
         unregisterBroadcastReceiver();
+        getOnBackInvokedDispatcher().unregisterOnBackInvokedCallback(mBackCallback);
         super.onDestroy();
     }
 
     @Override
     public void onBackPressed() {
+        onBackInvoked();
+    }
+
+    private void onBackInvoked() {
         // Ignore back presses.
     }
 
