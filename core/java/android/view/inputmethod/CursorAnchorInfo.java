@@ -20,12 +20,14 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.Matrix;
 import android.graphics.RectF;
+import android.inputmethodservice.InputMethodService;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.Layout;
 import android.text.SpannedString;
 import android.text.TextUtils;
 import android.view.inputmethod.SparseRectFArray.SparseRectFArrayBuilder;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -110,7 +112,7 @@ public final class CursorAnchorInfo implements Parcelable {
     /**
      * Container of rectangular position of Editor in the local coordinates that will be transformed
      * with the transformation matrix when rendered on the screen.
-     * @see {@link EditorBoundsInfo}.
+     * @see EditorBoundsInfo
      */
     private final EditorBoundsInfo mEditorBoundsInfo;
 
@@ -120,6 +122,12 @@ public final class CursorAnchorInfo implements Parcelable {
      */
     @NonNull
     private final float[] mMatrixValues;
+
+    /**
+     * Information about text appearance in the editor for use by {@link InputMethodService}.
+     */
+    @Nullable
+    private final TextAppearanceInfo mTextAppearanceInfo;
 
     /**
      * A list of visible line bounds stored in a float array. This array is divided into segment of
@@ -157,10 +165,11 @@ public final class CursorAnchorInfo implements Parcelable {
         mInsertionMarkerTop = source.readFloat();
         mInsertionMarkerBaseline = source.readFloat();
         mInsertionMarkerBottom = source.readFloat();
-        mCharacterBoundsArray = source.readParcelable(SparseRectFArray.class.getClassLoader(), android.view.inputmethod.SparseRectFArray.class);
+        mCharacterBoundsArray = source.readTypedObject(SparseRectFArray.CREATOR);
         mEditorBoundsInfo = source.readTypedObject(EditorBoundsInfo.CREATOR);
         mMatrixValues = source.createFloatArray();
         mVisibleLineBounds = source.createFloatArray();
+        mTextAppearanceInfo = source.readTypedObject(TextAppearanceInfo.CREATOR);
     }
 
     /**
@@ -181,10 +190,11 @@ public final class CursorAnchorInfo implements Parcelable {
         dest.writeFloat(mInsertionMarkerTop);
         dest.writeFloat(mInsertionMarkerBaseline);
         dest.writeFloat(mInsertionMarkerBottom);
-        dest.writeParcelable(mCharacterBoundsArray, flags);
+        dest.writeTypedObject(mCharacterBoundsArray, flags);
         dest.writeTypedObject(mEditorBoundsInfo, flags);
         dest.writeFloatArray(mMatrixValues);
         dest.writeFloatArray(mVisibleLineBounds);
+        dest.writeTypedObject(mTextAppearanceInfo, flags);
     }
 
     @Override
@@ -262,6 +272,11 @@ public final class CursorAnchorInfo implements Parcelable {
                 return false;
             }
         }
+
+        if (!Objects.equals(mTextAppearanceInfo, that.mTextAppearanceInfo)) {
+            return false;
+        }
+
         return true;
     }
 
@@ -270,16 +285,17 @@ public final class CursorAnchorInfo implements Parcelable {
         return "CursorAnchorInfo{mHashCode=" + mHashCode
                 + " mSelection=" + mSelectionStart + "," + mSelectionEnd
                 + " mComposingTextStart=" + mComposingTextStart
-                + " mComposingText=" + Objects.toString(mComposingText)
+                + " mComposingText=" + mComposingText
                 + " mInsertionMarkerFlags=" + mInsertionMarkerFlags
                 + " mInsertionMarkerHorizontal=" + mInsertionMarkerHorizontal
                 + " mInsertionMarkerTop=" + mInsertionMarkerTop
                 + " mInsertionMarkerBaseline=" + mInsertionMarkerBaseline
                 + " mInsertionMarkerBottom=" + mInsertionMarkerBottom
-                + " mCharacterBoundsArray=" + Objects.toString(mCharacterBoundsArray)
+                + " mCharacterBoundsArray=" + mCharacterBoundsArray
                 + " mEditorBoundsInfo=" + mEditorBoundsInfo
                 + " mVisibleLineBounds=" + getVisibleLineBounds()
                 + " mMatrix=" + Arrays.toString(mMatrixValues)
+                + " mTextAppearanceInfo=" + mTextAppearanceInfo
                 + "}";
     }
 
@@ -303,6 +319,7 @@ public final class CursorAnchorInfo implements Parcelable {
         private boolean mMatrixInitialized = false;
         private float[] mVisibleLineBounds = new float[LINE_BOUNDS_INITIAL_SIZE * 4];
         private int mVisibleLineBoundsCount = 0;
+        private TextAppearanceInfo mTextAppearanceInfo = null;
 
         /**
          * Sets the text range of the selection. Calling this can be skipped if there is no
@@ -416,6 +433,17 @@ public final class CursorAnchorInfo implements Parcelable {
         }
 
         /**
+         * Set the information related to text appearance, which is extracted from the original
+         * {@link TextView}.
+         * @param textAppearanceInfo {@link TextAppearanceInfo} of TextView.
+         */
+        @NonNull
+        public Builder setTextAppearanceInfo(@Nullable TextAppearanceInfo textAppearanceInfo) {
+            mTextAppearanceInfo = textAppearanceInfo;
+            return this;
+        }
+
+        /**
          * Add the bounds of a visible text line of the current editor.
          *
          * The line bounds should not include the vertical space between lines or the horizontal
@@ -504,6 +532,7 @@ public final class CursorAnchorInfo implements Parcelable {
             }
             mEditorBoundsInfo = null;
             clearVisibleLineBounds();
+            mTextAppearanceInfo = null;
         }
     }
 
@@ -524,7 +553,8 @@ public final class CursorAnchorInfo implements Parcelable {
                 builder.mInsertionMarkerHorizontal, builder.mInsertionMarkerTop,
                 builder.mInsertionMarkerBaseline, builder.mInsertionMarkerBottom,
                 characterBoundsArray, builder.mEditorBoundsInfo, matrixValues,
-                Arrays.copyOf(builder.mVisibleLineBounds, builder.mVisibleLineBoundsCount));
+                Arrays.copyOf(builder.mVisibleLineBounds, builder.mVisibleLineBoundsCount),
+                builder.mTextAppearanceInfo);
     }
 
     private CursorAnchorInfo(int selectionStart, int selectionEnd, int composingTextStart,
@@ -533,7 +563,8 @@ public final class CursorAnchorInfo implements Parcelable {
             float insertionMarkerBaseline, float insertionMarkerBottom,
             @Nullable SparseRectFArray characterBoundsArray,
             @Nullable EditorBoundsInfo editorBoundsInfo,
-            @NonNull float[] matrixValues, @Nullable float[] visibleLineBounds) {
+            @NonNull float[] matrixValues, @Nullable float[] visibleLineBounds,
+            @Nullable TextAppearanceInfo textAppearanceInfo) {
         mSelectionStart = selectionStart;
         mSelectionEnd = selectionEnd;
         mComposingTextStart = composingTextStart;
@@ -547,6 +578,7 @@ public final class CursorAnchorInfo implements Parcelable {
         mEditorBoundsInfo = editorBoundsInfo;
         mMatrixValues = matrixValues;
         mVisibleLineBounds = visibleLineBounds;
+        mTextAppearanceInfo = textAppearanceInfo;
 
         // To keep hash function simple, we only use some complex objects for hash.
         int hashCode = Objects.hashCode(mComposingText);
@@ -573,7 +605,7 @@ public final class CursorAnchorInfo implements Parcelable {
                 original.mInsertionMarkerTop, original.mInsertionMarkerBaseline,
                 original.mInsertionMarkerBottom, original.mCharacterBoundsArray,
                 original.mEditorBoundsInfo, computeMatrixValues(parentMatrix, original),
-                original.mVisibleLineBounds);
+                original.mVisibleLineBounds, original.mTextAppearanceInfo);
     }
 
     /**
@@ -738,6 +770,16 @@ public final class CursorAnchorInfo implements Parcelable {
     @Nullable
     public EditorBoundsInfo getEditorBoundsInfo() {
         return mEditorBoundsInfo;
+    }
+
+    /**
+     * Returns {@link TextAppearanceInfo} for the current editor, or {@code null} if IME is not
+     * subscribed with {@link InputConnection#CURSOR_UPDATE_FILTER_TEXT_APPEARANCE}
+     * or {@link InputConnection#CURSOR_UPDATE_MONITOR}.
+     */
+    @Nullable
+    public TextAppearanceInfo getTextAppearanceInfo() {
+        return mTextAppearanceInfo;
     }
 
     /**

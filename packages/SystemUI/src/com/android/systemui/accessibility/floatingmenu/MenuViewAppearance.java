@@ -136,11 +136,7 @@ class MenuViewAppearance {
         final Rect draggableBounds = getWindowAvailableBounds();
 
         // Initializes start position for mapping the translation of the menu view.
-        final WindowMetrics windowMetrics = mWindowManager.getCurrentWindowMetrics();
-        final WindowInsets windowInsets = windowMetrics.getWindowInsets();
-        final Insets displayCutoutInsets = windowInsets.getInsetsIgnoringVisibility(
-                WindowInsets.Type.displayCutout());
-        draggableBounds.offset(-displayCutoutInsets.left, -displayCutoutInsets.top);
+        draggableBounds.offsetTo(/* newLeft= */ 0, /* newTop= */ 0);
 
         draggableBounds.top += margin;
         draggableBounds.right -= getMenuWidth();

@@ -72,6 +72,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‏‎‏‎‎‏‎‎‏‏‏‏‎‏‏‎‏‏‎‏‎‏‎‎‏‏‏‏‏‎‏‏‎‎‎‎‏‎‎‎‏‎‎‏‏‎‏‎‏‏‎‏‎‏‎‎‏‏‎Caller ID defaults to not restricted. Next call: Not restricted‎‏‎‎‏‎"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‏‏‎‎‎‎‏‎‎‏‏‎‏‎‎‎‎‎‏‏‏‎‏‎‎‎‏‎‏‎‎‏‏‎‎‏‏‎‎‏‏‏‎‏‏‏‏‏‏‏‏‏‏‏‎‎‎‏‎Service not provisioned.‎‏‎‎‏‎"</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‎‏‎‎‏‎‎‏‏‏‏‎‏‎‏‎‎‏‏‏‎‏‎‎‏‎‏‏‎‎‏‎‏‎‏‎‏‎‏‏‎‎‏‏‎‎‎‏‏‎‏‏‎‏‏‏‏‏‎‎You can\'t change the caller ID setting.‎‏‎‎‏‎"</string>
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‏‎‏‏‎‎‏‏‎‏‏‎‏‏‏‎‏‏‎‏‎‎‏‎‎‎‎‏‎‏‎‏‏‏‎‎‏‏‎‏‎‏‎‏‏‏‎‎‏‏‎‎‎‎‏‏‎‎‏‎Switched data to ‎‏‎‎‏‏‎<xliff:g id="CARRIERDISPLAY">%s</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‎"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‏‏‎‎‏‎‎‏‏‎‏‏‎‎‏‏‏‏‎‏‏‏‏‎‏‏‏‏‏‏‏‏‏‏‏‎‎‎‎‏‎‏‏‏‏‏‏‏‏‏‎‎‏‎‏‏‏‏‎You can change this anytime in Settings‎‏‎‎‏‎"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‎‎‏‏‎‏‎‎‏‏‎‎‎‏‏‏‏‎‎‏‎‎‏‏‎‏‎‎‎‏‎‏‎‏‏‎‎‏‏‎‎‎‏‏‏‏‏‏‎‎‎‎‏‎‏‏‏‎‎No mobile data service‎‏‎‎‏‎"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‏‏‏‎‎‏‎‏‏‏‏‎‎‏‏‎‎‎‏‏‎‎‏‏‏‏‏‎‎‎‏‎‏‎‎‎‏‎‏‎‏‎‎‏‏‏‏‏‏‏‏‏‏‏‏‎‏‎‎Emergency calling unavailable‎‏‎‎‏‎"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‎‎‏‎‏‎‎‎‏‏‎‏‎‏‎‏‎‎‎‎‎‎‎‎‎‎‎‎‏‏‎‎‏‏‏‏‏‏‏‏‎‎‎‎‏‎‏‏‎‏‏‏‎‏‏‏‎‎‏‎No voice service‎‏‎‎‏‎"</string>

@@ -24,6 +24,7 @@ data class ProviderInfo(
   val displayName: String,
   val credentialTypeIcon: Drawable,
   val createOptions: List<CreateOptionInfo>,
+  val isDefault: Boolean,
 )
 
 data class CreateOptionInfo(

@@ -72,6 +72,10 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"មិន​បាន​ដាក់កម្រិត​លំនាំដើម​លេខ​សម្គាល់​អ្នក​ហៅ។ ការ​ហៅ​បន្ទាប់៖ មិន​បាន​ដាក់​កម្រិត។"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"មិន​បាន​ផ្ដល់​សេវាកម្ម។"</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"អ្នក​មិន​អាច​ប្ដូរ​ការ​កំណត់​លេខ​សម្គាល់​អ្នក​ហៅ​បានទេ។"</string>
+    <!-- no translation found for auto_data_switch_title (3286350716870518297) -->
+    <skip />
+    <!-- no translation found for auto_data_switch_content (803557715007110959) -->
+    <skip />
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"គ្មាន​​សេវាកម្ម​ទិន្នន័យ​ចល័ត​ទេ"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"ការ​ហៅ​បន្ទាន់​មិន​អាច​ប្រើ​បាន​ទេ"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"គ្មាន​សេវាកម្ម​ជា​សំឡេង​ទេ"</string>

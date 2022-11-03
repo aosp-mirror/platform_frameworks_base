@@ -73,6 +73,10 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"ID-ul apelantului este nerestricționat în mod prestabilit. Apelul următor: nerestricționat"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Nu se asigură accesul la acest serviciu."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Nu poți modifica setarea pentru ID-ul apelantului."</string>
+    <!-- no translation found for auto_data_switch_title (3286350716870518297) -->
+    <skip />
+    <!-- no translation found for auto_data_switch_content (803557715007110959) -->
+    <skip />
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Fără serviciu de date mobile"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Apelurile de urgență nu sunt disponibile"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Fără servicii vocale"</string>

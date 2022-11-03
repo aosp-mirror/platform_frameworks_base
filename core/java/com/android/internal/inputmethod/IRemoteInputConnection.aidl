@@ -16,20 +16,15 @@
 
 package com.android.internal.inputmethod;
 
+import android.graphics.RectF;
 import android.os.Bundle;
 import android.os.ResultReceiver;
 import android.view.KeyEvent;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CorrectionInfo;
-import android.view.inputmethod.DeleteGesture;
-import android.view.inputmethod.DeleteRangeGesture;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputContentInfo;
-import android.view.inputmethod.InsertGesture;
-import android.view.inputmethod.JoinOrSplitGesture;
-import android.view.inputmethod.RemoveSpaceGesture;
-import android.view.inputmethod.SelectGesture;
-import android.view.inputmethod.SelectRangeGesture;
+import android.view.inputmethod.ParcelableHandwritingGesture;
 import android.view.inputmethod.TextAttribute;
 
 import com.android.internal.infra.AndroidFuture;
@@ -94,26 +89,8 @@ import com.android.internal.inputmethod.InputConnectionCommandHeader;
     void performPrivateCommand(in InputConnectionCommandHeader header, String action,
             in Bundle data);
 
-    void performHandwritingSelectGesture(in InputConnectionCommandHeader header,
-            in SelectGesture gesture, in ResultReceiver resultReceiver);
-
-    void performHandwritingSelectRangeGesture(in InputConnectionCommandHeader header,
-            in SelectRangeGesture gesture, in ResultReceiver resultReceiver);
-
-    void performHandwritingInsertGesture(in InputConnectionCommandHeader header,
-            in InsertGesture gesture, in ResultReceiver resultReceiver);
-
-    void performHandwritingDeleteGesture(in InputConnectionCommandHeader header,
-            in DeleteGesture gesture, in ResultReceiver resultReceiver);
-
-    void performHandwritingDeleteRangeGesture(in InputConnectionCommandHeader header,
-                in DeleteRangeGesture gesture, in ResultReceiver resultReceiver);
-
-    void performHandwritingRemoveSpaceGesture(in InputConnectionCommandHeader header,
-            in RemoveSpaceGesture gesture, in ResultReceiver resultReceiver);
-
-    void performHandwritingJoinOrSplitGesture(in InputConnectionCommandHeader header,
-            in JoinOrSplitGesture gesture, in ResultReceiver resultReceiver);
+    void performHandwritingGesture(in InputConnectionCommandHeader header,
+            in ParcelableHandwritingGesture gesture, in ResultReceiver resultReceiver);
 
     void setComposingRegion(in InputConnectionCommandHeader header, int start, int end);
 
@@ -129,6 +106,9 @@ import com.android.internal.inputmethod.InputConnectionCommandHeader;
     void requestCursorUpdatesWithFilter(in InputConnectionCommandHeader header,
                 int cursorUpdateMode, int cursorUpdateFilter, int imeDisplayId,
                  in AndroidFuture future /* T=Boolean */);
+
+    void requestTextBoundsInfo(in InputConnectionCommandHeader header, in RectF rect,
+           in ResultReceiver resultReceiver /* T=TextBoundsInfoResult */);
 
     void commitContent(in InputConnectionCommandHeader header, in InputContentInfo inputContentInfo,
             int flags, in Bundle opts, in AndroidFuture future /* T=Boolean */);

@@ -31,7 +31,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
-        android:paddingStart="@dimen/clock_padding_start" />
+        android:paddingStart="@dimen/clock_padding_start"
+        android:visibility="invisible" />
     <FrameLayout
         android:id="@+id/lockscreen_clock_view_large"
         android:layout_width="match_parent"

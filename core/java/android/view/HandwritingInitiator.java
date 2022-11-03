@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.IdRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.Rect;
@@ -161,6 +162,15 @@ public class HandwritingInitiator {
                     if (candidateView != null) {
                         if (candidateView == getConnectedView()) {
                             startHandwriting(candidateView);
+                        } else if (candidateView.getHandwritingDelegateConfiguration() != null) {
+                            mState.mDelegatorViewId =
+                                    candidateView
+                                            .getHandwritingDelegateConfiguration()
+                                            .getDelegatorViewId();
+                            candidateView
+                                    .getHandwritingDelegateConfiguration()
+                                    .getInitiationCallback()
+                                    .run();
                         } else {
                             if (candidateView.getRevealOnFocusHint()) {
                                 candidateView.setRevealOnFocusHint(false);
@@ -259,8 +269,10 @@ public class HandwritingInitiator {
         }
 
         final Rect handwritingArea = getViewHandwritingArea(connectedView);
-        if (isInHandwritingArea(handwritingArea, mState.mStylusDownX,
-                mState.mStylusDownY, connectedView)) {
+        if ((mState.mDelegatorViewId != View.NO_ID
+                        && mState.mDelegatorViewId == connectedView.getId())
+                || isInHandwritingArea(
+                        handwritingArea, mState.mStylusDownX, mState.mStylusDownY, connectedView)) {
             startHandwriting(connectedView);
         } else {
             mState.mShouldInitHandwriting = false;
@@ -287,6 +299,11 @@ public class HandwritingInitiator {
         if (!view.isAutoHandwritingEnabled()) {
             return false;
         }
+        // The view may be a handwriting initiation delegate, in which case it is not the editor
+        // view for which handwriting would be started. However, in almost all cases, the return
+        // values of View#isStylusHandwritingAvailable will be the same for the delegate view and
+        // the delegator editor view. So the delegate view can be used to decide whether handwriting
+        // should be triggered.
         return view.isStylusHandwritingAvailable();
     }
 
@@ -473,6 +490,13 @@ public class HandwritingInitiator {
          * built InputConnection.
          */
         private boolean mExceedHandwritingSlop;
+        /**
+         * If the current ongoing stylus MotionEvent sequence started over a handwriting initiation
+         * delegate view, then this is the view identifier of the corresponding delegator view. If
+         * the delegator view creates an input connection while the MotionEvent sequence is still
+         * ongoing, then handwriting mode will be initiated for the delegator view.
+         */
+        @IdRes private int mDelegatorViewId = View.NO_ID;
 
         /** The pointer id of the stylus pointer that is being tracked. */
         private final int mStylusPointerId;

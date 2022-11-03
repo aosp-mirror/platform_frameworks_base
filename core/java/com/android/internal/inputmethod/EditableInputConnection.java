@@ -25,6 +25,7 @@ import static android.view.inputmethod.InputConnectionProto.SELECTED_TEXT_START;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.graphics.RectF;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.Selection;
@@ -46,9 +47,12 @@ import android.view.inputmethod.JoinOrSplitGesture;
 import android.view.inputmethod.RemoveSpaceGesture;
 import android.view.inputmethod.SelectGesture;
 import android.view.inputmethod.SelectRangeGesture;
+import android.view.inputmethod.TextBoundsInfo;
+import android.view.inputmethod.TextBoundsInfoResult;
 import android.widget.TextView;
 
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 
 /**
@@ -233,7 +237,9 @@ public final class EditableInputConnection extends BaseInputConnection
                 | InputConnection.CURSOR_UPDATE_MONITOR;
         final int knownFilterFlags = InputConnection.CURSOR_UPDATE_FILTER_EDITOR_BOUNDS
                 | InputConnection.CURSOR_UPDATE_FILTER_INSERTION_MARKER
-                | InputConnection.CURSOR_UPDATE_FILTER_CHARACTER_BOUNDS;
+                | InputConnection.CURSOR_UPDATE_FILTER_CHARACTER_BOUNDS
+                | InputConnection.CURSOR_UPDATE_FILTER_VISIBLE_LINE_BOUNDS
+                | InputConnection.CURSOR_UPDATE_FILTER_TEXT_APPEARANCE;
 
         // It is possible that any other bit is used as a valid flag in a future release.
         // We should reject the entire request in such a case.
@@ -259,6 +265,23 @@ public final class EditableInputConnection extends BaseInputConnection
                     cursorUpdateMode & knownFilterFlags);
         }
         return true;
+    }
+
+    @Override
+    public void requestTextBoundsInfo(
+            @NonNull RectF rectF, @Nullable @CallbackExecutor Executor executor,
+            @NonNull Consumer<TextBoundsInfoResult> consumer) {
+        final TextBoundsInfo textBoundsInfo = mTextView.getTextBoundsInfo(rectF);
+        final int resultCode;
+        if (textBoundsInfo != null) {
+            resultCode = TextBoundsInfoResult.CODE_SUCCESS;
+        } else {
+            resultCode = TextBoundsInfoResult.CODE_FAILED;
+        }
+        final TextBoundsInfoResult textBoundsInfoResult =
+                new TextBoundsInfoResult(resultCode, textBoundsInfo);
+
+        executor.execute(() -> consumer.accept(textBoundsInfoResult));
     }
 
     @Override

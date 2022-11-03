@@ -225,8 +225,7 @@ public final class DeviceIdleJobsController extends StateController {
     }
 
     @Override
-    public void maybeStopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob,
-            boolean forUpdate) {
+    public void maybeStopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob) {
         if ((jobStatus.getFlags()&JobInfo.FLAG_IMPORTANT_WHILE_FOREGROUND) != 0) {
             mAllowInIdleJobs.remove(jobStatus);
         }

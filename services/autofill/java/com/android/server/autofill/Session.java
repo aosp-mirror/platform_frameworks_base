@@ -24,6 +24,7 @@ import static android.service.autofill.FillEventHistory.Event.UI_TYPE_MENU;
 import static android.service.autofill.FillEventHistory.Event.UI_TYPE_UNKNOWN;
 import static android.service.autofill.FillRequest.FLAG_MANUAL_REQUEST;
 import static android.service.autofill.FillRequest.FLAG_PASSWORD_INPUT_TYPE;
+import static android.service.autofill.FillRequest.FLAG_RESET_FILL_DIALOG_STATE;
 import static android.service.autofill.FillRequest.FLAG_SUPPORTS_FILL_DIALOG;
 import static android.service.autofill.FillRequest.FLAG_VIEW_NOT_FOCUSED;
 import static android.service.autofill.FillRequest.INVALID_REQUEST_ID;
@@ -415,6 +416,14 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     @NonNull
     @GuardedBy("mLock")
     private boolean mPreviouslyFillDialogPotentiallyStarted;
+
+    /**
+     * Keeps the fill dialog trigger ids of the last response. This invalidates
+     * the trigger ids of the previous response.
+     */
+    @Nullable
+    @GuardedBy("mLock")
+    private AutofillId[] mLastFillDialogTriggerIds;
 
     void onSwitchInputMethodLocked() {
         // One caveat is that for the case where the focus is on a field for which regular autofill
@@ -1222,6 +1231,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 return;
             }
 
+            mLastFillDialogTriggerIds = response.getFillDialogTriggerIds();
+
             final int flags = response.getFlags();
             if ((flags & FillResponse.FLAG_DELAY_FILL) != 0) {
                 Slog.v(TAG, "Service requested to wait for delayed fill response.");
@@ -1310,6 +1321,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         // fallback to the default platform password manager
         mSessionFlags.mClientSuggestionsEnabled = false;
+        mLastFillDialogTriggerIds = null;
 
         final InlineSuggestionsRequest inlineRequest =
                 (mLastInlineSuggestionsRequest != null
@@ -1348,6 +1360,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         + (timedOut ? "timeout" : "failure"));
             }
             mService.resetLastResponse();
+            mLastFillDialogTriggerIds = null;
             final LogMaker requestLog = mRequestLogs.get(requestId);
             if (requestLog == null) {
                 Slog.w(TAG, "onFillRequestFailureOrTimeout(): no log for id " + requestId);
@@ -3049,6 +3062,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
         }
 
+        if ((flags & FLAG_RESET_FILL_DIALOG_STATE) != 0) {
+            if (sDebug) Log.d(TAG, "force to reset fill dialog state");
+            mSessionFlags.mFillDialogDisabled = false;
+        }
+
         switch(action) {
             case ACTION_START_SESSION:
                 // View is triggering autofill.
@@ -3488,10 +3506,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     }
 
     private boolean isFillDialogUiEnabled() {
-        // TODO read from Settings or somewhere
-        final boolean isSettingsEnabledFillDialog = true;
         synchronized (mLock) {
-            return isSettingsEnabledFillDialog && !mSessionFlags.mFillDialogDisabled;
+            return !mSessionFlags.mFillDialogDisabled;
         }
     }
 
@@ -3517,12 +3533,23 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             AutofillId filledId, String filterText, int flags) {
         if (!isFillDialogUiEnabled()) {
             // Unsupported fill dialog UI
+            if (sDebug) Log.w(TAG, "requestShowFillDialog: fill dialog is disabled");
             return false;
         }
 
         if ((flags & FillRequest.FLAG_IME_SHOWING) != 0) {
             // IME is showing, fallback to normal suggestions UI
+            if (sDebug) Log.w(TAG, "requestShowFillDialog: IME is showing");
             return false;
+        }
+
+        synchronized (mLock) {
+            if (mLastFillDialogTriggerIds == null
+                    || !ArrayUtils.contains(mLastFillDialogTriggerIds, filledId)) {
+                // Last fill dialog triggered ids are changed.
+                if (sDebug) Log.w(TAG, "Last fill dialog triggered ids are changed.");
+                return false;
+            }
         }
 
         final Drawable serviceIcon = getServiceIcon();
@@ -4393,6 +4420,13 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         pw.print(prefix); pw.print("mSelectedDatasetIds: "); pw.println(mSelectedDatasetIds);
         if (mSessionFlags.mAugmentedAutofillOnly) {
             pw.print(prefix); pw.println("For Augmented Autofill Only");
+        }
+        if (mSessionFlags.mFillDialogDisabled) {
+            pw.print(prefix); pw.println("Fill Dialog disabled");
+        }
+        if (mLastFillDialogTriggerIds != null) {
+            pw.print(prefix); pw.println("Last Fill Dialog trigger ids: ");
+            pw.println(mSelectedDatasetIds);
         }
         if (mAugmentedAutofillDestroyer != null) {
             pw.print(prefix); pw.println("has mAugmentedAutofillDestroyer");

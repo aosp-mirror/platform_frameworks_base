@@ -16,7 +16,6 @@
 package com.android.server.credentials;
 
 import android.annotation.NonNull;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.credentials.ui.IntentFactory;
@@ -48,7 +47,7 @@ public class CredentialManagerUi {
     };
 
     private void handleUiResult(int resultCode, Bundle resultData) {
-        if (resultCode == Activity.RESULT_OK) {
+        if (resultCode == UserSelectionDialogResult.RESULT_CODE_DIALOG_COMPLETE_WITH_SELECTION) {
             UserSelectionDialogResult selection = UserSelectionDialogResult
                     .fromResultData(resultData);
             if (selection != null) {
@@ -56,7 +55,7 @@ public class CredentialManagerUi {
             } else {
                 Slog.i(TAG, "No selection found in UI result");
             }
-        } else if (resultCode == Activity.RESULT_CANCELED) {
+        } else if (resultCode == UserSelectionDialogResult.RESULT_CODE_DIALOG_CANCELED) {
             mCallbacks.onUiCancelation();
         }
     }
@@ -84,8 +83,9 @@ public class CredentialManagerUi {
      */
     public void show(RequestInfo requestInfo, ArrayList<ProviderData> providerDataList) {
         Log.i(TAG, "In show");
-        Intent intent = IntentFactory.newIntent(requestInfo, providerDataList,
-                mResultReceiver);
+        Intent intent = IntentFactory.newIntent(
+                requestInfo, providerDataList,
+                new ArrayList<>(), mResultReceiver);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         mContext.startActivity(intent);
     }

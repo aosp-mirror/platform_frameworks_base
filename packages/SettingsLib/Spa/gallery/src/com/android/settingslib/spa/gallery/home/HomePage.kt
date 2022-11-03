@@ -18,7 +18,6 @@ package com.android.settingslib.spa.gallery.home
 
 import android.os.Bundle
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.android.settingslib.spa.framework.common.SettingsEntry
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
@@ -30,6 +29,7 @@ import com.android.settingslib.spa.gallery.SettingsPageProviderEnum
 import com.android.settingslib.spa.gallery.button.ActionButtonPageProvider
 import com.android.settingslib.spa.gallery.page.ArgumentPageModel
 import com.android.settingslib.spa.gallery.page.ArgumentPageProvider
+import com.android.settingslib.spa.gallery.page.ChartPageProvider
 import com.android.settingslib.spa.gallery.page.FooterPageProvider
 import com.android.settingslib.spa.gallery.page.IllustrationPageProvider
 import com.android.settingslib.spa.gallery.page.ProgressBarPageProvider
@@ -57,12 +57,17 @@ object HomePageProvider : SettingsPageProvider {
             CategoryPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
             ActionButtonPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
             ProgressBarPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
+            ChartPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
         )
+    }
+
+    override fun getTitle(arguments: Bundle?): String {
+        return SpaEnvironmentFactory.instance.appContext.getString(R.string.app_name)
     }
 
     @Composable
     override fun Page(arguments: Bundle?) {
-        HomeScaffold(title = stringResource(R.string.app_name)) {
+        HomeScaffold(title = getTitle(arguments)) {
             for (entry in buildEntry(arguments)) {
                 if (entry.owner.isCreateBy(SettingsPageProviderEnum.ARGUMENT.name)) {
                     entry.UiLayout(ArgumentPageModel.buildArgument(intParam = 0))

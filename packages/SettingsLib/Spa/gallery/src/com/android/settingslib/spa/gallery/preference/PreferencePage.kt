@@ -49,7 +49,6 @@ import com.android.settingslib.spa.gallery.preference.PreferencePageModel.Compan
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
 import com.android.settingslib.spa.widget.preference.SimplePreferenceMacro
-import com.android.settingslib.spa.widget.scaffold.RegularScaffold
 import com.android.settingslib.spa.widget.ui.SettingsIcon
 
 private const val TAG = "PreferencePage"
@@ -128,11 +127,11 @@ object PreferencePageProvider : SettingsPageProvider {
                 .setStatusDataFn { EntryStatusData(isDisabled = false) }
                 .setUiLayoutFn {
                     val model = PreferencePageModel.create()
-                    val asyncSummary = remember { model.getAsyncSummary() }
                     Preference(
                         object : PreferenceModel {
                             override val title = ASYNC_PREFERENCE_TITLE
-                            override val summary = asyncSummary
+                            override val summary = model.asyncSummary
+                            override val enabled = model.asyncEnable
                         }
                     )
                 }.build()
@@ -204,13 +203,8 @@ object PreferencePageProvider : SettingsPageProvider {
             }
     }
 
-    @Composable
-    override fun Page(arguments: Bundle?) {
-        RegularScaffold(title = PAGE_TITLE) {
-            for (entry in buildEntry(arguments)) {
-                entry.UiLayout()
-            }
-        }
+    override fun getTitle(arguments: Bundle?): String {
+        return PAGE_TITLE
     }
 }
 

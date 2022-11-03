@@ -47,6 +47,7 @@ import android.app.usage.UsageStatsManagerInternal.EstimatedLaunchTimeChangedLis
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.os.Handler;
 import android.os.Looper;
 import android.os.Process;
 import android.os.SystemClock;
@@ -276,13 +277,13 @@ public class PrefetchControllerTest {
         inOrder.verify(mAlarmManager, timeout(DEFAULT_WAIT_MS).times(1))
                 .setWindow(
                         anyInt(), eq(sElapsedRealtimeClock.millis() + 4 * HOUR_IN_MILLIS),
-                        anyLong(), eq(TAG_PREFETCH), any(), any());
+                        anyLong(), eq(TAG_PREFETCH), any(), any(Handler.class));
 
         setDeviceConfigLong(PcConstants.KEY_LAUNCH_TIME_THRESHOLD_MS, 3 * HOUR_IN_MILLIS);
         inOrder.verify(mAlarmManager, timeout(DEFAULT_WAIT_MS).times(1))
                 .setWindow(
                         anyInt(), eq(sElapsedRealtimeClock.millis() + 8 * HOUR_IN_MILLIS),
-                        anyLong(), eq(TAG_PREFETCH), any(), any());
+                        anyLong(), eq(TAG_PREFETCH), any(), any(Handler.class));
     }
 
     @Test
@@ -414,7 +415,7 @@ public class PrefetchControllerTest {
         verify(mAlarmManager, timeout(DEFAULT_WAIT_MS).times(1))
                 .setWindow(
                         anyInt(), eq(sElapsedRealtimeClock.millis() + 3 * HOUR_IN_MILLIS),
-                        anyLong(), eq(TAG_PREFETCH), any(), any());
+                        anyLong(), eq(TAG_PREFETCH), any(), any(Handler.class));
         assertFalse(jobStatus.isConstraintSatisfied(JobStatus.CONSTRAINT_PREFETCH));
         assertFalse(jobStatus.isReady());
     }
@@ -464,7 +465,7 @@ public class PrefetchControllerTest {
         verify(mAlarmManager, timeout(DEFAULT_WAIT_MS).times(1))
                 .setWindow(
                         anyInt(), eq(sElapsedRealtimeClock.millis() + 3 * HOUR_IN_MILLIS),
-                        anyLong(), eq(TAG_PREFETCH), any(), any());
+                        anyLong(), eq(TAG_PREFETCH), any(), any(Handler.class));
         assertFalse(jobStatus.isConstraintSatisfied(JobStatus.CONSTRAINT_PREFETCH));
         assertFalse(jobStatus.isReady());
 

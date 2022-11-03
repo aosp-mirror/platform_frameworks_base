@@ -46,7 +46,7 @@ public class BiometricSchedulerOperation {
 
     /**
      * The operation is added to the list of pending operations, but a subsequent operation
-     * has been added. This state only applies to {@link Interruptable} operations. When this
+     * has been added. This state only applies to interruptable operations. When this
      * operation reaches the head of the queue, it will send ERROR_CANCELED and finish.
      */
     protected static final int STATE_WAITING_IN_QUEUE_CANCELING = 1;
@@ -347,9 +347,9 @@ public class BiometricSchedulerOperation {
         return mClientMonitor == clientMonitor;
     }
 
-    /** If this operation is {@link Interruptable}. */
+    /** If this operation is interruptable. */
     public boolean isInterruptable() {
-        return mClientMonitor instanceof Interruptable;
+        return mClientMonitor.isInterruptable();
     }
 
     private boolean isHalOperation() {

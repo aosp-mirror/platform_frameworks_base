@@ -72,6 +72,10 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"कॉलर आईडी डिफ़ॉल्ट रूप से सीमित नहीं है. अगली कॉल: सीमित नहीं"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"सेवा प्रावधान की हुई नहीं है."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"आप कॉलर आईडी सेटिंग नहीं बदल सकते."</string>
+    <!-- no translation found for auto_data_switch_title (3286350716870518297) -->
+    <skip />
+    <!-- no translation found for auto_data_switch_content (803557715007110959) -->
+    <skip />
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"मोबाइल डेटा सेवा पर रोक लगा दी गई है"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"आपातकालीन कॉल पर रोक लगा दी गई है"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"कोई वॉइस सेवा नहीं है"</string>

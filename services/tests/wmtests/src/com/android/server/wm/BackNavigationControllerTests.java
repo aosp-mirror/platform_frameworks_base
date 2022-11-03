@@ -98,12 +98,19 @@ public class BackNavigationControllerTests extends WindowTestsBase {
     @Test
     public void backTypeCrossTaskWhenBackToPreviousTask() {
         Task taskA = createTask(mDefaultDisplay);
-        createActivityRecord(taskA);
+        ActivityRecord recordA = createActivityRecord(taskA);
+        Mockito.doNothing().when(recordA).reparentSurfaceControl(any(), any());
+
         withSystemCallback(createTopTaskWithActivity());
         BackNavigationInfo backNavigationInfo = startBackNavigation();
         assertWithMessage("BackNavigationInfo").that(backNavigationInfo).isNotNull();
         assertThat(typeToString(backNavigationInfo.getType()))
                 .isEqualTo(typeToString(BackNavigationInfo.TYPE_CROSS_TASK));
+
+        // verify if back animation would start.
+        verify(mBackNavigationController).scheduleAnimationLocked(
+                eq(BackNavigationInfo.TYPE_CROSS_TASK), any(), eq(mBackAnimationAdapter),
+                any());
     }
 
     @Test

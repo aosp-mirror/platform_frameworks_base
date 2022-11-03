@@ -21,6 +21,7 @@ import android.annotation.CallbackExecutor;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.graphics.RectF;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -32,8 +33,10 @@ import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.HandwritingGesture;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputContentInfo;
+import android.view.inputmethod.ParcelableHandwritingGesture;
 import android.view.inputmethod.SurroundingText;
 import android.view.inputmethod.TextAttribute;
+import android.view.inputmethod.TextBoundsInfoResult;
 
 import com.android.internal.inputmethod.CancellationGroup;
 import com.android.internal.inputmethod.CompletableFutureUtil;
@@ -44,6 +47,7 @@ import com.android.internal.inputmethod.InputConnectionProtoDumper;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 
 /**
@@ -418,7 +422,8 @@ final class RemoteInputConnection implements InputConnection {
     public void performHandwritingGesture(
             @NonNull HandwritingGesture gesture, @Nullable @CallbackExecutor Executor executor,
             @Nullable IntConsumer consumer) {
-        mInvoker.performHandwritingGesture(gesture, executor, consumer);
+        mInvoker.performHandwritingGesture(ParcelableHandwritingGesture.of(gesture), executor,
+                consumer);
     }
 
     @AnyThread
@@ -457,6 +462,13 @@ final class RemoteInputConnection implements InputConnection {
                 mInvoker.requestCursorUpdates(cursorUpdateMode, cursorUpdateFilter, displayId);
         return CompletableFutureUtil.getResultOrFalse(value, TAG, "requestCursorUpdates()",
                 mCancellationGroup, MAX_WAIT_TIME_MILLIS);
+    }
+
+    @AnyThread
+    public void requestTextBoundsInfo(
+            @NonNull RectF rectF, @NonNull @CallbackExecutor Executor executor,
+            @NonNull Consumer<TextBoundsInfoResult> consumer) {
+        mInvoker.requestTextBoundsInfo(rectF, executor, consumer);
     }
 
     @AnyThread

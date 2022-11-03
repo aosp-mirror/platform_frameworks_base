@@ -58,7 +58,6 @@ import com.android.systemui.qs.footer.dagger.FooterActionsModule;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.screenshot.dagger.ScreenshotModule;
 import com.android.systemui.security.data.repository.SecurityRepositoryModule;
-import com.android.systemui.settings.dagger.MultiUserUtilsModule;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.smartspace.dagger.SmartspaceModule;
 import com.android.systemui.statusbar.CommandQueue;
@@ -140,7 +139,6 @@ import dagger.Provides;
             PrivacyModule.class,
             ScreenshotModule.class,
             SensorModule.class,
-            MultiUserUtilsModule.class,
             SecurityRepositoryModule.class,
             SettingsUtilModule.class,
             SmartRepliesInflationModule.class,

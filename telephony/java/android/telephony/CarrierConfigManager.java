@@ -1147,8 +1147,12 @@ public class CarrierConfigManager {
             "carrier_data_call_apn_retry_after_disconnect_long";
 
     /**
-     * Data call setup permanent failure causes by the carrier
+     * Data call setup permanent failure causes by the carrier.
+     *
+     * @deprecated This API key was added in mistake and is not used anymore by the telephony data
+     * frameworks.
      */
+    @Deprecated
     public static final String KEY_CARRIER_DATA_CALL_PERMANENT_FAILURE_STRINGS =
             "carrier_data_call_permanent_failure_strings";
 
@@ -8446,7 +8450,8 @@ public class CarrierConfigManager {
      *
      * The syntax of the retry rule:
      * 1. Retry based on {@link NetworkCapabilities}. Note that only APN-type network capabilities
-     *    are supported.
+     *    are supported. If the capabilities are not specified, then the retry rule only applies
+     *    to the current failed APN used in setup data call request.
      * "capabilities=[netCaps1|netCaps2|...], [retry_interval=n1|n2|n3|n4...], [maximum_retries=n]"
      *
      * 2. Retry based on {@link DataFailCause}
@@ -8457,14 +8462,15 @@ public class CarrierConfigManager {
      * "capabilities=[netCaps1|netCaps2|...], fail_causes=[cause1|cause2|cause3|...],
      *     [retry_interval=n1|n2|n3|n4...], [maximum_retries=n]"
      *
+     * 4. Permanent fail causes (no timer-based retry) on the current failed APN. Retry interval
+     *    is specified for retrying the next available APN.
+     * "permanent_fail_causes=8|27|28|29|30|32|33|35|50|51|111|-5|-6|65537|65538|-3|65543|65547|
+     *     2252|2253|2254, retry_interval=2500"
+     *
      * For example,
      * "capabilities=eims, retry_interval=1000, maximum_retries=20" means if the attached
      * network request is emergency, then retry data network setup every 1 second for up to 20
      * times.
-     *
-     * "fail_causes=8|27|28|29|30|32|33|35|50|51|111|-5|-6|65537|65538|-3|2253|2254
-     * , maximum_retries=0" means for those fail causes, never retry with timers. Note that
-     * when environment changes, retry can still happen.
      *
      * "capabilities=internet|enterprise|dun|ims|fota, retry_interval=2500|3000|"
      * "5000|10000|15000|20000|40000|60000|120000|240000|600000|1200000|1800000"
@@ -8766,6 +8772,22 @@ public class CarrierConfigManager {
     public static final String
             KEY_PREMIUM_CAPABILITY_PURCHASE_CONDITION_BACKOFF_HYSTERESIS_TIME_MILLIS_LONG =
             "premium_capability_purchase_condition_backoff_hysteresis_time_millis_long";
+
+    /**
+     * The amount of time in milliseconds within which the network must set up a slicing
+     * configuration for the premium capability after
+     * {@link TelephonyManager#purchasePremiumCapability(int, Executor, Consumer)}
+     * returns {@link TelephonyManager#PURCHASE_PREMIUM_CAPABILITY_RESULT_SUCCESS}.
+     * During the setup time, calls to
+     * {@link TelephonyManager#purchasePremiumCapability(int, Executor, Consumer)} will return
+     * {@link TelephonyManager#PURCHASE_PREMIUM_CAPABILITY_RESULT_PENDING_NETWORK_SETUP}.
+     * If the network fails set up a slicing configuration for the premium capability within the
+     * setup time, subsequent purchase requests will be allowed to go through again.
+     *
+     * The default value is 5 minutes.
+     */
+    public static final String KEY_PREMIUM_CAPABILITY_NETWORK_SETUP_TIME_MILLIS_LONG =
+            "premium_capability_network_setup_time_millis_long";
 
     /**
      * The URL to redirect to when the user clicks on the notification for a network boost via
@@ -9443,8 +9465,13 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(
                 KEY_TELEPHONY_DATA_SETUP_RETRY_RULES_STRING_ARRAY, new String[] {
                         "capabilities=eims, retry_interval=1000, maximum_retries=20",
-                        "fail_causes=8|27|28|29|30|32|33|35|50|51|111|-5|-6|65537|65538|-3|2252|"
-                                + "2253|2254, maximum_retries=0", // No retry for those causes
+                        // Permanent fail causes. When setup data call fails with the following
+                        // fail causes, telephony data frameworks will stop timer-based retry on
+                        // the failed APN until power cycle, APM, or some special events. Note that
+                        // even timer-based retry is not performed, condition-based (RAT changes,
+                        // registration state changes) retry can still happen.
+                        "permanent_fail_causes=8|27|28|29|30|32|33|35|50|51|111|-5|-6|65537|65538|"
+                                + "-3|65543|65547|2252|2253|2254, retry_interval=2500",
                         "capabilities=mms|supl|cbs, retry_interval=2000",
                         "capabilities=internet|enterprise|dun|ims|fota, retry_interval=2500|3000|"
                                 + "5000|10000|15000|20000|40000|60000|120000|240000|"
@@ -9485,6 +9512,8 @@ public class CarrierConfigManager {
         sDefaults.putLong(
                 KEY_PREMIUM_CAPABILITY_PURCHASE_CONDITION_BACKOFF_HYSTERESIS_TIME_MILLIS_LONG,
                 TimeUnit.MINUTES.toMillis(30));
+        sDefaults.putLong(KEY_PREMIUM_CAPABILITY_NETWORK_SETUP_TIME_MILLIS_LONG,
+                TimeUnit.MINUTES.toMillis(5));
         sDefaults.putString(KEY_PREMIUM_CAPABILITY_PURCHASE_URL_STRING, null);
         sDefaults.putBoolean(KEY_PREMIUM_CAPABILITY_SUPPORTED_ON_LTE_BOOL, false);
         sDefaults.putStringArray(KEY_IWLAN_HANDOVER_POLICY_STRING_ARRAY, new String[]{

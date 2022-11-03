@@ -125,6 +125,7 @@ import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
+import android.view.inputmethod.TextAppearanceInfo;
 import android.view.textclassifier.TextClassification;
 import android.view.textclassifier.TextClassificationManager;
 import android.widget.AdapterView.OnItemClickListener;
@@ -4630,14 +4631,17 @@ public class Editor {
                     (filter & InputConnection.CURSOR_UPDATE_FILTER_INSERTION_MARKER) != 0;
             boolean includeVisibleLineBounds =
                     (filter & InputConnection.CURSOR_UPDATE_FILTER_VISIBLE_LINE_BOUNDS) != 0;
+            boolean includeTextAppearance =
+                    (filter & InputConnection.CURSOR_UPDATE_FILTER_TEXT_APPEARANCE) != 0;
             boolean includeAll =
                     (!includeEditorBounds && !includeCharacterBounds && !includeInsertionMarker
-                    && !includeVisibleLineBounds);
+                    && !includeVisibleLineBounds && !includeTextAppearance);
 
             includeEditorBounds |= includeAll;
             includeCharacterBounds |= includeAll;
             includeInsertionMarker |= includeAll;
             includeVisibleLineBounds |= includeAll;
+            includeTextAppearance |= includeAll;
 
             final CursorAnchorInfo.Builder builder = mSelectionInfoBuilder;
             builder.reset();
@@ -4757,6 +4761,10 @@ public class Editor {
                 }
             }
 
+            if (includeTextAppearance) {
+                TextAppearanceInfo textAppearanceInfo = new TextAppearanceInfo(mTextView);
+                builder.setTextAppearanceInfo(textAppearanceInfo);
+            }
             imm.updateCursorAnchorInfo(mTextView, builder.build());
 
             // Drop the immediate flag if any.

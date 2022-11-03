@@ -2763,10 +2763,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     "Missing existing base package");
         }
 
-        // Default to require only if existing base apk has fs-verity.
+        // Default to require only if existing base apk has fs-verity signature.
         mVerityFoundForApks = PackageManagerServiceUtils.isApkVerityEnabled()
                 && params.mode == SessionParams.MODE_INHERIT_EXISTING
-                && VerityUtils.hasFsverity(pkgInfo.applicationInfo.getBaseCodePath());
+                && (new File(VerityUtils.getFsveritySignatureFilePath(
+                        pkgInfo.applicationInfo.getBaseCodePath()))).exists();
 
         final List<File> removedFiles = getRemovedFilesLocked();
         final List<String> removeSplitList = new ArrayList<>();
@@ -3326,7 +3327,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     "Failure to obtain package info.");
         }
         final List<String> filePaths = packageLite.getAllApkPaths();
-        final String appLabel = mPreapprovalDetails.getLabel();
+        final CharSequence appLabel = mPreapprovalDetails.getLabel();
         final ULocale appLocale = mPreapprovalDetails.getLocale();
         final ApplicationInfo appInfo = packageInfo.applicationInfo;
         boolean appLabelMatched = false;

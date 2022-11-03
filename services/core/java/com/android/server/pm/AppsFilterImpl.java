@@ -492,9 +492,11 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
      *
      * @param newPkgSetting the new setting being added
      * @param isReplace     if the package is being replaced and may need extra cleanup.
+     * @param retainImplicitGrantOnReplace {@code true} to retain implicit grant access if
+     *                                     the package is being replaced.
      */
     public void addPackage(Computer snapshot, PackageStateInternal newPkgSetting,
-            boolean isReplace) {
+            boolean isReplace, boolean retainImplicitGrantOnReplace) {
         final long currentTimeUs = SystemClock.currentTimeMicro();
         final int logType = isReplace
                 ? PACKAGE_MANAGER_APPS_FILTER_CACHE_UPDATE_REPORTED__EVENT_TYPE__PACKAGE_REPLACED
@@ -505,7 +507,8 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
         try {
             if (isReplace) {
                 // let's first remove any prior rules for this package
-                removePackageInternal(snapshot, newPkgSetting, true /*isReplace*/);
+                removePackageInternal(snapshot, newPkgSetting,
+                        true /*isReplace*/, retainImplicitGrantOnReplace);
             }
             final ArrayMap<String, ? extends PackageStateInternal> settings =
                     snapshot.getPackageStates();
@@ -1016,13 +1019,14 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
     }
 
     /**
-     * Equivalent to calling {@link #addPackage(Computer, PackageStateInternal, boolean)}
-     * with {@code isReplace} equal to {@code false}.
+     * Equivalent to calling {@link #addPackage(Computer, PackageStateInternal, boolean, boolean)}
+     * with {@code isReplace} and {@code retainImplicitGrantOnReplace} equal to {@code false}.
      *
-     * @see AppsFilterImpl#addPackage(Computer, PackageStateInternal, boolean)
+     * @see AppsFilterImpl#addPackage(Computer, PackageStateInternal, boolean, boolean)
      */
     public void addPackage(Computer snapshot, PackageStateInternal newPkgSetting) {
-        addPackage(snapshot, newPkgSetting, false /* isReplace */);
+        addPackage(snapshot, newPkgSetting, false /* isReplace */,
+                false /* retainImplicitGrantOnReplace */);
     }
 
     /**
@@ -1032,7 +1036,8 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
      */
     public void removePackage(Computer snapshot, PackageStateInternal setting) {
         final long currentTimeUs = SystemClock.currentTimeMicro();
-        removePackageInternal(snapshot, setting, false /* isReplace */);
+        removePackageInternal(snapshot, setting,
+                false /* isReplace */, false /* retainImplicitGrantOnReplace */);
         logCacheUpdated(
                 PACKAGE_MANAGER_APPS_FILTER_CACHE_UPDATE_REPORTED__EVENT_TYPE__PACKAGE_DELETED,
                 SystemClock.currentTimeMicro() - currentTimeUs,
@@ -1046,33 +1051,37 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
      *
      * @param setting   the setting of the package being removed.
      * @param isReplace if the package is being replaced.
+     * @param retainImplicitGrantOnReplace {@code true} to retain implicit grant access if
+     *                                     the package is being replaced.
      */
     private void removePackageInternal(Computer snapshot, PackageStateInternal setting,
-            boolean isReplace) {
+            boolean isReplace, boolean retainImplicitGrantOnReplace) {
         final ArraySet<String> additionalChangedPackages;
         final ArrayMap<String, ? extends PackageStateInternal> settings =
                 snapshot.getPackageStates();
         final UserInfo[] users = snapshot.getUserInfos();
         final Collection<SharedUserSetting> sharedUserSettings = snapshot.getAllSharedUsers();
         final int userCount = users.length;
-        synchronized (mImplicitlyQueryableLock) {
-            for (int u = 0; u < userCount; u++) {
-                final int userId = users[u].id;
-                final int removingUid = UserHandle.getUid(userId, setting.getAppId());
-                mImplicitlyQueryable.remove(removingUid);
-                for (int i = mImplicitlyQueryable.size() - 1; i >= 0; i--) {
-                    mImplicitlyQueryable.remove(mImplicitlyQueryable.keyAt(i),
-                            removingUid);
-                }
+        if (!isReplace || !retainImplicitGrantOnReplace) {
+            synchronized (mImplicitlyQueryableLock) {
+                for (int u = 0; u < userCount; u++) {
+                    final int userId = users[u].id;
+                    final int removingUid = UserHandle.getUid(userId, setting.getAppId());
+                    mImplicitlyQueryable.remove(removingUid);
+                    for (int i = mImplicitlyQueryable.size() - 1; i >= 0; i--) {
+                        mImplicitlyQueryable.remove(mImplicitlyQueryable.keyAt(i),
+                                removingUid);
+                    }
 
-                if (isReplace) {
-                    continue;
-                }
+                    if (isReplace) {
+                        continue;
+                    }
 
-                mRetainedImplicitlyQueryable.remove(removingUid);
-                for (int i = mRetainedImplicitlyQueryable.size() - 1; i >= 0; i--) {
-                    mRetainedImplicitlyQueryable.remove(
-                            mRetainedImplicitlyQueryable.keyAt(i), removingUid);
+                    mRetainedImplicitlyQueryable.remove(removingUid);
+                    for (int i = mRetainedImplicitlyQueryable.size() - 1; i >= 0; i--) {
+                        mRetainedImplicitlyQueryable.remove(
+                                mRetainedImplicitlyQueryable.keyAt(i), removingUid);
+                    }
                 }
             }
         }

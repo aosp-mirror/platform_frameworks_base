@@ -53,7 +53,7 @@ class CopyContentInSplit(testSpec: FlickerTestParameter) : SplitScreenBase(testS
     override val transition: FlickerBuilder.() -> Unit
         get() = {
             super.transition(this)
-            setup { SplitScreenUtils.enterSplit(wmHelper, tapl, primaryApp, textEditApp) }
+            setup { SplitScreenUtils.enterSplit(wmHelper, tapl, device, primaryApp, textEditApp) }
             transitions {
                 SplitScreenUtils.copyContentInSplit(
                     instrumentation,

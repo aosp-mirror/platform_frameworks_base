@@ -394,10 +394,12 @@ public abstract class ImsFeature {
     @VisibleForTesting
     public void addImsFeatureStatusCallback(@NonNull IImsFeatureStatusCallback c) {
         try {
-            // If we have just connected, send queued status.
-            c.notifyImsFeatureStatus(getFeatureState());
-            // Add the callback if the callback completes successfully without a RemoteException.
-            mStatusCallbacks.register(c);
+            synchronized (mStatusCallbacks) {
+                // Add the callback if the callback completes successfully without a RemoteException
+                mStatusCallbacks.register(c);
+                // If we have just connected, send queued status.
+                c.notifyImsFeatureStatus(getFeatureState());
+            }
         } catch (RemoteException e) {
             Log.w(LOG_TAG, "Couldn't notify feature state: " + e.getMessage());
         }
@@ -409,7 +411,9 @@ public abstract class ImsFeature {
      */
     @VisibleForTesting
     public void removeImsFeatureStatusCallback(@NonNull IImsFeatureStatusCallback c) {
-        mStatusCallbacks.unregister(c);
+        synchronized (mStatusCallbacks) {
+            mStatusCallbacks.unregister(c);
+        }
     }
 
     /**

@@ -248,7 +248,8 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Šviesumas"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Spalvų inversija"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Spalvų taisymas"</string>
-    <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Naudotojo nustatymai"</string>
+    <!-- no translation found for quick_settings_more_user_settings (7634653308485206306) -->
+    <skip />
     <string name="quick_settings_done" msgid="2163641301648855793">"Atlikta"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Uždaryti"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Prijungtas"</string>
@@ -727,6 +728,14 @@
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Išjungti mobiliojo ryšio duomenis?"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"Naudodamiesi „<xliff:g id="CARRIER">%s</xliff:g>“ paslaugomis neturėsite galimybės pasiekti duomenų arba interneto. Internetą galėsite naudoti tik prisijungę prie „Wi-Fi“."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"savo operatoriaus"</string>
+    <!-- no translation found for auto_data_switch_disable_title (5146527155665190652) -->
+    <skip />
+    <!-- no translation found for auto_data_switch_disable_message (5885533647399535852) -->
+    <skip />
+    <!-- no translation found for auto_data_switch_dialog_negative_button (2370876875999891444) -->
+    <skip />
+    <!-- no translation found for auto_data_switch_dialog_positive_button (8531782041263087564) -->
+    <skip />
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Kadangi programa užstoja leidimo užklausą, nustatymuose negalima patvirtinti jūsų atsakymo."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"Leisti „<xliff:g id="APP_0">%1$s</xliff:g>“ rodyti „<xliff:g id="APP_2">%2$s</xliff:g>“ fragmentus?"</string>
     <string name="slice_permission_text_1" msgid="6675965177075443714">"- Gali nuskaityti informaciją iš „<xliff:g id="APP">%1$s</xliff:g>“"</string>
@@ -785,12 +794,18 @@
     <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"Didinimo lango nustatymai"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Palietę atidarykite pritaikymo neįgaliesiems funkcijas. Tinkinkite arba pakeiskite šį mygtuką nustatymuose.\n\n"<annotation id="link">"Žr. nustatymus"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Perkelkite mygtuką prie krašto, kad laikinai jį paslėptumėte"</string>
+    <!-- no translation found for accessibility_floating_button_undo (511112888715708241) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_undo_message_text (3044079592757099698) -->
+    <skip />
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Perkelti į viršų kairėje"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Perkelti į viršų dešinėje"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"Perkelti į apačią kairėje"</string>
     <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"Perkelti į apačią dešinėje"</string>
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Perkelti į kraštą ir slėpti"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Perkelti iš krašto ir rodyti"</string>
+    <!-- no translation found for accessibility_floating_button_action_remove_menu (6730432848162552135) -->
+    <skip />
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"perjungti"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Įrenginio valdikliai"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Pasirinkite programą, kad pridėtumėte valdiklių"</string>
@@ -933,6 +948,10 @@
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Mobiliojo ryšio duomenys"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Prisijungta"</string>
+    <!-- no translation found for mobile_data_temp_connection_active (4590222725908806824) -->
+    <skip />
+    <!-- no translation found for mobile_data_poor_connection (819617772268371434) -->
+    <skip />
     <string name="mobile_data_off_summary" msgid="3663995422004150567">"Naud. mob. r. duomenis nebus autom. prisijungiama"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"Nėra ryšio"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Nėra kitų pasiekiamų tinklų"</string>

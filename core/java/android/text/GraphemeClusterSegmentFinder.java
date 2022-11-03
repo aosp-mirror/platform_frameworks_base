@@ -49,6 +49,7 @@ public class GraphemeClusterSegmentFinder extends SegmentFinder {
 
     @Override
     public int previousStartBoundary(@IntRange(from = 0) int offset) {
+        if (offset == 0) return DONE;
         int boundary = mTextPaint.getTextRunCursor(
                 mText, 0, mText.length(), false, offset, Paint.CURSOR_BEFORE);
         return boundary == -1 ? DONE : boundary;
@@ -56,6 +57,7 @@ public class GraphemeClusterSegmentFinder extends SegmentFinder {
 
     @Override
     public int previousEndBoundary(@IntRange(from = 0) int offset) {
+        if (offset == 0) return DONE;
         int boundary = mTextPaint.getTextRunCursor(
                 mText, 0, mText.length(), false, offset, Paint.CURSOR_BEFORE);
         // Check that there is another cursor position before, otherwise this is not a valid
@@ -69,6 +71,7 @@ public class GraphemeClusterSegmentFinder extends SegmentFinder {
 
     @Override
     public int nextStartBoundary(@IntRange(from = 0) int offset) {
+        if (offset == mText.length()) return DONE;
         int boundary = mTextPaint.getTextRunCursor(
                 mText, 0, mText.length(), false, offset, Paint.CURSOR_AFTER);
         // Check that there is another cursor position after, otherwise this is not a valid
@@ -82,6 +85,7 @@ public class GraphemeClusterSegmentFinder extends SegmentFinder {
 
     @Override
     public int nextEndBoundary(@IntRange(from = 0) int offset) {
+        if (offset == mText.length()) return DONE;
         int boundary = mTextPaint.getTextRunCursor(
                 mText, 0, mText.length(), false, offset, Paint.CURSOR_AFTER);
         return boundary == -1 ? DONE : boundary;

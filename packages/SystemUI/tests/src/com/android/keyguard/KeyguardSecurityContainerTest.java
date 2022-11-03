@@ -31,6 +31,7 @@ import static androidx.constraintlayout.widget.ConstraintSet.WRAP_CONTENT;
 
 import static com.android.keyguard.KeyguardSecurityContainer.MODE_DEFAULT;
 import static com.android.keyguard.KeyguardSecurityContainer.MODE_ONE_HANDED;
+import static com.android.keyguard.KeyguardSecurityContainer.MODE_USER_SWITCHER;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -54,6 +55,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.classifier.FalsingA11yDelegate;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.user.data.source.UserRecord;
@@ -87,6 +89,8 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
     private FalsingManager mFalsingManager;
     @Mock
     private UserSwitcherController mUserSwitcherController;
+    @Mock
+    private FalsingA11yDelegate mFalsingA11yDelegate;
 
     private KeyguardSecurityContainer mKeyguardSecurityContainer;
 
@@ -111,15 +115,14 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
         when(mUserSwitcherController.getCurrentUserName()).thenReturn("Test User");
         when(mUserSwitcherController.isKeyguardShowing()).thenReturn(true);
     }
+
     @Test
     public void testOnApplyWindowInsets() {
         int paddingBottom = getContext().getResources()
                 .getDimensionPixelSize(R.dimen.keyguard_security_view_bottom_margin);
         int imeInsetAmount = paddingBottom + 1;
         int systemBarInsetAmount = 0;
-
-        mKeyguardSecurityContainer.initMode(MODE_DEFAULT, mGlobalSettings, mFalsingManager,
-                mUserSwitcherController, () -> {});
+        initMode(MODE_DEFAULT);
 
         Insets imeInset = Insets.of(0, 0, 0, imeInsetAmount);
         Insets systemBarInset = Insets.of(0, 0, 0, systemBarInsetAmount);
@@ -140,8 +143,7 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
                 .getDimensionPixelSize(R.dimen.keyguard_security_view_bottom_margin);
         int systemBarInsetAmount = paddingBottom + 1;
 
-        mKeyguardSecurityContainer.initMode(MODE_DEFAULT, mGlobalSettings, mFalsingManager,
-                mUserSwitcherController, () -> {});
+        initMode(MODE_DEFAULT);
 
         Insets imeInset = Insets.of(0, 0, 0, imeInsetAmount);
         Insets systemBarInset = Insets.of(0, 0, 0, systemBarInsetAmount);
@@ -157,11 +159,8 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
 
     @Test
     public void testDefaultViewMode() {
-        mKeyguardSecurityContainer.initMode(MODE_ONE_HANDED, mGlobalSettings, mFalsingManager,
-                mUserSwitcherController, () -> {
-                });
-        mKeyguardSecurityContainer.initMode(MODE_DEFAULT, mGlobalSettings, mFalsingManager,
-                mUserSwitcherController, () -> {});
+        initMode(MODE_ONE_HANDED);
+        initMode(MODE_DEFAULT);
         ConstraintSet.Constraint viewFlipperConstraint =
                 getViewConstraint(mSecurityViewFlipper.getId());
         assertThat(viewFlipperConstraint.layout.topToTop).isEqualTo(PARENT_ID);
@@ -377,8 +376,7 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
 
     private void setupUserSwitcher() {
         when(mGlobalSettings.getInt(any(), anyInt())).thenReturn(ONE_HANDED_KEYGUARD_SIDE_RIGHT);
-        mKeyguardSecurityContainer.initMode(KeyguardSecurityContainer.MODE_USER_SWITCHER,
-                mGlobalSettings, mFalsingManager, mUserSwitcherController, () -> {});
+        initMode(MODE_USER_SWITCHER);
     }
 
     private ArrayList<UserRecord> buildUserRecords(int count) {
@@ -396,8 +394,7 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
 
     private void setupForUpdateKeyguardPosition(boolean oneHandedMode) {
         int mode = oneHandedMode ? MODE_ONE_HANDED : MODE_DEFAULT;
-        mKeyguardSecurityContainer.initMode(mode, mGlobalSettings, mFalsingManager,
-                mUserSwitcherController, () -> {});
+        initMode(mode);
     }
 
     /** Get the ConstraintLayout constraint of the view. */
@@ -405,5 +402,11 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
         ConstraintSet constraintSet = new ConstraintSet();
         constraintSet.clone(mKeyguardSecurityContainer);
         return constraintSet.getConstraint(viewId);
+    }
+
+    private void initMode(int mode) {
+        mKeyguardSecurityContainer.initMode(mode, mGlobalSettings, mFalsingManager,
+                mUserSwitcherController, () -> {
+                }, mFalsingA11yDelegate);
     }
 }

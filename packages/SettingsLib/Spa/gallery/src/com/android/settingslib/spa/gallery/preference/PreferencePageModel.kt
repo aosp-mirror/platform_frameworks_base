@@ -59,7 +59,8 @@ class PreferencePageModel : PageModel() {
 
     private val spaLogger = SpaEnvironmentFactory.instance.logger
 
-    private val asyncSummary = mutableStateOf(" ")
+    val asyncSummary = mutableStateOf("(loading)")
+    val asyncEnable = mutableStateOf(false)
 
     private val manualUpdater = mutableStateOf(0)
 
@@ -87,14 +88,11 @@ class PreferencePageModel : PageModel() {
     override fun initialize(arguments: Bundle?) {
         spaLogger.message(TAG, "initialize with args " + arguments.toString())
         viewModelScope.launch(Dispatchers.IO) {
+            // Loading your data here.
             delay(2000L)
             asyncSummary.value = ASYNC_PREFERENCE_SUMMARY
+            asyncEnable.value = true
         }
-    }
-
-    fun getAsyncSummary(): State<String> {
-        spaLogger.message(TAG, "getAsyncSummary")
-        return asyncSummary
     }
 
     fun getManualUpdaterSummary(): State<String> {

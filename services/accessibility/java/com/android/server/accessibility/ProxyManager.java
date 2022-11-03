@@ -16,6 +16,8 @@
 package com.android.server.accessibility;
 import android.accessibilityservice.IAccessibilityServiceClient;
 
+import java.util.HashSet;
+
 /**
  * Manages proxy connections.
  *
@@ -26,6 +28,7 @@ import android.accessibilityservice.IAccessibilityServiceClient;
  */
 public class ProxyManager {
     private final Object mLock;
+    private final HashSet<Integer> mDisplayIds = new HashSet<>();
 
     ProxyManager(Object lock) {
         mLock = lock;
@@ -35,12 +38,21 @@ public class ProxyManager {
      * TODO: Create the proxy service connection.
      */
     public void registerProxy(IAccessibilityServiceClient client, int displayId) {
+        mDisplayIds.add(displayId);
     }
 
     /**
      * TODO: Unregister the proxy service connection based on display id.
      */
     public boolean unregisterProxy(int displayId) {
+        mDisplayIds.remove(displayId);
         return true;
+    }
+
+    /**
+     * Checks if a display id is being proxy-ed.
+     */
+    public boolean isProxyed(int displayId) {
+        return mDisplayIds.contains(displayId);
     }
 }

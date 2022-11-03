@@ -115,6 +115,7 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.DisplayLayout;
+import com.android.wm.shell.common.ScreenshotUtils;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
@@ -846,15 +847,44 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     void setSideStagePositionAnimated(@SplitPosition int sideStagePosition) {
         if (mSideStagePosition == sideStagePosition) return;
         SurfaceControl.Transaction t = mTransactionPool.acquire();
+        mTempRect1.setEmpty();
         final StageTaskListener topLeftStage =
                 mSideStagePosition == SPLIT_POSITION_TOP_OR_LEFT ? mSideStage : mMainStage;
+        final SurfaceControl topLeftScreenshot = ScreenshotUtils.takeScreenshot(t,
+                topLeftStage.mRootLeash, mTempRect1, Integer.MAX_VALUE - 1);
         final StageTaskListener bottomRightStage =
                 mSideStagePosition == SPLIT_POSITION_TOP_OR_LEFT ? mMainStage : mSideStage;
+        final SurfaceControl bottomRightScreenshot = ScreenshotUtils.takeScreenshot(t,
+                bottomRightStage.mRootLeash, mTempRect1, Integer.MAX_VALUE - 1);
         mSplitLayout.splitSwitching(t, topLeftStage.mRootLeash, bottomRightStage.mRootLeash,
-                () -> {
-                    setSideStagePosition(SplitLayout.reversePosition(mSideStagePosition),
-                            null /* wct */);
-                    mTransactionPool.release(t);
+                insets -> {
+                    WindowContainerTransaction wct = new WindowContainerTransaction();
+                    setSideStagePosition(SplitLayout.reversePosition(mSideStagePosition), wct);
+                    mSyncQueue.queue(wct);
+                    mSyncQueue.runInSync(st -> {
+                        updateSurfaceBounds(mSplitLayout, st, false /* applyResizingOffset */);
+                        st.setPosition(topLeftScreenshot, -insets.left, -insets.top);
+                        st.setPosition(bottomRightScreenshot, insets.left, insets.top);
+
+                        final ValueAnimator va = ValueAnimator.ofFloat(1, 0);
+                        va.addUpdateListener(valueAnimator-> {
+                            final float progress = (float) valueAnimator.getAnimatedValue();
+                            t.setAlpha(topLeftScreenshot, progress);
+                            t.setAlpha(bottomRightScreenshot, progress);
+                            t.apply();
+                        });
+                        va.addListener(new AnimatorListenerAdapter() {
+                            @Override
+                            public void onAnimationEnd(
+                                    @androidx.annotation.NonNull Animator animation) {
+                                t.remove(topLeftScreenshot);
+                                t.remove(bottomRightScreenshot);
+                                t.apply();
+                                mTransactionPool.release(t);
+                            }
+                        });
+                        va.start();
+                    });
                 });
     }
 

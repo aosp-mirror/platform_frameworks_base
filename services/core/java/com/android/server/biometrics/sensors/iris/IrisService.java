@@ -63,6 +63,8 @@ public class IrisService extends SystemService {
             // to wait, and some of the operations below might take a significant amount of time to
             // complete (calls to the HALs). To avoid blocking the rest of system server we put
             // this on a background thread.
+            super.registerAuthenticators_enforcePermission();
+
             final ServiceThread thread = new ServiceThread(TAG, Process.THREAD_PRIORITY_BACKGROUND,
                     true /* allowIo */);
             thread.start();

@@ -78,14 +78,6 @@ import com.android.server.testutils.mock
 import com.android.server.testutils.nullable
 import com.android.server.testutils.whenever
 import com.android.server.utils.WatchedArrayMap
-import java.io.File
-import java.io.IOException
-import java.nio.file.Files
-import java.security.PublicKey
-import java.security.cert.CertificateException
-import java.util.Arrays
-import java.util.Random
-import java.util.concurrent.FutureTask
 import libcore.util.HexEncoding
 import org.junit.Assert
 import org.junit.rules.TestRule
@@ -94,6 +86,14 @@ import org.junit.runners.model.Statement
 import org.mockito.AdditionalMatchers.or
 import org.mockito.Mockito
 import org.mockito.quality.Strictness
+import java.io.File
+import java.io.IOException
+import java.nio.file.Files
+import java.security.PublicKey
+import java.security.cert.CertificateException
+import java.util.Arrays
+import java.util.Random
+import java.util.concurrent.FutureTask
 
 /**
  * A utility for mocking behavior of the system and dependencies when testing PackageManagerService
@@ -104,6 +104,9 @@ import org.mockito.quality.Strictness
 class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
     private val random = Random()
     val mocks = Mocks()
+
+    // TODO: getBackingApexFile does not handle paths that aren't /apex
+    val apexDirectory = File("/apex")
     val packageCacheDirectory: File =
             Files.createTempDirectory("packageCache").toFile()
     val rootDirectory: File =
@@ -297,7 +300,9 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
         whenever(mocks.systemConfig.sharedLibraries).thenReturn(DEFAULT_SHARED_LIBRARIES_LIST)
         whenever(mocks.systemConfig.defaultVrComponents).thenReturn(ArraySet())
         whenever(mocks.systemConfig.hiddenApiWhitelistedApps).thenReturn(ArraySet())
+        wheneverStatic { SystemProperties.set(anyString(), anyString()) }.thenDoNothing()
         wheneverStatic { SystemProperties.getBoolean("fw.free_cache_v2", true) }.thenReturn(true)
+        wheneverStatic { Environment.getApexDirectory() }.thenReturn(apexDirectory)
         wheneverStatic { Environment.getPackageCacheDirectory() }.thenReturn(packageCacheDirectory)
         wheneverStatic { SystemProperties.digestOf("ro.build.fingerprint") }.thenReturn("cacheName")
         wheneverStatic { Environment.getRootDirectory() }.thenReturn(rootDirectory)

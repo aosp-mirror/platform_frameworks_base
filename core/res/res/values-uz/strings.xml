@@ -72,6 +72,10 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Qo‘ng‘iroq qiluvchi ma’lumotlari cheklanmagan. Keyingi qo‘ng‘iroq: cheklanmagan"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Xizmat ishalamaydi."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Qo‘ng‘iroq qiluvchining ID raqami sozlamasini o‘zgartirib bo‘lmaydi."</string>
+    <!-- no translation found for auto_data_switch_title (3286350716870518297) -->
+    <skip />
+    <!-- no translation found for auto_data_switch_content (803557715007110959) -->
+    <skip />
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Mobil internet ishlamayapti"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Favqulodda chaqiruv ishlamayapti"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Ovozli chaqiruvlar ishlamaydi"</string>
@@ -1592,7 +1596,7 @@
     <string name="issued_by" msgid="7872459822431585684">"Tegishli:"</string>
     <string name="validity_period" msgid="1717724283033175968">"Yaroqliligi:"</string>
     <string name="issued_on" msgid="5855489688152497307">"Chiqarilgan sanasi:"</string>
-    <string name="expires_on" msgid="1623640879705103121">"Amal qilish muddati:"</string>
+    <string name="expires_on" msgid="1623640879705103121">"Muddati:"</string>
     <string name="serial_number" msgid="3479576915806623429">"Serial raqam:"</string>
     <string name="fingerprints" msgid="148690767172613723">"Barmoq izlari:"</string>
     <string name="sha256_fingerprint" msgid="7103976380961964600">"SHA-256 barmoq izi:"</string>

@@ -432,10 +432,10 @@ public class BatteryControllerTest {
         assertFalse(topStartedJobs.contains(unrelatedJob));
 
         // Job cleanup
-        mBatteryController.maybeStopTrackingJobLocked(batteryJob, null, false);
-        mBatteryController.maybeStopTrackingJobLocked(chargingJob, null, false);
-        mBatteryController.maybeStopTrackingJobLocked(bothPowerJob, null, false);
-        mBatteryController.maybeStopTrackingJobLocked(unrelatedJob, null, false);
+        mBatteryController.maybeStopTrackingJobLocked(batteryJob, null);
+        mBatteryController.maybeStopTrackingJobLocked(chargingJob, null);
+        mBatteryController.maybeStopTrackingJobLocked(bothPowerJob, null);
+        mBatteryController.maybeStopTrackingJobLocked(unrelatedJob, null);
         assertFalse(trackedJobs.contains(batteryJob));
         assertFalse(trackedJobs.contains(chargingJob));
         assertFalse(trackedJobs.contains(bothPowerJob));

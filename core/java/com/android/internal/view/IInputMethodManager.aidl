@@ -81,8 +81,7 @@ interface IInputMethodManager {
     @EnforcePermission("WRITE_SECURE_SETTINGS")
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
             + "android.Manifest.permission.WRITE_SECURE_SETTINGS)")
-    void showInputMethodPickerFromSystem(in IInputMethodClient client,
-            int auxiliarySubtypeMode, int displayId);
+    void showInputMethodPickerFromSystem(int auxiliarySubtypeMode, int displayId);
 
     @EnforcePermission("TEST_INPUT_METHOD")
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
@@ -147,9 +146,9 @@ interface IInputMethodManager {
     boolean isStylusHandwritingAvailableAsUser(int userId);
 
     /** add virtual stylus id for test Stylus handwriting session **/
-    @EnforcePermission("INJECT_EVENTS")
+    @EnforcePermission("TEST_INPUT_METHOD")
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
-            + "android.Manifest.permission.INJECT_EVENTS)")
+            + "android.Manifest.permission.TEST_INPUT_METHOD)")
     void addVirtualStylusIdForTestSession(in IInputMethodClient client);
 
     /** Set a stylus idle-timeout after which handwriting {@code InkWindow} will be removed. */

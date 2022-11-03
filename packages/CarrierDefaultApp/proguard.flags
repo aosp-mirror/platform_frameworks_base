@@ -1,0 +1,4 @@
+# Keep classes and methods that have the @JavascriptInterface annotation
+-keepclassmembers class * {
+    @android.webkit.JavascriptInterface <methods>;
+}

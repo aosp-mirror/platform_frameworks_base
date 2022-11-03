@@ -16,11 +16,14 @@
 
 package android.view.inputmethod;
 
+import static android.view.inputmethod.TextBoundsInfoResult.CODE_UNSUPPORTED;
+
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.graphics.RectF;
 import android.inputmethodservice.InputMethodService;
 import android.os.Bundle;
 import android.os.Handler;
@@ -32,7 +35,9 @@ import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Objects;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 
 /**
@@ -1052,8 +1057,10 @@ public interface InputConnection {
      * used together with {@link #CURSOR_UPDATE_MONITOR}.
      * <p>
      * Note by default all of {@link #CURSOR_UPDATE_FILTER_EDITOR_BOUNDS},
-     * {@link #CURSOR_UPDATE_FILTER_CHARACTER_BOUNDS} and
-     * {@link #CURSOR_UPDATE_FILTER_INSERTION_MARKER} are included but specifying them can
+     * {@link #CURSOR_UPDATE_FILTER_CHARACTER_BOUNDS},
+     * {@link #CURSOR_UPDATE_FILTER_VISIBLE_LINE_BOUNDS},
+     * {@link #CURSOR_UPDATE_FILTER_TEXT_APPEARANCE}, and
+     * {@link #CURSOR_UPDATE_FILTER_INSERTION_MARKER}, are included but specifying them can
      * filter-out others.
      * It can be CPU intensive to include all, filtering specific info is recommended.
      * </p>
@@ -1071,7 +1078,8 @@ public interface InputConnection {
      * <p>
      * Note by default all of {@link #CURSOR_UPDATE_FILTER_EDITOR_BOUNDS},
      * {@link #CURSOR_UPDATE_FILTER_CHARACTER_BOUNDS},
-     * {@link #CURSOR_UPDATE_FILTER_VISIBLE_LINE_BOUNDS} and
+     * {@link #CURSOR_UPDATE_FILTER_VISIBLE_LINE_BOUNDS},
+     * {@link #CURSOR_UPDATE_FILTER_TEXT_APPEARANCE}, and
      * {@link #CURSOR_UPDATE_FILTER_INSERTION_MARKER}, are included but specifying them can
      * filter-out others.
      * It can be CPU intensive to include all, filtering specific info is recommended.
@@ -1087,6 +1095,7 @@ public interface InputConnection {
      * <p>
      * This flag can be used together with filters: {@link #CURSOR_UPDATE_FILTER_CHARACTER_BOUNDS},
      * {@link #CURSOR_UPDATE_FILTER_VISIBLE_LINE_BOUNDS},
+     * {@link #CURSOR_UPDATE_FILTER_TEXT_APPEARANCE},
      * {@link #CURSOR_UPDATE_FILTER_INSERTION_MARKER} and update flags
      * {@link #CURSOR_UPDATE_IMMEDIATE} and {@link #CURSOR_UPDATE_MONITOR}.
      * </p>
@@ -1102,8 +1111,8 @@ public interface InputConnection {
      * <p>
      * This flag can be combined with other filters: {@link #CURSOR_UPDATE_FILTER_EDITOR_BOUNDS},
      * {@link #CURSOR_UPDATE_FILTER_VISIBLE_LINE_BOUNDS},
-     * {@link #CURSOR_UPDATE_FILTER_INSERTION_MARKER} and update flags
-     * {@link #CURSOR_UPDATE_IMMEDIATE} and {@link #CURSOR_UPDATE_MONITOR}.
+     * {@link #CURSOR_UPDATE_FILTER_TEXT_APPEARANCE}, {@link #CURSOR_UPDATE_FILTER_INSERTION_MARKER}
+     * and update flags {@link #CURSOR_UPDATE_IMMEDIATE} and {@link #CURSOR_UPDATE_MONITOR}.
      * </p>
      */
     int CURSOR_UPDATE_FILTER_CHARACTER_BOUNDS = 1 << 3;
@@ -1118,8 +1127,8 @@ public interface InputConnection {
      * <p>
      * This flag can be combined with other filters: {@link #CURSOR_UPDATE_FILTER_CHARACTER_BOUNDS},
      * {@link #CURSOR_UPDATE_FILTER_VISIBLE_LINE_BOUNDS},
-     * {@link #CURSOR_UPDATE_FILTER_EDITOR_BOUNDS} and update flags {@link #CURSOR_UPDATE_IMMEDIATE}
-     * and {@link #CURSOR_UPDATE_MONITOR}.
+     * {@link #CURSOR_UPDATE_FILTER_TEXT_APPEARANCE}, {@link #CURSOR_UPDATE_FILTER_EDITOR_BOUNDS}
+     * and update flags {@link #CURSOR_UPDATE_IMMEDIATE} and {@link #CURSOR_UPDATE_MONITOR}.
      * </p>
      */
     int CURSOR_UPDATE_FILTER_INSERTION_MARKER = 1 << 4;
@@ -1133,12 +1142,27 @@ public interface InputConnection {
      * {@link InputConnection#requestCursorUpdates(int)} again with this flag off.
      * <p>
      * This flag can be combined with other filters: {@link #CURSOR_UPDATE_FILTER_CHARACTER_BOUNDS},
-     * {@link #CURSOR_UPDATE_FILTER_EDITOR_BOUNDS}, {@link #CURSOR_UPDATE_FILTER_INSERTION_MARKER}
-     * and update flags {@link #CURSOR_UPDATE_IMMEDIATE}
-     * and {@link #CURSOR_UPDATE_MONITOR}.
+     * {@link #CURSOR_UPDATE_FILTER_EDITOR_BOUNDS}, {@link #CURSOR_UPDATE_FILTER_INSERTION_MARKER},
+     * {@link #CURSOR_UPDATE_FILTER_TEXT_APPEARANCE} and update flags
+     * {@link #CURSOR_UPDATE_IMMEDIATE} and {@link #CURSOR_UPDATE_MONITOR}.
      * </p>
      */
     int CURSOR_UPDATE_FILTER_VISIBLE_LINE_BOUNDS = 1 << 5;
+
+    /**
+     * The editor is requested to call
+     * {@link InputMethodManager#updateCursorAnchorInfo(android.view.View, CursorAnchorInfo)}
+     * with new text appearance info {@link CursorAnchorInfo#getTextAppearanceInfo()}}
+     * whenever cursor/anchor position is changed. To disable monitoring, call
+     * {@link InputConnection#requestCursorUpdates(int)} again with this flag off.
+     * <p>
+     * This flag can be combined with other filters: {@link #CURSOR_UPDATE_FILTER_CHARACTER_BOUNDS},
+     * {@link #CURSOR_UPDATE_FILTER_EDITOR_BOUNDS}, {@link #CURSOR_UPDATE_FILTER_INSERTION_MARKER},
+     * {@link #CURSOR_UPDATE_FILTER_VISIBLE_LINE_BOUNDS} and update flags
+     * {@link #CURSOR_UPDATE_IMMEDIATE} and {@link #CURSOR_UPDATE_MONITOR}.
+     * </p>
+     */
+    int CURSOR_UPDATE_FILTER_TEXT_APPEARANCE = 1 << 6;
 
     /**
      * @hide
@@ -1153,7 +1177,8 @@ public interface InputConnection {
      */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(value = {CURSOR_UPDATE_FILTER_EDITOR_BOUNDS, CURSOR_UPDATE_FILTER_CHARACTER_BOUNDS,
-            CURSOR_UPDATE_FILTER_INSERTION_MARKER, CURSOR_UPDATE_FILTER_VISIBLE_LINE_BOUNDS},
+            CURSOR_UPDATE_FILTER_INSERTION_MARKER, CURSOR_UPDATE_FILTER_VISIBLE_LINE_BOUNDS,
+            CURSOR_UPDATE_FILTER_TEXT_APPEARANCE},
             flag = true, prefix = { "CURSOR_UPDATE_FILTER_" })
     @interface CursorUpdateFilter{}
 
@@ -1203,6 +1228,40 @@ public interface InputConnection {
             return requestCursorUpdates(cursorUpdateMode);
         }
         return false;
+    }
+
+
+    /**
+     * Called by input method to request the {@link TextBoundsInfo} for a range of text which is
+     * covered by or in vicinity of the given {@code RectF}. It can be used as a supplementary
+     * method to implement the handwriting gesture API -
+     * {@link #performHandwritingGesture(HandwritingGesture, Executor, IntConsumer)}.
+     *
+     * <p><strong>Editor authors</strong>: It's preferred that the editor returns a
+     * {@link TextBoundsInfo} of all the text lines whose bounds intersect with the given
+     * {@code rectF}.
+     * </p>
+     *
+     * <p><strong>IME authors</strong>: This method is expensive when the text is long. Please
+     * consider that both the text bounds computation and IPC round-trip to send the data are time
+     * consuming. It's preferable to only request text bounds in smaller areas.
+     * </p>
+     *
+     * @param rectF the interested area where the text bounds are requested, in the screen
+     *              coordinates.
+     * @param executor the executor to run the callback.
+     * @param consumer the callback invoked by editor to return the result. It must return a
+     *                 non-null object.
+     *
+     * @see TextBoundsInfo
+     * @see android.view.inputmethod.TextBoundsInfoResult
+     */
+    default void requestTextBoundsInfo(
+            @NonNull RectF rectF, @NonNull @CallbackExecutor Executor executor,
+            @NonNull Consumer<TextBoundsInfoResult> consumer) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(consumer);
+        executor.execute(() -> consumer.accept(new TextBoundsInfoResult(CODE_UNSUPPORTED)));
     }
 
     /**

@@ -30,6 +30,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.hardware.biometrics.BiometricFingerprintConstants;
 import android.hardware.display.DisplayManager;
 import android.hardware.fingerprint.FingerprintManager;
@@ -63,6 +64,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.ScreenLifecycle;
+import com.android.systemui.keyguard.domain.interactor.BouncerInteractor;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shade.ShadeExpansionStateManager;
@@ -133,6 +135,7 @@ public class UdfpsController implements DozeReceiver {
     @NonNull private final LatencyTracker mLatencyTracker;
     @VisibleForTesting @NonNull final BiometricDisplayListener mOrientationListener;
     @NonNull private final ActivityLaunchAnimator mActivityLaunchAnimator;
+    @NonNull private final BouncerInteractor mBouncerInteractor;
 
     // Currently the UdfpsController supports a single UDFPS sensor. If devices have multiple
     // sensors, this, in addition to a lot of the code here, will be updated.
@@ -219,7 +222,8 @@ public class UdfpsController implements DozeReceiver {
                             mUnlockedScreenOffAnimationController,
                             mUdfpsDisplayMode, requestId, reason, callback,
                             (view, event, fromUdfpsView) -> onTouch(requestId, event,
-                                    fromUdfpsView), mActivityLaunchAnimator)));
+                                    fromUdfpsView), mActivityLaunchAnimator, mFeatureFlags,
+                            mBouncerInteractor)));
         }
 
         @Override
@@ -295,6 +299,30 @@ public class UdfpsController implements DozeReceiver {
                 }
                 mOverlay.getOverlayView().setDebugMessage(message);
             });
+        }
+
+        public Rect getSensorBounds() {
+            return mOverlayParams.getSensorBounds();
+        }
+
+        /**
+         * Passes a mocked MotionEvent to OnTouch.
+         *
+         * @param event MotionEvent to simulate in onTouch
+         */
+        public void debugOnTouch(long requestId, MotionEvent event) {
+            UdfpsController.this.onTouch(requestId, event, false);
+        }
+
+        /**
+         * Debug to run onUiReady
+         */
+        public void debugOnUiReady(long requestId, int sensorId) {
+            if (UdfpsController.this.mAlternateTouchProvider != null) {
+                UdfpsController.this.mAlternateTouchProvider.onUiReady();
+            } else {
+                UdfpsController.this.mFingerprintManager.onUiReady(requestId, sensorId);
+            }
         }
     }
 
@@ -620,7 +648,8 @@ public class UdfpsController implements DozeReceiver {
             @NonNull LatencyTracker latencyTracker,
             @NonNull ActivityLaunchAnimator activityLaunchAnimator,
             @NonNull Optional<AlternateUdfpsTouchProvider> alternateTouchProvider,
-            @BiometricsBackground Executor biometricsExecutor) {
+            @BiometricsBackground Executor biometricsExecutor,
+            @NonNull BouncerInteractor bouncerInteractor) {
         mContext = context;
         mExecution = execution;
         mVibrator = vibrator;
@@ -651,6 +680,7 @@ public class UdfpsController implements DozeReceiver {
         mActivityLaunchAnimator = activityLaunchAnimator;
         mAlternateTouchProvider = alternateTouchProvider.orElse(null);
         mBiometricExecutor = biometricsExecutor;
+        mBouncerInteractor = bouncerInteractor;
 
         mOrientationListener = new BiometricDisplayListener(
                 context,

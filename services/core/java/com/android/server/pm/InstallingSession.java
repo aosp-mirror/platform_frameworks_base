@@ -572,19 +572,15 @@ class InstallingSession {
             }
             try (PackageParser2 packageParser = mPm.mInjector.getScanningPackageParser()) {
                 ApexInfo apexInfo = mPm.mApexManager.installPackage(apexes[0]);
-                if (ApexPackageInfo.ENABLE_FEATURE_SCAN_APEX) {
-                    // APEX has been handled successfully by apexd. Let's continue the install flow
-                    // so it will be scanned and registered with the system.
-                    // TODO(b/225756739): Improve atomicity of rebootless APEX install.
-                    // The newly installed APEX will not be reverted even if
-                    // processApkInstallRequests() fails. Need a way to keep info stored in apexd
-                    // and PMS in sync in the face of install failures.
-                    request.setApexInfo(apexInfo);
-                    mPm.mHandler.post(() -> processApkInstallRequests(true, requests));
-                    return;
-                } else {
-                    mPm.mApexPackageInfo.notifyPackageInstalled(apexInfo, packageParser);
-                }
+                // APEX has been handled successfully by apexd. Let's continue the install flow
+                // so it will be scanned and registered with the system.
+                // TODO(b/225756739): Improve atomicity of rebootless APEX install.
+                // The newly installed APEX will not be reverted even if
+                // processApkInstallRequests() fails. Need a way to keep info stored in apexd
+                // and PMS in sync in the face of install failures.
+                request.setApexInfo(apexInfo);
+                mPm.mHandler.post(() -> processApkInstallRequests(true, requests));
+                return;
             }
         } catch (PackageManagerException e) {
             request.setError("APEX installation failed", e);

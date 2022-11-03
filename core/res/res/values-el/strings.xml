@@ -72,6 +72,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Η αναγνώριση κλήσης βρίσκεται από προεπιλογή στην \"μη περιορισμένη\". Επόμενη κλήση: Μη περιορισμένη"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Η υπηρεσία δεν προβλέπεται."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Δεν μπορείτε να αλλάξετε τη ρύθμιση του αναγνωριστικού καλούντος."</string>
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"Έγινε εναλλαγή των δεδομένων σε <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"Μπορείτε να αλλάξετε αυτήν την επιλογή ανά πάσα στιγμή στις Ρυθμίσεις"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Δεν υπάρχει υπηρεσία δεδομένων κινητής τηλεφωνίας"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Οι κλήσεις έκτακτης ανάγκης δεν είναι διαθέσιμες"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Δεν υπάρχει φωνητική υπηρεσία"</string>

@@ -2884,6 +2884,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         fragmentSetup.accept(taskFragment1, new Rect(0, 0, width / 2, height));
         task.addChild(taskFragment1, POSITION_TOP);
         assertEquals(task, activity1.mStartingData.mAssociatedTask);
+        assertEquals(activity1.mStartingData, task.mSharedStartingData);
 
         final TaskFragment taskFragment2 = new TaskFragment(
                 mAtm, null /* fragmentToken */, false /* createdByOrganizer */);
@@ -2903,7 +2904,6 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         verify(activity1.getSyncTransaction()).reparent(eq(startingWindow.mSurfaceControl),
                 eq(task.mSurfaceControl));
-        assertEquals(activity1.mStartingData, startingWindow.mStartingData);
         assertEquals(task.mSurfaceControl, startingWindow.getAnimationLeashParent());
         assertEquals(taskFragment1.getBounds(), activity1.getBounds());
         // The activity was resized by task fragment, but starting window must still cover the task.
@@ -2914,6 +2914,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         activity1.onFirstWindowDrawn(activityWindow);
         activity2.onFirstWindowDrawn(activityWindow);
         assertNull(activity1.mStartingWindow);
+        assertNull(task.mSharedStartingData);
     }
 
     @Test
@@ -2989,10 +2990,10 @@ public class ActivityRecordTests extends WindowTestsBase {
         final WindowManager.LayoutParams attrs =
                 new WindowManager.LayoutParams(TYPE_APPLICATION_STARTING);
         final TestWindowState startingWindow = createWindowState(attrs, activity);
-        activity.startingDisplayed = true;
+        activity.mStartingData = mock(StartingData.class);
         activity.addWindow(startingWindow);
         assertTrue("Starting window should be present", activity.hasStartingWindow());
-        activity.startingDisplayed = false;
+        activity.mStartingData = null;
         assertTrue("Starting window should be present", activity.hasStartingWindow());
 
         activity.removeChild(startingWindow);

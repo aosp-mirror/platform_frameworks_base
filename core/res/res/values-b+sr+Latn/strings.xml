@@ -73,6 +73,10 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"ID pozivaoca podrazumevano nije ograničen. Sledeći poziv: Nije ograničen."</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Usluga nije dobavljena."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Ne možete da promenite podešavanje ID-a korisnika."</string>
+    <!-- no translation found for auto_data_switch_title (3286350716870518297) -->
+    <skip />
+    <!-- no translation found for auto_data_switch_content (803557715007110959) -->
+    <skip />
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Nema usluge mobilnih podataka"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Hitni pozivi nisu dostupni"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Nema glasovne usluge"</string>

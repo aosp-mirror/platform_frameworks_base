@@ -1257,7 +1257,7 @@ public final class ViewRootImpl implements ViewParent,
                     mTmpFrames.attachedFrame = attachedFrame;
                     mTmpFrames.sizeCompatScale = sizeCompatScale[0];
                     mInvSizeCompatScale = 1f / sizeCompatScale[0];
-                } catch (RemoteException e) {
+                } catch (RemoteException | RuntimeException e) {
                     mAdded = false;
                     mView = null;
                     mAttachInfo.mRootView = null;

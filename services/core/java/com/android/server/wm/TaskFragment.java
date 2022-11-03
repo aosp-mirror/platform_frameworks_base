@@ -1891,10 +1891,10 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     RemoteAnimationTarget createRemoteAnimationTarget(
             RemoteAnimationController.RemoteAnimationRecord record) {
         final ActivityRecord activity = record.getMode() == RemoteAnimationTarget.MODE_OPENING
-                // There may be a trampoline activity without window on top of the existing task
-                // which is moving to front. Exclude the finishing activity so the window of next
-                // activity can be chosen to create the animation target.
-                ? getTopNonFinishingActivity()
+                // There may be a launching (e.g. trampoline or embedded) activity without a window
+                // on top of the existing task which is moving to front. Exclude finishing activity
+                // so the window of next activity can be chosen to create the animation target.
+                ? getActivity(r -> !r.finishing && r.hasChild())
                 : getTopMostActivity();
         return activity != null ? activity.createRemoteAnimationTarget(record) : null;
     }

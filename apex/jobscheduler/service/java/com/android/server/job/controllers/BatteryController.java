@@ -133,7 +133,7 @@ public final class BatteryController extends RestrictingController {
     }
 
     @Override
-    public void maybeStopTrackingJobLocked(JobStatus taskStatus, JobStatus incomingJob, boolean forUpdate) {
+    public void maybeStopTrackingJobLocked(JobStatus taskStatus, JobStatus incomingJob) {
         if (taskStatus.clearTrackingController(JobStatus.TRACKING_BATTERY)) {
             mTrackedTasks.remove(taskStatus);
             mTopStartedJobs.remove(taskStatus);
@@ -143,7 +143,7 @@ public final class BatteryController extends RestrictingController {
     @Override
     public void stopTrackingRestrictedJobLocked(JobStatus jobStatus) {
         if (!jobStatus.hasPowerConstraint()) {
-            maybeStopTrackingJobLocked(jobStatus, null, false);
+            maybeStopTrackingJobLocked(jobStatus, null);
         }
     }
 

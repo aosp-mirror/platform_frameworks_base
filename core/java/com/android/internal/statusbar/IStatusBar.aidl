@@ -23,7 +23,7 @@ import android.graphics.Rect;
 import android.hardware.biometrics.IBiometricContextListener;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
-import android.hardware.fingerprint.IUdfpsHbmListener;
+import android.hardware.fingerprint.IUdfpsRefreshRateRequestCallback;
 import android.media.INearbyMediaDevicesProvider;
 import android.media.MediaRoute2Info;
 import android.os.Bundle;
@@ -175,9 +175,9 @@ oneway interface IStatusBar
     void setBiometicContextListener(in IBiometricContextListener listener);
 
     /**
-     * Sets an instance of IUdfpsHbmListener for UdfpsController.
+     * Sets an instance of IUdfpsRefreshRateRequestCallback for UdfpsController.
      */
-    void setUdfpsHbmListener(in IUdfpsHbmListener listener);
+    void setUdfpsRefreshRateCallback(in IUdfpsRefreshRateRequestCallback callback);
 
     /**
      * Notifies System UI that the display is ready to show system decorations.

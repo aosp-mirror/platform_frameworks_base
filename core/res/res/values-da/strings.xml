@@ -72,6 +72,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Standarder for opkalds-id til ikke begrænset. Næste opkald: Ikke begrænset"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Tjenesten provisioneres ikke."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Du kan ikke ændre indstillingen for opkalds-id\'et."</string>
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"Der blev skiftet til <xliff:g id="CARRIERDISPLAY">%s</xliff:g>-data"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"Du kan altid ændre dette under Indstillinger"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Ingen mobildatatjeneste"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Det er ikke muligt at foretage nødopkald"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Ingen taletjeneste"</string>

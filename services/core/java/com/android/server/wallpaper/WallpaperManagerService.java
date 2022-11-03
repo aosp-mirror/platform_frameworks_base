@@ -320,9 +320,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                                 IRemoteCallback.Stub callback = new IRemoteCallback.Stub() {
                                     @Override
                                     public void sendResult(Bundle data) throws RemoteException {
-                                        if (DEBUG) {
-                                            Slog.d(TAG, "publish system wallpaper changed!");
-                                        }
+                                        Slog.d(TAG, "publish system wallpaper changed!");
                                         notifyWallpaperChanged(wallpaper);
                                     }
                                 };
@@ -1551,6 +1549,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     try {
                         mReply.sendResult(null);
                     } catch (RemoteException e) {
+                        Slog.d(TAG, "failed to send callback!", e);
+                    } finally {
                         Binder.restoreCallingIdentity(ident);
                     }
                     mReply = null;

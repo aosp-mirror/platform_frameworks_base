@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Icon;
 import android.os.UserHandle;
+import android.telephony.AnomalyReporter;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
@@ -37,6 +38,7 @@ import com.android.phone.slicestore.SliceStore;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * The SliceStoreBroadcastReceiver listens for {@link SliceStore#ACTION_START_SLICE_STORE} from the
@@ -46,6 +48,12 @@ import java.util.Map;
  */
 public class SliceStoreBroadcastReceiver extends BroadcastReceiver{
     private static final String TAG = "SliceStoreBroadcastReceiver";
+
+    /**
+     * UUID to report an anomaly when receiving a PendingIntent from an application or process
+     * other than the Phone process.
+     */
+    private static final String UUID_BAD_PENDING_INTENT = "c360246e-95dc-4abf-9dc1-929a76cd7e53";
 
     /** Weak references to {@link SliceStoreActivity} for each capability, if it exists. */
     private static final Map<Integer, WeakReference<SliceStoreActivity>> sSliceStoreActivities =
@@ -102,6 +110,28 @@ public class SliceStoreBroadcastReceiver extends BroadcastReceiver{
     }
 
     /**
+     * Send the PendingIntent containing the corresponding SliceStore response with additional data.
+     *
+     * @param context The Context to use to send the PendingIntent.
+     * @param intent The Intent containing the PendingIntent extra.
+     * @param extra The extra to get the PendingIntent to send.
+     * @param data The Intent containing additional data to send with the PendingIntent.
+     */
+    public static void sendSliceStoreResponseWithData(@NonNull Context context,
+            @NonNull Intent intent, @NonNull String extra, @NonNull Intent data) {
+        PendingIntent pendingIntent = intent.getParcelableExtra(extra, PendingIntent.class);
+        if (pendingIntent == null) {
+            loge("PendingIntent does not exist for extra: " + extra);
+            return;
+        }
+        try {
+            pendingIntent.send(context, 0 /* unused */, data);
+        } catch (PendingIntent.CanceledException e) {
+            loge("Unable to send " + getPendingIntentType(extra) + " intent: " + e);
+        }
+    }
+
+    /**
      * Check whether the Intent is valid and can be used to complete purchases in the SliceStore.
      * This checks that all necessary extras exist and that the values are valid.
      *
@@ -139,7 +169,8 @@ public class SliceStoreBroadcastReceiver extends BroadcastReceiver{
         return isPendingIntentValid(intent, SliceStore.EXTRA_INTENT_CANCELED)
                 && isPendingIntentValid(intent, SliceStore.EXTRA_INTENT_CARRIER_ERROR)
                 && isPendingIntentValid(intent, SliceStore.EXTRA_INTENT_REQUEST_FAILED)
-                && isPendingIntentValid(intent, SliceStore.EXTRA_INTENT_NOT_DEFAULT_DATA);
+                && isPendingIntentValid(intent, SliceStore.EXTRA_INTENT_NOT_DEFAULT_DATA)
+                && isPendingIntentValid(intent, SliceStore.EXTRA_INTENT_SUCCESS);
     }
 
     private static boolean isPendingIntentValid(@NonNull Intent intent, @NonNull String extra) {
@@ -148,12 +179,20 @@ public class SliceStoreBroadcastReceiver extends BroadcastReceiver{
         if (pendingIntent == null) {
             loge("isPendingIntentValid: " + intentType + " intent not found.");
             return false;
-        } else if (pendingIntent.getCreatorPackage().equals(TelephonyManager.PHONE_PROCESS_NAME)) {
-            return true;
         }
-        loge("isPendingIntentValid: " + intentType + " intent was created by "
-                + pendingIntent.getCreatorPackage() + " instead of the phone process.");
-        return false;
+        String creatorPackage = pendingIntent.getCreatorPackage();
+        if (!creatorPackage.equals(TelephonyManager.PHONE_PROCESS_NAME)) {
+            String logStr = "isPendingIntentValid: " + intentType + " intent was created by "
+                    + creatorPackage + " instead of the phone process.";
+            loge(logStr);
+            AnomalyReporter.reportAnomaly(UUID.fromString(UUID_BAD_PENDING_INTENT), logStr);
+            return false;
+        }
+        if (!pendingIntent.isBroadcast()) {
+            loge("isPendingIntentValid: " + intentType + " intent is not a broadcast.");
+            return false;
+        }
+        return true;
     }
 
     @NonNull private static String getPendingIntentType(@NonNull String extra) {
@@ -162,6 +201,7 @@ public class SliceStoreBroadcastReceiver extends BroadcastReceiver{
             case SliceStore.EXTRA_INTENT_CARRIER_ERROR: return "carrier error";
             case SliceStore.EXTRA_INTENT_REQUEST_FAILED: return "request failed";
             case SliceStore.EXTRA_INTENT_NOT_DEFAULT_DATA: return "not default data";
+            case SliceStore.EXTRA_INTENT_SUCCESS: return "success";
             default: {
                 loge("Unknown pending intent extra: " + extra);
                 return "unknown(" + extra + ")";
@@ -292,7 +332,6 @@ public class SliceStoreBroadcastReceiver extends BroadcastReceiver{
             logd("Closing SliceStore WebView since the user did not complete the purchase "
                     + "in time.");
             sSliceStoreActivities.get(capability).get().finishAndRemoveTask();
-            // TODO: Display a toast to indicate timeout for better UX?
         }
     }
 

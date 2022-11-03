@@ -114,6 +114,8 @@ import com.android.systemui.util.Assert;
 import com.android.systemui.util.DumpUtilsKt;
 import com.android.systemui.util.LargeScreenUtils;
 
+import com.google.errorprone.annotations.CompileTimeConstant;
+
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.util.ArrayList;
@@ -1383,7 +1385,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             if (height < minExpansionHeight) {
                 mClipRect.left = 0;
                 mClipRect.right = getWidth();
-                mClipRect.top = 0;
+                mClipRect.top = getNotificationsClippingTopBound();
                 mClipRect.bottom = (int) height;
                 height = minExpansionHeight;
                 setRequestedClipBounds(mClipRect);
@@ -1444,6 +1446,17 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         notifyAppearChangedListeners();
     }
 
+    private int getNotificationsClippingTopBound() {
+        if (isHeadsUpTransition()) {
+            // HUN in split shade can go higher than bottom of NSSL when swiping up so we want
+            // to give it extra clipping margin. Because clipping has rounded corners, we also
+            // need to account for that corner clipping.
+            return -mAmbientState.getStackTopMargin() - mCornerRadius;
+        } else {
+            return 0;
+        }
+    }
+
     private void notifyAppearChangedListeners() {
         float appear;
         float expandAmount;
@@ -1482,7 +1495,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     public void updateClipping() {
         boolean clipped = mRequestedClipBounds != null && !mInHeadsUpPinnedMode
                 && !mHeadsUpAnimatingAway;
-        boolean clipToOutline = false;
         if (mIsClipped != clipped) {
             mIsClipped = clipped;
         }
@@ -1498,7 +1510,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             setClipBounds(null);
         }
 
-        setClipToOutline(clipToOutline);
+        setClipToOutline(false);
     }
 
     /**
@@ -3683,6 +3695,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     @ShadeViewRefactor(RefactorComponent.INPUT)
     void handleEmptySpaceClick(MotionEvent ev) {
+        logEmptySpaceClick(ev, isBelowLastNotification(mInitialTouchX, mInitialTouchY),
+                mStatusBarState, mTouchIsClick);
         switch (ev.getActionMasked()) {
             case MotionEvent.ACTION_MOVE:
                 final float touchSlop = getTouchSlop(ev);
@@ -3694,10 +3708,32 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             case MotionEvent.ACTION_UP:
                 if (mStatusBarState != StatusBarState.KEYGUARD && mTouchIsClick &&
                         isBelowLastNotification(mInitialTouchX, mInitialTouchY)) {
+                    debugLog("handleEmptySpaceClick: touch event propagated further");
                     mOnEmptySpaceClickListener.onEmptySpaceClicked(mInitialTouchX, mInitialTouchY);
                 }
                 break;
+            default:
+                debugLog("handleEmptySpaceClick: MotionEvent ignored");
         }
+    }
+
+    private void debugLog(@CompileTimeConstant String s) {
+        if (mLogger == null) {
+            return;
+        }
+        mLogger.d(s);
+    }
+
+    private void logEmptySpaceClick(MotionEvent ev, boolean isTouchBelowLastNotification,
+            int statusBarState, boolean touchIsClick) {
+        if (mLogger == null) {
+            return;
+        }
+        mLogger.logEmptySpaceClick(
+                isTouchBelowLastNotification,
+                statusBarState,
+                touchIsClick,
+                MotionEvent.actionToString(ev.getActionMasked()));
     }
 
     @ShadeViewRefactor(RefactorComponent.INPUT)

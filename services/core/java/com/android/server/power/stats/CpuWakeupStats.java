@@ -384,7 +384,7 @@ public class CpuWakeupStats {
     private static final class Wakeup {
         private static final String PARSER_TAG = "CpuWakeupStats.Wakeup";
         private static final String ABORT_REASON_PREFIX = "Abort";
-        private static final Pattern sIrqPattern = Pattern.compile("(\\d+)\\s+(\\S+)");
+        private static final Pattern sIrqPattern = Pattern.compile("^(\\d+)\\s+(\\S+)");
 
         String mRawReason;
         long mElapsedMillis;
@@ -409,7 +409,7 @@ public class CpuWakeupStats {
             IrqDevice[] parsedDevices = new IrqDevice[components.length];
 
             for (String component : components) {
-                final Matcher matcher = sIrqPattern.matcher(component);
+                final Matcher matcher = sIrqPattern.matcher(component.trim());
                 if (matcher.find()) {
                     final int line;
                     final String device;

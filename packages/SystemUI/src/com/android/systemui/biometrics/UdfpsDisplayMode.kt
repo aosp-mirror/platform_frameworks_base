@@ -46,7 +46,7 @@ constructor(
             logger.e(TAG, "enable | already requested")
             return
         }
-        if (authController.udfpsHbmListener == null) {
+        if (authController.udfpsRefreshRateCallback == null) {
             logger.e(TAG, "enable | mDisplayManagerCallback is null")
             return
         }
@@ -60,7 +60,7 @@ constructor(
         try {
             // This method is a misnomer. It has nothing to do with HBM, its purpose is to set
             // the appropriate display refresh rate.
-            authController.udfpsHbmListener!!.onHbmEnabled(request.displayId)
+            authController.udfpsRefreshRateCallback!!.onRequestEnabled(request.displayId)
             logger.v(TAG, "enable | requested optimal refresh rate for UDFPS")
         } catch (e: RemoteException) {
             logger.e(TAG, "enable", e)
@@ -84,7 +84,7 @@ constructor(
 
         try {
             // Allow DisplayManager to unset the UDFPS refresh rate.
-            authController.udfpsHbmListener!!.onHbmDisabled(request.displayId)
+            authController.udfpsRefreshRateCallback!!.onRequestDisabled(request.displayId)
             logger.v(TAG, "disable | removed the UDFPS refresh rate request")
         } catch (e: RemoteException) {
             logger.e(TAG, "disable", e)

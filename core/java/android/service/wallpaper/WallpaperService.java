@@ -575,6 +575,7 @@ public abstract class WallpaperService extends Service {
          */
         public void reportEngineShown(boolean waitForEngineShown) {
             if (mIWallpaperEngine.mShownReported) return;
+            Log.d(TAG, "reportEngineShown: shouldWait=" + waitForEngineShown);
             if (!waitForEngineShown) {
                 Message message = mCaller.obtainMessage(MSG_REPORT_SHOWN);
                 mCaller.removeMessages(MSG_REPORT_SHOWN);

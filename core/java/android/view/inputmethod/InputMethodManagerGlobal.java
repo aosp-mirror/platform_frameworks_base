@@ -16,6 +16,7 @@
 
 package android.view.inputmethod;
 
+import android.Manifest;
 import android.annotation.AnyThread;
 import android.annotation.Nullable;
 import android.annotation.RequiresNoPermission;
@@ -51,8 +52,8 @@ public class InputMethodManagerGlobal {
      * @param where where the information is coming from.
      * @param exceptionHandler an optional {@link RemoteException} handler.
      */
-    @RequiresNoPermission
     @AnyThread
+    @RequiresNoPermission
     public static void startProtoDump(byte[] protoDump, int source, String where,
             @Nullable Consumer<RemoteException> exceptionHandler) {
         IInputMethodManagerGlobalInvoker.startProtoDump(protoDump, source, where, exceptionHandler);
@@ -63,8 +64,8 @@ public class InputMethodManagerGlobal {
      *
      * @param exceptionHandler an optional {@link RemoteException} handler.
      */
-    @RequiresPermission(android.Manifest.permission.CONTROL_UI_TRACING)
     @AnyThread
+    @RequiresPermission(Manifest.permission.CONTROL_UI_TRACING)
     public static void startImeTrace(@Nullable Consumer<RemoteException> exceptionHandler) {
         IInputMethodManagerGlobalInvoker.startImeTrace(exceptionHandler);
     }
@@ -74,8 +75,8 @@ public class InputMethodManagerGlobal {
      *
      * @param exceptionHandler an optional {@link RemoteException} handler.
      */
-    @RequiresPermission(android.Manifest.permission.CONTROL_UI_TRACING)
     @AnyThread
+    @RequiresPermission(Manifest.permission.CONTROL_UI_TRACING)
     public static void stopImeTrace(@Nullable Consumer<RemoteException> exceptionHandler) {
         IInputMethodManagerGlobalInvoker.stopImeTrace(exceptionHandler);
     }
@@ -85,8 +86,8 @@ public class InputMethodManagerGlobal {
      *
      * @return The return value of {@link IInputMethodManager#isImeTraceEnabled()}.
      */
-    @RequiresNoPermission
     @AnyThread
+    @RequiresNoPermission
     public static boolean isImeTraceEnabled() {
         return IInputMethodManagerGlobalInvoker.isImeTraceEnabled();
     }
@@ -96,8 +97,8 @@ public class InputMethodManagerGlobal {
      *
      * @param exceptionHandler an optional {@link RemoteException} handler.
      */
-    @RequiresPermission(android.Manifest.permission.INTERNAL_SYSTEM_WINDOW)
     @AnyThread
+    @RequiresPermission(Manifest.permission.INTERNAL_SYSTEM_WINDOW)
     public static void removeImeSurface(@Nullable Consumer<RemoteException> exceptionHandler) {
         IInputMethodManagerGlobalInvoker.removeImeSurface(exceptionHandler);
     }

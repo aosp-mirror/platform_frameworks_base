@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.content.om.OverlayIdentifier;
 import android.content.om.OverlayInfo;
+import android.content.pm.UserPackage;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -54,7 +55,7 @@ public class OverlayManagerServiceImplRebootTests extends OverlayManagerServiceI
         addPackage(target(otherTarget), USER);
         addPackage(overlay(OVERLAY, TARGET), USER);
 
-        final Set<PackageAndUser> allPackages = Set.of(new PackageAndUser(TARGET, USER));
+        final Set<UserPackage> allPackages = Set.of(UserPackage.of(USER, TARGET));
 
         // The result should be the same for every time
         assertThat(impl.updateOverlaysForUser(USER)).isEqualTo(allPackages);
@@ -67,7 +68,7 @@ public class OverlayManagerServiceImplRebootTests extends OverlayManagerServiceI
         addPackage(target(TARGET), USER);
         addPackage(overlay(OVERLAY, TARGET), USER);
 
-        final Set<PackageAndUser> allPackages = Set.of(new PackageAndUser(TARGET, USER));
+        final Set<UserPackage> allPackages = Set.of(UserPackage.of(USER, TARGET));
 
         configureSystemOverlay(OVERLAY, ConfigState.IMMUTABLE_DISABLED, 0 /* priority */);
         expect.that(impl.updateOverlaysForUser(USER)).isEqualTo(allPackages);
@@ -101,7 +102,7 @@ public class OverlayManagerServiceImplRebootTests extends OverlayManagerServiceI
         addPackage(overlay(OVERLAY, TARGET), USER);
         configureSystemOverlay(OVERLAY, ConfigState.MUTABLE_DISABLED, 0 /* priority */);
 
-        final Set<PackageAndUser> allPackages = Set.of(new PackageAndUser(TARGET, USER));
+        final Set<UserPackage> allPackages = Set.of(UserPackage.of(USER, TARGET));
 
         expect.that(impl.updateOverlaysForUser(USER)).isEqualTo(allPackages);
         final OverlayInfo o1 = impl.getOverlayInfo(IDENTIFIER, USER);
@@ -133,7 +134,7 @@ public class OverlayManagerServiceImplRebootTests extends OverlayManagerServiceI
         addPackage(target(TARGET), USER);
         addPackage(overlay(OVERLAY, TARGET), USER);
 
-        final Set<PackageAndUser> allPackages = Set.of(new PackageAndUser(TARGET, USER));
+        final Set<UserPackage> allPackages = Set.of(UserPackage.of(USER, TARGET));
 
         final Consumer<ConfigState> setOverlay = (state -> {
             configureSystemOverlay(OVERLAY, state, 0 /* priority */);
@@ -185,7 +186,7 @@ public class OverlayManagerServiceImplRebootTests extends OverlayManagerServiceI
         configureSystemOverlay(OVERLAY, ConfigState.MUTABLE_DISABLED, 0 /* priority */);
         configureSystemOverlay(OVERLAY2, ConfigState.MUTABLE_DISABLED, 1 /* priority */);
 
-        final Set<PackageAndUser> allPackages = Set.of(new PackageAndUser(TARGET, USER));
+        final Set<UserPackage> allPackages = Set.of(UserPackage.of(USER, TARGET));
 
         expect.that(impl.updateOverlaysForUser(USER)).isEqualTo(allPackages);
         final OverlayInfo o1 = impl.getOverlayInfo(IDENTIFIER, USER);
@@ -230,7 +231,7 @@ public class OverlayManagerServiceImplRebootTests extends OverlayManagerServiceI
         configureSystemOverlay(OVERLAY, ConfigState.IMMUTABLE_ENABLED, 0 /* priority */);
         configureSystemOverlay(OVERLAY2, ConfigState.IMMUTABLE_ENABLED, 1 /* priority */);
 
-        final Set<PackageAndUser> allPackages = Set.of(new PackageAndUser(TARGET, USER));
+        final Set<UserPackage> allPackages = Set.of(UserPackage.of(USER, TARGET));
 
         expect.that(impl.updateOverlaysForUser(USER)).isEqualTo(allPackages);
         final OverlayInfo o1 = impl.getOverlayInfo(IDENTIFIER, USER);

@@ -57,7 +57,7 @@ import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.DisplayManagerInternal.RefreshRateLimitation;
-import android.hardware.fingerprint.IUdfpsHbmListener;
+import android.hardware.fingerprint.IUdfpsRefreshRateRequestCallback;
 import android.os.Handler;
 import android.os.IThermalEventListener;
 import android.os.IThermalService;
@@ -1081,10 +1081,10 @@ public class DisplayModeDirectorTest {
     public void testUdfpsListenerGetsRegistered() {
         DisplayModeDirector director =
                 createDirectorFromRefreshRateArray(new float[] {60.f, 90.f, 110.f}, 0);
-        verify(mStatusBarMock, never()).setUdfpsHbmListener(any());
+        verify(mStatusBarMock, never()).setUdfpsRefreshRateCallback(any());
 
         director.onBootCompleted();
-        verify(mStatusBarMock).setUdfpsHbmListener(eq(director.getUdpfsObserver()));
+        verify(mStatusBarMock).setUdfpsRefreshRateCallback(eq(director.getUdpfsObserver()));
     }
 
     @Test
@@ -1093,10 +1093,9 @@ public class DisplayModeDirectorTest {
                 createDirectorFromRefreshRateArray(new float[] {60.f, 90.f, 110.f}, 0);
         director.start(createMockSensorManager());
         director.onBootCompleted();
-        ArgumentCaptor<IUdfpsHbmListener> captor =
-                ArgumentCaptor.forClass(IUdfpsHbmListener.class);
-        verify(mStatusBarMock).setUdfpsHbmListener(captor.capture());
-        IUdfpsHbmListener hbmListener = captor.getValue();
+        ArgumentCaptor<IUdfpsRefreshRateRequestCallback> captor =
+                ArgumentCaptor.forClass(IUdfpsRefreshRateRequestCallback.class);
+        verify(mStatusBarMock).setUdfpsRefreshRateCallback(captor.capture());
 
         // Should be no vote initially
         Vote vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_UDFPS);

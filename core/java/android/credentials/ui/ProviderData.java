@@ -16,232 +16,62 @@
 
 package android.credentials.ui;
 
-import android.annotation.CurrentTimeMillisLong;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
-import android.graphics.drawable.Icon;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.android.internal.util.AnnotationValidations;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
- * Holds metadata and credential entries for a single provider.
+ * Super class for data structures that hold metadata and credential entries for a single provider.
  *
  * @hide
  */
-public class ProviderData implements Parcelable {
+public abstract class ProviderData implements Parcelable {
 
     /**
-     * The intent extra key for the list of {@code ProviderData} when launching the UX
-     * activities.
+     * The intent extra key for the list of {@code ProviderData} from active providers when
+     * launching the UX activities.
      */
-    public static final String EXTRA_PROVIDER_DATA_LIST =
-            "android.credentials.ui.extra.PROVIDER_DATA_LIST";
+    public static final String EXTRA_ENABLED_PROVIDER_DATA_LIST =
+            "android.credentials.ui.extra.ENABLED_PROVIDER_DATA_LIST";
+    /**
+     * The intent extra key for the list of {@code ProviderData} from disabled providers when
+     * launching the UX activities.
+     */
+    public static final String EXTRA_DISABLED_PROVIDER_DATA_LIST =
+            "android.credentials.ui.extra.DISABLED_PROVIDER_DATA_LIST";
 
     @NonNull
     private final String mProviderFlattenedComponentName;
-    @NonNull
-    private final String mProviderDisplayName;
-    @Nullable
-    private final Icon mIcon;
-    @NonNull
-    private final List<Entry> mCredentialEntries;
-    @NonNull
-    private final List<Entry> mActionChips;
-    @Nullable
-    private final Entry mAuthenticationEntry;
-
-    private final @CurrentTimeMillisLong long mLastUsedTimeMillis;
 
     public ProviderData(
-            @NonNull String providerFlattenedComponentName, @NonNull String providerDisplayName,
-            @Nullable Icon icon, @NonNull List<Entry> credentialEntries,
-            @NonNull List<Entry> actionChips, @Nullable Entry authenticationEntry,
-            @CurrentTimeMillisLong long lastUsedTimeMillis) {
+            @NonNull String providerFlattenedComponentName) {
         mProviderFlattenedComponentName = providerFlattenedComponentName;
-        mProviderDisplayName = providerDisplayName;
-        mIcon = icon;
-        mCredentialEntries = credentialEntries;
-        mActionChips = actionChips;
-        mAuthenticationEntry = authenticationEntry;
-        mLastUsedTimeMillis = lastUsedTimeMillis;
     }
 
-    /** Returns the unique provider id. */
+    /**
+     * Returns provider component name.
+     * It also serves as the unique identifier for this provider.
+     */
     @NonNull
     public String getProviderFlattenedComponentName() {
         return mProviderFlattenedComponentName;
-    }
-
-    @NonNull
-    public String getProviderDisplayName() {
-        return mProviderDisplayName;
-    }
-
-    @Nullable
-    public Icon getIcon() {
-        return mIcon;
-    }
-
-    @NonNull
-    public List<Entry> getCredentialEntries() {
-        return mCredentialEntries;
-    }
-
-    @NonNull
-    public List<Entry> getActionChips() {
-        return mActionChips;
-    }
-
-    @Nullable
-    public Entry getAuthenticationEntry() {
-        return mAuthenticationEntry;
-    }
-
-    /** Returns the time when the provider was last used. */
-    public @CurrentTimeMillisLong long getLastUsedTimeMillis() {
-        return mLastUsedTimeMillis;
     }
 
     protected ProviderData(@NonNull Parcel in) {
         String providerFlattenedComponentName = in.readString8();
         mProviderFlattenedComponentName = providerFlattenedComponentName;
         AnnotationValidations.validate(NonNull.class, null, mProviderFlattenedComponentName);
-
-        String providerDisplayName = in.readString8();
-        mProviderDisplayName = providerDisplayName;
-        AnnotationValidations.validate(NonNull.class, null, mProviderDisplayName);
-
-        Icon icon = in.readTypedObject(Icon.CREATOR);
-        mIcon = icon;
-
-        List<Entry> credentialEntries = new ArrayList<>();
-        in.readTypedList(credentialEntries, Entry.CREATOR);
-        mCredentialEntries = credentialEntries;
-        AnnotationValidations.validate(NonNull.class, null, mCredentialEntries);
-
-        List<Entry> actionChips  = new ArrayList<>();
-        in.readTypedList(actionChips, Entry.CREATOR);
-        mActionChips = actionChips;
-        AnnotationValidations.validate(NonNull.class, null, mActionChips);
-
-        Entry authenticationEntry = in.readTypedObject(Entry.CREATOR);
-        mAuthenticationEntry = authenticationEntry;
-
-        long lastUsedTimeMillis = in.readLong();
-        mLastUsedTimeMillis = lastUsedTimeMillis;
     }
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString8(mProviderFlattenedComponentName);
-        dest.writeString8(mProviderDisplayName);
-        dest.writeTypedObject(mIcon, flags);
-        dest.writeTypedList(mCredentialEntries);
-        dest.writeTypedList(mActionChips);
-        dest.writeTypedObject(mAuthenticationEntry, flags);
-        dest.writeLong(mLastUsedTimeMillis);
     }
 
     @Override
     public int describeContents() {
         return 0;
-    }
-
-    public static final @NonNull Creator<ProviderData> CREATOR = new Creator<ProviderData>() {
-        @Override
-        public ProviderData createFromParcel(@NonNull Parcel in) {
-            return new ProviderData(in);
-        }
-
-        @Override
-        public ProviderData[] newArray(int size) {
-            return new ProviderData[size];
-        }
-    };
-
-    /**
-     * Builder for {@link ProviderData}.
-     *
-     * @hide
-     */
-    public static class Builder {
-        private @NonNull String mProviderFlattenedComponentName;
-        private @NonNull String mProviderDisplayName;
-        private @Nullable Icon mIcon;
-        private @NonNull List<Entry> mCredentialEntries = new ArrayList<>();
-        private @NonNull List<Entry> mActionChips = new ArrayList<>();
-        private @Nullable Entry mAuthenticationEntry = null;
-        private @CurrentTimeMillisLong long mLastUsedTimeMillis = 0L;
-
-        /** Constructor with required properties. */
-        public Builder(@NonNull String providerFlattenedComponentName,
-                @NonNull String providerDisplayName,
-                @Nullable Icon icon) {
-            mProviderFlattenedComponentName = providerFlattenedComponentName;
-            mProviderDisplayName = providerDisplayName;
-            mIcon = icon;
-        }
-
-        /** Sets the unique provider id. */
-        @NonNull
-        public Builder setProviderFlattenedComponentName(@NonNull String providerFlattenedComponentName) {
-            mProviderFlattenedComponentName = providerFlattenedComponentName;
-            return this;
-        }
-
-        /** Sets the provider display name to be displayed to the user. */
-        @NonNull
-        public Builder setProviderDisplayName(@NonNull String providerDisplayName) {
-            mProviderDisplayName = providerDisplayName;
-            return this;
-        }
-
-        /** Sets the provider icon to be displayed to the user. */
-        @NonNull
-        public Builder setIcon(@NonNull Icon icon) {
-            mIcon = icon;
-            return this;
-        }
-
-        /** Sets the list of save / get credential entries to be displayed to the user. */
-        @NonNull
-        public Builder setCredentialEntries(@NonNull List<Entry> credentialEntries) {
-            mCredentialEntries = credentialEntries;
-            return this;
-        }
-
-        /** Sets the list of action chips to be displayed to the user. */
-        @NonNull
-        public Builder setActionChips(@NonNull List<Entry> actionChips) {
-            mActionChips = actionChips;
-            return this;
-        }
-
-        /** Sets the authentication entry to be displayed to the user. */
-        @NonNull
-        public Builder setAuthenticationEntry(@Nullable Entry authenticationEntry) {
-            mAuthenticationEntry = authenticationEntry;
-            return this;
-        }
-
-        /** Sets the time when the provider was last used. */
-        @NonNull
-        public Builder setLastUsedTimeMillis(@CurrentTimeMillisLong long lastUsedTimeMillis) {
-            mLastUsedTimeMillis = lastUsedTimeMillis;
-            return this;
-        }
-
-        /** Builds a {@link ProviderData}. */
-        @NonNull
-        public ProviderData build() {
-            return new ProviderData(mProviderFlattenedComponentName, mProviderDisplayName,
-                    mIcon, mCredentialEntries,
-                mActionChips, mAuthenticationEntry, mLastUsedTimeMillis);
-        }
     }
 }

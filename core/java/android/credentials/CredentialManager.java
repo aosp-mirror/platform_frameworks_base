@@ -62,10 +62,10 @@ public final class CredentialManager {
      * <p>The execution can potentially launch UI flows to collect user consent to using a
      * credential, display a picker when multiple credentials exist, etc.
      *
-     * @param request the request specifying type(s) of credentials to get from the user.
-     * @param cancellationSignal an optional signal that allows for cancelling this call.
-     * @param executor the callback will take place on this {@link Executor}.
-     * @param callback the callback invoked when the request succeeds or fails.
+     * @param request the request specifying type(s) of credentials to get from the user
+     * @param cancellationSignal an optional signal that allows for cancelling this call
+     * @param executor the callback will take place on this {@link Executor}
+     * @param callback the callback invoked when the request succeeds or fails
      */
     public void executeGetCredential(
             @NonNull GetCredentialRequest request,
@@ -101,10 +101,10 @@ public final class CredentialManager {
      * <p>The execution can potentially launch UI flows to collect user consent to creating
      * or storing the new credential, etc.
      *
-     * @param request the request specifying type(s) of credentials to get from the user.
-     * @param cancellationSignal an optional signal that allows for cancelling this call.
-     * @param executor the callback will take place on this {@link Executor}.
-     * @param callback the callback invoked when the request succeeds or fails.
+     * @param request the request specifying type(s) of credentials to get from the user
+     * @param cancellationSignal an optional signal that allows for cancelling this call
+     * @param executor the callback will take place on this {@link Executor}
+     * @param callback the callback invoked when the request succeeds or fails
      */
     public void executeCreateCredential(
             @NonNull CreateCredentialRequest request,
@@ -125,6 +125,44 @@ public final class CredentialManager {
         try {
             cancelRemote = mService.executeCreateCredential(request,
                     new CreateCredentialTransport(executor, callback),
+                    mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+
+        if (cancellationSignal != null && cancelRemote != null) {
+            cancellationSignal.setRemote(cancelRemote);
+        }
+    }
+
+    /**
+     * Clears the current user credential session from all credential providers.
+     *
+     * <p>Usually invoked after your user signs out of your app so that they will not be
+     * automatically signed in the next time.
+     *
+     * @param cancellationSignal an optional signal that allows for cancelling this call
+     * @param executor the callback will take place on this {@link Executor}
+     * @param callback the callback invoked when the request succeeds or fails
+     *
+     * @hide
+     */
+    public void clearCredentialSession(
+            @Nullable CancellationSignal cancellationSignal,
+            @CallbackExecutor @NonNull Executor executor,
+            @NonNull OutcomeReceiver<Void, CredentialManagerException> callback) {
+        requireNonNull(executor, "executor must not be null");
+        requireNonNull(callback, "callback must not be null");
+
+        if (cancellationSignal != null && cancellationSignal.isCanceled()) {
+            Log.w(TAG, "executeCreateCredential already canceled");
+            return;
+        }
+
+        ICancellationSignal cancelRemote = null;
+        try {
+            cancelRemote = mService.clearCredentialSession(
+                    new ClearCredentialSessionTransport(executor, callback),
                     mContext.getOpPackageName());
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
@@ -176,6 +214,31 @@ public final class CredentialManager {
         @Override
         public void onResponse(CreateCredentialResponse response) {
             mExecutor.execute(() -> mCallback.onResult(response));
+        }
+
+        @Override
+        public void onError(int errorCode, String message) {
+            mExecutor.execute(
+                    () -> mCallback.onError(new CredentialManagerException(errorCode, message)));
+        }
+    }
+
+    private static class ClearCredentialSessionTransport
+            extends IClearCredentialSessionCallback.Stub {
+        // TODO: listen for cancellation to release callback.
+
+        private final Executor mExecutor;
+        private final OutcomeReceiver<Void, CredentialManagerException> mCallback;
+
+        private ClearCredentialSessionTransport(Executor executor,
+                OutcomeReceiver<Void, CredentialManagerException> callback) {
+            mExecutor = executor;
+            mCallback = callback;
+        }
+
+        @Override
+        public void onSuccess() {
+            mCallback.onResult(null);
         }
 
         @Override

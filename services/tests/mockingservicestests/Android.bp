@@ -78,6 +78,12 @@ android_test {
         "servicestests-core-utils",
     ],
 
+    java_resources: [
+        ":apex.test",
+        ":test.rebootless_apex_v1",
+        ":test.rebootless_apex_v2",
+    ],
+
     jni_libs: [
         "libpsi",
     ],

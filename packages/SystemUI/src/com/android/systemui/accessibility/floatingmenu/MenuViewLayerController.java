@@ -74,7 +74,8 @@ class MenuViewLayerController implements IAccessibilityFloatingMenu {
         params.receiveInsetsIgnoringZOrder = true;
         params.privateFlags |= PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_MAGNIFICATION;
         params.windowAnimations = android.R.style.Animation_Translucent;
-        params.setFitInsetsTypes(WindowInsets.Type.navigationBars());
+        params.setFitInsetsTypes(
+                WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
         return params;
     }
 }

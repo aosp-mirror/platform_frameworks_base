@@ -227,6 +227,12 @@ public abstract class ActivityManagerInternal {
     public abstract boolean isModernQueueEnabled();
 
     /**
+     * Enforce capability restrictions on use of the given BroadcastOptions
+     */
+    public abstract void enforceBroadcastOptionsPermissions(@Nullable Bundle options,
+            int callingUid);
+
+    /**
      * Returns package name given pid.
      *
      * @param pid The pid we are searching package name for.
@@ -300,7 +306,7 @@ public abstract class ActivityManagerInternal {
     public abstract int handleIncomingUser(int callingPid, int callingUid, @UserIdInt int userId,
             boolean allowAll, int allowMode, String name, String callerPackage);
 
-    /** Checks if the calling binder pid as the permission. */
+    /** Checks if the calling binder pid/uid has the given permission. */
     @PermissionMethod
     public abstract void enforceCallingPermission(@PermissionName String permission, String func);
 

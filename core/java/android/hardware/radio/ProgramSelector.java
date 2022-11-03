@@ -533,7 +533,6 @@ public final class ProgramSelector implements Parcelable {
         mProgramType = in.readInt();
         mPrimaryId = in.readTypedObject(Identifier.CREATOR);
         mSecondaryIds = in.createTypedArray(Identifier.CREATOR);
-        Arrays.sort(mSecondaryIds);
         if (Stream.of(mSecondaryIds).anyMatch(id -> id == null)) {
             throw new IllegalArgumentException("secondaryIds list must not contain nulls");
         }

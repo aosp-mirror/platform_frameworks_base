@@ -21,7 +21,6 @@ import android.annotation.SuppressLint;
 import android.graphics.PointF;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.text.TextUtils;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -52,7 +51,8 @@ public final class InsertGesture extends HandwritingGesture implements Parcelabl
         mPoint = source.readTypedObject(PointF.CREATOR);
     }
 
-    /** Returns the text that will be inserted at {@link #getInsertionPoint()} **/
+    /** Returns the text that will be inserted at {@link #getInsertionPoint()}. When text is
+     * empty, cursor should be moved the insertion point. **/
     @NonNull
     public String getTextToInsert() {
         return mTextToInsert;
@@ -75,7 +75,11 @@ public final class InsertGesture extends HandwritingGesture implements Parcelabl
         private PointF mPoint;
         private String mFallbackText;
 
-        /** set the text that will be inserted at {@link #setInsertionPoint(PointF)} **/
+        /**
+         * Set the text that will be inserted at {@link #setInsertionPoint(PointF)}. When set with
+         * an empty string, cursor will be moved to {@link #getInsertionPoint()} and no text
+         * would be inserted.
+         */
         @NonNull
         @SuppressLint("MissingGetterMatchingBuilder")
         public Builder setTextToInsert(@NonNull String text) {
@@ -114,8 +118,8 @@ public final class InsertGesture extends HandwritingGesture implements Parcelabl
             if (mPoint == null) {
                 throw new IllegalArgumentException("Insertion point must be set.");
             }
-            if (TextUtils.isEmpty(mText)) {
-                throw new IllegalArgumentException("Text to insert must be non-empty.");
+            if (mText == null) {
+                throw new IllegalArgumentException("Text to insert must be set.");
             }
             return new InsertGesture(mText, mPoint, mFallbackText);
         }

@@ -61,14 +61,15 @@ object UserSwitcherViewBinder {
         falsingCollector: FalsingCollector,
         onFinish: () -> Unit,
     ) {
-        val rootView: UserSwitcherRootView = view.requireViewById(R.id.user_switcher_root)
-        val flowWidget: FlowWidget = view.requireViewById(R.id.flow)
+        val gridContainerView: UserSwitcherRootView =
+            view.requireViewById(R.id.user_switcher_grid_container)
+        val flowWidget: FlowWidget = gridContainerView.requireViewById(R.id.flow)
         val addButton: View = view.requireViewById(R.id.add)
         val cancelButton: View = view.requireViewById(R.id.cancel)
         val popupMenuAdapter = MenuAdapter(layoutInflater)
         var popupMenu: UserSwitcherPopupMenu? = null
 
-        rootView.touchHandler =
+        gridContainerView.touchHandler =
             object : Gefingerpoken {
                 override fun onTouchEvent(ev: MotionEvent?): Boolean {
                     falsingCollector.onTouchEvent(ev)
@@ -134,7 +135,7 @@ object UserSwitcherViewBinder {
                         val viewPool =
                             view.children.filter { it.tag == USER_VIEW_TAG }.toMutableList()
                         viewPool.forEach {
-                            view.removeView(it)
+                            gridContainerView.removeView(it)
                             flowWidget.removeView(it)
                         }
                         users.forEach { userViewModel ->
@@ -152,7 +153,7 @@ object UserSwitcherViewBinder {
                                     inflatedView
                                 }
                             userView.id = View.generateViewId()
-                            view.addView(userView)
+                            gridContainerView.addView(userView)
                             flowWidget.addView(userView)
                             UserViewBinder.bind(
                                 view = userView,

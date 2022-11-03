@@ -26,7 +26,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.text.SimpleDateFormat;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -79,18 +81,32 @@ public class EventLogger {
         enqueue(event.printLog(logType, tag));
     }
 
+    /** Dumps events into the given {@link DumpSink}. */
+    public synchronized void dump(DumpSink dumpSink) {
+        dumpSink.sink(mTag, new ArrayList<>(mEvents));
+    }
+
     /** Dumps events using {@link PrintWriter}. */
     public synchronized void dump(PrintWriter pw) {
         dump(pw, "" /* prefix */);
     }
 
     /** Dumps events using {@link PrintWriter} with a certain indent. */
-    public synchronized void dump(PrintWriter pw, String prefix) {
-        pw.println(prefix + "Events log: " + mTag);
-        String indent = prefix + "  ";
+    public synchronized void dump(PrintWriter pw, String indent) {
+        pw.println(indent + "Events log: " + mTag);
+
+        String childrenIndention = indent + "  ";
         for (Event evt : mEvents) {
-            pw.println(indent + evt.toString());
+            pw.println(childrenIndention + evt.toString());
         }
+    }
+
+    /** Receives events from {@link EventLogger} upon a {@link #dump(DumpSink)} call. **/
+    public interface DumpSink {
+
+        /** Processes given events into some pipeline with a given tag. **/
+        void sink(String tag, List<Event> events);
+
     }
 
     public abstract static class Event {

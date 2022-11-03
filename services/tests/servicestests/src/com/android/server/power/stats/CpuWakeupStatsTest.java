@@ -44,7 +44,9 @@ import java.util.concurrent.ThreadLocalRandom;
 public class CpuWakeupStatsTest {
     private static final String KERNEL_REASON_ALARM_IRQ = "120 test.alarm.device";
     private static final String KERNEL_REASON_UNKNOWN_IRQ = "140 test.unknown.device";
-    private static final String KERNEL_REASON_UNKNOWN = "unsupported-free-form-reason";
+    private static final String KERNEL_REASON_UNKNOWN = "free-form-reason test.alarm.device";
+    private static final String KERNEL_REASON_UNSUPPORTED = "-1 test.alarm.device";
+    private static final String KERNEL_REASON_ABORT = "Abort: due to test.alarm.device";
 
     private static final int TEST_UID_1 = 13239823;
     private static final int TEST_UID_2 = 25268423;
@@ -57,6 +59,7 @@ public class CpuWakeupStatsTest {
 
     @Test
     public void removesOldWakeups() {
+        // The xml resource doesn't matter for this test.
         final CpuWakeupStats obj = new CpuWakeupStats(sContext, R.xml.irq_device_map_1);
 
         final Set<Long> timestamps = new HashSet<>();
@@ -165,9 +168,34 @@ public class CpuWakeupStatsTest {
 
         obj.noteWakeupTimeAndReason(wakeupTime, 34, KERNEL_REASON_UNKNOWN);
 
-        // Unrelated subsystems, should be ignored.
+        // Should be ignored as this type of wakeup is unsupported.
         obj.noteWakingActivity(CPU_WAKEUP_SUBSYSTEM_ALARM, wakeupTime + 5, TEST_UID_3);
         obj.noteWakingActivity(CPU_WAKEUP_SUBSYSTEM_ALARM, wakeupTime - 3, TEST_UID_4);
+
+        // There should be nothing in the attribution map.
+        assertThat(obj.mWakeupAttribution.size()).isEqualTo(0);
+    }
+
+    @Test
+    public void unsupportedAttribution() {
+        final CpuWakeupStats obj = new CpuWakeupStats(sContext, R.xml.irq_device_map_3);
+
+        long wakeupTime = 970934;
+        obj.noteWakeupTimeAndReason(wakeupTime, 34, KERNEL_REASON_UNSUPPORTED);
+
+        // Should be ignored as this type of wakeup is unsupported.
+        obj.noteWakingActivity(CPU_WAKEUP_SUBSYSTEM_ALARM, wakeupTime + 5, TEST_UID_3);
+        obj.noteWakingActivity(CPU_WAKEUP_SUBSYSTEM_ALARM, wakeupTime - 3, TEST_UID_4);
+
+        // There should be nothing in the attribution map.
+        assertThat(obj.mWakeupAttribution.size()).isEqualTo(0);
+
+        wakeupTime = 883124;
+        obj.noteWakeupTimeAndReason(wakeupTime, 3, KERNEL_REASON_ABORT);
+
+        // Should be ignored as this type of wakeup is unsupported.
+        obj.noteWakingActivity(CPU_WAKEUP_SUBSYSTEM_ALARM, wakeupTime + 2, TEST_UID_1, TEST_UID_4);
+        obj.noteWakingActivity(CPU_WAKEUP_SUBSYSTEM_ALARM, wakeupTime - 5, TEST_UID_3);
 
         // There should be nothing in the attribution map.
         assertThat(obj.mWakeupAttribution.size()).isEqualTo(0);

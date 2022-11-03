@@ -21,7 +21,10 @@ import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCall
 import com.android.systemui.common.shared.model.Position
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.doze.DozeHost
+import com.android.systemui.keyguard.WakefulnessLifecycle
+import com.android.systemui.keyguard.WakefulnessLifecycle.Wakefulness
 import com.android.systemui.keyguard.shared.model.StatusBarState
+import com.android.systemui.keyguard.shared.model.WakefulnessModel
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import javax.inject.Inject
@@ -89,6 +92,9 @@ interface KeyguardRepository {
     /** Observable for the [StatusBarState] */
     val statusBarState: Flow<StatusBarState>
 
+    /** Observable for device wake/sleep state */
+    val wakefulnessState: Flow<WakefulnessModel>
+
     /**
      * Returns `true` if the keyguard is showing; `false` otherwise.
      *
@@ -118,6 +124,7 @@ constructor(
     statusBarStateController: StatusBarStateController,
     private val keyguardStateController: KeyguardStateController,
     dozeHost: DozeHost,
+    wakefulnessLifecycle: WakefulnessLifecycle,
 ) : KeyguardRepository {
     private val _animateBottomAreaDozingTransitions = MutableStateFlow(false)
     override val animateBottomAreaDozingTransitions =
@@ -207,6 +214,40 @@ constructor(
         awaitClose { statusBarStateController.removeCallback(callback) }
     }
 
+    override val wakefulnessState: Flow<WakefulnessModel> = conflatedCallbackFlow {
+        val callback =
+            object : WakefulnessLifecycle.Observer {
+                override fun onStartedWakingUp() {
+                    trySendWithFailureLogging(
+                        WakefulnessModel.STARTING_TO_WAKE,
+                        TAG,
+                        "Wakefulness: starting to wake"
+                    )
+                }
+                override fun onFinishedWakingUp() {
+                    trySendWithFailureLogging(WakefulnessModel.AWAKE, TAG, "Wakefulness: awake")
+                }
+                override fun onStartedGoingToSleep() {
+                    trySendWithFailureLogging(
+                        WakefulnessModel.STARTING_TO_SLEEP,
+                        TAG,
+                        "Wakefulness: starting to sleep"
+                    )
+                }
+                override fun onFinishedGoingToSleep() {
+                    trySendWithFailureLogging(WakefulnessModel.ASLEEP, TAG, "Wakefulness: asleep")
+                }
+            }
+        wakefulnessLifecycle.addObserver(callback)
+        trySendWithFailureLogging(
+            wakefulnessIntToObject(wakefulnessLifecycle.getWakefulness()),
+            TAG,
+            "initial wakefulness state"
+        )
+
+        awaitClose { wakefulnessLifecycle.removeObserver(callback) }
+    }
+
     override fun setAnimateDozingTransitions(animate: Boolean) {
         _animateBottomAreaDozingTransitions.value = animate
     }
@@ -225,6 +266,16 @@ constructor(
             1 -> StatusBarState.KEYGUARD
             2 -> StatusBarState.SHADE_LOCKED
             else -> throw IllegalArgumentException("Invalid StatusBarState value: $value")
+        }
+    }
+
+    private fun wakefulnessIntToObject(@Wakefulness value: Int): WakefulnessModel {
+        return when (value) {
+            0 -> WakefulnessModel.ASLEEP
+            1 -> WakefulnessModel.STARTING_TO_WAKE
+            2 -> WakefulnessModel.AWAKE
+            3 -> WakefulnessModel.STARTING_TO_SLEEP
+            else -> throw IllegalArgumentException("Invalid Wakefulness value: $value")
         }
     }
 

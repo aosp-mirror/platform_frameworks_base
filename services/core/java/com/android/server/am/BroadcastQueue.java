@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.DropBoxManager;
 import android.os.Handler;
+import android.os.Trace;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
@@ -74,6 +75,30 @@ public abstract class BroadcastQueue {
             pw.println(msg);
             pw.flush();
         }
+    }
+
+    static void checkState(boolean expression, @NonNull String msg) {
+        if (!expression) {
+            throw new IllegalStateException(msg);
+        }
+    }
+
+    static void checkStateWtf(boolean expression, @NonNull String msg) {
+        if (!expression) {
+            Slog.wtf(TAG, new IllegalStateException(msg));
+        }
+    }
+
+    static int traceBegin(@NonNull String methodName) {
+        final int cookie = methodName.hashCode();
+        Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                TAG, methodName, cookie);
+        return cookie;
+    }
+
+    static void traceEnd(int cookie) {
+        Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                TAG, cookie);
     }
 
     @Override

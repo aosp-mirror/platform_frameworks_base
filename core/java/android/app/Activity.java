@@ -8364,11 +8364,17 @@ public class Activity extends ContextThemeWrapper
     }
 
     final void performNewIntent(@NonNull Intent intent) {
+        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "performNewIntent");
         mCanEnterPictureInPicture = true;
         onNewIntent(intent);
+        Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
     }
 
     final void performStart(String reason) {
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_WINDOW_MANAGER)) {
+            Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "performStart:"
+                    + mComponent.getClassName());
+        }
         dispatchActivityPreStarted();
         mActivityTransitionState.setEnterActivityOptions(this, getActivityOptions());
         mFragments.noteStateNotSaved();
@@ -8415,6 +8421,7 @@ public class Activity extends ContextThemeWrapper
 
         mActivityTransitionState.enterReady(this);
         dispatchActivityPostStarted();
+        Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
     }
 
     /**
@@ -8423,7 +8430,8 @@ public class Activity extends ContextThemeWrapper
      *              The option to not start immediately is needed in case a transaction with
      *              multiple lifecycle transitions is in progress.
      */
-    final void performRestart(boolean start, String reason) {
+    final void performRestart(boolean start) {
+        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "performRestart");
         mCanEnterPictureInPicture = true;
         mFragments.noteStateNotSaved();
 
@@ -8458,17 +8466,18 @@ public class Activity extends ContextThemeWrapper
             final long startTime = SystemClock.uptimeMillis();
             mInstrumentation.callActivityOnRestart(this);
             final long duration = SystemClock.uptimeMillis() - startTime;
-            EventLogTags.writeWmOnRestartCalled(mIdent, getComponentName().getClassName(), reason,
-                    duration);
+            EventLogTags.writeWmOnRestartCalled(mIdent, getComponentName().getClassName(),
+                    "performRestart", duration);
             if (!mCalled) {
                 throw new SuperNotCalledException(
                     "Activity " + mComponent.toShortString() +
                     " did not call through to super.onRestart()");
             }
             if (start) {
-                performStart(reason);
+                performStart("performRestart");
             }
         }
+        Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
     }
 
     final void performResume(boolean followedByPause, String reason) {
@@ -8477,7 +8486,6 @@ public class Activity extends ContextThemeWrapper
                     + mComponent.getClassName());
         }
         dispatchActivityPreResumed();
-        performRestart(true /* start */, reason);
 
         mFragments.execPendingActions();
 

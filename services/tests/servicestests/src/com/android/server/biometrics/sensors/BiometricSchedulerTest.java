@@ -34,7 +34,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.withSettings;
 
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
@@ -475,8 +474,8 @@ public class BiometricSchedulerTest {
 
     @Test
     public void testInterruptPrecedingClients_whenExpected() {
-        final BaseClientMonitor interruptableMonitor = mock(BaseClientMonitor.class,
-                withSettings().extraInterfaces(Interruptable.class));
+        final BaseClientMonitor interruptableMonitor = mock(BaseClientMonitor.class);
+        when(interruptableMonitor.isInterruptable()).thenReturn(true);
 
         final BaseClientMonitor interrupter = mock(BaseClientMonitor.class);
         when(interrupter.interruptsPrecedingClients()).thenReturn(true);
@@ -491,8 +490,8 @@ public class BiometricSchedulerTest {
 
     @Test
     public void testDoesNotInterruptPrecedingClients_whenNotExpected() {
-        final BaseClientMonitor interruptableMonitor = mock(BaseClientMonitor.class,
-                withSettings().extraInterfaces(Interruptable.class));
+        final BaseClientMonitor interruptableMonitor = mock(BaseClientMonitor.class);
+        when(interruptableMonitor.isInterruptable()).thenReturn(true);
 
         final BaseClientMonitor interrupter = mock(BaseClientMonitor.class);
         when(interrupter.interruptsPrecedingClients()).thenReturn(false);

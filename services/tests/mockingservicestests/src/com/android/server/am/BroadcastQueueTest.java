@@ -280,13 +280,13 @@ public class BroadcastQueueTest {
         constants.TIMEOUT = 100;
         constants.ALLOW_BG_ACTIVITY_START_TIMEOUT = 0;
         final BroadcastSkipPolicy emptySkipPolicy = new BroadcastSkipPolicy(mAms) {
-            public boolean shouldSkip(BroadcastRecord r, ResolveInfo info) {
+            public boolean shouldSkip(BroadcastRecord r, Object o) {
                 // Ignored
                 return false;
             }
-            public boolean shouldSkip(BroadcastRecord r, BroadcastFilter filter) {
+            public String shouldSkipMessage(BroadcastRecord r, Object o) {
                 // Ignored
-                return false;
+                return null;
             }
         };
         final BroadcastHistory emptyHistory = new BroadcastHistory(constants) {
@@ -501,6 +501,11 @@ public class BroadcastQueueTest {
         ai.processName = processName;
         ai.uid = getUidForPackage(packageName, userId);
         return ai;
+    }
+
+    static ResolveInfo withPriority(ResolveInfo info, int priority) {
+        info.priority = priority;
+        return info;
     }
 
     static ResolveInfo makeManifestReceiver(String packageName, String name) {
@@ -1633,5 +1638,23 @@ public class BroadcastQueueTest {
 
         waitForIdle();
         verify(mAms, never()).enqueueOomAdjTargetLocked(any());
+    }
+
+    /**
+     * Verify that expected events are triggered when a broadcast is finished.
+     */
+    @Test
+    public void testNotifyFinished() throws Exception {
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+
+        final Intent intent = new Intent(Intent.ACTION_TIMEZONE_CHANGED);
+        final BroadcastRecord record = makeBroadcastRecord(intent, callerApp,
+                List.of(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN)));
+        enqueueBroadcast(record);
+
+        waitForIdle();
+        verify(mAms).notifyBroadcastFinishedLocked(eq(record));
+        verify(mAms).addBroadcastStatLocked(eq(Intent.ACTION_TIMEZONE_CHANGED), eq(PACKAGE_RED),
+                eq(1), eq(0), anyLong());
     }
 }
