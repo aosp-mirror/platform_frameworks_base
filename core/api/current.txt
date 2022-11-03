@@ -18434,7 +18434,7 @@ package android.hardware.camera2.params {
     method public android.graphics.Point getLeftEyePosition();
     method public android.graphics.Point getMouthPosition();
     method public android.graphics.Point getRightEyePosition();
-    method public int getScore();
+    method @IntRange(from=android.hardware.camera2.params.Face.SCORE_MIN, to=android.hardware.camera2.params.Face.SCORE_MAX) public int getScore();
     field public static final int ID_UNSUPPORTED = -1; // 0xffffffff
     field public static final int SCORE_MAX = 100; // 0x64
     field public static final int SCORE_MIN = 1; // 0x1
@@ -18449,7 +18449,7 @@ package android.hardware.camera2.params {
     method @NonNull public android.hardware.camera2.params.Face.Builder setLeftEyePosition(@NonNull android.graphics.Point);
     method @NonNull public android.hardware.camera2.params.Face.Builder setMouthPosition(@NonNull android.graphics.Point);
     method @NonNull public android.hardware.camera2.params.Face.Builder setRightEyePosition(@NonNull android.graphics.Point);
-    method @NonNull public android.hardware.camera2.params.Face.Builder setScore(int);
+    method @NonNull public android.hardware.camera2.params.Face.Builder setScore(@IntRange(from=android.hardware.camera2.params.Face.SCORE_MIN, to=android.hardware.camera2.params.Face.SCORE_MAX) int);
   }
 
   public final class InputConfiguration {

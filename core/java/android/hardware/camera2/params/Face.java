@@ -17,6 +17,7 @@
 
 package android.hardware.camera2.params;
 
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.Point;
@@ -173,6 +174,7 @@ public final class Face {
      * @see #SCORE_MAX
      * @see #SCORE_MIN
      */
+    @IntRange(from = SCORE_MIN, to = SCORE_MAX)
     public int getScore() {
         return mScore;
     }
@@ -377,7 +379,7 @@ public final class Face {
          * @param score Confidence level between {@value #SCORE_MIN}-{@value #SCORE_MAX}.
          * @return This builder.
          */
-        public @NonNull Builder setScore(int score) {
+        public @NonNull Builder setScore(@IntRange(from = SCORE_MIN, to = SCORE_MAX) int score) {
             checkNotUsed();
             checkScore(score);
             mBuilderFieldsSet |= FIELD_SCORE;
