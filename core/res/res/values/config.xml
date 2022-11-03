@@ -2944,6 +2944,9 @@
     <string name="config_usbResolverActivity" translatable="false"
             >com.android.systemui/com.android.systemui.usb.UsbResolverActivity</string>
 
+    <!-- Component name of the activity used to inform a user about a sensor privacy state chage. -->
+    <string name="config_sensorStateChangedActivity" translatable="false"></string>
+
     <!-- Component name of the activity used to inform a user about a sensory being blocked because
      of privacy settings. -->
     <string name="config_sensorUseStartedActivity" translatable="false"

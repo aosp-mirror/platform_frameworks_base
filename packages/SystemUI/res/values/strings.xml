@@ -783,6 +783,62 @@
         Microphone and camera available
     </string>
 
+    <!--- Title of dialog triggered if the microphone sensor privacy changed its state to unblocked. [CHAR LIMIT=NONE] -->
+    <string name="sensor_privacy_mic_turned_on_dialog_title">
+        Microphone turned on
+    </string>
+
+    <!--- Title of dialog triggered if the microphone sensor privacy changed its state to blocked. [CHAR LIMIT=NONE] -->
+    <string name="sensor_privacy_mic_turned_off_dialog_title">
+        Microphone turned off
+    </string>
+
+    <!--- Content of dialog triggered if the microphone sensor privacy changed its state to unblocked. [CHAR LIMIT=NONE] -->
+    <string name="sensor_privacy_mic_unblocked_dialog_content">
+        Microphone is enabled for all apps and services.
+    </string>
+
+    <!--- Content of dialog triggered if the microphone sensor privacy changed its state to blocked.
+        and there are no active exceptions for explicit user interaction [CHAR LIMIT=NONE] -->
+    <string name="sensor_privacy_mic_blocked_no_exception_dialog_content">
+        Microphone access is disabled for all apps and services.
+        You can enable microphone access in Settings &gt; Privacy &gt; Microphone.
+    </string>
+
+    <!--- Content of dialog triggered if the microphone sensor privacy changed its state to blocked.
+        and there are active exceptions for explicit user interaction [CHAR LIMIT=NONE] -->
+    <string name="sensor_privacy_mic_blocked_with_exception_dialog_content">
+        Microphone access is disabled for all apps and services.
+        You can change this in Settings &gt; Privacy &gt; Microphone.
+    </string>
+
+    <!--- Title of dialog triggered if the camera sensor privacy changed its state to unblocked. [CHAR LIMIT=NONE] -->
+    <string name="sensor_privacy_camera_turned_on_dialog_title">
+        Camera turned on
+    </string>
+
+    <!--- Title of dialog triggered if the camera sensor privacy changed its state to blocked. [CHAR LIMIT=NONE] -->
+    <string name="sensor_privacy_camera_turned_off_dialog_title">
+        Camera turned off
+    </string>
+
+    <!--- Content of dialog triggered if the camera sensor privacy changed its state to unblocked. [CHAR LIMIT=NONE] -->
+    <string name="sensor_privacy_camera_unblocked_dialog_content">
+        Camera is enabled for all apps and services.
+    </string>
+
+    <!--- Content of dialog triggered if the camera sensor privacy changed its state to blocked. [CHAR LIMIT=NONE] -->
+    <string name="sensor_privacy_camera_blocked_dialog_content">
+        Camera access is disabled for all apps and services.
+    </string>
+
+    <!--- Content of dialog triggered if the microphone sensor privacy changed its state to blocked.
+        and there are active exceptions for explicit user interaction [CHAR LIMIT=NONE] -->
+    <string name="sensor_privacy_htt_blocked_dialog_content">To use the microphone button, enable microphone access in Settings.</string>
+
+    <!-- Sensor privacy dialog: Button to open system settings [CHAR LIMIT=50] -->
+    <string name="sensor_privacy_dialog_open_settings">Open settings.</string>
+
     <!-- Default name for the media device shown in the output switcher when the name is not available [CHAR LIMIT=30] -->
     <string name="media_seamless_other_device">Other device</string>
 
