@@ -157,7 +157,7 @@ public final class DreamManagerService extends SystemService {
         mDozeConfig = new AmbientDisplayConfiguration(mContext);
         mUiEventLogger = new UiEventLoggerImpl();
         mDreamUiEventLogger = new DreamUiEventLoggerImpl(
-                mContext.getResources().getString(R.string.config_loggable_dream_prefix));
+                mContext.getResources().getStringArray(R.array.config_loggable_dream_prefixes));
         AmbientDisplayConfiguration adc = new AmbientDisplayConfiguration(mContext);
         mAmbientDisplayComponent = ComponentName.unflattenFromString(adc.ambientDisplayComponent());
         mDreamsOnlyEnabledForSystemUser =
