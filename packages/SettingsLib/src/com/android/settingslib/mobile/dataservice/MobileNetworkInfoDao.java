@@ -36,7 +36,7 @@ public interface MobileNetworkInfoDao {
 
     @Query("SELECT * FROM " + DataServiceUtils.MobileNetworkInfoData.TABLE_NAME + " WHERE "
             + DataServiceUtils.MobileNetworkInfoData.COLUMN_ID + " = :subId")
-    LiveData<MobileNetworkInfoEntity> queryMobileNetworkInfoBySubId(String subId);
+    MobileNetworkInfoEntity queryMobileNetworkInfoBySubId(String subId);
 
     @Query("SELECT * FROM " + DataServiceUtils.MobileNetworkInfoData.TABLE_NAME + " WHERE "
             + DataServiceUtils.MobileNetworkInfoData.COLUMN_IS_MOBILE_DATA_ENABLED

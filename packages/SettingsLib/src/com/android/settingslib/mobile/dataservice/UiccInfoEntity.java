@@ -16,6 +16,8 @@
 
 package com.android.settingslib.mobile.dataservice;
 
+import android.text.TextUtils;
+
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
@@ -72,6 +74,45 @@ public class UiccInfoEntity {
 
     @ColumnInfo(name = DataServiceUtils.UiccInfoData.COLUMN_PORT_INDEX)
     public int portIndex;
+
+
+    @Override
+    public int hashCode() {
+        int result = 17;
+        result = 31 * result + subId.hashCode();
+        result = 31 * result + physicalSlotIndex.hashCode();
+        result = 31 * result + logicalSlotIndex;
+        result = 31 * result + cardId;
+        result = 31 * result + Boolean.hashCode(isEuicc);
+        result = 31 * result + Boolean.hashCode(isMultipleEnabledProfilesSupported);
+        result = 31 * result + cardState;
+        result = 31 * result + Boolean.hashCode(isRemovable);
+        result = 31 * result + Boolean.hashCode(isActive);
+        result = 31 * result + portIndex;
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof UiccInfoEntity)) {
+            return false;
+        }
+
+        UiccInfoEntity info = (UiccInfoEntity) obj;
+        return  TextUtils.equals(subId, info.subId)
+                && TextUtils.equals(physicalSlotIndex, info.physicalSlotIndex)
+                && logicalSlotIndex == info.logicalSlotIndex
+                && cardId == info.cardId
+                && isEuicc == info.isEuicc
+                && isMultipleEnabledProfilesSupported == info.isMultipleEnabledProfilesSupported
+                && cardState == info.cardState
+                && isRemovable == info.isRemovable
+                && isActive == info.isActive
+                && portIndex == info.portIndex;
+    }
 
     public String toString() {
         StringBuilder builder = new StringBuilder();
