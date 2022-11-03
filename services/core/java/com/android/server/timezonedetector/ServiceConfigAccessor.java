@@ -59,20 +59,18 @@ public interface ServiceConfigAccessor {
      * Adds a listener that will be invoked when {@link ConfigurationInternal} may have changed.
      * The listener is invoked on the main thread.
      */
-    void addConfigurationInternalChangeListener(
-            @NonNull ConfigurationChangeListener listener);
+    void addConfigurationInternalChangeListener(@NonNull StateChangeListener listener);
 
     /**
      * Removes a listener previously added via {@link
-     * #addConfigurationInternalChangeListener(ConfigurationChangeListener)}.
+     * #addConfigurationInternalChangeListener(StateChangeListener)}.
      */
-    void removeConfigurationInternalChangeListener(
-            @NonNull ConfigurationChangeListener listener);
+    void removeConfigurationInternalChangeListener(@NonNull StateChangeListener listener);
 
     /**
      * Returns a snapshot of the {@link ConfigurationInternal} for the current user. This is only a
      * snapshot so callers must use {@link
-     * #addConfigurationInternalChangeListener(ConfigurationChangeListener)} to be notified when it
+     * #addConfigurationInternalChangeListener(StateChangeListener)} to be notified when it
      * changes.
      */
     @NonNull
@@ -104,8 +102,7 @@ public interface ServiceConfigAccessor {
      *
      * <p>Note: Currently only for use by long-lived objects; there is no associated remove method.
      */
-    void addLocationTimeZoneManagerConfigListener(
-            @NonNull ConfigurationChangeListener listener);
+    void addLocationTimeZoneManagerConfigListener(@NonNull StateChangeListener listener);
 
     /**
      * Returns {@code true} if the telephony-based time zone detection feature is supported on the

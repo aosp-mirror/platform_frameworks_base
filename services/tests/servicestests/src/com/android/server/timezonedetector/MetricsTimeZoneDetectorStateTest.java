@@ -161,7 +161,8 @@ public class MetricsTimeZoneDetectorStateTest {
 
     private static ConfigurationInternal createConfigurationInternal(
             boolean enhancedMetricsCollectionEnabled) {
-        return new ConfigurationInternal.Builder(ARBITRARY_USER_ID)
+        return new ConfigurationInternal.Builder()
+                .setUserId(ARBITRARY_USER_ID)
                 .setUserConfigAllowed(true)
                 .setTelephonyDetectionFeatureSupported(true)
                 .setGeoDetectionFeatureSupported(true)

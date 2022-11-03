@@ -35,17 +35,14 @@ public final class TimeZoneDetectorInternalImpl implements TimeZoneDetectorInter
     @NonNull private final Context mContext;
     @NonNull private final Handler mHandler;
     @NonNull private final CurrentUserIdentityInjector mCurrentUserIdentityInjector;
-    @NonNull private final ServiceConfigAccessor mServiceConfigAccessor;
     @NonNull private final TimeZoneDetectorStrategy mTimeZoneDetectorStrategy;
 
     public TimeZoneDetectorInternalImpl(@NonNull Context context, @NonNull Handler handler,
             @NonNull CurrentUserIdentityInjector currentUserIdentityInjector,
-            @NonNull ServiceConfigAccessor serviceConfigAccessor,
             @NonNull TimeZoneDetectorStrategy timeZoneDetectorStrategy) {
         mContext = Objects.requireNonNull(context);
         mHandler = Objects.requireNonNull(handler);
         mCurrentUserIdentityInjector = Objects.requireNonNull(currentUserIdentityInjector);
-        mServiceConfigAccessor = Objects.requireNonNull(serviceConfigAccessor);
         mTimeZoneDetectorStrategy = Objects.requireNonNull(timeZoneDetectorStrategy);
     }
 
@@ -53,10 +50,9 @@ public final class TimeZoneDetectorInternalImpl implements TimeZoneDetectorInter
     @NonNull
     public TimeZoneCapabilitiesAndConfig getCapabilitiesAndConfigForDpm() {
         int currentUserId = mCurrentUserIdentityInjector.getCurrentUserId();
-        ConfigurationInternal configurationInternal =
-                mServiceConfigAccessor.getConfigurationInternal(currentUserId);
         final boolean bypassUserPolicyChecks = true;
-        return configurationInternal.createCapabilitiesAndConfig(bypassUserPolicyChecks);
+        return mTimeZoneDetectorStrategy.getCapabilitiesAndConfig(
+                currentUserId, bypassUserPolicyChecks);
     }
 
     @Override
@@ -65,7 +61,7 @@ public final class TimeZoneDetectorInternalImpl implements TimeZoneDetectorInter
 
         int currentUserId = mCurrentUserIdentityInjector.getCurrentUserId();
         final boolean bypassUserPolicyChecks = true;
-        return mServiceConfigAccessor.updateConfiguration(
+        return mTimeZoneDetectorStrategy.updateConfiguration(
                 currentUserId, configuration, bypassUserPolicyChecks);
     }
 

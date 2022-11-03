@@ -17,11 +17,11 @@
 package com.android.server.timezonedetector;
 
 /**
- * A listener used to receive notification that configuration has / may have changed (depending on
+ * A listener used to receive notification that state has / may have changed (depending on
  * the usecase).
  */
 @FunctionalInterface
-public interface ConfigurationChangeListener {
-    /** Called when the configuration may have changed. */
+public interface StateChangeListener {
+    /** Called when something (may have) changed. */
     void onChange();
 }

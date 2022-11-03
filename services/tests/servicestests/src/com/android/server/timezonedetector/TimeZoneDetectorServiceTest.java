@@ -69,7 +69,6 @@ public class TimeZoneDetectorServiceTest {
     private HandlerThread mHandlerThread;
     private TestHandler mTestHandler;
     private TestCallerIdentityInjector mTestCallerIdentityInjector;
-    private FakeServiceConfigAccessor mFakeServiceConfigAccessorSpy;
     private FakeTimeZoneDetectorStrategy mFakeTimeZoneDetectorStrategySpy;
 
 
@@ -85,12 +84,11 @@ public class TimeZoneDetectorServiceTest {
         mTestCallerIdentityInjector = new TestCallerIdentityInjector();
         mTestCallerIdentityInjector.initializeCallingUserId(ARBITRARY_USER_ID);
 
-        mFakeServiceConfigAccessorSpy = spy(new FakeServiceConfigAccessor());
         mFakeTimeZoneDetectorStrategySpy = spy(new FakeTimeZoneDetectorStrategy());
 
         mTimeZoneDetectorService = new TimeZoneDetectorService(
                 mMockContext, mTestHandler, mTestCallerIdentityInjector,
-                mFakeServiceConfigAccessorSpy, mFakeTimeZoneDetectorStrategySpy);
+                mFakeTimeZoneDetectorStrategySpy);
     }
 
     @After
@@ -115,7 +113,7 @@ public class TimeZoneDetectorServiceTest {
 
         ConfigurationInternal configuration =
                 createConfigurationInternal(true /* autoDetectionEnabled*/);
-        mFakeServiceConfigAccessorSpy.initializeConfiguration(configuration);
+        mFakeTimeZoneDetectorStrategySpy.initializeConfiguration(configuration);
 
         TimeZoneCapabilitiesAndConfig actualCapabilitiesAndConfig =
                 mTimeZoneDetectorService.getCapabilitiesAndConfig();
@@ -124,11 +122,14 @@ public class TimeZoneDetectorServiceTest {
                 eq(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION), anyString());
 
         int expectedUserId = mTestCallerIdentityInjector.getCallingUserId();
-        verify(mFakeServiceConfigAccessorSpy).getConfigurationInternal(expectedUserId);
-
         boolean expectedBypassUserPolicyChecks = false;
+        verify(mFakeTimeZoneDetectorStrategySpy)
+                .getCapabilitiesAndConfig(expectedUserId, expectedBypassUserPolicyChecks);
+
         TimeZoneCapabilitiesAndConfig expectedCapabilitiesAndConfig =
-                configuration.createCapabilitiesAndConfig(expectedBypassUserPolicyChecks);
+                new TimeZoneCapabilitiesAndConfig(
+                        configuration.asCapabilities(expectedBypassUserPolicyChecks),
+                        configuration.asConfiguration());
         assertEquals(expectedCapabilitiesAndConfig, actualCapabilitiesAndConfig);
     }
 
@@ -160,7 +161,7 @@ public class TimeZoneDetectorServiceTest {
     public void testListenerRegistrationAndCallbacks() throws Exception {
         ConfigurationInternal initialConfiguration =
                 createConfigurationInternal(false /* autoDetectionEnabled */);
-        mFakeServiceConfigAccessorSpy.initializeConfiguration(initialConfiguration);
+        mFakeTimeZoneDetectorStrategySpy.initializeConfiguration(initialConfiguration);
 
         IBinder mockListenerBinder = mock(IBinder.class);
         ITimeZoneDetectorListener mockListener = mock(ITimeZoneDetectorListener.class);
@@ -455,7 +456,8 @@ public class TimeZoneDetectorServiceTest {
         // Default geo detection settings from auto detection settings - they are not important to
         // the tests.
         final boolean geoDetectionEnabled = autoDetectionEnabled;
-        return new ConfigurationInternal.Builder(ARBITRARY_USER_ID)
+        return new ConfigurationInternal.Builder()
+                .setUserId(ARBITRARY_USER_ID)
                 .setTelephonyDetectionFeatureSupported(true)
                 .setGeoDetectionFeatureSupported(true)
                 .setTelephonyFallbackSupported(false)
