@@ -20,9 +20,12 @@ import androidx.core.os.bundleOf
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
+import org.junit.runner.RunWith
 
+@RunWith(AndroidJUnit4::class)
 class ParameterTest {
     @Test
     fun navRouteTest() {
@@ -88,14 +91,14 @@ class ParameterTest {
             "Bundle[{rt_param=null, unset_string_param=null, unset_int_param=null}]"
         )
 
-        val setParialParam = navArguments.normalize(
+        val setPartialParam = navArguments.normalize(
             bundleOf(
                 "string_param" to "myStr",
                 "rt_param" to "rtStr",
             )
         )
-        assertThat(setParialParam).isNotNull()
-        assertThat(setParialParam.toString()).isEqualTo(
+        assertThat(setPartialParam).isNotNull()
+        assertThat(setPartialParam.toString()).isEqualTo(
             "Bundle[{rt_param=null, string_param=myStr, unset_int_param=null}]"
         )
 
