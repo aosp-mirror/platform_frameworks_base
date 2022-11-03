@@ -456,9 +456,10 @@ public abstract class TvInteractiveAppService extends Service {
 
         /**
          * Receives started recording's ID.
-         * @hide
+         *
+         * @param recordingId The ID of the recording started
          */
-        public void onRecordingStarted(@Nullable String recordingId) {
+        public void onRecordingStarted(@NonNull String recordingId) {
         }
 
         /**
