@@ -701,6 +701,10 @@ public class InternalResourceService extends SystemService {
             return;
         }
         final long totalDischargeMah = mAnalyst.getBatteryScreenOffDischargeMah();
+        if (totalDischargeMah == 0) {
+            Slog.i(TAG, "Total discharge was 0");
+            return;
+        }
         final long batteryCapacityMah = mBatteryManagerInternal.getBatteryFullCharge() / 1000;
         final long estimatedLifeHours = batteryCapacityMah * totalScreenOffDurationMs
                 / totalDischargeMah / HOUR_IN_MILLIS;
