@@ -151,6 +151,7 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.telephony.TelephonyListenerManager;
 import com.android.systemui.util.Assert;
+import com.android.systemui.util.settings.SecureSettings;
 
 import com.google.android.collect.Lists;
 
@@ -337,17 +338,20 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private final ArrayList<WeakReference<KeyguardUpdateMonitorCallback>>
             mCallbacks = Lists.newArrayList();
     private ContentObserver mDeviceProvisionedObserver;
+    private ContentObserver mSfpsRequireScreenOnToAuthPrefObserver;
     private final ContentObserver mTimeFormatChangeObserver;
 
     private boolean mSwitchingUser;
 
     private boolean mDeviceInteractive;
+    private boolean mSfpsRequireScreenOnToAuthPrefEnabled;
     private final SubscriptionManager mSubscriptionManager;
     private final TelephonyListenerManager mTelephonyListenerManager;
     private final TrustManager mTrustManager;
     private final UserManager mUserManager;
     private final DevicePolicyManager mDevicePolicyManager;
     private final BroadcastDispatcher mBroadcastDispatcher;
+    private final SecureSettings mSecureSettings;
     private final InteractionJankMonitor mInteractionJankMonitor;
     private final LatencyTracker mLatencyTracker;
     private final StatusBarStateController mStatusBarStateController;
@@ -1946,6 +1950,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             Context context,
             @Main Looper mainLooper,
             BroadcastDispatcher broadcastDispatcher,
+            SecureSettings secureSettings,
             DumpManager dumpManager,
             @Background Executor backgroundExecutor,
             @Main Executor mainExecutor,
@@ -1988,6 +1993,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         mStatusBarState = mStatusBarStateController.getState();
         mLockPatternUtils = lockPatternUtils;
         mAuthController = authController;
+        mSecureSettings = secureSettings;
         dumpManager.registerDumpable(getClass().getName(), this);
         mSensorPrivacyManager = sensorPrivacyManager;
         mActiveUnlockConfig = activeUnlockConfiguration;
@@ -2229,9 +2235,37 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                                 Settings.System.TIME_12_24)));
             }
         };
+
         mContext.getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(Settings.System.TIME_12_24),
                 false, mTimeFormatChangeObserver, UserHandle.USER_ALL);
+
+        if (isSfpsSupported() && isSfpsEnrolled()) {
+            updateSfpsRequireScreenOnToAuthPref();
+            mSfpsRequireScreenOnToAuthPrefObserver = new ContentObserver(mHandler) {
+                @Override
+                public void onChange(boolean selfChange) {
+                    updateSfpsRequireScreenOnToAuthPref();
+                }
+            };
+
+            mContext.getContentResolver().registerContentObserver(
+                    mSecureSettings.getUriFor(
+                        Settings.Secure.SFPS_REQUIRE_SCREEN_ON_TO_AUTH_ENABLED),
+                    false,
+                    mSfpsRequireScreenOnToAuthPrefObserver,
+                    getCurrentUser());
+        }
+    }
+
+    protected void updateSfpsRequireScreenOnToAuthPref() {
+        final int defaultSfpsRequireScreenOnToAuthValue =
+                mContext.getResources().getBoolean(
+                        com.android.internal.R.bool.config_requireScreenOnToAuthEnabled) ? 1 : 0;
+        mSfpsRequireScreenOnToAuthPrefEnabled = mSecureSettings.getIntForUser(
+                Settings.Secure.SFPS_REQUIRE_SCREEN_ON_TO_AUTH_ENABLED,
+                defaultSfpsRequireScreenOnToAuthValue,
+                getCurrentUser()) != 0;
     }
 
     private void initializeSimState() {
@@ -2273,6 +2307,22 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     public boolean isUdfpsSupported() {
         return mAuthController.getUdfpsProps() != null
                 && !mAuthController.getUdfpsProps().isEmpty();
+    }
+
+    /**
+     * @return true if there's at least one sfps enrollment for the current user.
+     */
+    public boolean isSfpsEnrolled() {
+        return mAuthController.isSfpsEnrolled(getCurrentUser());
+    }
+
+    /**
+     * @return true if sfps HW is supported on this device. Can return true even if the user has
+     * not enrolled sfps. This may be false if called before onAllAuthenticatorsRegistered.
+     */
+    public boolean isSfpsSupported() {
+        return mAuthController.getSfpsProps() != null
+                && !mAuthController.getSfpsProps().isEmpty();
     }
 
     /**
@@ -2603,8 +2653,22 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     && !isEncryptedOrLockdownForUser
                     && userDoesNotHaveTrust);
 
-        final boolean shouldListen = shouldListenKeyguardState && shouldListenUserState
-                && shouldListenBouncerState && shouldListenUdfpsState && !isFingerprintLockedOut();
+        boolean shouldListenSfpsState = true;
+        // If mSfpsRequireScreenOnToAuthPrefEnabled, require screen on to listen to SFPS
+        if (isSfpsSupported() && isSfpsEnrolled() && mSfpsRequireScreenOnToAuthPrefEnabled) {
+            shouldListenSfpsState = isDeviceInteractive();
+        }
+
+        boolean shouldListen = shouldListenKeyguardState && shouldListenUserState
+                && shouldListenBouncerState && !isFingerprintLockedOut();
+
+        if (isUdfpsSupported()) {
+            shouldListen = shouldListen && shouldListenUdfpsState;
+        }
+
+        if (isSfpsSupported()) {
+            shouldListen = shouldListen && shouldListenSfpsState;
+        }
 
         maybeLogListenerModelData(
                 new KeyguardFingerprintListenModel(
@@ -2626,6 +2690,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     mKeyguardOccluded,
                     mOccludingAppRequestingFp,
                     mIsPrimaryUser,
+                    shouldListenSfpsState,
                     shouldListenForFingerprintAssistant,
                     mSwitchingUser,
                     isUdfps,
@@ -3727,6 +3792,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             mContext.getContentResolver().unregisterContentObserver(mTimeFormatChangeObserver);
         }
 
+        if (mSfpsRequireScreenOnToAuthPrefObserver != null) {
+            mContext.getContentResolver().unregisterContentObserver(
+                    mSfpsRequireScreenOnToAuthPrefObserver);
+        }
+
         try {
             ActivityManager.getService().unregisterUserSwitchObserver(mUserSwitchObserver);
         } catch (RemoteException e) {
@@ -3799,6 +3869,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 pw.println("        mBouncerIsOrWillBeShowing=" + mBouncerIsOrWillBeShowing);
                 pw.println("        mStatusBarState=" + StatusBarState.toString(mStatusBarState));
                 pw.println("        mUdfpsBouncerShowing=" + mUdfpsBouncerShowing);
+            } else if (isSfpsSupported()) {
+                pw.println("        sfpsEnrolled=" + isSfpsEnrolled());
+                pw.println("        shouldListenForSfps=" + shouldListenForFingerprint(false));
+                pw.println("        mSfpsRequireScreenOnToAuthPrefEnabled="
+                        + mSfpsRequireScreenOnToAuthPrefEnabled);
             }
         }
         if (mFaceManager != null && mFaceManager.isHardwareDetected()) {

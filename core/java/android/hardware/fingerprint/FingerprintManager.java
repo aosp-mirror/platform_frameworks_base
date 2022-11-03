@@ -918,7 +918,6 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         }
     }
 
-
     /**
      * Forwards BiometricStateListener to FingerprintService
      * @param listener new BiometricStateListener being added

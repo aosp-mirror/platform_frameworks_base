@@ -4924,6 +4924,10 @@
     <!-- If face auth sends the user directly to home/last open app, or stays on keyguard -->
     <bool name="config_faceAuthDismissesKeyguard">true</bool>
 
+    <!-- Default value for whether a SFPS device is required to be interactive for fingerprint auth
+    to unlock the device.  -->
+    <bool name="config_requireScreenOnToAuthEnabled">false</bool>
+
     <!-- The component name for the default profile supervisor, which can be set as a profile owner
     even after user setup is complete. The defined component should be used for supervision purposes
     only. The component must be part of a system app. -->
