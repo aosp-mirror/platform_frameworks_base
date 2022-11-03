@@ -43,17 +43,20 @@ public final class UserProperties implements Parcelable {
     // Attribute strings for reading/writing properties to/from XML.
     private static final String ATTR_SHOW_IN_LAUNCHER = "showInLauncher";
     private static final String ATTR_START_WITH_PARENT = "startWithParent";
+    private static final String ATTR_SHOW_IN_SETTINGS = "showInSettings";
 
     /** Index values of each property (to indicate whether they are present in this object). */
     @IntDef(prefix = "INDEX_", value = {
             INDEX_SHOW_IN_LAUNCHER,
             INDEX_START_WITH_PARENT,
+            INDEX_SHOW_IN_SETTINGS,
     })
     @Retention(RetentionPolicy.SOURCE)
     private @interface PropertyIndex {
     }
     private static final int INDEX_SHOW_IN_LAUNCHER = 0;
     private static final int INDEX_START_WITH_PARENT = 1;
+    private static final int INDEX_SHOW_IN_SETTINGS = 2;
     /** A bit set, mapping each PropertyIndex to whether it is present (1) or absent (0). */
     private long mPropertiesPresent = 0;
 
@@ -85,6 +88,37 @@ public final class UserProperties implements Parcelable {
      * Suggests that the launcher should not show this user.
      */
     public static final int SHOW_IN_LAUNCHER_NO = 2;
+
+    /**
+     * Possible values for whether or how to show this user in the Settings app.
+     * @hide
+     */
+    @IntDef(prefix = "SHOW_IN_SETTINGS_", value = {
+            SHOW_IN_SETTINGS_WITH_PARENT,
+            SHOW_IN_SETTINGS_SEPARATE,
+            SHOW_IN_SETTINGS_NO,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ShowInSettings {
+    }
+    /**
+     * Suggests that the Settings app should show this user's apps in the main tab.
+     * That is, either this user is a full user, so its apps should be presented accordingly, or, if
+     * this user is a profile, then its apps should be shown alongside its parent's apps.
+     * @hide
+     */
+    public static final int SHOW_IN_SETTINGS_WITH_PARENT = 0;
+    /**
+     * Suggests that the Settings app should show this user's apps, but separately from the apps of
+     * this user's parent.
+     * @hide
+     */
+    public static final int SHOW_IN_SETTINGS_SEPARATE = 1;
+    /**
+     * Suggests that the Settings app should not show this user.
+     * @hide
+     */
+    public static final int SHOW_IN_SETTINGS_NO = 2;
 
     /**
      * Reference to the default user properties for this user's user type.
@@ -130,6 +164,7 @@ public final class UserProperties implements Parcelable {
         }
         if (hasManagePermission) {
             // Add items that require MANAGE_USERS or stronger.
+            setShowInSettings(orig.getShowInSettings());
         }
         if (hasQueryOrManagePermission) {
             // Add items that require QUERY_USERS or stronger.
@@ -183,6 +218,33 @@ public final class UserProperties implements Parcelable {
     private @ShowInLauncher int mShowInLauncher;
 
     /**
+     * Returns whether, and how, a user should be shown in the Settings app.
+     * This is generally inapplicable for non-profile users.
+     *
+     * Possible return values include
+     *    {@link #SHOW_IN_SETTINGS_WITH_PARENT}},
+     *    {@link #SHOW_IN_SETTINGS_SEPARATE},
+     *    and {@link #SHOW_IN_SETTINGS_NO}.
+     *
+     * <p> The caller must have {@link android.Manifest.permission#MANAGE_USERS} to query this
+     * property.
+     *
+     * @return whether, and how, a profile should be shown in the Settings.
+     * @hide
+     */
+    public @ShowInSettings int getShowInSettings() {
+        if (isPresent(INDEX_SHOW_IN_SETTINGS)) return mShowInSettings;
+        if (mDefaultProperties != null) return mDefaultProperties.mShowInSettings;
+        throw new SecurityException("You don't have permission to query mShowInSettings");
+    }
+    /** @hide */
+    public void setShowInSettings(@ShowInSettings int val) {
+        this.mShowInSettings = val;
+        setPresent(INDEX_SHOW_IN_SETTINGS);
+    }
+    private @ShowInSettings int mShowInSettings;
+
+    /**
      * Returns whether a profile should be started when its parent starts (unless in quiet mode).
      * This only applies for users that have parents (i.e. for profiles).
      * @hide
@@ -206,6 +268,7 @@ public final class UserProperties implements Parcelable {
                 + "mPropertiesPresent=" + Long.toBinaryString(mPropertiesPresent)
                 + ", mShowInLauncher=" + getShowInLauncher()
                 + ", mStartWithParent=" + getStartWithParent()
+                + ", mShowInSettings=" + getShowInSettings()
                 + "}";
     }
 
@@ -219,6 +282,7 @@ public final class UserProperties implements Parcelable {
         pw.println(prefix + "    mPropertiesPresent=" + Long.toBinaryString(mPropertiesPresent));
         pw.println(prefix + "    mShowInLauncher=" + getShowInLauncher());
         pw.println(prefix + "    mStartWithParent=" + getStartWithParent());
+        pw.println(prefix + "    mShowInSettings=" + getShowInSettings());
     }
 
     /**
@@ -258,6 +322,8 @@ public final class UserProperties implements Parcelable {
                 case ATTR_START_WITH_PARENT:
                     setStartWithParent(parser.getAttributeBoolean(i));
                     break;
+                case ATTR_SHOW_IN_SETTINGS:
+                    setShowInSettings(parser.getAttributeInt(i));
                 default:
                     Slog.w(LOG_TAG, "Skipping unknown property " + attributeName);
             }
@@ -281,6 +347,9 @@ public final class UserProperties implements Parcelable {
         if (isPresent(INDEX_START_WITH_PARENT)) {
             serializer.attributeBoolean(null, ATTR_START_WITH_PARENT, mStartWithParent);
         }
+        if (isPresent(INDEX_SHOW_IN_SETTINGS)) {
+            serializer.attributeInt(null, ATTR_SHOW_IN_SETTINGS, mShowInSettings);
+        }
     }
 
     // For use only with an object that has already had any permission-lacking fields stripped out.
@@ -289,6 +358,7 @@ public final class UserProperties implements Parcelable {
         dest.writeLong(mPropertiesPresent);
         dest.writeInt(mShowInLauncher);
         dest.writeBoolean(mStartWithParent);
+        dest.writeInt(mShowInSettings);
     }
 
     /**
@@ -301,6 +371,7 @@ public final class UserProperties implements Parcelable {
         mPropertiesPresent = source.readLong();
         mShowInLauncher = source.readInt();
         mStartWithParent = source.readBoolean();
+        mShowInSettings = source.readInt();
     }
 
     @Override
@@ -327,6 +398,7 @@ public final class UserProperties implements Parcelable {
         // UserProperties fields and their default values.
         private @ShowInLauncher int mShowInLauncher = SHOW_IN_LAUNCHER_WITH_PARENT;
         private boolean mStartWithParent = false;
+        private @ShowInSettings int mShowInSettings = SHOW_IN_SETTINGS_WITH_PARENT;
 
         public Builder setShowInLauncher(@ShowInLauncher int showInLauncher) {
             mShowInLauncher = showInLauncher;
@@ -338,21 +410,30 @@ public final class UserProperties implements Parcelable {
             return this;
         }
 
+        /** Sets the value for {@link #mShowInSettings} */
+        public Builder setShowInSettings(@ShowInSettings int showInSettings) {
+            mShowInSettings = showInSettings;
+            return this;
+        }
+
         /** Builds a UserProperties object with *all* values populated. */
         public UserProperties build() {
             return new UserProperties(
                     mShowInLauncher,
-                    mStartWithParent);
+                    mStartWithParent,
+                    mShowInSettings);
         }
     } // end Builder
 
     /** Creates a UserProperties with the given properties. Intended for building default values. */
     private UserProperties(
             @ShowInLauncher int showInLauncher,
-            boolean startWithParent) {
+            boolean startWithParent,
+            @ShowInSettings int showInSettings) {
 
         mDefaultProperties = null;
         setShowInLauncher(showInLauncher);
         setStartWithParent(startWithParent);
+        setShowInSettings(showInSettings);
     }
 }
