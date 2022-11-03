@@ -63,6 +63,10 @@ public final class GameManagerTests {
         mGameManager.setGameMode(mPackageName, GameManager.GAME_MODE_PERFORMANCE);
         assertEquals(GameManager.GAME_MODE_PERFORMANCE,
                 mGameManager.getGameMode());
+
+        mGameManager.setGameMode(mPackageName, GameManager.GAME_MODE_CUSTOM);
+        assertEquals(GameManager.GAME_MODE_CUSTOM,
+                mGameManager.getGameMode());
     }
 
     @Test
@@ -76,6 +80,10 @@ public final class GameManagerTests {
 
         mGameManager.setGameMode(mPackageName, GameManager.GAME_MODE_PERFORMANCE);
         assertEquals(GameManager.GAME_MODE_PERFORMANCE,
+                mGameManager.getGameMode(mPackageName));
+
+        mGameManager.setGameMode(mPackageName, GameManager.GAME_MODE_CUSTOM);
+        assertEquals(GameManager.GAME_MODE_CUSTOM,
                 mGameManager.getGameMode(mPackageName));
     }
 }
