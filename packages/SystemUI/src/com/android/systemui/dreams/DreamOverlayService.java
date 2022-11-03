@@ -257,6 +257,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
 
         mStateController.setOverlayActive(false);
         mStateController.setLowLightActive(false);
+        mStateController.setEntryAnimationsFinished(false);
 
         mDreamOverlayContainerViewController = null;
         mDreamOverlayTouchMonitor = null;
