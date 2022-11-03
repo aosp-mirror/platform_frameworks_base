@@ -643,6 +643,7 @@ class BroadcastProcessQueue {
     static final int REASON_CONTAINS_INTERACTIVE = 14;
     static final int REASON_CONTAINS_RESULT_TO = 15;
     static final int REASON_CONTAINS_INSTRUMENTED = 16;
+    static final int REASON_CONTAINS_MANIFEST = 17;
 
     @IntDef(flag = false, prefix = { "REASON_" }, value = {
             REASON_EMPTY,
@@ -658,6 +659,7 @@ class BroadcastProcessQueue {
             REASON_CONTAINS_INTERACTIVE,
             REASON_CONTAINS_RESULT_TO,
             REASON_CONTAINS_INSTRUMENTED,
+            REASON_CONTAINS_MANIFEST,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Reason {}
@@ -677,6 +679,7 @@ class BroadcastProcessQueue {
             case REASON_CONTAINS_INTERACTIVE: return "CONTAINS_INTERACTIVE";
             case REASON_CONTAINS_RESULT_TO: return "CONTAINS_RESULT_TO";
             case REASON_CONTAINS_INSTRUMENTED: return "CONTAINS_INSTRUMENTED";
+            case REASON_CONTAINS_MANIFEST: return "CONTAINS_MANIFEST";
             default: return Integer.toString(reason);
         }
     }
@@ -725,6 +728,9 @@ class BroadcastProcessQueue {
             } else if (mCountResultTo > 0) {
                 mRunnableAt = runnableAt;
                 mRunnableAtReason = REASON_CONTAINS_RESULT_TO;
+            } else if (mCountManifest > 0) {
+                mRunnableAt = runnableAt;
+                mRunnableAtReason = REASON_CONTAINS_MANIFEST;
             } else if (mProcessCached) {
                 mRunnableAt = runnableAt + constants.DELAY_CACHED_MILLIS;
                 mRunnableAtReason = REASON_CACHED;
