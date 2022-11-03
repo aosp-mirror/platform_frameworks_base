@@ -170,15 +170,7 @@ class CredentialManagerRepo(
               20, 7, 27, 11000),
           )
         )
-        .setActionChips(
-          listOf<Entry>(
-            newEntry("key2", "subkey-1", "Go to Settings",
-              20, 7, 27, 20000),
-            newEntry("key2", "subkey-2", "Switch Account",
-              20, 7, 27, 21000),
-          ),
-        )
-        .setIsDefaultProvider(false)
+        .setIsDefaultProvider(true)
         .build(),
       CreateCredentialProviderData
         .Builder("com.dashlane/com.dashlane.CredentialManagerService")
@@ -189,12 +181,8 @@ class CredentialManagerRepo(
             newEntry("key1", "subkey-4", "elisa.work@dashlane.com",
               20, 7, 27, 31000),
           )
-        ).setActionChips(
-          listOf<Entry>(
-            newEntry("key2", "subkey-3", "Manage Accounts",
-              20, 7, 27, 32000),
-          ),
-        ).build(),
+        )
+        .build(),
     )
   }
 
