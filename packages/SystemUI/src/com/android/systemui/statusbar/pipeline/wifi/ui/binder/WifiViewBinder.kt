@@ -30,9 +30,7 @@ import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.StatusBarIconView.STATE_DOT
 import com.android.systemui.statusbar.StatusBarIconView.STATE_HIDDEN
 import com.android.systemui.statusbar.StatusBarIconView.STATE_ICON
-import com.android.systemui.statusbar.phone.StatusBarLocation
 import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.LocationBasedWifiViewModel
-import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.WifiViewModel
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
@@ -62,26 +60,9 @@ object WifiViewBinder {
         fun onVisibilityStateChanged(@StatusBarIconView.VisibleState state: Int)
     }
 
-    /**
-     * Binds the view to the appropriate view-model based on the given location. The view will
-     * continue to be updated following updates from the view-model.
-     */
-    @JvmStatic
-    fun bind(
-        view: ViewGroup,
-        wifiViewModel: WifiViewModel,
-        location: StatusBarLocation,
-    ): Binding {
-        return when (location) {
-            StatusBarLocation.HOME -> bind(view, wifiViewModel.home)
-            StatusBarLocation.KEYGUARD -> bind(view, wifiViewModel.keyguard)
-            StatusBarLocation.QS -> bind(view, wifiViewModel.qs)
-        }
-    }
-
     /** Binds the view to the view-model, continuing to update the former based on the latter. */
     @JvmStatic
-    private fun bind(
+    fun bind(
         view: ViewGroup,
         viewModel: LocationBasedWifiViewModel,
     ): Binding {

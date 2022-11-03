@@ -20,6 +20,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.statusbar.phone.StatusBarIconController
 import com.android.systemui.statusbar.phone.StatusBarIconController.IconManager
+import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractor
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconsViewModel
 import javax.inject.Inject
@@ -50,6 +51,7 @@ constructor(
     private val iconController: StatusBarIconController,
     private val iconsViewModelFactory: MobileIconsViewModel.Factory,
     @Application scope: CoroutineScope,
+    private val statusBarPipelineFlags: StatusBarPipelineFlags,
 ) {
     private val mobileSubIds: Flow<List<Int>> =
         interactor.filteredSubscriptions.mapLatest { infos ->
@@ -66,8 +68,14 @@ constructor(
     private val mobileSubIdsState: StateFlow<List<Int>> =
         mobileSubIds
             .onEach {
-                // Notify the icon controller here so that it knows to add icons
-                iconController.setNewMobileIconSubIds(it)
+                // Only notify the icon controller if we want to *render* the new icons.
+                // Note that this flow may still run if
+                // [statusBarPipelineFlags.runNewMobileIconsBackend] is true because we may want to
+                // get the logging data without rendering.
+                if (statusBarPipelineFlags.useNewMobileIcons()) {
+                    // Notify the icon controller here so that it knows to add icons
+                    iconController.setNewMobileIconSubIds(it)
+                }
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), listOf())
 
