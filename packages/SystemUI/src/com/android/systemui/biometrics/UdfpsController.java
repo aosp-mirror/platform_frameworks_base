@@ -66,6 +66,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.DozeReceiver;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.plugins.FalsingManager;
@@ -459,8 +460,17 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                     mVelocityTracker.clear();
                 }
 
-                boolean withinSensorArea =
-                        isWithinSensorArea(udfpsView, event.getX(), event.getY(), fromUdfpsView);
+                boolean withinSensorArea;
+                if (mFeatureFlags.isEnabled(Flags.UDFPS_NEW_TOUCH_DETECTION)) {
+                    withinSensorArea =
+                            isWithinSensorArea(udfpsView, event.getRawX(),
+                                    event.getRawY(), fromUdfpsView);
+                } else {
+                    withinSensorArea =
+                            isWithinSensorArea(udfpsView, event.getX(),
+                                    event.getY(), fromUdfpsView);
+                }
+
                 if (withinSensorArea) {
                     Trace.beginAsyncSection("UdfpsController.e2e.onPointerDown", 0);
                     Log.v(TAG, "onTouch | action down");
@@ -491,9 +501,16 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                         ? event.getPointerId(0)
                         : event.findPointerIndex(mActivePointerId);
                 if (idx == event.getActionIndex()) {
-                    boolean actionMoveWithinSensorArea =
-                            isWithinSensorArea(udfpsView, event.getX(idx), event.getY(idx),
-                                    fromUdfpsView);
+                    boolean actionMoveWithinSensorArea;
+                    if (mFeatureFlags.isEnabled(Flags.UDFPS_NEW_TOUCH_DETECTION)) {
+                        actionMoveWithinSensorArea =
+                                isWithinSensorArea(udfpsView, event.getRawX(idx),
+                                        event.getRawY(idx), fromUdfpsView);
+                    } else {
+                        actionMoveWithinSensorArea =
+                                isWithinSensorArea(udfpsView, event.getX(idx),
+                                        event.getY(idx), fromUdfpsView);
+                    }
                     if ((fromUdfpsView || actionMoveWithinSensorArea)
                             && shouldTryToDismissKeyguard()) {
                         Log.v(TAG, "onTouch | dismiss keyguard ACTION_MOVE");
