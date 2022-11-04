@@ -282,10 +282,6 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         return mView.getLocationTop();
     }
 
-    public float getBottom() {
-        return mView.getLocationBottom();
-    }
-
     private void updateVisibility() {
         if (mCancelDelayedUpdateVisibilityRunnable != null) {
             mCancelDelayedUpdateVisibilityRunnable.run();

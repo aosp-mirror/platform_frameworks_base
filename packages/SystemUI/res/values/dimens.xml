@@ -762,7 +762,7 @@
     <dimen name="keyguard_lock_padding">20dp</dimen>
 
     <dimen name="keyguard_indication_margin_bottom">32dp</dimen>
-    <dimen name="lock_icon_margin_bottom">74dp</dimen>
+    <dimen name="lock_icon_margin_bottom">110dp</dimen>
     <dimen name="ambient_indication_margin_bottom">71dp</dimen>
 
 

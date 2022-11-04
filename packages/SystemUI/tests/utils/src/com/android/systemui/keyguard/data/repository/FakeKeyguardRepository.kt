@@ -53,8 +53,6 @@ class FakeKeyguardRepository : KeyguardRepository {
     private val _wakefulnessState = MutableStateFlow(WakefulnessModel.ASLEEP)
     override val wakefulnessState: Flow<WakefulnessModel> = _wakefulnessState
 
-    private val _isUdfpsSupported = MutableStateFlow(false)
-    
     private val _isBouncerShowing = MutableStateFlow(false)
     override val isBouncerShowing: Flow<Boolean> = _isBouncerShowing
 
@@ -87,9 +85,5 @@ class FakeKeyguardRepository : KeyguardRepository {
 
     fun setDozeAmount(dozeAmount: Float) {
         _dozeAmount.value = dozeAmount
-    }
-
-    override fun isUdfpsSupported(): Boolean {
-        return _isUdfpsSupported.value
     }
 }

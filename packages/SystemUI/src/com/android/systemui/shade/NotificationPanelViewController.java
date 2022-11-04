@@ -1308,11 +1308,7 @@ public final class NotificationPanelViewController {
     }
 
     private void initBottomArea() {
-        mKeyguardBottomArea.init(
-                mKeyguardBottomAreaViewModel,
-                mFalsingManager,
-                mLockIconViewController
-        );
+        mKeyguardBottomArea.init(mKeyguardBottomAreaViewModel, mFalsingManager);
     }
 
     @VisibleForTesting
