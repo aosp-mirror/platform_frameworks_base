@@ -166,13 +166,16 @@ class KeyguardUpdateMonitorLogger @Inject constructor(
                 { "Previously active sub id $int1 is now invalid, will remove" })
     }
 
-    fun logKeyguardBouncerChanged(bouncerIsOrWillBeShowing: Boolean, bouncerFullyShown: Boolean) {
+    fun logPrimaryKeyguardBouncerChanged(
+            primaryBouncerIsOrWillBeShowing: Boolean,
+            primaryBouncerFullyShown: Boolean
+    ) {
         logBuffer.log(TAG, DEBUG, {
-            bool1 = bouncerIsOrWillBeShowing
-            bool2 = bouncerFullyShown
+            bool1 = primaryBouncerIsOrWillBeShowing
+            bool2 = primaryBouncerFullyShown
         }, {
-            "handleKeyguardBouncerChanged " +
-                    "bouncerIsOrWillBeShowing=$bool1 bouncerFullyShowing=$bool2"
+            "handlePrimaryBouncerChanged " +
+                    "primaryBouncerIsOrWillBeShowing=$bool1 primaryBouncerFullyShown=$bool2"
         })
     }
 
@@ -229,16 +232,16 @@ class KeyguardUpdateMonitorLogger @Inject constructor(
                 { "Retrying fingerprint attempt: $int1" })
     }
 
-    fun logSendKeyguardBouncerChanged(
-        bouncerIsOrWillBeShowing: Boolean,
-        bouncerFullyShown: Boolean,
+    fun logSendPrimaryBouncerChanged(
+        primaryBouncerIsOrWillBeShowing: Boolean,
+        primaryBouncerFullyShown: Boolean,
     ) {
         logBuffer.log(TAG, DEBUG, {
-            bool1 = bouncerIsOrWillBeShowing
-            bool2 = bouncerFullyShown
+            bool1 = primaryBouncerIsOrWillBeShowing
+            bool2 = primaryBouncerFullyShown
         }, {
-            "sendKeyguardBouncerChanged bouncerIsOrWillBeShowing=$bool1 " +
-                    "bouncerFullyShown=$bool2"
+            "sendPrimaryBouncerChanged primaryBouncerIsOrWillBeShowing=$bool1 " +
+                    "primaryBouncerFullyShown=$bool2"
         })
     }
 

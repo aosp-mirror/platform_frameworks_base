@@ -30,7 +30,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.KeyguardViewMediator;
-import com.android.systemui.keyguard.domain.interactor.BouncerInteractor;
+import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shade.ShadeExpansionChangeEvent;
 import com.android.systemui.shade.ShadeExpansionListener;
@@ -72,7 +72,7 @@ public class UdfpsKeyguardViewControllerBaseTest extends SysuiTestCase {
     protected @Mock UdfpsController mUdfpsController;
     protected @Mock ActivityLaunchAnimator mActivityLaunchAnimator;
     protected @Mock KeyguardBouncer mBouncer;
-    protected @Mock BouncerInteractor mBouncerInteractor;
+    protected @Mock PrimaryBouncerInteractor mPrimaryBouncerInteractor;
 
     protected FakeFeatureFlags mFeatureFlags = new FakeFeatureFlags();
     protected FakeSystemClock mSystemClock = new FakeSystemClock();
@@ -86,9 +86,9 @@ public class UdfpsKeyguardViewControllerBaseTest extends SysuiTestCase {
     private @Captor ArgumentCaptor<ShadeExpansionListener> mExpansionListenerCaptor;
     protected List<ShadeExpansionListener> mExpansionListeners;
 
-    private @Captor ArgumentCaptor<StatusBarKeyguardViewManager.AlternateAuthInterceptor>
-            mAltAuthInterceptorCaptor;
-    protected StatusBarKeyguardViewManager.AlternateAuthInterceptor mAltAuthInterceptor;
+    private @Captor ArgumentCaptor<StatusBarKeyguardViewManager.AlternateBouncer>
+            mAlternateBouncerCaptor;
+    protected StatusBarKeyguardViewManager.AlternateBouncer mAlternateBouncer;
 
     private @Captor ArgumentCaptor<KeyguardStateController.Callback>
             mKeyguardStateControllerCallbackCaptor;
@@ -131,9 +131,9 @@ public class UdfpsKeyguardViewControllerBaseTest extends SysuiTestCase {
     }
 
     protected void captureAltAuthInterceptor() {
-        verify(mStatusBarKeyguardViewManager).setAlternateAuthInterceptor(
-                mAltAuthInterceptorCaptor.capture());
-        mAltAuthInterceptor = mAltAuthInterceptorCaptor.getValue();
+        verify(mStatusBarKeyguardViewManager).setAlternateBouncer(
+                mAlternateBouncerCaptor.capture());
+        mAlternateBouncer = mAlternateBouncerCaptor.getValue();
     }
 
     protected void captureKeyguardStateControllerCallback() {
@@ -149,7 +149,7 @@ public class UdfpsKeyguardViewControllerBaseTest extends SysuiTestCase {
     protected UdfpsKeyguardViewController createUdfpsKeyguardViewController(
             boolean useModernBouncer) {
         mFeatureFlags.set(Flags.MODERN_BOUNCER, useModernBouncer);
-        when(mStatusBarKeyguardViewManager.getBouncer()).thenReturn(
+        when(mStatusBarKeyguardViewManager.getPrimaryBouncer()).thenReturn(
                 useModernBouncer ? null : mBouncer);
         return new UdfpsKeyguardViewController(
                 mView,
@@ -167,6 +167,6 @@ public class UdfpsKeyguardViewControllerBaseTest extends SysuiTestCase {
                 mUdfpsController,
                 mActivityLaunchAnimator,
                 mFeatureFlags,
-                mBouncerInteractor);
+                mPrimaryBouncerInteractor);
     }
 }

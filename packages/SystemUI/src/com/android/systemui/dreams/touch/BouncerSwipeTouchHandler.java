@@ -116,7 +116,7 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
 
                         if (mCapture) {
                             // Since the user is dragging the bouncer up, set scrimmed to false.
-                            mStatusBarKeyguardViewManager.showBouncer(false);
+                            mStatusBarKeyguardViewManager.showPrimaryBouncer(false);
                         }
                     }
 

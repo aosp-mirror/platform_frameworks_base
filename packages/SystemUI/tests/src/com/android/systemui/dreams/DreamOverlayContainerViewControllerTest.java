@@ -36,10 +36,10 @@ import androidx.test.filters.SmallTest;
 import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dreams.complication.ComplicationHostViewController;
-import com.android.systemui.keyguard.domain.interactor.BouncerCallbackInteractor;
+import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerCallbackInteractor;
 import com.android.systemui.statusbar.BlurUtils;
 import com.android.systemui.statusbar.phone.KeyguardBouncer;
-import com.android.systemui.statusbar.phone.KeyguardBouncer.BouncerExpansionCallback;
+import com.android.systemui.statusbar.phone.KeyguardBouncer.PrimaryBouncerExpansionCallback;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 
 import org.junit.Before;
@@ -90,7 +90,7 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
     ViewRootImpl mViewRoot;
 
     @Mock
-    BouncerCallbackInteractor mBouncerCallbackInteractor;
+    PrimaryBouncerCallbackInteractor mPrimaryBouncerCallbackInteractor;
 
     @Mock
     DreamOverlayAnimationsController mAnimationsController;
@@ -106,7 +106,7 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
 
         when(mDreamOverlayContainerView.getResources()).thenReturn(mResources);
         when(mDreamOverlayContainerView.getViewTreeObserver()).thenReturn(mViewTreeObserver);
-        when(mStatusBarKeyguardViewManager.getBouncer()).thenReturn(mBouncer);
+        when(mStatusBarKeyguardViewManager.getPrimaryBouncer()).thenReturn(mBouncer);
         when(mDreamOverlayContainerView.getViewRootImpl()).thenReturn(mViewRoot);
 
         mController = new DreamOverlayContainerViewController(
@@ -121,7 +121,7 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
                 MAX_BURN_IN_OFFSET,
                 BURN_IN_PROTECTION_UPDATE_INTERVAL,
                 MILLIS_UNTIL_FULL_JITTER,
-                mBouncerCallbackInteractor,
+                mPrimaryBouncerCallbackInteractor,
                 mAnimationsController,
                 mStateController);
     }
@@ -167,8 +167,8 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
 
     @Test
     public void testBouncerAnimation_doesNotApply() {
-        final ArgumentCaptor<BouncerExpansionCallback> bouncerExpansionCaptor =
-                ArgumentCaptor.forClass(BouncerExpansionCallback.class);
+        final ArgumentCaptor<PrimaryBouncerExpansionCallback> bouncerExpansionCaptor =
+                ArgumentCaptor.forClass(PrimaryBouncerExpansionCallback.class);
         mController.onViewAttached();
         verify(mBouncer).addBouncerExpansionCallback(bouncerExpansionCaptor.capture());
 
@@ -178,8 +178,8 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
 
     @Test
     public void testBouncerAnimation_updateBlur() {
-        final ArgumentCaptor<BouncerExpansionCallback> bouncerExpansionCaptor =
-                ArgumentCaptor.forClass(BouncerExpansionCallback.class);
+        final ArgumentCaptor<PrimaryBouncerExpansionCallback> bouncerExpansionCaptor =
+                ArgumentCaptor.forClass(PrimaryBouncerExpansionCallback.class);
         mController.onViewAttached();
         verify(mBouncer).addBouncerExpansionCallback(bouncerExpansionCaptor.capture());
 
