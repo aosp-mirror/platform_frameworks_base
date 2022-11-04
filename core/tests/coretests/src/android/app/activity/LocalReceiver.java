@@ -36,8 +36,7 @@ public class LocalReceiver extends BroadcastReceiver {
         if (BroadcastTest.BROADCAST_FAIL_REGISTER.equals(intent.getAction())) {
             resultString = "Successfully registered, but expected it to fail";
             try {
-                context.registerReceiver(this, new IntentFilter("foo.bar"),
-                        Context.RECEIVER_EXPORTED_UNAUDITED);
+                context.registerReceiver(this, new IntentFilter("foo.bar"));
                 context.unregisterReceiver(this);
             } catch (ReceiverCallNotAllowedException e) {
                 //resultString = "This is the correct behavior but not yet implemented";
