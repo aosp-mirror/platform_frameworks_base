@@ -22,7 +22,7 @@ import android.os.UserManager
 import android.view.KeyEvent
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.util.kotlin.getOrNull
-import com.android.wm.shell.floating.FloatingTasks
+import com.android.wm.shell.bubbles.Bubbles
 import java.util.Optional
 import javax.inject.Inject
 
@@ -39,7 +39,7 @@ internal class NoteTaskController
 constructor(
     private val context: Context,
     private val intentResolver: NoteTaskIntentResolver,
-    private val optionalFloatingTasks: Optional<FloatingTasks>,
+    private val optionalBubbles: Optional<Bubbles>,
     private val optionalKeyguardManager: Optional<KeyguardManager>,
     private val optionalUserManager: Optional<UserManager>,
     @NoteTaskEnabledKey private val isEnabled: Boolean,
@@ -54,7 +54,7 @@ constructor(
     }
 
     private fun showNoteTask() {
-        val floatingTasks = optionalFloatingTasks.getOrNull() ?: return
+        val bubbles = optionalBubbles.getOrNull() ?: return
         val keyguardManager = optionalKeyguardManager.getOrNull() ?: return
         val userManager = optionalUserManager.getOrNull() ?: return
         val intent = intentResolver.resolveIntent() ?: return
@@ -66,7 +66,7 @@ constructor(
             context.startActivity(intent)
         } else {
             // TODO(b/254606432): Should include Intent.EXTRA_FLOATING_WINDOW_MODE parameter.
-            floatingTasks.showOrSetStashed(intent)
+            bubbles.showAppBubble(intent)
         }
     }
 }

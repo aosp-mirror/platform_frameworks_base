@@ -293,15 +293,6 @@ object Flags {
 
     @JvmField
     @Keep
-    val FLOATING_TASKS_ENABLED = SysPropBooleanFlag(1106, "persist.wm.debug.floating_tasks", false)
-
-    @JvmField
-    @Keep
-    val SHOW_FLOATING_TASKS_AS_BUBBLES =
-        SysPropBooleanFlag(1107, "persist.wm.debug.floating_tasks_as_bubbles", false)
-
-    @JvmField
-    @Keep
     val ENABLE_FLING_TO_DISMISS_BUBBLE =
         SysPropBooleanFlag(1108, "persist.wm.debug.fling_to_dismiss_bubble", true)
 
@@ -314,6 +305,9 @@ object Flags {
     @Keep
     val ENABLE_PIP_KEEP_CLEAR_ALGORITHM =
         SysPropBooleanFlag(1110, "persist.wm.debug.enable_pip_keep_clear_algorithm", false)
+
+    // TODO(b/256873975): Tracking Bug
+    @JvmField @Keep val WM_BUBBLE_BAR = UnreleasedFlag(1111)
 
     // 1200 - predictive back
     @JvmField

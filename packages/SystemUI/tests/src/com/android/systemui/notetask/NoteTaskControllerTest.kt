@@ -25,8 +25,8 @@ import androidx.test.runner.AndroidJUnit4
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.notetask.NoteTaskIntentResolver.Companion.NOTES_ACTION
 import com.android.systemui.util.mockito.whenever
-import com.android.wm.shell.floating.FloatingTasks
-import java.util.*
+import com.android.wm.shell.bubbles.Bubbles
+import java.util.Optional
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -49,8 +49,8 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
 
     @Mock lateinit var context: Context
     @Mock lateinit var noteTaskIntentResolver: NoteTaskIntentResolver
-    @Mock lateinit var floatingTasks: FloatingTasks
-    @Mock lateinit var optionalFloatingTasks: Optional<FloatingTasks>
+    @Mock lateinit var bubbles: Bubbles
+    @Mock lateinit var optionalBubbles: Optional<Bubbles>
     @Mock lateinit var keyguardManager: KeyguardManager
     @Mock lateinit var optionalKeyguardManager: Optional<KeyguardManager>
     @Mock lateinit var optionalUserManager: Optional<UserManager>
@@ -61,7 +61,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
 
         whenever(noteTaskIntentResolver.resolveIntent()).thenReturn(notesIntent)
-        whenever(optionalFloatingTasks.orElse(null)).thenReturn(floatingTasks)
+        whenever(optionalBubbles.orElse(null)).thenReturn(bubbles)
         whenever(optionalKeyguardManager.orElse(null)).thenReturn(keyguardManager)
         whenever(optionalUserManager.orElse(null)).thenReturn(userManager)
         whenever(userManager.isUserUnlocked).thenReturn(true)
@@ -71,7 +71,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
         return NoteTaskController(
             context = context,
             intentResolver = noteTaskIntentResolver,
-            optionalFloatingTasks = optionalFloatingTasks,
+            optionalBubbles = optionalBubbles,
             optionalKeyguardManager = optionalKeyguardManager,
             optionalUserManager = optionalUserManager,
             isEnabled = isEnabled,
@@ -85,16 +85,16 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
         createNoteTaskController().handleSystemKey(KeyEvent.KEYCODE_VIDEO_APP_1)
 
         verify(context).startActivity(notesIntent)
-        verify(floatingTasks, never()).showOrSetStashed(notesIntent)
+        verify(bubbles, never()).showAppBubble(notesIntent)
     }
 
     @Test
-    fun handleSystemKey_keyguardIsUnlocked_shouldStartFloatingTask() {
+    fun handleSystemKey_keyguardIsUnlocked_shouldStartBubbles() {
         whenever(keyguardManager.isKeyguardLocked).thenReturn(false)
 
         createNoteTaskController().handleSystemKey(KeyEvent.KEYCODE_VIDEO_APP_1)
 
-        verify(floatingTasks).showOrSetStashed(notesIntent)
+        verify(bubbles).showAppBubble(notesIntent)
         verify(context, never()).startActivity(notesIntent)
     }
 
@@ -103,17 +103,17 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
         createNoteTaskController().handleSystemKey(KeyEvent.KEYCODE_UNKNOWN)
 
         verify(context, never()).startActivity(notesIntent)
-        verify(floatingTasks, never()).showOrSetStashed(notesIntent)
+        verify(bubbles, never()).showAppBubble(notesIntent)
     }
 
     @Test
-    fun handleSystemKey_floatingTasksIsNull_shouldDoNothing() {
-        whenever(optionalFloatingTasks.orElse(null)).thenReturn(null)
+    fun handleSystemKey_bubblesIsNull_shouldDoNothing() {
+        whenever(optionalBubbles.orElse(null)).thenReturn(null)
 
         createNoteTaskController().handleSystemKey(KeyEvent.KEYCODE_VIDEO_APP_1)
 
         verify(context, never()).startActivity(notesIntent)
-        verify(floatingTasks, never()).showOrSetStashed(notesIntent)
+        verify(bubbles, never()).showAppBubble(notesIntent)
     }
 
     @Test
@@ -123,7 +123,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
         createNoteTaskController().handleSystemKey(KeyEvent.KEYCODE_VIDEO_APP_1)
 
         verify(context, never()).startActivity(notesIntent)
-        verify(floatingTasks, never()).showOrSetStashed(notesIntent)
+        verify(bubbles, never()).showAppBubble(notesIntent)
     }
 
     @Test
@@ -133,7 +133,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
         createNoteTaskController().handleSystemKey(KeyEvent.KEYCODE_VIDEO_APP_1)
 
         verify(context, never()).startActivity(notesIntent)
-        verify(floatingTasks, never()).showOrSetStashed(notesIntent)
+        verify(bubbles, never()).showAppBubble(notesIntent)
     }
 
     @Test
@@ -143,7 +143,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
         createNoteTaskController().handleSystemKey(KeyEvent.KEYCODE_VIDEO_APP_1)
 
         verify(context, never()).startActivity(notesIntent)
-        verify(floatingTasks, never()).showOrSetStashed(notesIntent)
+        verify(bubbles, never()).showAppBubble(notesIntent)
     }
 
     @Test
@@ -151,7 +151,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
         createNoteTaskController(isEnabled = false).handleSystemKey(KeyEvent.KEYCODE_VIDEO_APP_1)
 
         verify(context, never()).startActivity(notesIntent)
-        verify(floatingTasks, never()).showOrSetStashed(notesIntent)
+        verify(bubbles, never()).showAppBubble(notesIntent)
     }
 
     @Test
@@ -161,6 +161,6 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
         createNoteTaskController().handleSystemKey(KeyEvent.KEYCODE_VIDEO_APP_1)
 
         verify(context, never()).startActivity(notesIntent)
-        verify(floatingTasks, never()).showOrSetStashed(notesIntent)
+        verify(bubbles, never()).showAppBubble(notesIntent)
     }
 }
