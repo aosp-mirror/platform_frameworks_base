@@ -249,12 +249,6 @@ object Flags {
     val WM_ENABLE_SHELL_TRANSITIONS =
         SysPropBooleanFlag(1100, "persist.wm.debug.shell_transit", false)
 
-    /** b/170163464: animate bubbles expanded view collapse with home gesture */
-    @JvmField
-    @Keep
-    val BUBBLES_HOME_GESTURE =
-        SysPropBooleanFlag(1101, "persist.wm.debug.bubbles_home_gesture", true)
-
     // TODO(b/254513207): Tracking Bug
     @JvmField
     @Keep
