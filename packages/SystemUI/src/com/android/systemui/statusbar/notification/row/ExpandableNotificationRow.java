@@ -1341,21 +1341,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         return mOnKeyguard;
     }
 
-    public void removeAllChildren() {
-        List<ExpandableNotificationRow> notificationChildren =
-                mChildrenContainer.getAttachedChildren();
-        ArrayList<ExpandableNotificationRow> clonedList = new ArrayList<>(notificationChildren);
-        for (int i = 0; i < clonedList.size(); i++) {
-            ExpandableNotificationRow row = clonedList.get(i);
-            if (row.keepInParent()) {
-                continue;
-            }
-            mChildrenContainer.removeNotification(row);
-            row.setIsChildInGroup(false, null);
-        }
-        onAttachedChildrenCountChanged();
-    }
-
     @Override
     public void dismiss(boolean refocusOnDismiss) {
         super.dismiss(refocusOnDismiss);
