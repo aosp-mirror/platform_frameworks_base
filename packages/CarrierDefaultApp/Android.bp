@@ -10,7 +10,7 @@ package {
 android_app {
     name: "CarrierDefaultApp",
     srcs: ["src/**/*.java"],
-    libs: ["SliceStore"],
+    libs: ["SlicePurchaseController"],
     platform_apis: true,
     certificate: "platform",
     optimize: {

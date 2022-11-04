@@ -8732,7 +8732,8 @@ public class CarrierConfigManager {
      * {@link TelephonyManager#purchasePremiumCapability(int, Executor, Consumer)}
      * returns a failure due to user action or timeout.
      * The maximum number of network boost notifications to show the user are defined in
-     * {@link #KEY_PREMIUM_CAPABILITY_MAXIMUM_NOTIFICATION_COUNT_INT_ARRAY}.
+     * {@link #KEY_PREMIUM_CAPABILITY_MAXIMUM_DAILY_NOTIFICATION_COUNT_INT} and
+     * {@link #KEY_PREMIUM_CAPABILITY_MAXIMUM_MONTHLY_NOTIFICATION_COUNT_INT}.
      *
      * The default value is 30 minutes.
      *
@@ -8744,20 +8745,32 @@ public class CarrierConfigManager {
             "premium_capability_notification_backoff_hysteresis_time_millis_long";
 
     /**
-     * The maximum number of times that we display the notification for a network boost via premium
-     * capabilities when {@link TelephonyManager#purchasePremiumCapability(int, Executor, Consumer)}
+     * The maximum number of times in a day that we display the notification for a network boost
+     * via premium capabilities when
+     * {@link TelephonyManager#purchasePremiumCapability(int, Executor, Consumer)}
      * returns a failure due to user action or timeout.
      *
-     * An int array with 2 values: {max_notifications_per_day, max_notifications_per_month}.
-     *
-     * The default value is {2, 10}, meaning we display a maximum of 2 network boost notifications
-     * per day and 10 notifications per month.
+     * The default value is 2 times.
      *
      * @see TelephonyManager#PURCHASE_PREMIUM_CAPABILITY_RESULT_USER_CANCELED
      * @see TelephonyManager#PURCHASE_PREMIUM_CAPABILITY_RESULT_TIMEOUT
      */
-    public static final String KEY_PREMIUM_CAPABILITY_MAXIMUM_NOTIFICATION_COUNT_INT_ARRAY =
-            "premium_capability_maximum_notification_count_int_array";
+    public static final String KEY_PREMIUM_CAPABILITY_MAXIMUM_DAILY_NOTIFICATION_COUNT_INT =
+            "premium_capability_maximum_daily_notification_count_int";
+
+    /**
+     * The maximum number of times in a month that we display the notification for a network boost
+     * via premium capabilities when
+     * {@link TelephonyManager#purchasePremiumCapability(int, Executor, Consumer)}
+     * returns a failure due to user action or timeout.
+     *
+     * The default value is 10 times.
+     *
+     * @see TelephonyManager#PURCHASE_PREMIUM_CAPABILITY_RESULT_USER_CANCELED
+     * @see TelephonyManager#PURCHASE_PREMIUM_CAPABILITY_RESULT_TIMEOUT
+     */
+    public static final String KEY_PREMIUM_CAPABILITY_MAXIMUM_MONTHLY_NOTIFICATION_COUNT_INT =
+            "premium_capability_maximum_monthly_notification_count_int";
 
     /**
      * The amount of time in milliseconds that the purchase request should be throttled when
@@ -8781,7 +8794,7 @@ public class CarrierConfigManager {
      * During the setup time, calls to
      * {@link TelephonyManager#purchasePremiumCapability(int, Executor, Consumer)} will return
      * {@link TelephonyManager#PURCHASE_PREMIUM_CAPABILITY_RESULT_PENDING_NETWORK_SETUP}.
-     * If the network fails set up a slicing configuration for the premium capability within the
+     * If the network fails to set up a slicing configuration for the premium capability within the
      * setup time, subsequent purchase requests will be allowed to go through again.
      *
      * The default value is 5 minutes.
@@ -8808,7 +8821,7 @@ public class CarrierConfigManager {
      * when connected to {@link TelephonyManager#NETWORK_TYPE_LTE} to purchase and use
      * premium capabilities.
      * If this is {@code false}, applications can only purchase and use premium capabilities when
-     * conencted to {@link TelephonyManager#NETWORK_TYPE_NR}.
+     * connected to {@link TelephonyManager#NETWORK_TYPE_NR}.
      *
      * This is {@code false} by default.
      */
@@ -9507,8 +9520,8 @@ public class CarrierConfigManager {
                 TimeUnit.MINUTES.toMillis(30));
         sDefaults.putLong(KEY_PREMIUM_CAPABILITY_NOTIFICATION_BACKOFF_HYSTERESIS_TIME_MILLIS_LONG,
                 TimeUnit.MINUTES.toMillis(30));
-        sDefaults.putIntArray(KEY_PREMIUM_CAPABILITY_MAXIMUM_NOTIFICATION_COUNT_INT_ARRAY,
-                new int[] {2, 10});
+        sDefaults.putInt(KEY_PREMIUM_CAPABILITY_MAXIMUM_DAILY_NOTIFICATION_COUNT_INT, 2);
+        sDefaults.putInt(KEY_PREMIUM_CAPABILITY_MAXIMUM_MONTHLY_NOTIFICATION_COUNT_INT, 10);
         sDefaults.putLong(
                 KEY_PREMIUM_CAPABILITY_PURCHASE_CONDITION_BACKOFF_HYSTERESIS_TIME_MILLIS_LONG,
                 TimeUnit.MINUTES.toMillis(30));
