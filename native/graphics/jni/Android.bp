@@ -93,7 +93,7 @@ cc_defaults {
     ],
     static_libs: ["libarect"],
     fuzz_config: {
-        cc: ["scroggo@google.com"],
+        cc: ["dichenzhang@google.com","scroggo@google.com"],
         asan_options: [
             "detect_odr_violation=1",
         ],
