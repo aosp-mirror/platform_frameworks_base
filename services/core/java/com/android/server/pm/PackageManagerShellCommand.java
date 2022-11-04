@@ -3630,7 +3630,7 @@ class PackageManagerShellCommand extends ShellCommand {
                 fd = ParcelFileDescriptor.dup(getInFileDescriptor());
             }
             if (sizeBytes <= 0) {
-                getErrPrintWriter().println("Error: must specify a APK size");
+                getErrPrintWriter().println("Error: must specify an APK size");
                 return 1;
             }
 
