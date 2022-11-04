@@ -117,7 +117,7 @@ constructor(
      *
      * @return `true` if the affordance was selected successfully; `false` otherwise.
      */
-    suspend fun select(slotId: String, affordanceId: String): Boolean {
+    fun select(slotId: String, affordanceId: String): Boolean {
         check(isUsingRepository)
 
         val slots = repository.get().getSlotPickerRepresentations()
@@ -152,7 +152,7 @@ constructor(
      * @return `true` if the affordance was successfully removed; `false` otherwise (for example, if
      * the affordance was not on the slot to begin with).
      */
-    suspend fun unselect(slotId: String, affordanceId: String?): Boolean {
+    fun unselect(slotId: String, affordanceId: String?): Boolean {
         check(isUsingRepository)
 
         val slots = repository.get().getSlotPickerRepresentations()
@@ -187,7 +187,7 @@ constructor(
     }
 
     /** Returns affordance IDs indexed by slot ID, for all known slots. */
-    suspend fun getSelections(): Map<String, List<String>> {
+    fun getSelections(): Map<String, List<String>> {
         check(isUsingRepository)
 
         val selections = repository.get().getSelections()

@@ -31,7 +31,6 @@ import com.android.systemui.SystemUIAppComponentFactoryBase.ContextAvailableCall
 import com.android.systemui.keyguard.domain.interactor.KeyguardQuickAffordanceInteractor
 import com.android.systemui.shared.keyguard.data.content.KeyguardQuickAffordanceProviderContract as Contract
 import javax.inject.Inject
-import kotlinx.coroutines.runBlocking
 
 class KeyguardQuickAffordanceProvider :
     ContentProvider(), SystemUIAppComponentFactoryBase.ContextInitializer {
@@ -171,12 +170,11 @@ class KeyguardQuickAffordanceProvider :
             throw IllegalArgumentException("Cannot insert selection, affordance ID was empty!")
         }
 
-        val success = runBlocking {
+        val success =
             interactor.select(
                 slotId = slotId,
                 affordanceId = affordanceId,
             )
-        }
 
         return if (success) {
             Log.d(TAG, "Successfully selected $affordanceId for slot $slotId")
@@ -196,7 +194,7 @@ class KeyguardQuickAffordanceProvider :
                 )
             )
             .apply {
-                val affordanceIdsBySlotId = runBlocking { interactor.getSelections() }
+                val affordanceIdsBySlotId = interactor.getSelections()
                 affordanceIdsBySlotId.entries.forEach { (slotId, affordanceIds) ->
                     affordanceIds.forEach { affordanceId ->
                         addRow(
@@ -271,12 +269,11 @@ class KeyguardQuickAffordanceProvider :
                     )
             }
 
-        val deleted = runBlocking {
+        val deleted =
             interactor.unselect(
                 slotId = slotId,
                 affordanceId = affordanceId,
             )
-        }
 
         return if (deleted) {
             Log.d(TAG, "Successfully unselected $affordanceId for slot $slotId")

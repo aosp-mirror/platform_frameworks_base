@@ -36,8 +36,11 @@ import com.android.systemui.keyguard.data.repository.KeyguardQuickAffordanceRepo
 import com.android.systemui.keyguard.domain.quickaffordance.FakeKeyguardQuickAffordanceRegistry
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancePosition
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.settings.FakeUserTracker
+import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.util.FakeSharedPreferences
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
@@ -50,6 +53,8 @@ import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 import org.junit.runners.Parameterized.Parameter
 import org.junit.runners.Parameterized.Parameters
+import org.mockito.ArgumentMatchers.anyInt
+import org.mockito.ArgumentMatchers.anyString
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.ArgumentMatchers.same
 import org.mockito.Mock
@@ -201,7 +206,6 @@ class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
 
     @Mock private lateinit var lockPatternUtils: LockPatternUtils
     @Mock private lateinit var keyguardStateController: KeyguardStateController
-    @Mock private lateinit var userTracker: UserTracker
     @Mock private lateinit var activityStarter: ActivityStarter
     @Mock private lateinit var animationController: ActivityLaunchAnimator.Controller
     @Mock private lateinit var expandable: Expandable
@@ -214,12 +218,14 @@ class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
     @JvmField @Parameter(3) var needsToUnlockFirst: Boolean = false
     @JvmField @Parameter(4) var startActivity: Boolean = false
     private lateinit var homeControls: FakeKeyguardQuickAffordanceConfig
+    private lateinit var userTracker: UserTracker
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         whenever(expandable.activityLaunchController()).thenReturn(animationController)
 
+        userTracker = FakeUserTracker()
         homeControls =
             FakeKeyguardQuickAffordanceConfig(BuiltInKeyguardQuickAffordanceKeys.HOME_CONTROLS)
         val quickAccessWallet =
@@ -232,8 +238,21 @@ class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
             KeyguardQuickAffordanceRepository(
                 appContext = context,
                 scope = CoroutineScope(IMMEDIATE),
-                backgroundDispatcher = IMMEDIATE,
-                selectionManager = KeyguardQuickAffordanceSelectionManager(),
+                selectionManager =
+                    KeyguardQuickAffordanceSelectionManager(
+                        userFileManager =
+                            mock<UserFileManager>().apply {
+                                whenever(
+                                        getSharedPreferences(
+                                            anyString(),
+                                            anyInt(),
+                                            anyInt(),
+                                        )
+                                    )
+                                    .thenReturn(FakeSharedPreferences())
+                            },
+                        userTracker = userTracker,
+                    ),
                 configs = setOf(homeControls, quickAccessWallet, qrCodeScanner),
             )
         underTest =
@@ -319,7 +338,6 @@ class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
         needStrongAuthAfterBoot: Boolean = true,
         keyguardIsUnlocked: Boolean = false,
     ) {
-        whenever(userTracker.userHandle).thenReturn(mock())
         whenever(lockPatternUtils.getStrongAuthForUser(any()))
             .thenReturn(
                 if (needStrongAuthAfterBoot) {

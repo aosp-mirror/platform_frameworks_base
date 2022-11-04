@@ -38,8 +38,10 @@ import com.android.systemui.keyguard.domain.quickaffordance.FakeKeyguardQuickAff
 import com.android.systemui.keyguard.shared.quickaffordance.ActivationState
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancePosition
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.util.FakeSharedPreferences
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
@@ -56,6 +58,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
 import org.mockito.ArgumentMatchers.anyInt
+import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.verifyZeroInteractions
@@ -119,8 +122,21 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
             KeyguardQuickAffordanceRepository(
                 appContext = context,
                 scope = CoroutineScope(IMMEDIATE),
-                backgroundDispatcher = IMMEDIATE,
-                selectionManager = KeyguardQuickAffordanceSelectionManager(),
+                selectionManager =
+                    KeyguardQuickAffordanceSelectionManager(
+                        userFileManager =
+                            mock<UserFileManager>().apply {
+                                whenever(
+                                        getSharedPreferences(
+                                            anyString(),
+                                            anyInt(),
+                                            anyInt(),
+                                        )
+                                    )
+                                    .thenReturn(FakeSharedPreferences())
+                            },
+                        userTracker = userTracker,
+                    ),
                 configs =
                     setOf(
                         homeControlsQuickAffordanceConfig,

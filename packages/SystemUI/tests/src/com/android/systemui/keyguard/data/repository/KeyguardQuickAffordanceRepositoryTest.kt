@@ -25,6 +25,11 @@ import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanc
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceSelectionManager
 import com.android.systemui.keyguard.shared.model.KeyguardQuickAffordancePickerRepresentation
 import com.android.systemui.keyguard.shared.model.KeyguardSlotPickerRepresentation
+import com.android.systemui.settings.FakeUserTracker
+import com.android.systemui.settings.UserFileManager
+import com.android.systemui.util.FakeSharedPreferences
+import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -36,6 +41,8 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
+import org.mockito.ArgumentMatchers.anyInt
+import org.mockito.ArgumentMatchers.anyString
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -55,8 +62,21 @@ class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
             KeyguardQuickAffordanceRepository(
                 appContext = context,
                 scope = CoroutineScope(IMMEDIATE),
-                backgroundDispatcher = IMMEDIATE,
-                selectionManager = KeyguardQuickAffordanceSelectionManager(),
+                selectionManager =
+                    KeyguardQuickAffordanceSelectionManager(
+                        userFileManager =
+                            mock<UserFileManager>().apply {
+                                whenever(
+                                        getSharedPreferences(
+                                            anyString(),
+                                            anyInt(),
+                                            anyInt(),
+                                        )
+                                    )
+                                    .thenReturn(FakeSharedPreferences())
+                            },
+                        userTracker = FakeUserTracker(),
+                    ),
                 configs = setOf(config1, config2),
             )
     }
