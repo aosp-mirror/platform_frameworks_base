@@ -27,4 +27,6 @@
   <string name="passwords">passwords</string>
   <string name="sign_ins">sign-ins</string>
   <string name="createOptionInfo_icon_description">CreateOptionInfo credentialType icon</string>
+  <!-- Spoken content description of an element which will close the sheet when clicked. -->
+  <string name="close_sheet">"Close sheet"</string>
 </resources>
