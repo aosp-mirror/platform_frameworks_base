@@ -160,4 +160,9 @@ interface IInputManager {
     void registerBatteryListener(int deviceId, IInputDeviceBatteryListener listener);
 
     void unregisterBatteryListener(int deviceId, IInputDeviceBatteryListener listener);
+
+    @EnforcePermission("MONITOR_INPUT")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.MONITOR_INPUT)")
+    void pilferPointers(IBinder inputChannelToken);
 }
