@@ -16,6 +16,13 @@
 
 package com.android.server.am;
 
+import static com.android.server.am.BroadcastProcessQueue.REASON_CONTAINS_ALARM;
+import static com.android.server.am.BroadcastProcessQueue.REASON_CONTAINS_FOREGROUND;
+import static com.android.server.am.BroadcastProcessQueue.REASON_CONTAINS_INTERACTIVE;
+import static com.android.server.am.BroadcastProcessQueue.REASON_CONTAINS_MANIFEST;
+import static com.android.server.am.BroadcastProcessQueue.REASON_CONTAINS_ORDERED;
+import static com.android.server.am.BroadcastProcessQueue.REASON_CONTAINS_PRIORITIZED;
+import static com.android.server.am.BroadcastProcessQueue.REASON_CONTAINS_RESULT_TO;
 import static com.android.server.am.BroadcastProcessQueue.insertIntoRunnableList;
 import static com.android.server.am.BroadcastProcessQueue.removeFromRunnableList;
 import static com.android.server.am.BroadcastQueueTest.CLASS_GREEN;
@@ -36,13 +43,16 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 import android.annotation.NonNull;
 import android.app.Activity;
 import android.app.AppOpsManager;
 import android.app.BroadcastOptions;
+import android.content.IIntentReceiver;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ResolveInfo;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.BundleMerger;
@@ -140,6 +150,18 @@ public class BroadcastQueueModernImplTest {
         }
     }
 
+    private static Intent makeMockIntent() {
+        return mock(Intent.class);
+    }
+
+    private static ResolveInfo makeMockManifestReceiver() {
+        return mock(ResolveInfo.class);
+    }
+
+    private static BroadcastFilter makeMockRegisteredReceiver() {
+        return mock(BroadcastFilter.class);
+    }
+
     private BroadcastRecord makeBroadcastRecord(Intent intent) {
         return makeBroadcastRecord(intent, BroadcastOptions.makeBasic(),
                 List.of(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN)), false);
@@ -150,6 +172,10 @@ public class BroadcastQueueModernImplTest {
                 List.of(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN)), true);
     }
 
+    private BroadcastRecord makeBroadcastRecord(Intent intent, List receivers) {
+        return makeBroadcastRecord(intent, BroadcastOptions.makeBasic(), receivers, false);
+    }
+
     private BroadcastRecord makeBroadcastRecord(Intent intent, BroadcastOptions options) {
         return makeBroadcastRecord(intent, options,
                 List.of(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN)), false);
@@ -157,8 +183,13 @@ public class BroadcastQueueModernImplTest {
 
     private BroadcastRecord makeBroadcastRecord(Intent intent, BroadcastOptions options,
             List receivers, boolean ordered) {
+        return makeBroadcastRecord(intent, options, receivers, null, ordered);
+    }
+
+    private BroadcastRecord makeBroadcastRecord(Intent intent, BroadcastOptions options,
+            List receivers, IIntentReceiver resultTo, boolean ordered) {
         return new BroadcastRecord(mImpl, intent, mProcess, PACKAGE_RED, null, 21, 42, false, null,
-                null, null, null, AppOpsManager.OP_NONE, options, receivers, null, null,
+                null, null, null, AppOpsManager.OP_NONE, options, receivers, null, resultTo,
                 Activity.RESULT_OK, null, null, ordered, false, false, UserHandle.USER_SYSTEM,
                 false, null, false, null);
     }
@@ -287,7 +318,8 @@ public class BroadcastQueueModernImplTest {
                 PACKAGE_GREEN, getUidForPackage(PACKAGE_GREEN));
 
         final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-        final BroadcastRecord airplaneRecord = makeBroadcastRecord(airplane);
+        final BroadcastRecord airplaneRecord = makeBroadcastRecord(airplane,
+                List.of(makeMockRegisteredReceiver()));
         queue.enqueueOrReplaceBroadcast(airplaneRecord, 0);
 
         queue.setProcessCached(false);
@@ -367,7 +399,8 @@ public class BroadcastQueueModernImplTest {
                 PACKAGE_GREEN, getUidForPackage(PACKAGE_GREEN));
 
         final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-        final BroadcastRecord airplaneRecord = makeBroadcastRecord(airplane);
+        final BroadcastRecord airplaneRecord = makeBroadcastRecord(airplane,
+                List.of(makeMockRegisteredReceiver()));
         queue.enqueueOrReplaceBroadcast(airplaneRecord, 0);
 
         mConstants.MAX_PENDING_BROADCASTS = 128;
@@ -379,6 +412,80 @@ public class BroadcastQueueModernImplTest {
         queue.invalidateRunnableAt();
         assertThat(queue.getRunnableAt()).isAtMost(airplaneRecord.enqueueTime);
         assertEquals(BroadcastProcessQueue.REASON_MAX_PENDING, queue.getRunnableAtReason());
+    }
+
+    /**
+     * Verify that a cached process that would normally be delayed becomes
+     * immediately runnable when the given broadcast is enqueued.
+     */
+    private void doRunnableAt_Cached(BroadcastRecord testRecord, int testRunnableAtReason) {
+        final BroadcastProcessQueue queue = new BroadcastProcessQueue(mConstants,
+                PACKAGE_GREEN, getUidForPackage(PACKAGE_GREEN));
+        queue.setProcessCached(true);
+
+        final BroadcastRecord lazyRecord = makeBroadcastRecord(
+                new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED),
+                List.of(makeMockRegisteredReceiver()));
+
+        queue.enqueueOrReplaceBroadcast(lazyRecord, 0);
+        assertThat(queue.getRunnableAt()).isGreaterThan(lazyRecord.enqueueTime);
+        assertThat(queue.getRunnableAtReason()).isNotEqualTo(testRunnableAtReason);
+
+        queue.enqueueOrReplaceBroadcast(testRecord, 0);
+        assertThat(queue.getRunnableAt()).isAtMost(testRecord.enqueueTime);
+        assertThat(queue.getRunnableAtReason()).isEqualTo(testRunnableAtReason);
+    }
+
+    @Test
+    public void testRunnableAt_Cached_Manifest() {
+        doRunnableAt_Cached(makeBroadcastRecord(makeMockIntent(), null,
+                List.of(makeMockManifestReceiver()), null, false), REASON_CONTAINS_MANIFEST);
+    }
+
+    @Test
+    public void testRunnableAt_Cached_Ordered() {
+        doRunnableAt_Cached(makeBroadcastRecord(makeMockIntent(), null,
+                List.of(makeMockRegisteredReceiver()), null, true), REASON_CONTAINS_ORDERED);
+    }
+
+    @Test
+    public void testRunnableAt_Cached_ResultTo() {
+        final IIntentReceiver resultTo = mock(IIntentReceiver.class);
+        doRunnableAt_Cached(makeBroadcastRecord(makeMockIntent(), null,
+                List.of(makeMockRegisteredReceiver()), resultTo, false), REASON_CONTAINS_RESULT_TO);
+    }
+
+    @Test
+    public void testRunnableAt_Cached_Foreground() {
+        final Intent foregroundIntent = new Intent();
+        foregroundIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        doRunnableAt_Cached(makeBroadcastRecord(foregroundIntent, null,
+                List.of(makeMockRegisteredReceiver()), null, false), REASON_CONTAINS_FOREGROUND);
+    }
+
+    @Test
+    public void testRunnableAt_Cached_Interactive() {
+        final BroadcastOptions options = BroadcastOptions.makeBasic();
+        options.setInteractiveBroadcast(true);
+        doRunnableAt_Cached(makeBroadcastRecord(makeMockIntent(), options,
+                List.of(makeMockRegisteredReceiver()), null, false), REASON_CONTAINS_INTERACTIVE);
+    }
+
+    @Test
+    public void testRunnableAt_Cached_Alarm() {
+        final BroadcastOptions options = BroadcastOptions.makeBasic();
+        options.setAlarmBroadcast(true);
+        doRunnableAt_Cached(makeBroadcastRecord(makeMockIntent(), options,
+                List.of(makeMockRegisteredReceiver()), null, false), REASON_CONTAINS_ALARM);
+    }
+
+    @Test
+    public void testRunnableAt_Cached_Prioritized() {
+        final List receivers = List.of(
+                withPriority(makeManifestReceiver(PACKAGE_RED, PACKAGE_RED), 10),
+                withPriority(makeManifestReceiver(PACKAGE_GREEN, PACKAGE_GREEN), -10));
+        doRunnableAt_Cached(makeBroadcastRecord(makeMockIntent(), null,
+                receivers, null, false), REASON_CONTAINS_PRIORITIZED);
     }
 
     /**
