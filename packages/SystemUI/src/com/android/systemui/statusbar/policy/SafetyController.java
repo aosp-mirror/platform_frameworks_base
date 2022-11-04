@@ -78,8 +78,7 @@ public class SafetyController implements
         synchronized (mListeners) {
             mListeners.add(listener);
             if (mListeners.size() == 1) {
-                mContext.registerReceiver(mPermControllerChangeReceiver, PKG_CHANGE_INTENT_FILTER,
-                        Context.RECEIVER_EXPORTED_UNAUDITED);
+                mContext.registerReceiver(mPermControllerChangeReceiver, PKG_CHANGE_INTENT_FILTER);
                 mBgHandler.post(() -> {
                     mSafetyCenterEnabled = mSafetyCenterManager.isSafetyCenterEnabled();
                     listener.onSafetyCenterEnableChanged(isSafetyCenterEnabled());
