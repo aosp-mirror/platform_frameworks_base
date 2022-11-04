@@ -814,12 +814,25 @@ package android.app {
   }
 
   public final class GameModeInfo implements android.os.Parcelable {
-    ctor public GameModeInfo(int, @NonNull int[]);
+    ctor @Deprecated public GameModeInfo(int, @NonNull int[]);
     method public int describeContents();
     method public int getActiveGameMode();
     method @NonNull public int[] getAvailableGameModes();
+    method @NonNull public int[] getOptedInGameModes();
+    method public boolean isDownscalingAllowed();
+    method public boolean isFpsOverrideAllowed();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.GameModeInfo> CREATOR;
+  }
+
+  public static final class GameModeInfo.Builder {
+    ctor public GameModeInfo.Builder();
+    method @NonNull public android.app.GameModeInfo build();
+    method @NonNull public android.app.GameModeInfo.Builder setActiveGameMode(@NonNull int);
+    method @NonNull public android.app.GameModeInfo.Builder setAvailableGameModes(@NonNull int[]);
+    method @NonNull public android.app.GameModeInfo.Builder setDownscalingAllowed(boolean);
+    method @NonNull public android.app.GameModeInfo.Builder setFpsOverrideAllowed(boolean);
+    method @NonNull public android.app.GameModeInfo.Builder setOptedInGameModes(@NonNull int[]);
   }
 
   public abstract class InstantAppResolverService extends android.app.Service {

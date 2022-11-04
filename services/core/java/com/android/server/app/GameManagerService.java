@@ -763,6 +763,21 @@ public final class GameManagerService extends IGameManagerService.Stub {
         }
 
         /**
+         * Get an array of a package's opted-in game modes.
+         */
+        public @GameMode int[] getOptedInGameModes() {
+            if (mBatteryModeOptedIn && mPerfModeOptedIn) {
+                return new int[]{GameManager.GAME_MODE_BATTERY, GameManager.GAME_MODE_PERFORMANCE};
+            } else if (mBatteryModeOptedIn) {
+                return new int[]{GameManager.GAME_MODE_BATTERY};
+            } else if (mPerfModeOptedIn) {
+                return new int[]{GameManager.GAME_MODE_PERFORMANCE};
+            } else {
+                return new int[]{};
+            }
+        }
+
+        /**
          * Get a GameModeConfiguration for a given game mode.
          *
          * @return The package's GameModeConfiguration for the provided mode or null if absent
@@ -1022,9 +1037,20 @@ public final class GameManagerService extends IGameManagerService.Stub {
         }
 
         final @GameMode int activeGameMode = getGameModeFromSettings(packageName, userId);
-        final @GameMode int[] availableGameModes = getAvailableGameModesUnchecked(packageName);
-
-        return new GameModeInfo(activeGameMode, availableGameModes);
+        final GamePackageConfiguration config = getConfig(packageName, userId);
+        if (config != null) {
+            final @GameMode int[] optedInGameModes = config.getOptedInGameModes();
+            final @GameMode int[] availableGameModes = config.getAvailableGameModes();
+            return new GameModeInfo.Builder()
+                    .setActiveGameMode(activeGameMode)
+                    .setAvailableGameModes(availableGameModes)
+                    .setOptedInGameModes(optedInGameModes)
+                    .setDownscalingAllowed(config.mAllowDownscale)
+                    .setFpsOverrideAllowed(config.mAllowFpsOverride)
+                    .build();
+        } else {
+            return new GameModeInfo.Builder().setActiveGameMode(activeGameMode).build();
+        }
     }
 
     /**
