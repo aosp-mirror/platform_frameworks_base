@@ -57,6 +57,5 @@ android {
 }
 
 dependencies {
-    implementation(project(":spa"))
-    implementation "com.github.PhilJay:MPAndroidChart:v3.1.0-alpha"
+    implementation project(":spa")
 }

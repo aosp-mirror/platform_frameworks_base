@@ -26,6 +26,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Singleton;
 import android.view.RemoteAnimationAdapter;
+import android.view.SurfaceControl;
 
 /**
  * Base class for organizing specific types of windows like Tasks and DisplayAreas
@@ -182,6 +183,26 @@ public class WindowOrganizer {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Use WM's transaction-queue instead of Shell's independent one. This is necessary
+     * if WM and Shell need to coordinate transactions (eg. for shell transitions).
+     * @return true if successful, false otherwise.
+     * @hide
+     */
+    public boolean shareTransactionQueue() {
+        final IBinder wmApplyToken;
+        try {
+            wmApplyToken = getWindowOrganizerController().getApplyToken();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        if (wmApplyToken == null) {
+            return false;
+        }
+        SurfaceControl.Transaction.setDefaultApplyToken(wmApplyToken);
+        return true;
     }
 
     static IWindowOrganizerController getWindowOrganizerController() {

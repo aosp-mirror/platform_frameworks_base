@@ -37,6 +37,8 @@ import com.android.settingslib.spaprivileged.template.common.WorkProfilePager
 
 /**
  * The full screen template for an App List page.
+ *
+ * @param header the description header appears before all the applications.
  */
 @Composable
 fun <T : AppRecord> AppListPage(
@@ -44,6 +46,7 @@ fun <T : AppRecord> AppListPage(
     listModel: AppListModel<T>,
     showInstantApps: Boolean = false,
     primaryUserOnly: Boolean = false,
+    header: @Composable () -> Unit = {},
     appItem: @Composable (itemState: AppListItemModel<T>) -> Unit,
 ) {
     val showSystem = rememberSaveable { mutableStateOf(false) }
@@ -59,14 +62,17 @@ fun <T : AppRecord> AppListPage(
                 val selectedOption = rememberSaveable { mutableStateOf(0) }
                 Spinner(options, selectedOption.value) { selectedOption.value = it }
                 AppList(
-                    appListConfig = AppListConfig(
+                    config = AppListConfig(
                         userId = userInfo.id,
                         showInstantApps = showInstantApps,
                     ),
                     listModel = listModel,
-                    showSystem = showSystem,
-                    option = selectedOption,
-                    searchQuery = searchQuery,
+                    state = AppListState(
+                        showSystem = showSystem,
+                        option = selectedOption,
+                        searchQuery = searchQuery,
+                    ),
+                    header = header,
                     appItem = appItem,
                     bottomPadding = bottomPadding,
                 )

@@ -18434,7 +18434,7 @@ package android.hardware.camera2.params {
     method public android.graphics.Point getLeftEyePosition();
     method public android.graphics.Point getMouthPosition();
     method public android.graphics.Point getRightEyePosition();
-    method public int getScore();
+    method @IntRange(from=android.hardware.camera2.params.Face.SCORE_MIN, to=android.hardware.camera2.params.Face.SCORE_MAX) public int getScore();
     field public static final int ID_UNSUPPORTED = -1; // 0xffffffff
     field public static final int SCORE_MAX = 100; // 0x64
     field public static final int SCORE_MIN = 1; // 0x1
@@ -18449,7 +18449,7 @@ package android.hardware.camera2.params {
     method @NonNull public android.hardware.camera2.params.Face.Builder setLeftEyePosition(@NonNull android.graphics.Point);
     method @NonNull public android.hardware.camera2.params.Face.Builder setMouthPosition(@NonNull android.graphics.Point);
     method @NonNull public android.hardware.camera2.params.Face.Builder setRightEyePosition(@NonNull android.graphics.Point);
-    method @NonNull public android.hardware.camera2.params.Face.Builder setScore(int);
+    method @NonNull public android.hardware.camera2.params.Face.Builder setScore(@IntRange(from=android.hardware.camera2.params.Face.SCORE_MIN, to=android.hardware.camera2.params.Face.SCORE_MAX) int);
   }
 
   public final class InputConfiguration {
@@ -50112,7 +50112,7 @@ package android.view {
     method public void dispatchCreateViewTranslationRequest(@NonNull java.util.Map<android.view.autofill.AutofillId,long[]>, @NonNull int[], @NonNull android.view.translation.TranslationCapability, @NonNull java.util.List<android.view.translation.ViewTranslationRequest>);
     method public void dispatchDisplayHint(int);
     method public boolean dispatchDragEvent(android.view.DragEvent);
-    method protected void dispatchDraw(android.graphics.Canvas);
+    method protected void dispatchDraw(@NonNull android.graphics.Canvas);
     method public void dispatchDrawableHotspotChanged(float, float);
     method @CallSuper public void dispatchFinishTemporaryDetach();
     method protected boolean dispatchGenericFocusedEvent(android.view.MotionEvent);
@@ -50150,7 +50150,7 @@ package android.view {
     method @NonNull public android.view.WindowInsetsAnimation.Bounds dispatchWindowInsetsAnimationStart(@NonNull android.view.WindowInsetsAnimation, @NonNull android.view.WindowInsetsAnimation.Bounds);
     method @Deprecated public void dispatchWindowSystemUiVisiblityChanged(int);
     method public void dispatchWindowVisibilityChanged(int);
-    method @CallSuper public void draw(android.graphics.Canvas);
+    method @CallSuper public void draw(@NonNull android.graphics.Canvas);
     method @CallSuper public void drawableHotspotChanged(float, float);
     method @CallSuper protected void drawableStateChanged();
     method public android.view.View findFocus();
@@ -50443,9 +50443,9 @@ package android.view {
     method @CallSuper protected void onDetachedFromWindow();
     method protected void onDisplayHint(int);
     method public boolean onDragEvent(android.view.DragEvent);
-    method protected void onDraw(android.graphics.Canvas);
-    method public void onDrawForeground(android.graphics.Canvas);
-    method protected final void onDrawScrollBars(android.graphics.Canvas);
+    method protected void onDraw(@NonNull android.graphics.Canvas);
+    method public void onDrawForeground(@NonNull android.graphics.Canvas);
+    method protected final void onDrawScrollBars(@NonNull android.graphics.Canvas);
     method public boolean onFilterTouchEventForSecurity(android.view.MotionEvent);
     method @CallSuper protected void onFinishInflate();
     method public void onFinishTemporaryDetach();
@@ -50931,7 +50931,7 @@ package android.view {
     ctor public View.DragShadowBuilder(android.view.View);
     ctor public View.DragShadowBuilder();
     method public final android.view.View getView();
-    method public void onDrawShadow(android.graphics.Canvas);
+    method public void onDrawShadow(@NonNull android.graphics.Canvas);
     method public void onProvideShadowMetrics(android.graphics.Point, android.graphics.Point);
   }
 
@@ -51161,7 +51161,7 @@ package android.view {
     method public void dispatchSetActivated(boolean);
     method public void dispatchSetSelected(boolean);
     method protected void dispatchThawSelfOnly(android.util.SparseArray<android.os.Parcelable>);
-    method protected boolean drawChild(android.graphics.Canvas, android.view.View, long);
+    method protected boolean drawChild(@NonNull android.graphics.Canvas, android.view.View, long);
     method public void endViewTransition(android.view.View);
     method public android.view.View focusSearch(android.view.View, int);
     method public void focusableViewAvailable(android.view.View);

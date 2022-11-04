@@ -44,8 +44,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.SystemClockTime;
 import com.android.server.SystemClockTime.TimeConfidence;
 import com.android.server.timezonedetector.ArrayMapWithHistory;
-import com.android.server.timezonedetector.ConfigurationChangeListener;
 import com.android.server.timezonedetector.ReferenceWithHistory;
+import com.android.server.timezonedetector.StateChangeListener;
 
 import java.io.PrintWriter;
 import java.time.Duration;
@@ -136,11 +136,11 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
     public interface Environment {
 
         /**
-         * Sets a {@link ConfigurationChangeListener} that will be invoked when there are any
-         * changes that could affect the content of {@link ConfigurationInternal}.
+         * Sets a {@link StateChangeListener} that will be invoked when there are any changes that
+         * could affect the content of {@link ConfigurationInternal}.
          * This is invoked during system server setup.
          */
-        void setConfigurationInternalChangeListener(@NonNull ConfigurationChangeListener listener);
+        void setConfigurationInternalChangeListener(@NonNull StateChangeListener listener);
 
         /** Returns the {@link ConfigurationInternal} for the current user. */
         @NonNull ConfigurationInternal getCurrentUserConfigurationInternal();

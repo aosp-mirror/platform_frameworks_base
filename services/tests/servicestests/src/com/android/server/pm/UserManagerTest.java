@@ -599,6 +599,7 @@ public final class UserManagerTest {
         // Check that this new user has the expected properties (relative to the defaults)
         // provided that the test caller has the necessary permissions.
         assertThat(userProps.getShowInLauncher()).isEqualTo(typeProps.getShowInLauncher());
+        assertThat(userProps.getShowInSettings()).isEqualTo(typeProps.getShowInSettings());
         assertThrows(SecurityException.class, userProps::getStartWithParent);
     }
 

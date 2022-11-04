@@ -40,7 +40,7 @@ import android.os.TimestampedValue;
 
 import com.android.server.SystemClockTime.TimeConfidence;
 import com.android.server.timedetector.TimeDetectorStrategy.Origin;
-import com.android.server.timezonedetector.ConfigurationChangeListener;
+import com.android.server.timezonedetector.StateChangeListener;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -1821,7 +1821,7 @@ public class TimeDetectorStrategyImplTest {
         private long mElapsedRealtimeMillis;
         private long mSystemClockMillis;
         private int mSystemClockConfidence = TIME_CONFIDENCE_LOW;
-        private ConfigurationChangeListener mConfigurationInternalChangeListener;
+        private StateChangeListener mConfigurationInternalChangeListener;
 
         // Tracking operations.
         private boolean mSystemClockWasSet;
@@ -1837,7 +1837,7 @@ public class TimeDetectorStrategyImplTest {
         }
 
         @Override
-        public void setConfigurationInternalChangeListener(ConfigurationChangeListener listener) {
+        public void setConfigurationInternalChangeListener(StateChangeListener listener) {
             mConfigurationInternalChangeListener = Objects.requireNonNull(listener);
         }
 

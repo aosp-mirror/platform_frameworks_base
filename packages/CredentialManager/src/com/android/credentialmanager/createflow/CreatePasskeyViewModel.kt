@@ -73,21 +73,6 @@ class CreatePasskeyViewModel(
     )
   }
 
-  fun onCreateOptionSelected(entryKey: String, entrySubkey: String) {
-    Log.d(
-      "Account Selector",
-      "Option selected for creation: {key = $entryKey, subkey = $entrySubkey}"
-    )
-    CredentialManagerRepo.getInstance().onOptionSelected(
-      uiState.activeEntry?.activeProvider!!.name,
-      entryKey,
-      entrySubkey
-    )
-    dialogResult.value = DialogResult(
-      ResultState.COMPLETE,
-    )
-  }
-
   fun getProviderInfoByName(providerName: String): ProviderInfo {
     return uiState.providers.single {
       it.name.equals(providerName)
@@ -126,18 +111,18 @@ class CreatePasskeyViewModel(
   }
 
   fun onPrimaryCreateOptionInfoSelected() {
-    var createOptionEntryKey = uiState.activeEntry?.activeCreateOptionInfo?.entryKey
-    var createOptionEntrySubkey = uiState.activeEntry?.activeCreateOptionInfo?.entrySubkey
+    val entryKey = uiState.activeEntry?.activeEntryInfo?.entryKey
+    val entrySubkey = uiState.activeEntry?.activeEntryInfo?.entrySubkey
     Log.d(
       "Account Selector",
       "Option selected for creation: " +
-              "{key = $createOptionEntryKey, subkey = $createOptionEntrySubkey}"
+              "{key = $entryKey, subkey = $entrySubkey}"
     )
-    if (createOptionEntryKey != null && createOptionEntrySubkey != null) {
+    if (entryKey != null && entrySubkey != null) {
       CredentialManagerRepo.getInstance().onOptionSelected(
         uiState.activeEntry?.activeProvider!!.name,
-        createOptionEntryKey,
-        createOptionEntrySubkey
+        entryKey,
+        entrySubkey
       )
     } else {
       TODO("Gracefully handle illegal state.")

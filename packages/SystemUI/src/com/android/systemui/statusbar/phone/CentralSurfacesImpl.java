@@ -928,7 +928,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         }
         mCommandQueueCallbacks.onSystemBarAttributesChanged(mDisplayId, result.mAppearance,
                 result.mAppearanceRegions, result.mNavbarColorManagedByIme, result.mBehavior,
-                result.mRequestedVisibilities, result.mPackageName, result.mLetterboxDetails);
+                result.mRequestedVisibleTypes, result.mPackageName, result.mLetterboxDetails);
 
         // StatusBarManagerService has a back up of IME token and it's restored here.
         mCommandQueueCallbacks.setImeWindowStatus(mDisplayId, result.mImeToken,
@@ -1510,11 +1510,12 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     protected void startKeyguard() {
         Trace.beginSection("CentralSurfaces#startKeyguard");
         mBiometricUnlockController = mBiometricUnlockControllerLazy.get();
-        mBiometricUnlockController.setBiometricModeListener(
+        mBiometricUnlockController.addBiometricModeListener(
                 new BiometricUnlockController.BiometricModeListener() {
                     @Override
                     public void onResetMode() {
                         setWakeAndUnlocking(false);
+                        notifyBiometricAuthModeChanged();
                     }
 
                     @Override
@@ -1525,11 +1526,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                             case BiometricUnlockController.MODE_WAKE_AND_UNLOCK:
                                 setWakeAndUnlocking(true);
                         }
-                    }
-
-                    @Override
-                    public void notifyBiometricAuthModeChanged() {
-                        CentralSurfacesImpl.this.notifyBiometricAuthModeChanged();
+                        notifyBiometricAuthModeChanged();
                     }
 
                     private void setWakeAndUnlocking(boolean wakeAndUnlocking) {

@@ -59,9 +59,11 @@ public class UserManagerServiceUserPropertiesTest {
         final UserProperties defaultProps = new UserProperties.Builder()
                 .setShowInLauncher(21)
                 .setStartWithParent(false)
+                .setShowInSettings(45)
                 .build();
         final UserProperties actualProps = new UserProperties(defaultProps);
         actualProps.setShowInLauncher(14);
+        actualProps.setShowInSettings(32);
 
         // Write the properties to xml.
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -99,10 +101,12 @@ public class UserManagerServiceUserPropertiesTest {
         final UserProperties defaultProps = new UserProperties.Builder()
                 .setShowInLauncher(2145)
                 .setStartWithParent(true)
+                .setShowInSettings(3452)
                 .build();
         final UserProperties orig = new UserProperties(defaultProps);
         orig.setShowInLauncher(2841);
         orig.setStartWithParent(false);
+        orig.setShowInSettings(1437);
 
         // Test every permission level. (Currently, it's linear so it's easy.)
         for (int permLevel = 0; permLevel < 4; permLevel++) {
@@ -140,6 +144,9 @@ public class UserManagerServiceUserPropertiesTest {
         assertEqualGetterOrThrows(orig::getStartWithParent, copy::getStartWithParent, exposeAll);
 
         // Items requiring hasManagePermission - put them here using hasManagePermission.
+        assertEqualGetterOrThrows(orig::getShowInSettings, copy::getShowInSettings,
+                hasManagePermission);
+
         // Items requiring hasQueryPermission - put them here using hasQueryPermission.
 
         // Items with no permission requirements.
@@ -182,5 +189,6 @@ public class UserManagerServiceUserPropertiesTest {
         assertThat(expected.getPropertiesPresent()).isEqualTo(actual.getPropertiesPresent());
         assertThat(expected.getShowInLauncher()).isEqualTo(actual.getShowInLauncher());
         assertThat(expected.getStartWithParent()).isEqualTo(actual.getStartWithParent());
+        assertThat(expected.getShowInSettings()).isEqualTo(actual.getShowInSettings());
     }
 }

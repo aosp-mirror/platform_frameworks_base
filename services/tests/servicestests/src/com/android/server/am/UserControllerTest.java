@@ -24,7 +24,6 @@ import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
 import static android.app.ActivityManagerInternal.ALLOW_NON_FULL_IN_PROFILE;
 import static android.app.ActivityManagerInternal.ALLOW_PROFILES_OR_NON_FULL;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-import static android.os.UserHandle.USER_SYSTEM;
 import static android.testing.DexmakerShareClassLoaderRule.runWithDexmakerShareClassLoader;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
@@ -403,7 +402,7 @@ public class UserControllerTest {
         verify(mInjector, times(0)).dismissKeyguard(any(), anyString());
         verify(mInjector.getWindowManager(), times(1)).stopFreezingScreen();
         continueUserSwitchAssertions(TEST_USER_ID, false);
-        verifyOnUserStarting(USER_SYSTEM, /* visible= */ false);
+        verifySystemUserVisibilityChangedNotified(/* visible= */ false);
     }
 
     @Test
@@ -424,7 +423,7 @@ public class UserControllerTest {
         verify(mInjector, times(1)).dismissKeyguard(any(), anyString());
         verify(mInjector.getWindowManager(), times(1)).stopFreezingScreen();
         continueUserSwitchAssertions(TEST_USER_ID, false);
-        verifyOnUserStarting(USER_SYSTEM, /* visible= */ false);
+        verifySystemUserVisibilityChangedNotified(/* visible= */ false);
     }
 
     @Test
@@ -531,7 +530,7 @@ public class UserControllerTest {
         assertFalse(mUserController.canStartMoreUsers());
         assertEquals(Arrays.asList(new Integer[] {0, TEST_USER_ID1, TEST_USER_ID2}),
                 mUserController.getRunningUsersLU());
-        verifyOnUserStarting(USER_SYSTEM, /* visible= */ false);
+        verifySystemUserVisibilityChangedNotified(/* visible= */ false);
     }
 
     /**
@@ -964,8 +963,8 @@ public class UserControllerTest {
         verify(mInjector.getUserManagerInternal(), never()).unassignUserFromDisplay(userId);
     }
 
-    private void verifyOnUserStarting(@UserIdInt int userId, boolean visible) {
-        verify(mInjector).onUserStarting(userId, visible);
+    private void verifySystemUserVisibilityChangedNotified(boolean visible) {
+        verify(mInjector).notifySystemUserVisibilityChanged(visible);
     }
 
     // Should be public to allow mocking
@@ -1107,6 +1106,11 @@ public class UserControllerTest {
         @Override
         void onUserStarting(@UserIdInt int userId, boolean visible) {
             Log.i(TAG, "onUserStarting(" + userId + ", " + visible + ")");
+        }
+
+        @Override
+        void notifySystemUserVisibilityChanged(boolean visible) {
+            Log.i(TAG, "notifySystemUserVisibilityChanged(" + visible + ")");
         }
     }
 

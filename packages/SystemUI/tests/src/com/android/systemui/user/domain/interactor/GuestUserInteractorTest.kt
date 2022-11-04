@@ -23,6 +23,8 @@ import android.os.UserHandle
 import android.os.UserManager
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
+import com.android.systemui.GuestResetOrExitSessionReceiver
+import com.android.systemui.GuestResumeSessionReceiver
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.user.data.repository.FakeUserRepository
@@ -55,6 +57,8 @@ class GuestUserInteractorTest : SysuiTestCase() {
     @Mock private lateinit var dismissDialog: () -> Unit
     @Mock private lateinit var selectUser: (Int) -> Unit
     @Mock private lateinit var switchUser: (Int) -> Unit
+    @Mock private lateinit var resumeSessionReceiver: GuestResumeSessionReceiver
+    @Mock private lateinit var resetOrExitSessionReceiver: GuestResetOrExitSessionReceiver
 
     private lateinit var underTest: GuestUserInteractor
 
@@ -87,7 +91,15 @@ class GuestUserInteractorTest : SysuiTestCase() {
                         repository = repository,
                     ),
                 uiEventLogger = uiEventLogger,
+                resumeSessionReceiver = resumeSessionReceiver,
+                resetOrExitSessionReceiver = resetOrExitSessionReceiver,
             )
+    }
+
+    @Test
+    fun `registers broadcast receivers`() {
+        verify(resumeSessionReceiver).register()
+        verify(resetOrExitSessionReceiver).register()
     }
 
     @Test

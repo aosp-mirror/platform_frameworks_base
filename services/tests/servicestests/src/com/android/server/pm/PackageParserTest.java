@@ -676,27 +676,32 @@ public class PackageParserTest {
         final File testFile = extractFile(TEST_APP4_APK);
         try {
             final ParsedPackage pkg = new TestPackageParser2().parsePackage(testFile, 0, false);
+            var pkgSetting = mockPkgSetting(pkg);
             ApplicationInfo appInfo = PackageInfoUtils.generateApplicationInfo(pkg, 0,
-                    PackageUserStateInternal.DEFAULT, 0, null);
+                    PackageUserStateInternal.DEFAULT, 0, pkgSetting);
             for (ParsedActivity activity : pkg.getActivities()) {
                 assertNotNull(activity.getMetaData());
                 assertNull(PackageInfoUtils.generateActivityInfo(pkg, activity, 0,
-                        PackageUserStateInternal.DEFAULT, appInfo, 0, null).metaData);
+                        PackageUserStateInternal.DEFAULT, appInfo, 0, pkgSetting)
+                        .metaData);
             }
             for (ParsedProvider provider : pkg.getProviders()) {
                 assertNotNull(provider.getMetaData());
                 assertNull(PackageInfoUtils.generateProviderInfo(pkg, provider, 0,
-                        PackageUserStateInternal.DEFAULT, appInfo, 0, null).metaData);
+                        PackageUserStateInternal.DEFAULT, appInfo, 0, pkgSetting)
+                        .metaData);
             }
             for (ParsedActivity receiver : pkg.getReceivers()) {
                 assertNotNull(receiver.getMetaData());
                 assertNull(PackageInfoUtils.generateActivityInfo(pkg, receiver, 0,
-                        PackageUserStateInternal.DEFAULT, appInfo, 0, null).metaData);
+                        PackageUserStateInternal.DEFAULT, appInfo, 0, pkgSetting)
+                        .metaData);
             }
             for (ParsedService service : pkg.getServices()) {
                 assertNotNull(service.getMetaData());
                 assertNull(PackageInfoUtils.generateServiceInfo(pkg, service, 0,
-                        PackageUserStateInternal.DEFAULT, appInfo, 0, null).metaData);
+                        PackageUserStateInternal.DEFAULT, appInfo, 0, pkgSetting)
+                        .metaData);
             }
         } finally {
             testFile.delete();

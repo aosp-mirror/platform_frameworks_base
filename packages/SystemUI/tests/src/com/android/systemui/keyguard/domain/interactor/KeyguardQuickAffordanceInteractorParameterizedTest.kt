@@ -25,10 +25,14 @@ import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
+import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.quickaffordance.BuiltInKeyguardQuickAffordanceKeys
 import com.android.systemui.keyguard.data.quickaffordance.FakeKeyguardQuickAffordanceConfig
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceConfig
+import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceSelectionManager
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
+import com.android.systemui.keyguard.data.repository.KeyguardQuickAffordanceRepository
 import com.android.systemui.keyguard.domain.quickaffordance.FakeKeyguardQuickAffordanceRegistry
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancePosition
 import com.android.systemui.plugins.ActivityStarter
@@ -37,6 +41,8 @@ import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Before
 import org.junit.Test
@@ -189,6 +195,8 @@ class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
                     /* startActivity= */ true,
                 ),
             )
+
+        private val IMMEDIATE = Dispatchers.Main.immediate
     }
 
     @Mock private lateinit var lockPatternUtils: LockPatternUtils
@@ -213,10 +221,20 @@ class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
         whenever(expandable.activityLaunchController()).thenReturn(animationController)
 
         homeControls =
-            object :
-                FakeKeyguardQuickAffordanceConfig(
-                    BuiltInKeyguardQuickAffordanceKeys.HOME_CONTROLS
-                ) {}
+            FakeKeyguardQuickAffordanceConfig(BuiltInKeyguardQuickAffordanceKeys.HOME_CONTROLS)
+        val quickAccessWallet =
+            FakeKeyguardQuickAffordanceConfig(
+                BuiltInKeyguardQuickAffordanceKeys.QUICK_ACCESS_WALLET
+            )
+        val qrCodeScanner =
+            FakeKeyguardQuickAffordanceConfig(BuiltInKeyguardQuickAffordanceKeys.QR_CODE_SCANNER)
+        val quickAffordanceRepository =
+            KeyguardQuickAffordanceRepository(
+                scope = CoroutineScope(IMMEDIATE),
+                backgroundDispatcher = IMMEDIATE,
+                selectionManager = KeyguardQuickAffordanceSelectionManager(),
+                configs = setOf(homeControls, quickAccessWallet, qrCodeScanner),
+            )
         underTest =
             KeyguardQuickAffordanceInteractor(
                 keyguardInteractor = KeyguardInteractor(repository = FakeKeyguardRepository()),
@@ -229,14 +247,8 @@ class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
                                 ),
                             KeyguardQuickAffordancePosition.BOTTOM_END to
                                 listOf(
-                                    object :
-                                        FakeKeyguardQuickAffordanceConfig(
-                                            BuiltInKeyguardQuickAffordanceKeys.QUICK_ACCESS_WALLET
-                                        ) {},
-                                    object :
-                                        FakeKeyguardQuickAffordanceConfig(
-                                            BuiltInKeyguardQuickAffordanceKeys.QR_CODE_SCANNER
-                                        ) {},
+                                    quickAccessWallet,
+                                    qrCodeScanner,
                                 ),
                         ),
                     ),
@@ -244,6 +256,11 @@ class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
                 keyguardStateController = keyguardStateController,
                 userTracker = userTracker,
                 activityStarter = activityStarter,
+                featureFlags =
+                    FakeFeatureFlags().apply {
+                        set(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES, false)
+                    },
+                repository = { quickAffordanceRepository },
             )
     }
 

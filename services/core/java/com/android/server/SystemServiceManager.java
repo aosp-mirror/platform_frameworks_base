@@ -371,6 +371,7 @@ public final class SystemServiceManager implements Dumpable {
             // 2. When a user is switched from bg to fg, the onUserVisibilityChanged() callback is
             // called onUserSwitching(), so calling it before onUserStarting() make it more
             // consistent with that
+            EventLog.writeEvent(EventLogTags.SSM_USER_VISIBILITY_CHANGED, userId, /* visible= */ 1);
             onUser(t, USER_VISIBLE, /* prevUser= */ null, targetUser);
         }
         onUser(t, USER_STARTING, /* prevUser= */ null, targetUser);
@@ -381,11 +382,27 @@ public final class SystemServiceManager implements Dumpable {
      *
      * <p><b>NOTE: </b>this method should only be called when a user that is already running become
      * visible; if the user is starting visible, callers should call
-     * {@link #onUserStarting(TimingsTraceAndSlog, int, boolean)} instead
+     * {@link #onUserStarting(TimingsTraceAndSlog, int, boolean)} instead.
      */
     public void onUserVisible(@UserIdInt int userId) {
-        EventLog.writeEvent(EventLogTags.SSM_USER_VISIBLE, userId);
+        EventLog.writeEvent(EventLogTags.SSM_USER_VISIBILITY_CHANGED, userId, /* visible= */ 1);
         onUser(USER_VISIBLE, userId);
+    }
+
+    /**
+     * Updates the visibility of the system user.
+     *
+     * <p>Since the system user never stops, this method must be called when it's switched from / to
+     * foreground.
+     */
+    public void onSystemUserVisibilityChanged(boolean visible) {
+        int userId = UserHandle.USER_SYSTEM;
+        EventLog.writeEvent(EventLogTags.SSM_USER_VISIBILITY_CHANGED, userId, visible ? 1 : 0);
+        if (visible) {
+            onUser(USER_VISIBLE, userId);
+        } else {
+            onUser(USER_INVISIBLE, userId);
+        }
     }
 
     /**

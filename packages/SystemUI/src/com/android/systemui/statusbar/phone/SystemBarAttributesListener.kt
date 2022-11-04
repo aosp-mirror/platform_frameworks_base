@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar.phone
 
-import android.view.InsetsVisibilities
+import android.view.WindowInsets.Type.InsetsType
 import android.view.WindowInsetsController.Appearance
 import android.view.WindowInsetsController.Behavior
 import com.android.internal.statusbar.LetterboxDetails
@@ -66,21 +66,21 @@ internal constructor(
                 params.appearanceRegionsArray,
                 params.navbarColorManagedByIme,
                 params.behavior,
-                params.requestedVisibilities,
+                params.requestedVisibleTypes,
                 params.packageName,
                 params.letterboxesArray)
         }
     }
 
     fun onSystemBarAttributesChanged(
-        displayId: Int,
-        @Appearance originalAppearance: Int,
-        originalAppearanceRegions: Array<AppearanceRegion>,
-        navbarColorManagedByIme: Boolean,
-        @Behavior behavior: Int,
-        requestedVisibilities: InsetsVisibilities,
-        packageName: String,
-        letterboxDetails: Array<LetterboxDetails>
+            displayId: Int,
+            @Appearance originalAppearance: Int,
+            originalAppearanceRegions: Array<AppearanceRegion>,
+            navbarColorManagedByIme: Boolean,
+            @Behavior behavior: Int,
+            @InsetsType requestedVisibleTypes: Int,
+            packageName: String,
+            letterboxDetails: Array<LetterboxDetails>
     ) {
         lastSystemBarAttributesParams =
             SystemBarAttributesParams(
@@ -89,7 +89,7 @@ internal constructor(
                 originalAppearanceRegions.toList(),
                 navbarColorManagedByIme,
                 behavior,
-                requestedVisibilities,
+                requestedVisibleTypes,
                 packageName,
                 letterboxDetails.toList())
 
@@ -104,7 +104,7 @@ internal constructor(
 
         centralSurfaces.updateBubblesVisibility()
         statusBarStateController.setSystemBarAttributes(
-            appearance, behavior, requestedVisibilities, packageName)
+            appearance, behavior, requestedVisibleTypes, packageName)
     }
 
     private fun modifyAppearanceIfNeeded(
@@ -137,14 +137,14 @@ internal constructor(
  * [SystemBarAttributesListener.onSystemBarAttributesChanged].
  */
 private data class SystemBarAttributesParams(
-    val displayId: Int,
-    @Appearance val appearance: Int,
-    val appearanceRegions: List<AppearanceRegion>,
-    val navbarColorManagedByIme: Boolean,
-    @Behavior val behavior: Int,
-    val requestedVisibilities: InsetsVisibilities,
-    val packageName: String,
-    val letterboxes: List<LetterboxDetails>,
+        val displayId: Int,
+        @Appearance val appearance: Int,
+        val appearanceRegions: List<AppearanceRegion>,
+        val navbarColorManagedByIme: Boolean,
+        @Behavior val behavior: Int,
+        @InsetsType val requestedVisibleTypes: Int,
+        val packageName: String,
+        val letterboxes: List<LetterboxDetails>,
 ) {
     val letterboxesArray = letterboxes.toTypedArray()
     val appearanceRegionsArray = appearanceRegions.toTypedArray()

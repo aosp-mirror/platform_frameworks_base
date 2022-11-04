@@ -2027,10 +2027,6 @@
          STREAM_MUSIC as if it's on TV platform. -->
     <bool name="config_single_volume">false</bool>
 
-    <!-- Flag indicating whether notification and ringtone volumes
-         are controlled together (aliasing is true) or not. -->
-    <bool name="config_alias_ring_notif_stream_types">true</bool>
-
     <!-- The number of volume steps for the notification stream -->
     <integer name="config_audio_notif_vol_steps">7</integer>
 
@@ -2456,8 +2452,10 @@
          assistant activities (ACTIVITY_TYPE_ASSISTANT) -->
     <bool name="config_dismissDreamOnActivityStart">false</bool>
 
-    <!-- The prefix of dream component names that are loggable. If empty, logs "other" for all. -->
-    <string name="config_loggable_dream_prefix" translatable="false"></string>
+    <!-- The prefixes of dream component names that are loggable.
+         Matched against ComponentName#flattenToString() for dream components.
+         If empty, logs "other" for all. -->
+    <string-array name="config_loggable_dream_prefixes"></string-array>
 
     <!-- ComponentName of a dream to show whenever the system would otherwise have
          gone to sleep.  When the PowerManager is asked to go to sleep, it will instead
@@ -2941,6 +2939,9 @@
          in. -->
     <string name="config_usbResolverActivity" translatable="false"
             >com.android.systemui/com.android.systemui.usb.UsbResolverActivity</string>
+
+    <!-- Component name of the activity used to inform a user about a sensor privacy state chage. -->
+    <string name="config_sensorStateChangedActivity" translatable="false"></string>
 
     <!-- Component name of the activity used to inform a user about a sensory being blocked because
      of privacy settings. -->

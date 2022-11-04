@@ -145,7 +145,8 @@ constructor(
                 else -> null
             }
         }
-        .stateIn(scope, started = SharingStarted.WhileSubscribed(), initialValue = null)
+                .logOutputChange(logger, "icon") { icon -> icon?.contentDescription.toString() }
+                .stateIn(scope, started = SharingStarted.WhileSubscribed(), initialValue = null)
 
     /** The wifi activity status. Null if we shouldn't display the activity status. */
     private val activity: Flow<WifiActivityModel?> =

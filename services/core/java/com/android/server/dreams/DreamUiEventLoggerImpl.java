@@ -26,10 +26,10 @@ import com.android.internal.util.FrameworkStatsLog;
  * @hide
  */
 public class DreamUiEventLoggerImpl implements DreamUiEventLogger {
-    final String mLoggableDreamPrefix;
+    private final String[] mLoggableDreamPrefixes;
 
-    DreamUiEventLoggerImpl(String loggableDreamPrefix) {
-        mLoggableDreamPrefix = loggableDreamPrefix;
+    DreamUiEventLoggerImpl(String[] loggableDreamPrefixes) {
+        mLoggableDreamPrefixes = loggableDreamPrefixes;
     }
 
     @Override
@@ -38,13 +38,20 @@ public class DreamUiEventLoggerImpl implements DreamUiEventLogger {
         if (eventID <= 0) {
             return;
         }
-        final boolean isFirstPartyDream =
-                mLoggableDreamPrefix.isEmpty() ? false : dreamComponentName.startsWith(
-                        mLoggableDreamPrefix);
         FrameworkStatsLog.write(FrameworkStatsLog.DREAM_UI_EVENT_REPORTED,
                 /* uid = 1 */ 0,
                 /* event_id = 2 */ eventID,
                 /* instance_id = 3 */ 0,
-                /* dream_component_name = 4 */ isFirstPartyDream ? dreamComponentName : "other");
+                /* dream_component_name = 4 */
+                isFirstPartyDream(dreamComponentName) ? dreamComponentName : "other");
+    }
+
+    private boolean isFirstPartyDream(String dreamComponentName) {
+        for (int i = 0; i < mLoggableDreamPrefixes.length; ++i) {
+            if (dreamComponentName.startsWith(mLoggableDreamPrefixes[i])) {
+                return true;
+            }
+        }
+        return false;
     }
 }

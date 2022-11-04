@@ -33,6 +33,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.android.internal.util.ConcurrentUtils;
+import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -63,6 +64,7 @@ public class HotspotControllerImpl implements HotspotController, WifiManager.Sof
     private volatile int mNumConnectedDevices;
     // Assume tethering is available until told otherwise
     private volatile boolean mIsTetheringSupported = true;
+    private final boolean mIsTetheringSupportedConfig;
     private volatile boolean mHasTetherableWifiRegexs = true;
     private boolean mWaitingForTerminalState;
 
@@ -100,23 +102,29 @@ public class HotspotControllerImpl implements HotspotController, WifiManager.Sof
         mTetheringManager = context.getSystemService(TetheringManager.class);
         mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         mMainHandler = mainHandler;
-        mTetheringManager.registerTetheringEventCallback(
-                new HandlerExecutor(backgroundHandler), mTetheringCallback);
+        mIsTetheringSupportedConfig = context.getResources()
+                .getBoolean(R.bool.config_show_wifi_tethering);
+        if (mIsTetheringSupportedConfig) {
+            mTetheringManager.registerTetheringEventCallback(
+                    new HandlerExecutor(backgroundHandler), mTetheringCallback);
+        }
         dumpManager.registerDumpable(getClass().getSimpleName(), this);
     }
 
     /**
      * Whether hotspot is currently supported.
      *
-     * This will return {@code true} immediately on creation of the controller, but may be updated
-     * later. Callbacks from this controllers will notify if the state changes.
+     * This may return {@code true} immediately on creation of the controller, but may be updated
+     * later as capabilities are collected from System Server.
+     *
+     * Callbacks from this controllers will notify if the state changes.
      *
      * @return {@code true} if hotspot is supported (or we haven't been told it's not)
      * @see #addCallback
      */
     @Override
     public boolean isHotspotSupported() {
-        return mIsTetheringSupported && mHasTetherableWifiRegexs
+        return mIsTetheringSupportedConfig && mIsTetheringSupported && mHasTetherableWifiRegexs
                 && UserManager.get(mContext).isUserAdmin(ActivityManager.getCurrentUser());
     }
 

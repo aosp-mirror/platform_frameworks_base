@@ -50,7 +50,6 @@ public class TimeZoneDetectorInternalImplTest {
     private HandlerThread mHandlerThread;
     private TestHandler mTestHandler;
     private TestCurrentUserIdentityInjector mTestCurrentUserIdentityInjector;
-    private FakeServiceConfigAccessor mFakeServiceConfigAccessorSpy;
     private FakeTimeZoneDetectorStrategy mFakeTimeZoneDetectorStrategySpy;
 
     private TimeZoneDetectorInternalImpl mTimeZoneDetectorInternal;
@@ -65,12 +64,11 @@ public class TimeZoneDetectorInternalImplTest {
         mTestHandler = new TestHandler(mHandlerThread.getLooper());
         mTestCurrentUserIdentityInjector = new TestCurrentUserIdentityInjector();
         mTestCurrentUserIdentityInjector.initializeCurrentUserId(ARBITRARY_USER_ID);
-        mFakeServiceConfigAccessorSpy = spy(new FakeServiceConfigAccessor());
         mFakeTimeZoneDetectorStrategySpy = spy(new FakeTimeZoneDetectorStrategy());
 
         mTimeZoneDetectorInternal = new TimeZoneDetectorInternalImpl(
                 mMockContext, mTestHandler, mTestCurrentUserIdentityInjector,
-                mFakeServiceConfigAccessorSpy, mFakeTimeZoneDetectorStrategySpy);
+                mFakeTimeZoneDetectorStrategySpy);
     }
 
     @After
@@ -83,17 +81,20 @@ public class TimeZoneDetectorInternalImplTest {
     public void testGetCapabilitiesAndConfigForDpm() throws Exception {
         final boolean autoDetectionEnabled = true;
         ConfigurationInternal testConfig = createConfigurationInternal(autoDetectionEnabled);
-        mFakeServiceConfigAccessorSpy.initializeConfiguration(testConfig);
+        mFakeTimeZoneDetectorStrategySpy.initializeConfiguration(testConfig);
 
         TimeZoneCapabilitiesAndConfig actualCapabilitiesAndConfig =
                 mTimeZoneDetectorInternal.getCapabilitiesAndConfigForDpm();
 
         int expectedUserId = mTestCurrentUserIdentityInjector.getCurrentUserId();
-        verify(mFakeServiceConfigAccessorSpy).getConfigurationInternal(expectedUserId);
+        final boolean expectedBypassUserPolicyChecks = true;
+        verify(mFakeTimeZoneDetectorStrategySpy).getCapabilitiesAndConfig(
+                expectedUserId, expectedBypassUserPolicyChecks);
 
-        final boolean bypassUserPolicyChecks = true;
         TimeZoneCapabilitiesAndConfig expectedCapabilitiesAndConfig =
-                testConfig.createCapabilitiesAndConfig(bypassUserPolicyChecks);
+                new TimeZoneCapabilitiesAndConfig(
+                        testConfig.asCapabilities(expectedBypassUserPolicyChecks),
+                        testConfig.asConfiguration());
         assertEquals(expectedCapabilitiesAndConfig, actualCapabilitiesAndConfig);
     }
 
@@ -102,7 +103,7 @@ public class TimeZoneDetectorInternalImplTest {
         final boolean autoDetectionEnabled = false;
         ConfigurationInternal initialConfigurationInternal =
                 createConfigurationInternal(autoDetectionEnabled);
-        mFakeServiceConfigAccessorSpy.initializeConfiguration(initialConfigurationInternal);
+        mFakeTimeZoneDetectorStrategySpy.initializeConfiguration(initialConfigurationInternal);
 
         TimeZoneConfiguration timeConfiguration = new TimeZoneConfiguration.Builder()
                 .setAutoDetectionEnabled(true)
@@ -110,7 +111,7 @@ public class TimeZoneDetectorInternalImplTest {
         assertTrue(mTimeZoneDetectorInternal.updateConfigurationForDpm(timeConfiguration));
 
         final boolean expectedBypassUserPolicyChecks = true;
-        verify(mFakeServiceConfigAccessorSpy).updateConfiguration(
+        verify(mFakeTimeZoneDetectorStrategySpy).updateConfiguration(
                 mTestCurrentUserIdentityInjector.getCurrentUserId(),
                 timeConfiguration,
                 expectedBypassUserPolicyChecks);
@@ -148,7 +149,8 @@ public class TimeZoneDetectorInternalImplTest {
     }
 
     private static ConfigurationInternal createConfigurationInternal(boolean autoDetectionEnabled) {
-        return new ConfigurationInternal.Builder(ARBITRARY_USER_ID)
+        return new ConfigurationInternal.Builder()
+                .setUserId(ARBITRARY_USER_ID)
                 .setTelephonyDetectionFeatureSupported(true)
                 .setGeoDetectionFeatureSupported(true)
                 .setTelephonyFallbackSupported(false)

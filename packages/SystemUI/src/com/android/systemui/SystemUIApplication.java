@@ -269,7 +269,11 @@ public class SystemUIApplication extends Application implements
     }
 
     private static void notifyBootCompleted(CoreStartable coreStartable) {
-        Trace.beginSection(coreStartable.getClass().getSimpleName() + ".onBootCompleted()");
+        if (Trace.isEnabled()) {
+            Trace.traceBegin(
+                    Trace.TRACE_TAG_APP,
+                    coreStartable.getClass().getSimpleName() + ".onBootCompleted()");
+        }
         coreStartable.onBootCompleted();
         Trace.endSection();
     }
@@ -291,14 +295,18 @@ public class SystemUIApplication extends Application implements
     private static CoreStartable startAdditionalStartable(String clsName) {
         CoreStartable startable;
         if (DEBUG) Log.d(TAG, "loading: " + clsName);
+        if (Trace.isEnabled()) {
+            Trace.traceBegin(
+                    Trace.TRACE_TAG_APP, clsName + ".newInstance()");
+        }
         try {
-            Trace.beginSection(clsName + ".newInstance()");
             startable = (CoreStartable) Class.forName(clsName).newInstance();
-            Trace.endSection();
         } catch (ClassNotFoundException
                 | IllegalAccessException
                 | InstantiationException ex) {
             throw new RuntimeException(ex);
+        } finally {
+            Trace.endSection();
         }
 
         return startStartable(startable);
@@ -306,7 +314,10 @@ public class SystemUIApplication extends Application implements
 
     private static CoreStartable startStartable(String clsName, Provider<CoreStartable> provider) {
         if (DEBUG) Log.d(TAG, "loading: " + clsName);
-        Trace.beginSection("Provider<" + clsName + ">.get()");
+        if (Trace.isEnabled()) {
+            Trace.traceBegin(
+                    Trace.TRACE_TAG_APP, "Provider<" + clsName + ">.get()");
+        }
         CoreStartable startable = provider.get();
         Trace.endSection();
         return startStartable(startable);
@@ -314,7 +325,10 @@ public class SystemUIApplication extends Application implements
 
     private static CoreStartable startStartable(CoreStartable startable) {
         if (DEBUG) Log.d(TAG, "running: " + startable);
-        Trace.beginSection(startable.getClass().getSimpleName() + ".start()");
+        if (Trace.isEnabled()) {
+            Trace.traceBegin(
+                    Trace.TRACE_TAG_APP, startable.getClass().getSimpleName() + ".start()");
+        }
         startable.start();
         Trace.endSection();
 
@@ -355,15 +369,22 @@ public class SystemUIApplication extends Application implements
     public void onConfigurationChanged(Configuration newConfig) {
         if (mServicesStarted) {
             ConfigurationController configController = mSysUIComponent.getConfigurationController();
-            Trace.beginSection(
-                    configController.getClass().getSimpleName() + ".onConfigurationChanged()");
+            if (Trace.isEnabled()) {
+                Trace.traceBegin(
+                        Trace.TRACE_TAG_APP,
+                        configController.getClass().getSimpleName() + ".onConfigurationChanged()");
+            }
             configController.onConfigurationChanged(newConfig);
             Trace.endSection();
             int len = mServices.length;
             for (int i = 0; i < len; i++) {
                 if (mServices[i] != null) {
-                    Trace.beginSection(
-                            mServices[i].getClass().getSimpleName() + ".onConfigurationChanged()");
+                    if (Trace.isEnabled()) {
+                        Trace.traceBegin(
+                                Trace.TRACE_TAG_APP,
+                                mServices[i].getClass().getSimpleName()
+                                        + ".onConfigurationChanged()");
+                    }
                     mServices[i].onConfigurationChanged(newConfig);
                     Trace.endSection();
                 }

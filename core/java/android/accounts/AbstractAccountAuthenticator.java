@@ -117,27 +117,27 @@ public abstract class AbstractAccountAuthenticator {
     /**
      * Bundle key used for the {@link String} account type in session bundle.
      * This is used in the default implementation of
-     * {@link #startAddAccountSession} and {@link startUpdateCredentialsSession}.
+     * {@link #startAddAccountSession} and {@link #startUpdateCredentialsSession}.
      */
     private static final String KEY_AUTH_TOKEN_TYPE =
             "android.accounts.AbstractAccountAuthenticato.KEY_AUTH_TOKEN_TYPE";
     /**
      * Bundle key used for the {@link String} array of required features in
      * session bundle. This is used in the default implementation of
-     * {@link #startAddAccountSession} and {@link startUpdateCredentialsSession}.
+     * {@link #startAddAccountSession} and {@link #startUpdateCredentialsSession}.
      */
     private static final String KEY_REQUIRED_FEATURES =
             "android.accounts.AbstractAccountAuthenticator.KEY_REQUIRED_FEATURES";
     /**
      * Bundle key used for the {@link Bundle} options in session bundle. This is
      * used in default implementation of {@link #startAddAccountSession} and
-     * {@link startUpdateCredentialsSession}.
+     * {@link #startUpdateCredentialsSession}.
      */
     private static final String KEY_OPTIONS =
             "android.accounts.AbstractAccountAuthenticator.KEY_OPTIONS";
     /**
      * Bundle key used for the {@link Account} account in session bundle. This is used
-     * used in default implementation of {@link startUpdateCredentialsSession}.
+     * used in default implementation of {@link #startUpdateCredentialsSession}.
      */
     private static final String KEY_ACCOUNT =
             "android.accounts.AbstractAccountAuthenticator.KEY_ACCOUNT";

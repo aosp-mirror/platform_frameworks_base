@@ -57,7 +57,7 @@ object Flags {
     val INSTANT_VOICE_REPLY = UnreleasedFlag(111, teamfood = true)
 
     // TODO(b/254512425): Tracking Bug
-    val NOTIFICATION_MEMORY_MONITOR_ENABLED = UnreleasedFlag(112, teamfood = true)
+    val NOTIFICATION_MEMORY_MONITOR_ENABLED = ReleasedFlag(112)
 
     // TODO(b/254512731): Tracking Bug
     @JvmField val NOTIFICATION_DISMISSAL_FADE = UnreleasedFlag(113, teamfood = true)
@@ -89,7 +89,7 @@ object Flags {
      * replacement of KeyguardBouncer.java.
      */
     // TODO(b/254512385): Tracking Bug
-    @JvmField val MODERN_BOUNCER = UnreleasedFlag(208)
+    @JvmField val MODERN_BOUNCER = ReleasedFlag(208)
 
     /**
      * Whether the user interactor and repository should use `UserSwitcherController`.
@@ -128,6 +128,14 @@ object Flags {
     @JvmField val NEW_ELLIPSE_DETECTION = UnreleasedFlag(214)
 
     @JvmField val NEW_UDFPS_OVERLAY = UnreleasedFlag(215)
+
+    /**
+     * Whether to enable the code powering customizable lock screen quick affordances.
+     *
+     * Note that this flag does not enable individual implementations of quick affordances like the
+     * new camera quick affordance. Look for individual flags for those.
+     */
+    @JvmField val CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES = UnreleasedFlag(216, teamfood = false)
 
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
@@ -178,9 +186,17 @@ object Flags {
     @Deprecated("Replaced by mobile and wifi specific flags.")
     val NEW_STATUS_BAR_PIPELINE_FRONTEND = UnreleasedFlag(605, teamfood = false)
 
+    // TODO(b/256614753): Tracking Bug
     val NEW_STATUS_BAR_MOBILE_ICONS = UnreleasedFlag(606)
 
+    // TODO(b/256614210): Tracking Bug
     val NEW_STATUS_BAR_WIFI_ICON = UnreleasedFlag(607)
+
+    // TODO(b/256614751): Tracking Bug
+    val NEW_STATUS_BAR_MOBILE_ICONS_BACKEND = UnreleasedFlag(608)
+
+    // TODO(b/256613548): Tracking Bug
+    val NEW_STATUS_BAR_WIFI_ICON_BACKEND = UnreleasedFlag(609)
 
     // 700 - dialer/calls
     // TODO(b/254512734): Tracking Bug
@@ -345,6 +361,9 @@ object Flags {
 
     // 1900 - note task
     @JvmField val NOTE_TASKS = SysPropBooleanFlag(1900, "persist.sysui.debug.note_tasks")
+
+    // 2000 - device controls
+    @Keep val USE_APP_PANELS = UnreleasedFlag(2000, true)
 
     // Pay no attention to the reflection behind the curtain.
     // ========================== Curtain ==========================

@@ -25,6 +25,7 @@ import com.android.tradefed.testtype.junit4.BaseHostJUnit4Test;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -98,6 +99,7 @@ public class MultiUserRollbackTest extends BaseHostJUnit4Test {
     }
 
     @Test
+    @Ignore
     public void testBadUpdateRollback() throws Exception {
         // Need to switch user in order to send broadcasts in device tests
         assertTrue(getDevice().switchUser(mSecondaryUserId));

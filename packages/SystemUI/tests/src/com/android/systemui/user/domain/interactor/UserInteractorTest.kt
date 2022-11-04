@@ -21,6 +21,8 @@ import android.app.ActivityManager
 import android.app.admin.DevicePolicyManager
 import android.os.UserManager
 import com.android.internal.logging.UiEventLogger
+import com.android.systemui.GuestResetOrExitSessionReceiver
+import com.android.systemui.GuestResumeSessionReceiver
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
@@ -48,6 +50,8 @@ abstract class UserInteractorTest : SysuiTestCase() {
     @Mock protected lateinit var devicePolicyManager: DevicePolicyManager
     @Mock protected lateinit var uiEventLogger: UiEventLogger
     @Mock protected lateinit var dialogShower: UserSwitchDialogController.DialogShower
+    @Mock private lateinit var resumeSessionReceiver: GuestResumeSessionReceiver
+    @Mock private lateinit var resetOrExitSessionReceiver: GuestResetOrExitSessionReceiver
 
     protected lateinit var underTest: UserInteractor
 
@@ -107,6 +111,8 @@ abstract class UserInteractorTest : SysuiTestCase() {
                         devicePolicyManager = devicePolicyManager,
                         refreshUsersScheduler = refreshUsersScheduler,
                         uiEventLogger = uiEventLogger,
+                        resumeSessionReceiver = resumeSessionReceiver,
+                        resetOrExitSessionReceiver = resetOrExitSessionReceiver,
                     )
             )
     }

@@ -810,17 +810,26 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
     private void updateUdfpsLocation() {
         if (mUdfpsController != null) {
             final FingerprintSensorPropertiesInternal udfpsProp = mUdfpsProps.get(0);
+
             final Rect previousUdfpsBounds = mUdfpsBounds;
             mUdfpsBounds = udfpsProp.getLocation().getRect();
             mUdfpsBounds.scale(mScaleFactor);
-            mUdfpsController.updateOverlayParams(udfpsProp.sensorId,
-                    new UdfpsOverlayParams(mUdfpsBounds, new Rect(
-                            0, mCachedDisplayInfo.getNaturalHeight() / 2,
-                            mCachedDisplayInfo.getNaturalWidth(),
-                            mCachedDisplayInfo.getNaturalHeight()),
-                            mCachedDisplayInfo.getNaturalWidth(),
-                            mCachedDisplayInfo.getNaturalHeight(), mScaleFactor,
-                            mCachedDisplayInfo.rotation));
+
+            final Rect overlayBounds = new Rect(
+                    0, /* left */
+                    mCachedDisplayInfo.getNaturalHeight() / 2, /* top */
+                    mCachedDisplayInfo.getNaturalWidth(), /* right */
+                    mCachedDisplayInfo.getNaturalHeight() /* botom */);
+
+            final UdfpsOverlayParams overlayParams = new UdfpsOverlayParams(
+                    mUdfpsBounds,
+                    overlayBounds,
+                    mCachedDisplayInfo.getNaturalWidth(),
+                    mCachedDisplayInfo.getNaturalHeight(),
+                    mScaleFactor,
+                    mCachedDisplayInfo.rotation);
+
+            mUdfpsController.updateOverlayParams(udfpsProp, overlayParams);
             if (!Objects.equals(previousUdfpsBounds, mUdfpsBounds)) {
                 for (Callback cb : mCallbacks) {
                     cb.onUdfpsLocationChanged();

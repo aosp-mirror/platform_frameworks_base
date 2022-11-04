@@ -25,8 +25,8 @@ import android.provider.DeviceConfig;
 import android.util.ArrayMap;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.server.timezonedetector.ConfigurationChangeListener;
 import com.android.server.timezonedetector.ServiceConfigAccessor;
+import com.android.server.timezonedetector.StateChangeListener;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -185,8 +185,7 @@ public final class ServerFlags {
      * ensure O(1) lookup performance when working out whether a listener should trigger.
      */
     @GuardedBy("mListeners")
-    private final ArrayMap<ConfigurationChangeListener, HashSet<String>> mListeners =
-            new ArrayMap<>();
+    private final ArrayMap<StateChangeListener, HashSet<String>> mListeners = new ArrayMap<>();
 
     private static final Object SLOCK = new Object();
 
@@ -213,7 +212,7 @@ public final class ServerFlags {
 
     private void handlePropertiesChanged(@NonNull DeviceConfig.Properties properties) {
         synchronized (mListeners) {
-            for (Map.Entry<ConfigurationChangeListener, HashSet<String>> listenerEntry
+            for (Map.Entry<StateChangeListener, HashSet<String>> listenerEntry
                     : mListeners.entrySet()) {
                 // It's unclear which set of the following two Sets is going to be larger in the
                 // average case: monitoredKeys will be a subset of the set of possible keys, but
@@ -249,7 +248,7 @@ public final class ServerFlags {
      * <p>Note: Only for use by long-lived objects like other singletons. There is deliberately no
      * associated remove method.
      */
-    public void addListener(@NonNull ConfigurationChangeListener listener,
+    public void addListener(@NonNull StateChangeListener listener,
             @NonNull Set<String> keys) {
         Objects.requireNonNull(listener);
         Objects.requireNonNull(keys);

@@ -28,7 +28,6 @@ import com.android.systemui.lifecycle.InstantTaskExecutorRule
 import com.android.systemui.statusbar.StatusBarIconView.STATE_DOT
 import com.android.systemui.statusbar.StatusBarIconView.STATE_HIDDEN
 import com.android.systemui.statusbar.StatusBarIconView.STATE_ICON
-import com.android.systemui.statusbar.phone.StatusBarLocation
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
@@ -40,6 +39,7 @@ import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.FakeWifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiInteractor
 import com.android.systemui.statusbar.pipeline.wifi.shared.WifiConstants
+import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.LocationBasedWifiViewModel
 import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.WifiViewModel
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
@@ -70,7 +70,7 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
     private lateinit var connectivityRepository: FakeConnectivityRepository
     private lateinit var wifiRepository: FakeWifiRepository
     private lateinit var interactor: WifiInteractor
-    private lateinit var viewModel: WifiViewModel
+    private lateinit var viewModel: LocationBasedWifiViewModel
     private lateinit var scope: CoroutineScope
     private lateinit var airplaneModeViewModel: AirplaneModeViewModel
 
@@ -105,23 +105,19 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
             scope,
             statusBarPipelineFlags,
             wifiConstants,
-        )
+        ).home
     }
 
     @Test
     fun constructAndBind_hasCorrectSlot() {
-        val view = ModernStatusBarWifiView.constructAndBind(
-            context, "slotName", viewModel, StatusBarLocation.HOME
-        )
+        val view = ModernStatusBarWifiView.constructAndBind(context, "slotName", viewModel)
 
         assertThat(view.slot).isEqualTo("slotName")
     }
 
     @Test
     fun getVisibleState_icon_returnsIcon() {
-        val view = ModernStatusBarWifiView.constructAndBind(
-            context, SLOT_NAME, viewModel, StatusBarLocation.HOME
-        )
+        val view = ModernStatusBarWifiView.constructAndBind(context, SLOT_NAME, viewModel)
 
         view.setVisibleState(STATE_ICON, /* animate= */ false)
 
@@ -130,9 +126,7 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
 
     @Test
     fun getVisibleState_dot_returnsDot() {
-        val view = ModernStatusBarWifiView.constructAndBind(
-            context, SLOT_NAME, viewModel, StatusBarLocation.HOME
-        )
+        val view = ModernStatusBarWifiView.constructAndBind(context, SLOT_NAME, viewModel)
 
         view.setVisibleState(STATE_DOT, /* animate= */ false)
 
@@ -141,9 +135,7 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
 
     @Test
     fun getVisibleState_hidden_returnsHidden() {
-        val view = ModernStatusBarWifiView.constructAndBind(
-            context, SLOT_NAME, viewModel, StatusBarLocation.HOME
-        )
+        val view = ModernStatusBarWifiView.constructAndBind(context, SLOT_NAME, viewModel)
 
         view.setVisibleState(STATE_HIDDEN, /* animate= */ false)
 
@@ -155,9 +147,7 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
 
     @Test
     fun setVisibleState_icon_iconShownDotHidden() {
-        val view = ModernStatusBarWifiView.constructAndBind(
-            context, SLOT_NAME, viewModel, StatusBarLocation.HOME
-        )
+        val view = ModernStatusBarWifiView.constructAndBind(context, SLOT_NAME, viewModel)
 
         view.setVisibleState(STATE_ICON, /* animate= */ false)
 
@@ -172,9 +162,7 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
 
     @Test
     fun setVisibleState_dot_iconHiddenDotShown() {
-        val view = ModernStatusBarWifiView.constructAndBind(
-            context, SLOT_NAME, viewModel, StatusBarLocation.HOME
-        )
+        val view = ModernStatusBarWifiView.constructAndBind(context, SLOT_NAME, viewModel)
 
         view.setVisibleState(STATE_DOT, /* animate= */ false)
 
@@ -189,9 +177,7 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
 
     @Test
     fun setVisibleState_hidden_iconAndDotHidden() {
-        val view = ModernStatusBarWifiView.constructAndBind(
-            context, SLOT_NAME, viewModel, StatusBarLocation.HOME
-        )
+        val view = ModernStatusBarWifiView.constructAndBind(context, SLOT_NAME, viewModel)
 
         view.setVisibleState(STATE_HIDDEN, /* animate= */ false)
 
@@ -211,9 +197,7 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
             WifiNetworkModel.Active(NETWORK_ID, isValidated = true, level = 2)
         )
 
-        val view = ModernStatusBarWifiView.constructAndBind(
-            context, SLOT_NAME, viewModel, StatusBarLocation.HOME
-        )
+        val view = ModernStatusBarWifiView.constructAndBind(context, SLOT_NAME, viewModel)
 
         ViewUtils.attachView(view)
         testableLooper.processAllMessages()
@@ -230,9 +214,7 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
             WifiNetworkModel.Active(NETWORK_ID, isValidated = true, level = 2)
         )
 
-        val view = ModernStatusBarWifiView.constructAndBind(
-            context, SLOT_NAME, viewModel, StatusBarLocation.HOME
-        )
+        val view = ModernStatusBarWifiView.constructAndBind(context, SLOT_NAME, viewModel)
 
         ViewUtils.attachView(view)
         testableLooper.processAllMessages()
