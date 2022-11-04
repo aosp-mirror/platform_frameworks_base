@@ -1032,6 +1032,9 @@ public class WindowStateTests extends WindowTestsBase {
         // Simulate app requests IME with updating all windows Insets State when IME is above app.
         mDisplayContent.setImeLayeringTarget(app);
         mDisplayContent.setImeInputTarget(app);
+        final InsetsVisibilities requestedVisibilities = new InsetsVisibilities();
+        requestedVisibilities.setVisibility(ITYPE_IME, true);
+        app.setRequestedVisibilities(requestedVisibilities);
         assertTrue(mDisplayContent.shouldImeAttachedToApp());
         controller.getImeSourceProvider().scheduleShowImePostLayout(app);
         controller.getImeSourceProvider().getSource().setVisible(true);
@@ -1069,6 +1072,9 @@ public class WindowStateTests extends WindowTestsBase {
         app2.mActivityRecord.mImeInsetsFrozenUntilStartInput = true;
         mDisplayContent.setImeLayeringTarget(app);
         mDisplayContent.setImeInputTarget(app);
+        final InsetsVisibilities requestedVisibilities = new InsetsVisibilities();
+        requestedVisibilities.setVisibility(ITYPE_IME, true);
+        app.setRequestedVisibilities(requestedVisibilities);
         assertTrue(mDisplayContent.shouldImeAttachedToApp());
         controller.getImeSourceProvider().scheduleShowImePostLayout(app);
         controller.getImeSourceProvider().getSource().setVisible(true);
