@@ -90,6 +90,12 @@ constructor(
             .distinctUntilChanged()
     }
 
+    /**
+     * Returns whether the keyguard bottom area should be constrained to the top of the lock icon
+     */
+    fun shouldConstrainToTopOfLockIcon(): Boolean =
+            bottomAreaInteractor.shouldConstrainToTopOfLockIcon()
+
     private fun button(
         position: KeyguardQuickAffordancePosition
     ): Flow<KeyguardQuickAffordanceViewModel> {
