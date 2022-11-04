@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,22 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.android.systemui.classifier;
 
-import static com.android.systemui.classifier.FalsingModule.SINGLE_TAP_TOUCH_SLOP;
+import static com.android.systemui.classifier.FalsingModule.LONG_TAP_TOUCH_SLOP;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
 /**
- * Falsing classifier that accepts or rejects a gesture as a single tap.
+ * Falsing classifier that accepts or rejects a gesture as a long tap.
  */
-public class SingleTapClassifier extends TapClassifier {
+public class LongTapClassifier extends TapClassifier{
 
     @Inject
-    SingleTapClassifier(FalsingDataProvider dataProvider,
-            @Named(SINGLE_TAP_TOUCH_SLOP) float touchSlop) {
+    LongTapClassifier(FalsingDataProvider dataProvider,
+            @Named(LONG_TAP_TOUCH_SLOP) float touchSlop) {
         super(dataProvider, touchSlop);
     }
+
 }

@@ -359,6 +359,9 @@ object Flags {
     // 2000 - device controls
     @Keep val USE_APP_PANELS = UnreleasedFlag(2000, true)
 
+    // 2100 - Falsing Manager
+    @JvmField val FALSING_FOR_LONG_TAPS = ReleasedFlag(2100)
+
     // Pay no attention to the reflection behind the curtain.
     // ========================== Curtain ==========================
     // |                                                           |

@@ -34,6 +34,8 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.classifier.FalsingDataProvider.SessionListener;
 import com.android.systemui.classifier.HistoryTracker.BeliefListener;
 import com.android.systemui.dagger.qualifiers.TestHarness;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
@@ -65,6 +67,7 @@ public class BrightLineFalsingManager implements FalsingManager {
     private static final double FALSE_BELIEF_THRESHOLD = 0.9;
 
     private final FalsingDataProvider mDataProvider;
+    private final LongTapClassifier mLongTapClassifier;
     private final SingleTapClassifier mSingleTapClassifier;
     private final DoubleTapClassifier mDoubleTapClassifier;
     private final HistoryTracker mHistoryTracker;
@@ -73,6 +76,7 @@ public class BrightLineFalsingManager implements FalsingManager {
     private final boolean mTestHarness;
     private final MetricsLogger mMetricsLogger;
     private int mIsFalseTouchCalls;
+    private FeatureFlags mFeatureFlags;
     private static final Queue<String> RECENT_INFO_LOG =
             new ArrayDeque<>(RECENT_INFO_LOG_SIZE + 1);
     private static final Queue<DebugSwipeRecord> RECENT_SWIPES =
@@ -175,19 +179,23 @@ public class BrightLineFalsingManager implements FalsingManager {
     public BrightLineFalsingManager(FalsingDataProvider falsingDataProvider,
             MetricsLogger metricsLogger,
             @Named(BRIGHT_LINE_GESTURE_CLASSIFERS) Set<FalsingClassifier> classifiers,
-            SingleTapClassifier singleTapClassifier, DoubleTapClassifier doubleTapClassifier,
-            HistoryTracker historyTracker, KeyguardStateController keyguardStateController,
+            SingleTapClassifier singleTapClassifier, LongTapClassifier longTapClassifier,
+            DoubleTapClassifier doubleTapClassifier, HistoryTracker historyTracker,
+            KeyguardStateController keyguardStateController,
             AccessibilityManager accessibilityManager,
-            @TestHarness boolean testHarness) {
+            @TestHarness boolean testHarness,
+            FeatureFlags featureFlags) {
         mDataProvider = falsingDataProvider;
         mMetricsLogger = metricsLogger;
         mClassifiers = classifiers;
         mSingleTapClassifier = singleTapClassifier;
+        mLongTapClassifier = longTapClassifier;
         mDoubleTapClassifier = doubleTapClassifier;
         mHistoryTracker = historyTracker;
         mKeyguardStateController = keyguardStateController;
         mAccessibilityManager = accessibilityManager;
         mTestHarness = testHarness;
+        mFeatureFlags = featureFlags;
 
         mDataProvider.addSessionListener(mSessionListener);
         mDataProvider.addGestureCompleteListener(mGestureFinalizedListener);
@@ -310,6 +318,58 @@ public class BrightLineFalsingManager implements FalsingManager {
             return singleTapResult.isFalse();
         }
 
+    }
+
+    @Override
+    public boolean isFalseLongTap(@Penalty int penalty) {
+        if (!mFeatureFlags.isEnabled(Flags.FALSING_FOR_LONG_TAPS)) {
+            return false;
+        }
+
+        checkDestroyed();
+
+        if (skipFalsing(GENERIC)) {
+            mPriorResults = getPassedResult(1);
+            logDebug("Skipped falsing");
+            return false;
+        }
+
+        double falsePenalty = 0;
+        switch(penalty) {
+            case NO_PENALTY:
+                falsePenalty = 0;
+                break;
+            case LOW_PENALTY:
+                falsePenalty = 0.1;
+                break;
+            case MODERATE_PENALTY:
+                falsePenalty = 0.3;
+                break;
+            case HIGH_PENALTY:
+                falsePenalty = 0.6;
+                break;
+        }
+
+        FalsingClassifier.Result longTapResult =
+                mLongTapClassifier.isTap(mDataProvider.getRecentMotionEvents().isEmpty()
+                        ? mDataProvider.getPriorMotionEvents()
+                        : mDataProvider.getRecentMotionEvents(), falsePenalty);
+        mPriorResults = Collections.singleton(longTapResult);
+
+        if (!longTapResult.isFalse()) {
+            if (mDataProvider.isJustUnlockedWithFace()) {
+                // Immediately pass if a face is detected.
+                mPriorResults = getPassedResult(1);
+                logDebug("False Long Tap: false (face detected)");
+            } else {
+                mPriorResults = getPassedResult(0.1);
+                logDebug("False Long Tap: false (default)");
+            }
+            return false;
+        } else {
+            logDebug("False Long Tap: " + longTapResult.isFalse() + " (simple)");
+            return longTapResult.isFalse();
+        }
     }
 
     @Override
