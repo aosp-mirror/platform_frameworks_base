@@ -2901,7 +2901,7 @@
             >com.android.systemui/com.android.systemui.usb.UsbDebuggingActivity</string>
 
     <!-- Name of the activity that prompts the secondary user to acknowledge they need to
-         switch to the primary user to enable USB debugging.
+         switch to an admin user to enable USB debugging.
          Can be customized for other product types -->
     <string name="config_customAdbPublicKeyConfirmationSecondaryUserComponent"
             >com.android.systemui/com.android.systemui.usb.UsbDebuggingSecondaryUserActivity</string>
@@ -2913,7 +2913,7 @@
             >com.android.systemui/com.android.systemui.wifi.WifiDebuggingActivity</string>
 
     <!-- Name of the activity that prompts the secondary user to acknowledge they need to
-         switch to the primary user to enable wireless debugging.
+         switch to an admin user to enable wireless debugging.
          Can be customized for other product types -->
     <string name="config_customAdbWifiNetworkConfirmationSecondaryUserComponent"
             >com.android.systemui/com.android.systemui.wifi.WifiDebuggingSecondaryUserActivity</string>
