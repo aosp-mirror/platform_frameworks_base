@@ -2868,6 +2868,15 @@ static jboolean android_media_AudioSystem_canBeSpatialized(JNIEnv *env, jobject 
     return canBeSpatialized;
 }
 
+static jint android_media_AudioSystem_registerSoundDoseCallback(JNIEnv *env, jobject thiz,
+                                                                    jobject jISoundDoseCallback) {
+    sp<media::ISoundDoseCallback> nISoundDoseCallback = interface_cast<media::ISoundDoseCallback>(
+            ibinderForJavaObject(env, jISoundDoseCallback));
+
+    return static_cast<jint>(
+            check_AudioSystem_Command(AudioSystem::registerSoundDoseCallback(nISoundDoseCallback)));
+}
+
 // keep these values in sync with AudioSystem.java
 #define DIRECT_NOT_SUPPORTED 0
 #define DIRECT_OFFLOAD_SUPPORTED 1
@@ -3104,6 +3113,8 @@ static const JNINativeMethod gMethods[] =
           "(Landroid/media/AudioAttributes;Landroid/media/AudioFormat;"
           "[Landroid/media/AudioDeviceAttributes;)Z",
           (void *)android_media_AudioSystem_canBeSpatialized},
+         {"registerSoundDoseCallback", "(Landroid/media/ISoundDoseCallback;)I",
+          (void *)android_media_AudioSystem_registerSoundDoseCallback},
          {"getDirectPlaybackSupport",
           "(Landroid/media/AudioFormat;Landroid/media/AudioAttributes;)I",
           (void *)android_media_AudioSystem_getDirectPlaybackSupport},

@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.media.AudioAttributes;
 import android.media.AudioDeviceAttributes;
 import android.media.AudioSystem;
+import android.media.ISoundDoseCallback;
 import android.media.audiopolicy.AudioMix;
 import android.os.SystemClock;
 import android.util.Log;
@@ -492,6 +493,15 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback,
     public int removeUserIdDeviceAffinities(int userId) {
         invalidateRoutingCache();
         return AudioSystem.removeUserIdDeviceAffinities(userId);
+    }
+
+    /**
+     * Same as {@link AudioSystem#registerSoundDoseCallback(ISoundDoseCallback)}
+     * @param callback
+     * @return
+     */
+    public int registerSoundDoseCallback(ISoundDoseCallback callback) {
+        return AudioSystem.registerSoundDoseCallback(callback);
     }
 
     /**

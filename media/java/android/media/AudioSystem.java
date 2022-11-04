@@ -2260,6 +2260,14 @@ public class AudioSystem
 
     /**
      * @hide
+     * Register the sound dose callback with the audio server.
+     *
+     * @return {@link #SUCCESS} if the callback was registered successfully.
+     */
+    public static native int registerSoundDoseCallback(ISoundDoseCallback callback);
+
+    /**
+     * @hide
      * @param attributes audio attributes describing the playback use case
      * @param audioProfilesList the list of AudioProfiles that can be played as direct output
      * @return {@link #SUCCESS} if the list of AudioProfiles was successfully created (can be empty)

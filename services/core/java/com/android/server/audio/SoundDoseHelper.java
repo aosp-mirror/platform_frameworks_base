@@ -27,6 +27,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.media.AudioSystem;
+import android.media.ISoundDoseCallback;
 import android.os.Binder;
 import android.os.Message;
 import android.os.SystemClock;
@@ -131,6 +132,14 @@ public class SoundDoseHelper {
 
     private final Context mContext;
 
+    private final ISoundDoseCallback.Stub mSoundDoseCallback = new ISoundDoseCallback.Stub() {
+        @Override
+        public void onMomentaryExposure(float currentMel, int deviceId) {
+            Log.w(TAG, "DeviceId " + deviceId + " triggered momentary exposure with value: "
+                    + currentMel);
+        }
+    };
+
     SoundDoseHelper(@NonNull AudioService audioService, Context context,
             @NonNull AudioHandler audioHandler,
             @NonNull SettingsAdapter settings,
@@ -145,6 +154,7 @@ public class SoundDoseHelper {
         mSafeMediaVolumeState = mSettings.getGlobalInt(audioService.getContentResolver(),
                 Settings.Global.AUDIO_SAFE_VOLUME_STATE, 0);
         if (USE_CSD_FOR_SAFE_HEARING) {
+            AudioSystem.registerSoundDoseCallback(mSoundDoseCallback);
             mSafeMediaVolumeState = SAFE_MEDIA_VOLUME_DISABLED;
         }
 
