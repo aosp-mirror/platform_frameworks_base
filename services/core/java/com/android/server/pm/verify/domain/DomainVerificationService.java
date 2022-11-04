@@ -1209,6 +1209,7 @@ public class DomainVerificationService extends SystemService
     public void printOwnersForPackage(@NonNull IndentingPrintWriter writer,
             @Nullable String packageName, @Nullable @UserIdInt Integer userId)
             throws NameNotFoundException {
+        mEnforcer.assertApprovedQuerent(mConnection.getCallingUid(), mProxy);
         final Computer snapshot = mConnection.snapshot();
         synchronized (mLock) {
             if (packageName == null) {
@@ -1257,6 +1258,7 @@ public class DomainVerificationService extends SystemService
     @Override
     public void printOwnersForDomains(@NonNull IndentingPrintWriter writer,
             @NonNull List<String> domains, @Nullable @UserIdInt Integer userId) {
+        mEnforcer.assertApprovedQuerent(mConnection.getCallingUid(), mProxy);
         final Computer snapshot = mConnection.snapshot();
         synchronized (mLock) {
             int size = domains.size();
