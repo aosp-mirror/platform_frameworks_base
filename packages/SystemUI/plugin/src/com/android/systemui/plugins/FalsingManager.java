@@ -82,6 +82,18 @@ public interface FalsingManager {
     boolean isFalseTap(@Penalty int penalty);
 
     /**
+     * Returns true if the FalsingManager thinks the last gesture was not a valid long tap.
+     *
+     * Use this method to validate a long tap for launching an action, like long press on a UMO
+     *
+     * The only parameter, penalty, indicates how much this should affect future gesture
+     * classifications if this long tap looks like a false.
+     * As long taps are hard to confirm as false or otherwise,
+     * a low penalty value is encouraged unless context indicates otherwise.
+     */
+    boolean isFalseLongTap(@Penalty int penalty);
+
+    /**
      * Returns true if the last two gestures do not look like a double tap.
      *
      * Only works on data that has already been reported to the FalsingManager. Be sure that
