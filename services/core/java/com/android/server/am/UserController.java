@@ -1769,7 +1769,7 @@ class UserController implements Handler.Callback {
 
             if (foreground) {
                 t.traceBegin("moveUserToForeground");
-                moveUserToForeground(uss, oldUserId, userId);
+                moveUserToForeground(uss, userId);
                 t.traceEnd();
             } else {
                 t.traceBegin("finishUserBoot");
@@ -1983,21 +1983,25 @@ class UserController implements Handler.Callback {
 
     /** Called on handler thread */
     @VisibleForTesting
-    void dispatchUserSwitchComplete(@UserIdInt int userId) {
+    void dispatchUserSwitchComplete(@UserIdInt int oldUserId, @UserIdInt int newUserId) {
         final TimingsTraceAndSlog t = new TimingsTraceAndSlog();
-        t.traceBegin("dispatchUserSwitchComplete-" + userId);
+        t.traceBegin("dispatchUserSwitchComplete-" + newUserId);
         mInjector.getWindowManager().setSwitchingUser(false);
         final int observerCount = mUserSwitchObservers.beginBroadcast();
         for (int i = 0; i < observerCount; i++) {
             try {
-                t.traceBegin("onUserSwitchComplete-" + userId + " #" + i + " "
+                t.traceBegin("onUserSwitchComplete-" + newUserId + " #" + i + " "
                         + mUserSwitchObservers.getBroadcastCookie(i));
-                mUserSwitchObservers.getBroadcastItem(i).onUserSwitchComplete(userId);
+                mUserSwitchObservers.getBroadcastItem(i).onUserSwitchComplete(newUserId);
                 t.traceEnd();
             } catch (RemoteException e) {
+                // Ignore
             }
         }
         mUserSwitchObservers.finishBroadcast();
+        t.traceBegin("sendUserSwitchBroadcasts-" + oldUserId + "-" + newUserId);
+        sendUserSwitchBroadcasts(oldUserId, newUserId);
+        t.traceEnd();
         t.traceEnd();
     }
 
@@ -2159,7 +2163,8 @@ class UserController implements Handler.Callback {
 
         // Do the keyguard dismiss and unfreeze later
         mHandler.removeMessages(COMPLETE_USER_SWITCH_MSG);
-        mHandler.sendMessage(mHandler.obtainMessage(COMPLETE_USER_SWITCH_MSG, newUserId, 0));
+        mHandler.sendMessage(mHandler.obtainMessage(
+                COMPLETE_USER_SWITCH_MSG, oldUserId, newUserId));
 
         uss.switching = false;
         stopGuestOrEphemeralUserIfBackground(oldUserId);
@@ -2169,7 +2174,7 @@ class UserController implements Handler.Callback {
     }
 
     @VisibleForTesting
-    void completeUserSwitch(int newUserId) {
+    void completeUserSwitch(int oldUserId, int newUserId) {
         final boolean isUserSwitchUiEnabled = isUserSwitchUiEnabled();
         final Runnable runnable = () -> {
             if (isUserSwitchUiEnabled) {
@@ -2177,7 +2182,7 @@ class UserController implements Handler.Callback {
             }
             mHandler.removeMessages(REPORT_USER_SWITCH_COMPLETE_MSG);
             mHandler.sendMessage(mHandler.obtainMessage(
-                    REPORT_USER_SWITCH_COMPLETE_MSG, newUserId, 0));
+                    REPORT_USER_SWITCH_COMPLETE_MSG, oldUserId, newUserId));
         };
 
         // If there is no challenge set, dismiss the keyguard right away
@@ -2202,7 +2207,7 @@ class UserController implements Handler.Callback {
         t.traceEnd();
     }
 
-    private void moveUserToForeground(UserState uss, int oldUserId, int newUserId) {
+    private void moveUserToForeground(UserState uss, int newUserId) {
         boolean homeInFront = mInjector.taskSupervisorSwitchUser(newUserId, uss);
         if (homeInFront) {
             mInjector.startHomeActivity(newUserId, "moveUserToForeground");
@@ -2210,7 +2215,6 @@ class UserController implements Handler.Callback {
             mInjector.taskSupervisorResumeFocusedStackTopActivity();
         }
         EventLogTags.writeAmSwitchUser(newUserId);
-        sendUserSwitchBroadcasts(oldUserId, newUserId);
     }
 
     void sendUserSwitchBroadcasts(int oldUserId, int newUserId) {
@@ -3080,9 +3084,8 @@ class UserController implements Handler.Callback {
                 dispatchForegroundProfileChanged(msg.arg1);
                 break;
             case REPORT_USER_SWITCH_COMPLETE_MSG:
-                dispatchUserSwitchComplete(msg.arg1);
-
-                logUserLifecycleEvent(msg.arg1, USER_LIFECYCLE_EVENT_SWITCH_USER,
+                dispatchUserSwitchComplete(msg.arg1, msg.arg2);
+                logUserLifecycleEvent(msg.arg2, USER_LIFECYCLE_EVENT_SWITCH_USER,
                         USER_LIFECYCLE_EVENT_STATE_FINISH);
                 break;
             case REPORT_LOCKED_BOOT_COMPLETE_MSG:
@@ -3100,7 +3103,7 @@ class UserController implements Handler.Callback {
                 logAndClearSessionId(msg.arg1);
                 break;
             case COMPLETE_USER_SWITCH_MSG:
-                completeUserSwitch(msg.arg1);
+                completeUserSwitch(msg.arg1, msg.arg2);
                 break;
         }
         return false;
