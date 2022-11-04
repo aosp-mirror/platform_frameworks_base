@@ -442,7 +442,8 @@ public class DpmMockContext extends MockContext {
     @Override
     public Intent registerReceiver(BroadcastReceiver receiver, IntentFilter filter) {
         mMockSystemServices.registerReceiver(receiver, filter, null);
-        return spiedContext.registerReceiver(receiver, filter);
+        return spiedContext.registerReceiver(receiver, filter,
+                Context.RECEIVER_EXPORTED_UNAUDITED);
     }
 
     @Override

@@ -62,7 +62,7 @@ public class RecoverySnapshotListenersStorageTest {
                 context.unregisterReceiver(this);
                 latch.countDown();
             }
-        }, new IntentFilter(TEST_INTENT_ACTION));
+        }, new IntentFilter(TEST_INTENT_ACTION), Context.RECEIVER_EXPORTED_UNAUDITED);
 
         mStorage.setSnapshotListener(recoveryAgentUid, intent);
 
@@ -83,7 +83,8 @@ public class RecoverySnapshotListenersStorageTest {
                 latch.countDown();
             }
         };
-        context.registerReceiver(broadcastReceiver, new IntentFilter(TEST_INTENT_ACTION));
+        context.registerReceiver(broadcastReceiver, new IntentFilter(TEST_INTENT_ACTION),
+                Context.RECEIVER_EXPORTED_UNAUDITED);
 
         mStorage.setSnapshotListener(recoveryAgentUid, intent);
         mStorage.setSnapshotListener(recoveryAgentUid, intent);
