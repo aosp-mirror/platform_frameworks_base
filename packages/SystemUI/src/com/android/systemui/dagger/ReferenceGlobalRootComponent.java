@@ -16,49 +16,27 @@
 
 package com.android.systemui.dagger;
 
-import android.content.Context;
-
-import com.android.systemui.dagger.qualifiers.InstrumentationTest;
-import com.android.systemui.util.InitializationChecker;
-
 import javax.inject.Singleton;
 
-import dagger.BindsInstance;
 import dagger.Component;
 
 /**
- * Base root component for Dagger injection.
- *
- * See {@link ReferenceGlobalRootComponent} for the one actually used by AOSP.
+ * Root component for Dagger injection used in AOSP.
  */
 @Singleton
 @Component(modules = {GlobalModule.class})
-public interface GlobalRootComponent {
+public interface ReferenceGlobalRootComponent extends GlobalRootComponent {
 
     /**
-     * Builder for a GlobalRootComponent.
+     * Builder for a ReferenceGlobalRootComponent.
      */
     @Component.Builder
-    interface Builder {
-        @BindsInstance
-        Builder context(Context context);
-        @BindsInstance
-        Builder instrumentationTest(@InstrumentationTest boolean test);
-        GlobalRootComponent build();
+    interface Builder extends GlobalRootComponent.Builder {
+        ReferenceGlobalRootComponent build();
     }
-
-    /**
-     * Builder for a {@link WMComponent}, which makes it a subcomponent of this class.
-     */
-    WMComponent.Builder getWMComponentBuilder();
 
     /**
      * Builder for a {@link ReferenceSysUIComponent}, which makes it a subcomponent of this class.
      */
-    SysUIComponent.Builder getSysUIComponent();
-
-    /**
-     * Returns an {@link InitializationChecker}.
-     */
-    InitializationChecker getInitializationChecker();
+    ReferenceSysUIComponent.Builder getSysUIComponent();
 }
