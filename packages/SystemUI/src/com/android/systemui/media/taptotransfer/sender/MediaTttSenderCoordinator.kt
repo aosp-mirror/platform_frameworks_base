@@ -108,7 +108,7 @@ constructor(
             }
 
             displayedState = null
-            chipbarCoordinator.removeView(removalReason)
+            chipbarCoordinator.removeView(routeInfo.id, removalReason)
         } else {
             displayedState = chipState
             chipbarCoordinator.displayView(
@@ -162,6 +162,7 @@ constructor(
             windowTitle = MediaTttUtils.WINDOW_TITLE_SENDER,
             wakeReason = MediaTttUtils.WAKE_REASON_SENDER,
             timeoutMs = chipStateSender.timeout,
+            id = routeInfo.id,
         )
     }
 
