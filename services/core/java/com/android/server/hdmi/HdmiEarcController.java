@@ -21,6 +21,8 @@ import android.os.Looper;
 
 import com.android.internal.annotations.VisibleForTesting;
 
+import java.util.List;
+
 final class HdmiEarcController {
     private static final String TAG = "HdmiEarcController";
 
@@ -91,10 +93,25 @@ final class HdmiEarcController {
         return Constants.HDMI_EARC_STATUS_IDLE;
     }
 
+     /**
+     * Ask the HAL to report the last eARC capabilities that the connected audio system reported.
+     * @return the raw eARC capabilities
+     */
+    @HdmiAnnotations.ServiceThreadOnly
+    byte[] getLastReportedCaps() {
+        // Stub. TODO: bind to native.
+        return new byte[] {};
+    }
+
     final class EarcCallback {
         public void onStateChange(@Constants.EarcStatus int status, int portId) {
             runOnServiceThread(
                     () -> mService.handleEarcStateChange(status, portId));
+        }
+
+        public void onCapabilitiesReported(List<byte[]> capabilities, int portId) {
+            runOnServiceThread(
+                    () -> mService.handleEarcCapabilitiesReported(capabilities, portId));
         }
     }
 

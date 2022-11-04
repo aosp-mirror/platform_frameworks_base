@@ -1320,7 +1320,6 @@ public class HdmiControlService extends SystemService {
      * Returns {@link Looper} of main thread. Use this {@link Looper} instance
      * for tasks that are running on main service thread.
      */
-    @VisibleForTesting
     protected Looper getServiceLooper() {
         return mHandler.getLooper();
     }
@@ -4524,6 +4523,21 @@ public class HdmiControlService extends SystemService {
         // reported connection state changes, but even if it did, it won't take effect.
         if (mEarcLocalDevice != null) {
             mEarcLocalDevice.handleEarcStateChange(status);
+        }
+    }
+
+    @ServiceThreadOnly
+    void handleEarcCapabilitiesReported(List<byte[]> capabilities, int portId) {
+        assertRunOnServiceThread();
+        if (!getPortInfo(portId).isEarcSupported()) {
+            Slog.w(TAG,
+                    "Tried to process eARC capabilities from a port that doesn't support eARC.");
+            return;
+        }
+        // If eARC is disabled, the local device is null. In this case, the HAL shouldn't have
+        // reported eARC capabilities, but even if it did, it won't take effect.
+        if (mEarcLocalDevice != null) {
+            mEarcLocalDevice.handleEarcCapabilitiesReported(capabilities);
         }
     }
 }

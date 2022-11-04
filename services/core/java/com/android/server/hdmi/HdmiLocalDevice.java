@@ -16,8 +16,6 @@
 
 package com.android.server.hdmi;
 
-import com.android.internal.annotations.VisibleForTesting;
-
 /**
  * Class that models an HDMI device hosted in this system.
  * Can be used to share methods between CEC and eARC local devices.
@@ -29,7 +27,6 @@ abstract class HdmiLocalDevice {
     protected final HdmiControlService mService;
     protected final int mDeviceType;
 
-    @VisibleForTesting
     protected final Object mLock;
 
     protected HdmiLocalDevice(HdmiControlService service, int deviceType) {

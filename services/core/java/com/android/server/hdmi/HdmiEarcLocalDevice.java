@@ -21,6 +21,8 @@ import android.util.IndentingPrintWriter;
 
 import com.android.internal.annotations.GuardedBy;
 
+import java.util.List;
+
 /**
  * Class that models a local eARC device hosted in this system.
  * The class contains methods that are common between eARC TX and eARC RX devices.
@@ -49,6 +51,7 @@ abstract class HdmiEarcLocalDevice extends HdmiLocalDevice {
 
     protected abstract void handleEarcStateChange(@Constants.EarcStatus int status);
 
+    protected abstract void handleEarcCapabilitiesReported(List<byte[]> capabilities);
 
     protected void disableDevice() {
     }

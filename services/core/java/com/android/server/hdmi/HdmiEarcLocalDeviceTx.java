@@ -25,9 +25,12 @@ import android.media.AudioDescriptor;
 import android.media.AudioDeviceAttributes;
 import android.media.AudioDeviceInfo;
 import android.media.AudioProfile;
+import android.os.Handler;
 import android.util.IndentingPrintWriter;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Represents a local eARC device of type TX residing in the Android system.
@@ -36,8 +39,19 @@ import java.util.ArrayList;
 public class HdmiEarcLocalDeviceTx extends HdmiEarcLocalDevice {
     private static final String TAG = "HdmiEarcLocalDeviceTx";
 
+    // How long to wait for the audio system to report its capabilities after eARC was connected
+    static final long REPORT_CAPS_MAX_DELAY_MS = 2_000;
+
+    // Handler and runnable for waiting for the audio system to report its capabilities after eARC
+    // was connected
+    private Handler mReportCapsHandler;
+    private ReportCapsRunnable mReportCapsRunnable;
+
     HdmiEarcLocalDeviceTx(HdmiControlService service) {
         super(service, HdmiDeviceInfo.DEVICE_TV);
+
+        mReportCapsHandler = new Handler(service.getServiceLooper());
+        mReportCapsRunnable = new ReportCapsRunnable();
     }
 
     protected void handleEarcStateChange(@Constants.EarcStatus int status) {
@@ -46,20 +60,52 @@ public class HdmiEarcLocalDeviceTx extends HdmiEarcLocalDevice {
                     status);
             mEarcStatus = status;
         }
+
+        mReportCapsHandler.removeCallbacksAndMessages(null);
         if (status == HDMI_EARC_STATUS_IDLE) {
-            notifyEarcStatusToAudioService(false);
+            notifyEarcStatusToAudioService(false, new ArrayList<>());
         } else if (status == HDMI_EARC_STATUS_ARC_PENDING) {
-            notifyEarcStatusToAudioService(false);
+            notifyEarcStatusToAudioService(false, new ArrayList<>());
         } else if (status == HDMI_EARC_STATUS_EARC_CONNECTED) {
-            notifyEarcStatusToAudioService(true);
+            mReportCapsHandler.postDelayed(mReportCapsRunnable, REPORT_CAPS_MAX_DELAY_MS);
         }
     }
 
-    private void notifyEarcStatusToAudioService(boolean enabled) {
+    protected void handleEarcCapabilitiesReported(List<byte[]> capabilities) {
+        synchronized (mLock) {
+            if (mEarcStatus == HDMI_EARC_STATUS_EARC_CONNECTED
+                    && mReportCapsHandler.hasCallbacks(mReportCapsRunnable)) {
+                mReportCapsHandler.removeCallbacksAndMessages(null);
+                notifyEarcStatusToAudioService(true, capabilities);
+            }
+        }
+    }
+
+    private void notifyEarcStatusToAudioService(boolean enabled, List<byte[]> capabilities) {
         AudioDeviceAttributes attributes = new AudioDeviceAttributes(
                 AudioDeviceAttributes.ROLE_OUTPUT, AudioDeviceInfo.TYPE_HDMI_EARC, "", "",
-                new ArrayList<AudioProfile>(), new ArrayList<AudioDescriptor>());
+                new ArrayList<AudioProfile>(), capabilities.stream()
+                .map(cap -> new AudioDescriptor(AudioDescriptor.STANDARD_EDID,
+                        AudioProfile.AUDIO_ENCAPSULATION_TYPE_NONE, cap))
+                .collect(Collectors.toList()));
         mService.getAudioManager().setWiredDeviceConnectionState(attributes, enabled ? 1 : 0);
+    }
+
+    /**
+     * Runnable for waiting for a certain amount of time for the audio system to report its
+     * capabilities after eARC was connected. If the audio system doesn´t report its capabilities in
+     * this time, we inform AudioService about the connection state only, without any specified
+     * capabilities.
+     */
+    private class ReportCapsRunnable implements Runnable {
+        @Override
+        public void run() {
+            synchronized (mLock) {
+                if (mEarcStatus == HDMI_EARC_STATUS_EARC_CONNECTED) {
+                    notifyEarcStatusToAudioService(true, new ArrayList<>());
+                }
+            }
+        }
     }
 
     /** Dump internal status of HdmiEarcLocalDeviceTx object */
