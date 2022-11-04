@@ -439,6 +439,17 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
         verify(mQSPanelController).setExpanded(false);
     }
 
+    @Test
+    public void startsListeningAfterStateChangeToExpanded_inSplitShade() {
+        QSFragment fragment = resumeAndGetFragment();
+        enableSplitShade();
+        fragment.setQsVisible(true);
+        clearInvocations(mQSPanelController);
+
+        fragment.setExpanded(true);
+        verify(mQSPanelController).setListening(true, true);
+    }
+
     @Override
     protected Fragment instantiate(Context context, String className, Bundle arguments) {
         MockitoAnnotations.initMocks(this);
