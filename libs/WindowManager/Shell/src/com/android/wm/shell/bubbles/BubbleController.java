@@ -709,7 +709,7 @@ public class BubbleController implements ConfigurationChangeListener {
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
-        mContext.registerReceiver(mBroadcastReceiver, filter);
+        mContext.registerReceiver(mBroadcastReceiver, filter, Context.RECEIVER_EXPORTED_UNAUDITED);
     }
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
