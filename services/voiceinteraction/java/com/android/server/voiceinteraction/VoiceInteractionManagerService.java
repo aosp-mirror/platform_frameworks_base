@@ -1174,6 +1174,8 @@ public class VoiceInteractionManagerService extends SystemService {
         @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE)
         @Override
         public void setDisabled(boolean disabled) {
+            super.setDisabled_enforcePermission();
+
             synchronized (this) {
                 if (mTemporarilyDisabled == disabled) {
                     if (DEBUG) Slog.d(TAG, "setDisabled(): already " + disabled);
@@ -1244,6 +1246,8 @@ public class VoiceInteractionManagerService extends SystemService {
         public void updateState(
                 @Nullable PersistableBundle options,
                 @Nullable SharedMemory sharedMemory) {
+            super.updateState_enforcePermission();
+
             synchronized (this) {
                 enforceIsCurrentVoiceInteractionService();
 
@@ -1260,6 +1264,8 @@ public class VoiceInteractionManagerService extends SystemService {
                 @Nullable SharedMemory sharedMemory,
                 IHotwordRecognitionStatusCallback callback,
                 int detectorType) {
+            super.initAndVerifyDetector_enforcePermission();
+
             synchronized (this) {
                 enforceIsCurrentVoiceInteractionService();
 
@@ -1711,6 +1717,8 @@ public class VoiceInteractionManagerService extends SystemService {
                 @Nullable String attributionTag,
                 @Nullable IVoiceInteractionSessionShowCallback showCallback,
                 @Nullable IBinder activityToken) {
+            super.showSessionForActiveService_enforcePermission();
+
             if (DEBUG_USER) Slog.d(TAG, "showSessionForActiveService()");
 
             synchronized (this) {
@@ -1742,6 +1750,8 @@ public class VoiceInteractionManagerService extends SystemService {
         @Override
         public void hideCurrentSession() throws RemoteException {
 
+            super.hideCurrentSession_enforcePermission();
+
             if (mImpl == null) {
                 return;
             }
@@ -1762,6 +1772,8 @@ public class VoiceInteractionManagerService extends SystemService {
         @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE)
         @Override
         public void launchVoiceAssistFromKeyguard() {
+            super.launchVoiceAssistFromKeyguard_enforcePermission();
+
             synchronized (this) {
                 if (mImpl == null) {
                     Slog.w(TAG, "launchVoiceAssistFromKeyguard without running voice interaction"
@@ -1780,6 +1792,8 @@ public class VoiceInteractionManagerService extends SystemService {
         @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE)
         @Override
         public boolean isSessionRunning() {
+            super.isSessionRunning_enforcePermission();
+
             synchronized (this) {
                 return mImpl != null && mImpl.mActiveSession != null;
             }
@@ -1788,6 +1802,8 @@ public class VoiceInteractionManagerService extends SystemService {
         @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE)
         @Override
         public boolean activeServiceSupportsAssist() {
+            super.activeServiceSupportsAssist_enforcePermission();
+
             synchronized (this) {
                 return mImpl != null && mImpl.mInfo != null && mImpl.mInfo.getSupportsAssist();
             }
@@ -1796,6 +1812,8 @@ public class VoiceInteractionManagerService extends SystemService {
         @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE)
         @Override
         public boolean activeServiceSupportsLaunchFromKeyguard() throws RemoteException {
+            super.activeServiceSupportsLaunchFromKeyguard_enforcePermission();
+
             synchronized (this) {
                 return mImpl != null && mImpl.mInfo != null
                         && mImpl.mInfo.getSupportsLaunchFromKeyguard();
@@ -1805,6 +1823,8 @@ public class VoiceInteractionManagerService extends SystemService {
         @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE)
         @Override
         public void onLockscreenShown() {
+            super.onLockscreenShown_enforcePermission();
+
             synchronized (this) {
                 if (mImpl == null) {
                     return;
@@ -1828,6 +1848,8 @@ public class VoiceInteractionManagerService extends SystemService {
         @Override
         public void registerVoiceInteractionSessionListener(
                 IVoiceInteractionSessionListener listener) {
+            super.registerVoiceInteractionSessionListener_enforcePermission();
+
             synchronized (this) {
                 mVoiceInteractionSessionListeners.register(listener);
             }
@@ -1837,6 +1859,8 @@ public class VoiceInteractionManagerService extends SystemService {
         @Override
         public void getActiveServiceSupportedActions(List<String> voiceActions,
                 IVoiceActionCheckCallback callback) {
+            super.getActiveServiceSupportedActions_enforcePermission();
+
             synchronized (this) {
                 if (mImpl == null) {
                     try {
