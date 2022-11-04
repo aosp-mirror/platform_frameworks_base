@@ -1308,7 +1308,7 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     @Test
     public void qsExpansion_BehindTint_shadeLocked_bouncerActive_usesBouncerProgress() {
-        when(mStatusBarKeyguardViewManager.isBouncerInTransit()).thenReturn(true);
+        when(mStatusBarKeyguardViewManager.isPrimaryBouncerInTransit()).thenReturn(true);
         // clipping doesn't change tested logic but allows to assert scrims more in line with
         // their expected large screen behaviour
         mScrimController.setClipsQsScrim(false);
@@ -1324,7 +1324,7 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     @Test
     public void expansionNotificationAlpha_shadeLocked_bouncerActive_usesBouncerInterpolator() {
-        when(mStatusBarKeyguardViewManager.isBouncerInTransit()).thenReturn(true);
+        when(mStatusBarKeyguardViewManager.isPrimaryBouncerInTransit()).thenReturn(true);
 
         mScrimController.transitionTo(SHADE_LOCKED);
 
@@ -1340,7 +1340,7 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     @Test
     public void expansionNotificationAlpha_shadeLocked_bouncerNotActive_usesShadeInterpolator() {
-        when(mStatusBarKeyguardViewManager.isBouncerInTransit()).thenReturn(false);
+        when(mStatusBarKeyguardViewManager.isPrimaryBouncerInTransit()).thenReturn(false);
 
         mScrimController.transitionTo(SHADE_LOCKED);
 
@@ -1355,7 +1355,7 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     @Test
     public void notificationAlpha_unnocclusionAnimating_bouncerActive_usesKeyguardNotifAlpha() {
-        when(mStatusBarKeyguardViewManager.isBouncerInTransit()).thenReturn(true);
+        when(mStatusBarKeyguardViewManager.isPrimaryBouncerInTransit()).thenReturn(true);
         mScrimController.setClipsQsScrim(true);
 
         mScrimController.transitionTo(ScrimState.KEYGUARD);
@@ -1377,7 +1377,7 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     @Test
     public void notificationAlpha_unnocclusionAnimating_bouncerNotActive_usesKeyguardNotifAlpha() {
-        when(mStatusBarKeyguardViewManager.isBouncerInTransit()).thenReturn(false);
+        when(mStatusBarKeyguardViewManager.isPrimaryBouncerInTransit()).thenReturn(false);
 
         mScrimController.transitionTo(ScrimState.KEYGUARD);
         mScrimController.setUnocclusionAnimationRunning(true);
@@ -1398,7 +1398,7 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     @Test
     public void notificationAlpha_inKeyguardState_bouncerActive_usesInvertedBouncerInterpolator() {
-        when(mStatusBarKeyguardViewManager.isBouncerInTransit()).thenReturn(true);
+        when(mStatusBarKeyguardViewManager.isPrimaryBouncerInTransit()).thenReturn(true);
         mScrimController.setClipsQsScrim(true);
 
         mScrimController.transitionTo(ScrimState.KEYGUARD);
@@ -1418,7 +1418,7 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     @Test
     public void notificationAlpha_inKeyguardState_bouncerNotActive_usesInvertedShadeInterpolator() {
-        when(mStatusBarKeyguardViewManager.isBouncerInTransit()).thenReturn(false);
+        when(mStatusBarKeyguardViewManager.isPrimaryBouncerInTransit()).thenReturn(false);
         mScrimController.setClipsQsScrim(true);
 
         mScrimController.transitionTo(ScrimState.KEYGUARD);
