@@ -57,6 +57,7 @@ import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.navigationbar.NavigationModeController;
+import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
@@ -105,6 +106,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Mock ScreenOffAnimationController mScreenOffAnimationController;
     private @Mock InteractionJankMonitor mInteractionJankMonitor;
     private @Mock ScreenOnCoordinator mScreenOnCoordinator;
+    private @Mock ShadeController mShadeController;
     private @Mock Lazy<NotificationShadeWindowController> mNotificationShadeWindowControllerLazy;
     private @Mock DreamOverlayStateController mDreamOverlayStateController;
     private @Mock ActivityLaunchAnimator mActivityLaunchAnimator;
@@ -307,6 +309,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 mScreenOnCoordinator,
                 mInteractionJankMonitor,
                 mDreamOverlayStateController,
+                () -> mShadeController,
                 mNotificationShadeWindowControllerLazy,
                 () -> mActivityLaunchAnimator);
         mViewMediator.start();
