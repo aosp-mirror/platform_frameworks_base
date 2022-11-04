@@ -60,11 +60,6 @@ oneway interface IOverviewProxy {
     void onSystemUiStateChanged(int stateFlags) = 16;
 
     /**
-     * Sent when the split screen is resized
-     */
-    void onSplitScreenSecondaryBoundsChanged(in Rect bounds, in Rect insets) = 17;
-
-    /**
      * Sent when suggested rotation button could be shown
      */
     void onRotationProposal(int rotation, boolean isValid) = 18;
