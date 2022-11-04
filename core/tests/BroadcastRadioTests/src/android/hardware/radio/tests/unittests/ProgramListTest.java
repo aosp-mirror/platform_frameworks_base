@@ -360,15 +360,32 @@ public final class ProgramListTest {
     }
 
     @Test
-    public void registerListCallback_withExecutor() throws Exception {
+    public void onItemChanged_forListCallbackRegisteredWithExecutor_invokesWhenIdAdded()
+            throws Exception {
         createRadioTuner();
         mProgramList = mRadioTuner.getDynamicProgramList(TEST_FILTER);
         ProgramList.ListCallback listCallbackMock = mock(ProgramList.ListCallback.class);
-
         mProgramList.registerListCallback(mExecutor, listCallbackMock);
+
         mTunerCallback.onProgramListUpdated(FM_ADD_INCOMPLETE_CHUNK);
 
         verify(listCallbackMock, CALLBACK_TIMEOUT).onItemChanged(FM_IDENTIFIER);
+    }
+
+    @Test
+    public void onItemRemoved_forListCallbackRegisteredWithExecutor_invokesWhenIdRemoved()
+            throws Exception {
+        ProgramList.Chunk purgeChunk = new ProgramList.Chunk(/* purge= */ true,
+                /* complete= */ true, new ArraySet<>(), new ArraySet<>());
+        createRadioTuner();
+        mProgramList = mRadioTuner.getDynamicProgramList(TEST_FILTER);
+        ProgramList.ListCallback listCallbackMock = mock(ProgramList.ListCallback.class);
+        mProgramList.registerListCallback(mExecutor, listCallbackMock);
+        mTunerCallback.onProgramListUpdated(FM_ADD_INCOMPLETE_CHUNK);
+
+        mTunerCallback.onProgramListUpdated(purgeChunk);
+
+        verify(listCallbackMock, CALLBACK_TIMEOUT).onItemRemoved(FM_IDENTIFIER);
     }
 
     @Test
