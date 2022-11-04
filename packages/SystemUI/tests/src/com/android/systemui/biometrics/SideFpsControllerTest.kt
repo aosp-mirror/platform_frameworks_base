@@ -52,6 +52,7 @@ import androidx.test.filters.SmallTest
 import com.airbnb.lottie.LottieAnimationView
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.recents.OverviewProxyService
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
@@ -82,37 +83,31 @@ private const val SENSOR_ID = 1
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper
-class SidefpsControllerTest : SysuiTestCase() {
+class SideFpsControllerTest : SysuiTestCase() {
 
-    @JvmField @Rule
-    var rule = MockitoJUnit.rule()
+    @JvmField @Rule var rule = MockitoJUnit.rule()
 
-    @Mock
-    lateinit var layoutInflater: LayoutInflater
-    @Mock
-    lateinit var fingerprintManager: FingerprintManager
-    @Mock
-    lateinit var windowManager: WindowManager
-    @Mock
-    lateinit var activityTaskManager: ActivityTaskManager
-    @Mock
-    lateinit var sidefpsView: View
-    @Mock
-    lateinit var displayManager: DisplayManager
-    @Mock
-    lateinit var overviewProxyService: OverviewProxyService
-    @Mock
-    lateinit var handler: Handler
-    @Captor
-    lateinit var overlayCaptor: ArgumentCaptor<View>
-    @Captor
-    lateinit var overlayViewParamsCaptor: ArgumentCaptor<WindowManager.LayoutParams>
+    @Mock lateinit var layoutInflater: LayoutInflater
+    @Mock lateinit var fingerprintManager: FingerprintManager
+    @Mock lateinit var windowManager: WindowManager
+    @Mock lateinit var activityTaskManager: ActivityTaskManager
+    @Mock lateinit var sideFpsView: View
+    @Mock lateinit var displayManager: DisplayManager
+    @Mock lateinit var overviewProxyService: OverviewProxyService
+    @Mock lateinit var handler: Handler
+    @Mock lateinit var dumpManager: DumpManager
+    @Captor lateinit var overlayCaptor: ArgumentCaptor<View>
+    @Captor lateinit var overlayViewParamsCaptor: ArgumentCaptor<WindowManager.LayoutParams>
 
     private val executor = FakeExecutor(FakeSystemClock())
     private lateinit var overlayController: ISidefpsController
-    private lateinit var sideFpsController: SidefpsController
+    private lateinit var sideFpsController: SideFpsController
 
-    enum class DeviceConfig { X_ALIGNED, Y_ALIGNED_UNFOLDED, Y_ALIGNED_FOLDED }
+    enum class DeviceConfig {
+        X_ALIGNED,
+        Y_ALIGNED_UNFOLDED,
+        Y_ALIGNED_FOLDED
+    }
 
     private lateinit var deviceConfig: DeviceConfig
     private lateinit var indicatorBounds: Rect
@@ -128,17 +123,18 @@ class SidefpsControllerTest : SysuiTestCase() {
         context.addMockSystemService(DisplayManager::class.java, displayManager)
         context.addMockSystemService(WindowManager::class.java, windowManager)
 
-        whenEver(layoutInflater.inflate(R.layout.sidefps_view, null, false)).thenReturn(sidefpsView)
-        whenEver(sidefpsView.findViewById<LottieAnimationView>(eq(R.id.sidefps_animation)))
+        whenEver(layoutInflater.inflate(R.layout.sidefps_view, null, false)).thenReturn(sideFpsView)
+        whenEver(sideFpsView.findViewById<LottieAnimationView>(eq(R.id.sidefps_animation)))
             .thenReturn(mock(LottieAnimationView::class.java))
         with(mock(ViewPropertyAnimator::class.java)) {
-            whenEver(sidefpsView.animate()).thenReturn(this)
+            whenEver(sideFpsView.animate()).thenReturn(this)
             whenEver(alpha(anyFloat())).thenReturn(this)
             whenEver(setStartDelay(anyLong())).thenReturn(this)
             whenEver(setDuration(anyLong())).thenReturn(this)
             whenEver(setListener(any())).thenAnswer {
-                (it.arguments[0] as Animator.AnimatorListener)
-                    .onAnimationEnd(mock(Animator::class.java))
+                (it.arguments[0] as Animator.AnimatorListener).onAnimationEnd(
+                    mock(Animator::class.java)
+                )
                 this
             }
         }
@@ -179,20 +175,21 @@ class SidefpsControllerTest : SysuiTestCase() {
         displayBounds = Rect(0, 0, displayWidth, displayHeight)
         var locations = listOf(sensorLocation)
 
-        whenEver(fingerprintManager.sensorPropertiesInternal).thenReturn(
-            listOf(
-                FingerprintSensorPropertiesInternal(
-                    SENSOR_ID,
-                    SensorProperties.STRENGTH_STRONG,
-                    5 /* maxEnrollmentsPerUser */,
-                    listOf() /* componentInfo */,
-                    FingerprintSensorProperties.TYPE_POWER_BUTTON,
-                    true /* halControlsIllumination */,
-                    true /* resetLockoutRequiresHardwareAuthToken */,
-                    locations
+        whenEver(fingerprintManager.sensorPropertiesInternal)
+            .thenReturn(
+                listOf(
+                    FingerprintSensorPropertiesInternal(
+                        SENSOR_ID,
+                        SensorProperties.STRENGTH_STRONG,
+                        5 /* maxEnrollmentsPerUser */,
+                        listOf() /* componentInfo */,
+                        FingerprintSensorProperties.TYPE_POWER_BUTTON,
+                        true /* halControlsIllumination */,
+                        true /* resetLockoutRequiresHardwareAuthToken */,
+                        locations
+                    )
                 )
             )
-        )
 
         val displayInfo = DisplayInfo()
         displayInfo.initInfo()
@@ -200,22 +197,29 @@ class SidefpsControllerTest : SysuiTestCase() {
         val display = Display(dmGlobal, DISPLAY_ID, displayInfo, DEFAULT_DISPLAY_ADJUSTMENTS)
         whenEver(dmGlobal.getDisplayInfo(eq(DISPLAY_ID))).thenReturn(displayInfo)
         whenEver(windowManager.defaultDisplay).thenReturn(display)
-        whenEver(windowManager.maximumWindowMetrics).thenReturn(
-                WindowMetrics(displayBounds, WindowInsets.CONSUMED)
-        )
-        whenEver(windowManager.currentWindowMetrics).thenReturn(
-            WindowMetrics(displayBounds, windowInsets)
-        )
+        whenEver(windowManager.maximumWindowMetrics)
+            .thenReturn(WindowMetrics(displayBounds, WindowInsets.CONSUMED))
+        whenEver(windowManager.currentWindowMetrics)
+            .thenReturn(WindowMetrics(displayBounds, windowInsets))
 
-        sideFpsController = SidefpsController(
-            context.createDisplayContext(display), layoutInflater, fingerprintManager,
-            windowManager, activityTaskManager, overviewProxyService, displayManager, executor,
-            handler
-        )
+        sideFpsController =
+            SideFpsController(
+                context.createDisplayContext(display),
+                layoutInflater,
+                fingerprintManager,
+                windowManager,
+                activityTaskManager,
+                overviewProxyService,
+                displayManager,
+                executor,
+                handler,
+                dumpManager
+            )
 
-        overlayController = ArgumentCaptor.forClass(ISidefpsController::class.java).apply {
-            verify(fingerprintManager).setSidefpsController(capture())
-        }.value
+        overlayController =
+            ArgumentCaptor.forClass(ISidefpsController::class.java)
+                .apply { verify(fingerprintManager).setSidefpsController(capture()) }
+                .value
 
         block()
     }
@@ -272,10 +276,7 @@ class SidefpsControllerTest : SysuiTestCase() {
         verify(windowManager).removeView(any())
     }
 
-    @Test
-    fun testIgnoredForKeyguard() = testWithDisplay {
-        testIgnoredFor(REASON_AUTH_KEYGUARD)
-    }
+    @Test fun testIgnoredForKeyguard() = testWithDisplay { testIgnoredFor(REASON_AUTH_KEYGUARD) }
 
     @Test
     fun testShowsForMostSettings() = testWithDisplay {
@@ -297,88 +298,76 @@ class SidefpsControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun showsWithTaskbar() = testWithDisplay(
-        deviceConfig = DeviceConfig.X_ALIGNED,
-        { rotation = Surface.ROTATION_0 }
-    ) {
-        hidesWithTaskbar(visible = true)
-    }
+    fun showsWithTaskbar() =
+        testWithDisplay(deviceConfig = DeviceConfig.X_ALIGNED, { rotation = Surface.ROTATION_0 }) {
+            hidesWithTaskbar(visible = true)
+        }
 
     @Test
-    fun showsWithTaskbarOnY() = testWithDisplay(
-        deviceConfig = DeviceConfig.Y_ALIGNED_UNFOLDED,
-        { rotation = Surface.ROTATION_0 }
-    ) {
-        hidesWithTaskbar(visible = true)
-    }
+    fun showsWithTaskbarOnY() =
+        testWithDisplay(
+            deviceConfig = DeviceConfig.Y_ALIGNED_UNFOLDED,
+            { rotation = Surface.ROTATION_0 }
+        ) { hidesWithTaskbar(visible = true) }
 
     @Test
-    fun showsWithTaskbar90() = testWithDisplay(
-        deviceConfig = DeviceConfig.X_ALIGNED,
-        { rotation = Surface.ROTATION_90 }
-    ) {
-        hidesWithTaskbar(visible = true)
-    }
+    fun showsWithTaskbar90() =
+        testWithDisplay(deviceConfig = DeviceConfig.X_ALIGNED, { rotation = Surface.ROTATION_90 }) {
+            hidesWithTaskbar(visible = true)
+        }
 
     @Test
-    fun showsWithTaskbar90OnY() = testWithDisplay(
-        deviceConfig = DeviceConfig.Y_ALIGNED_UNFOLDED,
-        { rotation = Surface.ROTATION_90 }
-    ) {
-        hidesWithTaskbar(visible = true)
-    }
+    fun showsWithTaskbar90OnY() =
+        testWithDisplay(
+            deviceConfig = DeviceConfig.Y_ALIGNED_UNFOLDED,
+            { rotation = Surface.ROTATION_90 }
+        ) { hidesWithTaskbar(visible = true) }
 
     @Test
-    fun showsWithTaskbar180() = testWithDisplay(
-        deviceConfig = DeviceConfig.X_ALIGNED,
-        { rotation = Surface.ROTATION_180 }
-    ) {
-        hidesWithTaskbar(visible = true)
-    }
+    fun showsWithTaskbar180() =
+        testWithDisplay(
+            deviceConfig = DeviceConfig.X_ALIGNED,
+            { rotation = Surface.ROTATION_180 }
+        ) { hidesWithTaskbar(visible = true) }
 
     @Test
-    fun showsWithTaskbar270OnY() = testWithDisplay(
-        deviceConfig = DeviceConfig.Y_ALIGNED_UNFOLDED,
-        { rotation = Surface.ROTATION_270 }
-    ) {
-        hidesWithTaskbar(visible = true)
-    }
+    fun showsWithTaskbar270OnY() =
+        testWithDisplay(
+            deviceConfig = DeviceConfig.Y_ALIGNED_UNFOLDED,
+            { rotation = Surface.ROTATION_270 }
+        ) { hidesWithTaskbar(visible = true) }
 
     @Test
-    fun showsWithTaskbarCollapsedDown() = testWithDisplay(
-        deviceConfig = DeviceConfig.X_ALIGNED,
-        { rotation = Surface.ROTATION_270 },
-        windowInsets = insetsForSmallNavbar()
-    ) {
-        hidesWithTaskbar(visible = true)
-    }
+    fun showsWithTaskbarCollapsedDown() =
+        testWithDisplay(
+            deviceConfig = DeviceConfig.X_ALIGNED,
+            { rotation = Surface.ROTATION_270 },
+            windowInsets = insetsForSmallNavbar()
+        ) { hidesWithTaskbar(visible = true) }
 
     @Test
-    fun showsWithTaskbarCollapsedDownOnY() = testWithDisplay(
-        deviceConfig = DeviceConfig.Y_ALIGNED_UNFOLDED,
-        { rotation = Surface.ROTATION_180 },
-        windowInsets = insetsForSmallNavbar()
-    ) {
-        hidesWithTaskbar(visible = true)
-    }
+    fun showsWithTaskbarCollapsedDownOnY() =
+        testWithDisplay(
+            deviceConfig = DeviceConfig.Y_ALIGNED_UNFOLDED,
+            { rotation = Surface.ROTATION_180 },
+            windowInsets = insetsForSmallNavbar()
+        ) { hidesWithTaskbar(visible = true) }
 
     @Test
-    fun hidesWithTaskbarDown() = testWithDisplay(
-        deviceConfig = DeviceConfig.X_ALIGNED,
-        { rotation = Surface.ROTATION_180 },
-        windowInsets = insetsForLargeNavbar()
-    ) {
-        hidesWithTaskbar(visible = false)
-    }
+    fun hidesWithTaskbarDown() =
+        testWithDisplay(
+            deviceConfig = DeviceConfig.X_ALIGNED,
+            { rotation = Surface.ROTATION_180 },
+            windowInsets = insetsForLargeNavbar()
+        ) { hidesWithTaskbar(visible = false) }
 
     @Test
-    fun hidesWithTaskbarDownOnY() = testWithDisplay(
-        deviceConfig = DeviceConfig.Y_ALIGNED_UNFOLDED,
-        { rotation = Surface.ROTATION_270 },
-        windowInsets = insetsForLargeNavbar()
-    ) {
-        hidesWithTaskbar(visible = true)
-    }
+    fun hidesWithTaskbarDownOnY() =
+        testWithDisplay(
+            deviceConfig = DeviceConfig.Y_ALIGNED_UNFOLDED,
+            { rotation = Surface.ROTATION_270 },
+            windowInsets = insetsForLargeNavbar()
+        ) { hidesWithTaskbar(visible = true) }
 
     private fun hidesWithTaskbar(visible: Boolean) {
         overlayController.show(SENSOR_ID, REASON_UNKNOWN)
@@ -389,43 +378,35 @@ class SidefpsControllerTest : SysuiTestCase() {
 
         verify(windowManager).addView(any(), any())
         verify(windowManager, never()).removeView(any())
-        verify(sidefpsView).visibility = if (visible) View.VISIBLE else View.GONE
+        verify(sideFpsView).visibility = if (visible) View.VISIBLE else View.GONE
     }
 
     @Test
-    fun testIndicatorPlacementForXAlignedSensor() = testWithDisplay(
-        deviceConfig = DeviceConfig.X_ALIGNED
-    ) {
-        overlayController.show(SENSOR_ID, REASON_UNKNOWN)
-        sideFpsController.overlayOffsets = sensorLocation
-        sideFpsController.updateOverlayParams(
-            windowManager.defaultDisplay,
-            indicatorBounds
-        )
-        executor.runAllReady()
+    fun testIndicatorPlacementForXAlignedSensor() =
+        testWithDisplay(deviceConfig = DeviceConfig.X_ALIGNED) {
+            overlayController.show(SENSOR_ID, REASON_UNKNOWN)
+            sideFpsController.overlayOffsets = sensorLocation
+            sideFpsController.updateOverlayParams(windowManager.defaultDisplay, indicatorBounds)
+            executor.runAllReady()
 
-        verify(windowManager).updateViewLayout(any(), overlayViewParamsCaptor.capture())
+            verify(windowManager).updateViewLayout(any(), overlayViewParamsCaptor.capture())
 
-        assertThat(overlayViewParamsCaptor.value.x).isEqualTo(sensorLocation.sensorLocationX)
-        assertThat(overlayViewParamsCaptor.value.y).isEqualTo(0)
-    }
+            assertThat(overlayViewParamsCaptor.value.x).isEqualTo(sensorLocation.sensorLocationX)
+            assertThat(overlayViewParamsCaptor.value.y).isEqualTo(0)
+        }
 
     @Test
-    fun testIndicatorPlacementForYAlignedSensor() = testWithDisplay(
-        deviceConfig = DeviceConfig.Y_ALIGNED_UNFOLDED
-    ) {
-        sideFpsController.overlayOffsets = sensorLocation
-        sideFpsController.updateOverlayParams(
-            windowManager.defaultDisplay,
-            indicatorBounds
-        )
-        overlayController.show(SENSOR_ID, REASON_UNKNOWN)
-        executor.runAllReady()
+    fun testIndicatorPlacementForYAlignedSensor() =
+        testWithDisplay(deviceConfig = DeviceConfig.Y_ALIGNED_UNFOLDED) {
+            sideFpsController.overlayOffsets = sensorLocation
+            sideFpsController.updateOverlayParams(windowManager.defaultDisplay, indicatorBounds)
+            overlayController.show(SENSOR_ID, REASON_UNKNOWN)
+            executor.runAllReady()
 
-        verify(windowManager).updateViewLayout(any(), overlayViewParamsCaptor.capture())
-        assertThat(overlayViewParamsCaptor.value.x).isEqualTo(displayWidth - boundsWidth)
-        assertThat(overlayViewParamsCaptor.value.y).isEqualTo(sensorLocation.sensorLocationY)
-    }
+            verify(windowManager).updateViewLayout(any(), overlayViewParamsCaptor.capture())
+            assertThat(overlayViewParamsCaptor.value.x).isEqualTo(displayWidth - boundsWidth)
+            assertThat(overlayViewParamsCaptor.value.y).isEqualTo(sensorLocation.sensorLocationY)
+        }
 
     @Test
     fun hasSideFpsSensor_withSensorProps_returnsTrue() = testWithDisplay {
@@ -442,52 +423,50 @@ class SidefpsControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testLayoutParams_hasNoMoveAnimationWindowFlag() = testWithDisplay(
-        deviceConfig = DeviceConfig.Y_ALIGNED_UNFOLDED
-    ) {
-        sideFpsController.overlayOffsets = sensorLocation
-        sideFpsController.updateOverlayParams(
-            windowManager.defaultDisplay,
-            indicatorBounds
-        )
-        overlayController.show(SENSOR_ID, REASON_UNKNOWN)
-        executor.runAllReady()
+    fun testLayoutParams_hasNoMoveAnimationWindowFlag() =
+        testWithDisplay(deviceConfig = DeviceConfig.Y_ALIGNED_UNFOLDED) {
+            sideFpsController.overlayOffsets = sensorLocation
+            sideFpsController.updateOverlayParams(windowManager.defaultDisplay, indicatorBounds)
+            overlayController.show(SENSOR_ID, REASON_UNKNOWN)
+            executor.runAllReady()
 
-        verify(windowManager).updateViewLayout(any(), overlayViewParamsCaptor.capture())
+            verify(windowManager).updateViewLayout(any(), overlayViewParamsCaptor.capture())
 
-        val lpFlags = overlayViewParamsCaptor.value.privateFlags
+            val lpFlags = overlayViewParamsCaptor.value.privateFlags
 
-        assertThat((lpFlags and PRIVATE_FLAG_NO_MOVE_ANIMATION) != 0).isTrue()
-    }
+            assertThat((lpFlags and PRIVATE_FLAG_NO_MOVE_ANIMATION) != 0).isTrue()
+        }
 
     @Test
-    fun testLayoutParams_hasTrustedOverlayWindowFlag() = testWithDisplay(
-        deviceConfig = DeviceConfig.Y_ALIGNED_UNFOLDED
-    ) {
-        sideFpsController.overlayOffsets = sensorLocation
-        sideFpsController.updateOverlayParams(
-            windowManager.defaultDisplay,
-            indicatorBounds
-        )
-        overlayController.show(SENSOR_ID, REASON_UNKNOWN)
-        executor.runAllReady()
+    fun testLayoutParams_hasTrustedOverlayWindowFlag() =
+        testWithDisplay(deviceConfig = DeviceConfig.Y_ALIGNED_UNFOLDED) {
+            sideFpsController.overlayOffsets = sensorLocation
+            sideFpsController.updateOverlayParams(windowManager.defaultDisplay, indicatorBounds)
+            overlayController.show(SENSOR_ID, REASON_UNKNOWN)
+            executor.runAllReady()
 
-        verify(windowManager).updateViewLayout(any(), overlayViewParamsCaptor.capture())
+            verify(windowManager).updateViewLayout(any(), overlayViewParamsCaptor.capture())
 
-        val lpFlags = overlayViewParamsCaptor.value.privateFlags
+            val lpFlags = overlayViewParamsCaptor.value.privateFlags
 
-        assertThat((lpFlags and PRIVATE_FLAG_TRUSTED_OVERLAY) != 0).isTrue()
-    }
+            assertThat((lpFlags and PRIVATE_FLAG_TRUSTED_OVERLAY) != 0).isTrue()
+        }
 }
 
 private fun insetsForSmallNavbar() = insetsWithBottom(60)
+
 private fun insetsForLargeNavbar() = insetsWithBottom(100)
-private fun insetsWithBottom(bottom: Int) = WindowInsets.Builder()
-    .setInsets(WindowInsets.Type.navigationBars(), Insets.of(0, 0, 0, bottom))
-    .build()
+
+private fun insetsWithBottom(bottom: Int) =
+    WindowInsets.Builder()
+        .setInsets(WindowInsets.Type.navigationBars(), Insets.of(0, 0, 0, bottom))
+        .build()
 
 private fun fpEnrollTask() = settingsTask(".biometrics.fingerprint.FingerprintEnrollEnrolling")
+
 private fun fpSettingsTask() = settingsTask(".biometrics.fingerprint.FingerprintSettings")
-private fun settingsTask(cls: String) = ActivityManager.RunningTaskInfo().apply {
-    topActivity = ComponentName.createRelative("com.android.settings", cls)
-}
+
+private fun settingsTask(cls: String) =
+    ActivityManager.RunningTaskInfo().apply {
+        topActivity = ComponentName.createRelative("com.android.settings", cls)
+    }
