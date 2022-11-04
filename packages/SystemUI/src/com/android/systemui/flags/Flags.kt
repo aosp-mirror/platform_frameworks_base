@@ -144,7 +144,6 @@ object Flags {
     val SMARTSPACE = ResourceBooleanFlag(402, R.bool.flag_smartspace)
 
     // 500 - quick settings
-    @Deprecated("Not needed anymore") val NEW_USER_SWITCHER = ReleasedFlag(500)
 
     // TODO(b/254512321): Tracking Bug
     @JvmField val COMBINED_QS_HEADERS = UnreleasedFlag(501, teamfood = true)
@@ -152,9 +151,6 @@ object Flags {
     @JvmField
     val QS_USER_DETAIL_SHORTCUT =
         ResourceBooleanFlag(503, R.bool.flag_lockscreen_qs_user_detail_shortcut)
-
-    // TODO(b/254512699): Tracking Bug
-    @Deprecated("Not needed anymore") val NEW_FOOTER = ReleasedFlag(504)
 
     // TODO(b/254512747): Tracking Bug
     val NEW_HEADER = UnreleasedFlag(505, teamfood = true)
