@@ -37,8 +37,7 @@ import java.util.Map;
  * Base class of a request session, that listens to UI events. This class must be extended
  * every time a new response type is expected from the providers.
  */
-abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialManagerUiCallback,
-        ProviderSession.ProviderInternalCallback {
+abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialManagerUiCallback{
     private static final String TAG = "RequestSession";
 
     // TODO: Revise access levels of attributes
@@ -89,7 +88,7 @@ abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialMan
         }
         Log.i(TAG, "Provider session found");
         providerSession.onUiEntrySelected(selection.getEntryKey(),
-                selection.getEntrySubkey());
+                selection.getEntrySubkey(), selection.getPendingIntentProviderResponse());
     }
 
     @Override // from CredentialManagerUiCallbacks
@@ -98,8 +97,7 @@ abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialMan
         finishSession();
     }
 
-    @Override // from provider session
-    public void onProviderStatusChanged(ProviderSession.Status status,
+    protected void onProviderStatusChanged(ProviderSession.Status status,
             ComponentName componentName) {
         Log.i(TAG, "in onStatusChanged with status: " + status);
         if (ProviderSession.isTerminatingStatus(status)) {

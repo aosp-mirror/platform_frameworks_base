@@ -19,10 +19,12 @@ package com.android.server.credentials;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.PendingIntent;
 import android.content.Context;
-import android.credentials.Credential;
+import android.content.Intent;
 import android.credentials.ui.CreateCredentialProviderData;
 import android.credentials.ui.Entry;
+import android.credentials.ui.ProviderPendingIntentResponse;
 import android.os.Bundle;
 import android.service.credentials.CreateCredentialRequest;
 import android.service.credentials.CreateCredentialResponse;
@@ -166,33 +168,28 @@ public final class ProviderCreateSession extends ProviderSession<
     }
 
     @Override
-    public void onProviderIntentResult(Bundle resultData) {
-        Credential credential = resultData.getParcelable(
-                CredentialProviderService.EXTRA_SAVE_CREDENTIAL,
-                Credential.class);
-        if (credential == null) {
-            Log.i(TAG, "Credential returned from intent is null");
-            return;
+    public void onUiEntrySelected(String entryType, String entryKey,
+            ProviderPendingIntentResponse providerPendingIntentResponse) {
+        switch (entryType) {
+            case SAVE_ENTRY_KEY:
+                if (mUiSaveEntries.containsKey(entryKey)) {
+                    onSaveEntrySelected(providerPendingIntentResponse);
+                } else {
+                    //TODO: Handle properly
+                    Log.i(TAG, "Unexpected save entry key");
+                }
+                break;
+            case REMOTE_ENTRY_KEY:
+                if (mUiRemoteEntry.first.equals(entryKey)) {
+                    onRemoteEntrySelected(providerPendingIntentResponse);
+                } else {
+                    //TODO: Handle properly
+                    Log.i(TAG, "Unexpected remote entry key");
+                }
+                break;
+            default:
+                Log.i(TAG, "Unsupported entry type selected");
         }
-        updateFinalCredentialResponse(credential);
-    }
-
-    @Override
-    public void onUiEntrySelected(String entryType, String entryKey) {
-        if (entryType.equals(SAVE_ENTRY_KEY)) {
-            SaveEntry saveEntry = mUiSaveEntries.get(entryKey);
-            if (saveEntry == null) {
-                Log.i(TAG, "Save entry not found");
-                return;
-            }
-            // TODO: Uncomment when pending intent works
-            // onSaveEntrySelected(saveEntry);
-        }
-    }
-
-    @Override
-    public void onProviderIntentCancelled() {
-        //TODO (Implement)
     }
 
     private List<Entry> prepareUiSaveEntries(@NonNull List<SaveEntry> saveEntries) {
@@ -204,14 +201,17 @@ public final class ProviderCreateSession extends ProviderSession<
             String entryId = generateEntryId();
             mUiSaveEntries.put(entryId, saveEntry);
             Log.i(TAG, "in prepareUiProviderData creating ui entry with id " + entryId);
-            uiSaveEntries.add(new Entry(SAVE_ENTRY_KEY, entryId, saveEntry.getSlice()));
+            uiSaveEntries.add(new Entry(SAVE_ENTRY_KEY, entryId, saveEntry.getSlice(),
+                    saveEntry.getPendingIntent(), setUpFillInIntent(saveEntry.getPendingIntent())));
         }
         return uiSaveEntries;
     }
 
-    private void updateFinalCredentialResponse(@NonNull Credential credential) {
-        mFinalCredentialResponse = credential;
-        updateStatusAndInvokeCallback(Status.CREDENTIAL_RECEIVED_FROM_INTENT);
+    private Intent setUpFillInIntent(PendingIntent pendingIntent) {
+        Intent intent = pendingIntent.getIntent();
+        intent.putExtra(CredentialProviderService.EXTRA_CREATE_CREDENTIAL_REQUEST_PARAMS,
+                mCompleteRequest.getData());
+        return intent;
     }
 
     private CreateCredentialProviderData prepareUiProviderData(List<Entry> saveEntries,
@@ -223,9 +223,20 @@ public final class ProviderCreateSession extends ProviderSession<
                 .build();
     }
 
-    private void onSaveEntrySelected(SaveEntry saveEntry) {
-        mProviderIntentController.setupAndInvokePendingIntent(saveEntry.getPendingIntent(),
-                mProviderRequest);
-        setStatus(Status.PENDING_INTENT_INVOKED);
+    private void onSaveEntrySelected(ProviderPendingIntentResponse pendingIntentResponse) {
+        if (pendingIntentResponse == null) {
+            return;
+            //TODO: Handle failure if pending intent is null
+        }
+        if (PendingIntentResultHandler.isSuccessfulResponse(pendingIntentResponse)) {
+            android.credentials.CreateCredentialResponse credentialResponse =
+                    PendingIntentResultHandler.extractCreateCredentialResponse(
+                            pendingIntentResponse.getResultData());
+            if (credentialResponse != null) {
+                mCallbacks.onFinalResponseReceived(mComponentName, credentialResponse);
+                return;
+            }
+        }
+        //TODO: Handle failure case is pending intent response does not have a credential
     }
 }

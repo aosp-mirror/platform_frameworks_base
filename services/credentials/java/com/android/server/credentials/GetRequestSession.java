@@ -17,16 +17,14 @@
 package com.android.server.credentials;
 
 import android.annotation.Nullable;
+import android.content.ComponentName;
 import android.content.Context;
-import android.credentials.Credential;
 import android.credentials.GetCredentialRequest;
 import android.credentials.GetCredentialResponse;
 import android.credentials.IGetCredentialCallback;
 import android.credentials.ui.ProviderData;
 import android.credentials.ui.RequestInfo;
-import android.credentials.ui.UserSelectionDialogResult;
 import android.os.RemoteException;
-import android.service.credentials.CredentialEntry;
 import android.service.credentials.CredentialProviderInfo;
 import android.util.Log;
 
@@ -37,7 +35,8 @@ import java.util.ArrayList;
  * responses from providers, and the UX app, and updates the provider(S) state.
  */
 public final class GetRequestSession extends RequestSession<GetCredentialRequest,
-        IGetCredentialCallback> {
+        IGetCredentialCallback>
+        implements ProviderSession.ProviderInternalCallback<GetCredentialResponse> {
     private static final String TAG = "GetRequestSession";
 
     public GetRequestSession(Context context, int userId,
@@ -67,23 +66,6 @@ public final class GetRequestSession extends RequestSession<GetCredentialRequest
         return providerGetSession;
     }
 
-    // TODO: Override for this method not needed once get selection logic is
-    //  moved to ProviderGetSession
-    @Override
-    public void onUiSelection(UserSelectionDialogResult selection) {
-        String providerId = selection.getProviderId();
-        ProviderGetSession providerSession = (ProviderGetSession) mProviders.get(providerId);
-        if (providerSession != null) {
-            CredentialEntry credentialEntry = providerSession.getCredentialEntry(
-                    selection.getEntrySubkey());
-            if (credentialEntry != null && credentialEntry.getCredential() != null) {
-                respondToClientAndFinish(credentialEntry.getCredential());
-            }
-            // TODO : Handle action chips and authentication selection
-        }
-        // TODO : finish session and respond to client if provider not found
-    }
-
     @Override
     protected void launchUiWithProviderData(ArrayList<ProviderData> providerDataList) {
         mHandler.post(() -> mCredentialManagerUi.show(RequestInfo.newGetRequestInfo(
@@ -91,9 +73,26 @@ public final class GetRequestSession extends RequestSession<GetCredentialRequest
                 providerDataList));
     }
 
-    private void respondToClientAndFinish(Credential credential) {
+    @Override // from provider session
+    public void onProviderStatusChanged(ProviderSession.Status status,
+            ComponentName componentName) {
+        super.onProviderStatusChanged(status, componentName);
+    }
+
+
+    @Override
+    public void onFinalResponseReceived(ComponentName componentName,
+            GetCredentialResponse response) {
+        Log.i(TAG, "onFinalCredentialReceived from: " + componentName.flattenToString());
+        if (response != null) {
+            respondToClientAndFinish(response);
+        }
+    }
+
+    private void respondToClientAndFinish(GetCredentialResponse response) {
+        Log.i(TAG, "respondToClientAndFinish");
         try {
-            mClientCallback.onResponse(new GetCredentialResponse(credential));
+            mClientCallback.onResponse(response);
         } catch (RemoteException e) {
             e.printStackTrace();
         }
