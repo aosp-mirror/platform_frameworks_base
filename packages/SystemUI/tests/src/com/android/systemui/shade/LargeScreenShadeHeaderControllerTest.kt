@@ -13,6 +13,8 @@ import com.android.systemui.animation.Interpolators
 import com.android.systemui.animation.ShadeInterpolation
 import com.android.systemui.battery.BatteryMeterView
 import com.android.systemui.battery.BatteryMeterViewController
+import com.android.systemui.demomode.DemoMode
+import com.android.systemui.demomode.DemoModeController
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
@@ -22,9 +24,12 @@ import com.android.systemui.qs.carrier.QSCarrierGroupController
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
 import com.android.systemui.statusbar.phone.StatusBarIconController
 import com.android.systemui.statusbar.phone.StatusIconContainer
+import com.android.systemui.statusbar.policy.Clock
 import com.android.systemui.statusbar.policy.FakeConfigurationController
 import com.android.systemui.statusbar.policy.VariableDateViewController
 import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.argumentCaptor
+import com.android.systemui.util.mockito.capture
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
 import org.junit.Before
@@ -52,7 +57,7 @@ class LargeScreenShadeHeaderControllerTest : SysuiTestCase() {
     @Mock private lateinit var qsCarrierGroupController: QSCarrierGroupController
     @Mock private lateinit var qsCarrierGroupControllerBuilder: QSCarrierGroupController.Builder
     @Mock private lateinit var featureFlags: FeatureFlags
-    @Mock private lateinit var clock: TextView
+    @Mock private lateinit var clock: Clock
     @Mock private lateinit var date: TextView
     @Mock private lateinit var carrierGroup: QSCarrierGroup
     @Mock private lateinit var batteryMeterView: BatteryMeterView
@@ -66,6 +71,7 @@ class LargeScreenShadeHeaderControllerTest : SysuiTestCase() {
         CombinedShadeHeadersConstraintManager
 
     @Mock private lateinit var mockedContext: Context
+    @Mock private lateinit var demoModeController: DemoModeController
 
     @JvmField @Rule val mockitoRule = MockitoJUnit.rule()
     var viewVisibility = View.GONE
@@ -76,7 +82,7 @@ class LargeScreenShadeHeaderControllerTest : SysuiTestCase() {
 
     @Before
     fun setup() {
-        whenever<TextView>(view.findViewById(R.id.clock)).thenReturn(clock)
+        whenever<Clock>(view.findViewById(R.id.clock)).thenReturn(clock)
         whenever(clock.context).thenReturn(mockedContext)
         whenever<TextView>(view.findViewById(R.id.date)).thenReturn(date)
         whenever(date.context).thenReturn(mockedContext)
@@ -111,8 +117,9 @@ class LargeScreenShadeHeaderControllerTest : SysuiTestCase() {
                 dumpManager,
                 featureFlags,
                 qsCarrierGroupControllerBuilder,
-                combinedShadeHeadersConstraintManager
-        )
+                combinedShadeHeadersConstraintManager,
+                demoModeController
+                )
         whenever(view.isAttachedToWindow).thenReturn(true)
         mLargeScreenShadeHeaderController.init()
         carrierIconSlots = listOf(
@@ -229,5 +236,22 @@ class LargeScreenShadeHeaderControllerTest : SysuiTestCase() {
         verify(animator).alpha(1f)
         verify(animator).setInterpolator(Interpolators.ALPHA_IN)
         verify(animator).start()
+    }
+
+    @Test
+    fun demoMode_attachDemoMode() {
+        val cb = argumentCaptor<DemoMode>()
+        verify(demoModeController).addCallback(capture(cb))
+        cb.value.onDemoModeStarted()
+        verify(clock).onDemoModeStarted()
+    }
+
+    @Test
+    fun demoMode_detachDemoMode() {
+        mLargeScreenShadeHeaderController.simulateViewDetached()
+        val cb = argumentCaptor<DemoMode>()
+        verify(demoModeController).removeCallback(capture(cb))
+        cb.value.onDemoModeFinished()
+        verify(clock).onDemoModeFinished()
     }
 }
