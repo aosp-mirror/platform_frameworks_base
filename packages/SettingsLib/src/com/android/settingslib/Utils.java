@@ -10,8 +10,6 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.pm.Signature;
 import android.content.pm.UserInfo;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
@@ -62,7 +60,6 @@ public class Utils {
     static final String STORAGE_MANAGER_ENABLED_PROPERTY =
             "ro.storage_manager.enabled";
 
-    private static Signature[] sSystemSignature;
     private static String sPermissionControllerPackageName;
     private static String sServicesSystemSharedLibPackageName;
     private static String sSharedSystemSharedLibPackageName;
@@ -374,13 +371,21 @@ public class Utils {
     }
 
     /**
+     * @deprecated Use {@link #isSystemPackage(Resources, PackageManager, ApplicationInfo)} instead.
+     */
+    @Deprecated
+    public static boolean isSystemPackage(Resources resources, PackageManager pm, PackageInfo pkg) {
+        return pkg.applicationInfo != null && isSystemPackage(resources, pm, pkg.applicationInfo);
+    }
+
+    /**
      * Determine whether a package is a "system package", in which case certain things (like
      * disabling notifications or disabling the package altogether) should be disallowed.
+     *
+     * Note: This function is just for UI treatment, and should not be used for security purposes.
      */
-    public static boolean isSystemPackage(Resources resources, PackageManager pm, PackageInfo pkg) {
-        if (sSystemSignature == null) {
-            sSystemSignature = new Signature[]{getSystemSignature(pm)};
-        }
+    public static boolean isSystemPackage(
+            Resources resources, PackageManager pm, @NonNull ApplicationInfo app) {
         if (sPermissionControllerPackageName == null) {
             sPermissionControllerPackageName = pm.getPermissionControllerPackageName();
         }
@@ -390,29 +395,12 @@ public class Utils {
         if (sSharedSystemSharedLibPackageName == null) {
             sSharedSystemSharedLibPackageName = pm.getSharedSystemSharedLibraryPackageName();
         }
-        return (sSystemSignature[0] != null
-                && sSystemSignature[0].equals(getFirstSignature(pkg)))
-                || pkg.packageName.equals(sPermissionControllerPackageName)
-                || pkg.packageName.equals(sServicesSystemSharedLibPackageName)
-                || pkg.packageName.equals(sSharedSystemSharedLibPackageName)
-                || pkg.packageName.equals(PrintManager.PRINT_SPOOLER_PACKAGE_NAME)
-                || isDeviceProvisioningPackage(resources, pkg.packageName);
-    }
-
-    private static Signature getFirstSignature(PackageInfo pkg) {
-        if (pkg != null && pkg.signatures != null && pkg.signatures.length > 0) {
-            return pkg.signatures[0];
-        }
-        return null;
-    }
-
-    private static Signature getSystemSignature(PackageManager pm) {
-        try {
-            final PackageInfo sys = pm.getPackageInfo("android", PackageManager.GET_SIGNATURES);
-            return getFirstSignature(sys);
-        } catch (NameNotFoundException e) {
-        }
-        return null;
+        return app.isSignedWithPlatformKey()
+                || app.packageName.equals(sPermissionControllerPackageName)
+                || app.packageName.equals(sServicesSystemSharedLibPackageName)
+                || app.packageName.equals(sSharedSystemSharedLibPackageName)
+                || app.packageName.equals(PrintManager.PRINT_SPOOLER_PACKAGE_NAME)
+                || isDeviceProvisioningPackage(resources, app.packageName);
     }
 
     /**
