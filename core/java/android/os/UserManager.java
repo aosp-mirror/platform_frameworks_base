@@ -4339,6 +4339,7 @@ public class UserManager {
      * @return true if the creation of users of the given user type is enabled on this device.
      * @hide
      */
+    @TestApi
     @RequiresPermission(anyOf = {
             android.Manifest.permission.MANAGE_USERS,
             android.Manifest.permission.CREATE_USERS
