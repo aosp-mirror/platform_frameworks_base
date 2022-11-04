@@ -20,6 +20,8 @@ import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_MOVE;
 import static android.view.MotionEvent.ACTION_UP;
 
+import static com.android.internal.util.FunctionalUtils.ThrowingConsumer;
+
 import static junit.framework.Assert.assertEquals;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -108,9 +110,6 @@ import java.util.Optional;
 @RunWithLooper(setAsMainLooper = true)
 public class UdfpsControllerTest extends SysuiTestCase {
 
-    // Use this for inputs going into SystemUI. Use UdfpsController.mUdfpsSensorId for things
-    // leaving SystemUI.
-    private static final int TEST_UDFPS_SENSOR_ID = 1;
     private static final long TEST_REQUEST_ID = 70;
 
     @Rule
@@ -121,15 +120,12 @@ public class UdfpsControllerTest extends SysuiTestCase {
 
     // Dependencies
     private FakeExecutor mBiometricsExecutor;
-    private Execution mExecution;
     @Mock
     private LayoutInflater mLayoutInflater;
     @Mock
     private FingerprintManager mFingerprintManager;
     @Mock
     private WindowManager mWindowManager;
-    @Mock
-    private UdfpsDisplayModeProvider mDisplayModeProvider;
     @Mock
     private StatusBarStateController mStatusBarStateController;
     @Mock
@@ -199,17 +195,24 @@ public class UdfpsControllerTest extends SysuiTestCase {
     private BouncerInteractor mBouncerInteractor;
 
     // Capture listeners so that they can be used to send events
-    @Captor private ArgumentCaptor<IUdfpsOverlayController> mOverlayCaptor;
+    @Captor
+    private ArgumentCaptor<IUdfpsOverlayController> mOverlayCaptor;
     private IUdfpsOverlayController mOverlayController;
-    @Captor private ArgumentCaptor<UdfpsView.OnTouchListener> mTouchListenerCaptor;
-    @Captor private ArgumentCaptor<View.OnHoverListener> mHoverListenerCaptor;
-    @Captor private ArgumentCaptor<Runnable> mOnDisplayConfiguredCaptor;
-    @Captor private ArgumentCaptor<ScreenLifecycle.Observer> mScreenObserverCaptor;
+    @Captor
+    private ArgumentCaptor<UdfpsView.OnTouchListener> mTouchListenerCaptor;
+    @Captor
+    private ArgumentCaptor<View.OnHoverListener> mHoverListenerCaptor;
+    @Captor
+    private ArgumentCaptor<Runnable> mOnDisplayConfiguredCaptor;
+    @Captor
+    private ArgumentCaptor<ScreenLifecycle.Observer> mScreenObserverCaptor;
     private ScreenLifecycle.Observer mScreenObserver;
+    private FingerprintSensorPropertiesInternal mOpticalProps;
+    private FingerprintSensorPropertiesInternal mUltrasonicProps;
 
     @Before
     public void setUp() {
-        mExecution = new FakeExecution();
+        Execution execution = new FakeExecution();
 
         when(mLayoutInflater.inflate(R.layout.udfps_view, null, false))
                 .thenReturn(mUdfpsView);
@@ -222,9 +225,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
         when(mLayoutInflater.inflate(R.layout.udfps_fpm_other_view, null))
                 .thenReturn(mFpmOtherView);
         when(mEnrollView.getContext()).thenReturn(mContext);
-        when(mKeyguardStateController.isOccluded()).thenReturn(false);
         when(mKeyguardUpdateMonitor.isFingerprintDetectionRunning()).thenReturn(true);
-        final List<FingerprintSensorPropertiesInternal> props = new ArrayList<>();
 
         final List<ComponentInfoInternal> componentInfo = new ArrayList<>();
         componentInfo.add(new ComponentInfoInternal("faceSensor" /* componentId */,
@@ -234,13 +235,25 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 "" /* hardwareVersion */, "" /* firmwareVersion */, "" /* serialNumber */,
                 "vendor/version/revision" /* softwareVersion */));
 
-        props.add(new FingerprintSensorPropertiesInternal(TEST_UDFPS_SENSOR_ID,
+        mOpticalProps = new FingerprintSensorPropertiesInternal(1 /* sensorId */,
                 SensorProperties.STRENGTH_STRONG,
                 5 /* maxEnrollmentsPerUser */,
                 componentInfo,
                 FingerprintSensorProperties.TYPE_UDFPS_OPTICAL,
-                true /* resetLockoutRequiresHardwareAuthToken */));
+                true /* resetLockoutRequiresHardwareAuthToken */);
+
+        mUltrasonicProps = new FingerprintSensorPropertiesInternal(2 /* sensorId */,
+                SensorProperties.STRENGTH_STRONG,
+                5 /* maxEnrollmentsPerUser */,
+                componentInfo,
+                FingerprintSensorProperties.TYPE_UDFPS_ULTRASONIC,
+                true /* resetLockoutRequiresHardwareAuthToken */);
+
+        List<FingerprintSensorPropertiesInternal> props = new ArrayList<>();
+        props.add(mOpticalProps);
+        props.add(mUltrasonicProps);
         when(mFingerprintManager.getSensorPropertiesInternal()).thenReturn(props);
+
         mFgExecutor = new FakeExecutor(new FakeSystemClock());
 
         // Create a fake background executor.
@@ -248,7 +261,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
 
         mUdfpsController = new UdfpsController(
                 mContext,
-                mExecution,
+                execution,
                 mLayoutInflater,
                 mFingerprintManager,
                 mWindowManager,
@@ -283,13 +296,13 @@ public class UdfpsControllerTest extends SysuiTestCase {
         mOverlayController = mOverlayCaptor.getValue();
         verify(mScreenLifecycle).addObserver(mScreenObserverCaptor.capture());
         mScreenObserver = mScreenObserverCaptor.getValue();
-        mUdfpsController.updateOverlayParams(TEST_UDFPS_SENSOR_ID, new UdfpsOverlayParams());
+        mUdfpsController.updateOverlayParams(mOpticalProps, new UdfpsOverlayParams());
         mUdfpsController.setUdfpsDisplayMode(mUdfpsDisplayMode);
     }
 
     @Test
     public void dozeTimeTick() throws RemoteException {
-        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, TEST_UDFPS_SENSOR_ID,
+        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, mOpticalProps.sensorId,
                 BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
         mFgExecutor.runAllReady();
         mUdfpsController.dozeTimeTick();
@@ -304,7 +317,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
         when(mUdfpsView.getAnimationViewController()).thenReturn(mUdfpsKeyguardViewController);
 
         // GIVEN that the overlay is showing
-        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, TEST_UDFPS_SENSOR_ID,
+        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, mOpticalProps.sensorId,
                 BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
         mFgExecutor.runAllReady();
 
@@ -339,7 +352,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
         when(mUdfpsView.getAnimationViewController()).thenReturn(mUdfpsKeyguardViewController);
 
         // GIVEN that the overlay is showing
-        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, TEST_UDFPS_SENSOR_ID,
+        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, mOpticalProps.sensorId,
                 BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
         mFgExecutor.runAllReady();
 
@@ -347,7 +360,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
         verify(mUdfpsView).setOnTouchListener(mTouchListenerCaptor.capture());
         MotionEvent moveEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, 0, 0, 0);
         if (stale) {
-            mOverlayController.hideUdfpsOverlay(TEST_UDFPS_SENSOR_ID);
+            mOverlayController.hideUdfpsOverlay(mOpticalProps.sensorId);
             mFgExecutor.runAllReady();
         }
         mTouchListenerCaptor.getValue().onTouch(mUdfpsView, moveEvent);
@@ -367,7 +380,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
         when(mUdfpsView.getAnimationViewController()).thenReturn(mUdfpsKeyguardViewController);
 
         // GIVEN that the overlay is showing
-        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, TEST_UDFPS_SENSOR_ID,
+        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, mOpticalProps.sensorId,
                 BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
         mFgExecutor.runAllReady();
 
@@ -390,12 +403,12 @@ public class UdfpsControllerTest extends SysuiTestCase {
     @Test
     public void hideUdfpsOverlay_resetsAltAuthBouncerWhenShowing() throws RemoteException {
         // GIVEN overlay was showing and the udfps bouncer is showing
-        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, TEST_UDFPS_SENSOR_ID,
+        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, mOpticalProps.sensorId,
                 BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
         when(mStatusBarKeyguardViewManager.isShowingAlternateAuth()).thenReturn(true);
 
         // WHEN the overlay is hidden
-        mOverlayController.hideUdfpsOverlay(TEST_UDFPS_SENSOR_ID);
+        mOverlayController.hideUdfpsOverlay(mOpticalProps.sensorId);
         mFgExecutor.runAllReady();
 
         // THEN the udfps bouncer is reset
@@ -404,13 +417,13 @@ public class UdfpsControllerTest extends SysuiTestCase {
 
     @Test
     public void testSubscribesToOrientationChangesWhenShowingOverlay() throws Exception {
-        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, TEST_UDFPS_SENSOR_ID,
+        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, mOpticalProps.sensorId,
                 BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
         mFgExecutor.runAllReady();
 
         verify(mDisplayManager).registerDisplayListener(any(), eq(mHandler), anyLong());
 
-        mOverlayController.hideUdfpsOverlay(TEST_UDFPS_SENSOR_ID);
+        mOverlayController.hideUdfpsOverlay(mOpticalProps.sensorId);
         mFgExecutor.runAllReady();
 
         verify(mDisplayManager).unregisterDisplayListener(any());
@@ -440,12 +453,12 @@ public class UdfpsControllerTest extends SysuiTestCase {
                             }
 
                             // Initialize the overlay with old parameters.
-                            mUdfpsController.updateOverlayParams(TEST_UDFPS_SENSOR_ID, oldParams);
+                            mUdfpsController.updateOverlayParams(mOpticalProps, oldParams);
 
                             // Show the overlay.
                             reset(mWindowManager);
                             mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID,
-                                    TEST_UDFPS_SENSOR_ID,
+                                    mOpticalProps.sensorId,
                                     BiometricOverlayConstants.REASON_ENROLL_ENROLLING,
                                     mUdfpsOverlayControllerCallback);
                             mFgExecutor.runAllReady();
@@ -453,7 +466,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
 
                             // Update overlay parameters.
                             reset(mWindowManager);
-                            mUdfpsController.updateOverlayParams(TEST_UDFPS_SENSOR_ID, newParams);
+                            mUdfpsController.updateOverlayParams(mOpticalProps, newParams);
                             mFgExecutor.runAllReady();
 
                             // Ensure the overlay was recreated.
@@ -475,18 +488,18 @@ public class UdfpsControllerTest extends SysuiTestCase {
         final int rotation = Surface.ROTATION_0;
 
         // Initialize the overlay.
-        mUdfpsController.updateOverlayParams(TEST_UDFPS_SENSOR_ID,
+        mUdfpsController.updateOverlayParams(mOpticalProps,
                 new UdfpsOverlayParams(sensorBounds, displayWidth, displayHeight, scaleFactor,
                         rotation));
 
         // Show the overlay.
-        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, TEST_UDFPS_SENSOR_ID,
+        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, mOpticalProps.sensorId,
                 BiometricOverlayConstants.REASON_ENROLL_ENROLLING, mUdfpsOverlayControllerCallback);
         mFgExecutor.runAllReady();
         verify(mWindowManager).addView(any(), any());
 
         // Update overlay with the same parameters.
-        mUdfpsController.updateOverlayParams(TEST_UDFPS_SENSOR_ID,
+        mUdfpsController.updateOverlayParams(mOpticalProps,
                 new UdfpsOverlayParams(sensorBounds, displayWidth, displayHeight, scaleFactor,
                         rotation));
         mFgExecutor.runAllReady();
@@ -528,13 +541,13 @@ public class UdfpsControllerTest extends SysuiTestCase {
         when(mUdfpsView.isWithinSensorArea(anyFloat(), anyFloat())).thenReturn(true);
 
         // Show the overlay.
-        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, TEST_UDFPS_SENSOR_ID,
+        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, mOpticalProps.sensorId,
                 BiometricOverlayConstants.REASON_ENROLL_ENROLLING, mUdfpsOverlayControllerCallback);
         mFgExecutor.runAllReady();
         verify(mUdfpsView).setOnTouchListener(mTouchListenerCaptor.capture());
 
         // Test ROTATION_0
-        mUdfpsController.updateOverlayParams(TEST_UDFPS_SENSOR_ID,
+        mUdfpsController.updateOverlayParams(mOpticalProps,
                 new UdfpsOverlayParams(sensorBounds, displayWidth, displayHeight, scaleFactor,
                         Surface.ROTATION_0));
         MotionEvent event = obtainMotionEvent(ACTION_DOWN, displayWidth, displayHeight, touchMinor,
@@ -551,7 +564,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
 
         // Test ROTATION_90
         reset(mAlternateTouchProvider);
-        mUdfpsController.updateOverlayParams(TEST_UDFPS_SENSOR_ID,
+        mUdfpsController.updateOverlayParams(mOpticalProps,
                 new UdfpsOverlayParams(sensorBounds, displayWidth, displayHeight, scaleFactor,
                         Surface.ROTATION_90));
         event = obtainMotionEvent(ACTION_DOWN, displayHeight, 0, touchMinor, touchMajor);
@@ -567,7 +580,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
 
         // Test ROTATION_270
         reset(mAlternateTouchProvider);
-        mUdfpsController.updateOverlayParams(TEST_UDFPS_SENSOR_ID,
+        mUdfpsController.updateOverlayParams(mOpticalProps,
                 new UdfpsOverlayParams(sensorBounds, displayWidth, displayHeight, scaleFactor,
                         Surface.ROTATION_270));
         event = obtainMotionEvent(ACTION_DOWN, 0, displayWidth, touchMinor, touchMajor);
@@ -583,7 +596,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
 
         // Test ROTATION_180
         reset(mAlternateTouchProvider);
-        mUdfpsController.updateOverlayParams(TEST_UDFPS_SENSOR_ID,
+        mUdfpsController.updateOverlayParams(mOpticalProps,
                 new UdfpsOverlayParams(sensorBounds, displayWidth, displayHeight, scaleFactor,
                         Surface.ROTATION_180));
         // ROTATION_180 is not supported. It should be treated like ROTATION_0.
@@ -599,63 +612,108 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 eq(expectedY), eq(expectedMinor), eq(expectedMajor));
     }
 
+    private void runForAllUdfpsTypes(
+            ThrowingConsumer<FingerprintSensorPropertiesInternal> sensorPropsConsumer) {
+        for (FingerprintSensorPropertiesInternal sensorProps : List.of(mOpticalProps,
+                mUltrasonicProps)) {
+            mUdfpsController.updateOverlayParams(sensorProps, new UdfpsOverlayParams());
+            sensorPropsConsumer.accept(sensorProps);
+        }
+    }
+
     @Test
-    public void fingerDown() throws RemoteException {
+    public void fingerDown() {
+        runForAllUdfpsTypes(this::fingerDownForSensor);
+    }
+
+    private void fingerDownForSensor(FingerprintSensorPropertiesInternal sensorProps)
+            throws RemoteException {
+        reset(mUdfpsView, mAlternateTouchProvider, mFingerprintManager, mLatencyTracker,
+                mKeyguardUpdateMonitor);
+
         // Configure UdfpsView to accept the ACTION_DOWN event
         when(mUdfpsView.isDisplayConfigured()).thenReturn(false);
         when(mUdfpsView.isWithinSensorArea(anyFloat(), anyFloat())).thenReturn(true);
         when(mKeyguardUpdateMonitor.isFingerprintDetectionRunning()).thenReturn(true);
 
         // GIVEN that the overlay is showing
-        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, TEST_UDFPS_SENSOR_ID,
+        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, sensorProps.sensorId,
                 BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
         mFgExecutor.runAllReady();
-        // WHEN ACTION_DOWN is received
         verify(mUdfpsView).setOnTouchListener(mTouchListenerCaptor.capture());
+
+        // WHEN ACTION_DOWN is received
         MotionEvent downEvent = MotionEvent.obtain(0, 0, ACTION_DOWN, 0, 0, 0);
         mTouchListenerCaptor.getValue().onTouch(mUdfpsView, downEvent);
         mBiometricsExecutor.runAllReady();
         downEvent.recycle();
-        MotionEvent moveEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, 0, 0, 0);
 
-        // FIX THIS TEST
+        MotionEvent moveEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, 0, 0, 0);
         mTouchListenerCaptor.getValue().onTouch(mUdfpsView, moveEvent);
         mBiometricsExecutor.runAllReady();
         moveEvent.recycle();
+
         mFgExecutor.runAllReady();
+
         // THEN FingerprintManager is notified about onPointerDown
         verify(mAlternateTouchProvider).onPointerDown(eq(TEST_REQUEST_ID), eq(0), eq(0), eq(0f),
                 eq(0f));
         verify(mFingerprintManager, never()).onPointerDown(anyLong(), anyInt(), anyInt(), anyInt(),
                 anyFloat(), anyFloat());
-        verify(mLatencyTracker).onActionStart(eq(LatencyTracker.ACTION_UDFPS_ILLUMINATE));
+
         // AND display configuration begins
-        verify(mUdfpsView).configureDisplay(mOnDisplayConfiguredCaptor.capture());
+        if (sensorProps.sensorType == FingerprintSensorProperties.TYPE_UDFPS_OPTICAL) {
+            verify(mLatencyTracker).onActionStart(eq(LatencyTracker.ACTION_UDFPS_ILLUMINATE));
+            verify(mUdfpsView).configureDisplay(mOnDisplayConfiguredCaptor.capture());
+        } else {
+            verify(mLatencyTracker, never()).onActionStart(
+                    eq(LatencyTracker.ACTION_UDFPS_ILLUMINATE));
+            verify(mUdfpsView, never()).configureDisplay(any());
+        }
         verify(mLatencyTracker, never()).onActionEnd(eq(LatencyTracker.ACTION_UDFPS_ILLUMINATE));
         verify(mKeyguardUpdateMonitor).onUdfpsPointerDown(eq((int) TEST_REQUEST_ID));
-        // AND onDisplayConfigured notifies FingerprintManager about onUiReady
-        mOnDisplayConfiguredCaptor.getValue().run();
-        mBiometricsExecutor.runAllReady();
-        InOrder inOrder = inOrder(mAlternateTouchProvider, mLatencyTracker);
-        inOrder.verify(mAlternateTouchProvider).onUiReady();
-        inOrder.verify(mLatencyTracker).onActionEnd(eq(LatencyTracker.ACTION_UDFPS_ILLUMINATE));
+
+        if (sensorProps.sensorType == FingerprintSensorProperties.TYPE_UDFPS_OPTICAL) {
+            // AND onDisplayConfigured notifies FingerprintManager about onUiReady
+            mOnDisplayConfiguredCaptor.getValue().run();
+            mBiometricsExecutor.runAllReady();
+            InOrder inOrder = inOrder(mAlternateTouchProvider, mLatencyTracker);
+            inOrder.verify(mAlternateTouchProvider).onUiReady();
+            inOrder.verify(mLatencyTracker).onActionEnd(eq(LatencyTracker.ACTION_UDFPS_ILLUMINATE));
+        } else {
+            verify(mAlternateTouchProvider, never()).onUiReady();
+            verify(mLatencyTracker, never()).onActionEnd(
+                    eq(LatencyTracker.ACTION_UDFPS_ILLUMINATE));
+        }
     }
 
     @Test
-    public void aodInterrupt() throws RemoteException {
+    public void aodInterrupt() {
+        runForAllUdfpsTypes(this::aodInterruptForSensor);
+    }
+
+    private void aodInterruptForSensor(FingerprintSensorPropertiesInternal sensorProps)
+            throws RemoteException {
+        mUdfpsController.cancelAodInterrupt();
+        reset(mUdfpsView, mAlternateTouchProvider, mFingerprintManager, mKeyguardUpdateMonitor);
+        when(mKeyguardUpdateMonitor.isFingerprintDetectionRunning()).thenReturn(true);
+
         // GIVEN that the overlay is showing and screen is on and fp is running
-        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, TEST_UDFPS_SENSOR_ID,
+        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, sensorProps.sensorId,
                 BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
         mScreenObserver.onScreenTurnedOn();
         mFgExecutor.runAllReady();
-        when(mKeyguardUpdateMonitor.isFingerprintDetectionRunning()).thenReturn(true);
         // WHEN fingerprint is requested because of AOD interrupt
         mUdfpsController.onAodInterrupt(0, 0, 2f, 3f);
         mFgExecutor.runAllReady();
-        // THEN display configuration begins
-        // AND onDisplayConfigured notifies FingerprintManager about onUiReady
-        verify(mUdfpsView).configureDisplay(mOnDisplayConfiguredCaptor.capture());
-        mOnDisplayConfiguredCaptor.getValue().run();
+        if (sensorProps.sensorType == FingerprintSensorProperties.TYPE_UDFPS_OPTICAL) {
+            // THEN display configuration begins
+            // AND onDisplayConfigured notifies FingerprintManager about onUiReady
+            verify(mUdfpsView).configureDisplay(mOnDisplayConfiguredCaptor.capture());
+            mOnDisplayConfiguredCaptor.getValue().run();
+        } else {
+            verify(mUdfpsView, never()).configureDisplay(mOnDisplayConfiguredCaptor.capture());
+        }
         mBiometricsExecutor.runAllReady();
         verify(mAlternateTouchProvider).onPointerDown(eq(TEST_REQUEST_ID),
                 eq(0), eq(0), eq(3f) /* minor */, eq(2f) /* major */);
@@ -665,54 +723,92 @@ public class UdfpsControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void cancelAodInterrupt() throws RemoteException {
+    public void cancelAodInterrupt() {
+        runForAllUdfpsTypes(this::cancelAodInterruptForSensor);
+    }
+
+    private void cancelAodInterruptForSensor(FingerprintSensorPropertiesInternal sensorProps)
+            throws RemoteException {
+        reset(mUdfpsView);
+
         // GIVEN AOD interrupt
-        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, TEST_UDFPS_SENSOR_ID,
+        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, sensorProps.sensorId,
                 BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
         mScreenObserver.onScreenTurnedOn();
         mFgExecutor.runAllReady();
-        when(mKeyguardUpdateMonitor.isFingerprintDetectionRunning()).thenReturn(true);
         mUdfpsController.onAodInterrupt(0, 0, 0f, 0f);
-        when(mUdfpsView.isDisplayConfigured()).thenReturn(true);
-        // WHEN it is cancelled
-        mUdfpsController.cancelAodInterrupt();
-        // THEN the display is unconfigured
-        verify(mUdfpsView).unconfigureDisplay();
+        if (sensorProps.sensorType == FingerprintSensorProperties.TYPE_UDFPS_OPTICAL) {
+            when(mUdfpsView.isDisplayConfigured()).thenReturn(true);
+            // WHEN it is cancelled
+            mUdfpsController.cancelAodInterrupt();
+            // THEN the display is unconfigured
+            verify(mUdfpsView).unconfigureDisplay();
+        } else {
+            when(mUdfpsView.isDisplayConfigured()).thenReturn(false);
+            // WHEN it is cancelled
+            mUdfpsController.cancelAodInterrupt();
+            // THEN the display configuration is unchanged.
+            verify(mUdfpsView, never()).unconfigureDisplay();
+        }
     }
 
     @Test
-    public void aodInterruptTimeout() throws RemoteException {
+    public void aodInterruptTimeout() {
+        runForAllUdfpsTypes(this::aodInterruptTimeoutForSensor);
+    }
+
+    private void aodInterruptTimeoutForSensor(FingerprintSensorPropertiesInternal sensorProps)
+            throws RemoteException {
+        reset(mUdfpsView);
+
         // GIVEN AOD interrupt
-        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, TEST_UDFPS_SENSOR_ID,
+        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, sensorProps.sensorId,
                 BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
         mScreenObserver.onScreenTurnedOn();
         mFgExecutor.runAllReady();
-        when(mKeyguardUpdateMonitor.isFingerprintDetectionRunning()).thenReturn(true);
         mUdfpsController.onAodInterrupt(0, 0, 0f, 0f);
         mFgExecutor.runAllReady();
-        when(mUdfpsView.isDisplayConfigured()).thenReturn(true);
+        if (sensorProps.sensorType == FingerprintSensorProperties.TYPE_UDFPS_OPTICAL) {
+            when(mUdfpsView.isDisplayConfigured()).thenReturn(true);
+        } else {
+            when(mUdfpsView.isDisplayConfigured()).thenReturn(false);
+        }
         // WHEN it times out
         mFgExecutor.advanceClockToNext();
         mFgExecutor.runAllReady();
-        // THEN the display is unconfigured
-        verify(mUdfpsView).unconfigureDisplay();
+        if (sensorProps.sensorType == FingerprintSensorProperties.TYPE_UDFPS_OPTICAL) {
+            // THEN the display is unconfigured.
+            verify(mUdfpsView).unconfigureDisplay();
+        } else {
+            // THEN the display configuration is unchanged.
+            verify(mUdfpsView, never()).unconfigureDisplay();
+        }
     }
 
     @Test
-    public void aodInterruptCancelTimeoutActionOnFingerUp() throws RemoteException {
+    public void aodInterruptCancelTimeoutActionOnFingerUp() {
+        runForAllUdfpsTypes(this::aodInterruptCancelTimeoutActionOnFingerUpForSensor);
+    }
+
+    private void aodInterruptCancelTimeoutActionOnFingerUpForSensor(
+            FingerprintSensorPropertiesInternal sensorProps) throws RemoteException {
+        reset(mUdfpsView);
         when(mUdfpsView.isWithinSensorArea(anyFloat(), anyFloat())).thenReturn(true);
-        when(mKeyguardUpdateMonitor.isFingerprintDetectionRunning()).thenReturn(true);
 
         // GIVEN AOD interrupt
-        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, TEST_UDFPS_SENSOR_ID,
+        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, sensorProps.sensorId,
                 BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
         mScreenObserver.onScreenTurnedOn();
         mFgExecutor.runAllReady();
         mUdfpsController.onAodInterrupt(0, 0, 0f, 0f);
         mFgExecutor.runAllReady();
 
-        // Configure UdfpsView to accept the ACTION_UP event
-        when(mUdfpsView.isDisplayConfigured()).thenReturn(true);
+        if (sensorProps.sensorType == FingerprintSensorProperties.TYPE_UDFPS_OPTICAL) {
+            // Configure UdfpsView to accept the ACTION_UP event
+            when(mUdfpsView.isDisplayConfigured()).thenReturn(true);
+        } else {
+            when(mUdfpsView.isDisplayConfigured()).thenReturn(false);
+        }
 
         // WHEN ACTION_UP is received
         verify(mUdfpsView).setOnTouchListener(mTouchListenerCaptor.capture());
@@ -737,37 +833,54 @@ public class UdfpsControllerTest extends SysuiTestCase {
         moveEvent.recycle();
         mFgExecutor.runAllReady();
 
-        // Configure UdfpsView to accept the finger up event
-        when(mUdfpsView.isDisplayConfigured()).thenReturn(true);
+        if (sensorProps.sensorType == FingerprintSensorProperties.TYPE_UDFPS_OPTICAL) {
+            // Configure UdfpsView to accept the finger up event
+            when(mUdfpsView.isDisplayConfigured()).thenReturn(true);
+        } else {
+            when(mUdfpsView.isDisplayConfigured()).thenReturn(false);
+        }
 
         // WHEN it times out
         mFgExecutor.advanceClockToNext();
         mFgExecutor.runAllReady();
 
-        // THEN the display should be unconfigured once. If the timeout action is not
-        // cancelled, the display would be unconfigured twice which would cause two
-        // FP attempts.
-        verify(mUdfpsView, times(1)).unconfigureDisplay();
+        if (sensorProps.sensorType == FingerprintSensorProperties.TYPE_UDFPS_OPTICAL) {
+            // THEN the display should be unconfigured once. If the timeout action is not
+            // cancelled, the display would be unconfigured twice which would cause two
+            // FP attempts.
+            verify(mUdfpsView, times(1)).unconfigureDisplay();
+        } else {
+            verify(mUdfpsView, never()).unconfigureDisplay();
+        }
     }
 
     @Test
-    public void aodInterruptCancelTimeoutActionOnAcquired() throws RemoteException {
+    public void aodInterruptCancelTimeoutActionOnAcquired() {
+        runForAllUdfpsTypes(this::aodInterruptCancelTimeoutActionOnAcquiredForSensor);
+    }
+
+    private void aodInterruptCancelTimeoutActionOnAcquiredForSensor(
+            FingerprintSensorPropertiesInternal sensorProps) throws RemoteException {
+        reset(mUdfpsView);
         when(mUdfpsView.isWithinSensorArea(anyFloat(), anyFloat())).thenReturn(true);
-        when(mKeyguardUpdateMonitor.isFingerprintDetectionRunning()).thenReturn(true);
 
         // GIVEN AOD interrupt
-        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, TEST_UDFPS_SENSOR_ID,
+        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, sensorProps.sensorId,
                 BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
         mScreenObserver.onScreenTurnedOn();
         mFgExecutor.runAllReady();
         mUdfpsController.onAodInterrupt(0, 0, 0f, 0f);
         mFgExecutor.runAllReady();
 
-        // Configure UdfpsView to accept the acquired event
-        when(mUdfpsView.isDisplayConfigured()).thenReturn(true);
+        if (sensorProps.sensorType == FingerprintSensorProperties.TYPE_UDFPS_OPTICAL) {
+            // Configure UdfpsView to accept the acquired event
+            when(mUdfpsView.isDisplayConfigured()).thenReturn(true);
+        } else {
+            when(mUdfpsView.isDisplayConfigured()).thenReturn(false);
+        }
 
         // WHEN acquired is received
-        mOverlayController.onAcquired(TEST_UDFPS_SENSOR_ID,
+        mOverlayController.onAcquired(sensorProps.sensorId,
                 BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_GOOD);
 
         // Configure UdfpsView to accept the ACTION_DOWN event
@@ -787,29 +900,43 @@ public class UdfpsControllerTest extends SysuiTestCase {
         moveEvent.recycle();
         mFgExecutor.runAllReady();
 
-        // Configure UdfpsView to accept the finger up event
-        when(mUdfpsView.isDisplayConfigured()).thenReturn(true);
+        if (sensorProps.sensorType == FingerprintSensorProperties.TYPE_UDFPS_OPTICAL) {
+            // Configure UdfpsView to accept the finger up event
+            when(mUdfpsView.isDisplayConfigured()).thenReturn(true);
+        } else {
+            when(mUdfpsView.isDisplayConfigured()).thenReturn(false);
+        }
 
         // WHEN it times out
         mFgExecutor.advanceClockToNext();
         mFgExecutor.runAllReady();
 
-        // THEN the display should be unconfigured once. If the timeout action is not
-        // cancelled, the display would be unconfigured twice which would cause two
-        // FP attempts.
-        verify(mUdfpsView, times(1)).unconfigureDisplay();
+        if (sensorProps.sensorType == FingerprintSensorProperties.TYPE_UDFPS_OPTICAL) {
+            // THEN the display should be unconfigured once. If the timeout action is not
+            // cancelled, the display would be unconfigured twice which would cause two
+            // FP attempts.
+            verify(mUdfpsView, times(1)).unconfigureDisplay();
+        } else {
+            verify(mUdfpsView, never()).unconfigureDisplay();
+        }
     }
 
     @Test
-    public void aodInterruptScreenOff() throws RemoteException {
+    public void aodInterruptScreenOff() {
+        runForAllUdfpsTypes(this::aodInterruptScreenOffForSensor);
+    }
+
+    private void aodInterruptScreenOffForSensor(FingerprintSensorPropertiesInternal sensorProps)
+            throws RemoteException {
+        reset(mUdfpsView);
+
         // GIVEN screen off
-        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, TEST_UDFPS_SENSOR_ID,
+        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, sensorProps.sensorId,
                 BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
         mScreenObserver.onScreenTurnedOff();
         mFgExecutor.runAllReady();
 
         // WHEN aod interrupt is received
-        when(mKeyguardUpdateMonitor.isFingerprintDetectionRunning()).thenReturn(true);
         mUdfpsController.onAodInterrupt(0, 0, 0f, 0f);
 
         // THEN display doesn't get configured because it's off
@@ -817,9 +944,16 @@ public class UdfpsControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void aodInterrupt_fingerprintNotRunning() throws RemoteException {
+    public void aodInterrupt_fingerprintNotRunning() {
+        runForAllUdfpsTypes(this::aodInterrupt_fingerprintNotRunningForSensor);
+    }
+
+    private void aodInterrupt_fingerprintNotRunningForSensor(
+            FingerprintSensorPropertiesInternal sensorProps) throws RemoteException {
+        reset(mUdfpsView);
+
         // GIVEN showing overlay
-        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, TEST_UDFPS_SENSOR_ID,
+        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, sensorProps.sensorId,
                 BiometricOverlayConstants.REASON_AUTH_KEYGUARD,
                 mUdfpsOverlayControllerCallback);
         mScreenObserver.onScreenTurnedOn();
@@ -841,7 +975,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
 
         // GIVEN that the overlay is showing and a11y touch exploration enabled
         when(mAccessibilityManager.isTouchExplorationEnabled()).thenReturn(true);
-        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, TEST_UDFPS_SENSOR_ID,
+        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, mOpticalProps.sensorId,
                 BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
         mFgExecutor.runAllReady();
 
@@ -876,7 +1010,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
 
         // GIVEN that the overlay is showing and a11y touch exploration NOT enabled
         when(mAccessibilityManager.isTouchExplorationEnabled()).thenReturn(false);
-        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, TEST_UDFPS_SENSOR_ID,
+        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, mOpticalProps.sensorId,
                 BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
         mFgExecutor.runAllReady();
 
