@@ -203,6 +203,7 @@
     <string name="accessibility_clear_all" msgid="970525598287244592">"Cancella tutte le notifiche."</string>
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="91483442850649192">
+      <item quantity="many"><xliff:g id="NUMBER_1">%s</xliff:g> more notifications inside.</item>
       <item quantity="other">Altre <xliff:g id="NUMBER_1">%s</xliff:g> notifiche nel gruppo.</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> altra notifica nel gruppo.</item>
     </plurals>
@@ -253,6 +254,7 @@
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"Attivazione…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Risp. dati attivo"</string>
     <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="3142308865165871976">
+      <item quantity="many">%d devices</item>
       <item quantity="other">%d dispositivi</item>
       <item quantity="one">%d dispositivo</item>
     </plurals>
@@ -347,6 +349,7 @@
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Sì, continua"</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Limite di utenti raggiunto"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
+      <item quantity="many">You can add up to <xliff:g id="COUNT">%d</xliff:g> users.</item>
       <item quantity="other">Puoi aggiungere fino a <xliff:g id="COUNT">%d</xliff:g> utenti.</item>
       <item quantity="one">È possibile creare un solo utente.</item>
     </plurals>
@@ -536,10 +539,12 @@
     <string name="snooze_undo" msgid="2738844148845992103">"Annulla"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"Posticipato di <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
+      <item quantity="many">%d hours</item>
       <item quantity="other">%d ore</item>
       <item quantity="one">%d ora</item>
     </plurals>
     <plurals name="snoozeMinuteOptions" formatted="false" msgid="8998483159208055980">
+      <item quantity="many">%d minutes</item>
       <item quantity="other">%d minuti</item>
       <item quantity="one">%d minuto</item>
     </plurals>
@@ -766,6 +771,7 @@
     <string name="quick_controls_title" msgid="6839108006171302273">"Controllo dispositivi"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Scegli un\'app per aggiungere controlli"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
+      <item quantity="many"><xliff:g id="NUMBER_1">%s</xliff:g> controls added.</item>
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> controlli aggiunti.</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> controllo aggiunto.</item>
     </plurals>
@@ -926,6 +932,7 @@
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Non aggiungerlo"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Seleziona utente"</string>
     <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
+      <item quantity="many"><xliff:g id="COUNT_1">%s</xliff:g> app attive</item>
       <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> app attive</item>
       <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> app attiva</item>
     </plurals>
@@ -956,5 +963,5 @@
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Modalità Priorità"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Sveglia impostata"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Fotocamera e microfono non attivi"</string>
-    <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# notifica}other{# notifiche}}"</string>
+    <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# notifica}many{# notifiche}other{# notifiche}}"</string>
 </resources>

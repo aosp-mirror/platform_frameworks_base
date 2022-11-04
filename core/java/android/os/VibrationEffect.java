@@ -830,29 +830,8 @@ public abstract class VibrationEffect implements Parcelable {
      *     .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 1.0f, 100)
      *     .compose();}</pre>
      *
-     * <p>Composition elements can also be {@link VibrationEffect} instances, including other
-     * compositions, and off durations, which are periods of time when the vibrator will be
-     * turned off. Here is an example of a composition that "warms up" with a light tap,
-     * a stronger double tap, then repeats a vibration pattern indefinitely:
-     *
-     * <pre>
-     * {@code VibrationEffect repeatingEffect = VibrationEffect.startComposition()
-     *     .addPrimitive(VibrationEffect.Composition.PRIMITIVE_LOW_TICK)
-     *     .addOffDuration(Duration.ofMillis(10))
-     *     .addEffect(VibrationEffect.createPredefined(VibrationEffect.EFFECT_DOUBLE_CLICK))
-     *     .addOffDuration(Duration.ofMillis(50))
-     *     .addEffect(VibrationEffect.createWaveform(pattern, repeatIndex))
-     *     .compose();}</pre>
-     *
      * <p>When choosing to play a composed effect, you should check that individual components are
-     * supported by the device by using the appropriate vibrator method:
-     *
-     * <ul>
-     *     <li>Primitive support can be checked using {@link Vibrator#arePrimitivesSupported}.
-     *     <li>Effect support can be checked using {@link Vibrator#areEffectsSupported}.
-     *     <li>Amplitude control for one-shot and waveforms with amplitude values can be checked
-     *         using {@link Vibrator#hasAmplitudeControl}.
-     * </ul>
+     * supported by the device by using {@link Vibrator#arePrimitivesSupported}.
      *
      * @see VibrationEffect#startComposition()
      */
@@ -1021,9 +1000,6 @@ public abstract class VibrationEffect implements Parcelable {
          *
          * @param primitiveId The primitive to add
          * @return This {@link Composition} object to enable adding multiple elements in one chain.
-         *
-         * @throws UnreachableAfterRepeatingIndefinitelyException if the composition is currently
-         * ending with a repeating effect.
          */
         @NonNull
         public Composition addPrimitive(@PrimitiveType int primitiveId) {
@@ -1038,9 +1014,6 @@ public abstract class VibrationEffect implements Parcelable {
          * @param primitiveId The primitive to add
          * @param scale The scale to apply to the intensity of the primitive.
          * @return This {@link Composition} object to enable adding multiple elements in one chain.
-         *
-         * @throws UnreachableAfterRepeatingIndefinitelyException if the composition is currently
-         * ending with a repeating effect.
          */
         @NonNull
         public Composition addPrimitive(@PrimitiveType int primitiveId,
@@ -1056,9 +1029,6 @@ public abstract class VibrationEffect implements Parcelable {
          * @param delay The amount of time in milliseconds to wait before playing this primitive,
          *              starting at the time the previous element in this composition is finished.
          * @return This {@link Composition} object to enable adding multiple elements in one chain.
-         *
-         * @throws UnreachableAfterRepeatingIndefinitelyException if the composition is currently
-         * ending with a repeating effect.
          */
         @NonNull
         public Composition addPrimitive(@PrimitiveType int primitiveId,
