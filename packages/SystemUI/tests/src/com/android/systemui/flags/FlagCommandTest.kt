@@ -35,6 +35,8 @@ class FlagCommandTest : SysuiTestCase() {
     private val flagMap = mutableMapOf<Int, Flag<*>>()
     private val flagA = UnreleasedFlag(500)
     private val flagB = ReleasedFlag(501)
+    private val stringFlag = StringFlag(502, "abracadabra")
+    private val intFlag = IntFlag(503, 12)
 
     private lateinit var cmd: FlagCommand
 
@@ -44,26 +46,59 @@ class FlagCommandTest : SysuiTestCase() {
 
         whenever(featureFlags.isEnabled(any(UnreleasedFlag::class.java))).thenReturn(false)
         whenever(featureFlags.isEnabled(any(ReleasedFlag::class.java))).thenReturn(true)
+        whenever(featureFlags.getString(any(StringFlag::class.java))).thenAnswer { invocation ->
+            (invocation.getArgument(0) as StringFlag).default
+        }
+        whenever(featureFlags.getInt(any(IntFlag::class.java))).thenAnswer { invocation ->
+            (invocation.getArgument(0) as IntFlag).default
+        }
+
         flagMap.put(flagA.id, flagA)
         flagMap.put(flagB.id, flagB)
+        flagMap.put(stringFlag.id, stringFlag)
+        flagMap.put(intFlag.id, intFlag)
 
         cmd = FlagCommand(featureFlags, flagMap)
     }
 
     @Test
-    fun readFlagCommand() {
+    fun readBooleanFlagCommand() {
         cmd.execute(pw, listOf(flagA.id.toString()))
         Mockito.verify(featureFlags).isEnabled(flagA)
     }
 
     @Test
-    fun setFlagCommand() {
+    fun readStringFlagCommand() {
+        cmd.execute(pw, listOf(stringFlag.id.toString()))
+        Mockito.verify(featureFlags).getString(stringFlag)
+    }
+
+    @Test
+    fun readIntFlag() {
+        cmd.execute(pw, listOf(intFlag.id.toString()))
+        Mockito.verify(featureFlags).getInt(intFlag)
+    }
+
+    @Test
+    fun setBooleanFlagCommand() {
         cmd.execute(pw, listOf(flagB.id.toString(), "on"))
         Mockito.verify(featureFlags).setBooleanFlagInternal(flagB, true)
     }
 
     @Test
-    fun toggleFlagCommand() {
+    fun setStringFlagCommand() {
+        cmd.execute(pw, listOf(stringFlag.id.toString(), "set", "foobar"))
+        Mockito.verify(featureFlags).setStringFlagInternal(stringFlag, "foobar")
+    }
+
+    @Test
+    fun setIntFlag() {
+        cmd.execute(pw, listOf(intFlag.id.toString(), "put", "123"))
+        Mockito.verify(featureFlags).setIntFlagInternal(intFlag, 123)
+    }
+
+    @Test
+    fun toggleBooleanFlagCommand() {
         cmd.execute(pw, listOf(flagB.id.toString(), "toggle"))
         Mockito.verify(featureFlags).setBooleanFlagInternal(flagB, false)
     }
