@@ -30,7 +30,9 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.RectF;
 import android.os.Bundle;
+import android.os.CancellationSignal;
 import android.os.Handler;
+import android.os.ICancellationSignal;
 import android.os.Looper;
 import android.os.ResultReceiver;
 import android.os.Trace;
@@ -1012,6 +1014,34 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                     resultReceiver != null
                             ? (resultCode) -> resultReceiver.send(resultCode, null /* resultData */)
                             : null);
+        });
+    }
+
+    @Dispatching(cancellable = true)
+    @Override
+    public void previewHandwritingGesture(
+            InputConnectionCommandHeader header, ParcelableHandwritingGesture gestureContainer,
+            ICancellationSignal transport) {
+
+        // TODO(b/254727073): Implement CancellationSignal receiver
+        final CancellationSignal cancellationSignal = CancellationSignal.fromTransport(transport);
+        // Previews always use PreviewableHandwritingGesture but if incorrectly wrong class is
+        // passed, ClassCastException will be sent back to caller.
+        final PreviewableHandwritingGesture gesture =
+                (PreviewableHandwritingGesture) gestureContainer.get();
+
+        dispatchWithTracing("previewHandwritingGesture", () -> {
+            if (header.mSessionId != mCurrentSessionId.get()
+                    || (cancellationSignal != null && cancellationSignal.isCanceled())) {
+                return;  // cancelled
+            }
+            InputConnection ic = getInputConnection();
+            if (ic == null || !isActive()) {
+                Log.w(TAG, "previewHandwritingGesture on inactive InputConnection");
+                return; // cancelled
+            }
+
+            ic.previewHandwritingGesture(gesture, cancellationSignal);
         });
     }
 

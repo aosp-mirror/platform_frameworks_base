@@ -53403,7 +53403,7 @@ package android.view.inputmethod {
     method @NonNull public android.view.inputmethod.CursorAnchorInfo.Builder setTextAppearanceInfo(@Nullable android.view.inputmethod.TextAppearanceInfo);
   }
 
-  public final class DeleteGesture extends android.view.inputmethod.HandwritingGesture implements android.os.Parcelable {
+  public final class DeleteGesture extends android.view.inputmethod.PreviewableHandwritingGesture implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public android.graphics.RectF getDeletionArea();
     method public int getGranularity();
@@ -53419,7 +53419,7 @@ package android.view.inputmethod {
     method @NonNull public android.view.inputmethod.DeleteGesture.Builder setGranularity(int);
   }
 
-  public final class DeleteRangeGesture extends android.view.inputmethod.HandwritingGesture implements android.os.Parcelable {
+  public final class DeleteRangeGesture extends android.view.inputmethod.PreviewableHandwritingGesture implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public android.graphics.RectF getDeletionEndArea();
     method @NonNull public android.graphics.RectF getDeletionStartArea();
@@ -53461,11 +53461,13 @@ package android.view.inputmethod {
     method @Nullable public CharSequence getInitialTextAfterCursor(@IntRange(from=0) int, int);
     method @Nullable public CharSequence getInitialTextBeforeCursor(@IntRange(from=0) int, int);
     method public int getInitialToolType();
+    method @NonNull public java.util.Set<java.lang.Class<? extends android.view.inputmethod.PreviewableHandwritingGesture>> getSupportedHandwritingGesturePreviews();
     method @NonNull public java.util.List<java.lang.Class<? extends android.view.inputmethod.HandwritingGesture>> getSupportedHandwritingGestures();
     method public final void makeCompatible(int);
     method public void setInitialSurroundingSubText(@NonNull CharSequence, int);
     method public void setInitialSurroundingText(@NonNull CharSequence);
     method public void setInitialToolType(int);
+    method public void setSupportedHandwritingGesturePreviews(@NonNull java.util.Set<java.lang.Class<? extends android.view.inputmethod.PreviewableHandwritingGesture>>);
     method public void setSupportedHandwritingGestures(@NonNull java.util.List<java.lang.Class<? extends android.view.inputmethod.HandwritingGesture>>);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.inputmethod.EditorInfo> CREATOR;
@@ -53640,6 +53642,7 @@ package android.view.inputmethod {
     method public default void performHandwritingGesture(@NonNull android.view.inputmethod.HandwritingGesture, @Nullable java.util.concurrent.Executor, @Nullable java.util.function.IntConsumer);
     method public boolean performPrivateCommand(String, android.os.Bundle);
     method public default boolean performSpellCheck();
+    method public default boolean previewHandwritingGesture(@NonNull android.view.inputmethod.PreviewableHandwritingGesture, @Nullable android.os.CancellationSignal);
     method public default boolean replaceText(@IntRange(from=0) int, @IntRange(from=0) int, @NonNull CharSequence, int, @Nullable android.view.inputmethod.TextAttribute);
     method public boolean reportFullscreenMode(boolean);
     method public boolean requestCursorUpdates(int);
@@ -53900,6 +53903,9 @@ package android.view.inputmethod {
     method @NonNull public android.view.inputmethod.JoinOrSplitGesture.Builder setJoinOrSplitPoint(@NonNull android.graphics.PointF);
   }
 
+  public abstract class PreviewableHandwritingGesture extends android.view.inputmethod.HandwritingGesture {
+  }
+
   public final class RemoveSpaceGesture extends android.view.inputmethod.HandwritingGesture implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public android.graphics.PointF getEndPoint();
@@ -53915,7 +53921,7 @@ package android.view.inputmethod {
     method @NonNull public android.view.inputmethod.RemoveSpaceGesture.Builder setPoints(@NonNull android.graphics.PointF, @NonNull android.graphics.PointF);
   }
 
-  public final class SelectGesture extends android.view.inputmethod.HandwritingGesture implements android.os.Parcelable {
+  public final class SelectGesture extends android.view.inputmethod.PreviewableHandwritingGesture implements android.os.Parcelable {
     method public int describeContents();
     method public int getGranularity();
     method @NonNull public android.graphics.RectF getSelectionArea();
@@ -53931,7 +53937,7 @@ package android.view.inputmethod {
     method @NonNull public android.view.inputmethod.SelectGesture.Builder setSelectionArea(@NonNull android.graphics.RectF);
   }
 
-  public final class SelectRangeGesture extends android.view.inputmethod.HandwritingGesture implements android.os.Parcelable {
+  public final class SelectRangeGesture extends android.view.inputmethod.PreviewableHandwritingGesture implements android.os.Parcelable {
     method public int describeContents();
     method public int getGranularity();
     method @NonNull public android.graphics.RectF getSelectionEndArea();
