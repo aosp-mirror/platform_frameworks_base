@@ -20,6 +20,7 @@ import android.os.Message;
 import android.telephony.ims.aidl.IImsMmTelListener;
 import android.telephony.ims.aidl.IImsSmsListener;
 import android.telephony.ims.aidl.IImsCapabilityCallback;
+import android.telephony.ims.aidl.ISrvccStartedCallback;
 import android.telephony.ims.feature.CapabilityChangeRequest;
 import android.telephony.ims.RtpHeaderExtensionType;
 
@@ -55,6 +56,10 @@ interface IImsMmTelFeature {
             IImsCapabilityCallback c);
     oneway void queryCapabilityConfiguration(int capability, int radioTech,
             IImsCapabilityCallback c);
+    oneway void notifySrvccStarted(in ISrvccStartedCallback cb);
+    oneway void notifySrvccCompleted();
+    oneway void notifySrvccFailed();
+    oneway void notifySrvccCanceled();
     // SMS APIs
     void setSmsListener(IImsSmsListener l);
     oneway void sendSms(in int token, int messageRef, String format, String smsc, boolean retry,
