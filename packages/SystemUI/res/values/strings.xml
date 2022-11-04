@@ -1045,6 +1045,21 @@
     <!-- Title of the dialog that allows to select an app to share or record [CHAR LIMIT=NONE] -->
     <string name="media_projection_permission_app_selector_title">Share or record an app</string>
 
+    <!-- Media projection permission dialog title when there is no app name (e.g. it could be a system service when casting). [CHAR LIMIT=100] -->
+    <string name="media_projection_permission_dialog_system_service_title">Allow this app to share or record?</string>
+
+    <!-- Media projection permission warning for capturing the whole screen when a system service requests it (e.g. when casting). [CHAR LIMIT=350] -->
+    <string name="media_projection_permission_dialog_system_service_warning_entire_screen">When you\'re sharing, recording, or casting, this app has access to anything visible on your screen or played on your device. So be careful with passwords, payment details, messages, or other sensitive information.</string>
+
+    <!-- Media projection permission warning for capturing a single app when a system service requests it (e.g. when casting). [CHAR LIMIT=350] -->
+    <string name="media_projection_permission_dialog_system_service_warning_single_app">When you\'re sharing, recording, or casting an app, this app has access to anything shown or played on that app. So be careful with passwords, payment details, messages, or other sensitive information.</string>
+
+    <!-- Title for the dialog that is shown when screen capturing is disabled by enterprise policy. [CHAR LIMIT=100] -->
+    <string name="screen_capturing_disabled_by_policy_dialog_title">Blocked by your IT admin</string>
+
+    <!-- Description for the dialog that is shown when screen capturing is disabled by enterprise policy. [CHAR LIMIT=350] -->
+    <string name="screen_capturing_disabled_by_policy_dialog_description">Screen capturing is disabled by device policy</string>
+
     <!-- The text to clear all notifications. [CHAR LIMIT=60] -->
     <string name="clear_all_notifications_text">Clear all</string>
 
