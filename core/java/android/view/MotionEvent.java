@@ -1757,7 +1757,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      *
      * @param downTime The time (in ms) when the user originally pressed down to start
      * a stream of position events.  This must be obtained from {@link SystemClock#uptimeMillis()}.
-     * @param eventTime The the time (in ms) when this specific event was generated.  This
+     * @param eventTime The time (in ms) when this specific event was generated.  This
      * must be obtained from {@link SystemClock#uptimeMillis()}.
      * @param action The kind of action being performed, such as {@link #ACTION_DOWN}.
      * @param pointerCount The number of pointers that will be in this event.
@@ -1771,7 +1771,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @param buttonState The state of buttons that are pressed.
      * @param xPrecision The precision of the X coordinate being reported.
      * @param yPrecision The precision of the Y coordinate being reported.
-     * @param deviceId The id for the device that this event came from.  An id of
+     * @param deviceId The ID for the device that this event came from.  An ID of
      * zero indicates that the event didn't come from a physical device; other
      * numbers are arbitrary and you shouldn't depend on the values.
      * @param edgeFlags A bitfield indicating which edges, if any, were touched by this
@@ -1807,7 +1807,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      *
      * @param downTime The time (in ms) when the user originally pressed down to start
      * a stream of position events.  This must be obtained from {@link SystemClock#uptimeMillis()}.
-     * @param eventTime The the time (in ms) when this specific event was generated.  This
+     * @param eventTime The time (in ms) when this specific event was generated.  This
      * must be obtained from {@link SystemClock#uptimeMillis()}.
      * @param action The kind of action being performed, such as {@link #ACTION_DOWN}.
      * @param pointerCount The number of pointers that will be in this event.
@@ -1821,7 +1821,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @param buttonState The state of buttons that are pressed.
      * @param xPrecision The precision of the X coordinate being reported.
      * @param yPrecision The precision of the Y coordinate being reported.
-     * @param deviceId The id for the device that this event came from.  An id of
+     * @param deviceId The ID for the device that this event came from.  An ID of
      * zero indicates that the event didn't come from a physical device; other
      * numbers are arbitrary and you shouldn't depend on the values.
      * @param edgeFlags A bitfield indicating which edges, if any, were touched by this
@@ -1847,7 +1847,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      *
      * @param downTime The time (in ms) when the user originally pressed down to start
      * a stream of position events.  This must be obtained from {@link SystemClock#uptimeMillis()}.
-     * @param eventTime The the time (in ms) when this specific event was generated.  This
+     * @param eventTime The time (in ms) when this specific event was generated.  This
      * must be obtained from {@link SystemClock#uptimeMillis()}.
      * @param action The kind of action being performed, such as {@link #ACTION_DOWN}.
      * @param pointerCount The number of pointers that will be in this event.
@@ -1861,7 +1861,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @param buttonState The state of buttons that are pressed.
      * @param xPrecision The precision of the X coordinate being reported.
      * @param yPrecision The precision of the Y coordinate being reported.
-     * @param deviceId The id for the device that this event came from.  An id of
+     * @param deviceId The ID for the device that this event came from.  An ID of
      * zero indicates that the event didn't come from a physical device; other
      * numbers are arbitrary and you shouldn't depend on the values.
      * @param edgeFlags A bitfield indicating which edges, if any, were touched by this
@@ -1885,7 +1885,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      *
      * @param downTime The time (in ms) when the user originally pressed down to start
      * a stream of position events.  This must be obtained from {@link SystemClock#uptimeMillis()}.
-     * @param eventTime The the time (in ms) when this specific event was generated.  This
+     * @param eventTime The time (in ms) when this specific event was generated.  This
      * must be obtained from {@link SystemClock#uptimeMillis()}.
      * @param action The kind of action being performed, such as {@link #ACTION_DOWN}.
      * @param pointerCount The number of pointers that will be in this event.
@@ -1897,7 +1897,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * the event was generated.
      * @param xPrecision The precision of the X coordinate being reported.
      * @param yPrecision The precision of the Y coordinate being reported.
-     * @param deviceId The id for the device that this event came from.  An id of
+     * @param deviceId The ID for the device that this event came from.  An ID of
      * zero indicates that the event didn't come from a physical device; other
      * numbers are arbitrary and you shouldn't depend on the values.
      * @param edgeFlags A bitfield indicating which edges, if any, were touched by this
@@ -1932,7 +1932,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      *
      * @param downTime The time (in ms) when the user originally pressed down to start
      * a stream of position events.  This must be obtained from {@link SystemClock#uptimeMillis()}.
-     * @param eventTime  The the time (in ms) when this specific event was generated.  This
+     * @param eventTime The time (in ms) when this specific event was generated.  This
      * must be obtained from {@link SystemClock#uptimeMillis()}.
      * @param action The kind of action being performed, such as {@link #ACTION_DOWN}.
      * @param x The X coordinate of this event.
@@ -1949,7 +1949,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * the event was generated.
      * @param xPrecision The precision of the X coordinate being reported.
      * @param yPrecision The precision of the Y coordinate being reported.
-     * @param deviceId The id for the device that this event came from.  An id of
+     * @param deviceId The ID for the device that this event came from.  An ID of
      * zero indicates that the event didn't come from a physical device; other
      * numbers are arbitrary and you shouldn't depend on the values.
      * @param edgeFlags A bitfield indicating which edges, if any, were touched by this
@@ -1969,7 +1969,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      *
      * @param downTime The time (in ms) when the user originally pressed down to start
      * a stream of position events.  This must be obtained from {@link SystemClock#uptimeMillis()}.
-     * @param eventTime  The the time (in ms) when this specific event was generated.  This
+     * @param eventTime The time (in ms) when this specific event was generated.  This
      * must be obtained from {@link SystemClock#uptimeMillis()}.
      * @param action The kind of action being performed, such as {@link #ACTION_DOWN}.
      * @param x The X coordinate of this event.
@@ -1986,7 +1986,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * the event was generated.
      * @param xPrecision The precision of the X coordinate being reported.
      * @param yPrecision The precision of the Y coordinate being reported.
-     * @param deviceId The id for the device that this event came from.  An id of
+     * @param deviceId The ID for the device that this event came from.  An ID of
      * zero indicates that the event didn't come from a physical device; other
      * numbers are arbitrary and you shouldn't depend on the values.
      * @param source The source of this event.
@@ -2028,7 +2028,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      *
      * @param downTime The time (in ms) when the user originally pressed down to start
      * a stream of position events.  This must be obtained from {@link SystemClock#uptimeMillis()}.
-     * @param eventTime  The the time (in ms) when this specific event was generated.  This
+     * @param eventTime The time (in ms) when this specific event was generated.  This
      * must be obtained from {@link SystemClock#uptimeMillis()}.
      * @param action The kind of action being performed, such as {@link #ACTION_DOWN}.
      * @param pointerCount The number of pointers that are active in this event.
@@ -2046,7 +2046,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * the event was generated.
      * @param xPrecision The precision of the X coordinate being reported.
      * @param yPrecision The precision of the Y coordinate being reported.
-     * @param deviceId The id for the device that this event came from.  An id of
+     * @param deviceId The ID for the device that this event came from.  An ID of
      * zero indicates that the event didn't come from a physical device; other
      * numbers are arbitrary and you shouldn't depend on the values.
      * @param edgeFlags A bitfield indicating which edges, if any, were touched by this
@@ -2070,7 +2070,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      *
      * @param downTime The time (in ms) when the user originally pressed down to start
      * a stream of position events.  This must be obtained from {@link SystemClock#uptimeMillis()}.
-     * @param eventTime  The the time (in ms) when this specific event was generated.  This
+     * @param eventTime The time (in ms) when this specific event was generated.  This
      * must be obtained from {@link SystemClock#uptimeMillis()}.
      * @param action The kind of action being performed, such as {@link #ACTION_DOWN}.
      * @param x The X coordinate of this event.
