@@ -16583,6 +16583,7 @@ package android.graphics.fonts {
     field public static final int FONT_WEIGHT_NORMAL = 400; // 0x190
     field public static final int FONT_WEIGHT_SEMI_BOLD = 600; // 0x258
     field public static final int FONT_WEIGHT_THIN = 100; // 0x64
+    field public static final int FONT_WEIGHT_UNSPECIFIED = -1; // 0xffffffff
   }
 
   public final class FontVariationAxis {

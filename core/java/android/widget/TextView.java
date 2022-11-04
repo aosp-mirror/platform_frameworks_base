@@ -2286,11 +2286,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @param familyName family name string, e.g. "serif"
      * @param typefaceIndex an index of the typeface enum, e.g. SANS, SERIF.
      * @param style a typeface style
-     * @param weight a weight value for the Typeface or -1 if not specified.
+     * @param weight a weight value for the Typeface or {@code FontStyle.FONT_WEIGHT_UNSPECIFIED}
+     *               if not specified.
      */
     private void setTypefaceFromAttrs(@Nullable Typeface typeface, @Nullable String familyName,
             @XMLTypefaceAttr int typefaceIndex, @Typeface.Style int style,
-            @IntRange(from = -1, to = FontStyle.FONT_WEIGHT_MAX) int weight) {
+            @IntRange(from = FontStyle.FONT_WEIGHT_UNSPECIFIED, to = FontStyle.FONT_WEIGHT_MAX)
+                    int weight) {
         if (typeface == null && familyName != null) {
             // Lookup normal Typeface from system font map.
             final Typeface normalTypeface = Typeface.create(familyName, Typeface.NORMAL);
@@ -2317,7 +2319,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private void resolveStyleAndSetTypeface(@NonNull Typeface typeface, @Typeface.Style int style,
-            @IntRange(from = -1, to = FontStyle.FONT_WEIGHT_MAX) int weight) {
+            @IntRange(from = FontStyle.FONT_WEIGHT_UNSPECIFIED, to = FontStyle.FONT_WEIGHT_MAX)
+                    int weight) {
         if (weight >= 0) {
             weight = Math.min(FontStyle.FONT_WEIGHT_MAX, weight);
             final boolean italic = (style & Typeface.ITALIC) != 0;
@@ -4018,7 +4021,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         boolean mFontFamilyExplicit = false;
         int mTypefaceIndex = -1;
         int mTextStyle = 0;
-        int mFontWeight = -1;
+        int mFontWeight = FontStyle.FONT_WEIGHT_UNSPECIFIED;
         boolean mAllCaps = false;
         int mShadowColor = 0;
         float mShadowDx = 0, mShadowDy = 0, mShadowRadius = 0;
@@ -6943,18 +6946,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (isPassword) {
             setTransformationMethod(PasswordTransformationMethod.getInstance());
             setTypefaceFromAttrs(null/* fontTypeface */, null /* fontFamily */, MONOSPACE,
-                    Typeface.NORMAL, -1 /* weight, not specifeid */);
+                    Typeface.NORMAL, FontStyle.FONT_WEIGHT_UNSPECIFIED);
         } else if (isVisiblePassword) {
             if (mTransformation == PasswordTransformationMethod.getInstance()) {
                 forceUpdate = true;
             }
             setTypefaceFromAttrs(null/* fontTypeface */, null /* fontFamily */, MONOSPACE,
-                    Typeface.NORMAL, -1 /* weight, not specified */);
+                    Typeface.NORMAL, FontStyle.FONT_WEIGHT_UNSPECIFIED);
         } else if (wasPassword || wasVisiblePassword) {
             // not in password mode, clean up typeface and transformation
             setTypefaceFromAttrs(null/* fontTypeface */, null /* fontFamily */,
                     DEFAULT_TYPEFACE /* typeface index */, Typeface.NORMAL,
-                    -1 /* weight, not specified */);
+                    FontStyle.FONT_WEIGHT_UNSPECIFIED);
             if (mTransformation == PasswordTransformationMethod.getInstance()) {
                 forceUpdate = true;
             }
