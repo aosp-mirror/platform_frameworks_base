@@ -19,7 +19,6 @@ package com.android.systemui.shade
 import android.annotation.IdRes
 import android.app.StatusBarManager
 import android.content.res.Configuration
-import android.os.Bundle
 import android.os.Trace
 import android.os.Trace.TRACE_TAG_APP
 import android.util.Pair
@@ -35,8 +34,6 @@ import com.android.systemui.animation.Interpolators
 import com.android.systemui.animation.ShadeInterpolation
 import com.android.systemui.battery.BatteryMeterView
 import com.android.systemui.battery.BatteryMeterViewController
-import com.android.systemui.demomode.DemoMode
-import com.android.systemui.demomode.DemoModeController
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
@@ -56,7 +53,6 @@ import com.android.systemui.statusbar.phone.StatusIconContainer
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent.CentralSurfacesScope
 import com.android.systemui.statusbar.phone.dagger.StatusBarViewModule.LARGE_SCREEN_BATTERY_CONTROLLER
 import com.android.systemui.statusbar.phone.dagger.StatusBarViewModule.LARGE_SCREEN_SHADE_HEADER
-import com.android.systemui.statusbar.policy.Clock
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.VariableDateView
 import com.android.systemui.statusbar.policy.VariableDateViewController
@@ -93,8 +89,7 @@ class LargeScreenShadeHeaderController @Inject constructor(
     private val dumpManager: DumpManager,
     private val featureFlags: FeatureFlags,
     private val qsCarrierGroupControllerBuilder: QSCarrierGroupController.Builder,
-    private val combinedShadeHeadersConstraintManager: CombinedShadeHeadersConstraintManager,
-    private val demoModeController: DemoModeController
+    private val combinedShadeHeadersConstraintManager: CombinedShadeHeadersConstraintManager
 ) : ViewController<View>(header), Dumpable {
 
     companion object {
@@ -131,7 +126,7 @@ class LargeScreenShadeHeaderController @Inject constructor(
     private lateinit var qsCarrierGroupController: QSCarrierGroupController
 
     private val batteryIcon: BatteryMeterView = header.findViewById(R.id.batteryRemainingIcon)
-    private val clock: Clock = header.findViewById(R.id.clock)
+    private val clock: TextView = header.findViewById(R.id.clock)
     private val date: TextView = header.findViewById(R.id.date)
     private val iconContainer: StatusIconContainer = header.findViewById(R.id.statusIcons)
     private val qsCarrierGroup: QSCarrierGroup = header.findViewById(R.id.carrier_group)
@@ -215,14 +210,6 @@ class LargeScreenShadeHeaderController @Inject constructor(
         lastInsets = WindowInsets(insets)
 
         view.onApplyWindowInsets(insets)
-    }
-
-    private val demoModeReceiver = object : DemoMode {
-        override fun demoCommands() = listOf(DemoMode.COMMAND_CLOCK)
-        override fun dispatchDemoCommand(command: String, args: Bundle) =
-            clock.dispatchDemoCommand(command, args)
-        override fun onDemoModeStarted() = clock.onDemoModeStarted()
-        override fun onDemoModeFinished() = clock.onDemoModeFinished()
     }
 
     private val chipVisibilityListener: ChipVisibilityListener = object : ChipVisibilityListener {
@@ -311,7 +298,6 @@ class LargeScreenShadeHeaderController @Inject constructor(
 
         dumpManager.registerDumpable(this)
         configurationController.addCallback(configurationControllerListener)
-        demoModeController.addCallback(demoModeReceiver)
 
         updateVisibility()
         updateTransition()
@@ -321,7 +307,6 @@ class LargeScreenShadeHeaderController @Inject constructor(
         privacyIconsController.chipVisibilityListener = null
         dumpManager.unregisterDumpable(this::class.java.simpleName)
         configurationController.removeCallback(configurationControllerListener)
-        demoModeController.removeCallback(demoModeReceiver)
     }
 
     fun disable(state1: Int, state2: Int, animate: Boolean) {
@@ -539,7 +524,4 @@ class LargeScreenShadeHeaderController @Inject constructor(
             updateConstraints(LARGE_SCREEN_HEADER_CONSTRAINT, updates.largeScreenConstraintsChanges)
         }
     }
-
-    @VisibleForTesting
-    internal fun simulateViewDetached() = this.onViewDetached()
 }
