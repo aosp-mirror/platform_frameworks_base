@@ -203,7 +203,8 @@ public abstract class TimeZoneProviderService extends Service {
      * details.
      */
     public final void reportSuggestion(@NonNull TimeZoneProviderSuggestion suggestion) {
-        reportSuggestion(suggestion, TimeZoneProviderStatus.UNKNOWN);
+        TimeZoneProviderStatus providerStatus = null;
+        reportSuggestionInternal(suggestion, providerStatus);
     }
 
     /**
@@ -217,6 +218,12 @@ public abstract class TimeZoneProviderService extends Service {
      */
     public final void reportSuggestion(@NonNull TimeZoneProviderSuggestion suggestion,
             @NonNull TimeZoneProviderStatus providerStatus) {
+        Objects.requireNonNull(providerStatus);
+        reportSuggestionInternal(suggestion, providerStatus);
+    }
+
+    private void reportSuggestionInternal(@NonNull TimeZoneProviderSuggestion suggestion,
+            @Nullable TimeZoneProviderStatus providerStatus) {
         Objects.requireNonNull(suggestion);
 
         mHandler.post(() -> {
@@ -245,7 +252,8 @@ public abstract class TimeZoneProviderService extends Service {
      * to a time zone.
      */
     public final void reportUncertain() {
-        reportUncertain(TimeZoneProviderStatus.UNKNOWN);
+        TimeZoneProviderStatus providerStatus = null;
+        reportUncertainInternal(providerStatus);
     }
 
     /**
@@ -260,6 +268,11 @@ public abstract class TimeZoneProviderService extends Service {
      * @hide
      */
     public final void reportUncertain(@NonNull TimeZoneProviderStatus providerStatus) {
+        Objects.requireNonNull(providerStatus);
+        reportUncertainInternal(providerStatus);
+    }
+
+    private void reportUncertainInternal(@Nullable TimeZoneProviderStatus providerStatus) {
         mHandler.post(() -> {
             synchronized (mLock) {
                 ITimeZoneProviderManager manager = mManager;

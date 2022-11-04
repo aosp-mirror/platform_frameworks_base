@@ -18,9 +18,10 @@ package android.service.timezone;
 
 import static android.app.timezonedetector.ParcelableTestSupport.assertRoundTripParcelable;
 import static android.service.timezone.TimeZoneProviderStatus.DEPENDENCY_STATUS_BLOCKED_BY_ENVIRONMENT;
-import static android.service.timezone.TimeZoneProviderStatus.DEPENDENCY_STATUS_WORKING;
+import static android.service.timezone.TimeZoneProviderStatus.DEPENDENCY_STATUS_BLOCKED_BY_SETTINGS;
+import static android.service.timezone.TimeZoneProviderStatus.DEPENDENCY_STATUS_OK;
 import static android.service.timezone.TimeZoneProviderStatus.OPERATION_STATUS_FAILED;
-import static android.service.timezone.TimeZoneProviderStatus.OPERATION_STATUS_WORKING;
+import static android.service.timezone.TimeZoneProviderStatus.OPERATION_STATUS_OK;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -32,33 +33,44 @@ import org.junit.Test;
 public class TimeZoneProviderStatusTest {
 
     @Test
+    public void parseProviderStatus() {
+        TimeZoneProviderStatus status = new TimeZoneProviderStatus.Builder()
+                .setConnectivityDependencyStatus(DEPENDENCY_STATUS_OK)
+                .setLocationDetectionDependencyStatus(DEPENDENCY_STATUS_BLOCKED_BY_SETTINGS)
+                .setTimeZoneResolutionOperationStatus(OPERATION_STATUS_OK)
+                .build();
+
+        assertEquals(status, TimeZoneProviderStatus.parseProviderStatus(status.toString()));
+    }
+
+    @Test
     public void testStatusValidation() {
         TimeZoneProviderStatus status = new TimeZoneProviderStatus.Builder()
-                .setLocationDetectionStatus(DEPENDENCY_STATUS_WORKING)
-                .setConnectivityStatus(DEPENDENCY_STATUS_WORKING)
-                .setTimeZoneResolutionStatus(DEPENDENCY_STATUS_WORKING)
+                .setLocationDetectionDependencyStatus(DEPENDENCY_STATUS_OK)
+                .setConnectivityDependencyStatus(DEPENDENCY_STATUS_OK)
+                .setTimeZoneResolutionOperationStatus(OPERATION_STATUS_OK)
                 .build();
 
         assertThrows(IllegalArgumentException.class,
                 () -> new TimeZoneProviderStatus.Builder(status)
-                        .setLocationDetectionStatus(-1)
+                        .setLocationDetectionDependencyStatus(-1)
                         .build());
         assertThrows(IllegalArgumentException.class,
                 () -> new TimeZoneProviderStatus.Builder(status)
-                        .setConnectivityStatus(-1)
+                        .setConnectivityDependencyStatus(-1)
                         .build());
         assertThrows(IllegalArgumentException.class,
                 () -> new TimeZoneProviderStatus.Builder(status)
-                        .setTimeZoneResolutionStatus(-1)
+                        .setTimeZoneResolutionOperationStatus(-1)
                         .build());
     }
 
     @Test
     public void testEqualsAndHashcode() {
         TimeZoneProviderStatus status1_1 = new TimeZoneProviderStatus.Builder()
-                .setLocationDetectionStatus(DEPENDENCY_STATUS_WORKING)
-                .setConnectivityStatus(DEPENDENCY_STATUS_WORKING)
-                .setTimeZoneResolutionStatus(OPERATION_STATUS_WORKING)
+                .setLocationDetectionDependencyStatus(DEPENDENCY_STATUS_OK)
+                .setConnectivityDependencyStatus(DEPENDENCY_STATUS_OK)
+                .setTimeZoneResolutionOperationStatus(OPERATION_STATUS_OK)
                 .build();
         assertEqualsAndHashcode(status1_1, status1_1);
         assertNotEquals(status1_1, null);
@@ -72,21 +84,21 @@ public class TimeZoneProviderStatusTest {
 
         {
             TimeZoneProviderStatus status2 = new TimeZoneProviderStatus.Builder(status1_1)
-                    .setLocationDetectionStatus(DEPENDENCY_STATUS_BLOCKED_BY_ENVIRONMENT)
+                    .setLocationDetectionDependencyStatus(DEPENDENCY_STATUS_BLOCKED_BY_ENVIRONMENT)
                     .build();
             assertNotEquals(status1_1, status2);
         }
 
         {
             TimeZoneProviderStatus status2 = new TimeZoneProviderStatus.Builder(status1_1)
-                    .setConnectivityStatus(DEPENDENCY_STATUS_BLOCKED_BY_ENVIRONMENT)
+                    .setConnectivityDependencyStatus(DEPENDENCY_STATUS_BLOCKED_BY_ENVIRONMENT)
                     .build();
             assertNotEquals(status1_1, status2);
         }
 
         {
             TimeZoneProviderStatus status2 = new TimeZoneProviderStatus.Builder(status1_1)
-                    .setTimeZoneResolutionStatus(OPERATION_STATUS_FAILED)
+                    .setTimeZoneResolutionOperationStatus(OPERATION_STATUS_FAILED)
                     .build();
             assertNotEquals(status1_1, status2);
         }
@@ -101,9 +113,9 @@ public class TimeZoneProviderStatusTest {
     @Test
     public void testParcelable() {
         TimeZoneProviderStatus status = new TimeZoneProviderStatus.Builder()
-                .setLocationDetectionStatus(DEPENDENCY_STATUS_WORKING)
-                .setConnectivityStatus(DEPENDENCY_STATUS_BLOCKED_BY_ENVIRONMENT)
-                .setTimeZoneResolutionStatus(OPERATION_STATUS_FAILED)
+                .setLocationDetectionDependencyStatus(DEPENDENCY_STATUS_OK)
+                .setConnectivityDependencyStatus(DEPENDENCY_STATUS_BLOCKED_BY_ENVIRONMENT)
+                .setTimeZoneResolutionOperationStatus(OPERATION_STATUS_FAILED)
                 .build();
         assertRoundTripParcelable(status);
     }

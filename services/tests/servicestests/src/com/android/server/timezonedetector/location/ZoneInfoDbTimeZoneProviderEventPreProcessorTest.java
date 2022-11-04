@@ -16,9 +16,9 @@
 
 package com.android.server.timezonedetector.location;
 
-import static android.service.timezone.TimeZoneProviderStatus.DEPENDENCY_STATUS_WORKING;
+import static android.service.timezone.TimeZoneProviderStatus.DEPENDENCY_STATUS_OK;
 import static android.service.timezone.TimeZoneProviderStatus.OPERATION_STATUS_FAILED;
-import static android.service.timezone.TimeZoneProviderStatus.OPERATION_STATUS_WORKING;
+import static android.service.timezone.TimeZoneProviderStatus.OPERATION_STATUS_OK;
 
 import static com.google.common.truth.Truth.assertWithMessage;
 
@@ -61,7 +61,7 @@ public class ZoneInfoDbTimeZoneProviderEventPreProcessorTest {
 
             TimeZoneProviderStatus expectedProviderStatus =
                     new TimeZoneProviderStatus.Builder(event.getTimeZoneProviderStatus())
-                            .setTimeZoneResolutionStatus(OPERATION_STATUS_FAILED)
+                            .setTimeZoneResolutionOperationStatus(OPERATION_STATUS_FAILED)
                             .build();
 
             TimeZoneProviderEvent expectedResultEvent =
@@ -75,9 +75,9 @@ public class ZoneInfoDbTimeZoneProviderEventPreProcessorTest {
 
     private static TimeZoneProviderEvent timeZoneProviderEvent(String... timeZoneIds) {
         TimeZoneProviderStatus providerStatus = new TimeZoneProviderStatus.Builder()
-                .setLocationDetectionStatus(DEPENDENCY_STATUS_WORKING)
-                .setConnectivityStatus(DEPENDENCY_STATUS_WORKING)
-                .setTimeZoneResolutionStatus(OPERATION_STATUS_WORKING)
+                .setLocationDetectionDependencyStatus(DEPENDENCY_STATUS_OK)
+                .setConnectivityDependencyStatus(DEPENDENCY_STATUS_OK)
+                .setTimeZoneResolutionOperationStatus(OPERATION_STATUS_OK)
                 .build();
         TimeZoneProviderSuggestion suggestion = new TimeZoneProviderSuggestion.Builder()
                 .setTimeZoneIds(Arrays.asList(timeZoneIds))
