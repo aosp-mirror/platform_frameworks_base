@@ -219,8 +219,9 @@ public final class InputDevice implements Parcelable {
 
     /**
      * The input source is a mouse pointing device.
-     * This code is also used for other mouse-like pointing devices such as trackpads
-     * and trackpoints.
+     * This value is also used for other mouse-like pointing devices such as touchpads and pointing
+     * sticks. When used in combination with {@link #SOURCE_STYLUS}, it denotes an external drawing
+     * tablet.
      *
      * @see #SOURCE_CLASS_POINTER
      */
@@ -291,8 +292,8 @@ public final class InputDevice implements Parcelable {
     public static final int SOURCE_MOUSE_RELATIVE = 0x00020000 | SOURCE_CLASS_TRACKBALL;
 
     /**
-     * The input source is a touch pad or digitizer tablet that is not
-     * associated with a display (unlike {@link #SOURCE_TOUCHSCREEN}).
+     * The input source is a touchpad (also known as a trackpad). Touchpads that are used to move
+     * the mouse cursor will also have {@link #SOURCE_MOUSE}.
      *
      * @see #SOURCE_CLASS_POSITION
      */
@@ -779,7 +780,7 @@ public final class InputDevice implements Parcelable {
      * same input device descriptor.  This might happen in situations where a single
      * human input device registers multiple {@link InputDevice} instances (HID collections)
      * that describe separate features of the device, such as a keyboard that also
-     * has a trackpad.  Alternately, it may be that the input devices are simply
+     * has a touchpad.  Alternately, it may be that the input devices are simply
      * indistinguishable, such as two keyboards made by the same manufacturer.
      * </p><p>
      * The input device descriptor returned by {@link #getDescriptor} should only be
