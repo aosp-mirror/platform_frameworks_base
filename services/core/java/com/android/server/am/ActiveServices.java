@@ -1197,7 +1197,7 @@ public final class ActiveServices {
         }
 
         FrameworkStatsLog.write(SERVICE_REQUEST_EVENT_REPORTED, uid, callingUid,
-                ActivityManagerService.getShortAction(service.getAction()),
+                service.getAction(),
                 SERVICE_REQUEST_EVENT_REPORTED__REQUEST_TYPE__START, false,
                 r.app == null || r.app.getThread() == null
                 ? SERVICE_REQUEST_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_COLD
