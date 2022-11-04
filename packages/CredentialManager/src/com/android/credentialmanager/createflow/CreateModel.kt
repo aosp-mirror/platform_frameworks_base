@@ -22,7 +22,7 @@ data class ProviderInfo(
   val icon: Drawable,
   val name: String,
   val displayName: String,
-  val createOptions: List<CreateOptionInfo>,
+  var createOptions: List<CreateOptionInfo>,
   val isDefault: Boolean,
 )
 

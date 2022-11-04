@@ -123,7 +123,8 @@ class CredentialManagerRepo(
       providerList as List<CreateCredentialProviderData>, context)
     var hasDefault = false
     var defaultProvider: ProviderInfo = providerList.first()
-    providerList.forEach{providerInfo ->
+    providerList.forEach{providerInfo -> providerInfo.createOptions =
+      providerInfo.createOptions.sortedWith(compareBy { it.lastUsedTimeMillis }).reversed()
       if (providerInfo.isDefault) {hasDefault = true; defaultProvider = providerInfo} }
     // TODO: covert from real requestInfo
     val requestDisplayInfo = RequestDisplayInfo(
