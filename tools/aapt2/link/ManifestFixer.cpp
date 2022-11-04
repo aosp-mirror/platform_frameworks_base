@@ -69,7 +69,9 @@ static bool VerifyDeeplinkPathAttribute(xml::Element* data_el, android::SourcePa
     StringPiece attr_value = attr->value;
     const char* startChar = attr_value.begin();
     if (attr_name == "pathPattern") {
-      if (*startChar == '/' || *startChar == '.' || *startChar == '*') {
+      // pathPattern starts with '.' or '*' does not need leading slash.
+      // Reference starts with @ does not need leading slash.
+      if (*startChar == '/' || *startChar == '.' || *startChar == '*' || *startChar == '@') {
         return true;
       } else {
         diag->Error(android::DiagMessage(data_el->line_number)
@@ -80,7 +82,8 @@ static bool VerifyDeeplinkPathAttribute(xml::Element* data_el, android::SourcePa
         return false;
       }
     } else {
-      if (*startChar == '/') {
+      // Reference starts with @ does not need leading slash.
+      if (*startChar == '/' || *startChar == '@') {
         return true;
       } else {
         diag->Error(android::DiagMessage(data_el->line_number)
