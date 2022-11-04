@@ -150,7 +150,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
     // TODO(b/229290039): UDFPS controller should manage its dimensions on its own. Remove this.
     @Nullable private Runnable mAuthControllerUpdateUdfpsLocation;
     @Nullable private final AlternateUdfpsTouchProvider mAlternateTouchProvider;
-    @Nullable private UdfpsDisplayMode mUdfpsDisplayMode;
+    @Nullable private UdfpsDisplayModeProvider mUdfpsDisplayMode;
 
     // Tracks the velocity of a touch to help filter out the touches that move too fast.
     @Nullable private VelocityTracker mVelocityTracker;
@@ -165,6 +165,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
 
     // The current request from FingerprintService. Null if no current request.
     @Nullable UdfpsControllerOverlay mOverlay;
+    @Nullable private UdfpsEllipseDetection mUdfpsEllipseDetection;
 
     // The fingerprint AOD trigger doesn't provide an ACTION_UP/ACTION_CANCEL event to tell us when
     // to turn off high brightness mode. To get around this limitation, the state of the AOD
@@ -321,6 +322,10 @@ public class UdfpsController implements DozeReceiver, Dumpable {
         if (!mOverlayParams.equals(overlayParams)) {
             mOverlayParams = overlayParams;
 
+            if (mFeatureFlags.isEnabled(Flags.UDFPS_ELLIPSE_DETECTION)) {
+                mUdfpsEllipseDetection.updateOverlayParams(overlayParams);
+            }
+
             final boolean wasShowingAltAuth = mKeyguardViewManager.isShowingAlternateBouncer();
 
             // When the bounds change it's always necessary to re-create the overlay's window with
@@ -462,13 +467,19 @@ public class UdfpsController implements DozeReceiver, Dumpable {
 
                 boolean withinSensorArea;
                 if (mFeatureFlags.isEnabled(Flags.UDFPS_NEW_TOUCH_DETECTION)) {
-                    withinSensorArea =
+                    if (mFeatureFlags.isEnabled(Flags.UDFPS_ELLIPSE_DETECTION)) {
+                        // Ellipse detection
+                        withinSensorArea = mUdfpsEllipseDetection.isGoodEllipseOverlap(event);
+                    } else {
+                        // Centroid with expanded overlay
+                        withinSensorArea =
                             isWithinSensorArea(udfpsView, event.getRawX(),
-                                    event.getRawY(), fromUdfpsView);
+                                        event.getRawY(), fromUdfpsView);
+                    }
                 } else {
+                    // Centroid with sensor sized view
                     withinSensorArea =
-                            isWithinSensorArea(udfpsView, event.getX(),
-                                    event.getY(), fromUdfpsView);
+                        isWithinSensorArea(udfpsView, event.getX(), event.getY(), fromUdfpsView);
                 }
 
                 if (withinSensorArea) {
@@ -503,14 +514,23 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                 if (idx == event.getActionIndex()) {
                     boolean actionMoveWithinSensorArea;
                     if (mFeatureFlags.isEnabled(Flags.UDFPS_NEW_TOUCH_DETECTION)) {
-                        actionMoveWithinSensorArea =
+                        if (mFeatureFlags.isEnabled(Flags.UDFPS_ELLIPSE_DETECTION)) {
+                            // Ellipse detection
+                            actionMoveWithinSensorArea =
+                                    mUdfpsEllipseDetection.isGoodEllipseOverlap(event);
+                        } else {
+                            // Centroid with expanded overlay
+                            actionMoveWithinSensorArea =
                                 isWithinSensorArea(udfpsView, event.getRawX(idx),
                                         event.getRawY(idx), fromUdfpsView);
+                        }
                     } else {
+                        // Centroid with sensor sized view
                         actionMoveWithinSensorArea =
-                                isWithinSensorArea(udfpsView, event.getX(idx),
-                                        event.getY(idx), fromUdfpsView);
+                            isWithinSensorArea(udfpsView, event.getX(idx),
+                                    event.getY(idx), fromUdfpsView);
                     }
+
                     if ((fromUdfpsView || actionMoveWithinSensorArea)
                             && shouldTryToDismissKeyguard()) {
                         Log.v(TAG, "onTouch | dismiss keyguard ACTION_MOVE");
@@ -708,6 +728,10 @@ public class UdfpsController implements DozeReceiver, Dumpable {
 
         udfpsHapticsSimulator.setUdfpsController(this);
         udfpsShell.setUdfpsOverlayController(mUdfpsOverlayController);
+
+        if (featureFlags.isEnabled(Flags.UDFPS_ELLIPSE_DETECTION)) {
+            mUdfpsEllipseDetection = new UdfpsEllipseDetection(mOverlayParams);
+        }
     }
 
     /**

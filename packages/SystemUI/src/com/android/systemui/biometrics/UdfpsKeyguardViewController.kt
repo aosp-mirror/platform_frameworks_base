@@ -235,6 +235,7 @@ constructor(
                     return
                 }
 
+                // Forwarding touches not needed with expanded overlay
                 if (useExpandedOverlay) {
                     return
                 } else {
