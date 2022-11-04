@@ -19,8 +19,8 @@ package com.android.systemui.keyguard.data.quickaffordance
 
 import android.content.SharedPreferences
 import android.content.pm.UserInfo
-import androidx.test.core.app.ActivityScenario.launch
 import androidx.test.filters.SmallTest
+import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.settings.FakeUserTracker
 import com.android.systemui.settings.UserFileManager
@@ -63,6 +63,7 @@ class KeyguardQuickAffordanceSelectionManagerTest : SysuiTestCase() {
 
         underTest =
             KeyguardQuickAffordanceSelectionManager(
+                context = context,
                 userFileManager = userFileManager,
                 userTracker = userTracker,
             )
@@ -70,6 +71,7 @@ class KeyguardQuickAffordanceSelectionManagerTest : SysuiTestCase() {
 
     @Test
     fun setSelections() = runTest {
+        overrideResource(R.array.config_keyguardQuickAffordanceDefaults, arrayOf<String>())
         val affordanceIdsBySlotId = mutableListOf<Map<String, List<String>>>()
         val job =
             launch(UnconfinedTestDispatcher()) {
@@ -216,6 +218,101 @@ class KeyguardQuickAffordanceSelectionManagerTest : SysuiTestCase() {
                     slot1 to listOf(affordance1),
                     slot2 to listOf(affordance2),
                 ),
+        )
+
+        job.cancel()
+    }
+
+    @Test
+    fun `selections respects defaults`() = runTest {
+        val slotId1 = "slot1"
+        val slotId2 = "slot2"
+        val affordanceId1 = "affordance1"
+        val affordanceId2 = "affordance2"
+        val affordanceId3 = "affordance3"
+        overrideResource(
+            R.array.config_keyguardQuickAffordanceDefaults,
+            arrayOf(
+                "$slotId1:${listOf(affordanceId1, affordanceId3).joinToString(",")}",
+                "$slotId2:${listOf(affordanceId2).joinToString(",")}",
+            ),
+        )
+        val affordanceIdsBySlotId = mutableListOf<Map<String, List<String>>>()
+        val job =
+            launch(UnconfinedTestDispatcher()) {
+                underTest.selections.toList(affordanceIdsBySlotId)
+            }
+
+        assertSelections(
+            affordanceIdsBySlotId.last(),
+            mapOf(
+                slotId1 to listOf(affordanceId1, affordanceId3),
+                slotId2 to listOf(affordanceId2),
+            ),
+        )
+
+        job.cancel()
+    }
+
+    @Test
+    fun `selections ignores defaults after selecting an affordance`() = runTest {
+        val slotId1 = "slot1"
+        val slotId2 = "slot2"
+        val affordanceId1 = "affordance1"
+        val affordanceId2 = "affordance2"
+        val affordanceId3 = "affordance3"
+        overrideResource(
+            R.array.config_keyguardQuickAffordanceDefaults,
+            arrayOf(
+                "$slotId1:${listOf(affordanceId1, affordanceId3).joinToString(",")}",
+                "$slotId2:${listOf(affordanceId2).joinToString(",")}",
+            ),
+        )
+        val affordanceIdsBySlotId = mutableListOf<Map<String, List<String>>>()
+        val job =
+            launch(UnconfinedTestDispatcher()) {
+                underTest.selections.toList(affordanceIdsBySlotId)
+            }
+
+        underTest.setSelections(slotId1, listOf(affordanceId2))
+        assertSelections(
+            affordanceIdsBySlotId.last(),
+            mapOf(
+                slotId1 to listOf(affordanceId2),
+                slotId2 to listOf(affordanceId2),
+            ),
+        )
+
+        job.cancel()
+    }
+
+    @Test
+    fun `selections ignores defaults after clearing a slot`() = runTest {
+        val slotId1 = "slot1"
+        val slotId2 = "slot2"
+        val affordanceId1 = "affordance1"
+        val affordanceId2 = "affordance2"
+        val affordanceId3 = "affordance3"
+        overrideResource(
+            R.array.config_keyguardQuickAffordanceDefaults,
+            arrayOf(
+                "$slotId1:${listOf(affordanceId1, affordanceId3).joinToString(",")}",
+                "$slotId2:${listOf(affordanceId2).joinToString(",")}",
+            ),
+        )
+        val affordanceIdsBySlotId = mutableListOf<Map<String, List<String>>>()
+        val job =
+            launch(UnconfinedTestDispatcher()) {
+                underTest.selections.toList(affordanceIdsBySlotId)
+            }
+
+        underTest.setSelections(slotId1, listOf())
+        assertSelections(
+            affordanceIdsBySlotId.last(),
+            mapOf(
+                slotId1 to listOf(),
+                slotId2 to listOf(affordanceId2),
+            ),
         )
 
         job.cancel()

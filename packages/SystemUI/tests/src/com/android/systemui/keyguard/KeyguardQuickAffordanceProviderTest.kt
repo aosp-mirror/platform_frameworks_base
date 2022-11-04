@@ -77,6 +77,7 @@ class KeyguardQuickAffordanceProviderTest : SysuiTestCase() {
                 scope = CoroutineScope(IMMEDIATE),
                 selectionManager =
                     KeyguardQuickAffordanceSelectionManager(
+                        context = context,
                         userFileManager =
                             mock<UserFileManager>().apply {
                                 whenever(

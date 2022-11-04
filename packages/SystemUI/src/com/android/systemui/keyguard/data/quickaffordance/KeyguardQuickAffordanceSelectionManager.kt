@@ -20,9 +20,11 @@ package com.android.systemui.keyguard.data.quickaffordance
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.annotation.VisibleForTesting
+import com.android.systemui.R
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
 import javax.inject.Inject
@@ -38,6 +40,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 class KeyguardQuickAffordanceSelectionManager
 @Inject
 constructor(
+    @Application context: Context,
     private val userFileManager: UserFileManager,
     private val userTracker: UserTracker,
 ) {
@@ -63,6 +66,17 @@ constructor(
 
         awaitClose { userTracker.removeCallback(callback) }
     }
+    private val defaults: Map<String, List<String>> by lazy {
+        context.resources
+            .getStringArray(R.array.config_keyguardQuickAffordanceDefaults)
+            .associate { item ->
+                val splitUp = item.split(SLOT_AFFORDANCES_DELIMITER)
+                check(splitUp.size == 2)
+                val slotId = splitUp[0]
+                val affordanceIds = splitUp[1].split(AFFORDANCE_DELIMITER)
+                slotId to affordanceIds
+            }
+    }
 
     /** IDs of affordances to show, indexed by slot ID, and sorted in descending priority order. */
     val selections: Flow<Map<String, List<String>>> =
@@ -86,17 +100,35 @@ constructor(
      */
     fun getSelections(): Map<String, List<String>> {
         val slotKeys = sharedPrefs.all.keys.filter { it.startsWith(KEY_PREFIX_SLOT) }
-        return slotKeys.associate { key ->
-            val slotId = key.substring(KEY_PREFIX_SLOT.length)
-            val value = sharedPrefs.getString(key, null)
-            val affordanceIds =
-                if (!value.isNullOrEmpty()) {
-                    value.split(DELIMITER)
-                } else {
-                    emptyList()
+        val result =
+            slotKeys
+                .associate { key ->
+                    val slotId = key.substring(KEY_PREFIX_SLOT.length)
+                    val value = sharedPrefs.getString(key, null)
+                    val affordanceIds =
+                        if (!value.isNullOrEmpty()) {
+                            value.split(AFFORDANCE_DELIMITER)
+                        } else {
+                            emptyList()
+                        }
+                    slotId to affordanceIds
                 }
-            slotId to affordanceIds
+                .toMutableMap()
+
+        // If the result map is missing keys, it means that the system has never set anything for
+        // those slots. This is where we need examine our defaults and see if there should be a
+        // default value for the affordances in the slot IDs that are missing from the result.
+        //
+        // Once the user makes any selection for a slot, even when they select "None", this class
+        // will persist a key for that slot ID. In the case of "None", it will have a value of the
+        // empty string. This is why this system works.
+        defaults.forEach { (slotId, affordanceIds) ->
+            if (!result.containsKey(slotId)) {
+                result[slotId] = affordanceIds
+            }
         }
+
+        return result
     }
 
     /**
@@ -108,7 +140,7 @@ constructor(
         affordanceIds: List<String>,
     ) {
         val key = "$KEY_PREFIX_SLOT$slotId"
-        val value = affordanceIds.joinToString(DELIMITER)
+        val value = affordanceIds.joinToString(AFFORDANCE_DELIMITER)
         sharedPrefs.edit().putString(key, value).apply()
     }
 
@@ -116,6 +148,7 @@ constructor(
         private const val TAG = "KeyguardQuickAffordanceSelectionManager"
         @VisibleForTesting const val FILE_NAME = "quick_affordance_selections"
         private const val KEY_PREFIX_SLOT = "slot_"
-        private const val DELIMITER = ","
+        private const val SLOT_AFFORDANCES_DELIMITER = ":"
+        private const val AFFORDANCE_DELIMITER = ","
     }
 }
