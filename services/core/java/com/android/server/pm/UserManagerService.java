@@ -96,6 +96,7 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
+import android.util.EventLog;
 import android.util.IndentingPrintWriter;
 import android.util.IntArray;
 import android.util.Slog;
@@ -124,9 +125,11 @@ import com.android.server.BundleUtils;
 import com.android.server.LocalServices;
 import com.android.server.LockGuard;
 import com.android.server.SystemService;
+import com.android.server.am.EventLogTags;
 import com.android.server.am.UserState;
 import com.android.server.pm.UserManagerInternal.UserLifecycleListener;
 import com.android.server.pm.UserManagerInternal.UserRestrictionsListener;
+import com.android.server.pm.UserManagerInternal.UserVisibilityListener;
 import com.android.server.storage.DeviceStorageMonitorInternal;
 import com.android.server.utils.Slogf;
 import com.android.server.utils.TimingsTraceAndSlog;
@@ -503,6 +506,10 @@ public class UserManagerService extends IUserManager.Stub {
 
     @GuardedBy("mUserLifecycleListeners")
     private final ArrayList<UserLifecycleListener> mUserLifecycleListeners = new ArrayList<>();
+
+    // TODO(b/244333150): temporary array, should belong to UserVisibilityMediator
+    @GuardedBy("mUserVisibilityListeners")
+    private final ArrayList<UserVisibilityListener> mUserVisibilityListeners = new ArrayList<>();
 
     private final LockPatternUtils mLockPatternUtils;
 
@@ -6249,6 +6256,9 @@ public class UserManagerService extends IUserManager.Stub {
         synchronized (mUserLifecycleListeners) {
             pw.println("  user lifecycle events: " + mUserLifecycleListeners.size());
         }
+        synchronized (mUserVisibilityListeners) {
+            pw.println("  user visibility events: " + mUserVisibilityListeners.size());
+        }
 
         // Dump UserTypes
         pw.println();
@@ -6816,7 +6826,38 @@ public class UserManagerService extends IUserManager.Stub {
         public @UserIdInt int getUserAssignedToDisplay(int displayId) {
             return mUserVisibilityMediator.getUserAssignedToDisplay(displayId);
         }
+
+        @Override
+        public void addUserVisibilityListener(UserVisibilityListener listener) {
+            synchronized (mUserVisibilityListeners) {
+                mUserVisibilityListeners.add(listener);
+            }
+        }
+
+        @Override
+        public void removeUserVisibilityListener(UserVisibilityListener listener) {
+            synchronized (mUserVisibilityListeners) {
+                mUserVisibilityListeners.remove(listener);
+            }
+        }
+
+        @Override
+        public void onUserVisibilityChanged(@UserIdInt int userId, boolean visible) {
+            EventLog.writeEvent(EventLogTags.UM_USER_VISIBILITY_CHANGED, userId, visible ? 1 : 0);
+            mHandler.post(() -> {
+                UserVisibilityListener[] listeners;
+                synchronized (mUserVisibilityListeners) {
+                    listeners = new UserVisibilityListener[mUserVisibilityListeners.size()];
+                    mUserVisibilityListeners.toArray(listeners);
+                }
+                for (UserVisibilityListener listener : listeners) {
+                    listener.onUserVisibilityChanged(userId, visible);
+                }
+            });
+        }
     } // class LocalService
+
+
 
     /**
      * Check if user has restrictions

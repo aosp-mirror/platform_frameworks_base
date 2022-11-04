@@ -77,6 +77,23 @@ public abstract class UserManagerInternal {
     }
 
     /**
+     * Listener for {@link UserManager#isUserVisible() user visibility} changes.
+     */
+    public interface UserVisibilityListener {
+
+        /**
+         * Called when the {@link UserManager#isUserVisible() user visibility} changed.
+         *
+         * <p><b>Note:</b> this method is called independently of
+         * {@link com.android.server.SystemService} callbacks; for example, the call with
+         * {@code visible} {@code true} might be called before the
+         * {@link com.android.server.SystemService#onUserStarting(com.android.server.SystemService.TargetUser)}
+         * call.
+         */
+        void onUserVisibilityChanged(@UserIdInt int userId, boolean visible);
+    }
+
+    /**
      * Called by {@link com.android.server.devicepolicy.DevicePolicyManagerService} to set
      * restrictions enforced by the user.
      *
@@ -390,4 +407,13 @@ public abstract class UserManagerInternal {
      * would make such call).
      */
     public abstract @UserIdInt int getUserAssignedToDisplay(int displayId);
+
+    /** Adds a {@link UserVisibilityListener}. */
+    public abstract void addUserVisibilityListener(UserVisibilityListener listener);
+
+    /** Removes a {@link UserVisibilityListener}. */
+    public abstract void removeUserVisibilityListener(UserVisibilityListener listener);
+
+    /** TODO(b/244333150): temporary method until UserVisibilityMediator handles that logic */
+    public abstract void onUserVisibilityChanged(@UserIdInt int userId, boolean visible);
 }
