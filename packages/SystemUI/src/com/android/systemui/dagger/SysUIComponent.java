@@ -57,7 +57,9 @@ import dagger.BindsInstance;
 import dagger.Subcomponent;
 
 /**
- * Dagger Subcomponent for Core SysUI.
+ * An example Dagger Subcomponent for Core SysUI.
+ *
+ * See {@link ReferenceSysUIComponent} for the one actually used by AOSP.
  */
 @SysUISingleton
 @Subcomponent(modules = {
