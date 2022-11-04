@@ -24,16 +24,20 @@ data class ProviderInfo(
   val displayName: String,
   val credentialTypeIcon: Drawable,
   val credentialOptions: List<CredentialOptionInfo>,
+  // TODO: Add the authenticationOption
 )
 
-data class CredentialOptionInfo(
-  val icon: Drawable,
-  val title: String,
-  val subtitle: String,
+open class EntryInfo (
   val entryKey: String,
   val entrySubkey: String,
-  val usageData: String
 )
+
+class CredentialOptionInfo(
+  entryKey: String,
+  entrySubkey: String,
+  val icon: Drawable,
+  val usageData: String,
+) : EntryInfo(entryKey, entrySubkey)
 
 data class RequestDisplayInfo(
   val userName: String,

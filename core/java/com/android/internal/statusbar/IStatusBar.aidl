@@ -29,7 +29,6 @@ import android.media.MediaRoute2Info;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.service.notification.StatusBarNotification;
-import android.view.InsetsVisibilities;
 
 import com.android.internal.statusbar.IAddTileResultCallback;
 import com.android.internal.statusbar.IUndoMediaTransferCallback;
@@ -201,13 +200,13 @@ oneway interface IStatusBar
      *                         stacks.
      * @param navbarColorManagedByIme {@code true} if navigation bar color is managed by IME.
      * @param behavior the behavior of the focused window.
-     * @param requestedVisibilities the collection of the requested visibilities of system insets.
+     * @param requestedVisibleTypes the collection of insets types requested visible.
      * @param packageName the package name of the focused app.
      * @param letterboxDetails a set of letterbox details of apps visible on the screen.
      */
     void onSystemBarAttributesChanged(int displayId, int appearance,
             in AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
-            int behavior, in InsetsVisibilities requestedVisibilities, String packageName,
+            int behavior, int requestedVisibleTypes, String packageName,
             in LetterboxDetails[] letterboxDetails);
 
     /**

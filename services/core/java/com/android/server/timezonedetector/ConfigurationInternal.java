@@ -26,7 +26,6 @@ import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.time.Capabilities.CapabilityState;
 import android.app.time.TimeZoneCapabilities;
-import android.app.time.TimeZoneCapabilitiesAndConfig;
 import android.app.time.TimeZoneConfiguration;
 import android.os.UserHandle;
 
@@ -75,7 +74,7 @@ public final class ConfigurationInternal {
         mEnhancedMetricsCollectionEnabled = builder.mEnhancedMetricsCollectionEnabled;
         mAutoDetectionEnabledSetting = builder.mAutoDetectionEnabledSetting;
 
-        mUserId = builder.mUserId;
+        mUserId = Objects.requireNonNull(builder.mUserId, "userId must be set");
         mUserConfigAllowed = builder.mUserConfigAllowed;
         mLocationEnabledSetting = builder.mLocationEnabledSetting;
         mGeoDetectionEnabledSetting = builder.mGeoDetectionEnabledSetting;
@@ -151,8 +150,7 @@ public final class ConfigurationInternal {
      * Returns true if the user is allowed to modify time zone configuration, e.g. can be false due
      * to device policy (enterprise).
      *
-     * <p>See also {@link #createCapabilitiesAndConfig(boolean)} for situations where this value
-     * are ignored.
+     * <p>See also {@link #asCapabilities(boolean)} for situations where this value is ignored.
      */
     public boolean isUserConfigAllowed() {
         return mUserConfigAllowed;
@@ -196,20 +194,8 @@ public final class ConfigurationInternal {
                 || getGeoDetectionRunInBackgroundEnabled());
     }
 
-    /**
-     * Creates a {@link TimeZoneCapabilitiesAndConfig} object using the configuration values.
-     *
-     * @param bypassUserPolicyChecks {@code true} for device policy manager use cases where device
-     *   policy restrictions that should apply to actual users can be ignored
-     */
-    public TimeZoneCapabilitiesAndConfig createCapabilitiesAndConfig(
-            boolean bypassUserPolicyChecks) {
-        return new TimeZoneCapabilitiesAndConfig(
-                asCapabilities(bypassUserPolicyChecks), asConfiguration());
-    }
-
     @NonNull
-    private TimeZoneCapabilities asCapabilities(boolean bypassUserPolicyChecks) {
+    public TimeZoneCapabilities asCapabilities(boolean bypassUserPolicyChecks) {
         UserHandle userHandle = UserHandle.of(mUserId);
         TimeZoneCapabilities.Builder builder = new TimeZoneCapabilities.Builder(userHandle);
 
@@ -262,7 +248,7 @@ public final class ConfigurationInternal {
     }
 
     /** Returns a {@link TimeZoneConfiguration} from the configuration values. */
-    private TimeZoneConfiguration asConfiguration() {
+    public TimeZoneConfiguration asConfiguration() {
         return new TimeZoneConfiguration.Builder()
                 .setAutoDetectionEnabled(getAutoDetectionEnabledSetting())
                 .setGeoDetectionEnabled(getGeoDetectionEnabledSetting())
@@ -335,8 +321,7 @@ public final class ConfigurationInternal {
      */
     public static class Builder {
 
-        private final @UserIdInt int mUserId;
-
+        private @UserIdInt Integer mUserId;
         private boolean mUserConfigAllowed;
         private boolean mTelephonyDetectionSupported;
         private boolean mGeoDetectionSupported;
@@ -348,11 +333,9 @@ public final class ConfigurationInternal {
         private boolean mGeoDetectionEnabledSetting;
 
         /**
-         * Creates a new Builder with only the userId set.
+         * Creates a new Builder.
          */
-        public Builder(@UserIdInt int userId) {
-            mUserId = userId;
-        }
+        public Builder() {}
 
         /**
          * Creates a new Builder by copying values from an existing instance.
@@ -368,6 +351,14 @@ public final class ConfigurationInternal {
             this.mAutoDetectionEnabledSetting = toCopy.mAutoDetectionEnabledSetting;
             this.mLocationEnabledSetting = toCopy.mLocationEnabledSetting;
             this.mGeoDetectionEnabledSetting = toCopy.mGeoDetectionEnabledSetting;
+        }
+
+        /**
+         * Sets the user ID the configuration is for.
+         */
+        public Builder setUserId(@UserIdInt int userId) {
+            mUserId = userId;
+            return this;
         }
 
         /**

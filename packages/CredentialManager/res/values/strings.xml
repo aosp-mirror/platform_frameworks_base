@@ -22,4 +22,9 @@
   <string name="choose_create_option_description">You can use saved <xliff:g id="type">%1$s</xliff:g> on any device. It will be saved to <xliff:g id="providerInfoDisplayName">%2$s</xliff:g> for <xliff:g id="createInfoDisplayName">%3$s</xliff:g></string>
   <string name="more_options_title_multiple_options"><xliff:g id="providerInfoDisplayName">%1$s</xliff:g> for <xliff:g id="createInfoTitle">%2$s</xliff:g></string>
   <string name="more_options_title_one_option"><xliff:g id="providerInfoDisplayName">%1$s</xliff:g></string>
+  <string name="more_options_usage_data"><xliff:g id="passwordsNumber">%1$s</xliff:g> passwords and <xliff:g id="passkeyssNumber">%2$s</xliff:g> passkeys saved</string>
+  <string name="passkeys">passkeys</string>
+  <string name="passwords">passwords</string>
+  <string name="sign_ins">sign-ins</string>
+  <string name="createOptionInfo_icon_description">CreateOptionInfo credentialType icon</string>
 </resources>

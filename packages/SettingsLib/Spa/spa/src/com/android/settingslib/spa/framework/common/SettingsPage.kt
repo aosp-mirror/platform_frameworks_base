@@ -95,11 +95,6 @@ data class SettingsPage(
         return false
     }
 
-    fun getTitle(): String? {
-        val sppRepository by SpaEnvironmentFactory.instance.pageProviderRepository
-        return sppRepository.getProviderOrNull(sppName)?.getTitle(arguments)
-    }
-
     fun enterPage() {
         SpaEnvironmentFactory.instance.logger.event(
             id,

@@ -22,7 +22,7 @@ import android.hardware.fingerprint.IUdfpsRefreshRateRequestCallback;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.view.InsetsState.InternalInsetsType;
-import android.view.InsetsVisibilities;
+import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsController.Appearance;
 import android.view.WindowInsetsController.Behavior;
 
@@ -158,7 +158,7 @@ public interface StatusBarManagerInternal {
     /** @see com.android.internal.statusbar.IStatusBar#onSystemBarAttributesChanged */
     void onSystemBarAttributesChanged(int displayId, @Appearance int appearance,
             AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
-            @Behavior int behavior, InsetsVisibilities requestedVisibilities, String packageName,
+            @Behavior int behavior, @InsetsType int requestedVisibleTypes, String packageName,
             LetterboxDetails[] letterboxDetails);
 
     /** @see com.android.internal.statusbar.IStatusBar#showTransient */

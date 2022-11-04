@@ -1547,6 +1547,12 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         return mTransitionController.mTransitionMetricsReporter;
     }
 
+    @Override
+    public IBinder getApplyToken() {
+        enforceTaskPermission("getApplyToken()");
+        return SurfaceControl.Transaction.getDefaultApplyToken();
+    }
+
     /** Whether the configuration changes are important to report back to an organizer. */
     static boolean configurationsAreEqualForOrganizer(
             Configuration newConfig, @Nullable Configuration oldConfig) {

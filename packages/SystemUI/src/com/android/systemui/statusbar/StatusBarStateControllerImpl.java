@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar;
 
-import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
-import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_TRANSITION_FROM_AOD;
@@ -34,9 +32,10 @@ import android.util.FloatProperty;
 import android.util.Log;
 import android.view.Choreographer;
 import android.view.InsetsFlags;
-import android.view.InsetsVisibilities;
 import android.view.View;
 import android.view.ViewDebug;
+import android.view.WindowInsets;
+import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsController.Appearance;
 import android.view.WindowInsetsController.Behavior;
 import android.view.animation.Interpolator;
@@ -497,9 +496,9 @@ public class StatusBarStateControllerImpl implements
 
     @Override
     public void setSystemBarAttributes(@Appearance int appearance, @Behavior int behavior,
-            InsetsVisibilities requestedVisibilities, String packageName) {
-        boolean isFullscreen = !requestedVisibilities.getVisibility(ITYPE_STATUS_BAR)
-                || !requestedVisibilities.getVisibility(ITYPE_NAVIGATION_BAR);
+            @InsetsType int requestedVisibleTypes, String packageName) {
+        boolean isFullscreen = (requestedVisibleTypes & WindowInsets.Type.statusBars()) == 0
+                || (requestedVisibleTypes & WindowInsets.Type.navigationBars()) == 0;
         if (mIsFullscreen != isFullscreen) {
             mIsFullscreen = isFullscreen;
             synchronized (mListeners) {
@@ -514,12 +513,12 @@ public class StatusBarStateControllerImpl implements
         if (DEBUG_IMMERSIVE_APPS) {
             boolean dim = (appearance & APPEARANCE_LOW_PROFILE_BARS) != 0;
             String behaviorName = ViewDebug.flagsToString(InsetsFlags.class, "behavior", behavior);
-            String requestedVisibilityString = requestedVisibilities.toString();
-            if (requestedVisibilityString.isEmpty()) {
-                requestedVisibilityString = "none";
+            String requestedVisibleTypesString = WindowInsets.Type.toString(requestedVisibleTypes);
+            if (requestedVisibleTypesString.isEmpty()) {
+                requestedVisibleTypesString = "none";
             }
             Log.d(TAG, packageName + " dim=" + dim + " behavior=" + behaviorName
-                    + " requested visibilities: " + requestedVisibilityString);
+                    + " requested visible types: " + requestedVisibleTypesString);
         }
     }
 

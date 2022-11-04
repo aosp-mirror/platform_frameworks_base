@@ -7211,6 +7211,10 @@
             </intent-filter>
         </service>
 
+        <service android:name="com.android.server.art.BackgroundDexOptJobService"
+                 android:permission="android.permission.BIND_JOB_SERVICE" >
+        </service>
+
         <provider
             android:name="com.android.server.textclassifier.IconsContentProvider"
             android:authorities="com.android.textclassifier.icons"

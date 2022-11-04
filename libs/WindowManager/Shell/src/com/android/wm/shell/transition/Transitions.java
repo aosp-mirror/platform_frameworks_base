@@ -175,6 +175,9 @@ public class Transitions implements RemoteCallable<Transitions> {
     }
 
     private void onInit() {
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+            mOrganizer.shareTransactionQueue();
+        }
         mShellController.addExternalInterface(KEY_EXTRA_SHELL_SHELL_TRANSITIONS,
                 this::createExternalInterface, this);
 

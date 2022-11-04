@@ -45,14 +45,23 @@ fun FlickerTestParameter.appPairsDividerBecomesVisible() {
 fun FlickerTestParameter.splitScreenEntered(
     component1: IComponentMatcher,
     component2: IComponentMatcher,
-    fromOtherApp: Boolean
+    fromOtherApp: Boolean,
+    appExistAtStart: Boolean = true
 ) {
     if (fromOtherApp) {
-        appWindowIsInvisibleAtStart(component1)
+        if (appExistAtStart) {
+            appWindowIsInvisibleAtStart(component1)
+        } else {
+            appWindowIsNotContainAtStart(component1)
+        }
     } else {
         appWindowIsVisibleAtStart(component1)
     }
-    appWindowIsInvisibleAtStart(component2)
+    if (appExistAtStart) {
+        appWindowIsInvisibleAtStart(component2)
+    } else {
+        appWindowIsNotContainAtStart(component2)
+    }
     splitScreenDividerIsInvisibleAtStart()
 
     appWindowIsVisibleAtEnd(component1)
@@ -313,6 +322,10 @@ fun FlickerTestParameter.appWindowIsInvisibleAtStart(component: IComponentMatche
 
 fun FlickerTestParameter.appWindowIsInvisibleAtEnd(component: IComponentMatcher) {
     assertWmEnd { this.isAppWindowInvisible(component) }
+}
+
+fun FlickerTestParameter.appWindowIsNotContainAtStart(component: IComponentMatcher) {
+    assertWmStart { this.notContains(component) }
 }
 
 fun FlickerTestParameter.appWindowKeepVisible(component: IComponentMatcher) {

@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.AlarmManager;
+import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.IActivityTaskManager;
 import android.app.INotificationManager;
@@ -133,6 +134,12 @@ public class FrameworkServicesModule {
     @Provides
     public AmbientDisplayConfiguration provideAmbientDisplayConfiguration(Context context) {
         return new AmbientDisplayConfiguration(context);
+    }
+
+    @Provides
+    @Singleton
+    static AppOpsManager provideAppOpsManager(Context context) {
+        return context.getSystemService(AppOpsManager.class);
     }
 
     @Provides

@@ -66,10 +66,14 @@ public class TestHandler extends Handler {
     /**
      * Waits for all enqueued work to be completed before returning.
      */
-    public void waitForMessagesToBeProcessed() throws InterruptedException {
+    public void waitForMessagesToBeProcessed() {
         synchronized (mMonitor) {
             if (mMessagesSent != mMessagesProcessed) {
-                mMonitor.wait();
+                try {
+                    mMonitor.wait();
+                } catch (InterruptedException e) {
+                    throw new AssertionError("Unexpected exception", e);
+                }
             }
         }
     }

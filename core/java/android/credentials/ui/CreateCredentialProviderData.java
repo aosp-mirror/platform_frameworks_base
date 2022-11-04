@@ -34,19 +34,15 @@ import java.util.List;
 public class CreateCredentialProviderData extends ProviderData implements Parcelable {
     @NonNull
     private final List<Entry> mSaveEntries;
-    @NonNull
-    private final List<Entry> mActionChips;
     private final boolean mIsDefaultProvider;
     @Nullable
     private final Entry mRemoteEntry;
 
     public CreateCredentialProviderData(
             @NonNull String providerFlattenedComponentName, @NonNull List<Entry> saveEntries,
-            @NonNull List<Entry> actionChips, boolean isDefaultProvider,
-            @Nullable Entry remoteEntry) {
+            boolean isDefaultProvider, @Nullable Entry remoteEntry) {
         super(providerFlattenedComponentName);
         mSaveEntries = saveEntries;
-        mActionChips = actionChips;
         mIsDefaultProvider = isDefaultProvider;
         mRemoteEntry = remoteEntry;
     }
@@ -54,11 +50,6 @@ public class CreateCredentialProviderData extends ProviderData implements Parcel
     @NonNull
     public List<Entry> getSaveEntries() {
         return mSaveEntries;
-    }
-
-    @NonNull
-    public List<Entry> getActionChips() {
-        return mActionChips;
     }
 
     public boolean isDefaultProvider() {
@@ -78,11 +69,6 @@ public class CreateCredentialProviderData extends ProviderData implements Parcel
         mSaveEntries = credentialEntries;
         AnnotationValidations.validate(NonNull.class, null, mSaveEntries);
 
-        List<Entry> actionChips  = new ArrayList<>();
-        in.readTypedList(actionChips, Entry.CREATOR);
-        mActionChips = actionChips;
-        AnnotationValidations.validate(NonNull.class, null, mActionChips);
-
         mIsDefaultProvider = in.readBoolean();
 
         Entry remoteEntry = in.readTypedObject(Entry.CREATOR);
@@ -93,7 +79,6 @@ public class CreateCredentialProviderData extends ProviderData implements Parcel
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
         dest.writeTypedList(mSaveEntries);
-        dest.writeTypedList(mActionChips);
         dest.writeBoolean(isDefaultProvider());
         dest.writeTypedObject(mRemoteEntry, flags);
     }
@@ -124,7 +109,6 @@ public class CreateCredentialProviderData extends ProviderData implements Parcel
     public static class Builder {
         private @NonNull String mProviderFlattenedComponentName;
         private @NonNull List<Entry> mSaveEntries = new ArrayList<>();
-        private @NonNull List<Entry> mActionChips = new ArrayList<>();
         private boolean mIsDefaultProvider = false;
         private @Nullable Entry mRemoteEntry = null;
 
@@ -140,13 +124,6 @@ public class CreateCredentialProviderData extends ProviderData implements Parcel
             return this;
         }
 
-        /** Sets the list of action chips to be displayed to the user. */
-        @NonNull
-        public Builder setActionChips(@NonNull List<Entry> actionChips) {
-            mActionChips = actionChips;
-            return this;
-        }
-
         /** Sets whether this provider is the user's selected default provider. */
         @NonNull
         public Builder setIsDefaultProvider(boolean isDefaultProvider) {
@@ -158,7 +135,7 @@ public class CreateCredentialProviderData extends ProviderData implements Parcel
         @NonNull
         public CreateCredentialProviderData build() {
             return new CreateCredentialProviderData(mProviderFlattenedComponentName,
-                    mSaveEntries, mActionChips, mIsDefaultProvider, mRemoteEntry);
+                    mSaveEntries, mIsDefaultProvider, mRemoteEntry);
         }
     }
 }

@@ -21,10 +21,11 @@ data class TransitionStep(
     val to: KeyguardState = KeyguardState.NONE,
     val value: Float = 0f, // constrained [0.0, 1.0]
     val transitionState: TransitionState = TransitionState.FINISHED,
+    val ownerName: String = "",
 ) {
     constructor(
         info: TransitionInfo,
         value: Float,
         transitionState: TransitionState,
-    ) : this(info.from, info.to, value, transitionState)
+    ) : this(info.from, info.to, value, transitionState, info.ownerName)
 }

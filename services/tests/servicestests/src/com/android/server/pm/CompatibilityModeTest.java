@@ -34,6 +34,7 @@ import android.platform.test.annotations.Presubmit;
 
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.pkg.PackageImpl;
+import com.android.server.pm.pkg.PackageStateUnserialized;
 import com.android.server.pm.pkg.PackageUserStateImpl;
 import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 
@@ -46,12 +47,16 @@ public class CompatibilityModeTest {
 
     private boolean mCompatibilityModeEnabled;;
     private PackageImpl mMockAndroidPackage;
+    private PackageSetting mMockPackageState;
     private PackageUserStateImpl mMockUserState;
 
     @Before
     public void setUp() {
         mCompatibilityModeEnabled = ParsingPackageUtils.sCompatibilityModeEnabled;
         mMockAndroidPackage = mock(PackageImpl.class);
+        mMockPackageState = mock(PackageSetting.class);
+        when(mMockPackageState.getTransientState())
+                .thenReturn(new PackageStateUnserialized(mMockPackageState));
         mMockUserState = new PackageUserStateImpl();
         mMockUserState.setInstalled(true);
     }
@@ -221,7 +226,7 @@ public class CompatibilityModeTest {
         info.flags |= flags;
         when(mMockAndroidPackage.toAppInfoWithoutState()).thenReturn(info);
         return PackageInfoUtils.generateApplicationInfo(mMockAndroidPackage,
-                0 /*flags*/, mMockUserState, 0 /*userId*/, null);
+                0 /*flags*/, mMockUserState, 0 /*userId*/, mMockPackageState);
     }
 
     private void setGlobalCompatibilityMode(boolean enabled) {

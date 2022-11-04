@@ -23,7 +23,6 @@ import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.wm.shell.flicker.appWindowBecomesVisible
 import com.android.wm.shell.flicker.appWindowIsVisibleAtEnd
 import com.android.wm.shell.flicker.layerBecomesVisible
 import com.android.wm.shell.flicker.layerIsVisibleAtEnd
@@ -78,7 +77,8 @@ class EnterSplitScreenByDragFromShortcut(
 
     @Postsubmit
     @Test
-    fun cujCompleted() = testSpec.splitScreenEntered(primaryApp, secondaryApp, fromOtherApp = false)
+    fun cujCompleted() = testSpec.splitScreenEntered(primaryApp, secondaryApp,
+        fromOtherApp = false, appExistAtStart = false)
 
     @Postsubmit
     @Test
@@ -108,7 +108,15 @@ class EnterSplitScreenByDragFromShortcut(
 
     @Postsubmit
     @Test
-    fun secondaryAppWindowBecomesVisible() = testSpec.appWindowBecomesVisible(secondaryApp)
+    fun secondaryAppWindowBecomesVisible() {
+        testSpec.assertWm {
+            this.notContains(secondaryApp)
+                .then()
+                .isAppWindowInvisible(secondaryApp, isOptional = true)
+                .then()
+                .isAppWindowVisible(secondaryApp)
+        }
+    }
 
     /** {@inheritDoc} */
     @Postsubmit

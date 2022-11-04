@@ -22,19 +22,26 @@ data class ProviderInfo(
   val icon: Drawable,
   val name: String,
   val displayName: String,
-  val credentialTypeIcon: Drawable,
   val createOptions: List<CreateOptionInfo>,
   val isDefault: Boolean,
 )
 
-data class CreateOptionInfo(
-  val icon: Drawable,
-  val title: String,
-  val subtitle: String,
+open class EntryInfo (
   val entryKey: String,
   val entrySubkey: String,
-  val usageData: String
 )
+
+class CreateOptionInfo(
+  entryKey: String,
+  entrySubkey: String,
+  val userProviderDisplayName: String,
+  val credentialTypeIcon: Drawable,
+  val profileIcon: Drawable,
+  val passwordCount: Int,
+  val passkeyCount: Int,
+  val totalCredentialCount: Int,
+  val lastUsedTimeMillis: Long?,
+) : EntryInfo(entryKey, entrySubkey)
 
 data class RequestDisplayInfo(
   val userName: String,
@@ -49,7 +56,7 @@ data class RequestDisplayInfo(
  */
 data class ActiveEntry (
   val activeProvider: ProviderInfo,
-  val activeCreateOptionInfo: CreateOptionInfo,
+  val activeEntryInfo: EntryInfo,
 )
 
 /** The name of the current screen. */

@@ -29,7 +29,7 @@ import android.app.StatusBarManager;
 import android.os.PowerManager;
 import android.os.Vibrator;
 import android.testing.AndroidTestingRunner;
-import android.view.InsetsVisibilities;
+import android.view.WindowInsets;
 
 import androidx.test.filters.SmallTest;
 
@@ -177,7 +177,7 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
         AppearanceRegion[] appearanceRegions = new AppearanceRegion[]{};
         boolean navbarColorManagedByIme = true;
         int behavior = 456;
-        InsetsVisibilities requestedVisibilities = new InsetsVisibilities();
+        int requestedVisibleTypes = WindowInsets.Type.systemBars();
         String packageName = "test package name";
         LetterboxDetails[] letterboxDetails = new LetterboxDetails[]{};
 
@@ -187,7 +187,7 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
                 appearanceRegions,
                 navbarColorManagedByIme,
                 behavior,
-                requestedVisibilities,
+                requestedVisibleTypes,
                 packageName,
                 letterboxDetails);
 
@@ -197,7 +197,7 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
                 appearanceRegions,
                 navbarColorManagedByIme,
                 behavior,
-                requestedVisibilities,
+                requestedVisibleTypes,
                 packageName,
                 letterboxDetails
         );
@@ -209,7 +209,7 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
         AppearanceRegion[] appearanceRegions = new AppearanceRegion[]{};
         boolean navbarColorManagedByIme = true;
         int behavior = 456;
-        InsetsVisibilities requestedVisibilities = new InsetsVisibilities();
+        int requestedVisibleTypes = WindowInsets.Type.systemBars();
         String packageName = "test package name";
         LetterboxDetails[] letterboxDetails = new LetterboxDetails[]{};
 
@@ -219,7 +219,7 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
                 appearanceRegions,
                 navbarColorManagedByIme,
                 behavior,
-                requestedVisibilities,
+                requestedVisibleTypes,
                 packageName,
                 letterboxDetails);
 

@@ -2190,7 +2190,7 @@ class UserController implements Handler.Callback {
         if (oldUserId == UserHandle.USER_SYSTEM) {
             // System user is never stopped, but its visibility is changed (as it is brought to the
             // background)
-            updateSystemUserVisibility(/* visible= */ false);
+            updateSystemUserVisibility(t, /* visible= */ false);
         }
 
         t.traceEnd(); // end continueUserSwitch
@@ -2549,10 +2549,15 @@ class UserController implements Handler.Callback {
 
     // TODO(b/242195409): remove this method if initial system user boot logic is refactored?
     void onSystemUserStarting() {
-        updateSystemUserVisibility(/* visible= */ !UserManager.isHeadlessSystemUserMode());
+        if (!UserManager.isHeadlessSystemUserMode()) {
+            // Don't need to call on HSUM because it will be called when the system user is
+            // restarted on background
+            mInjector.onUserStarting(UserHandle.USER_SYSTEM, /* visible= */ true);
+        }
     }
 
-    private void updateSystemUserVisibility(boolean visible) {
+    private void updateSystemUserVisibility(TimingsTraceAndSlog t, boolean visible) {
+        t.traceBegin("update-system-userVisibility-" + visible);
         if (DEBUG_MU) {
             Slogf.d(TAG, "updateSystemUserVisibility(): visible=%b", visible);
         }
@@ -2564,7 +2569,8 @@ class UserController implements Handler.Callback {
                 mVisibleUsers.delete(userId);
             }
         }
-        mInjector.onUserStarting(userId, visible);
+        mInjector.notifySystemUserVisibilityChanged(visible);
+        t.traceEnd();
     }
 
     /**
@@ -3672,6 +3678,9 @@ class UserController implements Handler.Callback {
         void onUserStarting(int userId, boolean visible) {
             getSystemServiceManager().onUserStarting(TimingsTraceAndSlog.newAsyncLog(), userId,
                     visible);
+        }
+        void notifySystemUserVisibilityChanged(boolean visible) {
+            getSystemServiceManager().onSystemUserVisibilityChanged(visible);
         }
     }
 }
