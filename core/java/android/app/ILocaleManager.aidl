@@ -33,7 +33,7 @@ import android.os.LocaleList;
      /**
       * Sets a specified app’s app-specific UI locales.
       */
-     void setApplicationLocales(String packageName, int userId, in LocaleList locales);
+     void setApplicationLocales(String packageName, int userId, in LocaleList locales, boolean fromDelegate);
 
      /**
       * Returns the specified app's app-specific locales.
