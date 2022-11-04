@@ -437,7 +437,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
         final float[] scaleFactor = new float[]{1f, displayHeight[1] / (float) displayHeight[0]};
         final int[] rotation = new int[]{Surface.ROTATION_0, Surface.ROTATION_90};
         final UdfpsOverlayParams oldParams = new UdfpsOverlayParams(sensorBounds[0],
-                displayWidth[0], displayHeight[0], scaleFactor[0], rotation[0]);
+                sensorBounds[0], displayWidth[0], displayHeight[0], scaleFactor[0], rotation[0]);
 
         for (int i1 = 0; i1 <= 1; ++i1) {
             for (int i2 = 0; i2 <= 1; ++i2) {
@@ -445,8 +445,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
                     for (int i4 = 0; i4 <= 1; ++i4) {
                         for (int i5 = 0; i5 <= 1; ++i5) {
                             final UdfpsOverlayParams newParams = new UdfpsOverlayParams(
-                                    sensorBounds[i1], displayWidth[i2], displayHeight[i3],
-                                    scaleFactor[i4], rotation[i5]);
+                                    sensorBounds[i1], sensorBounds[i1], displayWidth[i2],
+                                    displayHeight[i3], scaleFactor[i4], rotation[i5]);
 
                             if (newParams.equals(oldParams)) {
                                 continue;
@@ -489,8 +489,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
 
         // Initialize the overlay.
         mUdfpsController.updateOverlayParams(mOpticalProps,
-                new UdfpsOverlayParams(sensorBounds, displayWidth, displayHeight, scaleFactor,
-                        rotation));
+                new UdfpsOverlayParams(sensorBounds, sensorBounds, displayWidth, displayHeight,
+                        scaleFactor, rotation));
 
         // Show the overlay.
         mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, mOpticalProps.sensorId,
@@ -500,8 +500,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
 
         // Update overlay with the same parameters.
         mUdfpsController.updateOverlayParams(mOpticalProps,
-                new UdfpsOverlayParams(sensorBounds, displayWidth, displayHeight, scaleFactor,
-                        rotation));
+                new UdfpsOverlayParams(sensorBounds, sensorBounds, displayWidth, displayHeight,
+                        scaleFactor, rotation));
         mFgExecutor.runAllReady();
 
         // Ensure the overlay was not recreated.
@@ -548,8 +548,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
 
         // Test ROTATION_0
         mUdfpsController.updateOverlayParams(mOpticalProps,
-                new UdfpsOverlayParams(sensorBounds, displayWidth, displayHeight, scaleFactor,
-                        Surface.ROTATION_0));
+                new UdfpsOverlayParams(sensorBounds, sensorBounds, displayWidth, displayHeight,
+                        scaleFactor, Surface.ROTATION_0));
         MotionEvent event = obtainMotionEvent(ACTION_DOWN, displayWidth, displayHeight, touchMinor,
                 touchMajor);
         mTouchListenerCaptor.getValue().onTouch(mUdfpsView, event);
@@ -565,8 +565,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
         // Test ROTATION_90
         reset(mAlternateTouchProvider);
         mUdfpsController.updateOverlayParams(mOpticalProps,
-                new UdfpsOverlayParams(sensorBounds, displayWidth, displayHeight, scaleFactor,
-                        Surface.ROTATION_90));
+                new UdfpsOverlayParams(sensorBounds, sensorBounds, displayWidth, displayHeight,
+                        scaleFactor, Surface.ROTATION_90));
         event = obtainMotionEvent(ACTION_DOWN, displayHeight, 0, touchMinor, touchMajor);
         mTouchListenerCaptor.getValue().onTouch(mUdfpsView, event);
         mBiometricsExecutor.runAllReady();
@@ -581,8 +581,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
         // Test ROTATION_270
         reset(mAlternateTouchProvider);
         mUdfpsController.updateOverlayParams(mOpticalProps,
-                new UdfpsOverlayParams(sensorBounds, displayWidth, displayHeight, scaleFactor,
-                        Surface.ROTATION_270));
+                new UdfpsOverlayParams(sensorBounds, sensorBounds, displayWidth, displayHeight,
+                        scaleFactor, Surface.ROTATION_270));
         event = obtainMotionEvent(ACTION_DOWN, 0, displayWidth, touchMinor, touchMajor);
         mTouchListenerCaptor.getValue().onTouch(mUdfpsView, event);
         mBiometricsExecutor.runAllReady();
@@ -597,8 +597,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
         // Test ROTATION_180
         reset(mAlternateTouchProvider);
         mUdfpsController.updateOverlayParams(mOpticalProps,
-                new UdfpsOverlayParams(sensorBounds, displayWidth, displayHeight, scaleFactor,
-                        Surface.ROTATION_180));
+                new UdfpsOverlayParams(sensorBounds, sensorBounds, displayWidth, displayHeight,
+                        scaleFactor, Surface.ROTATION_180));
         // ROTATION_180 is not supported. It should be treated like ROTATION_0.
         event = obtainMotionEvent(ACTION_DOWN, displayWidth, displayHeight, touchMinor, touchMajor);
         mTouchListenerCaptor.getValue().onTouch(mUdfpsView, event);
