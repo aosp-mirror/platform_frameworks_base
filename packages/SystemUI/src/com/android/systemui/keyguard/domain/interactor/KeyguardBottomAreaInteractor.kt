@@ -48,4 +48,9 @@ constructor(
     fun setAnimateDozingTransitions(animate: Boolean) {
         repository.setAnimateDozingTransitions(animate)
     }
+
+    /**
+     * Returns whether the keyguard bottom area should be constrained to the top of the lock icon
+     */
+    fun shouldConstrainToTopOfLockIcon(): Boolean = repository.isUdfpsSupported()
 }
