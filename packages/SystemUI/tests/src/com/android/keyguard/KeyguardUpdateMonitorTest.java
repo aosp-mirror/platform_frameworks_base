@@ -1621,7 +1621,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldListenForFace_whenFaceIsLockedOut_returnsFalse()
+    public void testShouldListenForFace_whenFaceIsLockedOut_returnsTrue()
             throws RemoteException {
         // Preconditions for face auth to run
         keyguardNotGoingAway();
@@ -1638,7 +1638,9 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         faceAuthLockedOut();
         mTestableLooper.processAllMessages();
 
-        assertThat(mKeyguardUpdateMonitor.shouldListenForFace()).isFalse();
+        // This is needed beccause we want to show face locked out error message whenever face auth
+        // is supposed to run.
+        assertThat(mKeyguardUpdateMonitor.shouldListenForFace()).isTrue();
     }
 
     @Test

@@ -153,6 +153,13 @@ class KeyguardUpdateMonitorLogger @Inject constructor(
                 { "fingerprintRunningState: $int1" })
     }
 
+    fun logFingerprintSuccess(userId: Int, isStrongBiometric: Boolean) {
+        logBuffer.log(TAG, DEBUG, {
+            int1 = userId
+            bool1 = isStrongBiometric
+        }, {"Fingerprint auth successful: userId: $int1, isStrongBiometric: $bool1"})
+    }
+
     fun logInvalidSubId(subId: Int) {
         logBuffer.log(TAG, INFO,
                 { int1 = subId },

@@ -20,6 +20,7 @@ import static android.app.admin.DevicePolicyManager.DEVICE_OWNER_TYPE_DEFAULT;
 import static android.app.admin.DevicePolicyManager.DEVICE_OWNER_TYPE_FINANCED;
 import static android.content.pm.UserInfo.FLAG_MANAGED_PROFILE;
 import static android.hardware.biometrics.BiometricFaceConstants.FACE_ACQUIRED_TOO_DARK;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_LOCKOUT_PERMANENT;
 import static android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_TIMEOUT;
 
 import static com.android.keyguard.KeyguardUpdateMonitor.BIOMETRIC_HELP_FACE_NOT_RECOGNIZED;
@@ -54,6 +55,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.app.Instrumentation;
@@ -88,6 +90,7 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.settingslib.fuelgauge.BatteryStatus;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.biometrics.FaceHelpMessageDeferral;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dock.DockManager;
@@ -173,6 +176,8 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     private FaceHelpMessageDeferral mFaceHelpMessageDeferral;
     @Mock
     private ScreenLifecycle mScreenLifecycle;
+    @Mock
+    private AuthController mAuthController;
     @Captor
     private ArgumentCaptor<DockManager.AlignmentStateListener> mAlignmentListener;
     @Captor
@@ -263,8 +268,9 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
                 mWakeLockBuilder,
                 mKeyguardStateController, mStatusBarStateController, mKeyguardUpdateMonitor,
                 mDockManager, mBroadcastDispatcher, mDevicePolicyManager, mIBatteryStats,
-                mUserManager, mExecutor, mExecutor,  mFalsingManager, mLockPatternUtils,
-                mScreenLifecycle, mKeyguardBypassController, mAccessibilityManager,
+                mUserManager, mExecutor, mExecutor, mFalsingManager,
+                mAuthController, mLockPatternUtils, mScreenLifecycle,
+                mKeyguardBypassController, mAccessibilityManager,
                 mFaceHelpMessageDeferral);
         mController.init();
         mController.setIndicationArea(mIndicationArea);
@@ -1371,6 +1377,110 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     }
 
 
+    @Test
+    public void onBiometricError_faceLockedOutFirstTime_showsThePassedInMessage() {
+        createController();
+        onFaceLockoutError("first lockout");
+
+        verifyIndicationShown(INDICATION_TYPE_BIOMETRIC_MESSAGE, "first lockout");
+    }
+
+    @Test
+    public void onBiometricError_faceLockedOutFirstTimeAndFpAllowed_showsTheFpFollowupMessage() {
+        createController();
+        fingerprintUnlockIsPossible();
+        onFaceLockoutError("first lockout");
+
+        verifyIndicationShown(INDICATION_TYPE_BIOMETRIC_MESSAGE_FOLLOW_UP,
+                mContext.getString(R.string.keyguard_suggest_fingerprint));
+    }
+
+    @Test
+    public void onBiometricError_faceLockedOutFirstTimeAndFpNotAllowed_showsDefaultFollowup() {
+        createController();
+        fingerprintUnlockIsNotPossible();
+        onFaceLockoutError("first lockout");
+
+        verifyIndicationShown(INDICATION_TYPE_BIOMETRIC_MESSAGE_FOLLOW_UP,
+                mContext.getString(R.string.keyguard_unlock));
+    }
+
+    @Test
+    public void onBiometricError_faceLockedOutSecondTimeInSession_showsUnavailableMessage() {
+        createController();
+        onFaceLockoutError("first lockout");
+        clearInvocations(mRotateTextViewController);
+
+        onFaceLockoutError("second lockout");
+
+        verifyIndicationShown(INDICATION_TYPE_BIOMETRIC_MESSAGE,
+                mContext.getString(R.string.keyguard_face_unlock_unavailable));
+    }
+
+    @Test
+    public void onBiometricError_faceLockedOutSecondTimeButUdfpsActive_showsNoMessage() {
+        createController();
+        onFaceLockoutError("first lockout");
+        clearInvocations(mRotateTextViewController);
+
+        when(mAuthController.isUdfpsFingerDown()).thenReturn(true);
+        onFaceLockoutError("second lockout");
+
+        verifyNoMoreInteractions(mRotateTextViewController);
+    }
+
+    @Test
+    public void onBiometricError_faceLockedOutAgainAndFpAllowed_showsTheFpFollowupMessage() {
+        createController();
+        fingerprintUnlockIsPossible();
+        onFaceLockoutError("first lockout");
+        clearInvocations(mRotateTextViewController);
+
+        onFaceLockoutError("second lockout");
+
+        verifyIndicationShown(INDICATION_TYPE_BIOMETRIC_MESSAGE_FOLLOW_UP,
+                mContext.getString(R.string.keyguard_suggest_fingerprint));
+    }
+
+    @Test
+    public void onBiometricError_faceLockedOutAgainAndFpNotAllowed_showsDefaultFollowup() {
+        createController();
+        fingerprintUnlockIsNotPossible();
+        onFaceLockoutError("first lockout");
+        clearInvocations(mRotateTextViewController);
+
+        onFaceLockoutError("second lockout");
+
+        verifyIndicationShown(INDICATION_TYPE_BIOMETRIC_MESSAGE_FOLLOW_UP,
+                mContext.getString(R.string.keyguard_unlock));
+    }
+
+    @Test
+    public void onBiometricError_whenFaceLockoutReset_onLockOutError_showsPassedInMessage() {
+        createController();
+        onFaceLockoutError("first lockout");
+        clearInvocations(mRotateTextViewController);
+        when(mKeyguardUpdateMonitor.isFaceLockedOut()).thenReturn(false);
+        mKeyguardUpdateMonitorCallback.onLockedOutStateChanged(BiometricSourceType.FACE);
+
+        onFaceLockoutError("second lockout");
+
+        verifyIndicationShown(INDICATION_TYPE_BIOMETRIC_MESSAGE, "second lockout");
+    }
+
+    @Test
+    public void onBiometricError_whenFaceIsLocked_onMultipleLockOutErrors_showUnavailableMessage() {
+        createController();
+        onFaceLockoutError("first lockout");
+        clearInvocations(mRotateTextViewController);
+        when(mKeyguardUpdateMonitor.isFaceLockedOut()).thenReturn(true);
+        mKeyguardUpdateMonitorCallback.onLockedOutStateChanged(BiometricSourceType.FACE);
+
+        onFaceLockoutError("second lockout");
+
+        verifyIndicationShown(INDICATION_TYPE_BIOMETRIC_MESSAGE,
+                mContext.getString(R.string.keyguard_face_unlock_unavailable));
+    }
 
     private void sendUpdateDisclosureBroadcast() {
         mBroadcastReceiver.onReceive(mContext, new Intent());
@@ -1418,5 +1528,34 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
             verify(mRotateTextViewController, never()).updateIndication(eq(type),
                     anyObject(), anyBoolean());
         }
+    }
+
+    private void verifyIndicationShown(int indicationType, String message) {
+        verify(mRotateTextViewController)
+                .updateIndication(eq(indicationType),
+                        mKeyguardIndicationCaptor.capture(),
+                        eq(true));
+        assertThat(mKeyguardIndicationCaptor.getValue().getMessage().toString())
+                .isEqualTo(message);
+    }
+
+    private void fingerprintUnlockIsNotPossible() {
+        setupFingerprintUnlockPossible(false);
+    }
+
+    private void fingerprintUnlockIsPossible() {
+        setupFingerprintUnlockPossible(true);
+    }
+
+    private void setupFingerprintUnlockPossible(boolean possible) {
+        when(mKeyguardUpdateMonitor
+                .getCachedIsUnlockWithFingerprintPossible(KeyguardUpdateMonitor.getCurrentUser()))
+                .thenReturn(possible);
+    }
+
+    private void onFaceLockoutError(String errMsg) {
+        mKeyguardUpdateMonitorCallback.onBiometricError(FACE_ERROR_LOCKOUT_PERMANENT,
+                errMsg,
+                BiometricSourceType.FACE);
     }
 }

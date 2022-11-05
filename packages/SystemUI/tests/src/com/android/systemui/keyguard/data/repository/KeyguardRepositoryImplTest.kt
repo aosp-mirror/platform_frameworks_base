@@ -17,7 +17,6 @@
 package com.android.systemui.keyguard.data.repository
 
 import androidx.test.filters.SmallTest
-import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.Position
 import com.android.systemui.doze.DozeHost
@@ -49,7 +48,6 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
     @Mock private lateinit var dozeHost: DozeHost
     @Mock private lateinit var keyguardStateController: KeyguardStateController
     @Mock private lateinit var wakefulnessLifecycle: WakefulnessLifecycle
-    @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
     @Mock private lateinit var biometricUnlockController: BiometricUnlockController
 
     private lateinit var underTest: KeyguardRepositoryImpl
@@ -60,12 +58,11 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
 
         underTest =
             KeyguardRepositoryImpl(
-                    statusBarStateController,
-                    dozeHost,
-                    wakefulnessLifecycle,
-                    biometricUnlockController,
-                    keyguardStateController,
-                    keyguardUpdateMonitor,
+                statusBarStateController,
+                keyguardStateController,
+                dozeHost,
+                wakefulnessLifecycle,
+                biometricUnlockController,
             )
     }
 
@@ -226,15 +223,6 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
     }
 
     @Test
-    fun isUdfpsSupported() = runBlockingTest {
-        whenever(keyguardUpdateMonitor.isUdfpsSupported).thenReturn(true)
-        assertThat(underTest.isUdfpsSupported()).isTrue()
-
-        whenever(keyguardUpdateMonitor.isUdfpsSupported).thenReturn(false)
-        assertThat(underTest.isUdfpsSupported()).isFalse()
-    }
-    
-    @Test    
     fun isBouncerShowing() = runBlockingTest {
         whenever(keyguardStateController.isBouncerShowing).thenReturn(false)
         var latest: Boolean? = null
