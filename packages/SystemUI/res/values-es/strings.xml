@@ -819,7 +819,7 @@
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="ELAPSED_TIME">%1$s</xliff:g> de <xliff:g id="TOTAL_TIME">%2$s</xliff:g>"</string>
     <string name="controls_media_button_play" msgid="2705068099607410633">"Reproducir"</string>
     <string name="controls_media_button_pause" msgid="8614887780950376258">"Pausar"</string>
-    <string name="controls_media_button_prev" msgid="8126822360056482970">"Pista anterior"</string>
+    <string name="controls_media_button_prev" msgid="8126822360056482970">"Canción anterior"</string>
     <string name="controls_media_button_next" msgid="6662636627525947610">"Siguiente pista"</string>
     <string name="controls_media_button_connecting" msgid="3138354625847598095">"Conectando"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"Reproducir"</string>
