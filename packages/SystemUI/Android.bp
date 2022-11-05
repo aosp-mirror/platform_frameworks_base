@@ -223,6 +223,7 @@ android_library {
         "androidx.test.rules",
         "androidx.test.uiautomator",
         "mockito-target-extended-minus-junit4",
+        "androidx.test.ext.junit",
         "testables",
         "truth-prebuilt",
         "monet",
