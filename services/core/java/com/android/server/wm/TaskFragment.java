@@ -79,6 +79,7 @@ import android.app.servertransaction.ResumeActivityItem;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.hardware.HardwareBuffer;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -1859,7 +1860,6 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         super.addChild(child, index);
 
         if (isAddingActivity && task != null) {
-
             // TODO(b/207481538): temporary per-activity screenshoting
             if (r != null && BackNavigationController.isScreenshotEnabled()) {
                 ProtoLog.v(WM_DEBUG_BACK_PREVIEW, "Screenshotting Activity %s",
@@ -2526,6 +2526,19 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
     boolean shouldRemoveSelfOnLastChildRemoval() {
         return !mCreatedByOrganizer || mIsRemovalRequested;
+    }
+
+    @Nullable
+    HardwareBuffer getSnapshotForActivityRecord(@Nullable ActivityRecord r) {
+        if (!BackNavigationController.isScreenshotEnabled()) {
+            return null;
+        }
+        if (r != null && r.mActivityComponent != null) {
+            ScreenCapture.ScreenshotHardwareBuffer backBuffer =
+                    mBackScreenshots.get(r.mActivityComponent.flattenToString());
+            return backBuffer != null ? backBuffer.getHardwareBuffer() : null;
+        }
+        return null;
     }
 
     @Override

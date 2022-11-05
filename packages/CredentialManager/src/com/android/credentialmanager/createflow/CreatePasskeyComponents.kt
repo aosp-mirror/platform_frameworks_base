@@ -1,6 +1,5 @@
 package com.android.credentialmanager.createflow
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -9,24 +8,19 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonColors
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Card
-import androidx.compose.material.Chip
-import androidx.compose.material.ChipDefaults
-import androidx.compose.material.Divider
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.ModalBottomSheetLayout
-import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
-import androidx.compose.material.TopAppBar
+import androidx.compose.material3.Card
+import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SuggestionChip
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
@@ -39,16 +33,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import com.android.credentialmanager.R
+import com.android.credentialmanager.common.material.ModalBottomSheetLayout
+import com.android.credentialmanager.common.material.ModalBottomSheetValue
+import com.android.credentialmanager.common.material.rememberModalBottomSheetState
 import com.android.credentialmanager.jetpack.provider.CredentialEntryUi.Companion.TYPE_PASSWORD_CREDENTIAL
 import com.android.credentialmanager.jetpack.provider.CredentialEntryUi.Companion.TYPE_PUBLIC_KEY_CREDENTIAL
-import com.android.credentialmanager.ui.theme.Grey100
-import com.android.credentialmanager.ui.theme.Shapes
-import com.android.credentialmanager.ui.theme.Typography
-import com.android.credentialmanager.ui.theme.lightBackgroundColor
-import com.android.credentialmanager.ui.theme.lightColorAccentSecondary
-import com.android.credentialmanager.ui.theme.lightSurface1
 
-@ExperimentalMaterialApi
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreatePasskeyScreen(
   viewModel: CreatePasskeyViewModel,
@@ -92,8 +83,8 @@ fun CreatePasskeyScreen(
         )
       }
     },
-    scrimColor = Color.Transparent,
-    sheetShape = Shapes.medium,
+    scrimColor = MaterialTheme.colorScheme.scrim,
+    sheetShape = MaterialTheme.shapes.medium,
   ) {}
   LaunchedEffect(state.currentValue) {
     if (state.currentValue == ModalBottomSheetValue.Hidden) {
@@ -107,9 +98,7 @@ fun ConfirmationCard(
   onConfirm: () -> Unit,
   onCancel: () -> Unit,
 ) {
-  Card(
-    backgroundColor = lightBackgroundColor,
-  ) {
+  Card() {
     Column() {
       Icon(
         painter = painterResource(R.drawable.ic_passkey),
@@ -119,7 +108,7 @@ fun ConfirmationCard(
       )
       Text(
         text = stringResource(R.string.passkey_creation_intro_title),
-        style = Typography.subtitle1,
+        style = MaterialTheme.typography.titleMedium,
         modifier = Modifier
           .padding(horizontal = 24.dp)
           .align(alignment = Alignment.CenterHorizontally)
@@ -130,7 +119,7 @@ fun ConfirmationCard(
       )
       Text(
         text = stringResource(R.string.passkey_creation_intro_body),
-        style = Typography.body1,
+        style = MaterialTheme.typography.bodyLarge,
         modifier = Modifier.padding(horizontal = 28.dp)
       )
       Divider(
@@ -143,11 +132,11 @@ fun ConfirmationCard(
       ) {
         CancelButton(
           stringResource(R.string.string_cancel),
-          onclick = onCancel
+          onClick = onCancel
         )
         ConfirmButton(
           stringResource(R.string.string_continue),
-          onclick = onConfirm
+          onClick = onConfirm
         )
       }
       Divider(
@@ -159,25 +148,23 @@ fun ConfirmationCard(
   }
 }
 
-@ExperimentalMaterialApi
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProviderSelectionCard(
   providerList: List<ProviderInfo>,
   onProviderSelected: (String) -> Unit,
   onCancel: () -> Unit
 ) {
-  Card(
-    backgroundColor = lightBackgroundColor,
-  ) {
+  Card() {
     Column() {
       Text(
         text = stringResource(R.string.choose_provider_title),
-        style = Typography.subtitle1,
+        style = MaterialTheme.typography.titleMedium,
         modifier = Modifier.padding(all = 24.dp).align(alignment = Alignment.CenterHorizontally)
       )
       Text(
         text = stringResource(R.string.choose_provider_body),
-        style = Typography.body1,
+        style = MaterialTheme.typography.bodyLarge,
         modifier = Modifier.padding(horizontal = 28.dp)
       )
       Divider(
@@ -185,10 +172,10 @@ fun ProviderSelectionCard(
         color = Color.Transparent
       )
       Card(
-        shape = Shapes.medium,
+        shape = MaterialTheme.shapes.large,
         modifier = Modifier
           .padding(horizontal = 24.dp)
-          .align(alignment = Alignment.CenterHorizontally)
+          .align(alignment = Alignment.CenterHorizontally),
       ) {
         LazyColumn(
           verticalArrangement = Arrangement.spacedBy(2.dp)
@@ -219,28 +206,27 @@ fun ProviderSelectionCard(
   }
 }
 
-@ExperimentalMaterialApi
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MoreOptionsSelectionCard(
   providerList: List<ProviderInfo>,
   onBackButtonSelected: () -> Unit,
   onOptionSelected: (ActiveEntry) -> Unit
 ) {
-  Card(
-    backgroundColor = lightBackgroundColor,
-  ) {
+  Card() {
     Column() {
       TopAppBar(
         title = {
-          Text(text = stringResource(R.string.string_more_options), style = Typography.subtitle1)
+          Text(
+            text = stringResource(R.string.string_more_options),
+            style = MaterialTheme.typography.titleMedium
+          )
         },
-        backgroundColor = lightBackgroundColor,
-        elevation = 0.dp,
-        navigationIcon =
-        {
+        navigationIcon = {
           IconButton(onClick = onBackButtonSelected) {
-            Icon(Icons.Filled.ArrowBack, "backIcon"
-            )
+            Icon(
+              Icons.Filled.ArrowBack,
+              "backIcon")
           }
         }
       )
@@ -250,12 +236,12 @@ fun MoreOptionsSelectionCard(
       )
       Text(
         text = stringResource(R.string.create_passkey_at),
-        style = Typography.body1,
+        style = MaterialTheme.typography.bodyLarge,
         modifier = Modifier.padding(horizontal = 28.dp),
         textAlign = TextAlign.Center
       )
       Card(
-        shape = Shapes.medium,
+        shape = MaterialTheme.shapes.large,
         modifier = Modifier
           .padding(horizontal = 24.dp)
           .align(alignment = Alignment.CenterHorizontally)
@@ -287,19 +273,17 @@ fun MoreOptionsSelectionCard(
   }
 }
 
-@ExperimentalMaterialApi
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MoreOptionsRowIntroCard(
   providerInfo: ProviderInfo,
   onDefaultOrNotSelected: () -> Unit,
 ) {
-  Card(
-    backgroundColor = lightBackgroundColor,
-  ) {
+  Card() {
     Column() {
       Text(
         text = stringResource(R.string.use_provider_for_all_title, providerInfo.displayName),
-        style = Typography.subtitle1,
+        style = MaterialTheme.typography.titleMedium,
         modifier = Modifier.padding(all = 24.dp).align(alignment = Alignment.CenterHorizontally)
       )
       Row(
@@ -308,11 +292,11 @@ fun MoreOptionsRowIntroCard(
       ) {
         CancelButton(
           stringResource(R.string.use_once),
-          onclick = onDefaultOrNotSelected
+          onClick = onDefaultOrNotSelected
         )
         ConfirmButton(
           stringResource(R.string.set_as_default),
-          onclick = onDefaultOrNotSelected
+          onClick = onDefaultOrNotSelected
         )
       }
       Divider(
@@ -324,74 +308,45 @@ fun MoreOptionsRowIntroCard(
   }
 }
 
-@ExperimentalMaterialApi
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProviderRow(providerInfo: ProviderInfo, onProviderSelected: (String) -> Unit) {
-  Chip(
+  SuggestionChip(
     modifier = Modifier.fillMaxWidth(),
     onClick = {onProviderSelected(providerInfo.name)},
-    leadingIcon = {
+    icon = {
       Image(modifier = Modifier.size(24.dp, 24.dp).padding(start = 10.dp),
             bitmap = providerInfo.icon.toBitmap().asImageBitmap(),
             // painter = painterResource(R.drawable.ic_passkey),
             // TODO: add description.
             contentDescription = "")
     },
-    colors = ChipDefaults.chipColors(
-      backgroundColor = Grey100,
-      leadingIconContentColor = Grey100
-    ),
-    shape = Shapes.large
-  ) {
-    Text(
-      text = providerInfo.displayName,
-      style = Typography.button,
-      modifier = Modifier.padding(vertical = 18.dp)
-    )
+    shape = MaterialTheme.shapes.large,
+    label = {
+      Text(
+        text = providerInfo.displayName,
+        style = MaterialTheme.typography.labelLarge,
+        modifier = Modifier.padding(vertical = 18.dp)
+      )
+    }
+  )
+}
+
+@Composable
+fun CancelButton(text: String, onClick: () -> Unit) {
+  TextButton(onClick = onClick) {
+    Text(text = text)
   }
 }
 
 @Composable
-fun CancelButton(text: String, onclick: () -> Unit) {
-  val colors = ButtonDefaults.buttonColors(
-    backgroundColor = lightBackgroundColor
-  )
-  NavigationButton(
-    border = BorderStroke(1.dp, lightSurface1),
-    colors = colors,
-    text = text,
-    onclick = onclick)
-}
-
-@Composable
-fun ConfirmButton(text: String, onclick: () -> Unit) {
-  val colors = ButtonDefaults.buttonColors(
-    backgroundColor = lightColorAccentSecondary
-  )
-  NavigationButton(
-    colors = colors,
-    text = text,
-    onclick = onclick)
-}
-
-@Composable
-fun NavigationButton(
-    border: BorderStroke? = null,
-    colors: ButtonColors,
-    text: String,
-    onclick: () -> Unit
-) {
-  Button(
-    onClick = onclick,
-    shape = Shapes.small,
-    colors = colors,
-    border = border
-  ) {
-    Text(text = text, style = Typography.button)
+fun ConfirmButton(text: String, onClick: () -> Unit) {
+  FilledTonalButton(onClick = onClick) {
+    Text(text = text)
   }
 }
 
-@ExperimentalMaterialApi
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreationSelectionCard(
   requestDisplayInfo: RequestDisplayInfo,
@@ -403,9 +358,7 @@ fun CreationSelectionCard(
   multiProvider: Boolean,
   onMoreOptionsSelected: () -> Unit,
 ) {
-  Card(
-    backgroundColor = lightBackgroundColor,
-  ) {
+  Card() {
     Column() {
       Icon(
         bitmap = createOptionInfo.credentialTypeIcon.toBitmap().asImageBitmap(),
@@ -422,14 +375,14 @@ fun CreationSelectionCard(
           else -> stringResource(R.string.choose_create_option_sign_in_title,
             providerInfo.displayName)
         },
-        style = Typography.subtitle1,
+        style = MaterialTheme.typography.titleMedium,
         modifier = Modifier.padding(horizontal = 24.dp)
           .align(alignment = Alignment.CenterHorizontally),
         textAlign = TextAlign.Center,
       )
       Text(
         text = requestDisplayInfo.appDomainName,
-        style = Typography.body2,
+        style = MaterialTheme.typography.bodyMedium,
         modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
       )
       Text(
@@ -441,15 +394,16 @@ fun CreationSelectionCard(
             else -> stringResource(R.string.sign_ins)
           },
           providerInfo.displayName,
-          createOptionInfo.userProviderDisplayName),
-        style = Typography.body1,
+          createOptionInfo.userProviderDisplayName
+        ),
+        style = MaterialTheme.typography.bodyLarge,
         modifier = Modifier.padding(all = 24.dp).align(alignment = Alignment.CenterHorizontally)
       )
       Card(
-        shape = Shapes.medium,
+        shape = MaterialTheme.shapes.large,
         modifier = Modifier
           .padding(horizontal = 24.dp)
-          .align(alignment = Alignment.CenterHorizontally)
+          .align(alignment = Alignment.CenterHorizontally),
       ) {
         LazyColumn(
           verticalArrangement = Arrangement.spacedBy(2.dp)
@@ -489,11 +443,11 @@ fun CreationSelectionCard(
       ) {
         CancelButton(
           stringResource(R.string.string_cancel),
-          onclick = onCancel
+          onClick = onCancel
         )
         ConfirmButton(
           stringResource(R.string.string_continue),
-          onclick = onConfirm
+          onClick = onConfirm
         )
       }
       Divider(
@@ -505,66 +459,59 @@ fun CreationSelectionCard(
   }
 }
 
-@ExperimentalMaterialApi
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PrimaryCreateOptionRow(
   requestDisplayInfo: RequestDisplayInfo,
   createOptionInfo: CreateOptionInfo,
   onOptionSelected: () -> Unit
 ) {
-  Chip(
+  SuggestionChip(
     modifier = Modifier.fillMaxWidth(),
     onClick = onOptionSelected,
-    leadingIcon = {
+    icon = {
       Image(modifier = Modifier.size(24.dp, 24.dp).padding(start = 10.dp),
         bitmap = createOptionInfo.credentialTypeIcon.toBitmap().asImageBitmap(),
         contentDescription = stringResource(R.string.createOptionInfo_icon_description))
     },
-    colors = ChipDefaults.chipColors(
-      backgroundColor = Grey100,
-      leadingIconContentColor = Grey100
-    ),
-    shape = Shapes.large
-  ) {
-    Column() {
-      Text(
-        text = requestDisplayInfo.userName,
-        style = Typography.h6,
-        modifier = Modifier.padding(top = 16.dp)
-      )
-      Text(
-        text = requestDisplayInfo.displayName,
-        style = Typography.body2,
-        modifier = Modifier.padding(bottom = 16.dp)
-      )
+    shape = MaterialTheme.shapes.large,
+    label = {
+      Column() {
+        Text(
+          text = requestDisplayInfo.userName,
+          style = MaterialTheme.typography.titleLarge,
+          modifier = Modifier.padding(top = 16.dp)
+        )
+        Text(
+          text = requestDisplayInfo.displayName,
+          style = MaterialTheme.typography.bodyMedium,
+          modifier = Modifier.padding(bottom = 16.dp)
+        )
+      }
     }
-  }
+  )
 }
 
-@ExperimentalMaterialApi
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MoreOptionsInfoRow(
   providerInfo: ProviderInfo,
   createOptionInfo: CreateOptionInfo,
   onOptionSelected: () -> Unit
 ) {
-    Chip(
+  SuggestionChip(
         modifier = Modifier.fillMaxWidth(),
         onClick = onOptionSelected,
-        leadingIcon = {
+        icon = {
             Image(modifier = Modifier.size(24.dp, 24.dp).padding(start = 10.dp),
                 bitmap = createOptionInfo.profileIcon.toBitmap().asImageBitmap(),
                 // painter = painterResource(R.drawable.ic_passkey),
                 // TODO: add description.
                 contentDescription = "")
         },
-        colors = ChipDefaults.chipColors(
-            backgroundColor = Grey100,
-            leadingIconContentColor = Grey100
-        ),
-        shape = Shapes.large
-    ) {
-        Column() {
+        shape = MaterialTheme.shapes.large,
+        label = {
+          Column() {
             Text(
                 text =
                 if (providerInfo.createOptions.size > 1)
@@ -572,15 +519,16 @@ fun MoreOptionsInfoRow(
                   providerInfo.displayName, createOptionInfo.userProviderDisplayName)} else {
                   stringResource(R.string.more_options_title_one_option,
                     providerInfo.displayName)},
-                style = Typography.h6,
+                style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(top = 16.dp)
             )
             Text(
                 text = stringResource(R.string.more_options_usage_data,
                   createOptionInfo.passwordCount, createOptionInfo.passkeyCount),
-                style = Typography.body2,
+                style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
+          }
         }
-    }
+    )
 }

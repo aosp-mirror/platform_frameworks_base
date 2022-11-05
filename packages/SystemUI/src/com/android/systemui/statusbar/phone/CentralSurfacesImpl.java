@@ -2549,12 +2549,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                         // ordering.
                         mMainExecutor.execute(mShadeController::runPostCollapseRunnables);
                     }
-                } else if (mNotificationPanelViewController.isLaunchTransitionFinished()) {
-                    // We are not dismissing the shade, but the launch transition is already
-                    // finished,
-                    // so nobody will call readyForKeyguardDone anymore. Post it such that
-                    // keyguardDonePending gets called first.
-                    mMainExecutor.execute(mStatusBarKeyguardViewManager::readyForKeyguardDone);
                 }
                 return deferred;
             }

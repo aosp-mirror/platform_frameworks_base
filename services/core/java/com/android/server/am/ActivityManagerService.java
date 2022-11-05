@@ -11111,11 +11111,13 @@ public class ActivityManagerService extends IActivityManager.Stub
         final long pss;
         final long swapPss;
         final long mRss;
-        final int id;
+        final int id; // pid
+        final int userId;
         final boolean hasActivities;
         ArrayList<MemItem> subitems;
 
         MemItem(String label, String shortLabel, long pss, long swapPss, long rss, int id,
+                @UserIdInt int userId,
                 boolean hasActivities) {
             this.isProc = true;
             this.label = label;
@@ -11124,6 +11126,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             this.swapPss = swapPss;
             this.mRss = rss;
             this.id = id;
+            this.userId = userId;
             this.hasActivities = hasActivities;
         }
 
@@ -11135,6 +11138,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             this.swapPss = swapPss;
             this.mRss = rss;
             this.id = id;
+            this.userId = UserHandle.USER_SYSTEM;
             this.hasActivities = false;
         }
     }
@@ -11169,8 +11173,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                     pw.printf("%s%s: %-60s (%s in swap)\n", prefix, stringifyKBSize(mi.pss),
                             mi.label, stringifyKBSize(mi.swapPss));
                 } else {
-                    pw.printf("%s%s: %s\n", prefix, stringifyKBSize(dumpPss ? mi.pss : mi.mRss),
-                            mi.label);
+                    pw.printf("%s%s: %s %s\n", prefix, stringifyKBSize(dumpPss ? mi.pss : mi.mRss),
+                            mi.label,
+                            mi.userId != UserHandle.USER_SYSTEM ? "(user " + mi.userId + ")" : "");
                 }
             } else if (mi.isProc) {
                 pw.print("proc,"); pw.print(tag); pw.print(","); pw.print(mi.shortLabel);
@@ -11662,7 +11667,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     ss[INDEX_TOTAL_MEMTRACK_GL] += memtrackGl;
                     MemItem pssItem = new MemItem(r.processName + " (pid " + pid +
                             (hasActivities ? " / activities)" : ")"), r.processName, myTotalPss,
-                            myTotalSwapPss, myTotalRss, pid, hasActivities);
+                            myTotalSwapPss, myTotalRss, pid, r.userId, hasActivities);
                     procMems.add(pssItem);
                     procMemsMap.put(pid, pssItem);
 
@@ -11759,7 +11764,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                     MemItem pssItem = new MemItem(st.name + " (pid " + st.pid + ")",
                             st.name, myTotalPss, info.getSummaryTotalSwapPss(), myTotalRss,
-                            st.pid, false);
+                            st.pid, UserHandle.getUserId(st.uid), false);
                     procMems.add(pssItem);
 
                     ss[INDEX_NATIVE_PSS] += info.nativePss;
@@ -12305,7 +12310,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 ss[INDEX_TOTAL_RSS] += myTotalRss;
                 MemItem pssItem = new MemItem(r.processName + " (pid " + pid +
                         (hasActivities ? " / activities)" : ")"), r.processName, myTotalPss,
-                        myTotalSwapPss, myTotalRss, pid, hasActivities);
+                        myTotalSwapPss, myTotalRss, pid, r.userId, hasActivities);
                 procMems.add(pssItem);
                 procMemsMap.put(pid, pssItem);
 
@@ -12393,7 +12398,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                     MemItem pssItem = new MemItem(st.name + " (pid " + st.pid + ")",
                             st.name, myTotalPss, info.getSummaryTotalSwapPss(), myTotalRss,
-                            st.pid, false);
+                            st.pid, UserHandle.getUserId(st.uid), false);
                     procMems.add(pssItem);
 
                     ss[INDEX_NATIVE_PSS] += info.nativePss;

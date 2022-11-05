@@ -583,11 +583,9 @@ public class TvInteractiveAppView extends ViewGroup {
     /**
      * Alerts the TV interactive app that a recording has been started with recordingId
      *
-     * @param recordingId The Id of the recording started
-     *
-     * @hide
+     * @param recordingId The ID of the recording started
      */
-    public void notifyRecordingStarted(@Nullable String recordingId) {
+    public void notifyRecordingStarted(@NonNull String recordingId) {
         if (DEBUG) {
             Log.d(TAG, "notifyRecordingStarted");
         }
@@ -859,10 +857,9 @@ public class TvInteractiveAppView extends ViewGroup {
         /**
          * This is called when {@link TvInteractiveAppService.Session#requestStartRecording(Uri)}
          * is called.
+         *
          * @param iAppServiceId The ID of the TV interactive app service bound to this view.
          * @param programUri The program URI to record
-         *
-         * @hide
          */
         public void onRequestStartRecording(
                 @NonNull String iAppServiceId,

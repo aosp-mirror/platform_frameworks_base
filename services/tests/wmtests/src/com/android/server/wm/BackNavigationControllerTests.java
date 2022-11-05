@@ -115,18 +115,14 @@ public class BackNavigationControllerTests extends WindowTestsBase {
 
     @Test
     public void backTypeCrossActivityWhenBackToPreviousActivity() {
-        Task task = createTopTaskWithActivity();
-        WindowState window = createAppWindow(task, FIRST_APPLICATION_WINDOW, "window");
-        addToWindowMap(window, true);
-        IOnBackInvokedCallback callback = createOnBackInvokedCallback();
-        window.setOnBackInvokedCallbackInfo(
-                new OnBackInvokedCallbackInfo(callback, OnBackInvokedDispatcher.PRIORITY_SYSTEM));
+        CrossActivityTestCase testCase = createTopTaskWithTwoActivities();
+        IOnBackInvokedCallback callback = withSystemCallback(testCase.task);
+
         BackNavigationInfo backNavigationInfo = startBackNavigation();
         assertWithMessage("BackNavigationInfo").that(backNavigationInfo).isNotNull();
+        assertThat(backNavigationInfo.getOnBackInvokedCallback()).isEqualTo(callback);
         assertThat(typeToString(backNavigationInfo.getType()))
                 .isEqualTo(typeToString(BackNavigationInfo.TYPE_CROSS_ACTIVITY));
-        assertWithMessage("Activity callback").that(
-                backNavigationInfo.getOnBackInvokedCallback()).isEqualTo(callback);
     }
 
     @Test
@@ -302,6 +298,34 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         return task;
     }
 
+    @NonNull
+    private CrossActivityTestCase createTopTaskWithTwoActivities() {
+        Task task = createTask(mDefaultDisplay);
+        ActivityRecord record1 = createActivityRecord(task);
+        ActivityRecord record2 = createActivityRecord(task);
+        // enable OnBackInvokedCallbacks
+        record2.info.applicationInfo.privateFlagsExt |=
+                PRIVATE_FLAG_EXT_ENABLE_ON_BACK_INVOKED_CALLBACK;
+        WindowState window1 = createWindow(null, FIRST_APPLICATION_WINDOW, record1, "window1");
+        WindowState window2 = createWindow(null, FIRST_APPLICATION_WINDOW, record2, "window2");
+        when(task.mSurfaceControl.isValid()).thenReturn(true);
+        when(record1.mSurfaceControl.isValid()).thenReturn(true);
+        when(record2.mSurfaceControl.isValid()).thenReturn(true);
+        Mockito.doNothing().when(task).reparentSurfaceControl(any(), any());
+        Mockito.doNothing().when(record1).reparentSurfaceControl(any(), any());
+        Mockito.doNothing().when(record2).reparentSurfaceControl(any(), any());
+        mAtm.setFocusedTask(task.mTaskId, record1);
+        mAtm.setFocusedTask(task.mTaskId, record2);
+        addToWindowMap(window1, true);
+        addToWindowMap(window2, true);
+
+        CrossActivityTestCase testCase = new CrossActivityTestCase();
+        testCase.task = task;
+        testCase.recordBack = record1;
+        testCase.recordFront = record2;
+        return testCase;
+    }
+
     private void addToWindowMap(WindowState window, boolean focus) {
         mWm.mWindowMap.put(window.mClient.asBinder(), window);
         if (focus) {
@@ -309,5 +333,11 @@ public class BackNavigationControllerTests extends WindowTestsBase {
                     .when(mWindowManagerInternal).getFocusedWindowToken();
             doReturn(window).when(mWm).getFocusedWindowLocked();
         }
+    }
+
+    private class CrossActivityTestCase {
+        public Task task;
+        public ActivityRecord recordBack;
+        public ActivityRecord recordFront;
     }
 }

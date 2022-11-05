@@ -280,6 +280,16 @@ public final class TunerAdapterTest {
     }
 
     @Test
+    public void startBackgroundScan_forTunerAdapter() throws Exception {
+        when(mTunerMock.startBackgroundScan()).thenReturn(false);
+
+        boolean scanStatus = mRadioTuner.startBackgroundScan();
+
+        verify(mTunerMock).startBackgroundScan();
+        assertWithMessage("Status for starting background scan").that(scanStatus).isFalse();
+    }
+
+    @Test
     public void isAnalogForced_forTunerAdapter() throws Exception {
         when(mTunerMock.isConfigFlagSet(RadioManager.CONFIG_FORCE_ANALOG)).thenReturn(true);
 

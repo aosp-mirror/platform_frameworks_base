@@ -125,6 +125,7 @@ import com.android.systemui.keyguard.dagger.KeyguardModule;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shade.NotificationPanelViewController;
+import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.CommandQueue;
@@ -266,6 +267,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     private final Executor mUiBgExecutor;
     private final ScreenOffAnimationController mScreenOffAnimationController;
     private final Lazy<NotificationShadeDepthController> mNotificationShadeDepthController;
+    private final Lazy<ShadeController> mShadeController;
 
     private boolean mSystemReady;
     private boolean mBootCompleted;
@@ -1150,6 +1152,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             ScreenOnCoordinator screenOnCoordinator,
             InteractionJankMonitor interactionJankMonitor,
             DreamOverlayStateController dreamOverlayStateController,
+            Lazy<ShadeController> shadeControllerLazy,
             Lazy<NotificationShadeWindowController> notificationShadeWindowControllerLazy,
             Lazy<ActivityLaunchAnimator> activityLaunchAnimator) {
         mContext = context;
@@ -1165,6 +1168,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         mTrustManager = trustManager;
         mUserSwitcherController = userSwitcherController;
         mKeyguardDisplayManager = keyguardDisplayManager;
+        mShadeController = shadeControllerLazy;
         dumpManager.registerDumpable(getClass().getName(), this);
         mDeviceConfig = deviceConfig;
         mScreenOnCoordinator = screenOnCoordinator;

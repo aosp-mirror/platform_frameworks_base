@@ -26541,6 +26541,7 @@ package android.media.tv.interactive {
     method public boolean onKeyMultiple(int, int, @NonNull android.view.KeyEvent);
     method public boolean onKeyUp(int, @NonNull android.view.KeyEvent);
     method public void onMediaViewSizeChanged(@Px int, @Px int);
+    method public void onRecordingStarted(@NonNull String);
     method public abstract void onRelease();
     method public void onResetInteractiveApp();
     method public abstract boolean onSetSurface(@Nullable android.view.Surface);
@@ -26566,6 +26567,7 @@ package android.media.tv.interactive {
     method @CallSuper public void requestCurrentChannelUri();
     method @CallSuper public void requestCurrentTvInputId();
     method @CallSuper public void requestSigning(@NonNull String, @NonNull String, @NonNull String, @NonNull byte[]);
+    method @CallSuper public void requestStartRecording(@Nullable android.net.Uri);
     method @CallSuper public void requestStreamVolume();
     method @CallSuper public void requestTrackInfoList();
     method @CallSuper public void sendPlaybackCommandRequest(@NonNull String, @Nullable android.os.Bundle);
@@ -26597,6 +26599,7 @@ package android.media.tv.interactive {
     method public boolean dispatchUnhandledInputEvent(@NonNull android.view.InputEvent);
     method @Nullable public android.media.tv.interactive.TvInteractiveAppView.OnUnhandledInputEventListener getOnUnhandledInputEventListener();
     method public void notifyError(@NonNull String, @NonNull android.os.Bundle);
+    method public void notifyRecordingStarted(@NonNull String);
     method public void onAttachedToWindow();
     method public void onDetachedFromWindow();
     method public void onLayout(boolean, int, int, int, int);
@@ -26638,6 +26641,7 @@ package android.media.tv.interactive {
     method public void onRequestCurrentChannelUri(@NonNull String);
     method public void onRequestCurrentTvInputId(@NonNull String);
     method public void onRequestSigning(@NonNull String, @NonNull String, @NonNull String, @NonNull String, @NonNull byte[]);
+    method public void onRequestStartRecording(@NonNull String, @Nullable android.net.Uri);
     method public void onRequestStreamVolume(@NonNull String);
     method public void onRequestTrackInfoList(@NonNull String);
     method public void onSetVideoBounds(@NonNull String, @NonNull android.graphics.Rect);
@@ -41783,7 +41787,8 @@ package android.telephony {
     field public static final String KEY_OPPORTUNISTIC_NETWORK_PING_PONG_TIME_LONG = "opportunistic_network_ping_pong_time_long";
     field public static final String KEY_PING_TEST_BEFORE_DATA_SWITCH_BOOL = "ping_test_before_data_switch_bool";
     field public static final String KEY_PREFER_2G_BOOL = "prefer_2g_bool";
-    field public static final String KEY_PREMIUM_CAPABILITY_MAXIMUM_NOTIFICATION_COUNT_INT_ARRAY = "premium_capability_maximum_notification_count_int_array";
+    field public static final String KEY_PREMIUM_CAPABILITY_MAXIMUM_DAILY_NOTIFICATION_COUNT_INT = "premium_capability_maximum_daily_notification_count_int";
+    field public static final String KEY_PREMIUM_CAPABILITY_MAXIMUM_MONTHLY_NOTIFICATION_COUNT_INT = "premium_capability_maximum_monthly_notification_count_int";
     field public static final String KEY_PREMIUM_CAPABILITY_NETWORK_SETUP_TIME_MILLIS_LONG = "premium_capability_network_setup_time_millis_long";
     field public static final String KEY_PREMIUM_CAPABILITY_NOTIFICATION_BACKOFF_HYSTERESIS_TIME_MILLIS_LONG = "premium_capability_notification_backoff_hysteresis_time_millis_long";
     field public static final String KEY_PREMIUM_CAPABILITY_NOTIFICATION_DISPLAY_TIMEOUT_MILLIS_LONG = "premium_capability_notification_display_timeout_millis_long";
@@ -44090,7 +44095,7 @@ package android.telephony {
     field public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_FEATURE_NOT_SUPPORTED = 10; // 0xa
     field public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_NETWORK_CONGESTED = 13; // 0xd
     field public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_NETWORK_NOT_AVAILABLE = 12; // 0xc
-    field public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_NOT_DEFAULT_DATA = 14; // 0xe
+    field public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_NOT_DEFAULT_DATA_SUB = 14; // 0xe
     field public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_OVERRIDDEN = 5; // 0x5
     field public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_PENDING_NETWORK_SETUP = 15; // 0xf
     field public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_REQUEST_FAILED = 11; // 0xb
@@ -53398,7 +53403,7 @@ package android.view.inputmethod {
     method @NonNull public android.view.inputmethod.CursorAnchorInfo.Builder setTextAppearanceInfo(@Nullable android.view.inputmethod.TextAppearanceInfo);
   }
 
-  public final class DeleteGesture extends android.view.inputmethod.HandwritingGesture implements android.os.Parcelable {
+  public final class DeleteGesture extends android.view.inputmethod.PreviewableHandwritingGesture implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public android.graphics.RectF getDeletionArea();
     method public int getGranularity();
@@ -53414,7 +53419,7 @@ package android.view.inputmethod {
     method @NonNull public android.view.inputmethod.DeleteGesture.Builder setGranularity(int);
   }
 
-  public final class DeleteRangeGesture extends android.view.inputmethod.HandwritingGesture implements android.os.Parcelable {
+  public final class DeleteRangeGesture extends android.view.inputmethod.PreviewableHandwritingGesture implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public android.graphics.RectF getDeletionEndArea();
     method @NonNull public android.graphics.RectF getDeletionStartArea();
@@ -53456,11 +53461,13 @@ package android.view.inputmethod {
     method @Nullable public CharSequence getInitialTextAfterCursor(@IntRange(from=0) int, int);
     method @Nullable public CharSequence getInitialTextBeforeCursor(@IntRange(from=0) int, int);
     method public int getInitialToolType();
+    method @NonNull public java.util.Set<java.lang.Class<? extends android.view.inputmethod.PreviewableHandwritingGesture>> getSupportedHandwritingGesturePreviews();
     method @NonNull public java.util.List<java.lang.Class<? extends android.view.inputmethod.HandwritingGesture>> getSupportedHandwritingGestures();
     method public final void makeCompatible(int);
     method public void setInitialSurroundingSubText(@NonNull CharSequence, int);
     method public void setInitialSurroundingText(@NonNull CharSequence);
     method public void setInitialToolType(int);
+    method public void setSupportedHandwritingGesturePreviews(@NonNull java.util.Set<java.lang.Class<? extends android.view.inputmethod.PreviewableHandwritingGesture>>);
     method public void setSupportedHandwritingGestures(@NonNull java.util.List<java.lang.Class<? extends android.view.inputmethod.HandwritingGesture>>);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.inputmethod.EditorInfo> CREATOR;
@@ -53635,6 +53642,7 @@ package android.view.inputmethod {
     method public default void performHandwritingGesture(@NonNull android.view.inputmethod.HandwritingGesture, @Nullable java.util.concurrent.Executor, @Nullable java.util.function.IntConsumer);
     method public boolean performPrivateCommand(String, android.os.Bundle);
     method public default boolean performSpellCheck();
+    method public default boolean previewHandwritingGesture(@NonNull android.view.inputmethod.PreviewableHandwritingGesture, @Nullable android.os.CancellationSignal);
     method public default boolean replaceText(@IntRange(from=0) int, @IntRange(from=0) int, @NonNull CharSequence, int, @Nullable android.view.inputmethod.TextAttribute);
     method public boolean reportFullscreenMode(boolean);
     method public boolean requestCursorUpdates(int);
@@ -53895,6 +53903,9 @@ package android.view.inputmethod {
     method @NonNull public android.view.inputmethod.JoinOrSplitGesture.Builder setJoinOrSplitPoint(@NonNull android.graphics.PointF);
   }
 
+  public abstract class PreviewableHandwritingGesture extends android.view.inputmethod.HandwritingGesture {
+  }
+
   public final class RemoveSpaceGesture extends android.view.inputmethod.HandwritingGesture implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public android.graphics.PointF getEndPoint();
@@ -53910,7 +53921,7 @@ package android.view.inputmethod {
     method @NonNull public android.view.inputmethod.RemoveSpaceGesture.Builder setPoints(@NonNull android.graphics.PointF, @NonNull android.graphics.PointF);
   }
 
-  public final class SelectGesture extends android.view.inputmethod.HandwritingGesture implements android.os.Parcelable {
+  public final class SelectGesture extends android.view.inputmethod.PreviewableHandwritingGesture implements android.os.Parcelable {
     method public int describeContents();
     method public int getGranularity();
     method @NonNull public android.graphics.RectF getSelectionArea();
@@ -53926,7 +53937,7 @@ package android.view.inputmethod {
     method @NonNull public android.view.inputmethod.SelectGesture.Builder setSelectionArea(@NonNull android.graphics.RectF);
   }
 
-  public final class SelectRangeGesture extends android.view.inputmethod.HandwritingGesture implements android.os.Parcelable {
+  public final class SelectRangeGesture extends android.view.inputmethod.PreviewableHandwritingGesture implements android.os.Parcelable {
     method public int describeContents();
     method public int getGranularity();
     method @NonNull public android.graphics.RectF getSelectionEndArea();

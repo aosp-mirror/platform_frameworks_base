@@ -71,7 +71,7 @@ public class LocaleManager {
      */
     @UserHandleAware
     public void setApplicationLocales(@NonNull LocaleList locales) {
-        setApplicationLocales(mContext.getPackageName(), locales);
+        setApplicationLocales(mContext.getPackageName(), locales, false);
     }
 
     /**
@@ -100,9 +100,14 @@ public class LocaleManager {
     @RequiresPermission(Manifest.permission.CHANGE_CONFIGURATION)
     @UserHandleAware
     public void setApplicationLocales(@NonNull String appPackageName, @NonNull LocaleList locales) {
+        setApplicationLocales(appPackageName, locales, true);
+    }
+
+    private void setApplicationLocales(@NonNull String appPackageName, @NonNull LocaleList locales,
+            boolean fromDelegate) {
         try {
             mService.setApplicationLocales(appPackageName, mContext.getUser().getIdentifier(),
-                    locales);
+                    locales, fromDelegate);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

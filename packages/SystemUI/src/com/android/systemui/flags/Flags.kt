@@ -148,7 +148,6 @@ object Flags {
     val SMARTSPACE = ResourceBooleanFlag(402, R.bool.flag_smartspace)
 
     // 500 - quick settings
-    @Deprecated("Not needed anymore") val NEW_USER_SWITCHER = ReleasedFlag(500)
 
     // TODO(b/254512321): Tracking Bug
     @JvmField val COMBINED_QS_HEADERS = UnreleasedFlag(501, teamfood = true)
@@ -156,9 +155,6 @@ object Flags {
     @JvmField
     val QS_USER_DETAIL_SHORTCUT =
         ResourceBooleanFlag(503, R.bool.flag_lockscreen_qs_user_detail_shortcut)
-
-    // TODO(b/254512699): Tracking Bug
-    @Deprecated("Not needed anymore") val NEW_FOOTER = ReleasedFlag(504)
 
     // TODO(b/254512747): Tracking Bug
     val NEW_HEADER = UnreleasedFlag(505, teamfood = true)
@@ -260,12 +256,6 @@ object Flags {
     val WM_ENABLE_SHELL_TRANSITIONS =
         SysPropBooleanFlag(1100, "persist.wm.debug.shell_transit", false)
 
-    /** b/170163464: animate bubbles expanded view collapse with home gesture */
-    @JvmField
-    @Keep
-    val BUBBLES_HOME_GESTURE =
-        SysPropBooleanFlag(1101, "persist.wm.debug.bubbles_home_gesture", true)
-
     // TODO(b/254513207): Tracking Bug
     @JvmField
     @Keep
@@ -293,15 +283,6 @@ object Flags {
 
     @JvmField
     @Keep
-    val FLOATING_TASKS_ENABLED = SysPropBooleanFlag(1106, "persist.wm.debug.floating_tasks", false)
-
-    @JvmField
-    @Keep
-    val SHOW_FLOATING_TASKS_AS_BUBBLES =
-        SysPropBooleanFlag(1107, "persist.wm.debug.floating_tasks_as_bubbles", false)
-
-    @JvmField
-    @Keep
     val ENABLE_FLING_TO_DISMISS_BUBBLE =
         SysPropBooleanFlag(1108, "persist.wm.debug.fling_to_dismiss_bubble", true)
 
@@ -314,6 +295,9 @@ object Flags {
     @Keep
     val ENABLE_PIP_KEEP_CLEAR_ALGORITHM =
         SysPropBooleanFlag(1110, "persist.wm.debug.enable_pip_keep_clear_algorithm", false)
+
+    // TODO(b/256873975): Tracking Bug
+    @JvmField @Keep val WM_BUBBLE_BAR = UnreleasedFlag(1111)
 
     // 1200 - predictive back
     @JvmField
@@ -364,6 +348,9 @@ object Flags {
 
     // 2000 - device controls
     @Keep val USE_APP_PANELS = UnreleasedFlag(2000, true)
+
+    // 2100 - Falsing Manager
+    @JvmField val FALSING_FOR_LONG_TAPS = ReleasedFlag(2100)
 
     // Pay no attention to the reflection behind the curtain.
     // ========================== Curtain ==========================

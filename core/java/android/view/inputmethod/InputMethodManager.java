@@ -3115,6 +3115,8 @@ public final class InputMethodManager {
      * when it was started, which allows it to perform this operation on
      * itself.
      * @param id The unique identifier for the new input method to be switched to.
+     * @throws IllegalArgumentException if the input method is unknown or filtered by the rules of
+     * <a href="/training/basics/intents/package-visibility">package visibility</a>.
      * @deprecated Use {@link InputMethodService#switchInputMethod(String)}
      * instead. This method was intended for IME developers who should be accessing APIs through
      * the service. APIs in this class are intended for app developers interacting with the IME.
@@ -3185,6 +3187,8 @@ public final class InputMethodManager {
      * itself.
      * @param id The unique identifier for the new input method to be switched to.
      * @param subtype The new subtype of the new input method to be switched to.
+     * @throws IllegalArgumentException if the input method is unknown or filtered by the rules of
+     * <a href="/training/basics/intents/package-visibility">package visibility</a>.
      * @deprecated Use
      * {@link InputMethodService#switchInputMethod(String, InputMethodSubtype)}
      * instead. This method was intended for IME developers who should be accessing APIs through
