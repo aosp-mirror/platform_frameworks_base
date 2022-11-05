@@ -250,6 +250,10 @@ constructor(
                         override fun onUserChanged(newUser: Int, userContext: Context) {
                             send()
                         }
+
+                        override fun onProfilesChanged(profiles: List<UserInfo>) {
+                            send()
+                        }
                     }
 
                 tracker.addCallback(callback, mainDispatcher.asExecutor())
