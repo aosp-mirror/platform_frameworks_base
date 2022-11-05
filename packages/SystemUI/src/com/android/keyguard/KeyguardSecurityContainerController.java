@@ -58,7 +58,8 @@ import com.android.keyguard.dagger.KeyguardBouncerScope;
 import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.Gefingerpoken;
 import com.android.systemui.R;
-import com.android.systemui.biometrics.SidefpsController;
+import com.android.systemui.biometrics.SideFpsController;
+import com.android.systemui.biometrics.SideFpsUiRequestSource;
 import com.android.systemui.classifier.FalsingA11yDelegate;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.flags.FeatureFlags;
@@ -100,7 +101,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     private final GlobalSettings mGlobalSettings;
     private final FeatureFlags mFeatureFlags;
     private final SessionTracker mSessionTracker;
-    private final Optional<SidefpsController> mSidefpsController;
+    private final Optional<SideFpsController> mSideFpsController;
     private final FalsingA11yDelegate mFalsingA11yDelegate;
 
     private int mLastOrientation = Configuration.ORIENTATION_UNDEFINED;
@@ -290,7 +291,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             FeatureFlags featureFlags,
             GlobalSettings globalSettings,
             SessionTracker sessionTracker,
-            Optional<SidefpsController> sidefpsController,
+            Optional<SideFpsController> sideFpsController,
             FalsingA11yDelegate falsingA11yDelegate) {
         super(view);
         mLockPatternUtils = lockPatternUtils;
@@ -311,7 +312,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         mFeatureFlags = featureFlags;
         mGlobalSettings = globalSettings;
         mSessionTracker = sessionTracker;
-        mSidefpsController = sidefpsController;
+        mSideFpsController = sideFpsController;
         mFalsingA11yDelegate = falsingA11yDelegate;
     }
 
@@ -351,7 +352,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     }
 
     private void updateSideFpsVisibility() {
-        if (!mSidefpsController.isPresent()) {
+        if (!mSideFpsController.isPresent()) {
             return;
         }
         final boolean sfpsEnabled = getResources().getBoolean(
@@ -369,9 +370,9 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                     + "needsStrongAuth=" + needsStrongAuth);
         }
         if (toShow) {
-            mSidefpsController.get().show();
+            mSideFpsController.get().show(SideFpsUiRequestSource.PRIMARY_BOUNCER);
         } else {
-            mSidefpsController.get().hide();
+            mSideFpsController.get().hide(SideFpsUiRequestSource.PRIMARY_BOUNCER);
         }
     }
 
@@ -745,7 +746,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         private final FeatureFlags mFeatureFlags;
         private final UserSwitcherController mUserSwitcherController;
         private final SessionTracker mSessionTracker;
-        private final Optional<SidefpsController> mSidefpsController;
+        private final Optional<SideFpsController> mSidefpsController;
         private final FalsingA11yDelegate mFalsingA11yDelegate;
 
         @Inject
@@ -766,7 +767,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                 FeatureFlags featureFlags,
                 GlobalSettings globalSettings,
                 SessionTracker sessionTracker,
-                Optional<SidefpsController> sidefpsController,
+                Optional<SideFpsController> sidefpsController,
                 FalsingA11yDelegate falsingA11yDelegate) {
             mView = view;
             mAdminSecondaryLockScreenControllerFactory = adminSecondaryLockScreenControllerFactory;
