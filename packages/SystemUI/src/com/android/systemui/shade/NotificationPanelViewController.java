@@ -455,7 +455,6 @@ public final class NotificationPanelViewController {
      * need to take this into account in our panel height calculation.
      */
     private boolean mQsAnimatorExpand;
-    private boolean mIsLaunchTransitionFinished;
     private ValueAnimator mQsSizeChangeAnimator;
     private boolean mQsScrimEnabled = true;
     private boolean mQsTouchAboveFalsingThreshold;
@@ -1309,7 +1308,11 @@ public final class NotificationPanelViewController {
     }
 
     private void initBottomArea() {
-        mKeyguardBottomArea.init(mKeyguardBottomAreaViewModel, mFalsingManager);
+        mKeyguardBottomArea.init(
+                mKeyguardBottomAreaViewModel,
+                mFalsingManager,
+                mLockIconViewController
+        );
     }
 
     @VisibleForTesting
@@ -1753,7 +1756,6 @@ public final class NotificationPanelViewController {
     }
 
     public void resetViews(boolean animate) {
-        mIsLaunchTransitionFinished = false;
         mCentralSurfaces.getGutsManager().closeAndSaveGuts(true /* leavebehind */, true /* force */,
                 true /* controls */, -1 /* x */, -1 /* y */, true /* resetMenu */);
         if (animate && !isFullyCollapsed()) {
@@ -3777,10 +3779,6 @@ public final class NotificationPanelViewController {
     /** Close the QS customizer if it is open. */
     public void closeQsCustomizer() {
         mQs.closeCustomizer();
-    }
-
-    public boolean isLaunchTransitionFinished() {
-        return mIsLaunchTransitionFinished;
     }
 
     public void setIsLaunchAnimationRunning(boolean running) {

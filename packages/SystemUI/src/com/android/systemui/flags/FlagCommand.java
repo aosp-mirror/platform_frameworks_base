@@ -38,6 +38,7 @@ public class FlagCommand implements Command {
 
     private final List<String> mOnCommands = List.of("true", "on", "1", "enabled");
     private final List<String> mOffCommands = List.of("false", "off", "0", "disable");
+    private final List<String> mSetCommands = List.of("set", "put");
     private final FeatureFlagsDebug mFeatureFlags;
     private final Map<Integer, Flag<?>> mAllFlags;
 
@@ -60,12 +61,6 @@ public class FlagCommand implements Command {
             return;
         }
 
-        if (args.size() > 2) {
-            pw.println("Invalid number of arguments.");
-            help(pw);
-            return;
-        }
-
         int id = 0;
         try {
             id = Integer.parseInt(args.get(0));
@@ -85,46 +80,111 @@ public class FlagCommand implements Command {
         Flag<?> flag = mAllFlags.get(id);
 
         String cmd = "";
-        if (args.size() == 2) {
+        if (args.size() > 1) {
             cmd = args.get(1).toLowerCase();
         }
 
         if ("erase".equals(cmd) || "reset".equals(cmd)) {
+            if (args.size() > 2) {
+                pw.println("Invalid number of arguments to reset a flag.");
+                help(pw);
+                return;
+            }
+
             mFeatureFlags.eraseFlag(flag);
             return;
         }
 
-        boolean newValue = true;
-        if (args.size() == 1 || "toggle".equals(cmd)) {
-            boolean enabled = isBooleanFlagEnabled(flag);
-
-            if (args.size() == 1) {
-                pw.println("Flag " + id + " is " + enabled);
+        boolean shouldSet = true;
+        if (args.size() == 1) {
+            shouldSet = false;
+        }
+        if (isBooleanFlag(flag)) {
+            if (args.size() > 2) {
+                pw.println("Invalid number of arguments for a boolean flag.");
+                help(pw);
                 return;
             }
-
-            newValue = !enabled;
-        } else {
-            newValue = mOnCommands.contains(cmd);
-            if (!newValue && !mOffCommands.contains(cmd)) {
+            boolean newValue = isBooleanFlagEnabled(flag);
+            if ("toggle".equals(cmd)) {
+                newValue = !newValue;
+            } else if (mOnCommands.contains(cmd)) {
+                newValue = true;
+            } else if (mOffCommands.contains(cmd)) {
+                newValue = false;
+            } else if (shouldSet) {
                 pw.println("Invalid on/off argument supplied");
                 help(pw);
                 return;
             }
-        }
 
-        pw.flush();  // Next command will restart sysui, so flush before we do so.
-        mFeatureFlags.setBooleanFlagInternal(flag, newValue);
+            pw.println("Flag " + id + " is " + newValue);
+            pw.flush();  // Next command will restart sysui, so flush before we do so.
+            if (shouldSet) {
+                mFeatureFlags.setBooleanFlagInternal(flag, newValue);
+            }
+            return;
+
+        } else if (isStringFlag(flag)) {
+            if (shouldSet) {
+                if (args.size() != 3) {
+                    pw.println("Invalid number of arguments a StringFlag.");
+                    help(pw);
+                    return;
+                } else if (!mSetCommands.contains(cmd)) {
+                    pw.println("Unknown command: " + cmd);
+                    help(pw);
+                    return;
+                }
+                String value = args.get(2);
+                pw.println("Setting Flag " + id + " to " + value);
+                pw.flush();  // Next command will restart sysui, so flush before we do so.
+                mFeatureFlags.setStringFlagInternal(flag, args.get(2));
+            } else {
+                pw.println("Flag " + id + " is " + getStringFlag(flag));
+            }
+            return;
+        } else if (isIntFlag(flag)) {
+            if (shouldSet) {
+                if (args.size() != 3) {
+                    pw.println("Invalid number of arguments for an IntFlag.");
+                    help(pw);
+                    return;
+                } else if (!mSetCommands.contains(cmd)) {
+                    pw.println("Unknown command: " + cmd);
+                    help(pw);
+                    return;
+                }
+                int value = Integer.parseInt(args.get(2));
+                pw.println("Setting Flag " + id + " to " + value);
+                pw.flush();  // Next command will restart sysui, so flush before we do so.
+                mFeatureFlags.setIntFlagInternal(flag, value);
+            } else {
+                pw.println("Flag " + id + " is " + getIntFlag(flag));
+            }
+            return;
+        }
     }
 
     @Override
     public void help(PrintWriter pw) {
-        pw.println(
-                "Usage: adb shell cmd statusbar flag <id> "
+        pw.println("Usage: adb shell cmd statusbar flag <id> [options]");
+        pw.println();
+        pw.println("  Boolean Flag Options: "
                         + "[true|false|1|0|on|off|enable|disable|toggle|erase|reset]");
+        pw.println("  String Flag Options: [set|put \"<value>\"]");
+        pw.println("  Int Flag Options: [set|put <value>]");
+        pw.println();
         pw.println("The id can either be a numeric integer or the corresponding field name");
         pw.println(
                 "If no argument is supplied after the id, the flags runtime value is output");
+    }
+
+    private boolean isBooleanFlag(Flag<?> flag) {
+        return (flag instanceof BooleanFlag)
+                || (flag instanceof ResourceBooleanFlag)
+                || (flag instanceof SysPropFlag)
+                || (flag instanceof DeviceConfigBooleanFlag);
     }
 
     private boolean isBooleanFlagEnabled(Flag<?> flag) {
@@ -139,6 +199,34 @@ public class FlagCommand implements Command {
         }
 
         return false;
+    }
+
+    private boolean isStringFlag(Flag<?> flag) {
+        return (flag instanceof StringFlag) || (flag instanceof ResourceStringFlag);
+    }
+
+    private String getStringFlag(Flag<?> flag) {
+        if (flag instanceof StringFlag) {
+            return mFeatureFlags.getString((StringFlag) flag);
+        } else if (flag instanceof ResourceStringFlag) {
+            return mFeatureFlags.getString((ResourceStringFlag) flag);
+        }
+
+        return "";
+    }
+
+    private boolean isIntFlag(Flag<?> flag) {
+        return (flag instanceof IntFlag) || (flag instanceof ResourceIntFlag);
+    }
+
+    private int getIntFlag(Flag<?> flag) {
+        if (flag instanceof IntFlag) {
+            return mFeatureFlags.getInt((IntFlag) flag);
+        } else if (flag instanceof ResourceIntFlag) {
+            return mFeatureFlags.getInt((ResourceIntFlag) flag);
+        }
+
+        return 0;
     }
 
     private int flagNameToId(String flagName) {
@@ -176,13 +264,15 @@ public class FlagCommand implements Command {
         for (int i = 0; i < longestFieldName - "Flag Name".length() + 1; i++) {
             pw.print(" ");
         }
-        pw.println("ID   Enabled?");
+        pw.println("ID   Value");
         for (int i = 0; i < longestFieldName; i++) {
             pw.print("=");
         }
-        pw.println(" ==== ========");
+        pw.println(" ==== =====");
         for (Field field : fields) {
             int id = fieldToId(field);
+            Flag<?> flag = mAllFlags.get(id);
+
             if (id == 0 || !mAllFlags.containsKey(id)) {
                 continue;
             }
@@ -192,7 +282,15 @@ public class FlagCommand implements Command {
                 pw.print(" ");
             }
             pw.printf("%-4d ", id);
-            pw.println(isBooleanFlagEnabled(mAllFlags.get(id)));
+            if (isBooleanFlag(flag)) {
+                pw.println(isBooleanFlagEnabled(mAllFlags.get(id)));
+            } else if (isStringFlag(flag)) {
+                pw.println(getStringFlag(flag));
+            } else if (isIntFlag(flag)) {
+                pw.println(getIntFlag(flag));
+            } else {
+                pw.println("<unknown flag type>");
+            }
         }
     }
 }

@@ -1921,6 +1921,12 @@
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/TaskFragment.java"
     },
+    "-240296576": {
+      "message": "handleAppTransitionReady: displayId=%d appTransition={%s} openingApps=[%s] closingApps=[%s] transit=%s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_APP_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/AppTransitionController.java"
+    },
     "-237664290": {
       "message": "Pause the recording session on display %s",
       "level": "VERBOSE",
@@ -2022,12 +2028,6 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_CONTENT_RECORDING",
       "at": "com\/android\/server\/wm\/ContentRecorder.java"
-    },
-    "-134793542": {
-      "message": "handleAppTransitionReady: displayId=%d appTransition={%s} excludeLauncherFromAnimation=%b openingApps=[%s] closingApps=[%s] transit=%s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_APP_TRANSITIONS",
-      "at": "com\/android\/server\/wm\/AppTransitionController.java"
     },
     "-134091882": {
       "message": "Screenshotting Activity %s",
@@ -2568,6 +2568,12 @@
       "level": "WARN",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "323235828": {
+      "message": "Delaying app transition for recents animation to finish",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_APP_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/AppTransitionController.java"
     },
     "327461496": {
       "message": "Complete pause: %s",
