@@ -21,6 +21,7 @@ import static android.app.admin.DevicePolicyResources.Strings.SystemUi.KEYGUARD_
 import static android.app.admin.DevicePolicyResources.Strings.SystemUi.KEYGUARD_NAMED_MANAGEMENT_DISCLOSURE;
 import static android.hardware.biometrics.BiometricFaceConstants.FACE_ACQUIRED_TOO_DARK;
 import static android.hardware.biometrics.BiometricSourceType.FACE;
+import static android.hardware.biometrics.BiometricSourceType.FINGERPRINT;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
@@ -74,7 +75,6 @@ import androidx.annotation.Nullable;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.widget.LockPatternUtils;
-import com.android.internal.widget.ViewClippingUtil;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.settingslib.Utils;
@@ -188,14 +188,7 @@ public class KeyguardIndicationController {
     private KeyguardUpdateMonitorCallback mUpdateMonitorCallback;
 
     private boolean mDozing;
-    private final ViewClippingUtil.ClippingParameters mClippingParams =
-            new ViewClippingUtil.ClippingParameters() {
-                @Override
-                public boolean shouldFinish(View view) {
-                    return view == mIndicationArea;
-                }
-            };
-    private ScreenLifecycle mScreenLifecycle;
+    private final ScreenLifecycle mScreenLifecycle;
     private final ScreenLifecycle.Observer mScreenObserver =
             new ScreenLifecycle.Observer() {
         @Override
@@ -619,7 +612,6 @@ public class KeyguardIndicationController {
                                 if (mFalsingManager.isFalseTap(LOW_PENALTY)) {
                                     return;
                                 }
-                                int currentUserId = getCurrentUser();
                                 mDevicePolicyManager.logoutUser();
                             })
                             .build(),
@@ -676,7 +668,7 @@ public class KeyguardIndicationController {
                 hideTransientIndication();
             }
             updateDeviceEntryIndication(false);
-        } else if (!visible) {
+        } else {
             // If we unlock and return to keyguard quickly, previous error should not be shown
             hideTransientIndication();
         }
@@ -1078,11 +1070,8 @@ public class KeyguardIndicationController {
             final boolean isCoExFaceAcquisitionMessage =
                     faceAuthSoftError && isUnlockWithFingerprintPossible;
             if (isCoExFaceAcquisitionMessage && !mCoExFaceAcquisitionMsgIdsToShow.contains(msgId)) {
-                if (DEBUG) {
-                    Log.d(TAG, "skip showing msgId=" + msgId + " helpString=" + helpString
-                            + ", due to co-ex logic");
-                }
-                return;
+                debugLog("skip showing msgId=" + msgId + " helpString=" + helpString
+                        + ", due to co-ex logic");
             } else if (mStatusBarKeyguardViewManager.isBouncerShowing()) {
                 mStatusBarKeyguardViewManager.setKeyguardMessage(helpString,
                         mInitialTextColorState);
@@ -1122,23 +1111,23 @@ public class KeyguardIndicationController {
         @Override
         public void onBiometricError(int msgId, String errString,
                 BiometricSourceType biometricSourceType) {
-            CharSequence deferredFaceMessage = null;
             if (biometricSourceType == FACE) {
-                if (msgId == BiometricFaceConstants.FACE_ERROR_TIMEOUT) {
-                    deferredFaceMessage = mFaceAcquiredMessageDeferral.getDeferredMessage();
-                    if (DEBUG) {
-                        Log.d(TAG, "showDeferredFaceMessage msgId=" + deferredFaceMessage);
-                    }
-                }
-                mFaceAcquiredMessageDeferral.reset();
+                onFaceAuthError(msgId, errString);
+            } else if (biometricSourceType == FINGERPRINT) {
+                onFingerprintAuthError(msgId, errString);
             }
+        }
 
-            if (shouldSuppressBiometricError(msgId, biometricSourceType, mKeyguardUpdateMonitor)) {
-                if (DEBUG) {
-                    Log.d(TAG, "suppressingBiometricError msgId=" + msgId
-                            + " source=" + biometricSourceType);
-                }
-            } else if (biometricSourceType == FACE && msgId == FaceManager.FACE_ERROR_TIMEOUT) {
+        private void onFaceAuthError(int msgId, String errString) {
+            CharSequence deferredFaceMessage = null;
+            if (msgId == BiometricFaceConstants.FACE_ERROR_TIMEOUT) {
+                deferredFaceMessage = mFaceAcquiredMessageDeferral.getDeferredMessage();
+                debugLog("showDeferredFaceMessage msgId=" + deferredFaceMessage);
+            }
+            mFaceAcquiredMessageDeferral.reset();
+            if (shouldSuppressFaceError(msgId, mKeyguardUpdateMonitor)) {
+                debugLog("suppressingFaceError msgId=" + msgId + " errString= " + errString);
+            } else if (msgId == FaceManager.FACE_ERROR_TIMEOUT) {
                 // Co-ex: show deferred message OR nothing
                 if (mKeyguardUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(
                         KeyguardUpdateMonitor.getCurrentUser())) {
@@ -1153,9 +1142,7 @@ public class KeyguardIndicationController {
                     }
 
                     // otherwise, don't show any message
-                    if (DEBUG) {
-                        Log.d(TAG, "skip showing FACE_ERROR_TIMEOUT due to co-ex logic");
-                    }
+                    debugLog("skip showing FACE_ERROR_TIMEOUT due to co-ex logic");
                     return;
                 }
 
@@ -1170,24 +1157,18 @@ public class KeyguardIndicationController {
                     // suggest swiping up to unlock (try face auth again or swipe up to bouncer)
                     showActionToUnlock();
                 }
-            } else if (mStatusBarKeyguardViewManager.isBouncerShowing()) {
-                mStatusBarKeyguardViewManager.setKeyguardMessage(errString, mInitialTextColorState);
-            } else if (mScreenLifecycle.getScreenState() == SCREEN_ON) {
-                showBiometricMessage(errString);
             } else {
-                mBiometricErrorMessageToShowOnScreenOn = errString;
+                handleGenericBiometricError(errString);
             }
         }
 
-        private boolean shouldSuppressBiometricError(int msgId,
-                BiometricSourceType biometricSourceType, KeyguardUpdateMonitor updateMonitor) {
-            if (biometricSourceType == BiometricSourceType.FINGERPRINT) {
-                return shouldSuppressFingerprintError(msgId, updateMonitor);
+        private void onFingerprintAuthError(int msgId, String errString) {
+            if (shouldSuppressFingerprintError(msgId, mKeyguardUpdateMonitor)) {
+                debugLog("suppressingFingerprintError msgId=" + msgId
+                        + " errString= " + errString);
+            } else {
+                handleGenericBiometricError(errString);
             }
-            if (biometricSourceType == FACE) {
-                return shouldSuppressFaceError(msgId, updateMonitor);
-            }
-            return false;
         }
 
         private boolean shouldSuppressFingerprintError(int msgId,
@@ -1286,7 +1267,23 @@ public class KeyguardIndicationController {
         }
     }
 
-    private StatusBarStateController.StateListener mStatusBarStateListener =
+    private void debugLog(String logMsg) {
+        if (DEBUG) {
+            Log.d(TAG, logMsg);
+        }
+    }
+
+    private void handleGenericBiometricError(String errString) {
+        if (mStatusBarKeyguardViewManager.isBouncerShowing()) {
+            mStatusBarKeyguardViewManager.setKeyguardMessage(errString, mInitialTextColorState);
+        } else if (mScreenLifecycle.getScreenState() == SCREEN_ON) {
+            showBiometricMessage(errString);
+        } else {
+            mBiometricErrorMessageToShowOnScreenOn = errString;
+        }
+    }
+
+    private final StatusBarStateController.StateListener mStatusBarStateListener =
             new StatusBarStateController.StateListener() {
         @Override
         public void onStateChanged(int newState) {
@@ -1307,7 +1304,7 @@ public class KeyguardIndicationController {
         }
     };
 
-    private KeyguardStateController.Callback mKeyguardStateCallback =
+    private final KeyguardStateController.Callback mKeyguardStateCallback =
             new KeyguardStateController.Callback() {
         @Override
         public void onUnlockedChanged() {
