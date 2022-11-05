@@ -439,12 +439,13 @@ public final class DisplayManager {
             SWITCHING_TYPE_NONE,
             SWITCHING_TYPE_WITHIN_GROUPS,
             SWITCHING_TYPE_ACROSS_AND_WITHIN_GROUPS,
+            SWITCHING_TYPE_RENDER_FRAME_RATE_ONLY,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SwitchingType {}
 
     /**
-     * No mode switching will happen.
+     * No display mode switching will happen.
      * @hide
      */
     @TestApi
@@ -465,6 +466,13 @@ public final class DisplayManager {
      */
     @TestApi
     public static final int SWITCHING_TYPE_ACROSS_AND_WITHIN_GROUPS = 2;
+
+    /**
+     * Allow render frame rate switches, but not physical modes.
+     * @hide
+     */
+    @TestApi
+    public static final int SWITCHING_TYPE_RENDER_FRAME_RATE_ONLY = 3;
 
     /**
      * @hide
@@ -1308,6 +1316,7 @@ public final class DisplayManager {
         switch (switchingType) {
             case SWITCHING_TYPE_NONE:
                 return MATCH_CONTENT_FRAMERATE_NEVER;
+            case SWITCHING_TYPE_RENDER_FRAME_RATE_ONLY:
             case SWITCHING_TYPE_WITHIN_GROUPS:
                 return MATCH_CONTENT_FRAMERATE_SEAMLESSS_ONLY;
             case SWITCHING_TYPE_ACROSS_AND_WITHIN_GROUPS:

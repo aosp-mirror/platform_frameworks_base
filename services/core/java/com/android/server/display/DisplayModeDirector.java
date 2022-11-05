@@ -526,20 +526,26 @@ public class DisplayModeDirector {
                         ranges, ranges);
             }
 
-            if (mModeSwitchingType == DisplayManager.SWITCHING_TYPE_NONE
-                    || primarySummary.disableRefreshRateSwitching) {
+            boolean modeSwitchingDisabled =
+                    mModeSwitchingType == DisplayManager.SWITCHING_TYPE_NONE
+                            || mModeSwitchingType
+                                == DisplayManager.SWITCHING_TYPE_RENDER_FRAME_RATE_ONLY;
+
+            if (modeSwitchingDisabled || primarySummary.disableRefreshRateSwitching) {
                 float fps = baseMode.getRefreshRate();
                 primarySummary.minPhysicalRefreshRate = primarySummary.maxPhysicalRefreshRate = fps;
-                if (mRenderFrameRateIsPhysicalRefreshRate) {
-                    primarySummary.minRenderFrameRate = primarySummary.maxRenderFrameRate = fps;
-                }
-                if (mModeSwitchingType == DisplayManager.SWITCHING_TYPE_NONE) {
-                    primarySummary.minRenderFrameRate = primarySummary.maxRenderFrameRate = fps;
+                if (modeSwitchingDisabled) {
                     appRequestSummary.minPhysicalRefreshRate =
                             appRequestSummary.maxPhysicalRefreshRate = fps;
-                    appRequestSummary.minRenderFrameRate =
-                            appRequestSummary.maxRenderFrameRate = fps;
                 }
+            }
+
+            if (mModeSwitchingType == DisplayManager.SWITCHING_TYPE_NONE
+                    || mRenderFrameRateIsPhysicalRefreshRate) {
+                primarySummary.minRenderFrameRate = primarySummary.minPhysicalRefreshRate;
+                primarySummary.maxRenderFrameRate = primarySummary.maxPhysicalRefreshRate;
+                appRequestSummary.minRenderFrameRate = appRequestSummary.minPhysicalRefreshRate;
+                appRequestSummary.maxRenderFrameRate = appRequestSummary.maxPhysicalRefreshRate;
             }
 
             boolean allowGroupSwitching =
@@ -842,6 +848,8 @@ public class DisplayModeDirector {
                 return "SWITCHING_TYPE_WITHIN_GROUPS";
             case DisplayManager.SWITCHING_TYPE_ACROSS_AND_WITHIN_GROUPS:
                 return "SWITCHING_TYPE_ACROSS_AND_WITHIN_GROUPS";
+            case DisplayManager.SWITCHING_TYPE_RENDER_FRAME_RATE_ONLY:
+                return "SWITCHING_TYPE_RENDER_FRAME_RATE_ONLY";
             default:
                 return "Unknown SwitchingType " + type;
         }
