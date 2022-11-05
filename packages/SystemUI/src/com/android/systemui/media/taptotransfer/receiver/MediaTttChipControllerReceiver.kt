@@ -45,6 +45,7 @@ import com.android.systemui.temporarydisplay.TemporaryViewInfo
 import com.android.systemui.util.animation.AnimationUtil.Companion.frames
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.view.ViewUtil
+import com.android.systemui.util.wakelock.WakeLock
 import javax.inject.Inject
 
 /**
@@ -68,6 +69,7 @@ class MediaTttChipControllerReceiver @Inject constructor(
         private val mediaTttFlags: MediaTttFlags,
         private val uiEventLogger: MediaTttReceiverUiEventLogger,
         private val viewUtil: ViewUtil,
+        wakeLockBuilder: WakeLock.Builder,
 ) : TemporaryViewDisplayController<ChipReceiverInfo, MediaTttLogger>(
         context,
         logger,
@@ -77,6 +79,7 @@ class MediaTttChipControllerReceiver @Inject constructor(
         configurationController,
         powerManager,
         R.layout.media_ttt_chip_receiver,
+        wakeLockBuilder,
 ) {
     @SuppressLint("WrongConstant") // We're allowed to use LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
     override val windowLayoutParams = commonWindowLayoutParams.apply {
