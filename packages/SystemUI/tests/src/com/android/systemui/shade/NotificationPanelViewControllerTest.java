@@ -494,7 +494,8 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 systemClock,
                 mock(CameraGestureHelper.class),
                 mKeyguardBottomAreaViewModel,
-                mKeyguardBottomAreaInteractor);
+                mKeyguardBottomAreaInteractor,
+                mDumpManager);
         mNotificationPanelViewController.initDependencies(
                 mCentralSurfaces,
                 () -> {},
