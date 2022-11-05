@@ -13,16 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.systemui.classifier;
 
-package com.android.wm.shell.floating;
+import static com.android.systemui.classifier.FalsingModule.LONG_TAP_TOUCH_SLOP;
 
-import android.content.Intent;
+import javax.inject.Inject;
+import javax.inject.Named;
 
 /**
- * Interface that is exposed to remote callers to manipulate floating task features.
+ * Falsing classifier that accepts or rejects a gesture as a long tap.
  */
-interface IFloatingTasks {
+public class LongTapClassifier extends TapClassifier{
 
-    void showTask(in Intent intent) = 1;
+    @Inject
+    LongTapClassifier(FalsingDataProvider dataProvider,
+            @Named(LONG_TAP_TOUCH_SLOP) float touchSlop) {
+        super(dataProvider, touchSlop);
+    }
 
 }

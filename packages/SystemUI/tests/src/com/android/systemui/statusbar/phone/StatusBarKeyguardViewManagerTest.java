@@ -306,17 +306,6 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void onPanelExpansionChanged_neverTranslatesBouncerWhenLaunchingApp() {
-        when(mNotificationPanelView.isLaunchTransitionFinished()).thenReturn(true);
-        mStatusBarKeyguardViewManager.onPanelExpansionChanged(
-                expansionEvent(
-                        /* fraction= */ KeyguardBouncer.EXPANSION_VISIBLE,
-                        /* expanded= */ true,
-                        /* tracking= */ false));
-        verify(mBouncer, never()).setExpansion(anyFloat());
-    }
-
-    @Test
     public void onPanelExpansionChanged_neverTranslatesBouncerWhenShadeLocked() {
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE_LOCKED);
         mStatusBarKeyguardViewManager.onPanelExpansionChanged(
@@ -361,7 +350,6 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
 
     @Test
     public void setOccluded_isInLaunchTransition_onKeyguardOccludedChangedCalled() {
-        when(mNotificationPanelView.isLaunchTransitionFinished()).thenReturn(true);
         mStatusBarKeyguardViewManager.show(null);
 
         mStatusBarKeyguardViewManager.setOccluded(true /* occluded */, false /* animated */);

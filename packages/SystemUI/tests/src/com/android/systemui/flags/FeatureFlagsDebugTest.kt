@@ -20,6 +20,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager.NameNotFoundException
 import android.content.res.Resources
+import android.content.res.Resources.NotFoundException
 import android.test.suitebuilder.annotation.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.commandline.CommandRegistry
@@ -242,6 +243,43 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
         //  This prevents developers from not noticing when they reference an invalid resource.
         Assert.assertThrows(NameNotFoundException::class.java) {
             mFeatureFlagsDebug.getString(ResourceStringFlag(6, 1005))
+        }
+    }
+
+    @Test
+    fun readIntFlag() {
+        whenever(flagManager.readFlagValue<Int>(eq(3), any())).thenReturn(22)
+        whenever(flagManager.readFlagValue<Int>(eq(4), any())).thenReturn(48)
+        assertThat(mFeatureFlagsDebug.getInt(IntFlag(1, 12))).isEqualTo(12)
+        assertThat(mFeatureFlagsDebug.getInt(IntFlag(2, 93))).isEqualTo(93)
+        assertThat(mFeatureFlagsDebug.getInt(IntFlag(3, 8))).isEqualTo(22)
+        assertThat(mFeatureFlagsDebug.getInt(IntFlag(4, 234))).isEqualTo(48)
+    }
+
+    @Test
+    fun readResourceIntFlag() {
+        whenever(resources.getInteger(1001)).thenReturn(88)
+        whenever(resources.getInteger(1002)).thenReturn(61)
+        whenever(resources.getInteger(1003)).thenReturn(9342)
+        whenever(resources.getInteger(1004)).thenThrow(NotFoundException("unknown resource"))
+        whenever(resources.getInteger(1005)).thenThrow(NotFoundException("unknown resource"))
+        whenever(resources.getInteger(1006)).thenThrow(NotFoundException("unknown resource"))
+
+        whenever(flagManager.readFlagValue<Int>(eq(3), any())).thenReturn(20)
+        whenever(flagManager.readFlagValue<Int>(eq(4), any())).thenReturn(500)
+        whenever(flagManager.readFlagValue<Int>(eq(5), any())).thenReturn(9519)
+
+        assertThat(mFeatureFlagsDebug.getInt(ResourceIntFlag(1, 1001))).isEqualTo(88)
+        assertThat(mFeatureFlagsDebug.getInt(ResourceIntFlag(2, 1002))).isEqualTo(61)
+        assertThat(mFeatureFlagsDebug.getInt(ResourceIntFlag(3, 1003))).isEqualTo(20)
+
+        Assert.assertThrows(NotFoundException::class.java) {
+            mFeatureFlagsDebug.getInt(ResourceIntFlag(4, 1004))
+        }
+        // Test that resource is loaded (and validated) even when the setting is set.
+        //  This prevents developers from not noticing when they reference an invalid resource.
+        Assert.assertThrows(NotFoundException::class.java) {
+            mFeatureFlagsDebug.getInt(ResourceIntFlag(5, 1005))
         }
     }
 

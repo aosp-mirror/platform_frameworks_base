@@ -41,6 +41,7 @@ import com.android.systemui.demomode.dagger.DemoModeModule;
 import com.android.systemui.doze.dagger.DozeComponent;
 import com.android.systemui.dreams.dagger.DreamModule;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.FlagsModule;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyguard.data.BouncerViewModule;
@@ -242,6 +243,7 @@ public abstract class SystemUIModule {
             CommonNotifCollection notifCollection,
             NotifPipeline notifPipeline,
             SysUiState sysUiState,
+            FeatureFlags featureFlags,
             @Main Executor sysuiMainExecutor) {
         return Optional.ofNullable(BubblesManager.create(context,
                 bubblesOptional,
@@ -258,6 +260,7 @@ public abstract class SystemUIModule {
                 notifCollection,
                 notifPipeline,
                 sysUiState,
+                featureFlags,
                 sysuiMainExecutor));
     }
 
