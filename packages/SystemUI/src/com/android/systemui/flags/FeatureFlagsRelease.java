@@ -165,6 +165,18 @@ public class FeatureFlagsRelease implements FeatureFlags {
         return defaultValue;
     }
 
+    @NonNull
+    @Override
+    public int getInt(@NonNull IntFlag flag) {
+        return flag.getDefault();
+    }
+
+    @NonNull
+    @Override
+    public int getInt(@NonNull ResourceIntFlag flag) {
+        return mResources.getInteger(flag.getResourceId());
+    }
+
     @Override
     public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("can override: false");

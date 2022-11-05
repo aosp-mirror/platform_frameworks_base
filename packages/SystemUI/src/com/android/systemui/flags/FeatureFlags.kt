@@ -44,4 +44,10 @@ interface FeatureFlags : FlagListenable, Dumpable {
 
     /** Returns a string value for the given flag.  */
     fun getString(flag: ResourceStringFlag): String
+
+    /** Returns an int value for a given flag/ */
+    fun getInt(flag: IntFlag): Int
+
+    /** Returns an int value for a given flag/ */
+    fun getInt(flag: ResourceIntFlag): Int
 }

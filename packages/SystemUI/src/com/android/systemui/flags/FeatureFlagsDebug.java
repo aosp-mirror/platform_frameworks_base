@@ -81,6 +81,7 @@ public class FeatureFlagsDebug implements FeatureFlags {
     private final Map<Integer, Flag<?>> mAllFlags;
     private final Map<Integer, Boolean> mBooleanFlagCache = new TreeMap<>();
     private final Map<Integer, String> mStringFlagCache = new TreeMap<>();
+    private final Map<Integer, Integer> mIntFlagCache = new TreeMap<>();
     private final Restarter mRestarter;
 
     private final ServerFlagReader.ChangeListener mOnPropertiesChanged =
@@ -207,6 +208,31 @@ public class FeatureFlagsDebug implements FeatureFlags {
         }
 
         return mStringFlagCache.get(id);
+    }
+
+    @NonNull
+    @Override
+    public int getInt(@NonNull IntFlag flag) {
+        int id = flag.getId();
+        if (!mIntFlagCache.containsKey(id)) {
+            mIntFlagCache.put(id,
+                    readFlagValue(id, flag.getDefault(), IntFlagSerializer.INSTANCE));
+        }
+
+        return mIntFlagCache.get(id);
+    }
+
+    @NonNull
+    @Override
+    public int getInt(@NonNull ResourceIntFlag flag) {
+        int id = flag.getId();
+        if (!mIntFlagCache.containsKey(id)) {
+            mIntFlagCache.put(id,
+                    readFlagValue(id, mResources.getInteger(flag.getResourceId()),
+                            IntFlagSerializer.INSTANCE));
+        }
+
+        return mIntFlagCache.get(id);
     }
 
     /** Specific override for Boolean flags that checks against the teamfood list. */
@@ -346,6 +372,16 @@ public class FeatureFlagsDebug implements FeatureFlags {
             setFlagValue(flag.getId(), value, StringFlagSerializer.INSTANCE);
         } else if (flag instanceof ResourceStringFlag) {
             setFlagValue(flag.getId(), value, StringFlagSerializer.INSTANCE);
+        } else {
+            throw new IllegalArgumentException("Unknown flag type");
+        }
+    }
+
+    void setIntFlagInternal(Flag<?> flag, int value) {
+        if (flag instanceof IntFlag) {
+            setFlagValue(flag.getId(), value, IntFlagSerializer.INSTANCE);
+        } else if (flag instanceof ResourceIntFlag) {
+            setFlagValue(flag.getId(), value, IntFlagSerializer.INSTANCE);
         } else {
             throw new IllegalArgumentException("Unknown flag type");
         }
