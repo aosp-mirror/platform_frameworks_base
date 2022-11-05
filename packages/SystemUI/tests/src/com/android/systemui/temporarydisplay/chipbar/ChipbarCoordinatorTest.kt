@@ -43,6 +43,7 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
 import com.android.systemui.util.view.ViewUtil
+import com.android.systemui.util.wakelock.WakeLockFake
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -69,6 +70,8 @@ class ChipbarCoordinatorTest : SysuiTestCase() {
     @Mock private lateinit var falsingCollector: FalsingCollector
     @Mock private lateinit var viewUtil: ViewUtil
     @Mock private lateinit var vibratorHelper: VibratorHelper
+    private lateinit var fakeWakeLockBuilder: WakeLockFake.Builder
+    private lateinit var fakeWakeLock: WakeLockFake
     private lateinit var fakeClock: FakeSystemClock
     private lateinit var fakeExecutor: FakeExecutor
     private lateinit var uiEventLoggerFake: UiEventLoggerFake
@@ -80,6 +83,10 @@ class ChipbarCoordinatorTest : SysuiTestCase() {
 
         fakeClock = FakeSystemClock()
         fakeExecutor = FakeExecutor(fakeClock)
+
+        fakeWakeLock = WakeLockFake()
+        fakeWakeLockBuilder = WakeLockFake.Builder(context)
+        fakeWakeLockBuilder.setWakeLock(fakeWakeLock)
 
         uiEventLoggerFake = UiEventLoggerFake()
 
@@ -96,6 +103,7 @@ class ChipbarCoordinatorTest : SysuiTestCase() {
                 falsingCollector,
                 viewUtil,
                 vibratorHelper,
+                fakeWakeLockBuilder,
             )
         underTest.start()
     }

@@ -145,7 +145,7 @@ public class AuthControllerTest extends SysuiTestCase {
     @Mock
     private UdfpsController mUdfpsController;
     @Mock
-    private SidefpsController mSidefpsController;
+    private SideFpsController mSideFpsController;
     @Mock
     private DisplayManager mDisplayManager;
     @Mock
@@ -225,7 +225,7 @@ public class AuthControllerTest extends SysuiTestCase {
 
         mAuthController = new TestableAuthController(mContextSpy, mExecution, mCommandQueue,
                 mActivityTaskManager, mWindowManager, mFingerprintManager, mFaceManager,
-                () -> mUdfpsController, () -> mSidefpsController, mStatusBarStateController,
+                () -> mUdfpsController, () -> mSideFpsController, mStatusBarStateController,
                 mVibratorHelper);
 
         mAuthController.start();
@@ -256,7 +256,7 @@ public class AuthControllerTest extends SysuiTestCase {
         // This test requires an uninitialized AuthController.
         AuthController authController = new TestableAuthController(mContextSpy, mExecution,
                 mCommandQueue, mActivityTaskManager, mWindowManager, mFingerprintManager,
-                mFaceManager, () -> mUdfpsController, () -> mSidefpsController,
+                mFaceManager, () -> mUdfpsController, () -> mSideFpsController,
                 mStatusBarStateController, mVibratorHelper);
         authController.start();
 
@@ -282,7 +282,7 @@ public class AuthControllerTest extends SysuiTestCase {
         // This test requires an uninitialized AuthController.
         AuthController authController = new TestableAuthController(mContextSpy, mExecution,
                 mCommandQueue, mActivityTaskManager, mWindowManager, mFingerprintManager,
-                mFaceManager, () -> mUdfpsController, () -> mSidefpsController,
+                mFaceManager, () -> mUdfpsController, () -> mSideFpsController,
                 mStatusBarStateController, mVibratorHelper);
         authController.start();
 
@@ -936,7 +936,7 @@ public class AuthControllerTest extends SysuiTestCase {
                 FingerprintManager fingerprintManager,
                 FaceManager faceManager,
                 Provider<UdfpsController> udfpsControllerFactory,
-                Provider<SidefpsController> sidefpsControllerFactory,
+                Provider<SideFpsController> sidefpsControllerFactory,
                 StatusBarStateController statusBarStateController,
                 VibratorHelper vibratorHelper) {
             super(context, execution, commandQueue, activityTaskManager, windowManager,

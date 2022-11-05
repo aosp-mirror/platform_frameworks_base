@@ -106,6 +106,12 @@
                   android:finishOnCloseSystemDialogs="true"
                   android:excludeFromRecents="true" />
 
+        <activity android:name=".user.CreateUserActivityTest$CreateUserActivityTestable"
+            android:exported="false"
+            android:theme="@style/Theme.SystemUI.Dialog.Alert"
+            android:finishOnCloseSystemDialogs="true"
+            android:excludeFromRecents="true" />
+
         <provider
             android:name="androidx.startup.InitializationProvider"
             tools:replace="android:authorities"
