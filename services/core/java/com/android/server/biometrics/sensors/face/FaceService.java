@@ -200,6 +200,8 @@ public class FaceService extends SystemService {
         @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
         @Override
         public void scheduleWatchdog() {
+            super.scheduleWatchdog_enforcePermission();
+
             final Pair<Integer, ServiceProvider> provider = mRegistry.getSingleProvider();
             if (provider == null) {
                 Slog.w(TAG, "Null provider for scheduling watchdog");
