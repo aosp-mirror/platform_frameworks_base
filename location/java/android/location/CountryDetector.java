@@ -16,6 +16,9 @@
 
 package android.location;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -47,6 +50,7 @@ import java.util.HashMap;
  *
  * @hide
  */
+@SystemApi(client = SystemApi.Client.PRIVILEGED_APPS)
 @SystemService(Context.COUNTRY_DETECTOR)
 public class CountryDetector {
 
@@ -101,7 +105,7 @@ public class CountryDetector {
      * @return the country if it is available immediately, otherwise null will
      *         be returned.
      */
-    @UnsupportedAppUsage
+    @Nullable
     public Country detectCountry() {
         try {
             return mService.detectCountry();
@@ -120,8 +124,7 @@ public class CountryDetector {
      *        implement the callback mechanism. If looper is null then the
      *        callbacks will be called on the main thread.
      */
-    @UnsupportedAppUsage
-    public void addCountryListener(CountryListener listener, Looper looper) {
+    public void addCountryListener(@NonNull CountryListener listener, @Nullable Looper looper) {
         synchronized (mListeners) {
             if (!mListeners.containsKey(listener)) {
                 ListenerTransport transport = new ListenerTransport(listener, looper);
@@ -138,8 +141,7 @@ public class CountryDetector {
     /**
      * Remove the listener
      */
-    @UnsupportedAppUsage
-    public void removeCountryListener(CountryListener listener) {
+    public void removeCountryListener(@NonNull CountryListener listener) {
         synchronized (mListeners) {
             ListenerTransport transport = mListeners.get(listener);
             if (transport != null) {
