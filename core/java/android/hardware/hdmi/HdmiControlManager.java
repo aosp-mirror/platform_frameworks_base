@@ -1291,6 +1291,22 @@ public final class HdmiControlManager {
     }
 
     /**
+     * Get the list of the HDMI ports configuration.
+     *
+     * <p>This returns an empty list when the current device does not have HDMI ports.
+     *
+     * @return a list of {@link HdmiPortInfo}
+     */
+    @NonNull
+    public List<HdmiPortInfo> getPortInfo() {
+        try {
+            return mService.getPortInfo();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Power off the target device by sending CEC commands. Note that this device can't be the
      * current device itself.
      *
