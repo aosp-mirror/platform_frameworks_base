@@ -403,6 +403,8 @@
     <string name="keyguard_face_failed">Can\u2019t recognize face</string>
     <!-- Message shown to suggest using fingerprint sensor to authenticate after another biometric failed. [CHAR LIMIT=25] -->
     <string name="keyguard_suggest_fingerprint">Use fingerprint instead</string>
+    <!-- Message shown to inform the user that face unlock is not available. [CHAR LIMIT=25] -->
+    <string name="keyguard_face_unlock_unavailable">Face unlock unavailable.</string>
 
     <!-- Content description of the bluetooth icon when connected for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_bluetooth_connected">Bluetooth connected.</string>
