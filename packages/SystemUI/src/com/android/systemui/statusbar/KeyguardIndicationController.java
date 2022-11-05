@@ -51,7 +51,6 @@ import android.content.pm.UserInfo;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Color;
-import android.hardware.biometrics.BiometricFaceConstants;
 import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
@@ -1064,9 +1063,7 @@ public class KeyguardIndicationController {
                     && msgId != BIOMETRIC_HELP_FACE_NOT_RECOGNIZED;
             final boolean faceAuthFailed = biometricSourceType == FACE
                     && msgId == BIOMETRIC_HELP_FACE_NOT_RECOGNIZED; // ran through matcher & failed
-            final boolean isUnlockWithFingerprintPossible =
-                    mKeyguardUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(
-                            getCurrentUser());
+            final boolean isUnlockWithFingerprintPossible = canUnlockWithFingerprint();
             final boolean isCoExFaceAcquisitionMessage =
                     faceAuthSoftError && isUnlockWithFingerprintPossible;
             if (isCoExFaceAcquisitionMessage && !mCoExFaceAcquisitionMsgIdsToShow.contains(msgId)) {
@@ -1119,44 +1116,14 @@ public class KeyguardIndicationController {
         }
 
         private void onFaceAuthError(int msgId, String errString) {
-            CharSequence deferredFaceMessage = null;
-            if (msgId == BiometricFaceConstants.FACE_ERROR_TIMEOUT) {
-                deferredFaceMessage = mFaceAcquiredMessageDeferral.getDeferredMessage();
-                debugLog("showDeferredFaceMessage msgId=" + deferredFaceMessage);
-            }
+            CharSequence deferredFaceMessage = mFaceAcquiredMessageDeferral.getDeferredMessage();
             mFaceAcquiredMessageDeferral.reset();
             if (shouldSuppressFaceError(msgId, mKeyguardUpdateMonitor)) {
                 debugLog("suppressingFaceError msgId=" + msgId + " errString= " + errString);
-            } else if (msgId == FaceManager.FACE_ERROR_TIMEOUT) {
-                // Co-ex: show deferred message OR nothing
-                if (mKeyguardUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(
-                        KeyguardUpdateMonitor.getCurrentUser())) {
-                    // if we're on the lock screen (bouncer isn't showing), show the deferred msg
-                    if (deferredFaceMessage != null
-                            && !mStatusBarKeyguardViewManager.isBouncerShowing()) {
-                        showBiometricMessage(
-                                deferredFaceMessage,
-                                mContext.getString(R.string.keyguard_suggest_fingerprint)
-                        );
-                        return;
-                    }
-
-                    // otherwise, don't show any message
-                    debugLog("skip showing FACE_ERROR_TIMEOUT due to co-ex logic");
-                    return;
-                }
-
-                // Face-only: The face timeout message is not very actionable, let's ask the user to
-                // manually retry.
-                if (deferredFaceMessage != null) {
-                    showBiometricMessage(
-                            deferredFaceMessage,
-                            mContext.getString(R.string.keyguard_unlock)
-                    );
-                } else {
-                    // suggest swiping up to unlock (try face auth again or swipe up to bouncer)
-                    showActionToUnlock();
-                }
+                return;
+            }
+            if (msgId == FaceManager.FACE_ERROR_TIMEOUT) {
+                handleFaceAuthTimeoutError(deferredFaceMessage);
             } else {
                 handleGenericBiometricError(errString);
             }
@@ -1265,6 +1232,40 @@ public class KeyguardIndicationController {
             showTransientIndication(mContext.getString(R.string.require_unlock_for_nfc));
             hideTransientIndicationDelayed(DEFAULT_HIDE_DELAY_MS);
         }
+    }
+
+    private void handleFaceAuthTimeoutError(@Nullable CharSequence deferredFaceMessage) {
+        debugLog("showDeferredFaceMessage msgId=" + deferredFaceMessage);
+        if (canUnlockWithFingerprint()) {
+            // Co-ex: show deferred message OR nothing
+            // if we're on the lock screen (bouncer isn't showing), show the deferred msg
+            if (deferredFaceMessage != null
+                    && !mStatusBarKeyguardViewManager.isBouncerShowing()) {
+                showBiometricMessage(
+                        deferredFaceMessage,
+                        mContext.getString(R.string.keyguard_suggest_fingerprint)
+                );
+            } else {
+                // otherwise, don't show any message
+                debugLog("skip showing FACE_ERROR_TIMEOUT due to co-ex logic");
+            }
+        } else if (deferredFaceMessage != null) {
+            // Face-only: The face timeout message is not very actionable, let's ask the
+            // user to manually retry.
+            showBiometricMessage(
+                    deferredFaceMessage,
+                    mContext.getString(R.string.keyguard_unlock)
+            );
+        } else {
+            // Face-only
+            // suggest swiping up to unlock (try face auth again or swipe up to bouncer)
+            showActionToUnlock();
+        }
+    }
+
+    private boolean canUnlockWithFingerprint() {
+        return mKeyguardUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(
+                KeyguardUpdateMonitor.getCurrentUser());
     }
 
     private void debugLog(String logMsg) {
