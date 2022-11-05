@@ -52,6 +52,7 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
 import com.android.systemui.util.view.ViewUtil
+import com.android.systemui.util.wakelock.WakeLockFake
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -89,6 +90,8 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
     @Mock private lateinit var viewUtil: ViewUtil
     @Mock private lateinit var windowManager: WindowManager
     @Mock private lateinit var vibratorHelper: VibratorHelper
+    private lateinit var fakeWakeLockBuilder: WakeLockFake.Builder
+    private lateinit var fakeWakeLock: WakeLockFake
     private lateinit var chipbarCoordinator: ChipbarCoordinator
     private lateinit var commandQueueCallback: CommandQueue.Callbacks
     private lateinit var fakeAppIconDrawable: Drawable
@@ -118,6 +121,10 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         fakeClock = FakeSystemClock()
         fakeExecutor = FakeExecutor(fakeClock)
 
+        fakeWakeLock = WakeLockFake()
+        fakeWakeLockBuilder = WakeLockFake.Builder(context)
+        fakeWakeLockBuilder.setWakeLock(fakeWakeLock)
+
         uiEventLoggerFake = UiEventLoggerFake()
         uiEventLogger = MediaTttSenderUiEventLogger(uiEventLoggerFake)
 
@@ -134,6 +141,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
                 falsingCollector,
                 viewUtil,
                 vibratorHelper,
+                fakeWakeLockBuilder,
             )
         chipbarCoordinator.start()
 
@@ -469,6 +477,36 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         val viewCaptor = ArgumentCaptor.forClass(View::class.java)
         verify(windowManager).addView(viewCaptor.capture(), any())
         verify(windowManager).removeView(viewCaptor.value)
+    }
+
+    @Test
+    fun commandQueueCallback_almostCloseThenFarFromReceiver_wakeLockAcquiredThenReleased() {
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_START_CAST,
+            routeInfo,
+            null
+        )
+
+        assertThat(fakeWakeLock.isHeld).isTrue()
+
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_FAR_FROM_RECEIVER,
+            routeInfo,
+            null
+        )
+
+        assertThat(fakeWakeLock.isHeld).isFalse()
+    }
+
+    @Test
+    fun commandQueueCallback_FarFromReceiver_wakeLockNeverReleased() {
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_FAR_FROM_RECEIVER,
+            routeInfo,
+            null
+        )
+
+        assertThat(fakeWakeLock.isHeld).isFalse()
     }
 
     @Test
