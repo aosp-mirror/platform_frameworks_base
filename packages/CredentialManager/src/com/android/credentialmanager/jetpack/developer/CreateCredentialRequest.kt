@@ -38,14 +38,18 @@ open class CreateCredentialRequest(
             return try {
                 when (from.type) {
                     Credential.TYPE_PASSWORD_CREDENTIAL ->
-                        CreatePasswordRequest.createFrom(from.data)
+                        CreatePasswordRequest.createFrom(from.credentialData)
                     PublicKeyCredential.TYPE_PUBLIC_KEY_CREDENTIAL ->
-                        CreatePublicKeyCredentialBaseRequest.createFrom(from.data)
+                        CreatePublicKeyCredentialBaseRequest.createFrom(from.credentialData)
                     else ->
-                        CreateCredentialRequest(from.type, from.data, from.requireSystemProvider())
+                        CreateCredentialRequest(
+                            from.type, from.credentialData, from.requireSystemProvider()
+                        )
                 }
             } catch (e: FrameworkClassParsingException) {
-                CreateCredentialRequest(from.type, from.data, from.requireSystemProvider())
+                CreateCredentialRequest(
+                    from.type, from.credentialData, from.requireSystemProvider()
+                )
             }
         }
     }

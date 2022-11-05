@@ -67,8 +67,6 @@ public final class GetCredentialOption implements Parcelable {
     /**
      * Returns true if the request must only be fulfilled by a system provider, and false
      * otherwise.
-     *
-     * @hide
      */
     public boolean requireSystemProvider() {
         return mRequireSystemProvider;
@@ -100,24 +98,10 @@ public final class GetCredentialOption implements Parcelable {
      *
      * @param type the requested credential type
      * @param data the request data
-     *
-     * @throws IllegalArgumentException If type is empty
-     */
-    public GetCredentialOption(@NonNull String type, @NonNull Bundle data) {
-        this(type, data, /*requireSystemProvider=*/ false);
-    }
-
-    /**
-     * Constructs a {@link GetCredentialOption}.
-     *
-     * @param type the requested credential type
-     * @param data the request data
      * @param requireSystemProvider whether or not the request must only be fulfilled by a system
      *                              provider
      *
      * @throws IllegalArgumentException If type is empty.
-     *
-     * @hide
      */
     public GetCredentialOption(
             @NonNull String type,

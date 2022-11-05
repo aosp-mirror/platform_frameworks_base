@@ -458,12 +458,15 @@ class CredentialManagerRepo(
             "                     \"residentKey\": \"required\",\n" +
             "                     \"requireResidentKey\": true\n" +
             "                   }}")
-    val data = request.data
+    val credentialData = request.data
     return RequestInfo.newCreateRequestInfo(
       Binder(),
       CreateCredentialRequest(
         TYPE_PUBLIC_KEY_CREDENTIAL,
-        data
+        credentialData,
+        // TODO: populate with actual data
+        /*candidateQueryData=*/ Bundle(),
+        /*requireSystemProvider=*/ false
       ),
       /*isFirstUsage=*/false,
       "tribank"
@@ -476,7 +479,10 @@ class CredentialManagerRepo(
       Binder(),
       CreateCredentialRequest(
         TYPE_PASSWORD_CREDENTIAL,
-        data
+        data,
+        // TODO: populate with actual data
+        /*candidateQueryData=*/ Bundle(),
+        /*requireSystemProvider=*/ false
       ),
       /*isFirstUsage=*/false,
       "tribank"
@@ -489,7 +495,9 @@ class CredentialManagerRepo(
       Binder(),
       CreateCredentialRequest(
         "other-sign-ins",
-        data
+        data,
+        /*candidateQueryData=*/ Bundle(),
+        /*requireSystemProvider=*/ false
       ),
       /*isFirstUsage=*/false,
       "tribank"
@@ -501,7 +509,8 @@ class CredentialManagerRepo(
       Binder(),
       GetCredentialRequest.Builder()
         .addGetCredentialOption(
-          GetCredentialOption(TYPE_PUBLIC_KEY_CREDENTIAL, Bundle())
+          GetCredentialOption(
+            TYPE_PUBLIC_KEY_CREDENTIAL, Bundle(), /*requireSystemProvider=*/ false)
         )
         .build(),
       /*isFirstUsage=*/false,
