@@ -311,6 +311,37 @@ class UserTrackerImplTest : SysuiTestCase() {
     }
 
     @Test
+    fun testCallbackCalledOnUserInfoChanged() {
+        tracker.initialize(0)
+        val callback = TestCallback()
+        tracker.addCallback(callback, executor)
+        val profileID = tracker.userId + 10
+
+        `when`(userManager.getProfiles(anyInt())).thenAnswer { invocation ->
+            val id = invocation.getArgument<Int>(0)
+            val info = UserInfo(id, "", UserInfo.FLAG_FULL)
+            val infoProfile = UserInfo(
+                id + 10,
+                "",
+                "",
+                UserInfo.FLAG_MANAGED_PROFILE,
+                UserManager.USER_TYPE_PROFILE_MANAGED
+            )
+            infoProfile.profileGroupId = id
+            listOf(info, infoProfile)
+        }
+
+        val intent = Intent(Intent.ACTION_USER_INFO_CHANGED)
+            .putExtra(Intent.EXTRA_USER, UserHandle.of(profileID))
+
+        tracker.onReceive(context, intent)
+
+        assertThat(callback.calledOnUserChanged).isEqualTo(0)
+        assertThat(callback.calledOnProfilesChanged).isEqualTo(1)
+        assertThat(callback.lastUserProfiles.map { it.id }).containsExactly(0, profileID)
+    }
+
+    @Test
     fun testCallbackRemoved() {
         tracker.initialize(0)
         val newID = 5
