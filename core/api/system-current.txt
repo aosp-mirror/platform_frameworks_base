@@ -5555,6 +5555,28 @@ package android.location {
     method @NonNull public android.location.CorrelationVector.Builder setSamplingWidthMeters(@FloatRange(from=0.0f, fromInclusive=false) double);
   }
 
+  public final class Country implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public String getCountryIso();
+    method public int getSource();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int COUNTRY_SOURCE_LOCALE = 3; // 0x3
+    field public static final int COUNTRY_SOURCE_LOCATION = 1; // 0x1
+    field public static final int COUNTRY_SOURCE_NETWORK = 0; // 0x0
+    field public static final int COUNTRY_SOURCE_SIM = 2; // 0x2
+    field @NonNull public static final android.os.Parcelable.Creator<android.location.Country> CREATOR;
+  }
+
+  public class CountryDetector {
+    method public void addCountryListener(@NonNull android.location.CountryListener, @Nullable android.os.Looper);
+    method @Nullable public android.location.Country detectCountry();
+    method public void removeCountryListener(@NonNull android.location.CountryListener);
+  }
+
+  public interface CountryListener {
+    method public void onCountryDetected(@NonNull android.location.Country);
+  }
+
   public final class GnssCapabilities implements android.os.Parcelable {
     method @Deprecated public boolean hasMeasurementCorrectionsReflectingPane();
     method @Deprecated public boolean hasNavMessages();
