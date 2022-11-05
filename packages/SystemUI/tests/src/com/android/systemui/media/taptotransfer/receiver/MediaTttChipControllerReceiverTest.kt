@@ -43,6 +43,7 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
 import com.android.systemui.util.view.ViewUtil
+import com.android.systemui.util.wakelock.WakeLockFake
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -85,6 +86,10 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
     private lateinit var fakeAppIconDrawable: Drawable
     private lateinit var uiEventLoggerFake: UiEventLoggerFake
     private lateinit var receiverUiEventLogger: MediaTttReceiverUiEventLogger
+    private lateinit var fakeClock: FakeSystemClock
+    private lateinit var fakeExecutor: FakeExecutor
+    private lateinit var fakeWakeLockBuilder: WakeLockFake.Builder
+    private lateinit var fakeWakeLock: WakeLockFake
 
     @Before
     fun setUp() {
@@ -99,15 +104,22 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
         )).thenReturn(applicationInfo)
         context.setMockPackageManager(packageManager)
 
+        fakeClock = FakeSystemClock()
+        fakeExecutor = FakeExecutor(fakeClock)
+
         uiEventLoggerFake = UiEventLoggerFake()
         receiverUiEventLogger = MediaTttReceiverUiEventLogger(uiEventLoggerFake)
+
+        fakeWakeLock = WakeLockFake()
+        fakeWakeLockBuilder = WakeLockFake.Builder(context)
+        fakeWakeLockBuilder.setWakeLock(fakeWakeLock)
 
         controllerReceiver = MediaTttChipControllerReceiver(
             commandQueue,
             context,
             logger,
             windowManager,
-            FakeExecutor(FakeSystemClock()),
+            fakeExecutor,
             accessibilityManager,
             configurationController,
             powerManager,
@@ -115,6 +127,7 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
             mediaTttFlags,
             receiverUiEventLogger,
             viewUtil,
+            fakeWakeLockBuilder,
         )
         controllerReceiver.start()
 
@@ -141,6 +154,7 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
             mediaTttFlags,
             receiverUiEventLogger,
             viewUtil,
+            fakeWakeLockBuilder,
         )
         controllerReceiver.start()
 
@@ -197,6 +211,39 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
         val viewCaptor = ArgumentCaptor.forClass(View::class.java)
         verify(windowManager).addView(viewCaptor.capture(), any())
         verify(windowManager).removeView(viewCaptor.value)
+    }
+
+    @Test
+    fun commandQueueCallback_closeThenFar_wakeLockAcquiredThenReleased() {
+        commandQueueCallback.updateMediaTapToTransferReceiverDisplay(
+                StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_CLOSE_TO_SENDER,
+                routeInfo,
+                null,
+                null
+        )
+
+        assertThat(fakeWakeLock.isHeld).isTrue()
+
+        commandQueueCallback.updateMediaTapToTransferReceiverDisplay(
+                StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_FAR_FROM_SENDER,
+                routeInfo,
+                null,
+                null
+        )
+
+        assertThat(fakeWakeLock.isHeld).isFalse()
+    }
+
+    @Test
+    fun commandQueueCallback_closeThenFar_wakeLockNeverAcquired() {
+        commandQueueCallback.updateMediaTapToTransferReceiverDisplay(
+                StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_FAR_FROM_SENDER,
+                routeInfo,
+                null,
+                null
+        )
+
+        assertThat(fakeWakeLock.isHeld).isFalse()
     }
 
     @Test
