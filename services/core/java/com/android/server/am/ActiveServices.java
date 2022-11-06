@@ -539,7 +539,7 @@ public final class ActiveServices {
                     try {
                         final ServiceRecord.StartItem si = r.pendingStarts.get(0);
                         startServiceInnerLocked(this, si.intent, r, false, true, si.callingId,
-                                r.startRequested);
+                                si.mCallingProcessName, r.startRequested);
                     } catch (TransactionTooLargeException e) {
                         // Ignore, nobody upstack cares.
                     }
@@ -861,8 +861,10 @@ public final class ActiveServices {
         // alias component name to the client, not the "target" component name, which is
         // what realResult contains.
         final ComponentName realResult =
-                startServiceInnerLocked(r, service, callingUid, callingPid, fgRequired, callerFg,
-                allowBackgroundActivityStarts, backgroundActivityStartsToken);
+                startServiceInnerLocked(r, service, callingUid, callingPid,
+                        getCallingProcessNameLocked(callingUid, callingPid, callingPackage),
+                        fgRequired, callerFg, allowBackgroundActivityStarts,
+                        backgroundActivityStartsToken);
         if (res.aliasComponent != null
                 && !realResult.getPackageName().startsWith("!")
                 && !realResult.getPackageName().startsWith("?")) {
@@ -872,10 +874,18 @@ public final class ActiveServices {
         }
     }
 
+    private String getCallingProcessNameLocked(int callingUid, int callingPid,
+            String callingPackage) {
+        synchronized (mAm.mPidsSelfLocked) {
+            final ProcessRecord callingApp = mAm.mPidsSelfLocked.get(callingPid);
+            return callingApp != null ? callingApp.processName : callingPackage;
+        }
+    }
+
     private ComponentName startServiceInnerLocked(ServiceRecord r, Intent service,
-            int callingUid, int callingPid, boolean fgRequired, boolean callerFg,
-            boolean allowBackgroundActivityStarts, @Nullable IBinder backgroundActivityStartsToken)
-            throws TransactionTooLargeException {
+            int callingUid, int callingPid, String callingProcessName, boolean fgRequired,
+            boolean callerFg, boolean allowBackgroundActivityStarts,
+            @Nullable IBinder backgroundActivityStartsToken) throws TransactionTooLargeException {
         NeededUriGrants neededGrants = mAm.mUgmInternal.checkGrantUriPermissionFromIntent(
                 service, callingUid, r.packageName, r.userId);
         if (unscheduleServiceRestartLocked(r, callingUid, false)) {
@@ -887,7 +897,7 @@ public final class ActiveServices {
         r.delayedStop = false;
         r.fgRequired = fgRequired;
         r.pendingStarts.add(new ServiceRecord.StartItem(r, false, r.makeNextStartId(),
-                service, neededGrants, callingUid));
+                service, neededGrants, callingUid, callingProcessName));
 
         if (fgRequired) {
             // We are now effectively running a foreground service.
@@ -972,7 +982,7 @@ public final class ActiveServices {
             r.allowBgActivityStartsOnServiceStart(backgroundActivityStartsToken);
         }
         ComponentName cmp = startServiceInnerLocked(smap, service, r, callerFg, addToStarting,
-                callingUid, wasStartRequested);
+                callingUid, callingProcessName, wasStartRequested);
         return cmp;
     }
 
@@ -1090,6 +1100,8 @@ public final class ActiveServices {
             curPendingBringups = new ArrayList<>();
             mPendingBringups.put(s, curPendingBringups);
         }
+        final String callingProcessName = getCallingProcessNameLocked(
+                callingUid, callingPid, callingPackage);
         curPendingBringups.add(new Runnable() {
             @Override
             public void run() {
@@ -1122,8 +1134,8 @@ public final class ActiveServices {
                     } else { // Starting a service
                         try {
                             startServiceInnerLocked(s, serviceIntent, callingUid, callingPid,
-                                    fgRequired, callerFg, allowBackgroundActivityStarts,
-                                    backgroundActivityStartsToken);
+                                    callingProcessName, fgRequired, callerFg,
+                                    allowBackgroundActivityStarts, backgroundActivityStartsToken);
                         } catch (TransactionTooLargeException e) {
                             /* ignore - local call */
                         }
@@ -1168,8 +1180,8 @@ public final class ActiveServices {
     }
 
     ComponentName startServiceInnerLocked(ServiceMap smap, Intent service, ServiceRecord r,
-            boolean callerFg, boolean addToStarting, int callingUid, boolean wasStartRequested)
-            throws TransactionTooLargeException {
+            boolean callerFg, boolean addToStarting, int callingUid, String callingProcessName,
+            boolean wasStartRequested) throws TransactionTooLargeException {
         synchronized (mAm.mProcessStats.mLock) {
             final ServiceState stracker = r.getTracker();
             if (stracker != null) {
@@ -1203,7 +1215,8 @@ public final class ActiveServices {
                 ? SERVICE_REQUEST_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_COLD
                 : (wasStartRequested || !r.getConnections().isEmpty()
                 ? SERVICE_REQUEST_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_HOT
-                : SERVICE_REQUEST_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM));
+                : SERVICE_REQUEST_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM),
+                getShortProcessNameForStats(callingUid, callingProcessName));
 
         if (r.startRequested && addToStarting) {
             boolean first = smap.mStartingBackground.size() == 0;
@@ -1224,6 +1237,22 @@ public final class ActiveServices {
         }
 
         return r.name;
+    }
+
+    private @Nullable String getShortProcessNameForStats(int uid, String processName) {
+        final String[] packages = mAm.mContext.getPackageManager().getPackagesForUid(uid);
+        if (packages != null && packages.length == 1) {
+            // Not the shared UID case, let's see if the package name equals to the process name.
+            if (TextUtils.equals(packages[0], processName)) {
+                // same name, just return null here.
+                return null;
+            } else if (processName != null && processName.startsWith(packages[0])) {
+                // return the suffix of the process name
+                return processName.substring(packages[0].length());
+            }
+        }
+        // return the full process name.
+        return processName;
     }
 
     private void stopServiceLocked(ServiceRecord service, boolean enqueueOomAdj) {
@@ -3015,7 +3044,8 @@ public final class ActiveServices {
                     ? SERVICE_REQUEST_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_COLD
                     : (wasStartRequested || hadConnections
                     ? SERVICE_REQUEST_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_HOT
-                    : SERVICE_REQUEST_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM));
+                    : SERVICE_REQUEST_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM),
+                    getShortProcessNameForStats(callingUid, callerApp.processName));
 
             if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "Bind " + s + " with " + b
                     + ": received=" + b.intent.received
@@ -4484,7 +4514,7 @@ public final class ActiveServices {
         // be called.
         if (r.startRequested && r.callStart && r.pendingStarts.size() == 0) {
             r.pendingStarts.add(new ServiceRecord.StartItem(r, false, r.makeNextStartId(),
-                    null, null, 0));
+                    null, null, 0, null));
         }
 
         sendServiceArgsLocked(r, execInFg, true);
@@ -5442,7 +5472,7 @@ public final class ActiveServices {
                     stopServiceLocked(sr, true);
                 } else {
                     sr.pendingStarts.add(new ServiceRecord.StartItem(sr, true,
-                            sr.getLastStartId(), baseIntent, null, 0));
+                            sr.getLastStartId(), baseIntent, null, 0, null));
                     if (sr.app != null && sr.app.getThread() != null) {
                         // We always run in the foreground, since this is called as
                         // part of the "remove task" UI operation.
