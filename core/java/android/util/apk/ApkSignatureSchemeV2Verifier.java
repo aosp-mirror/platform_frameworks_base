@@ -93,8 +93,9 @@ public class ApkSignatureSchemeV2Verifier {
      * associated with each signer.
      *
      * @throws SignatureNotFoundException if the APK is not signed using APK Signature Scheme v2.
-     * @throws SecurityException if a APK Signature Scheme v2 signature of this APK does not verify.
-     * @throws IOException if an I/O error occurs while reading the APK file.
+     * @throws SecurityException          if an APK Signature Scheme v2 signature of this APK does
+     *                                    not verify.
+     * @throws IOException                if an I/O error occurs while reading the APK file.
      */
     public static X509Certificate[][] verify(String apkFile)
             throws SignatureNotFoundException, SecurityException, IOException {
@@ -386,7 +387,6 @@ public class ApkSignatureSchemeV2Verifier {
                     break;
             }
         }
-        return;
     }
 
     static byte[] getVerityRootHash(String apkPath)

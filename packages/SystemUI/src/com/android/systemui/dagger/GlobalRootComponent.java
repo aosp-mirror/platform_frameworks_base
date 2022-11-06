@@ -27,7 +27,9 @@ import dagger.BindsInstance;
 import dagger.Component;
 
 /**
- * Root component for Dagger injection.
+ * Base root component for Dagger injection.
+ *
+ * See {@link ReferenceGlobalRootComponent} for the one actually used by AOSP.
  */
 @Singleton
 @Component(modules = {GlobalModule.class})
@@ -51,7 +53,7 @@ public interface GlobalRootComponent {
     WMComponent.Builder getWMComponentBuilder();
 
     /**
-     * Builder for a {@link SysUIComponent}, which makes it a subcomponent of this class.
+     * Builder for a {@link ReferenceSysUIComponent}, which makes it a subcomponent of this class.
      */
     SysUIComponent.Builder getSysUIComponent();
 

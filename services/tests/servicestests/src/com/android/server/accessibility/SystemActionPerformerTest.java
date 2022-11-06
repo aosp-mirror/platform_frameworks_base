@@ -326,7 +326,7 @@ public class SystemActionPerformerTest {
 
         void register(Context context) {
             if (!mRegistered) {
-                context.registerReceiver(this, mFilter);
+                context.registerReceiver(this, mFilter, Context.RECEIVER_EXPORTED_UNAUDITED);
                 mRegistered = true;
             }
         }

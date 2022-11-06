@@ -104,7 +104,7 @@ public class ActionSendMultipleConsumerActivity extends Activity {
 
             final IntentFilter filter = new IntentFilter();
             filter.addAction(CUSTOM_ACTION_SEND_MULTIPLE_INTENT);
-            context.registerReceiver(receiver, filter);
+            context.registerReceiver(receiver, filter, Context.RECEIVER_EXPORTED_UNAUDITED);
         }
 
         /**

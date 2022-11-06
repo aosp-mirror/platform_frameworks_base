@@ -2268,6 +2268,8 @@ public class InputMethodService extends AbstractInputMethodService {
      * current input field.
      * 
      * @param id Unique identifier of the new input method to start.
+     * @throws IllegalArgumentException if the input method is unknown or filtered
+     * by the rules of <a href="/training/basics/intents/package-visibility">package visibility</a>.
      */
     public void switchInputMethod(String id) {
         mPrivOps.setInputMethod(id);
@@ -2280,6 +2282,8 @@ public class InputMethodService extends AbstractInputMethodService {
      *
      * @param id Unique identifier of the new input method to start.
      * @param subtype The new subtype of the new input method to be switched to.
+     * @throws IllegalArgumentException if the input method is unknown or filtered
+     * by the rules of <a href="/training/basics/intents/package-visibility">package visibility</a>.
      */
     public final void switchInputMethod(String id, InputMethodSubtype subtype) {
         mPrivOps.setInputMethodAndSubtype(id, subtype);

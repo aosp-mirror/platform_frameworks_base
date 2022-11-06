@@ -21,18 +21,19 @@ import android.annotation.Nullable;
 import android.telephony.TelephonyManager;
 import android.webkit.JavascriptInterface;
 
-import com.android.phone.slicestore.SliceStore;
+import com.android.phone.slice.SlicePurchaseController;
 
 /**
- * SliceStore web interface class allowing carrier websites to send responses back to SliceStore
- * using JavaScript.
+ * Slice purchase web interface class allowing carrier websites to send responses back to the
+ * slice purchase application using JavaScript.
  */
-public class SliceStoreWebInterface {
-    @NonNull SliceStoreActivity mActivity;
+public class SlicePurchaseWebInterface {
+    @NonNull SlicePurchaseActivity mActivity;
 
-    public SliceStoreWebInterface(@NonNull SliceStoreActivity activity) {
+    public SlicePurchaseWebInterface(@NonNull SlicePurchaseActivity activity) {
         mActivity = activity;
     }
+
     /**
      * Interface method allowing the carrier website to get the premium capability
      * that was requested to purchase.
@@ -40,7 +41,7 @@ public class SliceStoreWebInterface {
      * This can be called using the JavaScript below:
      * <script type="text/javascript">
      *     function getRequestedCapability(duration) {
-     *         SliceStoreWebInterface.getRequestedCapability();
+     *         SlicePurchaseWebInterface.getRequestedCapability();
      *     }
      * </script>
      */
@@ -50,13 +51,14 @@ public class SliceStoreWebInterface {
     }
 
     /**
-     * Interface method allowing the carrier website to notify the SliceStore of a successful
-     * premium capability purchase and the duration for which the premium capability is purchased.
+     * Interface method allowing the carrier website to notify the slice purchase application of
+     * a successful premium capability purchase and the duration for which the premium capability is
+     * purchased.
      *
      * This can be called using the JavaScript below:
      * <script type="text/javascript">
      *     function notifyPurchaseSuccessful(duration_ms_long = 0) {
-     *         SliceStoreWebInterface.notifyPurchaseSuccessful(duration_ms_long);
+     *         SlicePurchaseWebInterface.notifyPurchaseSuccessful(duration_ms_long);
      *     }
      * </script>
      *
@@ -68,22 +70,23 @@ public class SliceStoreWebInterface {
     }
 
     /**
-     * Interface method allowing the carrier website to notify the SliceStore of a failed
-     * premium capability purchase.
+     * Interface method allowing the carrier website to notify the slice purchase application of
+     * a failed premium capability purchase.
      *
      * This can be called using the JavaScript below:
      * <script type="text/javascript">
-     *     function notifyPurchaseFailed() {
-     *         SliceStoreWebInterface.notifyPurchaseFailed();
+     *     function notifyPurchaseFailed(failure_code = 0, failure_reason = "unknown") {
+     *         SlicePurchaseWebInterface.notifyPurchaseFailed();
      *     }
      * </script>
      *
      * @param failureCode The failure code.
-     * @param failureReason If the failure code is {@link SliceStore#FAILURE_CODE_UNKNOWN},
+     * @param failureReason If the failure code is
+     *                      {@link SlicePurchaseController#FAILURE_CODE_UNKNOWN},
      *                      the human-readable reason for failure.
      */
     @JavascriptInterface
-    public void notifyPurchaseFailed(@SliceStore.FailureCode int failureCode,
+    public void notifyPurchaseFailed(@SlicePurchaseController.FailureCode int failureCode,
             @Nullable String failureReason) {
         mActivity.onPurchaseFailed(failureCode, failureReason);
     }

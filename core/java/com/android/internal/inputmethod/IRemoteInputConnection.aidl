@@ -18,6 +18,7 @@ package com.android.internal.inputmethod;
 
 import android.graphics.RectF;
 import android.os.Bundle;
+import android.os.ICancellationSignal;
 import android.os.ResultReceiver;
 import android.view.KeyEvent;
 import android.view.inputmethod.CompletionInfo;
@@ -91,6 +92,9 @@ import com.android.internal.inputmethod.InputConnectionCommandHeader;
 
     void performHandwritingGesture(in InputConnectionCommandHeader header,
             in ParcelableHandwritingGesture gesture, in ResultReceiver resultReceiver);
+
+    void previewHandwritingGesture(in InputConnectionCommandHeader header,
+            in ParcelableHandwritingGesture gesture, in ICancellationSignal transport);
 
     void setComposingRegion(in InputConnectionCommandHeader header, int start, int end);
 

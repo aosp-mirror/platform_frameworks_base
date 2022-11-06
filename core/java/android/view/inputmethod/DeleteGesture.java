@@ -33,7 +33,7 @@ import java.util.Objects;
  * <p>Note: This deletes all text <em>within</em> the given area. To delete a range <em>between</em>
  * two areas, use {@link DeleteRangeGesture}.</p>
  */
-public final class DeleteGesture extends HandwritingGesture implements Parcelable {
+public final class DeleteGesture extends PreviewableHandwritingGesture implements Parcelable {
 
     private @Granularity int mGranularity;
     private RectF mArea;

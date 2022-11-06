@@ -1150,11 +1150,39 @@ public class ScrimControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testAuthScrim_notifScrimOpaque_whenShadeFullyExpanded() {
+    public void testAuthScrim_setClipQSScrimTrue_notifScrimOpaque_whenShadeFullyExpanded() {
         // GIVEN device has an activity showing ('UNLOCKED' state can occur on the lock screen
         // with the camera app occluding the keyguard)
         mScrimController.transitionTo(ScrimState.UNLOCKED);
         mScrimController.setClipsQsScrim(true);
+        mScrimController.setRawPanelExpansionFraction(1);
+        // notifications scrim alpha change require calling setQsPosition
+        mScrimController.setQsPosition(0, 300);
+        finishAnimationsImmediately();
+
+        // WHEN the user triggers the auth bouncer
+        mScrimController.transitionTo(ScrimState.AUTH_SCRIMMED_SHADE);
+        finishAnimationsImmediately();
+
+        assertEquals("Behind scrim should be opaque",
+                mScrimBehind.getViewAlpha(), 1, 0.0);
+        assertEquals("Notifications scrim should be opaque",
+                mNotificationsScrim.getViewAlpha(), 1, 0.0);
+
+        assertScrimTinted(Map.of(
+                mScrimInFront, true,
+                mScrimBehind, true,
+                mNotificationsScrim, false
+        ));
+    }
+
+
+    @Test
+    public void testAuthScrim_setClipQSScrimFalse_notifScrimOpaque_whenShadeFullyExpanded() {
+        // GIVEN device has an activity showing ('UNLOCKED' state can occur on the lock screen
+        // with the camera app occluding the keyguard)
+        mScrimController.transitionTo(ScrimState.UNLOCKED);
+        mScrimController.setClipsQsScrim(false);
         mScrimController.setRawPanelExpansionFraction(1);
         // notifications scrim alpha change require calling setQsPosition
         mScrimController.setQsPosition(0, 300);

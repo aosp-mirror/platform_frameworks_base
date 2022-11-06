@@ -116,7 +116,7 @@ public final class GnssSignalType implements Parcelable {
     public String toString() {
         StringBuilder s = new StringBuilder();
         s.append("GnssSignalType[");
-        s.append(" Constellation=").append(mConstellationType);
+        s.append("Constellation=").append(mConstellationType);
         s.append(", CarrierFrequencyHz=").append(mCarrierFrequencyHz);
         s.append(", CodeType=").append(mCodeType);
         s.append(']');

@@ -16,7 +16,8 @@
 
 package android.location;
 
-import android.compat.annotation.UnsupportedAppUsage;
+import android.annotation.NonNull;
+import android.annotation.SystemApi;
 
 /**
  * The listener for receiving the notification when the country is detected or
@@ -24,10 +25,11 @@ import android.compat.annotation.UnsupportedAppUsage;
  *
  * @hide
  */
+@SystemApi(client = SystemApi.Client.PRIVILEGED_APPS)
 public interface CountryListener {
     /**
      * @param country the changed or detected country.
+     *
      */
-    @UnsupportedAppUsage
-    void onCountryDetected(Country country);
+    void onCountryDetected(@NonNull Country country);
 }

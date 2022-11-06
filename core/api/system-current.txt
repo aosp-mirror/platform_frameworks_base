@@ -5555,6 +5555,28 @@ package android.location {
     method @NonNull public android.location.CorrelationVector.Builder setSamplingWidthMeters(@FloatRange(from=0.0f, fromInclusive=false) double);
   }
 
+  public final class Country implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public String getCountryIso();
+    method public int getSource();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int COUNTRY_SOURCE_LOCALE = 3; // 0x3
+    field public static final int COUNTRY_SOURCE_LOCATION = 1; // 0x1
+    field public static final int COUNTRY_SOURCE_NETWORK = 0; // 0x0
+    field public static final int COUNTRY_SOURCE_SIM = 2; // 0x2
+    field @NonNull public static final android.os.Parcelable.Creator<android.location.Country> CREATOR;
+  }
+
+  public class CountryDetector {
+    method public void addCountryListener(@NonNull android.location.CountryListener, @Nullable android.os.Looper);
+    method @Nullable public android.location.Country detectCountry();
+    method public void removeCountryListener(@NonNull android.location.CountryListener);
+  }
+
+  public interface CountryListener {
+    method public void onCountryDetected(@NonNull android.location.Country);
+  }
+
   public final class GnssCapabilities implements android.os.Parcelable {
     method @Deprecated public boolean hasMeasurementCorrectionsReflectingPane();
     method @Deprecated public boolean hasNavMessages();
@@ -13125,6 +13147,7 @@ package android.telephony {
     field public static final int PRECISE_CALL_STATE_HOLDING = 2; // 0x2
     field public static final int PRECISE_CALL_STATE_IDLE = 0; // 0x0
     field public static final int PRECISE_CALL_STATE_INCOMING = 5; // 0x5
+    field public static final int PRECISE_CALL_STATE_INCOMING_SETUP = 9; // 0x9
     field public static final int PRECISE_CALL_STATE_NOT_VALID = -1; // 0xffffffff
     field public static final int PRECISE_CALL_STATE_WAITING = 6; // 0x6
   }
@@ -15380,6 +15403,16 @@ package android.telephony.ims {
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.SipMessage> CREATOR;
   }
 
+  public final class SrvccCall implements android.os.Parcelable {
+    ctor public SrvccCall(@NonNull String, int, @NonNull android.telephony.ims.ImsCallProfile);
+    method public int describeContents();
+    method @NonNull public String getCallId();
+    method @NonNull public android.telephony.ims.ImsCallProfile getImsCallProfile();
+    method public int getPreciseCallState();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.SrvccCall> CREATOR;
+  }
+
 }
 
 package android.telephony.ims.feature {
@@ -15440,6 +15473,10 @@ package android.telephony.ims.feature {
     method public final void notifyCapabilitiesStatusChanged(@NonNull android.telephony.ims.feature.MmTelFeature.MmTelCapabilities);
     method public final void notifyIncomingCall(@NonNull android.telephony.ims.stub.ImsCallSessionImplBase, @NonNull android.os.Bundle);
     method public final void notifyRejectedCall(@NonNull android.telephony.ims.ImsCallProfile, @NonNull android.telephony.ims.ImsReasonInfo);
+    method public void notifySrvccCanceled();
+    method public void notifySrvccCompleted();
+    method public void notifySrvccFailed();
+    method public void notifySrvccStarted(@NonNull java.util.function.Consumer<java.util.List<android.telephony.ims.SrvccCall>>);
     method public final void notifyVoiceMessageCountUpdate(int);
     method public void onFeatureReady();
     method public void onFeatureRemoved();

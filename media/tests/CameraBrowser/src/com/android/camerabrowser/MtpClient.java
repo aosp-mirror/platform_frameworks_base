@@ -158,7 +158,7 @@ public class MtpClient {
         filter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED);
         filter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED);
         filter.addAction(ACTION_USB_PERMISSION);
-        context.registerReceiver(mUsbReceiver, filter);
+        context.registerReceiver(mUsbReceiver, filter, Context.RECEIVER_EXPORTED/*UNAUDITED*/);
     }
 
     /**

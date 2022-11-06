@@ -145,6 +145,25 @@ class UserRepositoryImplRefactoredTest : UserRepositoryImplTest() {
         assertThat(userInfos).isEqualTo(expectedUsers)
     }
 
+    @Test
+    fun `userTrackerCallback - updates selectedUserInfo`() = runSelfCancelingTest {
+        underTest = create(this)
+        var selectedUserInfo: UserInfo? = null
+        underTest.selectedUserInfo.onEach { selectedUserInfo = it }.launchIn(this)
+        setUpUsers(
+            count = 2,
+            selectedIndex = 0,
+        )
+        tracker.onProfileChanged()
+        assertThat(selectedUserInfo?.id == 0)
+        setUpUsers(
+            count = 2,
+            selectedIndex = 1,
+        )
+        tracker.onProfileChanged()
+        assertThat(selectedUserInfo?.id == 1)
+    }
+
     private fun setUpUsers(
         count: Int,
         isLastGuestUser: Boolean = false,

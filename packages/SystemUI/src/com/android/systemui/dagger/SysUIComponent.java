@@ -40,7 +40,6 @@ import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.desktopmode.DesktopMode;
 import com.android.wm.shell.displayareahelper.DisplayAreaHelper;
-import com.android.wm.shell.floating.FloatingTasks;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.recents.RecentTasks;
@@ -58,7 +57,9 @@ import dagger.BindsInstance;
 import dagger.Subcomponent;
 
 /**
- * Dagger Subcomponent for Core SysUI.
+ * An example Dagger Subcomponent for Core SysUI.
+ *
+ * See {@link ReferenceSysUIComponent} for the one actually used by AOSP.
  */
 @SysUISingleton
 @Subcomponent(modules = {
@@ -109,9 +110,6 @@ public interface SysUIComponent {
 
         @BindsInstance
         Builder setBackAnimation(Optional<BackAnimation> b);
-
-        @BindsInstance
-        Builder setFloatingTasks(Optional<FloatingTasks> f);
 
         @BindsInstance
         Builder setDesktopMode(Optional<DesktopMode> d);

@@ -2838,18 +2838,22 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 event.getThermalMax() == PowerManager.BRIGHTNESS_MAX
                 ? -1f : convertToNits(event.getThermalMax());
 
-        FrameworkStatsLog.write(FrameworkStatsLog.DISPLAY_BRIGHTNESS_CHANGED,
-                convertToNits(event.getInitialBrightness()),
-                convertToNits(event.getBrightness()),
-                event.getSlowAmbientLux(),
-                event.getPhysicalDisplayId(),
-                event.isShortTermModelActive(),
-                appliedLowPowerMode,
-                appliedRbcStrength,
-                appliedHbmMaxNits,
-                appliedThermalCapNits,
-                event.isAutomaticBrightnessEnabled(),
-                FrameworkStatsLog.DISPLAY_BRIGHTNESS_CHANGED__REASON__REASON_MANUAL);
+        if (mLogicalDisplay.getPrimaryDisplayDeviceLocked() != null
+                && mLogicalDisplay.getPrimaryDisplayDeviceLocked()
+                    .getDisplayDeviceInfoLocked().type == Display.TYPE_INTERNAL) {
+            FrameworkStatsLog.write(FrameworkStatsLog.DISPLAY_BRIGHTNESS_CHANGED,
+                    convertToNits(event.getInitialBrightness()),
+                    convertToNits(event.getBrightness()),
+                    event.getSlowAmbientLux(),
+                    event.getPhysicalDisplayId(),
+                    event.isShortTermModelActive(),
+                    appliedLowPowerMode,
+                    appliedRbcStrength,
+                    appliedHbmMaxNits,
+                    appliedThermalCapNits,
+                    event.isAutomaticBrightnessEnabled(),
+                    FrameworkStatsLog.DISPLAY_BRIGHTNESS_CHANGED__REASON__REASON_MANUAL);
+        }
     }
 
     private final class DisplayControllerHandler extends Handler {

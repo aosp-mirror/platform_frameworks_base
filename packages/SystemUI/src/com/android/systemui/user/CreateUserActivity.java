@@ -25,6 +25,8 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.Log;
+import android.window.OnBackInvokedCallback;
+import android.window.OnBackInvokedDispatcher;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -59,6 +61,7 @@ public class CreateUserActivity extends Activity {
     private final ActivityStarter mActivityStarter;
 
     private Dialog mSetupUserDialog;
+    private final OnBackInvokedCallback mBackCallback = this::onBackInvoked;
 
     @Inject
     public CreateUserActivity(UserCreator userCreator,
@@ -82,6 +85,10 @@ public class CreateUserActivity extends Activity {
 
         mSetupUserDialog = createDialog();
         mSetupUserDialog.show();
+
+        getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
+                        OnBackInvokedDispatcher.PRIORITY_DEFAULT,
+                        mBackCallback);
     }
 
     @Override
@@ -125,10 +132,20 @@ public class CreateUserActivity extends Activity {
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
+        onBackInvoked();
+    }
+
+    private void onBackInvoked() {
         if (mSetupUserDialog != null) {
             mSetupUserDialog.dismiss();
         }
+        finish();
+    }
+
+    @Override
+    protected void onDestroy() {
+        getOnBackInvokedDispatcher().unregisterOnBackInvokedCallback(mBackCallback);
+        super.onDestroy();
     }
 
     private void addUserNow(String userName, Drawable userIcon) {
