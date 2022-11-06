@@ -74,10 +74,10 @@ class MenuItemAccessibilityDelegate extends RecyclerViewAccessibilityDelegate.It
                                 R.string.accessibility_floating_button_action_move_bottom_right));
         info.addAction(moveBottomRight);
 
-        final int moveEdgeId = mAnimationController.isMovedToEdge()
+        final int moveEdgeId = mAnimationController.isMoveToTucked()
                 ? R.id.action_move_out_edge_and_show
                 : R.id.action_move_to_edge_and_hide;
-        final int moveEdgeTextResId = mAnimationController.isMovedToEdge()
+        final int moveEdgeTextResId = mAnimationController.isMoveToTucked()
                 ? R.string.accessibility_floating_button_action_move_out_edge_and_show
                 : R.string.accessibility_floating_button_action_move_to_edge_and_hide_to_half;
         final AccessibilityNodeInfoCompat.AccessibilityActionCompat moveToOrOutEdge =

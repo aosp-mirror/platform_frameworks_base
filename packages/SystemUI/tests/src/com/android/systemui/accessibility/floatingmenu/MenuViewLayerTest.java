@@ -141,6 +141,7 @@ public class MenuViewLayerTest extends SysuiTestCase {
                 Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES, mLastEnabledAccessibilityServices,
                 UserHandle.USER_CURRENT);
 
+        mMenuView.updateMenuMoveToTucked(/* isMoveToTucked= */ false);
         mMenuViewLayer.onDetachedFromWindow();
     }
 

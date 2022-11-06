@@ -16,8 +16,6 @@
 
 package com.android.systemui.accessibility.floatingmenu;
 
-import static android.util.MathUtils.constrain;
-
 import static java.util.Objects.requireNonNull;
 
 import android.animation.ValueAnimator;
@@ -64,7 +62,6 @@ class MenuAnimationController {
     private final MenuView mMenuView;
     private final ValueAnimator mFadeOutAnimator;
     private final Handler mHandler;
-    private boolean mIsMovedToEdge;
     private boolean mIsFadeEffectEnabled;
     private DismissAnimationController.DismissCallback mDismissCallback;
 
@@ -111,25 +108,25 @@ class MenuAnimationController {
     }
 
     void moveToTopLeftPosition() {
-        mIsMovedToEdge = false;
+        mMenuView.updateMenuMoveToTucked(/* isMoveToTucked= */ false);
         final Rect draggableBounds = mMenuView.getMenuDraggableBounds();
         moveAndPersistPosition(new PointF(draggableBounds.left, draggableBounds.top));
     }
 
     void moveToTopRightPosition() {
-        mIsMovedToEdge = false;
+        mMenuView.updateMenuMoveToTucked(/* isMoveToTucked= */ false);
         final Rect draggableBounds = mMenuView.getMenuDraggableBounds();
         moveAndPersistPosition(new PointF(draggableBounds.right, draggableBounds.top));
     }
 
     void moveToBottomLeftPosition() {
-        mIsMovedToEdge = false;
+        mMenuView.updateMenuMoveToTucked(/* isMoveToTucked= */ false);
         final Rect draggableBounds = mMenuView.getMenuDraggableBounds();
         moveAndPersistPosition(new PointF(draggableBounds.left, draggableBounds.bottom));
     }
 
     void moveToBottomRightPosition() {
-        mIsMovedToEdge = false;
+        mMenuView.updateMenuMoveToTucked(/* isMoveToTucked= */ false);
         final Rect draggableBounds = mMenuView.getMenuDraggableBounds();
         moveAndPersistPosition(new PointF(draggableBounds.right, draggableBounds.bottom));
     }
@@ -254,6 +251,8 @@ class MenuAnimationController {
         // If the translation x is zero, it should be at the left of the bound.
         if (currentXTranslation < draggableBounds.left
                 || currentXTranslation > draggableBounds.right) {
+            constrainPositionAndUpdate(
+                    new PointF(mMenuView.getTranslationX(), mMenuView.getTranslationY()));
             moveToEdgeAndHide();
             return true;
         }
@@ -262,37 +261,33 @@ class MenuAnimationController {
         return false;
     }
 
-    private boolean isOnLeftSide() {
+    boolean isOnLeftSide() {
         return mMenuView.getTranslationX() < mMenuView.getMenuDraggableBounds().centerX();
     }
 
-    boolean isMovedToEdge() {
-        return mIsMovedToEdge;
+    boolean isMoveToTucked() {
+        return mMenuView.isMoveToTucked();
     }
 
     void moveToEdgeAndHide() {
-        mIsMovedToEdge = true;
+        mMenuView.updateMenuMoveToTucked(/* isMoveToTucked= */ true);
 
-        final Rect draggableBounds = mMenuView.getMenuDraggableBounds();
-        final float endY = constrain(mMenuView.getTranslationY(), draggableBounds.top,
-                draggableBounds.bottom);
-        final float menuHalfWidth = mMenuView.getWidth() / 2.0f;
+        final PointF position = mMenuView.getMenuPosition();
+        final float menuHalfWidth = mMenuView.getMenuWidth() / 2.0f;
         final float endX = isOnLeftSide()
-                ? draggableBounds.left - menuHalfWidth
-                : draggableBounds.right + menuHalfWidth;
-        moveAndPersistPosition(new PointF(endX, endY));
+                ? position.x - menuHalfWidth
+                : position.x + menuHalfWidth;
+        moveToPosition(new PointF(endX, position.y));
 
         // Keep the touch region let users could click extra space to pop up the menu view
         // from the screen edge
-        mMenuView.onBoundsInParentChanged(isOnLeftSide()
-                ? draggableBounds.left
-                : draggableBounds.right, (int) mMenuView.getTranslationY());
+        mMenuView.onBoundsInParentChanged((int) position.x, (int) position.y);
 
         fadeOutIfEnabled();
     }
 
     void moveOutEdgeAndShow() {
-        mIsMovedToEdge = false;
+        mMenuView.updateMenuMoveToTucked(/* isMoveToTucked= */ false);
 
         mMenuView.onPositionChanged();
         mMenuView.onEdgeChangedIfNeeded();

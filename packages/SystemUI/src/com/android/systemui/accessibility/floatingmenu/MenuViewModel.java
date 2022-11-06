@@ -35,6 +35,7 @@ class MenuViewModel implements MenuInfoRepository.OnSettingsContentsChanged {
     private final MutableLiveData<Integer> mSizeTypeData = new MutableLiveData<>();
     private final MutableLiveData<MenuFadeEffectInfo> mFadeEffectInfoData =
             new MutableLiveData<>();
+    private final MutableLiveData<Boolean> mMoveToTuckedData = new MutableLiveData<>();
     private final MutableLiveData<Position> mPercentagePositionData = new MutableLiveData<>();
     private final MenuInfoRepository mInfoRepository;
 
@@ -57,8 +58,17 @@ class MenuViewModel implements MenuInfoRepository.OnSettingsContentsChanged {
         mFadeEffectInfoData.setValue(fadeEffectInfo);
     }
 
+    void updateMenuMoveToTucked(boolean isMoveToTucked) {
+        mInfoRepository.updateMoveToTucked(isMoveToTucked);
+    }
+
     void updateMenuSavingPosition(Position percentagePosition) {
         mInfoRepository.updateMenuSavingPosition(percentagePosition);
+    }
+
+    LiveData<Boolean> getMoveToTuckedData() {
+        mInfoRepository.loadMenuMoveToTucked(mMoveToTuckedData::setValue);
+        return mMoveToTuckedData;
     }
 
     LiveData<Position> getPercentagePositionData() {
