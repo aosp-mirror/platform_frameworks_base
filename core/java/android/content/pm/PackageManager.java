@@ -165,6 +165,21 @@ public abstract class PackageManager {
             "android.internal.PROPERTY_NO_APP_DATA_STORAGE";
 
     /**
+     * &lt;service&gt; level {@link android.content.pm.PackageManager.Property} tag specifying
+     * the actual use case of the service if it's foreground service with the type
+     * {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_SPECIAL_USE}.
+     *
+     * <p>
+     * For example:
+     * &lt;service&gt;
+     *   &lt;property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+     *     android:value="foo"/&gt;
+     * &lt;/service&gt;
+     */
+    public static final String PROPERTY_SPECIAL_USE_FGS_SUBTYPE =
+            "android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE";
+
+    /**
      * A property value set within the manifest.
      * <p>
      * The value of a property will only have a single type, as defined by

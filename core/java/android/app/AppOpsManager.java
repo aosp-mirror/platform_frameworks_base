@@ -1398,9 +1398,18 @@ public class AppOpsManager {
      */
     public static final int OP_READ_WRITE_HEALTH_DATA = AppProtoEnums.APP_OP_READ_WRITE_HEALTH_DATA;
 
+    /**
+     * Use foreground service with the type
+     * {@link android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_SPECIAL_USE}.
+     *
+     * @hide
+     */
+    public static final int OP_FOREGROUND_SERVICE_SPECIAL_USE =
+            AppProtoEnums.APP_OP_FOREGROUND_SERVICE_SPECIAL_USE;
+
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int _NUM_OP = 127;
+    public static final int _NUM_OP = 128;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -1930,6 +1939,14 @@ public class AppOpsManager {
     public static final String OPSTR_SYSTEM_EXEMPT_FROM_FORCED_APP_STANDBY =
             "android:system_exempt_from_forced_app_standby";
 
+    /**
+     * Start a foreground service with the type "specialUse".
+     *
+     * @hide
+     */
+    public static final String OPSTR_FOREGROUND_SERVICE_SPECIAL_USE =
+            "android:foreground_service_special_use";
+
     /** {@link #sAppOpsToNote} not initialized yet for this op */
     private static final byte SHOULD_COLLECT_NOTE_OP_NOT_INITIALIZED = 0;
     /** Should not collect noting of this app-op in {@link #sAppOpsToNote} */
@@ -2026,6 +2043,7 @@ public class AppOpsManager {
             OP_TURN_SCREEN_ON,
             OP_RUN_LONG_JOBS,
             OP_READ_MEDIA_VISUAL_USER_SELECTED,
+            OP_FOREGROUND_SERVICE_SPECIAL_USE,
     };
 
     static final AppOpInfo[] sAppOpInfos = new AppOpInfo[]{
@@ -2419,7 +2437,10 @@ public class AppOpsManager {
                 OPSTR_SYSTEM_EXEMPT_FROM_FORCED_APP_STANDBY,
                 "SYSTEM_EXEMPT_FROM_FORCED_APP_STANDBY").build(),
         new AppOpInfo.Builder(OP_READ_WRITE_HEALTH_DATA, OPSTR_READ_WRITE_HEALTH_DATA,
-                "READ_WRITE_HEALTH_DATA").setDefaultMode(AppOpsManager.MODE_ALLOWED).build()
+                "READ_WRITE_HEALTH_DATA").setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_FOREGROUND_SERVICE_SPECIAL_USE,
+                OPSTR_FOREGROUND_SERVICE_SPECIAL_USE, "FOREGROUND_SERVICE_SPECIAL_USE")
+                .setPermission(Manifest.permission.FOREGROUND_SERVICE_SPECIAL_USE).build(),
     };
 
     // The number of longs needed to form a full bitmask of app ops
