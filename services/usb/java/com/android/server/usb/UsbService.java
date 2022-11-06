@@ -504,6 +504,15 @@ public class UsbService extends IUsbManager.Stub {
     }
 
     @Override
+    public boolean hasDevicePermissionWithIdentity(UsbDevice device, String packageName,
+            int pid, int uid) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+
+        final int userId = UserHandle.getUserId(uid);
+        return getPermissionsForUser(userId).hasPermission(device, packageName, pid, uid);
+    }
+
+    @Override
     public boolean hasAccessoryPermission(UsbAccessory accessory) {
         final int uid = Binder.getCallingUid();
         final int pid = Binder.getCallingPid();
@@ -515,6 +524,14 @@ public class UsbService extends IUsbManager.Stub {
         } finally {
             Binder.restoreCallingIdentity(token);
         }
+    }
+
+    @Override
+    public boolean hasAccessoryPermissionWithIdentity(UsbAccessory accessory, int pid, int uid) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+
+        final int userId = UserHandle.getUserId(uid);
+        return getPermissionsForUser(userId).hasPermission(accessory, pid, uid);
     }
 
     @Override
