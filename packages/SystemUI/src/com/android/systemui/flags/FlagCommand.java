@@ -23,7 +23,6 @@ import androidx.annotation.NonNull;
 import com.android.systemui.statusbar.commandline.Command;
 
 import java.io.PrintWriter;
-import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 
@@ -230,33 +229,22 @@ public class FlagCommand implements Command {
     }
 
     private int flagNameToId(String flagName) {
-        List<Field> fields = Flags.getFlagFields();
-        for (Field field : fields) {
-            if (flagName.equals(field.getName())) {
-                return fieldToId(field);
+        Map<String, Flag<?>> flagFields = Flags.getFlagFields();
+        for (String fieldName : flagFields.keySet()) {
+            if (flagName.equals(fieldName)) {
+                return flagFields.get(fieldName).getId();
             }
         }
 
         return 0;
     }
 
-    private int fieldToId(Field field) {
-        try {
-            Flag<?> flag = (Flag<?>) field.get(null);
-            return flag.getId();
-        } catch (IllegalAccessException e) {
-            // no-op
-        }
-
-        return 0;
-    }
-
     private void printKnownFlags(PrintWriter pw) {
-        List<Field> fields = Flags.getFlagFields();
+        Map<String, Flag<?>> fields = Flags.getFlagFields();
 
         int longestFieldName = 0;
-        for (Field field : fields) {
-            longestFieldName = Math.max(longestFieldName, field.getName().length());
+        for (String fieldName : fields.keySet()) {
+            longestFieldName = Math.max(longestFieldName, fieldName.length());
         }
 
         pw.println("Known Flags:");
@@ -268,16 +256,15 @@ public class FlagCommand implements Command {
         for (int i = 0; i < longestFieldName; i++) {
             pw.print("=");
         }
-        pw.println(" ==== =====");
-        for (Field field : fields) {
-            int id = fieldToId(field);
-            Flag<?> flag = mAllFlags.get(id);
-
+        pw.println(" ==== ========");
+        for (String fieldName : fields.keySet()) {
+            Flag<?> flag = fields.get(fieldName);
+            int id = flag.getId();
             if (id == 0 || !mAllFlags.containsKey(id)) {
                 continue;
             }
-            pw.print(field.getName());
-            int fieldWidth = field.getName().length();
+            pw.print(fieldName);
+            int fieldWidth = fieldName.length();
             for (int i = 0; i < longestFieldName - fieldWidth + 1; i++) {
                 pw.print(" ");
             }
