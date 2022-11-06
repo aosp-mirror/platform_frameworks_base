@@ -5275,6 +5275,13 @@ package android.app {
     field @NonNull public static final android.os.Parcelable.Creator<android.app.ForegroundServiceStartNotAllowedException> CREATOR;
   }
 
+  public final class ForegroundServiceTypeNotAllowedException extends android.app.ServiceStartNotAllowedException implements android.os.Parcelable {
+    ctor public ForegroundServiceTypeNotAllowedException(@NonNull String);
+    method public int describeContents();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.ForegroundServiceTypeNotAllowedException> CREATOR;
+  }
+
   @Deprecated public class Fragment implements android.content.ComponentCallbacks2 android.view.View.OnCreateContextMenuListener {
     ctor @Deprecated public Fragment();
     method @Deprecated public void dump(String, java.io.FileDescriptor, java.io.PrintWriter, String[]);
