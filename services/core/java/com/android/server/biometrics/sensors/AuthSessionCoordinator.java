@@ -75,6 +75,7 @@ public class AuthSessionCoordinator implements AuthSessionListener {
         mUserId = userId;
         mIsAuthenticating = true;
         mAuthOperations.clear();
+        mTimedLockouts.clear();
         mAuthResultCoordinator = new AuthResultCoordinator();
         mRingBuffer.addApiCall("internal : onAuthSessionStarted(" + userId + ")");
     }
@@ -88,7 +89,6 @@ public class AuthSessionCoordinator implements AuthSessionListener {
      */
     void endAuthSession() {
         if (mIsAuthenticating) {
-            mAuthOperations.clear();
             final long currentTime = mClock.millis();
             for (Pair<Integer, Long> timedLockouts : mTimedLockouts) {
                 mMultiBiometricLockoutState.increaseLockoutTime(mUserId, timedLockouts.first,
@@ -109,16 +109,24 @@ public class AuthSessionCoordinator implements AuthSessionListener {
                 }
 
             }
+
             mRingBuffer.addApiCall("internal : onAuthSessionEnded(" + mUserId + ")");
-            mIsAuthenticating = false;
+            clearSession();
         }
     }
 
+    private void clearSession() {
+        mIsAuthenticating = false;
+        mTimedLockouts.clear();
+        mAuthOperations.clear();
+    }
+
     /**
-     * @return true if a user can authenticate with a given strength.
+     * Returns the current lockout state for a given user/strength.
      */
-    public boolean getCanAuthFor(int userId, @Authenticators.Types int strength) {
-        return mMultiBiometricLockoutState.canUserAuthenticate(userId, strength);
+    @LockoutTracker.LockoutMode
+    public int getLockoutStateFor(int userId, @Authenticators.Types int strength) {
+        return mMultiBiometricLockoutState.getLockoutState(userId, strength);
     }
 
     @Override
@@ -145,19 +153,8 @@ public class AuthSessionCoordinator implements AuthSessionListener {
     }
 
     @Override
-    public void authenticatedFor(int userId, @Authenticators.Types int biometricStrength,
-            int sensorId, long requestId) {
-        final String authStr =
-                "authenticatedFor(userId=" + userId + ", strength=" + biometricStrength
-                        + " , sensorId=" + sensorId + ", requestId= " + requestId + ")";
-        mRingBuffer.addApiCall(authStr);
-        mAuthResultCoordinator.authenticatedFor(biometricStrength);
-        attemptToFinish(userId, sensorId, authStr);
-    }
-
-    @Override
-    public void lockedOutFor(int userId, @Authenticators.Types int biometricStrength,
-            int sensorId, long requestId) {
+    public void lockedOutFor(int userId, @Authenticators.Types int biometricStrength, int sensorId,
+            long requestId) {
         final String lockedOutStr =
                 "lockOutFor(userId=" + userId + ", biometricStrength=" + biometricStrength
                         + ", sensorId=" + sensorId + ", requestId=" + requestId + ")";
@@ -179,12 +176,16 @@ public class AuthSessionCoordinator implements AuthSessionListener {
     }
 
     @Override
-    public void authEndedFor(int userId, @Authenticators.Types int biometricStrength,
-            int sensorId, long requestId) {
+    public void authEndedFor(int userId, @Authenticators.Types int biometricStrength, int sensorId,
+            long requestId, boolean wasSuccessful) {
         final String authEndedStr =
                 "authEndedFor(userId=" + userId + " ,biometricStrength=" + biometricStrength
-                        + ", sensorId=" + sensorId + ", requestId=" + requestId + ")";
+                        + ", sensorId=" + sensorId + ", requestId=" + requestId + ", wasSuccessful="
+                        + wasSuccessful + ")";
         mRingBuffer.addApiCall(authEndedStr);
+        if (wasSuccessful) {
+            mAuthResultCoordinator.authenticatedFor(biometricStrength);
+        }
         attemptToFinish(userId, sensorId, authEndedStr);
     }
 
@@ -195,6 +196,12 @@ public class AuthSessionCoordinator implements AuthSessionListener {
                 "resetLockoutFor(userId=" + userId + " ,biometricStrength=" + biometricStrength
                         + ", requestId=" + requestId + ")";
         mRingBuffer.addApiCall(resetLockStr);
+        if (biometricStrength == Authenticators.BIOMETRIC_STRONG) {
+            clearSession();
+        } else {
+            // Lockouts cannot be reset by non-strong biometrics
+            return;
+        }
         mMultiBiometricLockoutState.setAuthenticatorTo(userId, biometricStrength,
                 true /*canAuthenticate */);
         mMultiBiometricLockoutState.clearLockoutTime(userId, biometricStrength);
