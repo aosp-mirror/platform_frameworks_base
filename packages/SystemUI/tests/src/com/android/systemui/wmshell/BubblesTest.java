@@ -1329,7 +1329,7 @@ public class BubblesTest extends SysuiTestCase {
         spyOn(mContext);
         mBubbleController.updateBubble(mBubbleEntry);
         verify(mContext).registerReceiver(mBroadcastReceiverArgumentCaptor.capture(),
-                mFilterArgumentCaptor.capture());
+                mFilterArgumentCaptor.capture(), eq(Context.RECEIVER_EXPORTED));
         assertThat(mFilterArgumentCaptor.getValue().getAction(0)).isEqualTo(
                 Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         assertThat(mFilterArgumentCaptor.getValue().getAction(1)).isEqualTo(
@@ -1349,7 +1349,7 @@ public class BubblesTest extends SysuiTestCase {
         mBubbleController.updateBubble(mBubbleEntry);
         mBubbleData.setExpanded(true);
         verify(mContext).registerReceiver(mBroadcastReceiverArgumentCaptor.capture(),
-                mFilterArgumentCaptor.capture());
+                mFilterArgumentCaptor.capture(), eq(Context.RECEIVER_EXPORTED));
         Intent i = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         mBroadcastReceiverArgumentCaptor.getValue().onReceive(mContext, i);
 
@@ -1363,7 +1363,7 @@ public class BubblesTest extends SysuiTestCase {
         mBubbleData.setExpanded(true);
 
         verify(mContext).registerReceiver(mBroadcastReceiverArgumentCaptor.capture(),
-                mFilterArgumentCaptor.capture());
+                mFilterArgumentCaptor.capture(), eq(Context.RECEIVER_EXPORTED));
         Intent i = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         i.putExtra("reason", "gestureNav");
         mBroadcastReceiverArgumentCaptor.getValue().onReceive(mContext, i);
@@ -1377,7 +1377,7 @@ public class BubblesTest extends SysuiTestCase {
         mBubbleData.setExpanded(true);
 
         verify(mContext).registerReceiver(mBroadcastReceiverArgumentCaptor.capture(),
-                mFilterArgumentCaptor.capture());
+                mFilterArgumentCaptor.capture(), eq(Context.RECEIVER_EXPORTED));
 
         Intent i = new Intent(Intent.ACTION_SCREEN_OFF);
         mBroadcastReceiverArgumentCaptor.getValue().onReceive(mContext, i);
