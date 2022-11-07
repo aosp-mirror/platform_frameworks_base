@@ -260,7 +260,7 @@ object Flags {
     @Keep
     @JvmField
     val WM_ENABLE_SHELL_TRANSITIONS =
-        SysPropBooleanFlag(1100, "persist.wm.debug.shell_transit", false)
+        SysPropBooleanFlag(1100, "persist.wm.debug.shell_transit", true)
 
     // TODO(b/254513207): Tracking Bug
     @Keep
