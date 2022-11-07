@@ -48751,7 +48751,7 @@ package android.view {
     method public float getDesiredMaxAverageLuminance();
     method public float getDesiredMaxLuminance();
     method public float getDesiredMinLuminance();
-    method public int[] getSupportedHdrTypes();
+    method @Deprecated public int[] getSupportedHdrTypes();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.Display.HdrCapabilities> CREATOR;
     field public static final int HDR_TYPE_DOLBY_VISION = 1; // 0x1
@@ -48768,6 +48768,7 @@ package android.view {
     method public int getPhysicalHeight();
     method public int getPhysicalWidth();
     method public float getRefreshRate();
+    method @NonNull public int[] getSupportedHdrTypes();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.Display.Mode> CREATOR;
   }
