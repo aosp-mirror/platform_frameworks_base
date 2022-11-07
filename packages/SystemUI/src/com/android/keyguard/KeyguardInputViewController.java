@@ -59,10 +59,11 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
             return false;
         }
         @Override
-        public void dismiss(boolean securityVerified, int targetUserId) { }
+        public void dismiss(boolean securityVerified, int targetUserId,
+                SecurityMode expectedSecurityMode) { }
         @Override
         public void dismiss(boolean authenticated, int targetId,
-                boolean bypassSecondaryLockScreen) { }
+                boolean bypassSecondaryLockScreen, SecurityMode expectedSecurityMode) { }
         @Override
         public void onUserInput() { }
         @Override
