@@ -1092,7 +1092,8 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
             // ImePositionProcessor#onImeVisibilityChanged directly in DividerView is not enough
             // because DividerView won't receive onImeVisibilityChanged callback after it being
             // re-inflated.
-            mSplitWindowManager.setInteractive(!mImeShown || !mHasImeFocus);
+            mSplitWindowManager.setInteractive(!mImeShown || !mHasImeFocus,
+                    "onImeStartPositioning");
 
             return needOffset ? IME_ANIMATION_NO_ALPHA : 0;
         }
@@ -1118,7 +1119,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
             // Restore the split layout when wm-shell is not controlling IME insets anymore.
             if (!controlling && mImeShown) {
                 reset();
-                mSplitWindowManager.setInteractive(true);
+                mSplitWindowManager.setInteractive(true, "onImeControlTargetChanged");
                 mSplitLayoutHandler.setLayoutOffsetTarget(0, 0, SplitLayout.this);
                 mSplitLayoutHandler.onLayoutPositionChanging(SplitLayout.this);
             }
