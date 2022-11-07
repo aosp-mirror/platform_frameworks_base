@@ -128,7 +128,7 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
                     null /* typeSideMap */);
             mShownInsets = calculateInsets(mInitialInsetsState, frame, controls, true /* shown */,
                     typeSideMap);
-            mHasZeroInsetsIme = mShownInsets.bottom == 0 && controlsInternalType(ITYPE_IME);
+            mHasZeroInsetsIme = mShownInsets.bottom == 0 && controlsType(WindowInsets.Type.ime());
             if (mHasZeroInsetsIme) {
                 // IME has shownInsets of ZERO, and can't map to a side by default.
                 // Map zero insets IME to bottom, making it a special case of bottom insets.
@@ -141,7 +141,7 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
             mCurrentInsets = calculateInsets(mInitialInsetsState, controls, true /* shown */);
             mHiddenInsets = calculateInsets(null, controls, false /* shown */);
             mShownInsets = calculateInsets(null, controls, true /* shown */);
-            mHasZeroInsetsIme = mShownInsets.bottom == 0 && controlsInternalType(ITYPE_IME);
+            mHasZeroInsetsIme = mShownInsets.bottom == 0 && controlsType(WindowInsets.Type.ime());
             buildSideControlsMap(mSideControlsMap, controls);
         }
         mPendingInsets = mCurrentInsets;

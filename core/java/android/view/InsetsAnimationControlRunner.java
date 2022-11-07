@@ -19,7 +19,6 @@ package android.view;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.InsetsController.AnimationType;
-import android.view.InsetsState.InternalInsetsType;
 import android.view.WindowInsets.Type.InsetsType;
 
 /**
@@ -63,10 +62,10 @@ public interface InsetsAnimationControlRunner {
     WindowInsetsAnimation getAnimation();
 
     /**
-     * @return Whether {@link #getTypes()} maps to a specific {@link InternalInsetsType}.
+     * @return Whether {@link #getTypes()} contains a specific {@link InsetsType}.
      */
-    default boolean controlsInternalType(@InternalInsetsType int type) {
-        return InsetsState.toInternalType(getTypes()).contains(type);
+    default boolean controlsType(@InsetsType int type) {
+        return (getTypes() & type) != 0;
     }
 
     /**
