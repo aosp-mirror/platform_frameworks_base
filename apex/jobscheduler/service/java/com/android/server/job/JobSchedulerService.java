@@ -28,7 +28,6 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
-import android.app.AppOpsManager;
 import android.app.IUidObserver;
 import android.app.compat.CompatChanges;
 import android.app.job.IJobScheduler;
@@ -48,6 +47,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.PermissionChecker;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
@@ -305,7 +305,6 @@ public class JobSchedulerService extends com.android.server.SystemService
     final JobHandler mHandler;
     final JobSchedulerStub mJobSchedulerStub;
 
-    private AppOpsManager mAppOps;
     PackageManagerInternal mLocalPM;
     ActivityManagerInternal mActivityManagerInternal;
     DeviceIdleInternal mLocalDeviceIdleController;
@@ -1805,8 +1804,6 @@ public class JobSchedulerService extends com.android.server.SystemService
             for (StateController controller : mControllers) {
                 controller.onSystemServicesReady();
             }
-
-            mAppOps = (AppOpsManager) getContext().getSystemService(Context.APP_OPS_SERVICE);
 
             mAppStateTracker = (AppStateTrackerImpl) Objects.requireNonNull(
                     LocalServices.getService(AppStateTracker.class));
@@ -3414,6 +3411,19 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
 
         @Override
+        public boolean canRunLongJobs(@NonNull String packageName) {
+            final int callingUid = Binder.getCallingUid();
+            final int userId = UserHandle.getUserId(callingUid);
+            final int packageUid = mLocalPM.getPackageUid(packageName, 0, userId);
+            if (callingUid != packageUid) {
+                throw new SecurityException("Uid " + callingUid
+                        + " cannot query canRunLongJobs for package " + packageName);
+            }
+
+            return checkRunLongJobsPermission(packageUid, packageName);
+        }
+
+        @Override
         public boolean hasRunLongJobsPermission(@NonNull String packageName,
                 @UserIdInt int userId) {
             final int uid = mLocalPM.getPackageUid(packageName, 0, userId);
@@ -3423,9 +3433,14 @@ public class JobSchedulerService extends com.android.server.SystemService
                         + " cannot query canRunLongJobs for package " + packageName);
             }
 
-            final int mode = mAppOps.checkOpNoThrow(AppOpsManager.OP_RUN_LONG_JOBS, uid,
-                    packageName);
-            return mode == AppOpsManager.MODE_ALLOWED || mode == AppOpsManager.MODE_DEFAULT;
+            return checkRunLongJobsPermission(uid, packageName);
+        }
+
+        private boolean checkRunLongJobsPermission(int packageUid, String packageName) {
+            // Returns true if both the appop and permission are granted.
+            return PermissionChecker.checkPermissionForPreflight(getContext(),
+                    android.Manifest.permission.RUN_LONG_JOBS, PermissionChecker.PID_UNKNOWN,
+                    packageUid, packageName) == PermissionChecker.PERMISSION_GRANTED;
         }
 
         /**

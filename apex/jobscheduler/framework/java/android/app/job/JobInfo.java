@@ -396,6 +396,13 @@ public class JobInfo implements Parcelable {
     public static final int FLAG_EXPEDITED = 1 << 4;
 
     /**
+     * Whether it's a data transfer job or not.
+     *
+     * @hide
+     */
+    public static final int FLAG_DATA_TRANSFER = 1 << 5;
+
+    /**
      * @hide
      */
     public static final int CONSTRAINT_FLAG_CHARGING = 1 << 0;
@@ -720,6 +727,14 @@ public class JobInfo implements Parcelable {
      */
     public boolean isExpedited() {
         return (flags & FLAG_EXPEDITED) != 0;
+    }
+
+    /**
+     * @see JobInfo.Builder#setDataTransfer(boolean)
+     * @hide
+     */
+    public boolean isDataTransfer() {
+        return (flags & FLAG_DATA_TRANSFER) != 0;
     }
 
     /**
@@ -1816,6 +1831,52 @@ public class JobInfo implements Parcelable {
         }
 
         /**
+         * Indicates that this job will be used to transfer data to or from a remote server. The
+         * system could attempt to run a data transfer job longer than a regular job if the data
+         * being transferred is potentially very large and can take a long time to complete.
+         *
+         * <p>
+         * The app must hold the {@link android.Manifest.permission#RUN_LONG_JOBS} permission to
+         * use this API. JobScheduler will throw a {@link SecurityException} if an app without the
+         * permission granted attempts to schedule a data transfer job.
+         *
+         * <p>
+         * You must provide an estimate of the payload size via
+         * {@link #setEstimatedNetworkBytes(long, long)} when scheduling the job or use
+         * {@link JobService#updateEstimatedNetworkBytes(JobParameters, long, long)} or
+         * {@link JobService#updateEstimatedNetworkBytes(JobParameters, JobWorkItem, long, long)}
+         * shortly after the job starts.
+         *
+         * <p>
+         * For user-initiated transfers that must be started immediately, call
+         * {@link #setExpedited(boolean) setExpedited(true)}. Otherwise, the system may defer the
+         * job to a more opportune time. Using {@link #setExpedited(boolean) setExpedited(true)}
+         * with this API will only be allowed for foreground apps and when the user has clearly
+         * interacted with the app. {@link #setExpedited(boolean) setExpedited(true)} will return
+         * {@link JobScheduler#RESULT_FAILURE} for a data transfer job if the app is in the
+         * background. Apps that successfully schedule data transfer jobs with
+         * {@link #setExpedited(boolean) setExpedited(true)} will not have quotas applied to them,
+         * though they may still be stopped for system health or constraint reasons. The system will
+         * also give a user the ability to stop a data transfer job via the Task Manager.
+         *
+         * <p>
+         * If you want to perform more than one data transfer job, consider enqueuing multiple
+         * {@link JobWorkItem JobWorkItems} along with {@link #setDataTransfer(boolean)}.
+         *
+         * @see JobInfo#isDataTransfer()
+         * @hide
+         */
+        @NonNull
+        public Builder setDataTransfer(boolean dataTransfer) {
+            if (dataTransfer) {
+                mFlags |= FLAG_DATA_TRANSFER;
+            } else {
+                mFlags &= (~FLAG_DATA_TRANSFER);
+            }
+            return this;
+        }
+
+        /**
          * Setting this to true indicates that this job is important while the scheduling app
          * is in the foreground or on the temporary whitelist for background restrictions.
          * This means that the system will relax doze restrictions on this job during this time.
@@ -2062,14 +2123,33 @@ public class JobInfo implements Parcelable {
                         "An expedited job must be high or max priority. Don't use expedited jobs"
                                 + " for unimportant tasks.");
             }
-            if ((constraintFlags & ~CONSTRAINT_FLAG_STORAGE_NOT_LOW) != 0
-                    || (flags & ~(FLAG_EXPEDITED | FLAG_EXEMPT_FROM_APP_STANDBY)) != 0) {
+            if (((constraintFlags & ~CONSTRAINT_FLAG_STORAGE_NOT_LOW) != 0
+                    || (flags & ~(FLAG_EXPEDITED | FLAG_EXEMPT_FROM_APP_STANDBY
+                                    | FLAG_DATA_TRANSFER)) != 0)) {
                 throw new IllegalArgumentException(
                         "An expedited job can only have network and storage-not-low constraints");
             }
             if (triggerContentUris != null && triggerContentUris.length > 0) {
                 throw new IllegalArgumentException(
                         "Can't call addTriggerContentUri() on an expedited job");
+            }
+        }
+
+        if ((flags & FLAG_DATA_TRANSFER) != 0) {
+            if (backoffPolicy == BACKOFF_POLICY_LINEAR) {
+                throw new IllegalArgumentException(
+                        "A data transfer job cannot have a linear backoff policy.");
+            }
+            if (hasLateConstraint) {
+                throw new IllegalArgumentException("A data transfer job cannot have a deadline");
+            }
+            if ((flags & FLAG_PREFETCH) != 0) {
+                throw new IllegalArgumentException(
+                        "A data transfer job cannot also be a prefetch job");
+            }
+            if (networkRequest == null) {
+                throw new IllegalArgumentException(
+                        "A data transfer job must specify a valid network type");
             }
         }
     }

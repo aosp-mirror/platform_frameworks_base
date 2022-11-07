@@ -44,9 +44,9 @@ public class JobSchedulerFrameworkInitializer {
      * <p>If this is called from other places, it throws a {@link IllegalStateException).
      */
     public static void registerServiceWrappers() {
-        SystemServiceRegistry.registerStaticService(
+        SystemServiceRegistry.registerContextAwareService(
                 Context.JOB_SCHEDULER_SERVICE, JobScheduler.class,
-                (b) -> new JobSchedulerImpl(IJobScheduler.Stub.asInterface(b)));
+                (context, b) -> new JobSchedulerImpl(context, IJobScheduler.Stub.asInterface(b)));
         SystemServiceRegistry.registerContextAwareService(
                 Context.DEVICE_IDLE_CONTROLLER, DeviceIdleManager.class,
                 (context, b) -> new DeviceIdleManager(
