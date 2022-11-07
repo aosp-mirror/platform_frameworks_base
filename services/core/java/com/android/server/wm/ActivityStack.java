@@ -2404,7 +2404,23 @@ class ActivityStack extends Task {
                     parentLaunchMode == ActivityInfo.LAUNCH_SINGLE_TASK ||
                     parentLaunchMode == ActivityInfo.LAUNCH_SINGLE_TOP ||
                     (destIntentFlags & Intent.FLAG_ACTIVITY_CLEAR_TOP) != 0) {
-                parent.deliverNewIntentLocked(callingUid, destIntent, destGrants, srec.packageName);
+                boolean abort;
+                try {
+                    abort = !mStackSupervisor.checkStartAnyActivityPermission(destIntent,
+                            parent.info, null /* resultWho */, -1 /* requestCode */, srec.getPid(),
+                            callingUid, srec.info.packageName, null /* callingFeatureId */,
+                            false /* ignoreTargetSecurity */, false /* launchingInTask */, srec.app,
+                            null /* resultRecord */, null /* resultRootTask */);
+                } catch (SecurityException e) {
+                    abort = true;
+                }
+                if (abort) {
+                    android.util.EventLog.writeEvent(0x534e4554, "238605611", callingUid, "");
+                    foundParentInTask = false;
+                } else {
+                    parent.deliverNewIntentLocked(callingUid, destIntent, destGrants,
+                            srec.packageName);
+                }
             } else {
                 try {
                     ActivityInfo aInfo = AppGlobals.getPackageManager().getActivityInfo(
