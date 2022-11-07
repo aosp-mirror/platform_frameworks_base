@@ -124,6 +124,10 @@ class PhysicsBasedUnfoldTransitionProgressProvider(
 
     private fun cancelTransition(endValue: Float, animate: Boolean) {
         if (isTransitionRunning && animate) {
+            if (endValue == 1.0f && !isAnimatedCancelRunning) {
+                listeners.forEach { it.onTransitionFinishing() }
+            }
+
             isAnimatedCancelRunning = true
             springAnimation.animateToFinalPosition(endValue)
         } else {
