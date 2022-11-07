@@ -567,6 +567,8 @@ public final class ProcessStatsService extends IProcessStats.Stub {
     @android.annotation.EnforcePermission(android.Manifest.permission.PACKAGE_USAGE_STATS)
     @Override
     public byte[] getCurrentStats(List<ParcelFileDescriptor> historic) {
+        super.getCurrentStats_enforcePermission();
+
         Parcel current = Parcel.obtain();
         synchronized (mLock) {
             long now = SystemClock.uptimeMillis();
@@ -622,6 +624,8 @@ public final class ProcessStatsService extends IProcessStats.Stub {
     @Override
     public long getCommittedStatsMerged(long highWaterMarkMs, int section, boolean doAggregate,
             List<ParcelFileDescriptor> committedStats, ProcessStats mergedStats) {
+
+        super.getCommittedStatsMerged_enforcePermission();
 
         long newHighWaterMark = highWaterMarkMs;
         mFileLock.lock();
@@ -709,6 +713,8 @@ public final class ProcessStatsService extends IProcessStats.Stub {
     @android.annotation.EnforcePermission(android.Manifest.permission.PACKAGE_USAGE_STATS)
     @Override
     public ParcelFileDescriptor getStatsOverTime(long minTime) {
+        super.getStatsOverTime_enforcePermission();
+
         Parcel current = Parcel.obtain();
         long curTime;
         synchronized (mLock) {

@@ -70,6 +70,7 @@ import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.database.sqlite.SQLiteDatabase;
 import android.hardware.authsecret.V1_0.IAuthSecret;
+import android.hardware.biometrics.BiometricManager;
 import android.hardware.face.Face;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.Fingerprint;
@@ -552,6 +553,10 @@ public class LockSettingsService extends ILockSettings.Stub {
             }
         }
 
+        public BiometricManager getBiometricManager() {
+            return (BiometricManager) mContext.getSystemService(Context.BIOMETRIC_SERVICE);
+        }
+
         public int settingsGlobalGetInt(ContentResolver contentResolver, String keyName,
                 int defaultValue) {
             return Settings.Global.getInt(contentResolver, keyName, defaultValue);
@@ -837,7 +842,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         // TODO: maybe skip this for split system user mode.
         mStorage.prefetchUser(UserHandle.USER_SYSTEM);
         mBiometricDeferredQueue.systemReady(mInjector.getFingerprintManager(),
-                mInjector.getFaceManager());
+                mInjector.getFaceManager(), mInjector.getBiometricManager());
     }
 
     private void loadEscrowData() {

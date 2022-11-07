@@ -81,9 +81,12 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
     @State
     protected int mState = STATE_NEW;
     private long mStartTimeMs;
-
     private boolean mAuthAttempted;
     private boolean mAuthSuccess = false;
+    private final int mSensorStrength;
+    // This is used to determine if we should use the old lockout counter (HIDL) or the new lockout
+    // counter implementation (AIDL)
+    private final boolean mShouldUseLockoutTracker;
 
     public AuthenticationClient(@NonNull Context context, @NonNull Supplier<T> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener,
@@ -92,7 +95,7 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
             @NonNull BiometricLogger biometricLogger, @NonNull BiometricContext biometricContext,
             boolean isStrongBiometric, @Nullable TaskStackListener taskStackListener,
             @NonNull LockoutTracker lockoutTracker, boolean allowBackgroundAuthentication,
-            boolean shouldVibrate, boolean isKeyguardBypassEnabled) {
+            boolean shouldVibrate, boolean isKeyguardBypassEnabled, int sensorStrength) {
         super(context, lazyDaemon, token, listener, targetUserId, owner, cookie, sensorId,
                 shouldVibrate, biometricLogger, biometricContext);
         mIsStrongBiometric = isStrongBiometric;
@@ -105,22 +108,13 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
         mIsRestricted = restricted;
         mAllowBackgroundAuthentication = allowBackgroundAuthentication;
         mIsKeyguardBypassEnabled = isKeyguardBypassEnabled;
+        mShouldUseLockoutTracker = lockoutTracker != null;
+        mSensorStrength = sensorStrength;
     }
 
     @LockoutTracker.LockoutMode
     public int handleFailedAttempt(int userId) {
-        @LockoutTracker.LockoutMode final int lockoutMode =
-                mLockoutTracker.getLockoutModeForUser(userId);
-        final PerformanceTracker performanceTracker =
-                PerformanceTracker.getInstanceForSensorId(getSensorId());
-
-        if (lockoutMode == LockoutTracker.LOCKOUT_PERMANENT) {
-            performanceTracker.incrementPermanentLockoutForUser(userId);
-        } else if (lockoutMode == LockoutTracker.LOCKOUT_TIMED) {
-            performanceTracker.incrementTimedLockoutForUser(userId);
-        }
-
-        return lockoutMode;
+        return LockoutTracker.LOCKOUT_NONE;
     }
 
     protected long getStartTimeMs() {
@@ -273,10 +267,12 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
                 cancel();
             } else {
                 // Allow system-defined limit of number of attempts before giving up
-                @LockoutTracker.LockoutMode final int lockoutMode =
-                        handleFailedAttempt(getTargetUserId());
-                if (lockoutMode != LockoutTracker.LOCKOUT_NONE) {
-                    markAlreadyDone();
+                if (mShouldUseLockoutTracker) {
+                    @LockoutTracker.LockoutMode final int lockoutMode =
+                            handleFailedAttempt(getTargetUserId());
+                    if (lockoutMode != LockoutTracker.LOCKOUT_NONE) {
+                        markAlreadyDone();
+                    }
                 }
 
                 try {
@@ -309,13 +305,6 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
     @Override
     public void onAcquired(int acquiredInfo, int vendorCode) {
         super.onAcquired(acquiredInfo, vendorCode);
-
-        @LockoutTracker.LockoutMode final int lockoutMode =
-                mLockoutTracker.getLockoutModeForUser(getTargetUserId());
-        if (lockoutMode == LockoutTracker.LOCKOUT_NONE) {
-            PerformanceTracker pt = PerformanceTracker.getInstanceForSensorId(getSensorId());
-            pt.incrementAcquireForUser(getTargetUserId(), isCryptoOperation());
-        }
     }
 
     @Override
@@ -331,8 +320,14 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
     public void start(@NonNull ClientMonitorCallback callback) {
         super.start(callback);
 
-        @LockoutTracker.LockoutMode final int lockoutMode =
-                mLockoutTracker.getLockoutModeForUser(getTargetUserId());
+        final @LockoutTracker.LockoutMode int lockoutMode;
+        if (mShouldUseLockoutTracker) {
+            lockoutMode = mLockoutTracker.getLockoutModeForUser(getTargetUserId());
+        } else {
+            lockoutMode = getBiometricContext().getAuthSessionCoordinator()
+                    .getLockoutStateFor(getTargetUserId(), mSensorStrength);
+        }
+
         if (lockoutMode != LockoutTracker.LOCKOUT_NONE) {
             Slog.v(TAG, "In lockout mode(" + lockoutMode + ") ; disallowing authentication");
             int errorCode = lockoutMode == LockoutTracker.LOCKOUT_TIMED
@@ -404,6 +399,14 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
     /** If an auth attempt completed successfully. */
     public boolean wasAuthSuccessful() {
         return mAuthSuccess;
+    }
+
+    protected int getSensorStrength() {
+        return mSensorStrength;
+    }
+
+    protected LockoutTracker getLockoutTracker() {
+        return mLockoutTracker;
     }
 
     protected int getShowOverlayReason() {
