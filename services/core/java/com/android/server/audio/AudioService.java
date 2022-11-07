@@ -1699,6 +1699,7 @@ public class AudioService extends IAudioService.Stub
         }
 
         mSpatializerHelper.reset(/* featureEnabled */ mHasSpatializerEffect);
+        mSoundDoseHelper.reset();
 
         onIndicateSystemReady();
         // indicate the end of reconfiguration phase to audio HAL
