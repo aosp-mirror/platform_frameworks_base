@@ -16,7 +16,7 @@ java_binary_host {
         "asm-commons-9.2",
         "asm-tree-9.2",
         "asm-analysis-9.2",
-        "guava-21.0",
+        "guava",
     ],
 }
 
