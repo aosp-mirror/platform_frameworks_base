@@ -92,6 +92,7 @@ import com.android.server.appop.AppOpsService;
 import com.android.server.wm.ActivityTaskManagerService;
 
 import org.junit.After;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -442,9 +443,9 @@ public class BroadcastQueueTest {
             UnaryOperator<Bundle> extrasOperator, ReceiverInfo info) {
         final Intent intent = info.intent;
         final Bundle extras = info.extras;
-        final boolean ordered = info.ordered;
+        final boolean assumeDelivered = info.assumeDelivered;
         mScheduledBroadcasts.add(makeScheduledBroadcast(r, intent));
-        if (!wedge && ordered) {
+        if (!wedge && !assumeDelivered) {
             assertTrue(r.mReceivers.numberOfCurReceivers() > 0);
             assertNotEquals(ProcessList.SCHED_GROUP_UNDEFINED,
                     mQueue.getPreferredSchedulingGroupLocked(r));
@@ -695,6 +696,7 @@ public class BroadcastQueueTest {
             ArgumentMatcher<String> data,
             ArgumentMatcher<Bundle> extras,
             Boolean sync,
+            Boolean assumeDelivered,
             Integer sendingUser,
             Integer processState) {
         return (test) -> {
@@ -706,6 +708,7 @@ public class BroadcastQueueTest {
                     && matchObject(data, test.data)
                     && matchObject(extras, test.extras)
                     && matchElement(sync, test.sync)
+                    && matchElement(assumeDelivered, test.assumeDelivered)
                     && matchElement(sendingUser, test.sendingUser)
                     && matchElement(processState, test.processState);
         };
@@ -724,10 +727,12 @@ public class BroadcastQueueTest {
             ArgumentMatcher<String> data,
             ArgumentMatcher<Bundle> extras,
             Boolean sync,
+            Boolean assumeDelivered,
             Integer sendingUser,
             Integer processState) {
         return argThat(receiverList(manifestReceiverMatcher(intent, activityInfo, compatInfo,
-                                resultCode, data, extras, sync, sendingUser, processState)));
+                resultCode, data, extras, sync, assumeDelivered,
+                sendingUser, processState)));
     }
 
     /**
@@ -743,6 +748,7 @@ public class BroadcastQueueTest {
             ArgumentMatcher<Bundle> extras,
             Boolean ordered,
             Boolean sticky,
+            Boolean assumeDelivered,
             Integer sendingUser,
             Integer processState) {
         return (test) -> {
@@ -754,6 +760,7 @@ public class BroadcastQueueTest {
                     && matchObject(extras, test.extras)
                     && matchElement(ordered, test.ordered)
                     && matchElement(sticky, test.sticky)
+                    && matchElement(assumeDelivered, test.assumeDelivered)
                     && matchElement(sendingUser, test.sendingUser)
                     && matchElement(processState, test.processState);
         };
@@ -771,10 +778,12 @@ public class BroadcastQueueTest {
             ArgumentMatcher<Bundle> extras,
             Boolean ordered,
             Boolean sticky,
+            Boolean assumeDelivered,
             Integer sendingUser,
             Integer processState) {
         return argThat(receiverList(registeredReceiverMatcher(receiver, intent, resultCode,
-                                data, extras, ordered, sticky, sendingUser, processState)));
+                data, extras, ordered, sticky, assumeDelivered,
+                sendingUser, processState)));
     }
 
     /**
@@ -827,36 +836,36 @@ public class BroadcastQueueTest {
         final Intent targetedIntent = new Intent(intent);
         targetedIntent.setComponent(component);
         verify(app.getThread(), mode).scheduleReceiverList(
-            manifestReceiver(filterEquals(targetedIntent),
-                    null, null, null, null, null, null, UserHandle.USER_SYSTEM, null));
+                manifestReceiver(filterEquals(targetedIntent),
+                        null, null, null, null, null, null, null, UserHandle.USER_SYSTEM, null));
     }
 
     private void verifyScheduleReceiver(VerificationMode mode, ProcessRecord app,
             Intent intent, int userId) throws Exception {
         verify(app.getThread(), mode).scheduleReceiverList(
-            manifestReceiver(filterEqualsIgnoringComponent(intent),
-                    null, null, null, null, null, null, userId, null));
+                manifestReceiver(filterEqualsIgnoringComponent(intent),
+                        null, null, null, null, null, null, null, userId, null));
     }
 
     private void verifyScheduleReceiver(VerificationMode mode, ProcessRecord app,
             int userId) throws Exception {
         verify(app.getThread(), mode).scheduleReceiverList(
                 manifestReceiver(null,
-                        null, null, null, null, null, null, userId, null));
+                        null, null, null, null, null, null, null, userId, null));
     }
 
     private void verifyScheduleRegisteredReceiver(ProcessRecord app,
             Intent intent) throws Exception {
         verify(app.getThread()).scheduleReceiverList(
-            registeredReceiver(null, filterEqualsIgnoringComponent(intent),
-                    null, null, null, null, null, UserHandle.USER_SYSTEM, null));
+                registeredReceiver(null, filterEqualsIgnoringComponent(intent),
+                        null, null, null, null, null, null, UserHandle.USER_SYSTEM, null));
     }
 
     private void verifyScheduleRegisteredReceiver(VerificationMode mode, ProcessRecord app,
             int userId) throws Exception {
         verify(app.getThread(), mode).scheduleReceiverList(
                 registeredReceiver(null, null,
-                        null, null, null, null, null, userId, null));
+                        null, null, null, null, null, null, userId, null));
     }
 
     static final int USER_GUEST = 11;
@@ -1112,10 +1121,11 @@ public class BroadcastQueueTest {
     }
 
     /**
-     * Verify that we detect and ANR a wedged process.
+     * Verify that we detect and ANR a wedged process when delivering to a
+     * manifest receiver.
      */
     @Test
-    public void testWedged() throws Exception {
+    public void testWedged_Manifest() throws Exception {
         final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
         final ProcessRecord receiverApp = makeActiveProcessRecord(PACKAGE_GREEN,
                 ProcessBehavior.WEDGE);
@@ -1126,6 +1136,77 @@ public class BroadcastQueueTest {
 
         waitForIdle();
         verify(mAms).appNotResponding(eq(receiverApp), any());
+    }
+
+    /**
+     * Verify that we detect and ANR a wedged process when delivering an ordered
+     * broadcast, and that we deliver final result.
+     */
+    @Test
+    public void testWedged_Registered_Ordered() throws Exception {
+        // Legacy stack doesn't detect these ANRs; likely an oversight
+        Assume.assumeTrue(mImpl == Impl.MODERN);
+
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+        final ProcessRecord receiverApp = makeActiveProcessRecord(PACKAGE_GREEN,
+                ProcessBehavior.WEDGE);
+
+        final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        final IIntentReceiver resultTo = mock(IIntentReceiver.class);
+        enqueueBroadcast(makeOrderedBroadcastRecord(airplane, callerApp,
+                List.of(makeRegisteredReceiver(receiverApp)), resultTo, null));
+
+        waitForIdle();
+        verify(mAms).appNotResponding(eq(receiverApp), any());
+        verifyScheduleRegisteredReceiver(callerApp, airplane);
+    }
+
+    /**
+     * Verify that we detect and ANR a wedged process when delivering an
+     * unordered broadcast with a {@code resultTo}.
+     */
+    @Test
+    public void testWedged_Registered_ResultTo() throws Exception {
+        // Legacy stack doesn't detect these ANRs; likely an oversight
+        Assume.assumeTrue(mImpl == Impl.MODERN);
+
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+        final ProcessRecord receiverApp = makeActiveProcessRecord(PACKAGE_GREEN,
+                ProcessBehavior.WEDGE);
+
+        final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        final IIntentReceiver resultTo = mock(IIntentReceiver.class);
+        enqueueBroadcast(makeBroadcastRecord(airplane, callerApp,
+                List.of(makeRegisteredReceiver(receiverApp)), resultTo));
+
+        waitForIdle();
+        verify(mAms).appNotResponding(eq(receiverApp), any());
+        verifyScheduleRegisteredReceiver(callerApp, airplane);
+    }
+
+    /**
+     * Verify that we detect and ANR a wedged process when delivering a
+     * broadcast with more than one priority tranche.
+     */
+    @Test
+    public void testWedged_Registered_Prioritized() throws Exception {
+        // Legacy stack doesn't detect these ANRs; likely an oversight
+        Assume.assumeTrue(mImpl == Impl.MODERN);
+
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+        final ProcessRecord receiverGreenApp = makeActiveProcessRecord(PACKAGE_GREEN,
+                ProcessBehavior.WEDGE);
+        final ProcessRecord receiverBlueApp = makeActiveProcessRecord(PACKAGE_BLUE,
+                ProcessBehavior.NORMAL);
+
+        final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        enqueueBroadcast(makeBroadcastRecord(airplane, callerApp,
+                List.of(makeRegisteredReceiver(receiverGreenApp, 10),
+                        makeRegisteredReceiver(receiverBlueApp, 5))));
+
+        waitForIdle();
+        verify(mAms).appNotResponding(eq(receiverGreenApp), any());
+        verifyScheduleRegisteredReceiver(receiverBlueApp, airplane);
     }
 
     /**
@@ -1338,11 +1419,11 @@ public class BroadcastQueueTest {
 
         // Confirm that we saw no registered receiver traffic
         final IApplicationThread oldThread = oldApp.getThread();
-        verify(oldThread, never()).scheduleRegisteredReceiver(any(),
-                any(), anyInt(), any(), any(), anyBoolean(), anyBoolean(), anyInt(), anyInt());
+        verify(oldThread, never()).scheduleRegisteredReceiver(any(), any(), anyInt(), any(), any(),
+                anyBoolean(), anyBoolean(), anyBoolean(), anyInt(), anyInt());
         final IApplicationThread newThread = newApp.getThread();
-        verify(newThread, never()).scheduleRegisteredReceiver(any(),
-                any(), anyInt(), any(), any(), anyBoolean(), anyBoolean(), anyInt(), anyInt());
+        verify(newThread, never()).scheduleRegisteredReceiver(any(), any(), anyInt(), any(), any(),
+                anyBoolean(), anyBoolean(), anyBoolean(), anyInt(), anyInt());
 
         // Confirm that we saw final manifest broadcast
         verifyScheduleReceiver(times(1), newApp, airplane,
@@ -1464,22 +1545,22 @@ public class BroadcastQueueTest {
         expectedExtras.putBoolean(PACKAGE_RED, true);
         inOrder.verify(greenThread).scheduleReceiverList(manifestReceiver(
                 filterEqualsIgnoringComponent(airplane), null, null,
-                Activity.RESULT_OK, null, bundleEquals(expectedExtras), true,
+                Activity.RESULT_OK, null, bundleEquals(expectedExtras), true, false,
                 UserHandle.USER_SYSTEM, null));
         inOrder.verify(blueThread).scheduleReceiverList(manifestReceiver(
                 filterEqualsIgnoringComponent(airplane), null, null,
-                Activity.RESULT_OK, null, bundleEquals(expectedExtras), true,
+                Activity.RESULT_OK, null, bundleEquals(expectedExtras), true, false,
                 UserHandle.USER_SYSTEM, null));
         expectedExtras.putBoolean(PACKAGE_BLUE, true);
         inOrder.verify(yellowThread).scheduleReceiverList(manifestReceiver(
                 filterEqualsIgnoringComponent(airplane), null, null,
-                Activity.RESULT_OK, null, bundleEquals(expectedExtras), true,
+                Activity.RESULT_OK, null, bundleEquals(expectedExtras), true, false,
                 UserHandle.USER_SYSTEM, null));
         expectedExtras.putBoolean(PACKAGE_YELLOW, true);
         inOrder.verify(redThread).scheduleReceiverList(registeredReceiver(
                 null, filterEquals(airplane),
                 Activity.RESULT_OK, null, bundleEquals(expectedExtras), false,
-                null, UserHandle.USER_SYSTEM, null));
+                null, true, UserHandle.USER_SYSTEM, null));
 
         // Finally, verify that we thawed the final receiver
         verify(mAms.mOomAdjuster.mCachedAppOptimizer).unfreezeTemporarily(eq(callerApp),
@@ -1544,22 +1625,22 @@ public class BroadcastQueueTest {
         final InOrder inOrder = inOrder(greenThread, blueThread, redThread);
         inOrder.verify(greenThread).scheduleReceiverList(manifestReceiver(
                 filterEqualsIgnoringComponent(intent), null, null,
-                Activity.RESULT_OK, null, null, true, UserHandle.USER_SYSTEM,
+                Activity.RESULT_OK, null, null, true, false, UserHandle.USER_SYSTEM,
                 null));
         if ((intent.getFlags() & Intent.FLAG_RECEIVER_NO_ABORT) != 0) {
             inOrder.verify(blueThread).scheduleReceiverList(manifestReceiver(
                     filterEqualsIgnoringComponent(intent), null, null,
-                    Activity.RESULT_OK, null, null, true, UserHandle.USER_SYSTEM,
+                    Activity.RESULT_OK, null, null, true, false, UserHandle.USER_SYSTEM,
                     null));
         } else {
             inOrder.verify(blueThread, never()).scheduleReceiverList(manifestReceiver(
-                    null, null, null, null,
+                    null, null, null, null, null,
                     null, null, null, null, null));
         }
         inOrder.verify(redThread).scheduleReceiverList(registeredReceiver(
                 null, filterEquals(intent),
                 Activity.RESULT_OK, null, bundleEquals(expectedExtras),
-                false, null, UserHandle.USER_SYSTEM, null));
+                false, null, true, UserHandle.USER_SYSTEM, null));
     }
 
     /**
@@ -1582,7 +1663,7 @@ public class BroadcastQueueTest {
         verify(callerThread).scheduleReceiverList(registeredReceiver(
                 null, filterEquals(airplane),
                 Activity.RESULT_OK, null, bundleEquals(orderedExtras), false,
-                null, UserHandle.USER_SYSTEM, null));
+                null, true, UserHandle.USER_SYSTEM, null));
     }
 
     /**
@@ -1603,7 +1684,7 @@ public class BroadcastQueueTest {
         verify(callerThread).scheduleReceiverList(registeredReceiver(
                 null, filterEquals(airplane),
                 Activity.RESULT_OK, null, null, false,
-                null, UserHandle.USER_SYSTEM, null));
+                null, true, UserHandle.USER_SYSTEM, null));
     }
 
     /**
@@ -1768,26 +1849,26 @@ public class BroadcastQueueTest {
         // First broadcast is canceled
         inOrder.verify(callerThread).scheduleReceiverList(registeredReceiver(null,
                 filterAndExtrasEquals(timezoneFirst), Activity.RESULT_CANCELED, null,
-                null, false, null, UserHandle.USER_SYSTEM, null));
+                null, false, null, true, UserHandle.USER_SYSTEM, null));
 
         // We deliver second broadcast to app
         timezoneSecond.setClassName(PACKAGE_BLUE, CLASS_GREEN);
         inOrder.verify(blueThread).scheduleReceiverList(manifestReceiver(
                 filterAndExtrasEquals(timezoneSecond),
-                null, null, null, null, null, true, null, null));
+                null, null, null, null, null, true, false, null, null));
 
         // Second broadcast is finished
         timezoneSecond.setComponent(null);
         inOrder.verify(callerThread).scheduleReceiverList(registeredReceiver(null,
                 filterAndExtrasEquals(timezoneSecond), Activity.RESULT_OK, null,
-                null, false, null, UserHandle.USER_SYSTEM, null));
+                null, false, null, true, UserHandle.USER_SYSTEM, null));
 
         // Since we "replaced" the first broadcast in its original position,
         // only now do we see the airplane broadcast
         airplane.setClassName(PACKAGE_BLUE, CLASS_RED);
         inOrder.verify(blueThread).scheduleReceiverList(manifestReceiver(
                 filterEquals(airplane),
-                null, null, null, null, null, false, null, null));
+                null, null, null, null, null, false, false, null, null));
     }
 
     @Test

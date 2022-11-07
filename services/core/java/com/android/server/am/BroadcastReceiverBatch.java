@@ -19,8 +19,8 @@ package com.android.server.am;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ReceiverInfo;
-import android.content.Intent;
 import android.content.IIntentReceiver;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.CompatibilityInfo;
 import android.os.Bundle;
@@ -171,12 +171,13 @@ final class BroadcastReceiverBatch {
     // Add a ReceiverInfo for a registered receiver.
     void schedule(@Nullable IIntentReceiver receiver, Intent intent,
             int resultCode, @Nullable String data, @Nullable Bundle extras, boolean ordered,
-            boolean sticky, int sendingUser, int processState,
+            boolean sticky, boolean assumeDelivered, int sendingUser, int processState,
             @Nullable BroadcastRecord r, int index) {
         ReceiverInfo ri = new ReceiverInfo();
         ri.intent = intent;
         ri.data = data;
         ri.extras = extras;
+        ri.assumeDelivered = assumeDelivered;
         ri.sendingUser = sendingUser;
         ri.processState = processState;
         ri.resultCode = resultCode;
@@ -190,12 +191,13 @@ final class BroadcastReceiverBatch {
     // Add a ReceiverInfo for a manifest receiver.
     void schedule(@Nullable Intent intent, @Nullable ActivityInfo activityInfo,
             @Nullable CompatibilityInfo compatInfo, int resultCode, @Nullable String data,
-            @Nullable Bundle extras, boolean sync, int sendingUser, int processState,
-            @Nullable BroadcastRecord r, int index) {
+            @Nullable Bundle extras, boolean sync, boolean assumeDelivered, int sendingUser,
+            int processState, @Nullable BroadcastRecord r, int index) {
         ReceiverInfo ri = new ReceiverInfo();
         ri.intent = intent;
         ri.data = data;
         ri.extras = extras;
+        ri.assumeDelivered = assumeDelivered;
         ri.sendingUser = sendingUser;
         ri.processState = processState;
         ri.resultCode = resultCode;
@@ -214,10 +216,10 @@ final class BroadcastReceiverBatch {
      */
     ArrayList<ReceiverInfo> registeredReceiver(@Nullable IIntentReceiver receiver,
             @Nullable Intent intent, int resultCode, @Nullable String data,
-            @Nullable Bundle extras, boolean ordered, boolean sticky,
+            @Nullable Bundle extras, boolean ordered, boolean sticky, boolean assumeDelivered,
             int sendingUser, int processState) {
         reset();
-        schedule(receiver, intent, resultCode, data, extras, ordered, sticky,
+        schedule(receiver, intent, resultCode, data, extras, ordered, sticky, assumeDelivered,
                 sendingUser, processState, null, 0);
         return receivers();
     }
@@ -225,9 +227,9 @@ final class BroadcastReceiverBatch {
     ArrayList<ReceiverInfo> manifestReceiver(@Nullable Intent intent,
             @Nullable ActivityInfo activityInfo, @Nullable CompatibilityInfo compatInfo,
             int resultCode, @Nullable String data, @Nullable Bundle extras, boolean sync,
-            int sendingUser, int processState) {
+            boolean assumeDelivered, int sendingUser, int processState) {
         reset();
-        schedule(intent, activityInfo, compatInfo, resultCode, data, extras, sync,
+        schedule(intent, activityInfo, compatInfo, resultCode, data, extras, sync, assumeDelivered,
                 sendingUser, processState, null, 0);
         return receivers();
     }
@@ -255,6 +257,7 @@ final class BroadcastReceiverBatch {
             n.intent = r.intent;
             n.data = r.data;
             n.extras = r.extras;
+            n.assumeDelivered = r.assumeDelivered;
             n.sendingUser = r.sendingUser;
             n.processState = r.processState;
             n.resultCode = r.resultCode;
