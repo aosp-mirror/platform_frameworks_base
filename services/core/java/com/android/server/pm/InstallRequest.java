@@ -18,8 +18,10 @@ package com.android.server.pm;
 
 import static android.content.pm.PackageManager.INSTALL_REASON_UNKNOWN;
 import static android.content.pm.PackageManager.INSTALL_SCENARIO_DEFAULT;
+import static android.content.pm.PackageManager.INSTALL_SUCCEEDED;
 import static android.os.Process.INVALID_UID;
 
+import static com.android.server.pm.PackageManagerService.SCAN_AS_INSTANT_APP;
 import static com.android.server.pm.PackageManagerService.TAG;
 
 import android.annotation.NonNull;
@@ -105,6 +107,12 @@ final class InstallRequest {
     @Nullable
     private ScanResult mScanResult;
 
+    private boolean mIsInstallInherit;
+    private boolean mIsInstallForUsers;
+
+    @Nullable
+    private final PackageMetrics mPackageMetrics;
+
     // New install
     InstallRequest(InstallingSession params) {
         mUserId = params.getUser().getIdentifier();
@@ -116,6 +124,8 @@ final class InstallRequest {
                 params.mTraceMethod, params.mTraceCookie, params.mSigningDetails,
                 params.mInstallReason, params.mInstallScenario, params.mForceQueryableOverride,
                 params.mDataLoaderType, params.mPackageSource);
+        mPackageMetrics = new PackageMetrics(this);
+        mIsInstallInherit = params.mIsInherit;
     }
 
     // Install existing package as user
@@ -127,6 +137,8 @@ final class InstallRequest {
         mPkg = pkg;
         mNewUsers = newUsers;
         mPostInstallRunnable = runnable;
+        mPackageMetrics = new PackageMetrics(this);
+        mIsInstallForUsers = true;
     }
 
     // addForInit
@@ -143,6 +155,7 @@ final class InstallRequest {
         mParseFlags = parseFlags;
         mScanFlags = scanFlags;
         mScanResult = scanResult;
+        mPackageMetrics = null; // No real logging from this code path
     }
 
     @Nullable
@@ -200,7 +213,7 @@ final class InstallRequest {
         return mInstallArgs == null ? null : mInstallArgs.mObserver;
     }
 
-    public boolean isMoveInstall() {
+    public boolean isInstallMove() {
         return mInstallArgs != null && mInstallArgs.mMoveInfo != null;
     }
 
@@ -278,7 +291,7 @@ final class InstallRequest {
         return mRemovedInfo != null ? mRemovedInfo.mRemovedPackage : null;
     }
 
-    public boolean isInstallForExistingUser() {
+    public boolean isInstallExistingForUser() {
         return mInstallArgs == null;
     }
 
@@ -406,12 +419,20 @@ final class InstallRequest {
         return mClearCodeCache;
     }
 
-    public boolean isReplace() {
+    public boolean isInstallReplace() {
         return mReplace;
     }
 
-    public boolean isSystem() {
+    public boolean isInstallSystem() {
         return mSystem;
+    }
+
+    public boolean isInstallInherit() {
+        return mIsInstallInherit;
+    }
+
+    public boolean isInstallForUsers() {
+        return mIsInstallForUsers;
     }
 
     @Nullable
@@ -520,6 +541,10 @@ final class InstallRequest {
         return mScanResult.mRequest.mIsPlatformPackage;
     }
 
+    public boolean isInstantInstall() {
+        return (mScanFlags & SCAN_AS_INSTANT_APP) != 0;
+    }
+
     public void assertScanResultExists() {
         if (mScanResult == null) {
             // Should not happen. This indicates a bug in the installation code flow
@@ -529,7 +554,6 @@ final class InstallRequest {
                 Slog.e(TAG, "ScanResult is null and it should not happen");
             }
         }
-
     }
 
     public void setScanFlags(int scanFlags) {
@@ -656,6 +680,62 @@ final class InstallRequest {
     public void setRemovedAppId(int appId) {
         if (mRemovedInfo != null) {
             mRemovedInfo.mRemovedAppId = appId;
+        }
+    }
+
+    public void onPrepareStarted() {
+        if (mPackageMetrics != null) {
+            mPackageMetrics.onStepStarted(PackageMetrics.STEP_PREPARE);
+        }
+    }
+
+    public void onPrepareFinished() {
+        if (mPackageMetrics != null) {
+            mPackageMetrics.onStepFinished(PackageMetrics.STEP_PREPARE);
+        }
+    }
+
+    public void onScanStarted() {
+        if (mPackageMetrics != null) {
+            mPackageMetrics.onStepStarted(PackageMetrics.STEP_SCAN);
+        }
+    }
+
+    public void onScanFinished() {
+        if (mPackageMetrics != null) {
+            mPackageMetrics.onStepFinished(PackageMetrics.STEP_SCAN);
+        }
+    }
+
+    public void onReconcileStarted() {
+        if (mPackageMetrics != null) {
+            mPackageMetrics.onStepStarted(PackageMetrics.STEP_RECONCILE);
+        }
+    }
+
+    public void onReconcileFinished() {
+        if (mPackageMetrics != null) {
+            mPackageMetrics.onStepFinished(PackageMetrics.STEP_RECONCILE);
+        }
+    }
+
+    public void onCommitStarted() {
+        if (mPackageMetrics != null) {
+            mPackageMetrics.onStepStarted(PackageMetrics.STEP_COMMIT);
+        }
+    }
+
+    public void onCommitFinished() {
+        if (mPackageMetrics != null) {
+            mPackageMetrics.onStepFinished(PackageMetrics.STEP_COMMIT);
+        }
+    }
+
+    public void onInstallCompleted() {
+        if (getReturnCode() == INSTALL_SUCCEEDED) {
+            if (mPackageMetrics != null) {
+                mPackageMetrics.onInstallSucceed();
+            }
         }
     }
 }

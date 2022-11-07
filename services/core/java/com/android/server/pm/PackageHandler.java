@@ -95,7 +95,7 @@ final class PackageHandler extends Handler {
 
                 request.closeFreezer();
                 request.runPostInstallRunnable();
-                if (!request.isInstallForExistingUser()) {
+                if (!request.isInstallExistingForUser()) {
                     mInstallPackageHelper.handlePackagePostInstall(request, didRestore);
                 } else if (DEBUG_INSTALL) {
                     // No post-install when we run restore from installExistingPackageForUser
