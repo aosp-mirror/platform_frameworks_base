@@ -2598,7 +2598,7 @@ public final class DisplayManagerService extends SystemService {
             // initPowerManagement has not yet been called.
             return;
         }
-        if (mBrightnessTracker == null) {
+        if (mBrightnessTracker == null && display.getDisplayIdLocked() == Display.DEFAULT_DISPLAY) {
             mBrightnessTracker = new BrightnessTracker(mContext, null);
         }
 
