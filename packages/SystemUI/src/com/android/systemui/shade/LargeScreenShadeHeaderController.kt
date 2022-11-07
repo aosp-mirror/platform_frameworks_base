@@ -246,6 +246,8 @@ class LargeScreenShadeHeaderController @Inject constructor(
             qsCarrierGroup.updateTextAppearance(R.style.TextAppearance_QS_Status_Carriers)
             if (header is MotionLayout) {
                 loadConstraints()
+                header.minHeight = resources
+                        .getDimensionPixelSize(R.dimen.large_screen_shade_header_min_height)
                 lastInsets?.let { updateConstraintsForInsets(header, it) }
             }
             updateResources()

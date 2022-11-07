@@ -155,7 +155,7 @@ object Flags {
     // 500 - quick settings
 
     // TODO(b/254512321): Tracking Bug
-    @JvmField val COMBINED_QS_HEADERS = UnreleasedFlag(501, teamfood = true)
+    @JvmField val COMBINED_QS_HEADERS = ReleasedFlag(501)
     val PEOPLE_TILE = ResourceBooleanFlag(502, R.bool.flag_conversations)
 
     @JvmField
@@ -163,7 +163,7 @@ object Flags {
         ResourceBooleanFlag(503, R.bool.flag_lockscreen_qs_user_detail_shortcut)
 
     // TODO(b/254512747): Tracking Bug
-    val NEW_HEADER = UnreleasedFlag(505, teamfood = true)
+    val NEW_HEADER = ReleasedFlag(505)
 
     // TODO(b/254512383): Tracking Bug
     @JvmField
