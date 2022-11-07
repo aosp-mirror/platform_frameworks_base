@@ -23,7 +23,6 @@ import static android.view.WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.RemoteAction;
@@ -72,11 +71,6 @@ public interface PipMenuController {
      * Given a set of actions, update the menu.
      */
     void setAppActions(List<RemoteAction> appActions, RemoteAction closeAction);
-
-    /**
-     * Wait until the next frame to run the given Runnable.
-     */
-    void runWithNextFrame(@NonNull Runnable runnable);
 
     /**
      * Resize the PiP menu with the given bounds. The PiP SurfaceControl is given if there is a
