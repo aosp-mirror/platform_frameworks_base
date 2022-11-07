@@ -358,7 +358,7 @@ public final class SharedLibrariesImpl implements SharedLibrariesRead, Watchable
                     continue;
                 }
 
-                if (ps.getPkg().isSystem()) {
+                if (ps.isSystem()) {
                     continue;
                 }
 
@@ -722,8 +722,8 @@ public final class SharedLibrariesImpl implements SharedLibrariesRead, Watchable
                     // it is better for the user to reinstall than to be in an limbo
                     // state. Also libs disappearing under an app should never happen
                     // - just in case.
-                    if (!pkg.isSystem() || pkgSetting.getPkgState().isUpdatedSystemApp()) {
-                        final int flags = pkgSetting.getPkgState().isUpdatedSystemApp()
+                    if (!pkgSetting.isSystem() || pkgSetting.isUpdatedSystemApp()) {
+                        final int flags = pkgSetting.isUpdatedSystemApp()
                                 ? PackageManager.DELETE_KEEP_DATA : 0;
                         synchronized (mPm.mInstallLock) {
                             mDeletePackageHelper.deletePackageLIF(pkg.getPackageName(), null, true,
@@ -842,13 +842,15 @@ public final class SharedLibrariesImpl implements SharedLibrariesRead, Watchable
         if (installRequest.getStaticSharedLibraryInfo() != null) {
             return Collections.singletonList(installRequest.getStaticSharedLibraryInfo());
         }
-        final boolean hasDynamicLibraries = parsedPackage != null && parsedPackage.isSystem()
+        boolean isSystemApp = installRequest.getScannedPackageSetting() != null
+                && installRequest.getScannedPackageSetting().isSystem();
+        final boolean hasDynamicLibraries = parsedPackage != null && isSystemApp
                 && installRequest.getDynamicSharedLibraryInfos() != null;
         if (!hasDynamicLibraries) {
             return null;
         }
         final boolean isUpdatedSystemApp = installRequest.getScannedPackageSetting() != null
-                && installRequest.getScannedPackageSetting().getPkgState().isUpdatedSystemApp();
+                && installRequest.getScannedPackageSetting().isUpdatedSystemApp();
         // We may not yet have disabled the updated package yet, so be sure to grab the
         // current setting if that's the case.
         final PackageSetting updatedSystemPs = isUpdatedSystemApp

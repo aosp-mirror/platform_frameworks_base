@@ -2241,20 +2241,19 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             mRequiredSdkSandboxPackage = getRequiredSdkSandboxPackageName(computer);
 
             // Initialize InstantAppRegistry's Instant App list for all users.
-            for (AndroidPackage pkg : mPackages.values()) {
-                if (pkg.isSystem()) {
-                    continue;
+            forEachPackageState(computer, packageState -> {
+                var pkg = packageState.getAndroidPackage();
+                if (pkg == null || packageState.isSystem()) {
+                    return;
                 }
                 for (int userId : userIds) {
-                    final PackageStateInternal ps =
-                            computer.getPackageStateInternal(pkg.getPackageName());
-                    if (ps == null || !ps.getUserStateOrDefault(userId).isInstantApp()
-                            || !ps.getUserStateOrDefault(userId).isInstalled()) {
+                    if (!packageState.getUserStateOrDefault(userId).isInstantApp()
+                            || !packageState.getUserStateOrDefault(userId).isInstalled()) {
                         continue;
                     }
-                    mInstantAppRegistry.addInstantApp(userId, ps.getAppId());
+                    mInstantAppRegistry.addInstantApp(userId, packageState.getAppId());
                 }
-            }
+            });
 
             mInstallerService = mInjector.getPackageInstallerService();
             final ComponentName instantAppResolverComponent = getInstantAppResolver(computer);
@@ -3685,7 +3684,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         PackageStateInternal packageState = computer.getPackageStateInternal(componentPkgName);
         if (packageState == null || packageState.getPkg() == null
                 || (!packageState.isSystem()
-                && !packageState.getTransientState().isUpdatedSystemApp())) {
+                && !packageState.isUpdatedSystemApp())) {
             throw new SecurityException(
                     "Changing the label is not allowed for " + componentName);
         }
@@ -3887,7 +3886,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             final AndroidPackage deletedPkg = pkgSetting.getPkg();
             final boolean isSystemStub = (deletedPkg != null)
                     && deletedPkg.isStub()
-                    && deletedPkg.isSystem();
+                    && pkgSetting.isSystem();
             if (isSystemStub
                     && (newState == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
                     || newState == PackageManager.COMPONENT_ENABLED_STATE_ENABLED)) {
@@ -6408,7 +6407,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             }
 
             AndroidPackage pkg = packageState.getPkg();
-            return pkg != null && pkg.isSystem() && pkg.isPersistent();
+            return pkg != null && packageState.isSystem() && pkg.isPersistent();
         }
 
         @Override
@@ -6967,8 +6966,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         if (packageState == null || packageState.getPkg() == null) {
             return false;
         }
-        return AndroidPackageUtils.canHaveOatDir(packageState.getPkg(),
-                packageState.getTransientState().isUpdatedSystemApp());
+        return AndroidPackageUtils.canHaveOatDir(packageState, packageState.getPkg());
     }
 
     long deleteOatArtifactsOfPackage(@NonNull Computer snapshot, String packageName) {

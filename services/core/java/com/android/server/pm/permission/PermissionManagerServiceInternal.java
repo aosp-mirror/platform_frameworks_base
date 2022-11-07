@@ -24,6 +24,7 @@ import android.content.pm.PermissionInfo;
 import android.permission.PermissionManagerInternal;
 
 import com.android.server.pm.pkg.AndroidPackage;
+import com.android.server.pm.pkg.PackageState;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -249,13 +250,13 @@ public interface PermissionManagerServiceInternal extends PermissionManagerInter
     /**
      * Callback when a package has been added.
      *
-     * @param pkg the added package
+     * @param packageState the added package
      * @param isInstantApp whether the added package is an instant app
      * @param oldPkg the old package, or {@code null} if none
      */
     //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
-    void onPackageAdded(@NonNull AndroidPackage pkg, boolean isInstantApp,
-            @Nullable AndroidPackage oldPkg);
+    void onPackageAdded(@NonNull PackageState packageState,
+            boolean isInstantApp, @Nullable AndroidPackage oldPkg);
 
     /**
      * Callback when a package has been installed for a user.
@@ -285,16 +286,15 @@ public interface PermissionManagerServiceInternal extends PermissionManagerInter
      * The package may have been fully removed from the system, or only marked as uninstalled for
      * this user but still instlaled for other users.
      *
-     * TODO: Pass PackageState instead.
-     *
      * @param packageName the name of the uninstalled package
      * @param appId the app ID of the uninstalled package
-     * @param pkg the uninstalled package, or {@code null} if unavailable
+     * @param packageState the uninstalled package, or {@code null} if unavailable
      * @param sharedUserPkgs the packages that are in the same shared user
      * @param userId the user ID the package is uninstalled for
      */
     //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
-    void onPackageUninstalled(@NonNull String packageName, int appId, @Nullable AndroidPackage pkg,
+    void onPackageUninstalled(@NonNull String packageName, int appId,
+            @Nullable PackageState packageState, @Nullable AndroidPackage pkg,
             @NonNull List<AndroidPackage> sharedUserPkgs, @UserIdInt int userId);
 
     /**

@@ -873,8 +873,8 @@ public final class Settings implements Watchable, Snappable {
         }
         final PackageSetting dp = mDisabledSysPackages.get(name);
         // always make sure the system package code and resource paths dont change
-        if (dp == null && p.getPkg() != null && p.getPkg().isSystem()
-                && !p.getPkgState().isUpdatedSystemApp()) {
+        if (dp == null && p.getPkg() != null && p.isSystem()
+                && !p.isUpdatedSystemApp()) {
             final PackageSetting disabled;
             if (replaced) {
                 // a little trick...  when we install the new package, we don't

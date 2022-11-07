@@ -1250,17 +1250,17 @@ class PermissionService(
     }
 
     override fun onPackageAdded(
-        androidPackage: AndroidPackage,
+        packageState: PackageState,
         isInstantApp: Boolean,
         oldPackage: AndroidPackage?
     ) {
         synchronized(mountedStorageVolumes) {
-            if (androidPackage.volumeUuid !in mountedStorageVolumes) {
+            if (packageState.volumeUuid !in mountedStorageVolumes) {
                 // Wait for the storage volume to be mounted and batch the state mutation there.
                 return
             }
         }
-        service.onPackageAdded(androidPackage.packageName)
+        service.onPackageAdded(packageState.packageName)
     }
 
     override fun onPackageRemoved(androidPackage: AndroidPackage) {
@@ -1301,6 +1301,7 @@ class PermissionService(
     override fun onPackageUninstalled(
         packageName: String,
         appId: Int,
+        packageState: PackageState,
         androidPackage: AndroidPackage?,
         sharedUserPkgs: List<AndroidPackage>,
         userId: Int

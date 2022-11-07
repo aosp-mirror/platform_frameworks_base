@@ -161,11 +161,12 @@ public class AndroidPackageUtils {
         );
     }
 
-    public static boolean canHaveOatDir(AndroidPackage pkg, boolean isUpdatedSystemApp) {
+    public static boolean canHaveOatDir(@NonNull PackageState packageState,
+            @NonNull AndroidPackage pkg) {
         // The following app types CANNOT have oat directory
         // - non-updated system apps,
         // - incrementally installed apps.
-        if (pkg.isSystem() && !isUpdatedSystemApp) {
+        if (packageState.isSystem() && !packageState.isUpdatedSystemApp()) {
             return false;
         }
         if (IncrementalManager.isIncrementalPath(pkg.getPath())) {
@@ -234,14 +235,14 @@ public class AndroidPackageUtils {
                 || !pkg.getLibraryNames().isEmpty();
     }
 
-    public static int getHiddenApiEnforcementPolicy(@Nullable AndroidPackage pkg,
-            @NonNull PackageStateInternal pkgSetting) {
+    public static int getHiddenApiEnforcementPolicy(@NonNull AndroidPackage pkg,
+            @NonNull PackageStateInternal packageState) {
         boolean isAllowedToUseHiddenApis;
         if (pkg == null) {
             isAllowedToUseHiddenApis = false;
         } else if (pkg.isSignedWithPlatformKey()) {
             isAllowedToUseHiddenApis = true;
-        } else if (pkg.isSystem() || pkgSetting.getTransientState().isUpdatedSystemApp()) {
+        } else if (packageState.isSystem()) {
             isAllowedToUseHiddenApis = pkg.isUsesNonSdkApi()
                     || SystemConfig.getInstance().getHiddenApiWhitelistedApps().contains(
                     pkg.getPackageName());
@@ -266,9 +267,9 @@ public class AndroidPackageUtils {
      * Returns false iff the provided flags include the {@link PackageManager#MATCH_SYSTEM_ONLY}
      * flag and the provided package is not a system package. Otherwise returns {@code true}.
      */
-    public static boolean isMatchForSystemOnly(AndroidPackage pkg, long flags) {
+    public static boolean isMatchForSystemOnly(@NonNull PackageState packageState, long flags) {
         if ((flags & PackageManager.MATCH_SYSTEM_ONLY) != 0) {
-            return pkg.isSystem();
+            return packageState.isSystem();
         }
         return true;
     }
@@ -300,8 +301,8 @@ public class AndroidPackageUtils {
      * actually renamed.
      */
     @Nullable
-    public static String getRealPackageOrNull(AndroidPackage pkg) {
-        if (pkg.getOriginalPackages().isEmpty() || !pkg.isSystem()) {
+    public static String getRealPackageOrNull(@NonNull AndroidPackage pkg, boolean isSystem) {
+        if (pkg.getOriginalPackages().isEmpty() || !isSystem) {
             return null;
         }
 

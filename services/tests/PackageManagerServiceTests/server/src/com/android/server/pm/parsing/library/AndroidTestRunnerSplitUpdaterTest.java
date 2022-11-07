@@ -55,7 +55,7 @@ public class AndroidTestRunnerSplitUpdaterTest extends PackageSharedLibraryUpdat
                 .hideAsParsed())
                 .hideAsFinal();
 
-        checkBackwardsCompatibility(before, after);
+        checkBackwardsCompatibility(before, after, false);
     }
 
     @Test
@@ -73,10 +73,11 @@ public class AndroidTestRunnerSplitUpdaterTest extends PackageSharedLibraryUpdat
                 .hideAsParsed())
                 .hideAsFinal();
 
-        checkBackwardsCompatibility(before, after);
+        checkBackwardsCompatibility(before, after, false);
     }
 
-    private void checkBackwardsCompatibility(ParsedPackage before, AndroidPackage after) {
-        checkBackwardsCompatibility(before, after, AndroidTestRunnerSplitUpdater::new);
+    private void checkBackwardsCompatibility(ParsedPackage before, AndroidPackage after,
+            boolean isSystemApp) {
+        checkBackwardsCompatibility(before, after, isSystemApp, AndroidTestRunnerSplitUpdater::new);
     }
 }

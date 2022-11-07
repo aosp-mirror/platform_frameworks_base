@@ -139,7 +139,7 @@ public final class DexOptHelper {
 
             boolean useProfileForDexopt = false;
 
-            if ((mPm.isFirstBoot() || mPm.isDeviceUpgrading()) && pkg.isSystem()) {
+            if ((mPm.isFirstBoot() || mPm.isDeviceUpgrading()) && packageState.isSystem()) {
                 // Copy over initial preopt profiles since we won't get any JIT samples for methods
                 // that are already compiled.
                 File profileFile = new File(getPrebuildProfilePath(pkg));

@@ -325,16 +325,16 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
         whenever(mocks.settings.keySetManagerService).thenReturn(mocks.keySetManagerService)
         whenever(mocks.settings.keySetManagerService).thenReturn(mocks.keySetManagerService)
         whenever(mocks.settings.snapshot()).thenReturn(mocks.settings)
-        whenever(mocks.packageAbiHelper.derivePackageAbi(
-                any(AndroidPackage::class.java), anyBoolean(), nullable(), any(File::class.java))) {
+        whenever(mocks.packageAbiHelper.derivePackageAbi(any(AndroidPackage::class.java),
+            anyBoolean(), anyBoolean(), nullable(), any(File::class.java))) {
             android.util.Pair(PackageAbiHelper.Abis("", ""),
                     PackageAbiHelper.NativeLibraryPaths("", false, "", ""))
         }
         whenever(mocks.userManagerInternal.getUsers(true, false, false)).thenReturn(DEFAULT_USERS)
         whenever(mocks.userManagerService.userIds).thenReturn(intArrayOf(0))
         whenever(mocks.userManagerService.exists(0)).thenReturn(true)
-        whenever(mocks.packageAbiHelper.deriveNativeLibraryPaths(
-                any(AndroidPackage::class.java), anyBoolean(), any(File::class.java))) {
+        whenever(mocks.packageAbiHelper.deriveNativeLibraryPaths(any(AndroidPackage::class.java),
+                anyBoolean(), anyBoolean(), any(File::class.java))) {
             PackageAbiHelper.NativeLibraryPaths("", false, "", "")
         }
         whenever(mocks.injector.bootstrap(any(PackageManagerService::class.java))) {

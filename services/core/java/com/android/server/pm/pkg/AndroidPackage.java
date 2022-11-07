@@ -1537,10 +1537,4 @@ public interface AndroidPackage {
      * @hide
      */
     boolean isVisibleToInstantApps();
-
-    /**
-     * @see ApplicationInfo#FLAG_SYSTEM
-     * @hide
-     */
-    boolean isSystem();
 }

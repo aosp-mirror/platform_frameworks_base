@@ -286,7 +286,8 @@ final class InstallPackageHelper {
             pkgSetting = request.getScannedPackageSetting();
             if (originalPkgSetting != null) {
                 mPm.mSettings.addRenamedPackageLPw(
-                        AndroidPackageUtils.getRealPackageOrNull(parsedPackage),
+                        AndroidPackageUtils.getRealPackageOrNull(parsedPackage,
+                                pkgSetting.isSystem()),
                         originalPkgSetting.getPackageName());
                 mPm.mTransferredPackages.add(originalPkgSetting.getPackageName());
             } else {
@@ -503,7 +504,7 @@ final class InstallPackageHelper {
                 }
             }
 
-            mPm.mPermissionManager.onPackageAdded(pkg,
+            mPm.mPermissionManager.onPackageAdded(pkgSetting,
                     (scanFlags & SCAN_AS_INSTANT_APP) != 0, oldPkg);
         }
 
@@ -1225,9 +1226,7 @@ final class InstallPackageHelper {
             if (ps != null) {
                 if (DEBUG_INSTALL) Slog.d(TAG, "Existing package: " + ps);
 
-                if (ps.getPkg() != null) {
-                    systemApp = ps.getPkg().isSystem();
-                }
+                systemApp = ps.isSystem();
                 request.setOriginUsers(
                         ps.queryInstalledUsers(mPm.mUserManager.getUserIds(), true));
             }
@@ -1402,17 +1401,17 @@ final class InstallPackageHelper {
 
             try {
                 PackageSetting pkgSetting;
-                AndroidPackage oldPackage;
                 synchronized (mPm.mLock) {
                     pkgSetting = mPm.mSettings.getPackageLPr(pkgName);
-                    oldPackage = mPm.mPackages.get(pkgName);
                 }
                 boolean isUpdatedSystemAppFromExistingSetting = pkgSetting != null
-                        && pkgSetting.getPkgState().isUpdatedSystemApp();
+                        && pkgSetting.isUpdatedSystemApp();
                 final String abiOverride = deriveAbiOverride(request.getAbiOverride());
-                boolean isUpdatedSystemAppInferred = oldPackage != null && oldPackage.isSystem();
+
+                // TODO: Are these system flags actually set properly at this stage?
+                boolean isUpdatedSystemAppInferred = pkgSetting != null && pkgSetting.isSystem();
                 final Pair<PackageAbiHelper.Abis, PackageAbiHelper.NativeLibraryPaths>
-                        derivedAbi = mPackageAbiHelper.derivePackageAbi(parsedPackage,
+                        derivedAbi = mPackageAbiHelper.derivePackageAbi(parsedPackage, systemApp,
                         isUpdatedSystemAppFromExistingSetting || isUpdatedSystemAppInferred,
                         abiOverride, ScanPackageUtils.getAppLib32InstallDir());
                 derivedAbi.first.applyTo(parsedPackage);
@@ -1517,7 +1516,7 @@ final class InstallPackageHelper {
                     }
 
                     // don't allow a system upgrade unless the upgrade hash matches
-                    if (oldPackage.getRestrictUpdateHash() != null && oldPackage.isSystem()) {
+                    if (oldPackage.getRestrictUpdateHash() != null && oldPackageState.isSystem()) {
                         final byte[] digestBytes;
                         try {
                             final MessageDigest digest = MessageDigest.getInstance("SHA-512");
@@ -2043,7 +2042,7 @@ final class InstallPackageHelper {
             final PackageSetting ps = mPm.mSettings.getPackageLPr(pkgName);
             final int userId = installRequest.getUserId();
             if (ps != null) {
-                if (pkg.isSystem()) {
+                if (ps.isSystem()) {
                     if (DEBUG_INSTALL) {
                         Slog.d(TAG, "Implicitly enabling system package on upgrade: " + pkgName);
                     }
@@ -2362,8 +2361,7 @@ final class InstallPackageHelper {
 
                 // Unfortunately, the updated system app flag is only tracked on this PackageSetting
                 boolean isUpdatedSystemApp =
-                        installRequest.getScannedPackageSetting().getPkgState()
-                        .isUpdatedSystemApp();
+                        installRequest.getScannedPackageSetting().isUpdatedSystemApp();
 
                 realPkgSetting.getPkgState().setUpdatedSystemApp(isUpdatedSystemApp);
 
@@ -2706,7 +2704,7 @@ final class InstallPackageHelper {
                 // Send PACKAGE_ADDED broadcast for users that see the package for the first time
                 // sendPackageAddedForNewUsers also deals with system apps
                 int appId = UserHandle.getAppId(request.getUid());
-                boolean isSystem = request.getPkg().isSystem();
+                boolean isSystem = request.isInstallSystem();
                 mPm.sendPackageAddedForNewUsers(mPm.snapshotComputer(), packageName,
                         isSystem || virtualPreload, virtualPreload /*startReceiver*/, appId,
                         firstUserIds, firstInstantUserIds, dataLoaderType);
@@ -2783,7 +2781,7 @@ final class InstallPackageHelper {
                             null /*broadcastAllowList*/,
                             mBroadcastHelper.getTemporaryAppAllowlistBroadcastOptions(
                                     REASON_PACKAGE_REPLACED).toBundle());
-                } else if (launchedForRestore && !request.getPkg().isSystem()) {
+                } else if (launchedForRestore && !request.isInstallSystem()) {
                     // First-install and we did a restore, so we're responsible for the
                     // first-launch broadcast.
                     if (DEBUG_BACKUP) {
@@ -3782,9 +3780,11 @@ final class InstallPackageHelper {
 
         synchronized (mPm.mLock) {
             platformPackage = mPm.getPlatformPackage();
+            var isSystemApp = AndroidPackageUtils.isSystem(parsedPackage);
             final String renamedPkgName = mPm.mSettings.getRenamedPackageLPr(
-                    AndroidPackageUtils.getRealPackageOrNull(parsedPackage));
-            realPkgName = ScanPackageUtils.getRealPackageName(parsedPackage, renamedPkgName);
+                    AndroidPackageUtils.getRealPackageOrNull(parsedPackage, isSystemApp));
+            realPkgName = ScanPackageUtils.getRealPackageName(parsedPackage, renamedPkgName,
+                    isSystemApp);
             if (realPkgName != null) {
                 ScanPackageUtils.ensurePackageRenamed(parsedPackage, renamedPkgName);
             }
@@ -3848,7 +3848,7 @@ final class InstallPackageHelper {
 
         boolean isUpdatedSystemApp;
         if (installedPkgSetting != null) {
-            isUpdatedSystemApp = installedPkgSetting.getPkgState().isUpdatedSystemApp();
+            isUpdatedSystemApp = installedPkgSetting.isUpdatedSystemApp();
         } else {
             isUpdatedSystemApp = disabledPkgSetting != null;
         }

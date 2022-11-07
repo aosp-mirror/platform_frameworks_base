@@ -268,20 +268,21 @@ final class ScanPackageUtils {
         pkgSetting.getTransientState().setSeInfo(SELinuxMMAC.getSeInfo(pkgSetting, parsedPackage,
                 sharedUserSetting, injector.getCompatibility()));
 
-        if (parsedPackage.isSystem()) {
+        if (pkgSetting.isSystem()) {
             configurePackageComponents(parsedPackage);
         }
 
         final String cpuAbiOverride = deriveAbiOverride(request.mCpuAbiOverride);
-        final boolean isUpdatedSystemApp = pkgSetting.getPkgState().isUpdatedSystemApp();
+        final boolean isSystemApp = pkgSetting.isSystem();
+        final boolean isUpdatedSystemApp = pkgSetting.isUpdatedSystemApp();
 
         final File appLib32InstallDir = getAppLib32InstallDir();
         if ((scanFlags & SCAN_NEW_INSTALL) == 0) {
             if (needToDeriveAbi) {
                 Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "derivePackageAbi");
                 final Pair<PackageAbiHelper.Abis, PackageAbiHelper.NativeLibraryPaths> derivedAbi =
-                        packageAbiHelper.derivePackageAbi(parsedPackage, isUpdatedSystemApp,
-                                cpuAbiOverride, appLib32InstallDir);
+                        packageAbiHelper.derivePackageAbi(parsedPackage, isSystemApp,
+                                isUpdatedSystemApp, cpuAbiOverride, appLib32InstallDir);
                 derivedAbi.first.applyTo(parsedPackage);
                 derivedAbi.second.applyTo(parsedPackage);
                 Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
@@ -291,14 +292,13 @@ final class ScanPackageUtils {
                 // structure. Try to detect abi based on directory structure.
 
                 String pkgRawPrimaryCpuAbi = AndroidPackageUtils.getRawPrimaryCpuAbi(parsedPackage);
-                if (parsedPackage.isSystem() && !isUpdatedSystemApp
-                        && pkgRawPrimaryCpuAbi == null) {
+                if (isSystemApp && !isUpdatedSystemApp && pkgRawPrimaryCpuAbi == null) {
                     final PackageAbiHelper.Abis abis = packageAbiHelper.getBundledAppAbis(
                             parsedPackage);
                     abis.applyTo(parsedPackage);
                     abis.applyTo(pkgSetting);
                     final PackageAbiHelper.NativeLibraryPaths nativeLibraryPaths =
-                            packageAbiHelper.deriveNativeLibraryPaths(parsedPackage,
+                            packageAbiHelper.deriveNativeLibraryPaths(parsedPackage, isSystemApp,
                                     isUpdatedSystemApp, appLib32InstallDir);
                     nativeLibraryPaths.applyTo(parsedPackage);
                 }
@@ -310,7 +310,7 @@ final class ScanPackageUtils {
                         .setSecondaryCpuAbi(secondaryCpuAbiFromSettings);
 
                 final PackageAbiHelper.NativeLibraryPaths nativeLibraryPaths =
-                        packageAbiHelper.deriveNativeLibraryPaths(parsedPackage,
+                        packageAbiHelper.deriveNativeLibraryPaths(parsedPackage, isSystemApp,
                                 isUpdatedSystemApp, appLib32InstallDir);
                 nativeLibraryPaths.applyTo(parsedPackage);
 
@@ -336,8 +336,8 @@ final class ScanPackageUtils {
             // ABIs we determined during compilation, but the path will depend on the final
             // package path (after the rename away from the stage path).
             final PackageAbiHelper.NativeLibraryPaths nativeLibraryPaths =
-                    packageAbiHelper.deriveNativeLibraryPaths(parsedPackage, isUpdatedSystemApp,
-                            appLib32InstallDir);
+                    packageAbiHelper.deriveNativeLibraryPaths(parsedPackage, isSystemApp,
+                            isUpdatedSystemApp, appLib32InstallDir);
             nativeLibraryPaths.applyTo(parsedPackage);
         }
 
@@ -398,7 +398,7 @@ final class ScanPackageUtils {
         parsedPackage.setFactoryTest(isUnderFactoryTest && parsedPackage.getRequestedPermissions()
                 .contains(android.Manifest.permission.FACTORY_TEST));
 
-        if (parsedPackage.isSystem()) {
+        if (isSystemApp) {
             pkgSetting.setIsOrphaned(true);
         }
 
@@ -707,9 +707,9 @@ final class ScanPackageUtils {
      * been installed under one of this package's original names.
      */
     public static @Nullable String getRealPackageName(@NonNull AndroidPackage pkg,
-            @Nullable String renamedPkgName) {
+            @Nullable String renamedPkgName, boolean isSystemApp) {
         if (isPackageRenamed(pkg, renamedPkgName)) {
-            return AndroidPackageUtils.getRealPackageOrNull(pkg);
+            return AndroidPackageUtils.getRealPackageOrNull(pkg, isSystemApp);
         }
         return null;
     }
@@ -825,7 +825,17 @@ final class ScanPackageUtils {
     public static void applyPolicy(ParsedPackage parsedPackage,
             final @PackageManagerService.ScanFlags int scanFlags,
             @Nullable AndroidPackage platformPkg, boolean isUpdatedSystemApp) {
+        // TODO: In the real APIs, an updated system app is always a system app, but that may not
+        //  hold true during scan because PMS doesn't propagate the SCAN_AS_SYSTEM flag for the data
+        //  directory. This tries to emulate that behavior by using either the flag or the boolean,
+        //  but this logic is fragile. Specifically, it may affect the PackageBackwardCompatibility
+        //  checker, which switches branches based on whether an app is a system app. When install
+        //  is refactored, the scan policy flags should not be read this late and instead passed
+        //  around in the PackageSetting or a temporary object which infers these values early, so
+        //  that all further consumers agree on their values.
+        boolean isSystemApp = isUpdatedSystemApp;
         if ((scanFlags & SCAN_AS_SYSTEM) != 0) {
+            isSystemApp = true;
             parsedPackage.setSystem(true);
             // TODO(b/135203078): Can this be done in PackageParser? Or just inferred when the flag
             //  is set during parse.
@@ -871,13 +881,14 @@ final class ScanPackageUtils {
                 ) == PackageManager.SIGNATURE_MATCH))
         );
 
-        if (!parsedPackage.isSystem()) {
+        if (!isSystemApp) {
             // Only system apps can use these features.
             parsedPackage.clearOriginalPackages()
                     .clearAdoptPermissions();
         }
 
-        PackageBackwardCompatibility.modifySharedLibraries(parsedPackage, isUpdatedSystemApp);
+        PackageBackwardCompatibility.modifySharedLibraries(parsedPackage, isSystemApp,
+                isUpdatedSystemApp);
     }
 
     /**

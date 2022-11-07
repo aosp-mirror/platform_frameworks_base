@@ -29,7 +29,8 @@ public class ComGoogleAndroidMapsUpdater extends PackageSharedLibraryUpdater {
     private static final String LIBRARY_NAME = "com.google.android.maps";
 
     @Override
-    public void updatePackage(ParsedPackage parsedPackage, boolean isUpdatedSystemApp) {
+    public void updatePackage(ParsedPackage parsedPackage, boolean isSystemApp,
+            boolean isUpdatedSystemApp) {
         parsedPackage.removeUsesLibrary(LIBRARY_NAME);
         parsedPackage.removeUsesOptionalLibrary(LIBRARY_NAME);
     }

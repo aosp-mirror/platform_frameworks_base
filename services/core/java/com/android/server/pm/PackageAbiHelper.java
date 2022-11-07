@@ -38,8 +38,8 @@ public interface PackageAbiHelper {
      * which varies depending on where and how the package was installed.
      */
     @NonNull
-    NativeLibraryPaths deriveNativeLibraryPaths(AndroidPackage pkg, boolean isUpdatedSystemApp,
-            File appLib32InstallDir);
+    NativeLibraryPaths deriveNativeLibraryPaths(AndroidPackage pkg, boolean isSystemApp,
+            boolean isUpdatedSystemApp, File appLib32InstallDir);
 
     /**
      * Calculate the abis for a bundled app. These can uniquely be determined from the contents of
@@ -54,8 +54,9 @@ public interface PackageAbiHelper {
      *
      * If {@code extractLibs} is true, native libraries are extracted from the app if required.
      */
-    Pair<Abis, NativeLibraryPaths> derivePackageAbi(AndroidPackage pkg, boolean isUpdatedSystemApp,
-            String cpuAbiOverride, File appLib32InstallDir) throws PackageManagerException;
+    Pair<Abis, NativeLibraryPaths> derivePackageAbi(AndroidPackage pkg, boolean isSystemApp,
+            boolean isUpdatedSystemApp, String cpuAbiOverride, File appLib32InstallDir)
+            throws PackageManagerException;
 
     /**
      * Calculates adjusted ABIs for a set of packages belonging to a shared user so that they all

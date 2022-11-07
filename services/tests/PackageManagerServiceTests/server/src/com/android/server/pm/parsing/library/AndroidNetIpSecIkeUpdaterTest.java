@@ -51,7 +51,7 @@ public class AndroidNetIpSecIkeUpdaterTest extends PackageSharedLibraryUpdaterTe
                 .addUsesOptionalLibrary("optional")
                 .hideAsParsed())
                 .hideAsFinal();
-        checkBackwardsCompatibility(before, after);
+        checkBackwardsCompatibility(before, after, false);
     }
 
     @Test
@@ -66,7 +66,7 @@ public class AndroidNetIpSecIkeUpdaterTest extends PackageSharedLibraryUpdaterTe
                 .hideAsParsed())
                 .hideAsFinal();
 
-        checkBackwardsCompatibility(before, after);
+        checkBackwardsCompatibility(before, after, false);
     }
 
     @Test
@@ -81,10 +81,11 @@ public class AndroidNetIpSecIkeUpdaterTest extends PackageSharedLibraryUpdaterTe
                 .hideAsParsed())
                 .hideAsFinal();
 
-        checkBackwardsCompatibility(before, after);
+        checkBackwardsCompatibility(before, after, false);
     }
 
-    private void checkBackwardsCompatibility(ParsedPackage before, AndroidPackage after) {
-        checkBackwardsCompatibility(before, after, AndroidNetIpSecIkeUpdater::new);
+    private void checkBackwardsCompatibility(ParsedPackage before, AndroidPackage after,
+            boolean isSystemApp) {
+        checkBackwardsCompatibility(before, after, isSystemApp, AndroidNetIpSecIkeUpdater::new);
     }
 }

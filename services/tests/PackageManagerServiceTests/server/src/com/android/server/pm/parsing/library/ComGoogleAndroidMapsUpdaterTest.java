@@ -51,7 +51,7 @@ public class ComGoogleAndroidMapsUpdaterTest extends PackageSharedLibraryUpdater
                 .addUsesOptionalLibrary("optional")
                 .hideAsParsed())
                 .hideAsFinal();
-        checkBackwardsCompatibility(before, after);
+        checkBackwardsCompatibility(before, after, false);
     }
 
     @Test
@@ -68,7 +68,7 @@ public class ComGoogleAndroidMapsUpdaterTest extends PackageSharedLibraryUpdater
 
         // No change is required because the package explicitly requests org.apache.http.legacy
         // and is targeted at the current version so does not need backwards compatibility.
-        checkBackwardsCompatibility(before, after);
+        checkBackwardsCompatibility(before, after, false);
     }
 
     @Test
@@ -85,10 +85,11 @@ public class ComGoogleAndroidMapsUpdaterTest extends PackageSharedLibraryUpdater
 
         // No change is required because the package explicitly requests org.apache.http.legacy
         // and is targeted at the current version so does not need backwards compatibility.
-        checkBackwardsCompatibility(before, after);
+        checkBackwardsCompatibility(before, after, false);
     }
 
-    private void checkBackwardsCompatibility(ParsedPackage before, AndroidPackage after) {
-        checkBackwardsCompatibility(before, after, ComGoogleAndroidMapsUpdater::new);
+    private void checkBackwardsCompatibility(ParsedPackage before, AndroidPackage after,
+            boolean isSystemApp) {
+        checkBackwardsCompatibility(before, after, isSystemApp, ComGoogleAndroidMapsUpdater::new);
     }
 }
