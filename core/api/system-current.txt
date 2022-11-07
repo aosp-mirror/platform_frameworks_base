@@ -7461,6 +7461,7 @@ package android.media.tv.tuner {
     method public int getAudioFilterCount();
     method public int getDemuxCount();
     method public int getFilterCapabilities();
+    method @NonNull public int[] getFilterTypeCapabilityList();
     method @NonNull @Size(5) public int[] getLinkCapabilities();
     method public int getPcrFilterCount();
     method public int getPesFilterCount();
@@ -7471,6 +7472,12 @@ package android.media.tv.tuner {
     method public int getTsFilterCount();
     method public int getVideoFilterCount();
     method public boolean isTimeFilterSupported();
+  }
+
+  public class DemuxInfo {
+    ctor public DemuxInfo(int);
+    method public int getFilterTypes();
+    method public void setFilterTypes(int);
   }
 
   public class Descrambler implements java.lang.AutoCloseable {
@@ -7525,6 +7532,7 @@ package android.media.tv.tuner {
     method public void clearResourceLostListener();
     method public void close();
     method public void closeFrontend();
+    method public int configureDemux(@Nullable android.media.tv.tuner.DemuxInfo);
     method public int connectCiCam(int);
     method public int connectFrontendToCiCam(int);
     method public int disconnectCiCam();
@@ -7532,6 +7540,7 @@ package android.media.tv.tuner {
     method public int getAvSyncHwId(@NonNull android.media.tv.tuner.filter.Filter);
     method public long getAvSyncTime(int);
     method @Nullable public java.util.List<android.media.tv.tuner.frontend.FrontendInfo> getAvailableFrontendInfos();
+    method @Nullable public android.media.tv.tuner.DemuxInfo getCurrentDemuxInfo();
     method @Nullable public String getCurrentFrontendHardwareInfo();
     method @Nullable public android.media.tv.tuner.DemuxCapabilities getDemuxCapabilities();
     method @Nullable public android.media.tv.tuner.frontend.FrontendInfo getFrontendInfo();

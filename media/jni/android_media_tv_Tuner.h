@@ -198,6 +198,7 @@ struct JTuner : public RefBase {
     jobject openDescrambler();
     jobject openDvr(DvrType type, jlong bufferSize);
     jobject getDemuxCaps();
+    jobject getDemuxInfo(int handle);
     jobject getFrontendStatus(jintArray types);
     Result openDemux(int handle);
     jint close();
