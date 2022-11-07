@@ -46,5 +46,9 @@ abstract class StartKeyguardTransitionModule {
 
     @Binds
     @IntoSet
+    abstract fun bouncerGone(impl: BouncerToGoneTransitionInteractor): TransitionInteractor
+
+    @Binds
+    @IntoSet
     abstract fun lockscreenGone(impl: LockscreenGoneTransitionInteractor): TransitionInteractor
 }

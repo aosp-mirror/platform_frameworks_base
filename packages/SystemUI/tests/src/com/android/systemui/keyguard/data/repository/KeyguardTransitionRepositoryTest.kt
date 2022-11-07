@@ -25,8 +25,8 @@ import android.view.Choreographer.FrameCallback
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.Interpolators
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
-import com.android.systemui.keyguard.shared.model.KeyguardState.BOUNCER
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.TransitionInfo
 import com.android.systemui.keyguard.shared.model.TransitionState
@@ -38,7 +38,6 @@ import java.util.UUID
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.launchIn
@@ -91,18 +90,51 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
                 }
             }
 
-            assertSteps(steps, listWithStep(BigDecimal(.1)))
+            assertSteps(steps, listWithStep(BigDecimal(.1)), AOD, LOCKSCREEN)
 
             job.cancel()
             provider.stop()
         }
 
     @Test
-    fun `startTransition called during another transition fails`() {
-        underTest.startTransition(TransitionInfo(OWNER_NAME, AOD, LOCKSCREEN, null))
-        underTest.startTransition(TransitionInfo(OWNER_NAME, LOCKSCREEN, BOUNCER, null))
+    fun `starting second transition will cancel the first transition`() {
+        runBlocking(IMMEDIATE) {
+            val (animator, provider) = setupAnimator(this)
 
-        assertThat(wtfHandler.failed).isTrue()
+            val steps = mutableListOf<TransitionStep>()
+            val job = underTest.transition(AOD, LOCKSCREEN).onEach { steps.add(it) }.launchIn(this)
+
+            underTest.startTransition(TransitionInfo(OWNER_NAME, AOD, LOCKSCREEN, animator))
+            // 3 yields(), alternating with the animator, results in a value 0.1, which can be
+            // canceled and tested against
+            yield()
+            yield()
+            yield()
+
+            // Now start 2nd transition, which will interrupt the first
+            val job2 = underTest.transition(LOCKSCREEN, AOD).onEach { steps.add(it) }.launchIn(this)
+            val (animator2, provider2) = setupAnimator(this)
+            underTest.startTransition(TransitionInfo(OWNER_NAME, LOCKSCREEN, AOD, animator2))
+
+            val startTime = System.currentTimeMillis()
+            while (animator2.isRunning()) {
+                yield()
+                if (System.currentTimeMillis() - startTime > MAX_TEST_DURATION) {
+                    fail("Failed test due to excessive runtime of: $MAX_TEST_DURATION")
+                }
+            }
+
+            val firstTransitionSteps = listWithStep(step = BigDecimal(.1), stop = BigDecimal(.1))
+            assertSteps(steps.subList(0, 4), firstTransitionSteps, AOD, LOCKSCREEN)
+
+            val secondTransitionSteps = listWithStep(step = BigDecimal(.1), start = BigDecimal(.9))
+            assertSteps(steps.subList(4, steps.size), secondTransitionSteps, LOCKSCREEN, AOD)
+
+            job.cancel()
+            job2.cancel()
+            provider.stop()
+            provider2.stop()
+        }
     }
 
     @Test
@@ -165,11 +197,15 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
         assertThat(wtfHandler.failed).isTrue()
     }
 
-    private fun listWithStep(step: BigDecimal): List<BigDecimal> {
+    private fun listWithStep(
+        step: BigDecimal,
+        start: BigDecimal = BigDecimal.ZERO,
+        stop: BigDecimal = BigDecimal.ONE,
+    ): List<BigDecimal> {
         val steps = mutableListOf<BigDecimal>()
 
-        var i = BigDecimal.ZERO
-        while (i.compareTo(BigDecimal.ONE) <= 0) {
+        var i = start
+        while (i.compareTo(stop) <= 0) {
             steps.add(i)
             i = (i + step).setScale(2, RoundingMode.HALF_UP)
         }
@@ -177,23 +213,43 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
         return steps
     }
 
-    private fun assertSteps(steps: List<TransitionStep>, fractions: List<BigDecimal>) {
+    private fun assertSteps(
+        steps: List<TransitionStep>,
+        fractions: List<BigDecimal>,
+        from: KeyguardState,
+        to: KeyguardState,
+    ) {
         assertThat(steps[0])
-            .isEqualTo(TransitionStep(AOD, LOCKSCREEN, 0f, TransitionState.STARTED, OWNER_NAME))
+            .isEqualTo(
+                TransitionStep(
+                    from,
+                    to,
+                    fractions[0].toFloat(),
+                    TransitionState.STARTED,
+                    OWNER_NAME
+                )
+            )
         fractions.forEachIndexed { index, fraction ->
             assertThat(steps[index + 1])
                 .isEqualTo(
                     TransitionStep(
-                        AOD,
-                        LOCKSCREEN,
+                        from,
+                        to,
                         fraction.toFloat(),
                         TransitionState.RUNNING,
                         OWNER_NAME
                     )
                 )
         }
+        val lastValue = fractions[fractions.size - 1].toFloat()
+        val status =
+            if (lastValue < 1f) {
+                TransitionState.CANCELED
+            } else {
+                TransitionState.FINISHED
+            }
         assertThat(steps[steps.size - 1])
-            .isEqualTo(TransitionStep(AOD, LOCKSCREEN, 1f, TransitionState.FINISHED, OWNER_NAME))
+            .isEqualTo(TransitionStep(from, to, lastValue, status, OWNER_NAME))
 
         assertThat(wtfHandler.failed).isFalse()
     }
@@ -230,7 +286,7 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
                 scope.launch {
                     frames.collect {
                         // Delay is required for AnimationHandler to properly register a callback
-                        delay(1)
+                        yield()
                         val (frameNumber, callback) = it
                         callback?.doFrame(frameNumber)
                     }
@@ -243,7 +299,7 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
         }
 
         override fun postFrameCallback(cb: FrameCallback) {
-            frames.value = Pair(++frameCount, cb)
+            frames.value = Pair(frameCount++, cb)
         }
         override fun postCommitCallback(runnable: Runnable) {}
         override fun getFrameTime() = frameCount

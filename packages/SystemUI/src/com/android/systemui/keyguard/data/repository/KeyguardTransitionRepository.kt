@@ -94,11 +94,13 @@ class KeyguardTransitionRepositoryImpl @Inject constructor() : KeyguardTransitio
      */
     private val _transitions =
         MutableSharedFlow<TransitionStep>(
+            replay = 2,
             extraBufferCapacity = 10,
-            onBufferOverflow = BufferOverflow.DROP_OLDEST
+            onBufferOverflow = BufferOverflow.DROP_OLDEST,
         )
     override val transitions = _transitions.asSharedFlow().distinctUntilChanged()
     private var lastStep: TransitionStep = TransitionStep()
+    private var lastAnimator: ValueAnimator? = null
 
     /*
      * When manual control of the transition is requested, a unique [UUID] is used as the handle
@@ -106,19 +108,39 @@ class KeyguardTransitionRepositoryImpl @Inject constructor() : KeyguardTransitio
      */
     private var updateTransitionId: UUID? = null
 
+    init {
+        // Seed with transitions signaling a boot into lockscreen state
+        emitTransition(
+            TransitionStep(
+                KeyguardState.NONE,
+                KeyguardState.LOCKSCREEN,
+                0f,
+                TransitionState.STARTED,
+            )
+        )
+        emitTransition(
+            TransitionStep(
+                KeyguardState.NONE,
+                KeyguardState.LOCKSCREEN,
+                1f,
+                TransitionState.FINISHED,
+            )
+        )
+    }
+
     override fun startTransition(info: TransitionInfo): UUID? {
         if (lastStep.transitionState != TransitionState.FINISHED) {
-            // Open questions:
-            // * Queue of transitions? buffer of 1?
-            // * Are transitions cancellable if a new one is triggered?
-            // * What validation does this need to do?
-            Log.wtf(TAG, "Transition still active: $lastStep")
-            return null
+            Log.i(TAG, "Transition still active: $lastStep, canceling")
         }
+
+        val startingValue = 1f - lastStep.value
+        lastAnimator?.cancel()
+        lastAnimator = info.animator
 
         info.animator?.let { animator ->
             // An animator was provided, so use it to run the transition
-            animator.setFloatValues(0f, 1f)
+            animator.setFloatValues(startingValue, 1f)
+            animator.duration = ((1f - startingValue) * animator.duration).toLong()
             val updateListener =
                 object : AnimatorUpdateListener {
                     override fun onAnimationUpdate(animation: ValueAnimator) {
@@ -134,15 +156,24 @@ class KeyguardTransitionRepositoryImpl @Inject constructor() : KeyguardTransitio
             val adapter =
                 object : AnimatorListenerAdapter() {
                     override fun onAnimationStart(animation: Animator) {
-                        emitTransition(TransitionStep(info, 0f, TransitionState.STARTED))
+                        emitTransition(TransitionStep(info, startingValue, TransitionState.STARTED))
                     }
                     override fun onAnimationCancel(animation: Animator) {
-                        Log.i(TAG, "Cancelling transition: $info")
+                        endAnimation(animation, lastStep.value, TransitionState.CANCELED)
                     }
                     override fun onAnimationEnd(animation: Animator) {
-                        emitTransition(TransitionStep(info, 1f, TransitionState.FINISHED))
+                        endAnimation(animation, 1f, TransitionState.FINISHED)
+                    }
+
+                    private fun endAnimation(
+                        animation: Animator,
+                        value: Float,
+                        state: TransitionState
+                    ) {
+                        emitTransition(TransitionStep(info, value, state))
                         animator.removeListener(this)
                         animator.removeUpdateListener(updateListener)
+                        lastAnimator = null
                     }
                 }
             animator.addListener(adapter)

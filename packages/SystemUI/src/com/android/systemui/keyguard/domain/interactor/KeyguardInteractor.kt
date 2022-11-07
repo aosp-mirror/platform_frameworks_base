@@ -43,6 +43,8 @@ constructor(
     val isDozing: Flow<Boolean> = repository.isDozing
     /** Whether the keyguard is showing or not. */
     val isKeyguardShowing: Flow<Boolean> = repository.isKeyguardShowing
+    /** Whether the keyguard is going away. */
+    val isKeyguardGoingAway: Flow<Boolean> = repository.isKeyguardGoingAway
     /** Whether the bouncer is showing or not. */
     val isBouncerShowing: Flow<Boolean> = repository.isBouncerShowing
     /** The device wake/sleep state */

@@ -23,35 +23,44 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionInfo
+import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.util.kotlin.sample
+import java.util.UUID
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 @SysUISingleton
-class LockscreenGoneTransitionInteractor
+class BouncerToGoneTransitionInteractor
 @Inject
 constructor(
     @Application private val scope: CoroutineScope,
     private val keyguardInteractor: KeyguardInteractor,
-    private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
+    private val shadeRepository: ShadeRepository,
     private val keyguardTransitionRepository: KeyguardTransitionRepository,
-) : TransitionInteractor("LOCKSCREEN->GONE") {
+    private val keyguardTransitionInteractor: KeyguardTransitionInteractor
+) : TransitionInteractor("BOUNCER->GONE") {
+
+    private var transitionId: UUID? = null
 
     override fun start() {
+        listenForKeyguardGoingAway()
+    }
+
+    private fun listenForKeyguardGoingAway() {
         scope.launch {
             keyguardInteractor.isKeyguardGoingAway
                 .sample(keyguardTransitionInteractor.finishedKeyguardState, { a, b -> Pair(a, b) })
                 .collect { pair ->
                     val (isKeyguardGoingAway, keyguardState) = pair
-                    if (!isKeyguardGoingAway && keyguardState == KeyguardState.LOCKSCREEN) {
+                    if (isKeyguardGoingAway && keyguardState == KeyguardState.BOUNCER) {
                         keyguardTransitionRepository.startTransition(
                             TransitionInfo(
-                                name,
-                                KeyguardState.LOCKSCREEN,
-                                KeyguardState.GONE,
-                                getAnimator(),
+                                ownerName = name,
+                                from = KeyguardState.BOUNCER,
+                                to = KeyguardState.GONE,
+                                animator = getAnimator(),
                             )
                         )
                     }
@@ -67,6 +76,6 @@ constructor(
     }
 
     companion object {
-        private const val TRANSITION_DURATION_MS = 10L
+        private const val TRANSITION_DURATION_MS = 300L
     }
 }

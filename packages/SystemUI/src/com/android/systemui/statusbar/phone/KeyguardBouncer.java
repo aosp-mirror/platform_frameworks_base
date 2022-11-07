@@ -279,10 +279,7 @@ public class KeyguardBouncer {
      * @see #onFullyShown()
      */
     private void onFullyHidden() {
-        cancelShowRunnable();
-        setVisibility(View.INVISIBLE);
-        mFalsingCollector.onBouncerHidden();
-        DejankUtils.postAfterTraversal(mResetRunnable);
+
     }
 
     private void setVisibility(@View.Visibility int visibility) {
@@ -459,7 +456,13 @@ public class KeyguardBouncer {
             onFullyShown();
             dispatchFullyShown();
         } else if (fraction == EXPANSION_HIDDEN && oldExpansion != EXPANSION_HIDDEN) {
-            onFullyHidden();
+            DejankUtils.postAfterTraversal(mResetRunnable);
+            /*
+             * There are cases where #hide() was not invoked, such as when
+             * NotificationPanelViewController controls the hide animation. Make sure the state gets
+             * updated by calling #hide() directly.
+             */
+            hide(false /* destroyView */);
             dispatchFullyHidden();
         } else if (fraction != EXPANSION_VISIBLE && oldExpansion == EXPANSION_VISIBLE) {
             dispatchStartingToHide();

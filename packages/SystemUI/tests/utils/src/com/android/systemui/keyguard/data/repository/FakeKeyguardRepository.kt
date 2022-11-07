@@ -58,6 +58,9 @@ class FakeKeyguardRepository : KeyguardRepository {
     private val _isBouncerShowing = MutableStateFlow(false)
     override val isBouncerShowing: Flow<Boolean> = _isBouncerShowing
 
+    private val _isKeyguardGoingAway = MutableStateFlow(false)
+    override val isKeyguardGoingAway: Flow<Boolean> = _isKeyguardGoingAway
+
     private val _biometricUnlockState = MutableStateFlow(BiometricUnlockModel.NONE)
     override val biometricUnlockState: Flow<BiometricUnlockModel> = _biometricUnlockState
 

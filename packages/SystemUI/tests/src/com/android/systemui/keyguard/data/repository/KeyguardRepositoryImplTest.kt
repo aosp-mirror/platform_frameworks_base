@@ -257,6 +257,28 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
     }
 
     @Test
+    fun isKeyguardGoingAway() = runBlockingTest {
+        whenever(keyguardStateController.isKeyguardGoingAway).thenReturn(false)
+        var latest: Boolean? = null
+        val job = underTest.isKeyguardGoingAway.onEach { latest = it }.launchIn(this)
+
+        assertThat(latest).isFalse()
+
+        val captor = argumentCaptor<KeyguardStateController.Callback>()
+        verify(keyguardStateController).addCallback(captor.capture())
+
+        whenever(keyguardStateController.isKeyguardGoingAway).thenReturn(true)
+        captor.value.onKeyguardGoingAwayChanged()
+        assertThat(latest).isTrue()
+
+        whenever(keyguardStateController.isKeyguardGoingAway).thenReturn(false)
+        captor.value.onKeyguardGoingAwayChanged()
+        assertThat(latest).isFalse()
+
+        job.cancel()
+    }
+
+    @Test
     fun biometricUnlockState() = runBlockingTest {
         val values = mutableListOf<BiometricUnlockModel>()
         val job = underTest.biometricUnlockState.onEach(values::add).launchIn(this)
