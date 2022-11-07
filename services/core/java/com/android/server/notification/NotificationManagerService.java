@@ -4486,16 +4486,7 @@ public class NotificationManagerService extends SystemService {
             }
             enforcePolicyAccess(Binder.getCallingUid(), "addAutomaticZenRule");
 
-            // If the caller is system, take the package name from the rule's owner rather than
-            // from the caller's package.
-            String rulePkg = pkg;
-            if (isCallingUidSystem()) {
-                if (automaticZenRule.getOwner() != null) {
-                    rulePkg = automaticZenRule.getOwner().getPackageName();
-                }
-            }
-
-            return mZenModeHelper.addAutomaticZenRule(rulePkg, automaticZenRule,
+            return mZenModeHelper.addAutomaticZenRule(pkg, automaticZenRule,
                     "addAutomaticZenRule");
         }
 
