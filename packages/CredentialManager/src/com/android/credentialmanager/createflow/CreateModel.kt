@@ -34,12 +34,12 @@ open class EntryInfo (
 class CreateOptionInfo(
   entryKey: String,
   entrySubkey: String,
-  val userProviderDisplayName: String,
+  val userProviderDisplayName: String?,
   val credentialTypeIcon: Drawable,
   val profileIcon: Drawable,
-  val passwordCount: Int,
-  val passkeyCount: Int,
-  val totalCredentialCount: Int,
+  val passwordCount: Int?,
+  val passkeyCount: Int?,
+  val totalCredentialCount: Int?,
   val lastUsedTimeMillis: Long?,
 ) : EntryInfo(entryKey, entrySubkey)
 
