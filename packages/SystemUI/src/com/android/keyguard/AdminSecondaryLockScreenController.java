@@ -33,6 +33,7 @@ import android.view.SurfaceView;
 import android.view.ViewGroup;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 
 import java.util.NoSuchElementException;
 
@@ -204,7 +205,7 @@ public class AdminSecondaryLockScreenController {
             hide();
             if (mKeyguardCallback != null) {
                 mKeyguardCallback.dismiss(/* securityVerified= */ true, userId,
-                        /* bypassSecondaryLockScreen= */true);
+                        /* bypassSecondaryLockScreen= */true,  SecurityMode.Invalid);
             }
         }
     }

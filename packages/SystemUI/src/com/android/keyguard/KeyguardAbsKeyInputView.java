@@ -30,6 +30,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.widget.LinearLayout;
 
+import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternChecker;
 import com.android.internal.widget.LockPatternUtils;
@@ -99,6 +100,7 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
 
     protected abstract int getPasswordTextViewId();
     protected abstract void resetState();
+    protected abstract SecurityMode getSecurityMode();
 
     @Override
     protected void onFinishInflate() {
@@ -208,7 +210,7 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
             mCallback.reportUnlockAttempt(userId, true, 0);
             if (dismissKeyguard) {
                 mDismissing = true;
-                mCallback.dismiss(true, userId);
+                mCallback.dismiss(true, userId, getSecurityMode());
             }
         } else {
             if (isValidPassword) {
