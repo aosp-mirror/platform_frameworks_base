@@ -33212,6 +33212,7 @@ package android.os {
     field public static final String DISALLOW_CONFIG_CELL_BROADCASTS = "no_config_cell_broadcasts";
     field public static final String DISALLOW_CONFIG_CREDENTIALS = "no_config_credentials";
     field public static final String DISALLOW_CONFIG_DATE_TIME = "no_config_date_time";
+    field public static final String DISALLOW_CONFIG_DEFAULT_APPS = "disallow_config_default_apps";
     field public static final String DISALLOW_CONFIG_LOCALE = "no_config_locale";
     field public static final String DISALLOW_CONFIG_LOCATION = "no_config_location";
     field public static final String DISALLOW_CONFIG_MOBILE_NETWORKS = "no_config_mobile_networks";
