@@ -17,10 +17,15 @@
 package com.android.server.input;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.graphics.PointF;
 import android.hardware.display.DisplayViewport;
 import android.os.IBinder;
 import android.view.InputChannel;
+import android.view.inputmethod.InputMethodSubtype;
+
+import com.android.internal.inputmethod.InputMethodSubtypeHandle;
 
 import java.util.List;
 
@@ -134,6 +139,26 @@ public abstract class InputManagerInternal {
 
     /** Create an {@link InputChannel} that is registered to InputDispatcher. */
     public abstract InputChannel createInputChannel(String inputChannelName);
+
+    /**
+     * Pilfer pointers from the input channel with the given token so that ongoing gestures are
+     * canceled for all other channels.
+     */
+    public abstract void pilferPointers(IBinder token);
+
+    /**
+     * Called when the current input method and/or {@link InputMethodSubtype} is updated.
+     *
+     * @param userId User ID to be notified about.
+     * @param subtypeHandle A {@link InputMethodSubtypeHandle} corresponds to {@code subtype}.
+     * @param subtype A {@link InputMethodSubtype} object, or {@code null} when the current
+     *                {@link InputMethodSubtype} is not suitable for the physical keyboard layout
+     *                mapping.
+     * @see InputMethodSubtype#isSuitableForPhysicalKeyboardLayoutMapping()
+     */
+    public abstract void onInputMethodSubtypeChangedForKeyboardLayoutMapping(@UserIdInt int userId,
+            @Nullable InputMethodSubtypeHandle subtypeHandle,
+            @Nullable InputMethodSubtype subtype);
 
     /**
      * Increments keyboard backlight level if the device has an associated keyboard backlight
