@@ -193,6 +193,16 @@ final class DisabledWallpaperManager extends WallpaperManager {
     }
 
     @Override
+    public WallpaperInfo getWallpaperInfoWithFlags(@SetWallpaperFlags int which) {
+        return unsupported();
+    }
+
+    @Override
+    public WallpaperInfo getWallpaperInfoWithFlags(@SetWallpaperFlags int which, int userId) {
+        return unsupported();
+    }
+
+    @Override
     public int getWallpaperId(int which) {
         return unsupportedInt();
     }
