@@ -466,7 +466,7 @@
   <java-symbol type="integer" name="config_multiuserMaximumUsers" />
   <java-symbol type="integer" name="config_multiuserMaxRunningUsers" />
   <java-symbol type="bool" name="config_multiuserDelayUserDataLocking" />
-  <java-symbol type="bool" name="config_enableTimeoutToUserZeroWhenDocked" />
+  <java-symbol type="bool" name="config_enableTimeoutToDockUserWhenDocked" />
   <java-symbol type="integer" name="config_userTypePackageWhitelistMode"/>
   <java-symbol type="xml" name="config_user_types" />
   <java-symbol type="integer" name="config_safe_media_volume_index" />
@@ -2235,7 +2235,7 @@
   <java-symbol type="integer" name="config_dreamsBatteryLevelDrainCutoff" />
   <java-symbol type="string" name="config_dreamsDefaultComponent" />
   <java-symbol type="bool" name="config_dreamsDisabledByAmbientModeSuppressionConfig" />
-  <java-symbol type="bool" name="config_dreamsOnlyEnabledForSystemUser" />
+  <java-symbol type="bool" name="config_dreamsOnlyEnabledForDockUser" />
   <java-symbol type="integer" name="config_dreamOpenAnimationDuration" />
   <java-symbol type="integer" name="config_dreamCloseAnimationDuration" />
   <java-symbol type="array" name="config_supportedDreamComplications" />
