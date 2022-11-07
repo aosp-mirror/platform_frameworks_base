@@ -39903,7 +39903,7 @@ package android.service.wallpaper {
   public abstract class WallpaperService extends android.app.Service {
     ctor public WallpaperService();
     method public final android.os.IBinder onBind(android.content.Intent);
-    method public abstract android.service.wallpaper.WallpaperService.Engine onCreateEngine();
+    method @MainThread public abstract android.service.wallpaper.WallpaperService.Engine onCreateEngine();
     field public static final String SERVICE_INTERFACE = "android.service.wallpaper.WallpaperService";
     field public static final String SERVICE_META_DATA = "android.service.wallpaper";
   }
@@ -39918,20 +39918,20 @@ package android.service.wallpaper {
     method public boolean isPreview();
     method public boolean isVisible();
     method public void notifyColorsChanged();
-    method public void onApplyWindowInsets(android.view.WindowInsets);
-    method public android.os.Bundle onCommand(String, int, int, int, android.os.Bundle, boolean);
-    method @Nullable public android.app.WallpaperColors onComputeColors();
-    method public void onCreate(android.view.SurfaceHolder);
-    method public void onDesiredSizeChanged(int, int);
-    method public void onDestroy();
-    method public void onOffsetsChanged(float, float, float, float, int, int);
-    method public void onSurfaceChanged(android.view.SurfaceHolder, int, int, int);
-    method public void onSurfaceCreated(android.view.SurfaceHolder);
-    method public void onSurfaceDestroyed(android.view.SurfaceHolder);
-    method public void onSurfaceRedrawNeeded(android.view.SurfaceHolder);
-    method public void onTouchEvent(android.view.MotionEvent);
-    method public void onVisibilityChanged(boolean);
-    method public void onZoomChanged(@FloatRange(from=0.0f, to=1.0f) float);
+    method @MainThread public void onApplyWindowInsets(android.view.WindowInsets);
+    method @MainThread public android.os.Bundle onCommand(String, int, int, int, android.os.Bundle, boolean);
+    method @MainThread @Nullable public android.app.WallpaperColors onComputeColors();
+    method @MainThread public void onCreate(android.view.SurfaceHolder);
+    method @MainThread public void onDesiredSizeChanged(int, int);
+    method @MainThread public void onDestroy();
+    method @MainThread public void onOffsetsChanged(float, float, float, float, int, int);
+    method @MainThread public void onSurfaceChanged(android.view.SurfaceHolder, int, int, int);
+    method @MainThread public void onSurfaceCreated(android.view.SurfaceHolder);
+    method @MainThread public void onSurfaceDestroyed(android.view.SurfaceHolder);
+    method @MainThread public void onSurfaceRedrawNeeded(android.view.SurfaceHolder);
+    method @MainThread public void onTouchEvent(android.view.MotionEvent);
+    method @MainThread public void onVisibilityChanged(boolean);
+    method @MainThread public void onZoomChanged(@FloatRange(from=0.0f, to=1.0f) float);
     method public void setOffsetNotificationsEnabled(boolean);
     method public void setTouchEventsEnabled(boolean);
   }
