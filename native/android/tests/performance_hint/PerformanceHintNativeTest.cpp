@@ -122,9 +122,16 @@ TEST_F(PerformanceHintTest, TestSession) {
     result = APerformanceHint_reportActualWorkDuration(session, -1L);
     EXPECT_EQ(EINVAL, result);
 
-    // Send both valid and invalid session hints
     int hintId = 2;
-    EXPECT_CALL(*iSession, sendHint(Eq(2))).Times(Exactly(1));
+    EXPECT_CALL(*iSession, sendHint(Eq(hintId))).Times(Exactly(1));
+    result = APerformanceHint_sendHint(session, hintId);
+    EXPECT_EQ(0, result);
+    usleep(110000); // Sleep for longer than the update timeout.
+    EXPECT_CALL(*iSession, sendHint(Eq(hintId))).Times(Exactly(1));
+    result = APerformanceHint_sendHint(session, hintId);
+    EXPECT_EQ(0, result);
+    // Expect to get rate limited if we try to send faster than the limiter allows
+    EXPECT_CALL(*iSession, sendHint(Eq(hintId))).Times(Exactly(0));
     result = APerformanceHint_sendHint(session, hintId);
     EXPECT_EQ(0, result);
 

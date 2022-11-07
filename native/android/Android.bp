@@ -95,6 +95,7 @@ cc_library_shared {
         "libpowermanager",
         "android.hardware.configstore@1.0",
         "android.hardware.configstore-utils",
+        "android.hardware.power-V4-ndk",
         "libnativedisplay",
     ],
 
