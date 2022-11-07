@@ -34,6 +34,7 @@ import static com.google.common.truth.Truth.assertWithMessage;
 import static org.junit.Assert.assertThrows;
 
 import android.annotation.UserIdInt;
+import android.util.IntArray;
 import android.util.Log;
 
 import com.android.internal.util.Preconditions;
@@ -41,6 +42,8 @@ import com.android.server.ExtendedMockitoTestCase;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.Arrays;
 
 /**
  * Base class for {@link UserVisibilityMediator} tests.
@@ -133,6 +136,7 @@ abstract class UserVisibilityMediatorTestCase extends ExtendedMockitoTestCase {
         // TODO(b/244644281): once isUserVisible() is fixed (see note there), this assertion will
         // fail on MUMD, so we'll need to refactor / split this test (and possibly others)
         expectUserIsVisibleOnDisplay(USER_ID, SECONDARY_DISPLAY_ID);
+        expectVisibleUsers(USER_ID);
 
         expectDisplayAssignedToUser(USER_ID, DEFAULT_DISPLAY);
         expectUserAssignedToDisplay(DEFAULT_DISPLAY, USER_ID);
@@ -156,6 +160,7 @@ abstract class UserVisibilityMediatorTestCase extends ExtendedMockitoTestCase {
         expectUserIsNotVisibleOnDisplay(currentUserId, INVALID_DISPLAY);
         expectUserIsVisibleOnDisplay(currentUserId, DEFAULT_DISPLAY);
         expectUserIsVisibleOnDisplay(currentUserId, SECONDARY_DISPLAY_ID);
+        expectVisibleUsers(currentUserId);
 
         expectDisplayAssignedToUser(currentUserId, DEFAULT_DISPLAY);
         expectUserAssignedToDisplay(DEFAULT_DISPLAY, currentUserId);
@@ -216,6 +221,7 @@ abstract class UserVisibilityMediatorTestCase extends ExtendedMockitoTestCase {
         expectUserIsNotVisibleOnDisplay(PROFILE_USER_ID, INVALID_DISPLAY);
         expectUserIsVisibleOnDisplay(PROFILE_USER_ID, DEFAULT_DISPLAY);
         expectUserIsVisibleOnDisplay(PROFILE_USER_ID, SECONDARY_DISPLAY_ID);
+        expectVisibleUsers(PARENT_USER_ID, PROFILE_USER_ID);
 
         expectDisplayAssignedToUser(PROFILE_USER_ID, DEFAULT_DISPLAY);
         expectUserAssignedToDisplay(DEFAULT_DISPLAY, PARENT_USER_ID);
@@ -402,6 +408,13 @@ abstract class UserVisibilityMediatorTestCase extends ExtendedMockitoTestCase {
         expectWithMessage("mediator.isUserVisible(%s)", userId)
                 .that(mMediator.isUserVisible(userId))
                 .isTrue();
+    }
+
+    protected void expectVisibleUsers(@UserIdInt Integer... userIds) {
+        IntArray visibleUsers = mMediator.getVisibleUsers();
+        expectWithMessage("getVisibleUsers()").that(visibleUsers).isNotNull();
+        expectWithMessage("getVisibleUsers()").that(visibleUsers.toArray()).asList()
+                .containsExactlyElementsIn(Arrays.asList(userIds));
     }
 
     protected void expectUserIsVisibleOnDisplay(@UserIdInt int userId, int displayId) {
