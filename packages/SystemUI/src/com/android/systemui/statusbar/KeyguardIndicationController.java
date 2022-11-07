@@ -1263,7 +1263,8 @@ public class KeyguardIndicationController {
             showErrorMessageNowOrLater(errString, followupMessage);
         } else if (!mAuthController.isUdfpsFingerDown()) {
             // On subsequent lockouts, we show a more generic locked out message.
-            showBiometricMessage(mContext.getString(R.string.keyguard_face_unlock_unavailable),
+            showErrorMessageNowOrLater(
+                    mContext.getString(R.string.keyguard_face_unlock_unavailable),
                     followupMessage);
         }
     }
