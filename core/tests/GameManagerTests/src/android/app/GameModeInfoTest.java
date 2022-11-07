@@ -44,18 +44,29 @@ public class GameModeInfoTest {
                 new int[]{GameManager.GAME_MODE_STANDARD, GameManager.GAME_MODE_PERFORMANCE,
                         GameManager.GAME_MODE_BATTERY, GameManager.GAME_MODE_CUSTOM};
         int[] optedInGameModes = new int[]{GameManager.GAME_MODE_PERFORMANCE};
+        GameModeConfiguration batteryConfig = new GameModeConfiguration
+                .Builder().setFpsOverride(40).setScalingFactor(0.5f).build();
+        GameModeConfiguration performanceConfig = new GameModeConfiguration
+                .Builder().setFpsOverride(90).setScalingFactor(0.9f).build();
         GameModeInfo gameModeInfo = new GameModeInfo.Builder()
                 .setActiveGameMode(activeGameMode)
                 .setAvailableGameModes(availableGameModes)
                 .setOptedInGameModes(optedInGameModes)
                 .setDownscalingAllowed(true)
-                .setFpsOverrideAllowed(false).build();
+                .setFpsOverrideAllowed(false)
+                .setGameModeConfiguration(GameManager.GAME_MODE_BATTERY, batteryConfig)
+                .setGameModeConfiguration(GameManager.GAME_MODE_PERFORMANCE, performanceConfig)
+                .build();
 
         assertArrayEquals(availableGameModes, gameModeInfo.getAvailableGameModes());
         assertArrayEquals(optedInGameModes, gameModeInfo.getOptedInGameModes());
         assertEquals(activeGameMode, gameModeInfo.getActiveGameMode());
         assertTrue(gameModeInfo.isDownscalingAllowed());
         assertFalse(gameModeInfo.isFpsOverrideAllowed());
+        assertEquals(performanceConfig,
+                gameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_PERFORMANCE));
+        assertEquals(batteryConfig,
+                gameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_BATTERY));
 
         Parcel parcel = Parcel.obtain();
         gameModeInfo.writeToParcel(parcel, 0);
@@ -68,5 +79,9 @@ public class GameModeInfoTest {
                 newGameModeInfo.getOptedInGameModes());
         assertTrue(newGameModeInfo.isDownscalingAllowed());
         assertFalse(newGameModeInfo.isFpsOverrideAllowed());
+        assertEquals(performanceConfig,
+                newGameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_PERFORMANCE));
+        assertEquals(batteryConfig,
+                newGameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_BATTERY));
     }
 }

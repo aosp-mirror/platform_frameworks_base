@@ -813,11 +813,29 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.MANAGE_GAME_MODE) public void setGameMode(@NonNull String, int);
   }
 
+  public final class GameModeConfiguration implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getFpsOverride();
+    method public float getScalingFactor();
+    method @NonNull public android.app.GameModeConfiguration.Builder toBuilder();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.GameModeConfiguration> CREATOR;
+    field public static final int FPS_OVERRIDE_NONE = 0; // 0x0
+  }
+
+  public static final class GameModeConfiguration.Builder {
+    ctor public GameModeConfiguration.Builder();
+    method @NonNull public android.app.GameModeConfiguration build();
+    method @NonNull public android.app.GameModeConfiguration.Builder setFpsOverride(int);
+    method @NonNull public android.app.GameModeConfiguration.Builder setScalingFactor(float);
+  }
+
   public final class GameModeInfo implements android.os.Parcelable {
     ctor @Deprecated public GameModeInfo(int, @NonNull int[]);
     method public int describeContents();
     method public int getActiveGameMode();
     method @NonNull public int[] getAvailableGameModes();
+    method @Nullable public android.app.GameModeConfiguration getGameModeConfiguration(int);
     method @NonNull public int[] getOptedInGameModes();
     method public boolean isDownscalingAllowed();
     method public boolean isFpsOverrideAllowed();
@@ -832,6 +850,7 @@ package android.app {
     method @NonNull public android.app.GameModeInfo.Builder setAvailableGameModes(@NonNull int[]);
     method @NonNull public android.app.GameModeInfo.Builder setDownscalingAllowed(boolean);
     method @NonNull public android.app.GameModeInfo.Builder setFpsOverrideAllowed(boolean);
+    method @NonNull public android.app.GameModeInfo.Builder setGameModeConfiguration(int, @NonNull android.app.GameModeConfiguration);
     method @NonNull public android.app.GameModeInfo.Builder setOptedInGameModes(@NonNull int[]);
   }
 
