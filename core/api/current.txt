@@ -52339,6 +52339,7 @@ package android.view.accessibility {
     method public CharSequence getClassName();
     method public android.view.accessibility.AccessibilityNodeInfo.CollectionInfo getCollectionInfo();
     method public android.view.accessibility.AccessibilityNodeInfo.CollectionItemInfo getCollectionItemInfo();
+    method @Nullable public CharSequence getContainerTitle();
     method public CharSequence getContentDescription();
     method public int getDrawingOrder();
     method public CharSequence getError();
@@ -52415,6 +52416,7 @@ package android.view.accessibility {
     method public void setClickable(boolean);
     method public void setCollectionInfo(android.view.accessibility.AccessibilityNodeInfo.CollectionInfo);
     method public void setCollectionItemInfo(android.view.accessibility.AccessibilityNodeInfo.CollectionItemInfo);
+    method public void setContainerTitle(@Nullable CharSequence);
     method public void setContentDescription(CharSequence);
     method public void setContentInvalid(boolean);
     method public void setContextClickable(boolean);

@@ -897,6 +897,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     private CharSequence mTooltipText;
     private String mViewIdResourceName;
     private String mUniqueId;
+    private CharSequence mContainerTitle;
     private ArrayList<String> mExtraDataKeys;
 
     @UnsupportedAppUsage
@@ -3631,6 +3632,47 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
+     * Sets the container title for app-developer-defined container which can be any type of
+     * ViewGroup or layout.
+     * Container title will be used to group together related controls, similar to HTML fieldset.
+     * Or container title may identify a large piece of the UI that is visibly grouped together,
+     * such as a toolbar or a card, etc.
+     * <p>
+     * Container title helps to assist in navigation across containers and other groups.
+     * For example, a screen reader may use this to determine where to put accessibility focus.
+     * </p>
+     * <p>
+     * Container title is different from pane title{@link #setPaneTitle} which indicates that the
+     * node represents a window or activity.
+     * </p>
+     *
+     * <p>
+     *  Example: An app can set container titles on several non-modal menus, containing TextViews
+     *  or ImageButtons that have content descriptions, text, etc. Screen readers can quickly
+     *  switch accessibility focus among menus instead of child views.  Other accessibility-services
+     *  can easily find the menu.
+     * </p>
+     *
+     * @param containerTitle The container title that is associated with a ViewGroup/Layout on the
+     *                       screen.
+     */
+    public void setContainerTitle(@Nullable CharSequence containerTitle) {
+        enforceNotSealed();
+        mContainerTitle = (containerTitle == null) ? null
+                : containerTitle.subSequence(0, containerTitle.length());
+    }
+
+    /**
+     * Returns the container title.
+     *
+     * @see #setContainerTitle for details.
+     */
+    @Nullable
+    public CharSequence getContainerTitle() {
+        return mContainerTitle;
+    }
+
+    /**
      * Sets the token and node id of the leashed parent.
      *
      * @param token The token.
@@ -3963,6 +4005,10 @@ public class AccessibilityNodeInfo implements Parcelable {
             nonDefaultFields |= bitAt(fieldIndex);
         }
         fieldIndex++;
+        if (!Objects.equals(mContainerTitle, DEFAULT.mContainerTitle)) {
+            nonDefaultFields |= bitAt(fieldIndex);
+        }
+        fieldIndex++;
         if (!Objects.equals(mViewIdResourceName, DEFAULT.mViewIdResourceName)) {
             nonDefaultFields |= bitAt(fieldIndex);
         }
@@ -4108,10 +4154,10 @@ public class AccessibilityNodeInfo implements Parcelable {
         }
         if (isBitSet(nonDefaultFields, fieldIndex++)) parcel.writeCharSequence(mPaneTitle);
         if (isBitSet(nonDefaultFields, fieldIndex++)) parcel.writeCharSequence(mTooltipText);
+        if (isBitSet(nonDefaultFields, fieldIndex++)) parcel.writeCharSequence(mContainerTitle);
 
         if (isBitSet(nonDefaultFields, fieldIndex++)) parcel.writeString(mViewIdResourceName);
         if (isBitSet(nonDefaultFields, fieldIndex++)) parcel.writeString(mUniqueId);
-
         if (isBitSet(nonDefaultFields, fieldIndex++)) parcel.writeInt(mTextSelectionStart);
         if (isBitSet(nonDefaultFields, fieldIndex++)) parcel.writeInt(mTextSelectionEnd);
         if (isBitSet(nonDefaultFields, fieldIndex++)) parcel.writeInt(mInputType);
@@ -4204,6 +4250,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         mContentDescription = other.mContentDescription;
         mPaneTitle = other.mPaneTitle;
         mTooltipText = other.mTooltipText;
+        mContainerTitle = other.mContainerTitle;
         mViewIdResourceName = other.mViewIdResourceName;
 
         if (mActions != null) mActions.clear();
@@ -4347,6 +4394,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         }
         if (isBitSet(nonDefaultFields, fieldIndex++)) mPaneTitle = parcel.readCharSequence();
         if (isBitSet(nonDefaultFields, fieldIndex++)) mTooltipText = parcel.readCharSequence();
+        if (isBitSet(nonDefaultFields, fieldIndex++)) mContainerTitle = parcel.readCharSequence();
         if (isBitSet(nonDefaultFields, fieldIndex++)) mViewIdResourceName = parcel.readString();
         if (isBitSet(nonDefaultFields, fieldIndex++)) mUniqueId = parcel.readString();
 
@@ -4675,6 +4723,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         builder.append("; stateDescription: ").append(mStateDescription);
         builder.append("; contentDescription: ").append(mContentDescription);
         builder.append("; tooltipText: ").append(mTooltipText);
+        builder.append("; containerTitle: ").append(mContainerTitle);
         builder.append("; viewIdResName: ").append(mViewIdResourceName);
         builder.append("; uniqueId: ").append(mUniqueId);
 
