@@ -27,6 +27,7 @@ import androidx.constraintlayout.widget.Barrier
 import com.android.systemui.R
 import com.android.systemui.media.controls.models.GutsViewHolder
 import com.android.systemui.surfaceeffects.ripple.MultiRippleView
+import com.android.systemui.surfaceeffects.turbulencenoise.TurbulenceNoiseView
 import com.android.systemui.util.animation.TransitionLayout
 
 private const val TAG = "MediaViewHolder"
@@ -38,6 +39,8 @@ class MediaViewHolder constructor(itemView: View) {
     // Player information
     val albumView = itemView.requireViewById<ImageView>(R.id.album_art)
     val multiRippleView = itemView.requireViewById<MultiRippleView>(R.id.touch_ripple_view)
+    val turbulenceNoiseView =
+        itemView.requireViewById<TurbulenceNoiseView>(R.id.turbulence_noise_view)
     val appIcon = itemView.requireViewById<ImageView>(R.id.icon)
     val titleText = itemView.requireViewById<TextView>(R.id.header_title)
     val artistText = itemView.requireViewById<TextView>(R.id.header_artist)

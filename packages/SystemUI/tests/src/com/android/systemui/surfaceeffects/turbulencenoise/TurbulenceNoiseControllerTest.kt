@@ -15,6 +15,7 @@
  */
 package com.android.systemui.surfaceeffects.turbulencenoise
 
+import android.graphics.Color
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -46,6 +47,25 @@ class TurbulenceNoiseControllerTest : SysuiTestCase() {
             fakeSystemClock.advanceTime(config.duration.toLong())
 
             assertThat(turbulenceNoiseView.isPlaying).isFalse()
+        }
+    }
+
+    @Test
+    fun updateColor_updatesCorrectColor() {
+        val config = TurbulenceNoiseAnimationConfig(duration = 1000f, color = Color.WHITE)
+        val turbulenceNoiseView = TurbulenceNoiseView(context, null)
+        val expectedColor = Color.RED
+
+        val turbulenceNoiseController = TurbulenceNoiseController(turbulenceNoiseView)
+
+        fakeExecutor.execute {
+            turbulenceNoiseController.play(config)
+
+            turbulenceNoiseView.updateColor(expectedColor)
+
+            fakeSystemClock.advanceTime(config.duration.toLong())
+
+            assertThat(config.color).isEqualTo(expectedColor)
         }
     }
 }

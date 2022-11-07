@@ -31,6 +31,7 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
+import android.graphics.BlendMode;
 import android.graphics.Color;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
@@ -64,6 +65,7 @@ import androidx.annotation.UiThread;
 import androidx.constraintlayout.widget.ConstraintSet;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.graphics.ColorUtils;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.InstanceId;
 import com.android.settingslib.widget.AdaptiveIcon;
@@ -101,9 +103,12 @@ import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.surfaceeffects.ripple.MultiRippleController;
+import com.android.systemui.surfaceeffects.ripple.MultiRippleView;
 import com.android.systemui.surfaceeffects.ripple.RippleAnimation;
 import com.android.systemui.surfaceeffects.ripple.RippleAnimationConfig;
 import com.android.systemui.surfaceeffects.ripple.RippleShader;
+import com.android.systemui.surfaceeffects.turbulencenoise.TurbulenceNoiseAnimationConfig;
+import com.android.systemui.surfaceeffects.turbulencenoise.TurbulenceNoiseController;
 import com.android.systemui.util.ColorUtilKt;
 import com.android.systemui.util.animation.TransitionLayout;
 import com.android.systemui.util.time.SystemClock;
@@ -216,7 +221,9 @@ public class MediaControlPanel {
     private boolean mShowBroadcastDialogButton = false;
     private String mSwitchBroadcastApp;
     private MultiRippleController mMultiRippleController;
+    private TurbulenceNoiseController mTurbulenceNoiseController;
     private FeatureFlags mFeatureFlags;
+    private TurbulenceNoiseAnimationConfig mTurbulenceNoiseAnimationConfig = null;
 
     /**
      * Initialize a new control panel
@@ -393,9 +400,20 @@ public class MediaControlPanel {
         AnimatorSet exit = loadAnimator(R.anim.media_metadata_exit,
                 Interpolators.EMPHASIZED_ACCELERATE, titleText, artistText);
 
-        mMultiRippleController = new MultiRippleController(vh.getMultiRippleView());
+        MultiRippleView multiRippleView = vh.getMultiRippleView();
+        mMultiRippleController = new MultiRippleController(multiRippleView);
+        mTurbulenceNoiseController = new TurbulenceNoiseController(vh.getTurbulenceNoiseView());
+        multiRippleView.addRipplesFinishedListener(
+                () -> {
+                    if (mTurbulenceNoiseAnimationConfig == null) {
+                        mTurbulenceNoiseAnimationConfig = createLingeringNoiseAnimation();
+                    }
+                    // Color will be correctly updated in ColorSchemeTransition.
+                    mTurbulenceNoiseController.play(mTurbulenceNoiseAnimationConfig);
+                }
+        );
         mColorSchemeTransition = new ColorSchemeTransition(
-                mContext, mMediaViewHolder, mMultiRippleController);
+                mContext, mMediaViewHolder, mMultiRippleController, mTurbulenceNoiseController);
         mMetadataAnimationHandler = new MetadataAnimationHandler(exit, enter);
     }
 
@@ -1025,7 +1043,7 @@ public class MediaControlPanel {
                         /* maxWidth= */ maxSize,
                         /* maxHeight= */ maxSize,
                         /* pixelDensity= */ getContext().getResources().getDisplayMetrics().density,
-                        mColorSchemeTransition.getAccentPrimary().getTargetColor(),
+                        mColorSchemeTransition.getAccentPrimary().getCurrentColor(),
                         /* opacity= */ 100,
                         /* shouldFillRipple= */ false,
                         /* sparkleStrength= */ 0f,
@@ -1034,6 +1052,26 @@ public class MediaControlPanel {
         );
     }
 
+    private TurbulenceNoiseAnimationConfig createLingeringNoiseAnimation() {
+        return new TurbulenceNoiseAnimationConfig(
+                TurbulenceNoiseAnimationConfig.DEFAULT_NOISE_GRID_COUNT,
+                TurbulenceNoiseAnimationConfig.DEFAULT_LUMINOSITY_MULTIPLIER,
+                /* noiseMoveSpeedX= */ 0f,
+                /* noiseMoveSpeedY= */ 0f,
+                TurbulenceNoiseAnimationConfig.DEFAULT_NOISE_SPEED_Z,
+                /* color= */ mColorSchemeTransition.getAccentPrimary().getCurrentColor(),
+                // We want to add (BlendMode.PLUS) the turbulence noise on top of the album art.
+                // Thus, set the background color with alpha 0.
+                /* backgroundColor= */ ColorUtils.setAlphaComponent(Color.BLACK, 0),
+                TurbulenceNoiseAnimationConfig.DEFAULT_OPACITY,
+                /* width= */ mMediaViewHolder.getMultiRippleView().getWidth(),
+                /* height= */ mMediaViewHolder.getMultiRippleView().getHeight(),
+                TurbulenceNoiseAnimationConfig.DEFAULT_NOISE_DURATION_IN_MILLIS,
+                this.getContext().getResources().getDisplayMetrics().density,
+                BlendMode.PLUS,
+                /* onAnimationEnd= */ null
+        );
+    }
     private void clearButton(final ImageButton button) {
         button.setImageDrawable(null);
         button.setContentDescription(null);

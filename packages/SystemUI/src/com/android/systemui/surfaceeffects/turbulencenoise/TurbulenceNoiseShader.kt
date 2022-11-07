@@ -104,8 +104,8 @@ class TurbulenceNoiseShader : RuntimeShader(TURBULENCE_NOISE_SHADER) {
      *
      * Expected value range is [1, 0].
      */
-    fun setOpacity(fadeOut: Float) {
-        setFloatUniform("in_opacity", fadeOut)
+    fun setOpacity(opacity: Float) {
+        setFloatUniform("in_opacity", opacity)
     }
 
     /** Sets the size of the shader. */

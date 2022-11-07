@@ -17,6 +17,11 @@ package com.android.systemui.surfaceeffects.turbulencenoise
 
 /** A controller that plays [TurbulenceNoiseView]. */
 class TurbulenceNoiseController(private val turbulenceNoiseView: TurbulenceNoiseView) {
+    /** Updates the color of the noise. */
+    fun updateNoiseColor(color: Int) {
+        turbulenceNoiseView.updateColor(color)
+    }
+
     // TODO: add cancel and/ or pause once design requirements become clear.
     /** Plays [TurbulenceNoiseView] with the given config. */
     fun play(turbulenceNoiseAnimationConfig: TurbulenceNoiseAnimationConfig) {

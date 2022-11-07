@@ -81,6 +81,7 @@ import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.surfaceeffects.ripple.MultiRippleView
+import com.android.systemui.surfaceeffects.turbulencenoise.TurbulenceNoiseView
 import com.android.systemui.util.animation.TransitionLayout
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.KotlinArgumentCaptor
@@ -178,6 +179,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     private lateinit var dismiss: FrameLayout
     private lateinit var dismissText: TextView
     private lateinit var multiRippleView: MultiRippleView
+    private lateinit var turbulenceNoiseView: TurbulenceNoiseView
 
     private lateinit var session: MediaSession
     private lateinit var device: MediaDeviceData
@@ -382,6 +384,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
             }
 
         multiRippleView = MultiRippleView(context, null)
+        turbulenceNoiseView = TurbulenceNoiseView(context, null)
 
         whenever(viewHolder.player).thenReturn(view)
         whenever(viewHolder.appIcon).thenReturn(appIcon)
@@ -425,6 +428,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
         whenever(viewHolder.actionsTopBarrier).thenReturn(actionsTopBarrier)
 
         whenever(viewHolder.multiRippleView).thenReturn(multiRippleView)
+        whenever(viewHolder.turbulenceNoiseView).thenReturn(turbulenceNoiseView)
     }
 
     /** Initialize elements for the recommendation view holder */

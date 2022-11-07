@@ -31,11 +31,21 @@ import android.view.View
 class MultiRippleView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
 
     internal val ripples = ArrayList<RippleAnimation>()
+    private val listeners = ArrayList<RipplesFinishedListener>()
     private val ripplePaint = Paint()
     private var isWarningLogged = false
 
     companion object {
         private const val TAG = "MultiRippleView"
+
+        interface RipplesFinishedListener {
+            /** Triggered when all the ripples finish running. */
+            fun onRipplesFinish()
+        }
+    }
+
+    fun addRipplesFinishedListener(listener: RipplesFinishedListener) {
+        listeners.add(listener)
     }
 
     override fun onDraw(canvas: Canvas?) {
@@ -62,6 +72,10 @@ class MultiRippleView(context: Context?, attrs: AttributeSet?) : View(context, a
             shouldInvalidate = shouldInvalidate || anim.isPlaying()
         }
 
-        if (shouldInvalidate) invalidate()
+        if (shouldInvalidate) {
+            invalidate()
+        } else { // Nothing is playing.
+            listeners.forEach { listener -> listener.onRipplesFinish() }
+        }
     }
 }

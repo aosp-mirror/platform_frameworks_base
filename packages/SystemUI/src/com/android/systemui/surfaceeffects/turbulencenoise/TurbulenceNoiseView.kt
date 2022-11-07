@@ -40,6 +40,7 @@ class TurbulenceNoiseView(context: Context?, attrs: AttributeSet?) : View(contex
     private val paint = Paint().apply { this.shader = turbulenceNoiseShader }
     private val random = Random()
     private val animator: ValueAnimator = ValueAnimator.ofFloat(0f, 1f)
+    private var config: TurbulenceNoiseAnimationConfig? = null
 
     val isPlaying: Boolean
         get() = animator.isRunning
@@ -47,6 +48,14 @@ class TurbulenceNoiseView(context: Context?, attrs: AttributeSet?) : View(contex
     init {
         // Only visible during the animation.
         visibility = INVISIBLE
+    }
+
+    /** Updates the color during the animation. No-op if there's no animation playing. */
+    fun updateColor(color: Int) {
+        config?.let {
+            it.color = color
+            applyConfig(it)
+        }
     }
 
     override fun onDraw(canvas: Canvas?) {
@@ -101,6 +110,7 @@ class TurbulenceNoiseView(context: Context?, attrs: AttributeSet?) : View(contex
     }
 
     private fun applyConfig(config: TurbulenceNoiseAnimationConfig) {
+        this.config = config
         with(turbulenceNoiseShader) {
             setGridCount(config.gridCount)
             setColor(ColorUtils.setAlphaComponent(config.color, config.opacity))

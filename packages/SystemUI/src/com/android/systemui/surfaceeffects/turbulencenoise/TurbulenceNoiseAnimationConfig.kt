@@ -43,7 +43,7 @@ data class TurbulenceNoiseAnimationConfig(
     val noiseMoveSpeedZ: Float = DEFAULT_NOISE_SPEED_Z,
 
     /** Color of the effect. */
-    val color: Int = DEFAULT_COLOR,
+    var color: Int = DEFAULT_COLOR,
     /** Background color of the effect. */
     val backgroundColor: Int = DEFAULT_BACKGROUND_COLOR,
     val opacity: Int = DEFAULT_OPACITY,
