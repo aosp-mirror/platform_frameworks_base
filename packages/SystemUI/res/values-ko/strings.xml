@@ -168,6 +168,8 @@
     <skip />
     <string name="keyguard_face_failed" msgid="9044619102286917151">"얼굴을 인식할 수 없습니다."</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"대신 지문을 사용하세요."</string>
+    <!-- no translation found for keyguard_face_unlock_unavailable (8145547300240405980) -->
+    <skip />
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"블루투스가 연결되었습니다."</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"배터리 잔량을 알 수 없습니다."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"<xliff:g id="BLUETOOTH">%s</xliff:g>에 연결되었습니다."</string>
@@ -248,8 +250,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"밝기"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"색상 반전"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"색상 보정"</string>
-    <!-- no translation found for quick_settings_more_user_settings (7634653308485206306) -->
-    <skip />
+    <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"사용자 관리"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"완료"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"닫기"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"연결됨"</string>
@@ -304,6 +305,17 @@
     <string name="sensor_privacy_mic_unblocked_toast_content" msgid="306555320557065068">"마이크 사용 가능"</string>
     <string name="sensor_privacy_camera_unblocked_toast_content" msgid="7843105715964332311">"카메라 사용 가능"</string>
     <string name="sensor_privacy_mic_camera_unblocked_toast_content" msgid="7339355093282661115">"마이크 및 카메라 사용 가능"</string>
+    <string name="sensor_privacy_mic_turned_on_dialog_title" msgid="6348853159838376513">"마이크 사용 설정됨"</string>
+    <string name="sensor_privacy_mic_turned_off_dialog_title" msgid="5760464281790732849">"마이크 사용 중지됨"</string>
+    <string name="sensor_privacy_mic_unblocked_dialog_content" msgid="4889961886199270224">"모든 앱 및 서비스의 마이크가 사용 설정됩니다."</string>
+    <string name="sensor_privacy_mic_blocked_no_exception_dialog_content" msgid="5864898470772965394">"모든 앱 및 서비스의 마이크 액세스가 사용 중지됩니다. 설정 &gt; 개인 정보 보호 &gt; 마이크에서 마이크 액세스를 사용 설정할 수 있습니다."</string>
+    <string name="sensor_privacy_mic_blocked_with_exception_dialog_content" msgid="810289713700437896">"모든 앱 및 서비스의 마이크 액세스가 사용 중지됩니다. 설정 &gt; 개인 정보 보호 &gt; 마이크에서 변경할 수 있습니다."</string>
+    <string name="sensor_privacy_camera_turned_on_dialog_title" msgid="8039095295100075952">"카메라 사용 설정됨"</string>
+    <string name="sensor_privacy_camera_turned_off_dialog_title" msgid="1936603903120742696">"카메라 사용 중지됨"</string>
+    <string name="sensor_privacy_camera_unblocked_dialog_content" msgid="7847190103011782278">"모든 앱 및 서비스의 카메라가 사용 설정됩니다."</string>
+    <string name="sensor_privacy_camera_blocked_dialog_content" msgid="3182428709314874616">"모든 앱 및 서비스의 카메라 액세스가 사용 중지됩니다."</string>
+    <string name="sensor_privacy_htt_blocked_dialog_content" msgid="3333321592997666441">"마이크 버튼을 사용하려면 설정에서 마이크 액세스를 사용 설정하세요."</string>
+    <string name="sensor_privacy_dialog_open_settings" msgid="1503088305279285048">"설정 열기"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"기타 기기"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"최근 사용 버튼 전환"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"알람, 알림, 일정 및 지정한 발신자로부터 받은 전화를 제외한 소리와 진동을 끕니다. 음악, 동영상, 게임 등 재생하도록 선택한 소리는 정상적으로 들립니다."</string>
@@ -374,6 +386,16 @@
     <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"앱을 공유하거나 녹화하거나 전송할 때는 <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>에서 해당 앱에 표시되거나 재생되는 모든 항목에 액세스할 수 있으므로 비밀번호, 결제 세부정보, 메시지 등 민감한 정보가 노출되지 않도록 주의하세요."</string>
     <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"계속"</string>
     <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"앱 공유 또는 녹화"</string>
+    <!-- no translation found for media_projection_permission_dialog_system_service_title (6827129613741303726) -->
+    <skip />
+    <!-- no translation found for media_projection_permission_dialog_system_service_warning_entire_screen (8801616203805837575) -->
+    <skip />
+    <!-- no translation found for media_projection_permission_dialog_system_service_warning_single_app (543310680568419338) -->
+    <skip />
+    <!-- no translation found for screen_capturing_disabled_by_policy_dialog_title (2113331792064527203) -->
+    <skip />
+    <!-- no translation found for screen_capturing_disabled_by_policy_dialog_description (6015975736747696431) -->
+    <skip />
     <string name="clear_all_notifications_text" msgid="348312370303046130">"모두 지우기"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"관리"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"기록"</string>
@@ -728,14 +750,10 @@
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"모바일 데이터를 사용 중지하시겠습니까?"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"<xliff:g id="CARRIER">%s</xliff:g>을(를) 통해 데이터 또는 인터넷에 액세스할 수 없게 됩니다. 인터넷은 Wi-Fi를 통해서만 사용할 수 있습니다."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"이동통신사"</string>
-    <!-- no translation found for auto_data_switch_disable_title (5146527155665190652) -->
-    <skip />
-    <!-- no translation found for auto_data_switch_disable_message (5885533647399535852) -->
-    <skip />
-    <!-- no translation found for auto_data_switch_dialog_negative_button (2370876875999891444) -->
-    <skip />
-    <!-- no translation found for auto_data_switch_dialog_positive_button (8531782041263087564) -->
-    <skip />
+    <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"다시 <xliff:g id="CARRIER">%s</xliff:g>(으)로 전환할까요?"</string>
+    <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"모바일 데이터가 가용성에 따라 자동으로 전환하지 않습니다."</string>
+    <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"나중에"</string>
+    <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"예, 전환합니다"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"앱이 권한 요청을 가리고 있기 때문에 설정에서 내 응답을 확인할 수 없습니다."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"<xliff:g id="APP_0">%1$s</xliff:g>에서 <xliff:g id="APP_2">%2$s</xliff:g>의 슬라이스를 표시하도록 허용하시겠습니까?"</string>
     <string name="slice_permission_text_1" msgid="6675965177075443714">"- <xliff:g id="APP">%1$s</xliff:g>의 정보를 읽을 수 있음"</string>
@@ -794,18 +812,15 @@
     <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"돋보기 창 설정"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"접근성 기능을 열려면 탭하세요. 설정에서 이 버튼을 맞춤설정하거나 교체할 수 있습니다.\n\n"<annotation id="link">"설정 보기"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"버튼을 가장자리로 옮겨서 일시적으로 숨기세요."</string>
-    <!-- no translation found for accessibility_floating_button_undo (511112888715708241) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_undo_message_text (3044079592757099698) -->
-    <skip />
+    <string name="accessibility_floating_button_undo" msgid="511112888715708241">"실행취소"</string>
+    <string name="accessibility_floating_button_undo_message_text" msgid="3044079592757099698">"{count,plural, =1{바로가기 {label}개 삭제됨}other{바로가기 #개 삭제됨}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"왼쪽 상단으로 이동"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"오른쪽 상단으로 이동"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"왼쪽 하단으로 이동"</string>
     <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"오른쪽 하단으로 이동"</string>
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"가장자리로 옮겨서 숨기기"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"가장자리 바깥으로 옮겨서 표시"</string>
-    <!-- no translation found for accessibility_floating_button_action_remove_menu (6730432848162552135) -->
-    <skip />
+    <string name="accessibility_floating_button_action_remove_menu" msgid="6730432848162552135">"삭제"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"전환"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"기기 컨트롤"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"컨트롤을 추가할 앱을 선택하세요"</string>
@@ -948,10 +963,8 @@
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"모바일 데이터"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"연결됨"</string>
-    <!-- no translation found for mobile_data_temp_connection_active (4590222725908806824) -->
-    <skip />
-    <!-- no translation found for mobile_data_poor_connection (819617772268371434) -->
-    <skip />
+    <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"일시적으로 연결됨"</string>
+    <string name="mobile_data_poor_connection" msgid="819617772268371434">"연결 상태 나쁨"</string>
     <string name="mobile_data_off_summary" msgid="3663995422004150567">"모바일 데이터가 자동으로 연결되지 않음"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"연결되지 않음"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"사용 가능한 다른 네트워크가 없음"</string>
