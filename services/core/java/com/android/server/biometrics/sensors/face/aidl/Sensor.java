@@ -637,7 +637,7 @@ public class Sensor {
 
     public void onBinderDied() {
         final BaseClientMonitor client = mScheduler.getCurrentClient();
-        if (client.isInterruptable()) {
+        if (client != null && client.isInterruptable()) {
             Slog.e(mTag, "Sending ERROR_HW_UNAVAILABLE for client: " + client);
             final ErrorConsumer errorConsumer = (ErrorConsumer) client;
             errorConsumer.onError(FaceManager.FACE_ERROR_HW_UNAVAILABLE,
