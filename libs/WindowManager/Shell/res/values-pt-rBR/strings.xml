@@ -86,4 +86,9 @@
     <string name="close_button_text" msgid="2913281996024033299">"Fechar"</string>
     <string name="back_button_text" msgid="1469718707134137085">"Voltar"</string>
     <string name="handle_text" msgid="1766582106752184456">"Alça"</string>
+    <string name="fullscreen_text" msgid="1162316685217676079">"Tela cheia"</string>
+    <string name="desktop_text" msgid="1077633567027630454">"Modo área de trabalho"</string>
+    <string name="split_screen_text" msgid="1396336058129570886">"Tela dividida"</string>
+    <string name="more_button_text" msgid="3655388105592893530">"Mais"</string>
+    <string name="float_button_text" msgid="9221657008391364581">"Ponto flutuante"</string>
 </resources>
