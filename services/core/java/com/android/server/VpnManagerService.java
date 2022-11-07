@@ -186,6 +186,10 @@ public class VpnManagerService extends IVpnManager.Stub {
         synchronized (mVpns) {
             for (int i = 0; i < mVpns.size(); i++) {
                 pw.println(mVpns.keyAt(i) + ": " + mVpns.valueAt(i).getPackage());
+                pw.increaseIndent();
+                mVpns.valueAt(i).dump(pw);
+                pw.decreaseIndent();
+                pw.println();
             }
             pw.decreaseIndent();
         }
