@@ -96,7 +96,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         ActivityEmbeddingComponent {
     static final String TAG = "SplitController";
     static final boolean ENABLE_SHELL_TRANSITIONS =
-            SystemProperties.getBoolean("persist.wm.debug.shell_transit", true);
+            SystemProperties.getBoolean("persist.wm.debug.shell_transit", false);
 
     @VisibleForTesting
     @GuardedBy("mLock")
