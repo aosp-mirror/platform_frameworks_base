@@ -28,7 +28,7 @@ import com.android.systemui.plugins.ClockProvider
 import com.android.systemui.plugins.ClockProviderPlugin
 import com.android.systemui.plugins.PluginListener
 import com.android.systemui.shared.plugins.PluginManager
-import com.google.gson.Gson
+import org.json.JSONObject
 
 private val TAG = ClockRegistry::class.simpleName
 private const val DEBUG = true
@@ -47,7 +47,6 @@ open class ClockRegistry(
         fun onClockChanged()
     }
 
-    private val gson = Gson()
     private val availableClocks = mutableMapOf<ClockId, ClockInfo>()
     private val clockChangeListeners = mutableListOf<ClockChangeListener>()
     private val settingObserver = object : ContentObserver(handler) {
@@ -70,7 +69,7 @@ open class ClockRegistry(
                     context.contentResolver,
                     Settings.Secure.LOCK_SCREEN_CUSTOM_CLOCK_FACE
                 )
-                gson.fromJson(json, ClockSetting::class.java)?.clockId ?: DEFAULT_CLOCK_ID
+                ClockSetting.deserialize(json)?.clockId ?: DEFAULT_CLOCK_ID
             } catch (ex: Exception) {
                 Log.e(TAG, "Failed to parse clock setting", ex)
                 DEFAULT_CLOCK_ID
@@ -78,7 +77,7 @@ open class ClockRegistry(
         }
         set(value) {
             try {
-                val json = gson.toJson(ClockSetting(value, System.currentTimeMillis()))
+                val json = ClockSetting.serialize(ClockSetting(value, System.currentTimeMillis()))
                 Settings.Secure.putString(
                     context.contentResolver,
                     Settings.Secure.LOCK_SCREEN_CUSTOM_CLOCK_FACE, json
@@ -198,8 +197,27 @@ open class ClockRegistry(
     )
 
     @Keep
-    private data class ClockSetting(
+    data class ClockSetting(
         val clockId: ClockId,
         val _applied_timestamp: Long?
-    )
+    ) {
+        companion object {
+            private val KEY_CLOCK_ID = "clockId"
+            private val KEY_TIMESTAMP = "_applied_timestamp"
+
+            fun serialize(setting: ClockSetting): String {
+                return JSONObject()
+                    .put(KEY_CLOCK_ID, setting.clockId)
+                    .put(KEY_TIMESTAMP, setting._applied_timestamp)
+                    .toString()
+            }
+
+            fun deserialize(jsonStr: String): ClockSetting {
+                val json = JSONObject(jsonStr)
+                return ClockSetting(
+                    json.getString(KEY_CLOCK_ID),
+                    if (!json.isNull(KEY_TIMESTAMP)) json.getLong(KEY_TIMESTAMP) else null)
+            }
+        }
+    }
 }
