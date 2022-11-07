@@ -73,4 +73,3 @@ per-file Trace.java = file:/TRACE_OWNERS
 
 # PermissionEnforcer
 per-file PermissionEnforcer.java = tweek@google.com, brufino@google.com
-per-file PermissionEnforcer.java = file:/core/java/android/permission/OWNERS
