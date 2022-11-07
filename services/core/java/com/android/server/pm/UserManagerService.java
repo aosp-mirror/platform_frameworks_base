@@ -1776,7 +1776,7 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
-    public List<UserHandle> getVisibleUsers() {
+    public int[] getVisibleUsers() {
         if (!hasManageUsersOrPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)) {
             throw new SecurityException("Caller needs MANAGE_USERS or INTERACT_ACROSS_USERS "
                     + "permission to get list of visible users");
@@ -1784,18 +1784,19 @@ public class UserManagerService extends IUserManager.Stub {
         final long ident = Binder.clearCallingIdentity();
         try {
             // TODO(b/2399825580): refactor into UserDisplayAssigner
+            IntArray visibleUsers;
             synchronized (mUsersLock) {
                 int usersSize = mUsers.size();
-                ArrayList<UserHandle> visibleUsers = new ArrayList<>(usersSize);
+                visibleUsers = new IntArray();
                 for (int i = 0; i < usersSize; i++) {
                     UserInfo ui = mUsers.valueAt(i).info;
                     if (!ui.partial && !ui.preCreated && !mRemovingUserIds.get(ui.id)
                             && mUserVisibilityMediator.isUserVisible(ui.id)) {
-                        visibleUsers.add(UserHandle.of(ui.id));
+                        visibleUsers.add(ui.id);
                     }
                 }
-                return visibleUsers;
             }
+            return visibleUsers.toArray();
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
