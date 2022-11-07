@@ -170,6 +170,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     private ValueAnimator mDividerFadeInAnimator;
     private boolean mDividerVisible;
     private boolean mKeyguardShowing;
+    private boolean mShowDecorImmediately;
     private final SyncTransactionQueue mSyncQueue;
     private final ShellTaskOrganizer mTaskOrganizer;
     private final Context mContext;
@@ -1561,6 +1562,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 if (mLogger.isEnterRequestedByDrag()) {
                     updateSurfaceBounds(mSplitLayout, t, false /* applyResizingOffset */);
                 } else {
+                    mShowDecorImmediately = true;
                     mSplitLayout.flingDividerToCenter();
                 }
             });
@@ -1639,14 +1641,16 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         updateSurfaceBounds(layout, t, true /* applyResizingOffset */);
         getMainStageBounds(mTempRect1);
         getSideStageBounds(mTempRect2);
-        mMainStage.onResizing(mTempRect1, mTempRect2, t, offsetX, offsetY);
-        mSideStage.onResizing(mTempRect2, mTempRect1, t, offsetX, offsetY);
+        mMainStage.onResizing(mTempRect1, mTempRect2, t, offsetX, offsetY, mShowDecorImmediately);
+        mSideStage.onResizing(mTempRect2, mTempRect1, t, offsetX, offsetY, mShowDecorImmediately);
         t.apply();
         mTransactionPool.release(t);
     }
 
     @Override
     public void onLayoutSizeChanged(SplitLayout layout) {
+        // Reset this flag every time onLayoutSizeChanged.
+        mShowDecorImmediately = false;
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         updateWindowBounds(layout, wct);
         sendOnBoundsChanged();
