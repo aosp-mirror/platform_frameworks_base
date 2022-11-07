@@ -22,7 +22,9 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.Matrix;
@@ -1780,19 +1782,18 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @param displayId The display ID associated with this event.
      * @param flags The motion event flags.
      * @param classification The classification to give this event.
-     * @hide
      */
-    public static MotionEvent obtain(long downTime, long eventTime,
-            int action, int pointerCount, PointerProperties[] pointerProperties,
-            PointerCoords[] pointerCoords, int metaState, int buttonState,
-            float xPrecision, float yPrecision, int deviceId,
-            int edgeFlags, int source, int displayId, int flags,
-            @Classification int classification) {
+    public static @Nullable MotionEvent obtain(long downTime, long eventTime, int action,
+            int pointerCount,
+            @SuppressLint("ArrayReturn") @NonNull PointerProperties[] pointerProperties,
+            @SuppressLint("ArrayReturn") @NonNull PointerCoords[] pointerCoords, int metaState,
+            int buttonState, float xPrecision, float yPrecision, int deviceId, int edgeFlags,
+            int source, int displayId, int flags, @Classification int classification) {
         MotionEvent ev = obtain();
         final boolean success = ev.initialize(deviceId, source, displayId, action, flags, edgeFlags,
                 metaState, buttonState, classification, 0, 0, xPrecision, yPrecision,
-                downTime * NS_PER_MS, eventTime * NS_PER_MS,
-                pointerCount, pointerProperties, pointerCoords);
+                downTime * NS_PER_MS, eventTime * NS_PER_MS, pointerCount, pointerProperties,
+                pointerCoords);
         if (!success) {
             Log.e(TAG, "Could not initialize MotionEvent");
             ev.recycle();
