@@ -28,6 +28,7 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.quickaffordance.BuiltInKeyguardQuickAffordanceKeys
 import com.android.systemui.keyguard.data.quickaffordance.FakeKeyguardQuickAffordanceConfig
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceConfig
+import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceLegacySettingSyncer
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceSelectionManager
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.KeyguardQuickAffordanceRepository
@@ -44,6 +45,7 @@ import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.FakeSharedPreferences
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.settings.FakeSettings
 import com.google.common.truth.Truth.assertThat
 import kotlin.math.max
 import kotlin.math.min
@@ -118,25 +120,34 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
         whenever(userTracker.userHandle).thenReturn(mock())
         whenever(lockPatternUtils.getStrongAuthForUser(anyInt()))
             .thenReturn(LockPatternUtils.StrongAuthTracker.STRONG_AUTH_NOT_REQUIRED)
+        val scope = CoroutineScope(IMMEDIATE)
+        val selectionManager =
+            KeyguardQuickAffordanceSelectionManager(
+                context = context,
+                userFileManager =
+                    mock<UserFileManager>().apply {
+                        whenever(
+                                getSharedPreferences(
+                                    anyString(),
+                                    anyInt(),
+                                    anyInt(),
+                                )
+                            )
+                            .thenReturn(FakeSharedPreferences())
+                    },
+                userTracker = userTracker,
+            )
         val quickAffordanceRepository =
             KeyguardQuickAffordanceRepository(
                 appContext = context,
-                scope = CoroutineScope(IMMEDIATE),
-                selectionManager =
-                    KeyguardQuickAffordanceSelectionManager(
-                        context = context,
-                        userFileManager =
-                            mock<UserFileManager>().apply {
-                                whenever(
-                                        getSharedPreferences(
-                                            anyString(),
-                                            anyInt(),
-                                            anyInt(),
-                                        )
-                                    )
-                                    .thenReturn(FakeSharedPreferences())
-                            },
-                        userTracker = userTracker,
+                scope = scope,
+                selectionManager = selectionManager,
+                legacySettingSyncer =
+                    KeyguardQuickAffordanceLegacySettingSyncer(
+                        scope = scope,
+                        backgroundDispatcher = IMMEDIATE,
+                        secureSettings = FakeSettings(),
+                        selectionsManager = selectionManager,
                     ),
                 configs =
                     setOf(

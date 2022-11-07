@@ -22,6 +22,7 @@ import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceConfig
+import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceLegacySettingSyncer
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceSelectionManager
 import com.android.systemui.keyguard.shared.model.KeyguardQuickAffordancePickerRepresentation
 import com.android.systemui.keyguard.shared.model.KeyguardSlotPickerRepresentation
@@ -40,6 +41,7 @@ constructor(
     @Application private val appContext: Context,
     @Application private val scope: CoroutineScope,
     private val selectionManager: KeyguardQuickAffordanceSelectionManager,
+    legacySettingSyncer: KeyguardQuickAffordanceLegacySettingSyncer,
     private val configs: Set<@JvmSuppressWildcards KeyguardQuickAffordanceConfig>,
 ) {
     /**
@@ -81,6 +83,10 @@ constructor(
                 maxSelectedAffordances = slotCapacity,
             )
         }
+    }
+
+    init {
+        legacySettingSyncer.startSyncing()
     }
 
     /**
