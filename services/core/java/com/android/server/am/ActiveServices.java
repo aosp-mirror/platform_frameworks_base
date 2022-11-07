@@ -23,18 +23,29 @@ import static android.Manifest.permission.START_FOREGROUND_SERVICES_FROM_BACKGRO
 import static android.app.ActivityManager.PROCESS_STATE_HEAVY_WEIGHT;
 import static android.app.ActivityManager.PROCESS_STATE_RECEIVER;
 import static android.app.ActivityManager.PROCESS_STATE_TOP;
+import static android.app.ForegroundServiceTypePolicy.FGS_TYPE_POLICY_CHECK_DEPRECATED;
+import static android.app.ForegroundServiceTypePolicy.FGS_TYPE_POLICY_CHECK_DISABLED;
+import static android.app.ForegroundServiceTypePolicy.FGS_TYPE_POLICY_CHECK_OK;
+import static android.app.ForegroundServiceTypePolicy.FGS_TYPE_POLICY_CHECK_PERMISSION_DENIED_ENFORCED;
+import static android.app.ForegroundServiceTypePolicy.FGS_TYPE_POLICY_CHECK_PERMISSION_DENIED_PERMISSIVE;
+import static android.app.ForegroundServiceTypePolicy.FGS_TYPE_POLICY_CHECK_UNKNOWN;
+import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MANIFEST;
+import static android.os.PowerExemptionManager.REASON_ACTIVE_DEVICE_ADMIN;
 import static android.os.PowerExemptionManager.REASON_ACTIVITY_STARTER;
 import static android.os.PowerExemptionManager.REASON_ACTIVITY_VISIBILITY_GRACE_PERIOD;
 import static android.os.PowerExemptionManager.REASON_ALLOWLISTED_PACKAGE;
 import static android.os.PowerExemptionManager.REASON_BACKGROUND_ACTIVITY_PERMISSION;
 import static android.os.PowerExemptionManager.REASON_BACKGROUND_FGS_PERMISSION;
+import static android.os.PowerExemptionManager.REASON_CARRIER_PRIVILEGED_APP;
 import static android.os.PowerExemptionManager.REASON_COMPANION_DEVICE_MANAGER;
 import static android.os.PowerExemptionManager.REASON_CURRENT_INPUT_METHOD;
 import static android.os.PowerExemptionManager.REASON_DENIED;
 import static android.os.PowerExemptionManager.REASON_DEVICE_DEMO_MODE;
 import static android.os.PowerExemptionManager.REASON_DEVICE_OWNER;
+import static android.os.PowerExemptionManager.REASON_DISALLOW_APPS_CONTROL;
+import static android.os.PowerExemptionManager.REASON_DPO_PROTECTED_APP;
 import static android.os.PowerExemptionManager.REASON_FGS_BINDING;
 import static android.os.PowerExemptionManager.REASON_INSTR_BACKGROUND_ACTIVITY_PERMISSION;
 import static android.os.PowerExemptionManager.REASON_INSTR_BACKGROUND_FGS_PERMISSION;
@@ -45,10 +56,12 @@ import static android.os.PowerExemptionManager.REASON_PROC_STATE_PERSISTENT;
 import static android.os.PowerExemptionManager.REASON_PROC_STATE_PERSISTENT_UI;
 import static android.os.PowerExemptionManager.REASON_PROC_STATE_TOP;
 import static android.os.PowerExemptionManager.REASON_PROFILE_OWNER;
+import static android.os.PowerExemptionManager.REASON_ROLE_EMERGENCY;
 import static android.os.PowerExemptionManager.REASON_SERVICE_LAUNCH;
 import static android.os.PowerExemptionManager.REASON_START_ACTIVITY_FLAG;
 import static android.os.PowerExemptionManager.REASON_SYSTEM_ALERT_WINDOW_PERMISSION;
 import static android.os.PowerExemptionManager.REASON_SYSTEM_ALLOW_LISTED;
+import static android.os.PowerExemptionManager.REASON_SYSTEM_MODULE;
 import static android.os.PowerExemptionManager.REASON_SYSTEM_UID;
 import static android.os.PowerExemptionManager.REASON_TEMP_ALLOWED_WHILE_IN_USE;
 import static android.os.PowerExemptionManager.REASON_UID_VISIBLE;
@@ -63,6 +76,9 @@ import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.ZYGOTE_POLICY_FLAG_EMPTY;
 
 import static com.android.internal.messages.nano.SystemMessageProto.SystemMessage.NOTE_FOREGROUND_SERVICE_BG_LAUNCH;
+import static com.android.internal.util.FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED__STATE__DENIED;
+import static com.android.internal.util.FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED__STATE__ENTER;
+import static com.android.internal.util.FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED__STATE__EXIT;
 import static com.android.internal.util.FrameworkStatsLog.SERVICE_REQUEST_EVENT_REPORTED;
 import static com.android.internal.util.FrameworkStatsLog.SERVICE_REQUEST_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_COLD;
 import static com.android.internal.util.FrameworkStatsLog.SERVICE_REQUEST_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_HOT;
@@ -94,6 +110,11 @@ import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.ForegroundServiceStartNotAllowedException;
+import android.app.ForegroundServiceTypeNotAllowedException;
+import android.app.ForegroundServiceTypePolicy;
+import android.app.ForegroundServiceTypePolicy.ForegroundServicePolicyCheckCode;
+import android.app.ForegroundServiceTypePolicy.ForegroundServiceTypePermission;
+import android.app.ForegroundServiceTypePolicy.ForegroundServiceTypePolicyInfo;
 import android.app.IApplicationThread;
 import android.app.IForegroundServiceObserver;
 import android.app.IServiceConnection;
@@ -122,6 +143,7 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.content.pm.ServiceInfo.ForegroundServiceType;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -576,6 +598,7 @@ public final class ActiveServices {
         getAppStateTracker().addBackgroundRestrictedAppListener(new BackgroundRestrictedListener());
         mAppWidgetManagerInternal = LocalServices.getService(AppWidgetManagerInternal.class);
         setAllowListWhileInUsePermissionInFgs();
+        initSystemExemptedFgsTypePermission();
     }
 
     private AppStateTracker getAppStateTracker() {
@@ -757,8 +780,8 @@ public final class ActiveServices {
                 Slog.w(TAG, msg);
                 showFgsBgRestrictedNotificationLocked(r);
                 logFGSStateChangeLocked(r,
-                        FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED__STATE__DENIED,
-                        0, FGS_STOP_REASON_UNKNOWN);
+                        FOREGROUND_SERVICE_STATE_CHANGED__STATE__DENIED,
+                        0, FGS_STOP_REASON_UNKNOWN, FGS_TYPE_POLICY_CHECK_UNKNOWN);
                 if (CompatChanges.isChangeEnabled(FGS_START_EXCEPTION_CHANGE_ID, callingUid)) {
                     throw new ForegroundServiceStartNotAllowedException(msg);
                 }
@@ -1911,6 +1934,7 @@ public final class ActiveServices {
                     ignoreForeground = true;
                 }
 
+                int fgsTypeCheckCode = FGS_TYPE_POLICY_CHECK_UNKNOWN;
                 if (!ignoreForeground) {
                     if (r.mStartForegroundCount == 0) {
                         /*
@@ -1969,11 +1993,47 @@ public final class ActiveServices {
                         updateServiceForegroundLocked(psr, true);
                         ignoreForeground = true;
                         logFGSStateChangeLocked(r,
-                                FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED__STATE__DENIED,
-                                0, FGS_STOP_REASON_UNKNOWN);
+                                FOREGROUND_SERVICE_STATE_CHANGED__STATE__DENIED,
+                                0, FGS_STOP_REASON_UNKNOWN, FGS_TYPE_POLICY_CHECK_UNKNOWN);
                         if (CompatChanges.isChangeEnabled(FGS_START_EXCEPTION_CHANGE_ID,
                                 r.appInfo.uid)) {
                             throw new ForegroundServiceStartNotAllowedException(msg);
+                        }
+                    }
+
+                    if (!ignoreForeground) {
+                        Pair<Integer, RuntimeException> fgsTypeResult = null;
+                        if (foregroundServiceType == ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE) {
+                            fgsTypeResult = validateForegroundServiceType(r,
+                                    foregroundServiceType,
+                                    ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE);
+                        } else {
+                            int fgsTypes = foregroundServiceType;
+                            // If the service has declared some unknown types which might be coming
+                            // from future releases, and if it also comes with the "specialUse",
+                            // then it'll be deemed as the "specialUse" and we ignore this
+                            // unknown type. Otherwise, it'll be treated as an invalid type.
+                            int defaultFgsTypes = (foregroundServiceType
+                                    & ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE) != 0
+                                    ? ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE
+                                    : ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE;
+                            for (int serviceType = Integer.highestOneBit(fgsTypes);
+                                    serviceType != 0;
+                                    serviceType = Integer.highestOneBit(fgsTypes)) {
+                                fgsTypeResult = validateForegroundServiceType(r,
+                                        serviceType, defaultFgsTypes);
+                                fgsTypes &= ~serviceType;
+                                if (fgsTypeResult.first != FGS_TYPE_POLICY_CHECK_OK) {
+                                    break;
+                                }
+                            }
+                        }
+                        fgsTypeCheckCode = fgsTypeResult.first;
+                        if (fgsTypeResult.second != null) {
+                            logFGSStateChangeLocked(r,
+                                    FOREGROUND_SERVICE_STATE_CHANGED__STATE__DENIED,
+                                    0, FGS_STOP_REASON_UNKNOWN, fgsTypeResult.first);
+                            throw fgsTypeResult.second;
                         }
                     }
                 }
@@ -2044,8 +2104,8 @@ public final class ActiveServices {
                         registerAppOpCallbackLocked(r);
                         mAm.updateForegroundServiceUsageStats(r.name, r.userId, true);
                         logFGSStateChangeLocked(r,
-                                FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED__STATE__ENTER,
-                                0, FGS_STOP_REASON_UNKNOWN);
+                                FOREGROUND_SERVICE_STATE_CHANGED__STATE__ENTER,
+                                0, FGS_STOP_REASON_UNKNOWN, fgsTypeCheckCode);
                         updateNumForegroundServicesLocked();
                     }
                     // Even if the service is already a FGS, we need to update the notification,
@@ -2126,10 +2186,11 @@ public final class ActiveServices {
                         AppOpsManager.OP_START_FOREGROUND, r.appInfo.uid, r.packageName, null);
                 unregisterAppOpCallbackLocked(r);
                 logFGSStateChangeLocked(r,
-                        FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED__STATE__EXIT,
+                        FOREGROUND_SERVICE_STATE_CHANGED__STATE__EXIT,
                         r.mFgsExitTime > r.mFgsEnterTime
                                 ? (int) (r.mFgsExitTime - r.mFgsEnterTime) : 0,
-                        FGS_STOP_REASON_STOP_FOREGROUND);
+                        FGS_STOP_REASON_STOP_FOREGROUND,
+                        FGS_TYPE_POLICY_CHECK_UNKNOWN);
                 r.mFgsNotificationWasDeferred = false;
                 signalForegroundServiceObserversLocked(r);
                 resetFgsRestrictionLocked(r);
@@ -2163,6 +2224,118 @@ public final class ActiveServices {
             }
         }
         return now < eligible;
+    }
+
+    /**
+     * Validate if the given service can start a foreground service with given type.
+     *
+     * @return A pair, where the first parameter is the result code and second is the exception
+     *         object if it fails to start a foreground service with given type.
+     */
+    @NonNull
+    private Pair<Integer, RuntimeException> validateForegroundServiceType(ServiceRecord r,
+            @ForegroundServiceType int type,
+            @ForegroundServiceType int defaultToType) {
+        final ForegroundServiceTypePolicy policy = ForegroundServiceTypePolicy.getDefaultPolicy();
+        final ForegroundServiceTypePolicyInfo policyInfo =
+                policy.getForegroundServiceTypePolicyInfo(type, defaultToType);
+        final @ForegroundServicePolicyCheckCode int code = policy.checkForegroundServiceTypePolicy(
+                mAm.mContext, r.packageName, r.app.uid, r.app.getPid(),
+                r.mAllowWhileInUsePermissionInFgs, policyInfo);
+        RuntimeException exception = null;
+        switch (code) {
+            case FGS_TYPE_POLICY_CHECK_DEPRECATED: {
+                final String msg = "Starting FGS with type "
+                        + ServiceInfo.foregroundServiceTypeToLabel(type)
+                        + " code=" + code
+                        + " callerApp=" + r.app
+                        + " targetSDK=" + r.app.info.targetSdkVersion;
+                Slog.wtfQuiet(TAG, msg);
+                Slog.w(TAG, msg);
+            } break;
+            case FGS_TYPE_POLICY_CHECK_DISABLED: {
+                exception = new ForegroundServiceTypeNotAllowedException(
+                        "Starting FGS with type "
+                        + ServiceInfo.foregroundServiceTypeToLabel(type)
+                        + " callerApp=" + r.app
+                        + " targetSDK=" + r.app.info.targetSdkVersion
+                        + " has been prohibited");
+            } break;
+            case FGS_TYPE_POLICY_CHECK_PERMISSION_DENIED_PERMISSIVE: {
+                final String msg = "Starting FGS with type "
+                        + ServiceInfo.foregroundServiceTypeToLabel(type)
+                        + " code=" + code
+                        + " callerApp=" + r.app
+                        + " targetSDK=" + r.app.info.targetSdkVersion
+                        + " requiredPermissions=" + policyInfo.toPermissionString();
+                Slog.wtfQuiet(TAG, msg);
+                Slog.w(TAG, msg);
+            } break;
+            case FGS_TYPE_POLICY_CHECK_PERMISSION_DENIED_ENFORCED: {
+                exception = new SecurityException("Starting FGS with type "
+                        + ServiceInfo.foregroundServiceTypeToLabel(type)
+                        + " callerApp=" + r.app
+                        + " targetSDK=" + r.app.info.targetSdkVersion
+                        + " requires permissions: "
+                        + policyInfo.toPermissionString());
+            } break;
+            case FGS_TYPE_POLICY_CHECK_OK:
+            default:
+                break;
+        }
+        return Pair.create(code, exception);
+    }
+
+    private class SystemExemptedFgsTypePermission extends ForegroundServiceTypePermission {
+        SystemExemptedFgsTypePermission() {
+            super("System exempted");
+        }
+
+        @Override
+        public int checkPermission(@NonNull Context context, int callerUid, int callerPid,
+                @NonNull String packageName, boolean allowWhileInUse) {
+            final AppRestrictionController appRestrictionController = mAm.mAppRestrictionController;
+            @ReasonCode int reason = appRestrictionController
+                    .getPotentialSystemExemptionReason(callerUid);
+            if (reason == REASON_DENIED) {
+                reason = appRestrictionController
+                        .getPotentialSystemExemptionReason(callerUid, packageName);
+                if (reason == REASON_DENIED) {
+                    reason = appRestrictionController
+                            .getPotentialUserAllowedExemptionReason(callerUid, packageName);
+                }
+            }
+            switch (reason) {
+                case REASON_SYSTEM_UID:
+                case REASON_SYSTEM_ALLOW_LISTED:
+                case REASON_DEVICE_DEMO_MODE:
+                case REASON_DISALLOW_APPS_CONTROL:
+                case REASON_DEVICE_OWNER:
+                case REASON_PROFILE_OWNER:
+                case REASON_PROC_STATE_PERSISTENT:
+                case REASON_PROC_STATE_PERSISTENT_UI:
+                case REASON_SYSTEM_MODULE:
+                case REASON_CARRIER_PRIVILEGED_APP:
+                case REASON_DPO_PROTECTED_APP:
+                case REASON_ACTIVE_DEVICE_ADMIN:
+                case REASON_ROLE_EMERGENCY:
+                case REASON_ALLOWLISTED_PACKAGE:
+                    return PERMISSION_GRANTED;
+                default:
+                    return PERMISSION_DENIED;
+            }
+        }
+    }
+
+    private void initSystemExemptedFgsTypePermission() {
+        final ForegroundServiceTypePolicy policy = ForegroundServiceTypePolicy.getDefaultPolicy();
+        final ForegroundServiceTypePolicyInfo policyInfo =
+                policy.getForegroundServiceTypePolicyInfo(
+                       ServiceInfo.FOREGROUND_SERVICE_TYPE_SYSTEM_EXEMPTED,
+                       ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE);
+        if (policyInfo != null) {
+            policyInfo.setCustomPermission(new SystemExemptedFgsTypePermission());
+        }
     }
 
     ServiceNotificationPolicy applyForegroundServiceNotificationLocked(Notification notification,
@@ -4777,10 +4950,11 @@ public final class ActiveServices {
             unregisterAppOpCallbackLocked(r);
             r.mFgsExitTime = SystemClock.uptimeMillis();
             logFGSStateChangeLocked(r,
-                    FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED__STATE__EXIT,
+                    FOREGROUND_SERVICE_STATE_CHANGED__STATE__EXIT,
                     r.mFgsExitTime > r.mFgsEnterTime
                             ? (int) (r.mFgsExitTime - r.mFgsEnterTime) : 0,
-                    FGS_STOP_REASON_STOP_SERVICE);
+                    FGS_STOP_REASON_STOP_SERVICE,
+                    FGS_TYPE_POLICY_CHECK_UNKNOWN);
             mAm.updateForegroundServiceUsageStats(r.name, r.userId, false);
         }
 
@@ -7020,17 +7194,20 @@ public final class ActiveServices {
      * @param r ServiceRecord
      * @param state one of ENTER/EXIT/DENIED event.
      * @param durationMs Only meaningful for EXIT event, the duration from ENTER and EXIT state.
+     * @param fgsStopReason why was this FGS stopped.
+     * @param fgsTypeCheckCode The FGS type policy check result.
      */
     private void logFGSStateChangeLocked(ServiceRecord r, int state, int durationMs,
-            @FgsStopReason int fgsStopReason) {
+            @FgsStopReason int fgsStopReason,
+            @ForegroundServicePolicyCheckCode int fgsTypeCheckCode) {
         if (!ActivityManagerUtils.shouldSamplePackageForAtom(
                 r.packageName, mAm.mConstants.mFgsAtomSampleRate)) {
             return;
         }
         boolean allowWhileInUsePermissionInFgs;
         @PowerExemptionManager.ReasonCode int fgsStartReasonCode;
-        if (state == FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED__STATE__ENTER
-                || state == FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED__STATE__EXIT) {
+        if (state == FOREGROUND_SERVICE_STATE_CHANGED__STATE__ENTER
+                || state == FOREGROUND_SERVICE_STATE_CHANGED__STATE__EXIT) {
             allowWhileInUsePermissionInFgs = r.mAllowWhileInUsePermissionInFgsAtEntering;
             fgsStartReasonCode = r.mAllowStartForegroundAtEntering;
         } else {
@@ -7056,14 +7233,15 @@ public final class ActiveServices {
                 r.mStartForegroundCount,
                 ActivityManagerUtils.hashComponentNameForAtom(r.shortInstanceName),
                 r.mFgsHasNotificationPermission,
-                r.foregroundServiceType);
+                r.foregroundServiceType,
+                fgsTypeCheckCode);
 
         int event = 0;
-        if (state == FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED__STATE__ENTER) {
+        if (state == FOREGROUND_SERVICE_STATE_CHANGED__STATE__ENTER) {
             event = EventLogTags.AM_FOREGROUND_SERVICE_START;
-        } else if (state == FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED__STATE__EXIT) {
+        } else if (state == FOREGROUND_SERVICE_STATE_CHANGED__STATE__EXIT) {
             event = EventLogTags.AM_FOREGROUND_SERVICE_STOP;
-        } else if (state == FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED__STATE__DENIED) {
+        } else if (state == FOREGROUND_SERVICE_STATE_CHANGED__STATE__DENIED) {
             event = EventLogTags.AM_FOREGROUND_SERVICE_DENIED;
         } else {
             // Unknown event.

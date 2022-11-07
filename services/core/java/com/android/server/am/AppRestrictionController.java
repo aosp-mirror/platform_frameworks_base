@@ -2784,6 +2784,37 @@ public final class AppRestrictionController {
      */
     @ReasonCode
     int getBackgroundRestrictionExemptionReason(int uid) {
+        @ReasonCode int reason = getPotentialSystemExemptionReason(uid);
+        if (reason != REASON_DENIED) {
+            return reason;
+        }
+        final String[] packages = mInjector.getPackageManager().getPackagesForUid(uid);
+        if (packages != null) {
+            // Check each packages to see if any of them is in the "fixed" exemption cases.
+            for (String pkg : packages) {
+                reason = getPotentialSystemExemptionReason(uid, pkg);
+                if (reason != REASON_DENIED) {
+                    return reason;
+                }
+            }
+            // Loop the packages again, and check the user-configurable exemptions.
+            for (String pkg : packages) {
+                reason = getPotentialUserAllowedExemptionReason(uid, pkg);
+                if (reason != REASON_DENIED) {
+                    return reason;
+                }
+            }
+        }
+        return REASON_DENIED;
+    }
+
+    /**
+     * @param uid The uid to check.
+     * @return The potential exemption reason of the given uid. The caller must decide
+     * whether or not it should be exempted.
+     */
+    @ReasonCode
+    int getPotentialSystemExemptionReason(int uid) {
         if (UserHandle.isCore(uid)) {
             return REASON_SYSTEM_UID;
         }
@@ -2811,37 +2842,51 @@ public final class AppRestrictionController {
         } else if (uidProcState <= PROCESS_STATE_PERSISTENT_UI) {
             return REASON_PROC_STATE_PERSISTENT_UI;
         }
-        final String[] packages = mInjector.getPackageManager().getPackagesForUid(uid);
-        if (packages != null) {
-            final AppOpsManager appOpsManager = mInjector.getAppOpsManager();
-            final PackageManagerInternal pm = mInjector.getPackageManagerInternal();
-            final AppStandbyInternal appStandbyInternal = mInjector.getAppStandbyInternal();
-            // Check each packages to see if any of them is in the "fixed" exemption cases.
-            for (String pkg : packages) {
-                if (isSystemModule(pkg)) {
-                    return REASON_SYSTEM_MODULE;
-                } else if (isCarrierApp(pkg)) {
-                    return REASON_CARRIER_PRIVILEGED_APP;
-                } else if (isExemptedFromSysConfig(pkg)) {
-                    return REASON_SYSTEM_ALLOW_LISTED;
-                } else if (mConstantsObserver.mBgRestrictionExemptedPackages.contains(pkg)) {
-                    return REASON_SYSTEM_ALLOW_LISTED;
-                } else if (pm.isPackageStateProtected(pkg, userId)) {
-                    return REASON_DPO_PROTECTED_APP;
-                } else if (appStandbyInternal.isActiveDeviceAdmin(pkg, userId)) {
-                    return REASON_ACTIVE_DEVICE_ADMIN;
-                }
-            }
-            // Loop the packages again, and check the user-configurable exemptions.
-            for (String pkg : packages) {
-                if (appOpsManager.checkOpNoThrow(AppOpsManager.OP_ACTIVATE_VPN,
-                        uid, pkg) == AppOpsManager.MODE_ALLOWED) {
-                    return REASON_OP_ACTIVATE_VPN;
-                } else if (appOpsManager.checkOpNoThrow(AppOpsManager.OP_ACTIVATE_PLATFORM_VPN,
-                        uid, pkg) == AppOpsManager.MODE_ALLOWED) {
-                    return REASON_OP_ACTIVATE_PLATFORM_VPN;
-                }
-            }
+        return REASON_DENIED;
+    }
+
+    /**
+     * @param uid The uid to check.
+     * @param pkgName The package name to check.
+     * @return The potential system-fixed exemption reason of the given uid/package. The caller
+     * must decide whether or not it should be exempted.
+     */
+    @ReasonCode
+    int getPotentialSystemExemptionReason(int uid, String pkg) {
+        final PackageManagerInternal pm = mInjector.getPackageManagerInternal();
+        final AppStandbyInternal appStandbyInternal = mInjector.getAppStandbyInternal();
+        final int userId = UserHandle.getUserId(uid);
+        if (isSystemModule(pkg)) {
+            return REASON_SYSTEM_MODULE;
+        } else if (isCarrierApp(pkg)) {
+            return REASON_CARRIER_PRIVILEGED_APP;
+        } else if (isExemptedFromSysConfig(pkg)) {
+            return REASON_SYSTEM_ALLOW_LISTED;
+        } else if (mConstantsObserver.mBgRestrictionExemptedPackages.contains(pkg)) {
+            return REASON_SYSTEM_ALLOW_LISTED;
+        } else if (pm.isPackageStateProtected(pkg, userId)) {
+            return REASON_DPO_PROTECTED_APP;
+        } else if (appStandbyInternal.isActiveDeviceAdmin(pkg, userId)) {
+            return REASON_ACTIVE_DEVICE_ADMIN;
+        }
+        return REASON_DENIED;
+    }
+
+    /**
+     * @param uid The uid to check.
+     * @param pkgName The package name to check.
+     * @return The potential user-allowed exemption reason of the given uid/package. The caller
+     * must decide whether or not it should be exempted.
+     */
+    @ReasonCode
+    int getPotentialUserAllowedExemptionReason(int uid, String pkg) {
+        final AppOpsManager appOpsManager = mInjector.getAppOpsManager();
+        if (appOpsManager.checkOpNoThrow(AppOpsManager.OP_ACTIVATE_VPN,
+                uid, pkg) == AppOpsManager.MODE_ALLOWED) {
+            return REASON_OP_ACTIVATE_VPN;
+        } else if (appOpsManager.checkOpNoThrow(AppOpsManager.OP_ACTIVATE_PLATFORM_VPN,
+                uid, pkg) == AppOpsManager.MODE_ALLOWED) {
+            return REASON_OP_ACTIVATE_PLATFORM_VPN;
         }
         if (isRoleHeldByUid(RoleManager.ROLE_DIALER, uid)) {
             return REASON_ROLE_DIALER;
@@ -2852,6 +2897,7 @@ public final class AppRestrictionController {
         if (isOnDeviceIdleAllowlist(uid)) {
             return REASON_ALLOWLISTED_PACKAGE;
         }
+        final ActivityManagerInternal am = mInjector.getActivityManagerInternal();
         if (am.isAssociatedCompanionApp(UserHandle.getUserId(uid), uid)) {
             return REASON_COMPANION_DEVICE_MANAGER;
         }
