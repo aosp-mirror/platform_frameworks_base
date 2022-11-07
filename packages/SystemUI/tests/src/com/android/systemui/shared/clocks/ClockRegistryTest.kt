@@ -33,6 +33,7 @@ import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.eq
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.fail
+import org.json.JSONException
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -237,5 +238,53 @@ class ClockRegistryTest : SysuiTestCase() {
 
         pluginListener.onPluginDisconnected(plugin2)
         assertEquals(1, changeCallCount)
+    }
+
+    @Test
+    fun jsonDeserialization_gotExpectedObject() {
+        val expected = ClockRegistry.ClockSetting("ID", 500)
+        val actual = ClockRegistry.ClockSetting.deserialize("""{
+            "clockId":"ID",
+            "_applied_timestamp":500
+        }""")
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun jsonDeserialization_noTimestamp_gotExpectedObject() {
+        val expected = ClockRegistry.ClockSetting("ID", null)
+        val actual = ClockRegistry.ClockSetting.deserialize("{\"clockId\":\"ID\"}")
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun jsonDeserialization_nullTimestamp_gotExpectedObject() {
+        val expected = ClockRegistry.ClockSetting("ID", null)
+        val actual = ClockRegistry.ClockSetting.deserialize("""{
+            "clockId":"ID",
+            "_applied_timestamp":null
+        }""")
+        assertEquals(expected, actual)
+    }
+
+    @Test(expected = JSONException::class)
+    fun jsonDeserialization_noId_threwException() {
+        val expected = ClockRegistry.ClockSetting("ID", 500)
+        val actual = ClockRegistry.ClockSetting.deserialize("{\"_applied_timestamp\":500}")
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun jsonSerialization_gotExpectedString() {
+        val expected = "{\"clockId\":\"ID\",\"_applied_timestamp\":500}"
+        val actual = ClockRegistry.ClockSetting.serialize( ClockRegistry.ClockSetting("ID", 500))
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun jsonSerialization_noTimestamp_gotExpectedString() {
+        val expected = "{\"clockId\":\"ID\"}"
+        val actual = ClockRegistry.ClockSetting.serialize( ClockRegistry.ClockSetting("ID", null))
+        assertEquals(expected, actual)
     }
 }
