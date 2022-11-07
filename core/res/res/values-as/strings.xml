@@ -72,10 +72,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"কলাৰ আইডি সীমিত নকৰিবলৈ পূর্বনির্ধাৰণ কৰা হৈছে। পৰৱৰ্তী কল: সীমিত কৰা হোৱা নাই"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"সুবিধা যোগান ধৰা হোৱা নাই।"</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"আপুনি কলাৰ আইডি ছেটিং সলনি কৰিব নোৱাৰে।"</string>
-    <!-- no translation found for auto_data_switch_title (3286350716870518297) -->
-    <skip />
-    <!-- no translation found for auto_data_switch_content (803557715007110959) -->
-    <skip />
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"ডেটা <xliff:g id="CARRIERDISPLAY">%s</xliff:g>লৈ সলনি কৰা হৈছে"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"আপুনি ছেটিঙত এইটো যিকোনো সময়তে সলনি কৰিব পাৰে"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"কোনো ম’বাইল ডেটা সেৱা নাই"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"জৰুৰীকালীন কল কৰাৰ সুবিধা উপলব্ধ নহয়"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"কোনো ভইচ সেৱা নাই"</string>
@@ -700,6 +698,10 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"আপোনাৰ শ্বেয়াৰ কৰি ৰখা ষ্ট’ৰেজৰ পৰা ভিডিঅ’ ফাইল পঢ়িবলৈ এপ্‌টোক অনুমতি দিয়ে।"</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"শ্বেয়াৰ কৰি ৰখা ষ্ট’ৰেজৰ পৰা প্ৰতিচ্ছবিৰ ফাইল পঢ়ক"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"আপোনাৰ শ্বেয়াৰ কৰি ৰখা ষ্ট’ৰেজৰ পৰা প্ৰতিচ্ছবিৰ ফাইল পঢ়িবলৈ এপ্‌টোক অনুমতি দিয়ে।"</string>
+    <!-- no translation found for permlab_readVisualUserSelect (5516204215354667586) -->
+    <skip />
+    <!-- no translation found for permdesc_readVisualUserSelect (8027174717714968217) -->
+    <skip />
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"আপোনাৰ শ্বেয়াৰ কৰি ৰখা ষ্ট’ৰেজৰ সমল সংশোধন কৰিব বা মচিব পাৰে"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"আপোনাৰ শ্বেয়াৰ কৰি ৰখা ষ্ট’ৰেজৰ সমল লিখিবলৈ এপ্‌টোক অনুমতি দিয়ে।"</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP কল কৰা/পোৱা"</string>

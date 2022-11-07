@@ -73,10 +73,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"ID pozivaoca podrazumevano nije ograničen. Sledeći poziv: Nije ograničen."</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Usluga nije dobavljena."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Ne možete da promenite podešavanje ID-a korisnika."</string>
-    <!-- no translation found for auto_data_switch_title (3286350716870518297) -->
-    <skip />
-    <!-- no translation found for auto_data_switch_content (803557715007110959) -->
-    <skip />
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"Mobilni podaci su prebačeni na operatera <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"Ovo možete u svakom trenutku da promenite u Podešavanjima"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Nema usluge mobilnih podataka"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Hitni pozivi nisu dostupni"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Nema glasovne usluge"</string>
@@ -701,6 +699,10 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Omogućava aplikaciji da čita video fajlove iz deljenog memorijskog prostora."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"čitanje fajlova slika iz deljenog memorijskog prostora"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Omogućava aplikaciji da čita fajlove slika iz deljenog memorijskog prostora."</string>
+    <!-- no translation found for permlab_readVisualUserSelect (5516204215354667586) -->
+    <skip />
+    <!-- no translation found for permdesc_readVisualUserSelect (8027174717714968217) -->
+    <skip />
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"menjanje ili brisanje sadržaja deljenog memorijskog prostora"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Dozvoljava aplikaciji da upisuje sadržaj deljenog memorijskog prostora."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"upućivanje/prijem SIP poziva"</string>

@@ -72,10 +72,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Стандартната идентификация на повикванията е „разрешено“. За следващото обаждане тя е разрешена."</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Услугата не е обезпечена."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Не можете да променяте настройката за идентификация на обажданията."</string>
-    <!-- no translation found for auto_data_switch_title (3286350716870518297) -->
-    <skip />
-    <!-- no translation found for auto_data_switch_content (803557715007110959) -->
-    <skip />
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"Преминахте към мобилни данни от <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"Можете да промените това по всяко време в „Настройки“"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Няма достъп до мобилната услуга за данни"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Няма достъп до спешните обаждания"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Няма услуга за гласови обаждания"</string>
@@ -700,6 +698,10 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Разрешава на приложението да чете видеофайлове от споделеното ви хранилище."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"да чете графични файлове от споделеното хранилище"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Разрешава на приложението да чете графични файлове от споделеното ви хранилище."</string>
+    <!-- no translation found for permlab_readVisualUserSelect (5516204215354667586) -->
+    <skip />
+    <!-- no translation found for permdesc_readVisualUserSelect (8027174717714968217) -->
+    <skip />
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"промяна или изтрив. на съдърж. от сподел. ви хранил."</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Разрешава на прил. да записва съдърж. от сподел. ви хранил."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"извършване/получаване на обаждания чрез SIP"</string>

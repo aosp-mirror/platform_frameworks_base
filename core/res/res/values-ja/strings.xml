@@ -72,10 +72,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"既定: 発信者番号通知、次の発信: 通知"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"提供可能なサービスがありません。"</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"発信者番号の設定は変更できません。"</string>
-    <!-- no translation found for auto_data_switch_title (3286350716870518297) -->
-    <skip />
-    <!-- no translation found for auto_data_switch_content (803557715007110959) -->
-    <skip />
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"データが <xliff:g id="CARRIERDISPLAY">%s</xliff:g> に切り替わりました"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"これは [設定] でいつでも変更できます"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"モバイルデータ サービスのブロック"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"緊急通報のブロック"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"音声通話サービス停止"</string>
@@ -700,6 +698,10 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"共有ストレージからの動画ファイルの読み取りをアプリに許可します。"</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"共有ストレージからの画像ファイルの読み取り"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"共有ストレージからの画像ファイルの読み取りをアプリに許可します。"</string>
+    <!-- no translation found for permlab_readVisualUserSelect (5516204215354667586) -->
+    <skip />
+    <!-- no translation found for permdesc_readVisualUserSelect (8027174717714968217) -->
+    <skip />
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"共有ストレージのコンテンツの変更または削除"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"共有ストレージのコンテンツの書き込みをアプリに許可します。"</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP通話の発着信"</string>

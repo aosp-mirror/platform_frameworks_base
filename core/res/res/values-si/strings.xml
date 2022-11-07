@@ -72,10 +72,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"අමතන්නාගේ ID සුපුරුදු අනුව සීමා වී නැත. මීළඟ ඇමතුම: සීමා කර ඇත"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"සේවාවන් සපයා නැත."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"අමතන්නාගේ ID සැකසීම ඔබට වෙනස්කල නොහැක."</string>
-    <!-- no translation found for auto_data_switch_title (3286350716870518297) -->
-    <skip />
-    <!-- no translation found for auto_data_switch_content (803557715007110959) -->
-    <skip />
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"දත්ත <xliff:g id="CARRIERDISPLAY">%s</xliff:g> වෙත මාරු කරන ලදි"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"ඔබට සැකසීම් තුළ මෙය ඕනෑම වේලාවක වෙනස් කළ හැක"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"ජංගම දත්ත සේවාව නැත"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"හදිසි ඇමතුම් ලබා ගත නොහැකිය"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"හඬ සේවාව නැත"</string>
@@ -700,6 +698,10 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"ඔබගේ බෙදා ගත් ගබඩාවෙන් වීඩියෝ ගොනු කියවීමට යෙදුමට ඉඩ දෙයි."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"බෙදා ගත් ගබඩාවෙන් රූප ගොනු කියවන්න"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"ඔබගේ බෙදා ගත් ගබඩාවෙන් රූප ගොනු කියවීමට යෙදුමට ඉඩ දෙයි."</string>
+    <!-- no translation found for permlab_readVisualUserSelect (5516204215354667586) -->
+    <skip />
+    <!-- no translation found for permdesc_readVisualUserSelect (8027174717714968217) -->
+    <skip />
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"ඔබේ බෙදා ගත් ගබඩාවේ අන්තර්ගත වෙනස් කරන්න නැතහොත් මකන්න"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"යෙදුමට ඔබේ බෙදා ගත් ගබඩාවේ අන්තර්ගත කියවීමට ඉඩ දෙයි."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP ඇමතුම් සිදුකිරීමට/ලබාගැනීමට"</string>

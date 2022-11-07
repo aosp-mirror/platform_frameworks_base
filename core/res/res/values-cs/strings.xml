@@ -74,10 +74,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Ve výchozím nastavení není funkce ID volajícího omezena. Příští hovor: Neomezeno"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Služba není zřízena."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Nastavení ID volajícího nesmíte měnit."</string>
-    <!-- no translation found for auto_data_switch_title (3286350716870518297) -->
-    <skip />
-    <!-- no translation found for auto_data_switch_content (803557715007110959) -->
-    <skip />
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"Datové připojení bylo přepnuto na operátora <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"Volbu můžete kdykoli změnit v nastavení"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Není k dispozici žádná mobilní datová služba"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Tísňová volání jsou nedostupná"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Hlasová volání nejsou k dispozici"</string>
@@ -702,6 +700,10 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Umožňuje aplikaci čtení videosouborů ze sdíleného úložiště."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"čtení obrázkových souborů ze sdíleného úložiště"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Umožňuje aplikaci číst obrázkové soubory ze sdíleného úložiště."</string>
+    <!-- no translation found for permlab_readVisualUserSelect (5516204215354667586) -->
+    <skip />
+    <!-- no translation found for permdesc_readVisualUserSelect (8027174717714968217) -->
+    <skip />
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"úprava nebo mazání obsahu sdíleného úložiště"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Umožňuje aplikaci zápis obsahu do sdíleného úložiště."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"uskutečňování/příjem volání SIP"</string>

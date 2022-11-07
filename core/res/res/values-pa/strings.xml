@@ -72,10 +72,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"ਪ੍ਰਤਿਬੰਧਿਤ ਨਾ ਕਰਨ ਲਈ ਕਾਲਰ ਆਈ.ਡੀ. ਪੂਰਵ-ਨਿਰਧਾਰਤ। ਅਗਲੀ ਕਾਲ: ਪ੍ਰਤਿਬੰਧਿਤ ਨਹੀਂ"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"ਸੇਵਾ ਪ੍ਰਬੰਧਿਤ ਨਹੀਂ ਹੈ।"</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"ਤੁਸੀਂ ਕਾਲਰ ਆਈ.ਡੀ. ਸੈਟਿੰਗ ਨਹੀਂ ਬਦਲ ਸਕਦੇ।"</string>
-    <!-- no translation found for auto_data_switch_title (3286350716870518297) -->
-    <skip />
-    <!-- no translation found for auto_data_switch_content (803557715007110959) -->
-    <skip />
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"ਡਾਟੇ ਨੂੰ <xliff:g id="CARRIERDISPLAY">%s</xliff:g> \'ਤੇ ਸਵਿੱਚ ਕੀਤਾ ਗਿਆ"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"ਤੁਸੀਂ ਕਿਸੇ ਵੇਲੇ ਵੀ ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਜਾ ਕੇ ਇਸਨੂੰ ਬਦਲ ਸਕਦੇ ਹੋ"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"ਕੋਈ ਮੋਬਾਈਲ ਡਾਟਾ ਸੇਵਾ ਨਹੀਂ"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"ਸੰਕਟਕਾਲੀਨ ਕਾਲਿੰਗ ਉਪਲਬਧ ਨਹੀਂ"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"ਕੋਈ ਆਵਾਜ਼ੀ ਸੇਵਾ ਨਹੀਂ"</string>
@@ -700,6 +698,10 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"ਐਪ ਨੂੰ ਤੁਹਾਡੀ ਸਾਂਝੀ ਕੀਤੀ ਸਟੋਰੇਜ ਤੋਂ ਵੀਡੀਓ ਫ਼ਾਈਲਾਂ ਪੜ੍ਹਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"ਸਾਂਝੀ ਕੀਤੀ ਸਟੋਰੇਜ ਤੋਂ ਚਿੱਤਰ ਫ਼ਾਈਲਾਂ ਪੜ੍ਹੋ"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"ਐਪ ਨੂੰ ਤੁਹਾਡੀ ਸਾਂਝੀ ਕੀਤੀ ਸਟੋਰੇਜ ਤੋਂ ਚਿੱਤਰ ਫ਼ਾਈਲਾਂ ਪੜ੍ਹਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
+    <!-- no translation found for permlab_readVisualUserSelect (5516204215354667586) -->
+    <skip />
+    <!-- no translation found for permdesc_readVisualUserSelect (8027174717714968217) -->
+    <skip />
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"ਸਮੱਗਰੀਆਂ ਦਾ ਸੰਸ਼ੋਧਨ ਕਰੋ ਜਾਂ ਮਿਟਾਓ"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"ਐਪ ਨੂੰ ਸਮੱਗਰੀਆਂ ਲਿਖਣ ਦਿੰਦੀ ਹੈ।"</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP ਕਾਲਾਂ ਕਰੋ/ਪ੍ਰਾਪਤ ਕਰੋ"</string>
