@@ -115,6 +115,7 @@ android_library {
         "androidx-constraintlayout_constraintlayout",
         "androidx.exifinterface_exifinterface",
         "com.google.android.material_material",
+        "kotlin-reflect",
         "kotlinx_coroutines_android",
         "kotlinx_coroutines",
         "iconloader_base",

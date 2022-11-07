@@ -44,7 +44,7 @@ import java.util.function.Consumer;
 /**
  * A default provider for {@link BiometricContext}.
  */
-final class BiometricContextProvider implements BiometricContext {
+public final class BiometricContextProvider implements BiometricContext {
 
     private static final String TAG = "BiometricContextProvider";
 
@@ -83,7 +83,8 @@ final class BiometricContextProvider implements BiometricContext {
     private boolean mIsAwake = false;
 
     @VisibleForTesting
-    BiometricContextProvider(@NonNull AmbientDisplayConfiguration ambientDisplayConfiguration,
+    public BiometricContextProvider(
+            @NonNull AmbientDisplayConfiguration ambientDisplayConfiguration,
             @NonNull IStatusBarService service, @Nullable Handler handler,
             AuthSessionCoordinator authSessionCoordinator) {
         mAmbientDisplayConfiguration = ambientDisplayConfiguration;

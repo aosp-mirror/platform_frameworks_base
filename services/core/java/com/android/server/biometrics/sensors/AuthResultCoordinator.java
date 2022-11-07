@@ -75,7 +75,10 @@ class AuthResultCoordinator {
      * Adds auth success for a given strength to the current operation list.
      */
     void authenticatedFor(@Authenticators.Types int strength) {
-        updateState(strength, (old) -> AUTHENTICATOR_UNLOCKED | old);
+        // Only strong unlocks matter.
+        if (strength == Authenticators.BIOMETRIC_STRONG) {
+            updateState(strength, (old) -> AUTHENTICATOR_UNLOCKED | old);
+        }
     }
 
     /**
