@@ -81,6 +81,10 @@ final class EnforcingAdmin {
                 componentName.getPackageName(), componentName, Set.of(DEVICE_ADMIN_AUTHORITY));
     }
 
+    static String getRoleAuthorityOf(String roleName) {
+        return ROLE_AUTHORITY_PREFIX + roleName;
+    }
+
     private EnforcingAdmin(
             String packageName, ComponentName componentName, Set<String> authorities) {
         Objects.requireNonNull(packageName);

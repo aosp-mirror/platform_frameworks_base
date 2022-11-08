@@ -3936,6 +3936,12 @@ public class DevicePolicyManager {
         return PERMISSION_GRANT_POLICY_KEY + "_" + packageName + "_" + permission;
     }
 
+    // TODO: Expose this as SystemAPI once we add the query API
+    /**
+     * @hide
+     */
+    public static final String LOCK_TASK_POLICY = "lockTask";
+
     /**
      * This object is a single place to tack on invalidation and disable calls.  All
      * binder caches in this class derive from this Config, so all can be invalidated or

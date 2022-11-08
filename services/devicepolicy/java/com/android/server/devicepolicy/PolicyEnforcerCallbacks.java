@@ -29,6 +29,7 @@ import android.provider.Settings;
 
 import com.android.server.utils.Slogf;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -101,6 +102,14 @@ final class PolicyEnforcerCallbacks {
                 throw new IllegalStateException(notPossible);
             }
         }
+    }
+
+    static boolean setLockTask(
+            @Nullable LockTaskPolicy policy, @NonNull Context context, int userId) {
+        DevicePolicyManagerService.updateLockTaskPackagesLocked(
+                context, List.copyOf(policy.getPackages()), userId);
+        DevicePolicyManagerService.updateLockTaskFeaturesLocked(policy.getFlags(), userId);
+        return true;
     }
 
     private static class BlockingCallback {

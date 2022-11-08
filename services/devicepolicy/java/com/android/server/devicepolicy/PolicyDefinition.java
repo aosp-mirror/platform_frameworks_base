@@ -82,10 +82,22 @@ final class PolicyDefinition<V> {
                 new String[]{packageName, permission});
     }
 
+    static PolicyDefinition<LockTaskPolicy> LOCK_TASK = new PolicyDefinition<>(
+            DevicePolicyManager.LOCK_TASK_POLICY,
+            new TopPriority<>(List.of(
+                    // TODO(b/258166155): add correct device lock role name
+                    EnforcingAdmin.getRoleAuthorityOf("DeviceLock"),
+                    EnforcingAdmin.DPC_AUTHORITY)),
+            POLICY_FLAG_LOCAL_ONLY_POLICY,
+            (LockTaskPolicy value, Context context, Integer userId, String[] args) ->
+                    PolicyEnforcerCallbacks.setLockTask(value, context, userId),
+            new LockTaskPolicy.LockTaskPolicySerializer());
+
     private static Map<String, PolicyDefinition<?>> sPolicyDefinitions = Map.of(
             DevicePolicyManager.AUTO_TIMEZONE_POLICY, AUTO_TIMEZONE,
             DevicePolicyManager.PERMISSION_GRANT_POLICY_KEY, PERMISSION_GRANT_NO_ARGS
     );
+
 
     private final String mPolicyKey;
     private final String mPolicyDefinitionKey;
