@@ -82,7 +82,6 @@ import com.android.systemui.util.traceSection
 import java.io.IOException
 import java.io.PrintWriter
 import java.util.concurrent.Executor
-import java.util.concurrent.Executors
 import javax.inject.Inject
 
 // URI fields to try loading album art from
@@ -154,6 +153,7 @@ private fun allowMediaRecommendations(context: Context): Boolean {
 class MediaDataManager(
     private val context: Context,
     @Background private val backgroundExecutor: Executor,
+    @Main private val uiExecutor: Executor,
     @Main private val foregroundExecutor: DelayableExecutor,
     private val mediaControllerFactory: MediaControllerFactory,
     private val broadcastDispatcher: BroadcastDispatcher,
@@ -171,7 +171,8 @@ class MediaDataManager(
     private val systemClock: SystemClock,
     private val tunerService: TunerService,
     private val mediaFlags: MediaFlags,
-    private val logger: MediaUiEventLogger
+    private val logger: MediaUiEventLogger,
+    private val smartspaceManager: SmartspaceManager,
 ) : Dumpable, BcSmartspaceDataPlugin.SmartspaceTargetListener {
 
     companion object {
@@ -218,6 +219,7 @@ class MediaDataManager(
     constructor(
         context: Context,
         @Background backgroundExecutor: Executor,
+        @Main uiExecutor: Executor,
         @Main foregroundExecutor: DelayableExecutor,
         mediaControllerFactory: MediaControllerFactory,
         dumpManager: DumpManager,
@@ -233,10 +235,12 @@ class MediaDataManager(
         clock: SystemClock,
         tunerService: TunerService,
         mediaFlags: MediaFlags,
-        logger: MediaUiEventLogger
+        logger: MediaUiEventLogger,
+        smartspaceManager: SmartspaceManager,
     ) : this(
         context,
         backgroundExecutor,
+        uiExecutor,
         foregroundExecutor,
         mediaControllerFactory,
         broadcastDispatcher,
@@ -254,7 +258,8 @@ class MediaDataManager(
         clock,
         tunerService,
         mediaFlags,
-        logger
+        logger,
+        smartspaceManager,
     )
 
     private val appChangeReceiver =
@@ -314,21 +319,18 @@ class MediaDataManager(
 
         // Register for Smartspace data updates.
         smartspaceMediaDataProvider.registerListener(this)
-        val smartspaceManager: SmartspaceManager =
-            context.getSystemService(SmartspaceManager::class.java)
         smartspaceSession =
             smartspaceManager.createSmartspaceSession(
                 SmartspaceConfig.Builder(context, SMARTSPACE_UI_SURFACE_LABEL).build()
             )
         smartspaceSession?.let {
             it.addOnTargetsAvailableListener(
-                // Use a new thread listening to Smartspace updates instead of using the existing
-                // backgroundExecutor. SmartspaceSession has scheduled routine updates which can be
-                // unpredictable on test simulators, using the backgroundExecutor makes it's hard to
-                // test the threads numbers.
-                // Switch to use backgroundExecutor when SmartspaceSession has a good way to be
-                // mocked.
-                Executors.newCachedThreadPool(),
+                // Use a main uiExecutor thread listening to Smartspace updates instead of using
+                // the existing background executor.
+                // SmartspaceSession has scheduled routine updates which can be unpredictable on
+                // test simulators, using the backgroundExecutor makes it's hard to test the threads
+                // numbers.
+                uiExecutor,
                 SmartspaceSession.OnTargetsAvailableListener { targets ->
                     smartspaceMediaDataProvider.onTargetsAvailable(targets)
                 }
