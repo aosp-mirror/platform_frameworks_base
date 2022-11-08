@@ -27,7 +27,7 @@ class FakeFeatureFlags : FeatureFlags {
     private val listenerFlagIds = mutableMapOf<FlagListenable.Listener, MutableSet<Int>>()
 
     init {
-        Flags.flagFields.forEach { entry: Map.Entry<String, Flag<*>> ->
+        FlagsFactory.knownFlags.forEach { entry: Map.Entry<String, Flag<*>> ->
             knownFlagNames[entry.value.id] = entry.key
         }
     }

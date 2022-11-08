@@ -168,10 +168,10 @@ public class FeatureFlagsRelease implements FeatureFlags {
     @Override
     public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("can override: false");
-        Map<Integer, Flag<?>> knownFlags = Flags.collectFlags();
-        for (Map.Entry<Integer, Flag<?>> idToFlag : knownFlags.entrySet()) {
-            int id = idToFlag.getKey();
-            Flag<?> flag = idToFlag.getValue();
+        Map<String, Flag<?>> knownFlags = FlagsFactory.INSTANCE.getKnownFlags();
+        for (Map.Entry<String, Flag<?>> nameToFlag : knownFlags.entrySet()) {
+            Flag<?> flag = nameToFlag.getValue();
+            int id = flag.getId();
             boolean def = false;
             if (mBooleanCache.indexOfKey(flag.getId()) < 0) {
                 if (flag instanceof SysPropBooleanFlag) {
