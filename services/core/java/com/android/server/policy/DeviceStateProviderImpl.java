@@ -395,6 +395,10 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
                     break;
                 }
             }
+            if (newState == INVALID_DEVICE_STATE) {
+                Slog.e(TAG, "No declared device states match any of the required conditions.");
+                dumpSensorValues();
+            }
 
             if (newState != INVALID_DEVICE_STATE && newState != mLastReportedState) {
                 mLastReportedState = newState;
@@ -590,6 +594,19 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
         }
 
         return null;
+    }
+
+    @GuardedBy("mLock")
+    private void dumpSensorValues() {
+        Slog.i(TAG, "Sensor values:");
+        for (Sensor sensor : mLatestSensorEvent.keySet()) {
+            SensorEvent sensorEvent = mLatestSensorEvent.get(sensor);
+            if (sensorEvent != null) {
+                Slog.i(TAG, sensor.getName() + ": " + Arrays.toString(sensorEvent.values));
+            } else {
+                Slog.i(TAG, sensor.getName() + ": null");
+            }
+        }
     }
 
     /**
