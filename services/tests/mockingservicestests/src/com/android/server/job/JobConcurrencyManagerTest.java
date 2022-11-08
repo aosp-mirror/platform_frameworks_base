@@ -34,6 +34,8 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
@@ -51,6 +53,7 @@ import android.content.res.Resources;
 import android.os.Looper;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 
 import androidx.test.filters.SmallTest;
@@ -98,12 +101,23 @@ public final class JobConcurrencyManagerTest {
     @Mock
     private IPackageManager mIPackageManager;
 
-    static class InjectorForTest extends JobConcurrencyManager.Injector {
+    private static class InjectorForTest extends JobConcurrencyManager.Injector {
+        public final ArrayMap<JobServiceContext, JobStatus> contexts = new ArrayMap<>();
+
         @Override
         JobServiceContext createJobServiceContext(JobSchedulerService service,
                 JobConcurrencyManager concurrencyManager, IBatteryStats batteryStats,
                 JobPackageTracker tracker, Looper looper) {
-            return mock(JobServiceContext.class);
+            final JobServiceContext context = mock(JobServiceContext.class);
+            doAnswer((Answer<Boolean>) invocationOnMock -> {
+                Object[] args = invocationOnMock.getArguments();
+                final JobStatus job = (JobStatus) args[0];
+                contexts.put(context, job);
+                doReturn(job).when(context).getRunningJobLocked();
+                return true;
+            }).when(context).executeRunnableJob(any(), anyInt());
+            contexts.put(context, null);
+            return context;
         }
     }
 
@@ -142,6 +156,13 @@ public final class JobConcurrencyManagerTest {
         doReturn(mPendingJobQueue).when(jobSchedulerService).getPendingJobQueue();
         doReturn(mIPackageManager).when(AppGlobals::getPackageManager);
         mInjector = new InjectorForTest();
+        doAnswer((Answer<Long>) invocationOnMock -> {
+            Object[] args = invocationOnMock.getArguments();
+            final JobStatus job = (JobStatus) args[0];
+            return job.shouldTreatAsExpeditedJob()
+                    ? JobSchedulerService.Constants.DEFAULT_RUNTIME_MIN_EJ_GUARANTEE_MS
+                    : JobSchedulerService.Constants.DEFAULT_RUNTIME_MIN_GUARANTEE_MS;
+        }).when(jobSchedulerService).getMinJobExecutionGuaranteeMs(any());
         mJobConcurrencyManager = new JobConcurrencyManager(jobSchedulerService, mInjector);
         mGracePeriodObserver = mock(GracePeriodObserver.class);
         mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
@@ -167,32 +188,55 @@ public final class JobConcurrencyManagerTest {
         final ArraySet<JobConcurrencyManager.ContextAssignment> idle = new ArraySet<>();
         final List<JobConcurrencyManager.ContextAssignment> preferredUidOnly = new ArrayList<>();
         final List<JobConcurrencyManager.ContextAssignment> stoppable = new ArrayList<>();
-        mJobConcurrencyManager
+        final long minPreferredUidOnlyWaitingTimeMs = mJobConcurrencyManager
                 .prepareForAssignmentDeterminationLocked(idle, preferredUidOnly, stoppable);
 
         assertEquals(JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT, idle.size());
         assertEquals(0, preferredUidOnly.size());
         assertEquals(0, stoppable.size());
+        assertEquals(0, minPreferredUidOnlyWaitingTimeMs);
     }
 
     @Test
     public void testPrepareForAssignmentDetermination_onlyPendingJobs() {
-        final ArraySet<JobStatus> jobs = new ArraySet<>();
         for (int i = 0; i < JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT; ++i) {
             JobStatus job = createJob(mDefaultUserId * UserHandle.PER_USER_RANGE + i);
             mPendingJobQueue.add(job);
-            jobs.add(job);
         }
 
         final ArraySet<JobConcurrencyManager.ContextAssignment> idle = new ArraySet<>();
         final List<JobConcurrencyManager.ContextAssignment> preferredUidOnly = new ArrayList<>();
         final List<JobConcurrencyManager.ContextAssignment> stoppable = new ArrayList<>();
-        mJobConcurrencyManager
+        final long minPreferredUidOnlyWaitingTimeMs = mJobConcurrencyManager
                 .prepareForAssignmentDeterminationLocked(idle, preferredUidOnly, stoppable);
 
         assertEquals(JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT, idle.size());
         assertEquals(0, preferredUidOnly.size());
         assertEquals(0, stoppable.size());
+        assertEquals(0, minPreferredUidOnlyWaitingTimeMs);
+    }
+
+    @Test
+    public void testPrepareForAssignmentDetermination_onlyPreferredUidOnly() {
+        for (int i = 0; i < JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT; ++i) {
+            JobStatus job = createJob(mDefaultUserId * UserHandle.PER_USER_RANGE + i);
+            mJobConcurrencyManager.addRunningJobForTesting(job);
+        }
+
+        for (int i = 0; i < mInjector.contexts.size(); ++i) {
+            doReturn(true).when(mInjector.contexts.keyAt(i)).isWithinExecutionGuaranteeTime();
+        }
+
+        final ArraySet<JobConcurrencyManager.ContextAssignment> idle = new ArraySet<>();
+        final List<JobConcurrencyManager.ContextAssignment> preferredUidOnly = new ArrayList<>();
+        final List<JobConcurrencyManager.ContextAssignment> stoppable = new ArrayList<>();
+        final long minPreferredUidOnlyWaitingTimeMs = mJobConcurrencyManager
+                .prepareForAssignmentDeterminationLocked(idle, preferredUidOnly, stoppable);
+
+        assertEquals(0, idle.size());
+        assertEquals(JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT, preferredUidOnly.size());
+        assertEquals(0, stoppable.size());
+        assertEquals(0, minPreferredUidOnlyWaitingTimeMs);
     }
 
     @Test
@@ -216,13 +260,177 @@ public final class JobConcurrencyManagerTest {
         mJobConcurrencyManager
                 .prepareForAssignmentDeterminationLocked(idle, preferredUidOnly, stoppable);
         mJobConcurrencyManager
-                .determineAssignmentsLocked(changed, idle, preferredUidOnly, stoppable);
+                .determineAssignmentsLocked(changed, idle, preferredUidOnly, stoppable,
+                        Long.MAX_VALUE);
 
         assertEquals(JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT, changed.size());
         for (int i = changed.size() - 1; i >= 0; --i) {
             jobs.remove(changed.valueAt(i).newJob);
         }
         assertTrue("Some jobs weren't assigned", jobs.isEmpty());
+    }
+
+    @Test
+    public void testDetermineAssignments_allPreferredUidOnly_shortTimeLeft() throws Exception {
+        mConfigBuilder.setBoolean(JobConcurrencyManager.KEY_ENABLE_MAX_WAIT_TIME_BYPASS, true);
+        setConcurrencyConfig(JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT,
+                new TypeConfig(WORK_TYPE_BG, 0, JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT));
+        for (int i = 0; i < JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT * 2; ++i) {
+            final int uid = mDefaultUserId * UserHandle.PER_USER_RANGE + i;
+            final String sourcePkgName = "com.source.package." + UserHandle.getAppId(uid);
+            setPackageUid(sourcePkgName, uid);
+            final JobStatus job = createJob(uid, sourcePkgName);
+            spyOn(job);
+            doReturn(i % 2 == 0).when(job).shouldTreatAsExpeditedJob();
+            if (i < JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT) {
+                mJobConcurrencyManager.addRunningJobForTesting(job);
+            } else {
+                mPendingJobQueue.add(job);
+            }
+        }
+
+        // Waiting time is too short, so we shouldn't create any extra contexts.
+        final long remainingTimeMs = JobConcurrencyManager.DEFAULT_MAX_WAIT_EJ_MS / 2;
+        for (int i = 0; i < mInjector.contexts.size(); ++i) {
+            doReturn(true).when(mInjector.contexts.keyAt(i)).isWithinExecutionGuaranteeTime();
+            doReturn(remainingTimeMs)
+                    .when(mInjector.contexts.keyAt(i)).getRemainingGuaranteedTimeMs(anyLong());
+        }
+
+        final ArraySet<JobConcurrencyManager.ContextAssignment> changed = new ArraySet<>();
+        final ArraySet<JobConcurrencyManager.ContextAssignment> idle = new ArraySet<>();
+        final List<JobConcurrencyManager.ContextAssignment> preferredUidOnly = new ArrayList<>();
+        final List<JobConcurrencyManager.ContextAssignment> stoppable = new ArrayList<>();
+
+        long minPreferredUidOnlyWaitingTimeMs = mJobConcurrencyManager
+                .prepareForAssignmentDeterminationLocked(idle, preferredUidOnly, stoppable);
+        assertEquals(remainingTimeMs, minPreferredUidOnlyWaitingTimeMs);
+        assertEquals(JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT, preferredUidOnly.size());
+
+        mJobConcurrencyManager
+                .determineAssignmentsLocked(changed, idle, preferredUidOnly, stoppable,
+                        minPreferredUidOnlyWaitingTimeMs);
+
+        assertEquals(JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT, preferredUidOnly.size());
+        assertEquals(0, changed.size());
+    }
+
+    @Test
+    public void testDetermineAssignments_allPreferredUidOnly_mediumTimeLeft() throws Exception {
+        mConfigBuilder.setBoolean(JobConcurrencyManager.KEY_ENABLE_MAX_WAIT_TIME_BYPASS, true);
+        setConcurrencyConfig(JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT,
+                new TypeConfig(WORK_TYPE_BG, 0, JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT));
+        final ArraySet<JobStatus> jobs = new ArraySet<>();
+        for (int i = 0; i < JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT * 2; ++i) {
+            final int uid = mDefaultUserId * UserHandle.PER_USER_RANGE + i;
+            final String sourcePkgName = "com.source.package." + UserHandle.getAppId(uid);
+            setPackageUid(sourcePkgName, uid);
+            final JobStatus job = createJob(uid, sourcePkgName);
+            spyOn(job);
+            doReturn(i % 2 == 0).when(job).shouldTreatAsExpeditedJob();
+            if (i < JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT) {
+                mJobConcurrencyManager.addRunningJobForTesting(job);
+            } else {
+                mPendingJobQueue.add(job);
+                jobs.add(job);
+            }
+        }
+
+        // Waiting time is longer than the EJ waiting time, but shorter than regular job waiting
+        // time, so we should only create an extra context for an EJ.
+        final long remainingTimeMs = (JobConcurrencyManager.DEFAULT_MAX_WAIT_EJ_MS
+                + JobConcurrencyManager.DEFAULT_MAX_WAIT_REGULAR_MS) / 2;
+        for (int i = 0; i < mInjector.contexts.size(); ++i) {
+            doReturn(true).when(mInjector.contexts.keyAt(i)).isWithinExecutionGuaranteeTime();
+            doReturn(remainingTimeMs)
+                    .when(mInjector.contexts.keyAt(i)).getRemainingGuaranteedTimeMs(anyLong());
+        }
+
+        final ArraySet<JobConcurrencyManager.ContextAssignment> changed = new ArraySet<>();
+        final ArraySet<JobConcurrencyManager.ContextAssignment> idle = new ArraySet<>();
+        final List<JobConcurrencyManager.ContextAssignment> preferredUidOnly = new ArrayList<>();
+        final List<JobConcurrencyManager.ContextAssignment> stoppable = new ArrayList<>();
+
+        long minPreferredUidOnlyWaitingTimeMs = mJobConcurrencyManager
+                .prepareForAssignmentDeterminationLocked(idle, preferredUidOnly, stoppable);
+        assertEquals(remainingTimeMs, minPreferredUidOnlyWaitingTimeMs);
+        assertEquals(JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT, preferredUidOnly.size());
+
+        mJobConcurrencyManager
+                .determineAssignmentsLocked(changed, idle, preferredUidOnly, stoppable,
+                        minPreferredUidOnlyWaitingTimeMs);
+
+        assertEquals(JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT, preferredUidOnly.size());
+        for (int i = changed.size() - 1; i >= 0; --i) {
+            jobs.remove(changed.valueAt(i).newJob);
+        }
+        assertEquals(JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT - 1, jobs.size());
+        assertEquals(1, changed.size());
+        JobStatus assignedJob = changed.valueAt(0).newJob;
+        assertTrue(assignedJob.shouldTreatAsExpeditedJob());
+    }
+
+    @Test
+    public void testDetermineAssignments_allPreferredUidOnly_longTimeLeft() throws Exception {
+        mConfigBuilder.setBoolean(JobConcurrencyManager.KEY_ENABLE_MAX_WAIT_TIME_BYPASS, true);
+        setConcurrencyConfig(JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT,
+                new TypeConfig(WORK_TYPE_BG, 0, JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT));
+        final ArraySet<JobStatus> jobs = new ArraySet<>();
+        for (int i = 0; i < JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT * 2; ++i) {
+            final int uid = mDefaultUserId * UserHandle.PER_USER_RANGE + i;
+            final String sourcePkgName = "com.source.package." + UserHandle.getAppId(uid);
+            setPackageUid(sourcePkgName, uid);
+            final JobStatus job = createJob(uid, sourcePkgName);
+            spyOn(job);
+            doReturn(i % 2 == 0).when(job).shouldTreatAsExpeditedJob();
+            if (i < JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT) {
+                mJobConcurrencyManager.addRunningJobForTesting(job);
+            } else {
+                mPendingJobQueue.add(job);
+                jobs.add(job);
+            }
+        }
+
+        // Waiting time is longer than even the regular job waiting time, so we should
+        // create an extra context for an EJ, and potentially one for a regular job.
+        final long remainingTimeMs = 2 * JobConcurrencyManager.DEFAULT_MAX_WAIT_REGULAR_MS;
+        for (int i = 0; i < mInjector.contexts.size(); ++i) {
+            doReturn(true).when(mInjector.contexts.keyAt(i)).isWithinExecutionGuaranteeTime();
+            doReturn(remainingTimeMs)
+                    .when(mInjector.contexts.keyAt(i)).getRemainingGuaranteedTimeMs(anyLong());
+        }
+
+        final ArraySet<JobConcurrencyManager.ContextAssignment> changed = new ArraySet<>();
+        final ArraySet<JobConcurrencyManager.ContextAssignment> idle = new ArraySet<>();
+        final List<JobConcurrencyManager.ContextAssignment> preferredUidOnly = new ArrayList<>();
+        final List<JobConcurrencyManager.ContextAssignment> stoppable = new ArrayList<>();
+
+        long minPreferredUidOnlyWaitingTimeMs = mJobConcurrencyManager
+                .prepareForAssignmentDeterminationLocked(idle, preferredUidOnly, stoppable);
+        assertEquals(remainingTimeMs, minPreferredUidOnlyWaitingTimeMs);
+        assertEquals(JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT, preferredUidOnly.size());
+
+        mJobConcurrencyManager
+                .determineAssignmentsLocked(changed, idle, preferredUidOnly, stoppable,
+                        minPreferredUidOnlyWaitingTimeMs);
+
+        assertEquals(JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT, preferredUidOnly.size());
+        // Depending on iteration order, we may create 1 or 2 contexts.
+        final long numAssignedJobs = changed.size();
+        assertTrue(numAssignedJobs > 0);
+        assertTrue(numAssignedJobs <= 2);
+        for (int i = 0; i < numAssignedJobs; ++i) {
+            jobs.remove(changed.valueAt(i).newJob);
+        }
+        assertEquals(numAssignedJobs,
+                JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT - jobs.size());
+        JobStatus firstAssignedJob = changed.valueAt(0).newJob;
+        if (!firstAssignedJob.shouldTreatAsExpeditedJob()) {
+            assertEquals(2, numAssignedJobs);
+            assertTrue(changed.valueAt(1).newJob.shouldTreatAsExpeditedJob());
+        } else if (numAssignedJobs == 2) {
+            assertFalse(changed.valueAt(1).newJob.shouldTreatAsExpeditedJob());
+        }
     }
 
     @Test

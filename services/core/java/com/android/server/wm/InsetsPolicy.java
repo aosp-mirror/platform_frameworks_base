@@ -26,6 +26,7 @@ import static android.view.InsetsController.ANIMATION_TYPE_HIDE;
 import static android.view.InsetsController.ANIMATION_TYPE_SHOW;
 import static android.view.InsetsController.LAYOUT_INSETS_DURING_ANIMATION_HIDDEN;
 import static android.view.InsetsController.LAYOUT_INSETS_DURING_ANIMATION_SHOWN;
+import static android.view.InsetsState.ITYPE_CAPTION_BAR;
 import static android.view.InsetsState.ITYPE_CLIMATE_BAR;
 import static android.view.InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_IME;
@@ -288,8 +289,9 @@ class InsetsPolicy {
         final boolean alwaysOnTop = token != null && token.isAlwaysOnTop();
         // Always use windowing mode fullscreen when get insets for window metrics to make sure it
         // contains all insets types.
-        final InsetsState originalState = enforceInsetsPolicyForTarget(WINDOWING_MODE_FULLSCREEN,
-                alwaysOnTop, attrs, mStateController.getRawInsetsState());
+        final InsetsState originalState = mDisplayContent.getInsetsPolicy()
+                .enforceInsetsPolicyForTarget(type, WINDOWING_MODE_FULLSCREEN, alwaysOnTop,
+                        attrs.type, mStateController.getRawInsetsState());
         InsetsState state = adjustVisibilityForTransientTypes(originalState);
         return adjustInsetsForRoundedCorners(token, state, state == originalState);
     }
@@ -341,42 +343,56 @@ class InsetsPolicy {
 
 
     /**
-     * Modifies the given {@code state} according to the target's window state.
-     * When performing layout of the target or dispatching insets to the target, we need to adjust
-     * sources based on the target. e.g., the floating window will not receive system bars other
-     * than caption, and some insets provider may request to override sizes for given window types.
-     * Since the window type and the insets types provided by the window shall not change at
-     * runtime, rotation doesn't matter in the layout params.
+     * Modifies the given {@code state} according to the {@code type} (Inset type) provided by
+     * the target.
+     * When performing layout of the target or dispatching insets to the target, we need to exclude
+     * sources which should not be visible to the target. e.g., the source which represents the
+     * target window itself, and the IME source when the target is above IME. We also need to
+     * exclude certain types of insets source for client within specific windowing modes.
      *
+     * @param type the inset type provided by the target
      * @param windowingMode the windowing mode of the target
      * @param isAlwaysOnTop is the target always on top
-     * @param attrs the layout params of the target
+     * @param windowType the type of the target
      * @param state the input inset state containing all the sources
      * @return The state stripped of the necessary information.
      */
-    InsetsState enforceInsetsPolicyForTarget(@WindowConfiguration.WindowingMode int windowingMode,
-            boolean isAlwaysOnTop, WindowManager.LayoutParams attrs, InsetsState state) {
+    InsetsState enforceInsetsPolicyForTarget(@InternalInsetsType int type,
+            @WindowConfiguration.WindowingMode int windowingMode, boolean isAlwaysOnTop,
+            int windowType, InsetsState state) {
         boolean stateCopied = false;
 
-        if (attrs.providedInsets != null && attrs.providedInsets.length > 0) {
+        if (type != ITYPE_INVALID) {
             state = new InsetsState(state);
             stateCopied = true;
-            for (int i = attrs.providedInsets.length - 1; i >= 0; i--) {
-                state.removeSource(attrs.providedInsets[i].type);
+            state.removeSource(type);
+
+            // Navigation bar doesn't get influenced by anything else
+            if (type == ITYPE_NAVIGATION_BAR || type == ITYPE_EXTRA_NAVIGATION_BAR) {
+                state.removeSource(ITYPE_STATUS_BAR);
+                state.removeSource(ITYPE_CLIMATE_BAR);
+                state.removeSource(ITYPE_CAPTION_BAR);
+                state.removeSource(ITYPE_NAVIGATION_BAR);
+                state.removeSource(ITYPE_EXTRA_NAVIGATION_BAR);
+            }
+
+            // Status bar doesn't get influenced by caption bar
+            if (type == ITYPE_STATUS_BAR || type == ITYPE_CLIMATE_BAR) {
+                state.removeSource(ITYPE_CAPTION_BAR);
             }
         }
         ArrayMap<Integer, WindowContainerInsetsSourceProvider> providers = mStateController
                 .getSourceProviders();
         for (int i = providers.size() - 1; i >= 0; i--) {
             WindowContainerInsetsSourceProvider otherProvider = providers.valueAt(i);
-            if (otherProvider.overridesFrame(attrs.type)) {
+            if (otherProvider.overridesFrame(windowType)) {
                 if (!stateCopied) {
                     state = new InsetsState(state);
                     stateCopied = true;
                 }
                 InsetsSource override =
                         new InsetsSource(state.getSource(otherProvider.getSource().getType()));
-                override.setFrame(otherProvider.getOverriddenFrame(attrs.type));
+                override.setFrame(otherProvider.getOverriddenFrame(windowType));
                 state.addSource(override);
             }
         }

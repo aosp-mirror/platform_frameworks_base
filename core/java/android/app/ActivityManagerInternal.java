@@ -649,6 +649,8 @@ public abstract class ActivityManagerInternal {
      * using the rules of package visibility. Returns extras with legitimate package info that the
      * receiver is able to access, or {@code null} if none of the packages is visible to the
      * receiver.
+     * @param serialized Specifies whether or not the broadcast should be delivered to the
+     *                   receivers in a serial order.
      *
      * @see com.android.server.am.ActivityManagerService#broadcastIntentWithFeature(
      *      IApplicationThread, String, Intent, String, IIntentReceiver, int, String, Bundle,
@@ -657,6 +659,19 @@ public abstract class ActivityManagerInternal {
     public abstract int broadcastIntent(Intent intent,
             IIntentReceiver resultTo,
             String[] requiredPermissions, boolean serialized,
+            int userId, int[] appIdAllowList,
+            @Nullable BiFunction<Integer, Bundle, Bundle> filterExtrasForReceiver,
+            @Nullable Bundle bOptions);
+
+    /**
+     * Variant of
+     * {@link #broadcastIntent(Intent, IIntentReceiver, String[], boolean, int, int[], BiFunction, Bundle)}
+     * that allows sender to receive a finish callback once the broadcast delivery is completed,
+     * but provides no ordering guarantee for how the broadcast is delivered to receivers.
+     */
+    public abstract int broadcastIntentWithCallback(Intent intent,
+            IIntentReceiver resultTo,
+            String[] requiredPermissions,
             int userId, int[] appIdAllowList,
             @Nullable BiFunction<Integer, Bundle, Bundle> filterExtrasForReceiver,
             @Nullable Bundle bOptions);

@@ -65,7 +65,7 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
     public void onWindowFocusGained(boolean hasViewFocus) {
         super.onWindowFocusGained(hasViewFocus);
         getImm().registerImeConsumer(this);
-        if (isRequestedVisible() && getControl() == null) {
+        if ((mController.getRequestedVisibleTypes() & getType()) != 0 && getControl() == null) {
             mIsRequestedVisibleAwaitingControl = true;
         }
     }
@@ -125,7 +125,7 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
         // If we had a request before to show from IME (tracked with mImeRequestedShow), reaching
         // this code here means that we now got control, so we can start the animation immediately.
         // If client window is trying to control IME and IME is already visible, it is immediate.
-        if (fromIme || mState.getSource(getType()).isVisible() && getControl() != null) {
+        if (fromIme || (mState.getSource(getInternalType()).isVisible() && getControl() != null)) {
             return ShowResult.SHOW_IMMEDIATELY;
         }
 
@@ -169,7 +169,7 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
 
     @Override
     protected boolean isRequestedVisibleAwaitingControl() {
-        return mIsRequestedVisibleAwaitingControl || isRequestedVisible();
+        return super.isRequestedVisibleAwaitingControl() || mIsRequestedVisibleAwaitingControl;
     }
 
     @Override

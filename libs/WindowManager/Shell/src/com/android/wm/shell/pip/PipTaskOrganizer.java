@@ -179,10 +179,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 // This is necessary in case there was a resize animation ongoing when exit PIP
                 // started, in which case the first resize will be skipped to let the exit
                 // operation handle the final resize out of PIP mode. See b/185306679.
-                finishResizeDelayedIfNeeded(() -> {
-                    finishResize(tx, destinationBounds, direction, animationType);
-                    sendOnPipTransitionFinished(direction);
-                });
+                finishResize(tx, destinationBounds, direction, animationType);
+                sendOnPipTransitionFinished(direction);
             }
         }
 
@@ -197,34 +195,6 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             sendOnPipTransitionCancelled(direction);
         }
     };
-
-    /**
-     * Finishes resizing the PiP, delaying the operation if it has to be synced with the PiP menu.
-     *
-     * This is done to avoid a race condition between the last transaction applied in
-     * onAnimationUpdate and the finishResize in onAnimationEnd. finishResize creates a
-     * WindowContainerTransaction, which is to be applied by WmCore later. It may happen that it
-     * gets applied before the transaction created by the last onAnimationUpdate. As a result of
-     * this, the PiP surface may get scaled after the new bounds are applied by WmCore, which
-     * makes the PiP surface have unexpected bounds. To avoid this, we delay the finishResize
-     * operation until the next frame. This aligns the last onAnimationUpdate transaction with the
-     * WCT application.
-     *
-     * The race only happens when the PiP surface transaction has to be synced with the PiP menu
-     * due to the necessity for a delay when syncing the PiP surface, the PiP menu surface and
-     * the PiP menu contents.
-     */
-    private void finishResizeDelayedIfNeeded(Runnable finishResizeRunnable) {
-        if (!shouldSyncPipTransactionWithMenu()) {
-            finishResizeRunnable.run();
-            return;
-        }
-        mPipMenuController.runWithNextFrame(finishResizeRunnable);
-    }
-
-    private boolean shouldSyncPipTransactionWithMenu() {
-        return mPipMenuController.isMenuVisible();
-    }
 
     @VisibleForTesting
     final PipTransitionController.PipTransitionCallback mPipTransitionCallback =
@@ -251,7 +221,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 @Override
                 public boolean handlePipTransaction(SurfaceControl leash,
                         SurfaceControl.Transaction tx, Rect destinationBounds) {
-                    if (shouldSyncPipTransactionWithMenu()) {
+                    if (mPipMenuController.isMenuVisible()) {
                         mPipMenuController.movePipMenu(leash, tx, destinationBounds);
                         return true;
                     }
@@ -1253,7 +1223,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         mSurfaceTransactionHelper
                 .crop(tx, mLeash, toBounds)
                 .round(tx, mLeash, mPipTransitionState.isInPip());
-        if (shouldSyncPipTransactionWithMenu()) {
+        if (mPipMenuController.isMenuVisible()) {
             mPipMenuController.resizePipMenu(mLeash, tx, toBounds);
         } else {
             tx.apply();
@@ -1295,7 +1265,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         mSurfaceTransactionHelper
                 .scale(tx, mLeash, startBounds, toBounds, degrees)
                 .round(tx, mLeash, startBounds, toBounds);
-        if (shouldSyncPipTransactionWithMenu()) {
+        if (mPipMenuController.isMenuVisible()) {
             mPipMenuController.movePipMenu(mLeash, tx, toBounds);
         } else {
             tx.apply();

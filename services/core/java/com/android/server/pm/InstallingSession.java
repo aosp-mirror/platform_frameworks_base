@@ -17,6 +17,7 @@
 package com.android.server.pm;
 
 import static android.app.AppOpsManager.MODE_DEFAULT;
+import static android.content.pm.PackageInstaller.SessionParams.MODE_INHERIT_EXISTING;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
 import static android.content.pm.PackageManager.INSTALL_STAGED;
 import static android.content.pm.PackageManager.INSTALL_SUCCEEDED;
@@ -93,6 +94,7 @@ class InstallingSession {
     final PackageManagerService mPm;
     final InstallPackageHelper mInstallPackageHelper;
     final RemovePackageHelper mRemovePackageHelper;
+    final boolean mIsInherit;
 
     InstallingSession(OriginInfo originInfo, MoveInfo moveInfo, IPackageInstallObserver2 observer,
             int installFlags, InstallSource installSource, String volumeUuid,
@@ -121,6 +123,7 @@ class InstallingSession {
         mRequiredInstalledVersionCode = PackageManager.VERSION_CODE_HIGHEST;
         mPackageSource = packageSource;
         mPackageLite = packageLite;
+        mIsInherit = false;
     }
 
     InstallingSession(File stagedDir, IPackageInstallObserver2 observer,
@@ -151,6 +154,7 @@ class InstallingSession {
         mRequiredInstalledVersionCode = sessionParams.requiredInstalledVersionCode;
         mPackageSource = sessionParams.packageSource;
         mPackageLite = packageLite;
+        mIsInherit = sessionParams.mode == MODE_INHERIT_EXISTING;
     }
 
     @Override
@@ -506,6 +510,7 @@ class InstallingSession {
             mInstallPackageHelper.installPackagesTraced(installRequests);
 
             for (InstallRequest request : installRequests) {
+                request.onInstallCompleted();
                 doPostInstall(request);
             }
         }
@@ -531,7 +536,7 @@ class InstallingSession {
     }
 
     private void cleanUpForFailedInstall(InstallRequest request) {
-        if (request.isMoveInstall()) {
+        if (request.isInstallMove()) {
             mRemovePackageHelper.cleanUpForMoveInstall(request.getMoveToUuid(),
                     request.getMovePackageName(), request.getMoveFromCodePath());
         } else {

@@ -6908,13 +6908,6 @@
                   android:exported="false">
         </activity>
 
-        <activity android:name="com.android.internal.app.LogAccessDialogActivity"
-                  android:theme="@style/Theme.Translucent.NoTitleBar"
-                  android:process=":ui"
-                  android:excludeFromRecents="true"
-                  android:exported="false">
-        </activity>
-
         <activity android:name="com.android.server.notification.NASLearnMoreActivity"
                   android:theme="@style/Theme.Dialog.Confirmation"
                   android:excludeFromRecents="true"

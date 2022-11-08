@@ -425,7 +425,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * @see #ENABLE_SHELL_TRANSITIONS
      */
     public static final boolean sEnableShellTransitions =
-            SystemProperties.getBoolean(ENABLE_SHELL_TRANSITIONS, false);
+            SystemProperties.getBoolean(ENABLE_SHELL_TRANSITIONS, true);
 
     /**
      * Allows a fullscreen windowing mode activity to launch in its desired orientation directly
@@ -5295,7 +5295,6 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int WINDOW_FREEZE_TIMEOUT = 11;
 
         public static final int PERSIST_ANIMATION_SCALE = 14;
-        public static final int FORCE_GC = 15;
         public static final int ENABLE_SCREEN = 16;
         public static final int APP_FREEZE_TIMEOUT = 17;
         public static final int REPORT_WINDOWS_CHANGE = 19;
@@ -5383,26 +5382,6 @@ public class WindowManagerService extends IWindowManager.Stub
                             break;
                         }
                     }
-                    break;
-                }
-
-                case FORCE_GC: {
-                    synchronized (mGlobalLock) {
-                        // Since we're holding both mWindowMap and mAnimator we don't need to
-                        // hold mAnimator.mLayoutToAnim.
-                        if (mAnimator.isAnimationScheduled()) {
-                            // If we are animating, don't do the gc now but
-                            // delay a bit so we don't interrupt the animation.
-                            sendEmptyMessageDelayed(H.FORCE_GC, 2000);
-                            return;
-                        }
-                        // If we are currently rotating the display, it will
-                        // schedule a new message when done.
-                        if (mDisplayFrozen) {
-                            return;
-                        }
-                    }
-                    Runtime.getRuntime().gc();
                     break;
                 }
 
@@ -6263,14 +6242,6 @@ public class WindowManagerService extends IWindowManager.Stub
         // could have actually changed during that time so re-evaluate it
         // now to catch that.
         configChanged = displayContent != null && displayContent.updateOrientation();
-
-        // A little kludge: a lot could have happened while the
-        // display was frozen, so now that we are coming back we
-        // do a gc so that any remote references the system
-        // processes holds on others can be released if they are
-        // no longer needed.
-        mH.removeMessages(H.FORCE_GC);
-        mH.sendEmptyMessageDelayed(H.FORCE_GC, 2000);
 
         mScreenFrozenLock.release();
 

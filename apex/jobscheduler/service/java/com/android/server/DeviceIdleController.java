@@ -31,6 +31,7 @@ import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.IIntentReceiver;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
@@ -740,8 +741,10 @@ public class DeviceIdleController extends SystemService
         }
     };
 
-    private final BroadcastReceiver mIdleStartedDoneReceiver = new BroadcastReceiver() {
-        @Override public void onReceive(Context context, Intent intent) {
+    private final IIntentReceiver mIdleStartedDoneReceiver = new IIntentReceiver.Stub() {
+        @Override
+        public void performReceive(Intent intent, int resultCode, String data, Bundle extras,
+                boolean ordered, boolean sticky, int sendingUser) {
             // When coming out of a deep idle, we will add in some delay before we allow
             // the system to settle down and finish the maintenance window.  This is
             // to give a chance for any pending work to be scheduled.
@@ -1816,13 +1819,15 @@ public class DeviceIdleController extends SystemService
                     }
                     if (deepChanged) {
                         incActiveIdleOps();
-                        getContext().sendOrderedBroadcastAsUser(mIdleIntent, UserHandle.ALL,
-                                null, mIdleStartedDoneReceiver, null, 0, null, null);
+                        mLocalActivityManager.broadcastIntentWithCallback(mIdleIntent,
+                                mIdleStartedDoneReceiver, null, UserHandle.USER_ALL,
+                                null, null, null);
                     }
                     if (lightChanged) {
                         incActiveIdleOps();
-                        getContext().sendOrderedBroadcastAsUser(mLightIdleIntent, UserHandle.ALL,
-                                null, mIdleStartedDoneReceiver, null, 0, null, null);
+                        mLocalActivityManager.broadcastIntentWithCallback(mLightIdleIntent,
+                                mIdleStartedDoneReceiver, null, UserHandle.USER_ALL,
+                                null, null, null);
                     }
                     // Always start with one active op for the message being sent here.
                     // Now we are done!

@@ -2770,4 +2770,19 @@
 
     <!-- Time format for the Dream Time Complication for 24-hour time format [CHAR LIMIT=NONE] -->
     <string name="dream_time_complication_24_hr_time_format">kk:mm</string>
+
+    <!-- Title for the log access confirmation dialog. [CHAR LIMIT=NONE] -->
+    <string name="log_access_confirmation_title">Allow <xliff:g id="log_access_app_name" example="Example App">%s</xliff:g> to access all device logs?</string>
+    <!-- Label for the allow button on the log access confirmation dialog. [CHAR LIMIT=40] -->
+    <string name="log_access_confirmation_allow">Allow one-time access</string>
+    <!-- Label for the deny button on the log access confirmation dialog. [CHAR LIMIT=20] -->
+    <string name="log_access_confirmation_deny">Don\u2019t allow</string>
+
+    <!-- Content for the log access confirmation dialog. [CHAR LIMIT=NONE]-->
+    <string name="log_access_confirmation_body">Device logs record what happens on your device. Apps can use these logs to find and fix issues.\n\nSome logs may contain sensitive info, so only allow apps you trust to access all device logs.
+        \n\nIf you don’t allow this app to access all device logs, it can still access its own logs. Your device manufacturer may still be able to access some logs or info on your device.
+    </string>
+
+    <!-- Learn more URL for the log access confirmation dialog. [DO NOT TRANSLATE]-->
+    <string name="log_access_confirmation_learn_more" translatable="false">&lt;a href="https://support.google.com/android?p=system_logs#topic=7313011"&gt;Learn more&lt;/a&gt;</string>
 </resources>

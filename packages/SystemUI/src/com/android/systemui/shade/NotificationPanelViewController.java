@@ -56,15 +56,10 @@ import android.app.StatusBarManager;
 import android.content.ContentResolver;
 import android.content.res.Resources;
 import android.database.ContentObserver;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.ColorFilter;
 import android.graphics.Insets;
-import android.graphics.Paint;
-import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.Region;
-import android.graphics.drawable.Drawable;
 import android.hardware.biometrics.SensorLocationInternal;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.os.Bundle;
@@ -229,10 +224,8 @@ import com.android.wm.shell.animation.FlingAnimationUtils;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
@@ -899,7 +892,8 @@ public final class NotificationPanelViewController {
         mView.setOnApplyWindowInsetsListener((v, insets) -> onApplyShadeWindowInsets(insets));
 
         if (DEBUG_DRAWABLE) {
-            mView.getOverlay().add(new DebugDrawable());
+            mView.getOverlay().add(new DebugDrawable(this, mView,
+                    mNotificationStackScrollLayoutController, mLockIconViewController));
         }
 
         mKeyguardUnfoldTransition = unfoldComponent.map(
@@ -1152,8 +1146,15 @@ public final class NotificationPanelViewController {
 
         mLargeScreenShadeHeaderHeight =
                 mResources.getDimensionPixelSize(R.dimen.large_screen_shade_header_height);
-        mQuickQsHeaderHeight = mUseLargeScreenShadeHeader ? mLargeScreenShadeHeaderHeight :
-                SystemBarUtils.getQuickQsOffsetHeight(mView.getContext());
+        // TODO: When the flag is eventually removed, it means that we have a single view that is
+        // the same height in QQS and in Large Screen (large_screen_shade_header_height). Eventually
+        // the concept of largeScreenHeader or quickQsHeader will disappear outside of the class
+        // that controls the view as the offset needs to be the same regardless.
+        if (mUseLargeScreenShadeHeader || mFeatureFlags.isEnabled(Flags.COMBINED_QS_HEADERS)) {
+            mQuickQsHeaderHeight = mLargeScreenShadeHeaderHeight;
+        } else {
+            mQuickQsHeaderHeight = SystemBarUtils.getQuickQsOffsetHeight(mView.getContext());
+        }
         int topMargin = mUseLargeScreenShadeHeader ? mLargeScreenShadeHeaderHeight :
                 mResources.getDimensionPixelSize(R.dimen.notification_panel_margin_top);
         mLargeScreenShadeHeaderController.setLargeScreenActive(mUseLargeScreenShadeHeader);
@@ -1503,6 +1504,10 @@ public final class NotificationPanelViewController {
         }
         updateNotificationTranslucency();
         updateClock();
+    }
+
+    public KeyguardClockPositionAlgorithm.Result getClockPositionResult() {
+        return mClockPositionResult;
     }
 
     @ClockSize
@@ -2969,7 +2974,7 @@ public final class NotificationPanelViewController {
         }
     }
 
-    private float calculateNotificationsTopPadding() {
+    float calculateNotificationsTopPadding() {
         if (mSplitShadeEnabled) {
             return mKeyguardShowing ? getKeyguardNotificationStaticPadding() : 0;
         }
@@ -3001,6 +3006,18 @@ public final class NotificationPanelViewController {
             return mQsFrameTranslateController.getNotificationsTopPadding(mQsExpansionHeight,
                     mNotificationStackScrollLayoutController);
         }
+    }
+
+    public boolean getKeyguardShowing() {
+        return mKeyguardShowing;
+    }
+
+    public float getKeyguardNotificationTopPadding() {
+        return mKeyguardNotificationTopPadding;
+    }
+
+    public float getKeyguardNotificationBottomPadding() {
+        return mKeyguardNotificationBottomPadding;
     }
 
     /** Returns the topPadding of notifications when on keyguard not respecting QS expansion. */
@@ -3272,7 +3289,6 @@ public final class NotificationPanelViewController {
         return !mSplitShadeEnabled && (isInSettings() || mIsPanelCollapseOnQQS);
     }
 
-    @VisibleForTesting
     int getMaxPanelHeight() {
         int min = mStatusBarMinHeight;
         if (!(mBarState == KEYGUARD)
@@ -3398,7 +3414,7 @@ public final class NotificationPanelViewController {
         }
     }
 
-    private int calculatePanelHeightQsExpanded() {
+    int calculatePanelHeightQsExpanded() {
         float
                 notificationHeight =
                 mNotificationStackScrollLayoutController.getHeight()
@@ -4362,6 +4378,10 @@ public final class NotificationPanelViewController {
         if (DEBUG_DRAWABLE) mHeaderDebugInfo = text;
     }
 
+    public String getHeaderDebugInfo() {
+        return mHeaderDebugInfo;
+    }
+
     public void onThemeChanged() {
         mConfigurationListener.onThemeChanged();
     }
@@ -4811,7 +4831,6 @@ public final class NotificationPanelViewController {
         setExpandedHeight(getMaxPanelTransitionDistance() * frac);
     }
 
-    @VisibleForTesting
     float getExpandedHeight() {
         return mExpandedHeight;
     }
@@ -5510,89 +5529,6 @@ public final class NotificationPanelViewController {
         }
         if (mQsExpansionHeight == previousMin) {
             mQsExpansionHeight = mQsMinExpansionHeight;
-        }
-    }
-
-    private final class DebugDrawable extends Drawable {
-        private final Set<Integer> mDebugTextUsedYPositions = new HashSet<>();
-        private final Paint mDebugPaint = new Paint();
-
-        @Override
-        public void draw(@NonNull Canvas canvas) {
-            mDebugTextUsedYPositions.clear();
-
-            mDebugPaint.setColor(Color.RED);
-            mDebugPaint.setStrokeWidth(2);
-            mDebugPaint.setStyle(Paint.Style.STROKE);
-            mDebugPaint.setTextSize(24);
-            if (mHeaderDebugInfo != null) canvas.drawText(mHeaderDebugInfo, 50, 100, mDebugPaint);
-
-            drawDebugInfo(canvas, getMaxPanelHeight(), Color.RED, "getMaxPanelHeight()");
-            drawDebugInfo(canvas, (int) getExpandedHeight(), Color.BLUE, "getExpandedHeight()");
-            drawDebugInfo(canvas, calculatePanelHeightQsExpanded(), Color.GREEN,
-                    "calculatePanelHeightQsExpanded()");
-            drawDebugInfo(canvas, calculatePanelHeightShade(), Color.YELLOW,
-                    "calculatePanelHeightShade()");
-            drawDebugInfo(canvas, (int) calculateNotificationsTopPadding(), Color.MAGENTA,
-                    "calculateNotificationsTopPadding()");
-            drawDebugInfo(canvas, mClockPositionResult.clockY, Color.GRAY,
-                    "mClockPositionResult.clockY");
-            drawDebugInfo(canvas, (int) mLockIconViewController.getTop(), Color.GRAY,
-                    "mLockIconViewController.getTop()");
-
-            if (mKeyguardShowing) {
-                // Notifications have the space between those two lines.
-                drawDebugInfo(canvas,
-                        mNotificationStackScrollLayoutController.getTop() +
-                                (int) mKeyguardNotificationTopPadding,
-                        Color.RED,
-                        "NSSL.getTop() + mKeyguardNotificationTopPadding");
-
-                drawDebugInfo(canvas, mNotificationStackScrollLayoutController.getBottom() -
-                                (int) mKeyguardNotificationBottomPadding,
-                        Color.RED,
-                        "NSSL.getBottom() - mKeyguardNotificationBottomPadding");
-            }
-
-            mDebugPaint.setColor(Color.CYAN);
-            canvas.drawLine(0, mClockPositionResult.stackScrollerPadding, mView.getWidth(),
-                    mNotificationStackScrollLayoutController.getTopPadding(), mDebugPaint);
-        }
-
-        private void drawDebugInfo(Canvas canvas, int y, int color, String label) {
-            mDebugPaint.setColor(color);
-            canvas.drawLine(/* startX= */ 0, /* startY= */ y, /* stopX= */ mView.getWidth(),
-                    /* stopY= */ y, mDebugPaint);
-            canvas.drawText(label + " = " + y + "px", /* x= */ 0,
-                    /* y= */ computeDebugYTextPosition(y), mDebugPaint);
-        }
-
-        private int computeDebugYTextPosition(int lineY) {
-            if (lineY - mDebugPaint.getTextSize() < 0) {
-                // Avoiding drawing out of bounds
-                lineY += mDebugPaint.getTextSize();
-            }
-            int textY = lineY;
-            while (mDebugTextUsedYPositions.contains(textY)) {
-                textY = (int) (textY + mDebugPaint.getTextSize());
-            }
-            mDebugTextUsedYPositions.add(textY);
-            return textY;
-        }
-
-        @Override
-        public void setAlpha(int alpha) {
-
-        }
-
-        @Override
-        public void setColorFilter(ColorFilter colorFilter) {
-
-        }
-
-        @Override
-        public int getOpacity() {
-            return PixelFormat.UNKNOWN;
         }
     }
 
