@@ -226,7 +226,8 @@ object Flags {
     val SCREEN_CONTENTS_TRANSLATION = UnreleasedFlag(803)
 
     // 804 - monochromatic themes
-    @JvmField val MONOCHROMATIC_THEMES = UnreleasedFlag(804)
+    @JvmField
+    val MONOCHROMATIC_THEMES = SysPropBooleanFlag(804, "persist.sysui.monochromatic", false)
 
     // 900 - media
     // TODO(b/254512697): Tracking Bug
