@@ -189,6 +189,9 @@
     <!-- Text to show in warning dialog on the tv when the app source is not trusted [CHAR LIMIT=NONE] -->
     <string name="untrusted_external_source_warning" product="tv">For your security, your TV currently isn’t allowed to install unknown apps from this source. You can change this in Settings.</string>
 
+    <!-- Text to show in warning dialog on the wear when the app source is not trusted [CHAR LIMIT=NONE] -->
+    <string name="untrusted_external_source_warning" product="watch">For your security, your watch currently isn’t allowed to install unknown apps from this source. You can change this in Settings.</string>
+
     <!-- Text to show in warning dialog on the phone when the app source is not trusted [CHAR LIMIT=NONE] -->
     <string name="untrusted_external_source_warning" product="default">For your security, your phone currently isn’t allowed to install unknown apps from this source. You can change this in Settings.</string>
 
