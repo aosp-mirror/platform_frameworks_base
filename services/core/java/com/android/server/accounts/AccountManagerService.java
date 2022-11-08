@@ -840,6 +840,7 @@ public class AccountManagerService
                 }
 
                 if (notify) {
+                    Log.i(TAG, "Notifying visibility changed for package=" + packageName);
                     for (Entry<String, Integer> packageToVisibility : packagesToVisibility
                             .entrySet()) {
                         int oldVisibility = packageToVisibility.getValue();
@@ -850,9 +851,14 @@ public class AccountManagerService
                         }
                     }
                     for (String packageNameToNotify : accountRemovedReceivers) {
-                        sendAccountRemovedBroadcast(account, packageNameToNotify, accounts.userId);
+                        sendAccountRemovedBroadcast(
+                                account,
+                                packageNameToNotify,
+                                accounts.userId,
+                                /*useCase=*/"setAccountVisibility");
                     }
-                    sendAccountsChangedBroadcast(accounts.userId);
+                    sendAccountsChangedBroadcast(
+                            accounts.userId, account.type, /*useCase=*/"setAccountVisibility");
                 }
                 return true;
             }
@@ -973,6 +979,8 @@ public class AccountManagerService
      * @param accounts UserAccount that currently hosts the account
      */
     private void notifyPackage(String packageName, UserAccounts accounts) {
+        Log.i(TAG, "notifying package=" + packageName + " for userId=" + accounts.userId
+                +", sending broadcast of " + AccountManager.ACTION_VISIBLE_ACCOUNTS_CHANGED);
         Intent intent = new Intent(AccountManager.ACTION_VISIBLE_ACCOUNTS_CHANGED);
         intent.setPackage(packageName);
         intent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
@@ -1059,13 +1067,21 @@ public class AccountManagerService
                 || AccountManager.PACKAGE_NAME_KEY_LEGACY_NOT_VISIBLE.equals(packageName));
     }
 
-    private void sendAccountsChangedBroadcast(int userId) {
-        Log.i(TAG, "the accounts changed, sending broadcast of "
-                + ACCOUNTS_CHANGED_INTENT.getAction());
+    private void sendAccountsChangedBroadcast(
+            int userId, String accountType, @NonNull String useCase) {
+        Objects.requireNonNull(useCase, "useCase can't be null");
+        Log.i(TAG, "the accountType= " + (accountType == null ? "" : accountType)
+                + " changed with useCase=" + useCase + " for userId=" + userId
+                + ", sending broadcast of " + ACCOUNTS_CHANGED_INTENT.getAction());
         mContext.sendBroadcastAsUser(ACCOUNTS_CHANGED_INTENT, new UserHandle(userId));
     }
 
-    private void sendAccountRemovedBroadcast(Account account, String packageName, int userId) {
+    private void sendAccountRemovedBroadcast(
+            Account account, String packageName, int userId, @NonNull String useCase) {
+        Objects.requireNonNull(useCase, "useCase can't be null");
+        Log.i(TAG, "the account with type=" + account.type + " removed while useCase="
+                + useCase + " for userId=" + userId + ", sending broadcast of "
+                + AccountManager.ACTION_ACCOUNT_REMOVED);
         Intent intent = new Intent(AccountManager.ACTION_ACCOUNT_REMOVED);
         intent.setFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
         intent.setPackage(packageName);
@@ -1212,6 +1228,8 @@ public class AccountManagerService
                                 accountsDb.endTransaction();
                             }
                             accountDeleted = true;
+                            Log.i(TAG, "validateAccountsInternal#Deleted UserId="
+                                    + accounts.userId + ", AccountId=" + accountId);
 
                             logRecord(AccountsDb.DEBUG_ACTION_AUTHENTICATOR_REMOVE,
                                     AccountsDb.TABLE_ACCOUNTS, accountId, accounts);
@@ -1228,7 +1246,11 @@ public class AccountManagerService
                                 }
                             }
                             for (String packageName : accountRemovedReceivers) {
-                                sendAccountRemovedBroadcast(account, packageName, accounts.userId);
+                                sendAccountRemovedBroadcast(
+                                        account,
+                                        packageName,
+                                        accounts.userId,
+                                        /*useCase=*/"validateAccounts");
                             }
                         } else {
                             ArrayList<String> accountNames = accountNamesByType.get(account.type);
@@ -1253,7 +1275,10 @@ public class AccountManagerService
                     AccountManager.invalidateLocalAccountsDataCaches();
                 } finally {
                     if (accountDeleted) {
-                        sendAccountsChangedBroadcast(accounts.userId);
+                        sendAccountsChangedBroadcast(
+                                accounts.userId,
+                                /*accountType=*/"ambiguous",
+                                /*useCase=*/"validateAccounts");
                     }
                 }
             }
@@ -1899,7 +1924,9 @@ public class AccountManagerService
 
         sendNotificationAccountUpdated(account, accounts);
         // Only send LOGIN_ACCOUNTS_CHANGED when the database changed.
-        sendAccountsChangedBroadcast(accounts.userId);
+        Log.i(TAG, "callingUid=" + callingUid + ", userId=" + accounts.userId
+                + " added account");
+        sendAccountsChangedBroadcast(accounts.userId, account.type, /*useCase=*/"addAccount");
 
         logAddAccountExplicitlyMetrics(opPackageName, account.type, packageToVisibility);
         return true;
@@ -2089,6 +2116,8 @@ public class AccountManagerService
         final long identityToken = clearCallingIdentity();
         try {
             UserAccounts accounts = getUserAccounts(userId);
+            Log.i(TAG, "callingUid=" + callingUid + ", userId=" + accounts.userId
+                    + " performing rename account");
             Account resultingAccount = renameAccountInternal(accounts, accountToRename, newName);
             Bundle result = new Bundle();
             result.putString(AccountManager.KEY_ACCOUNT_NAME, resultingAccount.name);
@@ -2199,9 +2228,14 @@ public class AccountManagerService
                 }
 
                 sendNotificationAccountUpdated(resultAccount, accounts);
-                sendAccountsChangedBroadcast(accounts.userId);
+                sendAccountsChangedBroadcast(
+                        accounts.userId, accountToRename.type, /*useCase=*/"renameAccount");
                 for (String packageName : accountRemovedReceivers) {
-                    sendAccountRemovedBroadcast(accountToRename, packageName, accounts.userId);
+                    sendAccountRemovedBroadcast(
+                            accountToRename,
+                            packageName,
+                            accounts.userId,
+                            /*useCase=*/"renameAccount");
                 }
 
                 AccountManager.invalidateLocalAccountsDataCaches();
@@ -2433,9 +2467,13 @@ public class AccountManagerService
                     }
 
                     // Only broadcast LOGIN_ACCOUNTS_CHANGED if a change occurred.
-                    sendAccountsChangedBroadcast(accounts.userId);
+                    Log.i(TAG, "callingUid=" + callingUid + ", userId=" + accounts.userId
+                            + " removed account");
+                    sendAccountsChangedBroadcast(
+                            accounts.userId, account.type, /*useCase=*/"removeAccount");
                     for (String packageName : accountRemovedReceivers) {
-                        sendAccountRemovedBroadcast(account, packageName, accounts.userId);
+                        sendAccountRemovedBroadcast(
+                                account, packageName, accounts.userId, /*useCase=*/"removeAccount");
                     }
                     String action = userUnlocked ? AccountsDb.DEBUG_ACTION_ACCOUNT_REMOVE
                             : AccountsDb.DEBUG_ACTION_ACCOUNT_REMOVE_DE;
@@ -2709,7 +2747,9 @@ public class AccountManagerService
                     if (isChanged) {
                         // Send LOGIN_ACCOUNTS_CHANGED only if the something changed.
                         sendNotificationAccountUpdated(account, accounts);
-                        sendAccountsChangedBroadcast(accounts.userId);
+                        Log.i(TAG, "callingUid=" + callingUid + " changed password");
+                        sendAccountsChangedBroadcast(
+                                accounts.userId, account.type, /*useCase=*/"setPassword");
                     }
                 }
             }
