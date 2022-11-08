@@ -675,6 +675,22 @@ public final class Settings {
             "android.settings.WIFI_SETTINGS";
 
     /**
+     * Activity Action: Show settings to allow configuration of MTE.
+     * <p>
+     * Memory Tagging Extension (MTE) is a CPU extension that allows to protect against certain
+     * classes of security problems at a small runtime performance cost overhead.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_MEMTAG_SETTINGS =
+            "android.settings.MEMTAG_SETTINGS";
+
+    /**
      * Activity Action: Show settings to allow configuration of a static IP
      * address for Wi-Fi.
      * <p>
