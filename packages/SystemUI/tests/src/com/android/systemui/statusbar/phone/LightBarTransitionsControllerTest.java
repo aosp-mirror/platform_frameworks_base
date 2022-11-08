@@ -28,6 +28,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.LightBarTransitionsController.DarkIntensityApplier;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -56,7 +57,8 @@ public class LightBarTransitionsControllerTest extends SysuiTestCase {
     public void setup() {
         MockitoAnnotations.initMocks(this);
         mLightBarTransitionsController = new LightBarTransitionsController(mContext, mApplier,
-                new CommandQueue(mContext), mKeyguardStateController, mStatusBarStateController);
+                new CommandQueue(mContext, new FakeDisplayTracker(mContext)),
+                mKeyguardStateController, mStatusBarStateController);
     }
 
     @Test

@@ -41,6 +41,7 @@ import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.logging.QSLogger
+import com.android.systemui.settings.FakeDisplayTracker
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.nullable
@@ -90,6 +91,7 @@ class CustomTileTest : SysuiTestCase() {
     private lateinit var customTile: CustomTile
     private lateinit var testableLooper: TestableLooper
     private lateinit var customTileBuilder: CustomTile.Builder
+    private val displayTracker = FakeDisplayTracker(mContext)
 
     @Before
     fun setUp() {
@@ -119,7 +121,8 @@ class CustomTileTest : SysuiTestCase() {
                 activityStarter,
                 qsLogger,
                 customTileStatePersister,
-                tileServices
+                tileServices,
+                displayTracker
         )
 
         customTile = CustomTile.create(customTileBuilder, TILE_SPEC, mContext)

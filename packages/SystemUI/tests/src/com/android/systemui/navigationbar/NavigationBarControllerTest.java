@@ -37,6 +37,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.res.Configuration;
+import android.hardware.display.DisplayManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 import android.util.SparseArray;
@@ -50,6 +51,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.recents.OverviewProxyService;
+import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.shared.recents.utilities.Utilities;
 import com.android.systemui.shared.system.TaskStackChangeListeners;
 import com.android.systemui.statusbar.CommandQueue;
@@ -81,6 +83,7 @@ public class NavigationBarControllerTest extends SysuiTestCase {
     private NavigationBar mDefaultNavBar;
     private NavigationBar mSecondaryNavBar;
     private StaticMockitoSession mMockitoSession;
+    private FakeDisplayTracker mDisplayTracker = new FakeDisplayTracker(mContext);
 
     @Mock
     private CommandQueue mCommandQueue;
@@ -92,6 +95,7 @@ public class NavigationBarControllerTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        DisplayManager displayManager = mContext.getSystemService(DisplayManager.class);
         mNavigationBarController = spy(
                 new NavigationBarController(mContext,
                         mock(OverviewProxyService.class),
@@ -110,7 +114,8 @@ public class NavigationBarControllerTest extends SysuiTestCase {
                         Optional.of(mock(Pip.class)),
                         Optional.of(mock(BackAnimation.class)),
                         mock(FeatureFlags.class),
-                        mock(SecureSettings.class)));
+                        mock(SecureSettings.class),
+                        mDisplayTracker));
         initializeNavigationBars();
         mMockitoSession = mockitoSession().mockStatic(Utilities.class).startMocking();
     }

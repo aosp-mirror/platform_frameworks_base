@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.gesture
 import android.content.Context
 import android.view.MotionEvent
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.settings.DisplayTracker
 import com.android.systemui.statusbar.window.StatusBarWindowController
 import javax.inject.Inject
 
@@ -28,9 +29,10 @@ class SwipeStatusBarAwayGestureHandler
 @Inject
 constructor(
     context: Context,
+    displayTracker: DisplayTracker,
     logger: SwipeUpGestureLogger,
     private val statusBarWindowController: StatusBarWindowController,
-) : SwipeUpGestureHandler(context, logger, loggerTag = LOGGER_TAG) {
+) : SwipeUpGestureHandler(context, displayTracker, logger, loggerTag = LOGGER_TAG) {
     override fun startOfGestureIsWithinBounds(ev: MotionEvent): Boolean {
         // Gesture starts just below the status bar
         return ev.y >= statusBarWindowController.statusBarHeight &&

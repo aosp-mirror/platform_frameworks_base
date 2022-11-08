@@ -17,7 +17,6 @@
 package com.android.systemui.recents;
 
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
-import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.MotionEvent.ACTION_CANCEL;
 import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_UP;
@@ -88,6 +87,7 @@ import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.navigationbar.buttons.KeyButtonView;
 import com.android.systemui.recents.OverviewProxyService.OverviewProxyListener;
+import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shared.recents.IOverviewProxy;
@@ -144,6 +144,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private final UserTracker mUserTracker;
     private final KeyguardUnlockAnimationController mSysuiUnlockAnimationController;
     private final UiEventLogger mUiEventLogger;
+    private final DisplayTracker mDisplayTracker;
 
     private Region mActiveNavBarRegion;
     private SurfaceControl mNavigationBarSurface;
@@ -225,11 +226,11 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
         @Override
         public void onImeSwitcherPressed() {
-            // TODO(b/204901476) We're intentionally using DEFAULT_DISPLAY for now since
+            // TODO(b/204901476) We're intentionally using the default display for now since
             // Launcher/Taskbar isn't display aware.
             mContext.getSystemService(InputMethodManager.class)
                     .showInputMethodPickerFromSystem(true /* showAuxiliarySubtypes */,
-                            DEFAULT_DISPLAY);
+                            mDisplayTracker.getDefaultDisplayId());
             mUiEventLogger.log(KeyButtonView.NavBarButtonEvent.NAVBAR_IME_SWITCHER_BUTTON_TAP);
         }
 
@@ -507,6 +508,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             UserTracker userTracker,
             ScreenLifecycle screenLifecycle,
             UiEventLogger uiEventLogger,
+            DisplayTracker displayTracker,
             KeyguardUnlockAnimationController sysuiUnlockAnimationController,
             AssistUtils assistUtils,
             DumpManager dumpManager) {
@@ -534,6 +536,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         mSysUiState = sysUiState;
         mSysUiState.addCallback(this::notifySystemUiStateFlags);
         mUiEventLogger = uiEventLogger;
+        mDisplayTracker = displayTracker;
 
         dumpManager.registerDumpable(getClass().getSimpleName(), this);
 

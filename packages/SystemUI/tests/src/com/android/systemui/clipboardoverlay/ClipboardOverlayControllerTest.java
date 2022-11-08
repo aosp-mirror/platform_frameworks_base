@@ -47,6 +47,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.screenshot.TimeoutHandler;
+import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 
@@ -81,6 +82,7 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
     private ClipboardOverlayUtils mClipboardUtils;
     @Mock
     private UiEventLogger mUiEventLogger;
+    private FakeDisplayTracker mDisplayTracker = new FakeDisplayTracker(mContext);
     private FakeFeatureFlags mFeatureFlags = new FakeFeatureFlags();
 
     @Mock
@@ -116,7 +118,8 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
                 mFeatureFlags,
                 mClipboardUtils,
                 mExecutor,
-                mUiEventLogger);
+                mUiEventLogger,
+                mDisplayTracker);
         verify(mClipboardOverlayView).setCallbacks(mOverlayCallbacksCaptor.capture());
         mCallbacks = mOverlayCallbacksCaptor.getValue();
     }

@@ -38,6 +38,7 @@ import android.view.WindowlessWindowManager
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.settings.DisplayTracker
 import com.android.systemui.statusbar.LightRevealEffect
 import com.android.systemui.statusbar.LightRevealScrim
 import com.android.systemui.statusbar.LinearLightRevealEffect
@@ -68,6 +69,7 @@ constructor(
     @Main private val executor: Executor,
     private val threadFactory: ThreadFactory,
     private val rotationChangeProvider: RotationChangeProvider,
+    private val displayTracker: DisplayTracker
 ) {
 
     private val transitionListener = TransitionListener()
@@ -104,7 +106,7 @@ constructor(
                 .setName("unfold-overlay-container")
 
         displayAreaHelper.get().attachToRootDisplayArea(
-            Display.DEFAULT_DISPLAY,
+            displayTracker.defaultDisplayId,
             containerBuilder
         ) { builder ->
             executor.execute {
