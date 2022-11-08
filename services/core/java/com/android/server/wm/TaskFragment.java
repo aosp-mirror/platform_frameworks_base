@@ -2327,6 +2327,11 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         if (mTaskFragmentOrganizer != null
                 && (mLastSurfaceSize.x != 0 || mLastSurfaceSize.y != 0)) {
             t.setWindowCrop(mSurfaceControl, 0, 0);
+            final SurfaceControl.Transaction syncTransaction = getSyncTransaction();
+            if (t != syncTransaction) {
+                // Avoid restoring to old window crop if the sync transaction is applied later.
+                syncTransaction.setWindowCrop(mSurfaceControl, 0, 0);
+            }
             mLastSurfaceSize.set(0, 0);
         }
     }
