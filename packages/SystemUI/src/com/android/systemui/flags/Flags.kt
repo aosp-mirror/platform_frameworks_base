@@ -374,7 +374,8 @@ object Flags {
 
     // TODO(b/254513155): Tracking Bug
     @JvmField
-    val SCREENSHOT_WORK_PROFILE_POLICY = unreleasedFlag(1301, "screenshot_work_profile_policy")
+    val SCREENSHOT_WORK_PROFILE_POLICY =
+        unreleasedFlag(1301, "screenshot_work_profile_policy", teamfood = true)
 
     // 1400 - columbus
     // TODO(b/254512756): Tracking Bug
