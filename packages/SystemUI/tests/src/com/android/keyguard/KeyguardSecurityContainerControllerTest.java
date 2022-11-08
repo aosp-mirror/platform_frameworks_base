@@ -548,6 +548,22 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
         verify(mKeyguardPasswordViewControllerMock, never()).showMessage(null, null);
     }
 
+    @Test
+    public void onDensityorFontScaleChanged() {
+        ArgumentCaptor<ConfigurationController.ConfigurationListener>
+                configurationListenerArgumentCaptor = ArgumentCaptor.forClass(
+                ConfigurationController.ConfigurationListener.class);
+        mKeyguardSecurityContainerController.onViewAttached();
+        verify(mConfigurationController).addCallback(configurationListenerArgumentCaptor.capture());
+        configurationListenerArgumentCaptor.getValue().onDensityOrFontScaleChanged();
+
+        verify(mView).onDensityOrFontScaleChanged();
+        verify(mKeyguardSecurityViewFlipperController).onDensityOrFontScaleChanged();
+        verify(mKeyguardSecurityViewFlipperController).getSecurityView(any(SecurityMode.class),
+                any(KeyguardSecurityCallback.class));
+    }
+
+
     private KeyguardSecurityContainer.SwipeListener getRegisteredSwipeListener() {
         mKeyguardSecurityContainerController.onViewAttached();
         verify(mView).setSwipeListener(mSwipeListenerArgumentCaptor.capture());

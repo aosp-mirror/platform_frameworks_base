@@ -308,6 +308,17 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testOnDensityOrFontScaleChanged() {
+        setupUserSwitcher();
+        View oldUserSwitcher = mKeyguardSecurityContainer.findViewById(
+                R.id.keyguard_bouncer_user_switcher);
+        mKeyguardSecurityContainer.onDensityOrFontScaleChanged();
+        View newUserSwitcher = mKeyguardSecurityContainer.findViewById(
+                R.id.keyguard_bouncer_user_switcher);
+        assertThat(oldUserSwitcher).isNotEqualTo(newUserSwitcher);
+    }
+
+    @Test
     public void testTouchesAreRecognizedAsBeingOnTheOtherSideOfSecurity() {
         setupUserSwitcher();
         setViewWidth(VIEW_WIDTH);

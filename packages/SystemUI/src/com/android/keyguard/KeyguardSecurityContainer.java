@@ -727,6 +727,11 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
         mViewMode.reloadColors();
     }
 
+    /** Handles density or font scale changes. */
+    void onDensityOrFontScaleChanged() {
+        mViewMode.onDensityOrFontScaleChanged();
+    }
+
     /**
      * Enscapsulates the differences between bouncer modes for the container.
      */
@@ -751,6 +756,9 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
 
         /** Refresh colors */
         default void reloadColors() {};
+
+        /** Handles density or font scale changes. */
+        default void onDensityOrFontScaleChanged() {}
 
         /** On a successful auth, optionally handle how the view disappears */
         default void startDisappearAnimation(SecurityMode securityMode) {};
@@ -899,14 +907,9 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
             mFalsingA11yDelegate = falsingA11yDelegate;
 
             if (mUserSwitcherViewGroup == null) {
-                LayoutInflater.from(v.getContext()).inflate(
-                        R.layout.keyguard_bouncer_user_switcher,
-                        mView,
-                        true);
-                mUserSwitcherViewGroup =  mView.findViewById(R.id.keyguard_bouncer_user_switcher);
+                inflateUserSwitcher();
             }
             updateSecurityViewLocation();
-            mUserSwitcher = mView.findViewById(R.id.user_switcher_header);
             setupUserSwitcher();
             mUserSwitcherController.addUserSwitchCallback(mUserSwitchCallback);
         }
@@ -934,6 +937,12 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
                 keyDownDrawable.setTintList(Utils.getColorAttr(mView.getContext(),
                         android.R.attr.textColorPrimary));
             }
+        }
+
+        @Override
+        public void onDensityOrFontScaleChanged() {
+            mView.removeView(mUserSwitcherViewGroup);
+            inflateUserSwitcher();
         }
 
         @Override
@@ -1135,6 +1144,15 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
                 constraintSet.constrainHeight(mViewFlipper.getId(), MATCH_CONSTRAINT);
                 constraintSet.applyTo(mView);
             }
+        }
+
+        private void inflateUserSwitcher() {
+            LayoutInflater.from(mView.getContext()).inflate(
+                    R.layout.keyguard_bouncer_user_switcher,
+                    mView,
+                    true);
+            mUserSwitcherViewGroup = mView.findViewById(R.id.keyguard_bouncer_user_switcher);
+            mUserSwitcher = mView.findViewById(R.id.user_switcher_header);
         }
 
         interface UserSwitcherCallback {
