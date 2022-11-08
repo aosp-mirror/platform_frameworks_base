@@ -128,6 +128,7 @@
     <public name="isCredential"/>
     <public name="searchResultHighlightColor" />
     <public name="focusedSearchResultHighlightColor" />
+    <public name="stylusHandwritingSettingsActivity" />
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01cd0000">
