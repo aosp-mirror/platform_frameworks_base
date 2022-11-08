@@ -18,6 +18,7 @@ package android.credentials.ui;
 
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.os.Parcel;
 import android.os.ResultReceiver;
 
@@ -36,9 +37,10 @@ public class IntentFactory {
             ArrayList<DisabledProviderData> disabledProviderDataList,
             ResultReceiver resultReceiver) {
         Intent intent = new Intent();
-        // TODO: define these as proper config strings.
-        String activityName = "com.android.credentialmanager/.CredentialSelectorActivity";
-        intent.setComponent(ComponentName.unflattenFromString(activityName));
+        ComponentName componentName = ComponentName.unflattenFromString(
+                Resources.getSystem().getString(
+                        com.android.internal.R.string.config_credentialManagerDialogComponent));
+        intent.setComponent(componentName);
 
         intent.putParcelableArrayListExtra(
                 ProviderData.EXTRA_ENABLED_PROVIDER_DATA_LIST, enabledProviderDataList);
