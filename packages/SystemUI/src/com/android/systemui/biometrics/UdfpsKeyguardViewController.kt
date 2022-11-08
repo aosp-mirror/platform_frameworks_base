@@ -31,7 +31,7 @@ import com.android.systemui.animation.Interpolators
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
-import com.android.systemui.keyguard.domain.interactor.BouncerInteractor
+import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.shade.ShadeExpansionListener
@@ -40,9 +40,9 @@ import com.android.systemui.statusbar.LockscreenShadeTransitionController
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator
 import com.android.systemui.statusbar.phone.KeyguardBouncer
-import com.android.systemui.statusbar.phone.KeyguardBouncer.BouncerExpansionCallback
+import com.android.systemui.statusbar.phone.KeyguardBouncer.PrimaryBouncerExpansionCallback
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
-import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager.AlternateAuthInterceptor
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager.AlternateBouncer
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager.KeyguardViewManagerCallback
 import com.android.systemui.statusbar.phone.SystemUIDialogManager
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController
@@ -73,7 +73,7 @@ constructor(
     private val udfpsController: UdfpsController,
     private val activityLaunchAnimator: ActivityLaunchAnimator,
     featureFlags: FeatureFlags,
-    private val bouncerInteractor: BouncerInteractor
+    private val primaryBouncerInteractor: PrimaryBouncerInteractor
 ) :
     UdfpsAnimationViewController<UdfpsKeyguardView>(
         view,
@@ -146,8 +146,8 @@ constructor(
             }
         }
 
-    private val bouncerExpansionCallback: BouncerExpansionCallback =
-        object : BouncerExpansionCallback {
+    private val mPrimaryBouncerExpansionCallback: PrimaryBouncerExpansionCallback =
+        object : PrimaryBouncerExpansionCallback {
             override fun onExpansionChanged(expansion: Float) {
                 inputBouncerHiddenAmount = expansion
                 updateAlpha()
@@ -180,7 +180,7 @@ constructor(
 
     private val shadeExpansionListener = ShadeExpansionListener { (fraction) ->
         panelExpansionFraction =
-            if (keyguardViewManager.isBouncerInTransit) {
+            if (keyguardViewManager.isPrimaryBouncerInTransit) {
                 aboutToShowBouncerProgress(fraction)
             } else {
                 fraction
@@ -237,17 +237,17 @@ constructor(
             }
         }
 
-    private val alternateAuthInterceptor: AlternateAuthInterceptor =
-        object : AlternateAuthInterceptor {
-            override fun showAlternateAuthBouncer(): Boolean {
+    private val mAlternateBouncer: AlternateBouncer =
+        object : AlternateBouncer {
+            override fun showAlternateBouncer(): Boolean {
                 return showUdfpsBouncer(true)
             }
 
-            override fun hideAlternateAuthBouncer(): Boolean {
+            override fun hideAlternateBouncer(): Boolean {
                 return showUdfpsBouncer(false)
             }
 
-            override fun isShowingAlternateAuthBouncer(): Boolean {
+            override fun isShowingAlternateBouncer(): Boolean {
                 return showingUdfpsBouncer
             }
 
@@ -268,7 +268,7 @@ constructor(
 
     override fun onInit() {
         super.onInit()
-        keyguardViewManager.setAlternateAuthInterceptor(alternateAuthInterceptor)
+        keyguardViewManager.setAlternateBouncer(mAlternateBouncer)
     }
 
     init {
@@ -285,7 +285,7 @@ constructor(
     @VisibleForTesting
     internal suspend fun listenForBouncerExpansion(scope: CoroutineScope): Job {
         return scope.launch {
-            bouncerInteractor.bouncerExpansion.collect { bouncerExpansion: Float ->
+            primaryBouncerInteractor.bouncerExpansion.collect { bouncerExpansion: Float ->
                 inputBouncerExpansion = bouncerExpansion
                 updateAlpha()
                 updatePauseAuth()
@@ -306,10 +306,10 @@ constructor(
         qsExpansion = keyguardViewManager.qsExpansion
         keyguardViewManager.addCallback(statusBarKeyguardViewManagerCallback)
         if (!isModernBouncerEnabled) {
-            val bouncer = keyguardViewManager.bouncer
+            val bouncer = keyguardViewManager.primaryBouncer
             bouncer?.expansion?.let {
-                bouncerExpansionCallback.onExpansionChanged(it)
-                bouncer.addBouncerExpansionCallback(bouncerExpansionCallback)
+                mPrimaryBouncerExpansionCallback.onExpansionChanged(it)
+                bouncer.addBouncerExpansionCallback(mPrimaryBouncerExpansionCallback)
             }
             updateBouncerHiddenAmount()
         }
@@ -319,7 +319,7 @@ constructor(
         view.updatePadding()
         updateAlpha()
         updatePauseAuth()
-        keyguardViewManager.setAlternateAuthInterceptor(alternateAuthInterceptor)
+        keyguardViewManager.setAlternateBouncer(mAlternateBouncer)
         lockScreenShadeTransitionController.udfpsKeyguardViewController = this
         activityLaunchAnimator.addListener(activityLaunchAnimatorListener)
     }
@@ -329,7 +329,7 @@ constructor(
         faceDetectRunning = false
         keyguardStateController.removeCallback(keyguardStateControllerCallback)
         statusBarStateController.removeCallback(stateListener)
-        keyguardViewManager.removeAlternateAuthInterceptor(alternateAuthInterceptor)
+        keyguardViewManager.removeAlternateAuthInterceptor(mAlternateBouncer)
         keyguardUpdateMonitor.requestFaceAuthOnOccludingApp(false)
         configurationController.removeCallback(configurationListener)
         shadeExpansionStateManager.removeExpansionListener(shadeExpansionListener)
@@ -339,7 +339,9 @@ constructor(
         activityLaunchAnimator.removeListener(activityLaunchAnimatorListener)
         keyguardViewManager.removeCallback(statusBarKeyguardViewManagerCallback)
         if (!isModernBouncerEnabled) {
-            keyguardViewManager.bouncer?.removeBouncerExpansionCallback(bouncerExpansionCallback)
+            keyguardViewManager.primaryBouncer?.removeBouncerExpansionCallback(
+                mPrimaryBouncerExpansionCallback
+            )
         }
     }
 
@@ -442,7 +444,7 @@ constructor(
         return if (isModernBouncerEnabled) {
             inputBouncerExpansion == 1f
         } else {
-            keyguardViewManager.isBouncerShowing && !keyguardViewManager.isShowingAlternateAuth
+            keyguardViewManager.isBouncerShowing && !keyguardViewManager.isShowingAlternateBouncer
         }
     }
 
@@ -462,7 +464,7 @@ constructor(
      */
     private fun maybeShowInputBouncer() {
         if (showingUdfpsBouncer && hasUdfpsBouncerShownWithMinTime()) {
-            keyguardViewManager.showBouncer(true)
+            keyguardViewManager.showPrimaryBouncer(true)
         }
     }
 
@@ -535,8 +537,8 @@ constructor(
         if (isModernBouncerEnabled) {
             return
         }
-        val altBouncerShowing = keyguardViewManager.isShowingAlternateAuth
-        if (altBouncerShowing || !keyguardViewManager.bouncerIsOrWillBeShowing()) {
+        val altBouncerShowing = keyguardViewManager.isShowingAlternateBouncer
+        if (altBouncerShowing || !keyguardViewManager.primaryBouncerIsOrWillBeShowing()) {
             inputBouncerHiddenAmount = 1f
         } else if (keyguardViewManager.isBouncerShowing) {
             // input bouncer is fully showing

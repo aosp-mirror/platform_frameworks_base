@@ -30,57 +30,61 @@ import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(JUnit4::class)
-class BouncerCallbackInteractorTest : SysuiTestCase() {
-    private val bouncerCallbackInteractor = BouncerCallbackInteractor()
-    @Mock private lateinit var bouncerExpansionCallback: KeyguardBouncer.BouncerExpansionCallback
+class PrimaryBouncerCallbackInteractorTest : SysuiTestCase() {
+    private val mPrimaryBouncerCallbackInteractor = PrimaryBouncerCallbackInteractor()
+    @Mock
+    private lateinit var mPrimaryBouncerExpansionCallback:
+        KeyguardBouncer.PrimaryBouncerExpansionCallback
     @Mock private lateinit var keyguardResetCallback: KeyguardBouncer.KeyguardResetCallback
 
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        bouncerCallbackInteractor.addBouncerExpansionCallback(bouncerExpansionCallback)
-        bouncerCallbackInteractor.addKeyguardResetCallback(keyguardResetCallback)
+        mPrimaryBouncerCallbackInteractor.addBouncerExpansionCallback(
+            mPrimaryBouncerExpansionCallback
+        )
+        mPrimaryBouncerCallbackInteractor.addKeyguardResetCallback(keyguardResetCallback)
     }
 
     @Test
     fun testOnFullyShown() {
-        bouncerCallbackInteractor.dispatchFullyShown()
-        verify(bouncerExpansionCallback).onFullyShown()
+        mPrimaryBouncerCallbackInteractor.dispatchFullyShown()
+        verify(mPrimaryBouncerExpansionCallback).onFullyShown()
     }
 
     @Test
     fun testOnFullyHidden() {
-        bouncerCallbackInteractor.dispatchFullyHidden()
-        verify(bouncerExpansionCallback).onFullyHidden()
+        mPrimaryBouncerCallbackInteractor.dispatchFullyHidden()
+        verify(mPrimaryBouncerExpansionCallback).onFullyHidden()
     }
 
     @Test
     fun testOnExpansionChanged() {
-        bouncerCallbackInteractor.dispatchExpansionChanged(5f)
-        verify(bouncerExpansionCallback).onExpansionChanged(5f)
+        mPrimaryBouncerCallbackInteractor.dispatchExpansionChanged(5f)
+        verify(mPrimaryBouncerExpansionCallback).onExpansionChanged(5f)
     }
 
     @Test
     fun testOnVisibilityChanged() {
-        bouncerCallbackInteractor.dispatchVisibilityChanged(View.INVISIBLE)
-        verify(bouncerExpansionCallback).onVisibilityChanged(false)
+        mPrimaryBouncerCallbackInteractor.dispatchVisibilityChanged(View.INVISIBLE)
+        verify(mPrimaryBouncerExpansionCallback).onVisibilityChanged(false)
     }
 
     @Test
     fun testOnStartingToHide() {
-        bouncerCallbackInteractor.dispatchStartingToHide()
-        verify(bouncerExpansionCallback).onStartingToHide()
+        mPrimaryBouncerCallbackInteractor.dispatchStartingToHide()
+        verify(mPrimaryBouncerExpansionCallback).onStartingToHide()
     }
 
     @Test
     fun testOnStartingToShow() {
-        bouncerCallbackInteractor.dispatchStartingToShow()
-        verify(bouncerExpansionCallback).onStartingToShow()
+        mPrimaryBouncerCallbackInteractor.dispatchStartingToShow()
+        verify(mPrimaryBouncerExpansionCallback).onStartingToShow()
     }
 
     @Test
     fun testOnKeyguardReset() {
-        bouncerCallbackInteractor.dispatchReset()
+        mPrimaryBouncerCallbackInteractor.dispatchReset()
         verify(keyguardResetCallback).onKeyguardReset()
     }
 }

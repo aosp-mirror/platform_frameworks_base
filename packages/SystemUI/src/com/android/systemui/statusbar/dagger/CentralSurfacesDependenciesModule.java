@@ -300,7 +300,7 @@ public interface CentralSurfacesDependenciesModule {
 
             @Override
             public boolean isShowingAlternateAuthOnUnlock() {
-                return statusBarKeyguardViewManager.get().shouldShowAltAuth();
+                return statusBarKeyguardViewManager.get().canShowAlternateBouncer();
             }
         };
         return new DialogLaunchAnimator(callback, interactionJankMonitor);

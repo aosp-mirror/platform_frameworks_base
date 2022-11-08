@@ -284,7 +284,7 @@ public class NotificationShadeWindowViewController {
                     return true;
                 }
 
-                if (mStatusBarKeyguardViewManager.isShowingAlternateAuth()) {
+                if (mStatusBarKeyguardViewManager.isShowingAlternateBouncer()) {
                     // capture all touches if the alt auth bouncer is showing
                     return true;
                 }
@@ -322,7 +322,7 @@ public class NotificationShadeWindowViewController {
                     handled = !mService.isPulsing();
                 }
 
-                if (mStatusBarKeyguardViewManager.isShowingAlternateAuth()) {
+                if (mStatusBarKeyguardViewManager.isShowingAlternateBouncer()) {
                     // eat the touch
                     handled = true;
                 }

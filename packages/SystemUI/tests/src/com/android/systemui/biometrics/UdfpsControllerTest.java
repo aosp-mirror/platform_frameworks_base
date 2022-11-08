@@ -73,7 +73,7 @@ import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.ScreenLifecycle;
-import com.android.systemui.keyguard.domain.interactor.BouncerInteractor;
+import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shade.ShadeExpansionStateManager;
@@ -192,7 +192,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
     @Mock
     private AlternateUdfpsTouchProvider mAlternateTouchProvider;
     @Mock
-    private BouncerInteractor mBouncerInteractor;
+    private PrimaryBouncerInteractor mPrimaryBouncerInteractor;
 
     // Capture listeners so that they can be used to send events
     @Captor
@@ -291,7 +291,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mActivityLaunchAnimator,
                 Optional.of(mAlternateTouchProvider),
                 mBiometricsExecutor,
-                mBouncerInteractor);
+                mPrimaryBouncerInteractor);
         verify(mFingerprintManager).setUdfpsOverlayController(mOverlayCaptor.capture());
         mOverlayController = mOverlayCaptor.getValue();
         verify(mScreenLifecycle).addObserver(mScreenObserverCaptor.capture());
@@ -405,14 +405,14 @@ public class UdfpsControllerTest extends SysuiTestCase {
         // GIVEN overlay was showing and the udfps bouncer is showing
         mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, mOpticalProps.sensorId,
                 BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
-        when(mStatusBarKeyguardViewManager.isShowingAlternateAuth()).thenReturn(true);
+        when(mStatusBarKeyguardViewManager.isShowingAlternateBouncer()).thenReturn(true);
 
         // WHEN the overlay is hidden
         mOverlayController.hideUdfpsOverlay(mOpticalProps.sensorId);
         mFgExecutor.runAllReady();
 
         // THEN the udfps bouncer is reset
-        verify(mStatusBarKeyguardViewManager).resetAlternateAuth(eq(true));
+        verify(mStatusBarKeyguardViewManager).hideAlternateBouncer(eq(true));
     }
 
     @Test
