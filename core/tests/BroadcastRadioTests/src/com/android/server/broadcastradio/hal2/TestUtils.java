@@ -15,14 +15,23 @@
  */
 package com.android.server.broadcastradio.hal2;
 
+import android.hardware.broadcastradio.V2_0.IdentifierType;
+import android.hardware.broadcastradio.V2_0.ProgramIdentifier;
 import android.hardware.broadcastradio.V2_0.ProgramInfo;
+import android.hardware.broadcastradio.V2_0.VendorKeyValue;
 import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
 import android.hardware.radio.RadioMetadata;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 final class TestUtils {
+
+    private TestUtils() {
+        throw new UnsupportedOperationException("TestUtils class is noninstantiable");
+    }
+
     static RadioManager.ProgramInfo makeProgramInfo(int programType,
             ProgramSelector.Identifier identifier, int signalQuality) {
         // Note: If you set new fields, check if programInfoToHal() needs to be updated as well.
@@ -38,5 +47,34 @@ final class TestUtils {
         hwInfo.selector = Convert.programSelectorToHal(info.getSelector());
         hwInfo.signalQuality = info.getSignalStrength();
         return hwInfo;
+    }
+
+    static android.hardware.broadcastradio.V2_0.ProgramSelector makeHalFmSelector(int freq) {
+        ProgramIdentifier halId = new ProgramIdentifier();
+        halId.type = IdentifierType.AMFM_FREQUENCY;
+        halId.value = freq;
+
+        android.hardware.broadcastradio.V2_0.ProgramSelector halSelector =
+                new android.hardware.broadcastradio.V2_0.ProgramSelector();
+        halSelector.primaryId = halId;
+        halSelector.secondaryIds = new ArrayList<>();
+        return halSelector;
+    }
+
+    static VendorKeyValue makeVendorKeyValue(String vendorKey, String vendorValue) {
+        VendorKeyValue vendorKeyValue = new VendorKeyValue();
+        vendorKeyValue.key = vendorKey;
+        vendorKeyValue.value = vendorValue;
+        return vendorKeyValue;
+    }
+
+    static android.hardware.broadcastradio.V2_0.Announcement makeAnnouncement(int type,
+            int selectorFreq) {
+        android.hardware.broadcastradio.V2_0.Announcement halAnnouncement =
+                new android.hardware.broadcastradio.V2_0.Announcement();
+        halAnnouncement.type = (byte) type;
+        halAnnouncement.selector = makeHalFmSelector(selectorFreq);
+        halAnnouncement.vendorInfo = new ArrayList<>();
+        return halAnnouncement;
     }
 }
