@@ -21,6 +21,8 @@ import static android.Manifest.permission.MANAGE_BIOMETRIC;
 import static android.Manifest.permission.READ_CONTACTS;
 import static android.Manifest.permission.SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS;
 import static android.Manifest.permission.SET_INITIAL_LOCK;
+import static android.app.admin.DevicePolicyManager.DEPRECATE_USERMANAGERINTERNAL_DEVICEPOLICY_DEFAULT;
+import static android.app.admin.DevicePolicyManager.DEPRECATE_USERMANAGERINTERNAL_DEVICEPOLICY_FLAG;
 import static android.app.admin.DevicePolicyResources.Strings.Core.PROFILE_ENCRYPTED_DETAIL;
 import static android.app.admin.DevicePolicyResources.Strings.Core.PROFILE_ENCRYPTED_MESSAGE;
 import static android.app.admin.DevicePolicyResources.Strings.Core.PROFILE_ENCRYPTED_TITLE;
@@ -91,6 +93,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.provider.Settings.Secure;
 import android.security.AndroidKeyStoreMaintenance;
@@ -3183,18 +3186,34 @@ public class LockSettingsService extends ILockSettings.Stub {
      * if we are running an automotive build.
      */
     private void disableEscrowTokenOnNonManagedDevicesIfNeeded(int userId) {
-        final UserManagerInternal userManagerInternal = mInjector.getUserManagerInternal();
+        // TODO(b/258213147): Remove
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            if (DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_DEVICE_POLICY_MANAGER,
+                    DEPRECATE_USERMANAGERINTERNAL_DEVICEPOLICY_FLAG,
+                    DEPRECATE_USERMANAGERINTERNAL_DEVICEPOLICY_DEFAULT)) {
 
-        // Managed profile should have escrow enabled
-        if (userManagerInternal.isUserManaged(userId)) {
-            Slog.i(TAG, "Managed profile can have escrow token");
-            return;
-        }
+                if (mInjector.getDeviceStateCache().isUserOrganizationManaged(userId)) {
+                    Slog.i(TAG, "Organization managed users can have escrow token");
+                    return;
+                }
+            } else {
+                final UserManagerInternal userManagerInternal = mInjector.getUserManagerInternal();
 
-        // Devices with Device Owner should have escrow enabled on all users.
-        if (userManagerInternal.isDeviceManaged()) {
-            Slog.i(TAG, "Corp-owned device can have escrow token");
-            return;
+                // Managed profile should have escrow enabled
+                if (userManagerInternal.isUserManaged(userId)) {
+                    Slog.i(TAG, "Managed profile can have escrow token");
+                    return;
+                }
+
+                // Devices with Device Owner should have escrow enabled on all users.
+                if (userManagerInternal.isDeviceManaged()) {
+                    Slog.i(TAG, "Corp-owned device can have escrow token");
+                    return;
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(identity);
         }
 
         // If the device is yet to be provisioned (still in SUW), there is still
