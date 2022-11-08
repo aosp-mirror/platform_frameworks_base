@@ -27,6 +27,8 @@ import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.keyguard.KeyguardUpdateMonitor
+import com.android.keyguard.LockIconViewController
 import com.android.settingslib.Utils
 import com.android.systemui.R
 import com.android.systemui.animation.Expandable
@@ -69,6 +71,11 @@ object KeyguardBottomAreaViewBinder {
 
         /** Notifies that device configuration has changed. */
         fun onConfigurationChanged()
+
+        /**
+         * Returns whether the keyguard bottom area should be constrained to the top of the lock icon
+         */
+        fun shouldConstrainToTopOfLockIcon(): Boolean
     }
 
     /** Binds the view to the view-model, continuing to update the former based on the latter. */
@@ -208,6 +215,9 @@ object KeyguardBottomAreaViewBinder {
             override fun onConfigurationChanged() {
                 configurationBasedDimensions.value = loadFromResources(view)
             }
+
+            override fun shouldConstrainToTopOfLockIcon(): Boolean =
+                    viewModel.shouldConstrainToTopOfLockIcon()
         }
     }
 
