@@ -57,7 +57,6 @@ android_library {
         "androidx.recyclerview_recyclerview",
         "kotlinx_coroutines_android",
         "kotlinx_coroutines",
-        "gson-prebuilt-jar",
         "dagger2",
         "jsr330",
     ],
