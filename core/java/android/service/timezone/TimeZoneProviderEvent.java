@@ -74,39 +74,53 @@ public final class TimeZoneProviderEvent implements Parcelable {
     @Nullable
     private final String mFailureCause;
 
-    // Populated when mType == EVENT_TYPE_SUGGESTION or EVENT_TYPE_UNCERTAIN
+    // May be populated when EVENT_TYPE_SUGGESTION or EVENT_TYPE_UNCERTAIN
     @Nullable
     private final TimeZoneProviderStatus mTimeZoneProviderStatus;
 
-    private TimeZoneProviderEvent(int type,
+    private TimeZoneProviderEvent(@EventType int type,
             @ElapsedRealtimeLong long creationElapsedMillis,
             @Nullable TimeZoneProviderSuggestion suggestion,
             @Nullable String failureCause,
             @Nullable TimeZoneProviderStatus timeZoneProviderStatus) {
-        mType = type;
+        mType = validateEventType(type);
         mCreationElapsedMillis = creationElapsedMillis;
         mSuggestion = suggestion;
         mFailureCause = failureCause;
         mTimeZoneProviderStatus = timeZoneProviderStatus;
+
+        // Confirm the type and the provider status agree.
+        if (mType == EVENT_TYPE_PERMANENT_FAILURE && mTimeZoneProviderStatus != null) {
+            throw new IllegalArgumentException(
+                    "Unexpected status: mType=" + mType
+                            + ", mTimeZoneProviderStatus=" + mTimeZoneProviderStatus);
+        }
+    }
+
+    private static @EventType int validateEventType(@EventType int eventType) {
+        if (eventType < EVENT_TYPE_PERMANENT_FAILURE || eventType > EVENT_TYPE_UNCERTAIN) {
+            throw new IllegalArgumentException(Integer.toString(eventType));
+        }
+        return eventType;
     }
 
     /** Returns an event of type {@link #EVENT_TYPE_SUGGESTION}. */
     public static TimeZoneProviderEvent createSuggestionEvent(
             @ElapsedRealtimeLong long creationElapsedMillis,
             @NonNull TimeZoneProviderSuggestion suggestion,
-            @NonNull TimeZoneProviderStatus providerStatus) {
+            @Nullable TimeZoneProviderStatus providerStatus) {
         return new TimeZoneProviderEvent(EVENT_TYPE_SUGGESTION, creationElapsedMillis,
-                Objects.requireNonNull(suggestion), null, Objects.requireNonNull(providerStatus));
+                Objects.requireNonNull(suggestion), null, providerStatus);
     }
 
     /** Returns an event of type {@link #EVENT_TYPE_UNCERTAIN}. */
     public static TimeZoneProviderEvent createUncertainEvent(
             @ElapsedRealtimeLong long creationElapsedMillis,
-            @NonNull TimeZoneProviderStatus timeZoneProviderStatus) {
+            @Nullable TimeZoneProviderStatus timeZoneProviderStatus) {
 
         return new TimeZoneProviderEvent(
                 EVENT_TYPE_UNCERTAIN, creationElapsedMillis, null, null,
-                Objects.requireNonNull(timeZoneProviderStatus));
+                timeZoneProviderStatus);
     }
 
     /** Returns an event of type {@link #EVENT_TYPE_PERMANENT_FAILURE}. */
@@ -148,8 +162,8 @@ public final class TimeZoneProviderEvent implements Parcelable {
     }
 
     /**
-     * Returns the status of the time zone provider. Populated when {@link #getType()} is {@link
-     * #EVENT_TYPE_UNCERTAIN} or {@link #EVENT_TYPE_SUGGESTION}.
+     * Returns the status of the time zone provider.  May be populated when {@link #getType()} is
+     * {@link #EVENT_TYPE_UNCERTAIN} or {@link #EVENT_TYPE_SUGGESTION}, otherwise {@code null}.
      */
     @Nullable
     public TimeZoneProviderStatus getTimeZoneProviderStatus() {
