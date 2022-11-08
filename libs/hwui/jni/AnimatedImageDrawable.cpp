@@ -271,6 +271,13 @@ static const JNINativeMethod gAnimatedImageDrawableMethods[] = {
 };
 
 int register_android_graphics_drawable_AnimatedImageDrawable(JNIEnv* env) {
+    int robolectricApiLevel = GetRobolectricApiLevel(env);
+    if (robolectricApiLevel < 28) {
+        // Skip registration for SDK < 28 as AnimatedImageDrawable does not
+        // exist.
+        return JNI_OK;
+    }
+
     jclass animatedImageDrawable_class = FindClassOrDie(env, "android/graphics/drawable/AnimatedImageDrawable");
     gAnimatedImageDrawable_onAnimationEndMethodID = GetMethodIDOrDie(env, animatedImageDrawable_class, "onAnimationEnd", "()V");
 
