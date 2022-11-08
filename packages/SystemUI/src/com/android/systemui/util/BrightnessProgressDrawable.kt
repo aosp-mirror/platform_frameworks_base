@@ -24,7 +24,7 @@ import android.graphics.drawable.DrawableWrapper
 import android.graphics.drawable.InsetDrawable
 
 /**
- * [DrawableWrapper] to use in the progress of a slider.
+ * [DrawableWrapper] to use in the progress of brightness slider.
  *
  * This drawable is used to change the bounds of the enclosed drawable depending on the level to
  * simulate a sliding progress, instead of using clipping or scaling. That way, the shape of the
@@ -33,10 +33,13 @@ import android.graphics.drawable.InsetDrawable
  * Meant to be used with a rounded ends background, it will also prevent deformation when the slider
  * is meant to be smaller than the rounded corner. The background should have rounded corners that
  * are half of the height.
+ *
+ * This class also assumes that a "thumb" icon exists within the end's edge of the progress
+ * drawable, and the slider's width, when interacted on, if offset by half the size of the thumb
+ * icon which puts the icon directly underneath the user's finger.
  */
-class RoundedCornerProgressDrawable @JvmOverloads constructor(
-    drawable: Drawable? = null
-) : InsetDrawable(drawable, 0) {
+class BrightnessProgressDrawable @JvmOverloads constructor(drawable: Drawable? = null) :
+    InsetDrawable(drawable, 0) {
 
     companion object {
         private const val MAX_LEVEL = 10000 // Taken from Drawable
@@ -54,9 +57,18 @@ class RoundedCornerProgressDrawable @JvmOverloads constructor(
 
     override fun onLevelChange(level: Int): Boolean {
         val db = drawable?.bounds!!
+
+        // The thumb offset shifts the sun icon directly under the user's thumb
+        val thumbOffset = bounds.height() / 2
+        val width = bounds.width() * level / MAX_LEVEL + thumbOffset
+
         // On 0, the width is bounds.height (a circle), and on MAX_LEVEL, the width is bounds.width
-        val width = bounds.height() + (bounds.width() - bounds.height()) * level / MAX_LEVEL
-        drawable?.setBounds(bounds.left, db.top, bounds.left + width, db.bottom)
+        drawable?.setBounds(
+            bounds.left,
+            db.top,
+            width.coerceAtMost(bounds.width()).coerceAtLeast(bounds.height()),
+            db.bottom
+        )
         return super.onLevelChange(level)
     }
 
@@ -80,7 +92,7 @@ class RoundedCornerProgressDrawable @JvmOverloads constructor(
 
         override fun newDrawable(res: Resources?, theme: Resources.Theme?): Drawable {
             val wrapper = wrappedState.newDrawable(res, theme) as DrawableWrapper
-            return RoundedCornerProgressDrawable(wrapper.drawable)
+            return BrightnessProgressDrawable(wrapper.drawable)
         }
 
         override fun getChangingConfigurations(): Int {
