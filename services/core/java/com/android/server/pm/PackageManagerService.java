@@ -937,6 +937,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     final @Nullable String mOverlayConfigSignaturePackage;
     final @Nullable String mRecentsPackage;
     final @Nullable String mAmbientContextDetectionPackage;
+    final @Nullable String mWearableSensingPackage;
     private final @NonNull String mRequiredSdkSandboxPackage;
 
     @GuardedBy("mLock")
@@ -1682,6 +1683,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mRetailDemoPackage = testParams.retailDemoPackage;
         mRecentsPackage = testParams.recentsPackage;
         mAmbientContextDetectionPackage = testParams.ambientContextDetectionPackage;
+        mWearableSensingPackage = testParams.wearableSensingPackage;
         mConfiguratorPackage = testParams.configuratorPackage;
         mAppPredictionServicePackage = testParams.appPredictionServicePackage;
         mIncidentReportApproverPackage = testParams.incidentReportApproverPackage;
@@ -2039,6 +2041,9 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             mAmbientContextDetectionPackage = ensureSystemPackageName(computer,
                     getPackageFromComponentString(
                             R.string.config_defaultAmbientContextDetectionService));
+            mWearableSensingPackage = ensureSystemPackageName(computer,
+                    getPackageFromComponentString(
+                            R.string.config_defaultWearableSensingService));
 
             // Now that we know all of the shared libraries, update all clients to have
             // the correct library paths.
@@ -6031,6 +6036,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     mConfiguratorPackage,
                     mIncidentReportApproverPackage,
                     mAmbientContextDetectionPackage,
+                    mWearableSensingPackage,
                     mAppPredictionServicePackage,
                     COMPANION_PACKAGE_NAME,
                     mRetailDemoPackage,
@@ -7064,6 +7070,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 mConfiguratorPackage,
                 mIncidentReportApproverPackage,
                 mAmbientContextDetectionPackage,
+                mWearableSensingPackage,
                 mAppPredictionServicePackage,
                 COMPANION_PACKAGE_NAME,
                 mRetailDemoPackage,

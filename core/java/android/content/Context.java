@@ -6074,6 +6074,17 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.app.wearable.WearableSensingManager}.
+     *
+     * @see #getSystemService(String)
+     * @see WearableSensingManager
+     * @hide
+     */
+    @SystemApi
+    public static final String WEARABLE_SENSING_SERVICE = "wearable_sensing";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.healthconnect.HealthConnectManager}.
      *
      * @see #getSystemService(String)
