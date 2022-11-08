@@ -47,9 +47,11 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PermissionName;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.database.ContentObserver;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.location.ILocationManager;
@@ -3313,7 +3315,7 @@ public final class Settings {
         public ArrayMap<String, String> getStringsForPrefix(ContentResolver cr, String prefix,
                 List<String> names) {
             String namespace = prefix.substring(0, prefix.length() - 1);
-            DeviceConfig.enforceReadPermission(ActivityThread.currentApplication(), namespace);
+            DeviceConfig.enforceReadPermission(namespace);
             ArrayMap<String, String> keyValues = new ArrayMap<>();
             int currentGeneration = -1;
 
@@ -17971,15 +17973,31 @@ public final class Settings {
 
         /**
          * Look up a name in the database.
-         * @param resolver to access the database with
          * @param name to look up in the table
          * @return the corresponding value, or null if not present
          *
          * @hide
          */
         @RequiresPermission(Manifest.permission.READ_DEVICE_CONFIG)
-        static String getString(ContentResolver resolver, String name) {
+        static String getString(String name) {
+            ContentResolver resolver = getContentResolver();
             return sNameValueCache.getStringForUser(resolver, name, resolver.getUserId());
+        }
+
+        /**
+         * Look up a list of names in the database, within the specified namespace.
+         *
+         * @param namespace to which the names belong
+         * @param names to look up in the table
+         * @return a non null, but possibly empty, map from name to value for any of the names that
+         *         were found during lookup.
+         *
+         * @hide
+         */
+        @RequiresPermission(Manifest.permission.READ_DEVICE_CONFIG)
+        public static Map<String, String> getStrings(@NonNull String namespace,
+                @NonNull List<String> names) {
+            return getStrings(getContentResolver(), namespace, names);
         }
 
         /**
@@ -18022,7 +18040,6 @@ public final class Settings {
          * <strong>not</strong> be set as the default.
          * </p>
          *
-         * @param resolver to access the database with.
          * @param namespace to store the name/value pair in.
          * @param name to store.
          * @param value to associate with the name.
@@ -18034,11 +18051,29 @@ public final class Settings {
          * @hide
          */
         @RequiresPermission(Manifest.permission.WRITE_DEVICE_CONFIG)
-        static boolean putString(@NonNull ContentResolver resolver, @NonNull String namespace,
+        public static boolean putString(@NonNull String namespace,
                 @NonNull String name, @Nullable String value, boolean makeDefault) {
+            ContentResolver resolver = getContentResolver();
             return sNameValueCache.putStringForUser(resolver, createCompositeName(namespace, name),
                     value, null, makeDefault, resolver.getUserId(),
                     DEFAULT_OVERRIDEABLE_BY_RESTORE);
+        }
+
+        /**
+         * Clear all name/value pairs for the provided namespace and save new name/value pairs in
+         * their place.
+         *
+         * @param namespace to which the names should be set.
+         * @param keyValues map of key names (without the prefix) to values.
+         * @return true if the name/value pairs were set, false if setting was blocked
+         *
+         * @hide
+         */
+        @RequiresPermission(Manifest.permission.WRITE_DEVICE_CONFIG)
+        public static boolean setStrings(@NonNull String namespace,
+                @NonNull Map<String, String> keyValues)
+                throws DeviceConfig.BadConfigException {
+            return setStrings(getContentResolver(), namespace, keyValues);
         }
 
         /**
@@ -18075,7 +18110,6 @@ public final class Settings {
         /**
          * Delete a name/value pair from the database for the specified namespace.
          *
-         * @param resolver to access the database with.
          * @param namespace to delete the name/value pair from.
          * @param name to delete.
          * @return true if the value was deleted, false on database errors. If the name/value pair
@@ -18086,8 +18120,9 @@ public final class Settings {
          * @hide
          */
         @RequiresPermission(Manifest.permission.WRITE_DEVICE_CONFIG)
-        static boolean deleteString(@NonNull ContentResolver resolver, @NonNull String namespace,
+        static boolean deleteString(@NonNull String namespace,
                 @NonNull String name) {
+            ContentResolver resolver = getContentResolver();
             return sNameValueCache.deleteStringForUser(resolver,
                     createCompositeName(namespace, name), resolver.getUserId());
         }
@@ -18098,7 +18133,6 @@ public final class Settings {
          * The method accepts an optional prefix parameter. If provided, only pairs with a name that
          * starts with the exact prefix will be reset. Otherwise all will be reset.
          *
-         * @param resolver Handle to the content resolver.
          * @param resetMode The reset mode to use.
          * @param namespace Optionally, to limit which which namespace is reset.
          *
@@ -18107,9 +18141,10 @@ public final class Settings {
          * @hide
          */
         @RequiresPermission(Manifest.permission.WRITE_DEVICE_CONFIG)
-        static void resetToDefaults(@NonNull ContentResolver resolver, @ResetMode int resetMode,
+        static void resetToDefaults(@ResetMode int resetMode,
                 @Nullable String namespace) {
             try {
+                ContentResolver resolver = getContentResolver();
                 Bundle arg = new Bundle();
                 arg.putInt(CALL_METHOD_USER_KEY, resolver.getUserId());
                 arg.putInt(CALL_METHOD_RESET_MODE_KEY, resetMode);
@@ -18132,9 +18167,9 @@ public final class Settings {
          */
         @SuppressLint("AndroidFrameworkRequiresPermission")
         @RequiresPermission(Manifest.permission.WRITE_DEVICE_CONFIG)
-        static void setSyncDisabledMode(
-                @NonNull ContentResolver resolver, @SyncDisabledMode int disableSyncMode) {
+        static void setSyncDisabledMode(@SyncDisabledMode int disableSyncMode) {
             try {
+                ContentResolver resolver = getContentResolver();
                 Bundle args = new Bundle();
                 args.putInt(CALL_METHOD_SYNC_DISABLED_MODE_KEY, disableSyncMode);
                 IContentProvider cp = sProviderHolder.getProvider(resolver);
@@ -18153,8 +18188,9 @@ public final class Settings {
          */
         @SuppressLint("AndroidFrameworkRequiresPermission")
         @RequiresPermission(Manifest.permission.WRITE_DEVICE_CONFIG)
-        static int getSyncDisabledMode(@NonNull ContentResolver resolver) {
+        static int getSyncDisabledMode() {
             try {
+                ContentResolver resolver = getContentResolver();
                 Bundle args = Bundle.EMPTY;
                 IContentProvider cp = sProviderHolder.getProvider(resolver);
                 Bundle bundle = cp.call(resolver.getAttributionSource(),
@@ -18171,7 +18207,6 @@ public final class Settings {
         /**
          * Register callback for monitoring Config table.
          *
-         * @param resolver Handle to the content resolver.
          * @param callback callback to register
          *
          * @hide
@@ -18180,6 +18215,50 @@ public final class Settings {
         public static void registerMonitorCallback(@NonNull ContentResolver resolver,
                 @NonNull RemoteCallback callback) {
             registerMonitorCallbackAsUser(resolver, resolver.getUserId(), callback);
+        }
+
+
+        /**
+         * Register a content observer
+         *
+         * @hide
+         */
+        public static void registerContentObserver(@NonNull Uri uri, boolean notifyForDescendants,
+                @NonNull ContentObserver observer) {
+            ActivityThread.currentApplication().getContentResolver()
+               .registerContentObserver(uri, notifyForDescendants, observer);
+        }
+
+        /**
+         * Unregister a content observer
+         *
+         * @hide
+         */
+        public static void unregisterContentObserver(@NonNull ContentObserver observer) {
+            ActivityThread.currentApplication().getContentResolver()
+              .unregisterContentObserver(observer);
+        }
+
+        /**
+         * Determine whether the calling process of an IPC <em>or you</em> have been
+         * granted a particular permission.  This is the same as
+         * {@link #checkCallingPermission}, except it grants your own permissions
+         * if you are not currently processing an IPC.  Use with care!
+         *
+         * @param permission The name of the permission being checked.
+         *
+         * @return {@link PackageManager#PERMISSION_GRANTED} if the calling
+         * pid/uid is allowed that permission, or
+         * {@link PackageManager#PERMISSION_DENIED} if it is not.
+         *
+         * @see PackageManager#checkPermission(String, String)
+         * @see #checkPermission
+         * @see #checkCallingPermission
+         * @hide
+         */
+        public static int checkCallingOrSelfPermission(@NonNull @PermissionName String permission) {
+            return ActivityThread.currentApplication()
+               .getApplicationContext().checkCallingOrSelfPermission(permission);
         }
 
         private static void registerMonitorCallbackAsUser(
@@ -18213,6 +18292,10 @@ public final class Settings {
         private static String createPrefix(@NonNull String namespace) {
             Preconditions.checkNotNull(namespace);
             return namespace + "/";
+        }
+
+        private static ContentResolver getContentResolver() {
+            return ActivityThread.currentApplication().getContentResolver();
         }
     }
 
