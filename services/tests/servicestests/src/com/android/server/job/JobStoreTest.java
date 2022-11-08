@@ -155,7 +155,18 @@ public class JobStoreTest {
     }
 
     @Test
-    public void testWritingTwoFilesToDisk() throws Exception {
+    public void testWritingTwoJobsToDisk_singleFile() throws Exception {
+        mTaskStoreUnderTest.setUseSplitFiles(false);
+        runWritingTwoJobsToDisk();
+    }
+
+    @Test
+    public void testWritingTwoJobsToDisk_splitFiles() throws Exception {
+        mTaskStoreUnderTest.setUseSplitFiles(true);
+        runWritingTwoJobsToDisk();
+    }
+
+    private void runWritingTwoJobsToDisk() throws Exception {
         final JobInfo task1 = new Builder(8, mComponent)
                 .setRequiresDeviceIdle(true)
                 .setPeriodic(10000L)
@@ -169,8 +180,10 @@ public class JobStoreTest {
                 .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED)
                 .setPersisted(true)
                 .build();
-        final JobStatus taskStatus1 = JobStatus.createFromJobInfo(task1, SOME_UID, null, -1, null);
-        final JobStatus taskStatus2 = JobStatus.createFromJobInfo(task2, SOME_UID, null, -1, null);
+        final int uid1 = SOME_UID;
+        final int uid2 = uid1 + 1;
+        final JobStatus taskStatus1 = JobStatus.createFromJobInfo(task1, uid1, null, -1, null);
+        final JobStatus taskStatus2 = JobStatus.createFromJobInfo(task2, uid2, null, -1, null);
         mTaskStoreUnderTest.add(taskStatus1);
         mTaskStoreUnderTest.add(taskStatus2);
         waitForPendingIo();
