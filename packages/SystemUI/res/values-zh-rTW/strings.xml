@@ -168,6 +168,8 @@
     <skip />
     <string name="keyguard_face_failed" msgid="9044619102286917151">"無法辨識臉孔"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"請改用指紋"</string>
+    <!-- no translation found for keyguard_face_unlock_unavailable (8145547300240405980) -->
+    <skip />
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"藍牙連線已建立。"</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"電池電量不明。"</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"已連線至<xliff:g id="BLUETOOTH">%s</xliff:g>。"</string>
@@ -248,8 +250,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"亮度"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"色彩反轉"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"色彩校正"</string>
-    <!-- no translation found for quick_settings_more_user_settings (7634653308485206306) -->
-    <skip />
+    <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"管理使用者"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"完成"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"關閉"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"已連線"</string>
@@ -374,6 +375,16 @@
     <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"進行分享、錄製或投放應用程式時，<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> 可以存取在該應用程式中顯示或播放的所有內容。因此請謹慎處理密碼、付款資料、訊息或其他機密資訊。"</string>
     <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"繼續"</string>
     <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"分享或錄製應用程式"</string>
+    <!-- no translation found for media_projection_permission_dialog_system_service_title (6827129613741303726) -->
+    <skip />
+    <!-- no translation found for media_projection_permission_dialog_system_service_warning_entire_screen (8801616203805837575) -->
+    <skip />
+    <!-- no translation found for media_projection_permission_dialog_system_service_warning_single_app (543310680568419338) -->
+    <skip />
+    <!-- no translation found for screen_capturing_disabled_by_policy_dialog_title (2113331792064527203) -->
+    <skip />
+    <!-- no translation found for screen_capturing_disabled_by_policy_dialog_description (6015975736747696431) -->
+    <skip />
     <string name="clear_all_notifications_text" msgid="348312370303046130">"全部清除"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"管理"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"記錄"</string>

@@ -168,6 +168,8 @@
     <skip />
     <string name="keyguard_face_failed" msgid="9044619102286917151">"Nie można rozpoznać twarzy"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"Użyj odcisku palca"</string>
+    <!-- no translation found for keyguard_face_unlock_unavailable (8145547300240405980) -->
+    <skip />
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth połączony."</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Poziom naładowania baterii jest nieznany."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Połączono z <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
@@ -248,8 +250,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Jasność"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Odwrócenie kolorów"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Korekcja kolorów"</string>
-    <!-- no translation found for quick_settings_more_user_settings (7634653308485206306) -->
-    <skip />
+    <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Zarządzaj użytkownikami"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Gotowe"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Zamknij"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Połączono"</string>
@@ -374,6 +375,16 @@
     <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"Podczas udostępniania, nagrywania lub przesyłania treści aplikacja <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ma dostęp do wszystkiego, co jest w niej wyświetlane lub odtwarzane. Zachowaj ostrożność w przypadku haseł, danych do płatności, wiadomości i innych informacji poufnych."</string>
     <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"Dalej"</string>
     <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"Udostępnianie i nagrywanie za pomocą aplikacji"</string>
+    <!-- no translation found for media_projection_permission_dialog_system_service_title (6827129613741303726) -->
+    <skip />
+    <!-- no translation found for media_projection_permission_dialog_system_service_warning_entire_screen (8801616203805837575) -->
+    <skip />
+    <!-- no translation found for media_projection_permission_dialog_system_service_warning_single_app (543310680568419338) -->
+    <skip />
+    <!-- no translation found for screen_capturing_disabled_by_policy_dialog_title (2113331792064527203) -->
+    <skip />
+    <!-- no translation found for screen_capturing_disabled_by_policy_dialog_description (6015975736747696431) -->
+    <skip />
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Usuń wszystkie"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Zarządzaj"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Historia"</string>
