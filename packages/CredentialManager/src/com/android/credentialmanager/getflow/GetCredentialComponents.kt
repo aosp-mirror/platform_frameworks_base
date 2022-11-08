@@ -16,22 +16,29 @@
 
 package com.android.credentialmanager.getflow
 
+import android.text.TextUtils
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
@@ -45,7 +52,9 @@ import com.android.credentialmanager.R
 import com.android.credentialmanager.common.material.ModalBottomSheetLayout
 import com.android.credentialmanager.common.material.ModalBottomSheetValue
 import com.android.credentialmanager.common.material.rememberModalBottomSheetState
-import com.android.credentialmanager.createflow.CancelButton
+import com.android.credentialmanager.common.ui.CancelButton
+import com.android.credentialmanager.jetpack.developer.PublicKeyCredential
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -61,13 +70,17 @@ fun GetCredentialScreen(
     sheetContent = {
       val uiState = viewModel.uiState
       when (uiState.currentScreenState) {
-        GetScreenState.CREDENTIAL_SELECTION -> CredentialSelectionCard(
+        GetScreenState.PRIMARY_SELECTION -> PrimarySelectionCard(
           requestDisplayInfo = uiState.requestDisplayInfo,
-          providerInfo = uiState.selectedProvider!!,
+          sortedUserNameToCredentialEntryList = uiState.sortedUserNameToCredentialEntryList,
+          onEntrySelected = viewModel::onEntrySelected,
           onCancel = viewModel::onCancel,
-          onOptionSelected = viewModel::onCredentailSelected,
-          multiProvider = uiState.providers.size > 1,
           onMoreOptionSelected = viewModel::onMoreOptionSelected,
+        )
+        GetScreenState.ALL_SIGN_IN_OPTIONS -> AllSignInOptionCard(
+          sortedUserNameToCredentialEntryList = uiState.sortedUserNameToCredentialEntryList,
+          onEntrySelected = viewModel::onEntrySelected,
+          onBackButtonClicked = viewModel::onBackToPrimarySelectionScreen,
         )
       }
     },
@@ -81,42 +94,35 @@ fun GetCredentialScreen(
   }
 }
 
+/** Draws the primary credential selection page. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CredentialSelectionCard(
+fun PrimarySelectionCard(
   requestDisplayInfo: RequestDisplayInfo,
-  providerInfo: ProviderInfo,
-  onOptionSelected: (String, String) -> Unit,
+  sortedUserNameToCredentialEntryList: List<PerUserNameCredentialEntryList>,
+  onEntrySelected: (EntryInfo) -> Unit,
   onCancel: () -> Unit,
-  multiProvider: Boolean,
   onMoreOptionSelected: () -> Unit,
 ) {
   Card() {
     Column() {
-      Icon(
-        bitmap = providerInfo.credentialTypeIcon.toBitmap().asImageBitmap(),
-        contentDescription = null,
-        tint = Color.Unspecified,
-        modifier = Modifier.align(alignment = Alignment.CenterHorizontally).padding(top = 24.dp)
-      )
       Text(
-        text = stringResource(R.string.choose_sign_in_title),
+        text = stringResource(
+          if (sortedUserNameToCredentialEntryList.size == 1) {
+            if (sortedUserNameToCredentialEntryList.first().sortedCredentialEntryList
+                .first().credentialType == PublicKeyCredential.TYPE_PUBLIC_KEY_CREDENTIAL
+            )
+              R.string.get_dialog_title_use_passkey_for
+            else R.string.get_dialog_title_use_sign_in_for
+          } else R.string.get_dialog_title_choose_sign_in_for,
+          requestDisplayInfo.appDomainName
+        ),
         style = MaterialTheme.typography.titleMedium,
-        modifier = Modifier
-          .padding(all = 24.dp)
-          .align(alignment = Alignment.CenterHorizontally)
+        modifier = Modifier.padding(all = 24.dp).align(alignment = Alignment.CenterHorizontally)
       )
-      Text(
-        text = requestDisplayInfo.appDomainName,
-        style = MaterialTheme.typography.bodyMedium,
-        modifier = Modifier.padding(horizontal = 28.dp)
-      )
-      Divider(
-        thickness = 24.dp,
-        color = Color.Transparent
-      )
+
       Card(
-        shape = MaterialTheme.shapes.medium,
+        shape = MaterialTheme.shapes.large,
         modifier = Modifier
           .padding(horizontal = 24.dp)
           .align(alignment = Alignment.CenterHorizontally)
@@ -124,15 +130,14 @@ fun CredentialSelectionCard(
         LazyColumn(
           verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
-          providerInfo.credentialOptions.forEach {
-            item {
-              CredentialOptionRow(credentialOptionInfo = it, onOptionSelected = onOptionSelected)
-            }
+          items(sortedUserNameToCredentialEntryList) {
+            CredentialEntryRow(
+              credentialEntryInfo = it.sortedCredentialEntryList.first(),
+              onEntrySelected = onEntrySelected
+            )
           }
-          if (multiProvider) {
-            item {
-              MoreOptionRow(onSelect = onMoreOptionSelected)
-            }
+          item {
+            SignInAnotherWayRow(onSelect = onMoreOptionSelected)
           }
         }
       }
@@ -155,32 +160,106 @@ fun CredentialSelectionCard(
   }
 }
 
+/** Draws the secondary credential selection page, where all sign-in options are listed. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CredentialOptionRow(
-    credentialOptionInfo: CredentialOptionInfo,
-    onOptionSelected: (String, String) -> Unit,
+fun AllSignInOptionCard(
+  sortedUserNameToCredentialEntryList: List<PerUserNameCredentialEntryList>,
+  onEntrySelected: (EntryInfo) -> Unit,
+  onBackButtonClicked: () -> Unit,
+) {
+  Card() {
+    Column() {
+      TopAppBar(
+        colors = TopAppBarDefaults.smallTopAppBarColors(
+          containerColor = Color.Transparent,
+        ),
+        title = {
+          Text(
+            text = stringResource(R.string.get_dialog_title_sign_in_options),
+            style = MaterialTheme.typography.titleMedium
+          )
+        },
+        navigationIcon = {
+          IconButton(onClick = onBackButtonClicked) {
+            Icon(
+              Icons.Filled.ArrowBack,
+              contentDescription = stringResource(R.string.accessibility_back_arrow_button))
+          }
+        },
+        modifier = Modifier.padding(top = 12.dp)
+      )
+
+      Card(
+        shape = MaterialTheme.shapes.large,
+        modifier = Modifier
+          .padding(start = 24.dp, end = 24.dp, bottom = 24.dp)
+          .align(alignment = Alignment.CenterHorizontally)
+      ) {
+        LazyColumn(
+          verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+          items(sortedUserNameToCredentialEntryList) { item ->
+            PerUserNameCredentials(
+              perUserNameCredentialEntryList = item,
+              onEntrySelected = onEntrySelected
+            )
+          }
+        }
+      }
+    }
+  }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PerUserNameCredentials(
+  perUserNameCredentialEntryList: PerUserNameCredentialEntryList,
+  onEntrySelected: (EntryInfo) -> Unit,
+) {
+  Text(
+    text = stringResource(
+      R.string.get_dialog_heading_for_username, perUserNameCredentialEntryList.userName),
+    style = MaterialTheme.typography.labelLarge,
+    modifier = Modifier.padding(vertical = 8.dp)
+  )
+  perUserNameCredentialEntryList.sortedCredentialEntryList.forEach {
+    CredentialEntryRow(it, onEntrySelected)
+  }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CredentialEntryRow(
+  credentialEntryInfo: CredentialEntryInfo,
+  onEntrySelected: (EntryInfo) -> Unit,
 ) {
   SuggestionChip(
     modifier = Modifier.fillMaxWidth(),
-    onClick = {onOptionSelected(credentialOptionInfo.entryKey, credentialOptionInfo.entrySubkey)},
+    onClick = {onEntrySelected(credentialEntryInfo)},
     icon = {
       Image(modifier = Modifier.size(24.dp, 24.dp).padding(start = 10.dp),
-            bitmap = credentialOptionInfo.icon.toBitmap().asImageBitmap(),
+        bitmap = credentialEntryInfo.icon.toBitmap().asImageBitmap(),
         // TODO: add description.
-            contentDescription = "")
+        contentDescription = "")
     },
     shape = MaterialTheme.shapes.large,
     label = {
       Column() {
         // TODO: fix the text values.
         Text(
-          text = credentialOptionInfo.entryKey,
+          text = credentialEntryInfo.userName,
           style = MaterialTheme.typography.titleLarge,
           modifier = Modifier.padding(top = 16.dp)
         )
         Text(
-          text = credentialOptionInfo.entrySubkey,
+          text =
+          if (TextUtils.isEmpty(credentialEntryInfo.displayName))
+            credentialEntryInfo.credentialTypeDisplayName
+          else
+            credentialEntryInfo.credentialTypeDisplayName +
+                    stringResource(R.string.get_dialog_sign_in_type_username_separator) +
+                    credentialEntryInfo.displayName,
           style = MaterialTheme.typography.bodyMedium,
           modifier = Modifier.padding(bottom = 16.dp)
         )
@@ -191,15 +270,16 @@ fun CredentialOptionRow(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MoreOptionRow(onSelect: () -> Unit) {
+fun SignInAnotherWayRow(onSelect: () -> Unit) {
   SuggestionChip(
-    modifier = Modifier.fillMaxWidth().height(52.dp),
+    modifier = Modifier.fillMaxWidth(),
     onClick = onSelect,
     shape = MaterialTheme.shapes.large,
     label = {
       Text(
-        text = stringResource(R.string.string_more_options),
+        text = stringResource(R.string.get_dialog_use_saved_passkey_for),
         style = MaterialTheme.typography.titleLarge,
+        modifier = Modifier.padding(vertical = 16.dp)
       )
     }
   )

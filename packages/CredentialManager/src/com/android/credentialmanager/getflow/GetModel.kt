@@ -19,34 +19,74 @@ package com.android.credentialmanager.getflow
 import android.graphics.drawable.Drawable
 
 data class ProviderInfo(
+  /**
+   * Unique id (component name) of this provider.
+   * Not for display purpose - [displayName] should be used for ui rendering.
+   */
+  val id: String,
   val icon: Drawable,
-  val name: String,
   val displayName: String,
-  val credentialTypeIcon: Drawable,
-  val credentialOptions: List<CredentialOptionInfo>,
-  // TODO: Add the authenticationOption
+  val credentialEntryList: List<CredentialEntryInfo>,
+  val authenticationEntry: AuthenticationEntryInfo?,
+  val actionEntryList: List<ActionEntryInfo>,
+  // TODO: add remote entry
 )
 
-open class EntryInfo (
+abstract class EntryInfo (
+  /** Unique id combination of this entry. Not for display purpose. */
+  val providerId: String,
   val entryKey: String,
   val entrySubkey: String,
 )
 
-class CredentialOptionInfo(
+class CredentialEntryInfo(
+  providerId: String,
   entryKey: String,
   entrySubkey: String,
+  /** Type of this credential used for sorting. Not localized so must not be directly displayed. */
+  val credentialType: String,
+  /** Localized type value of this credential used for display purpose. */
+  val credentialTypeDisplayName: String,
+  val userName: String,
+  val displayName: String?,
   val icon: Drawable,
-  val usageData: String,
-) : EntryInfo(entryKey, entrySubkey)
+  val lastUsedTimeMillis: Long?,
+) : EntryInfo(providerId, entryKey, entrySubkey)
+
+// TODO: handle sub credential type values like password obfuscation.
+
+class AuthenticationEntryInfo(
+  providerId: String,
+  entryKey: String,
+  entrySubkey: String,
+) : EntryInfo(providerId, entryKey, entrySubkey)
+
+class ActionEntryInfo(
+  providerId: String,
+  entryKey: String,
+  entrySubkey: String,
+  val title: String,
+  val subTitle: String?,
+) : EntryInfo(providerId, entryKey, entrySubkey)
 
 data class RequestDisplayInfo(
-  val userName: String,
-  val displayName: String,
-  val type: String,
   val appDomainName: String,
+)
+
+/**
+ * @property userName the userName that groups all the entries in this list
+ * @property sortedCredentialEntryList the credential entries associated with the [userName] sorted
+ *                                     by last used timestamps and then by credential types
+ */
+data class PerUserNameCredentialEntryList(
+  val userName: String,
+  val sortedCredentialEntryList: List<CredentialEntryInfo>,
 )
 
 /** The name of the current screen. */
 enum class GetScreenState {
-  CREDENTIAL_SELECTION,
+  /** The primary credential selection page. */
+  PRIMARY_SELECTION,
+  /** The secondary credential selection page, where all sign-in options are listed. */
+  ALL_SIGN_IN_OPTIONS,
 }

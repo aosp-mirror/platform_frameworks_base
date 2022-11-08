@@ -17,6 +17,7 @@
 package com.android.credentialmanager.jetpack.provider
 
 import android.app.slice.Slice
+import android.credentials.ui.Entry
 import android.graphics.drawable.Icon
 
 /**
@@ -24,23 +25,46 @@ import android.graphics.drawable.Icon
  *
  * TODO: move to jetpack.
  */
-abstract class CredentialEntryUi(
-  val credentialTypeIcon: Icon,
-  val profileIcon: Icon?,
+class CredentialEntryUi(
+  val credentialType: CharSequence,
+  val credentialTypeDisplayName: CharSequence,
+  val userName: CharSequence,
+  val userDisplayName: CharSequence?,
+  val entryIcon: Icon,
   val lastUsedTimeMillis: Long?,
   val note: CharSequence?,
 ) {
   companion object {
     fun fromSlice(slice: Slice): CredentialEntryUi {
-      return when (slice.spec?.type) {
-        TYPE_PUBLIC_KEY_CREDENTIAL -> PasskeyCredentialEntryUi.fromSlice(slice)
-        TYPE_PASSWORD_CREDENTIAL -> PasswordCredentialEntryUi.fromSlice(slice)
-        else -> throw IllegalArgumentException("Unexpected type: ${slice.spec?.type}")
-      }
-    }
+      var credentialType = slice.spec!!.type
+      var credentialTypeDisplayName: CharSequence? = null
+      var userName: CharSequence? = null
+      var userDisplayName: CharSequence? = null
+      var entryIcon: Icon? = null
+      var lastUsedTimeMillis: Long? = null
+      var note: CharSequence? = null
 
-    const val TYPE_PUBLIC_KEY_CREDENTIAL: String =
-      "androidx.credentials.TYPE_PUBLIC_KEY_CREDENTIAL"
-    const val TYPE_PASSWORD_CREDENTIAL: String = "androidx.credentials.TYPE_PASSWORD"
+      val items = slice.items
+      items.forEach {
+        if (it.hasHint(Entry.HINT_CREDENTIAL_TYPE_DISPLAY_NAME)) {
+          credentialTypeDisplayName = it.text
+        } else if (it.hasHint(Entry.HINT_USER_NAME)) {
+          userName = it.text
+        } else if (it.hasHint(Entry.HINT_PASSKEY_USER_DISPLAY_NAME)) {
+          userDisplayName = it.text
+        } else if (it.hasHint(Entry.HINT_PROFILE_ICON)) {
+          entryIcon = it.icon
+        } else if (it.hasHint(Entry.HINT_LAST_USED_TIME_MILLIS)) {
+          lastUsedTimeMillis = it.long
+        } else if (it.hasHint(Entry.HINT_NOTE)) {
+          note = it.text
+        }
+      }
+
+      return CredentialEntryUi(
+        credentialType, credentialTypeDisplayName!!, userName!!, userDisplayName, entryIcon!!,
+        lastUsedTimeMillis, note,
+      )
+    }
   }
 }
