@@ -44,24 +44,27 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 
-/** Encapsulates business logic for interacting with the lock-screen bouncer. */
+/**
+ * Encapsulates business logic for interacting with the lock-screen primary (pin/pattern/password)
+ * bouncer.
+ */
 @SysUISingleton
-class BouncerInteractor
+class PrimaryBouncerInteractor
 @Inject
 constructor(
     private val repository: KeyguardBouncerRepository,
-    private val bouncerView: BouncerView,
+    private val primaryBouncerView: BouncerView,
     @Main private val mainHandler: Handler,
     private val keyguardStateController: KeyguardStateController,
     private val keyguardSecurityModel: KeyguardSecurityModel,
-    private val callbackInteractor: BouncerCallbackInteractor,
+    private val primaryBouncerCallbackInteractor: PrimaryBouncerCallbackInteractor,
     private val falsingCollector: FalsingCollector,
     private val dismissCallbackRegistry: DismissCallbackRegistry,
     keyguardBypassController: KeyguardBypassController,
     keyguardUpdateMonitor: KeyguardUpdateMonitor,
 ) {
     /** Whether we want to wait for face auth. */
-    private val bouncerFaceDelay =
+    private val primaryBouncerFaceDelay =
         keyguardStateController.isFaceAuthEnabled &&
             !keyguardUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(
                 KeyguardUpdateMonitor.getCurrentUser()
@@ -70,38 +73,39 @@ constructor(
             !keyguardUpdateMonitor.userNeedsStrongAuth() &&
             !keyguardBypassController.bypassEnabled
 
-    /** Runnable to show the bouncer. */
+    /** Runnable to show the primary bouncer. */
     val showRunnable = Runnable {
-        repository.setVisible(true)
-        repository.setShow(
+        repository.setPrimaryVisible(true)
+        repository.setPrimaryShow(
             KeyguardBouncerModel(
                 promptReason = repository.bouncerPromptReason ?: 0,
                 errorMessage = repository.bouncerErrorMessage,
                 expansionAmount = repository.panelExpansionAmount.value
             )
         )
-        repository.setShowingSoon(false)
+        repository.setPrimaryShowingSoon(false)
     }
 
     val keyguardAuthenticated: Flow<Boolean> = repository.keyguardAuthenticated.filterNotNull()
     val screenTurnedOff: Flow<Unit> = repository.onScreenTurnedOff.filter { it }.map {}
-    val show: Flow<KeyguardBouncerModel> = repository.show.filterNotNull()
-    val hide: Flow<Unit> = repository.hide.filter { it }.map {}
-    val startingToHide: Flow<Unit> = repository.startingToHide.filter { it }.map {}
-    val isVisible: Flow<Boolean> = repository.isVisible
+    val show: Flow<KeyguardBouncerModel> = repository.primaryBouncerShow.filterNotNull()
+    val hide: Flow<Unit> = repository.primaryBouncerHide.filter { it }.map {}
+    val startingToHide: Flow<Unit> = repository.primaryBouncerStartingToHide.filter { it }.map {}
+    val isVisible: Flow<Boolean> = repository.primaryBouncerVisible
     val isBackButtonEnabled: Flow<Boolean> = repository.isBackButtonEnabled.filterNotNull()
     val showMessage: Flow<BouncerShowMessageModel> = repository.showMessage.filterNotNull()
     val startingDisappearAnimation: Flow<Runnable> =
-        repository.startingDisappearAnimation.filterNotNull()
+        repository.primaryBouncerStartingDisappearAnimation.filterNotNull()
     val resourceUpdateRequests: Flow<Boolean> = repository.resourceUpdateRequests.filter { it }
     val keyguardPosition: Flow<Float> = repository.keyguardPosition
     val panelExpansionAmount: Flow<Float> = repository.panelExpansionAmount
     /** 0f = bouncer fully hidden. 1f = bouncer fully visible. */
-    val bouncerExpansion: Flow<Float> = //
-        combine(repository.panelExpansionAmount, repository.isVisible) { expansionAmount, isVisible
-            ->
-            if (isVisible) {
-                1f - expansionAmount
+    val bouncerExpansion: Flow<Float> =
+        combine(repository.panelExpansionAmount, repository.primaryBouncerVisible) {
+            panelExpansion,
+            primaryBouncerVisible ->
+            if (primaryBouncerVisible) {
+                1f - panelExpansion
             } else {
                 0f
             }
@@ -116,13 +120,14 @@ constructor(
         repository.setShowMessage(null)
         repository.setOnScreenTurnedOff(false)
         repository.setKeyguardAuthenticated(null)
-        repository.setHide(false)
-        repository.setStartingToHide(false)
+        repository.setPrimaryHide(false)
+        repository.setPrimaryStartingToHide(false)
 
         val resumeBouncer =
-            (repository.isVisible.value || repository.showingSoon.value) && needsFullscreenBouncer()
+            (repository.primaryBouncerVisible.value ||
+                repository.primaryBouncerShowingSoon.value) && needsFullscreenBouncer()
 
-        if (!resumeBouncer && repository.show.value != null) {
+        if (!resumeBouncer && repository.primaryBouncerShow.value != null) {
             // If bouncer is visible, the bouncer is already showing.
             return
         }
@@ -134,29 +139,29 @@ constructor(
         }
 
         Trace.beginSection("KeyguardBouncer#show")
-        repository.setScrimmed(isScrimmed)
+        repository.setPrimaryScrimmed(isScrimmed)
         if (isScrimmed) {
             setPanelExpansion(KeyguardBouncer.EXPANSION_VISIBLE)
         }
 
         if (resumeBouncer) {
-            bouncerView.delegate?.resume()
+            primaryBouncerView.delegate?.resume()
             // Bouncer is showing the next security screen and we just need to prompt a resume.
             return
         }
-        if (bouncerView.delegate?.showNextSecurityScreenOrFinish() == true) {
+        if (primaryBouncerView.delegate?.showNextSecurityScreenOrFinish() == true) {
             // Keyguard is done.
             return
         }
 
-        repository.setShowingSoon(true)
-        if (bouncerFaceDelay) {
+        repository.setPrimaryShowingSoon(true)
+        if (primaryBouncerFaceDelay) {
             mainHandler.postDelayed(showRunnable, 1200L)
         } else {
             DejankUtils.postAfterTraversal(showRunnable)
         }
         keyguardStateController.notifyBouncerShowing(true)
-        callbackInteractor.dispatchStartingToShow()
+        primaryBouncerCallbackInteractor.dispatchStartingToShow()
         Trace.endSection()
     }
 
@@ -174,10 +179,10 @@ constructor(
         falsingCollector.onBouncerHidden()
         keyguardStateController.notifyBouncerShowing(false /* showing */)
         cancelShowRunnable()
-        repository.setShowingSoon(false)
-        repository.setVisible(false)
-        repository.setHide(true)
-        repository.setShow(null)
+        repository.setPrimaryShowingSoon(false)
+        repository.setPrimaryVisible(false)
+        repository.setPrimaryHide(true)
+        repository.setPrimaryShow(null)
         Trace.endSection()
     }
 
@@ -191,7 +196,7 @@ constructor(
     fun setPanelExpansion(expansion: Float) {
         val oldExpansion = repository.panelExpansionAmount.value
         val expansionChanged = oldExpansion != expansion
-        if (repository.startingDisappearAnimation.value == null) {
+        if (repository.primaryBouncerStartingDisappearAnimation.value == null) {
             repository.setPanelExpansion(expansion)
         }
 
@@ -200,25 +205,25 @@ constructor(
                 oldExpansion != KeyguardBouncer.EXPANSION_VISIBLE
         ) {
             falsingCollector.onBouncerShown()
-            callbackInteractor.dispatchFullyShown()
+            primaryBouncerCallbackInteractor.dispatchFullyShown()
         } else if (
             expansion == KeyguardBouncer.EXPANSION_HIDDEN &&
                 oldExpansion != KeyguardBouncer.EXPANSION_HIDDEN
         ) {
-            repository.setVisible(false)
-            repository.setShow(null)
+            repository.setPrimaryVisible(false)
+            repository.setPrimaryShow(null)
             falsingCollector.onBouncerHidden()
-            DejankUtils.postAfterTraversal { callbackInteractor.dispatchReset() }
-            callbackInteractor.dispatchFullyHidden()
+            DejankUtils.postAfterTraversal { primaryBouncerCallbackInteractor.dispatchReset() }
+            primaryBouncerCallbackInteractor.dispatchFullyHidden()
         } else if (
             expansion != KeyguardBouncer.EXPANSION_VISIBLE &&
                 oldExpansion == KeyguardBouncer.EXPANSION_VISIBLE
         ) {
-            callbackInteractor.dispatchStartingToHide()
-            repository.setStartingToHide(true)
+            primaryBouncerCallbackInteractor.dispatchStartingToHide()
+            repository.setPrimaryStartingToHide(true)
         }
         if (expansionChanged) {
-            callbackInteractor.dispatchExpansionChanged(expansion)
+            primaryBouncerCallbackInteractor.dispatchExpansionChanged(expansion)
         }
     }
 
@@ -236,7 +241,7 @@ constructor(
         onDismissAction: ActivityStarter.OnDismissAction?,
         cancelAction: Runnable?
     ) {
-        bouncerView.delegate?.setDismissAction(onDismissAction, cancelAction)
+        primaryBouncerView.delegate?.setDismissAction(onDismissAction, cancelAction)
     }
 
     /** Update the resources of the views. */
@@ -266,7 +271,7 @@ constructor(
 
     /** Notify that view visibility has changed. */
     fun notifyBouncerVisibilityHasChanged(visibility: Int) {
-        callbackInteractor.dispatchVisibilityChanged(visibility)
+        primaryBouncerCallbackInteractor.dispatchVisibilityChanged(visibility)
     }
 
     /** Notify that the resources have been updated */
@@ -283,38 +288,39 @@ constructor(
     fun startDisappearAnimation(runnable: Runnable) {
         val finishRunnable = Runnable {
             runnable.run()
-            repository.setStartDisappearAnimation(null)
+            repository.setPrimaryStartDisappearAnimation(null)
         }
-        repository.setStartDisappearAnimation(finishRunnable)
+        repository.setPrimaryStartDisappearAnimation(finishRunnable)
     }
 
     /** Returns whether bouncer is fully showing. */
     fun isFullyShowing(): Boolean {
-        return (repository.showingSoon.value || repository.isVisible.value) &&
+        return (repository.primaryBouncerShowingSoon.value ||
+            repository.primaryBouncerVisible.value) &&
             repository.panelExpansionAmount.value == KeyguardBouncer.EXPANSION_VISIBLE &&
-            repository.startingDisappearAnimation.value == null
+            repository.primaryBouncerStartingDisappearAnimation.value == null
     }
 
     /** Returns whether bouncer is scrimmed. */
     fun isScrimmed(): Boolean {
-        return repository.isScrimmed.value
+        return repository.primaryBouncerScrimmed.value
     }
 
     /** If bouncer expansion is between 0f and 1f non-inclusive. */
     fun isInTransit(): Boolean {
-        return repository.showingSoon.value ||
+        return repository.primaryBouncerShowingSoon.value ||
             repository.panelExpansionAmount.value != KeyguardBouncer.EXPANSION_HIDDEN &&
                 repository.panelExpansionAmount.value != KeyguardBouncer.EXPANSION_VISIBLE
     }
 
     /** Return whether bouncer is animating away. */
     fun isAnimatingAway(): Boolean {
-        return repository.startingDisappearAnimation.value != null
+        return repository.primaryBouncerStartingDisappearAnimation.value != null
     }
 
     /** Return whether bouncer will dismiss with actions */
     fun willDismissWithAction(): Boolean {
-        return bouncerView.delegate?.willDismissWithActions() == true
+        return primaryBouncerView.delegate?.willDismissWithActions() == true
     }
 
     /** Returns whether the bouncer should be full screen. */

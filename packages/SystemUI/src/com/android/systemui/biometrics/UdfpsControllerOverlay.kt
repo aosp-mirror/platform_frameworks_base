@@ -49,7 +49,7 @@ import com.android.systemui.R
 import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.keyguard.domain.interactor.BouncerInteractor
+import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.shade.ShadeExpansionStateManager
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
@@ -95,7 +95,7 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
         private val onTouch: (View, MotionEvent, Boolean) -> Boolean,
         private val activityLaunchAnimator: ActivityLaunchAnimator,
         private val featureFlags: FeatureFlags,
-        private val bouncerInteractor: BouncerInteractor,
+        private val primaryBouncerInteractor: PrimaryBouncerInteractor,
         private val isDebuggable: Boolean = Build.IS_DEBUGGABLE
 ) {
     /** The view, when [isShowing], or null. */
@@ -252,7 +252,7 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
                     controller,
                     activityLaunchAnimator,
                     featureFlags,
-                    bouncerInteractor
+                    primaryBouncerInteractor
                 )
             }
             REASON_AUTH_BP -> {

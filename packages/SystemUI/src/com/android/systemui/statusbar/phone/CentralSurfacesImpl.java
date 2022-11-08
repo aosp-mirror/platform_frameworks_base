@@ -3302,9 +3302,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 // lock screen where users can use the UDFPS affordance to enter the device
                 mStatusBarKeyguardViewManager.reset(true);
             } else if (mState == StatusBarState.KEYGUARD
-                    && !mStatusBarKeyguardViewManager.bouncerIsOrWillBeShowing()
+                    && !mStatusBarKeyguardViewManager.primaryBouncerIsOrWillBeShowing()
                     && isKeyguardSecure()) {
-                mStatusBarKeyguardViewManager.showGenericBouncer(true /* scrimmed */);
+                mStatusBarKeyguardViewManager.showBouncer(true /* scrimmed */);
             }
         }
     }
@@ -3786,7 +3786,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
      * is fully hidden, while 0 means the bouncer is visible.
      */
     @Override
-    public void setBouncerHiddenFraction(float expansion) {
+    public void setPrimaryBouncerHiddenFraction(float expansion) {
         mScrimController.setBouncerHiddenFraction(expansion);
     }
 
@@ -3808,7 +3808,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 mNotificationPanelViewController.isLaunchingAffordanceWithPreview();
         mScrimController.setLaunchingAffordanceWithPreview(launchingAffordanceWithPreview);
 
-        if (mStatusBarKeyguardViewManager.isShowingAlternateAuth()) {
+        if (mStatusBarKeyguardViewManager.isShowingAlternateBouncer()) {
             if (mState == StatusBarState.SHADE || mState == StatusBarState.SHADE_LOCKED
                     || mTransitionToFullShadeProgress > 0f) {
                 mScrimController.transitionTo(ScrimState.AUTH_SCRIMMED_SHADE);
@@ -3819,7 +3819,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             // Bouncer needs the front scrim when it's on top of an activity,
             // tapping on a notification, editing QS or being dismissed by
             // FLAG_DISMISS_KEYGUARD_ACTIVITY.
-            ScrimState state = mStatusBarKeyguardViewManager.bouncerNeedsScrimming()
+            ScrimState state = mStatusBarKeyguardViewManager.primaryBouncerNeedsScrimming()
                     ? ScrimState.BOUNCER_SCRIMMED : ScrimState.BOUNCER;
             mScrimController.transitionTo(state);
         } else if (launchingAffordanceWithPreview) {
@@ -4128,7 +4128,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
      */
     @Override
     public boolean isBouncerShowingScrimmed() {
-        return isBouncerShowing() && mStatusBarKeyguardViewManager.bouncerNeedsScrimming();
+        return isBouncerShowing() && mStatusBarKeyguardViewManager.primaryBouncerNeedsScrimming();
     }
 
     @Override
