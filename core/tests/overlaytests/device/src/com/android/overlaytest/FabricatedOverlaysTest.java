@@ -18,7 +18,6 @@ package com.android.overlaytest;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertThrows;
@@ -45,7 +44,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 @RunWith(JUnit4.class)
@@ -221,11 +219,56 @@ public class FabricatedOverlaysTest {
     }
 
     @Test
+    public void setResourceValue_withNullResourceName() throws Exception {
+        final FabricatedOverlay.Builder builder = new FabricatedOverlay.Builder(
+                "android", TEST_OVERLAY_NAME, mContext.getPackageName());
+
+        assertThrows(NullPointerException.class,
+                () -> builder.setResourceValue(null, TypedValue.TYPE_INT_DEC, 1));
+    }
+
+    @Test
+    public void setResourceValue_withEmptyResourceName() throws Exception {
+        final FabricatedOverlay.Builder builder = new FabricatedOverlay.Builder(
+                "android", TEST_OVERLAY_NAME, mContext.getPackageName());
+
+        assertThrows(IllegalArgumentException.class,
+                () -> builder.setResourceValue("", TypedValue.TYPE_INT_DEC, 1));
+    }
+
+    @Test
+    public void setResourceValue_withEmptyPackageName() throws Exception {
+        final FabricatedOverlay.Builder builder = new FabricatedOverlay.Builder(
+                "android", TEST_OVERLAY_NAME, mContext.getPackageName());
+
+        assertThrows(IllegalArgumentException.class,
+                () -> builder.setResourceValue(":color/mycolor", TypedValue.TYPE_INT_DEC, 1));
+    }
+
+    @Test
+    public void setResourceValue_withInvalidTypeName() throws Exception {
+        final FabricatedOverlay.Builder builder = new FabricatedOverlay.Builder(
+                "android", TEST_OVERLAY_NAME, mContext.getPackageName());
+
+        assertThrows(IllegalArgumentException.class,
+                () -> builder.setResourceValue("c/mycolor", TypedValue.TYPE_INT_DEC, 1));
+    }
+
+    @Test
+    public void setResourceValue_withEmptyTypeName() throws Exception {
+        final FabricatedOverlay.Builder builder = new FabricatedOverlay.Builder(
+                "android", TEST_OVERLAY_NAME, mContext.getPackageName());
+
+        assertThrows(IllegalArgumentException.class,
+                () -> builder.setResourceValue("/mycolor", TypedValue.TYPE_INT_DEC, 1));
+    }
+
+    @Test
     public void testInvalidResourceValues() throws Exception {
         final FabricatedOverlay overlay = new FabricatedOverlay.Builder(
                 "android", TEST_OVERLAY_NAME, mContext.getPackageName())
                 .setResourceValue(TEST_RESOURCE, TypedValue.TYPE_INT_DEC, 1)
-                .setResourceValue("something", TypedValue.TYPE_INT_DEC, 1)
+                .setResourceValue("color/something", TypedValue.TYPE_INT_DEC, 1)
                 .build();
 
         waitForResourceValue(0);
