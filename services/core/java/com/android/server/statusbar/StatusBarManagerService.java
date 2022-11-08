@@ -272,7 +272,6 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         mContext = context;
 
         LocalServices.addService(StatusBarManagerInternal.class, mInternalService);
-        LocalServices.addService(GlobalActionsProvider.class, mGlobalActionsProvider);
 
         // We always have a default display.
         final UiState state = new UiState();
@@ -287,6 +286,17 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
         mTileRequestTracker = new TileRequestTracker(mContext);
         mSessionMonitor = new SessionMonitor(mContext);
+    }
+
+    /**
+     * Publish the {@link GlobalActionsProvider}.
+     */
+    // TODO(b/259420401): investigate if we can extract GlobalActionsProvider to its own system
+    // service.
+    public void publishGlobalActionsProvider() {
+        if (LocalServices.getService(GlobalActionsProvider.class) == null) {
+            LocalServices.addService(GlobalActionsProvider.class, mGlobalActionsProvider);
+        }
     }
 
     private IOverlayManager getOverlayManager() {
