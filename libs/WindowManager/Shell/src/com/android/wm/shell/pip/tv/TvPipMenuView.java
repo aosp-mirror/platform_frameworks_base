@@ -32,7 +32,6 @@ import static com.android.wm.shell.pip.tv.TvPipAction.ACTION_EXPAND_COLLAPSE;
 import static com.android.wm.shell.pip.tv.TvPipAction.ACTION_FULLSCREEN;
 import static com.android.wm.shell.pip.tv.TvPipAction.ACTION_MOVE;
 
-import android.app.RemoteAction;
 import android.content.Context;
 import android.graphics.Rect;
 import android.os.Handler;
@@ -54,25 +53,18 @@ import com.android.wm.shell.common.TvWindowMenuActionButton;
 import com.android.wm.shell.pip.PipUtils;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A View that represents Pip Menu on TV. It's responsible for displaying 3 ever-present Pip Menu
- * actions: Fullscreen, Move and Close, but could also display "additional" actions, that may be set
- * via a {@link #setAdditionalActions(List, RemoteAction, Handler)} call.
+ * A View that represents Pip Menu on TV. It's responsible for displaying the Pip menu actions from
+ * the TvPipActionsProvider as well as the buttons for manually moving the PiP.
  */
-public class TvPipMenuView extends FrameLayout {
+public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.Listener {
     private static final String TAG = "TvPipMenuView";
-
-    private static final int CLOSE_ACTION_INDEX = 1;
-    private static final int FIRST_CUSTOM_ACTION_INDEX = 2;
 
     private final TvPipMenuView.Listener mListener;
 
-    private final List<TvPipAction> mActionsList;
-    private final TvPipSystemAction mDefaultCloseAction;
-    private final TvPipSystemAction mExpandCollapseAction;
+    private final TvPipActionsProvider mTvPipActionsProvider;
 
     private final RecyclerView mActionButtonsRecyclerView;
     private final LinearLayoutManager mButtonLayoutManager;
@@ -108,7 +100,7 @@ public class TvPipMenuView extends FrameLayout {
     private final Handler mMainHandler;
 
     public TvPipMenuView(@NonNull Context context, @NonNull Handler mainHandler,
-            @NonNull Listener listener) {
+            @NonNull Listener listener, TvPipActionsProvider tvPipActionsProvider) {
         super(context, null, 0, 0);
         inflate(context, R.layout.tv_pip_menu, this);
 
@@ -121,25 +113,11 @@ public class TvPipMenuView extends FrameLayout {
         mActionButtonsRecyclerView.setLayoutManager(mButtonLayoutManager);
         mActionButtonsRecyclerView.setPreserveFocusAfterLayout(true);
 
-        mDefaultCloseAction =
-                new TvPipSystemAction(ACTION_CLOSE, R.string.pip_close,
-                        R.drawable.pip_ic_close_white);
-        mExpandCollapseAction =
-                new TvPipSystemAction(ACTION_EXPAND_COLLAPSE, R.string.pip_collapse,
-                        R.drawable.pip_ic_collapse);
-
-        mActionsList = new ArrayList<>();
-        mActionsList.add(
-                new TvPipSystemAction(ACTION_FULLSCREEN, R.string.pip_fullscreen,
-                        R.drawable.pip_ic_fullscreen_white));
-        mActionsList.add(mDefaultCloseAction);
-        mActionsList.add(
-                new TvPipSystemAction(ACTION_MOVE, R.string.pip_move,
-                        R.drawable.pip_ic_move_white));
-        mActionsList.add(mExpandCollapseAction);
-
-        mRecyclerViewAdapter = new RecyclerViewAdapter(mActionsList);
+        mTvPipActionsProvider = tvPipActionsProvider;
+        mRecyclerViewAdapter = new RecyclerViewAdapter(tvPipActionsProvider.getActionsList());
         mActionButtonsRecyclerView.setAdapter(mRecyclerViewAdapter);
+
+        tvPipActionsProvider.addListener(this);
 
         mMenuFrameView = findViewById(R.id.tv_pip_menu_frame);
         mPipFrameView = findViewById(R.id.tv_pip_border);
@@ -217,7 +195,7 @@ public class TvPipMenuView extends FrameLayout {
         }
     }
 
-    void onPipTransitionFinished(boolean enterTransition, boolean isTvPipExpanded) {
+    void onPipTransitionFinished(boolean enterTransition) {
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                 "%s: onPipTransitionFinished()", TAG);
 
@@ -231,9 +209,6 @@ public class TvPipMenuView extends FrameLayout {
         if (enterTransition) {
             mEduTextDrawer.init();
         }
-
-        // Update buttons.
-        setIsExpanded(isTvPipExpanded);
 
         if (mSwitchingOrientation) {
             mActionButtonsRecyclerView.animate()
@@ -294,26 +269,6 @@ public class TvPipMenuView extends FrameLayout {
         }
     }
 
-    void setExpandedModeEnabled(boolean enabled) {
-        int actionIndex = mActionsList.indexOf(mExpandCollapseAction);
-        boolean actionInList = actionIndex != -1;
-        if (enabled && !actionInList) {
-            mActionsList.add(mExpandCollapseAction);
-            mRecyclerViewAdapter.notifyItemInserted(mActionsList.size() - 1);
-        } else if (!enabled && actionInList) {
-            mActionsList.remove(actionIndex);
-            mRecyclerViewAdapter.notifyItemRemoved(actionIndex);
-        }
-    }
-
-    void setIsExpanded(boolean expanded) {
-        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                "%s: setIsExpanded, expanded: %b", TAG, expanded);
-        mExpandCollapseAction.update(expanded ? R.string.pip_collapse : R.string.pip_expand,
-                expanded ? R.drawable.pip_ic_collapse : R.drawable.pip_ic_expand);
-        mRecyclerViewAdapter.notifyItemChanged(mActionsList.indexOf(mExpandCollapseAction));
-    }
-
     /**
      * @param gravity for the arrow hints
      */
@@ -339,7 +294,7 @@ public class TvPipMenuView extends FrameLayout {
         mEduTextDrawer.closeIfNeeded();
 
         if (exitingMoveMode) {
-            scrollAndRefocusButton(getFirstIndexOfAction(ACTION_MOVE),
+            scrollAndRefocusButton(mTvPipActionsProvider.getFirstIndexOfAction(ACTION_MOVE),
                     /* alwaysScroll= */ false);
         } else {
             scrollAndRefocusButton(0, /* alwaysScroll= */ true);
@@ -367,18 +322,6 @@ public class TvPipMenuView extends FrameLayout {
             itemToFocus.requestAccessibilityFocus();
         }
         return itemToFocus != null;
-    }
-
-    /**
-     * Returns the position of the first action of the given action type or -1 if none can be found.
-     */
-    private int getFirstIndexOfAction(@TvPipAction.ActionType int actionType) {
-        for (int i = 0; i < mActionsList.size(); i++) {
-            if (mActionsList.get(i).getActionType() == actionType) {
-                return i;
-            }
-        }
-        return -1;
     }
 
     void hideAllUserControls() {
@@ -418,57 +361,13 @@ public class TvPipMenuView extends FrameLayout {
                 });
     }
 
-    void setAdditionalActions(List<RemoteAction> actions, RemoteAction closeAction) {
-        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                "%s: setAdditionalActions(), %d actions", TAG, actions.size());
-
-        int oldCustomActionCount = 0;
-        for (TvPipAction action : mActionsList) {
-            if (action.getActionType() == ACTION_CUSTOM) {
-                oldCustomActionCount++;
-            }
-        }
-
-        // Update close action.
-        mActionsList.set(CLOSE_ACTION_INDEX,
-                closeAction == null ? mDefaultCloseAction
-                        : new TvPipCustomAction(ACTION_CUSTOM_CLOSE, closeAction));
-        mRecyclerViewAdapter.notifyItemChanged(CLOSE_ACTION_INDEX);
-
-        // Replace custom actions with new ones.
-        mActionsList.removeIf(tvPipAction -> tvPipAction.getActionType() == ACTION_CUSTOM);
-        List<TvPipAction> customActions = new ArrayList<>(actions.size());
-        int newCustomActionCount = 0;
-        for (RemoteAction action : actions) {
-            if (action == null || PipUtils.remoteActionsMatch(action, closeAction)) {
-                // Don't show an action if it is the same as the custom close action
-                continue;
-            }
-            customActions.add(new TvPipCustomAction(ACTION_CUSTOM, action));
-            newCustomActionCount++;
-        }
-        mActionsList.addAll(FIRST_CUSTOM_ACTION_INDEX, customActions);
-
-        mRecyclerViewAdapter.notifyItemRangeChanged(
-                FIRST_CUSTOM_ACTION_INDEX, Math.min(oldCustomActionCount, newCustomActionCount));
-
-        if (newCustomActionCount > oldCustomActionCount) {
-            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                    "%s: setAdditionalActions(), %d inserted starting at %d",
-                    TAG, newCustomActionCount - oldCustomActionCount,
-                    FIRST_CUSTOM_ACTION_INDEX + oldCustomActionCount);
-            mRecyclerViewAdapter.notifyItemRangeInserted(
-                    FIRST_CUSTOM_ACTION_INDEX + oldCustomActionCount,
-                    newCustomActionCount - oldCustomActionCount);
-
-        } else if (oldCustomActionCount > newCustomActionCount) {
-            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                    "%s: setAdditionalActions(), %d removed starting at %d",
-                    TAG, oldCustomActionCount - newCustomActionCount,
-                    FIRST_CUSTOM_ACTION_INDEX + newCustomActionCount);
-            mRecyclerViewAdapter.notifyItemRangeRemoved(
-                    FIRST_CUSTOM_ACTION_INDEX + newCustomActionCount,
-                    oldCustomActionCount - newCustomActionCount);
+    @Override
+    public void onActionsChanged(int added, int updated, int startIndex) {
+        mRecyclerViewAdapter.notifyItemRangeChanged(startIndex, updated);
+        if (added > 0) {
+            mRecyclerViewAdapter.notifyItemRangeInserted(startIndex + updated, added);
+        } else if (added < 0) {
+            mRecyclerViewAdapter.notifyItemRangeRemoved(startIndex + updated, -added);
         }
     }
 

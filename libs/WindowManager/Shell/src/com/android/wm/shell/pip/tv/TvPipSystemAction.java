@@ -16,10 +16,16 @@
 
 package com.android.wm.shell.pip.tv;
 
+import static android.app.Notification.Action.SEMANTIC_ACTION_DELETE;
+import static android.app.Notification.Action.SEMANTIC_ACTION_NONE;
+
 import android.annotation.DrawableRes;
 import android.annotation.NonNull;
 import android.annotation.StringRes;
+import android.app.Notification;
 import android.app.PendingIntent;
+import android.content.Context;
+import android.graphics.drawable.Icon;
 import android.os.Handler;
 
 import com.android.wm.shell.common.TvWindowMenuActionButton;
@@ -35,9 +41,14 @@ public class TvPipSystemAction extends TvPipAction {
     @DrawableRes
     private int mIconResource;
 
-    TvPipSystemAction(@ActionType int actionType, @StringRes int title, @DrawableRes int icon) {
+    private final PendingIntent mBroadcastIntent;
+
+    TvPipSystemAction(@ActionType int actionType, @StringRes int title, @DrawableRes int icon,
+            String broadcastAction, @NonNull Context context) {
         super(actionType);
         update(title, icon);
+        mBroadcastIntent = TvPipNotificationController.createPendingIntent(context,
+                broadcastAction);
     }
 
     void update(@StringRes int title, @DrawableRes int icon) {
@@ -53,6 +64,19 @@ public class TvPipSystemAction extends TvPipAction {
 
     PendingIntent getPendingIntent() {
         return null;
+    }
+
+    @Override
+    Notification.Action toNotificationAction(Context context) {
+        Notification.Action.Builder builder = new Notification.Action.Builder(
+                Icon.createWithResource(context, mIconResource),
+                context.getString(mTitleResource),
+                mBroadcastIntent);
+
+        builder.setSemanticAction(isCloseAction()
+                ? SEMANTIC_ACTION_DELETE : SEMANTIC_ACTION_NONE);
+        builder.setContextual(true);
+        return builder.build();
     }
 
 }

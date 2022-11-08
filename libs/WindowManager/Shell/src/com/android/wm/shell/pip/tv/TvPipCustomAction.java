@@ -16,9 +16,15 @@
 
 package com.android.wm.shell.pip.tv;
 
+import static android.app.Notification.Action.SEMANTIC_ACTION_DELETE;
+import static android.app.Notification.Action.SEMANTIC_ACTION_NONE;
+
 import android.annotation.NonNull;
+import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.RemoteAction;
+import android.content.Context;
+import android.os.Bundle;
 import android.os.Handler;
 
 import com.android.wm.shell.common.TvWindowMenuActionButton;
@@ -54,6 +60,23 @@ public class TvPipCustomAction extends TvPipAction {
 
     PendingIntent getPendingIntent() {
         return mRemoteAction.getActionIntent();
+    }
+
+    @Override
+    Notification.Action toNotificationAction(Context context) {
+        Notification.Action.Builder builder = new Notification.Action.Builder(
+                mRemoteAction.getIcon(),
+                mRemoteAction.getTitle(),
+                mRemoteAction.getActionIntent());
+        Bundle extras = new Bundle();
+        extras.putCharSequence(Notification.EXTRA_PICTURE_CONTENT_DESCRIPTION,
+                mRemoteAction.getContentDescription());
+        builder.addExtras(extras);
+
+        builder.setSemanticAction(isCloseAction()
+                ? SEMANTIC_ACTION_DELETE : SEMANTIC_ACTION_NONE);
+        builder.setContextual(true);
+        return builder.build();
     }
 
 }

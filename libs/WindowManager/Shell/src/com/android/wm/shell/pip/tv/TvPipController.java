@@ -107,6 +107,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
     private final PipAppOpsListener mAppOpsListener;
     private final PipTaskOrganizer mPipTaskOrganizer;
     private final PipMediaController mPipMediaController;
+    private final TvPipActionsProvider mTvPipActionsProvider;
     private final TvPipNotificationController mPipNotificationController;
     private final TvPipMenuController mTvPipMenuController;
     private final PipTransitionController mPipTransitionController;
@@ -141,6 +142,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
             PipTransitionController pipTransitionController,
             TvPipMenuController tvPipMenuController,
             PipMediaController pipMediaController,
+            TvPipActionsProvider tvPipActionsProvider,
             TvPipNotificationController pipNotificationController,
             TaskStackListenerImpl taskStackListener,
             PipParamsChangedForwarder pipParamsChangedForwarder,
@@ -159,6 +161,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
                 pipTransitionController,
                 tvPipMenuController,
                 pipMediaController,
+                tvPipActionsProvider,
                 pipNotificationController,
                 taskStackListener,
                 pipParamsChangedForwarder,
@@ -179,6 +182,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
             PipTransitionController pipTransitionController,
             TvPipMenuController tvPipMenuController,
             PipMediaController pipMediaController,
+            TvPipActionsProvider tvPipActionsProvider,
             TvPipNotificationController pipNotificationController,
             TaskStackListenerImpl taskStackListener,
             PipParamsChangedForwarder pipParamsChangedForwarder,
@@ -198,6 +202,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
         mTvPipBoundsController.setListener(this);
 
         mPipMediaController = pipMediaController;
+        mTvPipActionsProvider = tvPipActionsProvider;
 
         mPipNotificationController = pipNotificationController;
         mPipNotificationController.setDelegate(this);
@@ -241,7 +246,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
                 "%s: onConfigurationChanged(), state=%s", TAG, stateToName(mState));
 
         loadConfigurations();
-        mPipNotificationController.onConfigurationChanged(mContext);
+        mPipNotificationController.onConfigurationChanged();
         mTvPipBoundsAlgorithm.onConfigurationChanged(mContext);
     }
 
@@ -310,7 +315,6 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
         }
         mTvPipBoundsState.setTvPipManuallyCollapsed(!expanding);
         mTvPipBoundsState.setTvPipExpanded(expanding);
-        mPipNotificationController.updateExpansionState();
 
         updatePinnedStackBounds();
     }
@@ -373,7 +377,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
     @Override
     public void onPipTargetBoundsChange(Rect targetBounds, int animationDuration) {
         mPipTaskOrganizer.scheduleAnimateResizePip(targetBounds,
-                animationDuration, rect -> mTvPipMenuController.updateExpansionState());
+                animationDuration, null);
         mTvPipMenuController.onPipTransitionToTargetBoundsStarted(targetBounds);
     }
 
@@ -454,6 +458,11 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
 
     @Override
     public void onPipTransitionStarted(int direction, Rect currentPipBounds) {
+        final boolean enterPipTransition = PipAnimationController.isInPipDirection(direction);
+        if (enterPipTransition && mState == STATE_NO_PIP) {
+            // Set the initial ability to expand the PiP when entering PiP.
+            updateExpansionState();
+        }
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                 "%s: onPipTransition_Started(), state=%s, direction=%d",
                 TAG, stateToName(mState), direction);
@@ -465,6 +474,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
                 "%s: onPipTransition_Canceled(), state=%s", TAG, stateToName(mState));
         mTvPipMenuController.onPipTransitionFinished(
                 PipAnimationController.isInPipDirection(direction));
+        mTvPipActionsProvider.onPipExpansionToggled(mTvPipBoundsState.isTvPipExpanded());
     }
 
     @Override
@@ -477,6 +487,12 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
                 "%s: onPipTransition_Finished(), state=%s, direction=%d",
                 TAG, stateToName(mState), direction);
         mTvPipMenuController.onPipTransitionFinished(enterPipTransition);
+        mTvPipActionsProvider.onPipExpansionToggled(mTvPipBoundsState.isTvPipExpanded());
+    }
+
+    private void updateExpansionState() {
+        mTvPipActionsProvider.updateExpansionEnabled(mTvPipBoundsState.isTvExpandedPipSupported()
+                && mTvPipBoundsState.getDesiredTvExpandedAspectRatio() != 0);
     }
 
     private void setState(@State int state) {
@@ -534,7 +550,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
                 ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                         "%s: onActionsChanged()", TAG);
 
-                mTvPipMenuController.setAppActions(actions, closeAction);
+                mTvPipActionsProvider.setAppActions(actions, closeAction);
                 mCloseAction = closeAction;
             }
 
@@ -555,7 +571,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
                         "%s: onExpandedAspectRatioChanged: %f", TAG, ratio);
 
                 mTvPipBoundsState.setDesiredTvExpandedAspectRatio(ratio, false);
-                mTvPipMenuController.updateExpansionState();
+                updateExpansionState();
 
                 // 1) PiP is expanded and only aspect ratio changed, but wasn't disabled
                 // --> update bounds, but don't toggle

@@ -18,7 +18,9 @@ package com.android.wm.shell.pip.tv;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.app.Notification;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.os.Handler;
 
 import com.android.internal.protolog.common.ProtoLog;
@@ -80,5 +82,7 @@ abstract class TvPipAction {
                     "%s: Failed to send action, %s", TAG, e);
         }
     }
+
+    abstract Notification.Action toNotificationAction(Context context);
 
 }

@@ -41,13 +41,10 @@ import androidx.annotation.Nullable;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.SystemWindows;
-import com.android.wm.shell.pip.PipMediaController;
 import com.android.wm.shell.pip.PipMenuController;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Manages the visibility of the PiP Menu as user interacts with PiP.
@@ -60,6 +57,7 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
     private final SystemWindows mSystemWindows;
     private final TvPipBoundsState mTvPipBoundsState;
     private final Handler mMainHandler;
+    private final TvPipActionsProvider mTvPipActionsProvider;
 
     private Delegate mDelegate;
     private SurfaceControl mLeash;
@@ -72,10 +70,6 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
     // exiting the move menu instead of showing the regular button menu.
     private boolean mCloseAfterExitMoveMenu;
 
-    private final List<RemoteAction> mMediaActions = new ArrayList<>();
-    private final List<RemoteAction> mAppActions = new ArrayList<>();
-    private RemoteAction mCloseAction;
-
     private SyncRtSurfaceTransactionApplier mApplier;
     private SyncRtSurfaceTransactionApplier mBackgroundApplier;
     RectF mTmpSourceRectF = new RectF();
@@ -83,12 +77,13 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
     Matrix mMoveTransform = new Matrix();
 
     public TvPipMenuController(Context context, TvPipBoundsState tvPipBoundsState,
-            SystemWindows systemWindows, PipMediaController pipMediaController,
-            Handler mainHandler) {
+            SystemWindows systemWindows, Handler mainHandler,
+            TvPipActionsProvider tvPipActionsProvider) {
         mContext = context;
         mTvPipBoundsState = tvPipBoundsState;
         mSystemWindows = systemWindows;
         mMainHandler = mainHandler;
+        mTvPipActionsProvider = tvPipActionsProvider;
 
         // We need to "close" the menu the platform call for all the system dialogs to close (for
         // example, on the Home button press).
@@ -101,9 +96,6 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
         context.registerReceiverForAllUsers(closeSystemDialogsBroadcastReceiver,
                 new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS), null /* permission */,
                 mainHandler, Context.RECEIVER_EXPORTED);
-
-        pipMediaController.addActionListener(this::onMediaActionsChanged);
-
     }
 
     void setDelegate(Delegate delegate) {
@@ -151,10 +143,9 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
     }
 
     private void attachPipMenuView() {
-        mPipMenuView = new TvPipMenuView(mContext, mMainHandler, this);
+        mPipMenuView = new TvPipMenuView(mContext, mMainHandler, this, mTvPipActionsProvider);
         setUpViewSurfaceZOrder(mPipMenuView, 1);
         addPipMenuViewToSystemWindows(mPipMenuView, MENU_WINDOW_TITLE);
-        maybeUpdateMenuViewActions();
     }
 
     private void attachPipBackgroundView() {
@@ -189,8 +180,9 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
         // and the menu view has been fully remeasured and relaid out, we add a small delay here by
         // posting on the handler.
         mMainHandler.post(() -> {
-            mPipMenuView.onPipTransitionFinished(
-                    enterTransition, mTvPipBoundsState.isTvPipExpanded());
+            if (mPipMenuView != null) {
+                mPipMenuView.onPipTransitionFinished(enterTransition);
+            }
         });
     }
 
@@ -214,8 +206,6 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
         if (mPipMenuView == null) {
             return;
         }
-        maybeUpdateMenuViewActions();
-        updateExpansionState();
 
         grantPipMenuFocus(true);
         if (mInMoveMode) {
@@ -234,11 +224,6 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
 
     void updateGravity(int gravity) {
         mPipMenuView.showMovementHints(gravity);
-    }
-
-    void updateExpansionState() {
-        mPipMenuView.setExpandedModeEnabled(mTvPipBoundsState.isTvExpandedPipSupported()
-                && mTvPipBoundsState.getDesiredTvExpandedAspectRatio() != 0);
     }
 
     private Rect calculateMenuSurfaceBounds(Rect pipBounds) {
@@ -319,51 +304,7 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
 
     @Override
     public void setAppActions(List<RemoteAction> actions, RemoteAction closeAction) {
-        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                "%s: setAppActions()", TAG);
-        updateAdditionalActionsList(mAppActions, actions, closeAction);
-    }
-
-    private void onMediaActionsChanged(List<RemoteAction> actions) {
-        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                "%s: onMediaActionsChanged()", TAG);
-
-        // Hide disabled actions.
-        List<RemoteAction> enabledActions = new ArrayList<>();
-        for (RemoteAction remoteAction : actions) {
-            if (remoteAction.isEnabled()) {
-                enabledActions.add(remoteAction);
-            }
-        }
-        updateAdditionalActionsList(mMediaActions, enabledActions, mCloseAction);
-    }
-
-    private void updateAdditionalActionsList(List<RemoteAction> destination,
-            @Nullable List<RemoteAction> source, RemoteAction closeAction) {
-        final int number = source != null ? source.size() : 0;
-        if (number == 0 && destination.isEmpty() && Objects.equals(closeAction, mCloseAction)) {
-            // Nothing changed.
-            return;
-        }
-
-        mCloseAction = closeAction;
-
-        destination.clear();
-        if (number > 0) {
-            destination.addAll(source);
-        }
-        maybeUpdateMenuViewActions();
-    }
-
-    private void maybeUpdateMenuViewActions() {
-        if (mPipMenuView == null) {
-            return;
-        }
-        if (!mAppActions.isEmpty()) {
-            mPipMenuView.setAdditionalActions(mAppActions, mCloseAction);
-        } else {
-            mPipMenuView.setAdditionalActions(mMediaActions, mCloseAction);
-        }
+        // NOOP - handled via the TvPipActionsProvider
     }
 
     @Override
