@@ -8693,6 +8693,15 @@ public class CarrierConfigManager {
     public static final String KEY_VONR_ENABLED_BOOL = "vonr_enabled_bool";
 
     /**
+     * Boolean indicating the default VoNR user preference setting.
+     * If true, the VoNR setting will be enabled. If false, it will be disabled initially.
+     *
+     * Enabled by default.
+     *
+     */
+    public static final String KEY_VONR_ON_BY_DEFAULT_BOOL = "vonr_on_by_default_bool";
+
+    /**
      * Determine whether unthrottle data retry when tracking area code (TAC/LAC) from cell changes
      *
      * @hide
@@ -9515,6 +9524,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_UNTHROTTLE_DATA_RETRY_WHEN_TAC_CHANGES_BOOL, false);
         sDefaults.putBoolean(KEY_VONR_SETTING_VISIBILITY_BOOL, true);
         sDefaults.putBoolean(KEY_VONR_ENABLED_BOOL, false);
+        sDefaults.putBoolean(KEY_VONR_ON_BY_DEFAULT_BOOL, true);
         sDefaults.putIntArray(KEY_SUPPORTED_PREMIUM_CAPABILITIES_INT_ARRAY, new int[] {});
         sDefaults.putLong(KEY_PREMIUM_CAPABILITY_NOTIFICATION_DISPLAY_TIMEOUT_MILLIS_LONG,
                 TimeUnit.MINUTES.toMillis(30));
