@@ -394,7 +394,7 @@ public abstract class WallpaperService extends Service {
             public void resized(ClientWindowFrames frames, boolean reportDraw,
                     MergedConfiguration mergedConfiguration, InsetsState insetsState,
                     boolean forceLayout, boolean alwaysConsumeSystemBars, int displayId,
-                    int syncSeqId, int resizeMode) {
+                    int syncSeqId, boolean dragResizing) {
                 Message msg = mCaller.obtainMessageIO(MSG_WINDOW_RESIZED,
                         reportDraw ? 1 : 0,
                         mergedConfiguration);

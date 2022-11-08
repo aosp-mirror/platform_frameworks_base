@@ -51,8 +51,6 @@ import static android.view.ViewRootImplProto.WIDTH;
 import static android.view.ViewRootImplProto.WINDOW_ATTRIBUTES;
 import static android.view.ViewRootImplProto.WIN_FRAME;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION;
-import static android.view.WindowCallbacks.RESIZE_MODE_FREEFORM;
-import static android.view.WindowCallbacks.RESIZE_MODE_INVALID;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
@@ -517,7 +515,6 @@ public final class ViewRootImpl implements ViewParent,
     private boolean mPendingDragResizing;
     private boolean mDragResizing;
     private boolean mInvalidateRootRequested;
-    private int mResizeMode = RESIZE_MODE_INVALID;
     private int mCanvasOffsetX;
     private int mCanvasOffsetY;
     private boolean mActivityRelaunched;
@@ -1790,7 +1787,7 @@ public final class ViewRootImpl implements ViewParent,
         CompatibilityInfo.applyOverrideScaleIfNeeded(mergedConfiguration);
         final boolean forceNextWindowRelayout = args.argi1 != 0;
         final int displayId = args.argi3;
-        final int resizeMode = args.argi5;
+        final boolean dragResizing = args.argi5 != 0;
 
         final Rect frame = frames.frame;
         final Rect displayFrame = frames.displayFrame;
@@ -1806,16 +1803,14 @@ public final class ViewRootImpl implements ViewParent,
         final boolean attachedFrameChanged = LOCAL_LAYOUT
                 && !Objects.equals(mTmpFrames.attachedFrame, attachedFrame);
         final boolean displayChanged = mDisplay.getDisplayId() != displayId;
-        final boolean resizeModeChanged = mResizeMode != resizeMode;
         final boolean compatScaleChanged = mTmpFrames.compatScale != compatScale;
         if (msg == MSG_RESIZED && !frameChanged && !configChanged && !attachedFrameChanged
-                && !displayChanged && !resizeModeChanged && !forceNextWindowRelayout
+                && !displayChanged && !forceNextWindowRelayout
                 && !compatScaleChanged) {
             return;
         }
 
-        mPendingDragResizing = resizeMode != RESIZE_MODE_INVALID;
-        mResizeMode = resizeMode;
+        mPendingDragResizing = dragResizing;
         mTmpFrames.compatScale = compatScale;
         mInvCompatScale = 1f / compatScale;
 
@@ -2975,7 +2970,7 @@ public final class ViewRootImpl implements ViewParent,
                         frame.width() < desiredWindowWidth && frame.width() != mWidth)
                 || (lp.height == ViewGroup.LayoutParams.WRAP_CONTENT &&
                         frame.height() < desiredWindowHeight && frame.height() != mHeight));
-        windowShouldResize |= mDragResizing && mResizeMode == RESIZE_MODE_FREEFORM;
+        windowShouldResize |= mDragResizing && mPendingDragResizing;
 
         // If the activity was just relaunched, it might have unfrozen the task bounds (while
         // relaunching), so we need to force a call into window manager to pick up the latest
@@ -3222,7 +3217,7 @@ public final class ViewRootImpl implements ViewParent,
                                         && mWinFrame.height() == mPendingBackDropFrame.height();
                         // TODO: Need cutout?
                         startDragResizing(mPendingBackDropFrame, !backdropSizeMatchesFrame,
-                                mAttachInfo.mContentInsets, mAttachInfo.mStableInsets, mResizeMode);
+                                mAttachInfo.mContentInsets, mAttachInfo.mStableInsets);
                     } else {
                         // We shouldn't come here, but if we come we should end the resize.
                         endDragResizing();
@@ -8780,7 +8775,7 @@ public final class ViewRootImpl implements ViewParent,
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private void dispatchResized(ClientWindowFrames frames, boolean reportDraw,
             MergedConfiguration mergedConfiguration, InsetsState insetsState, boolean forceLayout,
-            boolean alwaysConsumeSystemBars, int displayId, int syncSeqId, int resizeMode) {
+            boolean alwaysConsumeSystemBars, int displayId, int syncSeqId, boolean dragResizing) {
         Message msg = mHandler.obtainMessage(reportDraw ? MSG_RESIZED_REPORT : MSG_RESIZED);
         SomeArgs args = SomeArgs.obtain();
         final boolean sameProcessCall = (Binder.getCallingPid() == android.os.Process.myPid());
@@ -8802,7 +8797,7 @@ public final class ViewRootImpl implements ViewParent,
         args.argi2 = alwaysConsumeSystemBars ? 1 : 0;
         args.argi3 = displayId;
         args.argi4 = syncSeqId;
-        args.argi5 = resizeMode;
+        args.argi5 = dragResizing ? 1 : 0;
 
         msg.obj = args;
         mHandler.sendMessage(msg);
@@ -10194,11 +10189,11 @@ public final class ViewRootImpl implements ViewParent,
         public void resized(ClientWindowFrames frames, boolean reportDraw,
                 MergedConfiguration mergedConfiguration, InsetsState insetsState,
                 boolean forceLayout, boolean alwaysConsumeSystemBars, int displayId, int syncSeqId,
-                int resizeMode) {
+                boolean dragResizing) {
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
                 viewAncestor.dispatchResized(frames, reportDraw, mergedConfiguration, insetsState,
-                        forceLayout, alwaysConsumeSystemBars, displayId, syncSeqId, resizeMode);
+                        forceLayout, alwaysConsumeSystemBars, displayId, syncSeqId, dragResizing);
             }
         }
 
@@ -10403,13 +10398,13 @@ public final class ViewRootImpl implements ViewParent,
      * Start a drag resizing which will inform all listeners that a window resize is taking place.
      */
     private void startDragResizing(Rect initialBounds, boolean fullscreen, Rect systemInsets,
-            Rect stableInsets, int resizeMode) {
+            Rect stableInsets) {
         if (!mDragResizing) {
             mDragResizing = true;
             if (mUseMTRenderer) {
                 for (int i = mWindowCallbacks.size() - 1; i >= 0; i--) {
                     mWindowCallbacks.get(i).onWindowDragResizeStart(
-                            initialBounds, fullscreen, systemInsets, stableInsets, resizeMode);
+                            initialBounds, fullscreen, systemInsets, stableInsets);
                 }
             }
             mFullRedrawNeeded = true;

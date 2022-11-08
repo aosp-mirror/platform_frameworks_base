@@ -249,11 +249,6 @@ interface IActivityTaskManager {
     /** Returns an interface enabling the management of window organizers. */
     IWindowOrganizerController getWindowOrganizerController();
 
-    /**
-     * Sets whether we are currently in an interactive split screen resize operation where we
-     * are changing the docked stack size.
-     */
-    void setSplitScreenResizing(boolean resizing);
     boolean supportsLocalVoiceInteraction();
 
     // Get device configuration

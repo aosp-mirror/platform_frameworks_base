@@ -16,8 +16,6 @@
 
 package android.view;
 
-import static android.view.WindowCallbacks.RESIZE_MODE_INVALID;
-
 import android.annotation.Nullable;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
@@ -550,7 +548,7 @@ public class WindowlessWindowManager implements IWindowSession {
                 mTmpConfig.setConfiguration(mConfiguration, mConfiguration);
                 s.mClient.resized(mTmpFrames, false /* reportDraw */, mTmpConfig, state,
                         false /* forceLayout */, false /* alwaysConsumeSystemBars */, s.mDisplayId,
-                        Integer.MAX_VALUE, RESIZE_MODE_INVALID);
+                        Integer.MAX_VALUE, false /* dragResizing */);
             } catch (RemoteException e) {
                 // Too bad
             }

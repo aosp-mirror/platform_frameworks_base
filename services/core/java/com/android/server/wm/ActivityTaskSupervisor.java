@@ -206,9 +206,6 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
     // Used to indicate that a task is removed it should also be removed from recents.
     static final boolean REMOVE_FROM_RECENTS = true;
 
-    /** True if the docked root task is currently being resized. */
-    private boolean mDockedRootTaskResizing;
-
     // Activity actions an app cannot start if it uses a permission which is not granted.
     private static final ArrayMap<String, String> ACTION_TO_RUNTIME_PERMISSION =
             new ArrayMap<>();
@@ -1525,15 +1522,6 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
 
     LaunchParamsController getLaunchParamsController() {
         return mLaunchParamsController;
-    }
-
-    void setSplitScreenResizing(boolean resizing) {
-        if (resizing == mDockedRootTaskResizing) {
-            return;
-        }
-
-        mDockedRootTaskResizing = resizing;
-        mWindowManager.setDockedRootTaskResizing(resizing);
     }
 
     private void removePinnedRootTaskInSurfaceTransaction(Task rootTask) {

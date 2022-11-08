@@ -514,7 +514,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     /** Remove this display when animation on it has completed. */
     private boolean mDeferredRemoval;
 
-    final DockedTaskDividerController mDividerControllerLocked;
     final PinnedTaskController mPinnedTaskController;
 
     final ArrayList<WindowState> mTapExcludedWindows = new ArrayList<>();
@@ -1151,7 +1150,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             mDisplayPolicy.systemReady();
         }
         mWindowCornerRadius = mDisplayPolicy.getWindowCornerRadius();
-        mDividerControllerLocked = new DockedTaskDividerController(this);
         mPinnedTaskController = new PinnedTaskController(mWmService, this);
 
         final Transaction pendingTransaction = getPendingTransaction();
@@ -2560,10 +2558,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             case Surface.ROTATION_270:
                 return Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
         }
-    }
-
-    DockedTaskDividerController getDockedDividerController() {
-        return mDividerControllerLocked;
     }
 
     PinnedTaskController getPinnedTaskController() {

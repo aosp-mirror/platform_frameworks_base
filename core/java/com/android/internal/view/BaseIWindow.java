@@ -53,7 +53,7 @@ public class BaseIWindow extends IWindow.Stub {
     @Override
     public void resized(ClientWindowFrames frames, boolean reportDraw,
             MergedConfiguration mergedConfiguration, InsetsState insetsState, boolean forceLayout,
-            boolean alwaysConsumeSystemBars, int displayId, int seqId, int resizeMode) {
+            boolean alwaysConsumeSystemBars, int displayId, int seqId, boolean dragResizing) {
         if (reportDraw) {
             try {
                 mSession.finishDrawing(this, null /* postDrawTransaction */, seqId);
