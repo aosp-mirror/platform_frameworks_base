@@ -1312,6 +1312,14 @@ package android.hardware.lights {
 
 }
 
+package android.hardware.location {
+
+  public final class ContextHubManager {
+    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public long[] getPreloadedNanoAppIds(@NonNull android.hardware.location.ContextHubInfo);
+  }
+
+}
+
 package android.hardware.soundtrigger {
 
   public class KeyphraseEnrollmentInfo {
