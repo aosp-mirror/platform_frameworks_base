@@ -663,6 +663,19 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
                 Binder.restoreCallingIdentity(ident);
             }
         }
+
+        @Override
+        public void onCaptureProcessProgressed(int progress) {
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                mExecutor.execute(
+                        () -> mClientCallbacks.onCaptureProcessProgressed(
+                                CameraAdvancedExtensionSessionImpl.this, mClientRequest,
+                                progress));
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
     }
 
     private final class CaptureCallbackHandler extends CameraCaptureSession.CaptureCallback {
