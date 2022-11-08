@@ -632,6 +632,8 @@ public final class InputMethodManager {
 
     private final DelegateImpl mDelegate = new DelegateImpl();
 
+    private static boolean sPreventImeStartupUnlessTextEditor;
+
     // -----------------------------------------------------------
 
     private static final int MSG_DUMP = 1;
@@ -1435,6 +1437,10 @@ public final class InputMethodManager {
         // display case.
         final Looper looper = displayId == Display.DEFAULT_DISPLAY
                 ? Looper.getMainLooper() : context.getMainLooper();
+        // Keep track of whether to expect the IME to be unavailable so as to avoid log spam in
+        // sendInputEventOnMainLooperLocked() by not logging a verbose message on every DPAD event
+        sPreventImeStartupUnlessTextEditor = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_preventImeStartupUnlessTextEditor);
         return forContextInternal(displayId, looper);
     }
 
@@ -3360,8 +3366,12 @@ public final class InputMethodManager {
                 return DISPATCH_IN_PROGRESS;
             }
 
-            Log.w(TAG, "Unable to send input event to IME: " + getImeIdLocked()
-                    + " dropping: " + event);
+            if (sPreventImeStartupUnlessTextEditor) {
+                Log.d(TAG, "Dropping event because IME is evicted: " + event);
+            } else {
+                Log.w(TAG, "Unable to send input event to IME: " + getImeIdLocked()
+                        + " dropping: " + event);
+            }
         }
         return DISPATCH_NOT_HANDLED;
     }
