@@ -226,6 +226,7 @@ public:
                          float sweepAngle, bool useCenter, const Paint& paint) = 0;
     virtual void drawPath(const SkPath& path, const Paint& paint) = 0;
     virtual void drawVertices(const SkVertices*, SkBlendMode, const Paint& paint) = 0;
+    virtual void drawMesh(const SkMesh& mesh, sk_sp<SkBlender>, const SkPaint& paint) = 0;
 
     // Bitmap-based
     virtual void drawBitmap(Bitmap& bitmap, float left, float top, const Paint* paint) = 0;

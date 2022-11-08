@@ -21,6 +21,7 @@
 #else
 #define __ANDROID_API_P__ 28
 #endif
+#include <Mesh.h>
 #include <androidfw/ResourceTypes.h>
 #include <hwui/Canvas.h>
 #include <hwui/Paint.h>
@@ -30,8 +31,8 @@
 #include <nativehelper/ScopedPrimitiveArray.h>
 #include <nativehelper/ScopedStringChars.h>
 
-#include "FontUtils.h"
 #include "Bitmap.h"
+#include "FontUtils.h"
 #include "SkBitmap.h"
 #include "SkBlendMode.h"
 #include "SkClipOp.h"
@@ -42,10 +43,10 @@
 #include "SkMatrix.h"
 #include "SkPath.h"
 #include "SkPoint.h"
+#include "SkRRect.h"
 #include "SkRect.h"
 #include "SkRefCnt.h"
 #include "SkRegion.h"
-#include "SkRRect.h"
 #include "SkScalar.h"
 #include "SkVertices.h"
 
@@ -443,6 +444,14 @@ static void drawVertices(JNIEnv* env, jobject, jlong canvasHandle,
                            blendMode, *paint);
 }
 
+static void drawMesh(JNIEnv* env, jobject, jlong canvasHandle, jlong meshHandle, jint modeHandle,
+                     jlong paintHandle) {
+    const SkMesh mesh = reinterpret_cast<MeshWrapper*>(meshHandle)->mesh;
+    SkBlendMode blendMode = static_cast<SkBlendMode>(modeHandle);
+    SkPaint* paint = reinterpret_cast<Paint*>(paintHandle);
+    get_canvas(canvasHandle)->drawMesh(mesh, SkBlender::Mode(blendMode), *paint);
+}
+
 static void drawNinePatch(JNIEnv* env, jobject, jlong canvasHandle, jlong bitmapHandle,
         jlong chunkHandle, jfloat left, jfloat top, jfloat right, jfloat bottom,
         jlong paintHandle, jint dstDensity, jint srcDensity) {
@@ -761,38 +770,38 @@ static const JNINativeMethod gMethods[] = {
 // If called from Canvas these are regular JNI
 // If called from DisplayListCanvas they are @FastNative
 static const JNINativeMethod gDrawMethods[] = {
-    {"nDrawColor","(JII)V", (void*) CanvasJNI::drawColor},
-    {"nDrawColor","(JJJI)V", (void*) CanvasJNI::drawColorLong},
-    {"nDrawPaint","(JJ)V", (void*) CanvasJNI::drawPaint},
-    {"nDrawPoint", "(JFFJ)V", (void*) CanvasJNI::drawPoint},
-    {"nDrawPoints", "(J[FIIJ)V", (void*) CanvasJNI::drawPoints},
-    {"nDrawLine", "(JFFFFJ)V", (void*) CanvasJNI::drawLine},
-    {"nDrawLines", "(J[FIIJ)V", (void*) CanvasJNI::drawLines},
-    {"nDrawRect","(JFFFFJ)V", (void*) CanvasJNI::drawRect},
-    {"nDrawRegion", "(JJJ)V", (void*) CanvasJNI::drawRegion },
-    {"nDrawRoundRect","(JFFFFFFJ)V", (void*) CanvasJNI::drawRoundRect},
-    {"nDrawDoubleRoundRect", "(JFFFFFFFFFFFFJ)V", (void*) CanvasJNI::drawDoubleRoundRectXY},
-    {"nDrawDoubleRoundRect", "(JFFFF[FFFFF[FJ)V", (void*) CanvasJNI::drawDoubleRoundRectRadii},
-    {"nDrawCircle","(JFFFJ)V", (void*) CanvasJNI::drawCircle},
-    {"nDrawOval","(JFFFFJ)V", (void*) CanvasJNI::drawOval},
-    {"nDrawArc","(JFFFFFFZJ)V", (void*) CanvasJNI::drawArc},
-    {"nDrawPath","(JJJ)V", (void*) CanvasJNI::drawPath},
-    {"nDrawVertices", "(JII[FI[FI[II[SIIJ)V", (void*)CanvasJNI::drawVertices},
-    {"nDrawNinePatch", "(JJJFFFFJII)V", (void*)CanvasJNI::drawNinePatch},
-    {"nDrawBitmapMatrix", "(JJJJ)V", (void*)CanvasJNI::drawBitmapMatrix},
-    {"nDrawBitmapMesh", "(JJII[FI[IIJ)V", (void*)CanvasJNI::drawBitmapMesh},
-    {"nDrawBitmap","(JJFFJIII)V", (void*) CanvasJNI::drawBitmap},
-    {"nDrawBitmap","(JJFFFFFFFFJII)V", (void*) CanvasJNI::drawBitmapRect},
-    {"nDrawBitmap", "(J[IIIFFIIZJ)V", (void*)CanvasJNI::drawBitmapArray},
-    {"nDrawGlyphs", "(J[I[FIIIJJ)V", (void*)CanvasJNI::drawGlyphs},
-    {"nDrawText","(J[CIIFFIJ)V", (void*) CanvasJNI::drawTextChars},
-    {"nDrawText","(JLjava/lang/String;IIFFIJ)V", (void*) CanvasJNI::drawTextString},
-    {"nDrawTextRun","(J[CIIIIFFZJJ)V", (void*) CanvasJNI::drawTextRunChars},
-    {"nDrawTextRun","(JLjava/lang/String;IIIIFFZJ)V", (void*) CanvasJNI::drawTextRunString},
-    {"nDrawTextOnPath","(J[CIIJFFIJ)V", (void*) CanvasJNI::drawTextOnPathChars},
-    {"nDrawTextOnPath","(JLjava/lang/String;JFFIJ)V", (void*) CanvasJNI::drawTextOnPathString},
-    {"nPunchHole", "(JFFFFFFF)V", (void*) CanvasJNI::punchHole}
-};
+        {"nDrawColor", "(JII)V", (void*)CanvasJNI::drawColor},
+        {"nDrawColor", "(JJJI)V", (void*)CanvasJNI::drawColorLong},
+        {"nDrawPaint", "(JJ)V", (void*)CanvasJNI::drawPaint},
+        {"nDrawPoint", "(JFFJ)V", (void*)CanvasJNI::drawPoint},
+        {"nDrawPoints", "(J[FIIJ)V", (void*)CanvasJNI::drawPoints},
+        {"nDrawLine", "(JFFFFJ)V", (void*)CanvasJNI::drawLine},
+        {"nDrawLines", "(J[FIIJ)V", (void*)CanvasJNI::drawLines},
+        {"nDrawRect", "(JFFFFJ)V", (void*)CanvasJNI::drawRect},
+        {"nDrawRegion", "(JJJ)V", (void*)CanvasJNI::drawRegion},
+        {"nDrawRoundRect", "(JFFFFFFJ)V", (void*)CanvasJNI::drawRoundRect},
+        {"nDrawDoubleRoundRect", "(JFFFFFFFFFFFFJ)V", (void*)CanvasJNI::drawDoubleRoundRectXY},
+        {"nDrawDoubleRoundRect", "(JFFFF[FFFFF[FJ)V", (void*)CanvasJNI::drawDoubleRoundRectRadii},
+        {"nDrawCircle", "(JFFFJ)V", (void*)CanvasJNI::drawCircle},
+        {"nDrawOval", "(JFFFFJ)V", (void*)CanvasJNI::drawOval},
+        {"nDrawArc", "(JFFFFFFZJ)V", (void*)CanvasJNI::drawArc},
+        {"nDrawPath", "(JJJ)V", (void*)CanvasJNI::drawPath},
+        {"nDrawVertices", "(JII[FI[FI[II[SIIJ)V", (void*)CanvasJNI::drawVertices},
+        {"nDrawMesh", "(JJIJ)V", (void*)CanvasJNI::drawMesh},
+        {"nDrawNinePatch", "(JJJFFFFJII)V", (void*)CanvasJNI::drawNinePatch},
+        {"nDrawBitmapMatrix", "(JJJJ)V", (void*)CanvasJNI::drawBitmapMatrix},
+        {"nDrawBitmapMesh", "(JJII[FI[IIJ)V", (void*)CanvasJNI::drawBitmapMesh},
+        {"nDrawBitmap", "(JJFFJIII)V", (void*)CanvasJNI::drawBitmap},
+        {"nDrawBitmap", "(JJFFFFFFFFJII)V", (void*)CanvasJNI::drawBitmapRect},
+        {"nDrawBitmap", "(J[IIIFFIIZJ)V", (void*)CanvasJNI::drawBitmapArray},
+        {"nDrawGlyphs", "(J[I[FIIIJJ)V", (void*)CanvasJNI::drawGlyphs},
+        {"nDrawText", "(J[CIIFFIJ)V", (void*)CanvasJNI::drawTextChars},
+        {"nDrawText", "(JLjava/lang/String;IIFFIJ)V", (void*)CanvasJNI::drawTextString},
+        {"nDrawTextRun", "(J[CIIIIFFZJJ)V", (void*)CanvasJNI::drawTextRunChars},
+        {"nDrawTextRun", "(JLjava/lang/String;IIIIFFZJ)V", (void*)CanvasJNI::drawTextRunString},
+        {"nDrawTextOnPath", "(J[CIIJFFIJ)V", (void*)CanvasJNI::drawTextOnPathChars},
+        {"nDrawTextOnPath", "(JLjava/lang/String;JFFIJ)V", (void*)CanvasJNI::drawTextOnPathString},
+        {"nPunchHole", "(JFFFFFFF)V", (void*)CanvasJNI::punchHole}};
 
 int register_android_graphics_Canvas(JNIEnv* env) {
     int ret = 0;

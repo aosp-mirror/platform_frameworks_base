@@ -196,7 +196,6 @@ public class Mesh {
         }
         nativeUpdateUniforms(
                 mNativeMeshWrapper, uniformName, value1, value2, value3, value4, count);
-        nativeUpdateMesh(mNativeMeshWrapper);
     }
 
     private void setUniform(String uniformName, float[] values, boolean isColor) {
@@ -208,7 +207,6 @@ public class Mesh {
         }
 
         nativeUpdateUniforms(mNativeMeshWrapper, uniformName, values, isColor);
-        nativeUpdateMesh(mNativeMeshWrapper);
     }
 
     /**
@@ -271,7 +269,14 @@ public class Mesh {
             throw new NullPointerException("The uniform values parameter must not be null");
         }
         nativeUpdateUniforms(mNativeMeshWrapper, uniformName, values);
-        nativeUpdateMesh(mNativeMeshWrapper);
+    }
+
+    /**
+     * @hide so only calls from module can utilize it
+     */
+    long getNativeWrapperInstance() {
+        nativeUpdateMesh(mNativeMeshWrapper, mIsIndexed);
+        return mNativeMeshWrapper;
     }
 
     private void setIntUniform(
@@ -282,7 +287,6 @@ public class Mesh {
 
         nativeUpdateUniforms(
                 mNativeMeshWrapper, uniformName, value1, value2, value3, value4, count);
-        nativeUpdateMesh(mNativeMeshWrapper);
     }
 
     private Mesh(long nativeMeshWrapper, boolean isIndexed) {
@@ -313,5 +317,5 @@ public class Mesh {
 
     private static native void nativeUpdateUniforms(long builder, String uniformName, int[] values);
 
-    private static native void nativeUpdateMesh(long nativeMeshWrapper);
+    private static native void nativeUpdateMesh(long nativeMeshWrapper, boolean mIsIndexed);
 }

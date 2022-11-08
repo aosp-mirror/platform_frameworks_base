@@ -96,7 +96,7 @@ public abstract class BaseCanvas {
     // These are also implemented in RecordingCanvas so that we can
     // selectively apply on them
     // Everything below here is copy/pasted from Canvas.java
-    // The JNI registration is handled by android_view_Canvas.cpp
+    // The JNI registration is handled by android_graphics_Canvas.cpp
     // ---------------------------------------------------------------------------
 
     public void drawArc(float left, float top, float right, float bottom, float startAngle,
@@ -670,6 +670,17 @@ public abstract class BaseCanvas {
     /**
      * @hide
      */
+    public void drawMesh(Mesh mesh, BlendMode blendMode, Paint paint) {
+        if (!isHardwareAccelerated() && onHwFeatureInSwMode()) {
+            throw new RuntimeException("software rendering doesn't support meshes");
+        }
+        nDrawMesh(this.mNativeCanvasWrapper, mesh.getNativeWrapperInstance(),
+                blendMode.getXfermode().porterDuffMode, paint.getNativeInstance());
+    }
+
+    /**
+     * @hide
+     */
     public void punchHole(float left, float top, float right, float bottom, float rx, float ry,
             float alpha) {
         nPunchHole(mNativeCanvasWrapper, left, top, right, bottom, rx, ry, alpha);
@@ -800,6 +811,9 @@ public abstract class BaseCanvas {
     private static native void nDrawVertices(long nativeCanvas, int mode, int n, float[] verts,
             int vertOffset, float[] texs, int texOffset, int[] colors, int colorOffset,
             short[] indices, int indexOffset, int indexCount, long nativePaint);
+
+    private static native void nDrawMesh(
+            long nativeCanvas, long nativeMesh, int mode, long nativePaint);
 
     private static native void nDrawGlyphs(long nativeCanvas, int[] glyphIds, float[] positions,
             int glyphIdStart, int positionStart, int glyphCount, long nativeFont, long nativePaint);

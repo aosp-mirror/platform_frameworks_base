@@ -76,6 +76,8 @@ extern int register_android_graphics_pdf_PdfRenderer(JNIEnv* env);
 extern int register_android_graphics_text_MeasuredText(JNIEnv* env);
 extern int register_android_graphics_text_LineBreaker(JNIEnv *env);
 extern int register_android_graphics_text_TextShaper(JNIEnv *env);
+extern int register_android_graphics_MeshSpecification(JNIEnv* env);
+extern int register_android_graphics_Mesh(JNIEnv* env);
 
 extern int register_android_util_PathParser(JNIEnv* env);
 extern int register_android_view_DisplayListCanvas(JNIEnv* env);
@@ -143,6 +145,8 @@ extern int register_android_view_ThreadedRenderer(JNIEnv* env);
             REG_JNI(register_android_graphics_text_MeasuredText),
             REG_JNI(register_android_graphics_text_LineBreaker),
             REG_JNI(register_android_graphics_text_TextShaper),
+            REG_JNI(register_android_graphics_MeshSpecification),
+            REG_JNI(register_android_graphics_Mesh),
 
             REG_JNI(register_android_util_PathParser),
             REG_JNI(register_android_view_RenderNode),

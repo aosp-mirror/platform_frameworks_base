@@ -42,7 +42,7 @@ static jlong make(JNIEnv* env, jobject, jlong meshSpec, jint mode, jobject verte
                   jint right, jint bottom) {
     auto skMeshSpec = sk_ref_sp(reinterpret_cast<SkMeshSpecification*>(meshSpec));
     sk_sp<SkMesh::VertexBuffer> skVertexBuffer =
-            genVertexBuffer(env, vertexBuffer, skMeshSpec->attributes().size_bytes(), isDirect);
+            genVertexBuffer(env, vertexBuffer, vertexCount * skMeshSpec->stride(), isDirect);
     auto skRect = SkRect::MakeLTRB(left, top, right, bottom);
     auto mesh = SkMesh::Make(skMeshSpec, SkMesh::Mode(mode), skVertexBuffer, vertexCount,
                              vertexOffset, nullptr, skRect);
@@ -55,8 +55,8 @@ static jlong makeIndexed(JNIEnv* env, jobject, jlong meshSpec, jint mode, jobjec
                          jobject indexBuffer, jboolean isIndexDirect, jint indexCount,
                          jint indexOffset, jint left, jint top, jint right, jint bottom) {
     auto skMeshSpec = sk_ref_sp(reinterpret_cast<SkMeshSpecification*>(meshSpec));
-    sk_sp<SkMesh::VertexBuffer> skVertexBuffer = genVertexBuffer(
-            env, vertexBuffer, skMeshSpec->attributes().size_bytes(), isVertexDirect);
+    sk_sp<SkMesh::VertexBuffer> skVertexBuffer =
+            genVertexBuffer(env, vertexBuffer, vertexCount * skMeshSpec->stride(), isVertexDirect);
     sk_sp<SkMesh::IndexBuffer> skIndexBuffer =
             genIndexBuffer(env, indexBuffer, indexCount * gIndexByteSize, isIndexDirect);
     auto skRect = SkRect::MakeLTRB(left, top, right, bottom);

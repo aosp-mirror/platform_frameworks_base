@@ -111,6 +111,8 @@ private:
     void drawRRect(const SkRRect&, const SkPaint&);
     void drawDRRect(const SkRRect&, const SkRRect&, const SkPaint&);
 
+    void drawMesh(const SkMesh&, const sk_sp<SkBlender>&, const SkPaint&);
+
     void drawAnnotation(const SkRect&, const char*, SkData*);
     void drawDrawable(SkDrawable*, const SkMatrix*);
     void drawPicture(const SkPicture*, const SkMatrix*, const SkPaint*);
@@ -210,6 +212,7 @@ public:
                      const SkPaint&) override;
     void onDrawPoints(PointMode, size_t count, const SkPoint pts[], const SkPaint&) override;
     void onDrawVerticesObject(const SkVertices*, SkBlendMode, const SkPaint&) override;
+    void onDrawMesh(const SkMesh&, sk_sp<SkBlender>, const SkPaint&) override;
     void onDrawAtlas2(const SkImage*, const SkRSXform[], const SkRect[], const SkColor[], int,
                      SkBlendMode, const SkSamplingOptions&, const SkRect*, const SkPaint*) override;
     void onDrawShadowRec(const SkPath&, const SkDrawShadowRec&) override;
