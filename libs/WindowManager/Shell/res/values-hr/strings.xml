@@ -86,4 +86,9 @@
     <string name="close_button_text" msgid="2913281996024033299">"Zatvori"</string>
     <string name="back_button_text" msgid="1469718707134137085">"Natrag"</string>
     <string name="handle_text" msgid="1766582106752184456">"Pokazivač"</string>
+    <string name="fullscreen_text" msgid="1162316685217676079">"Puni zaslon"</string>
+    <string name="desktop_text" msgid="1077633567027630454">"Stolni način rada"</string>
+    <string name="split_screen_text" msgid="1396336058129570886">"Razdvojeni zaslon"</string>
+    <string name="more_button_text" msgid="3655388105592893530">"Više"</string>
+    <string name="float_button_text" msgid="9221657008391364581">"Plutajući"</string>
 </resources>

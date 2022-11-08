@@ -1253,7 +1253,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Zagon aplikacij."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Dokončevanje zagona."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Pritisnili ste gumb za vklop, s čimer običajno izklopite zaslon.\n\nPoskusite se narahlo dotakniti med nastavljanjem prstnega odtisa."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Za končanje nastavitve izklopite zaslon"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Za končanje nastavitve izklopite zaslon."</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Izklopi"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Želite nadaljevati preverjanje prstnega odtisa?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Pritisnili ste gumb za vklop, s čimer običajno izklopite zaslon.\n\nZa preverjanje prstnega odtisa se poskusite narahlo dotakniti."</string>
