@@ -174,14 +174,12 @@ public class KeyguardUpdateMonitorCallback {
     public void onTrustManagedChanged(int userId) { }
 
     /**
-     * Called after trust was granted with non-zero flags.
+     * Called after trust was granted.
+     * @param userId of the user that has been granted trust
+     * @param message optional message the trust agent has provided to show that should indicate
+     *                why trust was granted.
      */
-    public void onTrustGrantedWithFlags(int flags, int userId) { }
-
-    /**
-     * Called when setting the trust granted message.
-     */
-    public void showTrustGrantedMessage(@Nullable CharSequence message) { }
+    public void onTrustGrantedWithFlags(int flags, int userId, @Nullable String message) { }
 
     /**
      * Called when a biometric has been acquired.
