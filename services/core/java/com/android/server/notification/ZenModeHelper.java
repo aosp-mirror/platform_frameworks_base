@@ -305,7 +305,7 @@ public class ZenModeHelper {
 
     public String addAutomaticZenRule(String pkg, AutomaticZenRule automaticZenRule,
             String reason) {
-        if (!ZenModeConfig.SYSTEM_AUTHORITY.equals(pkg)) {
+        if (!isSystemRule(automaticZenRule)) {
             PackageItemInfo component = getServiceInfo(automaticZenRule.getOwner());
             if (component == null) {
                 component = getActivityInfo(automaticZenRule.getConfigurationActivity());
@@ -552,6 +552,11 @@ public class ZenModeHelper {
                 }
             }
         }
+    }
+
+    private boolean isSystemRule(AutomaticZenRule rule) {
+        return rule.getOwner() != null
+                && ZenModeConfig.SYSTEM_AUTHORITY.equals(rule.getOwner().getPackageName());
     }
 
     private ServiceInfo getServiceInfo(ComponentName owner) {
