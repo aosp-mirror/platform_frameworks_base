@@ -118,7 +118,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
 
     @Test
     fun resetViewStates_expansionChanging_notificationBecomesTransparent() {
-        whenever(mStatusBarKeyguardViewManager.isBouncerInTransit).thenReturn(false)
+        whenever(mStatusBarKeyguardViewManager.isPrimaryBouncerInTransit).thenReturn(false)
         resetViewStates_expansionChanging_notificationAlphaUpdated(
                 expansionFraction = 0.25f,
                 expectedAlpha = 0.0f
@@ -127,7 +127,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
 
     @Test
     fun resetViewStates_expansionChangingWhileBouncerInTransit_viewBecomesTransparent() {
-        whenever(mStatusBarKeyguardViewManager.isBouncerInTransit).thenReturn(true)
+        whenever(mStatusBarKeyguardViewManager.isPrimaryBouncerInTransit).thenReturn(true)
         resetViewStates_expansionChanging_notificationAlphaUpdated(
                 expansionFraction = 0.85f,
                 expectedAlpha = 0.0f
@@ -136,7 +136,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
 
     @Test
     fun resetViewStates_expansionChanging_notificationAlphaUpdated() {
-        whenever(mStatusBarKeyguardViewManager.isBouncerInTransit).thenReturn(false)
+        whenever(mStatusBarKeyguardViewManager.isPrimaryBouncerInTransit).thenReturn(false)
         resetViewStates_expansionChanging_notificationAlphaUpdated(
                 expansionFraction = 0.6f,
                 expectedAlpha = getContentAlpha(0.6f)
@@ -145,7 +145,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
 
     @Test
     fun resetViewStates_expansionChangingWhileBouncerInTransit_notificationAlphaUpdated() {
-        whenever(mStatusBarKeyguardViewManager.isBouncerInTransit).thenReturn(true)
+        whenever(mStatusBarKeyguardViewManager.isPrimaryBouncerInTransit).thenReturn(true)
         resetViewStates_expansionChanging_notificationAlphaUpdated(
                 expansionFraction = 0.95f,
                 expectedAlpha = aboutToShowBouncerProgress(0.95f)

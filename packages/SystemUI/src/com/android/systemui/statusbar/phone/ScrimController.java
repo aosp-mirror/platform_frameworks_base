@@ -913,7 +913,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         if (mQsExpansion > 0) {
             behindAlpha = MathUtils.lerp(behindAlpha, mDefaultScrimAlpha, mQsExpansion);
             float tintProgress = mQsExpansion;
-            if (mStatusBarKeyguardViewManager.isBouncerInTransit()) {
+            if (mStatusBarKeyguardViewManager.isPrimaryBouncerInTransit()) {
                 // this is case of - on lockscreen - going from expanded QS to bouncer.
                 // Because mQsExpansion is already interpolated and transition between tints
                 // is too slow, we want to speed it up and make it more aligned to bouncer
@@ -1096,7 +1096,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     }
 
     private float getInterpolatedFraction() {
-        if (mStatusBarKeyguardViewManager.isBouncerInTransit()) {
+        if (mStatusBarKeyguardViewManager.isPrimaryBouncerInTransit()) {
             return BouncerPanelExpansionCalculator
                     .aboutToShowBouncerProgress(mPanelExpansionFraction);
         }
