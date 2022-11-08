@@ -56,8 +56,7 @@ public class LocaleManagerShellCommand extends ShellCommand {
         pw.println("Locale manager (locale) shell commands:");
         pw.println("  help");
         pw.println("      Print this help text.");
-        pw.println("  set-app-locales <PACKAGE_NAME> [--user <USER_ID>] [--locales <LOCALE_INFO>]"
-                + "[--delegate <FROM_DELEGATE>]");
+        pw.println("  set-app-locales <PACKAGE_NAME> [--user <USER_ID>] [--locales <LOCALE_INFO>]");
         pw.println("      Set the locales for the specified app.");
         pw.println("      --user <USER_ID>: apply for the given user, "
                 + "the current user is used when unspecified.");
@@ -65,8 +64,6 @@ public class LocaleManagerShellCommand extends ShellCommand {
                 + "as a single String separated by commas");
         pw.println("                 Empty locale list is used when unspecified.");
         pw.println("                 eg. en,en-US,hi ");
-        pw.println("      --delegate <FROM_DELEGATE>: The locales are set from a delegate, "
-                + "the value could be true or false. false is the default when unspecified.");
         pw.println("  get-app-locales <PACKAGE_NAME> [--user <USER_ID>]");
         pw.println("      Get the locales for the specified app.");
         pw.println("      --user <USER_ID>: get for the given user, "
@@ -80,7 +77,6 @@ public class LocaleManagerShellCommand extends ShellCommand {
         if (packageName != null) {
             int userId = ActivityManager.getCurrentUser();
             LocaleList locales = LocaleList.getEmptyLocaleList();
-            boolean fromDelegate = false;
             do {
                 String option = getNextOption();
                 if (option == null) {
@@ -95,10 +91,6 @@ public class LocaleManagerShellCommand extends ShellCommand {
                         locales = parseLocales();
                         break;
                     }
-                    case "--delegate": {
-                        fromDelegate = parseFromDelegate();
-                        break;
-                    }
                     default: {
                         throw new IllegalArgumentException("Unknown option: " + option);
                     }
@@ -106,7 +98,7 @@ public class LocaleManagerShellCommand extends ShellCommand {
             } while (true);
 
             try {
-                mBinderService.setApplicationLocales(packageName, userId, locales, fromDelegate);
+                mBinderService.setApplicationLocales(packageName, userId, locales);
             } catch (RemoteException e) {
                 getOutPrintWriter().println("Remote Exception: " + e);
             } catch (IllegalArgumentException e) {
@@ -156,26 +148,12 @@ public class LocaleManagerShellCommand extends ShellCommand {
     }
 
     private LocaleList parseLocales() {
-        String locales = getNextArg();
-        if (locales == null) {
+        if (getRemainingArgsCount() <= 0) {
             return LocaleList.getEmptyLocaleList();
-        } else {
-            if (locales.startsWith("-")) {
-                throw new IllegalArgumentException("Unknown locales: " + locales);
-            }
-            return LocaleList.forLanguageTags(locales);
         }
-    }
-
-    private boolean parseFromDelegate() {
-        String result = getNextArg();
-        if (result == null) {
-            return false;
-        } else {
-            if (result.startsWith("-")) {
-                throw new IllegalArgumentException("Unknown source: " + result);
-            }
-            return Boolean.parseBoolean(result);
-        }
+        String[] args = peekRemainingArgs();
+        String inputLocales = args[0];
+        LocaleList locales = LocaleList.forLanguageTags(inputLocales);
+        return locales;
     }
 }

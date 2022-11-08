@@ -20,7 +20,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringRes;
-import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -34,7 +33,6 @@ import com.android.internal.util.Parcelling.BuiltIn.ForStringSet;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.Collections;
 import java.util.Set;
 
 /**
@@ -488,10 +486,7 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
      *
      * @hide
      */
-    // Already being used as mutable and most other fields in this class are also mutable.
-    @SuppressLint("MutableBareField")
-    @SystemApi
-    public @NonNull Set<String> knownCerts = Collections.emptySet();
+    public @Nullable Set<String> knownCerts;
 
     /** @hide */
     public static int fixProtectionLevel(int level) {
@@ -625,8 +620,6 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
         descriptionRes = orig.descriptionRes;
         requestRes = orig.requestRes;
         nonLocalizedDescription = orig.nonLocalizedDescription;
-        // Note that knownCerts wasn't properly copied before Android U.
-        knownCerts = orig.knownCerts;
     }
 
     /**

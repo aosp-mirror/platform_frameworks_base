@@ -84,7 +84,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.ISoundTriggerService;
 import com.android.internal.app.ISoundTriggerSession;
 import com.android.server.SystemService;
-import com.android.server.utils.EventLogger;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -310,14 +309,14 @@ public class SoundTriggerService extends SystemService {
                     Slog.i(TAG, "startRecognition(): Uuid : " + parcelUuid);
                 }
 
-                sEventLogger.enqueue(new EventLogger.StringEvent(
-                        "startRecognition(): Uuid : " + parcelUuid));
+                sEventLogger.log(new SoundTriggerLogger.StringEvent("startRecognition(): Uuid : "
+                        + parcelUuid));
 
                 GenericSoundModel model = getSoundModel(parcelUuid);
                 if (model == null) {
                     Slog.w(TAG, "Null model in database for id: " + parcelUuid);
 
-                    sEventLogger.enqueue(new EventLogger.StringEvent(
+                    sEventLogger.log(new SoundTriggerLogger.StringEvent(
                             "startRecognition(): Null model in database for id: " + parcelUuid));
 
                     return STATUS_ERROR;
@@ -340,7 +339,7 @@ public class SoundTriggerService extends SystemService {
                     Slog.i(TAG, "stopRecognition(): Uuid : " + parcelUuid);
                 }
 
-                sEventLogger.enqueue(new EventLogger.StringEvent("stopRecognition(): Uuid : "
+                sEventLogger.log(new SoundTriggerLogger.StringEvent("stopRecognition(): Uuid : "
                         + parcelUuid));
 
                 int ret = mSoundTriggerHelper.stopGenericRecognition(parcelUuid.getUuid(),
@@ -360,7 +359,7 @@ public class SoundTriggerService extends SystemService {
                     Slog.i(TAG, "getSoundModel(): id = " + soundModelId);
                 }
 
-                sEventLogger.enqueue(new EventLogger.StringEvent("getSoundModel(): id = "
+                sEventLogger.log(new SoundTriggerLogger.StringEvent("getSoundModel(): id = "
                         + soundModelId));
 
                 SoundTrigger.GenericSoundModel model = mDbHelper.getGenericSoundModel(
@@ -377,7 +376,7 @@ public class SoundTriggerService extends SystemService {
                     Slog.i(TAG, "updateSoundModel(): model = " + soundModel);
                 }
 
-                sEventLogger.enqueue(new EventLogger.StringEvent("updateSoundModel(): model = "
+                sEventLogger.log(new SoundTriggerLogger.StringEvent("updateSoundModel(): model = "
                         + soundModel));
 
                 mDbHelper.updateGenericSoundModel(soundModel);
@@ -392,7 +391,7 @@ public class SoundTriggerService extends SystemService {
                     Slog.i(TAG, "deleteSoundModel(): id = " + soundModelId);
                 }
 
-                sEventLogger.enqueue(new EventLogger.StringEvent("deleteSoundModel(): id = "
+                sEventLogger.log(new SoundTriggerLogger.StringEvent("deleteSoundModel(): id = "
                         + soundModelId));
 
                 // Unload the model if it is loaded.
@@ -412,7 +411,7 @@ public class SoundTriggerService extends SystemService {
                 if (soundModel == null || soundModel.getUuid() == null) {
                     Slog.w(TAG, "Invalid sound model");
 
-                    sEventLogger.enqueue(new EventLogger.StringEvent(
+                    sEventLogger.log(new SoundTriggerLogger.StringEvent(
                             "loadGenericSoundModel(): Invalid sound model"));
 
                     return STATUS_ERROR;
@@ -421,7 +420,7 @@ public class SoundTriggerService extends SystemService {
                     Slog.i(TAG, "loadGenericSoundModel(): id = " + soundModel.getUuid());
                 }
 
-                sEventLogger.enqueue(new EventLogger.StringEvent("loadGenericSoundModel(): id = "
+                sEventLogger.log(new SoundTriggerLogger.StringEvent("loadGenericSoundModel(): id = "
                         + soundModel.getUuid()));
 
                 synchronized (mLock) {
@@ -448,7 +447,7 @@ public class SoundTriggerService extends SystemService {
                 if (soundModel == null || soundModel.getUuid() == null) {
                     Slog.w(TAG, "Invalid sound model");
 
-                    sEventLogger.enqueue(new EventLogger.StringEvent(
+                    sEventLogger.log(new SoundTriggerLogger.StringEvent(
                             "loadKeyphraseSoundModel(): Invalid sound model"));
 
                     return STATUS_ERROR;
@@ -456,7 +455,7 @@ public class SoundTriggerService extends SystemService {
                 if (soundModel.getKeyphrases() == null || soundModel.getKeyphrases().length != 1) {
                     Slog.w(TAG, "Only one keyphrase per model is currently supported.");
 
-                    sEventLogger.enqueue(new EventLogger.StringEvent(
+                    sEventLogger.log(new SoundTriggerLogger.StringEvent(
                             "loadKeyphraseSoundModel(): Only one keyphrase per model"
                                     + " is currently supported."));
 
@@ -466,8 +465,8 @@ public class SoundTriggerService extends SystemService {
                     Slog.i(TAG, "loadKeyphraseSoundModel(): id = " + soundModel.getUuid());
                 }
 
-                sEventLogger.enqueue(
-                        new EventLogger.StringEvent("loadKeyphraseSoundModel(): id = "
+                sEventLogger.log(
+                        new SoundTriggerLogger.StringEvent("loadKeyphraseSoundModel(): id = "
                                 + soundModel.getUuid()));
 
                 synchronized (mLock) {
@@ -504,7 +503,7 @@ public class SoundTriggerService extends SystemService {
                     Slog.i(TAG, "startRecognition(): id = " + soundModelId);
                 }
 
-                sEventLogger.enqueue(new EventLogger.StringEvent(
+                sEventLogger.log(new SoundTriggerLogger.StringEvent(
                         "startRecognitionForService(): id = " + soundModelId));
 
                 IRecognitionStatusCallback callback =
@@ -516,7 +515,7 @@ public class SoundTriggerService extends SystemService {
                     if (soundModel == null) {
                         Slog.w(TAG, soundModelId + " is not loaded");
 
-                        sEventLogger.enqueue(new EventLogger.StringEvent(
+                        sEventLogger.log(new SoundTriggerLogger.StringEvent(
                                 "startRecognitionForService():" + soundModelId + " is not loaded"));
 
                         return STATUS_ERROR;
@@ -528,7 +527,7 @@ public class SoundTriggerService extends SystemService {
                     if (existingCallback != null) {
                         Slog.w(TAG, soundModelId + " is already running");
 
-                        sEventLogger.enqueue(new EventLogger.StringEvent(
+                        sEventLogger.log(new SoundTriggerLogger.StringEvent(
                                 "startRecognitionForService():"
                                         + soundModelId + " is already running"));
 
@@ -543,7 +542,7 @@ public class SoundTriggerService extends SystemService {
                         default:
                             Slog.e(TAG, "Unknown model type");
 
-                            sEventLogger.enqueue(new EventLogger.StringEvent(
+                            sEventLogger.log(new SoundTriggerLogger.StringEvent(
                                     "startRecognitionForService(): Unknown model type"));
 
                             return STATUS_ERROR;
@@ -552,7 +551,7 @@ public class SoundTriggerService extends SystemService {
                     if (ret != STATUS_OK) {
                         Slog.e(TAG, "Failed to start model: " + ret);
 
-                        sEventLogger.enqueue(new EventLogger.StringEvent(
+                        sEventLogger.log(new SoundTriggerLogger.StringEvent(
                                 "startRecognitionForService(): Failed to start model:"));
 
                         return ret;
@@ -575,7 +574,7 @@ public class SoundTriggerService extends SystemService {
                     Slog.i(TAG, "stopRecognition(): id = " + soundModelId);
                 }
 
-                sEventLogger.enqueue(new EventLogger.StringEvent(
+                sEventLogger.log(new SoundTriggerLogger.StringEvent(
                         "stopRecognitionForService(): id = " + soundModelId));
 
                 synchronized (mLock) {
@@ -583,7 +582,7 @@ public class SoundTriggerService extends SystemService {
                     if (soundModel == null) {
                         Slog.w(TAG, soundModelId + " is not loaded");
 
-                        sEventLogger.enqueue(new EventLogger.StringEvent(
+                        sEventLogger.log(new SoundTriggerLogger.StringEvent(
                                 "stopRecognitionForService(): " + soundModelId
                                         + " is not loaded"));
 
@@ -596,7 +595,7 @@ public class SoundTriggerService extends SystemService {
                     if (callback == null) {
                         Slog.w(TAG, soundModelId + " is not running");
 
-                        sEventLogger.enqueue(new EventLogger.StringEvent(
+                        sEventLogger.log(new SoundTriggerLogger.StringEvent(
                                 "stopRecognitionForService(): " + soundModelId
                                         + " is not running"));
 
@@ -611,7 +610,7 @@ public class SoundTriggerService extends SystemService {
                         default:
                             Slog.e(TAG, "Unknown model type");
 
-                            sEventLogger.enqueue(new EventLogger.StringEvent(
+                            sEventLogger.log(new SoundTriggerLogger.StringEvent(
                                     "stopRecognitionForService(): Unknown model type"));
 
                             return STATUS_ERROR;
@@ -620,7 +619,7 @@ public class SoundTriggerService extends SystemService {
                     if (ret != STATUS_OK) {
                         Slog.e(TAG, "Failed to stop model: " + ret);
 
-                        sEventLogger.enqueue(new EventLogger.StringEvent(
+                        sEventLogger.log(new SoundTriggerLogger.StringEvent(
                                 "stopRecognitionForService(): Failed to stop model: " + ret));
 
                         return ret;
@@ -643,7 +642,7 @@ public class SoundTriggerService extends SystemService {
                     Slog.i(TAG, "unloadSoundModel(): id = " + soundModelId);
                 }
 
-                sEventLogger.enqueue(new EventLogger.StringEvent("unloadSoundModel(): id = "
+                sEventLogger.log(new SoundTriggerLogger.StringEvent("unloadSoundModel(): id = "
                         + soundModelId));
 
                 synchronized (mLock) {
@@ -651,7 +650,7 @@ public class SoundTriggerService extends SystemService {
                     if (soundModel == null) {
                         Slog.w(TAG, soundModelId + " is not loaded");
 
-                        sEventLogger.enqueue(new EventLogger.StringEvent(
+                        sEventLogger.log(new SoundTriggerLogger.StringEvent(
                                 "unloadSoundModel(): " + soundModelId + " is not loaded"));
 
                         return STATUS_ERROR;
@@ -668,7 +667,7 @@ public class SoundTriggerService extends SystemService {
                         default:
                             Slog.e(TAG, "Unknown model type");
 
-                            sEventLogger.enqueue(new EventLogger.StringEvent(
+                            sEventLogger.log(new SoundTriggerLogger.StringEvent(
                                     "unloadSoundModel(): Unknown model type"));
 
                             return STATUS_ERROR;
@@ -676,7 +675,7 @@ public class SoundTriggerService extends SystemService {
                     if (ret != STATUS_OK) {
                         Slog.e(TAG, "Failed to unload model");
 
-                        sEventLogger.enqueue(new EventLogger.StringEvent(
+                        sEventLogger.log(new SoundTriggerLogger.StringEvent(
                                 "unloadSoundModel(): Failed to unload model"));
 
                         return ret;
@@ -710,7 +709,7 @@ public class SoundTriggerService extends SystemService {
                     Slog.i(TAG, "getModelState(): id = " + soundModelId);
                 }
 
-                sEventLogger.enqueue(new EventLogger.StringEvent("getModelState(): id = "
+                sEventLogger.log(new SoundTriggerLogger.StringEvent("getModelState(): id = "
                         + soundModelId));
 
                 synchronized (mLock) {
@@ -718,7 +717,7 @@ public class SoundTriggerService extends SystemService {
                     if (soundModel == null) {
                         Slog.w(TAG, soundModelId + " is not loaded");
 
-                        sEventLogger.enqueue(new EventLogger.StringEvent("getModelState(): "
+                        sEventLogger.log(new SoundTriggerLogger.StringEvent("getModelState(): "
                                 + soundModelId + " is not loaded"));
 
                         return ret;
@@ -730,7 +729,7 @@ public class SoundTriggerService extends SystemService {
                         default:
                             // SoundModel.TYPE_KEYPHRASE is not supported to increase privacy.
                             Slog.e(TAG, "Unsupported model type, " + soundModel.getType());
-                            sEventLogger.enqueue(new EventLogger.StringEvent(
+                            sEventLogger.log(new SoundTriggerLogger.StringEvent(
                                     "getModelState(): Unsupported model type, "
                                             + soundModel.getType()));
                             break;
@@ -752,7 +751,7 @@ public class SoundTriggerService extends SystemService {
 
                 synchronized (mLock) {
                     ModuleProperties properties = mSoundTriggerHelper.getModuleProperties();
-                    sEventLogger.enqueue(new EventLogger.StringEvent(
+                    sEventLogger.log(new SoundTriggerLogger.StringEvent(
                             "getModuleProperties(): " + properties));
                     return properties;
                 }
@@ -770,7 +769,7 @@ public class SoundTriggerService extends SystemService {
                             + ", value=" + value);
                 }
 
-                sEventLogger.enqueue(new EventLogger.StringEvent(
+                sEventLogger.log(new SoundTriggerLogger.StringEvent(
                         "setParameter(): id=" + soundModelId
                                 + ", param=" + modelParam
                                 + ", value=" + value));
@@ -781,7 +780,7 @@ public class SoundTriggerService extends SystemService {
                         Slog.w(TAG, soundModelId + " is not loaded. Loaded models: "
                                 + mLoadedModels.toString());
 
-                        sEventLogger.enqueue(new EventLogger.StringEvent("setParameter(): "
+                        sEventLogger.log(new SoundTriggerLogger.StringEvent("setParameter(): "
                                 + soundModelId + " is not loaded"));
 
                         return STATUS_BAD_VALUE;
@@ -804,7 +803,7 @@ public class SoundTriggerService extends SystemService {
                             + ", param=" + modelParam);
                 }
 
-                sEventLogger.enqueue(new EventLogger.StringEvent(
+                sEventLogger.log(new SoundTriggerLogger.StringEvent(
                         "getParameter(): id=" + soundModelId
                                 + ", param=" + modelParam));
 
@@ -813,7 +812,7 @@ public class SoundTriggerService extends SystemService {
                     if (soundModel == null) {
                         Slog.w(TAG, soundModelId + " is not loaded");
 
-                        sEventLogger.enqueue(new EventLogger.StringEvent("getParameter(): "
+                        sEventLogger.log(new SoundTriggerLogger.StringEvent("getParameter(): "
                                 + soundModelId + " is not loaded"));
 
                         throw new IllegalArgumentException("sound model is not loaded");
@@ -835,7 +834,7 @@ public class SoundTriggerService extends SystemService {
                             + ", param=" + modelParam);
                 }
 
-                sEventLogger.enqueue(new EventLogger.StringEvent(
+                sEventLogger.log(new SoundTriggerLogger.StringEvent(
                         "queryParameter(): id=" + soundModelId
                                 + ", param=" + modelParam));
 
@@ -844,7 +843,7 @@ public class SoundTriggerService extends SystemService {
                     if (soundModel == null) {
                         Slog.w(TAG, soundModelId + " is not loaded");
 
-                        sEventLogger.enqueue(new EventLogger.StringEvent(
+                        sEventLogger.log(new SoundTriggerLogger.StringEvent(
                                 "queryParameter(): "
                                         + soundModelId + " is not loaded"));
 
@@ -858,7 +857,7 @@ public class SoundTriggerService extends SystemService {
 
         private void clientDied() {
             Slog.w(TAG, "Client died, cleaning up session.");
-            sEventLogger.enqueue(new EventLogger.StringEvent(
+            sEventLogger.log(new SoundTriggerLogger.StringEvent(
                     "Client died, cleaning up session."));
             mSoundTriggerHelper.detach();
         }
@@ -1028,7 +1027,7 @@ public class SoundTriggerService extends SystemService {
                     } catch (Exception e) {
                         Slog.e(TAG, mPuuid + ": Cannot remove client", e);
 
-                        sEventLogger.enqueue(new EventLogger.StringEvent(mPuuid
+                        sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
                                 + ": Cannot remove client"));
 
                     }
@@ -1053,7 +1052,7 @@ public class SoundTriggerService extends SystemService {
             private void destroy() {
                 if (DEBUG) Slog.v(TAG, mPuuid + ": destroy");
 
-                sEventLogger.enqueue(new EventLogger.StringEvent(mPuuid + ": destroy"));
+                sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid + ": destroy"));
 
                 synchronized (mRemoteServiceLock) {
                     disconnectLocked();
@@ -1087,7 +1086,7 @@ public class SoundTriggerService extends SystemService {
                                 Slog.e(TAG, mPuuid + ": Could not stop operation "
                                         + mRunningOpIds.valueAt(i), e);
 
-                                sEventLogger.enqueue(new EventLogger.StringEvent(mPuuid
+                                sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
                                         + ": Could not stop operation " + mRunningOpIds.valueAt(
                                         i)));
 
@@ -1117,7 +1116,7 @@ public class SoundTriggerService extends SystemService {
                     if (ri == null) {
                         Slog.w(TAG, mPuuid + ": " + mServiceName + " not found");
 
-                        sEventLogger.enqueue(new EventLogger.StringEvent(mPuuid
+                        sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
                                 + ": " + mServiceName + " not found"));
 
                         return;
@@ -1128,7 +1127,7 @@ public class SoundTriggerService extends SystemService {
                         Slog.w(TAG, mPuuid + ": " + mServiceName + " does not require "
                                 + BIND_SOUND_TRIGGER_DETECTION_SERVICE);
 
-                        sEventLogger.enqueue(new EventLogger.StringEvent(mPuuid
+                        sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
                                 + ": " + mServiceName + " does not require "
                                 + BIND_SOUND_TRIGGER_DETECTION_SERVICE));
 
@@ -1144,7 +1143,7 @@ public class SoundTriggerService extends SystemService {
                     } else {
                         Slog.w(TAG, mPuuid + ": Could not bind to " + mServiceName);
 
-                        sEventLogger.enqueue(new EventLogger.StringEvent(mPuuid
+                        sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
                                 + ": Could not bind to " + mServiceName));
 
                     }
@@ -1166,7 +1165,7 @@ public class SoundTriggerService extends SystemService {
                                 mPuuid + ": Dropped operation as already destroyed or marked for "
                                         + "destruction");
 
-                        sEventLogger.enqueue(new EventLogger.StringEvent(mPuuid
+                        sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
                                 + ":Dropped operation as already destroyed or marked for "
                                 + "destruction"));
 
@@ -1198,7 +1197,7 @@ public class SoundTriggerService extends SystemService {
                                             mPuuid + ": Dropped operation as too many operations "
                                                     + "were run in last 24 hours");
 
-                                    sEventLogger.enqueue(new EventLogger.StringEvent(mPuuid
+                                    sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
                                             + ": Dropped operation as too many operations "
                                             + "were run in last 24 hours"));
 
@@ -1208,7 +1207,7 @@ public class SoundTriggerService extends SystemService {
                             } catch (Exception e) {
                                 Slog.e(TAG, mPuuid + ": Could not drop operation", e);
 
-                                sEventLogger.enqueue(new EventLogger.StringEvent(mPuuid
+                                sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
                                         + ": Could not drop operation"));
 
                             }
@@ -1225,7 +1224,7 @@ public class SoundTriggerService extends SystemService {
                             try {
                                 if (DEBUG) Slog.v(TAG, mPuuid + ": runOp " + opId);
 
-                                sEventLogger.enqueue(new EventLogger.StringEvent(mPuuid
+                                sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
                                         + ": runOp " + opId));
 
                                 op.run(opId, mService);
@@ -1233,7 +1232,7 @@ public class SoundTriggerService extends SystemService {
                             } catch (Exception e) {
                                 Slog.e(TAG, mPuuid + ": Could not run operation " + opId, e);
 
-                                sEventLogger.enqueue(new EventLogger.StringEvent(mPuuid
+                                sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
                                         + ": Could not run operation " + opId));
 
                             }
@@ -1266,7 +1265,7 @@ public class SoundTriggerService extends SystemService {
                 Slog.w(TAG, mPuuid + "->" + mServiceName + ": IGNORED onKeyphraseDetected(" + event
                         + ")");
 
-                sEventLogger.enqueue(new EventLogger.StringEvent(mPuuid + "->" + mServiceName
+                sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid + "->" + mServiceName
                         + ": IGNORED onKeyphraseDetected(" + event + ")"));
             }
 
@@ -1283,9 +1282,9 @@ public class SoundTriggerService extends SystemService {
                 attributesBuilder.setInternalCapturePreset(MediaRecorder.AudioSource.HOTWORD);
                 AudioAttributes attributes = attributesBuilder.build();
 
-                AudioFormat originalFormat = event.getCaptureFormat();
+                    AudioFormat originalFormat = event.getCaptureFormat();
 
-                sEventLogger.enqueue(new EventLogger.StringEvent("createAudioRecordForEvent"));
+                    sEventLogger.log(new SoundTriggerLogger.StringEvent("createAudioRecordForEvent"));
 
                 return (new AudioRecord.Builder())
                             .setAudioAttributes(attributes)
@@ -1302,7 +1301,7 @@ public class SoundTriggerService extends SystemService {
             public void onGenericSoundTriggerDetected(SoundTrigger.GenericRecognitionEvent event) {
                 if (DEBUG) Slog.v(TAG, mPuuid + ": Generic sound trigger event: " + event);
 
-                sEventLogger.enqueue(new EventLogger.StringEvent(mPuuid
+                sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
                         + ": Generic sound trigger event: " + event));
 
                 runOrAddOperation(new Operation(
@@ -1337,7 +1336,7 @@ public class SoundTriggerService extends SystemService {
             public void onError(int status) {
                 if (DEBUG) Slog.v(TAG, mPuuid + ": onError: " + status);
 
-                sEventLogger.enqueue(new EventLogger.StringEvent(mPuuid
+                sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
                         + ": onError: " + status));
 
                 runOrAddOperation(
@@ -1360,7 +1359,7 @@ public class SoundTriggerService extends SystemService {
             public void onRecognitionPaused() {
                 Slog.i(TAG, mPuuid + "->" + mServiceName + ": IGNORED onRecognitionPaused");
 
-                sEventLogger.enqueue(new EventLogger.StringEvent(mPuuid
+                sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
                         + "->" + mServiceName + ": IGNORED onRecognitionPaused"));
 
             }
@@ -1369,7 +1368,7 @@ public class SoundTriggerService extends SystemService {
             public void onRecognitionResumed() {
                 Slog.i(TAG, mPuuid + "->" + mServiceName + ": IGNORED onRecognitionResumed");
 
-                sEventLogger.enqueue(new EventLogger.StringEvent(mPuuid
+                sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
                         + "->" + mServiceName + ": IGNORED onRecognitionResumed"));
 
             }
@@ -1378,7 +1377,7 @@ public class SoundTriggerService extends SystemService {
             public void onServiceConnected(ComponentName name, IBinder service) {
                 if (DEBUG) Slog.v(TAG, mPuuid + ": onServiceConnected(" + service + ")");
 
-                sEventLogger.enqueue(new EventLogger.StringEvent(mPuuid
+                sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
                         + ": onServiceConnected(" + service + ")"));
 
                 synchronized (mRemoteServiceLock) {
@@ -1401,7 +1400,7 @@ public class SoundTriggerService extends SystemService {
             public void onServiceDisconnected(ComponentName name) {
                 if (DEBUG) Slog.v(TAG, mPuuid + ": onServiceDisconnected");
 
-                sEventLogger.enqueue(new EventLogger.StringEvent(mPuuid
+                sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
                         + ": onServiceDisconnected"));
 
                 synchronized (mRemoteServiceLock) {
@@ -1413,7 +1412,7 @@ public class SoundTriggerService extends SystemService {
             public void onBindingDied(ComponentName name) {
                 if (DEBUG) Slog.v(TAG, mPuuid + ": onBindingDied");
 
-                sEventLogger.enqueue(new EventLogger.StringEvent(mPuuid
+                sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
                         + ": onBindingDied"));
 
                 synchronized (mRemoteServiceLock) {
@@ -1425,7 +1424,7 @@ public class SoundTriggerService extends SystemService {
             public void onNullBinding(ComponentName name) {
                 Slog.w(TAG, name + " for model " + mPuuid + " returned a null binding");
 
-                sEventLogger.enqueue(new EventLogger.StringEvent(name + " for model "
+                sEventLogger.log(new SoundTriggerLogger.StringEvent(name + " for model "
                         + mPuuid + " returned a null binding"));
 
                 synchronized (mRemoteServiceLock) {
@@ -1611,7 +1610,7 @@ public class SoundTriggerService extends SystemService {
 
             private void clientDied() {
                 Slog.w(TAG, "Client died, cleaning up session.");
-                sEventLogger.enqueue(new EventLogger.StringEvent(
+                sEventLogger.log(new SoundTriggerLogger.StringEvent(
                         "Client died, cleaning up session."));
                 mSoundTriggerHelper.detach();
             }
@@ -1638,7 +1637,7 @@ public class SoundTriggerService extends SystemService {
     //=================================================================
     // For logging
 
-    private static final EventLogger sEventLogger = new EventLogger(200,
+    private static final SoundTriggerLogger sEventLogger = new SoundTriggerLogger(200,
             "SoundTrigger activity");
 
 }

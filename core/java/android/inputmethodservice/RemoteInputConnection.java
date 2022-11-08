@@ -23,7 +23,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.RectF;
 import android.os.Bundle;
-import android.os.CancellationSignal;
 import android.os.Handler;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -35,7 +34,6 @@ import android.view.inputmethod.HandwritingGesture;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputContentInfo;
 import android.view.inputmethod.ParcelableHandwritingGesture;
-import android.view.inputmethod.PreviewableHandwritingGesture;
 import android.view.inputmethod.SurroundingText;
 import android.view.inputmethod.TextAttribute;
 import android.view.inputmethod.TextBoundsInfoResult;
@@ -426,14 +424,6 @@ final class RemoteInputConnection implements InputConnection {
             @Nullable IntConsumer consumer) {
         mInvoker.performHandwritingGesture(ParcelableHandwritingGesture.of(gesture), executor,
                 consumer);
-    }
-
-    @AnyThread
-    public boolean previewHandwritingGesture(
-            @NonNull PreviewableHandwritingGesture gesture,
-            @Nullable CancellationSignal cancellationSignal) {
-        return mInvoker.previewHandwritingGesture(ParcelableHandwritingGesture.of(gesture),
-                cancellationSignal);
     }
 
     @AnyThread

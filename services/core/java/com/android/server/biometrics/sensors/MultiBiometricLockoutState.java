@@ -75,9 +75,6 @@ class MultiBiometricLockoutState {
                 // fall through
             case Authenticators.BIOMETRIC_CONVENIENCE:
                 authMap.get(BIOMETRIC_CONVENIENCE).mPermanentlyLockedOut = !canAuth;
-                return;
-            default:
-                Slog.e(TAG, "increaseLockoutTime called for invalid strength : "  + strength);
         }
     }
 
@@ -92,9 +89,6 @@ class MultiBiometricLockoutState {
                 // fall through
             case Authenticators.BIOMETRIC_CONVENIENCE:
                 authMap.get(BIOMETRIC_CONVENIENCE).increaseLockoutTo(duration);
-                return;
-            default:
-                Slog.e(TAG, "increaseLockoutTime called for invalid strength : "  + strength);
         }
     }
 
@@ -109,34 +103,22 @@ class MultiBiometricLockoutState {
                 // fall through
             case Authenticators.BIOMETRIC_CONVENIENCE:
                 authMap.get(BIOMETRIC_CONVENIENCE).setTimedLockout(0);
-                return;
-            default:
-                Slog.e(TAG, "clearLockoutTime called for invalid strength : "  + strength);
         }
     }
 
     /**
-     * Retrieves the lockout state for a user of a specified strength.
+     * Indicates if a user can perform an authentication operation with a given
+     * {@link Authenticators.Types}
      *
      * @param userId   The user.
      * @param strength The strength of biometric that is requested to authenticate.
+     * @return If a user can authenticate with a given biometric of this strength.
      */
-    @LockoutTracker.LockoutMode
-    int getLockoutState(int userId, @Authenticators.Types int strength) {
-        final Map<Integer, AuthenticatorState> authMap = getAuthMapForUser(userId);
-        if (!authMap.containsKey(strength)) {
-            Slog.e(TAG, "Error, getLockoutState for unknown strength: " + strength
-                    + " returning LOCKOUT_NONE");
-            return LockoutTracker.LOCKOUT_NONE;
-        }
-        final AuthenticatorState state = authMap.get(strength);
-        if (state.mPermanentlyLockedOut) {
-            return LockoutTracker.LOCKOUT_PERMANENT;
-        } else if (state.isTimedLockout()) {
-            return LockoutTracker.LOCKOUT_TIMED;
-        } else {
-            return LockoutTracker.LOCKOUT_NONE;
-        }
+    boolean canUserAuthenticate(int userId, @Authenticators.Types int strength) {
+        final boolean canAuthenticate = getAuthMapForUser(userId).get(strength).canAuthenticate();
+        Slog.d(TAG, "canUserAuthenticate(userId=" + userId + ", strength=" + strength + ") ="
+                + canAuthenticate);
+        return canAuthenticate;
     }
 
     @Override
@@ -170,15 +152,7 @@ class MultiBiometricLockoutState {
         }
 
         boolean canAuthenticate() {
-            return !mPermanentlyLockedOut && !isTimedLockout();
-        }
-
-        boolean isTimedLockout() {
-            return mClock.millis() - mTimedLockout < 0;
-        }
-
-        void setTimedLockout(long duration) {
-            mTimedLockout = duration;
+            return !mPermanentlyLockedOut && mClock.millis() - mTimedLockout >= 0;
         }
 
         /**
@@ -186,6 +160,10 @@ class MultiBiometricLockoutState {
          */
         void increaseLockoutTo(long duration) {
             mTimedLockout = Math.max(mTimedLockout, duration);
+        }
+
+        void setTimedLockout(long duration) {
+            mTimedLockout = duration;
         }
 
         String toString(long currentTime) {

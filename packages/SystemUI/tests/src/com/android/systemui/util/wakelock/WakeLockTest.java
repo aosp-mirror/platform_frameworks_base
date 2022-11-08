@@ -42,9 +42,7 @@ public class WakeLockTest extends SysuiTestCase {
 
     @Before
     public void setUp() {
-        mInner = WakeLock.createWakeLockInner(mContext,
-                WakeLockTest.class.getName(),
-                PowerManager.PARTIAL_WAKE_LOCK);
+        mInner = WakeLock.createPartialInner(mContext, WakeLockTest.class.getName());
         mWakeLock = WakeLock.wrap(mInner, 20000);
     }
 

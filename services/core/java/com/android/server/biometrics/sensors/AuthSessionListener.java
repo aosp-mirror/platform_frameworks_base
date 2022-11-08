@@ -28,10 +28,16 @@ interface AuthSessionListener {
     void authStartedFor(int userId, int sensorId, long requestId);
 
     /**
+     * Indicates a successful authentication occurred for a sensor of a given strength.
+     */
+    void authenticatedFor(int userId, @Authenticators.Types int biometricStrength, int sensorId,
+            long requestId);
+
+    /**
      * Indicates authentication ended for a sensor of a given strength.
      */
     void authEndedFor(int userId, @Authenticators.Types int biometricStrength, int sensorId,
-            long requestId, boolean wasSuccessful);
+            long requestId);
 
     /**
      * Indicates a lockout occurred for a sensor of a given strength.

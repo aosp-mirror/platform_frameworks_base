@@ -63,6 +63,7 @@ import com.android.server.biometrics.log.Probe;
 import com.android.server.biometrics.sensors.AuthSessionCoordinator;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
+import com.android.server.biometrics.sensors.LockoutCache;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -112,6 +113,8 @@ public class FingerprintAuthenticationClientTest {
     private BiometricContext mBiometricContext;
     @Mock
     private BiometricManager mBiometricManager;
+    @Mock
+    private LockoutCache mLockoutCache;
     @Mock
     private IUdfpsOverlayController mUdfpsOverlayController;
     @Mock
@@ -655,7 +658,7 @@ public class FingerprintAuthenticationClientTest {
                 false /* requireConfirmation */,
                 9 /* sensorId */, mBiometricLogger, mBiometricContext,
                 true /* isStrongBiometric */,
-                null /* taskStackListener */, null /* lockoutCache */,
+                null /* taskStackListener */, mLockoutCache,
                 mUdfpsOverlayController, mSideFpsController, null, allowBackgroundAuthentication,
                 mSensorProps,
                 new Handler(mLooper.getLooper()), 0 /* biometricStrength */, mClock) {

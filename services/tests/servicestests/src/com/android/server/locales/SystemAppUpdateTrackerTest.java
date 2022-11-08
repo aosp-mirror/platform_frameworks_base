@@ -135,9 +135,8 @@ public class SystemAppUpdateTrackerTest {
         mSystemAppUpdateTracker = new SystemAppUpdateTracker(mMockContext,
             mLocaleManagerService, mStoragefile);
 
-        AppUpdateTracker appUpdateTracker = mock(AppUpdateTracker.class);
-        mPackageMonitor = new LocaleManagerServicePackageMonitor(mockLocaleManagerBackupHelper,
-                mSystemAppUpdateTracker, appUpdateTracker);
+        mPackageMonitor = new LocaleManagerServicePackageMonitor(
+                mockLocaleManagerBackupHelper, mSystemAppUpdateTracker);
     }
 
     @After

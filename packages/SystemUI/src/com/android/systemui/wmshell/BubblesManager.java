@@ -25,7 +25,6 @@ import static android.service.notification.NotificationListenerService.REASON_GR
 import static android.service.notification.NotificationStats.DISMISSAL_BUBBLE;
 import static android.service.notification.NotificationStats.DISMISS_SENTIMENT_NEUTRAL;
 
-import static com.android.systemui.flags.Flags.WM_BUBBLE_BAR;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
 
@@ -52,7 +51,6 @@ import androidx.annotation.Nullable;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shared.system.QuickStepContract;
@@ -131,7 +129,6 @@ public class BubblesManager {
             CommonNotifCollection notifCollection,
             NotifPipeline notifPipeline,
             SysUiState sysUiState,
-            FeatureFlags featureFlags,
             Executor sysuiMainExecutor) {
         if (bubblesOptional.isPresent()) {
             return new BubblesManager(context,
@@ -149,7 +146,6 @@ public class BubblesManager {
                     notifCollection,
                     notifPipeline,
                     sysUiState,
-                    featureFlags,
                     sysuiMainExecutor);
         } else {
             return null;
@@ -172,7 +168,6 @@ public class BubblesManager {
             CommonNotifCollection notifCollection,
             NotifPipeline notifPipeline,
             SysUiState sysUiState,
-            FeatureFlags featureFlags,
             Executor sysuiMainExecutor) {
         mContext = context;
         mBubbles = bubbles;
@@ -357,7 +352,6 @@ public class BubblesManager {
                 });
             }
         };
-        mBubbles.setBubbleBarEnabled(featureFlags.isEnabled(WM_BUBBLE_BAR));
         mBubbles.setSysuiProxy(mSysuiProxy);
     }
 

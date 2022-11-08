@@ -782,7 +782,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         mFingerprintCancelSignal = null;
         updateBiometricListeningState(BIOMETRIC_ACTION_UPDATE,
                 FACE_AUTH_UPDATED_FP_AUTHENTICATED);
-        mLogger.logFingerprintSuccess(userId, isStrongBiometric);
+        mLogger.d("onFingerprintAuthenticated");
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
@@ -2701,7 +2701,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                         || containsFlag(strongAuth, STRONG_AUTH_REQUIRED_AFTER_TIMEOUT);
 
         // TODO: always disallow when fp is already locked out?
-        final boolean fpLockedOut = mFingerprintLockedOut || mFingerprintLockedOutPermanent;
+        final boolean fpLockedout = mFingerprintLockedOut || mFingerprintLockedOutPermanent;
 
         final boolean canBypass = mKeyguardBypassController != null
                 && mKeyguardBypassController.canBypass();
@@ -2730,6 +2730,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         final boolean faceDisabledForUser = isFaceDisabled(user);
         final boolean biometricEnabledForUser = mBiometricEnabledForUser.get(user);
         final boolean shouldListenForFaceAssistant = shouldListenForFaceAssistant();
+        final boolean fpOrFaceIsLockedOut = isFaceLockedOut() || fpLockedout;
 
         // Only listen if this KeyguardUpdateMonitor belongs to the primary user. There is an
         // instance of KeyguardUpdateMonitor for each user but KeyguardUpdateMonitor is user-aware.
@@ -2747,10 +2748,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 && (!mSecureCameraLaunched || mOccludingAppRequestingFace)
                 && !faceAuthenticated
                 && !mGoingToSleep
-                // We only care about fp locked out state and not face because we still trigger
-                // face auth even when face is locked out to show the user a message that face
-                // unlock was supposed to run but didn't
-                && !fpLockedOut;
+                && !fpOrFaceIsLockedOut;
 
         // Aggregate relevant fields for debug logging.
         maybeLogListenerModelData(
@@ -2765,7 +2763,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     faceAuthenticated,
                     faceDisabledForUser,
                     isFaceLockedOut(),
-                    fpLockedOut,
+                    fpLockedout,
                     mGoingToSleep,
                     awakeKeyguard,
                     mKeyguardGoingAway,

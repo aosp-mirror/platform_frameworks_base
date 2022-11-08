@@ -85,7 +85,7 @@ public class PerformanceTracker {
         }
     }
 
-    public void incrementAcquireForUser(int userId, boolean isCrypto) {
+    void incrementAcquireForUser(int userId, boolean isCrypto) {
         createUserEntryIfNecessary(userId);
 
         if (isCrypto) {
@@ -95,13 +95,13 @@ public class PerformanceTracker {
         }
     }
 
-    public void incrementTimedLockoutForUser(int userId) {
+    void incrementTimedLockoutForUser(int userId) {
         createUserEntryIfNecessary(userId);
 
         mAllUsersInfo.get(userId).mTimedLockout++;
     }
 
-    public void incrementPermanentLockoutForUser(int userId) {
+    void incrementPermanentLockoutForUser(int userId) {
         createUserEntryIfNecessary(userId);
 
         mAllUsersInfo.get(userId).mPermanentLockout++;

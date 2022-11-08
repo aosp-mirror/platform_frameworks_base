@@ -52,8 +52,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.Arrays;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Supplemental tests that cannot be covered by CTS (e.g. due to hidden API dependencies).
@@ -502,7 +500,6 @@ public class EditorInfoTest {
                 + "prefix: extras=null\n"
                 + "prefix: hintLocales=null\n"
                 + "prefix: supportedHandwritingGestureTypes=(none)\n"
-                + "prefix: supportedHandwritingGesturePreviewTypes=(none)\n"
                 + "prefix: contentMimeTypes=null\n");
     }
 
@@ -519,8 +516,6 @@ public class EditorInfoTest {
         info.label = "testLabel";
         info.setInitialToolType(MotionEvent.TOOL_TYPE_STYLUS);
         info.setSupportedHandwritingGestures(Arrays.asList(SelectGesture.class));
-        info.setSupportedHandwritingGesturePreviews(
-                Stream.of(SelectGesture.class).collect(Collectors.toSet()));
         info.packageName = "android.view.inputmethod";
         info.autofillId = new AutofillId(123);
         info.fieldId = 456;
@@ -543,7 +538,6 @@ public class EditorInfoTest {
                         + "prefix2: extras=Bundle[{testKey=testValue}]\n"
                         + "prefix2: hintLocales=[en,es,zh]\n"
                         + "prefix2: supportedHandwritingGestureTypes=SELECT\n"
-                        + "prefix2: supportedHandwritingGesturePreviewTypes=SELECT\n"
                         + "prefix2: contentMimeTypes=[image/png]\n"
                         + "prefix2: targetInputMethodUserId=10\n");
     }
@@ -564,7 +558,6 @@ public class EditorInfoTest {
                         + "prefix: packageName=null autofillId=null fieldId=0 fieldName=null\n"
                         + "prefix: hintLocales=null\n"
                         + "prefix: supportedHandwritingGestureTypes=(none)\n"
-                        + "prefix: supportedHandwritingGesturePreviewTypes=(none)\n"
                         + "prefix: contentMimeTypes=null\n");
     }
 

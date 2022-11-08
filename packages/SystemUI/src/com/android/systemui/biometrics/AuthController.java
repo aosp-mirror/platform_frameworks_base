@@ -122,7 +122,7 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
     @Nullable private final FingerprintManager mFingerprintManager;
     @Nullable private final FaceManager mFaceManager;
     private final Provider<UdfpsController> mUdfpsControllerFactory;
-    private final Provider<SideFpsController> mSidefpsControllerFactory;
+    private final Provider<SidefpsController> mSidefpsControllerFactory;
 
     // TODO: these should be migrated out once ready
     @NonNull private final Provider<BiometricPromptCredentialInteractor> mBiometricPromptInteractor;
@@ -148,7 +148,7 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
     @NonNull private final DisplayManager mDisplayManager;
     @Nullable private UdfpsController mUdfpsController;
     @Nullable private IUdfpsRefreshRateRequestCallback mUdfpsRefreshRateRequestCallback;
-    @Nullable private SideFpsController mSideFpsController;
+    @Nullable private SidefpsController mSidefpsController;
     @Nullable private IBiometricContextListener mBiometricContextListener;
     @Nullable private UdfpsLogger mUdfpsLogger;
     @VisibleForTesting IBiometricSysuiReceiver mReceiver;
@@ -306,7 +306,7 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
 
         mSidefpsProps = !sidefpsProps.isEmpty() ? sidefpsProps : null;
         if (mSidefpsProps != null) {
-            mSideFpsController = mSidefpsControllerFactory.get();
+            mSidefpsController = mSidefpsControllerFactory.get();
         }
 
         mFingerprintManager.registerBiometricStateListener(new BiometricStateListener() {
@@ -702,7 +702,7 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
             @Nullable FingerprintManager fingerprintManager,
             @Nullable FaceManager faceManager,
             Provider<UdfpsController> udfpsControllerFactory,
-            Provider<SideFpsController> sidefpsControllerFactory,
+            Provider<SidefpsController> sidefpsControllerFactory,
             @NonNull DisplayManager displayManager,
             @NonNull WakefulnessLifecycle wakefulnessLifecycle,
             @NonNull UserManager userManager,
@@ -1120,7 +1120,7 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
      * Whether the passed userId has enrolled SFPS.
      */
     public boolean isSfpsEnrolled(int userId) {
-        if (mSideFpsController == null) {
+        if (mSidefpsController == null) {
             return false;
         }
 

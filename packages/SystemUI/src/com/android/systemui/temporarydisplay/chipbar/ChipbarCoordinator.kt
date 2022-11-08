@@ -44,7 +44,6 @@ import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.temporarydisplay.TemporaryViewDisplayController
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.view.ViewUtil
-import com.android.systemui.util.wakelock.WakeLock
 import javax.inject.Inject
 
 /**
@@ -76,7 +75,6 @@ open class ChipbarCoordinator @Inject constructor(
         private val falsingCollector: FalsingCollector,
         private val viewUtil: ViewUtil,
         private val vibratorHelper: VibratorHelper,
-        wakeLockBuilder: WakeLock.Builder,
 ) : TemporaryViewDisplayController<ChipbarInfo, ChipbarLogger>(
         context,
         logger,
@@ -86,7 +84,6 @@ open class ChipbarCoordinator @Inject constructor(
         configurationController,
         powerManager,
         R.layout.chipbar,
-        wakeLockBuilder,
 ) {
 
     private lateinit var parent: ChipbarRootView
@@ -94,6 +91,8 @@ open class ChipbarCoordinator @Inject constructor(
     override val windowLayoutParams = commonWindowLayoutParams.apply {
         gravity = Gravity.TOP.or(Gravity.CENTER_HORIZONTAL)
     }
+
+    override fun start() {}
 
     override fun updateView(
         newInfo: ChipbarInfo,
@@ -192,8 +191,6 @@ open class ChipbarCoordinator @Inject constructor(
             onAnimationEnd,
         )
     }
-
-    override fun start() {}
 
     override fun getTouchableRegion(view: View, outRect: Rect) {
         viewUtil.setRectToViewWindowLocation(view, outRect)

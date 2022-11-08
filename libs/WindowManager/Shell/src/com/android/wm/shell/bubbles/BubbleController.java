@@ -24,7 +24,6 @@ import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 
-import static com.android.wm.shell.bubbles.Bubble.KEY_APP_BUBBLE;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_CONTROLLER;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_GESTURE;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_BUBBLES;
@@ -38,6 +37,7 @@ import static com.android.wm.shell.bubbles.Bubbles.DISMISS_NO_LONGER_BUBBLE;
 import static com.android.wm.shell.bubbles.Bubbles.DISMISS_PACKAGE_REMOVED;
 import static com.android.wm.shell.bubbles.Bubbles.DISMISS_SHORTCUT_REMOVED;
 import static com.android.wm.shell.bubbles.Bubbles.DISMISS_USER_CHANGED;
+import static com.android.wm.shell.floating.FloatingTasksController.SHOW_FLOATING_TASKS_AS_BUBBLES;
 
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
@@ -150,9 +150,6 @@ public class BubbleController implements ConfigurationChangeListener {
 
     private final ShellExecutor mBackgroundExecutor;
 
-    // Whether or not we should show bubbles pinned at the bottom of the screen.
-    private boolean mIsBubbleBarEnabled;
-
     private BubbleLogger mLogger;
     private BubbleData mBubbleData;
     @Nullable private BubbleStackView mStackView;
@@ -213,6 +210,7 @@ public class BubbleController implements ConfigurationChangeListener {
     /** Drag and drop controller to register listener for onDragStarted. */
     private DragAndDropController mDragAndDropController;
 
+  
     public BubbleController(Context context,
             ShellInit shellInit,
             ShellCommandHandler shellCommandHandler,
@@ -528,12 +526,6 @@ public class BubbleController implements ConfigurationChangeListener {
         mDataRepository.removeBubblesForUser(removedUserId, parentUserId);
     }
 
-    // TODO(b/256873975): Should pass this into the constructor once flags are available to shell.
-    /** Sets whether the bubble bar is enabled (i.e. bubbles pinned to bottom on large screens). */
-    public void setBubbleBarEnabled(boolean enabled) {
-        mIsBubbleBarEnabled = enabled;
-    }
-
     /** Whether this userId belongs to the current user. */
     private boolean isCurrentProfile(int userId) {
         return userId == UserHandle.USER_ALL
@@ -599,8 +591,7 @@ public class BubbleController implements ConfigurationChangeListener {
             }
             mStackView.setUnbubbleConversationCallback(mSysuiProxy::onUnbubbleConversation);
         }
-
-        if (mIsBubbleBarEnabled && mBubblePositioner.isLargeScreen()) {
+        if (SHOW_FLOATING_TASKS_AS_BUBBLES && mBubblePositioner.isLargeScreen()) {
             mBubblePositioner.setUsePinnedLocation(true);
         } else {
             mBubblePositioner.setUsePinnedLocation(false);
@@ -976,18 +967,14 @@ public class BubbleController implements ConfigurationChangeListener {
     }
 
     /**
-     * Adds and expands bubble for a specific intent. These bubbles are <b>not</b> backed by a n
-     * otification and remain until the user dismisses the bubble or bubble stack. Only one intent
-     * bubble is supported at a time.
+     * Adds a bubble for a specific intent. These bubbles are <b>not</b> backed by a notification
+     * and remain until the user dismisses the bubble or bubble stack. Only one intent bubble
+     * is supported at a time.
      *
      * @param intent the intent to display in the bubble expanded view.
      */
-    public void showAppBubble(Intent intent) {
+    public void addAppBubble(Intent intent) {
         if (intent == null || intent.getPackage() == null) return;
-
-        PackageManager packageManager = getPackageManagerForUser(mContext, mCurrentUserId);
-        if (!isResizableActivity(intent, packageManager, KEY_APP_BUBBLE)) return;
-
         Bubble b = new Bubble(intent, UserHandle.of(mCurrentUserId), mMainExecutor);
         b.setShouldAutoExpand(true);
         inflateAndAdd(b, /* suppressFlyout= */ true, /* showInShade= */ false);
@@ -1510,23 +1497,18 @@ public class BubbleController implements ConfigurationChangeListener {
         }
         PackageManager packageManager = getPackageManagerForUser(
                 context, entry.getStatusBarNotification().getUser().getIdentifier());
-        return isResizableActivity(intent.getIntent(), packageManager, entry.getKey());
-    }
-
-    static boolean isResizableActivity(Intent intent, PackageManager packageManager, String key) {
-        if (intent == null) {
-            Log.w(TAG, "Unable to send as bubble: " + key + " null intent");
-            return false;
-        }
-        ActivityInfo info = intent.resolveActivityInfo(packageManager, 0);
+        ActivityInfo info =
+                intent.getIntent().resolveActivityInfo(packageManager, 0);
         if (info == null) {
-            Log.w(TAG, "Unable to send as bubble: " + key
-                    + " couldn't find activity info for intent: " + intent);
+            Log.w(TAG, "Unable to send as bubble, "
+                    + entry.getKey() + " couldn't find activity info for intent: "
+                    + intent);
             return false;
         }
         if (!ActivityInfo.isResizeableMode(info.resizeMode)) {
-            Log.w(TAG, "Unable to send as bubble: " + key
-                    + " activity is not resizable for intent: " + intent);
+            Log.w(TAG, "Unable to send as bubble, "
+                    + entry.getKey() + " activity is not resizable for intent: "
+                    + intent);
             return false;
         }
         return true;
@@ -1700,13 +1682,6 @@ public class BubbleController implements ConfigurationChangeListener {
         }
 
         @Override
-        public void showAppBubble(Intent intent) {
-            mMainExecutor.execute(() -> {
-                BubbleController.this.showAppBubble(intent);
-            });
-        }
-
-        @Override
         public boolean handleDismissalInterception(BubbleEntry entry,
                 @Nullable List<BubbleEntry> children, IntConsumer removeCallback,
                 Executor callbackExecutor) {
@@ -1813,13 +1788,6 @@ public class BubbleController implements ConfigurationChangeListener {
         public void onUserRemoved(int removedUserId) {
             mMainExecutor.execute(() -> {
                 BubbleController.this.onUserRemoved(removedUserId);
-            });
-        }
-
-        @Override
-        public void setBubbleBarEnabled(boolean enabled) {
-            mMainExecutor.execute(() -> {
-                BubbleController.this.setBubbleBarEnabled(enabled);
             });
         }
 

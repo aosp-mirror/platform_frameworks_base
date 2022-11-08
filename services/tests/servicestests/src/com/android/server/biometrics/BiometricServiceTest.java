@@ -64,7 +64,6 @@ import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.IBiometricServiceReceiver;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
-import android.hardware.display.AmbientDisplayConfiguration;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Binder;
 import android.os.IBinder;
@@ -76,10 +75,7 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
-import com.android.internal.statusbar.ISessionListener;
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.server.biometrics.log.BiometricContextProvider;
-import com.android.server.biometrics.sensors.AuthSessionCoordinator;
 import com.android.server.biometrics.sensors.LockoutTracker;
 
 import org.junit.Before;
@@ -133,16 +129,6 @@ public class BiometricServiceTest {
     ITrustManager mTrustManager;
     @Mock
     DevicePolicyManager mDevicePolicyManager;
-    @Mock
-    private IStatusBarService mStatusBarService;
-    @Mock
-    private ISessionListener mSessionListener;
-    @Mock
-    private AmbientDisplayConfiguration mAmbientDisplayConfiguration;
-    @Mock
-    private AuthSessionCoordinator mAuthSessionCoordinator;
-
-    BiometricContextProvider mBiometricContextProvider;
 
     @Before
     public void setUp() {
@@ -173,11 +159,6 @@ public class BiometricServiceTest {
                 .thenReturn(ERROR_NOT_RECOGNIZED);
         when(mResources.getString(R.string.biometric_error_user_canceled))
                 .thenReturn(ERROR_USER_CANCELED);
-
-        when(mAmbientDisplayConfiguration.alwaysOnEnabled(anyInt())).thenReturn(true);
-        mBiometricContextProvider = new BiometricContextProvider(mAmbientDisplayConfiguration,
-                mStatusBarService, null /* handler */, mAuthSessionCoordinator);
-        when(mInjector.getBiometricContext(any())).thenReturn(mBiometricContextProvider);
 
         final String[] config = {
                 "0:2:15",  // ID0:Fingerprint:Strong

@@ -34,13 +34,11 @@ import com.android.internal.content.PackageMonitor;
 final class LocaleManagerServicePackageMonitor extends PackageMonitor {
     private LocaleManagerBackupHelper mBackupHelper;
     private SystemAppUpdateTracker mSystemAppUpdateTracker;
-    private AppUpdateTracker mAppUpdateTracker;
 
     LocaleManagerServicePackageMonitor(LocaleManagerBackupHelper localeManagerBackupHelper,
-            SystemAppUpdateTracker systemAppUpdateTracker, AppUpdateTracker appUpdateTracker) {
+            SystemAppUpdateTracker systemAppUpdateTracker) {
         mBackupHelper = localeManagerBackupHelper;
         mSystemAppUpdateTracker = systemAppUpdateTracker;
-        mAppUpdateTracker = appUpdateTracker;
     }
 
     @Override
@@ -50,17 +48,16 @@ final class LocaleManagerServicePackageMonitor extends PackageMonitor {
 
     @Override
     public void onPackageDataCleared(String packageName, int uid) {
-        mBackupHelper.onPackageDataCleared(packageName, uid);
+        mBackupHelper.onPackageDataCleared();
     }
 
     @Override
     public void onPackageRemoved(String packageName, int uid) {
-        mBackupHelper.onPackageRemoved(packageName, uid);
+        mBackupHelper.onPackageRemoved();
     }
 
     @Override
     public void onPackageUpdateFinished(String packageName, int uid) {
-        mAppUpdateTracker.onPackageUpdateFinished(packageName, uid);
         mSystemAppUpdateTracker.onPackageUpdateFinished(packageName, uid);
     }
 }

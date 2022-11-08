@@ -639,24 +639,5 @@ public class BiometricManager {
             }
         }
     }
-
-    /**
-     * Notifies AuthService that keyguard has been dismissed for the given userId.
-     *
-     * @param userId
-     * @param hardwareAuthToken
-     * @hide
-     */
-    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
-    public void resetLockout(int userId, byte[] hardwareAuthToken) {
-        if (mService != null) {
-            try {
-                mService.resetLockout(userId, hardwareAuthToken);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
-
-    }
 }
 

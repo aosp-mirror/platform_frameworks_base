@@ -17,7 +17,7 @@
 package com.android.systemui.notetask
 
 import com.android.systemui.statusbar.CommandQueue
-import com.android.wm.shell.bubbles.Bubbles
+import com.android.wm.shell.floating.FloatingTasks
 import dagger.Lazy
 import java.util.Optional
 import javax.inject.Inject
@@ -26,7 +26,7 @@ import javax.inject.Inject
 internal class NoteTaskInitializer
 @Inject
 constructor(
-    private val optionalBubbles: Optional<Bubbles>,
+    private val optionalFloatingTasks: Optional<FloatingTasks>,
     private val lazyNoteTaskController: Lazy<NoteTaskController>,
     private val commandQueue: CommandQueue,
     @NoteTaskEnabledKey private val isEnabled: Boolean,
@@ -40,7 +40,7 @@ constructor(
         }
 
     fun initialize() {
-        if (isEnabled && optionalBubbles.isPresent) {
+        if (isEnabled && optionalFloatingTasks.isPresent) {
             commandQueue.addCallback(callbacks)
         }
     }

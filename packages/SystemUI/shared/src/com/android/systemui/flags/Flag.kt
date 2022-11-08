@@ -89,7 +89,7 @@ abstract class BooleanFlag constructor(
  *
  * It can be changed or overridden in debug builds but not in release builds.
  */
-data class UnreleasedFlag constructor(
+data class UnreleasedFlag @JvmOverloads constructor(
     override val id: Int,
     override val teamfood: Boolean = false,
     override val overridden: Boolean = false
@@ -100,7 +100,7 @@ data class UnreleasedFlag constructor(
  *
  * It can be changed or overridden in any build, meaning it can be turned off if needed.
  */
-data class ReleasedFlag constructor(
+data class ReleasedFlag @JvmOverloads constructor(
     override val id: Int,
     override val teamfood: Boolean = false,
     override val overridden: Boolean = false
@@ -111,7 +111,7 @@ data class ReleasedFlag constructor(
  *
  * Prefer [UnreleasedFlag] and [ReleasedFlag].
  */
-data class ResourceBooleanFlag constructor(
+data class ResourceBooleanFlag @JvmOverloads constructor(
     override val id: Int,
     @BoolRes override val resourceId: Int,
     override val teamfood: Boolean = false
@@ -124,7 +124,7 @@ data class ResourceBooleanFlag constructor(
  *
  * Prefer [UnreleasedFlag] and [ReleasedFlag].
  */
-data class DeviceConfigBooleanFlag constructor(
+data class DeviceConfigBooleanFlag @JvmOverloads constructor(
     override val id: Int,
     override val name: String,
     override val namespace: String,
@@ -139,7 +139,7 @@ data class DeviceConfigBooleanFlag constructor(
  *
  * Prefer [UnreleasedFlag] and [ReleasedFlag].
  */
-data class SysPropBooleanFlag constructor(
+data class SysPropBooleanFlag @JvmOverloads constructor(
     override val id: Int,
     override val name: String,
     override val default: Boolean = false
@@ -148,7 +148,7 @@ data class SysPropBooleanFlag constructor(
     override val teamfood: Boolean = false
 }
 
-data class StringFlag constructor(
+data class StringFlag @JvmOverloads constructor(
     override val id: Int,
     override val default: String = "",
     override val teamfood: Boolean = false,
@@ -173,13 +173,13 @@ data class StringFlag constructor(
     }
 }
 
-data class ResourceStringFlag constructor(
+data class ResourceStringFlag @JvmOverloads constructor(
     override val id: Int,
     @StringRes override val resourceId: Int,
     override val teamfood: Boolean = false
 ) : ResourceFlag<String>
 
-data class IntFlag constructor(
+data class IntFlag @JvmOverloads constructor(
     override val id: Int,
     override val default: Int = 0,
     override val teamfood: Boolean = false,
@@ -205,13 +205,13 @@ data class IntFlag constructor(
     }
 }
 
-data class ResourceIntFlag constructor(
+data class ResourceIntFlag @JvmOverloads constructor(
     override val id: Int,
     @IntegerRes override val resourceId: Int,
     override val teamfood: Boolean = false
 ) : ResourceFlag<Int>
 
-data class LongFlag constructor(
+data class LongFlag @JvmOverloads constructor(
     override val id: Int,
     override val default: Long = 0,
     override val teamfood: Boolean = false,
@@ -237,7 +237,7 @@ data class LongFlag constructor(
     }
 }
 
-data class FloatFlag constructor(
+data class FloatFlag @JvmOverloads constructor(
     override val id: Int,
     override val default: Float = 0f,
     override val teamfood: Boolean = false,
@@ -263,13 +263,13 @@ data class FloatFlag constructor(
     }
 }
 
-data class ResourceFloatFlag constructor(
+data class ResourceFloatFlag @JvmOverloads constructor(
     override val id: Int,
     override val resourceId: Int,
     override val teamfood: Boolean = false
 ) : ResourceFlag<Int>
 
-data class DoubleFlag constructor(
+data class DoubleFlag @JvmOverloads constructor(
     override val id: Int,
     override val default: Double = 0.0,
     override val teamfood: Boolean = false,

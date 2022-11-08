@@ -16,9 +16,6 @@
 
 package android.location;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
-import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -31,8 +28,7 @@ import java.util.Locale;
  *
  * @hide
  */
-@SystemApi(client = SystemApi.Client.PRIVILEGED_APPS)
-public final class Country implements Parcelable {
+public class Country implements Parcelable {
     /**
      * The country code came from the mobile network
      */
@@ -82,8 +78,6 @@ public final class Country implements Parcelable {
      *        <li>{@link #COUNTRY_SOURCE_SIM}</li>
      *        <li>{@link #COUNTRY_SOURCE_LOCALE}</li>
      *        </ul>
-     *
-     * @hide
      */
     @UnsupportedAppUsage
     public Country(final String countryIso, final int source) {
@@ -106,7 +100,6 @@ public final class Country implements Parcelable {
         mTimestamp = timestamp;
     }
 
-    /** @hide */
     public Country(Country country) {
         mCountryIso = country.mCountryIso;
         mSource = country.mSource;
@@ -116,8 +109,8 @@ public final class Country implements Parcelable {
     /**
      * @return the ISO 3166-1 two letters country code
      */
-    @NonNull
-    public String getCountryIso() {
+    @UnsupportedAppUsage
+    public final String getCountryIso() {
         return mCountryIso;
     }
 
@@ -131,22 +124,20 @@ public final class Country implements Parcelable {
      *         <li>{@link #COUNTRY_SOURCE_LOCALE}</li>
      *         </ul>
      */
-    public int getSource() {
+    @UnsupportedAppUsage
+    public final int getSource() {
         return mSource;
     }
 
     /**
      * Returns the time that this object was created (which we assume to be the time that the source
      * was consulted).
-     *
-     * @hide
      */
-    public long getTimestamp() {
+    public final long getTimestamp() {
         return mTimestamp;
     }
 
-    @android.annotation.NonNull
-    public static final Parcelable.Creator<Country> CREATOR = new Parcelable.Creator<Country>() {
+    public static final @android.annotation.NonNull Parcelable.Creator<Country> CREATOR = new Parcelable.Creator<Country>() {
         public Country createFromParcel(Parcel in) {
             return new Country(in.readString(), in.readInt(), in.readLong());
         }
@@ -156,13 +147,11 @@ public final class Country implements Parcelable {
         }
     };
 
-    @Override
     public int describeContents() {
         return 0;
     }
 
-    @Override
-    public void writeToParcel(@NonNull Parcel parcel, int flags) {
+    public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeString(mCountryIso);
         parcel.writeInt(mSource);
         parcel.writeLong(mTimestamp);
@@ -172,10 +161,9 @@ public final class Country implements Parcelable {
      * Returns true if this {@link Country} is equivalent to the given object. This ignores
      * the timestamp value and just checks for equivalence of countryIso and source values.
      * Returns false otherwise.
-     *
      */
     @Override
-    public boolean equals(@Nullable Object object) {
+    public boolean equals(Object object) {
         if (object == this) {
             return true;
         }
@@ -206,15 +194,12 @@ public final class Country implements Parcelable {
      * @param country the country to compare
      * @return true if the specified country's countryIso field is equal to this
      *         country's, false otherwise.
-     *
-     * @hide
      */
     public boolean equalsIgnoreSource(Country country) {
         return country != null && mCountryIso.equals(country.getCountryIso());
     }
 
     @Override
-    @NonNull
     public String toString() {
         return "Country {ISO=" + mCountryIso + ", source=" + mSource + ", time=" + mTimestamp + "}";
     }

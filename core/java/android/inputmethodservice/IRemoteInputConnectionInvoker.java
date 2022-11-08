@@ -24,7 +24,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.RectF;
 import android.os.Bundle;
-import android.os.CancellationSignal;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.view.KeyEvent;
@@ -694,27 +693,6 @@ final class IRemoteInputConnectionInvoker {
                 executor.execute(() -> consumer.accept(
                         InputConnection.HANDWRITING_GESTURE_RESULT_CANCELLED));
             }
-        }
-    }
-
-    /**
-     * Invokes one of {@link IRemoteInputConnection#previewHandwritingGesture(
-     * InputConnectionCommandHeader, ParcelableHandwritingGesture, CancellationSignal)}
-     */
-    @AnyThread
-    public boolean previewHandwritingGesture(
-            @NonNull ParcelableHandwritingGesture gesture,
-            @Nullable CancellationSignal cancellationSignal) {
-        if (cancellationSignal != null && cancellationSignal.isCanceled()) {
-            return false; // cancelled.
-        }
-
-        // TODO(b/254727073): Implement CancellationSignal
-        try {
-            mConnection.previewHandwritingGesture(createHeader(), gesture, null);
-            return true;
-        } catch (RemoteException e) {
-            return false;
         }
     }
 

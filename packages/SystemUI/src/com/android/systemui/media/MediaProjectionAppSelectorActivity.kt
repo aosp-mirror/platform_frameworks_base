@@ -79,7 +79,8 @@ class MediaProjectionAppSelectorActivity(
         val queryIntent = Intent(Intent.ACTION_MAIN).apply { addCategory(Intent.CATEGORY_LAUNCHER) }
         intent.putExtra(Intent.EXTRA_INTENT, queryIntent)
 
-        val title = getString(R.string.media_projection_permission_app_selector_title)
+        // TODO(b/240939253): update copies
+        val title = getString(R.string.media_projection_dialog_service_title)
         intent.putExtra(Intent.EXTRA_TITLE, title)
         super.onCreate(bundle)
         controller.init()

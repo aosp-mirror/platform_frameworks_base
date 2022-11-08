@@ -108,6 +108,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 import javax.inject.Inject;
@@ -469,6 +470,8 @@ public class OverviewProxyService extends CurrentUserTracker implements
     };
 
     private final StatusBarWindowCallback mStatusBarWindowCallback = this::onStatusBarStateChanged;
+    private final BiConsumer<Rect, Rect> mSplitScreenBoundsChangeListener =
+            this::notifySplitScreenBoundsChanged;
 
     // This is the death handler for the binder from the launcher service
     private final IBinder.DeathRecipient mOverviewServiceDeathRcpt
@@ -833,6 +836,26 @@ public class OverviewProxyService extends CurrentUserTracker implements
             }
         } catch (RemoteException e) {
             Log.e(TAG_OPS, "Failed to call notifyAssistantVisibilityChanged()", e);
+        }
+    }
+
+    /**
+     * Notifies the Launcher of split screen size changes
+     *
+     * @param secondaryWindowBounds Bounds of the secondary window including the insets
+     * @param secondaryWindowInsets stable insets received by the secondary window
+     */
+    public void notifySplitScreenBoundsChanged(
+            Rect secondaryWindowBounds, Rect secondaryWindowInsets) {
+        try {
+            if (mOverviewProxy != null) {
+                mOverviewProxy.onSplitScreenSecondaryBoundsChanged(
+                        secondaryWindowBounds, secondaryWindowInsets);
+            } else {
+                Log.e(TAG_OPS, "Failed to get overview proxy for split screen bounds.");
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG_OPS, "Failed to call onSplitScreenSecondaryBoundsChanged()", e);
         }
     }
 

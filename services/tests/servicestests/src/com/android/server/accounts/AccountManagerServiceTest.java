@@ -3470,8 +3470,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
 
         @Override
         public Intent registerReceiver(BroadcastReceiver receiver, IntentFilter filter) {
-            return mMockContext.registerReceiver(receiver, filter,
-                    Context.RECEIVER_EXPORTED_UNAUDITED);
+            return mMockContext.registerReceiver(receiver, filter);
         }
 
         @Override

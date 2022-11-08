@@ -97,6 +97,7 @@ public abstract class SystemUIInitializer {
                     .setDisplayAreaHelper(mWMComponent.getDisplayAreaHelper())
                     .setRecentTasks(mWMComponent.getRecentTasks())
                     .setBackAnimation(mWMComponent.getBackAnimation())
+                    .setFloatingTasks(mWMComponent.getFloatingTasks())
                     .setDesktopMode(mWMComponent.getDesktopMode());
 
             // Only initialize when not starting from tests since this currently initializes some
@@ -117,6 +118,7 @@ public abstract class SystemUIInitializer {
                     .setStartingSurface(Optional.ofNullable(null))
                     .setRecentTasks(Optional.ofNullable(null))
                     .setBackAnimation(Optional.ofNullable(null))
+                    .setFloatingTasks(Optional.ofNullable(null))
                     .setDesktopMode(Optional.ofNullable(null));
         }
         mSysUIComponent = builder.build();

@@ -99,8 +99,7 @@ public class ConnectionUtil {
         // Register a download receiver for ACTION_DOWNLOAD_COMPLETE
         mDownloadReceiver = new DownloadReceiver();
         mContext.registerReceiver(mDownloadReceiver,
-                new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE),
-                Context.RECEIVER_EXPORTED_UNAUDITED);
+                new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
 
         // Register a wifi receiver
         mWifiReceiver = new WifiReceiver();

@@ -2225,7 +2225,8 @@ final class AccessibilityController {
                 ProtoOutputStream proto = new ProtoOutputStream();
                 proto.write(MAGIC_NUMBER, MAGIC_NUMBER_VALUE);
                 long timeOffsetNs =
-                        TimeUnit.MILLISECONDS.toNanos(System.currentTimeMillis())
+                        TimeUnit.NANOSECONDS.convert(System.currentTimeMillis(),
+                                                     TimeUnit.NANOSECONDS)
                         - SystemClock.elapsedRealtimeNanos();
                 proto.write(REAL_TO_ELAPSED_TIME_OFFSET_NANOS, timeOffsetNs);
                 mBuffer.writeTraceToFile(mTraceFile, proto);

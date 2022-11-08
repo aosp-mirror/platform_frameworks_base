@@ -145,8 +145,7 @@ public class ConnectivityManagerTestBase extends InstrumentationTestCase {
         mIntentFilter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
         mIntentFilter.addAction(WifiManager.WIFI_AP_STATE_CHANGED_ACTION);
         mIntentFilter.addAction(TetheringManager.ACTION_TETHER_STATE_CHANGED);
-        mContext.registerReceiver(mWifiReceiver, mIntentFilter,
-                Context.RECEIVER_EXPORTED_UNAUDITED);
+        mContext.registerReceiver(mWifiReceiver, mIntentFilter);
 
         logv("Clear Wifi before we start the test.");
         removeConfiguredNetworksAndDisableWifi();

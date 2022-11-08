@@ -68,8 +68,4 @@ class FakeUserTracker(
 
         callbacks.forEach { it.onUserChanged(_userId, userContext) }
     }
-
-    fun onProfileChanged() {
-        callbacks.forEach { it.onProfilesChanged(_userProfiles) }
-    }
 }

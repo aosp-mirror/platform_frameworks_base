@@ -133,7 +133,7 @@ public class LocaleManagerServiceTest {
 
         try {
             mLocaleManagerService.setApplicationLocales(DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID,
-                    LocaleList.getEmptyLocaleList(), false);
+                    LocaleList.getEmptyLocaleList());
             fail("Expected SecurityException");
         } finally {
             verify(mMockContext).enforceCallingOrSelfPermission(
@@ -148,7 +148,7 @@ public class LocaleManagerServiceTest {
     public void testSetApplicationLocales_nullPackageName_fails() throws Exception {
         try {
             mLocaleManagerService.setApplicationLocales(/* appPackageName = */ null,
-                    DEFAULT_USER_ID, LocaleList.getEmptyLocaleList(), false);
+                    DEFAULT_USER_ID, LocaleList.getEmptyLocaleList());
             fail("Expected NullPointerException");
         } finally {
             verify(mMockBackupHelper, times(0)).notifyBackupManager();
@@ -162,7 +162,7 @@ public class LocaleManagerServiceTest {
 
         try {
             mLocaleManagerService.setApplicationLocales(DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID,
-                    /* locales = */ null, false);
+                    /* locales = */ null);
             fail("Expected NullPointerException");
         } finally {
             verify(mMockBackupHelper, times(0)).notifyBackupManager();
@@ -180,7 +180,7 @@ public class LocaleManagerServiceTest {
         setUpPassingPermissionCheckFor(Manifest.permission.CHANGE_CONFIGURATION);
 
         mLocaleManagerService.setApplicationLocales(DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID,
-                DEFAULT_LOCALES, true);
+                DEFAULT_LOCALES);
 
         assertEquals(DEFAULT_LOCALES, mFakePackageConfigurationUpdater.getStoredLocales());
         verify(mMockBackupHelper, times(1)).notifyBackupManager();
@@ -193,7 +193,7 @@ public class LocaleManagerServiceTest {
                 .when(mMockPackageManager).getPackageUidAsUser(anyString(), any(), anyInt());
 
         mLocaleManagerService.setApplicationLocales(DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID,
-                DEFAULT_LOCALES, false);
+                DEFAULT_LOCALES);
 
         assertEquals(DEFAULT_LOCALES, mFakePackageConfigurationUpdater.getStoredLocales());
         verify(mMockBackupHelper, times(1)).notifyBackupManager();
@@ -205,7 +205,7 @@ public class LocaleManagerServiceTest {
                 .when(mMockPackageManager).getPackageUidAsUser(anyString(), any(), anyInt());
         try {
             mLocaleManagerService.setApplicationLocales(DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID,
-                    LocaleList.getEmptyLocaleList(), false);
+                    LocaleList.getEmptyLocaleList());
             fail("Expected IllegalArgumentException");
         } finally {
             assertNoLocalesStored(mFakePackageConfigurationUpdater.getStoredLocales());

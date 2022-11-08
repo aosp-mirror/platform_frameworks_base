@@ -35,8 +35,6 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.time.FakeSystemClock
-import com.android.systemui.util.wakelock.WakeLock
-import com.android.systemui.util.wakelock.WakeLockFake
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -54,9 +52,6 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
 
     private lateinit var fakeClock: FakeSystemClock
     private lateinit var fakeExecutor: FakeExecutor
-
-    private lateinit var fakeWakeLockBuilder: WakeLockFake.Builder
-    private lateinit var fakeWakeLock: WakeLockFake
 
     @Mock
     private lateinit var logger: TemporaryViewLogger
@@ -79,10 +74,6 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
         fakeClock = FakeSystemClock()
         fakeExecutor = FakeExecutor(fakeClock)
 
-        fakeWakeLock = WakeLockFake()
-        fakeWakeLockBuilder = WakeLockFake.Builder(context)
-        fakeWakeLockBuilder.setWakeLock(fakeWakeLock)
-
         underTest = TestController(
                 context,
                 logger,
@@ -91,9 +82,7 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
                 accessibilityManager,
                 configurationController,
                 powerManager,
-                fakeWakeLockBuilder,
         )
-        underTest.start()
     }
 
     @Test
@@ -123,33 +112,25 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun displayView_screenOff_wakeLockAcquired() {
+    fun displayView_screenOff_screenWakes() {
+        whenever(powerManager.isScreenOn).thenReturn(false)
+
         underTest.displayView(getState())
 
-        assertThat(fakeWakeLock.isHeld).isTrue()
+        verify(powerManager).wakeUp(any(), any(), any())
     }
 
     @Test
-    fun displayView_screenAlreadyOn_wakeLockNotAcquired() {
+    fun displayView_screenAlreadyOn_screenNotWoken() {
         whenever(powerManager.isScreenOn).thenReturn(true)
 
         underTest.displayView(getState())
 
-        assertThat(fakeWakeLock.isHeld).isFalse()
+        verify(powerManager, never()).wakeUp(any(), any(), any())
     }
 
     @Test
-    fun displayView_screenOff_wakeLockCanBeReleasedAfterTimeOut() {
-        underTest.displayView(getState())
-        assertThat(fakeWakeLock.isHeld).isTrue()
-
-        fakeClock.advanceTime(TIMEOUT_MS + 1)
-
-        assertThat(fakeWakeLock.isHeld).isFalse()
-    }
-
-    @Test
-    fun displayView_twice_viewNotAddedTwice() {
+    fun displayView_twiceWithSameWindowTitle_viewNotAddedTwice() {
         underTest.displayView(getState())
         reset(windowManager)
 
@@ -288,7 +269,6 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
         accessibilityManager: AccessibilityManager,
         configurationController: ConfigurationController,
         powerManager: PowerManager,
-        wakeLockBuilder: WakeLock.Builder,
     ) : TemporaryViewDisplayController<ViewInfo, TemporaryViewLogger>(
         context,
         logger,
@@ -298,11 +278,12 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
         configurationController,
         powerManager,
         R.layout.chipbar,
-        wakeLockBuilder,
     ) {
         var mostRecentViewInfo: ViewInfo? = null
 
         override val windowLayoutParams = commonWindowLayoutParams
+
+        override fun start() {}
 
         override fun updateView(newInfo: ViewInfo, currentView: ViewGroup) {
             mostRecentViewInfo = newInfo
@@ -311,8 +292,6 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
         override fun getTouchableRegion(view: View, outRect: Rect) {
             outRect.setEmpty()
         }
-
-        override fun start() {}
     }
 
     inner class ViewInfo(

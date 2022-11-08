@@ -802,20 +802,12 @@ class StorageManagerService extends IStorageManager.Stub
                     break;
                 }
                 case H_CLOUD_MEDIA_PROVIDER_CHANGED: {
-                    // We send this message in two cases:
-                    // 1. After the cloud provider has been set/updated for a user.
-                    //    In this case Message's #arg1 is set to UserId, and #obj is set to the
-                    //    authority of the new cloud provider.
-                    // 2. After a new CloudProviderChangeListener is registered.
-                    //    In this case Message's #obj is set to the CloudProviderChangeListener.
-                    if (msg.obj instanceof StorageManagerInternal.CloudProviderChangeListener) {
-                        final StorageManagerInternal.CloudProviderChangeListener listener =
-                                (StorageManagerInternal.CloudProviderChangeListener) msg.obj;
-                        notifyCloudMediaProviderChangedAsync(listener);
+                    final Object listener = msg.obj;
+                    if (listener instanceof StorageManagerInternal.CloudProviderChangeListener) {
+                        notifyCloudMediaProviderChangedAsync(
+                                (StorageManagerInternal.CloudProviderChangeListener) listener);
                     } else {
-                        final int userId = msg.arg1;
-                        final String authority = (String) msg.obj;
-                        onCloudMediaProviderChangedAsync(userId, authority);
+                        onCloudMediaProviderChangedAsync(msg.arg1);
                     }
                     break;
                 }
@@ -1694,15 +1686,17 @@ class StorageManagerService extends IStorageManager.Stub
             @NonNull StorageManagerInternal.CloudProviderChangeListener listener) {
         synchronized (mCloudMediaProviders) {
             for (int i = mCloudMediaProviders.size() - 1; i >= 0; --i) {
-                final int userId = mCloudMediaProviders.keyAt(i);
-                final String authority = mCloudMediaProviders.valueAt(i);
-                listener.onCloudProviderChanged(userId, authority);
+                listener.onCloudProviderChanged(
+                        mCloudMediaProviders.keyAt(i), mCloudMediaProviders.valueAt(i));
             }
         }
     }
 
-    private void onCloudMediaProviderChangedAsync(
-            @UserIdInt int userId, @Nullable String authority) {
+    private void onCloudMediaProviderChangedAsync(int userId) {
+        final String authority;
+        synchronized (mCloudMediaProviders) {
+            authority = mCloudMediaProviders.get(userId);
+        }
         for (StorageManagerInternal.CloudProviderChangeListener listener :
                 mStorageManagerInternal.mCloudProviderChangeListeners) {
             listener.onCloudProviderChanged(userId, authority);
@@ -4837,7 +4831,7 @@ class StorageManagerService extends IStorageManager.Stub
         public void registerCloudProviderChangeListener(
                 @NonNull StorageManagerInternal.CloudProviderChangeListener listener) {
             mCloudProviderChangeListeners.add(listener);
-            mHandler.obtainMessage(H_CLOUD_MEDIA_PROVIDER_CHANGED, listener).sendToTarget();
+            mHandler.obtainMessage(H_CLOUD_MEDIA_PROVIDER_CHANGED, listener);
         }
     }
 }

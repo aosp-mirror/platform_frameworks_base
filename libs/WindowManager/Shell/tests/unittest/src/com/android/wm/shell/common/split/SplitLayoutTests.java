@@ -140,7 +140,7 @@ public class SplitLayoutTests extends ShellTestCase {
         DividerSnapAlgorithm.SnapTarget snapTarget = getSnapTarget(0 /* position */,
                 DividerSnapAlgorithm.SnapTarget.FLAG_DISMISS_START);
 
-        mSplitLayout.snapToTarget(mSplitLayout.getDividePosition(), snapTarget);
+        mSplitLayout.snapToTarget(0 /* currentPosition */, snapTarget);
         waitDividerFlingFinished();
         verify(mSplitLayoutHandler).onSnappedToDismiss(eq(false), anyInt());
     }
@@ -152,7 +152,7 @@ public class SplitLayoutTests extends ShellTestCase {
         DividerSnapAlgorithm.SnapTarget snapTarget = getSnapTarget(0 /* position */,
                 DividerSnapAlgorithm.SnapTarget.FLAG_DISMISS_END);
 
-        mSplitLayout.snapToTarget(mSplitLayout.getDividePosition(), snapTarget);
+        mSplitLayout.snapToTarget(0 /* currentPosition */, snapTarget);
         waitDividerFlingFinished();
         verify(mSplitLayoutHandler).onSnappedToDismiss(eq(true), anyInt());
     }

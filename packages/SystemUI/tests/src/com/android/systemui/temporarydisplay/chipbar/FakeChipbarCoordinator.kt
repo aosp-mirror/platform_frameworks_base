@@ -27,7 +27,6 @@ import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.view.ViewUtil
-import com.android.systemui.util.wakelock.WakeLock
 
 /** A fake implementation of [ChipbarCoordinator] for testing. */
 class FakeChipbarCoordinator(
@@ -42,7 +41,6 @@ class FakeChipbarCoordinator(
     falsingCollector: FalsingCollector,
     viewUtil: ViewUtil,
     vibratorHelper: VibratorHelper,
-    wakeLockBuilder: WakeLock.Builder,
 ) :
     ChipbarCoordinator(
         context,
@@ -56,7 +54,6 @@ class FakeChipbarCoordinator(
         falsingCollector,
         viewUtil,
         vibratorHelper,
-        wakeLockBuilder,
     ) {
     override fun animateViewOut(view: ViewGroup, onAnimationEnd: Runnable) {
         // Just bypass the animation in tests

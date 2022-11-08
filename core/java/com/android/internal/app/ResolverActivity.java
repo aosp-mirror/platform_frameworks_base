@@ -1098,9 +1098,6 @@ public class ResolverActivity extends Activity implements
     @Override // ResolverListCommunicator
     public final void onPostListReady(ResolverListAdapter listAdapter, boolean doPostProcessing,
             boolean rebuildCompleted) {
-        if (isDestroyed()) {
-            return;
-        }
         if (isAutolaunching()) {
             return;
         }

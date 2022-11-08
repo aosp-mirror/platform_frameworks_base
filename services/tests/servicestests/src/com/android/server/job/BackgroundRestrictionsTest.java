@@ -115,8 +115,7 @@ public class BackgroundRestrictionsTest {
         final IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(ACTION_JOB_STARTED);
         intentFilter.addAction(ACTION_JOB_STOPPED);
-        mContext.registerReceiver(mJobStateChangeReceiver, intentFilter,
-                Context.RECEIVER_EXPORTED_UNAUDITED);
+        mContext.registerReceiver(mJobStateChangeReceiver, intentFilter);
         setAppOpsModeAllowed(true);
         setPowerExemption(false);
     }

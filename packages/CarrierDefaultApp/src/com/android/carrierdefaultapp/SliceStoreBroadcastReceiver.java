@@ -33,7 +33,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.WebView;
 
-import com.android.phone.slice.SlicePurchaseController;
+import com.android.phone.slicestore.SliceStore;
 
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
@@ -41,14 +41,13 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * The SlicePurchaseBroadcastReceiver listens for
- * {@link SlicePurchaseController#ACTION_START_SLICE_PURCHASE_APP} from the SlicePurchaseController
- * in the phone process to start the slice purchase application. It displays the network boost
- * notification to the user and will start the {@link SlicePurchaseActivity} to display the
+ * The SliceStoreBroadcastReceiver listens for {@link SliceStore#ACTION_START_SLICE_STORE} from the
+ * SliceStore in the phone process to start the SliceStore application. It displays the network
+ * boost notification to the user and will start the {@link SliceStoreActivity} to display the
  * {@link WebView} to purchase network boosts from the user's carrier.
  */
-public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
-    private static final String TAG = "SlicePurchaseBroadcastReceiver";
+public class SliceStoreBroadcastReceiver extends BroadcastReceiver{
+    private static final String TAG = "SliceStoreBroadcastReceiver";
 
     /**
      * UUID to report an anomaly when receiving a PendingIntent from an application or process
@@ -56,49 +55,48 @@ public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
      */
     private static final String UUID_BAD_PENDING_INTENT = "c360246e-95dc-4abf-9dc1-929a76cd7e53";
 
-    /** Weak references to {@link SlicePurchaseActivity} for each capability, if it exists. */
-    private static final Map<Integer, WeakReference<SlicePurchaseActivity>>
-            sSlicePurchaseActivities = new HashMap<>();
+    /** Weak references to {@link SliceStoreActivity} for each capability, if it exists. */
+    private static final Map<Integer, WeakReference<SliceStoreActivity>> sSliceStoreActivities =
+            new HashMap<>();
 
     /** Channel ID for the network boost notification. */
     private static final String NETWORK_BOOST_NOTIFICATION_CHANNEL_ID = "network_boost";
     /** Tag for the network boost notification. */
-    public static final String NETWORK_BOOST_NOTIFICATION_TAG = "SlicePurchaseApp.Notification";
+    public static final String NETWORK_BOOST_NOTIFICATION_TAG = "SliceStore.Notification";
     /** Action for when the user clicks the "Not now" button on the network boost notification. */
     private static final String ACTION_NOTIFICATION_CANCELED =
-            "com.android.phone.slice.action.NOTIFICATION_CANCELED";
+            "com.android.phone.slicestore.action.NOTIFICATION_CANCELED";
 
     /**
-     * Create a weak reference to {@link SlicePurchaseActivity}. The reference will be removed when
-     * {@link SlicePurchaseActivity#onDestroy()} is called.
+     * Create a weak reference to {@link SliceStoreActivity}. The reference will be removed when
+     * {@link SliceStoreActivity#onDestroy()} is called.
      *
      * @param capability The premium capability requested.
-     * @param slicePurchaseActivity The instance of SlicePurchaseActivity.
+     * @param sliceStoreActivity The instance of SliceStoreActivity.
      */
-    public static void updateSlicePurchaseActivity(
-            @TelephonyManager.PremiumCapability int capability,
-            @NonNull SlicePurchaseActivity slicePurchaseActivity) {
-        sSlicePurchaseActivities.put(capability, new WeakReference<>(slicePurchaseActivity));
+    public static void updateSliceStoreActivity(@TelephonyManager.PremiumCapability int capability,
+            @NonNull SliceStoreActivity sliceStoreActivity) {
+        sSliceStoreActivities.put(capability, new WeakReference<>(sliceStoreActivity));
     }
 
     /**
-     * Remove the weak reference to {@link SlicePurchaseActivity} when
-     * {@link SlicePurchaseActivity#onDestroy()} is called.
+     * Remove the weak reference to {@link SliceStoreActivity} when
+     * {@link SliceStoreActivity#onDestroy()} is called.
      *
      * @param capability The premium capability requested.
      */
-    public static void removeSlicePurchaseActivity(
+    public static void removeSliceStoreActivity(
             @TelephonyManager.PremiumCapability int capability) {
-        sSlicePurchaseActivities.remove(capability);
+        sSliceStoreActivities.remove(capability);
     }
 
     /**
-     * Send the PendingIntent containing the corresponding slice purchase application response.
+     * Send the PendingIntent containing the corresponding SliceStore response.
      *
      * @param intent The Intent containing the PendingIntent extra.
      * @param extra The extra to get the PendingIntent to send.
      */
-    public static void sendSlicePurchaseAppResponse(@NonNull Intent intent, @NonNull String extra) {
+    public static void sendSliceStoreResponse(@NonNull Intent intent, @NonNull String extra) {
         PendingIntent pendingIntent = intent.getParcelableExtra(extra, PendingIntent.class);
         if (pendingIntent == null) {
             loge("PendingIntent does not exist for extra: " + extra);
@@ -112,15 +110,14 @@ public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
     }
 
     /**
-     * Send the PendingIntent containing the corresponding slice purchase application response
-     * with additional data.
+     * Send the PendingIntent containing the corresponding SliceStore response with additional data.
      *
      * @param context The Context to use to send the PendingIntent.
      * @param intent The Intent containing the PendingIntent extra.
      * @param extra The extra to get the PendingIntent to send.
      * @param data The Intent containing additional data to send with the PendingIntent.
      */
-    public static void sendSlicePurchaseAppResponseWithData(@NonNull Context context,
+    public static void sendSliceStoreResponseWithData(@NonNull Context context,
             @NonNull Intent intent, @NonNull String extra, @NonNull Intent data) {
         PendingIntent pendingIntent = intent.getParcelableExtra(extra, PendingIntent.class);
         if (pendingIntent == null) {
@@ -135,46 +132,45 @@ public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
     }
 
     /**
-     * Check whether the Intent is valid and can be used to complete purchases in the slice purchase
-     * application. This checks that all necessary extras exist and that the values are valid.
+     * Check whether the Intent is valid and can be used to complete purchases in the SliceStore.
+     * This checks that all necessary extras exist and that the values are valid.
      *
      * @param intent The intent to check
      * @return {@code true} if the intent is valid and {@code false} otherwise.
      */
     public static boolean isIntentValid(@NonNull Intent intent) {
-        int phoneId = intent.getIntExtra(SlicePurchaseController.EXTRA_PHONE_ID,
+        int phoneId = intent.getIntExtra(SliceStore.EXTRA_PHONE_ID,
                 SubscriptionManager.INVALID_PHONE_INDEX);
         if (phoneId == SubscriptionManager.INVALID_PHONE_INDEX) {
             loge("isIntentValid: invalid phone index: " + phoneId);
             return false;
         }
 
-        int subId = intent.getIntExtra(SlicePurchaseController.EXTRA_SUB_ID,
+        int subId = intent.getIntExtra(SliceStore.EXTRA_SUB_ID,
                 SubscriptionManager.INVALID_SUBSCRIPTION_ID);
         if (subId == SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
             loge("isIntentValid: invalid subscription ID: " + subId);
             return false;
         }
 
-        int capability = intent.getIntExtra(SlicePurchaseController.EXTRA_PREMIUM_CAPABILITY,
-                SlicePurchaseController.PREMIUM_CAPABILITY_INVALID);
-        if (capability == SlicePurchaseController.PREMIUM_CAPABILITY_INVALID) {
+        int capability = intent.getIntExtra(SliceStore.EXTRA_PREMIUM_CAPABILITY,
+                SliceStore.PREMIUM_CAPABILITY_INVALID);
+        if (capability == SliceStore.PREMIUM_CAPABILITY_INVALID) {
             loge("isIntentValid: invalid premium capability: " + capability);
             return false;
         }
 
-        String appName = intent.getStringExtra(SlicePurchaseController.EXTRA_REQUESTING_APP_NAME);
+        String appName = intent.getStringExtra(SliceStore.EXTRA_REQUESTING_APP_NAME);
         if (TextUtils.isEmpty(appName)) {
             loge("isIntentValid: empty requesting application name: " + appName);
             return false;
         }
 
-        return isPendingIntentValid(intent, SlicePurchaseController.EXTRA_INTENT_CANCELED)
-                && isPendingIntentValid(intent, SlicePurchaseController.EXTRA_INTENT_CARRIER_ERROR)
-                && isPendingIntentValid(intent, SlicePurchaseController.EXTRA_INTENT_REQUEST_FAILED)
-                && isPendingIntentValid(intent,
-                        SlicePurchaseController.EXTRA_INTENT_NOT_DEFAULT_DATA_SUB)
-                && isPendingIntentValid(intent, SlicePurchaseController.EXTRA_INTENT_SUCCESS);
+        return isPendingIntentValid(intent, SliceStore.EXTRA_INTENT_CANCELED)
+                && isPendingIntentValid(intent, SliceStore.EXTRA_INTENT_CARRIER_ERROR)
+                && isPendingIntentValid(intent, SliceStore.EXTRA_INTENT_REQUEST_FAILED)
+                && isPendingIntentValid(intent, SliceStore.EXTRA_INTENT_NOT_DEFAULT_DATA)
+                && isPendingIntentValid(intent, SliceStore.EXTRA_INTENT_SUCCESS);
     }
 
     private static boolean isPendingIntentValid(@NonNull Intent intent, @NonNull String extra) {
@@ -201,12 +197,11 @@ public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
 
     @NonNull private static String getPendingIntentType(@NonNull String extra) {
         switch (extra) {
-            case SlicePurchaseController.EXTRA_INTENT_CANCELED: return "canceled";
-            case SlicePurchaseController.EXTRA_INTENT_CARRIER_ERROR: return "carrier error";
-            case SlicePurchaseController.EXTRA_INTENT_REQUEST_FAILED: return "request failed";
-            case SlicePurchaseController.EXTRA_INTENT_NOT_DEFAULT_DATA_SUB:
-                return "not default data sub";
-            case SlicePurchaseController.EXTRA_INTENT_SUCCESS: return "success";
+            case SliceStore.EXTRA_INTENT_CANCELED: return "canceled";
+            case SliceStore.EXTRA_INTENT_CARRIER_ERROR: return "carrier error";
+            case SliceStore.EXTRA_INTENT_REQUEST_FAILED: return "request failed";
+            case SliceStore.EXTRA_INTENT_NOT_DEFAULT_DATA: return "not default data";
+            case SliceStore.EXTRA_INTENT_SUCCESS: return "success";
             default: {
                 loge("Unknown pending intent extra: " + extra);
                 return "unknown(" + extra + ")";
@@ -218,10 +213,10 @@ public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
     public void onReceive(@NonNull Context context, @NonNull Intent intent) {
         logd("onReceive intent: " + intent.getAction());
         switch (intent.getAction()) {
-            case SlicePurchaseController.ACTION_START_SLICE_PURCHASE_APP:
+            case SliceStore.ACTION_START_SLICE_STORE:
                 onDisplayBoosterNotification(context, intent);
                 break;
-            case SlicePurchaseController.ACTION_SLICE_PURCHASE_APP_RESPONSE_TIMEOUT:
+            case SliceStore.ACTION_SLICE_STORE_RESPONSE_TIMEOUT:
                 onTimeout(context, intent);
                 break;
             case ACTION_NOTIFICATION_CANCELED:
@@ -234,8 +229,7 @@ public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
 
     private void onDisplayBoosterNotification(@NonNull Context context, @NonNull Intent intent) {
         if (!isIntentValid(intent)) {
-            sendSlicePurchaseAppResponse(intent,
-                    SlicePurchaseController.EXTRA_INTENT_REQUEST_FAILED);
+            sendSliceStoreResponse(intent, SliceStore.EXTRA_INTENT_REQUEST_FAILED);
             return;
         }
 
@@ -249,14 +243,13 @@ public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
                 new Notification.Builder(context, NETWORK_BOOST_NOTIFICATION_CHANNEL_ID)
                         .setContentTitle(String.format(context.getResources().getString(
                                 R.string.network_boost_notification_title),
-                                intent.getStringExtra(
-                                        SlicePurchaseController.EXTRA_REQUESTING_APP_NAME)))
+                                intent.getStringExtra(SliceStore.EXTRA_REQUESTING_APP_NAME)))
                         .setContentText(context.getResources().getString(
                                 R.string.network_boost_notification_detail))
                         .setSmallIcon(R.drawable.ic_network_boost)
                         .setContentIntent(createContentIntent(context, intent, 1))
                         .setDeleteIntent(intent.getParcelableExtra(
-                                SlicePurchaseController.EXTRA_INTENT_CANCELED, PendingIntent.class))
+                                SliceStore.EXTRA_INTENT_CANCELED, PendingIntent.class))
                         // Add an action for the "Not now" button, which has the same behavior as
                         // the user canceling or closing the notification.
                         .addAction(new Notification.Action.Builder(
@@ -273,8 +266,8 @@ public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
                                 createContentIntent(context, intent, 2)).build())
                         .build();
 
-        int capability = intent.getIntExtra(SlicePurchaseController.EXTRA_PREMIUM_CAPABILITY,
-                SlicePurchaseController.PREMIUM_CAPABILITY_INVALID);
+        int capability = intent.getIntExtra(SliceStore.EXTRA_PREMIUM_CAPABILITY,
+                SliceStore.PREMIUM_CAPABILITY_INVALID);
         logd("Display the booster notification for capability "
                 + TelephonyManager.convertPremiumCapabilityToString(capability));
         context.getSystemService(NotificationManager.class).notifyAsUser(
@@ -283,19 +276,19 @@ public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
 
     /**
      * Create the intent for when the user clicks on the "Manage" button on the network boost
-     * notification or the notification itself. This will open {@link SlicePurchaseActivity}.
+     * notification or the notification itself. This will open {@link SliceStoreActivity}.
      *
      * @param context The Context to create the intent for.
-     * @param intent The source Intent used to launch the slice purchase application.
+     * @param intent The source Intent used to launch the SliceStore application.
      * @param requestCode The request code for the PendingIntent.
      *
-     * @return The intent to start {@link SlicePurchaseActivity}.
+     * @return The intent to start {@link SliceStoreActivity}.
      */
     @NonNull private PendingIntent createContentIntent(@NonNull Context context,
             @NonNull Intent intent, int requestCode) {
-        Intent i = new Intent(context, SlicePurchaseActivity.class);
+        Intent i = new Intent(context, SliceStoreActivity.class);
         i.setComponent(ComponentName.unflattenFromString(
-                "com.android.carrierdefaultapp/.SlicePurchaseActivity"));
+                "com.android.carrierdefaultapp/.SliceStoreActivity"));
         i.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT
                 | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         i.putExtras(intent);
@@ -310,7 +303,7 @@ public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
      * as if the user had canceled or removed the notification.
      *
      * @param context The Context to create the intent for.
-     * @param intent The source Intent used to launch the slice purchase application.
+     * @param intent The source Intent used to launch the SliceStore application.
      *
      * @return The canceled intent.
      */
@@ -318,37 +311,37 @@ public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
             @NonNull Intent intent) {
         Intent i = new Intent(ACTION_NOTIFICATION_CANCELED);
         i.setComponent(ComponentName.unflattenFromString(
-                "com.android.carrierdefaultapp/.SlicePurchaseBroadcastReceiver"));
+                "com.android.carrierdefaultapp/.SliceStoreBroadcastReceiver"));
         i.putExtras(intent);
         return PendingIntent.getBroadcast(context, 0, i,
                 PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_MUTABLE);
     }
 
     private void onTimeout(@NonNull Context context, @NonNull Intent intent) {
-        int capability = intent.getIntExtra(SlicePurchaseController.EXTRA_PREMIUM_CAPABILITY,
-                SlicePurchaseController.PREMIUM_CAPABILITY_INVALID);
+        int capability = intent.getIntExtra(SliceStore.EXTRA_PREMIUM_CAPABILITY,
+                SliceStore.PREMIUM_CAPABILITY_INVALID);
         logd("Purchase capability " + TelephonyManager.convertPremiumCapabilityToString(capability)
                 + " timed out.");
-        if (sSlicePurchaseActivities.get(capability) == null) {
+        if (sSliceStoreActivities.get(capability) == null) {
             // Notification is still active
             logd("Closing booster notification since the user did not respond in time.");
             context.getSystemService(NotificationManager.class).cancelAsUser(
                     NETWORK_BOOST_NOTIFICATION_TAG, capability, UserHandle.ALL);
         } else {
-            // Notification was dismissed but SlicePurchaseActivity is still active
-            logd("Closing slice purchase application WebView since the user did not complete the "
-                    + "purchase in time.");
-            sSlicePurchaseActivities.get(capability).get().finishAndRemoveTask();
+            // Notification was dismissed but SliceStoreActivity is still active
+            logd("Closing SliceStore WebView since the user did not complete the purchase "
+                    + "in time.");
+            sSliceStoreActivities.get(capability).get().finishAndRemoveTask();
         }
     }
 
     private void onUserCanceled(@NonNull Context context, @NonNull Intent intent) {
-        int capability = intent.getIntExtra(SlicePurchaseController.EXTRA_PREMIUM_CAPABILITY,
-                SlicePurchaseController.PREMIUM_CAPABILITY_INVALID);
+        int capability = intent.getIntExtra(SliceStore.EXTRA_PREMIUM_CAPABILITY,
+                SliceStore.PREMIUM_CAPABILITY_INVALID);
         logd("onUserCanceled: " + TelephonyManager.convertPremiumCapabilityToString(capability));
         context.getSystemService(NotificationManager.class)
                 .cancelAsUser(NETWORK_BOOST_NOTIFICATION_TAG, capability, UserHandle.ALL);
-        sendSlicePurchaseAppResponse(intent, SlicePurchaseController.EXTRA_INTENT_CANCELED);
+        sendSliceStoreResponse(intent, SliceStore.EXTRA_INTENT_CANCELED);
     }
 
     private static void logd(String s) {

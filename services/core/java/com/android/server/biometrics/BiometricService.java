@@ -72,7 +72,6 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.DumpUtils;
 import com.android.server.SystemService;
-import com.android.server.biometrics.log.BiometricContext;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -101,7 +100,6 @@ public class BiometricService extends SystemService {
     private final List<EnabledOnKeyguardCallback> mEnabledOnKeyguardCallbacks;
     private final Random mRandom = new Random();
     @NonNull private final Supplier<Long> mRequestCounter;
-    @NonNull private final BiometricContext mBiometricContext;
 
     @VisibleForTesting
     IStatusBarService mStatusBarService;
@@ -778,16 +776,6 @@ public class BiometricService extends SystemService {
 
         @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
         @Override // Binder call
-        public void resetLockout(
-                int userId, byte[] hardwareAuthToken) {
-            Slog.d(TAG, "resetLockout(userId=" + userId
-                    + ", hat=" + (hardwareAuthToken == null ? "null " : "present") + ")");
-            mBiometricContext.getAuthSessionCoordinator()
-                    .resetLockoutFor(userId, Authenticators.BIOMETRIC_STRONG, -1);
-        }
-
-        @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
-        @Override // Binder call
         public int getCurrentStrength(int sensorId) {
 
             super.getCurrentStrength_enforcePermission();
@@ -996,10 +984,6 @@ public class BiometricService extends SystemService {
             final AtomicLong generator = new AtomicLong(0);
             return () -> generator.incrementAndGet();
         }
-
-        public BiometricContext getBiometricContext(Context context) {
-            return BiometricContext.getInstance(context);
-        }
     }
 
     /**
@@ -1026,7 +1010,6 @@ public class BiometricService extends SystemService {
         mSettingObserver = mInjector.getSettingObserver(context, mHandler,
                 mEnabledOnKeyguardCallbacks);
         mRequestCounter = mInjector.getRequestGenerator();
-        mBiometricContext = injector.getBiometricContext(context);
 
         try {
             injector.getActivityManagerService().registerUserSwitchObserver(

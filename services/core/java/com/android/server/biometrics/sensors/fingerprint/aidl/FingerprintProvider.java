@@ -58,7 +58,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
-import com.android.server.biometrics.sensors.AuthSessionCoordinator;
 import com.android.server.biometrics.sensors.AuthenticationClient;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.BiometricScheduler;
@@ -95,23 +94,15 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
 
     private boolean mTestHalEnabled;
 
-    @NonNull
-    @VisibleForTesting
+    @NonNull private final Context mContext;
+    @NonNull private final BiometricStateCallback mBiometricStateCallback;
+    @NonNull private final String mHalInstanceName;
+    @NonNull @VisibleForTesting
     final SparseArray<Sensor> mSensors; // Map of sensors that this HAL supports
-    @NonNull
-    private final Context mContext;
-    @NonNull
-    private final BiometricStateCallback mBiometricStateCallback;
-    @NonNull
-    private final String mHalInstanceName;
-    @NonNull
-    private final Handler mHandler;
-    @NonNull
-    private final LockoutResetDispatcher mLockoutResetDispatcher;
-    @NonNull
-    private final ActivityTaskManager mActivityTaskManager;
-    @NonNull
-    private final BiometricTaskStackListener mTaskStackListener;
+    @NonNull private final Handler mHandler;
+    @NonNull private final LockoutResetDispatcher mLockoutResetDispatcher;
+    @NonNull private final ActivityTaskManager mActivityTaskManager;
+    @NonNull private final BiometricTaskStackListener mTaskStackListener;
     // for requests that do not use biometric prompt
     @NonNull private final AtomicLong mRequestCounter = new AtomicLong(0);
     @NonNull private final BiometricContext mBiometricContext;
@@ -119,7 +110,6 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     @Nullable private IUdfpsOverlayController mUdfpsOverlayController;
     @Nullable private ISidefpsController mSidefpsController;
     @Nullable private IUdfpsOverlay mUdfpsOverlay;
-    private AuthSessionCoordinator mAuthSessionCoordinator;
 
     private final class BiometricTaskStackListener extends TaskStackListener {
         @Override
@@ -164,7 +154,6 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
         mActivityTaskManager = ActivityTaskManager.getInstance();
         mTaskStackListener = new BiometricTaskStackListener();
         mBiometricContext = biometricContext;
-        mAuthSessionCoordinator = mBiometricContext.getAuthSessionCoordinator();
 
         final List<SensorLocationInternal> workaroundLocations = getWorkaroundSensorProps(context);
 
@@ -190,11 +179,11 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                             true /* resetLockoutRequiresHardwareAuthToken */,
                             !workaroundLocations.isEmpty() ? workaroundLocations :
                                     Arrays.stream(prop.sensorLocations).map(location ->
-                                                    new SensorLocationInternal(
-                                                            location.display,
-                                                            location.sensorLocationX,
-                                                            location.sensorLocationY,
-                                                            location.sensorRadius))
+                                            new SensorLocationInternal(
+                                                    location.display,
+                                                    location.sensorLocationX,
+                                                    location.sensorLocationY,
+                                                    location.sensorRadius))
                                             .collect(Collectors.toList()));
             final Sensor sensor = new Sensor(getTag() + "/" + sensorId, this, mContext, mHandler,
                     internalProp, lockoutResetDispatcher, gestureAvailabilityDispatcher,
@@ -358,7 +347,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                             mSensors.get(sensorId).getLazySession(), token,
                             new ClientMonitorCallbackConverter(receiver), userId, opPackageName,
                             sensorId, createLogger(BiometricsProtoEnums.ACTION_UNKNOWN,
-                            BiometricsProtoEnums.CLIENT_UNKNOWN),
+                                BiometricsProtoEnums.CLIENT_UNKNOWN),
                             mBiometricContext);
             scheduleForSensor(sensorId, client);
         });
@@ -456,30 +445,8 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                     mUdfpsOverlayController, mSidefpsController, mUdfpsOverlay,
                     allowBackgroundAuthentication,
                     mSensors.get(sensorId).getSensorProperties(), mHandler,
-                    Utils.getCurrentStrength(sensorId),
-                    SystemClock.elapsedRealtimeClock());
-            scheduleForSensor(sensorId, client, new ClientMonitorCallback() {
-
-                @Override
-                public void onClientStarted(@NonNull BaseClientMonitor clientMonitor) {
-                    mBiometricStateCallback.onClientStarted(clientMonitor);
-                    mAuthSessionCoordinator.authStartedFor(userId, sensorId, requestId);
-                }
-
-                @Override
-                public void onBiometricAction(int action) {
-                    mBiometricStateCallback.onBiometricAction(action);
-                }
-
-                @Override
-                public void onClientFinished(@NonNull BaseClientMonitor clientMonitor,
-                        boolean success) {
-                    mBiometricStateCallback.onClientFinished(clientMonitor, success);
-                    mAuthSessionCoordinator.authEndedFor(userId, Utils.getCurrentStrength(sensorId),
-                            sensorId, requestId, success);
-                }
-            });
-
+                    Utils.getCurrentStrength(sensorId), SystemClock.elapsedRealtimeClock());
+            scheduleForSensor(sensorId, client, mBiometricStateCallback);
         });
     }
 
@@ -617,8 +584,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
 
     @Override
     public int getLockoutModeForUser(int sensorId, int userId) {
-        return mBiometricContext.getAuthSessionCoordinator().getLockoutStateFor(userId,
-                Utils.getCurrentStrength(sensorId));
+        return mSensors.get(sensorId).getLockoutCache().getLockoutModeForUser(userId);
     }
 
     @Override

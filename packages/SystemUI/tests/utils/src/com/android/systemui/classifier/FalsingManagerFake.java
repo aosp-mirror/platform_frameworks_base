@@ -39,7 +39,6 @@ public class FalsingManagerFake implements FalsingManager {
     private boolean mShouldEnforceBouncer;
     private boolean mIsReportingEnabled;
     private boolean mIsFalseRobustTap;
-    private boolean mIsFalseLongTap;
     private boolean mDestroyed;
     private boolean mIsProximityNear;
 
@@ -88,10 +87,6 @@ public class FalsingManagerFake implements FalsingManager {
         mIsProximityNear = proxNear;
     }
 
-    public void setFalseLongTap(boolean falseLongTap) {
-        mIsFalseLongTap = falseLongTap;
-    }
-
     @Override
     public boolean isSimpleTap() {
         checkDestroyed();
@@ -102,12 +97,6 @@ public class FalsingManagerFake implements FalsingManager {
     public boolean isFalseTap(@Penalty int penalty) {
         checkDestroyed();
         return mIsFalseRobustTap;
-    }
-
-    @Override
-    public boolean isFalseLongTap(int penalty) {
-        checkDestroyed();
-        return mIsFalseLongTap;
     }
 
     @Override

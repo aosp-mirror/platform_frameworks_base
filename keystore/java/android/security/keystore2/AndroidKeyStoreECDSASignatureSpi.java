@@ -203,11 +203,6 @@ abstract class AndroidKeyStoreECDSASignatureSpi extends AndroidKeyStoreSignature
         for (Authorization a : key.getAuthorizations()) {
             if (a.keyParameter.tag == KeymasterDefs.KM_TAG_KEY_SIZE) {
                 keySizeBits = KeyStore2ParameterUtils.getUnsignedInt(a);
-                break;
-            } else if (a.keyParameter.tag == KeymasterDefs.KM_TAG_EC_CURVE) {
-                keySizeBits = KeyProperties.EcCurve.fromKeymasterCurve(
-                        a.keyParameter.value.getEcCurve());
-                break;
             }
         }
 

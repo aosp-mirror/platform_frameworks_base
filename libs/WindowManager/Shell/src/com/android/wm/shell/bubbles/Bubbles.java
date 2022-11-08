@@ -22,7 +22,6 @@ import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.app.NotificationChannel;
-import android.content.Intent;
 import android.content.pm.UserInfo;
 import android.os.UserHandle;
 import android.service.notification.NotificationListenerService;
@@ -107,15 +106,6 @@ public interface Bubbles {
      * @param bubble the bubble to be selected
      */
     void expandStackAndSelectBubble(Bubble bubble);
-
-    /**
-     * Adds and expands bubble that is not notification based, but instead based on an intent from
-     * the app. The intent must be explicit (i.e. include a package name or fully qualified
-     * component class name) and the activity for it should be resizable.
-     *
-     * @param intent the intent to populate the bubble.
-     */
-    void showAppBubble(Intent intent);
 
     /**
      * @return a bubble that matches the provided shortcutId, if one exists.
@@ -241,11 +231,6 @@ public interface Bubbles {
      * @param removedUserId the id of the removed user.
      */
     void onUserRemoved(int removedUserId);
-
-    /**
-     * Sets whether bubble bar should be enabled or not.
-     */
-    void setBubbleBarEnabled(boolean enabled);
 
     /** Listener to find out about stack expansion / collapse events. */
     interface BubbleExpandListener {

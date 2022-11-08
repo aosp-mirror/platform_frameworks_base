@@ -90,14 +90,11 @@ public enum ScrimState {
     AUTH_SCRIMMED_SHADE {
         @Override
         public void prepare(ScrimState previousState) {
-            // notif scrim alpha values are determined by ScrimController#applyState
+            // notif & behind scrim alpha values are determined by ScrimController#applyState
             // based on the shade expansion
 
             mFrontTint = Color.BLACK;
             mFrontAlpha = .66f;
-
-            mBehindTint = Color.BLACK;
-            mBehindAlpha = 1f;
         }
     },
 

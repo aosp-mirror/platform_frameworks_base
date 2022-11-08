@@ -16,6 +16,8 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.TRANSIT_CHANGE;
@@ -25,6 +27,7 @@ import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_OCCLUDE;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
 import static android.view.WindowManager.TRANSIT_NONE;
+import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_OPEN;
 import static android.view.WindowManager.TRANSIT_OLD_CRASHING_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE;
@@ -408,38 +411,50 @@ public class AppTransitionTests extends WindowTestsBase {
     }
 
     @Test
-    public void testDelayWhileRecents() {
+    public void testExcludeLauncher() {
         final DisplayContent dc = createNewDisplay(Display.STATE_ON);
         doReturn(false).when(dc).onDescendantOrientationChanged(any());
         final Task task = createTask(dc);
 
-        // Simulate activity1 launches activity2.
+        // Simulate activity1 launches activity2
         final ActivityRecord activity1 = createActivityRecord(task);
         activity1.setVisible(true);
         activity1.mVisibleRequested = false;
         activity1.allDrawn = true;
+        dc.mClosingApps.add(activity1);
         final ActivityRecord activity2 = createActivityRecord(task);
         activity2.setVisible(false);
         activity2.mVisibleRequested = true;
         activity2.allDrawn = true;
-
-        dc.mClosingApps.add(activity1);
         dc.mOpeningApps.add(activity2);
         dc.prepareAppTransition(TRANSIT_OPEN);
-        assertTrue(dc.mAppTransition.containsTransitRequest(TRANSIT_OPEN));
+
+        // Simulate start recents
+        final ActivityRecord homeActivity = createActivityRecord(dc, WINDOWING_MODE_FULLSCREEN,
+                ACTIVITY_TYPE_HOME);
+        homeActivity.setVisible(false);
+        homeActivity.mVisibleRequested = true;
+        homeActivity.allDrawn = true;
+        dc.mOpeningApps.add(homeActivity);
+        dc.prepareAppTransition(TRANSIT_NONE);
+        doReturn(true).when(task)
+                .isSelfAnimating(anyInt(), eq(ANIMATION_TYPE_RECENTS));
 
         // Wait until everything in animation handler get executed to prevent the exiting window
         // from being removed during WindowSurfacePlacer Traversal.
         waitUntilHandlersIdle();
 
-        // Start recents
-        doReturn(true).when(task)
-                .isSelfAnimating(anyInt(), eq(ANIMATION_TYPE_RECENTS));
-
         dc.mAppTransitionController.handleAppTransitionReady();
 
-        verify(activity1, never()).commitVisibility(anyBoolean(), anyBoolean(), anyBoolean());
-        verify(activity2, never()).commitVisibility(anyBoolean(), anyBoolean(), anyBoolean());
+        verify(activity1).commitVisibility(eq(false), anyBoolean(), anyBoolean());
+        verify(activity1).applyAnimation(any(), eq(TRANSIT_OLD_ACTIVITY_OPEN), eq(false),
+                anyBoolean(), any());
+        verify(activity2).commitVisibility(eq(true), anyBoolean(), anyBoolean());
+        verify(activity2).applyAnimation(any(), eq(TRANSIT_OLD_ACTIVITY_OPEN), eq(true),
+                anyBoolean(), any());
+        verify(homeActivity).commitVisibility(eq(true), anyBoolean(), anyBoolean());
+        verify(homeActivity, never()).applyAnimation(any(), anyInt(), anyBoolean(), anyBoolean(),
+                any());
     }
 
     @Test
