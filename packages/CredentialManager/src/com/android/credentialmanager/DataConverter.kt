@@ -21,8 +21,11 @@ import android.credentials.ui.Entry
 import android.credentials.ui.GetCredentialProviderData
 import android.credentials.ui.CreateCredentialProviderData
 import com.android.credentialmanager.createflow.CreateOptionInfo
-import com.android.credentialmanager.getflow.CredentialOptionInfo
+import com.android.credentialmanager.getflow.ActionEntryInfo
+import com.android.credentialmanager.getflow.AuthenticationEntryInfo
+import com.android.credentialmanager.getflow.CredentialEntryInfo
 import com.android.credentialmanager.getflow.ProviderInfo
+import com.android.credentialmanager.jetpack.provider.CredentialEntryUi
 import com.android.credentialmanager.jetpack.provider.SaveEntryUi
 
 /** Utility functions for converting CredentialManager data structures to or from UI formats. */
@@ -35,36 +38,64 @@ class GetFlowUtils {
     ): List<ProviderInfo> {
       return providerDataList.map {
         ProviderInfo(
+          id = it.providerFlattenedComponentName,
           // TODO: replace to extract from the service data structure when available
           icon = context.getDrawable(R.drawable.ic_passkey)!!,
-          name = it.providerFlattenedComponentName,
           // TODO: get the service display name and icon from the component name.
           displayName = it.providerFlattenedComponentName,
-          credentialTypeIcon = context.getDrawable(R.drawable.ic_passkey)!!,
-          credentialOptions = toCredentialOptionInfoList(it.credentialEntries, context),
+          credentialEntryList = getCredentialOptionInfoList(
+            it.providerFlattenedComponentName, it.credentialEntries, context),
+          authenticationEntry = getAuthenticationEntry(
+            it.providerFlattenedComponentName, it.authenticationEntry, context),
+          actionEntryList = getActionEntryList(
+            it.providerFlattenedComponentName, it.actionChips, context),
         )
       }
     }
 
 
     /* From service data structure to UI credential entry list representation. */
-    private fun toCredentialOptionInfoList(
+    private fun getCredentialOptionInfoList(
+      providerId: String,
       credentialEntries: List<Entry>,
       context: Context,
-    ): List<CredentialOptionInfo> {
+    ): List<CredentialEntryInfo> {
       return credentialEntries.map {
         val credentialEntryUi = CredentialEntryUi.fromSlice(it.slice)
 
         // Consider directly move the UI object into the class.
-        return@map CredentialOptionInfo(
-          // TODO: remove fallbacks
-          icon = credentialEntryUi.icon?.loadDrawable(context)
-            ?: context.getDrawable(R.drawable.ic_passkey)!!,
+        return@map CredentialEntryInfo(
+          providerId = providerId,
           entryKey = it.key,
           entrySubkey = it.subkey,
-          usageData = credentialEntryUi.usageData?.toString() ?: "Unknown usageData",
+          credentialType = credentialEntryUi.credentialType.toString(),
+          credentialTypeDisplayName = credentialEntryUi.credentialTypeDisplayName.toString(),
+          userName = credentialEntryUi.userName.toString(),
+          displayName = credentialEntryUi.userDisplayName?.toString(),
+          // TODO: proper fallback
+          icon = credentialEntryUi.entryIcon.loadDrawable(context)
+            ?: context.getDrawable(R.drawable.ic_passkey)!!,
+          lastUsedTimeMillis = credentialEntryUi.lastUsedTimeMillis,
         )
       }
+    }
+
+    private fun getAuthenticationEntry(
+      providerId: String,
+      authEntry: Entry?,
+      context: Context,
+    ): AuthenticationEntryInfo? {
+      // TODO: implement
+      return null
+    }
+
+    private fun getActionEntryList(
+      providerId: String,
+      actionEntries: List<Entry>,
+      context: Context,
+    ): List<ActionEntryInfo> {
+      // TODO: implement
+      return emptyList()
     }
   }
 }
