@@ -161,6 +161,7 @@ public final class TimeController extends StateController {
                     // Scheduler.
                     mStateChangedListener.onRunJobNow(job);
                 }
+                mTrackedJobs.remove(job);
                 Counter.logIncrement(
                         "job_scheduler.value_job_scheduler_job_deadline_expired_counter");
             } else if (wouldBeReadyWithConstraintLocked(job, JobStatus.CONSTRAINT_DEADLINE)) {
@@ -174,8 +175,11 @@ public final class TimeController extends StateController {
                 && job.getEarliestRunTime() <= mNextDelayExpiredElapsedMillis) {
             // Since this is just the delay, we don't need to rush the Scheduler to run the job
             // immediately if the constraint is satisfied here.
-            if (!evaluateTimingDelayConstraint(job, nowElapsedMillis)
-                    && wouldBeReadyWithConstraintLocked(job, JobStatus.CONSTRAINT_TIMING_DELAY)) {
+            if (evaluateTimingDelayConstraint(job, nowElapsedMillis)) {
+                if (canStopTrackingJobLocked(job)) {
+                    mTrackedJobs.remove(job);
+                }
+            } else if (wouldBeReadyWithConstraintLocked(job, JobStatus.CONSTRAINT_TIMING_DELAY)) {
                 // This job's delay is earlier than the current set alarm. Update the alarm.
                 setDelayExpiredAlarmLocked(job.getEarliestRunTime(),
                         mService.deriveWorkSource(job.getSourceUid(), job.getSourcePackageName()));
