@@ -36,7 +36,6 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.Log;
-import android.view.Display;
 import android.view.IWindowManager;
 import android.view.InputDevice;
 import android.view.KeyCharacterMap;
@@ -50,6 +49,7 @@ import com.android.internal.util.ScreenshotHelper;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.recents.Recents;
+import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.CommandQueue;
@@ -180,6 +180,7 @@ public class SystemActions implements CoreStartable {
     private final Context mContext;
     private final UserTracker mUserTracker;
     private final Optional<Recents> mRecentsOptional;
+    private final DisplayTracker mDisplayTracker;
     private Locale mLocale;
     private final AccessibilityManager mA11yManager;
     private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
@@ -194,11 +195,13 @@ public class SystemActions implements CoreStartable {
             NotificationShadeWindowController notificationShadeController,
             ShadeController shadeController,
             Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
-            Optional<Recents> recentsOptional) {
+            Optional<Recents> recentsOptional,
+            DisplayTracker displayTracker) {
         mContext = context;
         mUserTracker = userTracker;
         mShadeController = shadeController;
         mRecentsOptional = recentsOptional;
+        mDisplayTracker = displayTracker;
         mReceiver = new SystemActionsBroadcastReceiver();
         mLocale = mContext.getResources().getConfiguration().getLocales().get(0);
         mA11yManager = (AccessibilityManager) mContext.getSystemService(
@@ -523,7 +526,7 @@ public class SystemActions implements CoreStartable {
 
     private void handleAccessibilityButton() {
         AccessibilityManager.getInstance(mContext).notifyAccessibilityButtonClicked(
-                Display.DEFAULT_DISPLAY);
+                mDisplayTracker.getDefaultDisplayId());
     }
 
     private void handleAccessibilityButtonChooser() {

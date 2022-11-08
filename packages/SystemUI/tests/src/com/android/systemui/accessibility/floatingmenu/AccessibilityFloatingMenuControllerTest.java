@@ -47,6 +47,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.accessibility.AccessibilityButtonModeObserver;
 import com.android.systemui.accessibility.AccessibilityButtonTargetsObserver;
 import com.android.systemui.flags.FakeFeatureFlags;
+import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.After;
@@ -353,13 +354,14 @@ public class AccessibilityFloatingMenuControllerTest extends SysuiTestCase {
     private AccessibilityFloatingMenuController setUpController(FakeFeatureFlags featureFlags) {
         final WindowManager windowManager = mContext.getSystemService(WindowManager.class);
         final DisplayManager displayManager = mContext.getSystemService(DisplayManager.class);
+        final FakeDisplayTracker displayTracker = new FakeDisplayTracker(mContext);
         mTargetsObserver = spy(Dependency.get(AccessibilityButtonTargetsObserver.class));
         mModeObserver = spy(Dependency.get(AccessibilityButtonModeObserver.class));
         mKeyguardUpdateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
         final AccessibilityFloatingMenuController controller =
                 new AccessibilityFloatingMenuController(mContextWrapper, windowManager,
                         displayManager, mAccessibilityManager, mTargetsObserver, mModeObserver,
-                        mKeyguardUpdateMonitor, featureFlags, mSecureSettings);
+                        mKeyguardUpdateMonitor, featureFlags, mSecureSettings, displayTracker);
         controller.init();
 
         return controller;

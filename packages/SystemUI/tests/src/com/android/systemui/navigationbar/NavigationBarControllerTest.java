@@ -50,6 +50,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.recents.OverviewProxyService;
+import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.shared.recents.utilities.Utilities;
 import com.android.systemui.shared.system.TaskStackChangeListeners;
 import com.android.systemui.statusbar.CommandQueue;
@@ -81,6 +82,7 @@ public class NavigationBarControllerTest extends SysuiTestCase {
     private NavigationBar mDefaultNavBar;
     private NavigationBar mSecondaryNavBar;
     private StaticMockitoSession mMockitoSession;
+    private FakeDisplayTracker mDisplayTracker = new FakeDisplayTracker(mContext);
 
     @Mock
     private CommandQueue mCommandQueue;
@@ -110,7 +112,8 @@ public class NavigationBarControllerTest extends SysuiTestCase {
                         Optional.of(mock(Pip.class)),
                         Optional.of(mock(BackAnimation.class)),
                         mock(FeatureFlags.class),
-                        mock(SecureSettings.class)));
+                        mock(SecureSettings.class),
+                        mDisplayTracker));
         initializeNavigationBars();
         mMockitoSession = mockitoSession().mockStatic(Utilities.class).startMocking();
     }

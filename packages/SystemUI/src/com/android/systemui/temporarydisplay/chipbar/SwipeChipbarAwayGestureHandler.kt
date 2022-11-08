@@ -19,6 +19,7 @@ package com.android.systemui.temporarydisplay.chipbar
 import android.content.Context
 import android.view.MotionEvent
 import android.view.View
+import com.android.systemui.settings.DisplayTracker
 import com.android.systemui.statusbar.gesture.SwipeUpGestureHandler
 import com.android.systemui.statusbar.gesture.SwipeUpGestureLogger
 import com.android.systemui.util.boundsOnScreen
@@ -31,8 +32,9 @@ import com.android.systemui.util.boundsOnScreen
  */
 class SwipeChipbarAwayGestureHandler(
     context: Context,
+    displayTracker: DisplayTracker,
     logger: SwipeUpGestureLogger,
-) : SwipeUpGestureHandler(context, logger, loggerTag = LOGGER_TAG) {
+) : SwipeUpGestureHandler(context, displayTracker, logger, loggerTag = LOGGER_TAG) {
 
     private var viewFetcher: () -> View? = { null }
 

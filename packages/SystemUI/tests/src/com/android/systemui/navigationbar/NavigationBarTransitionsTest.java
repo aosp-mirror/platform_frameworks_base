@@ -36,6 +36,7 @@ import com.android.systemui.assist.AssistManager;
 import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.OverviewProxyService;
+import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.statusbar.phone.BarTransitions;
 import com.android.systemui.statusbar.phone.LightBarTransitionsController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -63,6 +64,7 @@ public class NavigationBarTransitionsTest extends SysuiTestCase {
     IWindowManager mIWindowManager;
 
     private NavigationBarTransitions mTransitions;
+    private FakeDisplayTracker mDisplayTracker = new FakeDisplayTracker(mContext);
 
     @Before
     public void setup() {
@@ -86,7 +88,7 @@ public class NavigationBarTransitionsTest extends SysuiTestCase {
         when(navBar.getCurrentView()).thenReturn(navBar);
         when(navBar.findViewById(anyInt())).thenReturn(navBar);
         mTransitions = new NavigationBarTransitions(
-                navBar, mIWindowManager, mLightBarTransitionsFactory);
+                navBar, mIWindowManager, mLightBarTransitionsFactory, mDisplayTracker);
     }
 
     @Test

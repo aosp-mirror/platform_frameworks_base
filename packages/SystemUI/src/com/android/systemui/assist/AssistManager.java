@@ -1,7 +1,5 @@
 package com.android.systemui.assist;
 
-import static android.view.Display.DEFAULT_DISPLAY;
-
 import static com.android.systemui.DejankUtils.whitelistIpcs;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_ASSIST_GESTURE_CONSTRAINED;
 
@@ -35,6 +33,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.recents.OverviewProxyService;
+import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
@@ -122,6 +121,7 @@ public class AssistManager {
     protected final Lazy<SysUiState> mSysUiState;
     protected final AssistLogger mAssistLogger;
     private final UserTracker mUserTracker;
+    private final DisplayTracker mDisplayTracker;
     private final SecureSettings mSecureSettings;
 
     private final DeviceProvisionedController mDeviceProvisionedController;
@@ -141,6 +141,7 @@ public class AssistManager {
             AssistLogger assistLogger,
             @Main Handler uiHandler,
             UserTracker userTracker,
+            DisplayTracker displayTracker,
             SecureSettings secureSettings) {
         mContext = context;
         mDeviceProvisionedController = controller;
@@ -150,6 +151,7 @@ public class AssistManager {
         mPhoneStateMonitor = phoneStateMonitor;
         mAssistLogger = assistLogger;
         mUserTracker = userTracker;
+        mDisplayTracker = displayTracker;
         mSecureSettings = secureSettings;
 
         registerVoiceInteractionSessionListener();
@@ -214,7 +216,7 @@ public class AssistManager {
                                     .setFlag(
                                             SYSUI_STATE_ASSIST_GESTURE_CONSTRAINED,
                                             hints.getBoolean(CONSTRAINED_KEY, false))
-                                    .commitUpdate(DEFAULT_DISPLAY);
+                                    .commitUpdate(mDisplayTracker.getDefaultDisplayId());
                         }
                     }
                 });

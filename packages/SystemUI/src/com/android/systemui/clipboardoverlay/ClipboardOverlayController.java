@@ -17,7 +17,6 @@
 package com.android.systemui.clipboardoverlay;
 
 import static android.content.Intent.ACTION_CLOSE_SYSTEM_DIALOGS;
-import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_SCREENSHOT;
 
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.CLIPBOARD_OVERLAY_SHOW_ACTIONS;
@@ -72,6 +71,7 @@ import com.android.systemui.clipboardoverlay.dagger.ClipboardOverlayModule.Overl
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.screenshot.TimeoutHandler;
+import com.android.systemui.settings.DisplayTracker;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -96,6 +96,7 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
     private final ClipboardLogger mClipboardLogger;
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final DisplayManager mDisplayManager;
+    private final DisplayTracker mDisplayTracker;
     private final ClipboardOverlayWindow mWindow;
     private final TimeoutHandler mTimeoutHandler;
     private final ClipboardOverlayUtils mClipboardUtils;
@@ -186,9 +187,11 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
             FeatureFlags featureFlags,
             ClipboardOverlayUtils clipboardUtils,
             @Background Executor bgExecutor,
-            UiEventLogger uiEventLogger) {
+            UiEventLogger uiEventLogger,
+            DisplayTracker displayTracker) {
         mBroadcastDispatcher = broadcastDispatcher;
         mDisplayManager = requireNonNull(context.getSystemService(DisplayManager.class));
+        mDisplayTracker = displayTracker;
         final Context displayContext = context.createDisplayContext(getDefaultDisplay());
         mContext = displayContext.createWindowContext(TYPE_SCREENSHOT, null);
 
@@ -514,7 +517,7 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
     }
 
     private Display getDefaultDisplay() {
-        return mDisplayManager.getDisplay(DEFAULT_DISPLAY);
+        return mDisplayManager.getDisplay(mDisplayTracker.getDefaultDisplayId());
     }
 
     static class ClipboardLogger {
