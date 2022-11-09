@@ -168,6 +168,8 @@
     <skip />
     <string name="keyguard_face_failed" msgid="9044619102286917151">"Visage non reconnu"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"Utiliser l\'empreinte digitale"</string>
+    <!-- no translation found for keyguard_face_unlock_unavailable (8145547300240405980) -->
+    <skip />
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth connecté"</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Pourcentage de la pile inconnu."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Connecté à : <xliff:g id="BLUETOOTH">%s</xliff:g>"</string>
@@ -248,8 +250,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Luminosité"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Inversion des couleurs"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Correction des couleurs"</string>
-    <!-- no translation found for quick_settings_more_user_settings (7634653308485206306) -->
-    <skip />
+    <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Gérer les utilisateurs"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Terminé"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Fermer"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Connecté"</string>
@@ -304,6 +305,17 @@
     <string name="sensor_privacy_mic_unblocked_toast_content" msgid="306555320557065068">"Microphone disponible"</string>
     <string name="sensor_privacy_camera_unblocked_toast_content" msgid="7843105715964332311">"Appareil photo disponible"</string>
     <string name="sensor_privacy_mic_camera_unblocked_toast_content" msgid="7339355093282661115">"Microphone et appareil photo disponibles"</string>
+    <string name="sensor_privacy_mic_turned_on_dialog_title" msgid="6348853159838376513">"Microphone activé"</string>
+    <string name="sensor_privacy_mic_turned_off_dialog_title" msgid="5760464281790732849">"Microphone désactivé"</string>
+    <string name="sensor_privacy_mic_unblocked_dialog_content" msgid="4889961886199270224">"Le microphone est activé pour toutes les applications et tous les services."</string>
+    <string name="sensor_privacy_mic_blocked_no_exception_dialog_content" msgid="5864898470772965394">"L\'accès au microphone est désactivé pour toutes les applications et tous les services. Vous pouvez l\'activer dans Paramètres &gt; Confidentialité &gt; Microphone."</string>
+    <string name="sensor_privacy_mic_blocked_with_exception_dialog_content" msgid="810289713700437896">"L\'accès au microphone est désactivé pour toutes les applications et tous les services. Vous pouvez modifier cette option dans Paramètres &gt; Confidentialité &gt; Microphone."</string>
+    <string name="sensor_privacy_camera_turned_on_dialog_title" msgid="8039095295100075952">"Appareil photo activé"</string>
+    <string name="sensor_privacy_camera_turned_off_dialog_title" msgid="1936603903120742696">"Appareil photo désactivé"</string>
+    <string name="sensor_privacy_camera_unblocked_dialog_content" msgid="7847190103011782278">"L\'appareil photo est activé pour toutes les applications et tous les services."</string>
+    <string name="sensor_privacy_camera_blocked_dialog_content" msgid="3182428709314874616">"L\'accès à l\'appareil photo est désactivé pour toutes les applications et tous les services."</string>
+    <string name="sensor_privacy_htt_blocked_dialog_content" msgid="3333321592997666441">"Pour utiliser le bouton du microphone, activez l\'accès au microphone dans les paramètres."</string>
+    <string name="sensor_privacy_dialog_open_settings" msgid="1503088305279285048">"Ouvrir les paramètres."</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Autre appareil"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Basculer l\'aperçu"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Vous ne serez pas dérangé par les sons et les vibrations, sauf pour les alarmes, les rappels, les événements et les appelants que vous sélectionnez. Vous entendrez tout ce que vous choisissez d\'écouter, y compris la musique, les vidéos et les jeux."</string>
@@ -374,6 +386,16 @@
     <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"Lorsque vous partagez, enregistrez ou diffusez une application, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> a accès à tout ce qui est affiché ou lu sur cette application. Par conséquent, soyez prudent avec les mots de passe, les détails du paiement, les messages ou toute autre information confidentielle."</string>
     <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"Continuer"</string>
     <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"Partager ou enregistrer une application"</string>
+    <!-- no translation found for media_projection_permission_dialog_system_service_title (6827129613741303726) -->
+    <skip />
+    <!-- no translation found for media_projection_permission_dialog_system_service_warning_entire_screen (8801616203805837575) -->
+    <skip />
+    <!-- no translation found for media_projection_permission_dialog_system_service_warning_single_app (543310680568419338) -->
+    <skip />
+    <!-- no translation found for screen_capturing_disabled_by_policy_dialog_title (2113331792064527203) -->
+    <skip />
+    <!-- no translation found for screen_capturing_disabled_by_policy_dialog_description (6015975736747696431) -->
+    <skip />
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Tout effacer"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Gérer"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Historique"</string>
@@ -608,8 +630,8 @@
     <string name="accessibility_status_bar_headset" msgid="2699275863720926104">"Écouteurs connectés"</string>
     <string name="data_saver" msgid="3484013368530820763">"Économiseur de données"</string>
     <string name="accessibility_data_saver_on" msgid="5394743820189757731">"La fonction Économiseur de données est activée"</string>
-    <string name="switch_bar_on" msgid="1770868129120096114">"Activé"</string>
-    <string name="switch_bar_off" msgid="5669805115416379556">"Désactivé"</string>
+    <string name="switch_bar_on" msgid="1770868129120096114">"Activée"</string>
+    <string name="switch_bar_off" msgid="5669805115416379556">"Désactivée"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Non disponible"</string>
     <string name="accessibility_tile_disabled_by_policy_action_description" msgid="6958422730461646926">"En savoir plus"</string>
     <string name="nav_bar" msgid="4642708685386136807">"Barre de navigation"</string>
@@ -728,14 +750,10 @@
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Désactiver les données cellulaires?"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"Vous n\'aurez pas accès aux données ni à Internet avec <xliff:g id="CARRIER">%s</xliff:g>. Vous ne pourrez accéder à Internet que par Wi-Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"votre fournisseur de services"</string>
-    <!-- no translation found for auto_data_switch_disable_title (5146527155665190652) -->
-    <skip />
-    <!-- no translation found for auto_data_switch_disable_message (5885533647399535852) -->
-    <skip />
-    <!-- no translation found for auto_data_switch_dialog_negative_button (2370876875999891444) -->
-    <skip />
-    <!-- no translation found for auto_data_switch_dialog_positive_button (8531782041263087564) -->
-    <skip />
+    <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"Rebasculer vers <xliff:g id="CARRIER">%s</xliff:g>?"</string>
+    <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"Il n\'y aura pas de basculement automatique entre les données mobiles selon la disponibilité"</string>
+    <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"Non merci"</string>
+    <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"Oui, basculer"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Une application obscurcit une demande d\'autorisation, alors Paramètres ne peut pas vérifier votre réponse."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"Autoriser <xliff:g id="APP_0">%1$s</xliff:g> à afficher <xliff:g id="APP_2">%2$s</xliff:g> tranches?"</string>
     <string name="slice_permission_text_1" msgid="6675965177075443714">"- Il peut lire de l\'information de <xliff:g id="APP">%1$s</xliff:g>"</string>
@@ -794,18 +812,15 @@
     <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"Paramètres de la fenêtre de loupe"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Touchez pour ouvrir fonction. d\'access. Personnalisez ou remplacez bouton dans Param.\n\n"<annotation id="link">"Afficher param."</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Déplacez le bouton vers le bord pour le masquer temporairement"</string>
-    <!-- no translation found for accessibility_floating_button_undo (511112888715708241) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_undo_message_text (3044079592757099698) -->
-    <skip />
+    <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Annuler"</string>
+    <string name="accessibility_floating_button_undo_message_text" msgid="3044079592757099698">"{count,plural, =1{{label} raccourci retiré}one{# raccourci retiré}many{# de raccourcis retirés}other{# raccourcis retirés}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Déplacer dans coin sup. gauche"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Déplacer dans coin sup. droit"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"Déplacer dans coin inf. gauche"</string>
     <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"Déplacer dans coin inf. droit"</string>
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Éloigner du bord et masquer"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Éloigner du bord et afficher"</string>
-    <!-- no translation found for accessibility_floating_button_action_remove_menu (6730432848162552135) -->
-    <skip />
+    <string name="accessibility_floating_button_action_remove_menu" msgid="6730432848162552135">"Retirer"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"basculer"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Commandes des appareils"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Sélectionnez l\'application pour laquelle ajouter des commandes"</string>
@@ -948,10 +963,8 @@
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Données cellulaires"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Connexion active"</string>
-    <!-- no translation found for mobile_data_temp_connection_active (4590222725908806824) -->
-    <skip />
-    <!-- no translation found for mobile_data_poor_connection (819617772268371434) -->
-    <skip />
+    <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Connectée temporairement"</string>
+    <string name="mobile_data_poor_connection" msgid="819617772268371434">"Connexion faible"</string>
     <string name="mobile_data_off_summary" msgid="3663995422004150567">"Aucune connexion auto. des données cellulaires"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"Aucune connexion"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Aucun autre réseau n\'est accessible"</string>
