@@ -21,13 +21,10 @@ import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
 
 /**
  * The config used to load the App List.
@@ -40,36 +37,42 @@ internal data class AppListConfig(
 /**
  * The repository to load the App List data.
  */
-internal class AppListRepository(context: Context) {
+internal interface AppListRepository {
+    /** Loads the list of [ApplicationInfo]. */
+    suspend fun loadApps(config: AppListConfig): List<ApplicationInfo>
+
+    /** Gets the flow of predicate that could used to filter system app. */
+    fun showSystemPredicate(
+        userIdFlow: Flow<Int>,
+        showSystemFlow: Flow<Boolean>,
+    ): Flow<(app: ApplicationInfo) -> Boolean>
+}
+
+
+internal class AppListRepositoryImpl(context: Context) : AppListRepository {
     private val packageManager = context.packageManager
 
-    fun loadApps(configFlow: Flow<AppListConfig>): Flow<List<ApplicationInfo>> = configFlow
-        .map { loadApps(it) }
-        .flowOn(Dispatchers.Default)
+    override suspend fun loadApps(config: AppListConfig): List<ApplicationInfo> = coroutineScope {
+        val hiddenSystemModulesDeferred = async {
+            packageManager.getInstalledModules(0)
+                .filter { it.isHidden }
+                .map { it.packageName }
+                .toSet()
+        }
+        val flags = PackageManager.ApplicationInfoFlags.of(
+            (PackageManager.MATCH_DISABLED_COMPONENTS or
+                PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS).toLong()
+        )
+        val installedApplicationsAsUser =
+            packageManager.getInstalledApplicationsAsUser(flags, config.userId)
 
-    private suspend fun loadApps(config: AppListConfig): List<ApplicationInfo> {
-        return coroutineScope {
-            val hiddenSystemModulesDeferred = async {
-                packageManager.getInstalledModules(0)
-                    .filter { it.isHidden }
-                    .map { it.packageName }
-                    .toSet()
-            }
-            val flags = PackageManager.ApplicationInfoFlags.of(
-                (PackageManager.MATCH_DISABLED_COMPONENTS or
-                    PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS).toLong()
-            )
-            val installedApplicationsAsUser =
-                packageManager.getInstalledApplicationsAsUser(flags, config.userId)
-
-            val hiddenSystemModules = hiddenSystemModulesDeferred.await()
-            installedApplicationsAsUser.filter { app ->
-                app.isInAppList(config.showInstantApps, hiddenSystemModules)
-            }
+        val hiddenSystemModules = hiddenSystemModulesDeferred.await()
+        installedApplicationsAsUser.filter { app ->
+            app.isInAppList(config.showInstantApps, hiddenSystemModules)
         }
     }
 
-    fun showSystemPredicate(
+    override fun showSystemPredicate(
         userIdFlow: Flow<Int>,
         showSystemFlow: Flow<Boolean>,
     ): Flow<(app: ApplicationInfo) -> Boolean> =
