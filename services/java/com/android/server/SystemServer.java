@@ -103,6 +103,7 @@ import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.EmergencyAffordanceManager;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.widget.ILockSettings;
+import com.android.internal.widget.LockSettingsInternal;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.ambientcontext.AmbientContextManagerService;
 import com.android.server.appbinding.AppBindingService;
@@ -3007,6 +3008,14 @@ public final class SystemServer implements Dumpable {
             }
             t.traceEnd();
         }, t);
+
+        t.traceBegin("LockSettingsThirdPartyAppsStarted");
+        LockSettingsInternal lockSettingsInternal =
+            LocalServices.getService(LockSettingsInternal.class);
+        if (lockSettingsInternal != null) {
+            lockSettingsInternal.onThirdPartyAppsStarted();
+        }
+        t.traceEnd();
 
         t.traceBegin("StartSystemUI");
         try {

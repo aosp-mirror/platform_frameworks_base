@@ -54,6 +54,12 @@ public abstract class LockSettingsInternal {
     // TODO(b/183140900) split store escrow key errors into detailed ones.
 
     /**
+     * This is called when Weaver is guaranteed to be available (if the device supports Weaver).
+     * It does any synthetic password related work that was delayed from earlier in the boot.
+     */
+    public abstract void onThirdPartyAppsStarted();
+
+    /**
      * Unlocks the credential-encrypted storage for the given user if the user is not secured, i.e.
      * doesn't have an LSKF.
      * <p>
