@@ -72,10 +72,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"El valor predeterminat de l\'identificador de trucada és no restringit. Trucada següent: no restringit"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"No s\'ha proveït el servei."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"No pots canviar la configuració de l\'identificador de trucada."</string>
-    <!-- no translation found for auto_data_switch_title (3286350716870518297) -->
-    <skip />
-    <!-- no translation found for auto_data_switch_content (803557715007110959) -->
-    <skip />
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"Les dades s\'han canviat a <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"Pots canviar aquesta opció en qualsevol moment a Configuració"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"No hi ha servei de dades mòbils"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Les trucades d\'emergència no estan disponibles"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Sense servei de veu"</string>
@@ -700,6 +698,10 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Permet que l\'aplicació llegeixi fitxers de vídeo de l\'emmagatzematge compartit."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"llegir fitxers d\'imatge de l\'emmagatzematge compartit"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Permet que l\'aplicació llegeixi fitxers d\'imatge de l\'emmagatzematge compartit."</string>
+    <!-- no translation found for permlab_readVisualUserSelect (5516204215354667586) -->
+    <skip />
+    <!-- no translation found for permdesc_readVisualUserSelect (8027174717714968217) -->
+    <skip />
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"editar o suprimir cont. d\'emmagatzematge compartit"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"L\'app pot editar contingut de l\'emmagatzematge compartit."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"Fer i rebre trucades de SIP"</string>

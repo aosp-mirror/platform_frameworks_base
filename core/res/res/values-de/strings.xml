@@ -72,10 +72,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Anrufer-ID ist standardmäßig nicht beschränkt. Nächster Anruf: Nicht beschränkt"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Dienst nicht eingerichtet."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Du kannst die Einstellung für die Anrufer-ID nicht ändern."</string>
-    <!-- no translation found for auto_data_switch_title (3286350716870518297) -->
-    <skip />
-    <!-- no translation found for auto_data_switch_content (803557715007110959) -->
-    <skip />
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"Mobile Daten wurden auf <xliff:g id="CARRIERDISPLAY">%s</xliff:g> umgestellt"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"Du kannst dies jederzeit in den Einstellungen ändern"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Kein mobiler Datendienst"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Notrufe nicht möglich"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Keine Anrufe"</string>
@@ -700,6 +698,10 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Gewährt der App Lesezugriff auf Videodateien in deinem freigegebenen Speicher."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"Lesezugriff auf Bilddateien im freigegebenen Speicher"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Gewährt der App Lesezugriff auf Bilddateien in deinem freigegebenen Speicher."</string>
+    <!-- no translation found for permlab_readVisualUserSelect (5516204215354667586) -->
+    <skip />
+    <!-- no translation found for permdesc_readVisualUserSelect (8027174717714968217) -->
+    <skip />
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"Inhalte deines freigegebenen Speichers ändern oder löschen"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"So kann die App Inhalte deines freigegebenen Speichers erstellen."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP-Anrufe tätigen/empfangen"</string>

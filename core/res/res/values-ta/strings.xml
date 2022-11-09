@@ -72,10 +72,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"அழைப்பாளர் ஐடி ஆனது வரையறுக்கப்படவில்லை என்பதற்கு இயல்பாக அமைக்கப்பட்டது. அடுத்த அழைப்பு: வரையறுக்கப்படவில்லை"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"சேவை ஒதுக்கப்படவில்லை."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"அழைப்பாளர் ஐடி அமைப்பை மாற்ற முடியாது."</string>
-    <!-- no translation found for auto_data_switch_title (3286350716870518297) -->
-    <skip />
-    <!-- no translation found for auto_data_switch_content (803557715007110959) -->
-    <skip />
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"டேட்டா <xliff:g id="CARRIERDISPLAY">%s</xliff:g>க்கு மாற்றப்பட்டது"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"அமைப்புகளில் இதை எப்போது வேண்டுமானாலும் மாற்றிக்கொள்ளலாம்"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"மொபைல் டேட்டா சேவையைப் பயன்படுத்த முடியாது"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"அவசர அழைப்பைச் செய்ய முடியாது"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"குரல் சேவை இல்லை"</string>
@@ -700,6 +698,10 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"உங்கள் பகிர்ந்த சேமிப்பகத்திலுள்ள வீடியோ ஃபைல்களைப் படிக்க ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"பகிர்ந்த சேமிப்பகத்திலுள்ள பட ஃபைல்களைப் படித்தல்"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"உங்கள் பகிர்ந்த சேமிப்பகத்திலுள்ள பட ஃபைல்களைப் படிக்க ஆப்ஸை அனுமதிக்கும்."</string>
+    <!-- no translation found for permlab_readVisualUserSelect (5516204215354667586) -->
+    <skip />
+    <!-- no translation found for permdesc_readVisualUserSelect (8027174717714968217) -->
+    <skip />
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"பகிர்ந்த சேமிப்பகத்தின் உள்ளடக்கங்களை மாற்றும் அல்லது நீக்கும்"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"பகிர்ந்த சேமிப்பகத்தின் உள்ளடக்கத்தில் மாற்றங்களைச் செய்ய அனுமதிக்கும்."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP அழைப்புகளைச் செய்தல்/பெறுதல்"</string>
