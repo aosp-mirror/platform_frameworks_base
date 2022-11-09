@@ -6107,8 +6107,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (mRedrawForSyncReported) {
             return false;
         }
-        // TODO(b/233286785): Remove mIsWallpaper once WallpaperService handles syncId of relayout.
-        if (mInRelayout && !mIsWallpaper) {
+        if (mInRelayout && mPrepareSyncSeqId > 0) {
             // The last sync seq id will return to the client, so there is no need to request the
             // client to redraw.
             return false;
