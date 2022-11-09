@@ -680,7 +680,7 @@ class Task extends TaskFragment {
         mLaunchCookie = _launchCookie;
         mDeferTaskAppear = _deferTaskAppear;
         mRemoveWithTaskOrganizer = _removeWithTaskOrganizer;
-        EventLogTags.writeWmTaskCreated(mTaskId, isRootTask() ? INVALID_TASK_ID : getRootTaskId());
+        EventLogTags.writeWmTaskCreated(mTaskId);
     }
 
     static Task fromWindowContainerToken(WindowContainerToken token) {
@@ -1297,7 +1297,8 @@ class Task extends TaskFragment {
     }
 
     void updateTaskMovement(boolean toTop, int position) {
-        EventLogTags.writeWmTaskMoved(mTaskId, toTop ? 1 : 0, position);
+        EventLogTags.writeWmTaskMoved(mTaskId, getRootTaskId(), getDisplayId(), toTop ? 1 : 0,
+                position);
         final TaskDisplayArea taskDisplayArea = getDisplayArea();
         if (taskDisplayArea != null && isLeafTask()) {
             taskDisplayArea.onLeafTaskMoved(this, toTop);
@@ -2560,7 +2561,7 @@ class Task extends TaskFragment {
         }
         mRemoving = true;
 
-        EventLogTags.writeWmTaskRemoved(mTaskId, reason);
+        EventLogTags.writeWmTaskRemoved(mTaskId, getRootTaskId(), getDisplayId(), reason);
         clearPinnedTaskIfNeed();
         // If applicable let the TaskOrganizer know the Task is vanishing.
         setTaskOrganizer(null);
@@ -2573,7 +2574,8 @@ class Task extends TaskFragment {
     void reparent(Task rootTask, int position, boolean moveParents, String reason) {
         if (DEBUG_ROOT_TASK) Slog.i(TAG, "reParentTask: removing taskId=" + mTaskId
                 + " from rootTask=" + getRootTask());
-        EventLogTags.writeWmTaskRemoved(mTaskId, "reParentTask:" + reason);
+        EventLogTags.writeWmTaskRemoved(mTaskId, getRootTaskId(), getDisplayId(),
+                "reParentTask:" + reason);
 
         reparent(rootTask, position);
 

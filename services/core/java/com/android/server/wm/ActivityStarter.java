@@ -1663,7 +1663,8 @@ class ActivityStarter {
         }
         final Task startedTask = mStartActivity.getTask();
         if (newTask) {
-            EventLogTags.writeWmCreateTask(mStartActivity.mUserId, startedTask.mTaskId);
+            EventLogTags.writeWmCreateTask(mStartActivity.mUserId, startedTask.mTaskId,
+                    startedTask.getRootTaskId(), startedTask.getDisplayId());
         }
         mStartActivity.logStartActivity(EventLogTags.WM_CREATE_ACTIVITY, startedTask);
 

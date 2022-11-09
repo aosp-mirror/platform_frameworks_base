@@ -9204,10 +9204,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                         + " preserveWindow=" + preserveWindow);
         if (andResume) {
             EventLogTags.writeWmRelaunchResumeActivity(mUserId, System.identityHashCode(this),
-                    task.mTaskId, shortComponentName);
+                    task.mTaskId, shortComponentName, Integer.toHexString(configChangeFlags));
         } else {
             EventLogTags.writeWmRelaunchActivity(mUserId, System.identityHashCode(this),
-                    task.mTaskId, shortComponentName);
+                    task.mTaskId, shortComponentName, Integer.toHexString(configChangeFlags));
         }
 
         startFreezingScreenLocked(0);
