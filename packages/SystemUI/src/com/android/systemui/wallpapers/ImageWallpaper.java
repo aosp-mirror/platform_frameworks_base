@@ -29,6 +29,7 @@ import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.Looper;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
@@ -99,6 +100,15 @@ public class ImageWallpaper extends WallpaperService {
         mFeatureFlags = featureFlags;
         mBackgroundExecutor = backgroundExecutor;
         mMainExecutor = mainExecutor;
+    }
+
+    @Override
+    public Looper onProvideEngineLooper() {
+        // Receive messages on mWorker thread instead of SystemUI's main handler.
+        // All other wallpapers have their own process, and they can receive messages on their own
+        // main handler without any delay. But since ImageWallpaper lives in SystemUI, performance
+        // of the image wallpaper could be negatively affected when SystemUI's main handler is busy.
+        return mWorker != null ? mWorker.getLooper() : super.onProvideEngineLooper();
     }
 
     @Override
