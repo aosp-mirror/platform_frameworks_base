@@ -181,6 +181,7 @@ import android.app.ApplicationErrorReport;
 import android.app.ApplicationExitInfo;
 import android.app.ApplicationThreadConstants;
 import android.app.BroadcastOptions;
+import android.app.ComponentOptions;
 import android.app.ContentProviderHolder;
 import android.app.IActivityController;
 import android.app.IActivityManager;
@@ -13914,10 +13915,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                 throw new SecurityException(
                         "Non-system callers may not flag broadcasts as alarm");
             }
-            if (options.containsKey(BroadcastOptions.KEY_INTERACTIVE_BROADCAST)) {
+            if (options.containsKey(ComponentOptions.KEY_INTERACTIVE)) {
                 enforceCallingPermission(
-                        android.Manifest.permission.BROADCAST_OPTION_INTERACTIVE,
-                        "setInteractiveBroadcast");
+                        android.Manifest.permission.COMPONENT_OPTION_INTERACTIVE,
+                        "setInteractive");
             }
         }
     }

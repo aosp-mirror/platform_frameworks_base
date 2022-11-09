@@ -3177,10 +3177,10 @@
     <permission android:name="android.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND"
                 android:protectionLevel="signature|privileged|vendorPrivileged|oem|verifier|role"/>
 
-    <!-- Allows an application to hint that a broadcast is associated with an
-         "interactive" usage scenario
+    <!-- Allows an application to hint that a component lifecycle operation such as sending
+         a broadcast is associated with an "interactive" usage scenario.
          @hide -->
-    <permission android:name="android.permission.BROADCAST_OPTION_INTERACTIVE"
+    <permission android:name="android.permission.COMPONENT_OPTION_INTERACTIVE"
                 android:protectionLevel="signature|privileged" />
 
     <!-- @SystemApi Must be required by activities that handle the intent action
