@@ -23,6 +23,7 @@ import static com.android.systemui.media.controls.models.recommendation.Smartspa
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
 import android.animation.AnimatorSet;
+import android.app.BroadcastOptions;
 import android.app.PendingIntent;
 import android.app.WallpaperColors;
 import android.app.smartspace.SmartspaceAction;
@@ -113,6 +114,8 @@ import com.android.systemui.util.ColorUtilKt;
 import com.android.systemui.util.animation.TransitionLayout;
 import com.android.systemui.util.time.SystemClock;
 
+import dagger.Lazy;
+
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
@@ -120,7 +123,6 @@ import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
-import dagger.Lazy;
 import kotlin.Unit;
 
 /**
@@ -625,7 +627,9 @@ public class MediaControlPanel {
                                         device.getIntent().getIntent(), true);
                             } else {
                                 try {
-                                    device.getIntent().send();
+                                    BroadcastOptions options = BroadcastOptions.makeBasic();
+                                    options.setInteractive(true);
+                                    device.getIntent().send(options.toBundle());
                                 } catch (PendingIntent.CanceledException e) {
                                     Log.e(TAG, "Device pending intent was canceled");
                                 }
