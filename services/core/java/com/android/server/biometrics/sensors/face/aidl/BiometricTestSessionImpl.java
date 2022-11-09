@@ -22,6 +22,7 @@ import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.ITestSessionCallback;
 import android.hardware.biometrics.face.AuthenticationFrame;
 import android.hardware.biometrics.face.BaseFrame;
+import android.hardware.biometrics.face.EnrollmentFrame;
 import android.hardware.face.Face;
 import android.hardware.face.FaceAuthenticationFrame;
 import android.hardware.face.FaceEnrollFrame;
@@ -33,6 +34,7 @@ import android.util.Slog;
 import com.android.server.biometrics.HardwareAuthTokenUtils;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
+import com.android.server.biometrics.sensors.EnrollClient;
 import com.android.server.biometrics.sensors.face.FaceUtils;
 
 import java.util.HashSet;
@@ -200,22 +202,24 @@ public class BiometricTestSessionImpl extends ITestSession.Stub {
     }
 
     @android.annotation.EnforcePermission(android.Manifest.permission.TEST_BIOMETRIC)
-    // TODO(b/178414967): replace with notifyAuthenticationFrame and notifyEnrollmentFrame.
     @Override
     public void notifyAcquired(int userId, int acquireInfo) {
-
         super.notifyAcquired_enforcePermission();
 
         BaseFrame data = new BaseFrame();
         data.acquiredInfo = (byte) acquireInfo;
 
-        AuthenticationFrame authenticationFrame = new AuthenticationFrame();
-        authenticationFrame.data = data;
-
-        // TODO(b/178414967): Currently onAuthenticationFrame and onEnrollmentFrame are the same.
-        // This will need to call the correct callback once the onAcquired callback is removed.
-        mSensor.getSessionForUser(userId).getHalSessionCallback().onAuthenticationFrame(
-                authenticationFrame);
+        if (mSensor.getScheduler().getCurrentClient() instanceof EnrollClient) {
+            final EnrollmentFrame frame = new EnrollmentFrame();
+            frame.data = data;
+            mSensor.getSessionForUser(userId).getHalSessionCallback()
+                    .onEnrollmentFrame(frame);
+        } else {
+            final AuthenticationFrame frame = new AuthenticationFrame();
+            frame.data = data;
+            mSensor.getSessionForUser(userId).getHalSessionCallback()
+                    .onAuthenticationFrame(frame);
+        }
     }
 
     @android.annotation.EnforcePermission(android.Manifest.permission.TEST_BIOMETRIC)
