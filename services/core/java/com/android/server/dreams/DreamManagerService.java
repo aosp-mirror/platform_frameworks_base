@@ -491,10 +491,6 @@ public final class DreamManagerService extends SystemService {
         }
     }
 
-    private ComponentName getActiveDreamComponentInternal(boolean doze) {
-        return chooseDreamForUser(doze, ActivityManager.getCurrentUser());
-    }
-
     /**
      * If doze is true, returns the doze component for the user.
      * Otherwise, returns the system dream component, if present.
@@ -647,7 +643,7 @@ public final class DreamManagerService extends SystemService {
                 .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, DREAM_WAKE_LOCK_TAG);
         final Binder dreamToken = mCurrentDream.token;
         mHandler.post(wakeLock.wrap(() -> {
-            mAtmInternal.notifyDreamStateChanged(true);
+            mAtmInternal.notifyActiveDreamChanged(name);
             mController.startDream(dreamToken, name, isPreviewMode, canDoze, userId, wakeLock,
                     mDreamOverlayServiceName, reason);
         }));
@@ -672,7 +668,7 @@ public final class DreamManagerService extends SystemService {
 
     @GuardedBy("mLock")
     private void cleanupDreamLocked() {
-        mHandler.post(() -> mAtmInternal.notifyDreamStateChanged(false /*dreaming*/));
+        mHandler.post(() -> mAtmInternal.notifyActiveDreamChanged(null));
 
         if (mCurrentDream == null) {
             return;
@@ -1010,11 +1006,6 @@ public final class DreamManagerService extends SystemService {
         @Override
         public boolean canStartDreaming(boolean isScreenOn) {
             return canStartDreamingInternal(isScreenOn);
-        }
-
-        @Override
-        public ComponentName getActiveDreamComponent(boolean doze) {
-            return getActiveDreamComponentInternal(doze);
         }
 
         @Override
