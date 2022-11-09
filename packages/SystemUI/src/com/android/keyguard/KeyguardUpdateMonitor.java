@@ -486,10 +486,12 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     FACE_AUTH_TRIGGERED_TRUST_DISABLED);
         }
 
-        String message = null;
-        if (KeyguardUpdateMonitor.getCurrentUser() == userId) {
-            final boolean userHasTrust = getUserHasTrust(userId);
-            if (userHasTrust && trustGrantedMessages != null) {
+        if (enabled) {
+            String message = null;
+            if (KeyguardUpdateMonitor.getCurrentUser() == userId
+                    && trustGrantedMessages != null) {
+                // Show the first non-empty string provided by a trust agent OR intentionally pass
+                // an empty string through (to prevent the default trust agent string from showing)
                 for (String msg : trustGrantedMessages) {
                     message = msg;
                     if (!TextUtils.isEmpty(message)) {
@@ -497,21 +499,39 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     }
                 }
             }
-        }
-        mLogger.logTrustChanged(wasTrusted, enabled, userId);
-        if (message != null) {
-            mLogger.logShowTrustGrantedMessage(message.toString());
-        }
-        for (int i = 0; i < mCallbacks.size(); i++) {
-            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
-            if (cb != null) {
-                cb.onTrustChanged(userId);
-                if (enabled) {
-                    cb.onTrustGrantedWithFlags(flags, userId, message);
+
+            mLogger.logTrustGrantedWithFlags(flags, userId, message);
+            if (userId == getCurrentUser()) {
+                final TrustGrantFlags trustGrantFlags = new TrustGrantFlags(flags);
+                for (int i = 0; i < mCallbacks.size(); i++) {
+                    KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+                    if (cb != null) {
+                        cb.onTrustGrantedForCurrentUser(
+                                shouldDismissKeyguardOnTrustGrantedWithCurrentUser(trustGrantFlags),
+                                trustGrantFlags, message);
+                    }
                 }
             }
         }
 
+        mLogger.logTrustChanged(wasTrusted, enabled, userId);
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+            if (cb != null) {
+                cb.onTrustChanged(userId);
+            }
+        }
+    }
+
+    /**
+     * Whether the trust granted call with its passed flags should dismiss keyguard.
+     * It's assumed that the trust was granted for the current user.
+     */
+    private boolean shouldDismissKeyguardOnTrustGrantedWithCurrentUser(TrustGrantFlags flags) {
+        final boolean isBouncerShowing = mPrimaryBouncerIsOrWillBeShowing || mUdfpsBouncerShowing;
+        return (flags.isInitiatedByUser() || flags.dismissKeyguardRequested())
+                && (mDeviceInteractive || flags.temporaryAndRenewable())
+                && (isBouncerShowing || flags.dismissKeyguardRequested());
     }
 
     @Override
