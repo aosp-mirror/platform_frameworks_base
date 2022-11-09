@@ -53853,6 +53853,7 @@ package android.view.inputmethod {
     method @NonNull public String getLanguageTag();
     method @Deprecated @NonNull public String getLocale();
     method public String getMode();
+    method @NonNull public CharSequence getNameOverride();
     method public int getNameResId();
     method public boolean isAsciiCapable();
     method public boolean isAuxiliary();
@@ -53873,6 +53874,7 @@ package android.view.inputmethod {
     method public android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder setSubtypeId(int);
     method public android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder setSubtypeLocale(String);
     method public android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder setSubtypeMode(String);
+    method @NonNull public android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder setSubtypeNameOverride(@NonNull CharSequence);
     method public android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder setSubtypeNameResId(int);
   }
 
