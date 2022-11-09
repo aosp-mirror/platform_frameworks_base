@@ -405,6 +405,12 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             BackupTransportClient transport =
                     mTransportConnection.connectOrThrow("PerformUnifiedRestoreTask.startRestore()");
 
+            // If the requester of the restore has not passed in a monitor, we ask the transport
+            // for one.
+            if (mMonitor == null) {
+                mMonitor = transport.getBackupManagerMonitor();
+            }
+
             mStatus = transport.startRestore(mToken, packages);
             if (mStatus != BackupTransport.TRANSPORT_OK) {
                 Slog.e(TAG, "Transport error " + mStatus + "; no restore possible");
