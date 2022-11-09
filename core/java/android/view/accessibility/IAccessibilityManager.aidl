@@ -27,6 +27,7 @@ import android.view.accessibility.IAccessibilityInteractionConnection;
 import android.view.accessibility.IAccessibilityManagerClient;
 import android.view.accessibility.AccessibilityWindowAttributes;
 import android.view.accessibility.IWindowMagnificationConnection;
+import android.view.InputEvent;
 import android.view.IWindow;
 
 /**
@@ -114,4 +115,7 @@ interface IAccessibilityManager {
 
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_ACCESSIBILITY)")
     boolean unregisterProxyForDisplay(int displayId);
+
+    // Used by UiAutomation for tests on the InputFilter
+    void injectInputEventToInputFilter(in InputEvent event);
 }
