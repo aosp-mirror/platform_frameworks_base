@@ -69,7 +69,11 @@ object Flags {
     val SEMI_STABLE_SORT = UnreleasedFlag(115, teamfood = true)
 
     @JvmField val NOTIFICATION_GROUP_CORNER = UnreleasedFlag(116, teamfood = true)
-    // next id: 117
+
+    // TODO(b/257506350): Tracking Bug
+    val FSI_CHROME = UnreleasedFlag(117)
+
+    // next id: 118
 
     // 200 - keyguard/lockscreen
     // ** Flag retired **
