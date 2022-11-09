@@ -378,14 +378,26 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
         float fullBatteryIconWidth =
                 BatterySpecs.getFullBatteryWidth(mainBatteryWidth, displayShield);
 
-        // TODO(b/255625888): Add some marginTop so that, even when the battery icon has the shield,
-        //   the bottom of the main icon is still aligned with the bottom of all the other icons.
+        int marginTop;
+        if (displayShield) {
+            // If the shield is displayed, we need some extra marginTop so that the bottom of the
+            // main icon is still aligned with the bottom of all the other system icons.
+            int shieldHeightAddition = Math.round(fullBatteryIconHeight - mainBatteryHeight);
+            // However, the other system icons have some embedded bottom padding that the battery
+            // doesn't have, so we shouldn't move the battery icon down by the full amount.
+            // See b/258672854.
+            marginTop = shieldHeightAddition
+                    - res.getDimensionPixelSize(R.dimen.status_bar_battery_extra_vertical_spacing);
+        } else {
+            marginTop = 0;
+        }
+
         int marginBottom = res.getDimensionPixelSize(R.dimen.battery_margin_bottom);
 
         LinearLayout.LayoutParams scaledLayoutParams = new LinearLayout.LayoutParams(
                 Math.round(fullBatteryIconWidth),
                 Math.round(fullBatteryIconHeight));
-        scaledLayoutParams.setMargins(0, 0, 0, marginBottom);
+        scaledLayoutParams.setMargins(0, marginTop, 0, marginBottom);
 
         mDrawable.setDisplayShield(displayShield);
         mBatteryIconView.setLayoutParams(scaledLayoutParams);
