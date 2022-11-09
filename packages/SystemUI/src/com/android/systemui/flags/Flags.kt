@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -134,13 +134,17 @@ object Flags {
     // TODO(b/255607168): Tracking Bug
     @JvmField val DOZING_MIGRATION_1 = UnreleasedFlag(213)
 
+    @JvmField val NEW_ELLIPSE_DETECTION = UnreleasedFlag(214)
+
+    @JvmField val NEW_UDFPS_OVERLAY = UnreleasedFlag(215)
+
     /**
      * Whether to enable the code powering customizable lock screen quick affordances.
      *
      * Note that this flag does not enable individual implementations of quick affordances like the
      * new camera quick affordance. Look for individual flags for those.
      */
-    @JvmField val CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES = UnreleasedFlag(214, teamfood = false)
+    @JvmField val CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES = UnreleasedFlag(216, teamfood = false)
 
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
@@ -172,6 +176,9 @@ object Flags {
 
     // TODO(b/254512678): Tracking Bug
     @JvmField val NEW_FOOTER_ACTIONS = ReleasedFlag(507)
+
+    // TODO(b/244064524): Tracking Bug
+    @JvmField val QS_SECONDARY_DATA_SUB_INFO = UnreleasedFlag(508, teamfood = true)
 
     // 600- status bar
     // TODO(b/254513246): Tracking Bug
@@ -335,6 +342,9 @@ object Flags {
     // 1500 - chooser
     // TODO(b/254512507): Tracking Bug
     val CHOOSER_UNBUNDLED = UnreleasedFlag(1500, teamfood = true)
+
+    // 1600 - accessibility
+    @JvmField val A11Y_FLOATING_MENU_FLING_SPRING_ANIMATIONS = UnreleasedFlag(1600)
 
     // 1700 - clipboard
     @JvmField val CLIPBOARD_OVERLAY_REFACTOR = UnreleasedFlag(1700, teamfood = true)
