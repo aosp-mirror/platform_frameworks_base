@@ -2272,13 +2272,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         }
 
         pw.println("  Panels: ");
-        if (mNotificationPanelViewController != null) {
-            pw.println("    mNotificationPanel="
-                    + mNotificationPanelViewController.getView() + " params="
-                    + mNotificationPanelViewController.getView().getLayoutParams().debug(""));
-            pw.print  ("      ");
-            mNotificationPanelViewController.dump(pw, args);
-        }
         pw.println("  mStackScroller: " + mStackScroller + " (dump moved)");
         pw.println("  Theme:");
         String nightMode = mUiModeManager == null ? "null" : mUiModeManager.getNightMode() + "";

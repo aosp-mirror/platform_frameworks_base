@@ -492,7 +492,8 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mShadeTransitionController,
                 systemClock,
                 mKeyguardBottomAreaViewModel,
-                mKeyguardBottomAreaInteractor);
+                mKeyguardBottomAreaInteractor,
+                mDumpManager);
         mNotificationPanelViewController.initDependencies(
                 mCentralSurfaces,
                 () -> {},

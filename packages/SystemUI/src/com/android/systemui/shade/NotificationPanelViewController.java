@@ -118,6 +118,7 @@ import com.android.keyguard.dagger.KeyguardStatusBarViewComponent;
 import com.android.keyguard.dagger.KeyguardStatusViewComponent;
 import com.android.keyguard.dagger.KeyguardUserSwitcherComponent;
 import com.android.systemui.DejankUtils;
+import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.Interpolators;
@@ -128,6 +129,7 @@ import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.DozeLog;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.dump.DumpsysTableLogger;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
@@ -231,7 +233,7 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 
 @CentralSurfacesComponent.CentralSurfacesScope
-public final class NotificationPanelViewController {
+public final class NotificationPanelViewController implements Dumpable {
 
     public static final String TAG = NotificationPanelView.class.getSimpleName();
     public static final float FLING_MAX_LENGTH_SECONDS = 0.6f;
@@ -739,7 +741,8 @@ public final class NotificationPanelViewController {
             ShadeTransitionController shadeTransitionController,
             SystemClock systemClock,
             KeyguardBottomAreaViewModel keyguardBottomAreaViewModel,
-            KeyguardBottomAreaInteractor keyguardBottomAreaInteractor) {
+            KeyguardBottomAreaInteractor keyguardBottomAreaInteractor,
+            DumpManager dumpManager) {
         keyguardStateController.addCallback(new KeyguardStateController.Callback() {
             @Override
             public void onKeyguardFadingAwayChanged() {
@@ -918,6 +921,7 @@ public final class NotificationPanelViewController {
                     }
                 });
         mKeyguardBottomAreaInteractor = keyguardBottomAreaInteractor;
+        dumpManager.registerDumpable(this);
     }
 
     private void unlockAnimationFinished() {
@@ -4257,29 +4261,185 @@ public final class NotificationPanelViewController {
         mBlockingExpansionForCurrentTouch = mTracking;
     }
 
+    @Override
     public void dump(PrintWriter pw, String[] args) {
-        pw.println(String.format("[PanelView(%s): expandedHeight=%f maxPanelHeight=%d closing=%s"
-                        + " tracking=%s timeAnim=%s%s "
-                        + "touchDisabled=%s" + "]",
-                this.getClass().getSimpleName(), getExpandedHeight(), getMaxPanelHeight(),
-                mClosing ? "T" : "f", mTracking ? "T" : "f", mHeightAnimator,
-                ((mHeightAnimator != null && mHeightAnimator.isStarted()) ? " (started)" : ""),
-                mTouchDisabled ? "T" : "f"));
+        pw.println(TAG + ":");
         IndentingPrintWriter ipw = asIndenting(pw);
         ipw.increaseIndent();
+
+        ipw.print("mDownTime="); ipw.println(mDownTime);
+        ipw.print("mTouchSlopExceededBeforeDown="); ipw.println(mTouchSlopExceededBeforeDown);
+        ipw.print("mIsLaunchAnimationRunning="); ipw.println(mIsLaunchAnimationRunning);
+        ipw.print("mOverExpansion="); ipw.println(mOverExpansion);
+        ipw.print("mExpandedHeight="); ipw.println(mExpandedHeight);
+        ipw.print("mTracking="); ipw.println(mTracking);
+        ipw.print("mHintAnimationRunning="); ipw.println(mHintAnimationRunning);
+        ipw.print("mExpanding="); ipw.println(mExpanding);
+        ipw.print("mSplitShadeEnabled="); ipw.println(mSplitShadeEnabled);
+        ipw.print("mKeyguardNotificationBottomPadding=");
+        ipw.println(mKeyguardNotificationBottomPadding);
+        ipw.print("mKeyguardNotificationTopPadding="); ipw.println(mKeyguardNotificationTopPadding);
+        ipw.print("mMaxAllowedKeyguardNotifications=");
+        ipw.println(mMaxAllowedKeyguardNotifications);
+        ipw.print("mAnimateNextPositionUpdate="); ipw.println(mAnimateNextPositionUpdate);
+        ipw.print("mQuickQsHeaderHeight="); ipw.println(mQuickQsHeaderHeight);
+        ipw.print("mQsTrackingPointer="); ipw.println(mQsTrackingPointer);
+        ipw.print("mQsTracking="); ipw.println(mQsTracking);
+        ipw.print("mConflictingQsExpansionGesture="); ipw.println(mConflictingQsExpansionGesture);
+        ipw.print("mPanelExpanded="); ipw.println(mPanelExpanded);
+        ipw.print("mQsExpanded="); ipw.println(mQsExpanded);
+        ipw.print("mQsExpandedWhenExpandingStarted="); ipw.println(mQsExpandedWhenExpandingStarted);
+        ipw.print("mQsFullyExpanded="); ipw.println(mQsFullyExpanded);
+        ipw.print("mKeyguardShowing="); ipw.println(mKeyguardShowing);
+        ipw.print("mKeyguardQsUserSwitchEnabled="); ipw.println(mKeyguardQsUserSwitchEnabled);
+        ipw.print("mKeyguardUserSwitcherEnabled="); ipw.println(mKeyguardUserSwitcherEnabled);
+        ipw.print("mDozing="); ipw.println(mDozing);
+        ipw.print("mDozingOnDown="); ipw.println(mDozingOnDown);
+        ipw.print("mBouncerShowing="); ipw.println(mBouncerShowing);
+        ipw.print("mBarState="); ipw.println(mBarState);
+        ipw.print("mInitialHeightOnTouch="); ipw.println(mInitialHeightOnTouch);
+        ipw.print("mInitialTouchX="); ipw.println(mInitialTouchX);
+        ipw.print("mInitialTouchY="); ipw.println(mInitialTouchY);
+        ipw.print("mQsExpansionHeight="); ipw.println(mQsExpansionHeight);
+        ipw.print("mQsMinExpansionHeight="); ipw.println(mQsMinExpansionHeight);
+        ipw.print("mQsMaxExpansionHeight="); ipw.println(mQsMaxExpansionHeight);
+        ipw.print("mQsPeekHeight="); ipw.println(mQsPeekHeight);
+        ipw.print("mStackScrollerOverscrolling="); ipw.println(mStackScrollerOverscrolling);
+        ipw.print("mQsExpansionFromOverscroll="); ipw.println(mQsExpansionFromOverscroll);
+        ipw.print("mLastOverscroll="); ipw.println(mLastOverscroll);
+        ipw.print("mQsExpansionEnabledPolicy="); ipw.println(mQsExpansionEnabledPolicy);
+        ipw.print("mQsExpansionEnabledAmbient="); ipw.println(mQsExpansionEnabledAmbient);
+        ipw.print("mStatusBarMinHeight="); ipw.println(mStatusBarMinHeight);
+        ipw.print("mStatusBarHeaderHeightKeyguard="); ipw.println(mStatusBarHeaderHeightKeyguard);
+        ipw.print("mOverStretchAmount="); ipw.println(mOverStretchAmount);
+        ipw.print("mDownX="); ipw.println(mDownX);
+        ipw.print("mDownY="); ipw.println(mDownY);
+        ipw.print("mDisplayTopInset="); ipw.println(mDisplayTopInset);
+        ipw.print("mDisplayRightInset="); ipw.println(mDisplayRightInset);
+        ipw.print("mLargeScreenShadeHeaderHeight="); ipw.println(mLargeScreenShadeHeaderHeight);
+        ipw.print("mSplitShadeNotificationsScrimMarginBottom=");
+        ipw.println(mSplitShadeNotificationsScrimMarginBottom);
+        ipw.print("mIsExpanding="); ipw.println(mIsExpanding);
+        ipw.print("mQsExpandImmediate="); ipw.println(mQsExpandImmediate);
+        ipw.print("mTwoFingerQsExpandPossible="); ipw.println(mTwoFingerQsExpandPossible);
+        ipw.print("mHeaderDebugInfo="); ipw.println(mHeaderDebugInfo);
+        ipw.print("mQsAnimatorExpand="); ipw.println(mQsAnimatorExpand);
+        ipw.print("mQsScrimEnabled="); ipw.println(mQsScrimEnabled);
+        ipw.print("mQsTouchAboveFalsingThreshold="); ipw.println(mQsTouchAboveFalsingThreshold);
+        ipw.print("mQsFalsingThreshold="); ipw.println(mQsFalsingThreshold);
+        ipw.print("mHeadsUpStartHeight="); ipw.println(mHeadsUpStartHeight);
+        ipw.print("mListenForHeadsUp="); ipw.println(mListenForHeadsUp);
+        ipw.print("mNavigationBarBottomHeight="); ipw.println(mNavigationBarBottomHeight);
+        ipw.print("mExpandingFromHeadsUp="); ipw.println(mExpandingFromHeadsUp);
+        ipw.print("mCollapsedOnDown="); ipw.println(mCollapsedOnDown);
+        ipw.print("mClosingWithAlphaFadeOut="); ipw.println(mClosingWithAlphaFadeOut);
+        ipw.print("mHeadsUpAnimatingAway="); ipw.println(mHeadsUpAnimatingAway);
+        ipw.print("mLaunchingAffordance="); ipw.println(mLaunchingAffordance);
+        ipw.print("mShowIconsWhenExpanded="); ipw.println(mShowIconsWhenExpanded);
+        ipw.print("mIndicationBottomPadding="); ipw.println(mIndicationBottomPadding);
+        ipw.print("mAmbientIndicationBottomPadding="); ipw.println(mAmbientIndicationBottomPadding);
+        ipw.print("mIsFullWidth="); ipw.println(mIsFullWidth);
+        ipw.print("mBlockingExpansionForCurrentTouch=");
+        ipw.println(mBlockingExpansionForCurrentTouch);
+        ipw.print("mExpectingSynthesizedDown="); ipw.println(mExpectingSynthesizedDown);
+        ipw.print("mLastEventSynthesizedDown="); ipw.println(mLastEventSynthesizedDown);
+        ipw.print("mInterpolatedDarkAmount="); ipw.println(mInterpolatedDarkAmount);
+        ipw.print("mLinearDarkAmount="); ipw.println(mLinearDarkAmount);
+        ipw.print("mPulsing="); ipw.println(mPulsing);
+        ipw.print("mHideIconsDuringLaunchAnimation="); ipw.println(mHideIconsDuringLaunchAnimation);
+        ipw.print("mStackScrollerMeasuringPass="); ipw.println(mStackScrollerMeasuringPass);
+        ipw.print("mPanelAlpha="); ipw.println(mPanelAlpha);
+        ipw.print("mBottomAreaShadeAlpha="); ipw.println(mBottomAreaShadeAlpha);
+        ipw.print("mHeadsUpInset="); ipw.println(mHeadsUpInset);
+        ipw.print("mHeadsUpPinnedMode="); ipw.println(mHeadsUpPinnedMode);
+        ipw.print("mAllowExpandForSmallExpansion="); ipw.println(mAllowExpandForSmallExpansion);
+        ipw.print("mLockscreenNotificationQSPadding=");
+        ipw.println(mLockscreenNotificationQSPadding);
+        ipw.print("mTransitioningToFullShadeProgress=");
+        ipw.println(mTransitioningToFullShadeProgress);
+        ipw.print("mTransitionToFullShadeQSPosition=");
+        ipw.println(mTransitionToFullShadeQSPosition);
+        ipw.print("mDistanceForQSFullShadeTransition=");
+        ipw.println(mDistanceForQSFullShadeTransition);
+        ipw.print("mQsTranslationForFullShadeTransition=");
+        ipw.println(mQsTranslationForFullShadeTransition);
+        ipw.print("mMaxOverscrollAmountForPulse="); ipw.println(mMaxOverscrollAmountForPulse);
+        ipw.print("mAnimateNextNotificationBounds="); ipw.println(mAnimateNextNotificationBounds);
+        ipw.print("mNotificationBoundsAnimationDelay=");
+        ipw.println(mNotificationBoundsAnimationDelay);
+        ipw.print("mNotificationBoundsAnimationDuration=");
+        ipw.println(mNotificationBoundsAnimationDuration);
+        ipw.print("mIsPanelCollapseOnQQS="); ipw.println(mIsPanelCollapseOnQQS);
+        ipw.print("mAnimatingQS="); ipw.println(mAnimatingQS);
+        ipw.print("mIsQsTranslationResetAnimator="); ipw.println(mIsQsTranslationResetAnimator);
+        ipw.print("mIsPulseExpansionResetAnimator="); ipw.println(mIsPulseExpansionResetAnimator);
+        ipw.print("mKeyguardOnlyContentAlpha="); ipw.println(mKeyguardOnlyContentAlpha);
+        ipw.print("mKeyguardOnlyTransitionTranslationY=");
+        ipw.println(mKeyguardOnlyTransitionTranslationY);
+        ipw.print("mUdfpsMaxYBurnInOffset="); ipw.println(mUdfpsMaxYBurnInOffset);
+        ipw.print("mIsGestureNavigation="); ipw.println(mIsGestureNavigation);
+        ipw.print("mOldLayoutDirection="); ipw.println(mOldLayoutDirection);
+        ipw.print("mScrimCornerRadius="); ipw.println(mScrimCornerRadius);
+        ipw.print("mScreenCornerRadius="); ipw.println(mScreenCornerRadius);
+        ipw.print("mQSAnimatingHiddenFromCollapsed="); ipw.println(mQSAnimatingHiddenFromCollapsed);
+        ipw.print("mUseLargeScreenShadeHeader="); ipw.println(mUseLargeScreenShadeHeader);
+        ipw.print("mEnableQsClipping="); ipw.println(mEnableQsClipping);
+        ipw.print("mQsClipTop="); ipw.println(mQsClipTop);
+        ipw.print("mQsClipBottom="); ipw.println(mQsClipBottom);
+        ipw.print("mQsVisible="); ipw.println(mQsVisible);
+        ipw.print("mMinFraction="); ipw.println(mMinFraction);
+        ipw.print("mStatusViewCentered="); ipw.println(mStatusViewCentered);
+        ipw.print("mSplitShadeFullTransitionDistance=");
+        ipw.println(mSplitShadeFullTransitionDistance);
+        ipw.print("mSplitShadeScrimTransitionDistance=");
+        ipw.println(mSplitShadeScrimTransitionDistance);
+        ipw.print("mMinExpandHeight="); ipw.println(mMinExpandHeight);
+        ipw.print("mPanelUpdateWhenAnimatorEnds="); ipw.println(mPanelUpdateWhenAnimatorEnds);
+        ipw.print("mHasVibratedOnOpen="); ipw.println(mHasVibratedOnOpen);
+        ipw.print("mFixedDuration="); ipw.println(mFixedDuration);
+        ipw.print("mPanelFlingOvershootAmount="); ipw.println(mPanelFlingOvershootAmount);
+        ipw.print("mLastGesturedOverExpansion="); ipw.println(mLastGesturedOverExpansion);
+        ipw.print("mIsSpringBackAnimation="); ipw.println(mIsSpringBackAnimation);
+        ipw.print("mInSplitShade="); ipw.println(mInSplitShade);
+        ipw.print("mHintDistance="); ipw.println(mHintDistance);
+        ipw.print("mInitialOffsetOnTouch="); ipw.println(mInitialOffsetOnTouch);
+        ipw.print("mCollapsedAndHeadsUpOnDown="); ipw.println(mCollapsedAndHeadsUpOnDown);
+        ipw.print("mExpandedFraction="); ipw.println(mExpandedFraction);
+        ipw.print("mExpansionDragDownAmountPx="); ipw.println(mExpansionDragDownAmountPx);
+        ipw.print("mPanelClosedOnDown="); ipw.println(mPanelClosedOnDown);
+        ipw.print("mHasLayoutedSinceDown="); ipw.println(mHasLayoutedSinceDown);
+        ipw.print("mUpdateFlingVelocity="); ipw.println(mUpdateFlingVelocity);
+        ipw.print("mUpdateFlingOnLayout="); ipw.println(mUpdateFlingOnLayout);
+        ipw.print("mClosing="); ipw.println(mClosing);
+        ipw.print("mTouchSlopExceeded="); ipw.println(mTouchSlopExceeded);
+        ipw.print("mTrackingPointer="); ipw.println(mTrackingPointer);
+        ipw.print("mTouchSlop="); ipw.println(mTouchSlop);
+        ipw.print("mSlopMultiplier="); ipw.println(mSlopMultiplier);
+        ipw.print("mTouchAboveFalsingThreshold="); ipw.println(mTouchAboveFalsingThreshold);
+        ipw.print("mTouchStartedInEmptyArea="); ipw.println(mTouchStartedInEmptyArea);
+        ipw.print("mMotionAborted="); ipw.println(mMotionAborted);
+        ipw.print("mUpwardsWhenThresholdReached="); ipw.println(mUpwardsWhenThresholdReached);
+        ipw.print("mAnimatingOnDown="); ipw.println(mAnimatingOnDown);
+        ipw.print("mHandlingPointerUp="); ipw.println(mHandlingPointerUp);
+        ipw.print("mInstantExpanding="); ipw.println(mInstantExpanding);
+        ipw.print("mAnimateAfterExpanding="); ipw.println(mAnimateAfterExpanding);
+        ipw.print("mIsFlinging="); ipw.println(mIsFlinging);
+        ipw.print("mViewName="); ipw.println(mViewName);
+        ipw.print("mInitialExpandY="); ipw.println(mInitialExpandY);
+        ipw.print("mInitialExpandX="); ipw.println(mInitialExpandX);
+        ipw.print("mTouchDisabled="); ipw.println(mTouchDisabled);
+        ipw.print("mInitialTouchFromKeyguard="); ipw.println(mInitialTouchFromKeyguard);
+        ipw.print("mNextCollapseSpeedUpFactor="); ipw.println(mNextCollapseSpeedUpFactor);
+        ipw.print("mGestureWaitForTouchSlop="); ipw.println(mGestureWaitForTouchSlop);
+        ipw.print("mIgnoreXTouchSlop="); ipw.println(mIgnoreXTouchSlop);
+        ipw.print("mExpandLatencyTracking="); ipw.println(mExpandLatencyTracking);
+        ipw.print("mExpandLatencyTracking="); ipw.println(mExpandLatencyTracking);
         ipw.println("gestureExclusionRect:" + calculateGestureExclusionRect());
-        ipw.println("applyQSClippingImmediately: top(" + mQsClipTop + ") bottom(" + mQsClipBottom
-                + ")");
-        ipw.println("qsVisible:" + mQsVisible);
         new DumpsysTableLogger(
                 TAG,
                 NPVCDownEventState.TABLE_HEADERS,
                 mLastDownEvents.toList()
         ).printTableData(ipw);
-        ipw.decreaseIndent();
-        if (mKeyguardStatusBarViewController != null) {
-            mKeyguardStatusBarViewController.dump(pw, args);
-        }
     }
 
 
