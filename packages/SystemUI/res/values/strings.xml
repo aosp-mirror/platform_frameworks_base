@@ -1311,7 +1311,7 @@
     <string name="wallet_lockscreen_settings_label">Lock screen settings</string>
 
     <!-- QR Code Scanner label, title [CHAR LIMIT=32] -->
-    <string name="qr_code_scanner_title">Scan QR code</string>
+    <string name="qr_code_scanner_title">QR code scanner</string>
 
     <!-- Name of the work status bar icon. -->
     <string name="status_bar_work">Work profile</string>
