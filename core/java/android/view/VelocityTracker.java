@@ -28,7 +28,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.Map;
 
 /**
- * Helper for tracking the velocity of touch events, for implementing
+ * Helper for tracking the velocity of motion events, for implementing
  * flinging and other such gestures.
  *
  * Use {@link #obtain} to retrieve a new instance of the class when you are going
@@ -42,6 +42,15 @@ public final class VelocityTracker {
             new SynchronizedPool<VelocityTracker>(2);
 
     private static final int ACTIVE_POINTER_ID = -1;
+
+    /** @hide */
+    @IntDef(value = {
+            MotionEvent.AXIS_X,
+            MotionEvent.AXIS_Y,
+            MotionEvent.AXIS_SCROLL
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface VelocityTrackableMotionEventAxis {}
 
     /**
      * Velocity Tracker Strategy: Invalid.
@@ -306,10 +315,12 @@ public final class VelocityTracker {
     }
 
     /**
-     * Checks whether a given motion axis is supported for velocity tracking.
+     * Checks whether a given velocity-trackable {@link MotionEvent} axis is supported for velocity
+     * tracking by this {@link VelocityTracker} instance (refer to
+     * {@link #getAxisVelocity(int, int)} for a list of potentially velocity-trackable axes).
      *
-     * <p>The axis values that would make sense to use for this method are the ones defined in the
-     * {@link MotionEvent} class.
+     * <p>Note that the value returned from this method will stay the same for a given instance, so
+     * a single check for axis support is enough per a {@link VelocityTracker} instance.
      *
      * @param axis The axis to check for velocity support.
      * @return {@code true} if {@code axis} is supported for velocity tracking, or {@code false}
@@ -317,7 +328,7 @@ public final class VelocityTracker {
      * @see #getAxisVelocity(int, int)
      * @see #getAxisVelocity(int)
      */
-    public boolean isAxisSupported(int axis) {
+    public boolean isAxisSupported(@VelocityTrackableMotionEventAxis int axis) {
         return nativeIsAxisSupported(axis);
     }
 
@@ -421,12 +432,15 @@ public final class VelocityTracker {
      * calling this function.
      *
      * <p>In addition to {@link MotionEvent#AXIS_X} and {@link MotionEvent#AXIS_Y} which have been
-     * supported since the introduction of this class, the following axes are supported for this
+     * supported since the introduction of this class, the following axes can be candidates for this
      * method:
      * <ul>
      *   <li> {@link MotionEvent#AXIS_SCROLL}: supported starting
      *        {@link Build.VERSION_CODES#UPSIDE_DOWN_CAKE}
      * </ul>
+     *
+     * <p>Before accessing velocities of an axis using this method, check that your
+     * {@link VelocityTracker} instance supports the axis by using {@link #isAxisSupported(int)}.
      *
      * @param axis Which axis' velocity to return.
      * @param id Which pointer's velocity to return.
@@ -435,7 +449,7 @@ public final class VelocityTracker {
      * for the axis.
      * @see #isAxisSupported(int)
      */
-    public float getAxisVelocity(int axis, int id) {
+    public float getAxisVelocity(@VelocityTrackableMotionEventAxis int axis, int id) {
         return nativeGetVelocity(mPtr, axis, id);
     }
 
@@ -450,7 +464,7 @@ public final class VelocityTracker {
      * @see #isAxisSupported(int)
      * @see #getAxisVelocity(int, int)
      */
-    public float getAxisVelocity(int axis) {
+    public float getAxisVelocity(@VelocityTrackableMotionEventAxis int axis) {
         return nativeGetVelocity(mPtr, axis, ACTIVE_POINTER_ID);
     }
 
