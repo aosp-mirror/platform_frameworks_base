@@ -175,7 +175,6 @@ import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.ripple.RippleShader.RippleShape;
 import com.android.systemui.scrim.ScrimView;
 import com.android.systemui.settings.brightness.BrightnessSliderController;
-import com.android.systemui.shade.CameraLauncher;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.NotificationShadeWindowViewController;
@@ -469,7 +468,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private final PluginManager mPluginManager;
     private final ShadeController mShadeController;
     private final InitController mInitController;
-    private final Lazy<CameraLauncher> mCameraLauncherLazy;
 
     private final PluginDependencyProvider mPluginDependencyProvider;
     private final KeyguardDismissUtil mKeyguardDismissUtil;
@@ -602,7 +600,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
     private Runnable mLaunchTransitionEndRunnable;
     private Runnable mLaunchTransitionCancelRunnable;
-    private boolean mLaunchingAffordance;
     private boolean mLaunchCameraWhenFinishedWaking;
     private boolean mLaunchCameraOnFinishedGoingToSleep;
     private boolean mLaunchEmergencyActionWhenFinishedWaking;
@@ -747,8 +744,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             InteractionJankMonitor jankMonitor,
             DeviceStateManager deviceStateManager,
             WiredChargingRippleController wiredChargingRippleController,
-            IDreamManager dreamManager,
-            Lazy<CameraLauncher> cameraLauncherLazy) {
+            IDreamManager dreamManager) {
         mContext = context;
         mNotificationsController = notificationsController;
         mFragmentService = fragmentService;
@@ -825,7 +821,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mMessageRouter = messageRouter;
         mWallpaperManager = wallpaperManager;
         mJankMonitor = jankMonitor;
-        mCameraLauncherLazy = cameraLauncherLazy;
 
         mLockscreenShadeTransitionController = lockscreenShadeTransitionController;
         mStartingSurfaceOptional = startingSurfaceOptional;
@@ -2956,7 +2951,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
     private void onLaunchTransitionFadingEnded() {
         mNotificationPanelViewController.resetAlpha();
-        mCameraLauncherLazy.get().setLaunchingAffordance(false);
+        mNotificationPanelViewController.onAffordanceLaunchEnded();
         releaseGestureWakeLock();
         runLaunchTransitionEndRunnable();
         mKeyguardStateController.setLaunchTransitionFadingAway(false);
@@ -3026,7 +3021,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
     private void onLaunchTransitionTimeout() {
         Log.w(TAG, "Launch transition: Timeout!");
-        mCameraLauncherLazy.get().setLaunchingAffordance(false);
+        mNotificationPanelViewController.onAffordanceLaunchEnded();
         releaseGestureWakeLock();
         mNotificationPanelViewController.resetViews(false /* animate */);
     }
@@ -3079,7 +3074,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         }
         mMessageRouter.cancelMessages(MSG_LAUNCH_TRANSITION_TIMEOUT);
         releaseGestureWakeLock();
-        mCameraLauncherLazy.get().setLaunchingAffordance(false);
+        mNotificationPanelViewController.onAffordanceLaunchEnded();
         mNotificationPanelViewController.resetAlpha();
         mNotificationPanelViewController.resetTranslation();
         mNotificationPanelViewController.resetViewGroupFade();
@@ -3237,7 +3232,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     @Override
     public void endAffordanceLaunch() {
         releaseGestureWakeLock();
-        mCameraLauncherLazy.get().setLaunchingAffordance(false);
+        mNotificationPanelViewController.onAffordanceLaunchEnded();
     }
 
     /**
@@ -3510,7 +3505,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     final WakefulnessLifecycle.Observer mWakefulnessObserver = new WakefulnessLifecycle.Observer() {
         @Override
         public void onFinishedGoingToSleep() {
-            mCameraLauncherLazy.get().setLaunchingAffordance(false);
+            mNotificationPanelViewController.onAffordanceLaunchEnded();
             releaseGestureWakeLock();
             mLaunchCameraWhenFinishedWaking = false;
             mDeviceInteractive = false;
@@ -3611,8 +3606,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                         .updateSensitivenessForOccludedWakeup();
             }
             if (mLaunchCameraWhenFinishedWaking) {
-                mCameraLauncherLazy.get().launchCamera(mLastCameraLaunchSource,
-                        mNotificationPanelViewController.isFullyCollapsed());
+                mNotificationPanelViewController.launchCamera(mLastCameraLaunchSource);
                 mLaunchCameraWhenFinishedWaking = false;
             }
             if (mLaunchEmergencyActionWhenFinishedWaking) {
@@ -3803,7 +3797,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
         mScrimController.setExpansionAffectsAlpha(!unlocking);
 
-        boolean launchingAffordanceWithPreview = mLaunchingAffordance;
+        boolean launchingAffordanceWithPreview =
+                mNotificationPanelViewController.isLaunchingAffordanceWithPreview();
         mScrimController.setLaunchingAffordanceWithPreview(launchingAffordanceWithPreview);
 
         if (mStatusBarKeyguardViewManager.isShowingAlternateBouncer()) {
