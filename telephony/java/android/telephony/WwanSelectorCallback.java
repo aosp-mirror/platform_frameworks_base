@@ -18,7 +18,6 @@ package android.telephony;
 
 import android.annotation.NonNull;
 import android.os.CancellationSignal;
-import android.telephony.AccessNetworkConstants.RadioAccessNetworkType;
 import android.telephony.DomainSelectionService.EmergencyScanType;
 
 import java.util.List;
@@ -46,7 +45,7 @@ public interface WwanSelectorCallback {
      * Notifies the FW that the domain has been selected. After this method is called,
      * this interface can be discarded.
      *
-     * @param accessNetworkType the selected network type.
+     * @param domain The selected domain.
      */
-    void onDomainSelected(@RadioAccessNetworkType int accessNetworkType);
+    void onDomainSelected(@NetworkRegistrationInfo.Domain int domain);
 }

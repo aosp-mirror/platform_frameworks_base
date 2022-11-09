@@ -21,6 +21,6 @@ import com.android.internal.telephony.IWwanSelectorResultCallback;
 oneway interface IWwanSelectorCallback {
     void onRequestEmergencyNetworkScan(in int[] preferredNetworks,
             int scanType, in IWwanSelectorResultCallback cb);
-    void onDomainSelected(int accessNetworkType);
+    void onDomainSelected(int domain);
     void onCancel();
 }
