@@ -619,12 +619,16 @@ public class SyntheticPasswordManager {
 
     /**
      * Creates a new synthetic password (SP) for the given user.
-     *
+     * <p>
      * Any existing SID for the user is cleared.
-     *
+     * <p>
      * Also saves the escrow information necessary to re-generate the synthetic password under
      * an escrow scheme. This information can be removed with {@link #destroyEscrowData} if
      * password escrow should be disabled completely on the given user.
+     * <p>
+     * {@link syncState()} is not called yet; the caller should create a protector afterwards, which
+     * handles this.  This makes it so that all the user's initial SP state files, including the
+     * initial LSKF-based protector, are efficiently created with only a single {@link syncState()}.
      */
     SyntheticPassword newSyntheticPassword(int userId) {
         clearSidForUser(userId);
@@ -668,6 +672,7 @@ public class SyntheticPasswordManager {
 
     private void saveSyntheticPasswordHandle(byte[] spHandle, int userId) {
         saveState(SP_HANDLE_NAME, spHandle, NULL_PROTECTOR_ID, userId);
+        syncState(userId);
     }
 
     private boolean loadEscrowData(SyntheticPassword sp, int userId) {
@@ -677,6 +682,11 @@ public class SyntheticPasswordManager {
         return e0 != null && p1 != null;
     }
 
+    /**
+     * Saves the escrow data for the synthetic password.  The caller is responsible for calling
+     * {@link syncState()} afterwards, once the user's other initial synthetic password state files
+     * have been created.
+     */
     private void saveEscrowData(SyntheticPassword sp, int userId) {
         saveState(SP_E0_NAME, sp.mEncryptedEscrowSplit0, NULL_PROTECTOR_ID, userId);
         saveState(SP_P1_NAME, sp.mEscrowSplit1, NULL_PROTECTOR_ID, userId);
@@ -708,6 +718,10 @@ public class SyntheticPasswordManager {
         return buffer.getInt();
     }
 
+    /**
+     * Creates a file that stores the Weaver slot the protector is using.  The caller is responsible
+     * for calling {@link syncState()} afterwards, once all the protector's files have been created.
+     */
     private void saveWeaverSlot(int slot, long protectorId, int userId) {
         ByteBuffer buffer = ByteBuffer.allocate(Byte.BYTES + Integer.BYTES);
         buffer.put(WEAVER_VERSION);
@@ -837,6 +851,7 @@ public class SyntheticPasswordManager {
         }
         createSyntheticPasswordBlob(protectorId, PROTECTOR_TYPE_LSKF_BASED, sp, protectorSecret,
                 sid, userId);
+        syncState(userId); // ensure the new files are really saved to disk
         return protectorId;
     }
 
@@ -996,6 +1011,7 @@ public class SyntheticPasswordManager {
         saveSecdiscardable(tokenHandle, tokenData.secdiscardableOnDisk, userId);
         createSyntheticPasswordBlob(tokenHandle, getTokenBasedProtectorType(tokenData.mType), sp,
                 tokenData.aggregatedSecret, 0L, userId);
+        syncState(userId); // ensure the new files are really saved to disk
         tokenMap.get(userId).remove(tokenHandle);
         if (tokenData.mCallback != null) {
             tokenData.mCallback.onEscrowTokenActivated(tokenHandle, userId);
@@ -1003,6 +1019,11 @@ public class SyntheticPasswordManager {
         return true;
     }
 
+    /**
+     * Creates a synthetic password blob, i.e. the file that stores the encrypted synthetic password
+     * (or encrypted escrow secret) for a protector.  The caller is responsible for calling
+     * {@link syncState()} afterwards, once all the protector's files have been created.
+     */
     private void createSyntheticPasswordBlob(long protectorId, byte protectorType,
             SyntheticPassword sp, byte[] protectorSecret, long sid, int userId) {
         final byte[] spSecret;
@@ -1118,6 +1139,7 @@ public class SyntheticPasswordManager {
                             // (getting rid of CREDENTIAL_TYPE_PASSWORD_OR_PIN)
                             pwd.credentialType = credential.getType();
                             saveState(PASSWORD_DATA_NAME, pwd.toBytes(), protectorId, userId);
+                            syncState(userId);
                             synchronizeFrpPassword(pwd, 0, userId);
                         } else {
                             Slog.w(TAG, "Fail to re-enroll user password for user " + userId);
@@ -1156,6 +1178,7 @@ public class SyntheticPasswordManager {
         if (result.syntheticPassword != null && !credential.isNone() &&
                 !hasPasswordMetrics(protectorId, userId)) {
             savePasswordMetrics(credential, result.syntheticPassword, protectorId, userId);
+            syncState(userId); // Not strictly needed as the upgrade can be re-done, but be safe.
         }
         return result;
     }
@@ -1275,6 +1298,7 @@ public class SyntheticPasswordManager {
                     + blob.mProtectorType);
             createSyntheticPasswordBlob(protectorId, blob.mProtectorType, result, protectorSecret,
                     sid, userId);
+            syncState(userId); // Not strictly needed as the upgrade can be re-done, but be safe.
         }
         return result;
     }
@@ -1396,12 +1420,21 @@ public class SyntheticPasswordManager {
         return ArrayUtils.concat(data, secdiscardable);
     }
 
+    /**
+     * Generates and writes the secdiscardable file for the given protector.  The caller is
+     * responsible for calling {@link syncState()} afterwards, once all the protector's files have
+     * been created.
+     */
     private byte[] createSecdiscardable(long protectorId, int userId) {
         byte[] data = secureRandom(SECDISCARDABLE_LENGTH);
         saveSecdiscardable(protectorId, data, userId);
         return data;
     }
 
+    /**
+     * Writes the secdiscardable file for the given protector.  The caller is responsible for
+     * calling {@link syncState()} afterwards, once all the protector's files have been created.
+     */
     private void saveSecdiscardable(long protectorId, byte[] secdiscardable, int userId) {
         saveState(SECDISCARDABLE_NAME, secdiscardable, protectorId, userId);
     }
@@ -1445,6 +1478,11 @@ public class SyntheticPasswordManager {
         return VersionedPasswordMetrics.deserialize(decrypted).getMetrics();
     }
 
+    /**
+     * Creates the password metrics file: the file associated with the LSKF-based protector that
+     * contains the encrypted metrics about the LSKF.  The caller is responsible for calling
+     * {@link syncState()} afterwards if needed.
+     */
     private void savePasswordMetrics(LockscreenCredential credential, SyntheticPassword sp,
             long protectorId, int userId) {
         final byte[] encrypted = SyntheticPasswordCrypto.encrypt(sp.deriveMetricsKey(),
@@ -1466,8 +1504,19 @@ public class SyntheticPasswordManager {
         return mStorage.readSyntheticPasswordState(userId, protectorId, stateName);
     }
 
+    /**
+     * Persists the given synthetic password state for the given user ID and protector ID.
+     * <p>
+     * For performance reasons, this doesn't sync the user's synthetic password state directory.  As
+     * a result, it doesn't guarantee that the file will really be present after a crash.  If that
+     * is needed, call {@link syncState()} afterwards, preferably after batching up related updates.
+     */
     private void saveState(String stateName, byte[] data, long protectorId, int userId) {
         mStorage.writeSyntheticPasswordState(userId, protectorId, stateName, data);
+    }
+
+    private void syncState(int userId) {
+        mStorage.syncSyntheticPasswordState(userId);
     }
 
     private void destroyState(String stateName, long protectorId, int userId) {
