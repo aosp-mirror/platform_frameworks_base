@@ -16,6 +16,7 @@
 
 package com.android.systemui.screenrecord;
 
+import android.app.Dialog;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -33,6 +34,7 @@ import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.statusbar.policy.CallbackController;
@@ -97,11 +99,15 @@ public class RecordingController
     }
 
     /** Create a dialog to show screen recording options to the user. */
-    public ScreenRecordDialog createScreenRecordDialog(Context context, FeatureFlags flags,
-            DialogLaunchAnimator dialogLaunchAnimator, ActivityStarter activityStarter,
-            @Nullable Runnable onStartRecordingClicked) {
-        return new ScreenRecordDialog(context, this, activityStarter, mUserContextProvider,
-                flags, dialogLaunchAnimator, onStartRecordingClicked);
+    public Dialog createScreenRecordDialog(Context context, FeatureFlags flags,
+                                           DialogLaunchAnimator dialogLaunchAnimator,
+                                           ActivityStarter activityStarter,
+                                           @Nullable Runnable onStartRecordingClicked) {
+        return flags.isEnabled(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING)
+                ? new ScreenRecordPermissionDialog(context, this, activityStarter,
+                        dialogLaunchAnimator, mUserContextProvider, onStartRecordingClicked)
+                : new ScreenRecordDialog(context, this, activityStarter,
+                mUserContextProvider, flags, dialogLaunchAnimator, onStartRecordingClicked);
     }
 
     /**
