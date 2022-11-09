@@ -52,7 +52,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 class Convert {
+
     private static final String TAG = "BcRadio2Srv.convert";
+
+    private Convert() {
+        throw new UnsupportedOperationException("Convert class is noninstantiable");
+    }
 
     static void throwOnError(String action, int result) {
         switch (result) {

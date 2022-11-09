@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.broadcastradio.aidl;
+package com.android.server.broadcastradio.hal2;
 
 import static com.google.common.truth.Truth.assertWithMessage;
 
@@ -42,10 +42,11 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Tests for AIDL HAL AnnouncementAggregator.
+ * Tests for HIDL 2.0 HAL AnnouncementAggregator.
  */
 @RunWith(MockitoJUnitRunner.class)
-public final class AnnouncementAggregatorTest {
+public final class AnnouncementAggregatorHidlTest {
+
     private static final int[] TEST_ENABLED_TYPES = new int[]{Announcement.TYPE_TRAFFIC};
 
     private final Object mLock = new Object();
@@ -78,7 +79,7 @@ public final class AnnouncementAggregatorTest {
                 ArgumentCaptor.forClass(IAnnouncementListener.class);
         watchModules(/* moduleNumber= */ 1);
 
-        verify(mRadioModuleMocks[0]).addAnnouncementListener(moduleWatcherCaptor.capture(), any());
+        verify(mRadioModuleMocks[0]).addAnnouncementListener(any(), moduleWatcherCaptor.capture());
 
         moduleWatcherCaptor.getValue().onListUpdated(Arrays.asList(mAnnouncementMocks[0]));
 
@@ -96,7 +97,7 @@ public final class AnnouncementAggregatorTest {
             ArgumentCaptor<List<Announcement>> announcementsCaptor =
                     ArgumentCaptor.forClass(List.class);
             verify(mRadioModuleMocks[index])
-                    .addAnnouncementListener(moduleWatcherCaptor.capture(), any());
+                    .addAnnouncementListener(any(), moduleWatcherCaptor.capture());
 
             moduleWatcherCaptor.getValue().onListUpdated(Arrays.asList(mAnnouncementMocks[index]));
 

@@ -36,6 +36,7 @@ import android.annotation.Nullable;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.service.timezone.TimeZoneProviderEvent;
+import android.service.timezone.TimeZoneProviderStatus;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -292,6 +293,12 @@ abstract class LocationTimeZoneProvider implements Dumpable {
         boolean isTerminated() {
             return stateEnum == PROVIDER_STATE_PERM_FAILED
                     || stateEnum == PROVIDER_STATE_DESTROYED;
+        }
+
+        /** Returns the status reported by the provider, if available. */
+        @Nullable
+        TimeZoneProviderStatus getReportedStatus() {
+            return event == null ? null : event.getTimeZoneProviderStatus();
         }
 
         @Override

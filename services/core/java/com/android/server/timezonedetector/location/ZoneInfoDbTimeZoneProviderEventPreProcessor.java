@@ -58,7 +58,7 @@ public class ZoneInfoDbTimeZoneProviderEventPreProcessor
         if (hasInvalidZones(event)) {
             TimeZoneProviderStatus providerStatus = new TimeZoneProviderStatus.Builder(
                     event.getTimeZoneProviderStatus())
-                    .setTimeZoneResolutionStatus(OPERATION_STATUS_FAILED)
+                    .setTimeZoneResolutionOperationStatus(OPERATION_STATUS_FAILED)
                     .build();
             return TimeZoneProviderEvent.createUncertainEvent(
                     event.getCreationElapsedMillis(), providerStatus);

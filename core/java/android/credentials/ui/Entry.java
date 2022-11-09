@@ -53,7 +53,8 @@ public class Entry implements Parcelable {
     /** Below are only available for get flows. */
     public static final String HINT_NOTE = "HINT_NOTE";
     public static final String HINT_USER_NAME = "HINT_USER_NAME";
-    public static final String HINT_CREDENTIAL_TYPE = "HINT_CREDENTIAL_TYPE";
+    public static final String HINT_CREDENTIAL_TYPE_DISPLAY_NAME =
+            "HINT_CREDENTIAL_TYPE_DISPLAY_NAME";
     public static final String HINT_PASSKEY_USER_DISPLAY_NAME = "HINT_PASSKEY_USER_DISPLAY_NAME";
     public static final String HINT_PASSWORD_VALUE = "HINT_PASSWORD_VALUE";
 

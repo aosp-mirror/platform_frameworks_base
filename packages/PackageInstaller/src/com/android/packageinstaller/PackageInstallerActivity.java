@@ -124,9 +124,8 @@ public class PackageInstallerActivity extends AlertActivity {
     private static final int DLG_INSTALL_ERROR = DLG_BASE + 4;
     private static final int DLG_UNKNOWN_SOURCES_RESTRICTED_FOR_USER = DLG_BASE + 5;
     private static final int DLG_ANONYMOUS_SOURCE = DLG_BASE + 6;
-    private static final int DLG_NOT_SUPPORTED_ON_WEAR = DLG_BASE + 7;
-    private static final int DLG_EXTERNAL_SOURCE_BLOCKED = DLG_BASE + 8;
-    private static final int DLG_INSTALL_APPS_RESTRICTED_FOR_USER = DLG_BASE + 9;
+    private static final int DLG_EXTERNAL_SOURCE_BLOCKED = DLG_BASE + 7;
+    private static final int DLG_INSTALL_APPS_RESTRICTED_FOR_USER = DLG_BASE + 8;
 
     // If unknown sources are temporary allowed
     private boolean mAllowUnknownSources;
@@ -189,8 +188,6 @@ public class PackageInstallerActivity extends AlertActivity {
             case DLG_INSTALL_ERROR:
                 return InstallErrorDialog.newInstance(
                         mPm.getApplicationLabel(mPkgInfo.applicationInfo));
-            case DLG_NOT_SUPPORTED_ON_WEAR:
-                return NotSupportedOnWearDialog.newInstance();
             case DLG_INSTALL_APPS_RESTRICTED_FOR_USER:
                 return SimpleErrorDialog.newInstance(
                         R.string.install_apps_user_restriction_dlg_text);
@@ -379,12 +376,8 @@ public class PackageInstallerActivity extends AlertActivity {
             return;
         }
 
-        if (DeviceUtils.isWear(this)) {
-            showDialogInner(DLG_NOT_SUPPORTED_ON_WEAR);
-            return;
-        }
-
         final boolean wasSetUp = processAppSnippet(packageSource);
+
         if (mLocalLOGV) Log.i(TAG, "wasSetUp: " + wasSetUp);
 
         if (!wasSetUp) {
@@ -774,21 +767,6 @@ public class PackageInstallerActivity extends AlertActivity {
 
         @Override
         public void onCancel(DialogInterface dialog) {
-            getActivity().finish();
-        }
-    }
-
-    /**
-     * An error dialog shown when the app is not supported on wear
-     */
-    public static class NotSupportedOnWearDialog extends SimpleErrorDialog {
-        static SimpleErrorDialog newInstance() {
-            return SimpleErrorDialog.newInstance(R.string.wear_not_allowed_dlg_text);
-        }
-
-        @Override
-        public void onCancel(DialogInterface dialog) {
-            getActivity().setResult(RESULT_OK);
             getActivity().finish();
         }
     }

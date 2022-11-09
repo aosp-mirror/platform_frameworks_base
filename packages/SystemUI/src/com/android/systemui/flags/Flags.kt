@@ -226,7 +226,8 @@ object Flags {
     val SCREEN_CONTENTS_TRANSLATION = UnreleasedFlag(803)
 
     // 804 - monochromatic themes
-    @JvmField val MONOCHROMATIC_THEMES = UnreleasedFlag(804)
+    @JvmField
+    val MONOCHROMATIC_THEMES = SysPropBooleanFlag(804, "persist.sysui.monochromatic", false)
 
     // 900 - media
     // TODO(b/254512697): Tracking Bug
@@ -260,7 +261,7 @@ object Flags {
     @Keep
     @JvmField
     val WM_ENABLE_SHELL_TRANSITIONS =
-        SysPropBooleanFlag(1100, "persist.wm.debug.shell_transit", true)
+        SysPropBooleanFlag(1100, "persist.wm.debug.shell_transit", false)
 
     // TODO(b/254513207): Tracking Bug
     @Keep

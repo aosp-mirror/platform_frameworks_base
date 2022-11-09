@@ -42,4 +42,5 @@ interface IImageCaptureExtenderImpl
     LatencyRange getEstimatedCaptureLatencyRange(in Size outputSize);
     CameraMetadataNative getAvailableCaptureRequestKeys();
     CameraMetadataNative getAvailableCaptureResultKeys();
+    boolean isCaptureProcessProgressAvailable();
 }

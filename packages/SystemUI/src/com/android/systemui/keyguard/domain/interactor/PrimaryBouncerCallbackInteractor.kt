@@ -24,9 +24,9 @@ import javax.inject.Inject
 
 /** Interactor to add and remove callbacks for the bouncer. */
 @SysUISingleton
-class BouncerCallbackInteractor @Inject constructor() {
+class PrimaryBouncerCallbackInteractor @Inject constructor() {
     private var resetCallbacks = ListenerSet<KeyguardBouncer.KeyguardResetCallback>()
-    private var expansionCallbacks = ArrayList<KeyguardBouncer.BouncerExpansionCallback>()
+    private var expansionCallbacks = ArrayList<KeyguardBouncer.PrimaryBouncerExpansionCallback>()
     /** Add a KeyguardResetCallback. */
     fun addKeyguardResetCallback(callback: KeyguardBouncer.KeyguardResetCallback) {
         resetCallbacks.addIfAbsent(callback)
@@ -38,7 +38,7 @@ class BouncerCallbackInteractor @Inject constructor() {
     }
 
     /** Adds a callback to listen to bouncer expansion updates. */
-    fun addBouncerExpansionCallback(callback: KeyguardBouncer.BouncerExpansionCallback) {
+    fun addBouncerExpansionCallback(callback: KeyguardBouncer.PrimaryBouncerExpansionCallback) {
         if (!expansionCallbacks.contains(callback)) {
             expansionCallbacks.add(callback)
         }
@@ -48,7 +48,7 @@ class BouncerCallbackInteractor @Inject constructor() {
      * Removes a previously added callback. If the callback was never added, this method does
      * nothing.
      */
-    fun removeBouncerExpansionCallback(callback: KeyguardBouncer.BouncerExpansionCallback) {
+    fun removeBouncerExpansionCallback(callback: KeyguardBouncer.PrimaryBouncerExpansionCallback) {
         expansionCallbacks.remove(callback)
     }
 

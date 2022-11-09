@@ -16,10 +16,10 @@
 package com.android.server.timezonedetector.location;
 
 import static android.service.timezone.TimeZoneProviderStatus.DEPENDENCY_STATUS_NOT_APPLICABLE;
+import static android.service.timezone.TimeZoneProviderStatus.DEPENDENCY_STATUS_OK;
 import static android.service.timezone.TimeZoneProviderStatus.DEPENDENCY_STATUS_TEMPORARILY_UNAVAILABLE;
-import static android.service.timezone.TimeZoneProviderStatus.DEPENDENCY_STATUS_WORKING;
+import static android.service.timezone.TimeZoneProviderStatus.OPERATION_STATUS_OK;
 import static android.service.timezone.TimeZoneProviderStatus.OPERATION_STATUS_UNKNOWN;
-import static android.service.timezone.TimeZoneProviderStatus.OPERATION_STATUS_WORKING;
 
 import static com.android.server.timezonedetector.ConfigurationInternal.DETECTION_MODE_MANUAL;
 import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_DESTROYED;
@@ -87,9 +87,9 @@ public class LocationTimeZoneProviderControllerTest {
             createSuggestionEvent(asList("Europe/Paris"));
     private static final TimeZoneProviderStatus UNCERTAIN_PROVIDER_STATUS =
             new TimeZoneProviderStatus.Builder()
-                    .setLocationDetectionStatus(DEPENDENCY_STATUS_TEMPORARILY_UNAVAILABLE)
-                    .setConnectivityStatus(DEPENDENCY_STATUS_WORKING)
-                    .setTimeZoneResolutionStatus(OPERATION_STATUS_UNKNOWN)
+                    .setLocationDetectionDependencyStatus(DEPENDENCY_STATUS_TEMPORARILY_UNAVAILABLE)
+                    .setConnectivityDependencyStatus(DEPENDENCY_STATUS_OK)
+                    .setTimeZoneResolutionOperationStatus(OPERATION_STATUS_UNKNOWN)
                     .build();
     private static final TimeZoneProviderEvent USER1_UNCERTAIN_LOCATION_TIME_ZONE_EVENT =
             TimeZoneProviderEvent.createUncertainEvent(
@@ -1405,9 +1405,9 @@ public class LocationTimeZoneProviderControllerTest {
 
     private static TimeZoneProviderEvent createSuggestionEvent(@NonNull List<String> timeZoneIds) {
         TimeZoneProviderStatus providerStatus = new TimeZoneProviderStatus.Builder()
-                .setLocationDetectionStatus(DEPENDENCY_STATUS_NOT_APPLICABLE)
-                .setConnectivityStatus(DEPENDENCY_STATUS_NOT_APPLICABLE)
-                .setTimeZoneResolutionStatus(OPERATION_STATUS_WORKING)
+                .setLocationDetectionDependencyStatus(DEPENDENCY_STATUS_NOT_APPLICABLE)
+                .setConnectivityDependencyStatus(DEPENDENCY_STATUS_NOT_APPLICABLE)
+                .setTimeZoneResolutionOperationStatus(OPERATION_STATUS_OK)
                 .build();
         TimeZoneProviderSuggestion suggestion = new TimeZoneProviderSuggestion.Builder()
                 .setElapsedRealtimeMillis(ARBITRARY_TIME_MILLIS)

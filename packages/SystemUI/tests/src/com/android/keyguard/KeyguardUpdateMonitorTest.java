@@ -629,7 +629,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
     @Test
     public void testNoStartAuthenticate_whenAboutToShowBouncer() {
-        mKeyguardUpdateMonitor.sendKeyguardBouncerChanged(
+        mKeyguardUpdateMonitor.sendPrimaryBouncerChanged(
                 /* bouncerIsOrWillBeShowing */ true, /* bouncerFullyShown */ false);
 
         verify(mFaceManager, never()).authenticate(any(), any(), any(), any(), anyInt(),
@@ -1851,7 +1851,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     private void setKeyguardBouncerVisibility(boolean isVisible) {
-        mKeyguardUpdateMonitor.sendKeyguardBouncerChanged(isVisible, isVisible);
+        mKeyguardUpdateMonitor.sendPrimaryBouncerChanged(isVisible, isVisible);
         mTestableLooper.processAllMessages();
     }
 
