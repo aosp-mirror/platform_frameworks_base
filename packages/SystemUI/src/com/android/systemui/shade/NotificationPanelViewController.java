@@ -123,7 +123,6 @@ import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.animation.LaunchAnimator;
 import com.android.systemui.biometrics.AuthController;
-import com.android.systemui.camera.CameraGestureHelper;
 import com.android.systemui.classifier.Classifier;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dagger.qualifiers.DisplayId;
@@ -462,7 +461,6 @@ public final class NotificationPanelViewController {
     private boolean mCollapsedOnDown;
     private boolean mClosingWithAlphaFadeOut;
     private boolean mHeadsUpAnimatingAway;
-    private boolean mLaunchingAffordance;
     private final FalsingManager mFalsingManager;
     private final FalsingCollector mFalsingCollector;
 
@@ -613,7 +611,6 @@ public final class NotificationPanelViewController {
     private final NotificationListContainer mNotificationListContainer;
     private final NotificationStackSizeCalculator mNotificationStackSizeCalculator;
     private final NPVCDownEventState.Buffer mLastDownEvents;
-    private final CameraGestureHelper mCameraGestureHelper;
     private final KeyguardBottomAreaViewModel mKeyguardBottomAreaViewModel;
     private final KeyguardBottomAreaInteractor mKeyguardBottomAreaInteractor;
     private float mMinExpandHeight;
@@ -741,7 +738,6 @@ public final class NotificationPanelViewController {
             UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
             ShadeTransitionController shadeTransitionController,
             SystemClock systemClock,
-            CameraGestureHelper cameraGestureHelper,
             KeyguardBottomAreaViewModel keyguardBottomAreaViewModel,
             KeyguardBottomAreaInteractor keyguardBottomAreaInteractor) {
         keyguardStateController.addCallback(new KeyguardStateController.Callback() {
@@ -921,7 +917,6 @@ public final class NotificationPanelViewController {
                         unlockAnimationStarted(playingCannedAnimation, isWakeAndUnlock, startDelay);
                     }
                 });
-        mCameraGestureHelper = cameraGestureHelper;
         mKeyguardBottomAreaInteractor = keyguardBottomAreaInteractor;
     }
 
@@ -3948,6 +3943,10 @@ public final class NotificationPanelViewController {
         }
     }
 
+    public int getBarState() {
+        return mBarState;
+    }
+
     private boolean isOnKeyguard() {
         return mBarState == KEYGUARD;
     }
@@ -3991,35 +3990,6 @@ public final class NotificationPanelViewController {
     private boolean isPanelVisibleBecauseOfHeadsUp() {
         return (mHeadsUpManager.hasPinnedHeadsUp() || mHeadsUpAnimatingAway)
                 && mBarState == StatusBarState.SHADE;
-    }
-
-    /** Launches the camera. */
-    public void launchCamera(int source) {
-        if (!isFullyCollapsed()) {
-            setLaunchingAffordance(true);
-        }
-
-        mCameraGestureHelper.launchCamera(source);
-    }
-
-    public void onAffordanceLaunchEnded() {
-        setLaunchingAffordance(false);
-    }
-
-    /** Set whether we are currently launching an affordance (i.e. camera gesture). */
-    private void setLaunchingAffordance(boolean launchingAffordance) {
-        mLaunchingAffordance = launchingAffordance;
-        mKeyguardBypassController.setLaunchingAffordance(launchingAffordance);
-    }
-
-    /** Returns whether a bottom affordance is launching an occluded activity with splash screen. */
-    public boolean isLaunchingAffordanceWithPreview() {
-        return mLaunchingAffordance;
-    }
-
-    /** Whether the camera application can be launched by the camera launch gesture. */
-    public boolean canCameraGestureBeLaunched() {
-        return mCameraGestureHelper.canCameraGestureBeLaunched(mBarState);
     }
 
     public boolean hideStatusBarIconsWhenExpanded() {
