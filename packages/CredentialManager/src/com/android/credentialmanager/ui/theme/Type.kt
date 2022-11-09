@@ -1,6 +1,6 @@
 package com.android.credentialmanager.ui.theme
 
-import androidx.compose.material.Typography
+import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -8,32 +8,32 @@ import androidx.compose.ui.unit.sp
 
 // Set of Material typography styles to start with
 val Typography = Typography(
-  subtitle1 = TextStyle(
+  titleMedium = TextStyle(
     fontFamily = FontFamily.Default,
     fontWeight = FontWeight.Normal,
     fontSize = 24.sp,
     lineHeight = 32.sp,
   ),
-  body1 = TextStyle(
+  bodyLarge = TextStyle(
     fontFamily = FontFamily.Default,
     fontWeight = FontWeight.Normal,
     fontSize = 14.sp,
     lineHeight = 20.sp,
   ),
-  body2 = TextStyle(
+  bodyMedium = TextStyle(
     fontFamily = FontFamily.Default,
     fontWeight = FontWeight.Normal,
     fontSize = 14.sp,
     lineHeight = 20.sp,
     color = textColorSecondary
   ),
-  button = TextStyle(
+  labelLarge = TextStyle(
     fontFamily = FontFamily.Default,
     fontWeight = FontWeight.Medium,
     fontSize = 14.sp,
     lineHeight = 20.sp,
   ),
-  h6 = TextStyle(
+  titleLarge = TextStyle(
     fontFamily = FontFamily.Default,
     fontWeight = FontWeight.Medium,
     fontSize = 16.sp,

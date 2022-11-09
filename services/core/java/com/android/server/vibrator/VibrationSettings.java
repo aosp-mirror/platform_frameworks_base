@@ -655,7 +655,8 @@ final class VibrationSettings {
     }
 
     private void registerSettingsChangeReceiver(IntentFilter intentFilter) {
-        mContext.registerReceiver(mSettingChangeReceiver, intentFilter);
+        mContext.registerReceiver(mSettingChangeReceiver, intentFilter,
+                Context.RECEIVER_EXPORTED_UNAUDITED);
     }
 
     @Nullable

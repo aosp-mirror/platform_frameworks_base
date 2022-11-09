@@ -175,7 +175,7 @@ public class BroadcastConstants {
      */
     public long DELAY_CACHED_MILLIS = DEFAULT_DELAY_CACHED_MILLIS;
     private static final String KEY_DELAY_CACHED_MILLIS = "bcast_delay_cached_millis";
-    private static final long DEFAULT_DELAY_CACHED_MILLIS = 0;
+    private static final long DEFAULT_DELAY_CACHED_MILLIS = +30_000;
 
     /**
      * For {@link BroadcastQueueModernImpl}: Delay to apply to urgent

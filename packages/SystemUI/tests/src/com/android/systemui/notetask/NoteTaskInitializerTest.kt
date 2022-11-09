@@ -21,8 +21,8 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
-import com.android.wm.shell.floating.FloatingTasks
-import java.util.*
+import com.android.wm.shell.bubbles.Bubbles
+import java.util.Optional
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -43,20 +43,20 @@ import org.mockito.MockitoAnnotations
 internal class NoteTaskInitializerTest : SysuiTestCase() {
 
     @Mock lateinit var commandQueue: CommandQueue
-    @Mock lateinit var floatingTasks: FloatingTasks
-    @Mock lateinit var optionalFloatingTasks: Optional<FloatingTasks>
+    @Mock lateinit var bubbles: Bubbles
+    @Mock lateinit var optionalBubbles: Optional<Bubbles>
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        whenever(optionalFloatingTasks.isPresent).thenReturn(true)
-        whenever(optionalFloatingTasks.orElse(null)).thenReturn(floatingTasks)
+        whenever(optionalBubbles.isPresent).thenReturn(true)
+        whenever(optionalBubbles.orElse(null)).thenReturn(bubbles)
     }
 
     private fun createNoteTaskInitializer(isEnabled: Boolean = true): NoteTaskInitializer {
         return NoteTaskInitializer(
-            optionalFloatingTasks = optionalFloatingTasks,
+            optionalBubbles = optionalBubbles,
             lazyNoteTaskController = mock(),
             commandQueue = commandQueue,
             isEnabled = isEnabled,
@@ -78,8 +78,8 @@ internal class NoteTaskInitializerTest : SysuiTestCase() {
     }
 
     @Test
-    fun initialize_floatingTasksNotPresent_shouldDoNothing() {
-        whenever(optionalFloatingTasks.isPresent).thenReturn(false)
+    fun initialize_bubblesNotPresent_shouldDoNothing() {
+        whenever(optionalBubbles.isPresent).thenReturn(false)
 
         createNoteTaskInitializer().initialize()
 

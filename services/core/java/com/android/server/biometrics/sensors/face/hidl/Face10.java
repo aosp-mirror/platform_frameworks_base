@@ -677,8 +677,9 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
                     opPackageName, cookie, false /* requireConfirmation */, mSensorId,
                     createLogger(BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient),
                     mBiometricContext, isStrongBiometric, mLockoutTracker,
-                    mUsageStats, allowBackgroundAuthentication, isKeyguardBypassEnabled);
-            mScheduler.scheduleClientMonitor(client, mBiometricStateCallback);
+                    mUsageStats, allowBackgroundAuthentication, isKeyguardBypassEnabled,
+                    Utils.getCurrentStrength(mSensorId));
+            mScheduler.scheduleClientMonitor(client);
         });
     }
 

@@ -17,7 +17,11 @@ android_app {
     static_libs: [
         "androidx.activity_activity-compose",
         "androidx.appcompat_appcompat",
-        "androidx.compose.material_material",
+        "androidx.compose.animation_animation-core",
+        "androidx.compose.foundation_foundation",
+        "androidx.compose.material3_material3",
+        "androidx.compose.material_material-icons-core",
+        "androidx.compose.material_material-icons-extended",
         "androidx.compose.runtime_runtime",
         "androidx.compose.ui_ui",
         "androidx.compose.ui_ui-tooling",
@@ -27,6 +31,7 @@ android_app {
         "androidx.lifecycle_lifecycle-runtime-ktx",
         "androidx.lifecycle_lifecycle-viewmodel-compose",
         "androidx.recyclerview_recyclerview",
+        "kotlinx-coroutines-core",
     ],
 
     platform_apis: true,

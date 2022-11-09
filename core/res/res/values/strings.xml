@@ -5759,32 +5759,6 @@
     <!-- Title for the harmful app warning dialog. [CHAR LIMIT=40] -->
     <string name="harmful_app_warning_title">Harmful app detected</string>
 
-    <!-- Title for the log access confirmation dialog. [CHAR LIMIT=NONE] -->
-    <string name="log_access_confirmation_title">Allow <xliff:g id="log_access_app_name" example="Example App">%s</xliff:g> to access all device logs?</string>
-    <!-- Label for the allow button on the log access confirmation dialog. [CHAR LIMIT=40] -->
-    <string name="log_access_confirmation_allow">Allow one-time access</string>
-    <!-- Label for the deny button on the log access confirmation dialog. [CHAR LIMIT=20] -->
-    <string name="log_access_confirmation_deny">Don\u2019t allow</string>
-
-    <!-- Content for the log access confirmation dialog. [CHAR LIMIT=NONE]-->
-    <string name="log_access_confirmation_body" product="default">Device logs record what happens on your device. Apps can use these logs to find and fix issues.\n\nSome logs may contain sensitive info, so only allow apps you trust to access all device logs.
-        \n\nIf you don’t allow this app to access all device logs, it can still access its own logs. Your device manufacturer may still be able to access some logs or info on your device.
-    </string>
-
-    <!-- Content for the log access confirmation dialog. [CHAR LIMIT=NONE]-->
-    <string name="log_access_confirmation_body" product="tv">Device logs record what happens on your device. Apps can use these logs to find and fix issues.\n\nSome logs may contain sensitive info, so only allow apps you trust to access all device logs.
-        \n\nIf you don’t allow this app to access all device logs, it can still access its own logs. Your device manufacturer may still be able to access some logs or info on your device.\n\nLearn more at g.co/android/devicelogs.
-    </string>
-
-    <!-- Learn more URL for the log access confirmation dialog. [DO NOT TRANSLATE]-->
-    <string name="log_access_confirmation_learn_more" product="default" translatable="false">&lt;a href="https://support.google.com/android?p=system_logs#topic=7313011"&gt;Learn more&lt;/a&gt;</string>
-
-    <!-- Learn more URL for the log access confirmation dialog. [DO NOT TRANSLATE]-->
-    <string name="log_access_confirmation_learn_more" product="tv" translatable="false"></string>
-
-    <!-- Privacy notice do not show [CHAR LIMIT=20] -->
-    <string name="log_access_do_not_show_again">Don\u2019t show again</string>
-
     <!-- Text describing a permission request for one app to show another app's
          slices [CHAR LIMIT=NONE] -->
     <string name="slices_permission_request"><xliff:g id="app" example="Example App">%1$s</xliff:g> wants to show <xliff:g id="app_2" example="Other Example App">%2$s</xliff:g> slices</string>

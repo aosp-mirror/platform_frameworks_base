@@ -24,7 +24,6 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_BACK_PREVIEW;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.ComponentName;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
@@ -41,7 +40,6 @@ import android.window.BackAnimationAdapter;
 import android.window.BackNavigationInfo;
 import android.window.IBackAnimationFinishedCallback;
 import android.window.OnBackInvokedCallbackInfo;
-import android.window.ScreenCapture;
 import android.window.TaskSnapshot;
 import android.window.WindowContainerToken;
 
@@ -269,10 +267,11 @@ class BackNavigationController {
                     removedWindowContainer,
                     BackNavigationInfo.typeToString(backType));
 
-            // For now, we only animate when going home and cross task.
+            // For now, we only animate when going home, cross task or cross-activity.
             boolean prepareAnimation =
                     (backType == BackNavigationInfo.TYPE_RETURN_TO_HOME
-                            || backType == BackNavigationInfo.TYPE_CROSS_TASK)
+                            || backType == BackNavigationInfo.TYPE_CROSS_TASK
+                            || backType == BackNavigationInfo.TYPE_CROSS_ACTIVITY)
                     && adapter != null;
 
             // Only prepare animation if no leash has been created (no animation is running).
@@ -336,6 +335,7 @@ class BackNavigationController {
         RemoteAnimationTarget behindAppTarget = null;
         if (needsScreenshot(backType)) {
             HardwareBuffer screenshotBuffer = null;
+            Task backTargetTask = prevTask;
             switch(backType) {
                 case BackNavigationInfo.TYPE_CROSS_TASK:
                     int prevTaskId = prevTask != null ? prevTask.mTaskId : 0;
@@ -343,14 +343,10 @@ class BackNavigationController {
                     screenshotBuffer = getTaskSnapshot(prevTaskId, prevUserId);
                     break;
                 case BackNavigationInfo.TYPE_CROSS_ACTIVITY:
-                    //TODO(207481538) Remove once the infrastructure to support per-activity
-                    // screenshot is implemented. For now we simply have the mBackScreenshots hash
-                    // map that dumbly saves the screenshots.
-                    if (prevActivity != null
-                            && prevActivity.mActivityComponent != null) {
-                        screenshotBuffer =
-                                getActivitySnapshot(currentTask, prevActivity.mActivityComponent);
+                    if (prevActivity != null && prevActivity.mActivityComponent != null) {
+                        screenshotBuffer = getActivitySnapshot(currentTask, prevActivity);
                     }
+                    backTargetTask = currentTask;
                     break;
             }
 
@@ -369,8 +365,9 @@ class BackNavigationController {
                 // leash needs to be added before to be in the synchronized block.
                 startedTransaction.setLayer(topAppTarget.leash, 1);
 
-                behindAppTarget = createRemoteAnimationTargetLocked(
-                        prevTask, screenshotSurface, MODE_OPENING);
+                behindAppTarget =
+                        createRemoteAnimationTargetLocked(
+                                backTargetTask, screenshotSurface, MODE_OPENING);
 
                 // reset leash after animation finished.
                 leashes.add(screenshotSurface);
@@ -543,14 +540,8 @@ class BackNavigationController {
         mShowWallpaper = false;
     }
 
-    private HardwareBuffer getActivitySnapshot(@NonNull Task task,
-            ComponentName activityComponent) {
-        // Check if we have a screenshot of the previous activity, indexed by its
-        // component name.
-        ScreenCapture.ScreenshotHardwareBuffer backBuffer = task.mBackScreenshots
-                .get(activityComponent.flattenToString());
-        return backBuffer != null ? backBuffer.getHardwareBuffer() : null;
-
+    private HardwareBuffer getActivitySnapshot(@NonNull Task task, ActivityRecord r) {
+        return task.getSnapshotForActivityRecord(r);
     }
 
     private HardwareBuffer getTaskSnapshot(int taskId, int userId) {

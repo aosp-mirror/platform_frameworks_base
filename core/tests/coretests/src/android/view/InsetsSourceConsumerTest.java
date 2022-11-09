@@ -122,7 +122,6 @@ public class InsetsSourceConsumerTest {
     public void testHide() {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             mConsumer.hide();
-            assertFalse("Consumer should not be visible", mConsumer.isRequestedVisible());
             verify(mSpyInsetsSource).setVisible(eq(false));
         });
 
@@ -134,7 +133,6 @@ public class InsetsSourceConsumerTest {
             // Insets source starts out visible
             mConsumer.hide();
             mConsumer.show(false /* fromIme */);
-            assertTrue("Consumer should be visible", mConsumer.isRequestedVisible());
             verify(mSpyInsetsSource).setVisible(eq(false));
             verify(mSpyInsetsSource).setVisible(eq(true));
         });
@@ -240,7 +238,7 @@ public class InsetsSourceConsumerTest {
             // visibility won't be updated when the consumer received the same leash in setControl.
             insetsController.controlWindowInsetsAnimation(ime(), 0L,
                     null /* interpolator */, null /* cancellationSignal */, null /* listener */);
-            assertTrue(insetsController.getAnimationType(ITYPE_IME) == ANIMATION_TYPE_USER);
+            assertEquals(ANIMATION_TYPE_USER, insetsController.getAnimationType(ime()));
             imeConsumer.setControl(new InsetsSourceControl(ITYPE_IME, mLeash,
                     true /* initialVisible */, new Point(), Insets.NONE), new int[1], new int[1]);
             verify(mMockTransaction, never()).show(mLeash);

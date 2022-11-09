@@ -1133,7 +1133,7 @@ public class BrightnessTracker {
 
         public void registerReceiver(Context context,
                 BroadcastReceiver receiver, IntentFilter filter) {
-            context.registerReceiver(receiver, filter);
+            context.registerReceiver(receiver, filter, Context.RECEIVER_EXPORTED_UNAUDITED);
         }
 
         public void unregisterReceiver(Context context,

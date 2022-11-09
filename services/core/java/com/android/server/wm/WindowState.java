@@ -25,10 +25,12 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.graphics.GraphicsProtos.dumpPointProto;
 import static android.hardware.display.DisplayManager.SWITCHING_TYPE_NONE;
+import static android.hardware.display.DisplayManager.SWITCHING_TYPE_RENDER_FRAME_RATE_ONLY;
 import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 import static android.os.PowerManager.DRAW_WAKE_LOCK;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.InsetsState.ITYPE_IME;
+import static android.view.InsetsState.ITYPE_INVALID;
 import static android.view.SurfaceControl.Transaction;
 import static android.view.SurfaceControl.getGlobalTransaction;
 import static android.view.ViewRootImpl.LOCAL_LAYOUT;
@@ -201,6 +203,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
 import android.gui.TouchOcclusionMode;
+import android.hardware.display.DisplayManager;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Debug;
@@ -1672,11 +1675,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (rotatedState != null) {
             return insetsPolicy.adjustInsetsForWindow(this, rotatedState);
         }
+        final InsetsSourceProvider provider = getControllableInsetProvider();
+        final @InternalInsetsType int insetTypeProvidedByWindow = provider != null
+                ? provider.getSource().getType() : ITYPE_INVALID;
         final InsetsState rawInsetsState =
                 mFrozenInsetsState != null ? mFrozenInsetsState : getMergedInsetsState();
         final InsetsState insetsStateForWindow = insetsPolicy
-                .enforceInsetsPolicyForTarget(
-                        getWindowingMode(), isAlwaysOnTop(), mAttrs, rawInsetsState);
+                .enforceInsetsPolicyForTarget(insetTypeProvidedByWindow,
+                        getWindowingMode(), isAlwaysOnTop(), mAttrs.type, rawInsetsState);
         return insetsPolicy.adjustInsetsForWindow(this, insetsStateForWindow,
                 includeTransient);
     }
@@ -5475,8 +5481,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // If refresh rate switching is disabled there is no point to set the frame rate on the
         // surface as the refresh rate will be limited by display manager to a single value
         // and SurfaceFlinger wouldn't be able to change it anyways.
-        if (mWmService.mDisplayManagerInternal.getRefreshRateSwitchingType()
-                != SWITCHING_TYPE_NONE) {
+        @DisplayManager.SwitchingType int refreshRateSwitchingType =
+                mWmService.mDisplayManagerInternal.getRefreshRateSwitchingType();
+        if (refreshRateSwitchingType != SWITCHING_TYPE_NONE
+                && refreshRateSwitchingType != SWITCHING_TYPE_RENDER_FRAME_RATE_ONLY) {
             final float refreshRate = refreshRatePolicy.getPreferredRefreshRate(this);
             if (mAppPreferredFrameRate != refreshRate) {
                 mAppPreferredFrameRate = refreshRate;

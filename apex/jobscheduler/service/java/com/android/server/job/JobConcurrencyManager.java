@@ -16,6 +16,8 @@
 
 package com.android.server.job;
 
+import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
+
 import static com.android.server.job.JobSchedulerService.RESTRICTED_INDEX;
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 
@@ -99,6 +101,18 @@ class JobConcurrencyManager {
     static final String KEY_PKG_CONCURRENCY_LIMIT_REGULAR =
             CONFIG_KEY_PREFIX_CONCURRENCY + "pkg_concurrency_limit_regular";
     private static final int DEFAULT_PKG_CONCURRENCY_LIMIT_REGULAR = STANDARD_CONCURRENCY_LIMIT / 2;
+    @VisibleForTesting
+    static final String KEY_ENABLE_MAX_WAIT_TIME_BYPASS =
+            CONFIG_KEY_PREFIX_CONCURRENCY + "enable_max_wait_time_bypass";
+    private static final boolean DEFAULT_ENABLE_MAX_WAIT_TIME_BYPASS = true;
+    private static final String KEY_MAX_WAIT_EJ_MS =
+            CONFIG_KEY_PREFIX_CONCURRENCY + "max_wait_ej_ms";
+    @VisibleForTesting
+    static final long DEFAULT_MAX_WAIT_EJ_MS = 5 * MINUTE_IN_MILLIS;
+    private static final String KEY_MAX_WAIT_REGULAR_MS =
+            CONFIG_KEY_PREFIX_CONCURRENCY + "max_wait_regular_ms";
+    @VisibleForTesting
+    static final long DEFAULT_MAX_WAIT_REGULAR_MS = 30 * MINUTE_IN_MILLIS;
 
     /**
      * Set of possible execution types that a job can have. The actual type(s) of a job are based
@@ -352,6 +366,20 @@ class JobConcurrencyManager {
      * TOP apps are not limited.
      */
     private int mPkgConcurrencyLimitRegular = DEFAULT_PKG_CONCURRENCY_LIMIT_REGULAR;
+
+    private boolean mMaxWaitTimeBypassEnabled = DEFAULT_ENABLE_MAX_WAIT_TIME_BYPASS;
+
+    /**
+     * The maximum time an expedited job would have to be potentially waiting for an available
+     * slot before we would consider creating a new slot for it.
+     */
+    private long mMaxWaitEjMs = DEFAULT_MAX_WAIT_EJ_MS;
+
+    /**
+     * The maximum time a regular job would have to be potentially waiting for an available
+     * slot before we would consider creating a new slot for it.
+     */
+    private long mMaxWaitRegularMs = DEFAULT_MAX_WAIT_REGULAR_MS;
 
     /** Current memory trim level. */
     private int mLastMemoryTrimLevel;
@@ -665,7 +693,7 @@ class JobConcurrencyManager {
             return;
         }
 
-        prepareForAssignmentDeterminationLocked(
+        final long minPreferredUidOnlyWaitingTimeMs = prepareForAssignmentDeterminationLocked(
                 mRecycledIdle, mRecycledPreferredUidOnly, mRecycledStoppable);
 
         if (DEBUG) {
@@ -674,7 +702,8 @@ class JobConcurrencyManager {
         }
 
         determineAssignmentsLocked(
-                mRecycledChanged, mRecycledIdle, mRecycledPreferredUidOnly, mRecycledStoppable);
+                mRecycledChanged, mRecycledIdle, mRecycledPreferredUidOnly, mRecycledStoppable,
+                minPreferredUidOnlyWaitingTimeMs);
 
         if (DEBUG) {
             Slog.d(TAG, printAssignments("running jobs final",
@@ -691,9 +720,10 @@ class JobConcurrencyManager {
         noteConcurrency();
     }
 
+    /** @return the minimum remaining execution time for preferred UID only JobServiceContexts. */
     @VisibleForTesting
     @GuardedBy("mLock")
-    void prepareForAssignmentDeterminationLocked(final ArraySet<ContextAssignment> idle,
+    long prepareForAssignmentDeterminationLocked(final ArraySet<ContextAssignment> idle,
             final List<ContextAssignment> preferredUidOnly,
             final List<ContextAssignment> stoppable) {
         final PendingJobQueue pendingJobQueue = mService.getPendingJobQueue();
@@ -709,6 +739,8 @@ class JobConcurrencyManager {
         updateNonRunningPrioritiesLocked(pendingJobQueue, true);
 
         final int numRunningJobs = activeServices.size();
+        final long nowElapsed = sElapsedRealtimeClock.millis();
+        long minPreferredUidOnlyWaitingTimeMs = Long.MAX_VALUE;
         for (int i = 0; i < numRunningJobs; ++i) {
             final JobServiceContext jsc = activeServices.get(i);
             final JobStatus js = jsc.getRunningJobLocked();
@@ -729,6 +761,9 @@ class JobConcurrencyManager {
             if ((assignment.shouldStopJobReason = shouldStopRunningJobLocked(jsc)) != null) {
                 stoppable.add(assignment);
             } else {
+                assignment.timeUntilStoppableMs = jsc.getRemainingGuaranteedTimeMs(nowElapsed);
+                minPreferredUidOnlyWaitingTimeMs =
+                        Math.min(minPreferredUidOnlyWaitingTimeMs, assignment.timeUntilStoppableMs);
                 preferredUidOnly.add(assignment);
             }
         }
@@ -754,6 +789,10 @@ class JobConcurrencyManager {
         }
 
         mWorkCountTracker.onCountDone();
+        // Return 0 if there were no preferred UID only contexts to indicate no waiting time due
+        // to such jobs.
+        return minPreferredUidOnlyWaitingTimeMs == Long.MAX_VALUE
+                ? 0 : minPreferredUidOnlyWaitingTimeMs;
     }
 
     @VisibleForTesting
@@ -761,12 +800,14 @@ class JobConcurrencyManager {
     void determineAssignmentsLocked(final ArraySet<ContextAssignment> changed,
             final ArraySet<ContextAssignment> idle,
             final List<ContextAssignment> preferredUidOnly,
-            final List<ContextAssignment> stoppable) {
+            final List<ContextAssignment> stoppable,
+            long minPreferredUidOnlyWaitingTimeMs) {
         final PendingJobQueue pendingJobQueue = mService.getPendingJobQueue();
         final List<JobServiceContext> activeServices = mActiveServices;
         pendingJobQueue.resetIterator();
         JobStatus nextPending;
         int projectedRunningCount = activeServices.size();
+        long minChangedWaitingTimeMs = Long.MAX_VALUE;
         while ((nextPending = pendingJobQueue.next()) != null) {
             if (mRunningJobs.contains(nextPending)) {
                 // Should never happen.
@@ -784,6 +825,14 @@ class JobConcurrencyManager {
                 Slog.w(TAG, "Already running similar " + (isTopEj ? "TOP-EJ" : "job")
                         + " to: " + nextPending);
             }
+
+            // Factoring minChangedWaitingTimeMs into the min waiting time effectively limits
+            // the number of additional contexts that are created due to long waiting times.
+            // By factoring it in, we imply that the new slot will be available for other
+            // pending jobs that could be designated as waiting too long, and those other jobs
+            // would only have to wait for the new slots to become available.
+            final long minWaitingTimeMs =
+                    Math.min(minPreferredUidOnlyWaitingTimeMs, minChangedWaitingTimeMs);
 
             // Find an available slot for nextPending. The context should be one of the following:
             // 1. Unused
@@ -833,12 +882,20 @@ class JobConcurrencyManager {
                     //    app was on TOP, the app is still TOP, but there are too many TOP+EJs
                     //    running (because we don't want them to starve out other apps and the
                     //    current job has already run for the minimum guaranteed time).
+                    // 5. This new job could be waiting for too long for a slot to open up
                     boolean canReplace = isTopEj; // Case 1
                     if (!canReplace && !isInOverage) {
                         final int currentJobBias = mService.evaluateJobBiasLocked(runningJob);
                         canReplace = runningJob.lastEvaluatedBias < JobInfo.BIAS_TOP_APP // Case 2
                                 || currentJobBias < JobInfo.BIAS_TOP_APP // Case 3
                                 || topEjCount > .5 * mWorkTypeConfig.getMaxTotal(); // Case 4
+                    }
+                    if (!canReplace && mMaxWaitTimeBypassEnabled) { // Case 5
+                        if (nextPending.shouldTreatAsExpeditedJob()) {
+                            canReplace = minWaitingTimeMs >= mMaxWaitEjMs;
+                        } else {
+                            canReplace = minWaitingTimeMs >= mMaxWaitRegularMs;
+                        }
                     }
                     if (canReplace) {
                         int replaceWorkType = mWorkCountTracker.canJobStart(allWorkTypes,
@@ -860,6 +917,7 @@ class JobConcurrencyManager {
             }
             if (selectedContext == null && (!isInOverage || isTopEj)) {
                 int lowestBiasSeen = Integer.MAX_VALUE;
+                long newMinPreferredUidOnlyWaitingTimeMs = Long.MAX_VALUE;
                 for (int p = preferredUidOnly.size() - 1; p >= 0; --p) {
                     final ContextAssignment assignment = preferredUidOnly.get(p);
                     final JobStatus runningJob = assignment.context.getRunningJobLocked();
@@ -872,6 +930,13 @@ class JobConcurrencyManager {
                     }
 
                     if (selectedContext == null || lowestBiasSeen > jobBias) {
+                        if (selectedContext != null) {
+                            // We're no longer using the previous context, so factor it into the
+                            // calculation.
+                            newMinPreferredUidOnlyWaitingTimeMs = Math.min(
+                                    newMinPreferredUidOnlyWaitingTimeMs,
+                                    selectedContext.timeUntilStoppableMs);
+                        }
                         // Step down the preemption threshold - wind up replacing
                         // the lowest-bias running job
                         lowestBiasSeen = jobBias;
@@ -880,11 +945,17 @@ class JobConcurrencyManager {
                         assignment.preemptReasonCode = JobParameters.STOP_REASON_PREEMPT;
                         // In this case, we're just going to preempt a low bias job, we're not
                         // actually starting a job, so don't set startingJob to true.
+                    } else {
+                        // We're not going to use this context, so factor it into the calculation.
+                        newMinPreferredUidOnlyWaitingTimeMs = Math.min(
+                                newMinPreferredUidOnlyWaitingTimeMs,
+                                assignment.timeUntilStoppableMs);
                     }
                 }
                 if (selectedContext != null) {
                     selectedContext.newJob = nextPending;
                     preferredUidOnly.remove(selectedContext);
+                    minPreferredUidOnlyWaitingTimeMs = newMinPreferredUidOnlyWaitingTimeMs;
                 }
             }
             // Make sure to run EJs for the TOP app immediately.
@@ -901,6 +972,9 @@ class JobConcurrencyManager {
                     selectedContext = null;
                 }
                 if (selectedContext == null) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "Allowing additional context because EJ would wait too long");
+                    }
                     selectedContext = mContextAssignmentPool.acquire();
                     if (selectedContext == null) {
                         selectedContext = new ContextAssignment();
@@ -913,6 +987,35 @@ class JobConcurrencyManager {
                     selectedContext.newWorkType =
                             (workType != WORK_TYPE_NONE) ? workType : WORK_TYPE_TOP;
                 }
+            } else if (selectedContext == null && mMaxWaitTimeBypassEnabled) {
+                final boolean wouldBeWaitingTooLong = nextPending.shouldTreatAsExpeditedJob()
+                        ? minWaitingTimeMs >= mMaxWaitEjMs
+                        : minWaitingTimeMs >= mMaxWaitRegularMs;
+                if (wouldBeWaitingTooLong) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "Allowing additional context because job would wait too long");
+                    }
+                    selectedContext = mContextAssignmentPool.acquire();
+                    if (selectedContext == null) {
+                        selectedContext = new ContextAssignment();
+                    }
+                    selectedContext.context = mIdleContexts.size() > 0
+                            ? mIdleContexts.removeAt(mIdleContexts.size() - 1)
+                            : createNewJobServiceContext();
+                    selectedContext.newJob = nextPending;
+                    final int workType = mWorkCountTracker.canJobStart(allWorkTypes);
+                    if (workType != WORK_TYPE_NONE) {
+                        selectedContext.newWorkType = workType;
+                    } else {
+                        // Use the strongest work type possible for this job.
+                        for (int type = 1; type <= ALL_WORK_TYPES; type = type << 1) {
+                            if ((type & allWorkTypes) != 0) {
+                                selectedContext.newWorkType = type;
+                                break;
+                            }
+                        }
+                    }
+                }
             }
             final PackageStats packageStats = getPkgStatsLocked(
                     nextPending.getSourceUserId(), nextPending.getSourcePackageName());
@@ -923,6 +1026,8 @@ class JobConcurrencyManager {
                 }
                 if (selectedContext.newJob != null) {
                     projectedRunningCount++;
+                    minChangedWaitingTimeMs = Math.min(minChangedWaitingTimeMs,
+                            mService.getMinJobExecutionGuaranteeMs(selectedContext.newJob));
                 }
                 packageStats.adjustStagedCount(true, nextPending.shouldTreatAsExpeditedJob());
             }
@@ -1251,12 +1356,36 @@ class JobConcurrencyManager {
         }
 
         final PendingJobQueue pendingJobQueue = mService.getPendingJobQueue();
-        if (mActiveServices.size() >= STANDARD_CONCURRENCY_LIMIT || pendingJobQueue.size() == 0) {
+        if (pendingJobQueue.size() == 0) {
             worker.clearPreferredUid();
-            // We're over the limit (because the TOP app scheduled a lot of EJs). Don't start
-            // running anything new until we get back below the limit.
             noteConcurrency();
             return;
+        }
+        if (mActiveServices.size() >= STANDARD_CONCURRENCY_LIMIT) {
+            final boolean respectConcurrencyLimit;
+            if (!mMaxWaitTimeBypassEnabled) {
+                respectConcurrencyLimit = true;
+            } else {
+                long minWaitingTimeMs = Long.MAX_VALUE;
+                final long nowElapsed = sElapsedRealtimeClock.millis();
+                for (int i = mActiveServices.size() - 1; i >= 0; --i) {
+                    minWaitingTimeMs = Math.min(minWaitingTimeMs,
+                            mActiveServices.get(i).getRemainingGuaranteedTimeMs(nowElapsed));
+                }
+                final boolean wouldBeWaitingTooLong =
+                        mWorkCountTracker.getPendingJobCount(WORK_TYPE_EJ) > 0
+                                ? minWaitingTimeMs >= mMaxWaitEjMs
+                                : minWaitingTimeMs >= mMaxWaitRegularMs;
+                respectConcurrencyLimit = !wouldBeWaitingTooLong;
+            }
+            if (respectConcurrencyLimit) {
+                worker.clearPreferredUid();
+                // We're over the limit (because the TOP app scheduled a lot of EJs), but we should
+                // be able to stop the other jobs soon so don't start running anything new until we
+                // get back below the limit.
+                noteConcurrency();
+                return;
+            }
         }
 
         if (worker.getPreferredUid() != JobServiceContext.NO_PREFERRED_UID) {
@@ -1609,6 +1738,14 @@ class JobConcurrencyManager {
         mPkgConcurrencyLimitRegular = Math.max(1, Math.min(STANDARD_CONCURRENCY_LIMIT,
                 properties.getInt(
                         KEY_PKG_CONCURRENCY_LIMIT_REGULAR, DEFAULT_PKG_CONCURRENCY_LIMIT_REGULAR)));
+
+        mMaxWaitTimeBypassEnabled = properties.getBoolean(
+                KEY_ENABLE_MAX_WAIT_TIME_BYPASS, DEFAULT_ENABLE_MAX_WAIT_TIME_BYPASS);
+        // EJ max wait must be in the range [0, infinity).
+        mMaxWaitEjMs = Math.max(0, properties.getLong(KEY_MAX_WAIT_EJ_MS, DEFAULT_MAX_WAIT_EJ_MS));
+        // Regular max wait must be in the range [EJ max wait, infinity).
+        mMaxWaitRegularMs = Math.max(mMaxWaitEjMs,
+                properties.getLong(KEY_MAX_WAIT_REGULAR_MS, DEFAULT_MAX_WAIT_REGULAR_MS));
     }
 
     @GuardedBy("mLock")
@@ -1622,6 +1759,9 @@ class JobConcurrencyManager {
             pw.print(KEY_SCREEN_OFF_ADJUSTMENT_DELAY_MS, mScreenOffAdjustmentDelayMs).println();
             pw.print(KEY_PKG_CONCURRENCY_LIMIT_EJ, mPkgConcurrencyLimitEj).println();
             pw.print(KEY_PKG_CONCURRENCY_LIMIT_REGULAR, mPkgConcurrencyLimitRegular).println();
+            pw.print(KEY_ENABLE_MAX_WAIT_TIME_BYPASS, mMaxWaitTimeBypassEnabled).println();
+            pw.print(KEY_MAX_WAIT_EJ_MS, mMaxWaitEjMs).println();
+            pw.print(KEY_MAX_WAIT_REGULAR_MS, mMaxWaitRegularMs).println();
             pw.println();
             CONFIG_LIMITS_SCREEN_ON.normal.dump(pw);
             pw.println();
@@ -2382,6 +2522,7 @@ class JobConcurrencyManager {
         public int workType = WORK_TYPE_NONE;
         public String preemptReason;
         public int preemptReasonCode = JobParameters.STOP_REASON_UNDEFINED;
+        public long timeUntilStoppableMs;
         public String shouldStopJobReason;
         public JobStatus newJob;
         public int newWorkType = WORK_TYPE_NONE;
@@ -2392,6 +2533,7 @@ class JobConcurrencyManager {
             workType = WORK_TYPE_NONE;
             preemptReason = null;
             preemptReasonCode = JobParameters.STOP_REASON_UNDEFINED;
+            timeUntilStoppableMs = 0;
             shouldStopJobReason = null;
             newJob = null;
             newWorkType = WORK_TYPE_NONE;
@@ -2406,6 +2548,15 @@ class JobConcurrencyManager {
         final PackageStats packageStats =
                 getPackageStatsForTesting(job.getSourceUserId(), job.getSourcePackageName());
         packageStats.adjustRunningCount(true, job.shouldTreatAsExpeditedJob());
+
+        final JobServiceContext context;
+        if (mIdleContexts.size() > 0) {
+            context = mIdleContexts.removeAt(mIdleContexts.size() - 1);
+        } else {
+            context = createNewJobServiceContext();
+        }
+        context.executeRunnableJob(job, mWorkCountTracker.canJobStart(getJobWorkTypes(job)));
+        mActiveServices.add(context);
     }
 
     @VisibleForTesting

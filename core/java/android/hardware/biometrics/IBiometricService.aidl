@@ -91,6 +91,10 @@ interface IBiometricService {
     void resetLockoutTimeBound(IBinder token, String opPackageName, int fromSensorId, int userId,
             in byte[] hardwareAuthToken);
 
+    // See documentation in BiometricManager.
+    @EnforcePermission("USE_BIOMETRIC_INTERNAL")
+    void resetLockout(int userId, in byte[] hardwareAuthToken);
+
     @EnforcePermission("USE_BIOMETRIC_INTERNAL")
     int getCurrentStrength(int sensorId);
 

@@ -223,9 +223,11 @@ public final class PermissionPolicyService extends SystemService {
                 this::synchronizePackagePermissionsAndAppOpsAsyncForUser);
 
         mAppOpsCallback = new IAppOpsCallback.Stub() {
-            public void opChanged(int op, int uid, String packageName) {
-                synchronizePackagePermissionsAndAppOpsAsyncForUser(packageName,
-                        UserHandle.getUserId(uid));
+            public void opChanged(int op, int uid, @Nullable String packageName) {
+                if (packageName != null) {
+                    synchronizePackagePermissionsAndAppOpsAsyncForUser(packageName,
+                            UserHandle.getUserId(uid));
+                }
                 resetAppOpPermissionsIfNotRequestedForUidAsync(uid);
             }
         };

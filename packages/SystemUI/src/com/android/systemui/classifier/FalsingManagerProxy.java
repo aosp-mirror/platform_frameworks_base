@@ -139,6 +139,11 @@ public class FalsingManagerProxy implements FalsingManager, Dumpable {
     }
 
     @Override
+    public boolean isFalseLongTap(int penalty) {
+        return mInternalFalsingManager.isFalseLongTap(penalty);
+    }
+
+    @Override
     public boolean isFalseDoubleTap() {
         return mInternalFalsingManager.isFalseDoubleTap();
     }

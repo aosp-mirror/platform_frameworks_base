@@ -232,7 +232,6 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
     @Test
     public void testUserLockedResetEvenWhenNoChildren() {
         mGroupRow.setUserLocked(true);
-        mGroupRow.removeAllChildren();
         mGroupRow.setUserLocked(false);
         assertFalse("The childrencontainer should not be userlocked but is, the state "
                 + "seems out of sync.", mGroupRow.getChildrenContainer().isUserLocked());
@@ -240,12 +239,11 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
 
     @Test
     public void testReinflatedOnDensityChange() {
-        mGroupRow.setUserLocked(true);
-        mGroupRow.removeAllChildren();
-        mGroupRow.setUserLocked(false);
         NotificationChildrenContainer mockContainer = mock(NotificationChildrenContainer.class);
-        mGroupRow.setChildrenContainer(mockContainer);
-        mGroupRow.onDensityOrFontScaleChanged();
+        mNotifRow.setChildrenContainer(mockContainer);
+
+        mNotifRow.onDensityOrFontScaleChanged();
+
         verify(mockContainer).reInflateViews(any(), any());
     }
 

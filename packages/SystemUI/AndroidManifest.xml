@@ -986,5 +986,11 @@
                 <action android:name="com.android.systemui.action.DISMISS_VOLUME_PANEL_DIALOG" />
             </intent-filter>
         </receiver>
+
+        <activity android:name=".logcat.LogAccessDialogActivity"
+                  android:theme="@android:style/Theme.Translucent.NoTitleBar"
+                  android:excludeFromRecents="true"
+                  android:exported="false">
+        </activity>
     </application>
 </manifest>

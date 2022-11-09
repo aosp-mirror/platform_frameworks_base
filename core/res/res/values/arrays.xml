@@ -166,12 +166,12 @@
     </string-array>
 
     <array name="sim_colors">
-        <item>@color/Teal_700</item>
-        <item>@color/Blue_700</item>
-        <item>@color/Indigo_700</item>
-        <item>@color/Purple_700</item>
-        <item>@color/Pink_700</item>
-        <item>@color/Red_700</item>
+        <item>@color/SIM_color_cyan</item>
+        <item>@color/SIM_color_blue</item>
+        <item>@color/SIM_color_green</item>
+        <item>@color/SIM_color_purple</item>
+        <item>@color/SIM_color_pink</item>
+        <item>@color/SIM_color_orange</item>
     </array>
 
     <!-- Used in ResolverTargetActionsDialogFragment -->

@@ -33,7 +33,7 @@ import java.util.Objects;
  * <p>Note: This selects all text <em>within</em> the given area. To select a range <em>between</em>
  * two areas, use {@link SelectRangeGesture}.</p>
  */
-public final class SelectGesture extends HandwritingGesture implements Parcelable {
+public final class SelectGesture extends PreviewableHandwritingGesture implements Parcelable {
 
     private @Granularity int mGranularity;
     private RectF mArea;
@@ -71,7 +71,6 @@ public final class SelectGesture extends HandwritingGesture implements Parcelabl
     public RectF getSelectionArea() {
         return mArea;
     }
-
 
     /**
      * Builder for {@link SelectGesture}. This class is not designed to be thread-safe.

@@ -61,11 +61,11 @@ public class AuthResultCoordinatorTest {
         assertThat(authMap.get(BiometricManager.Authenticators.BIOMETRIC_WEAK)).isEqualTo(
                 AUTHENTICATOR_DEFAULT);
         assertThat(authMap.get(BiometricManager.Authenticators.BIOMETRIC_CONVENIENCE)).isEqualTo(
-                AUTHENTICATOR_UNLOCKED);
+                AUTHENTICATOR_DEFAULT);
     }
 
     @Test
-    public void testLockout() {
+    public void testConvenientLockout() {
         mAuthResultCoordinator.lockedOutFor(
                 BiometricManager.Authenticators.BIOMETRIC_CONVENIENCE);
 
@@ -80,7 +80,7 @@ public class AuthResultCoordinatorTest {
     }
 
     @Test
-    public void testConvenientLockout() {
+    public void testConvenientUnlock() {
         mAuthResultCoordinator.authenticatedFor(
                 BiometricManager.Authenticators.BIOMETRIC_CONVENIENCE);
 
@@ -91,11 +91,26 @@ public class AuthResultCoordinatorTest {
         assertThat(authMap.get(BiometricManager.Authenticators.BIOMETRIC_WEAK)).isEqualTo(
                 AUTHENTICATOR_DEFAULT);
         assertThat(authMap.get(BiometricManager.Authenticators.BIOMETRIC_CONVENIENCE)).isEqualTo(
-                AUTHENTICATOR_UNLOCKED);
+                AUTHENTICATOR_DEFAULT);
     }
 
     @Test
     public void testWeakLockout() {
+        mAuthResultCoordinator.lockedOutFor(
+                BiometricManager.Authenticators.BIOMETRIC_CONVENIENCE);
+
+        Map<Integer, Integer> authMap = mAuthResultCoordinator.getResult();
+
+        assertThat(authMap.get(BiometricManager.Authenticators.BIOMETRIC_STRONG)).isEqualTo(
+                AUTHENTICATOR_DEFAULT);
+        assertThat(authMap.get(BiometricManager.Authenticators.BIOMETRIC_WEAK)).isEqualTo(
+                AUTHENTICATOR_DEFAULT);
+        assertThat(authMap.get(BiometricManager.Authenticators.BIOMETRIC_CONVENIENCE)).isEqualTo(
+                AUTHENTICATOR_LOCKED);
+    }
+
+    @Test
+    public void testWeakUnlock() {
         mAuthResultCoordinator.authenticatedFor(
                 BiometricManager.Authenticators.BIOMETRIC_WEAK);
 
@@ -104,13 +119,29 @@ public class AuthResultCoordinatorTest {
         assertThat(authMap.get(BiometricManager.Authenticators.BIOMETRIC_STRONG)).isEqualTo(
                 AUTHENTICATOR_DEFAULT);
         assertThat(authMap.get(BiometricManager.Authenticators.BIOMETRIC_WEAK)).isEqualTo(
-                AUTHENTICATOR_UNLOCKED);
+                AUTHENTICATOR_DEFAULT);
         assertThat(authMap.get(BiometricManager.Authenticators.BIOMETRIC_CONVENIENCE)).isEqualTo(
-                AUTHENTICATOR_UNLOCKED);
+                AUTHENTICATOR_DEFAULT);
     }
 
     @Test
     public void testStrongLockout() {
+        mAuthResultCoordinator.lockedOutFor(
+                BiometricManager.Authenticators.BIOMETRIC_STRONG);
+
+        Map<Integer, Integer> authMap = mAuthResultCoordinator.getResult();
+
+        assertThat(authMap.get(BiometricManager.Authenticators.BIOMETRIC_STRONG)).isEqualTo(
+                AUTHENTICATOR_LOCKED);
+        assertThat(authMap.get(BiometricManager.Authenticators.BIOMETRIC_WEAK)).isEqualTo(
+                AUTHENTICATOR_LOCKED);
+        assertThat(authMap.get(BiometricManager.Authenticators.BIOMETRIC_CONVENIENCE)).isEqualTo(
+                AUTHENTICATOR_LOCKED);
+    }
+
+
+    @Test
+    public void testStrongUnlock() {
         mAuthResultCoordinator.authenticatedFor(
                 BiometricManager.Authenticators.BIOMETRIC_STRONG);
 
@@ -136,9 +167,9 @@ public class AuthResultCoordinatorTest {
         assertThat(authMap.get(BiometricManager.Authenticators.BIOMETRIC_STRONG)).isEqualTo(
                 AUTHENTICATOR_DEFAULT);
         assertThat(authMap.get(BiometricManager.Authenticators.BIOMETRIC_WEAK)).isEqualTo(
-                AUTHENTICATOR_UNLOCKED | AUTHENTICATOR_LOCKED);
+                AUTHENTICATOR_LOCKED);
         assertThat(authMap.get(BiometricManager.Authenticators.BIOMETRIC_CONVENIENCE)).isEqualTo(
-                AUTHENTICATOR_UNLOCKED | AUTHENTICATOR_LOCKED);
+                AUTHENTICATOR_LOCKED);
 
     }
 

@@ -1047,7 +1047,7 @@ public final class TvInteractiveAppManager {
             }
         }
 
-        void notifyRecordingStarted(@Nullable String recordingId) {
+        void notifyRecordingStarted(String recordingId) {
             if (mToken == null) {
                 Log.w(TAG, "The session has been already released");
                 return;

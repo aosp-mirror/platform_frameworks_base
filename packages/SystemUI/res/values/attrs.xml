@@ -204,5 +204,10 @@
         <attr name="passwordTextAppearance" format="reference" />
         <attr name="errorTextAppearance" format="reference"/>
     </declare-styleable>
+
+    <declare-styleable name="LogAccessPermissionGrantDialog">
+        <attr name="permissionGrantButtonTopStyle" format="reference"/>
+        <attr name="permissionGrantButtonBottomStyle" format="reference"/>
+    </declare-styleable>
 </resources>
 

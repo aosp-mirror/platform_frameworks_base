@@ -138,7 +138,7 @@ class ImeTracingServerImpl extends ImeTracing {
     private void writeTracesToFilesLocked() {
         try {
             long timeOffsetNs =
-                    TimeUnit.NANOSECONDS.convert(System.currentTimeMillis(), TimeUnit.NANOSECONDS)
+                    TimeUnit.MILLISECONDS.toNanos(System.currentTimeMillis())
                     - SystemClock.elapsedRealtimeNanos();
 
             ProtoOutputStream clientsProto = new ProtoOutputStream();

@@ -26,6 +26,7 @@ import android.annotation.Nullable;
 import android.graphics.RectF;
 import android.inputmethodservice.InputMethodService;
 import android.os.Bundle;
+import android.os.CancellationSignal;
 import android.os.Handler;
 import android.text.TextUtils;
 import android.view.KeyCharacterMap;
@@ -1031,6 +1032,8 @@ public interface InputConnection {
     /**
      * Perform a handwriting gesture on text.
      *
+     * <p>Note: A supported gesture {@link EditorInfo#getSupportedHandwritingGestures()} may not
+     * have preview supported {@link EditorInfo#getSupportedHandwritingGesturePreviews()}.</p>
      * @param gesture the gesture to perform
      * @param executor The executor to run the callback on.
      * @param consumer if the caller passes a non-null consumer, the editor must invoke this
@@ -1041,6 +1044,7 @@ public interface InputConnection {
      * completed. Will be invoked on the given {@link Executor}.
      * Default implementation provides a callback to {@link IntConsumer} with
      * {@link #HANDWRITING_GESTURE_RESULT_UNSUPPORTED}.
+     * @see #previewHandwritingGesture(PreviewableHandwritingGesture, CancellationSignal)
      */
     default void performHandwritingGesture(
             @NonNull HandwritingGesture gesture, @Nullable @CallbackExecutor Executor executor,
@@ -1048,6 +1052,31 @@ public interface InputConnection {
         if (executor != null && consumer != null) {
             executor.execute(() -> consumer.accept(HANDWRITING_GESTURE_RESULT_UNSUPPORTED));
         }
+    }
+
+    /**
+     * Preview a handwriting gesture on text.
+     * Provides a real-time preview for a gesture to user for an ongoing gesture. e.g. as user
+     * begins to draw a circle around text, resulting selection {@link SelectGesture} is previewed
+     * while stylus is moving over applicable text.
+     *
+     * <p>Note: A supported gesture {@link EditorInfo#getSupportedHandwritingGestures()} might not
+     * have preview supported {@link EditorInfo#getSupportedHandwritingGesturePreviews()}.</p>
+     * @param gesture the gesture to preview. Preview support for a gesture (regardless of whether
+     *  implemented by editor) can be determined if gesture subclasses
+     *  {@link PreviewableHandwritingGesture}. Supported previewable gestures include
+     *  {@link SelectGesture}, {@link SelectRangeGesture}, {@link DeleteGesture} and
+     *  {@link DeleteRangeGesture}.
+     * @param cancellationSignal signal to cancel an ongoing preview.
+     * @return true on successfully sending command to Editor, false if not implemented by editor or
+     * the input connection is no longer valid or preview was cancelled with
+     * {@link CancellationSignal}.
+     * @see #performHandwritingGesture(HandwritingGesture, Executor, IntConsumer)
+     */
+    default boolean previewHandwritingGesture(
+            @NonNull PreviewableHandwritingGesture gesture,
+            @Nullable CancellationSignal cancellationSignal) {
+        return false;
     }
 
     /**

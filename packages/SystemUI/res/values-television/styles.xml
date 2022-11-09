@@ -63,4 +63,10 @@
         <item name="android:paddingVertical">@dimen/bottom_sheet_button_padding_vertical</item>
         <item name="android:stateListAnimator">@anim/tv_bottom_sheet_button_state_list_animator</item>
     </style>
+
+    <!-- The style for log access consent button -->
+    <style name="LogAccessDialogTheme" parent="@android:style/Theme.DeviceDefault.Dialog.Alert">
+        <item name="permissionGrantButtonTopStyle">?android:buttonBarButtonStyle</item>
+        <item name="permissionGrantButtonBottomStyle">?android:buttonBarButtonStyle</item>
+    </style>
 </resources>

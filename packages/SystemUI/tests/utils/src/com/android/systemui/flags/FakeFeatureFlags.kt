@@ -21,14 +21,14 @@ import java.io.PrintWriter
 class FakeFeatureFlags : FeatureFlags {
     private val booleanFlags = mutableMapOf<Int, Boolean>()
     private val stringFlags = mutableMapOf<Int, String>()
+    private val intFlags = mutableMapOf<Int, Int>()
     private val knownFlagNames = mutableMapOf<Int, String>()
     private val flagListeners = mutableMapOf<Int, MutableSet<FlagListenable.Listener>>()
     private val listenerFlagIds = mutableMapOf<FlagListenable.Listener, MutableSet<Int>>()
 
     init {
-        Flags.flagFields.forEach { field ->
-            val flag: Flag<*> = field.get(null) as Flag<*>
-            knownFlagNames[flag.id] = field.name
+        Flags.flagFields.forEach { entry: Map.Entry<String, Flag<*>> ->
+            knownFlagNames[entry.value.id] = entry.key
         }
     }
 
@@ -95,6 +95,10 @@ class FakeFeatureFlags : FeatureFlags {
 
     override fun getString(flag: ResourceStringFlag): String = requireStringValue(flag.id)
 
+    override fun getInt(flag: IntFlag): Int = requireIntValue(flag.id)
+
+    override fun getInt(flag: ResourceIntFlag): Int = requireIntValue(flag.id)
+
     override fun addListener(flag: Flag<*>, listener: FlagListenable.Listener) {
         flagListeners.getOrPut(flag.id) { mutableSetOf() }.add(listener)
         listenerFlagIds.getOrPut(listener) { mutableSetOf() }.add(flag.id)
@@ -118,11 +122,16 @@ class FakeFeatureFlags : FeatureFlags {
 
     private fun requireBooleanValue(flagId: Int): Boolean {
         return booleanFlags[flagId]
-            ?: error("Flag ${flagName(flagId)} was accessed but not specified.")
+            ?: error("Flag ${flagName(flagId)} was accessed as boolean but not specified.")
     }
 
     private fun requireStringValue(flagId: Int): String {
         return stringFlags[flagId]
-            ?: error("Flag ${flagName(flagId)} was accessed but not specified.")
+            ?: error("Flag ${flagName(flagId)} was accessed as string but not specified.")
+    }
+
+    private fun requireIntValue(flagId: Int): Int {
+        return intFlags[flagId]
+            ?: error("Flag ${flagName(flagId)} was accessed as int but not specified.")
     }
 }
