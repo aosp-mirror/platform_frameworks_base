@@ -20,21 +20,15 @@ plugins {
 }
 
 android {
-    namespace 'com.android.settingslib.spa.tests'
     compileSdk spa_target_sdk
 
     defaultConfig {
         minSdk spa_min_sdk
         targetSdk spa_target_sdk
-
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     sourceSets {
         main {
-            res.srcDirs = ["res"]
-        }
-        androidTest {
             kotlin {
                 srcDir "src"
             }
@@ -47,22 +41,10 @@ android {
     }
     kotlinOptions {
         jvmTarget = '1.8'
-        freeCompilerArgs = ["-Xjvm-default=all"]
-    }
-    buildFeatures {
-        compose true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion jetpack_compose_compiler_version
+        freeCompilerArgs = ["-Xjvm-default=all", "-opt-in=kotlin.RequiresOptIn"]
     }
 }
 
 dependencies {
-    androidTestImplementation project(":spa")
-    androidTestImplementation project(":testutils")
-    androidTestImplementation "androidx.test.ext:junit-ktx:1.1.3"
-    androidTestImplementation "androidx.compose.ui:ui-test-junit4:$jetpack_compose_version"
-    androidTestImplementation "com.google.truth:truth:1.1.3"
-    androidTestImplementation "org.mockito:mockito-android:3.4.6"
-    androidTestDebugImplementation "androidx.compose.ui:ui-test-manifest:$jetpack_compose_version"
+    api "org.mockito:mockito-android:3.4.6"
 }

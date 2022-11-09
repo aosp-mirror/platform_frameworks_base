@@ -18,23 +18,16 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
-android_test {
-    name: "SpaLibTests",
-    test_suites: ["device-tests"],
+android_library {
+    name: "SpaLibTestUtils",
 
     srcs: ["src/**/*.kt"],
 
     static_libs: [
-        "SpaLib",
-        "SpaLibTestUtils",
-        "androidx.test.runner",
-        "androidx.test.ext.junit",
-        "androidx.compose.runtime_runtime",
-        "androidx.compose.ui_ui-test-junit4",
-        "androidx.compose.ui_ui-test-manifest",
         "mockito-target-minus-junit4",
-        "truth-prebuilt",
     ],
-    kotlincflags: ["-Xjvm-default=all"],
+    kotlincflags: [
+        "-Xjvm-default=all",
+    ],
     min_sdk_version: "31",
 }
