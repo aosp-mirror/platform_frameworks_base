@@ -156,6 +156,8 @@ class DetailDialog(
                     // Remove the task explicitly, since onRelease() callback will be executed after
                     // startActivity() below is called.
                     broadcastSender.closeSystemDialogs()
+                    // not sent as interactive, lest the higher-importance activity launch
+                    // be impacted
                     pendingIntent.send()
                     false
                 }
