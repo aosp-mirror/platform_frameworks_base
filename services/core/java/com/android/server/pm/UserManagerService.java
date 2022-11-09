@@ -18,6 +18,7 @@ package com.android.server.pm;
 
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+import static android.os.UserManager.DEV_CREATE_OVERRIDE_PROPERTY;
 import static android.os.UserManager.DISALLOW_USER_SWITCH;
 import static android.os.UserManager.SYSTEM_USER_MODE_EMULATION_PROPERTY;
 
@@ -2807,7 +2808,8 @@ public class UserManagerService extends IUserManager.Stub {
         synchronized (mUsersLock) {
             count = getAliveUsersExcludingGuestsCountLU();
         }
-        return count >= UserManager.getMaxSupportedUsers();
+        return count >= UserManager.getMaxSupportedUsers()
+                && !isCreationOverrideEnabled();
     }
 
     /**
@@ -2817,15 +2819,16 @@ public class UserManagerService extends IUserManager.Stub {
      * <p>For checking whether more profiles can be added to a particular parent use
      * {@link #canAddMoreProfilesToUser}.
      */
-    private boolean canAddMoreUsersOfType(UserTypeDetails userTypeDetails) {
-        if (!userTypeDetails.isEnabled()) {
+    private boolean canAddMoreUsersOfType(@NonNull UserTypeDetails userTypeDetails) {
+        if (!isUserTypeEnabled(userTypeDetails)) {
             return false;
         }
         final int max = userTypeDetails.getMaxAllowed();
         if (max == UserTypeDetails.UNLIMITED_NUMBER_OF_USERS) {
             return true; // Indicates that there is no max.
         }
-        return getNumberOfUsersOfType(userTypeDetails.getName()) < max;
+        return getNumberOfUsersOfType(userTypeDetails.getName()) < max
+                || isCreationOverrideEnabled();
     }
 
     /**
@@ -2836,7 +2839,7 @@ public class UserManagerService extends IUserManager.Stub {
     public int getRemainingCreatableUserCount(String userType) {
         checkQueryOrCreateUsersPermission("get the remaining number of users that can be added.");
         final UserTypeDetails type = mUserTypes.get(userType);
-        if (type == null || !type.isEnabled()) {
+        if (type == null || !isUserTypeEnabled(type)) {
             return 0;
         }
         synchronized (mUsersLock) {
@@ -2910,7 +2913,21 @@ public class UserManagerService extends IUserManager.Stub {
     public boolean isUserTypeEnabled(String userType) {
         checkCreateUsersPermission("check if user type is enabled.");
         final UserTypeDetails userTypeDetails = mUserTypes.get(userType);
-        return userTypeDetails != null && userTypeDetails.isEnabled();
+        return userTypeDetails != null && isUserTypeEnabled(userTypeDetails);
+    }
+
+    /** Returns whether the creation of users of the given user type is enabled on this device. */
+    private boolean isUserTypeEnabled(@NonNull UserTypeDetails userTypeDetails) {
+        return userTypeDetails.isEnabled() || isCreationOverrideEnabled();
+    }
+
+    /**
+     * Returns whether to almost-always allow creating users even beyond their limit or if disabled.
+     * For Debug builds only.
+     */
+    private boolean isCreationOverrideEnabled() {
+        return Build.isDebuggable()
+                && SystemProperties.getBoolean(DEV_CREATE_OVERRIDE_PROPERTY, false);
     }
 
     @Override
@@ -2923,7 +2940,8 @@ public class UserManagerService extends IUserManager.Stub {
     @Override
     public boolean canAddMoreProfilesToUser(String userType, @UserIdInt int userId,
             boolean allowedToRemoveOne) {
-        return 0 < getRemainingCreatableProfileCount(userType, userId, allowedToRemoveOne);
+        return 0 < getRemainingCreatableProfileCount(userType, userId, allowedToRemoveOne)
+                || isCreationOverrideEnabled();
     }
 
     @Override
@@ -2941,7 +2959,7 @@ public class UserManagerService extends IUserManager.Stub {
         checkQueryOrCreateUsersPermission(
                 "get the remaining number of profiles that can be added to the given user.");
         final UserTypeDetails type = mUserTypes.get(userType);
-        if (type == null || !type.isEnabled()) {
+        if (type == null || !isUserTypeEnabled(type)) {
             return 0;
         }
         // Managed profiles have their own specific rules.
@@ -4400,7 +4418,7 @@ public class UserManagerService extends IUserManager.Stub {
                     + ") indicated SYSTEM user, which cannot be created.");
             return null;
         }
-        if (!userTypeDetails.isEnabled()) {
+        if (!isUserTypeEnabled(userTypeDetails)) {
             throwCheckedUserOperationException(
                     "Cannot add a user of disabled type " + userType + ".",
                     UserManager.USER_OPERATION_ERROR_MAX_USERS);
@@ -4472,26 +4490,11 @@ public class UserManagerService extends IUserManager.Stub {
                                     + " for user " + parentId,
                             UserManager.USER_OPERATION_ERROR_MAX_USERS);
                 }
-                // In legacy mode, restricted profile's parent can only be the owner user
-                if (isRestricted && !UserManager.isSplitSystemUser()
-                        && (parentId != UserHandle.USER_SYSTEM)) {
+                if (isRestricted && (parentId != UserHandle.USER_SYSTEM)
+                        && !isCreationOverrideEnabled()) {
                     throwCheckedUserOperationException(
-                            "Cannot add restricted profile - parent user must be owner",
+                            "Cannot add restricted profile - parent user must be system",
                             UserManager.USER_OPERATION_ERROR_UNKNOWN);
-                }
-                if (isRestricted && UserManager.isSplitSystemUser()) {
-                    if (parent == null) {
-                        throwCheckedUserOperationException(
-                                "Cannot add restricted profile - parent user must be specified",
-                                UserManager.USER_OPERATION_ERROR_UNKNOWN);
-                    }
-                    if (!parent.info.canHaveProfile()) {
-                        throwCheckedUserOperationException(
-                                "Cannot add restricted profile - profiles cannot be created for "
-                                        + "the specified parent user id "
-                                        + parentId,
-                                UserManager.USER_OPERATION_ERROR_UNKNOWN);
-                    }
                 }
 
                 userId = getNextAvailableId();

@@ -1612,6 +1612,16 @@ public class UserManager {
     /** @hide */
     public static final String SYSTEM_USER_MODE_EMULATION_HEADLESS = "headless";
 
+    /**
+     * System Property used to override whether users can be created even if their type is disabled
+     * or their limit is reached. Set value to 1 to enable.
+     *
+     * <p>Only used on non-user builds.
+     *
+     * @hide
+     */
+    public static final String DEV_CREATE_OVERRIDE_PROPERTY = "debug.user.creation_override";
+
     private static final String ACTION_CREATE_USER = "android.os.action.CREATE_USER";
 
     /**
