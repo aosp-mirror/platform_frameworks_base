@@ -30,10 +30,11 @@ import androidx.test.filters.SmallTest;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
- * Test class for {@link ConstrainDisplayApisConfig}.
+ * Test for {@link ConstrainDisplayApisConfig}.
  *
  * Build/Install/Run:
  * atest FrameworksCoreTests:ConstrainDisplayApisConfigTest
@@ -73,6 +74,7 @@ public final class ConstrainDisplayApisConfigTest {
         testNeverConstrainDisplayApis("com.android.test", /* version= */ 1, /* expected= */ false);
     }
 
+    @Ignore("b/257375674")
     @Test
     public void neverConstrainDisplayApis_flagsHasSingleEntry_returnsTrueForPackageWithinRange() {
         setNeverConstrainDisplayApisFlag("com.android.test:1:1");
@@ -108,6 +110,7 @@ public final class ConstrainDisplayApisConfigTest {
         testNeverConstrainDisplayApis("com.android.test4", /* version= */ 9, /* expected= */ false);
     }
 
+    @Ignore("b/257375674")
     @Test
     public void neverConstrainDisplayApis_flagHasInvalidEntries_ignoresInvalidEntries() {
         // We add a valid entry before and after the invalid ones to make sure they are applied.
