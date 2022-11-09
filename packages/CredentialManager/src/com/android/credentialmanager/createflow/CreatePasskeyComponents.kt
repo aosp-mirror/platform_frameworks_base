@@ -1,5 +1,6 @@
 package com.android.credentialmanager.createflow
 
+import android.credentials.Credential.TYPE_PASSWORD_CREDENTIAL
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -11,7 +12,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Card
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -36,8 +36,9 @@ import com.android.credentialmanager.R
 import com.android.credentialmanager.common.material.ModalBottomSheetLayout
 import com.android.credentialmanager.common.material.ModalBottomSheetValue
 import com.android.credentialmanager.common.material.rememberModalBottomSheetState
-import com.android.credentialmanager.jetpack.provider.CredentialEntryUi.Companion.TYPE_PASSWORD_CREDENTIAL
-import com.android.credentialmanager.jetpack.provider.CredentialEntryUi.Companion.TYPE_PUBLIC_KEY_CREDENTIAL
+import com.android.credentialmanager.common.ui.CancelButton
+import com.android.credentialmanager.common.ui.ConfirmButton
+import com.android.credentialmanager.jetpack.developer.PublicKeyCredential.Companion.TYPE_PUBLIC_KEY_CREDENTIAL
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -226,7 +227,7 @@ fun MoreOptionsSelectionCard(
           IconButton(onClick = onBackButtonSelected) {
             Icon(
               Icons.Filled.ArrowBack,
-              "backIcon")
+              stringResource(R.string.accessibility_back_arrow_button))
           }
         }
       )
@@ -330,20 +331,6 @@ fun ProviderRow(providerInfo: ProviderInfo, onProviderSelected: (String) -> Unit
       )
     }
   )
-}
-
-@Composable
-fun CancelButton(text: String, onClick: () -> Unit) {
-  TextButton(onClick = onClick) {
-    Text(text = text)
-  }
-}
-
-@Composable
-fun ConfirmButton(text: String, onClick: () -> Unit) {
-  FilledTonalButton(onClick = onClick) {
-    Text(text = text)
-  }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

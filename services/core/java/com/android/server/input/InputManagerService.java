@@ -2679,6 +2679,13 @@ public class InputManagerService extends IInputManager.Stub
         return mNative.getBluetoothAddress(deviceId);
     }
 
+    @EnforcePermission(Manifest.permission.MONITOR_INPUT)
+    @Override
+    public void pilferPointers(IBinder inputChannelToken) {
+        Objects.requireNonNull(inputChannelToken);
+        mNative.pilferPointers(inputChannelToken);
+    }
+
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;

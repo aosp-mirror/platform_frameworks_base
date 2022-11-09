@@ -33,4 +33,5 @@ interface IAdvancedExtenderImpl
     ISessionProcessorImpl getSessionProcessor();
     CameraMetadataNative getAvailableCaptureRequestKeys(in String cameraId);
     CameraMetadataNative getAvailableCaptureResultKeys(in String cameraId);
+    boolean isCaptureProcessProgressAvailable();
 }

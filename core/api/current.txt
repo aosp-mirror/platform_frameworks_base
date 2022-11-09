@@ -17770,6 +17770,7 @@ package android.hardware.camera2 {
     method @NonNull public <T> java.util.List<android.util.Size> getExtensionSupportedSizes(int, @NonNull Class<T>);
     method @NonNull public java.util.List<android.util.Size> getExtensionSupportedSizes(int, int);
     method @NonNull public java.util.List<java.lang.Integer> getSupportedExtensions();
+    method public boolean isCaptureProcessProgressAvailable(int);
     field public static final int EXTENSION_AUTOMATIC = 0; // 0x0
     field @Deprecated public static final int EXTENSION_BEAUTY = 1; // 0x1
     field public static final int EXTENSION_BOKEH = 2; // 0x2
@@ -17789,6 +17790,7 @@ package android.hardware.camera2 {
   public abstract static class CameraExtensionSession.ExtensionCaptureCallback {
     ctor public CameraExtensionSession.ExtensionCaptureCallback();
     method public void onCaptureFailed(@NonNull android.hardware.camera2.CameraExtensionSession, @NonNull android.hardware.camera2.CaptureRequest);
+    method public void onCaptureProcessProgressed(@NonNull android.hardware.camera2.CameraExtensionSession, @NonNull android.hardware.camera2.CaptureRequest, @IntRange(from=0, to=100) int);
     method public void onCaptureProcessStarted(@NonNull android.hardware.camera2.CameraExtensionSession, @NonNull android.hardware.camera2.CaptureRequest);
     method public void onCaptureResultAvailable(@NonNull android.hardware.camera2.CameraExtensionSession, @NonNull android.hardware.camera2.CaptureRequest, @NonNull android.hardware.camera2.TotalCaptureResult);
     method public void onCaptureSequenceAborted(@NonNull android.hardware.camera2.CameraExtensionSession, int);
@@ -44056,7 +44058,6 @@ package android.telephony {
     field public static final long NETWORK_TYPE_BITMASK_HSPA = 512L; // 0x200L
     field public static final long NETWORK_TYPE_BITMASK_HSPAP = 16384L; // 0x4000L
     field public static final long NETWORK_TYPE_BITMASK_HSUPA = 256L; // 0x100L
-    field public static final long NETWORK_TYPE_BITMASK_IDEN = 1024L; // 0x400L
     field public static final long NETWORK_TYPE_BITMASK_IWLAN = 131072L; // 0x20000L
     field public static final long NETWORK_TYPE_BITMASK_LTE = 4096L; // 0x1000L
     field @Deprecated public static final long NETWORK_TYPE_BITMASK_LTE_CA = 262144L; // 0x40000L
@@ -44076,7 +44077,7 @@ package android.telephony {
     field public static final int NETWORK_TYPE_HSPA = 10; // 0xa
     field public static final int NETWORK_TYPE_HSPAP = 15; // 0xf
     field public static final int NETWORK_TYPE_HSUPA = 9; // 0x9
-    field public static final int NETWORK_TYPE_IDEN = 11; // 0xb
+    field @Deprecated public static final int NETWORK_TYPE_IDEN = 11; // 0xb
     field public static final int NETWORK_TYPE_IWLAN = 18; // 0x12
     field public static final int NETWORK_TYPE_LTE = 13; // 0xd
     field public static final int NETWORK_TYPE_NR = 20; // 0x14

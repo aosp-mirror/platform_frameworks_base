@@ -16,11 +16,14 @@
 
 package com.android.credentialmanager
 
+import android.credentials.Credential.TYPE_PASSWORD_CREDENTIAL
 import android.app.slice.Slice
 import android.app.slice.SliceSpec
 import android.content.Context
 import android.content.Intent
 import android.credentials.CreateCredentialRequest
+import android.credentials.GetCredentialOption
+import android.credentials.GetCredentialRequest
 import android.credentials.ui.Constants
 import android.credentials.ui.Entry
 import android.credentials.ui.CreateCredentialProviderData
@@ -40,7 +43,7 @@ import com.android.credentialmanager.createflow.ProviderInfo
 import com.android.credentialmanager.createflow.RequestDisplayInfo
 import com.android.credentialmanager.getflow.GetCredentialUiState
 import com.android.credentialmanager.getflow.GetScreenState
-import com.android.credentialmanager.jetpack.provider.CredentialEntryUi.Companion.TYPE_PUBLIC_KEY_CREDENTIAL
+import com.android.credentialmanager.jetpack.developer.PublicKeyCredential.Companion.TYPE_PUBLIC_KEY_CREDENTIAL
 
 // Consider repo per screen, similar to view model?
 class CredentialManagerRepo(
@@ -56,7 +59,7 @@ class CredentialManagerRepo(
     requestInfo = intent.extras?.getParcelable(
       RequestInfo.EXTRA_REQUEST_INFO,
       RequestInfo::class.java
-    ) ?: testRequestInfo()
+    ) ?: testCreateRequestInfo()
 
     providerList = when (requestInfo.type) {
       RequestInfo.TYPE_CREATE ->
@@ -101,19 +104,14 @@ class CredentialManagerRepo(
 
   fun getCredentialInitialUiState(): GetCredentialUiState {
     val providerList = GetFlowUtils.toProviderList(
-      // TODO: handle runtime cast error
-      providerList as List<GetCredentialProviderData>, context)
+    // TODO: handle runtime cast error
+    providerList as List<GetCredentialProviderData>, context)
     // TODO: covert from real requestInfo
-    val requestDisplayInfo = com.android.credentialmanager.getflow.RequestDisplayInfo(
-      "Elisa Beckett",
-      "beckett-bakert@gmail.com",
-      TYPE_PUBLIC_KEY_CREDENTIAL,
-      "tribank")
+    val requestDisplayInfo = com.android.credentialmanager.getflow.RequestDisplayInfo("tribank")
     return GetCredentialUiState(
       providerList,
-      GetScreenState.CREDENTIAL_SELECTION,
+      GetScreenState.PRIMARY_SELECTION,
       requestDisplayInfo,
-      providerList.first()
     )
   }
 
@@ -165,9 +163,9 @@ class CredentialManagerRepo(
         .Builder("com.google/com.google.CredentialManagerService")
         .setSaveEntries(
           listOf<Entry>(
-            newEntry("key1", "subkey-1", "elisa.beckett@gmail.com",
+            newCreateEntry("key1", "subkey-1", "elisa.beckett@gmail.com",
               20, 7, 27, 10000),
-            newEntry("key1", "subkey-2", "elisa.work@google.com",
+            newCreateEntry("key1", "subkey-2", "elisa.work@google.com",
               20, 7, 27, 11000),
           )
         )
@@ -177,9 +175,9 @@ class CredentialManagerRepo(
         .Builder("com.dashlane/com.dashlane.CredentialManagerService")
         .setSaveEntries(
           listOf<Entry>(
-            newEntry("key1", "subkey-3", "elisa.beckett@dashlane.com",
+            newCreateEntry("key1", "subkey-3", "elisa.beckett@dashlane.com",
               20, 7, 27, 30000),
-            newEntry("key1", "subkey-4", "elisa.work@dashlane.com",
+            newCreateEntry("key1", "subkey-4", "elisa.work@dashlane.com",
               20, 7, 27, 31000),
           )
         )
@@ -192,37 +190,69 @@ class CredentialManagerRepo(
       GetCredentialProviderData.Builder("com.google/com.google.CredentialManagerService")
         .setCredentialEntries(
           listOf<Entry>(
-            newEntry("key1", "subkey-1", "elisa.beckett@gmail.com",
-              20, 7, 27, 10000),
-            newEntry("key1", "subkey-2", "elisa.work@google.com",
-              20, 7, 27, 11000),
+            newGetEntry(
+              "key1", "subkey-1", TYPE_PUBLIC_KEY_CREDENTIAL, "Passkey",
+              "elisa.bakery@gmail.com", "Elisa Beckett", 300L
+            ),
+            newGetEntry(
+              "key1", "subkey-2", TYPE_PASSWORD_CREDENTIAL, "Password",
+              "elisa.bakery@gmail.com", null, 300L
+            ),
+            newGetEntry(
+              "key1", "subkey-3", TYPE_PASSWORD_CREDENTIAL, "Password",
+              "elisa.family@outlook.com", null, 100L
+            ),
           )
-        ).setActionChips(
-          listOf<Entry>(
-            newEntry("key2", "subkey-1", "Go to Settings",
-              20, 7, 27, 20000),
-            newEntry("key2", "subkey-2", "Switch Account",
-              20, 7, 27, 21000),
-          ),
         ).build(),
       GetCredentialProviderData.Builder("com.dashlane/com.dashlane.CredentialManagerService")
         .setCredentialEntries(
           listOf<Entry>(
-            newEntry("key1", "subkey-3", "elisa.beckett@dashlane.com",
-              20, 7, 27, 30000),
-            newEntry("key1", "subkey-4", "elisa.work@dashlane.com",
-              20, 7, 27, 31000),
+            newGetEntry(
+              "key1", "subkey-1", TYPE_PASSWORD_CREDENTIAL, "Password",
+              "elisa.family@outlook.com", null, 600L
+            ),
+            newGetEntry(
+              "key1", "subkey-2", TYPE_PUBLIC_KEY_CREDENTIAL, "Passkey",
+              "elisa.family@outlook.com", null, 100L
+            ),
           )
-        ).setActionChips(
-          listOf<Entry>(
-            newEntry("key2", "subkey-3", "Manage Accounts",
-              20, 7, 27, 40000),
-          ),
         ).build(),
     )
   }
 
-  private fun newEntry(
+  private fun newGetEntry(
+    key: String,
+    subkey: String,
+    credentialType: String,
+    credentialTypeDisplayName: String,
+    userName: String,
+    userDisplayName: String?,
+    lastUsedTimeMillis: Long?,
+  ): Entry {
+    val slice = Slice.Builder(
+      Entry.CREDENTIAL_MANAGER_ENTRY_URI, SliceSpec(credentialType, 1)
+    ).addText(
+      credentialTypeDisplayName, null, listOf(Entry.HINT_CREDENTIAL_TYPE_DISPLAY_NAME)
+    ).addText(
+      userName, null, listOf(Entry.HINT_USER_NAME)
+    ).addIcon(
+      Icon.createWithResource(context, R.drawable.ic_passkey),
+      null,
+      listOf(Entry.HINT_PROFILE_ICON))
+    if (userDisplayName != null) {
+      slice.addText(userDisplayName, null, listOf(Entry.HINT_PASSKEY_USER_DISPLAY_NAME))
+    }
+    if (lastUsedTimeMillis != null) {
+      slice.addLong(lastUsedTimeMillis, null, listOf(Entry.HINT_LAST_USED_TIME_MILLIS))
+    }
+    return Entry(
+      key,
+      subkey,
+      slice.build()
+    )
+  }
+
+  private fun newCreateEntry(
     key: String,
     subkey: String,
     providerDisplayName: String,
@@ -259,15 +289,28 @@ class CredentialManagerRepo(
     )
   }
 
-  private fun testRequestInfo(): RequestInfo {
+  private fun testCreateRequestInfo(): RequestInfo {
     val data = Bundle()
     return RequestInfo.newCreateRequestInfo(
       Binder(),
       CreateCredentialRequest(
-        // TODO: use the jetpack type and utils once defined.
         TYPE_PUBLIC_KEY_CREDENTIAL,
         data
       ),
+      /*isFirstUsage=*/false,
+      "tribank.us"
+    )
+  }
+
+  private fun testGetRequestInfo(): RequestInfo {
+    val data = Bundle()
+    return RequestInfo.newGetRequestInfo(
+      Binder(),
+      GetCredentialRequest.Builder()
+        .addGetCredentialOption(
+          GetCredentialOption(TYPE_PUBLIC_KEY_CREDENTIAL, Bundle())
+        )
+        .build(),
       /*isFirstUsage=*/false,
       "tribank.us"
     )

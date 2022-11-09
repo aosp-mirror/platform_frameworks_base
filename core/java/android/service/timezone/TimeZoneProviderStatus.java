@@ -18,14 +18,18 @@ package android.service.timezone;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Information about the status of a {@link TimeZoneProviderService}.
@@ -71,7 +75,7 @@ public final class TimeZoneProviderStatus implements Parcelable {
     @IntDef(prefix = "DEPENDENCY_STATUS_", value = {
             DEPENDENCY_STATUS_UNKNOWN,
             DEPENDENCY_STATUS_NOT_APPLICABLE,
-            DEPENDENCY_STATUS_WORKING,
+            DEPENDENCY_STATUS_OK,
             DEPENDENCY_STATUS_TEMPORARILY_UNAVAILABLE,
             DEPENDENCY_STATUS_BLOCKED_BY_ENVIRONMENT,
             DEPENDENCY_STATUS_DEGRADED_BY_SETTINGS,
@@ -81,14 +85,18 @@ public final class TimeZoneProviderStatus implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface DependencyStatus {}
 
-    /** The dependency's status is unknown. */
+    /**
+     * The dependency's status is unknown.
+     *
+     * @hide
+     */
     public static final @DependencyStatus int DEPENDENCY_STATUS_UNKNOWN = 0;
 
     /** The dependency is not used by the provider's implementation. */
     public static final @DependencyStatus int DEPENDENCY_STATUS_NOT_APPLICABLE = 1;
 
-    /** The dependency is applicable and working well. */
-    public static final @DependencyStatus int DEPENDENCY_STATUS_WORKING = 2;
+    /** The dependency is applicable and there are no known problems. */
+    public static final @DependencyStatus int DEPENDENCY_STATUS_OK = 2;
 
     /**
      * The dependency is used but is temporarily unavailable, e.g. connectivity has been lost for an
@@ -136,74 +144,103 @@ public final class TimeZoneProviderStatus implements Parcelable {
     @IntDef(prefix = "OPERATION_STATUS_", value = {
             OPERATION_STATUS_UNKNOWN,
             OPERATION_STATUS_NOT_APPLICABLE,
-            OPERATION_STATUS_WORKING,
+            OPERATION_STATUS_OK,
             OPERATION_STATUS_FAILED,
     })
     @Target(ElementType.TYPE_USE)
     @Retention(RetentionPolicy.SOURCE)
     public @interface OperationStatus {}
 
-    /** The operation's status is unknown. */
+    /**
+     * The operation's status is unknown.
+     *
+     * @hide
+     */
     public static final @OperationStatus int OPERATION_STATUS_UNKNOWN = 0;
 
     /** The operation is not used by the provider's implementation. */
     public static final @OperationStatus int OPERATION_STATUS_NOT_APPLICABLE = 1;
 
-    /** The operation is applicable and working well. */
-    public static final @OperationStatus int OPERATION_STATUS_WORKING = 2;
+    /** The operation is applicable and there are no known problems. */
+    public static final @OperationStatus int OPERATION_STATUS_OK = 2;
 
-    /** The operation is applicable and failed. */
+    /** The operation is applicable and it recently failed. */
     public static final @OperationStatus int OPERATION_STATUS_FAILED = 3;
 
-    /**
-     * An instance that provides no information about status. Effectively a "null" status.
-     */
-    @NonNull
-    public static final TimeZoneProviderStatus UNKNOWN = new TimeZoneProviderStatus(
-            DEPENDENCY_STATUS_UNKNOWN, DEPENDENCY_STATUS_UNKNOWN, OPERATION_STATUS_UNKNOWN);
-
-    private final @DependencyStatus int mLocationDetectionStatus;
-    private final @DependencyStatus int mConnectivityStatus;
-    private final @OperationStatus int mTimeZoneResolutionStatus;
+    private final @DependencyStatus int mLocationDetectionDependencyStatus;
+    private final @DependencyStatus int mConnectivityDependencyStatus;
+    private final @OperationStatus int mTimeZoneResolutionOperationStatus;
 
     private TimeZoneProviderStatus(
             @DependencyStatus int locationDetectionStatus,
             @DependencyStatus int connectivityStatus,
             @OperationStatus int timeZoneResolutionStatus) {
-        mLocationDetectionStatus = requireValidDependencyStatus(locationDetectionStatus);
-        mConnectivityStatus = requireValidDependencyStatus(connectivityStatus);
-        mTimeZoneResolutionStatus = requireValidOperationStatus(timeZoneResolutionStatus);
+        mLocationDetectionDependencyStatus = locationDetectionStatus;
+        mConnectivityDependencyStatus = connectivityStatus;
+        mTimeZoneResolutionOperationStatus = timeZoneResolutionStatus;
     }
 
     /**
      * Returns the status of the location detection dependencies used by the provider (where
      * applicable).
      */
-    public @DependencyStatus int getLocationDetectionStatus() {
-        return mLocationDetectionStatus;
+    public @DependencyStatus int getLocationDetectionDependencyStatus() {
+        return mLocationDetectionDependencyStatus;
     }
 
     /**
      * Returns the status of the connectivity dependencies used by the provider (where applicable).
      */
-    public @DependencyStatus int getConnectivityStatus() {
-        return mConnectivityStatus;
+    public @DependencyStatus int getConnectivityDependencyStatus() {
+        return mConnectivityDependencyStatus;
     }
 
     /**
      * Returns the status of the time zone resolution operation used by the provider.
      */
-    public @OperationStatus int getTimeZoneResolutionStatus() {
-        return mTimeZoneResolutionStatus;
+    public @OperationStatus int getTimeZoneResolutionOperationStatus() {
+        return mTimeZoneResolutionOperationStatus;
     }
 
     @Override
     public String toString() {
         return "TimeZoneProviderStatus{"
-                + "mLocationDetectionStatus=" + mLocationDetectionStatus
-                + ", mConnectivityStatus=" + mConnectivityStatus
-                + ", mTimeZoneResolutionStatus=" + mTimeZoneResolutionStatus
+                + "mLocationDetectionDependencyStatus="
+                + dependencyStatusToString(mLocationDetectionDependencyStatus)
+                + ", mConnectivityDependencyStatus="
+                + dependencyStatusToString(mConnectivityDependencyStatus)
+                + ", mTimeZoneResolutionOperationStatus="
+                + operationStatusToString(mTimeZoneResolutionOperationStatus)
                 + '}';
+    }
+
+    /**
+     * Parses a {@link TimeZoneProviderStatus} from a toString() string for manual command-line
+     * testing.
+     *
+     * @hide
+     */
+    @NonNull
+    public static TimeZoneProviderStatus parseProviderStatus(@NonNull String arg) {
+        // Note: "}" has to be escaped on Android with "\\}" because the regexp library is not based
+        // on OpenJDK code.
+        Pattern pattern = Pattern.compile("TimeZoneProviderStatus\\{"
+                + "mLocationDetectionDependencyStatus=([^,]+)"
+                + ", mConnectivityDependencyStatus=([^,]+)"
+                + ", mTimeZoneResolutionOperationStatus=([^\\}]+)"
+                + "\\}");
+        Matcher matcher = pattern.matcher(arg);
+        if (!matcher.matches()) {
+            throw new IllegalArgumentException("Unable to parse provider status: " + arg);
+        }
+        @DependencyStatus int locationDependencyStatus =
+                dependencyStatusFromString(matcher.group(1));
+        @DependencyStatus int connectivityDependencyStatus =
+                dependencyStatusFromString(matcher.group(2));
+        @OperationStatus int timeZoneResolutionOperationStatus =
+                operationStatusFromString(matcher.group(3));
+        return new TimeZoneProviderStatus(locationDependencyStatus, connectivityDependencyStatus,
+                timeZoneResolutionOperationStatus);
     }
 
     public static final @NonNull Creator<TimeZoneProviderStatus> CREATOR = new Creator<>() {
@@ -229,9 +266,9 @@ public final class TimeZoneProviderStatus implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel parcel, int flags) {
-        parcel.writeInt(mLocationDetectionStatus);
-        parcel.writeInt(mConnectivityStatus);
-        parcel.writeInt(mTimeZoneResolutionStatus);
+        parcel.writeInt(mLocationDetectionDependencyStatus);
+        parcel.writeInt(mConnectivityDependencyStatus);
+        parcel.writeInt(mTimeZoneResolutionOperationStatus);
     }
 
     @Override
@@ -243,23 +280,33 @@ public final class TimeZoneProviderStatus implements Parcelable {
             return false;
         }
         TimeZoneProviderStatus that = (TimeZoneProviderStatus) o;
-        return mLocationDetectionStatus == that.mLocationDetectionStatus
-                && mConnectivityStatus == that.mConnectivityStatus
-                && mTimeZoneResolutionStatus == that.mTimeZoneResolutionStatus;
+        return mLocationDetectionDependencyStatus == that.mLocationDetectionDependencyStatus
+                && mConnectivityDependencyStatus == that.mConnectivityDependencyStatus
+                && mTimeZoneResolutionOperationStatus == that.mTimeZoneResolutionOperationStatus;
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(
-                mLocationDetectionStatus, mConnectivityStatus, mTimeZoneResolutionStatus);
+                mLocationDetectionDependencyStatus, mConnectivityDependencyStatus,
+                mTimeZoneResolutionOperationStatus);
+    }
+
+    /** @hide */
+    public boolean couldEnableTelephonyFallback() {
+        return mLocationDetectionDependencyStatus == DEPENDENCY_STATUS_BLOCKED_BY_ENVIRONMENT
+                || mLocationDetectionDependencyStatus == DEPENDENCY_STATUS_BLOCKED_BY_SETTINGS
+                || mConnectivityDependencyStatus == DEPENDENCY_STATUS_BLOCKED_BY_ENVIRONMENT
+                || mConnectivityDependencyStatus == DEPENDENCY_STATUS_BLOCKED_BY_SETTINGS;
     }
 
     /** A builder for {@link TimeZoneProviderStatus}. */
     public static final class Builder {
 
-        private @DependencyStatus int mLocationDetectionStatus = DEPENDENCY_STATUS_UNKNOWN;
-        private @DependencyStatus int mConnectivityStatus = DEPENDENCY_STATUS_UNKNOWN;
-        private @OperationStatus int mTimeZoneResolutionStatus = OPERATION_STATUS_UNKNOWN;
+        private @DependencyStatus int mLocationDetectionDependencyStatus =
+                DEPENDENCY_STATUS_UNKNOWN;
+        private @DependencyStatus int mConnectivityDependencyStatus = DEPENDENCY_STATUS_UNKNOWN;
+        private @OperationStatus int mTimeZoneResolutionOperationStatus = OPERATION_STATUS_UNKNOWN;
 
         /**
          * Creates a new builder instance. At creation time all status properties are set to
@@ -272,9 +319,9 @@ public final class TimeZoneProviderStatus implements Parcelable {
          * @hide
          */
         public Builder(TimeZoneProviderStatus toCopy) {
-            mLocationDetectionStatus = toCopy.mLocationDetectionStatus;
-            mConnectivityStatus = toCopy.mConnectivityStatus;
-            mTimeZoneResolutionStatus = toCopy.mTimeZoneResolutionStatus;
+            mLocationDetectionDependencyStatus = toCopy.mLocationDetectionDependencyStatus;
+            mConnectivityDependencyStatus = toCopy.mConnectivityDependencyStatus;
+            mTimeZoneResolutionOperationStatus = toCopy.mTimeZoneResolutionOperationStatus;
         }
 
         /**
@@ -282,8 +329,9 @@ public final class TimeZoneProviderStatus implements Parcelable {
          * See the {@code DEPENDENCY_STATUS_} constants for more information.
          */
         @NonNull
-        public Builder setLocationDetectionStatus(@DependencyStatus int locationDetectionStatus) {
-            mLocationDetectionStatus = locationDetectionStatus;
+        public Builder setLocationDetectionDependencyStatus(
+                @DependencyStatus int locationDetectionStatus) {
+            mLocationDetectionDependencyStatus = locationDetectionStatus;
             return this;
         }
 
@@ -292,8 +340,8 @@ public final class TimeZoneProviderStatus implements Parcelable {
          * See the {@code DEPENDENCY_STATUS_} constants for more information.
          */
         @NonNull
-        public Builder setConnectivityStatus(@DependencyStatus int connectivityStatus) {
-            mConnectivityStatus = connectivityStatus;
+        public Builder setConnectivityDependencyStatus(@DependencyStatus int connectivityStatus) {
+            mConnectivityDependencyStatus = connectivityStatus;
             return this;
         }
 
@@ -302,8 +350,9 @@ public final class TimeZoneProviderStatus implements Parcelable {
          * See the {@code OPERATION_STATUS_} constants for more information.
          */
         @NonNull
-        public Builder setTimeZoneResolutionStatus(@OperationStatus int timeZoneResolutionStatus) {
-            mTimeZoneResolutionStatus = timeZoneResolutionStatus;
+        public Builder setTimeZoneResolutionOperationStatus(
+                @OperationStatus int timeZoneResolutionStatus) {
+            mTimeZoneResolutionOperationStatus = timeZoneResolutionStatus;
             return this;
         }
 
@@ -313,16 +362,58 @@ public final class TimeZoneProviderStatus implements Parcelable {
         @NonNull
         public TimeZoneProviderStatus build() {
             return new TimeZoneProviderStatus(
-                    mLocationDetectionStatus, mConnectivityStatus, mTimeZoneResolutionStatus);
+                    requireValidDependencyStatus(mLocationDetectionDependencyStatus),
+                    requireValidDependencyStatus(mConnectivityDependencyStatus),
+                    requireValidOperationStatus(mTimeZoneResolutionOperationStatus));
         }
     }
 
-    private @OperationStatus int requireValidOperationStatus(@OperationStatus int operationStatus) {
+    private static @OperationStatus int requireValidOperationStatus(
+            @OperationStatus int operationStatus) {
         if (operationStatus < OPERATION_STATUS_UNKNOWN
                 || operationStatus > OPERATION_STATUS_FAILED) {
             throw new IllegalArgumentException(Integer.toString(operationStatus));
         }
         return operationStatus;
+    }
+
+    /** @hide */
+    @NonNull
+    public static String operationStatusToString(@OperationStatus int operationStatus) {
+        switch (operationStatus) {
+            case OPERATION_STATUS_UNKNOWN:
+                return "UNKNOWN";
+            case OPERATION_STATUS_NOT_APPLICABLE:
+                return "NOT_APPLICABLE";
+            case OPERATION_STATUS_OK:
+                return "OK";
+            case OPERATION_STATUS_FAILED:
+                return "FAILED";
+            default:
+                throw new IllegalArgumentException("Unknown status: " + operationStatus);
+        }
+    }
+
+    /** @hide */
+    public static @OperationStatus int operationStatusFromString(
+            @Nullable String operationStatusString) {
+
+        if (TextUtils.isEmpty(operationStatusString)) {
+            throw new IllegalArgumentException("Empty status: " + operationStatusString);
+        }
+
+        switch (operationStatusString) {
+            case "UNKNOWN":
+                return OPERATION_STATUS_UNKNOWN;
+            case "NOT_APPLICABLE":
+                return OPERATION_STATUS_NOT_APPLICABLE;
+            case "OK":
+                return OPERATION_STATUS_OK;
+            case "FAILED":
+                return OPERATION_STATUS_FAILED;
+            default:
+                throw new IllegalArgumentException("Unknown status: " + operationStatusString);
+        }
     }
 
     private static @DependencyStatus int requireValidDependencyStatus(
@@ -332,5 +423,57 @@ public final class TimeZoneProviderStatus implements Parcelable {
             throw new IllegalArgumentException(Integer.toString(dependencyStatus));
         }
         return dependencyStatus;
+    }
+
+    /** @hide */
+    @NonNull
+    public static String dependencyStatusToString(@DependencyStatus int dependencyStatus) {
+        switch (dependencyStatus) {
+            case DEPENDENCY_STATUS_UNKNOWN:
+                return "UNKNOWN";
+            case DEPENDENCY_STATUS_NOT_APPLICABLE:
+                return "NOT_APPLICABLE";
+            case DEPENDENCY_STATUS_OK:
+                return "OK";
+            case DEPENDENCY_STATUS_TEMPORARILY_UNAVAILABLE:
+                return "TEMPORARILY_UNAVAILABLE";
+            case DEPENDENCY_STATUS_BLOCKED_BY_ENVIRONMENT:
+                return "BLOCKED_BY_ENVIRONMENT";
+            case DEPENDENCY_STATUS_DEGRADED_BY_SETTINGS:
+                return "DEGRADED_BY_SETTINGS";
+            case DEPENDENCY_STATUS_BLOCKED_BY_SETTINGS:
+                return "BLOCKED_BY_SETTINGS";
+            default:
+                throw new IllegalArgumentException("Unknown status: " + dependencyStatus);
+        }
+    }
+
+    /** @hide */
+    public static @DependencyStatus int dependencyStatusFromString(
+            @Nullable String dependencyStatusString) {
+
+        if (TextUtils.isEmpty(dependencyStatusString)) {
+            throw new IllegalArgumentException("Empty status: " + dependencyStatusString);
+        }
+
+        switch (dependencyStatusString) {
+            case "UNKNOWN":
+                return DEPENDENCY_STATUS_UNKNOWN;
+            case "NOT_APPLICABLE":
+                return DEPENDENCY_STATUS_NOT_APPLICABLE;
+            case "OK":
+                return DEPENDENCY_STATUS_OK;
+            case "TEMPORARILY_UNAVAILABLE":
+                return DEPENDENCY_STATUS_TEMPORARILY_UNAVAILABLE;
+            case "BLOCKED_BY_ENVIRONMENT":
+                return DEPENDENCY_STATUS_BLOCKED_BY_ENVIRONMENT;
+            case "DEGRADED_BY_SETTINGS":
+                return DEPENDENCY_STATUS_DEGRADED_BY_SETTINGS;
+            case "BLOCKED_BY_SETTINGS":
+                return DEPENDENCY_STATUS_BLOCKED_BY_SETTINGS;
+            default:
+                throw new IllegalArgumentException(
+                        "Unknown status: " + dependencyStatusString);
+        }
     }
 }

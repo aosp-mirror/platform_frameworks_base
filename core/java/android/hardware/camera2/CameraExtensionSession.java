@@ -16,6 +16,7 @@
 
 package android.hardware.camera2;
 
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 
 import java.util.concurrent.Executor;
@@ -196,6 +197,41 @@ public abstract class CameraExtensionSession implements AutoCloseable {
          */
         public void onCaptureResultAvailable(@NonNull CameraExtensionSession session,
                 @NonNull CaptureRequest request, @NonNull TotalCaptureResult result) {
+            // default empty implementation
+        }
+
+        /**
+         * This method is called when image capture processing is ongoing between
+         * {@link #onCaptureProcessStarted} and the processed still capture frame returning
+         * to the client surface.
+         *
+         * <p>The value included in the arguments provides clients with an estimate
+         * of the post-processing progress which could take significantly more time
+         * relative to the rest of the {@link #capture} sequence.</p>
+         *
+         * <p>The callback will be triggered only by extensions that return {@code true}
+         * from calls
+         * {@link CameraExtensionCharacteristics#isCaptureProcessProgressAvailable}.</p>
+         *
+         * <p>If support for this callback is present, then clients will be notified at least once
+         * with progress value 100.</p>
+         *
+         * <p>The callback will be triggered only for still capture requests {@link #capture} and
+         * is not supported for repeating requests {@link #setRepeatingRequest}.</p>
+         *
+         * <p>The default implementation of this method does nothing.</p>
+         *
+         * @param session The session received during
+         *                {@link StateCallback#onConfigured(CameraExtensionSession)}
+         * @param request The request that was given to the CameraDevice
+         * @param progress Value between 0 and 100 (inclusive) indicating the current
+         *                post-processing progress
+         *
+         * @see CameraExtensionCharacteristics#isCaptureProcessProgressAvailable
+         *
+         */
+        public void onCaptureProcessProgressed(@NonNull CameraExtensionSession session,
+                @NonNull CaptureRequest request, @IntRange(from = 0, to = 100) int progress) {
             // default empty implementation
         }
     }

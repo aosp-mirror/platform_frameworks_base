@@ -29,7 +29,6 @@ class SmartspaceMediaDataProvider @Inject constructor() : BcSmartspaceDataPlugin
 
     private val smartspaceMediaTargetListeners: MutableList<SmartspaceTargetListener> =
         mutableListOf()
-    private var smartspaceMediaTargets: List<SmartspaceTarget> = listOf()
 
     override fun registerListener(smartspaceTargetListener: SmartspaceTargetListener) {
         smartspaceMediaTargetListeners.add(smartspaceTargetListener)
@@ -41,22 +40,7 @@ class SmartspaceMediaDataProvider @Inject constructor() : BcSmartspaceDataPlugin
 
     /** Updates Smartspace data and propagates it to any listeners. */
     override fun onTargetsAvailable(targets: List<SmartspaceTarget>) {
-        // Filter out non-media targets.
-        val mediaTargets = mutableListOf<SmartspaceTarget>()
-        for (target in targets) {
-            val smartspaceTarget = target
-            if (smartspaceTarget.featureType == SmartspaceTarget.FEATURE_MEDIA) {
-                mediaTargets.add(smartspaceTarget)
-            }
-        }
-
-        if (!mediaTargets.isEmpty()) {
-            Log.d(TAG, "Forwarding Smartspace media updates $mediaTargets")
-        }
-
-        smartspaceMediaTargets = mediaTargets
-        smartspaceMediaTargetListeners.forEach {
-            it.onSmartspaceTargetsUpdated(smartspaceMediaTargets)
-        }
+        Log.d(TAG, "Forwarding Smartspace updates $targets")
+        smartspaceMediaTargetListeners.forEach { it.onSmartspaceTargetsUpdated(targets) }
     }
 }

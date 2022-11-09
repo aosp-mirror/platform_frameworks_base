@@ -1309,7 +1309,11 @@ public final class NotificationPanelViewController {
     }
 
     private void initBottomArea() {
-        mKeyguardBottomArea.init(mKeyguardBottomAreaViewModel, mFalsingManager);
+        mKeyguardBottomArea.init(
+                mKeyguardBottomAreaViewModel,
+                mFalsingManager,
+                mLockIconViewController
+        );
     }
 
     @VisibleForTesting
@@ -4657,7 +4661,7 @@ public final class NotificationPanelViewController {
                 mUpdateFlingVelocity = vel;
             }
         } else if (!mCentralSurfaces.isBouncerShowing()
-                && !mStatusBarKeyguardViewManager.isShowingAlternateAuth()
+                && !mStatusBarKeyguardViewManager.isShowingAlternateBouncer()
                 && !mKeyguardStateController.isKeyguardGoingAway()) {
             onEmptySpaceClick();
             onTrackingStopped(true);
@@ -6041,7 +6045,7 @@ public final class NotificationPanelViewController {
                     == AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_FORWARD.getId()
                     || action
                     == AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_UP.getId()) {
-                mStatusBarKeyguardViewManager.showBouncer(true);
+                mStatusBarKeyguardViewManager.showPrimaryBouncer(true);
                 return true;
             }
             return super.performAccessibilityAction(host, action, args);

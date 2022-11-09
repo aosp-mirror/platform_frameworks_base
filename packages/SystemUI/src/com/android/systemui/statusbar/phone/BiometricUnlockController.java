@@ -462,7 +462,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
                 break;
             case MODE_SHOW_BOUNCER:
                 Trace.beginSection("MODE_SHOW_BOUNCER");
-                mKeyguardViewController.showBouncer(true);
+                mKeyguardViewController.showPrimaryBouncer(true);
                 Trace.endSection();
                 break;
             case MODE_WAKE_AND_UNLOCK_FROM_DREAM:
@@ -542,7 +542,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
             return MODE_WAKE_AND_UNLOCK_FROM_DREAM;
         }
         if (mKeyguardStateController.isShowing()) {
-            if (mKeyguardViewController.bouncerIsOrWillBeShowing() && unlockingAllowed) {
+            if (mKeyguardViewController.primaryBouncerIsOrWillBeShowing() && unlockingAllowed) {
                 return MODE_DISMISS_BOUNCER;
             } else if (unlockingAllowed) {
                 return MODE_UNLOCK_COLLAPSING;
@@ -585,7 +585,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
             return MODE_UNLOCK_COLLAPSING;
         }
         if (mKeyguardStateController.isShowing()) {
-            if ((mKeyguardViewController.bouncerIsOrWillBeShowing()
+            if ((mKeyguardViewController.primaryBouncerIsOrWillBeShowing()
                     || mKeyguardBypassController.getAltBouncerShowing()) && unlockingAllowed) {
                 return MODE_DISMISS_BOUNCER;
             } else if (unlockingAllowed && (bypass || mAuthController.isUdfpsFingerDown())) {

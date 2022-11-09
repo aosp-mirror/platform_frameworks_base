@@ -1387,6 +1387,18 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                 Binder.restoreCallingIdentity(ident);
             }
         }
+
+        @Override
+        public void onCaptureProcessProgressed(int progress) {
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                mExecutor.execute(
+                        () -> mCallbacks.onCaptureProcessProgressed(CameraExtensionSessionImpl.this,
+                                mClientRequest, progress));
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
     }
 
     // This handler can operate in three modes:

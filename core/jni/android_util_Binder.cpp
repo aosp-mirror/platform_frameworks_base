@@ -25,6 +25,7 @@
 #include <inttypes.h>
 #include <mutex>
 #include <stdio.h>
+#include <string>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -880,7 +881,7 @@ void signalExceptionForError(JNIEnv* env, jobject obj, status_t err,
         case FAILED_TRANSACTION: {
             ALOGE("!!! FAILED BINDER TRANSACTION !!!  (parcel size = %d)", parcelSize);
             const char* exceptionToThrow;
-            char msg[128];
+            std::string msg;
             // TransactionTooLargeException is a checked exception, only throw from certain methods.
             // TODO(b/28321379): Transaction size is the most common cause for FAILED_TRANSACTION
             //        but it is not the only one.  The Binder driver can return BR_FAILED_REPLY
@@ -890,7 +891,7 @@ void signalExceptionForError(JNIEnv* env, jobject obj, status_t err,
             if (canThrowRemoteException && parcelSize > 200*1024) {
                 // bona fide large payload
                 exceptionToThrow = "android/os/TransactionTooLargeException";
-                snprintf(msg, sizeof(msg)-1, "data parcel size %d bytes", parcelSize);
+                msg = base::StringPrintf("data parcel size %d bytes", parcelSize);
             } else {
                 // Heuristic: a payload smaller than this threshold "shouldn't" be too
                 // big, so it's probably some other, more subtle problem.  In practice
@@ -899,11 +900,10 @@ void signalExceptionForError(JNIEnv* env, jobject obj, status_t err,
                 exceptionToThrow = (canThrowRemoteException)
                         ? "android/os/DeadObjectException"
                         : "java/lang/RuntimeException";
-                snprintf(msg, sizeof(msg) - 1,
-                         "Transaction failed on small parcel; remote process probably died, but "
-                         "this could also be caused by running out of binder buffer space");
+                msg = "Transaction failed on small parcel; remote process probably died, but "
+                      "this could also be caused by running out of binder buffer space";
             }
-            jniThrowException(env, exceptionToThrow, msg);
+            jniThrowException(env, exceptionToThrow, msg.c_str());
         } break;
         case FDS_NOT_ALLOWED:
             jniThrowException(env, "java/lang/RuntimeException",

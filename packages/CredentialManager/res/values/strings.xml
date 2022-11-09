@@ -29,4 +29,26 @@
   <string name="createOptionInfo_icon_description">CreateOptionInfo credentialType icon</string>
   <!-- Spoken content description of an element which will close the sheet when clicked. -->
   <string name="close_sheet">"Close sheet"</string>
+  <!-- Spoken content description of the back arrow button. -->
+  <string name="accessibility_back_arrow_button">"Go back to the previous page"</string>
+
+  <!-- Strings for the get flow. -->
+  <!-- This appears as the title of the modal bottom sheet asking for user confirmation to use the single previously saved passkey to sign in to the app. [CHAR LIMIT=200] -->
+  <string name="get_dialog_title_use_passkey_for">Use your saved passkey for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g>?</string>
+  <!-- This appears as the title of the dialog asking for user confirmation to use the single previously saved credential to sign in to the app. [CHAR LIMIT=200] -->
+  <string name="get_dialog_title_use_sign_in_for">Use your saved sign-in for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g>?</string>
+  <!-- This appears as the title of the dialog asking for user to make a choice from various previously saved credentials to sign in to the app. [CHAR LIMIT=200] -->
+  <string name="get_dialog_title_choose_sign_in_for">Choose a saved sign-in for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g></string>
+  <!-- Appears as an option row for viewing all the available sign-in options. [CHAR LIMIT=80] -->
+  <string name="get_dialog_use_saved_passkey_for">Sign in another way</string>
+  <!-- Button label to close the dialog when the user does not want to use any sign-in. [CHAR LIMIT=40] -->
+  <string name="get_dialog_button_label_no_thanks">No thanks</string>
+  <!-- Button label to continue with the selected sign-in. [CHAR LIMIT=40] -->
+  <string name="get_dialog_button_label_continue">Continue</string>
+  <!-- Separator for sign-in type and username in a sign-in entry. -->
+  <string name="get_dialog_sign_in_type_username_separator" translatable="false">" - "</string>
+  <!-- Modal bottom sheet title for displaying all the available sign-in options. [CHAR LIMIT=80] -->
+  <string name="get_dialog_title_sign_in_options">Sign-in options</string>
+  <!-- Column heading for displaying sign-ins for a specific username. [CHAR LIMIT=20] -->
+  <string name="get_dialog_heading_for_username">For <xliff:g id="username" example="becket@gmail.com">%1$s</xliff:g></string>
 </resources>

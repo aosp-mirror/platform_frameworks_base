@@ -17,6 +17,7 @@
 package com.android.server.biometrics.sensors.face.aidl;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
@@ -25,7 +26,10 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.hardware.biometrics.IBiometricService;
+import android.hardware.biometrics.common.CommonProps;
+import android.hardware.biometrics.face.IFace;
 import android.hardware.biometrics.face.ISession;
+import android.hardware.biometrics.face.SensorProps;
 import android.os.Handler;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
@@ -36,6 +40,7 @@ import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.AuthSessionCoordinator;
 import com.android.server.biometrics.sensors.BiometricScheduler;
+import com.android.server.biometrics.sensors.BiometricStateCallback;
 import com.android.server.biometrics.sensors.LockoutCache;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.LockoutTracker;
@@ -74,12 +79,18 @@ public class SensorTest {
     private BiometricContext mBiometricContext;
     @Mock
     private AuthSessionCoordinator mAuthSessionCoordinator;
+    @Mock
+    private IFace mDaemon;
+    @Mock
+    private BiometricStateCallback mBiometricStateCallback;
 
     private final TestLooper mLooper = new TestLooper();
     private final LockoutCache mLockoutCache = new LockoutCache();
 
     private UserAwareBiometricScheduler mScheduler;
     private Sensor.HalSessionCallback mHalCallback;
+    private FaceProvider mFaceProvider;
+    private SensorProps[] mSensorProps;
 
     @Before
     public void setUp() {
@@ -99,6 +110,16 @@ public class SensorTest {
         mHalCallback = new Sensor.HalSessionCallback(mContext, new Handler(mLooper.getLooper()),
                 TAG, mScheduler, SENSOR_ID,
                 USER_ID, mLockoutCache, mLockoutResetDispatcher, mHalSessionCallback);
+
+        final SensorProps sensor1 = new SensorProps();
+        sensor1.commonProps = new CommonProps();
+        sensor1.commonProps.sensorId = 0;
+        final SensorProps sensor2 = new SensorProps();
+        sensor2.commonProps = new CommonProps();
+        sensor2.commonProps.sensorId = 1;
+        mSensorProps = new SensorProps[]{sensor1, sensor2};
+        mFaceProvider = new FaceProvider(mContext, mBiometricStateCallback,
+                mSensorProps, TAG, mLockoutResetDispatcher, mBiometricContext);
     }
 
     @Test
@@ -126,6 +147,18 @@ public class SensorTest {
         mLooper.dispatchAll();
 
         verifyNotLocked();
+    }
+
+    @Test
+    public void onBinderDied_noErrorOnNullClient() {
+        mScheduler.reset();
+        assertNull(mScheduler.getCurrentClient());
+        mFaceProvider.binderDied();
+
+        for (int i = 0; i < mFaceProvider.mSensors.size(); i++) {
+            final Sensor sensor = mFaceProvider.mSensors.valueAt(i);
+            assertNull(sensor.getSessionForUser(USER_ID));
+        }
     }
 
     private void verifyNotLocked() {

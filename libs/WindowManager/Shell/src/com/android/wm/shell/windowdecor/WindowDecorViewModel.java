@@ -44,7 +44,7 @@ public interface WindowDecorViewModel {
      * @param taskSurface the surface of the task
      * @param startT the start transaction to be applied before the transition
      * @param finishT the finish transaction to restore states after the transition
-     * @return the window decoration object
+     * @return {@code true} if window decoration was created, {@code false} otherwise
      */
     boolean createWindowDecoration(
             ActivityManager.RunningTaskInfo taskInfo,
@@ -66,8 +66,9 @@ public interface WindowDecorViewModel {
      *
      * @param startT the start transaction to be applied before the transition
      * @param finishT the finish transaction to restore states after the transition
+     * @return {@code true} if window decoration exists, {@code false} otherwise
      */
-    void setupWindowDecorationForTransition(
+    boolean setupWindowDecorationForTransition(
             ActivityManager.RunningTaskInfo taskInfo,
             SurfaceControl.Transaction startT,
             SurfaceControl.Transaction finishT);
@@ -76,6 +77,7 @@ public interface WindowDecorViewModel {
      * Destroys the window decoration of the give task.
      *
      * @param taskInfo the info of the task
+     * @return {@code true} if window decoration was destroyed, {@code false} otherwise
      */
-    void destroyWindowDecoration(ActivityManager.RunningTaskInfo taskInfo);
+    boolean destroyWindowDecoration(ActivityManager.RunningTaskInfo taskInfo);
 }

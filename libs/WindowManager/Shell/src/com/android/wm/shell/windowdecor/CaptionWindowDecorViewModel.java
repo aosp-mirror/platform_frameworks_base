@@ -105,6 +105,11 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
             SurfaceControl.Transaction startT,
             SurfaceControl.Transaction finishT) {
         if (!shouldShowWindowDecor(taskInfo)) return false;
+        CaptionWindowDecoration oldDecoration = mWindowDecorByTaskId.get(taskInfo.taskId);
+        if (oldDecoration != null) {
+            // close the old decoration if it exists to avoid two window decorations being added
+            oldDecoration.close();
+        }
         final CaptionWindowDecoration windowDecoration = new CaptionWindowDecoration(
                 mContext,
                 mDisplayController,
@@ -141,23 +146,25 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
     }
 
     @Override
-    public void setupWindowDecorationForTransition(
+    public boolean setupWindowDecorationForTransition(
             RunningTaskInfo taskInfo,
             SurfaceControl.Transaction startT,
             SurfaceControl.Transaction finishT) {
         final CaptionWindowDecoration decoration = mWindowDecorByTaskId.get(taskInfo.taskId);
-        if (decoration == null) return;
+        if (decoration == null) return false;
 
         decoration.relayout(taskInfo, startT, finishT);
+        return true;
     }
 
     @Override
-    public void destroyWindowDecoration(RunningTaskInfo taskInfo) {
+    public boolean destroyWindowDecoration(RunningTaskInfo taskInfo) {
         final CaptionWindowDecoration decoration =
                 mWindowDecorByTaskId.removeReturnOld(taskInfo.taskId);
-        if (decoration == null) return;
+        if (decoration == null) return false;
 
         decoration.close();
+        return true;
     }
 
     private class CaptionTouchEventListener implements

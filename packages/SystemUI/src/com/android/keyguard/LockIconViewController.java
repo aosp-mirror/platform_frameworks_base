@@ -282,6 +282,10 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         return mView.getLocationTop();
     }
 
+    public float getBottom() {
+        return mView.getLocationBottom();
+    }
+
     private void updateVisibility() {
         if (mCancelDelayedUpdateVisibilityRunnable != null) {
             mCancelDelayedUpdateVisibilityRunnable.run();
@@ -697,7 +701,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
                 "lock-screen-lock-icon-longpress",
                 TOUCH_VIBRATION_ATTRIBUTES);
 
-        mKeyguardViewController.showBouncer(/* scrim */ true);
+        mKeyguardViewController.showPrimaryBouncer(/* scrim */ true);
     }
 
 
