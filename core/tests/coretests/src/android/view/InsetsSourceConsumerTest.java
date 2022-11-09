@@ -43,6 +43,7 @@ import android.platform.test.annotations.Presubmit;
 import android.view.SurfaceControl.Transaction;
 import android.view.WindowManager.BadTokenException;
 import android.view.WindowManager.LayoutParams;
+import android.view.inputmethod.ImeTracker;
 import android.widget.TextView;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -221,7 +222,8 @@ public class InsetsSourceConsumerTest {
                     return new InsetsSourceConsumer(ITYPE_IME, ime(), state,
                             () -> mMockTransaction, controller) {
                         @Override
-                        public int requestShow(boolean fromController) {
+                        public int requestShow(boolean fromController,
+                                ImeTracker.Token statsToken) {
                             return SHOW_IMMEDIATELY;
                         }
                     };

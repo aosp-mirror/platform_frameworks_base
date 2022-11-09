@@ -71,6 +71,7 @@ import android.view.WindowInsetsController.OnControllableInsetsChangedListener;
 import android.view.WindowManager.BadTokenException;
 import android.view.WindowManager.LayoutParams;
 import android.view.animation.LinearInterpolator;
+import android.view.inputmethod.ImeTracker;
 import android.widget.TextView;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -136,7 +137,8 @@ public class InsetsControllerTest {
                         private boolean mImeRequestedShow;
 
                         @Override
-                        public int requestShow(boolean fromController) {
+                        public int requestShow(boolean fromController,
+                                ImeTracker.Token statsToken) {
                             if (fromController || mImeRequestedShow) {
                                 mImeRequestedShow = true;
                                 return SHOW_IMMEDIATELY;
