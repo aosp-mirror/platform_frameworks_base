@@ -33,6 +33,7 @@ import android.util.IndentingPrintWriter;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -132,6 +133,18 @@ public class BroadcastRadioService {
         }
     }
 
+    @VisibleForTesting
+    BroadcastRadioService(int nextModuleId, Object lock, IServiceManager manager) {
+        mNextModuleId = nextModuleId;
+        mLock = lock;
+        Objects.requireNonNull(manager, "Service manager cannot be null");
+        try {
+            manager.registerForNotifications(IBroadcastRadio.kInterfaceName, "", mServiceListener);
+        } catch (RemoteException ex) {
+            Slog.e(TAG, "Failed to register for service notifications: ", ex);
+        }
+    }
+
     public @NonNull Collection<RadioManager.ModuleProperties> listModules() {
         Slog.v(TAG, "List HIDL 2.0 modules");
         synchronized (mLock) {
@@ -154,7 +167,7 @@ public class BroadcastRadioService {
 
     public ITuner openSession(int moduleId, @Nullable RadioManager.BandConfig legacyConfig,
         boolean withAudio, @NonNull ITunerCallback callback) throws RemoteException {
-        Slog.v(TAG, "Open HIDL 2.0 session");
+        Slog.v(TAG, "Open HIDL 2.0 session with module id " + moduleId);
         Objects.requireNonNull(callback);
 
         if (!withAudio) {

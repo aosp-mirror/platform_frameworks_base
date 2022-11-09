@@ -13,50 +13,58 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.server.broadcastradio.aidl;
+package com.android.server.broadcastradio.hal2;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 
 import static com.google.common.truth.Truth.assertWithMessage;
 
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.hardware.broadcastradio.IBroadcastRadio;
+import android.hardware.broadcastradio.V2_0.IBroadcastRadio;
+import android.hardware.radio.Announcement;
+import android.hardware.radio.IAnnouncementListener;
+import android.hardware.radio.ICloseHandle;
 import android.hardware.radio.ITuner;
 import android.hardware.radio.ITunerCallback;
 import android.hardware.radio.RadioManager;
 import android.hardware.radio.RadioTuner;
+import android.hidl.manager.V1_0.IServiceManager;
+import android.hidl.manager.V1_0.IServiceNotification;
 import android.os.IBinder;
-import android.os.IServiceCallback;
+import android.os.IHwBinder.DeathRecipient;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 
 import com.android.dx.mockito.inline.extended.StaticMockitoSessionBuilder;
 import com.android.server.broadcastradio.ExtendedRadioMockitoTestCase;
 
 import org.junit.Test;
 import org.mockito.Mock;
-import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public final class BroadcastRadioServiceImplTest extends ExtendedRadioMockitoTestCase {
+public final class BroadcastRadioServiceHidlTest extends ExtendedRadioMockitoTestCase {
 
     private static final int FM_RADIO_MODULE_ID = 0;
     private static final int DAB_RADIO_MODULE_ID = 1;
     private static final ArrayList<String> SERVICE_LIST =
             new ArrayList<>(Arrays.asList("FmService", "DabService"));
+    private static final int[] TEST_ENABLED_TYPES = new int[]{Announcement.TYPE_TRAFFIC};
 
-    private BroadcastRadioServiceImpl mBroadcastRadioService;
-    private IBinder.DeathRecipient mFmDeathRecipient;
+    private final Object mLock = new Object();
 
+    private BroadcastRadioService mBroadcastRadioService;
+    private DeathRecipient mFmDeathRecipient;
+
+    @Mock
+    private IServiceManager mServiceManagerMock;
     @Mock
     private RadioManager.ModuleProperties mFmModuleMock;
     @Mock
@@ -70,25 +78,28 @@ public final class BroadcastRadioServiceImplTest extends ExtendedRadioMockitoTes
     @Mock
     private IBroadcastRadio mDabHalServiceMock;
     @Mock
-    private IBinder mFmBinderMock;
-    @Mock
-    private IBinder mDabBinderMock;
-    @Mock
     private TunerSession mFmTunerSessionMock;
     @Mock
     private ITunerCallback mTunerCallbackMock;
+    @Mock
+    private ICloseHandle mFmCloseHandleMock;
+    @Mock
+    private ICloseHandle mDabCloseHandleMock;
+    @Mock
+    private IAnnouncementListener mAnnouncementListenerMock;
+    @Mock
+    private IBinder mBinderMock;
 
     @Override
     protected void initializeSession(StaticMockitoSessionBuilder builder) {
-        builder.spyStatic(ServiceManager.class)
-                .spyStatic(RadioModule.class);
+        builder.spyStatic(RadioModule.class);
     }
 
     @Test
     public void listModules_withMultipleServiceNames() throws Exception {
         createBroadcastRadioService();
 
-        assertWithMessage("Radio modules in AIDL broadcast radio HAL client")
+        assertWithMessage("Radio modules in HIDL broadcast radio HAL client")
                 .that(mBroadcastRadioService.listModules())
                 .containsExactly(mFmModuleMock, mDabModuleMock);
     }
@@ -97,15 +108,15 @@ public final class BroadcastRadioServiceImplTest extends ExtendedRadioMockitoTes
     public void hasModules_withIdFoundInModules() throws Exception {
         createBroadcastRadioService();
 
-        assertWithMessage("DAB radio module in AIDL broadcast radio HAL client")
-                .that(mBroadcastRadioService.hasModule(DAB_RADIO_MODULE_ID)).isTrue();
+        assertWithMessage("DAB radio module in HIDL broadcast radio HAL client")
+                .that(mBroadcastRadioService.hasModule(FM_RADIO_MODULE_ID)).isTrue();
     }
 
     @Test
     public void hasModules_withIdNotFoundInModules() throws Exception {
         createBroadcastRadioService();
 
-        assertWithMessage("Radio module of id not found in AIDL broadcast radio HAL client")
+        assertWithMessage("Radio module of id not found in HIDL broadcast radio HAL client")
                 .that(mBroadcastRadioService.hasModule(DAB_RADIO_MODULE_ID + 1)).isFalse();
     }
 
@@ -113,7 +124,7 @@ public final class BroadcastRadioServiceImplTest extends ExtendedRadioMockitoTes
     public void hasAnyModules_withModulesExist() throws Exception {
         createBroadcastRadioService();
 
-        assertWithMessage("Any radio module in AIDL broadcast radio HAL client")
+        assertWithMessage("Any radio module in HIDL broadcast radio HAL client")
                 .that(mBroadcastRadioService.hasAnyModules()).isTrue();
     }
 
@@ -131,18 +142,38 @@ public final class BroadcastRadioServiceImplTest extends ExtendedRadioMockitoTes
     @Test
     public void openSession_withIdNotFound() throws Exception {
         createBroadcastRadioService();
+        int moduleIdInvalid = DAB_RADIO_MODULE_ID + 1;
 
-        ITuner session = mBroadcastRadioService.openSession(DAB_RADIO_MODULE_ID + 1,
-                /* legacyConfig= */ null, /* withAudio= */ true, mTunerCallbackMock);
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> {
+            mBroadcastRadioService.openSession(moduleIdInvalid, /* legacyConfig= */ null,
+                    /* withAudio= */ true, mTunerCallbackMock);
+        });
 
-        assertWithMessage("Session opened with id not found").that(session).isNull();
+        assertWithMessage("Exception for opening session with module id %s", moduleIdInvalid)
+                .that(thrown).hasMessageThat().contains("Invalid module ID");
+    }
+
+    @Test
+    public void addAnnouncementListener_addsOnAllRadioModules() throws Exception {
+        createBroadcastRadioService();
+        when(mAnnouncementListenerMock.asBinder()).thenReturn(mBinderMock);
+        when(mFmRadioModuleMock.addAnnouncementListener(any(), any()))
+                .thenReturn(mFmCloseHandleMock);
+        when(mDabRadioModuleMock.addAnnouncementListener(any(), any()))
+                .thenReturn(mDabCloseHandleMock);
+
+        mBroadcastRadioService.addAnnouncementListener(TEST_ENABLED_TYPES,
+                mAnnouncementListenerMock);
+
+        verify(mFmRadioModuleMock).addAnnouncementListener(any(), any());
+        verify(mDabRadioModuleMock).addAnnouncementListener(any(), any());
     }
 
     @Test
     public void binderDied_forDeathRecipient() throws Exception {
         createBroadcastRadioService();
 
-        mFmDeathRecipient.binderDied();
+        mFmDeathRecipient.serviceDied(FM_RADIO_MODULE_ID);
 
         verify(mFmRadioModuleMock).closeSessions(eq(RadioTuner.ERROR_HARDWARE_FAILURE));
         assertWithMessage("FM radio module after FM broadcast radio HAL service died")
@@ -151,23 +182,31 @@ public final class BroadcastRadioServiceImplTest extends ExtendedRadioMockitoTes
 
     private void createBroadcastRadioService() throws RemoteException {
         mockServiceManager();
-        mBroadcastRadioService = new BroadcastRadioServiceImpl(SERVICE_LIST);
+        mBroadcastRadioService = new BroadcastRadioService(/* nextModuleId= */ FM_RADIO_MODULE_ID,
+                mLock, mServiceManagerMock);
     }
 
     private void mockServiceManager() throws RemoteException {
-        doAnswer((Answer<Void>) invocation -> {
-            String serviceName = (String) invocation.getArguments()[0];
-            IServiceCallback serviceCallback = (IServiceCallback) invocation.getArguments()[1];
-            IBinder mockBinder = serviceName.equals("FmService") ? mFmBinderMock : mDabBinderMock;
-            serviceCallback.onRegistration(serviceName, mockBinder);
+        doAnswer(invocation -> {
+            mFmDeathRecipient = (DeathRecipient) invocation.getArguments()[0];
             return null;
-        }).when(() -> ServiceManager.registerForNotifications(anyString(),
-                any(IServiceCallback.class)));
+        }).when(mFmHalServiceMock).linkToDeath(any(), eq((long) FM_RADIO_MODULE_ID));
+
+        when(mServiceManagerMock.registerForNotifications(anyString(), anyString(),
+                any(IServiceNotification.class))).thenAnswer(invocation -> {
+                    IServiceNotification serviceCallback =
+                            (IServiceNotification) invocation.getArguments()[2];
+                    for (int index = 0; index < SERVICE_LIST.size(); index++) {
+                        serviceCallback.onRegistration(IBroadcastRadio.kInterfaceName,
+                                SERVICE_LIST.get(index), /* b= */ false);
+                    }
+                    return true;
+                }).thenReturn(true);
 
         doReturn(mFmRadioModuleMock).when(() -> RadioModule.tryLoadingModule(
-                eq(FM_RADIO_MODULE_ID), anyString(), any(IBinder.class), any(Object.class)));
+                eq(FM_RADIO_MODULE_ID), anyString(), any(Object.class)));
         doReturn(mDabRadioModuleMock).when(() -> RadioModule.tryLoadingModule(
-                eq(DAB_RADIO_MODULE_ID), anyString(), any(IBinder.class), any(Object.class)));
+                eq(DAB_RADIO_MODULE_ID), anyString(), any(Object.class)));
 
         when(mFmRadioModuleMock.getProperties()).thenReturn(mFmModuleMock);
         when(mDabRadioModuleMock.getProperties()).thenReturn(mDabModuleMock);
@@ -175,15 +214,7 @@ public final class BroadcastRadioServiceImplTest extends ExtendedRadioMockitoTes
         when(mFmRadioModuleMock.getService()).thenReturn(mFmHalServiceMock);
         when(mDabRadioModuleMock.getService()).thenReturn(mDabHalServiceMock);
 
-        when(mFmHalServiceMock.asBinder()).thenReturn(mFmBinderMock);
-        when(mDabHalServiceMock.asBinder()).thenReturn(mDabBinderMock);
-
-        doAnswer(invocation -> {
-            mFmDeathRecipient = (IBinder.DeathRecipient) invocation.getArguments()[0];
-            return null;
-        }).when(mFmBinderMock).linkToDeath(any(), anyInt());
-
-        when(mFmRadioModuleMock.openSession(eq(mTunerCallbackMock)))
+        when(mFmRadioModuleMock.openSession(mTunerCallbackMock))
                 .thenReturn(mFmTunerSessionMock);
     }
 }
