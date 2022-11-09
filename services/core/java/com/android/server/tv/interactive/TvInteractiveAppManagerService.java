@@ -1066,7 +1066,28 @@ public class TvInteractiveAppManagerService extends SystemService {
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
+        }
 
+        @Override
+        public void notifyRecordingStopped(IBinder sessionToken, String recordingId, int userId) {
+            final int callingUid = Binder.getCallingUid();
+            final int callingPid = Binder.getCallingPid();
+            final int resolvedUserId = resolveCallingUserId(callingPid, callingUid, userId,
+                    "notifyRecordingStopped");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        SessionState sessionState = getSessionStateLocked(sessionToken, callingUid,
+                                resolvedUserId);
+                        getSessionLocked(sessionState).notifyRecordingStopped(recordingId);
+                    } catch (RemoteException | SessionNotFoundException e) {
+                        Slogf.e(TAG, "error in notifyRecordingStopped", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
 
         @Override
