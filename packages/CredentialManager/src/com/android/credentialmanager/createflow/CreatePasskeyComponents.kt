@@ -74,6 +74,7 @@ fun CreatePasskeyScreen(
           onMoreOptionsSelected = viewModel::onMoreOptionsSelected
         )
         CreateScreenState.MORE_OPTIONS_SELECTION -> MoreOptionsSelectionCard(
+            requestDisplayInfo = uiState.requestDisplayInfo,
             providerList = uiState.providers,
             onBackButtonSelected = viewModel::onBackButtonSelected,
             onOptionSelected = viewModel::onMoreOptionsRowSelected
@@ -210,6 +211,7 @@ fun ProviderSelectionCard(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MoreOptionsSelectionCard(
+  requestDisplayInfo: RequestDisplayInfo,
   providerList: List<ProviderInfo>,
   onBackButtonSelected: () -> Unit,
   onOptionSelected: (ActiveEntry) -> Unit
@@ -219,7 +221,11 @@ fun MoreOptionsSelectionCard(
       TopAppBar(
         title = {
           Text(
-            text = stringResource(R.string.string_more_options),
+            text = when (requestDisplayInfo.type) {
+              TYPE_PUBLIC_KEY_CREDENTIAL -> stringResource(R.string.create_passkey_in)
+              TYPE_PASSWORD_CREDENTIAL -> stringResource(R.string.save_password_to)
+              else -> stringResource(R.string.save_sign_in_to)
+            },
             style = MaterialTheme.typography.titleMedium
           )
         },
@@ -232,14 +238,8 @@ fun MoreOptionsSelectionCard(
         }
       )
       Divider(
-         thickness = 24.dp,
+         thickness = 8.dp,
          color = Color.Transparent
-      )
-      Text(
-        text = stringResource(R.string.create_passkey_at),
-        style = MaterialTheme.typography.bodyLarge,
-        modifier = Modifier.padding(horizontal = 28.dp),
-        textAlign = TextAlign.Center
       )
       Card(
         shape = MaterialTheme.shapes.large,
@@ -250,7 +250,6 @@ fun MoreOptionsSelectionCard(
         LazyColumn(
           verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
-          // TODO: change the order according to usage frequency
           providerList.forEach { providerInfo ->
             providerInfo.createOptions.forEach { createOptionInfo ->
               item {
@@ -372,20 +371,22 @@ fun CreationSelectionCard(
         style = MaterialTheme.typography.bodyMedium,
         modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
       )
-      Text(
-        text = stringResource(
-          R.string.choose_create_option_description,
-          when (requestDisplayInfo.type) {
-            TYPE_PUBLIC_KEY_CREDENTIAL -> stringResource(R.string.passkeys)
-            TYPE_PASSWORD_CREDENTIAL -> stringResource(R.string.passwords)
-            else -> stringResource(R.string.sign_ins)
-          },
-          providerInfo.displayName,
-          createOptionInfo.userProviderDisplayName
-        ),
-        style = MaterialTheme.typography.bodyLarge,
-        modifier = Modifier.padding(all = 24.dp).align(alignment = Alignment.CenterHorizontally)
-      )
+      if (createOptionInfo.userProviderDisplayName != null) {
+        Text(
+          text = stringResource(
+            R.string.choose_create_option_description,
+            when (requestDisplayInfo.type) {
+              TYPE_PUBLIC_KEY_CREDENTIAL -> stringResource(R.string.passkeys)
+              TYPE_PASSWORD_CREDENTIAL -> stringResource(R.string.passwords)
+              else -> stringResource(R.string.sign_ins)
+            },
+            providerInfo.displayName,
+            createOptionInfo.userProviderDisplayName
+          ),
+          style = MaterialTheme.typography.bodyLarge,
+          modifier = Modifier.padding(all = 24.dp).align(alignment = Alignment.CenterHorizontally)
+        )
+      }
       Card(
         shape = MaterialTheme.shapes.large,
         modifier = Modifier
@@ -491,30 +492,57 @@ fun MoreOptionsInfoRow(
         onClick = onOptionSelected,
         icon = {
             Image(modifier = Modifier.size(24.dp, 24.dp).padding(start = 10.dp),
-                bitmap = createOptionInfo.profileIcon.toBitmap().asImageBitmap(),
-                // painter = painterResource(R.drawable.ic_passkey),
-                // TODO: add description.
-                contentDescription = "")
+                bitmap = createOptionInfo.credentialTypeIcon.toBitmap().asImageBitmap(),
+                contentDescription = stringResource(R.string.createOptionInfo_icon_description))
         },
         shape = MaterialTheme.shapes.large,
         label = {
           Column() {
-            Text(
+              Text(
+                  text = providerInfo.displayName,
+                  style = MaterialTheme.typography.titleLarge,
+                  modifier = Modifier.padding(top = 16.dp)
+              )
+            if (createOptionInfo.userProviderDisplayName != null) {
+              Text(
+                text = createOptionInfo.userProviderDisplayName,
+                style = MaterialTheme.typography.bodyMedium)
+            }
+            if (createOptionInfo.passwordCount != null && createOptionInfo.passkeyCount != null) {
+              Text(
                 text =
-                if (providerInfo.createOptions.size > 1)
-                {stringResource(R.string.more_options_title_multiple_options,
-                  providerInfo.displayName, createOptionInfo.userProviderDisplayName)} else {
-                  stringResource(R.string.more_options_title_one_option,
-                    providerInfo.displayName)},
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(top = 16.dp)
-            )
-            Text(
-                text = stringResource(R.string.more_options_usage_data,
-                  createOptionInfo.passwordCount, createOptionInfo.passkeyCount),
+                  stringResource(
+                    R.string.more_options_usage_passwords_passkeys,
+                    createOptionInfo.passwordCount,
+                    createOptionInfo.passkeyCount
+                  ),
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(bottom = 16.dp)
-            )
+              )
+            } else if (createOptionInfo.passwordCount != null) {
+              Text(
+                text =
+                stringResource(
+                  R.string.more_options_usage_passwords,
+                  createOptionInfo.passwordCount
+                ),
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(bottom = 16.dp)
+              )
+            } else if (createOptionInfo.passkeyCount != null) {
+              Text(
+                text =
+                stringResource(
+                  R.string.more_options_usage_passkeys,
+                  createOptionInfo.passkeyCount
+                ),
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(bottom = 16.dp)
+              )
+            } else if (createOptionInfo.totalCredentialCount != null) {
+              // TODO: Handle the case when there is total count
+              // but no passwords and passkeys after design is set
+            }
           }
         }
     )
