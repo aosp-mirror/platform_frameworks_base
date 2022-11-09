@@ -168,6 +168,8 @@
     <skip />
     <string name="keyguard_face_failed" msgid="9044619102286917151">"Visage non reconnu"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"Utiliser l\'empreinte digitale"</string>
+    <!-- no translation found for keyguard_face_unlock_unavailable (8145547300240405980) -->
+    <skip />
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth connecté"</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Pourcentage de la pile inconnu."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Connecté à : <xliff:g id="BLUETOOTH">%s</xliff:g>"</string>
@@ -248,8 +250,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Luminosité"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Inversion des couleurs"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Correction des couleurs"</string>
-    <!-- no translation found for quick_settings_more_user_settings (7634653308485206306) -->
-    <skip />
+    <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Gérer les utilisateurs"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Terminé"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Fermer"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Connecté"</string>
@@ -374,6 +375,16 @@
     <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"Lorsque vous partagez, enregistrez ou diffusez une application, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> a accès à tout ce qui est affiché ou lu sur cette application. Par conséquent, soyez prudent avec les mots de passe, les détails du paiement, les messages ou toute autre information confidentielle."</string>
     <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"Continuer"</string>
     <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"Partager ou enregistrer une application"</string>
+    <!-- no translation found for media_projection_permission_dialog_system_service_title (6827129613741303726) -->
+    <skip />
+    <!-- no translation found for media_projection_permission_dialog_system_service_warning_entire_screen (8801616203805837575) -->
+    <skip />
+    <!-- no translation found for media_projection_permission_dialog_system_service_warning_single_app (543310680568419338) -->
+    <skip />
+    <!-- no translation found for screen_capturing_disabled_by_policy_dialog_title (2113331792064527203) -->
+    <skip />
+    <!-- no translation found for screen_capturing_disabled_by_policy_dialog_description (6015975736747696431) -->
+    <skip />
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Tout effacer"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Gérer"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Historique"</string>
@@ -608,8 +619,8 @@
     <string name="accessibility_status_bar_headset" msgid="2699275863720926104">"Écouteurs connectés"</string>
     <string name="data_saver" msgid="3484013368530820763">"Économiseur de données"</string>
     <string name="accessibility_data_saver_on" msgid="5394743820189757731">"La fonction Économiseur de données est activée"</string>
-    <string name="switch_bar_on" msgid="1770868129120096114">"Activé"</string>
-    <string name="switch_bar_off" msgid="5669805115416379556">"Désactivé"</string>
+    <string name="switch_bar_on" msgid="1770868129120096114">"Activée"</string>
+    <string name="switch_bar_off" msgid="5669805115416379556">"Désactivée"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Non disponible"</string>
     <string name="accessibility_tile_disabled_by_policy_action_description" msgid="6958422730461646926">"En savoir plus"</string>
     <string name="nav_bar" msgid="4642708685386136807">"Barre de navigation"</string>
