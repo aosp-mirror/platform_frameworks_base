@@ -21,6 +21,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
@@ -59,7 +60,7 @@ fun CreatePasskeyScreen(
           onCancel = viewModel::onCancel,
         )
         CreateScreenState.PROVIDER_SELECTION -> ProviderSelectionCard(
-          providerList = uiState.providers,
+          enabledProviderList = uiState.enabledProviders,
           onCancel = viewModel::onCancel,
           onProviderSelected = viewModel::onProviderSelected
         )
@@ -70,14 +71,16 @@ fun CreatePasskeyScreen(
           onOptionSelected = viewModel::onPrimaryCreateOptionInfoSelected,
           onConfirm = viewModel::onPrimaryCreateOptionInfoSelected,
           onCancel = viewModel::onCancel,
-          multiProvider = uiState.providers.size > 1,
+          multiProvider = uiState.enabledProviders.size > 1,
           onMoreOptionsSelected = viewModel::onMoreOptionsSelected
         )
         CreateScreenState.MORE_OPTIONS_SELECTION -> MoreOptionsSelectionCard(
             requestDisplayInfo = uiState.requestDisplayInfo,
-            providerList = uiState.providers,
+            enabledProviderList = uiState.enabledProviders,
+            disabledProviderList = uiState.disabledProviders,
             onBackButtonSelected = viewModel::onBackButtonSelected,
-            onOptionSelected = viewModel::onMoreOptionsRowSelected
+            onOptionSelected = viewModel::onMoreOptionsRowSelected,
+            onDisabledPasswordManagerSelected = viewModel::onDisabledPasswordManagerSelected
           )
         CreateScreenState.MORE_OPTIONS_ROW_INTRO -> MoreOptionsRowIntroCard(
           providerInfo = uiState.activeEntry?.activeProvider!!,
@@ -153,7 +156,7 @@ fun ConfirmationCard(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProviderSelectionCard(
-  providerList: List<ProviderInfo>,
+  enabledProviderList: List<EnabledProviderInfo>,
   onProviderSelected: (String) -> Unit,
   onCancel: () -> Unit
 ) {
@@ -182,7 +185,7 @@ fun ProviderSelectionCard(
         LazyColumn(
           verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
-          providerList.forEach {
+          enabledProviderList.forEach {
             item {
               ProviderRow(providerInfo = it, onProviderSelected = onProviderSelected)
             }
@@ -212,9 +215,11 @@ fun ProviderSelectionCard(
 @Composable
 fun MoreOptionsSelectionCard(
   requestDisplayInfo: RequestDisplayInfo,
-  providerList: List<ProviderInfo>,
+  enabledProviderList: List<EnabledProviderInfo>,
+  disabledProviderList: List<DisabledProviderInfo>,
   onBackButtonSelected: () -> Unit,
-  onOptionSelected: (ActiveEntry) -> Unit
+  onOptionSelected: (ActiveEntry) -> Unit,
+  onDisabledPasswordManagerSelected: () -> Unit,
 ) {
   Card() {
     Column() {
@@ -250,17 +255,23 @@ fun MoreOptionsSelectionCard(
         LazyColumn(
           verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
-          providerList.forEach { providerInfo ->
-            providerInfo.createOptions.forEach { createOptionInfo ->
+          enabledProviderList.forEach { enabledProviderInfo ->
+            enabledProviderInfo.createOptions.forEach { createOptionInfo ->
               item {
                 MoreOptionsInfoRow(
-                  providerInfo = providerInfo,
+                  providerInfo = enabledProviderInfo,
                   createOptionInfo = createOptionInfo,
                   onOptionSelected = {
-                    onOptionSelected(ActiveEntry(providerInfo, createOptionInfo))
+                    onOptionSelected(ActiveEntry(enabledProviderInfo, createOptionInfo))
                   })
               }
             }
+          }
+          item {
+            MoreOptionsDisabledProvidersRow(
+              disabledProviders = disabledProviderList,
+              onDisabledPasswordManagerSelected = onDisabledPasswordManagerSelected,
+            )
           }
         }
       }
@@ -276,7 +287,7 @@ fun MoreOptionsSelectionCard(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MoreOptionsRowIntroCard(
-  providerInfo: ProviderInfo,
+  providerInfo: EnabledProviderInfo,
   onDefaultOrNotSelected: () -> Unit,
 ) {
   Card() {
@@ -483,7 +494,7 @@ fun PrimaryCreateOptionRow(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MoreOptionsInfoRow(
-  providerInfo: ProviderInfo,
+  providerInfo: EnabledProviderInfo,
   createOptionInfo: CreateOptionInfo,
   onOptionSelected: () -> Unit
 ) {
@@ -546,4 +557,37 @@ fun MoreOptionsInfoRow(
           }
         }
     )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MoreOptionsDisabledProvidersRow(
+  disabledProviders: List<ProviderInfo>,
+  onDisabledPasswordManagerSelected: () -> Unit,
+) {
+  SuggestionChip(
+    modifier = Modifier.fillMaxWidth(),
+    onClick = onDisabledPasswordManagerSelected,
+    icon = {
+      Icon(
+        Icons.Filled.Add,
+        contentDescription = null
+      )
+    },
+    shape = MaterialTheme.shapes.large,
+    label = {
+      Column() {
+        Text(
+          text = stringResource(R.string.other_password_manager),
+          style = MaterialTheme.typography.titleLarge,
+          modifier = Modifier.padding(top = 16.dp)
+        )
+        Text(
+          text = disabledProviders.joinToString(separator = ", "){ it.displayName },
+          style = MaterialTheme.typography.bodyMedium,
+          modifier = Modifier.padding(bottom = 16.dp)
+        )
+      }
+    }
+  )
 }

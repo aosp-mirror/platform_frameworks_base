@@ -28,6 +28,7 @@ import android.credentials.ui.Constants
 import android.credentials.ui.Entry
 import android.credentials.ui.CreateCredentialProviderData
 import android.credentials.ui.GetCredentialProviderData
+import android.credentials.ui.DisabledProviderData
 import android.credentials.ui.ProviderData
 import android.credentials.ui.RequestInfo
 import android.credentials.ui.BaseDialogResult
@@ -39,7 +40,7 @@ import android.os.ResultReceiver
 import com.android.credentialmanager.createflow.ActiveEntry
 import com.android.credentialmanager.createflow.CreatePasskeyUiState
 import com.android.credentialmanager.createflow.CreateScreenState
-import com.android.credentialmanager.createflow.ProviderInfo
+import com.android.credentialmanager.createflow.EnabledProviderInfo
 import com.android.credentialmanager.createflow.RequestDisplayInfo
 import com.android.credentialmanager.getflow.GetCredentialUiState
 import com.android.credentialmanager.getflow.GetScreenState
@@ -51,7 +52,8 @@ class CredentialManagerRepo(
   intent: Intent,
 ) {
   private val requestInfo: RequestInfo
-  private val providerList: List<ProviderData>
+  private val providerEnabledList: List<ProviderData>
+  private val providerDisabledList: List<DisabledProviderData>
   // TODO: require non-null.
   val resultReceiver: ResultReceiver?
 
@@ -61,22 +63,28 @@ class CredentialManagerRepo(
       RequestInfo::class.java
     ) ?: testCreateRequestInfo()
 
-    providerList = when (requestInfo.type) {
+    providerEnabledList = when (requestInfo.type) {
       RequestInfo.TYPE_CREATE ->
         intent.extras?.getParcelableArrayList(
                 ProviderData.EXTRA_ENABLED_PROVIDER_DATA_LIST,
                 CreateCredentialProviderData::class.java
-        ) ?: testCreateCredentialProviderList()
+        ) ?: testCreateCredentialEnabledProviderList()
       RequestInfo.TYPE_GET ->
         intent.extras?.getParcelableArrayList(
           ProviderData.EXTRA_ENABLED_PROVIDER_DATA_LIST,
-          GetCredentialProviderData::class.java
+          DisabledProviderData::class.java
         ) ?: testGetCredentialProviderList()
       else -> {
         // TODO: fail gracefully
         throw IllegalStateException("Unrecognized request type: ${requestInfo.type}")
       }
     }
+
+    providerDisabledList =
+      intent.extras?.getParcelableArrayList(
+        ProviderData.EXTRA_DISABLED_PROVIDER_DATA_LIST,
+        DisabledProviderData::class.java
+      ) ?: testDisabledProviderList()
 
     resultReceiver = intent.getParcelableExtra(
       Constants.EXTRA_RESULT_RECEIVER,
@@ -103,25 +111,28 @@ class CredentialManagerRepo(
   }
 
   fun getCredentialInitialUiState(): GetCredentialUiState {
-    val providerList = GetFlowUtils.toProviderList(
+    val providerEnabledList = GetFlowUtils.toProviderList(
     // TODO: handle runtime cast error
-    providerList as List<GetCredentialProviderData>, context)
+      providerEnabledList as List<GetCredentialProviderData>, context)
     // TODO: covert from real requestInfo
     val requestDisplayInfo = com.android.credentialmanager.getflow.RequestDisplayInfo("tribank")
     return GetCredentialUiState(
-      providerList,
+      providerEnabledList,
       GetScreenState.PRIMARY_SELECTION,
       requestDisplayInfo,
     )
   }
 
   fun createPasskeyInitialUiState(): CreatePasskeyUiState {
-    val providerList = CreateFlowUtils.toProviderList(
+    val providerEnabledList = CreateFlowUtils.toEnabledProviderList(
       // Handle runtime cast error
-      providerList as List<CreateCredentialProviderData>, context)
+      providerEnabledList as List<CreateCredentialProviderData>, context)
+    val providerDisabledList = CreateFlowUtils.toDisabledProviderList(
+      // Handle runtime cast error
+      providerDisabledList as List<DisabledProviderData>, context)
     var hasDefault = false
-    var defaultProvider: ProviderInfo = providerList.first()
-    providerList.forEach{providerInfo -> providerInfo.createOptions =
+    var defaultProvider: EnabledProviderInfo = providerEnabledList.first()
+    providerEnabledList.forEach{providerInfo -> providerInfo.createOptions =
       providerInfo.createOptions.sortedWith(compareBy { it.lastUsedTimeMillis }).reversed()
       if (providerInfo.isDefault) {hasDefault = true; defaultProvider = providerInfo} }
     // TODO: covert from real requestInfo
@@ -131,7 +142,8 @@ class CredentialManagerRepo(
       TYPE_PUBLIC_KEY_CREDENTIAL,
       "tribank")
     return CreatePasskeyUiState(
-      providers = providerList,
+      enabledProviders = providerEnabledList,
+      disabledProviders = providerDisabledList,
       if (hasDefault)
       {CreateScreenState.CREATION_OPTION_SELECTION} else {CreateScreenState.PASSKEY_INTRO},
       requestDisplayInfo,
@@ -157,7 +169,7 @@ class CredentialManagerRepo(
   }
 
   // TODO: below are prototype functionalities. To be removed for productionization.
-  private fun testCreateCredentialProviderList(): List<CreateCredentialProviderData> {
+  private fun testCreateCredentialEnabledProviderList(): List<CreateCredentialProviderData> {
     return listOf(
       CreateCredentialProviderData
         .Builder("com.google/com.google.CredentialManagerService")
@@ -182,6 +194,13 @@ class CredentialManagerRepo(
           )
         )
         .build(),
+    )
+  }
+
+  private fun testDisabledProviderList(): List<DisabledProviderData> {
+    return listOf(
+      DisabledProviderData("LastPass"),
+      DisabledProviderData("Xyzinstalledbutdisabled"),
     )
   }
 
