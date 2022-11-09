@@ -1157,6 +1157,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     Slog.w(TAG, "WallpaperService is not connected yet");
                     return;
                 }
+                TimingsTraceAndSlog t = new TimingsTraceAndSlog(TAG);
+                t.traceBegin("WPMS.connectLocked-" + wallpaper.wallpaperComponent);
                 if (DEBUG) Slog.v(TAG, "Adding window token: " + mToken);
                 mWindowManagerInternal.addWindowToken(mToken, TYPE_WALLPAPER, mDisplayId,
                         null /* options */);
@@ -1173,6 +1175,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                                 false /* fromUser */, wallpaper, null /* reply */);
                     }
                 }
+                t.traceEnd();
             }
 
             void disconnectLocked() {
@@ -1322,6 +1325,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
+            TimingsTraceAndSlog t = new TimingsTraceAndSlog(TAG);
+            t.traceBegin("WPMS.onServiceConnected-" + name);
             synchronized (mLock) {
                 if (mWallpaper.connection == this) {
                     mService = IWallpaperService.Stub.asInterface(service);
@@ -1337,6 +1342,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     mContext.getMainThreadHandler().removeCallbacks(mTryToRebindRunnable);
                 }
             }
+            t.traceEnd();
         }
 
         @Override
@@ -1544,6 +1550,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         public void engineShown(IWallpaperEngine engine) {
             synchronized (mLock) {
                 if (mReply != null) {
+                    TimingsTraceAndSlog t = new TimingsTraceAndSlog(TAG);
+                    t.traceBegin("WPMS.mReply.sendResult");
                     final long ident = Binder.clearCallingIdentity();
                     try {
                         mReply.sendResult(null);
@@ -1551,6 +1559,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                         Binder.restoreCallingIdentity(ident);
                         Slog.d(TAG, "failed to send callback!", e);
                     }
+                    t.traceEnd();
                     mReply = null;
                 }
             }
@@ -3049,6 +3058,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             return true;
         }
 
+        TimingsTraceAndSlog t = new TimingsTraceAndSlog(TAG);
+        t.traceBegin("WPMS.bindWallpaperComponentLocked-" + componentName);
         try {
             if (componentName == null) {
                 componentName = mDefaultWallpaperComponent;
@@ -3181,6 +3192,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             }
             Slog.w(TAG, msg);
             return false;
+        } finally {
+            t.traceEnd();
         }
         return true;
     }
@@ -3225,7 +3238,10 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     }
 
     private void attachServiceLocked(WallpaperConnection conn, WallpaperData wallpaper) {
+        TimingsTraceAndSlog t = new TimingsTraceAndSlog(TAG);
+        t.traceBegin("WPMS.attachServiceLocked");
         conn.forEachDisplayConnector(connector-> connector.connectLocked(conn, wallpaper));
+        t.traceEnd();
     }
 
     private void notifyCallbacksLocked(WallpaperData wallpaper) {
@@ -3351,6 +3367,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     }
 
     void saveSettingsLocked(int userId) {
+        TimingsTraceAndSlog t = new TimingsTraceAndSlog(TAG);
+        t.traceBegin("WPMS.saveSettingsLocked-" + userId);
         JournaledFile journal = makeJournaledFile(userId);
         FileOutputStream fstream = null;
         try {
@@ -3379,6 +3397,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             IoUtils.closeQuietly(fstream);
             journal.rollback();
         }
+        t.traceEnd();
     }
 
 
