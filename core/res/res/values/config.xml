@@ -4410,6 +4410,10 @@
         or empty if the default should be used. -->
     <string translatable="false" name="config_deviceSpecificDeviceStatePolicyProvider"></string>
 
+    <!-- Class name of the device specific implementation of InputMethodManagerService
+        or empty if the default should be used. -->
+    <string translatable="false" name="config_deviceSpecificInputMethodManagerService"></string>
+
     <!-- Component name of media projection permission dialog -->
     <string name="config_mediaProjectionPermissionDialogComponent" translatable="false">com.android.systemui/com.android.systemui.media.MediaProjectionPermissionActivity</string>
 
