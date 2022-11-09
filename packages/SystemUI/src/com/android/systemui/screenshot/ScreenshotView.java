@@ -80,6 +80,7 @@ import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 
@@ -137,6 +138,8 @@ public class ScreenshotView extends FrameLayout implements
 
     private ImageView mScrollingScrim;
     private DraggableConstraintLayout mScreenshotStatic;
+    private ViewGroup mMessageContainer;
+    private TextView mMessageContent;
     private ImageView mScreenshotPreview;
     private ImageView mScreenshotBadge;
     private View mScreenshotPreviewBorder;
@@ -340,10 +343,26 @@ public class ScreenshotView extends FrameLayout implements
         }
     }
 
+    /**
+     * Show a notification under the screenshot view indicating that a work profile screenshot has
+     * been taken and which app can be used to view it.
+     *
+     * @param appName The name of the app to use to view screenshots
+     */
+    void showWorkProfileMessage(String appName) {
+        mMessageContent.setText(
+                mContext.getString(R.string.screenshot_work_profile_notification, appName));
+        mMessageContainer.setVisibility(VISIBLE);
+    }
+
     @Override // View
     protected void onFinishInflate() {
         mScrollingScrim = requireNonNull(findViewById(R.id.screenshot_scrolling_scrim));
         mScreenshotStatic = requireNonNull(findViewById(R.id.screenshot_static));
+        mMessageContainer =
+                requireNonNull(mScreenshotStatic.findViewById(R.id.screenshot_message_container));
+        mMessageContent =
+                requireNonNull(mMessageContainer.findViewById(R.id.screenshot_message_content));
         mScreenshotPreview = requireNonNull(findViewById(R.id.screenshot_preview));
 
         mScreenshotPreviewBorder = requireNonNull(
