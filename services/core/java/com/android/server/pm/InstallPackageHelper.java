@@ -174,6 +174,7 @@ import com.android.server.pm.pkg.component.ParsedPermission;
 import com.android.server.pm.pkg.component.ParsedPermissionGroup;
 import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.server.rollback.RollbackManagerInternal;
+import com.android.server.security.FileIntegrityService;
 import com.android.server.utils.WatchedArrayMap;
 import com.android.server.utils.WatchedLongSparseArray;
 
@@ -1836,6 +1837,7 @@ final class InstallPackageHelper {
             }
         }
 
+        var fis = FileIntegrityService.getService();
         for (Map.Entry<String, String> entry : fsverityCandidates.entrySet()) {
             try {
                 final String filePath = entry.getKey();
@@ -1843,13 +1845,16 @@ final class InstallPackageHelper {
                     continue;
                 }
 
-                // Set up fs-verity with optional signature.
+                VerityUtils.setUpFsverity(filePath, (byte[]) null);
+
+                // Verify fs-verity signature if exists.
                 final String signaturePath = entry.getValue();
-                String optionalSignaturePath = null;
                 if (new File(signaturePath).exists()) {
-                    optionalSignaturePath = signaturePath;
+                    if (!fis.verifyPkcs7DetachedSignature(signaturePath, filePath)) {
+                        throw new PrepareFailure(PackageManager.INSTALL_FAILED_BAD_SIGNATURE,
+                                "fs-verity signature does not verify against a known key");
+                    }
                 }
-                VerityUtils.setUpFsverity(filePath, optionalSignaturePath);
             } catch (IOException e) {
                 throw new PrepareFailure(PackageManager.INSTALL_FAILED_BAD_SIGNATURE,
                         "Failed to enable fs-verity: " + e);
