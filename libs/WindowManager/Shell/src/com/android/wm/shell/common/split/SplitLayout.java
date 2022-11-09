@@ -448,7 +448,8 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
      */
     void updateDivideBounds(int position) {
         updateBounds(position);
-        mSplitLayoutHandler.onLayoutSizeChanging(this);
+        mSplitLayoutHandler.onLayoutSizeChanging(this, mSurfaceEffectPolicy.mParallaxOffset.x,
+                mSurfaceEffectPolicy.mParallaxOffset.y);
     }
 
     void setDividePosition(int position, boolean applyLayoutChange) {
@@ -811,7 +812,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
          * @see #applySurfaceChanges(SurfaceControl.Transaction, SurfaceControl, SurfaceControl,
          * SurfaceControl, SurfaceControl, boolean)
          */
-        void onLayoutSizeChanging(SplitLayout layout);
+        void onLayoutSizeChanging(SplitLayout layout, int offsetX, int offsetY);
 
         /**
          * Calls when finish resizing the split bounds.
