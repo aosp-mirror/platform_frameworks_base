@@ -1638,7 +1638,16 @@ public class DisplayPolicy {
      */
     private void applyKeyguardPolicy(WindowState win, WindowState imeTarget) {
         if (win.canBeHiddenByKeyguard()) {
-            if (shouldBeHiddenByKeyguard(win, imeTarget)) {
+            final boolean shouldBeHiddenByKeyguard = shouldBeHiddenByKeyguard(win, imeTarget);
+            if (win.mIsImWindow) {
+                // Notify IME insets provider to freeze the IME insets. In case when turning off
+                // the screen, the IME insets source window will be hidden because of keyguard
+                // policy change and affects the system to freeze the last insets state. (And
+                // unfreeze when the IME is going to show)
+                mDisplayContent.getInsetsStateController().getImeSourceProvider().setFrozen(
+                        shouldBeHiddenByKeyguard);
+            }
+            if (shouldBeHiddenByKeyguard) {
                 win.hide(false /* doAnimation */, true /* requestAnim */);
             } else {
                 win.show(false /* doAnimation */, true /* requestAnim */);
