@@ -16,6 +16,7 @@
 
 package com.android.systemui.keyguard.data.repository
 
+import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.common.shared.model.Position
@@ -123,6 +124,11 @@ interface KeyguardRepository {
      * Sets the relative offset of the lock-screen clock from its natural position on the screen.
      */
     fun setClockPosition(x: Int, y: Int)
+
+    /**
+     * Returns whether the keyguard bottom area should be constrained to the top of the lock icon
+     */
+    fun isUdfpsSupported(): Boolean
 }
 
 /** Encapsulates application state for the keyguard. */
@@ -130,11 +136,12 @@ interface KeyguardRepository {
 class KeyguardRepositoryImpl
 @Inject
 constructor(
-    statusBarStateController: StatusBarStateController,
-    private val keyguardStateController: KeyguardStateController,
-    dozeHost: DozeHost,
-    wakefulnessLifecycle: WakefulnessLifecycle,
-    biometricUnlockController: BiometricUnlockController,
+        statusBarStateController: StatusBarStateController,
+        dozeHost: DozeHost,
+        wakefulnessLifecycle: WakefulnessLifecycle,
+        biometricUnlockController: BiometricUnlockController,
+        private val keyguardStateController: KeyguardStateController,
+        private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
 ) : KeyguardRepository {
     private val _animateBottomAreaDozingTransitions = MutableStateFlow(false)
     override val animateBottomAreaDozingTransitions =
@@ -310,6 +317,8 @@ constructor(
     override fun setClockPosition(x: Int, y: Int) {
         _clockPosition.value = Position(x, y)
     }
+
+    override fun isUdfpsSupported(): Boolean = keyguardUpdateMonitor.isUdfpsSupported
 
     private fun statusBarStateIntToObject(value: Int): StatusBarState {
         return when (value) {

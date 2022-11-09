@@ -43,8 +43,8 @@ public class UdfpsEnrollView extends UdfpsAnimationView {
 
     public UdfpsEnrollView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-        mFingerprintDrawable = new UdfpsEnrollDrawable(mContext);
-        mFingerprintProgressDrawable = new UdfpsEnrollProgressBarDrawable(context);
+        mFingerprintDrawable = new UdfpsEnrollDrawable(mContext, attrs);
+        mFingerprintProgressDrawable = new UdfpsEnrollProgressBarDrawable(context, attrs);
         mHandler = new Handler(Looper.getMainLooper());
     }
 
