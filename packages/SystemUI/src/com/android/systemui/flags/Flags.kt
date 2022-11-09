@@ -178,9 +178,6 @@ object Flags {
             "qs_user_detail_shortcut"
         )
 
-    // TODO(b/254512747): Tracking Bug
-    val NEW_HEADER = releasedFlag(505, "new_header")
-
     // TODO(b/254512383): Tracking Bug
     @JvmField
     val FULL_SCREEN_USER_SWITCHER =

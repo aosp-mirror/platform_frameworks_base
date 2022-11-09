@@ -43,7 +43,7 @@ class CombinedShadeHeaderConstraintsTest : SysuiTestCase() {
             load(context, context.resources.getXml(R.xml.qqs_header))
         }
         qsConstraint = ConstraintSet().apply {
-            load(context, context.resources.getXml(R.xml.qs_header_new))
+            load(context, context.resources.getXml(R.xml.qs_header))
         }
         largeScreenConstraint = ConstraintSet().apply {
             load(context, context.resources.getXml(R.xml.large_screen_shade_header))
