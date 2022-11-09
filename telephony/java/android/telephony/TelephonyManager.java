@@ -17339,7 +17339,7 @@ public class TelephonyManager {
      * Subsequent attempts will return the same error until the request is made on the default
      * data subscription.
      */
-    public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_NOT_DEFAULT_DATA_SUB = 14;
+    public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_NOT_DEFAULT_DATA_SUBSCRIPTION = 14;
 
     /**
      * Purchase premium capability was successful and is waiting for the network to setup the
@@ -17369,7 +17369,7 @@ public class TelephonyManager {
             PURCHASE_PREMIUM_CAPABILITY_RESULT_FEATURE_NOT_SUPPORTED,
             PURCHASE_PREMIUM_CAPABILITY_RESULT_NETWORK_NOT_AVAILABLE,
             PURCHASE_PREMIUM_CAPABILITY_RESULT_ENTITLEMENT_CHECK_FAILED,
-            PURCHASE_PREMIUM_CAPABILITY_RESULT_NOT_DEFAULT_DATA_SUB,
+            PURCHASE_PREMIUM_CAPABILITY_RESULT_NOT_DEFAULT_DATA_SUBSCRIPTION,
             PURCHASE_PREMIUM_CAPABILITY_RESULT_PENDING_NETWORK_SETUP})
     public @interface PurchasePremiumCapabilityResult {}
 
@@ -17409,8 +17409,8 @@ public class TelephonyManager {
                 return "NETWORK_NOT_AVAILABLE";
             case PURCHASE_PREMIUM_CAPABILITY_RESULT_ENTITLEMENT_CHECK_FAILED:
                 return "ENTITLEMENT_CHECK_FAILED";
-            case PURCHASE_PREMIUM_CAPABILITY_RESULT_NOT_DEFAULT_DATA_SUB:
-                return "NOT_DEFAULT_DATA_SUB";
+            case PURCHASE_PREMIUM_CAPABILITY_RESULT_NOT_DEFAULT_DATA_SUBSCRIPTION:
+                return "NOT_DEFAULT_DATA_SUBSCRIPTION";
             case PURCHASE_PREMIUM_CAPABILITY_RESULT_PENDING_NETWORK_SETUP:
                 return "PENDING_NETWORK_SETUP";
             default:

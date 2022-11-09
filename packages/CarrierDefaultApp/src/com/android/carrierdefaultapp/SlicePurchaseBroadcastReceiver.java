@@ -173,7 +173,7 @@ public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
                 && isPendingIntentValid(intent, SlicePurchaseController.EXTRA_INTENT_CARRIER_ERROR)
                 && isPendingIntentValid(intent, SlicePurchaseController.EXTRA_INTENT_REQUEST_FAILED)
                 && isPendingIntentValid(intent,
-                        SlicePurchaseController.EXTRA_INTENT_NOT_DEFAULT_DATA_SUB)
+                        SlicePurchaseController.EXTRA_INTENT_NOT_DEFAULT_DATA_SUBSCRIPTION)
                 && isPendingIntentValid(intent, SlicePurchaseController.EXTRA_INTENT_SUCCESS);
     }
 
@@ -204,8 +204,8 @@ public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
             case SlicePurchaseController.EXTRA_INTENT_CANCELED: return "canceled";
             case SlicePurchaseController.EXTRA_INTENT_CARRIER_ERROR: return "carrier error";
             case SlicePurchaseController.EXTRA_INTENT_REQUEST_FAILED: return "request failed";
-            case SlicePurchaseController.EXTRA_INTENT_NOT_DEFAULT_DATA_SUB:
-                return "not default data sub";
+            case SlicePurchaseController.EXTRA_INTENT_NOT_DEFAULT_DATA_SUBSCRIPTION:
+                return "not default data subscription";
             case SlicePurchaseController.EXTRA_INTENT_SUCCESS: return "success";
             default: {
                 loge("Unknown pending intent extra: " + extra);
