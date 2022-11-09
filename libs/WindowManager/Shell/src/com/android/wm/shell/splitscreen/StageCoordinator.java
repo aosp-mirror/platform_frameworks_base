@@ -1097,7 +1097,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             activityTaskManagerService.setFocusedTask(getTaskId(stageToFocus));
         } catch (RemoteException | NullPointerException e) {
             ProtoLog.e(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
-                    "%s: Unable to update focus on the chosen stage, %s", TAG, e);
+                    "Unable to update focus on the chosen stage: %s", e.getMessage());
         }
     }
 
@@ -1434,14 +1434,14 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         }
 
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
-                "%s: Request to %s divider bar from %s.", TAG,
+                "Request to %s divider bar from %s.",
                 (visible ? "show" : "hide"), Debug.getCaller());
 
         // Defer showing divider bar after keyguard dismissed, so it won't interfere with keyguard
         // dismissing animation.
         if (visible && mKeyguardShowing) {
             ProtoLog.d(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
-                    "%s:   Defer showing divider bar due to keyguard showing.", TAG);
+                    "   Defer showing divider bar due to keyguard showing.");
             return;
         }
 
@@ -1450,7 +1450,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
         if (mIsDividerRemoteAnimating) {
             ProtoLog.d(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
-                    "%s:   Skip animating divider bar due to it's remote animating.", TAG);
+                    "   Skip animating divider bar due to it's remote animating.");
             return;
         }
 
@@ -1465,12 +1465,12 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         final SurfaceControl dividerLeash = mSplitLayout.getDividerLeash();
         if (dividerLeash == null) {
             ProtoLog.d(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
-                    "%s:   Skip animating divider bar due to divider leash not ready.", TAG);
+                    "   Skip animating divider bar due to divider leash not ready.");
             return;
         }
         if (mIsDividerRemoteAnimating) {
             ProtoLog.d(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
-                    "%s:   Skip animating divider bar due to it's remote animating.", TAG);
+                    "   Skip animating divider bar due to it's remote animating.");
             return;
         }
 
