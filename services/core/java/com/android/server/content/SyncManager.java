@@ -27,6 +27,7 @@ import android.accounts.AccountManager;
 import android.accounts.AccountManagerInternal;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.UserIdInt;
 import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
@@ -65,6 +66,7 @@ import android.content.pm.RegisteredServicesCache;
 import android.content.pm.RegisteredServicesCacheListener;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
+import android.content.pm.UserProperties;
 import android.database.ContentObserver;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -88,6 +90,7 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.WorkSource;
+import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.text.format.TimeMigrationUtils;
@@ -800,9 +803,43 @@ public class SyncManager {
         return mSyncStorageEngine;
     }
 
+    @SuppressLint("AndroidFrameworkRequiresPermission")
+    private boolean areContactWritesEnabledForUser(UserInfo userInfo) {
+        final UserManager um = UserManager.get(mContext);
+        try {
+            final UserProperties userProperties = um.getUserProperties(userInfo.getUserHandle());
+            return !userProperties.getUseParentsContacts();
+        } catch (IllegalArgumentException e) {
+            Log.w(TAG, "Trying to fetch user properties for non-existing/partial user "
+                    + userInfo.getUserHandle());
+            return false;
+        }
+    }
+
+    /**
+     * Check if account sync should be disabled for the given user and provider.
+     * @param userInfo
+     * @param providerName
+     * @return true if sync for the account corresponding to the given user and provider should be
+     * disabled, false otherwise. Also returns false if either of the inputs are null.
+     */
+    private boolean shouldDisableSyncForUser(UserInfo userInfo, String providerName) {
+        if (userInfo == null || providerName == null) return false;
+        return providerName.equals(ContactsContract.AUTHORITY)
+                && !areContactWritesEnabledForUser(userInfo);
+    }
+
     private int getIsSyncable(Account account, int userId, String providerName) {
         int isSyncable = mSyncStorageEngine.getIsSyncable(account, userId, providerName);
-        UserInfo userInfo = UserManager.get(mContext).getUserInfo(userId);
+        final UserManager um = UserManager.get(mContext);
+        UserInfo userInfo = um.getUserInfo(userId);
+
+        // Check if the provider is allowed to sync data from linked accounts for the user
+        if (shouldDisableSyncForUser(userInfo, providerName)) {
+            Log.w(TAG, "Account sync is disabled for account: " + account
+                    + " userId: " + userId + " provider: " + providerName);
+            return AuthorityInfo.NOT_SYNCABLE;
+        }
 
         // If it's not a restricted user, return isSyncable.
         if (userInfo == null || !userInfo.isRestricted()) return isSyncable;
