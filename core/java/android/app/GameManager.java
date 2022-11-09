@@ -279,4 +279,25 @@ public final class GameManager {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * Updates the config for the game's {@link #GAME_MODE_CUSTOM} mode.
+     * <p>
+     * The caller must have {@link android.Manifest.permission#MANAGE_GAME_MODE}.
+     *
+     * @param gameModeConfig The configuration to use for game mode interventions
+     * @hide
+     */
+    @SystemApi
+    @UserHandleAware
+    @RequiresPermission(Manifest.permission.MANAGE_GAME_MODE)
+    public void updateCustomGameModeConfiguration(@NonNull String packageName,
+            @NonNull GameModeConfiguration gameModeConfig) {
+        try {
+            mService.updateCustomGameModeConfiguration(packageName, gameModeConfig,
+                    mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }

@@ -40,6 +40,7 @@ import static org.mockito.Mockito.when;
 import android.Manifest;
 import android.annotation.Nullable;
 import android.app.GameManager;
+import android.app.GameModeConfiguration;
 import android.app.GameModeInfo;
 import android.app.GameState;
 import android.content.BroadcastReceiver;
@@ -1261,6 +1262,15 @@ public class GameManagerServiceTests {
         checkReportedAvailableGameModes(gameManagerService, GameManager.GAME_MODE_PERFORMANCE,
                 GameManager.GAME_MODE_BATTERY, GameManager.GAME_MODE_STANDARD);
         checkReportedOptedInGameModes(gameManagerService);
+
+        assertEquals(new GameModeConfiguration.Builder()
+                .setFpsOverride(30)
+                .setScalingFactor(0.7f)
+                .build(), gameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_BATTERY));
+        assertEquals(new GameModeConfiguration.Builder()
+                .setFpsOverride(90)
+                .setScalingFactor(0.5f)
+                .build(), gameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_PERFORMANCE));
     }
 
     @Test
@@ -1278,6 +1288,9 @@ public class GameManagerServiceTests {
         checkReportedAvailableGameModes(gameManagerService,
                 GameManager.GAME_MODE_BATTERY, GameManager.GAME_MODE_STANDARD);
         checkReportedOptedInGameModes(gameManagerService);
+
+        assertNotNull(gameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_BATTERY));
+        assertNull(gameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_PERFORMANCE));
     }
 
     @Test
@@ -1294,6 +1307,9 @@ public class GameManagerServiceTests {
         checkReportedAvailableGameModes(gameManagerService,
                 GameManager.GAME_MODE_PERFORMANCE, GameManager.GAME_MODE_STANDARD);
         checkReportedOptedInGameModes(gameManagerService);
+
+        assertNotNull(gameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_PERFORMANCE));
+        assertNull(gameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_BATTERY));
     }
 
     @Test
@@ -1307,6 +1323,9 @@ public class GameManagerServiceTests {
 
         assertEquals(GameManager.GAME_MODE_UNSUPPORTED, gameModeInfo.getActiveGameMode());
         checkReportedAvailableGameModes(gameManagerService);
+
+        assertNull(gameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_BATTERY));
+        assertNull(gameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_PERFORMANCE));
     }
 
     @Test
@@ -1319,6 +1338,9 @@ public class GameManagerServiceTests {
         GameModeInfo gameModeInfo = gameManagerService.getGameModeInfo(mPackageName, USER_ID_1);
         assertEquals(GameManager.GAME_MODE_STANDARD, gameModeInfo.getActiveGameMode());
         verifyAllModesOptedInAndInterventionsAvailable(gameManagerService, gameModeInfo);
+
+        assertNull(gameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_BATTERY));
+        assertNull(gameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_PERFORMANCE));
     }
 
     @Test
@@ -1331,6 +1353,9 @@ public class GameManagerServiceTests {
         GameModeInfo gameModeInfo = gameManagerService.getGameModeInfo(mPackageName, USER_ID_1);
         assertEquals(GameManager.GAME_MODE_STANDARD, gameModeInfo.getActiveGameMode());
         verifyAllModesOptedInAndInterventionsAvailable(gameManagerService, gameModeInfo);
+
+        assertNull(gameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_BATTERY));
+        assertNull(gameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_PERFORMANCE));
     }
 
     private void verifyAllModesOptedInAndInterventionsAvailable(
@@ -1358,6 +1383,9 @@ public class GameManagerServiceTests {
         checkReportedAvailableGameModes(gameManagerService, GameManager.GAME_MODE_BATTERY,
                 GameManager.GAME_MODE_STANDARD);
         checkReportedOptedInGameModes(gameManagerService, GameManager.GAME_MODE_BATTERY);
+
+        assertNull(gameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_BATTERY));
+        assertNull(gameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_PERFORMANCE));
     }
 
     @Test
@@ -1373,6 +1401,9 @@ public class GameManagerServiceTests {
         checkReportedAvailableGameModes(gameManagerService, GameManager.GAME_MODE_PERFORMANCE,
                 GameManager.GAME_MODE_BATTERY, GameManager.GAME_MODE_STANDARD);
         checkReportedOptedInGameModes(gameManagerService, GameManager.GAME_MODE_PERFORMANCE);
+
+        assertNotNull(gameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_BATTERY));
+        assertNull(gameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_PERFORMANCE));
     }
 
     @Test
@@ -1694,6 +1725,33 @@ public class GameManagerServiceTests {
         assertThrows(IllegalArgumentException.class, () -> {
             gameManagerService.getResolutionScalingFactor(mPackageName,
                     GameManager.GAME_MODE_BATTERY, USER_ID_1);
+        });
+    }
+
+    @Test
+    public void testUpdateCustomGameModeConfiguration_permissionDenied() {
+        mockModifyGameModeDenied();
+        mockDeviceConfigAll();
+        GameManagerService gameManagerService =
+                new GameManagerService(mMockContext, mTestLooper.getLooper());
+        startUser(gameManagerService, USER_ID_1);
+        assertThrows(SecurityException.class, () -> {
+            gameManagerService.updateCustomGameModeConfiguration(mPackageName,
+                    new GameModeConfiguration.Builder().setScalingFactor(0.5f).build(),
+                    USER_ID_1);
+        });
+    }
+
+    @Test
+    public void testUpdateCustomGameModeConfiguration_noUserId() {
+        mockModifyGameModeGranted();
+        GameManagerService gameManagerService =
+                new GameManagerService(mMockContext, mTestLooper.getLooper());
+        startUser(gameManagerService, USER_ID_2);
+        assertThrows(IllegalArgumentException.class, () -> {
+            gameManagerService.updateCustomGameModeConfiguration(mPackageName,
+                    new GameModeConfiguration.Builder().setScalingFactor(0.5f).build(),
+                    USER_ID_1);
         });
     }
 

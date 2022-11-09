@@ -811,6 +811,7 @@ package android.app {
   public final class GameManager {
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_GAME_MODE) public android.app.GameModeInfo getGameModeInfo(@NonNull String);
     method @RequiresPermission(android.Manifest.permission.MANAGE_GAME_MODE) public void setGameMode(@NonNull String, int);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_GAME_MODE) public void updateCustomGameModeConfiguration(@NonNull String, @NonNull android.app.GameModeConfiguration);
   }
 
   public final class GameModeConfiguration implements android.os.Parcelable {
