@@ -343,6 +343,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     private static class TestableNotificationManagerService extends NotificationManagerService {
         int countSystemChecks = 0;
         boolean isSystemUid = true;
+        boolean isSystemAppId = true;
         int countLogSmartSuggestionsVisible = 0;
         @Nullable
         NotificationAssistantAccessGrantedCallback mNotificationAssistantAccessGrantedCallback;
@@ -363,6 +364,12 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         protected boolean isCallingUidSystem() {
             countSystemChecks++;
             return isSystemUid;
+        }
+
+        @Override
+        protected boolean isCallingAppIdSystem() {
+            countSystemChecks++;
+            return isSystemUid || isSystemAppId;
         }
 
         @Override
@@ -6828,6 +6835,65 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         rule = new AutomaticZenRule("test", owner, owner, mock(Uri.class),
                 null, NotificationManager.INTERRUPTION_FILTER_NONE, isEnabled);
         mBinderService.addAutomaticZenRule(rule, mContext.getPackageName());
+    }
+
+    @Test
+    public void testAddAutomaticZenRule_systemCallTakesPackageFromOwner() throws Exception {
+        mService.isSystemUid = true;
+        ZenModeHelper mockZenModeHelper = mock(ZenModeHelper.class);
+        when(mConditionProviders.isPackageOrComponentAllowed(anyString(), anyInt()))
+                .thenReturn(true);
+        mService.setZenHelper(mockZenModeHelper);
+        ComponentName owner = new ComponentName("android", "ProviderName");
+        ZenPolicy zenPolicy = new ZenPolicy.Builder().allowAlarms(true).build();
+        boolean isEnabled = true;
+        AutomaticZenRule rule = new AutomaticZenRule("test", owner, owner, mock(Uri.class),
+                zenPolicy, NotificationManager.INTERRUPTION_FILTER_PRIORITY, isEnabled);
+        mBinderService.addAutomaticZenRule(rule, "com.android.settings");
+
+        // verify that zen mode helper gets passed in a package name of "android"
+        verify(mockZenModeHelper).addAutomaticZenRule(eq("android"), eq(rule), anyString());
+    }
+
+    @Test
+    public void testAddAutomaticZenRule_systemAppIdCallTakesPackageFromOwner() throws Exception {
+        // The multi-user case: where the calling uid doesn't match the system uid, but the calling
+        // *appid* is the system.
+        mService.isSystemUid = false;
+        mService.isSystemAppId = true;
+        ZenModeHelper mockZenModeHelper = mock(ZenModeHelper.class);
+        when(mConditionProviders.isPackageOrComponentAllowed(anyString(), anyInt()))
+                .thenReturn(true);
+        mService.setZenHelper(mockZenModeHelper);
+        ComponentName owner = new ComponentName("android", "ProviderName");
+        ZenPolicy zenPolicy = new ZenPolicy.Builder().allowAlarms(true).build();
+        boolean isEnabled = true;
+        AutomaticZenRule rule = new AutomaticZenRule("test", owner, owner, mock(Uri.class),
+                zenPolicy, NotificationManager.INTERRUPTION_FILTER_PRIORITY, isEnabled);
+        mBinderService.addAutomaticZenRule(rule, "com.android.settings");
+
+        // verify that zen mode helper gets passed in a package name of "android"
+        verify(mockZenModeHelper).addAutomaticZenRule(eq("android"), eq(rule), anyString());
+    }
+
+    @Test
+    public void testAddAutomaticZenRule_nonSystemCallTakesPackageFromArg() throws Exception {
+        mService.isSystemUid = false;
+        mService.isSystemAppId = false;
+        ZenModeHelper mockZenModeHelper = mock(ZenModeHelper.class);
+        when(mConditionProviders.isPackageOrComponentAllowed(anyString(), anyInt()))
+                .thenReturn(true);
+        mService.setZenHelper(mockZenModeHelper);
+        ComponentName owner = new ComponentName("android", "ProviderName");
+        ZenPolicy zenPolicy = new ZenPolicy.Builder().allowAlarms(true).build();
+        boolean isEnabled = true;
+        AutomaticZenRule rule = new AutomaticZenRule("test", owner, owner, mock(Uri.class),
+                zenPolicy, NotificationManager.INTERRUPTION_FILTER_PRIORITY, isEnabled);
+        mBinderService.addAutomaticZenRule(rule, "another.package");
+
+        // verify that zen mode helper gets passed in the package name from the arg, not the owner
+        verify(mockZenModeHelper).addAutomaticZenRule(
+                eq("another.package"), eq(rule), anyString());
     }
 
     @Test
