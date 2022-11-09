@@ -2075,6 +2075,8 @@ class UserController implements Handler.Callback {
     }
 
     private void timeoutUserSwitch(UserState uss, int oldUserId, int newUserId) {
+        TimingsTraceAndSlog t = new TimingsTraceAndSlog(TAG);
+        t.traceBegin("timeoutUserSwitch-" + oldUserId + "-to-" + newUserId);
         synchronized (mLock) {
             Slogf.e(TAG, "User switch timeout: from " + oldUserId + " to " + newUserId);
             mTimeoutUserSwitchCallbacks = mCurWaitingUserSwitchCallbacks;
@@ -2084,6 +2086,7 @@ class UserController implements Handler.Callback {
             mHandler.sendMessageDelayed(mHandler.obtainMessage(USER_SWITCH_CALLBACKS_TIMEOUT_MSG,
                     oldUserId, newUserId), USER_SWITCH_CALLBACKS_TIMEOUT_MS);
         }
+        t.traceEnd();
     }
 
     private void timeoutUserSwitchCallbacks(int oldUserId, int newUserId) {
@@ -2141,6 +2144,8 @@ class UserController implements Handler.Callback {
                                             + " ms after dispatchUserSwitch.");
                                 }
 
+                                TimingsTraceAndSlog t2 = new TimingsTraceAndSlog(TAG);
+                                t2.traceBegin("onUserSwitchingReply-" + name);
                                 curWaitingUserSwitchCallbacks.remove(name);
                                 // Continue switching if all callbacks have been notified and
                                 // user switching session is still valid
@@ -2149,11 +2154,15 @@ class UserController implements Handler.Callback {
                                         == mCurWaitingUserSwitchCallbacks)) {
                                     sendContinueUserSwitchLU(uss, oldUserId, newUserId);
                                 }
+                                t2.traceEnd();
                             }
                         }
                     };
+                    t.traceBegin("onUserSwitching-" + name);
                     mUserSwitchObservers.getBroadcastItem(i).onUserSwitching(newUserId, callback);
+                    t.traceEnd();
                 } catch (RemoteException e) {
+                    // Ignore
                 }
             }
         } else {
@@ -2167,10 +2176,13 @@ class UserController implements Handler.Callback {
 
     @GuardedBy("mLock")
     private void sendContinueUserSwitchLU(UserState uss, int oldUserId, int newUserId) {
+        TimingsTraceAndSlog t = new TimingsTraceAndSlog(TAG);
+        t.traceBegin("sendContinueUserSwitchLU-" + oldUserId + "-to-" + newUserId);
         mCurWaitingUserSwitchCallbacks = null;
         mHandler.removeMessages(USER_SWITCH_TIMEOUT_MSG);
         mHandler.sendMessage(mHandler.obtainMessage(CONTINUE_USER_SWITCH_MSG,
                 oldUserId, newUserId, uss));
+        t.traceEnd();
     }
 
     @VisibleForTesting
