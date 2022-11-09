@@ -135,7 +135,7 @@ public class BroadcastRadioService {
     public @NonNull Collection<RadioManager.ModuleProperties> listModules() {
         Slog.v(TAG, "List HIDL 2.0 modules");
         synchronized (mLock) {
-            return mModules.values().stream().map(module -> module.mProperties)
+            return mModules.values().stream().map(module -> module.getProperties())
                     .collect(Collectors.toList());
         }
     }

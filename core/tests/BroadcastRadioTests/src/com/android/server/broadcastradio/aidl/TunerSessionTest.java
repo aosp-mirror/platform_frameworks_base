@@ -19,10 +19,10 @@ package com.android.server.broadcastradio.aidl;
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
@@ -93,13 +93,8 @@ public final class TunerSessionTest {
 
     @Before
     public void setup() throws Exception {
-        mRadioModule = new RadioModule(mBroadcastRadioMock, new RadioManager.ModuleProperties(
-                /* id= */ 0, /* serviceName= */ "", /* classId= */ 0, /* implementor= */ "",
-                /* product= */ "", /* version= */ "", /* serial= */ "", /* numTuners= */ 0,
-                /* numAudioSources= */ 0, /* isInitializationRequired= */ false,
-                /* isCaptureSupported= */ false, /* bands= */ null, /* isBgScanSupported= */ false,
-                new int[] {}, new int[] {},
-                /* dabFrequencyTable= */ null, /* vendorInfo= */ null), mLock);
+        mRadioModule = new RadioModule(mBroadcastRadioMock,
+                AidlTestUtils.makeDefaultModuleProperties(), mLock);
 
         doAnswer(invocation -> {
             mHalTunerCallback = (ITunerCallback) invocation.getArguments()[0];
@@ -424,7 +419,7 @@ public final class TunerSessionTest {
             mTunerSessions[0].getImage(imageId);
         });
 
-        assertWithMessage("Exception for getting image with invalid ID")
+        assertWithMessage("Get image exception")
                 .that(thrown).hasMessageThat().contains("Image ID is missing");
     }
 
@@ -467,7 +462,7 @@ public final class TunerSessionTest {
         boolean isSupported = mTunerSessions[0].isConfigFlagSupported(flag);
 
         verify(mBroadcastRadioMock).isConfigFlagSet(flag);
-        assertWithMessage("Config  flag %s is supported", flag).that(isSupported).isFalse();
+        assertWithMessage("Config flag %s is supported", flag).that(isSupported).isFalse();
     }
 
     @Test

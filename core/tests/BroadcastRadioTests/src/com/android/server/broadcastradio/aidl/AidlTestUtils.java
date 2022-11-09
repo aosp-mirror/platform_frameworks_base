@@ -31,6 +31,16 @@ final class AidlTestUtils {
         throw new UnsupportedOperationException("AidlTestUtils class is noninstantiable");
     }
 
+    static RadioManager.ModuleProperties makeDefaultModuleProperties() {
+        return new RadioManager.ModuleProperties(
+                /* id= */ 0, /* serviceName= */ "", /* classId= */ 0, /* implementor= */ "",
+                /* product= */ "", /* version= */ "", /* serial= */ "", /* numTuners= */ 0,
+                /* numAudioSources= */ 0, /* isInitializationRequired= */ false,
+                /* isCaptureSupported= */ false, /* bands= */ null,
+                /* isBgScanSupported= */ false, new int[] {}, new int[] {},
+                /* dabFrequencyTable= */ null, /* vendorInfo= */ null);
+    }
+
     static RadioManager.ProgramInfo makeProgramInfo(ProgramSelector selector, int signalQuality) {
         return new RadioManager.ProgramInfo(selector,
                 selector.getPrimaryId(), selector.getPrimaryId(), /* relatedContents= */ null,
