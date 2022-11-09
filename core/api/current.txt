@@ -54019,7 +54019,7 @@ package android.view.inputmethod {
   }
 
   public abstract class HandwritingGesture {
-    method @Nullable public String getFallbackText();
+    method @Nullable public final String getFallbackText();
     field public static final int GESTURE_TYPE_DELETE = 4; // 0x4
     field public static final int GESTURE_TYPE_DELETE_RANGE = 64; // 0x40
     field public static final int GESTURE_TYPE_INSERT = 2; // 0x2
