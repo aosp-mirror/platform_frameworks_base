@@ -16,9 +16,6 @@
 
 package android.location;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
-import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -31,35 +28,35 @@ import android.util.Log;
 import java.util.HashMap;
 
 /**
- * This class provides access to the system country detector service. This
- * service allows applications to obtain the country that the user is in.
- * <p>
- * The country will be detected in order of reliability, like
+ * This class provides access to the system country detector service. This service allows
+ * applications to obtain the country that the user is in.
+ *
+ * <p>The country will be detected in order of reliability, like
+ *
  * <ul>
- * <li>Mobile network</li>
- * <li>Location</li>
- * <li>SIM's country</li>
- * <li>Phone's locale</li>
+ *   <li>Mobile network
+ *   <li>Location
+ *   <li>SIM's country
+ *   <li>Phone's locale
  * </ul>
- * <p>
- * Call the {@link #detectCountry()} to get the available country immediately.
- * <p>
- * To be notified of the future country change, use the
- * {@link #addCountryListener}
+ *
+ * <p>Call the {@link #detectCountry()} to get the available country immediately.
+ *
+ * <p>To be notified of the future country change, use the {@link #addCountryListener}
+ *
  * <p>
  *
  * @hide
  */
-@SystemApi(client = SystemApi.Client.PRIVILEGED_APPS)
 @SystemService(Context.COUNTRY_DETECTOR)
 public class CountryDetector {
 
     /**
-     * The class to wrap the ICountryListener.Stub and CountryListener objects
-     * together. The CountryListener will be notified through the specific
-     * looper once the country changed and detected.
+     * The class to wrap the ICountryListener.Stub and CountryListener objects together. The
+     * CountryListener will be notified through the specific looper once the country changed and
+     * detected.
      */
-    private final static class ListenerTransport extends ICountryListener.Stub {
+    private static final class ListenerTransport extends ICountryListener.Stub {
 
         private final CountryListener mListener;
 
@@ -75,23 +72,23 @@ public class CountryDetector {
         }
 
         public void onCountryDetected(final Country country) {
-            mHandler.post(new Runnable() {
-                public void run() {
-                    mListener.onCountryDetected(country);
-                }
-            });
+            mHandler.post(
+                    new Runnable() {
+                        public void run() {
+                            mListener.onCountryDetected(country);
+                        }
+                    });
         }
     }
 
-    private final static String TAG = "CountryDetector";
+    private static final String TAG = "CountryDetector";
     private final ICountryDetector mService;
     private final HashMap<CountryListener, ListenerTransport> mListeners;
 
     /**
-     * @hide - hide this constructor because it has a parameter of type
-     *       ICountryDetector, which is a system private class. The right way to
-     *       create an instance of this class is using the factory
-     *       Context.getSystemService.
+     * @hide - hide this constructor because it has a parameter of type ICountryDetector, which is a
+     *     system private class. The right way to create an instance of this class is using the
+     *     factory Context.getSystemService.
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public CountryDetector(ICountryDetector service) {
@@ -102,10 +99,9 @@ public class CountryDetector {
     /**
      * Start detecting the country that the user is in.
      *
-     * @return the country if it is available immediately, otherwise null will
-     *         be returned.
+     * @return the country if it is available immediately, otherwise null will be returned.
      */
-    @Nullable
+    @UnsupportedAppUsage
     public Country detectCountry() {
         try {
             return mService.detectCountry();
@@ -116,15 +112,14 @@ public class CountryDetector {
     }
 
     /**
-     * Add a listener to receive the notification when the country is detected
-     * or changed.
+     * Add a listener to receive the notification when the country is detected or changed.
      *
      * @param listener will be called when the country is detected or changed.
-     * @param looper a Looper object whose message queue will be used to
-     *        implement the callback mechanism. If looper is null then the
-     *        callbacks will be called on the main thread.
+     * @param looper a Looper object whose message queue will be used to implement the callback
+     *     mechanism. If looper is null then the callbacks will be called on the main thread.
      */
-    public void addCountryListener(@NonNull CountryListener listener, @Nullable Looper looper) {
+    @UnsupportedAppUsage
+    public void addCountryListener(CountryListener listener, Looper looper) {
         synchronized (mListeners) {
             if (!mListeners.containsKey(listener)) {
                 ListenerTransport transport = new ListenerTransport(listener, looper);
@@ -138,10 +133,9 @@ public class CountryDetector {
         }
     }
 
-    /**
-     * Remove the listener
-     */
-    public void removeCountryListener(@NonNull CountryListener listener) {
+    /** Remove the listener */
+    @UnsupportedAppUsage
+    public void removeCountryListener(CountryListener listener) {
         synchronized (mListeners) {
             ListenerTransport transport = mListeners.get(listener);
             if (transport != null) {
