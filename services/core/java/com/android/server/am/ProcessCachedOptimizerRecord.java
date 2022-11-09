@@ -73,6 +73,12 @@ final class ProcessCachedOptimizerRecord {
     private boolean mFrozen;
 
     /**
+     * Set to false after the process has been frozen.
+     * Set to true after we have collected PSS for the frozen process.
+     */
+    private boolean mHasCollectedFrozenPSS;
+
+    /**
      * An override on the freeze state is in progress.
      */
     @GuardedBy("mProcLock")
@@ -186,6 +192,25 @@ final class ProcessCachedOptimizerRecord {
     @GuardedBy("mProcLock")
     void setFrozen(boolean frozen) {
         mFrozen = frozen;
+    }
+
+    boolean skipPSSCollectionBecauseFrozen() {
+        boolean collected = mHasCollectedFrozenPSS;
+
+        // This check is racy but it isn't critical to PSS collection that we have the most up to
+        // date idea of whether a task is frozen.
+        if (!mFrozen) {
+            // not frozen == always ask to collect PSS
+            return false;
+        }
+
+        // We don't want to count PSS for a frozen process more than once.
+        mHasCollectedFrozenPSS = true;
+        return collected;
+    }
+
+    void setHasCollectedFrozenPSS(boolean collected) {
+        mHasCollectedFrozenPSS = collected;
     }
 
     @GuardedBy("mProcLock")
