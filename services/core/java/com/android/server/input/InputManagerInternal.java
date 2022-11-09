@@ -136,12 +136,6 @@ public abstract class InputManagerInternal {
     public abstract InputChannel createInputChannel(String inputChannelName);
 
     /**
-     * Pilfer pointers from the input channel with the given token so that ongoing gestures are
-     * canceled for all other channels.
-     */
-    public abstract void pilferPointers(IBinder token);
-
-    /**
      * Increments keyboard backlight level if the device has an associated keyboard backlight
      * {@see Light.LIGHT_TYPE_KEYBOARD_BACKLIGHT}
      */

@@ -18,9 +18,12 @@ package com.android.server.inputmethod;
 
 import static android.view.InputDevice.SOURCE_STYLUS;
 
+import android.Manifest;
 import android.annotation.AnyThread;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.UiThread;
+import android.hardware.input.InputManager;
 import android.os.IBinder;
 import android.os.Looper;
 import android.util.Slog;
@@ -141,6 +144,7 @@ final class HandwritingModeController {
      * input events and disposing the input event receiver.
      * @return the handwriting session to send to the IME, or null if the request was invalid.
      */
+    @RequiresPermission(Manifest.permission.MONITOR_INPUT)
     @UiThread
     @Nullable
     HandwritingSession startHandwritingSession(
@@ -169,7 +173,7 @@ final class HandwritingModeController {
         }
         if (DEBUG) Slog.d(TAG, "Starting handwriting session in display: " + mCurrentDisplayId);
 
-        mInputManagerInternal.pilferPointers(mHandwritingSurface.getInputChannel().getToken());
+        InputManager.getInstance().pilferPointers(mHandwritingSurface.getInputChannel().getToken());
 
         // Stop processing more events.
         mHandwritingEventReceiver.dispose();
