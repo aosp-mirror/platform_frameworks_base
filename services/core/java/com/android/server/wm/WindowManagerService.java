@@ -1928,22 +1928,14 @@ public class WindowManagerService extends IWindowManager.Stub
                     && attachedWindow.mActivityRecord.mTargetSdk >= Build.VERSION_CODES.O;
         } else {
             // Otherwise, look at the package
-            try {
-                ApplicationInfo appInfo = mContext.getPackageManager()
-                        .getApplicationInfoAsUser(packageName, 0,
-                                UserHandle.getUserId(callingUid));
-                if (appInfo.uid != callingUid) {
-                    throw new SecurityException("Package " + packageName + " not in UID "
-                            + callingUid);
-                }
-                if (appInfo.targetSdkVersion >= Build.VERSION_CODES.O) {
-                    return true;
-                }
-            } catch (PackageManager.NameNotFoundException e) {
-                /* ignore */
+            final ApplicationInfo appInfo = mPmInternal.getApplicationInfo(
+                    packageName, 0 /* flags */, SYSTEM_UID, UserHandle.getUserId(callingUid));
+            if (appInfo == null || appInfo.uid != callingUid) {
+                throw new SecurityException("Package " + packageName + " not in UID "
+                        + callingUid);
             }
+            return appInfo.targetSdkVersion >= Build.VERSION_CODES.O;
         }
-        return false;
     }
 
     /**
