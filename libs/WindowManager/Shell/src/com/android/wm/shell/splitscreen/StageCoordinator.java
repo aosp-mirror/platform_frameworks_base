@@ -1064,6 +1064,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             wct.setSmallestScreenWidthDp(childrenToTop.mRootTaskInfo.token,
                     SMALLEST_SCREEN_WIDTH_DP_UNDEFINED);
         }
+        wct.setReparentLeafTaskIfRelaunch(mRootTaskInfo.token,
+                false /* reparentLeafTaskIfRelaunch */);
         mSyncQueue.queue(wct);
         mSyncQueue.runInSync(t -> {
             t.setWindowCrop(mMainStage.mRootLeash, null)
@@ -1441,16 +1443,19 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             return;
         }
 
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
         if (!mainStageVisible) {
+            wct.setReparentLeafTaskIfRelaunch(mRootTaskInfo.token,
+                    true /* setReparentLeafTaskIfRelaunch */);
             // Both stages are not visible, check if it needs to dismiss split screen.
-            if (mExitSplitScreenOnHide
-                    // Don't dismiss split screen when both stages are not visible due to sleeping
-                    // display.
-                    || (!mMainStage.mRootTaskInfo.isSleeping
-                    && !mSideStage.mRootTaskInfo.isSleeping)) {
+            if (mExitSplitScreenOnHide) {
                 exitSplitScreen(null /* childrenToTop */, EXIT_REASON_RETURN_HOME);
             }
+        } else {
+            wct.setReparentLeafTaskIfRelaunch(mRootTaskInfo.token,
+                    false /* setReparentLeafTaskIfRelaunch */);
         }
+        mSyncQueue.queue(wct);
 
         mSyncQueue.runInSync(t -> {
             t.setVisibility(mSideStage.mRootLeash, sideStageVisible)
@@ -1571,6 +1576,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                             mSideStagePosition != SPLIT_POSITION_BOTTOM_OR_RIGHT,
                             EXIT_REASON_APP_FINISHED);
                 }
+            } else {
+                exitSplitScreen(null /* childrenToTop */, EXIT_REASON_UNKNOWN);
             }
         } else if (isSideStage && hasChildren && !mMainStage.isActive()) {
             final WindowContainerTransaction wct = new WindowContainerTransaction();
