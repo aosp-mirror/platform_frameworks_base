@@ -2096,7 +2096,8 @@ public class ChooserActivity extends ResolverActivity implements
         return matchingShortcuts;
     }
 
-    private void sendShortcutManagerShareTargetResults(
+    @VisibleForTesting
+    protected void sendShortcutManagerShareTargetResults(
             int shortcutType, ServiceResultInfo[] results) {
         final Message msg = Message.obtain();
         msg.what = ChooserHandler.SHORTCUT_MANAGER_ALL_SHARE_TARGET_RESULTS;
@@ -3873,7 +3874,11 @@ public class ChooserActivity extends ResolverActivity implements
         }
     }
 
-    static class ServiceResultInfo {
+    /**
+     * Shortcuts grouped by application.
+     */
+    @VisibleForTesting
+    public static class ServiceResultInfo {
         public final DisplayResolveInfo originalTarget;
         public final List<ChooserTarget> resultTargets;
         public final UserHandle userHandle;
