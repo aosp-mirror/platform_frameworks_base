@@ -16,10 +16,13 @@
 
 package com.android.wm.shell.desktopmode;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOW_CONFIG_BOUNDS;
+import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REORDER;
@@ -30,13 +33,14 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.app.ActivityManager;
+import android.app.ActivityManager.RunningTaskInfo;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -68,6 +72,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 public class DesktopModeControllerTest extends ShellTestCase {
@@ -83,9 +90,7 @@ public class DesktopModeControllerTest extends ShellTestCase {
     @Mock
     private Handler mMockHandler;
     @Mock
-    private Transitions mMockTransitions;
-    private TestShellExecutor mExecutor;
-
+    private Transitions mTransitions;
     private DesktopModeController mController;
     private DesktopModeTaskRepository mDesktopModeTaskRepository;
     private ShellInit mShellInit;
@@ -97,20 +102,19 @@ public class DesktopModeControllerTest extends ShellTestCase {
         when(DesktopModeStatus.isActive(any())).thenReturn(true);
 
         mShellInit = Mockito.spy(new ShellInit(mTestExecutor));
-        mExecutor = new TestShellExecutor();
 
         mDesktopModeTaskRepository = new DesktopModeTaskRepository();
 
         mController = new DesktopModeController(mContext, mShellInit, mShellController,
-                mShellTaskOrganizer, mRootTaskDisplayAreaOrganizer, mMockTransitions,
-                mDesktopModeTaskRepository, mMockHandler, mExecutor);
+                mShellTaskOrganizer, mRootTaskDisplayAreaOrganizer, mTransitions,
+                mDesktopModeTaskRepository, mMockHandler, new TestShellExecutor());
 
-        when(mShellTaskOrganizer.prepareClearFreeformForStandardTasks(anyInt())).thenReturn(
-                new WindowContainerTransaction());
+        when(mShellTaskOrganizer.getRunningTasks(anyInt())).thenReturn(new ArrayList<>());
 
         mShellInit.init();
         clearInvocations(mShellTaskOrganizer);
         clearInvocations(mRootTaskDisplayAreaOrganizer);
+        clearInvocations(mTransitions);
     }
 
     @After
@@ -124,113 +128,106 @@ public class DesktopModeControllerTest extends ShellTestCase {
     }
 
     @Test
-    public void testDesktopModeEnabled_taskWmClearedDisplaySetToFreeform() {
-        // Create a fake WCT to simulate setting task windowing mode to undefined
-        WindowContainerTransaction taskWct = new WindowContainerTransaction();
-        MockToken taskMockToken = new MockToken();
-        taskWct.setWindowingMode(taskMockToken.token(), WINDOWING_MODE_UNDEFINED);
-        when(mShellTaskOrganizer.prepareClearFreeformForStandardTasks(
-                mContext.getDisplayId())).thenReturn(taskWct);
+    public void testDesktopModeEnabled_rootTdaSetToFreeform() {
+        DisplayAreaInfo displayAreaInfo = createMockDisplayArea();
 
-        // Create a fake DisplayAreaInfo to check if windowing mode change is set correctly
-        MockToken displayMockToken = new MockToken();
-        DisplayAreaInfo displayAreaInfo = new DisplayAreaInfo(displayMockToken.mToken,
-                mContext.getDisplayId(), 0);
-        when(mRootTaskDisplayAreaOrganizer.getDisplayAreaInfo(mContext.getDisplayId()))
-                .thenReturn(displayAreaInfo);
-
-        // The test
         mController.updateDesktopModeActive(true);
+        WindowContainerTransaction wct = getDesktopModeSwitchTransaction();
 
-        ArgumentCaptor<WindowContainerTransaction> arg = ArgumentCaptor.forClass(
-                WindowContainerTransaction.class);
-        verify(mRootTaskDisplayAreaOrganizer).applyTransaction(arg.capture());
-
-        // WCT should have 2 changes - clear task wm mode and set display wm mode
-        WindowContainerTransaction wct = arg.getValue();
-        assertThat(wct.getChanges()).hasSize(2);
-
-        // Verify executed WCT has a change for setting task windowing mode to undefined
-        Change taskWmModeChange = wct.getChanges().get(taskMockToken.binder());
-        assertThat(taskWmModeChange).isNotNull();
-        assertThat(taskWmModeChange.getWindowingMode()).isEqualTo(WINDOWING_MODE_UNDEFINED);
-
-        // Verify executed WCT has a change for setting display windowing mode to freeform
-        Change displayWmModeChange = wct.getChanges().get(displayAreaInfo.token.asBinder());
-        assertThat(displayWmModeChange).isNotNull();
-        assertThat(displayWmModeChange.getWindowingMode()).isEqualTo(WINDOWING_MODE_FREEFORM);
+        // 1 change: Root TDA windowing mode
+        assertThat(wct.getChanges().size()).isEqualTo(1);
+        // Verify WCT has a change for setting windowing mode to freeform
+        Change change = wct.getChanges().get(displayAreaInfo.token.asBinder());
+        assertThat(change).isNotNull();
+        assertThat(change.getWindowingMode()).isEqualTo(WINDOWING_MODE_FREEFORM);
     }
 
     @Test
-    public void testDesktopModeDisabled_taskWmAndBoundsClearedDisplaySetToFullscreen() {
-        // Create a fake WCT to simulate setting task windowing mode to undefined
-        WindowContainerTransaction taskWmWct = new WindowContainerTransaction();
-        MockToken taskWmMockToken = new MockToken();
-        taskWmWct.setWindowingMode(taskWmMockToken.token(), WINDOWING_MODE_UNDEFINED);
-        when(mShellTaskOrganizer.prepareClearFreeformForStandardTasks(
-                mContext.getDisplayId())).thenReturn(taskWmWct);
+    public void testDesktopModeDisabled_rootTdaSetToFullscreen() {
+        DisplayAreaInfo displayAreaInfo = createMockDisplayArea();
 
-        // Create a fake WCT to simulate clearing task bounds
-        WindowContainerTransaction taskBoundsWct = new WindowContainerTransaction();
-        MockToken taskBoundsMockToken = new MockToken();
-        taskBoundsWct.setBounds(taskBoundsMockToken.token(), null);
-        when(mShellTaskOrganizer.prepareClearBoundsForStandardTasks(
-                mContext.getDisplayId())).thenReturn(taskBoundsWct);
-
-        // Create a fake DisplayAreaInfo to check if windowing mode change is set correctly
-        MockToken displayMockToken = new MockToken();
-        DisplayAreaInfo displayAreaInfo = new DisplayAreaInfo(displayMockToken.mToken,
-                mContext.getDisplayId(), 0);
-        when(mRootTaskDisplayAreaOrganizer.getDisplayAreaInfo(mContext.getDisplayId()))
-                .thenReturn(displayAreaInfo);
-
-        // The test
         mController.updateDesktopModeActive(false);
+        WindowContainerTransaction wct = getDesktopModeSwitchTransaction();
 
-        ArgumentCaptor<WindowContainerTransaction> arg = ArgumentCaptor.forClass(
-                WindowContainerTransaction.class);
-        verify(mRootTaskDisplayAreaOrganizer).applyTransaction(arg.capture());
+        // 1 change: Root TDA windowing mode
+        assertThat(wct.getChanges().size()).isEqualTo(1);
+        // Verify WCT has a change for setting windowing mode to fullscreen
+        Change change = wct.getChanges().get(displayAreaInfo.token.asBinder());
+        assertThat(change).isNotNull();
+        assertThat(change.getWindowingMode()).isEqualTo(WINDOWING_MODE_FULLSCREEN);
+    }
 
-        // WCT should have 3 changes - clear task wm mode and bounds and set display wm mode
-        WindowContainerTransaction wct = arg.getValue();
-        assertThat(wct.getChanges()).hasSize(3);
+    @Test
+    public void testDesktopModeEnabled_windowingModeCleared() {
+        createMockDisplayArea();
+        RunningTaskInfo freeformTask = createFreeformTask();
+        RunningTaskInfo fullscreenTask = createFullscreenTask();
+        RunningTaskInfo homeTask = createHomeTask();
+        when(mShellTaskOrganizer.getRunningTasks(anyInt())).thenReturn(new ArrayList<>(
+                Arrays.asList(freeformTask, fullscreenTask, homeTask)));
 
-        // Verify executed WCT has a change for setting task windowing mode to undefined
-        Change taskWmMode = wct.getChanges().get(taskWmMockToken.binder());
-        assertThat(taskWmMode).isNotNull();
-        assertThat(taskWmMode.getWindowingMode()).isEqualTo(WINDOWING_MODE_UNDEFINED);
+        mController.updateDesktopModeActive(true);
+        WindowContainerTransaction wct = getDesktopModeSwitchTransaction();
 
-        // Verify executed WCT has a change for clearing task bounds
-        Change bounds = wct.getChanges().get(taskBoundsMockToken.binder());
-        assertThat(bounds).isNotNull();
-        assertThat(bounds.getWindowSetMask() & WINDOW_CONFIG_BOUNDS).isNotEqualTo(0);
-        assertThat(bounds.getConfiguration().windowConfiguration.getBounds().isEmpty()).isTrue();
+        // 2 changes: Root TDA windowing mode and 1 task
+        assertThat(wct.getChanges().size()).isEqualTo(2);
+        // No changes for tasks that are not standard or freeform
+        assertThat(wct.getChanges().get(fullscreenTask.token.asBinder())).isNull();
+        assertThat(wct.getChanges().get(homeTask.token.asBinder())).isNull();
+        // Standard freeform task has windowing mode cleared
+        Change change = wct.getChanges().get(freeformTask.token.asBinder());
+        assertThat(change).isNotNull();
+        assertThat(change.getWindowingMode()).isEqualTo(WINDOWING_MODE_UNDEFINED);
+    }
 
-        // Verify executed WCT has a change for setting display windowing mode to fullscreen
-        Change displayWmModeChange = wct.getChanges().get(displayAreaInfo.token.asBinder());
-        assertThat(displayWmModeChange).isNotNull();
-        assertThat(displayWmModeChange.getWindowingMode()).isEqualTo(WINDOWING_MODE_FULLSCREEN);
+    @Test
+    public void testDesktopModeDisabled_windowingModeAndBoundsCleared() {
+        createMockDisplayArea();
+        RunningTaskInfo freeformTask = createFreeformTask();
+        RunningTaskInfo fullscreenTask = createFullscreenTask();
+        RunningTaskInfo homeTask = createHomeTask();
+        when(mShellTaskOrganizer.getRunningTasks(anyInt())).thenReturn(new ArrayList<>(
+                Arrays.asList(freeformTask, fullscreenTask, homeTask)));
+
+        mController.updateDesktopModeActive(false);
+        WindowContainerTransaction wct = getDesktopModeSwitchTransaction();
+
+        // 3 changes: Root TDA windowing mode and 2 tasks
+        assertThat(wct.getChanges().size()).isEqualTo(3);
+        // No changes to home task
+        assertThat(wct.getChanges().get(homeTask.token.asBinder())).isNull();
+        // Standard tasks have bounds cleared
+        assertThatBoundsCleared(wct.getChanges().get(freeformTask.token.asBinder()));
+        assertThatBoundsCleared(wct.getChanges().get(fullscreenTask.token.asBinder()));
+        // Freeform standard tasks have windowing mode cleared
+        assertThat(wct.getChanges().get(
+                freeformTask.token.asBinder()).getWindowingMode()).isEqualTo(
+                WINDOWING_MODE_UNDEFINED);
     }
 
     @Test
     public void testShowDesktopApps() {
         // Set up two active tasks on desktop
-        mDesktopModeTaskRepository.addActiveTask(1);
-        mDesktopModeTaskRepository.addActiveTask(2);
-        MockToken token1 = new MockToken();
-        MockToken token2 = new MockToken();
-        ActivityManager.RunningTaskInfo taskInfo1 = new TestRunningTaskInfoBuilder().setToken(
-                token1.token()).setLastActiveTime(100).build();
-        ActivityManager.RunningTaskInfo taskInfo2 = new TestRunningTaskInfoBuilder().setToken(
-                token2.token()).setLastActiveTime(200).build();
-        when(mShellTaskOrganizer.getRunningTaskInfo(1)).thenReturn(taskInfo1);
-        when(mShellTaskOrganizer.getRunningTaskInfo(2)).thenReturn(taskInfo2);
+        RunningTaskInfo freeformTask1 = createFreeformTask();
+        freeformTask1.lastActiveTime = 100;
+        RunningTaskInfo freeformTask2 = createFreeformTask();
+        freeformTask2.lastActiveTime = 200;
+        mDesktopModeTaskRepository.addActiveTask(freeformTask1.taskId);
+        mDesktopModeTaskRepository.addActiveTask(freeformTask2.taskId);
+        when(mShellTaskOrganizer.getRunningTaskInfo(freeformTask1.taskId)).thenReturn(
+                freeformTask1);
+        when(mShellTaskOrganizer.getRunningTaskInfo(freeformTask2.taskId)).thenReturn(
+                freeformTask2);
 
         // Run show desktop apps logic
         mController.showDesktopApps();
         ArgumentCaptor<WindowContainerTransaction> wctCaptor = ArgumentCaptor.forClass(
                 WindowContainerTransaction.class);
-        verify(mShellTaskOrganizer).applyTransaction(wctCaptor.capture());
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+            verify(mTransitions).startTransition(eq(TRANSIT_TO_FRONT), wctCaptor.capture(), any());
+        } else {
+            verify(mShellTaskOrganizer).applyTransaction(wctCaptor.capture());
+        }
         WindowContainerTransaction wct = wctCaptor.getValue();
 
         // Check wct has reorder calls
@@ -239,12 +236,12 @@ public class DesktopModeControllerTest extends ShellTestCase {
         // Task 2 has activity later, must be first
         WindowContainerTransaction.HierarchyOp op1 = wct.getHierarchyOps().get(0);
         assertThat(op1.getType()).isEqualTo(HIERARCHY_OP_TYPE_REORDER);
-        assertThat(op1.getContainer()).isEqualTo(token2.binder());
+        assertThat(op1.getContainer()).isEqualTo(freeformTask2.token.asBinder());
 
         // Task 1 should be second
-        WindowContainerTransaction.HierarchyOp op2 = wct.getHierarchyOps().get(0);
+        WindowContainerTransaction.HierarchyOp op2 = wct.getHierarchyOps().get(1);
         assertThat(op2.getType()).isEqualTo(HIERARCHY_OP_TYPE_REORDER);
-        assertThat(op2.getContainer()).isEqualTo(token2.binder());
+        assertThat(op2.getContainer()).isEqualTo(freeformTask1.token.asBinder());
     }
 
     @Test
@@ -266,7 +263,7 @@ public class DesktopModeControllerTest extends ShellTestCase {
 
     @Test
     public void testHandleTransitionRequest_notFreeform_returnsNull() {
-        ActivityManager.RunningTaskInfo trigger = new ActivityManager.RunningTaskInfo();
+        RunningTaskInfo trigger = new RunningTaskInfo();
         trigger.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         WindowContainerTransaction wct = mController.handleRequest(
                 new Binder(),
@@ -276,13 +273,64 @@ public class DesktopModeControllerTest extends ShellTestCase {
 
     @Test
     public void testHandleTransitionRequest_returnsWct() {
-        ActivityManager.RunningTaskInfo trigger = new ActivityManager.RunningTaskInfo();
+        RunningTaskInfo trigger = new RunningTaskInfo();
         trigger.token = new MockToken().mToken;
         trigger.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FREEFORM);
         WindowContainerTransaction wct = mController.handleRequest(
                 mock(IBinder.class),
                 new TransitionRequestInfo(TRANSIT_OPEN, trigger, null /* remote */));
         assertThat(wct).isNotNull();
+    }
+
+    private DisplayAreaInfo createMockDisplayArea() {
+        DisplayAreaInfo displayAreaInfo = new DisplayAreaInfo(new MockToken().mToken,
+                mContext.getDisplayId(), 0);
+        when(mRootTaskDisplayAreaOrganizer.getDisplayAreaInfo(mContext.getDisplayId()))
+                .thenReturn(displayAreaInfo);
+        return displayAreaInfo;
+    }
+
+    private RunningTaskInfo createFreeformTask() {
+        return new TestRunningTaskInfoBuilder()
+                .setToken(new MockToken().token())
+                .setActivityType(ACTIVITY_TYPE_STANDARD)
+                .setWindowingMode(WINDOWING_MODE_FREEFORM)
+                .setLastActiveTime(100)
+                .build();
+    }
+
+    private RunningTaskInfo createFullscreenTask() {
+        return new TestRunningTaskInfoBuilder()
+                .setToken(new MockToken().token())
+                .setActivityType(ACTIVITY_TYPE_STANDARD)
+                .setWindowingMode(WINDOWING_MODE_FULLSCREEN)
+                .setLastActiveTime(100)
+                .build();
+    }
+
+    private RunningTaskInfo createHomeTask() {
+        return new TestRunningTaskInfoBuilder()
+                .setToken(new MockToken().token())
+                .setActivityType(ACTIVITY_TYPE_HOME)
+                .setWindowingMode(WINDOWING_MODE_FULLSCREEN)
+                .setLastActiveTime(100)
+                .build();
+    }
+
+    private WindowContainerTransaction getDesktopModeSwitchTransaction() {
+        ArgumentCaptor<WindowContainerTransaction> arg = ArgumentCaptor.forClass(
+                WindowContainerTransaction.class);
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+            verify(mTransitions).startTransition(eq(TRANSIT_CHANGE), arg.capture(), any());
+        } else {
+            verify(mRootTaskDisplayAreaOrganizer).applyTransaction(arg.capture());
+        }
+        return arg.getValue();
+    }
+
+    private void assertThatBoundsCleared(Change change) {
+        assertThat((change.getWindowSetMask() & WINDOW_CONFIG_BOUNDS) != 0).isTrue();
+        assertThat(change.getConfiguration().windowConfiguration.getBounds().isEmpty()).isTrue();
     }
 
     private static class MockToken {
@@ -297,10 +345,6 @@ public class DesktopModeControllerTest extends ShellTestCase {
 
         WindowContainerToken token() {
             return mToken;
-        }
-
-        IBinder binder() {
-            return mBinder;
         }
     }
 }

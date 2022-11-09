@@ -16,8 +16,10 @@
 
 package com.android.wm.shell.desktopmode;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
@@ -151,21 +153,20 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
 
         int displayId = mContext.getDisplayId();
 
+        ArrayList<RunningTaskInfo> runningTasks = mShellTaskOrganizer.getRunningTasks(displayId);
+
         WindowContainerTransaction wct = new WindowContainerTransaction();
-        // Reset freeform windowing mode that is set per task level (tasks should inherit
-        // container value)
-        wct.merge(mShellTaskOrganizer.prepareClearFreeformForStandardTasks(displayId),
-                true /* transfer */);
+        // Reset freeform windowing mode that is set per task level so tasks inherit it
+        clearFreeformForStandardTasks(runningTasks, wct);
         int targetWindowingMode;
         if (active) {
             targetWindowingMode = WINDOWING_MODE_FREEFORM;
         } else {
             targetWindowingMode = WINDOWING_MODE_FULLSCREEN;
             // Clear any resized bounds
-            wct.merge(mShellTaskOrganizer.prepareClearBoundsForStandardTasks(displayId),
-                    true /* transfer */);
+            clearBoundsForStandardTasks(runningTasks, wct);
         }
-        prepareWindowingModeChange(wct, displayId, targetWindowingMode);
+        setDisplayAreaWindowingMode(displayId, targetWindowingMode, wct);
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             mTransitions.startTransition(TRANSIT_CHANGE, wct, null);
         } else {
@@ -173,17 +174,44 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
         }
     }
 
-    private void prepareWindowingModeChange(WindowContainerTransaction wct,
-            int displayId, @WindowConfiguration.WindowingMode int windowingMode) {
-        DisplayAreaInfo displayAreaInfo = mRootTaskDisplayAreaOrganizer
-                .getDisplayAreaInfo(displayId);
+    private WindowContainerTransaction clearBoundsForStandardTasks(
+            ArrayList<RunningTaskInfo> runningTasks, WindowContainerTransaction wct) {
+        ProtoLog.v(WM_SHELL_DESKTOP_MODE, "prepareClearBoundsForTasks");
+        for (RunningTaskInfo taskInfo : runningTasks) {
+            if (taskInfo.getActivityType() == ACTIVITY_TYPE_STANDARD) {
+                ProtoLog.v(WM_SHELL_DESKTOP_MODE, "clearing bounds for token=%s taskInfo=%s",
+                        taskInfo.token, taskInfo);
+                wct.setBounds(taskInfo.token, null);
+            }
+        }
+        return wct;
+    }
+
+    private void clearFreeformForStandardTasks(ArrayList<RunningTaskInfo> runningTasks,
+            WindowContainerTransaction wct) {
+        ProtoLog.v(WM_SHELL_DESKTOP_MODE, "prepareClearFreeformForTasks");
+        for (RunningTaskInfo taskInfo : runningTasks) {
+            if (taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM
+                    && taskInfo.getActivityType() == ACTIVITY_TYPE_STANDARD) {
+                ProtoLog.v(WM_SHELL_DESKTOP_MODE,
+                        "clearing windowing mode for token=%s taskInfo=%s", taskInfo.token,
+                        taskInfo);
+                wct.setWindowingMode(taskInfo.token, WINDOWING_MODE_UNDEFINED);
+            }
+        }
+    }
+
+    private void setDisplayAreaWindowingMode(int displayId,
+            @WindowConfiguration.WindowingMode int windowingMode, WindowContainerTransaction wct) {
+        DisplayAreaInfo displayAreaInfo = mRootTaskDisplayAreaOrganizer.getDisplayAreaInfo(
+                displayId);
         if (displayAreaInfo == null) {
             ProtoLog.e(WM_SHELL_DESKTOP_MODE,
                     "unable to update windowing mode for display %d display not found", displayId);
             return;
         }
 
-        ProtoLog.d(WM_SHELL_DESKTOP_MODE,
+        ProtoLog.v(WM_SHELL_DESKTOP_MODE,
                 "setWindowingMode: displayId=%d current wmMode=%d new wmMode=%d", displayId,
                 displayAreaInfo.configuration.windowConfiguration.getWindowingMode(),
                 windowingMode);
