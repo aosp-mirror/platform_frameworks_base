@@ -599,6 +599,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         // If nothing to dispatch, send any pending result immediately
         if (r.receivers.isEmpty()) {
             scheduleResultTo(r);
+            notifyFinishBroadcast(r);
         }
 
         traceEnd(cookie);
@@ -1402,30 +1403,34 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
         final boolean recordFinished = (r.terminalCount == r.receivers.size());
         if (recordFinished) {
-            mService.notifyBroadcastFinishedLocked(r);
-            mHistory.addBroadcastToHistoryLocked(r);
+            notifyFinishBroadcast(r);
+        }
+    }
 
-            r.finishTime = SystemClock.uptimeMillis();
-            r.nextReceiver = r.receivers.size();
-            BroadcastQueueImpl.logBootCompletedBroadcastCompletionLatencyIfPossible(r);
+    private void notifyFinishBroadcast(@NonNull BroadcastRecord r) {
+        mService.notifyBroadcastFinishedLocked(r);
+        mHistory.addBroadcastToHistoryLocked(r);
 
-            if (r.intent.getComponent() == null && r.intent.getPackage() == null
-                    && (r.intent.getFlags() & Intent.FLAG_RECEIVER_REGISTERED_ONLY) == 0) {
-                int manifestCount = 0;
-                int manifestSkipCount = 0;
-                for (int i = 0; i < r.receivers.size(); i++) {
-                    if (r.receivers.get(i) instanceof ResolveInfo) {
-                        manifestCount++;
-                        if (r.delivery[i] == BroadcastRecord.DELIVERY_SKIPPED) {
-                            manifestSkipCount++;
-                        }
+        r.finishTime = SystemClock.uptimeMillis();
+        r.nextReceiver = r.receivers.size();
+        BroadcastQueueImpl.logBootCompletedBroadcastCompletionLatencyIfPossible(r);
+
+        if (r.intent.getComponent() == null && r.intent.getPackage() == null
+                && (r.intent.getFlags() & Intent.FLAG_RECEIVER_REGISTERED_ONLY) == 0) {
+            int manifestCount = 0;
+            int manifestSkipCount = 0;
+            for (int i = 0; i < r.receivers.size(); i++) {
+                if (r.receivers.get(i) instanceof ResolveInfo) {
+                    manifestCount++;
+                    if (r.delivery[i] == BroadcastRecord.DELIVERY_SKIPPED) {
+                        manifestSkipCount++;
                     }
                 }
-
-                final long dispatchTime = SystemClock.uptimeMillis() - r.enqueueTime;
-                mService.addBroadcastStatLocked(r.intent.getAction(), r.callerPackage,
-                        manifestCount, manifestSkipCount, dispatchTime);
             }
+
+            final long dispatchTime = SystemClock.uptimeMillis() - r.enqueueTime;
+            mService.addBroadcastStatLocked(r.intent.getAction(), r.callerPackage,
+                    manifestCount, manifestSkipCount, dispatchTime);
         }
     }
 
