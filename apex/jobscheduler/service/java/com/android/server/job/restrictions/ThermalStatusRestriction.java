@@ -18,6 +18,7 @@ package com.android.server.job.restrictions;
 
 import android.app.job.JobInfo;
 import android.app.job.JobParameters;
+import android.app.job.JobScheduler;
 import android.os.PowerManager;
 import android.os.PowerManager.OnThermalStatusChangedListener;
 import android.util.IndentingPrintWriter;
@@ -42,6 +43,7 @@ public class ThermalStatusRestriction extends JobRestriction {
 
     public ThermalStatusRestriction(JobSchedulerService service) {
         super(service, JobParameters.STOP_REASON_DEVICE_STATE,
+                JobScheduler.PENDING_JOB_REASON_DEVICE_STATE,
                 JobParameters.INTERNAL_STOP_REASON_DEVICE_THERMAL);
     }
 

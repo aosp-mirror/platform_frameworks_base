@@ -8484,7 +8484,26 @@ package android.app.job {
     method public abstract int enqueue(@NonNull android.app.job.JobInfo, @NonNull android.app.job.JobWorkItem);
     method @NonNull public abstract java.util.List<android.app.job.JobInfo> getAllPendingJobs();
     method @Nullable public abstract android.app.job.JobInfo getPendingJob(int);
+    method public int getPendingJobReason(int);
     method public abstract int schedule(@NonNull android.app.job.JobInfo);
+    field public static final int PENDING_JOB_REASON_APP = 1; // 0x1
+    field public static final int PENDING_JOB_REASON_APP_STANDBY = 2; // 0x2
+    field public static final int PENDING_JOB_REASON_BACKGROUND_RESTRICTION = 3; // 0x3
+    field public static final int PENDING_JOB_REASON_CONSTRAINT_BATTERY_NOT_LOW = 4; // 0x4
+    field public static final int PENDING_JOB_REASON_CONSTRAINT_CHARGING = 5; // 0x5
+    field public static final int PENDING_JOB_REASON_CONSTRAINT_CONNECTIVITY = 6; // 0x6
+    field public static final int PENDING_JOB_REASON_CONSTRAINT_CONTENT_TRIGGER = 7; // 0x7
+    field public static final int PENDING_JOB_REASON_CONSTRAINT_DEVICE_IDLE = 8; // 0x8
+    field public static final int PENDING_JOB_REASON_CONSTRAINT_MINIMUM_LATENCY = 9; // 0x9
+    field public static final int PENDING_JOB_REASON_CONSTRAINT_PREFETCH = 10; // 0xa
+    field public static final int PENDING_JOB_REASON_CONSTRAINT_STORAGE_NOT_LOW = 11; // 0xb
+    field public static final int PENDING_JOB_REASON_DEVICE_STATE = 12; // 0xc
+    field public static final int PENDING_JOB_REASON_EXECUTING = -1; // 0xffffffff
+    field public static final int PENDING_JOB_REASON_INVALID_JOB_ID = -2; // 0xfffffffe
+    field public static final int PENDING_JOB_REASON_JOB_SCHEDULER_OPTIMIZATION = 13; // 0xd
+    field public static final int PENDING_JOB_REASON_QUOTA = 14; // 0xe
+    field public static final int PENDING_JOB_REASON_UNDEFINED = 0; // 0x0
+    field public static final int PENDING_JOB_REASON_USER = 15; // 0xf
     field public static final int RESULT_FAILURE = 0; // 0x0
     field public static final int RESULT_SUCCESS = 1; // 0x1
   }

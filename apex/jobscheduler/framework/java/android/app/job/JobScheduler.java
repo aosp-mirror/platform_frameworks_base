@@ -23,10 +23,14 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.UserIdInt;
+import android.app.ActivityManager;
+import android.app.usage.UsageStatsManager;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
 import android.content.ClipData;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.net.NetworkRequest;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.PersistableBundle;
@@ -132,6 +136,132 @@ public abstract class JobScheduler {
      * Returned from {@link #schedule(JobInfo)} if this job has been successfully scheduled.
      */
     public static final int RESULT_SUCCESS = 1;
+
+    /** The job doesn't exist. */
+    public static final int PENDING_JOB_REASON_INVALID_JOB_ID = -2;
+    /** The job is currently running and is therefore not pending. */
+    public static final int PENDING_JOB_REASON_EXECUTING = -1;
+    /**
+     * There is no known reason why the job is pending.
+     * If additional reasons are added on newer Android versions, the system may return this reason
+     * to apps whose target SDK is not high enough to expect that reason.
+     */
+    public static final int PENDING_JOB_REASON_UNDEFINED = 0;
+    /**
+     * The app is in a state that prevents the job from running
+     * (eg. the {@link JobService} component is disabled).
+     */
+    public static final int PENDING_JOB_REASON_APP = 1;
+    /**
+     * The current standby bucket prevents the job from running.
+     *
+     * @see UsageStatsManager#STANDBY_BUCKET_RESTRICTED
+     */
+    public static final int PENDING_JOB_REASON_APP_STANDBY = 2;
+    /**
+     * The app is restricted from running in the background.
+     *
+     * @see ActivityManager#isBackgroundRestricted()
+     * @see PackageManager#isInstantApp()
+     */
+    public static final int PENDING_JOB_REASON_BACKGROUND_RESTRICTION = 3;
+    /**
+     * The requested battery-not-low constraint is not satisfied.
+     *
+     * @see JobInfo.Builder#setRequiresBatteryNotLow(boolean)
+     */
+    public static final int PENDING_JOB_REASON_CONSTRAINT_BATTERY_NOT_LOW = 4;
+    /**
+     * The requested charging constraint is not satisfied.
+     *
+     * @see JobInfo.Builder#setRequiresCharging(boolean)
+     */
+    public static final int PENDING_JOB_REASON_CONSTRAINT_CHARGING = 5;
+    /**
+     * The requested connectivity constraint is not satisfied.
+     *
+     * @see JobInfo.Builder#setRequiredNetwork(NetworkRequest)
+     * @see JobInfo.Builder#setRequiredNetworkType(int)
+     */
+    public static final int PENDING_JOB_REASON_CONSTRAINT_CONNECTIVITY = 6;
+    /**
+     * The requested content trigger constraint is not satisfied.
+     *
+     * @see JobInfo.Builder#addTriggerContentUri(JobInfo.TriggerContentUri)
+     */
+    public static final int PENDING_JOB_REASON_CONSTRAINT_CONTENT_TRIGGER = 7;
+    /**
+     * The requested idle constraint is not satisfied.
+     *
+     * @see JobInfo.Builder#setRequiresDeviceIdle(boolean)
+     */
+    public static final int PENDING_JOB_REASON_CONSTRAINT_DEVICE_IDLE = 8;
+    /**
+     * The minimum latency has not transpired.
+     *
+     * @see JobInfo.Builder#setMinimumLatency(long)
+     */
+    public static final int PENDING_JOB_REASON_CONSTRAINT_MINIMUM_LATENCY = 9;
+    /**
+     * The system's estimate of when the app will be launched is far away enough to warrant delaying
+     * this job.
+     *
+     * @see JobInfo#isPrefetch()
+     * @see JobInfo.Builder#setPrefetch(boolean)
+     */
+    public static final int PENDING_JOB_REASON_CONSTRAINT_PREFETCH = 10;
+    /**
+     * The requested storage-not-low constraint is not satisfied.
+     *
+     * @see JobInfo.Builder#setRequiresStorageNotLow(boolean)
+     */
+    public static final int PENDING_JOB_REASON_CONSTRAINT_STORAGE_NOT_LOW = 11;
+    /**
+     * The job is being deferred due to the device state (eg. Doze, battery saver, memory usage,
+     * thermal status, etc.).
+     */
+    public static final int PENDING_JOB_REASON_DEVICE_STATE = 12;
+    /**
+     * JobScheduler thinks it can defer this job to a more optimal running time.
+     */
+    public static final int PENDING_JOB_REASON_JOB_SCHEDULER_OPTIMIZATION = 13;
+    /**
+     * The app has consumed all of its current quota.
+     *
+     * @see UsageStatsManager#getAppStandbyBucket()
+     * @see JobParameters#STOP_REASON_QUOTA
+     */
+    public static final int PENDING_JOB_REASON_QUOTA = 14;
+    /**
+     * JobScheduler is respecting one of the user's actions (eg. force stop or adb shell commands)
+     * to defer this job.
+     */
+    public static final int PENDING_JOB_REASON_USER = 15;
+
+    /** @hide */
+    @IntDef(prefix = {"PENDING_JOB_REASON_"}, value = {
+            PENDING_JOB_REASON_UNDEFINED,
+            PENDING_JOB_REASON_APP,
+            PENDING_JOB_REASON_APP_STANDBY,
+            PENDING_JOB_REASON_BACKGROUND_RESTRICTION,
+            PENDING_JOB_REASON_CONSTRAINT_BATTERY_NOT_LOW,
+            PENDING_JOB_REASON_CONSTRAINT_CHARGING,
+            PENDING_JOB_REASON_CONSTRAINT_CONNECTIVITY,
+            PENDING_JOB_REASON_CONSTRAINT_CONTENT_TRIGGER,
+            PENDING_JOB_REASON_CONSTRAINT_DEVICE_IDLE,
+            PENDING_JOB_REASON_CONSTRAINT_MINIMUM_LATENCY,
+            PENDING_JOB_REASON_CONSTRAINT_PREFETCH,
+            PENDING_JOB_REASON_CONSTRAINT_STORAGE_NOT_LOW,
+            PENDING_JOB_REASON_DEVICE_STATE,
+            PENDING_JOB_REASON_EXECUTING,
+            PENDING_JOB_REASON_INVALID_JOB_ID,
+            PENDING_JOB_REASON_JOB_SCHEDULER_OPTIMIZATION,
+            PENDING_JOB_REASON_QUOTA,
+            PENDING_JOB_REASON_USER,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PendingJobReason {
+    }
 
     /**
      * Schedule a job to be executed.  Will replace any currently scheduled job with the same
@@ -248,6 +378,15 @@ public abstract class JobScheduler {
      *     if the supplied job ID does not correspond to any job.
      */
     public abstract @Nullable JobInfo getPendingJob(int jobId);
+
+    /**
+     * Returns a reason why the job is pending and not currently executing. If there are multiple
+     * reasons why a job may be pending, this will only return one of them.
+     */
+    @PendingJobReason
+    public int getPendingJobReason(int jobId) {
+        return PENDING_JOB_REASON_UNDEFINED;
+    }
 
     /**
      * Returns {@code true} if the calling app currently holds the

@@ -33,6 +33,7 @@ interface IJobScheduler {
     void cancelAll();
     ParceledListSlice getAllPendingJobs();
     JobInfo getPendingJob(int jobId);
+    int getPendingJobReason(int jobId);
     boolean canRunLongJobs(String packageName);
     boolean hasRunLongJobsPermission(String packageName, int userId);
     List<JobInfo> getStartedJobs();
