@@ -610,7 +610,8 @@ constructor(
             // are
             // elements in mediaPlayers.
             if (MediaPlayerData.players().size != mediaContent.childCount) {
-                throw IllegalStateException(
+                Log.e(
+                    TAG,
                     "Size of players list and number of views in carousel are out of sync. " +
                         "Players size is ${MediaPlayerData.players().size}. " +
                         "View count is ${mediaContent.childCount}."
@@ -671,7 +672,8 @@ constructor(
             // are
             // elements in mediaPlayers.
             if (MediaPlayerData.players().size != mediaContent.childCount) {
-                throw IllegalStateException(
+                Log.e(
+                    TAG,
                     "Size of players list and number of views in carousel are out of sync. " +
                         "Players size is ${MediaPlayerData.players().size}. " +
                         "View count is ${mediaContent.childCount}."
