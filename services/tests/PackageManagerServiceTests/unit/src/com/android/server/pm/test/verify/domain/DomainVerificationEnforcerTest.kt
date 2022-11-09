@@ -219,6 +219,20 @@ class DomainVerificationEnforcerTest {
                     printState(mock(Computer::class.java), mock(IndentingPrintWriter::class.java),
                         null, null)
                 },
+                service(Type.QUERENT, "printOwnersForPackage") {
+                    printOwnersForPackage(
+                        mock(IndentingPrintWriter::class.java),
+                        it.targetPackageName,
+                        it.userId
+                    )
+                },
+                service(Type.QUERENT, "printOwnersForDomains") {
+                    printOwnersForDomains(
+                        mock(IndentingPrintWriter::class.java),
+                        listOf("example.com"),
+                        it.userId
+                    )
+                },
                 service(Type.VERIFIER, "setStatus") {
                     setDomainVerificationStatus(
                         it.targetDomainSetId,
