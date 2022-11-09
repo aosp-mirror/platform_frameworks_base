@@ -41,7 +41,6 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
-import com.android.systemui.shade.CameraLauncher;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.CommandQueue;
@@ -60,8 +59,6 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.stubbing.Answer;
 
 import java.util.Optional;
-
-import dagger.Lazy;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -87,7 +84,6 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
     @Mock private Vibrator mVibrator;
     @Mock private StatusBarHideIconsForBouncerManager mStatusBarHideIconsForBouncerManager;
     @Mock private SystemBarAttributesListener mSystemBarAttributesListener;
-    @Mock private Lazy<CameraLauncher> mCameraLauncherLazy;
 
     CentralSurfacesCommandQueueCallbacks mSbcqCallbacks;
 
@@ -119,8 +115,7 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
                 Optional.of(mVibrator),
                 new DisableFlagsLogger(),
                 DEFAULT_DISPLAY,
-                mSystemBarAttributesListener,
-                mCameraLauncherLazy);
+                mSystemBarAttributesListener);
 
         when(mDeviceProvisionedController.isCurrentUserSetup()).thenReturn(true);
         when(mRemoteInputQuickSettingsDisabler.adjustDisableFlags(anyInt()))
