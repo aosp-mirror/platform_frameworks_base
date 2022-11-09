@@ -54,11 +54,11 @@ final class RadioModule {
     private static final int RADIO_EVENT_LOGGER_QUEUE_SIZE = 25;
 
     private final IBroadcastRadio mService;
-    public final RadioManager.ModuleProperties mProperties;
 
     private final Object mLock;
     private final Handler mHandler;
     private final RadioLogger mLogger;
+    private final RadioManager.ModuleProperties mProperties;
 
     /**
      * Tracks antenna state reported by HAL (if any).
@@ -215,6 +215,10 @@ final class RadioModule {
 
     public IBroadcastRadio getService() {
         return mService;
+    }
+
+    public RadioManager.ModuleProperties getProperties() {
+        return mProperties;
     }
 
     void setInternalHalCallback() throws RemoteException {

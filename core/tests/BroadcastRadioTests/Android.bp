@@ -48,7 +48,7 @@ android_test {
     ],
     // mockito-target-inline dependency
     jni_libs: [
-        "libcarservicejni",
         "libdexmakerjvmtiagent",
+        "libstaticjvmtiagent",
     ],
 }
