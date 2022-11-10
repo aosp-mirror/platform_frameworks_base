@@ -19050,6 +19050,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         return mOomAdjuster.mCachedAppOptimizer.useFreezer();
     }
 
+    public boolean isAppFreezerExemptInstPkg() {
+        return mOomAdjuster.mCachedAppOptimizer.freezerExemptInstPkg();
+    }
+
     /**
      * Resets the state of the {@link com.android.server.am.AppErrors} instance.
      * This is intended for testing within the CTS only and is protected by

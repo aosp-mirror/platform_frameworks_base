@@ -89,6 +89,8 @@ public final class CachedAppOptimizer {
             "compact_proc_state_throttle";
     @VisibleForTesting static final String KEY_FREEZER_DEBOUNCE_TIMEOUT =
             "freeze_debounce_timeout";
+    @VisibleForTesting static final String KEY_FREEZER_EXEMPT_INST_PKG =
+            "freeze_exempt_inst_pkg";
 
     // RSS Indices
     private static final int RSS_TOTAL_INDEX = 0;
@@ -137,6 +139,7 @@ public final class CachedAppOptimizer {
     @VisibleForTesting static final String DEFAULT_COMPACT_PROC_STATE_THROTTLE =
             String.valueOf(ActivityManager.PROCESS_STATE_RECEIVER);
     @VisibleForTesting static final long DEFAULT_FREEZER_DEBOUNCE_TIMEOUT = 600_000L;
+    @VisibleForTesting static final Boolean DEFAULT_FREEZER_EXEMPT_INST_PKG = true;
 
     @VisibleForTesting static final Uri CACHED_APP_FREEZER_ENABLED_URI = Settings.Global.getUriFor(
                 Settings.Global.CACHED_APPS_FREEZER_ENABLED);
@@ -277,6 +280,8 @@ public final class CachedAppOptimizer {
                         for (String name : properties.getKeyset()) {
                             if (KEY_FREEZER_DEBOUNCE_TIMEOUT.equals(name)) {
                                 updateFreezerDebounceTimeout();
+                            } else if (KEY_FREEZER_EXEMPT_INST_PKG.equals(name)) {
+                                updateFreezerExemptInstPkg();
                             }
                         }
                     }
@@ -357,6 +362,7 @@ public final class CachedAppOptimizer {
     private boolean mFreezerOverride = false;
 
     @VisibleForTesting volatile long mFreezerDebounceTimeout = DEFAULT_FREEZER_DEBOUNCE_TIMEOUT;
+    @VisibleForTesting volatile boolean mFreezerExemptInstPkg = DEFAULT_FREEZER_EXEMPT_INST_PKG;
 
     // Maps process ID to last compaction statistics for processes that we've fully compacted. Used
     // when evaluating throttles that we only consider for "full" compaction, so we don't store
@@ -566,6 +572,15 @@ public final class CachedAppOptimizer {
         }
     }
 
+    /**
+     * Returns whether freezer exempts INSTALL_PACKAGES.
+     */
+    public boolean freezerExemptInstPkg() {
+        synchronized (mPhenotypeFlagLock) {
+            return mUseFreezer && mFreezerExemptInstPkg;
+        }
+    }
+
     @GuardedBy("mProcLock")
     void dump(PrintWriter pw) {
         pw.println("CachedAppOptimizer settings");
@@ -647,6 +662,7 @@ public final class CachedAppOptimizer {
             pw.println("  " + KEY_USE_FREEZER + "=" + mUseFreezer);
             pw.println("  " + KEY_FREEZER_STATSD_SAMPLE_RATE + "=" + mFreezerStatsdSampleRate);
             pw.println("  " + KEY_FREEZER_DEBOUNCE_TIMEOUT + "=" + mFreezerDebounceTimeout);
+            pw.println("  " + KEY_FREEZER_EXEMPT_INST_PKG + "=" + mFreezerExemptInstPkg);
             synchronized (mProcLock) {
                 int size = mFrozenProcesses.size();
                 pw.println("  Apps frozen: " + size);
@@ -1007,6 +1023,7 @@ public final class CachedAppOptimizer {
                     KEY_USE_FREEZER, DEFAULT_USE_FREEZER)) {
             mUseFreezer = isFreezerSupported();
             updateFreezerDebounceTimeout();
+            updateFreezerExemptInstPkg();
         } else {
             mUseFreezer = false;
         }
@@ -1194,6 +1211,15 @@ public final class CachedAppOptimizer {
         if (mFreezerDebounceTimeout < 0) {
             mFreezerDebounceTimeout = DEFAULT_FREEZER_DEBOUNCE_TIMEOUT;
         }
+        Slog.d(TAG_AM, "Freezer timeout set to " + mFreezerDebounceTimeout);
+    }
+
+    @GuardedBy("mPhenotypeFlagLock")
+    private void updateFreezerExemptInstPkg() {
+        mFreezerExemptInstPkg = DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER_NATIVE_BOOT,
+                KEY_FREEZER_EXEMPT_INST_PKG, DEFAULT_FREEZER_EXEMPT_INST_PKG);
+        Slog.d(TAG_AM, "Freezer exemption set to " + mFreezerExemptInstPkg);
     }
 
     private boolean parseProcStateThrottle(String procStateThrottleString) {
