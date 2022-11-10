@@ -598,6 +598,14 @@ public final class GameManagerService extends IGameManagerService.Stub {
             }
         }
 
+        // used to check if the override package config has any game mode config, if not, it's
+        // considered empty and safe to delete from settings
+        boolean hasActiveGameModeConfig() {
+            synchronized (mModeConfigLock) {
+                return !mModeConfigs.isEmpty();
+            }
+        }
+
         /**
          * GameModeConfiguration contains all the values for all the interventions associated with
          * a game mode.
@@ -693,7 +701,8 @@ public final class GameManagerService extends IGameManagerService.Stub {
             public boolean isActive() {
                 return (mGameMode == GameManager.GAME_MODE_STANDARD
                         || mGameMode == GameManager.GAME_MODE_PERFORMANCE
-                        || mGameMode == GameManager.GAME_MODE_BATTERY)
+                        || mGameMode == GameManager.GAME_MODE_BATTERY
+                        || mGameMode == GameManager.GAME_MODE_CUSTOM)
                         && !willGamePerformOptimizations(mGameMode);
             }
 
@@ -741,7 +750,8 @@ public final class GameManagerService extends IGameManagerService.Stub {
         }
 
         private int getAvailableGameModesBitfield() {
-            int field = 0;
+            int field = modeToBitmask(GameManager.GAME_MODE_CUSTOM)
+                    | modeToBitmask(GameManager.GAME_MODE_STANDARD);
             synchronized (mModeConfigLock) {
                 for (final int mode : mModeConfigs.keySet()) {
                     field |= modeToBitmask(mode);
@@ -752,13 +762,6 @@ public final class GameManagerService extends IGameManagerService.Stub {
             }
             if (mPerfModeOptedIn) {
                 field |= modeToBitmask(GameManager.GAME_MODE_PERFORMANCE);
-            }
-            // The lowest bit is reserved for UNSUPPORTED, STANDARD is supported if we support any
-            // other mode.
-            if (field > 1) {
-                field |= modeToBitmask(GameManager.GAME_MODE_STANDARD);
-            } else {
-                field |= modeToBitmask(GameManager.GAME_MODE_UNSUPPORTED);
             }
             return field;
         }
@@ -881,7 +884,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
     private final class LocalService extends GameManagerInternal {
         @Override
         public float getResolutionScalingFactor(String packageName, int userId) {
-            final int gameMode = getGameModeFromSettings(packageName, userId);
+            final int gameMode = getGameModeFromSettingsUnchecked(packageName, userId);
             return getResolutionScalingFactorInternal(packageName, gameMode, userId);
         }
     }
@@ -960,7 +963,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
             config = mConfigs.get(packageName);
         }
         if (config == null) {
-            return new int[]{};
+            return new int[]{GameManager.GAME_MODE_STANDARD, GameManager.GAME_MODE_CUSTOM};
         }
         return config.getAvailableGameModes();
     }
@@ -986,12 +989,13 @@ public final class GameManagerService extends IGameManagerService.Stub {
         return getAvailableGameModesUnchecked(packageName);
     }
 
-    private @GameMode int getGameModeFromSettings(String packageName, @UserIdInt int userId) {
+    private @GameMode int getGameModeFromSettingsUnchecked(String packageName,
+            @UserIdInt int userId) {
         synchronized (mLock) {
             if (!mSettings.containsKey(userId)) {
                 Slog.d(TAG, "User ID '" + userId + "' does not have a Game Mode"
-                            + " selected for package: '" + packageName + "'");
-                return GameManager.GAME_MODE_UNSUPPORTED;
+                        + " selected for package: '" + packageName + "'");
+                return GameManager.GAME_MODE_STANDARD;
             }
 
             return mSettings.get(userId).getGameModeLocked(packageName);
@@ -1024,12 +1028,12 @@ public final class GameManagerService extends IGameManagerService.Stub {
         // return a value if the package name is valid. Next, check if the caller has the necessary
         // permission and return a value. Do this check last, since it can throw an exception.
         if (isValidPackageName(packageName, userId)) {
-            return getGameModeFromSettings(packageName, userId);
+            return getGameModeFromSettingsUnchecked(packageName, userId);
         }
 
         // Since the package name doesn't match, check the caller has the necessary permission.
         checkPermission(Manifest.permission.MANAGE_GAME_MODE);
-        return getGameModeFromSettings(packageName, userId);
+        return getGameModeFromSettingsUnchecked(packageName, userId);
     }
 
     /**
@@ -1054,7 +1058,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
             return null;
         }
 
-        final @GameMode int activeGameMode = getGameModeFromSettings(packageName, userId);
+        final @GameMode int activeGameMode = getGameModeFromSettingsUnchecked(packageName, userId);
         final GamePackageConfiguration config = getConfig(packageName, userId);
         if (config != null) {
             final @GameMode int[] optedInGameModes = config.getOptedInGameModes();
@@ -1077,7 +1081,10 @@ public final class GameManagerService extends IGameManagerService.Stub {
             }
             return gameModeInfoBuilder.build();
         } else {
-            return new GameModeInfo.Builder().setActiveGameMode(activeGameMode).build();
+            return new GameModeInfo.Builder()
+                    .setActiveGameMode(activeGameMode)
+                    .setAvailableGameModes(getAvailableGameModesUnchecked(packageName))
+                    .build();
         }
     }
 
@@ -1474,7 +1481,8 @@ public final class GameManagerService extends IGameManagerService.Stub {
         final GamePackageConfiguration packageConfig = getConfig(packageName, userId);
         if (gameMode == GameManager.GAME_MODE_STANDARD
                 || gameMode == GameManager.GAME_MODE_UNSUPPORTED || packageConfig == null
-                || packageConfig.willGamePerformOptimizations(gameMode)) {
+                || packageConfig.willGamePerformOptimizations(gameMode)
+                || packageConfig.getGameModeConfiguration(gameMode) == null) {
             resetFps(packageName, userId);
             // resolution scaling does not need to be reset as it's now read dynamically on game
             // restart, see #getResolutionScalingFactor and CompatModePackages#getCompatScale.
@@ -1562,13 +1570,9 @@ public final class GameManagerService extends IGameManagerService.Stub {
                 if (!bitFieldContainsModeBitmask(modesBitfield, gameModeToReset)) {
                     return;
                 }
-                // if the game mode to reset is the only mode other than standard mode or there
-                // is device config, the entire package config override is removed.
-                if (Integer.bitCount(modesBitfield) <= 2 || deviceConfig == null) {
+                configOverride.removeModeConfig(gameModeToReset);
+                if (!configOverride.hasActiveGameModeConfig()) {
                     settings.removeConfigOverride(packageName);
-                } else {
-                    // otherwise we reset the mode by removing the game mode config override
-                    configOverride.removeModeConfig(gameModeToReset);
                 }
             } else {
                 settings.removeConfigOverride(packageName);
@@ -1596,20 +1600,12 @@ public final class GameManagerService extends IGameManagerService.Stub {
             // want to check if we support selectable game modes
             modesBitfield &= ~modeToBitmask(GameManager.GAME_MODE_UNSUPPORTED);
             if (!bitFieldContainsModeBitmask(modesBitfield, gameMode)) {
-                if (bitFieldContainsModeBitmask(modesBitfield,
-                        GameManager.GAME_MODE_STANDARD)) {
-                    // If the current set mode isn't supported,
-                    // but we support STANDARD, then set the mode to STANDARD.
-                    newGameMode = GameManager.GAME_MODE_STANDARD;
-                } else {
-                    // If we don't support any game modes, then set to UNSUPPORTED
-                    newGameMode = GameManager.GAME_MODE_UNSUPPORTED;
-                }
+                // always default to STANDARD if there is no mode config
+                newGameMode = GameManager.GAME_MODE_STANDARD;
             }
-        } else if (gameMode != GameManager.GAME_MODE_UNSUPPORTED) {
-            // If we have no config for the package, but the configured mode is not
-            // UNSUPPORTED, then set to UNSUPPORTED
-            newGameMode = GameManager.GAME_MODE_UNSUPPORTED;
+        } else {
+            // always default to STANDARD if there is no package config
+            newGameMode = GameManager.GAME_MODE_STANDARD;
         }
         return newGameMode;
     }
