@@ -47,7 +47,6 @@ import com.android.systemui.dreams.dagger.DreamModule;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.FlagsModule;
-import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyboard.KeyboardModule;
 import com.android.systemui.keyguard.data.BouncerViewModule;
 import com.android.systemui.log.dagger.LogModule;
@@ -63,6 +62,7 @@ import com.android.systemui.privacy.PrivacyModule;
 import com.android.systemui.qrcodescanner.dagger.QRCodeScannerModule;
 import com.android.systemui.qs.FgsManagerController;
 import com.android.systemui.qs.FgsManagerControllerImpl;
+import com.android.systemui.qs.QSFragmentStartableModule;
 import com.android.systemui.qs.footer.dagger.FooterActionsModule;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.screenrecord.ScreenRecordModule;
@@ -116,15 +116,15 @@ import com.android.systemui.wallet.dagger.WalletModule;
 import com.android.systemui.wmshell.BubblesManager;
 import com.android.wm.shell.bubbles.Bubbles;
 
-import java.util.Optional;
-import java.util.concurrent.Executor;
-
-import javax.inject.Named;
-
 import dagger.Binds;
 import dagger.BindsOptionalOf;
 import dagger.Module;
 import dagger.Provides;
+
+import java.util.Optional;
+import java.util.concurrent.Executor;
+
+import javax.inject.Named;
 
 /**
  * A dagger module for injecting components of System UI that are required by System UI.
@@ -165,6 +165,7 @@ import dagger.Provides;
             PolicyModule.class,
             PrivacyModule.class,
             QRCodeScannerModule.class,
+            QSFragmentStartableModule.class,
             ScreenshotModule.class,
             SensorModule.class,
             SecurityRepositoryModule.class,
@@ -194,8 +195,7 @@ import dagger.Provides;
             DozeComponent.class,
             ExpandableNotificationRowComponent.class,
             KeyguardBouncerComponent.class,
-            NotificationShelfComponent.class,
-            FragmentService.FragmentCreator.class
+            NotificationShelfComponent.class
         })
 public abstract class SystemUIModule {
 
