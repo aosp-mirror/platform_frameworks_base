@@ -411,11 +411,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
             // For a new display, we need to initialize the default mode ID.
             if (mDefaultModeId == INVALID_MODE_ID) {
-                mDefaultModeId = mSystemPreferredModeId != INVALID_MODE_ID
-                        ? mSystemPreferredModeId : activeRecord.mMode.getModeId();
-                mDefaultModeGroup = mSystemPreferredModeId != INVALID_MODE_ID
-                        ? preferredSfDisplayMode.group
-                        : mActiveSfDisplayMode.group;
+                mDefaultModeId = activeRecord.mMode.getModeId();
+                mDefaultModeGroup = mActiveSfDisplayMode.group;
             } else if (modesAdded && activeModeChanged) {
                 Slog.d(TAG, "New display modes are added and the active mode has changed, "
                         + "use active mode as default mode.");
@@ -897,6 +894,13 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         public void setUserPreferredDisplayModeLocked(Display.Mode mode) {
             final int oldModeId = getPreferredModeId();
             mUserPreferredMode = mode;
+            // When clearing the user preferred mode we need to also reset the default mode. This is
+            // used by DisplayModeDirector to determine the default resolution, so if we don't clear
+            // it then the resolution won't reset to what it would've been prior to setting a user
+            // preferred display mode.
+            if (mode == null && mSystemPreferredModeId != INVALID_MODE_ID) {
+                mDefaultModeId = mSystemPreferredModeId;
+            }
             if (mode != null && (mode.isRefreshRateSet() || mode.isResolutionSet())) {
                 Display.Mode matchingSupportedMode;
                 matchingSupportedMode = findMode(mode.getPhysicalWidth(),
