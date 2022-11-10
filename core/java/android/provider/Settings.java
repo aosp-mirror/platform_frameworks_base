@@ -192,6 +192,21 @@ public final class Settings {
             "android.settings.LOCATION_SCANNING_SETTINGS";
 
     /**
+     * Activity Action: Show settings to manage creation/deletion of cloned apps.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_MANAGE_CLONED_APPS_SETTINGS =
+            "android.settings.MANAGE_CLONED_APPS_SETTINGS";
+
+    /**
      * Activity Action: Show settings to allow configuration of users.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
