@@ -16,8 +16,11 @@
 
 package com.android.keyguard;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
@@ -89,5 +92,12 @@ public class KeyguardMessageAreaControllerTest extends SysuiTestCase {
     public void testSetBouncerVisible() {
         mMessageAreaController.setIsVisible(true);
         verify(mKeyguardMessageArea).setIsVisible(true);
+    }
+
+    @Test
+    public void testGetMessage() {
+        String msg = "abc";
+        when(mKeyguardMessageArea.getText()).thenReturn(msg);
+        assertThat(mMessageAreaController.getMessage()).isEqualTo(msg);
     }
 }
