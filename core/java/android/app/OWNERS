@@ -32,8 +32,10 @@ per-file SystemServiceRegistry.java = file:/services/core/java/com/android/serve
 per-file *UserSwitchObserver* = file:/services/core/java/com/android/server/am/OWNERS
 per-file UiAutomation* = file:/services/accessibility/OWNERS
 per-file GameManager* = file:/GAME_MANAGER_OWNERS
+per-file GameMode* = file:/GAME_MANAGER_OWNERS
 per-file GameState* = file:/GAME_MANAGER_OWNERS
 per-file IGameManager* = file:/GAME_MANAGER_OWNERS
+per-file IGameMode* = file:/GAME_MANAGER_OWNERS
 
 # ActivityThread
 per-file ActivityThread.java = file:/services/core/java/com/android/server/am/OWNERS
