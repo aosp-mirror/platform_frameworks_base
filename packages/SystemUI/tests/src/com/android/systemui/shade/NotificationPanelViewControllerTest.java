@@ -854,7 +854,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_FORWARD.getId(),
                 null);
 
-        verify(mStatusBarKeyguardViewManager).showBouncer(true);
+        verify(mStatusBarKeyguardViewManager).showPrimaryBouncer(true);
     }
 
     @Test
@@ -864,7 +864,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_UP.getId(),
                 null);
 
-        verify(mStatusBarKeyguardViewManager).showBouncer(true);
+        verify(mStatusBarKeyguardViewManager).showPrimaryBouncer(true);
     }
 
     @Test

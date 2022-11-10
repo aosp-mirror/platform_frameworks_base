@@ -19,7 +19,7 @@ package com.android.systemui.keyguard.ui.viewmodel
 import android.view.View
 import com.android.systemui.keyguard.data.BouncerView
 import com.android.systemui.keyguard.data.BouncerViewDelegate
-import com.android.systemui.keyguard.domain.interactor.BouncerInteractor
+import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.keyguard.shared.model.BouncerShowMessageModel
 import com.android.systemui.keyguard.shared.model.KeyguardBouncerModel
 import com.android.systemui.statusbar.phone.KeyguardBouncer.EXPANSION_VISIBLE
@@ -34,7 +34,7 @@ class KeyguardBouncerViewModel
 @Inject
 constructor(
     private val view: BouncerView,
-    private val interactor: BouncerInteractor,
+    private val interactor: PrimaryBouncerInteractor,
 ) {
     /** Observe on bouncer expansion amount. */
     val bouncerExpansionAmount: Flow<Float> = interactor.panelExpansionAmount

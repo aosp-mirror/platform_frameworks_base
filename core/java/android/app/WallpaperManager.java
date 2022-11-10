@@ -1320,18 +1320,16 @@ public class WallpaperManager {
     }
 
     /**
-     * Returns the information about the wallpaper if the current wallpaper is
-     * a live wallpaper component. Otherwise, if the wallpaper is a static image,
-     * this returns null.
+     * Returns the information about the home screen wallpaper if its current wallpaper is a live
+     * wallpaper component. Otherwise, if the wallpaper is a static image, this returns null.
      */
     public WallpaperInfo getWallpaperInfo() {
         return getWallpaperInfo(mContext.getUserId());
     }
 
     /**
-     * Returns the information about the wallpaper if the current wallpaper is
-     * a live wallpaper component. Otherwise, if the wallpaper is a static image,
-     * this returns null.
+     * Returns the information about the home screen wallpaper if its current wallpaper is a live
+     * wallpaper component. Otherwise, if the wallpaper is a static image, this returns null.
      *
      * @param userId Owner of the wallpaper.
      * @hide
@@ -1347,6 +1345,29 @@ public class WallpaperManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Returns the information about the home screen wallpaper if its current wallpaper is a live
+     * wallpaper component. Otherwise, if the wallpaper is a static image, this returns null.
+     *
+     * @param which Specifies wallpaper destination (home or lock).
+     * @hide
+     */
+    public WallpaperInfo getWallpaperInfoWithFlags(@SetWallpaperFlags int which) {
+        return getWallpaperInfo();
+    }
+
+    /**
+     * Returns the information about the designated wallpaper if its current wallpaper is a live
+     * wallpaper component. Otherwise, if the wallpaper is a static image, this returns null.
+     *
+     * @param which Specifies wallpaper destination (home or lock).
+     * @param userId Owner of the wallpaper.
+     * @hide
+     */
+    public WallpaperInfo getWallpaperInfoWithFlags(@SetWallpaperFlags int which, int userId) {
+        return getWallpaperInfo(userId);
     }
 
     /**

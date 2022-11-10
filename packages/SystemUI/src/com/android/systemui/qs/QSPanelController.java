@@ -237,7 +237,7 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
      * @return if bouncer is in transit
      */
     public boolean isBouncerInTransit() {
-        return mStatusBarKeyguardViewManager.isBouncerInTransit();
+        return mStatusBarKeyguardViewManager.isPrimaryBouncerInTransit();
     }
 }
 

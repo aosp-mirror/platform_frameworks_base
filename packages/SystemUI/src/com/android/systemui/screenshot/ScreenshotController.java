@@ -63,6 +63,7 @@ import android.os.Bundle;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -276,6 +277,7 @@ public class ScreenshotController {
             mScreenshotNotificationSmartActionsProvider;
     private final TimeoutHandler mScreenshotHandler;
     private final ActionIntentExecutor mActionExecutor;
+    private final UserManager mUserManager;
 
     private ScreenshotView mScreenshotView;
     private Bitmap mScreenBitmap;
@@ -314,7 +316,8 @@ public class ScreenshotController {
             TimeoutHandler timeoutHandler,
             BroadcastSender broadcastSender,
             ScreenshotNotificationSmartActionsProvider screenshotNotificationSmartActionsProvider,
-            ActionIntentExecutor actionExecutor
+            ActionIntentExecutor actionExecutor,
+            UserManager userManager
     ) {
         mScreenshotSmartActions = screenshotSmartActions;
         mNotificationsController = screenshotNotificationsController;
@@ -345,6 +348,7 @@ public class ScreenshotController {
         mWindowManager = mContext.getSystemService(WindowManager.class);
         mFlags = flags;
         mActionExecutor = actionExecutor;
+        mUserManager = userManager;
 
         mAccessibilityManager = AccessibilityManager.getInstance(mContext);
 
@@ -975,13 +979,22 @@ public class ScreenshotController {
                         @Override
                         public void onAnimationEnd(Animator animation) {
                             super.onAnimationEnd(animation);
-                            mScreenshotView.setChipIntents(imageData);
+                            doPostAnimation(imageData);
                         }
                     });
                 } else {
-                    mScreenshotView.setChipIntents(imageData);
+                    doPostAnimation(imageData);
                 }
             });
+        }
+    }
+
+    private void doPostAnimation(ScreenshotController.SavedImageData imageData) {
+        mScreenshotView.setChipIntents(imageData);
+        if (mFlags.isEnabled(SCREENSHOT_WORK_PROFILE_POLICY)
+                && mUserManager.isManagedProfile(imageData.owner.getIdentifier())) {
+            // TODO: Read app from configuration
+            mScreenshotView.showWorkProfileMessage("Files");
         }
     }
 

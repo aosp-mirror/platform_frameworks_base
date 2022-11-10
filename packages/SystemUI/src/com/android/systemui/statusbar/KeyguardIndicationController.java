@@ -925,7 +925,7 @@ public class KeyguardIndicationController {
         }
 
         if (mStatusBarKeyguardViewManager.isBouncerShowing()) {
-            if (mStatusBarKeyguardViewManager.isShowingAlternateAuth()) {
+            if (mStatusBarKeyguardViewManager.isShowingAlternateBouncer()) {
                 return; // udfps affordance is highlighted, no need to show action to unlock
             } else if (mKeyguardUpdateMonitor.isFaceEnrolled()) {
                 String message = mContext.getString(R.string.keyguard_retry);
