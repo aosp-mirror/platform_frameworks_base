@@ -345,6 +345,7 @@ cc_defaults {
         "jni/android_nio_utils.cpp",
         "jni/android_util_PathParser.cpp",
 
+        "jni/AnimatedImageDrawable.cpp",
         "jni/Bitmap.cpp",
         "jni/BitmapFactory.cpp",
         "jni/ByteBufferStreamAdaptor.cpp",
@@ -408,7 +409,6 @@ cc_defaults {
     target: {
         android: {
             srcs: [ // sources that depend on android only libraries
-                "jni/AnimatedImageDrawable.cpp",
                 "jni/android_graphics_TextureLayer.cpp",
                 "jni/BitmapRegionDecoder.cpp",
                 "jni/GIFMovie.cpp",

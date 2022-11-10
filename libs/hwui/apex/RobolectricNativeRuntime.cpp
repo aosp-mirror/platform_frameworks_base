@@ -31,14 +31,15 @@ int register_android_graphics_BitmapFactory(JNIEnv*);
 int register_android_graphics_ByteBufferStreamAdaptor(JNIEnv* env);
 int register_android_graphics_CreateJavaOutputStreamAdaptor(JNIEnv* env);
 int register_android_graphics_Graphics(JNIEnv* env);
-int register_android_graphics_Interpolator(JNIEnv* env);
 int register_android_graphics_ImageDecoder(JNIEnv*);
+int register_android_graphics_Interpolator(JNIEnv* env);
 int register_android_graphics_MaskFilter(JNIEnv* env);
 int register_android_graphics_NinePatch(JNIEnv*);
 int register_android_graphics_PathEffect(JNIEnv* env);
+int register_android_graphics_RenderEffect(JNIEnv* env);
 int register_android_graphics_Shader(JNIEnv* env);
 int register_android_graphics_Typeface(JNIEnv* env);
-int register_android_graphics_RenderEffect(JNIEnv* env);
+int register_android_graphics_drawable_AnimatedImageDrawable(JNIEnv* env);
 
 namespace android {
 
@@ -100,6 +101,7 @@ static const RegJNIRec graphicsJNI[] = {
         REG_JNI(register_android_graphics_Region),
         REG_JNI(register_android_graphics_animation_RenderNodeAnimator),
         REG_JNI(register_android_graphics_animation_NativeInterpolatorFactory),
+        REG_JNI(register_android_graphics_drawable_AnimatedImageDrawable),
         REG_JNI(register_android_graphics_drawable_AnimatedVectorDrawable),
         REG_JNI(register_android_graphics_drawable_VectorDrawable),
         REG_JNI(register_android_graphics_RenderEffect),
