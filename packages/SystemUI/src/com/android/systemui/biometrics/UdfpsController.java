@@ -67,7 +67,7 @@ import com.android.systemui.doze.DozeReceiver;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.ScreenLifecycle;
-import com.android.systemui.keyguard.domain.interactor.BouncerInteractor;
+import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shade.ShadeExpansionStateManager;
@@ -140,7 +140,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
     @NonNull private final LatencyTracker mLatencyTracker;
     @VisibleForTesting @NonNull final BiometricDisplayListener mOrientationListener;
     @NonNull private final ActivityLaunchAnimator mActivityLaunchAnimator;
-    @NonNull private final BouncerInteractor mBouncerInteractor;
+    @NonNull private final PrimaryBouncerInteractor mPrimaryBouncerInteractor;
 
     // Currently the UdfpsController supports a single UDFPS sensor. If devices have multiple
     // sensors, this, in addition to a lot of the code here, will be updated.
@@ -229,7 +229,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                             mUdfpsDisplayMode, requestId, reason, callback,
                             (view, event, fromUdfpsView) -> onTouch(requestId, event,
                                     fromUdfpsView), mActivityLaunchAnimator, mFeatureFlags,
-                            mBouncerInteractor)));
+                            mPrimaryBouncerInteractor)));
         }
 
         @Override
@@ -320,14 +320,14 @@ public class UdfpsController implements DozeReceiver, Dumpable {
         if (!mOverlayParams.equals(overlayParams)) {
             mOverlayParams = overlayParams;
 
-            final boolean wasShowingAltAuth = mKeyguardViewManager.isShowingAlternateAuth();
+            final boolean wasShowingAltAuth = mKeyguardViewManager.isShowingAlternateBouncer();
 
             // When the bounds change it's always necessary to re-create the overlay's window with
             // new LayoutParams. If the overlay needs to be shown, this will re-create and show the
             // overlay with the updated LayoutParams. Otherwise, the overlay will remain hidden.
             redrawOverlay();
             if (wasShowingAltAuth) {
-                mKeyguardViewManager.showGenericBouncer(true);
+                mKeyguardViewManager.showBouncer(true);
             }
         }
     }
@@ -626,7 +626,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
             @NonNull ActivityLaunchAnimator activityLaunchAnimator,
             @NonNull Optional<AlternateUdfpsTouchProvider> alternateTouchProvider,
             @NonNull @BiometricsBackground Executor biometricsExecutor,
-            @NonNull BouncerInteractor bouncerInteractor) {
+            @NonNull PrimaryBouncerInteractor primaryBouncerInteractor) {
         mContext = context;
         mExecution = execution;
         mVibrator = vibrator;
@@ -643,6 +643,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
         mDumpManager = dumpManager;
         mDialogManager = dialogManager;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
+        mFeatureFlags = featureFlags;
         mFalsingManager = falsingManager;
         mPowerManager = powerManager;
         mAccessibilityManager = accessibilityManager;
@@ -664,8 +665,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                 false /* resetLockoutRequiresHardwareAuthToken */);
 
         mBiometricExecutor = biometricsExecutor;
-        mFeatureFlags = featureFlags;
-        mBouncerInteractor = bouncerInteractor;
+        mPrimaryBouncerInteractor = primaryBouncerInteractor;
 
         mDumpManager.registerDumpable(TAG, this);
 
@@ -757,8 +757,8 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                 onFingerUp(mOverlay.getRequestId(), oldView);
             }
             final boolean removed = mOverlay.hide();
-            if (mKeyguardViewManager.isShowingAlternateAuth()) {
-                mKeyguardViewManager.resetAlternateAuth(true);
+            if (mKeyguardViewManager.isShowingAlternateBouncer()) {
+                mKeyguardViewManager.hideAlternateBouncer(true);
             }
             Log.v(TAG, "hideUdfpsOverlay | removing window: " + removed);
         } else {
@@ -798,7 +798,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                 Log.v(TAG, "aod lock icon long-press rejected by the falsing manager.");
                 return;
             }
-            mKeyguardViewManager.showBouncer(true);
+            mKeyguardViewManager.showPrimaryBouncer(true);
 
             // play the same haptic as the LockIconViewController longpress
             mVibrator.vibrate(

@@ -55,13 +55,13 @@ import java.util.List;
 import javax.inject.Inject;
 
 /**
- * A class which manages the bouncer on the lockscreen.
+ * A class which manages the primary (pin/pattern/password) bouncer on the lockscreen.
  * @deprecated Use KeyguardBouncerRepository
  */
 @Deprecated
 public class KeyguardBouncer {
 
-    private static final String TAG = "KeyguardBouncer";
+    private static final String TAG = "PrimaryKeyguardBouncer";
     static final long BOUNCER_FACE_DELAY = 1200;
     public static final float ALPHA_EXPANSION_THRESHOLD = 0.95f;
     /**
@@ -78,7 +78,7 @@ public class KeyguardBouncer {
     private final FalsingCollector mFalsingCollector;
     private final DismissCallbackRegistry mDismissCallbackRegistry;
     private final Handler mHandler;
-    private final List<BouncerExpansionCallback> mExpansionCallbacks = new ArrayList<>();
+    private final List<PrimaryBouncerExpansionCallback> mExpansionCallbacks = new ArrayList<>();
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final KeyguardStateController mKeyguardStateController;
     private final KeyguardSecurityModel mKeyguardSecurityModel;
@@ -126,7 +126,7 @@ public class KeyguardBouncer {
     private KeyguardBouncer(Context context, ViewMediatorCallback callback,
             ViewGroup container,
             DismissCallbackRegistry dismissCallbackRegistry, FalsingCollector falsingCollector,
-            BouncerExpansionCallback expansionCallback,
+            PrimaryBouncerExpansionCallback expansionCallback,
             KeyguardStateController keyguardStateController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             KeyguardBypassController keyguardBypassController, @Main Handler handler,
@@ -571,37 +571,37 @@ public class KeyguardBouncer {
     }
 
     private void dispatchFullyShown() {
-        for (BouncerExpansionCallback callback : mExpansionCallbacks) {
+        for (PrimaryBouncerExpansionCallback callback : mExpansionCallbacks) {
             callback.onFullyShown();
         }
     }
 
     private void dispatchStartingToHide() {
-        for (BouncerExpansionCallback callback : mExpansionCallbacks) {
+        for (PrimaryBouncerExpansionCallback callback : mExpansionCallbacks) {
             callback.onStartingToHide();
         }
     }
 
     private void dispatchStartingToShow() {
-        for (BouncerExpansionCallback callback : mExpansionCallbacks) {
+        for (PrimaryBouncerExpansionCallback callback : mExpansionCallbacks) {
             callback.onStartingToShow();
         }
     }
 
     private void dispatchFullyHidden() {
-        for (BouncerExpansionCallback callback : mExpansionCallbacks) {
+        for (PrimaryBouncerExpansionCallback callback : mExpansionCallbacks) {
             callback.onFullyHidden();
         }
     }
 
     private void dispatchExpansionChanged() {
-        for (BouncerExpansionCallback callback : mExpansionCallbacks) {
+        for (PrimaryBouncerExpansionCallback callback : mExpansionCallbacks) {
             callback.onExpansionChanged(mExpansion);
         }
     }
 
     private void dispatchVisibilityChanged() {
-        for (BouncerExpansionCallback callback : mExpansionCallbacks) {
+        for (PrimaryBouncerExpansionCallback callback : mExpansionCallbacks) {
             callback.onVisibilityChanged(mContainer.getVisibility() == View.VISIBLE);
         }
     }
@@ -647,7 +647,7 @@ public class KeyguardBouncer {
     /**
      * Adds a callback to listen to bouncer expansion updates.
      */
-    public void addBouncerExpansionCallback(BouncerExpansionCallback callback) {
+    public void addBouncerExpansionCallback(PrimaryBouncerExpansionCallback callback) {
         if (!mExpansionCallbacks.contains(callback)) {
             mExpansionCallbacks.add(callback);
         }
@@ -657,11 +657,14 @@ public class KeyguardBouncer {
      * Removes a previously added callback. If the callback was never added, this methood
      * does nothing.
      */
-    public void removeBouncerExpansionCallback(BouncerExpansionCallback callback) {
+    public void removeBouncerExpansionCallback(PrimaryBouncerExpansionCallback callback) {
         mExpansionCallbacks.remove(callback);
     }
 
-    public interface BouncerExpansionCallback {
+    /**
+     * Callback updated when the primary bouncer's show and hide states change.
+     */
+    public interface PrimaryBouncerExpansionCallback {
         /**
          * Invoked when the bouncer expansion reaches {@link KeyguardBouncer#EXPANSION_VISIBLE}.
          * This is NOT called each time the bouncer is shown, but rather only when the fully
@@ -745,7 +748,7 @@ public class KeyguardBouncer {
          * Construct a KeyguardBouncer that will exist in the given container.
          */
         public KeyguardBouncer create(ViewGroup container,
-                BouncerExpansionCallback expansionCallback) {
+                PrimaryBouncerExpansionCallback expansionCallback) {
             return new KeyguardBouncer(mContext, mCallback, container,
                     mDismissCallbackRegistry, mFalsingCollector, expansionCallback,
                     mKeyguardStateController, mKeyguardUpdateMonitor,

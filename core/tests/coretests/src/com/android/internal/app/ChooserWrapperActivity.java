@@ -31,6 +31,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.UserHandle;
+import android.util.Pair;
 import android.util.Size;
 
 import com.android.internal.app.ResolverListAdapter.ResolveInfoPresentationGetter;
@@ -239,6 +240,12 @@ public class ChooserWrapperActivity extends ChooserActivity implements IChooserW
     @Override
     protected void queryDirectShareTargets(ChooserListAdapter adapter,
             boolean skipAppPredictionService) {
+        if (sOverrides.directShareTargets != null) {
+            Pair<Integer, ServiceResultInfo[]> result =
+                    sOverrides.directShareTargets.apply(this, adapter);
+            sendShortcutManagerShareTargetResults(result.first, result.second);
+            return;
+        }
         if (sOverrides.onQueryDirectShareTargets != null) {
             sOverrides.onQueryDirectShareTargets.apply(adapter);
         }

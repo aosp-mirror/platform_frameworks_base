@@ -92,6 +92,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<AidlSession>
     private long mSideFpsLastAcquireStartTime;
     private Runnable mAuthSuccessRunnable;
     private final Clock mClock;
+    private boolean mDidFinishSfps;
 
     FingerprintAuthenticationClient(
             @NonNull Context context,
@@ -197,8 +198,9 @@ class FingerprintAuthenticationClient extends AuthenticationClient<AidlSession>
 
     @Override
     protected void handleLifecycleAfterAuth(boolean authenticated) {
-        if (authenticated) {
+        if (authenticated && !mDidFinishSfps) {
             mCallback.onClientFinished(this, true /* success */);
+            mDidFinishSfps = true;
         }
     }
 
@@ -490,11 +492,16 @@ class FingerprintAuthenticationClient extends AuthenticationClient<AidlSession>
         if (mSensorProps.isAnySidefpsType()) {
             Slog.i(TAG, "(sideFPS): onPowerPressed");
             mHandler.post(() -> {
+                if (mDidFinishSfps) {
+                    return;
+                }
                 Slog.i(TAG, "(sideFPS): finishing auth");
                 // Ignore auths after a power has been detected
                 mHandler.removeMessages(MESSAGE_AUTH_SUCCESS);
                 // Do not call onError() as that will send an additional callback to coex.
+                mDidFinishSfps = true;
                 onErrorInternal(BiometricConstants.BIOMETRIC_ERROR_POWER_PRESSED, 0, true);
+                stopHalOperation();
                 mSensorOverlays.hide(getSensorId());
             });
         }

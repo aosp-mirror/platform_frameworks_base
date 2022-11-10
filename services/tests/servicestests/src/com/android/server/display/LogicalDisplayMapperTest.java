@@ -22,6 +22,8 @@ import static android.view.Display.DEFAULT_DISPLAY_GROUP;
 import static com.android.server.display.DisplayAdapter.DISPLAY_DEVICE_EVENT_ADDED;
 import static com.android.server.display.DisplayAdapter.DISPLAY_DEVICE_EVENT_CHANGED;
 import static com.android.server.display.DisplayAdapter.DISPLAY_DEVICE_EVENT_REMOVED;
+import static com.android.server.display.LogicalDisplay.DISPLAY_PHASE_DISABLED;
+import static com.android.server.display.LogicalDisplay.DISPLAY_PHASE_ENABLED;
 import static com.android.server.display.LogicalDisplayMapper.LOGICAL_DISPLAY_EVENT_ADDED;
 import static com.android.server.display.LogicalDisplayMapper.LOGICAL_DISPLAY_EVENT_REMOVED;
 
@@ -52,6 +54,8 @@ import android.view.DisplayInfo;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
+
+import com.android.server.display.layout.Layout;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -85,6 +89,7 @@ public class LogicalDisplayMapperTest {
     @Mock Resources mResourcesMock;
     @Mock IPowerManager mIPowerManagerMock;
     @Mock IThermalService mIThermalServiceMock;
+    @Mock DeviceStateToLayoutMap mDeviceStateToLayoutMapMock;
 
     @Captor ArgumentCaptor<LogicalDisplay> mDisplayCaptor;
 
@@ -130,11 +135,13 @@ public class LogicalDisplayMapperTest {
         when(mResourcesMock.getIntArray(
                 com.android.internal.R.array.config_deviceStatesOnWhichToSleep))
                 .thenReturn(new int[]{0});
+        when(mDeviceStateToLayoutMapMock.get(-1)).thenReturn(new Layout());
 
         mLooper = new TestLooper();
         mHandler = new Handler(mLooper.getLooper());
         mLogicalDisplayMapper = new LogicalDisplayMapper(mContextMock, mDisplayDeviceRepo,
-                mListenerMock, new DisplayManagerService.SyncRoot(), mHandler);
+                mListenerMock, new DisplayManagerService.SyncRoot(), mHandler,
+                mDeviceStateToLayoutMapMock);
     }
 
 
@@ -411,6 +418,58 @@ public class LogicalDisplayMapperTest {
                 /* isOverrideActive= */true,
                 /* isInteractive= */true,
                 /* isBootCompleted= */true));
+    }
+
+    @Test
+    public void testDeviceStateLocked() {
+        DisplayDevice device1 = createDisplayDevice(Display.TYPE_INTERNAL, 600, 800,
+                DisplayDeviceInfo.FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY);
+        DisplayDevice device2 = createDisplayDevice(Display.TYPE_INTERNAL, 600, 800,
+                DisplayDeviceInfo.FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY);
+
+        Layout layout = new Layout();
+        layout.createDisplayLocked(device1.getDisplayDeviceInfoLocked().address, true, true);
+        layout.createDisplayLocked(device2.getDisplayDeviceInfoLocked().address, false, false);
+        when(mDeviceStateToLayoutMapMock.get(0)).thenReturn(layout);
+
+        layout = new Layout();
+        layout.createDisplayLocked(device1.getDisplayDeviceInfoLocked().address, false, false);
+        layout.createDisplayLocked(device2.getDisplayDeviceInfoLocked().address, true, true);
+        when(mDeviceStateToLayoutMapMock.get(1)).thenReturn(layout);
+        when(mDeviceStateToLayoutMapMock.get(2)).thenReturn(layout);
+
+        LogicalDisplay display1 = add(device1);
+        assertEquals(info(display1).address, info(device1).address);
+        assertEquals(DEFAULT_DISPLAY, id(display1));
+
+        LogicalDisplay display2 = add(device2);
+        assertEquals(info(display2).address, info(device2).address);
+        // We can only have one default display
+        assertEquals(DEFAULT_DISPLAY, id(display1));
+
+        mLogicalDisplayMapper.setDeviceStateLocked(0, false);
+        mLooper.moveTimeForward(1000);
+        mLooper.dispatchAll();
+        assertEquals(DISPLAY_PHASE_ENABLED,
+                mLogicalDisplayMapper.getDisplayLocked(device1).getPhase());
+        assertEquals(DISPLAY_PHASE_DISABLED,
+                mLogicalDisplayMapper.getDisplayLocked(device2).getPhase());
+
+        mLogicalDisplayMapper.setDeviceStateLocked(1, false);
+        mLooper.moveTimeForward(1000);
+        mLooper.dispatchAll();
+        assertEquals(DISPLAY_PHASE_DISABLED,
+                mLogicalDisplayMapper.getDisplayLocked(device1).getPhase());
+        assertEquals(DISPLAY_PHASE_ENABLED,
+                mLogicalDisplayMapper.getDisplayLocked(device2).getPhase());
+
+        mLogicalDisplayMapper.setDeviceStateLocked(2, false);
+        mLooper.moveTimeForward(1000);
+        mLooper.dispatchAll();
+        assertEquals(DISPLAY_PHASE_DISABLED,
+                mLogicalDisplayMapper.getDisplayLocked(device1).getPhase());
+        assertEquals(DISPLAY_PHASE_ENABLED,
+                mLogicalDisplayMapper.getDisplayLocked(device2).getPhase());
     }
 
     /////////////////
