@@ -661,8 +661,6 @@ public class BackupTransport {
      *
      * <p>Backups requested from outside the framework may pass in a monitor with the request,
      * however backups initiated by the framework will call this method to retrieve one.
-     *
-     * @hide
      */
     @Nullable
     public BackupManagerMonitor getBackupManagerMonitor() {
