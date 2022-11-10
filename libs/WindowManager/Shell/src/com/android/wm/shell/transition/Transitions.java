@@ -24,7 +24,6 @@ import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.view.WindowManager.fixScale;
-import static android.window.TransitionInfo.FLAG_IS_INPUT_METHOD;
 import static android.window.TransitionInfo.FLAG_IS_OCCLUDED;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
@@ -333,9 +332,12 @@ public class Transitions implements RemoteCallable<Transitions> {
         boolean isOpening = isOpeningType(info.getType());
         for (int i = info.getChanges().size() - 1; i >= 0; --i) {
             final TransitionInfo.Change change = info.getChanges().get(i);
-            if ((change.getFlags() & TransitionInfo.FLAG_IS_SYSTEM_WINDOW) != 0) {
+            if (change.hasFlags(TransitionInfo.FLAGS_IS_NON_APP_WINDOW)) {
                 // Currently system windows are controlled by WindowState, so don't change their
-                // surfaces. Otherwise their window tokens could be hidden unexpectedly.
+                // surfaces. Otherwise their surfaces could be hidden or cropped unexpectedly.
+                // This includes Wallpaper (always z-ordered at bottom) and IME (associated with
+                // app), because there may not be a transition associated with their visibility
+                // changes, and currently they don't need transition animation.
                 continue;
             }
             final SurfaceControl leash = change.getLeash();
@@ -372,16 +374,7 @@ public class Transitions implements RemoteCallable<Transitions> {
                     finishT.setAlpha(leash, 1.f);
                 }
             } else if (mode == TRANSIT_CLOSE || mode == TRANSIT_TO_BACK) {
-                // Wallpaper/IME are anomalies: their visibility is tied to other WindowStates.
-                // As a result, we actually can't hide their WindowTokens because there may not be a
-                // transition associated with them becoming visible again. Fortunately, since
-                // wallpapers are always z-ordered to the back, we don't have to worry about it
-                // flickering to the front during reparenting. Similarly, the IME is reparented to
-                // the associated app, so its visibility is coupled. So, an explicit hide is not
-                // needed visually anyways.
-                if ((change.getFlags() & (FLAG_IS_WALLPAPER | FLAG_IS_INPUT_METHOD)) == 0) {
-                    finishT.hide(leash);
-                }
+                finishT.hide(leash);
             }
         }
     }
