@@ -8478,7 +8478,12 @@ public class CarrierConfigManager {
      *
      * Used to trade privacy/security against potentially reduced carrier coverage for some
      * carriers.
+     *
+     * @deprecated Future versions of Android will disallow carriers from hiding this toggle
+     * because disabling 2g is a security feature that users should always have access to at
+     * their discretion.
      */
+    @Deprecated
     public static final String KEY_HIDE_ENABLE_2G = "hide_enable_2g_bool";
 
     /**
