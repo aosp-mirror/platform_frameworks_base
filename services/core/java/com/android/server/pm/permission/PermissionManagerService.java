@@ -5650,7 +5650,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                     if (resolvedPackageName == null) {
                         return;
                     }
-                    appOpsManager.finishOp(accessorSource.getToken(), op,
+                    appOpsManager.finishOp(attributionSourceState.token, op,
                             accessorSource.getUid(), resolvedPackageName,
                             accessorSource.getAttributionTag());
                 } else {
@@ -5659,8 +5659,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                     if (resolvedAttributionSource.getPackageName() == null) {
                         return;
                     }
-                    appOpsManager.finishProxyOp(AppOpsManager.opToPublicName(op),
-                            resolvedAttributionSource, skipCurrentFinish);
+                    appOpsManager.finishProxyOp(attributionSourceState.token,
+                            AppOpsManager.opToPublicName(op), resolvedAttributionSource,
+                            skipCurrentFinish);
                 }
 
                 if (next == null || next.getNext() == null) {
@@ -5770,10 +5771,11 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                         && next.getNext() == null);
                 final boolean selfAccess = singleReceiverFromDatasource || next == null;
 
-                final int opMode = performOpTransaction(context, op, current, message,
-                        forDataDelivery, /*startDataDelivery*/ false, skipCurrentChecks,
-                        selfAccess, singleReceiverFromDatasource, AppOpsManager.OP_NONE,
-                        AppOpsManager.ATTRIBUTION_FLAGS_NONE, AppOpsManager.ATTRIBUTION_FLAGS_NONE,
+                final int opMode = performOpTransaction(context, attributionSource.getToken(), op,
+                        current, message, forDataDelivery, /*startDataDelivery*/ false,
+                        skipCurrentChecks, selfAccess, singleReceiverFromDatasource,
+                        AppOpsManager.OP_NONE, AppOpsManager.ATTRIBUTION_FLAGS_NONE,
+                        AppOpsManager.ATTRIBUTION_FLAGS_NONE,
                         AppOpsManager.ATTRIBUTION_CHAIN_ID_NONE);
 
                 switch (opMode) {
@@ -5875,10 +5877,10 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                         attributionSource, next, fromDatasource, startDataDelivery, selfAccess,
                         isLinkTrusted) : ATTRIBUTION_FLAGS_NONE;
 
-                final int opMode = performOpTransaction(context, op, current, message,
-                        forDataDelivery, startDataDelivery, skipCurrentChecks, selfAccess,
-                        singleReceiverFromDatasource, attributedOp, proxyAttributionFlags,
-                        proxiedAttributionFlags, attributionChainId);
+                final int opMode = performOpTransaction(context, attributionSource.getToken(), op,
+                        current, message, forDataDelivery, startDataDelivery, skipCurrentChecks,
+                        selfAccess, singleReceiverFromDatasource, attributedOp,
+                        proxyAttributionFlags, proxiedAttributionFlags, attributionChainId);
 
                 switch (opMode) {
                     case AppOpsManager.MODE_ERRORED: {
@@ -6023,8 +6025,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                         attributionSource, next, /*fromDatasource*/ false, startDataDelivery,
                         selfAccess, isLinkTrusted) : ATTRIBUTION_FLAGS_NONE;
 
-                final int opMode = performOpTransaction(context, op, current, message,
-                        forDataDelivery, startDataDelivery, skipCurrentChecks, selfAccess,
+                final int opMode = performOpTransaction(context, current.getToken(), op, current,
+                        message, forDataDelivery, startDataDelivery, skipCurrentChecks, selfAccess,
                         /*fromDatasource*/ false, AppOpsManager.OP_NONE, proxyAttributionFlags,
                         proxiedAttributionFlags, attributionChainId);
 
@@ -6046,7 +6048,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
 
         @SuppressWarnings("ConstantConditions")
-        private static int performOpTransaction(@NonNull Context context, int op,
+        private static int performOpTransaction(@NonNull Context context,
+                @NonNull IBinder chainStartToken, int op,
                 @NonNull AttributionSource attributionSource, @Nullable String message,
                 boolean forDataDelivery, boolean startDataDelivery, boolean skipProxyOperation,
                 boolean selfAccess, boolean singleReceiverFromDatasource, int attributedOp,
@@ -6108,7 +6111,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 if (selfAccess) {
                     try {
                         startedOpResult = appOpsManager.startOpNoThrow(
-                                resolvedAttributionSource.getToken(), startedOp,
+                                chainStartToken, startedOp,
                                 resolvedAttributionSource.getUid(),
                                 resolvedAttributionSource.getPackageName(),
                                 /*startIfModeDefault*/ false,
@@ -6119,12 +6122,12 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                                 + " platform defined runtime permission "
                                 + AppOpsManager.opToPermission(op) + " while not having "
                                 + Manifest.permission.UPDATE_APP_OPS_STATS);
-                        startedOpResult = appOpsManager.startProxyOpNoThrow(attributedOp,
-                                attributionSource, message, skipProxyOperation,
+                        startedOpResult = appOpsManager.startProxyOpNoThrow(chainStartToken,
+                                attributedOp, attributionSource, message, skipProxyOperation,
                                 proxyAttributionFlags, proxiedAttributionFlags, attributionChainId);
                     }
                 } else {
-                    startedOpResult = appOpsManager.startProxyOpNoThrow(startedOp,
+                    startedOpResult = appOpsManager.startProxyOpNoThrow(chainStartToken, startedOp,
                             resolvedAttributionSource, message, skipProxyOperation,
                             proxyAttributionFlags, proxiedAttributionFlags, attributionChainId);
                 }
