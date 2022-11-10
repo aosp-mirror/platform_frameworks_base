@@ -50,7 +50,7 @@ class ServerFlagReaderImplTest : SysuiTestCase() {
 
     @Test
     fun testChange_alertsListener() {
-        val flag = ReleasedFlag(1)
+        val flag = ReleasedFlag(1, "1", "test")
         serverFlagReader.listenForChanges(listOf(flag), changeListener)
 
         deviceConfig.setProperty(NAMESPACE, "flag_override_1", "1", false)

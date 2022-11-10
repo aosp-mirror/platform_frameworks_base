@@ -57,21 +57,32 @@ import org.mockito.Mockito.`when` as whenever
 class FeatureFlagsDebugTest : SysuiTestCase() {
     private lateinit var mFeatureFlagsDebug: FeatureFlagsDebug
 
-    @Mock private lateinit var flagManager: FlagManager
-    @Mock private lateinit var mockContext: Context
-    @Mock private lateinit var secureSettings: SecureSettings
-    @Mock private lateinit var systemProperties: SystemPropertiesHelper
-    @Mock private lateinit var resources: Resources
-    @Mock private lateinit var commandRegistry: CommandRegistry
-    @Mock private lateinit var restarter: Restarter
+    @Mock
+    private lateinit var flagManager: FlagManager
+    @Mock
+    private lateinit var mockContext: Context
+    @Mock
+    private lateinit var secureSettings: SecureSettings
+    @Mock
+    private lateinit var systemProperties: SystemPropertiesHelper
+    @Mock
+    private lateinit var resources: Resources
+    @Mock
+    private lateinit var commandRegistry: CommandRegistry
+    @Mock
+    private lateinit var restarter: Restarter
     private val flagMap = mutableMapOf<Int, Flag<*>>()
     private lateinit var broadcastReceiver: BroadcastReceiver
     private lateinit var clearCacheAction: Consumer<Int>
     private val serverFlagReader = ServerFlagReaderFake()
 
     private val deviceConfig = DeviceConfigProxyFake()
-    private val teamfoodableFlagA = UnreleasedFlag(500, teamfood = true)
-    private val teamfoodableFlagB = ReleasedFlag(501, teamfood = true)
+    private val teamfoodableFlagA = UnreleasedFlag(
+        500, name = "a", namespace = "test", teamfood = true
+    )
+    private val teamfoodableFlagB = ReleasedFlag(
+        501, name = "b", namespace = "test", teamfood = true
+    )
 
     @Before
     fun setup() {
@@ -91,8 +102,10 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
         mFeatureFlagsDebug.init()
         verify(flagManager).onSettingsChangedAction = any()
         broadcastReceiver = withArgCaptor {
-            verify(mockContext).registerReceiver(capture(), any(), nullable(), nullable(),
-                any())
+            verify(mockContext).registerReceiver(
+                capture(), any(), nullable(), nullable(),
+                any()
+            )
         }
         clearCacheAction = withArgCaptor {
             verify(flagManager).clearCacheAction = capture()
@@ -106,10 +119,42 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
         whenever(flagManager.readFlagValue<Boolean>(eq(3), any())).thenReturn(true)
         whenever(flagManager.readFlagValue<Boolean>(eq(4), any())).thenReturn(false)
 
-        assertThat(mFeatureFlagsDebug.isEnabled(ReleasedFlag(2))).isTrue()
-        assertThat(mFeatureFlagsDebug.isEnabled(UnreleasedFlag(3))).isTrue()
-        assertThat(mFeatureFlagsDebug.isEnabled(ReleasedFlag(4))).isFalse()
-        assertThat(mFeatureFlagsDebug.isEnabled(UnreleasedFlag(5))).isFalse()
+        assertThat(
+            mFeatureFlagsDebug.isEnabled(
+                ReleasedFlag(
+                    2,
+                    name = "2",
+                    namespace = "test"
+                )
+            )
+        ).isTrue()
+        assertThat(
+            mFeatureFlagsDebug.isEnabled(
+                UnreleasedFlag(
+                    3,
+                    name = "3",
+                    namespace = "test"
+                )
+            )
+        ).isTrue()
+        assertThat(
+            mFeatureFlagsDebug.isEnabled(
+                ReleasedFlag(
+                    4,
+                    name = "3",
+                    namespace = "test"
+                )
+            )
+        ).isFalse()
+        assertThat(
+            mFeatureFlagsDebug.isEnabled(
+                UnreleasedFlag(
+                    5,
+                    name = "4",
+                    namespace = "test"
+                )
+            )
+        ).isFalse()
     }
 
     @Test
@@ -137,9 +182,9 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
     @Test
     fun teamFoodFlag_Overridden() {
         whenever(flagManager.readFlagValue<Boolean>(eq(teamfoodableFlagA.id), any()))
-                .thenReturn(true)
+            .thenReturn(true)
         whenever(flagManager.readFlagValue<Boolean>(eq(teamfoodableFlagB.id), any()))
-                .thenReturn(false)
+            .thenReturn(false)
         whenever(flagManager.readFlagValue<Boolean>(eq(1), any())).thenReturn(true)
         assertThat(mFeatureFlagsDebug.isEnabled(teamfoodableFlagA)).isTrue()
         assertThat(mFeatureFlagsDebug.isEnabled(teamfoodableFlagB)).isFalse()
@@ -160,17 +205,26 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
         whenever(flagManager.readFlagValue<Boolean>(eq(3), any())).thenReturn(true)
         whenever(flagManager.readFlagValue<Boolean>(eq(5), any())).thenReturn(false)
 
-        assertThat(mFeatureFlagsDebug.isEnabled(ResourceBooleanFlag(1, 1001))).isFalse()
-        assertThat(mFeatureFlagsDebug.isEnabled(ResourceBooleanFlag(2, 1002))).isTrue()
-        assertThat(mFeatureFlagsDebug.isEnabled(ResourceBooleanFlag(3, 1003))).isTrue()
+        assertThat(
+            mFeatureFlagsDebug.isEnabled(
+                ResourceBooleanFlag(
+                    1,
+                    "1",
+                    "test",
+                    1001
+                )
+            )
+        ).isFalse()
+        assertThat(mFeatureFlagsDebug.isEnabled(ResourceBooleanFlag(2, "2", "test", 1002))).isTrue()
+        assertThat(mFeatureFlagsDebug.isEnabled(ResourceBooleanFlag(3, "3", "test", 1003))).isTrue()
 
         Assert.assertThrows(NameNotFoundException::class.java) {
-            mFeatureFlagsDebug.isEnabled(ResourceBooleanFlag(4, 1004))
+            mFeatureFlagsDebug.isEnabled(ResourceBooleanFlag(4, "4", "test", 1004))
         }
         // Test that resource is loaded (and validated) even when the setting is set.
         //  This prevents developers from not noticing when they reference an invalid resource.
         Assert.assertThrows(NameNotFoundException::class.java) {
-            mFeatureFlagsDebug.isEnabled(ResourceBooleanFlag(5, 1005))
+            mFeatureFlagsDebug.isEnabled(ResourceBooleanFlag(5, "5", "test", 1005))
         }
     }
 
@@ -183,21 +237,30 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
             return@thenAnswer it.getArgument(1)
         }
 
-        assertThat(mFeatureFlagsDebug.isEnabled(SysPropBooleanFlag(1, "a"))).isFalse()
-        assertThat(mFeatureFlagsDebug.isEnabled(SysPropBooleanFlag(2, "b"))).isTrue()
-        assertThat(mFeatureFlagsDebug.isEnabled(SysPropBooleanFlag(3, "c", true))).isTrue()
-        assertThat(mFeatureFlagsDebug.isEnabled(SysPropBooleanFlag(4, "d", false))).isFalse()
-        assertThat(mFeatureFlagsDebug.isEnabled(SysPropBooleanFlag(5, "e"))).isFalse()
+        assertThat(mFeatureFlagsDebug.isEnabled(SysPropBooleanFlag(1, "a", "test"))).isFalse()
+        assertThat(mFeatureFlagsDebug.isEnabled(SysPropBooleanFlag(2, "b", "test"))).isTrue()
+        assertThat(mFeatureFlagsDebug.isEnabled(SysPropBooleanFlag(3, "c", "test", true))).isTrue()
+        assertThat(
+            mFeatureFlagsDebug.isEnabled(
+                SysPropBooleanFlag(
+                    4,
+                    "d",
+                    "test",
+                    false
+                )
+            )
+        ).isFalse()
+        assertThat(mFeatureFlagsDebug.isEnabled(SysPropBooleanFlag(5, "e", "test"))).isFalse()
     }
 
     @Test
     fun readStringFlag() {
         whenever(flagManager.readFlagValue<String>(eq(3), any())).thenReturn("foo")
         whenever(flagManager.readFlagValue<String>(eq(4), any())).thenReturn("bar")
-        assertThat(mFeatureFlagsDebug.getString(StringFlag(1, "biz"))).isEqualTo("biz")
-        assertThat(mFeatureFlagsDebug.getString(StringFlag(2, "baz"))).isEqualTo("baz")
-        assertThat(mFeatureFlagsDebug.getString(StringFlag(3, "buz"))).isEqualTo("foo")
-        assertThat(mFeatureFlagsDebug.getString(StringFlag(4, "buz"))).isEqualTo("bar")
+        assertThat(mFeatureFlagsDebug.getString(StringFlag(1, "1", "test", "biz"))).isEqualTo("biz")
+        assertThat(mFeatureFlagsDebug.getString(StringFlag(2, "2", "test", "baz"))).isEqualTo("baz")
+        assertThat(mFeatureFlagsDebug.getString(StringFlag(3, "3", "test", "buz"))).isEqualTo("foo")
+        assertThat(mFeatureFlagsDebug.getString(StringFlag(4, "4", "test", "buz"))).isEqualTo("bar")
     }
 
     @Test
@@ -213,20 +276,47 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
         whenever(flagManager.readFlagValue<String>(eq(4), any())).thenReturn("override4")
         whenever(flagManager.readFlagValue<String>(eq(6), any())).thenReturn("override6")
 
-        assertThat(mFeatureFlagsDebug.getString(ResourceStringFlag(1, 1001))).isEqualTo("")
-        assertThat(mFeatureFlagsDebug.getString(ResourceStringFlag(2, 1002))).isEqualTo("resource2")
-        assertThat(mFeatureFlagsDebug.getString(ResourceStringFlag(3, 1003))).isEqualTo("override3")
+        assertThat(
+            mFeatureFlagsDebug.getString(
+                ResourceStringFlag(
+                    1,
+                    "1",
+                    "test",
+                    1001
+                )
+            )
+        ).isEqualTo("")
+        assertThat(
+            mFeatureFlagsDebug.getString(
+                ResourceStringFlag(
+                    2,
+                    "2",
+                    "test",
+                    1002
+                )
+            )
+        ).isEqualTo("resource2")
+        assertThat(
+            mFeatureFlagsDebug.getString(
+                ResourceStringFlag(
+                    3,
+                    "3",
+                    "test",
+                    1003
+                )
+            )
+        ).isEqualTo("override3")
 
         Assert.assertThrows(NullPointerException::class.java) {
-            mFeatureFlagsDebug.getString(ResourceStringFlag(4, 1004))
+            mFeatureFlagsDebug.getString(ResourceStringFlag(4, "4", "test", 1004))
         }
         Assert.assertThrows(NameNotFoundException::class.java) {
-            mFeatureFlagsDebug.getString(ResourceStringFlag(5, 1005))
+            mFeatureFlagsDebug.getString(ResourceStringFlag(5, "5", "test", 1005))
         }
         // Test that resource is loaded (and validated) even when the setting is set.
         //  This prevents developers from not noticing when they reference an invalid resource.
         Assert.assertThrows(NameNotFoundException::class.java) {
-            mFeatureFlagsDebug.getString(ResourceStringFlag(6, 1005))
+            mFeatureFlagsDebug.getString(ResourceStringFlag(6, "6", "test", 1005))
         }
     }
 
@@ -234,10 +324,10 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
     fun readIntFlag() {
         whenever(flagManager.readFlagValue<Int>(eq(3), any())).thenReturn(22)
         whenever(flagManager.readFlagValue<Int>(eq(4), any())).thenReturn(48)
-        assertThat(mFeatureFlagsDebug.getInt(IntFlag(1, 12))).isEqualTo(12)
-        assertThat(mFeatureFlagsDebug.getInt(IntFlag(2, 93))).isEqualTo(93)
-        assertThat(mFeatureFlagsDebug.getInt(IntFlag(3, 8))).isEqualTo(22)
-        assertThat(mFeatureFlagsDebug.getInt(IntFlag(4, 234))).isEqualTo(48)
+        assertThat(mFeatureFlagsDebug.getInt(IntFlag(1, "1", "test", 12))).isEqualTo(12)
+        assertThat(mFeatureFlagsDebug.getInt(IntFlag(2, "2", "test", 93))).isEqualTo(93)
+        assertThat(mFeatureFlagsDebug.getInt(IntFlag(3, "3", "test", 8))).isEqualTo(22)
+        assertThat(mFeatureFlagsDebug.getInt(IntFlag(4, "4", "test", 234))).isEqualTo(48)
     }
 
     @Test
@@ -253,26 +343,26 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
         whenever(flagManager.readFlagValue<Int>(eq(4), any())).thenReturn(500)
         whenever(flagManager.readFlagValue<Int>(eq(5), any())).thenReturn(9519)
 
-        assertThat(mFeatureFlagsDebug.getInt(ResourceIntFlag(1, 1001))).isEqualTo(88)
-        assertThat(mFeatureFlagsDebug.getInt(ResourceIntFlag(2, 1002))).isEqualTo(61)
-        assertThat(mFeatureFlagsDebug.getInt(ResourceIntFlag(3, 1003))).isEqualTo(20)
+        assertThat(mFeatureFlagsDebug.getInt(ResourceIntFlag(1, "1", "test", 1001))).isEqualTo(88)
+        assertThat(mFeatureFlagsDebug.getInt(ResourceIntFlag(2, "2", "test", 1002))).isEqualTo(61)
+        assertThat(mFeatureFlagsDebug.getInt(ResourceIntFlag(3, "3", "test", 1003))).isEqualTo(20)
 
         Assert.assertThrows(NotFoundException::class.java) {
-            mFeatureFlagsDebug.getInt(ResourceIntFlag(4, 1004))
+            mFeatureFlagsDebug.getInt(ResourceIntFlag(4, "4", "test", 1004))
         }
         // Test that resource is loaded (and validated) even when the setting is set.
         //  This prevents developers from not noticing when they reference an invalid resource.
         Assert.assertThrows(NotFoundException::class.java) {
-            mFeatureFlagsDebug.getInt(ResourceIntFlag(5, 1005))
+            mFeatureFlagsDebug.getInt(ResourceIntFlag(5, "5", "test", 1005))
         }
     }
 
     @Test
     fun broadcastReceiver_IgnoresInvalidData() {
-        addFlag(UnreleasedFlag(1))
-        addFlag(ResourceBooleanFlag(2, 1002))
-        addFlag(StringFlag(3, "flag3"))
-        addFlag(ResourceStringFlag(4, 1004))
+        addFlag(UnreleasedFlag(1, "1", "test"))
+        addFlag(ResourceBooleanFlag(2, "2", "test", 1002))
+        addFlag(StringFlag(3, "3", "test", "flag3"))
+        addFlag(ResourceStringFlag(4, "4", "test", 1004))
 
         broadcastReceiver.onReceive(mockContext, null)
         broadcastReceiver.onReceive(mockContext, Intent())
@@ -288,7 +378,7 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
 
     @Test
     fun intentWithId_NoValueKeyClears() {
-        addFlag(UnreleasedFlag(1))
+        addFlag(UnreleasedFlag(1, name = "1", namespace = "test"))
 
         // trying to erase an id not in the map does nothing
         broadcastReceiver.onReceive(
@@ -307,10 +397,10 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
 
     @Test
     fun setBooleanFlag() {
-        addFlag(UnreleasedFlag(1))
-        addFlag(UnreleasedFlag(2))
-        addFlag(ResourceBooleanFlag(3, 1003))
-        addFlag(ResourceBooleanFlag(4, 1004))
+        addFlag(UnreleasedFlag(1, "1", "test"))
+        addFlag(UnreleasedFlag(2, "2", "test"))
+        addFlag(ResourceBooleanFlag(3, "3", "test", 1003))
+        addFlag(ResourceBooleanFlag(4, "4", "test", 1004))
 
         setByBroadcast(1, false)
         verifyPutData(1, "{\"type\":\"boolean\",\"value\":false}")
@@ -327,8 +417,8 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
 
     @Test
     fun setStringFlag() {
-        addFlag(StringFlag(1, "flag1"))
-        addFlag(ResourceStringFlag(2, 1002))
+        addFlag(StringFlag(1, "flag1", "1", "test"))
+        addFlag(ResourceStringFlag(2, "2", "test", 1002))
 
         setByBroadcast(1, "override1")
         verifyPutData(1, "{\"type\":\"string\",\"value\":\"override1\"}")
@@ -339,7 +429,7 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
 
     @Test
     fun setFlag_ClearsCache() {
-        val flag1 = addFlag(StringFlag(1, "flag1"))
+        val flag1 = addFlag(StringFlag(1, "1", "test", "flag1"))
         whenever(flagManager.readFlagValue<String>(eq(1), any())).thenReturn("original")
 
         // gets the flag & cache it
@@ -361,7 +451,7 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
 
     @Test
     fun serverSide_Overrides_MakesFalse() {
-        val flag = ReleasedFlag(100)
+        val flag = ReleasedFlag(100, "100", "test")
 
         serverFlagReader.setFlagValue(flag.namespace, flag.name, false)
 
@@ -370,7 +460,7 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
 
     @Test
     fun serverSide_Overrides_MakesTrue() {
-        val flag = UnreleasedFlag(100)
+        val flag = UnreleasedFlag(100, name = "100", namespace = "test")
 
         serverFlagReader.setFlagValue(flag.namespace, flag.name, true)
 
@@ -379,13 +469,13 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
 
     @Test
     fun dumpFormat() {
-        val flag1 = ReleasedFlag(1)
-        val flag2 = ResourceBooleanFlag(2, 1002)
-        val flag3 = UnreleasedFlag(3)
-        val flag4 = StringFlag(4, "")
-        val flag5 = StringFlag(5, "flag5default")
-        val flag6 = ResourceStringFlag(6, 1006)
-        val flag7 = ResourceStringFlag(7, 1007)
+        val flag1 = ReleasedFlag(1, "1", "test")
+        val flag2 = ResourceBooleanFlag(2, "2", "test", 1002)
+        val flag3 = UnreleasedFlag(3, "3", "test")
+        val flag4 = StringFlag(4, "4", "test", "")
+        val flag5 = StringFlag(5, "5", "test", "flag5default")
+        val flag6 = ResourceStringFlag(6, "6", "test", 1006)
+        val flag7 = ResourceStringFlag(7, "7", "test", 1007)
 
         whenever(resources.getBoolean(1002)).thenReturn(true)
         whenever(resources.getString(1006)).thenReturn("resource1006")

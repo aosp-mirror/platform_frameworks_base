@@ -229,7 +229,7 @@ public class FlagCommand implements Command {
     }
 
     private int flagNameToId(String flagName) {
-        Map<String, Flag<?>> flagFields = Flags.getFlagFields();
+        Map<String, Flag<?>> flagFields = FlagsFactory.INSTANCE.getKnownFlags();
         for (String fieldName : flagFields.keySet()) {
             if (flagName.equals(fieldName)) {
                 return flagFields.get(fieldName).getId();
@@ -240,7 +240,7 @@ public class FlagCommand implements Command {
     }
 
     private void printKnownFlags(PrintWriter pw) {
-        Map<String, Flag<?>> fields = Flags.getFlagFields();
+        Map<String, Flag<?>> fields = FlagsFactory.INSTANCE.getKnownFlags();
 
         int longestFieldName = 0;
         for (String fieldName : fields.keySet()) {
