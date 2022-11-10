@@ -121,18 +121,32 @@ constructor(
     }
 
     /**
-     * Returns the list of representation objects for all known affordances, regardless of what is
-     * selected. This is useful for building experiences like the picker/selector or user settings
-     * so the user can see everything that can be selected in a menu.
+     * Returns the list of representation objects for all known, device-available affordances,
+     * regardless of what is selected. This is useful for building experiences like the
+     * picker/selector or user settings so the user can see everything that can be selected in a
+     * menu.
      */
-    fun getAffordancePickerRepresentations(): List<KeyguardQuickAffordancePickerRepresentation> {
-        return configs.map { config ->
-            KeyguardQuickAffordancePickerRepresentation(
-                id = config.key,
-                name = config.pickerName,
-                iconResourceId = config.pickerIconResourceId,
-            )
-        }
+    suspend fun getAffordancePickerRepresentations():
+        List<KeyguardQuickAffordancePickerRepresentation> {
+        return configs
+            .associateWith { config -> config.getPickerScreenState() }
+            .filterNot { (_, pickerState) ->
+                pickerState is KeyguardQuickAffordanceConfig.PickerScreenState.UnavailableOnDevice
+            }
+            .map { (config, pickerState) ->
+                val disabledPickerState =
+                    pickerState as? KeyguardQuickAffordanceConfig.PickerScreenState.Disabled
+                KeyguardQuickAffordancePickerRepresentation(
+                    id = config.key,
+                    name = config.pickerName,
+                    iconResourceId = config.pickerIconResourceId,
+                    isEnabled =
+                        pickerState is KeyguardQuickAffordanceConfig.PickerScreenState.Default,
+                    instructions = disabledPickerState?.instructions,
+                    actionText = disabledPickerState?.actionText,
+                    actionComponentName = disabledPickerState?.actionComponentName,
+                )
+            }
     }
 
     /**
