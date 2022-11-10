@@ -115,7 +115,8 @@ public class DisplayInsetsControllerTest extends ShellTestCase {
         mInsetsControllersByDisplayId.get(DEFAULT_DISPLAY).insetsControlChanged(null, null);
         mInsetsControllersByDisplayId.get(DEFAULT_DISPLAY).showInsets(0, false,
                 null /* statsToken */);
-        mInsetsControllersByDisplayId.get(DEFAULT_DISPLAY).hideInsets(0, false);
+        mInsetsControllersByDisplayId.get(DEFAULT_DISPLAY).hideInsets(0, false,
+                null /* statsToken */);
         mExecutor.flushAll();
 
         assertTrue(defaultListener.topFocusedWindowChangedCount == 1);
@@ -136,7 +137,8 @@ public class DisplayInsetsControllerTest extends ShellTestCase {
         mInsetsControllersByDisplayId.get(SECOND_DISPLAY).insetsControlChanged(null, null);
         mInsetsControllersByDisplayId.get(SECOND_DISPLAY).showInsets(0, false,
                 null /* statsToken */);
-        mInsetsControllersByDisplayId.get(SECOND_DISPLAY).hideInsets(0, false);
+        mInsetsControllersByDisplayId.get(SECOND_DISPLAY).hideInsets(0, false,
+                null /* statsToken */);
         mExecutor.flushAll();
 
         assertTrue(defaultListener.topFocusedWindowChangedCount == 1);
@@ -200,7 +202,7 @@ public class DisplayInsetsControllerTest extends ShellTestCase {
         }
 
         @Override
-        public void hideInsets(int types, boolean fromIme) {
+        public void hideInsets(int types, boolean fromIme, @Nullable ImeTracker.Token statsToken) {
             hideInsetsCount++;
         }
     }

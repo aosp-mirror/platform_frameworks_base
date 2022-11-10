@@ -5663,7 +5663,10 @@ public final class ViewRootImpl implements ViewParent,
                     break;
                 }
                 case MSG_HIDE_INSETS: {
-                    mInsetsController.hide(msg.arg1, msg.arg2 == 1);
+                    final ImeTracker.Token statsToken = (ImeTracker.Token) msg.obj;
+                    ImeTracker.get().onProgress(statsToken,
+                            ImeTracker.PHASE_CLIENT_HANDLE_HIDE_INSETS);
+                    mInsetsController.hide(msg.arg1, msg.arg2 == 1, statsToken);
                     break;
                 }
                 case MSG_WINDOW_MOVED:
@@ -8820,8 +8823,9 @@ public final class ViewRootImpl implements ViewParent,
         mHandler.obtainMessage(MSG_SHOW_INSETS, types, fromIme ? 1 : 0, statsToken).sendToTarget();
     }
 
-    private void hideInsets(@InsetsType int types, boolean fromIme) {
-        mHandler.obtainMessage(MSG_HIDE_INSETS, types, fromIme ? 1 : 0).sendToTarget();
+    private void hideInsets(@InsetsType int types, boolean fromIme,
+            @Nullable ImeTracker.Token statsToken) {
+        mHandler.obtainMessage(MSG_HIDE_INSETS, types, fromIme ? 1 : 0, statsToken).sendToTarget();
     }
 
     public void dispatchMoved(int newX, int newY) {
@@ -10202,8 +10206,8 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         @Override
-        public void hideInsets(@InsetsType int types, boolean fromIme) {
-
+        public void hideInsets(@InsetsType int types, boolean fromIme,
+                @Nullable ImeTracker.Token statsToken) {
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (fromIme) {
                 ImeTracing.getInstance().triggerClientDump("ViewRootImpl.W#hideInsets",
@@ -10211,7 +10215,10 @@ public final class ViewRootImpl implements ViewParent,
                         null /* icProto */);
             }
             if (viewAncestor != null) {
-                viewAncestor.hideInsets(types, fromIme);
+                ImeTracker.get().onProgress(statsToken, ImeTracker.PHASE_CLIENT_HIDE_INSETS);
+                viewAncestor.hideInsets(types, fromIme, statsToken);
+            } else {
+                ImeTracker.get().onFailed(statsToken, ImeTracker.PHASE_CLIENT_HIDE_INSETS);
             }
         }
 

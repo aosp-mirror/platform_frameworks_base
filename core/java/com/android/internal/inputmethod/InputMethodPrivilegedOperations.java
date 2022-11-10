@@ -384,7 +384,7 @@ public final class InputMethodPrivilegedOperations {
      *        {@link android.view.inputmethod.InputMethodManager#hideSoftInputFromWindow(IBinder,
      *        int)}
      * @param setVisible {@code true} to set IME visible, else hidden.
-     * @param statsToken the token tracking the current IME show request or {@code null} otherwise.
+     * @param statsToken the token tracking the current IME request or {@code null} otherwise.
      */
     @AnyThread
     public void applyImeVisibilityAsync(IBinder showOrHideInputToken, boolean setVisible,

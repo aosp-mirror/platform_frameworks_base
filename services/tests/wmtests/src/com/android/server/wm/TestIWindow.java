@@ -124,6 +124,7 @@ public class TestIWindow extends IWindow.Stub {
     }
 
     @Override
-    public void hideInsets(int types, boolean fromIme) throws RemoteException {
+    public void hideInsets(int types, boolean fromIme, @Nullable ImeTracker.Token statsToken)
+            throws RemoteException {
     }
 }

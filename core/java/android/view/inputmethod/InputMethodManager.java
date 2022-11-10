@@ -2002,7 +2002,8 @@ public final class InputMethodManager {
     private boolean showSoftInput(View view, int flags, ResultReceiver resultReceiver,
             @SoftInputShowHideReason int reason) {
         final ImeTracker.Token statsToken = new ImeTracker.Token();
-        ImeTracker.get().onRequestShow(statsToken, ImeTracker.ORIGIN_SHOW_SOFT_INPUT, reason);
+        ImeTracker.get().onRequestShow(statsToken, ImeTracker.ORIGIN_CLIENT_SHOW_SOFT_INPUT,
+                reason);
 
         ImeTracing.getInstance().triggerClientDump("InputMethodManager#showSoftInput", this,
                 null /* icProto */);
@@ -2051,7 +2052,7 @@ public final class InputMethodManager {
     public void showSoftInputUnchecked(int flags, ResultReceiver resultReceiver) {
         synchronized (mH) {
             final ImeTracker.Token statsToken = new ImeTracker.Token();
-            ImeTracker.get().onRequestShow(statsToken, ImeTracker.ORIGIN_SHOW_SOFT_INPUT,
+            ImeTracker.get().onRequestShow(statsToken, ImeTracker.ORIGIN_CLIENT_SHOW_SOFT_INPUT,
                     SoftInputShowHideReason.SHOW_SOFT_INPUT);
 
             Log.w(TAG, "showSoftInputUnchecked() is a hidden method, which will be"
@@ -2141,17 +2142,24 @@ public final class InputMethodManager {
 
     private boolean hideSoftInputFromWindow(IBinder windowToken, int flags,
             ResultReceiver resultReceiver, @SoftInputShowHideReason int reason) {
+        final ImeTracker.Token statsToken = new ImeTracker.Token();
+        ImeTracker.get().onRequestHide(statsToken, ImeTracker.ORIGIN_CLIENT_HIDE_SOFT_INPUT,
+                reason);
+
         ImeTracing.getInstance().triggerClientDump("InputMethodManager#hideSoftInputFromWindow",
                 this, null /* icProto */);
         checkFocus();
         synchronized (mH) {
             final View servedView = getServedViewLocked();
             if (servedView == null || servedView.getWindowToken() != windowToken) {
+                ImeTracker.get().onFailed(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
                 return false;
             }
 
-            return IInputMethodManagerGlobalInvoker.hideSoftInput(mClient, windowToken, flags,
-                    resultReceiver, reason);
+            ImeTracker.get().onProgress(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
+
+            return IInputMethodManagerGlobalInvoker.hideSoftInput(mClient, windowToken, statsToken,
+                    flags, resultReceiver, reason);
         }
     }
 
@@ -2779,14 +2787,23 @@ public final class InputMethodManager {
 
     @UnsupportedAppUsage
     void closeCurrentInput() {
+        final ImeTracker.Token statsToken = new ImeTracker.Token();
+        ImeTracker.get().onRequestHide(statsToken, ImeTracker.ORIGIN_CLIENT_HIDE_SOFT_INPUT,
+                SoftInputShowHideReason.HIDE_SOFT_INPUT);
+
         synchronized (mH) {
             if (mCurRootView == null || mCurRootView.getView() == null) {
+                ImeTracker.get().onFailed(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
                 Log.w(TAG, "No current root view, ignoring closeCurrentInput()");
                 return;
             }
+
+            ImeTracker.get().onProgress(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
+
             IInputMethodManagerGlobalInvoker.hideSoftInput(
                     mClient,
                     mCurRootView.getView().getWindowToken(),
+                    statsToken,
                     HIDE_NOT_ALWAYS,
                     null,
                     SoftInputShowHideReason.HIDE_SOFT_INPUT);
@@ -2855,15 +2872,24 @@ public final class InputMethodManager {
      * @hide
      */
     public void notifyImeHidden(IBinder windowToken) {
+        final ImeTracker.Token statsToken = new ImeTracker.Token();
+        ImeTracker.get().onRequestHide(statsToken, ImeTracker.ORIGIN_CLIENT_HIDE_SOFT_INPUT,
+                SoftInputShowHideReason.HIDE_SOFT_INPUT_BY_INSETS_API);
+
         ImeTracing.getInstance().triggerClientDump("InputMethodManager#notifyImeHidden", this,
                 null /* icProto */);
         synchronized (mH) {
-            if (isImeSessionAvailableLocked() && mCurRootView != null
-                    && mCurRootView.getWindowToken() == windowToken) {
-                IInputMethodManagerGlobalInvoker.hideSoftInput(mClient, windowToken, 0 /* flags */,
-                        null /* resultReceiver */,
-                        SoftInputShowHideReason.HIDE_SOFT_INPUT_BY_INSETS_API);
+            if (!isImeSessionAvailableLocked() || mCurRootView == null
+                    || mCurRootView.getWindowToken() != windowToken) {
+                ImeTracker.get().onFailed(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
+                return;
             }
+
+            ImeTracker.get().onProgress(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
+
+            IInputMethodManagerGlobalInvoker.hideSoftInput(mClient, windowToken, statsToken,
+                    0 /* flags */, null /* resultReceiver */,
+                    SoftInputShowHideReason.HIDE_SOFT_INPUT_BY_INSETS_API);
         }
     }
 

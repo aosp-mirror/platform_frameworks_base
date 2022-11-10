@@ -670,7 +670,7 @@ public class InputMethodService extends AbstractInputMethodService {
      */
     private IBinder mCurHideInputToken;
 
-    /** The token tracking the current IME show request or {@code null} otherwise. */
+    /** The token tracking the current IME request or {@code null} otherwise. */
     @Nullable
     private ImeTracker.Token mCurStatsToken;
 
@@ -875,10 +875,12 @@ public class InputMethodService extends AbstractInputMethodService {
         @MainThread
         @Override
         public void hideSoftInputWithToken(int flags, ResultReceiver resultReceiver,
-                IBinder hideInputToken) {
+                IBinder hideInputToken, @Nullable ImeTracker.Token statsToken) {
             mSystemCallingHideSoftInput = true;
             mCurHideInputToken = hideInputToken;
+            mCurStatsToken = statsToken;
             hideSoftInput(flags, resultReceiver);
+            mCurStatsToken = null;
             mCurHideInputToken = null;
             mSystemCallingHideSoftInput = false;
         }
@@ -889,6 +891,7 @@ public class InputMethodService extends AbstractInputMethodService {
         @MainThread
         @Override
         public void hideSoftInput(int flags, ResultReceiver resultReceiver) {
+            ImeTracker.get().onProgress(mCurStatsToken, ImeTracker.PHASE_IME_HIDE_SOFT_INPUT);
             if (DEBUG) Log.v(TAG, "hideSoftInput()");
             if (getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.R
                     && !mSystemCallingHideSoftInput) {
@@ -930,9 +933,9 @@ public class InputMethodService extends AbstractInputMethodService {
             try {
                 showSoftInput(flags, resultReceiver);
             } finally {
+                mCurStatsToken = null;
                 mCurShowInputToken = null;
                 mSystemCallingShowSoftInput = false;
-                mCurStatsToken = null;
             }
         }
 
@@ -2939,10 +2942,8 @@ public class InputMethodService extends AbstractInputMethodService {
         ImeTracing.getInstance().triggerServiceDump(
                 "InputMethodService#applyVisibilityInInsetsConsumerIfNecessary", mDumper,
                 null /* icProto */);
-        if (setVisible) {
-            ImeTracker.get().onProgress(mCurStatsToken,
-                    ImeTracker.PHASE_IME_APPLY_VISIBILITY_INSETS_CONSUMER);
-        }
+        ImeTracker.get().onProgress(mCurStatsToken,
+                ImeTracker.PHASE_IME_APPLY_VISIBILITY_INSETS_CONSUMER);
         mPrivOps.applyImeVisibilityAsync(setVisible
                 ? mCurShowInputToken : mCurHideInputToken, setVisible, mCurStatsToken);
     }

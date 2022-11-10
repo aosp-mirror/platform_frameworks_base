@@ -104,7 +104,7 @@ public class ImeInsetsSourceConsumerTest {
             assertTrue((mController.getRequestedVisibleTypes() & WindowInsets.Type.ime()) != 0);
 
             // test if setVisibility can hide IME
-            mController.hide(WindowInsets.Type.ime(), true /* fromIme */);
+            mController.hide(WindowInsets.Type.ime(), true /* fromIme */, null /* statsToken */);
             mController.cancelExistingAnimations();
             assertFalse((mController.getRequestedVisibleTypes() & WindowInsets.Type.ime()) != 0);
         });
