@@ -23,6 +23,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionInfo
+import com.android.systemui.keyguard.shared.model.WakefulnessModel.Companion.isSleepingOrStartingToSleep
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -30,27 +31,30 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 @SysUISingleton
-class LockscreenGoneTransitionInteractor
+class DreamingToAodTransitionInteractor
 @Inject
 constructor(
     @Application private val scope: CoroutineScope,
     private val keyguardInteractor: KeyguardInteractor,
-    private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val keyguardTransitionRepository: KeyguardTransitionRepository,
-) : TransitionInteractor("LOCKSCREEN->GONE") {
+    private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
+) : TransitionInteractor("DREAMING->AOD") {
 
     override fun start() {
         scope.launch {
-            keyguardInteractor.isKeyguardGoingAway
+            keyguardInteractor.wakefulnessState
                 .sample(keyguardTransitionInteractor.finishedKeyguardState, { a, b -> Pair(a, b) })
                 .collect { pair ->
-                    val (isKeyguardGoingAway, keyguardState) = pair
-                    if (!isKeyguardGoingAway && keyguardState == KeyguardState.LOCKSCREEN) {
+                    val (wakefulnessState, keyguardState) = pair
+                    if (
+                        isSleepingOrStartingToSleep(wakefulnessState) &&
+                            keyguardState == KeyguardState.DREAMING
+                    ) {
                         keyguardTransitionRepository.startTransition(
                             TransitionInfo(
                                 name,
-                                KeyguardState.LOCKSCREEN,
-                                KeyguardState.GONE,
+                                KeyguardState.DREAMING,
+                                KeyguardState.AOD,
                                 getAnimator(),
                             )
                         )
@@ -67,6 +71,6 @@ constructor(
     }
 
     companion object {
-        private const val TRANSITION_DURATION_MS = 10L
+        private const val TRANSITION_DURATION_MS = 300L
     }
 }
