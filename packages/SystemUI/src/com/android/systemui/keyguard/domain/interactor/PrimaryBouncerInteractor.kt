@@ -210,9 +210,12 @@ constructor(
             expansion == KeyguardBouncer.EXPANSION_HIDDEN &&
                 oldExpansion != KeyguardBouncer.EXPANSION_HIDDEN
         ) {
-            repository.setPrimaryVisible(false)
-            repository.setPrimaryShow(null)
-            falsingCollector.onBouncerHidden()
+            /*
+             * There are cases where #hide() was not invoked, such as when
+             * NotificationPanelViewController controls the hide animation. Make sure the state gets
+             * updated by calling #hide() directly.
+             */
+            hide()
             DejankUtils.postAfterTraversal { primaryBouncerCallbackInteractor.dispatchReset() }
             primaryBouncerCallbackInteractor.dispatchFullyHidden()
         } else if (

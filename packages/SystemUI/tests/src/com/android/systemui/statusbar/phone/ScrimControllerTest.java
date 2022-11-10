@@ -1437,6 +1437,17 @@ public class ScrimControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void behindTint_inKeyguardState_bouncerNotActive_usesKeyguardBehindTint() {
+        when(mStatusBarKeyguardViewManager.isPrimaryBouncerInTransit()).thenReturn(false);
+        mScrimController.setClipsQsScrim(false);
+
+        mScrimController.transitionTo(ScrimState.KEYGUARD);
+        finishAnimationsImmediately();
+        assertThat(mScrimBehind.getTint())
+                .isEqualTo(ScrimState.KEYGUARD.getBehindTint());
+    }
+
+    @Test
     public void testNotificationTransparency_followsTransitionToFullShade() {
         mScrimController.transitionTo(SHADE_LOCKED);
         mScrimController.setRawPanelExpansionFraction(1.0f);
