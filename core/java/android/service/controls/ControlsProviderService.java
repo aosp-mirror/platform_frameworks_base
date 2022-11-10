@@ -55,6 +55,20 @@ public abstract class ControlsProviderService extends Service {
             "android.service.controls.ControlsProviderService";
 
     /**
+     * Manifest metadata to show a custom embedded activity as part of device controls.
+     *
+     * The value of this metadata must be the {@link ComponentName} as a string of an activity in
+     * the same package that will be launched as part of a TaskView.
+     *
+     * The activity must be exported, enabled and protected by
+     * {@link Manifest.permission.BIND_CONTROLS}.
+     *
+     * @hide
+     */
+    public static final String META_DATA_PANEL_ACTIVITY =
+            "android.service.controls.META_DATA_PANEL_ACTIVITY";
+
+    /**
      * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
