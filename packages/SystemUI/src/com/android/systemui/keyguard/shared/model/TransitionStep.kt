@@ -17,8 +17,8 @@ package com.android.systemui.keyguard.shared.model
 
 /** This information will flow from the [KeyguardTransitionRepository] to control the UI layer */
 data class TransitionStep(
-    val from: KeyguardState = KeyguardState.NONE,
-    val to: KeyguardState = KeyguardState.NONE,
+    val from: KeyguardState = KeyguardState.OFF,
+    val to: KeyguardState = KeyguardState.OFF,
     val value: Float = 0f, // constrained [0.0, 1.0]
     val transitionState: TransitionState = TransitionState.FINISHED,
     val ownerName: String = "",

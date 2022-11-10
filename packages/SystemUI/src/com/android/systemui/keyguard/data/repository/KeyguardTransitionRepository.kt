@@ -112,7 +112,7 @@ class KeyguardTransitionRepositoryImpl @Inject constructor() : KeyguardTransitio
         // Seed with transitions signaling a boot into lockscreen state
         emitTransition(
             TransitionStep(
-                KeyguardState.NONE,
+                KeyguardState.OFF,
                 KeyguardState.LOCKSCREEN,
                 0f,
                 TransitionState.STARTED,
@@ -120,7 +120,7 @@ class KeyguardTransitionRepositoryImpl @Inject constructor() : KeyguardTransitio
         )
         emitTransition(
             TransitionStep(
-                KeyguardState.NONE,
+                KeyguardState.OFF,
                 KeyguardState.LOCKSCREEN,
                 1f,
                 TransitionState.FINISHED,

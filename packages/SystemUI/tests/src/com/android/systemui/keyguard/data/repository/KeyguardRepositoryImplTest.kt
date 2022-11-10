@@ -18,6 +18,7 @@ package com.android.systemui.keyguard.data.repository
 
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardUpdateMonitor
+import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.Position
 import com.android.systemui.doze.DozeHost
@@ -60,12 +61,12 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
 
         underTest =
             KeyguardRepositoryImpl(
-                    statusBarStateController,
-                    dozeHost,
-                    wakefulnessLifecycle,
-                    biometricUnlockController,
-                    keyguardStateController,
-                    keyguardUpdateMonitor,
+                statusBarStateController,
+                dozeHost,
+                wakefulnessLifecycle,
+                biometricUnlockController,
+                keyguardStateController,
+                keyguardUpdateMonitor,
             )
     }
 
@@ -273,6 +274,26 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
 
         whenever(keyguardStateController.isKeyguardGoingAway).thenReturn(false)
         captor.value.onKeyguardGoingAwayChanged()
+        assertThat(latest).isFalse()
+
+        job.cancel()
+    }
+
+    @Test
+    fun isDreaming() = runBlockingTest {
+        whenever(keyguardUpdateMonitor.isDreaming()).thenReturn(false)
+        var latest: Boolean? = null
+        val job = underTest.isDreaming.onEach { latest = it }.launchIn(this)
+
+        assertThat(latest).isFalse()
+
+        val captor = argumentCaptor<KeyguardUpdateMonitorCallback>()
+        verify(keyguardUpdateMonitor).registerCallback(captor.capture())
+
+        captor.value.onDreamingStateChanged(true)
+        assertThat(latest).isTrue()
+
+        captor.value.onDreamingStateChanged(false)
         assertThat(latest).isFalse()
 
         job.cancel()
