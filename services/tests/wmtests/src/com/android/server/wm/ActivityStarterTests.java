@@ -1497,7 +1497,7 @@ public class ActivityStarterTests extends WindowTestsBase {
             TaskFragment inTaskFragment) {
         starter.startActivityInner(target, source, null /* voiceSession */,
                 null /* voiceInteractor */, 0 /* startFlags */, true /* doResume */,
-                options, inTask, inTaskFragment, false /* restrictedBgActivity */,
-                null /* intentGrants */);
+                options, inTask, inTaskFragment,
+                BackgroundActivityStartController.BAL_ALLOW_DEFAULT, null /* intentGrants */);
     }
 }
