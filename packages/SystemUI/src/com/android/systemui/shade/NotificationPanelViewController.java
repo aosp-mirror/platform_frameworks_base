@@ -575,7 +575,7 @@ public final class NotificationPanelViewController implements Dumpable {
 
     /** Whether the current animator is resetting the pulse expansion after a drag down. */
     private boolean mIsPulseExpansionResetAnimator;
-    private final Rect mKeyguardStatusAreaClipBounds = new Rect();
+    private final Rect mLastQsClipBounds = new Rect();
     private final Region mQsInterceptRegion = new Region();
     /** Alpha of the views which only show on the keyguard but not in shade / shade locked. */
     private float mKeyguardOnlyContentAlpha = 1.0f;
@@ -2814,7 +2814,7 @@ public final class NotificationPanelViewController implements Dumpable {
      */
     private void applyQSClippingBounds(int left, int top, int right, int bottom,
             boolean qsVisible) {
-        if (!mAnimateNextNotificationBounds || mKeyguardStatusAreaClipBounds.isEmpty()) {
+        if (!mAnimateNextNotificationBounds || mLastQsClipBounds.isEmpty()) {
             if (mQsClippingAnimation != null) {
                 // update the end position of the animator
                 mQsClippingAnimationEndBounds.set(left, top, right, bottom);
@@ -2823,10 +2823,10 @@ public final class NotificationPanelViewController implements Dumpable {
             }
         } else {
             mQsClippingAnimationEndBounds.set(left, top, right, bottom);
-            final int startLeft = mKeyguardStatusAreaClipBounds.left;
-            final int startTop = mKeyguardStatusAreaClipBounds.top;
-            final int startRight = mKeyguardStatusAreaClipBounds.right;
-            final int startBottom = mKeyguardStatusAreaClipBounds.bottom;
+            final int startLeft = mLastQsClipBounds.left;
+            final int startTop = mLastQsClipBounds.top;
+            final int startRight = mLastQsClipBounds.right;
+            final int startBottom = mLastQsClipBounds.bottom;
             if (mQsClippingAnimation != null) {
                 mQsClippingAnimation.cancel();
             }
@@ -2863,12 +2863,10 @@ public final class NotificationPanelViewController implements Dumpable {
 
     private void applyQSClippingImmediately(int left, int top, int right, int bottom,
             boolean qsVisible) {
-        // Fancy clipping for quick settings
         int radius = mScrimCornerRadius;
         boolean clipStatusView = false;
+        mLastQsClipBounds.set(left, top, right, bottom);
         if (mIsFullWidth) {
-            // The padding on this area is large enough that we can use a cheaper clipping strategy
-            mKeyguardStatusAreaClipBounds.set(left, top, right, bottom);
             clipStatusView = qsVisible;
             float screenCornerRadius = mRecordingController.isRecording() ? 0 : mScreenCornerRadius;
             radius = (int) MathUtils.lerp(screenCornerRadius, mScrimCornerRadius,
@@ -2903,8 +2901,8 @@ public final class NotificationPanelViewController implements Dumpable {
                     radius,
                     qsVisible && !mSplitShadeEnabled);
         }
-        mKeyguardStatusViewController.setClipBounds(
-                clipStatusView ? mKeyguardStatusAreaClipBounds : null);
+        // The padding on this area is large enough that we can use a cheaper clipping strategy
+        mKeyguardStatusViewController.setClipBounds(clipStatusView ? mLastQsClipBounds : null);
         if (!qsVisible && mSplitShadeEnabled) {
             // On the lockscreen when qs isn't visible, we don't want the bounds of the shade to
             // be visible, otherwise you can see the bounds once swiping up to see bouncer
