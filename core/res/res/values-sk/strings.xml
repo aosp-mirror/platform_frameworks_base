@@ -74,10 +74,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"V predvolenom nastavení nie je identifikácia volajúceho obmedzená. Ďalší hovor: Bez obmedzenia"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Služba nie je poskytovaná."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Nemôžete meniť nastavenie identifikácie volajúcich."</string>
-    <!-- no translation found for auto_data_switch_title (3286350716870518297) -->
-    <skip />
-    <!-- no translation found for auto_data_switch_content (803557715007110959) -->
-    <skip />
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"Dátové pripojenie bolo prepnuté na operátora <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"Toto môžete kedykoľvek zmeniť v Nastaveniach"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Žiadna mobilná dátová služba"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Tiesňové volania nie sú k dispozícii"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Žiadne hlasové hovory"</string>
@@ -702,6 +700,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Umožňuje aplikácii čítať videosúbory z vášho zdieľaného priestoru."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"čítať súbory obrázka zo zdieľaného priestoru"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Umožňuje aplikácii čítať súbory obrázka z vášho zdieľaného priestoru."</string>
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"čítanie obrázkových súborov a videosúborov vybraných používateľom v zdieľanom ukladacom priestore"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"Umožňuje aplikácii čítať obrázkové súbory a videosúbory, ktoré vyberiete vo svojom zdieľanom ukladacom priestore."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"upravovanie alebo odstraňovanie obsahu zdieľaného úložiska"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Umožňuje aplikácii zapisovať obsah zdieľaného úložiska."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"uskutočňovanie/príjem hovorov SIP"</string>

@@ -169,7 +169,7 @@ public final class BroadcastRadioServiceImpl {
         synchronized (mLock) {
             List<RadioManager.ModuleProperties> moduleList = new ArrayList<>(mModules.size());
             for (int i = 0; i < mModules.size(); i++) {
-                moduleList.add(mModules.valueAt(i).mProperties);
+                moduleList.add(mModules.valueAt(i).getProperties());
             }
             return moduleList;
         }

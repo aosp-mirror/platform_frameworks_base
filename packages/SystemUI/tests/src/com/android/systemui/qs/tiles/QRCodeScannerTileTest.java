@@ -119,6 +119,6 @@ public class QRCodeScannerTileTest extends SysuiTestCase {
         when(mController.isEnabledForQuickSettings()).thenReturn(true);
         QSTile.State state = new QSTile.State();
         mTile.handleUpdateState(state, null);
-        assertEquals(state.state, Tile.STATE_ACTIVE);
+        assertEquals(state.state, Tile.STATE_INACTIVE);
     }
 }

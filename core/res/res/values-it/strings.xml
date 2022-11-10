@@ -73,10 +73,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"ID chiamante generalmente non limitato. Prossima chiamata: non limitato"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Servizio non fornito."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Non è possibile modificare l\'impostazione ID chiamante."</string>
-    <!-- no translation found for auto_data_switch_title (3286350716870518297) -->
-    <skip />
-    <!-- no translation found for auto_data_switch_content (803557715007110959) -->
-    <skip />
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"I dati sono stati trasferiti a <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"Puoi modificare questa opzione in qualsiasi momento in Impostazioni"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Nessun servizio dati mobile"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Chiamate di emergenza non disponibili"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Nessun servizio di telefonia"</string>
@@ -701,6 +699,10 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Consente all\'app di leggere i file video dal tuo spazio di archiviazione condiviso."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"Lettura dei file immagine dallo spazio di archiviazione condiviso"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Consente all\'app di leggere i file immagine dal tuo spazio di archiviazione condiviso."</string>
+    <!-- no translation found for permlab_readVisualUserSelect (5516204215354667586) -->
+    <skip />
+    <!-- no translation found for permdesc_readVisualUserSelect (8027174717714968217) -->
+    <skip />
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"Modifica/eliminazione dei contenuti dell\'archivio condiviso"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Consente all\'app di modificare i contenuti del tuo archivio condiviso."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"invio/ricezione di chiamate SIP"</string>

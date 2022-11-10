@@ -88,4 +88,14 @@
     <string name="close_button_text" msgid="2913281996024033299">"Bağlayın"</string>
     <string name="back_button_text" msgid="1469718707134137085">"Geriyə"</string>
     <string name="handle_text" msgid="1766582106752184456">"Hər kəsə açıq istifadəçi adı"</string>
+    <!-- no translation found for fullscreen_text (1162316685217676079) -->
+    <skip />
+    <!-- no translation found for desktop_text (1077633567027630454) -->
+    <skip />
+    <!-- no translation found for split_screen_text (1396336058129570886) -->
+    <skip />
+    <!-- no translation found for more_button_text (3655388105592893530) -->
+    <skip />
+    <!-- no translation found for float_button_text (9221657008391364581) -->
+    <skip />
 </resources>

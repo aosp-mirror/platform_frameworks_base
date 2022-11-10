@@ -26,6 +26,7 @@ android_test {
 
     static_libs: [
         "SpaLib",
+        "SpaLibTestUtils",
         "androidx.test.runner",
         "androidx.test.ext.junit",
         "androidx.compose.runtime_runtime",

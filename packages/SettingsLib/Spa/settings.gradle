@@ -32,4 +32,5 @@ dependencyResolutionManagement {
 rootProject.name = "SpaLib"
 include ':spa'
 include ':gallery'
+include ':testutils'
 include ':tests'

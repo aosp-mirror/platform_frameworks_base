@@ -26,7 +26,7 @@ import android.graphics.drawable.Icon
  * TODO: move to jetpack.
  */
 class SaveEntryUi(
-  val userProviderAccountName: CharSequence,
+  val userProviderAccountName: CharSequence?,
   val credentialTypeIcon: Icon?,
   val profileIcon: Icon?,
   val passwordCount: Int?,

@@ -982,8 +982,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     /**
      * The last input source on this TextView.
+     *
+     * Use the SOURCE_TOUCHSCREEN as the default value for backward compatibility. There could be a
+     * non UI event originated ActionMode initiation, e.g. API call, a11y events, etc.
      */
-    private int mLastInputSource = InputDevice.SOURCE_UNKNOWN;
+    private int mLastInputSource = InputDevice.SOURCE_TOUCHSCREEN;
 
     /**
      * The TextView does not auto-size text (default).

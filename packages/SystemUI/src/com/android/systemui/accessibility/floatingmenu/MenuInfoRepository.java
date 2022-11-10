@@ -50,7 +50,7 @@ class MenuInfoRepository {
     private static final float DEFAULT_MENU_POSITION_X_PERCENT = 1.0f;
 
     @FloatRange(from = 0.0, to = 1.0)
-    private static final float DEFAULT_MENU_POSITION_Y_PERCENT = 0.9f;
+    private static final float DEFAULT_MENU_POSITION_Y_PERCENT = 0.77f;
 
     private final Context mContext;
     private final Handler mHandler = new Handler(Looper.getMainLooper());

@@ -74,10 +74,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"ID klicatelja je ponastavljen na neomejeno. Naslednji klic: ni omejeno"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Storitev ni nastavljena in omogočena."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Ne morete spremeniti nastavitve ID-ja klicatelja."</string>
-    <!-- no translation found for auto_data_switch_title (3286350716870518297) -->
-    <skip />
-    <!-- no translation found for auto_data_switch_content (803557715007110959) -->
-    <skip />
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"Prenos podatkov je preklopljen na operaterja <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"To lahko kadar koli spremenite v nastavitvah."</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Ni mobilne podatkovne storitve"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Klicanje v sili ni na voljo"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Ni storitve za glasovne klice"</string>
@@ -702,6 +700,10 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Aplikaciji omogoča branje videodatotek v deljeni shrambi."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"branje slikovnih datotek v deljeni shrambi"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Aplikaciji omogoča branje slikovnih datotek v deljeni shrambi."</string>
+    <!-- no translation found for permlab_readVisualUserSelect (5516204215354667586) -->
+    <skip />
+    <!-- no translation found for permdesc_readVisualUserSelect (8027174717714968217) -->
+    <skip />
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"spreminjanje ali brisanje vsebine skupne shrambe"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Aplikaciji omogoča zapisovanje vsebine skupne shrambe."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"opravljanje/sprejemanje klicev SIP"</string>
@@ -1254,7 +1256,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Zagon aplikacij."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Dokončevanje zagona."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Pritisnili ste gumb za vklop, s čimer običajno izklopite zaslon.\n\nPoskusite se narahlo dotakniti med nastavljanjem prstnega odtisa."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Za končanje nastavitve izklopite zaslon"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Za končanje nastavitve izklopite zaslon."</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Izklopi"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Želite nadaljevati preverjanje prstnega odtisa?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Pritisnili ste gumb za vklop, s čimer običajno izklopite zaslon.\n\nZa preverjanje prstnega odtisa se poskusite narahlo dotakniti."</string>

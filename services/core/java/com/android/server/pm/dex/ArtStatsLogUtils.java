@@ -320,12 +320,15 @@ public class ArtStatsLogUtils {
     public static class BackgroundDexoptJobStatsLogger {
         /** Writes background dexopt job stats to statsd. */
         public void write(@BackgroundDexOptService.Status int status,
-                @JobParameters.StopReason int cancellationReason, long durationMs,
-                long durationIncludingSleepMs) {
-            ArtStatsLog.write(ArtStatsLog.BACKGROUND_DEXOPT_JOB_ENDED,
+                          @JobParameters.StopReason int cancellationReason,
+                          long durationMs) {
+            ArtStatsLog.write(
+                    ArtStatsLog.BACKGROUND_DEXOPT_JOB_ENDED,
                     STATUS_MAP.getOrDefault(status,
                             ArtStatsLog.BACKGROUND_DEXOPT_JOB_ENDED__STATUS__STATUS_UNKNOWN),
-                    cancellationReason, durationMs, durationIncludingSleepMs);
+                    cancellationReason,
+                    durationMs,
+                    0);  // deprecated, used to be durationIncludingSleepMs
         }
     }
 }

@@ -74,10 +74,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"ID rozmówcy ustawiony jest domyślnie na „nie zastrzeżony”. Następne połączenie: nie zastrzeżony"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Usługa nie jest świadczona."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Nie możesz zmienić ustawienia ID rozmówcy."</string>
-    <!-- no translation found for auto_data_switch_title (3286350716870518297) -->
-    <skip />
-    <!-- no translation found for auto_data_switch_content (803557715007110959) -->
-    <skip />
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"Przełączono mobilną transmisję danych na: <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"Możesz to zmienić w dowolnym momencie w Ustawieniach"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Brak komórkowej usługi transmisji danych"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Połączenia alarmowe są niedostępne"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Brak usługi połączeń głosowych"</string>
@@ -702,6 +700,10 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Zezwala na odczyt przez aplikację plików wideo w pamięci współdzielonej."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"odczyt plików graficznych z pamięci współdzielonej"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Zezwala na odczyt przez aplikację plików graficznych w pamięci współdzielonej."</string>
+    <!-- no translation found for permlab_readVisualUserSelect (5516204215354667586) -->
+    <skip />
+    <!-- no translation found for permdesc_readVisualUserSelect (8027174717714968217) -->
+    <skip />
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"modyfikowanie i usuwanie zawartości pamięci współdzielonej"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Zezwala aplikacji na zapis zawartości pamięci współdzielonej."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"wykonywanie/odbieranie połączeń SIP"</string>

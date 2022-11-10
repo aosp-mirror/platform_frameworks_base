@@ -16,6 +16,8 @@
 
 package com.android.server.broadcastradio;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -31,29 +33,35 @@ import android.hardware.radio.ICloseHandle;
 import android.hardware.radio.ITuner;
 import android.hardware.radio.ITunerCallback;
 import android.hardware.radio.RadioManager;
+import android.os.IBinder;
+import android.os.ServiceManager;
 
+import com.android.dx.mockito.inline.extended.StaticMockitoSessionBuilder;
 import com.android.server.broadcastradio.aidl.BroadcastRadioServiceImpl;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 
-import java.util.Arrays;
+import java.util.List;
 
 /**
  * Tests for {@link android.hardware.radio.IRadioService} with AIDL HAL implementation
  */
-@RunWith(MockitoJUnitRunner.class)
-public final class IRadioServiceAidlImplTest {
+public final class IRadioServiceAidlImplTest extends ExtendedRadioMockitoTestCase {
 
     private static final int[] ENABLE_TYPES = new int[]{Announcement.TYPE_TRAFFIC};
+    private static final String AM_FM_SERVICE_NAME =
+            "android.hardware.broadcastradio.IBroadcastRadio/amfm";
+    private static final String DAB_SERVICE_NAME =
+            "android.hardware.broadcastradio.IBroadcastRadio/dab";
 
     private IRadioServiceAidlImpl mAidlImpl;
 
     @Mock
     private BroadcastRadioService mServiceMock;
+    @Mock
+    private IBinder mServiceBinderMock;
     @Mock
     private BroadcastRadioServiceImpl mHalMock;
     @Mock
@@ -73,7 +81,7 @@ public final class IRadioServiceAidlImplTest {
     public void setUp() throws Exception {
         doNothing().when(mServiceMock).enforcePolicyAccess();
 
-        when(mHalMock.listModules()).thenReturn(Arrays.asList(mModuleMock));
+        when(mHalMock.listModules()).thenReturn(List.of(mModuleMock));
         when(mHalMock.openSession(anyInt(), any(), anyBoolean(), any()))
                 .thenReturn(mTunerMock);
         when(mHalMock.addAnnouncementListener(any(), any())).thenReturn(mICloseHandle);
@@ -81,11 +89,26 @@ public final class IRadioServiceAidlImplTest {
         mAidlImpl = new IRadioServiceAidlImpl(mServiceMock, mHalMock);
     }
 
+    @Override
+    protected void initializeSession(StaticMockitoSessionBuilder builder) {
+        builder.spyStatic(ServiceManager.class);
+    }
+
+    @Test
+    public void getServicesNames_forAidlImpl() {
+        doReturn(null).when(() -> ServiceManager.waitForDeclaredService(
+                AM_FM_SERVICE_NAME));
+        doReturn(mServiceBinderMock).when(() -> ServiceManager.waitForDeclaredService(
+                DAB_SERVICE_NAME));
+
+        assertWithMessage("Names of services available")
+                .that(IRadioServiceAidlImpl.getServicesNames()).containsExactly(DAB_SERVICE_NAME);
+    }
+
     @Test
     public void loadModules_forAidlImpl() {
         assertWithMessage("Modules loaded in AIDL HAL")
-                .that(mAidlImpl.listModules())
-                .containsExactly(mModuleMock);
+                .that(mAidlImpl.listModules()).containsExactly(mModuleMock);
     }
 
     @Test
@@ -105,5 +128,4 @@ public final class IRadioServiceAidlImplTest {
         assertWithMessage("Close handle of announcement listener for HAL 2")
                 .that(closeHandle).isEqualTo(mICloseHandle);
     }
-
 }

@@ -115,7 +115,7 @@ public class QRCodeScannerTile extends QSTileImpl<QSTile.State> {
         state.label = mContext.getString(R.string.qr_code_scanner_title);
         state.contentDescription = state.label;
         state.icon = ResourceIcon.get(R.drawable.ic_qr_code_scanner);
-        state.state = mQRCodeScannerController.isEnabledForQuickSettings() ? Tile.STATE_ACTIVE
+        state.state = mQRCodeScannerController.isEnabledForQuickSettings() ? Tile.STATE_INACTIVE
                 : Tile.STATE_UNAVAILABLE;
     }
 

@@ -84,6 +84,7 @@ import android.content.IntentFilter;
 import android.content.PermissionChecker;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.UserPackage;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.BatteryManager;
@@ -120,7 +121,6 @@ import android.util.IndentingPrintWriter;
 import android.util.IntArray;
 import android.util.Log;
 import android.util.LongArrayQueue;
-import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseArrayMap;
@@ -402,7 +402,7 @@ public class AlarmManagerService extends SystemService {
             public long lastUsage;
         }
         /** Map of {package, user} -> {quotaInfo} */
-        private final ArrayMap<Pair<String, Integer>, QuotaInfo> mQuotaBuffer = new ArrayMap<>();
+        private final ArrayMap<UserPackage, QuotaInfo> mQuotaBuffer = new ArrayMap<>();
 
         private long mMaxDuration;
 
@@ -414,11 +414,11 @@ public class AlarmManagerService extends SystemService {
             if (quota <= 0) {
                 return;
             }
-            final Pair<String, Integer> packageUser = Pair.create(packageName, userId);
-            QuotaInfo currentQuotaInfo = mQuotaBuffer.get(packageUser);
+            final UserPackage userPackage = UserPackage.of(userId, packageName);
+            QuotaInfo currentQuotaInfo = mQuotaBuffer.get(userPackage);
             if (currentQuotaInfo == null) {
                 currentQuotaInfo = new QuotaInfo();
-                mQuotaBuffer.put(packageUser, currentQuotaInfo);
+                mQuotaBuffer.put(userPackage, currentQuotaInfo);
             }
             currentQuotaInfo.remainingQuota = quota;
             currentQuotaInfo.expirationTime = nowElapsed + mMaxDuration;
@@ -426,8 +426,8 @@ public class AlarmManagerService extends SystemService {
 
         /** Returns if the supplied package has reserve quota to fire at the given time. */
         boolean hasQuota(String packageName, int userId, long triggerElapsed) {
-            final Pair<String, Integer> packageUser = Pair.create(packageName, userId);
-            final QuotaInfo quotaInfo = mQuotaBuffer.get(packageUser);
+            final UserPackage userPackage = UserPackage.of(userId, packageName);
+            final QuotaInfo quotaInfo = mQuotaBuffer.get(userPackage);
 
             return quotaInfo != null && quotaInfo.remainingQuota > 0
                     && triggerElapsed <= quotaInfo.expirationTime;
@@ -438,8 +438,8 @@ public class AlarmManagerService extends SystemService {
          * required.
          */
         void recordUsage(String packageName, int userId, long nowElapsed) {
-            final Pair<String, Integer> packageUser = Pair.create(packageName, userId);
-            final QuotaInfo quotaInfo = mQuotaBuffer.get(packageUser);
+            final UserPackage userPackage = UserPackage.of(userId, packageName);
+            final QuotaInfo quotaInfo = mQuotaBuffer.get(userPackage);
 
             if (quotaInfo == null) {
                 Slog.wtf(TAG, "Temporary quota being consumed at " + nowElapsed
@@ -479,26 +479,26 @@ public class AlarmManagerService extends SystemService {
 
         void removeForUser(int userId) {
             for (int i = mQuotaBuffer.size() - 1; i >= 0; i--) {
-                final Pair<String, Integer> packageUserKey = mQuotaBuffer.keyAt(i);
-                if (packageUserKey.second == userId) {
+                final UserPackage userPackageKey = mQuotaBuffer.keyAt(i);
+                if (userPackageKey.userId == userId) {
                     mQuotaBuffer.removeAt(i);
                 }
             }
         }
 
         void removeForPackage(String packageName, int userId) {
-            final Pair<String, Integer> packageUser = Pair.create(packageName, userId);
-            mQuotaBuffer.remove(packageUser);
+            final UserPackage userPackage = UserPackage.of(userId, packageName);
+            mQuotaBuffer.remove(userPackage);
         }
 
         void dump(IndentingPrintWriter pw, long nowElapsed) {
             pw.increaseIndent();
             for (int i = 0; i < mQuotaBuffer.size(); i++) {
-                final Pair<String, Integer> packageUser = mQuotaBuffer.keyAt(i);
+                final UserPackage userPackage = mQuotaBuffer.keyAt(i);
                 final QuotaInfo quotaInfo = mQuotaBuffer.valueAt(i);
-                pw.print(packageUser.first);
+                pw.print(userPackage.packageName);
                 pw.print(", u");
-                pw.print(packageUser.second);
+                pw.print(userPackage.userId);
                 pw.print(": ");
                 if (quotaInfo == null) {
                     pw.print("--");
@@ -522,8 +522,7 @@ public class AlarmManagerService extends SystemService {
      */
     @VisibleForTesting
     static class AppWakeupHistory {
-        private ArrayMap<Pair<String, Integer>, LongArrayQueue> mPackageHistory =
-                new ArrayMap<>();
+        private final ArrayMap<UserPackage, LongArrayQueue> mPackageHistory = new ArrayMap<>();
         private long mWindowSize;
 
         AppWakeupHistory(long windowSize) {
@@ -531,11 +530,11 @@ public class AlarmManagerService extends SystemService {
         }
 
         void recordAlarmForPackage(String packageName, int userId, long nowElapsed) {
-            final Pair<String, Integer> packageUser = Pair.create(packageName, userId);
-            LongArrayQueue history = mPackageHistory.get(packageUser);
+            final UserPackage userPackage = UserPackage.of(userId, packageName);
+            LongArrayQueue history = mPackageHistory.get(userPackage);
             if (history == null) {
                 history = new LongArrayQueue();
-                mPackageHistory.put(packageUser, history);
+                mPackageHistory.put(userPackage, history);
             }
             if (history.size() == 0 || history.peekLast() < nowElapsed) {
                 history.addLast(nowElapsed);
@@ -545,16 +544,16 @@ public class AlarmManagerService extends SystemService {
 
         void removeForUser(int userId) {
             for (int i = mPackageHistory.size() - 1; i >= 0; i--) {
-                final Pair<String, Integer> packageUserKey = mPackageHistory.keyAt(i);
-                if (packageUserKey.second == userId) {
+                final UserPackage userPackageKey = mPackageHistory.keyAt(i);
+                if (userPackageKey.userId == userId) {
                     mPackageHistory.removeAt(i);
                 }
             }
         }
 
         void removeForPackage(String packageName, int userId) {
-            final Pair<String, Integer> packageUser = Pair.create(packageName, userId);
-            mPackageHistory.remove(packageUser);
+            final UserPackage userPackage = UserPackage.of(userId, packageName);
+            mPackageHistory.remove(userPackage);
         }
 
         private void snapToWindow(LongArrayQueue history) {
@@ -564,7 +563,7 @@ public class AlarmManagerService extends SystemService {
         }
 
         int getTotalWakeupsInWindow(String packageName, int userId) {
-            final LongArrayQueue history = mPackageHistory.get(Pair.create(packageName, userId));
+            final LongArrayQueue history = mPackageHistory.get(UserPackage.of(userId, packageName));
             return (history == null) ? 0 : history.size();
         }
 
@@ -573,7 +572,7 @@ public class AlarmManagerService extends SystemService {
          *          (1=1st-last=the ultimate wakeup and 2=2nd-last=the penultimate wakeup)
          */
         long getNthLastWakeupForPackage(String packageName, int userId, int n) {
-            final LongArrayQueue history = mPackageHistory.get(Pair.create(packageName, userId));
+            final LongArrayQueue history = mPackageHistory.get(UserPackage.of(userId, packageName));
             if (history == null) {
                 return 0;
             }
@@ -584,11 +583,11 @@ public class AlarmManagerService extends SystemService {
         void dump(IndentingPrintWriter pw, long nowElapsed) {
             pw.increaseIndent();
             for (int i = 0; i < mPackageHistory.size(); i++) {
-                final Pair<String, Integer> packageUser = mPackageHistory.keyAt(i);
+                final UserPackage userPackage = mPackageHistory.keyAt(i);
                 final LongArrayQueue timestamps = mPackageHistory.valueAt(i);
-                pw.print(packageUser.first);
+                pw.print(userPackage.packageName);
                 pw.print(", u");
-                pw.print(packageUser.second);
+                pw.print(userPackage.userId);
                 pw.print(": ");
                 // limit dumping to a max of 100 values
                 final int lastIdx = Math.max(0, timestamps.size() - 100);
@@ -1501,13 +1500,13 @@ public class AlarmManagerService extends SystemService {
      *                       null indicates all
      * @return True if there was any reordering done to the current list.
      */
-    boolean reorderAlarmsBasedOnStandbyBuckets(ArraySet<Pair<String, Integer>> targetPackages) {
+    boolean reorderAlarmsBasedOnStandbyBuckets(ArraySet<UserPackage> targetPackages) {
         final long start = mStatLogger.getTime();
 
         final boolean changed = mAlarmStore.updateAlarmDeliveries(a -> {
-            final Pair<String, Integer> packageUser =
-                    Pair.create(a.sourcePackage, UserHandle.getUserId(a.creatorUid));
-            if (targetPackages != null && !targetPackages.contains(packageUser)) {
+            final UserPackage userPackage =
+                    UserPackage.of(UserHandle.getUserId(a.creatorUid), a.sourcePackage);
+            if (targetPackages != null && !targetPackages.contains(userPackage)) {
                 return false;
             }
             return adjustDeliveryTimeBasedOnBucketLocked(a);
@@ -1524,13 +1523,13 @@ public class AlarmManagerService extends SystemService {
      *                       null indicates all
      * @return True if there was any reordering done to the current list.
      */
-    boolean reorderAlarmsBasedOnTare(ArraySet<Pair<String, Integer>> targetPackages) {
+    boolean reorderAlarmsBasedOnTare(ArraySet<UserPackage> targetPackages) {
         final long start = mStatLogger.getTime();
 
         final boolean changed = mAlarmStore.updateAlarmDeliveries(a -> {
-            final Pair<String, Integer> packageUser =
-                    Pair.create(a.sourcePackage, UserHandle.getUserId(a.creatorUid));
-            if (targetPackages != null && !targetPackages.contains(packageUser)) {
+            final UserPackage userPackage =
+                    UserPackage.of(UserHandle.getUserId(a.creatorUid), a.sourcePackage);
+            if (targetPackages != null && !targetPackages.contains(userPackage)) {
                 return false;
             }
             return adjustDeliveryTimeBasedOnTareLocked(a);
@@ -4786,8 +4785,7 @@ public class AlarmManagerService extends SystemService {
                                     }
                                 }
                             }
-                            final ArraySet<Pair<String, Integer>> triggerPackages =
-                                    new ArraySet<>();
+                            final ArraySet<UserPackage> triggerPackages = new ArraySet<>();
                             final IntArray wakeupUids = new IntArray();
                             for (int i = 0; i < triggerList.size(); i++) {
                                 final Alarm a = triggerList.get(i);
@@ -4796,13 +4794,13 @@ public class AlarmManagerService extends SystemService {
                                 }
                                 if (mConstants.USE_TARE_POLICY) {
                                     if (!isExemptFromTare(a)) {
-                                        triggerPackages.add(Pair.create(
-                                                a.sourcePackage,
-                                                UserHandle.getUserId(a.creatorUid)));
+                                        triggerPackages.add(UserPackage.of(
+                                                UserHandle.getUserId(a.creatorUid),
+                                                a.sourcePackage));
                                     }
                                 } else if (!isExemptFromAppStandby(a)) {
-                                    triggerPackages.add(Pair.create(
-                                            a.sourcePackage, UserHandle.getUserId(a.creatorUid)));
+                                    triggerPackages.add(UserPackage.of(
+                                            UserHandle.getUserId(a.creatorUid), a.sourcePackage));
                                 }
                             }
                             if (wakeupUids.size() > 0 && mBatteryStatsInternal != null) {
@@ -4990,8 +4988,8 @@ public class AlarmManagerService extends SystemService {
                 case TEMPORARY_QUOTA_CHANGED:
                 case APP_STANDBY_BUCKET_CHANGED:
                     synchronized (mLock) {
-                        final ArraySet<Pair<String, Integer>> filterPackages = new ArraySet<>();
-                        filterPackages.add(Pair.create((String) msg.obj, msg.arg1));
+                        final ArraySet<UserPackage> filterPackages = new ArraySet<>();
+                        filterPackages.add(UserPackage.of(msg.arg1, (String) msg.obj));
                         if (reorderAlarmsBasedOnStandbyBuckets(filterPackages)) {
                             rescheduleKernelAlarmsLocked();
                             updateNextAlarmClockLocked();
@@ -5004,8 +5002,8 @@ public class AlarmManagerService extends SystemService {
                         final int userId = msg.arg1;
                         final String packageName = (String) msg.obj;
 
-                        final ArraySet<Pair<String, Integer>> filterPackages = new ArraySet<>();
-                        filterPackages.add(Pair.create(packageName, userId));
+                        final ArraySet<UserPackage> filterPackages = new ArraySet<>();
+                        filterPackages.add(UserPackage.of(userId, packageName));
                         if (reorderAlarmsBasedOnTare(filterPackages)) {
                             rescheduleKernelAlarmsLocked();
                             updateNextAlarmClockLocked();

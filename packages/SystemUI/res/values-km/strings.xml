@@ -168,6 +168,8 @@
     <skip />
     <string name="keyguard_face_failed" msgid="9044619102286917151">"មិនអាចសម្គាល់មុខបានទេ"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"ប្រើស្នាមម្រាមដៃជំនួសវិញ​"</string>
+    <!-- no translation found for keyguard_face_unlock_unavailable (8145547300240405980) -->
+    <skip />
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"បាន​តភ្ជាប់​ប៊្លូធូស។"</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"មិនដឹងអំពី​ភាគរយថ្មទេ។"</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"បាន​ភ្ជាប់​ទៅ <xliff:g id="BLUETOOTH">%s</xliff:g> ។"</string>
@@ -248,8 +250,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"ពន្លឺ"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"ការបញ្ច្រាស​ពណ៌"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"ការ​កែតម្រូវ​ពណ៌"</string>
-    <!-- no translation found for quick_settings_more_user_settings (7634653308485206306) -->
-    <skip />
+    <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"គ្រប់គ្រង​អ្នក​ប្រើប្រាស់"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"រួចរាល់"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"បិទ"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"បាន​ភ្ជាប់"</string>
@@ -304,6 +305,17 @@
     <string name="sensor_privacy_mic_unblocked_toast_content" msgid="306555320557065068">"អាចប្រើមីក្រូហ្វូនបាន"</string>
     <string name="sensor_privacy_camera_unblocked_toast_content" msgid="7843105715964332311">"អាចប្រើកាមេរ៉ាបាន"</string>
     <string name="sensor_privacy_mic_camera_unblocked_toast_content" msgid="7339355093282661115">"អាចប្រើកាមេរ៉ា និងមីក្រូហ្វូនបាន"</string>
+    <string name="sensor_privacy_mic_turned_on_dialog_title" msgid="6348853159838376513">"បានបើក​មីក្រូហ្វូន"</string>
+    <string name="sensor_privacy_mic_turned_off_dialog_title" msgid="5760464281790732849">"បានបិទ​មីក្រូហ្វូន"</string>
+    <string name="sensor_privacy_mic_unblocked_dialog_content" msgid="4889961886199270224">"មីក្រូហ្វូនត្រូវបានបើកសម្រាប់កម្មវិធី និងសេវាកម្មទាំងអស់។"</string>
+    <string name="sensor_privacy_mic_blocked_no_exception_dialog_content" msgid="5864898470772965394">"សិទ្ធិចូលប្រើប្រាស់មីក្រូហ្វូនត្រូវបានបិទសម្រាប់កម្មវិធី និងសេវាកម្មទាំងអស់។ អ្នកអាចបើកសិទ្ធិចូលប្រើប្រាស់មីក្រូហ្វូននៅក្នុងការកំណត់ &gt; ឯកជនភាព &gt; មីក្រូហ្វូន។"</string>
+    <string name="sensor_privacy_mic_blocked_with_exception_dialog_content" msgid="810289713700437896">"សិទ្ធិចូលប្រើប្រាស់មីក្រូហ្វូនត្រូវបានបិទសម្រាប់កម្មវិធី និងសេវាកម្មទាំងអស់។ អ្នកអាចផ្លាស់ប្ដូរលក្ខណៈនេះនៅក្នុងការកំណត់ &gt; ឯកជនភាព &gt; មីក្រូហ្វូន។"</string>
+    <string name="sensor_privacy_camera_turned_on_dialog_title" msgid="8039095295100075952">"បាន​បើក​កាមេរ៉ា"</string>
+    <string name="sensor_privacy_camera_turned_off_dialog_title" msgid="1936603903120742696">"បានបិទ​កាមេរ៉ា"</string>
+    <string name="sensor_privacy_camera_unblocked_dialog_content" msgid="7847190103011782278">"កាមេរ៉ាត្រូវបានបើកសម្រាប់កម្មវិធី និងសេវាកម្មទាំងអស់។"</string>
+    <string name="sensor_privacy_camera_blocked_dialog_content" msgid="3182428709314874616">"សិទ្ធិចូលប្រើប្រាស់កាមេរ៉ាត្រូវបានបិទសម្រាប់កម្មវិធី និងសេវាកម្មទាំងអស់។"</string>
+    <string name="sensor_privacy_htt_blocked_dialog_content" msgid="3333321592997666441">"ដើម្បីប្រើប្រាស់ប៊ូតុងមីក្រូហ្វូន សូមបើកសិទ្ធិចូលប្រើប្រាស់មីក្រូហ្វូននៅក្នុងការកំណត់។"</string>
+    <string name="sensor_privacy_dialog_open_settings" msgid="1503088305279285048">"បើកការកំណត់។"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"ឧបករណ៍ផ្សេងទៀត"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"បិទ/បើក​ទិដ្ឋភាពរួម"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"សំឡេង និងរំញ័រនឹងមិន​រំខានដល់អ្នកឡើយ លើកលែងតែម៉ោងរោទ៍ ការរំលឹក ព្រឹត្តិការណ៍ និងអ្នកហៅទូរសព្ទដែលអ្នកបញ្ជាក់ប៉ុណ្ណោះ។ អ្នកនឹងនៅតែឮសំឡេងសកម្មភាពគ្រប់យ៉ាងដែលអ្នកលេងដដែល រួមទាំងតន្រ្តី វីដេអូ និងហ្គេម។"</string>
@@ -374,6 +386,16 @@
     <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"នៅពេលអ្នកកំពុងចែករំលែក ថត ឬបញ្ជូនកម្មវិធី <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> មានសិទ្ធិចូលប្រើប្រាស់អ្វីៗដែលបង្ហាញ ឬលេងនៅលើកម្មវិធីនោះ។ ដូច្នេះ សូមប្រុងប្រយ័ត្នចំពោះពាក្យសម្ងាត់ ព័ត៌មាន​លម្អិតអំពី​ការ​ទូទាត់ប្រាក់ សារ ឬព័ត៌មានរសើបផ្សេងទៀត។"</string>
     <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"បន្ត"</string>
     <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"ចែករំលែក ឬថតកម្មវិធី"</string>
+    <!-- no translation found for media_projection_permission_dialog_system_service_title (6827129613741303726) -->
+    <skip />
+    <!-- no translation found for media_projection_permission_dialog_system_service_warning_entire_screen (8801616203805837575) -->
+    <skip />
+    <!-- no translation found for media_projection_permission_dialog_system_service_warning_single_app (543310680568419338) -->
+    <skip />
+    <!-- no translation found for screen_capturing_disabled_by_policy_dialog_title (2113331792064527203) -->
+    <skip />
+    <!-- no translation found for screen_capturing_disabled_by_policy_dialog_description (6015975736747696431) -->
+    <skip />
     <string name="clear_all_notifications_text" msgid="348312370303046130">"សម្អាត​ទាំងអស់"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"គ្រប់គ្រង"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"ប្រវត្តិ"</string>
@@ -728,14 +750,10 @@
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"បិទទិន្នន័យទូរសព្ទចល័ត?"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"អ្នកនឹង​មិន​មាន​សិទ្ធិ​ចូល​ប្រើទិន្នន័យ​ ឬអ៊ីនធឺណិត​តាមរយៈ <xliff:g id="CARRIER">%s</xliff:g> បានឡើយ។ អ៊ីនធឺណិត​នឹងអាច​ប្រើបាន​តាមរយៈ Wi-Fi តែប៉ុណ្ណោះ។"</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"ក្រុមហ៊ុន​​សេវាទូរសព្ទរបស់អ្នក"</string>
-    <!-- no translation found for auto_data_switch_disable_title (5146527155665190652) -->
-    <skip />
-    <!-- no translation found for auto_data_switch_disable_message (5885533647399535852) -->
-    <skip />
-    <!-- no translation found for auto_data_switch_dialog_negative_button (2370876875999891444) -->
-    <skip />
-    <!-- no translation found for auto_data_switch_dialog_positive_button (8531782041263087564) -->
-    <skip />
+    <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"ប្ដូរទៅ <xliff:g id="CARRIER">%s</xliff:g> វិញឬ?"</string>
+    <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"ទិន្នន័យទូរសព្ទចល័តនឹងមិនប្ដូរដោយស្វ័យប្រវត្តិដោយផ្អែកតាមភាពអាចប្រើបាននោះទេ"</string>
+    <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"ទេ អរគុណ"</string>
+    <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"បាទ/ចាស ប្ដូរ"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"ការកំណត់​មិនអាច​ផ្ទៀងផ្ទាត់​ការឆ្លើយតប​របស់អ្នក​បាន​ទេ ដោយសារ​កម្មវិធី​កំពុង​បាំងសំណើ​សុំការ​អនុញ្ញាត។"</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"អនុញ្ញាតឱ្យ <xliff:g id="APP_0">%1$s</xliff:g> បង្ហាញ​ស្ថិតិប្រើប្រាស់​របស់ <xliff:g id="APP_2">%2$s</xliff:g>?"</string>
     <string name="slice_permission_text_1" msgid="6675965177075443714">"- វា​អាច​អាន​ព័ត៌មាន​ពី <xliff:g id="APP">%1$s</xliff:g>"</string>
@@ -794,18 +812,15 @@
     <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"ការកំណត់វិនដូ​កម្មវិធីពង្រីក"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"ចុចដើម្បីបើក​មុខងារ​ភាពងាយស្រួល។ ប្ដូរ ឬប្ដូរ​ប៊ូតុងនេះ​តាមបំណង​នៅក្នុង​ការកំណត់។\n\n"<annotation id="link">"មើល​ការកំណត់"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"ផ្លាស់ទី​ប៊ូតុង​ទៅគែម ដើម្បីលាក់វា​ជាបណ្ដោះអាសន្ន"</string>
-    <!-- no translation found for accessibility_floating_button_undo (511112888715708241) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_undo_message_text (3044079592757099698) -->
-    <skip />
+    <string name="accessibility_floating_button_undo" msgid="511112888715708241">"ត្រឡប់វិញ"</string>
+    <string name="accessibility_floating_button_undo_message_text" msgid="3044079592757099698">"{count,plural, =1{បានដក​ផ្លូវកាត់ {label} ចេញ}other{បាន​ដក​ផ្លូវ​កាត់ # ចេញ}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"ផ្លាស់ទីទៅខាងលើផ្នែកខាងឆ្វេង"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"ផ្លាស់ទីទៅខាងលើផ្នែកខាងស្ដាំ"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"ផ្លាស់ទីទៅខាងក្រោមផ្នែកខាងឆ្វេង​"</string>
     <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"ផ្លាស់ទីទៅខាងក្រោមផ្នែកខាងស្ដាំ"</string>
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"ផ្លាស់ទីទៅផ្នែកខាងចុង រួចលាក់"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"ផ្លាស់ទីចេញពីផ្នែកខាងចុង រួចបង្ហាញ"</string>
-    <!-- no translation found for accessibility_floating_button_action_remove_menu (6730432848162552135) -->
-    <skip />
+    <string name="accessibility_floating_button_action_remove_menu" msgid="6730432848162552135">"ដកចេញ"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"បិទ/បើក"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"ផ្ទាំងគ្រប់គ្រងឧបករណ៍"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"ជ្រើសរើស​កម្មវិធីដែលត្រូវបញ្ចូល​ផ្ទាំងគ្រប់គ្រង"</string>
@@ -948,10 +963,8 @@
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"ទិន្នន័យ​ទូរសព្ទចល័ត"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"បានភ្ជាប់"</string>
-    <!-- no translation found for mobile_data_temp_connection_active (4590222725908806824) -->
-    <skip />
-    <!-- no translation found for mobile_data_poor_connection (819617772268371434) -->
-    <skip />
+    <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"បានភ្ជាប់ជាបណ្ដោះអាសន្ន"</string>
+    <string name="mobile_data_poor_connection" msgid="819617772268371434">"ការតភ្ជាប់​ខ្សោយ"</string>
     <string name="mobile_data_off_summary" msgid="3663995422004150567">"ទិន្នន័យទូរសព្ទចល័ត​នឹងមិនភ្ជាប់ដោយស្វ័យប្រវត្តិទេ"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"មិនមាន​ការតភ្ជាប់ទេ"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"មិន​មាន​បណ្ដាញផ្សេងទៀតដែល​អាច​ប្រើ​បានទេ"</string>

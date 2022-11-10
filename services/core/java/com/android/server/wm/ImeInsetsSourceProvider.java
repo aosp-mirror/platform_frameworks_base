@@ -55,6 +55,12 @@ final class ImeInsetsSourceProvider extends WindowContainerInsetsSourceProvider 
     private boolean mImeShowing;
     private final InsetsSource mLastSource = new InsetsSource(ITYPE_IME);
 
+    /** @see #setFrozen(boolean) */
+    private boolean mFrozen;
+
+    /** @see #setServerVisible(boolean) */
+    private boolean mServerVisible;
+
     ImeInsetsSourceProvider(InsetsSource source,
             InsetsStateController stateController, DisplayContent displayContent) {
         super(source, stateController, displayContent);
@@ -78,6 +84,32 @@ final class ImeInsetsSourceProvider extends WindowContainerInsetsSourceProvider 
                     && snapshot != null && snapshot.hasImeSurface());
         }
         return control;
+    }
+
+    @Override
+    void setServerVisible(boolean serverVisible) {
+        mServerVisible = serverVisible;
+        if (!mFrozen) {
+            super.setServerVisible(serverVisible);
+        }
+    }
+
+    /**
+     * Freeze IME insets source state when required.
+     *
+     * When setting {@param frozen} as {@code true}, the IME insets provider will freeze the
+     * current IME insets state and pending the IME insets state update until setting
+     * {@param frozen} as {@code false}.
+     */
+    void setFrozen(boolean frozen) {
+        if (mFrozen == frozen) {
+            return;
+        }
+        mFrozen = frozen;
+        if (!frozen) {
+            // Unfreeze and process the pending IME insets states.
+            super.setServerVisible(mServerVisible);
+        }
     }
 
     @Override

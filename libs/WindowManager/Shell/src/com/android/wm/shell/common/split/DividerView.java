@@ -46,8 +46,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.policy.DividerSnapAlgorithm;
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.animation.Interpolators;
+import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
 /**
  * Divider for multi window splits.
@@ -364,8 +366,11 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
         mViewHost.relayout(lp);
     }
 
-    void setInteractive(boolean interactive) {
+    void setInteractive(boolean interactive, String from) {
         if (interactive == mInteractive) return;
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
+                "Set divider bar %s from %s", interactive ? "interactive" : "non-interactive",
+                from);
         mInteractive = interactive;
         releaseTouching();
         mHandle.setVisibility(mInteractive ? View.VISIBLE : View.INVISIBLE);
