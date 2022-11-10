@@ -24,5 +24,15 @@ enum class WakefulnessModel {
     /** Device is now fully awake and interactive. */
     AWAKE,
     /** Signal that the device is now going to sleep. */
-    STARTING_TO_SLEEP,
+    STARTING_TO_SLEEP;
+
+    companion object {
+        fun isSleepingOrStartingToSleep(model: WakefulnessModel): Boolean {
+            return model == ASLEEP || model == STARTING_TO_SLEEP
+        }
+
+        fun isWakingOrStartingToWake(model: WakefulnessModel): Boolean {
+            return model == AWAKE || model == STARTING_TO_WAKE
+        }
+    }
 }
