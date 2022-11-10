@@ -58,8 +58,8 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.UnreleasedFlag;
+import com.android.systemui.flags.FakeFeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.connectivity.AccessPointController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -161,8 +161,8 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     private WifiStateWorker mWifiStateWorker;
     @Mock
     private SignalStrength mSignalStrength;
-    @Mock
-    private FeatureFlags mFlags;
+
+    private FakeFeatureFlags mFlags = new FakeFeatureFlags();
 
     private TestableResources mTestableResources;
     private InternetDialogController mInternetDialogController;
@@ -213,6 +213,7 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         mInternetDialogController.onAccessPointsChanged(mAccessPoints);
         mInternetDialogController.mActivityStarter = mActivityStarter;
         mInternetDialogController.mWifiIconInjector = mWifiIconInjector;
+        mFlags.set(Flags.QS_SECONDARY_DATA_SUB_INFO, false);
     }
 
     @After
@@ -348,7 +349,7 @@ public class InternetDialogControllerTest extends SysuiTestCase {
 
     @Test
     public void getSubtitleText_withNoService_returnNoNetworksAvailable() {
-        when(mFlags.isEnabled(any(UnreleasedFlag.class))).thenReturn(true);
+        mFlags.set(Flags.QS_SECONDARY_DATA_SUB_INFO, true);
         InternetDialogController spyController = spy(mInternetDialogController);
         fakeAirplaneModeEnabled(false);
         when(mWifiStateWorker.isWifiEnabled()).thenReturn(true);
@@ -705,7 +706,7 @@ public class InternetDialogControllerTest extends SysuiTestCase {
 
     @Test
     public void getSignalStrengthIcon_differentSubId() {
-        when(mFlags.isEnabled(any(UnreleasedFlag.class))).thenReturn(true);
+        mFlags.set(Flags.QS_SECONDARY_DATA_SUB_INFO, true);
         InternetDialogController spyController = spy(mInternetDialogController);
         Drawable icons = spyController.getSignalStrengthIcon(SUB_ID, mContext, 1, 1, 0, false);
         Drawable icons2 = spyController.getSignalStrengthIcon(SUB_ID2, mContext, 1, 1, 0, false);
@@ -715,7 +716,7 @@ public class InternetDialogControllerTest extends SysuiTestCase {
 
     @Test
     public void getActiveAutoSwitchNonDdsSubId() {
-        when(mFlags.isEnabled(any(UnreleasedFlag.class))).thenReturn(true);
+        mFlags.set(Flags.QS_SECONDARY_DATA_SUB_INFO, true);
         // active on non-DDS
         SubscriptionInfo info = mock(SubscriptionInfo.class);
         doReturn(SUB_ID2).when(info).getSubscriptionId();
@@ -751,7 +752,7 @@ public class InternetDialogControllerTest extends SysuiTestCase {
 
     @Test
     public void getMobileNetworkSummary() {
-        when(mFlags.isEnabled(any(UnreleasedFlag.class))).thenReturn(true);
+        mFlags.set(Flags.QS_SECONDARY_DATA_SUB_INFO, true);
         InternetDialogController spyController = spy(mInternetDialogController);
         doReturn(SUB_ID2).when(spyController).getActiveAutoSwitchNonDdsSubId();
         doReturn(true).when(spyController).isMobileDataEnabled();
@@ -775,7 +776,7 @@ public class InternetDialogControllerTest extends SysuiTestCase {
 
     @Test
     public void launchMobileNetworkSettings_validSubId() {
-        when(mFlags.isEnabled(any(UnreleasedFlag.class))).thenReturn(true);
+        mFlags.set(Flags.QS_SECONDARY_DATA_SUB_INFO, true);
         InternetDialogController spyController = spy(mInternetDialogController);
         doReturn(SUB_ID2).when(spyController).getActiveAutoSwitchNonDdsSubId();
         spyController.launchMobileNetworkSettings(mDialogLaunchView);
@@ -786,7 +787,7 @@ public class InternetDialogControllerTest extends SysuiTestCase {
 
     @Test
     public void launchMobileNetworkSettings_invalidSubId() {
-        when(mFlags.isEnabled(any(UnreleasedFlag.class))).thenReturn(true);
+        mFlags.set(Flags.QS_SECONDARY_DATA_SUB_INFO, true);
         InternetDialogController spyController = spy(mInternetDialogController);
         doReturn(SubscriptionManager.INVALID_SUBSCRIPTION_ID)
                 .when(spyController).getActiveAutoSwitchNonDdsSubId();
@@ -798,7 +799,7 @@ public class InternetDialogControllerTest extends SysuiTestCase {
 
     @Test
     public void setAutoDataSwitchMobileDataPolicy() {
-        when(mFlags.isEnabled(any(UnreleasedFlag.class))).thenReturn(true);
+        mFlags.set(Flags.QS_SECONDARY_DATA_SUB_INFO, true);
         mInternetDialogController.setAutoDataSwitchMobileDataPolicy(SUB_ID, true);
 
         verify(mTelephonyManager).setMobileDataPolicyEnabled(eq(
