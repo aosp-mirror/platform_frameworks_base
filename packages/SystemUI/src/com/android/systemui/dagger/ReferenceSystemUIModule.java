@@ -44,6 +44,7 @@ import com.android.systemui.screenshot.ReferenceScreenshotModule;
 import com.android.systemui.shade.NotificationShadeWindowControllerImpl;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeControllerImpl;
+import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationLockscreenUserManagerImpl;
@@ -162,7 +163,8 @@ public abstract class ReferenceSystemUIModule {
             ConfigurationController configurationController,
             @Main Handler handler,
             AccessibilityManagerWrapper accessibilityManagerWrapper,
-            UiEventLogger uiEventLogger) {
+            UiEventLogger uiEventLogger,
+            ShadeExpansionStateManager shadeExpansionStateManager) {
         return new HeadsUpManagerPhone(
                 context,
                 headsUpManagerLogger,
@@ -173,7 +175,8 @@ public abstract class ReferenceSystemUIModule {
                 configurationController,
                 handler,
                 accessibilityManagerWrapper,
-                uiEventLogger
+                uiEventLogger,
+                shadeExpansionStateManager
         );
     }
 
