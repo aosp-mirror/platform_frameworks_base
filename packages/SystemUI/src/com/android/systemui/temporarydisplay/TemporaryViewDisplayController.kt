@@ -65,8 +65,7 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
         height = WindowManager.LayoutParams.WRAP_CONTENT
         type = WindowManager.LayoutParams.TYPE_SYSTEM_ERROR
         flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-            WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
-            WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+            WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
         format = PixelFormat.TRANSLUCENT
         setTrustedOverlay()
     }
@@ -120,20 +119,27 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
             // At this point, we're guaranteed to no longer be displaying a view.
             // So, set up all our callbacks and inflate the view.
             configurationController.addCallback(displayScaleListener)
-            // Wake the screen if necessary so the user will see the view. (Per b/239426653, we want
-            // the view to show over the dream state, so we should only wake up if the screen is
-            // completely off.)
-            if (!powerManager.isScreenOn) {
-                wakeLock = wakeLockBuilder
+
+            wakeLock = if (!powerManager.isScreenOn) {
+                // If the screen is off, fully wake it so the user can see the view.
+                wakeLockBuilder
                     .setTag(newInfo.windowTitle)
                     .setLevelsAndFlags(
-                        PowerManager.FULL_WAKE_LOCK or
-                        PowerManager.ACQUIRE_CAUSES_WAKEUP
+                            PowerManager.FULL_WAKE_LOCK or
+                                PowerManager.ACQUIRE_CAUSES_WAKEUP
                     )
                     .build()
-                wakeLock?.acquire(newInfo.wakeReason)
-                wakeReasonAcquired = newInfo.wakeReason
+            } else {
+                // Per b/239426653, we want the view to show over the dream state.
+                // If the screen is on, using screen bright level will leave screen on the dream
+                // state but ensure the screen will not go off before wake lock is released.
+                wakeLockBuilder
+                    .setTag(newInfo.windowTitle)
+                    .setLevelsAndFlags(PowerManager.SCREEN_BRIGHT_WAKE_LOCK)
+                    .build()
             }
+            wakeLock?.acquire(newInfo.wakeReason)
+            wakeReasonAcquired = newInfo.wakeReason
             logger.logViewAddition(newInfo.windowTitle)
             inflateAndUpdateView(newInfo)
         }
