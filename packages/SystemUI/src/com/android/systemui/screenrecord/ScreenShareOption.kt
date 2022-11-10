@@ -13,19 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.systemui.screenrecord
 
-package com.android.systemui;
+import androidx.annotation.IntDef
+import androidx.annotation.StringRes
+import kotlin.annotation.Retention
 
-import androidx.annotation.StringRes;
+@Retention(AnnotationRetention.SOURCE)
+@IntDef(SINGLE_APP, ENTIRE_SCREEN)
+annotation class ScreenShareMode
 
-import com.android.internal.R;
+const val SINGLE_APP = 0
+const val ENTIRE_SCREEN = 1
 
-/** Helper class for referencing resources */
-class ChooserSelectorResourceHelper {
-
-    private ChooserSelectorResourceHelper() {
-    }
-
-    @StringRes
-    static final int CONFIG_CHOOSER_ACTIVITY = R.string.config_chooserActivity;
-}
+class ScreenShareOption(
+    @ScreenShareMode val mode: Int,
+    @StringRes val spinnerText: Int,
+    @StringRes val warningText: Int
+)

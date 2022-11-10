@@ -25,8 +25,8 @@ import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.BouncerView
 import com.android.systemui.keyguard.data.repository.KeyguardBouncerRepository
-import com.android.systemui.keyguard.domain.interactor.BouncerCallbackInteractor
-import com.android.systemui.keyguard.domain.interactor.BouncerInteractor
+import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerCallbackInteractor
+import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.phone.KeyguardBouncer
 import com.android.systemui.statusbar.phone.KeyguardBypassController
@@ -59,14 +59,14 @@ class UdfpsKeyguardViewControllerWithCoroutinesTest : UdfpsKeyguardViewControlle
     }
 
     override fun createUdfpsKeyguardViewController(): UdfpsKeyguardViewController? {
-        mBouncerInteractor =
-            BouncerInteractor(
+        mPrimaryBouncerInteractor =
+            PrimaryBouncerInteractor(
                 keyguardBouncerRepository,
                 mock(BouncerView::class.java),
                 mock(Handler::class.java),
                 mKeyguardStateController,
                 mock(KeyguardSecurityModel::class.java),
-                mock(BouncerCallbackInteractor::class.java),
+                mock(PrimaryBouncerCallbackInteractor::class.java),
                 mock(FalsingCollector::class.java),
                 mock(DismissCallbackRegistry::class.java),
                 mock(KeyguardBypassController::class.java),
@@ -86,7 +86,7 @@ class UdfpsKeyguardViewControllerWithCoroutinesTest : UdfpsKeyguardViewControlle
 
             // WHEN the bouncer expansion is VISIBLE
             val job = mController.listenForBouncerExpansion(this)
-            keyguardBouncerRepository.setVisible(true)
+            keyguardBouncerRepository.setPrimaryVisible(true)
             keyguardBouncerRepository.setPanelExpansion(KeyguardBouncer.EXPANSION_VISIBLE)
             yield()
 
