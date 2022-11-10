@@ -20,10 +20,10 @@ import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.RequiresDevice
 import android.view.Surface
 import android.view.WindowManagerPolicyConstants
-import com.android.server.wm.flicker.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.FlickerBuilder
+import com.android.server.wm.flicker.FlickerTest
+import com.android.server.wm.flicker.FlickerTestFactory
+import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.rules.RemoveAllTasksButHomeRule
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -55,15 +55,14 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class OpenAppColdFromIcon(testSpec: FlickerTestParameter) :
-    OpenAppFromLauncherTransition(testSpec) {
+class OpenAppColdFromIcon(flicker: FlickerTest) : OpenAppFromLauncherTransition(flicker) {
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit
         get() = {
             super.transition(this)
             setup {
-                if (testSpec.isTablet) {
-                    tapl.setExpectedRotation(testSpec.startRotation)
+                if (flicker.scenario.isTablet) {
+                    tapl.setExpectedRotation(flicker.scenario.startRotation)
                 } else {
                     tapl.setExpectedRotation(Surface.ROTATION_0)
                 }
@@ -180,19 +179,17 @@ class OpenAppColdFromIcon(testSpec: FlickerTestParameter) :
         /**
          * Creates the test configurations.
          *
-         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring repetitions,
-         * screen orientation and navigation modes.
+         * See [FlickerTestFactory.nonRotationTests] for configuring screen orientation and
+         * navigation modes.
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): Collection<FlickerTestParameter> {
-            return FlickerTestParameterFactory.getInstance()
-                // TAPL fails on landscape mode b/240916028
-                .getConfigNonRotationTests(
-                    supportedNavigationModes = listOf(
-                        WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY
-                    )
-                )
+        fun getParams(): Collection<FlickerTest> {
+            // TAPL fails on landscape mode b/240916028
+            return FlickerTestFactory.nonRotationTests(
+                supportedNavigationModes =
+                    listOf(WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY)
+            )
         }
     }
 }

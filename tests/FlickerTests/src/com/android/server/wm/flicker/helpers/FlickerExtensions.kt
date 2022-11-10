@@ -18,7 +18,7 @@
 
 package com.android.server.wm.flicker.helpers
 
-import com.android.server.wm.flicker.Flicker
+import com.android.server.wm.flicker.IFlickerTestData
 import com.android.server.wm.flicker.rules.ChangeDisplayOrientationRule
 
 /**
@@ -26,7 +26,7 @@ import com.android.server.wm.flicker.rules.ChangeDisplayOrientationRule
  *
  * @param rotation New device rotation
  */
-fun Flicker.setRotation(rotation: Int) =
+fun IFlickerTestData.setRotation(rotation: Int) =
     ChangeDisplayOrientationRule.setRotation(
         rotation,
         instrumentation,

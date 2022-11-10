@@ -17,14 +17,12 @@
 package com.android.server.wm.flicker.activityembedding
 
 import android.platform.test.annotations.Presubmit
-import android.view.Surface
-import android.view.WindowManagerPolicyConstants
 import androidx.test.filters.RequiresDevice
-import com.android.server.wm.flicker.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.FlickerBuilder
+import com.android.server.wm.flicker.FlickerTest
+import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.helpers.ActivityEmbeddingAppHelper
+import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -41,8 +39,8 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class OpenActivityEmbeddingPlaceholderSplit(testSpec: FlickerTestParameter) :
-    ActivityEmbeddingTestBase(testSpec) {
+class OpenActivityEmbeddingPlaceholderSplit(flicker: FlickerTest) :
+    ActivityEmbeddingTestBase(flicker) {
 
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit = {
@@ -60,7 +58,7 @@ class OpenActivityEmbeddingPlaceholderSplit(testSpec: FlickerTestParameter) :
     @Presubmit
     @Test
     fun mainActivityBecomesInvisible() {
-        testSpec.assertLayers {
+        flicker.assertLayers {
             isVisible(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT)
                 .then()
                 .isInvisible(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT)
@@ -70,12 +68,12 @@ class OpenActivityEmbeddingPlaceholderSplit(testSpec: FlickerTestParameter) :
     @Presubmit
     @Test
     fun placeholderSplitBecomesVisible() {
-        testSpec.assertLayers {
+        flicker.assertLayers {
             isInvisible(ActivityEmbeddingAppHelper.PLACEHOLDER_PRIMARY_COMPONENT)
                 .then()
                 .isVisible(ActivityEmbeddingAppHelper.PLACEHOLDER_PRIMARY_COMPONENT)
         }
-        testSpec.assertLayers {
+        flicker.assertLayers {
             isInvisible(ActivityEmbeddingAppHelper.PLACEHOLDER_SECONDARY_COMPONENT)
                 .then()
                 .isVisible(ActivityEmbeddingAppHelper.PLACEHOLDER_SECONDARY_COMPONENT)
@@ -142,21 +140,13 @@ class OpenActivityEmbeddingPlaceholderSplit(testSpec: FlickerTestParameter) :
         /**
          * Creates the test configurations.
          *
-         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring repetitions,
-         * screen orientation and navigation modes.
+         * See [FlickerTestFactory.nonRotationTests] for configuring screen orientation and
+         * navigation modes.
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): Collection<FlickerTestParameter> {
-            return FlickerTestParameterFactory.getInstance()
-                .getConfigNonRotationTests(
-                    supportedRotations = listOf(Surface.ROTATION_0, Surface.ROTATION_90),
-                    supportedNavigationModes =
-                        listOf(
-                            WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY,
-                            WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
-                        )
-                )
+        fun getParams(): Collection<FlickerTest> {
+            return FlickerTestFactory.nonRotationTests()
         }
     }
 }

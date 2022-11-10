@@ -129,10 +129,18 @@ internal object SplitScreenUtils {
 
             // Find the second task in the upper right corner in split select mode by sorting
             // 'left' in descending order and 'top' in ascending order.
-            Collections.sort(snapshots, { t1: UiObject2, t2: UiObject2 ->
-                t2.getVisibleBounds().left - t1.getVisibleBounds().left})
-            Collections.sort(snapshots, { t1: UiObject2, t2: UiObject2 ->
-                t1.getVisibleBounds().top - t2.getVisibleBounds().top})
+            Collections.sort(
+                snapshots,
+                { t1: UiObject2, t2: UiObject2 ->
+                    t2.getVisibleBounds().left - t1.getVisibleBounds().left
+                }
+            )
+            Collections.sort(
+                snapshots,
+                { t1: UiObject2, t2: UiObject2 ->
+                    t1.getVisibleBounds().top - t2.getVisibleBounds().top
+                }
+            )
             snapshots[0].click()
         } else {
             tapl.workspace

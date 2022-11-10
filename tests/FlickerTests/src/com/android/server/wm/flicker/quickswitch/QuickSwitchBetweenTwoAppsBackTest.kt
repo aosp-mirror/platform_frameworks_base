@@ -21,13 +21,13 @@ import android.platform.test.annotations.RequiresDevice
 import android.view.Surface
 import android.view.WindowManagerPolicyConstants
 import com.android.server.wm.flicker.BaseTest
-import com.android.server.wm.flicker.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.FlickerBuilder
+import com.android.server.wm.flicker.FlickerTest
+import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.helpers.NonResizeableAppHelper
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
+import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.traces.common.ComponentNameMatcher
 import com.android.server.wm.traces.common.Rect
 import org.junit.Assume
@@ -54,7 +54,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class QuickSwitchBetweenTwoAppsBackTest(testSpec: FlickerTestParameter) : BaseTest(testSpec) {
+open class QuickSwitchBetweenTwoAppsBackTest(flicker: FlickerTest) : BaseTest(flicker) {
     private val testApp1 = SimpleAppHelper(instrumentation)
     private val testApp2 = NonResizeableAppHelper(instrumentation)
 
@@ -66,7 +66,7 @@ open class QuickSwitchBetweenTwoAppsBackTest(testSpec: FlickerTestParameter) : B
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit = {
         setup {
-            tapl.setExpectedRotation(testSpec.startRotation)
+            tapl.setExpectedRotation(flicker.scenario.startRotation)
             tapl.setIgnoreTaskbarVisibility(true)
             testApp1.launchViaIntent(wmHelper)
             testApp2.launchViaIntent(wmHelper)
@@ -96,7 +96,7 @@ open class QuickSwitchBetweenTwoAppsBackTest(testSpec: FlickerTestParameter) : B
     @Presubmit
     @Test
     open fun startsWithApp2WindowsCoverFullScreen() {
-        testSpec.assertWmStart { this.visibleRegion(testApp2).coversExactly(startDisplayBounds) }
+        flicker.assertWmStart { this.visibleRegion(testApp2).coversExactly(startDisplayBounds) }
     }
 
     /**
@@ -106,16 +106,14 @@ open class QuickSwitchBetweenTwoAppsBackTest(testSpec: FlickerTestParameter) : B
     @Presubmit
     @Test
     open fun startsWithApp2LayersCoverFullScreen() {
-        testSpec.assertLayersStart {
-            this.visibleRegion(testApp2).coversExactly(startDisplayBounds)
-        }
+        flicker.assertLayersStart { this.visibleRegion(testApp2).coversExactly(startDisplayBounds) }
     }
 
     /** Checks that the transition starts with [testApp2] being the top window. */
     @Presubmit
     @Test
     open fun startsWithApp2WindowBeingOnTop() {
-        testSpec.assertWmStart { this.isAppWindowOnTop(testApp2) }
+        flicker.assertWmStart { this.isAppWindowOnTop(testApp2) }
     }
 
     /**
@@ -125,7 +123,7 @@ open class QuickSwitchBetweenTwoAppsBackTest(testSpec: FlickerTestParameter) : B
     @Presubmit
     @Test
     open fun endsWithApp1WindowsCoveringFullScreen() {
-        testSpec.assertWmEnd { this.visibleRegion(testApp1).coversExactly(startDisplayBounds) }
+        flicker.assertWmEnd { this.visibleRegion(testApp1).coversExactly(startDisplayBounds) }
     }
 
     /**
@@ -135,7 +133,7 @@ open class QuickSwitchBetweenTwoAppsBackTest(testSpec: FlickerTestParameter) : B
     @Presubmit
     @Test
     fun endsWithApp1LayersCoveringFullScreen() {
-        testSpec.assertLayersEnd { this.visibleRegion(testApp1).coversExactly(startDisplayBounds) }
+        flicker.assertLayersEnd { this.visibleRegion(testApp1).coversExactly(startDisplayBounds) }
     }
 
     /**
@@ -145,7 +143,7 @@ open class QuickSwitchBetweenTwoAppsBackTest(testSpec: FlickerTestParameter) : B
     @Presubmit
     @Test
     open fun endsWithApp1BeingOnTop() {
-        testSpec.assertWmEnd { this.isAppWindowOnTop(testApp1) }
+        flicker.assertWmEnd { this.isAppWindowOnTop(testApp1) }
     }
 
     /**
@@ -155,7 +153,7 @@ open class QuickSwitchBetweenTwoAppsBackTest(testSpec: FlickerTestParameter) : B
     @Presubmit
     @Test
     open fun app1WindowBecomesAndStaysVisible() {
-        testSpec.assertWm {
+        flicker.assertWm {
             this.isAppWindowInvisible(testApp1)
                 .then()
                 .isAppWindowVisible(ComponentNameMatcher.SNAPSHOT, isOptional = true)
@@ -171,7 +169,7 @@ open class QuickSwitchBetweenTwoAppsBackTest(testSpec: FlickerTestParameter) : B
     @Presubmit
     @Test
     open fun app1LayerBecomesAndStaysVisible() {
-        testSpec.assertLayers { this.isInvisible(testApp1).then().isVisible(testApp1) }
+        flicker.assertLayers { this.isInvisible(testApp1).then().isVisible(testApp1) }
     }
 
     /**
@@ -181,9 +179,7 @@ open class QuickSwitchBetweenTwoAppsBackTest(testSpec: FlickerTestParameter) : B
     @Presubmit
     @Test
     open fun app2WindowBecomesAndStaysInvisible() {
-        testSpec.assertWm {
-            this.isAppWindowVisible(testApp2).then().isAppWindowInvisible(testApp2)
-        }
+        flicker.assertWm { this.isAppWindowVisible(testApp2).then().isAppWindowInvisible(testApp2) }
     }
 
     /**
@@ -193,7 +189,7 @@ open class QuickSwitchBetweenTwoAppsBackTest(testSpec: FlickerTestParameter) : B
     @Presubmit
     @Test
     open fun app2LayerBecomesAndStaysInvisible() {
-        testSpec.assertLayers { this.isVisible(testApp2).then().isInvisible(testApp2) }
+        flicker.assertLayers { this.isVisible(testApp2).then().isInvisible(testApp2) }
     }
 
     /**
@@ -204,7 +200,7 @@ open class QuickSwitchBetweenTwoAppsBackTest(testSpec: FlickerTestParameter) : B
     @Presubmit
     @Test
     open fun app1WindowIsVisibleOnceApp2WindowIsInvisible() {
-        testSpec.assertWm {
+        flicker.assertWm {
             this.isAppWindowVisible(testApp2)
                 .then()
                 // TODO: Do we actually want to test this? Seems too implementation specific...
@@ -224,7 +220,7 @@ open class QuickSwitchBetweenTwoAppsBackTest(testSpec: FlickerTestParameter) : B
     @Presubmit
     @Test
     open fun app1LayerIsVisibleOnceApp2LayerIsInvisible() {
-        testSpec.assertLayers {
+        flicker.assertLayers {
             this.isVisible(testApp2)
                 .then()
                 .isVisible(ComponentNameMatcher.LAUNCHER, isOptional = true)
@@ -240,13 +236,12 @@ open class QuickSwitchBetweenTwoAppsBackTest(testSpec: FlickerTestParameter) : B
 
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): Collection<FlickerTestParameter> {
-            return FlickerTestParameterFactory.getInstance()
-                .getConfigNonRotationTests(
-                    supportedNavigationModes =
-                        listOf(WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY),
-                    supportedRotations = listOf(Surface.ROTATION_0, Surface.ROTATION_90)
-                )
+        fun getParams(): Collection<FlickerTest> {
+            return FlickerTestFactory.nonRotationTests(
+                supportedNavigationModes =
+                    listOf(WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY),
+                supportedRotations = listOf(Surface.ROTATION_0, Surface.ROTATION_90)
+            )
         }
     }
 }

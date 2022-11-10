@@ -25,11 +25,11 @@ import android.view.WindowInsets.Type.statusBars
 import android.view.WindowManagerPolicyConstants
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.BaseTest
-import com.android.server.wm.flicker.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.FlickerBuilder
+import com.android.server.wm.flicker.FlickerTest
+import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
+import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.traces.common.ComponentNameMatcher
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -47,8 +47,8 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class LaunchAppShowImeAndDialogThemeAppTest(testSpec: FlickerTestParameter) : BaseTest(testSpec) {
-    private val testApp = ImeAppAutoFocusHelper(instrumentation, testSpec.startRotation)
+class LaunchAppShowImeAndDialogThemeAppTest(flicker: FlickerTest) : BaseTest(flicker) {
+    private val testApp = ImeAppAutoFocusHelper(instrumentation, flicker.scenario.startRotation)
 
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit = {
@@ -75,42 +75,41 @@ class LaunchAppShowImeAndDialogThemeAppTest(testSpec: FlickerTestParameter) : Ba
     @Test
     override fun taskBarLayerIsVisibleAtStartAndEnd() = super.taskBarLayerIsVisibleAtStartAndEnd()
 
-    /** Checks that [ComponentMatcher.IME] layer becomes visible during the transition */
-    @Presubmit @Test fun imeWindowIsAlwaysVisible() = testSpec.imeWindowIsAlwaysVisible()
+    /** Checks that [ComponentNameMatcher.IME] layer becomes visible during the transition */
+    @Presubmit @Test fun imeWindowIsAlwaysVisible() = flicker.imeWindowIsAlwaysVisible()
 
-    /** Checks that [ComponentMatcher.IME] layer is visible at the end of the transition */
+    /** Checks that [ComponentNameMatcher.IME] layer is visible at the end of the transition */
     @Presubmit
     @Test
     fun imeLayerExistsEnd() {
-        testSpec.assertLayersEnd { this.isVisible(ComponentNameMatcher.IME) }
+        flicker.assertLayersEnd { this.isVisible(ComponentNameMatcher.IME) }
     }
 
-    /** Checks that [ComponentMatcher.IME_SNAPSHOT] layer is invisible always. */
+    /** Checks that [ComponentNameMatcher.IME_SNAPSHOT] layer is invisible always. */
     @Presubmit
     @Test
     fun imeSnapshotNotVisible() {
-        testSpec.assertLayers { this.isInvisible(ComponentNameMatcher.IME_SNAPSHOT) }
+        flicker.assertLayers { this.isInvisible(ComponentNameMatcher.IME_SNAPSHOT) }
     }
 
     companion object {
         /**
          * Creates the test configurations.
          *
-         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring repetitions,
-         * screen orientation and navigation modes.
+         * See [FlickerTestFactory.nonRotationTests] for configuring screen orientation and
+         * navigation modes.
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): Collection<FlickerTestParameter> {
-            return FlickerTestParameterFactory.getInstance()
-                .getConfigNonRotationTests(
-                    supportedRotations = listOf(Surface.ROTATION_0),
-                    supportedNavigationModes =
-                        listOf(
-                            WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY,
-                            WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
-                        )
-                )
+        fun getParams(): Collection<FlickerTest> {
+            return FlickerTestFactory.nonRotationTests(
+                supportedRotations = listOf(Surface.ROTATION_0),
+                supportedNavigationModes =
+                    listOf(
+                        WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY,
+                        WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
+                    )
+            )
         }
     }
 }

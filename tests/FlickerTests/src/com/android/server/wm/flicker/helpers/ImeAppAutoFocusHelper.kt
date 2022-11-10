@@ -63,7 +63,7 @@ constructor(
             } else {
                 getPackage()
             }
-        launcherStrategy.launch(appName, expectedPackage)
+        open(expectedPackage)
     }
 
     fun startDialogThemedActivity(wmHelper: WindowManagerStateHelper) {

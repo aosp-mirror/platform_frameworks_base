@@ -19,8 +19,8 @@ package com.android.wm.shell.flicker.pip
 import android.app.Instrumentation
 import android.content.Intent
 import android.view.Surface
-import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.FlickerBuilder
+import com.android.server.wm.flicker.FlickerTest
 import com.android.server.wm.flicker.helpers.PipAppHelper
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.helpers.setRotation
@@ -28,9 +28,9 @@ import com.android.server.wm.flicker.rules.RemoveAllTasksButHomeRule.Companion.r
 import com.android.server.wm.flicker.testapp.ActivityOptions
 import com.android.wm.shell.flicker.BaseTest
 
-abstract class PipTransition(testSpec: FlickerTestParameter) : BaseTest(testSpec) {
+abstract class PipTransition(flicker: FlickerTest) : BaseTest(flicker) {
     protected val pipApp = PipAppHelper(instrumentation)
-    protected val displayBounds = WindowUtils.getDisplayBounds(testSpec.startRotation)
+    protected val displayBounds = WindowUtils.getDisplayBounds(flicker.scenario.startRotation)
     protected val broadcastActionTrigger = BroadcastActionTrigger(instrumentation)
 
     // Helper class to process test actions by broadcast.
