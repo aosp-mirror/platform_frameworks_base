@@ -585,6 +585,7 @@ public class TvInteractiveAppView extends ViewGroup {
      *
      * @param recordingId The ID of the recording started. This ID is created and maintained by the
      *                    TV app and is used to identify the recording in the future.
+     * @see TvInteractiveAppView#notifyRecordingStopped(String)
      */
     public void notifyRecordingStarted(@NonNull String recordingId) {
         if (DEBUG) {
@@ -601,7 +602,6 @@ public class TvInteractiveAppView extends ViewGroup {
      * @param recordingId The ID of the recording stopped. This ID is created and maintained
      *                    by the TV app when a recording is started.
      * @see TvInteractiveAppView#notifyRecordingStarted(String)
-     * @hide
      */
     public void notifyRecordingStopped(@NonNull String recordingId) {
         if (DEBUG) {
