@@ -358,7 +358,7 @@ fun CreationSelectionCard(
   Card() {
     Column() {
       Icon(
-        bitmap = createOptionInfo.credentialTypeIcon.toBitmap().asImageBitmap(),
+        bitmap = providerInfo.icon.toBitmap().asImageBitmap(),
         contentDescription = null,
         tint = Color.Unspecified,
         modifier = Modifier.align(alignment = Alignment.CenterHorizontally).padding(all = 24.dp)
@@ -377,18 +377,14 @@ fun CreationSelectionCard(
           .align(alignment = Alignment.CenterHorizontally),
         textAlign = TextAlign.Center,
       )
-      Text(
-        text = requestDisplayInfo.appDomainName,
-        style = MaterialTheme.typography.bodyMedium,
-        modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
-      )
       if (createOptionInfo.userProviderDisplayName != null) {
         Text(
           text = stringResource(
             R.string.choose_create_option_description,
+            requestDisplayInfo.appDomainName,
             when (requestDisplayInfo.type) {
-              TYPE_PUBLIC_KEY_CREDENTIAL -> stringResource(R.string.passkeys)
-              TYPE_PASSWORD_CREDENTIAL -> stringResource(R.string.passwords)
+              TYPE_PUBLIC_KEY_CREDENTIAL -> stringResource(R.string.passkey)
+              TYPE_PASSWORD_CREDENTIAL -> stringResource(R.string.password)
               else -> stringResource(R.string.sign_ins)
             },
             providerInfo.displayName,
@@ -471,7 +467,7 @@ fun PrimaryCreateOptionRow(
     icon = {
       Image(modifier = Modifier.size(24.dp, 24.dp).padding(start = 10.dp),
         bitmap = createOptionInfo.credentialTypeIcon.toBitmap().asImageBitmap(),
-        contentDescription = stringResource(R.string.createOptionInfo_icon_description))
+        contentDescription = null)
     },
     shape = MaterialTheme.shapes.large,
     label = {
@@ -502,9 +498,9 @@ fun MoreOptionsInfoRow(
         modifier = Modifier.fillMaxWidth(),
         onClick = onOptionSelected,
         icon = {
-            Image(modifier = Modifier.size(24.dp, 24.dp).padding(start = 10.dp),
-                bitmap = createOptionInfo.credentialTypeIcon.toBitmap().asImageBitmap(),
-                contentDescription = stringResource(R.string.createOptionInfo_icon_description))
+            Image(modifier = Modifier.size(32.dp, 32.dp).padding(start = 10.dp),
+                bitmap = providerInfo.icon.toBitmap().asImageBitmap(),
+                contentDescription = null)
         },
         shape = MaterialTheme.shapes.large,
         label = {

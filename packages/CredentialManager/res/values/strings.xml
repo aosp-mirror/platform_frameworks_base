@@ -21,15 +21,14 @@
   <string name="use_provider_for_all_title">Use <xliff:g id="providerInfoDisplayName">%1$s</xliff:g> for all your sign-ins?</string>
   <string name="set_as_default">Set as default</string>
   <string name="use_once">Use once</string>
-  <string name="choose_create_option_description">You can use saved <xliff:g id="type">%1$s</xliff:g> on any device. It will be saved to <xliff:g id="providerInfoDisplayName">%2$s</xliff:g> for <xliff:g id="createInfoDisplayName">%3$s</xliff:g></string>
+  <string name="choose_create_option_description">You can use your <xliff:g id="appDomainName">%1$s</xliff:g> <xliff:g id="type">%2$s</xliff:g> on any device. It is saved to <xliff:g id="providerInfoDisplayName">%3$s</xliff:g> for <xliff:g id="createInfoDisplayName">%4$s</xliff:g></string>
   <string name="more_options_usage_passwords_passkeys"><xliff:g id="passwordsNumber">%1$s</xliff:g> passwords, <xliff:g id="passkeysNumber">%2$s</xliff:g> passkeys</string>
   <string name="more_options_usage_passwords"><xliff:g id="passwordsNumber">%1$s</xliff:g> passwords</string>
   <string name="more_options_usage_passkeys"><xliff:g id="passkeysNumber">%1$s</xliff:g> passkeys</string>
-  <string name="passkeys">passkeys</string>
-  <string name="passwords">passwords</string>
+  <string name="passkey">passkey</string>
+  <string name="password">password</string>
   <string name="sign_ins">sign-ins</string>
   <string name="other_password_manager">Other password manager</string>
-  <string name="createOptionInfo_icon_description">CreateOptionInfo credentialType icon</string>
   <!-- Spoken content description of an element which will close the sheet when clicked. -->
   <string name="close_sheet">"Close sheet"</string>
   <!-- Spoken content description of the back arrow button. -->

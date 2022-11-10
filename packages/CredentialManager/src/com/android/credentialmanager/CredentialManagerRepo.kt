@@ -172,7 +172,7 @@ class CredentialManagerRepo(
   private fun testCreateCredentialEnabledProviderList(): List<CreateCredentialProviderData> {
     return listOf(
       CreateCredentialProviderData
-        .Builder("com.google/com.google.CredentialManagerService")
+        .Builder("io.enpass.app")
         .setSaveEntries(
           listOf<Entry>(
             newCreateEntry("key1", "subkey-1", "elisa.beckett@gmail.com",
@@ -184,7 +184,7 @@ class CredentialManagerRepo(
         .setIsDefaultProvider(true)
         .build(),
       CreateCredentialProviderData
-        .Builder("com.dashlane/com.dashlane.CredentialManagerService")
+        .Builder("com.dashlane")
         .setSaveEntries(
           listOf<Entry>(
             newCreateEntry("key1", "subkey-3", "elisa.beckett@dashlane.com",
@@ -199,8 +199,8 @@ class CredentialManagerRepo(
 
   private fun testDisabledProviderList(): List<DisabledProviderData> {
     return listOf(
-      DisabledProviderData("LastPass"),
-      DisabledProviderData("Xyzinstalledbutdisabled"),
+      DisabledProviderData("com.lastpass.lpandroid"),
+      DisabledProviderData("com.google.android.youtube")
     )
   }
 
