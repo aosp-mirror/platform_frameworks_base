@@ -124,7 +124,6 @@ import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.animation.LaunchAnimator;
 import com.android.systemui.biometrics.AuthController;
-import com.android.systemui.camera.CameraGestureHelper;
 import com.android.systemui.classifier.Classifier;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dagger.qualifiers.DisplayId;
@@ -464,7 +463,6 @@ public final class NotificationPanelViewController implements Dumpable {
     private boolean mCollapsedOnDown;
     private boolean mClosingWithAlphaFadeOut;
     private boolean mHeadsUpAnimatingAway;
-    private boolean mLaunchingAffordance;
     private final FalsingManager mFalsingManager;
     private final FalsingCollector mFalsingCollector;
 
@@ -615,7 +613,6 @@ public final class NotificationPanelViewController implements Dumpable {
     private final NotificationListContainer mNotificationListContainer;
     private final NotificationStackSizeCalculator mNotificationStackSizeCalculator;
     private final NPVCDownEventState.Buffer mLastDownEvents;
-    private final CameraGestureHelper mCameraGestureHelper;
     private final KeyguardBottomAreaViewModel mKeyguardBottomAreaViewModel;
     private final KeyguardBottomAreaInteractor mKeyguardBottomAreaInteractor;
     private float mMinExpandHeight;
@@ -743,7 +740,6 @@ public final class NotificationPanelViewController implements Dumpable {
             UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
             ShadeTransitionController shadeTransitionController,
             SystemClock systemClock,
-            CameraGestureHelper cameraGestureHelper,
             KeyguardBottomAreaViewModel keyguardBottomAreaViewModel,
             KeyguardBottomAreaInteractor keyguardBottomAreaInteractor,
             DumpManager dumpManager) {
@@ -924,7 +920,6 @@ public final class NotificationPanelViewController implements Dumpable {
                         unlockAnimationStarted(playingCannedAnimation, isWakeAndUnlock, startDelay);
                     }
                 });
-        mCameraGestureHelper = cameraGestureHelper;
         mKeyguardBottomAreaInteractor = keyguardBottomAreaInteractor;
         dumpManager.registerDumpable(this);
     }
@@ -3946,6 +3941,10 @@ public final class NotificationPanelViewController implements Dumpable {
         }
     }
 
+    public int getBarState() {
+        return mBarState;
+    }
+
     private boolean isOnKeyguard() {
         return mBarState == KEYGUARD;
     }
@@ -3989,35 +3988,6 @@ public final class NotificationPanelViewController implements Dumpable {
     private boolean isPanelVisibleBecauseOfHeadsUp() {
         return (mHeadsUpManager.hasPinnedHeadsUp() || mHeadsUpAnimatingAway)
                 && mBarState == StatusBarState.SHADE;
-    }
-
-    /** Launches the camera. */
-    public void launchCamera(int source) {
-        if (!isFullyCollapsed()) {
-            setLaunchingAffordance(true);
-        }
-
-        mCameraGestureHelper.launchCamera(source);
-    }
-
-    public void onAffordanceLaunchEnded() {
-        setLaunchingAffordance(false);
-    }
-
-    /** Set whether we are currently launching an affordance (i.e. camera gesture). */
-    private void setLaunchingAffordance(boolean launchingAffordance) {
-        mLaunchingAffordance = launchingAffordance;
-        mKeyguardBypassController.setLaunchingAffordance(launchingAffordance);
-    }
-
-    /** Returns whether a bottom affordance is launching an occluded activity with splash screen. */
-    public boolean isLaunchingAffordanceWithPreview() {
-        return mLaunchingAffordance;
-    }
-
-    /** Whether the camera application can be launched by the camera launch gesture. */
-    public boolean canCameraGestureBeLaunched() {
-        return mCameraGestureHelper.canCameraGestureBeLaunched(mBarState);
     }
 
     public boolean hideStatusBarIconsWhenExpanded() {
@@ -4358,7 +4328,6 @@ public final class NotificationPanelViewController implements Dumpable {
         ipw.print("mCollapsedOnDown="); ipw.println(mCollapsedOnDown);
         ipw.print("mClosingWithAlphaFadeOut="); ipw.println(mClosingWithAlphaFadeOut);
         ipw.print("mHeadsUpAnimatingAway="); ipw.println(mHeadsUpAnimatingAway);
-        ipw.print("mLaunchingAffordance="); ipw.println(mLaunchingAffordance);
         ipw.print("mShowIconsWhenExpanded="); ipw.println(mShowIconsWhenExpanded);
         ipw.print("mIndicationBottomPadding="); ipw.println(mIndicationBottomPadding);
         ipw.print("mAmbientIndicationBottomPadding="); ipw.println(mAmbientIndicationBottomPadding);
