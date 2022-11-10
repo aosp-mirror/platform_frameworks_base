@@ -604,9 +604,7 @@ public final class UserVisibilityMediator implements Dumpable {
             ipw.println(mCurrentUserId);
 
             ipw.print("Visible users: ");
-            // TODO: merge 2 lines below if/when IntArray implements toString()...
-            IntArray visibleUsers = getVisibleUsers();
-            ipw.println(java.util.Arrays.toString(visibleUsers.toArray()));
+            ipw.println(getVisibleUsers());
 
             dumpSparseIntArray(ipw, mStartedProfileGroupIds, "started user / profile group",
                     "u", "pg");
