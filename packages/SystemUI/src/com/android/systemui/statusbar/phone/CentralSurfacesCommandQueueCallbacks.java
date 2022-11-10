@@ -55,6 +55,7 @@ import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.qs.QSPanelController;
+import com.android.systemui.shade.CameraLauncher;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.CommandQueue;
@@ -70,6 +71,8 @@ import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import java.util.Optional;
 
 import javax.inject.Inject;
+
+import dagger.Lazy;
 
 /** */
 @CentralSurfacesComponent.CentralSurfacesScope
@@ -99,6 +102,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
     private final boolean mVibrateOnOpening;
     private final VibrationEffect mCameraLaunchGestureVibrationEffect;
     private final SystemBarAttributesListener mSystemBarAttributesListener;
+    private final Lazy<CameraLauncher> mCameraLauncherLazy;
 
     private static final VibrationAttributes HARDWARE_FEEDBACK_VIBRATION_ATTRIBUTES =
             VibrationAttributes.createForUsage(VibrationAttributes.USAGE_HARDWARE_FEEDBACK);
@@ -128,8 +132,8 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
             Optional<Vibrator> vibratorOptional,
             DisableFlagsLogger disableFlagsLogger,
             @DisplayId int displayId,
-            SystemBarAttributesListener systemBarAttributesListener) {
-
+            SystemBarAttributesListener systemBarAttributesListener,
+            Lazy<CameraLauncher> cameraLauncherLazy) {
         mCentralSurfaces = centralSurfaces;
         mContext = context;
         mShadeController = shadeController;
@@ -152,6 +156,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
         mVibratorOptional = vibratorOptional;
         mDisableFlagsLogger = disableFlagsLogger;
         mDisplayId = displayId;
+        mCameraLauncherLazy = cameraLauncherLazy;
 
         mVibrateOnOpening = resources.getBoolean(R.bool.config_vibrateOnIconAnimation);
         mCameraLaunchGestureVibrationEffect = getCameraGestureVibrationEffect(
@@ -346,7 +351,8 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
             mCentralSurfaces.setLaunchCameraOnFinishedGoingToSleep(true);
             return;
         }
-        if (!mNotificationPanelViewController.canCameraGestureBeLaunched()) {
+        if (!mCameraLauncherLazy.get().canCameraGestureBeLaunched(
+                mNotificationPanelViewController.getBarState())) {
             if (CentralSurfaces.DEBUG_CAMERA_LIFT) {
                 Slog.d(CentralSurfaces.TAG, "Can't launch camera right now");
             }
@@ -383,7 +389,8 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
                 if (mStatusBarKeyguardViewManager.isBouncerShowing()) {
                     mStatusBarKeyguardViewManager.reset(true /* hide */);
                 }
-                mNotificationPanelViewController.launchCamera(source);
+                mCameraLauncherLazy.get().launchCamera(source,
+                        mNotificationPanelViewController.isFullyCollapsed());
                 mCentralSurfaces.updateScrimController();
             } else {
                 // We need to defer the camera launch until the screen comes on, since otherwise
