@@ -438,6 +438,14 @@ public class AudioSystem
                 return "AUDIO_FORMAT_APTX_TWSP";
             case /* AUDIO_FORMAT_LC3             */ 0x2B000000:
                 return "AUDIO_FORMAT_LC3";
+            case /* AUDIO_FORMAT_MPEGH           */ 0x2C000000:
+                return "AUDIO_FORMAT_MPEGH";
+            case /* AUDIO_FORMAT_IEC60958        */ 0x2D000000:
+                return "AUDIO_FORMAT_IEC60958";
+            case /* AUDIO_FORMAT_DTS_UHD         */ 0x2E000000:
+                return "AUDIO_FORMAT_DTS_UHD";
+            case /* AUDIO_FORMAT_DRA             */ 0x2F000000:
+                return "AUDIO_FORMAT_DRA";
 
             /* Aliases */
             case /* AUDIO_FORMAT_PCM_16_BIT        */ 0x1:
@@ -510,10 +518,14 @@ public class AudioSystem
                 return "AUDIO_FORMAT_MAT_2_0"; // (MAT | MAT_SUB_2_0)
             case /* AUDIO_FORMAT_MAT_2_1           */ 0x24000003:
                 return "AUDIO_FORMAT_MAT_2_1"; // (MAT | MAT_SUB_2_1)
-            case /* AUDIO_FORMAT_DTS_UHD */           0x2E000000:
-                return "AUDIO_FORMAT_DTS_UHD";
-            case /* AUDIO_FORMAT_DRA */           0x2F000000:
-                return "AUDIO_FORMAT_DRA";
+            case /* AUDIO_FORMAT_MPEGH_SUB_BL_L3   */ 0x2C000013:
+                return "AUDIO_FORMAT_MPEGH_SUB_BL_L3";
+            case /* AUDIO_FORMAT_MPEGH_SUB_BL_L4   */ 0x2C000014:
+                return "AUDIO_FORMAT_MPEGH_SUB_BL_L4";
+            case /* AUDIO_FORMAT_MPEGH_SUB_LC_L3   */ 0x2C000023:
+                return "AUDIO_FORMAT_MPEGH_SUB_LC_L3";
+            case /* AUDIO_FORMAT_MPEGH_SUB_LC_L4   */ 0x2C000024:
+                return "AUDIO_FORMAT_MPEGH_SUB_LC_L4";
             default:
                 return "AUDIO_FORMAT_(" + audioFormat + ")";
         }
@@ -2407,4 +2419,3 @@ public class AudioSystem
      */
     final static int NATIVE_EVENT_ROUTING_CHANGE = 1000;
 }
-
