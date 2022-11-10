@@ -23,6 +23,7 @@ import android.credentials.ui.GetCredentialProviderData
 import android.credentials.ui.CreateCredentialProviderData
 import android.credentials.ui.DisabledProviderData
 import com.android.credentialmanager.createflow.CreateOptionInfo
+import com.android.credentialmanager.createflow.RemoteInfo
 import com.android.credentialmanager.getflow.ActionEntryInfo
 import com.android.credentialmanager.getflow.AuthenticationEntryInfo
 import com.android.credentialmanager.getflow.CredentialEntryInfo
@@ -120,6 +121,7 @@ class CreateFlowUtils {
           displayName = pkgInfo.applicationInfo.loadLabel(packageManager).toString(),
           createOptions = toCreationOptionInfoList(it.saveEntries, context),
           isDefault = it.isDefaultProvider,
+          remoteEntry = toRemoteInfo(it.remoteEntry),
         )
       }
     }
@@ -163,6 +165,18 @@ class CreateFlowUtils {
           lastUsedTimeMillis = saveEntryUi.lastUsedTimeMillis ?: 0,
         )
       }
+    }
+
+    private fun toRemoteInfo(
+      remoteEntry: Entry?,
+    ): RemoteInfo? {
+      // TODO: should also call fromSlice after getting the official jetpack code.
+      return if (remoteEntry != null) {
+        RemoteInfo(
+          entryKey = remoteEntry.key,
+          entrySubkey = remoteEntry.subkey,
+        )
+      } else null
     }
   }
 }

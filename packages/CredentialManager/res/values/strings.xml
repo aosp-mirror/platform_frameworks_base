@@ -28,6 +28,7 @@
   <string name="passkey">passkey</string>
   <string name="password">password</string>
   <string name="sign_ins">sign-ins</string>
+  <string name="another_device">Another device</string>
   <string name="other_password_manager">Other password manager</string>
   <!-- Spoken content description of an element which will close the sheet when clicked. -->
   <string name="close_sheet">"Close sheet"</string>

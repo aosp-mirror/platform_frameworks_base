@@ -181,6 +181,9 @@ class CredentialManagerRepo(
               20, 7, 27, 11000),
           )
         )
+        .setRemoteEntry(
+          newRemoteEntry("key1", "subkey-1")
+        )
         .setIsDefaultProvider(true)
         .build(),
       CreateCredentialProviderData
@@ -305,6 +308,19 @@ class CredentialManagerRepo(
       key,
       subkey,
       slice
+    )
+  }
+
+  private fun newRemoteEntry(
+    key: String,
+    subkey: String,
+  ): Entry {
+    return Entry(
+      key,
+      subkey,
+      Slice.Builder(
+        Entry.CREDENTIAL_MANAGER_ENTRY_URI, SliceSpec(Entry.VERSION, 1)
+      ).build()
     )
   }
 

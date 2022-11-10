@@ -29,7 +29,7 @@ import com.android.credentialmanager.common.ResultState
 
 data class CreatePasskeyUiState(
   val enabledProviders: List<EnabledProviderInfo>,
-  val disabledProviders: List<DisabledProviderInfo>,
+  val disabledProviders: List<DisabledProviderInfo>? = null,
   val currentScreenState: CreateScreenState,
   val requestDisplayInfo: RequestDisplayInfo,
   val activeEntry: ActiveEntry? = null,
@@ -100,6 +100,10 @@ class CreatePasskeyViewModel(
   }
 
   fun onDisabledPasswordManagerSelected() {
+    // TODO: Complete this function
+  }
+
+  fun onRemoteEntrySelected() {
     // TODO: Complete this function
   }
 

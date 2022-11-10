@@ -131,6 +131,13 @@ public class CreateCredentialProviderData extends ProviderData implements Parcel
             return this;
         }
 
+        /** Sets the remote entry of the provider. */
+        @NonNull
+        public Builder setRemoteEntry(@Nullable Entry remoteEntry) {
+            mRemoteEntry = remoteEntry;
+            return this;
+        }
+
         /** Builds a {@link CreateCredentialProviderData}. */
         @NonNull
         public CreateCredentialProviderData build() {

@@ -80,7 +80,8 @@ fun CreatePasskeyScreen(
             disabledProviderList = uiState.disabledProviders,
             onBackButtonSelected = viewModel::onBackButtonSelected,
             onOptionSelected = viewModel::onMoreOptionsRowSelected,
-            onDisabledPasswordManagerSelected = viewModel::onDisabledPasswordManagerSelected
+            onDisabledPasswordManagerSelected = viewModel::onDisabledPasswordManagerSelected,
+            onRemoteEntrySelected = viewModel::onRemoteEntrySelected
           )
         CreateScreenState.MORE_OPTIONS_ROW_INTRO -> MoreOptionsRowIntroCard(
           providerInfo = uiState.activeEntry?.activeProvider!!,
@@ -216,10 +217,11 @@ fun ProviderSelectionCard(
 fun MoreOptionsSelectionCard(
   requestDisplayInfo: RequestDisplayInfo,
   enabledProviderList: List<EnabledProviderInfo>,
-  disabledProviderList: List<DisabledProviderInfo>,
+  disabledProviderList: List<DisabledProviderInfo>?,
   onBackButtonSelected: () -> Unit,
   onOptionSelected: (ActiveEntry) -> Unit,
   onDisabledPasswordManagerSelected: () -> Unit,
+  onRemoteEntrySelected: () -> Unit,
 ) {
   Card() {
     Column() {
@@ -267,11 +269,26 @@ fun MoreOptionsSelectionCard(
               }
             }
           }
-          item {
-            MoreOptionsDisabledProvidersRow(
-              disabledProviders = disabledProviderList,
-              onDisabledPasswordManagerSelected = onDisabledPasswordManagerSelected,
-            )
+          if (disabledProviderList != null) {
+            item {
+              MoreOptionsDisabledProvidersRow(
+                disabledProviders = disabledProviderList,
+                onDisabledPasswordManagerSelected = onDisabledPasswordManagerSelected,
+              )
+            }
+          }
+          var hasRemoteInfo = false
+          enabledProviderList.forEach {
+            if (it.remoteEntry != null) {
+              hasRemoteInfo = true
+            }
+          }
+          if (hasRemoteInfo) {
+            item {
+              RemoteEntryRow(
+                onRemoteEntrySelected = onRemoteEntrySelected,
+              )
+            }
           }
         }
       }
@@ -498,7 +515,7 @@ fun MoreOptionsInfoRow(
         modifier = Modifier.fillMaxWidth(),
         onClick = onOptionSelected,
         icon = {
-            Image(modifier = Modifier.size(32.dp, 32.dp).padding(start = 10.dp),
+            Image(modifier = Modifier.size(32.dp, 32.dp).padding(start = 16.dp),
                 bitmap = providerInfo.icon.toBitmap().asImageBitmap(),
                 contentDescription = null)
         },
@@ -508,12 +525,14 @@ fun MoreOptionsInfoRow(
               Text(
                   text = providerInfo.displayName,
                   style = MaterialTheme.typography.titleLarge,
-                  modifier = Modifier.padding(top = 16.dp)
+                  modifier = Modifier.padding(top = 16.dp, start = 16.dp)
               )
             if (createOptionInfo.userProviderDisplayName != null) {
               Text(
                 text = createOptionInfo.userProviderDisplayName,
-                style = MaterialTheme.typography.bodyMedium)
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(start = 16.dp)
+              )
             }
             if (createOptionInfo.passwordCount != null && createOptionInfo.passkeyCount != null) {
               Text(
@@ -524,7 +543,7 @@ fun MoreOptionsInfoRow(
                     createOptionInfo.passkeyCount
                   ),
                 style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(bottom = 16.dp)
+                modifier = Modifier.padding(bottom = 16.dp, start = 16.dp)
               )
             } else if (createOptionInfo.passwordCount != null) {
               Text(
@@ -534,7 +553,7 @@ fun MoreOptionsInfoRow(
                   createOptionInfo.passwordCount
                 ),
                 style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(bottom = 16.dp)
+                modifier = Modifier.padding(bottom = 16.dp, start = 16.dp)
               )
             } else if (createOptionInfo.passkeyCount != null) {
               Text(
@@ -544,7 +563,7 @@ fun MoreOptionsInfoRow(
                   createOptionInfo.passkeyCount
                 ),
                 style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(bottom = 16.dp)
+                modifier = Modifier.padding(bottom = 16.dp, start = 16.dp)
               )
             } else if (createOptionInfo.totalCredentialCount != null) {
               // TODO: Handle the case when there is total count
@@ -567,7 +586,8 @@ fun MoreOptionsDisabledProvidersRow(
     icon = {
       Icon(
         Icons.Filled.Add,
-        contentDescription = null
+        contentDescription = null,
+        modifier = Modifier.padding(start = 16.dp)
       )
     },
     shape = MaterialTheme.shapes.large,
@@ -576,12 +596,42 @@ fun MoreOptionsDisabledProvidersRow(
         Text(
           text = stringResource(R.string.other_password_manager),
           style = MaterialTheme.typography.titleLarge,
-          modifier = Modifier.padding(top = 16.dp)
+          modifier = Modifier.padding(top = 16.dp, start = 16.dp)
         )
         Text(
           text = disabledProviders.joinToString(separator = ", "){ it.displayName },
           style = MaterialTheme.typography.bodyMedium,
-          modifier = Modifier.padding(bottom = 16.dp)
+          modifier = Modifier.padding(bottom = 16.dp, start = 16.dp)
+        )
+      }
+    }
+  )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun RemoteEntryRow(
+  onRemoteEntrySelected: () -> Unit,
+) {
+  SuggestionChip(
+    modifier = Modifier.fillMaxWidth(),
+    onClick = onRemoteEntrySelected,
+    icon = {
+      Icon(
+        painter = painterResource(R.drawable.ic_other_devices),
+        contentDescription = null,
+        tint = Color.Unspecified,
+        modifier = Modifier.padding(start = 18.dp)
+      )
+    },
+    shape = MaterialTheme.shapes.large,
+    label = {
+      Column() {
+        Text(
+          text = stringResource(R.string.another_device),
+          style = MaterialTheme.typography.titleLarge,
+          modifier = Modifier.padding(start = 16.dp, top = 18.dp, bottom = 18.dp)
+            .align(alignment = Alignment.CenterHorizontally)
         )
       }
     }
