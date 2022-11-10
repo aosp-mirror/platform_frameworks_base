@@ -16,31 +16,59 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.util
 
+import android.telephony.TelephonyDisplayInfo
 import com.android.settingslib.SignalIcon.MobileIconGroup
 import com.android.settingslib.mobile.MobileMappings.Config
 import com.android.settingslib.mobile.TelephonyIcons
 
 class FakeMobileMappingsProxy : MobileMappingsProxy {
+    // The old [NetworkControllerDataTest] infra requires us to be able to use the real
+    // impl sometimes
+    var useRealImpl = false
+
+    private var realImpl = MobileMappingsProxyImpl()
     private var iconMap = mapOf<String, MobileIconGroup>()
     private var defaultIcons = TelephonyIcons.THREE_G
 
     fun setIconMap(map: Map<String, MobileIconGroup>) {
         iconMap = map
     }
-    override fun mapIconSets(config: Config): Map<String, MobileIconGroup> = iconMap
+    override fun mapIconSets(config: Config): Map<String, MobileIconGroup> {
+        if (useRealImpl) {
+            return realImpl.mapIconSets(config)
+        }
+        return iconMap
+    }
     fun getIconMap() = iconMap
 
     fun setDefaultIcons(group: MobileIconGroup) {
         defaultIcons = group
     }
-    override fun getDefaultIcons(config: Config): MobileIconGroup = defaultIcons
+    override fun getDefaultIcons(config: Config): MobileIconGroup {
+        if (useRealImpl) {
+            return realImpl.getDefaultIcons(config)
+        }
+        return defaultIcons
+    }
+
+    /** This is only used in the old pipeline, use the real impl always */
+    override fun getIconKey(displayInfo: TelephonyDisplayInfo): String {
+        return realImpl.getIconKey(displayInfo)
+    }
+
     fun getDefaultIcons(): MobileIconGroup = defaultIcons
 
     override fun toIconKey(networkType: Int): String {
+        if (useRealImpl) {
+            return realImpl.toIconKeyOverride(networkType)
+        }
         return networkType.toString()
     }
 
     override fun toIconKeyOverride(networkType: Int): String {
+        if (useRealImpl) {
+            return realImpl.toIconKeyOverride(networkType)
+        }
         return toIconKey(networkType) + "_override"
     }
 }
