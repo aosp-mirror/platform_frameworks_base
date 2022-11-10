@@ -366,6 +366,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @GuardedBy("mLock")
     private boolean mStageDirInUse = false;
 
+    /**
+     * True if the installation is already in progress. This is used to prevent the caller
+     * from {@link #commit(IntentSender, boolean) committing} the session again while the
+     * installation is still in progress.
+     */
+    @GuardedBy("mLock")
+    private boolean mInstallationInProgress = false;
+
     /** Permissions have been accepted by the user (see {@link #setPermissionsResult}) */
     @GuardedBy("mLock")
     private boolean mPermissionsManuallyAccepted = false;
@@ -1659,6 +1667,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     return;
                 }
             }
+        }
+
+        synchronized (mLock) {
+            if (mInstallationInProgress) {
+                throw new IllegalStateException("Installation is already in progress. Don't "
+                        + "commit session=" + sessionId + " again.");
+            }
+            mInstallationInProgress = true;
         }
 
         dispatchSessionSealed();
