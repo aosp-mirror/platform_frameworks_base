@@ -29,6 +29,7 @@ import static android.os.Process.PACKAGE_INFO_GID;
 import static android.os.Process.SYSTEM_UID;
 
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
+import static com.android.server.pm.PackageManagerService.WRITE_USER_PACKAGE_RESTRICTIONS;
 import static com.android.server.pm.SharedUidMigration.BEST_EFFORT;
 
 import android.annotation.NonNull;
@@ -56,7 +57,6 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.CreateAppDataArgs;
-import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.Message;
@@ -374,6 +374,13 @@ public final class Settings implements Watchable, Snappable {
     private final File mBackupStoppedPackagesFilename;
     /** The top level directory in configfs for sdcardfs to push the package->uid,userId mappings */
     private final File mKernelMappingFilename;
+
+    // Lock for user package restrictions operations.
+    private final Object mPackageRestrictionsLock = new Object();
+
+    // Pending write operations.
+    @GuardedBy("mPackageRestrictionsLock")
+    private final SparseIntArray mPendingAsyncPackageRestrictionsWrites = new SparseIntArray();
 
     /** Map from package name to settings */
     @Watched
@@ -1469,31 +1476,46 @@ public final class Settings implements Watchable, Snappable {
         return (userId == UserHandle.USER_ALL) ? null : mDefaultBrowserApp.removeReturnOld(userId);
     }
 
-    private File getUserPackagesStateFile(int userId) {
-        // TODO: Implement a cleaner solution when adding tests.
+    private File getUserSystemDirectory(int userId) {
         // This instead of Environment.getUserSystemDirectory(userId) to support testing.
-        File userDir = new File(new File(mSystemDir, "users"), Integer.toString(userId));
-        return new File(userDir, "package-restrictions.xml");
+        return new File(new File(mSystemDir, "users"), Integer.toString(userId));
+    }
+
+    // The method itself does not have to be guarded, but the file does.
+    @GuardedBy("mPackageRestrictionsLock")
+    private File getUserPackagesStateFile(int userId) {
+        return new File(getUserSystemDirectory(userId), "package-restrictions.xml");
+    }
+
+    // The method itself does not have to be guarded, but the file does.
+    @GuardedBy("mPackageRestrictionsLock")
+    private File getUserPackagesStateBackupFile(int userId) {
+        return new File(getUserSystemDirectory(userId), "package-restrictions-backup.xml");
     }
 
     private File getUserRuntimePermissionsFile(int userId) {
-        // TODO: Implement a cleaner solution when adding tests.
-        // This instead of Environment.getUserSystemDirectory(userId) to support testing.
-        File userDir = new File(new File(mSystemDir, "users"), Integer.toString(userId));
-        return new File(userDir, RUNTIME_PERMISSIONS_FILE_NAME);
+        return new File(getUserSystemDirectory(userId), RUNTIME_PERMISSIONS_FILE_NAME);
     }
 
-    private File getUserPackagesStateBackupFile(int userId) {
-        return new File(Environment.getUserSystemDirectory(userId),
-                "package-restrictions-backup.xml");
-    }
-
+    // Default version is writing restrictions asynchronously.
     void writeAllUsersPackageRestrictionsLPr() {
+        writeAllUsersPackageRestrictionsLPr(/*sync=*/false);
+    }
+
+    void writeAllUsersPackageRestrictionsLPr(boolean sync) {
         List<UserInfo> users = getAllUsers(UserManagerService.getInstance());
         if (users == null) return;
 
+        if (sync) {
+            // Cancel all pending per-user writes.
+            synchronized (mPackageRestrictionsLock) {
+                mPendingAsyncPackageRestrictionsWrites.clear();
+            }
+            mHandler.removeMessages(WRITE_USER_PACKAGE_RESTRICTIONS);
+        }
+
         for (UserInfo user : users) {
-            writePackageRestrictionsLPr(user.id);
+            writePackageRestrictionsLPr(user.id, sync);
         }
     }
 
@@ -1684,63 +1706,75 @@ public final class Settings implements Watchable, Snappable {
             Log.i(TAG, "Reading package restrictions for user=" + userId);
         }
         FileInputStream str = null;
-        File userPackagesStateFile = getUserPackagesStateFile(userId);
-        File backupFile = getUserPackagesStateBackupFile(userId);
-        if (backupFile.exists()) {
-            try {
-                str = new FileInputStream(backupFile);
-                mReadMessages.append("Reading from backup stopped packages file\n");
-                PackageManagerService.reportSettingsProblem(Log.INFO,
-                        "Need to read from backup stopped packages file");
-                if (userPackagesStateFile.exists()) {
-                    // If both the backup and normal file exist, we
-                    // ignore the normal one since it might have been
-                    // corrupted.
-                    Slog.w(PackageManagerService.TAG, "Cleaning up stopped packages file "
-                            + userPackagesStateFile);
-                    userPackagesStateFile.delete();
+
+        synchronized (mPackageRestrictionsLock) {
+            File userPackagesStateFile = getUserPackagesStateFile(userId);
+            File backupFile = getUserPackagesStateBackupFile(userId);
+            if (backupFile.exists()) {
+                try {
+                    str = new FileInputStream(backupFile);
+                    mReadMessages.append("Reading from backup stopped packages file\n");
+                    PackageManagerService.reportSettingsProblem(Log.INFO,
+                            "Need to read from backup stopped packages file");
+                    if (userPackagesStateFile.exists()) {
+                        // If both the backup and normal file exist, we
+                        // ignore the normal one since it might have been
+                        // corrupted.
+                        Slog.w(PackageManagerService.TAG, "Cleaning up stopped packages file "
+                                + userPackagesStateFile);
+                        userPackagesStateFile.delete();
+                    }
+                } catch (java.io.IOException e) {
+                    // We'll try for the normal settings file.
                 }
-            } catch (java.io.IOException e) {
-                // We'll try for the normal settings file.
+            }
+
+            if (str == null && userPackagesStateFile.exists()) {
+                try {
+                    str = new FileInputStream(userPackagesStateFile);
+                    if (DEBUG_MU) Log.i(TAG, "Reading " + userPackagesStateFile);
+                } catch (java.io.IOException e) {
+                    mReadMessages.append("Error reading: " + e.toString());
+                    PackageManagerService.reportSettingsProblem(Log.ERROR,
+                            "Error reading settings: " + e);
+                    Slog.wtf(TAG, "Error reading package manager stopped packages", e);
+                }
             }
         }
 
-        try {
-            if (str == null) {
-                if (!userPackagesStateFile.exists()) {
-                    mReadMessages.append("No stopped packages file found\n");
-                    PackageManagerService.reportSettingsProblem(Log.INFO,
-                            "No stopped packages file; "
+        if (str == null) {
+            mReadMessages.append("No stopped packages file found\n");
+            PackageManagerService.reportSettingsProblem(Log.INFO,
+                    "No stopped packages file; "
                             + "assuming all started");
-                    // At first boot, make sure no packages are stopped.
-                    // We usually want to have third party apps initialize
-                    // in the stopped state, but not at first boot.  Also
-                    // consider all applications to be installed.
-                    for (PackageSetting pkg : mPackages.values()) {
-                        pkg.setUserState(userId, 0, COMPONENT_ENABLED_STATE_DEFAULT,
-                                true  /*installed*/,
-                                false /*stopped*/,
-                                false /*notLaunched*/,
-                                false /*hidden*/,
-                                0 /*distractionFlags*/,
-                                null /*suspendParams*/,
-                                false /*instantApp*/,
-                                false /*virtualPreload*/,
-                                null /*lastDisableAppCaller*/,
-                                null /*enabledComponents*/,
-                                null /*disabledComponents*/,
-                                PackageManager.INSTALL_REASON_UNKNOWN,
-                                PackageManager.UNINSTALL_REASON_UNKNOWN,
-                                null /*harmfulAppWarning*/,
-                                null /* splashScreenTheme*/,
-                                0 /*firstInstallTime*/
-                        );
-                    }
-                    return;
-                }
-                str = new FileInputStream(userPackagesStateFile);
-                if (DEBUG_MU) Log.i(TAG, "Reading " + userPackagesStateFile);
+            // At first boot, make sure no packages are stopped.
+            // We usually want to have third party apps initialize
+            // in the stopped state, but not at first boot.  Also
+            // consider all applications to be installed.
+            for (PackageSetting pkg : mPackages.values()) {
+                pkg.setUserState(userId, 0, COMPONENT_ENABLED_STATE_DEFAULT,
+                        true  /*installed*/,
+                        false /*stopped*/,
+                        false /*notLaunched*/,
+                        false /*hidden*/,
+                        0 /*distractionFlags*/,
+                        null /*suspendParams*/,
+                        false /*instantApp*/,
+                        false /*virtualPreload*/,
+                        null /*lastDisableAppCaller*/,
+                        null /*enabledComponents*/,
+                        null /*disabledComponents*/,
+                        PackageManager.INSTALL_REASON_UNKNOWN,
+                        PackageManager.UNINSTALL_REASON_UNKNOWN,
+                        null /*harmfulAppWarning*/,
+                        null /* splashScreenTheme*/,
+                        0 /*firstInstallTime*/
+                );
             }
+            return;
+        }
+
+        try {
             final TypedXmlPullParser parser = Xml.resolvePullParser(str);
 
             int type;
@@ -2063,179 +2097,247 @@ public final class Settings implements Watchable, Snappable {
         }
     }
 
+    // Default version is writing restrictions asynchronously.
     void writePackageRestrictionsLPr(int userId) {
+        writePackageRestrictionsLPr(userId, /*sync=*/false);
+    }
+
+    void writePackageRestrictionsLPr(int userId, boolean sync) {
         invalidatePackageCache();
 
+        final long startTime = SystemClock.uptimeMillis();
+
+        if (sync) {
+            writePackageRestrictions(userId, startTime, sync);
+        } else {
+            if (DEBUG_MU) {
+                Log.i(TAG, "Scheduling deferred IO sync for user=" + userId);
+            }
+            synchronized (mPackageRestrictionsLock) {
+                int pending = mPendingAsyncPackageRestrictionsWrites.get(userId, 0) + 1;
+                mPendingAsyncPackageRestrictionsWrites.put(userId, pending);
+            }
+            Runnable r = () -> writePackageRestrictions(userId, startTime, sync);
+            mHandler.obtainMessage(WRITE_USER_PACKAGE_RESTRICTIONS, r).sendToTarget();
+        }
+    }
+
+    void writePackageRestrictions(Integer[] userIds) {
+        invalidatePackageCache();
+        final long startTime = SystemClock.uptimeMillis();
+        for (int userId : userIds) {
+            writePackageRestrictions(userId, startTime, /*sync=*/true);
+        }
+    }
+
+    void writePackageRestrictions(int userId, long startTime, boolean sync) {
         if (DEBUG_MU) {
             Log.i(TAG, "Writing package restrictions for user=" + userId);
         }
-        final long startTime = SystemClock.uptimeMillis();
 
-        // Keep the old stopped packages around until we know the new ones have
-        // been successfully written.
-        File userPackagesStateFile = getUserPackagesStateFile(userId);
-        File backupFile = getUserPackagesStateBackupFile(userId);
-        new File(userPackagesStateFile.getParent()).mkdirs();
-        if (userPackagesStateFile.exists()) {
-            // Presence of backup settings file indicates that we failed
-            // to persist packages earlier. So preserve the older
-            // backup for future reference since the current packages
-            // might have been corrupted.
-            if (!backupFile.exists()) {
-                if (!userPackagesStateFile.renameTo(backupFile)) {
-                    Slog.wtf(PackageManagerService.TAG,
-                            "Unable to backup user packages state file, "
-                            + "current changes will be lost at reboot");
+        final File userPackagesStateFile;
+        final File backupFile;
+        final FileOutputStream fstr;
+
+        synchronized (mPackageRestrictionsLock) {
+            if (!sync) {
+                int pending = mPendingAsyncPackageRestrictionsWrites.get(userId, 0) - 1;
+                if (pending < 0) {
+                    Log.i(TAG, "Cancel writing package restrictions for user=" + userId);
                     return;
                 }
-            } else {
-                userPackagesStateFile.delete();
-                Slog.w(PackageManagerService.TAG, "Preserving older stopped packages backup");
+                mPendingAsyncPackageRestrictionsWrites.put(userId, pending);
+            }
+
+            // Keep the old stopped packages around until we know the new ones have
+            // been successfully written.
+            userPackagesStateFile = getUserPackagesStateFile(userId);
+            backupFile = getUserPackagesStateBackupFile(userId);
+            new File(userPackagesStateFile.getParent()).mkdirs();
+            if (userPackagesStateFile.exists()) {
+                // Presence of backup settings file indicates that we failed
+                // to persist packages earlier. So preserve the older
+                // backup for future reference since the current packages
+                // might have been corrupted.
+                if (!backupFile.exists()) {
+                    if (!userPackagesStateFile.renameTo(backupFile)) {
+                        Slog.wtf(PackageManagerService.TAG,
+                                "Unable to backup user packages state file, "
+                                        + "current changes will be lost at reboot");
+                        return;
+                    }
+                } else {
+                    userPackagesStateFile.delete();
+                    Slog.w(PackageManagerService.TAG, "Preserving older stopped packages backup");
+                }
+            }
+
+            try {
+                fstr = new FileOutputStream(userPackagesStateFile);
+                // File is created, set permissions.
+                FileUtils.setPermissions(userPackagesStateFile.toString(),
+                        FileUtils.S_IRUSR | FileUtils.S_IWUSR
+                                | FileUtils.S_IRGRP | FileUtils.S_IWGRP,
+                        -1, -1);
+            } catch (java.io.IOException e) {
+                Slog.wtf(PackageManagerService.TAG,
+                        "Unable to write package manager user packages state, "
+                                + " current changes will be lost at reboot", e);
+                return;
             }
         }
 
         try {
-            final FileOutputStream fstr = new FileOutputStream(userPackagesStateFile);
-            final TypedXmlSerializer serializer = Xml.resolveSerializer(fstr);
-            serializer.startDocument(null, true);
-            serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
+            synchronized (mLock) {
+                final TypedXmlSerializer serializer = Xml.resolveSerializer(fstr);
+                serializer.startDocument(null, true);
+                serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output",
+                        true);
 
-            serializer.startTag(null, TAG_PACKAGE_RESTRICTIONS);
+                serializer.startTag(null, TAG_PACKAGE_RESTRICTIONS);
 
-            if (DEBUG_MU) {
-                Slogf.i(TAG, "Writing %s (%d packages)", userPackagesStateFile,
-                        mPackages.values().size());
-            }
-            for (final PackageSetting pkg : mPackages.values()) {
-                final PackageUserStateInternal ustate = pkg.readUserState(userId);
                 if (DEBUG_MU) {
-                    Log.v(TAG, "  pkg=" + pkg.getPackageName()
-                            + ", installed=" + ustate.isInstalled()
-                            + ", state=" + ustate.getEnabledState());
+                    Slogf.i(TAG, "Writing %s (%d packages)", userPackagesStateFile,
+                            mPackages.values().size());
                 }
-
-                serializer.startTag(null, TAG_PACKAGE);
-                serializer.attribute(null, ATTR_NAME, pkg.getPackageName());
-                if (ustate.getCeDataInode() != 0) {
-                    serializer.attributeLong(null, ATTR_CE_DATA_INODE, ustate.getCeDataInode());
-                }
-                if (!ustate.isInstalled()) {
-                    serializer.attributeBoolean(null, ATTR_INSTALLED, false);
-                }
-                if (ustate.isStopped()) {
-                    serializer.attributeBoolean(null, ATTR_STOPPED, true);
-                }
-                if (ustate.isNotLaunched()) {
-                    serializer.attributeBoolean(null, ATTR_NOT_LAUNCHED, true);
-                }
-                if (ustate.isHidden()) {
-                    serializer.attributeBoolean(null, ATTR_HIDDEN, true);
-                }
-                if (ustate.getDistractionFlags() != 0) {
-                    serializer.attributeInt(null, ATTR_DISTRACTION_FLAGS,
-                            ustate.getDistractionFlags());
-                }
-                if (ustate.isSuspended()) {
-                    serializer.attributeBoolean(null, ATTR_SUSPENDED, true);
-                }
-                if (ustate.isInstantApp()) {
-                    serializer.attributeBoolean(null, ATTR_INSTANT_APP, true);
-                }
-                if (ustate.isVirtualPreload()) {
-                    serializer.attributeBoolean(null, ATTR_VIRTUAL_PRELOAD, true);
-                }
-                if (ustate.getEnabledState() != COMPONENT_ENABLED_STATE_DEFAULT) {
-                    serializer.attributeInt(null, ATTR_ENABLED, ustate.getEnabledState());
-                    if (ustate.getLastDisableAppCaller() != null) {
-                        serializer.attribute(null, ATTR_ENABLED_CALLER,
-                                ustate.getLastDisableAppCaller());
+                for (final PackageSetting pkg : mPackages.values()) {
+                    final PackageUserStateInternal ustate = pkg.readUserState(userId);
+                    if (DEBUG_MU) {
+                        Log.v(TAG, "  pkg=" + pkg.getPackageName()
+                                + ", installed=" + ustate.isInstalled()
+                                + ", state=" + ustate.getEnabledState());
                     }
-                }
-                if (ustate.getInstallReason() != PackageManager.INSTALL_REASON_UNKNOWN) {
-                    serializer.attributeInt(null, ATTR_INSTALL_REASON,
-                            ustate.getInstallReason());
-                }
-                serializer.attributeLongHex(null, ATTR_FIRST_INSTALL_TIME,
-                        ustate.getFirstInstallTime());
-                if (ustate.getUninstallReason() != PackageManager.UNINSTALL_REASON_UNKNOWN) {
-                    serializer.attributeInt(null, ATTR_UNINSTALL_REASON,
-                            ustate.getUninstallReason());
-                }
-                if (ustate.getHarmfulAppWarning() != null) {
-                    serializer.attribute(null, ATTR_HARMFUL_APP_WARNING,
-                            ustate.getHarmfulAppWarning());
-                }
-                if (ustate.getSplashScreenTheme() != null) {
-                    serializer.attribute(null, ATTR_SPLASH_SCREEN_THEME,
-                            ustate.getSplashScreenTheme());
-                }
-                if (ustate.isSuspended()) {
-                    for (int i = 0; i < ustate.getSuspendParams().size(); i++) {
-                        final String suspendingPackage = ustate.getSuspendParams().keyAt(i);
-                        serializer.startTag(null, TAG_SUSPEND_PARAMS);
-                        serializer.attribute(null, ATTR_SUSPENDING_PACKAGE, suspendingPackage);
-                        final SuspendParams params =
-                                ustate.getSuspendParams().valueAt(i);
-                        if (params != null) {
-                            params.saveToXml(serializer);
+
+                    serializer.startTag(null, TAG_PACKAGE);
+                    serializer.attribute(null, ATTR_NAME, pkg.getPackageName());
+                    if (ustate.getCeDataInode() != 0) {
+                        serializer.attributeLong(null, ATTR_CE_DATA_INODE, ustate.getCeDataInode());
+                    }
+                    if (!ustate.isInstalled()) {
+                        serializer.attributeBoolean(null, ATTR_INSTALLED, false);
+                    }
+                    if (ustate.isStopped()) {
+                        serializer.attributeBoolean(null, ATTR_STOPPED, true);
+                    }
+                    if (ustate.isNotLaunched()) {
+                        serializer.attributeBoolean(null, ATTR_NOT_LAUNCHED, true);
+                    }
+                    if (ustate.isHidden()) {
+                        serializer.attributeBoolean(null, ATTR_HIDDEN, true);
+                    }
+                    if (ustate.getDistractionFlags() != 0) {
+                        serializer.attributeInt(null, ATTR_DISTRACTION_FLAGS,
+                                ustate.getDistractionFlags());
+                    }
+                    if (ustate.isSuspended()) {
+                        serializer.attributeBoolean(null, ATTR_SUSPENDED, true);
+                    }
+                    if (ustate.isInstantApp()) {
+                        serializer.attributeBoolean(null, ATTR_INSTANT_APP, true);
+                    }
+                    if (ustate.isVirtualPreload()) {
+                        serializer.attributeBoolean(null, ATTR_VIRTUAL_PRELOAD, true);
+                    }
+                    if (ustate.getEnabledState() != COMPONENT_ENABLED_STATE_DEFAULT) {
+                        serializer.attributeInt(null, ATTR_ENABLED, ustate.getEnabledState());
+                        if (ustate.getLastDisableAppCaller() != null) {
+                            serializer.attribute(null, ATTR_ENABLED_CALLER,
+                                    ustate.getLastDisableAppCaller());
                         }
-                        serializer.endTag(null, TAG_SUSPEND_PARAMS);
                     }
-                }
-                final ArraySet<String> enabledComponents = ustate.getEnabledComponents();
-                if (enabledComponents != null && enabledComponents.size() > 0) {
-                    serializer.startTag(null, TAG_ENABLED_COMPONENTS);
-                    for (int i = 0; i < enabledComponents.size(); i++) {
-                        serializer.startTag(null, TAG_ITEM);
-                        serializer.attribute(null, ATTR_NAME,
-                                enabledComponents.valueAt(i));
-                        serializer.endTag(null, TAG_ITEM);
+                    if (ustate.getInstallReason() != PackageManager.INSTALL_REASON_UNKNOWN) {
+                        serializer.attributeInt(null, ATTR_INSTALL_REASON,
+                                ustate.getInstallReason());
                     }
-                    serializer.endTag(null, TAG_ENABLED_COMPONENTS);
-                }
-                final ArraySet<String> disabledComponents = ustate.getDisabledComponents();
-                if (disabledComponents != null && disabledComponents.size() > 0) {
-                    serializer.startTag(null, TAG_DISABLED_COMPONENTS);
-                    for (int i = 0; i < disabledComponents.size(); i++) {
-                        serializer.startTag(null, TAG_ITEM);
-                        serializer.attribute(null, ATTR_NAME,
-                                disabledComponents.valueAt(i));
-                        serializer.endTag(null, TAG_ITEM);
+                    serializer.attributeLongHex(null, ATTR_FIRST_INSTALL_TIME,
+                            ustate.getFirstInstallTime());
+                    if (ustate.getUninstallReason() != PackageManager.UNINSTALL_REASON_UNKNOWN) {
+                        serializer.attributeInt(null, ATTR_UNINSTALL_REASON,
+                                ustate.getUninstallReason());
                     }
-                    serializer.endTag(null, TAG_DISABLED_COMPONENTS);
+                    if (ustate.getHarmfulAppWarning() != null) {
+                        serializer.attribute(null, ATTR_HARMFUL_APP_WARNING,
+                                ustate.getHarmfulAppWarning());
+                    }
+                    if (ustate.getSplashScreenTheme() != null) {
+                        serializer.attribute(null, ATTR_SPLASH_SCREEN_THEME,
+                                ustate.getSplashScreenTheme());
+                    }
+                    if (ustate.isSuspended()) {
+                        for (int i = 0; i < ustate.getSuspendParams().size(); i++) {
+                            final String suspendingPackage = ustate.getSuspendParams().keyAt(i);
+                            serializer.startTag(null, TAG_SUSPEND_PARAMS);
+                            serializer.attribute(null, ATTR_SUSPENDING_PACKAGE, suspendingPackage);
+                            final SuspendParams params =
+                                    ustate.getSuspendParams().valueAt(i);
+                            if (params != null) {
+                                params.saveToXml(serializer);
+                            }
+                            serializer.endTag(null, TAG_SUSPEND_PARAMS);
+                        }
+                    }
+                    final ArraySet<String> enabledComponents = ustate.getEnabledComponents();
+                    if (enabledComponents != null && enabledComponents.size() > 0) {
+                        serializer.startTag(null, TAG_ENABLED_COMPONENTS);
+                        for (int i = 0; i < enabledComponents.size(); i++) {
+                            serializer.startTag(null, TAG_ITEM);
+                            serializer.attribute(null, ATTR_NAME,
+                                    enabledComponents.valueAt(i));
+                            serializer.endTag(null, TAG_ITEM);
+                        }
+                        serializer.endTag(null, TAG_ENABLED_COMPONENTS);
+                    }
+                    final ArraySet<String> disabledComponents = ustate.getDisabledComponents();
+                    if (disabledComponents != null && disabledComponents.size() > 0) {
+                        serializer.startTag(null, TAG_DISABLED_COMPONENTS);
+                        for (int i = 0; i < disabledComponents.size(); i++) {
+                            serializer.startTag(null, TAG_ITEM);
+                            serializer.attribute(null, ATTR_NAME,
+                                    disabledComponents.valueAt(i));
+                            serializer.endTag(null, TAG_ITEM);
+                        }
+                        serializer.endTag(null, TAG_DISABLED_COMPONENTS);
+                    }
+
+                    serializer.endTag(null, TAG_PACKAGE);
                 }
 
-                serializer.endTag(null, TAG_PACKAGE);
+                writePreferredActivitiesLPr(serializer, userId, true);
+                writePersistentPreferredActivitiesLPr(serializer, userId);
+                writeCrossProfileIntentFiltersLPr(serializer, userId);
+                writeDefaultAppsLPr(serializer, userId);
+                writeBlockUninstallPackagesLPr(serializer, userId);
+
+                serializer.endTag(null, TAG_PACKAGE_RESTRICTIONS);
+
+                serializer.endDocument();
             }
-
-            writePreferredActivitiesLPr(serializer, userId, true);
-            writePersistentPreferredActivitiesLPr(serializer, userId);
-            writeCrossProfileIntentFiltersLPr(serializer, userId);
-            writeDefaultAppsLPr(serializer, userId);
-            writeBlockUninstallPackagesLPr(serializer, userId);
-
-            serializer.endTag(null, TAG_PACKAGE_RESTRICTIONS);
-
-            serializer.endDocument();
 
             fstr.flush();
             FileUtils.sync(fstr);
-            fstr.close();
+            IoUtils.closeQuietly(fstr);
 
-            // New settings successfully written, old ones are no longer
-            // needed.
-            backupFile.delete();
-            FileUtils.setPermissions(userPackagesStateFile.toString(),
-                    FileUtils.S_IRUSR|FileUtils.S_IWUSR
-                    |FileUtils.S_IRGRP|FileUtils.S_IWGRP,
-                    -1, -1);
+            synchronized (mPackageRestrictionsLock) {
+                // File is created, set permissions.
+                FileUtils.setPermissions(userPackagesStateFile.toString(),
+                        FileUtils.S_IRUSR | FileUtils.S_IWUSR
+                                | FileUtils.S_IRGRP | FileUtils.S_IWGRP,
+                        -1, -1);
+                // New settings successfully written, old ones are no longer needed.
+                backupFile.delete();
+            }
+
+            if (DEBUG_MU) {
+                Log.i(TAG, "New settings successfully written for user=" + userId + ": "
+                        + userPackagesStateFile);
+            }
 
             com.android.internal.logging.EventLogTags.writeCommitSysConfigFile(
                     "package-user-" + userId, SystemClock.uptimeMillis() - startTime);
 
             // Done, all is good!
             return;
-        } catch(java.io.IOException e) {
+        } catch (java.io.IOException e) {
             Slog.wtf(PackageManagerService.TAG,
                     "Unable to write package manager user packages state, "
                     + " current changes will be lost at reboot", e);
@@ -2446,7 +2548,7 @@ public final class Settings implements Watchable, Snappable {
         }
     }
 
-    void writeLPr(@NonNull Computer computer) {
+    void writeLPr(@NonNull Computer computer, boolean sync) {
         //Debug.startMethodTracing("/data/system/packageprof", 8 * 1024 * 1024);
 
         final long startTime = SystemClock.uptimeMillis();
@@ -2569,7 +2671,7 @@ public final class Settings implements Watchable, Snappable {
 
             writeKernelMappingLPr();
             writePackageListLPr();
-            writeAllUsersPackageRestrictionsLPr();
+            writeAllUsersPackageRestrictionsLPr(sync);
             writeAllRuntimePermissionsLPr();
             com.android.internal.logging.EventLogTags.writeCommitSysConfigFile(
                     "package", SystemClock.uptimeMillis() - startTime);
@@ -3200,7 +3302,7 @@ public final class Settings implements Watchable, Snappable {
             mBackupStoppedPackagesFilename.delete();
             mStoppedPackagesFilename.delete();
             // Migrate to new file format
-            writePackageRestrictionsLPr(UserHandle.USER_SYSTEM);
+            writePackageRestrictionsLPr(UserHandle.USER_SYSTEM, /*sync=*/true);
         } else {
             for (UserInfo user : users) {
                 readPackageRestrictionsLPr(user.id, originalFirstInstallTimes);
@@ -4271,10 +4373,15 @@ public final class Settings implements Watchable, Snappable {
             entry.getValue().removeUser(userId);
         }
         mPreferredActivities.remove(userId);
-        File file = getUserPackagesStateFile(userId);
-        file.delete();
-        file = getUserPackagesStateBackupFile(userId);
-        file.delete();
+
+        synchronized (mPackageRestrictionsLock) {
+            File file = getUserPackagesStateFile(userId);
+            file.delete();
+            file = getUserPackagesStateBackupFile(userId);
+            file.delete();
+            mPendingAsyncPackageRestrictionsWrites.delete(userId);
+        }
+
         removeCrossProfileIntentFiltersLPw(userId);
 
         mRuntimePermissionsPersistence.onUserRemoved(userId);
@@ -4319,7 +4426,7 @@ public final class Settings implements Watchable, Snappable {
         if (mVerifierDeviceIdentity == null) {
             mVerifierDeviceIdentity = VerifierDeviceIdentity.generate();
 
-            writeLPr(computer);
+            writeLPr(computer, /*sync=*/false);
         }
 
         return mVerifierDeviceIdentity;
