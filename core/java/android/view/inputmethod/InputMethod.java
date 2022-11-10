@@ -300,11 +300,12 @@ public interface InputMethod {
      * @param showInputToken an opaque {@link android.os.Binder} token to identify which API call
      *        of {@link InputMethodManager#showSoftInput(View, int)} is associated with
      *        this callback.
+     * @param statsToken the token tracking the current IME show request or {@code null} otherwise.
      * @hide
      */
     @MainThread
     default public void showSoftInputWithToken(int flags, ResultReceiver resultReceiver,
-            IBinder showInputToken) {
+            IBinder showInputToken, @Nullable ImeTracker.Token statsToken) {
         showSoftInput(flags, resultReceiver);
     }
 
@@ -369,7 +370,7 @@ public interface InputMethod {
 
     /**
      * Checks if IME is ready to start stylus handwriting session.
-     * If yes, {@link #startStylusHandwriting(InputChannel, List)} is called.
+     * If yes, {@link #startStylusHandwriting(int, InputChannel, List)} is called.
      * @param requestId
      * @hide
      */

@@ -17,6 +17,7 @@
 package com.android.internal.view;
 
 import android.os.ResultReceiver;
+import android.view.inputmethod.ImeTracker;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
 import android.view.inputmethod.EditorInfo;
@@ -54,11 +55,11 @@ interface IInputMethodManager {
             + "android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)")
     InputMethodSubtype getLastInputMethodSubtype(int userId);
 
-    boolean showSoftInput(in IInputMethodClient client, @nullable IBinder windowToken, int flags,
-            int lastClickToolType, in @nullable ResultReceiver resultReceiver, int reason);
+    boolean showSoftInput(in IInputMethodClient client, @nullable IBinder windowToken,
+            in @nullable ImeTracker.Token statsToken, int flags, int lastClickToolType,
+            in @nullable ResultReceiver resultReceiver, int reason);
     boolean hideSoftInput(in IInputMethodClient client, @nullable IBinder windowToken, int flags,
             in @nullable ResultReceiver resultReceiver, int reason);
-
     // If windowToken is null, this just does startInput().  Otherwise this reports that a window
     // has gained focus, and if 'editorInfo' is non-null then also does startInput.
     // @NonNull
