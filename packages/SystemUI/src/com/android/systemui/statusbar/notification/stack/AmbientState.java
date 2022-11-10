@@ -719,7 +719,7 @@ public class AmbientState implements Dumpable {
      */
     public boolean isBouncerInTransit() {
         return mStatusBarKeyguardViewManager != null
-                && mStatusBarKeyguardViewManager.isBouncerInTransit();
+                && mStatusBarKeyguardViewManager.isPrimaryBouncerInTransit();
     }
 
     /**

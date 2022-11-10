@@ -19,6 +19,7 @@ package com.android.systemui.mediaprojection.appselector
 import android.app.Activity
 import android.content.ComponentName
 import android.content.Context
+import com.android.launcher3.icons.IconFactory
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.media.MediaProjectionAppSelectorActivity
 import com.android.systemui.mediaprojection.appselector.data.ActivityTaskManagerThumbnailLoader
@@ -90,6 +91,11 @@ interface MediaProjectionAppSelectorModule {
         fun bindConfigurationController(
             activity: MediaProjectionAppSelectorActivity
         ): ConfigurationController = ConfigurationControllerImpl(activity)
+
+        @Provides
+        fun bindIconFactory(
+            context: Context
+        ): IconFactory = IconFactory.obtain(context)
 
         @Provides
         @MediaProjectionAppSelector
