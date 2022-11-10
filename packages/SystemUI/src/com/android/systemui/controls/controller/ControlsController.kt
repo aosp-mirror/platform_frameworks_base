@@ -24,6 +24,7 @@ import com.android.systemui.controls.ControlStatus
 import com.android.systemui.util.UserAwareController
 import com.android.systemui.controls.management.ControlsFavoritingActivity
 import com.android.systemui.controls.ui.ControlsUiController
+import com.android.systemui.controls.ui.SelectedItem
 import java.util.function.Consumer
 
 /**
@@ -184,8 +185,8 @@ interface ControlsController : UserAwareController {
      */
     fun countFavoritesForComponent(componentName: ComponentName): Int
 
-    /** See [ControlsUiController.getPreferredStructure]. */
-    fun getPreferredStructure(): StructureInfo
+    /** See [ControlsUiController.getPreferredSelectedItem]. */
+    fun getPreferredSelection(): SelectedItem
 
     /**
      * Interface for structure to pass data to [ControlsFavoritingActivity].
