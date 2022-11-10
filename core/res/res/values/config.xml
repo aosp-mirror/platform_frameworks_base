@@ -2958,6 +2958,10 @@
     <string name="config_carrierAppInstallDialogComponent" translatable="false"
             >com.android.simappdialog/com.android.simappdialog.InstallCarrierAppActivity</string>
 
+    <!-- Name of the dialog that is used to get or save an app credential -->
+    <string name="config_credentialManagerDialogComponent" translatable="false"
+            >com.android.credentialmanager/com.android.credentialmanager.CredentialSelectorActivity</string>
+
     <!-- Apps that are authorized to access shared accounts, overridden by product overlays -->
     <string name="config_appsAuthorizedForSharedAccounts" translatable="false">;com.android.settings;</string>
 
@@ -4405,6 +4409,10 @@
     <!-- Class name of the device specific implementation of DeviceStatePolicy.Provider
         or empty if the default should be used. -->
     <string translatable="false" name="config_deviceSpecificDeviceStatePolicyProvider"></string>
+
+    <!-- Class name of the device specific implementation of InputMethodManagerService
+        or empty if the default should be used. -->
+    <string translatable="false" name="config_deviceSpecificInputMethodManagerService"></string>
 
     <!-- Component name of media projection permission dialog -->
     <string name="config_mediaProjectionPermissionDialogComponent" translatable="false">com.android.systemui/com.android.systemui.media.MediaProjectionPermissionActivity</string>

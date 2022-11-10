@@ -1665,7 +1665,18 @@ public final class SystemServer implements Dumpable {
         // Bring up services needed for UI.
         if (mFactoryTestMode != FactoryTest.FACTORY_TEST_LOW_LEVEL) {
             t.traceBegin("StartInputMethodManagerLifecycle");
-            mSystemServiceManager.startService(InputMethodManagerService.Lifecycle.class);
+            String immsClassName = context.getResources().getString(
+                    R.string.config_deviceSpecificInputMethodManagerService);
+            if (immsClassName.isEmpty()) {
+                mSystemServiceManager.startService(InputMethodManagerService.Lifecycle.class);
+            } else {
+                try {
+                    Slog.i(TAG, "Starting custom IMMS: " + immsClassName);
+                    mSystemServiceManager.startService(immsClassName);
+                } catch (Throwable e) {
+                    reportWtf("starting " + immsClassName, e);
+                }
+            }
             t.traceEnd();
 
             t.traceBegin("StartAccessibilityManagerService");

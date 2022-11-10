@@ -219,12 +219,14 @@ public class AnimationHandler {
             return;
         }
         for (int i = 0; i < mAnimationCallbacks.size(); ++i) {
-            Animator animator = ((Animator) mAnimationCallbacks.get(i));
-            if (animator != null
-                    && animator.getTotalDuration() == Animator.DURATION_INFINITE
-                    && !animator.isPaused()) {
-                mPausedAnimators.add(animator);
-                animator.pause();
+            AnimationFrameCallback callback = mAnimationCallbacks.get(i);
+            if (callback instanceof Animator) {
+                Animator animator = ((Animator) callback);
+                if (animator.getTotalDuration() == Animator.DURATION_INFINITE
+                        && !animator.isPaused()) {
+                    mPausedAnimators.add(animator);
+                    animator.pause();
+                }
             }
         }
     };

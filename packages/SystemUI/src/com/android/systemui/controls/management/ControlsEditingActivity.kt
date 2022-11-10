@@ -20,11 +20,14 @@ import android.app.ActivityOptions
 import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewStub
 import android.widget.Button
 import android.widget.TextView
+import android.window.OnBackInvokedCallback
+import android.window.OnBackInvokedDispatcher
 import androidx.activity.ComponentActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -42,7 +45,7 @@ import javax.inject.Inject
 /**
  * Activity for rearranging and removing controls for a given structure
  */
-class ControlsEditingActivity @Inject constructor(
+open class ControlsEditingActivity @Inject constructor(
     private val controller: ControlsControllerImpl,
     private val broadcastDispatcher: BroadcastDispatcher,
     private val customIconCache: CustomIconCache,
@@ -50,8 +53,9 @@ class ControlsEditingActivity @Inject constructor(
 ) : ComponentActivity() {
 
     companion object {
+        private const val DEBUG = false
         private const val TAG = "ControlsEditingActivity"
-        private const val EXTRA_STRUCTURE = ControlsFavoritingActivity.EXTRA_STRUCTURE
+        const val EXTRA_STRUCTURE = ControlsFavoritingActivity.EXTRA_STRUCTURE
         private val SUBTITLE_ID = R.string.controls_favorite_rearrange
         private val EMPTY_TEXT_ID = R.string.controls_favorite_removed
     }
@@ -71,6 +75,13 @@ class ControlsEditingActivity @Inject constructor(
                 finish()
             }
         }
+    }
+
+    private val mOnBackInvokedCallback = OnBackInvokedCallback {
+        if (DEBUG) {
+            Log.d(TAG, "Predictive Back dispatcher called mOnBackInvokedCallback")
+        }
+        onBackPressed()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -94,11 +105,22 @@ class ControlsEditingActivity @Inject constructor(
         setUpList()
 
         currentUserTracker.startTracking()
+
+        if (DEBUG) {
+            Log.d(TAG, "Registered onBackInvokedCallback")
+        }
+        onBackInvokedDispatcher.registerOnBackInvokedCallback(
+                OnBackInvokedDispatcher.PRIORITY_DEFAULT, mOnBackInvokedCallback)
     }
 
     override fun onStop() {
         super.onStop()
         currentUserTracker.stopTracking()
+
+        if (DEBUG) {
+            Log.d(TAG, "Unregistered onBackInvokedCallback")
+        }
+        onBackInvokedDispatcher.unregisterOnBackInvokedCallback(mOnBackInvokedCallback)
     }
 
     override fun onBackPressed() {

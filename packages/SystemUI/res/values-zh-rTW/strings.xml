@@ -168,6 +168,8 @@
     <skip />
     <string name="keyguard_face_failed" msgid="9044619102286917151">"無法辨識臉孔"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"請改用指紋"</string>
+    <!-- no translation found for keyguard_face_unlock_unavailable (8145547300240405980) -->
+    <skip />
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"藍牙連線已建立。"</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"電池電量不明。"</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"已連線至<xliff:g id="BLUETOOTH">%s</xliff:g>。"</string>
@@ -248,8 +250,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"亮度"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"色彩反轉"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"色彩校正"</string>
-    <!-- no translation found for quick_settings_more_user_settings (7634653308485206306) -->
-    <skip />
+    <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"管理使用者"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"完成"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"關閉"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"已連線"</string>
@@ -304,6 +305,17 @@
     <string name="sensor_privacy_mic_unblocked_toast_content" msgid="306555320557065068">"可使用麥克風"</string>
     <string name="sensor_privacy_camera_unblocked_toast_content" msgid="7843105715964332311">"可使用相機"</string>
     <string name="sensor_privacy_mic_camera_unblocked_toast_content" msgid="7339355093282661115">"可使用麥克風和相機"</string>
+    <string name="sensor_privacy_mic_turned_on_dialog_title" msgid="6348853159838376513">"麥克風已開啟"</string>
+    <string name="sensor_privacy_mic_turned_off_dialog_title" msgid="5760464281790732849">"麥克風已關閉"</string>
+    <string name="sensor_privacy_mic_unblocked_dialog_content" msgid="4889961886199270224">"所有應用程式和服務的麥克風存取權皆已啟用。"</string>
+    <string name="sensor_privacy_mic_blocked_no_exception_dialog_content" msgid="5864898470772965394">"所有應用程式和服務的麥克風存取權皆已停用。如要啟用麥克風存取權，請依序前往「設定」&gt;「隱私權」&gt;「麥克風」。"</string>
+    <string name="sensor_privacy_mic_blocked_with_exception_dialog_content" msgid="810289713700437896">"所有應用程式和服務的麥克風存取權皆已停用。如要變更這項設定，請依序前往「設定」&gt;「隱私權」&gt;「麥克風」。"</string>
+    <string name="sensor_privacy_camera_turned_on_dialog_title" msgid="8039095295100075952">"相機已開啟"</string>
+    <string name="sensor_privacy_camera_turned_off_dialog_title" msgid="1936603903120742696">"相機已關閉"</string>
+    <string name="sensor_privacy_camera_unblocked_dialog_content" msgid="7847190103011782278">"所有應用程式和服務的相機存取權皆已啟用。"</string>
+    <string name="sensor_privacy_camera_blocked_dialog_content" msgid="3182428709314874616">"所有應用程式和服務的相機存取權皆已停用。"</string>
+    <string name="sensor_privacy_htt_blocked_dialog_content" msgid="3333321592997666441">"如要使用麥克風按鈕，請前往「設定」啟用麥克風存取權。"</string>
+    <string name="sensor_privacy_dialog_open_settings" msgid="1503088305279285048">"開啟設定。"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"其他裝置"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"切換總覽"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"裝置不會發出音效或震動造成干擾，但是會保留與鬧鐘、提醒、活動和指定來電者有關的設定。如果你選擇播放音樂、影片和遊戲等內容，還是可以聽見相關音訊。"</string>
@@ -374,6 +386,16 @@
     <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"進行分享、錄製或投放應用程式時，<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> 可以存取在該應用程式中顯示或播放的所有內容。因此請謹慎處理密碼、付款資料、訊息或其他機密資訊。"</string>
     <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"繼續"</string>
     <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"分享或錄製應用程式"</string>
+    <!-- no translation found for media_projection_permission_dialog_system_service_title (6827129613741303726) -->
+    <skip />
+    <!-- no translation found for media_projection_permission_dialog_system_service_warning_entire_screen (8801616203805837575) -->
+    <skip />
+    <!-- no translation found for media_projection_permission_dialog_system_service_warning_single_app (543310680568419338) -->
+    <skip />
+    <!-- no translation found for screen_capturing_disabled_by_policy_dialog_title (2113331792064527203) -->
+    <skip />
+    <!-- no translation found for screen_capturing_disabled_by_policy_dialog_description (6015975736747696431) -->
+    <skip />
     <string name="clear_all_notifications_text" msgid="348312370303046130">"全部清除"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"管理"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"記錄"</string>
@@ -728,14 +750,10 @@
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"要關閉行動數據嗎？"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"你將無法透過「<xliff:g id="CARRIER">%s</xliff:g>」使用行動數據或網際網路。你只能透過 Wi-Fi 使用網際網路。"</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"你的電信業者"</string>
-    <!-- no translation found for auto_data_switch_disable_title (5146527155665190652) -->
-    <skip />
-    <!-- no translation found for auto_data_switch_disable_message (5885533647399535852) -->
-    <skip />
-    <!-- no translation found for auto_data_switch_dialog_negative_button (2370876875999891444) -->
-    <skip />
-    <!-- no translation found for auto_data_switch_dialog_positive_button (8531782041263087564) -->
-    <skip />
+    <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"要切換回「<xliff:g id="CARRIER">%s</xliff:g>」嗎？"</string>
+    <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"行動數據不會依據可用性自動切換"</string>
+    <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"不用了，謝謝"</string>
+    <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"是，切換回 DDS 對話方塊"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"由於某個應用程式覆蓋了權限要求畫面，因此「設定」應用程式無法驗證你的回應。"</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"要允許「<xliff:g id="APP_0">%1$s</xliff:g>」顯示「<xliff:g id="APP_2">%2$s</xliff:g>」的區塊嗎？"</string>
     <string name="slice_permission_text_1" msgid="6675965177075443714">"- 它可以讀取「<xliff:g id="APP">%1$s</xliff:g>」的資訊"</string>
@@ -794,18 +812,15 @@
     <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"放大鏡視窗設定"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"輕觸即可開啟無障礙功能。你可以前往「設定」自訂或更換這個按鈕。\n\n"<annotation id="link">"查看設定"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"將按鈕移到邊緣處即可暫時隱藏"</string>
-    <!-- no translation found for accessibility_floating_button_undo (511112888715708241) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_undo_message_text (3044079592757099698) -->
-    <skip />
+    <string name="accessibility_floating_button_undo" msgid="511112888715708241">"復原"</string>
+    <string name="accessibility_floating_button_undo_message_text" msgid="3044079592757099698">"{count,plural, =1{已移除 {label} 個捷徑}other{已移除 # 個捷徑}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"移到左上方"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"移到右上方"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"移到左下方"</string>
     <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"移到右下方"</string>
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"移到邊緣並隱藏"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"從邊緣移出並顯示"</string>
-    <!-- no translation found for accessibility_floating_button_action_remove_menu (6730432848162552135) -->
-    <skip />
+    <string name="accessibility_floating_button_action_remove_menu" msgid="6730432848162552135">"移除"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"切換"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"裝置控制"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"選擇應用程式以新增控制項"</string>
@@ -948,10 +963,8 @@
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"行動數據"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"已連線"</string>
-    <!-- no translation found for mobile_data_temp_connection_active (4590222725908806824) -->
-    <skip />
-    <!-- no translation found for mobile_data_poor_connection (819617772268371434) -->
-    <skip />
+    <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"已暫時建立連線"</string>
+    <string name="mobile_data_poor_connection" msgid="819617772268371434">"連線品質不佳"</string>
     <string name="mobile_data_off_summary" msgid="3663995422004150567">"系統將不會自動使用行動數據連線"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"沒有網路連線"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"沒有可用的其他網路"</string>

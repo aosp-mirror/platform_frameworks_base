@@ -373,6 +373,7 @@ public class FingerprintAuthenticationClientTest {
     @Test
     public void fingerprintPowerIgnoresAuthInWindow() throws Exception {
         when(mSensorProps.isAnySidefpsType()).thenReturn(true);
+        when(mHal.authenticate(anyLong())).thenReturn(mCancellationSignal);
 
         final FingerprintAuthenticationClient client = createClient(1);
         client.start(mCallback);
@@ -383,11 +384,13 @@ public class FingerprintAuthenticationClientTest {
         mLooper.dispatchAll();
 
         verify(mCallback).onClientFinished(any(), eq(false));
+        verify(mCancellationSignal).cancel();
     }
 
     @Test
     public void fingerprintAuthIgnoredWaitingForPower() throws Exception {
         when(mSensorProps.isAnySidefpsType()).thenReturn(true);
+        when(mHal.authenticate(anyLong())).thenReturn(mCancellationSignal);
 
         final FingerprintAuthenticationClient client = createClient(1);
         client.start(mCallback);
@@ -398,11 +401,13 @@ public class FingerprintAuthenticationClientTest {
         mLooper.dispatchAll();
 
         verify(mCallback).onClientFinished(any(), eq(false));
+        verify(mCancellationSignal).cancel();
     }
 
     @Test
-    public void fingerprintAuthSucceedsAfterPowerWindow() throws Exception {
+    public void fingerprintAuthFailsWhenAuthAfterPower() throws Exception {
         when(mSensorProps.isAnySidefpsType()).thenReturn(true);
+        when(mHal.authenticate(anyLong())).thenReturn(mCancellationSignal);
 
         final FingerprintAuthenticationClient client = createClient(1);
         client.start(mCallback);
@@ -416,7 +421,9 @@ public class FingerprintAuthenticationClientTest {
         mLooper.moveTimeForward(1000);
         mLooper.dispatchAll();
 
-        verify(mCallback).onClientFinished(any(), eq(true));
+        verify(mCallback, never()).onClientFinished(any(), eq(true));
+        verify(mCallback).onClientFinished(any(), eq(false));
+        when(mHal.authenticateWithContext(anyLong(), any())).thenReturn(mCancellationSignal);
     }
 
     @Test

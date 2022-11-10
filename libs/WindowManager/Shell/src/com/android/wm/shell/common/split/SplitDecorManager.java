@@ -48,6 +48,7 @@ import androidx.annotation.NonNull;
 
 import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.R;
+import com.android.wm.shell.common.ScreenshotUtils;
 import com.android.wm.shell.common.SurfaceUtils;
 
 import java.util.function.Consumer;
@@ -74,10 +75,14 @@ public class SplitDecorManager extends WindowlessWindowManager {
 
     private boolean mShown;
     private boolean mIsResizing;
-    private Rect mBounds = new Rect();
+    private final Rect mBounds = new Rect();
+    private final Rect mResizingBounds = new Rect();
+    private final Rect mTempRect = new Rect();
     private ValueAnimator mFadeAnimator;
 
     private int mIconSize;
+    private int mOffsetX;
+    private int mOffsetY;
 
     public SplitDecorManager(Configuration configuration, IconProvider iconProvider,
             SurfaceSession surfaceSession) {
@@ -158,7 +163,7 @@ public class SplitDecorManager extends WindowlessWindowManager {
 
     /** Showing resizing hint. */
     public void onResizing(ActivityManager.RunningTaskInfo resizingTask, Rect newBounds,
-            Rect sideBounds, SurfaceControl.Transaction t) {
+            Rect sideBounds, SurfaceControl.Transaction t, int offsetX, int offsetY) {
         if (mResizingIconView == null) {
             return;
         }
@@ -167,6 +172,9 @@ public class SplitDecorManager extends WindowlessWindowManager {
             mIsResizing = true;
             mBounds.set(newBounds);
         }
+        mResizingBounds.set(newBounds);
+        mOffsetX = offsetX;
+        mOffsetY = offsetY;
 
         final boolean show =
                 newBounds.width() > mBounds.width() || newBounds.height() > mBounds.height();
@@ -221,11 +229,37 @@ public class SplitDecorManager extends WindowlessWindowManager {
 
     /** Stops showing resizing hint. */
     public void onResized(SurfaceControl.Transaction t) {
+        if (!mShown && mIsResizing) {
+            mTempRect.set(mResizingBounds);
+            mTempRect.offsetTo(-mOffsetX, -mOffsetY);
+            final SurfaceControl screenshot = ScreenshotUtils.takeScreenshot(t,
+                    mHostLeash, mTempRect, Integer.MAX_VALUE - 1);
+
+            final SurfaceControl.Transaction animT = new SurfaceControl.Transaction();
+            final ValueAnimator va = ValueAnimator.ofFloat(1, 0);
+            va.addUpdateListener(valueAnimator -> {
+                final float progress = (float) valueAnimator.getAnimatedValue();
+                animT.setAlpha(screenshot, progress);
+                animT.apply();
+            });
+            va.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(@androidx.annotation.NonNull Animator animation) {
+                    animT.remove(screenshot);
+                    animT.apply();
+                    animT.close();
+                }
+            });
+            va.start();
+        }
+
         if (mResizingIconView == null) {
             return;
         }
 
         mIsResizing = false;
+        mOffsetX = 0;
+        mOffsetY = 0;
         if (mFadeAnimator != null && mFadeAnimator.isRunning()) {
             if (!mShown) {
                 // If fade-out animation is running, just add release callback to it.

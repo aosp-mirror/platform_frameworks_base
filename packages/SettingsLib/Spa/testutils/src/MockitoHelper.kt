@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.systemui;
+package com.android.settingslib.spa.testutils
 
-import androidx.annotation.StringRes;
+import org.mockito.Mockito
 
-import com.android.internal.R;
+/**
+ * Returns Mockito.any() as nullable type to avoid java.lang.IllegalStateException when null is
+ * returned.
+ *
+ * Generic T is nullable because implicitly bounded by Any?.
+ */
+fun <T> any(type: Class<T>): T = Mockito.any(type)
 
-/** Helper class for referencing resources */
-class ChooserSelectorResourceHelper {
-
-    private ChooserSelectorResourceHelper() {
-    }
-
-    @StringRes
-    static final int CONFIG_CHOOSER_ACTIVITY = R.string.config_chooserActivity;
-}
+inline fun <reified T> any(): T = any(T::class.java)

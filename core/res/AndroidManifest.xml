@@ -2533,6 +2533,19 @@
         android:description="@string/permdesc_modifyAudioSettings"
         android:protectionLevel="normal" />
 
+    <!-- ==================================================== -->
+    <!-- Permissions related to screen capture   -->
+    <!-- ==================================================== -->
+    <eat-comment />
+
+    <!-- Allows an application to get notified when a screen capture of its windows is attempted.
+         <p>Protection level: normal
+    -->
+    <permission android:name="android.permission.DETECT_SCREEN_CAPTURE"
+                android:label="@string/permlab_detectScreenCapture"
+                android:description="@string/permdesc_detectScreenCapture"
+                android:protectionLevel="normal" />
+
     <!-- ======================================== -->
     <!-- Permissions for factory reset protection -->
     <!-- ======================================== -->

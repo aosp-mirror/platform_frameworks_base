@@ -58,6 +58,7 @@ final class AdditionalSubtypeUtils {
     private static final String NODE_IMI = "imi";
     private static final String ATTR_ID = "id";
     private static final String ATTR_LABEL = "label";
+    private static final String ATTR_NAME_OVERRIDE = "nameOverride";
     private static final String ATTR_ICON = "icon";
     private static final String ATTR_IME_SUBTYPE_ID = "subtypeId";
     private static final String ATTR_IME_SUBTYPE_LOCALE = "imeSubtypeLocale";
@@ -161,6 +162,7 @@ final class AdditionalSubtypeUtils {
                     }
                     out.attributeInt(null, ATTR_ICON, subtype.getIconResId());
                     out.attributeInt(null, ATTR_LABEL, subtype.getNameResId());
+                    out.attribute(null, ATTR_NAME_OVERRIDE, subtype.getNameOverride().toString());
                     out.attribute(null, ATTR_IME_SUBTYPE_LOCALE, subtype.getLocale());
                     out.attribute(null, ATTR_IME_SUBTYPE_LANGUAGE_TAG,
                             subtype.getLanguageTag());
@@ -243,6 +245,8 @@ final class AdditionalSubtypeUtils {
                     }
                     final int icon = parser.getAttributeInt(null, ATTR_ICON);
                     final int label = parser.getAttributeInt(null, ATTR_LABEL);
+                    final String untranslatableName = parser.getAttributeValue(null,
+                            ATTR_NAME_OVERRIDE);
                     final String imeSubtypeLocale =
                             parser.getAttributeValue(null, ATTR_IME_SUBTYPE_LOCALE);
                     final String languageTag =
@@ -258,6 +262,7 @@ final class AdditionalSubtypeUtils {
                     final InputMethodSubtype.InputMethodSubtypeBuilder
                             builder = new InputMethodSubtype.InputMethodSubtypeBuilder()
                             .setSubtypeNameResId(label)
+                            .setSubtypeNameOverride(untranslatableName)
                             .setSubtypeIconResId(icon)
                             .setSubtypeLocale(imeSubtypeLocale)
                             .setLanguageTag(languageTag)

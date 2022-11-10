@@ -72,10 +72,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"ნაგულისხმებად დაყენებულია ნომრის დაფარვის გამორთვა. შემდეგი ზარი: არ არის დაფარული."</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"სერვისი არ არის მიწოდებული."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"არ შეგიძლიათ აბონენტის ID პარამეტრების შეცვლა."</string>
-    <!-- no translation found for auto_data_switch_title (3286350716870518297) -->
-    <skip />
-    <!-- no translation found for auto_data_switch_content (803557715007110959) -->
-    <skip />
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"მონაცემები გადართულია <xliff:g id="CARRIERDISPLAY">%s</xliff:g>-ზე"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"ამის შეცვლა ნებისმიერ დროს შეგიძლიათ პარამეტრებში"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"მობილური ინტერნეტის სერვისი არ არის"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"გადაუდებელი ზარი მიუწვდომელია"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"ხმოვანი ზარების სერვისი არ არის"</string>
@@ -700,6 +698,10 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"საშუალებას აძლევს აპს, წაიკითხოს ვიდეო ფაილები თქვენი ზიარი მეხსიერებიდან."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"სურათების ფაილების წაკითხვა ზიარი მეხსიერებიდან"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"საშუალებას აძლევს აპს, წაიკითხოს სურათის ფაილები თქვენი ზიარი მეხსიერებიდან."</string>
+    <!-- no translation found for permlab_readVisualUserSelect (5516204215354667586) -->
+    <skip />
+    <!-- no translation found for permdesc_readVisualUserSelect (8027174717714968217) -->
+    <skip />
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"თქვენი ზიარი მეხსიერების შიგთავსის შეცვლა ან წაშლა"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"საშუალებას აძლევს აპს, ჩაწეროს თქვენი ზიარი მეხსიერების შიგთავსი."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP ზარების წამოწყება/მიღება"</string>

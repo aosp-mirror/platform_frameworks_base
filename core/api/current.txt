@@ -84,6 +84,7 @@ package android {
     field public static final String DELETE_CACHE_FILES = "android.permission.DELETE_CACHE_FILES";
     field public static final String DELETE_PACKAGES = "android.permission.DELETE_PACKAGES";
     field public static final String DELIVER_COMPANION_MESSAGES = "android.permission.DELIVER_COMPANION_MESSAGES";
+    field public static final String DETECT_SCREEN_CAPTURE = "android.permission.DETECT_SCREEN_CAPTURE";
     field public static final String DIAGNOSTIC = "android.permission.DIAGNOSTIC";
     field public static final String DISABLE_KEYGUARD = "android.permission.DISABLE_KEYGUARD";
     field public static final String DUMP = "android.permission.DUMP";
@@ -10392,6 +10393,7 @@ package android.content {
     field public static final String ACTION_SEND_MULTIPLE = "android.intent.action.SEND_MULTIPLE";
     field public static final String ACTION_SET_WALLPAPER = "android.intent.action.SET_WALLPAPER";
     field public static final String ACTION_SHOW_APP_INFO = "android.intent.action.SHOW_APP_INFO";
+    field public static final String ACTION_SHOW_OUTPUT_SWITCHER = "android.intent.action.SHOW_OUTPUT_SWITCHER";
     field public static final String ACTION_SHOW_WORK_APPS = "android.intent.action.SHOW_WORK_APPS";
     field public static final String ACTION_SHUTDOWN = "android.intent.action.ACTION_SHUTDOWN";
     field public static final String ACTION_SYNC = "android.intent.action.SYNC";
@@ -53853,6 +53855,7 @@ package android.view.inputmethod {
     method @NonNull public String getLanguageTag();
     method @Deprecated @NonNull public String getLocale();
     method public String getMode();
+    method @NonNull public CharSequence getNameOverride();
     method public int getNameResId();
     method public boolean isAsciiCapable();
     method public boolean isAuxiliary();
@@ -53873,6 +53876,7 @@ package android.view.inputmethod {
     method public android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder setSubtypeId(int);
     method public android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder setSubtypeLocale(String);
     method public android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder setSubtypeMode(String);
+    method @NonNull public android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder setSubtypeNameOverride(@NonNull CharSequence);
     method public android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder setSubtypeNameResId(int);
   }
 

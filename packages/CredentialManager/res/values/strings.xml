@@ -15,14 +15,16 @@
   <string name="choose_create_option_password_title">Save your password to <xliff:g id="providerInfoDisplayName">%1$s</xliff:g>?</string>
   <string name="choose_create_option_sign_in_title">Save your sign-in info to <xliff:g id="providerInfoDisplayName">%1$s</xliff:g>?</string>
   <string name="choose_sign_in_title">Use saved sign in</string>
-  <string name="create_passkey_at">Create passkey at</string>
+  <string name="create_passkey_in">Create passkey in</string>
+  <string name="save_password_to">Save password to</string>
+  <string name="save_sign_in_to">Save sign-in to</string>
   <string name="use_provider_for_all_title">Use <xliff:g id="providerInfoDisplayName">%1$s</xliff:g> for all your sign-ins?</string>
   <string name="set_as_default">Set as default</string>
   <string name="use_once">Use once</string>
   <string name="choose_create_option_description">You can use saved <xliff:g id="type">%1$s</xliff:g> on any device. It will be saved to <xliff:g id="providerInfoDisplayName">%2$s</xliff:g> for <xliff:g id="createInfoDisplayName">%3$s</xliff:g></string>
-  <string name="more_options_title_multiple_options"><xliff:g id="providerInfoDisplayName">%1$s</xliff:g> for <xliff:g id="createInfoTitle">%2$s</xliff:g></string>
-  <string name="more_options_title_one_option"><xliff:g id="providerInfoDisplayName">%1$s</xliff:g></string>
-  <string name="more_options_usage_data"><xliff:g id="passwordsNumber">%1$s</xliff:g> passwords and <xliff:g id="passkeyssNumber">%2$s</xliff:g> passkeys saved</string>
+  <string name="more_options_usage_passwords_passkeys"><xliff:g id="passwordsNumber">%1$s</xliff:g> passwords, <xliff:g id="passkeysNumber">%2$s</xliff:g> passkeys</string>
+  <string name="more_options_usage_passwords"><xliff:g id="passwordsNumber">%1$s</xliff:g> passwords</string>
+  <string name="more_options_usage_passkeys"><xliff:g id="passkeysNumber">%1$s</xliff:g> passkeys</string>
   <string name="passkeys">passkeys</string>
   <string name="passwords">passwords</string>
   <string name="sign_ins">sign-ins</string>

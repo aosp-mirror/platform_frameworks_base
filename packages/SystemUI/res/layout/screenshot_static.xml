@@ -44,7 +44,7 @@
         app:layout_constraintHorizontal_bias="0"
         app:layout_constraintWidth_percent="1.0"
         app:layout_constraintWidth_max="wrap"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/screenshot_message_container"
         app:layout_constraintStart_toEndOf="@+id/screenshot_preview_border"
         app:layout_constraintEnd_toEndOf="parent">
         <LinearLayout
@@ -70,7 +70,7 @@
         android:alpha="0"
         android:background="@drawable/overlay_border"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/screenshot_message_container"
         app:layout_constraintEnd_toEndOf="@id/screenshot_preview_end"
         app:layout_constraintTop_toTopOf="@id/screenshot_preview_top"/>
     <androidx.constraintlayout.widget.Barrier
@@ -142,4 +142,41 @@
         app:layout_constraintStart_toStartOf="@id/screenshot_preview"
         app:layout_constraintTop_toTopOf="@id/screenshot_preview"
         android:elevation="7dp"/>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/screenshot_message_container"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/overlay_action_container_margin_horizontal"
+        android:layout_marginVertical="4dp"
+        android:paddingHorizontal="@dimen/overlay_action_container_padding_right"
+        android:paddingVertical="@dimen/overlay_action_container_padding_vertical"
+        android:elevation="4dp"
+        android:background="@drawable/action_chip_container_background"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <ImageView
+            android:id="@+id/screenshot_message_icon"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:paddingEnd="4dp"
+            android:src="@drawable/ic_work_app_badge"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+        <TextView
+            android:id="@+id/screenshot_message_content"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@id/screenshot_message_icon"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </com.android.systemui.screenshot.DraggableConstraintLayout>

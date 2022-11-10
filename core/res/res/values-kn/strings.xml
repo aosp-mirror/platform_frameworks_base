@@ -72,10 +72,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"ಕರೆಮಾಡುವವರ ID ಅನ್ನು ನಿರ್ಬಂಧಿಸದಿರುವಂತೆ ಡಿಫಾಲ್ಟ್ ಮಾಡಲಾಗಿದೆ. ಮುಂದಿನ ಕರೆ: ನಿರ್ಬಂಧಿಸಲಾಗಿಲ್ಲ"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"ಸೇವೆಯನ್ನು ಪೂರೈಸಲಾಗಿಲ್ಲ."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"ನೀವು ಕಾಲರ್‌ ID ಸೆಟ್ಟಿಂಗ್‌ ಬದಲಾಯಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ."</string>
-    <!-- no translation found for auto_data_switch_title (3286350716870518297) -->
-    <skip />
-    <!-- no translation found for auto_data_switch_content (803557715007110959) -->
-    <skip />
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"<xliff:g id="CARRIERDISPLAY">%s</xliff:g> ಗೆ ಡೇಟಾವನ್ನು ಬದಲಾಯಿಸಲಾಗಿದೆ"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"ನೀವು ಇದನ್ನು ಯಾವುದೇ ಸಮಯದಲ್ಲಿಯೂ ಸೆಟ್ಟಿಂಗ್‌ಗಳಲ್ಲಿ ಬದಲಿಸಬಹುದು"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"ಮೊಬೈಲ್ ಡೇಟಾ ಸೇವೆಯಿಲ್ಲ"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"ತುರ್ತು ಕರೆ ಲಭ್ಯವಿಲ್ಲ"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"ಧ್ವನಿ ಸೇವೆಯಿಲ್ಲ"</string>
@@ -700,6 +698,10 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"ನಿಮ್ಮ ಹಂಚಿಕೊಂಡ ಸಂಗ್ರಹಣೆಯಿಂದ ವೀಡಿಯೊ ಫೈಲ್‌ಗಳನ್ನು ಓದಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"ಹಂಚಿಕೊಂಡ ಸಂಗ್ರಹಣೆಯಿಂದ ಚಿತ್ರದ ಫೈಲ್‌ಗಳನ್ನು ಓದಿ"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"ನಿಮ್ಮ ಹಂಚಿಕೊಂಡ ಸಂಗ್ರಹಣೆಯಿಂದ ಚಿತ್ರದ ಫೈಲ್‌ಗಳನ್ನು ಓದಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
+    <!-- no translation found for permlab_readVisualUserSelect (5516204215354667586) -->
+    <skip />
+    <!-- no translation found for permdesc_readVisualUserSelect (8027174717714968217) -->
+    <skip />
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"ನಿಮ್ಮ ಹಂಚಿಕೊಂಡ ಸಂಗ್ರಹಣೆಯ ವಿಷಯಗಳನ್ನು ಮಾರ್ಪಡಿಸಿ ಅಥವಾ ಅಳಿಸಿ"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"ನಿಮ್ಮ ಹಂಚಿಕೊಂಡ ಸಂಗ್ರಹಣೆಯ ವಿಷಯಗಳನ್ನು ಬರೆಯಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"ಎಸ್‌ಐಪಿ ಕರೆಗಳನ್ನು ಮಾಡಿ/ಸ್ವೀಕರಿಸಿ"</string>

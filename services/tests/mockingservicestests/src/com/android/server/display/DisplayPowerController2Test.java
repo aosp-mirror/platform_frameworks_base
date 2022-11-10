@@ -33,6 +33,7 @@ import android.hardware.SensorManager;
 import android.hardware.display.DisplayManagerInternal.DisplayPowerCallbacks;
 import android.hardware.display.DisplayManagerInternal.DisplayPowerRequest;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.PowerManager;
 import android.os.test.TestLooper;
 import android.util.FloatProperty;
@@ -134,6 +135,16 @@ public final class DisplayPowerController2Test {
             WakelockController getWakelockController(int displayId,
                     DisplayPowerCallbacks displayPowerCallbacks) {
                 return mWakelockController;
+            }
+
+            @Override
+            DisplayPowerProximityStateController getDisplayPowerProximityStateController(
+                    WakelockController wakelockController, DisplayDeviceConfig displayDeviceConfig,
+                    Looper looper, Runnable nudgeUpdatePowerState, int displayId,
+                    SensorManager sensorManager) {
+                return new DisplayPowerProximityStateController(wakelockController,
+                        displayDeviceConfig, looper, nudgeUpdatePowerState, displayId,
+                        sensorManager);
             }
         };
 

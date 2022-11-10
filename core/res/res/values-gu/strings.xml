@@ -72,10 +72,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"કૉલર ID પ્રતિબંધિત નહીં પર ડિફોલ્ટ છે. આગલો કૉલ: પ્રતિબંધિત નહીં"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"સેવાની જોગવાઈ કરી નથી."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"તમે કૉલર ID સેટિંગ બદલી શકતાં નથી."</string>
-    <!-- no translation found for auto_data_switch_title (3286350716870518297) -->
-    <skip />
-    <!-- no translation found for auto_data_switch_content (803557715007110959) -->
-    <skip />
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"ડેટા <xliff:g id="CARRIERDISPLAY">%s</xliff:g> પર સ્વિચ કર્યો"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"સેટિંગમાં તમે આને કોઈપણ સમયે બદલી શકો છો"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"કોઈ મોબાઇલ ડેટા સેવા નથી"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"કોટોકટીની કૉલિંગ સેવા અનુપલબ્ધ"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"કોઈ વૉઇસ સેવા નથી"</string>
@@ -700,6 +698,10 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"ઍપને તમારા શેર કરાયેલા સ્ટોરેજમાંથી વીડિયો ફાઇલો વાંચવાની મંજૂરી આપે છે."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"શેર કરાયેલા સ્ટોરેજમાંથી છબી ફાઇલો વાંચવા માટે"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"ઍપને તમારા શેર કરાયેલા સ્ટોરેજમાંથી છબી ફાઇલો વાંચવાની મંજૂરી આપે છે."</string>
+    <!-- no translation found for permlab_readVisualUserSelect (5516204215354667586) -->
+    <skip />
+    <!-- no translation found for permdesc_readVisualUserSelect (8027174717714968217) -->
+    <skip />
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"શેર કરેલા સ્ટોરેજ કન્ટેન્ટમાં ફેરફાર કરો/ડિલીટ કરો"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"શેર કરેલા સ્ટોરેજ કન્ટેન્ટમાં લખવાની મંજૂરી આપે છે."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP કૉલ્સ કરો/પ્રાપ્ત કરો"</string>

@@ -168,6 +168,8 @@
     <skip />
     <string name="keyguard_face_failed" msgid="9044619102286917151">"अनुहार पहिचान गर्न सकिएन"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"बरु फिंगरप्रिन्ट प्रयोग गर्नुहोस्"</string>
+    <!-- no translation found for keyguard_face_unlock_unavailable (8145547300240405980) -->
+    <skip />
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"ब्लुटुथ जडान भयो।"</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"ब्याट्रीमा कति प्रतिशत चार्ज छ भन्ने कुराको जानाकरी छैन।"</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"<xliff:g id="BLUETOOTH">%s</xliff:g> मा जडित।"</string>
@@ -248,8 +250,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"उज्यालपन"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"कलर इन्भर्सन"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"कलर करेक्सन"</string>
-    <!-- no translation found for quick_settings_more_user_settings (7634653308485206306) -->
-    <skip />
+    <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"प्रयोगकर्ताहरू व्यवस्थित गर्नुहोस्"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"भयो"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"बन्द गर्नुहोस्"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"जोडिएको"</string>
@@ -304,6 +305,17 @@
     <string name="sensor_privacy_mic_unblocked_toast_content" msgid="306555320557065068">"माइक्रोफोन उपलब्ध छ"</string>
     <string name="sensor_privacy_camera_unblocked_toast_content" msgid="7843105715964332311">"क्यामेरा उपलब्ध छ"</string>
     <string name="sensor_privacy_mic_camera_unblocked_toast_content" msgid="7339355093282661115">"माइक्रोफोन र क्यामेरा उपलब्ध छन्"</string>
+    <string name="sensor_privacy_mic_turned_on_dialog_title" msgid="6348853159838376513">"माइक्रोफोन अन गरियो"</string>
+    <string name="sensor_privacy_mic_turned_off_dialog_title" msgid="5760464281790732849">"माइक्रोफोन अफ गरियो"</string>
+    <string name="sensor_privacy_mic_unblocked_dialog_content" msgid="4889961886199270224">"सबै एप तथा सेवाहरूलाई माइक्रोफोन प्रयोग गर्ने अनुमति दिइएको छ।"</string>
+    <string name="sensor_privacy_mic_blocked_no_exception_dialog_content" msgid="5864898470772965394">"कुनै पनि एप तथा सेवालाई माइक्रोफोन प्रयोग गर्ने अनुमति दिइएको छैन। तपाईं \"सेटिङ &gt; गोपनीयता &gt; माइक्रोफोन\" मा गई माइक्रोफोन प्रयोग गर्ने अनुमति दिन सक्नुहुन्छ।"</string>
+    <string name="sensor_privacy_mic_blocked_with_exception_dialog_content" msgid="810289713700437896">"कुनै पनि एप तथा सेवालाई माइक्रोफोन प्रयोग गर्ने अनुमति दिइएको छैन। तपाईं \"सेटिङ &gt; गोपनीयता &gt; माइक्रोफोन\" मा गई यो कुरा परिवर्तन गर्न सक्नुहुन्छ।"</string>
+    <string name="sensor_privacy_camera_turned_on_dialog_title" msgid="8039095295100075952">"क्यामेरा अन गरियो"</string>
+    <string name="sensor_privacy_camera_turned_off_dialog_title" msgid="1936603903120742696">"क्यामेरा अफ गरियो"</string>
+    <string name="sensor_privacy_camera_unblocked_dialog_content" msgid="7847190103011782278">"सबै एप तथा सेवाहरूलाई क्यामेरा प्रयोग गर्ने अनुमति दिइएको छ।"</string>
+    <string name="sensor_privacy_camera_blocked_dialog_content" msgid="3182428709314874616">"कुनै पनि एप तथा सेवालाई क्यामेरा प्रयोग गर्ने अनुमति दिइएको छैन।"</string>
+    <string name="sensor_privacy_htt_blocked_dialog_content" msgid="3333321592997666441">"तपाईं माइक्रोफोन बटन प्रयोग गर्न चाहनुहुन्छ भने सेटिङमा गई माइक्रोफोन प्रयोग गर्ने अनुमति दिनुहोस्।"</string>
+    <string name="sensor_privacy_dialog_open_settings" msgid="1503088305279285048">"सेटिङ खोल्नुहोस्।"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"अर्को डिभाइड"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"परिदृश्य टगल गर्नुहोस्"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"तपाईंलाई अलार्म, रिमाइन्डर, कार्यक्रम र तपाईंले निर्दिष्ट गर्नुभएका कलरहरू बाहेकका ध्वनि र कम्पनहरूले बाधा पुऱ्याउने छैनन्। तपाईंले अझै सङ्गीत, भिडियो र खेलहरू लगायत आफूले प्ले गर्न छनौट गरेका जुनसुकै कुरा सुन्न सक्नुहुनेछ।"</string>
@@ -374,6 +386,16 @@
     <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"तपाईंले सेयर गर्दा, रेकर्ड गर्दा वा कास्ट गर्दा<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ले तपाईंको स्क्रिनमा देखिने वा डिभाइसमा प्ले गरिएका सबै कुरा खिच्न सक्छ। त्यसैले पासवर्ड, भुक्तानीको विवरण, म्यासेज वा अन्य संवेदनशील जानकारी सुरक्षित राख्नुहोला।"</string>
     <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"जारी राख्नुहोस्"</string>
     <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"सेयर वा रेकर्ड गर्नका लागि एप चयन गर्नुहोस्"</string>
+    <!-- no translation found for media_projection_permission_dialog_system_service_title (6827129613741303726) -->
+    <skip />
+    <!-- no translation found for media_projection_permission_dialog_system_service_warning_entire_screen (8801616203805837575) -->
+    <skip />
+    <!-- no translation found for media_projection_permission_dialog_system_service_warning_single_app (543310680568419338) -->
+    <skip />
+    <!-- no translation found for screen_capturing_disabled_by_policy_dialog_title (2113331792064527203) -->
+    <skip />
+    <!-- no translation found for screen_capturing_disabled_by_policy_dialog_description (6015975736747696431) -->
+    <skip />
     <string name="clear_all_notifications_text" msgid="348312370303046130">"सबै हटाउनुहोस्"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"व्यवस्थित गर्नुहोस्"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"इतिहास"</string>
@@ -728,14 +750,10 @@
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"मोबाइल डेटा निष्क्रिय पार्ने हो?"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"तपाईं <xliff:g id="CARRIER">%s</xliff:g> मार्फत डेटा वा इन्टरनेट प्रयोग गर्न सक्नुहुने छैन। Wi-Fi मार्फत मात्र इन्टरनेट उपलब्ध हुने छ।"</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"तपाईंको सेवा प्रदायक"</string>
-    <!-- no translation found for auto_data_switch_disable_title (5146527155665190652) -->
-    <skip />
-    <!-- no translation found for auto_data_switch_disable_message (5885533647399535852) -->
-    <skip />
-    <!-- no translation found for auto_data_switch_dialog_negative_button (2370876875999891444) -->
-    <skip />
-    <!-- no translation found for auto_data_switch_dialog_positive_button (8531782041263087564) -->
-    <skip />
+    <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"फेरि <xliff:g id="CARRIER">%s</xliff:g> को मोबाइल डेटा अन गर्ने हो?"</string>
+    <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"मोबाइल डेटा उपलब्धताका आधारमा स्वतः बदलिँदैन"</string>
+    <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"पर्दैन, धन्यवाद"</string>
+    <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"हुन्छ, बदल्नुहोस्"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"कुनै एपको कारणले अनुमतिसम्बन्धी अनुरोध बुझ्न गाह्रो भइरहेकोले सेटिङहरूले तपाईंको प्रतिक्रिया प्रमाणित गर्न सक्दैनन्।"</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"<xliff:g id="APP_0">%1$s</xliff:g> लाई <xliff:g id="APP_2">%2$s</xliff:g> का स्लाइसहरू देखाउन अनुमति दिने हो?"</string>
     <string name="slice_permission_text_1" msgid="6675965177075443714">"- यसले <xliff:g id="APP">%1$s</xliff:g> बाट जानकारी पढ्न सक्छ"</string>
@@ -794,18 +812,15 @@
     <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"म्याग्निफायर विन्डोसम्बन्धी सेटिङ"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"सर्वसुलभता कायम गर्ने सुविधा खोल्न ट्याप गर्नुहोस्। सेटिङमा गई यो बटन कस्टमाइज गर्नुहोस् वा बदल्नुहोस्।\n\n"<annotation id="link">"सेटिङ हेर्नुहोस्"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"यो बटन केही बेर नदेखिने पार्न किनारातिर सार्नुहोस्"</string>
-    <!-- no translation found for accessibility_floating_button_undo (511112888715708241) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_undo_message_text (3044079592757099698) -->
-    <skip />
+    <string name="accessibility_floating_button_undo" msgid="511112888715708241">"अन्डू गर्नुहोस्"</string>
+    <string name="accessibility_floating_button_undo_message_text" msgid="3044079592757099698">"{count,plural, =1{{label} वटा सर्टकट हटाइयो}other{# वटा सर्टकट हटाइयो}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"सिरानको बायाँतिर सार्नुहोस्"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"सिरानको दायाँतिर सार्नुहोस्"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"पुछारको बायाँतिर सार्नुहोस्"</string>
     <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"पुछारको दायाँतिर सार्नुहोस्"</string>
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"किनारामा सार्नुहोस् र नदेखिने पार्नु…"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"किनाराबाट सार्नुहोस् र देखिने पार्नु…"</string>
-    <!-- no translation found for accessibility_floating_button_action_remove_menu (6730432848162552135) -->
-    <skip />
+    <string name="accessibility_floating_button_action_remove_menu" msgid="6730432848162552135">"हटाउनुहोस्"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"टगल गर्नुहोस्"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"डिभाइस नियन्त्रण गर्ने विजेटहरू"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"कन्ट्रोल थप्नु पर्ने एप छान्नुहोस्"</string>
@@ -948,10 +963,8 @@
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"मोबाइल डेटा"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"इन्टरनेटमा कनेक्ट गरिएको छ"</string>
-    <!-- no translation found for mobile_data_temp_connection_active (4590222725908806824) -->
-    <skip />
-    <!-- no translation found for mobile_data_poor_connection (819617772268371434) -->
-    <skip />
+    <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"केही समयका लागि मोबाइल डेटामा कनेक्ट गरिएको छ"</string>
+    <string name="mobile_data_poor_connection" msgid="819617772268371434">"इन्टरनेट राम्री चलेको छैन"</string>
     <string name="mobile_data_off_summary" msgid="3663995422004150567">"मोबाइल डेटा स्वतः कनेक्ट हुँदैन"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"इन्टरनेट छैन"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"अन्य नेटवर्क उपलब्ध छैनन्"</string>

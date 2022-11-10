@@ -59,6 +59,7 @@ android {
 
 dependencies {
     androidTestImplementation project(":spa")
+    androidTestImplementation project(":testutils")
     androidTestImplementation "androidx.test.ext:junit-ktx:1.1.3"
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$jetpack_compose_version"
     androidTestImplementation "com.google.truth:truth:1.1.3"

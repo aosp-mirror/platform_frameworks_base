@@ -72,10 +72,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"కాలర్ ID ఆటోమేటిక్‌లపై పరిమితి లేదు. తర్వాత కాల్: పరిమితి లేదు"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"సేవ కేటాయించబడలేదు."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"మీరు కాలర్ ID సెట్టింగ్‌ను మార్చలేరు."</string>
-    <!-- no translation found for auto_data_switch_title (3286350716870518297) -->
-    <skip />
-    <!-- no translation found for auto_data_switch_content (803557715007110959) -->
-    <skip />
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"డేటాను <xliff:g id="CARRIERDISPLAY">%s</xliff:g>కు స్విచ్ చేశారు"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"మీరు ఎప్పుడైనా సెట్టింగ్‌లలో దీనిని మార్చవచ్చు"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"మొబైల్ డేటా సేవ లేదు"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"అత్యవసర కాలింగ్ అందుబాటులో లేదు"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"వాయిస్ సర్వీస్ లేదు"</string>
@@ -700,6 +698,10 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"మీ షేర్ చేయబడిన స్టోరేజ్ నుండి వీడియో ఫైల్‌లను చదవడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"షేర్ చేయబడిన స్టోరేజ్ నుండి ఇమేజ్ ఫైల్‌లను చదవండి"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"మీ షేర్ చేయబడిన స్టోరేజ్ నుండి ఇమేజ్ ఫైల్‌లను చదవడానికి యాప్‌ను అనుమతిస్తుంది."</string>
+    <!-- no translation found for permlab_readVisualUserSelect (5516204215354667586) -->
+    <skip />
+    <!-- no translation found for permdesc_readVisualUserSelect (8027174717714968217) -->
+    <skip />
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"మీ షేర్ చేసిన నిల్వ యొక్క కంటెంట్‌లను ఎడిట్ చేయండి లేదా తొలగించండి"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"మీ షేర్ చేసిన నిల్వ యొక్క కంటెంట్‌లను రాయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP కాల్స్‌ను చేయడానికి/స్వీకరించడానికి"</string>

@@ -3782,11 +3782,6 @@ public class InputManagerService extends IInputManager.Stub
         }
 
         @Override
-        public void pilferPointers(IBinder token) {
-            mNative.pilferPointers(token);
-        }
-
-        @Override
         public void incrementKeyboardBacklight(int deviceId) {
             mKeyboardBacklightController.incrementKeyboardBacklight(deviceId);
         }

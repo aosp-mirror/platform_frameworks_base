@@ -448,7 +448,8 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
      */
     void updateDivideBounds(int position) {
         updateBounds(position);
-        mSplitLayoutHandler.onLayoutSizeChanging(this);
+        mSplitLayoutHandler.onLayoutSizeChanging(this, mSurfaceEffectPolicy.mParallaxOffset.x,
+                mSurfaceEffectPolicy.mParallaxOffset.y);
     }
 
     void setDividePosition(int position, boolean applyLayoutChange) {
@@ -811,7 +812,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
          * @see #applySurfaceChanges(SurfaceControl.Transaction, SurfaceControl, SurfaceControl,
          * SurfaceControl, SurfaceControl, boolean)
          */
-        void onLayoutSizeChanging(SplitLayout layout);
+        void onLayoutSizeChanging(SplitLayout layout, int offsetX, int offsetY);
 
         /**
          * Calls when finish resizing the split bounds.
@@ -1092,7 +1093,8 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
             // ImePositionProcessor#onImeVisibilityChanged directly in DividerView is not enough
             // because DividerView won't receive onImeVisibilityChanged callback after it being
             // re-inflated.
-            mSplitWindowManager.setInteractive(!mImeShown || !mHasImeFocus);
+            mSplitWindowManager.setInteractive(!mImeShown || !mHasImeFocus,
+                    "onImeStartPositioning");
 
             return needOffset ? IME_ANIMATION_NO_ALPHA : 0;
         }
@@ -1118,7 +1120,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
             // Restore the split layout when wm-shell is not controlling IME insets anymore.
             if (!controlling && mImeShown) {
                 reset();
-                mSplitWindowManager.setInteractive(true);
+                mSplitWindowManager.setInteractive(true, "onImeControlTargetChanged");
                 mSplitLayoutHandler.setLayoutOffsetTarget(0, 0, SplitLayout.this);
                 mSplitLayoutHandler.onLayoutPositionChanging(SplitLayout.this);
             }

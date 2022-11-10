@@ -72,10 +72,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"ডিফল্টরূপে কলার আইডি সীমাবদ্ধ করা থাকে না৷ পরবর্তী কল: সীমাবদ্ধ নয়"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"পরিষেবা প্রস্তুত নয়৷"</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"আপনি কলার আইডি এর সেটিংস পরিবর্তন করতে পারবেন না৷"</string>
-    <!-- no translation found for auto_data_switch_title (3286350716870518297) -->
-    <skip />
-    <!-- no translation found for auto_data_switch_content (803557715007110959) -->
-    <skip />
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"<xliff:g id="CARRIERDISPLAY">%s</xliff:g>-এর ডেটা ব্যবহার করা হয়েছে"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"আপনি যে কোনও সময় সেটিংস থেকে এটি পরিবর্তন করতে পারবেন"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"মোবাইল ডেটা পরিষেবা নেই"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"জরুরি কল করা যাবে না"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"ভয়েস পরিষেবা নেই"</string>
@@ -700,6 +698,10 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"আপনার শেয়ার করা স্টোরেজ থেকে ভিডিও ফাইল রিড করতে অ্যাপকে অনুমতি দিন।"</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"শেয়ার করা স্টোরেজ থেকে ছবির ফাইল রিড করা"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"আপনার শেয়ার করা স্টোরেজ থেকে ছবির ফাইল রিড করার জন্য অ্যাপকে অনুমতি দেয়।"</string>
+    <!-- no translation found for permlab_readVisualUserSelect (5516204215354667586) -->
+    <skip />
+    <!-- no translation found for permdesc_readVisualUserSelect (8027174717714968217) -->
+    <skip />
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"শেয়ার করা স্টোরেজের কন্টেন্ট মুছে ফেলুন বা পরিবর্তন করুন"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"শেয়ার করা স্টোরেজের কন্টেন্ট লেখার জন্য অ্যাপটিকে অনুমতি দিন।"</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP কল করুন/গ্রহণ করুন"</string>

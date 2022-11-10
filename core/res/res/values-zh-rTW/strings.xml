@@ -72,10 +72,8 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"預設顯示本機號碼，下一通電話也繼續顯示。"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"無法提供此服務。"</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"你無法變更來電顯示設定。"</string>
-    <!-- no translation found for auto_data_switch_title (3286350716870518297) -->
-    <skip />
-    <!-- no translation found for auto_data_switch_content (803557715007110959) -->
-    <skip />
+    <string name="auto_data_switch_title" msgid="3286350716870518297">"行動數據已切換至「<xliff:g id="CARRIERDISPLAY">%s</xliff:g>」"</string>
+    <string name="auto_data_switch_content" msgid="803557715007110959">"你隨時可以前往「設定」變更這項設定"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"沒有行動數據傳輸服務"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"無法撥打緊急電話"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"無法使用語音通話服務"</string>
@@ -700,6 +698,10 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"允許應用程式讀取共用儲存空間中的影片檔案。"</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"讀取共用儲存空間中的圖片檔案"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"允許應用程式讀取共用儲存空間中的圖片檔案。"</string>
+    <!-- no translation found for permlab_readVisualUserSelect (5516204215354667586) -->
+    <skip />
+    <!-- no translation found for permdesc_readVisualUserSelect (8027174717714968217) -->
+    <skip />
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"修改或刪除共用儲存空間中的內容"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"允許這個應用程式寫入共用儲存空間中的內容。"</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"撥打/接聽 SIP 通話"</string>
