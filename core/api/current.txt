@@ -1174,6 +1174,8 @@ package android {
     field public static final int persistentDrawingCache = 16842990; // 0x10100ee
     field public static final int persistentWhenFeatureAvailable = 16844131; // 0x1010563
     field @Deprecated public static final int phoneNumber = 16843111; // 0x1010167
+    field public static final int physicalKeyboardHintLanguageTag;
+    field public static final int physicalKeyboardHintLayoutType;
     field public static final int pivotX = 16843189; // 0x10101b5
     field public static final int pivotY = 16843190; // 0x10101b6
     field public static final int pointerIcon = 16844041; // 0x1010509
@@ -54395,6 +54397,8 @@ package android.view.inputmethod {
     method public String getMode();
     method @NonNull public CharSequence getNameOverride();
     method public int getNameResId();
+    method @Nullable public android.icu.util.ULocale getPhysicalKeyboardHintLanguageTag();
+    method @NonNull public String getPhysicalKeyboardHintLayoutType();
     method public boolean isAsciiCapable();
     method public boolean isAuxiliary();
     method public boolean overridesImplicitlyEnabledSubtype();
@@ -54409,6 +54413,7 @@ package android.view.inputmethod {
     method public android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder setIsAuxiliary(boolean);
     method public android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder setLanguageTag(String);
     method public android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder setOverridesImplicitlyEnabledSubtype(boolean);
+    method @NonNull public android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder setPhysicalKeyboardHint(@Nullable android.icu.util.ULocale, @NonNull String);
     method public android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder setSubtypeExtraValue(String);
     method public android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder setSubtypeIconResId(int);
     method public android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder setSubtypeId(int);
