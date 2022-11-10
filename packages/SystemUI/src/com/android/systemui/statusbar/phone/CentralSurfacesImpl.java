@@ -848,6 +848,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mScreenOffAnimationController = screenOffAnimationController;
 
         mShadeExpansionStateManager.addExpansionListener(this::onPanelExpansionChanged);
+        mShadeExpansionStateManager.addFullExpansionListener(this::onShadeExpansionFullyChanged);
 
         mBubbleExpandListener = (isExpanding, key) ->
                 mContext.getMainExecutor().execute(this::updateScrimController);
@@ -1376,6 +1377,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private void onPanelExpansionChanged(ShadeExpansionChangeEvent event) {
         float fraction = event.getFraction();
         boolean tracking = event.getTracking();
+        boolean isExpanded = event.getExpanded();
         dispatchPanelExpansionForKeyguardDismiss(fraction, tracking);
 
         if (fraction == 0 || fraction == 1) {
@@ -1384,6 +1386,23 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             }
             if (getNotificationPanelViewController() != null) {
                 getNotificationPanelViewController().updateSystemUiStateFlags();
+            }
+        }
+    }
+
+    @VisibleForTesting
+    void onShadeExpansionFullyChanged(Boolean isExpanded) {
+        if (mPanelExpanded != isExpanded) {
+            mPanelExpanded = isExpanded;
+            if (isExpanded && mStatusBarStateController.getState() != StatusBarState.KEYGUARD) {
+                if (DEBUG) {
+                    Log.v(TAG, "clearing notification effects from Height");
+                }
+                clearNotificationEffects();
+            }
+
+            if (!isExpanded) {
+                mRemoteInputManager.onPanelCollapsed();
             }
         }
     }
@@ -1790,27 +1809,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     @Override
     public void onKeyguardViewManagerStatesUpdated() {
         logStateToEventlog();
-    }
-
-    @Override
-    public void setPanelExpanded(boolean isExpanded) {
-        if (mPanelExpanded != isExpanded) {
-            mNotificationLogger.onPanelExpandedChanged(isExpanded);
-        }
-        mPanelExpanded = isExpanded;
-        mStatusBarHideIconsForBouncerManager.setPanelExpandedAndTriggerUpdate(isExpanded);
-        mNotificationShadeWindowController.setPanelExpanded(isExpanded);
-        mStatusBarStateController.setPanelExpanded(isExpanded);
-        if (isExpanded && mStatusBarStateController.getState() != StatusBarState.KEYGUARD) {
-            if (DEBUG) {
-                Log.v(TAG, "clearing notification effects from Height");
-            }
-            clearNotificationEffects();
-        }
-
-        if (!isExpanded) {
-            mRemoteInputManager.onPanelCollapsed();
-        }
     }
 
     @Override
