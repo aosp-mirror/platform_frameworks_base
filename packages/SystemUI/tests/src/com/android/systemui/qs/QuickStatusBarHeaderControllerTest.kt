@@ -36,6 +36,7 @@ import com.android.systemui.statusbar.FeatureFlags
 import com.android.systemui.statusbar.phone.StatusBarIconController
 import com.android.systemui.statusbar.phone.StatusIconContainer
 import com.android.systemui.statusbar.policy.Clock
+import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
@@ -48,6 +49,7 @@ import org.mockito.Answers
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
+import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
@@ -95,6 +97,7 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var featureFlags: FeatureFlags
 
+    private lateinit var deviceProvisionedController: FakeDeviceProvisionedController
     private val qsExpansionPathInterpolator = QSExpansionPathInterpolator()
 
     private lateinit var controller: QuickStatusBarHeaderController
@@ -112,6 +115,9 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
         `when`(view.resources).thenReturn(mContext.resources)
         `when`(view.isAttachedToWindow).thenReturn(true)
         `when`(view.context).thenReturn(context)
+
+        deviceProvisionedController = FakeDeviceProvisionedController()
+        deviceProvisionedController.provisioned = true
 
         cameraSlotName = mContext.resources.getString(
             com.android.internal.R.string.status_bar_camera)
@@ -133,7 +139,8 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
                 colorExtractor,
                 privacyDialogController,
                 qsExpansionPathInterpolator,
-                featureFlags
+                featureFlags,
+                deviceProvisionedController
         )
     }
 
@@ -268,6 +275,34 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
         verify(view).setIsSingleCarrier(false)
     }
 
+    @Test
+    fun testDeviceNotProvisionedBeforeInit_clickOnChipDoesntShowDialog() {
+        deviceProvisionedController.provisioned = false
+        controller.init()
+
+        val captor = argumentCaptor<View.OnClickListener>()
+        verify(privacyChip).setOnClickListener(capture(captor))
+
+        captor.value.onClick(privacyChip)
+
+        verify(privacyDialogController, never()).showDialog(any(Context::class.java))
+    }
+
+    @Test
+    fun testDeviceNotProvisionedBeforeInit_provisionedAfter_clickOnChipDoesntShowDialog() {
+        deviceProvisionedController.provisioned = false
+        controller.init()
+
+        deviceProvisionedController.provisioned = true
+
+        val captor = argumentCaptor<View.OnClickListener>()
+        verify(privacyChip).setOnClickListener(capture(captor))
+
+        captor.value.onClick(privacyChip)
+
+        verify(privacyDialogController).showDialog(any(Context::class.java))
+    }
+
     private fun stubViews() {
         `when`(view.findViewById<View>(anyInt())).thenReturn(mockView)
         `when`(view.findViewById<QSCarrierGroup>(R.id.carrier_group)).thenReturn(qsCarrierGroup)
@@ -279,5 +314,41 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
     private fun setPrivacyController(micCamera: Boolean, location: Boolean) {
         `when`(privacyItemController.micCameraAvailable).thenReturn(micCamera)
         `when`(privacyItemController.locationAvailable).thenReturn(location)
+    }
+
+    // We only care about device provisioned
+    class FakeDeviceProvisionedController : DeviceProvisionedController {
+        val callbacks = mutableSetOf<DeviceProvisionedController.DeviceProvisionedListener>()
+        var provisioned = false
+            set(value) {
+                if (field != value) {
+                    field = value
+                    callbacks.forEach { it.onDeviceProvisionedChanged() }
+                }
+            }
+
+        override fun addCallback(listener: DeviceProvisionedController.DeviceProvisionedListener) {
+            if (callbacks.add(listener)) {
+                listener.onDeviceProvisionedChanged()
+            }
+        }
+
+        override fun removeCallback(
+                listener: DeviceProvisionedController.DeviceProvisionedListener
+        ) {
+            callbacks.remove(listener)
+        }
+
+        override fun isDeviceProvisioned(): Boolean {
+            return provisioned
+        }
+
+        override fun isUserSetup(currentUser: Int): Boolean {
+            return true
+        }
+
+        override fun getCurrentUser(): Int {
+            return 0
+        }
     }
 }
