@@ -21,6 +21,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.outlined.NewReleases
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -309,9 +310,21 @@ fun MoreOptionsRowIntroCard(
 ) {
   Card() {
     Column() {
+      Icon(
+        Icons.Outlined.NewReleases,
+        contentDescription = null,
+        modifier = Modifier.align(alignment = Alignment.CenterHorizontally).padding(all = 24.dp)
+      )
       Text(
         text = stringResource(R.string.use_provider_for_all_title, providerInfo.displayName),
         style = MaterialTheme.typography.titleMedium,
+        modifier = Modifier.padding(horizontal = 24.dp)
+          .align(alignment = Alignment.CenterHorizontally),
+        textAlign = TextAlign.Center,
+      )
+      Text(
+        text = stringResource(R.string.confirm_default_or_use_once_description),
+        style = MaterialTheme.typography.bodyLarge,
         modifier = Modifier.padding(all = 24.dp).align(alignment = Alignment.CenterHorizontally)
       )
       Row(
