@@ -53,7 +53,6 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
-import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.scrim.ScrimView;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.statusbar.notification.stack.ViewState;
@@ -205,7 +204,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     private final ScreenOffAnimationController mScreenOffAnimationController;
     private final KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
     private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
-    private KeyguardViewMediator mKeyguardViewMediator;
 
     private GradientColors mColors;
     private boolean mNeedsDrawableColorUpdate;
@@ -275,8 +273,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             @Main Executor mainExecutor,
             ScreenOffAnimationController screenOffAnimationController,
             KeyguardUnlockAnimationController keyguardUnlockAnimationController,
-            StatusBarKeyguardViewManager statusBarKeyguardViewManager,
-            KeyguardViewMediator keyguardViewMediator) {
+            StatusBarKeyguardViewManager statusBarKeyguardViewManager) {
         mScrimStateListener = lightBarController::setScrimState;
         mDefaultScrimAlpha = BUSY_SCRIM_ALPHA;
 
@@ -315,8 +312,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             }
         });
         mColors = new GradientColors();
-
-        mKeyguardViewMediator = keyguardViewMediator;
     }
 
     /**
@@ -811,13 +806,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
                 mBehindTint = ColorUtils.blendARGB(ScrimState.BOUNCER.getBehindTint(),
                         mBehindTint,
                         interpolatedFraction);
-            }
-
-            // If we're unlocked but still playing the occlude animation, remain at the keyguard
-            // alpha temporarily.
-            if (mKeyguardViewMediator.isOccludeAnimationPlaying()
-                    || mState.mLaunchingAffordanceWithPreview) {
-                mNotificationsAlpha = KEYGUARD_SCRIM_ALPHA;
             }
         } else if (mState == ScrimState.AUTH_SCRIMMED_SHADE) {
             float behindFraction = getInterpolatedFraction();
