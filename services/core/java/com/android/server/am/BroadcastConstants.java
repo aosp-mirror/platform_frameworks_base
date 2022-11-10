@@ -141,7 +141,8 @@ public class BroadcastConstants {
      */
     public int MAX_RUNNING_PROCESS_QUEUES = DEFAULT_MAX_RUNNING_PROCESS_QUEUES;
     private static final String KEY_MAX_RUNNING_PROCESS_QUEUES = "bcast_max_running_process_queues";
-    private static final int DEFAULT_MAX_RUNNING_PROCESS_QUEUES = 4;
+    private static final int DEFAULT_MAX_RUNNING_PROCESS_QUEUES =
+            ActivityManager.isLowRamDeviceStatic() ? 2 : 4;
 
     /**
      * For {@link BroadcastQueueModernImpl}: Maximum number of active broadcasts
@@ -150,7 +151,8 @@ public class BroadcastConstants {
      */
     public int MAX_RUNNING_ACTIVE_BROADCASTS = DEFAULT_MAX_RUNNING_ACTIVE_BROADCASTS;
     private static final String KEY_MAX_RUNNING_ACTIVE_BROADCASTS = "bcast_max_running_active_broadcasts";
-    private static final int DEFAULT_MAX_RUNNING_ACTIVE_BROADCASTS = 16;
+    private static final int DEFAULT_MAX_RUNNING_ACTIVE_BROADCASTS =
+            ActivityManager.isLowRamDeviceStatic() ? 8 : 16;
 
     /**
      * For {@link BroadcastQueueModernImpl}: Maximum number of pending
@@ -159,7 +161,8 @@ public class BroadcastConstants {
      */
     public int MAX_PENDING_BROADCASTS = DEFAULT_MAX_PENDING_BROADCASTS;
     private static final String KEY_MAX_PENDING_BROADCASTS = "bcast_max_pending_broadcasts";
-    private static final int DEFAULT_MAX_PENDING_BROADCASTS = 256;
+    private static final int DEFAULT_MAX_PENDING_BROADCASTS =
+            ActivityManager.isLowRamDeviceStatic() ? 128 : 256;
 
     /**
      * For {@link BroadcastQueueModernImpl}: Delay to apply to normal
