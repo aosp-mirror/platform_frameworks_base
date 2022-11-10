@@ -205,6 +205,9 @@ object Flags {
     val QS_SECONDARY_DATA_SUB_INFO =
         unreleasedFlag(508, "qs_secondary_data_sub_info", teamfood = true)
 
+    // TODO(b/244064524): Tracking Bug
+    @JvmField val QS_SECONDARY_DATA_SUB_INFO = UnreleasedFlag(508, teamfood = true)
+
     // 600- status bar
     // TODO(b/254513246): Tracking Bug
     val STATUS_BAR_USER_SWITCHER =
