@@ -24,8 +24,9 @@ import android.os.Handler
 import android.os.Looper
 import android.os.ResultReceiver
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.widget.AdapterView
-import android.widget.AdapterView.OnItemClickListener
 import android.widget.ArrayAdapter
 import android.widget.Spinner
 import android.widget.Switch
@@ -47,6 +48,7 @@ class ScreenRecordPermissionDialog(
     private val onStartRecordingClicked: Runnable?
 ) : BaseScreenSharePermissionDialog(context, createOptionList(), null) {
     private lateinit var tapsSwitch: Switch
+    private lateinit var tapsView: View
     private lateinit var audioSwitch: Switch
     private lateinit var options: Spinner
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -84,16 +86,25 @@ class ScreenRecordPermissionDialog(
     private fun initRecordOptionsView() {
         audioSwitch = findViewById(R.id.screenrecord_audio_switch)
         tapsSwitch = findViewById(R.id.screenrecord_taps_switch)
+        tapsView = findViewById(R.id.show_taps)
+        updateTapsViewVisibility()
         options = findViewById(R.id.screen_recording_options)
         val a: ArrayAdapter<*> =
             ScreenRecordingAdapter(context, android.R.layout.simple_spinner_dropdown_item, MODES)
         a.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         options.adapter = a
-        options.setOnItemClickListenerInt(
-            OnItemClickListener { _: AdapterView<*>?, _: View?, _: Int, _: Long ->
-                audioSwitch.isChecked = true
-            }
-        )
+        options.setOnItemClickListenerInt { _: AdapterView<*>?, _: View?, _: Int, _: Long ->
+            audioSwitch.isChecked = true
+        }
+    }
+
+    override fun onItemSelected(adapterView: AdapterView<*>?, view: View, pos: Int, id: Long) {
+        super.onItemSelected(adapterView, view, pos, id)
+        updateTapsViewVisibility()
+    }
+
+    private fun updateTapsViewVisibility() {
+        tapsView.visibility = if (selectedScreenShareOption.mode == SINGLE_APP) GONE else VISIBLE
     }
 
     /**
@@ -103,7 +114,7 @@ class ScreenRecordPermissionDialog(
      */
     private fun requestScreenCapture(captureTarget: MediaProjectionCaptureTarget?) {
         val userContext = userContextProvider.userContext
-        val showTaps = tapsSwitch.isChecked
+        val showTaps = selectedScreenShareOption.mode != SINGLE_APP && tapsSwitch.isChecked
         val audioMode =
             if (audioSwitch.isChecked) options.selectedItem as ScreenRecordingAudioSource
             else ScreenRecordingAudioSource.NONE
