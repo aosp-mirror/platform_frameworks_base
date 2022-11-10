@@ -369,12 +369,10 @@ import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.MemInfoReader;
 import com.android.internal.util.Preconditions;
-import com.android.internal.util.function.DecFunction;
 import com.android.internal.util.function.HeptFunction;
 import com.android.internal.util.function.HexFunction;
 import com.android.internal.util.function.QuadFunction;
 import com.android.internal.util.function.QuintFunction;
-import com.android.internal.util.function.TriFunction;
 import com.android.internal.util.function.UndecFunction;
 import com.android.server.AlarmManagerInternal;
 import com.android.server.DeviceIdleInternal;
@@ -18321,19 +18319,20 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public SyncNotedAppOp startProxyOperation(int code,
+        public SyncNotedAppOp startProxyOperation(@NonNull IBinder clientId, int code,
                 @NonNull AttributionSource attributionSource, boolean startIfModeDefault,
                 boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
                 boolean skipProxyOperation, @AttributionFlags int proxyAttributionFlags,
                 @AttributionFlags int proxiedAttributionFlags, int attributionChainId,
-                @NonNull DecFunction<Integer, AttributionSource, Boolean, Boolean, String, Boolean,
-                        Boolean, Integer, Integer, Integer, SyncNotedAppOp> superImpl) {
+                @NonNull UndecFunction<IBinder, Integer, AttributionSource,
+                        Boolean, Boolean, String, Boolean, Boolean, Integer, Integer, Integer,
+                        SyncNotedAppOp> superImpl) {
             if (attributionSource.getUid() == mTargetUid && isTargetOp(code)) {
                 final int shellUid = UserHandle.getUid(UserHandle.getUserId(
                         attributionSource.getUid()), Process.SHELL_UID);
                 final long identity = Binder.clearCallingIdentity();
                 try {
-                    return superImpl.apply(code, new AttributionSource(shellUid,
+                    return superImpl.apply(clientId, code, new AttributionSource(shellUid,
                             "com.android.shell", attributionSource.getAttributionTag(),
                             attributionSource.getToken(), attributionSource.getNext()),
                             startIfModeDefault, shouldCollectAsyncNotedOp, message,
@@ -18343,21 +18342,22 @@ public class ActivityManagerService extends IActivityManager.Stub
                     Binder.restoreCallingIdentity(identity);
                 }
             }
-            return superImpl.apply(code, attributionSource, startIfModeDefault,
+            return superImpl.apply(clientId, code, attributionSource, startIfModeDefault,
                     shouldCollectAsyncNotedOp, message, shouldCollectMessage, skipProxyOperation,
                     proxyAttributionFlags, proxiedAttributionFlags, attributionChainId);
         }
 
         @Override
-        public void finishProxyOperation(int code, @NonNull AttributionSource attributionSource,
-                boolean skipProxyOperation, @NonNull TriFunction<Integer, AttributionSource,
-                        Boolean, Void> superImpl) {
+        public void finishProxyOperation(@NonNull IBinder clientId, int code,
+                @NonNull AttributionSource attributionSource, boolean skipProxyOperation,
+                @NonNull QuadFunction<IBinder, Integer, AttributionSource, Boolean,
+                        Void> superImpl) {
             if (attributionSource.getUid() == mTargetUid && isTargetOp(code)) {
                 final int shellUid = UserHandle.getUid(UserHandle.getUserId(
                         attributionSource.getUid()), Process.SHELL_UID);
                 final long identity = Binder.clearCallingIdentity();
                 try {
-                    superImpl.apply(code, new AttributionSource(shellUid,
+                    superImpl.apply(clientId, code, new AttributionSource(shellUid,
                             "com.android.shell", attributionSource.getAttributionTag(),
                             attributionSource.getToken(), attributionSource.getNext()),
                             skipProxyOperation);
@@ -18365,7 +18365,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     Binder.restoreCallingIdentity(identity);
                 }
             }
-            superImpl.apply(code, attributionSource, skipProxyOperation);
+            superImpl.apply(clientId, code, attributionSource, skipProxyOperation);
         }
 
         private boolean isTargetOp(int code) {
