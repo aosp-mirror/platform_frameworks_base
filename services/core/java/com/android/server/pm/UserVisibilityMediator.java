@@ -16,8 +16,8 @@
 package com.android.server.pm;
 
 import static android.content.pm.UserInfo.NO_PROFILE_GROUP_ID;
-import static android.os.UserHandle.USER_CURRENT;
 import static android.os.UserHandle.USER_NULL;
+import static android.os.UserHandle.USER_SYSTEM;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import android.annotation.IntDef;
@@ -54,10 +54,9 @@ public final class UserVisibilityMediator implements Dumpable {
 
     private static final String PREFIX_START_USER_RESULT = "START_USER_";
 
-    // NOTE: it's set as USER_CURRENT instead of USER_NULL because NO_PROFILE_GROUP_ID has the same
-    // falue of USER_NULL, which would complicate some checks (especially on unit tests)
+    // TODO(b/242195409): might need to change this if boot logic is refactored for HSUM devices
     @VisibleForTesting
-    static final int INITIAL_CURRENT_USER_ID = USER_CURRENT;
+    static final int INITIAL_CURRENT_USER_ID = USER_SYSTEM;
 
     public static final int START_USER_RESULT_SUCCESS_VISIBLE = 1;
     public static final int START_USER_RESULT_SUCCESS_INVISIBLE = 2;
@@ -126,7 +125,8 @@ public final class UserVisibilityMediator implements Dumpable {
                 }
                 if (foreground) {
                     Slogf.w(TAG, "startUser(%d, %d, %b, %d) failed: cannot start profile user in "
-                            + "foreground");
+                            + "foreground", userId, actualProfileGroupId, foreground,
+                            displayId);
                     return START_USER_RESULT_FAILURE;
                 } else {
                     boolean isParentRunning = mStartedProfileGroupIds
