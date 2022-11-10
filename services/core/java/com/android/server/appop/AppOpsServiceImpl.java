@@ -16,14 +16,15 @@
 
 package com.android.server.appop;
 
-import static android.app.AppOpsManager.ATTRIBUTION_CHAIN_ID_NONE;
-import static android.app.AppOpsManager.ATTRIBUTION_FLAG_TRUSTED;
+import static android.app.AppOpsManager.AttributedOpEntry;
+import static android.app.AppOpsManager.AttributionFlags;
 import static android.app.AppOpsManager.CALL_BACK_ON_SWITCHED_OP;
 import static android.app.AppOpsManager.FILTER_BY_ATTRIBUTION_TAG;
 import static android.app.AppOpsManager.FILTER_BY_OP_NAMES;
 import static android.app.AppOpsManager.FILTER_BY_PACKAGE_NAME;
 import static android.app.AppOpsManager.FILTER_BY_UID;
 import static android.app.AppOpsManager.HISTORY_FLAG_GET_ATTRIBUTION_CHAINS;
+import static android.app.AppOpsManager.HistoricalOps;
 import static android.app.AppOpsManager.HistoricalOpsRequestFilter;
 import static android.app.AppOpsManager.KEY_BG_STATE_SETTLE_TIME;
 import static android.app.AppOpsManager.KEY_FG_SERVICE_STATE_SETTLE_TIME;
@@ -33,6 +34,7 @@ import static android.app.AppOpsManager.MODE_DEFAULT;
 import static android.app.AppOpsManager.MODE_ERRORED;
 import static android.app.AppOpsManager.MODE_FOREGROUND;
 import static android.app.AppOpsManager.MODE_IGNORED;
+import static android.app.AppOpsManager.Mode;
 import static android.app.AppOpsManager.OP_CAMERA;
 import static android.app.AppOpsManager.OP_FLAGS_ALL;
 import static android.app.AppOpsManager.OP_FLAG_SELF;
@@ -45,12 +47,10 @@ import static android.app.AppOpsManager.OP_RECORD_AUDIO_HOTWORD;
 import static android.app.AppOpsManager.OP_VIBRATE;
 import static android.app.AppOpsManager.OnOpStartedListener.START_TYPE_FAILED;
 import static android.app.AppOpsManager.OnOpStartedListener.START_TYPE_STARTED;
+import static android.app.AppOpsManager.OpEntry;
 import static android.app.AppOpsManager.OpEventProxyInfo;
+import static android.app.AppOpsManager.OpFlags;
 import static android.app.AppOpsManager.RestrictionBypass;
-import static android.app.AppOpsManager.SAMPLING_STRATEGY_BOOT_TIME_SAMPLING;
-import static android.app.AppOpsManager.SAMPLING_STRATEGY_RARELY_USED;
-import static android.app.AppOpsManager.SAMPLING_STRATEGY_UNIFORM;
-import static android.app.AppOpsManager.SAMPLING_STRATEGY_UNIFORM_OPS;
 import static android.app.AppOpsManager.SECURITY_EXCEPTION_ON_INVALID_ATTRIBUTION_TAG_CHANGE;
 import static android.app.AppOpsManager._NUM_OP;
 import static android.app.AppOpsManager.extractFlagsFromKey;
@@ -59,13 +59,10 @@ import static android.app.AppOpsManager.modeToName;
 import static android.app.AppOpsManager.opAllowSystemBypassRestriction;
 import static android.app.AppOpsManager.opRestrictsRead;
 import static android.app.AppOpsManager.opToName;
-import static android.app.AppOpsManager.opToPublicName;
 import static android.content.Intent.ACTION_PACKAGE_REMOVED;
 import static android.content.Intent.EXTRA_REPLACING;
-import static android.content.pm.PermissionInfo.PROTECTION_DANGEROUS;
-import static android.content.pm.PermissionInfo.PROTECTION_FLAG_APPOP;
 
-import static com.android.server.appop.AppOpsService.ModeCallback.ALL_OPS;
+import static com.android.server.appop.AppOpsServiceImpl.ModeCallback.ALL_OPS;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -75,30 +72,16 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
-import android.app.AppOpsManager.AttributedOpEntry;
-import android.app.AppOpsManager.AttributionFlags;
-import android.app.AppOpsManager.HistoricalOps;
-import android.app.AppOpsManager.Mode;
-import android.app.AppOpsManager.OpEntry;
-import android.app.AppOpsManager.OpFlags;
-import android.app.AppOpsManagerInternal;
-import android.app.AppOpsManagerInternal.CheckOpsDelegate;
-import android.app.AsyncNotedAppOp;
-import android.app.RuntimeAppOpAccessMessage;
-import android.app.SyncNotedAppOp;
 import android.app.admin.DevicePolicyManagerInternal;
-import android.content.AttributionSource;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PermissionInfo;
 import android.database.ContentObserver;
-import android.hardware.camera2.CameraDevice.CAMERA_AUDIO_RESTRICTION;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Binder;
@@ -107,15 +90,12 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.IBinder;
+import android.os.IBinder.DeathRecipient;
 import android.os.PackageTagsList;
 import android.os.Process;
 import android.os.RemoteCallback;
-import android.os.RemoteCallbackList;
 import android.os.RemoteException;
-import android.os.ResultReceiver;
 import android.os.ServiceManager;
-import android.os.ShellCallback;
-import android.os.ShellCommand;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.storage.StorageManagerInternal;
@@ -125,7 +105,6 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.KeyValueListParser;
-import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -134,15 +113,11 @@ import android.util.TimeUtils;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.annotations.Immutable;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IAppOpsActiveCallback;
-import com.android.internal.app.IAppOpsAsyncNotedCallback;
 import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsNotedCallback;
-import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IAppOpsStartedCallback;
-import com.android.internal.app.MessageSamplingConfig;
 import com.android.internal.compat.IPlatformCompat;
 import com.android.internal.os.Clock;
 import com.android.internal.util.ArrayUtils;
@@ -155,18 +130,13 @@ import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.LocalServices;
 import com.android.server.LockGuard;
 import com.android.server.SystemServerInitThreadPool;
-import com.android.server.SystemServiceManager;
-import com.android.server.pm.PackageList;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.component.ParsedAttribution;
-import com.android.server.policy.AppOpsPolicy;
 
 import dalvik.annotation.optimization.NeverCompile;
 
 import libcore.util.EmptyArray;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -175,12 +145,9 @@ import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -190,27 +157,21 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Scanner;
 import java.util.Set;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.function.Consumer;
 
-public class AppOpsServiceImpl extends IAppOpsService.Stub implements PersistenceScheduler {
+class AppOpsServiceImpl implements AppOpsServiceInterface {
     static final String TAG = "AppOps";
     static final boolean DEBUG = false;
 
-    /**
-     * Used for data access validation collection, we wish to only log a specific access once
-     */
-    private final ArraySet<NoteOpTrace> mNoteOpCallerStacktraces = new ArraySet<>();
-
     private static final int NO_VERSION = -1;
-    /** Increment by one every time and add the corresponding upgrade logic in
-     *  {@link #upgradeLocked(int)} below. The first version was 1 */
+    /**
+     * Increment by one every time and add the corresponding upgrade logic in
+     * {@link #upgradeLocked(int)} below. The first version was 1
+     */
     private static final int CURRENT_VERSION = 1;
 
     // Write at most every 30 minutes.
-    static final long WRITE_DELAY = DEBUG ? 1000 : 30*60*1000;
+    static final long WRITE_DELAY = DEBUG ? 1000 : 30 * 60 * 1000;
 
     // Constant meaning that any UID should be matched when dispatching callbacks
     private static final int UID_ANY = -2;
@@ -221,65 +182,34 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
             OP_CAMERA,
             OP_VIBRATE,
     };
-
-    private static final int MAX_UNFORWARDED_OPS = 10;
     private static final int MAX_UNUSED_POOLED_OBJECTS = 3;
-    private static final int RARELY_USED_PACKAGES_INITIALIZATION_DELAY_MILLIS = 300000;
 
     final Context mContext;
     final AtomicFile mFile;
-    private final @Nullable File mNoteOpCallerStacktracesFile;
     final Handler mHandler;
 
     /**
-     * Pool for {@link AttributedOp2.OpEventProxyInfoPool} to avoid to constantly reallocate new
+     * Pool for {@link AttributedOp.OpEventProxyInfoPool} to avoid to constantly reallocate new
      * objects
      */
     @GuardedBy("this")
-    final AttributedOp2.OpEventProxyInfoPool mOpEventProxyInfoPool =
-            new AttributedOp2.OpEventProxyInfoPool(MAX_UNUSED_POOLED_OBJECTS);
+    final AttributedOp.OpEventProxyInfoPool mOpEventProxyInfoPool =
+            new AttributedOp.OpEventProxyInfoPool(MAX_UNUSED_POOLED_OBJECTS);
 
     /**
-     * Pool for {@link AttributedOp2.InProgressStartOpEventPool} to avoid to constantly reallocate
+     * Pool for {@link AttributedOp.InProgressStartOpEventPool} to avoid to constantly reallocate
      * new objects
      */
     @GuardedBy("this")
-    final AttributedOp2.InProgressStartOpEventPool mInProgressStartOpEventPool =
-            new AttributedOp2.InProgressStartOpEventPool(mOpEventProxyInfoPool,
+    final AttributedOp.InProgressStartOpEventPool mInProgressStartOpEventPool =
+            new AttributedOp.InProgressStartOpEventPool(mOpEventProxyInfoPool,
                     MAX_UNUSED_POOLED_OBJECTS);
-
-    private final AppOpsManagerInternalImpl mAppOpsManagerInternal
-            = new AppOpsManagerInternalImpl();
-    @Nullable private final DevicePolicyManagerInternal dpmi =
+    @Nullable
+    private final DevicePolicyManagerInternal dpmi =
             LocalServices.getService(DevicePolicyManagerInternal.class);
 
     private final IPlatformCompat mPlatformCompat = IPlatformCompat.Stub.asInterface(
             ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE));
-
-    /**
-     * Registered callbacks, called from {@link #collectAsyncNotedOp}.
-     *
-     * <p>(package name, uid) -> callbacks
-     *
-     * @see #getAsyncNotedOpsKey(String, int)
-     */
-    @GuardedBy("this")
-    private final ArrayMap<Pair<String, Integer>, RemoteCallbackList<IAppOpsAsyncNotedCallback>>
-            mAsyncOpWatchers = new ArrayMap<>();
-
-    /**
-     * Async note-ops collected from {@link #collectAsyncNotedOp} that have not been delivered to a
-     * callback yet.
-     *
-     * <p>(package name, uid) -> list&lt;ops&gt;
-     *
-     * @see #getAsyncNotedOpsKey(String, int)
-     */
-    @GuardedBy("this")
-    private final ArrayMap<Pair<String, Integer>, ArrayList<AsyncNotedAppOp>>
-            mUnforwardedAsyncNotedOps = new ArrayMap<>();
-
-    boolean mWriteNoteOpsScheduled;
 
     boolean mWriteScheduled;
     boolean mFastWriteScheduled;
@@ -289,12 +219,13 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
                 mWriteScheduled = false;
                 mFastWriteScheduled = false;
                 AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>() {
-                    @Override protected Void doInBackground(Void... params) {
+                    @Override
+                    protected Void doInBackground(Void... params) {
                         writeState();
                         return null;
                     }
                 };
-                task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
+                task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
             }
         }
     };
@@ -319,62 +250,38 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
 
     SparseIntArray mProfileOwners;
 
-    private volatile CheckOpsDelegateDispatcher mCheckOpsDelegateDispatcher =
-            new CheckOpsDelegateDispatcher(/*policy*/ null, /*delegate*/ null);
-
     /**
-      * Reverse lookup for {@link AppOpsManager#opToSwitch(int)}. Initialized once and never
-      * changed
-      */
+     * Reverse lookup for {@link AppOpsManager#opToSwitch(int)}. Initialized once and never
+     * changed
+     */
     private final SparseArray<int[]> mSwitchedOps = new SparseArray<>();
 
-    private ActivityManagerInternal mActivityManagerInternal;
-
-    /** Package sampled for message collection in the current session */
-    @GuardedBy("this")
-    private String mSampledPackage = null;
-
-    /** Appop sampled for message collection in the current session */
-    @GuardedBy("this")
-    private int mSampledAppOpCode = OP_NONE;
-
-    /** Maximum distance for appop to be considered for message collection in the current session */
-    @GuardedBy("this")
-    private int mAcceptableLeftDistance = 0;
-
-    /** Number of messages collected for sampled package and appop in the current session */
-    @GuardedBy("this")
-    private float mMessagesCollectedCount;
-
-    /** List of rarely used packages priorities for message collection */
-    @GuardedBy("this")
-    private ArraySet<String> mRarelyUsedPackages = new ArraySet<>();
-
-    /** Sampling strategy used for current session */
-    @GuardedBy("this")
-    @AppOpsManager.SamplingStrategy
-    private int mSamplingStrategy;
-
-    /** Last runtime permission access message collected and ready for reporting */
-    @GuardedBy("this")
-    private RuntimeAppOpAccessMessage mCollectedRuntimePermissionMessage;
-
-    /** Package Manager internal. Access via {@link #getPackageManagerInternal()} */
+    /**
+     * Package Manager internal. Access via {@link #getPackageManagerInternal()}
+     */
     private @Nullable PackageManagerInternal mPackageManagerInternal;
 
-    /** Interface for app-op modes.*/
-    @VisibleForTesting AppOpsServiceInterface mAppOpsServiceInterface;
+    /**
+     * Interface for app-op modes.
+     */
+    @VisibleForTesting
+    AppOpsCheckingServiceInterface mAppOpsServiceInterface;
 
-    /** Interface for app-op restrictions.*/
-    @VisibleForTesting AppOpsRestrictions mAppOpsRestrictions;
+    /**
+     * Interface for app-op restrictions.
+     */
+    @VisibleForTesting
+    AppOpsRestrictions mAppOpsRestrictions;
 
     private AppOpsUidStateTracker mUidStateTracker;
 
-    /** Hands the definition of foreground and uid states */
+    /**
+     * Hands the definition of foreground and uid states
+     */
     @GuardedBy("this")
     public AppOpsUidStateTracker getUidStateTracker() {
         if (mUidStateTracker == null) {
-            mUidStateTracker = new AppOpsUidStateTrackerImpl2(
+            mUidStateTracker = new AppOpsUidStateTrackerImpl(
                     LocalServices.getService(ActivityManagerInternal.class),
                     mHandler,
                     r -> {
@@ -399,6 +306,7 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
 
         /**
          * How long we want for a drop in uid state from top to settle before applying it.
+         *
          * @see Settings.Global#APP_OPS_CONSTANTS
          * @see AppOpsManager#KEY_TOP_STATE_SETTLE_TIME
          */
@@ -406,6 +314,7 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
 
         /**
          * How long we want for a drop in uid state from foreground to settle before applying it.
+         *
          * @see Settings.Global#APP_OPS_CONSTANTS
          * @see AppOpsManager#KEY_FG_SERVICE_STATE_SETTLE_TIME
          */
@@ -413,6 +322,7 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
 
         /**
          * How long we want for a drop in uid state from background to settle before applying it.
+         *
          * @see Settings.Global#APP_OPS_CONSTANTS
          * @see AppOpsManager#KEY_BG_STATE_SETTLE_TIME
          */
@@ -421,7 +331,7 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
         private final KeyValueListParser mParser = new KeyValueListParser(',');
         private ContentResolver mResolver;
 
-        public Constants(Handler handler) {
+        Constants(Handler handler) {
             super(handler);
             updateConstants();
         }
@@ -463,13 +373,19 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
         void dump(PrintWriter pw) {
             pw.println("  Settings:");
 
-            pw.print("    "); pw.print(KEY_TOP_STATE_SETTLE_TIME); pw.print("=");
+            pw.print("    ");
+            pw.print(KEY_TOP_STATE_SETTLE_TIME);
+            pw.print("=");
             TimeUtils.formatDuration(TOP_STATE_SETTLE_TIME, pw);
             pw.println();
-            pw.print("    "); pw.print(KEY_FG_SERVICE_STATE_SETTLE_TIME); pw.print("=");
+            pw.print("    ");
+            pw.print(KEY_FG_SERVICE_STATE_SETTLE_TIME);
+            pw.print("=");
             TimeUtils.formatDuration(FG_SERVICE_STATE_SETTLE_TIME, pw);
             pw.println();
-            pw.print("    "); pw.print(KEY_BG_STATE_SETTLE_TIME); pw.print("=");
+            pw.print("    ");
+            pw.print(KEY_BG_STATE_SETTLE_TIME);
+            pw.print("=");
             TimeUtils.formatDuration(BG_STATE_SETTLE_TIME, pw);
             pw.println();
         }
@@ -543,13 +459,14 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
             if (pkgOps != null) {
                 for (int i = pkgOps.size() - 1; i >= 0; i--) {
                     foregroundOps = mAppOpsServiceInterface
-                            .evalForegroundPackageOps(pkgOps.valueAt(i).packageName, foregroundOps,
+                            .evalForegroundPackageOps(pkgOps.valueAt(i).packageName,
+                                    foregroundOps,
                                     UserHandle.getUserId(uid));
                 }
             }
             hasForegroundWatchers = false;
             if (foregroundOps != null) {
-                for (int i = 0;  i < foregroundOps.size(); i++) {
+                for (int i = 0; i < foregroundOps.size(); i++) {
                     if (foregroundOps.valueAt(i)) {
                         hasForegroundWatchers = true;
                         break;
@@ -569,7 +486,7 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
         }
     }
 
-    final static class Ops extends SparseArray<Op> {
+    static final class Ops extends SparseArray<Op> {
         final String packageName;
         final UidState uidState;
 
@@ -612,8 +529,8 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
         final UidState uidState;
         final @NonNull String packageName;
 
-        /** attributionTag -> AttributedOp2 */
-        final ArrayMap<String, AttributedOp2> mAttributions = new ArrayMap<>(1);
+        /** attributionTag -> AttributedOp */
+        final ArrayMap<String, AttributedOp> mAttributions = new ArrayMap<>(1);
 
         Op(UidState uidState, String packageName, int op, int uid) {
             this.op = op;
@@ -626,6 +543,7 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
             return mAppOpsServiceInterface.getPackageMode(packageName, this.op,
                     UserHandle.getUserId(this.uid));
         }
+
         void setMode(@Mode int mode) {
             mAppOpsServiceInterface.setPackageMode(packageName, this.op, mode,
                     UserHandle.getUserId(this.uid));
@@ -639,20 +557,22 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
             }
         }
 
-        private @NonNull AttributedOp2 getOrCreateAttribution(@NonNull Op parent,
+        private @NonNull AttributedOp getOrCreateAttribution(@NonNull Op parent,
                 @Nullable String attributionTag) {
-            AttributedOp2 attributedOp;
+            AttributedOp attributedOp;
 
             attributedOp = mAttributions.get(attributionTag);
             if (attributedOp == null) {
-                attributedOp = new AttributedOp2(AppOpsServiceImpl.this, attributionTag, parent);
+                attributedOp = new AttributedOp(AppOpsServiceImpl.this, attributionTag,
+                        parent);
                 mAttributions.put(attributionTag, attributedOp);
             }
 
             return attributedOp;
         }
 
-        @NonNull OpEntry createEntryLocked() {
+        @NonNull
+        OpEntry createEntryLocked() {
             final int numAttributions = mAttributions.size();
 
             final ArrayMap<String, AppOpsManager.AttributedOpEntry> attributionEntries =
@@ -665,7 +585,8 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
             return new OpEntry(op, getMode(), attributionEntries);
         }
 
-        @NonNull OpEntry createSingleAttributionEntryLocked(@Nullable String attributionTag) {
+        @NonNull
+        OpEntry createSingleAttributionEntryLocked(@Nullable String attributionTag) {
             final int numAttributions = mAttributions.size();
 
             final ArrayMap<String, AttributedOpEntry> attributionEntries = new ArrayMap<>(1);
@@ -696,7 +617,6 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
     final ArrayMap<IBinder, SparseArray<ActiveCallback>> mActiveWatchers = new ArrayMap<>();
     final ArrayMap<IBinder, SparseArray<StartedCallback>> mStartedWatchers = new ArrayMap<>();
     final ArrayMap<IBinder, SparseArray<NotedCallback>> mNotedWatchers = new ArrayMap<>();
-    final AudioRestrictionManager mAudioRestrictionManager = new AudioRestrictionManager();
 
     final class ModeCallback extends OnOpModeChangedListener implements DeathRecipient  {
         /** If mWatchedOpCode==ALL_OPS notify for ops affected by the switch-op */
@@ -893,38 +813,14 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
     }
 
     /**
-     * Call {@link AttributedOp2#onClientDeath attributedOp.onClientDeath(clientId)}.
+     * Call {@link AttributedOp#onClientDeath attributedOp.onClientDeath(clientId)}.
      */
-    static void onClientDeath(@NonNull AttributedOp2 attributedOp,
+    static void onClientDeath(@NonNull AttributedOp attributedOp,
             @NonNull IBinder clientId) {
         attributedOp.onClientDeath(clientId);
     }
 
-
-    /**
-     * Loads the OpsValidation file results into a hashmap {@link #mNoteOpCallerStacktraces}
-     * so that we do not log the same operation twice between instances
-     */
-    private void readNoteOpCallerStackTraces() {
-        try {
-            if (!mNoteOpCallerStacktracesFile.exists()) {
-                mNoteOpCallerStacktracesFile.createNewFile();
-                return;
-            }
-
-            try (Scanner read = new Scanner(mNoteOpCallerStacktracesFile)) {
-                read.useDelimiter("\\},");
-                while (read.hasNext()) {
-                    String jsonOps = read.next();
-                    mNoteOpCallerStacktraces.add(NoteOpTrace.fromJson(jsonOps));
-                }
-            }
-        } catch (Exception e) {
-            Slog.e(TAG, "Cannot parse traces noteOps", e);
-        }
-    }
-
-    public AppOpsServiceImpl(File storagePath, Handler handler, Context context) {
+    AppOpsServiceImpl(File storagePath, Handler handler, Context context) {
         mContext = context;
 
         for (int switchedCode = 0; switchedCode < _NUM_OP; switchedCode++) {
@@ -933,30 +829,21 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
                     ArrayUtils.appendInt(mSwitchedOps.get(switchCode), switchedCode));
         }
         mAppOpsServiceInterface =
-                new LegacyAppOpsServiceInterfaceImpl(this, this, handler, context, mSwitchedOps);
+                new AppOpsCheckingServiceImpl(this, this, handler, context, mSwitchedOps);
         mAppOpsRestrictions = new AppOpsRestrictionsImpl(context, handler,
                 mAppOpsServiceInterface);
 
         LockGuard.installLock(this, LockGuard.INDEX_APP_OPS);
         mFile = new AtomicFile(storagePath, "appops");
-        if (AppOpsManager.NOTE_OP_COLLECTION_ENABLED) {
-            mNoteOpCallerStacktracesFile = new File(SystemServiceManager.ensureSystemDir(),
-                    "noteOpStackTraces.json");
-            readNoteOpCallerStackTraces();
-        } else {
-            mNoteOpCallerStacktracesFile = null;
-        }
+
         mHandler = handler;
         mConstants = new Constants(mHandler);
         readState();
     }
 
-    public void publish() {
-        ServiceManager.addService(Context.APP_OPS_SERVICE, asBinder());
-        LocalServices.addService(AppOpsManagerInternal.class, mAppOpsManagerInternal);
-    }
-
-    /** Handler for work when packages are removed or updated */
+    /**
+     * Handler for work when packages are removed or updated
+     */
     private BroadcastReceiver mOnPackageUpdatedReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -1034,9 +921,9 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
 
                             String newAttributionTag = dstAttributionTags.get(attributionTag);
 
-                            AttributedOp2 newAttributedOp2 = op.getOrCreateAttribution(op,
+                            AttributedOp newAttributedOp = op.getOrCreateAttribution(op,
                                     newAttributionTag);
-                            newAttributedOp2.add(op.mAttributions.valueAt(attributionNum));
+                            newAttributedOp.add(op.mAttributions.valueAt(attributionNum));
                             op.mAttributions.removeAt(attributionNum);
 
                             scheduleFastWriteLocked();
@@ -1047,6 +934,7 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
         }
     };
 
+    @Override
     public void systemReady() {
         mConstants.startMonitoring(mContext.getContentResolver());
         mHistoricalRegistry.systemReady(mContext.getContentResolver());
@@ -1125,66 +1013,9 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
                 }
             }
         }, UserHandle.ALL, packageSuspendFilter, null, null);
-
-        final IntentFilter packageAddedFilter = new IntentFilter();
-        packageAddedFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
-        packageAddedFilter.addDataScheme("package");
-        mContext.registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                final Uri data = intent.getData();
-
-                final String packageName = data.getSchemeSpecificPart();
-                PackageInfo pi = getPackageManagerInternal().getPackageInfo(packageName,
-                        PackageManager.GET_PERMISSIONS, Process.myUid(), mContext.getUserId());
-                if (isSamplingTarget(pi)) {
-                    synchronized (AppOpsServiceImpl.this) {
-                        mRarelyUsedPackages.add(packageName);
-                    }
-                }
-            }
-        }, packageAddedFilter);
-
-        mHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                List<String> packageNames = getPackageListAndResample();
-                initializeRarelyUsedPackagesList(new ArraySet<>(packageNames));
-            }
-        }, RARELY_USED_PACKAGES_INITIALIZATION_DELAY_MILLIS);
-
-        getPackageManagerInternal().setExternalSourcesPolicy(
-                new PackageManagerInternal.ExternalSourcesPolicy() {
-                    @Override
-                    public int getPackageTrustedToInstallApps(String packageName, int uid) {
-                        int appOpMode = checkOperation(AppOpsManager.OP_REQUEST_INSTALL_PACKAGES,
-                                uid, packageName);
-                        switch (appOpMode) {
-                            case AppOpsManager.MODE_ALLOWED:
-                                return PackageManagerInternal.ExternalSourcesPolicy.USER_TRUSTED;
-                            case AppOpsManager.MODE_ERRORED:
-                                return PackageManagerInternal.ExternalSourcesPolicy.USER_BLOCKED;
-                            default:
-                                return PackageManagerInternal.ExternalSourcesPolicy.USER_DEFAULT;
-                        }
-                    }
-                });
-
-        mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
     }
 
-    /**
-     * Sets a policy for handling app ops.
-     *
-     * @param policy The policy.
-     */
-    public void setAppOpsPolicy(@Nullable CheckOpsDelegate policy) {
-        final CheckOpsDelegateDispatcher oldDispatcher = mCheckOpsDelegateDispatcher;
-        final CheckOpsDelegate delegate = (oldDispatcher != null)
-                ? oldDispatcher.mCheckOpsDelegate : null;
-        mCheckOpsDelegateDispatcher = new CheckOpsDelegateDispatcher(policy, delegate);
-    }
-
+    @Override
     public void packageRemoved(int uid, String packageName) {
         synchronized (this) {
             UidState uidState = mUidStates.get(uid);
@@ -1217,7 +1048,7 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
                     final int numAttributions = op.mAttributions.size();
                     for (int attributionNum = 0; attributionNum < numAttributions;
                             attributionNum++) {
-                        AttributedOp2 attributedOp = op.mAttributions.valueAt(attributionNum);
+                        AttributedOp attributedOp = op.mAttributions.valueAt(attributionNum);
 
                         while (attributedOp.isRunning()) {
                             attributedOp.finished(attributedOp.mInProgressEvents.keyAt(0));
@@ -1231,9 +1062,10 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
         }
 
         mHandler.post(PooledLambda.obtainRunnable(HistoricalRegistry::clearHistory,
-                    mHistoricalRegistry, uid, packageName));
+                mHistoricalRegistry, uid, packageName));
     }
 
+    @Override
     public void uidRemoved(int uid) {
         synchronized (this) {
             if (mUidStates.indexOfKey(uid) >= 0) {
@@ -1302,7 +1134,7 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
                         int numAttributions = op.mAttributions.size();
                         for (int attributionNum = 0; attributionNum < numAttributions;
                                 attributionNum++) {
-                            AttributedOp2 attributedOp = op.mAttributions.valueAt(
+                            AttributedOp attributedOp = op.mAttributions.valueAt(
                                     attributionNum);
 
                             attributedOp.onUidStateChanged(state);
@@ -1316,6 +1148,7 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
     /**
      * Notify the proc state or capability has changed for a certain UID.
      */
+    @Override
     public void updateUidProcState(int uid, int procState,
             @ActivityManager.ProcessCapability int capability) {
         synchronized (this) {
@@ -1329,6 +1162,7 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
         }
     }
 
+    @Override
     public void shutdown() {
         Slog.w(TAG, "Writing app ops before shutdown...");
         boolean doWrite = false;
@@ -1343,9 +1177,6 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
         if (doWrite) {
             writeState();
         }
-        if (AppOpsManager.NOTE_OP_COLLECTION_ENABLED && mWriteNoteOpsScheduled) {
-            writeNoteOps();
-        }
 
         mHistoricalRegistry.shutdown();
     }
@@ -1354,12 +1185,12 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
         ArrayList<AppOpsManager.OpEntry> resOps = null;
         if (ops == null) {
             resOps = new ArrayList<>();
-            for (int j=0; j<pkgOps.size(); j++) {
+            for (int j = 0; j < pkgOps.size(); j++) {
                 Op curOp = pkgOps.valueAt(j);
                 resOps.add(getOpEntryForResult(curOp));
             }
         } else {
-            for (int j=0; j<ops.length; j++) {
+            for (int j = 0; j < ops.length; j++) {
                 Op curOp = pkgOps.get(ops[j]);
                 if (curOp != null) {
                     if (resOps == null) {
@@ -1392,7 +1223,7 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
                 resOps.add(new OpEntry(code, opModes.get(code), Collections.emptyMap()));
             }
         } else {
-            for (int j=0; j<ops.length; j++) {
+            for (int j = 0; j < ops.length; j++) {
                 int code = ops[j];
                 if (opModes.indexOfKey(code) >= 0) {
                     if (resOps == null) {
@@ -1448,7 +1279,7 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
     @Override
     public List<AppOpsManager.PackageOps> getOpsForPackage(int uid, String packageName,
             int[] ops) {
-        enforceGetAppOpsStatsPermissionIfNeeded(uid,packageName);
+        enforceGetAppOpsStatsPermissionIfNeeded(uid, packageName);
         String resolvedPackageName = AppOpsManager.resolvePackageName(uid, packageName);
         if (resolvedPackageName == null) {
             return Collections.emptyList();
@@ -1463,7 +1294,7 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
             if (resOps == null) {
                 return null;
             }
-            ArrayList<AppOpsManager.PackageOps> res = new ArrayList<AppOpsManager.PackageOps>();
+            ArrayList<AppOpsManager.PackageOps> res = new ArrayList<>();
             AppOpsManager.PackageOps resPackage = new AppOpsManager.PackageOps(
                     pkgOps.packageName, pkgOps.uidState.uid, resOps);
             res.add(resPackage);
@@ -1574,7 +1405,7 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
 
         final String[] chainExemptPkgArray = attributionChainExemptPackages != null
                 ? attributionChainExemptPackages.toArray(
-                        new String[attributionChainExemptPackages.size()]) : null;
+                new String[attributionChainExemptPackages.size()]) : null;
 
         // Must not hold the appops lock
         mHandler.post(PooledLambda.obtainRunnable(HistoricalRegistry::getHistoricalOps,
@@ -1671,7 +1502,8 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
         }
     }
 
-    private void enforceManageAppOpsModes(int callingPid, int callingUid, int targetUid) {
+    @Override
+    public void enforceManageAppOpsModes(int callingPid, int callingUid, int targetUid) {
         if (callingPid == Process.myPid()) {
             return;
         }
@@ -1690,11 +1522,7 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
     }
 
     @Override
-    public void setUidMode(int code, int uid, int mode) {
-        setUidMode(code, uid, mode, null);
-    }
-
-    private void setUidMode(int code, int uid, int mode,
+    public void setUidMode(int code, int uid, int mode,
             @Nullable IAppOpsCallback permissionPolicyCallback) {
         if (DEBUG) {
             Slog.i(TAG, "uid " + uid + " OP_" + opToName(code) + " := " + modeToName(mode)
@@ -1744,8 +1572,8 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
     /**
      * Notify that an op changed for all packages in an uid.
      *
-     * @param code The op that changed
-     * @param uid The uid the op was changed for
+     * @param code           The op that changed
+     * @param uid            The uid the op was changed for
      * @param onlyForeground Only notify watchers that watch for foreground changes
      */
     private void notifyOpChangedForAllPkgsInUid(int code, int uid, boolean onlyForeground,
@@ -1856,20 +1684,8 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
         }
     }
 
-    /**
-     * Sets the mode for a certain op and uid.
-     *
-     * @param code The op code to set
-     * @param uid The UID for which to set
-     * @param packageName The package for which to set
-     * @param mode The new mode to set
-     */
     @Override
-    public void setMode(int code, int uid, @NonNull String packageName, int mode) {
-        setMode(code, uid, packageName, mode, null);
-    }
-
-    private void setMode(int code, int uid, @NonNull String packageName, int mode,
+    public void setMode(int code, int uid, @NonNull String packageName, int mode,
             @Nullable IAppOpsCallback permissionPolicyCallback) {
         enforceManageAppOpsModes(Binder.getCallingPid(), Binder.getCallingUid(), uid);
         verifyIncomingOp(code);
@@ -2045,11 +1861,11 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
                             int previousMode = opModes.valueAt(j);
                             uidState.setUidMode(code, AppOpsManager.opToDefaultMode(code));
                             for (String packageName : getPackagesForUid(uidState.uid)) {
-                                callbacks = addCallbacks(callbacks, code, uidState.uid, packageName,
-                                        previousMode,
+                                callbacks = addCallbacks(callbacks, code, uidState.uid,
+                                        packageName, previousMode,
                                         mAppOpsServiceInterface.getOpModeChangedListeners(code));
-                                callbacks = addCallbacks(callbacks, code, uidState.uid, packageName,
-                                        previousMode, mAppOpsServiceInterface
+                                callbacks = addCallbacks(callbacks, code, uidState.uid,
+                                        packageName, previousMode, mAppOpsServiceInterface
                                                 .getPackageModeChangedListeners(packageName));
 
                                 allChanges = addChange(allChanges, code, uidState.uid,
@@ -2172,11 +1988,6 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
     }
 
     @Override
-    public void startWatchingMode(int op, String packageName, IAppOpsCallback callback) {
-        startWatchingModeWithFlags(op, packageName, 0, callback);
-    }
-
-    @Override
     public void startWatchingModeWithFlags(int op, String packageName, int flags,
             IAppOpsCallback callback) {
         int watchedUid = -1;
@@ -2239,35 +2050,8 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
         }
     }
 
-    public CheckOpsDelegate getAppOpsServiceDelegate() {
-        synchronized (AppOpsServiceImpl.this) {
-            final CheckOpsDelegateDispatcher dispatcher = mCheckOpsDelegateDispatcher;
-            return (dispatcher != null) ? dispatcher.getCheckOpsDelegate() : null;
-        }
-    }
-
-    public void setAppOpsServiceDelegate(CheckOpsDelegate delegate) {
-        synchronized (AppOpsServiceImpl.this) {
-            final CheckOpsDelegateDispatcher oldDispatcher = mCheckOpsDelegateDispatcher;
-            final CheckOpsDelegate policy = (oldDispatcher != null) ? oldDispatcher.mPolicy : null;
-            mCheckOpsDelegateDispatcher = new CheckOpsDelegateDispatcher(policy, delegate);
-        }
-    }
-
     @Override
-    public int checkOperationRaw(int code, int uid, String packageName,
-            @Nullable String attributionTag) {
-        return mCheckOpsDelegateDispatcher.checkOperation(code, uid, packageName, attributionTag,
-                true /*raw*/);
-    }
-
-    @Override
-    public int checkOperation(int code, int uid, String packageName) {
-        return mCheckOpsDelegateDispatcher.checkOperation(code, uid, packageName, null,
-                false /*raw*/);
-    }
-
-    private int checkOperationImpl(int code, int uid, String packageName,
+    public int checkOperation(int code, int uid, String packageName,
             @Nullable String attributionTag, boolean raw) {
         verifyIncomingOp(code);
         if (!isIncomingPackageValid(packageName, UserHandle.getUserId(uid))) {
@@ -2284,11 +2068,10 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
     /**
      * Get the mode of an app-op.
      *
-     * @param code The code of the op
-     * @param uid The uid of the package the op belongs to
+     * @param code        The code of the op
+     * @param uid         The uid of the package the op belongs to
      * @param packageName The package the op belongs to
-     * @param raw If the raw state of eval-ed state should be checked.
-     *
+     * @param raw         If the raw state of eval-ed state should be checked.
      * @return The mode of the op
      */
     private @Mode int checkOperationUnchecked(int code, int uid, @NonNull String packageName,
@@ -2321,49 +2104,6 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
             }
             return raw ? op.getMode() : op.uidState.evalMode(op.op, op.getMode());
         }
-    }
-
-    @Override
-    public int checkAudioOperation(int code, int usage, int uid, String packageName) {
-        return mCheckOpsDelegateDispatcher.checkAudioOperation(code, usage, uid, packageName);
-    }
-
-    private int checkAudioOperationImpl(int code, int usage, int uid, String packageName) {
-        final int mode = mAudioRestrictionManager.checkAudioOperation(
-                code, usage, uid, packageName);
-        if (mode != AppOpsManager.MODE_ALLOWED) {
-            return mode;
-        }
-        return checkOperation(code, uid, packageName);
-    }
-
-    @Override
-    public void setAudioRestriction(int code, int usage, int uid, int mode,
-            String[] exceptionPackages) {
-        enforceManageAppOpsModes(Binder.getCallingPid(), Binder.getCallingUid(), uid);
-        verifyIncomingUid(uid);
-        verifyIncomingOp(code);
-
-        mAudioRestrictionManager.setZenModeAudioRestriction(
-                code, usage, uid, mode, exceptionPackages);
-
-        mHandler.sendMessage(PooledLambda.obtainMessage(
-                AppOpsServiceImpl::notifyWatchersOfChange, this, code, UID_ANY));
-    }
-
-
-    @Override
-    public void setCameraAudioRestriction(@CAMERA_AUDIO_RESTRICTION int mode) {
-        enforceManageAppOpsModes(Binder.getCallingPid(), Binder.getCallingUid(), -1);
-
-        mAudioRestrictionManager.setCameraAudioRestriction(mode);
-
-        mHandler.sendMessage(PooledLambda.obtainMessage(
-                AppOpsServiceImpl::notifyWatchersOfChange, this,
-                AppOpsManager.OP_PLAY_AUDIO, UID_ANY));
-        mHandler.sendMessage(PooledLambda.obtainMessage(
-                AppOpsServiceImpl::notifyWatchersOfChange, this,
-                AppOpsManager.OP_VIBRATE, UID_ANY));
     }
 
     @Override
@@ -2401,117 +2141,35 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
     }
 
     @Override
-    public SyncNotedAppOp noteProxyOperation(int code, AttributionSource attributionSource,
-            boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
-            boolean skipProxyOperation) {
-        return mCheckOpsDelegateDispatcher.noteProxyOperation(code, attributionSource,
-                shouldCollectAsyncNotedOp, message, shouldCollectMessage, skipProxyOperation);
-    }
-
-    private SyncNotedAppOp noteProxyOperationImpl(int code, AttributionSource attributionSource,
-            boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
-            boolean skipProxyOperation) {
-        final int proxyUid = attributionSource.getUid();
-        final String proxyPackageName = attributionSource.getPackageName();
-        final String proxyAttributionTag = attributionSource.getAttributionTag();
-        final int proxiedUid = attributionSource.getNextUid();
-        final String proxiedPackageName = attributionSource.getNextPackageName();
-        final String proxiedAttributionTag = attributionSource.getNextAttributionTag();
-
-        verifyIncomingProxyUid(attributionSource);
-        verifyIncomingOp(code);
-        if (!isIncomingPackageValid(proxiedPackageName, UserHandle.getUserId(proxiedUid))
-                || !isIncomingPackageValid(proxyPackageName, UserHandle.getUserId(proxyUid))) {
-            return new SyncNotedAppOp(AppOpsManager.MODE_ERRORED, code, proxiedAttributionTag,
-                    proxiedPackageName);
-        }
-
-        skipProxyOperation = skipProxyOperation
-                && isCallerAndAttributionTrusted(attributionSource);
-
-        String resolveProxyPackageName = AppOpsManager.resolvePackageName(proxyUid,
-                proxyPackageName);
-        if (resolveProxyPackageName == null) {
-            return new SyncNotedAppOp(AppOpsManager.MODE_IGNORED, code,
-                    proxiedAttributionTag, proxiedPackageName);
-        }
-
-        final boolean isSelfBlame = Binder.getCallingUid() == proxiedUid;
-        final boolean isProxyTrusted = mContext.checkPermission(
-                Manifest.permission.UPDATE_APP_OPS_STATS, -1, proxyUid)
-                == PackageManager.PERMISSION_GRANTED || isSelfBlame;
-
-        if (!skipProxyOperation) {
-            final int proxyFlags = isProxyTrusted ? AppOpsManager.OP_FLAG_TRUSTED_PROXY
-                    : AppOpsManager.OP_FLAG_UNTRUSTED_PROXY;
-
-            final SyncNotedAppOp proxyReturn = noteOperationUnchecked(code, proxyUid,
-                    resolveProxyPackageName, proxyAttributionTag, Process.INVALID_UID, null, null,
-                    proxyFlags, !isProxyTrusted, "proxy " + message, shouldCollectMessage);
-            if (proxyReturn.getOpMode() != AppOpsManager.MODE_ALLOWED) {
-                return new SyncNotedAppOp(proxyReturn.getOpMode(), code, proxiedAttributionTag,
-                        proxiedPackageName);
-            }
-        }
-
-        String resolveProxiedPackageName = AppOpsManager.resolvePackageName(proxiedUid,
-                proxiedPackageName);
-        if (resolveProxiedPackageName == null) {
-            return new SyncNotedAppOp(AppOpsManager.MODE_IGNORED, code, proxiedAttributionTag,
-                    proxiedPackageName);
-        }
-
-        final int proxiedFlags = isProxyTrusted ? AppOpsManager.OP_FLAG_TRUSTED_PROXIED
-                : AppOpsManager.OP_FLAG_UNTRUSTED_PROXIED;
-        return noteOperationUnchecked(code, proxiedUid, resolveProxiedPackageName,
-                proxiedAttributionTag, proxyUid, resolveProxyPackageName, proxyAttributionTag,
-                proxiedFlags, shouldCollectAsyncNotedOp, message, shouldCollectMessage);
-    }
-
-    @Override
-    public SyncNotedAppOp noteOperation(int code, int uid, String packageName,
-            String attributionTag, boolean shouldCollectAsyncNotedOp, String message,
-            boolean shouldCollectMessage) {
-        return mCheckOpsDelegateDispatcher.noteOperation(code, uid, packageName,
-                attributionTag, shouldCollectAsyncNotedOp, message, shouldCollectMessage);
-    }
-
-    private SyncNotedAppOp noteOperationImpl(int code, int uid, @Nullable String packageName,
-            @Nullable String attributionTag, boolean shouldCollectAsyncNotedOp,
-            @Nullable String message, boolean shouldCollectMessage) {
+    public int noteOperation(int code, int uid, @Nullable String packageName,
+            @Nullable String attributionTag, @Nullable String message) {
         verifyIncomingUid(uid);
         verifyIncomingOp(code);
         if (!isIncomingPackageValid(packageName, UserHandle.getUserId(uid))) {
-            return new SyncNotedAppOp(AppOpsManager.MODE_ERRORED, code, attributionTag,
-                    packageName);
+            return AppOpsManager.MODE_ERRORED;
         }
 
         String resolvedPackageName = AppOpsManager.resolvePackageName(uid, packageName);
         if (resolvedPackageName == null) {
-            return new SyncNotedAppOp(AppOpsManager.MODE_IGNORED, code, attributionTag,
-                    packageName);
+            return AppOpsManager.MODE_IGNORED;
         }
         return noteOperationUnchecked(code, uid, resolvedPackageName, attributionTag,
-                Process.INVALID_UID, null, null, AppOpsManager.OP_FLAG_SELF,
-                shouldCollectAsyncNotedOp, message, shouldCollectMessage);
+                Process.INVALID_UID, null, null, AppOpsManager.OP_FLAG_SELF);
     }
 
-    private SyncNotedAppOp noteOperationUnchecked(int code, int uid, @NonNull String packageName,
+    @Override
+    public int noteOperationUnchecked(int code, int uid, @NonNull String packageName,
             @Nullable String attributionTag, int proxyUid, String proxyPackageName,
-            @Nullable String proxyAttributionTag, @OpFlags int flags,
-            boolean shouldCollectAsyncNotedOp, @Nullable String message,
-            boolean shouldCollectMessage) {
+            @Nullable String proxyAttributionTag, @OpFlags int flags) {
         PackageVerificationResult pvr;
         try {
             pvr = verifyAndGetBypass(uid, packageName, attributionTag, proxyPackageName);
-            boolean wasNull = attributionTag == null;
             if (!pvr.isAttributionTagValid) {
                 attributionTag = null;
             }
         } catch (SecurityException e) {
             Slog.e(TAG, "noteOperation", e);
-            return new SyncNotedAppOp(AppOpsManager.MODE_ERRORED, code, attributionTag,
-                    packageName);
+            return AppOpsManager.MODE_ERRORED;
         }
 
         synchronized (this) {
@@ -2520,14 +2178,15 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
             if (ops == null) {
                 scheduleOpNotedIfNeededLocked(code, uid, packageName, attributionTag, flags,
                         AppOpsManager.MODE_IGNORED);
-                if (DEBUG) Slog.d(TAG, "noteOperation: no op for code " + code + " uid " + uid
-                        + " package " + packageName + "flags: " +
-                        AppOpsManager.flagsToString(flags));
-                return new SyncNotedAppOp(AppOpsManager.MODE_ERRORED, code, attributionTag,
-                        packageName);
+                if (DEBUG) {
+                    Slog.d(TAG, "noteOperation: no op for code " + code + " uid " + uid
+                            + " package " + packageName + "flags: "
+                            + AppOpsManager.flagsToString(flags));
+                }
+                return AppOpsManager.MODE_ERRORED;
             }
             final Op op = getOpLocked(ops, code, uid, true);
-            final AttributedOp2 attributedOp = op.getOrCreateAttribution(op, attributionTag);
+            final AttributedOp attributedOp = op.getOrCreateAttribution(op, attributionTag);
             if (attributedOp.isRunning()) {
                 Slog.w(TAG, "Noting op not finished: uid " + uid + " pkg " + packageName + " code "
                         + code + " startTime of in progress event="
@@ -2540,34 +2199,37 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
                 attributedOp.rejected(uidState.getState(), flags);
                 scheduleOpNotedIfNeededLocked(code, uid, packageName, attributionTag, flags,
                         AppOpsManager.MODE_IGNORED);
-                return new SyncNotedAppOp(AppOpsManager.MODE_IGNORED, code, attributionTag,
-                        packageName);
+                return AppOpsManager.MODE_IGNORED;
             }
             // If there is a non-default per UID policy (we set UID op mode only if
             // non-default) it takes over, otherwise use the per package policy.
             if (uidState.getUidMode(switchCode) != AppOpsManager.opToDefaultMode(switchCode)) {
                 final int uidMode = uidState.evalMode(code, uidState.getUidMode(switchCode));
                 if (uidMode != AppOpsManager.MODE_ALLOWED) {
-                    if (DEBUG) Slog.d(TAG, "noteOperation: uid reject #" + uidMode + " for code "
-                            + switchCode + " (" + code + ") uid " + uid + " package "
-                            + packageName + " flags: " + AppOpsManager.flagsToString(flags));
+                    if (DEBUG) {
+                        Slog.d(TAG, "noteOperation: uid reject #" + uidMode + " for code "
+                                + switchCode + " (" + code + ") uid " + uid + " package "
+                                + packageName + " flags: " + AppOpsManager.flagsToString(flags));
+                    }
                     attributedOp.rejected(uidState.getState(), flags);
                     scheduleOpNotedIfNeededLocked(code, uid, packageName, attributionTag, flags,
                             uidMode);
-                    return new SyncNotedAppOp(uidMode, code, attributionTag, packageName);
+                    return uidMode;
                 }
             } else {
                 final Op switchOp = switchCode != code ? getOpLocked(ops, switchCode, uid, true)
                         : op;
                 final int mode = switchOp.uidState.evalMode(switchOp.op, switchOp.getMode());
                 if (mode != AppOpsManager.MODE_ALLOWED) {
-                    if (DEBUG) Slog.d(TAG, "noteOperation: reject #" + mode + " for code "
-                            + switchCode + " (" + code + ") uid " + uid + " package "
-                            + packageName + " flags: " + AppOpsManager.flagsToString(flags));
+                    if (DEBUG) {
+                        Slog.d(TAG, "noteOperation: reject #" + mode + " for code "
+                                + switchCode + " (" + code + ") uid " + uid + " package "
+                                + packageName + " flags: " + AppOpsManager.flagsToString(flags));
+                    }
                     attributedOp.rejected(uidState.getState(), flags);
                     scheduleOpNotedIfNeededLocked(code, uid, packageName, attributionTag, flags,
                             mode);
-                    return new SyncNotedAppOp(mode, code, attributionTag, packageName);
+                    return mode;
                 }
             }
             if (DEBUG) {
@@ -2583,13 +2245,21 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
                     uidState.getState(),
                     flags);
 
-            if (shouldCollectAsyncNotedOp) {
-                collectAsyncNotedOp(uid, packageName, code, attributionTag, flags, message,
-                        shouldCollectMessage);
-            }
+            return AppOpsManager.MODE_ALLOWED;
+        }
+    }
 
-            return new SyncNotedAppOp(AppOpsManager.MODE_ALLOWED, code, attributionTag,
-                    packageName);
+    @Override
+    public boolean isAttributionTagValid(int uid, @NonNull String packageName,
+            @Nullable String attributionTag,
+            @Nullable String proxyPackageName) {
+        try {
+            return verifyAndGetBypass(uid, packageName, attributionTag, proxyPackageName)
+                    .isAttributionTagValid;
+        } catch (SecurityException ignored) {
+            // We don't want to throw, this exception will be handled in the (c/n/s)Operation calls
+            // when they need the bypass object.
+            return false;
         }
     }
 
@@ -2733,173 +2403,20 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
         }
     }
 
-    /**
-     * Collect an {@link AsyncNotedAppOp}.
-     *
-     * @param uid The uid the op was noted for
-     * @param packageName The package the op was noted for
-     * @param opCode The code of the op noted
-     * @param attributionTag attribution tag the op was noted for
-     * @param message The message for the op noting
-     */
-    private void collectAsyncNotedOp(int uid, @NonNull String packageName, int opCode,
-            @Nullable String attributionTag, @OpFlags int flags, @NonNull String message,
-            boolean shouldCollectMessage) {
-        Objects.requireNonNull(message);
-
-        int callingUid = Binder.getCallingUid();
-
-        final long token = Binder.clearCallingIdentity();
-        try {
-            synchronized (this) {
-                Pair<String, Integer> key = getAsyncNotedOpsKey(packageName, uid);
-
-                RemoteCallbackList<IAppOpsAsyncNotedCallback> callbacks = mAsyncOpWatchers.get(key);
-                AsyncNotedAppOp asyncNotedOp = new AsyncNotedAppOp(opCode, callingUid,
-                        attributionTag, message, System.currentTimeMillis());
-                final boolean[] wasNoteForwarded = {false};
-
-                if ((flags & (OP_FLAG_SELF | OP_FLAG_TRUSTED_PROXIED)) != 0
-                        && shouldCollectMessage) {
-                    reportRuntimeAppOpAccessMessageAsyncLocked(uid, packageName, opCode,
-                            attributionTag, message);
-                }
-
-                if (callbacks != null) {
-                    callbacks.broadcast((cb) -> {
-                        try {
-                            cb.opNoted(asyncNotedOp);
-                            wasNoteForwarded[0] = true;
-                        } catch (RemoteException e) {
-                            Slog.e(TAG,
-                                    "Could not forward noteOp of " + opCode + " to " + packageName
-                                            + "/" + uid + "(" + attributionTag + ")", e);
-                        }
-                    });
-                }
-
-                if (!wasNoteForwarded[0]) {
-                    ArrayList<AsyncNotedAppOp> unforwardedOps = mUnforwardedAsyncNotedOps.get(key);
-                    if (unforwardedOps == null) {
-                        unforwardedOps = new ArrayList<>(1);
-                        mUnforwardedAsyncNotedOps.put(key, unforwardedOps);
-                    }
-
-                    unforwardedOps.add(asyncNotedOp);
-                    if (unforwardedOps.size() > MAX_UNFORWARDED_OPS) {
-                        unforwardedOps.remove(0);
-                    }
-                }
-            }
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
-    }
-
-    /**
-     * Compute a key to be used in {@link #mAsyncOpWatchers} and {@link #mUnforwardedAsyncNotedOps}
-     *
-     * @param packageName The package name of the app
-     * @param uid The uid of the app
-     *
-     * @return They key uniquely identifying the app
-     */
-    private @NonNull Pair<String, Integer> getAsyncNotedOpsKey(@NonNull String packageName,
-            int uid) {
-        return new Pair<>(packageName, uid);
-    }
-
     @Override
-    public void startWatchingAsyncNoted(String packageName, IAppOpsAsyncNotedCallback callback) {
-        Objects.requireNonNull(packageName);
-        Objects.requireNonNull(callback);
-
-        int uid = Binder.getCallingUid();
-        Pair<String, Integer> key = getAsyncNotedOpsKey(packageName, uid);
-
-        verifyAndGetBypass(uid, packageName, null);
-
-        synchronized (this) {
-            RemoteCallbackList<IAppOpsAsyncNotedCallback> callbacks = mAsyncOpWatchers.get(key);
-            if (callbacks == null) {
-                callbacks = new RemoteCallbackList<IAppOpsAsyncNotedCallback>() {
-                    @Override
-                    public void onCallbackDied(IAppOpsAsyncNotedCallback callback) {
-                        synchronized (AppOpsServiceImpl.this) {
-                            if (getRegisteredCallbackCount() == 0) {
-                                mAsyncOpWatchers.remove(key);
-                            }
-                        }
-                    }
-                };
-                mAsyncOpWatchers.put(key, callbacks);
-            }
-
-            callbacks.register(callback);
-        }
-    }
-
-    @Override
-    public void stopWatchingAsyncNoted(String packageName, IAppOpsAsyncNotedCallback callback) {
-        Objects.requireNonNull(packageName);
-        Objects.requireNonNull(callback);
-
-        int uid = Binder.getCallingUid();
-        Pair<String, Integer> key = getAsyncNotedOpsKey(packageName, uid);
-
-        verifyAndGetBypass(uid, packageName, null);
-
-        synchronized (this) {
-            RemoteCallbackList<IAppOpsAsyncNotedCallback> callbacks = mAsyncOpWatchers.get(key);
-            if (callbacks != null) {
-                callbacks.unregister(callback);
-                if (callbacks.getRegisteredCallbackCount() == 0) {
-                    mAsyncOpWatchers.remove(key);
-                }
-            }
-        }
-    }
-
-    @Override
-    public List<AsyncNotedAppOp> extractAsyncOps(String packageName) {
-        Objects.requireNonNull(packageName);
-
-        int uid = Binder.getCallingUid();
-
-        verifyAndGetBypass(uid, packageName, null);
-
-        synchronized (this) {
-            return mUnforwardedAsyncNotedOps.remove(getAsyncNotedOpsKey(packageName, uid));
-        }
-    }
-
-    @Override
-    public SyncNotedAppOp startOperation(IBinder token, int code, int uid,
+    public int startOperation(@NonNull IBinder clientId, int code, int uid,
             @Nullable String packageName, @Nullable String attributionTag,
-            boolean startIfModeDefault, boolean shouldCollectAsyncNotedOp,
-            String message, boolean shouldCollectMessage, @AttributionFlags int attributionFlags,
-            int attributionChainId) {
-        return mCheckOpsDelegateDispatcher.startOperation(token, code, uid, packageName,
-                attributionTag, startIfModeDefault, shouldCollectAsyncNotedOp, message,
-                shouldCollectMessage, attributionFlags, attributionChainId);
-    }
-
-    private SyncNotedAppOp startOperationImpl(@NonNull IBinder clientId, int code, int uid,
-            @Nullable String packageName, @Nullable String attributionTag,
-            boolean startIfModeDefault, boolean shouldCollectAsyncNotedOp, @NonNull String message,
-            boolean shouldCollectMessage, @AttributionFlags int attributionFlags,
-            int attributionChainId) {
+            boolean startIfModeDefault, @NonNull String message,
+            @AttributionFlags int attributionFlags, int attributionChainId) {
         verifyIncomingUid(uid);
         verifyIncomingOp(code);
         if (!isIncomingPackageValid(packageName, UserHandle.getUserId(uid))) {
-            return new SyncNotedAppOp(AppOpsManager.MODE_ERRORED, code, attributionTag,
-                    packageName);
+            return AppOpsManager.MODE_ERRORED;
         }
 
         String resolvedPackageName = AppOpsManager.resolvePackageName(uid, packageName);
         if (resolvedPackageName == null) {
-            return new SyncNotedAppOp(AppOpsManager.MODE_IGNORED, code, attributionTag,
-                    packageName);
+            return AppOpsManager.MODE_IGNORED;
         }
 
         // As a special case for OP_RECORD_AUDIO_HOTWORD, which we use only for attribution
@@ -2908,120 +2425,25 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
         //
         // TODO: Revert this change before Android 12.
         if (code == OP_RECORD_AUDIO_HOTWORD || code == OP_RECEIVE_AMBIENT_TRIGGER_AUDIO) {
-            int result = checkOperation(OP_RECORD_AUDIO, uid, packageName);
+            int result = checkOperation(OP_RECORD_AUDIO, uid, packageName, null, false);
             if (result != AppOpsManager.MODE_ALLOWED) {
-                return new SyncNotedAppOp(result, code, attributionTag, packageName);
+                return result;
             }
         }
         return startOperationUnchecked(clientId, code, uid, packageName, attributionTag,
                 Process.INVALID_UID, null, null, OP_FLAG_SELF, startIfModeDefault,
-                shouldCollectAsyncNotedOp, message, shouldCollectMessage, attributionFlags,
-                attributionChainId, /*dryRun*/ false);
-    }
-
-    @Override
-    public SyncNotedAppOp startProxyOperation(@NonNull IBinder clientId, int code,
-            @NonNull AttributionSource attributionSource, boolean startIfModeDefault,
-            boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
-            boolean skipProxyOperation, @AttributionFlags int proxyAttributionFlags,
-            @AttributionFlags int proxiedAttributionFlags, int attributionChainId) {
-        return mCheckOpsDelegateDispatcher.startProxyOperation(clientId, code, attributionSource,
-                startIfModeDefault, shouldCollectAsyncNotedOp, message, shouldCollectMessage,
-                skipProxyOperation, proxyAttributionFlags, proxiedAttributionFlags,
-                attributionChainId);
-    }
-
-    private SyncNotedAppOp startProxyOperationImpl(@NonNull IBinder clientId, int code,
-            @NonNull AttributionSource attributionSource,
-            boolean startIfModeDefault, boolean shouldCollectAsyncNotedOp, String message,
-            boolean shouldCollectMessage, boolean skipProxyOperation, @AttributionFlags
-            int proxyAttributionFlags, @AttributionFlags int proxiedAttributionFlags,
-            int attributionChainId) {
-        final int proxyUid = attributionSource.getUid();
-        final String proxyPackageName = attributionSource.getPackageName();
-        final String proxyAttributionTag = attributionSource.getAttributionTag();
-        final int proxiedUid = attributionSource.getNextUid();
-        final String proxiedPackageName = attributionSource.getNextPackageName();
-        final String proxiedAttributionTag = attributionSource.getNextAttributionTag();
-
-        verifyIncomingProxyUid(attributionSource);
-        verifyIncomingOp(code);
-        if (!isIncomingPackageValid(proxyPackageName, UserHandle.getUserId(proxyUid))
-                || !isIncomingPackageValid(proxiedPackageName, UserHandle.getUserId(proxiedUid))) {
-            return new SyncNotedAppOp(AppOpsManager.MODE_ERRORED, code, proxiedAttributionTag,
-                    proxiedPackageName);
-        }
-
-        boolean isCallerTrusted = isCallerAndAttributionTrusted(attributionSource);
-        skipProxyOperation = isCallerTrusted && skipProxyOperation;
-
-        String resolvedProxyPackageName = AppOpsManager.resolvePackageName(proxyUid,
-                proxyPackageName);
-        if (resolvedProxyPackageName == null) {
-            return new SyncNotedAppOp(AppOpsManager.MODE_IGNORED, code, proxiedAttributionTag,
-                    proxiedPackageName);
-        }
-
-        final boolean isChainTrusted = isCallerTrusted
-                && attributionChainId != ATTRIBUTION_CHAIN_ID_NONE
-                && ((proxyAttributionFlags & ATTRIBUTION_FLAG_TRUSTED) != 0
-                || (proxiedAttributionFlags & ATTRIBUTION_FLAG_TRUSTED) != 0);
-        final boolean isSelfBlame = Binder.getCallingUid() == proxiedUid;
-        final boolean isProxyTrusted = mContext.checkPermission(
-                Manifest.permission.UPDATE_APP_OPS_STATS, -1, proxyUid)
-                == PackageManager.PERMISSION_GRANTED || isSelfBlame
-                || isChainTrusted;
-
-        String resolvedProxiedPackageName = AppOpsManager.resolvePackageName(proxiedUid,
-                proxiedPackageName);
-        if (resolvedProxiedPackageName == null) {
-            return new SyncNotedAppOp(AppOpsManager.MODE_IGNORED, code, proxiedAttributionTag,
-                    proxiedPackageName);
-        }
-
-        final int proxiedFlags = isProxyTrusted ? AppOpsManager.OP_FLAG_TRUSTED_PROXIED
-                : AppOpsManager.OP_FLAG_UNTRUSTED_PROXIED;
-
-        if (!skipProxyOperation) {
-            // Test if the proxied operation will succeed before starting the proxy operation
-            final SyncNotedAppOp testProxiedOp = startOperationUnchecked(clientId, code,
-                    proxiedUid, resolvedProxiedPackageName, proxiedAttributionTag, proxyUid,
-                    resolvedProxyPackageName, proxyAttributionTag, proxiedFlags, startIfModeDefault,
-                    shouldCollectAsyncNotedOp, message, shouldCollectMessage,
-                    proxiedAttributionFlags, attributionChainId, /*dryRun*/ true);
-            if (!shouldStartForMode(testProxiedOp.getOpMode(), startIfModeDefault)) {
-                return testProxiedOp;
-            }
-
-            final int proxyFlags = isProxyTrusted ? AppOpsManager.OP_FLAG_TRUSTED_PROXY
-                    : AppOpsManager.OP_FLAG_UNTRUSTED_PROXY;
-
-            final SyncNotedAppOp proxyAppOp = startOperationUnchecked(clientId, code, proxyUid,
-                    resolvedProxyPackageName, proxyAttributionTag, Process.INVALID_UID, null, null,
-                    proxyFlags, startIfModeDefault, !isProxyTrusted, "proxy " + message,
-                    shouldCollectMessage, proxyAttributionFlags, attributionChainId,
-                    /*dryRun*/ false);
-            if (!shouldStartForMode(proxyAppOp.getOpMode(), startIfModeDefault)) {
-                return proxyAppOp;
-            }
-        }
-
-        return startOperationUnchecked(clientId, code, proxiedUid, resolvedProxiedPackageName,
-                proxiedAttributionTag, proxyUid, resolvedProxyPackageName, proxyAttributionTag,
-                proxiedFlags, startIfModeDefault, shouldCollectAsyncNotedOp, message,
-                shouldCollectMessage, proxiedAttributionFlags, attributionChainId,
-                /*dryRun*/ false);
+                attributionFlags, attributionChainId, /*dryRun*/ false);
     }
 
     private boolean shouldStartForMode(int mode, boolean startIfModeDefault) {
         return (mode == MODE_ALLOWED || (mode == MODE_DEFAULT && startIfModeDefault));
     }
 
-    private SyncNotedAppOp startOperationUnchecked(IBinder clientId, int code, int uid,
+    @Override
+    public int startOperationUnchecked(IBinder clientId, int code, int uid,
             @NonNull String packageName, @Nullable String attributionTag, int proxyUid,
             String proxyPackageName, @Nullable String proxyAttributionTag, @OpFlags int flags,
-            boolean startIfModeDefault, boolean shouldCollectAsyncNotedOp, @Nullable String message,
-            boolean shouldCollectMessage, @AttributionFlags int attributionFlags,
+            boolean startIfModeDefault, @AttributionFlags int attributionFlags,
             int attributionChainId, boolean dryRun) {
         PackageVerificationResult pvr;
         try {
@@ -3031,11 +2453,10 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
             }
         } catch (SecurityException e) {
             Slog.e(TAG, "startOperation", e);
-            return new SyncNotedAppOp(AppOpsManager.MODE_ERRORED, code, attributionTag,
-                    packageName);
+            return AppOpsManager.MODE_ERRORED;
         }
 
-        boolean isRestricted = false;
+        boolean isRestricted;
         int startType = START_TYPE_FAILED;
         synchronized (this) {
             final Ops ops = getOpsLocked(uid, packageName, attributionTag,
@@ -3046,14 +2467,15 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
                             flags, AppOpsManager.MODE_IGNORED, startType, attributionFlags,
                             attributionChainId);
                 }
-                if (DEBUG) Slog.d(TAG, "startOperation: no op for code " + code + " uid " + uid
-                        + " package " + packageName + " flags: "
-                        + AppOpsManager.flagsToString(flags));
-                return new SyncNotedAppOp(AppOpsManager.MODE_ERRORED, code, attributionTag,
-                        packageName);
+                if (DEBUG) {
+                    Slog.d(TAG, "startOperation: no op for code " + code + " uid " + uid
+                            + " package " + packageName + " flags: "
+                            + AppOpsManager.flagsToString(flags));
+                }
+                return AppOpsManager.MODE_ERRORED;
             }
             final Op op = getOpLocked(ops, code, uid, true);
-            final AttributedOp2 attributedOp = op.getOrCreateAttribution(op, attributionTag);
+            final AttributedOp attributedOp = op.getOrCreateAttribution(op, attributionTag);
             final UidState uidState = ops.uidState;
             isRestricted = isOpRestrictedLocked(uid, code, packageName, attributionTag, pvr.bypass,
                     false);
@@ -3073,28 +2495,31 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
                         scheduleOpStartedIfNeededLocked(code, uid, packageName, attributionTag,
                                 flags, uidMode, startType, attributionFlags, attributionChainId);
                     }
-                    return new SyncNotedAppOp(uidMode, code, attributionTag, packageName);
+                    return uidMode;
                 }
             } else {
                 final Op switchOp = switchCode != code ? getOpLocked(ops, switchCode, uid, true)
                         : op;
                 final int mode = switchOp.uidState.evalMode(switchOp.op, switchOp.getMode());
-                if (mode != AppOpsManager.MODE_ALLOWED
-                        && (!startIfModeDefault || mode != MODE_DEFAULT)) {
-                    if (DEBUG) Slog.d(TAG, "startOperation: reject #" + mode + " for code "
-                            + switchCode + " (" + code + ") uid " + uid + " package "
-                            + packageName + " flags: " + AppOpsManager.flagsToString(flags));
+                if (!shouldStartForMode(mode, startIfModeDefault)) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "startOperation: reject #" + mode + " for code "
+                                + switchCode + " (" + code + ") uid " + uid + " package "
+                                + packageName + " flags: " + AppOpsManager.flagsToString(flags));
+                    }
                     if (!dryRun) {
                         attributedOp.rejected(uidState.getState(), flags);
                         scheduleOpStartedIfNeededLocked(code, uid, packageName, attributionTag,
                                 flags, mode, startType, attributionFlags, attributionChainId);
                     }
-                    return new SyncNotedAppOp(mode, code, attributionTag, packageName);
+                    return mode;
                 }
             }
-            if (DEBUG) Slog.d(TAG, "startOperation: allowing code " + code + " uid " + uid
-                    + " package " + packageName + " restricted: " + isRestricted
-                    + " flags: " + AppOpsManager.flagsToString(flags));
+            if (DEBUG) {
+                Slog.d(TAG, "startOperation: allowing code " + code + " uid " + uid
+                        + " package " + packageName + " restricted: " + isRestricted
+                        + " flags: " + AppOpsManager.flagsToString(flags));
+            }
             if (!dryRun) {
                 try {
                     if (isRestricted) {
@@ -3116,23 +2541,12 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
             }
         }
 
-        if (shouldCollectAsyncNotedOp && !dryRun && !isRestricted) {
-            collectAsyncNotedOp(uid, packageName, code, attributionTag, AppOpsManager.OP_FLAG_SELF,
-                    message, shouldCollectMessage);
-        }
-
-        return new SyncNotedAppOp(isRestricted ? MODE_IGNORED : MODE_ALLOWED, code, attributionTag,
-                packageName);
+        // Possible bug? The raw mode could have been MODE_DEFAULT to reach here.
+        return isRestricted ? MODE_IGNORED : MODE_ALLOWED;
     }
 
     @Override
     public void finishOperation(IBinder clientId, int code, int uid, String packageName,
-            String attributionTag) {
-        mCheckOpsDelegateDispatcher.finishOperation(clientId, code, uid, packageName,
-                attributionTag);
-    }
-
-    private void finishOperationImpl(IBinder clientId, int code, int uid, String packageName,
             String attributionTag) {
         verifyIncomingUid(uid);
         verifyIncomingOp(code);
@@ -3149,55 +2563,7 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
     }
 
     @Override
-    public void finishProxyOperation(@NonNull IBinder clientId, int code,
-            @NonNull AttributionSource attributionSource, boolean skipProxyOperation) {
-        mCheckOpsDelegateDispatcher.finishProxyOperation(clientId, code, attributionSource,
-                skipProxyOperation);
-    }
-
-    private Void finishProxyOperationImpl(IBinder clientId, int code,
-            @NonNull AttributionSource attributionSource, boolean skipProxyOperation) {
-        final int proxyUid = attributionSource.getUid();
-        final String proxyPackageName = attributionSource.getPackageName();
-        final String proxyAttributionTag = attributionSource.getAttributionTag();
-        final int proxiedUid = attributionSource.getNextUid();
-        final String proxiedPackageName = attributionSource.getNextPackageName();
-        final String proxiedAttributionTag = attributionSource.getNextAttributionTag();
-
-        skipProxyOperation = skipProxyOperation
-                && isCallerAndAttributionTrusted(attributionSource);
-
-        verifyIncomingProxyUid(attributionSource);
-        verifyIncomingOp(code);
-        if (!isIncomingPackageValid(proxyPackageName, UserHandle.getUserId(proxyUid))
-                || !isIncomingPackageValid(proxiedPackageName, UserHandle.getUserId(proxiedUid))) {
-            return null;
-        }
-
-        String resolvedProxyPackageName = AppOpsManager.resolvePackageName(proxyUid,
-                proxyPackageName);
-        if (resolvedProxyPackageName == null) {
-            return null;
-        }
-
-        if (!skipProxyOperation) {
-            finishOperationUnchecked(clientId, code, proxyUid, resolvedProxyPackageName,
-                    proxyAttributionTag);
-        }
-
-        String resolvedProxiedPackageName = AppOpsManager.resolvePackageName(proxiedUid,
-                proxiedPackageName);
-        if (resolvedProxiedPackageName == null) {
-            return null;
-        }
-
-        finishOperationUnchecked(clientId, code, proxiedUid, resolvedProxiedPackageName,
-                proxiedAttributionTag);
-
-        return null;
-    }
-
-    private void finishOperationUnchecked(IBinder clientId, int code, int uid, String packageName,
+    public void finishOperationUnchecked(IBinder clientId, int code, int uid, String packageName,
             String attributionTag) {
         PackageVerificationResult pvr;
         try {
@@ -3218,7 +2584,7 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
                         + attributionTag + ") op=" + AppOpsManager.opToName(code));
                 return;
             }
-            final AttributedOp2 attributedOp = op.mAttributions.get(attributionTag);
+            final AttributedOp attributedOp = op.mAttributions.get(attributionTag);
             if (attributedOp == null) {
                 Slog.e(TAG, "Attribution not found: uid=" + uid + " pkg=" + packageName + "("
                         + attributionTag + ") op=" + AppOpsManager.opToName(code));
@@ -3234,9 +2600,9 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
         }
     }
 
-    void scheduleOpActiveChangedIfNeededLocked(int code, int uid, @NonNull
-            String packageName, @Nullable String attributionTag, boolean active, @AttributionFlags
-            int attributionFlags, int attributionChainId) {
+    void scheduleOpActiveChangedIfNeededLocked(int code, int uid, @NonNull String packageName,
+            @Nullable String attributionTag, boolean active,
+            @AttributionFlags int attributionFlags, int attributionChainId) {
         ArraySet<ActiveCallback> dispatchedCallbacks = null;
         final int callbackListCount = mActiveWatchers.size();
         for (int i = 0; i < callbackListCount; i++) {
@@ -3394,52 +2760,6 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
         }
     }
 
-    @Override
-    public int permissionToOpCode(String permission) {
-        if (permission == null) {
-            return AppOpsManager.OP_NONE;
-        }
-        return AppOpsManager.permissionToOpCode(permission);
-    }
-
-    @Override
-    public boolean shouldCollectNotes(int opCode) {
-        Preconditions.checkArgumentInRange(opCode, 0, _NUM_OP - 1, "opCode");
-
-        if (AppOpsManager.shouldForceCollectNoteForOp(opCode)) {
-            return true;
-        }
-
-        String perm = AppOpsManager.opToPermission(opCode);
-        if (perm == null) {
-            return false;
-        }
-
-        PermissionInfo permInfo;
-        try {
-            permInfo = mContext.getPackageManager().getPermissionInfo(perm, 0);
-        } catch (PackageManager.NameNotFoundException e) {
-            return false;
-        }
-
-        return permInfo.getProtection() == PROTECTION_DANGEROUS
-                || (permInfo.getProtectionFlags() & PROTECTION_FLAG_APPOP) != 0;
-    }
-
-    private void verifyIncomingProxyUid(@NonNull AttributionSource attributionSource) {
-        if (attributionSource.getUid() == Binder.getCallingUid()) {
-            return;
-        }
-        if (Binder.getCallingPid() == Process.myPid()) {
-            return;
-        }
-        if (attributionSource.isTrusted(mContext)) {
-            return;
-        }
-        mContext.enforcePermission(android.Manifest.permission.UPDATE_APP_OPS_STATS,
-                Binder.getCallingPid(), Binder.getCallingUid(), null);
-    }
-
     private void verifyIncomingUid(int uid) {
         if (uid == Binder.getCallingUid()) {
             return;
@@ -3498,16 +2818,6 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
                 || resolveUid(resolvedPackage) != Process.INVALID_UID;
     }
 
-    private boolean isCallerAndAttributionTrusted(@NonNull AttributionSource attributionSource) {
-        if (attributionSource.getUid() != Binder.getCallingUid()
-                && attributionSource.isTrusted(mContext)) {
-            return true;
-        }
-        return mContext.checkPermission(android.Manifest.permission.UPDATE_APP_OPS_STATS,
-                Binder.getCallingPid(), Binder.getCallingUid(), null)
-                == PackageManager.PERMISSION_GRANTED;
-    }
-
     private @Nullable UidState getUidStateLocked(int uid, boolean edit) {
         UidState uidState = mUidStates.get(uid);
         if (uidState == null) {
@@ -3521,7 +2831,8 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
         return uidState;
     }
 
-    private void updateAppWidgetVisibility(SparseArray<String> uidPackageNames, boolean visible) {
+    @Override
+    public void updateAppWidgetVisibility(SparseArray<String> uidPackageNames, boolean visible) {
         synchronized (this) {
             getUidStateTracker().updateAppWidgetVisibility(uidPackageNames, visible);
         }
@@ -3538,18 +2849,22 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
         return mPackageManagerInternal;
     }
 
+    @Override
+    public void verifyPackage(int uid, String packageName) {
+        verifyAndGetBypass(uid, packageName, null);
+    }
+
     /**
      * Create a restriction description matching the properties of the package.
      *
      * @param pkg The package to create the restriction description for
-     *
      * @return The restriction matching the package
      */
     private RestrictionBypass getBypassforPackage(@NonNull AndroidPackage pkg) {
         return new RestrictionBypass(pkg.getUid() == Process.SYSTEM_UID, pkg.isPrivileged(),
                 mContext.checkPermission(android.Manifest.permission
                         .EXEMPT_FROM_AUDIO_RECORD_RESTRICTIONS, -1, pkg.getUid())
-                == PackageManager.PERMISSION_GRANTED);
+                        == PackageManager.PERMISSION_GRANTED);
     }
 
     /**
@@ -3565,13 +2880,12 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
      * description} for the package, along with a boolean indicating whether the attribution tag is
      * valid.
      *
-     * @param uid The uid the package belongs to
-     * @param packageName The package the might belong to the uid
-     * @param attributionTag attribution tag or {@code null} if no need to verify
+     * @param uid              The uid the package belongs to
+     * @param packageName      The package the might belong to the uid
+     * @param attributionTag   attribution tag or {@code null} if no need to verify
      * @param proxyPackageName The proxy package, from which the attribution tag is to be pulled
-     *
      * @return PackageVerificationResult containing {@link RestrictionBypass} and whether the
-     *         attribution tag is valid
+     * attribution tag is valid
      */
     private @NonNull PackageVerificationResult verifyAndGetBypass(int uid, String packageName,
             @Nullable String attributionTag, @Nullable String proxyPackageName) {
@@ -3632,7 +2946,7 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
                         + "Package \"" + packageName + "\" does not belong to uid " + uid + ".");
                 String otherUidMessage = DEBUG ? " but it is really " + pkgUid : " but it is not";
                 throw new SecurityException("Specified package \"" + packageName + "\" under uid "
-                        +  UserHandle.getAppId(uid) + otherUidMessage);
+                        + UserHandle.getAppId(uid) + otherUidMessage);
             }
             return new PackageVerificationResult(RestrictionBypass.UNRESTRICTED,
                     /* isAttributionTagValid */ true);
@@ -3672,7 +2986,7 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
                     if (!mPlatformCompat.isChangeEnabledByPackageName(
                             SECURITY_EXCEPTION_ON_INVALID_ATTRIBUTION_TAG_CHANGE, packageName,
                             userId) || !mPlatformCompat.isChangeEnabledByUid(
-                                    SECURITY_EXCEPTION_ON_INVALID_ATTRIBUTION_TAG_CHANGE,
+                            SECURITY_EXCEPTION_ON_INVALID_ATTRIBUTION_TAG_CHANGE,
                             callingUid)) {
                         // Do not override tags if overriding is not enabled for this package
                         isAttributionTagValid = true;
@@ -3718,13 +3032,13 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
     /**
      * Get (and potentially create) ops.
      *
-     * @param uid The uid the package belongs to
-     * @param packageName The name of the package
-     * @param attributionTag attribution tag
+     * @param uid                   The uid the package belongs to
+     * @param packageName           The name of the package
+     * @param attributionTag        attribution tag
      * @param isAttributionTagValid whether the given attribution tag is valid
-     * @param bypass When to bypass certain op restrictions (can be null if edit == false)
-     * @param edit If an ops does not exist, create the ops?
-
+     * @param bypass                When to bypass certain op restrictions (can be null if edit
+        *                              == false)
+     * @param edit                  If an ops does not exist, create the ops?
      * @return The ops
      */
     private Ops getOpsLocked(int uid, String packageName, @Nullable String attributionTag,
@@ -3782,21 +3096,21 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
             mWriteScheduled = true;
             mFastWriteScheduled = true;
             mHandler.removeCallbacks(mWriteRunner);
-            mHandler.postDelayed(mWriteRunner, 10*1000);
+            mHandler.postDelayed(mWriteRunner, 10 * 1000);
         }
     }
 
     /**
      * Get the state of an op for a uid.
      *
-     * @param code The code of the op
-     * @param uid The uid the of the package
-     * @param packageName The package name for which to get the state for
-     * @param attributionTag The attribution tag
+     * @param code                  The code of the op
+     * @param uid                   The uid the of the package
+     * @param packageName           The package name for which to get the state for
+     * @param attributionTag        The attribution tag
      * @param isAttributionTagValid Whether the given attribution tag is valid
-     * @param bypass When to bypass certain op restrictions (can be null if edit == false)
-     * @param edit Iff {@code true} create the {@link Op} object if not yet created
-     *
+     * @param bypass                When to bypass certain op restrictions (can be null if edit
+     *                              == false)
+     * @param edit                  Iff {@code true} create the {@link Op} object if not yet created
      * @return The {@link Op state} of the op
      */
     private @Nullable Op getOpLocked(int code, int uid, @NonNull String packageName,
@@ -3875,7 +3189,8 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
         return false;
     }
 
-    void readState() {
+    @Override
+    public void readState() {
         int oldVersion = NO_VERSION;
         synchronized (mFile) {
             synchronized (this) {
@@ -3894,7 +3209,7 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
                     int type;
                     while ((type = parser.next()) != XmlPullParser.START_TAG
                             && type != XmlPullParser.END_DOCUMENT) {
-                        ;
+                        // Parse next until we reach the start or end
                     }
 
                     if (type != XmlPullParser.START_TAG) {
@@ -4018,7 +3333,7 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
             if (tagName.equals("op")) {
                 final int code = parser.getAttributeInt(null, "n");
                 final int mode = parser.getAttributeInt(null, "m");
-                setUidMode(code, uid, mode);
+                setUidMode(code, uid, mode, null);
             } else {
                 Slog.w(TAG, "Unknown element under <uid-ops>: "
                         + parser.getName());
@@ -4075,7 +3390,7 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
     private void readAttributionOp(TypedXmlPullParser parser, @NonNull Op parent,
             @Nullable String attribution)
             throws NumberFormatException, IOException, XmlPullParserException {
-        final AttributedOp2 attributedOp = parent.getOrCreateAttribution(parent, attribution);
+        final AttributedOp attributedOp = parent.getOrCreateAttribution(parent, attribution);
 
         final long key = parser.getAttributeLong(null, "n");
         final int uidState = extractUidStateFromKey(key);
@@ -4134,7 +3449,8 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
         ops.put(op.op, op);
     }
 
-    void writeState() {
+    @Override
+    public void writeState() {
         synchronized (mFile) {
             FileOutputStream stream;
             try {
@@ -4189,7 +3505,7 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
 
                 if (allOps != null) {
                     String lastPkg = null;
-                    for (int i=0; i<allOps.size(); i++) {
+                    for (int i = 0; i < allOps.size(); i++) {
                         AppOpsManager.PackageOps pkg = allOps.get(i);
                         if (!Objects.equals(pkg.getPackageName(), lastPkg)) {
                             if (lastPkg != null) {
@@ -4204,7 +3520,7 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
                         out.startTag(null, "uid");
                         out.attributeInt(null, "n", pkg.getUid());
                         List<AppOpsManager.OpEntry> ops = pkg.getOps();
-                        for (int j=0; j<ops.size(); j++) {
+                        for (int j = 0; j < ops.size(); j++) {
                             AppOpsManager.OpEntry op = ops.get(j);
                             out.startTag(null, "op");
                             out.attributeInt(null, "n", op.getOp());
@@ -4294,505 +3610,6 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
             }
         }
         mHistoricalRegistry.writeAndClearDiscreteHistory();
-    }
-
-    static class Shell extends ShellCommand {
-        final IAppOpsService mInterface;
-        final AppOpsServiceImpl mInternal;
-
-        int userId = UserHandle.USER_SYSTEM;
-        String packageName;
-        String attributionTag;
-        String opStr;
-        String modeStr;
-        int op;
-        int mode;
-        int packageUid;
-        int nonpackageUid;
-        final static Binder sBinder = new Binder();
-        IBinder mToken;
-        boolean targetsUid;
-
-        Shell(IAppOpsService iface, AppOpsServiceImpl internal) {
-            mInterface = iface;
-            mInternal = internal;
-            mToken = AppOpsManager.getClientId();
-        }
-
-        @Override
-        public int onCommand(String cmd) {
-            return onShellCommand(this, cmd);
-        }
-
-        @Override
-        public void onHelp() {
-            PrintWriter pw = getOutPrintWriter();
-            dumpCommandHelp(pw);
-        }
-
-        static private int strOpToOp(String op, PrintWriter err) {
-            try {
-                return AppOpsManager.strOpToOp(op);
-            } catch (IllegalArgumentException e) {
-            }
-            try {
-                return Integer.parseInt(op);
-            } catch (NumberFormatException e) {
-            }
-            try {
-                return AppOpsManager.strDebugOpToOp(op);
-            } catch (IllegalArgumentException e) {
-                err.println("Error: " + e.getMessage());
-                return -1;
-            }
-        }
-
-        static int strModeToMode(String modeStr, PrintWriter err) {
-            for (int i = AppOpsManager.MODE_NAMES.length - 1; i >= 0; i--) {
-                if (AppOpsManager.MODE_NAMES[i].equals(modeStr)) {
-                    return i;
-                }
-            }
-            try {
-                return Integer.parseInt(modeStr);
-            } catch (NumberFormatException e) {
-            }
-            err.println("Error: Mode " + modeStr + " is not valid");
-            return -1;
-        }
-
-        int parseUserOpMode(int defMode, PrintWriter err) throws RemoteException {
-            userId = UserHandle.USER_CURRENT;
-            opStr = null;
-            modeStr = null;
-            for (String argument; (argument = getNextArg()) != null;) {
-                if ("--user".equals(argument)) {
-                    userId = UserHandle.parseUserArg(getNextArgRequired());
-                } else {
-                    if (opStr == null) {
-                        opStr = argument;
-                    } else if (modeStr == null) {
-                        modeStr = argument;
-                        break;
-                    }
-                }
-            }
-            if (opStr == null) {
-                err.println("Error: Operation not specified.");
-                return -1;
-            }
-            op = strOpToOp(opStr, err);
-            if (op < 0) {
-                return -1;
-            }
-            if (modeStr != null) {
-                if ((mode=strModeToMode(modeStr, err)) < 0) {
-                    return -1;
-                }
-            } else {
-                mode = defMode;
-            }
-            return 0;
-        }
-
-        int parseUserPackageOp(boolean reqOp, PrintWriter err) throws RemoteException {
-            userId = UserHandle.USER_CURRENT;
-            packageName = null;
-            opStr = null;
-            for (String argument; (argument = getNextArg()) != null;) {
-                if ("--user".equals(argument)) {
-                    userId = UserHandle.parseUserArg(getNextArgRequired());
-                } else if ("--uid".equals(argument)) {
-                    targetsUid = true;
-                } else if ("--attribution".equals(argument)) {
-                    attributionTag = getNextArgRequired();
-                } else {
-                    if (packageName == null) {
-                        packageName = argument;
-                    } else if (opStr == null) {
-                        opStr = argument;
-                        break;
-                    }
-                }
-            }
-            if (packageName == null) {
-                err.println("Error: Package name not specified.");
-                return -1;
-            } else if (opStr == null && reqOp) {
-                err.println("Error: Operation not specified.");
-                return -1;
-            }
-            if (opStr != null) {
-                op = strOpToOp(opStr, err);
-                if (op < 0) {
-                    return -1;
-                }
-            } else {
-                op = AppOpsManager.OP_NONE;
-            }
-            if (userId == UserHandle.USER_CURRENT) {
-                userId = ActivityManager.getCurrentUser();
-            }
-            nonpackageUid = -1;
-            try {
-                nonpackageUid = Integer.parseInt(packageName);
-            } catch (NumberFormatException e) {
-            }
-            if (nonpackageUid == -1 && packageName.length() > 1 && packageName.charAt(0) == 'u'
-                    && packageName.indexOf('.') < 0) {
-                int i = 1;
-                while (i < packageName.length() && packageName.charAt(i) >= '0'
-                        && packageName.charAt(i) <= '9') {
-                    i++;
-                }
-                if (i > 1 && i < packageName.length()) {
-                    String userStr = packageName.substring(1, i);
-                    try {
-                        int user = Integer.parseInt(userStr);
-                        char type = packageName.charAt(i);
-                        i++;
-                        int startTypeVal = i;
-                        while (i < packageName.length() && packageName.charAt(i) >= '0'
-                                && packageName.charAt(i) <= '9') {
-                            i++;
-                        }
-                        if (i > startTypeVal) {
-                            String typeValStr = packageName.substring(startTypeVal, i);
-                            try {
-                                int typeVal = Integer.parseInt(typeValStr);
-                                if (type == 'a') {
-                                    nonpackageUid = UserHandle.getUid(user,
-                                            typeVal + Process.FIRST_APPLICATION_UID);
-                                } else if (type == 's') {
-                                    nonpackageUid = UserHandle.getUid(user, typeVal);
-                                }
-                            } catch (NumberFormatException e) {
-                            }
-                        }
-                    } catch (NumberFormatException e) {
-                    }
-                }
-            }
-            if (nonpackageUid != -1) {
-                packageName = null;
-            } else {
-                packageUid = resolveUid(packageName);
-                if (packageUid < 0) {
-                    packageUid = AppGlobals.getPackageManager().getPackageUid(packageName,
-                            PackageManager.MATCH_UNINSTALLED_PACKAGES, userId);
-                }
-                if (packageUid < 0) {
-                    err.println("Error: No UID for " + packageName + " in user " + userId);
-                    return -1;
-                }
-            }
-            return 0;
-        }
-    }
-
-    @Override public void onShellCommand(FileDescriptor in, FileDescriptor out,
-            FileDescriptor err, String[] args, ShellCallback callback,
-            ResultReceiver resultReceiver) {
-        (new Shell(this, this)).exec(this, in, out, err, args, callback, resultReceiver);
-    }
-
-    static void dumpCommandHelp(PrintWriter pw) {
-        pw.println("AppOps service (appops) commands:");
-        pw.println("  help");
-        pw.println("    Print this help text.");
-        pw.println("  start [--user <USER_ID>] [--attribution <ATTRIBUTION_TAG>] <PACKAGE | UID> "
-                + "<OP> ");
-        pw.println("    Starts a given operation for a particular application.");
-        pw.println("  stop [--user <USER_ID>] [--attribution <ATTRIBUTION_TAG>] <PACKAGE | UID> "
-                + "<OP> ");
-        pw.println("    Stops a given operation for a particular application.");
-        pw.println("  set [--user <USER_ID>] <[--uid] PACKAGE | UID> <OP> <MODE>");
-        pw.println("    Set the mode for a particular application and operation.");
-        pw.println("  get [--user <USER_ID>] [--attribution <ATTRIBUTION_TAG>] <PACKAGE | UID> "
-                + "[<OP>]");
-        pw.println("    Return the mode for a particular application and optional operation.");
-        pw.println("  query-op [--user <USER_ID>] <OP> [<MODE>]");
-        pw.println("    Print all packages that currently have the given op in the given mode.");
-        pw.println("  reset [--user <USER_ID>] [<PACKAGE>]");
-        pw.println("    Reset the given application or all applications to default modes.");
-        pw.println("  write-settings");
-        pw.println("    Immediately write pending changes to storage.");
-        pw.println("  read-settings");
-        pw.println("    Read the last written settings, replacing current state in RAM.");
-        pw.println("  options:");
-        pw.println("    <PACKAGE> an Android package name or its UID if prefixed by --uid");
-        pw.println("    <OP>      an AppOps operation.");
-        pw.println("    <MODE>    one of allow, ignore, deny, or default");
-        pw.println("    <USER_ID> the user id under which the package is installed. If --user is");
-        pw.println("              not specified, the current user is assumed.");
-    }
-
-    static int onShellCommand(Shell shell, String cmd) {
-        if (cmd == null) {
-            return shell.handleDefaultCommands(cmd);
-        }
-        PrintWriter pw = shell.getOutPrintWriter();
-        PrintWriter err = shell.getErrPrintWriter();
-        try {
-            switch (cmd) {
-                case "set": {
-                    int res = shell.parseUserPackageOp(true, err);
-                    if (res < 0) {
-                        return res;
-                    }
-                    String modeStr = shell.getNextArg();
-                    if (modeStr == null) {
-                        err.println("Error: Mode not specified.");
-                        return -1;
-                    }
-
-                    final int mode = shell.strModeToMode(modeStr, err);
-                    if (mode < 0) {
-                        return -1;
-                    }
-
-                    if (!shell.targetsUid && shell.packageName != null) {
-                        shell.mInterface.setMode(shell.op, shell.packageUid, shell.packageName,
-                                mode);
-                    } else if (shell.targetsUid && shell.packageName != null) {
-                        try {
-                            final int uid = shell.mInternal.mContext.getPackageManager()
-                                    .getPackageUidAsUser(shell.packageName, shell.userId);
-                            shell.mInterface.setUidMode(shell.op, uid, mode);
-                        } catch (PackageManager.NameNotFoundException e) {
-                            return -1;
-                        }
-                    } else {
-                        shell.mInterface.setUidMode(shell.op, shell.nonpackageUid, mode);
-                    }
-                    return 0;
-                }
-                case "get": {
-                    int res = shell.parseUserPackageOp(false, err);
-                    if (res < 0) {
-                        return res;
-                    }
-
-                    List<AppOpsManager.PackageOps> ops = new ArrayList<>();
-                    if (shell.packageName != null) {
-                        // Uid mode overrides package mode, so make sure it's also reported
-                        List<AppOpsManager.PackageOps> r = shell.mInterface.getUidOps(
-                                shell.packageUid,
-                                shell.op != AppOpsManager.OP_NONE ? new int[]{shell.op} : null);
-                        if (r != null) {
-                            ops.addAll(r);
-                        }
-                        r = shell.mInterface.getOpsForPackage(
-                                shell.packageUid, shell.packageName,
-                                shell.op != AppOpsManager.OP_NONE ? new int[]{shell.op} : null);
-                        if (r != null) {
-                            ops.addAll(r);
-                        }
-                    } else {
-                        ops = shell.mInterface.getUidOps(
-                                shell.nonpackageUid,
-                                shell.op != AppOpsManager.OP_NONE ? new int[]{shell.op} : null);
-                    }
-                    if (ops == null || ops.size() <= 0) {
-                        pw.println("No operations.");
-                        if (shell.op > AppOpsManager.OP_NONE && shell.op < AppOpsManager._NUM_OP) {
-                            pw.println("Default mode: " + AppOpsManager.modeToName(
-                                    AppOpsManager.opToDefaultMode(shell.op)));
-                        }
-                        return 0;
-                    }
-                    final long now = System.currentTimeMillis();
-                    for (int i=0; i<ops.size(); i++) {
-                        AppOpsManager.PackageOps packageOps = ops.get(i);
-                        if (packageOps.getPackageName() == null) {
-                            pw.print("Uid mode: ");
-                        }
-                        List<AppOpsManager.OpEntry> entries = packageOps.getOps();
-                        for (int j=0; j<entries.size(); j++) {
-                            AppOpsManager.OpEntry ent = entries.get(j);
-                            pw.print(AppOpsManager.opToName(ent.getOp()));
-                            pw.print(": ");
-                            pw.print(AppOpsManager.modeToName(ent.getMode()));
-                            if (shell.attributionTag == null) {
-                                if (ent.getLastAccessTime(OP_FLAGS_ALL) != -1) {
-                                    pw.print("; time=");
-                                    TimeUtils.formatDuration(
-                                            now - ent.getLastAccessTime(OP_FLAGS_ALL), pw);
-                                    pw.print(" ago");
-                                }
-                                if (ent.getLastRejectTime(OP_FLAGS_ALL) != -1) {
-                                    pw.print("; rejectTime=");
-                                    TimeUtils.formatDuration(
-                                            now - ent.getLastRejectTime(OP_FLAGS_ALL), pw);
-                                    pw.print(" ago");
-                                }
-                                if (ent.isRunning()) {
-                                    pw.print(" (running)");
-                                } else if (ent.getLastDuration(OP_FLAGS_ALL) != -1) {
-                                    pw.print("; duration=");
-                                    TimeUtils.formatDuration(ent.getLastDuration(OP_FLAGS_ALL), pw);
-                                }
-                            } else {
-                                final AppOpsManager.AttributedOpEntry attributionEnt =
-                                        ent.getAttributedOpEntries().get(shell.attributionTag);
-                                if (attributionEnt != null) {
-                                    if (attributionEnt.getLastAccessTime(OP_FLAGS_ALL) != -1) {
-                                        pw.print("; time=");
-                                        TimeUtils.formatDuration(
-                                                now - attributionEnt.getLastAccessTime(
-                                                        OP_FLAGS_ALL), pw);
-                                        pw.print(" ago");
-                                    }
-                                    if (attributionEnt.getLastRejectTime(OP_FLAGS_ALL) != -1) {
-                                        pw.print("; rejectTime=");
-                                        TimeUtils.formatDuration(
-                                                now - attributionEnt.getLastRejectTime(
-                                                        OP_FLAGS_ALL), pw);
-                                        pw.print(" ago");
-                                    }
-                                    if (attributionEnt.isRunning()) {
-                                        pw.print(" (running)");
-                                    } else if (attributionEnt.getLastDuration(OP_FLAGS_ALL)
-                                            != -1) {
-                                        pw.print("; duration=");
-                                        TimeUtils.formatDuration(
-                                                attributionEnt.getLastDuration(OP_FLAGS_ALL), pw);
-                                    }
-                                }
-                            }
-                            pw.println();
-                        }
-                    }
-                    return 0;
-                }
-                case "query-op": {
-                    int res = shell.parseUserOpMode(AppOpsManager.MODE_IGNORED, err);
-                    if (res < 0) {
-                        return res;
-                    }
-                    List<AppOpsManager.PackageOps> ops = shell.mInterface.getPackagesForOps(
-                            new int[] {shell.op});
-                    if (ops == null || ops.size() <= 0) {
-                        pw.println("No operations.");
-                        return 0;
-                    }
-                    for (int i=0; i<ops.size(); i++) {
-                        final AppOpsManager.PackageOps pkg = ops.get(i);
-                        boolean hasMatch = false;
-                        final List<AppOpsManager.OpEntry> entries = ops.get(i).getOps();
-                        for (int j=0; j<entries.size(); j++) {
-                            AppOpsManager.OpEntry ent = entries.get(j);
-                            if (ent.getOp() == shell.op && ent.getMode() == shell.mode) {
-                                hasMatch = true;
-                                break;
-                            }
-                        }
-                        if (hasMatch) {
-                            pw.println(pkg.getPackageName());
-                        }
-                    }
-                    return 0;
-                }
-                case "reset": {
-                    String packageName = null;
-                    int userId = UserHandle.USER_CURRENT;
-                    for (String argument; (argument = shell.getNextArg()) != null;) {
-                        if ("--user".equals(argument)) {
-                            String userStr = shell.getNextArgRequired();
-                            userId = UserHandle.parseUserArg(userStr);
-                        } else {
-                            if (packageName == null) {
-                                packageName = argument;
-                            } else {
-                                err.println("Error: Unsupported argument: " + argument);
-                                return -1;
-                            }
-                        }
-                    }
-
-                    if (userId == UserHandle.USER_CURRENT) {
-                        userId = ActivityManager.getCurrentUser();
-                    }
-
-                    shell.mInterface.resetAllModes(userId, packageName);
-                    pw.print("Reset all modes for: ");
-                    if (userId == UserHandle.USER_ALL) {
-                        pw.print("all users");
-                    } else {
-                        pw.print("user "); pw.print(userId);
-                    }
-                    pw.print(", ");
-                    if (packageName == null) {
-                        pw.println("all packages");
-                    } else {
-                        pw.print("package "); pw.println(packageName);
-                    }
-                    return 0;
-                }
-                case "write-settings": {
-                    shell.mInternal.enforceManageAppOpsModes(Binder.getCallingPid(),
-                            Binder.getCallingUid(), -1);
-                    final long token = Binder.clearCallingIdentity();
-                    try {
-                        synchronized (shell.mInternal) {
-                            shell.mInternal.mHandler.removeCallbacks(shell.mInternal.mWriteRunner);
-                        }
-                        shell.mInternal.writeState();
-                        pw.println("Current settings written.");
-                    } finally {
-                        Binder.restoreCallingIdentity(token);
-                    }
-                    return 0;
-                }
-                case "read-settings": {
-                    shell.mInternal.enforceManageAppOpsModes(Binder.getCallingPid(),
-                            Binder.getCallingUid(), -1);
-                    final long token = Binder.clearCallingIdentity();
-                    try {
-                        shell.mInternal.readState();
-                        pw.println("Last settings read.");
-                    } finally {
-                        Binder.restoreCallingIdentity(token);
-                    }
-                    return 0;
-                }
-                case "start": {
-                    int res = shell.parseUserPackageOp(true, err);
-                    if (res < 0) {
-                        return res;
-                    }
-
-                    if (shell.packageName != null) {
-                        shell.mInterface.startOperation(shell.mToken, shell.op, shell.packageUid,
-                                shell.packageName, shell.attributionTag, true, true,
-                                "appops start shell command", true,
-                                AppOpsManager.ATTRIBUTION_FLAG_ACCESSOR, ATTRIBUTION_CHAIN_ID_NONE);
-                    } else {
-                        return -1;
-                    }
-                    return 0;
-                }
-                case "stop": {
-                    int res = shell.parseUserPackageOp(true, err);
-                    if (res < 0) {
-                        return res;
-                    }
-
-                    if (shell.packageName != null) {
-                        shell.mInterface.finishOperation(shell.mToken, shell.op, shell.packageUid,
-                                shell.packageName, shell.attributionTag);
-                    } else {
-                        return -1;
-                    }
-                    return 0;
-                }
-                default:
-                    return shell.handleDefaultCommands(cmd);
-            }
-        } catch (RemoteException e) {
-            pw.println("Remote exception: " + e);
-        }
-        return -1;
     }
 
     private void dumpHelp(PrintWriter pw) {
@@ -4914,13 +3731,13 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
             }
         }
 
-        final AttributedOp2 attributedOp = op.mAttributions.get(attributionTag);
+        final AttributedOp attributedOp = op.mAttributions.get(attributionTag);
         if (attributedOp.isRunning()) {
             long earliestElapsedTime = Long.MAX_VALUE;
             long maxNumStarts = 0;
             int numInProgressEvents = attributedOp.mInProgressEvents.size();
             for (int i = 0; i < numInProgressEvents; i++) {
-                AttributedOp2.InProgressStartOpEvent event =
+                AttributedOp.InProgressStartOpEvent event =
                         attributedOp.mInProgressEvents.valueAt(i);
 
                 earliestElapsedTime = Math.min(earliestElapsedTime, event.getStartElapsedTime());
@@ -4940,7 +3757,7 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
 
     @NeverCompile // Avoid size overhead of debugging code.
     @Override
-    protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpAndUsageStatsPermission(mContext, TAG, pw)) return;
 
         int dumpOp = OP_NONE;
@@ -4972,7 +3789,7 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
                         pw.println("No argument for --op option");
                         return;
                     }
-                    dumpOp = Shell.strOpToOp(args[i], pw);
+                    dumpOp = AppOpsService.Shell.strOpToOp(args[i], pw);
                     dumpFilter |= FILTER_BY_OP_NAMES;
                     if (dumpOp < 0) {
                         return;
@@ -5011,7 +3828,7 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
                         pw.println("No argument for --mode option");
                         return;
                     }
-                    dumpMode = Shell.strModeToMode(args[i], pw);
+                    dumpMode = AppOpsService.Shell.strModeToMode(args[i], pw);
                     if (dumpMode < 0) {
                         return;
                     }
@@ -5054,7 +3871,6 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
             pw.println();
             final long now = System.currentTimeMillis();
             final long nowElapsed = SystemClock.elapsedRealtime();
-            final long nowUptime = SystemClock.uptimeMillis();
             boolean needSep = false;
             if (dumpFilter == 0 && dumpMode < 0 && mProfileOwners != null && !dumpWatchers
                     && !dumpHistory) {
@@ -5088,7 +3904,8 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
                     }
                     pw.print("    ");
                     pw.print(Integer.toHexString(System.identityHashCode(mModeWatchers.keyAt(i))));
-                    pw.print(": "); pw.println(cb);
+                    pw.print(": ");
+                    pw.println(cb);
                 }
             }
             if (mActiveWatchers.size() > 0 && dumpMode < 0) {
@@ -5223,14 +4040,10 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
                     pw.println(cb);
                 }
             }
-            if (mAudioRestrictionManager.hasActiveRestrictions() && dumpOp < 0
-                    && dumpPackage != null && dumpMode < 0 && !dumpWatchers) {
-                needSep = mAudioRestrictionManager.dump(pw) || needSep;
-            }
             if (needSep) {
                 pw.println();
             }
-            for (int i=0; i<mUidStates.size(); i++) {
+            for (int i = 0; i < mUidStates.size(); i++) {
                 UidState uidState = mUidStates.valueAt(i);
                 final SparseIntArray opModes = uidState.getNonDefaultUidModes();
                 final ArrayMap<String, Ops> pkgOps = uidState.pkgOps;
@@ -5252,8 +4065,8 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
                     }
                     if (pkgOps != null) {
                         for (int pkgi = 0;
-                                 (!hasOp || !hasPackage || !hasMode) && pkgi < pkgOps.size();
-                                 pkgi++) {
+                                (!hasOp || !hasPackage || !hasMode) && pkgi < pkgOps.size();
+                                pkgi++) {
                             Ops ops = pkgOps.valueAt(pkgi);
                             if (!hasOp && ops != null && ops.indexOfKey(dumpOp) >= 0) {
                                 hasOp = true;
@@ -5280,7 +4093,9 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
                     }
                 }
 
-                pw.print("  Uid "); UserHandle.formatUid(pw, uidState.uid); pw.println(":");
+                pw.print("  Uid ");
+                UserHandle.formatUid(pw, uidState.uid);
+                pw.println(":");
                 uidState.dump(pw, nowElapsed);
                 if (uidState.foregroundOps != null && (dumpMode < 0
                         || dumpMode == AppOpsManager.MODE_FOREGROUND)) {
@@ -5310,8 +4125,10 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
                         if (dumpMode >= 0 && dumpMode != mode) {
                             continue;
                         }
-                        pw.print("      "); pw.print(AppOpsManager.opToName(code));
-                        pw.print(": mode="); pw.println(AppOpsManager.modeToName(mode));
+                        pw.print("      ");
+                        pw.print(AppOpsManager.opToName(code));
+                        pw.print(": mode=");
+                        pw.println(AppOpsManager.modeToName(mode));
                     }
                 }
 
@@ -5325,7 +4142,7 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
                         continue;
                     }
                     boolean printedPackage = false;
-                    for (int j=0; j<ops.size(); j++) {
+                    for (int j = 0; j < ops.size(); j++) {
                         final Op op = ops.valueAt(j);
                         final int opCode = op.op;
                         if (dumpOp >= 0 && dumpOp != opCode) {
@@ -5335,11 +4152,15 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
                             continue;
                         }
                         if (!printedPackage) {
-                            pw.print("    Package "); pw.print(ops.packageName); pw.println(":");
+                            pw.print("    Package ");
+                            pw.print(ops.packageName);
+                            pw.println(":");
                             printedPackage = true;
                         }
-                        pw.print("      "); pw.print(AppOpsManager.opToName(opCode));
-                        pw.print(" ("); pw.print(AppOpsManager.modeToName(op.getMode()));
+                        pw.print("      ");
+                        pw.print(AppOpsManager.opToName(opCode));
+                        pw.print(" (");
+                        pw.print(AppOpsManager.modeToName(op.getMode()));
                         final int switchOp = AppOpsManager.opToSwitch(opCode);
                         if (switchOp != opCode) {
                             pw.print(" / switch ");
@@ -5347,7 +4168,8 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
                             final Op switchObj = ops.get(switchOp);
                             int mode = switchObj == null
                                     ? AppOpsManager.opToDefaultMode(switchOp) : switchObj.getMode();
-                            pw.print("="); pw.print(AppOpsManager.modeToName(mode));
+                            pw.print("=");
+                            pw.print(AppOpsManager.modeToName(mode));
                         }
                         pw.println("): ");
                         dumpStatesLocked(pw, dumpAttributionTag, dumpFilter, nowElapsed, op, now,
@@ -5361,17 +4183,6 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
 
             boolean showUserRestrictions = !(dumpMode < 0 && !dumpWatchers && !dumpHistory);
             mAppOpsRestrictions.dumpRestrictions(pw, dumpOp, dumpPackage, showUserRestrictions);
-
-            if (!dumpHistory && !dumpWatchers) {
-                pw.println();
-                if (mCheckOpsDelegateDispatcher.mPolicy != null
-                        && mCheckOpsDelegateDispatcher.mPolicy instanceof AppOpsPolicy) {
-                    AppOpsPolicy policy = (AppOpsPolicy) mCheckOpsDelegateDispatcher.mPolicy;
-                    policy.dumpTags(pw);
-                } else {
-                    pw.println("  AppOps policy not set.");
-                }
-            }
 
             if (dumpAll || dumpUidStateChangeLogs) {
                 pw.println();
@@ -5416,7 +4227,7 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
         if (userHandle != UserHandle.getCallingUserId()) {
             if (mContext.checkCallingOrSelfPermission(Manifest.permission
                     .INTERACT_ACROSS_USERS_FULL) != PackageManager.PERMISSION_GRANTED
-                && mContext.checkCallingOrSelfPermission(Manifest.permission
+                    && mContext.checkCallingOrSelfPermission(Manifest.permission
                     .INTERACT_ACROSS_USERS) != PackageManager.PERMISSION_GRANTED) {
                 throw new SecurityException("Need INTERACT_ACROSS_USERS_FULL or"
                         + " INTERACT_ACROSS_USERS to interact cross user ");
@@ -5446,8 +4257,8 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
                 mHandler.sendMessage(PooledLambda.obtainMessage(
                         AppOpsServiceImpl::notifyWatchersOfChange, this, code, UID_ANY));
                 mHandler.sendMessage(PooledLambda.obtainMessage(
-                        AppOpsServiceImpl::updateStartedOpModeForUser, this, code, restricted,
-                        userHandle));
+                        AppOpsServiceImpl::updateStartedOpModeForUser, this, code,
+                        restricted, userHandle));
             }
 
             if (restrictionState.isDefault()) {
@@ -5455,6 +4266,64 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
                 restrictionState.destroy();
             }
         }
+    }
+
+    @Override
+    public void setGlobalRestriction(int code, boolean restricted, IBinder token) {
+        if (Binder.getCallingPid() != Process.myPid()) {
+            throw new SecurityException("Only the system can set global restrictions");
+        }
+
+        synchronized (this) {
+            ClientGlobalRestrictionState restrictionState = mOpGlobalRestrictions.get(token);
+
+            if (restrictionState == null) {
+                try {
+                    restrictionState = new ClientGlobalRestrictionState(token);
+                } catch (RemoteException e) {
+                    return;
+                }
+                mOpGlobalRestrictions.put(token, restrictionState);
+            }
+
+            if (restrictionState.setRestriction(code, restricted)) {
+                mHandler.sendMessage(PooledLambda.obtainMessage(
+                        AppOpsServiceImpl::notifyWatchersOfChange, this, code, UID_ANY));
+                mHandler.sendMessage(PooledLambda.obtainMessage(
+                        AppOpsServiceImpl::updateStartedOpModeForUser, this, code,
+                        restricted, UserHandle.USER_ALL));
+            }
+
+            if (restrictionState.isDefault()) {
+                mOpGlobalRestrictions.remove(token);
+                restrictionState.destroy();
+            }
+        }
+    }
+
+    @Override
+    public int getOpRestrictionCount(int code, UserHandle user, String pkg,
+            String attributionTag) {
+        int number = 0;
+        synchronized (this) {
+            int numRestrictions = mOpUserRestrictions.size();
+            for (int i = 0; i < numRestrictions; i++) {
+                if (mOpUserRestrictions.valueAt(i)
+                        .hasRestriction(code, pkg, attributionTag, user.getIdentifier(),
+                                false)) {
+                    number++;
+                }
+            }
+
+            numRestrictions = mOpGlobalRestrictions.size();
+            for (int i = 0; i < numRestrictions; i++) {
+                if (mOpGlobalRestrictions.valueAt(i).hasRestriction(code)) {
+                    number++;
+                }
+            }
+        }
+
+        return number;
     }
 
     private void updateStartedOpModeForUser(int code, boolean restricted, int userId) {
@@ -5485,7 +4354,7 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
             }
             int numAttrTags = op.mAttributions.size();
             for (int attrNum = 0; attrNum < numAttrTags; attrNum++) {
-                AttributedOp2 attrOp = op.mAttributions.valueAt(attrNum);
+                AttributedOp attrOp = op.mAttributions.valueAt(attrNum);
                 if (restricted && attrOp.isRunning()) {
                     attrOp.pause();
                 } else if (attrOp.isPaused()) {
@@ -5495,7 +4364,8 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
         }
     }
 
-    private void notifyWatchersOfChange(int code, int uid) {
+    @Override
+    public void notifyWatchersOfChange(int code, int uid) {
         final ArraySet<OnOpModeChangedListener> modeChangedListenerSet;
         synchronized (this) {
             modeChangedListenerSet = mAppOpsServiceInterface.getOpModeChangedListeners(code);
@@ -5504,7 +4374,7 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
             }
         }
 
-        notifyOpChanged(modeChangedListenerSet,  code, uid, null);
+        notifyOpChanged(modeChangedListenerSet, code, uid, null);
     }
 
     @Override
@@ -5563,7 +4433,7 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
         final long identity = Binder.clearCallingIdentity();
         try {
             final List<AppOpsManager.PackageOps> packageOps = getOpsForPackage(proxiedUid,
-                    proxiedPackageName, new int[] {op});
+                    proxiedPackageName, new int[]{op});
             if (packageOps == null || packageOps.isEmpty()) {
                 return false;
             }
@@ -5668,258 +4538,6 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
         mHistoricalRegistry.persistPendingHistory();
     }
 
-    /**
-     * Report runtime access to AppOp together with message (including stack trace)
-     *
-     * @param packageName The package which reported the op
-     * @param notedAppOp contains code of op and attributionTag provided by developer
-     * @param message Message describing AppOp access (can be stack trace)
-     *
-     * @return Config for future sampling to reduce amount of reporting
-     */
-    @Override
-    public MessageSamplingConfig reportRuntimeAppOpAccessMessageAndGetConfig(
-            String packageName, SyncNotedAppOp notedAppOp, String message) {
-        int uid = Binder.getCallingUid();
-        Objects.requireNonNull(packageName);
-        synchronized (this) {
-            switchPackageIfBootTimeOrRarelyUsedLocked(packageName);
-            if (!packageName.equals(mSampledPackage)) {
-                return new MessageSamplingConfig(OP_NONE, 0,
-                        Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli());
-            }
-
-            Objects.requireNonNull(notedAppOp);
-            Objects.requireNonNull(message);
-
-            reportRuntimeAppOpAccessMessageInternalLocked(uid, packageName,
-                    AppOpsManager.strOpToOp(notedAppOp.getOp()),
-                    notedAppOp.getAttributionTag(), message);
-
-            return new MessageSamplingConfig(mSampledAppOpCode, mAcceptableLeftDistance,
-                    Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli());
-        }
-    }
-
-    /**
-     * Report runtime access to AppOp together with message (entry point for reporting
-     * asynchronous access)
-     * @param uid Uid of the package which reported the op
-     * @param packageName The package which reported the op
-     * @param opCode Code of AppOp
-     * @param attributionTag FeautreId of AppOp reported
-     * @param message Message describing AppOp access (can be stack trace)
-     */
-    private void reportRuntimeAppOpAccessMessageAsyncLocked(int uid,
-            @NonNull String packageName, int opCode, @Nullable String attributionTag,
-            @NonNull String message) {
-        switchPackageIfBootTimeOrRarelyUsedLocked(packageName);
-        if (!Objects.equals(mSampledPackage, packageName)) {
-            return;
-        }
-        reportRuntimeAppOpAccessMessageInternalLocked(uid, packageName, opCode, attributionTag,
-                message);
-    }
-
-    /**
-     * Decides whether reported message is within the range of watched AppOps and picks it for
-     * reporting uniformly at random across all received messages.
-     */
-    private void reportRuntimeAppOpAccessMessageInternalLocked(int uid,
-            @NonNull String packageName, int opCode, @Nullable String attributionTag,
-            @NonNull String message) {
-        int newLeftDistance = AppOpsManager.leftCircularDistance(opCode,
-                mSampledAppOpCode, _NUM_OP);
-
-        if (mAcceptableLeftDistance < newLeftDistance
-                && mSamplingStrategy != SAMPLING_STRATEGY_UNIFORM_OPS) {
-            return;
-        }
-
-        if (mAcceptableLeftDistance > newLeftDistance
-                && mSamplingStrategy != SAMPLING_STRATEGY_UNIFORM_OPS) {
-            mAcceptableLeftDistance = newLeftDistance;
-            mMessagesCollectedCount = 0.0f;
-        }
-
-        mMessagesCollectedCount += 1.0f;
-        if (ThreadLocalRandom.current().nextFloat() <= 1.0f / mMessagesCollectedCount) {
-            mCollectedRuntimePermissionMessage = new RuntimeAppOpAccessMessage(uid, opCode,
-                    packageName, attributionTag, message, mSamplingStrategy);
-        }
-        return;
-    }
-
-    /** Pulls current AppOps access report and resamples package and app op to watch */
-    @Override
-    public @Nullable RuntimeAppOpAccessMessage collectRuntimeAppOpAccessMessage() {
-        ActivityManagerInternal ami = LocalServices.getService(ActivityManagerInternal.class);
-        boolean isCallerInstrumented =
-                ami.getInstrumentationSourceUid(Binder.getCallingUid()) != Process.INVALID_UID;
-        boolean isCallerSystem = Binder.getCallingPid() == Process.myPid();
-        if (!isCallerSystem && !isCallerInstrumented) {
-            return null;
-        }
-        mContext.enforcePermission(android.Manifest.permission.GET_APP_OPS_STATS,
-                Binder.getCallingPid(), Binder.getCallingUid(), null);
-        RuntimeAppOpAccessMessage result;
-        synchronized (this) {
-            result = mCollectedRuntimePermissionMessage;
-            mCollectedRuntimePermissionMessage = null;
-        }
-        mHandler.sendMessage(PooledLambda.obtainMessage(
-                AppOpsServiceImpl::getPackageListAndResample,
-                this));
-        return result;
-    }
-
-    /**
-     * Checks if package is in the list of rarely used package and starts watching the new package
-     * to collect incoming message or if collection is happening in first minutes since boot.
-     * @param packageName
-     */
-    private void switchPackageIfBootTimeOrRarelyUsedLocked(@NonNull String packageName) {
-        if (mSampledPackage == null) {
-            if (ThreadLocalRandom.current().nextFloat() < 0.5f) {
-                mSamplingStrategy = SAMPLING_STRATEGY_BOOT_TIME_SAMPLING;
-                resampleAppOpForPackageLocked(packageName, true);
-            }
-        } else if (mRarelyUsedPackages.contains(packageName)) {
-            mRarelyUsedPackages.remove(packageName);
-            if (ThreadLocalRandom.current().nextFloat() < 0.5f) {
-                mSamplingStrategy = SAMPLING_STRATEGY_RARELY_USED;
-                resampleAppOpForPackageLocked(packageName, true);
-            }
-        }
-    }
-
-    /** Obtains package list and resamples package and appop to watch. */
-    private List<String> getPackageListAndResample() {
-        List<String> packageNames = getPackageNamesForSampling();
-        synchronized (this) {
-            resamplePackageAndAppOpLocked(packageNames);
-        }
-        return packageNames;
-    }
-
-    /** Resamples package and appop to watch from the list provided. */
-    private void resamplePackageAndAppOpLocked(@NonNull List<String> packageNames) {
-        if (!packageNames.isEmpty()) {
-            if (ThreadLocalRandom.current().nextFloat() < 0.5f) {
-                mSamplingStrategy = SAMPLING_STRATEGY_UNIFORM;
-                resampleAppOpForPackageLocked(packageNames.get(
-                        ThreadLocalRandom.current().nextInt(packageNames.size())), true);
-            } else {
-                mSamplingStrategy = SAMPLING_STRATEGY_UNIFORM_OPS;
-                resampleAppOpForPackageLocked(packageNames.get(
-                        ThreadLocalRandom.current().nextInt(packageNames.size())), false);
-            }
-        }
-    }
-
-    /** Resamples appop for the chosen package and initializes sampling state */
-    private void resampleAppOpForPackageLocked(@NonNull String packageName, boolean pickOp) {
-        mMessagesCollectedCount = 0.0f;
-        mSampledAppOpCode = pickOp ? ThreadLocalRandom.current().nextInt(_NUM_OP) : OP_NONE;
-        mAcceptableLeftDistance = _NUM_OP - 1;
-        mSampledPackage = packageName;
-    }
-
-    /**
-     * Creates list of rarely used packages - packages which were not used over last week or
-     * which declared but did not use permissions over last week.
-     *  */
-    private void initializeRarelyUsedPackagesList(@NonNull ArraySet<String> candidates) {
-        AppOpsManager appOps = mContext.getSystemService(AppOpsManager.class);
-        List<String> runtimeAppOpsList = getRuntimeAppOpsList();
-        AppOpsManager.HistoricalOpsRequest histOpsRequest =
-                new AppOpsManager.HistoricalOpsRequest.Builder(
-                        Math.max(Instant.now().minus(7, ChronoUnit.DAYS).toEpochMilli(), 0),
-                        Long.MAX_VALUE).setOpNames(runtimeAppOpsList).setFlags(
-                        OP_FLAG_SELF | OP_FLAG_TRUSTED_PROXIED).build();
-        appOps.getHistoricalOps(histOpsRequest, AsyncTask.THREAD_POOL_EXECUTOR,
-                new Consumer<HistoricalOps>() {
-                    @Override
-                    public void accept(HistoricalOps histOps) {
-                        int uidCount = histOps.getUidCount();
-                        for (int uidIdx = 0; uidIdx < uidCount; uidIdx++) {
-                            final AppOpsManager.HistoricalUidOps uidOps = histOps.getUidOpsAt(
-                                    uidIdx);
-                            int pkgCount = uidOps.getPackageCount();
-                            for (int pkgIdx = 0; pkgIdx < pkgCount; pkgIdx++) {
-                                String packageName = uidOps.getPackageOpsAt(
-                                        pkgIdx).getPackageName();
-                                if (!candidates.contains(packageName)) {
-                                    continue;
-                                }
-                                AppOpsManager.HistoricalPackageOps packageOps =
-                                        uidOps.getPackageOpsAt(pkgIdx);
-                                if (packageOps.getOpCount() != 0) {
-                                    candidates.remove(packageName);
-                                }
-                            }
-                        }
-                        synchronized (this) {
-                            int numPkgs = mRarelyUsedPackages.size();
-                            for (int i = 0; i < numPkgs; i++) {
-                                candidates.add(mRarelyUsedPackages.valueAt(i));
-                            }
-                            mRarelyUsedPackages = candidates;
-                        }
-                    }
-                });
-    }
-
-    /** List of app ops related to runtime permissions */
-    private List<String> getRuntimeAppOpsList() {
-        ArrayList<String> result = new ArrayList();
-        for (int i = 0; i < _NUM_OP; i++) {
-            if (shouldCollectNotes(i)) {
-                result.add(opToPublicName(i));
-            }
-        }
-        return result;
-    }
-
-    /** Returns list of packages to be used for package sampling */
-    private @NonNull List<String> getPackageNamesForSampling() {
-        List<String> packageNames = new ArrayList<>();
-        PackageManagerInternal packageManagerInternal = LocalServices.getService(
-                PackageManagerInternal.class);
-        PackageList packages = packageManagerInternal.getPackageList();
-        for (String packageName : packages.getPackageNames()) {
-            PackageInfo pkg = packageManagerInternal.getPackageInfo(packageName,
-                    PackageManager.GET_PERMISSIONS, Process.myUid(), mContext.getUserId());
-            if (isSamplingTarget(pkg)) {
-                packageNames.add(pkg.packageName);
-            }
-        }
-        return packageNames;
-    }
-
-    /** Checks whether package should be included in sampling pool */
-    private boolean isSamplingTarget(@Nullable PackageInfo pkg) {
-        if (pkg == null) {
-            return false;
-        }
-        String[] requestedPermissions = pkg.requestedPermissions;
-        if (requestedPermissions == null) {
-            return false;
-        }
-        for (String permission : requestedPermissions) {
-            PermissionInfo permissionInfo;
-            try {
-                permissionInfo = mContext.getPackageManager().getPermissionInfo(permission, 0);
-            } catch (PackageManager.NameNotFoundException ignored) {
-                continue;
-            }
-            if (permissionInfo.getProtection() == PROTECTION_DANGEROUS) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     @GuardedBy("this")
     private void removeUidsForUserLocked(int userHandle) {
         for (int i = mUidStates.size() - 1; i >= 0; --i) {
@@ -5938,7 +4556,7 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
         }
     }
 
-    private static int resolveUid(String packageName)  {
+    private static int resolveUid(String packageName) {
         if (packageName == null) {
             return Process.INVALID_UID;
         }
@@ -5977,45 +4595,45 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
     }
 
     private final class ClientUserRestrictionState implements DeathRecipient {
-        private final IBinder token;
+        private final IBinder mToken;
 
         ClientUserRestrictionState(IBinder token)
                 throws RemoteException {
             token.linkToDeath(this, 0);
-            this.token = token;
+            this.mToken = token;
         }
 
         public boolean setRestriction(int code, boolean restricted,
                 PackageTagsList excludedPackageTags, int userId) {
-            return mAppOpsRestrictions.setUserRestriction(token, userId, code,
+            return mAppOpsRestrictions.setUserRestriction(mToken, userId, code,
                     restricted, excludedPackageTags);
         }
 
         public boolean hasRestriction(int code, String packageName, String attributionTag,
                 int userId, boolean isCheckOp) {
-            return mAppOpsRestrictions.getUserRestriction(token, userId, code, packageName,
+            return mAppOpsRestrictions.getUserRestriction(mToken, userId, code, packageName,
                     attributionTag, isCheckOp);
         }
 
         public void removeUser(int userId) {
-            mAppOpsRestrictions.clearUserRestrictions(token, userId);
+            mAppOpsRestrictions.clearUserRestrictions(mToken, userId);
         }
 
         public boolean isDefault() {
-            return !mAppOpsRestrictions.hasUserRestrictions(token);
+            return !mAppOpsRestrictions.hasUserRestrictions(mToken);
         }
 
         @Override
         public void binderDied() {
             synchronized (AppOpsServiceImpl.this) {
-                mAppOpsRestrictions.clearUserRestrictions(token);
-                mOpUserRestrictions.remove(token);
+                mAppOpsRestrictions.clearUserRestrictions(mToken);
+                mOpUserRestrictions.remove(mToken);
                 destroy();
             }
         }
 
         public void destroy() {
-            token.unlinkToDeath(this, 0);
+            mToken.unlinkToDeath(this, 0);
         }
     }
 
@@ -6052,472 +4670,10 @@ public class AppOpsServiceImpl extends IAppOpsService.Stub implements Persistenc
         }
     }
 
-    private final class AppOpsManagerInternalImpl extends AppOpsManagerInternal {
-        @Override public void setDeviceAndProfileOwners(SparseIntArray owners) {
-            synchronized (AppOpsServiceImpl.this) {
-                mProfileOwners = owners;
-            }
-        }
-
-        @Override
-        public void updateAppWidgetVisibility(SparseArray<String> uidPackageNames,
-                boolean visible) {
-            AppOpsServiceImpl.this.updateAppWidgetVisibility(uidPackageNames, visible);
-        }
-
-        @Override
-        public void setUidModeFromPermissionPolicy(int code, int uid, int mode,
-                @Nullable IAppOpsCallback callback) {
-            setUidMode(code, uid, mode, callback);
-        }
-
-        @Override
-        public void setModeFromPermissionPolicy(int code, int uid, @NonNull String packageName,
-                int mode, @Nullable IAppOpsCallback callback) {
-            setMode(code, uid, packageName, mode, callback);
-        }
-
-
-        @Override
-        public void setGlobalRestriction(int code, boolean restricted, IBinder token) {
-            if (Binder.getCallingPid() != Process.myPid()) {
-                // TODO instead of this enforcement put in AppOpsManagerInternal
-                throw new SecurityException("Only the system can set global restrictions");
-            }
-
-            synchronized (AppOpsServiceImpl.this) {
-                ClientGlobalRestrictionState restrictionState = mOpGlobalRestrictions.get(token);
-
-                if (restrictionState == null) {
-                    try {
-                        restrictionState = new ClientGlobalRestrictionState(token);
-                    } catch (RemoteException  e) {
-                        return;
-                    }
-                    mOpGlobalRestrictions.put(token, restrictionState);
-                }
-
-                if (restrictionState.setRestriction(code, restricted)) {
-                    mHandler.sendMessage(PooledLambda.obtainMessage(
-                            AppOpsServiceImpl::notifyWatchersOfChange, AppOpsServiceImpl.this, code,
-                            UID_ANY));
-                    mHandler.sendMessage(PooledLambda.obtainMessage(
-                            AppOpsServiceImpl::updateStartedOpModeForUser, AppOpsServiceImpl.this,
-                            code, restricted, UserHandle.USER_ALL));
-                }
-
-                if (restrictionState.isDefault()) {
-                    mOpGlobalRestrictions.remove(token);
-                    restrictionState.destroy();
-                }
-            }
-        }
-
-        @Override
-        public int getOpRestrictionCount(int code, UserHandle user, String pkg,
-                String attributionTag) {
-            int number = 0;
-            synchronized (AppOpsServiceImpl.this) {
-                int numRestrictions = mOpUserRestrictions.size();
-                for (int i = 0; i < numRestrictions; i++) {
-                    if (mOpUserRestrictions.valueAt(i)
-                            .hasRestriction(code, pkg, attributionTag, user.getIdentifier(),
-                                    false)) {
-                        number++;
-                    }
-                }
-
-                numRestrictions = mOpGlobalRestrictions.size();
-                for (int i = 0; i < numRestrictions; i++) {
-                    if (mOpGlobalRestrictions.valueAt(i).hasRestriction(code)) {
-                        number++;
-                    }
-                }
-            }
-
-            return number;
-        }
-    }
-
-    /**
-     * Async task for writing note op stack trace, op code, package name and version to file
-     * More specifically, writes all the collected ops from {@link #mNoteOpCallerStacktraces}
-     */
-    private void writeNoteOps() {
-        synchronized (this) {
-            mWriteNoteOpsScheduled = false;
-        }
-        synchronized (mNoteOpCallerStacktracesFile) {
-            try (FileWriter writer = new FileWriter(mNoteOpCallerStacktracesFile)) {
-                int numTraces = mNoteOpCallerStacktraces.size();
-                for (int i = 0; i < numTraces; i++) {
-                    // Writing json formatted string into file
-                    writer.write(mNoteOpCallerStacktraces.valueAt(i).asJson());
-                    // Comma separation, so we can wrap the entire log as a JSON object
-                    // when all results are collected
-                    writer.write(",");
-                }
-            } catch (IOException e) {
-                Slog.w(TAG, "Failed to load opsValidation file for FileWriter", e);
-            }
-        }
-    }
-
-    /**
-     * This class represents a NoteOp Trace object amd contains the necessary fields that will
-     * be written to file to use for permissions data validation in JSON format
-     */
-    @Immutable
-    static class NoteOpTrace {
-        static final String STACKTRACE = "stackTrace";
-        static final String OP = "op";
-        static final String PACKAGENAME = "packageName";
-        static final String VERSION = "version";
-
-        private final @NonNull String mStackTrace;
-        private final int mOp;
-        private final @Nullable String mPackageName;
-        private final long mVersion;
-
-        /**
-         * Initialize a NoteOp object using a JSON object containing the necessary fields
-         *
-         * @param jsonTrace JSON object represented as a string
-         *
-         * @return NoteOpTrace object initialized with JSON fields
-         */
-        static NoteOpTrace fromJson(String jsonTrace) {
-            try {
-                // Re-add closing bracket which acted as a delimiter by the reader
-                JSONObject obj = new JSONObject(jsonTrace.concat("}"));
-                return new NoteOpTrace(obj.getString(STACKTRACE), obj.getInt(OP),
-                        obj.getString(PACKAGENAME), obj.getLong(VERSION));
-            } catch (JSONException e) {
-                // Swallow error, only meant for logging ops, should not affect flow of the code
-                Slog.e(TAG, "Error constructing NoteOpTrace object "
-                        + "JSON trace format incorrect", e);
-                return null;
-            }
-        }
-
-        NoteOpTrace(String stackTrace, int op, String packageName, long version) {
-            mStackTrace = stackTrace;
-            mOp = op;
-            mPackageName = packageName;
-            mVersion = version;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            NoteOpTrace that = (NoteOpTrace) o;
-            return mOp == that.mOp
-                    && mVersion == that.mVersion
-                    && mStackTrace.equals(that.mStackTrace)
-                    && Objects.equals(mPackageName, that.mPackageName);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(mStackTrace, mOp, mPackageName, mVersion);
-        }
-
-        /**
-         * The object is formatted as a JSON object and returned as a String
-         *
-         * @return JSON formatted string
-         */
-        public String asJson() {
-            return  "{"
-                    + "\"" + STACKTRACE + "\":\"" + mStackTrace.replace("\n", "\\n")
-                    + '\"' + ",\"" + OP + "\":" + mOp
-                    + ",\"" + PACKAGENAME + "\":\"" + mPackageName + '\"'
-                    + ",\"" + VERSION + "\":" + mVersion
-                    + '}';
-        }
-    }
-
-    /**
-     * Collects noteOps, noteProxyOps and startOps from AppOpsManager and writes it into a file
-     * which will be used for permissions data validation, the given parameters to this method
-     * will be logged in json format
-     *
-     * @param stackTrace stacktrace from the most recent call in AppOpsManager
-     * @param op op code
-     * @param packageName package making call
-     * @param version android version for this call
-     */
     @Override
-    public void collectNoteOpCallsForValidation(String stackTrace, int op, String packageName,
-            long version) {
-        if (!AppOpsManager.NOTE_OP_COLLECTION_ENABLED) {
-            return;
-        }
-
-        Objects.requireNonNull(stackTrace);
-        Preconditions.checkArgument(op >= 0);
-        Preconditions.checkArgument(op < AppOpsManager._NUM_OP);
-
-        NoteOpTrace noteOpTrace = new NoteOpTrace(stackTrace, op, packageName, version);
-
-        boolean noteOpSetWasChanged;
+    public void setDeviceAndProfileOwners(SparseIntArray owners) {
         synchronized (this) {
-            noteOpSetWasChanged = mNoteOpCallerStacktraces.add(noteOpTrace);
-            if (noteOpSetWasChanged && !mWriteNoteOpsScheduled) {
-                mWriteNoteOpsScheduled = true;
-                mHandler.postDelayed(PooledLambda.obtainRunnable((that) -> {
-                    AsyncTask.execute(() -> {
-                        that.writeNoteOps();
-                    });
-                }, this), 2500);
-            }
-        }
-    }
-
-    @Immutable
-    private final class CheckOpsDelegateDispatcher {
-        private final @Nullable CheckOpsDelegate mPolicy;
-        private final @Nullable CheckOpsDelegate mCheckOpsDelegate;
-
-        CheckOpsDelegateDispatcher(@Nullable CheckOpsDelegate policy,
-                @Nullable CheckOpsDelegate checkOpsDelegate) {
-            mPolicy = policy;
-            mCheckOpsDelegate = checkOpsDelegate;
-        }
-
-        public @NonNull CheckOpsDelegate getCheckOpsDelegate() {
-            return mCheckOpsDelegate;
-        }
-
-        public int checkOperation(int code, int uid, String packageName,
-                @Nullable String attributionTag, boolean raw) {
-            if (mPolicy != null) {
-                if (mCheckOpsDelegate != null) {
-                    return mPolicy.checkOperation(code, uid, packageName, attributionTag, raw,
-                            this::checkDelegateOperationImpl);
-                } else {
-                    return mPolicy.checkOperation(code, uid, packageName, attributionTag, raw,
-                            AppOpsServiceImpl.this::checkOperationImpl);
-                }
-            } else if (mCheckOpsDelegate != null) {
-                return checkDelegateOperationImpl(code, uid, packageName, attributionTag, raw);
-            }
-            return checkOperationImpl(code, uid, packageName, attributionTag, raw);
-        }
-
-        private int checkDelegateOperationImpl(int code, int uid, String packageName,
-                @Nullable String attributionTag, boolean raw) {
-            return mCheckOpsDelegate.checkOperation(code, uid, packageName, attributionTag, raw,
-                    AppOpsServiceImpl.this::checkOperationImpl);
-        }
-
-        public int checkAudioOperation(int code, int usage, int uid, String packageName) {
-            if (mPolicy != null) {
-                if (mCheckOpsDelegate != null) {
-                    return mPolicy.checkAudioOperation(code, usage, uid, packageName,
-                            this::checkDelegateAudioOperationImpl);
-                } else {
-                    return mPolicy.checkAudioOperation(code, usage, uid, packageName,
-                            AppOpsServiceImpl.this::checkAudioOperationImpl);
-                }
-            } else if (mCheckOpsDelegate != null) {
-                return checkDelegateAudioOperationImpl(code, usage, uid, packageName);
-            }
-            return checkAudioOperationImpl(code, usage, uid, packageName);
-        }
-
-        private int checkDelegateAudioOperationImpl(int code, int usage, int uid,
-                String packageName) {
-            return mCheckOpsDelegate.checkAudioOperation(code, usage, uid, packageName,
-                    AppOpsServiceImpl.this::checkAudioOperationImpl);
-        }
-
-        public SyncNotedAppOp noteOperation(int code, int uid, String packageName,
-                String attributionTag, boolean shouldCollectAsyncNotedOp, String message,
-                boolean shouldCollectMessage) {
-            if (mPolicy != null) {
-                if (mCheckOpsDelegate != null) {
-                    return mPolicy.noteOperation(code, uid, packageName, attributionTag,
-                            shouldCollectAsyncNotedOp, message, shouldCollectMessage,
-                            this::noteDelegateOperationImpl);
-                } else {
-                    return mPolicy.noteOperation(code, uid, packageName, attributionTag,
-                            shouldCollectAsyncNotedOp, message, shouldCollectMessage,
-                            AppOpsServiceImpl.this::noteOperationImpl);
-                }
-            } else if (mCheckOpsDelegate != null) {
-                return noteDelegateOperationImpl(code, uid, packageName,
-                        attributionTag, shouldCollectAsyncNotedOp, message, shouldCollectMessage);
-            }
-            return noteOperationImpl(code, uid, packageName, attributionTag,
-                    shouldCollectAsyncNotedOp, message, shouldCollectMessage);
-        }
-
-        private SyncNotedAppOp noteDelegateOperationImpl(int code, int uid,
-                @Nullable String packageName, @Nullable String featureId,
-                boolean shouldCollectAsyncNotedOp, @Nullable String message,
-                boolean shouldCollectMessage) {
-            return mCheckOpsDelegate.noteOperation(code, uid, packageName, featureId,
-                    shouldCollectAsyncNotedOp, message, shouldCollectMessage,
-                    AppOpsServiceImpl.this::noteOperationImpl);
-        }
-
-        public SyncNotedAppOp noteProxyOperation(int code, AttributionSource attributionSource,
-                boolean shouldCollectAsyncNotedOp, @Nullable String message,
-                boolean shouldCollectMessage, boolean skipProxyOperation) {
-            if (mPolicy != null) {
-                if (mCheckOpsDelegate != null) {
-                    return mPolicy.noteProxyOperation(code, attributionSource,
-                            shouldCollectAsyncNotedOp, message, shouldCollectMessage,
-                            skipProxyOperation, this::noteDelegateProxyOperationImpl);
-                } else {
-                    return mPolicy.noteProxyOperation(code, attributionSource,
-                            shouldCollectAsyncNotedOp, message, shouldCollectMessage,
-                            skipProxyOperation, AppOpsServiceImpl.this::noteProxyOperationImpl);
-                }
-            } else if (mCheckOpsDelegate != null) {
-                return noteDelegateProxyOperationImpl(code,
-                        attributionSource, shouldCollectAsyncNotedOp, message,
-                        shouldCollectMessage, skipProxyOperation);
-            }
-            return noteProxyOperationImpl(code, attributionSource, shouldCollectAsyncNotedOp,
-                    message, shouldCollectMessage,skipProxyOperation);
-        }
-
-        private SyncNotedAppOp noteDelegateProxyOperationImpl(int code,
-                @NonNull AttributionSource attributionSource, boolean shouldCollectAsyncNotedOp,
-                @Nullable String message, boolean shouldCollectMessage,
-                boolean skipProxyOperation) {
-            return mCheckOpsDelegate.noteProxyOperation(code, attributionSource,
-                    shouldCollectAsyncNotedOp, message, shouldCollectMessage, skipProxyOperation,
-                    AppOpsServiceImpl.this::noteProxyOperationImpl);
-        }
-
-        public SyncNotedAppOp startOperation(IBinder token, int code, int uid,
-                @Nullable String packageName, @NonNull String attributionTag,
-                boolean startIfModeDefault, boolean shouldCollectAsyncNotedOp,
-                @Nullable String message, boolean shouldCollectMessage,
-                @AttributionFlags int attributionFlags, int attributionChainId) {
-            if (mPolicy != null) {
-                if (mCheckOpsDelegate != null) {
-                    return mPolicy.startOperation(token, code, uid, packageName,
-                            attributionTag, startIfModeDefault, shouldCollectAsyncNotedOp, message,
-                            shouldCollectMessage, attributionFlags, attributionChainId,
-                            this::startDelegateOperationImpl);
-                } else {
-                    return mPolicy.startOperation(token, code, uid, packageName, attributionTag,
-                            startIfModeDefault, shouldCollectAsyncNotedOp, message,
-                            shouldCollectMessage, attributionFlags, attributionChainId,
-                            AppOpsServiceImpl.this::startOperationImpl);
-                }
-            } else if (mCheckOpsDelegate != null) {
-                return startDelegateOperationImpl(token, code, uid, packageName, attributionTag,
-                        startIfModeDefault, shouldCollectAsyncNotedOp, message,
-                        shouldCollectMessage, attributionFlags, attributionChainId);
-            }
-            return startOperationImpl(token, code, uid, packageName, attributionTag,
-                    startIfModeDefault, shouldCollectAsyncNotedOp, message, shouldCollectMessage,
-                    attributionFlags, attributionChainId);
-        }
-
-        private SyncNotedAppOp startDelegateOperationImpl(IBinder token, int code, int uid,
-                @Nullable String packageName, @Nullable String attributionTag,
-                boolean startIfModeDefault, boolean shouldCollectAsyncNotedOp, String message,
-                boolean shouldCollectMessage, @AttributionFlags int attributionFlags,
-                int attributionChainId) {
-            return mCheckOpsDelegate.startOperation(token, code, uid, packageName, attributionTag,
-                    startIfModeDefault, shouldCollectAsyncNotedOp, message, shouldCollectMessage,
-                    attributionFlags, attributionChainId, AppOpsServiceImpl.this::startOperationImpl);
-        }
-
-        public SyncNotedAppOp startProxyOperation(@NonNull IBinder clientId, int code,
-                @NonNull AttributionSource attributionSource, boolean startIfModeDefault,
-                boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
-                boolean skipProxyOperation, @AttributionFlags int proxyAttributionFlags,
-                @AttributionFlags int proxiedAttributionFlags, int attributionChainId) {
-            if (mPolicy != null) {
-                if (mCheckOpsDelegate != null) {
-                    return mPolicy.startProxyOperation(clientId, code, attributionSource,
-                            startIfModeDefault, shouldCollectAsyncNotedOp, message,
-                            shouldCollectMessage, skipProxyOperation, proxyAttributionFlags,
-                            proxiedAttributionFlags, attributionChainId,
-                            this::startDelegateProxyOperationImpl);
-                } else {
-                    return mPolicy.startProxyOperation(clientId, code, attributionSource,
-                            startIfModeDefault, shouldCollectAsyncNotedOp, message,
-                            shouldCollectMessage, skipProxyOperation, proxyAttributionFlags,
-                            proxiedAttributionFlags, attributionChainId,
-                            AppOpsServiceImpl.this::startProxyOperationImpl);
-                }
-            } else if (mCheckOpsDelegate != null) {
-                return startDelegateProxyOperationImpl(clientId, code, attributionSource,
-                        startIfModeDefault, shouldCollectAsyncNotedOp, message,
-                        shouldCollectMessage, skipProxyOperation, proxyAttributionFlags,
-                        proxiedAttributionFlags, attributionChainId);
-            }
-            return startProxyOperationImpl(clientId, code, attributionSource, startIfModeDefault,
-                    shouldCollectAsyncNotedOp, message, shouldCollectMessage, skipProxyOperation,
-                    proxyAttributionFlags, proxiedAttributionFlags, attributionChainId);
-        }
-
-        private SyncNotedAppOp startDelegateProxyOperationImpl(@NonNull IBinder clientId, int code,
-                @NonNull AttributionSource attributionSource, boolean startIfModeDefault,
-                boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
-                boolean skipProxyOperation, @AttributionFlags int proxyAttributionFlags,
-                @AttributionFlags int proxiedAttributionFlsgs, int attributionChainId) {
-            return mCheckOpsDelegate.startProxyOperation(clientId, code, attributionSource,
-                    startIfModeDefault, shouldCollectAsyncNotedOp, message, shouldCollectMessage,
-                    skipProxyOperation, proxyAttributionFlags, proxiedAttributionFlsgs,
-                    attributionChainId, AppOpsServiceImpl.this::startProxyOperationImpl);
-        }
-
-        public void finishOperation(IBinder clientId, int code, int uid, String packageName,
-                String attributionTag) {
-            if (mPolicy != null) {
-                if (mCheckOpsDelegate != null) {
-                    mPolicy.finishOperation(clientId, code, uid, packageName, attributionTag,
-                            this::finishDelegateOperationImpl);
-                } else {
-                    mPolicy.finishOperation(clientId, code, uid, packageName, attributionTag,
-                            AppOpsServiceImpl.this::finishOperationImpl);
-                }
-            } else if (mCheckOpsDelegate != null) {
-                finishDelegateOperationImpl(clientId, code, uid, packageName, attributionTag);
-            } else {
-                finishOperationImpl(clientId, code, uid, packageName, attributionTag);
-            }
-        }
-
-        private void finishDelegateOperationImpl(IBinder clientId, int code, int uid,
-                String packageName, String attributionTag) {
-            mCheckOpsDelegate.finishOperation(clientId, code, uid, packageName, attributionTag,
-                    AppOpsServiceImpl.this::finishOperationImpl);
-        }
-
-        public void finishProxyOperation(@NonNull IBinder clientId, int code,
-                @NonNull AttributionSource attributionSource, boolean skipProxyOperation) {
-            if (mPolicy != null) {
-                if (mCheckOpsDelegate != null) {
-                    mPolicy.finishProxyOperation(clientId, code, attributionSource,
-                            skipProxyOperation, this::finishDelegateProxyOperationImpl);
-                } else {
-                    mPolicy.finishProxyOperation(clientId, code, attributionSource,
-                            skipProxyOperation, AppOpsServiceImpl.this::finishProxyOperationImpl);
-                }
-            } else if (mCheckOpsDelegate != null) {
-                finishDelegateProxyOperationImpl(clientId, code, attributionSource,
-                        skipProxyOperation);
-            } else {
-                finishProxyOperationImpl(clientId, code, attributionSource, skipProxyOperation);
-            }
-        }
-
-        private Void finishDelegateProxyOperationImpl(@NonNull IBinder clientId, int code,
-                @NonNull AttributionSource attributionSource, boolean skipProxyOperation) {
-            mCheckOpsDelegate.finishProxyOperation(clientId, code, attributionSource,
-                    skipProxyOperation, AppOpsServiceImpl.this::finishProxyOperationImpl);
-            return null;
+            mProfileOwners = owners;
         }
     }
 }

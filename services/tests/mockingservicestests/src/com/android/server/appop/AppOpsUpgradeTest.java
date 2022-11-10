@@ -93,12 +93,13 @@ public class AppOpsUpgradeTest {
         }
     }
 
-    private void assertSameModes(SparseArray<AppOpsService.UidState> uidStates, int op1, int op2) {
+    private void assertSameModes(SparseArray<AppOpsServiceImpl.UidState> uidStates,
+            int op1, int op2) {
         int numberOfNonDefaultOps = 0;
         final int defaultModeOp1 = AppOpsManager.opToDefaultMode(op1);
         final int defaultModeOp2 = AppOpsManager.opToDefaultMode(op2);
         for(int i = 0; i < uidStates.size(); i++) {
-            final AppOpsService.UidState uidState = uidStates.valueAt(i);
+            final AppOpsServiceImpl.UidState uidState = uidStates.valueAt(i);
             SparseIntArray opModes = uidState.getNonDefaultUidModes();
             if (opModes != null) {
                 final int uidMode1 = opModes.get(op1, defaultModeOp1);
@@ -112,12 +113,12 @@ public class AppOpsUpgradeTest {
                 continue;
             }
             for (int j = 0; j < uidState.pkgOps.size(); j++) {
-                final AppOpsService.Ops ops = uidState.pkgOps.valueAt(j);
+                final AppOpsServiceImpl.Ops ops = uidState.pkgOps.valueAt(j);
                 if (ops == null) {
                     continue;
                 }
-                final AppOpsService.Op _op1 = ops.get(op1);
-                final AppOpsService.Op _op2 = ops.get(op2);
+                final AppOpsServiceImpl.Op _op1 = ops.get(op1);
+                final AppOpsServiceImpl.Op _op2 = ops.get(op2);
                 final int mode1 = (_op1 == null) ? defaultModeOp1 : _op1.getMode();
                 final int mode2 = (_op2 == null) ? defaultModeOp2 : _op2.getMode();
                 assertEquals(mode1, mode2);
@@ -158,8 +159,8 @@ public class AppOpsUpgradeTest {
         // Stub out package calls to disable AppOpsService#updatePermissionRevokedCompat
         when(testPM.getPackagesForUid(anyInt())).thenReturn(null);
 
-        AppOpsService testService = spy(
-                new AppOpsService(mAppOpsFile, mHandler, testContext)); // trigger upgrade
+        AppOpsServiceImpl testService = spy(
+                new AppOpsServiceImpl(mAppOpsFile, mHandler, testContext)); // trigger upgrade
         assertSameModes(testService.mUidStates, AppOpsManager.OP_RUN_IN_BACKGROUND,
                 AppOpsManager.OP_RUN_ANY_IN_BACKGROUND);
         mHandler.removeCallbacks(testService.mWriteRunner);
