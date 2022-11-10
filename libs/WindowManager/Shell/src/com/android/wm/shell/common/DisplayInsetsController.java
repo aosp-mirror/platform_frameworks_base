@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.common;
 
-import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -26,7 +25,6 @@ import android.view.IWindowManager;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.WindowInsets.Type.InsetsType;
-import android.view.inputmethod.ImeTracker;
 
 import androidx.annotation.BinderThread;
 
@@ -158,20 +156,17 @@ public class DisplayInsetsController implements DisplayController.OnDisplaysChan
             }
         }
 
-        private void showInsets(@InsetsType int types, boolean fromIme,
-                @Nullable ImeTracker.Token statsToken) {
+        private void showInsets(int types, boolean fromIme) {
             CopyOnWriteArrayList<OnInsetsChangedListener> listeners = mListeners.get(mDisplayId);
             if (listeners == null) {
-                ImeTracker.get().onFailed(statsToken, ImeTracker.PHASE_WM_REMOTE_INSETS_CONTROLLER);
                 return;
             }
-            ImeTracker.get().onProgress(statsToken, ImeTracker.PHASE_WM_REMOTE_INSETS_CONTROLLER);
             for (OnInsetsChangedListener listener : listeners) {
-                listener.showInsets(types, fromIme, statsToken);
+                listener.showInsets(types, fromIme);
             }
         }
 
-        private void hideInsets(@InsetsType int types, boolean fromIme) {
+        private void hideInsets(int types, boolean fromIme) {
             CopyOnWriteArrayList<OnInsetsChangedListener> listeners = mListeners.get(mDisplayId);
             if (listeners == null) {
                 return;
@@ -219,15 +214,14 @@ public class DisplayInsetsController implements DisplayController.OnDisplaysChan
             }
 
             @Override
-            public void showInsets(@InsetsType int types, boolean fromIme,
-                    @Nullable ImeTracker.Token statsToken) throws RemoteException {
+            public void showInsets(int types, boolean fromIme) throws RemoteException {
                 mMainExecutor.execute(() -> {
-                    PerDisplay.this.showInsets(types, fromIme, statsToken);
+                    PerDisplay.this.showInsets(types, fromIme);
                 });
             }
 
             @Override
-            public void hideInsets(@InsetsType int types, boolean fromIme) throws RemoteException {
+            public void hideInsets(int types, boolean fromIme) throws RemoteException {
                 mMainExecutor.execute(() -> {
                     PerDisplay.this.hideInsets(types, fromIme);
                 });
@@ -269,11 +263,8 @@ public class DisplayInsetsController implements DisplayController.OnDisplaysChan
          *
          * @param types {@link InsetsType} to show
          * @param fromIme true if this request originated from IME (InputMethodService).
-         * @param statsToken the token tracking the current IME show request
-         *                   or {@code null} otherwise.
          */
-        default void showInsets(@InsetsType int types, boolean fromIme,
-                @Nullable ImeTracker.Token statsToken) {}
+        default void showInsets(@InsetsType int types, boolean fromIme) {}
 
         /**
          * Called when a set of insets source window should be hidden by policy.

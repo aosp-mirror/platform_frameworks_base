@@ -24,7 +24,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -99,7 +98,7 @@ public class ImeInsetsSourceConsumerTest {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             // test if setVisibility can show IME
             mImeConsumer.onWindowFocusGained(true);
-            mController.show(WindowInsets.Type.ime(), true /* fromIme */, null /* statsToken */);
+            mController.show(WindowInsets.Type.ime(), true /* fromIme */);
             mController.cancelExistingAnimations();
             assertTrue((mController.getRequestedVisibleTypes() & WindowInsets.Type.ime()) != 0);
 
@@ -118,7 +117,7 @@ public class ImeInsetsSourceConsumerTest {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             // Request IME visible before control is available.
             mImeConsumer.onWindowFocusGained(true);
-            mController.show(WindowInsets.Type.ime(), true /* fromIme */, null /* statsToken */);
+            mController.show(WindowInsets.Type.ime(), true /* fromIme */);
 
             // set control and verify visibility is applied.
             InsetsSourceControl control =
@@ -126,11 +125,9 @@ public class ImeInsetsSourceConsumerTest {
             mController.onControlsChanged(new InsetsSourceControl[] { control });
             // IME show animation should be triggered when control becomes available.
             verify(mController).applyAnimation(
-                    eq(WindowInsets.Type.ime()), eq(true) /* show */, eq(true) /* fromIme */,
-                    any() /* statsToken */);
+                    eq(WindowInsets.Type.ime()), eq(true) /* show */, eq(true) /* fromIme */);
             verify(mController, never()).applyAnimation(
-                    eq(WindowInsets.Type.ime()), eq(false) /* show */, eq(true) /* fromIme */,
-                    any() /* statsToken */);
+                    eq(WindowInsets.Type.ime()), eq(false) /* show */, eq(true) /* fromIme */);
         });
     }
 
@@ -156,8 +153,7 @@ public class ImeInsetsSourceConsumerTest {
             mImeConsumer.onWindowFocusGained(hasWindowFocus);
             final boolean imeVisible = hasWindowFocus && hasViewFocus;
             if (imeVisible) {
-                mController.show(WindowInsets.Type.ime(), true /* fromIme */,
-                        null /* statsToken */);
+                mController.show(WindowInsets.Type.ime(), true /* fromIme */);
             }
 
             // set control and verify visibility is applied.
@@ -173,21 +169,20 @@ public class ImeInsetsSourceConsumerTest {
                 verify(control).getAndClearSkipAnimationOnce();
                 verify(mController).applyAnimation(eq(WindowInsets.Type.ime()),
                         eq(true) /* show */, eq(false) /* fromIme */,
-                        eq(expectSkipAnim) /* skipAnim */, null /* statsToken */);
+                        eq(expectSkipAnim) /* skipAnim */);
             }
 
             // If previously hasViewFocus is false, verify when requesting the IME visible next
             // time will not skip animation.
             if (!hasViewFocus) {
-                mController.show(WindowInsets.Type.ime(), true /* fromIme */,
-                        null /* statsToken */);
+                mController.show(WindowInsets.Type.ime(), true);
                 mController.onControlsChanged(new InsetsSourceControl[]{ control });
                 // Verify IME show animation should be triggered when control becomes available and
                 // the animation will be skipped by getAndClearSkipAnimationOnce invoked.
                 verify(control).getAndClearSkipAnimationOnce();
                 verify(mController).applyAnimation(eq(WindowInsets.Type.ime()),
                         eq(true) /* show */, eq(true) /* fromIme */,
-                        eq(false) /* skipAnim */, null /* statsToken */);
+                        eq(false) /* skipAnim */);
             }
         });
     }

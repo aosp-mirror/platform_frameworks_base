@@ -37,7 +37,6 @@ import android.view.InsetsState.InternalInsetsType;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsAnimation.Bounds;
 import android.view.animation.Interpolator;
-import android.view.inputmethod.ImeTracker;
 
 /**
  * Runs a fake animation of resizing insets to produce insets animation callbacks.
@@ -90,12 +89,6 @@ public class InsetsResizeAnimationRunner implements InsetsAnimationControlRunner
     @Override
     public int getAnimationType() {
         return ANIMATION_TYPE_RESIZE;
-    }
-
-    @Override
-    public ImeTracker.Token getStatsToken() {
-        // Return null as resizing the IME view is not explicitly tracked.
-        return null;
     }
 
     @Override

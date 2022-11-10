@@ -16,11 +16,9 @@
 
 package com.android.server.wm;
 
-import android.annotation.Nullable;
 import android.inputmethodservice.InputMethodService;
 import android.view.WindowInsets;
 import android.view.WindowInsets.Type.InsetsType;
-import android.view.inputmethod.ImeTracker;
 
 /**
  * Generalization of an object that can control insets state.
@@ -59,10 +57,8 @@ interface InsetsControlTarget {
      *
      * @param types to specify which types of insets source window should be shown.
      * @param fromIme {@code true} if IME show request originated from {@link InputMethodService}.
-     * @param statsToken the token tracking the current IME show request or {@code null} otherwise.
      */
-    default void showInsets(@InsetsType int types, boolean fromIme,
-            @Nullable ImeTracker.Token statsToken) {
+    default void showInsets(@InsetsType int types, boolean fromIme) {
     }
 
     /**

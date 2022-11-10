@@ -25,7 +25,6 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.View;
-import android.view.inputmethod.ImeTracker;
 import android.view.inputmethod.InputMethodSubtype;
 
 import com.android.internal.annotations.GuardedBy;
@@ -101,7 +100,7 @@ public final class InputMethodPrivilegedOperations {
     }
 
     /**
-     * Calls {@link IInputMethodPrivilegedOperations#setImeWindowStatusAsync(int, int)}.
+     * Calls {@link IInputMethodPrivilegedOperations#setImeWindowStatusAsync(int, int}.
      *
      * @param vis visibility flags
      * @param backDisposition disposition flags
@@ -251,7 +250,7 @@ public final class InputMethodPrivilegedOperations {
     }
 
     /**
-     * Calls {@link IInputMethodPrivilegedOperations#hideMySoftInput(int, int, AndroidFuture)}
+     * Calls {@link IInputMethodPrivilegedOperations#hideMySoftInput(int, IVoidResultCallback)}
      *
      * @param flags additional operating flags
      * @param reason the reason to hide soft input
@@ -317,7 +316,7 @@ public final class InputMethodPrivilegedOperations {
 
     /**
      * Calls {@link IInputMethodPrivilegedOperations#switchToNextInputMethod(boolean,
-     * AndroidFuture)}
+     * IBooleanResultCallback)}
      *
      * @param onlyCurrentIme {@code true} to switch to a {@link InputMethodSubtype} within the same
      *                       IME
@@ -376,25 +375,22 @@ public final class InputMethodPrivilegedOperations {
     }
 
     /**
-     * Calls {@link IInputMethodPrivilegedOperations#applyImeVisibilityAsync(IBinder, boolean,
-     * ImeTracker.Token)}.
+     * Calls {@link IInputMethodPrivilegedOperations#applyImeVisibilityAsync(IBinder, boolean)}.
      *
      * @param showOrHideInputToken placeholder token that maps to window requesting
      *        {@link android.view.inputmethod.InputMethodManager#showSoftInput(View, int)} or
-     *        {@link android.view.inputmethod.InputMethodManager#hideSoftInputFromWindow(IBinder,
-     *        int)}
+     *        {@link android.view.inputmethod.InputMethodManager#hideSoftInputFromWindow
+     *        (IBinder, int)}
      * @param setVisible {@code true} to set IME visible, else hidden.
-     * @param statsToken the token tracking the current IME show request or {@code null} otherwise.
      */
     @AnyThread
-    public void applyImeVisibilityAsync(IBinder showOrHideInputToken, boolean setVisible,
-            @Nullable ImeTracker.Token statsToken) {
+    public void applyImeVisibilityAsync(IBinder showOrHideInputToken, boolean setVisible) {
         final IInputMethodPrivilegedOperations ops = mOps.getAndWarnIfNull();
         if (ops == null) {
             return;
         }
         try {
-            ops.applyImeVisibilityAsync(showOrHideInputToken, setVisible, statsToken);
+            ops.applyImeVisibilityAsync(showOrHideInputToken, setVisible);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
