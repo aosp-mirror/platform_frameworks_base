@@ -22,9 +22,19 @@ import android.annotation.StringRes
 import android.os.Parcel
 import android.os.Parcelable
 
+/**
+ * Base interface for flags that can change value on a running device.
+ * @property id unique id to help identify this flag. Must be unique. This will be removed soon.
+ * @property teamfood Set to true to include this flag as part of the teamfood flag. This will
+ *                    be removed soon.
+ * @property name Used for server-side flagging where appropriate. Also used for display. No spaces.
+ * @property namespace The server-side namespace that this flag lives under.
+ */
 interface Flag<T> {
     val id: Int
     val teamfood: Boolean
+    val name: String
+    val namespace: String
 }
 
 interface ParcelableFlag<T> : Flag<T>, Parcelable {
@@ -38,13 +48,10 @@ interface ResourceFlag<T> : Flag<T> {
 }
 
 interface DeviceConfigFlag<T> : Flag<T> {
-    val name: String
-    val namespace: String
     val default: T
 }
 
 interface SysPropFlag<T> : Flag<T> {
-    val name: String
     val default: T
 }
 
@@ -57,6 +64,8 @@ interface SysPropFlag<T> : Flag<T> {
 abstract class BooleanFlag constructor(
     override val id: Int,
     override val default: Boolean = false,
+    override val name: String = "",
+    override val namespace: String = "",
     override val teamfood: Boolean = false,
     override val overridden: Boolean = false
 ) : ParcelableFlag<Boolean> {
@@ -91,20 +100,24 @@ abstract class BooleanFlag constructor(
  */
 data class UnreleasedFlag constructor(
     override val id: Int,
+    override val name: String = "",
+    override val namespace: String = "",
     override val teamfood: Boolean = false,
     override val overridden: Boolean = false
-) : BooleanFlag(id, false, teamfood, overridden)
+) : BooleanFlag(id, false, name, namespace, teamfood, overridden)
 
 /**
- * A Flag that is is true by default.
+ * A Flag that is true by default.
  *
  * It can be changed or overridden in any build, meaning it can be turned off if needed.
  */
 data class ReleasedFlag constructor(
     override val id: Int,
+    override val name: String = "",
+    override val namespace: String = "",
     override val teamfood: Boolean = false,
     override val overridden: Boolean = false
-) : BooleanFlag(id, true, teamfood, overridden)
+) : BooleanFlag(id, true, name, namespace, teamfood, overridden)
 
 /**
  * A Flag that reads its default values from a resource overlay instead of code.
@@ -114,6 +127,8 @@ data class ReleasedFlag constructor(
 data class ResourceBooleanFlag constructor(
     override val id: Int,
     @BoolRes override val resourceId: Int,
+    override val name: String = "",
+    override val namespace: String = "",
     override val teamfood: Boolean = false
 ) : ResourceFlag<Boolean>
 
@@ -142,7 +157,8 @@ data class DeviceConfigBooleanFlag constructor(
 data class SysPropBooleanFlag constructor(
     override val id: Int,
     override val name: String,
-    override val default: Boolean = false
+    override val default: Boolean = false,
+    override val namespace: String = ""
 ) : SysPropFlag<Boolean> {
     // TODO(b/223379190): Teamfood not supported for sysprop flags yet.
     override val teamfood: Boolean = false
@@ -151,6 +167,8 @@ data class SysPropBooleanFlag constructor(
 data class StringFlag constructor(
     override val id: Int,
     override val default: String = "",
+    override val name: String = "",
+    override val namespace: String = "",
     override val teamfood: Boolean = false,
     override val overridden: Boolean = false
 ) : ParcelableFlag<String> {
@@ -176,12 +194,16 @@ data class StringFlag constructor(
 data class ResourceStringFlag constructor(
     override val id: Int,
     @StringRes override val resourceId: Int,
+    override val name: String = "",
+    override val namespace: String = "",
     override val teamfood: Boolean = false
 ) : ResourceFlag<String>
 
 data class IntFlag constructor(
     override val id: Int,
     override val default: Int = 0,
+    override val name: String = "",
+    override val namespace: String = "",
     override val teamfood: Boolean = false,
     override val overridden: Boolean = false
 ) : ParcelableFlag<Int> {
@@ -208,6 +230,8 @@ data class IntFlag constructor(
 data class ResourceIntFlag constructor(
     override val id: Int,
     @IntegerRes override val resourceId: Int,
+    override val name: String = "",
+    override val namespace: String = "",
     override val teamfood: Boolean = false
 ) : ResourceFlag<Int>
 
@@ -215,6 +239,8 @@ data class LongFlag constructor(
     override val id: Int,
     override val default: Long = 0,
     override val teamfood: Boolean = false,
+    override val name: String = "",
+    override val namespace: String = "",
     override val overridden: Boolean = false
 ) : ParcelableFlag<Long> {
 
@@ -240,6 +266,8 @@ data class LongFlag constructor(
 data class FloatFlag constructor(
     override val id: Int,
     override val default: Float = 0f,
+    override val name: String = "",
+    override val namespace: String = "",
     override val teamfood: Boolean = false,
     override val overridden: Boolean = false
 ) : ParcelableFlag<Float> {
@@ -266,13 +294,17 @@ data class FloatFlag constructor(
 data class ResourceFloatFlag constructor(
     override val id: Int,
     override val resourceId: Int,
-    override val teamfood: Boolean = false
+    override val name: String = "",
+    override val namespace: String = "",
+    override val teamfood: Boolean = false,
 ) : ResourceFlag<Int>
 
 data class DoubleFlag constructor(
     override val id: Int,
     override val default: Double = 0.0,
     override val teamfood: Boolean = false,
+    override val name: String = "",
+    override val namespace: String = "",
     override val overridden: Boolean = false
 ) : ParcelableFlag<Double> {
 
