@@ -181,7 +181,7 @@ struct MultiAssetsProvider : public AssetsProvider {
 // Does not provide any assets.
 struct EmptyAssetsProvider : public AssetsProvider {
   static std::unique_ptr<AssetsProvider> Create();
-  static std::unique_ptr<AssetsProvider> Create(const std::string& path);
+  static std::unique_ptr<AssetsProvider> Create(std::string path);
 
   bool ForEachFile(const std::string& path,
                    const std::function<void(StringPiece, FileType)>& f) const override;

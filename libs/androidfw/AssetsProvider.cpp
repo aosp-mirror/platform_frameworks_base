@@ -393,8 +393,8 @@ std::unique_ptr<AssetsProvider> EmptyAssetsProvider::Create() {
   return std::unique_ptr<EmptyAssetsProvider>(new EmptyAssetsProvider({}));
 }
 
-std::unique_ptr<AssetsProvider> EmptyAssetsProvider::Create(const std::string& path) {
-  return std::unique_ptr<EmptyAssetsProvider>(new EmptyAssetsProvider(path));
+std::unique_ptr<AssetsProvider> EmptyAssetsProvider::Create(std::string path) {
+  return std::unique_ptr<EmptyAssetsProvider>(new EmptyAssetsProvider(std::move(path)));
 }
 
 std::unique_ptr<Asset> EmptyAssetsProvider::OpenInternal(const std::string& /* path */,
