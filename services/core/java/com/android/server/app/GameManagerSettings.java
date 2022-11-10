@@ -90,7 +90,12 @@ public class GameManagerSettings {
      */
     int getGameModeLocked(String packageName) {
         if (mGameModes.containsKey(packageName)) {
-            return mGameModes.get(packageName);
+            final int gameMode = mGameModes.get(packageName);
+            if (gameMode == GameManager.GAME_MODE_UNSUPPORTED) {
+                // force replace cached UNSUPPORTED mode with STANDARD starting in U
+                return GameManager.GAME_MODE_STANDARD;
+            }
+            return gameMode;
         }
         return GameManager.GAME_MODE_STANDARD;
     }

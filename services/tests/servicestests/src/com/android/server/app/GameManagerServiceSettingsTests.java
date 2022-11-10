@@ -192,7 +192,7 @@ public class GameManagerServiceSettingsTests {
         final Context context = InstrumentationRegistry.getContext();
         GameManagerSettings settings = new GameManagerSettings(context.getFilesDir());
         assertTrue(settings.readPersistentDataLocked());
-        assertEquals(0, settings.getGameModeLocked(PACKAGE_NAME_1));
+        assertEquals(1, settings.getGameModeLocked(PACKAGE_NAME_1));
         assertEquals(2, settings.getGameModeLocked(PACKAGE_NAME_2));
         assertEquals(3, settings.getGameModeLocked(PACKAGE_NAME_3));
 

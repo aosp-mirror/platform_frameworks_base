@@ -1098,8 +1098,8 @@ public final class GameManagerService extends IGameManagerService.Stub {
             throws SecurityException {
         checkPermission(Manifest.permission.MANAGE_GAME_MODE);
 
-        if (!isPackageGame(packageName, userId)) {
-            // Restrict to games only.
+        if (!isPackageGame(packageName, userId) || gameMode == GameManager.GAME_MODE_UNSUPPORTED) {
+            // Restrict to games and valid game modes only.
             return;
         }
 
