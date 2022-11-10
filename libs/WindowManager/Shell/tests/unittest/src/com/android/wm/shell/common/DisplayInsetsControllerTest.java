@@ -25,7 +25,6 @@ import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.os.RemoteException;
 import android.util.SparseArray;
@@ -34,7 +33,6 @@ import android.view.IWindowManager;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.WindowInsets;
-import android.view.inputmethod.ImeTracker;
 
 import androidx.test.filters.SmallTest;
 
@@ -113,10 +111,8 @@ public class DisplayInsetsControllerTest extends ShellTestCase {
                 WindowInsets.Type.defaultVisible());
         mInsetsControllersByDisplayId.get(DEFAULT_DISPLAY).insetsChanged(null);
         mInsetsControllersByDisplayId.get(DEFAULT_DISPLAY).insetsControlChanged(null, null);
-        mInsetsControllersByDisplayId.get(DEFAULT_DISPLAY).showInsets(0, false,
-                null /* statsToken */);
-        mInsetsControllersByDisplayId.get(DEFAULT_DISPLAY).hideInsets(0, false,
-                null /* statsToken */);
+        mInsetsControllersByDisplayId.get(DEFAULT_DISPLAY).showInsets(0, false);
+        mInsetsControllersByDisplayId.get(DEFAULT_DISPLAY).hideInsets(0, false);
         mExecutor.flushAll();
 
         assertTrue(defaultListener.topFocusedWindowChangedCount == 1);
@@ -135,10 +131,8 @@ public class DisplayInsetsControllerTest extends ShellTestCase {
                 WindowInsets.Type.defaultVisible());
         mInsetsControllersByDisplayId.get(SECOND_DISPLAY).insetsChanged(null);
         mInsetsControllersByDisplayId.get(SECOND_DISPLAY).insetsControlChanged(null, null);
-        mInsetsControllersByDisplayId.get(SECOND_DISPLAY).showInsets(0, false,
-                null /* statsToken */);
-        mInsetsControllersByDisplayId.get(SECOND_DISPLAY).hideInsets(0, false,
-                null /* statsToken */);
+        mInsetsControllersByDisplayId.get(SECOND_DISPLAY).showInsets(0, false);
+        mInsetsControllersByDisplayId.get(SECOND_DISPLAY).hideInsets(0, false);
         mExecutor.flushAll();
 
         assertTrue(defaultListener.topFocusedWindowChangedCount == 1);
@@ -197,12 +191,12 @@ public class DisplayInsetsControllerTest extends ShellTestCase {
         }
 
         @Override
-        public void showInsets(int types, boolean fromIme, @Nullable ImeTracker.Token statsToken) {
+        public void showInsets(int types, boolean fromIme) {
             showInsetsCount++;
         }
 
         @Override
-        public void hideInsets(int types, boolean fromIme, @Nullable ImeTracker.Token statsToken) {
+        public void hideInsets(int types, boolean fromIme) {
             hideInsetsCount++;
         }
     }

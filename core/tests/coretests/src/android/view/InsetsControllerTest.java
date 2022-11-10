@@ -248,7 +248,7 @@ public class InsetsControllerTest {
             mController.setSystemDrivenInsetsAnimationLoggingListener(loggingListener);
             mController.getSourceConsumer(ITYPE_IME).onWindowFocusGained(true);
             // since there is no focused view, forcefully make IME visible.
-            mController.show(WindowInsets.Type.ime(), true /* fromIme */, null /* statsToken */);
+            mController.show(ime(), true /* fromIme */);
             verify(loggingListener).onReady(notNull(), anyInt());
         });
     }
@@ -260,14 +260,14 @@ public class InsetsControllerTest {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             mController.getSourceConsumer(ITYPE_IME).onWindowFocusGained(true);
             // since there is no focused view, forcefully make IME visible.
-            mController.show(WindowInsets.Type.ime(), true /* fromIme */, null /* statsToken */);
+            mController.show(ime(), true /* fromIme */);
             mController.show(all());
             // quickly jump to final state by cancelling it.
             mController.cancelExistingAnimations();
             final @InsetsType int types = navigationBars() | statusBars() | ime();
             assertEquals(types, mController.getRequestedVisibleTypes() & types);
 
-            mController.hide(ime(), true /* fromIme */, null /* statsToken */);
+            mController.hide(ime(), true /* fromIme */);
             mController.hide(all());
             mController.cancelExistingAnimations();
             assertEquals(0, mController.getRequestedVisibleTypes() & types);
@@ -282,10 +282,10 @@ public class InsetsControllerTest {
         mController.onControlsChanged(new InsetsSourceControl[] { ime });
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             mController.getSourceConsumer(ITYPE_IME).onWindowFocusGained(true);
-            mController.show(WindowInsets.Type.ime(), true /* fromIme */, null /* statsToken */);
+            mController.show(ime(), true /* fromIme */);
             mController.cancelExistingAnimations();
             assertTrue(isRequestedVisible(mController, ime()));
-            mController.hide(ime(), true /* fromIme */, null /* statsToken */);
+            mController.hide(ime(), true /* fromIme */);
             mController.cancelExistingAnimations();
             assertFalse(isRequestedVisible(mController, ime()));
             mController.getSourceConsumer(ITYPE_IME).onWindowFocusLost();
@@ -452,7 +452,7 @@ public class InsetsControllerTest {
             assertFalse(mController.getState().getSource(ITYPE_IME).isVisible());
 
             // Pretend IME is calling
-            mController.show(ime(), true /* fromIme */, null /* statsToken */);
+            mController.show(ime(), true /* fromIme */);
 
             // Gaining control shortly after
             mController.onControlsChanged(createSingletonControl(ITYPE_IME));
@@ -476,7 +476,7 @@ public class InsetsControllerTest {
             mController.onControlsChanged(createSingletonControl(ITYPE_IME));
 
             // Pretend IME is calling
-            mController.show(ime(), true /* fromIme */, null /* statsToken */);
+            mController.show(ime(), true /* fromIme */);
 
             assertEquals(ANIMATION_TYPE_SHOW, mController.getAnimationType(ime()));
             mController.cancelExistingAnimations();
@@ -554,7 +554,7 @@ public class InsetsControllerTest {
             verify(listener, never()).onReady(any(), anyInt());
 
             // Pretend that IME is calling.
-            mController.show(ime(), true /* fromIme */, null /* statsToken */);
+            mController.show(ime(), true);
 
             // Ready gets deferred until next predraw
             mViewRoot.getView().getViewTreeObserver().dispatchOnPreDraw();
@@ -638,7 +638,7 @@ public class InsetsControllerTest {
             mController.onControlsChanged(createSingletonControl(ITYPE_IME));
 
             // Pretend IME is calling
-            mController.show(ime(), true /* fromIme */, null /* statsToken */);
+            mController.show(ime(), true /* fromIme */);
 
             InsetsState copy = new InsetsState(mController.getState(), true /* copySources */);
             copy.getSource(ITYPE_IME).setFrame(0, 1, 2, 3);
@@ -845,7 +845,7 @@ public class InsetsControllerTest {
 
             // Showing invisible ime should only causes insets change once.
             clearInvocations(mTestHost);
-            mController.show(ime(), true /* fromIme */, null /* statsToken */);
+            mController.show(ime(), true /* fromIme */);
             verify(mTestHost, times(1)).notifyInsetsChanged();
 
             // Sending the same insets state should not cause insets change.

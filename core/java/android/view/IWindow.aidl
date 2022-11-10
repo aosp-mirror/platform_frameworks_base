@@ -29,7 +29,6 @@ import android.view.InsetsState;
 import android.view.IScrollCaptureResponseListener;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
-import android.view.inputmethod.ImeTracker;
 import android.window.ClientWindowFrames;
 
 import com.android.internal.os.IResultReceiver;
@@ -69,18 +68,16 @@ oneway interface IWindow {
      *
      * @param types internal insets types (WindowInsets.Type.InsetsType) to show
      * @param fromIme true if this request originated from IME (InputMethodService).
-     * @param statsToken the token tracking the current IME show request or {@code null} otherwise.
      */
-    void showInsets(int types, boolean fromIme, in @nullable ImeTracker.Token statsToken);
+    void showInsets(int types, boolean fromIme);
 
     /**
      * Called when a set of insets source window should be hidden by policy.
      *
      * @param types internal insets types (WindowInsets.Type.InsetsType) to hide
      * @param fromIme true if this request originated from IME (InputMethodService).
-     * @param statsToken the token tracking the current IME hide request or {@code null} otherwise.
      */
-    void hideInsets(int types, boolean fromIme, in @nullable ImeTracker.Token statsToken);
+    void hideInsets(int types, boolean fromIme);
 
     void moved(int newX, int newY);
     void dispatchAppVisibility(boolean visible);

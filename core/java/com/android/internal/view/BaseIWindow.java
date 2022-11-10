@@ -16,7 +16,6 @@
 
 package com.android.internal.view;
 
-import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.hardware.input.InputManager;
 import android.os.Bundle;
@@ -32,7 +31,6 @@ import android.view.InsetsState;
 import android.view.PointerIcon;
 import android.view.ScrollCaptureResponse;
 import android.view.WindowInsets.Type.InsetsType;
-import android.view.inputmethod.ImeTracker;
 import android.window.ClientWindowFrames;
 
 import com.android.internal.os.IResultReceiver;
@@ -68,13 +66,11 @@ public class BaseIWindow extends IWindow.Stub {
     }
 
     @Override
-    public void showInsets(@InsetsType int types, boolean fromIme,
-            @Nullable ImeTracker.Token statsToken) {
+    public void showInsets(@InsetsType int types, boolean fromIme) {
     }
 
     @Override
-    public void hideInsets(@InsetsType int types, boolean fromIme,
-            @Nullable ImeTracker.Token statsToken) {
+    public void hideInsets(@InsetsType int types, boolean fromIme) {
     }
 
     @Override

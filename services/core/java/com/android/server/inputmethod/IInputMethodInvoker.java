@@ -28,7 +28,6 @@ import android.util.Slog;
 import android.view.InputChannel;
 import android.view.MotionEvent;
 import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.ImeTracker;
 import android.view.inputmethod.InputBinding;
 import android.view.inputmethod.InputMethodSubtype;
 import android.window.ImeOnBackInvokedDispatcher;
@@ -199,10 +198,9 @@ final class IInputMethodInvoker {
 
     // TODO(b/192412909): Convert this back to void method
     @AnyThread
-    boolean showSoftInput(IBinder showInputToken, @Nullable ImeTracker.Token statsToken, int flags,
-            ResultReceiver resultReceiver) {
+    boolean showSoftInput(IBinder showInputToken, int flags, ResultReceiver resultReceiver) {
         try {
-            mTarget.showSoftInput(showInputToken, statsToken, flags, resultReceiver);
+            mTarget.showSoftInput(showInputToken, flags, resultReceiver);
         } catch (RemoteException e) {
             logRemoteException(e);
             return false;
@@ -212,10 +210,9 @@ final class IInputMethodInvoker {
 
     // TODO(b/192412909): Convert this back to void method
     @AnyThread
-    boolean hideSoftInput(IBinder hideInputToken, @Nullable ImeTracker.Token statsToken, int flags,
-            ResultReceiver resultReceiver) {
+    boolean hideSoftInput(IBinder hideInputToken, int flags, ResultReceiver resultReceiver) {
         try {
-            mTarget.hideSoftInput(hideInputToken, statsToken, flags, resultReceiver);
+            mTarget.hideSoftInput(hideInputToken, flags, resultReceiver);
         } catch (RemoteException e) {
             logRemoteException(e);
             return false;

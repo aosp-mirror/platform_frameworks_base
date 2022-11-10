@@ -19,7 +19,6 @@ package com.android.wm.shell.common;
 import static android.view.WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Region;
@@ -47,7 +46,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.WindowlessWindowManager;
-import android.view.inputmethod.ImeTracker;
 import android.window.ClientWindowFrames;
 
 import com.android.internal.os.IResultReceiver;
@@ -353,10 +351,10 @@ public class SystemWindows {
                 InsetsSourceControl[] activeControls) {}
 
         @Override
-        public void showInsets(int types, boolean fromIme, @Nullable ImeTracker.Token statsToken) {}
+        public void showInsets(int types, boolean fromIme) {}
 
         @Override
-        public void hideInsets(int types, boolean fromIme, @Nullable ImeTracker.Token statsToken) {}
+        public void hideInsets(int types, boolean fromIme) {}
 
         @Override
         public void moved(int newX, int newY) {}

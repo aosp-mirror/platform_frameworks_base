@@ -2049,8 +2049,7 @@ public class DisplayPolicy {
             // Don't show status bar when swiping on already visible navigation bar.
             // But restore the position of navigation bar if it has been moved by the control
             // target.
-            controlTarget.showInsets(Type.navigationBars(), false /* fromIme */,
-                    null /* statsToken */);
+            controlTarget.showInsets(Type.navigationBars(), false);
             return;
         }
 
@@ -2058,12 +2057,10 @@ public class DisplayPolicy {
             // Show transient bars if they are hidden; restore position if they are visible.
             mDisplayContent.getInsetsPolicy().showTransient(SHOW_TYPES_FOR_SWIPE,
                     isGestureOnSystemBar);
-            controlTarget.showInsets(restorePositionTypes, false /* fromIme */,
-                    null /* statsToken */);
+            controlTarget.showInsets(restorePositionTypes, false);
         } else {
             // Restore visibilities and positions of system bars.
-            controlTarget.showInsets(Type.statusBars() | Type.navigationBars(),
-                    false /* fromIme */, null /* statsToken */);
+            controlTarget.showInsets(Type.statusBars() | Type.navigationBars(), false);
             // To further allow the pull-down-from-the-top gesture to pull down the notification
             // shade as a consistent motion, we reroute the touch events here from the currently
             // touched window to the status bar after making it visible.

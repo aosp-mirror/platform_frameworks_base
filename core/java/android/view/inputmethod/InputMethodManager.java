@@ -2001,10 +2001,6 @@ public final class InputMethodManager {
 
     private boolean showSoftInput(View view, int flags, ResultReceiver resultReceiver,
             @SoftInputShowHideReason int reason) {
-        final ImeTracker.Token statsToken = new ImeTracker.Token();
-        ImeTracker.get().onRequestShow(statsToken, ImeTracker.ORIGIN_CLIENT_SHOW_SOFT_INPUT,
-                reason);
-
         ImeTracing.getInstance().triggerClientDump("InputMethodManager#showSoftInput", this,
                 null /* icProto */);
         // Re-dispatch if there is a context mismatch.
@@ -2016,12 +2012,9 @@ public final class InputMethodManager {
         checkFocus();
         synchronized (mH) {
             if (!hasServedByInputMethodLocked(view)) {
-                ImeTracker.get().onFailed(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
                 Log.w(TAG, "Ignoring showSoftInput() as view=" + view + " is not served.");
                 return false;
             }
-
-            ImeTracker.get().onProgress(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
 
             // Makes sure to call ImeInsetsSourceConsumer#onShowRequested on the UI thread.
             // TODO(b/229426865): call WindowInsetsController#show instead.
@@ -2031,7 +2024,6 @@ public final class InputMethodManager {
             return IInputMethodManagerGlobalInvoker.showSoftInput(
                     mClient,
                     view.getWindowToken(),
-                    statsToken,
                     flags,
                     mCurRootView.getLastClickToolType(),
                     resultReceiver,
@@ -2051,28 +2043,19 @@ public final class InputMethodManager {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123768499)
     public void showSoftInputUnchecked(int flags, ResultReceiver resultReceiver) {
         synchronized (mH) {
-            final ImeTracker.Token statsToken = new ImeTracker.Token();
-            ImeTracker.get().onRequestShow(statsToken, ImeTracker.ORIGIN_CLIENT_SHOW_SOFT_INPUT,
-                    SoftInputShowHideReason.SHOW_SOFT_INPUT);
-
             Log.w(TAG, "showSoftInputUnchecked() is a hidden method, which will be"
                     + " removed soon. If you are using androidx.appcompat.widget.SearchView,"
                     + " please update to version 26.0 or newer version.");
             if (mCurRootView == null || mCurRootView.getView() == null) {
-                ImeTracker.get().onFailed(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
                 Log.w(TAG, "No current root view, ignoring showSoftInputUnchecked()");
                 return;
             }
-
-            ImeTracker.get().onProgress(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
-
             // Makes sure to call ImeInsetsSourceConsumer#onShowRequested on the UI thread.
             // TODO(b/229426865): call WindowInsetsController#show instead.
             mH.executeOrSendMessage(Message.obtain(mH, MSG_ON_SHOW_REQUESTED));
             IInputMethodManagerGlobalInvoker.showSoftInput(
                     mClient,
                     mCurRootView.getView().getWindowToken(),
-                    statsToken,
                     flags,
                     mCurRootView.getLastClickToolType(),
                     resultReceiver,
@@ -2142,24 +2125,17 @@ public final class InputMethodManager {
 
     private boolean hideSoftInputFromWindow(IBinder windowToken, int flags,
             ResultReceiver resultReceiver, @SoftInputShowHideReason int reason) {
-        final ImeTracker.Token statsToken = new ImeTracker.Token();
-        ImeTracker.get().onRequestHide(statsToken, ImeTracker.ORIGIN_CLIENT_HIDE_SOFT_INPUT,
-                reason);
-
         ImeTracing.getInstance().triggerClientDump("InputMethodManager#hideSoftInputFromWindow",
                 this, null /* icProto */);
         checkFocus();
         synchronized (mH) {
             final View servedView = getServedViewLocked();
             if (servedView == null || servedView.getWindowToken() != windowToken) {
-                ImeTracker.get().onFailed(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
                 return false;
             }
 
-            ImeTracker.get().onProgress(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
-
-            return IInputMethodManagerGlobalInvoker.hideSoftInput(mClient, windowToken, statsToken,
-                    flags, resultReceiver, reason);
+            return IInputMethodManagerGlobalInvoker.hideSoftInput(mClient, windowToken, flags,
+                    resultReceiver, reason);
         }
     }
 
@@ -2787,23 +2763,14 @@ public final class InputMethodManager {
 
     @UnsupportedAppUsage
     void closeCurrentInput() {
-        final ImeTracker.Token statsToken = new ImeTracker.Token();
-        ImeTracker.get().onRequestHide(statsToken, ImeTracker.ORIGIN_CLIENT_HIDE_SOFT_INPUT,
-                SoftInputShowHideReason.HIDE_SOFT_INPUT);
-
         synchronized (mH) {
             if (mCurRootView == null || mCurRootView.getView() == null) {
-                ImeTracker.get().onFailed(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
                 Log.w(TAG, "No current root view, ignoring closeCurrentInput()");
                 return;
             }
-
-            ImeTracker.get().onProgress(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
-
             IInputMethodManagerGlobalInvoker.hideSoftInput(
                     mClient,
                     mCurRootView.getView().getWindowToken(),
-                    statsToken,
                     HIDE_NOT_ALWAYS,
                     null,
                     SoftInputShowHideReason.HIDE_SOFT_INPUT);
@@ -2872,24 +2839,15 @@ public final class InputMethodManager {
      * @hide
      */
     public void notifyImeHidden(IBinder windowToken) {
-        final ImeTracker.Token statsToken = new ImeTracker.Token();
-        ImeTracker.get().onRequestHide(statsToken, ImeTracker.ORIGIN_CLIENT_HIDE_SOFT_INPUT,
-                SoftInputShowHideReason.HIDE_SOFT_INPUT_BY_INSETS_API);
-
         ImeTracing.getInstance().triggerClientDump("InputMethodManager#notifyImeHidden", this,
                 null /* icProto */);
         synchronized (mH) {
-            if (!isImeSessionAvailableLocked() || mCurRootView == null
-                    || mCurRootView.getWindowToken() != windowToken) {
-                ImeTracker.get().onFailed(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
-                return;
+            if (isImeSessionAvailableLocked() && mCurRootView != null
+                    && mCurRootView.getWindowToken() == windowToken) {
+                IInputMethodManagerGlobalInvoker.hideSoftInput(mClient, windowToken, 0 /* flags */,
+                        null /* resultReceiver */,
+                        SoftInputShowHideReason.HIDE_SOFT_INPUT_BY_INSETS_API);
             }
-
-            ImeTracker.get().onProgress(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
-
-            IInputMethodManagerGlobalInvoker.hideSoftInput(mClient, windowToken, statsToken,
-                    0 /* flags */, null /* resultReceiver */,
-                    SoftInputShowHideReason.HIDE_SOFT_INPUT_BY_INSETS_API);
         }
     }
 
@@ -4009,7 +3967,7 @@ public final class InputMethodManager {
 
         /**
          * As reported by {@link InputBindResult}. This value is determined by
-         * {@link com.android.internal.R.styleable#InputMethod_suppressesSpellChecker}.
+         * {@link com.android.internal.R.styleable#InputMethod_suppressesSpellChecking}.
          */
         final boolean mIsInputMethodSuppressingSpellChecker;
 

@@ -292,7 +292,6 @@ import android.view.WindowManagerGlobal;
 import android.view.WindowManagerPolicyConstants.PointerEventListener;
 import android.view.displayhash.DisplayHash;
 import android.view.displayhash.VerifiedDisplayHash;
-import android.view.inputmethod.ImeTracker;
 import android.window.ClientWindowFrames;
 import android.window.ITaskFpsCallback;
 import android.window.ScreenCapture;
@@ -8015,8 +8014,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public void showImePostLayout(IBinder imeTargetWindowToken,
-                @Nullable ImeTracker.Token statsToken) {
+        public void showImePostLayout(IBinder imeTargetWindowToken) {
             synchronized (mGlobalLock) {
                 InputTarget imeTarget = getInputTargetFromWindowTokenLocked(imeTargetWindowToken);
                 if (imeTarget == null) {
@@ -8025,18 +8023,17 @@ public class WindowManagerService extends IWindowManager.Stub
                 Trace.asyncTraceBegin(TRACE_TAG_WINDOW_MANAGER, "WMS.showImePostLayout", 0);
                 final InsetsControlTarget controlTarget = imeTarget.getImeControlTarget();
                 imeTarget = controlTarget.getWindow();
-                // If InsetsControlTarget doesn't have a window, it's using remoteControlTarget
-                // which is controlled by default display
+                // If InsetsControlTarget doesn't have a window, its using remoteControlTarget which
+                // is controlled by default display
                 final DisplayContent dc = imeTarget != null
                         ? imeTarget.getDisplayContent() : getDefaultDisplayContentLocked();
                 dc.getInsetsStateController().getImeSourceProvider()
-                        .scheduleShowImePostLayout(controlTarget, statsToken);
+                        .scheduleShowImePostLayout(controlTarget);
             }
         }
 
         @Override
-        public void hideIme(IBinder imeTargetWindowToken, int displayId,
-                @Nullable ImeTracker.Token statsToken) {
+        public void hideIme(IBinder imeTargetWindowToken, int displayId) {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "WMS.hideIme");
             synchronized (mGlobalLock) {
                 WindowState imeTarget = mWindowMap.get(imeTargetWindowToken);
@@ -8052,15 +8049,10 @@ public class WindowManagerService extends IWindowManager.Stub
                     dc.getInsetsStateController().getImeSourceProvider().abortShowImePostLayout();
                 }
                 if (dc != null && dc.getImeTarget(IME_TARGET_CONTROL) != null) {
-                    ImeTracker.get().onProgress(statsToken,
-                            ImeTracker.PHASE_WM_HAS_IME_INSETS_CONTROL_TARGET);
                     ProtoLog.d(WM_DEBUG_IME, "hideIme Control target: %s ",
                             dc.getImeTarget(IME_TARGET_CONTROL));
-                    dc.getImeTarget(IME_TARGET_CONTROL).hideInsets(WindowInsets.Type.ime(),
-                            true /* fromIme */, statsToken);
-                } else {
-                    ImeTracker.get().onFailed(statsToken,
-                            ImeTracker.PHASE_WM_HAS_IME_INSETS_CONTROL_TARGET);
+                    dc.getImeTarget(IME_TARGET_CONTROL).hideInsets(
+                            WindowInsets.Type.ime(), true /* fromIme */);
                 }
                 if (dc != null) {
                     dc.getInsetsStateController().getImeSourceProvider().setImeShowing(false);

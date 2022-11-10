@@ -32,7 +32,6 @@ import android.os.ResultReceiver;
 import android.util.Log;
 import android.view.InputChannel;
 import android.view.MotionEvent;
-import android.view.inputmethod.ImeTracker;
 import android.view.inputmethod.InputBinding;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethod;
@@ -94,10 +93,9 @@ class IInputMethodWrapper extends IInputMethod.Stub
     final int mTargetSdkVersion;
 
     /**
-     * This is not {@code null} only between {@link #bindInput(InputBinding)} and
-     * {@link #unbindInput()} so that {@link RemoteInputConnection} can query if
-     * {@link #unbindInput()} has already been called or not, mainly to avoid unnecessary
-     * blocking operations.
+     * This is not {@null} only between {@link #bindInput(InputBinding)} and {@link #unbindInput()}
+     * so that {@link RemoteInputConnection} can query if {@link #unbindInput()} has already been
+     * called or not, mainly to avoid unnecessary blocking operations.
      *
      * <p>This field must be set and cleared only from the binder thread(s), where the system
      * guarantees that {@link #bindInput(InputBinding)},
@@ -221,26 +219,18 @@ class IInputMethodWrapper extends IInputMethod.Stub
                 return;
             case DO_SHOW_SOFT_INPUT: {
                 final SomeArgs args = (SomeArgs) msg.obj;
-                final ImeTracker.Token statsToken = (ImeTracker.Token) args.arg3;
                 if (isValid(inputMethod, target, "DO_SHOW_SOFT_INPUT")) {
-                    ImeTracker.get().onProgress(statsToken, ImeTracker.PHASE_IME_WRAPPER_DISPATCH);
                     inputMethod.showSoftInputWithToken(
-                            msg.arg1, (ResultReceiver) args.arg2, (IBinder) args.arg1, statsToken);
-                } else {
-                    ImeTracker.get().onFailed(statsToken, ImeTracker.PHASE_IME_WRAPPER_DISPATCH);
+                            msg.arg1, (ResultReceiver) args.arg2, (IBinder) args.arg1);
                 }
                 args.recycle();
                 return;
             }
             case DO_HIDE_SOFT_INPUT: {
                 final SomeArgs args = (SomeArgs) msg.obj;
-                final ImeTracker.Token statsToken = (ImeTracker.Token) args.arg3;
                 if (isValid(inputMethod, target, "DO_HIDE_SOFT_INPUT")) {
-                    ImeTracker.get().onProgress(statsToken, ImeTracker.PHASE_IME_WRAPPER_DISPATCH);
                     inputMethod.hideSoftInputWithToken(msg.arg1, (ResultReceiver) args.arg2,
-                            (IBinder) args.arg1, statsToken);
-                } else {
-                    ImeTracker.get().onFailed(statsToken, ImeTracker.PHASE_IME_WRAPPER_DISPATCH);
+                            (IBinder) args.arg1);
                 }
                 args.recycle();
                 return;
@@ -426,20 +416,16 @@ class IInputMethodWrapper extends IInputMethod.Stub
 
     @BinderThread
     @Override
-    public void showSoftInput(IBinder showInputToken, @Nullable ImeTracker.Token statsToken,
-            int flags, ResultReceiver resultReceiver) {
-        ImeTracker.get().onProgress(statsToken, ImeTracker.PHASE_IME_WRAPPER);
-        mCaller.executeOrSendMessage(mCaller.obtainMessageIOOO(DO_SHOW_SOFT_INPUT,
-                flags, showInputToken, resultReceiver, statsToken));
+    public void showSoftInput(IBinder showInputToken, int flags, ResultReceiver resultReceiver) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageIOO(DO_SHOW_SOFT_INPUT,
+                flags, showInputToken, resultReceiver));
     }
 
     @BinderThread
     @Override
-    public void hideSoftInput(IBinder hideInputToken, @Nullable ImeTracker.Token statsToken,
-            int flags, ResultReceiver resultReceiver) {
-        ImeTracker.get().onProgress(statsToken, ImeTracker.PHASE_IME_WRAPPER);
-        mCaller.executeOrSendMessage(mCaller.obtainMessageIOOO(DO_HIDE_SOFT_INPUT,
-                flags, hideInputToken, resultReceiver, statsToken));
+    public void hideSoftInput(IBinder hideInputToken, int flags, ResultReceiver resultReceiver) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageIOO(DO_HIDE_SOFT_INPUT,
+                flags, hideInputToken, resultReceiver));
     }
 
     @BinderThread

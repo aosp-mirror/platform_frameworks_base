@@ -19,7 +19,6 @@ package android.view;
 import android.content.ComponentName;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
-import android.view.inputmethod.ImeTracker;
 
 /**
  * Singular controller of insets to use when there isn't another obvious controller available.
@@ -49,10 +48,10 @@ oneway interface IDisplayWindowInsetsController {
     /**
      * @see IWindow#showInsets
      */
-    void showInsets(int types, boolean fromIme, in @nullable ImeTracker.Token statsToken);
+    void showInsets(int types, boolean fromIme);
 
     /**
      * @see IWindow#hideInsets
      */
-    void hideInsets(int types, boolean fromIme, in @nullable ImeTracker.Token statsToken);
+    void hideInsets(int types, boolean fromIme);
 }
