@@ -954,13 +954,14 @@ public abstract class TvInteractiveAppService extends Service {
         }
 
         /**
-         * Requests starting of recording
+         * Requests the recording associated with the recordingId to stop.
          *
-         * <p> This is used to request the active {@link android.media.tv.TvRecordingClient} to
+         * <p> This is used to request the associated {@link android.media.tv.TvRecordingClient} to
          * call {@link android.media.tv.TvRecordingClient#stopRecording()}.
-         * @see android.media.tv.TvRecordingClient#stopRecording()
          *
-         * @hide
+         * @param recordingId The ID of the recording to stop. This is provided by the TV app in
+         *                    {@link TvInteractiveAppView#notifyRecordingStarted(String)}
+         * @see android.media.tv.TvRecordingClient#stopRecording()
          */
         @CallSuper
         public void requestStopRecording(@NonNull String recordingId) {
@@ -977,8 +978,6 @@ public abstract class TvInteractiveAppService extends Service {
                 }
             });
         }
-
-
 
         /**
          * Requests signing of the given data.

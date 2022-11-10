@@ -877,7 +877,8 @@ public class TvInteractiveAppView extends ViewGroup {
          * is called.
          *
          * @param iAppServiceId The ID of the TV interactive app service bound to this view.
-         * @param programUri The program URI to record
+         * @param programUri The URI of the program to record
+         *
          */
         public void onRequestStartRecording(
                 @NonNull String iAppServiceId,
@@ -885,12 +886,14 @@ public class TvInteractiveAppView extends ViewGroup {
         }
 
         /**
-         * This is called when {@link TvInteractiveAppService.Session#requestStopRecording()}
+         * This is called when {@link TvInteractiveAppService.Session#requestStopRecording(String)}
          * is called.
          *
          * @param iAppServiceId The ID of the TV interactive app service bound to this view.
-         * @param recordingId The ID of the recording to stop.
-         * @hide
+         * @param recordingId The ID of the recording to stop. This is provided by the TV app in
+         *                    {@link #notifyRecordingStarted(String)}
+         * @see #notifyRecordingStarted(String)
+         * @see #notifyRecordingStopped(String)
          */
         public void onRequestStopRecording(
                 @NonNull String iAppServiceId,
