@@ -44095,8 +44095,8 @@ package android.telephony {
     field public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_ALREADY_PURCHASED = 3; // 0x3
     field public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_CARRIER_DISABLED = 7; // 0x7
     field public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_CARRIER_ERROR = 8; // 0x8
+    field public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_ENTITLEMENT_CHECK_FAILED = 13; // 0xd
     field public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_FEATURE_NOT_SUPPORTED = 10; // 0xa
-    field public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_NETWORK_CONGESTED = 13; // 0xd
     field public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_NETWORK_NOT_AVAILABLE = 12; // 0xc
     field public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_NOT_DEFAULT_DATA_SUB = 14; // 0xe
     field public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_OVERRIDDEN = 5; // 0x5

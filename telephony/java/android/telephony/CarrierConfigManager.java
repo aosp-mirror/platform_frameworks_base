@@ -8785,7 +8785,7 @@ public class CarrierConfigManager {
      * The default value is 30 minutes.
      *
      * @see TelephonyManager#PURCHASE_PREMIUM_CAPABILITY_RESULT_CARRIER_ERROR
-     * @see TelephonyManager#PURCHASE_PREMIUM_CAPABILITY_RESULT_NETWORK_CONGESTED
+     * @see TelephonyManager#PURCHASE_PREMIUM_CAPABILITY_RESULT_ENTITLEMENT_CHECK_FAILED
      */
     public static final String
             KEY_PREMIUM_CAPABILITY_PURCHASE_CONDITION_BACKOFF_HYSTERESIS_TIME_MILLIS_LONG =
