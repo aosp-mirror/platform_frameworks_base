@@ -78,7 +78,7 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
     private boolean mShowPercentAvailable;
     private String mEstimateText = null;
     private boolean mCharging;
-    private boolean mDisplayShield;
+    private boolean mIsOverheated;
     private boolean mDisplayShieldEnabled;
     // Error state where we know nothing about the current battery state
     private boolean mBatteryStateUnknown;
@@ -207,16 +207,14 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
     }
 
     void onIsOverheatedChanged(boolean isOverheated) {
-        // The battery drawable is a different size depending on whether it's currently overheated
-        // or not, so we need to re-scale the view when overheated changes.
-        boolean requiresScaling = mDisplayShield != isOverheated;
-        // If the battery is marked as overheated, we should display a shield indicating that the
-        // battery is being "defended".
-        mDisplayShield = isOverheated;
-        if (requiresScaling) {
+        boolean valueChanged = mIsOverheated != isOverheated;
+        mIsOverheated = isOverheated;
+        if (valueChanged) {
+            updateContentDescription();
+            // The battery drawable is a different size depending on whether it's currently
+            // overheated or not, so we need to re-scale the view when overheated changes.
             scaleBatteryMeterViews();
         }
-        // TODO(b/255625888): We should also update the content description.
     }
 
     private TextView loadPercentView() {
@@ -303,9 +301,14 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
             contentDescription = context.getString(R.string.accessibility_battery_unknown);
         } else if (mShowPercentMode == MODE_ESTIMATE && !TextUtils.isEmpty(mEstimateText)) {
             contentDescription = context.getString(
-                    R.string.accessibility_battery_level_with_estimate,
+                    mIsOverheated
+                            ? R.string.accessibility_battery_level_charging_paused_with_estimate
+                            : R.string.accessibility_battery_level_with_estimate,
                     mLevel,
                     mEstimateText);
+        } else if (mIsOverheated) {
+            contentDescription =
+                    context.getString(R.string.accessibility_battery_level_charging_paused, mLevel);
         } else if (mCharging) {
             contentDescription =
                     context.getString(R.string.accessibility_battery_level_charging, mLevel);
@@ -390,7 +393,9 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
         float mainBatteryWidth =
                 res.getDimensionPixelSize(R.dimen.status_bar_battery_icon_width) * iconScaleFactor;
 
-        boolean displayShield = mDisplayShieldEnabled && mDisplayShield;
+        // If the battery is marked as overheated, we should display a shield indicating that the
+        // battery is being "defended".
+        boolean displayShield = mDisplayShieldEnabled && mIsOverheated;
         float fullBatteryIconHeight =
                 BatterySpecs.getFullBatteryHeight(mainBatteryHeight, displayShield);
         float fullBatteryIconWidth =

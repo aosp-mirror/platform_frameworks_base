@@ -85,6 +85,34 @@ class BatteryMeterViewTest : SysuiTestCase() {
     }
 
     @Test
+    fun contentDescription_estimateAndOverheated() {
+        mBatteryMeterView.onBatteryLevelChanged(17, false)
+        mBatteryMeterView.onIsOverheatedChanged(true)
+        mBatteryMeterView.setPercentShowMode(BatteryMeterView.MODE_ESTIMATE)
+        mBatteryMeterView.setBatteryEstimateFetcher(Fetcher())
+
+        mBatteryMeterView.updatePercentText()
+
+        assertThat(mBatteryMeterView.contentDescription).isEqualTo(
+                context.getString(
+                        R.string.accessibility_battery_level_charging_paused_with_estimate,
+                        17,
+                        ESTIMATE,
+                )
+        )
+    }
+
+    @Test
+    fun contentDescription_overheated() {
+        mBatteryMeterView.onBatteryLevelChanged(90, false)
+        mBatteryMeterView.onIsOverheatedChanged(true)
+
+        assertThat(mBatteryMeterView.contentDescription).isEqualTo(
+                context.getString(R.string.accessibility_battery_level_charging_paused, 90)
+        )
+    }
+
+    @Test
     fun contentDescription_charging() {
         mBatteryMeterView.onBatteryLevelChanged(45, true)
 
@@ -122,6 +150,50 @@ class BatteryMeterViewTest : SysuiTestCase() {
         assertThat(mBatteryMeterView.batteryPercentViewText).isEqualTo("15%")
         assertThat(mBatteryMeterView.contentDescription).isEqualTo(
                 context.getString(R.string.accessibility_battery_level, 15)
+        )
+    }
+
+    @Test
+    fun contentDescription_manyUpdates_alwaysUpdated() {
+        // Overheated
+        mBatteryMeterView.onBatteryLevelChanged(90, false)
+        mBatteryMeterView.onIsOverheatedChanged(true)
+        assertThat(mBatteryMeterView.contentDescription).isEqualTo(
+                context.getString(R.string.accessibility_battery_level_charging_paused, 90)
+        )
+
+        // Overheated & estimate
+        mBatteryMeterView.setPercentShowMode(BatteryMeterView.MODE_ESTIMATE)
+        mBatteryMeterView.setBatteryEstimateFetcher(Fetcher())
+        mBatteryMeterView.updatePercentText()
+        assertThat(mBatteryMeterView.contentDescription).isEqualTo(
+                context.getString(
+                        R.string.accessibility_battery_level_charging_paused_with_estimate,
+                        90,
+                        ESTIMATE,
+                )
+        )
+
+        // Just estimate
+        mBatteryMeterView.onIsOverheatedChanged(false)
+        assertThat(mBatteryMeterView.contentDescription).isEqualTo(
+                context.getString(
+                        R.string.accessibility_battery_level_with_estimate,
+                        90,
+                        ESTIMATE,
+                )
+        )
+
+        // Just percent
+        mBatteryMeterView.setPercentShowMode(BatteryMeterView.MODE_ON)
+        assertThat(mBatteryMeterView.contentDescription).isEqualTo(
+                context.getString(R.string.accessibility_battery_level, 90)
+        )
+
+        // Charging
+        mBatteryMeterView.onBatteryLevelChanged(90, true)
+        assertThat(mBatteryMeterView.contentDescription).isEqualTo(
+                context.getString(R.string.accessibility_battery_level_charging, 90)
         )
     }
 
