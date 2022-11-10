@@ -283,6 +283,10 @@ public final class PowerManagerService extends SystemService
 
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("MM-dd HH:mm:ss.SSS");
 
+    /** Display group IDs representing only DEFAULT_DISPLAY_GROUP. */
+    private static final IntArray DEFAULT_DISPLAY_GROUP_IDS =
+            IntArray.wrap(new int[]{Display.DEFAULT_DISPLAY_GROUP});
+
     private final Context mContext;
     private final ServiceThread mHandlerThread;
     private final Handler mHandler;
@@ -5731,33 +5735,29 @@ public final class PowerManagerService extends SystemService
         }
 
         @Override // Binder call
+        @RequiresPermission(android.Manifest.permission.DEVICE_POWER)
         public void goToSleep(long eventTime, int reason, int flags) {
-            if (eventTime > mClock.uptimeMillis()) {
-                throw new IllegalArgumentException("event time must not be in the future");
-            }
+            goToSleepInternal(DEFAULT_DISPLAY_GROUP_IDS, eventTime, reason, flags);
+        }
 
-            mContext.enforceCallingOrSelfPermission(
-                    android.Manifest.permission.DEVICE_POWER, null);
+        @Override // Binder call
+        @RequiresPermission(android.Manifest.permission.DEVICE_POWER)
+        public void goToSleepWithDisplayId(int displayId, long eventTime, int reason, int flags) {
+            IntArray groupIds;
 
-            final int uid = Binder.getCallingUid();
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                synchronized (mLock) {
-                    PowerGroup defaultPowerGroup = mPowerGroups.get(Display.DEFAULT_DISPLAY_GROUP);
-                    if ((flags & PowerManager.GO_TO_SLEEP_FLAG_SOFT_SLEEP) != 0) {
-                        if (defaultPowerGroup.hasWakeLockKeepingScreenOnLocked()) {
-                            return;
-                        }
-                    }
-                    if ((flags & PowerManager.GO_TO_SLEEP_FLAG_NO_DOZE) != 0) {
-                        sleepPowerGroupLocked(defaultPowerGroup, eventTime, reason, uid);
-                    } else {
-                        dozePowerGroupLocked(defaultPowerGroup, eventTime, reason, uid);
-                    }
+            if (displayId == Display.INVALID_DISPLAY) {
+                groupIds = mDisplayManagerInternal.getDisplayGroupIds();
+            } else {
+                DisplayInfo displayInfo = mDisplayManagerInternal.getDisplayInfo(displayId);
+                Preconditions.checkArgument(displayInfo != null, "display ID(%d) doesn't exist",
+                        displayId);
+                int groupId = displayInfo.displayGroupId;
+                if (groupId == Display.INVALID_DISPLAY_GROUP) {
+                    throw new IllegalArgumentException("invalid display group ID");
                 }
-            } finally {
-                Binder.restoreCallingIdentity(ident);
+                groupIds = IntArray.wrap(new int[]{groupId});
             }
+            goToSleepInternal(groupIds, eventTime, reason, flags);
         }
 
         @Override // Binder call
@@ -6551,6 +6551,44 @@ public final class PowerManagerService extends SystemService
         }
 
         return false;
+    }
+
+    @RequiresPermission(android.Manifest.permission.DEVICE_POWER)
+    private void goToSleepInternal(IntArray groupIds, long eventTime, int reason, int flags) {
+        if (eventTime > mClock.uptimeMillis()) {
+            throw new IllegalArgumentException("event time must not be in the future");
+        }
+
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER,
+                /* message= */ null);
+
+        boolean isNoDoze = (flags & PowerManager.GO_TO_SLEEP_FLAG_NO_DOZE) != 0;
+        int uid = Binder.getCallingUid();
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (mLock) {
+                for (int i = 0; i < groupIds.size(); i++) {
+                    int groupId = groupIds.get(i);
+                    PowerGroup powerGroup = mPowerGroups.get(groupId);
+                    if (powerGroup == null) {
+                        throw new IllegalArgumentException("power group(" + groupId
+                                + ") doesn't exist");
+                    }
+                    if ((flags & PowerManager.GO_TO_SLEEP_FLAG_SOFT_SLEEP) != 0) {
+                        if (powerGroup.hasWakeLockKeepingScreenOnLocked()) {
+                            continue;
+                        }
+                    }
+                    if (isNoDoze) {
+                        sleepPowerGroupLocked(powerGroup, eventTime, reason, uid);
+                    } else {
+                        dozePowerGroupLocked(powerGroup, eventTime, reason, uid);
+                    }
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
     }
 
     @VisibleForTesting
