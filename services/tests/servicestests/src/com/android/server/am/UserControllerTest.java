@@ -38,6 +38,7 @@ import static com.android.server.am.UserController.USER_COMPLETED_EVENT_MSG;
 import static com.android.server.am.UserController.USER_CURRENT_MSG;
 import static com.android.server.am.UserController.USER_START_MSG;
 import static com.android.server.am.UserController.USER_SWITCH_TIMEOUT_MSG;
+import static com.android.server.am.UserController.USER_VISIBILITY_CHANGED_MSG;
 
 import static com.google.android.collect.Lists.newArrayList;
 import static com.google.android.collect.Sets.newHashSet;
@@ -158,6 +159,7 @@ public class UserControllerTest {
             REPORT_USER_SWITCH_MSG,
             USER_SWITCH_TIMEOUT_MSG,
             USER_START_MSG,
+            USER_VISIBILITY_CHANGED_MSG,
             USER_CURRENT_MSG);
 
     private static final Set<Integer> START_BACKGROUND_USER_MESSAGE_CODES = newHashSet(
@@ -964,7 +966,7 @@ public class UserControllerTest {
     }
 
     private void verifySystemUserVisibilityChangedNotified(boolean visible) {
-        verify(mInjector).notifySystemUserVisibilityChanged(visible);
+        verify(mInjector).onUserVisibilityChanged(UserHandle.USER_SYSTEM, visible);
     }
 
     // Should be public to allow mocking
@@ -1104,13 +1106,13 @@ public class UserControllerTest {
         }
 
         @Override
-        void onUserStarting(@UserIdInt int userId, boolean visible) {
-            Log.i(TAG, "onUserStarting(" + userId + ", " + visible + ")");
+        void onUserStarting(@UserIdInt int userId) {
+            Log.i(TAG, "onUserStarting(" + userId + ")");
         }
 
         @Override
-        void notifySystemUserVisibilityChanged(boolean visible) {
-            Log.i(TAG, "notifySystemUserVisibilityChanged(" + visible + ")");
+        void onUserVisibilityChanged(@UserIdInt int userId, boolean visible) {
+            Log.i(TAG, "onUserVisibilityChanged(" + userId + ", " + visible + ")");
         }
     }
 
