@@ -240,7 +240,7 @@ public class DragAndDropPolicy {
             // Update launch options for the split side we are targeting.
             position = leftOrTop ? SPLIT_POSITION_TOP_OR_LEFT : SPLIT_POSITION_BOTTOM_OR_RIGHT;
             // Add some data for logging splitscreen once it is invoked
-            mSplitScreen.logOnDroppedToSplit(position, mLoggerSessionId);
+            mSplitScreen.onDroppedToSplit(position, mLoggerSessionId);
         }
 
         final ClipDescription description = data.getDescription();
