@@ -3125,6 +3125,43 @@ public final class SmsManager {
         }
     }
 
+    /**
+     * Set Storage Availability in SmsStorageMonitor
+     * @param storageAvailable storage availability to be set true or false
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    @TestApi
+    public void setStorageMonitorMemoryStatusOverride(boolean storageAvailable) {
+        try {
+            ISms iccISms = getISmsServiceOrThrow();
+            if (iccISms != null) {
+                iccISms.setStorageMonitorMemoryStatusOverride(getSubscriptionId(),
+                                                                storageAvailable);
+            }
+        } catch (RemoteException ex) {
+            ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Clear the memory status override set by
+     * {@link #setStorageMonitorMemoryStatusOverride(boolean)}
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    @TestApi
+    public void clearStorageMonitorMemoryStatusOverride() {
+        try {
+            ISms iccISms = getISmsServiceOrThrow();
+            if (iccISms != null) {
+                iccISms.clearStorageMonitorMemoryStatusOverride(getSubscriptionId());
+            }
+        } catch (RemoteException ex) {
+            ex.rethrowFromSystemServer();
+        }
+    }
+
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"SMS_CATEGORY_"},
