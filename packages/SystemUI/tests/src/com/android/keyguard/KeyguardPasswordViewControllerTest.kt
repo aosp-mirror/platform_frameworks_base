@@ -31,6 +31,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito
+import org.mockito.Mockito.`when`
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
@@ -117,5 +118,15 @@ class KeyguardPasswordViewControllerTest : SysuiTestCase() {
     fun startAppearAnimation() {
         keyguardPasswordViewController.startAppearAnimation()
         verify(mKeyguardMessageAreaController).setMessage(R.string.keyguard_enter_your_password)
+    }
+
+    @Test
+    fun startAppearAnimation_withExistingMessage() {
+        `when`(mKeyguardMessageAreaController.message).thenReturn("Unlock to continue.")
+        keyguardPasswordViewController.startAppearAnimation()
+        verify(
+            mKeyguardMessageAreaController,
+            never()
+        ).setMessage(R.string.keyguard_enter_your_password)
     }
 }
