@@ -25,8 +25,8 @@ import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
+import org.mockito.Mockito.`when` as whenever
 
 /**
  * NOTE: This test is for the version of FeatureFlagManager in src-release, which should not allow
@@ -83,21 +83,6 @@ class FeatureFlagsReleaseTest : SysuiTestCase() {
     }
 
     @Test
-    fun testReadDeviceConfigBooleanFlag() {
-        val namespace = "test_namespace"
-        deviceConfig.setProperty(namespace, "a", "true", false)
-        deviceConfig.setProperty(namespace, "b", "false", false)
-        deviceConfig.setProperty(namespace, "c", null, false)
-
-        assertThat(mFeatureFlagsRelease.isEnabled(DeviceConfigBooleanFlag(1, "a", namespace)))
-            .isTrue()
-        assertThat(mFeatureFlagsRelease.isEnabled(DeviceConfigBooleanFlag(2, "b", namespace)))
-            .isFalse()
-        assertThat(mFeatureFlagsRelease.isEnabled(DeviceConfigBooleanFlag(3, "c", namespace)))
-            .isFalse()
-    }
-
-    @Test
     fun testSysPropBooleanFlag() {
         val flagId = 213
         val flagName = "sys_prop_flag"
@@ -112,7 +97,7 @@ class FeatureFlagsReleaseTest : SysuiTestCase() {
     fun serverSide_OverridesReleased_MakesFalse() {
         val flag = ReleasedFlag(100)
 
-        serverFlagReader.setFlagValue(flag.id, false)
+        serverFlagReader.setFlagValue(flag.namespace, flag.name, false)
 
         assertThat(mFeatureFlagsRelease.isEnabled(flag)).isFalse()
     }
@@ -121,7 +106,7 @@ class FeatureFlagsReleaseTest : SysuiTestCase() {
     fun serverSide_OverridesUnreleased_Ignored() {
         val flag = UnreleasedFlag(100)
 
-        serverFlagReader.setFlagValue(flag.id, true)
+        serverFlagReader.setFlagValue(flag.namespace, flag.name, true)
 
         assertThat(mFeatureFlagsRelease.isEnabled(flag)).isFalse()
     }

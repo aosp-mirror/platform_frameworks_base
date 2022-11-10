@@ -31,10 +31,6 @@ import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.mockito.withArgCaptor
 import com.android.systemui.util.settings.SecureSettings
 import com.google.common.truth.Truth.assertThat
-import java.io.PrintWriter
-import java.io.Serializable
-import java.io.StringWriter
-import java.util.function.Consumer
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -46,8 +42,12 @@ import org.mockito.Mockito.inOrder
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
+import java.io.PrintWriter
+import java.io.Serializable
+import java.io.StringWriter
+import java.util.function.Consumer
+import org.mockito.Mockito.`when` as whenever
 
 /**
  * NOTE: This test is for the version of FeatureFlagManager in src-debug, which allows overriding
@@ -70,8 +70,8 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
     private val serverFlagReader = ServerFlagReaderFake()
 
     private val deviceConfig = DeviceConfigProxyFake()
-    private val teamfoodableFlagA = UnreleasedFlag(500, true)
-    private val teamfoodableFlagB = ReleasedFlag(501, true)
+    private val teamfoodableFlagA = UnreleasedFlag(500, teamfood = true)
+    private val teamfoodableFlagB = ReleasedFlag(501, teamfood = true)
 
     @Before
     fun setup() {
@@ -84,7 +84,6 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
             secureSettings,
             systemProperties,
             resources,
-            deviceConfig,
             serverFlagReader,
             flagMap,
             restarter
@@ -189,21 +188,6 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
         assertThat(mFeatureFlagsDebug.isEnabled(SysPropBooleanFlag(3, "c", true))).isTrue()
         assertThat(mFeatureFlagsDebug.isEnabled(SysPropBooleanFlag(4, "d", false))).isFalse()
         assertThat(mFeatureFlagsDebug.isEnabled(SysPropBooleanFlag(5, "e"))).isFalse()
-    }
-
-    @Test
-    fun readDeviceConfigBooleanFlag() {
-        val namespace = "test_namespace"
-        deviceConfig.setProperty(namespace, "a", "true", false)
-        deviceConfig.setProperty(namespace, "b", "false", false)
-        deviceConfig.setProperty(namespace, "c", null, false)
-
-        assertThat(mFeatureFlagsDebug.isEnabled(DeviceConfigBooleanFlag(1, "a", namespace)))
-            .isTrue()
-        assertThat(mFeatureFlagsDebug.isEnabled(DeviceConfigBooleanFlag(2, "b", namespace)))
-            .isFalse()
-        assertThat(mFeatureFlagsDebug.isEnabled(DeviceConfigBooleanFlag(3, "c", namespace)))
-            .isFalse()
     }
 
     @Test
@@ -379,7 +363,7 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
     fun serverSide_Overrides_MakesFalse() {
         val flag = ReleasedFlag(100)
 
-        serverFlagReader.setFlagValue(flag.id, false)
+        serverFlagReader.setFlagValue(flag.namespace, flag.name, false)
 
         assertThat(mFeatureFlagsDebug.isEnabled(flag)).isFalse()
     }
@@ -388,7 +372,7 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
     fun serverSide_Overrides_MakesTrue() {
         val flag = UnreleasedFlag(100)
 
-        serverFlagReader.setFlagValue(flag.id, true)
+        serverFlagReader.setFlagValue(flag.namespace, flag.name, true)
 
         assertThat(mFeatureFlagsDebug.isEnabled(flag)).isTrue()
     }

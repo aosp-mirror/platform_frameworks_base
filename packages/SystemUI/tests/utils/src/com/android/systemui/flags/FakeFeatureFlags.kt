@@ -87,8 +87,6 @@ class FakeFeatureFlags : FeatureFlags {
 
     override fun isEnabled(flag: ResourceBooleanFlag): Boolean = requireBooleanValue(flag.id)
 
-    override fun isEnabled(flag: DeviceConfigBooleanFlag): Boolean = requireBooleanValue(flag.id)
-
     override fun isEnabled(flag: SysPropBooleanFlag): Boolean = requireBooleanValue(flag.id)
 
     override fun getString(flag: StringFlag): String = requireStringValue(flag.id)
