@@ -206,6 +206,33 @@ public class DesktopModeControllerTest extends ShellTestCase {
     }
 
     @Test
+    public void testDesktopModeEnabled_homeTaskBehindVisibleTask() {
+        createMockDisplayArea();
+        RunningTaskInfo fullscreenTask1 = createFullscreenTask();
+        fullscreenTask1.isVisible = true;
+        RunningTaskInfo fullscreenTask2 = createFullscreenTask();
+        fullscreenTask2.isVisible = false;
+        RunningTaskInfo homeTask = createHomeTask();
+        when(mShellTaskOrganizer.getRunningTasks(anyInt())).thenReturn(new ArrayList<>(
+                Arrays.asList(fullscreenTask1, fullscreenTask2, homeTask)));
+
+        mController.updateDesktopModeActive(true);
+        WindowContainerTransaction wct = getDesktopModeSwitchTransaction();
+
+        // Check that there are hierarchy changes for home task and visible task
+        assertThat(wct.getHierarchyOps()).hasSize(2);
+        // First show home task
+        WindowContainerTransaction.HierarchyOp op1 = wct.getHierarchyOps().get(0);
+        assertThat(op1.getType()).isEqualTo(HIERARCHY_OP_TYPE_REORDER);
+        assertThat(op1.getContainer()).isEqualTo(homeTask.token.asBinder());
+
+        // Then visible task on top of it
+        WindowContainerTransaction.HierarchyOp op2 = wct.getHierarchyOps().get(1);
+        assertThat(op2.getType()).isEqualTo(HIERARCHY_OP_TYPE_REORDER);
+        assertThat(op2.getContainer()).isEqualTo(fullscreenTask1.token.asBinder());
+    }
+
+    @Test
     public void testShowDesktopApps() {
         // Set up two active tasks on desktop
         RunningTaskInfo freeformTask1 = createFreeformTask();

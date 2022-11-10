@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.desktopmode;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
@@ -158,15 +159,13 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
         WindowContainerTransaction wct = new WindowContainerTransaction();
         // Reset freeform windowing mode that is set per task level so tasks inherit it
         clearFreeformForStandardTasks(runningTasks, wct);
-        int targetWindowingMode;
         if (active) {
-            targetWindowingMode = WINDOWING_MODE_FREEFORM;
+            moveHomeBehindVisibleTasks(runningTasks, wct);
+            setDisplayAreaWindowingMode(displayId, WINDOWING_MODE_FREEFORM, wct);
         } else {
-            targetWindowingMode = WINDOWING_MODE_FULLSCREEN;
-            // Clear any resized bounds
             clearBoundsForStandardTasks(runningTasks, wct);
+            setDisplayAreaWindowingMode(displayId, WINDOWING_MODE_FULLSCREEN, wct);
         }
-        setDisplayAreaWindowingMode(displayId, targetWindowingMode, wct);
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             mTransitions.startTransition(TRANSIT_CHANGE, wct, null);
         } else {
@@ -197,6 +196,31 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
                         "clearing windowing mode for token=%s taskInfo=%s", taskInfo.token,
                         taskInfo);
                 wct.setWindowingMode(taskInfo.token, WINDOWING_MODE_UNDEFINED);
+            }
+        }
+    }
+
+    private void moveHomeBehindVisibleTasks(ArrayList<RunningTaskInfo> runningTasks,
+            WindowContainerTransaction wct) {
+        ProtoLog.v(WM_SHELL_DESKTOP_MODE, "moveHomeBehindVisibleTasks");
+        RunningTaskInfo homeTask = null;
+        ArrayList<RunningTaskInfo> visibleTasks = new ArrayList<>();
+        for (RunningTaskInfo taskInfo : runningTasks) {
+            if (taskInfo.getActivityType() == ACTIVITY_TYPE_HOME) {
+                homeTask = taskInfo;
+            } else if (taskInfo.getActivityType() == ACTIVITY_TYPE_STANDARD
+                    && taskInfo.isVisible()) {
+                visibleTasks.add(taskInfo);
+            }
+        }
+        if (homeTask == null) {
+            ProtoLog.w(WM_SHELL_DESKTOP_MODE, "moveHomeBehindVisibleTasks: home task not found");
+        } else {
+            ProtoLog.v(WM_SHELL_DESKTOP_MODE, "moveHomeBehindVisibleTasks: visible tasks %d",
+                    visibleTasks.size());
+            wct.reorder(homeTask.getToken(), true /* onTop */);
+            for (RunningTaskInfo task : visibleTasks) {
+                wct.reorder(task.getToken(), true /* onTop */);
             }
         }
     }
