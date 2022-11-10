@@ -41,6 +41,7 @@ import com.android.server.wm.traces.parser.toFlickerComponent
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import com.android.wm.shell.flicker.LAUNCHER_UI_PACKAGE_NAME
 import com.android.wm.shell.flicker.SYSTEM_UI_PACKAGE_NAME
+import org.junit.Assert.assertNotNull
 import java.util.Collections
 
 internal object SplitScreenUtils {
@@ -50,7 +51,7 @@ internal object SplitScreenUtils {
     private const val DIVIDER_BAR = "docked_divider_handle"
     private const val OVERVIEW_SNAPSHOT = "snapshot"
     private const val GESTURE_STEP_MS = 16L
-    private const val LONG_PRESS_TIME_MS = 100L
+    private val LONG_PRESS_TIME_MS = ViewConfiguration.getLongPressTimeout() * 2L
     private val SPLIT_DECOR_MANAGER = ComponentNameMatcher("", "SplitDecorManager#")
 
     private val notificationScrollerSelector: BySelector
@@ -275,13 +276,6 @@ internal object SplitScreenUtils {
         }
     }
 
-    fun longPress(instrumentation: Instrumentation, point: Point) {
-        val downTime = SystemClock.uptimeMillis()
-        touch(instrumentation, MotionEvent.ACTION_DOWN, downTime, downTime, TIMEOUT_MS, point)
-        SystemClock.sleep(LONG_PRESS_TIME_MS)
-        touch(instrumentation, MotionEvent.ACTION_UP, downTime, downTime, TIMEOUT_MS, point)
-    }
-
     fun createShortcutOnHotseatIfNotExist(tapl: LauncherInstrumentation, appName: String) {
         tapl.workspace.deleteAppIcon(tapl.workspace.getHotseatAppIcon(0))
         val allApps = tapl.workspace.switchToAllApps()
@@ -353,9 +347,11 @@ internal object SplitScreenUtils {
                 Until.findObject(By.res(sourceApp.packageName, "SplitScreenTest")),
                 TIMEOUT_MS
             )
-        longPress(instrumentation, textView.visibleCenter)
+        assertNotNull("Unable to find the TextView", textView)
+        textView.click(LONG_PRESS_TIME_MS)
 
         val copyBtn = device.wait(Until.findObject(By.text("Copy")), TIMEOUT_MS)
+        assertNotNull("Unable to find the copy button", copyBtn)
         copyBtn.click()
 
         // Paste text to destinationApp
@@ -364,9 +360,11 @@ internal object SplitScreenUtils {
                 Until.findObject(By.res(destinationApp.packageName, "plain_text_input")),
                 TIMEOUT_MS
             )
-        longPress(instrumentation, editText.visibleCenter)
+        assertNotNull("Unable to find the EditText", editText)
+        editText.click(LONG_PRESS_TIME_MS)
 
         val pasteBtn = device.wait(Until.findObject(By.text("Paste")), TIMEOUT_MS)
+        assertNotNull("Unable to find the paste button", pasteBtn)
         pasteBtn.click()
 
         // Verify text
