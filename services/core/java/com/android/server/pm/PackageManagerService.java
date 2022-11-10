@@ -15,6 +15,7 @@
 
 package com.android.server.pm;
 
+import static android.Manifest.permission.GET_APP_METADATA;
 import static android.Manifest.permission.MANAGE_DEVICE_ADMINS;
 import static android.Manifest.permission.SET_HARMFUL_APP_WARNINGS;
 import static android.app.AppOpsManager.MODE_IGNORED;
@@ -558,6 +559,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
     static final String RANDOM_DIR_PREFIX = "~~";
     static final char RANDOM_CODEPATH_PREFIX = '-';
+
+    static final String APP_METADATA_FILE_NAME = "app.metadata";
 
     final Handler mHandler;
     final Handler mBackgroundHandler;
@@ -5055,6 +5058,20 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             mContext.enforceCallingOrSelfPermission(
                     Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS, null);
             return mMoveCallbacks.mLastStatus.get(moveId);
+        }
+
+        @Override
+        public String getAppMetadataPath(String packageName, int userId) {
+            mContext.enforceCallingOrSelfPermission(GET_APP_METADATA, "getAppMetadataPath");
+            final int callingUid = Binder.getCallingUid();
+            final Computer snapshot = snapshotComputer();
+            final PackageStateInternal ps = snapshot.getPackageStateForInstalledAndFiltered(
+                    packageName, callingUid, userId);
+            if (ps == null) {
+                throw new ParcelableException(
+                        new PackageManager.NameNotFoundException(packageName));
+            }
+            return new File(ps.getPathString(), APP_METADATA_FILE_NAME).getAbsolutePath();
         }
 
         @Override

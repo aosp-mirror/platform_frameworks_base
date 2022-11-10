@@ -6847,6 +6847,11 @@
     <permission android:name="android.permission.RUN_LONG_JOBS"
                 android:protectionLevel="normal|appop"/>
 
+    <!-- Allows an app access to the installer provided app metadata.
+        @hide -->
+    <permission android:name="android.permission.GET_APP_METADATA"
+                android:protectionLevel="signature" />
+
     <!-- Attribution for Geofencing service. -->
     <attribution android:tag="GeofencingService" android:label="@string/geofencing_service"/>
     <!-- Attribution for Country Detector. -->

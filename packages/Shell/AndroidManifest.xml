@@ -786,6 +786,9 @@
     <!-- Permission required for CTS test - ApplicationExemptionsTests -->
     <uses-permission android:name="android.permission.MANAGE_DEVICE_POLICY_APP_EXEMPTIONS" />
 
+    <!-- Permission required for CTS test - CtsPackageInstallTestCases-->
+    <uses-permission android:name="android.permission.GET_APP_METADATA" />
+
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
                 android:defaultToDeviceProtectedStorage="true"

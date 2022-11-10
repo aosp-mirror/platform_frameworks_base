@@ -11809,6 +11809,7 @@ package android.content.pm {
     method public void close();
     method public void commit(@NonNull android.content.IntentSender);
     method public void fsync(@NonNull java.io.OutputStream) throws java.io.IOException;
+    method @NonNull public android.os.PersistableBundle getAppMetadata();
     method @NonNull public int[] getChildSessionIds();
     method @NonNull public String[] getNames() throws java.io.IOException;
     method public int getParentSessionId();
@@ -11821,6 +11822,7 @@ package android.content.pm {
     method public void removeSplit(@NonNull String) throws java.io.IOException;
     method public void requestChecksums(@NonNull String, int, @NonNull java.util.List<java.security.cert.Certificate>, @NonNull java.util.concurrent.Executor, @NonNull android.content.pm.PackageManager.OnChecksumsReadyListener) throws java.security.cert.CertificateEncodingException, java.io.FileNotFoundException;
     method public void requestUserPreapproval(@NonNull android.content.pm.PackageInstaller.PreapprovalDetails, @NonNull android.content.IntentSender);
+    method public void setAppMetadata(@Nullable android.os.PersistableBundle) throws java.io.IOException;
     method @Deprecated public void setChecksums(@NonNull String, @NonNull java.util.List<android.content.pm.Checksum>, @Nullable byte[]) throws java.io.IOException;
     method public void setStagingProgress(float);
     method public void transfer(@NonNull String) throws android.content.pm.PackageManager.NameNotFoundException;

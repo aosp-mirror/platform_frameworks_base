@@ -34,6 +34,7 @@ import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_NO_CERTIFIC
 import static android.content.pm.PackageManager.INSTALL_STAGED;
 import static android.content.pm.PackageManager.INSTALL_SUCCEEDED;
 import static android.os.Process.INVALID_UID;
+import static android.provider.DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE;
 import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_RDONLY;
 import static android.system.OsConstants.O_WRONLY;
@@ -48,6 +49,7 @@ import static com.android.internal.util.XmlUtils.writeByteArrayAttribute;
 import static com.android.internal.util.XmlUtils.writeStringAttribute;
 import static com.android.internal.util.XmlUtils.writeUriAttribute;
 import static com.android.server.pm.PackageInstallerService.prepareStageDir;
+import static com.android.server.pm.PackageManagerService.APP_METADATA_FILE_NAME;
 
 import android.Manifest;
 import android.annotation.AnyThread;
@@ -106,6 +108,7 @@ import android.icu.util.ULocale;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.FileBridge;
 import android.os.FileUtils;
 import android.os.Handler;
@@ -125,6 +128,7 @@ import android.os.incremental.IncrementalManager;
 import android.os.incremental.PerUidReadTimeouts;
 import android.os.incremental.StorageHealthCheckParams;
 import android.os.storage.StorageManager;
+import android.provider.DeviceConfig;
 import android.provider.Settings.Global;
 import android.stats.devicepolicy.DevicePolicyEnums;
 import android.system.ErrnoException;
@@ -178,6 +182,7 @@ import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
 import java.security.cert.Certificate;
@@ -291,6 +296,18 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      * {@link #checkUserActionRequirement(PackageInstallerSession, IntentSender)}.
      */
     private static final int INVALID_TARGET_SDK_VERSION = Integer.MAX_VALUE;
+
+    /**
+     * Byte size limit for app metadata.
+     *
+     * Flag type: {@code long}
+     * Namespace: NAMESPACE_PACKAGE_MANAGER_SERVICE
+     */
+    private static final String PROPERTY_APP_METADATA_BYTE_SIZE_LIMIT =
+            "app_metadata_byte_size_limit";
+
+    /** Default byte size limit for app metadata */
+    private static final long DEFAULT_APP_METADATA_BYTE_SIZE_LIMIT = 32000;
 
     // TODO: enforce INSTALL_ALLOW_TEST
     // TODO: enforce INSTALL_ALLOW_DOWNGRADE
@@ -708,6 +725,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             // entries like "lost+found".
             if (file.isDirectory()) return false;
             if (file.getName().endsWith(REMOVE_MARKER_EXTENSION)) return false;
+            if (isAppMetadata(file)) return false;
             if (DexMetadataHelper.isDexMetadataFile(file)) return false;
             if (VerityUtils.isFsveritySignatureFile(file)) return false;
             if (ApkChecksums.isDigestOrDigestSignatureFile(file)) return false;
@@ -1434,6 +1452,61 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
+    private File getTmpAppMetadataFile() {
+        return new File(Environment.getDataAppDirectory(params.volumeUuid),
+                sessionId + "-" + APP_METADATA_FILE_NAME);
+    }
+
+    private File getStagedAppMetadataFile() {
+        File file = new File(stageDir, APP_METADATA_FILE_NAME);
+        return file.exists() ? file : null;
+    }
+
+    private static boolean isAppMetadata(String name) {
+        return name.endsWith(APP_METADATA_FILE_NAME);
+    }
+
+    private static boolean isAppMetadata(File file) {
+        return isAppMetadata(file.getName());
+    }
+
+    @Override
+    public ParcelFileDescriptor getAppMetadataFd() {
+        assertCallerIsOwnerOrRoot();
+        synchronized (mLock) {
+            assertPreparedAndNotCommittedOrDestroyedLocked("openRead");
+            try {
+                return openReadInternalLocked(APP_METADATA_FILE_NAME);
+            } catch (IOException e) {
+                throw ExceptionUtils.wrap(e);
+            }
+        }
+    }
+
+    private static long getAppMetadataSizeLimit() {
+        final long token = Binder.clearCallingIdentity();
+        try {
+            return DeviceConfig.getLong(NAMESPACE_PACKAGE_MANAGER_SERVICE,
+                    PROPERTY_APP_METADATA_BYTE_SIZE_LIMIT, DEFAULT_APP_METADATA_BYTE_SIZE_LIMIT);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    @Override
+    public ParcelFileDescriptor openWriteAppMetadata() {
+        assertCallerIsOwnerOrRoot();
+        synchronized (mLock) {
+            assertPreparedAndNotSealedLocked("openWriteAppMetadata");
+        }
+        try {
+            return doWriteInternal(APP_METADATA_FILE_NAME, /* offsetBytes= */ 0,
+                    /* lengthBytes= */ -1, null);
+        } catch (IOException e) {
+            throw ExceptionUtils.wrap(e);
+        }
+    }
+
     @Override
     public ParcelFileDescriptor openWrite(String name, long offsetBytes, long lengthBytes) {
         assertCanWrite(false);
@@ -1702,6 +1775,21 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 if (sealFailed) {
                     return;
                 }
+            }
+        }
+
+        File appMetadataFile = getStagedAppMetadataFile();
+        if (appMetadataFile != null) {
+            long sizeLimit = getAppMetadataSizeLimit();
+            if (appMetadataFile.length() > sizeLimit) {
+                appMetadataFile.delete();
+                throw new IllegalArgumentException(
+                        "App metadata size exceeds the maximum allowed limit of " + sizeLimit);
+            }
+            if (isIncrementalInstallation()) {
+                // Incremental requires stageDir to be empty so move the app metadata file to a
+                // temporary location and move back after commit.
+                appMetadataFile.renameTo(getTmpAppMetadataFile());
             }
         }
 
@@ -2802,7 +2890,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         final List<File> addedFiles = getAddedApksLocked();
-        if (addedFiles.isEmpty() && removeSplitList.size() == 0) {
+        if (addedFiles.isEmpty()
+                && (removeSplitList.size() == 0 || getStagedAppMetadataFile() != null)) {
             throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
                     TextUtils.formatSimple("Session: %d. No packages staged in %s", sessionId,
                           stageDir.getAbsolutePath()));
@@ -2899,10 +2988,27 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         }
 
-        if (isIncrementalInstallation() && !isIncrementalInstallationAllowed(mPackageName)) {
-            throw new PackageManagerException(
-                    PackageManager.INSTALL_FAILED_SESSION_INVALID,
-                    "Incremental installation of this package is not allowed.");
+        if (isIncrementalInstallation()) {
+            if (!isIncrementalInstallationAllowed(mPackageName)) {
+                throw new PackageManagerException(
+                        PackageManager.INSTALL_FAILED_SESSION_INVALID,
+                        "Incremental installation of this package is not allowed.");
+            }
+            // Since we moved the staged app metadata file so that incfs can be initialized, lets
+            // now move it back.
+            File appMetadataFile = getTmpAppMetadataFile();
+            if (appMetadataFile.exists()) {
+                final IncrementalFileStorages incrementalFileStorages =
+                        getIncrementalFileStorages();
+                try {
+                    incrementalFileStorages.makeFile(APP_METADATA_FILE_NAME,
+                            Files.readAllBytes(appMetadataFile.toPath()));
+                } catch (IOException e) {
+                    Slog.e(TAG, "Failed to write app metadata to incremental storage", e);
+                } finally {
+                    appMetadataFile.delete();
+                }
+            }
         }
 
         if (mInstallerUid != mOriginalInstallerUid) {
