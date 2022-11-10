@@ -56,8 +56,11 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
     private static final int SURFACE_FLINGER_CALLBACK_WINDOWS_STABLE_TIMES_MS = 35;
     // To avoid the surface flinger callbacks always comes within in 2 frames, then no windows
     // are reported to the A11y framework, and the animation duration time is 500ms, so setting
-    // this value as the max timeout value to force computing changed windows.
-    private static final int WINDOWS_CHANGED_NOTIFICATION_MAX_DURATION_TIMES_MS = 500;
+    // this value as the max timeout value to force computing changed windows. However, since
+    // UiAutomator waits 500ms to determine that things are idle. Since we aren't actually idle,
+    // we need to reduce the timeout here a little so that we can deliver an updated state before
+    // UiAutomator reports idle based-on stale information.
+    private static final int WINDOWS_CHANGED_NOTIFICATION_MAX_DURATION_TIMES_MS = 450;
 
     private static final float[] sTempFloats = new float[9];
 
