@@ -76,7 +76,7 @@ public interface InsetsAnimationControlRunner {
     @AnimationType int getAnimationType();
 
     /**
-     * @return The token tracking the current IME request or {@code null} otherwise.
+     * @return The token tracking the current IME show request or {@code null} otherwise.
      */
     @Nullable
     ImeTracker.Token getStatsToken();

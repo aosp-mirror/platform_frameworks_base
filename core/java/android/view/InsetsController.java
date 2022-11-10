@@ -1029,12 +1029,11 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     @Override
     public void hide(@InsetsType int types) {
-        hide(types, false /* fromIme */, null /* statsToken */);
+        hide(types, false /* fromIme */);
     }
 
     @VisibleForTesting
-    public void hide(@InsetsType int types, boolean fromIme,
-            @Nullable ImeTracker.Token statsToken) {
+    public void hide(@InsetsType int types, boolean fromIme) {
         if (fromIme) {
             ImeTracing.getInstance().triggerClientDump("InsetsController#hide",
                     mHost.getInputMethodManager(), null /* icProto */);
@@ -1047,25 +1046,16 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             if ((types & type) == 0) {
                 continue;
             }
-            @AnimationType final int animationType = getAnimationType(type);
+            final @AnimationType int animationType = getAnimationType(type);
             final boolean requestedVisible = (type & mRequestedVisibleTypes) != 0;
-            final boolean isImeAnimation = type == ime();
             if (!requestedVisible && animationType == ANIMATION_TYPE_NONE
                     || animationType == ANIMATION_TYPE_HIDE) {
-                // no-op: already hidden or animating out (because window visibility is
-                // applied before starting animation).
-                if (isImeAnimation) {
-                    ImeTracker.get().onCancelled(statsToken,
-                            ImeTracker.PHASE_CLIENT_APPLY_ANIMATION);
-                }
+                // no-op: already hidden or animating out.
                 continue;
-            }
-            if (isImeAnimation) {
-                ImeTracker.get().onProgress(statsToken, ImeTracker.PHASE_CLIENT_APPLY_ANIMATION);
             }
             typesReady |= type;
         }
-        applyAnimation(typesReady, false /* show */, fromIme, statsToken);
+        applyAnimation(typesReady, false /* show */, fromIme /* fromIme */, null /* statsToken */);
     }
 
     @Override
@@ -1347,11 +1337,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             showDirectly(runner.getTypes(), true /* fromIme */);
             ImeTracker.get().onShown(statsToken);
         } else {
-            ImeTracker.get().onProgress(statsToken,
-                    ImeTracker.PHASE_CLIENT_ANIMATION_FINISHED_HIDE);
+            ImeTracker.get().onFailed(statsToken, ImeTracker.PHASE_CLIENT_ANIMATION_FINISHED_SHOW);
             hideDirectly(runner.getTypes(), true /* animationFinished */,
                     runner.getAnimationType(), true /* fromIme */);
-            ImeTracker.get().onHidden(statsToken);
         }
     }
 
@@ -1376,7 +1364,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     private void cancelAnimation(InsetsAnimationControlRunner control, boolean invokeCallback) {
         if (invokeCallback) {
-            ImeTracker.get().onCancelled(control.getStatsToken(),
+            ImeTracker.get().onFailed(control.getStatsToken(),
                     ImeTracker.PHASE_CLIENT_ANIMATION_CANCEL);
             control.cancel();
         } else {
@@ -1539,8 +1527,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                 !hasAnimationCallbacks /* useInsetsAnimationThread */, statsToken);
     }
 
-    private void hideDirectly(@InsetsType int types, boolean animationFinished,
-            @AnimationType int animationType, boolean fromIme) {
+    private void hideDirectly(
+            @InsetsType int types, boolean animationFinished, @AnimationType int animationType,
+            boolean fromIme) {
         if ((types & ime()) != 0) {
             ImeTracing.getInstance().triggerClientDump("InsetsController#hideDirectly",
                     mHost.getInputMethodManager(), null /* icProto */);

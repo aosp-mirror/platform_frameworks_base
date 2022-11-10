@@ -324,13 +324,12 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
         }
 
         @Override
-        public void hideInsets(@InsetsType int types, boolean fromIme,
-                @Nullable ImeTracker.Token statsToken) {
+        public void hideInsets(@InsetsType int types, boolean fromIme) {
             if ((types & WindowInsets.Type.ime()) == 0) {
                 return;
             }
             if (DEBUG) Slog.d(TAG, "Got hideInsets for ime");
-            startAnimation(false /* show */, false /* forceRestart */, statsToken);
+            startAnimation(false /* show */, false /* forceRestart */, null /* statsToken */);
         }
 
         @Override
@@ -396,7 +395,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                         + (mAnimationDirection == DIRECTION_SHOW ? "SHOW"
                         : (mAnimationDirection == DIRECTION_HIDE ? "HIDE" : "NONE")));
             }
-            if ((!forceRestart && (mAnimationDirection == DIRECTION_SHOW && show))
+            if (!forceRestart && (mAnimationDirection == DIRECTION_SHOW && show)
                     || (mAnimationDirection == DIRECTION_HIDE && !show)) {
                 ImeTracker.get().onCancelled(statsToken, ImeTracker.PHASE_WM_ANIMATION_CREATE);
                 return;
@@ -465,9 +464,9 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                             : 1.f;
                     t.setAlpha(mImeSourceControl.getLeash(), alpha);
                     if (mAnimationDirection == DIRECTION_SHOW) {
+                        t.show(mImeSourceControl.getLeash());
                         ImeTracker.get().onProgress(mStatsToken,
                                 ImeTracker.PHASE_WM_ANIMATION_RUNNING);
-                        t.show(mImeSourceControl.getLeash());
                     }
                     t.apply();
                     mTransactionPool.release(t);
@@ -488,19 +487,18 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                     }
                     dispatchEndPositioning(mDisplayId, mCancelled, t);
                     if (mAnimationDirection == DIRECTION_HIDE && !mCancelled) {
-                        ImeTracker.get().onProgress(mStatsToken,
-                                ImeTracker.PHASE_WM_ANIMATION_RUNNING);
                         t.hide(mImeSourceControl.getLeash());
                         removeImeSurface();
-                        ImeTracker.get().onHidden(mStatsToken);
-                    } else if (mAnimationDirection == DIRECTION_SHOW && !mCancelled) {
-                        ImeTracker.get().onShown(mStatsToken);
-                    } else if (mCancelled) {
-                        ImeTracker.get().onCancelled(mStatsToken,
-                                ImeTracker.PHASE_WM_ANIMATION_RUNNING);
                     }
                     t.apply();
                     mTransactionPool.release(t);
+
+                    if (mAnimationDirection == DIRECTION_SHOW && mCancelled) {
+                        ImeTracker.get().onFailed(mStatsToken,
+                                ImeTracker.PHASE_WM_ANIMATION_RUNNING);
+                    } else if (!mCancelled) {
+                        ImeTracker.get().onShown(mStatsToken);
+                    }
 
                     mAnimationDirection = DIRECTION_NONE;
                     mAnimation = null;

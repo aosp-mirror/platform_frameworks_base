@@ -740,10 +740,8 @@ public abstract class WindowManagerInternal {
      *
      * @param imeTargetWindowToken token of the (IME target) window on which IME should be hidden.
      * @param displayId the id of the display the IME is on.
-     * @param statsToken the token tracking the current IME hide request or {@code null} otherwise.
      */
-    public abstract void hideIme(IBinder imeTargetWindowToken, int displayId,
-            @Nullable ImeTracker.Token statsToken);
+    public abstract void hideIme(IBinder imeTargetWindowToken, int displayId);
 
     /**
      * Tell window manager about a package that should be running with a restricted range of

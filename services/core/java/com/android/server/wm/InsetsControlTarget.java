@@ -70,10 +70,8 @@ interface InsetsControlTarget {
      *
      * @param types to specify which types of insets source window should be hidden.
      * @param fromIme {@code true} if IME hide request originated from {@link InputMethodService}.
-     * @param statsToken the token tracking the current IME hide request or {@code null} otherwise.
      */
-    default void hideInsets(@InsetsType int types, boolean fromIme,
-            @Nullable ImeTracker.Token statsToken) {
+    default void hideInsets(@InsetsType int types, boolean fromIme) {
     }
 
     /**

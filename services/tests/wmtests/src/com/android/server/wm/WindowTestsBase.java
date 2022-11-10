@@ -854,8 +854,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
             }
 
             @Override
-            public void hideInsets(int i, boolean b, @Nullable ImeTracker.Token t)
-                    throws RemoteException {
+            public void hideInsets(int i, boolean b) throws RemoteException {
             }
 
             @Override

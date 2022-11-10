@@ -267,7 +267,7 @@ public class InsetsControllerTest {
             final @InsetsType int types = navigationBars() | statusBars() | ime();
             assertEquals(types, mController.getRequestedVisibleTypes() & types);
 
-            mController.hide(ime(), true /* fromIme */, null /* statsToken */);
+            mController.hide(ime(), true /* fromIme */);
             mController.hide(all());
             mController.cancelExistingAnimations();
             assertEquals(0, mController.getRequestedVisibleTypes() & types);
@@ -285,7 +285,7 @@ public class InsetsControllerTest {
             mController.show(WindowInsets.Type.ime(), true /* fromIme */, null /* statsToken */);
             mController.cancelExistingAnimations();
             assertTrue(isRequestedVisible(mController, ime()));
-            mController.hide(ime(), true /* fromIme */, null /* statsToken */);
+            mController.hide(ime(), true /* fromIme */);
             mController.cancelExistingAnimations();
             assertFalse(isRequestedVisible(mController, ime()));
             mController.getSourceConsumer(ITYPE_IME).onWindowFocusLost();

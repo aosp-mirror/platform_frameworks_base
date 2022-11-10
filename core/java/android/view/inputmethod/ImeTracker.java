@@ -27,8 +27,9 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.SystemProperties;
+import android.os.ResultReceiver;
 import android.util.Log;
+import android.view.View;
 
 import com.android.internal.inputmethod.InputMethodDebug;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
@@ -46,46 +47,33 @@ public interface ImeTracker {
 
     String TAG = "ImeTracker";
 
-    /**
-     * The origin of the IME request
-     *
-     * The name follows the format {@code PHASE_x_...} where {@code x} denotes
-     * where the origin is (i.e. {@code PHASE_SERVER_...} occurs in the server).
-     */
+    /** The origin of the IME show request. */
     @IntDef(prefix = { "ORIGIN_" }, value = {
-            ORIGIN_CLIENT_SHOW_SOFT_INPUT,
-            ORIGIN_CLIENT_HIDE_SOFT_INPUT,
-            ORIGIN_SERVER_START_INPUT,
-            ORIGIN_SERVER_HIDE_INPUT
+            ORIGIN_SHOW_SOFT_INPUT,
+            ORIGIN_START_INPUT
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface Origin {}
 
     /**
-     * The IME show request originated in the client.
+     * The IME is already started.
+     *
+     * @see InputMethodManager#showSoftInput(View, int, ResultReceiver)
      */
-    int ORIGIN_CLIENT_SHOW_SOFT_INPUT = 0;
+    int ORIGIN_SHOW_SOFT_INPUT = 0;
 
     /**
-     * The IME hide request originated in the client.
+     * The IME must be started.
+     *
+     * @see com.android.server.inputmethod.InputMethodManagerService#showCurrentInputImplicitLocked
      */
-    int ORIGIN_CLIENT_HIDE_SOFT_INPUT = 1;
+    int ORIGIN_START_INPUT = 1;
 
     /**
-     * The IME show request originated in the server.
-     */
-    int ORIGIN_SERVER_START_INPUT = 2;
-
-    /**
-     * The IME hide request originated in the server.
-     */
-    int ORIGIN_SERVER_HIDE_INPUT = 3;
-
-    /**
-     * The current phase of the IME request.
+     * The current phase of the IME show request.
      *
      * The name follows the format {@code PHASE_x_...} where {@code x} denotes
-     * where the phase is (i.e. {@code PHASE_SERVER_...} occurs in the server).
+     * where the phase occurs (i.e. {@code PHASE_WM_...} takes place in the WindowManager).
      */
     @IntDef(prefix = { "PHASE_" }, value = {
             PHASE_CLIENT_VIEW_SERVED,
@@ -93,152 +81,107 @@ public interface ImeTracker {
             PHASE_SERVER_CLIENT_FOCUSED,
             PHASE_SERVER_ACCESSIBILITY,
             PHASE_SERVER_SYSTEM_READY,
-            PHASE_SERVER_HIDE_IMPLICIT,
-            PHASE_SERVER_HIDE_NOT_ALWAYS,
-            PHASE_SERVER_WAIT_IME,
             PHASE_SERVER_HAS_IME,
-            PHASE_SERVER_SHOULD_HIDE,
             PHASE_IME_WRAPPER,
             PHASE_IME_WRAPPER_DISPATCH,
             PHASE_IME_SHOW_SOFT_INPUT,
-            PHASE_IME_HIDE_SOFT_INPUT,
             PHASE_IME_ON_SHOW_SOFT_INPUT_TRUE,
             PHASE_IME_APPLY_VISIBILITY_INSETS_CONSUMER,
             PHASE_SERVER_APPLY_IME_VISIBILITY,
             PHASE_WM_SHOW_IME_RUNNER,
             PHASE_WM_SHOW_IME_READY,
-            PHASE_WM_HAS_IME_INSETS_CONTROL_TARGET,
-            PHASE_WM_WINDOW_INSETS_CONTROL_TARGET_SHOW_INSETS,
-            PHASE_WM_WINDOW_INSETS_CONTROL_TARGET_HIDE_INSETS,
-            PHASE_WM_REMOTE_INSETS_CONTROL_TARGET_SHOW_INSETS,
-            PHASE_WM_REMOTE_INSETS_CONTROL_TARGET_HIDE_INSETS,
+            PHASE_WM_REMOTE_INSETS_CONTROL_TARGET,
             PHASE_WM_REMOTE_INSETS_CONTROLLER,
             PHASE_WM_ANIMATION_CREATE,
             PHASE_WM_ANIMATION_RUNNING,
             PHASE_CLIENT_SHOW_INSETS,
-            PHASE_CLIENT_HIDE_INSETS,
             PHASE_CLIENT_HANDLE_SHOW_INSETS,
-            PHASE_CLIENT_HANDLE_HIDE_INSETS,
             PHASE_CLIENT_APPLY_ANIMATION,
             PHASE_CLIENT_CONTROL_ANIMATION,
             PHASE_CLIENT_ANIMATION_RUNNING,
             PHASE_CLIENT_ANIMATION_CANCEL,
-            PHASE_CLIENT_ANIMATION_FINISHED_SHOW,
-            PHASE_CLIENT_ANIMATION_FINISHED_HIDE
+            PHASE_CLIENT_ANIMATION_FINISHED_SHOW
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface Phase {}
 
     /** The view that requested the IME has been served by the IMM. */
-    int PHASE_CLIENT_VIEW_SERVED = 0;
+    int PHASE_CLIENT_VIEW_SERVED = 1;
 
     /** The IME client that requested the IME has window manager focus. */
-    int PHASE_SERVER_CLIENT_KNOWN = 1;
+    int PHASE_SERVER_CLIENT_KNOWN = 2;
 
     /** The IME client that requested the IME has IME focus. */
-    int PHASE_SERVER_CLIENT_FOCUSED = 2;
+    int PHASE_SERVER_CLIENT_FOCUSED = 3;
 
     /** The IME request complies with the current accessibility settings. */
-    int PHASE_SERVER_ACCESSIBILITY = 3;
+    int PHASE_SERVER_ACCESSIBILITY = 4;
 
     /** The server is ready to run third party code. */
-    int PHASE_SERVER_SYSTEM_READY = 4;
-
-    /** Checked the implicit hide request against any explicit show requests. */
-    int PHASE_SERVER_HIDE_IMPLICIT = 5;
-
-    /** Checked the not-always hide request against any forced show requests. */
-    int PHASE_SERVER_HIDE_NOT_ALWAYS = 6;
+    int PHASE_SERVER_SYSTEM_READY = 5;
 
     /** The server is waiting for a connection to the IME. */
-    int PHASE_SERVER_WAIT_IME = 7;
+    int PHASE_SERVER_WAIT_IME = 6;
 
     /** The server has a connection to the IME. */
-    int PHASE_SERVER_HAS_IME = 8;
-
-    /** The server decided the IME should be hidden. */
-    int PHASE_SERVER_SHOULD_HIDE = 9;
+    int PHASE_SERVER_HAS_IME = 7;
 
     /** Reached the IME wrapper. */
-    int PHASE_IME_WRAPPER = 10;
+    int PHASE_IME_WRAPPER = 8;
 
     /** Dispatched from the IME wrapper to the IME. */
-    int PHASE_IME_WRAPPER_DISPATCH = 11;
+    int PHASE_IME_WRAPPER_DISPATCH = 9;
 
-    /** Reached the IME' showSoftInput method. */
-    int PHASE_IME_SHOW_SOFT_INPUT = 12;
-
-    /** Reached the IME' hideSoftInput method. */
-    int PHASE_IME_HIDE_SOFT_INPUT = 13;
+    /** Reached the IME. */
+    int PHASE_IME_SHOW_SOFT_INPUT = 10;
 
     /** The server decided the IME should be shown. */
-    int PHASE_IME_ON_SHOW_SOFT_INPUT_TRUE = 14;
+    int PHASE_IME_ON_SHOW_SOFT_INPUT_TRUE = 11;
 
     /** Requested applying the IME visibility in the insets source consumer. */
-    int PHASE_IME_APPLY_VISIBILITY_INSETS_CONSUMER = 15;
+    int PHASE_IME_APPLY_VISIBILITY_INSETS_CONSUMER = 12;
 
     /** Applied the IME visibility. */
-    int PHASE_SERVER_APPLY_IME_VISIBILITY = 16;
+    int PHASE_SERVER_APPLY_IME_VISIBILITY = 13;
 
     /** Created the show IME runner. */
-    int PHASE_WM_SHOW_IME_RUNNER = 17;
+    int PHASE_WM_SHOW_IME_RUNNER = 14;
 
     /** Ready to show IME. */
-    int PHASE_WM_SHOW_IME_READY = 18;
+    int PHASE_WM_SHOW_IME_READY = 15;
 
-    /** The Window Manager has a connection to the IME insets control target. */
-    int PHASE_WM_HAS_IME_INSETS_CONTROL_TARGET = 19;
-
-    /** Reached the window insets control target's show insets method. */
-    int PHASE_WM_WINDOW_INSETS_CONTROL_TARGET_SHOW_INSETS = 20;
-
-    /** Reached the window insets control target's hide insets method. */
-    int PHASE_WM_WINDOW_INSETS_CONTROL_TARGET_HIDE_INSETS = 21;
-
-    /** Reached the remote insets control target's show insets method. */
-    int PHASE_WM_REMOTE_INSETS_CONTROL_TARGET_SHOW_INSETS = 22;
-
-    /** Reached the remote insets control target's hide insets method. */
-    int PHASE_WM_REMOTE_INSETS_CONTROL_TARGET_HIDE_INSETS = 23;
+    /** Reached the remote insets control target. */
+    int PHASE_WM_REMOTE_INSETS_CONTROL_TARGET = 16;
 
     /** Reached the remote insets controller. */
-    int PHASE_WM_REMOTE_INSETS_CONTROLLER = 24;
+    int PHASE_WM_REMOTE_INSETS_CONTROLLER = 17;
 
     /** Created the IME window insets show animation. */
-    int PHASE_WM_ANIMATION_CREATE = 25;
+    int PHASE_WM_ANIMATION_CREATE = 18;
 
     /** Started the IME window insets show animation. */
-    int PHASE_WM_ANIMATION_RUNNING = 26;
+    int PHASE_WM_ANIMATION_RUNNING = 19;
 
-    /** Reached the client's show insets method. */
-    int PHASE_CLIENT_SHOW_INSETS = 27;
+    /** Reached the client. */
+    int PHASE_CLIENT_SHOW_INSETS = 20;
 
-    /** Reached the client's hide insets method. */
-    int PHASE_CLIENT_HIDE_INSETS = 28;
-
-    /** Handling the IME window insets show request. */
-    int PHASE_CLIENT_HANDLE_SHOW_INSETS = 29;
-
-    /** Handling the IME window insets hide request. */
-    int PHASE_CLIENT_HANDLE_HIDE_INSETS = 30;
+    /** Handled the IME window insets show request. */
+    int PHASE_CLIENT_HANDLE_SHOW_INSETS = 21;
 
     /** Applied the IME window insets show animation. */
-    int PHASE_CLIENT_APPLY_ANIMATION = 31;
+    int PHASE_CLIENT_APPLY_ANIMATION = 22;
 
     /** Started the IME window insets show animation. */
-    int PHASE_CLIENT_CONTROL_ANIMATION = 32;
+    int PHASE_CLIENT_CONTROL_ANIMATION = 23;
 
     /** Queued the IME window insets show animation. */
-    int PHASE_CLIENT_ANIMATION_RUNNING = 33;
+    int PHASE_CLIENT_ANIMATION_RUNNING = 24;
 
     /** Cancelled the IME window insets show animation. */
-    int PHASE_CLIENT_ANIMATION_CANCEL = 34;
+    int PHASE_CLIENT_ANIMATION_CANCEL = 25;
 
     /** Finished the IME window insets show animation. */
-    int PHASE_CLIENT_ANIMATION_FINISHED_SHOW = 35;
-
-    /** Finished the IME window insets hide animation. */
-    int PHASE_CLIENT_ANIMATION_FINISHED_HIDE = 36;
+    int PHASE_CLIENT_ANIMATION_FINISHED_SHOW = 26;
 
     /**
      * Called when an IME show request is created.
@@ -251,44 +194,34 @@ public interface ImeTracker {
             @SoftInputShowHideReason int reason);
 
     /**
-     * Called when an IME hide request is created.
+     * Called when an IME show request progresses to a further phase.
      *
-     * @param token the token tracking the current IME hide request or {@code null} otherwise.
-     * @param origin the origin of the IME hide request.
-     * @param reason the reason why the IME hide request was created.
-     */
-    void onRequestHide(@Nullable Token token, @Origin int origin,
-            @SoftInputShowHideReason int reason);
-
-    /**
-     * Called when an IME request progresses to a further phase.
-     *
-     * @param token the token tracking the current IME request or {@code null} otherwise.
-     * @param phase the new phase the IME request reached.
+     * @param token the token tracking the current IME show request or {@code null} otherwise.
+     * @param phase the new phase the IME show request reached.
      */
     void onProgress(@Nullable Token token, @Phase int phase);
 
     /**
-     * Called when an IME request fails.
+     * Called when an IME show request failed.
      *
-     * @param token the token tracking the current IME request or {@code null} otherwise.
-     * @param phase the phase the IME request failed at.
+     * @param token the token tracking the current IME show request or {@code null} otherwise.
+     * @param phase the phase the IME show request failed at.
      */
     void onFailed(@Nullable Token token, @Phase int phase);
 
     /**
-     * Called when an IME request reached a flow that is not yet implemented.
+     * Called when an IME show request reached a flow that is not yet implemented.
      *
-     * @param token the token tracking the current IME request or {@code null} otherwise.
-     * @param phase the phase the IME request was currently at.
+     * @param token the token tracking the current IME show request or {@code null} otherwise.
+     * @param phase the phase the IME show request was currently at.
      */
     void onTodo(@Nullable Token token, @Phase int phase);
 
     /**
-     * Called when an IME request is cancelled.
+     * Called when an IME show request is cancelled.
      *
-     * @param token the token tracking the current IME request or {@code null} otherwise.
-     * @param phase the phase the IME request was cancelled at.
+     * @param token the token tracking the current IME show request or {@code null} otherwise.
+     * @param phase the phase the IME show request was cancelled at.
      */
     void onCancelled(@Nullable Token token, @Phase int phase);
 
@@ -300,40 +233,22 @@ public interface ImeTracker {
     void onShown(@Nullable Token token);
 
     /**
-     * Called when the IME hide request is successful.
-     *
-     * @param token the token tracking the current IME hide request or {@code null} otherwise.
-     */
-    void onHidden(@Nullable Token token);
-
-    /**
      * Get the singleton instance of this class.
      *
      * @return the singleton instance of this class
      */
     @NonNull
     static ImeTracker get() {
-        return SystemProperties.getBoolean("persist.debug.imetracker", false)
-                ? LOGGER
-                : NOOP_LOGGER;
+        return LOGGER;
     }
 
     /** The singleton IME tracker instance. */
     ImeTracker LOGGER = new ImeTracker() {
 
         @Override
-        public void onRequestShow(@Nullable Token token, int origin,
-                @SoftInputShowHideReason int reason) {
+        public void onRequestShow(@Nullable Token token, int origin, int reason) {
             if (token == null) return;
             Log.i(TAG, token.mTag + ": onRequestShow at " + originToString(origin)
-                    + " reason " + InputMethodDebug.softInputDisplayReasonToString(reason));
-        }
-
-        @Override
-        public void onRequestHide(@Nullable Token token, int origin,
-                @SoftInputShowHideReason int reason) {
-            if (token == null) return;
-            Log.i(TAG, token.mTag + ": onRequestHide at " + originToString(origin)
                     + " reason " + InputMethodDebug.softInputDisplayReasonToString(reason));
         }
 
@@ -366,45 +281,9 @@ public interface ImeTracker {
             if (token == null) return;
             Log.i(TAG, token.mTag + ": onShown");
         }
-
-        @Override
-        public void onHidden(@Nullable Token token) {
-            if (token == null) return;
-            Log.i(TAG, token.mTag + ": onHidden");
-        }
     };
 
-    /** The singleton no-op IME tracker instance. */
-    ImeTracker NOOP_LOGGER = new ImeTracker() {
-
-        @Override
-        public void onRequestShow(@Nullable Token token, int origin,
-                @SoftInputShowHideReason int reason) {}
-
-        @Override
-        public void onRequestHide(@Nullable Token token, int origin,
-                @SoftInputShowHideReason int reason) {}
-
-        @Override
-        public void onProgress(@Nullable Token token, int phase) {}
-
-        @Override
-        public void onFailed(@Nullable Token token, int phase) {}
-
-        @Override
-        public void onTodo(@Nullable Token token, int phase) {}
-
-        @Override
-        public void onCancelled(@Nullable Token token, int phase) {}
-
-        @Override
-        public void onShown(@Nullable Token token) {}
-
-        @Override
-        public void onHidden(@Nullable Token token) {}
-    };
-
-    /** A token that tracks the progress of an IME request. */
+    /** A token that tracks the progress of an IME show request. */
     class Token implements Parcelable {
 
         private final IBinder mBinder;

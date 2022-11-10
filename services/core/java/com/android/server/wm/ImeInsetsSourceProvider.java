@@ -51,7 +51,7 @@ import java.io.PrintWriter;
  */
 final class ImeInsetsSourceProvider extends WindowContainerInsetsSourceProvider {
 
-    /** The token tracking the current IME request or {@code null} otherwise. */
+    /** The token tracking the current IME show request or {@code null} otherwise. */
     @Nullable
     private ImeTracker.Token mImeRequesterStatsToken;
     private InsetsControlTarget mImeRequester;
@@ -139,7 +139,7 @@ final class ImeInsetsSourceProvider extends WindowContainerInsetsSourceProvider 
      * when {@link android.inputmethodservice.InputMethodService} requests to show IME
      * on {@param imeTarget}.
      *
-     * @param imeTarget imeTarget on which IME show request is coming from.
+     * @param imeTarget imeTarget on which IME request is coming from.
      * @param statsToken the token tracking the current IME show request or {@code null} otherwise.
      */
     void scheduleShowImePostLayout(InsetsControlTarget imeTarget,
@@ -223,8 +223,9 @@ final class ImeInsetsSourceProvider extends WindowContainerInsetsSourceProvider 
         mImeRequester = null;
         mIsImeLayoutDrawn = false;
         mShowImeRunner = null;
-        ImeTracker.get().onCancelled(mImeRequesterStatsToken, ImeTracker.PHASE_WM_SHOW_IME_RUNNER);
-        mImeRequesterStatsToken = null;
+        if (mImeRequesterStatsToken != null) {
+            ImeTracker.get().onFailed(mImeRequesterStatsToken, ImeTracker.PHASE_WM_SHOW_IME_RUNNER);
+        }
     }
 
     @VisibleForTesting
