@@ -633,7 +633,7 @@ public class UserManagerService extends IUserManager.Stub {
     @GuardedBy("mUserStates")
     private final WatchedUserStates mUserStates = new WatchedUserStates();
 
-    private final UserVisibilityMediator mUserVisibilityMediator;
+    private final UserVisibilityMediator mUserVisibilityMediator = new UserVisibilityMediator();
 
     private static UserManagerService sInstance;
 
@@ -756,7 +756,6 @@ public class UserManagerService extends IUserManager.Stub {
         mUserStates.put(UserHandle.USER_SYSTEM, UserState.STATE_BOOTING);
         mUser0Allocations = DBG_ALLOCATION ? new AtomicInteger() : null;
         emulateSystemUserModeIfNeeded();
-        mUserVisibilityMediator = new UserVisibilityMediator(this);
     }
 
     void systemReady() {
@@ -6154,7 +6153,7 @@ public class UserManagerService extends IUserManager.Stub {
                     dumpUser(pw, UserHandle.parseUserArg(args[1]), sb, now, nowRealtime);
                     return;
                 case "--visibility-mediator":
-                    mUserVisibilityMediator.dump(pw);
+                    mUserVisibilityMediator.dump(pw, args);
                     return;
             }
         }
@@ -6220,7 +6219,7 @@ public class UserManagerService extends IUserManager.Stub {
         } // synchronized (mPackagesLock)
 
         pw.println();
-        mUserVisibilityMediator.dump(pw);
+        mUserVisibilityMediator.dump(pw, args);
         pw.println();
 
         // Dump some capabilities
@@ -6799,13 +6798,16 @@ public class UserManagerService extends IUserManager.Stub {
         }
 
         @Override
-        public void assignUserToDisplay(@UserIdInt int userId, int displayId) {
-            mUserVisibilityMediator.assignUserToDisplay(userId, displayId);
+        public void assignUserToDisplay(@UserIdInt int userId, @UserIdInt int profileGroupId,
+                boolean foreground, int displayId) {
+            mUserVisibilityMediator.startUser(userId, profileGroupId, foreground, displayId);
+            mUserVisibilityMediator.assignUserToDisplay(userId, profileGroupId, displayId);
         }
 
         @Override
         public void unassignUserFromDisplay(@UserIdInt int userId) {
             mUserVisibilityMediator.unassignUserFromDisplay(userId);
+            mUserVisibilityMediator.stopUser(userId);
         }
 
         @Override
