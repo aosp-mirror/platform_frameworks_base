@@ -1883,7 +1883,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 // Make this invalid which indicates a null attached frame.
                 outAttachedFrame.set(0, 0, -1, -1);
             }
-            outSizeCompatScale[0] = win.getSizeCompatScale();
+            outSizeCompatScale[0] = win.getSizeCompatScaleForClient();
         }
 
         Binder.restoreCallingIdentity(origId);
