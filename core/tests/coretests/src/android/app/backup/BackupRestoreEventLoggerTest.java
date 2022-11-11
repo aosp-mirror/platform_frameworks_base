@@ -63,18 +63,22 @@ public class BackupRestoreEventLoggerTest {
     public void testBackupLogger_rejectsRestoreLogs() {
         mLogger = new BackupRestoreEventLogger(BACKUP);
 
-        assertThat(mLogger.logItemsRestored(DATA_TYPE_1, /* count */ 5)).isFalse();
-        assertThat(mLogger.logItemsRestoreFailed(DATA_TYPE_1, /* count */ 5, ERROR_1)).isFalse();
-        assertThat(mLogger.logRestoreMetadata(DATA_TYPE_1, /* metadata */ "metadata")).isFalse();
+        mLogger.logItemsRestored(DATA_TYPE_1, /* count */ 5);
+        mLogger.logItemsRestoreFailed(DATA_TYPE_1, /* count */ 5, ERROR_1);
+        mLogger.logRestoreMetadata(DATA_TYPE_1, /* metadata */ "metadata");
+
+        assertThat(getResultForDataTypeIfPresent(mLogger, DATA_TYPE_1)).isEqualTo(Optional.empty());
     }
 
     @Test
     public void testRestoreLogger_rejectsBackupLogs() {
         mLogger = new BackupRestoreEventLogger(RESTORE);
 
-        assertThat(mLogger.logItemsBackedUp(DATA_TYPE_1, /* count */ 5)).isFalse();
-        assertThat(mLogger.logItemsBackupFailed(DATA_TYPE_1, /* count */ 5, ERROR_1)).isFalse();
-        assertThat(mLogger.logBackupMetaData(DATA_TYPE_1, /* metadata */ "metadata")).isFalse();
+        mLogger.logItemsBackedUp(DATA_TYPE_1, /* count */ 5);
+        mLogger.logItemsBackupFailed(DATA_TYPE_1, /* count */ 5, ERROR_1);
+        mLogger.logBackupMetaData(DATA_TYPE_1, /* metadata */ "metadata");
+
+        assertThat(getResultForDataTypeIfPresent(mLogger, DATA_TYPE_1)).isEqualTo(Optional.empty());
     }
 
     @Test
@@ -83,16 +87,17 @@ public class BackupRestoreEventLoggerTest {
 
         for (int i = 0; i < DATA_TYPES_ALLOWED; i++) {
             String dataType = DATA_TYPE_1 + i;
-            assertThat(mLogger.logItemsBackedUp(dataType, /* count */ 5)).isTrue();
-            assertThat(mLogger.logItemsBackupFailed(dataType, /* count */ 5, /* error */ null))
-                    .isTrue();
-            assertThat(mLogger.logBackupMetaData(dataType, METADATA_1)).isTrue();
+            mLogger.logItemsBackedUp(dataType, /* count */ 5);
+            mLogger.logItemsBackupFailed(dataType, /* count */ 5, /* error */ null);
+            mLogger.logBackupMetaData(dataType, METADATA_1);
+
+            assertThat(getResultForDataTypeIfPresent(mLogger, dataType)).isNotEqualTo(
+                    Optional.empty());
         }
 
-        assertThat(mLogger.logItemsBackedUp(DATA_TYPE_2, /* count */ 5)).isFalse();
-        assertThat(mLogger.logItemsBackupFailed(DATA_TYPE_2, /* count */ 5, /* error */ null))
-                .isFalse();
-        assertThat(mLogger.logRestoreMetadata(DATA_TYPE_2, METADATA_1)).isFalse();
+        mLogger.logItemsBackedUp(DATA_TYPE_2, /* count */ 5);
+        mLogger.logItemsBackupFailed(DATA_TYPE_2, /* count */ 5, /* error */ null);
+        mLogger.logRestoreMetadata(DATA_TYPE_2, METADATA_1);
         assertThat(getResultForDataTypeIfPresent(mLogger, DATA_TYPE_2)).isEqualTo(Optional.empty());
     }
 
@@ -102,16 +107,17 @@ public class BackupRestoreEventLoggerTest {
 
         for (int i = 0; i < DATA_TYPES_ALLOWED; i++) {
             String dataType = DATA_TYPE_1 + i;
-            assertThat(mLogger.logItemsRestored(dataType, /* count */ 5)).isTrue();
-            assertThat(mLogger.logItemsRestoreFailed(dataType, /* count */ 5, /* error */ null))
-                    .isTrue();
-            assertThat(mLogger.logRestoreMetadata(dataType, METADATA_1)).isTrue();
+            mLogger.logItemsRestored(dataType, /* count */ 5);
+            mLogger.logItemsRestoreFailed(dataType, /* count */ 5, /* error */ null);
+            mLogger.logRestoreMetadata(dataType, METADATA_1);
+
+            assertThat(getResultForDataTypeIfPresent(mLogger, dataType)).isNotEqualTo(
+                    Optional.empty());
         }
 
-        assertThat(mLogger.logItemsRestored(DATA_TYPE_2, /* count */ 5)).isFalse();
-        assertThat(mLogger.logItemsRestoreFailed(DATA_TYPE_2, /* count */ 5, /* error */ null))
-                .isFalse();
-        assertThat(mLogger.logRestoreMetadata(DATA_TYPE_2, METADATA_1)).isFalse();
+        mLogger.logItemsRestored(DATA_TYPE_2, /* count */ 5);
+        mLogger.logItemsRestoreFailed(DATA_TYPE_2, /* count */ 5, /* error */ null);
+        mLogger.logRestoreMetadata(DATA_TYPE_2, METADATA_1);
         assertThat(getResultForDataTypeIfPresent(mLogger, DATA_TYPE_2)).isEqualTo(Optional.empty());
     }
 
