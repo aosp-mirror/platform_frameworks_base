@@ -1388,4 +1388,23 @@
         <item name="android:lineHeight">@dimen/magnification_setting_button_line_height</item>
         <item name="android:textAlignment">center</item>
     </style>
+
+    <style name="ShortCutButton" parent="@android:style/Widget.Material.Button">
+        <item name="android:background">@drawable/shortcut_button_colored</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:padding">4dp</item>
+        <item name="android:textColor">?androidprv:attr/textColorSecondary</item>
+    </style>
+
+    <style name="ShortcutHorizontalDivider">
+        <item name="android:layout_width">120dp</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:layout_gravity">center_horizontal</item>
+        <item name="android:background">?android:attr/dividerHorizontal</item>
+    </style>
+
+    <style name="ShortcutItemBackground">
+        <item name="android:background">@color/ksh_key_item_new_background</item>
+    </style>
 </resources>
