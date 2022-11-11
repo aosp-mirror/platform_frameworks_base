@@ -32484,6 +32484,7 @@ package android.os {
   public static class PerformanceHintManager.Session implements java.io.Closeable {
     method public void close();
     method public void reportActualWorkDuration(long);
+    method public void setThreads(@NonNull int[]);
     method public void updateTargetWorkDuration(long);
   }
 
