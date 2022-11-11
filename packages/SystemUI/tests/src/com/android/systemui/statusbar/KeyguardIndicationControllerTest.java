@@ -1418,6 +1418,21 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void onBiometricError_faceLockedOutSecondTimeOnBouncer_showsUnavailableMessage() {
+        createController();
+        onFaceLockoutError("first lockout");
+        clearInvocations(mRotateTextViewController);
+        when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(true);
+
+        onFaceLockoutError("second lockout");
+
+        verify(mStatusBarKeyguardViewManager)
+                .setKeyguardMessage(
+                        eq(mContext.getString(R.string.keyguard_face_unlock_unavailable)),
+                        any());
+    }
+
+    @Test
     public void onBiometricError_faceLockedOutSecondTimeButUdfpsActive_showsNoMessage() {
         createController();
         onFaceLockoutError("first lockout");

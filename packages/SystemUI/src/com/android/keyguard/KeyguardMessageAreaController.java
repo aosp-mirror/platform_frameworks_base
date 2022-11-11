@@ -103,6 +103,11 @@ public class KeyguardMessageAreaController<T extends KeyguardMessageArea>
         mView.setNextMessageColor(colorState);
     }
 
+    /** Returns the message of the underlying TextView. */
+    public CharSequence getMessage() {
+        return mView.getText();
+    }
+
     /**
      * Reload colors from resources.
      **/

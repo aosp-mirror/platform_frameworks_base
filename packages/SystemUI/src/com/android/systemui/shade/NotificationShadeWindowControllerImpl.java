@@ -44,6 +44,7 @@ import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.view.WindowManagerGlobal;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
@@ -158,6 +159,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
                         SysuiStatusBarStateController.RANK_STATUS_BAR_WINDOW_CONTROLLER);
         configurationController.addCallback(this);
         shadeExpansionStateManager.addQsExpansionListener(this::onQsExpansionChanged);
+        shadeExpansionStateManager.addFullExpansionListener(this::onShadeExpansionFullyChanged);
 
         float desiredPreferredRefreshRate = context.getResources()
                 .getInteger(R.integer.config_keyguardRefreshRate);
@@ -201,6 +203,14 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
                 mCallbacks.remove(i);
                 return;
             }
+        }
+    }
+
+    @VisibleForTesting
+    void onShadeExpansionFullyChanged(Boolean isExpanded) {
+        if (mCurrentState.mPanelExpanded != isExpanded) {
+            mCurrentState.mPanelExpanded = isExpanded;
+            apply(mCurrentState);
         }
     }
 
@@ -695,15 +705,6 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
     @Override
     public void setForceWindowCollapsed(boolean force) {
         mCurrentState.mForceCollapsed = force;
-        apply(mCurrentState);
-    }
-
-    @Override
-    public void setPanelExpanded(boolean isExpanded) {
-        if (mCurrentState.mPanelExpanded == isExpanded) {
-            return;
-        }
-        mCurrentState.mPanelExpanded = isExpanded;
         apply(mCurrentState);
     }
 
