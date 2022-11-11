@@ -242,10 +242,19 @@ public class PackageSetting extends PackageSettingBase {
     }
 
     public boolean setMimeGroup(String mimeGroup, List<String> mimeTypes) {
+        for (String mimeType : mimeTypes) {
+            if (mimeType.length() > 255) {
+                throw new IllegalArgumentException("MIME type length exceeds 255 characters");
+            }
+        }
         ArraySet<String> oldMimeTypes = getMimeGroupInternal(mimeGroup);
         if (oldMimeTypes == null) {
             throw new IllegalArgumentException("Unknown MIME group " + mimeGroup
                     + " for package " + name);
+        }
+        if (mimeTypes.size() > 500) {
+            throw new IllegalStateException("Max limit on MIME types for MIME group "
+                    + mimeGroup + " exceeded for package " + name);
         }
 
         ArraySet<String> newMimeTypes = new ArraySet<>(mimeTypes);
