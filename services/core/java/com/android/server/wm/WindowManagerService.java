@@ -1842,7 +1842,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 // Make this invalid which indicates a null attached frame.
                 outAttachedFrame.set(0, 0, -1, -1);
             }
-            outSizeCompatScale[0] = win.getSizeCompatScaleForClient();
+            outSizeCompatScale[0] = win.getCompatScaleForClient();
         }
 
         Binder.restoreCallingIdentity(origId);
@@ -8895,7 +8895,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 outInsetsState.set(state, true /* copySources */);
                 if (WindowState.hasCompatScale(attrs, token, overrideScale)) {
                     final float compatScale = token != null && token.hasSizeCompatBounds()
-                            ? token.getSizeCompatScale() * overrideScale
+                            ? token.getCompatScale() * overrideScale
                             : overrideScale;
                     outInsetsState.scale(1f / compatScale);
                 }
