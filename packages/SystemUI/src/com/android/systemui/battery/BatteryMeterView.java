@@ -179,6 +179,7 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         updatePercentView();
+        mDrawable.notifyDensityChanged();
     }
 
     public void setColorsFromContext(Context context) {

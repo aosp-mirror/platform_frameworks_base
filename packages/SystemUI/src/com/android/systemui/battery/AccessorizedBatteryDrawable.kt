@@ -57,6 +57,8 @@ class AccessorizedBatteryDrawable(
     private var shieldLeftOffsetScaled = SHIELD_LEFT_OFFSET
     private var shieldTopOffsetScaled = SHIELD_TOP_OFFSET
 
+    private var density = context.resources.displayMetrics.density
+
     private val dualTone =
         context.resources.getBoolean(com.android.internal.R.bool.config_batterymeterDualTone)
 
@@ -126,8 +128,7 @@ class AccessorizedBatteryDrawable(
             } else {
                 BATTERY_HEIGHT
             }
-        // TODO(b/255625888): Cache the density so we don't have to re-fetch.
-        return (height * context.resources.displayMetrics.density).toInt()
+        return (height * density).toInt()
     }
 
     override fun getIntrinsicWidth(): Int {
@@ -137,8 +138,7 @@ class AccessorizedBatteryDrawable(
             } else {
                 BATTERY_WIDTH
             }
-        // TODO(b/255625888): Cache the density so we don't have to re-fetch.
-        return (width * context.resources.displayMetrics.density).toInt()
+        return (width * density).toInt()
     }
 
     override fun draw(c: Canvas) {
@@ -193,6 +193,11 @@ class AccessorizedBatteryDrawable(
     fun setColors(fgColor: Int, bgColor: Int, singleToneColor: Int) {
         shieldPaint.color = if (dualTone) fgColor else singleToneColor
         mainBatteryDrawable.setColors(fgColor, bgColor, singleToneColor)
+    }
+
+    /** Notifies this drawable that the density might have changed. */
+    fun notifyDensityChanged() {
+        density = context.resources.displayMetrics.density
     }
 
     private fun loadPaths() {
