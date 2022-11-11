@@ -148,6 +148,7 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 
         val currentRotation: Int = display.rotation
         val displayWidthPx = windowMetrics.bounds.width()
+        val displayHeightPx = windowMetrics.bounds.height()
         val isRtl = layoutDirection == LAYOUT_DIRECTION_RTL
         val isTablet = isTablet(context)
         val taskbarSize =
@@ -163,6 +164,7 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
             measuredWidth,
             measuredHeight,
             displayWidthPx,
+            displayHeightPx,
             taskbarSize,
             isTablet,
             currentRotation,

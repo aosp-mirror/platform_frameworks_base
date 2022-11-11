@@ -161,6 +161,25 @@ class AuthContainerViewTest : SysuiTestCase() {
     }
 
     @Test
+    fun testFocusLossAfterRotating() {
+        val container = initializeFingerprintContainer()
+        waitForIdleSync()
+
+        val requestID = authContainer?.requestId ?: 0L
+
+        verify(callback).onDialogAnimatedIn(requestID)
+        container.onOrientationChanged()
+        container.onWindowFocusChanged(false)
+        waitForIdleSync()
+
+        verify(callback, never()).onDismissed(
+                eq(AuthDialogCallback.DISMISSED_USER_CANCELED),
+                eq<ByteArray?>(null), /* credentialAttestation */
+                eq(requestID)
+        )
+    }
+
+    @Test
     fun testDismissesOnFocusLoss_hidesKeyboardWhenVisible() {
         val container = initializeFingerprintContainer(
             authenticators = BiometricManager.Authenticators.DEVICE_CREDENTIAL

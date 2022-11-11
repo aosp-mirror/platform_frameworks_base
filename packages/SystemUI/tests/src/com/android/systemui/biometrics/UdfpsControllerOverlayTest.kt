@@ -191,10 +191,11 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
         val sensorBounds = Rect(0, 0, SENSOR_WIDTH, SENSOR_HEIGHT)
         overlayParams = UdfpsOverlayParams(
             sensorBounds,
+            sensorBounds,
             DISPLAY_WIDTH,
             DISPLAY_HEIGHT,
             scaleFactor = 1f,
-            rotation
+            rotation = rotation
         )
         block()
     }

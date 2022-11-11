@@ -34,6 +34,7 @@ import javax.inject.Inject
 class ShadeExpansionStateManager @Inject constructor() : ShadeStateEvents {
 
     private val expansionListeners = CopyOnWriteArrayList<ShadeExpansionListener>()
+    private val fullExpansionListeners = CopyOnWriteArrayList<ShadeFullExpansionListener>()
     private val qsExpansionListeners = CopyOnWriteArrayList<ShadeQsExpansionListener>()
     private val stateListeners = CopyOnWriteArrayList<ShadeStateListener>()
     private val shadeStateEventsListeners = CopyOnWriteArrayList<ShadeStateEventsListener>()
@@ -60,6 +61,15 @@ class ShadeExpansionStateManager @Inject constructor() : ShadeStateEvents {
     /** Removes an expansion listener. */
     fun removeExpansionListener(listener: ShadeExpansionListener) {
         expansionListeners.remove(listener)
+    }
+
+    fun addFullExpansionListener(listener: ShadeFullExpansionListener) {
+        fullExpansionListeners.add(listener)
+        listener.onShadeExpansionFullyChanged(qsExpanded)
+    }
+
+    fun removeFullExpansionListener(listener: ShadeFullExpansionListener) {
+        fullExpansionListeners.remove(listener)
     }
 
     fun addQsExpansionListener(listener: ShadeQsExpansionListener) {
@@ -154,6 +164,13 @@ class ShadeExpansionStateManager @Inject constructor() : ShadeStateEvents {
 
         debugLog("qsExpanded=$qsExpanded")
         qsExpansionListeners.forEach { it.onQsExpansionChanged(qsExpanded) }
+    }
+
+    fun onShadeExpansionFullyChanged(isExpanded: Boolean) {
+        this.expanded = isExpanded
+
+        debugLog("expanded=$isExpanded")
+        fullExpansionListeners.forEach { it.onShadeExpansionFullyChanged(isExpanded) }
     }
 
     /** Updates the panel state if necessary. */

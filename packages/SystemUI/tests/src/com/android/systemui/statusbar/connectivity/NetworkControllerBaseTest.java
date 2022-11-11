@@ -71,6 +71,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.log.LogBuffer;
+import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
 import com.android.systemui.telephony.TelephonyListenerManager;
@@ -125,6 +126,8 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     protected CarrierConfigTracker mCarrierConfigTracker;
     protected FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
     protected Handler mMainHandler;
+    // Use a real mobile mappings object since lots of tests rely on it
+    protected FakeMobileMappingsProxy mMobileMappingsProxy = new FakeMobileMappingsProxy();
     protected WifiStatusTrackerFactory mWifiStatusTrackerFactory;
     protected MobileSignalControllerFactory mMobileFactory;
 
@@ -219,10 +222,13 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
 
         mWifiStatusTrackerFactory = new WifiStatusTrackerFactory(
                 mContext, mMockWm, mMockNsm, mMockCm, mMainHandler);
+        // Most of these tests rely on the actual MobileMappings behavior
+        mMobileMappingsProxy.setUseRealImpl(true);
         mMobileFactory = new MobileSignalControllerFactory(
                 mContext,
                 mCallbackHandler,
-                mCarrierConfigTracker
+                mCarrierConfigTracker,
+                mMobileMappingsProxy
         );
 
         mNetworkController = new NetworkControllerImpl(mContext,

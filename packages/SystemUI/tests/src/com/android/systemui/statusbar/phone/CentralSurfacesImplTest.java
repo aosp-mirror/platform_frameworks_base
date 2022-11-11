@@ -220,6 +220,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private NotificationLockscreenUserManager mLockscreenUserManager;
     @Mock private NotificationRemoteInputManager mRemoteInputManager;
     @Mock private StatusBarStateControllerImpl mStatusBarStateController;
+    @Mock private ShadeExpansionStateManager mShadeExpansionStateManager;
     @Mock private BatteryController mBatteryController;
     @Mock private DeviceProvisionedController mDeviceProvisionedController;
     @Mock private StatusBarNotificationPresenter mNotificationPresenter;
@@ -339,6 +340,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mVisibilityProvider,
                 mock(NotifPipeline.class),
                 mStatusBarStateController,
+                mShadeExpansionStateManager,
                 mExpansionStateLogger,
                 new NotificationPanelLoggerFake()
         );
@@ -1025,7 +1027,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Test
     public void collapseShade_callsAnimateCollapsePanels_whenExpanded() {
         // GIVEN the shade is expanded
-        mCentralSurfaces.setPanelExpanded(true);
+        mCentralSurfaces.onShadeExpansionFullyChanged(true);
         mCentralSurfaces.setBarStateForTest(StatusBarState.SHADE);
 
         // WHEN collapseShade is called
@@ -1038,7 +1040,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Test
     public void collapseShade_doesNotCallAnimateCollapsePanels_whenCollapsed() {
         // GIVEN the shade is collapsed
-        mCentralSurfaces.setPanelExpanded(false);
+        mCentralSurfaces.onShadeExpansionFullyChanged(false);
         mCentralSurfaces.setBarStateForTest(StatusBarState.SHADE);
 
         // WHEN collapseShade is called
@@ -1051,7 +1053,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Test
     public void collapseShadeForBugReport_callsAnimateCollapsePanels_whenFlagDisabled() {
         // GIVEN the shade is expanded & flag enabled
-        mCentralSurfaces.setPanelExpanded(true);
+        mCentralSurfaces.onShadeExpansionFullyChanged(true);
         mCentralSurfaces.setBarStateForTest(StatusBarState.SHADE);
         mFeatureFlags.set(Flags.LEAVE_SHADE_OPEN_FOR_BUGREPORT, false);
 
@@ -1065,7 +1067,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Test
     public void collapseShadeForBugReport_doesNotCallAnimateCollapsePanels_whenFlagEnabled() {
         // GIVEN the shade is expanded & flag enabled
-        mCentralSurfaces.setPanelExpanded(true);
+        mCentralSurfaces.onShadeExpansionFullyChanged(true);
         mCentralSurfaces.setBarStateForTest(StatusBarState.SHADE);
         mFeatureFlags.set(Flags.LEAVE_SHADE_OPEN_FOR_BUGREPORT, true);
 
