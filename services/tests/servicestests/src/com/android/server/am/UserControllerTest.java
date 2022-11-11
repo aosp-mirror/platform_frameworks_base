@@ -38,9 +38,6 @@ import static com.android.server.am.UserController.USER_COMPLETED_EVENT_MSG;
 import static com.android.server.am.UserController.USER_CURRENT_MSG;
 import static com.android.server.am.UserController.USER_START_MSG;
 import static com.android.server.am.UserController.USER_SWITCH_TIMEOUT_MSG;
-import static com.android.server.am.UserController.USER_VISIBILITY_CHANGED_MSG;
-import static com.android.server.pm.UserManagerInternal.USER_ASSIGNMENT_RESULT_SUCCESS_INVISIBLE;
-import static com.android.server.pm.UserManagerInternal.USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE;
 
 import static com.google.android.collect.Lists.newArrayList;
 import static com.google.android.collect.Sets.newHashSet;
@@ -102,7 +99,6 @@ import com.android.server.FgThread;
 import com.android.server.SystemService;
 import com.android.server.am.UserState.KeyEvictedCallback;
 import com.android.server.pm.UserManagerInternal;
-import com.android.server.pm.UserManagerInternal.UserAssignmentResult;
 import com.android.server.pm.UserManagerService;
 import com.android.server.wm.WindowManagerService;
 
@@ -162,16 +158,10 @@ public class UserControllerTest {
             REPORT_USER_SWITCH_MSG,
             USER_SWITCH_TIMEOUT_MSG,
             USER_START_MSG,
-            USER_VISIBILITY_CHANGED_MSG,
             USER_CURRENT_MSG);
 
-    private static final Set<Integer> START_INVISIBLE_BACKGROUND_USER_MESSAGE_CODES = newHashSet(
+    private static final Set<Integer> START_BACKGROUND_USER_MESSAGE_CODES = newHashSet(
             USER_START_MSG,
-            REPORT_LOCKED_BOOT_COMPLETE_MSG);
-
-    private static final Set<Integer> START_VISIBLE_BACKGROUND_USER_MESSAGE_CODES = newHashSet(
-            USER_START_MSG,
-            USER_VISIBILITY_CHANGED_MSG,
             REPORT_LOCKED_BOOT_COMPLETE_MSG);
 
     @Before
@@ -225,14 +215,12 @@ public class UserControllerTest {
 
     @Test
     public void testStartUser_background() {
-        mockAssignUserToMainDisplay(TEST_USER_ID, /* foreground= */ false,
-                USER_ASSIGNMENT_RESULT_SUCCESS_INVISIBLE);
         boolean started = mUserController.startUser(TEST_USER_ID, /* foreground= */ false);
         assertWithMessage("startUser(%s, foreground=false)", TEST_USER_ID).that(started).isTrue();
         verify(mInjector.getWindowManager(), never()).startFreezingScreen(anyInt(), anyInt());
         verify(mInjector.getWindowManager(), never()).setSwitchingUser(anyBoolean());
         verify(mInjector, never()).clearAllLockedTasks(anyString());
-        startBackgroundUserAssertions(/*visible= */ false);
+        startBackgroundUserAssertions();
         verifyUserAssignedToDisplay(TEST_USER_ID, Display.DEFAULT_DISPLAY);
     }
 
@@ -267,7 +255,7 @@ public class UserControllerTest {
         verify(mInjector.getWindowManager(), never()).startFreezingScreen(anyInt(), anyInt());
         verify(mInjector.getWindowManager(), never()).setSwitchingUser(anyBoolean());
         verify(mInjector, never()).clearAllLockedTasks(anyString());
-        startBackgroundUserAssertions(/*visible= */ true);
+        startBackgroundUserAssertions();
     }
 
     @Test
@@ -293,8 +281,6 @@ public class UserControllerTest {
 
     @Test
     public void testStartPreCreatedUser_background() throws Exception {
-        mockAssignUserToMainDisplay(TEST_PRE_CREATED_USER_ID, /* foreground= */ false,
-                USER_ASSIGNMENT_RESULT_SUCCESS_INVISIBLE);
         assertTrue(mUserController.startUser(TEST_PRE_CREATED_USER_ID, /* foreground= */ false));
         // Make sure no intents have been fired for pre-created users.
         assertTrue(mInjector.mSentIntents.isEmpty());
@@ -322,10 +308,8 @@ public class UserControllerTest {
         assertEquals("Unexpected message sent", expectedMessageCodes, actualCodes);
     }
 
-    private void startBackgroundUserAssertions(boolean visible) {
-        startUserAssertions(START_BACKGROUND_USER_ACTIONS,
-                visible ? START_VISIBLE_BACKGROUND_USER_MESSAGE_CODES
-                        : START_INVISIBLE_BACKGROUND_USER_MESSAGE_CODES);
+    private void startBackgroundUserAssertions() {
+        startUserAssertions(START_BACKGROUND_USER_ACTIONS, START_BACKGROUND_USER_MESSAGE_CODES);
     }
 
     private void startForegroundUserAssertions() {
@@ -433,7 +417,7 @@ public class UserControllerTest {
         verify(mInjector, times(0)).dismissKeyguard(any(), anyString());
         verify(mInjector.getWindowManager(), times(1)).stopFreezingScreen();
         continueUserSwitchAssertions(TEST_USER_ID, false);
-        verifySystemUserVisibilityChangedNotified(/* visible= */ false);
+        verifySystemUserVisibilityChangesNeverNotified();
     }
 
     @Test
@@ -454,7 +438,7 @@ public class UserControllerTest {
         verify(mInjector, times(1)).dismissKeyguard(any(), anyString());
         verify(mInjector.getWindowManager(), times(1)).stopFreezingScreen();
         continueUserSwitchAssertions(TEST_USER_ID, false);
-        verifySystemUserVisibilityChangedNotified(/* visible= */ false);
+        verifySystemUserVisibilityChangesNeverNotified();
     }
 
     @Test
@@ -561,7 +545,7 @@ public class UserControllerTest {
         assertFalse(mUserController.canStartMoreUsers());
         assertEquals(Arrays.asList(new Integer[] {0, TEST_USER_ID1, TEST_USER_ID2}),
                 mUserController.getRunningUsersLU());
-        verifySystemUserVisibilityChangedNotified(/* visible= */ false);
+        verifySystemUserVisibilityChangesNeverNotified();
     }
 
     /**
@@ -709,24 +693,19 @@ public class UserControllerTest {
 
     @Test
     public void testStartProfile() throws Exception {
-        mockAssignUserToMainDisplay(TEST_PRE_CREATED_USER_ID, /* foreground= */ false,
-                USER_ASSIGNMENT_RESULT_SUCCESS_INVISIBLE);
         setUpAndStartProfileInBackground(TEST_USER_ID1);
 
-        startBackgroundUserAssertions(/*visible= */ true);
+        startBackgroundUserAssertions();
         verifyUserAssignedToDisplay(TEST_USER_ID1, Display.DEFAULT_DISPLAY);
     }
 
     @Test
     public void testStartProfile_whenUsersOnSecondaryDisplaysIsEnabled() throws Exception {
-        mockAssignUserToMainDisplay(TEST_USER_ID1, /* foreground= */ false,
-                USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE);
-
         mockIsUsersOnSecondaryDisplaysEnabled(true);
 
         setUpAndStartProfileInBackground(TEST_USER_ID1);
 
-        startBackgroundUserAssertions(/*visible= */ true);
+        startBackgroundUserAssertions();
         verifyUserAssignedToDisplay(TEST_USER_ID1, Display.DEFAULT_DISPLAY);
     }
 
@@ -983,13 +962,6 @@ public class UserControllerTest {
         when(mInjector.isUsersOnSecondaryDisplaysEnabled()).thenReturn(value);
     }
 
-    private void mockAssignUserToMainDisplay(@UserIdInt int userId, boolean foreground,
-            @UserAssignmentResult int result) {
-        when(mInjector.mUserManagerInternalMock.assignUserToDisplayOnStart(eq(userId),
-                /* profileGroupId= */ anyInt(), eq(foreground), eq(Display.DEFAULT_DISPLAY)))
-                        .thenReturn(result);
-    }
-
     private void verifyUserAssignedToDisplay(@UserIdInt int userId, int displayId) {
         verify(mInjector.getUserManagerInternal()).assignUserToDisplayOnStart(eq(userId), anyInt(),
                 anyBoolean(), eq(displayId));
@@ -1008,8 +980,8 @@ public class UserControllerTest {
         verify(mInjector.getUserManagerInternal(), never()).unassignUserFromDisplayOnStop(userId);
     }
 
-    private void verifySystemUserVisibilityChangedNotified(boolean visible) {
-        verify(mInjector).onUserVisibilityChanged(UserHandle.USER_SYSTEM, visible);
+    private void verifySystemUserVisibilityChangesNeverNotified() {
+        verify(mInjector, never()).onSystemUserVisibilityChanged(anyBoolean());
     }
 
     // Should be public to allow mocking
@@ -1154,8 +1126,8 @@ public class UserControllerTest {
         }
 
         @Override
-        void onUserVisibilityChanged(@UserIdInt int userId, boolean visible) {
-            Log.i(TAG, "onUserVisibilityChanged(" + userId + ", " + visible + ")");
+        void onSystemUserVisibilityChanged(boolean visible) {
+            Log.i(TAG, "onSystemUserVisibilityChanged(" + visible + ")");
         }
     }
 

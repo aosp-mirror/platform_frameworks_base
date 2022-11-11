@@ -977,12 +977,11 @@ message UserControllerProto {
         optional int32 profile = 2;
     }
     repeated UserProfile user_profile_group_ids = 4;
-    repeated int32 visible_users_array = 5;
 
     // current_user contains the id of the current user, while current_profiles contains the ids of
     // both the current user and its profiles (if any)
-    optional int32 current_user = 6;
-    repeated int32 current_profiles = 7;
+    optional int32 current_user = 5;
+    repeated int32 current_profiles = 6;
 }
 
 // sync with com.android.server.am.AppTimeTracker.java

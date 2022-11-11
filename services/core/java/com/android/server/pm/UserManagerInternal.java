@@ -435,8 +435,10 @@ public abstract class UserManagerInternal {
     /** Removes a {@link UserVisibilityListener}. */
     public abstract void removeUserVisibilityListener(UserVisibilityListener listener);
 
-    /** TODO(b/244333150): temporary method until UserVisibilityMediator handles that logic */
-    public abstract void onUserVisibilityChanged(@UserIdInt int userId, boolean visible);
+    // TODO(b/242195409): remove this method if not needed anymore
+    /** Notify {@link UserVisibilityListener listeners} that the visibility of the
+     * {@link android.os.UserHandle#USER_SYSTEM} changed. */
+    public abstract void onSystemUserVisibilityChanged(boolean visible);
 
     /** Return the integer types of the given user IDs. Only used for reporting metrics to statsd.
      */

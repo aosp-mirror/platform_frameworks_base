@@ -32,6 +32,7 @@ import android.os.Handler;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Dumpable;
+import android.util.EventLog;
 import android.util.IndentingPrintWriter;
 import android.util.IntArray;
 import android.util.SparseIntArray;
@@ -40,6 +41,7 @@ import android.view.Display;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
+import com.android.server.am.EventLogTags;
 import com.android.server.pm.UserManagerInternal.UserAssignmentResult;
 import com.android.server.pm.UserManagerInternal.UserVisibilityListener;
 import com.android.server.utils.Slogf;
@@ -68,6 +70,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public final class UserVisibilityMediator implements Dumpable {
 
     private static final boolean DBG = false; // DO NOT SUBMIT WITH TRUE
+    private static final boolean VERBOSE = false; // DO NOT SUBMIT WITH TRUE
 
     private static final String TAG = UserVisibilityMediator.class.getSimpleName();
 
@@ -381,8 +384,8 @@ public final class UserVisibilityMediator implements Dumpable {
     public boolean isUserVisible(@UserIdInt int userId) {
         // First check current foreground user and their profiles (on main display)
         if (isCurrentUserOrRunningProfileOfCurrentUser(userId)) {
-            if (DBG) {
-                Slogf.d(TAG, "isUserVisible(%d): true to current user or profile", userId);
+            if (VERBOSE) {
+                Slogf.v(TAG, "isUserVisible(%d): true to current user or profile", userId);
             }
             return true;
         }
@@ -517,6 +520,14 @@ public final class UserVisibilityMediator implements Dumpable {
         }
     }
 
+    // TODO(b/242195409): remove this method if not needed anymore
+    /**
+     * Nofify all listeners that the system user visibility changed.
+     */
+    void onSystemUserVisibilityChanged(boolean visible) {
+        dispatchVisibilityChanged(mListeners, USER_SYSTEM, visible);
+    }
+
     /**
      * Nofify all listeners about the visibility changes from before / after a change of state.
      */
@@ -534,7 +545,7 @@ public final class UserVisibilityMediator implements Dumpable {
             Slogf.d(TAG,
                     "dispatchVisibilityChanged(): visibleUsersBefore=%s, visibleUsersAfter=%s, "
                     + "%d listeners (%s)", visibleUsersBefore, visibleUsersAfter, listeners.size(),
-                    mListeners);
+                    listeners);
         }
         for (int i = 0; i < visibleUsersBefore.size(); i++) {
             int userId = visibleUsersBefore.get(i);
@@ -552,13 +563,14 @@ public final class UserVisibilityMediator implements Dumpable {
 
     private void dispatchVisibilityChanged(CopyOnWriteArrayList<UserVisibilityListener> listeners,
             @UserIdInt int userId, boolean visible) {
+        EventLog.writeEvent(EventLogTags.UM_USER_VISIBILITY_CHANGED, userId, visible ? 1 : 0);
         if (DBG) {
             Slogf.d(TAG, "dispatchVisibilityChanged(%d -> %b): sending to %d listeners",
                     userId, visible, listeners.size());
         }
         for (int i = 0; i < mListeners.size(); i++) {
             UserVisibilityListener listener =  mListeners.get(i);
-            if (DBG) {
+            if (VERBOSE) {
                 Slogf.v(TAG, "dispatchVisibilityChanged(%d -> %b): sending to %s",
                         userId, visible, listener);
             }

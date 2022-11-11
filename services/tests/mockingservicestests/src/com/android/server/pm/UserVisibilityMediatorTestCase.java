@@ -329,6 +329,15 @@ abstract class UserVisibilityMediatorTestCase extends ExtendedMockitoTestCase {
         listener.verify();
     }
 
+    @Test
+    public final void testOnSystemUserVisibilityChanged() throws Exception {
+        AsyncUserVisibilityListener listener = addListenerForEvents(onVisible(USER_SYSTEM));
+
+        mMediator.onSystemUserVisibilityChanged(/* visible= */ true);
+
+        listener.verify();
+    }
+
     /**
      * Starts a user in foreground on the default display, asserting it was properly started.
      *
