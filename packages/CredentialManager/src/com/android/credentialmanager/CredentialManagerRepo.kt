@@ -209,7 +209,7 @@ class CredentialManagerRepo(
 
   private fun testGetCredentialProviderList(): List<GetCredentialProviderData> {
     return listOf(
-      GetCredentialProviderData.Builder("com.google/com.google.CredentialManagerService")
+      GetCredentialProviderData.Builder("io.enpass.app")
         .setCredentialEntries(
           listOf<Entry>(
             newGetEntry(
@@ -225,8 +225,23 @@ class CredentialManagerRepo(
               "elisa.family@outlook.com", null, 100L
             ),
           )
+        ).setAuthenticationEntry(
+          newAuthenticationEntry("key2", "subkey-1", TYPE_PASSWORD_CREDENTIAL)
+        ).setActionChips(
+          listOf(
+            newActionEntry(
+              "key3", "subkey-1", TYPE_PASSWORD_CREDENTIAL,
+              Icon.createWithResource(context, R.drawable.ic_manage_accounts),
+              "Open Google Password Manager", "elisa.beckett@gmail.com"
+            ),
+            newActionEntry(
+              "key3", "subkey-2", TYPE_PASSWORD_CREDENTIAL,
+              Icon.createWithResource(context, R.drawable.ic_manage_accounts),
+              "Open Google Password Manager", "beckett-family@gmail.com"
+            ),
+          )
         ).build(),
-      GetCredentialProviderData.Builder("com.dashlane/com.dashlane.CredentialManagerService")
+      GetCredentialProviderData.Builder("com.dashlane")
         .setCredentialEntries(
           listOf<Entry>(
             newGetEntry(
@@ -238,7 +253,55 @@ class CredentialManagerRepo(
               "elisa.family@outlook.com", null, 100L
             ),
           )
+        ).setAuthenticationEntry(
+          newAuthenticationEntry("key2", "subkey-1", TYPE_PASSWORD_CREDENTIAL)
+        ).setActionChips(
+          listOf(
+            newActionEntry(
+              "key3", "subkey-1", TYPE_PASSWORD_CREDENTIAL,
+              Icon.createWithResource(context, R.drawable.ic_face),
+              "Open Enpass"
+            ),
+          )
         ).build(),
+    )
+  }
+
+  private fun newActionEntry(
+    key: String,
+    subkey: String,
+    credentialType: String,
+    icon: Icon,
+    text: String,
+    subtext: String? = null,
+  ): Entry {
+    val slice = Slice.Builder(
+      Entry.CREDENTIAL_MANAGER_ENTRY_URI, SliceSpec(credentialType, 1)
+    ).addText(
+      text, null, listOf(Entry.HINT_ACTION_TITLE)
+    ).addIcon(icon, null, listOf(Entry.HINT_ACTION_ICON))
+    if (subtext != null) {
+      slice.addText(subtext, null, listOf(Entry.HINT_ACTION_SUBTEXT))
+    }
+    return Entry(
+      key,
+      subkey,
+      slice.build()
+    )
+  }
+
+  private fun newAuthenticationEntry(
+    key: String,
+    subkey: String,
+    credentialType: String,
+  ): Entry {
+    val slice = Slice.Builder(
+      Entry.CREDENTIAL_MANAGER_ENTRY_URI, SliceSpec(credentialType, 1)
+    )
+    return Entry(
+      key,
+      subkey,
+      slice.build()
     )
   }
 
