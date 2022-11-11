@@ -51,6 +51,7 @@ class DeletePackageHelperTest {
 
         mUserManagerInternal = rule.mocks().injector.userManagerInternal
         whenever(mUserManagerInternal.getUserIds()).thenReturn(intArrayOf(0, 1))
+        whenever(mUserManagerInternal.getUserTypesForStatsd(any())).thenReturn(intArrayOf(1, 1))
 
         mPms = createPackageManagerService()
         doAnswer { false }.`when`(mPms).isPackageDeviceAdmin(any(), any())

@@ -19,12 +19,13 @@ package com.android.server.pm;
 import static android.os.Process.INVALID_UID;
 
 import android.annotation.IntDef;
+import android.content.pm.PackageManager;
 import android.content.pm.parsing.ApkLiteParseUtils;
-import android.os.UserManager;
 import android.util.Pair;
 import android.util.SparseArray;
 
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.server.LocalServices;
 import com.android.server.pm.pkg.PackageStateInternal;
 
 import java.io.File;
@@ -73,6 +74,8 @@ final class PackageMetrics {
     }
 
     private void reportInstallationStats(Computer snapshot, boolean success) {
+        UserManagerInternal userManagerInternal =
+                LocalServices.getService(UserManagerInternal.class);
         // TODO(b/249294752): do not log if adb
         final long installDurationMillis =
                 System.currentTimeMillis() - mInstallStartTimestampMillis;
@@ -93,9 +96,9 @@ final class PackageMetrics {
                 success ? null : packageName /* not report package_name on success */,
                 mInstallRequest.getUid() /* uid */,
                 newUsers /* user_ids */,
-                getUserTypes(newUsers) /* user_types */,
+                userManagerInternal.getUserTypesForStatsd(newUsers) /* user_types */,
                 originalUsers /* original_user_ids */,
-                getUserTypes(originalUsers) /* original_user_types */,
+                userManagerInternal.getUserTypesForStatsd(originalUsers) /* original_user_types */,
                 mInstallRequest.getReturnCode() /* public_return_code */,
                 0 /* internal_error_code */,
                 apksSize /* apks_size_bytes */,
@@ -163,18 +166,6 @@ final class PackageMetrics {
         return new Pair<>(stepsArray, durationsArray);
     }
 
-    private static int[] getUserTypes(int[] userIds) {
-        if (userIds == null) {
-            return null;
-        }
-        final int[] userTypes = new int[userIds.length];
-        for (int i = 0; i < userTypes.length; i++) {
-            String userType = UserManagerService.getInstance().getUserInfo(userIds[i]).userType;
-            userTypes[i] = UserManager.getUserTypeForStatsd(userType);
-        }
-        return userTypes;
-    }
-
     private static class InstallStep {
         private final long mStartTimestampMillis;
         private long mDurationMillis = -1;
@@ -190,5 +181,21 @@ final class PackageMetrics {
         long getDurationMillis() {
             return mDurationMillis;
         }
+    }
+
+    public static void onUninstallSucceeded(PackageRemovedInfo info, int deleteFlags,
+            UserManagerInternal userManagerInternal) {
+        if (info.mIsUpdate) {
+            // Not logging uninstalls caused by app updates
+            return;
+        }
+        final int[] removedUsers = info.mRemovedUsers;
+        final int[] removedUserTypes = userManagerInternal.getUserTypesForStatsd(removedUsers);
+        final int[] originalUsers = info.mOrigUsers;
+        final int[] originalUserTypes = userManagerInternal.getUserTypesForStatsd(originalUsers);
+        FrameworkStatsLog.write(FrameworkStatsLog.PACKAGE_UNINSTALLATION_REPORTED,
+                info.mUid, removedUsers, removedUserTypes, originalUsers, originalUserTypes,
+                deleteFlags, PackageManager.DELETE_SUCCEEDED, info.mIsRemovedPackageSystemUpdate,
+                !info.mRemovedForAllUsers);
     }
 }
