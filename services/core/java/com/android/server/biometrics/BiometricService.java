@@ -780,6 +780,8 @@ public class BiometricService extends SystemService {
         @Override // Binder call
         public void resetLockout(
                 int userId, byte[] hardwareAuthToken) {
+            super.resetLockout_enforcePermission();
+
             Slog.d(TAG, "resetLockout(userId=" + userId
                     + ", hat=" + (hardwareAuthToken == null ? "null " : "present") + ")");
             mBiometricContext.getAuthSessionCoordinator()

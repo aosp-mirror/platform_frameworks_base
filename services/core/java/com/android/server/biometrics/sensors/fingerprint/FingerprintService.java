@@ -942,6 +942,8 @@ public class FingerprintService extends SystemService {
         @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
         @Override
         public void setUdfpsOverlay(@NonNull IUdfpsOverlay controller) {
+            super.setUdfpsOverlay_enforcePermission();
+
             for (ServiceProvider provider : mRegistry.getProviders()) {
                 provider.setUdfpsOverlay(controller);
             }

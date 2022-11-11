@@ -2677,6 +2677,8 @@ public class InputManagerService extends IInputManager.Stub
     @EnforcePermission(Manifest.permission.BLUETOOTH)
     @Override
     public String getInputDeviceBluetoothAddress(int deviceId) {
+        super.getInputDeviceBluetoothAddress_enforcePermission();
+
         return mNative.getBluetoothAddress(deviceId);
     }
 
