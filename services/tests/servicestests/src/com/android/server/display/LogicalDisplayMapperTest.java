@@ -54,6 +54,7 @@ import android.view.DisplayInfo;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.server.display.layout.DisplayIdProducer;
 import com.android.server.display.layout.Layout;
 
 import org.junit.Before;
@@ -76,6 +77,7 @@ public class LogicalDisplayMapperTest {
     private static int sUniqueTestDisplayId = 0;
     private static final int DEVICE_STATE_CLOSED = 0;
     private static final int DEVICE_STATE_OPEN = 2;
+    private static int sNextNonDefaultDisplayId = DEFAULT_DISPLAY + 1;
 
     private DisplayDeviceRepository mDisplayDeviceRepo;
     private LogicalDisplayMapper mLogicalDisplayMapper;
@@ -83,12 +85,16 @@ public class LogicalDisplayMapperTest {
     private Handler mHandler;
     private PowerManager mPowerManager;
 
+    private final DisplayIdProducer mIdProducer = (isDefault) ->
+            isDefault ? DEFAULT_DISPLAY : sNextNonDefaultDisplayId++;
+
     @Mock LogicalDisplayMapper.Listener mListenerMock;
     @Mock Context mContextMock;
     @Mock Resources mResourcesMock;
     @Mock IPowerManager mIPowerManagerMock;
     @Mock IThermalService mIThermalServiceMock;
-    @Spy DeviceStateToLayoutMap mDeviceStateToLayoutMapSpy = new DeviceStateToLayoutMap();
+    @Spy DeviceStateToLayoutMap mDeviceStateToLayoutMapSpy =
+            new DeviceStateToLayoutMap(mIdProducer);
 
     @Captor ArgumentCaptor<LogicalDisplay> mDisplayCaptor;
 
@@ -519,13 +525,17 @@ public class LogicalDisplayMapperTest {
                 DisplayDeviceInfo.FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY);
 
         Layout layout = new Layout();
-        layout.createDisplayLocked(device1.getDisplayDeviceInfoLocked().address, true, true);
-        layout.createDisplayLocked(device2.getDisplayDeviceInfoLocked().address, false, false);
+        layout.createDisplayLocked(device1.getDisplayDeviceInfoLocked().address,
+                true, true, mIdProducer);
+        layout.createDisplayLocked(device2.getDisplayDeviceInfoLocked().address,
+                false, false, mIdProducer);
         when(mDeviceStateToLayoutMapSpy.get(0)).thenReturn(layout);
 
         layout = new Layout();
-        layout.createDisplayLocked(device1.getDisplayDeviceInfoLocked().address, false, false);
-        layout.createDisplayLocked(device2.getDisplayDeviceInfoLocked().address, true, true);
+        layout.createDisplayLocked(device1.getDisplayDeviceInfoLocked().address,
+                false, false, mIdProducer);
+        layout.createDisplayLocked(device2.getDisplayDeviceInfoLocked().address,
+                true, true, mIdProducer);
         when(mDeviceStateToLayoutMapSpy.get(1)).thenReturn(layout);
         when(mDeviceStateToLayoutMapSpy.get(2)).thenReturn(layout);
 
@@ -580,15 +590,18 @@ public class LogicalDisplayMapperTest {
         threeDevicesEnabledLayout.createDisplayLocked(
                 displayAddressOne,
                 /* isDefault= */ true,
-                /* isEnabled= */ true);
+                /* isEnabled= */ true,
+                mIdProducer);
         threeDevicesEnabledLayout.createDisplayLocked(
                 displayAddressTwo,
                 /* isDefault= */ false,
-                /* isEnabled= */ true);
+                /* isEnabled= */ true,
+                mIdProducer);
         threeDevicesEnabledLayout.createDisplayLocked(
                 displayAddressThree,
                 /* isDefault= */ false,
-                /* isEnabled= */ true);
+                /* isEnabled= */ true,
+                mIdProducer);
 
         when(mDeviceStateToLayoutMapSpy.get(DeviceStateToLayoutMap.STATE_DEFAULT))
                 .thenReturn(threeDevicesEnabledLayout);
@@ -622,15 +635,18 @@ public class LogicalDisplayMapperTest {
         oneDeviceEnabledLayout.createDisplayLocked(
                 displayAddressOne,
                 /* isDefault= */ true,
-                /* isEnabled= */ true);
+                /* isEnabled= */ true,
+                mIdProducer);
         oneDeviceEnabledLayout.createDisplayLocked(
                 displayAddressTwo,
                 /* isDefault= */ false,
-                /* isEnabled= */ false);
+                /* isEnabled= */ false,
+                mIdProducer);
         oneDeviceEnabledLayout.createDisplayLocked(
                 displayAddressThree,
                 /* isDefault= */ false,
-                /* isEnabled= */ false);
+                /* isEnabled= */ false,
+                mIdProducer);
 
         when(mDeviceStateToLayoutMapSpy.get(0)).thenReturn(oneDeviceEnabledLayout);
         when(mDeviceStateToLayoutMapSpy.get(1)).thenReturn(threeDevicesEnabledLayout);
