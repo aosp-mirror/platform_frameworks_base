@@ -21,7 +21,6 @@ import android.graphics.ColorFilter
 import android.graphics.ColorMatrix
 import android.graphics.ColorMatrixColorFilter
 import android.graphics.drawable.Drawable
-import android.os.UserHandle
 import android.widget.BaseAdapter
 import com.android.systemui.qs.user.UserSwitchDialogController.DialogShower
 import com.android.systemui.user.data.source.UserRecord
@@ -84,7 +83,7 @@ protected constructor(
     }
 
     fun refresh() {
-        controller.refreshUsers(UserHandle.USER_NULL)
+        controller.refreshUsers()
     }
 
     companion object {

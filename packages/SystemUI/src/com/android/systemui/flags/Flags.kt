@@ -112,28 +112,6 @@ object Flags {
     @JvmField val MODERN_BOUNCER = releasedFlag(208, "modern_bouncer")
 
     /**
-     * Whether the user interactor and repository should use `UserSwitcherController`.
-     *
-     * If this is `false`, the interactor and repo skip the controller and directly access the
-     * framework APIs.
-     */
-    // TODO(b/254513286): Tracking Bug
-    val USER_INTERACTOR_AND_REPO_USE_CONTROLLER =
-        unreleasedFlag(210, "user_interactor_and_repo_use_controller")
-
-    /**
-     * Whether `UserSwitcherController` should use the user interactor.
-     *
-     * When this is `true`, the controller does not directly access framework APIs. Instead, it goes
-     * through the interactor.
-     *
-     * Note: do not set this to true if [.USER_INTERACTOR_AND_REPO_USE_CONTROLLER] is `true` as it
-     * would created a cycle between controller -> interactor -> controller.
-     */
-    // TODO(b/254513102): Tracking Bug
-    val USER_CONTROLLER_USES_INTERACTOR = releasedFlag(211, "user_controller_uses_interactor")
-
-    /**
      * Whether the clock on a wide lock screen should use the new "stepping" animation for moving
      * the digits when the clock moves.
      */

@@ -19,31 +19,18 @@ package com.android.systemui.user.data.repository
 
 import android.content.Context
 import android.content.pm.UserInfo
-import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.Drawable
 import android.os.UserHandle
 import android.os.UserManager
 import android.provider.Settings
 import androidx.annotation.VisibleForTesting
-import androidx.appcompat.content.res.AppCompatResources
-import com.android.internal.util.UserIcons
-import com.android.systemui.R
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
-import com.android.systemui.common.shared.model.Text
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.settings.UserTracker
-import com.android.systemui.statusbar.policy.UserSwitcherController
 import com.android.systemui.user.data.model.UserSwitcherSettingsModel
-import com.android.systemui.user.data.source.UserRecord
-import com.android.systemui.user.legacyhelper.ui.LegacyUserUiHelper
-import com.android.systemui.user.shared.model.UserActionModel
-import com.android.systemui.user.shared.model.UserModel
 import com.android.systemui.util.settings.GlobalSettings
 import com.android.systemui.util.settings.SettingsProxyExt.observerFlow
 import java.util.concurrent.atomic.AtomicBoolean
@@ -55,7 +42,6 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -72,15 +58,6 @@ import kotlinx.coroutines.withContext
  * upstream changes.
  */
 interface UserRepository {
-    /** List of all users on the device. */
-    val users: Flow<List<UserModel>>
-
-    /** The currently-selected user. */
-    val selectedUser: Flow<UserModel>
-
-    /** List of available user-related actions. */
-    val actions: Flow<List<UserActionModel>>
-
     /** User switcher related settings. */
     val userSwitcherSettings: Flow<UserSwitcherSettingsModel>
 
@@ -92,9 +69,6 @@ interface UserRepository {
 
     /** User ID of the last non-guest selected user. */
     val lastSelectedNonGuestUserId: Int
-
-    /** Whether actions are available even when locked. */
-    val isActionableWhenLocked: Flow<Boolean>
 
     /** Whether the device is configured to always have a guest user available. */
     val isGuestUserAutoCreated: Boolean
@@ -125,17 +99,12 @@ class UserRepositoryImpl
 constructor(
     @Application private val appContext: Context,
     private val manager: UserManager,
-    private val controller: UserSwitcherController,
     @Application private val applicationScope: CoroutineScope,
     @Main private val mainDispatcher: CoroutineDispatcher,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
     private val globalSettings: GlobalSettings,
     private val tracker: UserTracker,
-    private val featureFlags: FeatureFlags,
 ) : UserRepository {
-
-    private val isNewImpl: Boolean
-        get() = !featureFlags.isEnabled(Flags.USER_INTERACTOR_AND_REPO_USE_CONTROLLER)
 
     private val _userSwitcherSettings = MutableStateFlow(runBlocking { getSettings() })
     override val userSwitcherSettings: Flow<UserSwitcherSettingsModel> =
@@ -150,58 +119,11 @@ constructor(
     override var lastSelectedNonGuestUserId: Int = UserHandle.USER_SYSTEM
         private set
 
-    private val userRecords: Flow<List<UserRecord>> = conflatedCallbackFlow {
-        fun send() {
-            trySendWithFailureLogging(
-                controller.users,
-                TAG,
-            )
-        }
-
-        val callback = UserSwitcherController.UserSwitchCallback { send() }
-
-        controller.addUserSwitchCallback(callback)
-        send()
-
-        awaitClose { controller.removeUserSwitchCallback(callback) }
-    }
-
-    override val users: Flow<List<UserModel>> =
-        userRecords.map { records -> records.filter { it.isUser() }.map { it.toUserModel() } }
-
-    override val selectedUser: Flow<UserModel> =
-        users.map { users -> users.first { user -> user.isSelected } }
-
-    override val actions: Flow<List<UserActionModel>> =
-        userRecords.map { records -> records.filter { it.isNotUser() }.map { it.toActionModel() } }
-
-    override val isActionableWhenLocked: Flow<Boolean> =
-        if (isNewImpl) {
-            emptyFlow()
-        } else {
-            controller.isAddUsersFromLockScreenEnabled
-        }
-
     override val isGuestUserAutoCreated: Boolean =
-        if (isNewImpl) {
-            appContext.resources.getBoolean(com.android.internal.R.bool.config_guestUserAutoCreated)
-        } else {
-            controller.isGuestUserAutoCreated
-        }
+        appContext.resources.getBoolean(com.android.internal.R.bool.config_guestUserAutoCreated)
 
     private var _isGuestUserResetting: Boolean = false
-    override var isGuestUserResetting: Boolean =
-        if (isNewImpl) {
-            _isGuestUserResetting
-        } else {
-            controller.isGuestUserResetting
-        }
-        set(value) =
-            if (isNewImpl) {
-                _isGuestUserResetting = value
-            } else {
-                error("Not supported in the old implementation!")
-            }
+    override var isGuestUserResetting: Boolean = _isGuestUserResetting
 
     override val isGuestUserCreationScheduled = AtomicBoolean()
 
@@ -210,10 +132,8 @@ constructor(
     override var isRefreshUsersPaused: Boolean = false
 
     init {
-        if (isNewImpl) {
-            observeSelectedUser()
-            observeUserSettings()
-        }
+        observeSelectedUser()
+        observeUserSettings()
     }
 
     override fun refreshUsers() {
@@ -325,64 +245,6 @@ constructor(
                 isUserSwitcherEnabled = isUserSwitcherEnabled,
             )
         }
-    }
-
-    private fun UserRecord.isUser(): Boolean {
-        return when {
-            isAddUser -> false
-            isAddSupervisedUser -> false
-            isManageUsers -> false
-            isGuest -> info != null
-            else -> true
-        }
-    }
-
-    private fun UserRecord.isNotUser(): Boolean {
-        return !isUser()
-    }
-
-    private fun UserRecord.toUserModel(): UserModel {
-        return UserModel(
-            id = resolveId(),
-            name = getUserName(this),
-            image = getUserImage(this),
-            isSelected = isCurrent,
-            isSelectable = isSwitchToEnabled || isGuest,
-            isGuest = isGuest,
-        )
-    }
-
-    private fun UserRecord.toActionModel(): UserActionModel {
-        return when {
-            isAddUser -> UserActionModel.ADD_USER
-            isAddSupervisedUser -> UserActionModel.ADD_SUPERVISED_USER
-            isGuest -> UserActionModel.ENTER_GUEST_MODE
-            isManageUsers -> UserActionModel.NAVIGATE_TO_USER_MANAGEMENT
-            else -> error("Don't know how to convert to UserActionModel: $this")
-        }
-    }
-
-    private fun getUserName(record: UserRecord): Text {
-        val resourceId: Int? = LegacyUserUiHelper.getGuestUserRecordNameResourceId(record)
-        return if (resourceId != null) {
-            Text.Resource(resourceId)
-        } else {
-            Text.Loaded(checkNotNull(record.info).name)
-        }
-    }
-
-    private fun getUserImage(record: UserRecord): Drawable {
-        if (record.isGuest) {
-            return checkNotNull(
-                AppCompatResources.getDrawable(appContext, R.drawable.ic_account_circle)
-            )
-        }
-
-        val userId = checkNotNull(record.info?.id)
-        return manager.getUserIcon(userId)?.let { userSelectedIcon ->
-            BitmapDrawable(userSelectedIcon)
-        }
-            ?: UserIcons.getDefaultUserIcon(appContext.resources, userId, /* light= */ false)
     }
 
     companion object {
