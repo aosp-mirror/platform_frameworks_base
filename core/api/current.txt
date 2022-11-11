@@ -23507,6 +23507,7 @@ package android.media {
     method public void registerRouteCallback(@NonNull java.util.concurrent.Executor, @NonNull android.media.MediaRouter2.RouteCallback, @NonNull android.media.RouteDiscoveryPreference);
     method public void registerTransferCallback(@NonNull java.util.concurrent.Executor, @NonNull android.media.MediaRouter2.TransferCallback);
     method public void setOnGetControllerHintsListener(@Nullable android.media.MediaRouter2.OnGetControllerHintsListener);
+    method public void setRouteListingPreference(@Nullable android.media.RouteListingPreference);
     method public void stop();
     method public void transferTo(@NonNull android.media.MediaRoute2Info);
     method public void unregisterControllerCallback(@NonNull android.media.MediaRouter2.ControllerCallback);
@@ -23878,6 +23879,22 @@ package android.media {
     method @NonNull public android.media.RouteDiscoveryPreference build();
     method @NonNull public android.media.RouteDiscoveryPreference.Builder setPreferredFeatures(@NonNull java.util.List<java.lang.String>);
     method @NonNull public android.media.RouteDiscoveryPreference.Builder setShouldPerformActiveScan(boolean);
+  }
+
+  public final class RouteListingPreference implements android.os.Parcelable {
+    ctor public RouteListingPreference(@NonNull java.util.List<android.media.RouteListingPreference.Item>);
+    method public int describeContents();
+    method @NonNull public java.util.List<android.media.RouteListingPreference.Item> getItems();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.RouteListingPreference> CREATOR;
+  }
+
+  public static final class RouteListingPreference.Item implements android.os.Parcelable {
+    ctor public RouteListingPreference.Item(@NonNull String);
+    method public int describeContents();
+    method @NonNull public String getRouteId();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.RouteListingPreference.Item> CREATOR;
   }
 
   public final class RoutingSessionInfo implements android.os.Parcelable {
