@@ -32,7 +32,7 @@ import android.view.WindowManagerGlobal
 import com.android.internal.infra.ServiceConnector
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dagger.qualifiers.Main
 import javax.inject.Inject
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
@@ -45,7 +45,7 @@ class ActionIntentExecutor
 @Inject
 constructor(
     @Application private val applicationScope: CoroutineScope,
-    @Background private val bgDispatcher: CoroutineDispatcher,
+    @Main private val mainDispatcher: CoroutineDispatcher,
     private val context: Context,
 ) {
     /**
@@ -70,23 +70,21 @@ constructor(
         userId: Int,
         overrideTransition: Boolean,
     ) {
-        withContext(bgDispatcher) {
-            dismissKeyguard()
+        dismissKeyguard()
 
-            if (userId == UserHandle.myUserId()) {
-                context.startActivity(intent, bundle)
-            } else {
-                launchCrossProfileIntent(userId, intent, bundle)
-            }
+        if (userId == UserHandle.myUserId()) {
+            withContext(mainDispatcher) { context.startActivity(intent, bundle) }
+        } else {
+            launchCrossProfileIntent(userId, intent, bundle)
+        }
 
-            if (overrideTransition) {
-                val runner = RemoteAnimationAdapter(SCREENSHOT_REMOTE_RUNNER, 0, 0)
-                try {
-                    WindowManagerGlobal.getWindowManagerService()
-                        .overridePendingAppTransitionRemote(runner, Display.DEFAULT_DISPLAY)
-                } catch (e: Exception) {
-                    Log.e(TAG, "Error overriding screenshot app transition", e)
-                }
+        if (overrideTransition) {
+            val runner = RemoteAnimationAdapter(SCREENSHOT_REMOTE_RUNNER, 0, 0)
+            try {
+                WindowManagerGlobal.getWindowManagerService()
+                    .overridePendingAppTransitionRemote(runner, Display.DEFAULT_DISPLAY)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error overriding screenshot app transition", e)
             }
         }
     }
