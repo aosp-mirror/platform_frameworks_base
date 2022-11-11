@@ -308,7 +308,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         SystemClock systemClock = new FakeSystemClock();
         mStatusBarStateController = new StatusBarStateControllerImpl(mUiEventLogger, mDumpManager,
-                mInteractionJankMonitor);
+                mInteractionJankMonitor, mShadeExpansionStateManager);
 
         KeyguardStatusView keyguardStatusView = new KeyguardStatusView(mContext);
         keyguardStatusView.setId(R.id.keyguard_status_view);
@@ -379,7 +379,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                         mDumpManager,
                         mock(HeadsUpManagerPhone.class),
                         new StatusBarStateControllerImpl(new UiEventLoggerFake(), mDumpManager,
-                                mInteractionJankMonitor),
+                                mInteractionJankMonitor, mShadeExpansionStateManager),
                         mKeyguardBypassController,
                         mDozeParameters,
                         mScreenOffAnimationController);
@@ -494,7 +494,8 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 systemClock,
                 mock(CameraGestureHelper.class),
                 mKeyguardBottomAreaViewModel,
-                mKeyguardBottomAreaInteractor);
+                mKeyguardBottomAreaInteractor,
+                mDumpManager);
         mNotificationPanelViewController.initDependencies(
                 mCentralSurfaces,
                 () -> {},

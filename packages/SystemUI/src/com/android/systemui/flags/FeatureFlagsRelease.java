@@ -101,7 +101,7 @@ public class FeatureFlagsRelease implements FeatureFlags {
 
     @Override
     public boolean isEnabled(@NotNull ReleasedFlag flag) {
-        return mServerFlagReader.readServerOverride(flag.getId(), true);
+        return mServerFlagReader.readServerOverride(flag.getNamespace(), flag.getName(), true);
     }
 
     @Override
@@ -109,18 +109,6 @@ public class FeatureFlagsRelease implements FeatureFlags {
         int cacheIndex = mBooleanCache.indexOfKey(flag.getId());
         if (cacheIndex < 0) {
             return isEnabled(flag.getId(), mResources.getBoolean(flag.getResourceId()));
-        }
-
-        return mBooleanCache.valueAt(cacheIndex);
-    }
-
-    @Override
-    public boolean isEnabled(@NonNull DeviceConfigBooleanFlag flag) {
-        int cacheIndex = mBooleanCache.indexOfKey(flag.getId());
-        if (cacheIndex < 0) {
-            boolean deviceConfigValue = mDeviceConfigProxy.getBoolean(flag.getNamespace(),
-                    flag.getName(), flag.getDefault());
-            return isEnabled(flag.getId(), deviceConfigValue);
         }
 
         return mBooleanCache.valueAt(cacheIndex);
@@ -180,10 +168,10 @@ public class FeatureFlagsRelease implements FeatureFlags {
     @Override
     public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("can override: false");
-        Map<Integer, Flag<?>> knownFlags = Flags.collectFlags();
-        for (Map.Entry<Integer, Flag<?>> idToFlag : knownFlags.entrySet()) {
-            int id = idToFlag.getKey();
-            Flag<?> flag = idToFlag.getValue();
+        Map<String, Flag<?>> knownFlags = FlagsFactory.INSTANCE.getKnownFlags();
+        for (Map.Entry<String, Flag<?>> nameToFlag : knownFlags.entrySet()) {
+            Flag<?> flag = nameToFlag.getValue();
+            int id = flag.getId();
             boolean def = false;
             if (mBooleanCache.indexOfKey(flag.getId()) < 0) {
                 if (flag instanceof SysPropBooleanFlag) {

@@ -22,6 +22,7 @@ import static android.net.wifi.WifiManager.TrafficStateCallback.DATA_ACTIVITY_IN
 import static android.net.wifi.WifiManager.TrafficStateCallback.DATA_ACTIVITY_INOUT;
 import static android.net.wifi.WifiManager.TrafficStateCallback.DATA_ACTIVITY_NONE;
 import static android.net.wifi.WifiManager.TrafficStateCallback.DATA_ACTIVITY_OUT;
+import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
 import android.annotation.Nullable;
 import android.content.BroadcastReceiver;
@@ -139,7 +140,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
     private final MobileSignalControllerFactory mMobileFactory;
 
     private TelephonyCallback.ActiveDataSubscriptionIdListener mPhoneStateListener;
-    private int mActiveMobileDataSubscription = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
+    private int mActiveMobileDataSubscription = INVALID_SUBSCRIPTION_ID;
 
     // Subcontrollers.
     @VisibleForTesting
@@ -503,6 +504,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         filter.addAction(TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED);
         filter.addAction(TelephonyManager.ACTION_DEFAULT_VOICE_SUBSCRIPTION_CHANGED);
         filter.addAction(TelephonyManager.ACTION_SERVICE_PROVIDERS_UPDATED);
+        filter.addAction(TelephonyManager.ACTION_SUBSCRIPTION_CARRIER_IDENTITY_CHANGED);
         filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
         mBroadcastDispatcher.registerReceiverWithHandler(this, filter, mReceiverHandler);
         mListening = true;
@@ -793,6 +795,20 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 mConfig = Config.readConfig(mContext);
                 mReceiverHandler.post(this::handleConfigurationChanged);
                 break;
+
+            case TelephonyManager.ACTION_SUBSCRIPTION_CARRIER_IDENTITY_CHANGED: {
+                // Notify the relevant MobileSignalController of the change
+                int subId = intent.getIntExtra(
+                        TelephonyManager.EXTRA_SUBSCRIPTION_ID,
+                        INVALID_SUBSCRIPTION_ID
+                );
+                if (SubscriptionManager.isValidSubscriptionId(subId)) {
+                    if (mMobileSignalControllers.indexOfKey(subId) >= 0) {
+                        mMobileSignalControllers.get(subId).handleBroadcast(intent);
+                    }
+                }
+            }
+            break;
             case Intent.ACTION_SIM_STATE_CHANGED:
                 // Avoid rebroadcast because SysUI is direct boot aware.
                 if (intent.getBooleanExtra(Intent.EXTRA_REBROADCAST_ON_UNLOCK, false)) {
@@ -820,7 +836,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 break;
             default:
                 int subId = intent.getIntExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX,
-                        SubscriptionManager.INVALID_SUBSCRIPTION_ID);
+                        INVALID_SUBSCRIPTION_ID);
                 if (SubscriptionManager.isValidSubscriptionId(subId)) {
                     if (mMobileSignalControllers.indexOfKey(subId) >= 0) {
                         mMobileSignalControllers.get(subId).handleBroadcast(intent);
@@ -1336,6 +1352,9 @@ public class NetworkControllerImpl extends BroadcastReceiver
             String slotString = args.getString("slot");
             int slot = TextUtils.isEmpty(slotString) ? 0 : Integer.parseInt(slotString);
             slot = MathUtils.constrain(slot, 0, 8);
+            String carrierIdString = args.getString("carrierid");
+            int carrierId = TextUtils.isEmpty(carrierIdString) ? 0
+                    : Integer.parseInt(carrierIdString);
             // Ensure we have enough sim slots
             List<SubscriptionInfo> subs = new ArrayList<>();
             while (mMobileSignalControllers.size() <= slot) {
@@ -1347,6 +1366,9 @@ public class NetworkControllerImpl extends BroadcastReceiver
             }
             // Hack to index linearly for easy use.
             MobileSignalController controller = mMobileSignalControllers.valueAt(slot);
+            if (carrierId != 0) {
+                controller.getState().setCarrierId(carrierId);
+            }
             controller.getState().dataSim = datatype != null;
             controller.getState().isDefault = datatype != null;
             controller.getState().dataConnected = datatype != null;

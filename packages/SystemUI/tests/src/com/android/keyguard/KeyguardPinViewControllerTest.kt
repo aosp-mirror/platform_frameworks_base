@@ -100,4 +100,12 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
         pinViewController.startAppearAnimation()
         verify(keyguardMessageAreaController).setMessage(R.string.keyguard_enter_your_pin)
     }
+
+    @Test
+    fun startAppearAnimation_withExistingMessage() {
+        Mockito.`when`(keyguardMessageAreaController.message).thenReturn("Unlock to continue.")
+        pinViewController.startAppearAnimation()
+        verify(keyguardMessageAreaController, Mockito.never())
+            .setMessage(R.string.keyguard_enter_your_password)
+    }
 }

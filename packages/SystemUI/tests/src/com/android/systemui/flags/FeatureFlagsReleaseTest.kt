@@ -25,8 +25,8 @@ import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
+import org.mockito.Mockito.`when` as whenever
 
 /**
  * NOTE: This test is for the version of FeatureFlagManager in src-release, which should not allow
@@ -59,7 +59,9 @@ class FeatureFlagsReleaseTest : SysuiTestCase() {
     fun testBooleanResourceFlag() {
         val flagId = 213
         val flagResourceId = 3
-        val flag = ResourceBooleanFlag(flagId, flagResourceId)
+        val flagName = "213"
+        val flagNamespace = "test"
+        val flag = ResourceBooleanFlag(flagId, flagName, flagNamespace, flagResourceId)
         whenever(mResources.getBoolean(flagResourceId)).thenReturn(true)
         assertThat(mFeatureFlagsRelease.isEnabled(flag)).isTrue()
     }
@@ -71,57 +73,45 @@ class FeatureFlagsReleaseTest : SysuiTestCase() {
         whenever(mResources.getString(1003)).thenReturn(null)
         whenever(mResources.getString(1004)).thenAnswer { throw NameNotFoundException() }
 
-        assertThat(mFeatureFlagsRelease.getString(ResourceStringFlag(1, 1001))).isEqualTo("")
-        assertThat(mFeatureFlagsRelease.getString(ResourceStringFlag(2, 1002))).isEqualTo("res2")
+        assertThat(mFeatureFlagsRelease.getString(
+            ResourceStringFlag(1, "1", "test", 1001))).isEqualTo("")
+        assertThat(mFeatureFlagsRelease.getString(
+            ResourceStringFlag(2, "2", "test", 1002))).isEqualTo("res2")
 
         assertThrows(NullPointerException::class.java) {
-            mFeatureFlagsRelease.getString(ResourceStringFlag(3, 1003))
+            mFeatureFlagsRelease.getString(ResourceStringFlag(3, "3", "test", 1003))
         }
         assertThrows(NameNotFoundException::class.java) {
-            mFeatureFlagsRelease.getString(ResourceStringFlag(4, 1004))
+            mFeatureFlagsRelease.getString(ResourceStringFlag(4, "4", "test", 1004))
         }
-    }
-
-    @Test
-    fun testReadDeviceConfigBooleanFlag() {
-        val namespace = "test_namespace"
-        deviceConfig.setProperty(namespace, "a", "true", false)
-        deviceConfig.setProperty(namespace, "b", "false", false)
-        deviceConfig.setProperty(namespace, "c", null, false)
-
-        assertThat(mFeatureFlagsRelease.isEnabled(DeviceConfigBooleanFlag(1, "a", namespace)))
-            .isTrue()
-        assertThat(mFeatureFlagsRelease.isEnabled(DeviceConfigBooleanFlag(2, "b", namespace)))
-            .isFalse()
-        assertThat(mFeatureFlagsRelease.isEnabled(DeviceConfigBooleanFlag(3, "c", namespace)))
-            .isFalse()
     }
 
     @Test
     fun testSysPropBooleanFlag() {
         val flagId = 213
         val flagName = "sys_prop_flag"
+        val flagNamespace = "test"
         val flagDefault = true
 
-        val flag = SysPropBooleanFlag(flagId, flagName, flagDefault)
+        val flag = SysPropBooleanFlag(flagId, flagName, flagNamespace, flagDefault)
         whenever(mSystemProperties.getBoolean(flagName, flagDefault)).thenReturn(flagDefault)
         assertThat(mFeatureFlagsRelease.isEnabled(flag)).isEqualTo(flagDefault)
     }
 
     @Test
     fun serverSide_OverridesReleased_MakesFalse() {
-        val flag = ReleasedFlag(100)
+        val flag = ReleasedFlag(100, "100", "test")
 
-        serverFlagReader.setFlagValue(flag.id, false)
+        serverFlagReader.setFlagValue(flag.namespace, flag.name, false)
 
         assertThat(mFeatureFlagsRelease.isEnabled(flag)).isFalse()
     }
 
     @Test
     fun serverSide_OverridesUnreleased_Ignored() {
-        val flag = UnreleasedFlag(100)
+        val flag = UnreleasedFlag(100, "100", "test")
 
-        serverFlagReader.setFlagValue(flag.id, true)
+        serverFlagReader.setFlagValue(flag.namespace, flag.name, true)
 
         assertThat(mFeatureFlagsRelease.isEnabled(flag)).isFalse()
     }

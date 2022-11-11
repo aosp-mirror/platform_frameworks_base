@@ -34,6 +34,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeEventsModule;
+import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.notification.AssistantFeedbackController;
 import com.android.systemui.statusbar.notification.collection.NotifInflaterImpl;
@@ -160,6 +161,7 @@ public interface NotificationsModule {
             NotificationVisibilityProvider visibilityProvider,
             NotifPipeline notifPipeline,
             StatusBarStateController statusBarStateController,
+            ShadeExpansionStateManager shadeExpansionStateManager,
             NotificationLogger.ExpansionStateLogger expansionStateLogger,
             NotificationPanelLogger notificationPanelLogger) {
         return new NotificationLogger(
@@ -169,6 +171,7 @@ public interface NotificationsModule {
                 visibilityProvider,
                 notifPipeline,
                 statusBarStateController,
+                shadeExpansionStateManager,
                 expansionStateLogger,
                 notificationPanelLogger);
     }

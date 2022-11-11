@@ -34,9 +34,6 @@ interface FeatureFlags : FlagListenable, Dumpable {
     fun isEnabled(flag: ResourceBooleanFlag): Boolean
 
     /** Returns a boolean value for the given flag.  */
-    fun isEnabled(flag: DeviceConfigBooleanFlag): Boolean
-
-    /** Returns a boolean value for the given flag.  */
     fun isEnabled(flag: SysPropBooleanFlag): Boolean
 
     /** Returns a string value for the given flag.  */
