@@ -118,10 +118,13 @@ public class TaskFragmentTest extends WindowTestsBase {
         doReturn(true).when(mTaskFragment).isVisibleRequested();
 
         clearInvocations(mTransaction);
+        mTaskFragment.deferOrganizedTaskFragmentSurfaceUpdate();
         mTaskFragment.setBounds(endBounds);
+        assertTrue(mTaskFragment.shouldStartChangeTransition(startBounds));
+        mTaskFragment.initializeChangeTransition(startBounds);
+        mTaskFragment.continueOrganizedTaskFragmentSurfaceUpdate();
 
         // Surface reset when prepare transition.
-        verify(mTaskFragment).initializeChangeTransition(startBounds);
         verify(mTransaction).setPosition(mLeash, 0, 0);
         verify(mTransaction).setWindowCrop(mLeash, 0, 0);
 
@@ -166,7 +169,7 @@ public class TaskFragmentTest extends WindowTestsBase {
 
         mTaskFragment.setBounds(endBounds);
 
-        verify(mTaskFragment, never()).initializeChangeTransition(any());
+        assertFalse(mTaskFragment.shouldStartChangeTransition(startBounds));
     }
 
     /**
