@@ -475,7 +475,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     // Current transformation being applied.
     float mGlobalScale = 1f;
     float mInvGlobalScale = 1f;
-    float mSizeCompatScale = 1f;
+    float mCompatScale = 1f;
     final float mOverrideScale;
     float mHScale = 1f, mVScale = 1f;
     float mLastHScale = 1f, mLastVScale = 1f;
@@ -1254,21 +1254,21 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     void updateGlobalScale() {
         if (hasCompatScale()) {
-            mSizeCompatScale = (mOverrideScale == 1f || mToken.hasSizeCompatBounds())
-                    ? mToken.getSizeCompatScale()
+            mCompatScale = (mOverrideScale == 1f || mToken.hasSizeCompatBounds())
+                    ? mToken.getCompatScale()
                     : 1f;
-            mGlobalScale = mSizeCompatScale * mOverrideScale;
+            mGlobalScale = mCompatScale * mOverrideScale;
             mInvGlobalScale = 1f / mGlobalScale;
             return;
         }
 
-        mGlobalScale = mInvGlobalScale = mSizeCompatScale = 1f;
+        mGlobalScale = mInvGlobalScale = mCompatScale = 1f;
     }
 
-    float getSizeCompatScaleForClient() {
-        // If the size compat scale is because of the size compat bounds, we only scale down its
-        // coordinates at the server side without letting the client know.
-        return mToken.hasSizeCompatBounds() ? 1f : mSizeCompatScale;
+    float getCompatScaleForClient() {
+        // If this window in the size compat mode. The scaling is fully controlled at the server
+        // side. The client doesn't need to take it into account.
+        return mToken.hasSizeCompatBounds() ? 1f : mCompatScale;
     }
 
     /**
@@ -3867,7 +3867,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             }
         }
 
-        outFrames.sizeCompatScale = getSizeCompatScaleForClient();
+        outFrames.compatScale = getCompatScaleForClient();
 
         // Note: in the cases where the window is tied to an activity, we should not send a
         // configuration update when the window has requested to be hidden. Doing so can lead to
