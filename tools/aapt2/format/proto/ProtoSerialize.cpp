@@ -345,7 +345,11 @@ void SerializeTableToPb(const ResourceTable& table, pb::ResourceTable* out_table
   pb::ToolFingerprint* pb_fingerprint = out_table->add_tool_fingerprint();
   pb_fingerprint->set_tool(util::GetToolName());
   pb_fingerprint->set_version(util::GetToolFingerprint());
-
+  for (auto it = table.included_packages_.begin(); it != table.included_packages_.end(); ++it) {
+    pb::DynamicRefTable* pb_dynamic_ref = out_table->add_dynamic_ref_table();
+    pb_dynamic_ref->mutable_package_id()->set_id(it->first);
+    pb_dynamic_ref->set_package_name(it->second);
+  }
   std::vector<Overlayable*> overlayables;
   auto table_view = table.GetPartitionedView();
   for (const auto& package : table_view.packages) {
