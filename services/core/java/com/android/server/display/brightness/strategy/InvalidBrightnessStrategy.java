@@ -21,6 +21,7 @@ import android.os.PowerManager;
 
 import com.android.server.display.DisplayBrightnessState;
 import com.android.server.display.brightness.BrightnessReason;
+import com.android.server.display.brightness.BrightnessUtils;
 
 /**
  * Manages the brightness of the display when the system is in the invalid state.
@@ -29,13 +30,8 @@ public class InvalidBrightnessStrategy implements DisplayBrightnessStrategy {
     @Override
     public DisplayBrightnessState updateBrightness(
             DisplayManagerInternal.DisplayPowerRequest displayPowerRequest) {
-        BrightnessReason brightnessReason = new BrightnessReason();
-        brightnessReason.set(null);
-        return new DisplayBrightnessState.Builder()
-                .setBrightness(PowerManager.BRIGHTNESS_INVALID_FLOAT)
-                .setSdrBrightness(PowerManager.BRIGHTNESS_INVALID_FLOAT)
-                .setBrightnessReason(brightnessReason)
-                .build();
+        return BrightnessUtils.constructDisplayBrightnessState(BrightnessReason.REASON_UNKNOWN,
+                PowerManager.BRIGHTNESS_INVALID_FLOAT, PowerManager.BRIGHTNESS_INVALID_FLOAT);
     }
 
     @Override

@@ -27,6 +27,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.display.brightness.strategy.DisplayBrightnessStrategy;
 import com.android.server.display.brightness.strategy.DozeBrightnessStrategy;
 import com.android.server.display.brightness.strategy.InvalidBrightnessStrategy;
+import com.android.server.display.brightness.strategy.OverrideBrightnessStrategy;
 import com.android.server.display.brightness.strategy.ScreenOffBrightnessStrategy;
 
 import java.io.PrintWriter;
@@ -46,6 +47,8 @@ public class DisplayBrightnessStrategySelector {
     private final ScreenOffBrightnessStrategy mScreenOffBrightnessStrategy;
     // The brightness strategy used to manage the brightness state when the request state is
     // invalid.
+    private final OverrideBrightnessStrategy mOverrideBrightnessStrategy;
+    // The brightness strategy used to manage the brightness state request is invalid.
     private final InvalidBrightnessStrategy mInvalidBrightnessStrategy;
 
     // We take note of the old brightness strategy so that we can know when the strategy changes.
@@ -63,6 +66,7 @@ public class DisplayBrightnessStrategySelector {
         mDisplayId = displayId;
         mDozeBrightnessStrategy = injector.getDozeBrightnessStrategy();
         mScreenOffBrightnessStrategy = injector.getScreenOffBrightnessStrategy();
+        mOverrideBrightnessStrategy = injector.getOverrideBrightnessStrategy();
         mInvalidBrightnessStrategy = injector.getInvalidBrightnessStrategy();
         mAllowAutoBrightnessWhileDozingConfig = context.getResources().getBoolean(
                 R.bool.config_allowAutoBrightnessWhileDozing);
@@ -82,6 +86,9 @@ public class DisplayBrightnessStrategySelector {
             displayBrightnessStrategy = mScreenOffBrightnessStrategy;
         } else if (shouldUseDozeBrightnessStrategy(displayPowerRequest)) {
             displayBrightnessStrategy = mDozeBrightnessStrategy;
+        } else if (BrightnessUtils
+                .isValidBrightnessValue(displayPowerRequest.screenBrightnessOverride)) {
+            displayBrightnessStrategy = mOverrideBrightnessStrategy;
         }
 
         if (!mOldBrightnessStrategyName.equals(displayBrightnessStrategy.getName())) {
@@ -108,8 +115,11 @@ public class DisplayBrightnessStrategySelector {
     public void dump(PrintWriter writer) {
         writer.println();
         writer.println("DisplayBrightnessStrategySelector:");
+        writer.println("  mDisplayId= " + mDisplayId);
+        writer.println("  mOldBrightnessStrategyName= " + mOldBrightnessStrategyName);
         writer.println(
-                "  mAllowAutoBrightnessWhileDozingConfig=" + mAllowAutoBrightnessWhileDozingConfig);
+                "  mAllowAutoBrightnessWhileDozingConfig= "
+                        + mAllowAutoBrightnessWhileDozingConfig);
     }
 
     /**
@@ -136,6 +146,10 @@ public class DisplayBrightnessStrategySelector {
 
         DozeBrightnessStrategy getDozeBrightnessStrategy() {
             return new DozeBrightnessStrategy();
+        }
+
+        OverrideBrightnessStrategy getOverrideBrightnessStrategy() {
+            return new OverrideBrightnessStrategy();
         }
 
         InvalidBrightnessStrategy getInvalidBrightnessStrategy() {
