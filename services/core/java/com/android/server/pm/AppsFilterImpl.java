@@ -73,7 +73,6 @@ import com.android.server.utils.Snappable;
 import com.android.server.utils.SnapshotCache;
 import com.android.server.utils.Watchable;
 import com.android.server.utils.WatchableImpl;
-import com.android.server.utils.WatchedArrayList;
 import com.android.server.utils.WatchedArraySet;
 import com.android.server.utils.WatchedSparseBooleanMatrix;
 import com.android.server.utils.WatchedSparseSetArray;
@@ -223,7 +222,7 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
         mForceQueryable = new WatchedArraySet<>();
         mForceQueryableSnapshot = new SnapshotCache.Auto<>(
                 mForceQueryable, mForceQueryable, "AppsFilter.mForceQueryable");
-        mProtectedBroadcasts = new WatchedArrayList<>();
+        mProtectedBroadcasts = new WatchedArraySet<>();
         mProtectedBroadcastsSnapshot = new SnapshotCache.Auto<>(
                 mProtectedBroadcasts, mProtectedBroadcasts, "AppsFilter.mProtectedBroadcasts");
         mPermissionToUids = new HashMap<>();
@@ -573,13 +572,17 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
             return null;
         }
 
-        final boolean protectedBroadcastsChanged;
-        synchronized (mProtectedBroadcastsLock) {
-            protectedBroadcastsChanged =
-                    mProtectedBroadcasts.addAll(newPkg.getProtectedBroadcasts());
-        }
-        if (protectedBroadcastsChanged) {
-            mQueriesViaComponentRequireRecompute.set(true);
+        final List<String> newBroadcasts = newPkg.getProtectedBroadcasts();
+        if (newBroadcasts.size() != 0) {
+            final boolean protectedBroadcastsChanged;
+            synchronized (mProtectedBroadcastsLock) {
+                final int oldSize = mProtectedBroadcasts.size();
+                mProtectedBroadcasts.addAll(newBroadcasts);
+                protectedBroadcastsChanged = mProtectedBroadcasts.size() != oldSize;
+            }
+            if (protectedBroadcastsChanged) {
+                mQueriesViaComponentRequireRecompute.set(true);
+            }
         }
 
         final boolean newIsForceQueryable;
@@ -1149,7 +1152,12 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
                 final ArrayList<String> protectedBroadcasts = new ArrayList<>(
                         mProtectedBroadcasts.untrackedStorage());
                 collectProtectedBroadcasts(settings, removingPackageName);
-                protectedBroadcastsChanged = !mProtectedBroadcasts.containsAll(protectedBroadcasts);
+                for (int i = 0; i < protectedBroadcasts.size(); ++i) {
+                    if (!mProtectedBroadcasts.contains(protectedBroadcasts.get(i))) {
+                        protectedBroadcastsChanged = true;
+                        break;
+                    }
+                }
             }
         }
 
