@@ -261,6 +261,9 @@ constructor(
     /** Whether the guest user is currently being reset. */
     val isGuestUserResetting: Boolean = guestUserInteractor.isGuestUserResetting
 
+    /** Whether to enable the user chip in the status bar */
+    val isStatusBarUserChipEnabled: Boolean = repository.isStatusBarUserChipEnabled
+
     private val _dialogShowRequests = MutableStateFlow<ShowDialogRequestModel?>(null)
     val dialogShowRequests: Flow<ShowDialogRequestModel?> = _dialogShowRequests.asStateFlow()
 

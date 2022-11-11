@@ -48,6 +48,9 @@ import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.battery.BatteryMeterView;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
+import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherContainer;
+import com.android.systemui.user.ui.binder.StatusBarUserChipViewBinder;
+import com.android.systemui.user.ui.viewmodel.StatusBarUserChipViewModel;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -70,7 +73,7 @@ public class KeyguardStatusBarView extends RelativeLayout {
     private ImageView mMultiUserAvatar;
     private BatteryMeterView mBatteryView;
     private StatusIconContainer mStatusIconContainer;
-    private ViewGroup mUserSwitcherContainer;
+    private StatusBarUserSwitcherContainer mUserSwitcherContainer;
 
     private boolean mKeyguardUserSwitcherEnabled;
     private boolean mKeyguardUserAvatarEnabled;
@@ -121,8 +124,12 @@ public class KeyguardStatusBarView extends RelativeLayout {
         loadDimens();
     }
 
-    public ViewGroup getUserSwitcherContainer() {
-        return mUserSwitcherContainer;
+    /**
+     * Should only be called from {@link KeyguardStatusBarViewController}
+     * @param viewModel view model for the status bar user chip
+     */
+    void init(StatusBarUserChipViewModel viewModel) {
+        StatusBarUserChipViewBinder.bind(mUserSwitcherContainer, viewModel);
     }
 
     @Override

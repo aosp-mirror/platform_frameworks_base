@@ -49,6 +49,8 @@ class FakeUserRepository : UserRepository {
 
     override val isGuestUserCreationScheduled = AtomicBoolean()
 
+    override var isStatusBarUserChipEnabled: Boolean = false
+
     override var secondaryUserId: Int = UserHandle.USER_NULL
 
     override var isRefreshUsersPaused: Boolean = false
