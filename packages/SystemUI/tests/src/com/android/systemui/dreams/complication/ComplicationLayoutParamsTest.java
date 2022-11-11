@@ -97,6 +97,31 @@ public class ComplicationLayoutParamsTest extends SysuiTestCase {
     }
 
     /**
+     * Ensures ComplicationLayoutParams correctly returns whether the complication specified margin.
+     */
+    @Test
+    public void testIsMarginSpecified() {
+        final ComplicationLayoutParams paramsNoMargin = new ComplicationLayoutParams(
+                100,
+                100,
+                ComplicationLayoutParams.POSITION_TOP
+                        | ComplicationLayoutParams.POSITION_START,
+                ComplicationLayoutParams.DIRECTION_DOWN,
+                0);
+        assertThat(paramsNoMargin.isMarginSpecified()).isFalse();
+
+        final ComplicationLayoutParams paramsWithMargin = new ComplicationLayoutParams(
+                100,
+                100,
+                ComplicationLayoutParams.POSITION_TOP
+                        | ComplicationLayoutParams.POSITION_START,
+                ComplicationLayoutParams.DIRECTION_DOWN,
+                0,
+                20 /*margin*/);
+        assertThat(paramsWithMargin.isMarginSpecified()).isTrue();
+    }
+
+    /**
      * Ensures unspecified margin uses default.
      */
     @Test
