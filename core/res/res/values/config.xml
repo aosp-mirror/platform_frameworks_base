@@ -1096,13 +1096,24 @@
     <integer name="config_triplePressOnStemPrimaryBehavior">0</integer>
 
     <!-- Control the behavior when the user short presses the stem primary button.
-        Stem primary button is only used on watch form factor. If a device is not
-        a watch, setting this config is no-op.
-           0 - Nothing
-           1 - Go to launch all apps
+         Stem primary button is only used on watch form factor. If a device is not
+         a watch, setting this config is no-op.
+            0 - Nothing
+            1 - Go to launch all apps
     -->
     <integer name="config_shortPressOnStemPrimaryBehavior">0</integer>
 
+
+    <!-- Control the behavior of the search key.
+            0 - Launch default search activity
+            1 - Launch target activity defined by config_searchKeyTargetActivity
+    -->
+    <integer name="config_searchKeyBehavior">0</integer>
+
+    <!-- Component name for the default target activity to be launched when user
+         presses the global search key. [DO NOT TRANSLATE]
+    -->
+    <string name="config_searchKeyTargetActivity" translatable="false"></string>
 
     <!-- Time to wait while a button is pressed before triggering a very long press. -->
     <integer name="config_veryLongPressTimeout">3500</integer>
