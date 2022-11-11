@@ -113,11 +113,13 @@ public class UsbRequest {
      * Releases all resources related to this request.
      */
     public void close() {
-        if (mNativeContext != 0) {
-            mEndpoint = null;
-            mConnection = null;
-            native_close();
-            mCloseGuard.close();
+        synchronized (mLock) {
+            if (mNativeContext != 0) {
+                mEndpoint = null;
+                mConnection = null;
+                native_close();
+                mCloseGuard.close();
+            }
         }
     }
 
@@ -191,10 +193,32 @@ public class UsbRequest {
      */
     @Deprecated
     public boolean queue(ByteBuffer buffer, int length) {
+        UsbDeviceConnection connection = mConnection;
+        if (connection == null) {
+            // The expected exception by CTS Verifier - USB Device test
+            throw new NullPointerException("invalid connection");
+        }
+
+        // Calling into the underlying UsbDeviceConnection to synchronize on its lock, to prevent
+        // the connection being closed while queueing.
+        return connection.queueRequest(this, buffer, length);
+    }
+
+    /**
+     * This is meant to be called from UsbDeviceConnection after synchronizing using the lock over
+     * there, to prevent the connection being closed while queueing.
+     */
+    /* package */ boolean queueIfConnectionOpen(ByteBuffer buffer, int length) {
+        UsbDeviceConnection connection = mConnection;
+        if (connection == null || !connection.isOpen()) {
+            // The expected exception by CTS Verifier - USB Device test
+            throw new NullPointerException("invalid connection");
+        }
+
         boolean out = (mEndpoint.getDirection() == UsbConstants.USB_DIR_OUT);
         boolean result;
 
-        if (mConnection.getContext().getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.P
+        if (connection.getContext().getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.P
                 && length > MAX_USBFS_BUFFER_SIZE) {
             length = MAX_USBFS_BUFFER_SIZE;
         }
@@ -243,6 +267,28 @@ public class UsbRequest {
      * @return true if the queueing operation succeeded
      */
     public boolean queue(@Nullable ByteBuffer buffer) {
+        UsbDeviceConnection connection = mConnection;
+        if (connection == null) {
+            // The expected exception by CTS Verifier - USB Device test
+            throw new IllegalStateException("invalid connection");
+        }
+
+        // Calling into the underlying UsbDeviceConnection to synchronize on its lock, to prevent
+        // the connection being closed while queueing.
+        return connection.queueRequest(this, buffer);
+    }
+
+    /**
+     * This is meant to be called from UsbDeviceConnection after synchronizing using the lock over
+     * there, to prevent the connection being closed while queueing.
+     */
+    /* package */ boolean queueIfConnectionOpen(@Nullable ByteBuffer buffer) {
+        UsbDeviceConnection connection = mConnection;
+        if (connection == null || !connection.isOpen()) {
+            // The expected exception by CTS Verifier - USB Device test
+            throw new IllegalStateException("invalid connection");
+        }
+
         // Request need to be initialized
         Preconditions.checkState(mNativeContext != 0, "request is not initialized");
 
@@ -260,7 +306,7 @@ public class UsbRequest {
                 mIsUsingNewQueue = true;
                 wasQueued = native_queue(null, 0, 0);
             } else {
-                if (mConnection.getContext().getApplicationInfo().targetSdkVersion
+                if (connection.getContext().getApplicationInfo().targetSdkVersion
                         < Build.VERSION_CODES.P) {
                     // Can only send/receive MAX_USBFS_BUFFER_SIZE bytes at once
                     Preconditions.checkArgumentInRange(buffer.remaining(), 0, MAX_USBFS_BUFFER_SIZE,
@@ -363,11 +409,12 @@ public class UsbRequest {
      * @return true if cancelling succeeded
      */
     public boolean cancel() {
-        if (mConnection == null) {
+        UsbDeviceConnection connection = mConnection;
+        if (connection == null) {
             return false;
         }
 
-        return mConnection.cancelRequest(this);
+        return connection.cancelRequest(this);
     }
 
     /**
@@ -382,7 +429,8 @@ public class UsbRequest {
      * @return true if cancelling succeeded.
      */
     /* package */ boolean cancelIfOpen() {
-        if (mNativeContext == 0 || (mConnection != null && !mConnection.isOpen())) {
+        UsbDeviceConnection connection = mConnection;
+        if (mNativeContext == 0 || (connection != null && !connection.isOpen())) {
             Log.w(TAG,
                     "Detected attempt to cancel a request on a connection which isn't open");
             return false;
