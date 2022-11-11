@@ -19,6 +19,7 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.widget.ImageView
 import androidx.test.filters.SmallTest
+import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.battery.BatteryMeterView.BatteryEstimateFetcher
 import com.android.systemui.statusbar.policy.BatteryController.EstimateFetchCompletion
@@ -57,6 +58,71 @@ class BatteryMeterViewTest : SysuiTestCase() {
 
         mBatteryMeterView.updatePercentText()
         // No assert needed
+    }
+
+    @Test
+    fun contentDescription_unknown() {
+        mBatteryMeterView.onBatteryUnknownStateChanged(true)
+
+        assertThat(mBatteryMeterView.contentDescription).isEqualTo(
+                context.getString(R.string.accessibility_battery_unknown)
+        )
+    }
+
+    @Test
+    fun contentDescription_estimate() {
+        mBatteryMeterView.onBatteryLevelChanged(15, false)
+        mBatteryMeterView.setPercentShowMode(BatteryMeterView.MODE_ESTIMATE)
+        mBatteryMeterView.setBatteryEstimateFetcher(Fetcher())
+
+        mBatteryMeterView.updatePercentText()
+
+        assertThat(mBatteryMeterView.contentDescription).isEqualTo(
+                context.getString(
+                        R.string.accessibility_battery_level_with_estimate, 15, ESTIMATE
+                )
+        )
+    }
+
+    @Test
+    fun contentDescription_charging() {
+        mBatteryMeterView.onBatteryLevelChanged(45, true)
+
+        assertThat(mBatteryMeterView.contentDescription).isEqualTo(
+                context.getString(R.string.accessibility_battery_level_charging, 45)
+        )
+    }
+
+    @Test
+    fun contentDescription_notCharging() {
+        mBatteryMeterView.onBatteryLevelChanged(45, false)
+
+        assertThat(mBatteryMeterView.contentDescription).isEqualTo(
+                context.getString(R.string.accessibility_battery_level, 45)
+        )
+    }
+
+    @Test
+    fun changesFromEstimateToPercent_textAndContentDescriptionChanges() {
+        mBatteryMeterView.onBatteryLevelChanged(15, false)
+        mBatteryMeterView.setPercentShowMode(BatteryMeterView.MODE_ESTIMATE)
+        mBatteryMeterView.setBatteryEstimateFetcher(Fetcher())
+
+        mBatteryMeterView.updatePercentText()
+
+        assertThat(mBatteryMeterView.contentDescription).isEqualTo(
+                context.getString(
+                        R.string.accessibility_battery_level_with_estimate, 15, ESTIMATE
+                )
+        )
+
+        // Update the show mode from estimate to percent
+        mBatteryMeterView.setPercentShowMode(BatteryMeterView.MODE_ON)
+
+        assertThat(mBatteryMeterView.batteryPercentViewText).isEqualTo("15%")
+        assertThat(mBatteryMeterView.contentDescription).isEqualTo(
+                context.getString(R.string.accessibility_battery_level, 15)
+        )
     }
 
     @Test
