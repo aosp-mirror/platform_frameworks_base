@@ -32,7 +32,6 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.annotation.NonNull;
@@ -92,9 +91,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
                 .isEqualTo(typeToString(BackNavigationInfo.TYPE_RETURN_TO_HOME));
 
         // verify if back animation would start.
-        verify(mBackNavigationController).scheduleAnimationLocked(
-                eq(BackNavigationInfo.TYPE_RETURN_TO_HOME), any(), eq(mBackAnimationAdapter),
-                any());
+        assertTrue("Animation scheduled", backNavigationInfo.isPrepareRemoteAnimation());
     }
 
     @Test
@@ -111,9 +108,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
                 .isEqualTo(typeToString(BackNavigationInfo.TYPE_CROSS_TASK));
 
         // verify if back animation would start.
-        verify(mBackNavigationController).scheduleAnimationLocked(
-                eq(BackNavigationInfo.TYPE_CROSS_TASK), any(), eq(mBackAnimationAdapter),
-                any());
+        assertTrue("Animation scheduled", backNavigationInfo.isPrepareRemoteAnimation());
 
         // reset drawning status
         topTask.forAllWindows(w -> {
