@@ -59112,6 +59112,22 @@ package android.widget.inline {
 
 package android.window {
 
+  public final class BackEvent {
+    ctor public BackEvent(float, float, float, int);
+    method @FloatRange(from=0, to=1) public float getProgress();
+    method public int getSwipeEdge();
+    method public float getTouchX();
+    method public float getTouchY();
+    field public static final int EDGE_LEFT = 0; // 0x0
+    field public static final int EDGE_RIGHT = 1; // 0x1
+  }
+
+  public interface OnBackAnimationCallback extends android.window.OnBackInvokedCallback {
+    method public default void onBackCancelled();
+    method public default void onBackProgressed(@NonNull android.window.BackEvent);
+    method public default void onBackStarted(@NonNull android.window.BackEvent);
+  }
+
   public interface OnBackInvokedCallback {
     method public void onBackInvoked();
   }

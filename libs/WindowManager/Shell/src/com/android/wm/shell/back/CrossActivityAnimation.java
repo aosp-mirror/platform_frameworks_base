@@ -39,6 +39,7 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.window.BackEvent;
+import android.window.BackMotionEvent;
 import android.window.BackProgressAnimator;
 import android.window.IOnBackInvokedCallback;
 
@@ -315,13 +316,13 @@ class CrossActivityAnimation {
 
     private final class Callback extends IOnBackInvokedCallback.Default {
         @Override
-        public void onBackStarted(BackEvent backEvent) {
+        public void onBackStarted(BackMotionEvent backEvent) {
             mProgressAnimator.onBackStarted(backEvent,
                     CrossActivityAnimation.this::onGestureProgress);
         }
 
         @Override
-        public void onBackProgressed(@NonNull BackEvent backEvent) {
+        public void onBackProgressed(@NonNull BackMotionEvent backEvent) {
             mProgressAnimator.onBackProgressed(backEvent);
         }
 

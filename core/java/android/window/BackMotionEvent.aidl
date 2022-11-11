@@ -19,4 +19,4 @@ package android.window;
 /**
  * @hide
  */
-parcelable BackEvent;
+parcelable BackMotionEvent;
