@@ -121,18 +121,32 @@ class MediaTttChipControllerReceiver @Inject constructor(
         uiEventLogger.logReceiverStateChange(chipState)
 
         if (chipState == ChipStateReceiver.FAR_FROM_SENDER) {
-            removeView(removalReason = ChipStateReceiver.FAR_FROM_SENDER.name)
+            removeView(routeInfo.id, removalReason = ChipStateReceiver.FAR_FROM_SENDER.name)
             return
         }
         if (appIcon == null) {
-            displayView(ChipReceiverInfo(routeInfo, appIconDrawableOverride = null, appName))
+            displayView(
+                ChipReceiverInfo(
+                    routeInfo,
+                    appIconDrawableOverride = null,
+                    appName,
+                    id = routeInfo.id,
+                )
+            )
             return
         }
 
         appIcon.loadDrawableAsync(
                 context,
                 Icon.OnDrawableLoadedListener { drawable ->
-                    displayView(ChipReceiverInfo(routeInfo, drawable, appName))
+                    displayView(
+                        ChipReceiverInfo(
+                            routeInfo,
+                            drawable,
+                            appName,
+                            id = routeInfo.id,
+                        )
+                    )
                 },
                 // Notify the listener on the main handler since the listener will update
                 // the UI.
@@ -234,4 +248,5 @@ data class ChipReceiverInfo(
     val appNameOverride: CharSequence?,
     override val windowTitle: String = MediaTttUtils.WINDOW_TITLE_RECEIVER,
     override val wakeReason: String = MediaTttUtils.WAKE_REASON_RECEIVER,
+    override val id: String,
 ) : TemporaryViewInfo()
