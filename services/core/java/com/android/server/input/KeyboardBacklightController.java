@@ -24,6 +24,7 @@ import android.hardware.lights.Light;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -216,12 +217,14 @@ final class KeyboardBacklightController implements InputManager.InputDeviceListe
         return null;
     }
 
-    void dump(PrintWriter pw, String prefix) {
-        pw.println(prefix + TAG + ": " + mKeyboardBacklights.size() + " keyboard backlights");
+    void dump(PrintWriter pw) {
+        IndentingPrintWriter ipw = new IndentingPrintWriter(pw);
+        ipw.println(TAG + ": " + mKeyboardBacklights.size() + " keyboard backlights");
+        ipw.increaseIndent();
         for (int i = 0; i < mKeyboardBacklights.size(); i++) {
             Light light = mKeyboardBacklights.get(i);
-            pw.println(prefix + "  " + i + ": { id: " + light.getId() + ", name: " + light.getName()
-                    + " }");
+            ipw.println(i + ": { id: " + light.getId() + ", name: " + light.getName() + " }");
         }
+        ipw.decreaseIndent();
     }
 }

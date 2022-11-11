@@ -22,9 +22,17 @@
 #include <SkBlendMode.h>
 #include <SkCanvas.h>
 #include <SkColor.h>
+#include <android-base/stringprintf.h>
 #include <android-base/thread_annotations.h>
+#include <ftl/enum.h>
+
+#include <mutex>
 
 #include "PointerControllerContext.h"
+
+#define INDENT "  "
+#define INDENT2 "    "
+#define INDENT3 "      "
 
 namespace android {
 
@@ -223,7 +231,7 @@ void PointerController::clearSpots() {
 }
 
 void PointerController::clearSpotsLocked() {
-    for (auto& [displayID, spotController] : mLocked.spotControllers) {
+    for (auto& [displayId, spotController] : mLocked.spotControllers) {
         spotController.clearSpots();
     }
 }
@@ -235,7 +243,7 @@ void PointerController::setInactivityTimeout(InactivityTimeout inactivityTimeout
 void PointerController::reloadPointerResources() {
     std::scoped_lock lock(getLock());
 
-    for (auto& [displayID, spotController] : mLocked.spotControllers) {
+    for (auto& [displayId, spotController] : mLocked.spotControllers) {
         spotController.reloadSpotResources();
     }
 
@@ -286,13 +294,13 @@ void PointerController::onDisplayViewportsUpdated(std::vector<DisplayViewport>& 
 
     std::scoped_lock lock(getLock());
     for (auto it = mLocked.spotControllers.begin(); it != mLocked.spotControllers.end();) {
-        int32_t displayID = it->first;
-        if (!displayIdSet.count(displayID)) {
+        int32_t displayId = it->first;
+        if (!displayIdSet.count(displayId)) {
             /*
              * Ensures that an in-progress animation won't dereference
              * a null pointer to TouchSpotController.
              */
-            mContext.removeAnimationCallback(displayID);
+            mContext.removeAnimationCallback(displayId);
             it = mLocked.spotControllers.erase(it);
         } else {
             ++it;
@@ -311,6 +319,22 @@ const ui::Transform& PointerController::getTransformForDisplayLocked(int display
         return info.displayId == displayId;
     });
     return it != di.end() ? it->transform : kIdentityTransform;
+}
+
+void PointerController::dump(std::string& dump) {
+    dump += INDENT "PointerController:\n";
+    std::scoped_lock lock(getLock());
+    dump += StringPrintf(INDENT2 "Presentation: %s\n",
+                         ftl::enum_string(mLocked.presentation).c_str());
+    dump += StringPrintf(INDENT2 "Pointer Display ID: %" PRIu32 "\n", mLocked.pointerDisplayId);
+    dump += StringPrintf(INDENT2 "Viewports:\n");
+    for (const auto& info : mLocked.mDisplayInfos) {
+        info.dump(dump, INDENT3);
+    }
+    dump += INDENT2 "Spot Controllers:\n";
+    for (const auto& [_, spotController] : mLocked.spotControllers) {
+        spotController.dump(dump, INDENT3);
+    }
 }
 
 } // namespace android
