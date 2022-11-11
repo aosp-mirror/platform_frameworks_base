@@ -17,6 +17,7 @@
 package com.android.credentialmanager
 
 import android.content.Context
+import android.content.pm.PackageManager
 import android.credentials.ui.Entry
 import android.credentials.ui.GetCredentialProviderData
 import android.credentials.ui.CreateCredentialProviderData
@@ -108,12 +109,15 @@ class CreateFlowUtils {
       providerDataList: List<CreateCredentialProviderData>,
       context: Context,
     ): List<com.android.credentialmanager.createflow.EnabledProviderInfo> {
+      val packageManager = context.packageManager
       return providerDataList.map {
+        val pkgInfo = packageManager
+          .getPackageInfo(it.providerFlattenedComponentName,
+            PackageManager.PackageInfoFlags.of(0))
         com.android.credentialmanager.createflow.EnabledProviderInfo(
-          // TODO: replace to extract from the service data structure when available
-          icon = context.getDrawable(R.drawable.ic_passkey)!!,
+          icon = pkgInfo.applicationInfo.loadIcon(packageManager)!!,
           name = it.providerFlattenedComponentName,
-          displayName = it.providerFlattenedComponentName,
+          displayName = pkgInfo.applicationInfo.loadLabel(packageManager).toString(),
           createOptions = toCreationOptionInfoList(it.saveEntries, context),
           isDefault = it.isDefaultProvider,
         )
@@ -124,12 +128,15 @@ class CreateFlowUtils {
       providerDataList: List<DisabledProviderData>,
       context: Context,
     ): List<com.android.credentialmanager.createflow.DisabledProviderInfo> {
+      val packageManager = context.packageManager
       return providerDataList.map {
+        val pkgInfo = packageManager
+          .getPackageInfo(it.providerFlattenedComponentName,
+            PackageManager.PackageInfoFlags.of(0))
         com.android.credentialmanager.createflow.DisabledProviderInfo(
-          // TODO: replace to extract from the service data structure when available
-          icon = context.getDrawable(R.drawable.ic_passkey)!!,
+          icon = pkgInfo.applicationInfo.loadIcon(packageManager)!!,
           name = it.providerFlattenedComponentName,
-          displayName = it.providerFlattenedComponentName,
+          displayName = pkgInfo.applicationInfo.loadLabel(packageManager).toString(),
         )
       }
     }
