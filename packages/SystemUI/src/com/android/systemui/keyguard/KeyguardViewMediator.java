@@ -137,6 +137,7 @@ import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
+import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.util.DeviceConfigProxy;
@@ -847,6 +848,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                 @Override
                 public void onLaunchAnimationStart(boolean isExpandingFullyAbove) {
                     mOccludeAnimationPlaying = true;
+                    mScrimControllerLazy.get().setOccludeAnimationPlaying(true);
                 }
 
                 @Override
@@ -857,6 +859,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
 
                     // Ensure keyguard state is set correctly if we're cancelled.
                     mCentralSurfaces.updateIsKeyguard();
+                    mScrimControllerLazy.get().setOccludeAnimationPlaying(false);
                 }
 
                 @Override
@@ -870,6 +873,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                     // Hide the keyguard now that we're done launching the occluding activity over
                     // it.
                     mCentralSurfaces.updateIsKeyguard();
+                    mScrimControllerLazy.get().setOccludeAnimationPlaying(false);
 
                     mInteractionJankMonitor.end(CUJ_LOCKSCREEN_OCCLUSION);
                 }
@@ -1126,6 +1130,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     private ScreenOnCoordinator mScreenOnCoordinator;
 
     private Lazy<ActivityLaunchAnimator> mActivityLaunchAnimator;
+    private Lazy<ScrimController> mScrimControllerLazy;
 
     /**
      * Injected constructor. See {@link KeyguardModule}.
@@ -1156,7 +1161,8 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             DreamOverlayStateController dreamOverlayStateController,
             Lazy<ShadeController> shadeControllerLazy,
             Lazy<NotificationShadeWindowController> notificationShadeWindowControllerLazy,
-            Lazy<ActivityLaunchAnimator> activityLaunchAnimator) {
+            Lazy<ActivityLaunchAnimator> activityLaunchAnimator,
+            Lazy<ScrimController> scrimControllerLazy) {
         mContext = context;
         mUserTracker = userTracker;
         mFalsingCollector = falsingCollector;
@@ -1201,6 +1207,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         mDreamOverlayStateController = dreamOverlayStateController;
 
         mActivityLaunchAnimator = activityLaunchAnimator;
+        mScrimControllerLazy = scrimControllerLazy;
 
         mPowerButtonY = context.getResources().getDimensionPixelSize(
                 R.dimen.physical_power_button_center_screen_location_y);

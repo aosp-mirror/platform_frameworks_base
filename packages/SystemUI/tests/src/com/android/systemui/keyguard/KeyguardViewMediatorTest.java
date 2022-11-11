@@ -65,6 +65,7 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
+import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
@@ -112,6 +113,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Mock Lazy<NotificationShadeWindowController> mNotificationShadeWindowControllerLazy;
     private @Mock DreamOverlayStateController mDreamOverlayStateController;
     private @Mock ActivityLaunchAnimator mActivityLaunchAnimator;
+    private @Mock ScrimController mScrimController;
     private DeviceConfigProxy mDeviceConfig = new DeviceConfigProxyFake();
     private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
 
@@ -314,7 +316,8 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 mDreamOverlayStateController,
                 () -> mShadeController,
                 mNotificationShadeWindowControllerLazy,
-                () -> mActivityLaunchAnimator);
+                () -> mActivityLaunchAnimator,
+                () -> mScrimController);
         mViewMediator.start();
 
         mViewMediator.registerCentralSurfaces(mCentralSurfaces, null, null, null, null, null);
