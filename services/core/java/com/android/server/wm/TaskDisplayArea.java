@@ -455,7 +455,7 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         }
 
         mLastLeafTaskToFrontId = t.mTaskId;
-        EventLogTags.writeWmTaskToFront(t.mUserId, t.mTaskId);
+        EventLogTags.writeWmTaskToFront(t.mUserId, t.mTaskId, getDisplayId());
         // Notifying only when a leaf task moved to front. Or the listeners would be notified
         // couple times from the leaf task all the way up to the root task.
         mAtmService.getTaskChangeNotificationController().notifyTaskMovedToFront(t.getTaskInfo());
