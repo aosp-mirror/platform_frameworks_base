@@ -28,7 +28,7 @@ import com.android.systemui.plugins.ClockMetadata
 import com.android.systemui.plugins.ClockProvider
 import com.android.systemui.plugins.ClockProviderPlugin
 import com.android.systemui.plugins.PluginListener
-import com.android.systemui.shared.plugins.PluginManager
+import com.android.systemui.plugins.PluginManager
 import org.json.JSONObject
 
 private val TAG = ClockRegistry::class.simpleName

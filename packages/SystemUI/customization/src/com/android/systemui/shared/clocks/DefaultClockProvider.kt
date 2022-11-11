@@ -17,23 +17,21 @@ import android.content.Context
 import android.content.res.Resources
 import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
-import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.customization.R
 import com.android.systemui.plugins.ClockController
 import com.android.systemui.plugins.ClockId
 import com.android.systemui.plugins.ClockMetadata
 import com.android.systemui.plugins.ClockProvider
-import com.android.systemui.shared.R
-import javax.inject.Inject
 
 private val TAG = DefaultClockProvider::class.simpleName
 const val DEFAULT_CLOCK_NAME = "Default Clock"
 const val DEFAULT_CLOCK_ID = "DEFAULT"
 
 /** Provides the default system clock */
-class DefaultClockProvider @Inject constructor(
+class DefaultClockProvider constructor(
     val ctx: Context,
     val layoutInflater: LayoutInflater,
-    @Main val resources: Resources
+    val resources: Resources
 ) : ClockProvider {
     override fun getClocks(): List<ClockMetadata> =
         listOf(ClockMetadata(DEFAULT_CLOCK_ID, DEFAULT_CLOCK_NAME))
