@@ -2904,12 +2904,19 @@ public class UserManager {
      */
     @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
             Manifest.permission.INTERACT_ACROSS_USERS})
-    public @NonNull List<UserHandle> getVisibleUsers() {
+    public @NonNull Set<UserHandle> getVisibleUsers() {
+        ArraySet<UserHandle> result = new ArraySet<>();
         try {
-            return mService.getVisibleUsers();
+            int[] visibleUserIds = mService.getVisibleUsers();
+            if (visibleUserIds != null) {
+                for (int userId : visibleUserIds) {
+                    result.add(UserHandle.of(userId));
+                }
+            }
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
+        return result;
     }
 
     /**

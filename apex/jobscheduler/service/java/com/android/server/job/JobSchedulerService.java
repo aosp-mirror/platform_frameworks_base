@@ -177,7 +177,7 @@ public class JobSchedulerService extends com.android.server.SystemService
     @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     private static final long REQUIRE_NETWORK_CONSTRAINT_FOR_NETWORK_JOB_WORK_ITEMS = 241104082L;
 
-    @VisibleForTesting
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     public static Clock sSystemClock = Clock.systemUTC();
 
     private abstract static class MySimpleClock extends Clock {
@@ -454,6 +454,10 @@ public class JobSchedulerService extends com.android.server.SystemService
                                 runtimeUpdated = true;
                             }
                             break;
+                        case Constants.KEY_PERSIST_IN_SPLIT_FILES:
+                            mConstants.updatePersistingConstantsLocked();
+                            mJobs.setUseSplitFiles(mConstants.PERSIST_IN_SPLIT_FILES);
+                            break;
                         default:
                             if (name.startsWith(JobConcurrencyManager.CONFIG_KEY_PREFIX_CONCURRENCY)
                                     && !concurrencyUpdated) {
@@ -537,6 +541,8 @@ public class JobSchedulerService extends com.android.server.SystemService
         private static final String KEY_RUNTIME_MIN_HIGH_PRIORITY_GUARANTEE_MS =
                 "runtime_min_high_priority_guarantee_ms";
 
+        private static final String KEY_PERSIST_IN_SPLIT_FILES = "persist_in_split_files";
+
         private static final int DEFAULT_MIN_READY_NON_ACTIVE_JOBS_COUNT = 5;
         private static final long DEFAULT_MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS = 31 * MINUTE_IN_MILLIS;
         private static final float DEFAULT_HEAVY_USE_FACTOR = .9f;
@@ -563,6 +569,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         public static final long DEFAULT_RUNTIME_MIN_EJ_GUARANTEE_MS = 3 * MINUTE_IN_MILLIS;
         @VisibleForTesting
         static final long DEFAULT_RUNTIME_MIN_HIGH_PRIORITY_GUARANTEE_MS = 5 * MINUTE_IN_MILLIS;
+        static final boolean DEFAULT_PERSIST_IN_SPLIT_FILES = false;
         private static final boolean DEFAULT_USE_TARE_POLICY = false;
 
         /**
@@ -678,6 +685,12 @@ public class JobSchedulerService extends com.android.server.SystemService
                 DEFAULT_RUNTIME_MIN_HIGH_PRIORITY_GUARANTEE_MS;
 
         /**
+         * Whether to persist jobs in split files (by UID). If false, all persisted jobs will be
+         * saved in a single file.
+         */
+        public boolean PERSIST_IN_SPLIT_FILES = DEFAULT_PERSIST_IN_SPLIT_FILES;
+
+        /**
          * If true, use TARE policy for job limiting. If false, use quotas.
          */
         public boolean USE_TARE_POLICY = DEFAULT_USE_TARE_POLICY;
@@ -733,6 +746,11 @@ public class JobSchedulerService extends com.android.server.SystemService
                     DeviceConfig.NAMESPACE_JOB_SCHEDULER,
                     KEY_CONN_LOW_SIGNAL_STRENGTH_RELAX_FRAC,
                     DEFAULT_CONN_LOW_SIGNAL_STRENGTH_RELAX_FRAC);
+        }
+
+        private void updatePersistingConstantsLocked() {
+            PERSIST_IN_SPLIT_FILES = DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_JOB_SCHEDULER,
+                    KEY_PERSIST_IN_SPLIT_FILES, DEFAULT_PERSIST_IN_SPLIT_FILES);
         }
 
         private void updatePrefetchConstantsLocked() {
@@ -834,6 +852,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                     RUNTIME_MIN_HIGH_PRIORITY_GUARANTEE_MS).println();
             pw.print(KEY_RUNTIME_FREE_QUOTA_MAX_LIMIT_MS, RUNTIME_FREE_QUOTA_MAX_LIMIT_MS)
                     .println();
+
+            pw.print(KEY_PERSIST_IN_SPLIT_FILES, PERSIST_IN_SPLIT_FILES).println();
 
             pw.print(Settings.Global.ENABLE_TARE, USE_TARE_POLICY).println();
 

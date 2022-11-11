@@ -35,8 +35,8 @@
         </activity>
 
         <provider
-            android:name=".GalleryEntryProvider"
-            android:authorities="com.android.spa.gallery.provider"
+            android:name="com.android.settingslib.spa.framework.SpaSearchProvider"
+            android:authorities="com.android.spa.gallery.search.provider"
             android:enabled="true"
             android:exported="false">
         </provider>
@@ -51,7 +51,7 @@
         </activity>
         <provider
             android:name="com.android.settingslib.spa.framework.debug.DebugProvider"
-            android:authorities="com.android.spa.gallery.debug"
+            android:authorities="com.android.spa.gallery.debug.provider"
             android:enabled="true"
             android:exported="false">
         </provider>

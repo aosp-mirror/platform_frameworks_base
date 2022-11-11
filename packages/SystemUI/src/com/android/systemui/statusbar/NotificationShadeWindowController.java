@@ -123,9 +123,6 @@ public interface NotificationShadeWindowController extends RemoteInputController
     /** Sets whether the window was collapsed by force or not. */
     default void setForceWindowCollapsed(boolean force) {}
 
-    /** Sets whether panel is expanded or not. */
-    default void setPanelExpanded(boolean isExpanded) {}
-
     /** Gets whether the panel is expanded or not. */
     default boolean getPanelExpanded() {
         return false;

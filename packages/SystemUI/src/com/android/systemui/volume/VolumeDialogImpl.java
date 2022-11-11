@@ -1230,6 +1230,9 @@ public class VolumeDialogImpl implements VolumeDialog,
                 effect = VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
                 break;
             case RINGER_MODE_VIBRATE:
+                // Feedback handled by onStateChange, for feedback both when user toggles
+                // directly in volume dialog, or drags slider to a value of 0 in settings.
+                break;
             default:
                 effect = VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK);
         }
@@ -1630,9 +1633,8 @@ public class VolumeDialogImpl implements VolumeDialog,
                 && mState.ringerModeInternal != -1
                 && mState.ringerModeInternal != state.ringerModeInternal
                 && state.ringerModeInternal == AudioManager.RINGER_MODE_VIBRATE) {
-            mController.vibrate(VibrationEffect.get(VibrationEffect.EFFECT_HEAVY_CLICK));
+            mController.vibrate(VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK));
         }
-
         mState = state;
         mDynamic.clear();
         // add any new dynamic rows

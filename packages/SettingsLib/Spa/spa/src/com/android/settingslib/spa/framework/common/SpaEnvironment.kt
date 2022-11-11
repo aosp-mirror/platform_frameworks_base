@@ -64,7 +64,7 @@ abstract class SpaEnvironment(context: Context) {
 
     open val browseActivityClass: Class<out Activity>? = null
 
-    open val entryProviderAuthorities: String? = null
+    open val searchProviderAuthorities: String? = null
 
     open val logger: SpaLogger = object : SpaLogger {}
 

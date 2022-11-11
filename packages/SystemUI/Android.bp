@@ -116,7 +116,6 @@ android_library {
         "androidx.exifinterface_exifinterface",
         "androidx.test.ext.junit",
         "com.google.android.material_material",
-        "kotlin-reflect",
         "kotlinx_coroutines_android",
         "kotlinx_coroutines",
         "iconloader_base",

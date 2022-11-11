@@ -373,6 +373,7 @@ public class MediaControlPanel {
         mMediaViewController.attach(player, MediaViewController.TYPE.PLAYER);
 
         vh.getPlayer().setOnLongClickListener(v -> {
+            if (mFalsingManager.isFalseLongTap(FalsingManager.LOW_PENALTY)) return true;
             if (!mMediaViewController.isGutsVisible()) {
                 openGuts();
                 return true;
@@ -423,6 +424,7 @@ public class MediaControlPanel {
         mMediaViewController.attach(recommendations, MediaViewController.TYPE.RECOMMENDATION);
 
         mRecommendationViewHolder.getRecommendations().setOnLongClickListener(v -> {
+            if (mFalsingManager.isFalseLongTap(FalsingManager.LOW_PENALTY)) return true;
             if (!mMediaViewController.isGutsVisible()) {
                 openGuts();
                 return true;
@@ -1191,6 +1193,7 @@ public class MediaControlPanel {
             setSmartspaceRecItemOnClickListener(mediaCoverContainer, recommendation, itemIndex);
             // Bubble up the long-click event to the card.
             mediaCoverContainer.setOnLongClickListener(v -> {
+                if (mFalsingManager.isFalseLongTap(FalsingManager.LOW_PENALTY)) return true;
                 View parent = (View) v.getParent();
                 if (parent != null) {
                     parent.performLongClick();

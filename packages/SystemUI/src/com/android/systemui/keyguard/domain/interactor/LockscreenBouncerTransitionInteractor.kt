@@ -56,10 +56,20 @@ constructor(
     private fun listenForBouncerHiding() {
         scope.launch {
             keyguardInteractor.isBouncerShowing
-                .sample(keyguardInteractor.wakefulnessState, { a, b -> Pair(a, b) })
-                .collect { pair ->
-                    val (isBouncerShowing, wakefulnessState) = pair
-                    if (!isBouncerShowing) {
+                .sample(
+                    combine(
+                        keyguardInteractor.wakefulnessState,
+                        keyguardTransitionInteractor.startedKeyguardTransitionStep,
+                    ) { a, b ->
+                        Pair(a, b)
+                    },
+                    { a, bc -> Triple(a, bc.first, bc.second) }
+                )
+                .collect { triple ->
+                    val (isBouncerShowing, wakefulnessState, lastStartedTransitionStep) = triple
+                    if (
+                        !isBouncerShowing && lastStartedTransitionStep.to == KeyguardState.BOUNCER
+                    ) {
                         val to =
                             if (
                                 wakefulnessState == WakefulnessModel.STARTING_TO_SLEEP ||
@@ -90,10 +100,10 @@ constructor(
                     combine(
                         keyguardTransitionInteractor.finishedKeyguardState,
                         keyguardInteractor.statusBarState,
-                    ) { keyguardState, statusBarState ->
-                        Pair(keyguardState, statusBarState)
+                    ) { a, b ->
+                        Pair(a, b)
                     },
-                    { shadeModel, pair -> Triple(shadeModel, pair.first, pair.second) }
+                    { a, bc -> Triple(a, bc.first, bc.second) }
                 )
                 .collect { triple ->
                     val (shadeModel, keyguardState, statusBarState) = triple
@@ -116,8 +126,7 @@ constructor(
                         )
                     } else {
                         // TODO (b/251849525): Remove statusbarstate check when that state is
-                        // integrated
-                        // into KeyguardTransitionRepository
+                        // integrated into KeyguardTransitionRepository
                         if (
                             keyguardState == KeyguardState.LOCKSCREEN &&
                                 shadeModel.isUserDragging &&

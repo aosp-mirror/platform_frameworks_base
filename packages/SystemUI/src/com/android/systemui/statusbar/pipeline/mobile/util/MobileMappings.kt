@@ -32,6 +32,7 @@ import javax.inject.Inject
 interface MobileMappingsProxy {
     fun mapIconSets(config: Config): Map<String, MobileIconGroup>
     fun getDefaultIcons(config: Config): MobileIconGroup
+    fun getIconKey(displayInfo: TelephonyDisplayInfo): String
     fun toIconKey(@NetworkType networkType: Int): String
     fun toIconKeyOverride(@NetworkType networkType: Int): String
 }
@@ -43,6 +44,9 @@ class MobileMappingsProxyImpl @Inject constructor() : MobileMappingsProxy {
 
     override fun getDefaultIcons(config: Config): MobileIconGroup =
         MobileMappings.getDefaultIcons(config)
+
+    override fun getIconKey(displayInfo: TelephonyDisplayInfo): String =
+        MobileMappings.getIconKey(displayInfo)
 
     override fun toIconKey(@NetworkType networkType: Int): String =
         MobileMappings.toIconKey(networkType)

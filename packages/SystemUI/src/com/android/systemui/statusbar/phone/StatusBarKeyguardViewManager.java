@@ -165,6 +165,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             @Override
             public void onFullyHidden() {
                 mPrimaryBouncerAnimating = false;
+                updateStates();
             }
 
             @Override
@@ -1183,12 +1184,16 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             updateNavigationBarVisibility(navBarVisible);
         }
 
-        if (primaryBouncerShowing != mLastPrimaryBouncerShowing || mFirstUpdate) {
+        boolean isPrimaryBouncerShowingChanged =
+            primaryBouncerShowing != mLastPrimaryBouncerShowing;
+        mLastPrimaryBouncerShowing = primaryBouncerShowing;
+
+        if (isPrimaryBouncerShowingChanged || mFirstUpdate) {
             mNotificationShadeWindowController.setBouncerShowing(primaryBouncerShowing);
             mCentralSurfaces.setBouncerShowing(primaryBouncerShowing);
         }
         if (primaryBouncerIsOrWillBeShowing != mLastPrimaryBouncerIsOrWillBeShowing || mFirstUpdate
-                || primaryBouncerShowing != mLastPrimaryBouncerShowing) {
+                || isPrimaryBouncerShowingChanged) {
             mKeyguardUpdateManager.sendPrimaryBouncerChanged(primaryBouncerIsOrWillBeShowing,
                     primaryBouncerShowing);
         }
@@ -1197,7 +1202,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mLastShowing = showing;
         mLastGlobalActionsVisible = mGlobalActionsVisible;
         mLastOccluded = occluded;
-        mLastPrimaryBouncerShowing = primaryBouncerShowing;
         mLastPrimaryBouncerIsOrWillBeShowing = primaryBouncerIsOrWillBeShowing;
         mLastBouncerDismissible = primaryBouncerDismissible;
         mLastRemoteInputActive = remoteInputActive;

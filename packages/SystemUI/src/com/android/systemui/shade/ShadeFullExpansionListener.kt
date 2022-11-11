@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (c) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spa.gallery
+package com.android.systemui.shade
 
-import com.android.settingslib.spa.framework.EntryProvider
-
-class GalleryEntryProvider : EntryProvider()
+/** A listener interface to be notified of expansion events for the notification shade. */
+fun interface ShadeFullExpansionListener {
+    /** Invoked whenever the shade expansion changes, when it is fully collapsed or expanded */
+    fun onShadeExpansionFullyChanged(isExpanded: Boolean)
+}

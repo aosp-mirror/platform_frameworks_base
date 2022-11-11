@@ -33,7 +33,7 @@ import com.android.settingslib.spa.framework.common.SpaEnvironmentFactory
 import com.android.settingslib.spa.framework.common.addUri
 import com.android.settingslib.spa.framework.common.getColumns
 
-private const val TAG = "EntryProvider"
+private const val TAG = "SpaSearchProvider"
 
 /**
  * The content provider to return entry related data, which can be used for search and hierarchy.
@@ -47,7 +47,7 @@ private const val TAG = "EntryProvider"
  *   $ adb shell content query --uri content://<AuthorityPath>/search_mutable_status
  *   $ adb shell content query --uri content://<AuthorityPath>/search_immutable_status
  */
-open class EntryProvider : ContentProvider() {
+class SpaSearchProvider : ContentProvider() {
     private val spaEnvironment get() = SpaEnvironmentFactory.instance
     private val uriMatcher = UriMatcher(UriMatcher.NO_MATCH)
 

@@ -210,7 +210,7 @@ public final class TunerSessionTest {
 
         mTunerSessions[0].setMuted(/* mute= */ false);
 
-        assertWithMessage("Session mute state after setting muted %s", false)
+        assertWithMessage("Session mute state after setting unmuted")
                 .that(mTunerSessions[0].isMuted()).isFalse();
     }
 
@@ -220,7 +220,7 @@ public final class TunerSessionTest {
 
         mTunerSessions[0].setMuted(/* mute= */ true);
 
-        assertWithMessage("Session mute state after setting muted %s", true)
+        assertWithMessage("Session mute state after setting muted")
                 .that(mTunerSessions[0].isMuted()).isTrue();
     }
 

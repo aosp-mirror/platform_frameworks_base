@@ -24,17 +24,14 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
@@ -136,7 +133,6 @@ private fun SearchableTopAppBar(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SearchTopAppBar(
     query: TextFieldValue,
@@ -144,20 +140,16 @@ private fun SearchTopAppBar(
     onClose: () -> Unit,
     actions: @Composable RowScope.() -> Unit = {},
 ) {
-    Surface(color = SettingsTheme.colorScheme.surfaceHeader) {
-        TopAppBar(
-            title = { SearchBox(query, onQueryChange) },
-            modifier = Modifier.statusBarsPadding(),
-            navigationIcon = { CollapseAction(onClose) },
-            actions = {
-                if (query.text.isNotEmpty()) {
-                    ClearAction { onQueryChange(TextFieldValue()) }
-                }
-                actions()
-            },
-            colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = Color.Transparent),
-        )
-    }
+    CustomizedTopAppBar(
+        title = { SearchBox(query, onQueryChange) },
+        navigationIcon = { CollapseAction(onClose) },
+        actions = {
+            if (query.text.isNotEmpty()) {
+                ClearAction { onQueryChange(TextFieldValue()) }
+            }
+            actions()
+        },
+    )
     BackHandler { onClose() }
 }
 

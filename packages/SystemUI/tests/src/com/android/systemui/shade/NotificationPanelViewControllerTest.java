@@ -94,7 +94,6 @@ import com.android.systemui.DejankUtils;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
-import com.android.systemui.camera.CameraGestureHelper;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.doze.DozeLog;
@@ -308,7 +307,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         SystemClock systemClock = new FakeSystemClock();
         mStatusBarStateController = new StatusBarStateControllerImpl(mUiEventLogger, mDumpManager,
-                mInteractionJankMonitor);
+                mInteractionJankMonitor, mShadeExpansionStateManager);
 
         KeyguardStatusView keyguardStatusView = new KeyguardStatusView(mContext);
         keyguardStatusView.setId(R.id.keyguard_status_view);
@@ -379,7 +378,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                         mDumpManager,
                         mock(HeadsUpManagerPhone.class),
                         new StatusBarStateControllerImpl(new UiEventLoggerFake(), mDumpManager,
-                                mInteractionJankMonitor),
+                                mInteractionJankMonitor, mShadeExpansionStateManager),
                         mKeyguardBypassController,
                         mDozeParameters,
                         mScreenOffAnimationController);
@@ -492,9 +491,9 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mUnlockedScreenOffAnimationController,
                 mShadeTransitionController,
                 systemClock,
-                mock(CameraGestureHelper.class),
                 mKeyguardBottomAreaViewModel,
-                mKeyguardBottomAreaInteractor);
+                mKeyguardBottomAreaInteractor,
+                mDumpManager);
         mNotificationPanelViewController.initDependencies(
                 mCentralSurfaces,
                 () -> {},

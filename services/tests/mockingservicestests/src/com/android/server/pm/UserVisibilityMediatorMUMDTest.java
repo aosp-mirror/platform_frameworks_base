@@ -44,14 +44,14 @@ public final class UserVisibilityMediatorMUMDTest extends UserVisibilityMediator
 
     @Test
     public void testAssignUserToDisplay_systemUser() {
-        assertThrows(IllegalArgumentException.class,
-                () -> mMediator.assignUserToDisplay(USER_SYSTEM, SECONDARY_DISPLAY_ID));
+        assertThrows(IllegalArgumentException.class, () -> mMediator
+                .assignUserToDisplay(USER_SYSTEM, USER_SYSTEM, SECONDARY_DISPLAY_ID));
     }
 
     @Test
     public void testAssignUserToDisplay_invalidDisplay() {
         assertThrows(IllegalArgumentException.class,
-                () -> mMediator.assignUserToDisplay(USER_ID, INVALID_DISPLAY));
+                () -> mMediator.assignUserToDisplay(USER_ID, USER_ID, INVALID_DISPLAY));
     }
 
     @Test
@@ -59,7 +59,7 @@ public final class UserVisibilityMediatorMUMDTest extends UserVisibilityMediator
         mockCurrentUser(USER_ID);
 
         assertThrows(IllegalArgumentException.class,
-                () -> mMediator.assignUserToDisplay(USER_ID, SECONDARY_DISPLAY_ID));
+                () -> mMediator.assignUserToDisplay(USER_ID, USER_ID, SECONDARY_DISPLAY_ID));
 
         assertNoUserAssignedToDisplay();
     }
@@ -67,11 +67,10 @@ public final class UserVisibilityMediatorMUMDTest extends UserVisibilityMediator
     @Test
     public void testAssignUserToDisplay_startedProfileOfCurrentUser() {
         mockCurrentUser(PARENT_USER_ID);
-        addDefaultProfileAndParent();
         startDefaultProfile();
 
-        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
-                () -> mMediator.assignUserToDisplay(PROFILE_USER_ID, SECONDARY_DISPLAY_ID));
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> mMediator
+                .assignUserToDisplay(PROFILE_USER_ID, PARENT_USER_ID, SECONDARY_DISPLAY_ID));
 
         Log.v(TAG, "Exception: " + e);
         assertNoUserAssignedToDisplay();
@@ -80,11 +79,10 @@ public final class UserVisibilityMediatorMUMDTest extends UserVisibilityMediator
     @Test
     public void testAssignUserToDisplay_stoppedProfileOfCurrentUser() {
         mockCurrentUser(PARENT_USER_ID);
-        addDefaultProfileAndParent();
         stopDefaultProfile();
 
-        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
-                () -> mMediator.assignUserToDisplay(PROFILE_USER_ID, SECONDARY_DISPLAY_ID));
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> mMediator
+                .assignUserToDisplay(PROFILE_USER_ID, PARENT_USER_ID, SECONDARY_DISPLAY_ID));
 
         Log.v(TAG, "Exception: " + e);
         assertNoUserAssignedToDisplay();
@@ -92,17 +90,17 @@ public final class UserVisibilityMediatorMUMDTest extends UserVisibilityMediator
 
     @Test
     public void testAssignUserToDisplay_displayAvailable() {
-        mMediator.assignUserToDisplay(USER_ID, SECONDARY_DISPLAY_ID);
+        mMediator.assignUserToDisplay(USER_ID, USER_ID, SECONDARY_DISPLAY_ID);
 
         assertUserAssignedToDisplay(USER_ID, SECONDARY_DISPLAY_ID);
     }
 
     @Test
     public void testAssignUserToDisplay_displayAlreadyAssigned() {
-        mMediator.assignUserToDisplay(USER_ID, SECONDARY_DISPLAY_ID);
+        mMediator.assignUserToDisplay(USER_ID, USER_ID, SECONDARY_DISPLAY_ID);
 
-        IllegalStateException e = assertThrows(IllegalStateException.class,
-                () -> mMediator.assignUserToDisplay(OTHER_USER_ID, SECONDARY_DISPLAY_ID));
+        IllegalStateException e = assertThrows(IllegalStateException.class, () -> mMediator
+                .assignUserToDisplay(OTHER_USER_ID, OTHER_USER_ID, SECONDARY_DISPLAY_ID));
 
         Log.v(TAG, "Exception: " + e);
         assertWithMessage("exception (%s) message", e).that(e).hasMessageThat()
@@ -112,10 +110,10 @@ public final class UserVisibilityMediatorMUMDTest extends UserVisibilityMediator
 
     @Test
     public void testAssignUserToDisplay_userAlreadyAssigned() {
-        mMediator.assignUserToDisplay(USER_ID, SECONDARY_DISPLAY_ID);
+        mMediator.assignUserToDisplay(USER_ID, USER_ID, SECONDARY_DISPLAY_ID);
 
         IllegalStateException e = assertThrows(IllegalStateException.class,
-                () -> mMediator.assignUserToDisplay(USER_ID, OTHER_SECONDARY_DISPLAY_ID));
+                () -> mMediator.assignUserToDisplay(USER_ID, USER_ID, OTHER_SECONDARY_DISPLAY_ID));
 
         Log.v(TAG, "Exception: " + e);
         assertWithMessage("exception (%s) message", e).that(e).hasMessageThat()
@@ -127,11 +125,9 @@ public final class UserVisibilityMediatorMUMDTest extends UserVisibilityMediator
 
     @Test
     public void testAssignUserToDisplay_profileOnSameDisplayAsParent() {
-        addDefaultProfileAndParent();
-
-        mMediator.assignUserToDisplay(PARENT_USER_ID, SECONDARY_DISPLAY_ID);
-        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
-                () -> mMediator.assignUserToDisplay(PROFILE_USER_ID, SECONDARY_DISPLAY_ID));
+        mMediator.assignUserToDisplay(PARENT_USER_ID, PARENT_USER_ID, SECONDARY_DISPLAY_ID);
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> mMediator
+                .assignUserToDisplay(PROFILE_USER_ID, PARENT_USER_ID, SECONDARY_DISPLAY_ID));
 
         Log.v(TAG, "Exception: " + e);
         assertUserAssignedToDisplay(PARENT_USER_ID, SECONDARY_DISPLAY_ID);
@@ -139,11 +135,9 @@ public final class UserVisibilityMediatorMUMDTest extends UserVisibilityMediator
 
     @Test
     public void testAssignUserToDisplay_profileOnDifferentDisplayAsParent() {
-        addDefaultProfileAndParent();
-
-        mMediator.assignUserToDisplay(PARENT_USER_ID, SECONDARY_DISPLAY_ID);
-        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
-                () -> mMediator.assignUserToDisplay(PROFILE_USER_ID, OTHER_SECONDARY_DISPLAY_ID));
+        mMediator.assignUserToDisplay(PARENT_USER_ID, PARENT_USER_ID, SECONDARY_DISPLAY_ID);
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> mMediator
+                .assignUserToDisplay(PROFILE_USER_ID, PARENT_USER_ID, OTHER_SECONDARY_DISPLAY_ID));
 
         Log.v(TAG, "Exception: " + e);
         assertUserAssignedToDisplay(PARENT_USER_ID, SECONDARY_DISPLAY_ID);
@@ -151,11 +145,9 @@ public final class UserVisibilityMediatorMUMDTest extends UserVisibilityMediator
 
     @Test
     public void testAssignUserToDisplay_profileDefaultDisplayParentOnSecondaryDisplay() {
-        addDefaultProfileAndParent();
-
-        mMediator.assignUserToDisplay(PARENT_USER_ID, SECONDARY_DISPLAY_ID);
-        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
-                () -> mMediator.assignUserToDisplay(PROFILE_USER_ID, DEFAULT_DISPLAY));
+        mMediator.assignUserToDisplay(PARENT_USER_ID, PARENT_USER_ID, SECONDARY_DISPLAY_ID);
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> mMediator
+                .assignUserToDisplay(PROFILE_USER_ID, PARENT_USER_ID, DEFAULT_DISPLAY));
 
         Log.v(TAG, "Exception: " + e);
         assertUserAssignedToDisplay(PARENT_USER_ID, SECONDARY_DISPLAY_ID);
@@ -201,7 +193,6 @@ public final class UserVisibilityMediatorMUMDTest extends UserVisibilityMediator
 
     @Test
     public void testIsUserVisibleOnDisplay_startedProfileOfCurrentUserSecondaryDisplayAssignedToAnotherUser() {
-        addDefaultProfileAndParent();
         startDefaultProfile();
         mockCurrentUser(PARENT_USER_ID);
         assignUserToDisplay(OTHER_USER_ID, SECONDARY_DISPLAY_ID);
@@ -212,7 +203,6 @@ public final class UserVisibilityMediatorMUMDTest extends UserVisibilityMediator
 
     @Test
     public void testIsUserVisibleOnDisplay_stoppedProfileOfCurrentUserSecondaryDisplayAssignedToAnotherUser() {
-        addDefaultProfileAndParent();
         stopDefaultProfile();
         mockCurrentUser(PARENT_USER_ID);
         assignUserToDisplay(OTHER_USER_ID, SECONDARY_DISPLAY_ID);
@@ -223,7 +213,6 @@ public final class UserVisibilityMediatorMUMDTest extends UserVisibilityMediator
 
     @Test
     public void testIsUserVisibleOnDisplay_startedProfileOfCurrentUserOnUnassignedSecondaryDisplay() {
-        addDefaultProfileAndParent();
         startDefaultProfile();
         mockCurrentUser(PARENT_USER_ID);
 
@@ -280,19 +269,6 @@ public final class UserVisibilityMediatorMUMDTest extends UserVisibilityMediator
     @Test
     public void testGetUserAssignedToDisplay_noUserOnSecondaryDisplay() {
         mockCurrentUser(USER_ID);
-
-        assertWithMessage("getUserAssignedToDisplay(%s)", SECONDARY_DISPLAY_ID)
-                .that(mMediator.getUserAssignedToDisplay(SECONDARY_DISPLAY_ID)).isEqualTo(USER_ID);
-    }
-
-    // TODO(b/244644281): scenario below shouldn't happen on "real life", as the profile cannot be
-    // started on secondary display if its parent isn't, so we might need to remove (or refactor
-    // this test) if/when the underlying logic changes
-    @Test
-    public void testGetUserAssignedToDisplay_profileOnSecondaryDisplay() {
-        addDefaultProfileAndParent();
-        mockCurrentUser(USER_ID);
-        assignUserToDisplay(PROFILE_USER_ID, SECONDARY_DISPLAY_ID);
 
         assertWithMessage("getUserAssignedToDisplay(%s)", SECONDARY_DISPLAY_ID)
                 .that(mMediator.getUserAssignedToDisplay(SECONDARY_DISPLAY_ID)).isEqualTo(USER_ID);

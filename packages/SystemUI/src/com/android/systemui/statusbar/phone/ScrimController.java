@@ -895,7 +895,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
 
         float stateBehind = mClipsQsScrim ? state.getNotifAlpha() : state.getBehindAlpha();
         float behindAlpha;
-        int behindTint;
+        int behindTint = state.getBehindTint();
         if (mDarkenWhileDragging) {
             behindAlpha = MathUtils.lerp(mDefaultScrimAlpha, stateBehind,
                     interpolatedFract);
@@ -903,12 +903,14 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             behindAlpha = MathUtils.lerp(0 /* start */, stateBehind,
                     interpolatedFract);
         }
-        if (mClipsQsScrim) {
-            behindTint = ColorUtils.blendARGB(ScrimState.BOUNCER.getNotifTint(),
+        if (mStatusBarKeyguardViewManager.isPrimaryBouncerInTransit()) {
+            if (mClipsQsScrim) {
+                behindTint = ColorUtils.blendARGB(ScrimState.BOUNCER.getNotifTint(),
                     state.getNotifTint(), interpolatedFract);
-        } else {
-            behindTint = ColorUtils.blendARGB(ScrimState.BOUNCER.getBehindTint(),
+            } else {
+                behindTint = ColorUtils.blendARGB(ScrimState.BOUNCER.getBehindTint(),
                     state.getBehindTint(), interpolatedFract);
+            }
         }
         if (mQsExpansion > 0) {
             behindAlpha = MathUtils.lerp(behindAlpha, mDefaultScrimAlpha, mQsExpansion);
