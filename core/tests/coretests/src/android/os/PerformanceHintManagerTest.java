@@ -114,6 +114,23 @@ public class PerformanceHintManagerTest {
     }
 
     @Test
+    public void testSendHint() {
+        Session s = createSession();
+        assumeNotNull(s);
+        s.sendHint(Session.CPU_LOAD_UP);
+        s.sendHint(Session.CPU_LOAD_RESET);
+    }
+
+    @Test
+    public void testSendHintWithNegativeHint() {
+        Session s = createSession();
+        assumeNotNull(s);
+        assertThrows(IllegalArgumentException.class, () -> {
+            s.sendHint(-1);
+        });
+    }
+
+    @Test
     public void testCloseHintSession() {
         Session s = createSession();
         assumeNotNull(s);

@@ -40,6 +40,7 @@ typedef int64_t (*APH_getPreferredUpdateRateNanos)(APerformanceHintManager* mana
 typedef void (*APH_updateTargetWorkDuration)(APerformanceHintSession*, int64_t);
 typedef void (*APH_reportActualWorkDuration)(APerformanceHintSession*, int64_t);
 typedef void (*APH_closeSession)(APerformanceHintSession* session);
+typedef void (*APH_sendHint)(APerformanceHintSession*, int32_t);
 
 bool gAPerformanceHintBindingInitialized = false;
 APH_getManager gAPH_getManagerFn = nullptr;
@@ -48,6 +49,7 @@ APH_getPreferredUpdateRateNanos gAPH_getPreferredUpdateRateNanosFn = nullptr;
 APH_updateTargetWorkDuration gAPH_updateTargetWorkDurationFn = nullptr;
 APH_reportActualWorkDuration gAPH_reportActualWorkDurationFn = nullptr;
 APH_closeSession gAPH_closeSessionFn = nullptr;
+APH_sendHint gAPH_sendHintFn = nullptr;
 
 void ensureAPerformanceHintBindingInitialized() {
     if (gAPerformanceHintBindingInitialized) return;
@@ -87,6 +89,11 @@ void ensureAPerformanceHintBindingInitialized() {
     gAPH_closeSessionFn = (APH_closeSession)dlsym(handle_, "APerformanceHint_closeSession");
     LOG_ALWAYS_FATAL_IF(gAPH_closeSessionFn == nullptr,
                         "Failed to find required symbol APerformanceHint_closeSession!");
+
+    gAPH_sendHintFn = (APH_sendHint)dlsym(handle_, "APerformanceHint_sendHint");
+    LOG_ALWAYS_FATAL_IF(gAPH_sendHintFn == nullptr,
+                        "Failed to find required symbol "
+                        "APerformanceHint_sendHint!");
 
     gAPerformanceHintBindingInitialized = true;
 }
@@ -138,6 +145,11 @@ static void nativeCloseSession(JNIEnv* env, jclass clazz, jlong nativeSessionPtr
     gAPH_closeSessionFn(reinterpret_cast<APerformanceHintSession*>(nativeSessionPtr));
 }
 
+static void nativeSendHint(JNIEnv* env, jclass clazz, jlong nativeSessionPtr, jint hint) {
+    ensureAPerformanceHintBindingInitialized();
+    gAPH_sendHintFn(reinterpret_cast<APerformanceHintSession*>(nativeSessionPtr), hint);
+}
+
 static const JNINativeMethod gPerformanceHintMethods[] = {
         {"nativeAcquireManager", "()J", (void*)nativeAcquireManager},
         {"nativeGetPreferredUpdateRateNanos", "(J)J", (void*)nativeGetPreferredUpdateRateNanos},
@@ -145,6 +157,7 @@ static const JNINativeMethod gPerformanceHintMethods[] = {
         {"nativeUpdateTargetWorkDuration", "(JJ)V", (void*)nativeUpdateTargetWorkDuration},
         {"nativeReportActualWorkDuration", "(JJ)V", (void*)nativeReportActualWorkDuration},
         {"nativeCloseSession", "(J)V", (void*)nativeCloseSession},
+        {"nativeSendHint", "(JI)V", (void*)nativeSendHint},
 };
 
 int register_android_os_PerformanceHintManager(JNIEnv* env) {

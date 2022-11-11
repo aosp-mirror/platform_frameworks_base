@@ -34,6 +34,7 @@
 #include "jni.h"
 
 using android::hardware::power::IPowerHintSession;
+using android::hardware::power::SessionHint;
 using android::hardware::power::WorkDuration;
 
 using android::base::StringPrintf;
@@ -79,6 +80,11 @@ static void reportActualWorkDuration(int64_t session_ptr,
                                      const std::vector<WorkDuration>& actualDurations) {
     sp<IPowerHintSession> appSession = reinterpret_cast<IPowerHintSession*>(session_ptr);
     appSession->reportActualWorkDuration(actualDurations);
+}
+
+static void sendHint(int64_t session_ptr, SessionHint hint) {
+    sp<IPowerHintSession> appSession = reinterpret_cast<IPowerHintSession*>(session_ptr);
+    appSession->sendHint(hint);
 }
 
 static int64_t getHintSessionPreferredRate() {
@@ -139,6 +145,10 @@ static void nativeReportActualWorkDuration(JNIEnv* env, jclass /* clazz */, jlon
     reportActualWorkDuration(session_ptr, actualList);
 }
 
+static void nativeSendHint(JNIEnv* env, jclass /* clazz */, jlong session_ptr, jint hint) {
+    sendHint(session_ptr, static_cast<SessionHint>(hint));
+}
+
 static jlong nativeGetHintSessionPreferredRate(JNIEnv* /* env */, jclass /* clazz */) {
     return static_cast<jlong>(getHintSessionPreferredRate());
 }
@@ -153,6 +163,7 @@ static const JNINativeMethod sHintManagerServiceMethods[] = {
         {"nativeCloseHintSession", "(J)V", (void*)nativeCloseHintSession},
         {"nativeUpdateTargetWorkDuration", "(JJ)V", (void*)nativeUpdateTargetWorkDuration},
         {"nativeReportActualWorkDuration", "(J[J[J)V", (void*)nativeReportActualWorkDuration},
+        {"nativeSendHint", "(JI)V", (void*)nativeSendHint},
         {"nativeGetHintSessionPreferredRate", "()J", (void*)nativeGetHintSessionPreferredRate},
 };
 

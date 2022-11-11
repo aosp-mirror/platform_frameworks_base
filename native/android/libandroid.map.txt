@@ -330,6 +330,7 @@ LIBANDROID {
     APerformanceHint_updateTargetWorkDuration; # introduced=Tiramisu
     APerformanceHint_reportActualWorkDuration; # introduced=Tiramisu
     APerformanceHint_closeSession; # introduced=Tiramisu
+    APerformanceHint_sendHint; # introduced=UpsideDownCake
   local:
     *;
 };

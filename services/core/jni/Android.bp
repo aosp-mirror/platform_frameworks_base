@@ -170,7 +170,7 @@ cc_defaults {
         "android.hardware.power@1.1",
         "android.hardware.power@1.2",
         "android.hardware.power@1.3",
-        "android.hardware.power-V3-cpp",
+        "android.hardware.power-V4-cpp",
         "android.hardware.power.stats@1.0",
         "android.hardware.power.stats-V1-ndk",
         "android.hardware.thermal@1.0",
