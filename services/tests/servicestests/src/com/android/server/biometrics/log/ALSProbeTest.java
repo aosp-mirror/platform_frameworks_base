@@ -125,12 +125,9 @@ public class ALSProbeTest {
         mProbe.destroy();
         mProbe.enable();
 
-        AtomicInteger lux = new AtomicInteger(10);
-        mProbe.awaitNextLux((v) -> lux.set(Math.round(v)), null /* handler */);
-
         verify(mSensorManager, never()).registerListener(any(), any(), anyInt());
         verifyNoMoreInteractions(mSensorManager);
-        assertThat(lux.get()).isLessThan(0);
+        assertThat(mProbe.getMostRecentLux()).isLessThan(0);
     }
 
     @Test
@@ -323,15 +320,27 @@ public class ALSProbeTest {
     }
 
     @Test
-    public void testNoNextLuxWhenDestroyed() {
+    public void testDestroyAllowsAwaitLuxExactlyOnce() {
+        final float lastValue = 5.5f;
         mProbe.destroy();
 
-        AtomicInteger lux = new AtomicInteger(-20);
+        AtomicInteger lux = new AtomicInteger(10);
         mProbe.awaitNextLux((v) -> lux.set(Math.round(v)), null /* handler */);
 
-        assertThat(lux.get()).isEqualTo(-1);
-        verify(mSensorManager, never()).registerListener(
+        verify(mSensorManager).registerListener(
                 mSensorEventListenerCaptor.capture(), any(), anyInt());
+        mSensorEventListenerCaptor.getValue().onSensorChanged(
+                new SensorEvent(mLightSensor, 1, 1, new float[]{lastValue}));
+
+        assertThat(lux.get()).isEqualTo(Math.round(lastValue));
+        verify(mSensorManager).unregisterListener(eq(mSensorEventListenerCaptor.getValue()));
+
+        lux.set(22);
+        mProbe.enable();
+        mProbe.awaitNextLux((v) -> lux.set(Math.round(v)), null /* handler */);
+        mProbe.enable();
+
+        assertThat(lux.get()).isEqualTo(Math.round(lastValue));
         verifyNoMoreInteractions(mSensorManager);
     }
 
