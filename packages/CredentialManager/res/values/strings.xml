@@ -28,7 +28,10 @@
   <string name="passkey">passkey</string>
   <string name="password">password</string>
   <string name="sign_ins">sign-ins</string>
+  <string name="another_device">Another device</string>
   <string name="other_password_manager">Other password manager</string>
+  <!-- TODO: Check the wording here. -->
+  <string name="confirm_default_or_use_once_description">This password manager will store your passwords and passkeys to help you easily sign in.</string>
   <!-- Spoken content description of an element which will close the sheet when clicked. -->
   <string name="close_sheet">"Close sheet"</string>
   <!-- Spoken content description of the back arrow button. -->

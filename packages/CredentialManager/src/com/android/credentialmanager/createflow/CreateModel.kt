@@ -30,6 +30,7 @@ class EnabledProviderInfo(
   displayName: String,
   var createOptions: List<CreateOptionInfo>,
   val isDefault: Boolean,
+  var remoteEntry: RemoteInfo?,
 ) : ProviderInfo(icon, name, displayName)
 
 class DisabledProviderInfo(
@@ -53,6 +54,11 @@ class CreateOptionInfo(
   val passkeyCount: Int?,
   val totalCredentialCount: Int?,
   val lastUsedTimeMillis: Long?,
+) : EntryInfo(entryKey, entrySubkey)
+
+class RemoteInfo(
+  entryKey: String,
+  entrySubkey: String,
 ) : EntryInfo(entryKey, entrySubkey)
 
 data class RequestDisplayInfo(
