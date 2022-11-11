@@ -470,19 +470,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     FACE_AUTH_TRIGGERED_TRUST_DISABLED);
         }
 
-        mLogger.logTrustChanged(wasTrusted, enabled, userId);
-        for (int i = 0; i < mCallbacks.size(); i++) {
-            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
-            if (cb != null) {
-                cb.onTrustChanged(userId);
-                if (enabled && flags != 0) {
-                    cb.onTrustGrantedWithFlags(flags, userId);
-                }
-            }
-        }
-
+        String message = null;
         if (KeyguardUpdateMonitor.getCurrentUser() == userId) {
-            CharSequence message = null;
             final boolean userHasTrust = getUserHasTrust(userId);
             if (userHasTrust && trustGrantedMessages != null) {
                 for (String msg : trustGrantedMessages) {
@@ -492,14 +481,17 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     }
                 }
             }
-
-            if (message != null) {
-                mLogger.logShowTrustGrantedMessage(message.toString());
-            }
-            for (int i = 0; i < mCallbacks.size(); i++) {
-                KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
-                if (cb != null) {
-                    cb.showTrustGrantedMessage(message);
+        }
+        mLogger.logTrustChanged(wasTrusted, enabled, userId);
+        if (message != null) {
+            mLogger.logShowTrustGrantedMessage(message.toString());
+        }
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+            if (cb != null) {
+                cb.onTrustChanged(userId);
+                if (enabled) {
+                    cb.onTrustGrantedWithFlags(flags, userId, message);
                 }
             }
         }
