@@ -261,7 +261,12 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
     @Test
     fun updateView_noOverrides_usesInfoFromAppIcon() {
         controllerReceiver.displayView(
-            ChipReceiverInfo(routeInfo, appIconDrawableOverride = null, appNameOverride = null)
+            ChipReceiverInfo(
+                routeInfo,
+                appIconDrawableOverride = null,
+                appNameOverride = null,
+                id = "id",
+            )
         )
 
         val view = getChipView()
@@ -274,7 +279,12 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
         val drawableOverride = context.getDrawable(R.drawable.ic_celebration)!!
 
         controllerReceiver.displayView(
-            ChipReceiverInfo(routeInfo, drawableOverride, appNameOverride = null)
+            ChipReceiverInfo(
+                routeInfo,
+                drawableOverride,
+                appNameOverride = null,
+                id = "id",
+            )
         )
 
         val view = getChipView()
@@ -286,7 +296,12 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
         val appNameOverride = "Sweet New App"
 
         controllerReceiver.displayView(
-            ChipReceiverInfo(routeInfo, appIconDrawableOverride = null, appNameOverride)
+            ChipReceiverInfo(
+                routeInfo,
+                appIconDrawableOverride = null,
+                appNameOverride,
+                id = "id",
+            )
         )
 
         val view = getChipView()
@@ -340,7 +355,7 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
             .addFeature("feature")
             .setClientPackageName(packageName)
             .build()
-        return ChipReceiverInfo(routeInfo, null, null)
+        return ChipReceiverInfo(routeInfo, null, null, id = "id")
     }
 
     private fun ViewGroup.getAppIconView() = this.requireViewById<ImageView>(R.id.app_icon)
