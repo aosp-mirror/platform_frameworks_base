@@ -136,6 +136,12 @@ public class VirtualTouchEventTest {
                 .build());
     }
 
+    /**
+     * The combination of TOOL_TYPE_PALM with anything else than ACTION_CANCEL should throw an
+     * exception. This is due to an underlying implementation detail. See documentation of {@link
+     * VirtualTouchEvent}
+     * for details.
+     */
     @Test
     public void touchEvent_palmUsedImproperly() {
         assertThrows(IllegalArgumentException.class, () -> new VirtualTouchEvent.Builder()
