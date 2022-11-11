@@ -603,7 +603,7 @@ public final class MediaRouter2 {
      */
     public void transferTo(@NonNull MediaRoute2Info route) {
         if (isSystemRouter()) {
-            sManager.selectRoute(mClientPackageName, route);
+            sManager.transfer(mClientPackageName, route);
             return;
         }
 

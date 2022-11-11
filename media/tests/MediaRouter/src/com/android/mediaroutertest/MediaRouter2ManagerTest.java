@@ -384,7 +384,7 @@ public class MediaRouter2ManagerTest {
         MediaRoute2Info routeToSelect = routes.get(ROUTE_ID1);
         assertThat(routeToSelect).isNotNull();
 
-        mManager.selectRoute(mPackageName, routeToSelect);
+        mManager.transfer(mPackageName, routeToSelect);
         assertThat(latch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)).isTrue();
         assertThat(mManager.getRemoteSessions()).hasSize(1);
     }
@@ -410,7 +410,7 @@ public class MediaRouter2ManagerTest {
 
         assertThat(mManager.getRoutingSessions(mPackageName)).hasSize(1);
 
-        mManager.selectRoute(mPackageName, routeToSelect);
+        mManager.transfer(mPackageName, routeToSelect);
         assertThat(latch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)).isTrue();
 
         List<RoutingSessionInfo> sessions = mManager.getRoutingSessions(mPackageName);
@@ -514,7 +514,7 @@ public class MediaRouter2ManagerTest {
             }
         });
         awaitOnRouteChangedManager(
-                () -> mManager.selectRoute(mPackageName, routes.get(ROUTE_ID1)),
+                () -> mManager.transfer(mPackageName, routes.get(ROUTE_ID1)),
                 ROUTE_ID1,
                 route -> TextUtils.equals(route.getClientPackageName(), mPackageName));
         assertThat(onSessionCreatedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)).isTrue();
@@ -525,7 +525,7 @@ public class MediaRouter2ManagerTest {
         RoutingSessionInfo sessionInfo = sessions.get(1);
 
         awaitOnRouteChangedManager(
-                () -> mManager.selectRoute(mPackageName, routes.get(ROUTE_ID5_TO_TRANSFER_TO)),
+                () -> mManager.transfer(mPackageName, routes.get(ROUTE_ID5_TO_TRANSFER_TO)),
                 ROUTE_ID5_TO_TRANSFER_TO,
                 route -> TextUtils.equals(route.getClientPackageName(), mPackageName));
 
@@ -583,9 +583,9 @@ public class MediaRouter2ManagerTest {
         assertThat(route1).isNotNull();
         assertThat(route2).isNotNull();
 
-        mManager.selectRoute(mPackageName, route1);
+        mManager.transfer(mPackageName, route1);
         assertThat(successLatch1.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)).isTrue();
-        mManager.selectRoute(mPackageName, route2);
+        mManager.transfer(mPackageName, route2);
         assertThat(successLatch2.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)).isTrue();
 
         // onTransferFailed/onSessionReleased should not be called.
@@ -703,7 +703,7 @@ public class MediaRouter2ManagerTest {
             }
         });
 
-        mManager.selectRoute(mPackageName, routes.get(ROUTE_ID1));
+        mManager.transfer(mPackageName, routes.get(ROUTE_ID1));
         assertThat(onSessionCreatedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)).isTrue();
 
         List<RoutingSessionInfo> sessions = mManager.getRoutingSessions(mPackageName);
@@ -858,7 +858,7 @@ public class MediaRouter2ManagerTest {
         });
 
         mRouter2.setOnGetControllerHintsListener(listener);
-        mManager.selectRoute(mPackageName, route);
+        mManager.transfer(mPackageName, route);
         assertThat(hintLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)).isTrue();
         assertThat(successLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)).isTrue();
 
@@ -903,7 +903,7 @@ public class MediaRouter2ManagerTest {
             }
         });
 
-        mManager.selectRoute(mPackageName, routes.get(ROUTE_ID4_TO_SELECT_AND_DESELECT));
+        mManager.transfer(mPackageName, routes.get(ROUTE_ID4_TO_SELECT_AND_DESELECT));
         assertThat(onSessionCreatedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)).isTrue();
     }
 

@@ -461,7 +461,7 @@ public class MediaDeviceTest {
     public void connect_shouldSelectRoute() {
         mInfoMediaDevice1.connect();
 
-        verify(mMediaRouter2Manager).selectRoute(TEST_PACKAGE_NAME, mRouteInfo1);
+        verify(mMediaRouter2Manager).transfer(TEST_PACKAGE_NAME, mRouteInfo1);
     }
 
     @Test
