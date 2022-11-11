@@ -1265,8 +1265,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mGlobalScale = mInvGlobalScale = mSizeCompatScale = 1f;
     }
 
-    float getSizeCompatScale() {
-        return mSizeCompatScale;
+    float getSizeCompatScaleForClient() {
+        // If the size compat scale is because of the size compat bounds, we only scale down its
+        // coordinates at the server side without letting the client know.
+        return mToken.hasSizeCompatBounds() ? 1f : mSizeCompatScale;
     }
 
     /**
@@ -3863,7 +3865,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 outFrames.attachedFrame.scale(mInvGlobalScale);
             }
         }
-        outFrames.sizeCompatScale = mSizeCompatScale;
+
+        outFrames.sizeCompatScale = getSizeCompatScaleForClient();
 
         // Note: in the cases where the window is tied to an activity, we should not send a
         // configuration update when the window has requested to be hidden. Doing so can lead to
