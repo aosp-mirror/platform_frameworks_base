@@ -67,7 +67,6 @@ import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.window.DisplayAreaOrganizer.FEATURE_UNDEFINED;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_BACK_PREVIEW;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_LOCKTASK;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_RECENTS_ANIMATIONS;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STATES;
@@ -606,12 +605,6 @@ class Task extends TaskFragment {
     ActivityRecord mChildPipActivity;
 
     boolean mLastSurfaceShowing = true;
-
-    /**
-     * Tracks if a back gesture is in progress.
-     * Skips any system transition animations if this is set to {@code true}.
-     */
-    boolean mBackGestureStarted = false;
 
     private Task(ActivityTaskManagerService atmService, int _taskId, Intent _intent,
             Intent _affinityIntent, String _affinity, String _rootAffinity,
@@ -3333,14 +3326,6 @@ class Task extends TaskFragment {
                     }
                 });
             }
-        } else if (mBackGestureStarted) {
-            // Cancel playing transitions if a back navigation animation is in progress.
-            // This bit is set by {@link BackNavigationController} when a back gesture is started.
-            // It is used as a one-off transition overwrite that is cleared when the back gesture
-            // is committed and triggers a transition, or when the gesture is cancelled.
-            mBackGestureStarted = false;
-            mDisplayContent.mSkipAppTransitionAnimation = true;
-            ProtoLog.d(WM_DEBUG_BACK_PREVIEW, "Skipping app transition animation. task=%s", this);
         } else {
             super.applyAnimationUnchecked(lp, enter, transit, isVoiceInteraction, sources);
         }

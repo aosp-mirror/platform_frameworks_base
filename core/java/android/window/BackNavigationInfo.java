@@ -89,8 +89,6 @@ public final class BackNavigationInfo implements Parcelable {
     @Nullable
     private final IOnBackInvokedCallback mOnBackInvokedCallback;
     private final boolean mPrepareRemoteAnimation;
-    @Nullable
-    private WindowContainerToken mDepartingWindowContainerToken;
 
     /**
      * Create a new {@link BackNavigationInfo} instance.
@@ -100,20 +98,15 @@ public final class BackNavigationInfo implements Parcelable {
      *                                back preview.
      * @param onBackInvokedCallback   The back callback registered by the current top level window.
      * @param departingWindowContainerToken The {@link WindowContainerToken} of departing window.
-     * @param isPrepareRemoteAnimation  Return whether the core is preparing a back gesture
-     *                                  animation, if true, the caller of startBackNavigation should
-     *                                  be expected to receive an animation start callback.
      */
     private BackNavigationInfo(@BackTargetType int type,
             @Nullable RemoteCallback onBackNavigationDone,
             @Nullable IOnBackInvokedCallback onBackInvokedCallback,
-            boolean isPrepareRemoteAnimation,
-            @Nullable WindowContainerToken departingWindowContainerToken) {
+            boolean isPrepareRemoteAnimation) {
         mType = type;
         mOnBackNavigationDone = onBackNavigationDone;
         mOnBackInvokedCallback = onBackInvokedCallback;
         mPrepareRemoteAnimation = isPrepareRemoteAnimation;
-        mDepartingWindowContainerToken = departingWindowContainerToken;
     }
 
     private BackNavigationInfo(@NonNull Parcel in) {
@@ -121,7 +114,6 @@ public final class BackNavigationInfo implements Parcelable {
         mOnBackNavigationDone = in.readTypedObject(RemoteCallback.CREATOR);
         mOnBackInvokedCallback = IOnBackInvokedCallback.Stub.asInterface(in.readStrongBinder());
         mPrepareRemoteAnimation = in.readBoolean();
-        mDepartingWindowContainerToken = in.readTypedObject(WindowContainerToken.CREATOR);
     }
 
     @Override
@@ -130,7 +122,6 @@ public final class BackNavigationInfo implements Parcelable {
         dest.writeTypedObject(mOnBackNavigationDone, flags);
         dest.writeStrongInterface(mOnBackInvokedCallback);
         dest.writeBoolean(mPrepareRemoteAnimation);
-        dest.writeTypedObject(mDepartingWindowContainerToken, flags);
     }
 
     /**
@@ -161,18 +152,6 @@ public final class BackNavigationInfo implements Parcelable {
      */
     public boolean isPrepareRemoteAnimation() {
         return mPrepareRemoteAnimation;
-    }
-
-    /**
-     * Returns the {@link WindowContainerToken} of the highest container in the hierarchy being
-     * removed.
-     * <p>
-     * For example, if an Activity is the last one of its Task, the Task's token will be given.
-     * Otherwise, it will be the Activity's token.
-     */
-    @Nullable
-    public WindowContainerToken getDepartingWindowContainerToken() {
-        return mDepartingWindowContainerToken;
     }
 
     /**
@@ -212,7 +191,6 @@ public final class BackNavigationInfo implements Parcelable {
                 + "mType=" + typeToString(mType) + " (" + mType + ")"
                 + ", mOnBackNavigationDone=" + mOnBackNavigationDone
                 + ", mOnBackInvokedCallback=" + mOnBackInvokedCallback
-                + ", mWindowContainerToken=" + mDepartingWindowContainerToken
                 + '}';
     }
 
@@ -248,8 +226,6 @@ public final class BackNavigationInfo implements Parcelable {
         @Nullable
         private IOnBackInvokedCallback mOnBackInvokedCallback = null;
         private boolean mPrepareRemoteAnimation;
-        @Nullable
-        private WindowContainerToken mDepartingWindowContainerToken = null;
 
         /**
          * @see BackNavigationInfo#getType()
@@ -285,20 +261,12 @@ public final class BackNavigationInfo implements Parcelable {
         }
 
         /**
-         * @see BackNavigationInfo#getDepartingWindowContainerToken()
-         */
-        public void setDepartingWCT(@NonNull WindowContainerToken windowContainerToken) {
-            mDepartingWindowContainerToken = windowContainerToken;
-        }
-
-        /**
          * Builds and returns an instance of {@link BackNavigationInfo}
          */
         public BackNavigationInfo build() {
             return new BackNavigationInfo(mType, mOnBackNavigationDone,
                     mOnBackInvokedCallback,
-                    mPrepareRemoteAnimation,
-                    mDepartingWindowContainerToken);
+                    mPrepareRemoteAnimation);
         }
     }
 }

@@ -215,9 +215,20 @@ public class AppTransitionController {
         mWallpaperControllerLocked.adjustWallpaperWindowsForAppTransitionIfNeeded(
                 mDisplayContent.mOpeningApps);
 
+        ArraySet<ActivityRecord> tmpOpenApps = mDisplayContent.mOpeningApps;
+        ArraySet<ActivityRecord> tmpCloseApps = mDisplayContent.mClosingApps;
+        if (mDisplayContent.mAtmService.mBackNavigationController.isWaitBackTransition()) {
+            tmpOpenApps = new ArraySet<>(mDisplayContent.mOpeningApps);
+            tmpCloseApps = new ArraySet<>(mDisplayContent.mClosingApps);
+            if (mDisplayContent.mAtmService.mBackNavigationController
+                    .removeIfContainsBackAnimationTargets(tmpOpenApps, tmpCloseApps)) {
+                mDisplayContent.mAtmService.mBackNavigationController.clearBackAnimations(null);
+            }
+        }
+
         @TransitionOldType final int transit = getTransitCompatType(
-                mDisplayContent.mAppTransition, mDisplayContent.mOpeningApps,
-                mDisplayContent.mClosingApps, mDisplayContent.mChangingContainers,
+                mDisplayContent.mAppTransition, tmpOpenApps,
+                tmpCloseApps, mDisplayContent.mChangingContainers,
                 mWallpaperControllerLocked.getWallpaperTarget(), getOldWallpaper(),
                 mDisplayContent.mSkipAppTransitionAnimation);
         mDisplayContent.mSkipAppTransitionAnimation = false;
@@ -225,22 +236,21 @@ public class AppTransitionController {
         ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
                 "handleAppTransitionReady: displayId=%d appTransition={%s}"
                 + " openingApps=[%s] closingApps=[%s] transit=%s",
-                mDisplayContent.mDisplayId, appTransition.toString(), mDisplayContent.mOpeningApps,
-                mDisplayContent.mClosingApps, AppTransition.appTransitionOldToString(transit));
+                mDisplayContent.mDisplayId, appTransition.toString(), tmpOpenApps,
+                tmpCloseApps, AppTransition.appTransitionOldToString(transit));
 
         // Find the layout params of the top-most application window in the tokens, which is
         // what will control the animation theme. If all closing windows are obscured, then there is
         // no need to do an animation. This is the case, for example, when this transition is being
         // done behind a dream window.
-        final ArraySet<Integer> activityTypes = collectActivityTypes(mDisplayContent.mOpeningApps,
-                mDisplayContent.mClosingApps, mDisplayContent.mChangingContainers);
+        final ArraySet<Integer> activityTypes = collectActivityTypes(tmpOpenApps,
+                tmpCloseApps, mDisplayContent.mChangingContainers);
         final ActivityRecord animLpActivity = findAnimLayoutParamsToken(transit, activityTypes,
-                mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
-                mDisplayContent.mChangingContainers);
+                tmpOpenApps, tmpCloseApps, mDisplayContent.mChangingContainers);
         final ActivityRecord topOpeningApp =
-                getTopApp(mDisplayContent.mOpeningApps, false /* ignoreHidden */);
+                getTopApp(tmpOpenApps, false /* ignoreHidden */);
         final ActivityRecord topClosingApp =
-                getTopApp(mDisplayContent.mClosingApps, false /* ignoreHidden */);
+                getTopApp(tmpCloseApps, false /* ignoreHidden */);
         final ActivityRecord topChangingApp =
                 getTopApp(mDisplayContent.mChangingContainers, false /* ignoreHidden */);
         final WindowManager.LayoutParams animLp = getAnimLp(animLpActivity);
@@ -258,8 +268,7 @@ public class AppTransitionController {
         final int layoutRedo;
         mService.mSurfaceAnimationRunner.deferStartingAnimations();
         try {
-            applyAnimations(mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps, transit,
-                    animLp, voiceInteraction);
+            applyAnimations(tmpOpenApps, tmpCloseApps, transit, animLp, voiceInteraction);
             handleClosingApps();
             handleOpeningApps();
             handleChangingApps(transit);

@@ -62,7 +62,6 @@ import com.android.wm.shell.common.annotations.ShellBackgroundThread;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
-import com.android.wm.shell.transition.Transitions;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -82,8 +81,6 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                     SETTING_VALUE_OFF) == SETTING_VALUE_ON;
     /** Predictive back animation developer option */
     private final AtomicBoolean mEnableAnimations = new AtomicBoolean(false);
-    // TODO (b/241808055) Find a appropriate time to remove during refactor
-    private static final boolean ENABLE_SHELL_TRANSITIONS = Transitions.ENABLE_SHELL_TRANSITIONS;
     /**
      * Max duration to wait for a transition to finish before accepting another gesture start
      * request.
@@ -121,8 +118,6 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     private final TouchTracker mTouchTracker = new TouchTracker();
 
     private final SparseArray<BackAnimationRunner> mAnimationDefinition = new SparseArray<>();
-    private final Transitions mTransitions;
-    private BackTransitionHandler mBackTransitionHandler;
 
     @VisibleForTesting
     final IWindowFocusObserver mFocusObserver = new IWindowFocusObserver.Stub() {
@@ -148,11 +143,9 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             @NonNull ShellController shellController,
             @NonNull @ShellMainThread ShellExecutor shellExecutor,
             @NonNull @ShellBackgroundThread Handler backgroundHandler,
-            Context context,
-            Transitions transitions) {
+            Context context) {
         this(shellInit, shellController, shellExecutor, backgroundHandler,
-                ActivityTaskManager.getService(), context, context.getContentResolver(),
-                transitions);
+                ActivityTaskManager.getService(), context, context.getContentResolver());
     }
 
     @VisibleForTesting
@@ -162,8 +155,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             @NonNull @ShellMainThread ShellExecutor shellExecutor,
             @NonNull @ShellBackgroundThread Handler bgHandler,
             @NonNull IActivityTaskManager activityTaskManager,
-            Context context, ContentResolver contentResolver,
-            Transitions transitions) {
+            Context context, ContentResolver contentResolver) {
         mShellController = shellController;
         mShellExecutor = shellExecutor;
         mActivityTaskManager = activityTaskManager;
@@ -171,7 +163,6 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         mContentResolver = contentResolver;
         mBgHandler = bgHandler;
         shellInit.addInitCallback(this::onInit, this);
-        mTransitions = transitions;
     }
 
     @VisibleForTesting
@@ -182,10 +173,6 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     private void onInit() {
         setupAnimationDeveloperSettingsObserver(mContentResolver, mBgHandler);
         createAdapter();
-        if (ENABLE_SHELL_TRANSITIONS) {
-            mBackTransitionHandler = new BackTransitionHandler(this);
-            mTransitions.addHandler(mBackTransitionHandler);
-        }
         mShellController.addExternalInterface(KEY_EXTRA_SHELL_BACK_ANIMATION,
                 this::createExternalInterface, this);
 
@@ -335,17 +322,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             }
         }
 
-        // In legacy transition, it would use `Task.mBackGestureStarted` in core to handle the
-        // following transition when back callback is invoked.
-        // If the back callback is not invoked, we should reset the token and finish the whole back
-        // navigation without waiting the transition.
-        if (!ENABLE_SHELL_TRANSITIONS) {
-            finishBackNavigation();
-        } else if (!mTriggerBack) {
-            // reset the token to prevent it consume next transition.
-            mBackTransitionHandler.setDepartingWindowContainerToken(null);
-            finishBackNavigation();
-        }
+        finishBackNavigation();
     }
 
     /**
@@ -614,29 +591,12 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             return;
         }
         mTransitionInProgress = true;
-        if (ENABLE_SHELL_TRANSITIONS) {
-            mBackTransitionHandler.setDepartingWindowContainerToken(
-                    mBackNavigationInfo.getDepartingWindowContainerToken());
-        }
         mShellExecutor.executeDelayed(mResetTransitionRunnable, MAX_TRANSITION_DURATION);
     }
 
     void stopTransition() {
         mShellExecutor.removeCallbacks(mResetTransitionRunnable);
         mTransitionInProgress = false;
-    }
-
-    /**
-     * This should be called from {@link BackTransitionHandler#startAnimation} when the following
-     * transition is triggered by the real back callback in {@link #onBackAnimationFinished}.
-     * Will consume the default transition and finish current back navigation.
-     */
-    void finishTransition(Transitions.TransitionFinishCallback finishCallback) {
-        ProtoLog.d(WM_SHELL_BACK_PREVIEW, "BackAnimationController: finishTransition()");
-        mShellExecutor.execute(() -> {
-            finishBackNavigation();
-            finishCallback.onTransitionFinished(null, null);
-        });
     }
 
     private void createAdapter() {
