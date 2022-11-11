@@ -1065,7 +1065,7 @@ public class OomAdjuster {
         int numTrimming = 0;
 
         boolean proactiveKillsEnabled = mConstants.PROACTIVE_KILLS_ENABLED;
-        double lowSwapThresholdPercent = 0.10;  // TODO: Configure from phenotype
+        double lowSwapThresholdPercent = mConstants.LOW_SWAP_THRESHOLD_PERCENT;
         double freeSwapPercent =  proactiveKillsEnabled ? getFreeSwapPercent() : 1.00;
         ProcessRecord lruCachedApp = null;
 
