@@ -68,7 +68,7 @@ public class KeyguardHostViewController extends ViewController<KeyguardHostView>
     private final KeyguardUpdateMonitorCallback mUpdateCallback =
             new KeyguardUpdateMonitorCallback() {
                 @Override
-                public void onTrustGrantedWithFlags(int flags, int userId) {
+                public void onTrustGrantedWithFlags(int flags, int userId, String message) {
                     if (userId != KeyguardUpdateMonitor.getCurrentUser()) return;
                     boolean bouncerVisible = mView.isVisibleToUser();
                     boolean temporaryAndRenewable =
