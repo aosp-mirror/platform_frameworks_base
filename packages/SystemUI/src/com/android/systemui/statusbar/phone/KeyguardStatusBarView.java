@@ -311,10 +311,7 @@ public class KeyguardStatusBarView extends RelativeLayout {
         lp = (LayoutParams) mStatusIconArea.getLayoutParams();
         lp.removeRule(RelativeLayout.RIGHT_OF);
         lp.width = LayoutParams.WRAP_CONTENT;
-
-        LinearLayout.LayoutParams llp =
-                (LinearLayout.LayoutParams) mSystemIconsContainer.getLayoutParams();
-        llp.setMarginStart(getResources().getDimensionPixelSize(
+        lp.setMarginStart(getResources().getDimensionPixelSize(
                 R.dimen.system_icons_super_container_margin_start));
         return true;
     }
@@ -346,10 +343,7 @@ public class KeyguardStatusBarView extends RelativeLayout {
         lp = (LayoutParams) mStatusIconArea.getLayoutParams();
         lp.addRule(RelativeLayout.RIGHT_OF, R.id.cutout_space_view);
         lp.width = LayoutParams.MATCH_PARENT;
-
-        LinearLayout.LayoutParams llp =
-                (LinearLayout.LayoutParams) mSystemIconsContainer.getLayoutParams();
-        llp.setMarginStart(0);
+        lp.setMarginStart(0);
         return true;
     }
 
