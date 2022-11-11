@@ -1693,7 +1693,8 @@ public final class ProcessList {
                             app.info.packageName);
                     externalStorageAccess = storageManagerInternal.hasExternalStorageAccess(uid,
                             app.info.packageName);
-                    if (pm.checkPermission(Manifest.permission.INSTALL_PACKAGES,
+                    if (mService.isAppFreezerExemptInstPkg()
+                            && pm.checkPermission(Manifest.permission.INSTALL_PACKAGES,
                             app.info.packageName, userId)
                             == PackageManager.PERMISSION_GRANTED) {
                         Slog.i(TAG, app.info.packageName + " is exempt from freezer");

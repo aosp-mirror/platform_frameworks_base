@@ -80,7 +80,7 @@ class GallerySpaEnvironment(context: Context) : SpaEnvironment(context) {
 
     override val browseActivityClass = GalleryMainActivity::class.java
 
-    override val entryProviderAuthorities = "com.android.spa.gallery.provider"
+    override val searchProviderAuthorities = "com.android.spa.gallery.search.provider"
 
     override val logger = LocalLogger()
 }

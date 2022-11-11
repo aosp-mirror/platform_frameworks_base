@@ -61,26 +61,42 @@ public class PreviewPositionHelper {
      * Updates the matrix based on the provided parameters
      */
     public void updateThumbnailMatrix(Rect thumbnailBounds, ThumbnailData thumbnailData,
-            int canvasWidth, int canvasHeight, int screenWidthPx, int taskbarSize, boolean isTablet,
+            int canvasWidth, int canvasHeight, int screenWidthPx, int screenHeightPx,
+            int taskbarSize, boolean isTablet,
             int currentRotation, boolean isRtl) {
         boolean isRotated = false;
         boolean isOrientationDifferent;
 
-        float fullscreenTaskWidth = screenWidthPx;
-        if (mSplitBounds != null && !mSplitBounds.appsStackedVertically) {
-            // For landscape, scale the width
-            float taskPercent = mDesiredStagePosition == STAGE_POSITION_TOP_OR_LEFT
-                    ? mSplitBounds.leftTaskPercent
-                    : (1 - (mSplitBounds.leftTaskPercent + mSplitBounds.dividerWidthPercent));
-            // Scale landscape width to that of actual screen
-            fullscreenTaskWidth = screenWidthPx * taskPercent;
-        }
         int thumbnailRotation = thumbnailData.rotation;
         int deltaRotate = getRotationDelta(currentRotation, thumbnailRotation);
         RectF thumbnailClipHint = new RectF();
-        float canvasScreenRatio = canvasWidth / fullscreenTaskWidth;
-        float scaledTaskbarSize = taskbarSize * canvasScreenRatio;
-        thumbnailClipHint.bottom = isTablet ? scaledTaskbarSize : 0;
+
+        float scaledTaskbarSize = 0;
+        if (mSplitBounds != null) {
+            float fullscreenTaskWidth;
+            float fullscreenTaskHeight;
+            float canvasScreenRatio;
+
+            float taskPercent;
+            if (!mSplitBounds.appsStackedVertically) {
+                // For landscape, scale the width
+                taskPercent = mDesiredStagePosition == STAGE_POSITION_TOP_OR_LEFT
+                        ? mSplitBounds.leftTaskPercent
+                        : (1 - (mSplitBounds.leftTaskPercent + mSplitBounds.dividerWidthPercent));
+                // Scale landscape width to that of actual screen
+                fullscreenTaskWidth = screenWidthPx * taskPercent;
+                canvasScreenRatio = canvasWidth / fullscreenTaskWidth;
+            } else {
+                taskPercent = mDesiredStagePosition != STAGE_POSITION_TOP_OR_LEFT
+                        ? mSplitBounds.leftTaskPercent
+                        : (1 - (mSplitBounds.leftTaskPercent + mSplitBounds.dividerWidthPercent));
+                // Scale landscape width to that of actual screen
+                fullscreenTaskHeight = screenHeightPx * taskPercent;
+                canvasScreenRatio = canvasHeight / fullscreenTaskHeight;
+            }
+            scaledTaskbarSize = taskbarSize * canvasScreenRatio;
+            thumbnailClipHint.bottom = isTablet ? scaledTaskbarSize : 0;
+        }
 
         float scale = thumbnailData.scale;
         final float thumbnailScale;

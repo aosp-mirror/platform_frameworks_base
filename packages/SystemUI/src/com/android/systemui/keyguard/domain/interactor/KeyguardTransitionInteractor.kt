@@ -57,6 +57,14 @@ constructor(
             lockscreenToAodTransition,
         )
 
+    /* The last [TransitionStep] with a [TransitionState] of STARTED */
+    val startedKeyguardTransitionStep: Flow<TransitionStep> =
+        repository.transitions.filter { step -> step.transitionState == TransitionState.STARTED }
+
+    /* The last [TransitionStep] with a [TransitionState] of CANCELED */
+    val canceledKeyguardTransitionStep: Flow<TransitionStep> =
+        repository.transitions.filter { step -> step.transitionState == TransitionState.CANCELED }
+
     /* The last [TransitionStep] with a [TransitionState] of FINISHED */
     val finishedKeyguardTransitionStep: Flow<TransitionStep> =
         repository.transitions.filter { step -> step.transitionState == TransitionState.FINISHED }
@@ -64,8 +72,4 @@ constructor(
     /* The last completed [KeyguardState] transition */
     val finishedKeyguardState: Flow<KeyguardState> =
         finishedKeyguardTransitionStep.map { step -> step.to }
-
-    /* The last [TransitionStep] with a [TransitionState] of STARTED */
-    val startedKeyguardTransitionStep: Flow<TransitionStep> =
-        repository.transitions.filter { step -> step.transitionState == TransitionState.STARTED }
 }

@@ -258,8 +258,6 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
 
     void onKeyguardViewManagerStatesUpdated();
 
-    void setPanelExpanded(boolean isExpanded);
-
     ViewGroup getNotificationScrollLayout();
 
     boolean isPulsing();

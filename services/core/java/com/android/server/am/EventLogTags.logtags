@@ -107,21 +107,21 @@ option java_package com.android.server.am
 30079 uc_dispatch_user_switch (oldUserId|1|5),(newUserId|1|5)
 30080 uc_continue_user_switch (oldUserId|1|5),(newUserId|1|5)
 30081 uc_send_user_broadcast (userId|1|5),(IntentAction|3)
+
 # Tags below are used by SystemServiceManager - although it's technically part of am, these are
 # also user switch events and useful to be analyzed together with events above.
-30082 ssm_user_starting (userId|1|5),(visible|1)
+30082 ssm_user_starting (userId|1|5)
 30083 ssm_user_switching (oldUserId|1|5),(newUserId|1|5)
 30084 ssm_user_unlocking (userId|1|5)
 30085 ssm_user_unlocked (userId|1|5)
-30086 ssm_user_stopping (userId|1|5),(visibilityChanged|1)
+30086 ssm_user_stopping (userId|1|5)
 30087 ssm_user_stopped (userId|1|5)
 30088 ssm_user_completed_event (userId|1|5),(eventFlag|1|5)
-30089 ssm_user_visibility_changed (userId|1|5),(visible|1)
+
+# Similarly, tags below are used by UserManagerService
+30091 um_user_visibility_changed (userId|1|5),(visible|1)
 
 # Foreground service start/stop events.
 30100 am_foreground_service_start (User|1|5),(Component Name|3),(allowWhileInUse|1),(startReasonCode|3),(targetSdk|1|1),(callerTargetSdk|1|1),(notificationWasDeferred|1),(notificationShown|1),(durationMs|1|3),(startForegroundCount|1|1),(stopReason|3)
 30101 am_foreground_service_denied (User|1|5),(Component Name|3),(allowWhileInUse|1),(startReasonCode|3),(targetSdk|1|1),(callerTargetSdk|1|1),(notificationWasDeferred|1),(notificationShown|1),(durationMs|1|3),(startForegroundCount|1|1),(stopReason|3)
 30102 am_foreground_service_stop (User|1|5),(Component Name|3),(allowWhileInUse|1),(startReasonCode|3),(targetSdk|1|1),(callerTargetSdk|1|1),(notificationWasDeferred|1),(notificationShown|1),(durationMs|1|3),(startForegroundCount|1|1),(stopReason|3)
-
-
-

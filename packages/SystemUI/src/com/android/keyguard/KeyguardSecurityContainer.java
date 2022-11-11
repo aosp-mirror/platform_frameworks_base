@@ -1097,11 +1097,19 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
                         new KeyguardSecurityViewTransition());
             }
             int yTrans = mResources.getDimensionPixelSize(R.dimen.bouncer_user_switcher_y_trans);
+            int viewFlipperBottomMargin = mResources.getDimensionPixelSize(
+                    R.dimen.bouncer_user_switcher_view_mode_view_flipper_bottom_margin);
+            int userSwitcherBottomMargin = mResources.getDimensionPixelSize(
+                    R.dimen.bouncer_user_switcher_view_mode_user_switcher_bottom_margin);
             if (mResources.getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
                 ConstraintSet constraintSet = new ConstraintSet();
                 constraintSet.connect(mUserSwitcherViewGroup.getId(), TOP, PARENT_ID, TOP, yTrans);
-                constraintSet.connect(mViewFlipper.getId(), TOP, PARENT_ID, TOP);
-                constraintSet.connect(mViewFlipper.getId(), BOTTOM, PARENT_ID, BOTTOM);
+                constraintSet.connect(mUserSwitcherViewGroup.getId(), BOTTOM, mViewFlipper.getId(),
+                        TOP, userSwitcherBottomMargin);
+                constraintSet.connect(mViewFlipper.getId(), TOP, mUserSwitcherViewGroup.getId(),
+                        BOTTOM);
+                constraintSet.connect(mViewFlipper.getId(), BOTTOM, PARENT_ID, BOTTOM,
+                        viewFlipperBottomMargin);
                 constraintSet.centerHorizontally(mViewFlipper.getId(), PARENT_ID);
                 constraintSet.centerHorizontally(mUserSwitcherViewGroup.getId(), PARENT_ID);
                 constraintSet.setVerticalChainStyle(mViewFlipper.getId(), CHAIN_SPREAD);

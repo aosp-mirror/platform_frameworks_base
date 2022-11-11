@@ -16,9 +16,7 @@
 
 package com.android.systemui.keyguard.data.repository
 
-import android.hardware.biometrics.BiometricSourceType
 import com.android.keyguard.KeyguardUpdateMonitor
-import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.keyguard.ViewMediatorCallback
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.shared.model.BouncerShowMessageModel
@@ -70,32 +68,14 @@ constructor(
     private val _keyguardAuthenticated = MutableStateFlow<Boolean?>(null)
     /** Determines if user is already unlocked */
     val keyguardAuthenticated = _keyguardAuthenticated.asStateFlow()
-
-    var bouncerPromptReason: Int? = null
     private val _showMessage = MutableStateFlow<BouncerShowMessageModel?>(null)
     val showMessage = _showMessage.asStateFlow()
     private val _resourceUpdateRequests = MutableStateFlow(false)
     val resourceUpdateRequests = _resourceUpdateRequests.asStateFlow()
-
+    val bouncerPromptReason: Int
+        get() = viewMediatorCallback.bouncerPromptReason
     val bouncerErrorMessage: CharSequence?
         get() = viewMediatorCallback.consumeCustomMessage()
-
-    init {
-        val callback =
-            object : KeyguardUpdateMonitorCallback() {
-                override fun onStrongAuthStateChanged(userId: Int) {
-                    bouncerPromptReason = viewMediatorCallback.bouncerPromptReason
-                }
-
-                override fun onLockedOutStateChanged(type: BiometricSourceType) {
-                    if (type == BiometricSourceType.FINGERPRINT) {
-                        bouncerPromptReason = viewMediatorCallback.bouncerPromptReason
-                    }
-                }
-            }
-
-        keyguardUpdateMonitor.registerCallback(callback)
-    }
 
     fun setPrimaryScrimmed(isScrimmed: Boolean) {
         _primaryBouncerScrimmed.value = isScrimmed

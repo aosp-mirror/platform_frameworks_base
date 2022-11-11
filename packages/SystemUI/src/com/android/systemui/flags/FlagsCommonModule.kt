@@ -30,7 +30,7 @@ interface FlagsCommonModule {
         @Provides
         @Named(ALL_FLAGS)
         fun providesAllFlags(): Map<Int, Flag<*>> {
-            return Flags.collectFlags()
+            return FlagsFactory.knownFlags.map { it.value.id to it.value }.toMap()
         }
 
         @JvmStatic

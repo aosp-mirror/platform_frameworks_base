@@ -28,7 +28,8 @@ import com.android.credentialmanager.common.DialogResult
 import com.android.credentialmanager.common.ResultState
 
 data class CreatePasskeyUiState(
-  val providers: List<ProviderInfo>,
+  val enabledProviders: List<EnabledProviderInfo>,
+  val disabledProviders: List<DisabledProviderInfo>,
   val currentScreenState: CreateScreenState,
   val requestDisplayInfo: RequestDisplayInfo,
   val activeEntry: ActiveEntry? = null,
@@ -50,15 +51,15 @@ class CreatePasskeyViewModel(
   }
 
   fun onConfirmIntro() {
-    if (uiState.providers.size > 1) {
+    if (uiState.enabledProviders.size > 1) {
       uiState = uiState.copy(
         currentScreenState = CreateScreenState.PROVIDER_SELECTION
       )
-    } else if (uiState.providers.size == 1){
+    } else if (uiState.enabledProviders.size == 1){
       uiState = uiState.copy(
         currentScreenState = CreateScreenState.CREATION_OPTION_SELECTION,
-        activeEntry = ActiveEntry(uiState.providers.first(),
-          uiState.providers.first().createOptions.first())
+        activeEntry = ActiveEntry(uiState.enabledProviders.first(),
+          uiState.enabledProviders.first().createOptions.first())
       )
     } else {
       throw java.lang.IllegalStateException("Empty provider list.")
@@ -73,8 +74,8 @@ class CreatePasskeyViewModel(
     )
   }
 
-  fun getProviderInfoByName(providerName: String): ProviderInfo {
-    return uiState.providers.single {
+  fun getProviderInfoByName(providerName: String): EnabledProviderInfo {
+    return uiState.enabledProviders.single {
       it.name.equals(providerName)
     }
   }
@@ -96,6 +97,10 @@ class CreatePasskeyViewModel(
       currentScreenState = CreateScreenState.MORE_OPTIONS_ROW_INTRO,
       activeEntry = activeEntry
     )
+  }
+
+  fun onDisabledPasswordManagerSelected() {
+    // TODO: Complete this function
   }
 
   fun onCancel() {

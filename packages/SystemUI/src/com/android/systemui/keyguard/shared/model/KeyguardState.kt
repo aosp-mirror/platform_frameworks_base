@@ -17,12 +17,29 @@ package com.android.systemui.keyguard.shared.model
 
 /** List of all possible states to transition to/from */
 enum class KeyguardState {
-    /**
-     * For initialization as well as when the security method is set to NONE, indicating that
-     * the keyguard should never be shown.
+    /*
+     * The display is completely off, as well as any sensors that would trigger the device to wake
+     * up.
      */
-    NONE,
-    /* Always-on Display. The device is in a low-power mode with a minimal UI visible */
+    OFF,
+    /**
+     * The device has entered a special low-power mode within SystemUI. Doze is technically a
+     * special dream service implementation. No UI is visible. In this state, a least some
+     * low-powered sensors such as lift to wake or tap to wake are enabled, or wake screen for
+     * notifications is enabled, allowing the device to quickly wake up.
+     */
+    DOZING,
+    /*
+     * A device state after the device times out, which can be from both LOCKSCREEN or GONE states.
+     * DOZING is an example of special version of this state. Dreams may be implemented by third
+     * parties to present their own UI over keyguard, like a screensaver.
+     */
+    DREAMING,
+    /**
+     * The device has entered a special low-power mode within SystemUI, also called the Always-on
+     * Display (AOD). A minimal UI is presented to show critical information. If the device is in
+     * low-power mode without a UI, then it is DOZING.
+     */
     AOD,
     /*
      * The security screen prompt UI, containing PIN, Password, Pattern, and all FPS
@@ -34,7 +51,6 @@ enum class KeyguardState {
      * unlocked if SWIPE security method is used, or if face lockscreen bypass is false.
      */
     LOCKSCREEN,
-
     /*
      * Keyguard is no longer visible. In most cases the user has just authenticated and keyguard
      * is being removed, but there are other cases where the user is swiping away keyguard, such as

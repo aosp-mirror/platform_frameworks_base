@@ -77,6 +77,23 @@ public abstract class UserManagerInternal {
     }
 
     /**
+     * Listener for {@link UserManager#isUserVisible() user visibility} changes.
+     */
+    public interface UserVisibilityListener {
+
+        /**
+         * Called when the {@link UserManager#isUserVisible() user visibility} changed.
+         *
+         * <p><b>Note:</b> this method is called independently of
+         * {@link com.android.server.SystemService} callbacks; for example, the call with
+         * {@code visible} {@code true} might be called before the
+         * {@link com.android.server.SystemService#onUserStarting(com.android.server.SystemService.TargetUser)}
+         * call.
+         */
+        void onUserVisibilityChanged(@UserIdInt int userId, boolean visible);
+    }
+
+    /**
      * Called by {@link com.android.server.devicepolicy.DevicePolicyManagerService} to set
      * restrictions enforced by the user.
      *
@@ -331,13 +348,18 @@ public abstract class UserManagerInternal {
      * <p>On most devices this call will be a no-op, but it will be used on devices that support
      * multiple users on multiple displays (like automotives with passenger displays).
      *
+     * <p><b>NOTE: </b>this method is meant to be used only by {@code UserController} (when a user
+     * is started)
+     *
      * <p><b>NOTE: </b>this method doesn't validate if the display exists, it's up to the caller to
      * check it. In fact, one of the intended clients for this method is
      * {@code DisplayManagerService}, which will call it when a virtual display is created (another
      * client is {@code UserController}, which will call it when a user is started).
-     *
      */
-    public abstract void assignUserToDisplay(@UserIdInt int userId, int displayId);
+    // TODO(b/244644281): rename to assignUserToDisplayOnStart() and make sure it's called on boot
+    // as well
+    public abstract void assignUserToDisplay(@UserIdInt int userId, @UserIdInt int profileGroupId,
+            boolean foreground, int displayId);
 
     /**
      * Unassigns a user from its current display.
@@ -346,7 +368,7 @@ public abstract class UserManagerInternal {
      * multiple users on multiple displays (like automotives with passenger displays).
      *
      * <p><b>NOTE: </b>this method is meant to be used only by {@code UserController} (when a user
-     * is stopped) and {@code DisplayManagerService} (when a virtual display is destroyed).
+     * is stopped).
      */
     public abstract void unassignUserFromDisplay(@UserIdInt int userId);
 
@@ -390,4 +412,13 @@ public abstract class UserManagerInternal {
      * would make such call).
      */
     public abstract @UserIdInt int getUserAssignedToDisplay(int displayId);
+
+    /** Adds a {@link UserVisibilityListener}. */
+    public abstract void addUserVisibilityListener(UserVisibilityListener listener);
+
+    /** Removes a {@link UserVisibilityListener}. */
+    public abstract void removeUserVisibilityListener(UserVisibilityListener listener);
+
+    /** TODO(b/244333150): temporary method until UserVisibilityMediator handles that logic */
+    public abstract void onUserVisibilityChanged(@UserIdInt int userId, boolean visible);
 }

@@ -37,6 +37,7 @@ import static com.android.server.am.BroadcastRecord.isDeliveryStateTerminal;
 import static com.android.server.am.OomAdjuster.OOM_ADJ_REASON_FINISH_RECEIVER;
 import static com.android.server.am.OomAdjuster.OOM_ADJ_REASON_START_RECEIVER;
 
+import android.annotation.DurationMillisLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UptimeMillisLong;
@@ -239,7 +240,11 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             }
             case MSG_DELIVERY_TIMEOUT_SOFT: {
                 synchronized (mService) {
-                    deliveryTimeoutSoftLocked((BroadcastProcessQueue) msg.obj);
+                    final SomeArgs args = (SomeArgs) msg.obj;
+                    final BroadcastProcessQueue queue = (BroadcastProcessQueue) args.arg1;
+                    final long originalTimeout = args.argl1;
+                    args.recycle();
+                    deliveryTimeoutSoftLocked(queue, originalTimeout);
                 }
                 return true;
             }
@@ -599,6 +604,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         // If nothing to dispatch, send any pending result immediately
         if (r.receivers.isEmpty()) {
             scheduleResultTo(r);
+            notifyFinishBroadcast(r);
         }
 
         traceEnd(cookie);
@@ -746,8 +752,11 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             queue.lastCpuDelayTime = queue.app.getCpuDelayTime();
 
             final long timeout = r.isForeground() ? mFgConstants.TIMEOUT : mBgConstants.TIMEOUT;
+            final SomeArgs args = SomeArgs.obtain();
+            args.arg1 = queue;
+            args.argl1 = timeout;
             mLocalHandler.sendMessageDelayed(
-                    Message.obtain(mLocalHandler, MSG_DELIVERY_TIMEOUT_SOFT, queue), timeout);
+                    Message.obtain(mLocalHandler, MSG_DELIVERY_TIMEOUT_SOFT, args), timeout);
         }
 
         if (r.allowBackgroundActivityStarts) {
@@ -834,15 +843,16 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         r.resultTo = null;
     }
 
-    private void deliveryTimeoutSoftLocked(@NonNull BroadcastProcessQueue queue) {
+    private void deliveryTimeoutSoftLocked(@NonNull BroadcastProcessQueue queue,
+            @DurationMillisLong long originalTimeout) {
         if (queue.app != null) {
             // Instead of immediately triggering an ANR, extend the timeout by
             // the amount of time the process was runnable-but-waiting; we're
             // only willing to do this once before triggering an hard ANR
             final long cpuDelayTime = queue.app.getCpuDelayTime() - queue.lastCpuDelayTime;
-            final long timeout = MathUtils.constrain(cpuDelayTime, 0, mConstants.TIMEOUT);
+            final long hardTimeout = MathUtils.constrain(cpuDelayTime, 0, originalTimeout);
             mLocalHandler.sendMessageDelayed(
-                    Message.obtain(mLocalHandler, MSG_DELIVERY_TIMEOUT_HARD, queue), timeout);
+                    Message.obtain(mLocalHandler, MSG_DELIVERY_TIMEOUT_HARD, queue), hardTimeout);
         } else {
             deliveryTimeoutHardLocked(queue);
         }
@@ -1402,30 +1412,34 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
         final boolean recordFinished = (r.terminalCount == r.receivers.size());
         if (recordFinished) {
-            mService.notifyBroadcastFinishedLocked(r);
-            mHistory.addBroadcastToHistoryLocked(r);
+            notifyFinishBroadcast(r);
+        }
+    }
 
-            r.finishTime = SystemClock.uptimeMillis();
-            r.nextReceiver = r.receivers.size();
-            BroadcastQueueImpl.logBootCompletedBroadcastCompletionLatencyIfPossible(r);
+    private void notifyFinishBroadcast(@NonNull BroadcastRecord r) {
+        mService.notifyBroadcastFinishedLocked(r);
+        mHistory.addBroadcastToHistoryLocked(r);
 
-            if (r.intent.getComponent() == null && r.intent.getPackage() == null
-                    && (r.intent.getFlags() & Intent.FLAG_RECEIVER_REGISTERED_ONLY) == 0) {
-                int manifestCount = 0;
-                int manifestSkipCount = 0;
-                for (int i = 0; i < r.receivers.size(); i++) {
-                    if (r.receivers.get(i) instanceof ResolveInfo) {
-                        manifestCount++;
-                        if (r.delivery[i] == BroadcastRecord.DELIVERY_SKIPPED) {
-                            manifestSkipCount++;
-                        }
+        r.finishTime = SystemClock.uptimeMillis();
+        r.nextReceiver = r.receivers.size();
+        BroadcastQueueImpl.logBootCompletedBroadcastCompletionLatencyIfPossible(r);
+
+        if (r.intent.getComponent() == null && r.intent.getPackage() == null
+                && (r.intent.getFlags() & Intent.FLAG_RECEIVER_REGISTERED_ONLY) == 0) {
+            int manifestCount = 0;
+            int manifestSkipCount = 0;
+            for (int i = 0; i < r.receivers.size(); i++) {
+                if (r.receivers.get(i) instanceof ResolveInfo) {
+                    manifestCount++;
+                    if (r.delivery[i] == BroadcastRecord.DELIVERY_SKIPPED) {
+                        manifestSkipCount++;
                     }
                 }
-
-                final long dispatchTime = SystemClock.uptimeMillis() - r.enqueueTime;
-                mService.addBroadcastStatLocked(r.intent.getAction(), r.callerPackage,
-                        manifestCount, manifestSkipCount, dispatchTime);
             }
+
+            final long dispatchTime = SystemClock.uptimeMillis() - r.enqueueTime;
+            mService.addBroadcastStatLocked(r.intent.getAction(), r.callerPackage,
+                    manifestCount, manifestSkipCount, dispatchTime);
         }
     }
 

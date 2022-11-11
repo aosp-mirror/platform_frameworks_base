@@ -2392,6 +2392,8 @@ public class UsageStatsService extends SystemService implements
         @Override
         public void setAppStandbyBucket(String packageName, int bucket, int userId) {
 
+            super.setAppStandbyBucket_enforcePermission();
+
             final int callingUid = Binder.getCallingUid();
             final int callingPid = Binder.getCallingPid();
             final long token = Binder.clearCallingIdentity();
@@ -2441,6 +2443,8 @@ public class UsageStatsService extends SystemService implements
         @android.annotation.EnforcePermission(android.Manifest.permission.CHANGE_APP_IDLE_STATE)
         @Override
         public void setAppStandbyBuckets(ParceledListSlice appBuckets, int userId) {
+
+            super.setAppStandbyBuckets_enforcePermission();
 
             final int callingUid = Binder.getCallingUid();
             final int callingPid = Binder.getCallingPid();
@@ -2493,6 +2497,8 @@ public class UsageStatsService extends SystemService implements
         public void setEstimatedLaunchTime(String packageName, long estimatedLaunchTime,
                 int userId) {
 
+            super.setEstimatedLaunchTime_enforcePermission();
+
             final long token = Binder.clearCallingIdentity();
             try {
                 UsageStatsService.this
@@ -2505,6 +2511,8 @@ public class UsageStatsService extends SystemService implements
         @android.annotation.EnforcePermission(android.Manifest.permission.CHANGE_APP_LAUNCH_TIME_ESTIMATE)
         @Override
         public void setEstimatedLaunchTimes(ParceledListSlice estimatedLaunchTimes, int userId) {
+
+            super.setEstimatedLaunchTimes_enforcePermission();
 
             final long token = Binder.clearCallingIdentity();
             try {

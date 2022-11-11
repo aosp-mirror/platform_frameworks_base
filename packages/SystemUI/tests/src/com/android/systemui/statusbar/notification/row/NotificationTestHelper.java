@@ -56,6 +56,7 @@ import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.media.controls.util.MediaFeatureFlag;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
@@ -151,7 +152,8 @@ public class NotificationTestHelper {
                 mock(ConfigurationControllerImpl.class),
                 new Handler(mTestLooper.getLooper()),
                 mock(AccessibilityManagerWrapper.class),
-                mock(UiEventLogger.class)
+                mock(UiEventLogger.class),
+                mock(ShadeExpansionStateManager.class)
         );
         mIconManager = new IconManager(
                 mock(CommonNotifCollection.class),

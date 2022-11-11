@@ -239,9 +239,9 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
 
     @Test
     public void setPanelExpanded_notFocusable_altFocusable_whenPanelIsOpen() {
-        mNotificationShadeWindowController.setPanelExpanded(true);
+        mNotificationShadeWindowController.onShadeExpansionFullyChanged(true);
         clearInvocations(mWindowManager);
-        mNotificationShadeWindowController.setPanelExpanded(true);
+        mNotificationShadeWindowController.onShadeExpansionFullyChanged(true);
         verifyNoMoreInteractions(mWindowManager);
         mNotificationShadeWindowController.setNotificationShadeFocusable(true);
 
@@ -313,7 +313,7 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
         verifyNoMoreInteractions(mWindowManager);
 
         clearInvocations(mWindowManager);
-        mNotificationShadeWindowController.batchApplyWindowLayoutParams(()-> {
+        mNotificationShadeWindowController.batchApplyWindowLayoutParams(() -> {
             mNotificationShadeWindowController.setForceDozeBrightness(false);
             verify(mWindowManager, never()).updateViewLayout(any(), any());
         });

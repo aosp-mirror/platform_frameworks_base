@@ -33,17 +33,19 @@ import java.util.Objects;
  * @hide
  */
 public final class UserPackage {
+    private static final boolean ENABLE_CACHING = true;
+
     @UserIdInt
     public final int userId;
     public final String packageName;
 
-    @GuardedBy("sCache")
+    private static final Object sCacheLock = new Object();
+    @GuardedBy("sCacheLock")
     private static final SparseArrayMap<String, UserPackage> sCache = new SparseArrayMap<>();
 
-    private static final Object sUserIdLock = new Object();
     private static final class NoPreloadHolder {
         /** Set of userIDs to cache objects for. */
-        @GuardedBy("sUserIdLock")
+        @GuardedBy("sCacheLock")
         private static int[] sUserIds = new int[]{UserHandle.getUserId(Process.myUid())};
     }
 
@@ -80,13 +82,16 @@ public final class UserPackage {
     /** Return an instance of this class representing the given userId + packageName combination. */
     @NonNull
     public static UserPackage of(@UserIdInt int userId, @NonNull String packageName) {
-        synchronized (sUserIdLock) {
+        if (!ENABLE_CACHING) {
+            return new UserPackage(userId, packageName);
+        }
+
+        synchronized (sCacheLock) {
             if (!ArrayUtils.contains(NoPreloadHolder.sUserIds, userId)) {
                 // Don't cache objects for invalid userIds.
                 return new UserPackage(userId, packageName);
             }
-        }
-        synchronized (sCache) {
+
             UserPackage up = sCache.get(userId, packageName);
             if (up == null) {
                 packageName = packageName.intern();
@@ -99,23 +104,27 @@ public final class UserPackage {
 
     /** Remove the specified app from the cache. */
     public static void removeFromCache(@UserIdInt int userId, @NonNull String packageName) {
-        synchronized (sCache) {
+        if (!ENABLE_CACHING) {
+            return;
+        }
+
+        synchronized (sCacheLock) {
             sCache.delete(userId, packageName);
         }
     }
 
     /** Indicate the list of valid user IDs on the device. */
     public static void setValidUserIds(@NonNull int[] userIds) {
-        userIds = userIds.clone();
-        synchronized (sUserIdLock) {
-            NoPreloadHolder.sUserIds = userIds;
+        if (!ENABLE_CACHING) {
+            return;
         }
-        synchronized (sCache) {
+
+        userIds = userIds.clone();
+        synchronized (sCacheLock) {
+            NoPreloadHolder.sUserIds = userIds;
+
             for (int u = sCache.numMaps() - 1; u >= 0; --u) {
                 final int userId = sCache.keyAt(u);
-                // Not holding sUserIdLock is intentional here. We don't modify the elements within
-                // the array and so even if this method is called multiple times with different sets
-                // of user IDs, we want to adjust the cache based on each new array.
                 if (!ArrayUtils.contains(userIds, userId)) {
                     sCache.deleteAt(u);
                 }

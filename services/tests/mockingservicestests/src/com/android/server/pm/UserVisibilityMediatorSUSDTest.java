@@ -39,27 +39,25 @@ public final class UserVisibilityMediatorSUSDTest extends UserVisibilityMediator
         mockCurrentUser(USER_ID);
 
         assertThrows(UnsupportedOperationException.class,
-                () -> mMediator.assignUserToDisplay(USER_ID, SECONDARY_DISPLAY_ID));
+                () -> mMediator.assignUserToDisplay(USER_ID, USER_ID, SECONDARY_DISPLAY_ID));
     }
 
     @Test
     public void testAssignUserToDisplay_otherDisplay_startProfileOfcurrentUser() {
         mockCurrentUser(PARENT_USER_ID);
-        addDefaultProfileAndParent();
         startDefaultProfile();
 
-        assertThrows(UnsupportedOperationException.class,
-                () -> mMediator.assignUserToDisplay(PROFILE_USER_ID, SECONDARY_DISPLAY_ID));
+        assertThrows(UnsupportedOperationException.class, () -> mMediator
+                .assignUserToDisplay(PROFILE_USER_ID, PARENT_USER_ID, SECONDARY_DISPLAY_ID));
     }
 
     @Test
     public void testAssignUserToDisplay_otherDisplay_stoppedProfileOfcurrentUser() {
         mockCurrentUser(PARENT_USER_ID);
-        addDefaultProfileAndParent();
         stopDefaultProfile();
 
-        assertThrows(UnsupportedOperationException.class,
-                () -> mMediator.assignUserToDisplay(PROFILE_USER_ID, SECONDARY_DISPLAY_ID));
+        assertThrows(UnsupportedOperationException.class, () -> mMediator
+                .assignUserToDisplay(PROFILE_USER_ID, PARENT_USER_ID, SECONDARY_DISPLAY_ID));
     }
 
     @Test

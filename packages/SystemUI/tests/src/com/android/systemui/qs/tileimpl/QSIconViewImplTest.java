@@ -40,6 +40,8 @@ import com.android.systemui.plugins.qs.QSTile.State;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InOrder;
+import org.mockito.Mockito;
 
 @RunWith(AndroidTestingRunner.class)
 @UiThreadTest
@@ -138,7 +140,7 @@ public class QSIconViewImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testIconNotAnimatedWhenAllowAnimationsFalse() {
+    public void testIconStartedAndStoppedWhenAllowAnimationsFalse() {
         ImageView iv = new ImageView(mContext);
         AnimatedVectorDrawable d = mock(AnimatedVectorDrawable.class);
         State s = new State();
@@ -148,7 +150,9 @@ public class QSIconViewImplTest extends SysuiTestCase {
 
         mIconView.updateIcon(iv, s, false);
 
-        verify(d, never()).start();
+        InOrder inOrder = Mockito.inOrder(d);
+        inOrder.verify(d).start();
+        inOrder.verify(d).stop();
     }
 
     private static Drawable.ConstantState fakeConstantState(Drawable otherDrawable) {

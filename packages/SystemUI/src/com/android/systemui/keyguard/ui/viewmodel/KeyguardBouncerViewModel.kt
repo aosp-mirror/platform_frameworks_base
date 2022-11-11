@@ -26,7 +26,6 @@ import com.android.systemui.statusbar.phone.KeyguardBouncer.EXPANSION_VISIBLE
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 
 /** Models UI state for the lock screen bouncer; handles user input. */
@@ -44,13 +43,6 @@ constructor(
 
     /** Observe whether bouncer is showing. */
     val show: Flow<KeyguardBouncerModel> = interactor.show
-
-    /** Observe bouncer prompt when bouncer is showing. */
-    val showPromptReason: Flow<Int> = interactor.show.map { it.promptReason }
-
-    /** Observe bouncer error message when bouncer is showing. */
-    val showBouncerErrorMessage: Flow<CharSequence> =
-        interactor.show.map { it.errorMessage }.filterNotNull()
 
     /** Observe visible expansion when bouncer is showing. */
     val showWithFullExpansion: Flow<KeyguardBouncerModel> =

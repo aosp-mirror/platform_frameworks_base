@@ -473,18 +473,6 @@ public abstract class SystemService {
     }
 
     /**
-     * The {@link UserManager#isUserVisible() user visibility} changed.
-     *
-     * <p>This callback is called before the user starts or is switched to (or after it stops), when
-     * its visibility changed because of that action.
-     *
-     * @hide
-     */
-    // NOTE: change visible to int if this method becomes a @SystemApi
-    public void onUserVisibilityChanged(@NonNull TargetUser user, boolean visible) {
-    }
-
-    /**
      * Called when an existing user is stopping, for system services to finalize any per-user
      * state they maintain for running users.  This is called prior to sending the SHUTDOWN
      * broadcast to the user; it is a good place to stop making use of any resources of that

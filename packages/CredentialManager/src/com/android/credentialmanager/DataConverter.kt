@@ -20,6 +20,7 @@ import android.content.Context
 import android.credentials.ui.Entry
 import android.credentials.ui.GetCredentialProviderData
 import android.credentials.ui.CreateCredentialProviderData
+import android.credentials.ui.DisabledProviderData
 import com.android.credentialmanager.createflow.CreateOptionInfo
 import com.android.credentialmanager.getflow.ActionEntryInfo
 import com.android.credentialmanager.getflow.AuthenticationEntryInfo
@@ -103,18 +104,32 @@ class GetFlowUtils {
 class CreateFlowUtils {
   companion object {
 
-    fun toProviderList(
+    fun toEnabledProviderList(
       providerDataList: List<CreateCredentialProviderData>,
       context: Context,
-    ): List<com.android.credentialmanager.createflow.ProviderInfo> {
+    ): List<com.android.credentialmanager.createflow.EnabledProviderInfo> {
       return providerDataList.map {
-        com.android.credentialmanager.createflow.ProviderInfo(
+        com.android.credentialmanager.createflow.EnabledProviderInfo(
           // TODO: replace to extract from the service data structure when available
           icon = context.getDrawable(R.drawable.ic_passkey)!!,
           name = it.providerFlattenedComponentName,
           displayName = it.providerFlattenedComponentName,
           createOptions = toCreationOptionInfoList(it.saveEntries, context),
           isDefault = it.isDefaultProvider,
+        )
+      }
+    }
+
+    fun toDisabledProviderList(
+      providerDataList: List<DisabledProviderData>,
+      context: Context,
+    ): List<com.android.credentialmanager.createflow.DisabledProviderInfo> {
+      return providerDataList.map {
+        com.android.credentialmanager.createflow.DisabledProviderInfo(
+          // TODO: replace to extract from the service data structure when available
+          icon = context.getDrawable(R.drawable.ic_passkey)!!,
+          name = it.providerFlattenedComponentName,
+          displayName = it.providerFlattenedComponentName,
         )
       }
     }
