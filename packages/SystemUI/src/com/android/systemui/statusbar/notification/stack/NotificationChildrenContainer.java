@@ -495,6 +495,20 @@ public class NotificationChildrenContainer extends ViewGroup
     }
 
     /**
+     * Sets the alpha on the content, while leaving the background of the container itself as is.
+     *
+     * @param alpha alpha value to apply to the content
+     */
+    public void setContentAlpha(float alpha) {
+        for (int i = 0; i < mNotificationHeader.getChildCount(); i++) {
+            mNotificationHeader.getChildAt(i).setAlpha(alpha);
+        }
+        for (ExpandableNotificationRow child : getAttachedChildren()) {
+            child.setContentAlpha(alpha);
+        }
+    }
+
+    /**
      * To be called any time the rows have been updated
      */
     public void updateExpansionStates() {

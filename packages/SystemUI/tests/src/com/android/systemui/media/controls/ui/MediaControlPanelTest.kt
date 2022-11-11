@@ -1137,6 +1137,19 @@ public class MediaControlPanelTest : SysuiTestCase() {
     /* ***** Guts tests for the player ***** */
 
     @Test
+    fun player_longClick_isFalse() {
+        whenever(falsingManager.isFalseLongTap(FalsingManager.LOW_PENALTY)).thenReturn(true)
+        player.attachPlayer(viewHolder)
+
+        val captor = ArgumentCaptor.forClass(View.OnLongClickListener::class.java)
+        verify(viewHolder.player).onLongClickListener = captor.capture()
+
+        captor.value.onLongClick(viewHolder.player)
+        verify(mediaViewController, never()).openGuts()
+        verify(mediaViewController, never()).closeGuts()
+    }
+
+    @Test
     fun player_longClickWhenGutsClosed_gutsOpens() {
         player.attachPlayer(viewHolder)
         player.bindPlayer(mediaData, KEY)
@@ -1314,6 +1327,20 @@ public class MediaControlPanelTest : SysuiTestCase() {
     /* ***** END guts tests for the player ***** */
 
     /* ***** Guts tests for the recommendations ***** */
+
+    @Test
+    fun recommendations_longClick_isFalse() {
+        whenever(falsingManager.isFalseLongTap(FalsingManager.LOW_PENALTY)).thenReturn(true)
+        player.attachRecommendation(recommendationViewHolder)
+        player.bindRecommendation(smartspaceData)
+
+        val captor = ArgumentCaptor.forClass(View.OnLongClickListener::class.java)
+        verify(viewHolder.player).onLongClickListener = captor.capture()
+
+        captor.value.onLongClick(viewHolder.player)
+        verify(mediaViewController, never()).openGuts()
+        verify(mediaViewController, never()).closeGuts()
+    }
 
     @Test
     fun recommendations_longClickWhenGutsClosed_gutsOpens() {

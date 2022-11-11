@@ -20,7 +20,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.wm.shell.common.split.SplitScreenConstants.CONTROLLED_ACTIVITY_TYPES;
-import static com.android.wm.shell.common.split.SplitScreenConstants.CONTROLLED_WINDOWING_MODES;
+import static com.android.wm.shell.common.split.SplitScreenConstants.CONTROLLED_WINDOWING_MODES_WHEN_ACTIVE;
 
 import android.app.ActivityManager;
 import android.app.ActivityManager.TaskDescription;
@@ -255,7 +255,8 @@ public class Task {
         // Also consider undefined activity type to include tasks in overview right after rebooting
         // the device.
         final boolean isDockable = taskInfo.supportsMultiWindow
-                && ArrayUtils.contains(CONTROLLED_WINDOWING_MODES, taskInfo.getWindowingMode())
+                && ArrayUtils.contains(
+                        CONTROLLED_WINDOWING_MODES_WHEN_ACTIVE, taskInfo.getWindowingMode())
                 && (taskInfo.getActivityType() == ACTIVITY_TYPE_UNDEFINED
                 || ArrayUtils.contains(CONTROLLED_ACTIVITY_TYPES, taskInfo.getActivityType()));
         return new Task(taskKey,

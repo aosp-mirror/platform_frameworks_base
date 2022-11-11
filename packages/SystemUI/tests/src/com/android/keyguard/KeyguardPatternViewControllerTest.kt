@@ -33,6 +33,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
+import org.mockito.Mockito.never
 import org.mockito.MockitoAnnotations
 
 @SmallTest
@@ -111,5 +112,15 @@ class KeyguardPatternViewControllerTest : SysuiTestCase() {
     fun startAppearAnimation() {
         mKeyguardPatternViewController.startAppearAnimation()
         verify(mKeyguardMessageAreaController).setMessage(R.string.keyguard_enter_your_pattern)
+    }
+
+    @Test
+    fun startAppearAnimation_withExistingMessage() {
+        `when`(mKeyguardMessageAreaController.message).thenReturn("Unlock to continue.")
+        mKeyguardPatternViewController.startAppearAnimation()
+        verify(
+            mKeyguardMessageAreaController,
+            never()
+        ).setMessage(R.string.keyguard_enter_your_password)
     }
 }

@@ -123,27 +123,37 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun displayView_screenOff_wakeLockAcquired() {
+    fun displayView_wakeLockAcquired() {
         underTest.displayView(getState())
 
         assertThat(fakeWakeLock.isHeld).isTrue()
     }
 
     @Test
-    fun displayView_screenAlreadyOn_wakeLockNotAcquired() {
+    fun displayView_screenAlreadyOn_wakeLockAcquired() {
         whenever(powerManager.isScreenOn).thenReturn(true)
 
         underTest.displayView(getState())
+
+        assertThat(fakeWakeLock.isHeld).isTrue()
+    }
+
+    @Test
+    fun displayView_wakeLockCanBeReleasedAfterTimeOut() {
+        underTest.displayView(getState())
+        assertThat(fakeWakeLock.isHeld).isTrue()
+
+        fakeClock.advanceTime(TIMEOUT_MS + 1)
 
         assertThat(fakeWakeLock.isHeld).isFalse()
     }
 
     @Test
-    fun displayView_screenOff_wakeLockCanBeReleasedAfterTimeOut() {
+    fun displayView_removeView_wakeLockCanBeReleased() {
         underTest.displayView(getState())
         assertThat(fakeWakeLock.isHeld).isTrue()
 
-        fakeClock.advanceTime(TIMEOUT_MS + 1)
+        underTest.removeView("test reason")
 
         assertThat(fakeWakeLock.isHeld).isFalse()
     }

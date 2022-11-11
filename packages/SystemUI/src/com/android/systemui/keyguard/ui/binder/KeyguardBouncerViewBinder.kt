@@ -94,22 +94,14 @@ object KeyguardBouncerViewBinder {
                     viewModel.setBouncerViewDelegate(delegate)
                     launch {
                         viewModel.show.collect {
+                            hostViewController.showPromptReason(it.promptReason)
+                            it.errorMessage?.let { errorMessage ->
+                                hostViewController.showErrorMessage(errorMessage)
+                            }
                             hostViewController.showPrimarySecurityScreen()
                             hostViewController.appear(
                                 SystemBarUtils.getStatusBarHeight(view.context)
                             )
-                        }
-                    }
-
-                    launch {
-                        viewModel.showPromptReason.collect { prompt ->
-                            hostViewController.showPromptReason(prompt)
-                        }
-                    }
-
-                    launch {
-                        viewModel.showBouncerErrorMessage.collect { errorMessage ->
-                            hostViewController.showErrorMessage(errorMessage)
                         }
                     }
 

@@ -1327,6 +1327,12 @@
       "group": "WM_DEBUG_ANIM",
       "at": "com\/android\/server\/wm\/WindowState.java"
     },
+    "-787664727": {
+      "message": "Cannot launch dream activity due to invalid state. dream component: %s packageName: %s",
+      "level": "ERROR",
+      "group": "WM_DEBUG_DREAM",
+      "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
+    },
     "-784959154": {
       "message": "Attempted to add private presentation window to a non-private display.  Aborting.",
       "level": "WARN",
@@ -2863,6 +2869,12 @@
       "group": "WM_DEBUG_BOOT",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "601283564": {
+      "message": "Dream packageName does not match active dream. Package %s does not match %s",
+      "level": "ERROR",
+      "group": "WM_DEBUG_DREAM",
+      "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
+    },
     "608694300": {
       "message": "  NEW SURFACE SESSION %s",
       "level": "INFO",
@@ -3102,12 +3114,6 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_STARTING_WINDOW",
       "at": "com\/android\/server\/wm\/WindowStateAnimator.java"
-    },
-    "829869827": {
-      "message": "Cannot launch dream activity due to invalid state. dreaming: %b packageName: %s",
-      "level": "ERROR",
-      "group": "WM_DEBUG_DREAM",
-      "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
     },
     "835814848": {
       "message": "%s",
@@ -4140,12 +4146,6 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_WINDOW_ORGANIZER",
       "at": "com\/android\/server\/wm\/TaskOrganizerController.java"
-    },
-    "1918771553": {
-      "message": "Dream packageName does not match active dream. Package %s does not match %s or %s",
-      "level": "ERROR",
-      "group": "WM_DEBUG_DREAM",
-      "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
     },
     "1921821199": {
       "message": "Preserving %s until the new one is added",

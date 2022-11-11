@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.inputmethod.InputMethodManager;
 
@@ -152,7 +153,9 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
     }
 
     public void startAppearAnimation() {
-        mMessageAreaController.setMessage(getInitialMessageResId());
+        if (TextUtils.isEmpty(mMessageAreaController.getMessage())) {
+            mMessageAreaController.setMessage(getInitialMessageResId());
+        }
         mView.startAppearAnimation();
     }
 
