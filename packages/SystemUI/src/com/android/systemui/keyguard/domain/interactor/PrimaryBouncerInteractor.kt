@@ -117,7 +117,6 @@ constructor(
     @JvmOverloads
     fun show(isScrimmed: Boolean) {
         // Reset some states as we show the bouncer.
-        repository.setShowMessage(null)
         repository.setOnScreenTurnedOff(false)
         repository.setKeyguardAuthenticated(null)
         repository.setPrimaryHide(false)
