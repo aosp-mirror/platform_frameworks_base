@@ -383,7 +383,8 @@ public class InternetTile extends QSTileImpl<SignalState> {
 
     @Override
     protected void handleUpdateState(SignalState state, Object arg) {
-        mQSLogger.logInternetTileUpdate(mLastTileState, arg == null ? "null" : arg.toString());
+        mQSLogger.logInternetTileUpdate(
+                getTileSpec(), mLastTileState, arg == null ? "null" : arg.toString());
         if (arg instanceof CellularCallbackInfo) {
             mLastTileState = 0;
             handleUpdateCellularState(state, arg);

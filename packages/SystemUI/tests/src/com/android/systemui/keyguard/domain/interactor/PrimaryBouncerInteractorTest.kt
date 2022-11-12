@@ -93,7 +93,6 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
     @Test
     fun testShow_isScrimmed() {
         mPrimaryBouncerInteractor.show(true)
-        verify(repository).setShowMessage(null)
         verify(repository).setOnScreenTurnedOff(false)
         verify(repository).setKeyguardAuthenticated(null)
         verify(repository).setPrimaryHide(false)
