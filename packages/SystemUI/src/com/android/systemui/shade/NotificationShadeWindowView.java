@@ -16,6 +16,7 @@
 
 package com.android.systemui.shade;
 
+import static android.os.Trace.TRACE_TAG_ALWAYS;
 import static android.view.WindowInsets.Type.systemBars;
 
 import static com.android.systemui.statusbar.phone.CentralSurfaces.DEBUG;
@@ -33,6 +34,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Trace;
 import android.util.AttributeSet;
 import android.view.ActionMode;
 import android.view.DisplayCutout;
@@ -297,6 +299,19 @@ public class NotificationShadeWindowView extends FrameLayout {
             mode = null;
         }
         return mode;
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        Trace.beginSection("NotificationShadeWindowView#onMeasure");
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        Trace.endSection();
+    }
+
+    @Override
+    public void requestLayout() {
+        Trace.instant(TRACE_TAG_ALWAYS, "NotificationShadeWindowView#requestLayout");
+        super.requestLayout();
     }
 
     private class ActionModeCallback2Wrapper extends ActionMode.Callback2 {

@@ -135,6 +135,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     private static final String TAG = "ExpandableNotifRow";
     private static final boolean DEBUG = Compile.IS_DEBUG && Log.isLoggable(TAG, Log.DEBUG);
+    private static final boolean DEBUG_ONMEASURE =
+            Compile.IS_DEBUG && Log.isLoggable(TAG, Log.VERBOSE);
     private static final int DEFAULT_DIVIDER_ALPHA = 0x29;
     private static final int COLORED_DIVIDER_ALPHA = 0x7B;
     private static final int MENU_VIEW_INDEX = 0;
@@ -1724,6 +1726,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         Trace.beginSection(appendTraceStyleTag("ExpNotRow#onMeasure"));
+        if (DEBUG_ONMEASURE) {
+            Log.d(TAG, "onMeasure("
+                    + "widthMeasureSpec=" + MeasureSpec.toString(widthMeasureSpec) + ", "
+                    + "heightMeasureSpec=" + MeasureSpec.toString(heightMeasureSpec) + ")");
+        }
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         Trace.endSection();
     }
