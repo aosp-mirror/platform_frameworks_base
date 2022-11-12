@@ -39,6 +39,7 @@ import android.app.GameModeConfiguration;
 import android.app.GameModeInfo;
 import android.app.GameState;
 import android.app.IGameManagerService;
+import android.app.IGameModeListener;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -58,10 +59,12 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManagerInternal;
 import android.os.Process;
+import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.UserManager;
@@ -132,6 +135,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
     private final Context mContext;
     private final Object mLock = new Object();
     private final Object mDeviceConfigLock = new Object();
+    private final Object mGameModeListenerLock = new Object();
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
     final Handler mHandler;
     private final PackageManager mPackageManager;
@@ -145,6 +149,9 @@ public final class GameManagerService extends IGameManagerService.Stub {
     private final ArrayMap<Integer, GameManagerSettings> mSettings = new ArrayMap<>();
     @GuardedBy("mDeviceConfigLock")
     private final ArrayMap<String, GamePackageConfiguration> mConfigs = new ArrayMap<>();
+    // listener to caller uid map
+    @GuardedBy("mGameModeListenerLock")
+    private final ArrayMap<IGameModeListener, Integer> mGameModeListeners = new ArrayMap<>();
     @Nullable
     private final GameServiceController mGameServiceController;
 
@@ -1102,7 +1109,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
             // Restrict to games and valid game modes only.
             return;
         }
-
+        int fromGameMode;
         synchronized (mLock) {
             userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
                     Binder.getCallingUid(), userId, false, true, "setGameMode",
@@ -1114,9 +1121,21 @@ public final class GameManagerService extends IGameManagerService.Stub {
                 return;
             }
             GameManagerSettings userSettings = mSettings.get(userId);
+            fromGameMode = userSettings.getGameModeLocked(packageName);
             userSettings.setGameModeLocked(packageName, gameMode);
         }
         updateInterventions(packageName, gameMode, userId);
+        synchronized (mGameModeListenerLock) {
+            for (IGameModeListener listener : mGameModeListeners.keySet()) {
+                Binder.allowBlocking(listener.asBinder());
+                try {
+                    listener.onGameModeChanged(packageName, fromGameMode, gameMode, userId);
+                } catch (RemoteException ex) {
+                    Slog.w(TAG, "Cannot notify game mode change for listener added by "
+                            + mGameModeListeners.get(listener));
+                }
+            }
+        }
         sendUserMessage(userId, WRITE_SETTINGS, "SET_GAME_MODE", WRITE_DELAY_MILLIS);
         sendUserMessage(userId, WRITE_GAME_MODE_INTERVENTION_LIST_FILE,
                 "SET_GAME_MODE", 0 /*delayMillis*/);
@@ -1339,6 +1358,57 @@ public final class GameManagerService extends IGameManagerService.Stub {
         Slog.i(TAG, "Updated custom game mode config for package: " + packageName
                 + " with FPS=" + internalConfig.getFps() + ";Scaling="
                 + internalConfig.getScaling());
+    }
+
+    /**
+     * Adds a game mode listener.
+     *
+     * @throws SecurityException if caller doesn't have
+     *                           {@link android.Manifest.permission#MANAGE_GAME_MODE}
+     *                           permission.
+     */
+    @Override
+    @RequiresPermission(Manifest.permission.MANAGE_GAME_MODE)
+    public void addGameModeListener(@NonNull IGameModeListener listener) {
+        checkPermission(Manifest.permission.MANAGE_GAME_MODE);
+        try {
+            final IBinder listenerBinder = listener.asBinder();
+            listenerBinder.linkToDeath(new DeathRecipient() {
+                @Override public void binderDied() {
+                    // TODO(b/258851194): add traces on binder death based listener removal
+                    removeGameModeListenerUnchecked(listener);
+                    listenerBinder.unlinkToDeath(this, 0 /*flags*/);
+                }
+            }, 0 /*flags*/);
+            synchronized (mGameModeListenerLock) {
+                mGameModeListeners.put(listener, Binder.getCallingUid());
+            }
+        } catch (RemoteException ex) {
+            Slog.e(TAG,
+                    "Failed to link death recipient for IGameModeListener from caller "
+                            + Binder.getCallingUid() + ", abandoned its listener registration", ex);
+        }
+    }
+
+    /**
+     * Removes a game mode listener.
+     *
+     * @throws SecurityException if caller doesn't have
+     *                           {@link android.Manifest.permission#MANAGE_GAME_MODE}
+     *                           permission.
+     */
+    @Override
+    @RequiresPermission(Manifest.permission.MANAGE_GAME_MODE)
+    public void removeGameModeListener(@NonNull IGameModeListener listener) {
+        // TODO(b/258851194): add traces on manual listener removal
+        checkPermission(Manifest.permission.MANAGE_GAME_MODE);
+        removeGameModeListenerUnchecked(listener);
+    }
+
+    private void removeGameModeListenerUnchecked(IGameModeListener listener) {
+        synchronized (mGameModeListenerLock) {
+            mGameModeListeners.remove(listener);
+        }
     }
 
     /**

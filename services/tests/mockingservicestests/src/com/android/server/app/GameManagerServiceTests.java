@@ -33,6 +33,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -43,6 +44,7 @@ import android.app.GameManager;
 import android.app.GameModeConfiguration;
 import android.app.GameModeInfo;
 import android.app.GameState;
+import android.app.IGameModeListener;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -57,7 +59,9 @@ import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.hardware.power.Mode;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.PowerManagerInternal;
+import android.os.RemoteException;
 import android.os.UserManager;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
@@ -74,7 +78,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoSession;
@@ -109,6 +115,9 @@ public class GameManagerServiceTests {
     @Mock
     private UserManager mMockUserManager;
     private BroadcastReceiver mShutDownActionReceiver;
+
+    @Captor
+    ArgumentCaptor<IBinder.DeathRecipient> mDeathRecipientCaptor;
 
     // Stolen from ConnectivityServiceTest.MockContext
     class MockContext extends ContextWrapper {
@@ -1872,6 +1881,53 @@ public class GameManagerServiceTests {
         Mockito.verify(gameManagerService).setOverrideFrameRate(
                 ArgumentMatchers.eq(DEFAULT_PACKAGE_UID),
                 ArgumentMatchers.eq(0.0f));
+    }
+
+    @Test
+    public void testAddGameModeListener() throws RemoteException {
+        GameManagerService gameManagerService =
+                new GameManagerService(mMockContext, mTestLooper.getLooper());
+        mockDeviceConfigAll();
+        startUser(gameManagerService, USER_ID_1);
+        mockModifyGameModeGranted();
+
+        IGameModeListener mockListener = Mockito.mock(IGameModeListener.class);
+        IBinder binder = Mockito.mock(IBinder.class);
+        when(mockListener.asBinder()).thenReturn(binder);
+        gameManagerService.addGameModeListener(mockListener);
+        verify(binder).linkToDeath(mDeathRecipientCaptor.capture(), anyInt());
+
+        gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_PERFORMANCE, USER_ID_1);
+        verify(mockListener).onGameModeChanged(mPackageName, GameManager.GAME_MODE_STANDARD,
+                GameManager.GAME_MODE_PERFORMANCE, USER_ID_1);
+        reset(mockListener);
+        gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_BATTERY, USER_ID_1);
+        verify(mockListener).onGameModeChanged(mPackageName, GameManager.GAME_MODE_PERFORMANCE,
+                GameManager.GAME_MODE_BATTERY, USER_ID_1);
+        reset(mockListener);
+
+        mDeathRecipientCaptor.getValue().binderDied();
+        verify(binder).unlinkToDeath(eq(mDeathRecipientCaptor.getValue()), anyInt());
+        gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_CUSTOM, USER_ID_1);
+        verify(mockListener, never()).onGameModeChanged(anyString(), anyInt(), anyInt(), anyInt());
+    }
+
+    @Test
+    public void testRemoveGameModeListener() throws RemoteException {
+        GameManagerService gameManagerService =
+                new GameManagerService(mMockContext, mTestLooper.getLooper());
+        mockDeviceConfigAll();
+        startUser(gameManagerService, USER_ID_1);
+        mockModifyGameModeGranted();
+
+        IGameModeListener mockListener = Mockito.mock(IGameModeListener.class);
+        IBinder binder = Mockito.mock(IBinder.class);
+        when(mockListener.asBinder()).thenReturn(binder);
+
+        gameManagerService.addGameModeListener(mockListener);
+        gameManagerService.removeGameModeListener(mockListener);
+        gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_PERFORMANCE, USER_ID_1);
+        verify(mockListener, never()).onGameModeChanged(anyString(), anyInt(), anyInt(), anyInt());
     }
 
     private static void deleteFolder(File folder) {
