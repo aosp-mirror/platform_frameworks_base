@@ -25,6 +25,7 @@ import android.content.ComponentName;
 import android.content.res.Configuration;
 import android.content.res.Configuration.Orientation;
 import android.metrics.LogMaker;
+import android.util.Log;
 import android.view.View;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -38,6 +39,7 @@ import com.android.systemui.plugins.qs.QSTileView;
 import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.logging.QSLogger;
+import com.android.systemui.qs.tileimpl.QSTileViewImpl;
 import com.android.systemui.util.LargeScreenUtils;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.animation.DisappearParameters;
@@ -237,6 +239,16 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     private void addTile(final QSTile tile, boolean collapsedView) {
         final TileRecord r =
                 new TileRecord(tile, mHost.createTileView(getContext(), tile, collapsedView));
+        // TODO(b/250618218): Remove the QSLogger in QSTileViewImpl once we know the root cause of
+        // b/250618218.
+        try {
+            QSTileViewImpl qsTileView = (QSTileViewImpl) (r.tileView);
+            if (qsTileView != null) {
+                qsTileView.setQsLogger(mQSLogger);
+            }
+        } catch (ClassCastException e) {
+            Log.e(TAG, "Failed to cast QSTileView to QSTileViewImpl", e);
+        }
         mView.addTile(r);
         mRecords.add(r);
         mCachedSpecs = getTilesSpecs();

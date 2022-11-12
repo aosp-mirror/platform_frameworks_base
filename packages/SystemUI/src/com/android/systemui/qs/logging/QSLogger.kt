@@ -129,12 +129,36 @@ class QSLogger @Inject constructor(
         })
     }
 
-    fun logInternetTileUpdate(lastType: Int, callback: String) {
+    fun logInternetTileUpdate(tileSpec: String, lastType: Int, callback: String) {
         log(VERBOSE, {
+            str1 = tileSpec
             int1 = lastType
-            str1 = callback
+            str2 = callback
         }, {
-            "mLastTileState=$int1, Callback=$str1."
+            "[$str1] mLastTileState=$int1, Callback=$str2."
+        })
+    }
+
+    // TODO(b/250618218): Remove this method once we know the root cause of b/250618218.
+    fun logTileBackgroundColorUpdateIfInternetTile(
+        tileSpec: String,
+        state: Int,
+        disabledByPolicy: Boolean,
+        color: Int
+    ) {
+        // This method is added to further debug b/250618218 which has only been observed from the
+        // InternetTile, so we are only logging the background color change for the InternetTile
+        // to avoid spamming the QSLogger.
+        if (tileSpec != "internet") {
+            return
+        }
+        log(VERBOSE, {
+            str1 = tileSpec
+            int1 = state
+            bool1 = disabledByPolicy
+            int2 = color
+        }, {
+            "[$str1] state=$int1, disabledByPolicy=$bool1, color=$int2."
         })
     }
 

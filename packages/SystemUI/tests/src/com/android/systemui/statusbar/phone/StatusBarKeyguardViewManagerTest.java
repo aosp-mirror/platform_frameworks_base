@@ -222,9 +222,16 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void onPanelExpansionChanged_neverHidesScrimmedBouncer() {
+    public void onPanelExpansionChanged_neverHidesFullscreenBouncer() {
         when(mPrimaryBouncer.isShowing()).thenReturn(true);
-        when(mPrimaryBouncer.isScrimmed()).thenReturn(true);
+        when(mKeyguardSecurityModel.getSecurityMode(anyInt())).thenReturn(
+                KeyguardSecurityModel.SecurityMode.SimPuk);
+        mStatusBarKeyguardViewManager.onPanelExpansionChanged(EXPANSION_EVENT);
+        verify(mPrimaryBouncer).setExpansion(eq(KeyguardBouncer.EXPANSION_VISIBLE));
+
+        reset(mPrimaryBouncer);
+        when(mKeyguardSecurityModel.getSecurityMode(anyInt())).thenReturn(
+                KeyguardSecurityModel.SecurityMode.SimPin);
         mStatusBarKeyguardViewManager.onPanelExpansionChanged(EXPANSION_EVENT);
         verify(mPrimaryBouncer).setExpansion(eq(KeyguardBouncer.EXPANSION_VISIBLE));
     }
@@ -268,13 +275,6 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         when(mPrimaryBouncer.isAnimatingAway()).thenReturn(true);
         mStatusBarKeyguardViewManager.onPanelExpansionChanged(EXPANSION_EVENT);
         verify(mPrimaryBouncer, never()).show(eq(false), eq(false));
-    }
-
-    @Test
-    public void onPanelExpansionChanged_neverTranslatesBouncerWhenOccluded() {
-        mStatusBarKeyguardViewManager.setOccluded(true /* occluded */, false /* animate */);
-        mStatusBarKeyguardViewManager.onPanelExpansionChanged(EXPANSION_EVENT);
-        verify(mPrimaryBouncer, never()).setExpansion(eq(0.5f));
     }
 
     @Test
