@@ -282,6 +282,12 @@ public class DisplayPolicy {
 
     private final ArraySet<WindowState> mInsetsSourceWindowsExceptIme = new ArraySet<>();
 
+    /** Apps which are controlling the appearance of system bars */
+    private final ArraySet<ActivityRecord> mSystemBarColorApps = new ArraySet<>();
+
+    /** Apps which are relaunching and were controlling the appearance of system bars */
+    private final ArraySet<ActivityRecord> mRelaunchingSystemBarColorApps = new ArraySet<>();
+
     private boolean mIsFreeformWindowOverlappingWithNavBar;
 
     private boolean mLastImmersiveMode;
@@ -1550,6 +1556,7 @@ public class DisplayPolicy {
         mStatusBarBackgroundWindows.clear();
         mStatusBarColorCheckedBounds.setEmpty();
         mStatusBarBackgroundCheckedBounds.setEmpty();
+        mSystemBarColorApps.clear();
 
         mAllowLockscreenWhenOn = false;
         mShowingDream = false;
@@ -1626,6 +1633,7 @@ public class DisplayPolicy {
                             win.mAttrs.insetsFlags.appearance & APPEARANCE_LIGHT_STATUS_BARS,
                             new Rect(win.getFrame())));
                     mStatusBarColorCheckedBounds.union(sTmpRect);
+                    addSystemBarColorApp(win);
                 }
             }
 
@@ -1638,6 +1646,7 @@ public class DisplayPolicy {
             if (isOverlappingWithNavBar) {
                 if (mNavBarColorWindowCandidate == null) {
                     mNavBarColorWindowCandidate = win;
+                    addSystemBarColorApp(win);
                 }
                 if (mNavBarBackgroundWindow == null) {
                     mNavBarBackgroundWindow = win;
@@ -1656,9 +1665,11 @@ public class DisplayPolicy {
             }
         } else if (win.isDimming()) {
             if (mStatusBar != null) {
-                addStatusBarAppearanceRegionsForDimmingWindow(
+                if (addStatusBarAppearanceRegionsForDimmingWindow(
                         win.mAttrs.insetsFlags.appearance & APPEARANCE_LIGHT_STATUS_BARS,
-                        mStatusBar.getFrame(), win.getBounds(), win.getFrame());
+                        mStatusBar.getFrame(), win.getBounds(), win.getFrame())) {
+                    addSystemBarColorApp(win);
+                }
             }
             if (isOverlappingWithNavBar && mNavBarColorWindowCandidate == null) {
                 mNavBarColorWindowCandidate = win;
@@ -1666,18 +1677,21 @@ public class DisplayPolicy {
         }
     }
 
-    private void addStatusBarAppearanceRegionsForDimmingWindow(int appearance, Rect statusBarFrame,
-            Rect winBounds, Rect winFrame) {
+    /**
+     * Returns true if mStatusBarAppearanceRegionList is changed.
+     */
+    private boolean addStatusBarAppearanceRegionsForDimmingWindow(
+            int appearance, Rect statusBarFrame, Rect winBounds, Rect winFrame) {
         if (!sTmpRect.setIntersect(winBounds, statusBarFrame)) {
-            return;
+            return false;
         }
         if (mStatusBarColorCheckedBounds.contains(sTmpRect)) {
-            return;
+            return false;
         }
         if (appearance == 0 || !sTmpRect2.setIntersect(winFrame, statusBarFrame)) {
             mStatusBarAppearanceRegionList.add(new AppearanceRegion(0, new Rect(winBounds)));
             mStatusBarColorCheckedBounds.union(sTmpRect);
-            return;
+            return true;
         }
         // A dimming window can divide status bar into different appearance regions (up to 3).
         // +---------+-------------+---------+
@@ -1706,6 +1720,14 @@ public class DisplayPolicy {
             // We don't have vertical status bar yet, so we don't handle the other orientation.
         }
         mStatusBarColorCheckedBounds.union(sTmpRect);
+        return true;
+    }
+
+    private void addSystemBarColorApp(WindowState win) {
+        final ActivityRecord app = win.mActivityRecord;
+        if (app != null) {
+            mSystemBarColorApps.add(app);
+        }
     }
 
     /**
@@ -2202,6 +2224,25 @@ public class DisplayPolicy {
         return mDisplayContent.getInsetsPolicy();
     }
 
+    /**
+     * Called when an app has started replacing its main window.
+     */
+    void addRelaunchingApp(ActivityRecord app) {
+        if (mSystemBarColorApps.contains(app)) {
+            mRelaunchingSystemBarColorApps.add(app);
+        }
+    }
+
+    /**
+     * Called when an app has finished replacing its main window or aborted.
+     */
+    void removeRelaunchingApp(ActivityRecord app) {
+        final boolean removed = mRelaunchingSystemBarColorApps.remove(app);
+        if (removed & mRelaunchingSystemBarColorApps.isEmpty()) {
+            updateSystemBarAttributes();
+        }
+    }
+
     void resetSystemBarAttributes() {
         mLastDisableFlags = 0;
         updateSystemBarAttributes();
@@ -2244,6 +2285,11 @@ public class DisplayPolicy {
         final int displayId = getDisplayId();
         final int disableFlags = win.getDisableFlags();
         final int opaqueAppearance = updateSystemBarsLw(win, disableFlags);
+        if (!mRelaunchingSystemBarColorApps.isEmpty()) {
+            // The appearance of system bars might change while relaunching apps. We don't report
+            // the intermediate state to system UI. Otherwise, it might trigger redundant effects.
+            return;
+        }
         final WindowState navColorWin = chooseNavigationColorWindowLw(mNavBarColorWindowCandidate,
                 mDisplayContent.mInputMethodWindow, mNavigationBarPosition);
         final boolean isNavbarColorManagedByIme =
@@ -2706,6 +2752,14 @@ public class DisplayPolicy {
         if (mTopFullscreenOpaqueWindowState != null) {
             pw.print(prefix); pw.print("mTopFullscreenOpaqueWindowState=");
             pw.println(mTopFullscreenOpaqueWindowState);
+        }
+        if (!mSystemBarColorApps.isEmpty()) {
+            pw.print(prefix); pw.print("mSystemBarColorApps=");
+            pw.println(mSystemBarColorApps);
+        }
+        if (!mRelaunchingSystemBarColorApps.isEmpty()) {
+            pw.print(prefix); pw.print("mRelaunchingSystemBarColorApps=");
+            pw.println(mRelaunchingSystemBarColorApps);
         }
         if (mNavBarColorWindowCandidate != null) {
             pw.print(prefix); pw.print("mNavBarColorWindowCandidate=");
