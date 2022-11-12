@@ -122,6 +122,7 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
         ActivityOptions options = getDefaultActivityOptions(animationAdapter);
         options.setLaunchDisplayId(displayId);
         options.setCallerDisplayId(displayId);
+        options.setPendingIntentBackgroundActivityLaunchAllowed(true);
         return options.toBundle();
     }
 
@@ -145,6 +146,7 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
                 : ActivityOptions.SourceInfo.TYPE_NOTIFICATION, eventTime);
         options.setLaunchDisplayId(displayId);
         options.setCallerDisplayId(displayId);
+        options.setPendingIntentBackgroundActivityLaunchAllowed(true);
         return options.toBundle();
     }
 
