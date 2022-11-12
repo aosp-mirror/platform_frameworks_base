@@ -112,6 +112,7 @@ import com.android.systemui.plugins.PluginDependencyProvider;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.settings.brightness.BrightnessSliderController;
+import com.android.systemui.shade.CameraLauncher;
 import com.android.systemui.shade.NotificationPanelView;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.NotificationShadeWindowView;
@@ -288,6 +289,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private InteractionJankMonitor mJankMonitor;
     @Mock private DeviceStateManager mDeviceStateManager;
     @Mock private WiredChargingRippleController mWiredChargingRippleController;
+    @Mock private Lazy<CameraLauncher> mCameraLauncherLazy;
+    @Mock private CameraLauncher mCameraLauncher;
     /**
      * The process of registering/unregistering a predictive back callback requires a
      * ViewRootImpl, which is present IRL, but may be missing during a Mockito unit test.
@@ -380,6 +383,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
         when(mLockscreenWallpaperLazy.get()).thenReturn(mLockscreenWallpaper);
         when(mBiometricUnlockControllerLazy.get()).thenReturn(mBiometricUnlockController);
+        when(mCameraLauncherLazy.get()).thenReturn(mCameraLauncher);
 
         when(mStatusBarComponentFactory.create()).thenReturn(mCentralSurfacesComponent);
         when(mCentralSurfacesComponent.getNotificationShadeWindowViewController()).thenReturn(
@@ -481,7 +485,9 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mActivityLaunchAnimator,
                 mJankMonitor,
                 mDeviceStateManager,
-                mWiredChargingRippleController, mDreamManager) {
+                mWiredChargingRippleController,
+                mDreamManager,
+                mCameraLauncherLazy) {
             @Override
             protected ViewRootImpl getViewRootImpl() {
                 return mViewRootImpl;
@@ -893,7 +899,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         mCentralSurfaces.showKeyguardImpl();
 
         // Starting a pulse should change the scrim controller to the pulsing state
-        when(mNotificationPanelViewController.isLaunchingAffordanceWithPreview()).thenReturn(true);
+        when(mCameraLauncher.isLaunchingAffordance()).thenReturn(true);
         mCentralSurfaces.updateScrimController();
         verify(mScrimController).transitionTo(eq(ScrimState.UNLOCKED), any());
     }
@@ -929,7 +935,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         mCentralSurfaces.showKeyguardImpl();
 
         // Starting a pulse should change the scrim controller to the pulsing state
-        when(mNotificationPanelViewController.isLaunchingAffordanceWithPreview()).thenReturn(false);
+        when(mCameraLauncher.isLaunchingAffordance()).thenReturn(false);
         mCentralSurfaces.updateScrimController();
         verify(mScrimController).transitionTo(eq(ScrimState.KEYGUARD));
     }

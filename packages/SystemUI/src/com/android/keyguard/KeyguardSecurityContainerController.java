@@ -251,6 +251,11 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                 public void onUiModeChanged() {
                     reloadColors();
                 }
+
+                @Override
+                public void onDensityOrFontScaleChanged() {
+                    KeyguardSecurityContainerController.this.onDensityOrFontScaleChanged();
+                }
             };
     private boolean mBouncerVisible = false;
     private final KeyguardUpdateMonitorCallback mKeyguardUpdateMonitorCallback =
@@ -725,6 +730,14 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     private void reloadColors() {
         mSecurityViewFlipperController.reloadColors();
         mView.reloadColors();
+    }
+
+    /** Handles density or font scale changes. */
+    private void onDensityOrFontScaleChanged() {
+        mSecurityViewFlipperController.onDensityOrFontScaleChanged();
+        mSecurityViewFlipperController.getSecurityView(mCurrentSecurityMode,
+                mKeyguardSecurityCallback);
+        mView.onDensityOrFontScaleChanged();
     }
 
     static class Factory {
