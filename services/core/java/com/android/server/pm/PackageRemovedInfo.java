@@ -111,12 +111,6 @@ final class PackageRemovedInfo {
     }
 
     private void sendPackageRemovedBroadcastInternal(boolean killApp, boolean removedBySystem) {
-        // Don't send static shared library removal broadcasts as these
-        // libs are visible only the apps that depend on them an one
-        // cannot remove the library if it has a dependency.
-        if (mIsStaticSharedLib) {
-            return;
-        }
         Bundle extras = new Bundle();
         final int removedUid = mRemovedAppId >= 0  ? mRemovedAppId : mUid;
         extras.putInt(Intent.EXTRA_UID, removedUid);
@@ -128,15 +122,22 @@ final class PackageRemovedInfo {
             extras.putBoolean(Intent.EXTRA_REPLACING, true);
         }
         extras.putBoolean(Intent.EXTRA_REMOVED_FOR_ALL_USERS, mRemovedForAllUsers);
+
+        // Send PACKAGE_REMOVED broadcast to the respective installer.
+        if (mRemovedPackage != null && mInstallerPackageName != null) {
+            mPackageSender.sendPackageBroadcast(Intent.ACTION_PACKAGE_REMOVED,
+                    mRemovedPackage, extras, 0 /*flags*/,
+                    mInstallerPackageName, null, mBroadcastUsers, mInstantUserIds, null, null);
+        }
+        if (mIsStaticSharedLib) {
+            // When uninstalling static shared libraries, only the package's installer needs to be
+            // sent a PACKAGE_REMOVED broadcast. There are no other intended recipients.
+            return;
+        }
         if (mRemovedPackage != null) {
             mPackageSender.sendPackageBroadcast(Intent.ACTION_PACKAGE_REMOVED,
                     mRemovedPackage, extras, 0, null /*targetPackage*/, null,
                     mBroadcastUsers, mInstantUserIds, mBroadcastAllowList, null);
-            if (mInstallerPackageName != null) {
-                mPackageSender.sendPackageBroadcast(Intent.ACTION_PACKAGE_REMOVED,
-                        mRemovedPackage, extras, 0 /*flags*/,
-                        mInstallerPackageName, null, mBroadcastUsers, mInstantUserIds, null, null);
-            }
             mPackageSender.sendPackageBroadcast(Intent.ACTION_PACKAGE_REMOVED_INTERNAL,
                     mRemovedPackage, extras, 0 /*flags*/, PLATFORM_PACKAGE_NAME,
                     null /*finishedReceiver*/, mBroadcastUsers, mInstantUserIds,
