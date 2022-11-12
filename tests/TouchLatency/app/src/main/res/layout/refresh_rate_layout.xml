@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+        <com.google.android.material.slider.RangeSlider
+            android:id="@+id/slider_from_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:tickColor="@color/cardview_light_background"
+            app:trackColor="@color/cardview_light_background"
+            app:thumbColor="@color/cardview_dark_background"
+            android:visibility="visible"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
