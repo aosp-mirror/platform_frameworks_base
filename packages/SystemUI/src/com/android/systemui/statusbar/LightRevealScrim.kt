@@ -18,6 +18,8 @@ import android.view.View
 import com.android.systemui.animation.Interpolators
 import com.android.systemui.statusbar.LightRevealEffect.Companion.getPercentPastThreshold
 import com.android.systemui.util.getColorWithAlpha
+import com.android.systemui.util.leak.RotationUtils
+import com.android.systemui.util.leak.RotationUtils.Rotation
 import java.util.function.Consumer
 
 /**
@@ -67,22 +69,19 @@ object LiftReveal : LightRevealEffect {
     override fun setRevealAmountOnScrim(amount: Float, scrim: LightRevealScrim) {
         val interpolatedAmount = INTERPOLATOR.getInterpolation(amount)
         val ovalWidthIncreaseAmount =
-                getPercentPastThreshold(interpolatedAmount, WIDEN_OVAL_THRESHOLD)
+            getPercentPastThreshold(interpolatedAmount, WIDEN_OVAL_THRESHOLD)
 
         val initialWidthMultiplier = (1f - OVAL_INITIAL_WIDTH_PERCENT) / 2f
 
         with(scrim) {
-            revealGradientEndColorAlpha = 1f - getPercentPastThreshold(
-                    amount, FADE_END_COLOR_OUT_THRESHOLD)
+            revealGradientEndColorAlpha =
+                1f - getPercentPastThreshold(amount, FADE_END_COLOR_OUT_THRESHOLD)
             setRevealGradientBounds(
-                    scrim.width * initialWidthMultiplier +
-                            -scrim.width * ovalWidthIncreaseAmount,
-                    scrim.height * OVAL_INITIAL_TOP_PERCENT -
-                            scrim.height * interpolatedAmount,
-                    scrim.width * (1f - initialWidthMultiplier) +
-                            scrim.width * ovalWidthIncreaseAmount,
-                    scrim.height * OVAL_INITIAL_BOTTOM_PERCENT +
-                            scrim.height * interpolatedAmount)
+                scrim.width * initialWidthMultiplier + -scrim.width * ovalWidthIncreaseAmount,
+                scrim.height * OVAL_INITIAL_TOP_PERCENT - scrim.height * interpolatedAmount,
+                scrim.width * (1f - initialWidthMultiplier) + scrim.width * ovalWidthIncreaseAmount,
+                scrim.height * OVAL_INITIAL_BOTTOM_PERCENT + scrim.height * interpolatedAmount
+            )
         }
     }
 }
@@ -97,12 +96,17 @@ class LinearLightRevealEffect(private val isVertical: Boolean) : LightRevealEffe
         scrim.interpolatedRevealAmount = interpolatedAmount
 
         scrim.startColorAlpha =
-            getPercentPastThreshold(1 - interpolatedAmount,
-                threshold = 1 - START_COLOR_REVEAL_PERCENTAGE)
+            getPercentPastThreshold(
+                1 - interpolatedAmount,
+                threshold = 1 - START_COLOR_REVEAL_PERCENTAGE
+            )
 
         scrim.revealGradientEndColorAlpha =
-            1f - getPercentPastThreshold(interpolatedAmount,
-                threshold = REVEAL_GRADIENT_END_COLOR_ALPHA_START_PERCENTAGE)
+            1f -
+                getPercentPastThreshold(
+                    interpolatedAmount,
+                    threshold = REVEAL_GRADIENT_END_COLOR_ALPHA_START_PERCENTAGE
+                )
 
         // Start changing gradient bounds later to avoid harsh gradient in the beginning
         val gradientBoundsAmount = lerp(GRADIENT_START_BOUNDS_PERCENTAGE, 1.0f, interpolatedAmount)
@@ -179,7 +183,7 @@ class PowerButtonReveal(
      */
     private val OFF_SCREEN_START_AMOUNT = 0.05f
 
-    private val WIDTH_INCREASE_MULTIPLIER = 1.25f
+    private val INCREASE_MULTIPLIER = 1.25f
 
     override fun setRevealAmountOnScrim(amount: Float, scrim: LightRevealScrim) {
         val interpolatedAmount = Interpolators.FAST_OUT_SLOW_IN_REVERSE.getInterpolation(amount)
@@ -188,15 +192,36 @@ class PowerButtonReveal(
         with(scrim) {
             revealGradientEndColorAlpha = 1f - fadeAmount
             interpolatedRevealAmount = interpolatedAmount
-            setRevealGradientBounds(
+            @Rotation val rotation = RotationUtils.getRotation(scrim.getContext())
+            if (rotation == RotationUtils.ROTATION_NONE) {
+                setRevealGradientBounds(
                     width * (1f + OFF_SCREEN_START_AMOUNT) -
-                            width * WIDTH_INCREASE_MULTIPLIER * interpolatedAmount,
-                    powerButtonY -
-                            height * interpolatedAmount,
+                        width * INCREASE_MULTIPLIER * interpolatedAmount,
+                    powerButtonY - height * interpolatedAmount,
                     width * (1f + OFF_SCREEN_START_AMOUNT) +
-                            width * WIDTH_INCREASE_MULTIPLIER * interpolatedAmount,
-                    powerButtonY +
-                            height * interpolatedAmount)
+                        width * INCREASE_MULTIPLIER * interpolatedAmount,
+                    powerButtonY + height * interpolatedAmount
+                )
+            } else if (rotation == RotationUtils.ROTATION_LANDSCAPE) {
+                setRevealGradientBounds(
+                    powerButtonY - width * interpolatedAmount,
+                    (-height * OFF_SCREEN_START_AMOUNT) -
+                        height * INCREASE_MULTIPLIER * interpolatedAmount,
+                    powerButtonY + width * interpolatedAmount,
+                    (-height * OFF_SCREEN_START_AMOUNT) +
+                        height * INCREASE_MULTIPLIER * interpolatedAmount
+                )
+            } else {
+                // RotationUtils.ROTATION_SEASCAPE
+                setRevealGradientBounds(
+                    (width - powerButtonY) - width * interpolatedAmount,
+                    height * (1f + OFF_SCREEN_START_AMOUNT) -
+                        height * INCREASE_MULTIPLIER * interpolatedAmount,
+                    (width - powerButtonY) + width * interpolatedAmount,
+                    height * (1f + OFF_SCREEN_START_AMOUNT) +
+                        height * INCREASE_MULTIPLIER * interpolatedAmount
+                )
+            }
         }
     }
 }
@@ -208,9 +233,7 @@ class PowerButtonReveal(
  */
 class LightRevealScrim(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
 
-    /**
-     * Listener that is called if the scrim's opaqueness changes
-     */
+    /** Listener that is called if the scrim's opaqueness changes */
     lateinit var isScrimOpaqueChangedListener: Consumer<Boolean>
 
     /**
@@ -224,8 +247,11 @@ class LightRevealScrim(context: Context?, attrs: AttributeSet?) : View(context, 
 
                 revealEffect.setRevealAmountOnScrim(value, this)
                 updateScrimOpaque()
-                Trace.traceCounter(Trace.TRACE_TAG_APP, "light_reveal_amount",
-                        (field * 100).toInt())
+                Trace.traceCounter(
+                    Trace.TRACE_TAG_APP,
+                    "light_reveal_amount",
+                    (field * 100).toInt()
+                )
                 invalidate()
             }
         }
@@ -250,10 +276,10 @@ class LightRevealScrim(context: Context?, attrs: AttributeSet?) : View(context, 
 
     /**
      * Alpha of the fill that can be used in the beginning of the animation to hide the content.
-     * Normally the gradient bounds are animated from small size so the content is not visible,
-     * but if the start gradient bounds allow to see some content this could be used to make the
-     * reveal smoother. It can help to add fade in effect in the beginning of the animation.
-     * The color of the fill is determined by [revealGradientEndColor].
+     * Normally the gradient bounds are animated from small size so the content is not visible, but
+     * if the start gradient bounds allow to see some content this could be used to make the reveal
+     * smoother. It can help to add fade in effect in the beginning of the animation. The color of
+     * the fill is determined by [revealGradientEndColor].
      *
      * 0 - no fill and content is visible, 1 - the content is covered with the start color
      */
@@ -281,9 +307,7 @@ class LightRevealScrim(context: Context?, attrs: AttributeSet?) : View(context, 
             }
         }
 
-    /**
-     * Is the scrim currently fully opaque
-     */
+    /** Is the scrim currently fully opaque */
     var isScrimOpaque = false
         private set(value) {
             if (field != value) {
@@ -318,16 +342,22 @@ class LightRevealScrim(context: Context?, attrs: AttributeSet?) : View(context, 
      * Paint used to draw a transparent-to-white radial gradient. This will be scaled and translated
      * via local matrix in [onDraw] so we never need to construct a new shader.
      */
-    private val gradientPaint = Paint().apply {
-        shader = RadialGradient(
-                0f, 0f, 1f,
-                intArrayOf(Color.TRANSPARENT, Color.WHITE), floatArrayOf(0f, 1f),
-                Shader.TileMode.CLAMP)
+    private val gradientPaint =
+        Paint().apply {
+            shader =
+                RadialGradient(
+                    0f,
+                    0f,
+                    1f,
+                    intArrayOf(Color.TRANSPARENT, Color.WHITE),
+                    floatArrayOf(0f, 1f),
+                    Shader.TileMode.CLAMP
+                )
 
-        // SRC_OVER ensures that we draw the semitransparent pixels over other views in the same
-        // window, rather than outright replacing them.
-        xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_OVER)
-    }
+            // SRC_OVER ensures that we draw the semitransparent pixels over other views in the same
+            // window, rather than outright replacing them.
+            xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_OVER)
+        }
 
     /**
      * Matrix applied to [gradientPaint]'s RadialGradient shader to move the gradient to
@@ -347,8 +377,8 @@ class LightRevealScrim(context: Context?, attrs: AttributeSet?) : View(context, 
      * simply a helper method that sets [revealGradientCenter], [revealGradientWidth], and
      * [revealGradientHeight] for you.
      *
-     * This method does not call [invalidate] - you should do so once you're done changing
-     * properties.
+     * This method does not call [invalidate]
+     * - you should do so once you're done changing properties.
      */
     fun setRevealGradientBounds(left: Float, top: Float, right: Float, bottom: Float) {
         revealGradientWidth = right - left
@@ -359,8 +389,12 @@ class LightRevealScrim(context: Context?, attrs: AttributeSet?) : View(context, 
     }
 
     override fun onDraw(canvas: Canvas?) {
-        if (canvas == null || revealGradientWidth <= 0 || revealGradientHeight <= 0 ||
-            revealAmount == 0f) {
+        if (
+            canvas == null ||
+                revealGradientWidth <= 0 ||
+                revealGradientHeight <= 0 ||
+                revealAmount == 0f
+        ) {
             if (revealAmount < 1f) {
                 canvas?.drawColor(revealGradientEndColor)
             }
@@ -383,8 +417,10 @@ class LightRevealScrim(context: Context?, attrs: AttributeSet?) : View(context, 
     }
 
     private fun setPaintColorFilter() {
-        gradientPaint.colorFilter = PorterDuffColorFilter(
-            getColorWithAlpha(revealGradientEndColor, revealGradientEndColorAlpha),
-            PorterDuff.Mode.MULTIPLY)
+        gradientPaint.colorFilter =
+            PorterDuffColorFilter(
+                getColorWithAlpha(revealGradientEndColor, revealGradientEndColorAlpha),
+                PorterDuff.Mode.MULTIPLY
+            )
     }
 }
