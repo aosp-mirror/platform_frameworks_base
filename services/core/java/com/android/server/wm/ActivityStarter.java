@@ -1663,7 +1663,8 @@ class ActivityStarter {
         }
         final Task startedTask = mStartActivity.getTask();
         if (newTask) {
-            EventLogTags.writeWmCreateTask(mStartActivity.mUserId, startedTask.mTaskId);
+            EventLogTags.writeWmCreateTask(mStartActivity.mUserId, startedTask.mTaskId,
+                    startedTask.getRootTaskId(), startedTask.getDisplayId());
         }
         mStartActivity.logStartActivity(EventLogTags.WM_CREATE_ACTIVITY, startedTask);
 
@@ -1856,6 +1857,11 @@ class ActivityStarter {
                         + " from background: " + mSourceRecord
                         + ". New task: " + newTask);
                 boolean newOrEmptyTask = newTask || (targetTopActivity == null);
+                int action = newTask
+                        ? FrameworkStatsLog.ACTIVITY_ACTION_BLOCKED__ACTION__ACTIVITY_START_NEW_TASK
+                        : (mSourceRecord.getTask().equals(targetTask)
+                                ? FrameworkStatsLog.ACTIVITY_ACTION_BLOCKED__ACTION__ACTIVITY_START_SAME_TASK
+                                :  FrameworkStatsLog.ACTIVITY_ACTION_BLOCKED__ACTION__ACTIVITY_START_DIFFERENT_TASK);
                 FrameworkStatsLog.write(FrameworkStatsLog.ACTIVITY_ACTION_BLOCKED,
                         /* caller_uid */
                         callerUid,
@@ -1874,7 +1880,14 @@ class ActivityStarter {
                         /* target_intent_action */
                         r.intent.getAction(),
                         /* target_intent_flags */
-                        r.intent.getFlags()
+                        r.intent.getFlags(),
+                        /* action */
+                        action,
+                        /* version */
+                        1,
+                        /* multi_window */
+                        targetTask != null && !targetTask.equals(mSourceRecord.getTask())
+                                && targetTask.isVisible()
                 );
             }
         }

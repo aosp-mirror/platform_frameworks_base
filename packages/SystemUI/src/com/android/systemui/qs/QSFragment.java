@@ -515,7 +515,13 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     public void setExpanded(boolean expanded) {
         if (DEBUG) Log.d(TAG, "setExpanded " + expanded);
         mQsExpanded = expanded;
-        updateQsPanelControllerListening();
+        if (mInSplitShade && mQsExpanded) {
+            // in split shade QS is expanded immediately when shade expansion starts and then we
+            // also need to listen to changes - otherwise QS is updated only once its fully expanded
+            setListening(true);
+        } else {
+            updateQsPanelControllerListening();
+        }
         updateQsState();
     }
 

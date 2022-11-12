@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemService;
@@ -24,6 +25,10 @@ import android.content.Context;
 import com.android.internal.util.Preconditions;
 
 import java.io.Closeable;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.ref.Reference;
+
 
 /** The PerformanceHintManager allows apps to send performance hint to system. */
 @SystemService(Context.PERFORMANCE_HINT_SERVICE)
@@ -104,6 +109,40 @@ public final class PerformanceHintManager {
             mNativeSessionPtr = nativeSessionPtr;
         }
 
+        /**
+        * This hint indicates a sudden increase in CPU workload intensity. It means
+        * that this hint session needs extra CPU resources immediately to meet the
+        * target duration for the current work cycle.
+        */
+        public static final int CPU_LOAD_UP = 0;
+        /**
+        * This hint indicates a decrease in CPU workload intensity. It means that
+        * this hint session can reduce CPU resources and still meet the target duration.
+        */
+        public static final int CPU_LOAD_DOWN = 1;
+        /*
+        * This hint indicates an upcoming CPU workload that is completely changed and
+        * unknown. It means that the hint session should reset CPU resources to a known
+        * baseline to prepare for an arbitrary load, and must wake up if inactive.
+        */
+        public static final int CPU_LOAD_RESET = 2;
+        /*
+        * This hint indicates that the most recent CPU workload is resuming after a
+        * period of inactivity. It means that the hint session should allocate similar
+        * CPU resources to what was used previously, and must wake up if inactive.
+        */
+        public static final int CPU_LOAD_RESUME = 3;
+
+        /** @hide */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef(prefix = {"CPU_LOAD_"}, value = {
+            CPU_LOAD_UP,
+            CPU_LOAD_DOWN,
+            CPU_LOAD_RESET,
+            CPU_LOAD_RESUME
+        })
+        public @interface Hint {}
+
         /** @hide */
         @Override
         protected void finalize() throws Throwable {
@@ -152,6 +191,21 @@ public final class PerformanceHintManager {
                 mNativeSessionPtr = 0;
             }
         }
+
+        /**
+         * Sends performance hints to inform the hint session of changes in the workload.
+         *
+         * @param hint The hint to send to the session.
+         */
+        public void sendHint(@Hint int hint) {
+            Preconditions.checkArgumentNonNegative(hint, "the hint ID should be at least"
+                    + " zero.");
+            try {
+                nativeSendHint(mNativeSessionPtr, hint);
+            } finally {
+                Reference.reachabilityFence(this);
+            }
+        }
     }
 
     private static native long nativeAcquireManager();
@@ -163,4 +217,5 @@ public final class PerformanceHintManager {
     private static native void nativeReportActualWorkDuration(long nativeSessionPtr,
             long actualDurationNanos);
     private static native void nativeCloseSession(long nativeSessionPtr);
+    private static native void nativeSendHint(long nativeSessionPtr, int hint);
 }

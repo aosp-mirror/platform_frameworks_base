@@ -260,13 +260,12 @@ public abstract class WMShellBaseModule {
             ShellInit shellInit,
             ShellController shellController,
             @ShellMainThread ShellExecutor shellExecutor,
-            @ShellBackgroundThread Handler backgroundHandler,
-            Transitions transitions
+            @ShellBackgroundThread Handler backgroundHandler
     ) {
         if (BackAnimationController.IS_ENABLED) {
             return Optional.of(
                     new BackAnimationController(shellInit, shellController, shellExecutor,
-                            backgroundHandler, context, transitions));
+                            backgroundHandler, context));
         }
         return Optional.empty();
     }

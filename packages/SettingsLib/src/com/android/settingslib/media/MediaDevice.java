@@ -293,7 +293,7 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
             return false;
         }
         setConnectedRecord();
-        mRouterManager.selectRoute(mPackageName, mRouteInfo);
+        mRouterManager.transfer(mPackageName, mRouteInfo);
         return true;
     }
 

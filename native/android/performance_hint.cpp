@@ -61,6 +61,7 @@ public:
 
     int updateTargetWorkDuration(int64_t targetDurationNanos);
     int reportActualWorkDuration(int64_t actualDurationNanos);
+    int sendHint(int32_t hint);
 
 private:
     friend struct APerformanceHintManager;
@@ -159,7 +160,7 @@ int APerformanceHintSession::updateTargetWorkDuration(int64_t targetDurationNano
     }
     binder::Status ret = mHintSession->updateTargetWorkDuration(targetDurationNanos);
     if (!ret.isOk()) {
-        ALOGE("%s: HintSessionn updateTargetWorkDuration failed: %s", __FUNCTION__,
+        ALOGE("%s: HintSession updateTargetWorkDuration failed: %s", __FUNCTION__,
               ret.exceptionMessage().c_str());
         return EPIPE;
     }
@@ -205,6 +206,21 @@ int APerformanceHintSession::reportActualWorkDuration(int64_t actualDurationNano
     return 0;
 }
 
+int APerformanceHintSession::sendHint(int32_t hint) {
+    if (hint < 0) {
+        ALOGE("%s: session hint value must be greater than zero", __FUNCTION__);
+        return EINVAL;
+    }
+
+    binder::Status ret = mHintSession->sendHint(hint);
+
+    if (!ret.isOk()) {
+        ALOGE("%s: HintSession sendHint failed: %s", __FUNCTION__, ret.exceptionMessage().c_str());
+        return EPIPE;
+    }
+    return 0;
+}
+
 // ===================================== C API
 APerformanceHintManager* APerformanceHint_getManager() {
     return APerformanceHintManager::getInstance();
@@ -228,6 +244,10 @@ int APerformanceHint_updateTargetWorkDuration(APerformanceHintSession* session,
 int APerformanceHint_reportActualWorkDuration(APerformanceHintSession* session,
                                               int64_t actualDurationNanos) {
     return session->reportActualWorkDuration(actualDurationNanos);
+}
+
+int APerformanceHint_sendHint(APerformanceHintSession* session, int32_t hint) {
+    return session->sendHint(hint);
 }
 
 void APerformanceHint_closeSession(APerformanceHintSession* session) {

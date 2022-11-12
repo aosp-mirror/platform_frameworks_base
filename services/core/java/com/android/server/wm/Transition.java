@@ -928,10 +928,16 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             mFlags |= TRANSIT_FLAG_KEYGUARD_LOCKED;
         }
 
+        // Check whether the participants were animated from back navigation.
+        final boolean markBackAnimated = mController.mAtm.mBackNavigationController
+                .containsBackAnimationTargets(this);
         // Resolve the animating targets from the participants
         mTargets = calculateTargets(mParticipants, mChanges);
         final TransitionInfo info = calculateTransitionInfo(mType, mFlags, mTargets, mChanges,
                 transaction);
+        if (markBackAnimated) {
+            mController.mAtm.mBackNavigationController.clearBackAnimations(mStartTransaction);
+        }
         if (mOverrideOptions != null) {
             info.setAnimationOptions(mOverrideOptions);
             if (mOverrideOptions.getType() == ANIM_OPEN_CROSS_PROFILE_APPS) {
@@ -1935,9 +1941,20 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             final Task task = wc.asTask();
             if (task != null) {
                 final ActivityRecord topActivity = task.getTopNonFinishingActivity();
-                if (topActivity != null && topActivity.mStartingData != null
-                        && topActivity.mStartingData.hasImeSurface()) {
-                    flags |= FLAG_WILL_IME_SHOWN;
+                if (topActivity != null) {
+                    if (topActivity.mStartingData != null
+                            && topActivity.mStartingData.hasImeSurface()) {
+                        flags |= FLAG_WILL_IME_SHOWN;
+                    }
+                    if (topActivity.mAtmService.mBackNavigationController
+                            .isMonitorTransitionTarget(topActivity)) {
+                        flags |= TransitionInfo.FLAG_BACK_GESTURE_ANIMATED;
+                    }
+                } else {
+                    if (task.mAtmService.mBackNavigationController
+                            .isMonitorTransitionTarget(task)) {
+                        flags |= TransitionInfo.FLAG_BACK_GESTURE_ANIMATED;
+                    }
                 }
                 if (task.voiceSession != null) {
                     flags |= FLAG_IS_VOICE_INTERACTION;
@@ -1951,6 +1968,10 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                     flags |= FLAG_IS_VOICE_INTERACTION;
                 }
                 flags |= record.mTransitionChangeFlags;
+                if (record.mAtmService.mBackNavigationController
+                        .isMonitorTransitionTarget(record)) {
+                    flags |= TransitionInfo.FLAG_BACK_GESTURE_ANIMATED;
+                }
             }
             final TaskFragment taskFragment = wc.asTaskFragment();
             if (taskFragment != null && task == null) {

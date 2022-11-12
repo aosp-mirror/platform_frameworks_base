@@ -660,9 +660,6 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
         if (!first.getEmergencyUrns().equals(second.getEmergencyUrns())) {
             return false;
         }
-        if (first.getEmergencyCallRouting() != second.getEmergencyCallRouting()) {
-            return false;
-        }
         // Never merge two numbers if one of them is from test mode but the other one is not;
         // This supports to remove a number from the test mode.
         if (first.isFromSources(EMERGENCY_NUMBER_SOURCE_TEST)
@@ -685,12 +682,18 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
     public static EmergencyNumber mergeSameEmergencyNumbers(@NonNull EmergencyNumber first,
                                                             @NonNull EmergencyNumber second) {
         if (areSameEmergencyNumbers(first, second)) {
+            int routing = first.getEmergencyCallRouting();
+
+            if (second.isFromSources(EMERGENCY_NUMBER_SOURCE_DATABASE)) {
+                routing = second.getEmergencyCallRouting();
+            }
+
             return new EmergencyNumber(first.getNumber(), first.getCountryIso(), first.getMnc(),
                     first.getEmergencyServiceCategoryBitmask(),
                     first.getEmergencyUrns(),
                     first.getEmergencyNumberSourceBitmask()
                             | second.getEmergencyNumberSourceBitmask(),
-                    first.getEmergencyCallRouting());
+                    routing);
         }
         return null;
     }

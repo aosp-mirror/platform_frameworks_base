@@ -51,6 +51,7 @@ public:
                 (const ::std::vector<int64_t>& actualDurationNanos,
                  const ::std::vector<int64_t>& timeStampNanos),
                 (override));
+    MOCK_METHOD(Status, sendHint, (int32_t hints), (override));
     MOCK_METHOD(Status, close, (), (override));
     MOCK_METHOD(IBinder*, onAsBinder, (), (override));
 };
@@ -119,6 +120,15 @@ TEST_F(PerformanceHintTest, TestSession) {
     result = APerformanceHint_updateTargetWorkDuration(session, -1L);
     EXPECT_EQ(EINVAL, result);
     result = APerformanceHint_reportActualWorkDuration(session, -1L);
+    EXPECT_EQ(EINVAL, result);
+
+    // Send both valid and invalid session hints
+    int hintId = 2;
+    EXPECT_CALL(*iSession, sendHint(Eq(2))).Times(Exactly(1));
+    result = APerformanceHint_sendHint(session, hintId);
+    EXPECT_EQ(0, result);
+
+    result = APerformanceHint_sendHint(session, -1);
     EXPECT_EQ(EINVAL, result);
 
     EXPECT_CALL(*iSession, close()).Times(Exactly(1));
