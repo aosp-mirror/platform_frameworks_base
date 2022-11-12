@@ -562,6 +562,11 @@ bool DeserializeTableFromPb(const pb::ResourceTable& pb_table, io::IFileCollecti
     }
   }
 
+  for (const pb::DynamicRefTable& dynamic_ref : pb_table.dynamic_ref_table()) {
+    out_table->included_packages_.insert(
+        {dynamic_ref.package_id().id(), dynamic_ref.package_name()});
+  }
+
   // Deserialize the overlayable groups of the table
   std::vector<std::shared_ptr<Overlayable>> overlayables;
   for (const pb::Overlayable& pb_overlayable : pb_table.overlayable()) {
