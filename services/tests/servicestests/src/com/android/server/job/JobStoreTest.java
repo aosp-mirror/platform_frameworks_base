@@ -427,6 +427,35 @@ public class JobStoreTest {
     }
 
     @Test
+    public void testEstimatedNetworkBytes() throws Exception {
+        assertPersistedEquals(new JobInfo.Builder(0, mComponent)
+                .setPersisted(true)
+                .setRequiredNetwork(new NetworkRequest.Builder().build())
+                .setEstimatedNetworkBytes(
+                        JobInfo.NETWORK_BYTES_UNKNOWN, JobInfo.NETWORK_BYTES_UNKNOWN)
+                .build());
+        assertPersistedEquals(new JobInfo.Builder(0, mComponent)
+                .setPersisted(true)
+                .setRequiredNetwork(new NetworkRequest.Builder().build())
+                .setEstimatedNetworkBytes(5, 15)
+                .build());
+    }
+
+    @Test
+    public void testMinimumNetworkChunkBytes() throws Exception {
+        assertPersistedEquals(new JobInfo.Builder(0, mComponent)
+                .setPersisted(true)
+                .setRequiredNetwork(new NetworkRequest.Builder().build())
+                .setMinimumNetworkChunkBytes(JobInfo.NETWORK_BYTES_UNKNOWN)
+                .build());
+        assertPersistedEquals(new JobInfo.Builder(0, mComponent)
+                .setPersisted(true)
+                .setRequiredNetwork(new NetworkRequest.Builder().build())
+                .setMinimumNetworkChunkBytes(42)
+                .build());
+    }
+
+    @Test
     public void testPersistedIdleConstraint() throws Exception {
         JobInfo.Builder b = new Builder(8, mComponent)
                 .setRequiresDeviceIdle(true)
@@ -541,6 +570,15 @@ public class JobStoreTest {
                 first.getNetworkType(), second.getNetworkType());
         assertEquals("Invalid network.",
                 first.getRequiredNetwork(), second.getRequiredNetwork());
+        assertEquals("Download bytes don't match",
+                first.getEstimatedNetworkDownloadBytes(),
+                second.getEstimatedNetworkDownloadBytes());
+        assertEquals("Upload bytes don't match",
+                first.getEstimatedNetworkUploadBytes(),
+                second.getEstimatedNetworkUploadBytes());
+        assertEquals("Minimum chunk bytes don't match",
+                first.getMinimumNetworkChunkBytes(),
+                second.getMinimumNetworkChunkBytes());
         assertEquals("Invalid deadline constraint.",
                 first.hasLateConstraint(),
                 second.hasLateConstraint());

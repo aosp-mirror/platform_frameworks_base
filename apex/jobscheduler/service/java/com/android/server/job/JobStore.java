@@ -48,6 +48,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.BitUtils;
+import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.IoThread;
 import com.android.server.job.JobSchedulerInternal.JobStorePersistStats;
@@ -746,9 +747,11 @@ public final class JobStore {
          *       because currently store is not including everything (like, UIDs, bandwidth,
          *       signal strength etc. are lost).
          */
-        private void writeConstraintsToXml(XmlSerializer out, JobStatus jobStatus) throws IOException {
+        private void writeConstraintsToXml(TypedXmlSerializer out, JobStatus jobStatus)
+                throws IOException {
             out.startTag(null, XML_TAG_PARAMS_CONSTRAINTS);
             if (jobStatus.hasConnectivityConstraint()) {
+                final JobInfo job = jobStatus.getJob();
                 final NetworkRequest network = jobStatus.getJob().getRequiredNetwork();
                 out.attribute(null, "net-capabilities-csv", intArrayToString(
                         network.getCapabilities()));
@@ -756,6 +759,18 @@ public final class JobStore {
                         network.getForbiddenCapabilities()));
                 out.attribute(null, "net-transport-types-csv", intArrayToString(
                         network.getTransportTypes()));
+                if (job.getEstimatedNetworkDownloadBytes() != JobInfo.NETWORK_BYTES_UNKNOWN) {
+                    out.attributeLong(null, "estimated-download-bytes",
+                            job.getEstimatedNetworkDownloadBytes());
+                }
+                if (job.getEstimatedNetworkUploadBytes() != JobInfo.NETWORK_BYTES_UNKNOWN) {
+                    out.attributeLong(null, "estimated-upload-bytes",
+                            job.getEstimatedNetworkUploadBytes());
+                }
+                if (job.getMinimumNetworkChunkBytes() != JobInfo.NETWORK_BYTES_UNKNOWN) {
+                    out.attributeLong(null, "minimum-network-chunk-bytes",
+                            job.getMinimumNetworkChunkBytes());
+                }
             }
             if (jobStatus.hasIdleConstraint()) {
                 out.attribute(null, "idle", Boolean.toString(true));
@@ -946,7 +961,7 @@ public final class JobStore {
 
         private List<JobStatus> readJobMapImpl(InputStream fis, boolean rtcIsGood)
                 throws XmlPullParserException, IOException {
-            XmlPullParser parser = Xml.resolvePullParser(fis);
+            TypedXmlPullParser parser = Xml.resolvePullParser(fis);
 
             int eventType = parser.getEventType();
             while (eventType != XmlPullParser.START_TAG &&
@@ -1006,7 +1021,7 @@ public final class JobStore {
          *               will take the parser into the body of the job tag.
          * @return Newly instantiated job holding all the information we just read out of the xml tag.
          */
-        private JobStatus restoreJobFromXml(boolean rtcIsGood, XmlPullParser parser,
+        private JobStatus restoreJobFromXml(boolean rtcIsGood, TypedXmlPullParser parser,
                 int schemaVersion) throws XmlPullParserException, IOException {
             JobInfo.Builder jobBuilder;
             int uid, sourceUserId;
@@ -1252,7 +1267,7 @@ public final class JobStore {
          * reading, but in order to avoid issues with OEM-defined flags, the accepted capabilities
          * are limited to that(maxNetCapabilityInR & maxTransportInR) defined in R.
          */
-        private void buildConstraintsFromXml(JobInfo.Builder jobBuilder, XmlPullParser parser)
+        private void buildConstraintsFromXml(JobInfo.Builder jobBuilder, TypedXmlPullParser parser)
                 throws XmlPullParserException, IOException {
             String val;
             String netCapabilitiesLong = null;
@@ -1289,7 +1304,17 @@ public final class JobStore {
                 for (int transport : stringToIntArray(netTransportTypesIntArray)) {
                     builder.addTransportType(transport);
                 }
-                jobBuilder.setRequiredNetwork(builder.build());
+                jobBuilder
+                        .setRequiredNetwork(builder.build())
+                        .setEstimatedNetworkBytes(
+                                parser.getAttributeLong(null,
+                                        "estimated-download-bytes", JobInfo.NETWORK_BYTES_UNKNOWN),
+                                parser.getAttributeLong(null,
+                                        "estimated-upload-bytes", JobInfo.NETWORK_BYTES_UNKNOWN))
+                        .setMinimumNetworkChunkBytes(
+                                parser.getAttributeLong(null,
+                                        "minimum-network-chunk-bytes",
+                                        JobInfo.NETWORK_BYTES_UNKNOWN));
             } else if (netCapabilitiesLong != null && netTransportTypesLong != null) {
                 // Format used on R- builds. Drop any unexpected capabilities and transports.
                 final NetworkRequest.Builder builder = new NetworkRequest.Builder()
@@ -1317,6 +1342,8 @@ public final class JobStore {
                     }
                 }
                 jobBuilder.setRequiredNetwork(builder.build());
+                // Estimated bytes weren't persisted on R- builds, so no point querying for the
+                // attributes here.
             } else {
                 // Read legacy values
                 val = parser.getAttributeValue(null, "connectivity");
