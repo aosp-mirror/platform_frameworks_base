@@ -7901,8 +7901,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     @Override
-    float getSizeCompatScale() {
-        return hasSizeCompatBounds() ? mSizeCompatScale : super.getSizeCompatScale();
+    float getCompatScale() {
+        return hasSizeCompatBounds() ? mSizeCompatScale : super.getCompatScale();
     }
 
     @Override
