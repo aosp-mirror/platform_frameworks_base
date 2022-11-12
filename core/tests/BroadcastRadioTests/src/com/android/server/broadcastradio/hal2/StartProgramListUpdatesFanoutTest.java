@@ -95,9 +95,8 @@ public class StartProgramListUpdatesFanoutTest {
     public void setup() throws RemoteException {
         MockitoAnnotations.initMocks(this);
 
-        mRadioModule = new RadioModule(mBroadcastRadioMock, new RadioManager.ModuleProperties(0, "",
-                  0, "", "", "", "", 0, 0, false, false, null, false, new int[] {}, new int[] {},
-                  null, null), mLock);
+        mRadioModule = new RadioModule(mBroadcastRadioMock,
+                TestUtils.makeDefaultModuleProperties(), mLock);
 
         doAnswer((Answer) invocation -> {
             mHalTunerCallback = (ITunerCallback) invocation.getArguments()[0];

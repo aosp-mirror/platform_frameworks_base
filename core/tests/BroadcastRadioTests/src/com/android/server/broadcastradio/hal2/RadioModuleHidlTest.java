@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.broadcastradio.aidl;
+package com.android.server.broadcastradio.hal2;
 
 import static com.google.common.truth.Truth.assertWithMessage;
 
@@ -27,7 +27,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.graphics.Bitmap;
-import android.hardware.broadcastradio.IBroadcastRadio;
+import android.hardware.broadcastradio.V2_0.Constants;
+import android.hardware.broadcastradio.V2_0.IBroadcastRadio;
+import android.hardware.broadcastradio.V2_0.Result;
 import android.hardware.radio.Announcement;
 import android.hardware.radio.IAnnouncementListener;
 import android.hardware.radio.ICloseHandle;
@@ -40,40 +42,45 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 /**
- * Tests for AIDL HAL RadioModule.
+ * Tests for HIDL HAL RadioModule.
  */
 @RunWith(MockitoJUnitRunner.class)
-public final class RadioModuleTest {
+public final class RadioModuleHidlTest {
 
     private static final int TEST_ENABLED_TYPE = Announcement.TYPE_EVENT;
     private static final RadioManager.ModuleProperties TEST_MODULE_PROPERTIES =
-            AidlTestUtils.makeDefaultModuleProperties();
+            TestUtils.makeDefaultModuleProperties();
 
-    // Mocks
     @Mock
     private IBroadcastRadio mBroadcastRadioMock;
     @Mock
     private IAnnouncementListener mListenerMock;
     @Mock
-    private android.hardware.broadcastradio.ICloseHandle mHalCloseHandleMock;
+    private android.hardware.broadcastradio.V2_0.ICloseHandle mHalCloseHandleMock;
 
     private final Object mLock = new Object();
-    // RadioModule under test
     private RadioModule mRadioModule;
-    private android.hardware.broadcastradio.IAnnouncementListener mHalListener;
+    private android.hardware.broadcastradio.V2_0.IAnnouncementListener mHalListener;
 
     @Before
     public void setup() throws RemoteException {
         mRadioModule = new RadioModule(mBroadcastRadioMock, TEST_MODULE_PROPERTIES, mLock);
 
-        // TODO(b/241118988): test non-null image for getImage method
-        when(mBroadcastRadioMock.getImage(anyInt())).thenReturn(null);
+        when(mBroadcastRadioMock.getImage(anyInt())).thenReturn(new ArrayList<Byte>(0));
+
         doAnswer(invocation -> {
-            mHalListener = (android.hardware.broadcastradio.IAnnouncementListener) invocation
-                    .getArguments()[0];
+            mHalListener = (android.hardware.broadcastradio.V2_0.IAnnouncementListener) invocation
+                    .getArguments()[1];
+            IBroadcastRadio.registerAnnouncementListenerCallback cb =
+                    (IBroadcastRadio.registerAnnouncementListenerCallback)
+                            invocation.getArguments()[2];
+            cb.onValues(Result.OK, mHalCloseHandleMock);
             return null;
-        }).when(mBroadcastRadioMock).registerAnnouncementListener(any(), any());
+        }).when(mBroadcastRadioMock).registerAnnouncementListener(any(), any(), any());
     }
 
     @Test
@@ -89,13 +96,6 @@ public final class RadioModuleTest {
     }
 
     @Test
-    public void setInternalHalCallback_callbackSetInHal() throws Exception {
-        mRadioModule.setInternalHalCallback();
-
-        verify(mBroadcastRadioMock).setTunerCallback(any());
-    }
-
-    @Test
     public void getImage_withValidIdFromRadioModule() {
         int imageId = 1;
 
@@ -106,7 +106,7 @@ public final class RadioModuleTest {
 
     @Test
     public void getImage_withInvalidIdFromRadioModule_throwsIllegalArgumentException() {
-        int invalidImageId = IBroadcastRadio.INVALID_IMAGE;
+        int invalidImageId = Constants.INVALID_IMAGE;
 
         IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> {
             mRadioModule.getImage(invalidImageId);
@@ -118,30 +118,31 @@ public final class RadioModuleTest {
 
     @Test
     public void addAnnouncementListener_listenerRegistered() throws Exception {
-        mRadioModule.addAnnouncementListener(mListenerMock, new int[]{TEST_ENABLED_TYPE});
+        ArrayList<Byte> enabledListExpected = new ArrayList<Byte>(Arrays.asList(
+                (byte) TEST_ENABLED_TYPE));
+        mRadioModule.addAnnouncementListener(new int[]{TEST_ENABLED_TYPE}, mListenerMock);
 
         verify(mBroadcastRadioMock)
-                .registerAnnouncementListener(any(), eq(new byte[]{TEST_ENABLED_TYPE}));
+                .registerAnnouncementListener(eq(enabledListExpected), any(), any());
     }
 
     @Test
     public void onListUpdate_forAnnouncementListener() throws Exception {
-        android.hardware.broadcastradio.Announcement halAnnouncement =
-                AidlTestUtils.makeAnnouncement(TEST_ENABLED_TYPE, /* selectorFreq= */ 96300);
-        mRadioModule.addAnnouncementListener(mListenerMock, new int[]{TEST_ENABLED_TYPE});
+        android.hardware.broadcastradio.V2_0.Announcement halAnnouncement =
+                TestUtils.makeAnnouncement(TEST_ENABLED_TYPE, /* selectorFreq= */ 96300);
+        mRadioModule.addAnnouncementListener(new int[]{TEST_ENABLED_TYPE}, mListenerMock);
 
         mHalListener.onListUpdated(
-                new android.hardware.broadcastradio.Announcement[]{halAnnouncement});
+                new ArrayList<android.hardware.broadcastradio.V2_0.Announcement>(
+                        Arrays.asList(halAnnouncement)));
 
         verify(mListenerMock).onListUpdated(any());
     }
 
     @Test
     public void close_forCloseHandle() throws Exception {
-        when(mBroadcastRadioMock.registerAnnouncementListener(any(), any()))
-                .thenReturn(mHalCloseHandleMock);
         ICloseHandle closeHandle =
-                mRadioModule.addAnnouncementListener(mListenerMock, new int[]{TEST_ENABLED_TYPE});
+                mRadioModule.addAnnouncementListener(new int[]{TEST_ENABLED_TYPE}, mListenerMock);
 
         closeHandle.close();
 
