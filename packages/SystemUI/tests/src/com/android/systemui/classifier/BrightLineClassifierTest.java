@@ -120,6 +120,7 @@ public class BrightLineClassifierTest extends SysuiTestCase {
 
         mGestureFinalizedListener = gestureCompleteListenerCaptor.getValue();
         mFakeFeatureFlags.set(Flags.FALSING_FOR_LONG_TAPS, true);
+        mFakeFeatureFlags.set(Flags.MEDIA_FALSING_PENALTY, true);
     }
 
     @Test

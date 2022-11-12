@@ -42,6 +42,7 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Mock
 import org.mockito.Mockito.any
+import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.eq
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
@@ -464,7 +465,7 @@ public class SeekBarViewModelTest : SysuiTestCase() {
     fun onFalseTapOrTouch() {
         whenever(mockController.getTransportControls()).thenReturn(mockTransport)
         whenever(falsingManager.isFalseTouch(Classifier.MEDIA_SEEKBAR)).thenReturn(true)
-        whenever(falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)).thenReturn(true)
+        whenever(falsingManager.isFalseTap(anyInt())).thenReturn(true)
         viewModel.updateController(mockController)
         val pos = 169
 

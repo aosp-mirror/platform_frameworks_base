@@ -210,7 +210,10 @@ public class MediaControlPanelTest : SysuiTestCase() {
     private lateinit var recSubtitle3: TextView
     private var shouldShowBroadcastButton: Boolean = false
     private val fakeFeatureFlag =
-        FakeFeatureFlags().apply { this.set(Flags.UMO_SURFACE_RIPPLE, false) }
+        FakeFeatureFlags().apply {
+            this.set(Flags.UMO_SURFACE_RIPPLE, false)
+            this.set(Flags.MEDIA_FALSING_PENALTY, true)
+        }
 
     @JvmField @Rule val mockito = MockitoJUnit.rule()
 
