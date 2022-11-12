@@ -2082,7 +2082,8 @@ public class Editor {
         }
 
         if (selectionHighlight != null && selectionStart == selectionEnd
-                && mDrawableForCursor != null) {
+                && mDrawableForCursor != null
+                && !mTextView.hasGesturePreviewHighlight()) {
             drawCursor(canvas, cursorOffsetVertical);
             // Rely on the drawable entirely, do not draw the cursor line.
             // Has to be done after the IMM related code above which relies on the highlight.
@@ -2714,7 +2715,7 @@ public class Editor {
         unregisterOnBackInvokedCallback();
     }
 
-    private void stopTextActionModeWithPreservingSelection() {
+    void stopTextActionModeWithPreservingSelection() {
         if (mTextActionMode != null) {
             mRestartActionModeOnNextRefresh = true;
         }

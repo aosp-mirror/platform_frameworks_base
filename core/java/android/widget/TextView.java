@@ -68,6 +68,7 @@ import android.content.res.XmlResourceParser;
 import android.graphics.BaseCanvas;
 import android.graphics.BlendMode;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Insets;
 import android.graphics.Matrix;
 import android.graphics.Paint;
@@ -222,6 +223,7 @@ import android.widget.RemoteViews.RemoteView;
 
 import com.android.internal.accessibility.util.AccessibilityUtils;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.graphics.ColorUtils;
 import com.android.internal.inputmethod.EditableInputConnection;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -931,6 +933,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private List<Path> mHighlightPaths;
     private List<Paint> mHighlightPaints;
     private Highlights mHighlights;
+    private int mGesturePreviewHighlightStart = -1;
+    private int mGesturePreviewHighlightEnd = -1;
+    private Paint mGesturePreviewHighlightPaint;
     private final List<Path> mPathRecyclePool = new ArrayList<>();
     private boolean mHighlightPathsBogus = true;
 
@@ -6167,6 +6172,59 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
+     * Highlights the text range (from inclusive start offset to exclusive end offset) to show what
+     * will be selected by the ongoing select handwriting gesture. While the gesture preview
+     * highlight is shown, the selection or cursor is hidden. If the text or selection is changed,
+     * the gesture preview highlight will be cleared.
+     */
+    private void setSelectGesturePreviewHighlight(int start, int end) {
+        // Selection preview highlight color is the same as selection highlight color.
+        setGesturePreviewHighlight(start, end, mHighlightColor);
+    }
+
+    /**
+     * Highlights the text range (from inclusive start offset to exclusive end offset) to show what
+     * will be deleted by the ongoing delete handwriting gesture. While the gesture preview
+     * highlight is shown, the selection or cursor is hidden. If the text or selection is changed,
+     * the gesture preview highlight will be cleared.
+     */
+    private void setDeleteGesturePreviewHighlight(int start, int end) {
+        // Deletion preview highlight color is 20% opacity of the default text color.
+        int color = mTextColor.getDefaultColor();
+        color = ColorUtils.setAlphaComponent(color, (int) (0.2f * Color.alpha(color)));
+        setGesturePreviewHighlight(start, end, color);
+    }
+
+    private void setGesturePreviewHighlight(int start, int end, int color) {
+        mGesturePreviewHighlightStart = start;
+        mGesturePreviewHighlightEnd = end;
+        if (mGesturePreviewHighlightPaint == null) {
+            mGesturePreviewHighlightPaint = new Paint();
+            mGesturePreviewHighlightPaint.setStyle(Paint.Style.FILL);
+        }
+        mGesturePreviewHighlightPaint.setColor(color);
+
+        if (mEditor != null) {
+            mEditor.hideCursorAndSpanControllers();
+            mEditor.stopTextActionModeWithPreservingSelection();
+        }
+
+        mHighlightPathsBogus = true;
+        invalidate();
+    }
+
+    private void clearGesturePreviewHighlight() {
+        mGesturePreviewHighlightStart = -1;
+        mGesturePreviewHighlightEnd = -1;
+        mHighlightPathsBogus = true;
+        invalidate();
+    }
+
+    boolean hasGesturePreviewHighlight() {
+        return mGesturePreviewHighlightStart > 0;
+    }
+
+    /**
      * Convenience method to append the specified text to the TextView's
      * display buffer, upgrading it to {@link android.widget.TextView.BufferType#EDITABLE}
      * if it was not already editable.
@@ -8300,6 +8358,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 }
             }
         }
+
+        if (hasGesturePreviewHighlight()) {
+            final Path path;
+            if (mPathRecyclePool.isEmpty()) {
+                path = new Path();
+            } else {
+                path = mPathRecyclePool.get(mPathRecyclePool.size() - 1);
+                mPathRecyclePool.remove(mPathRecyclePool.size() - 1);
+                path.reset();
+            }
+            mLayout.getSelectionPath(
+                    mGesturePreviewHighlightStart, mGesturePreviewHighlightEnd, path);
+            mHighlightPaths.add(path);
+            mHighlightPaints.add(mGesturePreviewHighlightPaint);
+        }
+
         mHighlightPathsBogus = false;
     }
 
@@ -8503,7 +8577,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         final int cursorOffsetVertical = voffsetCursor - voffsetText;
 
         maybeUpdateHighlightPaths();
-        Path highlight = getUpdatedHighlightPath();
+        // If there is a gesture preview highlight, then the selection or cursor is not drawn.
+        Path highlight = hasGesturePreviewHighlight() ? null : getUpdatedHighlightPath();
         if (mEditor != null) {
             mEditor.onDraw(canvas, layout, mHighlightPaths, mHighlightPaints, highlight,
                     mHighlightPaint, cursorOffsetVertical);
@@ -11699,6 +11774,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         resetErrorChangedFlag();
         sendOnTextChanged(buffer, start, before, after);
         onTextChanged(buffer, start, before, after);
+
+        clearGesturePreviewHighlight();
     }
 
     /**
@@ -11737,6 +11814,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         if (selChanged) {
+            clearGesturePreviewHighlight();
             mHighlightPathBogus = true;
             if (mEditor != null && !isFocused()) mEditor.mSelectionMoved = true;
 
