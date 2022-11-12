@@ -44,7 +44,7 @@ class TemporaryViewLoggerTest : SysuiTestCase() {
 
     @Test
     fun logViewAddition_bufferHasLog() {
-        logger.logViewAddition("Test Window Title")
+        logger.logViewAddition("test id", "Test Window Title")
 
         val stringWriter = StringWriter()
         buffer.dump(PrintWriter(stringWriter), tailLength = 0)
@@ -57,7 +57,8 @@ class TemporaryViewLoggerTest : SysuiTestCase() {
     @Test
     fun logViewRemoval_bufferHasTagAndReason() {
         val reason = "test reason"
-        logger.logViewRemoval(reason)
+        val deviceId = "test id"
+        logger.logViewRemoval(deviceId, reason)
 
         val stringWriter = StringWriter()
         buffer.dump(PrintWriter(stringWriter), tailLength = 0)
@@ -65,6 +66,7 @@ class TemporaryViewLoggerTest : SysuiTestCase() {
 
         assertThat(actualString).contains(TAG)
         assertThat(actualString).contains(reason)
+        assertThat(actualString).contains(deviceId)
     }
 }
 

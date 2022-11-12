@@ -146,8 +146,10 @@ object Flags {
     // TODO(b/255607168): Tracking Bug
     @JvmField val DOZING_MIGRATION_1 = unreleasedFlag(213, "dozing_migration_1")
 
+    // TODO(b/252897742): Tracking Bug
     @JvmField val NEW_ELLIPSE_DETECTION = unreleasedFlag(214, "new_ellipse_detection")
 
+    // TODO(b/252897742): Tracking Bug
     @JvmField val NEW_UDFPS_OVERLAY = unreleasedFlag(215, "new_udfps_overlay")
 
     /**
@@ -159,6 +161,10 @@ object Flags {
     @JvmField
     val CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES =
         unreleasedFlag(216, "customizable_lock_screen_quick_affordances", teamfood = false)
+
+    /** Shows chipbar UI whenever the device is unlocked by ActiveUnlock (watch). */
+    // TODO(b/240196500): Tracking Bug
+    @JvmField val ACTIVE_UNLOCK_CHIPBAR = unreleasedFlag(217, "active_unlock_chipbar")
 
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug

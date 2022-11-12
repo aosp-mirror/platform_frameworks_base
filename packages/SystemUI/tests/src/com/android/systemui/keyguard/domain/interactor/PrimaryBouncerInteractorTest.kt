@@ -155,6 +155,7 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
         mPrimaryBouncerInteractor.setPanelExpansion(EXPANSION_HIDDEN)
         verify(repository).setPrimaryVisible(false)
         verify(repository).setPrimaryShow(null)
+        verify(repository).setPrimaryHide(true)
         verify(falsingCollector).onBouncerHidden()
         verify(mPrimaryBouncerCallbackInteractor).dispatchReset()
         verify(mPrimaryBouncerCallbackInteractor).dispatchFullyHidden()
