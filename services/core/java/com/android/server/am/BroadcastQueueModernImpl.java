@@ -37,7 +37,6 @@ import static com.android.server.am.BroadcastRecord.isDeliveryStateTerminal;
 import static com.android.server.am.OomAdjuster.OOM_ADJ_REASON_FINISH_RECEIVER;
 import static com.android.server.am.OomAdjuster.OOM_ADJ_REASON_START_RECEIVER;
 
-import android.annotation.DurationMillisLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UptimeMillisLong;
@@ -240,11 +239,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             }
             case MSG_DELIVERY_TIMEOUT_SOFT: {
                 synchronized (mService) {
-                    final SomeArgs args = (SomeArgs) msg.obj;
-                    final BroadcastProcessQueue queue = (BroadcastProcessQueue) args.arg1;
-                    final long originalTimeout = args.argl1;
-                    args.recycle();
-                    deliveryTimeoutSoftLocked(queue, originalTimeout);
+                    deliveryTimeoutSoftLocked((BroadcastProcessQueue) msg.obj);
                 }
                 return true;
             }
@@ -752,11 +747,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             queue.lastCpuDelayTime = queue.app.getCpuDelayTime();
 
             final long timeout = r.isForeground() ? mFgConstants.TIMEOUT : mBgConstants.TIMEOUT;
-            final SomeArgs args = SomeArgs.obtain();
-            args.arg1 = queue;
-            args.argl1 = timeout;
             mLocalHandler.sendMessageDelayed(
-                    Message.obtain(mLocalHandler, MSG_DELIVERY_TIMEOUT_SOFT, args), timeout);
+                    Message.obtain(mLocalHandler, MSG_DELIVERY_TIMEOUT_SOFT, queue), timeout);
         }
 
         if (r.allowBackgroundActivityStarts) {
@@ -843,16 +835,15 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         r.resultTo = null;
     }
 
-    private void deliveryTimeoutSoftLocked(@NonNull BroadcastProcessQueue queue,
-            @DurationMillisLong long originalTimeout) {
+    private void deliveryTimeoutSoftLocked(@NonNull BroadcastProcessQueue queue) {
         if (queue.app != null) {
             // Instead of immediately triggering an ANR, extend the timeout by
             // the amount of time the process was runnable-but-waiting; we're
             // only willing to do this once before triggering an hard ANR
             final long cpuDelayTime = queue.app.getCpuDelayTime() - queue.lastCpuDelayTime;
-            final long hardTimeout = MathUtils.constrain(cpuDelayTime, 0, originalTimeout);
+            final long timeout = MathUtils.constrain(cpuDelayTime, 0, mConstants.TIMEOUT);
             mLocalHandler.sendMessageDelayed(
-                    Message.obtain(mLocalHandler, MSG_DELIVERY_TIMEOUT_HARD, queue), hardTimeout);
+                    Message.obtain(mLocalHandler, MSG_DELIVERY_TIMEOUT_HARD, queue), timeout);
         } else {
             deliveryTimeoutHardLocked(queue);
         }
