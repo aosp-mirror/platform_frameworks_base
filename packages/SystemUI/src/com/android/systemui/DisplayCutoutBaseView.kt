@@ -169,7 +169,7 @@ open class DisplayCutoutBaseView : View, RegionInterceptableView {
             return
         }
         cutoutPath.reset()
-        display.getDisplayInfo(displayInfo)
+        context.display?.getDisplayInfo(displayInfo)
         displayInfo.displayCutout?.cutoutPath?.let { path -> cutoutPath.set(path) }
         invalidate()
     }

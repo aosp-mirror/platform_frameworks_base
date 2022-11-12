@@ -41,8 +41,20 @@ constructor(
         }
 
         scope.launch {
+            keyguardInteractor.isBouncerShowing.collect { logger.v("Bouncer showing", it) }
+        }
+
+        scope.launch { keyguardInteractor.isDozing.collect { logger.v("isDozing", it) } }
+
+        scope.launch {
             interactor.finishedKeyguardTransitionStep.collect {
                 logger.i("Finished transition", it)
+            }
+        }
+
+        scope.launch {
+            interactor.canceledKeyguardTransitionStep.collect {
+                logger.i("Canceled transition", it)
             }
         }
 

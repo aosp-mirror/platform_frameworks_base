@@ -119,7 +119,7 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
             )
         )
 
-        verify(logger).logViewAddition("Fake Window Title")
+        verify(logger).logViewAddition("id", "Fake Window Title")
     }
 
     @Test
@@ -153,7 +153,7 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
         underTest.displayView(getState())
         assertThat(fakeWakeLock.isHeld).isTrue()
 
-        underTest.removeView("test reason")
+        underTest.removeView("id", "test reason")
 
         assertThat(fakeWakeLock.isHeld).isFalse()
     }
@@ -263,21 +263,143 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
     }
 
     @Test
+    fun multipleViewsWithDifferentIds_recentActiveViewIsDisplayed() {
+        underTest.displayView(ViewInfo("First name", id = "id1"))
+
+        verify(windowManager).addView(any(), any())
+
+        reset(windowManager)
+        underTest.displayView(ViewInfo("Second name", id = "id2"))
+        underTest.removeView("id2", "test reason")
+
+        verify(windowManager).removeView(any())
+
+        fakeClock.advanceTime(DISPLAY_VIEW_DELAY + 1)
+
+        assertThat(underTest.mostRecentViewInfo?.id).isEqualTo("id1")
+        assertThat(underTest.mostRecentViewInfo?.name).isEqualTo("First name")
+
+        reset(windowManager)
+        fakeClock.advanceTime(TIMEOUT_MS + 1)
+
+        verify(windowManager).removeView(any())
+        assertThat(underTest.activeViews.size).isEqualTo(0)
+    }
+
+    @Test
+    fun multipleViewsWithDifferentIds_oldViewRemoved_recentViewIsDisplayed() {
+        underTest.displayView(ViewInfo("First name", id = "id1"))
+
+        verify(windowManager).addView(any(), any())
+
+        reset(windowManager)
+        underTest.displayView(ViewInfo("Second name", id = "id2"))
+        underTest.removeView("id1", "test reason")
+
+        verify(windowManager, never()).removeView(any())
+        assertThat(underTest.mostRecentViewInfo?.id).isEqualTo("id2")
+        assertThat(underTest.mostRecentViewInfo?.name).isEqualTo("Second name")
+
+        fakeClock.advanceTime(TIMEOUT_MS + 1)
+
+        verify(windowManager).removeView(any())
+        assertThat(underTest.activeViews.size).isEqualTo(0)
+    }
+
+    @Test
+    fun multipleViewsWithDifferentIds_threeDifferentViews_recentActiveViewIsDisplayed() {
+        underTest.displayView(ViewInfo("First name", id = "id1"))
+        underTest.displayView(ViewInfo("Second name", id = "id2"))
+        underTest.displayView(ViewInfo("Third name", id = "id3"))
+
+        verify(windowManager).addView(any(), any())
+
+        reset(windowManager)
+        underTest.removeView("id3", "test reason")
+
+        verify(windowManager).removeView(any())
+
+        fakeClock.advanceTime(DISPLAY_VIEW_DELAY + 1)
+
+        assertThat(underTest.mostRecentViewInfo?.id).isEqualTo("id2")
+        assertThat(underTest.mostRecentViewInfo?.name).isEqualTo("Second name")
+
+        reset(windowManager)
+        underTest.removeView("id2", "test reason")
+
+        verify(windowManager).removeView(any())
+
+        fakeClock.advanceTime(DISPLAY_VIEW_DELAY + 1)
+
+        assertThat(underTest.mostRecentViewInfo?.id).isEqualTo("id1")
+        assertThat(underTest.mostRecentViewInfo?.name).isEqualTo("First name")
+
+        reset(windowManager)
+        fakeClock.advanceTime(TIMEOUT_MS + 1)
+
+        verify(windowManager).removeView(any())
+        assertThat(underTest.activeViews.size).isEqualTo(0)
+    }
+
+    @Test
+    fun multipleViewsWithDifferentIds_oneViewStateChanged_stackHasRecentState() {
+        underTest.displayView(ViewInfo("First name", id = "id1"))
+        underTest.displayView(ViewInfo("New name", id = "id1"))
+
+        verify(windowManager).addView(any(), any())
+
+        reset(windowManager)
+        underTest.displayView(ViewInfo("Second name", id = "id2"))
+        underTest.removeView("id2", "test reason")
+
+        verify(windowManager).removeView(any())
+
+        fakeClock.advanceTime(DISPLAY_VIEW_DELAY + 1)
+
+        assertThat(underTest.mostRecentViewInfo?.id).isEqualTo("id1")
+        assertThat(underTest.mostRecentViewInfo?.name).isEqualTo("New name")
+        assertThat(underTest.activeViews[0].second.name).isEqualTo("New name")
+
+        reset(windowManager)
+        fakeClock.advanceTime(TIMEOUT_MS + 1)
+
+        verify(windowManager).removeView(any())
+        assertThat(underTest.activeViews.size).isEqualTo(0)
+    }
+
+    @Test
+    fun multipleViewsWithDifferentIds_viewsTimeouts_noViewLeftToDisplay() {
+        underTest.displayView(ViewInfo("First name", id = "id1"))
+        fakeClock.advanceTime(TIMEOUT_MS / 3)
+        underTest.displayView(ViewInfo("Second name", id = "id2"))
+        fakeClock.advanceTime(TIMEOUT_MS / 3)
+        underTest.displayView(ViewInfo("Third name", id = "id3"))
+
+        reset(windowManager)
+        fakeClock.advanceTime(TIMEOUT_MS + 1)
+
+        verify(windowManager).removeView(any())
+        verify(windowManager, never()).addView(any(), any())
+        assertThat(underTest.activeViews.size).isEqualTo(0)
+    }
+
+    @Test
     fun removeView_viewRemovedAndRemovalLogged() {
         // First, add the view
         underTest.displayView(getState())
 
         // Then, remove it
         val reason = "test reason"
-        underTest.removeView(reason)
+        val deviceId = "id"
+        underTest.removeView(deviceId, reason)
 
         verify(windowManager).removeView(any())
-        verify(logger).logViewRemoval(reason)
+        verify(logger).logViewRemoval(deviceId, reason)
     }
 
     @Test
     fun removeView_noAdd_viewNotRemoved() {
-        underTest.removeView("reason")
+        underTest.removeView("id", "reason")
 
         verify(windowManager, never()).removeView(any())
     }
@@ -329,7 +451,8 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
         val name: String,
         override val windowTitle: String = "Window Title",
         override val wakeReason: String = "WAKE_REASON",
-        override val timeoutMs: Int = 1
+        override val timeoutMs: Int = 1,
+        override val id: String = "id",
     ) : TemporaryViewInfo()
 }
 

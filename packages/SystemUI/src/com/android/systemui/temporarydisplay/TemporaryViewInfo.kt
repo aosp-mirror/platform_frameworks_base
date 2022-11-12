@@ -37,6 +37,11 @@ abstract class TemporaryViewInfo {
      * disappears.
      */
     open val timeoutMs: Int = DEFAULT_TIMEOUT_MILLIS
+
+    /**
+     * The id of the temporary view.
+     */
+    abstract val id: String
 }
 
 const val DEFAULT_TIMEOUT_MILLIS = 10000
