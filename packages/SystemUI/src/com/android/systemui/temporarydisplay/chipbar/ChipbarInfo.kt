@@ -40,6 +40,7 @@ data class ChipbarInfo(
     override val windowTitle: String,
     override val wakeReason: String,
     override val timeoutMs: Int,
+    override val id: String,
 ) : TemporaryViewInfo()
 
 /** The possible items to display at the end of the chipbar. */
