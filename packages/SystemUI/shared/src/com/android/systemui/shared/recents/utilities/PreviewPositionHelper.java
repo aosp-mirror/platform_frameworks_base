@@ -82,7 +82,8 @@ public class PreviewPositionHelper {
                 taskPercent = mDesiredStagePosition != STAGE_POSITION_TOP_OR_LEFT
                         ? mSplitBounds.topTaskPercent
                         : (1 - (mSplitBounds.topTaskPercent + mSplitBounds.dividerHeightPercent));
-                fullscreenTaskHeight = screenHeightPx * taskPercent;
+                // Scale portrait height to that of (actual screen - taskbar inset)
+                fullscreenTaskHeight = (screenHeightPx - taskbarSize) * taskPercent;
                 canvasScreenRatio = canvasHeight / fullscreenTaskHeight;
             } else {
                 // For landscape, scale the width
