@@ -51925,6 +51925,7 @@ package android.view {
     method public static int statusBars();
     method public static int systemBars();
     method public static int systemGestures();
+    method public static int systemOverlays();
     method public static int tappableElement();
   }
 

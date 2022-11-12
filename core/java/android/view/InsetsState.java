@@ -702,7 +702,7 @@ public class InsetsState implements Parcelable {
             result.add(ITYPE_NAVIGATION_BAR);
             result.add(ITYPE_EXTRA_NAVIGATION_BAR);
         }
-        if ((types & Type.GENERIC_OVERLAYS) != 0) {
+        if ((types & Type.SYSTEM_OVERLAYS) != 0) {
             result.add(ITYPE_LEFT_GENERIC_OVERLAY);
             result.add(ITYPE_TOP_GENERIC_OVERLAY);
             result.add(ITYPE_RIGHT_GENERIC_OVERLAY);
@@ -752,7 +752,7 @@ public class InsetsState implements Parcelable {
             case ITYPE_TOP_GENERIC_OVERLAY:
             case ITYPE_RIGHT_GENERIC_OVERLAY:
             case ITYPE_BOTTOM_GENERIC_OVERLAY:
-                return Type.GENERIC_OVERLAYS;
+                return Type.SYSTEM_OVERLAYS;
             case ITYPE_CAPTION_BAR:
                 return Type.CAPTION_BAR;
             case ITYPE_IME:
