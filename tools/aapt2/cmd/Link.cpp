@@ -1085,6 +1085,10 @@ class Linker {
       const auto localeconfig_entry =
           ResolveTableEntry(context_, &final_table_, localeconfig_reference);
       if (!localeconfig_entry) {
+        // If locale config is resolved from external symbols - skip validation.
+        if (context_->GetExternalSymbols()->FindByReference(*localeconfig_reference)) {
+          return true;
+        }
         context_->GetDiagnostics()->Error(
             android::DiagMessage(localeConfig->compiled_value->GetSource())
             << "no localeConfig entry");
