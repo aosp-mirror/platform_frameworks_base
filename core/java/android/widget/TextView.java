@@ -88,6 +88,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
+import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.LocaleList;
 import android.os.Parcel;
@@ -149,6 +150,7 @@ import android.text.style.SuggestionSpan;
 import android.text.style.URLSpan;
 import android.text.style.UpdateAppearance;
 import android.text.util.Linkify;
+import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.FeatureFlagUtils;
@@ -200,6 +202,7 @@ import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InsertGesture;
 import android.view.inputmethod.JoinOrSplitGesture;
+import android.view.inputmethod.PreviewableHandwritingGesture;
 import android.view.inputmethod.RemoveSpaceGesture;
 import android.view.inputmethod.SelectGesture;
 import android.view.inputmethod.SelectRangeGesture;
@@ -244,6 +247,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -9275,6 +9279,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 gestures.add(RemoveSpaceGesture.class);
                 gestures.add(JoinOrSplitGesture.class);
                 outAttrs.setSupportedHandwritingGestures(gestures);
+
+                Set<Class<? extends PreviewableHandwritingGesture>> previews = new ArraySet<>();
+                previews.add(SelectGesture.class);
+                previews.add(SelectRangeGesture.class);
+                previews.add(DeleteGesture.class);
+                previews.add(DeleteRangeGesture.class);
+                outAttrs.setSupportedHandwritingGesturePreviews(previews);
+
                 return ic;
             }
         }
@@ -9486,83 +9498,130 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /** @hide */
+    public boolean previewHandwritingGesture(
+            @NonNull PreviewableHandwritingGesture gesture,
+            @Nullable CancellationSignal cancellationSignal) {
+        if (gesture instanceof SelectGesture) {
+            performHandwritingSelectGesture((SelectGesture) gesture, /* isPreview= */ true);
+        } else if (gesture instanceof SelectRangeGesture) {
+            performHandwritingSelectRangeGesture(
+                    (SelectRangeGesture) gesture, /* isPreview= */ true);
+        } else if (gesture instanceof DeleteGesture) {
+            performHandwritingDeleteGesture((DeleteGesture) gesture, /* isPreview= */ true);
+        } else if (gesture instanceof DeleteRangeGesture) {
+            performHandwritingDeleteRangeGesture(
+                    (DeleteRangeGesture) gesture, /* isPreview= */ true);
+        } else {
+            return false;
+        }
+        if (cancellationSignal != null) {
+            cancellationSignal.setOnCancelListener(this::clearGesturePreviewHighlight);
+        }
+        return true;
+    }
+
+    /** @hide */
     public int performHandwritingSelectGesture(@NonNull SelectGesture gesture) {
+        return performHandwritingSelectGesture(gesture, /* isPreview= */ false);
+    }
+
+    private int performHandwritingSelectGesture(@NonNull SelectGesture gesture, boolean isPreview) {
         int[] range = getRangeForRect(
                 convertFromScreenToContentCoordinates(gesture.getSelectionArea()),
                 gesture.getGranularity());
         if (range == null) {
-            return handleGestureFailure(gesture);
+            return handleGestureFailure(gesture, isPreview);
         }
-        Selection.setSelection(getEditableText(), range[0], range[1]);
-        mEditor.startSelectionActionModeAsync(/* adjustSelection= */ false);
+        return performHandwritingSelectGesture(range, isPreview);
+    }
+
+    private int performHandwritingSelectGesture(int[] range, boolean isPreview) {
+        if (isPreview) {
+            setSelectGesturePreviewHighlight(range[0], range[1]);
+        } else {
+            Selection.setSelection(getEditableText(), range[0], range[1]);
+            mEditor.startSelectionActionModeAsync(/* adjustSelection= */ false);
+        }
         return InputConnection.HANDWRITING_GESTURE_RESULT_SUCCESS;
     }
 
     /** @hide */
     public int performHandwritingSelectRangeGesture(@NonNull SelectRangeGesture gesture) {
+        return performHandwritingSelectRangeGesture(gesture, /* isPreview= */ false);
+    }
+
+    private int performHandwritingSelectRangeGesture(
+            @NonNull SelectRangeGesture gesture, boolean isPreview) {
         int[] startRange = getRangeForRect(
                 convertFromScreenToContentCoordinates(gesture.getSelectionStartArea()),
                 gesture.getGranularity());
         if (startRange == null) {
-            return handleGestureFailure(gesture);
+            return handleGestureFailure(gesture, isPreview);
         }
         int[] endRange = getRangeForRect(
                 convertFromScreenToContentCoordinates(gesture.getSelectionEndArea()),
                 gesture.getGranularity());
         if (endRange == null) {
-            return handleGestureFailure(gesture);
+            return handleGestureFailure(gesture, isPreview);
         }
         int[] range = new int[] {
                 Math.min(startRange[0], endRange[0]), Math.max(startRange[1], endRange[1])
         };
-        Selection.setSelection(getEditableText(), range[0], range[1]);
-        mEditor.startSelectionActionModeAsync(/* adjustSelection= */ false);
-        return InputConnection.HANDWRITING_GESTURE_RESULT_SUCCESS;
+        return performHandwritingSelectGesture(range, isPreview);
     }
 
     /** @hide */
     public int performHandwritingDeleteGesture(@NonNull DeleteGesture gesture) {
+        return performHandwritingDeleteGesture(gesture, /* isPreview= */ false);
+    }
+
+    private int performHandwritingDeleteGesture(@NonNull DeleteGesture gesture, boolean isPreview) {
         int[] range = getRangeForRect(
                 convertFromScreenToContentCoordinates(gesture.getDeletionArea()),
                 gesture.getGranularity());
         if (range == null) {
-            return handleGestureFailure(gesture);
+            return handleGestureFailure(gesture, isPreview);
         }
+        return performHandwritingDeleteGesture(range, gesture.getGranularity(), isPreview);
+    }
 
-        if (gesture.getGranularity() == HandwritingGesture.GRANULARITY_WORD) {
-            range = adjustHandwritingDeleteGestureRange(range);
+    private int performHandwritingDeleteGesture(int[] range, int granularity, boolean isPreview) {
+        if (isPreview) {
+            setDeleteGesturePreviewHighlight(range[0], range[1]);
+        } else {
+            if (granularity == HandwritingGesture.GRANULARITY_WORD) {
+                range = adjustHandwritingDeleteGestureRange(range);
+            }
+
+            getEditableText().delete(range[0], range[1]);
+            Selection.setSelection(getEditableText(), range[0]);
         }
-
-        getEditableText().delete(range[0], range[1]);
-        Selection.setSelection(getEditableText(), range[0]);
         return InputConnection.HANDWRITING_GESTURE_RESULT_SUCCESS;
     }
 
     /** @hide */
     public int performHandwritingDeleteRangeGesture(@NonNull DeleteRangeGesture gesture) {
+        return performHandwritingDeleteRangeGesture(gesture, /* isPreview= */ false);
+    }
+
+    private int performHandwritingDeleteRangeGesture(
+            @NonNull DeleteRangeGesture gesture, boolean isPreview) {
         int[] startRange = getRangeForRect(
                 convertFromScreenToContentCoordinates(gesture.getDeletionStartArea()),
                 gesture.getGranularity());
         if (startRange == null) {
-            return handleGestureFailure(gesture);
+            return handleGestureFailure(gesture, isPreview);
         }
         int[] endRange = getRangeForRect(
                 convertFromScreenToContentCoordinates(gesture.getDeletionEndArea()),
                 gesture.getGranularity());
         if (endRange == null) {
-            return handleGestureFailure(gesture);
+            return handleGestureFailure(gesture, isPreview);
         }
         int[] range = new int[] {
                 Math.min(startRange[0], endRange[0]), Math.max(startRange[1], endRange[1])
         };
-
-        if (gesture.getGranularity() == HandwritingGesture.GRANULARITY_WORD) {
-            range = adjustHandwritingDeleteGestureRange(range);
-        }
-
-        getEditableText().delete(range[0], range[1]);
-        Selection.setSelection(getEditableText(), range[0]);
-        return InputConnection.HANDWRITING_GESTURE_RESULT_SUCCESS;
+        return performHandwritingDeleteGesture(range, gesture.getGranularity(), isPreview);
     }
 
     private int[] adjustHandwritingDeleteGestureRange(int[] range) {
@@ -9740,7 +9799,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private int handleGestureFailure(HandwritingGesture gesture) {
-        if (!TextUtils.isEmpty(gesture.getFallbackText())) {
+        return handleGestureFailure(gesture, /* isPreview= */ false);
+    }
+
+    private int handleGestureFailure(HandwritingGesture gesture, boolean isPreview) {
+        clearGesturePreviewHighlight();
+        if (!isPreview && !TextUtils.isEmpty(gesture.getFallbackText())) {
             getEditableText()
                     .replace(getSelectionStart(), getSelectionEnd(), gesture.getFallbackText());
             return InputConnection.HANDWRITING_GESTURE_RESULT_FALLBACK;
