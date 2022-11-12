@@ -16,6 +16,9 @@
 
 package com.android.settingslib.spaprivileged.template.app
 
+import android.content.Intent
+import android.content.IntentFilter
+import android.os.UserHandle
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
@@ -33,6 +36,7 @@ import com.android.settingslib.spa.framework.compose.rememberLazyListStateAndHid
 import com.android.settingslib.spa.framework.compose.toState
 import com.android.settingslib.spa.widget.ui.PlaceholderTitle
 import com.android.settingslib.spaprivileged.R
+import com.android.settingslib.spaprivileged.framework.compose.DisposableBroadcastReceiverAsUser
 import com.android.settingslib.spaprivileged.model.app.AppListConfig
 import com.android.settingslib.spaprivileged.model.app.AppListData
 import com.android.settingslib.spaprivileged.model.app.AppListModel
@@ -120,5 +124,15 @@ private fun <T : AppRecord> loadAppListData(
     viewModel.option.Sync(state.option)
     viewModel.searchQuery.Sync(state.searchQuery)
 
-    return viewModel.appListDataFlow.collectAsState(null, Dispatchers.Default)
+    DisposableBroadcastReceiverAsUser(
+        intentFilter = IntentFilter(Intent.ACTION_PACKAGE_ADDED).apply {
+            addAction(Intent.ACTION_PACKAGE_REMOVED)
+            addAction(Intent.ACTION_PACKAGE_CHANGED)
+            addDataScheme("package")
+        },
+        userHandle = UserHandle.of(config.userId),
+        onStart = { viewModel.reloadApps() },
+    ) { viewModel.reloadApps() }
+
+    return viewModel.appListDataFlow.collectAsState(null, Dispatchers.IO)
 }
