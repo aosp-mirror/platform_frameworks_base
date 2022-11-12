@@ -6018,7 +6018,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             final long duration =
                     SystemClock.elapsedRealtime() - mActivityRecord.mRelaunchStartTime;
             Slog.i(TAG, "finishDrawing of relaunch: " + this + " " + duration + "ms");
-            mActivityRecord.mRelaunchStartTime = 0;
+            mActivityRecord.finishOrAbortReplacingWindow();
         }
         if (mActivityRecord != null && mAttrs.type == TYPE_APPLICATION_STARTING) {
             mWmService.mAtmService.mTaskSupervisor.getActivityMetricsLogger()
