@@ -11173,9 +11173,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                     pw.printf("%s%s: %-60s (%s in swap)\n", prefix, stringifyKBSize(mi.pss),
                             mi.label, stringifyKBSize(mi.swapPss));
                 } else {
-                    pw.printf("%s%s: %s %s\n", prefix, stringifyKBSize(dumpPss ? mi.pss : mi.mRss),
+                    pw.printf("%s%s: %s%s\n", prefix, stringifyKBSize(dumpPss ? mi.pss : mi.mRss),
                             mi.label,
-                            mi.userId != UserHandle.USER_SYSTEM ? "(user " + mi.userId + ")" : "");
+                            mi.userId != UserHandle.USER_SYSTEM ? " (user " + mi.userId + ")" : "");
                 }
             } else if (mi.isProc) {
                 pw.print("proc,"); pw.print(tag); pw.print(","); pw.print(mi.shortLabel);
