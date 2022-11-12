@@ -30,27 +30,36 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 @SysUISingleton
-class LockscreenGoneTransitionInteractor
+class DreamingLockscreenTransitionInteractor
 @Inject
 constructor(
     @Application private val scope: CoroutineScope,
     private val keyguardInteractor: KeyguardInteractor,
-    private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val keyguardTransitionRepository: KeyguardTransitionRepository,
-) : TransitionInteractor("LOCKSCREEN->GONE") {
+    private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
+) : TransitionInteractor("DREAMING<->LOCKSCREEN") {
 
     override fun start() {
         scope.launch {
-            keyguardInteractor.isKeyguardGoingAway
+            keyguardInteractor.isDreaming
                 .sample(keyguardTransitionInteractor.finishedKeyguardState, { a, b -> Pair(a, b) })
                 .collect { pair ->
-                    val (isKeyguardGoingAway, keyguardState) = pair
-                    if (!isKeyguardGoingAway && keyguardState == KeyguardState.LOCKSCREEN) {
+                    val (isDreaming, keyguardState) = pair
+                    if (isDreaming && keyguardState == KeyguardState.LOCKSCREEN) {
                         keyguardTransitionRepository.startTransition(
                             TransitionInfo(
                                 name,
                                 KeyguardState.LOCKSCREEN,
-                                KeyguardState.GONE,
+                                KeyguardState.DREAMING,
+                                getAnimator(),
+                            )
+                        )
+                    } else if (!isDreaming && keyguardState == KeyguardState.DREAMING) {
+                        keyguardTransitionRepository.startTransition(
+                            TransitionInfo(
+                                name,
+                                KeyguardState.DREAMING,
+                                KeyguardState.LOCKSCREEN,
                                 getAnimator(),
                             )
                         )
@@ -67,6 +76,6 @@ constructor(
     }
 
     companion object {
-        private const val TRANSITION_DURATION_MS = 10L
+        private const val TRANSITION_DURATION_MS = 500L
     }
 }

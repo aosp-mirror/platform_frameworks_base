@@ -27,6 +27,7 @@ import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.FrameworkStatsLog;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -287,6 +288,14 @@ public class AmbientBrightnessStatsTracker {
                     localDate)) {
                 return lastBrightnessStats;
             } else {
+                // It is a new day, and we have available data, so log data. The daily boundary
+                // might not be right if the user changes timezones but that is fine, since it
+                // won't be that frequent.
+                if (lastBrightnessStats != null) {
+                    FrameworkStatsLog.write(FrameworkStatsLog.AMBIENT_BRIGHTNESS_STATS_REPORTED,
+                            lastBrightnessStats.getStats(),
+                            lastBrightnessStats.getBucketBoundaries());
+                }
                 AmbientBrightnessDayStats dayStats = new AmbientBrightnessDayStats(localDate,
                         BUCKET_BOUNDARIES_FOR_NEW_STATS);
                 if (userStats.size() == MAX_DAYS_TO_TRACK) {

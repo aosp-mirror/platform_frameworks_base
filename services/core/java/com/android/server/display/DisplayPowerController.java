@@ -2810,18 +2810,22 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
         float appliedPowerFactor = event.isLowPowerModeSet() ? event.powerFactor : -1f;
 
-        FrameworkStatsLog.write(FrameworkStatsLog.DISPLAY_BRIGHTNESS_CHANGED,
-                convertToNits(event.initialBrightness),
-                convertToNits(event.brightness),
-                event.slowAmbientLux,
-                event.physicalDisplayId,
-                event.isShortTermModelActive(),
-                appliedPowerFactor,
-                appliedRbcStrength,
-                appliedHbmMaxNits,
-                appliedThermalCapNits,
-                event.automaticBrightnessEnabled,
-                FrameworkStatsLog.DISPLAY_BRIGHTNESS_CHANGED__REASON__REASON_MANUAL);
+        if (mLogicalDisplay.getPrimaryDisplayDeviceLocked() != null
+                && mLogicalDisplay.getPrimaryDisplayDeviceLocked()
+                    .getDisplayDeviceInfoLocked().type == Display.TYPE_INTERNAL) {
+            FrameworkStatsLog.write(FrameworkStatsLog.DISPLAY_BRIGHTNESS_CHANGED,
+                    convertToNits(event.initialBrightness),
+                    convertToNits(event.brightness),
+                    event.slowAmbientLux,
+                    event.physicalDisplayId,
+                    event.isShortTermModelActive(),
+                    appliedPowerFactor,
+                    appliedRbcStrength,
+                    appliedHbmMaxNits,
+                    appliedThermalCapNits,
+                    event.automaticBrightnessEnabled,
+                    FrameworkStatsLog.DISPLAY_BRIGHTNESS_CHANGED__REASON__REASON_MANUAL);
+        }
     }
 
     class BrightnessEvent {

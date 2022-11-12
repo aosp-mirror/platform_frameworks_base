@@ -61,7 +61,7 @@ class MediaTttCommandLineHelper @Inject constructor(
             @SuppressLint("WrongConstant") // sysui allowed to call STATUS_BAR_SERVICE
             val statusBarManager = context.getSystemService(Context.STATUS_BAR_SERVICE)
                     as StatusBarManager
-            val routeInfo = MediaRoute2Info.Builder("id", args[0])
+            val routeInfo = MediaRoute2Info.Builder(if (args.size >= 4) args[3] else "id", args[0])
                     .addFeature("feature")
             val useAppIcon = !(args.size >= 3 && args[2] == "useAppIcon=false")
             if (useAppIcon) {
@@ -107,7 +107,7 @@ class MediaTttCommandLineHelper @Inject constructor(
 
         override fun help(pw: PrintWriter) {
             pw.println("Usage: adb shell cmd statusbar $SENDER_COMMAND " +
-                    "<deviceName> <chipState> useAppIcon=[true|false]")
+                    "<deviceName> <chipState> useAppIcon=[true|false] <id>")
         }
     }
 
@@ -127,8 +127,10 @@ class MediaTttCommandLineHelper @Inject constructor(
             @SuppressLint("WrongConstant") // sysui is allowed to call STATUS_BAR_SERVICE
             val statusBarManager = context.getSystemService(Context.STATUS_BAR_SERVICE)
                     as StatusBarManager
-            val routeInfo = MediaRoute2Info.Builder("id", "Test Name")
-                .addFeature("feature")
+            val routeInfo = MediaRoute2Info.Builder(
+                if (args.size >= 3) args[2] else "id",
+                "Test Name"
+            ).addFeature("feature")
             val useAppIcon = !(args.size >= 2 && args[1] == "useAppIcon=false")
             if (useAppIcon) {
                 routeInfo.setClientPackageName(TEST_PACKAGE_NAME)
@@ -144,7 +146,7 @@ class MediaTttCommandLineHelper @Inject constructor(
 
         override fun help(pw: PrintWriter) {
             pw.println("Usage: adb shell cmd statusbar $RECEIVER_COMMAND " +
-                    "<chipState> useAppIcon=[true|false]")
+                    "<chipState> useAppIcon=[true|false] <id>")
         }
     }
 
