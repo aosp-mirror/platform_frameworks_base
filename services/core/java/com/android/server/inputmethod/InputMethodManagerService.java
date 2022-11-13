@@ -162,6 +162,7 @@ import com.android.internal.inputmethod.InlineSuggestionsRequestInfo;
 import com.android.internal.inputmethod.InputBindResult;
 import com.android.internal.inputmethod.InputMethodDebug;
 import com.android.internal.inputmethod.InputMethodNavButtonFlags;
+import com.android.internal.inputmethod.InputMethodSubtypeHandle;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.internal.inputmethod.StartInputFlags;
 import com.android.internal.inputmethod.StartInputReason;
@@ -3201,6 +3202,18 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @GuardedBy("ImfLock.class")
+    private void notifyInputMethodSubtypeChangedLocked(@UserIdInt int userId,
+            @NonNull InputMethodInfo imi, @Nullable InputMethodSubtype subtype) {
+        final InputMethodSubtype normalizedSubtype =
+                subtype != null && subtype.isSuitableForPhysicalKeyboardLayoutMapping()
+                        ? subtype : null;
+        final InputMethodSubtypeHandle newSubtypeHandle = normalizedSubtype != null
+                ? InputMethodSubtypeHandle.of(imi, normalizedSubtype) : null;
+        mInputManagerInternal.onInputMethodSubtypeChangedForKeyboardLayoutMapping(
+                userId, newSubtypeHandle, normalizedSubtype);
+    }
+
+    @GuardedBy("ImfLock.class")
     void setInputMethodLocked(String id, int subtypeId) {
         InputMethodInfo info = mMethodMap.get(id);
         if (info == null) {
@@ -3209,8 +3222,10 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
         // See if we need to notify a subtype change within the same IME.
         if (id.equals(getSelectedMethodIdLocked())) {
+            final int userId = mSettings.getCurrentUserId();
             final int subtypeCount = info.getSubtypeCount();
             if (subtypeCount <= 0) {
+                notifyInputMethodSubtypeChangedLocked(userId, info, null);
                 return;
             }
             final InputMethodSubtype oldSubtype = mCurrentSubtype;
@@ -3225,6 +3240,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             if (newSubtype == null || oldSubtype == null) {
                 Slog.w(TAG, "Illegal subtype state: old subtype = " + oldSubtype
                         + ", new subtype = " + newSubtype);
+                notifyInputMethodSubtypeChangedLocked(userId, info, null);
                 return;
             }
             if (newSubtype != oldSubtype) {
@@ -5297,6 +5313,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 mCurrentSubtype = getCurrentInputMethodSubtypeLocked();
             }
         }
+        notifyInputMethodSubtypeChangedLocked(mSettings.getCurrentUserId(), imi, mCurrentSubtype);
 
         if (!setSubtypeOnly) {
             // Set InputMethod here
