@@ -32,12 +32,7 @@ data class GetCredentialUiState(
   val providerInfoList: List<ProviderInfo>,
   val currentScreenState: GetScreenState,
   val requestDisplayInfo: RequestDisplayInfo,
-  /**
-   * The credential entries grouped by userName, derived from all entries of the [providerInfoList].
-   * Note that the list order matters to the display order.
-   */
-  val sortedUserNameToCredentialEntryList: List<PerUserNameCredentialEntryList> =
-    createSortedUserNameToCredentialEntryList(providerInfoList),
+  val providerDisplayInfo: ProviderDisplayInfo = toProviderDisplayInfo(providerInfoList),
 )
 
 class GetCredentialViewModel(
@@ -85,14 +80,19 @@ class GetCredentialViewModel(
   }
 }
 
-internal fun createSortedUserNameToCredentialEntryList(
+private fun toProviderDisplayInfo(
   providerInfoList: List<ProviderInfo>
-): List<PerUserNameCredentialEntryList> {
-  // Group by username
-  val userNameToEntryMap = mutableMapOf<String, MutableList<CredentialEntryInfo>>()
+): ProviderDisplayInfo {
+
+  val userNameToCredentialEntryMap = mutableMapOf<String, MutableList<CredentialEntryInfo>>()
+  val authenticationEntryList = mutableListOf<AuthenticationEntryInfo>()
   providerInfoList.forEach { providerInfo ->
+    if (providerInfo.authenticationEntry != null) {
+      authenticationEntryList.add(providerInfo.authenticationEntry)
+    }
+
     providerInfo.credentialEntryList.forEach {
-      userNameToEntryMap.compute(
+      userNameToCredentialEntryMap.compute(
         it.userName
       ) {
           _, v ->
@@ -105,16 +105,23 @@ internal fun createSortedUserNameToCredentialEntryList(
       }
     }
   }
+
+  // Compose sortedUserNameToCredentialEntryList
   val comparator = CredentialEntryInfoComparator()
   // Sort per username
-  userNameToEntryMap.values.forEach {
+  userNameToCredentialEntryMap.values.forEach {
     it.sortWith(comparator)
   }
   // Transform to list of PerUserNameCredentialEntryLists and then sort across usernames
-  return userNameToEntryMap.map {
+  val sortedUserNameToCredentialEntryList = userNameToCredentialEntryMap.map {
     PerUserNameCredentialEntryList(it.key, it.value)
   }.sortedWith(
     compareBy(comparator) { it.sortedCredentialEntryList.first() }
+  )
+
+  return ProviderDisplayInfo(
+    sortedUserNameToCredentialEntryList = sortedUserNameToCredentialEntryList,
+    authenticationEntryList = authenticationEntryList,
   )
 }
 

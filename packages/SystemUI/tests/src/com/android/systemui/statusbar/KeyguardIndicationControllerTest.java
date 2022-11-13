@@ -1067,7 +1067,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
         // GIVEN a trust granted message but trust isn't granted
         final String trustGrantedMsg = "testing trust granted message";
-        mController.getKeyguardCallback().showTrustGrantedMessage(trustGrantedMsg);
+        mController.getKeyguardCallback().onTrustGrantedWithFlags(0, 0, trustGrantedMsg);
 
         verifyHideIndication(INDICATION_TYPE_TRUST);
 
@@ -1091,7 +1091,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
         // WHEN the showTrustGranted method is called
         final String trustGrantedMsg = "testing trust granted message";
-        mController.getKeyguardCallback().showTrustGrantedMessage(trustGrantedMsg);
+        mController.getKeyguardCallback().onTrustGrantedWithFlags(0, 0, trustGrantedMsg);
 
         // THEN verify the trust granted message shows
         verifyIndicationMessage(
@@ -1108,7 +1108,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         when(mKeyguardUpdateMonitor.getUserHasTrust(anyInt())).thenReturn(true);
 
         // WHEN the showTrustGranted method is called with a null message
-        mController.getKeyguardCallback().showTrustGrantedMessage(null);
+        mController.getKeyguardCallback().onTrustGrantedWithFlags(0, 0, null);
 
         // THEN verify the default trust granted message shows
         verifyIndicationMessage(
@@ -1125,7 +1125,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         when(mKeyguardUpdateMonitor.getUserHasTrust(anyInt())).thenReturn(true);
 
         // WHEN the showTrustGranted method is called with an EMPTY string
-        mController.getKeyguardCallback().showTrustGrantedMessage("");
+        mController.getKeyguardCallback().onTrustGrantedWithFlags(0, 0, "");
 
         // THEN verify NO trust message is shown
         verifyNoMessage(INDICATION_TYPE_TRUST);

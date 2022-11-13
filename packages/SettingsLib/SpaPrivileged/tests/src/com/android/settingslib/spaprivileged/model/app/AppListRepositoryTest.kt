@@ -24,9 +24,6 @@ import android.content.pm.PackageManager.ResolveInfoFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
@@ -36,11 +33,9 @@ import org.mockito.Mock
 import org.mockito.Mockito.any
 import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.eq
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
-
-private const val USER_ID = 0
+import org.mockito.Mockito.`when` as whenever
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
@@ -80,36 +75,28 @@ class AppListRepositoryTest {
             packageManager.queryIntentActivitiesAsUser(any(), any<ResolveInfoFlags>(), eq(USER_ID))
         ).thenReturn(emptyList())
 
-        repository = AppListRepository(context)
+        repository = AppListRepositoryImpl(context)
     }
 
     @Test
     fun notShowInstantApps() = runTest {
         val appListConfig = AppListConfig(userId = USER_ID, showInstantApps = false)
 
-        val appListFlow = repository.loadApps(flowOf(appListConfig))
+        val appListFlow = repository.loadApps(appListConfig)
 
-        launch {
-            val flowValues = mutableListOf<List<ApplicationInfo>>()
-            appListFlow.toList(flowValues)
-            assertThat(flowValues).hasSize(1)
-
-            assertThat(flowValues[0]).containsExactly(normalApp)
-        }
+        assertThat(appListFlow).containsExactly(normalApp)
     }
 
     @Test
     fun showInstantApps() = runTest {
         val appListConfig = AppListConfig(userId = USER_ID, showInstantApps = true)
 
-        val appListFlow = repository.loadApps(flowOf(appListConfig))
+        val appListFlow = repository.loadApps(appListConfig)
 
-        launch {
-            val flowValues = mutableListOf<List<ApplicationInfo>>()
-            appListFlow.toList(flowValues)
-            assertThat(flowValues).hasSize(1)
+        assertThat(appListFlow).containsExactly(normalApp, instantApp)
+    }
 
-            assertThat(flowValues[0]).containsExactly(normalApp, instantApp)
-        }
+    private companion object {
+        const val USER_ID = 0
     }
 }

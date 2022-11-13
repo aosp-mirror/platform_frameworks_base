@@ -48,9 +48,9 @@ public interface RegisteredComplicationsModule {
 
     int DREAM_CLOCK_TIME_COMPLICATION_WEIGHT = 1;
     int DREAM_SMARTSPACE_COMPLICATION_WEIGHT = 0;
-    int DREAM_MEDIA_COMPLICATION_WEIGHT = -1;
-    int DREAM_HOME_CONTROLS_CHIP_COMPLICATION_WEIGHT = 1;
-    int DREAM_MEDIA_ENTRY_COMPLICATION_WEIGHT = 0;
+    int DREAM_MEDIA_COMPLICATION_WEIGHT = 0;
+    int DREAM_HOME_CONTROLS_CHIP_COMPLICATION_WEIGHT = 2;
+    int DREAM_MEDIA_ENTRY_COMPLICATION_WEIGHT = 1;
 
     /**
      * Provides layout parameters for the clock time complication.
@@ -60,10 +60,11 @@ public interface RegisteredComplicationsModule {
     static ComplicationLayoutParams provideClockTimeLayoutParams() {
         return new ComplicationLayoutParams(0,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
-                ComplicationLayoutParams.POSITION_TOP
+                ComplicationLayoutParams.POSITION_BOTTOM
                         | ComplicationLayoutParams.POSITION_START,
-                ComplicationLayoutParams.DIRECTION_DOWN,
-                DREAM_CLOCK_TIME_COMPLICATION_WEIGHT);
+                ComplicationLayoutParams.DIRECTION_UP,
+                DREAM_CLOCK_TIME_COMPLICATION_WEIGHT,
+                0 /*margin*/);
     }
 
     /**
@@ -77,8 +78,10 @@ public interface RegisteredComplicationsModule {
                 res.getDimensionPixelSize(R.dimen.keyguard_affordance_fixed_height),
                 ComplicationLayoutParams.POSITION_BOTTOM
                         | ComplicationLayoutParams.POSITION_START,
-                ComplicationLayoutParams.DIRECTION_END,
-                DREAM_HOME_CONTROLS_CHIP_COMPLICATION_WEIGHT);
+                ComplicationLayoutParams.DIRECTION_UP,
+                DREAM_HOME_CONTROLS_CHIP_COMPLICATION_WEIGHT,
+                // Add margin to the bottom of home controls to horizontally align with smartspace.
+                res.getDimensionPixelSize(R.dimen.dream_overlay_complication_clock_time_padding));
     }
 
     /**
@@ -101,14 +104,13 @@ public interface RegisteredComplicationsModule {
      */
     @Provides
     @Named(DREAM_SMARTSPACE_LAYOUT_PARAMS)
-    static ComplicationLayoutParams provideSmartspaceLayoutParams() {
+    static ComplicationLayoutParams provideSmartspaceLayoutParams(@Main Resources res) {
         return new ComplicationLayoutParams(0,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
-                ComplicationLayoutParams.POSITION_TOP
+                ComplicationLayoutParams.POSITION_BOTTOM
                         | ComplicationLayoutParams.POSITION_START,
-                ComplicationLayoutParams.DIRECTION_DOWN,
+                ComplicationLayoutParams.DIRECTION_END,
                 DREAM_SMARTSPACE_COMPLICATION_WEIGHT,
-                0,
-                true /*snapToGuide*/);
+                res.getDimensionPixelSize(R.dimen.dream_overlay_complication_smartspace_padding));
     }
 }

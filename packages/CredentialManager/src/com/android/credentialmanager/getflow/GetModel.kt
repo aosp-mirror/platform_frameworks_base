@@ -32,6 +32,17 @@ data class ProviderInfo(
   // TODO: add remote entry
 )
 
+/** Display-centric data structure derived from the [ProviderInfo]. This abstraction is not grouping
+ *  by the provider id but instead focuses on structures convenient for display purposes. */
+data class ProviderDisplayInfo(
+  /**
+   * The credential entries grouped by userName, derived from all entries of the [providerInfoList].
+   * Note that the list order matters to the display order.
+   */
+  val sortedUserNameToCredentialEntryList: List<PerUserNameCredentialEntryList>,
+  val authenticationEntryList: List<AuthenticationEntryInfo>,
+)
+
 abstract class EntryInfo (
   /** Unique id combination of this entry. Not for display purpose. */
   val providerId: String,
@@ -59,6 +70,8 @@ class AuthenticationEntryInfo(
   providerId: String,
   entryKey: String,
   entrySubkey: String,
+  val title: String,
+  val icon: Drawable,
 ) : EntryInfo(providerId, entryKey, entrySubkey)
 
 class ActionEntryInfo(
@@ -66,6 +79,7 @@ class ActionEntryInfo(
   entryKey: String,
   entrySubkey: String,
   val title: String,
+  val icon: Drawable,
   val subTitle: String?,
 ) : EntryInfo(providerId, entryKey, entrySubkey)
 

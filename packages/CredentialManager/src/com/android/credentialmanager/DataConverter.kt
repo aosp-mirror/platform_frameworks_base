@@ -22,11 +22,14 @@ import android.credentials.ui.Entry
 import android.credentials.ui.GetCredentialProviderData
 import android.credentials.ui.CreateCredentialProviderData
 import android.credentials.ui.DisabledProviderData
+import android.graphics.drawable.Drawable
 import com.android.credentialmanager.createflow.CreateOptionInfo
+import com.android.credentialmanager.createflow.RemoteInfo
 import com.android.credentialmanager.getflow.ActionEntryInfo
 import com.android.credentialmanager.getflow.AuthenticationEntryInfo
 import com.android.credentialmanager.getflow.CredentialEntryInfo
 import com.android.credentialmanager.getflow.ProviderInfo
+import com.android.credentialmanager.jetpack.provider.ActionUi
 import com.android.credentialmanager.jetpack.provider.CredentialEntryUi
 import com.android.credentialmanager.jetpack.provider.SaveEntryUi
 
@@ -38,17 +41,27 @@ class GetFlowUtils {
       providerDataList: List<GetCredentialProviderData>,
       context: Context,
     ): List<ProviderInfo> {
+      val packageManager = context.packageManager
       return providerDataList.map {
+        // TODO: get from the actual service info
+        val pkgInfo = packageManager
+          .getPackageInfo(it.providerFlattenedComponentName,
+            PackageManager.PackageInfoFlags.of(0))
+        val providerDisplayName = pkgInfo.applicationInfo.loadLabel(packageManager).toString()
+        // TODO: decide what to do when failed to load a provider icon
+        val providerIcon = pkgInfo.applicationInfo.loadIcon(packageManager)!!
         ProviderInfo(
           id = it.providerFlattenedComponentName,
-          // TODO: replace to extract from the service data structure when available
-          icon = context.getDrawable(R.drawable.ic_passkey)!!,
-          // TODO: get the service display name and icon from the component name.
-          displayName = it.providerFlattenedComponentName,
+          // TODO: decide what to do when failed to load a provider icon
+          icon = providerIcon,
+          displayName = providerDisplayName,
           credentialEntryList = getCredentialOptionInfoList(
             it.providerFlattenedComponentName, it.credentialEntries, context),
           authenticationEntry = getAuthenticationEntry(
-            it.providerFlattenedComponentName, it.authenticationEntry, context),
+              it.providerFlattenedComponentName,
+              providerDisplayName,
+              providerIcon,
+              it.authenticationEntry),
           actionEntryList = getActionEntryList(
             it.providerFlattenedComponentName, it.actionChips, context),
         )
@@ -84,11 +97,22 @@ class GetFlowUtils {
 
     private fun getAuthenticationEntry(
       providerId: String,
+      providerDisplayName: String,
+      providerIcon: Drawable,
       authEntry: Entry?,
-      context: Context,
     ): AuthenticationEntryInfo? {
-      // TODO: implement
-      return null
+      // TODO: should also call fromSlice after getting the official jetpack code.
+
+      if (authEntry == null) {
+        return null
+      }
+      return AuthenticationEntryInfo(
+        providerId = providerId,
+        entryKey = authEntry.key,
+        entrySubkey = authEntry.subkey,
+        title = providerDisplayName,
+        icon = providerIcon,
+      )
     }
 
     private fun getActionEntryList(
@@ -96,8 +120,19 @@ class GetFlowUtils {
       actionEntries: List<Entry>,
       context: Context,
     ): List<ActionEntryInfo> {
-      // TODO: implement
-      return emptyList()
+      return actionEntries.map {
+        val actionEntryUi = ActionUi.fromSlice(it.slice)
+
+        return@map ActionEntryInfo(
+          providerId = providerId,
+          entryKey = it.key,
+          entrySubkey = it.subkey,
+          title = actionEntryUi.text.toString(),
+          // TODO: gracefully fail
+          icon = actionEntryUi.icon.loadDrawable(context)!!,
+          subTitle = actionEntryUi.subtext?.toString(),
+        )
+      }
     }
   }
 }
@@ -109,17 +144,20 @@ class CreateFlowUtils {
       providerDataList: List<CreateCredentialProviderData>,
       context: Context,
     ): List<com.android.credentialmanager.createflow.EnabledProviderInfo> {
+      // TODO: get from the actual service info
       val packageManager = context.packageManager
       return providerDataList.map {
         val pkgInfo = packageManager
           .getPackageInfo(it.providerFlattenedComponentName,
             PackageManager.PackageInfoFlags.of(0))
         com.android.credentialmanager.createflow.EnabledProviderInfo(
+          // TODO: decide what to do when failed to load a provider icon
           icon = pkgInfo.applicationInfo.loadIcon(packageManager)!!,
           name = it.providerFlattenedComponentName,
           displayName = pkgInfo.applicationInfo.loadLabel(packageManager).toString(),
           createOptions = toCreationOptionInfoList(it.saveEntries, context),
           isDefault = it.isDefaultProvider,
+          remoteEntry = toRemoteInfo(it.remoteEntry),
         )
       }
     }
@@ -128,6 +166,7 @@ class CreateFlowUtils {
       providerDataList: List<DisabledProviderData>,
       context: Context,
     ): List<com.android.credentialmanager.createflow.DisabledProviderInfo> {
+      // TODO: get from the actual service info
       val packageManager = context.packageManager
       return providerDataList.map {
         val pkgInfo = packageManager
@@ -163,6 +202,18 @@ class CreateFlowUtils {
           lastUsedTimeMillis = saveEntryUi.lastUsedTimeMillis ?: 0,
         )
       }
+    }
+
+    private fun toRemoteInfo(
+      remoteEntry: Entry?,
+    ): RemoteInfo? {
+      // TODO: should also call fromSlice after getting the official jetpack code.
+      return if (remoteEntry != null) {
+        RemoteInfo(
+          entryKey = remoteEntry.key,
+          entrySubkey = remoteEntry.subkey,
+        )
+      } else null
     }
   }
 }

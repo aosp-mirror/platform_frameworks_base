@@ -25,6 +25,7 @@ import android.graphics.Canvas;
 import android.graphics.Path;
 import android.graphics.Path.Direction;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Trace;
 import android.service.notification.StatusBarNotification;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -219,6 +220,7 @@ public class NotificationChildrenContainer extends ViewGroup
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        Trace.beginSection("NotificationChildrenContainer#onMeasure");
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
         boolean hasFixedHeight = heightMode == MeasureSpec.EXACTLY;
         boolean isHeightLimited = heightMode == MeasureSpec.AT_MOST;
@@ -267,6 +269,7 @@ public class NotificationChildrenContainer extends ViewGroup
         }
 
         setMeasuredDimension(width, height);
+        Trace.endSection();
     }
 
     @Override

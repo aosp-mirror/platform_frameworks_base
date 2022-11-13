@@ -822,6 +822,7 @@ public class ViewConfiguration {
      *
      * @hide
      */
+    @TestApi
     public static long getSendRecurringAccessibilityEventsInterval() {
         return SEND_RECURRING_ACCESSIBILITY_EVENTS_INTERVAL_MILLIS;
     }

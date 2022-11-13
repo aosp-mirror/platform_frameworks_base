@@ -46,6 +46,13 @@ message ToolFingerprint {
   string version = 2;
 }
 
+// References to non local resources
+message DynamicRefTable {
+  PackageId package_id = 1;
+  string package_name = 2;
+}
+
+
 // Top level message representing a resource table.
 message ResourceTable {
   // The string pool containing source paths referenced throughout the resource table. This does
@@ -60,6 +67,8 @@ message ResourceTable {
 
   // The version fingerprints of the tools that built the resource table.
   repeated ToolFingerprint tool_fingerprint = 4;
+
+  repeated DynamicRefTable dynamic_ref_table = 5;
 }
 
 // A package ID in the range [0x00, 0xff].

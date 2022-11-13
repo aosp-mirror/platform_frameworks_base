@@ -122,7 +122,7 @@ public final class BroadcastRadioServiceImplTest extends ExtendedRadioMockitoTes
         createBroadcastRadioService();
 
         ITuner session = mBroadcastRadioService.openSession(FM_RADIO_MODULE_ID,
-                /*legacyConfig= */ null, /* withAudio= */ true, mTunerCallbackMock);
+                /* legacyConfig= */ null, /* withAudio= */ true, mTunerCallbackMock);
 
         assertWithMessage("Session opened in FM radio module")
                 .that(session).isEqualTo(mFmTunerSessionMock);
@@ -133,7 +133,7 @@ public final class BroadcastRadioServiceImplTest extends ExtendedRadioMockitoTes
         createBroadcastRadioService();
 
         ITuner session = mBroadcastRadioService.openSession(DAB_RADIO_MODULE_ID + 1,
-                /*legacyConfig= */ null, /* withAudio= */ true, mTunerCallbackMock);
+                /* legacyConfig= */ null, /* withAudio= */ true, mTunerCallbackMock);
 
         assertWithMessage("Session opened with id not found").that(session).isNull();
     }

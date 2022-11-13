@@ -28,7 +28,10 @@
   <string name="passkey">passkey</string>
   <string name="password">password</string>
   <string name="sign_ins">sign-ins</string>
+  <string name="another_device">Another device</string>
   <string name="other_password_manager">Other password manager</string>
+  <!-- TODO: Check the wording here. -->
+  <string name="confirm_default_or_use_once_description">This password manager will store your passwords and passkeys to help you easily sign in.</string>
   <!-- Spoken content description of an element which will close the sheet when clicked. -->
   <string name="close_sheet">"Close sheet"</string>
   <!-- Spoken content description of the back arrow button. -->
@@ -51,6 +54,12 @@
   <string name="get_dialog_sign_in_type_username_separator" translatable="false">" - "</string>
   <!-- Modal bottom sheet title for displaying all the available sign-in options. [CHAR LIMIT=80] -->
   <string name="get_dialog_title_sign_in_options">Sign-in options</string>
-  <!-- Column heading for displaying sign-ins for a specific username. [CHAR LIMIT=20] -->
+  <!-- Column heading for displaying sign-ins for a specific username. [CHAR LIMIT=80] -->
   <string name="get_dialog_heading_for_username">For <xliff:g id="username" example="becket@gmail.com">%1$s</xliff:g></string>
+  <!-- Column heading for displaying locked (that is, the user needs to first authenticate via pin, fingerprint, faceId, etc.) sign-ins. [CHAR LIMIT=80] -->
+  <string name="get_dialog_heading_locked_password_managers">Locked password managers</string>
+  <!-- Explanatory sub/body text for an option entry to use a locked (that is, the user needs to first authenticate via pin, fingerprint, faceId, etc.) sign-in. [CHAR LIMIT=120] -->
+  <string name="locked_credential_entry_label_subtext">Tap to unlock</string>
+  <!-- Column heading for displaying action chips for managing sign-ins from each credential provider. [CHAR LIMIT=80] -->
+  <string name="get_dialog_heading_manage_sign_ins">Manage sign-ins</string>
 </resources>
