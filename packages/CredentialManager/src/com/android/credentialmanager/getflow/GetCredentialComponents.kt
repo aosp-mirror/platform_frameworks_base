@@ -55,8 +55,6 @@ import com.android.credentialmanager.common.material.rememberModalBottomSheetSta
 import com.android.credentialmanager.common.ui.CancelButton
 import com.android.credentialmanager.jetpack.developer.PublicKeyCredential
 
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GetCredentialScreen(
   viewModel: GetCredentialViewModel,
@@ -72,13 +70,14 @@ fun GetCredentialScreen(
       when (uiState.currentScreenState) {
         GetScreenState.PRIMARY_SELECTION -> PrimarySelectionCard(
           requestDisplayInfo = uiState.requestDisplayInfo,
-          sortedUserNameToCredentialEntryList = uiState.sortedUserNameToCredentialEntryList,
+          providerDisplayInfo = uiState.providerDisplayInfo,
           onEntrySelected = viewModel::onEntrySelected,
           onCancel = viewModel::onCancel,
           onMoreOptionSelected = viewModel::onMoreOptionSelected,
         )
         GetScreenState.ALL_SIGN_IN_OPTIONS -> AllSignInOptionCard(
-          sortedUserNameToCredentialEntryList = uiState.sortedUserNameToCredentialEntryList,
+          providerInfoList = uiState.providerInfoList,
+          providerDisplayInfo = uiState.providerDisplayInfo,
           onEntrySelected = viewModel::onEntrySelected,
           onBackButtonClicked = viewModel::onBackToPrimarySelectionScreen,
         )
@@ -95,15 +94,16 @@ fun GetCredentialScreen(
 }
 
 /** Draws the primary credential selection page. */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PrimarySelectionCard(
   requestDisplayInfo: RequestDisplayInfo,
-  sortedUserNameToCredentialEntryList: List<PerUserNameCredentialEntryList>,
+  providerDisplayInfo: ProviderDisplayInfo,
   onEntrySelected: (EntryInfo) -> Unit,
   onCancel: () -> Unit,
   onMoreOptionSelected: () -> Unit,
 ) {
+  val sortedUserNameToCredentialEntryList = providerDisplayInfo.sortedUserNameToCredentialEntryList
+  val authenticationEntryList = providerDisplayInfo.authenticationEntryList
   Card() {
     Column() {
       Text(
@@ -133,7 +133,13 @@ fun PrimarySelectionCard(
           items(sortedUserNameToCredentialEntryList) {
             CredentialEntryRow(
               credentialEntryInfo = it.sortedCredentialEntryList.first(),
-              onEntrySelected = onEntrySelected
+              onEntrySelected = onEntrySelected,
+            )
+          }
+          items(authenticationEntryList) {
+            AuthenticationEntryRow(
+              authenticationEntryInfo = it,
+              onEntrySelected = onEntrySelected,
             )
           }
           item {
@@ -164,10 +170,13 @@ fun PrimarySelectionCard(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AllSignInOptionCard(
-  sortedUserNameToCredentialEntryList: List<PerUserNameCredentialEntryList>,
+  providerInfoList: List<ProviderInfo>,
+  providerDisplayInfo: ProviderDisplayInfo,
   onEntrySelected: (EntryInfo) -> Unit,
   onBackButtonClicked: () -> Unit,
 ) {
+  val sortedUserNameToCredentialEntryList = providerDisplayInfo.sortedUserNameToCredentialEntryList
+  val authenticationEntryList = providerDisplayInfo.authenticationEntryList
   Card() {
     Column() {
       TopAppBar(
@@ -199,11 +208,26 @@ fun AllSignInOptionCard(
         LazyColumn(
           verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+          // For username
           items(sortedUserNameToCredentialEntryList) { item ->
             PerUserNameCredentials(
               perUserNameCredentialEntryList = item,
-              onEntrySelected = onEntrySelected
+              onEntrySelected = onEntrySelected,
             )
+          }
+          // Locked password manager
+          item {
+            if (!authenticationEntryList.isEmpty()) {
+              LockedCredentials(
+                authenticationEntryList = authenticationEntryList,
+                onEntrySelected = onEntrySelected,
+              )
+            }
+          }
+          // TODO: Remote action
+          // Manage sign-ins
+          item {
+            ActionChips(providerInfoList = providerInfoList, onEntrySelected = onEntrySelected)
           }
         }
       }
@@ -211,7 +235,47 @@ fun AllSignInOptionCard(
   }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+// TODO: create separate rows for primary and secondary pages.
+// TODO: reuse rows and columns across types.
+
+@Composable
+fun ActionChips(
+  providerInfoList: List<ProviderInfo>,
+  onEntrySelected: (EntryInfo) -> Unit,
+) {
+  val actionChips = providerInfoList.flatMap { it.actionEntryList }
+  if (actionChips.isEmpty()) {
+    return
+  }
+
+  Text(
+    text = stringResource(R.string.get_dialog_heading_manage_sign_ins),
+    style = MaterialTheme.typography.labelLarge,
+    modifier = Modifier.padding(vertical = 8.dp)
+  )
+  // TODO: tweak padding.
+  Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+    actionChips.forEach {
+      ActionEntryRow(it, onEntrySelected)
+    }
+  }
+}
+
+@Composable
+fun LockedCredentials(
+  authenticationEntryList: List<AuthenticationEntryInfo>,
+  onEntrySelected: (EntryInfo) -> Unit,
+) {
+  Text(
+    text = stringResource(R.string.get_dialog_heading_locked_password_managers),
+    style = MaterialTheme.typography.labelLarge,
+    modifier = Modifier.padding(vertical = 8.dp)
+  )
+  authenticationEntryList.forEach {
+    AuthenticationEntryRow(it, onEntrySelected)
+  }
+}
+
 @Composable
 fun PerUserNameCredentials(
   perUserNameCredentialEntryList: PerUserNameCredentialEntryList,
@@ -263,6 +327,73 @@ fun CredentialEntryRow(
           style = MaterialTheme.typography.bodyMedium,
           modifier = Modifier.padding(bottom = 16.dp)
         )
+      }
+    }
+  )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AuthenticationEntryRow(
+  authenticationEntryInfo: AuthenticationEntryInfo,
+  onEntrySelected: (EntryInfo) -> Unit,
+) {
+  SuggestionChip(
+    modifier = Modifier.fillMaxWidth(),
+    onClick = {onEntrySelected(authenticationEntryInfo)},
+    icon = {
+      Image(modifier = Modifier.size(24.dp, 24.dp).padding(start = 10.dp),
+        bitmap = authenticationEntryInfo.icon.toBitmap().asImageBitmap(),
+        // TODO: add description.
+        contentDescription = "")
+    },
+    shape = MaterialTheme.shapes.large,
+    label = {
+      Column() {
+        // TODO: fix the text values.
+        Text(
+          text = authenticationEntryInfo.title,
+          style = MaterialTheme.typography.titleLarge,
+          modifier = Modifier.padding(top = 16.dp)
+        )
+        Text(
+          text = stringResource(R.string.locked_credential_entry_label_subtext),
+          style = MaterialTheme.typography.bodyMedium,
+          modifier = Modifier.padding(bottom = 16.dp)
+        )
+      }
+    }
+  )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ActionEntryRow(
+  actionEntryInfo: ActionEntryInfo,
+  onEntrySelected: (EntryInfo) -> Unit,
+) {
+  SuggestionChip(
+    modifier = Modifier.fillMaxWidth(),
+    onClick = { onEntrySelected(actionEntryInfo) },
+    icon = {
+      Image(modifier = Modifier.size(24.dp, 24.dp).padding(start = 10.dp),
+        bitmap = actionEntryInfo.icon.toBitmap().asImageBitmap(),
+        // TODO: add description.
+        contentDescription = "")
+    },
+    shape = MaterialTheme.shapes.large,
+    label = {
+      Column() {
+        Text(
+          text = actionEntryInfo.title,
+          style = MaterialTheme.typography.titleLarge,
+        )
+        if (actionEntryInfo.subTitle != null) {
+          Text(
+            text = actionEntryInfo.subTitle,
+            style = MaterialTheme.typography.bodyMedium,
+          )
+        }
       }
     }
   )

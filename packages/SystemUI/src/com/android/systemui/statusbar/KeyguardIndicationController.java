@@ -1179,16 +1179,14 @@ public class KeyguardIndicationController {
 
         @Override
         public void onTrustChanged(int userId) {
-            if (getCurrentUser() != userId) {
-                return;
-            }
+            if (!isCurrentUser(userId)) return;
             updateDeviceEntryIndication(false);
         }
 
         @Override
-        public void showTrustGrantedMessage(CharSequence message) {
-            mTrustGrantedIndication = message;
-            updateDeviceEntryIndication(false);
+        public void onTrustGrantedWithFlags(int flags, int userId, @Nullable String message) {
+            if (!isCurrentUser(userId)) return;
+            showTrustGrantedMessage(flags, message);
         }
 
         @Override
@@ -1246,6 +1244,15 @@ public class KeyguardIndicationController {
             showTransientIndication(mContext.getString(R.string.require_unlock_for_nfc));
             hideTransientIndicationDelayed(DEFAULT_HIDE_DELAY_MS);
         }
+    }
+
+    private boolean isCurrentUser(int userId) {
+        return getCurrentUser() == userId;
+    }
+
+    void showTrustGrantedMessage(int flags, @Nullable CharSequence message) {
+        mTrustGrantedIndication = message;
+        updateDeviceEntryIndication(false);
     }
 
     private void handleFaceLockoutError(String errString) {

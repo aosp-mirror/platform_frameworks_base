@@ -38,6 +38,8 @@ public:
     void reloadSpotResources();
     bool doAnimations(nsecs_t timestamp);
 
+    void dump(std::string& out, const char* prefix = "") const;
+
 private:
     struct Spot {
         static const uint32_t INVALID_ID = 0xffffffff;
@@ -58,6 +60,7 @@ private:
                 mLastIcon(nullptr) {}
 
         void updateSprite(const SpriteIcon* icon, float x, float y, int32_t displayId);
+        void dump(std::string& out, const char* prefix = "") const;
 
     private:
         const SpriteIcon* mLastIcon;

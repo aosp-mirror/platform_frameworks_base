@@ -42,6 +42,7 @@ import android.content.Context;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.IHintSession;
+import android.os.PerformanceHintManager;
 import android.os.Process;
 
 import com.android.server.FgThread;
@@ -247,6 +248,32 @@ public class HintManagerServiceTest {
         assumeFalse(a.updateHintAllowed());
         a.reportActualWorkDuration(DURATIONS_THREE, TIMESTAMPS_THREE);
         verify(mNativeWrapperMock, never()).halReportActualWorkDuration(anyLong(), any(), any());
+    }
+
+    @Test
+    public void testSendHint() throws Exception {
+        HintManagerService service = createService();
+        IBinder token = new Binder();
+
+        AppHintSession a = (AppHintSession) service.getBinderServiceInstance()
+                .createHintSession(token, SESSION_TIDS_A, DEFAULT_TARGET_DURATION);
+
+        a.sendHint(PerformanceHintManager.Session.CPU_LOAD_RESET);
+        verify(mNativeWrapperMock, times(1)).halSendHint(anyLong(),
+                eq(PerformanceHintManager.Session.CPU_LOAD_RESET));
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            a.sendHint(-1);
+        });
+
+        reset(mNativeWrapperMock);
+        // Set session to background, then the duration would not be updated.
+        service.mUidObserver.onUidStateChanged(
+                a.mUid, ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND, 0, 0);
+        FgThread.getHandler().runWithScissors(() -> { }, 500);
+        assertFalse(a.updateHintAllowed());
+        a.sendHint(PerformanceHintManager.Session.CPU_LOAD_RESET);
+        verify(mNativeWrapperMock, never()).halSendHint(anyLong(), anyInt());
     }
 
     @Test

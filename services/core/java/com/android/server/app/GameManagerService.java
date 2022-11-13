@@ -883,6 +883,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
 
         @Override
         public void onUserStarting(@NonNull TargetUser user) {
+            Slog.d(TAG, "Starting user " + user.getUserIdentifier());
             mService.onUserStarting(user,
                     Environment.getDataSystemDeDirectory(user.getUserIdentifier()));
         }
@@ -1047,6 +1048,8 @@ public final class GameManagerService extends IGameManagerService.Stub {
                     "com.android.server.app.GameManagerService");
 
             if (!mSettings.containsKey(userId)) {
+                Slog.d(TAG, "Failed to set game mode for package " + packageName
+                        + " as user " + userId + " is not started");
                 return;
             }
             GameManagerSettings userSettings = mSettings.get(userId);

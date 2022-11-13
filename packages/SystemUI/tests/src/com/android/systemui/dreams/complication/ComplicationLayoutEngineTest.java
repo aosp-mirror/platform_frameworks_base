@@ -347,21 +347,22 @@ public class ComplicationLayoutEngineTest extends SysuiTestCase {
 
         addComplication(engine, thirdViewInfo);
 
-        // The first added view should now be underneath the second view.
+        // The first added view should now be underneath the third view.
         verifyChange(firstViewInfo, false, lp -> {
             assertThat(lp.topToBottom == thirdViewInfo.view.getId()).isTrue();
             assertThat(lp.endToEnd == ConstraintLayout.LayoutParams.PARENT_ID).isTrue();
             assertThat(lp.topMargin).isEqualTo(margin);
         });
 
-        // The second view should be in underneath the third view.
+        // The second view should be to the start of the third view.
         verifyChange(secondViewInfo, false, lp -> {
             assertThat(lp.endToStart == thirdViewInfo.view.getId()).isTrue();
             assertThat(lp.topToTop == ConstraintLayout.LayoutParams.PARENT_ID).isTrue();
             assertThat(lp.getMarginEnd()).isEqualTo(margin);
         });
 
-        // The third view should be in at the top.
+        // The third view should be at the top end corner. No margin should be applied if not
+        // specified.
         verifyChange(thirdViewInfo, true, lp -> {
             assertThat(lp.topToTop == ConstraintLayout.LayoutParams.PARENT_ID).isTrue();
             assertThat(lp.endToEnd == ConstraintLayout.LayoutParams.PARENT_ID).isTrue();
@@ -425,18 +426,81 @@ public class ComplicationLayoutEngineTest extends SysuiTestCase {
 
         addComplication(engine, thirdViewInfo);
 
-        // The first added view should now be underneath the second view.
+        // The first added view should now be underneath the third view.
         verifyChange(firstViewInfo, false, lp -> {
             assertThat(lp.topToBottom == thirdViewInfo.view.getId()).isTrue();
             assertThat(lp.endToEnd == ConstraintLayout.LayoutParams.PARENT_ID).isTrue();
             assertThat(lp.topMargin).isEqualTo(complicationMargin);
         });
 
-        // The second view should be in underneath the third view.
+        // The second view should be to the start of the third view.
         verifyChange(secondViewInfo, false, lp -> {
             assertThat(lp.endToStart == thirdViewInfo.view.getId()).isTrue();
             assertThat(lp.topToTop == ConstraintLayout.LayoutParams.PARENT_ID).isTrue();
             assertThat(lp.getMarginEnd()).isEqualTo(defaultMargin);
+        });
+    }
+
+    /**
+     * Ensures the root complication applies margin if specified.
+     */
+    @Test
+    public void testRootComplicationSpecifiedMargin() {
+        final int defaultMargin = 5;
+        final int complicationMargin = 10;
+        final ComplicationLayoutEngine engine =
+                new ComplicationLayoutEngine(mLayout, defaultMargin, mTouchSession, 0, 0);
+
+        final ViewInfo firstViewInfo = new ViewInfo(
+                new ComplicationLayoutParams(
+                        100,
+                        100,
+                        ComplicationLayoutParams.POSITION_TOP
+                                | ComplicationLayoutParams.POSITION_END,
+                        ComplicationLayoutParams.DIRECTION_DOWN,
+                        0),
+                Complication.CATEGORY_STANDARD,
+                mLayout);
+
+        addComplication(engine, firstViewInfo);
+
+        final ViewInfo secondViewInfo = new ViewInfo(
+                new ComplicationLayoutParams(
+                        100,
+                        100,
+                        ComplicationLayoutParams.POSITION_TOP
+                                | ComplicationLayoutParams.POSITION_END,
+                        ComplicationLayoutParams.DIRECTION_START,
+                        0),
+                Complication.CATEGORY_SYSTEM,
+                mLayout);
+
+        addComplication(engine, secondViewInfo);
+
+        firstViewInfo.clearInvocations();
+        secondViewInfo.clearInvocations();
+
+        final ViewInfo thirdViewInfo = new ViewInfo(
+                new ComplicationLayoutParams(
+                        100,
+                        100,
+                        ComplicationLayoutParams.POSITION_TOP
+                                | ComplicationLayoutParams.POSITION_END,
+                        ComplicationLayoutParams.DIRECTION_START,
+                        1,
+                        complicationMargin),
+                Complication.CATEGORY_SYSTEM,
+                mLayout);
+
+        addComplication(engine, thirdViewInfo);
+
+        // The third view is the root view and has specified margin, which should be applied based
+        // on its direction.
+        verifyChange(thirdViewInfo, true, lp -> {
+            assertThat(lp.getMarginStart()).isEqualTo(0);
+            assertThat(lp.getMarginEnd()).isEqualTo(complicationMargin);
+            assertThat(lp.topMargin).isEqualTo(0);
+            assertThat(lp.bottomMargin).isEqualTo(0);
         });
     }
 

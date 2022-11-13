@@ -17,6 +17,7 @@
 package com.android.settingslib.spaprivileged.model.app
 
 import android.app.Application
+import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.icu.text.Collator
 import androidx.lifecycle.AndroidViewModel
@@ -27,12 +28,16 @@ import com.android.settingslib.spa.framework.util.waitFirst
 import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 
 internal data class AppListData<T : AppRecord>(
@@ -43,9 +48,15 @@ internal data class AppListData<T : AppRecord>(
         AppListData(appEntries.filter(predicate), option)
 }
 
-@OptIn(ExperimentalCoroutinesApi::class)
 internal class AppListViewModel<T : AppRecord>(
     application: Application,
+) : AppListViewModelImpl<T>(application)
+
+@OptIn(ExperimentalCoroutinesApi::class)
+internal open class AppListViewModelImpl<T : AppRecord>(
+    application: Application,
+    appListRepositoryFactory: (Context) -> AppListRepository = ::AppListRepositoryImpl,
+    appRepositoryFactory: (Context) -> AppRepository = ::AppRepositoryImpl,
 ) : AndroidViewModel(application) {
     val appListConfig = StateFlowBridge<AppListConfig>()
     val listModel = StateFlowBridge<AppListModel<T>>()
@@ -53,16 +64,18 @@ internal class AppListViewModel<T : AppRecord>(
     val option = StateFlowBridge<Int>()
     val searchQuery = StateFlowBridge<String>()
 
-    private val appListRepository = AppListRepository(application)
-    private val appRepository = AppRepositoryImpl(application)
+    private val appListRepository = appListRepositoryFactory(application)
+    private val appRepository = appRepositoryFactory(application)
     private val collator = Collator.getInstance().freeze()
     private val labelMap = ConcurrentHashMap<String, String>()
-    private val scope = viewModelScope + Dispatchers.Default
+    private val scope = viewModelScope + Dispatchers.IO
 
     private val userIdFlow = appListConfig.flow.map { it.userId }
 
+    private val appsStateFlow = MutableStateFlow<List<ApplicationInfo>?>(null)
+
     private val recordListFlow = listModel.flow
-        .flatMapLatest { it.transform(userIdFlow, appListRepository.loadApps(appListConfig.flow)) }
+        .flatMapLatest { it.transform(userIdFlow, appsStateFlow.filterNotNull()) }
         .shareIn(scope = scope, started = SharingStarted.Eagerly, replay = 1)
 
     private val systemFilteredFlow =
@@ -81,6 +94,12 @@ internal class AppListViewModel<T : AppRecord>(
 
     init {
         scheduleOnFirstLoaded()
+    }
+
+    fun reloadApps() {
+        viewModelScope.launch {
+            appsStateFlow.value = appListRepository.loadApps(appListConfig.flow.first())
+        }
     }
 
     private fun filterAndSort(option: Int) = listModel.flow.flatMapLatest { listModel ->

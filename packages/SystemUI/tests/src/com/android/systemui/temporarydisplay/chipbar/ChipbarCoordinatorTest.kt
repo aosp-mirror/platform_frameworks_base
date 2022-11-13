@@ -377,6 +377,7 @@ class ChipbarCoordinatorTest : SysuiTestCase() {
             windowTitle = WINDOW_TITLE,
             wakeReason = WAKE_REASON,
             timeoutMs = TIMEOUT,
+            id = DEVICE_ID,
         )
     }
 
@@ -401,3 +402,4 @@ class ChipbarCoordinatorTest : SysuiTestCase() {
 private const val TIMEOUT = 10000
 private const val WINDOW_TITLE = "Test Chipbar Window Title"
 private const val WAKE_REASON = "TEST_CHIPBAR_WAKE_REASON"
+private const val DEVICE_ID = "id"

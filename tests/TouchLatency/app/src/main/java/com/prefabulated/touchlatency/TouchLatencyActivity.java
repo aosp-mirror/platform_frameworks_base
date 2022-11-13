@@ -16,7 +16,6 @@
 
 package com.prefabulated.touchlatency;
 
-import android.app.Activity;
 import android.app.ActivityOptions;
 import android.content.Intent;
 import android.hardware.display.DisplayManager;
@@ -30,25 +29,49 @@ import android.view.MenuItem;
 import android.view.Window;
 import android.view.WindowManager;
 
-public class TouchLatencyActivity extends Activity {
-    private Mode mDisplayModes[];
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.android.material.slider.RangeSlider;
+import com.google.android.material.slider.RangeSlider.OnChangeListener;
+
+public class TouchLatencyActivity extends AppCompatActivity {
+    private static final int REFRESH_RATE_SLIDER_MIN = 20;
+    private static final int REFRESH_RATE_SLIDER_STEP = 5;
+
+    private Menu mMenu;
+    private Mode[] mDisplayModes;
     private int mCurrentModeIndex;
+    private float mSliderPreferredRefreshRate;
     private DisplayManager mDisplayManager;
+
     private final DisplayManager.DisplayListener mDisplayListener =
             new DisplayManager.DisplayListener() {
         @Override
         public void onDisplayAdded(int i) {
-            invalidateOptionsMenu();
+            updateOptionsMenu();
         }
 
         @Override
         public void onDisplayRemoved(int i) {
-            invalidateOptionsMenu();
+            updateOptionsMenu();
         }
 
         @Override
         public void onDisplayChanged(int i) {
-            invalidateOptionsMenu();
+            updateOptionsMenu();
+        }
+    };
+
+    private final RangeSlider.OnChangeListener mRefreshRateSliderListener = new OnChangeListener() {
+        @Override
+        public void onValueChange(@NonNull RangeSlider slider, float value, boolean fromUser) {
+            if (value == mSliderPreferredRefreshRate) return;
+
+            mSliderPreferredRefreshRate = value;
+            WindowManager.LayoutParams w = getWindow().getAttributes();
+            w.preferredRefreshRate = mSliderPreferredRefreshRate;
+            getWindow().setAttributes(w);
         }
     };
 
@@ -75,17 +98,23 @@ public class TouchLatencyActivity extends Activity {
         Trace.endSection();
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        Trace.beginSection("TouchLatencyActivity onCreateOptionsMenu");
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_touch_latency, menu);
+    public void updateOptionsMenu() {
         if (mDisplayModes.length > 1) {
-            MenuItem menuItem = menu.findItem(R.id.display_mode);
+            MenuItem menuItem = mMenu.findItem(R.id.display_mode);
             Mode currentMode = getWindowManager().getDefaultDisplay().getMode();
             updateDisplayMode(menuItem, currentMode);
         }
-        updateMultiDisplayMenu(menu.findItem(R.id.multi_display));
+        updateRefreshRateMenu(mMenu.findItem(R.id.frame_rate));
+        updateMultiDisplayMenu(mMenu.findItem(R.id.multi_display));
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        Trace.beginSection("TouchLatencyActivity onCreateOptionsMenu");
+        mMenu = menu;
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_touch_latency, mMenu);
+        updateOptionsMenu();
         Trace.endSection();
         return true;
     }
@@ -94,6 +123,32 @@ public class TouchLatencyActivity extends Activity {
         int fps = (int) displayMode.getRefreshRate();
         menuItem.setTitle(fps + "hz");
         menuItem.setVisible(true);
+    }
+
+    private float getHighestRefreshRate() {
+        float maxRefreshRate = 0;
+        for (Display.Mode mode : getDisplay().getSupportedModes()) {
+            if (sameSizeMode(mode) && mode.getRefreshRate() > maxRefreshRate) {
+                maxRefreshRate = mode.getRefreshRate();
+            }
+        }
+        return maxRefreshRate;
+    }
+
+    private void updateRefreshRateMenu(MenuItem item) {
+        item.setActionView(R.layout.refresh_rate_layout);
+        RangeSlider slider = item.getActionView().findViewById(R.id.slider_from_layout);
+        slider.addOnChangeListener(mRefreshRateSliderListener);
+
+        float highestRefreshRate = getHighestRefreshRate();
+        slider.setValueFrom(REFRESH_RATE_SLIDER_MIN);
+        slider.setValueTo(highestRefreshRate);
+        slider.setStepSize(REFRESH_RATE_SLIDER_STEP);
+        if (mSliderPreferredRefreshRate < REFRESH_RATE_SLIDER_MIN
+                || mSliderPreferredRefreshRate > highestRefreshRate) {
+            mSliderPreferredRefreshRate = highestRefreshRate;
+        }
+        slider.setValues(mSliderPreferredRefreshRate);
     }
 
     private void updateMultiDisplayMenu(MenuItem item) {
@@ -105,6 +160,12 @@ public class TouchLatencyActivity extends Activity {
         mDisplayManager.registerDisplayListener(mDisplayListener, new Handler());
     }
 
+    private boolean sameSizeMode(Display.Mode mode) {
+        Mode currentMode = mDisplayModes[mCurrentModeIndex];
+        return currentMode.getPhysicalHeight() == mode.getPhysicalHeight()
+            && currentMode.getPhysicalWidth() == mode.getPhysicalWidth();
+    }
+
     public void changeDisplayMode(MenuItem item) {
         Window w = getWindow();
         WindowManager.LayoutParams params = w.getAttributes();
@@ -112,10 +173,7 @@ public class TouchLatencyActivity extends Activity {
         int modeIndex = (mCurrentModeIndex + 1) % mDisplayModes.length;
         while (modeIndex != mCurrentModeIndex) {
             // skip modes with different resolutions
-            Mode currentMode = mDisplayModes[mCurrentModeIndex];
-            Mode nextMode = mDisplayModes[modeIndex];
-            if (currentMode.getPhysicalHeight() == nextMode.getPhysicalHeight()
-                    && currentMode.getPhysicalWidth() == nextMode.getPhysicalWidth()) {
+            if (sameSizeMode(mDisplayModes[modeIndex])) {
                 break;
             }
             modeIndex = (modeIndex + 1) % mDisplayModes.length;

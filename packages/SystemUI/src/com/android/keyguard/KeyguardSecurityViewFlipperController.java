@@ -83,6 +83,13 @@ public class KeyguardSecurityViewFlipperController
         }
     }
 
+    /** Handles density or font scale changes. */
+    public void onDensityOrFontScaleChanged() {
+        mView.removeAllViews();
+        mChildren.clear();
+    }
+
+
     @VisibleForTesting
     KeyguardInputViewController<KeyguardInputView> getSecurityView(SecurityMode securityMode,
             KeyguardSecurityCallback keyguardSecurityCallback) {

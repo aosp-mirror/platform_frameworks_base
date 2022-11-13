@@ -58,7 +58,7 @@ class RadioModule {
     private static final int RADIO_EVENT_LOGGER_QUEUE_SIZE = 25;
 
     @NonNull private final IBroadcastRadio mService;
-    @NonNull public final RadioManager.ModuleProperties mProperties;
+    @NonNull private final RadioManager.ModuleProperties mProperties;
 
     private final Object mLock;
     @NonNull private final Handler mHandler;
@@ -175,6 +175,10 @@ class RadioModule {
 
     public @NonNull IBroadcastRadio getService() {
         return mService;
+    }
+
+    public RadioManager.ModuleProperties getProperties() {
+        return mProperties;
     }
 
     public @NonNull TunerSession openSession(@NonNull android.hardware.radio.ITunerCallback userCb)

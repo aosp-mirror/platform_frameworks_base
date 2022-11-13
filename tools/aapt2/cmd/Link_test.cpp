@@ -840,6 +840,43 @@ TEST_F(LinkTest, LocaleConfigVerification) {
   ASSERT_TRUE(Link(link1_args, &diag));
 }
 
+TEST_F(LinkTest, LocaleConfigVerificationExternalSymbol) {
+  StdErrDiagnostics diag;
+  const std::string base_files_dir = GetTestPath("base");
+  ASSERT_TRUE(CompileFile(GetTestPath("res/xml/locales_config.xml"), R"(
+    <locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+      <locale android:name="en-US"/>
+      <locale android:name="pt"/>
+      <locale android:name="es-419"/>
+      <locale android:name="zh-Hans-SG"/>
+    </locale-config>)",
+                          base_files_dir, &diag));
+  const std::string base_apk = GetTestPath("base.apk");
+  std::vector<std::string> link_args = {
+      "--manifest",
+      GetDefaultManifest("com.aapt2.app"),
+      "-o",
+      base_apk,
+  };
+  ASSERT_TRUE(Link(link_args, base_files_dir, &diag));
+
+  const std::string localeconfig_manifest = GetTestPath("localeconfig_manifest.xml");
+  const std::string out_apk = GetTestPath("out.apk");
+  WriteFile(localeconfig_manifest, android::base::StringPrintf(R"(
+    <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      package="com.aapt2.app">
+
+      <application
+        android:localeConfig="@xml/locales_config">
+      </application>
+    </manifest>)"));
+  link_args = LinkCommandBuilder(this)
+                  .SetManifestFile(localeconfig_manifest)
+                  .AddParameter("-I", base_apk)
+                  .Build(out_apk);
+  ASSERT_TRUE(Link(link_args, &diag));
+}
+
 TEST_F(LinkTest, LocaleConfigWrongTag) {
   StdErrDiagnostics diag;
   const std::string compiled_files_dir = GetTestPath("compiled");

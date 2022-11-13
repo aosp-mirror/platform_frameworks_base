@@ -37,12 +37,15 @@ import android.hardware.broadcastradio.V2_0.ITunerSession;
 import android.hardware.broadcastradio.V2_0.IdentifierType;
 import android.hardware.broadcastradio.V2_0.ProgramInfo;
 import android.hardware.broadcastradio.V2_0.Result;
+import android.hardware.broadcastradio.V2_0.VendorKeyValue;
 import android.hardware.radio.ProgramList;
 import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
 import android.hardware.radio.RadioTuner;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -51,6 +54,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.verification.VerificationWithTimeout;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Map;
 
 /**
  * Tests for HIDL HAL TunerSession.
@@ -73,6 +78,7 @@ public final class TunerSessionHidlTest {
     private static final int UNSUPPORTED_CONFIG_FLAG = 0;
 
     private final Object mLock = new Object();
+    private final ArrayMap<Integer, Boolean> mHalConfigMap = new ArrayMap<>();
     private RadioModule mRadioModule;
     private ITunerCallback mHalTunerCallback;
     private ProgramInfo mHalCurrentInfo;
@@ -84,13 +90,8 @@ public final class TunerSessionHidlTest {
 
     @Before
     public void setup() throws Exception {
-        mRadioModule = new RadioModule(mBroadcastRadioMock, new RadioManager.ModuleProperties(
-                /* id= */ 0, /* serviceName= */ "", /* classId= */ 0, /* implementor= */ "",
-                /* product= */ "", /* version= */ "", /* serial= */ "", /* numTuners= */ 0,
-                /* numAudioSources= */ 0, /* isInitializationRequired= */ false,
-                /* isCaptureSupported= */ false, /* bands= */ null, /* isBgScanSupported= */ false,
-                new int[] {}, new int[] {},
-                /* dabFrequencyTable= */ null, /* vendorInfo= */ null), mLock);
+        mRadioModule = new RadioModule(mBroadcastRadioMock,
+                TestUtils.makeDefaultModuleProperties(), mLock);
 
         doAnswer(invocation -> {
             mHalTunerCallback = (ITunerCallback) invocation.getArguments()[0];
@@ -142,6 +143,32 @@ public final class TunerSessionHidlTest {
         }).when(mHalTunerSessionMock).scan(anyBoolean(), anyBoolean());
 
         when(mBroadcastRadioMock.getImage(anyInt())).thenReturn(new ArrayList<Byte>(0));
+
+        doAnswer(invocation -> {
+            int configFlag = (int) invocation.getArguments()[0];
+            ITunerSession.isConfigFlagSetCallback cb = (ITunerSession.isConfigFlagSetCallback)
+                    invocation.getArguments()[1];
+            if (configFlag == UNSUPPORTED_CONFIG_FLAG) {
+                cb.onValues(Result.NOT_SUPPORTED, false);
+                return null;
+            }
+            cb.onValues(Result.OK, mHalConfigMap.getOrDefault(configFlag, false));
+            return null;
+        }).when(mHalTunerSessionMock).isConfigFlagSet(anyInt(), any());
+
+        doAnswer(invocation -> {
+            int configFlag = (int) invocation.getArguments()[0];
+            if (configFlag == UNSUPPORTED_CONFIG_FLAG) {
+                return Result.NOT_SUPPORTED;
+            }
+            mHalConfigMap.put(configFlag, (boolean) invocation.getArguments()[1]);
+            return Result.OK;
+        }).when(mHalTunerSessionMock).setConfigFlag(anyInt(), anyBoolean());
+    }
+
+    @After
+    public void cleanUp() {
+        mHalConfigMap.clear();
     }
 
     @Test
@@ -395,7 +422,7 @@ public final class TunerSessionHidlTest {
             mTunerSessions[0].getImage(imageId);
         });
 
-        assertWithMessage("Exception for getting image with invalid ID")
+        assertWithMessage("Get image exception")
                 .that(thrown).hasMessageThat().contains("Image ID is missing");
     }
 
@@ -428,6 +455,138 @@ public final class TunerSessionHidlTest {
         mTunerSessions[0].stopProgramListUpdates();
 
         verify(mHalTunerSessionMock).stopProgramListUpdates();
+    }
+
+    @Test
+    public void isConfigFlagSupported_withUnsupportedFlag_returnsFalse() throws Exception {
+        openAidlClients(/* numClients= */ 1);
+        int flag = UNSUPPORTED_CONFIG_FLAG;
+
+        boolean isSupported = mTunerSessions[0].isConfigFlagSupported(flag);
+
+        verify(mHalTunerSessionMock).isConfigFlagSet(eq(flag), any());
+        assertWithMessage("Config flag %s is supported", flag).that(isSupported).isFalse();
+    }
+
+    @Test
+    public void isConfigFlagSupported_withSupportedFlag_returnsTrue() throws Exception {
+        openAidlClients(/* numClients= */ 1);
+        int flag = UNSUPPORTED_CONFIG_FLAG + 1;
+
+        boolean isSupported = mTunerSessions[0].isConfigFlagSupported(flag);
+
+        verify(mHalTunerSessionMock).isConfigFlagSet(eq(flag), any());
+        assertWithMessage("Config flag %s is supported", flag).that(isSupported).isTrue();
+    }
+
+    @Test
+    public void setConfigFlag_withUnsupportedFlag_throwsRuntimeException() throws Exception {
+        openAidlClients(/* numClients= */ 1);
+        int flag = UNSUPPORTED_CONFIG_FLAG;
+
+        RuntimeException thrown = assertThrows(RuntimeException.class, () -> {
+            mTunerSessions[0].setConfigFlag(flag, /* value= */ true);
+        });
+
+        assertWithMessage("Exception for setting unsupported flag %s", flag)
+                .that(thrown).hasMessageThat().contains("setConfigFlag: NOT_SUPPORTED");
+    }
+
+    @Test
+    public void setConfigFlag_withFlagSetToTrue() throws Exception {
+        openAidlClients(/* numClients= */ 1);
+        int flag = UNSUPPORTED_CONFIG_FLAG + 1;
+
+        mTunerSessions[0].setConfigFlag(flag, /* value= */ true);
+
+        verify(mHalTunerSessionMock).setConfigFlag(flag, /* value= */ true);
+    }
+
+    @Test
+    public void setConfigFlag_withFlagSetToFalse() throws Exception {
+        openAidlClients(/* numClients= */ 1);
+        int flag = UNSUPPORTED_CONFIG_FLAG + 1;
+
+        mTunerSessions[0].setConfigFlag(flag, /* value= */ false);
+
+        verify(mHalTunerSessionMock).setConfigFlag(flag, /* value= */ false);
+    }
+
+    @Test
+    public void isConfigFlagSet_withUnsupportedFlag_throwsRuntimeException()
+            throws Exception {
+        openAidlClients(/* numClients= */ 1);
+        int flag = UNSUPPORTED_CONFIG_FLAG;
+
+        RuntimeException thrown = assertThrows(RuntimeException.class, () -> {
+            mTunerSessions[0].isConfigFlagSet(flag);
+        });
+
+        assertWithMessage("Exception for check if unsupported flag %s is set", flag)
+                .that(thrown).hasMessageThat().contains("isConfigFlagSet: NOT_SUPPORTED");
+    }
+
+    @Test
+    public void isConfigFlagSet_withSupportedFlag() throws Exception {
+        openAidlClients(/* numClients= */ 1);
+        int flag = UNSUPPORTED_CONFIG_FLAG + 1;
+        boolean expectedConfigFlagValue = true;
+        mTunerSessions[0].setConfigFlag(flag, /* value= */ expectedConfigFlagValue);
+
+        boolean isSet = mTunerSessions[0].isConfigFlagSet(flag);
+
+        assertWithMessage("Config flag %s is set", flag)
+                .that(isSet).isEqualTo(expectedConfigFlagValue);
+    }
+
+    @Test
+    public void setParameters_withMockParameters() throws Exception {
+        openAidlClients(/* numClients= */ 1);
+        Map<String, String> parametersSet = Map.of("mockParam1", "mockValue1",
+                "mockParam2", "mockValue2");
+
+        mTunerSessions[0].setParameters(parametersSet);
+
+        verify(mHalTunerSessionMock).setParameters(Convert.vendorInfoToHal(parametersSet));
+    }
+
+    @Test
+    public void getParameters_withMockKeys() throws Exception {
+        openAidlClients(/* numClients= */ 1);
+        ArrayList<String> parameterKeys = new ArrayList<>(Arrays.asList("mockKey1", "mockKey2"));
+
+        mTunerSessions[0].getParameters(parameterKeys);
+
+        verify(mHalTunerSessionMock).getParameters(parameterKeys);
+    }
+
+    @Test
+    public void onConfigFlagUpdated_forTunerCallback() throws Exception {
+        int numSessions = 3;
+        openAidlClients(numSessions);
+
+        mHalTunerCallback.onAntennaStateChange(/* connected= */ false);
+
+        for (int index = 0; index < numSessions; index++) {
+            verify(mAidlTunerCallbackMocks[index], CALLBACK_TIMEOUT)
+                    .onAntennaState(/* connected= */ false);
+        }
+    }
+
+    @Test
+    public void onParametersUpdated_forTunerCallback() throws Exception {
+        int numSessions = 3;
+        openAidlClients(numSessions);
+        ArrayList<VendorKeyValue> parametersUpdates = new ArrayList<VendorKeyValue>(Arrays.asList(
+                TestUtils.makeVendorKeyValue("com.vendor.parameter1", "value1")));
+        Map<String, String> parametersExpected = Map.of("com.vendor.parameter1", "value1");
+
+        mHalTunerCallback.onParametersUpdated(parametersUpdates);
+
+        for (int index = 0; index < numSessions; index++) {
+            verify(mAidlTunerCallbackMocks[index], CALLBACK_TIMEOUT)
+                    .onParametersUpdated(parametersExpected);
+        }
     }
 
     private void openAidlClients(int numClients) throws Exception {

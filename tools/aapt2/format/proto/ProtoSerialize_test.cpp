@@ -1024,4 +1024,28 @@ TEST(ProtoSerializeTest, CustomResourceTypes) {
   EXPECT_THAT(*(custom_layout->path), Eq("res/layout/bar.xml"));
 }
 
+TEST(ProtoSerializeTest, SerializeDynamicRef) {
+  std::unique_ptr<IAaptContext> context =
+      test::ContextBuilder().SetCompilationPackage("app").SetPackageId(0x7f).Build();
+  std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder().Build();
+  table->included_packages_.insert({20, "foobar"});
+  table->included_packages_.insert({30, "barfoo"});
+
+  ResourceTable new_table;
+  pb::ResourceTable pb_table;
+  MockFileCollection files;
+  std::string error;
+  SerializeTableToPb(*table, &pb_table, context->GetDiagnostics());
+  ASSERT_TRUE(DeserializeTableFromPb(pb_table, &files, &new_table, &error));
+  EXPECT_THAT(error, IsEmpty());
+
+  int result = new_table.included_packages_.size();
+  EXPECT_THAT(result, Eq(2));
+  auto it = new_table.included_packages_.begin();
+  EXPECT_THAT(it->first, Eq(20));
+  EXPECT_THAT(it->second, Eq("foobar"));
+  it++;
+  EXPECT_THAT(it->first, Eq(30));
+  EXPECT_THAT(it->second, Eq("barfoo"));
+}
 }  // namespace aapt

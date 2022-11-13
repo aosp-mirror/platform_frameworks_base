@@ -22,8 +22,10 @@ import android.graphics.drawable.Drawable
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.produceState
+import androidx.compose.ui.res.stringResource
 import com.android.settingslib.Utils
 import com.android.settingslib.spa.framework.compose.rememberContext
+import com.android.settingslib.spaprivileged.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -34,7 +36,12 @@ interface AppRepository {
     fun loadLabel(app: ApplicationInfo): String
 
     @Composable
-    fun produceLabel(app: ApplicationInfo): State<String>
+    fun produceLabel(app: ApplicationInfo) =
+        produceState(initialValue = stringResource(R.string.summary_placeholder), app) {
+            withContext(Dispatchers.IO) {
+                value = loadLabel(app)
+            }
+        }
 
     @Composable
     fun produceIcon(app: ApplicationInfo): State<Drawable?>
@@ -44,13 +51,6 @@ internal class AppRepositoryImpl(private val context: Context) : AppRepository {
     private val packageManager = context.packageManager
 
     override fun loadLabel(app: ApplicationInfo): String = app.loadLabel(packageManager).toString()
-
-    @Composable
-    override fun produceLabel(app: ApplicationInfo) = produceState(initialValue = "", app) {
-        withContext(Dispatchers.Default) {
-            value = app.loadLabel(packageManager).toString()
-        }
-    }
 
     @Composable
     override fun produceIcon(app: ApplicationInfo) =

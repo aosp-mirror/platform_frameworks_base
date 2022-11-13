@@ -24,6 +24,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.IHintManager;
 import android.os.IHintSession;
+import android.os.PerformanceHintManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.util.ArrayMap;
@@ -147,6 +148,8 @@ public final class HintManagerService extends SystemService {
         private static native void nativeReportActualWorkDuration(
                 long halPtr, long[] actualDurationNanos, long[] timeStampNanos);
 
+        private static native void nativeSendHint(long halPtr, int hint);
+
         private static native long nativeGetHintSessionPreferredRate();
 
         /** Wrapper for HintManager.nativeInit */
@@ -184,6 +187,11 @@ public final class HintManagerService extends SystemService {
                 long halPtr, long[] actualDurationNanos, long[] timeStampNanos) {
             nativeReportActualWorkDuration(halPtr, actualDurationNanos,
                     timeStampNanos);
+        }
+
+        /** Wrapper for HintManager.sendHint */
+        public void halSendHint(long halPtr, int hint) {
+            nativeSendHint(halPtr, hint);
         }
 
         /** Wrapper for HintManager.nativeGetHintSessionPreferredRate */
@@ -472,6 +480,18 @@ public final class HintManagerService extends SystemService {
                 sessionSet.remove(this);
                 if (sessionSet.isEmpty()) tokenMap.remove(mToken);
                 if (tokenMap.isEmpty()) mActiveSessions.remove(mUid);
+            }
+        }
+
+        @Override
+        public void sendHint(@PerformanceHintManager.Session.Hint int hint) {
+            synchronized (mLock) {
+                if (mHalSessionPtr == 0 || !updateHintAllowed()) {
+                    return;
+                }
+                Preconditions.checkArgument(hint >= 0, "the hint ID the hint value should be"
+                        + " greater than zero.");
+                mNativeWrapper.halSendHint(mHalSessionPtr, hint);
             }
         }
 

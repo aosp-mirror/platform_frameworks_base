@@ -448,13 +448,15 @@ public final class MediaRouter2Manager {
     }
 
     /**
-     * Selects media route for the specified package name.
+     * Transfers a {@link RoutingSessionInfo routing session} belonging to a specified package name
+     * to a {@link MediaRoute2Info media route}.
+     *
+     * <p>Same as {@link #transfer(RoutingSessionInfo, MediaRoute2Info)}, but resolves the routing
+     * session based on the provided package name.
      */
-    public void selectRoute(@NonNull String packageName, @NonNull MediaRoute2Info route) {
+    public void transfer(@NonNull String packageName, @NonNull MediaRoute2Info route) {
         Objects.requireNonNull(packageName, "packageName must not be null");
         Objects.requireNonNull(route, "route must not be null");
-
-        Log.v(TAG, "Selecting route. packageName= " + packageName + ", route=" + route);
 
         List<RoutingSessionInfo> sessionInfos = getRoutingSessions(packageName);
         RoutingSessionInfo targetSession = sessionInfos.get(sessionInfos.size() - 1);

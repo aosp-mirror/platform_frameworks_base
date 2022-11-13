@@ -32,6 +32,7 @@ import android.os.SystemClock;
 import android.os.UEventObserver;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Slog;
 import android.view.InputDevice;
@@ -382,24 +383,28 @@ final class BatteryController {
         }
     }
 
-    public void dump(PrintWriter pw, String prefix) {
+    public void dump(PrintWriter pw) {
+        IndentingPrintWriter ipw = new IndentingPrintWriter(pw);
         synchronized (mLock) {
-            final String indent = prefix + "  ";
-            final String indent2 = indent + "  ";
-
-            pw.println(prefix + TAG + ":");
-            pw.println(indent + "State: Polling = " + mIsPolling
+            ipw.println(TAG + ":");
+            ipw.increaseIndent();
+            ipw.println("State: Polling = " + mIsPolling
                     + ", Interactive = " + mIsInteractive);
 
-            pw.println(indent + "Listeners: " + mListenerRecords.size() + " battery listeners");
+            ipw.println("Listeners: " + mListenerRecords.size() + " battery listeners");
+            ipw.increaseIndent();
             for (int i = 0; i < mListenerRecords.size(); i++) {
-                pw.println(indent2 + i + ": " + mListenerRecords.valueAt(i));
+                ipw.println(i + ": " + mListenerRecords.valueAt(i));
             }
+            ipw.decreaseIndent();
 
-            pw.println(indent + "Device Monitors: " + mDeviceMonitors.size() + " monitors");
+            ipw.println("Device Monitors: " + mDeviceMonitors.size() + " monitors");
+            ipw.increaseIndent();
             for (int i = 0; i < mDeviceMonitors.size(); i++) {
-                pw.println(indent2 + i + ": " + mDeviceMonitors.valueAt(i));
+                ipw.println(i + ": " + mDeviceMonitors.valueAt(i));
             }
+            ipw.decreaseIndent();
+            ipw.decreaseIndent();
         }
     }
 

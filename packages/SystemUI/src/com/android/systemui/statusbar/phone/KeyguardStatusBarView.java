@@ -26,6 +26,7 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.Trace;
 import android.util.AttributeSet;
 import android.util.Pair;
 import android.util.TypedValue;
@@ -526,5 +527,12 @@ public class KeyguardStatusBarView extends RelativeLayout {
     private void updateClipping() {
         mClipRect.set(0, mTopClipping, getWidth(), getHeight());
         setClipBounds(mClipRect);
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        Trace.beginSection("KeyguardStatusBarView#onMeasure");
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        Trace.endSection();
     }
 }
