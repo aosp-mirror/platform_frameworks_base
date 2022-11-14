@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,21 +18,28 @@ package com.android.systemui.animation;
 
 import android.graphics.Path;
 import android.util.MathUtils;
-import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.AccelerateInterpolator;
-import android.view.animation.BounceInterpolator;
-import android.view.animation.DecelerateInterpolator;
-import android.view.animation.Interpolator;
-import android.view.animation.LinearInterpolator;
-import android.view.animation.PathInterpolator;
+
+import androidx.core.animation.AccelerateDecelerateInterpolator;
+import androidx.core.animation.AccelerateInterpolator;
+import androidx.core.animation.BounceInterpolator;
+import androidx.core.animation.DecelerateInterpolator;
+import androidx.core.animation.Interpolator;
+import androidx.core.animation.LinearInterpolator;
+import androidx.core.animation.PathInterpolator;
 
 /**
- * Utility class to receive interpolators from.
+ * Utility class to receive interpolators from. (androidx compatible version)
  *
- * Make sure that changes made to this class are also reflected in {@link InterpolatorsAndroidX}.
- * Please consider using the androidx dependencies featuring better testability altogether.
+ * This is the androidx compatible version of {@link Interpolators}. Make sure that changes made to
+ * this class are also reflected in {@link Interpolators}.
+ *
+ * Using the androidx versions of {@link androidx.core.animation.ValueAnimator} or
+ * {@link androidx.core.animation.ObjectAnimator} improves animation testability. This file provides
+ * the androidx compatible versions of the interpolators defined in {@link Interpolators}.
+ * AnimatorTestRule can be used in Tests to manipulate the animation under test (e.g. artificially
+ * advancing the time).
  */
-public class Interpolators {
+public class InterpolatorsAndroidX {
 
     /*
      * ============================================================================================
