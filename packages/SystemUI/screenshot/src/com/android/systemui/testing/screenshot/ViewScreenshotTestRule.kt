@@ -34,6 +34,7 @@ import org.junit.runners.model.Statement
 import platform.test.screenshot.DeviceEmulationRule
 import platform.test.screenshot.DeviceEmulationSpec
 import platform.test.screenshot.MaterialYouColorsRule
+import platform.test.screenshot.PathConfig
 import platform.test.screenshot.ScreenshotTestRule
 import platform.test.screenshot.getEmulatedDevicePathConfig
 import platform.test.screenshot.matchers.BitmapMatcher
@@ -41,13 +42,19 @@ import platform.test.screenshot.matchers.BitmapMatcher
 /** A rule for View screenshot diff unit tests. */
 class ViewScreenshotTestRule(
     emulationSpec: DeviceEmulationSpec,
-    private val matcher: BitmapMatcher = UnitTestBitmapMatcher
+    private val matcher: BitmapMatcher = UnitTestBitmapMatcher,
+    pathConfig: PathConfig = getEmulatedDevicePathConfig(emulationSpec),
+    assetsPathRelativeToRepo: String = ""
 ) : TestRule {
     private val colorsRule = MaterialYouColorsRule()
     private val deviceEmulationRule = DeviceEmulationRule(emulationSpec)
     private val screenshotRule =
         ScreenshotTestRule(
-            SystemUIGoldenImagePathManager(getEmulatedDevicePathConfig(emulationSpec))
+            if (assetsPathRelativeToRepo.isBlank()) {
+                SystemUIGoldenImagePathManager(pathConfig)
+            } else {
+                SystemUIGoldenImagePathManager(pathConfig, assetsPathRelativeToRepo)
+            }
         )
     private val activityRule = ActivityScenarioRule(ScreenshotActivity::class.java)
     private val delegateRule =
