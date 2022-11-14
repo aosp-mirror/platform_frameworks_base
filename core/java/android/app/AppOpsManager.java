@@ -2403,6 +2403,9 @@ public class AppOpsManager {
                 "SYSTEM_EXEMPT_FROM_FORCED_APP_STANDBY").build()
     };
 
+    // The number of longs needed to form a full bitmask of app ops
+    private static final int BITMASK_LEN = ((_NUM_OP - 1) / Long.SIZE) + 1;
+
     /**
      * @hide
      */
@@ -2437,8 +2440,8 @@ public class AppOpsManager {
      * @see #getNotedOpCollectionMode
      * @see #collectNotedOpSync
      */
-    private static final ThreadLocal<ArrayMap<String, long[]>> sAppOpsNotedInThisBinderTransaction =
-            new ThreadLocal<>();
+    private static final ThreadLocal<ArrayMap<String, BitSet>>
+            sAppOpsNotedInThisBinderTransaction = new ThreadLocal<>();
 
     static {
         if (sAppOpInfos.length != _NUM_OP) {
@@ -8684,10 +8687,10 @@ public class AppOpsManager {
      */
     public static class PausedNotedAppOpsCollection {
         final int mUid;
-        final @Nullable ArrayMap<String, long[]> mCollectedNotedAppOps;
+        final @Nullable ArrayMap<String, BitSet> mCollectedNotedAppOps;
 
         PausedNotedAppOpsCollection(int uid, @Nullable ArrayMap<String,
-                long[]> collectedNotedAppOps) {
+                BitSet> collectedNotedAppOps) {
             mUid = uid;
             mCollectedNotedAppOps = collectedNotedAppOps;
         }
@@ -8705,7 +8708,7 @@ public class AppOpsManager {
     public static @Nullable PausedNotedAppOpsCollection pauseNotedAppOpsCollection() {
         Integer previousUid = sBinderThreadCallingUid.get();
         if (previousUid != null) {
-            ArrayMap<String, long[]> previousCollectedNotedAppOps =
+            ArrayMap<String, BitSet> previousCollectedNotedAppOps =
                     sAppOpsNotedInThisBinderTransaction.get();
 
             sBinderThreadCallingUid.remove();
@@ -8779,23 +8782,19 @@ public class AppOpsManager {
         // We are inside of a two-way binder call. Delivered to caller via
         // {@link #prefixParcelWithAppOpsIfNeeded}
         int op = sOpStrToOp.get(syncOp.getOp());
-        ArrayMap<String, long[]> appOpsNoted = sAppOpsNotedInThisBinderTransaction.get();
+        ArrayMap<String, BitSet> appOpsNoted = sAppOpsNotedInThisBinderTransaction.get();
         if (appOpsNoted == null) {
             appOpsNoted = new ArrayMap<>(1);
             sAppOpsNotedInThisBinderTransaction.set(appOpsNoted);
         }
 
-        long[] appOpsNotedForAttribution = appOpsNoted.get(syncOp.getAttributionTag());
+        BitSet appOpsNotedForAttribution = appOpsNoted.get(syncOp.getAttributionTag());
         if (appOpsNotedForAttribution == null) {
-            appOpsNotedForAttribution = new long[2];
+            appOpsNotedForAttribution = new BitSet(_NUM_OP);
             appOpsNoted.put(syncOp.getAttributionTag(), appOpsNotedForAttribution);
         }
 
-        if (op < 64) {
-            appOpsNotedForAttribution[0] |= 1L << op;
-        } else {
-            appOpsNotedForAttribution[1] |= 1L << (op - 64);
-        }
+        appOpsNotedForAttribution.set(op);
     }
 
     /** @hide */
@@ -8869,7 +8868,7 @@ public class AppOpsManager {
      */
     // TODO (b/186872903) Refactor how sync noted ops are propagated.
     public static void prefixParcelWithAppOpsIfNeeded(@NonNull Parcel p) {
-        ArrayMap<String, long[]> notedAppOps = sAppOpsNotedInThisBinderTransaction.get();
+        ArrayMap<String, BitSet> notedAppOps = sAppOpsNotedInThisBinderTransaction.get();
         if (notedAppOps == null) {
             return;
         }
@@ -8881,8 +8880,15 @@ public class AppOpsManager {
 
         for (int i = 0; i < numAttributionWithNotesAppOps; i++) {
             p.writeString(notedAppOps.keyAt(i));
-            p.writeLong(notedAppOps.valueAt(i)[0]);
-            p.writeLong(notedAppOps.valueAt(i)[1]);
+            // Bitmask's toLongArray will truncate the array, if upper bits arent used
+            long[] notedOpsMask = notedAppOps.valueAt(i).toLongArray();
+            for (int j = 0; j < BITMASK_LEN; j++) {
+                if (j < notedOpsMask.length) {
+                    p.writeLong(notedOpsMask[j]);
+                } else {
+                    p.writeLong(0);
+                }
+            }
         }
     }
 
@@ -8901,12 +8907,13 @@ public class AppOpsManager {
 
         for (int i = 0; i < numAttributionsWithNotedAppOps; i++) {
             String attributionTag = p.readString();
-            long[] rawNotedAppOps = new long[2];
-            rawNotedAppOps[0] = p.readLong();
-            rawNotedAppOps[1] = p.readLong();
+            long[] rawNotedAppOps = new long[BITMASK_LEN];
+            for (int j = 0; j < rawNotedAppOps.length; j++) {
+                rawNotedAppOps[j] = p.readLong();
+            }
+            BitSet notedAppOps = BitSet.valueOf(rawNotedAppOps);
 
-            if (rawNotedAppOps[0] != 0 || rawNotedAppOps[1] != 0) {
-                BitSet notedAppOps = BitSet.valueOf(rawNotedAppOps);
+            if (!notedAppOps.isEmpty()) {
 
                 synchronized (sLock) {
                     for (int code = notedAppOps.nextSetBit(0); code != -1;
