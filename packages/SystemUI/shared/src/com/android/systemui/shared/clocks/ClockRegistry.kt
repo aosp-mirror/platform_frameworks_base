@@ -20,6 +20,7 @@ import android.net.Uri
 import android.os.Handler
 import android.provider.Settings
 import android.util.Log
+import androidx.annotation.OpenForTesting
 import com.android.internal.annotations.Keep
 import com.android.systemui.plugins.ClockController
 import com.android.systemui.plugins.ClockId
@@ -154,7 +155,8 @@ open class ClockRegistry(
         }
     }
 
-    fun getClocks(): List<ClockMetadata> {
+    @OpenForTesting
+    open fun getClocks(): List<ClockMetadata> {
         if (!isEnabled) {
             return listOf(availableClocks[DEFAULT_CLOCK_ID]!!.metadata)
         }
