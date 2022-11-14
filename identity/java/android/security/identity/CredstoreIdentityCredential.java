@@ -380,8 +380,14 @@ class CredstoreIdentityCredential extends IdentityCredential {
 
     @Override
     public void setAvailableAuthenticationKeys(int keyCount, int maxUsesPerKey) {
+        setAvailableAuthenticationKeys(keyCount, maxUsesPerKey, 0);
+    }
+
+    @Override
+    public void setAvailableAuthenticationKeys(int keyCount, int maxUsesPerKey,
+                                               long minValidTimeMillis) {
         try {
-            mBinder.setAvailableAuthenticationKeys(keyCount, maxUsesPerKey);
+            mBinder.setAvailableAuthenticationKeys(keyCount, maxUsesPerKey, minValidTimeMillis);
         } catch (android.os.RemoteException e) {
             throw new RuntimeException("Unexpected RemoteException ", e);
         } catch (android.os.ServiceSpecificException e) {
@@ -476,6 +482,34 @@ class CredstoreIdentityCredential extends IdentityCredential {
             throw new RuntimeException("Unexpected RemoteException ", e);
         } catch (android.os.ServiceSpecificException e) {
             throw new RuntimeException("Unexpected ServiceSpecificException with code "
+                    + e.errorCode, e);
+        }
+    }
+
+    @Override
+    public @NonNull List<AuthenticationKeyMetadata> getAuthenticationKeyMetadata() {
+        try {
+            int[] usageCount = mBinder.getAuthenticationDataUsageCount();
+            long[] expirationsMillis = mBinder.getAuthenticationDataExpirations();
+            if (usageCount.length != expirationsMillis.length) {
+                throw new IllegalStateException("Size og usageCount and expirationMillis differ");
+            }
+            List<AuthenticationKeyMetadata> mds = new ArrayList<>();
+            for (int n = 0; n < expirationsMillis.length; n++) {
+                AuthenticationKeyMetadata md = null;
+                long expirationMillis = expirationsMillis[n];
+                if (expirationMillis != Long.MAX_VALUE) {
+                    md = new AuthenticationKeyMetadata(
+                        usageCount[n],
+                        Instant.ofEpochMilli(expirationMillis));
+                }
+                mds.add(md);
+            }
+            return mds;
+        } catch (android.os.RemoteException e) {
+            throw new IllegalStateException("Unexpected RemoteException ", e);
+        } catch (android.os.ServiceSpecificException e) {
+            throw new IllegalStateException("Unexpected ServiceSpecificException with code "
                     + e.errorCode, e);
         }
     }
