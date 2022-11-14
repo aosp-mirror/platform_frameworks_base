@@ -241,6 +241,7 @@ class BackNavigationController {
                 // We have another Activity in the same currentTask to go to
                 backType = BackNavigationInfo.TYPE_CROSS_ACTIVITY;
                 removedWindowContainer = currentActivity;
+                prevTask = prevActivity.getTask();
             } else if (currentTask.returnsToHomeRootTask()) {
                 // Our Task should bring back to home
                 removedWindowContainer = currentTask;
@@ -608,26 +609,23 @@ class BackNavigationController {
                 // reset leash after animation finished.
                 leashes.add(screenshotSurface);
             }
-        } else if (prevTask != null) {
-            prevActivity = prevTask.getTopNonFinishingActivity();
-            if (prevActivity != null) {
-                // Make previous task show from behind by marking its top activity as visible
-                // and launch-behind to bump its visibility for the duration of the back gesture.
-                setLaunchBehind(prevActivity);
+        } else if (prevTask != null && prevActivity != null) {
+            // Make previous task show from behind by marking its top activity as visible
+            // and launch-behind to bump its visibility for the duration of the back gesture.
+            setLaunchBehind(prevActivity);
 
-                final SurfaceControl leash = prevActivity.makeAnimationLeash()
-                        .setName("BackPreview Leash for " + prevActivity)
-                        .setHidden(false)
-                        .build();
-                prevActivity.reparentSurfaceControl(startedTransaction, leash);
-                behindAppTarget = createRemoteAnimationTargetLocked(
-                        prevTask, leash, MODE_OPENING);
+            final SurfaceControl leash = prevActivity.makeAnimationLeash()
+                    .setName("BackPreview Leash for " + prevActivity)
+                    .setHidden(false)
+                    .build();
+            prevActivity.reparentSurfaceControl(startedTransaction, leash);
+            behindAppTarget = createRemoteAnimationTargetLocked(
+                    prevTask, leash, MODE_OPENING);
 
-                // reset leash after animation finished.
-                leashes.add(leash);
-                prevActivity.reparentSurfaceControl(finishedTransaction,
-                        prevActivity.getParentSurfaceControl());
-            }
+            // reset leash after animation finished.
+            leashes.add(leash);
+            prevActivity.reparentSurfaceControl(finishedTransaction,
+                    prevActivity.getParentSurfaceControl());
         }
 
         if (mShowWallpaper) {

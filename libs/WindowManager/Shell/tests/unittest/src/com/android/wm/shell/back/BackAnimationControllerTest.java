@@ -110,6 +110,9 @@ public class BackAnimationControllerTest extends ShellTestCase {
     @Mock
     private ShellController mShellController;
 
+    @Mock
+    private BackAnimationBackground mAnimationBackground;
+
     private BackAnimationController mController;
     private TestableContentResolver mContentResolver;
     private TestableLooper mTestableLooper;
@@ -127,7 +130,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
         mController = new BackAnimationController(mShellInit, mShellController,
                 mShellExecutor, new Handler(mTestableLooper.getLooper()),
                 mActivityTaskManager, mContext,
-                mContentResolver);
+                mContentResolver, mAnimationBackground);
         mController.setEnableUAnimation(true);
         mShellInit.init();
         mShellExecutor.flushAll();
@@ -239,7 +242,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
         mController = new BackAnimationController(shellInit, mShellController,
                 mShellExecutor, new Handler(mTestableLooper.getLooper()),
                 mActivityTaskManager, mContext,
-                mContentResolver);
+                mContentResolver, mAnimationBackground);
         shellInit.init();
         registerAnimation(BackNavigationInfo.TYPE_RETURN_TO_HOME);
 
@@ -354,6 +357,10 @@ public class BackAnimationControllerTest extends ShellTestCase {
                 BackNavigationInfo.TYPE_DIALOG_CLOSE};
 
         for (int type: testTypes) {
+            unregisterAnimation(type);
+        }
+
+        for (int type: testTypes) {
             final ResultListener result = new ResultListener();
             createNavigationInfo(new BackNavigationInfo.Builder()
                     .setType(type)
@@ -429,6 +436,10 @@ public class BackAnimationControllerTest extends ShellTestCase {
     private void registerAnimation(int type) {
         mController.registerAnimation(type,
                 new BackAnimationRunner(mAnimatorCallback, mBackAnimationRunner));
+    }
+
+    private void unregisterAnimation(int type) {
+        mController.unregisterAnimation(type);
     }
 
     private static class ResultListener implements RemoteCallback.OnResultListener {
