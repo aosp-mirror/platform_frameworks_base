@@ -21,7 +21,8 @@ import static android.app.time.Capabilities.CAPABILITY_NOT_ALLOWED;
 import static android.app.time.Capabilities.CAPABILITY_NOT_APPLICABLE;
 import static android.app.time.Capabilities.CAPABILITY_NOT_SUPPORTED;
 import static android.app.time.Capabilities.CAPABILITY_POSSESSED;
-import static android.app.timezonedetector.ParcelableTestSupport.assertRoundTripParcelable;
+import static android.app.time.ParcelableTestSupport.assertEqualsAndHashCode;
+import static android.app.time.ParcelableTestSupport.assertRoundTripParcelable;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -55,7 +56,7 @@ public class TimeCapabilitiesTest {
         {
             TimeCapabilities one = builder1.build();
             TimeCapabilities two = builder2.build();
-            assertEquals(one, two);
+            assertEqualsAndHashCode(one, two);
         }
 
         builder2.setConfigureAutoDetectionEnabledCapability(CAPABILITY_NOT_ALLOWED);
@@ -69,7 +70,7 @@ public class TimeCapabilitiesTest {
         {
             TimeCapabilities one = builder1.build();
             TimeCapabilities two = builder2.build();
-            assertEquals(one, two);
+            assertEqualsAndHashCode(one, two);
         }
 
         builder2.setSetManualTimeCapability(CAPABILITY_NOT_ALLOWED);
@@ -83,7 +84,7 @@ public class TimeCapabilitiesTest {
         {
             TimeCapabilities one = builder1.build();
             TimeCapabilities two = builder2.build();
-            assertEquals(one, two);
+            assertEqualsAndHashCode(one, two);
         }
     }
 

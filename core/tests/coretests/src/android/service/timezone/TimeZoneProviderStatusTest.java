@@ -16,7 +16,7 @@
 
 package android.service.timezone;
 
-import static android.app.timezonedetector.ParcelableTestSupport.assertRoundTripParcelable;
+import static android.app.time.ParcelableTestSupport.assertRoundTripParcelable;
 import static android.service.timezone.TimeZoneProviderStatus.DEPENDENCY_STATUS_BLOCKED_BY_ENVIRONMENT;
 import static android.service.timezone.TimeZoneProviderStatus.DEPENDENCY_STATUS_BLOCKED_BY_SETTINGS;
 import static android.service.timezone.TimeZoneProviderStatus.DEPENDENCY_STATUS_OK;
