@@ -3666,8 +3666,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
         // Init the focused window state (e.g. whether the editor has focused or IME focus has
         // changed from another window).
-        mVisibilityStateComputer.setWindowState(windowToken,
-                new ImeTargetWindowState(softInputMode, !sameWindowFocused, isTextEditor));
+        final ImeTargetWindowState windowState = new ImeTargetWindowState(
+                softInputMode, !sameWindowFocused, isTextEditor);
+        mVisibilityStateComputer.setWindowState(windowToken, windowState);
 
         if (sameWindowFocused && isTextEditor) {
             if (DEBUG) {
@@ -3718,7 +3719,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         // Because the app might leverage these flags to hide soft-keyboard with showing their own
         // UI for input.
         if (isTextEditor && editorInfo != null
-                && shouldRestoreImeVisibility(windowToken, softInputMode)) {
+                && mVisibilityStateComputer.shouldRestoreImeVisibility(windowState)) {
             if (DEBUG) Slog.v(TAG, "Will show input to restore visibility");
             res = startInputUncheckedLocked(cs, inputContext, remoteAccessibilityInputConnection,
                     editorInfo, startInputFlags, startInputReason, unverifiedTargetSdkVersion,
@@ -3905,19 +3906,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
         ImeTracker.get().onProgress(statsToken, ImeTracker.PHASE_SERVER_CLIENT_FOCUSED);
         return true;
-    }
-
-    private boolean shouldRestoreImeVisibility(IBinder windowToken,
-            @SoftInputModeFlags int softInputMode) {
-        switch (softInputMode & LayoutParams.SOFT_INPUT_MASK_STATE) {
-            case LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN:
-                return false;
-            case LayoutParams.SOFT_INPUT_STATE_HIDDEN:
-                if ((softInputMode & LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION) != 0) {
-                    return false;
-                }
-        }
-        return mWindowManagerInternal.shouldRestoreImeVisibility(windowToken);
     }
 
     @GuardedBy("ImfLock.class")

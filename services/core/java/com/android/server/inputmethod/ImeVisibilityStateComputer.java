@@ -22,6 +22,7 @@ import static android.server.inputmethod.InputMethodManagerServiceProto.SHOW_EXP
 import static android.server.inputmethod.InputMethodManagerServiceProto.SHOW_FORCED;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
+import static android.view.WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED;
 import static android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 
@@ -247,6 +248,29 @@ public final class ImeVisibilityStateComputer {
         }
         // Fallback to the focused window for some edge cases (e.g. relaunching the activity)
         return mService.mCurFocusedWindow;
+    }
+
+    IBinder getWindowTokenFrom(ImeTargetWindowState windowState) {
+        for (IBinder windowToken : mRequestWindowStateMap.keySet()) {
+            final ImeTargetWindowState state = mRequestWindowStateMap.get(windowToken);
+            if (state == windowState) {
+                return windowToken;
+            }
+        }
+        return null;
+    }
+
+    boolean shouldRestoreImeVisibility(@NonNull ImeTargetWindowState state) {
+        final int softInputMode = state.getSoftInputModeState();
+        switch (softInputMode & WindowManager.LayoutParams.SOFT_INPUT_MASK_STATE) {
+            case WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN:
+                return false;
+            case WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN:
+                if ((softInputMode & SOFT_INPUT_IS_FORWARD_NAVIGATION) != 0) {
+                    return false;
+                }
+        }
+        return mWindowManagerInternal.shouldRestoreImeVisibility(getWindowTokenFrom(state));
     }
 
     void dumpDebug(ProtoOutputStream proto, long fieldId) {
