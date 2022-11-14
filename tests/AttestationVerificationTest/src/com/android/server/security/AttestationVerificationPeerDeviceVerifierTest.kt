@@ -89,6 +89,34 @@ class AttestationVerificationPeerDeviceVerifierTest {
     }
 
     @Test
+    fun verifyAttestation_returnsSuccessOwnedBySystem() {
+        val verifier = AttestationVerificationPeerDeviceVerifier(
+                context, trustAnchors, false, LocalDate.of(2022, 2, 1),
+                LocalDate.of(2021, 1, 1))
+        val challengeRequirements = Bundle()
+        challengeRequirements.putByteArray(PARAM_CHALLENGE, "activeUnlockValid".encodeToByteArray())
+        challengeRequirements.putBoolean("android.key_owned_by_system", true)
+
+        val result = verifier.verifyAttestation(TYPE_CHALLENGE, challengeRequirements,
+                TEST_OWNED_BY_SYSTEM_FILENAME.fromPEMFileToByteArray())
+        assertThat(result).isEqualTo(RESULT_SUCCESS)
+    }
+
+    @Test
+    fun verifyAttestation_returnsFailureOwnedBySystem() {
+        val verifier = AttestationVerificationPeerDeviceVerifier(
+                context, trustAnchors, false, LocalDate.of(2022, 2, 1),
+                LocalDate.of(2021, 1, 1))
+        val challengeRequirements = Bundle()
+        challengeRequirements.putByteArray(PARAM_CHALLENGE, "player456".encodeToByteArray())
+        challengeRequirements.putBoolean("android.key_owned_by_system", true)
+
+        val result = verifier.verifyAttestation(TYPE_CHALLENGE, challengeRequirements,
+                TEST_ATTESTATION_WITH_ROOT_CERT_FILENAME.fromPEMFileToByteArray())
+        assertThat(result).isEqualTo(RESULT_FAILURE)
+    }
+
+    @Test
     fun verifyAttestation_returnsFailurePatchDateNotWithinOneYearLocalPatch() {
         val verifier = AttestationVerificationPeerDeviceVerifier(
             context, trustAnchors, false, LocalDate.of(2023, 3, 1),
@@ -171,5 +199,6 @@ class AttestationVerificationPeerDeviceVerifierTest {
         private const val TEST_ATTESTATION_WITH_ROOT_CERT_FILENAME =
             "test_attestation_with_root_certs.pem"
         private const val TEST_ATTESTATION_CERT_FILENAME = "test_attestation_wrong_root_certs.pem"
+        private const val TEST_OWNED_BY_SYSTEM_FILENAME = "test_owned_by_system_certs.pem"
     }
 }
