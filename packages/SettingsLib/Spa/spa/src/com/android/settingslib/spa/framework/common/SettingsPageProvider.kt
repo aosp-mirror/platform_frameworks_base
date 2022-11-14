@@ -30,14 +30,14 @@ interface SettingsPageProvider {
     val name: String
 
     /** The display name of this page provider, for better readability. */
-    val displayName: String?
-        get() = null
+    val displayName: String
+        get() = name
 
     /** The page parameters, default is no parameters. */
     val parameter: List<NamedNavArgument>
         get() = emptyList()
 
-    fun getTitle(arguments: Bundle?): String = displayName ?: name
+    fun getTitle(arguments: Bundle?): String = displayName
 
     fun buildEntry(arguments: Bundle?): List<SettingsEntry> = emptyList()
 
