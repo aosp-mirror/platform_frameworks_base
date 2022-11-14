@@ -33,13 +33,11 @@ import java.util.Objects;
  * @hide
  */
 public final class CreateCredentialResponse implements Parcelable {
-    private final @Nullable CharSequence mHeader;
     private final @NonNull List<SaveEntry> mSaveEntries;
     private final @Nullable Action mRemoteSaveEntry;
     //TODO : Add actions if needed
 
     private CreateCredentialResponse(@NonNull Parcel in) {
-        mHeader = in.readCharSequence();
         List<SaveEntry> saveEntries = new ArrayList<>();
         in.readTypedList(saveEntries, SaveEntry.CREATOR);
         mSaveEntries = saveEntries;
@@ -48,7 +46,6 @@ public final class CreateCredentialResponse implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeCharSequence(mHeader);
         dest.writeTypedList(mSaveEntries);
         dest.writeTypedObject(mRemoteSaveEntry, flags);
     }
@@ -72,19 +69,12 @@ public final class CreateCredentialResponse implements Parcelable {
             };
 
     /* package-private */ CreateCredentialResponse(
-            @Nullable CharSequence header,
             @NonNull List<SaveEntry> saveEntries,
             @Nullable Action remoteSaveEntry) {
-        this.mHeader = header;
         this.mSaveEntries = saveEntries;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mSaveEntries);
         this.mRemoteSaveEntry = remoteSaveEntry;
-    }
-
-    /** Returns the header to be displayed on the UI. */
-    public @Nullable CharSequence getHeader() {
-        return mHeader;
     }
 
     /** Returns the list of save entries to be displayed on the UI. */
@@ -102,16 +92,8 @@ public final class CreateCredentialResponse implements Parcelable {
      */
     @SuppressWarnings("WeakerAccess")
     public static final class Builder {
-
-        private @Nullable CharSequence mHeader;
         private @NonNull List<SaveEntry> mSaveEntries = new ArrayList<>();
         private @Nullable Action mRemoteSaveEntry;
-
-        /** Sets the header to be displayed on the UI. */
-        public @NonNull Builder setHeader(@Nullable CharSequence header) {
-            mHeader = header;
-            return this;
-        }
 
         /**
          * Sets the list of save entries to be shown on the UI.
@@ -154,7 +136,6 @@ public final class CreateCredentialResponse implements Parcelable {
             Preconditions.checkCollectionNotEmpty(mSaveEntries, "saveEntries must "
                     + "not be empty");
             return new CreateCredentialResponse(
-                    mHeader,
                     mSaveEntries,
                     mRemoteSaveEntry);
         }
