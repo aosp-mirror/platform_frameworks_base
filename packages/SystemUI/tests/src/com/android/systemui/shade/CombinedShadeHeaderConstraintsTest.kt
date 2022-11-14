@@ -363,6 +363,22 @@ class CombinedShadeHeaderConstraintsTest : SysuiTestCase() {
         }
     }
 
+    @Test
+    fun testEmptyCutoutDateIconsAreConstrainedWidth() {
+        CombinedShadeHeadersConstraintManagerImpl.emptyCutoutConstraints()()
+
+        assertThat(qqsConstraint.getConstraint(R.id.date).layout.constrainedWidth).isTrue()
+        assertThat(qqsConstraint.getConstraint(R.id.statusIcons).layout.constrainedWidth).isTrue()
+    }
+
+    @Test
+    fun testCenterCutoutDateIconsAreConstrainedWidth() {
+        CombinedShadeHeadersConstraintManagerImpl.centerCutoutConstraints(false, 10)()
+
+        assertThat(qqsConstraint.getConstraint(R.id.date).layout.constrainedWidth).isTrue()
+        assertThat(qqsConstraint.getConstraint(R.id.statusIcons).layout.constrainedWidth).isTrue()
+    }
+
     private operator fun ConstraintsChanges.invoke() {
         qqsConstraintsChanges?.invoke(qqsConstraint)
         qsConstraintsChanges?.invoke(qsConstraint)
