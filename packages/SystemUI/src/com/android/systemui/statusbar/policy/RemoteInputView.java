@@ -143,6 +143,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     private NotificationViewWrapper mWrapper;
 
     private Integer mDefocusTargetHeight = null;
+    private boolean mIsAnimatingAppearance = false;
 
 
     // TODO(b/193539698): remove this; views shouldn't have access to their controller, and places
@@ -418,6 +419,10 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         return true;
     }
 
+    public boolean isAnimatingAppearance() {
+        return mIsAnimatingAppearance;
+    }
+
     /**
      * View will ensure to use at most the provided defocusTargetHeight, when defocusing animated.
      * This is to ensure that the parent can resize itself to the targetHeight while the defocus
@@ -624,8 +629,16 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
             animator.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
             animator.start();
         } else if (mIsFocusAnimationFlagActive && getVisibility() != VISIBLE) {
+            mIsAnimatingAppearance = true;
             setAlpha(0f);
-            getFocusAnimator(crossFadeView).start();
+            Animator focusAnimator = getFocusAnimator(crossFadeView);
+            focusAnimator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation, boolean isReverse) {
+                    mIsAnimatingAppearance = false;
+                }
+            });
+            focusAnimator.start();
         }
         focus();
     }

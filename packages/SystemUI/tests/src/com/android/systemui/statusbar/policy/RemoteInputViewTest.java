@@ -21,7 +21,9 @@ import static com.android.systemui.statusbar.notification.stack.StackStateAnimat
 import static com.google.common.truth.Truth.assertThat;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -392,12 +394,15 @@ public class RemoteInputViewTest extends SysuiTestCase {
         // Start focus animation
         view.focusAnimated(crossFadeView);
 
+        assertTrue(view.isAnimatingAppearance());
+
         // fast forward to end of animation
         mAnimatorTestRule.advanceTimeBy(ANIMATION_DURATION_STANDARD);
 
         // assert that crossFadeView's alpha is reset to 1f after the animation (hidden behind
         // RemoteInputView)
         assertEquals(1f, crossFadeView.getAlpha());
+        assertFalse(view.isAnimatingAppearance());
         assertEquals(View.VISIBLE, view.getVisibility());
         assertEquals(1f, view.getAlpha());
     }
