@@ -82,12 +82,12 @@ public class QSCustomizer extends LinearLayout {
         DefaultItemAnimator animator = new DefaultItemAnimator();
         animator.setMoveDuration(TileAdapter.MOVE_DURATION);
         mRecyclerView.setItemAnimator(animator);
+
+        updateTransparentViewHeight();
     }
 
     void updateResources() {
-        LayoutParams lp = (LayoutParams) mTransparentView.getLayoutParams();
-        lp.height = QSUtils.getQsHeaderSystemIconsAreaHeight(mContext);
-        mTransparentView.setLayoutParams(lp);
+        updateTransparentViewHeight();
         mRecyclerView.getAdapter().notifyItemChanged(0);
     }
 
@@ -235,5 +235,11 @@ public class QSCustomizer extends LinearLayout {
 
     public boolean isOpening() {
         return mOpening;
+    }
+
+    private void updateTransparentViewHeight() {
+        LayoutParams lp = (LayoutParams) mTransparentView.getLayoutParams();
+        lp.height = QSUtils.getQsHeaderSystemIconsAreaHeight(mContext);
+        mTransparentView.setLayoutParams(lp);
     }
 }
