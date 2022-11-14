@@ -55,7 +55,7 @@ class CameraQuickAffordanceConfigTest : SysuiTestCase() {
 
         //then
         verify(cameraGestureHelper)
-                .launchCamera(StatusBarManager.CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP)
+                .launchCamera(StatusBarManager.CAMERA_LAUNCH_SOURCE_QUICK_AFFORDANCE)
         assertEquals(KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled, result)
     }
 }

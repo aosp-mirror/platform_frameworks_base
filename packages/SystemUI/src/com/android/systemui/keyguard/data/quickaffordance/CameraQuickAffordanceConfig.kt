@@ -56,7 +56,7 @@ class CameraQuickAffordanceConfig @Inject constructor(
         )
 
     override fun onTriggered(expandable: Expandable?): KeyguardQuickAffordanceConfig.OnTriggeredResult {
-        cameraGestureHelper.launchCamera(StatusBarManager.CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP)
+        cameraGestureHelper.launchCamera(StatusBarManager.CAMERA_LAUNCH_SOURCE_QUICK_AFFORDANCE)
         return KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled
     }
 }
