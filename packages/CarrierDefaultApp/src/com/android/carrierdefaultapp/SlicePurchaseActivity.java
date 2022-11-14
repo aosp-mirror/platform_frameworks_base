@@ -58,8 +58,8 @@ import java.util.concurrent.TimeUnit;
 public class SlicePurchaseActivity extends Activity {
     private static final String TAG = "SlicePurchaseActivity";
 
-    private @NonNull WebView mWebView;
-    private @NonNull Context mApplicationContext;
+    @NonNull private WebView mWebView;
+    @NonNull private Context mApplicationContext;
     private int mSubId;
     @TelephonyManager.PremiumCapability protected int mCapability;
 

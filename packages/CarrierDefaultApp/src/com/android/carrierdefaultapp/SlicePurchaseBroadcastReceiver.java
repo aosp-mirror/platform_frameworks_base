@@ -33,6 +33,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.WebView;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.phone.slice.SlicePurchaseController;
 
 import java.lang.ref.WeakReference;
@@ -291,7 +292,8 @@ public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
      *
      * @return The intent to start {@link SlicePurchaseActivity}.
      */
-    @NonNull private PendingIntent createContentIntent(@NonNull Context context,
+    @VisibleForTesting
+    @NonNull public PendingIntent createContentIntent(@NonNull Context context,
             @NonNull Intent intent, int requestCode) {
         Intent i = new Intent(context, SlicePurchaseActivity.class);
         i.setComponent(ComponentName.unflattenFromString(
@@ -314,7 +316,8 @@ public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
      *
      * @return The canceled intent.
      */
-    @NonNull private PendingIntent createCanceledIntent(@NonNull Context context,
+    @VisibleForTesting
+    @NonNull public PendingIntent createCanceledIntent(@NonNull Context context,
             @NonNull Intent intent) {
         Intent i = new Intent(ACTION_NOTIFICATION_CANCELED);
         i.setComponent(ComponentName.unflattenFromString(
