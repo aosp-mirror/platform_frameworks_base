@@ -17,6 +17,7 @@
 package com.android.systemui.dagger;
 
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.AlarmManager;
@@ -69,6 +70,7 @@ import android.os.PowerManager;
 import android.os.ServiceManager;
 import android.os.UserManager;
 import android.os.Vibrator;
+import android.os.storage.StorageManager;
 import android.permission.PermissionManager;
 import android.safetycenter.SafetyCenterManager;
 import android.service.dreams.DreamService;
@@ -110,6 +112,7 @@ import dagger.Provides;
 /**
  * Provides Non-SystemUI, Framework-Owned instances to the dependency graph.
  */
+@SuppressLint("NonInjectedService")
 @Module
 public class FrameworkServicesModule {
     @Provides
@@ -469,7 +472,13 @@ public class FrameworkServicesModule {
 
     @Provides
     @Singleton
-    static SubscriptionManager provideSubcriptionManager(Context context) {
+    static StorageManager provideStorageManager(Context context) {
+        return context.getSystemService(StorageManager.class);
+    }
+
+    @Provides
+    @Singleton
+    static SubscriptionManager provideSubscriptionManager(Context context) {
         return context.getSystemService(SubscriptionManager.class);
     }
 
