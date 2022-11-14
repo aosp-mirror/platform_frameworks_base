@@ -397,6 +397,7 @@ public final class UserTypeFactory {
                 }
 
                 setIntAttribute(parser, "enabled", builder::setEnabled);
+                setIntAttribute(parser, "max-allowed", builder::setMaxAllowed);
 
                 // Process child elements.
                 final int depth = parser.getDepth();
