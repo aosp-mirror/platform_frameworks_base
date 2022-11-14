@@ -14,10 +14,12 @@
 
 package com.android.systemui.statusbar.phone
 
+import android.content.res.Configuration
 import androidx.test.filters.SmallTest
 import android.testing.AndroidTestingRunner
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener
+import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.doAnswer
@@ -29,8 +31,7 @@ import org.mockito.Mockito.verify
 @SmallTest
 class ConfigurationControllerImplTest : SysuiTestCase() {
 
-    private val mConfigurationController =
-            com.android.systemui.statusbar.phone.ConfigurationControllerImpl(mContext)
+    private val mConfigurationController = ConfigurationControllerImpl(mContext)
 
     @Test
     fun testThemeChange() {
@@ -56,5 +57,53 @@ class ConfigurationControllerImplTest : SysuiTestCase() {
         mConfigurationController.notifyThemeChanged()
         verify(listener).onThemeChanged()
         verify(listener2, never()).onThemeChanged()
+    }
+
+    @Test
+    fun maxBoundsChange_newConfigObject_listenerNotified() {
+        val config = mContext.resources.configuration
+        config.windowConfiguration.setMaxBounds(0, 0, 200, 200)
+        mConfigurationController.onConfigurationChanged(config)
+
+        val listener = object : ConfigurationListener {
+            var triggered: Boolean = false
+
+            override fun onMaxBoundsChanged() {
+                triggered = true
+            }
+        }
+        mConfigurationController.addCallback(listener)
+
+        // WHEN a new configuration object with new bounds is sent
+        val newConfig = Configuration()
+        newConfig.windowConfiguration.setMaxBounds(0, 0, 100, 100)
+        mConfigurationController.onConfigurationChanged(newConfig)
+
+        // THEN the listener is notified
+        assertThat(listener.triggered).isTrue()
+    }
+
+    // Regression test for b/245799099
+    @Test
+    fun maxBoundsChange_sameObject_listenerNotified() {
+        val config = mContext.resources.configuration
+        config.windowConfiguration.setMaxBounds(0, 0, 200, 200)
+        mConfigurationController.onConfigurationChanged(config)
+
+        val listener = object : ConfigurationListener {
+            var triggered: Boolean = false
+
+            override fun onMaxBoundsChanged() {
+                triggered = true
+            }
+        }
+        mConfigurationController.addCallback(listener)
+
+        // WHEN the existing config is updated with new bounds
+        config.windowConfiguration.setMaxBounds(0, 0, 100, 100)
+        mConfigurationController.onConfigurationChanged(config)
+
+        // THEN the listener is notified
+        assertThat(listener.triggered).isTrue()
     }
 }

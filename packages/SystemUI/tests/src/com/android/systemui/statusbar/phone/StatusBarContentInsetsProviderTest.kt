@@ -513,6 +513,31 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
         assertThat(firstDisplayInsetsFirstCall).isEqualTo(firstDisplayInsetsSecondCall)
     }
 
+    // Regression test for b/245799099
+    @Test
+    fun onMaxBoundsChanged_listenerNotified() {
+        // Start out with an existing configuration with bounds
+        configuration.windowConfiguration.setMaxBounds(0, 0, 100, 100)
+        configurationController.onConfigurationChanged(configuration)
+        val provider = StatusBarContentInsetsProvider(contextMock, configurationController,
+                mock(DumpManager::class.java))
+        val listener = object : StatusBarContentInsetsChangedListener {
+            var triggered = false
+
+            override fun onStatusBarContentInsetsChanged() {
+                triggered = true
+            }
+        }
+        provider.addCallback(listener)
+
+        // WHEN the config is updated with new bounds
+        configuration.windowConfiguration.setMaxBounds(0, 0, 456, 789)
+        configurationController.onConfigurationChanged(configuration)
+
+        // THEN the listener is notified
+        assertThat(listener.triggered).isTrue()
+    }
+
     private fun givenDisplay(screenBounds: Rect, displayUniqueId: String) {
         `when`(display.uniqueId).thenReturn(displayUniqueId)
         configuration.windowConfiguration.maxBounds = screenBounds
