@@ -39,7 +39,6 @@ import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.pip.PipTransitionState;
 import com.android.wm.shell.pip.PipUiEventLogger;
-import com.android.wm.shell.pip.tv.TvPipActionsProvider;
 import com.android.wm.shell.pip.tv.TvPipBoundsAlgorithm;
 import com.android.wm.shell.pip.tv.TvPipBoundsController;
 import com.android.wm.shell.pip.tv.TvPipBoundsState;
@@ -76,13 +75,13 @@ public abstract class TvPipModule {
             PipTaskOrganizer pipTaskOrganizer,
             TvPipMenuController tvPipMenuController,
             PipMediaController pipMediaController,
-            TvPipActionsProvider tvPipActionsProvider,
             PipTransitionController pipTransitionController,
             TvPipNotificationController tvPipNotificationController,
             TaskStackListenerImpl taskStackListener,
             PipParamsChangedForwarder pipParamsChangedForwarder,
             DisplayController displayController,
             WindowManagerShellWrapper windowManagerShellWrapper,
+            @ShellMainThread Handler mainHandler, // needed for registerReceiverForAllUsers()
             @ShellMainThread ShellExecutor mainExecutor) {
         return Optional.of(
                 TvPipController.create(
@@ -97,12 +96,12 @@ public abstract class TvPipModule {
                         pipTransitionController,
                         tvPipMenuController,
                         pipMediaController,
-                        tvPipActionsProvider,
                         tvPipNotificationController,
                         taskStackListener,
                         pipParamsChangedForwarder,
                         displayController,
                         windowManagerShellWrapper,
+                        mainHandler,
                         mainExecutor));
     }
 
@@ -160,22 +159,17 @@ public abstract class TvPipModule {
             Context context,
             TvPipBoundsState tvPipBoundsState,
             SystemWindows systemWindows,
-            TvPipActionsProvider tvPipActionsProvider,
             @ShellMainThread Handler mainHandler) {
-        return new TvPipMenuController(context, tvPipBoundsState, systemWindows, mainHandler,
-                tvPipActionsProvider);
+        return new TvPipMenuController(context, tvPipBoundsState, systemWindows, mainHandler);
     }
 
-    // Handler needed for registerReceiverForAllUsers()
     @WMSingleton
     @Provides
     static TvPipNotificationController provideTvPipNotificationController(Context context,
             PipMediaController pipMediaController,
-            PipParamsChangedForwarder pipParamsChangedForwarder,
-            TvPipActionsProvider tvPipActionsProvider,
-            @ShellMainThread Handler mainHandler) {
+            PipParamsChangedForwarder pipParamsChangedForwarder) {
         return new TvPipNotificationController(context, pipMediaController,
-                pipParamsChangedForwarder, tvPipActionsProvider, mainHandler);
+                pipParamsChangedForwarder);
     }
 
     @WMSingleton
@@ -226,12 +220,5 @@ public abstract class TvPipModule {
             PipTaskOrganizer pipTaskOrganizer,
             @ShellMainThread ShellExecutor mainExecutor) {
         return new PipAppOpsListener(context, pipTaskOrganizer::removePip, mainExecutor);
-    }
-
-    @WMSingleton
-    @Provides
-    static TvPipActionsProvider provideTvPipActionsProvider(Context context,
-            PipMediaController pipMediaController) {
-        return new TvPipActionsProvider(context, pipMediaController);
     }
 }

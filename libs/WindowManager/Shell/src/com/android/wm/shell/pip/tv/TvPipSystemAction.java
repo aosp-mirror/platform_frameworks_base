@@ -44,8 +44,9 @@ public class TvPipSystemAction extends TvPipAction {
     private final PendingIntent mBroadcastIntent;
 
     TvPipSystemAction(@ActionType int actionType, @StringRes int title, @DrawableRes int icon,
-            String broadcastAction, @NonNull Context context) {
-        super(actionType);
+            String broadcastAction, @NonNull Context context,
+            SystemActionsHandler systemActionsHandler) {
+        super(actionType, systemActionsHandler);
         update(title, icon);
         mBroadcastIntent = TvPipNotificationController.createPendingIntent(context,
                 broadcastAction);
@@ -63,7 +64,7 @@ public class TvPipSystemAction extends TvPipAction {
     }
 
     PendingIntent getPendingIntent() {
-        return null;
+        return mBroadcastIntent;
     }
 
     @Override

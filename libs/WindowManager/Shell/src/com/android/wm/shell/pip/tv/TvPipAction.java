@@ -23,16 +23,13 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.os.Handler;
 
-import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.common.TvWindowMenuActionButton;
-import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Objects;
 
 abstract class TvPipAction {
-
-    private static final String TAG = TvPipAction.class.getSimpleName();
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"ACTION_"}, value = {
@@ -56,8 +53,13 @@ abstract class TvPipAction {
     @ActionType
     private final int mActionType;
 
-    TvPipAction(@ActionType int actionType) {
+    @NonNull
+    private final SystemActionsHandler mSystemActionsHandler;
+
+    TvPipAction(@ActionType int actionType, @NonNull SystemActionsHandler systemActionsHandler) {
+        Objects.requireNonNull(systemActionsHandler);
         mActionType = actionType;
+        mSystemActionsHandler = systemActionsHandler;
     }
 
     boolean isCloseAction() {
@@ -73,16 +75,13 @@ abstract class TvPipAction {
 
     abstract PendingIntent getPendingIntent();
 
-    void executePendingIntent() {
-        if (getPendingIntent() == null) return;
-        try {
-            getPendingIntent().send();
-        } catch (PendingIntent.CanceledException e) {
-            ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                    "%s: Failed to send action, %s", TAG, e);
-        }
+    void executeAction() {
+        mSystemActionsHandler.executeAction(mActionType);
     }
 
     abstract Notification.Action toNotificationAction(Context context);
 
+    interface SystemActionsHandler {
+        void executeAction(@TvPipAction.ActionType int actionType);
+    }
 }

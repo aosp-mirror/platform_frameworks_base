@@ -23,10 +23,10 @@ import static com.android.wm.shell.pip.tv.TvPipAction.ACTION_CUSTOM_CLOSE;
 import static com.android.wm.shell.pip.tv.TvPipAction.ACTION_EXPAND_COLLAPSE;
 import static com.android.wm.shell.pip.tv.TvPipAction.ACTION_FULLSCREEN;
 import static com.android.wm.shell.pip.tv.TvPipAction.ACTION_MOVE;
-import static com.android.wm.shell.pip.tv.TvPipNotificationController.ACTION_CLOSE_PIP;
-import static com.android.wm.shell.pip.tv.TvPipNotificationController.ACTION_MOVE_PIP;
-import static com.android.wm.shell.pip.tv.TvPipNotificationController.ACTION_TOGGLE_EXPANDED_PIP;
-import static com.android.wm.shell.pip.tv.TvPipNotificationController.ACTION_TO_FULLSCREEN;
+import static com.android.wm.shell.pip.tv.TvPipController.ACTION_CLOSE_PIP;
+import static com.android.wm.shell.pip.tv.TvPipController.ACTION_MOVE_PIP;
+import static com.android.wm.shell.pip.tv.TvPipController.ACTION_TOGGLE_EXPANDED_PIP;
+import static com.android.wm.shell.pip.tv.TvPipController.ACTION_TO_FULLSCREEN;
 
 import android.annotation.NonNull;
 import android.app.RemoteAction;
@@ -47,13 +47,14 @@ import java.util.List;
  * changes to the actions, including the custom app actions and media actions. Other components can
  * listen to those changes.
  */
-public class TvPipActionsProvider {
+public class TvPipActionsProvider implements TvPipAction.SystemActionsHandler {
     private static final String TAG = TvPipActionsProvider.class.getSimpleName();
 
     private static final int CLOSE_ACTION_INDEX = 1;
     private static final int FIRST_CUSTOM_ACTION_INDEX = 2;
 
     private final List<Listener> mListeners = new ArrayList<>();
+    private final TvPipAction.SystemActionsHandler mSystemActionsHandler;
 
     private final List<TvPipAction> mActionsList;
     private final TvPipSystemAction mDefaultCloseAction;
@@ -62,24 +63,35 @@ public class TvPipActionsProvider {
     private final List<RemoteAction> mMediaActions = new ArrayList<>();
     private final List<RemoteAction> mAppActions = new ArrayList<>();
 
-    public TvPipActionsProvider(Context context, PipMediaController pipMediaController) {
+    public TvPipActionsProvider(Context context, PipMediaController pipMediaController,
+            TvPipAction.SystemActionsHandler systemActionsHandler) {
+        mSystemActionsHandler = systemActionsHandler;
 
         mActionsList = new ArrayList<>();
         mActionsList.add(new TvPipSystemAction(ACTION_FULLSCREEN, R.string.pip_fullscreen,
-                R.drawable.pip_ic_fullscreen_white, ACTION_TO_FULLSCREEN, context));
+                R.drawable.pip_ic_fullscreen_white, ACTION_TO_FULLSCREEN, context,
+                mSystemActionsHandler));
 
         mDefaultCloseAction = new TvPipSystemAction(ACTION_CLOSE, R.string.pip_close,
-                R.drawable.pip_ic_close_white, ACTION_CLOSE_PIP, context);
+                R.drawable.pip_ic_close_white, ACTION_CLOSE_PIP, context, mSystemActionsHandler);
         mActionsList.add(mDefaultCloseAction);
 
         mActionsList.add(new TvPipSystemAction(ACTION_MOVE, R.string.pip_move,
-                R.drawable.pip_ic_move_white, ACTION_MOVE_PIP, context));
+                R.drawable.pip_ic_move_white, ACTION_MOVE_PIP, context, mSystemActionsHandler));
 
         mExpandCollapseAction = new TvPipSystemAction(ACTION_EXPAND_COLLAPSE, R.string.pip_collapse,
-                R.drawable.pip_ic_collapse, ACTION_TOGGLE_EXPANDED_PIP, context);
+                R.drawable.pip_ic_collapse, ACTION_TOGGLE_EXPANDED_PIP, context,
+                mSystemActionsHandler);
         mActionsList.add(mExpandCollapseAction);
 
         pipMediaController.addActionListener(this::onMediaActionsChanged);
+    }
+
+    @Override
+    public void executeAction(@TvPipAction.ActionType int actionType) {
+        if (mSystemActionsHandler != null) {
+            mSystemActionsHandler.executeAction(actionType);
+        }
     }
 
     private void notifyActionsChanged(int added, int changed, int startIndex) {
@@ -93,7 +105,8 @@ public class TvPipActionsProvider {
         // Update close action.
         mActionsList.set(CLOSE_ACTION_INDEX,
                 closeAction == null ? mDefaultCloseAction
-                        : new TvPipCustomAction(ACTION_CUSTOM_CLOSE, closeAction));
+                        : new TvPipCustomAction(ACTION_CUSTOM_CLOSE, closeAction,
+                                mSystemActionsHandler));
         notifyActionsChanged(/* added= */ 0, /* updated= */ 1, CLOSE_ACTION_INDEX);
 
         // Replace custom actions with new ones.
@@ -146,7 +159,7 @@ public class TvPipActionsProvider {
 
         List<TvPipAction> actions = new ArrayList<>();
         for (RemoteAction action : newCustomActions) {
-            actions.add(new TvPipCustomAction(ACTION_CUSTOM, action));
+            actions.add(new TvPipCustomAction(ACTION_CUSTOM, action, mSystemActionsHandler));
         }
         mActionsList.addAll(FIRST_CUSTOM_ACTION_INDEX, actions);
 

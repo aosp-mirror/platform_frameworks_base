@@ -27,7 +27,9 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.common.TvWindowMenuActionButton;
+import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
 import java.util.List;
 import java.util.Objects;
@@ -38,11 +40,13 @@ import java.util.Objects;
  * android.app.PictureInPictureParams.Builder#setActions(List)}.
  */
 public class TvPipCustomAction extends TvPipAction {
+    private static final String TAG = TvPipCustomAction.class.getSimpleName();
 
     private final RemoteAction mRemoteAction;
 
-    TvPipCustomAction(@ActionType int actionType, @NonNull RemoteAction remoteAction) {
-        super(actionType);
+    TvPipCustomAction(@ActionType int actionType, @NonNull RemoteAction remoteAction,
+            SystemActionsHandler systemActionsHandler) {
+        super(actionType, systemActionsHandler);
         Objects.requireNonNull(remoteAction);
         mRemoteAction = remoteAction;
     }
@@ -60,6 +64,16 @@ public class TvPipCustomAction extends TvPipAction {
 
     PendingIntent getPendingIntent() {
         return mRemoteAction.getActionIntent();
+    }
+
+    void executeAction() {
+        super.executeAction();
+        try {
+            mRemoteAction.getActionIntent().send();
+        } catch (PendingIntent.CanceledException e) {
+            ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: Failed to send action, %s", TAG, e);
+        }
     }
 
     @Override

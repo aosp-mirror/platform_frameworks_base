@@ -63,6 +63,8 @@ public class TvPipActionProviderTest extends ShellTestCase {
     @Mock
     private TvPipActionsProvider.Listener mMockListener;
     @Mock
+    private TvPipAction.SystemActionsHandler mMockSystemActionsHandler;
+    @Mock
     private Icon mMockIcon;
     @Mock
     private PendingIntent mMockPendingIntent;
@@ -94,7 +96,8 @@ public class TvPipActionProviderTest extends ShellTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mActionsProvider = new TvPipActionsProvider(mContext, mMockPipMediaController);
+        mActionsProvider = new TvPipActionsProvider(mContext, mMockPipMediaController,
+                mMockSystemActionsHandler);
     }
 
     @Test

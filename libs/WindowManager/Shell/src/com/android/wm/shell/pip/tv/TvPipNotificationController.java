@@ -20,11 +20,9 @@ import android.annotation.NonNull;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -32,7 +30,6 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.media.session.MediaSession;
 import android.os.Bundle;
-import android.os.Handler;
 import android.text.TextUtils;
 
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
@@ -52,32 +49,17 @@ import java.util.List;
  * configuration changes and user initiated expanded PiP toggling.
  */
 public class TvPipNotificationController implements TvPipActionsProvider.Listener {
-    private static final String TAG = "TvPipNotification";
+    private static final String TAG = TvPipNotificationController.class.getSimpleName();
 
     // Referenced in com.android.systemui.util.NotificationChannels.
     public static final String NOTIFICATION_CHANNEL = "TVPIP";
     private static final String NOTIFICATION_TAG = "TvPip";
-    private static final String SYSTEMUI_PERMISSION = "com.android.systemui.permission.SELF";
-
-    private static final String ACTION_SHOW_PIP_MENU =
-            "com.android.wm.shell.pip.tv.notification.action.SHOW_PIP_MENU";
-    static final String ACTION_CLOSE_PIP =
-            "com.android.wm.shell.pip.tv.notification.action.CLOSE_PIP";
-    static final String ACTION_MOVE_PIP =
-            "com.android.wm.shell.pip.tv.notification.action.MOVE_PIP";
-    static final String ACTION_TOGGLE_EXPANDED_PIP =
-            "com.android.wm.shell.pip.tv.notification.action.TOGGLE_EXPANDED_PIP";
-    static final String ACTION_TO_FULLSCREEN =
-            "com.android.wm.shell.pip.tv.notification.action.FULLSCREEN";
 
     private final Context mContext;
     private final PackageManager mPackageManager;
     private final NotificationManager mNotificationManager;
     private final Notification.Builder mNotificationBuilder;
-    private final ActionBroadcastReceiver mActionBroadcastReceiver;
-    private final Handler mMainHandler;
-    private Delegate mDelegate;
-    private final TvPipActionsProvider mTvPipActionsProvider;
+    private TvPipActionsProvider mTvPipActionsProvider;
 
     private MediaSession.Token mMediaSessionToken;
 
@@ -89,22 +71,17 @@ public class TvPipNotificationController implements TvPipActionsProvider.Listene
     private String mPipTitle;
     private String mPipSubtitle;
 
-    // Saving the actions so they don't have to be regenerated when e.g. the PiP title changes.
+    // Saving the actions, so they don't have to be regenerated when e.g. the PiP title changes.
     @NonNull
     private Notification.Action[] mPipActions;
 
     private Bitmap mActivityIcon;
 
     public TvPipNotificationController(Context context, PipMediaController pipMediaController,
-            PipParamsChangedForwarder pipParamsChangedForwarder,
-            TvPipActionsProvider tvPipActionsProvider, Handler mainHandler) {
+            PipParamsChangedForwarder pipParamsChangedForwarder) {
         mContext = context;
         mPackageManager = context.getPackageManager();
         mNotificationManager = context.getSystemService(NotificationManager.class);
-        mMainHandler = mainHandler;
-
-        mTvPipActionsProvider = tvPipActionsProvider;
-        mTvPipActionsProvider.addListener(this);
 
         mPipActions = new Notification.Action[0];
 
@@ -116,10 +93,9 @@ public class TvPipNotificationController implements TvPipActionsProvider.Listene
                 .setOnlyAlertOnce(true)
                 .setSmallIcon(R.drawable.pip_icon)
                 .setAllowSystemGeneratedContextualActions(false)
-                .setContentIntent(createPendingIntent(context, ACTION_TO_FULLSCREEN));
+                .setContentIntent(
+                        createPendingIntent(context, TvPipController.ACTION_TO_FULLSCREEN));
         // TvExtender and DeleteIntent set later since they might change.
-
-        mActionBroadcastReceiver = new ActionBroadcastReceiver();
 
         pipMediaController.addTokenListener(this::onMediaSessionTokenChanged);
 
@@ -141,35 +117,30 @@ public class TvPipNotificationController implements TvPipActionsProvider.Listene
         onConfigurationChanged();
     }
 
+    /**
+     * Call before showing any notification.
+     */
+    void setTvPipActionsProvider(@NonNull TvPipActionsProvider tvPipActionsProvider) {
+        mTvPipActionsProvider = tvPipActionsProvider;
+        mTvPipActionsProvider.addListener(this);
+    }
+
     void onConfigurationChanged() {
         mDefaultTitle = mContext.getResources().getString(R.string.pip_notification_unknown_title);
         updateNotificationContent();
     }
 
-    void setDelegate(Delegate delegate) {
-        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE, "%s: setDelegate(), delegate=%s",
-                TAG, delegate);
-
-        if (mDelegate != null) {
-            throw new IllegalStateException(
-                    "The delegate has already been set and should not change.");
-        }
-        if (delegate == null) {
-            throw new IllegalArgumentException("The delegate must not be null.");
-        }
-        mDelegate = delegate;
-    }
-
     void show(String packageName) {
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE, "%s: show %s", TAG, packageName);
-        if (mDelegate == null) {
-            throw new IllegalStateException("Delegate is not set.");
+        if (mTvPipActionsProvider == null) {
+            ProtoLog.e(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: Missing TvPipActionsProvider", TAG);
+            return;
         }
 
         mIsNotificationShown = true;
         mPackageName = packageName;
         mActivityIcon = getActivityIcon();
-        mActionBroadcastReceiver.register();
 
         updateNotificationContent();
     }
@@ -179,8 +150,6 @@ public class TvPipNotificationController implements TvPipActionsProvider.Listene
 
         mIsNotificationShown = false;
         mPackageName = null;
-        mActionBroadcastReceiver.unregister();
-
         mNotificationManager.cancel(NOTIFICATION_TAG, SystemMessage.NOTE_TV_PIP);
     }
 
@@ -213,7 +182,8 @@ public class TvPipNotificationController implements TvPipActionsProvider.Listene
         mNotificationBuilder.setDeleteIntent(closeIntent);
         // TvExtender not recognized if not set last.
         mNotificationBuilder.extend(new Notification.TvExtender()
-                .setContentIntent(createPendingIntent(mContext, ACTION_SHOW_PIP_MENU))
+                .setContentIntent(
+                        createPendingIntent(mContext, TvPipController.ACTION_SHOW_PIP_MENU))
                 .setDeleteIntent(closeIntent));
 
         mNotificationManager.notify(NOTIFICATION_TAG, SystemMessage.NOTE_TV_PIP,
@@ -283,62 +253,4 @@ public class TvPipNotificationController implements TvPipActionsProvider.Listene
         updateNotificationContent();
     }
 
-    private class ActionBroadcastReceiver extends BroadcastReceiver {
-        final IntentFilter mIntentFilter;
-        {
-            mIntentFilter = new IntentFilter();
-            mIntentFilter.addAction(ACTION_CLOSE_PIP);
-            mIntentFilter.addAction(ACTION_SHOW_PIP_MENU);
-            mIntentFilter.addAction(ACTION_MOVE_PIP);
-            mIntentFilter.addAction(ACTION_TOGGLE_EXPANDED_PIP);
-            mIntentFilter.addAction(ACTION_TO_FULLSCREEN);
-        }
-        boolean mRegistered = false;
-
-        void register() {
-            if (mRegistered) return;
-
-            mContext.registerReceiverForAllUsers(this, mIntentFilter, SYSTEMUI_PERMISSION,
-                    mMainHandler);
-            mRegistered = true;
-        }
-
-        void unregister() {
-            if (!mRegistered) return;
-
-            mContext.unregisterReceiver(this);
-            mRegistered = false;
-        }
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            final String action = intent.getAction();
-            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                    "%s: on(Broadcast)Receive(), action=%s", TAG, action);
-
-            if (ACTION_SHOW_PIP_MENU.equals(action)) {
-                mDelegate.showPictureInPictureMenu();
-            } else if (ACTION_CLOSE_PIP.equals(action)) {
-                mDelegate.closePip();
-            } else if (ACTION_MOVE_PIP.equals(action)) {
-                mDelegate.enterPipMovementMenu();
-            } else if (ACTION_TOGGLE_EXPANDED_PIP.equals(action)) {
-                mDelegate.togglePipExpansion();
-            } else if (ACTION_TO_FULLSCREEN.equals(action)) {
-                mDelegate.movePipToFullscreen();
-            }
-        }
-    }
-
-    interface Delegate {
-        void showPictureInPictureMenu();
-
-        void closePip();
-
-        void enterPipMovementMenu();
-
-        void togglePipExpansion();
-
-        void movePipToFullscreen();
-    }
 }

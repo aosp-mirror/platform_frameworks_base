@@ -25,11 +25,6 @@ import static android.view.KeyEvent.KEYCODE_DPAD_RIGHT;
 import static android.view.KeyEvent.KEYCODE_DPAD_UP;
 import static android.view.KeyEvent.KEYCODE_ENTER;
 
-import static com.android.wm.shell.pip.tv.TvPipAction.ACTION_CLOSE;
-import static com.android.wm.shell.pip.tv.TvPipAction.ACTION_CUSTOM;
-import static com.android.wm.shell.pip.tv.TvPipAction.ACTION_CUSTOM_CLOSE;
-import static com.android.wm.shell.pip.tv.TvPipAction.ACTION_EXPAND_COLLAPSE;
-import static com.android.wm.shell.pip.tv.TvPipAction.ACTION_FULLSCREEN;
 import static com.android.wm.shell.pip.tv.TvPipAction.ACTION_MOVE;
 
 import android.content.Context;
@@ -516,26 +511,8 @@ public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.L
             public void onClick(View v) {
                 TvPipAction action = mActionList.get(
                         mActionButtonsRecyclerView.getChildLayoutPosition(v));
-                switch (action.getActionType()) {
-                    case ACTION_FULLSCREEN:
-                        mListener.onFullscreenButtonClick();
-                        return;
-                    case ACTION_CLOSE:
-                    case ACTION_CUSTOM_CLOSE:
-                        mListener.onCloseButtonClick();
-                        return;
-                    case ACTION_MOVE:
-                        mListener.onEnterMoveMode();
-                        return;
-                    case ACTION_EXPAND_COLLAPSE:
-                        mListener.onToggleExpandedMode();
-                        return;
-                    case ACTION_CUSTOM:
-                        action.executePendingIntent();
-                        return;
-                    default:
-                        ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                                "%s: No action available", TAG);
+                if (action != null) {
+                    action.executeAction();
                 }
             }
         }
@@ -544,8 +521,6 @@ public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.L
     interface Listener extends TvPipMenuEduTextDrawer.Listener {
 
         void onBackPress();
-
-        void onEnterMoveMode();
 
         /**
          * Called when a button for exiting move mode was pressed.
@@ -559,11 +534,5 @@ public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.L
          * @return whether pip movement was handled.
          */
         boolean onPipMovement(int keycode);
-
-        void onCloseButtonClick();
-
-        void onFullscreenButtonClick();
-
-        void onToggleExpandedMode();
     }
 }
