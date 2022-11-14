@@ -1703,6 +1703,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mTempBrightnessEvent.setRbcStrength(mCdsi != null
                 ? mCdsi.getReduceBrightColorsStrength() : -1);
         mTempBrightnessEvent.setPowerFactor(mPowerRequest.screenLowPowerBrightnessFactor);
+        mTempBrightnessEvent.setWasShortTermModelActive(hadUserBrightnessPoint);
         // Temporary is what we use during slider interactions. We avoid logging those so that
         // we don't spam logcat when the slider is being used.
         boolean tempToTempTransition =
@@ -1713,12 +1714,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 || brightnessAdjustmentFlags != 0) {
             float lastBrightness = mLastBrightnessEvent.getBrightness();
             mTempBrightnessEvent.setInitialBrightness(lastBrightness);
-            mTempBrightnessEvent.setFastAmbientLux(
-                    mAutomaticBrightnessController == null
-                        ? -1f : mAutomaticBrightnessController.getFastAmbientLux());
-            mTempBrightnessEvent.setSlowAmbientLux(
-                    mAutomaticBrightnessController == null
-                        ? -1f : mAutomaticBrightnessController.getSlowAmbientLux());
             mTempBrightnessEvent.setAutomaticBrightnessEnabled(mPowerRequest.useAutoBrightness);
             mLastBrightnessEvent.copyFrom(mTempBrightnessEvent);
             BrightnessEvent newEvent = new BrightnessEvent(mTempBrightnessEvent);
@@ -2846,9 +2841,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             FrameworkStatsLog.write(FrameworkStatsLog.DISPLAY_BRIGHTNESS_CHANGED,
                     convertToNits(event.getInitialBrightness()),
                     convertToNits(event.getBrightness()),
-                    event.getSlowAmbientLux(),
+                    event.getLux(),
                     event.getPhysicalDisplayId(),
-                    event.isShortTermModelActive(),
+                    event.wasShortTermModelActive(),
                     appliedLowPowerMode,
                     appliedRbcStrength,
                     appliedHbmMaxNits,

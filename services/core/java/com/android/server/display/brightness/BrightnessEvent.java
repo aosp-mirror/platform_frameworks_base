@@ -39,8 +39,6 @@ public final class BrightnessEvent {
     private String mPhysicalDisplayId;
     private long mTime;
     private float mLux;
-    private float mFastAmbientLux;
-    private float mSlowAmbientLux;
     private float mPreThresholdLux;
     private float mInitialBrightness;
     private float mBrightness;
@@ -51,6 +49,7 @@ public final class BrightnessEvent {
     private int mRbcStrength;
     private float mThermalMax;
     private float mPowerFactor;
+    private boolean mWasShortTermModelActive;
     private int mFlags;
     private int mAdjustmentFlags;
     private boolean mAutomaticBrightnessEnabled;
@@ -76,8 +75,6 @@ public final class BrightnessEvent {
         mTime = that.getTime();
         // Lux values
         mLux = that.getLux();
-        mFastAmbientLux = that.getFastAmbientLux();
-        mSlowAmbientLux = that.getSlowAmbientLux();
         mPreThresholdLux = that.getPreThresholdLux();
         // Brightness values
         mInitialBrightness = that.getInitialBrightness();
@@ -90,6 +87,7 @@ public final class BrightnessEvent {
         mRbcStrength = that.getRbcStrength();
         mThermalMax = that.getThermalMax();
         mPowerFactor = that.getPowerFactor();
+        mWasShortTermModelActive = that.wasShortTermModelActive();
         mFlags = that.getFlags();
         mAdjustmentFlags = that.getAdjustmentFlags();
         // Auto-brightness setting
@@ -105,8 +103,6 @@ public final class BrightnessEvent {
         mPhysicalDisplayId = "";
         // Lux values
         mLux = 0;
-        mFastAmbientLux = 0;
-        mSlowAmbientLux = 0;
         mPreThresholdLux = 0;
         // Brightness values
         mInitialBrightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
@@ -119,6 +115,7 @@ public final class BrightnessEvent {
         mRbcStrength = 0;
         mThermalMax = PowerManager.BRIGHTNESS_MAX;
         mPowerFactor = 1f;
+        mWasShortTermModelActive = false;
         mFlags = 0;
         mAdjustmentFlags = 0;
         // Auto-brightness setting
@@ -140,10 +137,6 @@ public final class BrightnessEvent {
                 && mDisplayId == that.mDisplayId
                 && mPhysicalDisplayId.equals(that.mPhysicalDisplayId)
                 && Float.floatToRawIntBits(mLux) == Float.floatToRawIntBits(that.mLux)
-                && Float.floatToRawIntBits(mFastAmbientLux)
-                == Float.floatToRawIntBits(that.mFastAmbientLux)
-                && Float.floatToRawIntBits(mSlowAmbientLux)
-                == Float.floatToRawIntBits(that.mSlowAmbientLux)
                 && Float.floatToRawIntBits(mPreThresholdLux)
                 == Float.floatToRawIntBits(that.mPreThresholdLux)
                 && Float.floatToRawIntBits(mInitialBrightness)
@@ -161,6 +154,7 @@ public final class BrightnessEvent {
                 == Float.floatToRawIntBits(that.mThermalMax)
                 && Float.floatToRawIntBits(mPowerFactor)
                 == Float.floatToRawIntBits(that.mPowerFactor)
+                && mWasShortTermModelActive == that.mWasShortTermModelActive
                 && mFlags == that.mFlags
                 && mAdjustmentFlags == that.mAdjustmentFlags
                 && mAutomaticBrightnessEnabled == that.mAutomaticBrightnessEnabled;
@@ -182,14 +176,13 @@ public final class BrightnessEvent {
                 + ", rcmdBrt=" + mRecommendedBrightness
                 + ", preBrt=" + mPreThresholdBrightness
                 + ", lux=" + mLux
-                + ", fastLux=" + mFastAmbientLux
-                + ", slowLux=" + mSlowAmbientLux
                 + ", preLux=" + mPreThresholdLux
                 + ", hbmMax=" + mHbmMax
                 + ", hbmMode=" + BrightnessInfo.hbmToString(mHbmMode)
                 + ", rbcStrength=" + mRbcStrength
                 + ", thrmMax=" + mThermalMax
                 + ", powerFactor=" + mPowerFactor
+                + ", wasShortTermModelActive=" + mWasShortTermModelActive
                 + ", flags=" + flagsToString()
                 + ", reason=" + mReason.toString(mAdjustmentFlags)
                 + ", autoBrightness=" + mAutomaticBrightnessEnabled;
@@ -238,22 +231,6 @@ public final class BrightnessEvent {
 
     public void setLux(float lux) {
         this.mLux = lux;
-    }
-
-    public float getFastAmbientLux() {
-        return mFastAmbientLux;
-    }
-
-    public void setFastAmbientLux(float mFastAmbientLux) {
-        this.mFastAmbientLux = mFastAmbientLux;
-    }
-
-    public float getSlowAmbientLux() {
-        return mSlowAmbientLux;
-    }
-
-    public void setSlowAmbientLux(float mSlowAmbientLux) {
-        this.mSlowAmbientLux = mSlowAmbientLux;
     }
 
     public float getPreThresholdLux() {
@@ -344,16 +321,26 @@ public final class BrightnessEvent {
         return (mFlags & FLAG_LOW_POWER_MODE) != 0;
     }
 
+    /**
+     * Set whether the short term model was active before the brightness event.
+     */
+    public boolean setWasShortTermModelActive(boolean wasShortTermModelActive) {
+        return this.mWasShortTermModelActive = wasShortTermModelActive;
+    }
+
+    /**
+     * Returns whether the short term model was active before the brightness event.
+     */
+    public boolean wasShortTermModelActive() {
+        return this.mWasShortTermModelActive;
+    }
+
     public int getFlags() {
         return mFlags;
     }
 
     public void setFlags(int flags) {
         this.mFlags = flags;
-    }
-
-    public boolean isShortTermModelActive() {
-        return (mFlags & FLAG_USER_SET) != 0;
     }
 
     public int getAdjustmentFlags() {
