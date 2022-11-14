@@ -222,6 +222,7 @@ cc_test {
     },
     data: [
         "tests/data/**/*.apk",
+        "tests/data/**/*.png",
     ],
     compile_multilib: "first",
     test_options: {
