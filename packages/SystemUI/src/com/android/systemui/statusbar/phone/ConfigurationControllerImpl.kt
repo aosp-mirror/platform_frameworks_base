@@ -47,6 +47,7 @@ class ConfigurationControllerImpl @Inject constructor(context: Context) : Config
         fontScale = currentConfig.fontScale
         density = currentConfig.densityDpi
         smallestScreenWidth = currentConfig.smallestScreenWidthDp
+        maxBounds.set(currentConfig.windowConfiguration.maxBounds)
         inCarMode = currentConfig.uiMode and Configuration.UI_MODE_TYPE_MASK ==
                 Configuration.UI_MODE_TYPE_CAR
         uiMode = currentConfig.uiMode and Configuration.UI_MODE_NIGHT_MASK
