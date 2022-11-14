@@ -21,11 +21,12 @@ plugins {
 
 android {
     namespace 'com.android.settingslib.spa'
-    compileSdk spa_target_sdk
+    compileSdk TARGET_SDK
+    buildToolsVersion = BUILD_TOOLS_VERSION
 
     defaultConfig {
-        minSdk spa_min_sdk
-        targetSdk spa_target_sdk
+        minSdk MIN_SDK
+        targetSdk TARGET_SDK
     }
 
     sourceSets {
