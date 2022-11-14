@@ -37,6 +37,7 @@ import static org.junit.Assert.assertThrows;
 
 import android.annotation.UserIdInt;
 import android.os.Handler;
+import android.text.TextUtils;
 import android.util.IntArray;
 import android.util.Log;
 
@@ -135,66 +136,6 @@ abstract class UserVisibilityMediatorTestCase extends ExtendedMockitoTestCase {
     }
 
     @Test
-    public final void testStartFgUser_onDefaultDisplay() throws Exception {
-        AsyncUserVisibilityListener listener = addListenerForEvents(
-                onInvisible(INITIAL_CURRENT_USER_ID),
-                onVisible(USER_ID));
-
-        int result = mMediator.assignUserToDisplayOnStart(USER_ID, USER_ID, FG,
-                DEFAULT_DISPLAY);
-        assertStartUserResult(result, USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE);
-
-        expectUserIsVisible(USER_ID);
-        expectUserIsNotVisibleOnDisplay(USER_ID, INVALID_DISPLAY);
-        expectUserIsVisibleOnDisplay(USER_ID, DEFAULT_DISPLAY);
-        // TODO(b/244644281): once isUserVisible() is fixed (see note there), this assertion will
-        // fail on MUMD, so we'll need to refactor / split this test (and possibly others)
-        expectUserIsVisibleOnDisplay(USER_ID, SECONDARY_DISPLAY_ID);
-        expectVisibleUsers(USER_ID);
-
-        expectDisplayAssignedToUser(USER_ID, DEFAULT_DISPLAY);
-        expectUserAssignedToDisplay(DEFAULT_DISPLAY, USER_ID);
-        expectUserAssignedToDisplay(INVALID_DISPLAY, USER_ID);
-        expectUserAssignedToDisplay(SECONDARY_DISPLAY_ID, USER_ID);
-
-        expectDisplayAssignedToUser(USER_NULL, INVALID_DISPLAY);
-
-        listener.verify();
-    }
-
-    @Test
-    public final void testSwitchFgUser_onDefaultDisplay() throws Exception {
-        int previousCurrentUserId = OTHER_USER_ID;
-        int currentUserId = USER_ID;
-        AsyncUserVisibilityListener listener = addListenerForEvents(
-                onInvisible(INITIAL_CURRENT_USER_ID),
-                onVisible(previousCurrentUserId),
-                onInvisible(previousCurrentUserId),
-                onVisible(currentUserId));
-        startForegroundUser(previousCurrentUserId);
-
-        int result = mMediator.assignUserToDisplayOnStart(currentUserId, currentUserId, FG,
-                DEFAULT_DISPLAY);
-        assertStartUserResult(result, USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE);
-
-        expectUserIsVisible(currentUserId);
-        expectUserIsNotVisibleOnDisplay(currentUserId, INVALID_DISPLAY);
-        expectUserIsVisibleOnDisplay(currentUserId, DEFAULT_DISPLAY);
-        expectUserIsVisibleOnDisplay(currentUserId, SECONDARY_DISPLAY_ID);
-        expectVisibleUsers(currentUserId);
-
-        expectDisplayAssignedToUser(currentUserId, DEFAULT_DISPLAY);
-        expectUserAssignedToDisplay(DEFAULT_DISPLAY, currentUserId);
-        expectUserAssignedToDisplay(INVALID_DISPLAY, currentUserId);
-        expectUserAssignedToDisplay(SECONDARY_DISPLAY_ID, currentUserId);
-
-        expectUserIsNotVisibleAtAll(previousCurrentUserId);
-        expectNoDisplayAssignedToUser(previousCurrentUserId);
-
-        listener.verify();
-    }
-
-    @Test
     public final void testStartFgUser_onSecondaryDisplay() throws Exception {
         AsyncUserVisibilityListener listener = addListenerForNoEvents();
 
@@ -240,31 +181,6 @@ abstract class UserVisibilityMediatorTestCase extends ExtendedMockitoTestCase {
 
         expectNoDisplayAssignedToUser(USER_SYSTEM);
         expectUserAssignedToDisplay(SECONDARY_DISPLAY_ID, USER_ID);
-
-        listener.verify();
-    }
-
-    @Test
-    public final void testStartBgProfile_onDefaultDisplay_whenParentIsCurrentUser()
-            throws Exception {
-        AsyncUserVisibilityListener listener = addListenerForEvents(
-                onInvisible(INITIAL_CURRENT_USER_ID),
-                onVisible(PARENT_USER_ID),
-                onVisible(PROFILE_USER_ID));
-        startForegroundUser(PARENT_USER_ID);
-
-        int result = mMediator.assignUserToDisplayOnStart(PROFILE_USER_ID, PARENT_USER_ID, BG,
-                DEFAULT_DISPLAY);
-        assertStartUserResult(result, USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE);
-
-        expectUserIsVisible(PROFILE_USER_ID);
-        expectUserIsNotVisibleOnDisplay(PROFILE_USER_ID, INVALID_DISPLAY);
-        expectUserIsVisibleOnDisplay(PROFILE_USER_ID, DEFAULT_DISPLAY);
-        expectUserIsVisibleOnDisplay(PROFILE_USER_ID, SECONDARY_DISPLAY_ID);
-        expectVisibleUsers(PARENT_USER_ID, PROFILE_USER_ID);
-
-        expectDisplayAssignedToUser(PROFILE_USER_ID, DEFAULT_DISPLAY);
-        expectUserAssignedToDisplay(DEFAULT_DISPLAY, PARENT_USER_ID);
 
         listener.verify();
     }
@@ -526,6 +442,14 @@ abstract class UserVisibilityMediatorTestCase extends ExtendedMockitoTestCase {
 
     protected void expectUserIsNotVisibleOnDisplay(@UserIdInt int userId, int displayId) {
         expectWithMessage("mediator.isUserVisible(%s, %s)", userId, displayId)
+                .that(mMediator.isUserVisible(userId, displayId))
+                .isFalse();
+    }
+
+    protected void expectUserIsNotVisibleOnDisplay(String when, @UserIdInt int userId,
+            int displayId) {
+        String suffix = TextUtils.isEmpty(when) ? "" : " on " + when;
+        expectWithMessage("mediator.isUserVisible(%s, %s)%s", userId, displayId, suffix)
                 .that(mMediator.isUserVisible(userId, displayId))
                 .isFalse();
     }
