@@ -724,7 +724,7 @@ public final class ActiveServices {
 
         ServiceRecord r = res.record;
         setFgsRestrictionLocked(callingPackage, callingPid, callingUid, service, r, userId,
-                allowBackgroundActivityStarts);
+                allowBackgroundActivityStarts, false /* isBindService */);
 
         if (!mAm.mUserController.exists(r.userId)) {
             Slog.w(TAG, "Trying to start service with non-existent user! " + r.userId);
@@ -1931,7 +1931,9 @@ public final class ActiveServices {
                             if (delayMs > mAm.mConstants.mFgsStartForegroundTimeoutMs) {
                                 resetFgsRestrictionLocked(r);
                                 setFgsRestrictionLocked(r.serviceInfo.packageName, r.app.getPid(),
-                                        r.appInfo.uid, r.intent.getIntent(), r, r.userId, false);
+                                        r.appInfo.uid, r.intent.getIntent(), r, r.userId,
+                                        false /* allowBackgroundActivityStarts */,
+                                        false /* isBindService */);
                                 final String temp = "startForegroundDelayMs:" + delayMs;
                                 if (r.mInfoAllowStartForeground != null) {
                                     r.mInfoAllowStartForeground += "; " + temp;
@@ -1945,7 +1947,9 @@ public final class ActiveServices {
                         // The second or later time startForeground() is called after service is
                         // started. Check for app state again.
                         setFgsRestrictionLocked(r.serviceInfo.packageName, r.app.getPid(),
-                                r.appInfo.uid, r.intent.getIntent(), r, r.userId, false);
+                                r.appInfo.uid, r.intent.getIntent(), r, r.userId,
+                                false /* allowBackgroundActivityStarts */,
+                                false /* isBindService */);
                     }
                     // If the foreground service is not started from TOP process, do not allow it to
                     // have while-in-use location/camera/microphone access.
@@ -2985,7 +2989,7 @@ public final class ActiveServices {
                 }
             }
             setFgsRestrictionLocked(callingPackage, callingPid, callingUid, service, s, userId,
-                    false);
+                    false /* allowBackgroundActivityStarts */, true /* isBindService */);
 
             if (s.app != null) {
                 ProcessServiceRecord servicePsr = s.app.mServices;
@@ -6500,7 +6504,7 @@ public final class ActiveServices {
      */
     private void setFgsRestrictionLocked(String callingPackage,
             int callingPid, int callingUid, Intent intent, ServiceRecord r, int userId,
-            boolean allowBackgroundActivityStarts) {
+            boolean allowBackgroundActivityStarts, boolean isBindService) {
         r.mLastSetFgsRestrictionTime = SystemClock.elapsedRealtime();
         // Check DeviceConfig flag.
         if (!mAm.mConstants.mFlagBackgroundFgsStartRestrictionEnabled) {
@@ -6510,14 +6514,15 @@ public final class ActiveServices {
         if (!r.mAllowWhileInUsePermissionInFgs
                 || (r.mAllowStartForeground == REASON_DENIED)) {
             final @ReasonCode int allowWhileInUse = shouldAllowFgsWhileInUsePermissionLocked(
-                    callingPackage, callingPid, callingUid, r, allowBackgroundActivityStarts);
+                    callingPackage, callingPid, callingUid, r, allowBackgroundActivityStarts,
+                    isBindService);
             if (!r.mAllowWhileInUsePermissionInFgs) {
                 r.mAllowWhileInUsePermissionInFgs = (allowWhileInUse != REASON_DENIED);
             }
             if (r.mAllowStartForeground == REASON_DENIED) {
                 r.mAllowStartForeground = shouldAllowFgsStartForegroundWithBindingCheckLocked(
                         allowWhileInUse, callingPackage, callingPid, callingUid, intent, r,
-                        userId);
+                        userId, isBindService);
             }
         }
     }
@@ -6537,9 +6542,10 @@ public final class ActiveServices {
         }
         final @ReasonCode int allowWhileInUse = shouldAllowFgsWhileInUsePermissionLocked(
                 callingPackage, callingPid, callingUid, null /* serviceRecord */,
-                false /* allowBackgroundActivityStarts */);
+                false /* allowBackgroundActivityStarts */, false);
         @ReasonCode int allowStartFgs = shouldAllowFgsStartForegroundNoBindingCheckLocked(
-                allowWhileInUse, callingPid, callingUid, callingPackage, null /* targetService */);
+                allowWhileInUse, callingPid, callingUid, callingPackage, null /* targetService */,
+                false /* isBindService */);
 
         if (allowStartFgs == REASON_DENIED) {
             if (canBindingClientStartFgsLocked(callingUid) != null) {
@@ -6559,7 +6565,7 @@ public final class ActiveServices {
      */
     private @ReasonCode int shouldAllowFgsWhileInUsePermissionLocked(String callingPackage,
             int callingPid, int callingUid, @Nullable ServiceRecord targetService,
-            boolean allowBackgroundActivityStarts) {
+            boolean allowBackgroundActivityStarts, boolean isBindService) {
         int ret = REASON_DENIED;
 
         final int uidState = mAm.getUidStateLocked(callingUid);
@@ -6713,12 +6719,12 @@ public final class ActiveServices {
                                         shouldAllowFgsWhileInUsePermissionLocked(
                                                 clientPackageName,
                                                 clientPid, clientUid, null /* serviceRecord */,
-                                                false /* allowBackgroundActivityStarts */);
+                                                false /* allowBackgroundActivityStarts */, false);
                                 final @ReasonCode int allowStartFgs =
                                         shouldAllowFgsStartForegroundNoBindingCheckLocked(
                                                 allowWhileInUse2,
                                                 clientPid, clientUid, clientPackageName,
-                                                null /* targetService */);
+                                                null /* targetService */, false);
                                 if (allowStartFgs != REASON_DENIED) {
                                     return new Pair<>(allowStartFgs, clientPackageName);
                                 } else {
@@ -6750,11 +6756,11 @@ public final class ActiveServices {
      */
     private @ReasonCode int shouldAllowFgsStartForegroundWithBindingCheckLocked(
             @ReasonCode int allowWhileInUse, String callingPackage, int callingPid,
-            int callingUid, Intent intent, ServiceRecord r, int userId) {
+            int callingUid, Intent intent, ServiceRecord r, int userId, boolean isBindService) {
         ActivityManagerService.FgsTempAllowListItem tempAllowListReason =
                 r.mInfoTempFgsAllowListReason = mAm.isAllowlistedForFgsStartLOSP(callingUid);
         int ret = shouldAllowFgsStartForegroundNoBindingCheckLocked(allowWhileInUse, callingPid,
-                callingUid, callingPackage, r);
+                callingUid, callingPackage, r, isBindService);
 
         String bindFromPackage = null;
         if (ret == REASON_DENIED) {
@@ -6789,6 +6795,7 @@ public final class ActiveServices {
                         + "; callerTargetSdkVersion:" + callerTargetSdkVersion
                         + "; startForegroundCount:" + r.mStartForegroundCount
                         + "; bindFromPackage:" + bindFromPackage
+                        + ": isBindService:" + isBindService
                         + "]";
         if (!debugInfo.equals(r.mInfoAllowStartForeground)) {
             r.mLoggedInfoAllowStartForeground = false;
@@ -6799,7 +6806,7 @@ public final class ActiveServices {
 
     private @ReasonCode int shouldAllowFgsStartForegroundNoBindingCheckLocked(
             @ReasonCode int allowWhileInUse, int callingPid, int callingUid, String callingPackage,
-            @Nullable ServiceRecord targetService) {
+            @Nullable ServiceRecord targetService, boolean isBindService) {
         int ret = allowWhileInUse;
 
         if (ret == REASON_DENIED) {
@@ -6981,10 +6988,12 @@ public final class ActiveServices {
     }
 
     private void logFgsBackgroundStart(ServiceRecord r) {
+        /*
         // Only log if FGS is started from background.
         if (!isFgsBgStart(r.mAllowStartForeground)) {
             return;
         }
+        */
         if (!r.mLoggedInfoAllowStartForeground) {
             final String msg = "Background started FGS: "
                     + ((r.mAllowStartForeground != REASON_DENIED) ? "Allowed " : "Disallowed ")
@@ -6996,10 +7005,10 @@ public final class ActiveServices {
                 }
                 Slog.i(TAG, msg);
             } else {
-                if (ActivityManagerUtils.shouldSamplePackageForAtom(r.packageName,
-                        mAm.mConstants.mFgsStartDeniedLogSampleRate)) {
+                //if (ActivityManagerUtils.shouldSamplePackageForAtom(r.packageName,
+                //        mAm.mConstants.mFgsStartDeniedLogSampleRate)) {
                     Slog.wtfQuiet(TAG, msg);
-                }
+                //}
                 Slog.w(TAG, msg);
             }
             r.mLoggedInfoAllowStartForeground = true;
@@ -7082,7 +7091,7 @@ public final class ActiveServices {
             String callingPackage) {
         return shouldAllowFgsWhileInUsePermissionLocked(callingPackage, callingPid, callingUid,
                 /* targetService */ null,
-                /* allowBackgroundActivityStarts */ false)
+                /* allowBackgroundActivityStarts */ false, false)
                 != REASON_DENIED;
     }
 
