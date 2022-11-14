@@ -22,7 +22,6 @@ import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Parcel;
@@ -184,7 +183,7 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
      *
      * @hide
      */
-    @TestApi
+    @SystemApi
     public static final int PROTECTION_FLAG_VENDOR_PRIVILEGED = 0x8000;
 
     /**
