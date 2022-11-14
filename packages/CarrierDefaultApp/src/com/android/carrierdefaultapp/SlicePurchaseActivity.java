@@ -105,7 +105,7 @@ public class SlicePurchaseActivity extends Activity {
             loge("Unable to start the slice purchase application on the non-default data "
                     + "subscription: " + mSubId);
             SlicePurchaseBroadcastReceiver.sendSlicePurchaseAppResponse(
-                    intent, SlicePurchaseController.EXTRA_INTENT_NOT_DEFAULT_DATA_SUB);
+                    intent, SlicePurchaseController.EXTRA_INTENT_NOT_DEFAULT_DATA_SUBSCRIPTION);
             finishAndRemoveTask();
             return;
         }
