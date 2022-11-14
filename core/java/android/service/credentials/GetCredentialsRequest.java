@@ -119,9 +119,9 @@ public final class GetCredentialsRequest implements Parcelable {
          */
         public @NonNull Builder setGetCredentialOptions(
                 @NonNull List<GetCredentialOption> getCredentialOptions) {
-            Preconditions.checkCollectionNotEmpty(mGetCredentialOptions,
+            Preconditions.checkCollectionNotEmpty(getCredentialOptions,
                     "getCredentialOptions");
-            Preconditions.checkCollectionElementsNotNull(mGetCredentialOptions,
+            Preconditions.checkCollectionElementsNotNull(getCredentialOptions,
                     "getCredentialOptions");
             mGetCredentialOptions = getCredentialOptions;
             return this;

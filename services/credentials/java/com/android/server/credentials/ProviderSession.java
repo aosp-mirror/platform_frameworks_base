@@ -17,25 +17,70 @@
 package com.android.server.credentials;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.ComponentName;
+import android.content.Context;
+import android.credentials.Credential;
 import android.credentials.ui.ProviderData;
+import android.os.Bundle;
 import android.service.credentials.CredentialProviderException;
 import android.service.credentials.CredentialProviderInfo;
 
+import java.util.UUID;
+
 /**
  * Provider session storing the state of provider response and ui entries.
- * @param <T> The request type expected from the remote provider, for a given request session.
+ * @param <T> The request to be sent to the provider
+ * @param <R> The response to be expected from the provider
  */
-public abstract class ProviderSession<T> implements RemoteCredentialService.ProviderCallbacks<T> {
+public abstract class ProviderSession<T, R> implements RemoteCredentialService.ProviderCallbacks<R>,
+        ProviderIntentController.ProviderIntentControllerCallback {
     // Key to be used as the entry key for an action entry
     protected static final String ACTION_ENTRY_KEY = "action_key";
 
+    @NonNull protected final Context mContext;
     @NonNull protected final ComponentName mComponentName;
     @NonNull protected final CredentialProviderInfo mProviderInfo;
     @NonNull protected final RemoteCredentialService mRemoteCredentialService;
     @NonNull protected final int mUserId;
     @NonNull protected Status mStatus = Status.NOT_STARTED;
     @NonNull protected final ProviderInternalCallback mCallbacks;
+    @NonNull protected final ProviderIntentController mProviderIntentController;
+    @Nullable protected Credential mFinalCredentialResponse;
+    @NonNull protected final T mProviderRequest;
+    @Nullable protected R mProviderResponse;
+
+    /**
+     * Returns true if the given status reflects that the provider state is ready to be shown
+     * on the credMan UI.
+     */
+    public static boolean isUiInvokingStatus(Status status) {
+        return status == Status.CREDENTIALS_RECEIVED || status == Status.SAVE_ENTRIES_RECEIVED;
+    }
+
+    /**
+     * Returns true if the given status reflects that the provider is waiting for a remote
+     * response.
+     */
+    public static boolean isStatusWaitingForRemoteResponse(Status status) {
+        return status == Status.PENDING;
+    }
+
+    /**
+     * Returns true if the given status means that the provider session must be terminated.
+     */
+    public static boolean isTerminatingStatus(Status status) {
+        return status == Status.CANCELED || status == Status.SERVICE_DEAD;
+    }
+
+    /**
+     * Returns true if the given status reflects that the provider is done getting the response,
+     * and is ready to return the final credential back to the user.
+     */
+    public static boolean isCompletionStatus(Status status) {
+        return status == Status.CREDENTIAL_RECEIVED_FROM_INTENT
+                || status == Status.CREDENTIAL_RECEIVED_FROM_SELECTION;
+    }
 
     /**
      * Interface to be implemented by any class that wishes to get a callback when a particular
@@ -49,35 +94,49 @@ public abstract class ProviderSession<T> implements RemoteCredentialService.Prov
         void onProviderStatusChanged(Status status, ComponentName componentName);
     }
 
-    protected ProviderSession(@NonNull CredentialProviderInfo info,
+    protected ProviderSession(@NonNull Context context, @NonNull CredentialProviderInfo info,
+            @NonNull T providerRequest,
             @NonNull ProviderInternalCallback callbacks,
             @NonNull int userId,
             @NonNull RemoteCredentialService remoteCredentialService) {
+        mContext = context;
         mProviderInfo = info;
+        mProviderRequest = providerRequest;
         mCallbacks = callbacks;
         mUserId = userId;
         mComponentName = info.getServiceInfo().getComponentName();
         mRemoteCredentialService = remoteCredentialService;
+        mProviderIntentController = new ProviderIntentController(userId, context, this);
     }
 
-    /** Update the response state stored with the provider session. */
-    protected abstract void updateResponse (T response);
-
-    /** Update the response state stored with the provider session. */
-    protected abstract T getResponse ();
-
-    /** Should be overridden to prepare, and stores state for {@link ProviderData} to be
-     * shown on the UI. */
-    protected abstract ProviderData prepareUiData();
-
     /** Provider status at various states of the request session. */
+    // TODO: Review status values, and adjust where needed
     enum Status {
         NOT_STARTED,
         PENDING,
         REQUIRES_AUTHENTICATION,
-        COMPLETE,
+        CREDENTIALS_RECEIVED,
         SERVICE_DEAD,
-        CANCELED
+        CREDENTIAL_RECEIVED_FROM_INTENT,
+        PENDING_INTENT_INVOKED,
+        CREDENTIAL_RECEIVED_FROM_SELECTION,
+        SAVE_ENTRIES_RECEIVED, CANCELED
+    }
+
+    /** Converts exception to a provider session status. */
+    @NonNull
+    public static Status toStatus(
+            @CredentialProviderException.CredentialProviderError int errorCode) {
+        // TODO : Add more mappings as more flows are supported
+        return Status.CANCELED;
+    }
+
+    protected String generateEntryId() {
+        return UUID.randomUUID().toString();
+    }
+
+    public Credential getFinalCredentialResponse() {
+        return  mFinalCredentialResponse;
     }
 
     protected void setStatus(@NonNull Status status) {
@@ -94,31 +153,38 @@ public abstract class ProviderSession<T> implements RemoteCredentialService.Prov
         return mComponentName;
     }
 
+    @NonNull
+    protected RemoteCredentialService getRemoteCredentialService() {
+        return mRemoteCredentialService;
+    }
+
     /** Updates the status .*/
     protected void updateStatusAndInvokeCallback(@NonNull Status status) {
         setStatus(status);
         mCallbacks.onProviderStatusChanged(status, mComponentName);
     }
 
-    @NonNull
-    public static Status toStatus(
-            @CredentialProviderException.CredentialProviderError int errorCode) {
-        // TODO : Add more mappings as more flows are supported
-        return Status.CANCELED;
+    /** Get the request to be sent to the provider. */
+    protected T getProviderRequest() {
+        return mProviderRequest;
     }
 
-    /**
-     * Returns true if the given status means that the provider session must be terminated.
-     */
-    public static boolean isTerminatingStatus(Status status) {
-        return status == Status.CANCELED || status == Status.SERVICE_DEAD;
+    /** Update the response state stored with the provider session. */
+    @Nullable protected R getProviderResponse() {
+        return mProviderResponse;
     }
 
-    /**
-     * Returns true if the given status means that the provider is done getting the response,
-     * and is ready for user interaction.
-     */
-    public static boolean isCompletionStatus(Status status) {
-        return status == Status.COMPLETE || status == Status.REQUIRES_AUTHENTICATION;
-    }
+    /** Should be overridden to prepare, and stores state for {@link ProviderData} to be
+     * shown on the UI. */
+    @Nullable protected abstract ProviderData prepareUiData();
+
+    /** Should be overridden to handle the selected entry from the UI. */
+    protected abstract void onUiEntrySelected(String entryType, String entryId);
+
+    @Override
+    public abstract void onProviderIntentResult(Bundle resultData);
+
+    @Override
+    public abstract void onProviderIntentCancelled();
+
 }
