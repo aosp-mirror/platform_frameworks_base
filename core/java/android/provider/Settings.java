@@ -18453,6 +18453,9 @@ public final class Settings {
     /**
      * Activity Action: For system or preinstalled apps to show their {@link Activity} embedded
      * in Settings app on large screen devices.
+     *
+     * Developers should resolve the Intent action before using it.
+     *
      * <p>
      *     Input: {@link #EXTRA_SETTINGS_EMBEDDED_DEEP_LINK_INTENT_URI} must be included to
      * specify the intent for the activity which will be embedded in Settings app.
