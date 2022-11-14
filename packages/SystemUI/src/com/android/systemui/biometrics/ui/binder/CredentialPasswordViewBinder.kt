@@ -13,6 +13,7 @@ import com.android.systemui.biometrics.ui.CredentialPasswordView
 import com.android.systemui.biometrics.ui.CredentialView
 import com.android.systemui.biometrics.ui.viewmodel.CredentialViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 /** Sub-binder for the [CredentialPasswordView]. */
@@ -23,17 +24,14 @@ object CredentialPasswordViewBinder {
         view: CredentialPasswordView,
         host: CredentialView.Host,
         viewModel: CredentialViewModel,
-        requestFocusForInput: Boolean,
     ) {
         val imeManager = view.context.getSystemService(InputMethodManager::class.java)!!
 
         val passwordField: ImeAwareEditText = view.requireViewById(R.id.lockPassword)
 
         view.repeatWhenAttached {
-            if (requestFocusForInput) {
-                passwordField.requestFocus()
-                passwordField.scheduleShowSoftInput()
-            }
+            passwordField.requestFocus()
+            passwordField.scheduleShowSoftInput()
 
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 // observe credential validation attempts and submit/cancel buttons
