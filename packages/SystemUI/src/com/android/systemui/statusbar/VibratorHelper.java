@@ -24,17 +24,21 @@ import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.dagger.qualifiers.Background;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
 
 /**
- *
+ * A Helper class that offloads {@link Vibrator} calls to a different thread.
+ * {@link Vibrator} makes blocking calls that may cause SysUI to ANR.
+ * TODO(b/245528624): Use regular Vibrator instance once new APIs are available.
  */
 @SysUISingleton
 public class VibratorHelper {
@@ -53,10 +57,18 @@ public class VibratorHelper {
     private final Executor mExecutor;
 
     /**
-     *
+     * Creates a vibrator helper on a new single threaded {@link Executor}.
      */
     @Inject
-    public VibratorHelper(@Nullable Vibrator vibrator, @Background Executor executor) {
+    public VibratorHelper(@Nullable Vibrator vibrator) {
+        this(vibrator, Executors.newSingleThreadExecutor());
+    }
+
+    /**
+     * Creates new vibrator helper on a specific {@link Executor}.
+     */
+    @VisibleForTesting
+    public VibratorHelper(@Nullable Vibrator vibrator, Executor executor) {
         mExecutor = executor;
         mVibrator = vibrator;
     }
