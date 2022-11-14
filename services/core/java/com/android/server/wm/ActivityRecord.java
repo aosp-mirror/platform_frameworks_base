@@ -6497,15 +6497,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
-    void reportFullyDrawnLocked(boolean restoredFromBundle) {
-        final TransitionInfoSnapshot info = mTaskSupervisor
-            .getActivityMetricsLogger().logAppTransitionReportedDrawn(this, restoredFromBundle);
-        if (info != null) {
-            mTaskSupervisor.reportActivityLaunched(false /* timeout */, this,
-                    info.windowsFullyDrawnDelayMs, info.getLaunchState());
-        }
-    }
-
     void onFirstWindowDrawn(WindowState win) {
         firstWindowDrawn = true;
         // stop tracking
