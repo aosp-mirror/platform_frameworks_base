@@ -59,8 +59,10 @@ final class InstallRequest {
     @Nullable
     private PackageRemovedInfo mRemovedInfo;
 
-    private @PackageManagerService.ScanFlags int mScanFlags;
-    private @ParsingPackageUtils.ParseFlags int mParseFlags;
+    @PackageManagerService.ScanFlags
+    private int mScanFlags;
+    @ParsingPackageUtils.ParseFlags
+    private int mParseFlags;
     private boolean mReplace;
 
     @Nullable /* The original Package if it is being replaced, otherwise {@code null} */
@@ -155,7 +157,7 @@ final class InstallRequest {
         mParseFlags = parseFlags;
         mScanFlags = scanFlags;
         mScanResult = scanResult;
-        mPackageMetrics = null; // No real logging from this code path
+        mPackageMetrics = null; // No logging from this code path
     }
 
     @Nullable
@@ -393,11 +395,13 @@ final class InstallRequest {
         return mParsedPackage;
     }
 
-    public @ParsingPackageUtils.ParseFlags int getParseFlags() {
+    @ParsingPackageUtils.ParseFlags
+    public int getParseFlags() {
         return mParseFlags;
     }
 
-    public @PackageManagerService.ScanFlags int getScanFlags() {
+    @PackageManagerService.ScanFlags
+    public int getScanFlags() {
         return mScanFlags;
     }
 
@@ -433,6 +437,11 @@ final class InstallRequest {
 
     public boolean isInstallForUsers() {
         return mIsInstallForUsers;
+    }
+
+    public boolean isInstallFromAdb() {
+        return mInstallArgs != null
+                && (mInstallArgs.mInstallFlags & PackageManager.INSTALL_FROM_ADB) != 0;
     }
 
     @Nullable
@@ -731,10 +740,10 @@ final class InstallRequest {
         }
     }
 
-    public void onInstallCompleted() {
+    public void onInstallCompleted(Computer snapshot) {
         if (getReturnCode() == INSTALL_SUCCEEDED) {
             if (mPackageMetrics != null) {
-                mPackageMetrics.onInstallSucceed();
+                mPackageMetrics.onInstallSucceed(snapshot);
             }
         }
     }

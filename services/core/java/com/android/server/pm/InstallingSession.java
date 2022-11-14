@@ -510,7 +510,7 @@ class InstallingSession {
             mInstallPackageHelper.installPackagesTraced(installRequests);
 
             for (InstallRequest request : installRequests) {
-                request.onInstallCompleted();
+                request.onInstallCompleted(mPm.snapshotComputer());
                 doPostInstall(request);
             }
         }
