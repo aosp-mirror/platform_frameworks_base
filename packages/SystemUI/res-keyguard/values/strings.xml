@@ -61,25 +61,25 @@
     <!-- SIM messages --><skip />
     <!-- When the user inserts a sim card from an unsupported network, it becomes network locked -->
     <string name="keyguard_network_locked_message">Network locked</string>
-    <!-- Shown when there is no SIM card. -->
-    <string name="keyguard_missing_sim_message_short">No SIM card</string>
-    <!-- Shown to ask the user to insert a SIM card. -->
-    <string name="keyguard_missing_sim_instructions">Insert a SIM card.</string>
-    <!-- Shown to ask the user to insert a SIM card when sim is missing or not readable. -->
-    <string name="keyguard_missing_sim_instructions_long">The SIM card is missing or not readable. Insert a SIM card.</string>
-    <!-- Shown when SIM card is permanently disabled. -->
-    <string name="keyguard_permanent_disabled_sim_message_short">Unusable SIM card.</string>
-    <!-- Shown to inform the user to SIM card is permanently disabled. -->
-    <string name="keyguard_permanent_disabled_sim_instructions">Your SIM card has been permanently disabled.\n
-    Contact your wireless service provider for another SIM card.</string>
+    <!-- Shown when there is no SIM. -->
+    <string name="keyguard_missing_sim_message_short">No SIM</string>
+    <!-- Shown to ask the user to add a SIM. -->
+    <string name="keyguard_missing_sim_instructions">Add a SIM.</string>
+    <!-- Shown to ask the user to add a SIM when sim is missing or not readable. -->
+    <string name="keyguard_missing_sim_instructions_long">The SIM is missing or not readable. Add a SIM.</string>
+    <!-- Shown when SIM is permanently disabled. -->
+    <string name="keyguard_permanent_disabled_sim_message_short">Unusable SIM.</string>
+    <!-- Shown to inform the user to SIM is permanently deactivated. -->
+    <string name="keyguard_permanent_disabled_sim_instructions">Your SIM has been permanently deactivated.\n
+    Contact your wireless service provider for another SIM.</string>
     <!-- Shown to tell the user that their SIM is locked and they must unlock it. -->
-    <string name="keyguard_sim_locked_message">SIM card is locked.</string>
+    <string name="keyguard_sim_locked_message">SIM is locked.</string>
     <!-- When the user enters a wrong sim pin too many times, it becomes PUK locked (Pin Unlock Kode) -->
-    <string name="keyguard_sim_puk_locked_message">SIM card is PUK-locked.</string>
+    <string name="keyguard_sim_puk_locked_message">SIM is PUK-locked.</string>
     <!-- For the unlock screen, When the user enters a sim unlock code, it takes a little while to check
          whether it is valid, and to unlock the sim if it is valid.  we display a
          progress dialog in the meantime.  this is the emssage. -->
-    <string name="keyguard_sim_unlock_progress_dialog_message">Unlocking SIM card\u2026</string>
+    <string name="keyguard_sim_unlock_progress_dialog_message">Unlocking SIM\u2026</string>
     <!-- Composes together the carrier name and the SIM card locked message. Example: CarrierName (SIM LOCKED) -->
     <string name="keyguard_carrier_name_with_sim_locked_template" translatable="false"><xliff:g id="carrier">%s</xliff:g> (<xliff:g id="message">%s</xliff:g>)</string>
 
@@ -139,8 +139,8 @@
     <string name="kg_puk_enter_pin_hint">Enter desired PIN code</string>
     <!-- Message shown when the user needs to confirm the PIN they just entered in the PUK screen -->
     <string name="kg_enter_confirm_pin_hint">Confirm desired PIN code</string>
-    <!-- Message shown in dialog while the device is unlocking the SIM card -->
-    <string name="kg_sim_unlock_progress_dialog_message">Unlocking SIM card\u2026</string>
+    <!-- Message shown in dialog while the device is unlocking the SIM -->
+    <string name="kg_sim_unlock_progress_dialog_message">Unlocking SIM\u2026</string>
     <!-- Message shown when the user enters an invalid SIM pin password in PUK screen -->
     <string name="kg_invalid_sim_pin_hint">Type a PIN that is 4 to 8 numbers.</string>
     <!-- Message shown when the user enters an invalid PUK code in the PUK screen -->
