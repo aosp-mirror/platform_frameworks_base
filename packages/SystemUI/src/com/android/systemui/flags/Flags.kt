@@ -82,7 +82,10 @@ object Flags {
     // TODO(b/257506350): Tracking Bug
     val FSI_CHROME = unreleasedFlag(117, "fsi_chrome")
 
-    // next id: 118
+    // TODO(b/257315550): Tracking Bug
+    val NO_HUN_FOR_OLD_WHEN = unreleasedFlag(118, "no_hun_for_old_when")
+
+    // next id: 119
 
     // 200 - keyguard/lockscreen
     // ** Flag retired **
