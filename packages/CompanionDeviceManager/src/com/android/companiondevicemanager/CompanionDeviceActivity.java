@@ -20,6 +20,7 @@ import static android.companion.AssociationRequest.DEVICE_PROFILE_APP_STREAMING;
 import static android.companion.AssociationRequest.DEVICE_PROFILE_AUTOMOTIVE_PROJECTION;
 import static android.companion.AssociationRequest.DEVICE_PROFILE_COMPUTER;
 import static android.companion.AssociationRequest.DEVICE_PROFILE_GLASSES;
+import static android.companion.AssociationRequest.DEVICE_PROFILE_NEARBY_DEVICE_STREAMING;
 import static android.companion.AssociationRequest.DEVICE_PROFILE_WATCH;
 import static android.companion.CompanionDeviceManager.REASON_CANCELED;
 import static android.companion.CompanionDeviceManager.REASON_DISCOVERY_TIMEOUT;
@@ -36,6 +37,7 @@ import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSIO
 import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_CALENDAR;
 import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_CONTACTS;
 import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_NEARBY_DEVICES;
+import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_NEARBY_DEVICE_STREAMING;
 import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_NOTIFICATION;
 import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_PHONE;
 import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_SMS;
@@ -500,6 +502,12 @@ public class CompanionDeviceActivity extends FragmentActivity implements
             case DEVICE_PROFILE_COMPUTER:
                 title = getHtmlFromResources(this, R.string.title_computer, deviceName);
                 mPermissionTypes.addAll(Arrays.asList(PERMISSION_NOTIFICATION, PERMISSION_STORAGE));
+                break;
+
+            case DEVICE_PROFILE_NEARBY_DEVICE_STREAMING:
+                title = getHtmlFromResources(this, R.string.title_nearby_device_streaming,
+                        deviceName);
+                mPermissionTypes.add(PERMISSION_NEARBY_DEVICE_STREAMING);
                 break;
 
             default:

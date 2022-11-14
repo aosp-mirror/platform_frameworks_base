@@ -24,6 +24,7 @@ import static android.companion.AssociationRequest.DEVICE_PROFILE_APP_STREAMING;
 import static android.companion.AssociationRequest.DEVICE_PROFILE_AUTOMOTIVE_PROJECTION;
 import static android.companion.AssociationRequest.DEVICE_PROFILE_COMPUTER;
 import static android.companion.AssociationRequest.DEVICE_PROFILE_GLASSES;
+import static android.companion.AssociationRequest.DEVICE_PROFILE_NEARBY_DEVICE_STREAMING;
 import static android.companion.AssociationRequest.DEVICE_PROFILE_WATCH;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Binder.getCallingPid;
@@ -67,6 +68,8 @@ public final class PermissionsUtils {
                 Manifest.permission.REQUEST_COMPANION_PROFILE_AUTOMOTIVE_PROJECTION);
         map.put(DEVICE_PROFILE_COMPUTER, Manifest.permission.REQUEST_COMPANION_PROFILE_COMPUTER);
         map.put(DEVICE_PROFILE_GLASSES, Manifest.permission.REQUEST_COMPANION_PROFILE_GLASSES);
+        map.put(DEVICE_PROFILE_NEARBY_DEVICE_STREAMING,
+                Manifest.permission.REQUEST_COMPANION_PROFILE_NEARBY_DEVICE_STREAMING);
 
         DEVICE_PROFILE_TO_PERMISSION = unmodifiableMap(map);
     }

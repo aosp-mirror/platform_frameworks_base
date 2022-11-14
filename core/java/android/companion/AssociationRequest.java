@@ -102,6 +102,20 @@ public final class AssociationRequest implements Parcelable {
             "android.app.role.COMPANION_DEVICE_APP_STREAMING";
 
     /**
+     * Device profile: a virtual device capable of rendering content from an Android host to a
+     * nearby device.
+     *
+     * Only applications that have been granted
+     * {@link android.Manifest.permission#REQUEST_COMPANION_PROFILE_NEARBY_DEVICE_STREAMING}
+     * are allowed to request to be associated with such devices.
+     *
+     * @see AssociationRequest.Builder#setDeviceProfile
+     */
+    @RequiresPermission(Manifest.permission.REQUEST_COMPANION_PROFILE_NEARBY_DEVICE_STREAMING)
+    public static final String DEVICE_PROFILE_NEARBY_DEVICE_STREAMING =
+            "android.app.role.COMPANION_DEVICE_NEARBY_DEVICE_STREAMING";
+
+    /**
      * Device profile: Android Automotive Projection
      *
      * Only applications that have been granted
@@ -132,7 +146,7 @@ public final class AssociationRequest implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     @StringDef(value = { DEVICE_PROFILE_WATCH, DEVICE_PROFILE_COMPUTER,
             DEVICE_PROFILE_AUTOMOTIVE_PROJECTION, DEVICE_PROFILE_APP_STREAMING,
-            DEVICE_PROFILE_GLASSES })
+            DEVICE_PROFILE_GLASSES, DEVICE_PROFILE_NEARBY_DEVICE_STREAMING })
     public @interface DeviceProfile {}
 
     /**
