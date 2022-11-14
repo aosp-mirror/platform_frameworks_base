@@ -27,6 +27,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
+import android.window.ScreenCapture;
 
 import java.util.Collections;
 import java.util.List;
@@ -179,6 +180,10 @@ public class AccessibilityServiceConnectionImpl extends IAccessibilityServiceCon
     }
 
     public void takeScreenshot(int displayId, RemoteCallback callback) {}
+
+    public void takeScreenshotOfWindow(int accessibilityWindowId, int interactionId,
+            ScreenCapture.ScreenCaptureListener listener,
+            IAccessibilityInteractionConnectionCallback callback) {}
 
     public void setFocusAppearance(int strokeWidth, int color) {}
 
