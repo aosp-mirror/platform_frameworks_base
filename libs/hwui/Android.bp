@@ -674,6 +674,7 @@ cc_test {
     srcs: [
         "tests/unit/main.cpp",
         "tests/unit/ABitmapTests.cpp",
+        "tests/unit/AutoBackendTextureReleaseTests.cpp",
         "tests/unit/CacheManagerTests.cpp",
         "tests/unit/CanvasContextTests.cpp",
         "tests/unit/CanvasOpTests.cpp",
