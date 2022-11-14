@@ -18,6 +18,17 @@
           "exclude-annotation": "androidx.test.filters.FlakyTest"
         }
       ]
+    },
+    {
+      "name": "FrameworksCoreGameManagerTests",
+      "options": [
+        {
+          "include-filter": "android.app"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
     }
   ]
 }
