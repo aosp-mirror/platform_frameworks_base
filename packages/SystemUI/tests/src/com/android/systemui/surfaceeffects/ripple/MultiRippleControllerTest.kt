@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.systemui.ripple
+package com.android.systemui.surfaceeffects.ripple
 
 import android.graphics.Color
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.ripple.MultiRippleController.Companion.MAX_RIPPLE_NUMBER
+import com.android.systemui.surfaceeffects.ripple.MultiRippleController.Companion.MAX_RIPPLE_NUMBER
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
