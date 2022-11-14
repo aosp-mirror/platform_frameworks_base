@@ -6908,11 +6908,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      *         {@link android.view.Display#INVALID_DISPLAY} if not attached.
      */
     int getDisplayId() {
-        final Task rootTask = getRootTask();
-        if (rootTask == null) {
-            return INVALID_DISPLAY;
-        }
-        return rootTask.getDisplayId();
+        return task != null && task.mDisplayContent != null
+                 ? task.mDisplayContent.mDisplayId : INVALID_DISPLAY;
     }
 
     final boolean isDestroyable() {
