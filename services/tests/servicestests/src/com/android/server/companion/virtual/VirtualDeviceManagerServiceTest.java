@@ -159,6 +159,8 @@ public class VirtualDeviceManagerServiceTest {
                     .setProductId(PRODUCT_ID)
                     .setInputDeviceName(DEVICE_NAME)
                     .setAssociatedDisplayId(DISPLAY_ID)
+                    .setLanguageTag(VirtualKeyboardConfig.DEFAULT_LANGUAGE_TAG)
+                    .setLayoutType(VirtualKeyboardConfig.DEFAULT_LAYOUT_TYPE)
                     .build();
     private static final VirtualMouseConfig MOUSE_CONFIG =
             new VirtualMouseConfig.Builder()
