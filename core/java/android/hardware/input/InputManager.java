@@ -1819,6 +1819,34 @@ public final class InputManager {
     }
 
     /**
+     * Pilfer pointers from an input channel.
+     *
+     * Takes all the current pointer event streams that are currently being sent to the given
+     * input channel and generates appropriate cancellations for all other windows that are
+     * receiving these pointers.
+     *
+     * This API is intended to be used in conjunction with spy windows. When a spy window pilfers
+     * pointers, the foreground windows and all other spy windows that are receiving any of the
+     * pointers that are currently being dispatched to the pilfering window will have those pointers
+     * canceled. Only the pilfering window will continue to receive events for the affected pointers
+     * until the pointer is lifted.
+     *
+     * This method should be used with caution as unexpected pilfering can break fundamental user
+     * interactions.
+     *
+     * @see android.os.InputConfig#SPY
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MONITOR_INPUT)
+    public void pilferPointers(IBinder inputChannelToken) {
+        try {
+            mIm.pilferPointers(inputChannelToken);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Removes a previously registered battery listener for an input device.
      * @see #addInputDeviceBatteryListener(int, Executor, InputDeviceBatteryListener)
      * @hide
