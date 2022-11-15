@@ -38,4 +38,7 @@ interface IDreamOverlay {
     */
     void startDream(in LayoutParams params, in IDreamOverlayCallback callback,
         in String dreamComponent, in boolean shouldShowComplications);
+
+    /** Called when the dream is waking, to do any exit animations */
+    void wakeUp();
 }
