@@ -240,11 +240,15 @@ public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
             return;
         }
 
-        context.getSystemService(NotificationManager.class).createNotificationChannel(
-                new NotificationChannel(NETWORK_BOOST_NOTIFICATION_CHANNEL_ID,
-                        context.getResources().getString(
-                                R.string.network_boost_notification_channel),
-                        NotificationManager.IMPORTANCE_DEFAULT));
+        NotificationChannel channel = new NotificationChannel(
+                NETWORK_BOOST_NOTIFICATION_CHANNEL_ID,
+                context.getResources().getString(R.string.network_boost_notification_channel),
+                NotificationManager.IMPORTANCE_DEFAULT);
+        // CarrierDefaultApp notifications are unblockable by default. Make this channel blockable
+        //  to allow users to disable notifications posted to this channel without affecting other
+        //  notifications in this application.
+        channel.setBlockable(true);
+        context.getSystemService(NotificationManager.class).createNotificationChannel(channel);
 
         Notification notification =
                 new Notification.Builder(context, NETWORK_BOOST_NOTIFICATION_CHANNEL_ID)
