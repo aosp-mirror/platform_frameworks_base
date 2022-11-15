@@ -23,7 +23,7 @@ import com.android.settingslib.spa.framework.common.SpaEnvironmentFactory
 
 class SpaSliceBroadcastReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
-        val sliceRepository = SpaEnvironmentFactory.instance.sliceDataRepository
+        val sliceRepository by SpaEnvironmentFactory.instance.sliceDataRepository
         val sliceUri = intent?.data ?: return
         val sliceData = sliceRepository.getActiveSliceData(sliceUri) ?: return
         sliceData.doAction()
