@@ -1356,21 +1356,22 @@ base::expected<uint32_t, NullOrIOError> AssetManager2::GetResourceId(
 
 void AssetManager2::RebuildFilterList() {
   for (PackageGroup& group : package_groups_) {
-    for (ConfiguredPackage& impl : group.packages_) {
-      impl.filtered_configs_.clear();
-
+    for (ConfiguredPackage& package : group.packages_) {
+      package.filtered_configs_.forEachItem([](auto, auto& fcg) { fcg.type_entries.clear(); });
       // Create the filters here.
-      impl.loaded_package_->ForEachTypeSpec([&](const TypeSpec& type_spec, uint8_t type_id) {
+      package.loaded_package_->ForEachTypeSpec([&](const TypeSpec& type_spec, uint8_t type_id) {
         FilteredConfigGroup* group = nullptr;
         for (const auto& type_entry : type_spec.type_entries) {
           if (type_entry.config.match(configuration_)) {
             if (!group) {
-              group = &impl.filtered_configs_.editItemAt(type_id - 1);
+              group = &package.filtered_configs_.editItemAt(type_id - 1);
             }
             group->type_entries.push_back(&type_entry);
           }
         }
       });
+      package.filtered_configs_.trimBuckets(
+          [](const auto& fcg) { return fcg.type_entries.empty(); });
     }
   }
 }
