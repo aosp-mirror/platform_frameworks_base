@@ -88,6 +88,7 @@ public class ParcelableBenchmark {
         }
     }
 
+    @SuppressWarnings("ParcelableCreator")
     @SuppressLint("ParcelCreator")
     private static class PointArray implements Parcelable {
         Rect mBounds = new Rect();

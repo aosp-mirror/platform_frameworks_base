@@ -58,4 +58,4 @@ public class PasswordSlotManagerTestable extends PasswordSlotManager {
         } catch (Exception e) {
         }
     }
-};
+}

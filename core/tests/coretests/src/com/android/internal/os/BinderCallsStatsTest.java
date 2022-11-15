@@ -1054,10 +1054,23 @@ public class BinderCallsStatsTest {
             super(new Injector() {
                 public Random getRandomGenerator() {
                     return new Random() {
-                        int mCallCount = 0;
+                        int mCallCount = -1;
 
                         public int nextInt() {
-                            return mCallCount++;
+                            throw new IllegalStateException("Should not use nextInt()");
+                        }
+
+                        public int nextInt(int x) {
+                            if (mCallCount == -1) {
+                                // The tests are written such that they expect
+                                // the first call to nextInt() to be on the first
+                                // callEnded(). However, the BinderCallsStats
+                                // constructor also calls nextInt(). Fake 0 being
+                                // rolled twice.
+                                mCallCount++;
+                                return 0;
+                            }
+                            return (mCallCount++) % x;
                         }
                     };
                 }

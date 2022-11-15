@@ -852,7 +852,9 @@ public class PreferencesHelper implements RankingConfig {
         Objects.requireNonNull(pkg);
         Objects.requireNonNull(group);
         Objects.requireNonNull(group.getId());
-        Objects.requireNonNull(!TextUtils.isEmpty(group.getName()));
+        if (TextUtils.isEmpty(group.getName())) {
+            throw new IllegalArgumentException("group.getName() can't be empty");
+        }
         boolean needsDndChange = false;
         synchronized (mPackagePreferences) {
             PackagePreferences r = getOrCreatePackagePreferencesLocked(pkg, uid);

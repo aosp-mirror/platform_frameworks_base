@@ -60,7 +60,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.Stack;
 
 /**
@@ -1171,18 +1171,14 @@ public class VectorDrawable extends Drawable {
 
         private static final int NATIVE_ALLOCATION_SIZE = 100;
 
-        private static final HashMap<String, Integer> sPropertyIndexMap =
-                new HashMap<String, Integer>() {
-                    {
-                        put("translateX", TRANSLATE_X_INDEX);
-                        put("translateY", TRANSLATE_Y_INDEX);
-                        put("scaleX", SCALE_X_INDEX);
-                        put("scaleY", SCALE_Y_INDEX);
-                        put("pivotX", PIVOT_X_INDEX);
-                        put("pivotY", PIVOT_Y_INDEX);
-                        put("rotation", ROTATION_INDEX);
-                    }
-                };
+        private static final Map<String, Integer> sPropertyIndexMap = Map.of(
+                "translateX", TRANSLATE_X_INDEX,
+                "translateY", TRANSLATE_Y_INDEX,
+                "scaleX", SCALE_X_INDEX,
+                "scaleY", SCALE_Y_INDEX,
+                "pivotX", PIVOT_X_INDEX,
+                "pivotY", PIVOT_Y_INDEX,
+                "rotation", ROTATION_INDEX);
 
         static int getPropertyIndex(String propertyName) {
             if (sPropertyIndexMap.containsKey(propertyName)) {
@@ -1285,18 +1281,15 @@ public class VectorDrawable extends Drawable {
                     }
                 };
 
-        private static final HashMap<String, Property> sPropertyMap =
-                new HashMap<String, Property>() {
-                    {
-                        put("translateX", TRANSLATE_X);
-                        put("translateY", TRANSLATE_Y);
-                        put("scaleX", SCALE_X);
-                        put("scaleY", SCALE_Y);
-                        put("pivotX", PIVOT_X);
-                        put("pivotY", PIVOT_Y);
-                        put("rotation", ROTATION);
-                    }
-                };
+        private static final Map<String, Property> sPropertyMap = Map.of(
+                "translateX", TRANSLATE_X,
+                "translateY", TRANSLATE_Y,
+                "scaleX", SCALE_X,
+                "scaleY", SCALE_Y,
+                "pivotX", PIVOT_X,
+                "pivotY", PIVOT_Y,
+                "rotation", ROTATION);
+
         // Temp array to store transform values obtained from native.
         private float[] mTransform;
         /////////////////////////////////////////////////////
@@ -1762,19 +1755,15 @@ public class VectorDrawable extends Drawable {
 
         private static final int NATIVE_ALLOCATION_SIZE = 264;
         // Property map for animatable attributes.
-        private final static HashMap<String, Integer> sPropertyIndexMap
-                = new HashMap<String, Integer> () {
-            {
-                put("strokeWidth", STROKE_WIDTH_INDEX);
-                put("strokeColor", STROKE_COLOR_INDEX);
-                put("strokeAlpha", STROKE_ALPHA_INDEX);
-                put("fillColor", FILL_COLOR_INDEX);
-                put("fillAlpha", FILL_ALPHA_INDEX);
-                put("trimPathStart", TRIM_PATH_START_INDEX);
-                put("trimPathEnd", TRIM_PATH_END_INDEX);
-                put("trimPathOffset", TRIM_PATH_OFFSET_INDEX);
-            }
-        };
+        private static final Map<String, Integer> sPropertyIndexMap = Map.of(
+                "strokeWidth", STROKE_WIDTH_INDEX,
+                "strokeColor", STROKE_COLOR_INDEX,
+                "strokeAlpha", STROKE_ALPHA_INDEX,
+                "fillColor", FILL_COLOR_INDEX,
+                "fillAlpha", FILL_ALPHA_INDEX,
+                "trimPathStart", TRIM_PATH_START_INDEX,
+                "trimPathEnd", TRIM_PATH_END_INDEX,
+                "trimPathOffset", TRIM_PATH_OFFSET_INDEX);
 
         // Below are the Properties that wrap the setters to avoid reflection overhead in animations
         private static final Property<VFullPath, Float> STROKE_WIDTH =
@@ -1881,19 +1870,15 @@ public class VectorDrawable extends Drawable {
                     }
                 };
 
-        private final static HashMap<String, Property> sPropertyMap
-                = new HashMap<String, Property> () {
-            {
-                put("strokeWidth", STROKE_WIDTH);
-                put("strokeColor", STROKE_COLOR);
-                put("strokeAlpha", STROKE_ALPHA);
-                put("fillColor", FILL_COLOR);
-                put("fillAlpha", FILL_ALPHA);
-                put("trimPathStart", TRIM_PATH_START);
-                put("trimPathEnd", TRIM_PATH_END);
-                put("trimPathOffset", TRIM_PATH_OFFSET);
-            }
-        };
+        private static final Map<String, Property> sPropertyMap = Map.of(
+                "strokeWidth", STROKE_WIDTH,
+                "strokeColor", STROKE_COLOR,
+                "strokeAlpha", STROKE_ALPHA,
+                "fillColor", FILL_COLOR,
+                "fillAlpha", FILL_ALPHA,
+                "trimPathStart", TRIM_PATH_START,
+                "trimPathEnd", TRIM_PATH_END,
+                "trimPathOffset", TRIM_PATH_OFFSET);
 
         // Temp array to store property data obtained from native getter.
         private byte[] mPropertyData;

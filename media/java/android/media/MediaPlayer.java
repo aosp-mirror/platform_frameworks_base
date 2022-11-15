@@ -2473,6 +2473,8 @@ public class MediaPlayer extends PlayerBase
      *
      * @see android.media.MediaPlayer#getTrackInfo
      */
+    // The creator needs to be pulic, which requires removing the @UnsupportedAppUsage
+    @SuppressWarnings("ParcelableCreator")
     static public class TrackInfo implements Parcelable {
         /**
          * Gets the track type.

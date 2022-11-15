@@ -436,11 +436,12 @@ class DisplayWindowSettings {
                     mRemoveContentMode = other.mRemoveContentMode;
                     changed = true;
                 }
-                if (other.mShouldShowWithInsecureKeyguard != mShouldShowWithInsecureKeyguard) {
+                if (!Objects.equals(
+                        other.mShouldShowWithInsecureKeyguard, mShouldShowWithInsecureKeyguard)) {
                     mShouldShowWithInsecureKeyguard = other.mShouldShowWithInsecureKeyguard;
                     changed = true;
                 }
-                if (other.mShouldShowSystemDecors != mShouldShowSystemDecors) {
+                if (!Objects.equals(other.mShouldShowSystemDecors, mShouldShowSystemDecors)) {
                     mShouldShowSystemDecors = other.mShouldShowSystemDecors;
                     changed = true;
                 }
@@ -452,15 +453,15 @@ class DisplayWindowSettings {
                     mFixedToUserRotation = other.mFixedToUserRotation;
                     changed = true;
                 }
-                if (other.mIgnoreOrientationRequest != mIgnoreOrientationRequest) {
+                if (!Objects.equals(other.mIgnoreOrientationRequest, mIgnoreOrientationRequest)) {
                     mIgnoreOrientationRequest = other.mIgnoreOrientationRequest;
                     changed = true;
                 }
-                if (other.mIgnoreDisplayCutout != mIgnoreDisplayCutout) {
+                if (!Objects.equals(other.mIgnoreDisplayCutout, mIgnoreDisplayCutout)) {
                     mIgnoreDisplayCutout = other.mIgnoreDisplayCutout;
                     changed = true;
                 }
-                if (other.mDontMoveToTop != mDontMoveToTop) {
+                if (!Objects.equals(other.mDontMoveToTop, mDontMoveToTop)) {
                     mDontMoveToTop = other.mDontMoveToTop;
                     changed = true;
                 }
@@ -516,14 +517,13 @@ class DisplayWindowSettings {
                     mRemoveContentMode = delta.mRemoveContentMode;
                     changed = true;
                 }
-                if (delta.mShouldShowWithInsecureKeyguard != null
-                        && delta.mShouldShowWithInsecureKeyguard
-                        != mShouldShowWithInsecureKeyguard) {
+                if (delta.mShouldShowWithInsecureKeyguard != null && !Objects.equals(
+                        delta.mShouldShowWithInsecureKeyguard, mShouldShowWithInsecureKeyguard)) {
                     mShouldShowWithInsecureKeyguard = delta.mShouldShowWithInsecureKeyguard;
                     changed = true;
                 }
-                if (delta.mShouldShowSystemDecors != null
-                        && delta.mShouldShowSystemDecors != mShouldShowSystemDecors) {
+                if (delta.mShouldShowSystemDecors != null && !Objects.equals(
+                        delta.mShouldShowSystemDecors, mShouldShowSystemDecors)) {
                     mShouldShowSystemDecors = delta.mShouldShowSystemDecors;
                     changed = true;
                 }
@@ -537,18 +537,18 @@ class DisplayWindowSettings {
                     mFixedToUserRotation = delta.mFixedToUserRotation;
                     changed = true;
                 }
-                if (delta.mIgnoreOrientationRequest != null
-                        && delta.mIgnoreOrientationRequest != mIgnoreOrientationRequest) {
+                if (delta.mIgnoreOrientationRequest != null && !Objects.equals(
+                        delta.mIgnoreOrientationRequest, mIgnoreOrientationRequest)) {
                     mIgnoreOrientationRequest = delta.mIgnoreOrientationRequest;
                     changed = true;
                 }
-                if (delta.mIgnoreDisplayCutout != null
-                        && delta.mIgnoreDisplayCutout != mIgnoreDisplayCutout) {
+                if (delta.mIgnoreDisplayCutout != null && !Objects.equals(
+                        delta.mIgnoreDisplayCutout, mIgnoreDisplayCutout)) {
                     mIgnoreDisplayCutout = delta.mIgnoreDisplayCutout;
                     changed = true;
                 }
-                if (delta.mDontMoveToTop != null
-                        && delta.mDontMoveToTop != mDontMoveToTop) {
+                if (delta.mDontMoveToTop != null && !Objects.equals(
+                        delta.mDontMoveToTop, mDontMoveToTop)) {
                     mDontMoveToTop = delta.mDontMoveToTop;
                     changed = true;
                 }

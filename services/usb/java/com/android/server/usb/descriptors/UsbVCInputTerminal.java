@@ -46,4 +46,4 @@ public final class UsbVCInputTerminal extends UsbVCInterface {
         // TODO Add reporting specific to this descriptor
         super.report(canvas);
     }
-};
+}
