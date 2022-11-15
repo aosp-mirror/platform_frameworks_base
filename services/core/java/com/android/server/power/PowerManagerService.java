@@ -1033,7 +1033,7 @@ public final class PowerManagerService extends SystemService
         super(context);
 
         mContext = context;
-        mBinderService = new BinderService();
+        mBinderService = new BinderService(mContext);
         mLocalService = new LocalService();
         mNativeWrapper = injector.createNativeWrapper();
         mSystemProperties = injector.createSystemPropertiesWrapper();
@@ -5465,12 +5465,17 @@ public final class PowerManagerService extends SystemService
 
     @VisibleForTesting
     final class BinderService extends IPowerManager.Stub {
+        private final PowerManagerShellCommand mShellCommand;
+
+        BinderService(Context context) {
+            mShellCommand = new PowerManagerShellCommand(context, this);
+        }
+
         @Override
         public void onShellCommand(FileDescriptor in, FileDescriptor out,
                 FileDescriptor err, String[] args, ShellCallback callback,
                 ResultReceiver resultReceiver) {
-            (new PowerManagerShellCommand(this)).exec(
-                    this, in, out, err, args, callback, resultReceiver);
+            mShellCommand.exec(this, in, out, err, args, callback, resultReceiver);
         }
 
         @Override // Binder call

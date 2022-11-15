@@ -82,7 +82,10 @@ object Flags {
     // TODO(b/257506350): Tracking Bug
     val FSI_CHROME = unreleasedFlag(117, "fsi_chrome")
 
-    // next id: 118
+    // TODO(b/257315550): Tracking Bug
+    val NO_HUN_FOR_OLD_WHEN = unreleasedFlag(118, "no_hun_for_old_when")
+
+    // next id: 119
 
     // 200 - keyguard/lockscreen
     // ** Flag retired **
@@ -239,6 +242,9 @@ object Flags {
     // TODO(b/256613548): Tracking Bug
     val NEW_STATUS_BAR_WIFI_ICON_BACKEND = unreleasedFlag(609, "new_status_bar_wifi_icon_backend")
 
+    // TODO(b/256623670): Tracking Bug
+    @JvmField val BATTERY_SHIELD_ICON = unreleasedFlag(610, "battery_shield_icon")
+
     // 700 - dialer/calls
     // TODO(b/254512734): Tracking Bug
     val ONGOING_CALL_STATUS_BAR_CHIP = releasedFlag(700, "ongoing_call_status_bar_chip")
@@ -380,7 +386,8 @@ object Flags {
 
     // TODO(b/254513155): Tracking Bug
     @JvmField
-    val SCREENSHOT_WORK_PROFILE_POLICY = unreleasedFlag(1301, "screenshot_work_profile_policy")
+    val SCREENSHOT_WORK_PROFILE_POLICY =
+        unreleasedFlag(1301, "screenshot_work_profile_policy", teamfood = true)
 
     // 1400 - columbus
     // TODO(b/254512756): Tracking Bug
