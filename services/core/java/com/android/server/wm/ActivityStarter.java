@@ -1970,12 +1970,6 @@ class ActivityStarter {
                 ? targetTask.getTopNonFinishingActivity()
                 : targetTaskTop;
 
-        // At this point we are certain we want the task moved to the front. If we need to dismiss
-        // any other always-on-top root tasks, now is the time to do it.
-        if (targetTaskTop.canTurnScreenOn() && mService.isDreaming()) {
-            targetTaskTop.mTaskSupervisor.wakeUp("recycleTask#turnScreenOnFlag");
-        }
-
         if (mMovedToFront) {
             // We moved the task to front, use starting window to hide initial drawn delay.
             targetTaskTop.showStartingWindow(true /* taskSwitch */);
@@ -1986,6 +1980,12 @@ class ActivityStarter {
         // We didn't do anything...  but it was needed (a.k.a., client don't use that intent!)
         // And for paranoia, make sure we have correctly resumed the top activity.
         resumeTargetRootTaskIfNeeded();
+
+        // This is moving an existing task to front. But since dream activity has a higher z-order
+        // to cover normal activities, it needs the awakening event to be dismissed.
+        if (mService.isDreaming() && targetTaskTop.canTurnScreenOn()) {
+            targetTaskTop.mTaskSupervisor.wakeUp("recycleTask#turnScreenOnFlag");
+        }
 
         mLastStartActivityRecord = targetTaskTop;
         return mMovedToFront ? START_TASK_TO_FRONT : START_DELIVERED_TO_TOP;

@@ -1137,6 +1137,26 @@ public class ActivityStarterTests extends WindowTestsBase {
     }
 
     @Test
+    public void testRecycleTaskWakeUpWhenDreaming() {
+        doNothing().when(mWm.mAtmService.mTaskSupervisor).wakeUp(anyString());
+        doReturn(true).when(mWm.mAtmService).isDreaming();
+        final ActivityStarter starter = prepareStarter(0 /* flags */);
+        final ActivityRecord target = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        starter.mStartActivity = target;
+        target.mVisibleRequested = false;
+        target.setTurnScreenOn(true);
+        // Assume the flag was consumed by relayout.
+        target.setCurrentLaunchCanTurnScreenOn(false);
+        startActivityInner(starter, target, null /* source */, null /* options */,
+                null /* inTask */, null /* inTaskFragment */);
+        // The flag should be set again when resuming (from recycleTask) the target as top.
+        assertTrue(target.currentLaunchCanTurnScreenOn());
+        // In real case, dream activity has a higher priority (TaskDisplayArea#getPriority) that
+        // will be put at a higher z-order. So it relies on wakeUp() to be dismissed.
+        verify(mWm.mAtmService.mTaskSupervisor).wakeUp(anyString());
+    }
+
+    @Test
     public void testTargetTaskInSplitScreen() {
         final ActivityStarter starter =
                 prepareStarter(FLAG_ACTIVITY_LAUNCH_ADJACENT, false /* mockGetRootTask */);
