@@ -3516,7 +3516,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     @Override
                     public void onKeyguardExitResult(boolean success) {
                         if (success) {
-                            startDockOrHome(displayId, true /*fromHomeKey*/, awakenFromDreams);
+                            final long origId = Binder.clearCallingIdentity();
+                            try {
+                                startDockOrHome(displayId, true /*fromHomeKey*/, awakenFromDreams);
+                            } finally {
+                                Binder.restoreCallingIdentity(origId);
+                            }
                         }
                     }
                 });
