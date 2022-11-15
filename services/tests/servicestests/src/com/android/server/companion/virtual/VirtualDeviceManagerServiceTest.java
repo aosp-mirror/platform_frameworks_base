@@ -83,6 +83,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.IPowerManager;
 import android.os.IThermalService;
+import android.os.LocaleList;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
@@ -502,6 +503,63 @@ public class VirtualDeviceManagerServiceTest {
     }
 
     @Test
+    public void getPreferredLocaleListForApp_keyboardAttached_returnLocaleHints() {
+        mDeviceImpl.mVirtualDisplayIds.add(DISPLAY_ID);
+
+        mDeviceImpl.createVirtualKeyboard(KEYBOARD_CONFIG, BINDER);
+
+        mVdms.notifyRunningAppsChanged(mDeviceImpl.getDeviceId(), Sets.newArraySet(UID_1));
+
+        LocaleList localeList = mLocalService.getPreferredLocaleListForUid(UID_1);
+        assertThat(localeList).isEqualTo(
+                LocaleList.forLanguageTags(KEYBOARD_CONFIG.getLanguageTag()));
+    }
+
+    @Test
+    public void getPreferredLocaleListForApp_noKeyboardAttached_nullLocaleHints() {
+        mVdms.notifyRunningAppsChanged(mDeviceImpl.getDeviceId(), Sets.newArraySet(UID_1));
+
+        // no preceding call to createVirtualKeyboard()
+        assertThat(mLocalService.getPreferredLocaleListForUid(UID_1)).isNull();
+    }
+
+    @Test
+    public void getPreferredLocaleListForApp_appOnMultipleVD_localeOnFirstVDReturned() {
+        int secondDeviceId = VIRTUAL_DEVICE_ID + 1;
+        VirtualDeviceImpl secondDevice = createVirtualDevice(secondDeviceId, DEVICE_OWNER_UID_2);
+        Binder secondBinder = new Binder("secondBinder");
+        VirtualKeyboardConfig firstKeyboardConfig =
+                new VirtualKeyboardConfig.Builder()
+                        .setVendorId(VENDOR_ID)
+                        .setProductId(PRODUCT_ID)
+                        .setInputDeviceName(DEVICE_NAME)
+                        .setAssociatedDisplayId(DISPLAY_ID)
+                        .setLanguageTag("zh-CN")
+                        .build();
+        VirtualKeyboardConfig secondKeyboardConfig =
+                new VirtualKeyboardConfig.Builder()
+                        .setVendorId(VENDOR_ID)
+                        .setProductId(PRODUCT_ID)
+                        .setInputDeviceName(DEVICE_NAME)
+                        .setAssociatedDisplayId(DISPLAY_ID_2)
+                        .setLanguageTag("fr-FR")
+                        .build();
+
+        mDeviceImpl.mVirtualDisplayIds.add(DISPLAY_ID);
+        secondDevice.mVirtualDisplayIds.add(DISPLAY_ID_2);
+
+        mDeviceImpl.createVirtualKeyboard(firstKeyboardConfig, BINDER);
+        secondDevice.createVirtualKeyboard(secondKeyboardConfig, secondBinder);
+
+        mVdms.notifyRunningAppsChanged(mDeviceImpl.getDeviceId(), Sets.newArraySet(UID_1));
+        mVdms.notifyRunningAppsChanged(secondDevice.getDeviceId(), Sets.newArraySet(UID_1));
+
+        LocaleList localeList = mLocalService.getPreferredLocaleListForUid(UID_1);
+        assertThat(localeList).isEqualTo(
+                LocaleList.forLanguageTags(firstKeyboardConfig.getLanguageTag()));
+    }
+
+    @Test
     public void onVirtualDisplayRemovedLocked_doesNotThrowException() {
         mDeviceImpl.onVirtualDisplayCreatedLocked(
                 mDeviceImpl.createWindowPolicyController(new ArrayList<>()), DISPLAY_ID);
@@ -880,6 +938,48 @@ public class VirtualDeviceManagerServiceTest {
                 mInputController.getInputDeviceDescriptors()).isNotEmpty();
         verify(mNativeWrapperMock).openUinputKeyboard(eq(DEVICE_NAME), eq(VENDOR_ID),
                 eq(PRODUCT_ID), anyString());
+    }
+
+    @Test
+    public void createVirtualKeyboard_keyboardCreated_localeUpdated() {
+        mDeviceImpl.mVirtualDisplayIds.add(DISPLAY_ID);
+        mDeviceImpl.createVirtualKeyboard(KEYBOARD_CONFIG, BINDER);
+        assertWithMessage("Virtual keyboard should register fd when the display matches")
+                .that(mInputController.getInputDeviceDescriptors())
+                .isNotEmpty();
+        verify(mNativeWrapperMock).openUinputKeyboard(eq(DEVICE_NAME), eq(VENDOR_ID),
+                eq(PRODUCT_ID), anyString());
+        assertThat(mDeviceImpl.getDeviceLocaleList()).isEqualTo(
+                LocaleList.forLanguageTags(KEYBOARD_CONFIG.getLanguageTag()));
+    }
+
+    @Test
+    public void createVirtualKeyboard_keyboardWithoutExplicitLayoutInfo_localeUpdatedWithDefault() {
+        VirtualKeyboardConfig configWithoutExplicitLayoutInfo =
+                new VirtualKeyboardConfig.Builder()
+                        .setVendorId(VENDOR_ID)
+                        .setProductId(PRODUCT_ID)
+                        .setInputDeviceName(DEVICE_NAME)
+                        .setAssociatedDisplayId(DISPLAY_ID)
+                        .build();
+
+        mDeviceImpl.mVirtualDisplayIds.add(DISPLAY_ID);
+        mDeviceImpl.createVirtualKeyboard(configWithoutExplicitLayoutInfo, BINDER);
+        assertWithMessage("Virtual keyboard should register fd when the display matches")
+                .that(mInputController.getInputDeviceDescriptors())
+                .isNotEmpty();
+        verify(mNativeWrapperMock).openUinputKeyboard(eq(DEVICE_NAME), eq(VENDOR_ID),
+                eq(PRODUCT_ID), anyString());
+        assertThat(mDeviceImpl.getDeviceLocaleList()).isEqualTo(
+                LocaleList.forLanguageTags(VirtualKeyboardConfig.DEFAULT_LANGUAGE_TAG));
+    }
+
+    @Test
+    public void virtualDeviceWithoutKeyboard_noLocaleUpdate() {
+        mDeviceImpl.mVirtualDisplayIds.add(DISPLAY_ID);
+
+        // no preceding call to createVirtualKeyboard()
+        assertThat(mDeviceImpl.getDeviceLocaleList()).isNull();
     }
 
     @Test

@@ -17,7 +17,9 @@
 package com.android.server.companion.virtual;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.companion.virtual.IVirtualDevice;
+import android.os.LocaleList;
 
 import java.util.Set;
 
@@ -109,6 +111,20 @@ public abstract class VirtualDeviceManagerInternal {
      * device.
      */
     public abstract int getBaseVirtualDisplayFlags(IVirtualDevice virtualDevice);
+
+    /**
+     * Returns the preferred locale hints of the Virtual Device on which the given app is running,
+     * or {@code null} if the hosting virtual device doesn't have a virtual keyboard or the app is
+     * not on any virtual device.
+     *
+     * If an app is on multiple virtual devices, the locale of the virtual device created the
+     * earliest will be returned.
+     *
+     * See {@link android.hardware.input.VirtualKeyboardConfig#setLanguageTag() for how the locale
+     * is specified for virtual keyboard.
+     */
+    @Nullable
+    public abstract LocaleList getPreferredLocaleListForUid(int uid);
 
     /**
      * Returns true if the given {@code uid} is currently running on any virtual devices. This is

@@ -124,6 +124,10 @@ public final class VirtualKeyboardConfig extends VirtualInputDeviceConfig implem
          * Note that the preferred layout is not guaranteed. If the specified language is
          * well-formed but not supported, the keyboard will be using English US QWERTY layout.
          *
+         * In case where the owning Virtual Device has created multiple virtual keyboards, only the
+         * {@code languageTag} of the most recent virtual keyboard will be kept to hint the locale
+         * of the Virtual Device.
+         *
          *  @throws IllegalArgumentException if either of the language or country is not present in
          *  the language tag.
          */
