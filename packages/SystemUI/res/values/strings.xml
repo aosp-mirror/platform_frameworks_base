@@ -1313,6 +1313,9 @@
     <!-- QR Code Scanner label, title [CHAR LIMIT=32] -->
     <string name="qr_code_scanner_title">QR code scanner</string>
 
+    <!-- QR Code Scanner Secondary label when GMS Core is Updating -->
+    <string name="qr_code_scanner_updating_secondary_label">Updating</string>
+
     <!-- Name of the work status bar icon. -->
     <string name="status_bar_work">Work profile</string>
 
