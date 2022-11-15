@@ -43514,9 +43514,12 @@ package android.telephony {
     method public int getDomain();
     method @Nullable public String getRegisteredPlmn();
     method public int getTransportType();
-    method public boolean isRegistered();
-    method public boolean isRoaming();
-    method public boolean isSearching();
+    method public boolean isNetworkRegistered();
+    method public boolean isNetworkRoaming();
+    method public boolean isNetworkSearching();
+    method @Deprecated public boolean isRegistered();
+    method @Deprecated public boolean isRoaming();
+    method @Deprecated public boolean isSearching();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.NetworkRegistrationInfo> CREATOR;
     field public static final int DOMAIN_CS = 1; // 0x1
@@ -44282,6 +44285,7 @@ package android.telephony {
     method public int describeContents();
     method public int getNetworkType();
     method public int getOverrideNetworkType();
+    method public boolean isRoaming();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.TelephonyDisplayInfo> CREATOR;
     field public static final int OVERRIDE_NETWORK_TYPE_LTE_ADVANCED_PRO = 2; // 0x2

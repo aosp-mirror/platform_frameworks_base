@@ -1956,7 +1956,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 && overrideNetworkType == TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NR_ADVANCED) {
             overrideNetworkType = TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NR_NSA_MMWAVE;
         }
-        return new TelephonyDisplayInfo(networkType, overrideNetworkType);
+        boolean isRoaming = telephonyDisplayInfo.isRoaming();
+        return new TelephonyDisplayInfo(networkType, overrideNetworkType, isRoaming);
     }
 
     public void notifyCallForwardingChanged(boolean cfi) {
