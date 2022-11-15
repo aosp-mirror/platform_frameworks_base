@@ -51,6 +51,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.doze.DozeSensors.TriggerSensor;
 import com.android.systemui.plugins.SensorManagerPlugin;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.policy.DevicePostureController;
 import com.android.systemui.util.sensors.AsyncSensorManager;
@@ -98,6 +99,8 @@ public class DozeSensorsTest extends SysuiTestCase {
     private AuthController mAuthController;
     @Mock
     private DevicePostureController mDevicePostureController;
+    @Mock
+    private UserTracker mUserTracker;
     @Mock
     private ProximitySensor mProximitySensor;
 
@@ -428,7 +431,7 @@ public class DozeSensorsTest extends SysuiTestCase {
         DozeSensors dozeSensors = new DozeSensors(mSensorManager, mDozeParameters,
                 mAmbientDisplayConfiguration, mWakeLock, mCallback, mProxCallback, mDozeLog,
                 mProximitySensor, mFakeSettings, mAuthController,
-                mDevicePostureController);
+                mDevicePostureController, mUserTracker);
 
         for (TriggerSensor sensor : dozeSensors.mTriggerSensors) {
             assertFalse(sensor.mIgnoresSetting);
@@ -440,7 +443,7 @@ public class DozeSensorsTest extends SysuiTestCase {
             super(mSensorManager, mDozeParameters,
                     mAmbientDisplayConfiguration, mWakeLock, mCallback, mProxCallback, mDozeLog,
                     mProximitySensor, mFakeSettings, mAuthController,
-                    mDevicePostureController);
+                    mDevicePostureController, mUserTracker);
             for (TriggerSensor sensor : mTriggerSensors) {
                 if (sensor instanceof PluginSensor
                         && ((PluginSensor) sensor).mPluginSensor.getType()

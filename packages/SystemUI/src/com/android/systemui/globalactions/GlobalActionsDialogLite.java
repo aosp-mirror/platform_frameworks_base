@@ -125,6 +125,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.GlobalActions.GlobalActionsManager;
 import com.android.systemui.plugins.GlobalActionsPanelPlugin;
 import com.android.systemui.scrim.ScrimDrawable;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
@@ -201,6 +202,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
     protected final SecureSettings mSecureSettings;
     protected final Resources mResources;
     private final ConfigurationController mConfigurationController;
+    private final UserTracker mUserTracker;
     private final UserManager mUserManager;
     private final TrustManager mTrustManager;
     private final IActivityManager mIActivityManager;
@@ -339,6 +341,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             @NonNull VibratorHelper vibrator,
             @Main Resources resources,
             ConfigurationController configurationController,
+            UserTracker userTracker,
             KeyguardStateController keyguardStateController,
             UserManager userManager,
             TrustManager trustManager,
@@ -370,6 +373,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         mSecureSettings = secureSettings;
         mResources = resources;
         mConfigurationController = configurationController;
+        mUserTracker = userTracker;
         mUserManager = userManager;
         mTrustManager = trustManager;
         mIActivityManager = iActivityManager;
@@ -1198,11 +1202,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
     }
 
     protected UserInfo getCurrentUser() {
-        try {
-            return mIActivityManager.getCurrentUser();
-        } catch (RemoteException re) {
-            return null;
-        }
+        return mUserTracker.getUserInfo();
     }
 
     /**
