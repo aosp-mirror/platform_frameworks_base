@@ -102,6 +102,7 @@ import android.util.SparseBooleanArray;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
@@ -501,7 +502,7 @@ public class SyncManager {
             }
             mJobScheduler = (JobScheduler) mContext.getSystemService(
                     Context.JOB_SCHEDULER_SERVICE);
-            mJobSchedulerInternal = LocalServices.getService(JobSchedulerInternal.class);
+            mJobSchedulerInternal = getJobSchedulerInternal();
             // Get all persisted syncs from JobScheduler
             List<JobInfo> pendingJobs = mJobScheduler.getAllPendingJobs();
 
@@ -537,6 +538,11 @@ public class SyncManager {
         } finally {
             Binder.restoreCallingIdentity(token);
         }
+    }
+
+    @VisibleForTesting
+    protected JobSchedulerInternal getJobSchedulerInternal() {
+        return LocalServices.getService(JobSchedulerInternal.class);
     }
 
     /**
@@ -648,7 +654,7 @@ public class SyncManager {
         mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         mAccountManager = (AccountManager) mContext.getSystemService(Context.ACCOUNT_SERVICE);
-        mAccountManagerInternal = LocalServices.getService(AccountManagerInternal.class);
+        mAccountManagerInternal = getAccountManagerInternal();
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         mAmi = LocalServices.getService(ActivityManagerInternal.class);
 
@@ -720,6 +726,11 @@ public class SyncManager {
         whiteListExistingSyncAdaptersIfNeeded();
 
         mLogger.log("Sync manager initialized: " + Build.FINGERPRINT);
+    }
+
+    @VisibleForTesting
+    protected AccountManagerInternal getAccountManagerInternal() {
+        return LocalServices.getService(AccountManagerInternal.class);
     }
 
     public void onStartUser(int userId) {
@@ -823,7 +834,8 @@ public class SyncManager {
      * @return true if sync for the account corresponding to the given user and provider should be
      * disabled, false otherwise. Also returns false if either of the inputs are null.
      */
-    private boolean shouldDisableSyncForUser(UserInfo userInfo, String providerName) {
+    @VisibleForTesting
+    protected boolean shouldDisableSyncForUser(UserInfo userInfo, String providerName) {
         if (userInfo == null || providerName == null) return false;
         return providerName.equals(ContactsContract.AUTHORITY)
                 && !areContactWritesEnabledForUser(userInfo);
