@@ -48,6 +48,8 @@ public final class UserProperties implements Parcelable {
     private static final String ATTR_USE_PARENTS_CONTACTS = "useParentsContacts";
     private static final String ATTR_UPDATE_CROSS_PROFILE_INTENT_FILTERS_ON_OTA =
             "updateCrossProfileIntentFiltersOnOTA";
+    private static final String ATTR_CROSS_PROFILE_INTENT_FILTER_ACCESS_CONTROL =
+            "crossProfileIntentFilterAccessControl";
 
     /** Index values of each property (to indicate whether they are present in this object). */
     @IntDef(prefix = "INDEX_", value = {
@@ -56,7 +58,8 @@ public final class UserProperties implements Parcelable {
             INDEX_SHOW_IN_SETTINGS,
             INDEX_INHERIT_DEVICE_POLICY,
             INDEX_USE_PARENTS_CONTACTS,
-            INDEX_UPDATE_CROSS_PROFILE_INTENT_FILTERS_ON_OTA
+            INDEX_UPDATE_CROSS_PROFILE_INTENT_FILTERS_ON_OTA,
+            INDEX_CROSS_PROFILE_INTENT_FILTER_ACCESS_CONTROL
     })
     @Retention(RetentionPolicy.SOURCE)
     private @interface PropertyIndex {
@@ -67,6 +70,7 @@ public final class UserProperties implements Parcelable {
     private static final int INDEX_INHERIT_DEVICE_POLICY = 3;
     private static final int INDEX_USE_PARENTS_CONTACTS = 4;
     private static final int INDEX_UPDATE_CROSS_PROFILE_INTENT_FILTERS_ON_OTA = 5;
+    private static final int INDEX_CROSS_PROFILE_INTENT_FILTER_ACCESS_CONTROL = 6;
     /** A bit set, mapping each PropertyIndex to whether it is present (1) or absent (0). */
     private long mPropertiesPresent = 0;
 
@@ -170,6 +174,51 @@ public final class UserProperties implements Parcelable {
     private final @Nullable UserProperties mDefaultProperties;
 
     /**
+     * CrossProfileIntentFilterAccessControlLevel provides level of access for user to create/modify
+     * {@link CrossProfileIntentFilter}. Each level have value assigned, the higher the value
+     * implies higher restriction for creation/modification.
+     * CrossProfileIntentFilterAccessControlLevel allows us to protect against malicious changes in
+     * user's {@link CrossProfileIntentFilter}s, which might add/remove
+     * {@link CrossProfileIntentFilter} leading to unprecedented results.
+     *
+     * @hide
+     */
+    @IntDef(prefix = {"CROSS_PROFILE_INTENT_FILTER_ACCESS_LEVEL_"}, value = {
+            CROSS_PROFILE_INTENT_FILTER_ACCESS_LEVEL_ALL,
+            CROSS_PROFILE_INTENT_FILTER_ACCESS_LEVEL_SYSTEM,
+            CROSS_PROFILE_INTENT_FILTER_ACCESS_LEVEL_SYSTEM_ADD_ONLY,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface CrossProfileIntentFilterAccessControlLevel {
+    }
+
+    /**
+     * CROSS_PROFILE_INTENT_FILTER_ACCESS_LEVEL_ALL signifies that irrespective of user we would
+     * allow access (addition/modification/removal) for CrossProfileIntentFilter.
+     * This is the default access control level.
+     *
+     * @hide
+     */
+    public static final int CROSS_PROFILE_INTENT_FILTER_ACCESS_LEVEL_ALL = 0;
+
+    /**
+     * CROSS_PROFILE_INTENT_FILTER_ACCESS_LEVEL_SYSTEM signifies that only system/root user would
+     * be able to access (addition/modification/removal) CrossProfileIntentFilter.
+     *
+     * @hide
+     */
+    public static final int CROSS_PROFILE_INTENT_FILTER_ACCESS_LEVEL_SYSTEM = 10;
+
+    /**
+     * CROSS_PROFILE_INTENT_FILTER_ACCESS_LEVEL_SYSTEM_ADD_ONLY signifies that only system/root
+     * user would be able to add CrossProfileIntentFilter but not modify/remove. Once added, it
+     * cannot be modified or removed.
+     *
+     * @hide
+     */
+    public static final int CROSS_PROFILE_INTENT_FILTER_ACCESS_LEVEL_SYSTEM_ADD_ONLY = 20;
+
+    /**
      * Creates a UserProperties (intended for the SystemServer) that stores a reference to the given
      * default properties, which it uses for any property not subsequently set.
      * @hide
@@ -204,6 +253,8 @@ public final class UserProperties implements Parcelable {
             setStartWithParent(orig.getStartWithParent());
             setInheritDevicePolicy(orig.getInheritDevicePolicy());
             setUpdateCrossProfileIntentFiltersOnOTA(orig.getUpdateCrossProfileIntentFiltersOnOTA());
+            setCrossProfileIntentFilterAccessControl(
+                    orig.getCrossProfileIntentFilterAccessControl());
         }
         if (hasManagePermission) {
             // Add items that require MANAGE_USERS or stronger.
@@ -387,6 +438,34 @@ public final class UserProperties implements Parcelable {
      */
     private boolean mUpdateCrossProfileIntentFiltersOnOTA;
 
+
+    /**
+     * Returns the user's {@link CrossProfileIntentFilterAccessControlLevel}.
+     * @hide
+     */
+    public @CrossProfileIntentFilterAccessControlLevel int
+            getCrossProfileIntentFilterAccessControl() {
+        if (isPresent(INDEX_CROSS_PROFILE_INTENT_FILTER_ACCESS_CONTROL)) {
+            return mCrossProfileIntentFilterAccessControl;
+        }
+        if (mDefaultProperties != null) {
+            return mDefaultProperties.mCrossProfileIntentFilterAccessControl;
+        }
+        throw new SecurityException("You don't have permission to query "
+                + "crossProfileIntentFilterAccessControl");
+    }
+    /**
+     * Sets {@link CrossProfileIntentFilterAccessControlLevel} for the user.
+     * @param val access control for user
+     * @hide
+     */
+    public void setCrossProfileIntentFilterAccessControl(
+            @CrossProfileIntentFilterAccessControlLevel int val) {
+        this.mCrossProfileIntentFilterAccessControl = val;
+        setPresent(INDEX_CROSS_PROFILE_INTENT_FILTER_ACCESS_CONTROL);
+    }
+    private @CrossProfileIntentFilterAccessControlLevel int mCrossProfileIntentFilterAccessControl;
+
     @Override
     public String toString() {
         // Please print in increasing order of PropertyIndex.
@@ -399,6 +478,8 @@ public final class UserProperties implements Parcelable {
                 + ", mUseParentsContacts=" + getUseParentsContacts()
                 + ", mUpdateCrossProfileIntentFiltersOnOTA="
                 + getUpdateCrossProfileIntentFiltersOnOTA()
+                + ", mCrossProfileIntentFilterAccessControl="
+                + getCrossProfileIntentFilterAccessControl()
                 + "}";
     }
 
@@ -417,6 +498,8 @@ public final class UserProperties implements Parcelable {
         pw.println(prefix + "    mUseParentsContacts=" + getUseParentsContacts());
         pw.println(prefix + "    mUpdateCrossProfileIntentFiltersOnOTA="
                 + getUpdateCrossProfileIntentFiltersOnOTA());
+        pw.println(prefix + "    mCrossProfileIntentFilterAccessControl="
+                + getCrossProfileIntentFilterAccessControl());
     }
 
     /**
@@ -468,6 +551,9 @@ public final class UserProperties implements Parcelable {
                 case ATTR_UPDATE_CROSS_PROFILE_INTENT_FILTERS_ON_OTA:
                     setUpdateCrossProfileIntentFiltersOnOTA(parser.getAttributeBoolean(i));
                     break;
+                case ATTR_CROSS_PROFILE_INTENT_FILTER_ACCESS_CONTROL:
+                    setCrossProfileIntentFilterAccessControl(parser.getAttributeInt(i));
+                    break;
                 default:
                     Slog.w(LOG_TAG, "Skipping unknown property " + attributeName);
             }
@@ -507,6 +593,10 @@ public final class UserProperties implements Parcelable {
                     ATTR_UPDATE_CROSS_PROFILE_INTENT_FILTERS_ON_OTA,
                     mUpdateCrossProfileIntentFiltersOnOTA);
         }
+        if (isPresent(INDEX_CROSS_PROFILE_INTENT_FILTER_ACCESS_CONTROL)) {
+            serializer.attributeInt(null, ATTR_CROSS_PROFILE_INTENT_FILTER_ACCESS_CONTROL,
+                    mCrossProfileIntentFilterAccessControl);
+        }
     }
 
     // For use only with an object that has already had any permission-lacking fields stripped out.
@@ -519,6 +609,7 @@ public final class UserProperties implements Parcelable {
         dest.writeInt(mInheritDevicePolicy);
         dest.writeBoolean(mUseParentsContacts);
         dest.writeBoolean(mUpdateCrossProfileIntentFiltersOnOTA);
+        dest.writeInt(mCrossProfileIntentFilterAccessControl);
     }
 
     /**
@@ -535,6 +626,7 @@ public final class UserProperties implements Parcelable {
         mInheritDevicePolicy = source.readInt();
         mUseParentsContacts = source.readBoolean();
         mUpdateCrossProfileIntentFiltersOnOTA = source.readBoolean();
+        mCrossProfileIntentFilterAccessControl = source.readInt();
     }
 
     @Override
@@ -565,6 +657,9 @@ public final class UserProperties implements Parcelable {
         private @InheritDevicePolicy int mInheritDevicePolicy = INHERIT_DEVICE_POLICY_NO;
         private boolean mUseParentsContacts = false;
         private boolean mUpdateCrossProfileIntentFiltersOnOTA = false;
+        private @CrossProfileIntentFilterAccessControlLevel int
+                mCrossProfileIntentFilterAccessControl =
+                CROSS_PROFILE_INTENT_FILTER_ACCESS_LEVEL_ALL;
 
         public Builder setShowInLauncher(@ShowInLauncher int showInLauncher) {
             mShowInLauncher = showInLauncher;
@@ -601,6 +696,14 @@ public final class UserProperties implements Parcelable {
             return this;
         }
 
+        /** Sets the value for {@link #mCrossProfileIntentFilterAccessControl} */
+        public Builder setCrossProfileIntentFilterAccessControl(
+                @CrossProfileIntentFilterAccessControlLevel int
+                        crossProfileIntentFilterAccessControl) {
+            mCrossProfileIntentFilterAccessControl = crossProfileIntentFilterAccessControl;
+            return this;
+        }
+
         /** Builds a UserProperties object with *all* values populated. */
         public UserProperties build() {
             return new UserProperties(
@@ -609,7 +712,8 @@ public final class UserProperties implements Parcelable {
                     mShowInSettings,
                     mInheritDevicePolicy,
                     mUseParentsContacts,
-                    mUpdateCrossProfileIntentFiltersOnOTA);
+                    mUpdateCrossProfileIntentFiltersOnOTA,
+                    mCrossProfileIntentFilterAccessControl);
         }
     } // end Builder
 
@@ -619,7 +723,8 @@ public final class UserProperties implements Parcelable {
             boolean startWithParent,
             @ShowInSettings int showInSettings,
             @InheritDevicePolicy int inheritDevicePolicy,
-            boolean useParentsContacts, boolean updateCrossProfileIntentFiltersOnOTA) {
+            boolean useParentsContacts, boolean updateCrossProfileIntentFiltersOnOTA,
+            @CrossProfileIntentFilterAccessControlLevel int crossProfileIntentFilterAccessControl) {
 
         mDefaultProperties = null;
         setShowInLauncher(showInLauncher);
@@ -628,5 +733,6 @@ public final class UserProperties implements Parcelable {
         setInheritDevicePolicy(inheritDevicePolicy);
         setUseParentsContacts(useParentsContacts);
         setUpdateCrossProfileIntentFiltersOnOTA(updateCrossProfileIntentFiltersOnOTA);
+        setCrossProfileIntentFilterAccessControl(crossProfileIntentFilterAccessControl);
     }
 }
