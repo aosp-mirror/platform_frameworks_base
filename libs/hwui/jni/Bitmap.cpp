@@ -2,48 +2,41 @@
 #define LOG_TAG "Bitmap"
 #include "Bitmap.h"
 
+#include <hwui/Bitmap.h>
+#include <hwui/Paint.h>
+
+#include "CreateJavaOutputStreamAdaptor.h"
 #include "GraphicsJNI.h"
+#include "HardwareBufferHelpers.h"
 #include "SkBitmap.h"
 #include "SkBlendMode.h"
 #include "SkCanvas.h"
 #include "SkColor.h"
 #include "SkColorSpace.h"
 #include "SkData.h"
-#include "SkImageEncoder.h"
 #include "SkImageInfo.h"
 #include "SkPaint.h"
-#include "SkPixelRef.h"
 #include "SkPixmap.h"
 #include "SkPoint.h"
 #include "SkRefCnt.h"
 #include "SkStream.h"
 #include "SkTypes.h"
-#include "SkWebpEncoder.h"
-
-
 #include "android_nio_utils.h"
-#include "CreateJavaOutputStreamAdaptor.h"
-#include <hwui/Paint.h>
-#include <hwui/Bitmap.h>
-#include <utils/Color.h>
 
 #ifdef __ANDROID__ // Layoutlib does not support graphic buffer, parcel or render thread
 #include <android-base/unique_fd.h>
 #include <android/binder_parcel.h>
 #include <android/binder_parcel_jni.h>
 #include <android/binder_parcel_platform.h>
-#include <android/binder_parcel_utils.h>
-#include <private/android/AHardwareBufferHelpers.h>
 #include <cutils/ashmem.h>
-#include <dlfcn.h>
 #include <renderthread/RenderProxy.h>
 #include <sys/mman.h>
 #endif
 
 #include <inttypes.h>
 #include <string.h>
+
 #include <memory>
-#include <string>
 
 #define DEBUG_PARCEL 0
 
@@ -1197,18 +1190,11 @@ static jobject Bitmap_copyPreserveInternalConfig(JNIEnv* env, jobject, jlong bit
     return createBitmap(env, bitmap.release(), getPremulBitmapCreateFlags(false));
 }
 
-#ifdef __ANDROID__ // Layoutlib does not support graphic buffer
-typedef AHardwareBuffer* (*AHB_from_HB)(JNIEnv*, jobject);
-AHB_from_HB AHardwareBuffer_fromHardwareBuffer;
-
-typedef jobject (*AHB_to_HB)(JNIEnv*, AHardwareBuffer*);
-AHB_to_HB AHardwareBuffer_toHardwareBuffer;
-#endif
-
 static jobject Bitmap_wrapHardwareBufferBitmap(JNIEnv* env, jobject, jobject hardwareBuffer,
                                                jlong colorSpacePtr) {
 #ifdef __ANDROID__ // Layoutlib does not support graphic buffer
-    AHardwareBuffer* buffer = AHardwareBuffer_fromHardwareBuffer(env, hardwareBuffer);
+    AHardwareBuffer* buffer = uirenderer::HardwareBufferHelpers::AHardwareBuffer_fromHardwareBuffer(
+            env, hardwareBuffer);
     sk_sp<Bitmap> bitmap = Bitmap::createFrom(buffer,
                                               GraphicsJNI::getNativeColorSpace(colorSpacePtr));
     if (!bitmap.get()) {
@@ -1231,7 +1217,8 @@ static jobject Bitmap_getHardwareBuffer(JNIEnv* env, jobject, jlong bitmapPtr) {
     }
 
     Bitmap& bitmap = bitmapHandle->bitmap();
-    return AHardwareBuffer_toHardwareBuffer(env, bitmap.hardwareBuffer());
+    return uirenderer::HardwareBufferHelpers::AHardwareBuffer_toHardwareBuffer(
+            env, bitmap.hardwareBuffer());
 #else
     return nullptr;
 #endif
@@ -1329,18 +1316,7 @@ int register_android_graphics_Bitmap(JNIEnv* env)
     gBitmap_nativePtr = GetFieldIDOrDie(env, gBitmap_class, "mNativePtr", "J");
     gBitmap_constructorMethodID = GetMethodIDOrDie(env, gBitmap_class, "<init>", "(JIIIZ[BLandroid/graphics/NinePatch$InsetStruct;Z)V");
     gBitmap_reinitMethodID = GetMethodIDOrDie(env, gBitmap_class, "reinit", "(IIZ)V");
-
-#ifdef __ANDROID__ // Layoutlib does not support graphic buffer or parcel
-    void* handle_ = dlopen("libandroid.so", RTLD_NOW | RTLD_NODELETE);
-    AHardwareBuffer_fromHardwareBuffer =
-            (AHB_from_HB)dlsym(handle_, "AHardwareBuffer_fromHardwareBuffer");
-    LOG_ALWAYS_FATAL_IF(AHardwareBuffer_fromHardwareBuffer == nullptr,
-                        "Failed to find required symbol AHardwareBuffer_fromHardwareBuffer!");
-
-    AHardwareBuffer_toHardwareBuffer = (AHB_to_HB)dlsym(handle_, "AHardwareBuffer_toHardwareBuffer");
-    LOG_ALWAYS_FATAL_IF(AHardwareBuffer_toHardwareBuffer == nullptr,
-                        " Failed to find required symbol AHardwareBuffer_toHardwareBuffer!");
-#endif
+    uirenderer::HardwareBufferHelpers::init();
     return android::RegisterMethodsOrDie(env, "android/graphics/Bitmap", gBitmapMethods,
                                          NELEM(gBitmapMethods));
 }

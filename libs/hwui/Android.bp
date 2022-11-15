@@ -329,6 +329,7 @@ cc_defaults {
         "jni/android_util_PathParser.cpp",
 
         "jni/Bitmap.cpp",
+        "jni/HardwareBufferHelpers.cpp",
         "jni/BitmapFactory.cpp",
         "jni/ByteBufferStreamAdaptor.cpp",
         "jni/Camera.cpp",
@@ -397,6 +398,7 @@ cc_defaults {
                 "jni/AnimatedImageDrawable.cpp",
                 "jni/android_graphics_TextureLayer.cpp",
                 "jni/android_graphics_HardwareRenderer.cpp",
+                "jni/android_graphics_HardwareBufferRenderer.cpp",
                 "jni/BitmapRegionDecoder.cpp",
                 "jni/GIFMovie.cpp",
                 "jni/GraphicsStatsService.cpp",

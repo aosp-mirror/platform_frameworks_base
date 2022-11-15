@@ -26,6 +26,7 @@
 #include "../Properties.h"
 #include "../RenderNode.h"
 #include "CanvasContext.h"
+#include "HardwareBufferRenderParams.h"
 #include "RenderThread.h"
 
 namespace android {
@@ -91,6 +92,9 @@ void DrawFrameTask::run() {
 
     mContext->setSyncDelayDuration(systemTime(SYSTEM_TIME_MONOTONIC) - mSyncQueued);
 
+    auto hardwareBufferParams = mHardwareBufferParams;
+    mContext->setHardwareBufferRenderParams(hardwareBufferParams);
+    IRenderPipeline* pipeline = mContext->getRenderPipeline();
     bool canUnblockUiThread;
     bool canDrawThisFrame;
     {
@@ -150,6 +154,11 @@ void DrawFrameTask::run() {
     if (!canUnblockUiThread) {
         unblockUiThread();
     }
+
+    if (pipeline->hasHardwareBuffer()) {
+        auto fence = pipeline->flush();
+        hardwareBufferParams.invokeRenderCallback(std::move(fence), 0);
+    }
 }
 
 bool DrawFrameTask::syncFrameState(TreeInfo& info) {
@@ -175,8 +184,9 @@ bool DrawFrameTask::syncFrameState(TreeInfo& info) {
 
     // This is after the prepareTree so that any pending operations
     // (RenderNode tree state, prefetched layers, etc...) will be flushed.
-    if (CC_UNLIKELY(!mContext->hasSurface() || !canDraw)) {
-        if (!mContext->hasSurface()) {
+    bool hasTarget = mContext->hasOutputTarget();
+    if (CC_UNLIKELY(!hasTarget || !canDraw)) {
+        if (!hasTarget) {
             mSyncResult |= SyncResult::LostSurfaceRewardIfFound;
         } else {
             // If we have a surface but can't draw we must be stopped

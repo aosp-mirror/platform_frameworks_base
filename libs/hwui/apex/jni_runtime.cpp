@@ -83,6 +83,7 @@ extern int register_android_util_PathParser(JNIEnv* env);
 extern int register_android_view_DisplayListCanvas(JNIEnv* env);
 extern int register_android_view_RenderNode(JNIEnv* env);
 extern int register_android_view_ThreadedRenderer(JNIEnv* env);
+extern int register_android_graphics_HardwareBufferRenderer(JNIEnv* env);
 
 #ifdef NDEBUG
     #define REG_JNI(name)      { name }
@@ -151,6 +152,8 @@ extern int register_android_view_ThreadedRenderer(JNIEnv* env);
             REG_JNI(register_android_util_PathParser),
             REG_JNI(register_android_view_RenderNode),
             REG_JNI(register_android_view_DisplayListCanvas),
+            REG_JNI(register_android_graphics_HardwareBufferRenderer),
+
             REG_JNI(register_android_view_ThreadedRenderer),
     };
 
