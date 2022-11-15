@@ -167,7 +167,7 @@ public class PackageInstallerSessionTest {
             params.isMultiPackage = true;
         }
         InstallSource installSource = InstallSource.create("testInstallInitiator",
-                "testInstallOriginator", "testInstaller", "testAttributionTag",
+                "testInstallOriginator", "testInstaller", -1, "testAttributionTag",
                 PackageInstaller.PACKAGE_SOURCE_UNSPECIFIED);
         return new PackageInstallerSession(
                 /* callback */ null,
@@ -335,8 +335,8 @@ public class PackageInstallerSessionTest {
     }
 
     private void assertInstallSourcesEquivalent(InstallSource expected, InstallSource actual) {
-        assertEquals(expected.installerPackageName, actual.installerPackageName);
-        assertEquals(expected.initiatingPackageName, actual.initiatingPackageName);
-        assertEquals(expected.originatingPackageName, actual.originatingPackageName);
+        assertEquals(expected.mInstallerPackageName, actual.mInstallerPackageName);
+        assertEquals(expected.mInitiatingPackageName, actual.mInitiatingPackageName);
+        assertEquals(expected.mOriginatingPackageName, actual.mOriginatingPackageName);
     }
 }

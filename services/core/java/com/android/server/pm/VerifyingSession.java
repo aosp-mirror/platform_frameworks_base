@@ -764,7 +764,7 @@ final class VerifyingSession {
 
     void populateInstallerExtras(Intent intent) {
         intent.putExtra(PackageManager.EXTRA_VERIFICATION_INSTALLER_PACKAGE,
-                mInstallSource.initiatingPackageName);
+                mInstallSource.mInitiatingPackageName);
 
         if (mVerificationInfo != null) {
             if (mVerificationInfo.mOriginatingUri != null) {

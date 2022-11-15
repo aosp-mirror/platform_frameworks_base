@@ -493,7 +493,7 @@ public class ScanTests {
 
         final ScanResult scanResult = executeScan(scanRequest);
 
-        assertThat(scanResult.mPkgSetting.getInstallSource().isOrphaned, is(true));
+        assertThat(scanResult.mPkgSetting.getInstallSource().mIsOrphaned, is(true));
     }
 
     private static Matcher<Integer> hasFlag(final int flag) {

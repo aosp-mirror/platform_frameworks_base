@@ -263,9 +263,10 @@ public class PackageStateMutator {
 
         @NonNull
         @Override
-        public PackageStateWrite setInstaller(@NonNull String installerPackageName) {
+        public PackageStateWrite setInstaller(@Nullable String installerPackageName,
+                int installerPackageUid) {
             if (mState != null) {
-                mState.setInstallerPackageName(installerPackageName);
+                mState.setInstallerPackage(installerPackageName, installerPackageUid);
             }
             return this;
         }

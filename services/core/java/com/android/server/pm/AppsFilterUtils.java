@@ -69,11 +69,11 @@ final class AppsFilterUtils {
     public static boolean canQueryAsInstaller(PackageStateInternal querying,
             AndroidPackage potentialTarget) {
         final InstallSource installSource = querying.getInstallSource();
-        if (potentialTarget.getPackageName().equals(installSource.installerPackageName)) {
+        if (potentialTarget.getPackageName().equals(installSource.mInstallerPackageName)) {
             return true;
         }
-        if (!installSource.isInitiatingPackageUninstalled
-                && potentialTarget.getPackageName().equals(installSource.initiatingPackageName)) {
+        if (!installSource.mIsInitiatingPackageUninstalled
+                && potentialTarget.getPackageName().equals(installSource.mInitiatingPackageName)) {
             return true;
         }
         return false;

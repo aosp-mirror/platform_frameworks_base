@@ -143,7 +143,7 @@ class InstallingSession {
         mOriginInfo = OriginInfo.fromStagedFile(stagedDir);
         mMoveInfo = null;
         mInstallReason = fixUpInstallReason(
-                installSource.installerPackageName, installerUid, sessionParams.installReason);
+                installSource.mInstallerPackageName, installerUid, sessionParams.installReason);
         mInstallScenario = sessionParams.installScenario;
         mObserver = observer;
         mInstallFlags = sessionParams.installFlags;

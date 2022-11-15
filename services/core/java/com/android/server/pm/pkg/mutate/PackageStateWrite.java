@@ -56,5 +56,5 @@ public interface PackageStateWrite {
     PackageStateWrite setOverrideSeInfo(@Nullable String newSeInfo);
 
     @NonNull
-    PackageStateWrite setInstaller(@NonNull String installerPackageName);
+    PackageStateWrite setInstaller(@Nullable String installerPackageName, int installerPackageUid);
 }

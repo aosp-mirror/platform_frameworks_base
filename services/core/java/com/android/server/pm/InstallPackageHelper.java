@@ -307,9 +307,9 @@ final class InstallPackageHelper {
         // previous device state.
         InstallSource installSource = request.getInstallSource();
         if (installSource != null) {
-            if (installSource.initiatingPackageName != null) {
+            if (installSource.mInitiatingPackageName != null) {
                 final PackageSetting ips = mPm.mSettings.getPackageLPr(
-                        installSource.initiatingPackageName);
+                        installSource.mInitiatingPackageName);
                 if (ips != null) {
                     installSource = installSource.setInitiatingPackageSignatures(
                             ips.getSignatures());
@@ -1565,7 +1565,7 @@ final class InstallPackageHelper {
                 removedInfo.mUid = oldPackage.getUid();
                 removedInfo.mRemovedPackage = oldPackage.getPackageName();
                 removedInfo.mInstallerPackageName =
-                        ps.getInstallSource().installerPackageName;
+                        ps.getInstallSource().mInstallerPackageName;
                 removedInfo.mIsStaticSharedLib =
                         parsedPackage.getStaticSharedLibraryName() != null;
                 removedInfo.mIsUpdate = true;

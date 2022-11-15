@@ -314,7 +314,7 @@ final class InstallRequest {
     @Nullable
     public String getInstallerPackageName() {
         return (mInstallArgs != null && mInstallArgs.mInstallSource != null)
-                ? mInstallArgs.mInstallSource.installerPackageName : null;
+                ? mInstallArgs.mInstallSource.mInstallerPackageName : null;
     }
 
     public int getDataLoaderType() {
@@ -343,7 +343,7 @@ final class InstallRequest {
 
     @Nullable
     public String getSourceInstallerPackageName() {
-        return mInstallArgs.mInstallSource.installerPackageName;
+        return mInstallArgs.mInstallSource.mInstallerPackageName;
     }
 
     public boolean isRollback() {
