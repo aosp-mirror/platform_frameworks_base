@@ -296,7 +296,7 @@ public final class TransitionFilter implements Parcelable {
                     out.append((i == 0 ? "" : ",") + TransitionInfo.modeToString(mModes[i]));
                 }
             }
-            out.append("]").toString();
+            out.append("]");
             out.append(" flags=" + TransitionInfo.flagsToString(mFlags));
             out.append(" mustBeTask=" + mMustBeTask);
             out.append(" order=" + containerOrderToString(mOrder));

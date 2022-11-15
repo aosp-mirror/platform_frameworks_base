@@ -909,4 +909,4 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
             }
         }
     };
-};
+}

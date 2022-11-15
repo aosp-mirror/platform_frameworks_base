@@ -50,7 +50,6 @@ import com.android.internal.telephony.util.TelephonyUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
@@ -164,10 +163,9 @@ public class ImsService extends Service {
      * Used for logging purposes, see {@link #getCapabilitiesString(long)}
      * @hide
      */
-    private static final Map<Long, String> CAPABILITIES_LOG_MAP = new HashMap<Long, String>() {{
-            put(CAPABILITY_EMERGENCY_OVER_MMTEL, "EMERGENCY_OVER_MMTEL");
-            put(CAPABILITY_SIP_DELEGATE_CREATION, "SIP_DELEGATE_CREATION");
-        }};
+    private static final Map<Long, String> CAPABILITIES_LOG_MAP = Map.of(
+            CAPABILITY_EMERGENCY_OVER_MMTEL, "EMERGENCY_OVER_MMTEL",
+            CAPABILITY_SIP_DELEGATE_CREATION, "SIP_DELEGATE_CREATION");
 
     /**
      * The intent that must be defined as an intent-filter in the AndroidManifest of the ImsService.

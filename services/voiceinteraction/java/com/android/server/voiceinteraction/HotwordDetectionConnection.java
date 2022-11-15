@@ -1312,4 +1312,4 @@ final class HotwordDetectionConnection {
 
     private static final String OP_MESSAGE =
             "Providing hotword detection result to VoiceInteractionService";
-};
+}
