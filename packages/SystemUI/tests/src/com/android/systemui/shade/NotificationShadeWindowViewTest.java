@@ -43,6 +43,7 @@ import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBouncerViewModel;
 import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
+import com.android.systemui.statusbar.NotificationInsetsController;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
@@ -91,6 +92,7 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
     @Mock private FeatureFlags mFeatureFlags;
     @Mock private KeyguardBouncerViewModel mKeyguardBouncerViewModel;
     @Mock private KeyguardBouncerComponent.Factory mKeyguardBouncerComponentFactory;
+    @Mock private NotificationInsetsController mNotificationInsetsController;
 
     @Captor private ArgumentCaptor<NotificationShadeWindowView.InteractionEventHandler>
             mInteractionEventHandlerCaptor;
@@ -125,6 +127,7 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
                 mCentralSurfaces,
                 mNotificationShadeWindowController,
                 mKeyguardUnlockAnimationController,
+                mNotificationInsetsController,
                 mAmbientState,
                 mPulsingGestureListener,
                 mFeatureFlags,

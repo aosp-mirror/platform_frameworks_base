@@ -24,6 +24,7 @@ import static com.android.systemui.statusbar.phone.CentralSurfaces.DEBUG;
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
 import android.annotation.LayoutRes;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
@@ -36,6 +37,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Trace;
 import android.util.AttributeSet;
+import android.util.Pair;
 import android.view.ActionMode;
 import android.view.DisplayCutout;
 import android.view.InputQueue;
@@ -74,6 +76,7 @@ public class NotificationShadeWindowView extends FrameLayout {
     private ViewTreeObserver.OnPreDrawListener mFloatingToolbarPreDrawListener;
 
     private InteractionEventHandler mInteractionEventHandler;
+    private LayoutInsetsController mLayoutInsetProvider;
 
     public NotificationShadeWindowView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -108,12 +111,10 @@ public class NotificationShadeWindowView extends FrameLayout {
         mLeftInset = 0;
         mRightInset = 0;
         DisplayCutout displayCutout = getRootWindowInsets().getDisplayCutout();
-        if (displayCutout != null) {
-            mLeftInset = displayCutout.getSafeInsetLeft();
-            mRightInset = displayCutout.getSafeInsetRight();
-        }
-        mLeftInset = Math.max(insets.left, mLeftInset);
-        mRightInset = Math.max(insets.right, mRightInset);
+        Pair<Integer, Integer> pairInsets = mLayoutInsetProvider
+                .getinsets(windowInsets, displayCutout);
+        mLeftInset = pairInsets.first;
+        mRightInset = pairInsets.second;
         applyMargins();
         return windowInsets;
     }
@@ -170,6 +171,10 @@ public class NotificationShadeWindowView extends FrameLayout {
 
     protected void setInteractionEventHandler(InteractionEventHandler listener) {
         mInteractionEventHandler = listener;
+    }
+
+    protected void setLayoutInsetsController(LayoutInsetsController provider) {
+        mLayoutInsetProvider = provider;
     }
 
     @Override
@@ -351,6 +356,18 @@ public class NotificationShadeWindowView extends FrameLayout {
                 super.onGetContentRect(mode, view, outRect);
             }
         }
+    }
+
+    /**
+     * Controller responsible for calculating insets for the shade window.
+     */
+    public interface LayoutInsetsController {
+
+        /**
+         * Update the insets and calculate them accordingly.
+         */
+        Pair<Integer, Integer> getinsets(@Nullable WindowInsets windowInsets,
+                @Nullable DisplayCutout displayCutout);
     }
 
     interface InteractionEventHandler {
