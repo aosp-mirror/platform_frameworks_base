@@ -645,16 +645,15 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
         }
 
         std::string name;
-        util::ReadUtf16StringFromDevice(overlayable->name, arraysize(overlayable->name), &name);
+        util::ReadUtf16StringFromDevice(overlayable->name, std::size(overlayable->name), &name);
         std::string actor;
-        util::ReadUtf16StringFromDevice(overlayable->actor, arraysize(overlayable->actor), &actor);
-
-        if (loaded_package->overlayable_map_.find(name) !=
-            loaded_package->overlayable_map_.end()) {
-          LOG(ERROR) << "Multiple <overlayable> blocks with the same name '" << name << "'.";
+        util::ReadUtf16StringFromDevice(overlayable->actor, std::size(overlayable->actor), &actor);
+        auto [it, inserted] =
+            loaded_package->overlayable_map_.emplace(name, actor);
+        if (!inserted) {
+          LOG(ERROR) << "Multiple <overlayable> blocks with the same name '" << it->first << "'.";
           return {};
         }
-        loaded_package->overlayable_map_.emplace(name, actor);
 
         // Iterate over the overlayable policy chunks contained within the overlayable chunk data
         ChunkIterator overlayable_iter(child_chunk.data_ptr(), child_chunk.data_size());
@@ -736,6 +735,7 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
         const auto entry_end = entry_begin + dtohl(lib_alias->count);
         std::unordered_set<uint32_t> finalized_ids;
         finalized_ids.reserve(entry_end - entry_begin);
+        loaded_package->alias_id_map_.reserve(entry_end - entry_begin);
         for (auto entry_iter = entry_begin; entry_iter != entry_end; ++entry_iter) {
           if (!entry_iter) {
             LOG(ERROR) << "NULL ResTable_staged_alias_entry record??";
@@ -749,13 +749,20 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
           }
 
           auto staged_id = dtohl(entry_iter->stagedResId);
-          auto [_, success] = loaded_package->alias_id_map_.emplace(staged_id, finalized_id);
-          if (!success) {
+          loaded_package->alias_id_map_.emplace_back(staged_id, finalized_id);
+        }
+
+        std::sort(loaded_package->alias_id_map_.begin(), loaded_package->alias_id_map_.end(),
+            [](auto&& l, auto&& r) { return l.first < r.first; });
+        const auto duplicate_it =
+            std::adjacent_find(loaded_package->alias_id_map_.begin(),
+                               loaded_package->alias_id_map_.end(),
+                               [](auto&& l, auto&& r) { return l.first == r.first; });
+          if (duplicate_it != loaded_package->alias_id_map_.end()) {
             LOG(ERROR) << StringPrintf("Repeated staged resource id '%08x' in staged aliases.",
-                                       staged_id);
+                                       duplicate_it->first);
             return {};
           }
-        }
       } break;
 
       default:
