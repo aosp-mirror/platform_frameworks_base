@@ -62,4 +62,10 @@ android_test {
 
     test_suites: ["device-tests"],
     certificate: "platform",
+
+    errorprone: {
+        javacflags: [
+            "-Xep:ReturnValueIgnored:WARN",
+        ],
+    },
 }
