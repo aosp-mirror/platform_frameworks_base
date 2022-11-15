@@ -81,7 +81,7 @@ final class InstallRequest {
     /** Package Installed Info */
     @Nullable
     private String mName;
-    private int mUid = -1;
+    private int mUid = INVALID_UID;
     // The set of users that originally had this package installed.
     @Nullable
     private int[] mOrigUsers;
@@ -315,6 +315,11 @@ final class InstallRequest {
     public String getInstallerPackageName() {
         return (mInstallArgs != null && mInstallArgs.mInstallSource != null)
                 ? mInstallArgs.mInstallSource.mInstallerPackageName : null;
+    }
+
+    public int getInstallerPackageUid() {
+        return (mInstallArgs != null && mInstallArgs.mInstallSource != null)
+                ? mInstallArgs.mInstallSource.mInstallerPackageUid : INVALID_UID;
     }
 
     public int getDataLoaderType() {
@@ -608,12 +613,18 @@ final class InstallRequest {
         setReturnCode(code);
         setReturnMessage(msg);
         Slog.w(TAG, msg);
+        if (mPackageMetrics != null) {
+            mPackageMetrics.onInstallFailed();
+        }
     }
 
     public void setError(String msg, PackageManagerException e) {
         mReturnCode = e.error;
         setReturnMessage(ExceptionUtils.getCompleteMessage(msg, e));
         Slog.w(TAG, msg, e);
+        if (mPackageMetrics != null) {
+            mPackageMetrics.onInstallFailed();
+        }
     }
 
     public void setReturnCode(int returnCode) {
@@ -757,10 +768,10 @@ final class InstallRequest {
         }
     }
 
-    public void onInstallCompleted(Computer snapshot) {
+    public void onInstallCompleted() {
         if (getReturnCode() == INSTALL_SUCCEEDED) {
             if (mPackageMetrics != null) {
-                mPackageMetrics.onInstallSucceed(snapshot);
+                mPackageMetrics.onInstallSucceed();
             }
         }
     }
