@@ -28,7 +28,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.settingslib.spa.framework.compose.stateOf
 import com.android.settingslib.spaprivileged.framework.common.storageStatsManager
 import com.android.settingslib.spaprivileged.model.app.userHandle
-import com.google.common.truth.Truth.assertThat
 import java.util.UUID
 import org.junit.Before
 import org.junit.Rule
@@ -77,7 +76,7 @@ class AppStorageSizeTest {
             }
         }
 
-        assertThat(storageSize.value).isEqualTo("123 B")
+        composeTestRule.waitUntil { storageSize.value == "123 B" }
     }
 
     companion object {

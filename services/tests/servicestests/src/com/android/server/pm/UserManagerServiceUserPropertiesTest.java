@@ -61,11 +61,13 @@ public class UserManagerServiceUserPropertiesTest {
                 .setStartWithParent(false)
                 .setShowInSettings(45)
                 .setInheritDevicePolicy(67)
+                .setUseParentsContacts(false)
                 .build();
         final UserProperties actualProps = new UserProperties(defaultProps);
         actualProps.setShowInLauncher(14);
         actualProps.setShowInSettings(32);
         actualProps.setInheritDevicePolicy(51);
+        actualProps.setUseParentsContacts(true);
 
         // Write the properties to xml.
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -152,11 +154,14 @@ public class UserManagerServiceUserPropertiesTest {
         // Items requiring hasManagePermission - put them here using hasManagePermission.
         assertEqualGetterOrThrows(orig::getShowInSettings, copy::getShowInSettings,
                 hasManagePermission);
+        assertEqualGetterOrThrows(orig::getUseParentsContacts,
+                copy::getUseParentsContacts, hasManagePermission);
 
         // Items requiring hasQueryPermission - put them here using hasQueryPermission.
 
         // Items with no permission requirements.
         assertEqualGetterOrThrows(orig::getShowInLauncher, copy::getShowInLauncher, true);
+
     }
 
     /**
@@ -196,7 +201,7 @@ public class UserManagerServiceUserPropertiesTest {
         assertThat(expected.getShowInLauncher()).isEqualTo(actual.getShowInLauncher());
         assertThat(expected.getStartWithParent()).isEqualTo(actual.getStartWithParent());
         assertThat(expected.getShowInSettings()).isEqualTo(actual.getShowInSettings());
-        assertThat(expected.getInheritDevicePolicy()).isEqualTo(
-                actual.getInheritDevicePolicy());
+        assertThat(expected.getInheritDevicePolicy()).isEqualTo(actual.getInheritDevicePolicy());
+        assertThat(expected.getUseParentsContacts()).isEqualTo(actual.getUseParentsContacts());
     }
 }

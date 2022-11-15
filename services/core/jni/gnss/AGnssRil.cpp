@@ -84,8 +84,19 @@ jboolean AGnssRil::updateNetworkState(jboolean connected, jint type, jboolean ro
     networkAttributes.capabilities = static_cast<int32_t>(capabilities),
     networkAttributes.apn = jniApn.c_str();
 
-    auto result = mIAGnssRil->updateNetworkState(networkAttributes);
-    return checkAidlStatus(result, "IAGnssRilAidl updateNetworkState() failed.");
+    auto status = mIAGnssRil->updateNetworkState(networkAttributes);
+    return checkAidlStatus(status, "IAGnssRilAidl updateNetworkState() failed.");
+}
+
+jboolean AGnssRil::injectNiSuplMessageData(const jbyteArray& msgData, jint length, jint slotIndex) {
+    JNIEnv* env = getJniEnv();
+    jbyte* bytes = reinterpret_cast<jbyte*>(env->GetPrimitiveArrayCritical(msgData, 0));
+    auto status = mIAGnssRil->injectNiSuplMessageData(std::vector<uint8_t>((const uint8_t*)bytes,
+                                                                           (const uint8_t*)bytes +
+                                                                                   length),
+                                                      static_cast<int>(slotIndex));
+    env->ReleasePrimitiveArrayCritical(msgData, bytes, JNI_ABORT);
+    return checkAidlStatus(status, "IAGnssRil injectNiSuplMessageData() failed.");
 }
 
 // Implementation of AGnssRil_V1_0
@@ -149,6 +160,11 @@ jboolean AGnssRil_V1_0::updateNetworkState(jboolean connected, jint type, jboole
                                                 static_cast<IAGnssRil_V1_0::NetworkType>(type),
                                                 roaming);
     return checkHidlReturn(result, "IAGnssRil_V1_0 updateNetworkState() failed.");
+}
+
+jboolean AGnssRil_V1_0::injectNiSuplMessageData(const jbyteArray&, jint, jint) {
+    ALOGI("IAGnssRil_V1_0 interface does not support injectNiSuplMessageData.");
+    return JNI_FALSE;
 }
 
 // Implementation of AGnssRil_V2_0

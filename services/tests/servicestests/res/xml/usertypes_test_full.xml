@@ -16,7 +16,8 @@
 <user-types>
     <full-type
         name='android.test.1'
-        max-allowed-per-parent='12' >
+        max-allowed-per-parent='12'
+        max-allowed='17' >
         <default-restrictions no_remove_user='true' no_bluetooth='true' />
         <badge-colors>
             <item res='@*android:color/profile_badge_1' />

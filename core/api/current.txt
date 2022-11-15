@@ -3112,10 +3112,13 @@ package android.accessibilityservice {
     method public final void setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo);
     method public void setTouchExplorationPassthroughRegion(int, @NonNull android.graphics.Region);
     method public void takeScreenshot(int, @NonNull java.util.concurrent.Executor, @NonNull android.accessibilityservice.AccessibilityService.TakeScreenshotCallback);
+    method public void takeScreenshotOfWindow(int, @NonNull java.util.concurrent.Executor, @NonNull android.accessibilityservice.AccessibilityService.TakeScreenshotCallback);
     field public static final int ERROR_TAKE_SCREENSHOT_INTERNAL_ERROR = 1; // 0x1
     field public static final int ERROR_TAKE_SCREENSHOT_INTERVAL_TIME_SHORT = 3; // 0x3
     field public static final int ERROR_TAKE_SCREENSHOT_INVALID_DISPLAY = 4; // 0x4
+    field public static final int ERROR_TAKE_SCREENSHOT_INVALID_WINDOW = 5; // 0x5
     field public static final int ERROR_TAKE_SCREENSHOT_NO_ACCESSIBILITY_ACCESS = 2; // 0x2
+    field public static final int ERROR_TAKE_SCREENSHOT_SECURE_WINDOW = 6; // 0x6
     field public static final int GESTURE_2_FINGER_DOUBLE_TAP = 20; // 0x14
     field public static final int GESTURE_2_FINGER_DOUBLE_TAP_AND_HOLD = 40; // 0x28
     field public static final int GESTURE_2_FINGER_SINGLE_TAP = 19; // 0x13
@@ -7669,6 +7672,7 @@ package android.app.admin {
     method public boolean updateOverrideApn(@NonNull android.content.ComponentName, int, @NonNull android.telephony.data.ApnSetting);
     method public void wipeData(int);
     method public void wipeData(int, @NonNull CharSequence);
+    method public void wipeDevice(int);
     field public static final String ACTION_ADD_DEVICE_ADMIN = "android.app.action.ADD_DEVICE_ADMIN";
     field public static final String ACTION_ADMIN_POLICY_COMPLIANCE = "android.app.action.ADMIN_POLICY_COMPLIANCE";
     field public static final String ACTION_APPLICATION_DELEGATION_SCOPES_CHANGED = "android.app.action.APPLICATION_DELEGATION_SCOPES_CHANGED";
@@ -16597,6 +16601,7 @@ package android.graphics.fonts {
     field public static final int FONT_WEIGHT_NORMAL = 400; // 0x190
     field public static final int FONT_WEIGHT_SEMI_BOLD = 600; // 0x258
     field public static final int FONT_WEIGHT_THIN = 100; // 0x64
+    field public static final int FONT_WEIGHT_UNSPECIFIED = -1; // 0xffffffff
   }
 
   public final class FontVariationAxis {
@@ -40389,6 +40394,7 @@ package android.telecom {
     field public static final String EVENT_DISPLAY_DIAGNOSTIC_MESSAGE = "android.telecom.event.DISPLAY_DIAGNOSTIC_MESSAGE";
     field public static final String EXTRA_DIAGNOSTIC_MESSAGE = "android.telecom.extra.DIAGNOSTIC_MESSAGE";
     field public static final String EXTRA_DIAGNOSTIC_MESSAGE_ID = "android.telecom.extra.DIAGNOSTIC_MESSAGE_ID";
+    field public static final String EXTRA_IS_SUPPRESSED_BY_DO_NOT_DISTURB = "android.telecom.extra.IS_SUPPRESSED_BY_DO_NOT_DISTURB";
     field public static final String EXTRA_LAST_EMERGENCY_CALLBACK_TIME_MILLIS = "android.telecom.extra.LAST_EMERGENCY_CALLBACK_TIME_MILLIS";
     field public static final String EXTRA_SILENT_RINGING_REQUESTED = "android.telecom.extra.SILENT_RINGING_REQUESTED";
     field public static final String EXTRA_SUGGESTED_PHONE_ACCOUNTS = "android.telecom.extra.SUGGESTED_PHONE_ACCOUNTS";
@@ -44117,7 +44123,7 @@ package android.telephony {
     field public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_ENTITLEMENT_CHECK_FAILED = 13; // 0xd
     field public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_FEATURE_NOT_SUPPORTED = 10; // 0xa
     field public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_NETWORK_NOT_AVAILABLE = 12; // 0xc
-    field public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_NOT_DEFAULT_DATA_SUB = 14; // 0xe
+    field public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_NOT_DEFAULT_DATA_SUBSCRIPTION = 14; // 0xe
     field public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_OVERRIDDEN = 5; // 0x5
     field public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_PENDING_NETWORK_SETUP = 15; // 0xf
     field public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_REQUEST_FAILED = 11; // 0xb

@@ -45,6 +45,7 @@ public final class UserProperties implements Parcelable {
     private static final String ATTR_START_WITH_PARENT = "startWithParent";
     private static final String ATTR_SHOW_IN_SETTINGS = "showInSettings";
     private static final String ATTR_INHERIT_DEVICE_POLICY = "inheritDevicePolicy";
+    private static final String ATTR_USE_PARENTS_CONTACTS = "useParentsContacts";
 
     /** Index values of each property (to indicate whether they are present in this object). */
     @IntDef(prefix = "INDEX_", value = {
@@ -52,6 +53,7 @@ public final class UserProperties implements Parcelable {
             INDEX_START_WITH_PARENT,
             INDEX_SHOW_IN_SETTINGS,
             INDEX_INHERIT_DEVICE_POLICY,
+            INDEX_USE_PARENTS_CONTACTS,
     })
     @Retention(RetentionPolicy.SOURCE)
     private @interface PropertyIndex {
@@ -60,6 +62,7 @@ public final class UserProperties implements Parcelable {
     private static final int INDEX_START_WITH_PARENT = 1;
     private static final int INDEX_SHOW_IN_SETTINGS = 2;
     private static final int INDEX_INHERIT_DEVICE_POLICY = 3;
+    private static final int INDEX_USE_PARENTS_CONTACTS = 4;
     /** A bit set, mapping each PropertyIndex to whether it is present (1) or absent (0). */
     private long mPropertiesPresent = 0;
 
@@ -200,6 +203,7 @@ public final class UserProperties implements Parcelable {
         if (hasManagePermission) {
             // Add items that require MANAGE_USERS or stronger.
             setShowInSettings(orig.getShowInSettings());
+            setUseParentsContacts(orig.getUseParentsContacts());
         }
         if (hasQueryOrManagePermission) {
             // Add items that require QUERY_USERS or stronger.
@@ -317,6 +321,39 @@ public final class UserProperties implements Parcelable {
     }
     private @InheritDevicePolicy int mInheritDevicePolicy;
 
+    /**
+     * Returns whether the current user must use parent user's contacts. If true, writes to the
+     * ContactsProvider corresponding to the current user will be disabled and reads will be
+     * redirected to the parent.
+     *
+     * This only applies to users that have parents (i.e. profiles) and is used to ensure
+     * they can access contacts from the parent profile. This will be generally inapplicable for
+     * non-profile users.
+     *
+     * Please note that in case of the clone profiles, only the allow-listed apps would be allowed
+     * to access contacts across profiles and other apps will not see any contacts.
+     * TODO(b/256126819) Add link to the method returning apps allow-listed for app-cloning
+     *
+     * @return whether contacts access from an associated profile is enabled for the user
+     * @hide
+     */
+    public boolean getUseParentsContacts() {
+        if (isPresent(INDEX_USE_PARENTS_CONTACTS)) return mUseParentsContacts;
+        if (mDefaultProperties != null) return mDefaultProperties.mUseParentsContacts;
+        throw new SecurityException("You don't have permission to query useParentsContacts");
+    }
+    /** @hide */
+    public void setUseParentsContacts(boolean val) {
+        this.mUseParentsContacts = val;
+        setPresent(INDEX_USE_PARENTS_CONTACTS);
+    }
+    /**
+     * Indicates whether the current user should use parent user's contacts.
+     * If this property is set true, the user will be blocked from storing any contacts in its
+     * own contacts database and will serve all read contacts calls through the parent's contacts.
+     */
+    private boolean mUseParentsContacts;
+
     @Override
     public String toString() {
         // Please print in increasing order of PropertyIndex.
@@ -326,6 +363,7 @@ public final class UserProperties implements Parcelable {
                 + ", mStartWithParent=" + getStartWithParent()
                 + ", mShowInSettings=" + getShowInSettings()
                 + ", mInheritDevicePolicy=" + getInheritDevicePolicy()
+                + ", mUseParentsContacts=" + getUseParentsContacts()
                 + "}";
     }
 
@@ -341,6 +379,7 @@ public final class UserProperties implements Parcelable {
         pw.println(prefix + "    mStartWithParent=" + getStartWithParent());
         pw.println(prefix + "    mShowInSettings=" + getShowInSettings());
         pw.println(prefix + "    mInheritDevicePolicy=" + getInheritDevicePolicy());
+        pw.println(prefix + "    mUseParentsContacts=" + getUseParentsContacts());
     }
 
     /**
@@ -386,6 +425,9 @@ public final class UserProperties implements Parcelable {
                 case ATTR_INHERIT_DEVICE_POLICY:
                     setInheritDevicePolicy(parser.getAttributeInt(i));
                     break;
+                case ATTR_USE_PARENTS_CONTACTS:
+                    setUseParentsContacts(parser.getAttributeBoolean(i));
+                    break;
                 default:
                     Slog.w(LOG_TAG, "Skipping unknown property " + attributeName);
             }
@@ -416,6 +458,10 @@ public final class UserProperties implements Parcelable {
             serializer.attributeInt(null, ATTR_INHERIT_DEVICE_POLICY,
                     mInheritDevicePolicy);
         }
+        if (isPresent(INDEX_USE_PARENTS_CONTACTS)) {
+            serializer.attributeBoolean(null, ATTR_USE_PARENTS_CONTACTS,
+                    mUseParentsContacts);
+        }
     }
 
     // For use only with an object that has already had any permission-lacking fields stripped out.
@@ -426,6 +472,7 @@ public final class UserProperties implements Parcelable {
         dest.writeBoolean(mStartWithParent);
         dest.writeInt(mShowInSettings);
         dest.writeInt(mInheritDevicePolicy);
+        dest.writeBoolean(mUseParentsContacts);
     }
 
     /**
@@ -440,6 +487,7 @@ public final class UserProperties implements Parcelable {
         mStartWithParent = source.readBoolean();
         mShowInSettings = source.readInt();
         mInheritDevicePolicy = source.readInt();
+        mUseParentsContacts = source.readBoolean();
     }
 
     @Override
@@ -468,6 +516,7 @@ public final class UserProperties implements Parcelable {
         private boolean mStartWithParent = false;
         private @ShowInSettings int mShowInSettings = SHOW_IN_SETTINGS_WITH_PARENT;
         private @InheritDevicePolicy int mInheritDevicePolicy = INHERIT_DEVICE_POLICY_NO;
+        private boolean mUseParentsContacts = false;
 
         public Builder setShowInLauncher(@ShowInLauncher int showInLauncher) {
             mShowInLauncher = showInLauncher;
@@ -492,13 +541,19 @@ public final class UserProperties implements Parcelable {
             return this;
         }
 
+        public Builder setUseParentsContacts(boolean useParentsContacts) {
+            mUseParentsContacts = useParentsContacts;
+            return this;
+        }
+
         /** Builds a UserProperties object with *all* values populated. */
         public UserProperties build() {
             return new UserProperties(
                     mShowInLauncher,
                     mStartWithParent,
                     mShowInSettings,
-                    mInheritDevicePolicy);
+                    mInheritDevicePolicy,
+                    mUseParentsContacts);
         }
     } // end Builder
 
@@ -507,12 +562,14 @@ public final class UserProperties implements Parcelable {
             @ShowInLauncher int showInLauncher,
             boolean startWithParent,
             @ShowInSettings int showInSettings,
-            @InheritDevicePolicy int inheritDevicePolicy) {
+            @InheritDevicePolicy int inheritDevicePolicy,
+            boolean useParentsContacts) {
 
         mDefaultProperties = null;
         setShowInLauncher(showInLauncher);
         setStartWithParent(startWithParent);
         setShowInSettings(showInSettings);
         setInheritDevicePolicy(inheritDevicePolicy);
+        setUseParentsContacts(useParentsContacts);
     }
 }

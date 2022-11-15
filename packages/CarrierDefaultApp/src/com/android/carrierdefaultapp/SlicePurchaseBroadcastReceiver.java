@@ -33,6 +33,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.WebView;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.phone.slice.SlicePurchaseController;
 
 import java.lang.ref.WeakReference;
@@ -173,7 +174,7 @@ public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
                 && isPendingIntentValid(intent, SlicePurchaseController.EXTRA_INTENT_CARRIER_ERROR)
                 && isPendingIntentValid(intent, SlicePurchaseController.EXTRA_INTENT_REQUEST_FAILED)
                 && isPendingIntentValid(intent,
-                        SlicePurchaseController.EXTRA_INTENT_NOT_DEFAULT_DATA_SUB)
+                        SlicePurchaseController.EXTRA_INTENT_NOT_DEFAULT_DATA_SUBSCRIPTION)
                 && isPendingIntentValid(intent, SlicePurchaseController.EXTRA_INTENT_SUCCESS);
     }
 
@@ -204,8 +205,8 @@ public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
             case SlicePurchaseController.EXTRA_INTENT_CANCELED: return "canceled";
             case SlicePurchaseController.EXTRA_INTENT_CARRIER_ERROR: return "carrier error";
             case SlicePurchaseController.EXTRA_INTENT_REQUEST_FAILED: return "request failed";
-            case SlicePurchaseController.EXTRA_INTENT_NOT_DEFAULT_DATA_SUB:
-                return "not default data sub";
+            case SlicePurchaseController.EXTRA_INTENT_NOT_DEFAULT_DATA_SUBSCRIPTION:
+                return "not default data subscription";
             case SlicePurchaseController.EXTRA_INTENT_SUCCESS: return "success";
             default: {
                 loge("Unknown pending intent extra: " + extra);
@@ -291,7 +292,8 @@ public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
      *
      * @return The intent to start {@link SlicePurchaseActivity}.
      */
-    @NonNull private PendingIntent createContentIntent(@NonNull Context context,
+    @VisibleForTesting
+    @NonNull public PendingIntent createContentIntent(@NonNull Context context,
             @NonNull Intent intent, int requestCode) {
         Intent i = new Intent(context, SlicePurchaseActivity.class);
         i.setComponent(ComponentName.unflattenFromString(
@@ -314,7 +316,8 @@ public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
      *
      * @return The canceled intent.
      */
-    @NonNull private PendingIntent createCanceledIntent(@NonNull Context context,
+    @VisibleForTesting
+    @NonNull public PendingIntent createCanceledIntent(@NonNull Context context,
             @NonNull Intent intent) {
         Intent i = new Intent(ACTION_NOTIFICATION_CANCELED);
         i.setComponent(ComponentName.unflattenFromString(

@@ -24,5 +24,6 @@ parcelable FabricatedOverlayInternalEntry {
     int dataType;
     int data;
     @nullable @utf8InCpp String stringData;
+    @nullable ParcelFileDescriptor binaryData;
     @nullable @utf8InCpp String configuration;
 }

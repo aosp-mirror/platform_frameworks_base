@@ -24,6 +24,8 @@ import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.traces.common.ComponentNameMatcher
+import com.android.server.wm.traces.common.EdgeExtensionComponentMatcher
 import com.android.wm.shell.flicker.SPLIT_SCREEN_DIVIDER_COMPONENT
 import com.android.wm.shell.flicker.appWindowIsVisibleAtEnd
 import com.android.wm.shell.flicker.appWindowIsVisibleAtStart
@@ -49,6 +51,8 @@ import org.junit.runners.Parameterized
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class CopyContentInSplit(testSpec: FlickerTestParameter) : SplitScreenBase(testSpec) {
     private val textEditApp = SplitScreenUtils.getIme(instrumentation)
+    private val MagnifierLayer = ComponentNameMatcher("", "magnifier surface bbq wrapper#")
+    private val PopupWindowLayer = ComponentNameMatcher("", "PopupWindow:")
 
     override val transition: FlickerBuilder.() -> Unit
         get() = {
@@ -159,8 +163,18 @@ class CopyContentInSplit(testSpec: FlickerTestParameter) : SplitScreenBase(testS
     /** {@inheritDoc} */
     @Presubmit
     @Test
-    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
-        super.visibleLayersShownMoreThanOneConsecutiveEntry()
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
+        testSpec.assertLayers {
+            this.visibleLayersShownMoreThanOneConsecutiveEntry(
+                ignoreLayers = listOf(
+                    ComponentNameMatcher.SPLASH_SCREEN,
+                    ComponentNameMatcher.SNAPSHOT,
+                    ComponentNameMatcher.IME_SNAPSHOT,
+                    EdgeExtensionComponentMatcher(),
+                    MagnifierLayer,
+                    PopupWindowLayer))
+        }
+    }
 
     /** {@inheritDoc} */
     @Presubmit

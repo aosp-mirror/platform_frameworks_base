@@ -16,6 +16,7 @@
 
 package com.android.server.accessibility;
 
+import static android.accessibilityservice.AccessibilityService.ACCESSIBILITY_TAKE_SCREENSHOT_REQUEST_INTERVAL_TIMES_MS;
 import static android.accessibilityservice.AccessibilityService.KEY_ACCESSIBILITY_SCREENSHOT_COLORSPACE;
 import static android.accessibilityservice.AccessibilityService.KEY_ACCESSIBILITY_SCREENSHOT_HARDWAREBUFFER;
 import static android.accessibilityservice.AccessibilityService.KEY_ACCESSIBILITY_SCREENSHOT_STATUS;
@@ -83,6 +84,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
 import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
 import android.view.inputmethod.EditorInfo;
+import android.window.ScreenCapture;
 import android.window.ScreenCapture.ScreenshotHardwareBuffer;
 
 import com.android.internal.annotations.GuardedBy;
@@ -211,6 +213,11 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
 
     /** The timestamp of requesting to take screenshot in milliseconds */
     private long mRequestTakeScreenshotTimestampMs;
+    /**
+     * The timestamps of requesting to take a window screenshot in milliseconds,
+     * mapping from accessibility window id -> timestamp.
+     */
+    private SparseArray<Long> mRequestTakeScreenshotOfWindowTimestampMs = new SparseArray<>();
 
     public interface SystemSupport {
         /**
@@ -1249,6 +1256,51 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             logTraceSvcConn("setSoftKeyboardCallbackEnabled", "enabled=" + enabled);
         }
         mInvocationHandler.setSoftKeyboardCallbackEnabled(enabled);
+    }
+
+    @Override
+    public void takeScreenshotOfWindow(int accessibilityWindowId, int interactionId,
+            ScreenCapture.ScreenCaptureListener listener,
+            IAccessibilityInteractionConnectionCallback callback) throws RemoteException {
+        final long currentTimestamp = SystemClock.uptimeMillis();
+        if ((currentTimestamp
+                - mRequestTakeScreenshotOfWindowTimestampMs.get(accessibilityWindowId, 0L))
+                <= ACCESSIBILITY_TAKE_SCREENSHOT_REQUEST_INTERVAL_TIMES_MS) {
+            callback.sendTakeScreenshotOfWindowError(
+                    AccessibilityService.ERROR_TAKE_SCREENSHOT_INTERVAL_TIME_SHORT, interactionId);
+            return;
+        }
+        mRequestTakeScreenshotOfWindowTimestampMs.put(accessibilityWindowId, currentTimestamp);
+
+        synchronized (mLock) {
+            if (!hasRightsToCurrentUserLocked()) {
+                callback.sendTakeScreenshotOfWindowError(
+                        AccessibilityService.ERROR_TAKE_SCREENSHOT_INTERNAL_ERROR, interactionId);
+                return;
+            }
+            if (!mSecurityPolicy.canTakeScreenshotLocked(this)) {
+                callback.sendTakeScreenshotOfWindowError(
+                        AccessibilityService.ERROR_TAKE_SCREENSHOT_NO_ACCESSIBILITY_ACCESS,
+                        interactionId);
+                return;
+            }
+        }
+        if (!mSecurityPolicy.checkAccessibilityAccess(this)) {
+            callback.sendTakeScreenshotOfWindowError(
+                    AccessibilityService.ERROR_TAKE_SCREENSHOT_NO_ACCESSIBILITY_ACCESS,
+                    interactionId);
+            return;
+        }
+
+        RemoteAccessibilityConnection connection = mA11yWindowManager.getConnectionLocked(
+                mSystemSupport.getCurrentUserIdLocked(),
+                resolveAccessibilityWindowIdLocked(accessibilityWindowId));
+        if (connection == null) {
+            callback.sendTakeScreenshotOfWindowError(
+                    AccessibilityService.ERROR_TAKE_SCREENSHOT_INVALID_WINDOW, interactionId);
+            return;
+        }
+        connection.getRemote().takeScreenshotOfWindow(interactionId, listener, callback);
     }
 
     @Override

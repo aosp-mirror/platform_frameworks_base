@@ -16,6 +16,8 @@
 
 package android.window;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+
 import android.annotation.NonNull;
 import android.app.WindowConfiguration;
 import android.content.ComponentName;
@@ -141,6 +143,14 @@ public abstract class DisplayWindowPolicyController {
      * in a process.
      */
     public void onRunningAppsChanged(ArraySet<Integer> runningUids) {}
+
+    /**
+     * This is called when an Activity is entering PIP.
+     * Returns {@code true} if the Activity is allowed to enter PIP.
+     */
+    public boolean isEnteringPipAllowed(int uid) {
+        return isWindowingModeSupported(WINDOWING_MODE_PINNED);
+    }
 
     /** Dump debug data */
     public void dump(String prefix, final PrintWriter pw) {

@@ -86,6 +86,15 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
     }
 
     /**
+     * For communicating when activities are blocked from entering PIP on the display by this
+     * policy controller.
+     */
+    public interface PipBlockedCallback {
+        /** Called when an activity is blocked from entering PIP. */
+        void onEnteringPipBlocked(int uid);
+    }
+
+    /**
      * If required, allow the secure activity to display on remote device since
      * {@link android.os.Build.VERSION_CODES#TIRAMISU}.
      */
@@ -112,6 +121,7 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
     @GuardedBy("mGenericWindowPolicyControllerLock")
     final ArraySet<Integer> mRunningUids = new ArraySet<>();
     @Nullable private final ActivityListener mActivityListener;
+    @Nullable private final PipBlockedCallback mPipBlockedCallback;
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     @NonNull
     @GuardedBy("mGenericWindowPolicyControllerLock")
@@ -155,6 +165,7 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
             @NonNull Set<ComponentName> blockedActivities,
             @ActivityPolicy int defaultActivityPolicy,
             @NonNull ActivityListener activityListener,
+            @NonNull PipBlockedCallback pipBlockedCallback,
             @NonNull ActivityBlockedCallback activityBlockedCallback,
             @NonNull SecureWindowCallback secureWindowCallback,
             @AssociationRequest.DeviceProfile String deviceProfile) {
@@ -169,6 +180,7 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
         setInterestedWindowFlags(windowFlags, systemWindowFlags);
         mActivityListener = activityListener;
         mDeviceProfile = deviceProfile;
+        mPipBlockedCallback = pipBlockedCallback;
         mSecureWindowCallback = secureWindowCallback;
     }
 
@@ -315,6 +327,17 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
             default:
                 return true;
         }
+    }
+
+    @Override
+    public boolean isEnteringPipAllowed(int uid) {
+        if (super.isEnteringPipAllowed(uid)) {
+            return true;
+        }
+        mHandler.post(() -> {
+            mPipBlockedCallback.onEnteringPipBlocked(uid);
+        });
+        return false;
     }
 
     /**

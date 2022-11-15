@@ -762,6 +762,10 @@ class GnssNetworkConnectivityHandler {
         return APN_INVALID;
     }
 
+    protected boolean isNativeAgpsRilSupported() {
+        return native_is_agps_ril_supported();
+    }
+
     // AGPS support
     private native void native_agps_data_conn_open(long networkHandle, String apn, int apnIpType);
 

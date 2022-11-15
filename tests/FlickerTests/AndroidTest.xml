@@ -15,6 +15,8 @@
         <option name="run-command" value="cmd window tracing frame" />
         <!-- ensure lock screen mode is swipe -->
         <option name="run-command" value="locksettings set-disabled false" />
+        <!-- disable betterbug as it's log collection dialogues cause flakes in e2e tests -->
+        <option name="run-command" value="pm disable com.google.android.internal.betterbug" />
         <!-- restart launcher to activate TAPL -->
         <option name="run-command" value="setprop ro.test_harness 1 ; am force-stop com.google.android.apps.nexuslauncher" />
     </target_preparer>

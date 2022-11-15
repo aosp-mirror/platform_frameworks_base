@@ -45,6 +45,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
@@ -375,10 +376,10 @@ public class DisplayPolicyTests extends WindowTestsBase {
 
         displayPolicy.setCanSystemBarsBeShownByUser(false);
         displayPolicy.requestTransientBars(windowState, true);
-        verify(controlTarget, never()).showInsets(anyInt(), anyBoolean());
+        verify(controlTarget, never()).showInsets(anyInt(), anyBoolean(), any() /* statsToken */);
 
         displayPolicy.setCanSystemBarsBeShownByUser(true);
         displayPolicy.requestTransientBars(windowState, true);
-        verify(controlTarget).showInsets(anyInt(), anyBoolean());
+        verify(controlTarget).showInsets(anyInt(), anyBoolean(), any() /* statsToken */);
     }
 }

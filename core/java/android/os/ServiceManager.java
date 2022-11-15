@@ -258,12 +258,14 @@ public final class ServiceManager {
      * waitForService should always be able to return the service.
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @NonNull
     public static String[] getDeclaredInstances(@NonNull String iface) {
         try {
             return getIServiceManager().getDeclaredInstances(iface);
         } catch (RemoteException e) {
             Log.e(TAG, "error in getDeclaredInstances", e);
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 

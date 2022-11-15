@@ -275,15 +275,16 @@ final class IInputMethodManagerGlobalInvoker {
 
     @AnyThread
     static boolean showSoftInput(@NonNull IInputMethodClient client, @Nullable IBinder windowToken,
-            int flags, int lastClickToolType, @Nullable ResultReceiver resultReceiver,
+            @Nullable ImeTracker.Token statsToken, int flags, int lastClickToolType,
+            @Nullable ResultReceiver resultReceiver,
             @SoftInputShowHideReason int reason) {
         final IInputMethodManager service = getService();
         if (service == null) {
             return false;
         }
         try {
-            return service.showSoftInput(
-                    client, windowToken, flags, lastClickToolType, resultReceiver, reason);
+            return service.showSoftInput(client, windowToken, statsToken, flags, lastClickToolType,
+                    resultReceiver, reason);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -291,14 +292,15 @@ final class IInputMethodManagerGlobalInvoker {
 
     @AnyThread
     static boolean hideSoftInput(@NonNull IInputMethodClient client, @Nullable IBinder windowToken,
-            int flags, @Nullable ResultReceiver resultReceiver,
-            @SoftInputShowHideReason int reason) {
+            @Nullable ImeTracker.Token statsToken, int flags,
+            @Nullable ResultReceiver resultReceiver, @SoftInputShowHideReason int reason) {
         final IInputMethodManager service = getService();
         if (service == null) {
             return false;
         }
         try {
-            return service.hideSoftInput(client, windowToken, flags, resultReceiver, reason);
+            return service.hideSoftInput(client, windowToken, statsToken, flags, resultReceiver,
+                    reason);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

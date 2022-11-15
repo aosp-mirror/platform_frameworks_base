@@ -21,12 +21,12 @@ import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
-import android.credentials.GetCredentialRequest;
 import android.service.credentials.CredentialProviderInfo;
-import android.service.credentials.GetCredentialsRequest;
 import android.util.Slog;
 
 import com.android.server.infra.AbstractPerUserSystemService;
+
+import java.util.List;
 
 
 /**
@@ -61,50 +61,38 @@ public final class CredentialManagerServiceImpl extends
         return mInfo.getServiceInfo();
     }
 
-    public void getCredential(GetCredentialRequest request, GetRequestSession requestSession,
-            String callingPackage) {
-        Slog.i(TAG, "in getCredential in CredManServiceImpl");
+    /**
+     * Starts a provider session and associates it with the given request session. */
+    @Nullable
+    public ProviderSession initiateProviderSessionForRequest(
+            RequestSession requestSession) {
+        Slog.i(TAG, "in initiateProviderSessionForRequest in CredManServiceImpl");
         if (mInfo == null) {
-            Slog.i(TAG, "in getCredential in CredManServiceImpl, but mInfo is null");
-            return;
+            Slog.i(TAG, "in initiateProviderSessionForRequest in CredManServiceImpl, "
+                    + "but mInfo is null. This shouldn't happen");
+            return null;
         }
-
-        // TODO : Determine if remoteService instance can be reused across requests
         final RemoteCredentialService remoteService = new RemoteCredentialService(
                 getContext(), mInfo.getServiceInfo().getComponentName(), mUserId);
-        ProviderGetSession providerSession = new ProviderGetSession(mInfo,
-                requestSession, mUserId, remoteService);
-        // Set the provider info to the session when the request is initiated. This happens here
-        // because there is one serviceImpl per remote provider, and so we can only retrieve
-        // the provider information in the scope of this instance, whereas the session is for the
-        // entire request.
-        requestSession.addProviderSession(providerSession);
-        GetCredentialsRequest filteredRequest = getRequestWithValidType(request, callingPackage);
-        if (filteredRequest != null) {
-            remoteService.onGetCredentials(getRequestWithValidType(request, callingPackage),
-                    providerSession);
-        }
+        ProviderSession providerSession =
+                requestSession.initiateProviderSession(mInfo, remoteService);
+        return providerSession;
     }
 
-    @Nullable
-    private GetCredentialsRequest getRequestWithValidType(GetCredentialRequest request,
-            String callingPackage) {
-        GetCredentialsRequest.Builder builder =
-                new GetCredentialsRequest.Builder(callingPackage);
-        request.getGetCredentialOptions().forEach( option -> {
-            if (mInfo.hasCapability(option.getType())) {
-                Slog.i(TAG, "Provider can handle: " + option.getType());
-                builder.addGetCredentialOption(option);
-            } else {
-                Slog.i(TAG, "Skipping request as provider cannot handle it");
-            }
-        });
-
-        try {
-            return builder.build();
-        } catch (IllegalArgumentException | NullPointerException e) {
-            Slog.i(TAG, "issue with request build: " + e.getMessage());
+    /** Return true if at least one capability found. */
+    boolean isServiceCapable(List<String> requestedOptions) {
+        if (mInfo == null) {
+            Slog.i(TAG, "in isServiceCapable, mInfo is null");
+            return false;
         }
-        return null;
+        for (String capability : requestedOptions) {
+            if (mInfo.hasCapability(capability)) {
+                Slog.i(TAG, "Provider can handle: " + capability);
+                return true;
+            } else {
+                Slog.i(TAG, "Provider cannot handle: " + capability);
+            }
+        }
+        return false;
     }
 }

@@ -63,7 +63,7 @@ class SettingsEntryTest {
         assertThat(entry.toPage).isNull()
         assertThat(entry.isAllowSearch).isFalse()
         assertThat(entry.isSearchDataDynamic).isFalse()
-        assertThat(entry.mutableStatus).isFalse()
+        assertThat(entry.hasMutableStatus).isFalse()
     }
 
     @Test
@@ -133,7 +133,7 @@ class SettingsEntryTest {
         assertThat(entry.toPage).isNull()
         assertThat(entry.isAllowSearch).isTrue()
         assertThat(entry.isSearchDataDynamic).isFalse()
-        assertThat(entry.mutableStatus).isTrue()
+        assertThat(entry.hasMutableStatus).isTrue()
     }
 
     @Test

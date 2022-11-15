@@ -23,6 +23,7 @@
 #include <memory>
 #include <string>
 
+#include <fcntl.h>
 #include "R.h"
 #include "TestConstants.h"
 #include "TestHelpers.h"
@@ -76,7 +77,12 @@ Result<Unit> MappingExists(const ResourceMapping& mapping, ResourceId target_res
   auto target_map = mapping.GetTargetToOverlayMap();
   auto entry_map = target_map.find(target_resource);
   if (entry_map == target_map.end()) {
-    return Error("Failed to find mapping for target resource");
+    std::string keys;
+    for (const auto &pair : target_map) {
+      keys.append(fmt::format("0x{:x}", pair.first)).append(" ");
+    }
+    return Error(R"(Failed to find mapping for target resource "0x%02x": "%s")",
+        target_resource, keys.c_str());
   }
 
   auto actual_overlay_resource = std::get_if<ResourceId>(&entry_map->second);
@@ -108,7 +114,12 @@ Result<Unit> MappingExists(const ResourceMapping& mapping, const ResourceId& tar
   auto target_map = mapping.GetTargetToOverlayMap();
   auto entry_map = target_map.find(target_resource);
   if (entry_map == target_map.end()) {
-    return Error("Failed to find mapping for target resource");
+    std::string keys;
+    for (const auto &pair : target_map) {
+      keys.append(fmt::format("{:x}", pair.first)).append(" ");
+    }
+    return Error(R"(Failed to find mapping for target resource "0x%02x": "%s")",
+        target_resource, keys.c_str());
   }
 
   auto config_map = std::get_if<ConfigMap>(&entry_map->second);
@@ -193,11 +204,16 @@ TEST(ResourceMappingTests, InlineResources) {
 }
 
 TEST(ResourceMappingTests, FabricatedOverlay) {
+  auto path = GetTestDataPath() + "/overlay/res/drawable/android.png";
+  auto fd = android::base::unique_fd(::open(path.c_str(), O_RDONLY | O_CLOEXEC));
+  ASSERT_TRUE(fd > 0) << "errno " << errno << " for path " << path;
   auto frro = FabricatedOverlay::Builder("com.example.overlay", "SandTheme", "test.target")
                   .SetOverlayable("TestResources")
                   .SetResourceValue("integer/int1", Res_value::TYPE_INT_DEC, 2U, "")
                   .SetResourceValue("string/str1", Res_value::TYPE_REFERENCE, 0x7f010000, "")
                   .SetResourceValue("string/str2", Res_value::TYPE_STRING, "foobar", "")
+                  .SetResourceValue("drawable/dr1", fd, "")
+                  .setFrroPath("/foo/bar/biz.frro")
                   .Build();
 
   ASSERT_TRUE(frro);
@@ -214,11 +230,16 @@ TEST(ResourceMappingTests, FabricatedOverlay) {
   auto string_pool_data = res.GetStringPoolData();
   auto string_pool = ResStringPool(string_pool_data.data(), string_pool_data.size(), false);
 
-  ASSERT_EQ(res.GetTargetToOverlayMap().size(), 3U);
+  std::u16string expected_uri = u"frro://foo/bar/biz.frro?offset=16&size=8341";
+  uint32_t uri_index
+      = string_pool.indexOfString(expected_uri.data(), expected_uri.length()).value_or(-1);
+
+  ASSERT_EQ(res.GetTargetToOverlayMap().size(), 4U);
   ASSERT_EQ(res.GetOverlayToTargetMap().size(), 0U);
   ASSERT_RESULT(MappingExists(res, R::target::string::str1, Res_value::TYPE_REFERENCE, 0x7f010000));
   ASSERT_RESULT(MappingExists(res, R::target::string::str2, Res_value::TYPE_STRING,
                               (uint32_t) (string_pool.indexOfString(u"foobar", 6)).value_or(-1)));
+  ASSERT_RESULT(MappingExists(res, R::target::drawable::dr1, Res_value::TYPE_STRING, uri_index));
   ASSERT_RESULT(MappingExists(res, R::target::integer::int1, Res_value::TYPE_INT_DEC, 2U));
 }
 

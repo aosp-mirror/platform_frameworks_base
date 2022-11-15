@@ -18,7 +18,6 @@ package com.android.internal.widget;
 
 import android.annotation.Nullable;
 import android.content.Context;
-import android.os.Trace;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -55,7 +54,6 @@ public class RemeasuringLinearLayout extends LinearLayout {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        Trace.beginSection("RemeasuringLinearLayout#onMeasure");
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         int count = getChildCount();
         int height = 0;
@@ -88,6 +86,5 @@ public class RemeasuringLinearLayout extends LinearLayout {
         }
         mMatchParentViews.clear();
         setMeasuredDimension(getMeasuredWidth(), height);
-        Trace.endSection();
     }
 }

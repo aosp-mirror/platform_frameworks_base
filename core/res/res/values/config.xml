@@ -1855,6 +1855,10 @@
     -->
     <string name="config_defaultCaptivePortalLoginPackageName" translatable="false">com.android.captiveportallogin</string>
 
+    <!-- The package name of the dock manager app. Must be granted the
+         POST_NOTIFICATIONS permission. -->
+    <string name="config_defaultDockManagerPackageName" translatable="false"></string>
+
     <!-- Whether to enable geocoder overlay which allows geocoder to be replaced
          by an app at run-time. When disabled, only the
          config_geocoderProviderPackageName package will be searched for
@@ -2422,8 +2426,8 @@
     <integer name="config_dreamsBatteryLevelDrainCutoff">5</integer>
     <!-- Limit of how long the device can remain unlocked due to attention checking.  -->
     <integer name="config_attentionMaximumExtension">900000</integer> <!-- 15 minutes.  -->
-    <!-- Is the system user the only user allowed to dream. -->
-    <bool name="config_dreamsOnlyEnabledForSystemUser">false</bool>
+    <!-- Whether there is to be a chosen Dock User who is the only user allowed to dream. -->
+    <bool name="config_dreamsOnlyEnabledForDockUser">false</bool>
     <!-- Whether dreams are disabled when ambient mode is suppressed. -->
     <bool name="config_dreamsDisabledByAmbientModeSuppressionConfig">false</bool>
 
@@ -2672,9 +2676,9 @@
          Should be false for most devices, except automotive vehicle with passenger displays. -->
     <bool name="config_multiuserUsersOnSecondaryDisplays">false</bool>
 
-    <!-- Whether to automatically switch a non-primary user back to the primary user after a
-         timeout when the device is docked.  -->
-    <bool name="config_enableTimeoutToUserZeroWhenDocked">false</bool>
+    <!-- Whether to automatically switch to the designated Dock User (the user chosen for
+         displaying dreams, etc.) after a timeout when the device is docked.  -->
+    <bool name="config_enableTimeoutToDockUserWhenDocked">false</bool>
 
     <!-- Whether to only install system packages on a user if they're allowlisted for that user
          type. These are flags and can be freely combined.

@@ -58,6 +58,7 @@ import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsAnimation.Bounds;
 import android.view.WindowManager.LayoutParams;
 import android.view.animation.Interpolator;
+import android.view.inputmethod.ImeTracker;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -68,7 +69,7 @@ import java.util.Objects;
  * Implements {@link WindowInsetsAnimationController}
  * @hide
  */
-@VisibleForTesting
+@VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
 public class InsetsAnimationControlImpl implements InternalInsetsAnimationController,
         InsetsAnimationControlRunner {
 
@@ -96,6 +97,8 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
     /** @see WindowInsetsAnimationController#hasZeroInsetsIme */
     private final boolean mHasZeroInsetsIme;
     private final CompatibilityInfo.Translator mTranslator;
+    @Nullable
+    private final ImeTracker.Token mStatsToken;
     private Insets mCurrentInsets;
     private Insets mPendingInsets;
     private float mPendingFraction;
@@ -114,7 +117,7 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
             @InsetsType int types, InsetsAnimationControlCallbacks controller, long durationMs,
             Interpolator interpolator, @AnimationType int animationType,
             @LayoutInsetsDuringAnimation int layoutInsetsDuringAnimation,
-            CompatibilityInfo.Translator translator) {
+            CompatibilityInfo.Translator translator, @Nullable ImeTracker.Token statsToken) {
         mControls = controls;
         mListener = listener;
         mTypes = types;
@@ -152,6 +155,7 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
         mAnimationType = animationType;
         mLayoutInsetsDuringAnimation = layoutInsetsDuringAnimation;
         mTranslator = translator;
+        mStatsToken = statsToken;
         mController.startAnimation(this, listener, types, mAnimation,
                 new Bounds(mHiddenInsets, mShownInsets));
     }
@@ -228,6 +232,11 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
     }
 
     @Override
+    public ImeTracker.Token getStatsToken() {
+        return mStatsToken;
+    }
+
+    @Override
     public void setInsetsAndAlpha(Insets insets, float alpha, float fraction) {
         setInsetsAndAlpha(insets, alpha, fraction, false /* allowWhenFinished */);
     }
@@ -253,10 +262,10 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
         }
     }
 
-    @VisibleForTesting
     /**
      * @return Whether the finish callback of this animation should be invoked.
      */
+    @VisibleForTesting
     public boolean applyChangeInsets(@Nullable InsetsState outState) {
         if (mCancelled) {
             if (DEBUG) Log.d(TAG, "applyChangeInsets canceled");

@@ -105,6 +105,12 @@
     so the width of the icon should be 13.0dp * (12.0 / 20.0) -->
     <dimen name="status_bar_battery_icon_width">7.8dp</dimen>
 
+    <!-- The battery icon is 13dp tall, but the other system icons are 15dp tall (see
+         @*android:dimen/status_bar_system_icon_size) with some top and bottom padding embedded in
+         the drawables themselves. So, the battery icon may need an extra 1dp of spacing so that its
+         bottom still aligns with the bottom of all the other system icons. See b/258672854. -->
+    <dimen name="status_bar_battery_extra_vertical_spacing">1dp</dimen>
+
     <!-- The font size for the clock in the status bar. -->
     <dimen name="status_bar_clock_size">14sp</dimen>
 

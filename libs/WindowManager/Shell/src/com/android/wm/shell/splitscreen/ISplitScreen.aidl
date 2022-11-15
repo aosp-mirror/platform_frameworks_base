@@ -86,8 +86,8 @@ interface ISplitScreen {
     /**
      * Starts a pair of intent and task in one transition.
      */
-    oneway void startIntentAndTask(in PendingIntent pendingIntent, in Intent fillInIntent,
-            in Bundle options1, int taskId, in Bundle options2, int sidePosition, float splitRatio,
+    oneway void startIntentAndTask(in PendingIntent pendingIntent, in Bundle options1, int taskId,
+            in Bundle options2, int sidePosition, float splitRatio,
             in RemoteTransition remoteTransition, in InstanceId instanceId) = 16;
 
     /**
@@ -108,9 +108,8 @@ interface ISplitScreen {
      * Starts a pair of intent and task using legacy transition system.
      */
     oneway void startIntentAndTaskWithLegacyTransition(in PendingIntent pendingIntent,
-            in Intent fillInIntent, in Bundle options1, int taskId, in Bundle options2,
-            int splitPosition, float splitRatio, in RemoteAnimationAdapter adapter,
-            in InstanceId instanceId) = 12;
+            in Bundle options1, int taskId, in Bundle options2, int splitPosition, float splitRatio,
+            in RemoteAnimationAdapter adapter, in InstanceId instanceId) = 12;
 
     /**
      * Starts a pair of shortcut and task using legacy transition system.

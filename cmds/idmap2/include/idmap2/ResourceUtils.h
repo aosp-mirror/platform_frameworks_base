@@ -19,6 +19,7 @@
 
 #include <optional>
 #include <string>
+#include <android-base/unique_fd.h>
 
 #include "androidfw/AssetManager2.h"
 #include "idmap2/Result.h"
@@ -41,6 +42,7 @@ struct TargetValue {
   DataType data_type;
   DataValue data_value;
   std::string data_string_value;
+  std::optional<android::base::borrowed_fd> data_binary_value;
 };
 
 struct TargetValueWithConfig {

@@ -90,7 +90,10 @@ public class DreamHomeControlsComplicationTest extends SysuiTestCase {
     private ActivityStarter mActivityStarter;
 
     @Mock
-    UiEventLogger mUiEventLogger;
+    private UiEventLogger mUiEventLogger;
+
+    @Captor
+    private ArgumentCaptor<DreamOverlayStateController.Callback> mStateCallbackCaptor;
 
     @Before
     public void setup() {
@@ -164,6 +167,29 @@ public class DreamHomeControlsComplicationTest extends SysuiTestCase {
         verify(mDreamOverlayStateController).addComplication(mComplication);
     }
 
+    @Test
+    public void complicationAvailability_checkAvailabilityWhenDreamOverlayBecomesActive() {
+        final DreamHomeControlsComplication.Registrant registrant =
+                new DreamHomeControlsComplication.Registrant(mComplication,
+                        mDreamOverlayStateController, mControlsComponent);
+        registrant.start();
+
+        setServiceAvailable(true);
+        setHaveFavorites(false);
+
+        // Complication not available on start.
+        verify(mDreamOverlayStateController, never()).addComplication(mComplication);
+
+        // Favorite controls added, complication should be available now.
+        setHaveFavorites(true);
+
+        // Dream overlay becomes active.
+        setDreamOverlayActive(true);
+
+        // Verify complication is added.
+        verify(mDreamOverlayStateController).addComplication(mComplication);
+    }
+
     /**
      * Ensures clicking home controls chip logs UiEvent.
      */
@@ -196,8 +222,15 @@ public class DreamHomeControlsComplicationTest extends SysuiTestCase {
 
     private void setServiceAvailable(boolean value) {
         final List<ControlsServiceInfo> serviceInfos = mock(List.class);
+        when(mControlsListingController.getCurrentServices()).thenReturn(serviceInfos);
         when(serviceInfos.isEmpty()).thenReturn(!value);
         triggerControlsListingCallback(serviceInfos);
+    }
+
+    private void setDreamOverlayActive(boolean value) {
+        when(mDreamOverlayStateController.isOverlayActive()).thenReturn(value);
+        verify(mDreamOverlayStateController).addCallback(mStateCallbackCaptor.capture());
+        mStateCallbackCaptor.getValue().onStateChanged();
     }
 
     private void triggerControlsListingCallback(List<ControlsServiceInfo> serviceInfos) {

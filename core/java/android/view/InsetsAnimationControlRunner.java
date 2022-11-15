@@ -16,10 +16,12 @@
 
 package android.view;
 
+import android.annotation.Nullable;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.InsetsController.AnimationType;
 import android.view.WindowInsets.Type.InsetsType;
+import android.view.inputmethod.ImeTracker;
 
 /**
  * Interface representing a runner for an insets animation.
@@ -72,6 +74,12 @@ public interface InsetsAnimationControlRunner {
      * @return The animation type this runner is running.
      */
     @AnimationType int getAnimationType();
+
+    /**
+     * @return The token tracking the current IME request or {@code null} otherwise.
+     */
+    @Nullable
+    ImeTracker.Token getStatsToken();
 
     /**
      *

@@ -58,8 +58,8 @@ import java.util.concurrent.TimeUnit;
 public class SlicePurchaseActivity extends Activity {
     private static final String TAG = "SlicePurchaseActivity";
 
-    private @NonNull WebView mWebView;
-    private @NonNull Context mApplicationContext;
+    @NonNull private WebView mWebView;
+    @NonNull private Context mApplicationContext;
     private int mSubId;
     @TelephonyManager.PremiumCapability protected int mCapability;
 
@@ -105,7 +105,7 @@ public class SlicePurchaseActivity extends Activity {
             loge("Unable to start the slice purchase application on the non-default data "
                     + "subscription: " + mSubId);
             SlicePurchaseBroadcastReceiver.sendSlicePurchaseAppResponse(
-                    intent, SlicePurchaseController.EXTRA_INTENT_NOT_DEFAULT_DATA_SUB);
+                    intent, SlicePurchaseController.EXTRA_INTENT_NOT_DEFAULT_DATA_SUBSCRIPTION);
             finishAndRemoveTask();
             return;
         }

@@ -16,22 +16,22 @@
 <configuration description="Config for hwuimicro">
     <target_preparer class="com.android.tradefed.targetprep.PushFilePreparer">
         <option name="cleanup" value="true" />
-        <option name="push" value="hwui_unit_tests->/data/nativetest/hwui_unit_tests" />
-        <option name="push" value="hwuimicro->/data/benchmarktest/hwuimicro" />
-        <option name="push" value="hwuimacro->/data/benchmarktest/hwuimacro" />
+        <option name="push" value="hwui_unit_tests->/data/local/tmp/nativetest/hwui_unit_tests" />
+        <option name="push" value="hwuimicro->/data/local/tmp/benchmarktest/hwuimicro" />
+        <option name="push" value="hwuimacro->/data/local/tmp/benchmarktest/hwuimacro" />
     </target_preparer>
     <option name="test-suite-tag" value="apct" />
     <test class="com.android.tradefed.testtype.GTest" >
-        <option name="native-test-device-path" value="/data/nativetest" />
+        <option name="native-test-device-path" value="/data/local/tmp/nativetest" />
         <option name="module-name" value="hwui_unit_tests" />
     </test>
     <test class="com.android.tradefed.testtype.GoogleBenchmarkTest" >
-        <option name="native-benchmark-device-path" value="/data/benchmarktest" />
+        <option name="native-benchmark-device-path" value="/data/local/tmp/benchmarktest" />
         <option name="benchmark-module-name" value="hwuimicro" />
         <option name="file-exclusion-filter-regex" value=".*\.config$" />
     </test>
     <test class="com.android.tradefed.testtype.GoogleBenchmarkTest" >
-        <option name="native-benchmark-device-path" value="/data/benchmarktest" />
+        <option name="native-benchmark-device-path" value="/data/local/tmp/benchmarktest" />
         <option name="benchmark-module-name" value="hwuimacro" />
         <option name="file-exclusion-filter-regex" value=".*\.config$" />
     </test>

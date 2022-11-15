@@ -103,7 +103,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
             MagnificationSize.LARGE,
     })
     /** Denotes the Magnification size type. */
-    @interface MagnificationSize {
+    public @interface MagnificationSize {
         int NONE = 0;
         int SMALL  = 1;
         int MEDIUM = 2;

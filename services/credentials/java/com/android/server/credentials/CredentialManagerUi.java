@@ -37,6 +37,7 @@ public class CredentialManagerUi {
     @NonNull
     private final CredentialManagerUiCallback mCallbacks;
     @NonNull private final Context mContext;
+    // TODO : Use for starting the activity for this user
     private final int mUserId;
     @NonNull private final ResultReceiver mResultReceiver = new ResultReceiver(
             new Handler(Looper.getMainLooper())) {
@@ -56,7 +57,7 @@ public class CredentialManagerUi {
                 Slog.i(TAG, "No selection found in UI result");
             }
         } else if (resultCode == UserSelectionDialogResult.RESULT_CODE_DIALOG_CANCELED) {
-            mCallbacks.onUiCancelation();
+            mCallbacks.onUiCancellation();
         }
     }
 
@@ -67,7 +68,7 @@ public class CredentialManagerUi {
         /** Called when the user makes a selection. */
         void onUiSelection(UserSelectionDialogResult selection);
         /** Called when the user cancels the UI. */
-        void onUiCancelation();
+        void onUiCancellation();
     }
     public CredentialManagerUi(Context context, int userId,
             CredentialManagerUiCallback callbacks) {
@@ -83,9 +84,8 @@ public class CredentialManagerUi {
      */
     public void show(RequestInfo requestInfo, ArrayList<ProviderData> providerDataList) {
         Log.i(TAG, "In show");
-        Intent intent = IntentFactory.newIntent(
-                requestInfo, providerDataList,
-                new ArrayList<>(), mResultReceiver);
+        Intent intent = IntentFactory.newIntent(requestInfo, providerDataList, new ArrayList<>(),
+                mResultReceiver);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         mContext.startActivity(intent);
     }

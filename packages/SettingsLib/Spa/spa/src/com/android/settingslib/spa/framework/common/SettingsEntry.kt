@@ -16,6 +16,7 @@
 
 package com.android.settingslib.spa.framework.common
 
+import android.net.Uri
 import android.os.Bundle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -38,6 +39,11 @@ interface EntryData {
 
 val LocalEntryDataProvider =
     compositionLocalOf<EntryData> { object : EntryData {} }
+
+typealias UiLayerRenderer = @Composable (arguments: Bundle?) -> Unit
+typealias StatusDataGetter = (arguments: Bundle?) -> EntryStatusData?
+typealias SearchDataGetter = (arguments: Bundle?) -> EntrySearchData?
+typealias SliceDataGetter = (sliceUri: Uri, arguments: Bundle?) -> EntrySliceData?
 
 /**
  * Defines data of a Settings entry.
@@ -71,7 +77,10 @@ data class SettingsEntry(
 
     // Indicate whether the status of entry is mutable.
     // If so, for instance, we'll reindex its status for search.
-    val mutableStatus: Boolean = false,
+    val hasMutableStatus: Boolean = false,
+
+    // Indicate whether the entry has SliceProvider support.
+    val hasSliceSupport: Boolean = false,
 
     /**
      * ========================================
@@ -83,13 +92,19 @@ data class SettingsEntry(
      * API to get the status data of the entry, such as isDisabled / isSwitchOff.
      * Returns null if this entry do NOT have any status.
      */
-    private val statusDataImpl: (arguments: Bundle?) -> EntryStatusData? = { null },
+    private val statusDataImpl: StatusDataGetter = { null },
 
     /**
      * API to get Search indexing data for this entry, such as title / keyword.
      * Returns null if this entry do NOT support search.
      */
-    private val searchDataImpl: (arguments: Bundle?) -> EntrySearchData? = { null },
+    private val searchDataImpl: SearchDataGetter = { null },
+
+    /**
+     * API to get Slice data of this entry. The Slice data is implemented as a LiveData,
+     * and is associated with the Slice's lifecycle (pin / unpin) by the framework.
+     */
+    private val sliceDataImpl: SliceDataGetter = { _: Uri, _: Bundle? -> null },
 
     /**
      * API to Render UI of this entry directly. For now, we use it in the internal injection, to
@@ -97,7 +112,7 @@ data class SettingsEntry(
      * injected entry. In the long term, we may deprecate the @Composable Page() API in SPP, and
      * use each entries' UI rendering function in the page instead.
      */
-    private val uiLayoutImpl: (@Composable (arguments: Bundle?) -> Unit) = {},
+    private val uiLayoutImpl: UiLayerRenderer = {},
 ) {
     fun containerPage(): SettingsPage {
         // The Container page of the entry, which is the from-page or
@@ -119,6 +134,10 @@ data class SettingsEntry(
 
     fun getSearchData(runtimeArguments: Bundle? = null): EntrySearchData? {
         return searchDataImpl(fullArgument(runtimeArguments))
+    }
+
+    fun getSliceData(sliceUri: Uri, runtimeArguments: Bundle? = null): EntrySliceData? {
+        return sliceDataImpl(sliceUri, fullArgument(runtimeArguments))
     }
 
     @Composable
@@ -152,12 +171,14 @@ class SettingsEntryBuilder(private val name: String, private val owner: Settings
     // Attributes
     private var isAllowSearch: Boolean = false
     private var isSearchDataDynamic: Boolean = false
-    private var mutableStatus: Boolean = false
+    private var hasMutableStatus: Boolean = false
+    private var hasSliceSupport: Boolean = false
 
     // Functions
-    private var statusDataFn: (arguments: Bundle?) -> EntryStatusData? = { null }
-    private var searchDataFn: (arguments: Bundle?) -> EntrySearchData? = { null }
-    private var uiLayoutFn: (@Composable (arguments: Bundle?) -> Unit) = { }
+    private var uiLayoutFn: UiLayerRenderer = { }
+    private var statusDataFn: StatusDataGetter = { null }
+    private var searchDataFn: SearchDataGetter = { null }
+    private var sliceDataFn: SliceDataGetter = { _: Uri, _: Bundle? -> null }
 
     fun build(): SettingsEntry {
         return SettingsEntry(
@@ -173,11 +194,13 @@ class SettingsEntryBuilder(private val name: String, private val owner: Settings
             // attributes
             isAllowSearch = isAllowSearch,
             isSearchDataDynamic = isSearchDataDynamic,
-            mutableStatus = mutableStatus,
+            hasMutableStatus = hasMutableStatus,
+            hasSliceSupport = hasSliceSupport,
 
             // functions
             statusDataImpl = statusDataFn,
             searchDataImpl = searchDataFn,
+            sliceDataImpl = sliceDataFn,
             uiLayoutImpl = uiLayoutFn,
         )
     }
@@ -207,7 +230,7 @@ class SettingsEntryBuilder(private val name: String, private val owner: Settings
     }
 
     fun setHasMutableStatus(hasMutableStatus: Boolean): SettingsEntryBuilder {
-        this.mutableStatus = hasMutableStatus
+        this.hasMutableStatus = hasMutableStatus
         return this
     }
 
@@ -221,17 +244,23 @@ class SettingsEntryBuilder(private val name: String, private val owner: Settings
         return this
     }
 
-    fun setStatusDataFn(fn: (arguments: Bundle?) -> EntryStatusData?): SettingsEntryBuilder {
+    fun setStatusDataFn(fn: StatusDataGetter): SettingsEntryBuilder {
         this.statusDataFn = fn
         return this
     }
 
-    fun setSearchDataFn(fn: (arguments: Bundle?) -> EntrySearchData?): SettingsEntryBuilder {
+    fun setSearchDataFn(fn: SearchDataGetter): SettingsEntryBuilder {
         this.searchDataFn = fn
         return this
     }
 
-    fun setUiLayoutFn(fn: @Composable (arguments: Bundle?) -> Unit): SettingsEntryBuilder {
+    fun setSliceDataFn(fn: SliceDataGetter): SettingsEntryBuilder {
+        this.sliceDataFn = fn
+        this.hasSliceSupport = true
+        return this
+    }
+
+    fun setUiLayoutFn(fn: UiLayerRenderer): SettingsEntryBuilder {
         this.uiLayoutFn = fn
         return this
     }

@@ -2284,8 +2284,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         doReturn(false).when(mAtm).shouldDisableNonVrUiLocked();
 
         spyOn(mDisplayContent.mDwpcHelper);
-        doReturn(false).when(mDisplayContent.mDwpcHelper).isWindowingModeSupported(
-                WINDOWING_MODE_PINNED);
+        doReturn(false).when(mDisplayContent.mDwpcHelper).isEnteringPipAllowed(anyInt());
 
         assertFalse(activity.checkEnterPictureInPictureState("TEST", false /* beforeStopping */));
     }

@@ -76,6 +76,8 @@ public class GnssConfiguration {
             "ENABLE_PSDS_PERIODIC_DOWNLOAD";
     private static final String CONFIG_ENABLE_ACTIVE_SIM_EMERGENCY_SUPL =
             "ENABLE_ACTIVE_SIM_EMERGENCY_SUPL";
+    private static final String CONFIG_ENABLE_NI_SUPL_MESSAGE_INJECTION =
+            "ENABLE_NI_SUPL_MESSAGE_INJECTION";
     static final String CONFIG_LONGTERM_PSDS_SERVER_1 = "LONGTERM_PSDS_SERVER_1";
     static final String CONFIG_LONGTERM_PSDS_SERVER_2 = "LONGTERM_PSDS_SERVER_2";
     static final String CONFIG_LONGTERM_PSDS_SERVER_3 = "LONGTERM_PSDS_SERVER_3";
@@ -215,6 +217,14 @@ public class GnssConfiguration {
      */
     boolean isActiveSimEmergencySuplEnabled() {
         return getBooleanConfig(CONFIG_ENABLE_ACTIVE_SIM_EMERGENCY_SUPL, false);
+    }
+
+    /**
+     * Returns true if NI SUPL message injection is enabled; Returns false otherwise.
+     * Default false if not set.
+     */
+    boolean isNiSuplMessageInjectionEnabled() {
+        return getBooleanConfig(CONFIG_ENABLE_NI_SUPL_MESSAGE_INJECTION, false);
     }
 
     /**

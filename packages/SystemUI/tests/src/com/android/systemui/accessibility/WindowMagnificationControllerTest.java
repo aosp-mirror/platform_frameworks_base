@@ -903,6 +903,97 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void changeMagnificationSize_expectedWindowSize() {
+        final Rect bounds = mWindowManager.getCurrentWindowMetrics().getBounds();
+
+        final float magnificationScaleLarge = 2.5f;
+        final int initSize = Math.min(bounds.width(), bounds.height()) / 3;
+        final int magnificationSize = (int) (initSize * magnificationScaleLarge);
+
+        final int expectedWindowHeight = magnificationSize;
+        final int expectedWindowWidth = magnificationSize;
+
+        mInstrumentation.runOnMainSync(
+                () ->
+                        mWindowMagnificationController.enableWindowMagnificationInternal(
+                                Float.NaN, Float.NaN, Float.NaN));
+
+        final AtomicInteger actualWindowHeight = new AtomicInteger();
+        final AtomicInteger actualWindowWidth = new AtomicInteger();
+        mInstrumentation.runOnMainSync(
+                () -> {
+                    mWindowMagnificationController.changeMagnificationSize(
+                            WindowMagnificationSettings.MagnificationSize.LARGE);
+                    actualWindowHeight.set(mWindowManager.getLayoutParamsFromAttachedView().height);
+                    actualWindowWidth.set(mWindowManager.getLayoutParamsFromAttachedView().width);
+                });
+
+        assertEquals(expectedWindowHeight, actualWindowHeight.get());
+        assertEquals(expectedWindowWidth, actualWindowWidth.get());
+    }
+
+    @Test
+    public void editModeOnDragCorner_resizesWindow() {
+        final Rect bounds = mWindowManager.getCurrentWindowMetrics().getBounds();
+
+        final int startingSize = (int) (bounds.width() / 2);
+
+        mInstrumentation.runOnMainSync(
+                () ->
+                        mWindowMagnificationController.enableWindowMagnificationInternal(
+                                Float.NaN, Float.NaN, Float.NaN));
+
+        final AtomicInteger actualWindowHeight = new AtomicInteger();
+        final AtomicInteger actualWindowWidth = new AtomicInteger();
+
+        mInstrumentation.runOnMainSync(
+                () -> {
+                    mWindowMagnificationController.setWindowSize(startingSize, startingSize);
+                    mWindowMagnificationController.setEditMagnifierSizeMode(true);
+                });
+
+        waitForIdleSync();
+
+        mInstrumentation.runOnMainSync(
+                () -> {
+                    mWindowMagnificationController
+                            .onDrag(getInternalView(R.id.bottom_right_corner), 2f, 1f);
+                    actualWindowHeight.set(mWindowManager.getLayoutParamsFromAttachedView().height);
+                    actualWindowWidth.set(mWindowManager.getLayoutParamsFromAttachedView().width);
+                });
+
+        assertEquals(startingSize + 1, actualWindowHeight.get());
+        assertEquals(startingSize + 2, actualWindowWidth.get());
+    }
+
+    @Test
+    public void editModeOnDragEdge_resizesWindowInOnlyOneDirection() {
+        final Rect bounds = mWindowManager.getCurrentWindowMetrics().getBounds();
+
+        final int startingSize = (int) (bounds.width() / 2f);
+
+        mInstrumentation.runOnMainSync(
+                () ->
+                        mWindowMagnificationController.enableWindowMagnificationInternal(
+                                Float.NaN, Float.NaN, Float.NaN));
+
+        final AtomicInteger actualWindowHeight = new AtomicInteger();
+        final AtomicInteger actualWindowWidth = new AtomicInteger();
+
+        mInstrumentation.runOnMainSync(
+                () -> {
+                    mWindowMagnificationController.setWindowSize(startingSize, startingSize);
+                    mWindowMagnificationController.setEditMagnifierSizeMode(true);
+                    mWindowMagnificationController
+                            .onDrag(getInternalView(R.id.bottom_handle), 2f, 1f);
+                    actualWindowHeight.set(mWindowManager.getLayoutParamsFromAttachedView().height);
+                    actualWindowWidth.set(mWindowManager.getLayoutParamsFromAttachedView().width);
+                });
+        assertEquals(startingSize + 1, actualWindowHeight.get());
+        assertEquals(startingSize, actualWindowWidth.get());
+    }
+
+    @Test
     public void setWindowCenterOutOfScreen_enabled_magnificationCenterIsInsideTheScreen() {
 
         final int minimumWindowSize = mResources.getDimensionPixelSize(

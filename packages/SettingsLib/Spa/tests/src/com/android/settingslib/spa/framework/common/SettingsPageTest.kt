@@ -118,6 +118,7 @@ class SettingsPageTest {
         page.enterPage()
         page.leavePage()
         page.enterPage()
+        assertThat(page.createBrowseIntent()).isNotNull()
         assertThat(spaLogger.getEventCount(page.id, LogEvent.PAGE_ENTER, LogCategory.FRAMEWORK))
             .isEqualTo(2)
         assertThat(spaLogger.getEventCount(page.id, LogEvent.PAGE_LEAVE, LogCategory.FRAMEWORK))

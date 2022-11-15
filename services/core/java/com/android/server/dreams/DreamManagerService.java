@@ -116,7 +116,7 @@ public final class DreamManagerService extends SystemService {
     private final DreamUiEventLogger mDreamUiEventLogger;
     private final ComponentName mAmbientDisplayComponent;
     private final boolean mDismissDreamOnActivityStart;
-    private final boolean mDreamsOnlyEnabledForSystemUser;
+    private final boolean mDreamsOnlyEnabledForDockUser;
     private final boolean mDreamsEnabledByDefaultConfig;
     private final boolean mDreamsActivatedOnChargeByDefault;
     private final boolean mDreamsActivatedOnDockByDefault;
@@ -214,8 +214,8 @@ public final class DreamManagerService extends SystemService {
                 mContext.getResources().getStringArray(R.array.config_loggable_dream_prefixes));
         AmbientDisplayConfiguration adc = new AmbientDisplayConfiguration(mContext);
         mAmbientDisplayComponent = ComponentName.unflattenFromString(adc.ambientDisplayComponent());
-        mDreamsOnlyEnabledForSystemUser =
-                mContext.getResources().getBoolean(R.bool.config_dreamsOnlyEnabledForSystemUser);
+        mDreamsOnlyEnabledForDockUser =
+                mContext.getResources().getBoolean(R.bool.config_dreamsOnlyEnabledForDockUser);
         mDismissDreamOnActivityStart = mContext.getResources().getBoolean(
                 R.bool.config_dismissDreamOnActivityStart);
 
@@ -292,10 +292,9 @@ public final class DreamManagerService extends SystemService {
             pw.println();
             pw.println("mCurrentDream=" + mCurrentDream);
             pw.println("mForceAmbientDisplayEnabled=" + mForceAmbientDisplayEnabled);
-            pw.println("mDreamsOnlyEnabledForSystemUser=" + mDreamsOnlyEnabledForSystemUser);
+            pw.println("mDreamsOnlyEnabledForDockUser=" + mDreamsOnlyEnabledForDockUser);
             pw.println("mDreamsEnabledSetting=" + mDreamsEnabledSetting);
             pw.println("mForceAmbientDisplayEnabled=" + mForceAmbientDisplayEnabled);
-            pw.println("mDreamsOnlyEnabledForSystemUser=" + mDreamsOnlyEnabledForSystemUser);
             pw.println("mDreamsActivatedOnDockByDefault=" + mDreamsActivatedOnDockByDefault);
             pw.println("mDreamsActivatedOnChargeByDefault=" + mDreamsActivatedOnChargeByDefault);
             pw.println("mIsDocked=" + mIsDocked);
@@ -602,7 +601,8 @@ public final class DreamManagerService extends SystemService {
     }
 
     private boolean dreamsEnabledForUser(int userId) {
-        return !mDreamsOnlyEnabledForSystemUser || (userId == UserHandle.USER_SYSTEM);
+        // TODO(b/257333623): Support non-system Dock Users in HSUM.
+        return !mDreamsOnlyEnabledForDockUser || (userId == UserHandle.USER_SYSTEM);
     }
 
     private ServiceInfo getServiceInfo(ComponentName name) {

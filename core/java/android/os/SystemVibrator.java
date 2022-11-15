@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.hardware.vibrator.IVibrator;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Range;
@@ -313,8 +314,14 @@ public class SystemVibrator extends Vibrator {
         private static final float EPSILON = 1e-5f;
 
         public MultiVibratorInfo(VibratorInfo[] vibrators) {
+            // Need to use an extra constructor to share the computation in super initialization.
+            this(vibrators, frequencyProfileIntersection(vibrators));
+        }
+
+        private MultiVibratorInfo(VibratorInfo[] vibrators,
+                VibratorInfo.FrequencyProfile mergedProfile) {
             super(/* id= */ -1,
-                    capabilitiesIntersection(vibrators),
+                    capabilitiesIntersection(vibrators, mergedProfile.isEmpty()),
                     supportedEffectsIntersection(vibrators),
                     supportedBrakingIntersection(vibrators),
                     supportedPrimitivesAndDurationsIntersection(vibrators),
@@ -323,13 +330,18 @@ public class SystemVibrator extends Vibrator {
                     integerLimitIntersection(vibrators, VibratorInfo::getPwlePrimitiveDurationMax),
                     integerLimitIntersection(vibrators, VibratorInfo::getPwleSizeMax),
                     floatPropertyIntersection(vibrators, VibratorInfo::getQFactor),
-                    frequencyProfileIntersection(vibrators));
+                    mergedProfile);
         }
 
-        private static int capabilitiesIntersection(VibratorInfo[] infos) {
+        private static int capabilitiesIntersection(VibratorInfo[] infos,
+                boolean frequencyProfileIsEmpty) {
             int intersection = ~0;
             for (VibratorInfo info : infos) {
                 intersection &= info.getCapabilities();
+            }
+            if (frequencyProfileIsEmpty) {
+                // Revoke frequency control if the merged frequency profile ended up empty.
+                intersection &= ~IVibrator.CAP_FREQUENCY_CONTROL;
             }
             return intersection;
         }

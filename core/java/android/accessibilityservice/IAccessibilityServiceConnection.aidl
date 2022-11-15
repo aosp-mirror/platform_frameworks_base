@@ -30,6 +30,7 @@ import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
 import android.view.accessibility.AccessibilityWindowInfo;
 import java.util.List;
+import android.window.ScreenCapture;
 
 /**
  * Interface given to an AccessibilitySerivce to talk to the AccessibilityManagerService.
@@ -121,6 +122,10 @@ interface IAccessibilityServiceConnection {
     int getWindowIdForLeashToken(IBinder token);
 
     void takeScreenshot(int displayId, in RemoteCallback callback);
+
+    void takeScreenshotOfWindow(int accessibilityWindowId, int interactionId,
+        in ScreenCapture.ScreenCaptureListener listener,
+        IAccessibilityInteractionConnectionCallback callback);
 
     void setGestureDetectionPassthroughRegion(int displayId, in Region region);
 

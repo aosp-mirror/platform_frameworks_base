@@ -71,7 +71,7 @@ public class BackgroundRestrictionsTest {
     private static final String TEST_APP_PACKAGE = "com.android.servicestests.apps.jobtestapp";
     private static final String TEST_APP_ACTIVITY = TEST_APP_PACKAGE + ".TestJobActivity";
     private static final long POLL_INTERVAL = 500;
-    private static final long DEFAULT_WAIT_TIMEOUT = 5000;
+    private static final long DEFAULT_WAIT_TIMEOUT = 10_000;
 
     private Context mContext;
     private AppOpsManager mAppOpsManager;

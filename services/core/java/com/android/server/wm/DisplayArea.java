@@ -369,6 +369,55 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
     }
 
     @Override
+    ActivityRecord getActivity(Predicate<ActivityRecord> callback, boolean traverseTopToBottom,
+            ActivityRecord boundary) {
+        if (mType == Type.ABOVE_TASKS || mType == Type.BELOW_TASKS) {
+            return null;
+        }
+        return super.getActivity(callback, traverseTopToBottom, boundary);
+    }
+
+    @Override
+    Task getTask(Predicate<Task> callback, boolean traverseTopToBottom) {
+        if (mType == Type.ABOVE_TASKS || mType == Type.BELOW_TASKS) {
+            return null;
+        }
+        return super.getTask(callback, traverseTopToBottom);
+    }
+
+    @Override
+    boolean forAllActivities(Predicate<ActivityRecord> callback, boolean traverseTopToBottom) {
+        if (mType == Type.ABOVE_TASKS || mType == Type.BELOW_TASKS) {
+            return false;
+        }
+        return super.forAllActivities(callback, traverseTopToBottom);
+    }
+
+    @Override
+    boolean forAllRootTasks(Predicate<Task> callback, boolean traverseTopToBottom) {
+        if (mType == Type.ABOVE_TASKS || mType == Type.BELOW_TASKS) {
+            return false;
+        }
+        return super.forAllRootTasks(callback, traverseTopToBottom);
+    }
+
+    @Override
+    boolean forAllTasks(Predicate<Task> callback) {
+        if (mType == Type.ABOVE_TASKS || mType == Type.BELOW_TASKS) {
+            return false;
+        }
+        return super.forAllTasks(callback);
+    }
+
+    @Override
+    boolean forAllLeafTasks(Predicate<Task> callback) {
+        if (mType == Type.ABOVE_TASKS || mType == Type.BELOW_TASKS) {
+            return false;
+        }
+        return super.forAllLeafTasks(callback);
+    }
+
+    @Override
     void forAllDisplayAreas(Consumer<DisplayArea> callback) {
         super.forAllDisplayAreas(callback);
         callback.accept(this);

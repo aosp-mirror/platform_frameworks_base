@@ -244,12 +244,9 @@ public final class MediaSession {
                 mCallback = null;
                 return;
             }
-            if (handler == null) {
-                handler = new Handler();
-            }
+            Looper looper = handler != null ? handler.getLooper() : Looper.myLooper();
             callback.mSession = this;
-            CallbackMessageHandler msgHandler = new CallbackMessageHandler(handler.getLooper(),
-                    callback);
+            CallbackMessageHandler msgHandler = new CallbackMessageHandler(looper, callback);
             mCallback = msgHandler;
         }
     }

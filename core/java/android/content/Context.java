@@ -4917,6 +4917,7 @@ public abstract class Context {
      * @see android.server.attention.AttentionManagerService
      * @hide
      */
+    @TestApi
     public static final String ATTENTION_SERVICE = "attention";
 
     /**

@@ -125,6 +125,14 @@ public interface Computer extends PackageDataSnapshot {
     ActivityInfo getActivityInfo(ComponentName component, long flags, int userId);
 
     /**
+     * Similar to {@link Computer#getActivityInfo(android.content.ComponentName, long, int)} but
+     * only visible as internal service. This method bypass INTERACT_ACROSS_USERS or
+     * INTERACT_ACROSS_USERS_FULL permission checks and only to be used for intent resolution across
+     * chained cross profiles
+     */
+    ActivityInfo getActivityInfoCrossProfile(ComponentName component, long flags, int userId);
+
+    /**
      * Important: The provided filterCallingUid is used exclusively to filter out activities
      * that can be seen based on user state. It's typically the original caller uid prior
      * to clearing. Because it can only be provided by trusted code, its value can be

@@ -225,6 +225,7 @@ public abstract class StatusBarViewModule {
             BroadcastDispatcher broadcastDispatcher,
             @Main Handler mainHandler,
             ContentResolver contentResolver,
+            FeatureFlags featureFlags,
             BatteryController batteryController
     ) {
         return new BatteryMeterViewController(
@@ -234,6 +235,7 @@ public abstract class StatusBarViewModule {
                 broadcastDispatcher,
                 mainHandler,
                 contentResolver,
+                featureFlags,
                 batteryController);
 
     }

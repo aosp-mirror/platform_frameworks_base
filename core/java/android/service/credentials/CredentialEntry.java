@@ -173,7 +173,7 @@ public final class CredentialEntry implements Parcelable {
          */
         public @NonNull Builder setPendingIntent(@Nullable PendingIntent pendingIntent) {
             if (pendingIntent != null) {
-                Preconditions.checkState(mCredential != null,
+                Preconditions.checkState(mCredential == null,
                         "credential is already set. Cannot set both the pendingIntent "
                                 + "and the credential");
             }
@@ -189,7 +189,7 @@ public final class CredentialEntry implements Parcelable {
          */
         public @NonNull Builder setCredential(@Nullable Credential credential) {
             if (credential != null) {
-                Preconditions.checkState(mPendingIntent != null,
+                Preconditions.checkState(mPendingIntent == null,
                         "pendingIntent is already set. Cannot set both the "
                                 + "pendingIntent and the credential");
             }
@@ -215,10 +215,10 @@ public final class CredentialEntry implements Parcelable {
          * is set, or if both are set.
          */
         public @NonNull CredentialEntry build() {
-            Preconditions.checkState(mPendingIntent == null && mCredential == null,
-                    "Either pendingIntent or credential must be set");
-            Preconditions.checkState(mPendingIntent != null && mCredential != null,
-                    "Cannot set both the pendingIntent and credential");
+            Preconditions.checkState(((mPendingIntent != null && mCredential == null)
+                            || (mPendingIntent == null && mCredential != null)),
+                    "Either pendingIntent or credential must be set, and both cannot"
+                            + "be set at the same time");
             return new CredentialEntry(mType, mSlice, mPendingIntent,
                     mCredential, mAutoSelectAllowed);
         }

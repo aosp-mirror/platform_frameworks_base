@@ -33,6 +33,7 @@ import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.controls.ControlsServiceInfo;
 import com.android.systemui.controls.dagger.ControlsComponent;
 import com.android.systemui.controls.management.ControlsListingController;
 import com.android.systemui.controls.ui.ControlsActivity;
@@ -41,6 +42,8 @@ import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.dreams.complication.dagger.DreamHomeControlsComplicationComponent;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.util.ViewController;
+
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -76,16 +79,25 @@ public class DreamHomeControlsComplication implements Complication {
         private final DreamOverlayStateController mDreamOverlayStateController;
         private final ControlsComponent mControlsComponent;
 
-        private boolean mControlServicesAvailable = false;
+        private boolean mOverlayActive = false;
 
         // Callback for when the home controls service availability changes.
         private final ControlsListingController.ControlsListingCallback mControlsCallback =
-                serviceInfos -> {
-                    boolean available = !serviceInfos.isEmpty();
+                services -> updateHomeControlsComplication();
 
-                    if (available != mControlServicesAvailable) {
-                        mControlServicesAvailable = available;
-                        updateComplicationAvailability();
+        private final DreamOverlayStateController.Callback mOverlayStateCallback =
+                new DreamOverlayStateController.Callback() {
+                    @Override
+                    public void onStateChanged() {
+                        if (mOverlayActive == mDreamOverlayStateController.isOverlayActive()) {
+                            return;
+                        }
+
+                        mOverlayActive = !mOverlayActive;
+
+                        if (mOverlayActive) {
+                            updateHomeControlsComplication();
+                        }
                     }
                 };
 
@@ -102,18 +114,29 @@ public class DreamHomeControlsComplication implements Complication {
         public void start() {
             mControlsComponent.getControlsListingController().ifPresent(
                     c -> c.addCallback(mControlsCallback));
+            mDreamOverlayStateController.addCallback(mOverlayStateCallback);
         }
 
-        private void updateComplicationAvailability() {
+        private void updateHomeControlsComplication() {
+            mControlsComponent.getControlsListingController().ifPresent(c -> {
+                if (isHomeControlsAvailable(c.getCurrentServices())) {
+                    mDreamOverlayStateController.addComplication(mComplication);
+                } else {
+                    mDreamOverlayStateController.removeComplication(mComplication);
+                }
+            });
+        }
+
+        private boolean isHomeControlsAvailable(List<ControlsServiceInfo> controlsServices) {
+            if (controlsServices.isEmpty()) {
+                return false;
+            }
+
             final boolean hasFavorites = mControlsComponent.getControlsController()
                     .map(c -> !c.getFavorites().isEmpty())
                     .orElse(false);
-            if (!hasFavorites || !mControlServicesAvailable
-                    || mControlsComponent.getVisibility() == UNAVAILABLE) {
-                mDreamOverlayStateController.removeComplication(mComplication);
-            } else {
-                mDreamOverlayStateController.addComplication(mComplication);
-            }
+            final ControlsComponent.Visibility visibility = mControlsComponent.getVisibility();
+            return hasFavorites && visibility != UNAVAILABLE;
         }
     }
 

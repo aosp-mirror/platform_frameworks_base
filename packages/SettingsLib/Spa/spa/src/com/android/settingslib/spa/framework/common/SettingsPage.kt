@@ -113,6 +113,12 @@ data class SettingsPage(
         )
     }
 
+    fun createBrowseIntent(entryId: String? = null): Intent? {
+        val context = SpaEnvironmentFactory.instance.appContext
+        val browseActivityClass = SpaEnvironmentFactory.instance.browseActivityClass
+        return createBrowseIntent(context, browseActivityClass, entryId)
+    }
+
     fun createBrowseIntent(
         context: Context?,
         browseActivityClass: Class<out Activity>?,

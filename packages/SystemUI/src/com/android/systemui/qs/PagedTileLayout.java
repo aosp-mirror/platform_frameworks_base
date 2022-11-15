@@ -364,13 +364,18 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     private void distributeTiles() {
         emptyAndInflateOrRemovePages();
 
-        final int tileCount = mPages.get(0).maxTiles();
-        if (DEBUG) Log.d(TAG, "Distributing tiles");
+        final int tilesPerPageCount = mPages.get(0).maxTiles();
         int index = 0;
-        final int NT = mTiles.size();
-        for (int i = 0; i < NT; i++) {
+        final int totalTilesCount = mTiles.size();
+        if (DEBUG) {
+            Log.d(TAG, "Distributing tiles: "
+                    + "[tilesPerPageCount=" + tilesPerPageCount + "]"
+                    + "[totalTilesCount=" + totalTilesCount + "]"
+            );
+        }
+        for (int i = 0; i < totalTilesCount; i++) {
             TileRecord tile = mTiles.get(i);
-            if (mPages.get(index).mRecords.size() == tileCount) index++;
+            if (mPages.get(index).mRecords.size() == tilesPerPageCount) index++;
             if (DEBUG) {
                 Log.d(TAG, "Adding " + tile.tile.getClass().getSimpleName() + " to "
                         + index);
@@ -577,8 +582,8 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         });
         setOffscreenPageLimit(lastPageNumber); // Ensure the page to reveal has been inflated.
         int dx = getWidth() * lastPageNumber;
-        mScroller.startScroll(getScrollX(), getScrollY(), isLayoutRtl() ? -dx  : dx, 0,
-            REVEAL_SCROLL_DURATION_MILLIS);
+        mScroller.startScroll(getScrollX(), getScrollY(), isLayoutRtl() ? -dx : dx, 0,
+                REVEAL_SCROLL_DURATION_MILLIS);
         postInvalidateOnAnimation();
     }
 
@@ -738,6 +743,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
 
     public interface PageListener {
         int INVALID_PAGE = -1;
+
         void onPageChanged(boolean isFirst, int pageNumber);
     }
 }

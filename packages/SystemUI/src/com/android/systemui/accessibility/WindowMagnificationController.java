@@ -158,6 +158,10 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     private View mTopDrag;
     private View mRightDrag;
     private View mBottomDrag;
+    private ImageView mTopLeftCornerView;
+    private ImageView mTopRightCornerView;
+    private ImageView mBottomLeftCornerView;
+    private ImageView mBottomRightCornerView;
     private final Configuration mConfiguration;
 
     @NonNull
@@ -357,13 +361,15 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         return false;
     }
 
-    private void changeMagnificationSize(@MagnificationSize int index) {
+    @VisibleForTesting
+    void changeMagnificationSize(@MagnificationSize int index) {
         final int initSize = Math.min(mWindowBounds.width(), mWindowBounds.height()) / 3;
         int size = (int) (initSize * MAGNIFICATION_SCALE_OPTIONS[index]);
         setWindowSize(size, size);
     }
 
-    private void setEditMagnifierSizeMode(boolean enable) {
+    @VisibleForTesting
+    void setEditMagnifierSizeMode(boolean enable) {
         mEditSizeEnable = enable;
         applyResourcesValues();
 
@@ -639,10 +645,37 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         Region regionInsideDragBorder = new Region(mBorderDragSize, mBorderDragSize,
                 mMirrorView.getWidth() - mBorderDragSize,
                 mMirrorView.getHeight() - mBorderDragSize);
+
+        Region tapExcludeRegion = new Region();
+
         Rect dragArea = new Rect();
         mDragView.getHitRect(dragArea);
 
-        regionInsideDragBorder.op(dragArea, Region.Op.DIFFERENCE);
+        Rect topLeftArea = new Rect();
+        mTopLeftCornerView.getHitRect(topLeftArea);
+
+        Rect topRightArea = new Rect();
+        mTopRightCornerView.getHitRect(topRightArea);
+
+        Rect bottomLeftArea = new Rect();
+        mBottomLeftCornerView.getHitRect(bottomLeftArea);
+
+        Rect bottomRightArea = new Rect();
+        mBottomRightCornerView.getHitRect(bottomRightArea);
+
+        Rect closeArea = new Rect();
+        mCloseView.getHitRect(closeArea);
+
+        // add tapExcludeRegion for Drag or close
+        tapExcludeRegion.op(dragArea, Region.Op.UNION);
+        tapExcludeRegion.op(topLeftArea, Region.Op.UNION);
+        tapExcludeRegion.op(topRightArea, Region.Op.UNION);
+        tapExcludeRegion.op(bottomLeftArea, Region.Op.UNION);
+        tapExcludeRegion.op(bottomRightArea, Region.Op.UNION);
+        tapExcludeRegion.op(closeArea, Region.Op.UNION);
+
+        regionInsideDragBorder.op(tapExcludeRegion, Region.Op.DIFFERENCE);
+
         return regionInsideDragBorder;
     }
 
@@ -756,6 +789,10 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         mRightDrag = mMirrorView.findViewById(R.id.right_handle);
         mBottomDrag = mMirrorView.findViewById(R.id.bottom_handle);
         mCloseView = mMirrorView.findViewById(R.id.close_button);
+        mTopRightCornerView = mMirrorView.findViewById(R.id.top_right_corner);
+        mTopLeftCornerView = mMirrorView.findViewById(R.id.top_left_corner);
+        mBottomRightCornerView = mMirrorView.findViewById(R.id.bottom_right_corner);
+        mBottomLeftCornerView = mMirrorView.findViewById(R.id.bottom_left_corner);
 
         mDragView.setOnTouchListener(this);
         mLeftDrag.setOnTouchListener(this);
@@ -763,6 +800,10 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         mRightDrag.setOnTouchListener(this);
         mBottomDrag.setOnTouchListener(this);
         mCloseView.setOnTouchListener(this);
+        mTopLeftCornerView.setOnTouchListener(this);
+        mTopRightCornerView.setOnTouchListener(this);
+        mBottomLeftCornerView.setOnTouchListener(this);
+        mBottomRightCornerView.setOnTouchListener(this);
     }
 
     /**
@@ -831,8 +872,16 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
-        if (v == mDragView || v == mLeftDrag || v == mTopDrag || v == mRightDrag
-                || v == mBottomDrag || v == mCloseView) {
+        if (v == mDragView
+                || v == mLeftDrag
+                || v == mTopDrag
+                || v == mRightDrag
+                || v == mBottomDrag
+                || v == mTopLeftCornerView
+                || v == mTopRightCornerView
+                || v == mBottomLeftCornerView
+                || v == mBottomRightCornerView
+                || v == mCloseView) {
             return mGestureDetector.onTouch(v, event);
         }
         return false;
@@ -1195,7 +1244,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     @Override
     public boolean onDrag(View view, float offsetX, float offsetY) {
         if (mEditSizeEnable) {
-            changeWindowSize(view, offsetX, offsetY);
+            return changeWindowSize(view, offsetX, offsetY);
         } else {
             move((int) offsetX, (int) offsetY);
         }
@@ -1220,13 +1269,47 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         if (mEditSizeEnable) {
             mDragView.setVisibility(View.GONE);
             mCloseView.setVisibility(View.VISIBLE);
+            mTopRightCornerView.setVisibility(View.VISIBLE);
+            mTopLeftCornerView.setVisibility(View.VISIBLE);
+            mBottomRightCornerView.setVisibility(View.VISIBLE);
+            mBottomLeftCornerView.setVisibility(View.VISIBLE);
         } else {
             mDragView.setVisibility(View.VISIBLE);
             mCloseView.setVisibility(View.GONE);
+            mTopRightCornerView.setVisibility(View.GONE);
+            mTopLeftCornerView.setVisibility(View.GONE);
+            mBottomRightCornerView.setVisibility(View.GONE);
+            mBottomLeftCornerView.setVisibility(View.GONE);
         }
     }
 
-    public boolean changeWindowSize(View view, float offsetX, float offsetY) {
+    private boolean changeWindowSize(View view, float offsetX, float offsetY) {
+        if (view == mLeftDrag) {
+            changeMagnificationFrameSize(offsetX, 0, 0, 0);
+        } else if (view == mRightDrag) {
+            changeMagnificationFrameSize(0, 0, offsetX, 0);
+        } else if (view == mTopDrag) {
+            changeMagnificationFrameSize(0, offsetY, 0, 0);
+        } else if (view == mBottomDrag) {
+            changeMagnificationFrameSize(0, 0, 0, offsetY);
+        } else if (view == mTopLeftCornerView) {
+            changeMagnificationFrameSize(offsetX, offsetY, 0, 0);
+        } else if (view == mTopRightCornerView) {
+            changeMagnificationFrameSize(0, offsetY, offsetX, 0);
+        } else if (view == mBottomLeftCornerView) {
+            changeMagnificationFrameSize(offsetX, 0, 0, offsetY);
+        } else if (view == mBottomRightCornerView) {
+            changeMagnificationFrameSize(0, 0, offsetX, offsetY);
+        } else {
+            return false;
+        }
+
+        return true;
+    }
+
+    private void changeMagnificationFrameSize(
+            float leftOffset, float topOffset, float rightOffset,
+            float bottomOffset) {
         boolean bRTL = isRTL(mContext);
         final int initSize = Math.min(mWindowBounds.width(), mWindowBounds.height()) / 3;
 
@@ -1236,54 +1319,26 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         Rect tempRect = new Rect();
         tempRect.set(mMagnificationFrame);
 
-        if (view == mLeftDrag) {
-            if (bRTL) {
-                tempRect.right += offsetX;
-                if (tempRect.right > mWindowBounds.width()) {
-                    return false;
-                }
-            } else {
-                tempRect.left += offsetX;
-                if (tempRect.left < 0) {
-                    return false;
-                }
-            }
-        } else if (view == mRightDrag) {
-            if (bRTL) {
-                tempRect.left += offsetX;
-                if (tempRect.left < 0) {
-                    return false;
-                }
-            } else {
-                tempRect.right += offsetX;
-                if (tempRect.right > mWindowBounds.width()) {
-                    return false;
-                }
-            }
-        } else if (view == mTopDrag) {
-            tempRect.top += offsetY;
-            if (tempRect.top < 0) {
-                return false;
-            }
-        } else if (view == mBottomDrag) {
-            tempRect.bottom += offsetY;
-            if (tempRect.bottom > mWindowBounds.height()) {
-                return false;
-            }
+        if (bRTL) {
+            tempRect.left += (int) (rightOffset);
+            tempRect.right += (int) (leftOffset);
+        } else {
+            tempRect.right += (int) (rightOffset);
+            tempRect.left += (int) (leftOffset);
         }
+        tempRect.top += (int) (topOffset);
+        tempRect.bottom += (int) (bottomOffset);
 
         if (tempRect.width() < initSize || tempRect.height() < initSize
                 || tempRect.width() > maxWidthSize || tempRect.height() > maxHeightSize) {
-            return false;
+            return;
         }
-
         mMagnificationFrame.set(tempRect);
 
         computeBounceAnimationScale();
         calculateMagnificationFrameBoundary();
 
         modifyWindowMagnification(true);
-        return true;
     }
 
     private static boolean isRTL(Context context) {

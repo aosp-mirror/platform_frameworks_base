@@ -126,11 +126,13 @@ public final class UserTypeFactory {
                 .setCrossProfileIntentFilterAccessControl(
                         CrossProfileIntentFilter.ACCESS_LEVEL_SYSTEM)
                 .setIsCredentialSharableWithParent(true)
+                .setDefaultCrossProfileIntentFilters(getDefaultCloneCrossProfileIntentFilter())
                 .setDefaultUserProperties(new UserProperties.Builder()
                         .setStartWithParent(true)
                         .setShowInLauncher(UserProperties.SHOW_IN_LAUNCHER_WITH_PARENT)
                         .setShowInSettings(UserProperties.SHOW_IN_SETTINGS_WITH_PARENT)
-                        .setInheritDevicePolicy(UserProperties.INHERIT_DEVICE_POLICY_FROM_PARENT));
+                        .setInheritDevicePolicy(UserProperties.INHERIT_DEVICE_POLICY_FROM_PARENT)
+                        .setUseParentsContacts(true));
     }
 
     /**
@@ -310,6 +312,10 @@ public final class UserTypeFactory {
         return DefaultCrossProfileIntentFiltersUtils.getDefaultManagedProfileFilters();
     }
 
+    private static List<DefaultCrossProfileIntentFilter> getDefaultCloneCrossProfileIntentFilter() {
+        return DefaultCrossProfileIntentFiltersUtils.getDefaultCloneProfileFilters();
+    }
+
     /**
      * Reads the given xml parser to obtain device user-type customization, and updates the given
      * map of {@link UserTypeDetails.Builder}s accordingly.
@@ -391,6 +397,7 @@ public final class UserTypeFactory {
                 }
 
                 setIntAttribute(parser, "enabled", builder::setEnabled);
+                setIntAttribute(parser, "max-allowed", builder::setMaxAllowed);
 
                 // Process child elements.
                 final int depth = parser.getDepth();

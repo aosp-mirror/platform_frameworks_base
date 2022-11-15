@@ -22,7 +22,9 @@ import static android.os.Build.VERSION_CODES.S;
 import static android.view.accessibility.AccessibilityNodeInfo.FLAG_PREFETCH_DESCENDANTS_MASK;
 import static android.view.accessibility.AccessibilityNodeInfo.FLAG_PREFETCH_MASK;
 
+import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.IAccessibilityServiceConnection;
+import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
@@ -31,17 +33,21 @@ import android.content.Context;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.Log;
 import android.util.LongSparseArray;
+import android.util.Pair;
 import android.util.SparseArray;
 import android.util.SparseLongArray;
 import android.view.Display;
 import android.view.ViewConfiguration;
+import android.window.ScreenCapture;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
@@ -53,6 +59,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -145,6 +152,10 @@ public final class AccessibilityInteractionClient
     private List<AccessibilityNodeInfo> mFindAccessibilityNodeInfosResult;
 
     private boolean mPerformAccessibilityActionResult;
+
+    // SparseArray of interaction ID -> screenshot executor+callback.
+    private final SparseArray<Pair<Executor, AccessibilityService.TakeScreenshotCallback>>
+            mTakeScreenshotOfWindowCallbacks = new SparseArray<>();
 
     private Message mSameThreadMessage;
 
@@ -779,6 +790,59 @@ public final class AccessibilityInteractionClient
     }
 
     /**
+     * Takes a screenshot of the window with the provided {@code accessibilityWindowId} and
+     * returns the answer asynchronously. This async behavior is similar to {@link
+     * AccessibilityService#takeScreenshot} but unlike other methods in this class which perform
+     * synchronous waiting in the AccessibilityService client.
+     *
+     * @see AccessibilityService#takeScreenshotOfWindow
+     */
+    public void takeScreenshotOfWindow(int connectionId, int accessibilityWindowId,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull AccessibilityService.TakeScreenshotCallback callback) {
+        synchronized (mInstanceLock) {
+            try {
+                IAccessibilityServiceConnection connection = getConnection(connectionId);
+                if (connection == null) {
+                    executor.execute(() -> callback.onFailure(
+                            AccessibilityService.ERROR_TAKE_SCREENSHOT_INTERNAL_ERROR));
+                    return;
+                }
+                final long identityToken = Binder.clearCallingIdentity();
+                try {
+                    final int interactionId = mInteractionIdCounter.getAndIncrement();
+                    mTakeScreenshotOfWindowCallbacks.put(interactionId,
+                            Pair.create(executor, callback));
+                    // Create a ScreenCaptureListener to receive the screenshot directly from
+                    // SurfaceFlinger instead of requiring an extra IPC from the app:
+                    //   A11yService -> App -> SurfaceFlinger -> A11yService
+                    ScreenCapture.ScreenCaptureListener listener =
+                            new ScreenCapture.ScreenCaptureListener(
+                                    screenshot -> sendWindowScreenshotSuccess(screenshot,
+                                            interactionId));
+                    connection.takeScreenshotOfWindow(accessibilityWindowId, interactionId,
+                            listener, this);
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                        synchronized (mInstanceLock) {
+                            // Notify failure if we still haven't sent a response after timeout.
+                            if (mTakeScreenshotOfWindowCallbacks.contains(interactionId)) {
+                                sendTakeScreenshotOfWindowError(
+                                        AccessibilityService.ERROR_TAKE_SCREENSHOT_INTERNAL_ERROR,
+                                        interactionId);
+                            }
+                        }
+                    }, TIMEOUT_INTERACTION_MILLIS);
+                } finally {
+                    Binder.restoreCallingIdentity(identityToken);
+                }
+            } catch (RemoteException re) {
+                executor.execute(() -> callback.onFailure(
+                        AccessibilityService.ERROR_TAKE_SCREENSHOT_INTERNAL_ERROR));
+            }
+        }
+    }
+
+    /**
      * Finds {@link AccessibilityNodeInfo}s by View text. The match is case
      * insensitive containment. The search is performed in the window whose
      * id is specified and starts from the node whose accessibility id is
@@ -1250,6 +1314,55 @@ public final class AccessibilityInteractionClient
                     Arrays.asList(Thread.currentThread().getStackTrace()));
             }
             mInstanceLock.notifyAll();
+        }
+    }
+
+    /**
+     * Sends the result of a window screenshot request to the requesting client.
+     *
+     * {@link #takeScreenshotOfWindow} does not perform synchronous waiting, so this method
+     * does not notify any wait lock.
+     */
+    private void sendWindowScreenshotSuccess(ScreenCapture.ScreenshotHardwareBuffer screenshot,
+            int interactionId) {
+        if (screenshot == null) {
+            sendTakeScreenshotOfWindowError(
+                    AccessibilityService.ERROR_TAKE_SCREENSHOT_INTERNAL_ERROR, interactionId);
+            return;
+        }
+        synchronized (mInstanceLock) {
+            if (mTakeScreenshotOfWindowCallbacks.contains(interactionId)) {
+                final AccessibilityService.ScreenshotResult result =
+                        new AccessibilityService.ScreenshotResult(screenshot.getHardwareBuffer(),
+                                screenshot.getColorSpace(), SystemClock.uptimeMillis());
+                final Pair<Executor, AccessibilityService.TakeScreenshotCallback> pair =
+                        mTakeScreenshotOfWindowCallbacks.get(interactionId);
+                final Executor executor = pair.first;
+                final AccessibilityService.TakeScreenshotCallback callback = pair.second;
+                executor.execute(() -> callback.onSuccess(result));
+                mTakeScreenshotOfWindowCallbacks.remove(interactionId);
+            }
+        }
+    }
+
+    /**
+     * Sends an error code for a window screenshot request to the requesting client.
+     *
+     * @param errorCode The error code from {@link AccessibilityService.ScreenshotErrorCode}.
+     * @param interactionId The interaction id of the request.
+     */
+    @Override
+    public void sendTakeScreenshotOfWindowError(
+            @AccessibilityService.ScreenshotErrorCode int errorCode, int interactionId) {
+        synchronized (mInstanceLock) {
+            if (mTakeScreenshotOfWindowCallbacks.contains(interactionId)) {
+                final Pair<Executor, AccessibilityService.TakeScreenshotCallback> pair =
+                        mTakeScreenshotOfWindowCallbacks.get(interactionId);
+                final Executor executor = pair.first;
+                final AccessibilityService.TakeScreenshotCallback callback = pair.second;
+                executor.execute(() -> callback.onFailure(errorCode));
+                mTakeScreenshotOfWindowCallbacks.remove(interactionId);
+            }
         }
     }
 

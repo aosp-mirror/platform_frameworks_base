@@ -16,6 +16,10 @@
 
 #include "idmap2/FabricatedOverlay.h"
 
+#include <sys/stat.h>   // umask
+#include <sys/types.h>  // umask
+
+#include <android-base/file.h>
 #include <androidfw/ResourceUtils.h>
 #include <androidfw/StringPool.h>
 #include <google/protobuf/io/coded_stream.h>
@@ -51,9 +55,13 @@ void Write32(std::ostream& stream, uint32_t value) {
 
 FabricatedOverlay::FabricatedOverlay(pb::FabricatedOverlay&& overlay,
                                      std::string&& string_pool_data,
+                                     std::vector<android::base::borrowed_fd> binary_files,
+                                     off_t total_binary_bytes,
                                      std::optional<uint32_t> crc_from_disk)
     : overlay_pb_(std::forward<pb::FabricatedOverlay>(overlay)),
     string_pool_data_(std::move(string_pool_data)),
+    binary_files_(std::move(binary_files)),
+    total_binary_bytes_(total_binary_bytes),
     crc_from_disk_(crc_from_disk) {
 }
 
@@ -72,14 +80,23 @@ FabricatedOverlay::Builder& FabricatedOverlay::Builder::SetOverlayable(const std
 FabricatedOverlay::Builder& FabricatedOverlay::Builder::SetResourceValue(
     const std::string& resource_name, uint8_t data_type, uint32_t data_value,
     const std::string& configuration) {
-  entries_.emplace_back(Entry{resource_name, data_type, data_value, "", configuration});
+  entries_.emplace_back(
+      Entry{resource_name, data_type, data_value, "", std::nullopt, configuration});
   return *this;
 }
 
 FabricatedOverlay::Builder& FabricatedOverlay::Builder::SetResourceValue(
     const std::string& resource_name, uint8_t data_type, const std::string& data_string_value,
     const std::string& configuration) {
-  entries_.emplace_back(Entry{resource_name, data_type, 0, data_string_value, configuration});
+  entries_.emplace_back(
+      Entry{resource_name, data_type, 0, data_string_value, std::nullopt, configuration});
+  return *this;
+}
+
+FabricatedOverlay::Builder& FabricatedOverlay::Builder::SetResourceValue(
+    const std::string& resource_name, std::optional<android::base::borrowed_fd>&& binary_value,
+    const std::string& configuration) {
+  entries_.emplace_back(Entry{resource_name, 0, 0, "", binary_value, configuration});
   return *this;
 }
 
@@ -135,7 +152,7 @@ Result<FabricatedOverlay> FabricatedOverlay::Builder::Build() {
     }
 
     value->second = TargetValue{res_entry.data_type, res_entry.data_value,
-        res_entry.data_string_value};
+        res_entry.data_string_value, res_entry.data_binary_value};
   }
 
   pb::FabricatedOverlay overlay_pb;
@@ -143,6 +160,11 @@ Result<FabricatedOverlay> FabricatedOverlay::Builder::Build() {
   overlay_pb.set_name(name_);
   overlay_pb.set_target_package_name(target_package_name_);
   overlay_pb.set_target_overlayable(target_overlayable_);
+
+  std::vector<android::base::borrowed_fd> binary_files;
+  size_t total_binary_bytes = 0;
+  // 16 for the number of bytes in the frro file before the binary data
+  const size_t FRRO_HEADER_SIZE = 16;
 
   for (auto& package : package_map) {
     auto package_pb = overlay_pb.add_packages();
@@ -162,6 +184,20 @@ Result<FabricatedOverlay> FabricatedOverlay::Builder::Build() {
           if (value.second.data_type == Res_value::TYPE_STRING) {
             auto ref = string_pool.MakeRef(value.second.data_string_value);
             pb_value->set_data_value(ref.index());
+          } else if (value.second.data_binary_value.has_value()) {
+              pb_value->set_data_type(Res_value::TYPE_STRING);
+              struct stat s;
+              if (fstat(value.second.data_binary_value->get(), &s) == -1) {
+                return Error("unable to get size of binary file: %d", errno);
+              }
+              std::string uri
+                  = StringPrintf("frro:/%s?offset=%d&size=%d", frro_path_.c_str(),
+                                 static_cast<int> (FRRO_HEADER_SIZE + total_binary_bytes),
+                                 static_cast<int> (s.st_size));
+              total_binary_bytes += s.st_size;
+              binary_files.emplace_back(value.second.data_binary_value->get());
+              auto ref = string_pool.MakeRef(std::move(uri));
+              pb_value->set_data_value(ref.index());
           } else {
             pb_value->set_data_value(value.second.data_value);
           }
@@ -169,10 +205,10 @@ Result<FabricatedOverlay> FabricatedOverlay::Builder::Build() {
       }
     }
   }
-
   android::BigBuffer string_buffer(kBufferSize);
   android::StringPool::FlattenUtf8(&string_buffer, string_pool, nullptr);
-  return FabricatedOverlay(std::move(overlay_pb), string_buffer.to_string());
+  return FabricatedOverlay(std::move(overlay_pb), string_buffer.to_string(),
+      std::move(binary_files), total_binary_bytes);
 }
 
 Result<FabricatedOverlay> FabricatedOverlay::FromBinaryStream(std::istream& stream) {
@@ -190,7 +226,7 @@ Result<FabricatedOverlay> FabricatedOverlay::FromBinaryStream(std::istream& stre
     return Error("Failed to read fabricated overlay version.");
   }
 
-  if (version != 1 && version != 2) {
+  if (version < 1 || version > 3) {
     return Error("Invalid fabricated overlay version '%u'.", version);
   }
 
@@ -201,7 +237,14 @@ Result<FabricatedOverlay> FabricatedOverlay::FromBinaryStream(std::istream& stre
 
   pb::FabricatedOverlay overlay{};
   std::string sp_data;
-  if (version == 2) {
+  uint32_t total_binary_bytes;
+  if (version == 3) {
+    if (!Read32(stream, &total_binary_bytes)) {
+      return Error("Failed read total binary bytes.");
+    }
+    stream.seekg(total_binary_bytes, std::istream::cur);
+  }
+  if (version >= 2) {
     uint32_t sp_size;
     if (!Read32(stream, &sp_size)) {
       return Error("Failed read string pool size.");
@@ -211,20 +254,15 @@ Result<FabricatedOverlay> FabricatedOverlay::FromBinaryStream(std::istream& stre
       return Error("Failed to read string pool.");
     }
     sp_data = buf;
-
-    if (!overlay.ParseFromIstream(&stream)) {
-      return Error("Failed read fabricated overlay proto.");
-    }
-  } else {
-    if (!overlay.ParseFromIstream(&stream)) {
-      return Error("Failed read fabricated overlay proto.");
-    }
+  }
+  if (!overlay.ParseFromIstream(&stream)) {
+    return Error("Failed read fabricated overlay proto.");
   }
 
   // If the proto version is the latest version, then the contents of the proto must be the same
   // when the proto is re-serialized; otherwise, the crc must be calculated because migrating the
   // proto to the latest version will likely change the contents of the fabricated overlay.
-  return FabricatedOverlay(std::move(overlay), std::move(sp_data),
+  return FabricatedOverlay(std::move(overlay), std::move(sp_data), {}, total_binary_bytes,
                            version == kFabricatedOverlayCurrentVersion
                                                    ? std::optional<uint32_t>(crc)
                                                    : std::nullopt);
@@ -274,6 +312,14 @@ Result<Unit> FabricatedOverlay::ToBinaryStream(std::ostream& stream) const {
   Write32(stream, kFabricatedOverlayMagic);
   Write32(stream, kFabricatedOverlayCurrentVersion);
   Write32(stream, (*data)->pb_crc);
+  Write32(stream, total_binary_bytes_);
+  std::string file_contents;
+  for (const android::base::borrowed_fd fd : binary_files_) {
+    if (!ReadFdToString(fd, &file_contents)) {
+      return Error("Failed to read binary file data.");
+    }
+    stream.write(file_contents.data(), file_contents.length());
+  }
   Write32(stream, (*data)->sp_data.length());
   stream.write((*data)->sp_data.data(), (*data)->sp_data.length());
   if (stream.bad()) {

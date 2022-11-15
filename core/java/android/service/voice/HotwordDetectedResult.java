@@ -31,6 +31,8 @@ import com.android.internal.R;
 import com.android.internal.util.DataClass;
 import com.android.internal.util.Preconditions;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -99,14 +101,30 @@ public final class HotwordDetectedResult implements Parcelable {
     private static final int LIMIT_AUDIO_CHANNEL_MAX_VALUE = 63;
 
     /**
-     * The bundle key for proximity value
+     * The bundle key for proximity
      *
      * TODO(b/238896013): Move the proximity logic out of bundle to proper API.
-     *
-     * @hide
      */
-    public static final String EXTRA_PROXIMITY_METERS =
-            "android.service.voice.extra.PROXIMITY_METERS";
+    private static final String EXTRA_PROXIMITY =
+            "android.service.voice.extra.PROXIMITY";
+
+    /** Users’ proximity is unknown (proximity sensing was inconclusive and is unsupported). */
+    public static final int PROXIMITY_UNKNOWN = -1;
+
+    /** Proximity value that represents that the object is near. */
+    public static final int PROXIMITY_NEAR = 1;
+
+    /** Proximity value that represents that the object is far. */
+    public static final int PROXIMITY_FAR = 2;
+
+    /** @hide */
+    @IntDef(prefix = {"PROXIMITY"}, value = {
+            PROXIMITY_UNKNOWN,
+            PROXIMITY_NEAR,
+            PROXIMITY_FAR
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ProximityValue {}
 
     /** Confidence level in the trigger outcome. */
     @HotwordConfidenceLevelValue
@@ -220,12 +238,14 @@ public final class HotwordDetectedResult implements Parcelable {
      * versions of Android.
      *
      * <p>After the trigger happens, a special case of proximity-related extra, with the key of
-     * 'android.service.voice.extra.PROXIMITY_METERS' and the value of distance in meters (double),
-     * will be stored to enable proximity logic. The proximity meters is provided by the system,
-     * on devices that support detecting proximity of nearby users, to help disambiguate which
-     * nearby device should respond. When the proximity is unknown, the proximity value will not
-     * be stored. This mapping will be excluded from the max bundle size calculation because this
-     * mapping is included after the result is returned from the hotword detector service.
+     * 'android.service.voice.extra.PROXIMITY_VALUE' and the value of proximity value (integer)
+     * will be stored to enable proximity logic. {@link HotwordDetectedResult#PROXIMITY_NEAR} will
+     * indicate 'NEAR' proximity and {@link HotwordDetectedResult#PROXIMITY_FAR} will indicate 'FAR'
+     * proximity. The proximity value is provided by the system, on devices that support detecting
+     * proximity of nearby users, to help disambiguate which nearby device should respond. When the
+     * proximity is unknown, the proximity value will not be stored. This mapping will be excluded
+     * from the max bundle size calculation because this mapping is included after the result is
+     * returned from the hotword detector service.
      *
      * <p>This is a PersistableBundle so it doesn't allow any remotable objects or other contents
      * that can be used to communicate with other processes.
@@ -348,16 +368,16 @@ public final class HotwordDetectedResult implements Parcelable {
             // Remove the proximity key from the bundle before checking the bundle size. The
             // proximity value is added after the privileged module and can avoid the
             // maxBundleSize limitation.
-            if (mExtras.containsKey(EXTRA_PROXIMITY_METERS)) {
-                double proximityMeters = mExtras.getDouble(EXTRA_PROXIMITY_METERS);
-                mExtras.remove(EXTRA_PROXIMITY_METERS);
+            if (mExtras.containsKey(EXTRA_PROXIMITY)) {
+                int proximityValue = mExtras.getInt(EXTRA_PROXIMITY);
+                mExtras.remove(EXTRA_PROXIMITY);
                 // Skip checking parcelable size if the new bundle size is 0. Newly empty bundle
                 // has parcelable size of 4, but the default bundle has parcelable size of 0.
                 if (mExtras.size() > 0) {
                     Preconditions.checkArgumentInRange(getParcelableSize(mExtras), 0,
                             getMaxBundleSize(), "extras");
                 }
-                mExtras.putDouble(EXTRA_PROXIMITY_METERS, proximityMeters);
+                mExtras.putInt(EXTRA_PROXIMITY, proximityValue);
             } else {
                 Preconditions.checkArgumentInRange(getParcelableSize(mExtras), 0,
                         getMaxBundleSize(), "extras");
@@ -370,6 +390,52 @@ public final class HotwordDetectedResult implements Parcelable {
      */
     public @NonNull List<HotwordAudioStream> getAudioStreams() {
         return List.copyOf(mAudioStreams);
+    }
+
+    /**
+     * Adds proximity level, either near or far, that is mapped for the given distance into
+     * the bundle. The proximity value is provided by the system, on devices that support detecting
+     * proximity of nearby users, to help disambiguate which nearby device should respond.
+     * This mapping will be excluded from the max bundle size calculation because this mapping is
+     * included after the result is returned from the hotword detector service. The value will not
+     * be included if the proximity was unknown.
+     *
+     * @hide
+     */
+    public void setProximity(double distance) {
+        int proximityLevel = convertToProximityLevel(distance);
+        if (proximityLevel != PROXIMITY_UNKNOWN) {
+            mExtras.putInt(EXTRA_PROXIMITY, proximityLevel);
+        }
+    }
+
+    /**
+     * Returns proximity level, which can be either of {@link HotwordDetectedResult#PROXIMITY_NEAR}
+     * or {@link HotwordDetectedResult#PROXIMITY_FAR}. If the proximity is unknown, it will
+     * return {@link HotwordDetectedResult#PROXIMITY_UNKNOWN}.
+     */
+    @ProximityValue
+    public int getProximity() {
+        return mExtras.getInt(EXTRA_PROXIMITY, PROXIMITY_UNKNOWN);
+    }
+
+    /**
+     * Mapping of the proximity distance (meters) to proximity values, unknown, near, and far.
+     * Currently, this mapping is handled by HotwordDetectedResult because it handles just
+     * HotwordDetectionConnection which we know the mapping of. However, the mapping will need to
+     * move to a more centralized place once there are more clients.
+     *
+     * TODO(b/258531144): Move the proximity mapping to a central location
+     */
+    @ProximityValue
+    private int convertToProximityLevel(double distance) {
+        if (distance < 0) {
+            return PROXIMITY_UNKNOWN;
+        } else if (distance <= 3) {
+            return PROXIMITY_NEAR;
+        } else {
+            return PROXIMITY_FAR;
+        }
     }
 
     @DataClass.Suppress("addAudioStreams")
@@ -432,7 +498,7 @@ public final class HotwordDetectedResult implements Parcelable {
         CONFIDENCE_LEVEL_HIGH,
         CONFIDENCE_LEVEL_VERY_HIGH
     })
-    @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE)
+    @Retention(RetentionPolicy.SOURCE)
     @DataClass.Generated.Member
     public @interface ConfidenceLevel {}
 
@@ -463,7 +529,7 @@ public final class HotwordDetectedResult implements Parcelable {
         LIMIT_HOTWORD_OFFSET_MAX_VALUE,
         LIMIT_AUDIO_CHANNEL_MAX_VALUE
     })
-    @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE)
+    @Retention(RetentionPolicy.SOURCE)
     @DataClass.Generated.Member
     /* package-private */ @interface Limit {}
 
@@ -475,6 +541,30 @@ public final class HotwordDetectedResult implements Parcelable {
                     return "LIMIT_HOTWORD_OFFSET_MAX_VALUE";
             case LIMIT_AUDIO_CHANNEL_MAX_VALUE:
                     return "LIMIT_AUDIO_CHANNEL_MAX_VALUE";
+            default: return Integer.toHexString(value);
+        }
+    }
+
+    /** @hide */
+    @IntDef(prefix = "PROXIMITY_", value = {
+        PROXIMITY_UNKNOWN,
+        PROXIMITY_NEAR,
+        PROXIMITY_FAR
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @DataClass.Generated.Member
+    public @interface Proximity {}
+
+    /** @hide */
+    @DataClass.Generated.Member
+    public static String proximityToString(@Proximity int value) {
+        switch (value) {
+            case PROXIMITY_UNKNOWN:
+                    return "PROXIMITY_UNKNOWN";
+            case PROXIMITY_NEAR:
+                    return "PROXIMITY_NEAR";
+            case PROXIMITY_FAR:
+                    return "PROXIMITY_FAR";
             default: return Integer.toHexString(value);
         }
     }
@@ -605,12 +695,14 @@ public final class HotwordDetectedResult implements Parcelable {
      * versions of Android.
      *
      * <p>After the trigger happens, a special case of proximity-related extra, with the key of
-     * 'android.service.voice.extra.PROXIMITY_METERS' and the value of distance in meters (double),
-     * will be stored to enable proximity logic. The proximity meters is provided by the system,
-     * on devices that support detecting proximity of nearby users, to help disambiguate which
-     * nearby device should respond. When the proximity is unknown, the proximity value will not
-     * be stored. This mapping will be excluded from the max bundle size calculation because this
-     * mapping is included after the result is returned from the hotword detector service.
+     * 'android.service.voice.extra.PROXIMITY_VALUE' and the value of proximity value (integer)
+     * will be stored to enable proximity logic. {@link HotwordDetectedResult#PROXIMITY_NEAR} will
+     * indicate 'NEAR' proximity and {@link HotwordDetectedResult#PROXIMITY_FAR} will indicate 'FAR'
+     * proximity. The proximity value is provided by the system, on devices that support detecting
+     * proximity of nearby users, to help disambiguate which nearby device should respond. When the
+     * proximity is unknown, the proximity value will not be stored. This mapping will be excluded
+     * from the max bundle size calculation because this mapping is included after the result is
+     * returned from the hotword detector service.
      *
      * <p>This is a PersistableBundle so it doesn't allow any remotable objects or other contents
      * that can be used to communicate with other processes.
@@ -923,12 +1015,14 @@ public final class HotwordDetectedResult implements Parcelable {
          * versions of Android.
          *
          * <p>After the trigger happens, a special case of proximity-related extra, with the key of
-         * 'android.service.voice.extra.PROXIMITY_METERS' and the value of distance in meters (double),
-         * will be stored to enable proximity logic. The proximity meters is provided by the system,
-         * on devices that support detecting proximity of nearby users, to help disambiguate which
-         * nearby device should respond. When the proximity is unknown, the proximity value will not
-         * be stored. This mapping will be excluded from the max bundle size calculation because this
-         * mapping is included after the result is returned from the hotword detector service.
+         * 'android.service.voice.extra.PROXIMITY_VALUE' and the value of proximity value (integer)
+         * will be stored to enable proximity logic. {@link HotwordDetectedResult#PROXIMITY_NEAR} will
+         * indicate 'NEAR' proximity and {@link HotwordDetectedResult#PROXIMITY_FAR} will indicate 'FAR'
+         * proximity. The proximity value is provided by the system, on devices that support detecting
+         * proximity of nearby users, to help disambiguate which nearby device should respond. When the
+         * proximity is unknown, the proximity value will not be stored. This mapping will be excluded
+         * from the max bundle size calculation because this mapping is included after the result is
+         * returned from the hotword detector service.
          *
          * <p>This is a PersistableBundle so it doesn't allow any remotable objects or other contents
          * that can be used to communicate with other processes.
@@ -1003,10 +1097,10 @@ public final class HotwordDetectedResult implements Parcelable {
     }
 
     @DataClass.Generated(
-            time = 1666342044844L,
+            time = 1668385264834L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/service/voice/HotwordDetectedResult.java",
-            inputSignatures = "public static final  int CONFIDENCE_LEVEL_NONE\npublic static final  int CONFIDENCE_LEVEL_LOW\npublic static final  int CONFIDENCE_LEVEL_LOW_MEDIUM\npublic static final  int CONFIDENCE_LEVEL_MEDIUM\npublic static final  int CONFIDENCE_LEVEL_MEDIUM_HIGH\npublic static final  int CONFIDENCE_LEVEL_HIGH\npublic static final  int CONFIDENCE_LEVEL_VERY_HIGH\npublic static final  int HOTWORD_OFFSET_UNSET\npublic static final  int AUDIO_CHANNEL_UNSET\nprivate static final  int LIMIT_HOTWORD_OFFSET_MAX_VALUE\nprivate static final  int LIMIT_AUDIO_CHANNEL_MAX_VALUE\npublic static final  java.lang.String EXTRA_PROXIMITY_METERS\nprivate final @android.service.voice.HotwordDetectedResult.HotwordConfidenceLevelValue int mConfidenceLevel\nprivate @android.annotation.Nullable android.media.MediaSyncEvent mMediaSyncEvent\nprivate  int mHotwordOffsetMillis\nprivate  int mHotwordDurationMillis\nprivate  int mAudioChannel\nprivate  boolean mHotwordDetectionPersonalized\nprivate final  int mScore\nprivate final  int mPersonalizedScore\nprivate final  int mHotwordPhraseId\nprivate final @android.annotation.NonNull java.util.List<android.service.voice.HotwordAudioStream> mAudioStreams\nprivate final @android.annotation.NonNull android.os.PersistableBundle mExtras\nprivate static  int sMaxBundleSize\nprivate static  int defaultConfidenceLevel()\nprivate static  int defaultScore()\nprivate static  int defaultPersonalizedScore()\npublic static  int getMaxScore()\nprivate static  int defaultHotwordPhraseId()\npublic static  int getMaxHotwordPhraseId()\nprivate static  java.util.List<android.service.voice.HotwordAudioStream> defaultAudioStreams()\nprivate static  android.os.PersistableBundle defaultExtras()\npublic static  int getMaxBundleSize()\npublic @android.annotation.Nullable android.media.MediaSyncEvent getMediaSyncEvent()\npublic static  int getParcelableSize(android.os.Parcelable)\npublic static  int getUsageSize(android.service.voice.HotwordDetectedResult)\nprivate static  int bitCount(long)\nprivate  void onConstructed()\npublic @android.annotation.NonNull java.util.List<android.service.voice.HotwordAudioStream> getAudioStreams()\npublic  android.service.voice.HotwordDetectedResult.Builder buildUpon()\nclass HotwordDetectedResult extends java.lang.Object implements [android.os.Parcelable]\npublic @android.annotation.NonNull android.service.voice.HotwordDetectedResult.Builder setAudioStreams(java.util.List<android.service.voice.HotwordAudioStream>)\nclass BaseBuilder extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genConstructor=false, genBuilder=true, genEqualsHashCode=true, genHiddenConstDefs=true, genParcelable=true, genToString=true)\npublic @android.annotation.NonNull android.service.voice.HotwordDetectedResult.Builder setAudioStreams(java.util.List<android.service.voice.HotwordAudioStream>)\nclass BaseBuilder extends java.lang.Object implements []")
+            inputSignatures = "public static final  int CONFIDENCE_LEVEL_NONE\npublic static final  int CONFIDENCE_LEVEL_LOW\npublic static final  int CONFIDENCE_LEVEL_LOW_MEDIUM\npublic static final  int CONFIDENCE_LEVEL_MEDIUM\npublic static final  int CONFIDENCE_LEVEL_MEDIUM_HIGH\npublic static final  int CONFIDENCE_LEVEL_HIGH\npublic static final  int CONFIDENCE_LEVEL_VERY_HIGH\npublic static final  int HOTWORD_OFFSET_UNSET\npublic static final  int AUDIO_CHANNEL_UNSET\nprivate static final  int LIMIT_HOTWORD_OFFSET_MAX_VALUE\nprivate static final  int LIMIT_AUDIO_CHANNEL_MAX_VALUE\nprivate static final  java.lang.String EXTRA_PROXIMITY\npublic static final  int PROXIMITY_UNKNOWN\npublic static final  int PROXIMITY_NEAR\npublic static final  int PROXIMITY_FAR\nprivate final @android.service.voice.HotwordDetectedResult.HotwordConfidenceLevelValue int mConfidenceLevel\nprivate @android.annotation.Nullable android.media.MediaSyncEvent mMediaSyncEvent\nprivate  int mHotwordOffsetMillis\nprivate  int mHotwordDurationMillis\nprivate  int mAudioChannel\nprivate  boolean mHotwordDetectionPersonalized\nprivate final  int mScore\nprivate final  int mPersonalizedScore\nprivate final  int mHotwordPhraseId\nprivate final @android.annotation.NonNull java.util.List<android.service.voice.HotwordAudioStream> mAudioStreams\nprivate final @android.annotation.NonNull android.os.PersistableBundle mExtras\nprivate static  int sMaxBundleSize\nprivate static  int defaultConfidenceLevel()\nprivate static  int defaultScore()\nprivate static  int defaultPersonalizedScore()\npublic static  int getMaxScore()\nprivate static  int defaultHotwordPhraseId()\npublic static  int getMaxHotwordPhraseId()\nprivate static  java.util.List<android.service.voice.HotwordAudioStream> defaultAudioStreams()\nprivate static  android.os.PersistableBundle defaultExtras()\npublic static  int getMaxBundleSize()\npublic @android.annotation.Nullable android.media.MediaSyncEvent getMediaSyncEvent()\npublic static  int getParcelableSize(android.os.Parcelable)\npublic static  int getUsageSize(android.service.voice.HotwordDetectedResult)\nprivate static  int bitCount(long)\nprivate  void onConstructed()\npublic @android.annotation.NonNull java.util.List<android.service.voice.HotwordAudioStream> getAudioStreams()\npublic  void setProximity(double)\npublic @android.service.voice.HotwordDetectedResult.ProximityValue int getProximity()\nprivate @android.service.voice.HotwordDetectedResult.ProximityValue int convertToProximityLevel(double)\npublic  android.service.voice.HotwordDetectedResult.Builder buildUpon()\nclass HotwordDetectedResult extends java.lang.Object implements [android.os.Parcelable]\npublic @android.annotation.NonNull android.service.voice.HotwordDetectedResult.Builder setAudioStreams(java.util.List<android.service.voice.HotwordAudioStream>)\nclass BaseBuilder extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genConstructor=false, genBuilder=true, genEqualsHashCode=true, genHiddenConstDefs=true, genParcelable=true, genToString=true)\npublic @android.annotation.NonNull android.service.voice.HotwordDetectedResult.Builder setAudioStreams(java.util.List<android.service.voice.HotwordAudioStream>)\nclass BaseBuilder extends java.lang.Object implements []")
     @Deprecated
     private void __metadata() {}
 

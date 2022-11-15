@@ -100,6 +100,7 @@ import android.view.SurfaceControl.Transaction;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManager.DisplayImePolicy;
+import android.view.inputmethod.ImeTracker;
 import android.window.ITransitionPlayer;
 import android.window.ScreenCapture;
 import android.window.StartingWindowInfo;
@@ -848,11 +849,13 @@ class WindowTestsBase extends SystemServiceTestsBase {
             }
 
             @Override
-            public void showInsets(int i, boolean b) throws RemoteException {
+            public void showInsets(int i, boolean b, @Nullable ImeTracker.Token t)
+                    throws RemoteException {
             }
 
             @Override
-            public void hideInsets(int i, boolean b) throws RemoteException {
+            public void hideInsets(int i, boolean b, @Nullable ImeTracker.Token t)
+                    throws RemoteException {
             }
 
             @Override

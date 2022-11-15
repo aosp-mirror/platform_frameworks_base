@@ -18,13 +18,16 @@ package com.android.server.credentials;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.slice.Slice;
+import android.annotation.UserIdInt;
+import android.content.Context;
+import android.credentials.GetCredentialOption;
 import android.credentials.ui.Entry;
 import android.credentials.ui.GetCredentialProviderData;
+import android.os.Bundle;
 import android.service.credentials.Action;
 import android.service.credentials.CredentialEntry;
 import android.service.credentials.CredentialProviderInfo;
-import android.service.credentials.CredentialsDisplayContent;
+import android.service.credentials.GetCredentialsRequest;
 import android.service.credentials.GetCredentialsResponse;
 import android.util.Log;
 import android.util.Slog;
@@ -38,75 +41,95 @@ import java.util.UUID;
 /**
  * Central provider session that listens for provider callbacks, and maintains provider state.
  * Will likely split this into remote response state and UI state.
+ *
+ * @hide
  */
-public final class ProviderGetSession extends ProviderSession<GetCredentialsResponse>
-        implements RemoteCredentialService.ProviderCallbacks<GetCredentialsResponse> {
+public final class ProviderGetSession extends ProviderSession<GetCredentialsRequest,
+        GetCredentialsResponse>
+        implements
+        RemoteCredentialService.ProviderCallbacks<GetCredentialsResponse> {
     private static final String TAG = "ProviderGetSession";
 
     // Key to be used as an entry key for a credential entry
     private static final String CREDENTIAL_ENTRY_KEY = "credential_key";
 
-    private GetCredentialsResponse mResponse;
-
     @NonNull
-    private final Map<String, CredentialEntry> mUiCredentials = new HashMap<>();
-
+    private final Map<String, CredentialEntry> mUiCredentialEntries = new HashMap<>();
     @NonNull
-    private final Map<String, Action> mUiActions = new HashMap<>();
+    private final Map<String, Action> mUiActionsEntries = new HashMap<>();
+    private Action mAuthenticationAction = null;
 
-    public ProviderGetSession(CredentialProviderInfo info,
-            ProviderInternalCallback callbacks,
-            int userId, RemoteCredentialService remoteCredentialService) {
-        super(info, callbacks, userId, remoteCredentialService);
-        setStatus(Status.PENDING);
-    }
-
-    /** Updates the response being maintained in state by this provider session. */
-    @Override
-    public void updateResponse(GetCredentialsResponse response) {
-        if (response.getAuthenticationAction() != null) {
-            // TODO : Implement authentication logic
-        } else if (response.getCredentialsDisplayContent() != null) {
-            Log.i(TAG , "updateResponse with credentialEntries");
-            mResponse = response;
-            updateStatusAndInvokeCallback(Status.COMPLETE);
+    /** Creates a new provider session to be used by the request session. */
+    @Nullable public static ProviderGetSession createNewSession(
+            Context context,
+            @UserIdInt int userId,
+            CredentialProviderInfo providerInfo,
+            GetRequestSession getRequestSession,
+            RemoteCredentialService remoteCredentialService) {
+        GetCredentialsRequest providerRequest =
+                createProviderRequest(providerInfo.getCapabilities(),
+                        getRequestSession.mClientRequest,
+                        getRequestSession.mClientCallingPackage);
+        if (providerRequest != null) {
+            return new ProviderGetSession(context, providerInfo, getRequestSession, userId,
+                    remoteCredentialService, providerRequest);
         }
+        Log.i(TAG, "Unable to create provider session");
+        return null;
     }
 
-    /** Returns the response being maintained in this provider session. */
-    @Override
     @Nullable
-    public GetCredentialsResponse getResponse() {
-        return  mResponse;
+    private static GetCredentialsRequest createProviderRequest(List<String> providerCapabilities,
+            android.credentials.GetCredentialRequest clientRequest,
+            String clientCallingPackage) {
+        List<GetCredentialOption> filteredOptions = new ArrayList<>();
+        for (GetCredentialOption option : clientRequest.getGetCredentialOptions()) {
+            if (providerCapabilities.contains(option.getType())) {
+                Log.i(TAG, "In createProviderRequest - capability found : " + option.getType());
+                filteredOptions.add(option);
+            } else {
+                Log.i(TAG, "In createProviderRequest - capability not "
+                        + "found : " + option.getType());
+            }
+        }
+        if (!filteredOptions.isEmpty()) {
+            return new GetCredentialsRequest.Builder(clientCallingPackage).setGetCredentialOptions(
+                    filteredOptions).build();
+        }
+        Log.i(TAG, "In createProviderRequest - returning null");
+        return null;
+    }
+
+    public ProviderGetSession(Context context,
+            CredentialProviderInfo info,
+            ProviderInternalCallback callbacks,
+            int userId, RemoteCredentialService remoteCredentialService,
+            GetCredentialsRequest request) {
+        super(context, info, request, callbacks, userId, remoteCredentialService);
+        setStatus(Status.PENDING);
     }
 
     /** Returns the credential entry maintained in state by this provider session. */
     @Nullable
     public CredentialEntry getCredentialEntry(@NonNull String entryId) {
-        return mUiCredentials.get(entryId);
-    }
-
-    /** Returns the action entry maintained in state by this provider session. */
-    @Nullable
-    public Action getAction(@NonNull String entryId) {
-        return mUiActions.get(entryId);
+        return mUiCredentialEntries.get(entryId);
     }
 
     /** Called when the provider response has been updated by an external source. */
-    @Override
+    @Override // Callback from the remote provider
     public void onProviderResponseSuccess(@Nullable GetCredentialsResponse response) {
         Log.i(TAG, "in onProviderResponseSuccess");
-        updateResponse(response);
+        onUpdateResponse(response);
     }
 
     /** Called when the provider response resulted in a failure. */
-    @Override
+    @Override // Callback from the remote provider
     public void onProviderResponseFailure(int errorCode, @Nullable CharSequence message) {
         updateStatusAndInvokeCallback(toStatus(errorCode));
     }
 
     /** Called when provider service dies. */
-    @Override
+    @Override // Callback from the remote provider
     public void onProviderServiceDied(RemoteCredentialService service) {
         if (service.getComponentName().equals(mProviderInfo.getServiceInfo().getComponentName())) {
             updateStatusAndInvokeCallback(Status.SERVICE_DEAD);
@@ -116,77 +139,106 @@ public final class ProviderGetSession extends ProviderSession<GetCredentialsResp
         }
     }
 
-    @Override
-    protected GetCredentialProviderData prepareUiData() throws IllegalArgumentException {
-        Log.i(TAG, "In prepareUiData");
-        if (!ProviderSession.isCompletionStatus(getStatus())) {
-            Log.i(TAG, "In prepareUiData not complete");
+    @Override // Callback from the provider intent controller class
+    public void onProviderIntentResult(Bundle resultData) {
+        // TODO : Implement
+    }
 
-            throw new IllegalStateException("Status must be in completion mode");
+    @Override
+    public void onProviderIntentCancelled() {
+        // TODO : Implement
+    }
+
+    @Override // Selection call from the request provider
+    protected void onUiEntrySelected(String entryType, String entryId) {
+        // TODO: Implement
+    }
+
+    @Override // Call from request session to data to be shown on the UI
+    @Nullable protected GetCredentialProviderData prepareUiData() throws IllegalArgumentException {
+        Log.i(TAG, "In prepareUiData");
+        if (!ProviderSession.isUiInvokingStatus(getStatus())) {
+            Log.i(TAG, "In prepareUiData - provider does not want to show UI: "
+                    + mComponentName.flattenToString());
+            return null;
         }
-        GetCredentialsResponse response = getResponse();
+        GetCredentialsResponse response = getProviderResponse();
         if (response == null) {
             Log.i(TAG, "In prepareUiData response null");
-
             throw new IllegalStateException("Response must be in completion mode");
         }
         if (response.getAuthenticationAction() != null) {
-            Log.i(TAG, "In prepareUiData auth not null");
-
-            return prepareUiProviderDataWithAuthentication(response.getAuthenticationAction());
+            Log.i(TAG, "In prepareUiData - top level authentication mode");
+            return prepareUiProviderData(null, null,
+                    prepareUiAuthenticationActionEntry(response.getAuthenticationAction()),
+                    /*remoteEntry=*/null);
         }
         if (response.getCredentialsDisplayContent() != null){
-            Log.i(TAG, "In prepareUiData credentials not null");
-
-            return prepareUiProviderDataWithCredentials(response.getCredentialsDisplayContent());
+            Log.i(TAG, "In prepareUiData displayContent not null");
+            return prepareUiProviderData(populateUiActionEntries(
+                            response.getCredentialsDisplayContent().getActions()),
+                    prepareUiCredentialEntries(response.getCredentialsDisplayContent()
+                            .getCredentialEntries()),
+                    /*authenticationActionEntry=*/null, /*remoteEntry=*/null);
         }
         return null;
     }
 
-    /**
-     * To be called by {@link ProviderGetSession} when the UI is to be invoked.
-     */
-    @Nullable
-    private GetCredentialProviderData prepareUiProviderDataWithCredentials(@NonNull
-            CredentialsDisplayContent content) {
-        Log.i(TAG, "in prepareUiProviderData");
-        List<Entry> credentialEntries = new ArrayList<>();
-        List<Entry> actionChips = new ArrayList<>();
-        Entry authenticationEntry = null;
+    private Entry prepareUiAuthenticationActionEntry(@NonNull Action authenticationAction) {
+        String entryId = generateEntryId();
+        mUiActionsEntries.put(entryId, authenticationAction);
+        return new Entry(ACTION_ENTRY_KEY, entryId, authenticationAction.getSlice());
+    }
+
+    private List<Entry> prepareUiCredentialEntries(@NonNull
+            List<CredentialEntry> credentialEntries) {
+        Log.i(TAG, "in prepareUiProviderDataWithCredentials");
+        List<Entry> credentialUiEntries = new ArrayList<>();
 
         // Populate the credential entries
-        for (CredentialEntry credentialEntry : content.getCredentialEntries()) {
-            String entryId = UUID.randomUUID().toString();
-            mUiCredentials.put(entryId, credentialEntry);
+        for (CredentialEntry credentialEntry : credentialEntries) {
+            String entryId = generateEntryId();
+            mUiCredentialEntries.put(entryId, credentialEntry);
             Log.i(TAG, "in prepareUiProviderData creating ui entry with id " + entryId);
-            Slice slice = credentialEntry.getSlice();
-            // TODO : Remove conversion of string to int after change in Entry class
-            credentialEntries.add(new Entry(CREDENTIAL_ENTRY_KEY, entryId,
+            credentialUiEntries.add(new Entry(CREDENTIAL_ENTRY_KEY, entryId,
                     credentialEntry.getSlice()));
         }
-        // populate the action chip
-        for (Action action : content.getActions()) {
-            String entryId = UUID.randomUUID().toString();
-            mUiActions.put(entryId, action);
-            // TODO : Remove conversion of string to int after change in Entry class
-            actionChips.add(new Entry(ACTION_ENTRY_KEY, entryId,
-                    action.getSlice()));
-        }
+        return credentialUiEntries;
+    }
 
-        return new GetCredentialProviderData.Builder(mComponentName.flattenToString())
+    private List<Entry> populateUiActionEntries(@Nullable List<Action> actions) {
+        List<Entry> actionEntries = new ArrayList<>();
+        for (Action action : actions) {
+            String entryId = UUID.randomUUID().toString();
+            mUiActionsEntries.put(entryId, action);
+            // TODO : Remove conversion of string to int after change in Entry class
+            actionEntries.add(new Entry(ACTION_ENTRY_KEY, entryId, action.getSlice()));
+        }
+        return actionEntries;
+    }
+
+    private GetCredentialProviderData prepareUiProviderData(List<Entry> actionEntries,
+            List<Entry> credentialEntries, Entry authenticationActionEntry,
+            Entry remoteEntry) {
+        return new GetCredentialProviderData.Builder(
+                mComponentName.flattenToString()).setActionChips(actionEntries)
                 .setCredentialEntries(credentialEntries)
-                .setActionChips(actionChips)
-                .setAuthenticationEntry(authenticationEntry)
+                .setAuthenticationEntry(authenticationActionEntry)
                 .build();
     }
 
-    /**
-     * To be called by {@link ProviderGetSession} when the UI is to be invoked.
-     */
-    @Nullable
-    private GetCredentialProviderData prepareUiProviderDataWithAuthentication(@NonNull
-            Action authenticationEntry) {
-        // TODO : Implement authentication flow
-        return null;
+    /** Updates the response being maintained in state by this provider session. */
+    private void onUpdateResponse(GetCredentialsResponse response) {
+        mProviderResponse = response;
+        if (response.getAuthenticationAction() != null) {
+            Log.i(TAG , "updateResponse with authentication entry");
+            // TODO validate authentication action
+            mAuthenticationAction = response.getAuthenticationAction();
+            updateStatusAndInvokeCallback(Status.REQUIRES_AUTHENTICATION);
+        } else if (response.getCredentialsDisplayContent() != null) {
+            Log.i(TAG , "updateResponse with credentialEntries");
+            // TODO validate response
+            updateStatusAndInvokeCallback(Status.CREDENTIALS_RECEIVED);
+        }
     }
 }

@@ -124,6 +124,7 @@ import android.view.inputmethod.CursorAnchorInfo;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
+import android.view.inputmethod.ImeTracker;
 import android.view.inputmethod.InlineSuggestionsRequest;
 import android.view.inputmethod.InlineSuggestionsResponse;
 import android.view.inputmethod.InputBinding;
@@ -669,6 +670,10 @@ public class InputMethodService extends AbstractInputMethodService {
      */
     private IBinder mCurHideInputToken;
 
+    /** The token tracking the current IME request or {@code null} otherwise. */
+    @Nullable
+    private ImeTracker.Token mCurStatsToken;
+
     final ViewTreeObserver.OnComputeInternalInsetsListener mInsetsComputer = info -> {
         onComputeInsets(mTmpInsets);
         if (!mViewsCreated) {
@@ -870,10 +875,12 @@ public class InputMethodService extends AbstractInputMethodService {
         @MainThread
         @Override
         public void hideSoftInputWithToken(int flags, ResultReceiver resultReceiver,
-                IBinder hideInputToken) {
+                IBinder hideInputToken, @Nullable ImeTracker.Token statsToken) {
             mSystemCallingHideSoftInput = true;
             mCurHideInputToken = hideInputToken;
+            mCurStatsToken = statsToken;
             hideSoftInput(flags, resultReceiver);
+            mCurStatsToken = null;
             mCurHideInputToken = null;
             mSystemCallingHideSoftInput = false;
         }
@@ -884,6 +891,7 @@ public class InputMethodService extends AbstractInputMethodService {
         @MainThread
         @Override
         public void hideSoftInput(int flags, ResultReceiver resultReceiver) {
+            ImeTracker.get().onProgress(mCurStatsToken, ImeTracker.PHASE_IME_HIDE_SOFT_INPUT);
             if (DEBUG) Log.v(TAG, "hideSoftInput()");
             if (getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.R
                     && !mSystemCallingHideSoftInput) {
@@ -918,12 +926,17 @@ public class InputMethodService extends AbstractInputMethodService {
         @MainThread
         @Override
         public void showSoftInputWithToken(int flags, ResultReceiver resultReceiver,
-                IBinder showInputToken) {
+                IBinder showInputToken, @Nullable ImeTracker.Token statsToken) {
             mSystemCallingShowSoftInput = true;
             mCurShowInputToken = showInputToken;
-            showSoftInput(flags, resultReceiver);
-            mCurShowInputToken = null;
-            mSystemCallingShowSoftInput = false;
+            mCurStatsToken = statsToken;
+            try {
+                showSoftInput(flags, resultReceiver);
+            } finally {
+                mCurStatsToken = null;
+                mCurShowInputToken = null;
+                mSystemCallingShowSoftInput = false;
+            }
         }
 
         /**
@@ -932,6 +945,7 @@ public class InputMethodService extends AbstractInputMethodService {
         @MainThread
         @Override
         public void showSoftInput(int flags, ResultReceiver resultReceiver) {
+            ImeTracker.get().onProgress(mCurStatsToken, ImeTracker.PHASE_IME_SHOW_SOFT_INPUT);
             if (DEBUG) Log.v(TAG, "showSoftInput()");
             // TODO(b/148086656): Disallow IME developers from calling InputMethodImpl methods.
             if (getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.R
@@ -947,7 +961,12 @@ public class InputMethodService extends AbstractInputMethodService {
                     null /* icProto */);
             final boolean wasVisible = isInputViewShown();
             if (dispatchOnShowInputRequested(flags, false)) {
+                ImeTracker.get().onProgress(mCurStatsToken,
+                        ImeTracker.PHASE_IME_ON_SHOW_SOFT_INPUT_TRUE);
                 showWindow(true);
+            } else {
+                ImeTracker.get().onFailed(mCurStatsToken,
+                        ImeTracker.PHASE_IME_ON_SHOW_SOFT_INPUT_TRUE);
             }
             setImeWindowStatus(mapToImeWindowStatus(), mBackDisposition);
 
@@ -2923,8 +2942,10 @@ public class InputMethodService extends AbstractInputMethodService {
         ImeTracing.getInstance().triggerServiceDump(
                 "InputMethodService#applyVisibilityInInsetsConsumerIfNecessary", mDumper,
                 null /* icProto */);
+        ImeTracker.get().onProgress(mCurStatsToken,
+                ImeTracker.PHASE_IME_APPLY_VISIBILITY_INSETS_CONSUMER);
         mPrivOps.applyImeVisibilityAsync(setVisible
-                ? mCurShowInputToken : mCurHideInputToken, setVisible);
+                ? mCurShowInputToken : mCurHideInputToken, setVisible, mCurStatsToken);
     }
 
     private void finishViews(boolean finishingInput) {

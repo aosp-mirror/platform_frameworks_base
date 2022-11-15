@@ -119,7 +119,7 @@ class SpaSearchProvider : ContentProvider() {
         val entryRepository by spaEnvironment.entryRepository
         val cursor = MatrixCursor(QueryEnum.SEARCH_IMMUTABLE_STATUS_DATA_QUERY.getColumns())
         for (entry in entryRepository.getAllEntries()) {
-            if (!entry.isAllowSearch || entry.mutableStatus) continue
+            if (!entry.isAllowSearch || entry.hasMutableStatus) continue
             fetchStatusData(entry, cursor)
         }
         return cursor
@@ -129,7 +129,7 @@ class SpaSearchProvider : ContentProvider() {
         val entryRepository by spaEnvironment.entryRepository
         val cursor = MatrixCursor(QueryEnum.SEARCH_MUTABLE_STATUS_DATA_QUERY.getColumns())
         for (entry in entryRepository.getAllEntries()) {
-            if (!entry.isAllowSearch || !entry.mutableStatus) continue
+            if (!entry.isAllowSearch || !entry.hasMutableStatus) continue
             fetchStatusData(entry, cursor)
         }
         return cursor

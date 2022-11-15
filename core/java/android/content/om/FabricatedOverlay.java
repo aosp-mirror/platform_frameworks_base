@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.FabricatedOverlayInternal;
 import android.os.FabricatedOverlayInternalEntry;
+import android.os.ParcelFileDescriptor;
 import android.text.TextUtils;
 
 import com.android.internal.util.Preconditions;
@@ -164,6 +165,24 @@ public class FabricatedOverlay {
             entry.resourceName = resourceName;
             entry.dataType = dataType;
             entry.stringData = value;
+            entry.configuration = configuration;
+            mEntries.add(entry);
+            return this;
+        }
+
+        /**
+         * Sets the value of the fabricated overlay
+         *
+         * @param resourceName name of the target resource to overlay (in the form
+         *                     [package]:type/entry)
+         * @param value the file descriptor whose contents are the value of the frro
+         * @param configuration The string representation of the config this overlay is enabled for
+         */
+        public Builder setResourceValue(@NonNull String resourceName, ParcelFileDescriptor value,
+                String configuration) {
+            final FabricatedOverlayInternalEntry entry = new FabricatedOverlayInternalEntry();
+            entry.resourceName = resourceName;
+            entry.binaryData = value;
             entry.configuration = configuration;
             mEntries.add(entry);
             return this;

@@ -485,6 +485,12 @@
     <!-- Whether to show a severe low battery dialog. -->
     <bool name="config_severe_battery_dialog">false</bool>
 
+    <!-- A path representing a shield. Will sometimes be displayed with the battery icon when
+         needed. This path is a 10px wide and 13px tall. -->
+    <string name="config_batterymeterShieldPath" translatable="false">
+        M5 0L0 1.88V6.19C0 9.35 2.13 12.29 5 13.01C7.87 12.29 10 9.35 10 6.19V1.88L5 0Z
+    </string>
+
     <!-- A path similar to frameworks/base/core/res/res/values/config.xml
       config_mainBuiltInDisplayCutout that describes a path larger than the exact path of a display
       cutout. If present as well as config_enableDisplayCutoutProtection is set to true, then

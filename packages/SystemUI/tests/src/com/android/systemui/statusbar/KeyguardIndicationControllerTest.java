@@ -87,6 +87,7 @@ import com.android.internal.app.IBatteryStats;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.keyguard.logging.KeyguardLogger;
 import com.android.settingslib.fuelgauge.BatteryStatus;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
@@ -271,7 +272,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
                 mUserManager, mExecutor, mExecutor, mFalsingManager,
                 mAuthController, mLockPatternUtils, mScreenLifecycle,
                 mKeyguardBypassController, mAccessibilityManager,
-                mFaceHelpMessageDeferral);
+                mFaceHelpMessageDeferral, mock(KeyguardLogger.class));
         mController.init();
         mController.setIndicationArea(mIndicationArea);
         verify(mStatusBarStateController).addCallback(mStatusBarStateListenerCaptor.capture());

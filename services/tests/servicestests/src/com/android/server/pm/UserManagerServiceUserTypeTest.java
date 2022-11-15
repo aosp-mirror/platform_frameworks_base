@@ -83,7 +83,8 @@ public class UserManagerServiceUserTypeTest {
                 /* flags= */0,
                 /* letsPersonalDataIntoProfile= */false).build());
         final UserProperties.Builder userProps = new UserProperties.Builder()
-                .setShowInLauncher(17);
+                .setShowInLauncher(17)
+                .setUseParentsContacts(true);
         final UserTypeDetails type = new UserTypeDetails.Builder()
                 .setName("a.name")
                 .setEnabled(1)
@@ -140,6 +141,7 @@ public class UserManagerServiceUserTypeTest {
         }
 
         assertEquals(17, type.getDefaultUserPropertiesReference().getShowInLauncher());
+        assertTrue(type.getDefaultUserPropertiesReference().getUseParentsContacts());
 
         assertEquals(23, type.getBadgeLabel(0));
         assertEquals(24, type.getBadgeLabel(1));
@@ -182,6 +184,7 @@ public class UserManagerServiceUserTypeTest {
         final UserProperties props = type.getDefaultUserPropertiesReference();
         assertNotNull(props);
         assertFalse(props.getStartWithParent());
+        assertFalse(props.getUseParentsContacts());
         assertEquals(UserProperties.SHOW_IN_LAUNCHER_WITH_PARENT, props.getShowInLauncher());
 
         assertFalse(type.hasBadge());
@@ -263,7 +266,8 @@ public class UserManagerServiceUserTypeTest {
         final Bundle restrictions = makeRestrictionsBundle("no_config_vpn", "no_config_tethering");
         final UserProperties.Builder props = new UserProperties.Builder()
                 .setShowInLauncher(19)
-                .setStartWithParent(true);
+                .setStartWithParent(true)
+                .setUseParentsContacts(true);
         final ArrayMap<String, UserTypeDetails.Builder> builders = new ArrayMap<>();
         builders.put(userTypeAosp1, new UserTypeDetails.Builder()
                 .setName(userTypeAosp1)
@@ -289,7 +293,9 @@ public class UserManagerServiceUserTypeTest {
         assertEquals(Resources.ID_NULL, aospType.getIconBadge());
         assertTrue(UserRestrictionsUtils.areEqual(restrictions, aospType.getDefaultRestrictions()));
         assertEquals(19, aospType.getDefaultUserPropertiesReference().getShowInLauncher());
-        assertEquals(true, aospType.getDefaultUserPropertiesReference().getStartWithParent());
+        assertTrue(aospType.getDefaultUserPropertiesReference().getStartWithParent());
+        assertTrue(aospType.getDefaultUserPropertiesReference()
+                .getUseParentsContacts());
 
         // userTypeAosp2 should be modified.
         aospType = builders.get(userTypeAosp2).createUserTypeDetails();
@@ -319,7 +325,9 @@ public class UserManagerServiceUserTypeTest {
                 makeRestrictionsBundle("no_remove_user", "no_bluetooth"),
                 aospType.getDefaultRestrictions()));
         assertEquals(2020, aospType.getDefaultUserPropertiesReference().getShowInLauncher());
-        assertEquals(false, aospType.getDefaultUserPropertiesReference().getStartWithParent());
+        assertFalse(aospType.getDefaultUserPropertiesReference().getStartWithParent());
+        assertFalse(aospType.getDefaultUserPropertiesReference()
+                .getUseParentsContacts());
 
         // userTypeOem1 should be created.
         UserTypeDetails.Builder customType = builders.get(userTypeOem1);
@@ -347,6 +355,7 @@ public class UserManagerServiceUserTypeTest {
         UserTypeDetails details = builders.get(userTypeFull).createUserTypeDetails();
         assertEquals(UNLIMITED_NUMBER_OF_USERS, details.getMaxAllowedPerParent());
         assertFalse(details.isEnabled());
+        assertEquals(17, details.getMaxAllowed());
         assertTrue(UserRestrictionsUtils.areEqual(
                 makeRestrictionsBundle("no_remove_user", "no_bluetooth"),
                 details.getDefaultRestrictions()));

@@ -23,6 +23,7 @@ import android.Manifest;
 import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.ActivityManagerInternal;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -111,11 +112,13 @@ import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.VerifiedInputEvent;
 import android.view.ViewConfiguration;
+import android.view.inputmethod.InputMethodSubtype;
 import android.widget.Toast;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.inputmethod.InputMethodSubtypeHandle;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.SomeArgs;
@@ -2685,6 +2688,8 @@ public class InputManagerService extends IInputManager.Stub
     @EnforcePermission(Manifest.permission.MONITOR_INPUT)
     @Override
     public void pilferPointers(IBinder inputChannelToken) {
+        super.pilferPointers_enforcePermission();
+
         Objects.requireNonNull(inputChannelToken);
         mNative.pilferPointers(inputChannelToken);
     }
@@ -3786,6 +3791,21 @@ public class InputManagerService extends IInputManager.Stub
         @Override
         public InputChannel createInputChannel(String inputChannelName) {
             return InputManagerService.this.createInputChannel(inputChannelName);
+        }
+
+        @Override
+        public void pilferPointers(IBinder token) {
+            mNative.pilferPointers(token);
+        }
+
+        @Override
+        public void onInputMethodSubtypeChangedForKeyboardLayoutMapping(@UserIdInt int userId,
+                @Nullable InputMethodSubtypeHandle subtypeHandle,
+                @Nullable InputMethodSubtype subtype) {
+            if (DEBUG) {
+                Slog.i(TAG, "InputMethodSubtype changed: userId=" + userId
+                        + " subtypeHandle=" + subtypeHandle);
+            }
         }
 
         @Override

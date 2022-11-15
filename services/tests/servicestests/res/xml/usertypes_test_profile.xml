@@ -33,6 +33,7 @@
         <user-properties
             showInLauncher='2020'
             startWithParent='false'
+            useParentsContacts='false'
         />
     </profile-type>
     <profile-type name='custom.test.1' max-allowed-per-parent='14' />

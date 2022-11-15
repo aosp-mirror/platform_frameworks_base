@@ -55,7 +55,7 @@ public class ImeInsetsSourceProviderTest extends WindowTestsBase {
         mDisplayContent.setImeControlTarget(popup);
         mDisplayContent.setImeLayeringTarget(appWin);
         popup.mAttrs.format = PixelFormat.TRANSPARENT;
-        mImeProvider.scheduleShowImePostLayout(appWin);
+        mImeProvider.scheduleShowImePostLayout(appWin, null /* statsToken */);
         assertTrue(mImeProvider.isReadyToShowIme());
     }
 
@@ -64,7 +64,7 @@ public class ImeInsetsSourceProviderTest extends WindowTestsBase {
         WindowState target = createWindow(null, TYPE_APPLICATION, "app");
         mDisplayContent.setImeLayeringTarget(target);
         mDisplayContent.updateImeInputAndControlTarget(target);
-        mImeProvider.scheduleShowImePostLayout(target);
+        mImeProvider.scheduleShowImePostLayout(target, null /* statsToken */);
         assertTrue(mImeProvider.isReadyToShowIme());
     }
 
@@ -78,7 +78,7 @@ public class ImeInsetsSourceProviderTest extends WindowTestsBase {
         mDisplayContent.setImeLayeringTarget(target);
         mDisplayContent.setImeControlTarget(target);
 
-        mImeProvider.scheduleShowImePostLayout(target);
+        mImeProvider.scheduleShowImePostLayout(target, null /* statsToken */);
         assertFalse(mImeProvider.isImeShowing());
         mImeProvider.checkShowImePostLayout();
         assertTrue(mImeProvider.isImeShowing());

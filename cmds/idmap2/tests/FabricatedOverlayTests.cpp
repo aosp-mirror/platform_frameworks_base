@@ -17,6 +17,7 @@
 #include <android-base/file.h>
 #include <gtest/gtest.h>
 #include <idmap2/FabricatedOverlay.h>
+#include "TestHelpers.h"
 
 #include <fstream>
 #include <utility>
@@ -41,6 +42,10 @@ TEST(FabricatedOverlayTests, OverlayInfo) {
 }
 
 TEST(FabricatedOverlayTests, SetResourceValue) {
+  auto path = GetTestDataPath() + "/overlay/res/drawable/android.png";
+  auto fd = android::base::unique_fd(::open(path.c_str(), O_RDONLY | O_CLOEXEC));
+  ASSERT_TRUE(fd > 0) << "errno " << errno << " for path " << path;
+
   auto overlay =
       FabricatedOverlay::Builder("com.example.overlay", "SandTheme", "com.example.target")
           .SetResourceValue(
@@ -54,6 +59,8 @@ TEST(FabricatedOverlayTests, SetResourceValue) {
               Res_value::TYPE_STRING,
               "foobar",
               "en-rUS-normal-xxhdpi-v21")
+          .SetResourceValue("com.example.target:drawable/dr1", fd, "port-xxhdpi-v7")
+          .setFrroPath("/foo/bar/biz.frro")
           .Build();
   ASSERT_TRUE(overlay);
   auto container = FabricatedOverlayContainer::FromOverlay(std::move(*overlay));
@@ -67,19 +74,28 @@ TEST(FabricatedOverlayTests, SetResourceValue) {
 
   auto pairs = container->GetOverlayData(*info);
   ASSERT_TRUE(pairs);
-  ASSERT_EQ(4U, pairs->pairs.size());
+  ASSERT_EQ(5U, pairs->pairs.size());
   auto string_pool = ResStringPool(pairs->string_pool_data->data.get(),
                                         pairs->string_pool_data->data_length, false);
 
   auto& it = pairs->pairs[0];
-  ASSERT_EQ("com.example.target:integer/int1", it.resource_name);
+  ASSERT_EQ("com.example.target:drawable/dr1", it.resource_name);
   auto entry = std::get_if<TargetValueWithConfig>(&it.value);
+  ASSERT_NE(nullptr, entry);
+  ASSERT_EQ(std::string("frro://foo/bar/biz.frro?offset=16&size=8341"),
+      string_pool.string8At(entry->value.data_value).value_or(""));
+  ASSERT_EQ(Res_value::TYPE_STRING, entry->value.data_type);
+  ASSERT_EQ("port-xxhdpi-v7", entry->config);
+
+  it = pairs->pairs[1];
+  ASSERT_EQ("com.example.target:integer/int1", it.resource_name);
+  entry = std::get_if<TargetValueWithConfig>(&it.value);
   ASSERT_NE(nullptr, entry);
   ASSERT_EQ(1U, entry->value.data_value);
   ASSERT_EQ(Res_value::TYPE_INT_DEC, entry->value.data_type);
   ASSERT_EQ("port", entry->config);
 
-  it = pairs->pairs[1];
+  it = pairs->pairs[2];
   ASSERT_EQ("com.example.target:string/int3", it.resource_name);
   entry = std::get_if<TargetValueWithConfig>(&it.value);
   ASSERT_NE(nullptr, entry);
@@ -87,7 +103,7 @@ TEST(FabricatedOverlayTests, SetResourceValue) {
   ASSERT_EQ(Res_value::TYPE_REFERENCE, entry->value.data_type);
   ASSERT_EQ("xxhdpi-v7", entry->config);
 
-  it = pairs->pairs[2];
+  it = pairs->pairs[3];
   ASSERT_EQ("com.example.target:string/string1", it.resource_name);
   entry = std::get_if<TargetValueWithConfig>(&it.value);
   ASSERT_NE(nullptr, entry);
@@ -95,7 +111,7 @@ TEST(FabricatedOverlayTests, SetResourceValue) {
   ASSERT_EQ(std::string("foobar"), string_pool.string8At(entry->value.data_value).value_or(""));
   ASSERT_EQ("en-rUS-normal-xxhdpi-v21", entry->config);
 
-  it = pairs->pairs[3];
+  it = pairs->pairs[4];
   ASSERT_EQ("com.example.target.split:integer/int2", it.resource_name);
   entry = std::get_if<TargetValueWithConfig>(&it.value);
   ASSERT_NE(nullptr, entry);

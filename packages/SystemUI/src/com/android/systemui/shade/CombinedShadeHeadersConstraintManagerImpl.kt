@@ -92,7 +92,6 @@ object CombinedShadeHeadersConstraintManagerImpl : CombinedShadeHeadersConstrain
                     centerEnd,
                     ConstraintSet.END
                 )
-                constrainWidth(R.id.statusIcons, 0)
             },
             qsConstraintsChanges = {
                 setGuidelineBegin(centerStart, offsetFromEdge)

@@ -758,6 +758,7 @@ package android.content {
     method public int getUserId();
     method public void setAutofillOptions(@Nullable android.content.AutofillOptions);
     method public void setContentCaptureOptions(@Nullable android.content.ContentCaptureOptions);
+    field public static final String ATTENTION_SERVICE = "attention";
     field public static final String CONTENT_CAPTURE_MANAGER_SERVICE = "content_capture";
     field public static final String DEVICE_IDLE_CONTROLLER = "deviceidle";
     field public static final String DREAM_SERVICE = "dream";
@@ -1900,6 +1901,7 @@ package android.os {
     method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public java.util.List<android.content.pm.UserInfo> getUsers(boolean, boolean, boolean);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public boolean hasBaseUserRestriction(@NonNull String, @NonNull android.os.UserHandle);
     method public static boolean isSplitSystemUser();
+    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public boolean isUserTypeEnabled(@NonNull String);
     method public boolean isUsersOnSecondaryDisplaysSupported();
     method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public android.content.pm.UserInfo preCreateUser(@NonNull String) throws android.os.UserManager.UserOperationException;
   }
@@ -2497,6 +2499,10 @@ package android.service.voice {
     method @NonNull public android.service.voice.AlwaysOnHotwordDetector.EventPayload.Builder setDataFormat(int);
     method @NonNull public android.service.voice.AlwaysOnHotwordDetector.EventPayload.Builder setHotwordDetectedResult(@NonNull android.service.voice.HotwordDetectedResult);
     method @NonNull public android.service.voice.AlwaysOnHotwordDetector.EventPayload.Builder setKeyphraseRecognitionExtras(@NonNull java.util.List<android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra>);
+  }
+
+  public abstract class HotwordDetectionService extends android.app.Service {
+    field public static final boolean ENABLE_PROXIMITY_RESULT = true;
   }
 
   public final class VisibleActivityInfo implements android.os.Parcelable {

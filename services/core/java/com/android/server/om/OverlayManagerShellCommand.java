@@ -29,6 +29,7 @@ import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.os.Binder;
+import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ShellCommand;
@@ -64,7 +65,8 @@ final class OverlayManagerShellCommand extends ShellCommand {
     private final IOverlayManager mInterface;
     private static final Map<String, Integer> TYPE_MAP = Map.of(
             "color", TypedValue.TYPE_FIRST_COLOR_INT,
-            "string", TypedValue.TYPE_STRING);
+            "string", TypedValue.TYPE_STRING,
+            "drawable", -1);
 
     OverlayManagerShellCommand(@NonNull final Context ctx, @NonNull final IOverlayManager iom) {
         mContext = ctx;
@@ -258,7 +260,7 @@ final class OverlayManagerShellCommand extends ShellCommand {
         String name = "";
         String filename = null;
         String opt;
-        String configuration = null;
+        String config = null;
         while ((opt = getNextOption()) != null) {
             switch (opt) {
                 case "--user":
@@ -277,7 +279,7 @@ final class OverlayManagerShellCommand extends ShellCommand {
                     filename = getNextArgRequired();
                     break;
                 case "--config":
-                    configuration = getNextArgRequired();
+                    config = getNextArgRequired();
                     break;
                 default:
                     err.println("Error: Unknown option: " + opt);
@@ -312,7 +314,9 @@ final class OverlayManagerShellCommand extends ShellCommand {
             final String resourceName = getNextArgRequired();
             final String typeStr = getNextArgRequired();
             final String strData = String.join(" ", peekRemainingArgs());
-            addOverlayValue(overlayBuilder, resourceName, typeStr, strData, configuration);
+            if (addOverlayValue(overlayBuilder, resourceName, typeStr, strData, config) != 0) {
+                return 1;
+            }
         }
 
         mInterface.commit(new OverlayManagerTransaction.Builder()
@@ -369,8 +373,10 @@ final class OverlayManagerShellCommand extends ShellCommand {
                             return 1;
                         }
                         String config = parser.getAttributeValue(null, "config");
-                        addOverlayValue(overlayBuilder, targetPackage + ':' + target,
-                                overlayType, value, config);
+                        if (addOverlayValue(overlayBuilder, targetPackage + ':' + target,
+                                  overlayType, value, config) != 0) {
+                            return 1;
+                        }
                     }
                 }
             }
@@ -384,7 +390,7 @@ final class OverlayManagerShellCommand extends ShellCommand {
         return 0;
     }
 
-    private void addOverlayValue(FabricatedOverlay.Builder overlayBuilder,
+    private int addOverlayValue(FabricatedOverlay.Builder overlayBuilder,
             String resourceName, String typeString, String valueString, String configuration) {
         final int type;
         typeString = typeString.toLowerCase(Locale.getDefault());
@@ -399,6 +405,9 @@ final class OverlayManagerShellCommand extends ShellCommand {
         }
         if (type == TypedValue.TYPE_STRING) {
             overlayBuilder.setResourceValue(resourceName, type, valueString, configuration);
+        } else if (type < 0) {
+            ParcelFileDescriptor pfd =  openFileForSystem(valueString, "r");
+            overlayBuilder.setResourceValue(resourceName, pfd, configuration);
         } else {
             final int intData;
             if (valueString.startsWith("0x")) {
@@ -408,6 +417,7 @@ final class OverlayManagerShellCommand extends ShellCommand {
             }
             overlayBuilder.setResourceValue(resourceName, type, intData, configuration);
         }
+        return 0;
     }
 
     private int runEnableExclusive() throws RemoteException {

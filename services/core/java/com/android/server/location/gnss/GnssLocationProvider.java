@@ -84,6 +84,7 @@ import android.os.UserHandle;
 import android.os.WorkSource;
 import android.os.WorkSource.WorkChain;
 import android.provider.Settings;
+import android.provider.Telephony.Sms.Intents;
 import android.telephony.CarrierConfigManager;
 import android.telephony.CellIdentity;
 import android.telephony.CellIdentityGsm;
@@ -95,6 +96,7 @@ import android.telephony.CellInfoGsm;
 import android.telephony.CellInfoLte;
 import android.telephony.CellInfoNr;
 import android.telephony.CellInfoWcdma;
+import android.telephony.SmsMessage;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
@@ -107,6 +109,7 @@ import com.android.internal.app.IBatteryStats;
 import com.android.internal.location.GpsNetInitiatedHandler;
 import com.android.internal.location.GpsNetInitiatedHandler.GpsNiNotification;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.internal.util.HexDump;
 import com.android.server.FgThread;
 import com.android.server.location.gnss.GnssSatelliteBlocklistHelper.GnssSatelliteBlocklistCallback;
 import com.android.server.location.gnss.NtpTimeHelper.InjectNtpTimeCallback;
@@ -523,23 +526,31 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED);
         intentFilter.addAction(TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED);
-        mContext.registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String action = intent.getAction();
-                if (DEBUG) Log.d(TAG, "receive broadcast intent, action: " + action);
-                if (action == null) {
-                    return;
-                }
+        mContext.registerReceiver(mIntentReceiver, intentFilter, null, mHandler);
 
-                switch (action) {
-                    case CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED:
-                    case TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED:
-                        subscriptionOrCarrierConfigChanged();
-                        break;
-                }
+        if (mNetworkConnectivityHandler.isNativeAgpsRilSupported()
+                && mGnssConfiguration.isNiSuplMessageInjectionEnabled()) {
+            // Listen to WAP PUSH NI SUPL message.
+            // See User Plane Location Protocol Candidate Version 3.0,
+            // OMA-TS-ULP-V3_0-20110920-C, Section 8.3 OMA Push.
+            intentFilter = new IntentFilter();
+            intentFilter.addAction(Intents.WAP_PUSH_RECEIVED_ACTION);
+            try {
+                intentFilter.addDataType("application/vnd.omaloc-supl-init");
+            } catch (IntentFilter.MalformedMimeTypeException e) {
+                Log.w(TAG, "Malformed SUPL init mime type");
             }
-        }, intentFilter, null, mHandler);
+            mContext.registerReceiver(mIntentReceiver, intentFilter, null, mHandler);
+
+            // Listen to MT SMS NI SUPL message.
+            // See User Plane Location Protocol Candidate Version 3.0,
+            // OMA-TS-ULP-V3_0-20110920-C, Section 8.4 MT SMS.
+            intentFilter = new IntentFilter();
+            intentFilter.addAction(Intents.DATA_SMS_RECEIVED_ACTION);
+            intentFilter.addDataScheme("sms");
+            intentFilter.addDataAuthority("localhost", "7275");
+            mContext.registerReceiver(mIntentReceiver, intentFilter, null, mHandler);
+        }
 
         mNetworkConnectivityHandler.registerNetworkCallbacks();
 
@@ -558,6 +569,80 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         }
 
         updateEnabled();
+    }
+
+    private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (DEBUG) Log.d(TAG, "receive broadcast intent, action: " + action);
+            if (action == null) {
+                return;
+            }
+
+            switch (action) {
+                case CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED:
+                case TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED:
+                    subscriptionOrCarrierConfigChanged();
+                    break;
+                case Intents.WAP_PUSH_RECEIVED_ACTION:
+                case Intents.DATA_SMS_RECEIVED_ACTION:
+                    injectSuplInit(intent);
+                    break;
+            }
+        }
+    };
+
+    private void injectSuplInit(Intent intent) {
+        if (!isNfwLocationAccessAllowed()) {
+            Log.w(TAG, "Reject SUPL INIT as no NFW location access");
+            return;
+        }
+
+        int slotIndex = intent.getIntExtra(SubscriptionManager.EXTRA_SLOT_INDEX,
+                SubscriptionManager.INVALID_SIM_SLOT_INDEX);
+        if (slotIndex == SubscriptionManager.INVALID_SIM_SLOT_INDEX) {
+            Log.e(TAG, "Invalid slot index");
+            return;
+        }
+
+        byte[] suplInit = null;
+        String action = intent.getAction();
+        if (action.equals(Intents.DATA_SMS_RECEIVED_ACTION)) {
+            SmsMessage[] messages = Intents.getMessagesFromIntent(intent);
+            if (messages == null) {
+                Log.e(TAG, "Message does not exist in the intent");
+                return;
+            }
+            for (SmsMessage message : messages) {
+                suplInit = message.getUserData();
+                injectSuplInit(suplInit, slotIndex);
+            }
+        } else if (action.equals(Intents.WAP_PUSH_RECEIVED_ACTION)) {
+            suplInit = intent.getByteArrayExtra("data");
+            injectSuplInit(suplInit, slotIndex);
+        }
+    }
+
+    private void injectSuplInit(byte[] suplInit, int slotIndex) {
+        if (suplInit != null) {
+            if (DEBUG) {
+                Log.d(TAG, "suplInit = "
+                        + HexDump.toHexString(suplInit) + " slotIndex = " + slotIndex);
+            }
+            mGnssNative.injectNiSuplMessageData(suplInit, suplInit.length , slotIndex);
+        }
+    }
+
+    private boolean isNfwLocationAccessAllowed() {
+        if (mGnssNative.isInEmergencySession()) {
+            return true;
+        }
+        if (mGnssVisibilityControl != null
+                && mGnssVisibilityControl.hasLocationPermissionEnabledProxyApps()) {
+            return true;
+        }
+        return false;
     }
 
     /**

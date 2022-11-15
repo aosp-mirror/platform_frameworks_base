@@ -454,6 +454,7 @@ class ActivityMetricsLogger {
         final int windowsFullyDrawnDelayMs;
         final int activityRecordIdHashCode;
         final boolean relaunched;
+        final long timestampNs;
 
         private TransitionInfoSnapshot(TransitionInfo info) {
             this(info, info.mLastLaunchedActivity, INVALID_DELAY);
@@ -483,6 +484,7 @@ class ActivityMetricsLogger {
             activityRecordIdHashCode = System.identityHashCode(launchedActivity);
             this.windowsFullyDrawnDelayMs = windowsFullyDrawnDelayMs;
             relaunched = info.mRelaunched;
+            timestampNs = info.mLaunchingState.mStartRealtimeNs;
         }
 
         @WaitResult.LaunchState int getLaunchState() {
@@ -496,6 +498,10 @@ class ActivityMetricsLogger {
                 default:
                     return -1;
             }
+        }
+
+        boolean isIntresetedToEventLog() {
+            return type == TYPE_TRANSITION_WARM_LAUNCH || type == TYPE_TRANSITION_COLD_LAUNCH;
         }
 
         PackageOptimizationInfo getPackageOptimizationInfo(ArtManagerInternal artManagerInternal) {
@@ -1022,16 +1028,17 @@ class ActivityMetricsLogger {
         // This will avoid any races with other operations that modify the ActivityRecord.
         final TransitionInfoSnapshot infoSnapshot = new TransitionInfoSnapshot(info);
         if (info.isInterestingToLoggerAndObserver()) {
-            final long timestampNs = info.mLaunchingState.mStartRealtimeNs;
             final long uptimeNs = info.mLaunchingState.mStartUptimeNs;
             final int transitionDelay = info.mCurrentTransitionDelayMs;
             final int processState = info.mProcessState;
             final int processOomAdj = info.mProcessOomAdj;
             mLoggerHandler.post(() -> logAppTransition(
-                    timestampNs, uptimeNs, transitionDelay, infoSnapshot, isHibernating,
+                    uptimeNs, transitionDelay, infoSnapshot, isHibernating,
                     processState, processOomAdj));
         }
-        mLoggerHandler.post(() -> logAppDisplayed(infoSnapshot));
+        if (infoSnapshot.isIntresetedToEventLog()) {
+            mLoggerHandler.post(() -> logAppDisplayed(infoSnapshot));
+        }
         if (info.mPendingFullyDrawn != null) {
             info.mPendingFullyDrawn.run();
         }
@@ -1040,7 +1047,7 @@ class ActivityMetricsLogger {
     }
 
     // This gets called on another thread without holding the activity manager lock.
-    private void logAppTransition(long transitionStartTimeNs, long transitionDeviceUptimeNs,
+    private void logAppTransition(long transitionDeviceUptimeNs,
             int currentTransitionDelayMs, TransitionInfoSnapshot info, boolean isHibernating,
             int processState, int processOomAdj) {
         final LogMaker builder = new LogMaker(APP_TRANSITION);
@@ -1108,7 +1115,7 @@ class ActivityMetricsLogger {
                 isIncremental,
                 isLoading,
                 info.launchedActivityName.hashCode(),
-                TimeUnit.NANOSECONDS.toMillis(transitionStartTimeNs),
+                TimeUnit.NANOSECONDS.toMillis(info.timestampNs),
                 processState,
                 processOomAdj);
 
@@ -1132,10 +1139,6 @@ class ActivityMetricsLogger {
     }
 
     private void logAppDisplayed(TransitionInfoSnapshot info) {
-        if (info.type != TYPE_TRANSITION_WARM_LAUNCH && info.type != TYPE_TRANSITION_COLD_LAUNCH) {
-            return;
-        }
-
         EventLog.writeEvent(WM_ACTIVITY_LAUNCH_TIME,
                 info.userId, info.activityRecordIdHashCode, info.launchedActivityShortComponentName,
                 info.windowsDrawnDelayMs);
@@ -1181,8 +1184,7 @@ class ActivityMetricsLogger {
     }
 
     /** @see android.app.Activity#reportFullyDrawn */
-    TransitionInfoSnapshot logAppTransitionReportedDrawn(ActivityRecord r,
-            boolean restoredFromBundle) {
+    TransitionInfoSnapshot notifyFullyDrawn(ActivityRecord r, boolean restoredFromBundle) {
         final TransitionInfo info = mLastTransitionInfo.get(r);
         if (info == null) {
             return null;
@@ -1191,7 +1193,7 @@ class ActivityMetricsLogger {
             // There are still undrawn activities, postpone reporting fully drawn until all of its
             // windows are drawn. So that is closer to an usable state.
             info.mPendingFullyDrawn = () -> {
-                logAppTransitionReportedDrawn(r, restoredFromBundle);
+                notifyFullyDrawn(r, restoredFromBundle);
                 info.mPendingFullyDrawn = null;
             };
             return null;
@@ -1204,7 +1206,9 @@ class ActivityMetricsLogger {
                         currentTimestampNs - info.mLaunchingState.mStartUptimeNs);
         final TransitionInfoSnapshot infoSnapshot =
                 new TransitionInfoSnapshot(info, r, (int) startupTimeMs);
-        mLoggerHandler.post(() -> logAppFullyDrawn(infoSnapshot));
+        if (infoSnapshot.isIntresetedToEventLog()) {
+            mLoggerHandler.post(() -> logAppFullyDrawn(infoSnapshot));
+        }
         mLastTransitionInfo.remove(r);
 
         if (!info.isInterestingToLoggerAndObserver()) {
@@ -1216,46 +1220,8 @@ class ActivityMetricsLogger {
         // fullfils (handling reportFullyDrawn() callbacks).
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
                 "ActivityManager:ReportingFullyDrawn " + info.mLastLaunchedActivity.packageName);
-
-        final LogMaker builder = new LogMaker(APP_TRANSITION_REPORTED_DRAWN);
-        builder.setPackageName(r.packageName);
-        builder.addTaggedData(FIELD_CLASS_NAME, r.info.name);
-        builder.addTaggedData(APP_TRANSITION_REPORTED_DRAWN_MS, startupTimeMs);
-        builder.setType(restoredFromBundle
-                ? TYPE_TRANSITION_REPORTED_DRAWN_WITH_BUNDLE
-                : TYPE_TRANSITION_REPORTED_DRAWN_NO_BUNDLE);
-        builder.addTaggedData(APP_TRANSITION_PROCESS_RUNNING,
-                info.mProcessRunning ? 1 : 0);
-        mMetricsLogger.write(builder);
-        final PackageOptimizationInfo packageOptimizationInfo =
-                infoSnapshot.getPackageOptimizationInfo(getArtManagerInternal());
-        // Incremental info
-        boolean isIncremental = false, isLoading = false;
-        final String codePath = info.mLastLaunchedActivity.info.applicationInfo.getCodePath();
-        if (codePath != null && IncrementalManager.isIncrementalPath(codePath)) {
-            isIncremental = true;
-            isLoading = isIncrementalLoading(info.mLastLaunchedActivity.packageName,
-                            info.mLastLaunchedActivity.mUserId);
-        }
-        FrameworkStatsLog.write(
-                FrameworkStatsLog.APP_START_FULLY_DRAWN,
-                info.mLastLaunchedActivity.info.applicationInfo.uid,
-                info.mLastLaunchedActivity.packageName,
-                restoredFromBundle
-                        ? FrameworkStatsLog.APP_START_FULLY_DRAWN__TYPE__WITH_BUNDLE
-                        : FrameworkStatsLog.APP_START_FULLY_DRAWN__TYPE__WITHOUT_BUNDLE,
-                info.mLastLaunchedActivity.info.name,
-                info.mProcessRunning,
-                startupTimeMs,
-                packageOptimizationInfo.getCompilationReason(),
-                packageOptimizationInfo.getCompilationFilter(),
-                info.mSourceType,
-                info.mSourceEventDelayMs,
-                isIncremental,
-                isLoading,
-                info.mLastLaunchedActivity.info.name.hashCode(),
-                TimeUnit.NANOSECONDS.toMillis(info.mLaunchingState.mStartRealtimeNs));
-
+        mLoggerHandler.post(() -> logAppFullyDrawnMetrics(infoSnapshot, restoredFromBundle,
+                info.mProcessRunning));
         // Ends the trace started at the beginning of this function. This is located here to allow
         // the trace slice to have a noticable duration.
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
@@ -1266,11 +1232,48 @@ class ActivityMetricsLogger {
         return infoSnapshot;
     }
 
-    private void logAppFullyDrawn(TransitionInfoSnapshot info) {
-        if (info.type != TYPE_TRANSITION_WARM_LAUNCH && info.type != TYPE_TRANSITION_COLD_LAUNCH) {
-            return;
+    private void logAppFullyDrawnMetrics(TransitionInfoSnapshot info, boolean restoredFromBundle,
+            boolean processRunning) {
+        final LogMaker builder = new LogMaker(APP_TRANSITION_REPORTED_DRAWN);
+        builder.setPackageName(info.packageName);
+        builder.addTaggedData(FIELD_CLASS_NAME, info.launchedActivityName);
+        builder.addTaggedData(APP_TRANSITION_REPORTED_DRAWN_MS,
+                (long) info.windowsFullyDrawnDelayMs);
+        builder.setType(restoredFromBundle
+                ? TYPE_TRANSITION_REPORTED_DRAWN_WITH_BUNDLE
+                : TYPE_TRANSITION_REPORTED_DRAWN_NO_BUNDLE);
+        builder.addTaggedData(APP_TRANSITION_PROCESS_RUNNING, processRunning ? 1 : 0);
+        mMetricsLogger.write(builder);
+        final PackageOptimizationInfo packageOptimizationInfo =
+                info.getPackageOptimizationInfo(getArtManagerInternal());
+        // Incremental info
+        boolean isIncremental = false, isLoading = false;
+        final String codePath = info.applicationInfo.getCodePath();
+        if (codePath != null && IncrementalManager.isIncrementalPath(codePath)) {
+            isIncremental = true;
+            isLoading = isIncrementalLoading(info.packageName, info.userId);
         }
+        FrameworkStatsLog.write(
+                FrameworkStatsLog.APP_START_FULLY_DRAWN,
+                info.applicationInfo.uid,
+                info.packageName,
+                restoredFromBundle
+                        ? FrameworkStatsLog.APP_START_FULLY_DRAWN__TYPE__WITH_BUNDLE
+                        : FrameworkStatsLog.APP_START_FULLY_DRAWN__TYPE__WITHOUT_BUNDLE,
+                info.launchedActivityName,
+                processRunning,
+                info.windowsFullyDrawnDelayMs,
+                packageOptimizationInfo.getCompilationReason(),
+                packageOptimizationInfo.getCompilationFilter(),
+                info.sourceType,
+                info.sourceEventDelayMs,
+                isIncremental,
+                isLoading,
+                info.launchedActivityName.hashCode(),
+                TimeUnit.NANOSECONDS.toMillis(info.timestampNs));
+    }
 
+    private void logAppFullyDrawn(TransitionInfoSnapshot info) {
         StringBuilder sb = mStringBuilder;
         sb.setLength(0);
         sb.append("Fully drawn ");

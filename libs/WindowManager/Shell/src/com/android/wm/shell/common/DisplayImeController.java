@@ -20,6 +20,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.res.Configuration;
 import android.graphics.Point;
@@ -38,6 +39,7 @@ import android.view.WindowInsets;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
+import android.view.inputmethod.ImeTracker;
 import android.view.inputmethod.InputMethodManagerGlobal;
 
 import androidx.annotation.VisibleForTesting;
@@ -112,7 +114,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
         }
         if (mDisplayController.getDisplayLayout(displayId).rotation()
                 != pd.mRotation && isImeShowing(displayId)) {
-            pd.startAnimation(true, false /* forceRestart */);
+            pd.startAnimation(true, false /* forceRestart */, null /* statsToken */);
         }
     }
 
@@ -244,7 +246,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
             mInsetsState.set(insetsState, true /* copySources */);
             if (mImeShowing && !newFrame.equals(oldFrame) && newSource.isVisible()) {
                 if (DEBUG) Slog.d(TAG, "insetsChanged when IME showing, restart animation");
-                startAnimation(mImeShowing, true /* forceRestart */);
+                startAnimation(mImeShowing, true /* forceRestart */, null /* statsToken */);
             }
         }
 
@@ -280,7 +282,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                         !haveSameLeash(mImeSourceControl, imeSourceControl);
                 if (mAnimation != null) {
                     if (positionChanged) {
-                        startAnimation(mImeShowing, true /* forceRestart */);
+                        startAnimation(mImeShowing, true /* forceRestart */, null /* statsToken */);
                     }
                 } else {
                     if (leashChanged) {
@@ -312,21 +314,23 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
         }
 
         @Override
-        public void showInsets(int types, boolean fromIme) {
+        public void showInsets(@InsetsType int types, boolean fromIme,
+                @Nullable ImeTracker.Token statsToken) {
             if ((types & WindowInsets.Type.ime()) == 0) {
                 return;
             }
             if (DEBUG) Slog.d(TAG, "Got showInsets for ime");
-            startAnimation(true /* show */, false /* forceRestart */);
+            startAnimation(true /* show */, false /* forceRestart */, statsToken);
         }
 
         @Override
-        public void hideInsets(int types, boolean fromIme) {
+        public void hideInsets(@InsetsType int types, boolean fromIme,
+                @Nullable ImeTracker.Token statsToken) {
             if ((types & WindowInsets.Type.ime()) == 0) {
                 return;
             }
             if (DEBUG) Slog.d(TAG, "Got hideInsets for ime");
-            startAnimation(false /* show */, false /* forceRestart */);
+            startAnimation(false /* show */, false /* forceRestart */, statsToken);
         }
 
         @Override
@@ -367,9 +371,11 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                     .navBarFrameHeight();
         }
 
-        private void startAnimation(final boolean show, final boolean forceRestart) {
+        private void startAnimation(final boolean show, final boolean forceRestart,
+                @Nullable ImeTracker.Token statsToken) {
             final InsetsSource imeSource = mInsetsState.getSource(InsetsState.ITYPE_IME);
             if (imeSource == null || mImeSourceControl == null) {
+                ImeTracker.get().onFailed(statsToken, ImeTracker.PHASE_WM_ANIMATION_CREATE);
                 return;
             }
             final Rect newFrame = imeSource.getFrame();
@@ -390,8 +396,9 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                         + (mAnimationDirection == DIRECTION_SHOW ? "SHOW"
                         : (mAnimationDirection == DIRECTION_HIDE ? "HIDE" : "NONE")));
             }
-            if (!forceRestart && (mAnimationDirection == DIRECTION_SHOW && show)
+            if ((!forceRestart && (mAnimationDirection == DIRECTION_SHOW && show))
                     || (mAnimationDirection == DIRECTION_HIDE && !show)) {
+                ImeTracker.get().onCancelled(statsToken, ImeTracker.PHASE_WM_ANIMATION_CREATE);
                 return;
             }
             boolean seek = false;
@@ -435,8 +442,11 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                 mTransactionPool.release(t);
             });
             mAnimation.setInterpolator(INTERPOLATOR);
+            ImeTracker.get().onProgress(statsToken, ImeTracker.PHASE_WM_ANIMATION_CREATE);
             mAnimation.addListener(new AnimatorListenerAdapter() {
                 private boolean mCancelled = false;
+                @Nullable
+                private final ImeTracker.Token mStatsToken = statsToken;
 
                 @Override
                 public void onAnimationStart(Animator animation) {
@@ -455,6 +465,8 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                             : 1.f;
                     t.setAlpha(mImeSourceControl.getLeash(), alpha);
                     if (mAnimationDirection == DIRECTION_SHOW) {
+                        ImeTracker.get().onProgress(mStatsToken,
+                                ImeTracker.PHASE_WM_ANIMATION_RUNNING);
                         t.show(mImeSourceControl.getLeash());
                     }
                     t.apply();
@@ -476,8 +488,16 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                     }
                     dispatchEndPositioning(mDisplayId, mCancelled, t);
                     if (mAnimationDirection == DIRECTION_HIDE && !mCancelled) {
+                        ImeTracker.get().onProgress(mStatsToken,
+                                ImeTracker.PHASE_WM_ANIMATION_RUNNING);
                         t.hide(mImeSourceControl.getLeash());
                         removeImeSurface();
+                        ImeTracker.get().onHidden(mStatsToken);
+                    } else if (mAnimationDirection == DIRECTION_SHOW && !mCancelled) {
+                        ImeTracker.get().onShown(mStatsToken);
+                    } else if (mCancelled) {
+                        ImeTracker.get().onCancelled(mStatsToken,
+                                ImeTracker.PHASE_WM_ANIMATION_RUNNING);
                     }
                     t.apply();
                     mTransactionPool.release(t);

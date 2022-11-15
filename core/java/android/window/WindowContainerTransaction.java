@@ -454,6 +454,23 @@ public final class WindowContainerTransaction implements Parcelable {
     }
 
     /**
+     * Sets whether a container is being drag-resized.
+     * When {@code true}, the client will reuse a single (larger) surface size to avoid
+     * continuous allocations on every size change.
+     *
+     * @param container WindowContainerToken of the task that changed its drag resizing state
+     * @hide
+     */
+    @NonNull
+    public WindowContainerTransaction setDragResizing(@NonNull WindowContainerToken container,
+            boolean dragResizing) {
+        final Change change = getOrCreateChange(container.asBinder());
+        change.mChangeMask |= Change.CHANGE_DRAG_RESIZING;
+        change.mDragResizing = dragResizing;
+        return this;
+    }
+
+    /**
      * Sends a pending intent in sync.
      * @param sender The PendingIntent sender.
      * @param intent The fillIn intent to patch over the sender's base intent.
@@ -894,12 +911,14 @@ public final class WindowContainerTransaction implements Parcelable {
         public static final int CHANGE_IGNORE_ORIENTATION_REQUEST = 1 << 5;
         public static final int CHANGE_FORCE_NO_PIP = 1 << 6;
         public static final int CHANGE_FORCE_TRANSLUCENT = 1 << 7;
+        public static final int CHANGE_DRAG_RESIZING = 1 << 8;
 
         private final Configuration mConfiguration = new Configuration();
         private boolean mFocusable = true;
         private boolean mHidden = false;
         private boolean mIgnoreOrientationRequest = false;
         private boolean mForceTranslucent = false;
+        private boolean mDragResizing = false;
 
         private int mChangeMask = 0;
         private @ActivityInfo.Config int mConfigSetMask = 0;
@@ -920,6 +939,7 @@ public final class WindowContainerTransaction implements Parcelable {
             mHidden = in.readBoolean();
             mIgnoreOrientationRequest = in.readBoolean();
             mForceTranslucent = in.readBoolean();
+            mDragResizing = in.readBoolean();
             mChangeMask = in.readInt();
             mConfigSetMask = in.readInt();
             mWindowSetMask = in.readInt();
@@ -967,6 +987,9 @@ public final class WindowContainerTransaction implements Parcelable {
             }
             if ((other.mChangeMask & CHANGE_FORCE_TRANSLUCENT) != 0) {
                 mForceTranslucent = other.mForceTranslucent;
+            }
+            if ((other.mChangeMask & CHANGE_DRAG_RESIZING) != 0) {
+                mDragResizing = other.mDragResizing;
             }
             mChangeMask |= other.mChangeMask;
             if (other.mActivityWindowingMode >= 0) {
@@ -1025,6 +1048,15 @@ public final class WindowContainerTransaction implements Parcelable {
                         + "Check CHANGE_FORCE_TRANSLUCENT first");
             }
             return mForceTranslucent;
+        }
+
+        /** Gets the requested drag resizing state. */
+        public boolean getDragResizing() {
+            if ((mChangeMask & CHANGE_DRAG_RESIZING) == 0) {
+                throw new RuntimeException("Drag resizing not set. "
+                        + "Check CHANGE_DRAG_RESIZING first");
+            }
+            return mDragResizing;
         }
 
         public int getChangeMask() {
@@ -1088,6 +1120,9 @@ public final class WindowContainerTransaction implements Parcelable {
             if ((mChangeMask & CHANGE_FOCUSABLE) != 0) {
                 sb.append("focusable:" + mFocusable + ",");
             }
+            if ((mChangeMask & CHANGE_DRAG_RESIZING) != 0) {
+                sb.append("dragResizing:" + mDragResizing + ",");
+            }
             if (mBoundsChangeTransaction != null) {
                 sb.append("hasBoundsTransaction,");
             }
@@ -1105,6 +1140,7 @@ public final class WindowContainerTransaction implements Parcelable {
             dest.writeBoolean(mHidden);
             dest.writeBoolean(mIgnoreOrientationRequest);
             dest.writeBoolean(mForceTranslucent);
+            dest.writeBoolean(mDragResizing);
             dest.writeInt(mChangeMask);
             dest.writeInt(mConfigSetMask);
             dest.writeInt(mWindowSetMask);

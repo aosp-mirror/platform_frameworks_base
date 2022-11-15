@@ -18,12 +18,12 @@ package com.android.wm.shell.back;
 
 import static android.view.WindowManager.TRANSIT_OLD_UNSET;
 
+import android.annotation.NonNull;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.IRemoteAnimationFinishedCallback;
 import android.view.IRemoteAnimationRunner;
 import android.view.RemoteAnimationTarget;
-import android.window.BackEvent;
 import android.window.IBackAnimationRunner;
 import android.window.IOnBackInvokedCallback;
 
@@ -38,11 +38,11 @@ class BackAnimationRunner {
     private final IOnBackInvokedCallback mCallback;
     private final IRemoteAnimationRunner mRunner;
 
-    private boolean mTriggerBack;
     // Whether we are waiting to receive onAnimationStart
     private boolean mWaitingAnimation;
 
-    BackAnimationRunner(IOnBackInvokedCallback callback, IRemoteAnimationRunner runner) {
+    BackAnimationRunner(@NonNull IOnBackInvokedCallback callback,
+            @NonNull IRemoteAnimationRunner runner) {
         mCallback = callback;
         mRunner = runner;
     }
@@ -83,25 +83,7 @@ class BackAnimationRunner {
         mWaitingAnimation = true;
     }
 
-    boolean onGestureFinished(boolean triggerBack) {
-        if (mWaitingAnimation) {
-            mTriggerBack = triggerBack;
-            return true;
-        }
-        return false;
-    }
-
-    void consumeIfGestureFinished(final BackEvent backFinish) {
-        Log.d(TAG, "Start transition due to gesture is finished");
-        try {
-            mCallback.onBackProgressed(backFinish);
-            if (mTriggerBack) {
-                mCallback.onBackInvoked();
-            } else {
-                mCallback.onBackCancelled();
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "dispatch error: ", e);
-        }
+    boolean isWaitingAnimation() {
+        return mWaitingAnimation;
     }
 }

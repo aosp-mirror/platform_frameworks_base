@@ -13,6 +13,8 @@
         <option name="run-command" value="cmd window tracing level all" />
         <!-- set WM tracing to frame (avoid incomplete states) -->
         <option name="run-command" value="cmd window tracing frame" />
+        <!-- disable betterbug as it's log collection dialogues cause flakes in e2e tests -->
+        <option name="run-command" value="pm disable com.google.android.internal.betterbug" />
         <!-- ensure lock screen mode is swipe -->
         <option name="run-command" value="locksettings set-disabled false" />
         <!-- restart launcher to activate TAPL -->

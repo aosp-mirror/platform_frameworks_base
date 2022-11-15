@@ -260,10 +260,9 @@ static std::string getStringElementFromJavaArray(JNIEnv* env, jobjectArray array
 
 // --- NativeInputManager ---
 
-class NativeInputManager : public virtual RefBase,
-    public virtual InputReaderPolicyInterface,
-    public virtual InputDispatcherPolicyInterface,
-    public virtual PointerControllerPolicyInterface {
+class NativeInputManager : public virtual InputReaderPolicyInterface,
+                           public virtual InputDispatcherPolicyInterface,
+                           public virtual PointerControllerPolicyInterface {
 protected:
     virtual ~NativeInputManager();
 
@@ -1520,8 +1519,14 @@ static jlong nativeInit(JNIEnv* env, jclass /* clazz */, jobject serviceObj,
         return 0;
     }
 
-    NativeInputManager* im = new NativeInputManager(serviceObj, messageQueue->getLooper());
-    im->incStrong(0);
+    static std::once_flag nativeInitialize;
+    NativeInputManager* im = nullptr;
+    std::call_once(nativeInitialize, [&]() {
+        // Create the NativeInputManager, which should not be destroyed or deallocated for the
+        // lifetime of the process.
+        im = new NativeInputManager(serviceObj, messageQueue->getLooper());
+    });
+    LOG_ALWAYS_FATAL_IF(im == nullptr, "NativeInputManager was already initialized.");
     return reinterpret_cast<jlong>(im);
 }
 

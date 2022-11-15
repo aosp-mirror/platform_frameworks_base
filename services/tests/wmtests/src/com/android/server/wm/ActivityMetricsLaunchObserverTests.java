@@ -324,7 +324,7 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
 
         // The activity reports fully drawn before windows drawn, then the fully drawn event will
         // be pending (see {@link WindowingModeTransitionInfo#pendingFullyDrawn}).
-        mActivityMetricsLogger.logAppTransitionReportedDrawn(mTopActivity, false);
+        mActivityMetricsLogger.notifyFullyDrawn(mTopActivity, false /* restoredFromBundle */);
         notifyTransitionStarting(mTopActivity);
         // The pending fully drawn event should send when the actual windows drawn event occurs.
         final ActivityMetricsLogger.TransitionInfoSnapshot info = notifyWindowsDrawn(mTopActivity);
@@ -337,7 +337,7 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
         verifyNoMoreInteractions(mLaunchObserver);
 
         final ActivityMetricsLogger.TransitionInfoSnapshot fullyDrawnInfo = mActivityMetricsLogger
-                .logAppTransitionReportedDrawn(mTopActivity, false /* restoredFromBundle */);
+                .notifyFullyDrawn(mTopActivity, false /* restoredFromBundle */);
         assertWithMessage("Invisible event must be dropped").that(fullyDrawnInfo).isNull();
     }
 

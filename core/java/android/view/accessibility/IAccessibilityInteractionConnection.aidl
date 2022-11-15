@@ -22,6 +22,7 @@ import android.os.Bundle;
 import android.view.MagnificationSpec;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
+import android.window.ScreenCapture;
 
 /**
  * Interface for interaction between the AccessibilityManagerService
@@ -60,4 +61,8 @@ oneway interface IAccessibilityInteractionConnection {
     void clearAccessibilityFocus();
 
     void notifyOutsideTouch();
+
+    void takeScreenshotOfWindow(int interactionId,
+        in ScreenCapture.ScreenCaptureListener listener,
+        IAccessibilityInteractionConnectionCallback callback);
 }

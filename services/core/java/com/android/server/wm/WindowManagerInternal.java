@@ -43,6 +43,7 @@ import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost;
 import android.view.WindowInfo;
 import android.view.WindowManager.DisplayImePolicy;
+import android.view.inputmethod.ImeTracker;
 
 import com.android.internal.policy.KeyInterceptionInfo;
 import com.android.server.input.InputManagerService;
@@ -729,16 +730,20 @@ public abstract class WindowManagerInternal {
      * Show IME on imeTargetWindow once IME has finished layout.
      *
      * @param imeTargetWindowToken token of the (IME target) window on which IME should be shown.
+     * @param statsToken the token tracking the current IME show request or {@code null} otherwise.
      */
-    public abstract void showImePostLayout(IBinder imeTargetWindowToken);
+    public abstract void showImePostLayout(IBinder imeTargetWindowToken,
+            @Nullable ImeTracker.Token statsToken);
 
     /**
      * Hide IME using imeTargetWindow when requested.
      *
      * @param imeTargetWindowToken token of the (IME target) window on which IME should be hidden.
      * @param displayId the id of the display the IME is on.
+     * @param statsToken the token tracking the current IME hide request or {@code null} otherwise.
      */
-    public abstract void hideIme(IBinder imeTargetWindowToken, int displayId);
+    public abstract void hideIme(IBinder imeTargetWindowToken, int displayId,
+            @Nullable ImeTracker.Token statsToken);
 
     /**
      * Tell window manager about a package that should be running with a restricted range of

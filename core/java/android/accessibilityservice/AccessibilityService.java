@@ -696,7 +696,8 @@ public abstract class AccessibilityService extends Service {
             ERROR_TAKE_SCREENSHOT_INTERNAL_ERROR,
             ERROR_TAKE_SCREENSHOT_NO_ACCESSIBILITY_ACCESS,
             ERROR_TAKE_SCREENSHOT_INTERVAL_TIME_SHORT,
-            ERROR_TAKE_SCREENSHOT_INVALID_DISPLAY
+            ERROR_TAKE_SCREENSHOT_INVALID_DISPLAY,
+            ERROR_TAKE_SCREENSHOT_INVALID_WINDOW
     })
     public @interface ScreenshotErrorCode {}
 
@@ -726,6 +727,18 @@ public abstract class AccessibilityService extends Service {
      * The status of taking screenshot is failure and the reason is invalid display Id.
      */
     public static final int ERROR_TAKE_SCREENSHOT_INVALID_DISPLAY = 4;
+
+    /**
+     * The status of taking screenshot is failure and the reason is invalid accessibility window Id.
+     */
+    public static final int ERROR_TAKE_SCREENSHOT_INVALID_WINDOW = 5;
+
+    /**
+     * The status of taking screenshot is failure and the reason is the window contains secure
+     * content.
+     * @see WindowManager.LayoutParams#FLAG_SECURE
+     */
+    public static final int ERROR_TAKE_SCREENSHOT_SECURE_WINDOW = 6;
 
     /**
      * The interval time of calling
@@ -2568,6 +2581,7 @@ public abstract class AccessibilityService extends Service {
      * @param executor Executor on which to run the callback.
      * @param callback The callback invoked when taking screenshot has succeeded or failed.
      *                 See {@link TakeScreenshotCallback} for details.
+     * @see #takeScreenshotOfWindow
      */
     public void takeScreenshot(int displayId, @NonNull @CallbackExecutor Executor executor,
             @NonNull TakeScreenshotCallback callback) {
@@ -2589,7 +2603,8 @@ public abstract class AccessibilityService extends Service {
                 final HardwareBuffer hardwareBuffer =
                         result.getParcelable(KEY_ACCESSIBILITY_SCREENSHOT_HARDWAREBUFFER, android.hardware.HardwareBuffer.class);
                 final ParcelableColorSpace colorSpace =
-                        result.getParcelable(KEY_ACCESSIBILITY_SCREENSHOT_COLORSPACE, android.graphics.ParcelableColorSpace.class);
+                        result.getParcelable(KEY_ACCESSIBILITY_SCREENSHOT_COLORSPACE,
+                                android.graphics.ParcelableColorSpace.class);
                 final ScreenshotResult screenshot = new ScreenshotResult(hardwareBuffer,
                         colorSpace.getColorSpace(),
                         result.getLong(KEY_ACCESSIBILITY_SCREENSHOT_TIMESTAMP));
@@ -2598,6 +2613,37 @@ public abstract class AccessibilityService extends Service {
         } catch (RemoteException re) {
             throw new RuntimeException(re);
         }
+    }
+
+    /**
+     * Takes a screenshot of the specified window and returns it via an
+     * {@link AccessibilityService.ScreenshotResult}. You can use {@link Bitmap#wrapHardwareBuffer}
+     * to construct the bitmap from the ScreenshotResult's payload.
+     * <p>
+     * <strong>Note:</strong> In order to take screenshots your service has
+     * to declare the capability to take screenshot by setting the
+     * {@link android.R.styleable#AccessibilityService_canTakeScreenshot}
+     * property in its meta-data. For details refer to {@link #SERVICE_META_DATA}.
+     * </p>
+     * <p>
+     * Both this method and {@link #takeScreenshot} can be used for machine learning-based visual
+     * screen understanding. Use <code>takeScreenshotOfWindow</code> if your target window might be
+     * visually underneath an accessibility overlay (from your or another accessibility service) in
+     * order to capture the window contents without the screenshot being covered by the overlay
+     * contents drawn on the screen.
+     * </p>
+     *
+     * @param accessibilityWindowId The window id, from {@link AccessibilityWindowInfo#getId()}.
+     * @param executor Executor on which to run the callback.
+     * @param callback The callback invoked when taking screenshot has succeeded or failed.
+     *                 See {@link TakeScreenshotCallback} for details.
+     * @see #takeScreenshot
+     */
+    public void takeScreenshotOfWindow(int accessibilityWindowId,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull TakeScreenshotCallback callback) {
+        AccessibilityInteractionClient.getInstance(this).takeScreenshotOfWindow(
+                        mConnectionId, accessibilityWindowId, executor, callback);
     }
 
     /**
@@ -3113,7 +3159,8 @@ public abstract class AccessibilityService extends Service {
         private final @NonNull ColorSpace mColorSpace;
         private final long mTimestamp;
 
-        private ScreenshotResult(@NonNull HardwareBuffer hardwareBuffer,
+        /** @hide */
+        public ScreenshotResult(@NonNull HardwareBuffer hardwareBuffer,
                 @NonNull ColorSpace colorSpace, long timestamp) {
             Preconditions.checkNotNull(hardwareBuffer, "hardwareBuffer cannot be null");
             Preconditions.checkNotNull(colorSpace, "colorSpace cannot be null");

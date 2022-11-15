@@ -685,7 +685,9 @@ public class BinaryTransparencyService extends SystemService {
                         FrameworkStatsLog.write(FrameworkStatsLog.APEX_INFO_GATHERED,
                                 packageInfo.packageName,
                                 packageInfo.getLongVersionCode(),
-                                mBinaryHashes.get(packageInfo.packageName));
+                                mBinaryHashes.get(packageInfo.packageName),
+                                4,  // indicating that the digest is SHA256
+                                null);  // TODO: This is to comform to the extended schema.
                     }
                 }
             } catch (PackageManager.NameNotFoundException e) {

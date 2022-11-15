@@ -42,7 +42,7 @@ struct R {
   struct string {
     enum : uint32_t {
       foo_999 = 0x7f0203e7,
-      only_v26 = 0x7f0203e8
+      only_land = 0x7f0203e8
     };
   };
 };

@@ -309,6 +309,10 @@ class LockSettingsStorage {
     }
 
     private void writeFile(File path, byte[] data) {
+        writeFile(path, data, /* syncParentDir= */ true);
+    }
+
+    private void writeFile(File path, byte[] data, boolean syncParentDir) {
         synchronized (mFileWriteLock) {
             // Use AtomicFile to guarantee atomicity of the file write, including when an existing
             // file is replaced with a new one.  This method is usually used to create new files,
@@ -326,9 +330,11 @@ class LockSettingsStorage {
                 file.failWrite(out);
             }
             // For performance reasons, AtomicFile only syncs the file itself, not also the parent
-            // directory.  The latter must be done explicitly here, as some callers need a guarantee
-            // that the file really exists on-disk when this returns.
-            fsyncDirectory(path.getParentFile());
+            // directory.  The latter must be done explicitly when requested here, as some callers
+            // need a guarantee that the file really exists on-disk when this returns.
+            if (syncParentDir) {
+                fsyncDirectory(path.getParentFile());
+            }
             mCache.putFile(path, data);
         }
     }
@@ -378,10 +384,20 @@ class LockSettingsStorage {
         }
     }
 
+    /**
+     * Writes the synthetic password state file for the given user ID, protector ID, and state name.
+     * If the file already exists, then it is atomically replaced.
+     * <p>
+     * This doesn't sync the parent directory, and a result the new state file may be lost if the
+     * system crashes.  The caller must call {@link syncSyntheticPasswordState()} afterwards to sync
+     * the parent directory if needed, preferably after batching up other state file creations for
+     * the same user.  We do it this way because directory syncs are expensive on some filesystems.
+     */
     public void writeSyntheticPasswordState(int userId, long protectorId, String name,
             byte[] data) {
         ensureSyntheticPasswordDirectoryForUser(userId);
-        writeFile(getSyntheticPasswordStateFileForUser(userId, protectorId, name), data);
+        writeFile(getSyntheticPasswordStateFileForUser(userId, protectorId, name), data,
+                /* syncParentDir= */ false);
     }
 
     public byte[] readSyntheticPasswordState(int userId, long protectorId, String name) {
@@ -390,6 +406,13 @@ class LockSettingsStorage {
 
     public void deleteSyntheticPasswordState(int userId, long protectorId, String name) {
         deleteFile(getSyntheticPasswordStateFileForUser(userId, protectorId, name));
+    }
+
+    /**
+     * Ensures that all synthetic password state files for the user have really been saved to disk.
+     */
+    public void syncSyntheticPasswordState(int userId) {
+        fsyncDirectory(getSyntheticPasswordDirectoryForUser(userId));
     }
 
     public Map<Integer, List<Long>> listSyntheticPasswordProtectorsForAllUsers(String stateName) {

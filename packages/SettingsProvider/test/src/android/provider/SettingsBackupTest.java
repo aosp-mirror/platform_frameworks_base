@@ -884,7 +884,7 @@ public class SettingsBackupTest {
                         Settings.Secure.SHOW_QR_CODE_SCANNER_SETTING,
                         Settings.Secure.SKIP_ACCESSIBILITY_SHORTCUT_DIALOG_TIMEOUT_RESTRICTION,
                         Settings.Secure.SPATIAL_AUDIO_ENABLED,
-                        Settings.Secure.TIMEOUT_TO_USER_ZERO,
+                        Settings.Secure.TIMEOUT_TO_DOCK_USER,
                         Settings.Secure.UI_NIGHT_MODE_LAST_COMPUTED,
                         Settings.Secure.UI_NIGHT_MODE_OVERRIDE_OFF,
                         Settings.Secure.UI_NIGHT_MODE_OVERRIDE_ON);

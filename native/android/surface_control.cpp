@@ -138,17 +138,14 @@ void ASurfaceControl_release(ASurfaceControl* aSurfaceControl) {
     SurfaceControl_release(surfaceControl);
 }
 
-ASurfaceControl* ASurfaceControl_fromSurfaceControl(JNIEnv* env, jobject surfaceControlObj) {
-    LOG_ALWAYS_FATAL_IF(!env,
-                        "nullptr passed to ASurfaceControl_fromSurfaceControl as env argument");
+ASurfaceControl* ASurfaceControl_fromJava(JNIEnv* env, jobject surfaceControlObj) {
+    LOG_ALWAYS_FATAL_IF(!env, "nullptr passed to ASurfaceControl_fromJava as env argument");
     LOG_ALWAYS_FATAL_IF(!surfaceControlObj,
-                        "nullptr passed to ASurfaceControl_fromSurfaceControl as surfaceControlObj "
-                        "argument");
+                        "nullptr passed to ASurfaceControl_fromJava as surfaceControlObj argument");
     SurfaceControl* surfaceControl =
             android_view_SurfaceControl_getNativeSurfaceControl(env, surfaceControlObj);
     LOG_ALWAYS_FATAL_IF(!surfaceControl,
-                        "surfaceControlObj passed to ASurfaceControl_fromSurfaceControl is not "
-                        "valid");
+                        "surfaceControlObj passed to ASurfaceControl_fromJava is not valid");
     SurfaceControl_acquire(surfaceControl);
     return reinterpret_cast<ASurfaceControl*>(surfaceControl);
 }
@@ -209,17 +206,15 @@ void ASurfaceTransaction_delete(ASurfaceTransaction* aSurfaceTransaction) {
     delete transaction;
 }
 
-ASurfaceTransaction* ASurfaceTransaction_fromTransaction(JNIEnv* env, jobject transactionObj) {
-    LOG_ALWAYS_FATAL_IF(!env,
-                        "nullptr passed to ASurfaceTransaction_fromTransaction as env argument");
+ASurfaceTransaction* ASurfaceTransaction_fromJava(JNIEnv* env, jobject transactionObj) {
+    LOG_ALWAYS_FATAL_IF(!env, "nullptr passed to ASurfaceTransaction_fromJava as env argument");
     LOG_ALWAYS_FATAL_IF(!transactionObj,
-                        "nullptr passed to ASurfaceTransaction_fromTransaction as transactionObj "
+                        "nullptr passed to ASurfaceTransaction_fromJava as transactionObj "
                         "argument");
     Transaction* transaction =
             android_view_SurfaceTransaction_getNativeSurfaceTransaction(env, transactionObj);
     LOG_ALWAYS_FATAL_IF(!transaction,
-                        "surfaceControlObj passed to ASurfaceTransaction_fromTransaction is not "
-                        "valid");
+                        "surfaceControlObj passed to ASurfaceTransaction_fromJava is not valid");
     return reinterpret_cast<ASurfaceTransaction*>(transaction);
 }
 
