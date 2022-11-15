@@ -16,6 +16,7 @@
 
 package android.location;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -24,6 +25,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Locale;
 
 /**
@@ -33,22 +36,48 @@ import java.util.Locale;
  */
 @SystemApi(client = SystemApi.Client.PRIVILEGED_APPS)
 public final class Country implements Parcelable {
-    /** The country code came from the mobile network */
+    /**
+     * The country code came from the mobile network
+     */
     public static final int COUNTRY_SOURCE_NETWORK = 0;
 
-    /** The country code came from the location service */
+    /**
+     * The country code came from the location service
+     */
     public static final int COUNTRY_SOURCE_LOCATION = 1;
 
-    /** The country code was read from the SIM card */
+    /**
+     * The country code was read from the SIM card
+     */
     public static final int COUNTRY_SOURCE_SIM = 2;
 
-    /** The country code came from the system locale setting */
+    /**
+     * The country code came from the system locale setting
+     */
     public static final int COUNTRY_SOURCE_LOCALE = 3;
+
+    /**
+     * Country source type
+     *
+     * @hide
+     */
+    @IntDef(
+            prefix = {"COUNTRY_SOURCE_"},
+            value = {
+                    COUNTRY_SOURCE_NETWORK,
+                    COUNTRY_SOURCE_LOCATION,
+                    COUNTRY_SOURCE_SIM,
+                    COUNTRY_SOURCE_LOCALE
+            })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface CountrySource {}
 
     /** The ISO 3166-1 two letters country code. */
     private final String mCountryIso;
 
-    /** Where the country code came from. */
+    /**
+     * Where the country code came from.
+     */
     private final int mSource;
 
     private int mHashCode;
@@ -69,11 +98,8 @@ public final class Country implements Parcelable {
      *       <li>{@link #COUNTRY_SOURCE_SIM}
      *       <li>{@link #COUNTRY_SOURCE_LOCALE}
      *     </ul>
-     *
-     * @hide
      */
-    @UnsupportedAppUsage
-    public Country(@NonNull final String countryIso, final int source) {
+    public Country(@NonNull final String countryIso, @CountrySource final int source) {
         if (countryIso == null
                 || source < COUNTRY_SOURCE_NETWORK
                 || source > COUNTRY_SOURCE_LOCALE) {
@@ -85,8 +111,7 @@ public final class Country implements Parcelable {
     }
 
     private Country(final String countryIso, final int source, long timestamp) {
-        if (countryIso == null
-                || source < COUNTRY_SOURCE_NETWORK
+        if (countryIso == null || source < COUNTRY_SOURCE_NETWORK
                 || source > COUNTRY_SOURCE_LOCALE) {
             throw new IllegalArgumentException();
         }
@@ -104,23 +129,38 @@ public final class Country implements Parcelable {
 
     /**
      * @return the ISO 3166-1 two letters country code
+     *
      * @hide
+     *
+     * @deprecated clients using getCountryIso should use the {@link #getCountryCode()} API instead.
      */
     @UnsupportedAppUsage
+    @Deprecated
     public String getCountryIso() {
         return mCountryIso;
     }
 
     /**
-     * @return where the country code came from, could be one of below values
-     *     <p>
-     *     <ul>
-     *       <li>{@link #COUNTRY_SOURCE_NETWORK}
-     *       <li>{@link #COUNTRY_SOURCE_LOCATION}
-     *       <li>{@link #COUNTRY_SOURCE_SIM}
-     *       <li>{@link #COUNTRY_SOURCE_LOCALE}
-     *     </ul>
+     * Retrieves country code.
+     *
+     * @return country code in ISO 3166-1:alpha2
      */
+    @NonNull
+    public String getCountryCode() {
+        return mCountryIso;
+    }
+
+    /**
+     * @return where the country code came from, could be one of below values
+     *         <p>
+     *         <ul>
+     *         <li>{@link #COUNTRY_SOURCE_NETWORK}</li>
+     *         <li>{@link #COUNTRY_SOURCE_LOCATION}</li>
+     *         <li>{@link #COUNTRY_SOURCE_SIM}</li>
+     *         <li>{@link #COUNTRY_SOURCE_LOCALE}</li>
+     *         </ul>
+     */
+    @CountrySource
     public int getSource() {
         return mSource;
     }
@@ -136,16 +176,15 @@ public final class Country implements Parcelable {
     }
 
     @android.annotation.NonNull
-    public static final Parcelable.Creator<Country> CREATOR =
-            new Parcelable.Creator<Country>() {
-                public Country createFromParcel(Parcel in) {
-                    return new Country(in.readString(), in.readInt(), in.readLong());
-                }
+    public static final Parcelable.Creator<Country> CREATOR = new Parcelable.Creator<Country>() {
+        public Country createFromParcel(Parcel in) {
+            return new Country(in.readString(), in.readInt(), in.readLong());
+        }
 
-                public Country[] newArray(int size) {
-                    return new Country[size];
-                }
-            };
+        public Country[] newArray(int size) {
+            return new Country[size];
+        }
+    };
 
     @Override
     public int describeContents() {
@@ -160,9 +199,10 @@ public final class Country implements Parcelable {
     }
 
     /**
-     * Returns true if this {@link Country} is equivalent to the given object. This ignores the
-     * timestamp value and just checks for equivalence of countryIso and source values. Returns
-     * false otherwise.
+     * Returns true if this {@link Country} is equivalent to the given object. This ignores
+     * the timestamp value and just checks for equivalence of countryIso and source values.
+     * Returns false otherwise.
+     *
      */
     @Override
     public boolean equals(@Nullable Object object) {
@@ -190,12 +230,13 @@ public final class Country implements Parcelable {
     }
 
     /**
-     * Compare the specified country to this country object ignoring the source and timestamp
-     * fields, return true if the countryIso fields are equal
+     * Compare the specified country to this country object ignoring the source
+     * and timestamp fields, return true if the countryIso fields are equal
      *
      * @param country the country to compare
-     * @return true if the specified country's countryIso field is equal to this country's, false
-     *     otherwise.
+     * @return true if the specified country's countryIso field is equal to this
+     *         country's, false otherwise.
+     *
      * @hide
      */
     public boolean equalsIgnoreSource(Country country) {
