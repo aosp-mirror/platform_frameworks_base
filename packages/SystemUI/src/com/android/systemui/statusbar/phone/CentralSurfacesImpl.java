@@ -1131,7 +1131,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         // into fragments, but the rest here, it leaves some awkward lifecycle and whatnot.
         mNotificationIconAreaController.setupShelf(mNotificationShelfController);
         mShadeExpansionStateManager.addExpansionListener(mWakeUpCoordinator);
-        mUserSwitcherController.init(mNotificationShadeWindowView);
 
         // Allow plugins to reference DarkIconDispatcher and StatusBarStateController
         mPluginDependencyProvider.allowPluginDependency(DarkIconDispatcher.class);
@@ -4266,7 +4265,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             }
             // TODO: Bring these out of CentralSurfaces.
             mUserInfoControllerImpl.onDensityOrFontScaleChanged();
-            mUserSwitcherController.onDensityOrFontScaleChanged();
             mNotificationIconAreaController.onDensityOrFontScaleChanged(mContext);
             mHeadsUpManager.onDensityOrFontScaleChanged();
         }
