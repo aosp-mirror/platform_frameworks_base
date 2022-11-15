@@ -48,6 +48,7 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Range;
 
 import org.junit.After;
@@ -495,16 +496,40 @@ public final class UserManagerTest {
         removeUser(userInfo.id);
     }
 
+    private void requireSingleGuest() throws Exception {
+        assumeTrue("device supports single guest",
+                UserTypeFactory.getUserTypes().get(UserManager.USER_TYPE_FULL_GUEST)
+                .getMaxAllowed() == 1);
+    }
+
+    private void requireMultipleGuests() throws Exception {
+        assumeTrue("device supports multiple guests",
+                UserTypeFactory.getUserTypes().get(UserManager.USER_TYPE_FULL_GUEST)
+                .getMaxAllowed() > 1);
+    }
 
     @MediumTest
     @Test
-    public void testThereCanBeOnlyOneGuest() throws Exception {
+    public void testThereCanBeOnlyOneGuest_singleGuest() throws Exception {
+        requireSingleGuest();
         assertThat(mUserManager.canAddMoreUsers(mUserManager.USER_TYPE_FULL_GUEST)).isTrue();
         UserInfo userInfo1 = createUser("Guest 1", UserInfo.FLAG_GUEST);
         assertThat(userInfo1).isNotNull();
         assertThat(mUserManager.canAddMoreUsers(mUserManager.USER_TYPE_FULL_GUEST)).isFalse();
         UserInfo userInfo2 = createUser("Guest 2", UserInfo.FLAG_GUEST);
         assertThat(userInfo2).isNull();
+    }
+
+    @MediumTest
+    @Test
+    public void testThereCanBeMultipleGuests_multipleGuests() throws Exception {
+        requireMultipleGuests();
+        assertThat(mUserManager.canAddMoreUsers(mUserManager.USER_TYPE_FULL_GUEST)).isTrue();
+        UserInfo userInfo1 = createUser("Guest 1", UserInfo.FLAG_GUEST);
+        assertThat(userInfo1).isNotNull();
+        assertThat(mUserManager.canAddMoreUsers(mUserManager.USER_TYPE_FULL_GUEST)).isTrue();
+        UserInfo userInfo2 = createUser("Guest 2", UserInfo.FLAG_GUEST);
+        assertThat(userInfo2).isNotNull();
     }
 
     @MediumTest
@@ -516,11 +541,66 @@ public final class UserManagerTest {
         assertThat(foundGuest).isNotNull();
     }
 
+    @MediumTest
+    @Test
+    public void testGetGuestUsers_singleGuest() throws Exception {
+        requireSingleGuest();
+        UserInfo userInfo1 = createUser("Guest1", UserInfo.FLAG_GUEST);
+        assertThat(userInfo1).isNotNull();
+        List<UserInfo> guestsFound = mUserManager.getGuestUsers();
+        assertThat(guestsFound).hasSize(1);
+        assertThat(guestsFound.get(0).name).isEqualTo("Guest1");
+    }
+
+    @MediumTest
+    @Test
+    public void testGetGuestUsers_multipleGuests() throws Exception {
+        requireMultipleGuests();
+        UserInfo userInfo1 = createUser("Guest1", UserInfo.FLAG_GUEST);
+        assertThat(userInfo1).isNotNull();
+        UserInfo userInfo2 = createUser("Guest2", UserInfo.FLAG_GUEST);
+        assertThat(userInfo2).isNotNull();
+
+        List<UserInfo> guestsFound = mUserManager.getGuestUsers();
+        assertThat(guestsFound).hasSize(2);
+        assertThat(ImmutableList.of(guestsFound.get(0).name, guestsFound.get(1).name))
+            .containsExactly("Guest1", "Guest2");
+    }
+
+    @MediumTest
+    @Test
+    public void testGetGuestUsers_markGuestForDeletion() throws Exception {
+        requireMultipleGuests();
+        UserInfo userInfo1 = createUser("Guest1", UserInfo.FLAG_GUEST);
+        assertThat(userInfo1).isNotNull();
+        UserInfo userInfo2 = createUser("Guest2", UserInfo.FLAG_GUEST);
+        assertThat(userInfo2).isNotNull();
+
+        boolean markedForDeletion1 = mUserManager.markGuestForDeletion(userInfo1.id);
+        assertThat(markedForDeletion1).isTrue();
+
+        List<UserInfo> guestsFound = mUserManager.getGuestUsers();
+        assertThat(guestsFound.size()).isEqualTo(1);
+
+        boolean markedForDeletion2 = mUserManager.markGuestForDeletion(userInfo2.id);
+        assertThat(markedForDeletion2).isTrue();
+
+        guestsFound = mUserManager.getGuestUsers();
+        assertThat(guestsFound).isEmpty();
+    }
+
     @SmallTest
     @Test
     public void testFindExistingGuest_guestDoesNotExist() throws Exception {
         UserInfo foundGuest = mUserManager.findCurrentGuestUser();
         assertThat(foundGuest).isNull();
+    }
+
+    @SmallTest
+    @Test
+    public void testGetGuestUsers_guestDoesNotExist() throws Exception {
+        List<UserInfo> guestsFound = mUserManager.getGuestUsers();
+        assertThat(guestsFound).isEmpty();
     }
 
     @MediumTest

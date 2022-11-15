@@ -2380,8 +2380,8 @@ public class UserManagerService extends IUserManager.Stub {
         synchronized (mGuestRestrictions) {
             mGuestRestrictions.clear();
             mGuestRestrictions.putAll(restrictions);
-            UserInfo guest = findCurrentGuestUser();
-            if (guest != null) {
+            final List<UserInfo> guests = getGuestUsers();
+            for (UserInfo guest : guests) {
                 synchronized (mRestrictionsLock) {
                     updateUserRestrictionsInternalLR(mGuestRestrictions, guest.id);
                 }
@@ -3627,10 +3627,12 @@ public class UserManagerService extends IUserManager.Stub {
                 );
             }
             // DISALLOW_CONFIG_WIFI was made a default guest restriction some time during version 6.
-            final UserInfo currentGuestUser = findCurrentGuestUser();
-            if (currentGuestUser != null && !hasUserRestriction(
-                    UserManager.DISALLOW_CONFIG_WIFI, currentGuestUser.id)) {
-                setUserRestriction(UserManager.DISALLOW_CONFIG_WIFI, true, currentGuestUser.id);
+            final List<UserInfo> guestUsers = getGuestUsers();
+            for (UserInfo guestUser : guestUsers) {
+                if (guestUser != null && !hasUserRestriction(
+                        UserManager.DISALLOW_CONFIG_WIFI, guestUser.id)) {
+                    setUserRestriction(UserManager.DISALLOW_CONFIG_WIFI, true, guestUser.id);
+                }
             }
             userVersion = 7;
         }
@@ -5173,26 +5175,26 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     /**
-     * Find the current guest user. If the Guest user is partial,
+     * Gets the existing guest users. If a Guest user is partial,
      * then do not include it in the results as it is about to die.
      *
-     * @return The current guest user.  Null if it doesn't exist.
-     * @hide
+     * @return list of existing Guest users currently on the device.
      */
     @Override
-    public UserInfo findCurrentGuestUser() {
-        checkManageUsersPermission("findCurrentGuestUser");
+    public List<UserInfo> getGuestUsers() {
+        checkManageUsersPermission("getGuestUsers");
+        final ArrayList<UserInfo> guestUsers = new ArrayList<>();
         synchronized (mUsersLock) {
             final int size = mUsers.size();
             for (int i = 0; i < size; i++) {
                 final UserInfo user = mUsers.valueAt(i).info;
                 if (user.isGuest() && !user.guestToRemove && !user.preCreated
                         && !mRemovingUserIds.get(user.id)) {
-                    return user;
+                    guestUsers.add(user);
                 }
             }
         }
-        return null;
+        return guestUsers;
     }
 
     /**
