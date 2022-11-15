@@ -1411,6 +1411,7 @@ uint8_t AssetManager2::GetAssignedPackageId(const LoadedPackage* package) const 
 std::unique_ptr<Theme> AssetManager2::NewTheme() {
   constexpr size_t kInitialReserveSize = 32;
   auto theme = std::unique_ptr<Theme>(new Theme(this));
+  theme->keys_.reserve(kInitialReserveSize);
   theme->entries_.reserve(kInitialReserveSize);
   return theme;
 }
@@ -1421,19 +1422,10 @@ Theme::Theme(AssetManager2* asset_manager) : asset_manager_(asset_manager) {
 Theme::~Theme() = default;
 
 struct Theme::Entry {
-  uint32_t attr_res_id;
   ApkAssetsCookie cookie;
   uint32_t type_spec_flags;
   Res_value value;
 };
-
-namespace {
-struct ThemeEntryKeyComparer {
-  bool operator() (const Theme::Entry& entry, uint32_t attr_res_id) const noexcept {
-    return entry.attr_res_id < attr_res_id;
-  }
-};
-} // namespace
 
 base::expected<std::monostate, NullOrIOError> Theme::ApplyStyle(uint32_t resid, bool force) {
   ATRACE_NAME("Theme::ApplyStyle");
@@ -1463,18 +1455,20 @@ base::expected<std::monostate, NullOrIOError> Theme::ApplyStyle(uint32_t resid, 
       continue;
     }
 
-    auto entry_it = std::lower_bound(entries_.begin(), entries_.end(), attr_res_id,
-                                     ThemeEntryKeyComparer{});
-    if (entry_it != entries_.end() && entry_it->attr_res_id == attr_res_id) {
+    const auto key_it = std::lower_bound(keys_.begin(), keys_.end(), attr_res_id);
+    const auto entry_it = entries_.begin() + (key_it - keys_.begin());
+    if (key_it != keys_.end() && *key_it == attr_res_id) {
       if (is_undefined) {
         // DATA_NULL_UNDEFINED clears the value of the attribute in the theme only when `force` is
-        /// true.
+        // true.
+        keys_.erase(key_it);
         entries_.erase(entry_it);
       } else if (force) {
-        *entry_it = Entry{attr_res_id, it->cookie, (*bag)->type_spec_flags, it->value};
+        *entry_it = Entry{it->cookie, (*bag)->type_spec_flags, it->value};
       }
     } else {
-      entries_.insert(entry_it, Entry{attr_res_id, it->cookie, (*bag)->type_spec_flags, it->value});
+      keys_.insert(key_it, attr_res_id);
+      entries_.insert(entry_it, Entry{it->cookie, (*bag)->type_spec_flags, it->value});
     }
   }
   return {};
@@ -1485,6 +1479,7 @@ void Theme::Rebase(AssetManager2* am, const uint32_t* style_ids, const uint8_t* 
   ATRACE_NAME("Theme::Rebase");
   // Reset the entries without changing the vector capacity to prevent reallocations during
   // ApplyStyle.
+  keys_.clear();
   entries_.clear();
   asset_manager_ = am;
   for (size_t i = 0; i < style_count; i++) {
@@ -1493,16 +1488,14 @@ void Theme::Rebase(AssetManager2* am, const uint32_t* style_ids, const uint8_t* 
 }
 
 std::optional<AssetManager2::SelectedValue> Theme::GetAttribute(uint32_t resid) const {
-
   constexpr const uint32_t kMaxIterations = 20;
   uint32_t type_spec_flags = 0u;
   for (uint32_t i = 0; i <= kMaxIterations; i++) {
-    auto entry_it = std::lower_bound(entries_.begin(), entries_.end(), resid,
-                                     ThemeEntryKeyComparer{});
-    if (entry_it == entries_.end() || entry_it->attr_res_id != resid) {
+    const auto key_it = std::lower_bound(keys_.begin(), keys_.end(), resid);
+    if (key_it == keys_.end() || *key_it != resid) {
       return std::nullopt;
     }
-
+    const auto entry_it = entries_.begin() + (key_it - keys_.begin());
     type_spec_flags |= entry_it->type_spec_flags;
     if (entry_it->value.dataType == Res_value::TYPE_ATTRIBUTE) {
       resid = entry_it->value.data;
@@ -1536,6 +1529,7 @@ base::expected<std::monostate, NullOrIOError> Theme::ResolveAttributeReference(
 }
 
 void Theme::Clear() {
+  keys_.clear();
   entries_.clear();
 }
 
@@ -1547,11 +1541,12 @@ base::expected<std::monostate, IOError> Theme::SetTo(const Theme& source) {
   type_spec_flags_ = source.type_spec_flags_;
 
   if (asset_manager_ == source.asset_manager_) {
+    keys_ = source.keys_;
     entries_ = source.entries_;
   } else {
-    std::map<ApkAssetsCookie, ApkAssetsCookie> src_to_dest_asset_cookies;
-    typedef std::map<int, int> SourceToDestinationRuntimePackageMap;
-    std::map<ApkAssetsCookie, SourceToDestinationRuntimePackageMap> src_asset_cookie_id_map;
+    std::unordered_map<ApkAssetsCookie, ApkAssetsCookie> src_to_dest_asset_cookies;
+    using SourceToDestinationRuntimePackageMap = std::unordered_map<int, int>;
+    std::unordered_map<ApkAssetsCookie, SourceToDestinationRuntimePackageMap> src_asset_cookie_id_map;
 
     // Determine which ApkAssets are loaded in both theme AssetManagers.
     const auto src_assets = source.asset_manager_->GetApkAssets();
@@ -1579,15 +1574,17 @@ base::expected<std::monostate, IOError> Theme::SetTo(const Theme& source) {
         }
 
         src_to_dest_asset_cookies.insert(std::make_pair(i, j));
-        src_asset_cookie_id_map.insert(std::make_pair(i, package_map));
+        src_asset_cookie_id_map.insert(std::make_pair(i, std::move(package_map)));
         break;
       }
     }
 
     // Reset the data in the destination theme.
+    keys_.clear();
     entries_.clear();
 
-    for (const auto& entry : source.entries_) {
+    for (size_t i = 0, size = source.entries_.size(); i != size; ++i) {
+      const auto& entry = source.entries_[i];
       bool is_reference = (entry.value.dataType == Res_value::TYPE_ATTRIBUTE
                            || entry.value.dataType == Res_value::TYPE_REFERENCE
                            || entry.value.dataType == Res_value::TYPE_DYNAMIC_ATTRIBUTE
@@ -1627,13 +1624,15 @@ base::expected<std::monostate, IOError> Theme::SetTo(const Theme& source) {
         }
       }
 
+      const auto source_res_id = source.keys_[i];
+
       // The package id of the attribute needs to be rewritten to the package id of the
       // attribute in the destination.
-      int attribute_dest_package_id = get_package_id(entry.attr_res_id);
+      int attribute_dest_package_id = get_package_id(source_res_id);
       if (attribute_dest_package_id != 0x01) {
         // Find the cookie of the attribute resource id in the source AssetManager
         base::expected<FindEntryResult, NullOrIOError> attribute_entry_result =
-            source.asset_manager_->FindEntry(entry.attr_res_id, 0 /* density_override */ ,
+            source.asset_manager_->FindEntry(source_res_id, 0 /* density_override */ ,
                                              true /* stop_at_first_match */,
                                              true /* ignore_configuration */);
         if (UNLIKELY(IsIOError(attribute_entry_result))) {
@@ -1657,16 +1656,15 @@ base::expected<std::monostate, IOError> Theme::SetTo(const Theme& source) {
         attribute_dest_package_id = attribute_dest_package->second;
       }
 
-      auto dest_attr_id = make_resid(attribute_dest_package_id, get_type_id(entry.attr_res_id),
-                                     get_entry_id(entry.attr_res_id));
-      Theme::Entry new_entry{dest_attr_id, data_dest_cookie, entry.type_spec_flags,
-                                            Res_value{.dataType = entry.value.dataType,
-                                                      .data = attribute_data}};
-
+      auto dest_attr_id = make_resid(attribute_dest_package_id, get_type_id(source_res_id),
+                                     get_entry_id(source_res_id));
+      const auto key_it = std::lower_bound(keys_.begin(), keys_.end(), dest_attr_id);
+      const auto entry_it = entries_.begin() + (key_it - keys_.begin());
       // Since the entries were cleared, the attribute resource id has yet been mapped to any value.
-      auto entry_it = std::lower_bound(entries_.begin(), entries_.end(), dest_attr_id,
-                                       ThemeEntryKeyComparer{});
-      entries_.insert(entry_it, new_entry);
+      keys_.insert(key_it, dest_attr_id);
+      entries_.insert(entry_it, Entry{data_dest_cookie, entry.type_spec_flags,
+                                      Res_value{.dataType = entry.value.dataType,
+                                                .data = attribute_data}});
     }
   }
   return {};
@@ -1674,9 +1672,11 @@ base::expected<std::monostate, IOError> Theme::SetTo(const Theme& source) {
 
 void Theme::Dump() const {
   LOG(INFO) << base::StringPrintf("Theme(this=%p, AssetManager2=%p)", this, asset_manager_);
-  for (auto& entry : entries_) {
+  for (size_t i = 0, size = keys_.size(); i != size; ++i) {
+    auto res_id = keys_[i];
+    const auto& entry = entries_[i];
     LOG(INFO) << base::StringPrintf("  entry(0x%08x)=(0x%08x) type=(0x%02x), cookie(%d)",
-                                    entry.attr_res_id, entry.value.data, entry.value.dataType,
+                                    res_id, entry.value.data, entry.value.dataType,
                                     entry.cookie);
   }
 }

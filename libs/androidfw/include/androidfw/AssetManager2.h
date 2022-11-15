@@ -571,6 +571,7 @@ class Theme {
   AssetManager2* asset_manager_ = nullptr;
   uint32_t type_spec_flags_ = 0u;
 
+  std::vector<uint32_t> keys_;
   std::vector<Entry> entries_;
 };
 
