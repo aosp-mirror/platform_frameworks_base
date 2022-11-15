@@ -273,6 +273,8 @@ object Flags {
     // TODO(b/254513168): Tracking Bug
     @JvmField val UMO_SURFACE_RIPPLE = unreleasedFlag(907, "umo_surface_ripple")
 
+    @JvmField val MEDIA_FALSING_PENALTY = unreleasedFlag(908, "media_falsing_media")
+
     // 1000 - dock
     val SIMULATE_DOCK_THROUGH_CHARGING = releasedFlag(1000, "simulate_dock_through_charging")
 
