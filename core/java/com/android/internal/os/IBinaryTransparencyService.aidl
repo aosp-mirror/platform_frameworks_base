@@ -26,5 +26,7 @@ package com.android.internal.os;
 interface IBinaryTransparencyService {
     String getSignedImageInfo();
 
-    Map getApexInfo();
+    List getApexInfo();
+
+    List getMeasurementsForAllPackages();
 }
