@@ -27,6 +27,6 @@ data class RippleAnimationConfig(
     companion object {
         const val RIPPLE_SPARKLE_STRENGTH: Float = 0.3f
         const val RIPPLE_DEFAULT_COLOR: Int = 0xffffffff.toInt()
-        const val RIPPLE_DEFAULT_ALPHA: Int = 45 // full opacity is 255.
+        const val RIPPLE_DEFAULT_ALPHA: Int = 115 // full opacity is 255.
     }
 }
