@@ -361,8 +361,26 @@ public class LocalBluetoothProfileManager {
                         cachedDevice.setHearingAidInfo(infoBuilder.build());
                     }
                 }
-
                 HearingAidStatsLogUtils.logHearingAidInfo(cachedDevice);
+            }
+
+            final boolean isHapClientProfile = getHapClientProfile() != null
+                    && mProfile instanceof HapClientProfile;
+            final boolean isLeAudioProfile = getLeAudioProfile() != null
+                    && mProfile instanceof LeAudioProfile;
+            final boolean isHapClientOrLeAudioProfile = isHapClientProfile || isLeAudioProfile;
+            if (isHapClientOrLeAudioProfile && newState == BluetoothProfile.STATE_CONNECTED) {
+
+                // Checks if both profiles are connected to the device. Hearing aid info need
+                // to be retrieved from these profiles separately.
+                if (cachedDevice.isConnectedLeAudioHearingAidDevice()) {
+                    final BluetoothDevice device = cachedDevice.getDevice();
+                    final HearingAidInfo.Builder infoBuilder = new HearingAidInfo.Builder()
+                            .setLeAudioLocation(getLeAudioProfile().getAudioLocation(device))
+                            .setHapDeviceType(getHapClientProfile().getHearingAidType(device));
+                    cachedDevice.setHearingAidInfo(infoBuilder.build());
+                    HearingAidStatsLogUtils.logHearingAidInfo(cachedDevice);
+                }
             }
 
             if (getCsipSetCoordinatorProfile() != null
