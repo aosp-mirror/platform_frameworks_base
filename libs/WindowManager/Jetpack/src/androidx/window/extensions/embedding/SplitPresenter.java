@@ -139,6 +139,11 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         super(executor, controller);
         mController = controller;
         registerOrganizer();
+        if (!SplitController.ENABLE_SHELL_TRANSITIONS) {
+            // TODO(b/207070762): cleanup with legacy app transition
+            // Animation will be handled by WM Shell when Shell transition is enabled.
+            overrideSplitAnimation();
+        }
     }
 
     /**
