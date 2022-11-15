@@ -17,6 +17,7 @@
 package com.android.systemui.dagger;
 
 import com.android.systemui.keyguard.KeyguardQuickAffordanceProvider;
+import com.android.systemui.statusbar.NotificationInsetsModule;
 import com.android.systemui.statusbar.QsFrameTranslateModule;
 
 import dagger.Subcomponent;
@@ -28,6 +29,7 @@ import dagger.Subcomponent;
 @Subcomponent(modules = {
         DefaultComponentBinder.class,
         DependencyProvider.class,
+        NotificationInsetsModule.class,
         QsFrameTranslateModule.class,
         SystemUIBinder.class,
         SystemUIModule.class,
