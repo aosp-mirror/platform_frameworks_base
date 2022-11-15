@@ -2159,6 +2159,12 @@ interface ITelephony {
     int getRadioHalVersion();
 
     /**
+     * Get the HAL Version of a specific service
+     * encoded as 100 * MAJOR_VERSION + MINOR_VERSION or -1 if unknown
+     */
+    int getHalVersion(int service);
+
+    /**
      * Get the current calling package name.
      */
     String getCurrentPackageName();
