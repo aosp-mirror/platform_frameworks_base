@@ -58,6 +58,7 @@ public class SystemBackupAgent extends BackupAgentHelper {
     private static final String SLICES_HELPER = "slices";
     private static final String PEOPLE_HELPER = "people";
     private static final String APP_LOCALES_HELPER = "app_locales";
+    private static final String APP_GENDER_HELPER = "app_gender";
 
     // These paths must match what the WallpaperManagerService uses.  The leaf *_FILENAME
     // are also used in the full-backup file format, so must not change unless steps are
@@ -104,6 +105,7 @@ public class SystemBackupAgent extends BackupAgentHelper {
         addHelper(SLICES_HELPER, new SliceBackupHelper(this));
         addHelper(PEOPLE_HELPER, new PeopleBackupHelper(mUserId));
         addHelper(APP_LOCALES_HELPER, new AppSpecificLocalesBackupHelper(mUserId));
+        addHelper(APP_GENDER_HELPER, new AppGrammaticalGenderBackupHelper(mUserId));
     }
 
     @Override
