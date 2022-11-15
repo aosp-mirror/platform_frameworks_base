@@ -6262,7 +6262,6 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
         Objects.requireNonNull(stackTrace);
         Preconditions.checkArgument(op >= 0);
         Preconditions.checkArgument(op < AppOpsManager._NUM_OP);
-        Objects.requireNonNull(version);
 
         NoteOpTrace noteOpTrace = new NoteOpTrace(stackTrace, op, packageName, version);
 

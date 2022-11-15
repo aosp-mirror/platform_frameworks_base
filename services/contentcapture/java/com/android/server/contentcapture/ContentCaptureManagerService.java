@@ -658,7 +658,6 @@ public final class ContentCaptureManagerService extends
                 int sessionId, int flags, @NonNull IResultReceiver result) {
             Objects.requireNonNull(activityToken);
             Objects.requireNonNull(shareableActivityToken);
-            Objects.requireNonNull(sessionId);
             final int userId = UserHandle.getCallingUserId();
 
             final ActivityPresentationInfo activityPresentationInfo = getAmInternal()
@@ -677,7 +676,6 @@ public final class ContentCaptureManagerService extends
 
         @Override
         public void finishSession(int sessionId) {
-            Objects.requireNonNull(sessionId);
             final int userId = UserHandle.getCallingUserId();
 
             synchronized (mLock) {

@@ -47,4 +47,4 @@ public final class UsbVCProcessingUnit extends UsbVCInterface {
         super.report(canvas);
         // TODO Add reporting specific to this descriptor
     }
-};
+}

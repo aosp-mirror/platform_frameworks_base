@@ -295,8 +295,8 @@ public class MirrorSurfaceActivity extends Activity implements View.OnClickListe
     private void updateMirror(Rect displayFrame, float scale) {
         if (displayFrame.isEmpty()) {
             Rect bounds = mWindowBounds;
-            int defaultCropW = Math.round(bounds.width() / 2);
-            int defaultCropH = Math.round(bounds.height() / 2);
+            int defaultCropW = bounds.width() / 2;
+            int defaultCropH = bounds.height() / 2;
             displayFrame.set(0, 0, defaultCropW, defaultCropH);
         }
 

@@ -696,5 +696,5 @@ public class TypedValue {
         sb.append("}");
         return sb.toString();
     }
-};
+}
 
