@@ -260,11 +260,17 @@ TEST(IdmapTests, FabricatedOverlay) {
   auto target = TargetResourceContainer::FromPath(target_apk_path);
   ASSERT_TRUE(target);
 
+  auto path = GetTestDataPath() + "/overlay/res/drawable/android.png";
+  auto fd = android::base::unique_fd(::open(path.c_str(), O_RDONLY | O_CLOEXEC));
+  ASSERT_TRUE(fd > 0) << "errno " << errno << " for path " << path;
+
   auto frro = FabricatedOverlay::Builder("com.example.overlay", "SandTheme", "test.target")
                   .SetOverlayable("TestResources")
                   .SetResourceValue("integer/int1", Res_value::TYPE_INT_DEC, 2U, "land-xxhdpi-v7")
                   .SetResourceValue("string/str1", Res_value::TYPE_REFERENCE, 0x7f010000, "land")
                   .SetResourceValue("string/str2", Res_value::TYPE_STRING, "foobar", "xxhdpi-v7")
+                  .SetResourceValue("drawable/dr1", fd, "port-xxhdpi-v7")
+                  .setFrroPath("/foo/bar/biz.frro")
                   .Build();
 
   ASSERT_TRUE(frro);
@@ -293,14 +299,19 @@ TEST(IdmapTests, FabricatedOverlay) {
   auto string_pool_data = data->GetStringPoolData();
   auto string_pool = ResStringPool(string_pool_data.data(), string_pool_data.size(), false);
 
+  std::u16string expected_uri = u"frro://foo/bar/biz.frro?offset=16&size=8341";
+  uint32_t uri_index
+      = string_pool.indexOfString(expected_uri.data(), expected_uri.length()).value_or(-1);
 
   const auto& target_inline_entries = data->GetTargetInlineEntries();
-  ASSERT_EQ(target_inline_entries.size(), 3U);
-  ASSERT_TARGET_INLINE_ENTRY(target_inline_entries[0], R::target::integer::int1, "land-xxhdpi-v7",
+  ASSERT_EQ(target_inline_entries.size(), 4U);
+  ASSERT_TARGET_INLINE_ENTRY(target_inline_entries[0], R::target::drawable::dr1, "port-xxhdpi-v7",
+                             Res_value::TYPE_STRING, uri_index);
+  ASSERT_TARGET_INLINE_ENTRY(target_inline_entries[1], R::target::integer::int1, "land-xxhdpi-v7",
                              Res_value::TYPE_INT_DEC, 2U);
-  ASSERT_TARGET_INLINE_ENTRY(target_inline_entries[1], R::target::string::str1, "land",
+  ASSERT_TARGET_INLINE_ENTRY(target_inline_entries[2], R::target::string::str1, "land",
                              Res_value::TYPE_REFERENCE, 0x7f010000);
-  ASSERT_TARGET_INLINE_ENTRY(target_inline_entries[2], R::target::string::str2, "xxhdpi-v7",
+  ASSERT_TARGET_INLINE_ENTRY(target_inline_entries[3], R::target::string::str2, "xxhdpi-v7",
                              Res_value::TYPE_STRING,
                              (uint32_t) (string_pool.indexOfString(u"foobar", 6)).value_or(-1));
 }

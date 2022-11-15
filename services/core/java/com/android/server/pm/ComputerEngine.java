@@ -835,6 +835,24 @@ public class ComputerEngine implements Computer {
     }
 
     /**
+     * Similar to {@link Computer#getActivityInfo(android.content.ComponentName, long, int)} but
+     * only visible as internal service. This method bypass INTERACT_ACROSS_USERS or
+     * INTERACT_ACROSS_USERS_FULL permission checks and only to be used for intent resolution across
+     * chained cross profiles
+     * @param component application's component
+     * @param flags resolve info flags
+     * @param userId user id where activity resides
+     * @return ActivityInfo corresponding to requested component.
+     */
+    public final ActivityInfo getActivityInfoCrossProfile(ComponentName component,
+            @PackageManager.ResolveInfoFlagsBits long flags, int userId) {
+        if (!mUserManager.exists(userId)) return null;
+        flags = updateFlagsForComponent(flags, userId);
+
+        return getActivityInfoInternalBody(component, flags, Binder.getCallingUid(), userId);
+    }
+
+    /**
      * Important: The provided filterCallingUid is used exclusively to filter out activities
      * that can be seen based on user state. It's typically the original caller uid prior
      * to clearing. Because it can only be provided by trusted code, its value can be
@@ -1711,7 +1729,7 @@ public class ComputerEngine implements Computer {
         ComponentName forwardingActivityComponentName = new ComponentName(
                 androidApplication().packageName, className);
         ActivityInfo forwardingActivityInfo =
-                getActivityInfo(forwardingActivityComponentName, 0,
+                getActivityInfoCrossProfile(forwardingActivityComponentName, 0,
                         sourceUserId);
         if (!targetIsProfile) {
             forwardingActivityInfo.showUserIcon = targetUserId;

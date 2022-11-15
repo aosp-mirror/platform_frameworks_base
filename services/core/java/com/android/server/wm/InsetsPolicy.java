@@ -799,7 +799,7 @@ class InsetsPolicy {
                         show ? ANIMATION_TYPE_SHOW : ANIMATION_TYPE_HIDE, show
                                 ? LAYOUT_INSETS_DURING_ANIMATION_SHOWN
                                 : LAYOUT_INSETS_DURING_ANIMATION_HIDDEN,
-                        null /* translator */);
+                        null /* translator */, null /* statsToken */);
                 SurfaceAnimationThread.getHandler().post(
                         () -> mListener.onReady(mAnimationControl, typesReady));
             }

@@ -1,0 +1,14 @@
+android_test_helper_app {
+    name: "FrameworkResourcesSparseTestApp",
+    sdk_version: "current",
+    min_sdk_version: "32",
+    aaptflags: [
+        "--enable-sparse-encoding",
+    ],
+}
+
+android_test_helper_app {
+    name: "FrameworkResourcesNotSparseTestApp",
+    sdk_version: "current",
+    min_sdk_version: "32",
+}

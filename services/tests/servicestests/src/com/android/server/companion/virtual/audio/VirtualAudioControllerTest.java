@@ -82,6 +82,7 @@ public class VirtualAudioControllerTest {
                 /* blockedActivities= */ new ArraySet<>(),
                 VirtualDeviceParams.ACTIVITY_POLICY_DEFAULT_ALLOWED,
                 /* activityListener= */ null,
+                /* pipBlockedCallback= */ null,
                 /* activityBlockedCallback= */ null,
                 /* secureWindowCallback= */ null,
                 /* deviceProfile= */ DEVICE_PROFILE_APP_STREAMING);

@@ -63,9 +63,6 @@ android_library {
     resource_dirs: [
         "res",
     ],
-    optimize: {
-        proguard_flags_files: ["proguard.flags"],
-    },
     min_sdk_version: "current",
     plugins: ["dagger2-compiler"],
     kotlincflags: ["-Xjvm-default=enable"],

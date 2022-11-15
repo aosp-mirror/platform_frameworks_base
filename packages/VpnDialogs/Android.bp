@@ -23,10 +23,15 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
+android_library {
+    name: "VpnDialogsLib",
+    srcs: ["src/**/*.java"],
+}
+
 android_app {
     name: "VpnDialogs",
     certificate: "platform",
     privileged: true,
-    srcs: ["src/**/*.java"],
+    static_libs: ["VpnDialogsLib"],
     platform_apis: true,
 }

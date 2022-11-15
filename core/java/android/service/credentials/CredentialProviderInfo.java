@@ -24,7 +24,6 @@ import android.app.AppGlobals;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
@@ -96,6 +95,8 @@ public final class CredentialProviderInfo {
         mLabel = mServiceInfo.loadSafeLabel(
                 mContext.getPackageManager(), 0 /* do not ellipsize */,
                 TextUtils.SAFE_STRING_FLAG_FIRST_LINE | TextUtils.SAFE_STRING_FLAG_TRIM);
+        Log.i(TAG, "mLabel is : " + mLabel + ", for: " + mServiceInfo.getComponentName()
+                .flattenToString());
         populateProviderCapabilities(context, serviceInfo);
     }
 

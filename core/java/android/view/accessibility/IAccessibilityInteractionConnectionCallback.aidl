@@ -63,4 +63,9 @@ oneway interface IAccessibilityInteractionConnectionCallback {
      */
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void setPerformAccessibilityActionResult(boolean succeeded, int interactionId);
+
+    /**
+    * Sends an error code for a window screenshot request to the requesting client.
+    */
+    void sendTakeScreenshotOfWindowError(int errorCode, int interactionId);
 }
