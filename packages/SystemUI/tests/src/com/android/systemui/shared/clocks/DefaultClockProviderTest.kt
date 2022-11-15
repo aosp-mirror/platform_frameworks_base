@@ -139,12 +139,19 @@ class DefaultClockProviderTest : SysuiTestCase() {
     }
 
     @Test
-    fun defaultClock_events_onFontSettingChanged() {
+    fun defaultSmallClock_events_onFontSettingChanged() {
         val clock = provider.createClock(DEFAULT_CLOCK_ID)
-        clock.events.onFontSettingChanged()
+        clock.smallClock.events.onFontSettingChanged(100f)
 
-        verify(mockSmallClockView).setTextSize(eq(TypedValue.COMPLEX_UNIT_PX), anyFloat())
-        verify(mockLargeClockView).setTextSize(eq(TypedValue.COMPLEX_UNIT_PX), anyFloat())
+        verify(mockSmallClockView).setTextSize(eq(TypedValue.COMPLEX_UNIT_PX), eq(100f))
+    }
+
+    @Test
+    fun defaultLargeClock_events_onFontSettingChanged() {
+        val clock = provider.createClock(DEFAULT_CLOCK_ID)
+        clock.largeClock.events.onFontSettingChanged(200f)
+
+        verify(mockLargeClockView).setTextSize(eq(TypedValue.COMPLEX_UNIT_PX), eq(200f))
         verify(mockLargeClockView).setLayoutParams(any())
     }
 

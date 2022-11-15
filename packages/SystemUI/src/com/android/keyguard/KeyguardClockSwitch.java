@@ -5,6 +5,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -22,6 +23,7 @@ import com.android.systemui.plugins.ClockController;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+
 /**
  * Switch to show plugin clock when plugin is connected, otherwise it will show default clock.
  */
@@ -46,6 +48,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
      */
     private FrameLayout mSmallClockFrame;
     private FrameLayout mLargeClockFrame;
+    private ClockController mClock;
 
     private View mStatusArea;
     private int mSmartspaceTopOffset;
@@ -95,6 +98,8 @@ public class KeyguardClockSwitch extends RelativeLayout {
     }
 
     void setClock(ClockController clock, int statusBarState) {
+        mClock = clock;
+
         // Disconnect from existing plugin.
         mSmallClockFrame.removeAllViews();
         mLargeClockFrame.removeAllViews();
@@ -108,6 +113,35 @@ public class KeyguardClockSwitch extends RelativeLayout {
         Log.i(TAG, "Attached new clock views to switch");
         mSmallClockFrame.addView(clock.getSmallClock().getView());
         mLargeClockFrame.addView(clock.getLargeClock().getView());
+        updateClockTargetRegions();
+    }
+
+    void updateClockTargetRegions() {
+        if (mClock != null) {
+            if (mSmallClockFrame.isLaidOut()) {
+                int targetHeight =  getResources()
+                        .getDimensionPixelSize(R.dimen.small_clock_text_size);
+                mClock.getSmallClock().getEvents().onTargetRegionChanged(new Rect(
+                        mSmallClockFrame.getLeft(),
+                        mSmallClockFrame.getTop(),
+                        mSmallClockFrame.getRight(),
+                        mSmallClockFrame.getTop() + targetHeight));
+            }
+
+            if (mLargeClockFrame.isLaidOut()) {
+                int largeClockTopMargin = getResources()
+                        .getDimensionPixelSize(R.dimen.keyguard_large_clock_top_margin);
+                int targetHeight = getResources()
+                        .getDimensionPixelSize(R.dimen.large_clock_text_size) * 2;
+                int top = mLargeClockFrame.getHeight() / 2 - targetHeight / 2
+                        + largeClockTopMargin / 2;
+                mClock.getLargeClock().getEvents().onTargetRegionChanged(new Rect(
+                        mLargeClockFrame.getLeft(),
+                        top,
+                        mLargeClockFrame.getRight(),
+                        top + targetHeight));
+            }
+        }
     }
 
     private void updateClockViews(boolean useLargeClock, boolean animate) {
@@ -213,6 +247,10 @@ public class KeyguardClockSwitch extends RelativeLayout {
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
+
+        if (changed) {
+            post(() -> updateClockTargetRegions());
+        }
 
         if (mDisplayedClockSize != null && !mChildrenAreLaidOut) {
             post(() -> updateClockViews(mDisplayedClockSize == LARGE, mAnimateOnLayout));
