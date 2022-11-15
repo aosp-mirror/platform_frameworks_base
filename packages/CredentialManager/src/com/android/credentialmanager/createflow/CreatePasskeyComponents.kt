@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.android.credentialmanager.createflow
 
 import android.credentials.Credential.TYPE_PASSWORD_CREDENTIAL
@@ -19,6 +21,7 @@ import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.outlined.NewReleases
@@ -40,6 +43,7 @@ import com.android.credentialmanager.common.material.ModalBottomSheetValue
 import com.android.credentialmanager.common.material.rememberModalBottomSheetState
 import com.android.credentialmanager.common.ui.CancelButton
 import com.android.credentialmanager.common.ui.ConfirmButton
+import com.android.credentialmanager.ui.theme.EntryShape
 import com.android.credentialmanager.jetpack.developer.PublicKeyCredential.Companion.TYPE_PUBLIC_KEY_CREDENTIAL
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -91,7 +95,7 @@ fun CreatePasskeyScreen(
       }
     },
     scrimColor = MaterialTheme.colorScheme.scrim,
-    sheetShape = MaterialTheme.shapes.medium,
+    sheetShape = EntryShape.TopRoundedCorner,
   ) {}
   LaunchedEffect(state.currentValue) {
     if (state.currentValue == ModalBottomSheetValue.Hidden) {
@@ -100,6 +104,7 @@ fun CreatePasskeyScreen(
   }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ConfirmationCard(
   onConfirm: () -> Unit,
@@ -179,7 +184,7 @@ fun ProviderSelectionCard(
         color = Color.Transparent
       )
       Card(
-        shape = MaterialTheme.shapes.large,
+        shape = EntryShape.FullRoundedCorner,
         modifier = Modifier
           .padding(horizontal = 24.dp)
           .align(alignment = Alignment.CenterHorizontally),
@@ -243,14 +248,16 @@ fun MoreOptionsSelectionCard(
               Icons.Filled.ArrowBack,
               stringResource(R.string.accessibility_back_arrow_button))
           }
-        }
+        },
+        colors = TopAppBarDefaults.smallTopAppBarColors
+          (containerColor = Color.Transparent),
       )
       Divider(
          thickness = 8.dp,
          color = Color.Transparent
       )
       Card(
-        shape = MaterialTheme.shapes.large,
+        shape = EntryShape.FullRoundedCorner,
         modifier = Modifier
           .padding(horizontal = 24.dp)
           .align(alignment = Alignment.CenterHorizontally)
@@ -362,7 +369,7 @@ fun ProviderRow(providerInfo: ProviderInfo, onProviderSelected: (String) -> Unit
             // TODO: add description.
             contentDescription = "")
     },
-    shape = MaterialTheme.shapes.large,
+    shape = EntryShape.FullRoundedCorner,
     label = {
       Text(
         text = providerInfo.displayName,
@@ -391,7 +398,8 @@ fun CreationSelectionCard(
         bitmap = providerInfo.icon.toBitmap().asImageBitmap(),
         contentDescription = null,
         tint = Color.Unspecified,
-        modifier = Modifier.align(alignment = Alignment.CenterHorizontally).padding(all = 24.dp)
+        modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
+          .padding(all = 24.dp).size(32.dp)
       )
       Text(
         text = when (requestDisplayInfo.type) {
@@ -425,7 +433,7 @@ fun CreationSelectionCard(
         )
       }
       Card(
-        shape = MaterialTheme.shapes.large,
+        shape = EntryShape.FullRoundedCorner,
         modifier = Modifier
           .padding(horizontal = 24.dp)
           .align(alignment = Alignment.CenterHorizontally),
@@ -499,7 +507,7 @@ fun PrimaryCreateOptionRow(
         bitmap = createOptionInfo.credentialTypeIcon.toBitmap().asImageBitmap(),
         contentDescription = null)
     },
-    shape = MaterialTheme.shapes.large,
+    shape = EntryShape.FullRoundedCorner,
     label = {
       Column() {
         Text(
@@ -532,7 +540,7 @@ fun MoreOptionsInfoRow(
                 bitmap = providerInfo.icon.toBitmap().asImageBitmap(),
                 contentDescription = null)
         },
-        shape = MaterialTheme.shapes.large,
+        shape = EntryShape.FullRoundedCorner,
         label = {
           Column() {
               Text(
@@ -603,7 +611,7 @@ fun MoreOptionsDisabledProvidersRow(
         modifier = Modifier.padding(start = 16.dp)
       )
     },
-    shape = MaterialTheme.shapes.large,
+    shape = EntryShape.FullRoundedCorner,
     label = {
       Column() {
         Text(
@@ -637,7 +645,7 @@ fun RemoteEntryRow(
         modifier = Modifier.padding(start = 18.dp)
       )
     },
-    shape = MaterialTheme.shapes.large,
+    shape = EntryShape.FullRoundedCorner,
     label = {
       Column() {
         Text(
