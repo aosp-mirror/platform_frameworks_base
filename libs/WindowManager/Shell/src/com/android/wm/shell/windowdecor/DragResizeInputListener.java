@@ -317,7 +317,7 @@ class DragResizeInputListener implements AutoCloseable {
                 }
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL: {
-                    if (mDragging) {
+                    if (mShouldHandleEvents && mDragging) {
                         int dragPointerIndex = e.findPointerIndex(mDragPointerId);
                         mCallback.onDragResizeEnd(
                                 e.getRawX(dragPointerIndex), e.getRawY(dragPointerIndex));
