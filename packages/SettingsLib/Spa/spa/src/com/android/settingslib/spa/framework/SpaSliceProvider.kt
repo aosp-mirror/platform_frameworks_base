@@ -32,7 +32,8 @@ private const val TAG = "SpaSliceProvider"
 class SpaSliceProvider : SliceProvider(), Observer<Slice?> {
     private fun getOrPutSliceData(sliceUri: Uri): EntrySliceData? {
         if (!SpaEnvironmentFactory.isReady()) return null
-        return SpaEnvironmentFactory.instance.sliceDataRepository.getOrBuildSliceData(sliceUri)
+        val sliceRepository by SpaEnvironmentFactory.instance.sliceDataRepository
+        return sliceRepository.getOrBuildSliceData(sliceUri)
     }
 
     override fun onBindSlice(sliceUri: Uri): Slice? {
