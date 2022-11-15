@@ -95,6 +95,8 @@ import android.view.InsetsSource;
 import android.view.InsetsState;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
+import android.window.ITaskFragmentOrganizer;
+import android.window.TaskFragmentOrganizer;
 
 import androidx.test.filters.SmallTest;
 
@@ -797,6 +799,39 @@ public class WindowStateTests extends WindowTestsBase {
         mWm.mResizingWindows.remove(win);
         win.updateResizingWindowIfNeeded();
         assertThat(mWm.mResizingWindows).doesNotContain(win);
+    }
+
+    @Test
+    public void testEmbeddedActivityResizing_clearAllDrawn() {
+        final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
+        mAtm.mTaskFragmentOrganizerController.registerOrganizer(
+                ITaskFragmentOrganizer.Stub.asInterface(organizer.getOrganizerToken().asBinder()));
+        final Task task = createTask(mDisplayContent);
+        final TaskFragment embeddedTf = createTaskFragmentWithEmbeddedActivity(task, organizer);
+        final ActivityRecord embeddedActivity = embeddedTf.getTopMostActivity();
+        final WindowState win = createWindow(null /* parent */, TYPE_APPLICATION, embeddedActivity,
+                "App window");
+        doReturn(true).when(embeddedActivity).isVisible();
+        embeddedActivity.mVisibleRequested = true;
+        makeWindowVisible(win);
+        win.mLayoutSeq = win.getDisplayContent().mLayoutSeq;
+        // Set the bounds twice:
+        // 1. To make sure there is no orientation change after #reportResized, which can also cause
+        // #clearAllDrawn.
+        // 2. Make #isLastConfigReportedToClient to be false after #reportResized, so it can process
+        // to check if we need redraw.
+        embeddedTf.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        embeddedTf.setBounds(0, 0, 1000, 2000);
+        win.reportResized();
+        embeddedTf.setBounds(500, 0, 1000, 2000);
+
+        // Clear all drawn when the embedded TaskFragment is in mDisplayContent.mChangingContainers.
+        win.updateResizingWindowIfNeeded();
+        verify(embeddedActivity, never()).clearAllDrawn();
+
+        mDisplayContent.mChangingContainers.add(embeddedTf);
+        win.updateResizingWindowIfNeeded();
+        verify(embeddedActivity).clearAllDrawn();
     }
 
     @Test
