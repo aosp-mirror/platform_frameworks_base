@@ -644,8 +644,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
             Permission bp = mRegistry.getPermission(info.name);
             added = bp == null;
             int fixedLevel = PermissionInfo.fixProtectionLevel(info.protectionLevel);
+            enforcePermissionCapLocked(info, tree);
             if (added) {
-                enforcePermissionCapLocked(info, tree);
                 bp = new Permission(info.name, tree.getPackageName(), Permission.TYPE_DYNAMIC);
             } else if (!bp.isDynamic()) {
                 throw new SecurityException("Not allowed to modify non-dynamic permission "
@@ -2133,6 +2133,46 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
             }
         }
 
+    }
+
+    /**
+     * If the package was below api 23, got the SYSTEM_ALERT_WINDOW permission automatically, and
+     * then updated past api 23, and the app does not satisfy any of the other SAW permission flags,
+     * the permission should be revoked.
+     *
+     * @param newPackage The new package that was installed
+     * @param oldPackage The old package that was updated
+     */
+    private void revokeSystemAlertWindowIfUpgradedPast23(
+            @NonNull AndroidPackage newPackage,
+            @NonNull AndroidPackage oldPackage) {
+        if (oldPackage.getTargetSdkVersion() >= Build.VERSION_CODES.M
+                || newPackage.getTargetSdkVersion() < Build.VERSION_CODES.M
+                || !newPackage.getRequestedPermissions()
+                .contains(Manifest.permission.SYSTEM_ALERT_WINDOW)) {
+            return;
+        }
+
+        Permission saw;
+        synchronized (mLock) {
+            saw = mRegistry.getPermission(Manifest.permission.SYSTEM_ALERT_WINDOW);
+        }
+        final PackageStateInternal ps =
+                mPackageManagerInt.getPackageStateInternal(newPackage.getPackageName());
+        if (shouldGrantPermissionByProtectionFlags(newPackage, ps, saw, new ArraySet<>())
+                || shouldGrantPermissionBySignature(newPackage, saw)) {
+            return;
+        }
+        for (int userId : getAllUserIds()) {
+            try {
+                revokePermissionFromPackageForUser(newPackage.getPackageName(),
+                        Manifest.permission.SYSTEM_ALERT_WINDOW, false, userId,
+                        mDefaultPermissionCallback);
+            } catch (IllegalStateException | SecurityException e) {
+                Log.e(TAG, "unable to revoke SYSTEM_ALERT_WINDOW for "
+                        + newPackage.getPackageName() + " user " + userId, e);
+            }
+        }
     }
 
     /**
@@ -4661,6 +4701,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                 if (hasOldPkg) {
                     revokeRuntimePermissionsIfGroupChangedInternal(pkg, oldPkg);
                     revokeStoragePermissionsIfScopeExpandedInternal(pkg, oldPkg);
+                    revokeSystemAlertWindowIfUpgradedPast23(pkg, oldPkg);
                 }
                 if (hasPermissionDefinitionChanges) {
                     revokeRuntimePermissionsIfPermissionDefinitionChangedInternal(
