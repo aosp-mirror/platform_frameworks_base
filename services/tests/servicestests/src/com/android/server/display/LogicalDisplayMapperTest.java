@@ -30,6 +30,8 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
@@ -52,6 +54,8 @@ import android.view.DisplayInfo;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.server.display.layout.Layout;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -59,6 +63,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -83,6 +88,7 @@ public class LogicalDisplayMapperTest {
     @Mock Resources mResourcesMock;
     @Mock IPowerManager mIPowerManagerMock;
     @Mock IThermalService mIThermalServiceMock;
+    @Spy DeviceStateToLayoutMap mDeviceStateToLayoutMapSpy = new DeviceStateToLayoutMap();
 
     @Captor ArgumentCaptor<LogicalDisplay> mDisplayCaptor;
 
@@ -132,7 +138,8 @@ public class LogicalDisplayMapperTest {
         mLooper = new TestLooper();
         mHandler = new Handler(mLooper.getLooper());
         mLogicalDisplayMapper = new LogicalDisplayMapper(mContextMock, mDisplayDeviceRepo,
-                mListenerMock, new DisplayManagerService.SyncRoot(), mHandler);
+                mListenerMock, new DisplayManagerService.SyncRoot(), mHandler,
+                mDeviceStateToLayoutMapSpy);
     }
 
 
@@ -259,7 +266,8 @@ public class LogicalDisplayMapperTest {
         add(createDisplayDevice(Display.TYPE_EXTERNAL, 600, 800, 0));
         add(createDisplayDevice(Display.TYPE_VIRTUAL, 600, 800, 0));
 
-        int [] ids = mLogicalDisplayMapper.getDisplayIdsLocked(Process.SYSTEM_UID);
+        int [] ids = mLogicalDisplayMapper.getDisplayIdsLocked(Process.SYSTEM_UID,
+                /* includeDisabled= */ true);
         assertEquals(3, ids.length);
         Arrays.sort(ids);
         assertEquals(DEFAULT_DISPLAY, ids[0]);
@@ -503,9 +511,182 @@ public class LogicalDisplayMapperTest {
                 /* isBootCompleted= */true));
     }
 
+    @Test
+    public void testDeviceStateLocked() {
+        DisplayDevice device1 = createDisplayDevice(Display.TYPE_INTERNAL, 600, 800,
+                DisplayDeviceInfo.FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY);
+        DisplayDevice device2 = createDisplayDevice(Display.TYPE_INTERNAL, 600, 800,
+                DisplayDeviceInfo.FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY);
+
+        Layout layout = new Layout();
+        layout.createDisplayLocked(device1.getDisplayDeviceInfoLocked().address, true, true);
+        layout.createDisplayLocked(device2.getDisplayDeviceInfoLocked().address, false, false);
+        when(mDeviceStateToLayoutMapSpy.get(0)).thenReturn(layout);
+
+        layout = new Layout();
+        layout.createDisplayLocked(device1.getDisplayDeviceInfoLocked().address, false, false);
+        layout.createDisplayLocked(device2.getDisplayDeviceInfoLocked().address, true, true);
+        when(mDeviceStateToLayoutMapSpy.get(1)).thenReturn(layout);
+        when(mDeviceStateToLayoutMapSpy.get(2)).thenReturn(layout);
+
+        LogicalDisplay display1 = add(device1);
+        assertEquals(info(display1).address, info(device1).address);
+        assertEquals(DEFAULT_DISPLAY, id(display1));
+
+        LogicalDisplay display2 = add(device2);
+        assertEquals(info(display2).address, info(device2).address);
+        // We can only have one default display
+        assertEquals(DEFAULT_DISPLAY, id(display1));
+
+        mLogicalDisplayMapper.setDeviceStateLocked(0, false);
+        advanceTime(1000);
+        assertTrue(mLogicalDisplayMapper.getDisplayLocked(device1).isEnabledLocked());
+        assertFalse(mLogicalDisplayMapper.getDisplayLocked(device2).isEnabledLocked());
+        assertFalse(mLogicalDisplayMapper.getDisplayLocked(device1).isInTransitionLocked());
+        assertFalse(mLogicalDisplayMapper.getDisplayLocked(device2).isInTransitionLocked());
+
+        mLogicalDisplayMapper.setDeviceStateLocked(1, false);
+        advanceTime(1000);
+        assertFalse(mLogicalDisplayMapper.getDisplayLocked(device1).isEnabledLocked());
+        assertTrue(mLogicalDisplayMapper.getDisplayLocked(device2).isEnabledLocked());
+        assertFalse(mLogicalDisplayMapper.getDisplayLocked(device1).isInTransitionLocked());
+        assertFalse(mLogicalDisplayMapper.getDisplayLocked(device2).isInTransitionLocked());
+
+        mLogicalDisplayMapper.setDeviceStateLocked(2, false);
+        advanceTime(1000);
+        assertFalse(mLogicalDisplayMapper.getDisplayLocked(device1).isEnabledLocked());
+        assertTrue(mLogicalDisplayMapper.getDisplayLocked(device2).isEnabledLocked());
+        assertFalse(mLogicalDisplayMapper.getDisplayLocked(device1).isInTransitionLocked());
+        assertFalse(mLogicalDisplayMapper.getDisplayLocked(device2).isInTransitionLocked());
+    }
+
+    @Test
+    public void testEnabledAndDisabledDisplays() {
+        DisplayAddress displayAddressOne = new TestUtils.TestDisplayAddress();
+        DisplayAddress displayAddressTwo = new TestUtils.TestDisplayAddress();
+        DisplayAddress displayAddressThree = new TestUtils.TestDisplayAddress();
+
+        TestDisplayDevice device1 = createDisplayDevice(displayAddressOne, "one",
+                Display.TYPE_INTERNAL, 600, 800,
+                DisplayDeviceInfo.FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY);
+        TestDisplayDevice device2 = createDisplayDevice(displayAddressTwo, "two",
+                Display.TYPE_INTERNAL, 200, 800,
+                DisplayDeviceInfo.FLAG_OWN_DISPLAY_GROUP);
+        TestDisplayDevice device3 = createDisplayDevice(displayAddressThree, "three",
+                Display.TYPE_INTERNAL, 600, 900,
+                DisplayDeviceInfo.FLAG_OWN_DISPLAY_GROUP);
+
+        Layout threeDevicesEnabledLayout = new Layout();
+        threeDevicesEnabledLayout.createDisplayLocked(
+                displayAddressOne,
+                /* isDefault= */ true,
+                /* isEnabled= */ true);
+        threeDevicesEnabledLayout.createDisplayLocked(
+                displayAddressTwo,
+                /* isDefault= */ false,
+                /* isEnabled= */ true);
+        threeDevicesEnabledLayout.createDisplayLocked(
+                displayAddressThree,
+                /* isDefault= */ false,
+                /* isEnabled= */ true);
+
+        when(mDeviceStateToLayoutMapSpy.get(DeviceStateToLayoutMap.STATE_DEFAULT))
+                .thenReturn(threeDevicesEnabledLayout);
+
+        LogicalDisplay display1 = add(device1);
+        LogicalDisplay display2 = add(device2);
+        LogicalDisplay display3 = add(device3);
+
+        // ensure 3 displays are returned
+        int [] ids = mLogicalDisplayMapper.getDisplayIdsLocked(Process.SYSTEM_UID, false);
+        assertEquals(3, ids.length);
+        Arrays.sort(ids);
+        assertEquals(DEFAULT_DISPLAY, ids[0]);
+        assertNotNull(mLogicalDisplayMapper.getDisplayLocked(device1,
+                /* includeDisabled= */ false));
+        assertNotNull(mLogicalDisplayMapper.getDisplayLocked(device2,
+                /* includeDisabled= */ false));
+        assertNotNull(mLogicalDisplayMapper.getDisplayLocked(device3,
+                /* includeDisabled= */ false));
+        assertNotNull(mLogicalDisplayMapper.getDisplayLocked(
+                threeDevicesEnabledLayout.getByAddress(displayAddressOne).getLogicalDisplayId(),
+                /* includeDisabled= */ false));
+        assertNotNull(mLogicalDisplayMapper.getDisplayLocked(
+                threeDevicesEnabledLayout.getByAddress(displayAddressTwo).getLogicalDisplayId(),
+                /* includeDisabled= */ false));
+        assertNotNull(mLogicalDisplayMapper.getDisplayLocked(
+                threeDevicesEnabledLayout.getByAddress(displayAddressThree).getLogicalDisplayId(),
+                /* includeDisabled= */ false));
+
+        Layout oneDeviceEnabledLayout = new Layout();
+        oneDeviceEnabledLayout.createDisplayLocked(
+                displayAddressOne,
+                /* isDefault= */ true,
+                /* isEnabled= */ true);
+        oneDeviceEnabledLayout.createDisplayLocked(
+                displayAddressTwo,
+                /* isDefault= */ false,
+                /* isEnabled= */ false);
+        oneDeviceEnabledLayout.createDisplayLocked(
+                displayAddressThree,
+                /* isDefault= */ false,
+                /* isEnabled= */ false);
+
+        when(mDeviceStateToLayoutMapSpy.get(0)).thenReturn(oneDeviceEnabledLayout);
+        when(mDeviceStateToLayoutMapSpy.get(1)).thenReturn(threeDevicesEnabledLayout);
+
+        // 1) Set the new state
+        // 2) Mark the displays as STATE_OFF so that it can continue with transition
+        // 3) Send DISPLAY_DEVICE_EVENT_CHANGE to inform the mapper of the new display state
+        // 4) Dispatch handler events.
+        mLogicalDisplayMapper.setDeviceStateLocked(0, false);
+        mDisplayDeviceRepo.onDisplayDeviceEvent(device3, DISPLAY_DEVICE_EVENT_CHANGED);
+        advanceTime(1000);
+        final int[] allDisplayIds = mLogicalDisplayMapper.getDisplayIdsLocked(
+                Process.SYSTEM_UID, false);
+        if (allDisplayIds.length != 1) {
+            throw new RuntimeException("Displays: \n"
+                    + mLogicalDisplayMapper.getDisplayLocked(device1).toString()
+                    + "\n" + mLogicalDisplayMapper.getDisplayLocked(device2).toString()
+                    + "\n" + mLogicalDisplayMapper.getDisplayLocked(device3).toString());
+        }
+        // ensure only one display is returned
+        assertEquals(1, allDisplayIds.length);
+        assertNotNull(mLogicalDisplayMapper.getDisplayLocked(device1,
+                /* includeDisabled= */ false));
+        assertNull(mLogicalDisplayMapper.getDisplayLocked(device2,
+                /* includeDisabled= */ false));
+        assertNull(mLogicalDisplayMapper.getDisplayLocked(device3,
+                /* includeDisabled= */ false));
+        assertNotNull(mLogicalDisplayMapper.getDisplayLocked(
+                oneDeviceEnabledLayout.getByAddress(displayAddressOne).getLogicalDisplayId(),
+                /* includeDisabled= */ false));
+        assertNull(mLogicalDisplayMapper.getDisplayLocked(
+                oneDeviceEnabledLayout.getByAddress(displayAddressTwo).getLogicalDisplayId(),
+                /* includeDisabled= */ false));
+        assertNull(mLogicalDisplayMapper.getDisplayLocked(
+                oneDeviceEnabledLayout.getByAddress(displayAddressThree).getLogicalDisplayId(),
+                /* includeDisabled= */ false));
+
+        // Now do it again to go back to state 1
+        mLogicalDisplayMapper.setDeviceStateLocked(1, false);
+        mDisplayDeviceRepo.onDisplayDeviceEvent(device3, DISPLAY_DEVICE_EVENT_CHANGED);
+        advanceTime(1000);
+        final int[] threeDisplaysEnabled = mLogicalDisplayMapper.getDisplayIdsLocked(
+                Process.SYSTEM_UID, false);
+
+        // ensure all three displays are returned
+        assertEquals(3, threeDisplaysEnabled.length);
+    }
+
     /////////////////
     // Helper Methods
     /////////////////
+
+    private void advanceTime(long timeMs) {
+        mLooper.moveTimeForward(1000);
+        mLooper.dispatchAll();
+    }
 
     private TestDisplayDevice createDisplayDevice(int type, int width, int height, int flags) {
         return createDisplayDevice(
@@ -575,6 +756,7 @@ public class LogicalDisplayMapperTest {
     class TestDisplayDevice extends DisplayDevice {
         private DisplayDeviceInfo mInfo;
         private DisplayDeviceInfo mSentInfo;
+        private int mState;
 
         TestDisplayDevice() {
             super(null, null, "test_display_" + sUniqueTestDisplayId++, mContextMock);

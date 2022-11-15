@@ -45,11 +45,6 @@ public interface DisplayPowerControllerInterface {
     void stop();
 
     /**
-     * Used to manage the displays preparing to transition from one device state to another.
-     */
-    void onDeviceStateTransition();
-
-    /**
      * Used to update the display's BrightnessConfiguration
      * @param config The new BrightnessConfiguration
      */
