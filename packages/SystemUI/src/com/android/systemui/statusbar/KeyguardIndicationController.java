@@ -198,7 +198,9 @@ public class KeyguardIndicationController {
         public void onScreenTurnedOn() {
             mHandler.removeMessages(MSG_RESET_ERROR_MESSAGE_ON_SCREEN_ON);
             if (mBiometricErrorMessageToShowOnScreenOn != null) {
-                showBiometricMessage(mBiometricErrorMessageToShowOnScreenOn);
+                String followUpMessage = mFaceLockedOutThisAuthSession
+                        ? faceLockedOutFollowupMessage() : null;
+                showBiometricMessage(mBiometricErrorMessageToShowOnScreenOn, followUpMessage);
                 // We want to keep this message around in case the screen was off
                 hideBiometricMessageDelayed(DEFAULT_HIDE_DELAY_MS);
                 mBiometricErrorMessageToShowOnScreenOn = null;
@@ -1263,9 +1265,7 @@ public class KeyguardIndicationController {
     }
 
     private void handleFaceLockoutError(String errString) {
-        int followupMsgId = canUnlockWithFingerprint() ? R.string.keyguard_suggest_fingerprint
-                : R.string.keyguard_unlock;
-        String followupMessage = mContext.getString(followupMsgId);
+        String followupMessage = faceLockedOutFollowupMessage();
         // Lockout error can happen multiple times in a session because we trigger face auth
         // even when it is locked out so that the user is aware that face unlock would have
         // triggered but didn't because it is locked out.
@@ -1281,6 +1281,12 @@ public class KeyguardIndicationController {
                     mContext.getString(R.string.keyguard_face_unlock_unavailable),
                     followupMessage);
         }
+    }
+
+    private String faceLockedOutFollowupMessage() {
+        int followupMsgId = canUnlockWithFingerprint() ? R.string.keyguard_suggest_fingerprint
+                : R.string.keyguard_unlock;
+        return mContext.getString(followupMsgId);
     }
 
     private static boolean isLockoutError(int msgId) {
