@@ -124,7 +124,8 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
         TaskPositioner taskPositioner = new TaskPositioner(mTaskOrganizer, windowDecoration,
                 mDragStartListener);
         CaptionTouchEventListener touchEventListener =
-                new CaptionTouchEventListener(taskInfo, taskPositioner);
+                new CaptionTouchEventListener(taskInfo, taskPositioner,
+                        windowDecoration.getDragDetector());
         windowDecoration.setCaptionListeners(touchEventListener, touchEventListener);
         windowDecoration.setDragResizeCallback(taskPositioner);
         setupWindowDecorationForTransition(taskInfo, startT, finishT);
@@ -173,16 +174,18 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
         private final int mTaskId;
         private final WindowContainerToken mTaskToken;
         private final DragResizeCallback mDragResizeCallback;
+        private final DragDetector mDragDetector;
 
         private int mDragPointerId = -1;
-        private boolean mDragActive = false;
 
         private CaptionTouchEventListener(
                 RunningTaskInfo taskInfo,
-                DragResizeCallback dragResizeCallback) {
+                DragResizeCallback dragResizeCallback,
+                DragDetector dragDetector) {
             mTaskId = taskInfo.taskId;
             mTaskToken = taskInfo.token;
             mDragResizeCallback = dragResizeCallback;
+            mDragDetector = dragDetector;
         }
 
         @Override
@@ -231,19 +234,21 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
 
         @Override
         public boolean onTouch(View v, MotionEvent e) {
+            boolean isDrag = false;
             int id = v.getId();
             if (id != R.id.caption_handle && id != R.id.caption) {
                 return false;
             }
-            if (id == R.id.caption_handle || mDragActive) {
+            if (id == R.id.caption_handle) {
+                isDrag = mDragDetector.detectDragEvent(e);
                 handleEventForMove(e);
             }
             if (e.getAction() != MotionEvent.ACTION_DOWN) {
-                return false;
+                return isDrag;
             }
             RunningTaskInfo taskInfo = mTaskOrganizer.getRunningTaskInfo(mTaskId);
             if (taskInfo.isFocused) {
-                return false;
+                return isDrag;
             }
             WindowContainerTransaction wct = new WindowContainerTransaction();
             wct.reorder(mTaskToken, true /* onTop */);
@@ -251,6 +256,10 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
             return true;
         }
 
+        /**
+         * @param e {@link MotionEvent} to process
+         * @return {@code true} if a drag is happening; or {@code false} if it is not
+         */
         private void handleEventForMove(MotionEvent e) {
             RunningTaskInfo taskInfo = mTaskOrganizer.getRunningTaskInfo(mTaskId);
             int windowingMode =  mDesktopModeController
@@ -259,12 +268,12 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
                 return;
             }
             switch (e.getActionMasked()) {
-                case MotionEvent.ACTION_DOWN:
-                    mDragActive = true;
-                    mDragPointerId  = e.getPointerId(0);
+                case MotionEvent.ACTION_DOWN: {
+                    mDragPointerId = e.getPointerId(0);
                     mDragResizeCallback.onDragResizeStart(
                             0 /* ctrlType */, e.getRawX(0), e.getRawY(0));
                     break;
+                }
                 case MotionEvent.ACTION_MOVE: {
                     int dragPointerIdx = e.findPointerIndex(mDragPointerId);
                     mDragResizeCallback.onDragResizeMove(
@@ -273,7 +282,6 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
                 }
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL: {
-                    mDragActive = false;
                     int dragPointerIdx = e.findPointerIndex(mDragPointerId);
                     int statusBarHeight = mDisplayController.getDisplayLayout(taskInfo.displayId)
                             .stableInsets().top;
