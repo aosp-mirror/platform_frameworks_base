@@ -79,8 +79,19 @@ interface IUsbManager
     /* Returns true if the caller has permission to access the device. */
     boolean hasDevicePermission(in UsbDevice device, String packageName);
 
+    /* Returns true if the given package/pid/uid has permission to access the device. */
+    @JavaPassthrough(annotation=
+            "@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_USB)")
+    boolean hasDevicePermissionWithIdentity(in UsbDevice device, String packageName,
+            int pid, int uid);
+
     /* Returns true if the caller has permission to access the accessory. */
     boolean hasAccessoryPermission(in UsbAccessory accessory);
+
+    /* Returns true if the given pid/uid has permission to access the accessory. */
+    @JavaPassthrough(annotation=
+            "@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_USB)")
+    boolean hasAccessoryPermissionWithIdentity(in UsbAccessory accessory, int pid, int uid);
 
     /* Requests permission for the given package to access the device.
      * Will display a system dialog to query the user if permission
