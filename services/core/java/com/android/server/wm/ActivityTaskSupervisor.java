@@ -27,6 +27,7 @@ import static android.app.ActivityManager.START_FLAG_DEBUG;
 import static android.app.ActivityManager.START_FLAG_NATIVE_DEBUGGING;
 import static android.app.ActivityManager.START_FLAG_TRACK_ALLOCATION;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
+import static android.app.ActivityOptions.ANIM_REMOTE_ANIMATION;
 import static android.app.ITaskStackListener.FORCED_RESIZEABLE_REASON_SECONDARY_DISPLAY;
 import static android.app.ITaskStackListener.FORCED_RESIZEABLE_REASON_SPLIT_SCREEN;
 import static android.app.WaitResult.INVALID_DELAY;
@@ -2592,6 +2593,10 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                         // Apply options to prevent pendingOptions be taken when scheduling
                         // activity lifecycle transaction to make sure the override pending app
                         // transition will be applied immediately.
+                        if (activityOptions.getAnimationType() == ANIM_REMOTE_ANIMATION) {
+                            targetActivity.mPendingRemoteAnimation =
+                                    activityOptions.getRemoteAnimationAdapter();
+                        }
                         targetActivity.applyOptionsAnimation();
                         if (activityOptions != null && activityOptions.getLaunchCookie() != null) {
                             targetActivity.mLaunchCookie = activityOptions.getLaunchCookie();
