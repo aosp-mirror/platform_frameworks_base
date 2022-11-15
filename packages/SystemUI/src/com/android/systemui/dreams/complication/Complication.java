@@ -197,11 +197,11 @@ public interface Complication {
      */
     interface VisibilityController {
         /**
-         * Called to set the visibility of all shown and future complications.
+         * Called to set the visibility of all shown and future complications. Changes in visibility
+         * will always be animated.
          * @param visibility The desired future visibility.
-         * @param animate whether the change should be animated.
          */
-        void setVisibility(@View.Visibility int visibility, boolean animate);
+        void setVisibility(@View.Visibility int visibility);
     }
 
     /**

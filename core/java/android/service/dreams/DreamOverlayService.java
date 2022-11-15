@@ -49,6 +49,17 @@ public abstract class DreamOverlayService extends Service {
             mShowComplications = shouldShowComplications;
             onStartDream(layoutParams);
         }
+
+        @Override
+        public void wakeUp() {
+            onWakeUp(() -> {
+                try {
+                    mDreamOverlayCallback.onWakeUpComplete();
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Could not notify dream of wakeUp:" + e);
+                }
+            });
+        }
     };
 
     IDreamOverlayCallback mDreamOverlayCallback;
@@ -69,6 +80,17 @@ public abstract class DreamOverlayService extends Service {
      *                     dream window.
      */
     public abstract void onStartDream(@NonNull WindowManager.LayoutParams layoutParams);
+
+    /**
+     * This method is overridden by implementations to handle when the dream has been requested
+     * to wakeup. This allows any overlay animations to run.
+     *
+     * @param onCompleteCallback The callback to trigger to notify the dream service that the
+     *                           overlay has completed waking up.
+     * @hide
+     */
+    public void onWakeUp(@NonNull Runnable onCompleteCallback) {
+    }
 
     /**
      * This method is invoked to request the dream exit.
