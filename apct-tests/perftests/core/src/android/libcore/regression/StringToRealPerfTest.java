@@ -20,22 +20,22 @@ import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
 import android.test.suitebuilder.annotation.LargeTest;
 
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
 
 import java.util.Arrays;
 import java.util.Collection;
 
-@RunWith(Parameterized.class)
+@RunWith(JUnitParamsRunner.class)
 @LargeTest
 public class StringToRealPerfTest {
     @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
-    @Parameters(name = "mString={0}")
-    public static Collection<Object[]> data() {
+    public static Collection<Object[]> getData() {
         return Arrays.asList(
                 new Object[][] {
                     {"NaN"},
@@ -49,22 +49,21 @@ public class StringToRealPerfTest {
                 });
     }
 
-    @Parameterized.Parameter(0)
-    public String mString;
-
     @Test
-    public void timeFloat_parseFloat() {
+    @Parameters(method = "getData")
+    public void timeFloat_parseFloat(String string) {
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
-            Float.parseFloat(mString);
+            Float.parseFloat(string);
         }
     }
 
     @Test
-    public void timeDouble_parseDouble() {
+    @Parameters(method = "getData")
+    public void timeDouble_parseDouble(String string) {
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
-            Double.parseDouble(mString);
+            Double.parseDouble(string);
         }
     }
 }
