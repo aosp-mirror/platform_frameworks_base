@@ -210,9 +210,7 @@ object Flags {
     @JvmField val NEW_FOOTER_ACTIONS = releasedFlag(507, "new_footer_actions")
 
     // TODO(b/244064524): Tracking Bug
-    @JvmField
-    val QS_SECONDARY_DATA_SUB_INFO =
-        unreleasedFlag(508, "qs_secondary_data_sub_info", teamfood = true)
+    @JvmField val QS_SECONDARY_DATA_SUB_INFO = releasedFlag(508, "qs_secondary_data_sub_info")
 
     // 600- status bar
     // TODO(b/254513246): Tracking Bug
