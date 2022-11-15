@@ -34,9 +34,11 @@ import com.android.settingslib.spa.framework.compose.LogCompositions
 import com.android.settingslib.spa.framework.compose.TimeMeasurer.Companion.rememberTimeMeasurer
 import com.android.settingslib.spa.framework.compose.rememberLazyListStateAndHideKeyboardWhenStartScroll
 import com.android.settingslib.spa.framework.compose.toState
+import com.android.settingslib.spa.widget.ui.CategoryTitle
 import com.android.settingslib.spa.widget.ui.PlaceholderTitle
 import com.android.settingslib.spaprivileged.R
 import com.android.settingslib.spaprivileged.framework.compose.DisposableBroadcastReceiverAsUser
+import com.android.settingslib.spaprivileged.model.app.AppEntry
 import com.android.settingslib.spaprivileged.model.app.AppListConfig
 import com.android.settingslib.spaprivileged.model.app.AppListData
 import com.android.settingslib.spaprivileged.model.app.AppListModel
@@ -100,15 +102,26 @@ private fun <T : AppRecord> AppListWidget(
             }
 
             items(count = list.size, key = { option to list[it].record.app.packageName }) {
+                remember(list) { listModel.getGroupTitleIfFirst(option, list, it) }
+                    ?.let { group -> CategoryTitle(title = group) }
+
                 val appEntry = list[it]
                 val summary = listModel.getSummary(option, appEntry.record) ?: "".toState()
-                val itemModel = remember(appEntry) {
+                appItem(remember(appEntry) {
                     AppListItemModel(appEntry.record, appEntry.label, summary)
-                }
-                appItem(itemModel)
+                })
             }
         }
     }
+}
+
+/** Returns group title if this is the first item of the group. */
+private fun <T : AppRecord> AppListModel<T>.getGroupTitleIfFirst(
+    option: Int,
+    list: List<AppEntry<T>>,
+    index: Int,
+): String? = getGroupTitle(option, list[index].record)?.takeIf {
+    index == 0 || it != getGroupTitle(option, list[index - 1].record)
 }
 
 @Composable

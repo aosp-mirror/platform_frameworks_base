@@ -54,6 +54,14 @@ interface AppListModel<T : AppRecord> {
     )
 
     /**
+     * Gets the group title of this item.
+     *
+     * Note: Items should be sorted by group in [getComparator] first, this [getGroupTitle] will not
+     * change the list order.
+     */
+    fun getGroupTitle(option: Int, record: T): String? = null
+
+    /**
      * Gets the summary for the given app record.
      *
      * @return null if no summary should be displayed.
