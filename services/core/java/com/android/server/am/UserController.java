@@ -1090,7 +1090,7 @@ class UserController implements Handler.Callback {
             // TODO(b/239982558): for now we're just updating the user's visibility, but most likely
             // we'll need to remove this call and handle that as part of the user state workflow
             // instead.
-            userManagerInternal.unassignUserFromDisplay(userId);
+            userManagerInternal.unassignUserFromDisplayOnStop(userId);
 
             final boolean visibilityChanged;
             boolean visibleBefore;
@@ -1650,12 +1650,29 @@ class UserController implements Handler.Callback {
                 return false;
             }
 
-            if (!userInfo.preCreated) {
-                // TODO(b/244644281): UMI should return whether the user is visible. And if fails,
-                // the user should not be in the mediator's started users structure
-                mInjector.getUserManagerInternal().assignUserToDisplay(userId,
-                        userInfo.profileGroupId, foreground, displayId);
+            t.traceBegin("assignUserToDisplayOnStart");
+            int result = mInjector.getUserManagerInternal().assignUserToDisplayOnStart(userId,
+                    userInfo.profileGroupId, foreground, displayId);
+            t.traceEnd();
+
+            boolean visible;
+            switch (result) {
+                case UserManagerInternal.USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE:
+                    visible = true;
+                    break;
+                case UserManagerInternal.USER_ASSIGNMENT_RESULT_SUCCESS_INVISIBLE:
+                    visible = false;
+                    break;
+                default:
+                    Slogf.wtf(TAG, "Wrong result from assignUserToDisplayOnStart(): %d", result);
+                    // Fall through
+                case UserManagerInternal.USER_ASSIGNMENT_RESULT_FAILURE:
+                    Slogf.e(TAG, "%s user(%d) / display (%d) assignment failed: %s",
+                            (foreground ? "fg" : "bg"), userId, displayId,
+                            UserManagerInternal.userAssignmentResultToString(result));
+                    return false;
             }
+
 
             // TODO(b/239982558): might need something similar for bg users on secondary display
             if (foreground && isUserSwitchUiEnabled()) {
@@ -1751,19 +1768,6 @@ class UserController implements Handler.Callback {
             }
             t.traceEnd();
 
-            // Need to call UM when user is on background, as there are some cases where the user
-            // cannot be started in background on a secondary display (for example, if user is a
-            // profile).
-            // TODO(b/253103846): it's also explicitly checking if the user is the USER_SYSTEM, as
-            // the UM call would return true during boot (when CarService / BootUserInitializer
-            // calls AM.startUserInBackground() because the system user is still the current user.
-            // TODO(b/244644281): another fragility of this check is that it must wait to call
-            // UMI.isUserVisible() until the user state is check, as that method checks if the
-            // profile of the current user is started. We should fix that dependency so the logic
-            // belongs to just one place (like UserDisplayAssigner)
-            boolean visible = foreground
-                    || userId != UserHandle.USER_SYSTEM
-                            && mInjector.getUserManagerInternal().isUserVisible(userId);
             if (visible) {
                 synchronized (mLock) {
                     addVisibleUserLocked(userId);
@@ -1816,8 +1820,8 @@ class UserController implements Handler.Callback {
                 // user that was started in the background before), so it's necessary to explicitly
                 // notify the services (while when the user starts from BOOTING, USER_START_MSG
                 // takes care of that.
-                mHandler.sendMessage(mHandler.obtainMessage(USER_VISIBILITY_CHANGED_MSG, userId,
-                        visible ? 1 : 0));
+                mHandler.sendMessage(
+                        mHandler.obtainMessage(USER_VISIBILITY_CHANGED_MSG, userId, 1));
             }
 
             t.traceBegin("sendMessages");

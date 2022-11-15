@@ -6802,15 +6802,14 @@ public class UserManagerService extends IUserManager.Stub {
         }
 
         @Override
-        public void assignUserToDisplay(@UserIdInt int userId, @UserIdInt int profileGroupId,
+        public int assignUserToDisplayOnStart(@UserIdInt int userId, @UserIdInt int profileGroupId,
                 boolean foreground, int displayId) {
-            mUserVisibilityMediator.startUser(userId, profileGroupId, foreground, displayId);
-            mUserVisibilityMediator.assignUserToDisplay(userId, profileGroupId, displayId);
+            return mUserVisibilityMediator.startUser(userId, profileGroupId, foreground,
+                    displayId);
         }
 
         @Override
-        public void unassignUserFromDisplay(@UserIdInt int userId) {
-            mUserVisibilityMediator.unassignUserFromDisplay(userId);
+        public void unassignUserFromDisplayOnStop(@UserIdInt int userId) {
             mUserVisibilityMediator.stopUser(userId);
         }
 

@@ -153,14 +153,8 @@ public final class UserVisibilityMediatorMUMDTest extends UserVisibilityMediator
         assertUserAssignedToDisplay(PARENT_USER_ID, SECONDARY_DISPLAY_ID);
     }
 
-    @Test
-    public void testUnassignUserFromDisplay() {
-        testAssignUserToDisplay_displayAvailable();
-
-        mMediator.unassignUserFromDisplay(USER_ID);
-
-        assertNoUserAssignedToDisplay();
-    }
+    // TODO(b/244644281): when start & assign are merged, rename tests above and also call
+    // stopUserAndAssertState() at the end of them
 
     @Test
     public void testIsUserVisible_bgUserOnSecondaryDisplay() {

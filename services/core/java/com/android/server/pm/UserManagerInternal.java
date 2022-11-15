@@ -25,6 +25,7 @@ import android.content.pm.UserProperties;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.UserManager;
+import android.util.DebugUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -45,6 +46,18 @@ public abstract class UserManagerInternal {
             OWNER_TYPE_PROFILE_OWNER_OF_ORGANIZATION_OWNED_DEVICE, OWNER_TYPE_NO_OWNER})
     public @interface OwnerType {
     }
+
+    public static final int USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE = 1;
+    public static final int USER_ASSIGNMENT_RESULT_SUCCESS_INVISIBLE = 2;
+    public static final int USER_ASSIGNMENT_RESULT_FAILURE = -1;
+
+    private static final String PREFIX_USER_ASSIGNMENT_RESULT = "USER_ASSIGNMENT_RESULT";
+    @IntDef(flag = false, prefix = {PREFIX_USER_ASSIGNMENT_RESULT}, value = {
+            USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE,
+            USER_ASSIGNMENT_RESULT_SUCCESS_INVISIBLE,
+            USER_ASSIGNMENT_RESULT_FAILURE
+    })
+    public @interface UserAssignmentResult {}
 
     public interface UserRestrictionsListener {
         /**
@@ -343,34 +356,28 @@ public abstract class UserManagerInternal {
     public abstract @Nullable UserProperties getUserProperties(@UserIdInt int userId);
 
     /**
-     * Assigns a user to a display.
-     *
-     * <p>On most devices this call will be a no-op, but it will be used on devices that support
-     * multiple users on multiple displays (like automotives with passenger displays).
+     * Assigns a user to a display when it's starting, returning whether the assignment succeeded
+     * and the user is {@link UserManager#isUserVisible() visible}.
      *
      * <p><b>NOTE: </b>this method is meant to be used only by {@code UserController} (when a user
-     * is started)
+     * is started). If other clients (like {@code CarService} need to explicitly change the user /
+     * display assignment, we'll need to provide other APIs.
      *
      * <p><b>NOTE: </b>this method doesn't validate if the display exists, it's up to the caller to
-     * check it. In fact, one of the intended clients for this method is
-     * {@code DisplayManagerService}, which will call it when a virtual display is created (another
-     * client is {@code UserController}, which will call it when a user is started).
+     * pass a valid display id.
      */
-    // TODO(b/244644281): rename to assignUserToDisplayOnStart() and make sure it's called on boot
-    // as well
-    public abstract void assignUserToDisplay(@UserIdInt int userId, @UserIdInt int profileGroupId,
+    public abstract @UserAssignmentResult int assignUserToDisplayOnStart(@UserIdInt int userId,
+            @UserIdInt int profileGroupId,
             boolean foreground, int displayId);
 
     /**
-     * Unassigns a user from its current display.
-     *
-     * <p>On most devices this call will be a no-op, but it will be used on devices that support
-     * multiple users on multiple displays (like automotives with passenger displays).
+     * Unassigns a user from its current display when it's stopping.
      *
      * <p><b>NOTE: </b>this method is meant to be used only by {@code UserController} (when a user
-     * is stopped).
+     * is stopped). If other clients (like {@code CarService} need to explicitly change the user /
+     * display assignment, we'll need to provide other APIs.
      */
-    public abstract void unassignUserFromDisplay(@UserIdInt int userId);
+    public abstract void unassignUserFromDisplayOnStop(@UserIdInt int userId);
 
     /**
      * Returns {@code true} if the user is visible (as defined by
@@ -412,6 +419,15 @@ public abstract class UserManagerInternal {
      * would make such call).
      */
     public abstract @UserIdInt int getUserAssignedToDisplay(int displayId);
+
+    /**
+     * Gets the user-friendly representation of the {@code result} of a
+     * {@link #assignUserToDisplayOnStart(int, int, boolean, int)} call.
+     */
+    public static String userAssignmentResultToString(@UserAssignmentResult int result) {
+        return DebugUtils.constantToString(UserManagerInternal.class, PREFIX_USER_ASSIGNMENT_RESULT,
+                result);
+    }
 
     /** Adds a {@link UserVisibilityListener}. */
     public abstract void addUserVisibilityListener(UserVisibilityListener listener);
