@@ -52369,6 +52369,7 @@ package android.view.accessibility {
     method public String getViewIdResourceName();
     method public android.view.accessibility.AccessibilityWindowInfo getWindow();
     method public int getWindowId();
+    method public boolean hasRequestInitialAccessibilityFocus();
     method public boolean isAccessibilityFocused();
     method public boolean isCheckable();
     method public boolean isChecked();
@@ -52448,6 +52449,7 @@ package android.view.accessibility {
     method public void setPassword(boolean);
     method public void setQueryFromAppProcessEnabled(@NonNull android.view.View, boolean);
     method public void setRangeInfo(android.view.accessibility.AccessibilityNodeInfo.RangeInfo);
+    method public void setRequestInitialAccessibilityFocus(boolean);
     method public void setScreenReaderFocusable(boolean);
     method public void setScrollable(boolean);
     method public void setSelected(boolean);
