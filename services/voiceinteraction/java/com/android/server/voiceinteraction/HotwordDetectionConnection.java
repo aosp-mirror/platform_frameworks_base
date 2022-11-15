@@ -59,6 +59,7 @@ import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPH
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.AppOpsManager;
 import android.attention.AttentionManagerInternal;
 import android.content.ComponentName;
 import android.content.ContentCaptureOptions;
@@ -137,6 +138,7 @@ final class HotwordDetectionConnection {
     // The error codes are used for onError callback
     private static final int HOTWORD_DETECTION_SERVICE_DIED = -1;
     private static final int CALLBACK_ONDETECTED_GOT_SECURITY_EXCEPTION = -2;
+    private static final int CALLBACK_ONDETECTED_STREAM_COPY_ERROR = -4;
 
     // Hotword metrics
     private static final int METRICS_INIT_UNKNOWN_TIMEOUT =
@@ -168,6 +170,8 @@ final class HotwordDetectionConnection {
     // TODO: This may need to be a Handler(looper)
     private final ScheduledExecutorService mScheduledExecutorService =
             Executors.newSingleThreadScheduledExecutor();
+    private final AppOpsManager mAppOpsManager;
+    private final HotwordAudioStreamManager mHotwordAudioStreamManager;
     @Nullable private final ScheduledFuture<?> mCancellationTaskFuture;
     private final AtomicBoolean mUpdateStateAfterStartFinished = new AtomicBoolean(false);
     private final IBinder.DeathRecipient mAudioServerDeathRecipient = this::audioServerDied;
@@ -228,6 +232,9 @@ final class HotwordDetectionConnection {
         mContext = context;
         mVoiceInteractionServiceUid = voiceInteractionServiceUid;
         mVoiceInteractorIdentity = voiceInteractorIdentity;
+        mAppOpsManager = mContext.getSystemService(AppOpsManager.class);
+        mHotwordAudioStreamManager = new HotwordAudioStreamManager(mAppOpsManager,
+                mVoiceInteractorIdentity);
         mDetectionComponentName = serviceName;
         mUser = userId;
         mCallback = callback;
@@ -482,13 +489,19 @@ final class HotwordDetectionConnection {
                         return;
                     }
                     saveProximityMetersToBundle(result);
-                    mSoftwareCallback.onDetected(result, null, null);
-                    if (result != null) {
-                        Slog.i(TAG, "Egressed " + HotwordDetectedResult.getUsageSize(result)
-                                + " bits from hotword trusted process");
-                        if (mDebugHotwordLogging) {
-                            Slog.i(TAG, "Egressed detected result: " + result);
-                        }
+                    HotwordDetectedResult newResult;
+                    try {
+                        newResult = mHotwordAudioStreamManager.startCopyingAudioStreams(result);
+                    } catch (IOException e) {
+                        // TODO: Write event
+                        mSoftwareCallback.onError();
+                        return;
+                    }
+                    mSoftwareCallback.onDetected(newResult, null, null);
+                    Slog.i(TAG, "Egressed " + HotwordDetectedResult.getUsageSize(newResult)
+                            + " bits from hotword trusted process");
+                    if (mDebugHotwordLogging) {
+                        Slog.i(TAG, "Egressed detected result: " + newResult);
                     }
                 }
             }
@@ -660,6 +673,7 @@ final class HotwordDetectionConnection {
                     try {
                         enforcePermissionsForDataDelivery();
                     } catch (SecurityException e) {
+                        Slog.i(TAG, "Ignoring #onDetected due to a SecurityException", e);
                         HotwordMetricsLogger.writeKeyphraseTriggerEvent(
                                 mDetectorType,
                                 METRICS_KEYPHRASE_TRIGGERED_DETECT_SECURITY_EXCEPTION);
@@ -667,13 +681,19 @@ final class HotwordDetectionConnection {
                         return;
                     }
                     saveProximityMetersToBundle(result);
-                    externalCallback.onKeyphraseDetected(recognitionEvent, result);
-                    if (result != null) {
-                        Slog.i(TAG, "Egressed " + HotwordDetectedResult.getUsageSize(result)
-                                + " bits from hotword trusted process");
-                        if (mDebugHotwordLogging) {
-                            Slog.i(TAG, "Egressed detected result: " + result);
-                        }
+                    HotwordDetectedResult newResult;
+                    try {
+                        newResult = mHotwordAudioStreamManager.startCopyingAudioStreams(result);
+                    } catch (IOException e) {
+                        // TODO: Write event
+                        externalCallback.onError(CALLBACK_ONDETECTED_STREAM_COPY_ERROR);
+                        return;
+                    }
+                    externalCallback.onKeyphraseDetected(recognitionEvent, newResult);
+                    Slog.i(TAG, "Egressed " + HotwordDetectedResult.getUsageSize(newResult)
+                            + " bits from hotword trusted process");
+                    if (mDebugHotwordLogging) {
+                        Slog.i(TAG, "Egressed detected result: " + newResult);
                     }
                 }
             }
@@ -757,6 +777,7 @@ final class HotwordDetectionConnection {
     }
 
     private void restartProcessLocked() {
+        // TODO(b/244598068): Check HotwordAudioStreamManager first
         Slog.v(TAG, "Restarting hotword detection process");
         ServiceConnection oldConnection = mRemoteHotwordDetectionService;
         HotwordDetectionServiceIdentity previousIdentity = mIdentity;
@@ -991,16 +1012,24 @@ final class HotwordDetectionConnection {
                                         callback.onError();
                                         return;
                                     }
-                                    callback.onDetected(triggerResult, null /* audioFormat */,
+                                    HotwordDetectedResult newResult;
+                                    try {
+                                        newResult =
+                                                mHotwordAudioStreamManager.startCopyingAudioStreams(
+                                                        triggerResult);
+                                    } catch (IOException e) {
+                                        // TODO: Write event
+                                        callback.onError();
+                                        return;
+                                    }
+                                    callback.onDetected(newResult, null /* audioFormat */,
                                             null /* audioStream */);
-                                    if (triggerResult != null) {
-                                        Slog.i(TAG, "Egressed "
-                                                + HotwordDetectedResult.getUsageSize(triggerResult)
-                                                + " bits from hotword trusted process");
-                                        if (mDebugHotwordLogging) {
-                                            Slog.i(TAG,
-                                                    "Egressed detected result: " + triggerResult);
-                                        }
+                                    Slog.i(TAG, "Egressed "
+                                            + HotwordDetectedResult.getUsageSize(newResult)
+                                            + " bits from hotword trusted process");
+                                    if (mDebugHotwordLogging) {
+                                        Slog.i(TAG,
+                                                "Egressed detected result: " + newResult);
                                     }
                                 }
                             });
