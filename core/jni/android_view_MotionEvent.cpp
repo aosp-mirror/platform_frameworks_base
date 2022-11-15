@@ -102,6 +102,20 @@ jobject android_view_MotionEvent_obtainAsCopy(JNIEnv* env, const MotionEvent& ev
     return eventObj;
 }
 
+jobject android_view_MotionEvent_obtainFromNative(JNIEnv* env, std::unique_ptr<MotionEvent> event) {
+    if (event == nullptr) {
+        return nullptr;
+    }
+    jobject eventObj =
+            env->CallStaticObjectMethod(gMotionEventClassInfo.clazz, gMotionEventClassInfo.obtain);
+    if (env->ExceptionCheck() || !eventObj) {
+        LOGE_EX(env);
+        LOG_ALWAYS_FATAL("An exception occurred while obtaining a Java motion event.");
+    }
+    android_view_MotionEvent_setNativePtr(env, eventObj, event.release());
+    return eventObj;
+}
+
 status_t android_view_MotionEvent_recycle(JNIEnv* env, jobject eventObj) {
     env->CallVoidMethod(eventObj, gMotionEventClassInfo.recycle);
     if (env->ExceptionCheck()) {
