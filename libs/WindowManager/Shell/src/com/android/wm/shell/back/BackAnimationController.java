@@ -611,8 +611,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                     mBackAnimationFinishedCallback = finishedCallback;
 
                     ProtoLog.d(WM_SHELL_BACK_PREVIEW, "BackAnimationController: startAnimation()");
-                    runner.startAnimation(apps, wallpapers, nonApps,
-                            BackAnimationController.this::onBackAnimationFinished);
+                    runner.startAnimation(apps, wallpapers, nonApps, () -> mShellExecutor.execute(
+                            BackAnimationController.this::onBackAnimationFinished));
 
                     if (apps.length >= 1) {
                         dispatchOnBackStarted(
