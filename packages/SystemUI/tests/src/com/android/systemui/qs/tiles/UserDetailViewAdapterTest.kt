@@ -42,27 +42,21 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
 class UserDetailViewAdapterTest : SysuiTestCase() {
 
-    @Mock
-    private lateinit var mUserSwitcherController: UserSwitcherController
-    @Mock
-    private lateinit var mParent: ViewGroup
-    @Mock
-    private lateinit var mUserDetailItemView: UserDetailItemView
-    @Mock
-    private lateinit var mOtherView: View
-    @Mock
-    private lateinit var mInflatedUserDetailItemView: UserDetailItemView
-    @Mock
-    private lateinit var mLayoutInflater: LayoutInflater
+    @Mock private lateinit var mUserSwitcherController: UserSwitcherController
+    @Mock private lateinit var mParent: ViewGroup
+    @Mock private lateinit var mUserDetailItemView: UserDetailItemView
+    @Mock private lateinit var mOtherView: View
+    @Mock private lateinit var mInflatedUserDetailItemView: UserDetailItemView
+    @Mock private lateinit var mLayoutInflater: LayoutInflater
     private var falsingManagerFake: FalsingManagerFake = FalsingManagerFake()
     private lateinit var adapter: UserDetailView.Adapter
     private lateinit var uiEventLogger: UiEventLoggerFake
@@ -77,10 +71,13 @@ class UserDetailViewAdapterTest : SysuiTestCase() {
         `when`(mLayoutInflater.inflate(anyInt(), any(ViewGroup::class.java), anyBoolean()))
             .thenReturn(mInflatedUserDetailItemView)
         `when`(mParent.context).thenReturn(mContext)
-        adapter = UserDetailView.Adapter(
-            mContext, mUserSwitcherController, uiEventLogger,
-            falsingManagerFake
-        )
+        adapter =
+            UserDetailView.Adapter(
+                mContext,
+                mUserSwitcherController,
+                uiEventLogger,
+                falsingManagerFake
+            )
         mPicture = UserIcons.convertToBitmap(mContext.getDrawable(R.drawable.ic_avatar_user))
     }
 
