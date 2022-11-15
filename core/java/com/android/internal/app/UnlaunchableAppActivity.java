@@ -28,11 +28,13 @@ import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.telecom.TelecomManager;
 import android.util.Log;
 import android.view.Window;
 
@@ -52,6 +54,7 @@ public class UnlaunchableAppActivity extends Activity
     private int mUserId;
     private int mReason;
     private IntentSender mTarget;
+    private TelecomManager mTelecomManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,9 +63,11 @@ public class UnlaunchableAppActivity extends Activity
         // TODO: Use AlertActivity so we don't need to hide title bar and create a dialog
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         Intent intent = getIntent();
+        mTelecomManager = getSystemService(TelecomManager.class);
         mReason = intent.getIntExtra(EXTRA_UNLAUNCHABLE_REASON, -1);
         mUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
-        mTarget = intent.getParcelableExtra(Intent.EXTRA_INTENT, android.content.IntentSender.class);
+        mTarget = intent.getParcelableExtra(Intent.EXTRA_INTENT,
+                android.content.IntentSender.class);
 
         if (mUserId == UserHandle.USER_NULL) {
             Log.wtf(TAG, "Invalid user id: " + mUserId + ". Stopping.");
@@ -70,29 +75,40 @@ public class UnlaunchableAppActivity extends Activity
             return;
         }
 
-        String dialogTitle;
-        String dialogMessage = null;
-        if (mReason == UNLAUNCHABLE_REASON_QUIET_MODE) {
-            dialogTitle = getDialogTitle();
-            dialogMessage = getDialogMessage();
-        } else {
+        if (mReason != UNLAUNCHABLE_REASON_QUIET_MODE) {
             Log.wtf(TAG, "Invalid unlaunchable type: " + mReason);
             finish();
             return;
         }
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this)
-                .setTitle(dialogTitle)
-                .setMessage(dialogMessage)
-                .setOnDismissListener(this);
-        if (mReason == UNLAUNCHABLE_REASON_QUIET_MODE) {
-            builder.setPositiveButton(R.string.work_mode_turn_on, this)
-                    .setNegativeButton(R.string.cancel, null);
+        String targetPackageName = intent.getStringExtra(Intent.EXTRA_PACKAGE_NAME);
+        boolean showEmergencyCallButton =
+                (targetPackageName != null && targetPackageName.equals(
+                        mTelecomManager.getDefaultDialerPackage(UserHandle.of(mUserId))));
+
+        final AlertDialog.Builder builder;
+        final String dialogMessage;
+        if (showEmergencyCallButton) {
+            builder = new AlertDialog.Builder(this, R.style.AlertDialogWithEmergencyButton);
+            dialogMessage = getDialogMessage(R.string.work_mode_dialer_off_message);
+            builder.setNeutralButton(R.string.work_mode_emergency_call_button, this);
         } else {
-            builder.setPositiveButton(R.string.ok, null);
+            builder = new AlertDialog.Builder(this);
+            dialogMessage = getDialogMessage(R.string.work_mode_off_message);
         }
+        builder.setTitle(getDialogTitle())
+                .setMessage(dialogMessage)
+                .setOnDismissListener(this)
+                .setPositiveButton(R.string.work_mode_turn_on, this)
+                .setNegativeButton(R.string.cancel, null);
+
         final AlertDialog dialog = builder.create();
         dialog.create();
+        if (showEmergencyCallButton) {
+            dialog.getWindow().findViewById(R.id.parentPanel).setPadding(0, 0, 0, 30);
+            dialog.getWindow().findViewById(R.id.button3).setOutlineProvider(null);
+        }
+
         // Prevents screen overlay attack.
         getWindow().setHideOverlayWindows(true);
         dialog.getButton(DialogInterface.BUTTON_POSITIVE).setFilterTouchesWhenObscured(true);
@@ -104,10 +120,10 @@ public class UnlaunchableAppActivity extends Activity
                 UNLAUNCHABLE_APP_WORK_PAUSED_TITLE, () -> getString(R.string.work_mode_off_title));
     }
 
-    private String getDialogMessage() {
+    private String getDialogMessage(int dialogMessageString) {
         return getSystemService(DevicePolicyManager.class).getResources().getString(
                 UNLAUNCHABLE_APP_WORK_PAUSED_MESSAGE,
-                () -> getString(R.string.work_mode_off_message));
+                () -> getString(dialogMessageString));
     }
 
     @Override
@@ -117,12 +133,25 @@ public class UnlaunchableAppActivity extends Activity
 
     @Override
     public void onClick(DialogInterface dialog, int which) {
-        if (mReason == UNLAUNCHABLE_REASON_QUIET_MODE && which == DialogInterface.BUTTON_POSITIVE) {
+        if (mReason != UNLAUNCHABLE_REASON_QUIET_MODE) {
+            return;
+        }
+        if (which == DialogInterface.BUTTON_POSITIVE) {
             UserManager userManager = UserManager.get(this);
             new Handler(Looper.getMainLooper()).post(
                     () -> userManager.requestQuietModeEnabled(
                             /* enableQuietMode= */ false, UserHandle.of(mUserId), mTarget));
+        } else if (which == DialogInterface.BUTTON_NEUTRAL) {
+            launchEmergencyDialer();
         }
+    }
+
+    private void launchEmergencyDialer() {
+        startActivity(mTelecomManager.createLaunchEmergencyDialerIntent(
+                        null /* number*/)
+                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                        | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
+                        | Intent.FLAG_ACTIVITY_CLEAR_TOP));
     }
 
     private static final Intent createBaseIntent() {
@@ -139,9 +168,13 @@ public class UnlaunchableAppActivity extends Activity
         return intent;
     }
 
-    public static Intent createInQuietModeDialogIntent(int userId, IntentSender target) {
+    public static Intent createInQuietModeDialogIntent(int userId, IntentSender target,
+            ResolveInfo resolveInfo) {
         Intent intent = createInQuietModeDialogIntent(userId);
         intent.putExtra(Intent.EXTRA_INTENT, target);
+        if (resolveInfo != null) {
+            intent.putExtra(Intent.EXTRA_PACKAGE_NAME, resolveInfo.getComponentInfo().packageName);
+        }
         return intent;
     }
 }
