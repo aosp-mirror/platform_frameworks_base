@@ -1672,11 +1672,9 @@ public class LocationTimeZoneProviderControllerTest {
         }
 
         @Override
-        void onInitialize() {
+        boolean onInitialize() {
             mInitialized = true;
-            if (mFailDuringInitialization) {
-                throw new RuntimeException("Simulated initialization failure");
-            }
+            return !mFailDuringInitialization;
         }
 
         @Override
