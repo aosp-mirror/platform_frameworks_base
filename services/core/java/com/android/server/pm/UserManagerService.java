@@ -265,7 +265,7 @@ public class UserManagerService extends IUserManager.Stub {
     @VisibleForTesting
     static final int MAX_RECENTLY_REMOVED_IDS_SIZE = 100;
 
-    private static final int USER_VERSION = 10;
+    private static final int USER_VERSION = 11;
 
     private static final long EPOCH_PLUS_30_YEARS = 30L * 365 * 24 * 60 * 60 * 1000L; // ms
 
@@ -3355,6 +3355,7 @@ public class UserManagerService extends IUserManager.Stub {
                 final int oldFlags = systemUserData.info.flags;
                 final int newFlags;
                 final String newUserType;
+                // TODO(b/256624031): Also handle FLAG_MAIN
                 if (newHeadlessSystemUserMode) {
                     newUserType = UserManager.USER_TYPE_SYSTEM_HEADLESS;
                     newFlags = oldFlags & ~UserInfo.FLAG_FULL;
@@ -3647,6 +3648,22 @@ public class UserManagerService extends IUserManager.Stub {
             userVersion = 10;
         }
 
+        if (userVersion < 11) {
+            // Add FLAG_MAIN
+            if (isHeadlessSystemUserMode()) {
+                final UserInfo earliestCreatedUser = getEarliestCreatedFullUser();
+                earliestCreatedUser.flags |= UserInfo.FLAG_MAIN;
+                userIdsToWrite.add(earliestCreatedUser.id);
+            } else {
+                synchronized (mUsersLock) {
+                    final UserData userData = mUsers.get(UserHandle.USER_SYSTEM);
+                    userData.info.flags |= UserInfo.FLAG_MAIN;
+                    userIdsToWrite.add(userData.info.id);
+                }
+            }
+            userVersion = 11;
+        }
+
         // Reminder: If you add another upgrade, make sure to increment USER_VERSION too.
 
         // Done with userVersion changes, moving on to deal with userTypeVersion upgrades
@@ -3774,6 +3791,21 @@ public class UserManagerService extends IUserManager.Stub {
 
         // re-compute badge index
         userInfo.profileBadge = getFreeProfileBadgeLU(userInfo.profileGroupId, userInfo.userType);
+    }
+
+    private UserInfo getEarliestCreatedFullUser() {
+        final List<UserInfo> users = getUsersInternal(true, true, true);
+        UserInfo earliestUser = users.get(0);
+        long earliestCreationTime = earliestUser.creationTime;
+        for (int i = 0; i < users.size(); i++) {
+            final UserInfo info = users.get(i);
+            if (info.isFull() && info.creationTime > 0
+                    && info.creationTime < earliestCreationTime) {
+                earliestCreationTime = info.creationTime;
+                earliestUser = info;
+            }
+        }
+        return earliestUser;
     }
 
     @GuardedBy({"mPackagesLock"})

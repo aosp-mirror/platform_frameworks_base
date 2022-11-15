@@ -905,6 +905,7 @@ package android.content.pm {
     method public boolean isFull();
     method public boolean isGuest();
     method public boolean isInitialized();
+    method public boolean isMain();
     method public boolean isManagedProfile();
     method public boolean isPrimary();
     method public boolean isProfile();
@@ -923,6 +924,7 @@ package android.content.pm {
     field public static final int FLAG_FULL = 1024; // 0x400
     field @Deprecated public static final int FLAG_GUEST = 4; // 0x4
     field public static final int FLAG_INITIALIZED = 16; // 0x10
+    field public static final int FLAG_MAIN = 16384; // 0x4000
     field @Deprecated public static final int FLAG_MANAGED_PROFILE = 32; // 0x20
     field public static final int FLAG_PRIMARY = 1; // 0x1
     field public static final int FLAG_PROFILE = 4096; // 0x1000
