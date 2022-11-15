@@ -499,6 +499,18 @@ public final class TvInteractiveAppManager {
             }
 
             @Override
+            public void onRequestStopRecording(String recordingId, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postRequestStopRecording(recordingId);
+                }
+            }
+
+            @Override
             public void onRequestSigning(
                     String id, String algorithm, String alias, byte[] data, int seq) {
                 synchronized (mSessionCallbackRecordMap) {
@@ -1729,6 +1741,15 @@ public final class TvInteractiveAppManager {
             });
         }
 
+        void postRequestStopRecording(String recordingId) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onRequestStopRecording(mSession, recordingId);
+                }
+            });
+        }
+
         void postRequestSigning(String id, String algorithm, String alias, byte[] data) {
             mHandler.post(new Runnable() {
                 @Override
@@ -1884,8 +1905,19 @@ public final class TvInteractiveAppManager {
          * called.
          *
          * @param session A {@link TvInteractiveAppService.Session} associated with this callback.
+         * @param programUri The Uri of the program to be recorded.
          */
         public void onRequestStartRecording(Session session, Uri programUri) {
+        }
+
+        /**
+         * This is called when {@link TvInteractiveAppService.Session#RequestStopRecording} is
+         * called.
+         *
+         * @param session A {@link TvInteractiveAppService.Session} associated with this callback.
+         * @param recordingId The recordingId of the recording to be stopped.
+         */
+        public void onRequestStopRecording(Session session, String recordingId) {
         }
 
         /**

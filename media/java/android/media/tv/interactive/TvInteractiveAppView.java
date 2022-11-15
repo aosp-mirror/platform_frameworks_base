@@ -867,6 +867,19 @@ public class TvInteractiveAppView extends ViewGroup {
         }
 
         /**
+         * This is called when {@link TvInteractiveAppService.Session#requestStopRecording()}
+         * is called.
+         *
+         * @param iAppServiceId The ID of the TV interactive app service bound to this view.
+         * @param recordingId The ID of the recording to stop.
+         * @hide
+         */
+        public void onRequestStopRecording(
+                @NonNull String iAppServiceId,
+                @NonNull String recordingId) {
+        }
+
+        /**
          * This is called when
          * {@link TvInteractiveAppService.Session#requestSigning(String, String, String, byte[])} is
          * called.
@@ -1200,6 +1213,20 @@ public class TvInteractiveAppView extends ViewGroup {
             }
             if (mCallback != null) {
                 mCallback.onRequestStartRecording(mIAppServiceId, programUri);
+            }
+        }
+
+        @Override
+        public void onRequestStopRecording(Session session, String recordingId) {
+            if (DEBUG) {
+                Log.d(TAG, "onRequestStopRecording");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onRequestStopRecording - session not created");
+                return;
+            }
+            if (mCallback != null) {
+                mCallback.onRequestStopRecording(mIAppServiceId, recordingId);
             }
         }
 
