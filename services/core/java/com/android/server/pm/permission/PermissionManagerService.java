@@ -50,6 +50,7 @@ import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
 import android.content.pm.permission.SplitPermissionInfoParcelable;
+import android.healthconnect.HealthConnectManager;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Process;
@@ -1156,7 +1157,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             if (permissionInfo == null) {
                 try {
                     permissionInfo = context.getPackageManager().getPermissionInfo(permission, 0);
-                    if (PLATFORM_PACKAGE_NAME.equals(permissionInfo.packageName)) {
+                    if (PLATFORM_PACKAGE_NAME.equals(permissionInfo.packageName)
+                            || HealthConnectManager.isHealthPermission(context, permission)) {
                         // Double addition due to concurrency is fine - the backing
                         // store is concurrent.
                         sPlatformPermissions.put(permission, permissionInfo);
