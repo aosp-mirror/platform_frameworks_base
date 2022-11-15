@@ -27,6 +27,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.util.Log;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.FrameworkStatsLog;
 
 import java.util.concurrent.Executor;
@@ -47,7 +48,9 @@ public class DvrRecorder implements AutoCloseable {
     private static int sInstantId = 0;
     private int mSegmentId = 0;
     private int mOverflow;
-    private Boolean mIsStopped = true;
+    private final Object mIsStoppedLock = new Object();
+    @GuardedBy("mIsStoppedLock")
+    private boolean mIsStopped = true;
     private final Object mListenerLock = new Object();
 
     private native int nativeAttachFilter(Filter filter);
@@ -147,7 +150,7 @@ public class DvrRecorder implements AutoCloseable {
                 .write(FrameworkStatsLog.TV_TUNER_DVR_STATUS, mUserId,
                     FrameworkStatsLog.TV_TUNER_DVR_STATUS__TYPE__RECORD,
                     FrameworkStatsLog.TV_TUNER_DVR_STATUS__STATE__STARTED, mSegmentId, 0);
-        synchronized (mIsStopped) {
+        synchronized (mIsStoppedLock) {
             int result = nativeStartDvr();
             if (result == Tuner.RESULT_SUCCESS) {
                 mIsStopped = false;
@@ -170,7 +173,7 @@ public class DvrRecorder implements AutoCloseable {
                 .write(FrameworkStatsLog.TV_TUNER_DVR_STATUS, mUserId,
                     FrameworkStatsLog.TV_TUNER_DVR_STATUS__TYPE__RECORD,
                     FrameworkStatsLog.TV_TUNER_DVR_STATUS__STATE__STOPPED, mSegmentId, mOverflow);
-        synchronized (mIsStopped) {
+        synchronized (mIsStoppedLock) {
             int result = nativeStopDvr();
             if (result == Tuner.RESULT_SUCCESS) {
                 mIsStopped = true;
@@ -188,7 +191,7 @@ public class DvrRecorder implements AutoCloseable {
      */
     @Result
     public int flush() {
-        synchronized (mIsStopped) {
+        synchronized (mIsStoppedLock) {
             if (mIsStopped) {
                 return nativeFlushDvr();
             }

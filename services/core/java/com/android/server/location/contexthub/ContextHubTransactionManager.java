@@ -519,9 +519,9 @@ import java.util.concurrent.atomic.AtomicInteger;
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder(100);
-        TransactionRecord[] arr;
+        ContextHubServiceTransaction[] arr;
         synchronized (this) {
-            arr = mTransactionQueue.toArray(new TransactionRecord[0]);
+            arr = mTransactionQueue.toArray(new ContextHubServiceTransaction[0]);
         }
         for (int i = 0; i < arr.length; i++) {
             sb.append(i + ": " + arr[i] + "\n");

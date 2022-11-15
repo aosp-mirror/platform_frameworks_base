@@ -21,7 +21,7 @@ import static android.os.Process.THREAD_PRIORITY_TOP_APP_BOOST;
 import static android.os.Process.myTid;
 import static android.os.Process.setThreadPriority;
 
-import static com.android.server.LockGuard.INDEX_WINDOW;;
+import static com.android.server.LockGuard.INDEX_WINDOW;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.AnimationThread;

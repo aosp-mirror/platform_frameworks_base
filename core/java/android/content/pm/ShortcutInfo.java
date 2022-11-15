@@ -50,6 +50,7 @@ import android.view.contentcapture.ContentCaptureContext;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 
+import java.lang.IllegalArgumentException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -1360,7 +1361,9 @@ public final class ShortcutInfo implements Parcelable {
         @NonNull
         public Builder setIntents(@NonNull Intent[] intents) {
             Objects.requireNonNull(intents, "intents cannot be null");
-            Objects.requireNonNull(intents.length, "intents cannot be empty");
+            if (intents.length == 0) {
+                throw new IllegalArgumentException("intents cannot be empty");
+            }
             for (Intent intent : intents) {
                 Objects.requireNonNull(intent, "intents cannot contain null");
                 Objects.requireNonNull(intent.getAction(), "intent's action must be set");
@@ -1398,7 +1401,9 @@ public final class ShortcutInfo implements Parcelable {
         @NonNull
         public Builder setPersons(@NonNull Person[] persons) {
             Objects.requireNonNull(persons, "persons cannot be null");
-            Objects.requireNonNull(persons.length, "persons cannot be empty");
+            if (persons.length == 0) {
+                throw new IllegalArgumentException("persons cannot be empty");
+            }
             for (Person person : persons) {
                 Objects.requireNonNull(person, "persons cannot contain null");
             }

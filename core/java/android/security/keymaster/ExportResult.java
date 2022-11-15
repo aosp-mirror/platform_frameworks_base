@@ -61,4 +61,4 @@ public class ExportResult implements Parcelable {
         out.writeInt(resultCode);
         out.writeByteArray(exportData);
     }
-};
+}
