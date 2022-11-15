@@ -380,8 +380,8 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
                 if (kDebugDispatchCycle) {
                     ALOGD("channel '%s' ~ Received motion event.", getInputChannelName().c_str());
                 }
-                MotionEvent* motionEvent = static_cast<MotionEvent*>(inputEvent);
-                if ((motionEvent->getAction() & AMOTION_EVENT_ACTION_MOVE) && outConsumedBatch) {
+                const MotionEvent& motionEvent = static_cast<const MotionEvent&>(*inputEvent);
+                if ((motionEvent.getAction() & AMOTION_EVENT_ACTION_MOVE) && outConsumedBatch) {
                     *outConsumedBatch = true;
                 }
                 inputEventObj = android_view_MotionEvent_obtainAsCopy(env, motionEvent);

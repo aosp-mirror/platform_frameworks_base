@@ -82,7 +82,7 @@ static void android_view_MotionEvent_setNativePtr(JNIEnv* env, jobject eventObj,
             reinterpret_cast<jlong>(event));
 }
 
-jobject android_view_MotionEvent_obtainAsCopy(JNIEnv* env, const MotionEvent* event) {
+jobject android_view_MotionEvent_obtainAsCopy(JNIEnv* env, const MotionEvent& event) {
     jobject eventObj = env->CallStaticObjectMethod(gMotionEventClassInfo.clazz,
             gMotionEventClassInfo.obtain);
     if (env->ExceptionCheck() || !eventObj) {
@@ -98,7 +98,7 @@ jobject android_view_MotionEvent_obtainAsCopy(JNIEnv* env, const MotionEvent* ev
         android_view_MotionEvent_setNativePtr(env, eventObj, destEvent);
     }
 
-    destEvent->copyFrom(event, true);
+    destEvent->copyFrom(&event, true);
     return eventObj;
 }
 
