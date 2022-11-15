@@ -16,7 +16,8 @@
 
 package android.app.time;
 
-import static android.app.timezonedetector.ParcelableTestSupport.assertRoundTripParcelable;
+import static android.app.time.ParcelableTestSupport.assertEqualsAndHashCode;
+import static android.app.time.ParcelableTestSupport.assertRoundTripParcelable;
 import static android.app.timezonedetector.ShellCommandTestSupport.createShellCommandWithArgsAndOptions;
 
 import static org.junit.Assert.assertEquals;
@@ -50,11 +51,6 @@ public class TimeZoneStateTest {
         String zone2 = "Europe/Parise";
         TimeZoneState zone2False = new TimeZoneState(zone2, false);
         assertNotEquals(zone1False_1, zone2False);
-    }
-
-    private static void assertEqualsAndHashCode(Object one, Object two) {
-        assertEquals(one, two);
-        assertEquals(one.hashCode(), two.hashCode());
     }
 
     @Test

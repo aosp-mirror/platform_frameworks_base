@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.app.timezonedetector;
+package android.app.time;
 
 import static org.junit.Assert.assertEquals;
 
@@ -48,6 +48,13 @@ public final class ParcelableTestSupport {
     }
 
     public static <T extends Parcelable> void assertRoundTripParcelable(T instance) {
-        assertEquals(instance, roundTripParcelable(instance));
+        assertEqualsAndHashCode(instance, roundTripParcelable(instance));
+    }
+
+    /** Asserts that the objects are equal and return identical hash codes. */
+    public static void assertEqualsAndHashCode(Object one, Object two) {
+        assertEquals(one, two);
+        assertEquals(two, one);
+        assertEquals(one.hashCode(), two.hashCode());
     }
 }
