@@ -27,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.android.settingslib.spa.framework.common.EntrySearchData
+import com.android.settingslib.spa.framework.common.EntrySliceData
 import com.android.settingslib.spa.framework.common.EntryStatusData
 import com.android.settingslib.spa.framework.common.SettingsEntry
 import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
@@ -37,6 +38,7 @@ import com.android.settingslib.spa.framework.compose.toState
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.gallery.R
 import com.android.settingslib.spa.gallery.SettingsPageProviderEnum
+import com.android.settingslib.spa.gallery.preference.PreferencePageModel.Companion.ASYNC_PREFERENCE_SUMMARY
 import com.android.settingslib.spa.gallery.preference.PreferencePageModel.Companion.ASYNC_PREFERENCE_TITLE
 import com.android.settingslib.spa.gallery.preference.PreferencePageModel.Companion.AUTO_UPDATE_PREFERENCE_TITLE
 import com.android.settingslib.spa.gallery.preference.PreferencePageModel.Companion.DISABLE_PREFERENCE_SUMMARY
@@ -46,10 +48,15 @@ import com.android.settingslib.spa.gallery.preference.PreferencePageModel.Compan
 import com.android.settingslib.spa.gallery.preference.PreferencePageModel.Companion.SIMPLE_PREFERENCE_KEYWORDS
 import com.android.settingslib.spa.gallery.preference.PreferencePageModel.Companion.SIMPLE_PREFERENCE_SUMMARY
 import com.android.settingslib.spa.gallery.preference.PreferencePageModel.Companion.SIMPLE_PREFERENCE_TITLE
+import com.android.settingslib.spa.slice.createBrowsePendingIntent
+import com.android.settingslib.spa.slice.provider.createDemoActionSlice
+import com.android.settingslib.spa.slice.provider.createDemoBrowseSlice
+import com.android.settingslib.spa.slice.provider.createDemoSlice
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
 import com.android.settingslib.spa.widget.preference.SimplePreferenceMacro
 import com.android.settingslib.spa.widget.ui.SettingsIcon
+import kotlinx.coroutines.delay
 
 private const val TAG = "PreferencePage"
 
@@ -134,6 +141,26 @@ object PreferencePageProvider : SettingsPageProvider {
                             override val enabled = model.asyncEnable
                         }
                     )
+                }
+                .setSliceDataFn { sliceUri, _ ->
+                    val createSliceImpl = { s: String ->
+                        createDemoBrowseSlice(
+                            sliceUri = sliceUri,
+                            title = ASYNC_PREFERENCE_TITLE,
+                            summary = s,
+                        )
+                    }
+                    return@setSliceDataFn object : EntrySliceData() {
+                        init {
+                            postValue(createSliceImpl("(loading)"))
+                        }
+
+                        override suspend fun asyncRunner() {
+                            spaLogger.message(TAG, "Async entry loading")
+                            delay(2000L)
+                            postValue(createSliceImpl(ASYNC_PREFERENCE_SUMMARY))
+                        }
+                    }
                 }.build()
         )
         entryList.add(
@@ -152,6 +179,27 @@ object PreferencePageProvider : SettingsPageProvider {
                             }
                         }
                     )
+                }.setSliceDataFn { sliceUri, args ->
+                    val createSliceImpl = { v: Int ->
+                        createDemoActionSlice(
+                            sliceUri = sliceUri,
+                            title = MANUAL_UPDATE_PREFERENCE_TITLE,
+                            summary = "manual update value $v",
+                        )
+                    }
+
+                    return@setSliceDataFn object : EntrySliceData() {
+                        private var tick = args?.getString("init")?.toInt() ?: 0
+
+                        init {
+                            postValue(createSliceImpl(tick))
+                        }
+
+                        override suspend fun asyncAction() {
+                            tick++
+                            postValue(createSliceImpl(tick))
+                        }
+                    }
                 }.build()
         )
         entryList.add(
@@ -170,7 +218,33 @@ object PreferencePageProvider : SettingsPageProvider {
                         }
                     )
                 }
-                .build()
+                .setSliceDataFn { sliceUri, args ->
+                    val createSliceImpl = { v: Int ->
+                        createDemoBrowseSlice(
+                            sliceUri = sliceUri,
+                            title = AUTO_UPDATE_PREFERENCE_TITLE,
+                            summary = "auto update value $v",
+                        )
+                    }
+
+                    return@setSliceDataFn object : EntrySliceData() {
+                        private var tick = args?.getString("init")?.toInt() ?: 0
+
+                        init {
+                            postValue(createSliceImpl(tick))
+                        }
+
+                        override suspend fun asyncRunner() {
+                            spaLogger.message(TAG, "autoUpdater.active")
+                            while (true) {
+                                delay(1000L)
+                                tick++
+                                spaLogger.message(TAG, "autoUpdater.value $tick")
+                                postValue(createSliceImpl(tick))
+                            }
+                        }
+                    }
+                }.build()
         )
 
         return entryList
@@ -200,6 +274,22 @@ object PreferencePageProvider : SettingsPageProvider {
                     title = PAGE_TITLE,
                     clickRoute = SettingsPageProviderEnum.PREFERENCE.name
                 )
+            }
+            .setSliceDataFn { sliceUri, _ ->
+                val intent = owner.createBrowseIntent()?.createBrowsePendingIntent()
+                    ?: return@setSliceDataFn null
+                return@setSliceDataFn object : EntrySliceData() {
+                    init {
+                        postValue(
+                            createDemoSlice(
+                                sliceUri = sliceUri,
+                                title = PAGE_TITLE,
+                                summary = "Injected Entry",
+                                intent = intent,
+                            )
+                        )
+                    }
+                }
             }
     }
 
