@@ -1,0 +1,24 @@
+# Keep all companion classes.
+-keep class android.companion.** {
+    *;
+}
+
+# Do not touch Mobly.
+-keep class com.google.android.mobly.** {
+    *;
+}
+
+# Keep names for easy debugging.
+-dontobfuscate
+
+# Necessary to allow debugging.
+-keepattributes *
+
+# By default, proguard leaves all classes in their original package, which
+# needlessly repeats com.google.android.apps.etc.
+-repackageclasses ""
+
+# Allows proguard to make private and protected methods and fields public as
+# part of optimization. This lets proguard inline trivial getter/setter
+# methods.
+-allowaccessmodification
