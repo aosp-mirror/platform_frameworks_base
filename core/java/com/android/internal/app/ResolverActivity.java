@@ -1617,6 +1617,14 @@ public class ResolverActivity extends Activity implements
     @VisibleForTesting
     protected ResolverListController createListController(UserHandle userHandle) {
         UserHandle queryIntentsUser = getQueryIntentsUser(userHandle);
+        ResolverRankerServiceResolverComparator resolverComparator =
+                new ResolverRankerServiceResolverComparator(
+                        this,
+                        getTargetIntent(),
+                        getReferrerPackageName(),
+                        null,
+                        null,
+                        getResolverRankerServiceUserHandleList(userHandle));
         return new ResolverListController(
                 this,
                 mPm,
@@ -1624,6 +1632,7 @@ public class ResolverActivity extends Activity implements
                 getReferrerPackageName(),
                 mLaunchedFromUid,
                 userHandle,
+                resolverComparator,
                 queryIntentsUser);
     }
 
@@ -2533,5 +2542,22 @@ public class ResolverActivity extends Activity implements
     public static UserHandle getResolveInfoUserHandle(ResolveInfo resolveInfo,
             UserHandle predictedHandle) {
         return resolveInfo.userHandle;
+    }
+
+    /**
+     * Returns the {@link List} of {@link UserHandle} to pass on to the
+     * {@link ResolverRankerServiceResolverComparator} as per the provided {@code userHandle}.
+     */
+    protected final List<UserHandle> getResolverRankerServiceUserHandleList(UserHandle userHandle) {
+        List<UserHandle> userList = new ArrayList<>();
+        userList.add(userHandle);
+        // Add clonedProfileUserHandle to the list only if we are:
+        // a. Building the Personal Tab.
+        // b. CloneProfile exists on the device.
+        if (userHandle.equals(getPersonalProfileUserHandle())
+                && getCloneProfileUserHandle() != null) {
+            userList.add(getCloneProfileUserHandle());
+        }
+        return userList;
     }
 }

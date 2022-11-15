@@ -545,13 +545,17 @@ public class ChooserActivityTest {
             return true;
         };
         ResolveInfo toChoose = resolvedComponentInfos.get(0).getResolveInfoAt(0);
+        DisplayResolveInfo testDri =
+                activity.createTestDisplayResolveInfo(sendIntent, toChoose, "testLabel", "testInfo",
+                        sendIntent,/* resolveInfoPresentationGetter */ null);
         onView(withText(toChoose.activityInfo.name))
                 .perform(click());
         waitForIdle();
         verify(ChooserActivityOverrideData.getInstance().resolverListController, times(1))
-                .updateChooserCounts(Mockito.anyString(), anyInt(), Mockito.anyString());
+                .updateChooserCounts(Mockito.anyString(), any(UserHandle.class),
+                        Mockito.anyString());
         verify(ChooserActivityOverrideData.getInstance().resolverListController, times(1))
-                .updateModel(toChoose.activityInfo.getComponentName());
+                .updateModel(testDri);
         assertThat(activity.getIsSelected(), is(true));
     }
 

@@ -2268,9 +2268,11 @@ public class ChooserActivity extends ResolverActivity implements
                         mChooserMultiProfilePagerAdapter.getActiveListAdapter();
                 if (currentListAdapter != null) {
                     sendImpressionToAppPredictor(info, currentListAdapter);
-                    currentListAdapter.updateModel(info.getResolvedComponentName());
-                    currentListAdapter.updateChooserCounts(ri.activityInfo.packageName,
-                            targetIntent.getAction());
+                    currentListAdapter.updateModel(info);
+                    currentListAdapter.updateChooserCounts(
+                            ri.activityInfo.packageName,
+                            targetIntent.getAction(),
+                            ri.userHandle);
                 }
                 if (DEBUG) {
                     Log.d(TAG, "ResolveInfo Package is " + ri.activityInfo.packageName);
@@ -2395,7 +2397,10 @@ public class ChooserActivity extends ResolverActivity implements
      */
     @Nullable
     private AppPredictor getAppPredictorForShareActivitiesIfEnabled(UserHandle userHandle) {
-        return USE_PREDICTION_MANAGER_FOR_SHARE_ACTIVITIES ? createAppPredictor(userHandle) : null;
+        // We cannot use APS service when clone profile is present as APS service cannot sort
+        // cross profile targets as of now.
+        return USE_PREDICTION_MANAGER_FOR_SHARE_ACTIVITIES && getCloneProfileUserHandle() == null
+                ? createAppPredictor(userHandle) : null;
     }
 
     void onRefinementResult(TargetInfo selectedTarget, Intent matchingIntent) {
@@ -2548,8 +2553,13 @@ public class ChooserActivity extends ResolverActivity implements
                     getReferrerPackageName(), appPredictor, userHandle, getChooserActivityLogger());
         } else {
             resolverComparator =
-                    new ResolverRankerServiceResolverComparator(this, getTargetIntent(),
-                        getReferrerPackageName(), null, getChooserActivityLogger());
+                    new ResolverRankerServiceResolverComparator(
+                            this,
+                            getTargetIntent(),
+                            getReferrerPackageName(),
+                            null,
+                            getChooserActivityLogger(),
+                            getResolverRankerServiceUserHandleList(userHandle));
         }
 
         UserHandle queryIntentsUser = getQueryIntentsUser(userHandle);

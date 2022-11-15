@@ -18,6 +18,7 @@ package com.android.internal.app;
 
 import static junit.framework.Assert.assertEquals;
 
+import android.app.Instrumentation;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -26,6 +27,10 @@ import android.content.pm.ResolveInfo;
 import android.os.Message;
 
 import androidx.test.InstrumentationRegistry;
+
+import com.android.internal.app.chooser.TargetInfo;
+
+import com.google.android.collect.Lists;
 
 import org.junit.Test;
 
@@ -96,7 +101,8 @@ public class AbstractResolverComparatorTest {
         Intent intent = new Intent();
 
         AbstractResolverComparator testComparator =
-                new AbstractResolverComparator(context, intent) {
+                new AbstractResolverComparator(context, intent,
+                        Lists.newArrayList(context.getUser())) {
 
             @Override
             int compare(ResolveInfo lhs, ResolveInfo rhs) {
@@ -109,7 +115,7 @@ public class AbstractResolverComparatorTest {
             void doCompute(List<ResolverActivity.ResolvedComponentInfo> targets) {}
 
             @Override
-            float getScore(ComponentName name) {
+            float getScore(TargetInfo targetInfo) {
                 return 0;
             }
 
