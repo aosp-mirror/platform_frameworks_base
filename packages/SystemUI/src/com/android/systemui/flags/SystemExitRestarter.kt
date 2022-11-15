@@ -13,23 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.android.systemui.flags
 
-import dagger.Module
-import dagger.Provides
-import javax.inject.Named
+import javax.inject.Inject
 
-/** Module containing shared code for all FeatureFlag implementations. */
-@Module
-interface FlagsCommonModule {
-    companion object {
-        const val ALL_FLAGS = "all_flags"
-
-        @JvmStatic
-        @Provides
-        @Named(ALL_FLAGS)
-        fun providesAllFlags(): Map<Int, Flag<*>> {
-            return FlagsFactory.knownFlags.map { it.value.id to it.value }.toMap()
-        }
+class SystemExitRestarter @Inject constructor() : Restarter {
+    override fun restart() {
+        System.exit(0)
     }
 }
