@@ -1417,6 +1417,18 @@ std::unique_ptr<Theme> AssetManager2::NewTheme() {
   return theme;
 }
 
+void AssetManager2::ForEachPackage(base::function_ref<bool(const std::string&, uint8_t)> func,
+                                   package_property_t excluded_property_flags) const {
+  for (const PackageGroup& package_group : package_groups_) {
+    const auto loaded_package = package_group.packages_.front().loaded_package_;
+    if ((loaded_package->GetPropertyFlags() & excluded_property_flags) == 0U
+        && !func(loaded_package->GetPackageName(),
+                 package_group.dynamic_ref_table->mAssignedPackageId)) {
+      return;
+    }
+  }
+}
+
 Theme::Theme(AssetManager2* asset_manager) : asset_manager_(asset_manager) {
 }
 

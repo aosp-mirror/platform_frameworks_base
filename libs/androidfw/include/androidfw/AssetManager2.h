@@ -17,6 +17,7 @@
 #ifndef ANDROIDFW_ASSETMANAGER2_H_
 #define ANDROIDFW_ASSETMANAGER2_H_
 
+#include "android-base/function_ref.h"
 #include "android-base/macros.h"
 
 #include <array>
@@ -320,17 +321,8 @@ class AssetManager2 {
   // Creates a new Theme from this AssetManager.
   std::unique_ptr<Theme> NewTheme();
 
-  void ForEachPackage(const std::function<bool(const std::string&, uint8_t)> func,
-                      package_property_t excluded_property_flags = 0U) const {
-    for (const PackageGroup& package_group : package_groups_) {
-      const auto loaded_package = package_group.packages_.front().loaded_package_;
-      if ((loaded_package->GetPropertyFlags() & excluded_property_flags) == 0U
-          && !func(loaded_package->GetPackageName(),
-                   package_group.dynamic_ref_table->mAssignedPackageId)) {
-        return;
-      }
-    }
-  }
+  void ForEachPackage(base::function_ref<bool(const std::string&, uint8_t)> func,
+                      package_property_t excluded_property_flags = 0U) const;
 
   void DumpToLog() const;
 
