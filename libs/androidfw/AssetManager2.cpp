@@ -112,7 +112,7 @@ void AssetManager2::BuildDynamicRefTable() {
   // A mapping from path of apk assets that could be target packages of overlays to the runtime
   // package id of its first loaded package. Overlays currently can only override resources in the
   // first package in the target resource table.
-  std::unordered_map<std::string, uint8_t> target_assets_package_ids;
+  std::unordered_map<std::string_view, uint8_t> target_assets_package_ids;
 
   // Overlay resources are not directly referenced by an application so their resource ids
   // can change throughout the application's lifetime. Assign overlay package ids last.
@@ -135,7 +135,7 @@ void AssetManager2::BuildDynamicRefTable() {
     if (auto loaded_idmap = apk_assets->GetLoadedIdmap(); loaded_idmap != nullptr) {
       // The target package must precede the overlay package in the apk assets paths in order
       // to take effect.
-      auto iter = target_assets_package_ids.find(std::string(loaded_idmap->TargetApkPath()));
+      auto iter = target_assets_package_ids.find(loaded_idmap->TargetApkPath());
       if (iter == target_assets_package_ids.end()) {
          LOG(INFO) << "failed to find target package for overlay "
                    << loaded_idmap->OverlayApkPath();
@@ -180,7 +180,7 @@ void AssetManager2::BuildDynamicRefTable() {
         if (overlay_ref_table != nullptr) {
           // If this package is from an overlay, use a dynamic reference table that can rewrite
           // overlay resource ids to their corresponding target resource ids.
-          new_group.dynamic_ref_table = overlay_ref_table;
+          new_group.dynamic_ref_table = std::move(overlay_ref_table);
         }
 
         DynamicRefTable* ref_table = new_group.dynamic_ref_table.get();
@@ -188,9 +188,9 @@ void AssetManager2::BuildDynamicRefTable() {
         ref_table->mAppAsLib = package->IsDynamic() && package->GetPackageId() == 0x7f;
       }
 
-      // Add the package and to the set of packages with the same ID.
+      // Add the package to the set of packages with the same ID.
       PackageGroup* package_group = &package_groups_[idx];
-      package_group->packages_.push_back(ConfiguredPackage{package.get(), {}});
+      package_group->packages_.emplace_back().loaded_package_ = package.get();
       package_group->cookies_.push_back(apk_assets_cookies[apk_assets]);
 
       // Add the package name -> build time ID mappings.
@@ -202,7 +202,7 @@ void AssetManager2::BuildDynamicRefTable() {
 
       if (auto apk_assets_path = apk_assets->GetPath()) {
         // Overlay target ApkAssets must have been created using path based load apis.
-        target_assets_package_ids.insert(std::make_pair(std::string(*apk_assets_path), package_id));
+        target_assets_package_ids.emplace(*apk_assets_path, package_id);
       }
     }
   }
@@ -219,11 +219,13 @@ void AssetManager2::BuildDynamicRefTable() {
 
     for (const auto& package : group.packages_) {
       const auto& package_aliases = package.loaded_package_->GetAliasResourceIdMap();
-      aliases.insert(package_aliases.begin(), package_aliases.end());
+      aliases.insert(aliases.end(), package_aliases.begin(), package_aliases.end());
     }
   }
 
   if (!aliases.empty()) {
+    std::sort(aliases.begin(), aliases.end(), [](auto&& l, auto&& r) { return l.first < r.first; });
+
     // Add the alias resources to the dynamic reference table of every package group. Since
     // staging aliases can only be defined by the framework package (which is not a shared
     // library), the compile-time package id of the framework is the same across all packages

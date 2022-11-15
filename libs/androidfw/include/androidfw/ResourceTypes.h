@@ -1885,11 +1885,10 @@ public:
 
     void addMapping(uint8_t buildPackageId, uint8_t runtimePackageId);
 
-    using AliasMap = std::map<uint32_t, uint32_t>;
+    using AliasMap = std::vector<std::pair<uint32_t, uint32_t>>;
     void setAliases(AliasMap aliases) {
         mAliasId = std::move(aliases);
     }
-    void addAlias(uint32_t stagedId, uint32_t finalizedId);
 
     // Returns whether or not the value must be looked up.
     bool requiresLookup(const Res_value* value) const;
