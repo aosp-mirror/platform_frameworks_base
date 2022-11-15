@@ -160,7 +160,7 @@ public class ShadeControllerImpl implements ShadeController {
                         if (getCentralSurfaces().getNotificationShadeWindowView()
                                 .isVisibleToUser()) {
                             getNotificationPanelViewController().removeOnGlobalLayoutListener(this);
-                            getNotificationPanelViewController().getView().post(executable);
+                            getNotificationPanelViewController().postToView(executable);
                         }
                     }
                 });
