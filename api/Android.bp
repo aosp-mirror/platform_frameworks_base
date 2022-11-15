@@ -99,7 +99,6 @@ combined_apis {
         "framework-connectivity",
         "framework-connectivity-t",
         "framework-devicelock",
-        "framework-federatedcompute",
         "framework-graphics",
         "framework-healthconnect",
         "framework-media",
