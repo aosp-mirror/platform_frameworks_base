@@ -290,7 +290,7 @@ public class LooperStats implements Looper.Observer {
     }
 
     protected boolean shouldCollectDetailedData() {
-        return ThreadLocalRandom.current().nextInt() % mSamplingInterval == 0;
+        return ThreadLocalRandom.current().nextInt(mSamplingInterval) == 0;
     }
 
     private static class DispatchSession {
