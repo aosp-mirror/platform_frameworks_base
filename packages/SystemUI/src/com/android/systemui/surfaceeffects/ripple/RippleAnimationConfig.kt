@@ -1,4 +1,4 @@
-package com.android.systemui.ripple
+package com.android.systemui.surfaceeffects.ripple
 
 import android.graphics.Color
 

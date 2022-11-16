@@ -37,7 +37,6 @@
         android:id="@+id/lockscreen_clock_view_large"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="@dimen/keyguard_large_clock_top_margin"
         android:clipChildren="false"
         android:visibility="gone" />
 

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.systemui.ripple
+package com.android.systemui.surfaceeffects.ripple
 
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
@@ -21,12 +21,10 @@ import com.android.systemui.SysuiTestCase
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mock
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 class RippleViewTest : SysuiTestCase() {
-    @Mock
     private lateinit var rippleView: RippleView
 
     @Before

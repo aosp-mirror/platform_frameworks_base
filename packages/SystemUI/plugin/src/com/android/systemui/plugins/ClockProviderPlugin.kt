@@ -70,10 +70,10 @@ interface ClockController {
     }
 
     /** Optional method for dumping debug information */
-    fun dump(pw: PrintWriter) { }
+    fun dump(pw: PrintWriter) {}
 
     /** Optional method for debug logging */
-    fun setLogBuffer(logBuffer: LogBuffer) { }
+    fun setLogBuffer(logBuffer: LogBuffer) {}
 }
 
 /** Interface for a specific clock face version rendered by the clock */
@@ -88,40 +88,37 @@ interface ClockFaceController {
 /** Events that should call when various rendering parameters change */
 interface ClockEvents {
     /** Call every time tick */
-    fun onTimeTick() { }
+    fun onTimeTick() {}
 
     /** Call whenever timezone changes */
-    fun onTimeZoneChanged(timeZone: TimeZone) { }
+    fun onTimeZoneChanged(timeZone: TimeZone) {}
 
     /** Call whenever the text time format changes (12hr vs 24hr) */
-    fun onTimeFormatChanged(is24Hr: Boolean) { }
+    fun onTimeFormatChanged(is24Hr: Boolean) {}
 
     /** Call whenever the locale changes */
-    fun onLocaleChanged(locale: Locale) { }
-
-    /** Call whenever font settings change */
-    fun onFontSettingChanged() { }
+    fun onLocaleChanged(locale: Locale) {}
 
     /** Call whenever the color palette should update */
-    fun onColorPaletteChanged(resources: Resources) { }
+    fun onColorPaletteChanged(resources: Resources) {}
 }
 
 /** Methods which trigger various clock animations */
 interface ClockAnimations {
     /** Runs an enter animation (if any) */
-    fun enter() { }
+    fun enter() {}
 
     /** Sets how far into AOD the device currently is. */
-    fun doze(fraction: Float) { }
+    fun doze(fraction: Float) {}
 
     /** Sets how far into the folding animation the device is. */
-    fun fold(fraction: Float) { }
+    fun fold(fraction: Float) {}
 
     /** Runs the battery animation (if any). */
-    fun charge() { }
+    fun charge() {}
 
     /** Move the clock, for example, if the notification tray appears in split-shade mode. */
-    fun onPositionUpdated(fromRect: Rect, toRect: Rect, fraction: Float) { }
+    fun onPositionUpdated(fromRect: Rect, toRect: Rect, fraction: Float) {}
 
     /**
      * Whether this clock has a custom position update animation. If true, the keyguard will call
@@ -135,11 +132,26 @@ interface ClockAnimations {
 /** Events that have specific data about the related face */
 interface ClockFaceEvents {
     /** Region Darkness specific to the clock face */
-    fun onRegionDarknessChanged(isDark: Boolean) { }
+    fun onRegionDarknessChanged(isDark: Boolean) {}
+
+    /**
+     * Call whenever font settings change. Pass in a target font size in pixels. The specific clock
+     * design is allowed to ignore this target size on a case-by-case basis.
+     */
+    fun onFontSettingChanged(fontSizePx: Float) {}
+
+    /**
+     * Target region information for the clock face. For small clock, this will match the bounds of
+     * the parent view mostly, but have a target height based on the height of the default clock.
+     * For large clocks, the parent view is the entire device size, but most clocks will want to
+     * render within the centered targetRect to avoid obstructing other elements. The specified
+     * targetRegion is relative to the parent view.
+     */
+    fun onTargetRegionChanged(targetRegion: Rect?) {}
 }
 
 /** Some data about a clock design */
 data class ClockMetadata(
     val clockId: ClockId,
-    val name: String
+    val name: String,
 )

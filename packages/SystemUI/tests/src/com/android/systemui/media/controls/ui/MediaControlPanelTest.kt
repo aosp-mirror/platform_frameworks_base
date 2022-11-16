@@ -78,9 +78,10 @@ import com.android.systemui.media.controls.util.MediaUiEventLogger
 import com.android.systemui.media.dialog.MediaOutputDialogFactory
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
-import com.android.systemui.ripple.MultiRippleView
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.surfaceeffects.ripple.MultiRippleView
+import com.android.systemui.surfaceeffects.turbulencenoise.TurbulenceNoiseView
 import com.android.systemui.util.animation.TransitionLayout
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.KotlinArgumentCaptor
@@ -178,6 +179,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     private lateinit var dismiss: FrameLayout
     private lateinit var dismissText: TextView
     private lateinit var multiRippleView: MultiRippleView
+    private lateinit var turbulenceNoiseView: TurbulenceNoiseView
 
     private lateinit var session: MediaSession
     private lateinit var device: MediaDeviceData
@@ -210,7 +212,10 @@ public class MediaControlPanelTest : SysuiTestCase() {
     private lateinit var recSubtitle3: TextView
     private var shouldShowBroadcastButton: Boolean = false
     private val fakeFeatureFlag =
-        FakeFeatureFlags().apply { this.set(Flags.UMO_SURFACE_RIPPLE, false) }
+        FakeFeatureFlags().apply {
+            this.set(Flags.UMO_SURFACE_RIPPLE, false)
+            this.set(Flags.MEDIA_FALSING_PENALTY, true)
+        }
 
     @JvmField @Rule val mockito = MockitoJUnit.rule()
 
@@ -382,6 +387,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
             }
 
         multiRippleView = MultiRippleView(context, null)
+        turbulenceNoiseView = TurbulenceNoiseView(context, null)
 
         whenever(viewHolder.player).thenReturn(view)
         whenever(viewHolder.appIcon).thenReturn(appIcon)
@@ -425,6 +431,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
         whenever(viewHolder.actionsTopBarrier).thenReturn(actionsTopBarrier)
 
         whenever(viewHolder.multiRippleView).thenReturn(multiRippleView)
+        whenever(viewHolder.turbulenceNoiseView).thenReturn(turbulenceNoiseView)
     }
 
     /** Initialize elements for the recommendation view holder */

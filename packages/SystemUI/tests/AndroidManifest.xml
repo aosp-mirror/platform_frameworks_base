@@ -140,6 +140,12 @@
             tools:replace="android:authorities"
             tools:node="remove" />
 
+        <provider android:name="com.android.systemui.keyguard.KeyguardQuickAffordanceProvider"
+            android:authorities="com.android.systemui.test.keyguard.quickaffordance.disabled"
+            android:enabled="false"
+            tools:replace="android:authorities"
+            tools:node="remove" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.android.systemui.test.fileprovider"

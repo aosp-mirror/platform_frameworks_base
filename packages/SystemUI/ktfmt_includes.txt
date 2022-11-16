@@ -16,7 +16,6 @@
 -packages/SystemUI/checks/tests/com/android/systemui/lint/RegisterReceiverViaContextDetectorTest.kt
 -packages/SystemUI/checks/tests/com/android/systemui/lint/SoftwareBitmapDetectorTest.kt
 -packages/SystemUI/monet/src/com/android/systemui/monet/ColorScheme.kt
--packages/SystemUI/plugin/src/com/android/systemui/plugins/ClockProviderPlugin.kt
 -packages/SystemUI/plugin/src/com/android/systemui/plugins/qs/QSContainerController.kt
 -packages/SystemUI/shared/src/com/android/systemui/flags/Flag.kt
 -packages/SystemUI/shared/src/com/android/systemui/flags/FlagListenable.kt

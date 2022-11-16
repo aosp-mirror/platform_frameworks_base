@@ -79,6 +79,11 @@ object Flags {
     val NOTIFICATION_GROUP_CORNER =
         unreleasedFlag(116, "notification_group_corner", teamfood = true)
 
+    // TODO(b/259217907)
+    @JvmField
+    val NOTIFICATION_GROUP_DISMISSAL_ANIMATION =
+        unreleasedFlag(259217907, "notification_group_dismissal_animation", teamfood = true)
+
     // TODO(b/257506350): Tracking Bug
     val FSI_CHROME = unreleasedFlag(117, "fsi_chrome")
 
@@ -113,28 +118,6 @@ object Flags {
      */
     // TODO(b/254512385): Tracking Bug
     @JvmField val MODERN_BOUNCER = releasedFlag(208, "modern_bouncer")
-
-    /**
-     * Whether the user interactor and repository should use `UserSwitcherController`.
-     *
-     * If this is `false`, the interactor and repo skip the controller and directly access the
-     * framework APIs.
-     */
-    // TODO(b/254513286): Tracking Bug
-    val USER_INTERACTOR_AND_REPO_USE_CONTROLLER =
-        unreleasedFlag(210, "user_interactor_and_repo_use_controller")
-
-    /**
-     * Whether `UserSwitcherController` should use the user interactor.
-     *
-     * When this is `true`, the controller does not directly access framework APIs. Instead, it goes
-     * through the interactor.
-     *
-     * Note: do not set this to true if [.USER_INTERACTOR_AND_REPO_USE_CONTROLLER] is `true` as it
-     * would created a cycle between controller -> interactor -> controller.
-     */
-    // TODO(b/254513102): Tracking Bug
-    val USER_CONTROLLER_USES_INTERACTOR = releasedFlag(211, "user_controller_uses_interactor")
 
     /**
      * Whether the clock on a wide lock screen should use the new "stepping" animation for moving
@@ -296,6 +279,8 @@ object Flags {
 
     // TODO(b/254513168): Tracking Bug
     @JvmField val UMO_SURFACE_RIPPLE = unreleasedFlag(907, "umo_surface_ripple")
+
+    @JvmField val MEDIA_FALSING_PENALTY = unreleasedFlag(908, "media_falsing_media")
 
     // 1000 - dock
     val SIMULATE_DOCK_THROUGH_CHARGING = releasedFlag(1000, "simulate_dock_through_charging")
