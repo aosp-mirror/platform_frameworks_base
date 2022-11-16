@@ -96,13 +96,11 @@ class DozeLogger @Inject constructor(
     fun logFling(
         expand: Boolean,
         aboveThreshold: Boolean,
-        thresholdNeeded: Boolean,
         screenOnFromTouch: Boolean
     ) {
         buffer.log(TAG, DEBUG, {
             bool1 = expand
             bool2 = aboveThreshold
-            bool3 = thresholdNeeded
             bool4 = screenOnFromTouch
         }, {
             "Fling expand=$bool1 aboveThreshold=$bool2 thresholdNeeded=$bool3 " +
