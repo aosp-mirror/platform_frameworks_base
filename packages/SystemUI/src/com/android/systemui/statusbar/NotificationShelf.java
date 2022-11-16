@@ -132,8 +132,11 @@ public class NotificationShelf extends ActivatableNotificationView implements
         mPaddingBetweenElements = res.getDimensionPixelSize(R.dimen.notification_divider_height);
 
         ViewGroup.LayoutParams layoutParams = getLayoutParams();
-        layoutParams.height = res.getDimensionPixelOffset(R.dimen.notification_shelf_height);
-        setLayoutParams(layoutParams);
+        final int newShelfHeight = res.getDimensionPixelOffset(R.dimen.notification_shelf_height);
+        if (newShelfHeight != layoutParams.height) {
+            layoutParams.height = newShelfHeight;
+            setLayoutParams(layoutParams);
+        }
 
         final int padding = res.getDimensionPixelOffset(R.dimen.shelf_icon_container_padding);
         mShelfIcons.setPadding(padding, 0, padding, 0);
