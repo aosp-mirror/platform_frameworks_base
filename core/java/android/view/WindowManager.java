@@ -3408,6 +3408,11 @@ public interface WindowManager extends ViewManager {
          * alt="Screenshot of an activity on a display with a cutout on the long edge in portrait,
          *         letterbox is applied."/>
          *
+         * <p>
+         * Note: Android might not allow the content view to overlap the system bars in view level.
+         * To override this behavior and allow content to be able to extend into the cutout area,
+         * call {@link Window#setDecorFitsSystemWindows(boolean)} with {@code false}.
+         *
          * @see DisplayCutout
          * @see WindowInsets#getDisplayCutout()
          * @see #layoutInDisplayCutoutMode
@@ -3442,6 +3447,11 @@ public interface WindowManager extends ViewManager {
          * <p>
          * In this mode, the window extends under cutouts on the all edges of the display in both
          * portrait and landscape, regardless of whether the window is hiding the system bars.
+         *
+         * <p>
+         * Note: Android might not allow the content view to overlap the system bars in view level.
+         * To override this behavior and allow content to be able to extend into the cutout area,
+         * call {@link Window#setDecorFitsSystemWindows(boolean)} with {@code false}.
          *
          * @see DisplayCutout
          * @see WindowInsets#getDisplayCutout()
