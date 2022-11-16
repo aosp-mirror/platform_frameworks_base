@@ -395,6 +395,54 @@
     <string name="permdesc_persistentActivity" product="default" msgid="1914841924366562051">"앱이 그 일부분을 영구적인 메모리로 만들 수 있도록 허용합니다. 이렇게 하면 다른 앱이 사용할 수 있는 메모리를 제한하여 휴대전화의 속도를 저하시킬 수 있습니다."</string>
     <string name="permlab_foregroundService" msgid="1768855976818467491">"포그라운드 서비스 실행"</string>
     <string name="permdesc_foregroundService" msgid="8720071450020922795">"앱에서 포그라운드 서비스를 사용하도록 허용합니다."</string>
+    <!-- no translation found for permlab_foregroundServiceCamera (7814751737955715297) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceCamera (6973701931250595727) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceConnectedDevice (3019650546176872501) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceConnectedDevice (1067457315741352963) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceDataSync (5847463514326881076) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceDataSync (2267140263423973050) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceLocation (3745428302378535690) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceLocation (118894034365177183) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceMediaPlayback (4002687983891935514) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceMediaPlayback (3638032446063968043) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceMediaProjection (2630868915733312527) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceMediaProjection (4805677128082002298) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceMicrophone (7390033424890545399) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceMicrophone (1206041516173483201) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServicePhoneCall (627937743867697892) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServicePhoneCall (5941660252587015147) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceHealth (3675776442080928184) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceHealth (2024586220562667185) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceRemoteMessaging (105670277002780950) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceRemoteMessaging (8767598075877576277) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceSystemExempted (1597663713590612685) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceSystemExempted (947381760834649622) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceSpecialUse (7973536745876645082) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceSpecialUse (646713654541885919) -->
+    <skip />
     <string name="permlab_getPackageSize" msgid="375391550792886641">"앱 저장공간 계산"</string>
     <string name="permdesc_getPackageSize" msgid="742743530909966782">"앱이 해당 코드, 데이터 및 캐시 크기를 검색할 수 있도록 허용합니다."</string>
     <string name="permlab_writeSettings" msgid="8057285063719277394">"시스템 설정 수정"</string>
@@ -447,6 +495,10 @@
     <string name="permdesc_recordAudio" msgid="5857246765327514062">"앱을 사용하는 동안 앱에서 마이크를 사용하여 오디오를 녹음할 수 있습니다."</string>
     <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"백그라운드에서 오디오 녹음"</string>
     <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"언제든지 앱에서 마이크를 사용하여 오디오를 녹음할 수 있습니다."</string>
+    <!-- no translation found for permlab_detectScreenCapture (4447042362828799433) -->
+    <skip />
+    <!-- no translation found for permdesc_detectScreenCapture (3485784917960342284) -->
+    <skip />
     <string name="permlab_sim_communication" msgid="176788115994050692">"SIM 카드로 명령 전송"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"앱이 SIM에 명령어를 전송할 수 있도록 허용합니다. 이 기능은 매우 신중히 허용해야 합니다."</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"신체 활동 확인"</string>
@@ -698,10 +750,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"앱이 공유 저장소에서 동영상 파일을 읽도록 허용합니다."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"공유 저장소에서 이미지 파일 읽기"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"앱이 공유 저장소에서 이미지 파일을 읽도록 허용합니다."</string>
-    <!-- no translation found for permlab_readVisualUserSelect (5516204215354667586) -->
-    <skip />
-    <!-- no translation found for permdesc_readVisualUserSelect (8027174717714968217) -->
-    <skip />
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"공유 저장소에서 사용자가 선택한 이미지 및 동영상 파일 읽기"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"앱이 공유 저장소에서 내가 선택한 이미지와 동영상 파일을 읽을 수 있도록 허용합니다."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"공유 저장공간의 콘텐츠 수정 또는 삭제"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"앱이 공유 저장공간의 콘텐츠에 쓰도록 허용합니다."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP 통화 발신/수신"</string>
@@ -2052,12 +2102,6 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"제거"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"열기"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"유해한 앱 감지됨"</string>
-    <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>에서 모든 기기 로그에 액세스하도록 허용하시겠습니까?"</string>
-    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"일회성 액세스 허용"</string>
-    <string name="log_access_confirmation_deny" msgid="7685790957455099845">"허용 안함"</string>
-    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"기기 로그에 기기에서 발생한 상황이 기록됩니다. 앱은 문제를 찾고 해결하는 데 이 로그를 사용할 수 있습니다.\n\n일부 로그는 민감한 정보를 포함할 수 있으므로 신뢰할 수 있는 앱만 모든 기기 로그에 액세스하도록 허용하세요. \n\n앱에 전체 기기 로그에 대한 액세스 권한을 부여하지 않아도 앱이 자체 로그에는 액세스할 수 있습니다. 기기 제조업체에서 일부 로그 또는 기기 내 정보에 액세스할 수도 있습니다."</string>
-    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"기기 로그에는 기기에서 발생한 상황이 기록됩니다. 앱은 문제를 찾고 해결하는 데 이 로그를 사용할 수 있습니다.\n\n일부 로그에 민감한 정보가 포함될 수 있으므로 신뢰할 수 있는 앱만 모든 기기 로그에 액세스하도록 허용하세요. \n\n앱에 전체 기기 로그에 대한 액세스 권한을 부여하지 않아도, 앱이 자체 로그에는 액세스할 수 있습니다. 기기 제조업체에서 기기 내 일부 로그 또는 정보에 액세스할 수도 있습니다.\n\ng.co/android/devicelogs에서 자세히 알아보세요."</string>
-    <string name="log_access_do_not_show_again" msgid="1058690599083091552">"다시 표시 안함"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g>에서 <xliff:g id="APP_2">%2$s</xliff:g>의 슬라이스를 표시하려고 합니다"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"수정"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"전화 및 알림이 오면 진동이 사용됩니다."</string>
@@ -2298,6 +2342,8 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"사용자의 <xliff:g id="DEVICE">%1$s</xliff:g>에서 휴대전화 카메라에 액세스할 수 없습니다."</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"사용자의 <xliff:g id="DEVICE">%1$s</xliff:g>에서 태블릿 카메라에 액세스할 수 없습니다."</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"스트리밍 중에는 액세스할 수 없습니다. 대신 휴대전화에서 시도해 보세요."</string>
+    <!-- no translation found for vdm_pip_blocked (4036107522497281397) -->
+    <skip />
     <string name="system_locale_title" msgid="711882686834677268">"시스템 기본값"</string>
     <string name="default_card_name" msgid="9198284935962911468">"<xliff:g id="CARDNUMBER">%d</xliff:g> 카드"</string>
 </resources>

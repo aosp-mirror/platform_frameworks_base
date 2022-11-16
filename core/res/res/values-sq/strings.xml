@@ -395,6 +395,54 @@
     <string name="permdesc_persistentActivity" product="default" msgid="1914841924366562051">"Lejon aplikacionin të zaptojë një pjesë të qëndrueshme në kujtesë. Kjo mund të kufizojë kujtesën e disponueshme për aplikacionet e tjera duke e ngadalësuar telefonin."</string>
     <string name="permlab_foregroundService" msgid="1768855976818467491">"ekzekuto shërbimin në plan të parë"</string>
     <string name="permdesc_foregroundService" msgid="8720071450020922795">"Lejon aplikacionin të përdorë shërbimet në plan të parë."</string>
+    <!-- no translation found for permlab_foregroundServiceCamera (7814751737955715297) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceCamera (6973701931250595727) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceConnectedDevice (3019650546176872501) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceConnectedDevice (1067457315741352963) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceDataSync (5847463514326881076) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceDataSync (2267140263423973050) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceLocation (3745428302378535690) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceLocation (118894034365177183) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceMediaPlayback (4002687983891935514) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceMediaPlayback (3638032446063968043) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceMediaProjection (2630868915733312527) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceMediaProjection (4805677128082002298) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceMicrophone (7390033424890545399) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceMicrophone (1206041516173483201) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServicePhoneCall (627937743867697892) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServicePhoneCall (5941660252587015147) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceHealth (3675776442080928184) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceHealth (2024586220562667185) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceRemoteMessaging (105670277002780950) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceRemoteMessaging (8767598075877576277) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceSystemExempted (1597663713590612685) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceSystemExempted (947381760834649622) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceSpecialUse (7973536745876645082) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceSpecialUse (646713654541885919) -->
+    <skip />
     <string name="permlab_getPackageSize" msgid="375391550792886641">"mat hapësirën ruajtëse të aplikacionit"</string>
     <string name="permdesc_getPackageSize" msgid="742743530909966782">"Lejon aplikacionin të gjejë kodin e tij, të dhënat dhe madhësitë e memorieve të përkohshme."</string>
     <string name="permlab_writeSettings" msgid="8057285063719277394">"modifiko cilësimet e sistemit"</string>
@@ -447,6 +495,10 @@
     <string name="permdesc_recordAudio" msgid="5857246765327514062">"Ky aplikacion mund të regjistrojë audion duke përdorur mikrofonin kur aplikacioni është në përdorim."</string>
     <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"të regjistrojë audion në sfond"</string>
     <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"Ky aplikacion mund të regjistrojë audion me mikrofonin në çdo kohë."</string>
+    <!-- no translation found for permlab_detectScreenCapture (4447042362828799433) -->
+    <skip />
+    <!-- no translation found for permdesc_detectScreenCapture (3485784917960342284) -->
+    <skip />
     <string name="permlab_sim_communication" msgid="176788115994050692">"dërgo komanda te karta SIM"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"Lejon aplikacionin t\'i dërgojë komanda kartës SIM. Kjo është shumë e rrezikshme."</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"njih aktivitetin fizik"</string>
@@ -698,10 +750,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Lejon që aplikacioni të lexojë skedarët e videove nga hapësira ruajtëse e ndarë."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"të lexojë skedarët e imazheve nga hapësira ruajtëse e ndarë"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Lejon që aplikacioni të lexojë skedarët e imazheve nga hapësira ruajtëse e ndarë."</string>
-    <!-- no translation found for permlab_readVisualUserSelect (5516204215354667586) -->
-    <skip />
-    <!-- no translation found for permdesc_readVisualUserSelect (8027174717714968217) -->
-    <skip />
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"të lexojë imazhin e zgjedhur nga përdoruesi dhe skedarët e videove nga hapësira ruajtëse e ndarë"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"Lejon aplikacionin të lexojë imazhin dhe skedarët e videove që ti zgjedh nga hapësira jote ruajtëse e ndarë."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"modifiko ose fshi përmbajtjet e hapësirës ruajtëse të ndarë"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Lejon që aplikacioni të shkruajë përmbajtjet e hapësirës ruajtëse të ndarë."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"bëj/merr telefonata SIP"</string>
@@ -2052,12 +2102,6 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"ÇINSTALO"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"HAPE GJITHSESI"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"U gjet aplikacion i dëmshëm"</string>
-    <string name="log_access_confirmation_title" msgid="2343578467290592708">"Të lejohet që <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> të ketë qasje te të gjitha evidencat e pajisjes?"</string>
-    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Lejo qasjen vetëm për një herë"</string>
-    <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Mos lejo"</string>
-    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"Evidencat e pajisjes regjistrojnë çfarë ndodh në pajisjen tënde. Aplikacionet mund t\'i përdorin këto evidenca për të gjetur dhe rregulluar problemet.\n\nDisa evidenca mund të përmbajnë informacione delikate, ndaj lejo vetëm aplikacionet që u beson të kenë qasje te të gjitha evidencat e pajisjes. \n\nNëse nuk e lejon këtë aplikacion që të ketë qasje te të gjitha evidencat e pajisjes, ai mund të vazhdojë të ketë qasje tek evidencat e tij. Prodhuesi i pajisjes sate mund të jetë ende në gjendje që të ketë qasje te disa evidenca ose informacione në pajisjen tënde."</string>
-    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"Evidencat e pajisjes regjistrojnë çfarë ndodh në pajisjen tënde. Aplikacionet mund t\'i përdorin këto evidenca për të gjetur dhe rregulluar problemet.\n\nDisa evidenca mund të përmbajnë informacione delikate, ndaj lejo vetëm aplikacionet që u beson të kenë qasje te të gjitha evidencat e pajisjes. \n\nNëse nuk e lejon këtë aplikacion që të ketë qasje te të gjitha evidencat e pajisjes, ai mund të vazhdojë të ketë qasje tek evidencat e tij. Prodhuesi i pajisjes sate mund të jetë ende në gjendje që të ketë qasje te disa evidenca ose informacione në pajisjen tënde.\n\nMëso më shumë në g.co/android/devicelogs."</string>
-    <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Mos e shfaq më"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> dëshiron të shfaqë pjesë të <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Modifiko"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Do të lëshojë dridhje për telefonatat dhe njoftimet"</string>
@@ -2298,6 +2342,8 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Nuk mund të qasesh në kamerën e telefonit tënd nga <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Nuk mund të qasesh në kamerën e tabletit tënd nga <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Nuk mund të kesh qasje në të gjatë transmetimit. Provoje në telefon më mirë."</string>
+    <!-- no translation found for vdm_pip_blocked (4036107522497281397) -->
+    <skip />
     <string name="system_locale_title" msgid="711882686834677268">"Parazgjedhja e sistemit"</string>
     <string name="default_card_name" msgid="9198284935962911468">"KARTA <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

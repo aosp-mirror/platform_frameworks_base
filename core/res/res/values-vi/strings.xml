@@ -395,6 +395,54 @@
     <string name="permdesc_persistentActivity" product="default" msgid="1914841924366562051">"Cho phép ứng dụng tạo sự đồng nhất cho các phần của mình trong bộ nhớ. Việc này có thể hạn chế bộ nhớ đối với các ứng dụng khác đang làm chậm điện thoại."</string>
     <string name="permlab_foregroundService" msgid="1768855976818467491">"chạy dịch vụ trên nền trước"</string>
     <string name="permdesc_foregroundService" msgid="8720071450020922795">"Cho phép ứng dụng sử dụng các dịch vụ trên nền trước."</string>
+    <!-- no translation found for permlab_foregroundServiceCamera (7814751737955715297) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceCamera (6973701931250595727) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceConnectedDevice (3019650546176872501) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceConnectedDevice (1067457315741352963) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceDataSync (5847463514326881076) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceDataSync (2267140263423973050) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceLocation (3745428302378535690) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceLocation (118894034365177183) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceMediaPlayback (4002687983891935514) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceMediaPlayback (3638032446063968043) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceMediaProjection (2630868915733312527) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceMediaProjection (4805677128082002298) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceMicrophone (7390033424890545399) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceMicrophone (1206041516173483201) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServicePhoneCall (627937743867697892) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServicePhoneCall (5941660252587015147) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceHealth (3675776442080928184) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceHealth (2024586220562667185) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceRemoteMessaging (105670277002780950) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceRemoteMessaging (8767598075877576277) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceSystemExempted (1597663713590612685) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceSystemExempted (947381760834649622) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceSpecialUse (7973536745876645082) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceSpecialUse (646713654541885919) -->
+    <skip />
     <string name="permlab_getPackageSize" msgid="375391550792886641">"đo dung lượng lưu trữ ứng dụng"</string>
     <string name="permdesc_getPackageSize" msgid="742743530909966782">"Cho phép ứng dụng truy xuất mã, dữ liệu và kích thước bộ nhớ đệm của chính ứng dụng"</string>
     <string name="permlab_writeSettings" msgid="8057285063719277394">"sửa đổi các chế độ cài đặt hệ thống"</string>
@@ -447,6 +495,10 @@
     <string name="permdesc_recordAudio" msgid="5857246765327514062">"Ứng dụng này có thể ghi âm bằng micrô khi bạn đang dùng ứng dụng."</string>
     <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"ghi âm trong nền"</string>
     <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"Ứng dụng này có thể ghi âm bằng micrô bất kỳ lúc nào."</string>
+    <!-- no translation found for permlab_detectScreenCapture (4447042362828799433) -->
+    <skip />
+    <!-- no translation found for permdesc_detectScreenCapture (3485784917960342284) -->
+    <skip />
     <string name="permlab_sim_communication" msgid="176788115994050692">"gửi lệnh đến SIM"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"Cho phép ứng dụng gửi lệnh đến SIM. Việc này rất nguy hiểm."</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"nhận dạng hoạt động thể chất"</string>
@@ -698,10 +750,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Cho phép ứng dụng đọc tệp video trong bộ nhớ dùng chung."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"đọc tệp hình ảnh trong bộ nhớ dùng chung"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Cho phép ứng dụng đọc tệp hình ảnh trong bộ nhớ dùng chung."</string>
-    <!-- no translation found for permlab_readVisualUserSelect (5516204215354667586) -->
-    <skip />
-    <!-- no translation found for permdesc_readVisualUserSelect (8027174717714968217) -->
-    <skip />
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"đọc các tệp hình ảnh và video mà người dùng đã chọn trong bộ nhớ dùng chung"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"Cho phép ứng dụng đọc các tệp hình ảnh và video mà bạn chọn trong bộ nhớ dùng chung."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"sửa đổi hoặc xóa nội dung của bộ nhớ dùng chung"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Cho phép ứng dụng ghi nội dung của bộ nhớ dùng chung."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"thực hiện/nhận các cuộc gọi qua SIP"</string>
@@ -2052,12 +2102,6 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"GỠ CÀI ĐẶT"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"VẪN MỞ"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Đã phát hiện ứng dụng độc hại"</string>
-    <string name="log_access_confirmation_title" msgid="2343578467290592708">"Cho phép <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> truy cập vào tất cả các nhật ký thiết bị?"</string>
-    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Cho phép truy cập một lần"</string>
-    <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Không cho phép"</string>
-    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"Nhật ký thiết bị ghi lại những hoạt động diễn ra trên thiết bị. Các ứng dụng có thể dùng nhật ký này để tìm và khắc phục sự cố.\n\nMột số nhật ký có thể chứa thông tin nhạy cảm, vì vậy, bạn chỉ nên cấp quyền truy cập vào toàn bộ nhật ký thiết bị cho những ứng dụng mà mình tin cậy. \n\nNếu bạn không cho phép ứng dụng này truy cập vào toàn bộ nhật ký thiết bị, thì ứng dụng vẫn có thể truy cập vào nhật ký của chính nó. Nhà sản xuất thiết bị vẫn có thể truy cập vào một số nhật ký hoặc thông tin trên thiết bị của bạn."</string>
-    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"Nhật ký thiết bị ghi lại những hoạt động diễn ra trên thiết bị. Các ứng dụng có thể dùng các nhật ký này để tìm và khắc phục sự cố.\n\nMột số nhật ký có thể chứa thông tin nhạy cảm, vì vậy, bạn chỉ nên cấp quyền truy cập vào mọi nhật ký thiết bị cho những ứng dụng mà mình tin cậy. \n\nNếu bạn không cho phép ứng dụng này truy cập vào toàn bộ nhật ký thiết bị, thì ứng dụng vẫn có thể truy cập vào nhật ký của chính nó. Nhà sản xuất thiết bị vẫn có thể truy cập vào một số nhật ký hoặc thông tin trên thiết bị của bạn.\n\nTìm hiểu thêm tại g.co/android/devicelogs."</string>
-    <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Không hiện lại"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> muốn hiển thị các lát của <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Chỉnh sửa"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Cuộc gọi và thông báo sẽ rung"</string>
@@ -2298,6 +2342,8 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Không truy cập được vào máy ảnh trên điện thoại từ <xliff:g id="DEVICE">%1$s</xliff:g> của bạn"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Không truy cập được vào máy ảnh trên máy tính bảng từ <xliff:g id="DEVICE">%1$s</xliff:g> của bạn"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Bạn không thể truy cập vào nội dung này trong khi phát trực tuyến. Hãy thử trên điện thoại."</string>
+    <!-- no translation found for vdm_pip_blocked (4036107522497281397) -->
+    <skip />
     <string name="system_locale_title" msgid="711882686834677268">"Theo chế độ mặc định của hệ thống"</string>
     <string name="default_card_name" msgid="9198284935962911468">"THẺ <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

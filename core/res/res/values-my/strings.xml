@@ -395,6 +395,54 @@
     <string name="permdesc_persistentActivity" product="default" msgid="1914841924366562051">"အပလီကေးရှင်းအား မှတ်ဉာဏ်ထဲတွင် ရေရှည်သိမ်းဆည်ထားရန် ခွင့်ပြုပါ။ ဒီခွင့်ပြုချက်ကြောင့် တခြားအပလီကေးရှင်းအများအတွက် မှတ်ဉာဏ်ရရှိမှု နည်းသွားနိုင်ပြီး ဖုန်းလည်း နှေးသွားနိုင်ပါသည်။"</string>
     <string name="permlab_foregroundService" msgid="1768855976818467491">"မျက်နှာစာ ဝန်ဆောင်မှုကို ဖွင့်ခြင်း"</string>
     <string name="permdesc_foregroundService" msgid="8720071450020922795">"မျက်နှာစာဝန်ဆောင်မှုများကို အက်ပ်အား အသုံးပြုခွင့်ပေးသည်။"</string>
+    <!-- no translation found for permlab_foregroundServiceCamera (7814751737955715297) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceCamera (6973701931250595727) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceConnectedDevice (3019650546176872501) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceConnectedDevice (1067457315741352963) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceDataSync (5847463514326881076) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceDataSync (2267140263423973050) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceLocation (3745428302378535690) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceLocation (118894034365177183) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceMediaPlayback (4002687983891935514) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceMediaPlayback (3638032446063968043) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceMediaProjection (2630868915733312527) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceMediaProjection (4805677128082002298) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceMicrophone (7390033424890545399) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceMicrophone (1206041516173483201) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServicePhoneCall (627937743867697892) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServicePhoneCall (5941660252587015147) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceHealth (3675776442080928184) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceHealth (2024586220562667185) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceRemoteMessaging (105670277002780950) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceRemoteMessaging (8767598075877576277) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceSystemExempted (1597663713590612685) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceSystemExempted (947381760834649622) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceSpecialUse (7973536745876645082) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceSpecialUse (646713654541885919) -->
+    <skip />
     <string name="permlab_getPackageSize" msgid="375391550792886641">"အက်ပ်သိုလ​ှောင်မှု နေရာကို တိုင်းထွာခြင်း"</string>
     <string name="permdesc_getPackageSize" msgid="742743530909966782">"အက်ပ်အား ၎င်း၏ ကုဒ်၊ ဒေတာ၊ နှင့် ကက်ရှ ဆိုက်များကို ရယူခွင့် ပြုသည်။"</string>
     <string name="permlab_writeSettings" msgid="8057285063719277394">"စနစ်အပြင်အဆင်အား မွမ်းမံခြင်း"</string>
@@ -447,6 +495,10 @@
     <string name="permdesc_recordAudio" msgid="5857246765327514062">"ဤအက်ပ်ကို အသုံးပြုနေစဉ် ၎င်းက မိုက်ခရိုဖုန်းကို အသုံးပြု၍ အသံဖမ်းနိုင်သည်။"</string>
     <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"နောက်ခံတွင် အသံဖမ်းပါ"</string>
     <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"ဤအက်ပ်သည် မိုက်ခရိုဖုန်းကို အသုံးပြု၍ အချိန်မရွေး အသံဖမ်းနိုင်သည်။"</string>
+    <!-- no translation found for permlab_detectScreenCapture (4447042362828799433) -->
+    <skip />
+    <!-- no translation found for permdesc_detectScreenCapture (3485784917960342284) -->
+    <skip />
     <string name="permlab_sim_communication" msgid="176788115994050692">"SIM ထံသို့ ညွှန်ကြားချက်များကို ပို့ပါ"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"အက်ပ်အား ဆင်းမ်ကဒ်ဆီသို့ အမိန့်များ ပေးပို့ခွင့် ပြုခြင်း။ ဤခွင့်ပြုမှုမှာ အန္တရာယ်အလွန် ရှိပါသည်။"</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"ကိုယ်ခန္ဓာလှုပ်ရှားမှုကို မှတ်သားပါ"</string>
@@ -698,10 +750,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"သင်၏မျှဝေထားသော သိုလှောင်ခန်းမှ ဗီဒီယိုဖိုင်များဖတ်ရန် အက်ပ်ကိုခွင့်ပြုသည်။"</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"မျှဝေထားသည့် သိုလှောင်ခန်းမှ ပုံပါဝင်သောဖိုင်များဖတ်ရန်"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"သင်၏မျှဝေထားသည့် သိုလှောင်ခန်းမှ ပုံပါဝင်သောဖိုင်များဖတ်ရန် အက်ပ်ကို ခွင့်ပြုသည်။"</string>
-    <!-- no translation found for permlab_readVisualUserSelect (5516204215354667586) -->
-    <skip />
-    <!-- no translation found for permdesc_readVisualUserSelect (8027174717714968217) -->
-    <skip />
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"မျှသုံးသိုလှောင်ခန်းမှ အသုံးပြုသူ ရွေးချယ်ထားသော ပုံနှင့် ဗီဒီယိုဖိုင်များ ဖတ်ခြင်း"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"မျှသုံးသိုလှောင်ခန်းမှ သင်ရွေးချယ်သည့် ပုံနှင့် ဗီဒီယိုဖိုင်များအား အက်ပ်ကို ဖတ်ခွင့်ပြုသည်။"</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"မျှဝေသိုလှောင်ခန်းမှ အရာများ ပြုပြင်/ဖျက်ခြင်း"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"မျှဝေသိုလှောင်ခန်းမှ အရာများ ရေးခွင့်ပြုသည်။"</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP ခေါ်ဆိုမှုများ ခေါ်ရန်/လက်ခံရန်"</string>
@@ -2052,12 +2102,6 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"ဖြုတ်ရန်"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"ဘာဖြစ်ဖြစ် ဖွင့်ရန်"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"အန္တရာယ်ရှိသော အက်ပ်ကို တွေ့ရှိထားသည်"</string>
-    <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> ကို စက်မှတ်တမ်းအားလုံး သုံးခွင့်ပြုမလား။"</string>
-    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"တစ်ခါသုံး ဝင်ခွင့်ပေးရန်"</string>
-    <string name="log_access_confirmation_deny" msgid="7685790957455099845">"ခွင့်မပြုပါ"</string>
-    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"သင့်စက်ရှိ အဖြစ်အပျက်များကို စက်မှတ်တမ်းများက မှတ်တမ်းတင်သည်။ အက်ပ်များက ပြဿနာများ ရှာဖွေပြီးဖြေရှင်းရန် ဤမှတ်တမ်းများကို သုံးနိုင်သည်။\n\nအချို့မှတ်တမ်းများတွင် သတိထားရမည့်အချက်အလက်များ ပါဝင်နိုင်သဖြင့် စက်မှတ်တမ်းအားလုံးကို ယုံကြည်ရသည့် အက်ပ်များကိုသာ သုံးခွင့်ပြုပါ။ \n\nဤအက်ပ်ကို စက်မှတ်တမ်းအားလုံး သုံးခွင့်မပြုသော်လည်း ၎င်းက ၎င်း၏ကိုယ်ပိုင်မှတ်တမ်းကို သုံးနိုင်ဆဲဖြစ်သည်။ သင့်စက်ရှိ အချို့မှတ်တမ်းများ (သို့) အချက်အလက်များကို သင့်စက်ထုတ်လုပ်သူက သုံးနိုင်ပါသေးသည်။"</string>
-    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"သင့်စက်ရှိ အဖြစ်အပျက်များကို စက်မှတ်တမ်းများက မှတ်တမ်းတင်သည်။ အက်ပ်များက ပြဿနာများ ရှာဖွေပြီးဖြေရှင်းရန် ဤမှတ်တမ်းများကို သုံးနိုင်သည်။\n\nအချို့မှတ်တမ်းများတွင် သတိထားရမည့်အချက်အလက်များ ပါဝင်နိုင်သဖြင့် ယုံကြည်ရသည့် အက်ပ်များကိုသာ စက်မှတ်တမ်းအားလုံး သုံးခွင့်ပြုပါ။ \n\nဤအက်ပ်ကို စက်မှတ်တမ်းအားလုံး သုံးခွင့်မပြုသော်လည်း ၎င်းက ကိုယ်ပိုင်မှတ်တမ်းများ သုံးနိုင်သေးသည်။ သင့်စက်ရှိ မှတ်တမ်း (သို့) အချက်အလက်အချို့ကို စက်ထုတ်လုပ်သူက သုံးနိုင်သေးသည်။\n\ng.co/android/devicelogs တွင် ပိုမိုလေ့လာပါ။"</string>
-    <string name="log_access_do_not_show_again" msgid="1058690599083091552">"နောက်ထပ်မပြပါနှင့်"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> သည် <xliff:g id="APP_2">%2$s</xliff:g> ၏အချပ်များကို ပြသလိုသည်"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"တည်းဖြတ်ရန်"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"ခေါ်ဆိုမှုများနှင့် အကြောင်းကြားချက်များ တုန်ခါပါမည်"</string>
@@ -2298,6 +2342,8 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"သင်၏ <xliff:g id="DEVICE">%1$s</xliff:g> မှ ဖုန်းကင်မရာကို သုံး၍မရပါ"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"သင်၏ <xliff:g id="DEVICE">%1$s</xliff:g> မှ တက်ဘလက်ကင်မရာကို သုံး၍မရပါ"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"တိုက်ရိုက်လွှင့်နေစဉ် ၎င်းကို မသုံးနိုင်ပါ။ ၎င်းအစား ဖုန်းတွင် စမ်းကြည့်ပါ။"</string>
+    <!-- no translation found for vdm_pip_blocked (4036107522497281397) -->
+    <skip />
     <string name="system_locale_title" msgid="711882686834677268">"စနစ်မူရင်း"</string>
     <string name="default_card_name" msgid="9198284935962911468">"ကတ် <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>
