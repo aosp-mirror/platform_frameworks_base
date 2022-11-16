@@ -2619,11 +2619,29 @@ final class InstallPackageHelper {
                 }
             }
 
+            Bundle extras = new Bundle();
+            extras.putInt(Intent.EXTRA_UID, request.getUid());
+            if (update) {
+                extras.putBoolean(Intent.EXTRA_REPLACING, true);
+            }
+            extras.putInt(PackageInstaller.EXTRA_DATA_LOADER_TYPE, dataLoaderType);
+
+            // If a package is a static shared library, then only the installer of the package
+            // should get the broadcast.
+            if (installerPackageName != null
+                    && request.getPkg().getStaticSharedLibraryName() != null) {
+                mPm.sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, packageName,
+                        extras, 0 /*flags*/,
+                        installerPackageName, null /*finishedReceiver*/,
+                        request.getNewUsers(), null /* instantUserIds*/,
+                        null /* broadcastAllowList */, null);
+            }
+
             // Send installed broadcasts if the package is not a static shared lib.
             if (request.getPkg().getStaticSharedLibraryName() == null) {
                 mPm.mProcessLoggingHandler.invalidateBaseApkHash(request.getPkg().getBaseApkPath());
 
-                // Send added for users that see the package for the first time
+                // Send PACKAGE_ADDED broadcast for users that see the package for the first time
                 // sendPackageAddedForNewUsers also deals with system apps
                 int appId = UserHandle.getAppId(request.getUid());
                 boolean isSystem = request.getPkg().isSystem();
@@ -2631,13 +2649,9 @@ final class InstallPackageHelper {
                         isSystem || virtualPreload, virtualPreload /*startReceiver*/, appId,
                         firstUserIds, firstInstantUserIds, dataLoaderType);
 
-                // Send added for users that don't see the package for the first time
-                Bundle extras = new Bundle();
-                extras.putInt(Intent.EXTRA_UID, request.getUid());
-                if (update) {
-                    extras.putBoolean(Intent.EXTRA_REPLACING, true);
-                }
-                extras.putInt(PackageInstaller.EXTRA_DATA_LOADER_TYPE, dataLoaderType);
+                // Send PACKAGE_ADDED broadcast for users that don't see
+                // the package for the first time
+
                 // Send to all running apps.
                 final SparseArray<int[]> newBroadcastAllowList;
                 synchronized (mPm.mLock) {
@@ -2650,8 +2664,8 @@ final class InstallPackageHelper {
                         extras, 0 /*flags*/,
                         null /*targetPackage*/, null /*finishedReceiver*/,
                         updateUserIds, instantUserIds, newBroadcastAllowList, null);
+                // Send to the installer, even if it's not running.
                 if (installerPackageName != null) {
-                    // Send to the installer, even if it's not running.
                     mPm.sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, packageName,
                             extras, 0 /*flags*/,
                             installerPackageName, null /*finishedReceiver*/,
