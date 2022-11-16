@@ -70,6 +70,7 @@ import com.android.systemui.qs.ReduceBrightColorsController;
 import com.android.systemui.qs.tiles.dialog.InternetDialogFactory;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.screenrecord.RecordingController;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
@@ -357,6 +358,7 @@ public class Dependency {
     @Inject Lazy<GroupExpansionManager> mGroupExpansionManagerLazy;
     @Inject Lazy<SystemUIDialogManager> mSystemUIDialogManagerLazy;
     @Inject Lazy<DialogLaunchAnimator> mDialogLaunchAnimatorLazy;
+    @Inject Lazy<UserTracker> mUserTrackerLazy;
 
     @Inject
     public Dependency() {
@@ -564,6 +566,7 @@ public class Dependency {
         mProviders.put(GroupExpansionManager.class, mGroupExpansionManagerLazy::get);
         mProviders.put(SystemUIDialogManager.class, mSystemUIDialogManagerLazy::get);
         mProviders.put(DialogLaunchAnimator.class, mDialogLaunchAnimatorLazy::get);
+        mProviders.put(UserTracker.class, mUserTrackerLazy::get);
 
         Dependency.setInstance(this);
     }

@@ -145,6 +145,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.TaskStackChangeListeners;
 import com.android.systemui.statusbar.StatusBarState;
@@ -279,6 +280,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     }
 
     private final Context mContext;
+    private final UserTracker mUserTracker;
     private final KeyguardUpdateMonitorLogger mLogger;
     private final boolean mIsPrimaryUser;
     private final AuthController mAuthController;
@@ -884,13 +886,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             mHandler.removeCallbacks(mFpCancelNotReceived);
         }
         try {
-            final int userId;
-            try {
-                userId = ActivityManager.getService().getCurrentUser().id;
-            } catch (RemoteException e) {
-                mLogger.logException(e, "Failed to get current user id");
-                return;
-            }
+            final int userId = mUserTracker.getUserId();
             if (userId != authUserId) {
                 mLogger.logFingerprintAuthForWrongUser(authUserId);
                 return;
@@ -1108,13 +1104,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 mLogger.d("Aborted successful auth because device is going to sleep.");
                 return;
             }
-            final int userId;
-            try {
-                userId = ActivityManager.getService().getCurrentUser().id;
-            } catch (RemoteException e) {
-                mLogger.logException(e, "Failed to get current user id");
-                return;
-            }
+            final int userId = mUserTracker.getUserId();
             if (userId != authUserId) {
                 mLogger.logFaceAuthForWrongUser(authUserId);
                 return;
@@ -1964,6 +1954,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     @Inject
     protected KeyguardUpdateMonitor(
             Context context,
+            UserTracker userTracker,
             @Main Looper mainLooper,
             BroadcastDispatcher broadcastDispatcher,
             SecureSettings secureSettings,
@@ -1996,6 +1987,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             FaceWakeUpTriggersConfig faceWakeUpTriggersConfig) {
         mContext = context;
         mSubscriptionManager = subscriptionManager;
+        mUserTracker = userTracker;
         mTelephonyListenerManager = telephonyListenerManager;
         mDeviceProvisioned = isDeviceProvisionedInSettingsDb();
         mStrongAuthTracker = new StrongAuthTracker(context, this::notifyStrongAuthStateChanged,
@@ -2227,7 +2219,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
         TaskStackChangeListeners.getInstance().registerTaskStackListener(mTaskStackListener);
         mIsPrimaryUser = mUserManager.isPrimaryUser();
-        int user = ActivityManager.getCurrentUser();
+        int user = mUserTracker.getUserId();
         mUserIsUnlocked.put(user, mUserManager.isUserUnlocked(user));
         mLogoutEnabled = mDevicePolicyManager.isLogoutEnabled();
         updateSecondaryLockscreenRequirement(user);
@@ -3853,7 +3845,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             pw.println("    " + subId + "=" + mServiceStates.get(subId));
         }
         if (mFpm != null && mFpm.isHardwareDetected()) {
-            final int userId = ActivityManager.getCurrentUser();
+            final int userId = mUserTracker.getUserId();
             final int strongAuthFlags = mStrongAuthTracker.getStrongAuthForUser(userId);
             BiometricAuthenticated fingerprint = mUserFingerprintAuthenticated.get(userId);
             pw.println("  Fingerprint state (user=" + userId + ")");
@@ -3891,7 +3883,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             }
         }
         if (mFaceManager != null && mFaceManager.isHardwareDetected()) {
-            final int userId = ActivityManager.getCurrentUser();
+            final int userId = mUserTracker.getUserId();
             final int strongAuthFlags = mStrongAuthTracker.getStrongAuthForUser(userId);
             BiometricAuthenticated face = mUserFaceAuthenticated.get(userId);
             pw.println("  Face authentication state (user=" + userId + ")");

@@ -35,6 +35,7 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.policy.ZenModeController.Callback;
 import com.android.systemui.util.settings.FakeSettings;
 
@@ -58,6 +59,8 @@ public class ZenModeControllerImplTest extends SysuiTestCase {
     BroadcastDispatcher mBroadcastDispatcher;
     @Mock
     DumpManager mDumpManager;
+    @Mock
+    UserTracker mUserTracker;
 
     private ZenModeControllerImpl mController;
 
@@ -72,7 +75,8 @@ public class ZenModeControllerImplTest extends SysuiTestCase {
                 Handler.createAsync(Looper.myLooper()),
                 mBroadcastDispatcher,
                 mDumpManager,
-                new FakeSettings());
+                new FakeSettings(),
+                mUserTracker);
     }
 
     @Test
