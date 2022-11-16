@@ -180,6 +180,19 @@ interface IPhoneSubInfo {
     String getIsimImpi(int subId);
 
     /**
+     * Fetches the ISIM PrivateUserIdentity (EF_IMPI) based on subId
+     *
+     * @param subId subscriptionId
+     * @return IMPI (IMS private user identity) of type string or null if EF_IMPI is not available.
+     * @throws IllegalArgumentException if the subscriptionId is not valid
+     * @throws IllegalStateException in case the ISIM hasn’t been loaded.
+     * @throws SecurityException if the caller does not have the required permission
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER)")
+    String getImsPrivateUserIdentity(int subId, String callingPackage, String callingFeatureId);
+
+    /**
      * Returns the IMS home network domain name that was loaded from the ISIM.
      * @return the IMS domain name, or null if not present or not loaded
      */
