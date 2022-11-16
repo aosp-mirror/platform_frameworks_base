@@ -22,6 +22,7 @@ import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_AMBIENT;
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_FULL_SCREEN_INTENT;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
 
 import static com.android.systemui.statusbar.NotificationEntryHelper.modifyRanking;
@@ -58,6 +59,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
+import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider.FullScreenIntentDecision;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl.NotificationInterruptEvent;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -403,11 +405,51 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
         when(mDreamManager.isDreaming()).thenReturn(false);
         when(mStatusBarStateController.getState()).thenReturn(SHADE);
 
+        assertThat(mNotifInterruptionStateProvider.getFullScreenIntentDecision(entry))
+                .isEqualTo(FullScreenIntentDecision.NO_FULL_SCREEN_INTENT);
         assertThat(mNotifInterruptionStateProvider.shouldLaunchFullScreenIntentWhenAdded(entry))
                 .isFalse();
         verify(mLogger, never()).logNoFullscreen(any(), any());
         verify(mLogger, never()).logNoFullscreenWarning(any(), any());
         verify(mLogger, never()).logFullscreen(any(), any());
+    }
+
+    @Test
+    public void testShouldNotFullScreen_suppressedOnlyByDND() throws RemoteException {
+        NotificationEntry entry = createFsiNotification(IMPORTANCE_HIGH, /* silenced */ false);
+        modifyRanking(entry)
+                .setSuppressedVisualEffects(SUPPRESSED_EFFECT_FULL_SCREEN_INTENT)
+                .build();
+        when(mPowerManager.isInteractive()).thenReturn(false);
+        when(mDreamManager.isDreaming()).thenReturn(false);
+        when(mStatusBarStateController.getState()).thenReturn(SHADE);
+
+        assertThat(mNotifInterruptionStateProvider.getFullScreenIntentDecision(entry))
+                .isEqualTo(FullScreenIntentDecision.NO_FSI_SUPPRESSED_ONLY_BY_DND);
+        assertThat(mNotifInterruptionStateProvider.shouldLaunchFullScreenIntentWhenAdded(entry))
+                .isFalse();
+        verify(mLogger, never()).logFullscreen(any(), any());
+        verify(mLogger, never()).logNoFullscreenWarning(any(), any());
+        verify(mLogger).logNoFullscreen(entry, "Suppressed by DND");
+    }
+
+    @Test
+    public void testShouldNotFullScreen_suppressedByDNDAndOther() throws RemoteException {
+        NotificationEntry entry = createFsiNotification(IMPORTANCE_LOW, /* silenced */ false);
+        modifyRanking(entry)
+                .setSuppressedVisualEffects(SUPPRESSED_EFFECT_FULL_SCREEN_INTENT)
+                .build();
+        when(mPowerManager.isInteractive()).thenReturn(false);
+        when(mDreamManager.isDreaming()).thenReturn(false);
+        when(mStatusBarStateController.getState()).thenReturn(SHADE);
+
+        assertThat(mNotifInterruptionStateProvider.getFullScreenIntentDecision(entry))
+                .isEqualTo(FullScreenIntentDecision.NO_FSI_SUPPRESSED_BY_DND);
+        assertThat(mNotifInterruptionStateProvider.shouldLaunchFullScreenIntentWhenAdded(entry))
+                .isFalse();
+        verify(mLogger, never()).logFullscreen(any(), any());
+        verify(mLogger, never()).logNoFullscreenWarning(any(), any());
+        verify(mLogger).logNoFullscreen(entry, "Suppressed by DND");
     }
 
     @Test
@@ -423,6 +465,8 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
         when(mDreamManager.isDreaming()).thenReturn(false);
         when(mStatusBarStateController.getState()).thenReturn(SHADE);
 
+        assertThat(mNotifInterruptionStateProvider.getFullScreenIntentDecision(entry))
+                .isEqualTo(FullScreenIntentDecision.NO_FSI_NOT_IMPORTANT_ENOUGH);
         assertThat(mNotifInterruptionStateProvider.shouldLaunchFullScreenIntentWhenAdded(entry))
                 .isFalse();
         verify(mLogger).logNoFullscreen(entry, "Not important enough");
@@ -443,6 +487,8 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
         when(mDreamManager.isDreaming()).thenReturn(true);
         when(mStatusBarStateController.getState()).thenReturn(KEYGUARD);
 
+        assertThat(mNotifInterruptionStateProvider.getFullScreenIntentDecision(entry))
+                .isEqualTo(FullScreenIntentDecision.NO_FSI_SUPPRESSIVE_GROUP_ALERT_BEHAVIOR);
         assertThat(mNotifInterruptionStateProvider.shouldLaunchFullScreenIntentWhenAdded(entry))
                 .isFalse();
         verify(mLogger, never()).logNoFullscreen(any(), any());
@@ -470,6 +516,8 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
         when(mDreamManager.isDreaming()).thenReturn(false);
         when(mStatusBarStateController.getState()).thenReturn(SHADE);
 
+        assertThat(mNotifInterruptionStateProvider.getFullScreenIntentDecision(entry))
+                .isEqualTo(FullScreenIntentDecision.FSI_DEVICE_NOT_INTERACTIVE);
         assertThat(mNotifInterruptionStateProvider.shouldLaunchFullScreenIntentWhenAdded(entry))
                 .isTrue();
         verify(mLogger, never()).logNoFullscreen(any(), any());
@@ -490,6 +538,8 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
         when(mDreamManager.isDreaming()).thenReturn(true);
         when(mStatusBarStateController.getState()).thenReturn(SHADE);
 
+        assertThat(mNotifInterruptionStateProvider.getFullScreenIntentDecision(entry))
+                .isEqualTo(FullScreenIntentDecision.FSI_DEVICE_IS_DREAMING);
         assertThat(mNotifInterruptionStateProvider.shouldLaunchFullScreenIntentWhenAdded(entry))
                 .isTrue();
         verify(mLogger, never()).logNoFullscreen(any(), any());
@@ -510,6 +560,8 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
         when(mDreamManager.isDreaming()).thenReturn(false);
         when(mStatusBarStateController.getState()).thenReturn(KEYGUARD);
 
+        assertThat(mNotifInterruptionStateProvider.getFullScreenIntentDecision(entry))
+                .isEqualTo(FullScreenIntentDecision.FSI_KEYGUARD_SHOWING);
         assertThat(mNotifInterruptionStateProvider.shouldLaunchFullScreenIntentWhenAdded(entry))
                 .isTrue();
         verify(mLogger, never()).logNoFullscreen(any(), any());
@@ -531,6 +583,8 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
         when(mDreamManager.isDreaming()).thenReturn(false);
         when(mStatusBarStateController.getState()).thenReturn(SHADE);
 
+        assertThat(mNotifInterruptionStateProvider.getFullScreenIntentDecision(entry))
+                .isEqualTo(FullScreenIntentDecision.NO_FSI_EXPECTED_TO_HUN);
         assertThat(mNotifInterruptionStateProvider.shouldLaunchFullScreenIntentWhenAdded(entry))
                 .isFalse();
         verify(mLogger).logNoFullscreen(entry, "Expected to HUN");
@@ -547,9 +601,10 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
         when(mStatusBarStateController.getState()).thenReturn(SHADE);
         when(mHeadsUpManager.isSnoozed("a")).thenReturn(true);
 
+        assertThat(mNotifInterruptionStateProvider.getFullScreenIntentDecision(entry))
+                .isEqualTo(FullScreenIntentDecision.FSI_EXPECTED_NOT_TO_HUN);
         assertThat(mNotifInterruptionStateProvider.shouldLaunchFullScreenIntentWhenAdded(entry))
                 .isTrue();
-        verify(mLogger).logNoHeadsUpPackageSnoozed(entry);
         verify(mLogger, never()).logNoFullscreen(any(), any());
         verify(mLogger, never()).logNoFullscreenWarning(any(), any());
         verify(mLogger).logFullscreen(entry, "Expected not to HUN");
@@ -567,9 +622,10 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
         when(mKeyguardStateController.isShowing()).thenReturn(true);
         when(mKeyguardStateController.isOccluded()).thenReturn(true);
 
+        assertThat(mNotifInterruptionStateProvider.getFullScreenIntentDecision(entry))
+                .isEqualTo(FullScreenIntentDecision.FSI_KEYGUARD_OCCLUDED);
         assertThat(mNotifInterruptionStateProvider.shouldLaunchFullScreenIntentWhenAdded(entry))
                 .isTrue();
-        verify(mLogger).logNoHeadsUpPackageSnoozed(entry);
         verify(mLogger, never()).logNoFullscreen(any(), any());
         verify(mLogger, never()).logNoFullscreenWarning(any(), any());
         verify(mLogger).logFullscreen(entry, "Expected not to HUN while keyguard occluded");
@@ -587,9 +643,10 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
         when(mKeyguardStateController.isShowing()).thenReturn(true);
         when(mKeyguardStateController.isOccluded()).thenReturn(false);
 
+        assertThat(mNotifInterruptionStateProvider.getFullScreenIntentDecision(entry))
+                .isEqualTo(FullScreenIntentDecision.FSI_LOCKED_SHADE);
         assertThat(mNotifInterruptionStateProvider.shouldLaunchFullScreenIntentWhenAdded(entry))
                 .isTrue();
-        verify(mLogger).logNoHeadsUpPackageSnoozed(entry);
         verify(mLogger, never()).logNoFullscreen(any(), any());
         verify(mLogger, never()).logNoFullscreenWarning(any(), any());
         verify(mLogger).logFullscreen(entry, "Keyguard is showing and not occluded");
@@ -607,9 +664,10 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
         when(mKeyguardStateController.isShowing()).thenReturn(false);
         when(mKeyguardStateController.isOccluded()).thenReturn(false);
 
+        assertThat(mNotifInterruptionStateProvider.getFullScreenIntentDecision(entry))
+                .isEqualTo(FullScreenIntentDecision.NO_FSI_NO_HUN_OR_KEYGUARD);
         assertThat(mNotifInterruptionStateProvider.shouldLaunchFullScreenIntentWhenAdded(entry))
                 .isFalse();
-        verify(mLogger).logNoHeadsUpPackageSnoozed(entry);
         verify(mLogger, never()).logNoFullscreen(any(), any());
         verify(mLogger).logNoFullscreenWarning(entry, "Expected not to HUN while not on keyguard");
         verify(mLogger, never()).logFullscreen(any(), any());
