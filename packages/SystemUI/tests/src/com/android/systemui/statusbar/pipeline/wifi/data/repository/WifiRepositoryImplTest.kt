@@ -29,6 +29,7 @@ import android.net.wifi.WifiManager.TrafficStateCallback
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
+import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepositoryImpl.Companion.ACTIVITY_DEFAULT
@@ -69,6 +70,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
     @Mock private lateinit var broadcastDispatcher: BroadcastDispatcher
     @Mock private lateinit var logger: ConnectivityPipelineLogger
+    @Mock private lateinit var tableLogger: TableLogBuffer
     @Mock private lateinit var connectivityManager: ConnectivityManager
     @Mock private lateinit var wifiManager: WifiManager
     private lateinit var executor: Executor
@@ -804,6 +806,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
             broadcastDispatcher,
             connectivityManager,
             logger,
+            tableLogger,
             executor,
             scope,
             wifiManagerToUse,

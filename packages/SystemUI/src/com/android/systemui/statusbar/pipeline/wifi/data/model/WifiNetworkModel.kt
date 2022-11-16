@@ -17,12 +17,30 @@
 package com.android.systemui.statusbar.pipeline.wifi.data.model
 
 import androidx.annotation.VisibleForTesting
+import com.android.systemui.log.table.TableRowLogger
+import com.android.systemui.log.table.Diffable
 
 /** Provides information about the current wifi network. */
-sealed class WifiNetworkModel {
+sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
+
     /** A model representing that we have no active wifi network. */
     object Inactive : WifiNetworkModel() {
         override fun toString() = "WifiNetwork.Inactive"
+
+        override fun logDiffs(prevVal: WifiNetworkModel, row: TableRowLogger) {
+            if (prevVal is Inactive) {
+                return
+            }
+            row.logChange(COL_NETWORK_TYPE, TYPE_INACTIVE)
+
+            if (prevVal is CarrierMerged) {
+                // The only difference between CarrierMerged and Inactive is the type
+                return
+            }
+
+            // When changing from Active to Inactive, we need to log diffs to all the fields.
+            logDiffsFromActiveToNotActive(prevVal as Active, row)
+        }
     }
 
     /**
@@ -33,6 +51,21 @@ sealed class WifiNetworkModel {
      */
     object CarrierMerged : WifiNetworkModel() {
         override fun toString() = "WifiNetwork.CarrierMerged"
+
+        override fun logDiffs(prevVal: WifiNetworkModel, row: TableRowLogger) {
+            if (prevVal is CarrierMerged) {
+                return
+            }
+            row.logChange(COL_NETWORK_TYPE, TYPE_CARRIER_MERGED)
+
+            if (prevVal is Inactive) {
+                // The only difference between CarrierMerged and Inactive is the type.
+                return
+            }
+
+            // When changing from Active to CarrierMerged, we need to log diffs to all the fields.
+            logDiffsFromActiveToNotActive(prevVal as Active, row)
+        }
     }
 
     /** Provides information about an active wifi network. */
@@ -76,6 +109,41 @@ sealed class WifiNetworkModel {
             }
         }
 
+        override fun logDiffs(prevVal: WifiNetworkModel, row: TableRowLogger) {
+            if (prevVal !is Active) {
+                row.logChange(COL_NETWORK_TYPE, TYPE_ACTIVE)
+            }
+
+            if (prevVal !is Active || prevVal.networkId != networkId) {
+                row.logChange(COL_NETWORK_ID, networkId)
+            }
+            if (prevVal !is Active || prevVal.isValidated != isValidated) {
+                row.logChange(COL_VALIDATED, isValidated)
+            }
+            if (prevVal !is Active || prevVal.level != level) {
+                row.logChange(COL_LEVEL, level ?: LEVEL_DEFAULT)
+            }
+            if (prevVal !is Active || prevVal.ssid != ssid) {
+                row.logChange(COL_SSID, ssid)
+            }
+
+            // TODO(b/238425913): The passpoint-related values are frequently never used, so it
+            //   would be great to not log them when they're not used.
+            if (prevVal !is Active || prevVal.isPasspointAccessPoint != isPasspointAccessPoint) {
+                row.logChange(COL_PASSPOINT_ACCESS_POINT, isPasspointAccessPoint)
+            }
+            if (prevVal !is Active ||
+                prevVal.isOnlineSignUpForPasspointAccessPoint !=
+                isOnlineSignUpForPasspointAccessPoint) {
+                row.logChange(COL_ONLINE_SIGN_UP, isOnlineSignUpForPasspointAccessPoint)
+            }
+            if (prevVal !is Active ||
+                prevVal.passpointProviderFriendlyName != passpointProviderFriendlyName) {
+                row.logChange(COL_PASSPOINT_NAME, passpointProviderFriendlyName)
+            }
+        }
+
+
         override fun toString(): String {
             // Only include the passpoint-related values in the string if we have them. (Most
             // networks won't have them so they'll be mostly clutter.)
@@ -101,4 +169,37 @@ sealed class WifiNetworkModel {
             internal const val MAX_VALID_LEVEL = 4
         }
     }
+
+    internal fun logDiffsFromActiveToNotActive(prevActive: Active, row: TableRowLogger) {
+        row.logChange(COL_NETWORK_ID, NETWORK_ID_DEFAULT)
+        row.logChange(COL_VALIDATED, false)
+        row.logChange(COL_LEVEL, LEVEL_DEFAULT)
+        row.logChange(COL_SSID, null)
+
+        if (prevActive.isPasspointAccessPoint) {
+            row.logChange(COL_PASSPOINT_ACCESS_POINT, false)
+        }
+        if (prevActive.isOnlineSignUpForPasspointAccessPoint) {
+            row.logChange(COL_ONLINE_SIGN_UP, false)
+        }
+        if (prevActive.passpointProviderFriendlyName != null) {
+            row.logChange(COL_PASSPOINT_NAME, null)
+        }
+    }
 }
+
+const val TYPE_CARRIER_MERGED = "CarrierMerged"
+const val TYPE_INACTIVE = "Inactive"
+const val TYPE_ACTIVE = "Active"
+
+const val COL_NETWORK_TYPE = "type"
+const val COL_NETWORK_ID = "networkId"
+const val COL_VALIDATED = "isValidated"
+const val COL_LEVEL = "level"
+const val COL_SSID = "ssid"
+const val COL_PASSPOINT_ACCESS_POINT = "isPasspointAccessPoint"
+const val COL_ONLINE_SIGN_UP = "isOnlineSignUpForPasspointAccessPoint"
+const val COL_PASSPOINT_NAME = "passpointProviderFriendlyName"
+
+const val LEVEL_DEFAULT = -1
+const val NETWORK_ID_DEFAULT = -1
