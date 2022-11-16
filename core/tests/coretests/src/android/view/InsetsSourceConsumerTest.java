@@ -97,7 +97,7 @@ public class InsetsSourceConsumerTest {
                 // activity isn't running, lets ignore BadTokenException.
             }
             mState = new InsetsState();
-            mSpyInsetsSource = Mockito.spy(new InsetsSource(ITYPE_STATUS_BAR));
+            mSpyInsetsSource = Mockito.spy(new InsetsSource(ITYPE_STATUS_BAR, statusBars()));
             mState.addSource(mSpyInsetsSource);
 
             mController = new InsetsController(new ViewRootInsetsControllerHost(mViewRoot));
@@ -146,7 +146,7 @@ public class InsetsSourceConsumerTest {
         InsetsSourceConsumer consumer = new InsetsSourceConsumer(
                 ITYPE_IME, state, null, controller);
 
-        InsetsSource source = new InsetsSource(ITYPE_IME);
+        InsetsSource source = new InsetsSource(ITYPE_IME, ime());
         source.setFrame(0, 1, 2, 3);
         consumer.updateSource(new InsetsSource(source), ANIMATION_TYPE_NONE);
 

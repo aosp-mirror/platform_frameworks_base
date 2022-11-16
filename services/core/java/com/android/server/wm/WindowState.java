@@ -27,8 +27,6 @@ import static android.graphics.GraphicsProtos.dumpPointProto;
 import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 import static android.os.PowerManager.DRAW_WAKE_LOCK;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
-import static android.view.InsetsState.ITYPE_IME;
-import static android.view.InsetsState.ITYPE_INVALID;
 import static android.view.SurfaceControl.Transaction;
 import static android.view.SurfaceControl.getGlobalTransaction;
 import static android.view.ViewRootImpl.LOCAL_LAYOUT;
@@ -915,7 +913,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         // Skip performing seamless rotation when the controlled insets is IME with visible state.
         if (mControllableInsetProvider != null
-                && mControllableInsetProvider.getSource().getType() == ITYPE_IME) {
+                && mControllableInsetProvider.getSource().getType() == WindowInsets.Type.ime()) {
             return;
         }
 
@@ -1677,14 +1675,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (rotatedState != null) {
             return insetsPolicy.adjustInsetsForWindow(this, rotatedState);
         }
-        final InsetsSourceProvider provider = getControllableInsetProvider();
-        final @InternalInsetsType int insetTypeProvidedByWindow = provider != null
-                ? provider.getSource().getType() : ITYPE_INVALID;
         final InsetsState rawInsetsState =
                 mFrozenInsetsState != null ? mFrozenInsetsState : getMergedInsetsState();
-        final InsetsState insetsStateForWindow = insetsPolicy
-                .enforceInsetsPolicyForTarget(insetTypeProvidedByWindow,
-                        getWindowingMode(), isAlwaysOnTop(), mAttrs.type, rawInsetsState);
+        final InsetsState insetsStateForWindow = insetsPolicy.enforceInsetsPolicyForTarget(
+                mAttrs, getWindowingMode(), isAlwaysOnTop(), rawInsetsState);
         return insetsPolicy.adjustInsetsForWindow(this, insetsStateForWindow,
                 includeTransient);
     }

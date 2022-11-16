@@ -33,6 +33,7 @@ import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_180;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
+import static android.view.WindowInsets.Type.navigationBars;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
@@ -2388,7 +2389,8 @@ public class SizeCompatTests extends WindowTestsBase {
         organizer.mPrimary.setBounds(0, screenHeight / 2, screenWidth, screenHeight);
         organizer.putTaskToPrimary(mTask, true);
 
-        final InsetsSource navSource = new InsetsSource(ITYPE_EXTRA_NAVIGATION_BAR);
+        final InsetsSource navSource =
+                new InsetsSource(ITYPE_EXTRA_NAVIGATION_BAR, navigationBars());
         navSource.setFrame(new Rect(0, screenHeight - taskbarHeight, screenWidth, screenHeight));
 
         mActivity.mWmService.mLetterboxConfiguration.setLetterboxActivityCornersRadius(15);

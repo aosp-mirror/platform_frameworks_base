@@ -133,7 +133,7 @@ public class DisplayImeControllerTest extends ShellTestCase {
 
     private InsetsState insetsStateWithIme(boolean visible) {
         InsetsState state = new InsetsState();
-        state.addSource(new InsetsSource(ITYPE_IME));
+        state.addSource(new InsetsSource(ITYPE_IME, ime()));
         state.setSourceVisible(ITYPE_IME, visible);
         return state;
     }

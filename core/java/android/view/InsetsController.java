@@ -835,7 +835,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                     && !fromSource.getFrame().equals(toSource.getFrame())
                     && (Rect.intersects(mFrame, fromSource.getFrame())
                             || Rect.intersects(mFrame, toSource.getFrame()))) {
-                types |= InsetsState.toPublicType(toSource.getType());
+                types |= toSource.getType();
                 if (toState == null) {
                     toState = new InsetsState();
                 }

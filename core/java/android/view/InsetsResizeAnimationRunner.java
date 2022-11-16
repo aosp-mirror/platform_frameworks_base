@@ -155,7 +155,7 @@ public class InsetsResizeAnimationRunner implements InsetsAnimationControlRunner
                     (int) (fromFrame.top + fraction * (toFrame.top - fromFrame.top)),
                     (int) (fromFrame.right + fraction * (toFrame.right - fromFrame.right)),
                     (int) (fromFrame.bottom + fraction * (toFrame.bottom - fromFrame.bottom)));
-            final InsetsSource source = new InsetsSource(type);
+            final InsetsSource source = new InsetsSource(type, fromSource.getType());
             source.setFrame(frame);
             source.setVisible(toSource.isVisible());
             outState.addSource(source);

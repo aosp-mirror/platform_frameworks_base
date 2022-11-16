@@ -24,6 +24,7 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.view.InsetsState.ITYPE_BOTTOM_GENERIC_OVERLAY;
 import static android.view.InsetsState.ITYPE_TOP_GENERIC_OVERLAY;
+import static android.view.WindowInsets.Type.systemOverlays;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.TRANSIT_CLOSE;
@@ -1311,11 +1312,11 @@ public class WindowContainerTests extends WindowTestsBase {
                 new int[]{ITYPE_BOTTOM_GENERIC_OVERLAY});
 
         InsetsSource genericOverlayInsetsProvider1Source = new InsetsSource(
-                ITYPE_TOP_GENERIC_OVERLAY);
+                ITYPE_TOP_GENERIC_OVERLAY, systemOverlays());
         genericOverlayInsetsProvider1Source.setFrame(genericOverlayInsetsRect1);
         genericOverlayInsetsProvider1Source.setVisible(true);
         InsetsSource genericOverlayInsetsProvider2Source = new InsetsSource(
-                ITYPE_BOTTOM_GENERIC_OVERLAY);
+                ITYPE_BOTTOM_GENERIC_OVERLAY, systemOverlays());
         genericOverlayInsetsProvider2Source.setFrame(genericOverlayInsetsRect2);
         genericOverlayInsetsProvider2Source.setVisible(true);
 

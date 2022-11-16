@@ -442,15 +442,17 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             mLocalInsetsSourceProviders = new SparseArray<>();
         }
         for (int i = 0; i < insetsTypes.length; i++) {
+            final @InsetsState.InternalInsetsType int type = insetsTypes[i];
             InsetsSourceProvider insetsSourceProvider =
-                    mLocalInsetsSourceProviders.get(insetsTypes[i]);
+                    mLocalInsetsSourceProviders.get(type);
             if (insetsSourceProvider != null) {
                 if (DEBUG) {
-                    Slog.d(TAG, "The local insets provider for this type " + insetsTypes[i]
+                    Slog.d(TAG, "The local insets provider for this type " + type
                             + " already exists. Overwriting");
                 }
             }
-            insetsSourceProvider = new RectInsetsSourceProvider(new InsetsSource(insetsTypes[i]),
+            insetsSourceProvider = new RectInsetsSourceProvider(
+                    new InsetsSource(type, InsetsState.toPublicType(type)),
                     mDisplayContent.getInsetsStateController(), mDisplayContent);
             mLocalInsetsSourceProviders.put(insetsTypes[i], insetsSourceProvider);
             ((RectInsetsSourceProvider) insetsSourceProvider).setRect(providerFrame);

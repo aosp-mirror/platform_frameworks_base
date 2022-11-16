@@ -26,11 +26,7 @@ import static android.view.InsetsController.ANIMATION_TYPE_HIDE;
 import static android.view.InsetsController.ANIMATION_TYPE_SHOW;
 import static android.view.InsetsController.LAYOUT_INSETS_DURING_ANIMATION_HIDDEN;
 import static android.view.InsetsController.LAYOUT_INSETS_DURING_ANIMATION_SHOWN;
-import static android.view.InsetsState.ITYPE_CAPTION_BAR;
-import static android.view.InsetsState.ITYPE_CLIMATE_BAR;
-import static android.view.InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_IME;
-import static android.view.InsetsState.ITYPE_INVALID;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.SyncRtSurfaceTransactionApplier.applyParams;
@@ -38,8 +34,6 @@ import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_B
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
-import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
-import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -66,6 +60,7 @@ import android.view.SurfaceControl;
 import android.view.SyncRtSurfaceTransactionApplier;
 import android.view.WindowInsets;
 import android.view.WindowInsets.Type;
+import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsAnimation;
 import android.view.WindowInsetsAnimation.Bounds;
 import android.view.WindowInsetsAnimationControlListener;
@@ -80,6 +75,10 @@ import com.android.server.statusbar.StatusBarManagerInternal;
  * Policy that implements who gets control over the windows generating insets.
  */
 class InsetsPolicy {
+
+    public static final int CONTROLLABLE_TYPES = WindowInsets.Type.statusBars()
+            | WindowInsets.Type.navigationBars()
+            | WindowInsets.Type.ime();
 
     private final InsetsStateController mStateController;
     private final DisplayContent mDisplayContent;
@@ -278,7 +277,6 @@ class InsetsPolicy {
      * @see WindowState#getInsetsState()
      */
     InsetsState getInsetsForWindowMetrics(@NonNull WindowManager.LayoutParams attrs) {
-        final @InternalInsetsType int type = getInsetsTypeForLayoutParams(attrs);
         final WindowToken token = mDisplayContent.getWindowToken(attrs.token);
         if (token != null) {
             final InsetsState rotatedState = token.getFixedRotationTransformInsetsState();
@@ -289,109 +287,62 @@ class InsetsPolicy {
         final boolean alwaysOnTop = token != null && token.isAlwaysOnTop();
         // Always use windowing mode fullscreen when get insets for window metrics to make sure it
         // contains all insets types.
-        final InsetsState originalState = mDisplayContent.getInsetsPolicy()
-                .enforceInsetsPolicyForTarget(type, WINDOWING_MODE_FULLSCREEN, alwaysOnTop,
-                        attrs.type, mStateController.getRawInsetsState());
+        final InsetsState originalState = enforceInsetsPolicyForTarget(attrs,
+                WINDOWING_MODE_FULLSCREEN, alwaysOnTop, mStateController.getRawInsetsState());
         InsetsState state = adjustVisibilityForTransientTypes(originalState);
         return adjustInsetsForRoundedCorners(token, state, state == originalState);
     }
 
     /**
-     * @param type the internal type of the insets.
-     * @return {@code true} if the given type is controllable, {@code false} otherwise.
-     */
-    static boolean isInsetsTypeControllable(@InternalInsetsType int type) {
-        switch (type) {
-            case ITYPE_STATUS_BAR:
-            case ITYPE_NAVIGATION_BAR:
-            case ITYPE_IME:
-            case ITYPE_CLIMATE_BAR:
-            case ITYPE_EXTRA_NAVIGATION_BAR:
-                return true;
-            default:
-                return false;
-        }
-    }
-
-    private static @InternalInsetsType int getInsetsTypeForLayoutParams(
-            WindowManager.LayoutParams attrs) {
-        @WindowManager.LayoutParams.WindowType int type = attrs.type;
-        switch (type) {
-            case TYPE_STATUS_BAR:
-                return ITYPE_STATUS_BAR;
-            case TYPE_NAVIGATION_BAR:
-                return ITYPE_NAVIGATION_BAR;
-            case TYPE_INPUT_METHOD:
-                return ITYPE_IME;
-        }
-
-        // If not one of the types above, check whether an internal inset mapping is specified.
-        if (attrs.providedInsets != null) {
-            for (InsetsFrameProvider provider : attrs.providedInsets) {
-                switch (provider.type) {
-                    case ITYPE_STATUS_BAR:
-                    case ITYPE_NAVIGATION_BAR:
-                    case ITYPE_CLIMATE_BAR:
-                    case ITYPE_EXTRA_NAVIGATION_BAR:
-                        return provider.type;
-                }
-            }
-        }
-
-        return ITYPE_INVALID;
-    }
-
-
-    /**
-     * Modifies the given {@code state} according to the {@code type} (Inset type) provided by
-     * the target.
-     * When performing layout of the target or dispatching insets to the target, we need to exclude
-     * sources which should not be visible to the target. e.g., the source which represents the
-     * target window itself, and the IME source when the target is above IME. We also need to
-     * exclude certain types of insets source for client within specific windowing modes.
+     * Modifies the given {@code state} according to insets provided by the target. When performing
+     * layout of the target or dispatching insets to the target, we need to exclude sources which
+     * should not be received by the target. e.g., the visible (non-gesture-wise) source provided by
+     * the target window itself.
      *
-     * @param type the inset type provided by the target
+     * We also need to exclude certain types of insets source for client within specific windowing
+     * modes.
+     *
+     * @param attrs the LayoutParams of the target
      * @param windowingMode the windowing mode of the target
      * @param isAlwaysOnTop is the target always on top
-     * @param windowType the type of the target
      * @param state the input inset state containing all the sources
      * @return The state stripped of the necessary information.
      */
-    InsetsState enforceInsetsPolicyForTarget(@InternalInsetsType int type,
+    InsetsState enforceInsetsPolicyForTarget(WindowManager.LayoutParams attrs,
             @WindowConfiguration.WindowingMode int windowingMode, boolean isAlwaysOnTop,
-            int windowType, InsetsState state) {
-        boolean stateCopied = false;
+            InsetsState state) {
+        final InsetsState originalState = state;
 
-        if (type != ITYPE_INVALID) {
+        // The caller should not receive the visible insets provided by itself.
+        if (attrs.type == TYPE_INPUT_METHOD) {
             state = new InsetsState(state);
-            stateCopied = true;
-            state.removeSource(type);
-
-            // Navigation bar doesn't get influenced by anything else
-            if (type == ITYPE_NAVIGATION_BAR || type == ITYPE_EXTRA_NAVIGATION_BAR) {
-                state.removeSource(ITYPE_STATUS_BAR);
-                state.removeSource(ITYPE_CLIMATE_BAR);
-                state.removeSource(ITYPE_CAPTION_BAR);
-                state.removeSource(ITYPE_NAVIGATION_BAR);
-                state.removeSource(ITYPE_EXTRA_NAVIGATION_BAR);
-            }
-
-            // Status bar doesn't get influenced by caption bar
-            if (type == ITYPE_STATUS_BAR || type == ITYPE_CLIMATE_BAR) {
-                state.removeSource(ITYPE_CAPTION_BAR);
+            state.removeSource(ITYPE_IME);
+        } else if (attrs.providedInsets != null) {
+            for (InsetsFrameProvider provider : attrs.providedInsets) {
+                // TODO(b/234093736): Let InsetsFrameProvider return the public type and the ID.
+                final int sourceId = provider.type;
+                final @InsetsType int type = InsetsState.toPublicType(sourceId);
+                if ((type & WindowInsets.Type.systemBars()) == 0) {
+                    continue;
+                }
+                if (state == originalState) {
+                    state = new InsetsState(state);
+                }
+                state.removeSource(sourceId);
             }
         }
-        ArrayMap<Integer, WindowContainerInsetsSourceProvider> providers = mStateController
+
+        final ArrayMap<Integer, WindowContainerInsetsSourceProvider> providers = mStateController
                 .getSourceProviders();
+        final int windowType = attrs.type;
         for (int i = providers.size() - 1; i >= 0; i--) {
-            WindowContainerInsetsSourceProvider otherProvider = providers.valueAt(i);
+            final WindowContainerInsetsSourceProvider otherProvider = providers.valueAt(i);
             if (otherProvider.overridesFrame(windowType)) {
-                if (!stateCopied) {
+                if (state == originalState) {
                     state = new InsetsState(state);
-                    stateCopied = true;
                 }
-                InsetsSource override =
-                        new InsetsSource(state.getSource(otherProvider.getSource().getType()));
+                final InsetsSource override =
+                        new InsetsSource(state.getSource(otherProvider.getSource().getId()));
                 override.setFrame(otherProvider.getOverriddenFrame(windowType));
                 state.addSource(override);
             }
@@ -404,10 +355,9 @@ class InsetsPolicy {
             if (windowingMode != WINDOWING_MODE_PINNED) {
                 types |= WindowInsets.Type.ime();
             }
-            InsetsState newState = new InsetsState();
+            final InsetsState newState = new InsetsState();
             newState.set(state, types);
             state = newState;
-            stateCopied = true;
         }
 
         return state;
@@ -628,7 +578,7 @@ class InsetsPolicy {
         return focusedWin;
     }
 
-    private boolean isShowingTransientTypes(@Type.InsetsType int types) {
+    private boolean isShowingTransientTypes(@InsetsType int types) {
         final IntArray showingTransientTypes = mShowingTransientTypes;
         for (int i = showingTransientTypes.size() - 1; i >= 0; i--) {
             if ((InsetsState.toPublicType(showingTransientTypes.get(i)) & types) != 0) {
@@ -733,7 +683,7 @@ class InsetsPolicy {
         }
 
         private void updateVisibility(@Nullable InsetsControlTarget controlTarget,
-                @Type.InsetsType int type) {
+                @InsetsType int type) {
             setVisible(controlTarget == null || controlTarget.isRequestedVisible(type));
         }
 

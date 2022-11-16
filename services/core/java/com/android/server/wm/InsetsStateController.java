@@ -246,7 +246,7 @@ class InsetsStateController {
 
     void notifyControlRevoked(@NonNull InsetsControlTarget previousControlTarget,
             InsetsSourceProvider provider) {
-        removeFromControlMaps(previousControlTarget, provider.getSource().getType(),
+        removeFromControlMaps(previousControlTarget, provider.getSource().getId(),
                 false /* fake */);
     }
 
