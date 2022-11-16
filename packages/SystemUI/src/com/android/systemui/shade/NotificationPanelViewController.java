@@ -177,6 +177,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
+import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
@@ -253,6 +254,8 @@ public final class NotificationPanelViewController implements Dumpable {
     private static final int FLING_COLLAPSE = 1;
     /** Fling until QS is completely hidden. */
     private static final int FLING_HIDE = 2;
+    /** The delay to reset the hint text when the hint animation is finished running. */
+    private static final int HINT_RESET_DELAY_MS = 1200;
     private static final long ANIMATION_DELAY_ICON_FADE_IN =
             ActivityLaunchAnimator.TIMINGS.getTotalDuration()
                     - CollapsedStatusBarFragment.FADE_IN_DURATION
@@ -343,6 +346,7 @@ public final class NotificationPanelViewController implements Dumpable {
     private final FalsingTapListener mFalsingTapListener = this::falsingAdditionalTapRequired;
     private final FragmentListener mQsFragmentListener = new QsFragmentListener();
     private final AccessibilityDelegate mAccessibilityDelegate = new ShadeAccessibilityDelegate();
+    private final NotificationGutsManager mGutsManager;
 
     private long mDownTime;
     private boolean mTouchSlopExceededBeforeDown;
@@ -701,6 +705,7 @@ public final class NotificationPanelViewController implements Dumpable {
             ConversationNotificationManager conversationNotificationManager,
             MediaHierarchyManager mediaHierarchyManager,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
+            NotificationGutsManager gutsManager,
             NotificationsQSContainerController notificationsQSContainerController,
             NotificationStackScrollLayoutController notificationStackScrollLayoutController,
             KeyguardStatusViewComponent.Factory keyguardStatusViewComponentFactory,
@@ -754,6 +759,7 @@ public final class NotificationPanelViewController implements Dumpable {
         mLockscreenGestureLogger = lockscreenGestureLogger;
         mShadeExpansionStateManager = shadeExpansionStateManager;
         mShadeLog = shadeLogger;
+        mGutsManager = gutsManager;
         mView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
             @Override
             public void onViewAttachedToWindow(View v) {
@@ -1766,7 +1772,7 @@ public final class NotificationPanelViewController implements Dumpable {
     }
 
     public void resetViews(boolean animate) {
-        mCentralSurfaces.getGutsManager().closeAndSaveGuts(true /* leavebehind */, true /* force */,
+        mGutsManager.closeAndSaveGuts(true /* leavebehind */, true /* force */,
                 true /* controls */, -1 /* x */, -1 /* y */, true /* resetMenu */);
         if (animate && !isFullyCollapsed()) {
             animateCloseQs(true /* animateAway */);
@@ -3711,7 +3717,6 @@ public final class NotificationPanelViewController implements Dumpable {
     private void onTrackingStopped(boolean expand) {
         mFalsingCollector.onTrackingStopped();
         mTracking = false;
-        mCentralSurfaces.onTrackingStopped(expand);
         updatePanelExpansionAndVisibility();
         if (expand) {
             mNotificationStackScrollLayoutController.setOverScrollAmount(0.0f, true /* onTop */,
@@ -3754,14 +3759,16 @@ public final class NotificationPanelViewController implements Dumpable {
 
     @VisibleForTesting
     void onUnlockHintFinished() {
-        mCentralSurfaces.onHintFinished();
+        // Delay the reset a bit so the user can read the text.
+        mKeyguardIndicationController.hideTransientIndicationDelayed(HINT_RESET_DELAY_MS);
         mScrimController.setExpansionAffectsAlpha(true);
         mNotificationStackScrollLayoutController.setUnlockHintRunning(false);
     }
 
     @VisibleForTesting
     void onUnlockHintStarted() {
-        mCentralSurfaces.onUnlockHintStarted();
+        mFalsingCollector.onUnlockHintStarted();
+        mKeyguardIndicationController.showActionToUnlock();
         mScrimController.setExpansionAffectsAlpha(false);
         mNotificationStackScrollLayoutController.setUnlockHintRunning(true);
     }
@@ -4787,7 +4794,6 @@ public final class NotificationPanelViewController implements Dumpable {
             }
 
             mDozeLog.traceFling(expand, mTouchAboveFalsingThreshold,
-                    mCentralSurfaces.isFalsingThresholdNeeded(),
                     mCentralSurfaces.isWakeUpComingFromTouch());
             // Log collapse gesture if on lock screen.
             if (!expand && onKeyguard) {
@@ -4836,9 +4842,6 @@ public final class NotificationPanelViewController implements Dumpable {
      */
     private boolean isFalseTouch(float x, float y,
             @Classifier.InteractionType int interactionType) {
-        if (!mCentralSurfaces.isFalsingThresholdNeeded()) {
-            return false;
-        }
         if (mFalsingManager.isClassifierEnabled()) {
             return mFalsingManager.isFalseTouch(interactionType);
         }
