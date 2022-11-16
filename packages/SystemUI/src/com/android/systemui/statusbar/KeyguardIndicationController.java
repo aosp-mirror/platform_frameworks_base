@@ -36,7 +36,7 @@ import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewCont
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_DISCLOSURE;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_LOGOUT;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_OWNER_INFO;
-import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_RESTING;
+import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_PERSISTENT_UNLOCK_MESSAGE;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_TRUST;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_USER_LOCKED;
 import static com.android.systemui.keyguard.ScreenLifecycle.SCREEN_ON;
@@ -161,7 +161,7 @@ public class KeyguardIndicationController {
     private BroadcastReceiver mBroadcastReceiver;
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
 
-    private String mRestingIndication;
+    private String mPersistentUnlockMessage;
     private String mAlignmentIndication;
     private CharSequence mTrustGrantedIndication;
     private CharSequence mTransientIndication;
@@ -379,7 +379,7 @@ public class KeyguardIndicationController {
         updateLockScreenTrustMsg(userId, getTrustGrantedIndication(), getTrustManagedIndication());
         updateLockScreenAlignmentMsg();
         updateLockScreenLogoutView();
-        updateLockScreenRestingMsg();
+        updateLockScreenPersistentUnlockMsg();
     }
 
     private void updateOrganizedOwnedDevice() {
@@ -485,7 +485,8 @@ public class KeyguardIndicationController {
     }
 
     private void updateLockScreenUserLockedMsg(int userId) {
-        if (!mKeyguardUpdateMonitor.isUserUnlocked(userId)) {
+        if (!mKeyguardUpdateMonitor.isUserUnlocked(userId)
+                || mKeyguardUpdateMonitor.isEncryptedOrLockdown(userId)) {
             mRotateTextViewController.updateIndication(
                     INDICATION_TYPE_USER_LOCKED,
                     new KeyguardIndication.Builder()
@@ -590,18 +591,17 @@ public class KeyguardIndicationController {
         }
     }
 
-    private void updateLockScreenRestingMsg() {
-        if (!TextUtils.isEmpty(mRestingIndication)
-                && !mRotateTextViewController.hasIndications()) {
+    private void updateLockScreenPersistentUnlockMsg() {
+        if (!TextUtils.isEmpty(mPersistentUnlockMessage)) {
             mRotateTextViewController.updateIndication(
-                    INDICATION_TYPE_RESTING,
+                    INDICATION_TYPE_PERSISTENT_UNLOCK_MESSAGE,
                     new KeyguardIndication.Builder()
-                            .setMessage(mRestingIndication)
+                            .setMessage(mPersistentUnlockMessage)
                             .setTextColor(mInitialTextColorState)
                             .build(),
-                    false);
+                    true);
         } else {
-            mRotateTextViewController.hideIndication(INDICATION_TYPE_RESTING);
+            mRotateTextViewController.hideIndication(INDICATION_TYPE_PERSISTENT_UNLOCK_MESSAGE);
         }
     }
 
@@ -684,11 +684,8 @@ public class KeyguardIndicationController {
         }
     }
 
-    /**
-     * Sets the indication that is shown if nothing else is showing.
-     */
-    public void setRestingIndication(String restingIndication) {
-        mRestingIndication = restingIndication;
+    private void setPersistentUnlockMessage(String persistentUnlockMessage) {
+        mPersistentUnlockMessage = persistentUnlockMessage;
         updateDeviceEntryIndication(false);
     }
 
@@ -1122,6 +1119,9 @@ public class KeyguardIndicationController {
         public void onLockedOutStateChanged(BiometricSourceType biometricSourceType) {
             if (biometricSourceType == FACE && !mKeyguardUpdateMonitor.isFaceLockedOut()) {
                 mFaceLockedOutThisAuthSession = false;
+            } else if (biometricSourceType == FINGERPRINT) {
+                setPersistentUnlockMessage(mKeyguardUpdateMonitor.isFingerprintLockedOut()
+                        ? mContext.getString(R.string.keyguard_unlock) : "");
             }
         }
 
