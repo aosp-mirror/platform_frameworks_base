@@ -54,6 +54,9 @@ class DemoModeController constructor(
     private val receiverMap: Map<String, MutableList<DemoMode>>
 
     init {
+        // Don't persist demo mode across restarts.
+        requestFinishDemoMode()
+
         val m = mutableMapOf<String, MutableList<DemoMode>>()
         DemoMode.COMMANDS.map { command ->
             m.put(command, mutableListOf())
@@ -74,7 +77,6 @@ class DemoModeController constructor(
         // content changes to know if the setting turned on or off
         tracker.startTracking()
 
-        // TODO: We should probably exit demo mode if we booted up with it on
         isInDemoMode = tracker.isInDemoMode
 
         val demoFilter = IntentFilter()
