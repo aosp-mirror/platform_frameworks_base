@@ -1490,6 +1490,38 @@ public class GameManagerServiceTests {
     }
 
     @Test
+    public void testSwitchUser() {
+        mockManageUsersGranted();
+        mockModifyGameModeGranted();
+
+        mockDeviceConfigBattery();
+        final Context context = InstrumentationRegistry.getContext();
+        GameManagerService gameManagerService = new GameManagerService(mMockContext,
+                mTestLooper.getLooper(), context.getFilesDir());
+        startUser(gameManagerService, USER_ID_1);
+        startUser(gameManagerService, USER_ID_2);
+        gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_BATTERY, USER_ID_1);
+        checkReportedModes(gameManagerService, GameManager.GAME_MODE_STANDARD,
+                GameManager.GAME_MODE_BATTERY);
+        assertEquals(gameManagerService.getGameMode(mPackageName, USER_ID_1),
+                GameManager.GAME_MODE_BATTERY);
+
+        mockDeviceConfigAll();
+        switchUser(gameManagerService, USER_ID_1, USER_ID_2);
+        assertEquals(gameManagerService.getGameMode(mPackageName, USER_ID_2),
+                GameManager.GAME_MODE_STANDARD);
+        checkReportedModes(gameManagerService, GameManager.GAME_MODE_STANDARD,
+                GameManager.GAME_MODE_BATTERY, GameManager.GAME_MODE_PERFORMANCE);
+        gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_PERFORMANCE, USER_ID_2);
+        gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_BATTERY, USER_ID_1);
+
+        switchUser(gameManagerService, USER_ID_2, USER_ID_1);
+        checkReportedModes(gameManagerService, GameManager.GAME_MODE_STANDARD,
+                GameManager.GAME_MODE_BATTERY, GameManager.GAME_MODE_PERFORMANCE);
+        gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_PERFORMANCE, USER_ID_2);
+        gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_BATTERY, USER_ID_1);
+    }
+
     public void testResetInterventions_onDeviceConfigReset() throws Exception {
         mockModifyGameModeGranted();
         String configStringBefore =
