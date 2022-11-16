@@ -20,6 +20,8 @@ import android.app.Notification
 import android.app.Notification.MediaStyle
 import android.app.PendingIntent
 import android.app.smartspace.SmartspaceAction
+import android.app.smartspace.SmartspaceConfig
+import android.app.smartspace.SmartspaceManager
 import android.app.smartspace.SmartspaceTarget
 import android.content.Intent
 import android.graphics.Bitmap
@@ -106,6 +108,7 @@ class MediaDataManagerTest : SysuiTestCase() {
     lateinit var metadataBuilder: MediaMetadata.Builder
     lateinit var backgroundExecutor: FakeExecutor
     lateinit var foregroundExecutor: FakeExecutor
+    lateinit var uiExecutor: FakeExecutor
     @Mock lateinit var dumpManager: DumpManager
     @Mock lateinit var broadcastDispatcher: BroadcastDispatcher
     @Mock lateinit var mediaTimeoutListener: MediaTimeoutListener
@@ -117,6 +120,7 @@ class MediaDataManagerTest : SysuiTestCase() {
     @Mock lateinit var listener: MediaDataManager.Listener
     @Mock lateinit var pendingIntent: PendingIntent
     @Mock lateinit var activityStarter: ActivityStarter
+    @Mock lateinit var smartspaceManager: SmartspaceManager
     lateinit var smartspaceMediaDataProvider: SmartspaceMediaDataProvider
     @Mock lateinit var mediaSmartspaceTarget: SmartspaceTarget
     @Mock private lateinit var mediaRecommendationItem: SmartspaceAction
@@ -131,6 +135,7 @@ class MediaDataManagerTest : SysuiTestCase() {
     @Mock private lateinit var tunerService: TunerService
     @Captor lateinit var tunableCaptor: ArgumentCaptor<TunerService.Tunable>
     @Captor lateinit var callbackCaptor: ArgumentCaptor<(String, PlaybackState) -> Unit>
+    @Captor lateinit var smartSpaceConfigBuilderCaptor: ArgumentCaptor<SmartspaceConfig>
 
     private val instanceIdSequence = InstanceIdSequenceFake(1 shl 20)
 
@@ -145,6 +150,7 @@ class MediaDataManagerTest : SysuiTestCase() {
     fun setup() {
         foregroundExecutor = FakeExecutor(clock)
         backgroundExecutor = FakeExecutor(clock)
+        uiExecutor = FakeExecutor(clock)
         smartspaceMediaDataProvider = SmartspaceMediaDataProvider()
         Settings.Secure.putInt(
             context.contentResolver,
@@ -155,6 +161,7 @@ class MediaDataManagerTest : SysuiTestCase() {
             MediaDataManager(
                 context = context,
                 backgroundExecutor = backgroundExecutor,
+                uiExecutor = uiExecutor,
                 foregroundExecutor = foregroundExecutor,
                 mediaControllerFactory = mediaControllerFactory,
                 broadcastDispatcher = broadcastDispatcher,
@@ -172,7 +179,8 @@ class MediaDataManagerTest : SysuiTestCase() {
                 systemClock = clock,
                 tunerService = tunerService,
                 mediaFlags = mediaFlags,
-                logger = logger
+                logger = logger,
+                smartspaceManager = smartspaceManager,
             )
         verify(tunerService)
             .addTunable(capture(tunableCaptor), eq(Settings.Secure.MEDIA_CONTROLS_RECOMMENDATION))
@@ -191,6 +199,7 @@ class MediaDataManagerTest : SysuiTestCase() {
                 putString(MediaMetadata.METADATA_KEY_ARTIST, SESSION_ARTIST)
                 putString(MediaMetadata.METADATA_KEY_TITLE, SESSION_TITLE)
             }
+        verify(smartspaceManager).createSmartspaceSession(capture(smartSpaceConfigBuilderCaptor))
         whenever(mediaControllerFactory.create(eq(session.sessionToken))).thenReturn(controller)
         whenever(controller.transportControls).thenReturn(transportControls)
         whenever(controller.playbackInfo).thenReturn(playbackInfo)
@@ -767,15 +776,14 @@ class MediaDataManagerTest : SysuiTestCase() {
             .onSmartspaceMediaDataLoaded(anyObject(), anyObject(), anyBoolean())
     }
 
-    @Ignore("b/233283726")
     @Test
     fun testOnSmartspaceMediaDataLoaded_hasNoneMediaTarget_callsRemoveListener() {
         smartspaceMediaDataProvider.onTargetsAvailable(listOf(mediaSmartspaceTarget))
         verify(logger).getNewInstanceId()
 
         smartspaceMediaDataProvider.onTargetsAvailable(listOf())
-        foregroundExecutor.advanceClockToLast()
-        foregroundExecutor.runAllReady()
+        uiExecutor.advanceClockToLast()
+        uiExecutor.runAllReady()
 
         verify(listener).onSmartspaceMediaDataRemoved(eq(KEY_MEDIA_SMARTSPACE), eq(false))
         verifyNoMoreInteractions(logger)
