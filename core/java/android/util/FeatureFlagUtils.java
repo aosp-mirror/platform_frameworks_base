@@ -132,6 +132,12 @@ public class FeatureFlagUtils {
      */
     public static final String SETTINGS_ADB_METRICS_WRITER = "settings_adb_metrics_writer";
 
+    /**
+     * Flag to enable/disable biometrics enrollment v2
+     * @hide
+     */
+    public static final String SETTINGS_BIOMETRICS2_ENROLLMENT = "settings_biometrics2_enrollment";
+
     private static final Map<String, String> DEFAULT_FLAGS;
 
     static {
@@ -167,6 +173,7 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(SETTINGS_NEW_KEYBOARD_TRACKPAD, "false");
         DEFAULT_FLAGS.put(SETTINGS_ENABLE_SPA, "false");
         DEFAULT_FLAGS.put(SETTINGS_ADB_METRICS_WRITER, "false");
+        DEFAULT_FLAGS.put(SETTINGS_BIOMETRICS2_ENROLLMENT, "false");
     }
 
     private static final Set<String> PERSISTENT_FLAGS;
