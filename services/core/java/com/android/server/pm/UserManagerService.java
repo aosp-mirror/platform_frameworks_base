@@ -3799,7 +3799,7 @@ public class UserManagerService extends IUserManager.Stub {
         long earliestCreationTime = earliestUser.creationTime;
         for (int i = 0; i < users.size(); i++) {
             final UserInfo info = users.get(i);
-            if (info.isFull() && info.creationTime > 0
+            if (info.isFull() && info.isAdmin() && info.creationTime > 0
                     && info.creationTime < earliestCreationTime) {
                 earliestCreationTime = info.creationTime;
                 earliestUser = info;
