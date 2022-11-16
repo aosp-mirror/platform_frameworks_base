@@ -806,4 +806,15 @@
     <!-- Whether the device should display hotspot UI. If true, UI will display only when tethering
          is available. If false, UI will never show regardless of tethering availability" -->
     <bool name="config_show_wifi_tethering">true</bool>
+
+    <!-- A collection of "slots" for placing quick affordance actions on the lock screen when the
+    device is locked. Each item is a string consisting of two parts, separated by the ':' character.
+    The first part is the unique ID for the slot, it is not a human-visible name, but should still
+    be unique across all slots specified. The second part is the capacity and must be a positive
+    integer; this is how many quick affordance actions that user is allowed to add to the slot. -->
+    <string-array name="config_keyguardQuickAffordanceSlots" translatable="false">
+        <item>bottom_start:1</item>
+        <item>bottom_end:1</item>
+    </string-array>
+
 </resources>

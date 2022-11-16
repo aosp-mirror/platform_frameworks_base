@@ -92,6 +92,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
 
         val quickAffordanceRepository =
             KeyguardQuickAffordanceRepository(
+                appContext = context,
                 scope = CoroutineScope(IMMEDIATE),
                 backgroundDispatcher = IMMEDIATE,
                 selectionManager = KeyguardQuickAffordanceSelectionManager(),
