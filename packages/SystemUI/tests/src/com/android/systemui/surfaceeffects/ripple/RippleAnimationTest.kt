@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.ripple
+package com.android.systemui.surfaceeffects.ripple
 
 import android.graphics.Color
 import android.testing.AndroidTestingRunner

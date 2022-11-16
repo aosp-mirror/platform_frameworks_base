@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.systemui.ripple
+package com.android.systemui.surfaceeffects.shaderutil
 
 /** Library class that contains 2D signed distance functions. */
 class SdfShaderLibrary {
-    //language=AGSL
+    // language=AGSL
     companion object {
-        const val CIRCLE_SDF = """
+        const val CIRCLE_SDF =
+            """
             float sdCircle(vec2 p, float r) {
                 return (length(p)-r) / r;
             }
@@ -34,7 +35,8 @@ class SdfShaderLibrary {
             }
         """
 
-        const val ROUNDED_BOX_SDF = """
+        const val ROUNDED_BOX_SDF =
+            """
             float sdRoundedBox(vec2 p, vec2 size, float cornerRadius) {
                 size *= 0.5;
                 cornerRadius *= 0.5;
@@ -58,7 +60,8 @@ class SdfShaderLibrary {
         // Used non-trigonometry parametrization and Halley's method (iterative) for root finding.
         // This is more expensive than the regular circle SDF, recommend to use the circle SDF if
         // possible.
-        const val ELLIPSE_SDF = """float sdEllipse(vec2 p, vec2 wh) {
+        const val ELLIPSE_SDF =
+            """float sdEllipse(vec2 p, vec2 wh) {
             wh *= 0.5;
 
             // symmetry
@@ -98,7 +101,8 @@ class SdfShaderLibrary {
         }
         """
 
-        const val SHADER_SDF_OPERATION_LIB = """
+        const val SHADER_SDF_OPERATION_LIB =
+            """
             float soften(float d, float blur) {
                 float blurHalf = blur * 0.5;
                 return smoothstep(-blurHalf, blurHalf, d);

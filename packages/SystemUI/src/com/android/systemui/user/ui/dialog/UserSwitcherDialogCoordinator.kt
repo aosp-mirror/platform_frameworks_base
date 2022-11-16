@@ -27,15 +27,12 @@ import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.broadcast.BroadcastSender
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.user.domain.interactor.UserInteractor
 import com.android.systemui.user.domain.model.ShowDialogRequestModel
 import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 
@@ -50,16 +47,11 @@ constructor(
     private val broadcastSender: Lazy<BroadcastSender>,
     private val dialogLaunchAnimator: Lazy<DialogLaunchAnimator>,
     private val interactor: Lazy<UserInteractor>,
-    private val featureFlags: Lazy<FeatureFlags>,
 ) : CoreStartable {
 
     private var currentDialog: Dialog? = null
 
     override fun start() {
-        if (featureFlags.get().isEnabled(Flags.USER_INTERACTOR_AND_REPO_USE_CONTROLLER)) {
-            return
-        }
-
         startHandlingDialogShowRequests()
         startHandlingDialogDismissRequests()
     }

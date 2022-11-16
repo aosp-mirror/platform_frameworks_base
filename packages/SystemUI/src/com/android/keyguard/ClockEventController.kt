@@ -26,6 +26,7 @@ import android.view.View
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.systemui.R
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
@@ -43,6 +44,11 @@ import com.android.systemui.shared.regionsampling.RegionSampler
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback
 import com.android.systemui.statusbar.policy.ConfigurationController
+import java.io.PrintWriter
+import java.util.Locale
+import java.util.TimeZone
+import java.util.concurrent.Executor
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.Job
@@ -50,11 +56,6 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
-import java.io.PrintWriter
-import java.util.Locale
-import java.util.TimeZone
-import java.util.concurrent.Executor
-import javax.inject.Inject
 
 /**
  * Controller for a Clock provided by the registry and used on the keyguard. Instantiated by
@@ -84,6 +85,7 @@ open class ClockEventController @Inject constructor(
 
                 value.initialize(resources, dozeAmount, 0f)
                 updateRegionSamplers(value)
+                updateFontSizes()
             }
         }
 
@@ -150,7 +152,7 @@ open class ClockEventController @Inject constructor(
             mainExecutor,
             bgExecutor,
             regionSamplingEnabled,
-            updateFun = { updateColors() } )
+            updateColors)
     }
 
     var smallRegionSampler: RegionSampler? = null
@@ -166,7 +168,7 @@ open class ClockEventController @Inject constructor(
         }
 
         override fun onDensityOrFontScaleChanged() {
-            clock?.events?.onFontSettingChanged()
+            updateFontSizes()
         }
     }
 
@@ -249,6 +251,13 @@ open class ClockEventController @Inject constructor(
         keyguardUpdateMonitor.removeCallback(keyguardUpdateMonitorCallback)
         smallRegionSampler?.stopRegionSampler()
         largeRegionSampler?.stopRegionSampler()
+    }
+
+    private fun updateFontSizes() {
+        clock?.smallClock?.events?.onFontSettingChanged(
+            resources.getDimensionPixelSize(R.dimen.small_clock_text_size).toFloat())
+        clock?.largeClock?.events?.onFontSettingChanged(
+            resources.getDimensionPixelSize(R.dimen.large_clock_text_size).toFloat())
     }
 
     /**
