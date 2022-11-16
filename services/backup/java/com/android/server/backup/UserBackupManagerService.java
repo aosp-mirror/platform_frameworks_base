@@ -46,8 +46,8 @@ import android.app.IActivityManager;
 import android.app.IBackupAgent;
 import android.app.PendingIntent;
 import android.app.backup.BackupAgent;
+import android.app.backup.BackupAnnotations.BackupDestination;
 import android.app.backup.BackupManager;
-import android.app.backup.BackupManager.OperationType;
 import android.app.backup.BackupManagerMonitor;
 import android.app.backup.FullBackup;
 import android.app.backup.IBackupManager;
@@ -405,7 +405,7 @@ public class UserBackupManagerService {
     private long mAncestralToken = 0;
     private long mCurrentToken = 0;
     @Nullable private File mAncestralSerialNumberFile;
-    @OperationType private volatile long mAncestralOperationType;
+    @BackupDestination private volatile long mAncestralBackupDestination;
 
     private final ContentObserver mSetupObserver;
     private final BroadcastReceiver mRunInitReceiver;
@@ -550,7 +550,7 @@ public class UserBackupManagerService {
         mActivityManager = ActivityManager.getService();
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
         mScheduledBackupEligibility = getEligibilityRules(mPackageManager, userId,
-                OperationType.BACKUP);
+                BackupDestination.CLOUD);
 
         mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
@@ -844,8 +844,8 @@ public class UserBackupManagerService {
         mAncestralToken = ancestralToken;
     }
 
-    public void setAncestralOperationType(@OperationType int operationType) {
-        mAncestralOperationType = operationType;
+    public void setAncestralBackupDestination(@BackupDestination int backupDestination) {
+        mAncestralBackupDestination = backupDestination;
     }
 
     public long getCurrentToken() {
@@ -1619,14 +1619,14 @@ public class UserBackupManagerService {
     /** Fires off a backup agent, blocking until it attaches or times out. */
     @Nullable
     public IBackupAgent bindToAgentSynchronous(ApplicationInfo app, int mode,
-            @OperationType int operationType) {
+            @BackupDestination int backupDestination) {
         IBackupAgent agent = null;
         synchronized (mAgentConnectLock) {
             mConnecting = true;
             mConnectedAgent = null;
             try {
                 if (mActivityManager.bindBackupAgent(app.packageName, mode, mUserId,
-                        operationType)) {
+                        backupDestination)) {
                     Slog.d(TAG, addUserIdToLogMessage(mUserId, "awaiting agent for " + app));
 
                     // success; wait for the agent to arrive
@@ -1776,8 +1776,9 @@ public class UserBackupManagerService {
     }
 
     private BackupEligibilityRules getEligibilityRulesForRestoreAtInstall(long restoreToken) {
-        if (mAncestralOperationType == OperationType.MIGRATION && restoreToken == mAncestralToken) {
-            return getEligibilityRulesForOperation(OperationType.MIGRATION);
+        if (mAncestralBackupDestination == BackupDestination.DEVICE_TRANSFER
+                && restoreToken == mAncestralToken) {
+            return getEligibilityRulesForOperation(BackupDestination.DEVICE_TRANSFER);
         } else {
             // If we're not using the ancestral data set, it means we're restoring from a backup
             // that happened on this device.
@@ -1856,14 +1857,14 @@ public class UserBackupManagerService {
 
         final TransportConnection transportConnection;
         final String transportDirName;
-        int operationType;
+        int backupDestination;
         try {
             transportDirName =
                     mTransportManager.getTransportDirName(
                             mTransportManager.getCurrentTransportName());
             transportConnection =
                     mTransportManager.getCurrentTransportClientOrThrow("BMS.requestBackup()");
-            operationType = getOperationTypeFromTransport(transportConnection);
+            backupDestination = getBackupDestinationFromTransport(transportConnection);
         } catch (TransportNotRegisteredException | TransportNotAvailableException
                 | RemoteException e) {
             BackupObserverUtils.sendBackupFinished(observer, BackupManager.ERROR_TRANSPORT_ABORTED);
@@ -1876,7 +1877,7 @@ public class UserBackupManagerService {
         OnTaskFinishedListener listener =
                 caller -> mTransportManager.disposeOfTransportClient(transportConnection, caller);
         BackupEligibilityRules backupEligibilityRules = getEligibilityRulesForOperation(
-                operationType);
+                backupDestination);
 
         Message msg = mBackupHandler.obtainMessage(MSG_REQUEST_BACKUP);
         msg.obj = getRequestBackupParams(packages, observer, monitor, flags, backupEligibilityRules,
@@ -2373,7 +2374,7 @@ public class UserBackupManagerService {
                             /* monitor */ null,
                             /* userInitiated */ false,
                             "BMS.beginFullBackup()",
-                            getEligibilityRulesForOperation(OperationType.BACKUP));
+                            getEligibilityRulesForOperation(BackupDestination.CLOUD));
                 } catch (IllegalStateException e) {
                     Slog.w(TAG, "Failed to start backup", e);
                     runBackup = false;
@@ -2835,7 +2836,7 @@ public class UserBackupManagerService {
             Slog.i(TAG, addUserIdToLogMessage(mUserId, "Beginning adb backup..."));
 
             BackupEligibilityRules eligibilityRules = getEligibilityRulesForOperation(
-                    OperationType.ADB_BACKUP);
+                    BackupDestination.ADB_BACKUP);
             AdbBackupParams params = new AdbBackupParams(fd, includeApks, includeObbs,
                     includeShared, doWidgets, doAllApps, includeSystem, compress, doKeyValue,
                     pkgList, eligibilityRules);
@@ -2924,7 +2925,7 @@ public class UserBackupManagerService {
                         /* monitor */ null,
                         /* userInitiated */ false,
                         "BMS.fullTransportBackup()",
-                        getEligibilityRulesForOperation(OperationType.BACKUP));
+                        getEligibilityRulesForOperation(BackupDestination.CLOUD));
                 // Acquiring wakelock for PerformFullTransportBackupTask before its start.
                 mWakelock.acquire();
                 (new Thread(task, "full-transport-master")).start();
@@ -3917,12 +3918,12 @@ public class UserBackupManagerService {
             }
         }
 
-        int operationType;
+        int backupDestination;
         TransportConnection transportConnection = null;
         try {
             transportConnection = mTransportManager.getTransportClientOrThrow(
                     transport, /* caller */"BMS.beginRestoreSession");
-            operationType = getOperationTypeFromTransport(transportConnection);
+            backupDestination = getBackupDestinationFromTransport(transportConnection);
         } catch (TransportNotAvailableException | TransportNotRegisteredException
                 | RemoteException e) {
             Slog.w(TAG, "Failed to get operation type from transport: " + e);
@@ -3951,7 +3952,7 @@ public class UserBackupManagerService {
                 return null;
             }
             mActiveRestoreSession = new ActiveRestoreSession(this, packageName, transport,
-                    getEligibilityRulesForOperation(operationType));
+                    getEligibilityRulesForOperation(backupDestination));
             mBackupHandler.sendEmptyMessageDelayed(MSG_RESTORE_SESSION_TIMEOUT,
                     mAgentTimeoutParameters.getRestoreSessionTimeoutMillis());
         }
@@ -4037,14 +4038,14 @@ public class UserBackupManagerService {
     }
 
     public BackupEligibilityRules getEligibilityRulesForOperation(
-            @OperationType int operationType) {
-        return getEligibilityRules(mPackageManager, mUserId, operationType);
+            @BackupDestination int backupDestination) {
+        return getEligibilityRules(mPackageManager, mUserId, backupDestination);
     }
 
     private static BackupEligibilityRules getEligibilityRules(PackageManager packageManager,
-            int userId, @OperationType int operationType) {
+            int userId, @BackupDestination int backupDestination) {
         return new BackupEligibilityRules(packageManager,
-                LocalServices.getService(PackageManagerInternal.class), userId, operationType);
+                LocalServices.getService(PackageManagerInternal.class), userId, backupDestination);
     }
 
     /** Prints service state for 'dumpsys backup'. */
@@ -4200,21 +4201,22 @@ public class UserBackupManagerService {
     }
 
     @VisibleForTesting
-    @OperationType int getOperationTypeFromTransport(TransportConnection transportConnection)
+    @BackupDestination int getBackupDestinationFromTransport(
+            TransportConnection transportConnection)
             throws TransportNotAvailableException, RemoteException {
         if (!shouldUseNewBackupEligibilityRules()) {
             // Return the default to stick to the legacy behaviour.
-            return OperationType.BACKUP;
+            return BackupDestination.CLOUD;
         }
 
         final long oldCallingId = Binder.clearCallingIdentity();
         try {
             BackupTransportClient transport = transportConnection.connectOrThrow(
-                    /* caller */ "BMS.getOperationTypeFromTransport");
+                    /* caller */ "BMS.getBackupDestinationFromTransport");
             if ((transport.getTransportFlags() & BackupAgent.FLAG_DEVICE_TO_DEVICE_TRANSFER) != 0) {
-                return OperationType.MIGRATION;
+                return BackupDestination.DEVICE_TRANSFER;
             } else {
-                return OperationType.BACKUP;
+                return BackupDestination.CLOUD;
             }
         } finally {
             Binder.restoreCallingIdentity(oldCallingId);
