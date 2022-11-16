@@ -6,6 +6,8 @@ import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -15,6 +17,7 @@ import static org.mockito.Mockito.when;
 
 import android.app.job.JobInfo;
 import android.app.job.JobInfo.Builder;
+import android.app.job.JobWorkItem;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManagerInternal;
@@ -31,6 +34,7 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.util.ArrayUtils;
 import com.android.server.LocalServices;
 import com.android.server.job.JobStore.JobSet;
 import com.android.server.job.controllers.JobStatus;
@@ -43,6 +47,10 @@ import org.junit.runner.RunWith;
 import java.io.File;
 import java.time.Clock;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * Test reading and writing correctly from file.
@@ -690,20 +698,46 @@ public class JobStoreTest {
                 taskStatus.getJob().isRequireBatteryNotLow());
     }
 
+    @Test
+    public void testJobWorkItems() throws Exception {
+        JobWorkItem item1 = new JobWorkItem.Builder().build();
+        item1.bumpDeliveryCount();
+        PersistableBundle bundle = new PersistableBundle();
+        bundle.putBoolean("test", true);
+        JobWorkItem item2 = new JobWorkItem.Builder().setExtras(bundle).build();
+        item2.bumpDeliveryCount();
+        JobWorkItem item3 = new JobWorkItem.Builder().setEstimatedNetworkBytes(1, 2).build();
+        JobWorkItem item4 = new JobWorkItem.Builder().setMinimumNetworkChunkBytes(3).build();
+        JobWorkItem item5 = new JobWorkItem.Builder().build();
+
+        JobInfo jobInfo = new JobInfo.Builder(0, mComponent)
+                .setPersisted(true)
+                .build();
+        JobStatus jobStatus =
+                JobStatus.createFromJobInfo(jobInfo, SOME_UID, null, -1, null, null);
+        jobStatus.executingWork = new ArrayList<>(List.of(item1, item2));
+        jobStatus.pendingWork = new ArrayList<>(List.of(item3, item4, item5));
+        assertPersistedEquals(jobStatus);
+    }
+
     /**
      * Helper function to kick a {@link JobInfo} through a persistence cycle and
      * assert that it's unchanged.
      */
     private void assertPersistedEquals(JobInfo firstInfo) throws Exception {
+        assertPersistedEquals(
+                JobStatus.createFromJobInfo(firstInfo, SOME_UID, null, -1, null, null));
+    }
+
+    private void assertPersistedEquals(JobStatus original) throws Exception {
         mTaskStoreUnderTest.clear();
-        JobStatus first = JobStatus.createFromJobInfo(firstInfo, SOME_UID, null, -1, null, null);
-        mTaskStoreUnderTest.add(first);
+        mTaskStoreUnderTest.add(original);
         waitForPendingIo();
 
         final JobSet jobStatusSet = new JobSet();
         mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
         final JobStatus second = jobStatusSet.getAllJobs().iterator().next();
-        assertJobsEqual(first, second);
+        assertJobsEqual(original, second);
     }
 
     /**
@@ -729,6 +763,59 @@ public class JobStoreTest {
                 expected.getEarliestRunTime(), actual.getEarliestRunTime());
         compareTimestampsSubjectToIoLatency("Late run-times not the same after read.",
                 expected.getLatestRunTimeElapsed(), actual.getLatestRunTimeElapsed());
+
+        assertEquals(expected.hasWorkLocked(), actual.hasWorkLocked());
+        if (expected.hasWorkLocked()) {
+            List<JobWorkItem> allWork = new ArrayList<>();
+            if (expected.executingWork != null) {
+                allWork.addAll(expected.executingWork);
+            }
+            if (expected.pendingWork != null) {
+                allWork.addAll(expected.pendingWork);
+            }
+            // All work for freshly loaded Job will be pending.
+            assertNotNull(actual.pendingWork);
+            assertTrue(ArrayUtils.isEmpty(actual.executingWork));
+            assertEquals(allWork.size(), actual.pendingWork.size());
+            for (int i = 0; i < allWork.size(); ++i) {
+                JobWorkItem expectedItem = allWork.get(i);
+                JobWorkItem actualItem = actual.pendingWork.get(i);
+                assertJobWorkItemsEqual(expectedItem, actualItem);
+            }
+        }
+    }
+
+    private void assertJobWorkItemsEqual(JobWorkItem expected, JobWorkItem actual) {
+        if (expected == null) {
+            assertNull(actual);
+            return;
+        }
+        assertNotNull(actual);
+        assertEquals(expected.getDeliveryCount(), actual.getDeliveryCount());
+        assertEquals(expected.getEstimatedNetworkDownloadBytes(),
+                actual.getEstimatedNetworkDownloadBytes());
+        assertEquals(expected.getEstimatedNetworkUploadBytes(),
+                actual.getEstimatedNetworkUploadBytes());
+        assertEquals(expected.getMinimumNetworkChunkBytes(), actual.getMinimumNetworkChunkBytes());
+        if (expected.getIntent() == null) {
+            assertNull(actual.getIntent());
+        } else {
+            // filterEquals() just so happens to check almost everything that is persisted to disk.
+            assertTrue(expected.getIntent().filterEquals(actual.getIntent()));
+            assertEquals(expected.getIntent().getFlags(), actual.getIntent().getFlags());
+        }
+        assertEquals(expected.getGrants(), actual.getGrants());
+        PersistableBundle expectedExtras = expected.getExtras();
+        PersistableBundle actualExtras = actual.getExtras();
+        if (expectedExtras == null) {
+            assertNull(actualExtras);
+        } else {
+            assertEquals(expectedExtras.size(), actualExtras.size());
+            Set<String> keys = expectedExtras.keySet();
+            for (String key : keys) {
+                assertTrue(Objects.equals(expectedExtras.get(key), actualExtras.get(key)));
+            }
+        }
     }
 
     /**

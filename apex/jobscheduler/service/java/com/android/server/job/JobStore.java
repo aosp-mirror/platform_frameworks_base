@@ -25,6 +25,7 @@ import static com.android.server.job.JobSchedulerService.sSystemClock;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.job.JobInfo;
+import android.app.job.JobWorkItem;
 import android.content.ComponentName;
 import android.content.Context;
 import android.net.NetworkRequest;
@@ -310,6 +311,15 @@ public final class JobStore {
         mJobSet.removeJobsOfUnlistedUsers(keepUserIds);
     }
 
+    /** Note a change in the specified JobStatus that necessitates writing job state to disk. */
+    void touchJob(@NonNull JobStatus jobStatus) {
+        if (!jobStatus.isPersisted()) {
+            return;
+        }
+        mPendingJobWriteUids.put(jobStatus.getUid(), true);
+        maybeWriteStatusToDiskAsync();
+    }
+
     @VisibleForTesting
     public void clear() {
         mJobSet.clear();
@@ -430,6 +440,7 @@ public final class JobStore {
     private static final String XML_TAG_PERIODIC = "periodic";
     private static final String XML_TAG_ONEOFF = "one-off";
     private static final String XML_TAG_EXTRAS = "extras";
+    private static final String XML_TAG_JOB_WORK_ITEM = "job-work-item";
 
     private void migrateJobFilesAsync() {
         synchronized (mLock) {
@@ -724,6 +735,7 @@ public final class JobStore {
                     writeConstraintsToXml(out, jobStatus);
                     writeExecutionCriteriaToXml(out, jobStatus);
                     writeBundleToXml(jobStatus.getJob().getExtras(), out);
+                    writeJobWorkItemsToXml(out, jobStatus);
                     out.endTag(null, XML_TAG_JOB);
 
                     numJobs++;
@@ -904,6 +916,53 @@ public final class JobStore {
                 out.endTag(null, XML_TAG_PERIODIC);
             } else {
                 out.endTag(null, XML_TAG_ONEOFF);
+            }
+        }
+
+        private void writeJobWorkItemsToXml(@NonNull TypedXmlSerializer out,
+                @NonNull JobStatus jobStatus) throws IOException, XmlPullParserException {
+            // Write executing first since they're technically at the front of the queue.
+            writeJobWorkItemListToXml(out, jobStatus.executingWork);
+            writeJobWorkItemListToXml(out, jobStatus.pendingWork);
+        }
+
+        private void writeJobWorkItemListToXml(@NonNull TypedXmlSerializer out,
+                @Nullable List<JobWorkItem> jobWorkItems)
+                throws IOException, XmlPullParserException {
+            if (jobWorkItems == null) {
+                return;
+            }
+            // Write the items in list order to maintain the enqueue order.
+            final int size = jobWorkItems.size();
+            for (int i = 0; i < size; ++i) {
+                final JobWorkItem item = jobWorkItems.get(i);
+                if (item.getGrants() != null) {
+                    // We currently don't allow persisting jobs when grants are involved.
+                    // TODO(256618122): allow persisting JobWorkItems with grant flags
+                    continue;
+                }
+                if (item.getIntent() != null) {
+                    // Intent.saveToXml() doesn't persist everything, so we shouldn't attempt to
+                    // persist these JobWorkItems at all.
+                    Slog.wtf(TAG, "Encountered JobWorkItem with Intent in persisting list");
+                    continue;
+                }
+                out.startTag(null, XML_TAG_JOB_WORK_ITEM);
+                out.attributeInt(null, "delivery-count", item.getDeliveryCount());
+                if (item.getEstimatedNetworkDownloadBytes() != JobInfo.NETWORK_BYTES_UNKNOWN) {
+                    out.attributeLong(null, "estimated-download-bytes",
+                            item.getEstimatedNetworkDownloadBytes());
+                }
+                if (item.getEstimatedNetworkUploadBytes() != JobInfo.NETWORK_BYTES_UNKNOWN) {
+                    out.attributeLong(null, "estimated-upload-bytes",
+                            item.getEstimatedNetworkUploadBytes());
+                }
+                if (item.getMinimumNetworkChunkBytes() != JobInfo.NETWORK_BYTES_UNKNOWN) {
+                    out.attributeLong(null, "minimum-network-chunk-bytes",
+                            item.getMinimumNetworkChunkBytes());
+                }
+                writeBundleToXml(item.getExtras(), out);
+                out.endTag(null, XML_TAG_JOB_WORK_ITEM);
             }
         }
     };
@@ -1262,7 +1321,13 @@ public final class JobStore {
                 Slog.e(TAG, "Persisted extras contained invalid data", e);
                 return null;
             }
-            parser.nextTag(); // Consume </extras>
+            eventType = parser.nextTag(); // Consume </extras>
+
+            List<JobWorkItem> jobWorkItems = null;
+            if (eventType == XmlPullParser.START_TAG
+                    && XML_TAG_JOB_WORK_ITEM.equals(parser.getName())) {
+                jobWorkItems = readJobWorkItemsFromXml(parser);
+            }
 
             final JobInfo builtJob;
             try {
@@ -1301,6 +1366,11 @@ public final class JobStore {
                     elapsedRuntimes.first, elapsedRuntimes.second,
                     lastSuccessfulRunTime, lastFailedRunTime,
                     (rtcIsGood) ? null : rtcRuntimes, internalFlags, /* dynamicConstraints */ 0);
+            if (jobWorkItems != null) {
+                for (int i = 0; i < jobWorkItems.size(); ++i) {
+                    js.enqueueWorkLocked(jobWorkItems.get(i));
+                }
+            }
             return js;
         }
 
@@ -1472,6 +1542,64 @@ public final class JobStore {
             final long latestRunTimeRtc =
                     parser.getAttributeLong(null, "deadline", JobStatus.NO_LATEST_RUNTIME);
             return Pair.create(earliestRunTimeRtc, latestRunTimeRtc);
+        }
+
+        @NonNull
+        private List<JobWorkItem> readJobWorkItemsFromXml(TypedXmlPullParser parser)
+                throws IOException, XmlPullParserException {
+            List<JobWorkItem> jobWorkItems = new ArrayList<>();
+
+            for (int eventType = parser.getEventType(); eventType != XmlPullParser.END_DOCUMENT;
+                    eventType = parser.next()) {
+                final String tagName = parser.getName();
+                if (!XML_TAG_JOB_WORK_ITEM.equals(tagName)) {
+                    // We're no longer operating with work items.
+                    break;
+                }
+                try {
+                    JobWorkItem jwi = readJobWorkItemFromXml(parser);
+                    if (jwi != null) {
+                        jobWorkItems.add(jwi);
+                    }
+                } catch (Exception e) {
+                    // If there's an issue with one JobWorkItem, drop only the one item and not the
+                    // whole job.
+                    Slog.e(TAG, "Problem with persisted JobWorkItem", e);
+                }
+            }
+
+            return jobWorkItems;
+        }
+
+        @Nullable
+        private JobWorkItem readJobWorkItemFromXml(TypedXmlPullParser parser)
+                throws IOException, XmlPullParserException {
+            JobWorkItem.Builder jwiBuilder = new JobWorkItem.Builder();
+
+            jwiBuilder
+                    .setDeliveryCount(parser.getAttributeInt(null, "delivery-count"))
+                    .setEstimatedNetworkBytes(
+                            parser.getAttributeLong(null,
+                                    "estimated-download-bytes", JobInfo.NETWORK_BYTES_UNKNOWN),
+                            parser.getAttributeLong(null,
+                                    "estimated-upload-bytes", JobInfo.NETWORK_BYTES_UNKNOWN))
+                    .setMinimumNetworkChunkBytes(parser.getAttributeLong(null,
+                            "minimum-network-chunk-bytes", JobInfo.NETWORK_BYTES_UNKNOWN));
+            parser.next();
+            try {
+                final PersistableBundle extras = PersistableBundle.restoreFromXml(parser);
+                jwiBuilder.setExtras(extras);
+            } catch (IllegalArgumentException e) {
+                Slog.e(TAG, "Persisted extras contained invalid data", e);
+                return null;
+            }
+
+            try {
+                return jwiBuilder.build();
+            } catch (Exception e) {
+                Slog.e(TAG, "Invalid JobWorkItem", e);
+                return null;
+            }
         }
     }
 

@@ -337,13 +337,23 @@ public abstract class JobScheduler {
      * but there are situations where it may get this wrong and count the JobInfo as changing.
      * (That said, you should be relatively safe with a simple set of consistent data in these
      * fields.)  You should never use {@link JobInfo.Builder#setClipData(ClipData, int)} with
-     * work you are enqueue, since currently this will always be treated as a different JobInfo,
+     * work you are enqueuing, since currently this will always be treated as a different JobInfo,
      * even if the ClipData contents are exactly the same.</p>
      *
      * <p class="caution"><strong>Note:</strong> Scheduling a job can have a high cost, even if it's
      * rescheduling the same job and the job didn't execute, especially on platform versions before
      * version {@link android.os.Build.VERSION_CODES#Q}. As such, the system may throttle calls to
      * this API if calls are made too frequently in a short amount of time.
+     *
+     * <p class="caution"><strong>Note:</strong> Prior to Android version
+     * {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, JobWorkItems could not be persisted.
+     * Apps were not allowed to enqueue JobWorkItems with persisted jobs and the system would throw
+     * an {@link IllegalArgumentException} if they attempted to do so. Starting with
+     * {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+     * JobWorkItems can be persisted alongside the hosting job.
+     * However, Intents cannot be persisted. Set a {@link PersistableBundle} using
+     * {@link JobWorkItem.Builder#setExtras(PersistableBundle)} for any information that needs
+     * to be persisted.
      *
      * <p>Note: The JobService component needs to be enabled in order to successfully schedule a
      * job.
