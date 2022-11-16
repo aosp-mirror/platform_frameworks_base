@@ -845,7 +845,7 @@ public final class CachedAppOptimizer {
     /**
      * Retrieves the free swap percentage.
      */
-    static private native double getFreeSwapPercent();
+    static native double getFreeSwapPercent();
 
     /**
      * Retrieves the total used physical ZRAM
