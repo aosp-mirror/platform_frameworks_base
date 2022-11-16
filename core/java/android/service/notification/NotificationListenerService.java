@@ -2365,6 +2365,7 @@ public abstract class NotificationListenerService extends Service {
                     UserHandle user= (UserHandle) args.arg2;
                     NotificationChannel channel = (NotificationChannel) args.arg3;
                     int modificationType = (int) args.arg4;
+                    args.recycle();
                     onNotificationChannelModified(pkgName, user, channel, modificationType);
                 } break;
 
@@ -2374,6 +2375,7 @@ public abstract class NotificationListenerService extends Service {
                     UserHandle user = (UserHandle) args.arg2;
                     NotificationChannelGroup group = (NotificationChannelGroup) args.arg3;
                     int modificationType = (int) args.arg4;
+                    args.recycle();
                     onNotificationChannelGroupModified(pkgName, user, group, modificationType);
                 } break;
 
