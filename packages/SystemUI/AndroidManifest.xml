@@ -195,6 +195,9 @@
     <permission android:name="com.android.systemui.permission.FLAGS"
                 android:protectionLevel="signature" />
 
+    <permission android:name="android.permission.ACCESS_KEYGUARD_QUICK_AFFORDANCES"
+        android:protectionLevel="signature|privileged" />
+
     <!-- Adding Quick Settings tiles -->
     <uses-permission android:name="android.permission.BIND_QUICK_SETTINGS_TILE" />
 
@@ -976,5 +979,12 @@
                 <action android:name="com.android.systemui.action.DISMISS_VOLUME_PANEL_DIALOG" />
             </intent-filter>
         </receiver>
+
+        <provider
+            android:authorities="com.android.systemui.keyguard.quickaffordance"
+            android:name="com.android.systemui.keyguard.KeyguardQuickAffordanceProvider"
+            android:exported="true"
+            android:permission="android.permission.ACCESS_KEYGUARD_QUICK_AFFORDANCES"
+            />
     </application>
 </manifest>

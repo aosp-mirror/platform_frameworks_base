@@ -25,7 +25,8 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.media.controls.models.GutsViewHolder
 import com.android.systemui.media.controls.models.player.MediaViewHolder
 import com.android.systemui.monet.ColorScheme
-import com.android.systemui.ripple.MultiRippleController
+import com.android.systemui.surfaceeffects.ripple.MultiRippleController
+import com.android.systemui.surfaceeffects.turbulencenoise.TurbulenceNoiseController
 import junit.framework.Assert.assertEquals
 import org.junit.After
 import org.junit.Before
@@ -62,6 +63,7 @@ class ColorSchemeTransitionTest : SysuiTestCase() {
     @Mock private lateinit var mediaViewHolder: MediaViewHolder
     @Mock private lateinit var gutsViewHolder: GutsViewHolder
     @Mock private lateinit var multiRippleController: MultiRippleController
+    @Mock private lateinit var turbulenceNoiseController: TurbulenceNoiseController
 
     @JvmField @Rule val mockitoRule = MockitoJUnit.rule()
 
@@ -76,6 +78,7 @@ class ColorSchemeTransitionTest : SysuiTestCase() {
                 context,
                 mediaViewHolder,
                 multiRippleController,
+                turbulenceNoiseController,
                 animatingColorTransitionFactory
             )
 
