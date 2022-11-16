@@ -360,6 +360,9 @@
     <!-- Permission needed to test wallpaper dimming -->
     <uses-permission android:name="android.permission.SET_WALLPAPER_DIM_AMOUNT" />
 
+    <!-- Permission needed to test wallpapers supporting ambient mode -->
+    <uses-permission android:name="android.permission.AMBIENT_WALLPAPER" />
+
     <!-- Permission required to test ContentResolver caching. -->
     <uses-permission android:name="android.permission.CACHE_CONTENT" />
 
