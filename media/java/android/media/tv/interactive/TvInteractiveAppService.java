@@ -463,6 +463,16 @@ public abstract class TvInteractiveAppService extends Service {
         }
 
         /**
+         * Receives stopped recording's ID.
+         *
+         * @param recordingId The ID of the recording stopped
+         * @hide
+         */
+        public void onRecordingStopped(@NonNull String recordingId) {
+        }
+
+
+        /**
          * Receives signing result.
          * @param signingId the ID to identify the request. It's the same as the corresponding ID in
          *        {@link Session#requestSigning(String, String, String, byte[])}
@@ -1178,8 +1188,18 @@ public abstract class TvInteractiveAppService extends Service {
             onAdResponse(response);
         }
 
+        /**
+         * Calls {@link #onRecordingStarted(String)}.
+         */
         void notifyRecordingStarted(String recordingId) {
             onRecordingStarted(recordingId);
+        }
+
+        /**
+         * Calls {@link #onRecordingStopped(String)}.
+         */
+        void notifyRecordingStopped(String recordingId) {
+            onRecordingStopped(recordingId);
         }
 
         /**

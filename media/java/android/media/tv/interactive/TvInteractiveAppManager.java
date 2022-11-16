@@ -1071,6 +1071,18 @@ public final class TvInteractiveAppManager {
             }
         }
 
+        void notifyRecordingStopped(String recordingId) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.notifyRecordingStopped(mToken, recordingId, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
         void sendSigningResult(@NonNull String signingId, @NonNull byte[] result) {
             if (mToken == null) {
                 Log.w(TAG, "The session has been already released");
