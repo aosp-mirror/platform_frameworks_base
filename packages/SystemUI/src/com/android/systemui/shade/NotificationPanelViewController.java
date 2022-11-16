@@ -1567,23 +1567,31 @@ public final class NotificationPanelViewController implements Dumpable {
                     // Find the clock, so we can exclude it from this transition.
                     FrameLayout clockContainerView =
                             mView.findViewById(R.id.lockscreen_clock_view_large);
-                    View clockView = clockContainerView.getChildAt(0);
 
-                    transition.excludeTarget(clockView, /* exclude= */ true);
+                    // The clock container can sometimes be null. If it is, just fall back to the
+                    // old animation rather than setting up the custom animations.
+                    if (clockContainerView == null || clockContainerView.getChildCount() == 0) {
+                        TransitionManager.beginDelayedTransition(
+                                mNotificationContainerParent, transition);
+                    } else {
+                        View clockView = clockContainerView.getChildAt(0);
 
-                    TransitionSet set = new TransitionSet();
-                    set.addTransition(transition);
+                        transition.excludeTarget(clockView, /* exclude= */ true);
 
-                    SplitShadeTransitionAdapter adapter =
-                            new SplitShadeTransitionAdapter(mKeyguardStatusViewController);
+                        TransitionSet set = new TransitionSet();
+                        set.addTransition(transition);
 
-                    // Use linear here, so the actual clock can pick its own interpolator.
-                    adapter.setInterpolator(Interpolators.LINEAR);
-                    adapter.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
-                    adapter.addTarget(clockView);
-                    set.addTransition(adapter);
+                        SplitShadeTransitionAdapter adapter =
+                                new SplitShadeTransitionAdapter(mKeyguardStatusViewController);
 
-                    TransitionManager.beginDelayedTransition(mNotificationContainerParent, set);
+                        // Use linear here, so the actual clock can pick its own interpolator.
+                        adapter.setInterpolator(Interpolators.LINEAR);
+                        adapter.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
+                        adapter.addTarget(clockView);
+                        set.addTransition(adapter);
+
+                        TransitionManager.beginDelayedTransition(mNotificationContainerParent, set);
+                    }
                 } else {
                     TransitionManager.beginDelayedTransition(
                             mNotificationContainerParent, transition);
