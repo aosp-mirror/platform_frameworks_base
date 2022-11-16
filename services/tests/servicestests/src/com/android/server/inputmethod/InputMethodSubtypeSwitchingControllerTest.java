@@ -367,6 +367,7 @@ public class InputMethodSubtypeSwitchingControllerTest {
         assertFalse(item_en_us_allcaps.mIsSystemLocale);
     }
 
+    @SuppressWarnings("SelfComparison")
     @Test
     public void testImeSubtypeListComparator() throws Exception {
         final ComponentName imeX1 = new ComponentName("com.example.imeX", "Ime1");

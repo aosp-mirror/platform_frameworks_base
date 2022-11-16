@@ -402,7 +402,7 @@ public final class PrintContentView extends ViewGroup implements View.OnClickLis
 
         @Override
         public void onViewPositionChanged(View changedView, int left, int top, int dx, int dy) {
-            if ((isOptionsClosed() || isOptionsClosed()) && dy <= 0) {
+            if (isOptionsClosed() && dy <= 0) {
                 return;
             }
 

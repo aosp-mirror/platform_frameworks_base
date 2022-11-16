@@ -203,6 +203,7 @@ public class CompanionDeviceActivity extends FragmentActivity implements
         initUI();
     }
 
+    @SuppressWarnings("MissingSuperCall") // TODO: Fix me
     @Override
     protected void onNewIntent(Intent intent) {
         // Force cancels the CDM dialog if this activity receives another intent with
