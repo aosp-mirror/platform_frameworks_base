@@ -8400,13 +8400,10 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         // On Automotive / Headless System User Mode, at this point the system user has already been
         // started and unlocked, and some of the tasks we do here have already been done. So skip
-        // those in that case.
+        // those in that case. The duplicate system user start is guarded in SystemServiceManager.
         // TODO(b/242195409): this workaround shouldn't be necessary once we move the headless-user
-        // start logic to UserManager-land
-        final boolean bootingSystemUser = currentUserId == UserHandle.USER_SYSTEM;
-        if (bootingSystemUser) {
-            mUserController.onSystemUserStarting();
-        }
+        // start logic to UserManager-land.
+        mUserController.onSystemUserStarting();
 
         synchronized (this) {
             // Only start up encryption-aware persistent apps; once user is
@@ -8436,7 +8433,15 @@ public class ActivityManagerService extends IActivityManager.Stub
                 t.traceEnd();
             }
 
-            if (bootingSystemUser) {
+            // Some systems - like automotive - will explicitly unlock system user then switch
+            // to a secondary user. Hence, we don't want to send duplicate broadcasts for
+            // the system user here.
+            // TODO(b/242195409): this workaround shouldn't be necessary once we move
+            // the headless-user start logic to UserManager-land.
+            final boolean isBootingSystemUser = (currentUserId == UserHandle.USER_SYSTEM)
+                    && !UserManager.isHeadlessSystemUserMode();
+
+            if (isBootingSystemUser) {
                 t.traceBegin("startHomeOnAllDisplays");
                 mAtmInternal.startHomeOnAllDisplays(currentUserId, "systemReady");
                 t.traceEnd();
@@ -8447,7 +8452,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             t.traceEnd();
 
 
-            if (bootingSystemUser) {
+            if (isBootingSystemUser) {
                 t.traceBegin("sendUserStartBroadcast");
                 final int callingUid = Binder.getCallingUid();
                 final int callingPid = Binder.getCallingPid();
@@ -8488,7 +8493,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             mAtmInternal.resumeTopActivities(false /* scheduleIdle */);
             t.traceEnd();
 
-            if (bootingSystemUser) {
+            if (isBootingSystemUser) {
                 t.traceBegin("sendUserSwitchBroadcasts");
                 mUserController.sendUserSwitchBroadcasts(-1, currentUserId);
                 t.traceEnd();
