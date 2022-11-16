@@ -83,6 +83,7 @@
     <string name="app_name_unknown" msgid="6881210203354323926">"不明"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"為安全起見，您的平板電腦目前不得安裝此來源的不明應用程式。您可以在「設定」中變更這項設定。"</string>
     <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"為安全起見，您的電視目前不得安裝此來源的不明應用程式。您可以在「設定」中變更這項設定。"</string>
+    <string name="untrusted_external_source_warning" product="watch" msgid="7195163388090818636">"為了安全起見，你的智慧手錶目前禁止安裝這個來源的不明應用程式。如要變更，請前往「設定」。"</string>
     <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"為安全起見，您的手機目前不得安裝此來源的不明應用程式。您可以在「設定」中變更這項設定。"</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"來源不明的應用程式可能會侵害您的手機和個人資料。安裝此應用程式，即表示您同意承擔因使用這個應用程式而導致手機損壞或資料遺失的責任。"</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"來源不明的應用程式可能會侵害您的平板電腦和個人資料。安裝此應用程式，即表示您同意承擔因使用這個應用程式而導致平板電腦損壞或資料遺失的責任。"</string>
