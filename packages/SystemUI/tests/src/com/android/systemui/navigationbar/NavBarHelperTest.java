@@ -16,6 +16,7 @@
 
 package com.android.systemui.navigationbar;
 
+import static android.app.StatusBarManager.WINDOW_NAVIGATION_BAR;
 import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU;
 import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR;
 
@@ -47,6 +48,7 @@ import com.android.systemui.assist.AssistManager;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
@@ -68,6 +70,10 @@ import dagger.Lazy;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class NavBarHelperTest extends SysuiTestCase {
+
+    private static final int DISPLAY_ID = 0;
+    private static final int WINDOW = WINDOW_NAVIGATION_BAR;
+    private static final int STATE_ID = 0;
 
     @Mock
     AccessibilityManager mAccessibilityManager;
@@ -93,6 +99,8 @@ public class NavBarHelperTest extends SysuiTestCase {
     DumpManager mDumpManager;
     @Mock
     NavBarHelper.NavbarTaskbarStateUpdater mNavbarTaskbarStateUpdater;
+    @Mock
+    CommandQueue mCommandQueue;
     private AccessibilityManager.AccessibilityServicesStateChangeListener
             mAccessibilityServicesStateChangeListener;
 
@@ -114,7 +122,7 @@ public class NavBarHelperTest extends SysuiTestCase {
                 mAccessibilityButtonModeObserver, mAccessibilityButtonTargetObserver,
                 mSystemActions, mOverviewProxyService, mAssistManagerLazy,
                 () -> Optional.of(mock(CentralSurfaces.class)), mock(KeyguardStateController.class),
-                mNavigationModeController, mUserTracker, mDumpManager);
+                mNavigationModeController, mUserTracker, mDumpManager, mCommandQueue);
 
     }
 
@@ -239,6 +247,45 @@ public class NavBarHelperTest extends SysuiTestCase {
 
         assertThat(mNavBarHelper.getA11yButtonState()).isEqualTo(
                 ACCESSIBILITY_BUTTON_CLICKABLE_STATE);
+    }
+
+    @Test
+    public void registerCommandQueueCallbacks() {
+        mNavBarHelper.init();
+        verify(mCommandQueue, times(1)).addCallback(any());
+    }
+
+    @Test
+    public void saveMostRecentSysuiState() {
+        mNavBarHelper.init();
+        mNavBarHelper.setWindowState(DISPLAY_ID, WINDOW, STATE_ID);
+        NavBarHelper.CurrentSysuiState state1 = mNavBarHelper.getCurrentSysuiState();
+
+        // Update window state
+        int newState = STATE_ID + 1;
+        mNavBarHelper.setWindowState(DISPLAY_ID, WINDOW, newState);
+        NavBarHelper.CurrentSysuiState state2 = mNavBarHelper.getCurrentSysuiState();
+
+        // Ensure we get most recent state back
+        assertThat(state1.mWindowState).isNotEqualTo(state2.mWindowState);
+        assertThat(state1.mWindowStateDisplayId).isEqualTo(state2.mWindowStateDisplayId);
+        assertThat(state2.mWindowState).isEqualTo(newState);
+    }
+
+    @Test
+    public void ignoreNonNavbarSysuiState() {
+        mNavBarHelper.init();
+        mNavBarHelper.setWindowState(DISPLAY_ID, WINDOW, STATE_ID);
+        NavBarHelper.CurrentSysuiState state1 = mNavBarHelper.getCurrentSysuiState();
+
+        // Update window state for other window type
+        int newState = STATE_ID + 1;
+        mNavBarHelper.setWindowState(DISPLAY_ID, WINDOW + 1, newState);
+        NavBarHelper.CurrentSysuiState state2 = mNavBarHelper.getCurrentSysuiState();
+
+        // Ensure we get first state back
+        assertThat(state2.mWindowState).isEqualTo(state1.mWindowState);
+        assertThat(state2.mWindowState).isNotEqualTo(newState);
     }
 
     private List<String> createFakeShortcutTargets() {
