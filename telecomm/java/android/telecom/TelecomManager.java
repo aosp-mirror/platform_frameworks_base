@@ -1851,7 +1851,7 @@ public class TelecomManager {
         ITelecomService service = getTelecomService();
         if (service != null) {
             try {
-                return service.getCallStateUsingPackage(mContext.getPackageName(),
+                return service.getCallStateUsingPackage(mContext.getOpPackageName(),
                         mContext.getAttributionTag());
             } catch (RemoteException e) {
                 Log.d(TAG, "RemoteException calling getCallState().", e);
