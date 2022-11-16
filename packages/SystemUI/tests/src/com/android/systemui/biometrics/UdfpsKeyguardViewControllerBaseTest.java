@@ -94,6 +94,11 @@ public class UdfpsKeyguardViewControllerBaseTest extends SysuiTestCase {
             mKeyguardStateControllerCallbackCaptor;
     protected KeyguardStateController.Callback mKeyguardStateControllerCallback;
 
+    private @Captor ArgumentCaptor<StatusBarKeyguardViewManager.KeyguardViewManagerCallback>
+            mKeyguardViewManagerCallbackArgumentCaptor;
+    protected StatusBarKeyguardViewManager.KeyguardViewManagerCallback mKeyguardViewManagerCallback;
+
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -143,15 +148,22 @@ public class UdfpsKeyguardViewControllerBaseTest extends SysuiTestCase {
     }
 
     public UdfpsKeyguardViewController createUdfpsKeyguardViewController() {
-        return createUdfpsKeyguardViewController(false);
+        return createUdfpsKeyguardViewController(false, false);
+    }
+
+    public void captureKeyGuardViewManagerCallback() {
+        verify(mStatusBarKeyguardViewManager).addCallback(
+                mKeyguardViewManagerCallbackArgumentCaptor.capture());
+        mKeyguardViewManagerCallback = mKeyguardViewManagerCallbackArgumentCaptor.getValue();
     }
 
     protected UdfpsKeyguardViewController createUdfpsKeyguardViewController(
-            boolean useModernBouncer) {
+            boolean useModernBouncer, boolean useExpandedOverlay) {
         mFeatureFlags.set(Flags.MODERN_BOUNCER, useModernBouncer);
+        mFeatureFlags.set(Flags.UDFPS_NEW_TOUCH_DETECTION, useExpandedOverlay);
         when(mStatusBarKeyguardViewManager.getPrimaryBouncer()).thenReturn(
                 useModernBouncer ? null : mBouncer);
-        return new UdfpsKeyguardViewController(
+        UdfpsKeyguardViewController controller = new UdfpsKeyguardViewController(
                 mView,
                 mStatusBarStateController,
                 mShadeExpansionStateManager,
@@ -168,5 +180,6 @@ public class UdfpsKeyguardViewControllerBaseTest extends SysuiTestCase {
                 mActivityLaunchAnimator,
                 mFeatureFlags,
                 mPrimaryBouncerInteractor);
+        return controller;
     }
 }
