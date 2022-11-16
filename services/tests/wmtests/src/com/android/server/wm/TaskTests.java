@@ -433,6 +433,24 @@ public class TaskTests extends WindowTestsBase {
     }
 
     @Test
+    public void testPropagateFocusedStateToRootTask() {
+        final Task rootTask = createTask(mDefaultDisplay);
+        final Task leafTask = createTaskInRootTask(rootTask, 0 /* userId */);
+
+        final ActivityRecord activity = createActivityRecord(leafTask);
+
+        leafTask.getDisplayContent().setFocusedApp(activity);
+
+        assertTrue(leafTask.getTaskInfo().isFocused);
+        assertTrue(rootTask.getTaskInfo().isFocused);
+
+        leafTask.getDisplayContent().setFocusedApp(null);
+
+        assertFalse(leafTask.getTaskInfo().isFocused);
+        assertFalse(rootTask.getTaskInfo().isFocused);
+    }
+
+    @Test
     public void testReturnsToHomeRootTask() throws Exception {
         final Task task = createTask(1);
         spyOn(task);
