@@ -174,6 +174,12 @@ static struct {
     jfieldID typeId;
 } gDescriptorInfo;
 
+static struct {
+    jclass clazz;
+    jmethodID ctorId;
+    jmethodID setId;
+} gBufferInfo;
+
 struct fields_t {
     jmethodID postEventFromNativeID;
     jmethodID lockAndGetContextID;
@@ -460,11 +466,7 @@ status_t JMediaCodec::dequeueOutputBuffer(
         return err;
     }
 
-    ScopedLocalRef<jclass> clazz(
-            env, env->FindClass("android/media/MediaCodec$BufferInfo"));
-
-    jmethodID method = env->GetMethodID(clazz.get(), "set", "(IIJI)V");
-    env->CallVoidMethod(bufferInfo, method, (jint)offset, (jint)size, timeUs, flags);
+    env->CallVoidMethod(bufferInfo, gBufferInfo.setId, (jint)offset, (jint)size, timeUs, flags);
 
     return OK;
 }
@@ -1091,13 +1093,7 @@ void JMediaCodec::handleCallback(const sp<AMessage> &msg) {
             CHECK(msg->findInt64("timeUs", &timeUs));
             CHECK(msg->findInt32("flags", (int32_t *)&flags));
 
-            ScopedLocalRef<jclass> clazz(
-                    env, env->FindClass("android/media/MediaCodec$BufferInfo"));
-            jmethodID ctor = env->GetMethodID(clazz.get(), "<init>", "()V");
-            jmethodID method = env->GetMethodID(clazz.get(), "set", "(IIJI)V");
-
-            obj = env->NewObject(clazz.get(), ctor);
-
+            obj = env->NewObject(gBufferInfo.clazz, gBufferInfo.ctorId);
             if (obj == NULL) {
                 if (env->ExceptionCheck()) {
                     ALOGE("Could not create MediaCodec.BufferInfo.");
@@ -1107,7 +1103,7 @@ void JMediaCodec::handleCallback(const sp<AMessage> &msg) {
                 return;
             }
 
-            env->CallVoidMethod(obj, method, (jint)offset, (jint)size, timeUs, flags);
+            env->CallVoidMethod(obj, gBufferInfo.setId, (jint)offset, (jint)size, timeUs, flags);
             break;
         }
 
@@ -3235,6 +3231,16 @@ static void android_media_MediaCodec_native_init(JNIEnv *env, jclass) {
 
     gDescriptorInfo.typeId = env->GetFieldID(clazz.get(), "mType", "I");
     CHECK(gDescriptorInfo.typeId != NULL);
+
+    clazz.reset(env->FindClass("android/media/MediaCodec$BufferInfo"));
+    CHECK(clazz.get() != NULL);
+    gBufferInfo.clazz = (jclass)env->NewGlobalRef(clazz.get());
+
+    gBufferInfo.ctorId = env->GetMethodID(clazz.get(), "<init>", "()V");
+    CHECK(gBufferInfo.ctorId != NULL);
+
+    gBufferInfo.setId = env->GetMethodID(clazz.get(), "set", "(IIJI)V");
+    CHECK(gBufferInfo.setId != NULL);
 }
 
 static void android_media_MediaCodec_native_setup(
