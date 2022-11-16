@@ -90,7 +90,8 @@ object Flags {
     // TODO(b/257315550): Tracking Bug
     val NO_HUN_FOR_OLD_WHEN = unreleasedFlag(118, "no_hun_for_old_when")
 
-    // next id: 119
+    val FILTER_UNSEEN_NOTIFS_ON_KEYGUARD =
+        unreleasedFlag(254647461, "filter_unseen_notifs_on_keyguard", teamfood = true)
 
     // 200 - keyguard/lockscreen
     // ** Flag retired **
