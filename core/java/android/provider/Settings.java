@@ -10309,11 +10309,11 @@ public final class Settings {
         public static final String QS_AUTO_ADDED_TILES = "qs_auto_tiles";
 
         /**
-         * The duration of timeout, in milliseconds, to switch from a non-primary user to the
-         * primary user when the device is docked.
+         * The duration of timeout, in milliseconds, to switch from a non-Dock User to the
+         * Dock User when the device is docked.
          * @hide
          */
-        public static final String TIMEOUT_TO_USER_ZERO = "timeout_to_user_zero";
+        public static final String TIMEOUT_TO_DOCK_USER = "timeout_to_dock_user";
 
         /**
          * Backup manager behavioral parameters.
