@@ -64,8 +64,6 @@ class CredentialEntryInfo(
   val lastUsedTimeMillis: Long?,
 ) : EntryInfo(providerId, entryKey, entrySubkey)
 
-// TODO: handle sub credential type values like password obfuscation.
-
 class AuthenticationEntryInfo(
   providerId: String,
   entryKey: String,

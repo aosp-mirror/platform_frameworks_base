@@ -17,7 +17,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -43,6 +42,7 @@ import com.android.credentialmanager.common.material.ModalBottomSheetValue
 import com.android.credentialmanager.common.material.rememberModalBottomSheetState
 import com.android.credentialmanager.common.ui.CancelButton
 import com.android.credentialmanager.common.ui.ConfirmButton
+import com.android.credentialmanager.common.ui.Entry
 import com.android.credentialmanager.ui.theme.EntryShape
 import com.android.credentialmanager.jetpack.developer.PublicKeyCredential.Companion.TYPE_PUBLIC_KEY_CREDENTIAL
 
@@ -184,7 +184,7 @@ fun ProviderSelectionCard(
         color = Color.Transparent
       )
       Card(
-        shape = EntryShape.FullRoundedCorner,
+        shape = MaterialTheme.shapes.medium,
         modifier = Modifier
           .padding(horizontal = 24.dp)
           .align(alignment = Alignment.CenterHorizontally),
@@ -257,7 +257,7 @@ fun MoreOptionsSelectionCard(
          color = Color.Transparent
       )
       Card(
-        shape = EntryShape.FullRoundedCorner,
+        shape = MaterialTheme.shapes.medium,
         modifier = Modifier
           .padding(horizontal = 24.dp)
           .align(alignment = Alignment.CenterHorizontally)
@@ -356,20 +356,17 @@ fun MoreOptionsRowIntroCard(
   }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProviderRow(providerInfo: ProviderInfo, onProviderSelected: (String) -> Unit) {
-  SuggestionChip(
-    modifier = Modifier.fillMaxWidth(),
+  Entry(
     onClick = {onProviderSelected(providerInfo.name)},
     icon = {
-      Image(modifier = Modifier.size(24.dp, 24.dp).padding(start = 10.dp),
+      Image(modifier = Modifier.size(32.dp).padding(start = 10.dp),
             bitmap = providerInfo.icon.toBitmap().asImageBitmap(),
             // painter = painterResource(R.drawable.ic_passkey),
             // TODO: add description.
             contentDescription = "")
     },
-    shape = EntryShape.FullRoundedCorner,
     label = {
       Text(
         text = providerInfo.displayName,
@@ -433,7 +430,7 @@ fun CreationSelectionCard(
         )
       }
       Card(
-        shape = EntryShape.FullRoundedCorner,
+        shape = MaterialTheme.shapes.medium,
         modifier = Modifier
           .padding(horizontal = 24.dp)
           .align(alignment = Alignment.CenterHorizontally),
@@ -499,15 +496,13 @@ fun PrimaryCreateOptionRow(
   createOptionInfo: CreateOptionInfo,
   onOptionSelected: () -> Unit
 ) {
-  SuggestionChip(
-    modifier = Modifier.fillMaxWidth(),
+  Entry(
     onClick = onOptionSelected,
     icon = {
-      Image(modifier = Modifier.size(24.dp, 24.dp).padding(start = 10.dp),
+      Image(modifier = Modifier.size(32.dp).padding(start = 10.dp),
         bitmap = createOptionInfo.credentialTypeIcon.toBitmap().asImageBitmap(),
         contentDescription = null)
     },
-    shape = EntryShape.FullRoundedCorner,
     label = {
       Column() {
         // TODO: Add the function to hide/view password when the type is create password
@@ -542,15 +537,13 @@ fun MoreOptionsInfoRow(
   createOptionInfo: CreateOptionInfo,
   onOptionSelected: () -> Unit
 ) {
-  SuggestionChip(
-        modifier = Modifier.fillMaxWidth(),
+  Entry(
         onClick = onOptionSelected,
         icon = {
-            Image(modifier = Modifier.size(32.dp, 32.dp).padding(start = 16.dp),
+            Image(modifier = Modifier.size(32.dp).padding(start = 16.dp),
                 bitmap = providerInfo.icon.toBitmap().asImageBitmap(),
                 contentDescription = null)
         },
-        shape = EntryShape.FullRoundedCorner,
         label = {
           Column() {
               Text(
@@ -611,8 +604,7 @@ fun MoreOptionsDisabledProvidersRow(
   disabledProviders: List<ProviderInfo>,
   onDisabledPasswordManagerSelected: () -> Unit,
 ) {
-  SuggestionChip(
-    modifier = Modifier.fillMaxWidth(),
+  Entry(
     onClick = onDisabledPasswordManagerSelected,
     icon = {
       Icon(
@@ -621,7 +613,6 @@ fun MoreOptionsDisabledProvidersRow(
         modifier = Modifier.padding(start = 16.dp)
       )
     },
-    shape = EntryShape.FullRoundedCorner,
     label = {
       Column() {
         Text(
@@ -644,8 +635,7 @@ fun MoreOptionsDisabledProvidersRow(
 fun RemoteEntryRow(
   onRemoteEntrySelected: () -> Unit,
 ) {
-  SuggestionChip(
-    modifier = Modifier.fillMaxWidth(),
+  Entry(
     onClick = onRemoteEntrySelected,
     icon = {
       Icon(
@@ -655,7 +645,6 @@ fun RemoteEntryRow(
         modifier = Modifier.padding(start = 18.dp)
       )
     },
-    shape = EntryShape.FullRoundedCorner,
     label = {
       Column() {
         Text(
