@@ -297,6 +297,14 @@ package android.net.netstats {
 
 package android.os {
 
+  public class ArtModuleServiceManager {
+    method @NonNull public android.os.ArtModuleServiceManager.ServiceRegisterer getArtdServiceRegisterer();
+  }
+
+  public static final class ArtModuleServiceManager.ServiceRegisterer {
+    method @Nullable public android.os.IBinder waitForService();
+  }
+
   public final class BatteryStatsManager {
     method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK}) public void reportNetworkInterfaceForTransports(@NonNull String, @NonNull int[]) throws java.lang.RuntimeException;
   }
