@@ -567,6 +567,10 @@ MissingNullability: android.telephony.SmsManager#checkSmsShortCodeDestination(St
     Missing nullability on parameter `destAddress` in method `checkSmsShortCodeDestination`
 MissingNullability: android.telephony.SmsManager#checkSmsShortCodeDestination(String, String) parameter #1:
     Missing nullability on parameter `countryIso` in method `checkSmsShortCodeDestination`
+MissingNullability: android.telephony.TelephonyManager#HAL_VERSION_UNKNOWN:
+    Missing nullability on field `HAL_VERSION_UNKNOWN` in class `class android.telephony.TelephonyManager`
+MissingNullability: android.telephony.TelephonyManager#HAL_VERSION_UNSUPPORTED:
+    Missing nullability on field `HAL_VERSION_UNSUPPORTED` in class `class android.telephony.TelephonyManager`
 MissingNullability: android.telephony.TelephonyManager#getLine1AlphaTag():
     Missing nullability on method `getLine1AlphaTag` return
 MissingNullability: android.telephony.TelephonyManager#getRadioHalVersion():

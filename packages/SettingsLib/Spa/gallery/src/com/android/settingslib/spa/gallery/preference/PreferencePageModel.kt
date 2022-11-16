@@ -44,7 +44,7 @@ class PreferencePageModel : PageModel() {
         const val DISABLE_PREFERENCE_TITLE = "Disabled"
         const val DISABLE_PREFERENCE_SUMMARY = "Disabled summary"
         const val ASYNC_PREFERENCE_TITLE = "Async Preference"
-        private const val ASYNC_PREFERENCE_SUMMARY = "Async summary"
+        const val ASYNC_PREFERENCE_SUMMARY = "Async summary"
         const val MANUAL_UPDATE_PREFERENCE_TITLE = "Manual Updater"
         const val AUTO_UPDATE_PREFERENCE_TITLE = "Auto Updater"
         val SIMPLE_PREFERENCE_KEYWORDS = listOf("simple keyword1", "simple keyword2")

@@ -83,9 +83,10 @@ final class BootUserInitializer {
             Slogf.d(TAG, "Creating initial user");
             t.traceBegin("create-initial-user");
             try {
+                int flags = UserInfo.FLAG_ADMIN | UserInfo.FLAG_MAIN;
                 // TODO(b/204091126): proper name for user
                 UserInfo newUser = um.createUserEvenWhenDisallowed("Real User",
-                        UserManager.USER_TYPE_FULL_SECONDARY, UserInfo.FLAG_ADMIN,
+                        UserManager.USER_TYPE_FULL_SECONDARY, flags,
                         /* disallowedPackages= */ null, /* token= */ null);
                 Slogf.i(TAG, "Created initial user: %s", newUser.toFullString());
                 initialUserId = newUser.id;

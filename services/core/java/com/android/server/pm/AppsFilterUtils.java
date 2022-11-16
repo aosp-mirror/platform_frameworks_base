@@ -29,7 +29,7 @@ import com.android.server.pm.pkg.component.ParsedComponent;
 import com.android.server.pm.pkg.component.ParsedIntentInfo;
 import com.android.server.pm.pkg.component.ParsedMainComponent;
 import com.android.server.pm.pkg.component.ParsedProvider;
-import com.android.server.utils.WatchedArrayList;
+import com.android.server.utils.WatchedArraySet;
 
 import java.util.List;
 import java.util.Set;
@@ -45,7 +45,7 @@ final class AppsFilterUtils {
 
     /** Returns true if the querying package may query for the potential target package */
     public static boolean canQueryViaComponents(AndroidPackage querying,
-            AndroidPackage potentialTarget, WatchedArrayList<String> protectedBroadcasts) {
+            AndroidPackage potentialTarget, WatchedArraySet<String> protectedBroadcasts) {
         if (!querying.getQueriesIntents().isEmpty()) {
             for (Intent intent : querying.getQueriesIntents()) {
                 if (matchesPackage(intent, potentialTarget, protectedBroadcasts)) {
@@ -117,7 +117,7 @@ final class AppsFilterUtils {
     }
 
     private static boolean matchesPackage(Intent intent, AndroidPackage potentialTarget,
-            WatchedArrayList<String> protectedBroadcasts) {
+            WatchedArraySet<String> protectedBroadcasts) {
         if (matchesAnyComponents(
                 intent, potentialTarget.getServices(), null /*protectedBroadcasts*/)) {
             return true;
@@ -138,7 +138,7 @@ final class AppsFilterUtils {
 
     private static boolean matchesAnyComponents(Intent intent,
             List<? extends ParsedMainComponent> components,
-            WatchedArrayList<String> protectedBroadcasts) {
+            WatchedArraySet<String> protectedBroadcasts) {
         for (int i = ArrayUtils.size(components) - 1; i >= 0; i--) {
             ParsedMainComponent component = components.get(i);
             if (!component.isExported()) {
@@ -152,7 +152,7 @@ final class AppsFilterUtils {
     }
 
     private static boolean matchesAnyFilter(Intent intent, ParsedComponent component,
-            WatchedArrayList<String> protectedBroadcasts) {
+            WatchedArraySet<String> protectedBroadcasts) {
         List<ParsedIntentInfo> intents = component.getIntents();
         for (int i = ArrayUtils.size(intents) - 1; i >= 0; i--) {
             IntentFilter intentFilter = intents.get(i).getIntentFilter();
@@ -164,7 +164,7 @@ final class AppsFilterUtils {
     }
 
     private static boolean matchesIntentFilter(Intent intent, IntentFilter intentFilter,
-            @Nullable WatchedArrayList<String> protectedBroadcasts) {
+            @Nullable WatchedArraySet<String> protectedBroadcasts) {
         return intentFilter.match(intent.getAction(), intent.getType(), intent.getScheme(),
                 intent.getData(), intent.getCategories(), "AppsFilter", true,
                 protectedBroadcasts != null ? protectedBroadcasts.untrackedStorage() : null) > 0;

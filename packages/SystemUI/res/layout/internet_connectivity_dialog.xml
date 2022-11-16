@@ -312,22 +312,15 @@
 
             <LinearLayout
                 android:id="@+id/see_all_layout"
-                android:layout_width="match_parent"
+                style="@style/InternetDialog.Network"
                 android:layout_height="64dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:background="?android:attr/selectableItemBackground"
-                android:gravity="center_vertical|center_horizontal"
-                android:orientation="horizontal"
-                android:paddingStart="22dp"
-                android:paddingEnd="22dp">
+                android:paddingStart="20dp">
 
                 <FrameLayout
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:clickable="false"
-                    android:layout_gravity="center_vertical|start"
-                    android:layout_marginStart="@dimen/internet_dialog_network_layout_margin">
+                    android:layout_gravity="center_vertical|start">
                     <ImageView
                         android:id="@+id/arrow_forward"
                         android:src="@drawable/ic_arrow_forward"

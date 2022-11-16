@@ -47,7 +47,6 @@ import androidx.annotation.VisibleForTesting;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.UiEventLogger;
 import com.android.wm.shell.R;
-import com.android.wm.shell.RootDisplayAreaOrganizer;
 import com.android.wm.shell.common.DisplayChangeController;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
@@ -205,14 +204,12 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
             DisplayController displayController, DisplayLayout displayLayout,
             TaskStackListenerImpl taskStackListener,
             InteractionJankMonitor jankMonitor, UiEventLogger uiEventLogger,
-            RootDisplayAreaOrganizer rootDisplayAreaOrganizer,
             ShellExecutor mainExecutor, Handler mainHandler) {
         OneHandedSettingsUtil settingsUtil = new OneHandedSettingsUtil();
         OneHandedAccessibilityUtil accessibilityUtil = new OneHandedAccessibilityUtil(context);
         OneHandedTimeoutHandler timeoutHandler = new OneHandedTimeoutHandler(mainExecutor);
         OneHandedState oneHandedState = new OneHandedState();
-        BackgroundWindowManager backgroundWindowManager =
-                new BackgroundWindowManager(context, rootDisplayAreaOrganizer);
+        BackgroundWindowManager backgroundWindowManager = new BackgroundWindowManager(context);
         OneHandedTutorialHandler tutorialHandler = new OneHandedTutorialHandler(context,
                 settingsUtil, windowManager, backgroundWindowManager);
         OneHandedAnimationController animationController =

@@ -18,8 +18,8 @@ package com.android.systemui.media.taptotransfer.receiver
 
 import android.content.Context
 import android.util.AttributeSet
-import com.android.systemui.ripple.RippleShader
-import com.android.systemui.ripple.RippleView
+import com.android.systemui.surfaceeffects.ripple.RippleShader
+import com.android.systemui.surfaceeffects.ripple.RippleView
 
 /**
  * An expanding ripple effect for the media tap-to-transfer receiver chip.

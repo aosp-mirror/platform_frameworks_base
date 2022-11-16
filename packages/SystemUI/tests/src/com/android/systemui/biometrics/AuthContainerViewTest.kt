@@ -125,6 +125,21 @@ class AuthContainerViewTest : SysuiTestCase() {
     }
 
     @Test
+    fun testCredentialPasswordDismissesOnBack() {
+        val container = initializeCredentialPasswordContainer(addToView = true)
+        assertThat(container.parent).isNotNull()
+        val root = container.rootView
+
+        // Simulate back invocation
+        container.dispatchKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BACK))
+        container.dispatchKeyEvent(KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_BACK))
+        waitForIdleSync()
+
+        assertThat(container.parent).isNull()
+        assertThat(root.isAttachedToWindow).isFalse()
+    }
+
+    @Test
     fun testIgnoresAnimatedInWhenDismissed() {
         val container = initializeFingerprintContainer(addToView = false)
         container.dismissFromSystemServer()
@@ -369,20 +384,7 @@ class AuthContainerViewTest : SysuiTestCase() {
 
     @Test
     fun testCredentialUI_disablesClickingOnBackground() {
-        whenever(userManager.getCredentialOwnerProfile(anyInt())).thenReturn(20)
-        whenever(lockPatternUtils.getKeyguardStoredPasswordQuality(eq(20))).thenReturn(
-            DevicePolicyManager.PASSWORD_QUALITY_NUMERIC
-        )
-
-        // In the credential view, clicking on the background (to cancel authentication) is not
-        // valid. Thus, the listener should be null, and it should not be in the accessibility
-        // hierarchy.
-        val container = initializeFingerprintContainer(
-            authenticators = BiometricManager.Authenticators.DEVICE_CREDENTIAL
-        )
-        waitForIdleSync()
-
-        assertThat(container.hasCredentialPasswordView()).isTrue()
+        val container = initializeCredentialPasswordContainer()
         assertThat(container.hasBiometricPrompt()).isFalse()
         assertThat(
             container.findViewById<View>(R.id.background)?.isImportantForAccessibility
@@ -440,6 +442,27 @@ class AuthContainerViewTest : SysuiTestCase() {
         waitForIdleSync()
 
         verify(callback).onTryAgainPressed(authContainer?.requestId ?: 0L)
+    }
+
+    private fun initializeCredentialPasswordContainer(
+            addToView: Boolean = true,
+    ): TestAuthContainerView {
+        whenever(userManager.getCredentialOwnerProfile(anyInt())).thenReturn(20)
+        whenever(lockPatternUtils.getKeyguardStoredPasswordQuality(eq(20))).thenReturn(
+            DevicePolicyManager.PASSWORD_QUALITY_NUMERIC
+        )
+
+        // In the credential view, clicking on the background (to cancel authentication) is not
+        // valid. Thus, the listener should be null, and it should not be in the accessibility
+        // hierarchy.
+        val container = initializeFingerprintContainer(
+                authenticators = BiometricManager.Authenticators.DEVICE_CREDENTIAL,
+                addToView = addToView,
+        )
+        waitForIdleSync()
+
+        assertThat(container.hasCredentialPasswordView()).isTrue()
+        return container
     }
 
     private fun initializeFingerprintContainer(

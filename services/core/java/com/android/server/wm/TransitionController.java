@@ -423,7 +423,7 @@ class TransitionController {
         Transition newTransition = null;
         if (isCollecting()) {
             if (displayChange != null) {
-                throw new IllegalArgumentException("Provided displayChange for a non-new request");
+                Slog.e(TAG, "Provided displayChange for a non-new request", new Throwable());
             }
             // Make the collecting transition wait until this request is ready.
             mCollectingTransition.setReady(readyGroupRef, false);

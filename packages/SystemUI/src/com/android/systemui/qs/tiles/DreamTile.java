@@ -108,14 +108,14 @@ public class DreamTile extends QSTileImpl<QSTile.BooleanState> {
         mDreamManager = dreamManager;
         mBroadcastDispatcher = broadcastDispatcher;
         mEnabledSettingObserver = new SettingObserver(secureSettings, mHandler,
-                Settings.Secure.SCREENSAVER_ENABLED) {
+                Settings.Secure.SCREENSAVER_ENABLED, userTracker.getUserId()) {
             @Override
             protected void handleValueChanged(int value, boolean observedChange) {
                 refreshState();
             }
         };
         mDreamSettingObserver = new SettingObserver(secureSettings, mHandler,
-                Settings.Secure.SCREENSAVER_COMPONENTS) {
+                Settings.Secure.SCREENSAVER_COMPONENTS, userTracker.getUserId()) {
             @Override
             protected void handleValueChanged(int value, boolean observedChange) {
                 refreshState();

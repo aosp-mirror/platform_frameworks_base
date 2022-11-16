@@ -838,6 +838,28 @@ public class UsbManager {
     }
 
     /**
+     * Returns true if the caller has permission to access the device. It's similar to the
+     * {@link #hasPermission(UsbDevice)} but allows to specify a different package/uid/pid.
+     *
+     * <p>Not for third-party apps.</p>
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_USB)
+    @RequiresFeature(PackageManager.FEATURE_USB_HOST)
+    public boolean hasPermission(@NonNull UsbDevice device, @NonNull String packageName,
+            int pid, int uid) {
+        if (mService == null) {
+            return false;
+        }
+        try {
+            return mService.hasDevicePermissionWithIdentity(device, packageName, pid, uid);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Returns true if the caller has permission to access the accessory.
      * Permission might have been granted temporarily via
      * {@link #requestPermission(UsbAccessory, PendingIntent)} or
@@ -859,6 +881,27 @@ public class UsbManager {
     }
 
     /**
+     * Returns true if the caller has permission to access the accessory. It's similar to the
+     * {@link #hasPermission(UsbAccessory)} but allows to specify a different uid/pid.
+     *
+     * <p>Not for third-party apps.</p>
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_USB)
+    @RequiresFeature(PackageManager.FEATURE_USB_ACCESSORY)
+    public boolean hasPermission(@NonNull UsbAccessory accessory, int pid, int uid) {
+        if (mService == null) {
+            return false;
+        }
+        try {
+            return mService.hasAccessoryPermissionWithIdentity(accessory, pid, uid);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+   /**
      * Requests temporary permission for the given package to access the device.
      * This may result in a system dialog being displayed to the user
      * if permission had not already been granted.

@@ -2253,6 +2253,23 @@ public class TvInteractiveAppManagerService extends SystemService {
         }
 
         @Override
+        public void onRequestStopRecording(String recordingId) {
+            synchronized (mLock) {
+                if (DEBUG) {
+                    Slogf.d(TAG, "onRequestStopRecording");
+                }
+                if (mSessionState.mSession == null || mSessionState.mClient == null) {
+                    return;
+                }
+                try {
+                    mSessionState.mClient.onRequestStopRecording(recordingId, mSessionState.mSeq);
+                } catch (RemoteException e) {
+                    Slogf.e(TAG, "error in onRequestStopRecording", e);
+                }
+            }
+        }
+
+        @Override
         public void onRequestSigning(String id, String algorithm, String alias, byte[] data) {
             synchronized (mLock) {
                 if (DEBUG) {

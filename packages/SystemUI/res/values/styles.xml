@@ -1091,7 +1091,7 @@
         <item name="android:orientation">horizontal</item>
         <item name="android:focusable">true</item>
         <item name="android:clickable">true</item>
-        <item name="android:background">?android:attr/selectableItemBackground</item>
+        <item name="android:background">@drawable/internet_dialog_selected_effect</item>
     </style>
 
     <style name="InternetDialog.NetworkTitle">

@@ -48,6 +48,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SystemUIInitializerImpl;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.DozeParameters;
@@ -93,6 +94,8 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
     private NextAlarmController mNextAlarmController;
     @Mock
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    @Mock
+    private UserTracker mUserTracker;
     private TestableKeyguardSliceProvider mProvider;
     private boolean mIsZenMode;
 
@@ -105,6 +108,7 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
         mProvider.attachInfo(getContext(), null);
         reset(mContentResolver);
         SliceProvider.setSpecs(new HashSet<>(Arrays.asList(SliceSpecs.LIST)));
+        when(mUserTracker.getUserId()).thenReturn(100);
     }
 
     @After
@@ -267,6 +271,7 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
             mKeyguardBypassController = KeyguardSliceProviderTest.this.mKeyguardBypassController;
             mMediaManager = KeyguardSliceProviderTest.this.mNotificationMediaManager;
             mKeyguardUpdateMonitor = KeyguardSliceProviderTest.this.mKeyguardUpdateMonitor;
+            mUserTracker = KeyguardSliceProviderTest.this.mUserTracker;
         }
 
         @Override

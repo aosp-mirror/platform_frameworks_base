@@ -20,8 +20,6 @@ package com.android.systemui.user.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.android.systemui.common.ui.drawable.CircularDrawable
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.user.domain.interactor.GuestUserInteractor
 import com.android.systemui.user.domain.interactor.UserInteractor
@@ -41,11 +39,7 @@ private constructor(
     private val userInteractor: UserInteractor,
     private val guestUserInteractor: GuestUserInteractor,
     private val powerInteractor: PowerInteractor,
-    private val featureFlags: FeatureFlags,
 ) : ViewModel() {
-
-    private val isNewImpl: Boolean
-        get() = !featureFlags.isEnabled(Flags.USER_INTERACTOR_AND_REPO_USE_CONTROLLER)
 
     /** On-device users. */
     val users: Flow<List<UserViewModel>> =
@@ -216,7 +210,6 @@ private constructor(
         private val userInteractor: UserInteractor,
         private val guestUserInteractor: GuestUserInteractor,
         private val powerInteractor: PowerInteractor,
-        private val featureFlags: FeatureFlags,
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             @Suppress("UNCHECKED_CAST")
@@ -224,7 +217,6 @@ private constructor(
                 userInteractor = userInteractor,
                 guestUserInteractor = guestUserInteractor,
                 powerInteractor = powerInteractor,
-                featureFlags = featureFlags,
             )
                 as T
         }

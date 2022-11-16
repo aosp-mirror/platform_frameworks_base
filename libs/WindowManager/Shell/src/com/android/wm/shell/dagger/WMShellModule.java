@@ -27,7 +27,6 @@ import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.launcher3.icons.IconProvider;
-import com.android.wm.shell.RootDisplayAreaOrganizer;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.TaskViewTransitions;
@@ -272,12 +271,11 @@ public abstract class WMShellModule {
             TaskStackListenerImpl taskStackListener,
             UiEventLogger uiEventLogger,
             InteractionJankMonitor jankMonitor,
-            RootDisplayAreaOrganizer rootDisplayAreaOrganizer,
             @ShellMainThread ShellExecutor mainExecutor,
             @ShellMainThread Handler mainHandler) {
         return OneHandedController.create(context, shellInit, shellCommandHandler, shellController,
                 windowManager, displayController, displayLayout, taskStackListener, jankMonitor,
-                uiEventLogger, rootDisplayAreaOrganizer, mainExecutor, mainHandler);
+                uiEventLogger, mainExecutor, mainHandler);
     }
 
     //

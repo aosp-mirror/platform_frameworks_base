@@ -133,7 +133,9 @@ object UserSwitcherViewBinder {
                 launch {
                     viewModel.users.collect { users ->
                         val viewPool =
-                            view.children.filter { it.tag == USER_VIEW_TAG }.toMutableList()
+                            gridContainerView.children
+                                .filter { it.tag == USER_VIEW_TAG }
+                                .toMutableList()
                         viewPool.forEach {
                             gridContainerView.removeView(it)
                             flowWidget.removeView(it)

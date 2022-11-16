@@ -19,6 +19,7 @@ package android.service.timezone;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -65,6 +66,7 @@ import java.util.regex.Pattern;
  *
  * @hide
  */
+@SystemApi
 public final class TimeZoneProviderStatus implements Parcelable {
 
     /**

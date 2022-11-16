@@ -24,7 +24,6 @@ import androidx.test.annotation.UiThreadTest;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
-import com.android.wm.shell.RootDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.DisplayLayout;
 
@@ -42,13 +41,11 @@ public class BackgroundWindowManagerTest extends ShellTestCase {
     private BackgroundWindowManager mBackgroundWindowManager;
     @Mock
     private DisplayLayout  mMockDisplayLayout;
-    @Mock
-    private RootDisplayAreaOrganizer mRootDisplayAreaOrganizer;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mBackgroundWindowManager = new BackgroundWindowManager(mContext, mRootDisplayAreaOrganizer);
+        mBackgroundWindowManager = new BackgroundWindowManager(mContext);
         mBackgroundWindowManager.onDisplayChanged(mMockDisplayLayout);
     }
 

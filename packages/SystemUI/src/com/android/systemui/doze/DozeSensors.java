@@ -24,7 +24,6 @@ import static com.android.systemui.plugins.SensorManagerPlugin.Sensor.TYPE_WAKE_
 import static com.android.systemui.plugins.SensorManagerPlugin.Sensor.TYPE_WAKE_LOCK_SCREEN;
 
 import android.annotation.AnyThread;
-import android.app.ActivityManager;
 import android.database.ContentObserver;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
@@ -50,6 +49,7 @@ import com.android.internal.logging.UiEventLoggerImpl;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.plugins.SensorManagerPlugin;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.policy.DevicePostureController;
 import com.android.systemui.util.sensors.AsyncSensorManager;
@@ -99,6 +99,7 @@ public class DozeSensors {
     private final SecureSettings mSecureSettings;
     private final DevicePostureController mDevicePostureController;
     private final AuthController mAuthController;
+    private final UserTracker mUserTracker;
     private final boolean mScreenOffUdfpsEnabled;
 
     // Sensors
@@ -152,7 +153,8 @@ public class DozeSensors {
             ProximitySensor proximitySensor,
             SecureSettings secureSettings,
             AuthController authController,
-            DevicePostureController devicePostureController
+            DevicePostureController devicePostureController,
+            UserTracker userTracker
     ) {
         mSensorManager = sensorManager;
         mConfig = config;
@@ -170,6 +172,7 @@ public class DozeSensors {
         mDevicePostureController = devicePostureController;
         mDevicePosture = mDevicePostureController.getDevicePosture();
         mAuthController = authController;
+        mUserTracker = userTracker;
 
         mUdfpsEnrolled =
                 mAuthController.isUdfpsEnrolled(KeyguardUpdateMonitor.getCurrentUser());
@@ -441,7 +444,7 @@ public class DozeSensors {
     private final ContentObserver mSettingsObserver = new ContentObserver(mHandler) {
         @Override
         public void onChange(boolean selfChange, Collection<Uri> uris, int flags, int userId) {
-            if (userId != ActivityManager.getCurrentUser()) {
+            if (userId != mUserTracker.getUserId()) {
                 return;
             }
             for (TriggerSensor s : mTriggerSensors) {

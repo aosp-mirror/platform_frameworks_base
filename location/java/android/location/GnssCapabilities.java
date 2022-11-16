@@ -25,6 +25,7 @@ import android.os.Parcelable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
@@ -125,7 +126,7 @@ public final class GnssCapabilities implements Parcelable {
      * @hide
      */
     public static GnssCapabilities empty() {
-        return new GnssCapabilities(0, 0, 0, new ArrayList<>());
+        return new GnssCapabilities(0, 0, 0, Collections.emptyList());
     }
 
     private final @TopHalCapabilityFlags int mTopFlags;
@@ -142,7 +143,7 @@ public final class GnssCapabilities implements Parcelable {
         mTopFlags = topFlags;
         mMeasurementCorrectionsFlags = measurementCorrectionsFlags;
         mPowerFlags = powerFlags;
-        mGnssSignalTypes = gnssSignalTypes;
+        mGnssSignalTypes = Collections.unmodifiableList(gnssSignalTypes);
     }
 
     /**
@@ -155,7 +156,7 @@ public final class GnssCapabilities implements Parcelable {
             return this;
         } else {
             return new GnssCapabilities(flags, mMeasurementCorrectionsFlags, mPowerFlags,
-                    new ArrayList<>(mGnssSignalTypes));
+                    mGnssSignalTypes);
         }
     }
 
@@ -171,7 +172,7 @@ public final class GnssCapabilities implements Parcelable {
             return this;
         } else {
             return new GnssCapabilities(mTopFlags, flags, mPowerFlags,
-                    new ArrayList<>(mGnssSignalTypes));
+                    mGnssSignalTypes);
         }
     }
 
@@ -186,7 +187,7 @@ public final class GnssCapabilities implements Parcelable {
             return this;
         } else {
             return new GnssCapabilities(mTopFlags, mMeasurementCorrectionsFlags, flags,
-                    new ArrayList<>(mGnssSignalTypes));
+                    mGnssSignalTypes);
         }
     }
 
@@ -606,7 +607,7 @@ public final class GnssCapabilities implements Parcelable {
             mTopFlags = 0;
             mMeasurementCorrectionsFlags = 0;
             mPowerFlags = 0;
-            mGnssSignalTypes = new ArrayList<>();
+            mGnssSignalTypes = Collections.emptyList();
         }
 
         public Builder(@NonNull GnssCapabilities capabilities) {

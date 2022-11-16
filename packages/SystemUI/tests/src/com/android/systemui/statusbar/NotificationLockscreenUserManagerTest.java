@@ -53,6 +53,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.OverviewProxyService;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager.NotificationStateChangedListener;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
@@ -78,6 +79,8 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     private NotificationPresenter mPresenter;
     @Mock
     private UserManager mUserManager;
+    @Mock
+    private UserTracker mUserTracker;
 
     // Dependency mocks:
     @Mock
@@ -115,6 +118,7 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
 
         int currentUserId = ActivityManager.getCurrentUser();
+        when(mUserTracker.getUserId()).thenReturn(currentUserId);
         mSettings = new FakeSettings();
         mSettings.setUserId(ActivityManager.getCurrentUser());
         mCurrentUser = new UserInfo(currentUserId, "", 0);
@@ -344,6 +348,7 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
                     mBroadcastDispatcher,
                     mDevicePolicyManager,
                     mUserManager,
+                    mUserTracker,
                     (() -> mVisibilityProvider),
                     (() -> mNotifCollection),
                     mClickNotifier,

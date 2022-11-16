@@ -29,7 +29,8 @@ import com.android.internal.annotations.VisibleForTesting
 import com.android.settingslib.Utils
 import com.android.systemui.media.controls.models.player.MediaViewHolder
 import com.android.systemui.monet.ColorScheme
-import com.android.systemui.ripple.MultiRippleController
+import com.android.systemui.surfaceeffects.ripple.MultiRippleController
+import com.android.systemui.surfaceeffects.turbulencenoise.TurbulenceNoiseController
 
 /**
  * A [ColorTransition] is an object that updates the colors of views each time [updateColorScheme]
@@ -102,13 +103,21 @@ internal constructor(
     private val context: Context,
     private val mediaViewHolder: MediaViewHolder,
     private val multiRippleController: MultiRippleController,
+    private val turbulenceNoiseController: TurbulenceNoiseController,
     animatingColorTransitionFactory: AnimatingColorTransitionFactory
 ) {
     constructor(
         context: Context,
         mediaViewHolder: MediaViewHolder,
         multiRippleController: MultiRippleController,
-    ) : this(context, mediaViewHolder, multiRippleController, ::AnimatingColorTransition)
+        turbulenceNoiseController: TurbulenceNoiseController
+    ) : this(
+        context,
+        mediaViewHolder,
+        multiRippleController,
+        turbulenceNoiseController,
+        ::AnimatingColorTransition
+    )
 
     val bgColor = context.getColor(com.android.systemui.R.color.material_dynamic_secondary95)
     val surfaceColor =
@@ -129,6 +138,7 @@ internal constructor(
             mediaViewHolder.actionPlayPause.backgroundTintList = accentColorList
             mediaViewHolder.gutsViewHolder.setAccentPrimaryColor(accentPrimary)
             multiRippleController.updateColor(accentPrimary)
+            turbulenceNoiseController.updateNoiseColor(accentPrimary)
         }
 
     val accentSecondary =

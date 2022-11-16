@@ -33,6 +33,7 @@ import com.android.systemui.statusbar.CommandQueue.Callbacks;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import java.io.PrintWriter;
+import java.lang.ref.WeakReference;
 
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
@@ -41,11 +42,53 @@ import dagger.assisted.AssistedInject;
 /**
  * Class to control all aspects about light bar changes.
  */
-public class LightBarTransitionsController implements Dumpable, Callbacks,
-        StatusBarStateController.StateListener {
+public class LightBarTransitionsController implements Dumpable {
 
     public static final int DEFAULT_TINT_ANIMATION_DURATION = 120;
     private static final String EXTRA_DARK_INTENSITY = "dark_intensity";
+
+    private static class Callback implements Callbacks, StatusBarStateController.StateListener {
+        private final WeakReference<LightBarTransitionsController> mSelf;
+
+        Callback(LightBarTransitionsController self) {
+            mSelf = new WeakReference<>(self);
+        }
+
+        @Override
+        public void appTransitionPending(int displayId, boolean forced) {
+            LightBarTransitionsController self = mSelf.get();
+            if (self != null) {
+                self.appTransitionPending(displayId, forced);
+            }
+        }
+
+        @Override
+        public void appTransitionCancelled(int displayId) {
+            LightBarTransitionsController self = mSelf.get();
+            if (self != null) {
+                self.appTransitionCancelled(displayId);
+            }
+        }
+
+        @Override
+        public void appTransitionStarting(int displayId, long startTime, long duration,
+                boolean forced) {
+            LightBarTransitionsController self = mSelf.get();
+            if (self != null) {
+                self.appTransitionStarting(displayId, startTime, duration, forced);
+            }
+        }
+
+        @Override
+        public void onDozeAmountChanged(float linear, float eased) {
+            LightBarTransitionsController self = mSelf.get();
+            if (self != null) {
+                self.onDozeAmountChanged(linear, eased);
+            }
+        }
+    }
+
+    private final Callback mCallback;
 
     private final Handler mHandler;
     private final DarkIntensityApplier mApplier;
@@ -86,8 +129,9 @@ public class LightBarTransitionsController implements Dumpable, Callbacks,
         mKeyguardStateController = keyguardStateController;
         mStatusBarStateController = statusBarStateController;
         mCommandQueue = commandQueue;
-        mCommandQueue.addCallback(this);
-        mStatusBarStateController.addCallback(this);
+        mCallback = new Callback(this);
+        mCommandQueue.addCallback(mCallback);
+        mStatusBarStateController.addCallback(mCallback);
         mDozeAmount = mStatusBarStateController.getDozeAmount();
         mContext = context;
         mDisplayId = mContext.getDisplayId();
@@ -95,8 +139,8 @@ public class LightBarTransitionsController implements Dumpable, Callbacks,
 
     /** Call to cleanup the LightBarTransitionsController when done with it. */
     public void destroy() {
-        mCommandQueue.removeCallback(this);
-        mStatusBarStateController.removeCallback(this);
+        mCommandQueue.removeCallback(mCallback);
+        mStatusBarStateController.removeCallback(mCallback);
     }
 
     public void saveState(Bundle outState) {
@@ -110,16 +154,14 @@ public class LightBarTransitionsController implements Dumpable, Callbacks,
         mNextDarkIntensity = mDarkIntensity;
     }
 
-    @Override
-    public void appTransitionPending(int displayId, boolean forced) {
+    private void appTransitionPending(int displayId, boolean forced) {
         if (mDisplayId != displayId || mKeyguardStateController.isKeyguardGoingAway() && !forced) {
             return;
         }
         mTransitionPending = true;
     }
 
-    @Override
-    public void appTransitionCancelled(int displayId) {
+    private void appTransitionCancelled(int displayId) {
         if (mDisplayId != displayId) {
             return;
         }
@@ -131,9 +173,7 @@ public class LightBarTransitionsController implements Dumpable, Callbacks,
         mTransitionPending = false;
     }
 
-    @Override
-    public void appTransitionStarting(int displayId, long startTime, long duration,
-            boolean forced) {
+    private void appTransitionStarting(int displayId, long startTime, long duration, boolean forced) {
         if (mDisplayId != displayId || mKeyguardStateController.isKeyguardGoingAway() && !forced) {
             return;
         }
@@ -230,10 +270,6 @@ public class LightBarTransitionsController implements Dumpable, Callbacks,
         pw.print(" mNextDarkIntensity="); pw.println(mNextDarkIntensity);
     }
 
-    @Override
-    public void onStateChanged(int newState) { }
-
-    @Override
     public void onDozeAmountChanged(float linear, float eased) {
         mDozeAmount = eased;
         dispatchDark();

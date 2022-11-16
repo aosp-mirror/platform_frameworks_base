@@ -44,7 +44,6 @@ import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.snapshot.PackageDataSnapshot;
 import com.android.server.utils.SnapshotCache;
 import com.android.server.utils.Watched;
-import com.android.server.utils.WatchedArrayList;
 import com.android.server.utils.WatchedArrayMap;
 import com.android.server.utils.WatchedArraySet;
 import com.android.server.utils.WatchedSparseBooleanMatrix;
@@ -179,9 +178,9 @@ public abstract class AppsFilterBase implements AppsFilterSnapshot {
 
     @NonNull
     @Watched
-    protected WatchedArrayList<String> mProtectedBroadcasts;
+    protected WatchedArraySet<String> mProtectedBroadcasts;
     @NonNull
-    protected SnapshotCache<WatchedArrayList<String>> mProtectedBroadcastsSnapshot;
+    protected SnapshotCache<WatchedArraySet<String>> mProtectedBroadcastsSnapshot;
 
     /**
      * This structure maps uid -> uid and indicates whether access from the first should be

@@ -2920,18 +2920,18 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
     }
 
     @Override
-    public SyncNotedAppOp startProxyOperation(int code,
+    public SyncNotedAppOp startProxyOperation(@NonNull IBinder clientId, int code,
             @NonNull AttributionSource attributionSource, boolean startIfModeDefault,
             boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
             boolean skipProxyOperation, @AttributionFlags int proxyAttributionFlags,
             @AttributionFlags int proxiedAttributionFlags, int attributionChainId) {
-        return mCheckOpsDelegateDispatcher.startProxyOperation(code, attributionSource,
+        return mCheckOpsDelegateDispatcher.startProxyOperation(clientId, code, attributionSource,
                 startIfModeDefault, shouldCollectAsyncNotedOp, message, shouldCollectMessage,
                 skipProxyOperation, proxyAttributionFlags, proxiedAttributionFlags,
                 attributionChainId);
     }
 
-    private SyncNotedAppOp startProxyOperationImpl(int code,
+    private SyncNotedAppOp startProxyOperationImpl(@NonNull IBinder clientId, int code,
             @NonNull AttributionSource attributionSource,
             boolean startIfModeDefault, boolean shouldCollectAsyncNotedOp, String message,
             boolean shouldCollectMessage, boolean skipProxyOperation, @AttributionFlags
@@ -2940,11 +2940,9 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
         final int proxyUid = attributionSource.getUid();
         final String proxyPackageName = attributionSource.getPackageName();
         final String proxyAttributionTag = attributionSource.getAttributionTag();
-        final IBinder proxyToken = attributionSource.getToken();
         final int proxiedUid = attributionSource.getNextUid();
         final String proxiedPackageName = attributionSource.getNextPackageName();
         final String proxiedAttributionTag = attributionSource.getNextAttributionTag();
-        final IBinder proxiedToken = attributionSource.getNextToken();
 
         verifyIncomingProxyUid(attributionSource);
         verifyIncomingOp(code);
@@ -2986,7 +2984,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
 
         if (!skipProxyOperation) {
             // Test if the proxied operation will succeed before starting the proxy operation
-            final SyncNotedAppOp testProxiedOp = startOperationUnchecked(proxiedToken, code,
+            final SyncNotedAppOp testProxiedOp = startOperationUnchecked(clientId, code,
                     proxiedUid, resolvedProxiedPackageName, proxiedAttributionTag, proxyUid,
                     resolvedProxyPackageName, proxyAttributionTag, proxiedFlags, startIfModeDefault,
                     shouldCollectAsyncNotedOp, message, shouldCollectMessage,
@@ -2998,7 +2996,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
             final int proxyFlags = isProxyTrusted ? AppOpsManager.OP_FLAG_TRUSTED_PROXY
                     : AppOpsManager.OP_FLAG_UNTRUSTED_PROXY;
 
-            final SyncNotedAppOp proxyAppOp = startOperationUnchecked(proxyToken, code, proxyUid,
+            final SyncNotedAppOp proxyAppOp = startOperationUnchecked(clientId, code, proxyUid,
                     resolvedProxyPackageName, proxyAttributionTag, Process.INVALID_UID, null, null,
                     proxyFlags, startIfModeDefault, !isProxyTrusted, "proxy " + message,
                     shouldCollectMessage, proxyAttributionFlags, attributionChainId,
@@ -3008,7 +3006,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
             }
         }
 
-        return startOperationUnchecked(proxiedToken, code, proxiedUid, resolvedProxiedPackageName,
+        return startOperationUnchecked(clientId, code, proxiedUid, resolvedProxiedPackageName,
                 proxiedAttributionTag, proxyUid, resolvedProxyPackageName, proxyAttributionTag,
                 proxiedFlags, startIfModeDefault, shouldCollectAsyncNotedOp, message,
                 shouldCollectMessage, proxiedAttributionFlags, attributionChainId,
@@ -3151,22 +3149,20 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
     }
 
     @Override
-    public void finishProxyOperation(int code, @NonNull AttributionSource attributionSource,
-            boolean skipProxyOperation) {
-        mCheckOpsDelegateDispatcher.finishProxyOperation(code, attributionSource,
+    public void finishProxyOperation(@NonNull IBinder clientId, int code,
+            @NonNull AttributionSource attributionSource, boolean skipProxyOperation) {
+        mCheckOpsDelegateDispatcher.finishProxyOperation(clientId, code, attributionSource,
                 skipProxyOperation);
     }
 
-    private Void finishProxyOperationImpl(int code, @NonNull AttributionSource attributionSource,
-            boolean skipProxyOperation) {
+    private Void finishProxyOperationImpl(IBinder clientId, int code,
+            @NonNull AttributionSource attributionSource, boolean skipProxyOperation) {
         final int proxyUid = attributionSource.getUid();
         final String proxyPackageName = attributionSource.getPackageName();
         final String proxyAttributionTag = attributionSource.getAttributionTag();
-        final IBinder proxyToken = attributionSource.getToken();
         final int proxiedUid = attributionSource.getNextUid();
         final String proxiedPackageName = attributionSource.getNextPackageName();
         final String proxiedAttributionTag = attributionSource.getNextAttributionTag();
-        final IBinder proxiedToken = attributionSource.getNextToken();
 
         skipProxyOperation = skipProxyOperation
                 && isCallerAndAttributionTrusted(attributionSource);
@@ -3185,7 +3181,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
         }
 
         if (!skipProxyOperation) {
-            finishOperationUnchecked(proxyToken, code, proxyUid, resolvedProxyPackageName,
+            finishOperationUnchecked(clientId, code, proxyUid, resolvedProxyPackageName,
                     proxyAttributionTag);
         }
 
@@ -3195,7 +3191,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
             return null;
         }
 
-        finishOperationUnchecked(proxiedToken, code, proxiedUid, resolvedProxiedPackageName,
+        finishOperationUnchecked(clientId, code, proxiedUid, resolvedProxiedPackageName,
                 proxiedAttributionTag);
 
         return null;
@@ -6436,42 +6432,42 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
                     attributionFlags, attributionChainId, AppOpsService.this::startOperationImpl);
         }
 
-        public SyncNotedAppOp startProxyOperation(int code,
+        public SyncNotedAppOp startProxyOperation(@NonNull IBinder clientId, int code,
                 @NonNull AttributionSource attributionSource, boolean startIfModeDefault,
                 boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
                 boolean skipProxyOperation, @AttributionFlags int proxyAttributionFlags,
                 @AttributionFlags int proxiedAttributionFlags, int attributionChainId) {
             if (mPolicy != null) {
                 if (mCheckOpsDelegate != null) {
-                    return mPolicy.startProxyOperation(code, attributionSource,
+                    return mPolicy.startProxyOperation(clientId, code, attributionSource,
                             startIfModeDefault, shouldCollectAsyncNotedOp, message,
                             shouldCollectMessage, skipProxyOperation, proxyAttributionFlags,
                             proxiedAttributionFlags, attributionChainId,
                             this::startDelegateProxyOperationImpl);
                 } else {
-                    return mPolicy.startProxyOperation(code, attributionSource,
+                    return mPolicy.startProxyOperation(clientId, code, attributionSource,
                             startIfModeDefault, shouldCollectAsyncNotedOp, message,
                             shouldCollectMessage, skipProxyOperation, proxyAttributionFlags,
                             proxiedAttributionFlags, attributionChainId,
                             AppOpsService.this::startProxyOperationImpl);
                 }
             } else if (mCheckOpsDelegate != null) {
-                return startDelegateProxyOperationImpl(code, attributionSource,
+                return startDelegateProxyOperationImpl(clientId, code, attributionSource,
                         startIfModeDefault, shouldCollectAsyncNotedOp, message,
                         shouldCollectMessage, skipProxyOperation, proxyAttributionFlags,
                         proxiedAttributionFlags, attributionChainId);
             }
-            return startProxyOperationImpl(code, attributionSource, startIfModeDefault,
+            return startProxyOperationImpl(clientId, code, attributionSource, startIfModeDefault,
                     shouldCollectAsyncNotedOp, message, shouldCollectMessage, skipProxyOperation,
                     proxyAttributionFlags, proxiedAttributionFlags, attributionChainId);
         }
 
-        private SyncNotedAppOp startDelegateProxyOperationImpl(int code,
+        private SyncNotedAppOp startDelegateProxyOperationImpl(@NonNull IBinder clientId, int code,
                 @NonNull AttributionSource attributionSource, boolean startIfModeDefault,
                 boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
                 boolean skipProxyOperation, @AttributionFlags int proxyAttributionFlags,
                 @AttributionFlags int proxiedAttributionFlsgs, int attributionChainId) {
-            return mCheckOpsDelegate.startProxyOperation(code, attributionSource,
+            return mCheckOpsDelegate.startProxyOperation(clientId, code, attributionSource,
                     startIfModeDefault, shouldCollectAsyncNotedOp, message, shouldCollectMessage,
                     skipProxyOperation, proxyAttributionFlags, proxiedAttributionFlsgs,
                     attributionChainId, AppOpsService.this::startProxyOperationImpl);
@@ -6500,27 +6496,28 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
                     AppOpsService.this::finishOperationImpl);
         }
 
-        public void finishProxyOperation(int code,
+        public void finishProxyOperation(@NonNull IBinder clientId, int code,
                 @NonNull AttributionSource attributionSource, boolean skipProxyOperation) {
             if (mPolicy != null) {
                 if (mCheckOpsDelegate != null) {
-                    mPolicy.finishProxyOperation(code, attributionSource,
+                    mPolicy.finishProxyOperation(clientId, code, attributionSource,
                             skipProxyOperation, this::finishDelegateProxyOperationImpl);
                 } else {
-                    mPolicy.finishProxyOperation(code, attributionSource,
+                    mPolicy.finishProxyOperation(clientId, code, attributionSource,
                             skipProxyOperation, AppOpsService.this::finishProxyOperationImpl);
                 }
             } else if (mCheckOpsDelegate != null) {
-                finishDelegateProxyOperationImpl(code, attributionSource, skipProxyOperation);
+                finishDelegateProxyOperationImpl(clientId, code, attributionSource,
+                        skipProxyOperation);
             } else {
-                finishProxyOperationImpl(code, attributionSource, skipProxyOperation);
+                finishProxyOperationImpl(clientId, code, attributionSource, skipProxyOperation);
             }
         }
 
-        private Void finishDelegateProxyOperationImpl(int code,
+        private Void finishDelegateProxyOperationImpl(@NonNull IBinder clientId, int code,
                 @NonNull AttributionSource attributionSource, boolean skipProxyOperation) {
-            mCheckOpsDelegate.finishProxyOperation(code, attributionSource, skipProxyOperation,
-                    AppOpsService.this::finishProxyOperationImpl);
+            mCheckOpsDelegate.finishProxyOperation(clientId, code, attributionSource,
+                    skipProxyOperation, AppOpsService.this::finishProxyOperationImpl);
             return null;
         }
     }

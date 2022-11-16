@@ -1314,16 +1314,9 @@ public final class GameManagerService extends IGameManagerService.Stub {
 
     void onUserSwitching(TargetUser from, TargetUser to) {
         final int toUserId = to.getUserIdentifier();
-        if (from != null) {
-            synchronized (mLock) {
-                final int fromUserId = from.getUserIdentifier();
-                if (mSettings.containsKey(fromUserId)) {
-                    sendUserMessage(fromUserId, REMOVE_SETTINGS, "ON_USER_SWITCHING",
-                            0 /*delayMillis*/);
-                }
-            }
-        }
-
+        // we want to re-populate the setting when switching user as the device config may have
+        // changed, which will only update for the previous user, see
+        // DeviceConfigListener#onPropertiesChanged.
         sendUserMessage(toUserId, POPULATE_GAME_MODE_SETTINGS, "ON_USER_SWITCHING",
                 0 /*delayMillis*/);
 
@@ -1392,8 +1385,9 @@ public final class GameManagerService extends IGameManagerService.Stub {
                 Slog.v(TAG, "Package configuration not found for " + packageName);
                 return;
             }
+        } else {
+            updateFps(packageConfig, packageName, gameMode, userId);
         }
-        updateFps(packageConfig, packageName, gameMode, userId);
         updateUseAngle(packageName, gameMode);
     }
 

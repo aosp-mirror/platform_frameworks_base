@@ -23,13 +23,13 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.backup.ITransportStatusCallback;
+import com.android.server.backup.BackupAndRestoreFeatureFlags;
 
 public class TransportStatusCallback extends ITransportStatusCallback.Stub {
     private static final String TAG = "TransportStatusCallback";
-    private static final int TIMEOUT_MILLIS = 300 * 1000; // 5 minutes.
     private static final int OPERATION_STATUS_DEFAULT = 0;
 
-    private final int mOperationTimeout;
+    private final long mOperationTimeout;
 
     @GuardedBy("this")
     private int mOperationStatus = OPERATION_STATUS_DEFAULT;
@@ -37,7 +37,7 @@ public class TransportStatusCallback extends ITransportStatusCallback.Stub {
     private boolean mHasCompletedOperation = false;
 
     public TransportStatusCallback() {
-        mOperationTimeout = TIMEOUT_MILLIS;
+        mOperationTimeout = BackupAndRestoreFeatureFlags.getBackupTransportCallbackTimeoutMillis();
     }
 
     @VisibleForTesting
