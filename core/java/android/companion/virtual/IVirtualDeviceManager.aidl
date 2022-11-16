@@ -52,6 +52,11 @@ interface IVirtualDeviceManager {
     List<VirtualDevice> getVirtualDevices();
 
     /**
+     * Returns the device policy for the given virtual device and policy type.
+     */
+    int getDevicePolicy(int deviceId, int policyType);
+
+    /**
      * Creates a virtual display owned by a particular virtual device.
      *
      * @param virtualDisplayConfig The configuration used in creating the display
