@@ -54,7 +54,6 @@ import com.android.systemui.shade.NotificationShadeWindowViewController;
 import com.android.systemui.statusbar.GestureRecorder;
 import com.android.systemui.statusbar.LightRevealScrim;
 import com.android.systemui.statusbar.NotificationPresenter;
-import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 
 import java.io.PrintWriter;
 
@@ -254,8 +253,6 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
 
     boolean isWakeUpComingFromTouch();
 
-    boolean isFalsingThresholdNeeded();
-
     void onKeyguardViewManagerStatesUpdated();
 
     ViewGroup getNotificationScrollLayout();
@@ -413,12 +410,6 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
 
     void onClosingFinished();
 
-    void onUnlockHintStarted();
-
-    void onHintFinished();
-
-    void onTrackingStopped(boolean expand);
-
     // TODO: Figure out way to remove these.
     NavigationBarView getNavigationBarView();
 
@@ -499,8 +490,6 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
     boolean isBouncerShowingOverDream();
 
     boolean isKeyguardSecure();
-
-    NotificationGutsManager getGutsManager();
 
     void updateNotificationPanelTouchState();
 
