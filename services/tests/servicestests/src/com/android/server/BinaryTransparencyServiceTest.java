@@ -23,6 +23,7 @@ import android.app.job.JobScheduler;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.SystemProperties;
@@ -36,8 +37,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.FileDescriptor;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 @RunWith(AndroidJUnit4.class)
 public class BinaryTransparencyServiceTest {
@@ -96,7 +96,7 @@ public class BinaryTransparencyServiceTest {
     @Test
     public void getApexInfo_postInitialize_returnsValidEntries() throws RemoteException {
         prepApexInfo();
-        Map result = mTestInterface.getApexInfo();
+        List result = mTestInterface.getApexInfo();
         Assert.assertNotNull("Apex info map should not be null", result);
         Assert.assertFalse("Apex info map should not be empty", result.isEmpty());
     }
@@ -105,13 +105,18 @@ public class BinaryTransparencyServiceTest {
     public void getApexInfo_postInitialize_returnsActualApexs()
             throws RemoteException, PackageManager.NameNotFoundException {
         prepApexInfo();
-        Map result = mTestInterface.getApexInfo();
+        List resultList = mTestInterface.getApexInfo();
 
         PackageManager pm = mContext.getPackageManager();
         Assert.assertNotNull(pm);
-        HashMap<PackageInfo, String> castedResult = (HashMap<PackageInfo, String>) result;
-        for (PackageInfo packageInfo : castedResult.keySet()) {
-            Assert.assertTrue(packageInfo.packageName + "is not an APEX!", packageInfo.isApex);
+        List<Bundle> castedResult = (List<Bundle>) resultList;
+        for (Bundle resultBundle : castedResult) {
+            PackageInfo resultPackageInfo = resultBundle.getParcelable(
+                    BinaryTransparencyService.BUNDLE_PACKAGE_INFO, PackageInfo.class);
+            Assert.assertNotNull("PackageInfo for APEX should not be null",
+                    resultPackageInfo);
+            Assert.assertTrue(resultPackageInfo.packageName + "is not an APEX!",
+                    resultPackageInfo.isApex);
         }
     }
 

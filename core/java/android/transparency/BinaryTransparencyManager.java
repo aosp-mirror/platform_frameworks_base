@@ -24,7 +24,7 @@ import android.util.Slog;
 
 import com.android.internal.os.IBinaryTransparencyService;
 
-import java.util.Map;
+import java.util.List;
 
 /**
  * BinaryTransparencyManager defines a number of system interfaces that other system apps or
@@ -66,12 +66,15 @@ public class BinaryTransparencyManager {
     }
 
     /**
-     * Returns a map of all installed APEXs consisting of package name to SHA256 hash of the
-     * package.
-     * @return A Map with the following entries: {apex package name : sha256 digest of package}
+     * Gets binary measurements of all installed APEXs, each packed in a Bundle.
+     * @return A List of {@link android.os.Bundle}s with the following keys:
+     *         {@link com.android.server.BinaryTransparencyService#BUNDLE_PACKAGE_INFO}
+     *         {@link com.android.server.BinaryTransparencyService#BUNDLE_CONTENT_DIGEST_ALGORITHM}
+     *         {@link com.android.server.BinaryTransparencyService#BUNDLE_CONTENT_DIGEST}
      */
+    // TODO(b/259422958): Fix static constants referenced here - should be defined here
     @NonNull
-    public Map getApexInfo() {
+    public List getApexInfo() {
         try {
             Slog.d(TAG, "Calling backend's getApexInfo()");
             return mService.getApexInfo();
