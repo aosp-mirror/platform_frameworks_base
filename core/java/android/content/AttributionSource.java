@@ -29,6 +29,7 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Process;
+import android.os.UserHandle;
 import android.permission.PermissionManager;
 import android.util.ArraySet;
 
@@ -297,7 +298,7 @@ public final class AttributionSource implements Parcelable {
     public boolean checkCallingUid() {
         final int callingUid = Binder.getCallingUid();
         if (callingUid != Process.ROOT_UID
-                && callingUid != Process.SYSTEM_UID
+                && UserHandle.getAppId(callingUid) != Process.SYSTEM_UID
                 && callingUid != mAttributionSourceState.uid) {
             return false;
         }
