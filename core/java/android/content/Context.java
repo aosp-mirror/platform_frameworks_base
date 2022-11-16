@@ -3939,6 +3939,7 @@ public abstract class Context {
             DISPLAY_HASH_SERVICE,
             CREDENTIAL_SERVICE,
             DEVICE_LOCK_SERVICE,
+            VIRTUALIZATION_SERVICE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ServiceName {}
@@ -6112,6 +6113,20 @@ public abstract class Context {
      * @see #getSystemService(String)
      */
     public static final String DEVICE_LOCK_SERVICE = "device_lock";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.system.virtualmachine.VirtualMachineManager}.
+     *
+     * <p>On devices without {@link PackageManager#FEATURE_VIRTUALIZATION_FRAMEWORK} system feature
+     * the {@link #getSystemService(String)} will return {@code null}.
+     *
+     * @see #getSystemService(String)
+     * @see android.system.virtualmachine.VirtualMachineManager
+     * @hide
+     */
+    @SystemApi
+    public static final String VIRTUALIZATION_SERVICE = "virtualization";
 
     /**
      * Determine whether the given permission is allowed for a particular
