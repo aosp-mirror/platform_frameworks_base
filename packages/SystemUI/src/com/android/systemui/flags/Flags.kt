@@ -141,9 +141,9 @@ object Flags {
     /**
      * Whether to enable the code powering customizable lock screen quick affordances.
      *
-     * Note that this flag does not enable individual implementations of quick affordances like the
-     * new camera quick affordance. Look for individual flags for those.
+     * This flag enables any new prebuilt quick affordances as well.
      */
+    // TODO(b/255618149): Tracking Bug
     @JvmField
     val CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES =
         unreleasedFlag(216, "customizable_lock_screen_quick_affordances", teamfood = false)
