@@ -5249,47 +5249,67 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         // If we are preparing an app transition, then delay changing
         // the visibility of this token until we execute that transition.
-        // Note that we ignore display frozen since we want the opening / closing transition type
-        // can be updated correctly even display frozen, and it's safe since in applyAnimation will
-        // still check DC#okToAnimate again if the transition animation is fine to apply.
-        // TODO(new-app-transition): Rewrite this logic using WM Shell.
-        final boolean recentsAnimating = isAnimating(PARENTS, ANIMATION_TYPE_RECENTS);
-        final boolean isEnteringPipWithoutVisibleChange = mWaitForEnteringPinnedMode
-                && mVisible == visible;
-        if (okToAnimate(true /* ignoreFrozen */, canTurnScreenOn())
-                && (appTransition.isTransitionSet()
-                || (recentsAnimating && !isActivityTypeHome()))
-                // If the visibility is not changed during enter PIP, we don't want to include it in
-                // app transition to affect the animation theme, because the Pip organizer will
-                // animate the entering PIP instead.
-                && !isEnteringPipWithoutVisibleChange) {
-            if (visible) {
-                displayContent.mOpeningApps.add(this);
-                mEnteringAnimation = true;
-            } else if (mVisible) {
-                displayContent.mClosingApps.add(this);
-                mEnteringAnimation = false;
-            }
-            if ((appTransition.getTransitFlags() & TRANSIT_FLAG_OPEN_BEHIND) != 0) {
-                // We're launchingBehind, add the launching activity to mOpeningApps.
-                final WindowState win = getDisplayContent().findFocusedWindow();
-                if (win != null) {
-                    final ActivityRecord focusedActivity = win.mActivityRecord;
-                    if (focusedActivity != null) {
-                        ProtoLog.d(WM_DEBUG_APP_TRANSITIONS,
-                                "TRANSIT_FLAG_OPEN_BEHIND,  adding %s to mOpeningApps",
-                                focusedActivity);
-
-                        // Force animation to be loaded.
-                        displayContent.mOpeningApps.add(focusedActivity);
-                    }
-                }
-            }
+        if (deferCommitVisibilityChange(visible)) {
             return;
         }
 
         commitVisibility(visible, true /* performLayout */);
         updateReportedVisibilityLocked();
+    }
+
+    /**
+     * Returns {@code true} if this activity is either added to opening-apps or closing-apps.
+     * Then its visibility will be committed until the transition is ready.
+     */
+    private boolean deferCommitVisibilityChange(boolean visible) {
+        if (!mDisplayContent.mAppTransition.isTransitionSet()) {
+            if (mTransitionController.isShellTransitionsEnabled()) {
+                // Shell transition doesn't use opening/closing sets.
+                return false;
+            }
+            // Defer committing visibility for non-home app which is animating by recents.
+            if (isActivityTypeHome() || !isAnimating(PARENTS, ANIMATION_TYPE_RECENTS)) {
+                return false;
+            }
+        }
+        if (mWaitForEnteringPinnedMode && mVisible == visible) {
+            // If the visibility is not changed during enter PIP, we don't want to include it in
+            // app transition to affect the animation theme, because the Pip organizer will
+            // animate the entering PIP instead.
+            return false;
+        }
+
+        // The animation will be visible soon so do not skip by screen off.
+        final boolean ignoreScreenOn = canTurnScreenOn() || mTaskSupervisor.getKeyguardController()
+                .isKeyguardGoingAway(mDisplayContent.mDisplayId);
+        // Ignore display frozen so the opening / closing transition type can be updated correctly
+        // even if the display is frozen. And it's safe since in applyAnimation will still check
+        // DC#okToAnimate again if the transition animation is fine to apply.
+        if (!okToAnimate(true /* ignoreFrozen */, ignoreScreenOn)) {
+            return false;
+        }
+        if (visible) {
+            mDisplayContent.mOpeningApps.add(this);
+            mEnteringAnimation = true;
+        } else if (mVisible) {
+            mDisplayContent.mClosingApps.add(this);
+            mEnteringAnimation = false;
+        }
+        if ((mDisplayContent.mAppTransition.getTransitFlags() & TRANSIT_FLAG_OPEN_BEHIND) != 0) {
+            // Add the launching-behind activity to mOpeningApps.
+            final WindowState win = mDisplayContent.findFocusedWindow();
+            if (win != null) {
+                final ActivityRecord focusedActivity = win.mActivityRecord;
+                if (focusedActivity != null) {
+                    ProtoLog.d(WM_DEBUG_APP_TRANSITIONS,
+                            "TRANSIT_FLAG_OPEN_BEHIND,  adding %s to mOpeningApps",
+                            focusedActivity);
+                    // Force animation to be loaded.
+                    mDisplayContent.mOpeningApps.add(focusedActivity);
+                }
+            }
+        }
+        return true;
     }
 
     @Override
