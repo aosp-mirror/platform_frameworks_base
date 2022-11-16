@@ -44,7 +44,7 @@ import dagger.Provides;
             DreamOverlayComponent.class,
         })
 public interface DreamModule {
-    String DREAM_ONLY_ENABLED_FOR_SYSTEM_USER = "dream_only_enabled_for_system_user";
+    String DREAM_ONLY_ENABLED_FOR_DOCK_USER = "dream_only_enabled_for_dock_user";
 
     String DREAM_SUPPORTED = "dream_supported";
 
@@ -70,10 +70,10 @@ public interface DreamModule {
 
     /** */
     @Provides
-    @Named(DREAM_ONLY_ENABLED_FOR_SYSTEM_USER)
-    static boolean providesDreamOnlyEnabledForSystemUser(@Main Resources resources) {
+    @Named(DREAM_ONLY_ENABLED_FOR_DOCK_USER)
+    static boolean providesDreamOnlyEnabledForDockUser(@Main Resources resources) {
         return resources.getBoolean(
-                com.android.internal.R.bool.config_dreamsOnlyEnabledForSystemUser);
+                com.android.internal.R.bool.config_dreamsOnlyEnabledForDockUser);
     }
 
     /** */
