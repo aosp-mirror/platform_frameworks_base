@@ -18125,6 +18125,30 @@ public class ActivityManagerService extends IActivityManager.Stub
             mUidObserverController.register(observer, which, cutpoint, callingPackage,
                     Binder.getCallingUid());
         }
+
+        @Override
+        public boolean startForegroundServiceDelegate(
+                @NonNull ForegroundServiceDelegationOptions options,
+                @Nullable ServiceConnection connection) {
+            synchronized (ActivityManagerService.this) {
+                return mServices.startForegroundServiceDelegateLocked(options, connection);
+            }
+        }
+
+        @Override
+        public void stopForegroundServiceDelegate(
+                @NonNull ForegroundServiceDelegationOptions options) {
+            synchronized (ActivityManagerService.this) {
+                mServices.stopForegroundServiceDelegateLocked(options);
+            }
+        }
+
+        @Override
+        public void stopForegroundServiceDelegate(@NonNull ServiceConnection connection) {
+            synchronized (ActivityManagerService.this) {
+                mServices.stopForegroundServiceDelegateLocked(connection);
+            }
+        }
     }
 
     long inputDispatchingTimedOut(int pid, final boolean aboveSystem, TimeoutRecord timeoutRecord) {
@@ -18308,6 +18332,59 @@ public class ActivityManagerService extends IActivityManager.Stub
         final long callingId = Binder.clearCallingIdentity();
         try {
             return mInternal.getRestrictionLevel(packageName, userId);
+        } finally {
+            Binder.restoreCallingIdentity(callingId);
+        }
+    }
+
+    /**
+     * Start/stop foreground service delegate on a app's process.
+     * This interface is intended for the shell command to use.
+     */
+    void setForegroundServiceDelegate(String packageName, int uid, boolean isStart,
+            @ForegroundServiceDelegationOptions.DelegationService int delegateService,
+            String clientInstanceName) {
+        final int callingUid = Binder.getCallingUid();
+        if (callingUid != SYSTEM_UID && callingUid != ROOT_UID && callingUid != SHELL_UID) {
+            throw new SecurityException(
+                    "No permission to start/stop foreground service delegate");
+        }
+        final long callingId = Binder.clearCallingIdentity();
+        try {
+            boolean foundPid = false;
+            synchronized (this) {
+                ArrayList<ForegroundServiceDelegationOptions> delegates = new ArrayList<>();
+                synchronized (mPidsSelfLocked) {
+                    for (int i = 0; i < mPidsSelfLocked.size(); i++) {
+                        final ProcessRecord p = mPidsSelfLocked.valueAt(i);
+                        final IApplicationThread thread = p.getThread();
+                        if (p.uid == uid && thread != null) {
+                            foundPid = true;
+                            int pid = mPidsSelfLocked.keyAt(i);
+                            ForegroundServiceDelegationOptions options =
+                                    new ForegroundServiceDelegationOptions(pid, uid, packageName,
+                                            null /* clientAppThread */,
+                                            false /* isSticky */,
+                                            clientInstanceName, 0 /* foregroundServiceType */,
+                                            delegateService);
+                            delegates.add(options);
+                        }
+                    }
+                }
+                for (int i = delegates.size() - 1; i >= 0; i--) {
+                    final ForegroundServiceDelegationOptions options = delegates.get(i);
+                    if (isStart) {
+                        ((ActivityManagerLocal) mInternal).startForegroundServiceDelegate(options,
+                                null /* connection */);
+                    } else {
+                        ((ActivityManagerLocal) mInternal).stopForegroundServiceDelegate(options);
+                    }
+                }
+            }
+            if (!foundPid) {
+                Slog.e(TAG, "setForegroundServiceDelegate can not find process for packageName:"
+                        + packageName + " uid:" + uid);
+            }
         } finally {
             Binder.restoreCallingIdentity(callingId);
         }

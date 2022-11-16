@@ -206,6 +206,10 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     // Last time mAllowWhileInUsePermissionInFgs or mAllowStartForeground is set.
     long mLastSetFgsRestrictionTime;
 
+    // This is a service record of a FGS delegate (not a service record of a real service)
+    boolean mIsFgsDelegate;
+    @Nullable ForegroundServiceDelegation mFgsDelegation;
+
     String stringName;      // caching of toString
 
     private int lastStartId;    // identifier of most recent start request.
@@ -502,6 +506,9 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                     pw.print(" foregroundId="); pw.print(foregroundId);
                     pw.print(" foregroundNoti="); pw.println(foregroundNoti);
         }
+        if (mIsFgsDelegate) {
+            pw.print(prefix); pw.print("isFgsDelegate="); pw.println(mIsFgsDelegate);
+        }
         pw.print(prefix); pw.print("createTime=");
                 TimeUtils.formatDuration(createRealTime, nowReal, pw);
                 pw.print(" startingBgTimeout=");
@@ -634,7 +641,9 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                     serviceInfo.applicationInfo.uid,
                     serviceInfo.applicationInfo.longVersionCode,
                     serviceInfo.processName, serviceInfo.name);
-            tracker.applyNewOwner(this);
+            if (tracker != null) {
+                tracker.applyNewOwner(this);
+            }
         }
         return tracker;
     }
