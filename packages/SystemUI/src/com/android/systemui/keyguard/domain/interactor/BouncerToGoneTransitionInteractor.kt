@@ -40,7 +40,7 @@ constructor(
     private val shadeRepository: ShadeRepository,
     private val keyguardTransitionRepository: KeyguardTransitionRepository,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor
-) : TransitionInteractor("BOUNCER->GONE") {
+) : TransitionInteractor(BouncerToGoneTransitionInteractor::class.simpleName!!) {
 
     private var transitionId: UUID? = null
 
