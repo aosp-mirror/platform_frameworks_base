@@ -38,6 +38,7 @@ import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewCont
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_USER_LOCKED;
 import static com.android.systemui.keyguard.ScreenLifecycle.SCREEN_OFF;
 import static com.android.systemui.keyguard.ScreenLifecycle.SCREEN_ON;
+import static com.android.systemui.keyguard.ScreenLifecycle.SCREEN_TURNING_ON;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -1504,6 +1505,44 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
         verifyIndicationShown(INDICATION_TYPE_BIOMETRIC_MESSAGE,
                 mContext.getString(R.string.keyguard_face_unlock_unavailable));
+    }
+
+    @Test
+    public void onBiometricError_screenIsTurningOn_faceLockedOutFpIsNotAvailable_showsMessage() {
+        createController();
+        screenIsTurningOn();
+        fingerprintUnlockIsNotPossible();
+
+        onFaceLockoutError("lockout error");
+        verifyNoMoreInteractions(mRotateTextViewController);
+
+        mScreenObserver.onScreenTurnedOn();
+
+        verifyIndicationShown(INDICATION_TYPE_BIOMETRIC_MESSAGE,
+                "lockout error");
+        verifyIndicationShown(INDICATION_TYPE_BIOMETRIC_MESSAGE_FOLLOW_UP,
+                mContext.getString(R.string.keyguard_unlock));
+    }
+
+    @Test
+    public void onBiometricError_screenIsTurningOn_faceLockedOutFpIsAvailable_showsMessage() {
+        createController();
+        screenIsTurningOn();
+        fingerprintUnlockIsPossible();
+
+        onFaceLockoutError("lockout error");
+        verifyNoMoreInteractions(mRotateTextViewController);
+
+        mScreenObserver.onScreenTurnedOn();
+
+        verifyIndicationShown(INDICATION_TYPE_BIOMETRIC_MESSAGE,
+                "lockout error");
+        verifyIndicationShown(INDICATION_TYPE_BIOMETRIC_MESSAGE_FOLLOW_UP,
+                mContext.getString(R.string.keyguard_suggest_fingerprint));
+    }
+
+    private void screenIsTurningOn() {
+        when(mScreenLifecycle.getScreenState()).thenReturn(SCREEN_TURNING_ON);
     }
 
     private void sendUpdateDisclosureBroadcast() {
