@@ -1882,8 +1882,9 @@ public final class DisplayManagerService extends SystemService {
                 if (displayDevice == null) {
                     return;
                 }
-                if (mLogicalDisplayMapper.getDisplayLocked(displayDevice)
-                        .getDisplayInfoLocked().type == Display.TYPE_INTERNAL) {
+                if (mLogicalDisplayMapper.getDisplayLocked(displayDevice) != null
+                        && mLogicalDisplayMapper.getDisplayLocked(displayDevice)
+                        .getDisplayInfoLocked().type == Display.TYPE_INTERNAL && c != null) {
                     FrameworkStatsLog.write(FrameworkStatsLog.BRIGHTNESS_CONFIGURATION_UPDATED,
                                 c.getCurve().first,
                                 c.getCurve().second,
