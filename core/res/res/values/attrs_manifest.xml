@@ -1586,19 +1586,71 @@
          together. -->
     <attr name="foregroundServiceType">
         <!-- Data (photo, file, account) upload/download, backup/restore, import/export, fetch,
-        transfer over network between device and cloud.  -->
+            transfer over network between device and cloud.
+
+            <p>For apps with <code>targetSdkVersion</code>
+            {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} and above, this type should NOT
+            be used: calling
+            {@link android.app.Service#startForeground(int, android.app.Notification, int)} with
+            this type on devices running {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}
+            is still allowed, but calling it with this type on devices running future platform
+            releases may get a {@link android.app.ForegroundServiceTypeNotAllowedException}.
+        -->
         <flag name="dataSync" value="0x01" />
-        <!-- Music, video, news or other media play. -->
+        <!-- Music, video, news or other media play.
+
+            <p>For apps with <code>targetSdkVersion</code>
+            {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} and above, starting a foreground
+            service with this type will require permission
+            {@link android.Manifest.permission#FOREGROUND_SERVICE_MEDIA_PLAYBACK}.
+        -->
         <flag name="mediaPlayback" value="0x02" />
         <!-- Ongoing operations related to phone calls, video conferencing,
-             or similar interactive communication. -->
+            or similar interactive communication.
+
+            <p>For apps with <code>targetSdkVersion</code>
+            {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} and above, starting a foreground
+            service with this type will require permission
+            {@link android.Manifest.permission#FOREGROUND_SERVICE_PHONE_CALL} and
+            {@link android.Manifest.permission#MANAGE_OWN_CALLS}.
+        -->
         <flag name="phoneCall" value="0x04" />
-        <!-- GPS, map, navigation location update. -->
+        <!-- GPS, map, navigation location update.
+
+            <p>For apps with <code>targetSdkVersion</code>
+            {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} and above, starting a foreground
+            service with this type will require permission
+            {@link android.Manifest.permission#FOREGROUND_SERVICE_LOCATION} and one of the
+            following permissions:
+            {@link android.Manifest.permission#ACCESS_COARSE_LOCATION},
+            {@link android.Manifest.permission#ACCESS_FINE_LOCATION}.
+        -->
         <flag name="location" value="0x08" />
-        <!-- Auto, bluetooth, TV or other devices connection, monitoring and interaction. -->
+        <!-- Auto, bluetooth, TV or other devices connection, monitoring and interaction.
+
+            <p>For apps with <code>targetSdkVersion</code>
+            {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} and above, starting a foreground
+            service with this type will require permission
+            {@link android.Manifest.permission#FOREGROUND_SERVICE_CONNECTED_DEVICE} and one of the
+            following permissions:
+            {@link android.Manifest.permission#BLUETOOTH_CONNECT},
+            {@link android.Manifest.permission#CHANGE_NETWORK_STATE},
+            {@link android.Manifest.permission#CHANGE_WIFI_STATE},
+            {@link android.Manifest.permission#CHANGE_WIFI_MULTICAST_STATE},
+            {@link android.Manifest.permission#NFC},
+            {@link android.Manifest.permission#TRANSMIT_IR},
+            or has been granted the access to one of the attached USB devices/accessories.
+        -->
         <flag name="connectedDevice" value="0x10" />
         <!-- Managing a media projection session, e.g, for screen recording or taking
-             screenshots.-->
+            screenshots.
+
+            <p>For apps with <code>targetSdkVersion</code>
+            {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} and above, starting a foreground
+            service with this type will require permission
+            {@link android.Manifest.permission#FOREGROUND_SERVICE_MEDIA_PROJECTION}, and the user
+            must have allowed the screen capture request from this app.
+        -->
         <flag name="mediaProjection" value="0x20" />
         <!-- Use the camera device or record video.
 
@@ -1606,6 +1658,12 @@
             and above, a foreground service will not be able to access the camera if this type is
             not specified in the manifest and in
             {@link android.app.Service#startForeground(int, android.app.Notification, int)}.
+
+            <p>For apps with <code>targetSdkVersion</code>
+            {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} and above, starting a foreground
+            service with this type will require permission
+            {@link android.Manifest.permission#FOREGROUND_SERVICE_CAMERA} and
+            {@link android.Manifest.permission#CAMERA}.
             -->
         <flag name="camera" value="0x40" />
         <!--Use the microphone device or record audio.
@@ -1614,8 +1672,48 @@
             and above, a foreground service will not be able to access the microphone if this type
             is not specified in the manifest and in
             {@link android.app.Service#startForeground(int, android.app.Notification, int)}.
+
+            <p>For apps with <code>targetSdkVersion</code>
+            {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} and above, starting a foreground
+            service with this type will require permission
+            {@link android.Manifest.permission#FOREGROUND_SERVICE_MICROPHONE} and one of the
+            following permissions:
+            {@link android.Manifest.permission#CAPTURE_AUDIO_OUTPUT},
+            {@link android.Manifest.permission#RECORD_AUDIO}.
             -->
         <flag name="microphone" value="0x80" />
+        <!--Health, wellness and fitness.
+            <p>Requires the app to hold the permission
+            {@link android.Manifest.permission#FOREGROUND_SERVICE_HEALTH} and one of the following
+            permissions
+            {@link android.Manifest.permission#ACTIVITY_RECOGNITION},
+            {@link android.Manifest.permission#BODY_SENSORS},
+            {@link android.Manifest.permission#HIGH_SAMPLING_RATE_SENSORS}.
+        -->
+        <flag name="health" value="0x100" />
+        <!-- Messaging use cases which host local server to relay messages across devices.
+            <p>Requires the app to hold the permission
+            {@link android.Manifest.permission#FOREGROUND_SERVICE_REMOTE_MESSAGING} in order to use
+            this type.
+        -->
+        <flag name="remoteMessaging" value="0x200" />
+        <!-- The system exmpted foreground service use cases.
+            <p>Requires the app to hold the permission
+            {@link android.Manifest.permission#FOREGROUND_SERVICE_SYSTEM_EXEMPTED} in order to use
+            this type. Apps are allowed to use this type only in the use cases listed in
+            {@link android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_SYSTEM_EXEMPTED}.
+        -->
+        <flag name="systemExempted" value="0x400" />
+        <!-- Use cases that can't be categorized into any other foreground service types, but also
+            can't use @link android.app.job.JobInfo.Builder} APIs.
+            See {@link android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_SPECIAL_USE} for the
+            best practice of the use of this type.
+
+            <p>Requires the app to hold the permission
+            {@link android.Manifest.permission#FOREGROUND_SERVICE_SPECIAL_USE} in order to use
+            this type.
+        -->
+        <flag name="specialUse" value="0x40000000" />
     </attr>
 
     <!-- Enable sampled memory bug detection in this process.
