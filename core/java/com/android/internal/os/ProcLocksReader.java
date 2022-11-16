@@ -16,6 +16,8 @@
 
 package com.android.internal.os;
 
+import android.util.IntArray;
+
 import com.android.internal.util.ProcFileReader;
 
 import java.io.FileInputStream;
@@ -35,6 +37,7 @@ import java.io.IOException;
 public class ProcLocksReader {
     private final String mPath;
     private ProcFileReader mReader = null;
+    private IntArray mPids = new IntArray();
 
     public ProcLocksReader() {
         mPath = "/proc/locks";
@@ -51,9 +54,13 @@ public class ProcLocksReader {
     public interface ProcLocksReaderCallback {
         /**
          * Call the callback function of handleBlockingFileLocks().
-         * @param pid Each process that hold file locks blocking other processes.
+         * @param pids Each process that hold file locks blocking other processes.
+         *             pids[0] is the process blocking others
+         *             pids[1..n-1] are the processes being blocked
+         * NOTE: pids are cleared immediately after onBlockingFileLock() returns. If the caller
+         * needs to cache it, please make a copy, e.g. by calling pids.toArray().
          */
-        void onBlockingFileLock(int pid);
+        void onBlockingFileLock(IntArray pids);
     }
 
     /**
@@ -64,8 +71,7 @@ public class ProcLocksReader {
     public void handleBlockingFileLocks(ProcLocksReaderCallback callback) throws IOException {
         long last = -1;
         long id; // ordinal position of the lock in the list
-        int owner = -1; // the PID of the process that owns the lock
-        int pid = -1; // the PID of the process blocking others
+        int pid = -1; // the PID of the process being blocked
 
         if (mReader == null) {
             mReader = new ProcFileReader(new FileInputStream(mPath));
@@ -73,26 +79,49 @@ public class ProcLocksReader {
             mReader.rewind();
         }
 
+        mPids.clear();
         while (mReader.hasMoreData()) {
             id = mReader.nextLong(true); // lock id
             if (id == last) {
-                mReader.finishLine(); // blocked lock
-                if (pid < 0) {
-                    pid = owner; // get pid from the previous line
-                    callback.onBlockingFileLock(pid);
+                // blocked lock found
+                mReader.nextIgnored(); // ->
+                mReader.nextIgnored(); // lock type: POSIX?
+                mReader.nextIgnored(); // lock type: MANDATORY?
+                mReader.nextIgnored(); // lock type: RW?
+
+                pid = mReader.nextInt(); // pid
+                if (pid > 0) {
+                    mPids.add(pid);
                 }
-                continue;
+
+                mReader.finishLine();
             } else {
-                pid = -1; // a new lock
+                // process blocking lock and move on to a new lock
+                if (mPids.size() > 1) {
+                    callback.onBlockingFileLock(mPids);
+                    mPids.clear();
+                }
+
+                // new lock found
+                mReader.nextIgnored(); // lock type: POSIX?
+                mReader.nextIgnored(); // lock type: MANDATORY?
+                mReader.nextIgnored(); // lock type: RW?
+
+                pid = mReader.nextInt(); // pid
+                if (pid > 0) {
+                    if (mPids.size() == 0) {
+                        mPids.add(pid);
+                    } else {
+                        mPids.set(0, pid);
+                    }
+                }
+                mReader.finishLine();
+                last = id;
             }
-
-            mReader.nextIgnored(); // lock type: POSIX?
-            mReader.nextIgnored(); // lock type: MANDATORY?
-            mReader.nextIgnored(); // lock type: RW?
-
-            owner = mReader.nextInt(); // pid
-            mReader.finishLine();
-            last = id;
+        }
+        // The last unprocessed blocking lock immediately before EOF
+        if (mPids.size() > 1) {
+            callback.onBlockingFileLock(mPids);
         }
     }
 }
