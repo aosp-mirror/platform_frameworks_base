@@ -71,6 +71,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
     private int[] mTmp = new int[2];
     private boolean mHideBackground;
     private int mStatusBarHeight;
+    private boolean mEnableNotificationClipping;
     private AmbientState mAmbientState;
     private NotificationStackScrollLayoutController mHostLayoutController;
     private int mPaddingBetweenElements;
@@ -117,7 +118,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
         // Setting this to first in section to get the clipping to the top roundness correct. This
         // value determines the way we are clipping to the top roundness of the overall shade
         setFirstInSection(true);
-        initDimens();
+        updateResources();
     }
 
     public void bind(AmbientState ambientState,
@@ -126,7 +127,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
         mHostLayoutController = hostLayoutController;
     }
 
-    private void initDimens() {
+    private void updateResources() {
         Resources res = getResources();
         mStatusBarHeight = SystemBarUtils.getStatusBarHeight(mContext);
         mPaddingBetweenElements = res.getDimensionPixelSize(R.dimen.notification_divider_height);
@@ -144,6 +145,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
         mShowNotificationShelf = res.getBoolean(R.bool.config_showNotificationShelf);
         mCornerAnimationDistance = res.getDimensionPixelSize(
                 R.dimen.notification_corner_animation_distance);
+        mEnableNotificationClipping = res.getBoolean(R.bool.notification_enable_clipping);
 
         mShelfIcons.setInNotificationIconShelf(true);
         if (!mShowNotificationShelf) {
@@ -154,7 +156,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        initDimens();
+        updateResources();
     }
 
     @Override
@@ -639,7 +641,8 @@ public class NotificationShelf extends ActivatableNotificationView implements
         }
         if (!isPinned) {
             if (viewEnd > notificationClipEnd && !shouldClipOwnTop) {
-                int clipBottomAmount = (int) (viewEnd - notificationClipEnd);
+                int clipBottomAmount =
+                        mEnableNotificationClipping ? (int) (viewEnd - notificationClipEnd) : 0;
                 view.setClipBottomAmount(clipBottomAmount);
             } else {
                 view.setClipBottomAmount(0);
