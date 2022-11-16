@@ -2951,8 +2951,15 @@ public class UserManager {
      * </ol>
      *
      * @return whether the user is visible at the moment, as defined above.
+     *
+     * @hide
      */
+    @SystemApi
     @UserHandleAware
+    @RequiresPermission(anyOf = {
+            "android.permission.INTERACT_ACROSS_USERS",
+            "android.permission.MANAGE_USERS"
+    })
     public boolean isUserVisible() {
         try {
             return mService.isUserVisible(mUserId);
@@ -2965,9 +2972,14 @@ public class UserManager {
      * Gets the visible users (as defined by {@link #isUserVisible()}.
      *
      * @return visible users at the moment.
+     *
+     * @hide
      */
-    @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
-            Manifest.permission.INTERACT_ACROSS_USERS})
+    @SystemApi
+    @RequiresPermission(anyOf = {
+            "android.permission.INTERACT_ACROSS_USERS",
+            "android.permission.MANAGE_USERS"
+    })
     public @NonNull Set<UserHandle> getVisibleUsers() {
         ArraySet<UserHandle> result = new ArraySet<>();
         try {
