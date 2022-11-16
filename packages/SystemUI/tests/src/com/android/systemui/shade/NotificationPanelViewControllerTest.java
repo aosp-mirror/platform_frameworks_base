@@ -499,8 +499,18 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mDumpManager);
         mNotificationPanelViewController.initDependencies(
                 mCentralSurfaces,
+                null,
                 () -> {},
                 mNotificationShelfController);
+        mNotificationPanelViewController.setTrackingStartedListener(() -> {});
+        mNotificationPanelViewController.setOpenCloseListener(
+                new NotificationPanelViewController.OpenCloseListener() {
+                    @Override
+                    public void onClosingFinished() {}
+
+                    @Override
+                    public void onOpenStarted() {}
+                });
         mNotificationPanelViewController.setHeadsUpManager(mHeadsUpManager);
         ArgumentCaptor<View.OnAttachStateChangeListener> onAttachStateChangeListenerArgumentCaptor =
                 ArgumentCaptor.forClass(View.OnAttachStateChangeListener.class);
