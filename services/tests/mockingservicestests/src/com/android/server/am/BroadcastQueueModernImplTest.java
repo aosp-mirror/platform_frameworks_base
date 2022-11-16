@@ -586,7 +586,7 @@ public class BroadcastQueueModernImplTest {
         final BroadcastOptions optionsMusicVolumeChanged = BroadcastOptions.makeBasic();
         optionsMusicVolumeChanged.setDeliveryGroupPolicy(
                 BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT);
-        optionsMusicVolumeChanged.setDeliveryGroupKey("audio",
+        optionsMusicVolumeChanged.setDeliveryGroupMatchingKey("audio",
                 String.valueOf(AudioManager.STREAM_MUSIC));
 
         final Intent alarmVolumeChanged = new Intent(AudioManager.VOLUME_CHANGED_ACTION);
@@ -595,7 +595,7 @@ public class BroadcastQueueModernImplTest {
         final BroadcastOptions optionsAlarmVolumeChanged = BroadcastOptions.makeBasic();
         optionsAlarmVolumeChanged.setDeliveryGroupPolicy(
                 BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT);
-        optionsAlarmVolumeChanged.setDeliveryGroupKey("audio",
+        optionsAlarmVolumeChanged.setDeliveryGroupMatchingKey("audio",
                 String.valueOf(AudioManager.STREAM_ALARM));
 
         // Halt all processing so that we get a consistent view
@@ -651,7 +651,8 @@ public class BroadcastQueueModernImplTest {
         final BroadcastOptions optionsPackageChangedForUid = BroadcastOptions.makeBasic();
         optionsPackageChangedForUid.setDeliveryGroupPolicy(
                 BroadcastOptions.DELIVERY_GROUP_POLICY_MERGED);
-        optionsPackageChangedForUid.setDeliveryGroupKey("package", String.valueOf(TEST_UID));
+        optionsPackageChangedForUid.setDeliveryGroupMatchingKey("package",
+                String.valueOf(TEST_UID));
         optionsPackageChangedForUid.setDeliveryGroupExtrasMerger(extrasMerger);
 
         final Intent secondPackageChangedForUid = createPackageChangedIntent(TEST_UID,
@@ -662,7 +663,8 @@ public class BroadcastQueueModernImplTest {
         final BroadcastOptions optionsPackageChangedForUid2 = BroadcastOptions.makeBasic();
         optionsPackageChangedForUid.setDeliveryGroupPolicy(
                 BroadcastOptions.DELIVERY_GROUP_POLICY_MERGED);
-        optionsPackageChangedForUid.setDeliveryGroupKey("package", String.valueOf(TEST_UID2));
+        optionsPackageChangedForUid.setDeliveryGroupMatchingKey("package",
+                String.valueOf(TEST_UID2));
         optionsPackageChangedForUid.setDeliveryGroupExtrasMerger(extrasMerger);
 
         // Halt all processing so that we get a consistent view
@@ -683,6 +685,75 @@ public class BroadcastQueueModernImplTest {
         // Verify that packageChangedForUid and secondPackageChangedForUid broadcasts
         // have been merged.
         verifyPendingRecords(queue, List.of(packageChangedForUid2, expectedPackageChangedForUid));
+    }
+
+    @Test
+    public void testDeliveryGroupPolicy_matchingFilter() {
+        final Intent timeTick = new Intent(Intent.ACTION_TIME_TICK);
+        final BroadcastOptions optionsTimeTick = BroadcastOptions.makeBasic();
+        optionsTimeTick.setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT);
+
+        final Intent musicVolumeChanged = new Intent(AudioManager.VOLUME_CHANGED_ACTION);
+        musicVolumeChanged.putExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE,
+                AudioManager.STREAM_MUSIC);
+        final IntentFilter filterMusicVolumeChanged = new IntentFilter(
+                AudioManager.VOLUME_CHANGED_ACTION);
+        filterMusicVolumeChanged.addExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE,
+                AudioManager.STREAM_MUSIC);
+        final BroadcastOptions optionsMusicVolumeChanged = BroadcastOptions.makeBasic();
+        optionsMusicVolumeChanged.setDeliveryGroupPolicy(
+                BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT);
+        optionsMusicVolumeChanged.setDeliveryGroupMatchingFilter(filterMusicVolumeChanged);
+
+        final Intent alarmVolumeChanged = new Intent(AudioManager.VOLUME_CHANGED_ACTION);
+        alarmVolumeChanged.putExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE,
+                AudioManager.STREAM_ALARM);
+        final IntentFilter filterAlarmVolumeChanged = new IntentFilter(
+                AudioManager.VOLUME_CHANGED_ACTION);
+        filterAlarmVolumeChanged.addExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE,
+                AudioManager.STREAM_ALARM);
+        final BroadcastOptions optionsAlarmVolumeChanged = BroadcastOptions.makeBasic();
+        optionsAlarmVolumeChanged.setDeliveryGroupPolicy(
+                BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT);
+        optionsAlarmVolumeChanged.setDeliveryGroupMatchingFilter(filterAlarmVolumeChanged);
+
+        // Halt all processing so that we get a consistent view
+        mHandlerThread.getLooper().getQueue().postSyncBarrier();
+
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(timeTick, optionsTimeTick));
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(musicVolumeChanged,
+                optionsMusicVolumeChanged));
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(alarmVolumeChanged,
+                optionsAlarmVolumeChanged));
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(musicVolumeChanged,
+                optionsMusicVolumeChanged));
+
+        final BroadcastProcessQueue queue = mImpl.getProcessQueue(PACKAGE_GREEN,
+                getUidForPackage(PACKAGE_GREEN));
+        // Verify that the older musicVolumeChanged has been removed.
+        verifyPendingRecords(queue,
+                List.of(timeTick, alarmVolumeChanged, musicVolumeChanged));
+
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(timeTick, optionsTimeTick));
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(alarmVolumeChanged,
+                optionsAlarmVolumeChanged));
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(musicVolumeChanged,
+                optionsMusicVolumeChanged));
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(alarmVolumeChanged,
+                optionsAlarmVolumeChanged));
+        // Verify that the older alarmVolumeChanged has been removed.
+        verifyPendingRecords(queue,
+                List.of(timeTick, musicVolumeChanged, alarmVolumeChanged));
+
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(timeTick, optionsTimeTick));
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(musicVolumeChanged,
+                optionsMusicVolumeChanged));
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(alarmVolumeChanged,
+                optionsAlarmVolumeChanged));
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(timeTick, optionsTimeTick));
+        // Verify that the older timeTick has been removed.
+        verifyPendingRecords(queue,
+                List.of(musicVolumeChanged, alarmVolumeChanged, timeTick));
     }
 
     private Intent createPackageChangedIntent(int uid, List<String> componentNameList) {
