@@ -58,26 +58,43 @@ class AppListTest {
 
     @Test
     fun couldShowAppItem() {
-        setContent(appEntries = listOf(APP_ENTRY))
+        setContent(appEntries = listOf(APP_ENTRY_A))
 
-        composeTestRule.onNodeWithText(APP_ENTRY.label).assertIsDisplayed()
+        composeTestRule.onNodeWithText(APP_ENTRY_A.label).assertIsDisplayed()
     }
 
     @Test
     fun couldShowHeader() {
-        setContent(header = { Text(HEADER) }, appEntries = listOf(APP_ENTRY))
+        setContent(appEntries = listOf(APP_ENTRY_A), header = { Text(HEADER) })
 
         composeTestRule.onNodeWithText(HEADER).assertIsDisplayed()
     }
 
+    @Test
+    fun whenNotGrouped_groupTitleDoesNotExist() {
+        setContent(appEntries = listOf(APP_ENTRY_A, APP_ENTRY_B), enableGrouping = false)
+
+        composeTestRule.onNodeWithText(GROUP_A).assertDoesNotExist()
+        composeTestRule.onNodeWithText(GROUP_B).assertDoesNotExist()
+    }
+
+    @Test
+    fun whenGrouped_groupTitleDisplayed() {
+        setContent(appEntries = listOf(APP_ENTRY_A, APP_ENTRY_B), enableGrouping = true)
+
+        composeTestRule.onNodeWithText(GROUP_A).assertIsDisplayed()
+        composeTestRule.onNodeWithText(GROUP_B).assertIsDisplayed()
+    }
+
     private fun setContent(
-        header: @Composable () -> Unit = {},
         appEntries: List<AppEntry<TestAppRecord>>,
+        header: @Composable () -> Unit = {},
+        enableGrouping: Boolean = false,
     ) {
         composeTestRule.setContent {
             AppList(
                 config = AppListConfig(userId = USER_ID, showInstantApps = false),
-                listModel = TestAppListModel(),
+                listModel = TestAppListModel(enableGrouping),
                 state = AppListState(
                     showSystem = false.toState(),
                     option = 0.toState(),
@@ -96,17 +113,37 @@ class AppListTest {
     private companion object {
         const val USER_ID = 0
         const val HEADER = "Header"
-        val APP_ENTRY = AppEntry(
-            record = TestAppRecord(ApplicationInfo()),
-            label = "AAA",
+        const val GROUP_A = "Group A"
+        const val GROUP_B = "Group B"
+        val APP_ENTRY_A = AppEntry(
+            record = TestAppRecord(
+                app = ApplicationInfo().apply {
+                    packageName = "package.name.a"
+                },
+                group = GROUP_A,
+            ),
+            label = "Label A",
+            labelCollationKey = CollationKey("", byteArrayOf()),
+        )
+        val APP_ENTRY_B = AppEntry(
+            record = TestAppRecord(
+                app = ApplicationInfo().apply {
+                    packageName = "package.name.b"
+                },
+                group = GROUP_B,
+            ),
+            label = "Label B",
             labelCollationKey = CollationKey("", byteArrayOf()),
         )
     }
 }
 
-private data class TestAppRecord(override val app: ApplicationInfo) : AppRecord
+private data class TestAppRecord(
+    override val app: ApplicationInfo,
+    val group: String? = null,
+) : AppRecord
 
-private class TestAppListModel : AppListModel<TestAppRecord> {
+private class TestAppListModel(val enableGrouping: Boolean) : AppListModel<TestAppRecord> {
     override fun transform(userIdFlow: Flow<Int>, appListFlow: Flow<List<ApplicationInfo>>) =
         appListFlow.asyncMapItem { TestAppRecord(it) }
 
@@ -118,4 +155,7 @@ private class TestAppListModel : AppListModel<TestAppRecord> {
         option: Int,
         recordListFlow: Flow<List<TestAppRecord>>,
     ) = recordListFlow
+
+    override fun getGroupTitle(option: Int, record: TestAppRecord) =
+        if (enableGrouping) record.group else null
 }
