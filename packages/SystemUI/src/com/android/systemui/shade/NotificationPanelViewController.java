@@ -625,7 +625,6 @@ public final class NotificationPanelViewController implements Dumpable {
     private float mLastGesturedOverExpansion = -1;
     /** Whether the current animator is the spring back animation. */
     private boolean mIsSpringBackAnimation;
-    private boolean mInSplitShade;
     private float mHintDistance;
     private float mInitialOffsetOnTouch;
     private boolean mCollapsedAndHeadsUpOnDown;
@@ -1061,7 +1060,6 @@ public final class NotificationPanelViewController implements Dumpable {
         mSlopMultiplier = configuration.getScaledAmbiguousGestureMultiplier();
         mHintDistance = mResources.getDimension(R.dimen.hint_move_distance);
         mPanelFlingOvershootAmount = mResources.getDimension(R.dimen.panel_overshoot_amount);
-        mInSplitShade = mResources.getBoolean(R.bool.config_use_split_notification_shade);
         mFlingAnimationUtils = mFlingAnimationUtilsBuilder.get()
                 .setMaxLengthSeconds(0.4f).build();
         mStatusBarMinHeight = SystemBarUtils.getStatusBarHeight(mView.getContext());
@@ -1836,6 +1834,10 @@ public final class NotificationPanelViewController implements Dumpable {
     public void closeQs() {
         cancelQsAnimation();
         setQsExpansionHeight(mQsMinExpansionHeight);
+        // qsExpandImmediate is a safety latch in case we're calling closeQS while we're in the
+        // middle of animation - we need to make sure that value is always false when shade if
+        // fully collapsed or expanded
+        setQsExpandImmediate(false);
     }
 
     @VisibleForTesting
@@ -1938,7 +1940,7 @@ public final class NotificationPanelViewController implements Dumpable {
         // we want to perform an overshoot animation when flinging open
         final boolean addOverscroll =
                 expand
-                        && !mInSplitShade // Split shade has its own overscroll logic
+                        && !mSplitShadeEnabled // Split shade has its own overscroll logic
                         && mStatusBarStateController.getState() != KEYGUARD
                         && mOverExpansion == 0.0f
                         && vel >= 0;
@@ -2727,8 +2729,10 @@ public final class NotificationPanelViewController implements Dumpable {
      * as well based on the bounds of the shade and QS state.
      */
     private void setQSClippingBounds() {
-        final int qsPanelBottomY = calculateQsBottomPosition(computeQsExpansionFraction());
-        final boolean qsVisible = (computeQsExpansionFraction() > 0 || qsPanelBottomY > 0);
+        float qsExpansionFraction = computeQsExpansionFraction();
+        final int qsPanelBottomY = calculateQsBottomPosition(qsExpansionFraction);
+        final boolean qsVisible = (qsExpansionFraction > 0 || qsPanelBottomY > 0);
+        checkCorrectScrimVisibility(qsExpansionFraction);
 
         int top = calculateTopQsClippingBound(qsPanelBottomY);
         int bottom = calculateBottomQsClippingBound(top);
@@ -2737,6 +2741,19 @@ public final class NotificationPanelViewController implements Dumpable {
         // top should never be lower than bottom, otherwise it will be invisible.
         top = Math.min(top, bottom);
         applyQSClippingBounds(left, top, right, bottom, qsVisible);
+    }
+
+    private void checkCorrectScrimVisibility(float expansionFraction) {
+        // issues with scrims visible on keyguard occur only in split shade
+        if (mSplitShadeEnabled) {
+            boolean keyguardViewsVisible = mBarState == KEYGUARD && mKeyguardOnlyContentAlpha == 1;
+            // expansionFraction == 1 means scrims are fully visible as their size/visibility depend
+            // on QS expansion
+            if (expansionFraction == 1 && keyguardViewsVisible) {
+                Log.wtf(TAG,
+                        "Incorrect state, scrim is visible at the same time when clock is visible");
+            }
+        }
     }
 
     private int calculateTopQsClippingBound(int qsPanelBottomY) {
@@ -4393,7 +4410,7 @@ public final class NotificationPanelViewController implements Dumpable {
         ipw.print("mPanelFlingOvershootAmount="); ipw.println(mPanelFlingOvershootAmount);
         ipw.print("mLastGesturedOverExpansion="); ipw.println(mLastGesturedOverExpansion);
         ipw.print("mIsSpringBackAnimation="); ipw.println(mIsSpringBackAnimation);
-        ipw.print("mInSplitShade="); ipw.println(mInSplitShade);
+        ipw.print("mSplitShadeEnabled="); ipw.println(mSplitShadeEnabled);
         ipw.print("mHintDistance="); ipw.println(mHintDistance);
         ipw.print("mInitialOffsetOnTouch="); ipw.println(mInitialOffsetOnTouch);
         ipw.print("mCollapsedAndHeadsUpOnDown="); ipw.println(mCollapsedAndHeadsUpOnDown);
@@ -4911,7 +4928,7 @@ public final class NotificationPanelViewController implements Dumpable {
             float maxPanelHeight = getMaxPanelTransitionDistance();
             if (mHeightAnimator == null) {
                 // Split shade has its own overscroll logic
-                if (mTracking && !mInSplitShade) {
+                if (mTracking && !mSplitShadeEnabled) {
                     float overExpansionPixels = Math.max(0, h - maxPanelHeight);
                     setOverExpansionInternal(overExpansionPixels, true /* isFromGesture */);
                 }
@@ -5459,6 +5476,12 @@ public final class NotificationPanelViewController implements Dumpable {
                 //  - from SHADE to KEYGUARD
                 //  - from SHADE_LOCKED to SHADE
                 //  - getting notified again about the current SHADE or KEYGUARD state
+                if (mSplitShadeEnabled && oldState == SHADE && statusBarState == KEYGUARD) {
+                    // user can go to keyguard from different shade states and closing animation
+                    // may not fully run - we always want to make sure we close QS when that happens
+                    // as we never need QS open in fresh keyguard state
+                    closeQs();
+                }
                 final boolean animatingUnlockedShadeToKeyguard = oldState == SHADE
                         && statusBarState == KEYGUARD
                         && mScreenOffAnimationController.isKeyguardShowDelayed();
