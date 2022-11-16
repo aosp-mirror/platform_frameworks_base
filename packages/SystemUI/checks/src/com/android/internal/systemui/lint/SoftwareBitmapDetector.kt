@@ -44,10 +44,9 @@ class SoftwareBitmapDetector : Detector(), SourceCodeScanner {
         val evaluator = context.evaluator
         if (evaluator.isMemberInClass(referenced as? PsiField, "android.graphics.Bitmap.Config")) {
             context.report(
-                    ISSUE,
-                    referenced,
-                    context.getNameLocation(reference),
-                    "Replace software bitmap with `Config.HARDWARE`"
+                    issue = ISSUE,
+                    location = context.getNameLocation(reference),
+                    message = "Replace software bitmap with `Config.HARDWARE`"
             )
         }
     }
