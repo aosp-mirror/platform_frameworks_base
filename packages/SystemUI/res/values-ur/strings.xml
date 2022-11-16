@@ -52,7 +52,7 @@
     <string name="usb_debugging_always" msgid="4003121804294739548">"اس کمپیوٹر سے ہمیشہ اجازت دیں"</string>
     <string name="usb_debugging_allow" msgid="1722643858015321328">"اجازت دیں"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"‏USB ڈیبگ کرنے کی اجازت نہیں ہے"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"‏اس آلہ پر فی الحال سائن ان کردہ صارف USB ڈیبگنگ آن نہیں کر سکتا۔ اس خصوصیت کا استعمال کرنے کیلئے، ابتدائی صارف پر سوئچ کریں۔"</string>
+    <string name="usb_debugging_secondary_user_message" msgid="1888835696965417845">"‏اس آلہ پر فی الحال سائن ان کردہ صارف USB ڈیبگنگ آن نہیں کر سکتا۔ اس خصوصیت کا استعمال کرنے کے لیے، منتظم صارف پر سوئچ کریں۔"</string>
     <string name="hdmi_cec_set_menu_language_title" msgid="1259765420091503742">"کیا آپ سسٹم کی زبان کو <xliff:g id="LANGUAGE">%1$s</xliff:g> میں تبدیل کرنا چاہتے ہیں؟"</string>
     <string name="hdmi_cec_set_menu_language_description" msgid="8176716678074126619">"کسی دوسرے آلے کے ذریعے سسٹم کی زبان میں تبدیلی کی درخواست کی گئی"</string>
     <string name="hdmi_cec_set_menu_language_accept" msgid="2513689457281009578">"زبان تبدیل کریں"</string>
@@ -62,7 +62,7 @@
     <string name="wifi_debugging_always" msgid="2968383799517975155">"اس نیٹ ورک پر ہمیشہ اجازت دیں"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"اجازت دیں"</string>
     <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"وائرلیس ڈیبگنگ کرنے کی اجازت نہیں ہے"</string>
-    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"اس آلہ پر فی الحال سائن ان کردہ صارف وائرلیس ڈیبگنگ آن نہیں کر سکتا۔ اس خصوصیت کا استعمال کرنے کے ليے، ابتدائی صارف پر سوئچ کریں۔"</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="9085779370142222881">"اس آلہ پر فی الحال سائن ان کردہ صارف وائرلیس ڈیبگنگ آن نہیں کر سکتا۔ اس خصوصیت کا استعمال کرنے کے ليے، منتظم صارف پر سوئچ کریں۔"</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"‏USB پورٹ غیر فعال ہو گیا"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"‏آپ کے آلے کی سیال یا دھول سے حفاظت کرنے کے لیے، USB پورٹ کو غیر فعال کر دیا گیا ہے اور یہ کسی لوازم کا پتہ نہیں لگا پائے گا۔\n\nUSB پورٹ کا دوبارہ استعمال کرنا ٹھیک ہونے پر آپ کو مطلع کیا جائے گا۔"</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"‏چارجرز اور لوازمات کا پتا لگانے کے لیے USB پورٹ فعال ہے"</string>
@@ -125,7 +125,8 @@
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"صوتی معاون"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"والٹ"</string>
     <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"‏QR کوڈ اسکینر"</string>
-    <string name="accessibility_unlock_button" msgid="122785427241471085">"غیر مقفل کریں"</string>
+    <!-- no translation found for accessibility_unlock_button (3613812140816244310) -->
+    <skip />
     <string name="accessibility_lock_icon" msgid="661492842417875775">"آلہ مقفل کر دیا گیا"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"اسکیننگ چہرہ"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"بھیجیں"</string>
@@ -168,7 +169,7 @@
     <skip />
     <string name="keyguard_face_failed" msgid="9044619102286917151">"چہرے کی پہچان نہیں ہو سکی"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"اس کے بجائے فنگر پرنٹ استعمال کریں"</string>
-    <!-- no translation found for keyguard_face_unlock_unavailable (8145547300240405980) -->
+    <!-- no translation found for keyguard_face_unlock_unavailable (1581949044193418736) -->
     <skip />
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"بلوٹوتھ مربوط ہے۔"</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"بیٹری کی فیصد نامعلوم ہے۔"</string>
@@ -180,8 +181,12 @@
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"ہوائی جہاز وضع۔"</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"‏VPN آن ہے۔"</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"بیٹری <xliff:g id="NUMBER">%d</xliff:g> فیصد۔"</string>
-    <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"آپ کے استعمال کی بنیاد پر بیٹری <xliff:g id="PERCENTAGE">%1$s</xliff:g> فیصد، تقریباً <xliff:g id="TIME">%2$s</xliff:g> باقی ہے"</string>
+    <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"آپ کے استعمال کی بنیاد پر بیٹری <xliff:g id="PERCENTAGE">%1$d</xliff:g> فیصد، تقریباً <xliff:g id="TIME">%2$s</xliff:g> باقی ہے"</string>
     <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"بیٹری چارج ہو رہی ہے، اس وقت <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> فیصد ہے۔"</string>
+    <!-- no translation found for accessibility_battery_level_charging_paused (1716051308782906917) -->
+    <skip />
+    <!-- no translation found for accessibility_battery_level_charging_paused_with_estimate (4006089349465741762) -->
+    <skip />
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"تمام اطلاعات دیکھیں"</string>
     <string name="accessibility_tty_enabled" msgid="1123180388823381118">"ٹیلی ٹائپ رائٹر فعال ہے۔"</string>
     <string name="accessibility_ringer_vibrate" msgid="6261841170896561364">"رنگر وائبریٹ۔"</string>
@@ -305,28 +310,17 @@
     <string name="sensor_privacy_mic_unblocked_toast_content" msgid="306555320557065068">"مائیکروفون دستیاب ہے"</string>
     <string name="sensor_privacy_camera_unblocked_toast_content" msgid="7843105715964332311">"کیمرا دستیاب ہے"</string>
     <string name="sensor_privacy_mic_camera_unblocked_toast_content" msgid="7339355093282661115">"مائیکروفون اور کیمرا دستیاب ہیں"</string>
-    <!-- no translation found for sensor_privacy_mic_turned_on_dialog_title (6348853159838376513) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_mic_turned_off_dialog_title (5760464281790732849) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_mic_unblocked_dialog_content (4889961886199270224) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_mic_blocked_no_exception_dialog_content (5864898470772965394) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_mic_blocked_with_exception_dialog_content (810289713700437896) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_camera_turned_on_dialog_title (8039095295100075952) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_camera_turned_off_dialog_title (1936603903120742696) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_camera_unblocked_dialog_content (7847190103011782278) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_camera_blocked_dialog_content (3182428709314874616) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_htt_blocked_dialog_content (3333321592997666441) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_dialog_open_settings (1503088305279285048) -->
-    <skip />
+    <string name="sensor_privacy_mic_turned_on_dialog_title" msgid="6348853159838376513">"مائیکروفون کو آن کر دیا گیا"</string>
+    <string name="sensor_privacy_mic_turned_off_dialog_title" msgid="5760464281790732849">"مائیکروفون کو آف کر دیا گیا"</string>
+    <string name="sensor_privacy_mic_unblocked_dialog_content" msgid="4889961886199270224">"مائیکروفون سبھی ایپس اور سروسز کے لیے فعال ہو گیا۔"</string>
+    <string name="sensor_privacy_mic_blocked_no_exception_dialog_content" msgid="5864898470772965394">"‏مائیکروفون تک رسائی سبھی ایپس اور سروسز کے لیے غیر فعال ہو گئی۔ آپ مائیکروفون تک رسائی کو ترتیبات &gt; رازداری &gt; مائیکروفون میں فعال کر سکتے ہیں۔"</string>
+    <string name="sensor_privacy_mic_blocked_with_exception_dialog_content" msgid="810289713700437896">"‏مائیکروفون تک رسائی سبھی ایپس اور سروسز کے لیے غیر فعال ہو گئی۔ آپ اسے ترتیبات &gt; رازداری &gt; مائیکروفون میں اسے تبدیل کر سکتے ہیں۔"</string>
+    <string name="sensor_privacy_camera_turned_on_dialog_title" msgid="8039095295100075952">"کیمرا آن ہو گیا"</string>
+    <string name="sensor_privacy_camera_turned_off_dialog_title" msgid="1936603903120742696">"کیمرا آف ہو گیا"</string>
+    <string name="sensor_privacy_camera_unblocked_dialog_content" msgid="7847190103011782278">"کیمرا سبھی ایپس اور سروسز کے لیے فعال ہو گیا۔"</string>
+    <string name="sensor_privacy_camera_blocked_dialog_content" msgid="3182428709314874616">"کیمرا تک رسائی سبھی ایپس اور سروسز کے لیے غیر فعال ہو گئی۔"</string>
+    <string name="sensor_privacy_htt_blocked_dialog_content" msgid="3333321592997666441">"مائیکروفون بٹن کو استعمال کرنے کے لیے، ترتیبات میں مائیکروفون تک رسائی کو فعال کریں۔"</string>
+    <string name="sensor_privacy_dialog_open_settings" msgid="1503088305279285048">"ترتیبات کھولیں۔"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"دوسرا آلہ"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"مجموعی جائزہ ٹوگل کریں"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"الارمز، یاددہانیوں، ایونٹس اور آپ کے متعین کردہ کالرز کے علاوہ، آپ آوازوں اور وائبریشنز سے ڈسٹرب نہیں ہوں گے۔ موسیقی، ویڈیوز اور گیمز سمیت آپ ابھی بھی ہر وہ چیز سنیں گے جسے چلانے کا آپ انتخاب کرتے ہیں۔"</string>
@@ -397,16 +391,11 @@
     <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"جب آپ اشتراک، ریکارڈنگ یا کاسٹ کر رہے ہوتے ہیں تو <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> کو آپ کی اسکرین پر دکھائی گئی یا آپ کے آلے پر چلائی گئی ہر چیز تک رسائی حاصل ہوتی ہے۔ اس لیے پاس ورڈز، ادائیگی کی تفصیلات، پیغامات، یا دیگر حساس معلومات کے سلسلے میں محتاط رہیں۔"</string>
     <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"جاری رکھیں"</string>
     <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"ایپ کا اشتراک یا ریکارڈ کریں"</string>
-    <!-- no translation found for media_projection_permission_dialog_system_service_title (6827129613741303726) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_system_service_warning_entire_screen (8801616203805837575) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_system_service_warning_single_app (543310680568419338) -->
-    <skip />
-    <!-- no translation found for screen_capturing_disabled_by_policy_dialog_title (2113331792064527203) -->
-    <skip />
-    <!-- no translation found for screen_capturing_disabled_by_policy_dialog_description (6015975736747696431) -->
-    <skip />
+    <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"اس ایپ کو اشتراک یا ریکارڈ کرنے کی اجازت دیں؟"</string>
+    <string name="media_projection_permission_dialog_system_service_warning_entire_screen" msgid="8801616203805837575">"جب آپ اشتراک، ریکارڈنگ یا کاسٹ کر رہے ہوتے ہیں تو اس ایپ کو آپ کی اسکرین پر دکھائی دینے والی یا آپ کے آلے پر چلنے والی ہر چیز تک رسائی حاصل ہوتی ہے۔ اس لیے پاس ورڈز، ادائیگی کی تفصیلات، پیغامات، یا دیگر حساس معلومات کے سلسلے میں محتاط رہیں۔"</string>
+    <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"جب آپ اشتراک، ریکارڈنگ یا کاسٹ کر رہے ہوتے ہیں تو اس ایپ کو آپ کی اسکرین پر دکھائی گئی یا آپ کے آلے پر چلائی گئی ہر چیز تک رسائی حاصل ہوتی ہے۔ اس لیے پاس ورڈز، ادائیگی کی تفصیلات، پیغامات، یا دیگر حساس معلومات کے سلسلے میں محتاط رہیں۔"</string>
+    <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"‏آپ کے IT منتظم نے مسدود کر دیا"</string>
+    <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"اسکرین کو کیپچر کرنا آلہ کی پالیسی کے ذریعے غیر فعال ہے"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"سبھی کو صاف کریں"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"نظم کریں"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"سرگزشت"</string>
@@ -522,7 +511,8 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"استعمال کرنے کے لیے غیر مقفل کریں"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"آپ کے کارڈز حاصل کرنے میں ایک مسئلہ درپیش تھا، براہ کرم بعد میں دوبارہ کوشش کریں"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"مقفل اسکرین کی ترتیبات"</string>
-    <string name="qr_code_scanner_title" msgid="5290201053875420785">"‏QR کوڈ اسکین کریں"</string>
+    <!-- no translation found for qr_code_scanner_title (1938155688725760702) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"دفتری پروفائل"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"ہوائی جہاز وضع"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"آپ کو <xliff:g id="WHEN">%1$s</xliff:g> بجے اپنا اگلا الارم سنائی نہیں دے گا"</string>
@@ -805,6 +795,8 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"فُل اسکرین کو بڑا کریں"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"اسکرین کا حصہ بڑا کریں"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"سوئچ کریں"</string>
+    <!-- no translation found for magnification_drag_corner_to_resize (1249766311052418130) -->
+    <skip />
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"وتری سکرولنگ کی اجازت دیں"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"سائز تبدیل کریں"</string>
     <string name="accessibility_change_magnification_type" msgid="666000085077432421">"میگنیفیکیشن کی قسم کو تبدیل کریں"</string>
@@ -1035,4 +1027,8 @@
     <string name="dream_date_complication_date_format" msgid="8191225366513860104">"EEE, MMM d"</string>
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
+    <string name="log_access_confirmation_title" msgid="4843557604739943395">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> کو آلے کے تمام لاگز تک رسائی کی اجازت دیں؟"</string>
+    <string name="log_access_confirmation_allow" msgid="752147861593202968">"یک وقتی رسائی کی اجازت دیں"</string>
+    <string name="log_access_confirmation_deny" msgid="2389461495803585795">"اجازت نہ دیں"</string>
+    <string name="log_access_confirmation_body" msgid="6883031912003112634">"آپ کے آلے پر جو ہوتا ہے آلے کے لاگز اسے ریکارڈ کر لیتے ہیں۔ ایپس ان لاگز کا استعمال مسائل کو تلاش کرنے اور ان کو حل کرنے کے لیے کر سکتی ہیں۔\n\nکچھ لاگز میں حساس معلومات شامل ہو سکتی ہیں، اس لیے صرف اپنی بھروسے مند ایپس کو ہی آلے کے تمام لاگز تک رسائی کی اجازت دیں۔ \n\nاگر آپ اس ایپ کو آلے کے تمام لاگز تک رسائی کی اجازت نہیں دیتے ہیں تب بھی یہ اپنے لاگز تک رسائی حاصل کر سکتی ہے۔ آپ کے آلے کا مینوفیکچرر اب بھی آپ کے آلے پر کچھ لاگز یا معلومات تک رسائی حاصل کر سکتا ہے۔"</string>
 </resources>

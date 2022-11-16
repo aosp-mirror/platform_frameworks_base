@@ -52,7 +52,7 @@
     <string name="usb_debugging_always" msgid="4003121804294739548">"Tillat alltid fra denne datamaskinen"</string>
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Tillat"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"USB-feilsøking er ikke tillatt"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"Brukeren som for øyeblikket er logget på denne enheten, kan ikke slå på USB-feilsøking. For å bruke denne funksjonen, bytt til hovedbrukeren."</string>
+    <string name="usb_debugging_secondary_user_message" msgid="1888835696965417845">"Brukeren som for øyeblikket er logget på denne enheten, kan ikke slå på USB-feilsøking. For å bruke denne funksjonen, bytt til en administratorbruker."</string>
     <string name="hdmi_cec_set_menu_language_title" msgid="1259765420091503742">"Vil du bytte systemspråk til <xliff:g id="LANGUAGE">%1$s</xliff:g>?"</string>
     <string name="hdmi_cec_set_menu_language_description" msgid="8176716678074126619">"Bytte av systemspråk er forespurt av en annen enhet"</string>
     <string name="hdmi_cec_set_menu_language_accept" msgid="2513689457281009578">"Bytt språk"</string>
@@ -62,7 +62,7 @@
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Tillat alltid på dette nettverket"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"Tillat"</string>
     <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"Trådløs feilsøking er ikke tillatt"</string>
-    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"Brukeren som for øyeblikket er logget på denne enheten, kan ikke slå på trådløs feilsøking. For å bruke denne funksjonen, bytt til primærbrukeren."</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="9085779370142222881">"Brukeren som for øyeblikket er logget på denne enheten, kan ikke slå på trådløs feilsøking. For å bruke denne funksjonen, bytt til en administratorbruker."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"USB-porten er deaktivert"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"For å beskytte enheten din mot væsker eller rusk er USB-porten deaktivert og kan ikke oppdage tilbehør.\n\nDu blir varslet når det er trygt å bruke USB-porten igjen."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"Registrering av ladere og tilbehør er slått på for USB-porten"</string>
@@ -125,7 +125,8 @@
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Talehjelp"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"Wallet"</string>
     <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"QR-kodeskanner"</string>
-    <string name="accessibility_unlock_button" msgid="122785427241471085">"Lås opp"</string>
+    <!-- no translation found for accessibility_unlock_button (3613812140816244310) -->
+    <skip />
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Enheten er låst"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Skanning av ansikt"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"Send"</string>
@@ -168,7 +169,7 @@
     <skip />
     <string name="keyguard_face_failed" msgid="9044619102286917151">"Ansiktet gjenkjennes ikke"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"Bruk fingeravtrykk"</string>
-    <!-- no translation found for keyguard_face_unlock_unavailable (8145547300240405980) -->
+    <!-- no translation found for keyguard_face_unlock_unavailable (1581949044193418736) -->
     <skip />
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth er tilkoblet."</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Batteriprosenten er ukjent."</string>
@@ -180,8 +181,12 @@
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"Flymodus."</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN på."</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"Batteri – <xliff:g id="NUMBER">%d</xliff:g> prosent."</string>
-    <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"Batterinivået er <xliff:g id="PERCENTAGE">%1$s</xliff:g> prosent – omtrent <xliff:g id="TIME">%2$s</xliff:g> gjenstår basert på bruken din"</string>
+    <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"Batterinivået er <xliff:g id="PERCENTAGE">%1$d</xliff:g> prosent – omtrent <xliff:g id="TIME">%2$s</xliff:g> gjenstår basert på bruken din"</string>
     <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"Batteriet lades – <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> prosent."</string>
+    <!-- no translation found for accessibility_battery_level_charging_paused (1716051308782906917) -->
+    <skip />
+    <!-- no translation found for accessibility_battery_level_charging_paused_with_estimate (4006089349465741762) -->
+    <skip />
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"Se alle varslene"</string>
     <string name="accessibility_tty_enabled" msgid="1123180388823381118">"TeleTypewriter er aktivert."</string>
     <string name="accessibility_ringer_vibrate" msgid="6261841170896561364">"Vibreringsmodus."</string>
@@ -386,16 +391,11 @@
     <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"Når du deler, tar opp eller caster en app, har <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> tilgang til alt som vises eller spilles av i den aktuelle appen. Derfor bør du være forsiktig med passord, betalingsopplysninger, meldinger og annen sensitiv informasjon."</string>
     <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"Fortsett"</string>
     <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"Del eller ta opp en app"</string>
-    <!-- no translation found for media_projection_permission_dialog_system_service_title (6827129613741303726) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_system_service_warning_entire_screen (8801616203805837575) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_system_service_warning_single_app (543310680568419338) -->
-    <skip />
-    <!-- no translation found for screen_capturing_disabled_by_policy_dialog_title (2113331792064527203) -->
-    <skip />
-    <!-- no translation found for screen_capturing_disabled_by_policy_dialog_description (6015975736747696431) -->
-    <skip />
+    <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"Vil du tillate at denne appen deler eller tar opp?"</string>
+    <string name="media_projection_permission_dialog_system_service_warning_entire_screen" msgid="8801616203805837575">"Når du deler, tar opp eller caster noe, har denne appen tilgang til alt som vises på skjermen eller spilles av på enheten. Derfor bør du være forsiktig med passord, betalingsopplysninger, meldinger og annen sensitiv informasjon."</string>
+    <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"Når du deler, tar opp eller caster en app, har denne appen tilgang til alt som vises eller spilles av i den aktuelle appen. Derfor bør du være forsiktig med passord, betalingsopplysninger, meldinger og annen sensitiv informasjon."</string>
+    <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"Blokkert av IT-administratoren"</string>
+    <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"Skjermdumper er deaktivert av enhetsinnstillingene"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Fjern alt"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Administrer"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Logg"</string>
@@ -511,7 +511,8 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Lås opp for å bruke"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Det oppsto et problem med henting av kortene. Prøv på nytt senere"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Innstillinger for låseskjermen"</string>
-    <string name="qr_code_scanner_title" msgid="5290201053875420785">"Skann QR-koden"</string>
+    <!-- no translation found for qr_code_scanner_title (1938155688725760702) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"Work-profil"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Flymodus"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Du hører ikke neste innstilte alarm <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -794,6 +795,8 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Forstørr hele skjermen"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Forstørr en del av skjermen"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Bytt"</string>
+    <!-- no translation found for magnification_drag_corner_to_resize (1249766311052418130) -->
+    <skip />
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Tillat diagonal rulling"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"Endre størrelse"</string>
     <string name="accessibility_change_magnification_type" msgid="666000085077432421">"Endre forstørringstype"</string>
@@ -1024,4 +1027,8 @@
     <string name="dream_date_complication_date_format" msgid="8191225366513860104">"EEE d. MMM"</string>
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
+    <string name="log_access_confirmation_title" msgid="4843557604739943395">"Vil du gi <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> tilgang til alle enhetslogger?"</string>
+    <string name="log_access_confirmation_allow" msgid="752147861593202968">"Gi éngangstilgang"</string>
+    <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Ikke tillat"</string>
+    <string name="log_access_confirmation_body" msgid="6883031912003112634">"Enhetslogger registrerer det som skjer på enheten din. Apper kan bruke disse loggene til å finne og løse problemer.\n\nNoen logger kan inneholde sensitiv informasjon, så du bør bare gi tilgang til alle enhetslogger til apper du stoler på. \n\nHvis du ikke gir denne appen tilgang til alle enhetslogger, har den fortsatt tilgang til sine egne logger. Enhetsprodusenten kan fortsatt ha tilgang til visse logger eller noe informasjon på enheten din."</string>
 </resources>

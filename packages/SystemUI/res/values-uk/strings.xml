@@ -52,7 +52,7 @@
     <string name="usb_debugging_always" msgid="4003121804294739548">"Завжди дозволяти з цього комп’ютера"</string>
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Дозволити"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Ви не можете вмикати налагодження USB"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"Користувач поточного облікового запису не може вмикати налагодження USB. Щоб увімкнути цю функцію, увійдіть в обліковий запис основного користувача."</string>
+    <string name="usb_debugging_secondary_user_message" msgid="1888835696965417845">"Користувач поточного облікового запису не може вмикати налагодження через USB. Щоб увімкнути цю функцію, увійдіть в обліковий запис адміністратора."</string>
     <string name="hdmi_cec_set_menu_language_title" msgid="1259765420091503742">"Змінити мову системи на таку: <xliff:g id="LANGUAGE">%1$s</xliff:g>?"</string>
     <string name="hdmi_cec_set_menu_language_description" msgid="8176716678074126619">"Запит на змінення мови системи надіслано з іншого пристрою"</string>
     <string name="hdmi_cec_set_menu_language_accept" msgid="2513689457281009578">"Змінити мову"</string>
@@ -62,7 +62,7 @@
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Завжди дозволяти в цій мережі"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"Дозволити"</string>
     <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"Налагодження через Wi-Fi заборонене"</string>
-    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"Користувач поточного облікового запису не може вмикати налагодження через Wi-Fi. Щоб активувати цю функцію, увійдіть в обліковий запис основного користувача."</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="9085779370142222881">"Користувач поточного облікового запису не може вмикати налагодження через Wi-Fi. Щоб активувати цю функцію, увійдіть в обліковий запис адміністратора."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"USB-порт вимкнено"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"Щоб захистити ваш пристрій від рідини та сміття, USB-порт вимкнено. Він не виявлятиме жодних аксесуарів.\n\nКоли USB-порт можна буде використовувати, ви отримаєте сповіщення."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"Порт USB виявлятиме зарядні пристрої та аксесуари"</string>
@@ -125,7 +125,8 @@
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Голосові підказки"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"Гаманець"</string>
     <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"Сканер QR-коду"</string>
-    <string name="accessibility_unlock_button" msgid="122785427241471085">"Розблокувати"</string>
+    <!-- no translation found for accessibility_unlock_button (3613812140816244310) -->
+    <skip />
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Пристрій заблоковано"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Сканування обличчя"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"Надіслати"</string>
@@ -168,7 +169,7 @@
     <skip />
     <string name="keyguard_face_failed" msgid="9044619102286917151">"Обличчя не розпізнано"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"Скористайтеся відбитком"</string>
-    <!-- no translation found for keyguard_face_unlock_unavailable (8145547300240405980) -->
+    <!-- no translation found for keyguard_face_unlock_unavailable (1581949044193418736) -->
     <skip />
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth під’єднано."</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Відсоток заряду акумулятора невідомий."</string>
@@ -180,8 +181,12 @@
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"Режим польоту."</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"Мережу VPN увімкнено."</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"Заряд акумулятора у відсотках: <xliff:g id="NUMBER">%d</xliff:g>."</string>
-    <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"Згідно з даними про використання залишилося <xliff:g id="PERCENTAGE">%1$s</xliff:g> заряду акумулятора – близько <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"Згідно з даними про використання залишилося <xliff:g id="PERCENTAGE">%1$d</xliff:g> заряду акумулятора – близько <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"Акумулятор заряджається, поточний заряд <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> відсотків."</string>
+    <!-- no translation found for accessibility_battery_level_charging_paused (1716051308782906917) -->
+    <skip />
+    <!-- no translation found for accessibility_battery_level_charging_paused_with_estimate (4006089349465741762) -->
+    <skip />
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"Переглянути всі сповіщення"</string>
     <string name="accessibility_tty_enabled" msgid="1123180388823381118">"Телетайп увімкнено."</string>
     <string name="accessibility_ringer_vibrate" msgid="6261841170896561364">"Дзвінок на вібросигналі."</string>
@@ -386,16 +391,11 @@
     <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"Коли ви показуєте, записуєте або транслюєте додаток, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> отримує доступ до всього, що відображається або відтворюється в цьому додатку. Тому будьте уважні з паролями, повідомленнями, платіжною й іншою конфіденційною інформацією."</string>
     <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"Продовжити"</string>
     <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"Показувати або записувати додаток"</string>
-    <!-- no translation found for media_projection_permission_dialog_system_service_title (6827129613741303726) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_system_service_warning_entire_screen (8801616203805837575) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_system_service_warning_single_app (543310680568419338) -->
-    <skip />
-    <!-- no translation found for screen_capturing_disabled_by_policy_dialog_title (2113331792064527203) -->
-    <skip />
-    <!-- no translation found for screen_capturing_disabled_by_policy_dialog_description (6015975736747696431) -->
-    <skip />
+    <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"Дозволити цьому додатку показувати або записувати екран?"</string>
+    <string name="media_projection_permission_dialog_system_service_warning_entire_screen" msgid="8801616203805837575">"Коли ви показуєте, записуєте або транслюєте екран, цей додаток отримує доступ до всього, що відображається на екрані чи відтворюється на пристрої. Тому будьте уважні з паролями, повідомленнями, платіжною й іншою конфіденційною інформацією."</string>
+    <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"Коли ви показуєте, записуєте або транслюєте додаток, доступ до всього, що відображається або відтворюється в ньому, отримує цей додаток. Тому будьте уважні з паролями, повідомленнями, платіжною й іншою конфіденційною інформацією."</string>
+    <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"Заблоковано адміністратором"</string>
+    <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"Запис екрана вимкнено згідно з правилами для пристрою"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Очистити все"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Керувати"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Історія"</string>
@@ -511,7 +511,8 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Розблокувати, щоб використовувати"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Не вдалось отримати ваші картки. Повторіть спробу пізніше."</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Параметри блокування екрана"</string>
-    <string name="qr_code_scanner_title" msgid="5290201053875420785">"Сканувати QR-код"</string>
+    <!-- no translation found for qr_code_scanner_title (1938155688725760702) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"Робочий профіль"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Режим польоту"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Наступний сигнал о <xliff:g id="WHEN">%1$s</xliff:g> не пролунає"</string>
@@ -794,6 +795,8 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Збільшення всього екрана"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Збільшити частину екрана"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Перемкнути"</string>
+    <!-- no translation found for magnification_drag_corner_to_resize (1249766311052418130) -->
+    <skip />
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Дозволити прокручування по діагоналі"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"Змінити розмір"</string>
     <string name="accessibility_change_magnification_type" msgid="666000085077432421">"Змінити тип збільшення"</string>
@@ -1024,4 +1027,8 @@
     <string name="dream_date_complication_date_format" msgid="8191225366513860104">"EEE, d MMM"</string>
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
+    <string name="log_access_confirmation_title" msgid="4843557604739943395">"Надати додатку <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> доступ до всіх журналів пристрою?"</string>
+    <string name="log_access_confirmation_allow" msgid="752147861593202968">"Надати доступ лише цього разу"</string>
+    <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Не надавати"</string>
+    <string name="log_access_confirmation_body" msgid="6883031912003112634">"У журналах пристрою реєструється все, що відбувається на ньому. За допомогою цих журналів додатки можуть виявляти й усувати проблеми.\n\nДеякі журнали можуть містити конфіденційні дані, тому надавати доступ до всіх журналів пристрою слід лише надійним додаткам. \n\nЯкщо додаток не має доступу до всіх журналів пристрою, він усе одно може використовувати власні журнали. Виробник вашого пристрою все одно може використовувати деякі журнали чи інформацію на ньому."</string>
 </resources>

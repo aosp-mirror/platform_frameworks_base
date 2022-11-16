@@ -52,7 +52,7 @@
     <string name="usb_debugging_always" msgid="4003121804294739548">"السماح دائمًا من هذا الكمبيوتر"</string>
     <string name="usb_debugging_allow" msgid="1722643858015321328">"سماح"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"‏لا يُسمح بتصحيح أخطاء USB"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"‏لا يمكن للمستخدم الذي يسجّل دخوله حاليًا إلى هذا الجهاز تفعيل تصحيح الأخطاء USB. لاستخدام هذه الميزة، يمكنك التبديل إلى المستخدم الأساسي."</string>
+    <string name="usb_debugging_secondary_user_message" msgid="1888835696965417845">"‏لا يمكن للمستخدم المسجِّل دخوله حاليًا على هذا الجهاز تفعيل ميزة \"تصحيح أخطاء الجهاز عبر USB\". لاستخدام هذه الميزة، يمكنك التبديل إلى مستخدم مشرف."</string>
     <string name="hdmi_cec_set_menu_language_title" msgid="1259765420091503742">"هل تريد تغيير لغة النظام إلى <xliff:g id="LANGUAGE">%1$s</xliff:g>؟"</string>
     <string name="hdmi_cec_set_menu_language_description" msgid="8176716678074126619">"طلب جهاز آخر تغيير لغة النظام."</string>
     <string name="hdmi_cec_set_menu_language_accept" msgid="2513689457281009578">"تغيير اللغة"</string>
@@ -62,7 +62,7 @@
     <string name="wifi_debugging_always" msgid="2968383799517975155">"السماح باستخدام هذه الميزة على هذه الشبكة دائمًا"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"سماح"</string>
     <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"غير مسموح باستخدام ميزة \"تصحيح الأخطاء اللاسلكي\""</string>
-    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"لا يمكن للمستخدم المسجِّل دخوله حاليًا على هذا الجهاز تفعيل ميزة \"تصحيح الأخطاء اللاسلكي\". لاستخدام هذه الميزة، يمكنك التبديل إلى المستخدم الأساسي."</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="9085779370142222881">"لا يمكن للمستخدم المسجِّل دخوله حاليًا على هذا الجهاز تفعيل ميزة \"تصحيح الأخطاء اللاسلكي\". لاستخدام هذه الميزة، يمكنك التبديل إلى مستخدم مشرف."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"‏تمّ إيقاف منفذ USB"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"‏لحماية جهازك من السوائل أو الشوائب، سيتمّ إيقاف منفذ USB ولن يتم رصد أيّ ملحقات.\n\nوسيتمّ إعلامك عندما يُسمح باستخدام منفذ USB مرة أخرى."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"‏تم تفعيل منفذ USB لاكتشاف أجهزة الشحن والملحقات."</string>
@@ -125,7 +125,8 @@
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"المساعد الصوتي"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"محفظة"</string>
     <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"الماسح الضوئي لرمز الاستجابة السريعة"</string>
-    <string name="accessibility_unlock_button" msgid="122785427241471085">"فتح القفل"</string>
+    <!-- no translation found for accessibility_unlock_button (3613812140816244310) -->
+    <skip />
     <string name="accessibility_lock_icon" msgid="661492842417875775">"الجهاز مُقفل."</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"مسح الوجه"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"إرسال"</string>
@@ -168,7 +169,7 @@
     <skip />
     <string name="keyguard_face_failed" msgid="9044619102286917151">"يتعذّر التعرّف على الوجه."</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"يمكنك استخدام بصمة إصبعك."</string>
-    <!-- no translation found for keyguard_face_unlock_unavailable (8145547300240405980) -->
+    <!-- no translation found for keyguard_face_unlock_unavailable (1581949044193418736) -->
     <skip />
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"تم توصيل البلوتوث."</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"نسبة شحن البطارية غير معروفة."</string>
@@ -180,8 +181,12 @@
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"وضع الطيران."</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"‏الشبكة الافتراضية الخاصة (VPN) قيد التفعيل."</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"مستوى البطارية <xliff:g id="NUMBER">%d</xliff:g> في المائة."</string>
-    <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"نسبة الشحن بالبطارية <xliff:g id="PERCENTAGE">%1$s</xliff:g> بالمائة، ويتبقى <xliff:g id="TIME">%2$s</xliff:g> تقريبًا بناءً على استخدامك."</string>
+    <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"نسبة الشحن بالبطارية <xliff:g id="PERCENTAGE">%1$d</xliff:g> بالمائة، ويتبقى <xliff:g id="TIME">%2$s</xliff:g> تقريبًا بناءً على استخدامك."</string>
     <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"جارٍ شحن البطارية، <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%."</string>
+    <!-- no translation found for accessibility_battery_level_charging_paused (1716051308782906917) -->
+    <skip />
+    <!-- no translation found for accessibility_battery_level_charging_paused_with_estimate (4006089349465741762) -->
+    <skip />
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"الاطّلاع على جميع الإشعارات"</string>
     <string name="accessibility_tty_enabled" msgid="1123180388823381118">"تم تفعيل المبرقة الكاتبة."</string>
     <string name="accessibility_ringer_vibrate" msgid="6261841170896561364">"رنين مع الاهتزاز."</string>
@@ -305,28 +310,17 @@
     <string name="sensor_privacy_mic_unblocked_toast_content" msgid="306555320557065068">"يمكنك الوصول إلى الميكروفون الآن."</string>
     <string name="sensor_privacy_camera_unblocked_toast_content" msgid="7843105715964332311">"يمكنك الوصول إلى الكاميرا الآن."</string>
     <string name="sensor_privacy_mic_camera_unblocked_toast_content" msgid="7339355093282661115">"يمكنك الوصول إلى الميكروفون والكاميرا الآن."</string>
-    <!-- no translation found for sensor_privacy_mic_turned_on_dialog_title (6348853159838376513) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_mic_turned_off_dialog_title (5760464281790732849) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_mic_unblocked_dialog_content (4889961886199270224) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_mic_blocked_no_exception_dialog_content (5864898470772965394) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_mic_blocked_with_exception_dialog_content (810289713700437896) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_camera_turned_on_dialog_title (8039095295100075952) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_camera_turned_off_dialog_title (1936603903120742696) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_camera_unblocked_dialog_content (7847190103011782278) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_camera_blocked_dialog_content (3182428709314874616) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_htt_blocked_dialog_content (3333321592997666441) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_dialog_open_settings (1503088305279285048) -->
-    <skip />
+    <string name="sensor_privacy_mic_turned_on_dialog_title" msgid="6348853159838376513">"تم تفعيل الميكروفون"</string>
+    <string name="sensor_privacy_mic_turned_off_dialog_title" msgid="5760464281790732849">"تم إيقاف الميكروفون."</string>
+    <string name="sensor_privacy_mic_unblocked_dialog_content" msgid="4889961886199270224">"تم تفعيل الميكروفون لكل التطبيقات والخدمات."</string>
+    <string name="sensor_privacy_mic_blocked_no_exception_dialog_content" msgid="5864898470772965394">"‏تم إيقاف إمكانية وصول كل التطبيقات والخدمات إلى الميكروفون. يمكنك تفعيل إمكانية الوصول إلى الميكروفون في الإعدادات &gt; الخصوصية &gt; الميكروفون."</string>
+    <string name="sensor_privacy_mic_blocked_with_exception_dialog_content" msgid="810289713700437896">"‏تم إيقاف إمكانية وصول كل التطبيقات والخدمات إلى الميكروفون. يمكنك تغيير ذلك في الإعدادات &gt; الخصوصية &gt; الميكروفون."</string>
+    <string name="sensor_privacy_camera_turned_on_dialog_title" msgid="8039095295100075952">"تم تفعيل الكاميرا"</string>
+    <string name="sensor_privacy_camera_turned_off_dialog_title" msgid="1936603903120742696">"تم إيقاف الكاميرا"</string>
+    <string name="sensor_privacy_camera_unblocked_dialog_content" msgid="7847190103011782278">"تم تفعيل الكاميرا لكل التطبيقات والخدمات."</string>
+    <string name="sensor_privacy_camera_blocked_dialog_content" msgid="3182428709314874616">"تم إيقاف إمكانية وصول كل التطبيقات والخدمات إلى الكاميرا."</string>
+    <string name="sensor_privacy_htt_blocked_dialog_content" msgid="3333321592997666441">"لاستخدام زر الميكروفون، عليك تفعيل إمكانية الوصول إلى الميكروفون في \"الإعدادات\"."</string>
+    <string name="sensor_privacy_dialog_open_settings" msgid="1503088305279285048">"فتح الإعدادات"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"جهاز آخر"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"تبديل \"النظرة العامة\""</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"لن يتم إزعاجك بالأصوات والاهتزاز، باستثناء المُنبِّهات والتذكيرات والأحداث والمتصلين الذين تحددهم. وسيظل بإمكانك سماع أي عناصر أخرى تختار تشغيلها، بما في ذلك الموسيقى والفيديوهات والألعاب."</string>
@@ -397,16 +391,11 @@
     <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"أثناء مشاركة محتوى تطبيق أو تسجيله أو بثه، يمكن لتطبيق <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> الوصول إلى كل العناصر المعروضة أو التي يتم تشغيلها في ذلك التطبيق، لذا يُرجى توخي الحذر بشأن كلمات المرور أو تفاصيل الدفع أو الرسائل أو المعلومات الحساسة الأخرى."</string>
     <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"متابعة"</string>
     <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"مشاركة محتوى تطبيق أو تسجيله"</string>
-    <!-- no translation found for media_projection_permission_dialog_system_service_title (6827129613741303726) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_system_service_warning_entire_screen (8801616203805837575) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_system_service_warning_single_app (543310680568419338) -->
-    <skip />
-    <!-- no translation found for screen_capturing_disabled_by_policy_dialog_title (2113331792064527203) -->
-    <skip />
-    <!-- no translation found for screen_capturing_disabled_by_policy_dialog_description (6015975736747696431) -->
-    <skip />
+    <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"هل تريد السماح لهذا التطبيق بمشاركة المحتوى أو تسجيله؟"</string>
+    <string name="media_projection_permission_dialog_system_service_warning_entire_screen" msgid="8801616203805837575">"أثناء مشاركة المحتوى أو تسجيله أو بثه، يمكن لهذا التطبيق الوصول إلى كل العناصر المرئية على شاشتك أو التي يتم تشغيلها على جهازك، لذا يُرجى توخي الحذر بشأن كلمات المرور أو تفاصيل الدفع أو الرسائل أو المعلومات الحساسة الأخرى."</string>
+    <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"أثناء مشاركة محتوى تطبيق أو تسجيله أو بثه، يمكن لهذا التطبيق الوصول إلى كل العناصر المعروضة أو التي يتم تشغيلها في ذلك التطبيق، لذا يُرجى توخي الحذر بشأن كلمات المرور أو تفاصيل الدفع أو الرسائل أو المعلومات الحساسة الأخرى."</string>
+    <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"حظر مشرف تكنولوجيا المعلومات هذه الميزة"</string>
+    <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"ميزة \"تصوير الشاشة\" غير مفعَّلة بسبب سياسة الجهاز."</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"محو الكل"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"إدارة"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"السجلّ"</string>
@@ -522,7 +511,8 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"فتح القفل للاستخدام"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"حدثت مشكلة أثناء الحصول على البطاقات، يُرجى إعادة المحاولة لاحقًا."</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"إعدادات شاشة القفل"</string>
-    <string name="qr_code_scanner_title" msgid="5290201053875420785">"مسح رمز الاستجابة السريعة ضوئيًا"</string>
+    <!-- no translation found for qr_code_scanner_title (1938155688725760702) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"الملف الشخصي للعمل"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"وضع الطيران"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"لن تسمع المنبّه القادم في <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -805,6 +795,8 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"تكبير الشاشة كلها"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"تكبير جزء من الشاشة"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"تبديل"</string>
+    <!-- no translation found for magnification_drag_corner_to_resize (1249766311052418130) -->
+    <skip />
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"السماح بالتمرير القطري"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"تغيير الحجم"</string>
     <string name="accessibility_change_magnification_type" msgid="666000085077432421">"تغيير نوع التكبير"</string>
@@ -1035,4 +1027,8 @@
     <string name="dream_date_complication_date_format" msgid="8191225366513860104">"‏EEE،‏ d‏ MMM"</string>
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
+    <string name="log_access_confirmation_title" msgid="4843557604739943395">"هل تريد السماح لتطبيق \"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>\" بالوصول إلى جميع سجلّات الجهاز؟"</string>
+    <string name="log_access_confirmation_allow" msgid="752147861593202968">"السماح بالوصول إلى السجلّ لمرة واحدة"</string>
+    <string name="log_access_confirmation_deny" msgid="2389461495803585795">"عدم السماح"</string>
+    <string name="log_access_confirmation_body" msgid="6883031912003112634">"ترصد سجلّات الجهاز ما يحدث على جهازك. يمكن أن تستخدم التطبيقات هذه السجلّات لتحديد المشاكل وحلّها.\n\nقد تحتوي بعض السجلّات على معلومات حساسة، ولذلك يجب عدم السماح بالوصول إلى جميع سجلّات الجهاز إلا للتطبيقات التي تثق بها. \n\nإذا لم تسمح بوصول هذا التطبيق إلى جميع سجلّات الجهاز، يظل بإمكان التطبيق الوصول إلى سجلّاته. ويظل بإمكان الشركة المصنِّعة لجهازك الوصول إلى بعض السجلّات أو المعلومات المتوفّرة على جهازك."</string>
 </resources>

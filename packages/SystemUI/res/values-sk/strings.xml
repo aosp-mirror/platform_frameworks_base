@@ -52,7 +52,7 @@
     <string name="usb_debugging_always" msgid="4003121804294739548">"Vždy povoliť z tohto počítača"</string>
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Povoliť"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Ladenie cez USB nie je povolené"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"Používateľ, ktorý je práve prihlásený v tomto zariadení, nemôže zapnúť ladenie USB. Ak chcete použiť túto funkciu, prepnite na hlavného používateľa."</string>
+    <string name="usb_debugging_secondary_user_message" msgid="1888835696965417845">"Používateľ, ktorý je práve prihlásený v tomto zariadení, nemôže zapnúť ladenie USB. Ak chcete použiť túto funkciu, prepnite na správcu."</string>
     <string name="hdmi_cec_set_menu_language_title" msgid="1259765420091503742">"Chcete zmeniť jazyk systému na možnosť <xliff:g id="LANGUAGE">%1$s</xliff:g>?"</string>
     <string name="hdmi_cec_set_menu_language_description" msgid="8176716678074126619">"Zmenu jazyka systému vyžiadalo iné zariadenie"</string>
     <string name="hdmi_cec_set_menu_language_accept" msgid="2513689457281009578">"Zmeniť jazyk"</string>
@@ -62,7 +62,7 @@
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Vždy povoliť v tejto sieti"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"Povoliť"</string>
     <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"Bezdrôtové ladenie nie je povolené"</string>
-    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"Používateľ, ktorý je práve prihlásený v tomto zariadení, nemôže zapnúť bezdrôtové ladenie. Ak chcete použiť túto funkciu, prepnite na hlavného používateľa."</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="9085779370142222881">"Používateľ, ktorý je práve prihlásený v tomto zariadení, nemôže zapnúť bezdrôtové ladenie. Ak chcete použiť túto funkciu, prepnite na správcu."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"Port USB je deaktivovaný"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"Port USB je deaktivovaný na zaistenie ochrany zariadenia pred tekutinami alebo nečistotami a nerozpoznáva príslušenstvo.\n\nKeď ho budete môcť znova použiť, upozorníme vás."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"Bol povolený port USB na zisťovanie nabíjačiek a príslušenstva"</string>
@@ -125,7 +125,8 @@
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Hlasový asistent"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"Peňaženka"</string>
     <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"Skener QR kódov"</string>
-    <string name="accessibility_unlock_button" msgid="122785427241471085">"Odomknúť"</string>
+    <!-- no translation found for accessibility_unlock_button (3613812140816244310) -->
+    <skip />
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Zariadenie je uzamknuté"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Skenovanie tváre"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"Odoslať"</string>
@@ -168,7 +169,7 @@
     <skip />
     <string name="keyguard_face_failed" msgid="9044619102286917151">"Tvár sa nedá rozpoznať"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"Používať radšej odtlačok"</string>
-    <!-- no translation found for keyguard_face_unlock_unavailable (8145547300240405980) -->
+    <!-- no translation found for keyguard_face_unlock_unavailable (1581949044193418736) -->
     <skip />
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth pripojené."</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Percento batérie nie je známe."</string>
@@ -180,8 +181,12 @@
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"Režim v lietadle."</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN je zapnuté."</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"Batéria <xliff:g id="NUMBER">%d</xliff:g> percent."</string>
-    <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"Percentá batérie: <xliff:g id="PERCENTAGE">%1$s</xliff:g>. Na základe vášho používania zostáva <xliff:g id="TIME">%2$s</xliff:g>."</string>
+    <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"Percentá batérie: <xliff:g id="PERCENTAGE">%1$d</xliff:g>. Na základe vášho používania zostáva <xliff:g id="TIME">%2$s</xliff:g>."</string>
     <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"Nabíja sa batéria, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> %%."</string>
+    <!-- no translation found for accessibility_battery_level_charging_paused (1716051308782906917) -->
+    <skip />
+    <!-- no translation found for accessibility_battery_level_charging_paused_with_estimate (4006089349465741762) -->
+    <skip />
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"Zobraziť všetky upozornenia"</string>
     <string name="accessibility_tty_enabled" msgid="1123180388823381118">"Rozhranie TeleTypewriter je povolené."</string>
     <string name="accessibility_ringer_vibrate" msgid="6261841170896561364">"Vibračné zvonenie."</string>
@@ -386,16 +391,11 @@
     <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"Počas zdieľania, nahrávania alebo prenosu bude mať aplikácia <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> prístup k všetkému obsahu, ktorý sa v nej bude zobrazovať alebo prehrávať. Preto venujte zvýšenú pozornosť heslám, platobným údajom, správam a ďalším citlivým údajom."</string>
     <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"Pokračovať"</string>
     <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"Aplikácia na zdieľanie alebo nahrávanie"</string>
-    <!-- no translation found for media_projection_permission_dialog_system_service_title (6827129613741303726) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_system_service_warning_entire_screen (8801616203805837575) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_system_service_warning_single_app (543310680568419338) -->
-    <skip />
-    <!-- no translation found for screen_capturing_disabled_by_policy_dialog_title (2113331792064527203) -->
-    <skip />
-    <!-- no translation found for screen_capturing_disabled_by_policy_dialog_description (6015975736747696431) -->
-    <skip />
+    <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"Chcete povoliť tejto aplikácii zdieľať alebo nahrávať?"</string>
+    <string name="media_projection_permission_dialog_system_service_warning_entire_screen" msgid="8801616203805837575">"Počas zdieľania, nahrávania alebo prenosu bude mať táto aplikácia prístup k všetkému na obrazovke, prípadne k obsahu, ktorý sa bude v zariadení prehrávať. Venujte preto zvýšenú pozornosť heslám, platobným údajom, správam a ďalším citlivým údajom."</string>
+    <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"Počas zdieľania, nahrávania alebo prenosu bude mať táto aplikácia prístup k všetkému obsahu, ktorý sa v nej bude zobrazovať alebo prehrávať. Venujte preto zvýšenú pozornosť heslám, platobným údajom, správam či ďalším citlivým údajom."</string>
+    <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"Blokované vaším správcom IT"</string>
+    <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"Snímanie obrazovky je zakázané pravidlami pre zariadenie"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Vymazať všetko"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Spravovať"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"História"</string>
@@ -511,7 +511,8 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Odomknúť a použiť"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Pri načítavaní kariet sa vyskytol problém. Skúste to neskôr."</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Nastavenia uzamknutej obrazovky"</string>
-    <string name="qr_code_scanner_title" msgid="5290201053875420785">"Skenovanie QR kódu"</string>
+    <!-- no translation found for qr_code_scanner_title (1938155688725760702) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"Pracovný profil"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Režim v lietadle"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Váš budík o <xliff:g id="WHEN">%1$s</xliff:g> sa nespustí"</string>
@@ -794,6 +795,8 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Zväčšenie celej obrazovky"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Zväčšiť časť obrazovky"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Prepnúť"</string>
+    <!-- no translation found for magnification_drag_corner_to_resize (1249766311052418130) -->
+    <skip />
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Povoliť diagonálne posúvanie"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"Zmeniť veľkosť"</string>
     <string name="accessibility_change_magnification_type" msgid="666000085077432421">"Zmeniť typ zväčšenia"</string>
@@ -1024,4 +1027,8 @@
     <string name="dream_date_complication_date_format" msgid="8191225366513860104">"EEE, d. MMM"</string>
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
+    <string name="log_access_confirmation_title" msgid="4843557604739943395">"Chcete povoliť aplikácii <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> prístup k všetkým denníkom zariadenia?"</string>
+    <string name="log_access_confirmation_allow" msgid="752147861593202968">"Povoliť jednorazový prístup"</string>
+    <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Nepovoliť"</string>
+    <string name="log_access_confirmation_body" msgid="6883031912003112634">"Denníky zariadenia zaznamenávajú, čo sa deje vo vašom zariadení. Aplikácie môžu pomocou týchto denníkov vyhľadávať a riešiť problémy.\n\nNiektoré denníky môžu obsahovať citlivé údaje, preto povoľte prístup k všetkým denníkom zariadenia iba dôveryhodným aplikáciám. \n\nAk tejto aplikácii nepovolíte prístup k všetkým denníkom zariadenia, stále bude mať prístup k vlastným denníkom. Výrobca vášho zariadenia bude mať naďalej prístup k niektorým denníkom alebo informáciám vo vašom zariadení."</string>
 </resources>

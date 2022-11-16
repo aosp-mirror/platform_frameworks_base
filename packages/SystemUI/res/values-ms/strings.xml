@@ -52,7 +52,7 @@
     <string name="usb_debugging_always" msgid="4003121804294739548">"Sentiasa benarkan komputer ini"</string>
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Benarkan"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Penyahpepijatan USB tidak dibenarkan"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"Pengguna yang log masuk ke peranti ini pada masa ini tidak boleh menghidupkan penyahpepijatan USB. Untuk menggunakan ciri ini, tukar kepada pengguna utama."</string>
+    <string name="usb_debugging_secondary_user_message" msgid="1888835696965417845">"Pengguna yang log masuk ke peranti ini pada masa ini tidak boleh menghidupkan penyahpepijatan USB. Untuk menggunakan ciri ini, tukar kepada pengguna pentadbir."</string>
     <string name="hdmi_cec_set_menu_language_title" msgid="1259765420091503742">"Adakah anda ingin menukar bahasa sistem kepada <xliff:g id="LANGUAGE">%1$s</xliff:g>?"</string>
     <string name="hdmi_cec_set_menu_language_description" msgid="8176716678074126619">"Permintaan pertukaran bahasa sistem oleh peranti lain"</string>
     <string name="hdmi_cec_set_menu_language_accept" msgid="2513689457281009578">"Tukar bahasa"</string>
@@ -62,7 +62,7 @@
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Sentiasa benarkan pada rangkaian ini"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"Benarkan"</string>
     <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"Penyahpepijatan wayarles tidak dibenarkan"</string>
-    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"Pengguna yang telah log masuk ke peranti ini pada masa ini tidak boleh menghidupkan penyahpepijatan wayarles. Untuk menggunakan ciri ini, tukar kepada pengguna utama."</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="9085779370142222881">"Pengguna yang log masuk ke peranti ini pada masa ini tidak boleh menghidupkan penyahpepijatan wayarles. Untuk menggunakan ciri ini, tukar kepada pengguna pentadbir."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"Port USB dilumpuhkan"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"Untuk melindungi peranti anda daripada cecair atau serpihan, port USB dilumpuhkan dan tidak akan mengesan sebarang aksesori.\n\nAnda akan dimaklumi apabila selamat untuk menggunakan port USB lagi."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"Port USB didayakan untuk mengesan pengecas dan aksesori"</string>
@@ -125,7 +125,8 @@
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Bantuan Suara"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"Wallet"</string>
     <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"Pengimbas Kod QR"</string>
-    <string name="accessibility_unlock_button" msgid="122785427241471085">"Buka kunci"</string>
+    <!-- no translation found for accessibility_unlock_button (3613812140816244310) -->
+    <skip />
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Peranti dikunci"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Mengimbas wajah"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"Hantar"</string>
@@ -168,7 +169,7 @@
     <skip />
     <string name="keyguard_face_failed" msgid="9044619102286917151">"Tak dapat mengecam wajah"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"Gunakan cap jari"</string>
-    <!-- no translation found for keyguard_face_unlock_unavailable (8145547300240405980) -->
+    <!-- no translation found for keyguard_face_unlock_unavailable (1581949044193418736) -->
     <skip />
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth disambungkan."</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Peratusan kuasa bateri tidak diketahui."</string>
@@ -180,8 +181,12 @@
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"Mod pesawat"</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN dihidupkan."</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"Bateri <xliff:g id="NUMBER">%d</xliff:g> peratus."</string>
-    <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"Bateri <xliff:g id="PERCENTAGE">%1$s</xliff:g> peratus, tinggal kira-kira <xliff:g id="TIME">%2$s</xliff:g> lagi berdasarkan penggunaan anda"</string>
+    <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"Bateri <xliff:g id="PERCENTAGE">%1$d</xliff:g> peratus, tinggal kira-kira <xliff:g id="TIME">%2$s</xliff:g> lagi berdasarkan penggunaan anda"</string>
     <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"Bateri mengecas, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> peratus."</string>
+    <!-- no translation found for accessibility_battery_level_charging_paused (1716051308782906917) -->
+    <skip />
+    <!-- no translation found for accessibility_battery_level_charging_paused_with_estimate (4006089349465741762) -->
+    <skip />
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"Lihat semua pemberitahuan"</string>
     <string name="accessibility_tty_enabled" msgid="1123180388823381118">"Mesin Teletaip didayakan."</string>
     <string name="accessibility_ringer_vibrate" msgid="6261841170896561364">"Pendering bergetar."</string>
@@ -305,28 +310,17 @@
     <string name="sensor_privacy_mic_unblocked_toast_content" msgid="306555320557065068">"Mikrofon tersedia"</string>
     <string name="sensor_privacy_camera_unblocked_toast_content" msgid="7843105715964332311">"Kamera tersedia"</string>
     <string name="sensor_privacy_mic_camera_unblocked_toast_content" msgid="7339355093282661115">"Mikrofon dan kamera tersedia"</string>
-    <!-- no translation found for sensor_privacy_mic_turned_on_dialog_title (6348853159838376513) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_mic_turned_off_dialog_title (5760464281790732849) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_mic_unblocked_dialog_content (4889961886199270224) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_mic_blocked_no_exception_dialog_content (5864898470772965394) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_mic_blocked_with_exception_dialog_content (810289713700437896) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_camera_turned_on_dialog_title (8039095295100075952) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_camera_turned_off_dialog_title (1936603903120742696) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_camera_unblocked_dialog_content (7847190103011782278) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_camera_blocked_dialog_content (3182428709314874616) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_htt_blocked_dialog_content (3333321592997666441) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_dialog_open_settings (1503088305279285048) -->
-    <skip />
+    <string name="sensor_privacy_mic_turned_on_dialog_title" msgid="6348853159838376513">"Mikrofon dihidupkan"</string>
+    <string name="sensor_privacy_mic_turned_off_dialog_title" msgid="5760464281790732849">"Mikrofon dimatikan"</string>
+    <string name="sensor_privacy_mic_unblocked_dialog_content" msgid="4889961886199270224">"Mikrofon didayakan untuk semua apl dan perkhidmatan."</string>
+    <string name="sensor_privacy_mic_blocked_no_exception_dialog_content" msgid="5864898470772965394">"Akses mikrofon dilumpuhkan untuk semua apl dan perkhidmatan. Anda boleh mendayakan akses mikrofon dalam Tetapan &gt; Privasi &gt; Mikrofon."</string>
+    <string name="sensor_privacy_mic_blocked_with_exception_dialog_content" msgid="810289713700437896">"Akses mikrofon dilumpuhkan untuk semua apl dan perkhidmatan. Anda boleh menukar tetapan ini dalam Tetapan &gt; Privasi &gt; Mikrofon."</string>
+    <string name="sensor_privacy_camera_turned_on_dialog_title" msgid="8039095295100075952">"Kamera dihidupkan"</string>
+    <string name="sensor_privacy_camera_turned_off_dialog_title" msgid="1936603903120742696">"Kamera dimatikan"</string>
+    <string name="sensor_privacy_camera_unblocked_dialog_content" msgid="7847190103011782278">"Kamera didayakan untuk semua apl dan perkhidmatan."</string>
+    <string name="sensor_privacy_camera_blocked_dialog_content" msgid="3182428709314874616">"Akses kamera dilumpuhkan untuk semua apl dan perkhidmatan."</string>
+    <string name="sensor_privacy_htt_blocked_dialog_content" msgid="3333321592997666441">"Untuk menggunakan butang mikrofon, dayakan akses mikrofon dalam Tetapan."</string>
+    <string name="sensor_privacy_dialog_open_settings" msgid="1503088305279285048">"Buka tetapan."</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Peranti lain"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Togol Ikhtisar"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Anda tidak akan diganggu oleh bunyi dan getaran, kecuali daripada penggera, peringatan, acara dan pemanggil yang anda tetapkan. Anda masih mendengar item lain yang anda pilih untuk dimainkan termasuk muzik, video dan permainan."</string>
@@ -397,16 +391,11 @@
     <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"Apabila anda berkongsi, merakam atau menghantar apl, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> mempunyai akses kepada apa-apa yang dipaparkan atau dimainkan pada apl tersebut. Jadi berhati-hati dengan kata laluan, butiran pembayaran, mesej atau maklumat sensitif lain."</string>
     <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"Teruskan"</string>
     <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"Kongsi atau rakam apl"</string>
-    <!-- no translation found for media_projection_permission_dialog_system_service_title (6827129613741303726) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_system_service_warning_entire_screen (8801616203805837575) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_system_service_warning_single_app (543310680568419338) -->
-    <skip />
-    <!-- no translation found for screen_capturing_disabled_by_policy_dialog_title (2113331792064527203) -->
-    <skip />
-    <!-- no translation found for screen_capturing_disabled_by_policy_dialog_description (6015975736747696431) -->
-    <skip />
+    <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"Benarkan apl ini berkongsi atau merakam?"</string>
+    <string name="media_projection_permission_dialog_system_service_warning_entire_screen" msgid="8801616203805837575">"Apabila anda berkongsi, merakam atau menghantar, apl ini mempunyai akses kepada apa-apa yang boleh dilihat pada skrin anda atau dimainkan pada peranti anda. Jadi berhati-hati dengan kata laluan, butiran pembayaran, mesej atau maklumat sensitif lain."</string>
+    <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"Apabila anda berkongsi, merakam atau menghantar apl, apl ini mempunyai akses kepada apa-apa yang dipaparkan atau dimainkan pada apl tersebut. Jadi berhati-hati dengan kata laluan, butiran pembayaran, mesej atau maklumat sensitif lain."</string>
+    <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"Disekat oleh pentadbir IT anda"</string>
+    <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"Tangkapan skrin dilumpuhkan oleh dasar peranti"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Kosongkan semua"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Urus"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Sejarah"</string>
@@ -522,7 +511,7 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Buka kunci untuk menggunakan"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Terdapat masalah sewaktu mendapatkan kad anda. Sila cuba sebentar lagi"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Tetapan skrin kunci"</string>
-    <string name="qr_code_scanner_title" msgid="5290201053875420785">"Imbas kod QR"</string>
+    <string name="qr_code_scanner_title" msgid="1938155688725760702">"Pengimbas kod QR"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Profil kerja"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Mod pesawat"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Anda tidak akan mendengar penggera yang seterusnya <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -805,6 +794,8 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Besarkan skrin penuh"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Besarkan sebahagian skrin"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Tukar"</string>
+    <!-- no translation found for magnification_drag_corner_to_resize (1249766311052418130) -->
+    <skip />
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Benarkan penatalan pepenjuru"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"Ubah saiz"</string>
     <string name="accessibility_change_magnification_type" msgid="666000085077432421">"Tukar jenis pembesaran"</string>
@@ -1035,4 +1026,8 @@
     <string name="dream_date_complication_date_format" msgid="8191225366513860104">"EEE, d MMM"</string>
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
+    <string name="log_access_confirmation_title" msgid="4843557604739943395">"Benarkan <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> mengakses semua log peranti?"</string>
+    <string name="log_access_confirmation_allow" msgid="752147861593202968">"Benarkan akses satu kali"</string>
+    <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Jangan benarkan"</string>
+    <string name="log_access_confirmation_body" msgid="6883031912003112634">"Log peranti merekodkan perkara yang berlaku pada peranti anda. Apl boleh menggunakan log ini untuk menemukan dan membetulkan masalah.\n\nSesetengah log mungkin mengandungi maklumat sensitif, jadi hanya benarkan apl yang anda percaya untuk mengakses semua log peranti. \n\nJika anda tidak membenarkan apl ini mengakses semua log peranti, apl ini masih boleh mengakses log sendiri. Pengilang peranti anda mungkin masih dapat mengakses sesetengah log atau maklumat pada peranti anda."</string>
 </resources>

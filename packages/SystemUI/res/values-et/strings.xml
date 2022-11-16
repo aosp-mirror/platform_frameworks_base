@@ -52,7 +52,7 @@
     <string name="usb_debugging_always" msgid="4003121804294739548">"Luba alati sellest arvutist"</string>
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Luba"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"USB-silumine pole lubatud"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"Sellesse seadmesse praegu sisse logitud kasutaja ei saa USB-silumist sisse lülitada. Selle funktsiooni kasutamiseks vahetage peamisele kasutajale."</string>
+    <string name="usb_debugging_secondary_user_message" msgid="1888835696965417845">"Sellesse seadmesse praegu sisse logitud kasutaja ei saa USB-silumist sisse lülitada. Selle funktsiooni kasutamiseks vahetage administraatoriõigustega kasutajale."</string>
     <string name="hdmi_cec_set_menu_language_title" msgid="1259765420091503742">"Kas soovite süsteemi keeleks määrata järgmise: <xliff:g id="LANGUAGE">%1$s</xliff:g>?"</string>
     <string name="hdmi_cec_set_menu_language_description" msgid="8176716678074126619">"Teine seade taotles süsteemi keele muutmist"</string>
     <string name="hdmi_cec_set_menu_language_accept" msgid="2513689457281009578">"Muuda keelt"</string>
@@ -62,7 +62,7 @@
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Luba selles võrgus alati"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"Luba"</string>
     <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"Juhtmevaba silumine pole lubatud"</string>
-    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"Sellesse seadmesse praegu sisse logitud kasutaja ei saa juhtmevaba silumist sisse lülitada. Selle funktsiooni kasutamiseks vahetage peamisele kasutajale."</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="9085779370142222881">"Sellesse seadmesse praegu sisse logitud kasutaja ei saa juhtmevaba silumist sisse lülitada. Selle funktsiooni kasutamiseks vahetage administraatoriõigustega kasutajale."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"USB-port on keelatud"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"Selleks et kaitsta teie seadet vedeliku või mustuse eest, on USB-port keelatud ja see ei tuvasta lisatarvikuid.\n\nKui USB-porti tohib taas kasutada, saate selle kohta märguande."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"USB-pordil on lubatud tuvastada laadijaid ja tarvikuid"</string>
@@ -125,7 +125,8 @@
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Häälabi"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"Wallet"</string>
     <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"QR-koodi skanner"</string>
-    <string name="accessibility_unlock_button" msgid="122785427241471085">"Luku avamine"</string>
+    <!-- no translation found for accessibility_unlock_button (3613812140816244310) -->
+    <skip />
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Seade on lukustatud"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Näo skannimine"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"Saada"</string>
@@ -168,7 +169,7 @@
     <skip />
     <string name="keyguard_face_failed" msgid="9044619102286917151">"Nägu ei õnnestu tuvastada"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"Kasutage sõrmejälge"</string>
-    <!-- no translation found for keyguard_face_unlock_unavailable (8145547300240405980) -->
+    <!-- no translation found for keyguard_face_unlock_unavailable (1581949044193418736) -->
     <skip />
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth on ühendatud."</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Aku laetuse protsent on teadmata."</string>
@@ -180,8 +181,12 @@
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"Lennukirežiim."</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN on sees."</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"Aku: <xliff:g id="NUMBER">%d</xliff:g> protsenti."</string>
-    <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"Aku protsent <xliff:g id="PERCENTAGE">%1$s</xliff:g>, teie kasutuse põhjal on jäänud ligikaudu <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"Aku protsent <xliff:g id="PERCENTAGE">%1$d</xliff:g>, teie kasutuse põhjal on jäänud ligikaudu <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"Akut laetakse (<xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%)."</string>
+    <!-- no translation found for accessibility_battery_level_charging_paused (1716051308782906917) -->
+    <skip />
+    <!-- no translation found for accessibility_battery_level_charging_paused_with_estimate (4006089349465741762) -->
+    <skip />
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"Kõikide märguannete kuvamine"</string>
     <string name="accessibility_tty_enabled" msgid="1123180388823381118">"TeleTypewriter lubatud."</string>
     <string name="accessibility_ringer_vibrate" msgid="6261841170896561364">"Vibreeriv kõlisti."</string>
@@ -305,28 +310,17 @@
     <string name="sensor_privacy_mic_unblocked_toast_content" msgid="306555320557065068">"Mikrofon on saadaval"</string>
     <string name="sensor_privacy_camera_unblocked_toast_content" msgid="7843105715964332311">"Kaamera on saadaval"</string>
     <string name="sensor_privacy_mic_camera_unblocked_toast_content" msgid="7339355093282661115">"Mikrofon ja kaamera on saadaval"</string>
-    <!-- no translation found for sensor_privacy_mic_turned_on_dialog_title (6348853159838376513) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_mic_turned_off_dialog_title (5760464281790732849) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_mic_unblocked_dialog_content (4889961886199270224) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_mic_blocked_no_exception_dialog_content (5864898470772965394) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_mic_blocked_with_exception_dialog_content (810289713700437896) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_camera_turned_on_dialog_title (8039095295100075952) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_camera_turned_off_dialog_title (1936603903120742696) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_camera_unblocked_dialog_content (7847190103011782278) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_camera_blocked_dialog_content (3182428709314874616) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_htt_blocked_dialog_content (3333321592997666441) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_dialog_open_settings (1503088305279285048) -->
-    <skip />
+    <string name="sensor_privacy_mic_turned_on_dialog_title" msgid="6348853159838376513">"Mikrofon lülitati sisse"</string>
+    <string name="sensor_privacy_mic_turned_off_dialog_title" msgid="5760464281790732849">"Mikrofon lülitati välja"</string>
+    <string name="sensor_privacy_mic_unblocked_dialog_content" msgid="4889961886199270224">"Mikrofon on kõigi rakenduste ja teenuste jaoks lubatud."</string>
+    <string name="sensor_privacy_mic_blocked_no_exception_dialog_content" msgid="5864898470772965394">"Juurdepääs mikrofonile on kõigi rakenduste ja teenuste jaoks keelatud. Saate juurdepääsu mikrofonile lubada, tehes valikud Seaded &gt; Privaatsus &gt; Mikrofon."</string>
+    <string name="sensor_privacy_mic_blocked_with_exception_dialog_content" msgid="810289713700437896">"Juurdepääs mikrofonile on kõigi rakenduste ja teenuste jaoks keelatud. Saate seda muuta valikutega Seaded &gt; Privaatsus &gt; Mikrofon."</string>
+    <string name="sensor_privacy_camera_turned_on_dialog_title" msgid="8039095295100075952">"Kaamera lülitati sisse"</string>
+    <string name="sensor_privacy_camera_turned_off_dialog_title" msgid="1936603903120742696">"Kaamera lülitati välja"</string>
+    <string name="sensor_privacy_camera_unblocked_dialog_content" msgid="7847190103011782278">"Kaamera on kõigi rakenduste ja teenuste jaoks lubatud."</string>
+    <string name="sensor_privacy_camera_blocked_dialog_content" msgid="3182428709314874616">"Juurdepääs kaamerale on kõigi rakenduste ja teenuste jaoks keelatud."</string>
+    <string name="sensor_privacy_htt_blocked_dialog_content" msgid="3333321592997666441">"Mikrofoninupu kasutamiseks lubage seadetes juurdepääs mikrofonile."</string>
+    <string name="sensor_privacy_dialog_open_settings" msgid="1503088305279285048">"Avage seaded."</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Muu seade"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Lehe Ülevaade sisse- ja väljalülitamine"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Helid ja värinad ei sega teid. Kuulete siiski enda määratud äratusi, meeldetuletusi, sündmusi ja helistajaid. Samuti kuulete kõike, mille esitamise ise valite, sh muusika, videod ja mängud."</string>
@@ -397,16 +391,11 @@
     <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"Kui jagate, salvestate või kannate rakendust üle, on rakendusel <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> juurdepääs kõigele, mida selles rakenduses kuvatakse või esitatakse. Seega olge paroolide, makseteabe, sõnumite ja muu tundliku teabega ettevaatlik."</string>
     <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"Jätka"</string>
     <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"Rakenduse jagamine või salvestamine"</string>
-    <!-- no translation found for media_projection_permission_dialog_system_service_title (6827129613741303726) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_system_service_warning_entire_screen (8801616203805837575) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_system_service_warning_single_app (543310680568419338) -->
-    <skip />
-    <!-- no translation found for screen_capturing_disabled_by_policy_dialog_title (2113331792064527203) -->
-    <skip />
-    <!-- no translation found for screen_capturing_disabled_by_policy_dialog_description (6015975736747696431) -->
-    <skip />
+    <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"Kas lubada sellel rakendusel jagada või salvestada?"</string>
+    <string name="media_projection_permission_dialog_system_service_warning_entire_screen" msgid="8801616203805837575">"Kui jagate, salvestate või kannate üle, on selle rakendusel juurdepääs kõigele, mis on teie ekraanikuval nähtaval või mida teie seadmes esitatakse. Seega olge paroolide, makseteabe, sõnumite ja muu tundliku teabega ettevaatlik."</string>
+    <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"Kui jagate, salvestate või kannate rakendust üle, on sellel rakendusel juurdepääs kõigele, mida selles rakenduses kuvatakse või esitatakse. Seega olge paroolide, makseteabe, sõnumite ja muu tundliku teabega ettevaatlik."</string>
+    <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"Blokeeris teie IT-administraator"</string>
+    <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"Ekraanikuva jäädvustamine on seadmereeglitega keelatud"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Tühjenda kõik"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Haldamine"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Ajalugu"</string>
@@ -522,7 +511,8 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Avage kasutamiseks"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Teie kaartide hankimisel ilmnes probleem, proovige hiljem uuesti"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Lukustuskuva seaded"</string>
-    <string name="qr_code_scanner_title" msgid="5290201053875420785">"QR-koodi skannimine"</string>
+    <!-- no translation found for qr_code_scanner_title (1938155688725760702) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"Tööprofiil"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Lennukirežiim"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Te ei kuule järgmist äratust kell <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -805,6 +795,8 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Täisekraani suurendamine"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Ekraanikuva osa suurendamine"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Vaheta"</string>
+    <!-- no translation found for magnification_drag_corner_to_resize (1249766311052418130) -->
+    <skip />
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Luba diagonaalne kerimine"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"Muuda suurust"</string>
     <string name="accessibility_change_magnification_type" msgid="666000085077432421">"Muuda suurenduse tüüpi"</string>
@@ -1035,4 +1027,8 @@
     <string name="dream_date_complication_date_format" msgid="8191225366513860104">"EEE, d. MMM"</string>
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
+    <string name="log_access_confirmation_title" msgid="4843557604739943395">"Kas anda rakendusele <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> juurdepääs kõigile seadmelogidele?"</string>
+    <string name="log_access_confirmation_allow" msgid="752147861593202968">"Luba ühekordne juurdepääs"</string>
+    <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Ära luba"</string>
+    <string name="log_access_confirmation_body" msgid="6883031912003112634">"Seadmelogid jäädvustavad, mis teie seadmes toimub. Rakendused saavad neid logisid kasutada probleemide tuvastamiseks ja lahendamiseks.\n\nMõned logid võivad sisaldada tundlikku teavet, seega lubage juurdepääs kõigile seadmelogidele ainult rakendustele, mida usaldate. \n\nKui te ei luba sellel rakendusel kõigile seadmelogidele juurde pääseda, pääseb see siiski juurde oma logidele. Teie seadme tootja võib teie seadmes siiski teatud logidele või teabele juurde pääseda."</string>
 </resources>
