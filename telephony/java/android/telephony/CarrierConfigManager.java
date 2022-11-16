@@ -7920,7 +7920,8 @@ public class CarrierConfigManager {
                     KEY_XCAP_OVER_UT_SUPPORTED_RATS_INT_ARRAY,
                     new int[] {
                         AccessNetworkType.EUTRAN,
-                        AccessNetworkType.IWLAN
+                        AccessNetworkType.IWLAN,
+                        AccessNetworkType.NGRAN
                     });
             defaults.putString(KEY_UT_AS_SERVER_FQDN_STRING, "");
             defaults.putBoolean(KEY_TERMINAL_BASED_CALL_WAITING_DEFAULT_ENABLED_BOOL, true);
