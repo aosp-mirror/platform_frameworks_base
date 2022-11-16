@@ -67,6 +67,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityManager;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -74,6 +75,7 @@ import com.android.internal.app.IBatteryStats;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.keyguard.TrustGrantFlags;
 import com.android.keyguard.logging.KeyguardLogger;
 import com.android.settingslib.Utils;
 import com.android.settingslib.fuelgauge.BatteryStatus;
@@ -154,7 +156,8 @@ public class KeyguardIndicationController {
     private final AccessibilityManager mAccessibilityManager;
     private final Handler mHandler;
 
-    protected KeyguardIndicationRotateTextViewController mRotateTextViewController;
+    @VisibleForTesting
+    public KeyguardIndicationRotateTextViewController mRotateTextViewController;
     private BroadcastReceiver mBroadcastReceiver;
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
 
@@ -1188,9 +1191,9 @@ public class KeyguardIndicationController {
         }
 
         @Override
-        public void onTrustGrantedWithFlags(int flags, int userId, @Nullable String message) {
-            if (!isCurrentUser(userId)) return;
-            showTrustGrantedMessage(flags, message);
+        public void onTrustGrantedForCurrentUser(boolean dismissKeyguard,
+                @NonNull TrustGrantFlags flags, @Nullable String message) {
+            showTrustGrantedMessage(dismissKeyguard, message);
         }
 
         @Override
@@ -1254,7 +1257,7 @@ public class KeyguardIndicationController {
         return getCurrentUser() == userId;
     }
 
-    void showTrustGrantedMessage(int flags, @Nullable CharSequence message) {
+    protected void showTrustGrantedMessage(boolean dismissKeyguard, @Nullable String message) {
         mTrustGrantedIndication = message;
         updateDeviceEntryIndication(false);
     }
