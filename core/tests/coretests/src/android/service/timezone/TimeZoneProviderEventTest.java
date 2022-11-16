@@ -16,7 +16,7 @@
 
 package android.service.timezone;
 
-import static android.app.timezonedetector.ParcelableTestSupport.assertRoundTripParcelable;
+import static android.app.time.ParcelableTestSupport.assertRoundTripParcelable;
 import static android.service.timezone.TimeZoneProviderEvent.EVENT_TYPE_PERMANENT_FAILURE;
 import static android.service.timezone.TimeZoneProviderEvent.EVENT_TYPE_SUGGESTION;
 import static android.service.timezone.TimeZoneProviderEvent.EVENT_TYPE_UNCERTAIN;

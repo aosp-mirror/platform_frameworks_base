@@ -291,6 +291,12 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     private final IBinder mFragmentToken;
 
     /**
+     * Whether to delay the call to {@link #updateOrganizedTaskFragmentSurface()} when there is a
+     * configuration change.
+     */
+    private boolean mDelayOrganizedTaskFragmentSurfaceUpdate;
+
+    /**
      * Whether to delay the last activity of TaskFragment being immediately removed while finishing.
      * This should only be set on a embedded TaskFragment, where the organizer can have the
      * opportunity to perform animations and finishing the adjacent TaskFragment.
@@ -2264,35 +2270,41 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
     @Override
     public void onConfigurationChanged(Configuration newParentConfig) {
-        // Task will animate differently.
-        if (mTaskFragmentOrganizer != null) {
-            mTmpPrevBounds.set(getBounds());
-        }
-
         super.onConfigurationChanged(newParentConfig);
 
-        final boolean shouldStartChangeTransition = shouldStartChangeTransition(mTmpPrevBounds);
-        if (shouldStartChangeTransition) {
-            initializeChangeTransition(mTmpPrevBounds);
-        }
         if (mTaskFragmentOrganizer != null) {
-            if (mTransitionController.isShellTransitionsEnabled()
-                    && !mTransitionController.isCollecting(this)) {
-                // TaskFragmentOrganizer doesn't have access to the surface for security reasons, so
-                // update the surface here if it is not collected by Shell transition.
-                updateOrganizedTaskFragmentSurface();
-            } else if (!mTransitionController.isShellTransitionsEnabled()
-                    && !shouldStartChangeTransition) {
-                // Update the surface here instead of in the organizer so that we can make sure
-                // it can be synced with the surface freezer for legacy app transition.
-                updateOrganizedTaskFragmentSurface();
-            }
+            updateOrganizedTaskFragmentSurface();
         }
 
         sendTaskFragmentInfoChanged();
     }
 
+    void deferOrganizedTaskFragmentSurfaceUpdate() {
+        mDelayOrganizedTaskFragmentSurfaceUpdate = true;
+    }
+
+    void continueOrganizedTaskFragmentSurfaceUpdate() {
+        mDelayOrganizedTaskFragmentSurfaceUpdate = false;
+        updateOrganizedTaskFragmentSurface();
+    }
+
     private void updateOrganizedTaskFragmentSurface() {
+        if (mDelayOrganizedTaskFragmentSurfaceUpdate) {
+            return;
+        }
+        if (mTransitionController.isShellTransitionsEnabled()
+                && !mTransitionController.isCollecting(this)) {
+            // TaskFragmentOrganizer doesn't have access to the surface for security reasons, so
+            // update the surface here if it is not collected by Shell transition.
+            updateOrganizedTaskFragmentSurfaceUnchecked();
+        } else if (!mTransitionController.isShellTransitionsEnabled() && !isAnimating()) {
+            // Update the surface here instead of in the organizer so that we can make sure
+            // it can be synced with the surface freezer for legacy app transition.
+            updateOrganizedTaskFragmentSurfaceUnchecked();
+        }
+    }
+
+    private void updateOrganizedTaskFragmentSurfaceUnchecked() {
         final SurfaceControl.Transaction t = getSyncTransaction();
         updateSurfacePosition(t);
         updateOrganizedTaskFragmentSurfaceSize(t, false /* forceUpdate */);
@@ -2346,7 +2358,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     }
 
     /** Whether we should prepare a transition for this {@link TaskFragment} bounds change. */
-    private boolean shouldStartChangeTransition(Rect startBounds) {
+    boolean shouldStartChangeTransition(Rect startBounds) {
         if (mTaskFragmentOrganizer == null || !canStartChangeTransition()) {
             return false;
         }
@@ -2366,7 +2378,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     void setSurfaceControl(SurfaceControl sc) {
         super.setSurfaceControl(sc);
         if (mTaskFragmentOrganizer != null) {
-            updateOrganizedTaskFragmentSurface();
+            updateOrganizedTaskFragmentSurfaceUnchecked();
             // If the TaskFragmentOrganizer was set before we created the SurfaceControl, we need to
             // emit the callbacks now.
             sendTaskFragmentAppeared();

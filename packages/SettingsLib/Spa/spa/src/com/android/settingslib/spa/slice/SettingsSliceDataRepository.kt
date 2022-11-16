@@ -19,11 +19,11 @@ package com.android.settingslib.spa.slice
 import android.net.Uri
 import android.util.Log
 import com.android.settingslib.spa.framework.common.EntrySliceData
-import com.android.settingslib.spa.framework.common.SpaEnvironmentFactory
+import com.android.settingslib.spa.framework.common.SettingsEntryRepository
 
 private const val TAG = "SliceDataRepository"
 
-class SettingsSliceDataRepository {
+class SettingsSliceDataRepository(private val entryRepository: SettingsEntryRepository) {
     // The map of slice uri to its EntrySliceData, a.k.a. LiveData<Slice?>
     private val sliceDataMap: MutableMap<String, EntrySliceData> = mutableMapOf()
 
@@ -46,13 +46,10 @@ class SettingsSliceDataRepository {
 
     private fun buildLiveDataImpl(sliceUri: Uri): EntrySliceData? {
         Log.d(TAG, "buildLiveData: $sliceUri")
-        if (!SpaEnvironmentFactory.isReady()) return null
 
-        val entryRepository by SpaEnvironmentFactory.instance.entryRepository
         val entryId = sliceUri.getEntryId() ?: return null
         val entry = entryRepository.getEntry(entryId) ?: return null
         if (!entry.hasSliceSupport) return null
-
         val arguments = sliceUri.getRuntimeArguments()
         return entry.getSliceData(runtimeArguments = arguments, sliceUri = sliceUri)
     }

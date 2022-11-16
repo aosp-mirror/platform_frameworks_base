@@ -65,7 +65,7 @@ abstract class SpaEnvironment(context: Context) {
 
     val entryRepository = lazy { SettingsEntryRepository(pageProviderRepository.value) }
 
-    val sliceDataRepository = SettingsSliceDataRepository()
+    val sliceDataRepository = lazy { SettingsSliceDataRepository(entryRepository.value) }
 
     // In Robolectric test, applicationContext is not available. Use context as fallback.
     val appContext: Context = context.applicationContext ?: context

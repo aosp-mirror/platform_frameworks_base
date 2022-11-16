@@ -235,19 +235,24 @@ class LockscreenSmartspaceController @Inject constructor(
 
         ssView.setIntentStarter(object : BcSmartspaceDataPlugin.IntentStarter {
             override fun startIntent(view: View, intent: Intent, showOnLockscreen: Boolean) {
-                activityStarter.startActivity(
-                    intent,
-                    true, /* dismissShade */
-                    null, /* launch animator - looks bad with the transparent smartspace bg */
-                    showOnLockscreen
-                )
+                if (showOnLockscreen) {
+                    activityStarter.startActivity(
+                            intent,
+                            true, /* dismissShade */
+                            // launch animator - looks bad with the transparent smartspace bg
+                            null,
+                            true
+                    )
+                } else {
+                    activityStarter.postStartActivityDismissingKeyguard(intent, 0)
+                }
             }
 
             override fun startPendingIntent(pi: PendingIntent, showOnLockscreen: Boolean) {
                 if (showOnLockscreen) {
                     pi.send()
                 } else {
-                    activityStarter.startPendingIntentDismissingKeyguard(pi)
+                    activityStarter.postStartActivityDismissingKeyguard(pi)
                 }
             }
         })

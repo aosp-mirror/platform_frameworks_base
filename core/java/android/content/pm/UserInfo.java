@@ -159,6 +159,18 @@ public class UserInfo implements Parcelable {
     public static final int FLAG_EPHEMERAL_ON_CREATE = 0x00002000;
 
     /**
+     * Indicates that this user is the designated main user on the device. This user may have access
+     * to certain features which are limited to at most one user.
+     *
+     * <p>Currently, this will be the first user to go through setup on the device, but in future
+     * releases this status may be transferable or may even not be given to any users.
+     *
+     * <p>This is not necessarily the system user. For example, it will not be the system user on
+     * devices for which {@link UserManager#isHeadlessSystemUserMode()} returns true.
+     */
+    public static final int FLAG_MAIN = 0x00004000;
+
+    /**
      * @hide
      */
     @IntDef(flag = true, prefix = "FLAG_", value = {
@@ -175,7 +187,8 @@ public class UserInfo implements Parcelable {
             FLAG_FULL,
             FLAG_SYSTEM,
             FLAG_PROFILE,
-            FLAG_EPHEMERAL_ON_CREATE
+            FLAG_EPHEMERAL_ON_CREATE,
+            FLAG_MAIN
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface UserInfoFlag {
@@ -366,6 +379,13 @@ public class UserInfo implements Parcelable {
 
     public boolean isFull() {
         return (flags & FLAG_FULL) == FLAG_FULL;
+    }
+
+    /**
+     * @see #FLAG_MAIN
+     */
+    public boolean isMain() {
+        return (flags & FLAG_MAIN) == FLAG_MAIN;
     }
 
     /**

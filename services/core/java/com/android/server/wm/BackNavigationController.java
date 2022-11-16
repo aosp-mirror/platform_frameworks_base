@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.view.RemoteAnimationTarget.MODE_CLOSING;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
 import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
+import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 
@@ -831,9 +832,8 @@ class BackNavigationController {
     }
 
     boolean isWallpaperVisible(WindowState w) {
-        if (mBackAnimationInProgress && w.isFocused()) {
-            return mShowWallpaper;
-        }
-        return false;
+        return mAnimationTargets.mComposed && mShowWallpaper
+                && w.mAttrs.type == TYPE_BASE_APPLICATION && w.mActivityRecord != null
+                && mAnimationTargets.isTarget(w.mActivityRecord, true /* open */);
     }
 }

@@ -18,7 +18,7 @@ package android.app.time;
 
 import static android.app.time.Capabilities.CAPABILITY_NOT_ALLOWED;
 import static android.app.time.Capabilities.CAPABILITY_POSSESSED;
-import static android.app.timezonedetector.ParcelableTestSupport.assertRoundTripParcelable;
+import static android.app.time.ParcelableTestSupport.assertRoundTripParcelable;
 
 import static com.google.common.truth.Truth.assertThat;
 

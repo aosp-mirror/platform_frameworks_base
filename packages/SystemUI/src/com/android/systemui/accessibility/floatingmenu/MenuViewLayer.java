@@ -16,14 +16,19 @@
 
 package com.android.systemui.accessibility.floatingmenu;
 
+import static com.android.internal.accessibility.common.ShortcutConstants.AccessibilityFragmentType.INVISIBLE_TOGGLE;
+import static com.android.internal.accessibility.util.AccessibilityUtils.getAccessibilityServiceFragmentType;
+import static com.android.internal.accessibility.util.AccessibilityUtils.setAccessibilityServiceState;
 import static com.android.systemui.accessibility.floatingmenu.MenuMessageView.Index;
 
+import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.IntDef;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.PluralsMessageFormatter;
 import android.view.MotionEvent;
@@ -82,8 +87,22 @@ class MenuViewLayer extends FrameLayout {
     final Runnable mDismissMenuAction = new Runnable() {
         @Override
         public void run() {
-            Settings.Secure.putString(getContext().getContentResolver(),
-                    Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS, /* value= */ "");
+            Settings.Secure.putStringForUser(getContext().getContentResolver(),
+                    Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS, /* value= */ "",
+                    UserHandle.USER_CURRENT);
+
+            // Should disable the corresponding service when the fragment type is
+            // INVISIBLE_TOGGLE, which will enable service when the shortcut is on.
+            final List<AccessibilityServiceInfo> serviceInfoList =
+                    mAccessibilityManager.getEnabledAccessibilityServiceList(
+                            AccessibilityServiceInfo.FEEDBACK_ALL_MASK);
+            serviceInfoList.forEach(info -> {
+                if (getAccessibilityServiceFragmentType(info) == INVISIBLE_TOGGLE) {
+                    setAccessibilityServiceState(mContext, info.getComponentName(), /* enabled= */
+                            false);
+                }
+            });
+
             mFloatingMenu.hide();
         }
     };

@@ -588,6 +588,7 @@ package android.app {
     field public static final String OPSTR_READ_MEDIA_IMAGES = "android:read_media_images";
     field public static final String OPSTR_READ_MEDIA_VIDEO = "android:read_media_video";
     field public static final String OPSTR_READ_MEDIA_VISUAL_USER_SELECTED = "android:read_media_visual_user_selected";
+    field public static final String OPSTR_READ_WRITE_HEALTH_DATA = "android:read_write_health_data";
     field public static final String OPSTR_RECEIVE_AMBIENT_TRIGGER_AUDIO = "android:receive_ambient_trigger_audio";
     field public static final String OPSTR_RECEIVE_EMERGENCY_BROADCAST = "android:receive_emergency_broadcast";
     field public static final String OPSTR_RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO = "android:receive_explicit_user_interaction_audio";
@@ -7155,6 +7156,7 @@ package android.media.tv.tuner {
 
   public class Tuner implements java.lang.AutoCloseable {
     ctor @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public Tuner(@NonNull android.content.Context, @Nullable String, int);
+    method public int applyFrontend(@NonNull android.media.tv.tuner.frontend.FrontendInfo);
     method public int cancelScanning();
     method public int cancelTuning();
     method public void clearOnTuneEventListener();
@@ -7185,7 +7187,6 @@ package android.media.tv.tuner {
     method @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_TV_SHARED_FILTER) public static android.media.tv.tuner.filter.SharedFilter openSharedFilter(@NonNull android.content.Context, @NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.media.tv.tuner.filter.SharedFilterCallback);
     method @Nullable public android.media.tv.tuner.filter.TimeFilter openTimeFilter();
     method public int removeOutputPid(@IntRange(from=0) int);
-    method public int requestFrontendById(int);
     method public int scan(@NonNull android.media.tv.tuner.frontend.FrontendSettings, int, @NonNull java.util.concurrent.Executor, @NonNull android.media.tv.tuner.frontend.ScanCallback);
     method public int setLnaEnabled(boolean);
     method public int setMaxNumberOfFrontends(int, @IntRange(from=0) int);
@@ -9968,9 +9969,10 @@ package android.os {
     method public boolean isCloneProfile();
     method public boolean isCredentialSharableWithParent();
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS, android.Manifest.permission.QUERY_USERS}) public boolean isGuestUser();
+    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS, android.Manifest.permission.QUERY_USERS}) public boolean isMainUser();
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.QUERY_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional=true) public boolean isManagedProfile(int);
     method public boolean isMediaSharedWithParent();
-    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS, android.Manifest.permission.QUERY_USERS}) public boolean isPrimaryUser();
+    method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS, android.Manifest.permission.QUERY_USERS}) public boolean isPrimaryUser();
     method public static boolean isRemoveResultSuccessful(int);
     method public boolean isRestrictedProfile();
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}, conditional=true) public boolean isRestrictedProfile(@NonNull android.os.UserHandle);
@@ -11924,9 +11926,37 @@ package android.service.timezone {
     method public abstract void onStopUpdates();
     method public final void reportPermanentFailure(@NonNull Throwable);
     method public final void reportSuggestion(@NonNull android.service.timezone.TimeZoneProviderSuggestion);
+    method public final void reportSuggestion(@NonNull android.service.timezone.TimeZoneProviderSuggestion, @NonNull android.service.timezone.TimeZoneProviderStatus);
     method public final void reportUncertain();
+    method public final void reportUncertain(@NonNull android.service.timezone.TimeZoneProviderStatus);
     field public static final String PRIMARY_LOCATION_TIME_ZONE_PROVIDER_SERVICE_INTERFACE = "android.service.timezone.PrimaryLocationTimeZoneProviderService";
     field public static final String SECONDARY_LOCATION_TIME_ZONE_PROVIDER_SERVICE_INTERFACE = "android.service.timezone.SecondaryLocationTimeZoneProviderService";
+  }
+
+  public final class TimeZoneProviderStatus implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getConnectivityDependencyStatus();
+    method public int getLocationDetectionDependencyStatus();
+    method public int getTimeZoneResolutionOperationStatus();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.timezone.TimeZoneProviderStatus> CREATOR;
+    field public static final int DEPENDENCY_STATUS_BLOCKED_BY_ENVIRONMENT = 4; // 0x4
+    field public static final int DEPENDENCY_STATUS_BLOCKED_BY_SETTINGS = 6; // 0x6
+    field public static final int DEPENDENCY_STATUS_DEGRADED_BY_SETTINGS = 5; // 0x5
+    field public static final int DEPENDENCY_STATUS_NOT_APPLICABLE = 1; // 0x1
+    field public static final int DEPENDENCY_STATUS_OK = 2; // 0x2
+    field public static final int DEPENDENCY_STATUS_TEMPORARILY_UNAVAILABLE = 3; // 0x3
+    field public static final int OPERATION_STATUS_FAILED = 3; // 0x3
+    field public static final int OPERATION_STATUS_NOT_APPLICABLE = 1; // 0x1
+    field public static final int OPERATION_STATUS_OK = 2; // 0x2
+  }
+
+  public static final class TimeZoneProviderStatus.Builder {
+    ctor public TimeZoneProviderStatus.Builder();
+    method @NonNull public android.service.timezone.TimeZoneProviderStatus build();
+    method @NonNull public android.service.timezone.TimeZoneProviderStatus.Builder setConnectivityDependencyStatus(int);
+    method @NonNull public android.service.timezone.TimeZoneProviderStatus.Builder setLocationDetectionDependencyStatus(int);
+    method @NonNull public android.service.timezone.TimeZoneProviderStatus.Builder setTimeZoneResolutionOperationStatus(int);
   }
 
   public final class TimeZoneProviderSuggestion implements android.os.Parcelable {
@@ -12225,7 +12255,7 @@ package android.service.wallpaper {
 
   public class WallpaperService.Engine {
     method public boolean isInAmbientMode();
-    method public void onAmbientModeChanged(boolean, long);
+    method @MainThread public void onAmbientModeChanged(boolean, long);
   }
 
 }

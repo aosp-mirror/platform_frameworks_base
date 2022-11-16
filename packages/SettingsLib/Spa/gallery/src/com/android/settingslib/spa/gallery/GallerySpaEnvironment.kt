@@ -17,6 +17,7 @@
 package com.android.settingslib.spa.gallery
 
 import android.content.Context
+import com.android.settingslib.spa.framework.SpaSliceBroadcastReceiver
 import com.android.settingslib.spa.framework.common.LocalLogger
 import com.android.settingslib.spa.framework.common.SettingsPageProviderRepository
 import com.android.settingslib.spa.framework.common.SpaEnvironment
@@ -79,8 +80,8 @@ class GallerySpaEnvironment(context: Context) : SpaEnvironment(context) {
     }
 
     override val browseActivityClass = GalleryMainActivity::class.java
-
+    override val sliceBroadcastReceiverClass = SpaSliceBroadcastReceiver::class.java
     override val searchProviderAuthorities = "com.android.spa.gallery.search.provider"
-
+    override val sliceProviderAuthorities = "com.android.spa.gallery.slice.provider"
     override val logger = LocalLogger()
 }

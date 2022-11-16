@@ -30,6 +30,7 @@ import android.annotation.ElapsedRealtimeLong;
 import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.os.SystemClock;
+import android.os.Trace;
 import android.util.Slog;
 import android.util.TimeUtils;
 
@@ -43,6 +44,9 @@ import java.io.PrintWriter;
  * The state info of the process, including proc state, oom adj score, et al.
  */
 final class ProcessStateRecord {
+    // Enable this to trace all OomAdjuster state transitions
+    private static final boolean TRACE_OOM_ADJ = false;
+
     private final ProcessRecord mApp;
     private final ActivityManagerService mService;
     private final ActivityManagerGlobalLock mProcLock;
@@ -916,6 +920,12 @@ final class ProcessStateRecord {
 
     @GuardedBy("mService")
     void setAdjType(String adjType) {
+        if (TRACE_OOM_ADJ) {
+            Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                    "oom:" + mApp.processName + "/u" + mApp.uid, 0);
+            Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                    "oom:" + mApp.processName + "/u" + mApp.uid, adjType, 0);
+        }
         mAdjType = adjType;
     }
 
@@ -1153,6 +1163,10 @@ final class ProcessStateRecord {
 
     @GuardedBy({"mService", "mProcLock"})
     void onCleanupApplicationRecordLSP() {
+        if (TRACE_OOM_ADJ) {
+            Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                    "oom:" + mApp.processName + "/u" + mApp.uid, 0);
+        }
         setHasForegroundActivities(false);
         mHasShownUi = false;
         mForcingToImportant = null;

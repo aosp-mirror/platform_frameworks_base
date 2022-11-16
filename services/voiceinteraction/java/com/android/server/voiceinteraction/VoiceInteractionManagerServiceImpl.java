@@ -639,7 +639,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
     private void logDetectorCreateEventIfNeeded(IHotwordRecognitionStatusCallback callback,
             int detectorType, boolean isCreated, int voiceInteractionServiceUid) {
         if (callback != null) {
-            HotwordMetricsLogger.writeDetectorCreateEvent(detectorType, true,
+            HotwordMetricsLogger.writeDetectorCreateEvent(detectorType, isCreated,
                     voiceInteractionServiceUid);
         }
 

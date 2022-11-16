@@ -2376,19 +2376,20 @@ public class Tuner implements AutoCloseable  {
     }
 
     /**
-     * Request a frontend by frontend id.
+     * Request a frontend by frontend info.
      *
      * <p> This API is used if the applications want to select a desired frontend before
      * {@link tune} to use a specific satellite or sending SatCR DiSEqC command for {@link tune}.
      *
-     * @param desiredId the desired fronted Id. It can be retrieved by
+     * @param desiredFrontendInfo the FrontendInfo of the desired fronted. It can be retrieved by
      * {@link getAvailableFrontendInfos}
      *
      * @return result status of open operation.
      * @throws SecurityException if the caller does not have appropriate permissions.
      */
     @Result
-    public int requestFrontendById(int desiredId) {
+    public int applyFrontend(@NonNull FrontendInfo desiredFrontendInfo) {
+        Objects.requireNonNull(desiredFrontendInfo, "desiredFrontendInfo must not be null");
         mFrontendLock.lock();
         try {
             if (mFeOwnerTuner != null) {
@@ -2399,17 +2400,12 @@ public class Tuner implements AutoCloseable  {
                 Log.e(TAG, "A frontend has been opened before");
                 return RESULT_INVALID_STATE;
             }
-            FrontendInfo frontendInfo = getFrontendInfoById(desiredId);
-            if (frontendInfo == null) {
-                Log.e(TAG, "Failed to get a FrontendInfo by frontend id: " + desiredId);
-                return RESULT_UNAVAILABLE;
-            }
-            int frontendType = frontendInfo.getType();
+            mFrontendType = desiredFrontendInfo.getType();
+            mDesiredFrontendId = desiredFrontendInfo.getId();
             if (DEBUG) {
-                Log.d(TAG, "Opening frontend with type " + frontendType + ", id " + desiredId);
+                Log.d(TAG, "Applying frontend with type " + mFrontendType + ", id "
+                        + mDesiredFrontendId);
             }
-            mFrontendType = frontendType;
-            mDesiredFrontendId = desiredId;
             if (!checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND, mFrontendLock)) {
                 return RESULT_UNAVAILABLE;
             }

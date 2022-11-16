@@ -34,13 +34,4 @@ final class Mutable<E> {
     public Mutable() {
         value = null;
     }
-
-    /**
-     * Initialize value with specific value.
-     *
-     * @param value initial value.
-     */
-    public Mutable(E value) {
-        this.value = value;
-    }
 }

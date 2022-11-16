@@ -33,9 +33,9 @@ import android.widget.TextView;
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
-import com.android.systemui.ripple.RippleAnimationConfig;
-import com.android.systemui.ripple.RippleShader.RippleShape;
-import com.android.systemui.ripple.RippleView;
+import com.android.systemui.surfaceeffects.ripple.RippleAnimationConfig;
+import com.android.systemui.surfaceeffects.ripple.RippleShader.RippleShape;
+import com.android.systemui.surfaceeffects.ripple.RippleView;
 
 import java.text.NumberFormat;
 

@@ -24,7 +24,6 @@ import android.os.PowerManager;
 import android.os.UserHandle;
 import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
-import android.text.TextUtils;
 import android.util.KeyValueListParser;
 import android.util.Log;
 import android.util.Slog;
@@ -221,17 +220,14 @@ public class BatterySaverUtils {
     }
 
     /**
-     * Reverts battery saver schedule mode to none if we are in a bad state where routine mode
-     * is selected but no app is configured to actually provide the signal.
+     * Reverts battery saver schedule mode to none if routine mode is selected.
      * @param context a valid context
      */
     public static void revertScheduleToNoneIfNeeded(Context context) {
         ContentResolver resolver = context.getContentResolver();
         final int currentMode = Global.getInt(resolver, Global.AUTOMATIC_POWER_SAVE_MODE,
                 PowerManager.POWER_SAVE_MODE_TRIGGER_PERCENTAGE);
-        boolean providerConfigured = !TextUtils.isEmpty(context.getString(
-                com.android.internal.R.string.config_batterySaverScheduleProvider));
-        if (currentMode == PowerManager.POWER_SAVE_MODE_TRIGGER_DYNAMIC && !providerConfigured) {
+        if (currentMode == PowerManager.POWER_SAVE_MODE_TRIGGER_DYNAMIC) {
             Global.putInt(resolver, Global.LOW_POWER_MODE_TRIGGER_LEVEL, 0);
             Global.putInt(resolver, Global.AUTOMATIC_POWER_SAVE_MODE,
                     PowerManager.POWER_SAVE_MODE_TRIGGER_PERCENTAGE);

@@ -14957,21 +14957,132 @@ public class TelephonyManager {
      * @return a Pair of (major version, minor version) or (-1,-1) if unknown.
      *
      * @hide
+     *
+     * @deprecated Use {@link #getHalVersion} instead.
      */
+    @Deprecated
     @UnsupportedAppUsage
     @TestApi
     public Pair<Integer, Integer> getRadioHalVersion() {
+        return getHalVersion(HAL_SERVICE_RADIO);
+    }
+
+    /** @hide */
+    public static final int HAL_SERVICE_RADIO = 0;
+
+    /**
+     * HAL service type that supports the HAL APIs implementation of IRadioData
+     * {@link RadioDataProxy}
+     * @hide
+     */
+    @TestApi
+    public static final int HAL_SERVICE_DATA = 1;
+
+    /**
+     * HAL service type that supports the HAL APIs implementation of IRadioMessaging
+     * {@link RadioMessagingProxy}
+     * @hide
+     */
+    @TestApi
+    public static final int HAL_SERVICE_MESSAGING = 2;
+
+    /**
+     * HAL service type that supports the HAL APIs implementation of IRadioModem
+     * {@link RadioModemProxy}
+     * @hide
+     */
+    @TestApi
+    public static final int HAL_SERVICE_MODEM = 3;
+
+    /**
+     * HAL service type that supports the HAL APIs implementation of IRadioNetwork
+     * {@link RadioNetworkProxy}
+     * @hide
+     */
+    @TestApi
+    public static final int HAL_SERVICE_NETWORK = 4;
+
+    /**
+     * HAL service type that supports the HAL APIs implementation of IRadioSim
+     * {@link RadioSimProxy}
+     * @hide
+     */
+    @TestApi
+    public static final int HAL_SERVICE_SIM = 5;
+
+    /**
+     * HAL service type that supports the HAL APIs implementation of IRadioVoice
+     * {@link RadioVoiceProxy}
+     * @hide
+     */
+    @TestApi
+    public static final int HAL_SERVICE_VOICE = 6;
+
+    /**
+     * HAL service type that supports the HAL APIs implementation of IRadioIms
+     * {@link RadioImsProxy}
+     * @hide
+     */
+    @TestApi
+    public static final int HAL_SERVICE_IMS = 7;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"HAL_SERVICE_"},
+            value = {
+                    HAL_SERVICE_RADIO,
+                    HAL_SERVICE_DATA,
+                    HAL_SERVICE_MESSAGING,
+                    HAL_SERVICE_MODEM,
+                    HAL_SERVICE_NETWORK,
+                    HAL_SERVICE_SIM,
+                    HAL_SERVICE_VOICE,
+                    HAL_SERVICE_IMS,
+            })
+    public @interface HalService {}
+
+    /**
+     * The HAL Version indicating that the version is unknown or invalid.
+     * @hide
+     */
+    @TestApi
+    public static final Pair HAL_VERSION_UNKNOWN = new Pair(-1, -1);
+
+    /**
+     * The HAL Version indicating that the version is unsupported.
+     * @hide
+     */
+    @TestApi
+    public static final Pair HAL_VERSION_UNSUPPORTED = new Pair(-2, -2);
+
+    /**
+     * Retrieve the HAL Version of a specific service for this device.
+     *
+     * Get the HAL version for a specific HAL interface for test purposes.
+     *
+     * @param halService the service id to query.
+     * @return a Pair of (major version, minor version), HAL_VERSION_UNKNOWN if unknown
+     * or HAL_VERSION_UNSUPPORTED if unsupported.
+     *
+     * @hide
+     */
+    @TestApi
+    public @NonNull Pair<Integer, Integer> getHalVersion(@HalService int halService) {
         try {
             ITelephony service = getITelephony();
             if (service != null) {
-                int version = service.getRadioHalVersion();
-                if (version == -1) return new Pair<Integer, Integer>(-1, -1);
-                return new Pair<Integer, Integer>(version / 100, version % 100);
+                int version = service.getHalVersion(halService);
+                if (version != -1) {
+                    return new Pair<Integer, Integer>(version / 100, version % 100);
+                }
+            } else {
+                throw new IllegalStateException("telephony service is null.");
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "getRadioHalVersion() RemoteException", e);
+            Log.e(TAG, "getHalVersion() RemoteException", e);
+            e.rethrowAsRuntimeException();
         }
-        return new Pair<Integer, Integer>(-1, -1);
+        return HAL_VERSION_UNKNOWN;
     }
 
     /**

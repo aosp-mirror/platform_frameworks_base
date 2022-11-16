@@ -22,7 +22,6 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERL
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 
 import android.content.Context;
-import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.input.InputManager;
@@ -38,6 +37,7 @@ import android.view.InputEventReceiver;
 import android.view.MotionEvent;
 import android.view.PointerIcon;
 import android.view.SurfaceControl;
+import android.view.ViewConfiguration;
 import android.view.WindowManagerGlobal;
 
 import com.android.internal.view.BaseIWindow;
@@ -76,7 +76,7 @@ class DragResizeInputListener implements AutoCloseable {
     private Rect mRightBottomCornerBounds;
 
     private int mDragPointerId = -1;
-    private int mTouchSlop;
+    private DragDetector mDragDetector;
 
     DragResizeInputListener(
             Context context,
@@ -115,6 +115,7 @@ class DragResizeInputListener implements AutoCloseable {
         mInputEventReceiver = new TaskResizeInputEventReceiver(
                 mInputChannel, mHandler, mChoreographer);
         mCallback = callback;
+        mDragDetector = new DragDetector(ViewConfiguration.get(context).getScaledTouchSlop());
     }
 
     /**
@@ -146,7 +147,7 @@ class DragResizeInputListener implements AutoCloseable {
         mHeight = height;
         mResizeHandleThickness = resizeHandleThickness;
         mCornerSize = cornerSize;
-        mTouchSlop = touchSlop;
+        mDragDetector.setTouchSlop(touchSlop);
 
         Region touchRegion = new Region();
         final Rect topInputBounds = new Rect(0, 0, mWidth, mResizeHandleThickness);
@@ -228,7 +229,6 @@ class DragResizeInputListener implements AutoCloseable {
         private boolean mConsumeBatchEventScheduled;
         private boolean mShouldHandleEvents;
         private boolean mDragging;
-        private final PointF mActionDownPoint = new PointF();
 
         private TaskResizeInputEventReceiver(
                 InputChannel inputChannel, Handler handler, Choreographer choreographer) {
@@ -276,7 +276,9 @@ class DragResizeInputListener implements AutoCloseable {
             // Check if this is a touch event vs mouse event.
             // Touch events are tracked in four corners. Other events are tracked in resize edges.
             boolean isTouch = (e.getSource() & SOURCE_TOUCHSCREEN) == SOURCE_TOUCHSCREEN;
-
+            if (isTouch) {
+                mDragging = mDragDetector.detectDragEvent(e);
+            }
             switch (e.getActionMasked()) {
                 case MotionEvent.ACTION_DOWN: {
                     float x = e.getX(0);
@@ -290,7 +292,6 @@ class DragResizeInputListener implements AutoCloseable {
                         mDragPointerId = e.getPointerId(0);
                         float rawX = e.getRawX(0);
                         float rawY = e.getRawY(0);
-                        mActionDownPoint.set(rawX, rawY);
                         int ctrlType = calculateCtrlType(isTouch, x, y);
                         mCallback.onDragResizeStart(ctrlType, rawX, rawY);
                         result = true;
@@ -304,14 +305,7 @@ class DragResizeInputListener implements AutoCloseable {
                     int dragPointerIndex = e.findPointerIndex(mDragPointerId);
                     float rawX = e.getRawX(dragPointerIndex);
                     float rawY = e.getRawY(dragPointerIndex);
-                    if (isTouch) {
-                        // Check for touch slop for touch events
-                        float dx = rawX - mActionDownPoint.x;
-                        float dy = rawY - mActionDownPoint.y;
-                        if (!mDragging && Math.hypot(dx, dy) > mTouchSlop) {
-                            mDragging = true;
-                        }
-                    } else {
+                    if (!isTouch) {
                         // For all other types allow immediate dragging.
                         mDragging = true;
                     }
@@ -330,7 +324,6 @@ class DragResizeInputListener implements AutoCloseable {
                     }
                     mDragging = false;
                     mShouldHandleEvents = false;
-                    mActionDownPoint.set(0, 0);
                     mDragPointerId = -1;
                     result = true;
                     break;

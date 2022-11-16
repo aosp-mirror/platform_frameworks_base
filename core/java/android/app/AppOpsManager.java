@@ -42,6 +42,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.database.DatabaseUtils;
+import android.healthconnect.HealthConnectManager;
 import android.media.AudioAttributes.AttributeUsage;
 import android.os.Binder;
 import android.os.Build;
@@ -1390,9 +1391,16 @@ public class AppOpsManager {
     public static final int OP_SYSTEM_EXEMPT_FROM_FORCED_APP_STANDBY =
             AppProtoEnums.APP_OP_SYSTEM_EXEMPT_FROM_FORCED_APP_STANDBY;
 
+    /**
+     * An app op for reading/writing health connect data.
+     *
+     * @hide
+     */
+    public static final int OP_READ_WRITE_HEALTH_DATA = AppProtoEnums.APP_OP_READ_WRITE_HEALTH_DATA;
+
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int _NUM_OP = 126;
+    public static final int _NUM_OP = 127;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -1871,6 +1879,15 @@ public class AppOpsManager {
     @SystemApi
     public static final String OPSTR_READ_MEDIA_VISUAL_USER_SELECTED =
             "android:read_media_visual_user_selected";
+
+    /**
+     * An app op for reading/writing health connect data.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String OPSTR_READ_WRITE_HEALTH_DATA =
+            "android:read_write_health_data";
 
     /**
      * Record audio from near-field microphone (ie. TV remote)
@@ -2400,7 +2417,9 @@ public class AppOpsManager {
                 "SYSTEM_EXEMPT_FROM_APP_STANDBY").build(),
         new AppOpInfo.Builder(OP_SYSTEM_EXEMPT_FROM_FORCED_APP_STANDBY,
                 OPSTR_SYSTEM_EXEMPT_FROM_FORCED_APP_STANDBY,
-                "SYSTEM_EXEMPT_FROM_FORCED_APP_STANDBY").build()
+                "SYSTEM_EXEMPT_FROM_FORCED_APP_STANDBY").build(),
+        new AppOpInfo.Builder(OP_READ_WRITE_HEALTH_DATA, OPSTR_READ_WRITE_HEALTH_DATA,
+                "READ_WRITE_HEALTH_DATA").setDefaultMode(AppOpsManager.MODE_ALLOWED).build()
     };
 
     // The number of longs needed to form a full bitmask of app ops
@@ -2560,7 +2579,14 @@ public class AppOpsManager {
     @TestApi
     public static int permissionToOpCode(String permission) {
         Integer boxedOpCode = sPermToOp.get(permission);
-        return boxedOpCode != null ? boxedOpCode : OP_NONE;
+        if (boxedOpCode != null) {
+            return boxedOpCode;
+        }
+        if (HealthConnectManager.isHealthPermission(ActivityThread.currentApplication(),
+                permission)) {
+            return OP_READ_WRITE_HEALTH_DATA;
+        }
+        return OP_NONE;
     }
 
     /**
@@ -7224,10 +7250,14 @@ public class AppOpsManager {
      */
     public static @Nullable String permissionToOp(@NonNull String permission) {
         final Integer opCode = sPermToOp.get(permission);
-        if (opCode == null) {
-            return null;
+        if (opCode != null) {
+            return sAppOpInfos[opCode].name;
         }
-        return sAppOpInfos[opCode].name;
+        if (HealthConnectManager.isHealthPermission(ActivityThread.currentApplication(),
+                permission)) {
+            return sAppOpInfos[OP_READ_WRITE_HEALTH_DATA].name;
+        }
+        return null;
     }
 
     /**
@@ -8456,8 +8486,9 @@ public class AppOpsManager {
      */
     public int startProxyOpNoThrow(int op, @NonNull AttributionSource attributionSource,
             @Nullable String message, boolean skipProxyOperation) {
-        return startProxyOpNoThrow(op, attributionSource, message, skipProxyOperation,
-                ATTRIBUTION_FLAGS_NONE, ATTRIBUTION_FLAGS_NONE, ATTRIBUTION_CHAIN_ID_NONE);
+        return startProxyOpNoThrow(attributionSource.getToken(), op, attributionSource, message,
+                skipProxyOperation, ATTRIBUTION_FLAGS_NONE, ATTRIBUTION_FLAGS_NONE,
+                ATTRIBUTION_CHAIN_ID_NONE);
     }
 
     /**
@@ -8469,7 +8500,8 @@ public class AppOpsManager {
      *
      * @hide
      */
-    public int startProxyOpNoThrow(int op, @NonNull AttributionSource attributionSource,
+    public int startProxyOpNoThrow(@NonNull IBinder clientId, int op,
+            @NonNull AttributionSource attributionSource,
             @Nullable String message, boolean skipProxyOperation, @AttributionFlags
             int proxyAttributionFlags, @AttributionFlags int proxiedAttributionFlags,
             int attributionChainId) {
@@ -8487,7 +8519,7 @@ public class AppOpsManager {
                 }
             }
 
-            SyncNotedAppOp syncOp = mService.startProxyOperation(op,
+            SyncNotedAppOp syncOp = mService.startProxyOperation(clientId, op,
                     attributionSource, false, collectionMode == COLLECT_ASYNC, message,
                     shouldCollectMessage, skipProxyOperation, proxyAttributionFlags,
                     proxiedAttributionFlags, attributionChainId);
@@ -8585,9 +8617,10 @@ public class AppOpsManager {
      */
     public void finishProxyOp(@NonNull String op, int proxiedUid,
             @NonNull String proxiedPackageName, @Nullable String proxiedAttributionTag) {
-        finishProxyOp(op, new AttributionSource(mContext.getAttributionSource(),
+        IBinder token = mContext.getAttributionSource().getToken();
+        finishProxyOp(token, op, new AttributionSource(mContext.getAttributionSource(),
                 new AttributionSource(proxiedUid, proxiedPackageName,  proxiedAttributionTag,
-                        mContext.getAttributionSource().getToken())), /*skipProxyOperation*/ false);
+                        token)), /*skipProxyOperation*/ false);
     }
 
     /**
@@ -8602,10 +8635,11 @@ public class AppOpsManager {
      *
      * @hide
      */
-    public void finishProxyOp(@NonNull String op, @NonNull AttributionSource attributionSource,
-            boolean skipProxyOperation) {
+    public void finishProxyOp(@NonNull IBinder clientId, @NonNull String op,
+            @NonNull AttributionSource attributionSource, boolean skipProxyOperation) {
         try {
-            mService.finishProxyOperation(strOpToOp(op), attributionSource, skipProxyOperation);
+            mService.finishProxyOperation(clientId, strOpToOp(op), attributionSource,
+                    skipProxyOperation);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

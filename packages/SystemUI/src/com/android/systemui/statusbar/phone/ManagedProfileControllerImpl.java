@@ -14,7 +14,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import android.app.ActivityManager;
 import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -28,6 +27,7 @@ import androidx.annotation.NonNull;
 
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.settings.UserTracker;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -44,6 +44,7 @@ public class ManagedProfileControllerImpl implements ManagedProfileController {
 
     private final Context mContext;
     private final UserManager mUserManager;
+    private final UserTracker mUserTracker;
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final LinkedList<UserInfo> mProfiles;
     private boolean mListening;
@@ -52,9 +53,11 @@ public class ManagedProfileControllerImpl implements ManagedProfileController {
     /**
      */
     @Inject
-    public ManagedProfileControllerImpl(Context context, BroadcastDispatcher broadcastDispatcher) {
+    public ManagedProfileControllerImpl(Context context, UserTracker userTracker,
+            BroadcastDispatcher broadcastDispatcher) {
         mContext = context;
         mUserManager = UserManager.get(mContext);
+        mUserTracker = userTracker;
         mBroadcastDispatcher = broadcastDispatcher;
         mProfiles = new LinkedList<UserInfo>();
     }
@@ -90,7 +93,7 @@ public class ManagedProfileControllerImpl implements ManagedProfileController {
     private void reloadManagedProfiles() {
         synchronized (mProfiles) {
             boolean hadProfile = mProfiles.size() > 0;
-            int user = ActivityManager.getCurrentUser();
+            int user = mUserTracker.getUserId();
             mProfiles.clear();
 
             for (UserInfo ui : mUserManager.getEnabledProfiles(user)) {

@@ -41,6 +41,7 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.settings.UserTracker;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -60,6 +61,8 @@ import java.util.concurrent.Executor;
 @TestableLooper.RunWithLooper
 public class HotspotControllerImplTest extends SysuiTestCase {
 
+    @Mock
+    private UserTracker mUserTracker;
     @Mock
     private DumpManager mDumpManager;
     @Mock
@@ -104,7 +107,8 @@ public class HotspotControllerImplTest extends SysuiTestCase {
 
         Handler handler = new Handler(mLooper.getLooper());
 
-        mController = new HotspotControllerImpl(mContext, handler, handler, mDumpManager);
+        mController = new HotspotControllerImpl(mContext, mUserTracker, handler, handler,
+                mDumpManager);
         verify(mTetheringManager)
                 .registerTetheringEventCallback(any(), mTetheringCallbackCaptor.capture());
     }
@@ -191,7 +195,7 @@ public class HotspotControllerImplTest extends SysuiTestCase {
         Handler handler = new Handler(mLooper.getLooper());
 
         HotspotController controller =
-                new HotspotControllerImpl(mContext, handler, handler, mDumpManager);
+                new HotspotControllerImpl(mContext, mUserTracker, handler, handler, mDumpManager);
 
         verifyNoMoreInteractions(mTetheringManager);
         assertFalse(controller.isHotspotSupported());

@@ -16,7 +16,8 @@
 
 package android.app.time;
 
-import static android.app.timezonedetector.ParcelableTestSupport.assertRoundTripParcelable;
+import static android.app.time.ParcelableTestSupport.assertEqualsAndHashCode;
+import static android.app.time.ParcelableTestSupport.assertRoundTripParcelable;
 import static android.app.timezonedetector.ShellCommandTestSupport.createShellCommandWithArgsAndOptions;
 
 import static org.junit.Assert.assertEquals;
@@ -50,11 +51,6 @@ public class TimeStateTest {
         UnixEpochTime time2 = new UnixEpochTime(2, 2);
         TimeState time2False = new TimeState(time2, false);
         assertNotEquals(time1False_1, time2False);
-    }
-
-    private static void assertEqualsAndHashCode(Object one, Object two) {
-        assertEquals(one, two);
-        assertEquals(one.hashCode(), two.hashCode());
     }
 
     @Test

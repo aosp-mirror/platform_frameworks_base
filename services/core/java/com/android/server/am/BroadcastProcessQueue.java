@@ -164,6 +164,7 @@ class BroadcastProcessQueue {
 
     private boolean mProcessCached;
     private boolean mProcessInstrumented;
+    private boolean mProcessPersistent;
 
     private String mCachedToString;
     private String mCachedToShortString;
@@ -323,8 +324,10 @@ class BroadcastProcessQueue {
         this.app = app;
         if (app != null) {
             setProcessInstrumented(app.getActiveInstrumentation() != null);
+            setProcessPersistent(app.isPersistent());
         } else {
             setProcessInstrumented(false);
+            setProcessPersistent(false);
         }
     }
 
@@ -347,6 +350,17 @@ class BroadcastProcessQueue {
     public void setProcessInstrumented(boolean instrumented) {
         if (mProcessInstrumented != instrumented) {
             mProcessInstrumented = instrumented;
+            invalidateRunnableAt();
+        }
+    }
+
+    /**
+     * Update if this process is in the "persistent" state, which signals broadcast dispatch should
+     * bypass all pauses or delays to prevent the system from becoming out of sync with itself.
+     */
+    public void setProcessPersistent(boolean persistent) {
+        if (mProcessPersistent != persistent) {
+            mProcessPersistent = persistent;
             invalidateRunnableAt();
         }
     }
@@ -636,6 +650,7 @@ class BroadcastProcessQueue {
     static final int REASON_MAX_PENDING = 3;
     static final int REASON_BLOCKED = 4;
     static final int REASON_INSTRUMENTED = 5;
+    static final int REASON_PERSISTENT = 6;
     static final int REASON_CONTAINS_FOREGROUND = 10;
     static final int REASON_CONTAINS_ORDERED = 11;
     static final int REASON_CONTAINS_ALARM = 12;
@@ -652,6 +667,7 @@ class BroadcastProcessQueue {
             REASON_MAX_PENDING,
             REASON_BLOCKED,
             REASON_INSTRUMENTED,
+            REASON_PERSISTENT,
             REASON_CONTAINS_FOREGROUND,
             REASON_CONTAINS_ORDERED,
             REASON_CONTAINS_ALARM,
@@ -672,6 +688,7 @@ class BroadcastProcessQueue {
             case REASON_MAX_PENDING: return "MAX_PENDING";
             case REASON_BLOCKED: return "BLOCKED";
             case REASON_INSTRUMENTED: return "INSTRUMENTED";
+            case REASON_PERSISTENT: return "PERSISTENT";
             case REASON_CONTAINS_FOREGROUND: return "CONTAINS_FOREGROUND";
             case REASON_CONTAINS_ORDERED: return "CONTAINS_ORDERED";
             case REASON_CONTAINS_ALARM: return "CONTAINS_ALARM";
@@ -731,6 +748,9 @@ class BroadcastProcessQueue {
             } else if (mCountManifest > 0) {
                 mRunnableAt = runnableAt;
                 mRunnableAtReason = REASON_CONTAINS_MANIFEST;
+            } else if (mProcessPersistent) {
+                mRunnableAt = runnableAt;
+                mRunnableAtReason = REASON_PERSISTENT;
             } else if (mProcessCached) {
                 mRunnableAt = runnableAt + constants.DELAY_CACHED_MILLIS;
                 mRunnableAtReason = REASON_CACHED;

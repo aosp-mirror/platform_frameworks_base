@@ -108,6 +108,19 @@ public class MetricsFeatureProvider {
     }
 
     /**
+     * Logs a value changed event when user changed item value.
+     *
+     * @param category the target page id
+     * @param key the key id that user clicked
+     * @param value the value that user changed which converted to integer
+     */
+    public void changed(int category, String key, int value) {
+        for (LogWriter writer : mLoggerWriters) {
+            writer.changed(category, key, value);
+        }
+    }
+
+    /**
      * Logs a simple action without page id or attribution
      *
      * @param category the target page

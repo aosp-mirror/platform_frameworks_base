@@ -163,7 +163,7 @@ final class HotwordAudioStreamManager {
 
     private static class SingleAudioStreamCopyTask implements Callable<Void> {
         // TODO: Make this buffer size customizable from updateState()
-        private static final int COPY_BUFFER_LENGTH = 1_024;
+        private static final int COPY_BUFFER_LENGTH = 2_560;
 
         private final String mStreamTaskId;
         private final ParcelFileDescriptor mAudioSource;

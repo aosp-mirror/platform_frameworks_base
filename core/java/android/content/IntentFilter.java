@@ -28,6 +28,7 @@ import android.os.Parcelable;
 import android.os.PatternMatcher;
 import android.text.TextUtils;
 import android.util.AndroidException;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.Printer;
 import android.util.proto.ProtoOutputStream;
@@ -302,7 +303,7 @@ public class IntentFilter implements Parcelable {
     @UnsupportedAppUsage
     private int mOrder;
     @UnsupportedAppUsage
-    private final ArrayList<String> mActions;
+    private final ArraySet<String> mActions;
     private ArrayList<String> mCategories = null;
     private ArrayList<String> mDataSchemes = null;
     private ArrayList<PatternMatcher> mDataSchemeSpecificParts = null;
@@ -433,7 +434,7 @@ public class IntentFilter implements Parcelable {
      */
     public IntentFilter() {
         mPriority = 0;
-        mActions = new ArrayList<String>();
+        mActions = new ArraySet<>();
     }
 
     /**
@@ -445,7 +446,7 @@ public class IntentFilter implements Parcelable {
      */
     public IntentFilter(String action) {
         mPriority = 0;
-        mActions = new ArrayList<String>();
+        mActions = new ArraySet<>();
         addAction(action);
     }
 
@@ -468,7 +469,7 @@ public class IntentFilter implements Parcelable {
     public IntentFilter(String action, String dataType)
         throws MalformedMimeTypeException {
         mPriority = 0;
-        mActions = new ArrayList<String>();
+        mActions = new ArraySet<>();
         addAction(action);
         addDataType(dataType);
     }
@@ -481,7 +482,7 @@ public class IntentFilter implements Parcelable {
     public IntentFilter(IntentFilter o) {
         mPriority = o.mPriority;
         mOrder = o.mOrder;
-        mActions = new ArrayList<String>(o.mActions);
+        mActions = new ArraySet<>(o.mActions);
         if (o.mCategories != null) {
             mCategories = new ArrayList<String>(o.mCategories);
         }
@@ -742,9 +743,7 @@ public class IntentFilter implements Parcelable {
      * @param action Name of the action to match, such as Intent.ACTION_VIEW.
      */
     public final void addAction(String action) {
-        if (!mActions.contains(action)) {
-            mActions.add(action.intern());
-        }
+        mActions.add(action.intern());
     }
 
     /**
@@ -758,7 +757,7 @@ public class IntentFilter implements Parcelable {
      * Return an action in the filter.
      */
     public final String getAction(int index) {
-        return mActions.get(index);
+        return mActions.valueAt(index);
     }
 
     /**
@@ -797,8 +796,11 @@ public class IntentFilter implements Parcelable {
             if (ignoreActions == null) {
                 return !mActions.isEmpty();
             }
+            if (mActions.size() > ignoreActions.size()) {
+                return true;    // some actions are definitely not ignored
+            }
             for (int i = mActions.size() - 1; i >= 0; i--) {
-                if (!ignoreActions.contains(mActions.get(i))) {
+                if (!ignoreActions.contains(mActions.valueAt(i))) {
                     return true;
                 }
             }
@@ -1918,7 +1920,7 @@ public class IntentFilter implements Parcelable {
         int N = countActions();
         for (int i=0; i<N; i++) {
             serializer.startTag(null, ACTION_STR);
-            serializer.attribute(null, NAME_STR, mActions.get(i));
+            serializer.attribute(null, NAME_STR, mActions.valueAt(i));
             serializer.endTag(null, ACTION_STR);
         }
         N = countCategories();
@@ -2313,7 +2315,7 @@ public class IntentFilter implements Parcelable {
     }
 
     public final void writeToParcel(Parcel dest, int flags) {
-        dest.writeStringList(mActions);
+        dest.writeStringArray(mActions.toArray(new String[mActions.size()]));
         if (mCategories != null) {
             dest.writeInt(1);
             dest.writeStringList(mCategories);
@@ -2407,8 +2409,9 @@ public class IntentFilter implements Parcelable {
 
     /** @hide */
     public IntentFilter(Parcel source) {
-        mActions = new ArrayList<String>();
-        source.readStringList(mActions);
+        List<String> actions = new ArrayList<>();
+        source.readStringList(actions);
+        mActions = new ArraySet<>(actions);
         if (source.readInt() != 0) {
             mCategories = new ArrayList<String>();
             source.readStringList(mCategories);

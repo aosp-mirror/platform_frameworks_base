@@ -239,7 +239,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             }
             case MSG_DELIVERY_TIMEOUT_SOFT: {
                 synchronized (mService) {
-                    deliveryTimeoutSoftLocked((BroadcastProcessQueue) msg.obj);
+                    deliveryTimeoutSoftLocked((BroadcastProcessQueue) msg.obj, msg.arg1);
                 }
                 return true;
             }
@@ -746,9 +746,10 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         if (mService.mProcessesReady && !r.timeoutExempt && !assumeDelivered) {
             queue.lastCpuDelayTime = queue.app.getCpuDelayTime();
 
-            final long timeout = r.isForeground() ? mFgConstants.TIMEOUT : mBgConstants.TIMEOUT;
-            mLocalHandler.sendMessageDelayed(
-                    Message.obtain(mLocalHandler, MSG_DELIVERY_TIMEOUT_SOFT, queue), timeout);
+            final int softTimeoutMillis = (int) (r.isForeground() ? mFgConstants.TIMEOUT
+                    : mBgConstants.TIMEOUT);
+            mLocalHandler.sendMessageDelayed(Message.obtain(mLocalHandler,
+                    MSG_DELIVERY_TIMEOUT_SOFT, softTimeoutMillis, 0, queue), softTimeoutMillis);
         }
 
         if (r.allowBackgroundActivityStarts) {
@@ -835,15 +836,17 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         r.resultTo = null;
     }
 
-    private void deliveryTimeoutSoftLocked(@NonNull BroadcastProcessQueue queue) {
+    private void deliveryTimeoutSoftLocked(@NonNull BroadcastProcessQueue queue,
+            int softTimeoutMillis) {
         if (queue.app != null) {
             // Instead of immediately triggering an ANR, extend the timeout by
             // the amount of time the process was runnable-but-waiting; we're
             // only willing to do this once before triggering an hard ANR
             final long cpuDelayTime = queue.app.getCpuDelayTime() - queue.lastCpuDelayTime;
-            final long timeout = MathUtils.constrain(cpuDelayTime, 0, mConstants.TIMEOUT);
+            final long hardTimeoutMillis = MathUtils.constrain(cpuDelayTime, 0, softTimeoutMillis);
             mLocalHandler.sendMessageDelayed(
-                    Message.obtain(mLocalHandler, MSG_DELIVERY_TIMEOUT_HARD, queue), timeout);
+                    Message.obtain(mLocalHandler, MSG_DELIVERY_TIMEOUT_HARD, queue),
+                    hardTimeoutMillis);
         } else {
             deliveryTimeoutHardLocked(queue);
         }
@@ -1453,7 +1456,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         }
 
         BroadcastProcessQueue created = new BroadcastProcessQueue(mConstants, processName, uid);
-        created.app = mService.getProcessRecordLocked(processName, uid);
+        created.setProcess(mService.getProcessRecordLocked(processName, uid));
 
         if (leaf == null) {
             mProcessQueues.put(uid, created);
