@@ -184,7 +184,7 @@ public class ScreenshotNotificationSmartActionsTest extends SysuiTestCase {
                         ActionTransition::new, mSmartActionsProvider);
 
         Notification.Action shareAction = task.createShareAction(mContext, mContext.getResources(),
-                Uri.parse("Screenshot_123.png")).get().action;
+                Uri.parse("Screenshot_123.png"), true).get().action;
 
         Intent intent = shareAction.actionIntent.getIntent();
         assertNotNull(intent);
@@ -212,7 +212,7 @@ public class ScreenshotNotificationSmartActionsTest extends SysuiTestCase {
                         ActionTransition::new, mSmartActionsProvider);
 
         Notification.Action editAction = task.createEditAction(mContext, mContext.getResources(),
-                Uri.parse("Screenshot_123.png")).get().action;
+                Uri.parse("Screenshot_123.png"), true).get().action;
 
         Intent intent = editAction.actionIntent.getIntent();
         assertNotNull(intent);
@@ -241,7 +241,7 @@ public class ScreenshotNotificationSmartActionsTest extends SysuiTestCase {
 
         Notification.Action deleteAction = task.createDeleteAction(mContext,
                 mContext.getResources(),
-                Uri.parse("Screenshot_123.png"));
+                Uri.parse("Screenshot_123.png"), true);
 
         Intent intent = deleteAction.actionIntent.getIntent();
         assertNotNull(intent);
