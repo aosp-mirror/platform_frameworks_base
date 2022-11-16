@@ -192,16 +192,17 @@ public class SurfaceSyncGroupTest {
     }
 
     private static class SyncTarget implements SurfaceSyncGroup.SyncTarget {
-        private SurfaceSyncGroup.SyncBufferCallback mSyncBufferCallback;
+        private SurfaceSyncGroup.TransactionReadyCallback mTransactionReadyCallback;
 
         @Override
-        public void onReadyToSync(SurfaceSyncGroup.SyncBufferCallback syncBufferCallback) {
-            mSyncBufferCallback = syncBufferCallback;
+        public void onAddedToSyncGroup(SurfaceSyncGroup parentSyncGroup,
+                SurfaceSyncGroup.TransactionReadyCallback transactionReadyCallback) {
+            mTransactionReadyCallback = transactionReadyCallback;
         }
 
         void onBufferReady() {
             SurfaceControl.Transaction t = new StubTransaction();
-            mSyncBufferCallback.onBufferReady(t);
+            mTransactionReadyCallback.onTransactionReady(t);
         }
     }
 }
