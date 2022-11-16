@@ -403,7 +403,7 @@ public class BatteryStatsHistory {
      * Returns true if this instance only supports reading history.
      */
     public boolean isReadOnly() {
-        return mActiveFile == null;
+        return mActiveFile == null || mHistoryDir == null;
     }
 
     /**
@@ -1292,7 +1292,9 @@ public class BatteryStatsHistory {
                 && mHistoryLastWritten.batteryHealth == cur.batteryHealth
                 && mHistoryLastWritten.batteryPlugType == cur.batteryPlugType
                 && mHistoryLastWritten.batteryTemperature == cur.batteryTemperature
-                && mHistoryLastWritten.batteryVoltage == cur.batteryVoltage) {
+                && mHistoryLastWritten.batteryVoltage == cur.batteryVoltage
+                && mHistoryLastWritten.measuredEnergyDetails == null
+                && mHistoryLastWritten.cpuUsageDetails == null) {
             // We can merge this new change in with the last one.  Merging is
             // allowed as long as only the states have changed, and within those states
             // as long as no bit has changed both between now and the last entry, as
@@ -1761,8 +1763,8 @@ public class BatteryStatsHistory {
      * Saves the accumulated history buffer in the active file, see {@link #getActiveFile()} .
      */
     public void writeHistory() {
-        if (mActiveFile == null) {
-            Slog.w(TAG, "writeHistory: no history file associated with this instance");
+        if (isReadOnly()) {
+            Slog.w(TAG, "writeHistory: this instance instance is read-only");
             return;
         }
 
