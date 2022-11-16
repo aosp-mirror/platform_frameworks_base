@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.policy;
 
 import android.annotation.Nullable;
-import android.app.ActivityManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
@@ -41,6 +40,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.settings.UserTracker;
 
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
@@ -83,6 +83,7 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
     @Inject
     public BluetoothControllerImpl(
             Context context,
+            UserTracker userTracker,
             DumpManager dumpManager,
             BluetoothLogger logger,
             @Background Looper bgLooper,
@@ -100,7 +101,7 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
                     mLocalBluetoothManager.getBluetoothAdapter().getBluetoothState());
         }
         mUserManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
-        mCurrentUser = ActivityManager.getCurrentUser();
+        mCurrentUser = userTracker.getUserId();
         mDumpManager.registerDumpable(TAG, this);
     }
 

@@ -45,6 +45,7 @@ import com.android.systemui.dock.DockManager;
 import com.android.systemui.doze.DozeMachine.State;
 import com.android.systemui.doze.dagger.DozeScope;
 import com.android.systemui.log.SessionTracker;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.policy.DevicePostureController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -188,7 +189,8 @@ public class DozeTriggers implements DozeMachine.Part {
             UiEventLogger uiEventLogger,
             SessionTracker sessionTracker,
             KeyguardStateController keyguardStateController,
-            DevicePostureController devicePostureController) {
+            DevicePostureController devicePostureController,
+            UserTracker userTracker) {
         mContext = context;
         mDozeHost = dozeHost;
         mConfig = config;
@@ -200,7 +202,7 @@ public class DozeTriggers implements DozeMachine.Part {
 
         mDozeSensors = new DozeSensors(mSensorManager, dozeParameters,
                 config, wakeLock, this::onSensor, this::onProximityFar, dozeLog, proximitySensor,
-                secureSettings, authController, devicePostureController);
+                secureSettings, authController, devicePostureController, userTracker);
         mDockManager = dockManager;
         mProxCheck = proxCheck;
         mDozeLog = dozeLog;

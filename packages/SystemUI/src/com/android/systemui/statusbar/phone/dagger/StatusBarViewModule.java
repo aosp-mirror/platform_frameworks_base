@@ -28,13 +28,13 @@ import com.android.systemui.R;
 import com.android.systemui.battery.BatteryMeterView;
 import com.android.systemui.battery.BatteryMeterViewController;
 import com.android.systemui.biometrics.AuthRippleView;
-import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.privacy.OngoingPrivacyChip;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.CombinedShadeHeadersConstraintManager;
 import com.android.systemui.shade.CombinedShadeHeadersConstraintManagerImpl;
 import com.android.systemui.shade.NotificationPanelView;
@@ -221,9 +221,9 @@ public abstract class StatusBarViewModule {
     @Named(LARGE_SCREEN_BATTERY_CONTROLLER)
     static BatteryMeterViewController getBatteryMeterViewController(
             @Named(SPLIT_SHADE_BATTERY_VIEW) BatteryMeterView batteryMeterView,
+            UserTracker userTracker,
             ConfigurationController configurationController,
             TunerService tunerService,
-            BroadcastDispatcher broadcastDispatcher,
             @Main Handler mainHandler,
             ContentResolver contentResolver,
             FeatureFlags featureFlags,
@@ -231,9 +231,9 @@ public abstract class StatusBarViewModule {
     ) {
         return new BatteryMeterViewController(
                 batteryMeterView,
+                userTracker,
                 configurationController,
                 tunerService,
-                broadcastDispatcher,
                 mainHandler,
                 contentResolver,
                 featureFlags,
