@@ -39,8 +39,6 @@ public final class BrightnessEventTest {
                 getReason(BrightnessReason.REASON_DOZE, BrightnessReason.MODIFIER_LOW_POWER));
         mBrightnessEvent.setPhysicalDisplayId("test");
         mBrightnessEvent.setLux(100.0f);
-        mBrightnessEvent.setFastAmbientLux(90.0f);
-        mBrightnessEvent.setSlowAmbientLux(85.0f);
         mBrightnessEvent.setPreThresholdLux(150.0f);
         mBrightnessEvent.setTime(System.currentTimeMillis());
         mBrightnessEvent.setInitialBrightness(25.0f);
@@ -50,6 +48,7 @@ public final class BrightnessEventTest {
         mBrightnessEvent.setRbcStrength(-1);
         mBrightnessEvent.setThermalMax(0.65f);
         mBrightnessEvent.setPowerFactor(0.2f);
+        mBrightnessEvent.setWasShortTermModelActive(true);
         mBrightnessEvent.setHbmMode(BrightnessInfo.HIGH_BRIGHTNESS_MODE_OFF);
         mBrightnessEvent.setFlags(0);
         mBrightnessEvent.setAdjustmentFlags(0);
@@ -69,9 +68,9 @@ public final class BrightnessEventTest {
         String actualString = mBrightnessEvent.toString(false);
         String expectedString =
                 "BrightnessEvent: disp=1, physDisp=test, brt=0.6, initBrt=25.0, rcmdBrt=0.6,"
-                + " preBrt=NaN, lux=100.0, fastLux=90.0, slowLux=85.0, preLux=150.0, hbmMax=0.62,"
-                + " hbmMode=off, rbcStrength=-1, thrmMax=0.65, powerFactor=0.2, flags=, reason=doze"
-                + " [ low_pwr ], autoBrightness=true";
+                + " preBrt=NaN, lux=100.0, preLux=150.0, hbmMax=0.62, hbmMode=off, rbcStrength=-1,"
+                + " thrmMax=0.65, powerFactor=0.2, wasShortTermModelActive=true, flags=,"
+                + " reason=doze [ low_pwr ], autoBrightness=true";
         assertEquals(expectedString, actualString);
     }
 
