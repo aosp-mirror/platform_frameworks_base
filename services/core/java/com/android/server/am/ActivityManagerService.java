@@ -13509,9 +13509,19 @@ public class ActivityManagerService extends IActivityManager.Stub
             // Don't enforce the flag check if we're EITHER registering for only protected
             // broadcasts, or the receiver is null (a sticky broadcast). Sticky broadcasts should
             // not be used generally, so we will be marking them as exported by default
-            final boolean requireExplicitFlagForDynamicReceivers = CompatChanges.isChangeEnabled(
+            boolean requireExplicitFlagForDynamicReceivers = CompatChanges.isChangeEnabled(
                     DYNAMIC_RECEIVER_EXPLICIT_EXPORT_REQUIRED, callingUid)
                     && mConstants.mEnforceReceiverExportedFlagRequirement;
+            // STOPSHIP(b/259139792): Allow apps that are currently targeting U and in process of
+            // updating their receivers to be exempt from this requirement until their receivers
+            // are flagged.
+            if (requireExplicitFlagForDynamicReceivers) {
+                if ("com.google.android.apps.messaging".equals(callerPackage)) {
+                    // Note, a versionCode check for this package is not performed because it could
+                    // cause breakage with a subsequent update outside the system image.
+                    requireExplicitFlagForDynamicReceivers = false;
+                }
+            }
             if (!onlyProtectedBroadcasts) {
                 if (receiver == null && !explicitExportStateDefined) {
                     // sticky broadcast, no flag specified (flag isn't required)
