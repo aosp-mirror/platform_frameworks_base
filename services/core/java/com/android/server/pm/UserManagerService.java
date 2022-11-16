@@ -191,6 +191,7 @@ public class UserManagerService extends IUserManager.Stub {
     private static final String ATTR_CREATION_TIME = "created";
     private static final String ATTR_LAST_LOGGED_IN_TIME = "lastLoggedIn";
     private static final String ATTR_LAST_LOGGED_IN_FINGERPRINT = "lastLoggedInFingerprint";
+    private static final String ATTR_LAST_ENTERED_FOREGROUND_TIME = "lastEnteredForeground";
     private static final String ATTR_SERIAL_NO = "serialNumber";
     private static final String ATTR_NEXT_SERIAL_NO = "nextSerialNumber";
     private static final String ATTR_PARTIAL = "partial";
@@ -340,6 +341,9 @@ public class UserManagerService extends IUserManager.Stub {
 
         /** Elapsed realtime since boot when the user was unlocked. */
         long unlockRealtime;
+
+        /** Wall clock time in millis when the user last entered the foreground. */
+        long mLastEnteredForegroundTimeMillis;
 
         private long mLastRequestQuietModeEnabledMillis;
 
@@ -680,6 +684,10 @@ public class UserManagerService extends IUserManager.Stub {
                 final UserData user = mUms.getUserDataLU(targetUser.getUserIdentifier());
                 if (user != null) {
                     user.startRealtime = SystemClock.elapsedRealtime();
+                    if (targetUser.getUserIdentifier() == UserHandle.USER_SYSTEM
+                            && targetUser.isFull()) {
+                        mUms.setLastEnteredForegroundTimeToNow(user);
+                    }
                 }
             }
         }
@@ -690,6 +698,16 @@ public class UserManagerService extends IUserManager.Stub {
                 final UserData user = mUms.getUserDataLU(targetUser.getUserIdentifier());
                 if (user != null) {
                     user.unlockRealtime = SystemClock.elapsedRealtime();
+                }
+            }
+        }
+
+        @Override
+        public void onUserSwitching(@NonNull TargetUser from, @NonNull TargetUser to) {
+            synchronized (mUms.mUsersLock) {
+                final UserData user = mUms.getUserDataLU(to.getUserIdentifier());
+                if (user != null) {
+                    mUms.setLastEnteredForegroundTimeToNow(user);
                 }
             }
         }
@@ -918,6 +936,30 @@ public class UserManagerService extends IUserManager.Stub {
             }
         }
         return UserHandle.USER_NULL;
+    }
+
+    @Override
+    public int getPreviousFullUserToEnterForeground() {
+        checkQueryOrCreateUsersPermission("get previous user");
+        int previousUser = UserHandle.USER_NULL;
+        long latestEnteredTime = 0;
+        final int currentUser = getCurrentUserId();
+        synchronized (mUsersLock) {
+            final int userSize = mUsers.size();
+            for (int i = 0; i < userSize; i++) {
+                final UserData userData = mUsers.valueAt(i);
+                final int userId = userData.info.id;
+                if (userId != currentUser && userData.info.isFull() && !userData.info.partial
+                        && !mRemovingUserIds.get(userId)) {
+                    final long userEnteredTime = userData.mLastEnteredForegroundTimeMillis;
+                    if (userEnteredTime > latestEnteredTime) {
+                        latestEnteredTime = userEnteredTime;
+                        previousUser = userId;
+                    }
+                }
+            }
+        }
+        return previousUser;
     }
 
     public @NonNull List<UserInfo> getUsers(boolean excludeDying) {
@@ -3941,6 +3983,8 @@ public class UserManagerService extends IUserManager.Stub {
             serializer.attribute(null, ATTR_LAST_LOGGED_IN_FINGERPRINT,
                     userInfo.lastLoggedInFingerprint);
         }
+        serializer.attributeLong(
+                null, ATTR_LAST_ENTERED_FOREGROUND_TIME, userData.mLastEnteredForegroundTimeMillis);
         if (userInfo.iconPath != null) {
             serializer.attribute(null,  ATTR_ICON_PATH, userInfo.iconPath);
         }
@@ -4114,6 +4158,7 @@ public class UserManagerService extends IUserManager.Stub {
         long lastLoggedInTime = 0L;
         long lastRequestQuietModeEnabledTimestamp = 0L;
         String lastLoggedInFingerprint = null;
+        long lastEnteredForegroundTime = 0L;
         int profileGroupId = UserInfo.NO_PROFILE_GROUP_ID;
         int profileBadge = 0;
         int restrictedProfileParentId = UserInfo.NO_PROFILE_GROUP_ID;
@@ -4159,6 +4204,8 @@ public class UserManagerService extends IUserManager.Stub {
             lastLoggedInTime = parser.getAttributeLong(null, ATTR_LAST_LOGGED_IN_TIME, 0);
             lastLoggedInFingerprint = parser.getAttributeValue(null,
                     ATTR_LAST_LOGGED_IN_FINGERPRINT);
+            lastEnteredForegroundTime =
+                    parser.getAttributeLong(null, ATTR_LAST_ENTERED_FOREGROUND_TIME, 0L);
             profileGroupId = parser.getAttributeInt(null, ATTR_PROFILE_GROUP_ID,
                     UserInfo.NO_PROFILE_GROUP_ID);
             profileBadge = parser.getAttributeInt(null, ATTR_PROFILE_BADGE, 0);
@@ -4253,6 +4300,7 @@ public class UserManagerService extends IUserManager.Stub {
         userData.seedAccountOptions = seedAccountOptions;
         userData.userProperties = userProperties;
         userData.setLastRequestQuietModeEnabledMillis(lastRequestQuietModeEnabledTimestamp);
+        userData.mLastEnteredForegroundTimeMillis = lastEnteredForegroundTime;
         if (ignorePrepareStorageErrors) {
             userData.setIgnorePrepareStorageErrors();
         }
@@ -6172,6 +6220,11 @@ public class UserManagerService extends IUserManager.Stub {
                         || someUserHasSeedAccountNoChecks(accountName, accountType));
     }
 
+    private void setLastEnteredForegroundTimeToNow(@NonNull UserData userData) {
+        userData.mLastEnteredForegroundTimeMillis = System.currentTimeMillis();
+        scheduleWriteUser(userData);
+    }
+
     @Override
     public void onShellCommand(FileDescriptor in, FileDescriptor out,
             FileDescriptor err, String[] args, ShellCallback callback,
@@ -6395,6 +6448,9 @@ public class UserManagerService extends IUserManager.Stub {
 
         pw.print("    Unlock time: ");
         dumpTimeAgo(pw, tempStringBuilder, nowRealtime, userData.unlockRealtime);
+
+        pw.print("    Last entered foreground: ");
+        dumpTimeAgo(pw, tempStringBuilder, now, userData.mLastEnteredForegroundTimeMillis);
 
         pw.print("    Has profile owner: ");
         pw.println(mIsUserManaged.get(userId));
