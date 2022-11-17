@@ -8555,6 +8555,16 @@ public class CarrierConfigManager {
     public static final String KEY_VONR_ENABLED_BOOL = "vonr_enabled_bool";
 
     /**
+     * Boolean indicating the default VoNR user preference setting.
+     * If true, the VoNR setting will be enabled. If false, it will be disabled initially.
+     *
+     * Enabled by default.
+     *
+     * @hide
+     */
+    public static final String KEY_VONR_ON_BY_DEFAULT_BOOL = "vonr_on_by_default_bool";
+
+    /**
      * Determine whether unthrottle data retry when tracking area code (TAC/LAC) from cell changes
      *
      * @hide
@@ -9247,6 +9257,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_UNTHROTTLE_DATA_RETRY_WHEN_TAC_CHANGES_BOOL, false);
         sDefaults.putBoolean(KEY_VONR_SETTING_VISIBILITY_BOOL, true);
         sDefaults.putBoolean(KEY_VONR_ENABLED_BOOL, false);
+        sDefaults.putBoolean(KEY_VONR_ON_BY_DEFAULT_BOOL, true);
         sDefaults.putStringArray(KEY_IWLAN_HANDOVER_POLICY_STRING_ARRAY, new String[]{
                 "source=GERAN|UTRAN|EUTRAN|NGRAN|IWLAN, "
                         + "target=GERAN|UTRAN|EUTRAN|NGRAN|IWLAN, type=allowed"});
