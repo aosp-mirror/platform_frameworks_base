@@ -75,7 +75,11 @@ object Flags {
     @JvmField
     val NOTIFICATION_DISMISSAL_FADE =
         unreleasedFlag(113, "notification_dismissal_fade", teamfood = true)
-    val STABILITY_INDEX_FIX = unreleasedFlag(114, "stability_index_fix", teamfood = true)
+
+    // TODO(b/259558771): Tracking Bug
+    val STABILITY_INDEX_FIX = releasedFlag(114, "stability_index_fix")
+
+    // TODO(b/259559750): Tracking Bug
     val SEMI_STABLE_SORT = unreleasedFlag(115, "semi_stable_sort", teamfood = true)
 
     @JvmField
