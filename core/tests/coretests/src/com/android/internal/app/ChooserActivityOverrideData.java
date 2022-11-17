@@ -29,7 +29,6 @@ import android.os.UserHandle;
 import android.util.Pair;
 
 import com.android.internal.app.AbstractMultiProfilePagerAdapter.CrossProfileIntentsChecker;
-import com.android.internal.app.AbstractMultiProfilePagerAdapter.MyUserIdProvider;
 import com.android.internal.app.AbstractMultiProfilePagerAdapter.QuietModeManager;
 import com.android.internal.app.chooser.TargetInfo;
 import com.android.internal.logging.MetricsLogger;
@@ -71,13 +70,13 @@ public class ChooserActivityOverrideData {
     public int alternateProfileSetting;
     public Resources resources;
     public UserHandle workProfileUserHandle;
+    public UserHandle tabOwnerUserHandleForLaunch;
     public boolean hasCrossProfileIntents;
     public boolean isQuietModeEnabled;
     public boolean isWorkProfileUserRunning;
     public boolean isWorkProfileUserUnlocked;
     public Integer myUserId;
     public QuietModeManager mQuietModeManager;
-    public MyUserIdProvider mMyUserIdProvider;
     public CrossProfileIntentsChecker mCrossProfileIntentsChecker;
     public PackageManager packageManager;
 
@@ -98,6 +97,7 @@ public class ChooserActivityOverrideData {
         alternateProfileSetting = 0;
         resources = null;
         workProfileUserHandle = null;
+        tabOwnerUserHandleForLaunch = null;
         hasCrossProfileIntents = true;
         isQuietModeEnabled = false;
         isWorkProfileUserRunning = true;
@@ -123,13 +123,6 @@ public class ChooserActivityOverrideData {
             @Override
             public boolean isWaitingToEnableWorkProfile() {
                 return false;
-            }
-        };
-
-        mMyUserIdProvider = new MyUserIdProvider() {
-            @Override
-            public int getMyUserId() {
-                return myUserId != null ? myUserId : UserHandle.myUserId();
             }
         };
 

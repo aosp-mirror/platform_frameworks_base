@@ -92,7 +92,7 @@ public class ResolverActivityWorkProfileTest {
     public void testBlocker() {
         setUpPersonalAndWorkComponentInfos();
         sOverrides.hasCrossProfileIntents = mTestCase.hasCrossProfileIntents();
-        sOverrides.myUserId = mTestCase.getMyUserHandle().getIdentifier();
+        sOverrides.tabOwnerUserHandleForLaunch = mTestCase.getMyUserHandle();
 
         launchActivity(/* callingUser= */ mTestCase.getExtraCallingUser());
         switchToTab(mTestCase.getTab());

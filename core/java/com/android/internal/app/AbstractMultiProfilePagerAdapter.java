@@ -16,8 +16,8 @@
 package com.android.internal.app;
 
 import android.annotation.IntDef;
-import android.annotation.Nullable;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.AppGlobals;
 import android.content.ContentResolver;
@@ -60,16 +60,19 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
     private Set<Integer> mLoadedPages;
     private final EmptyStateProvider mEmptyStateProvider;
     private final UserHandle mWorkProfileUserHandle;
+    private final UserHandle mCloneUserHandle;
     private final QuietModeManager mQuietModeManager;
 
     AbstractMultiProfilePagerAdapter(Context context, int currentPage,
             EmptyStateProvider emptyStateProvider,
             QuietModeManager quietModeManager,
-            UserHandle workProfileUserHandle) {
+            UserHandle workProfileUserHandle,
+            UserHandle cloneUserHandle) {
         mContext = Objects.requireNonNull(context);
         mCurrentPage = currentPage;
         mLoadedPages = new HashSet<>();
         mWorkProfileUserHandle = workProfileUserHandle;
+        mCloneUserHandle = cloneUserHandle;
         mEmptyStateProvider = emptyStateProvider;
         mQuietModeManager = quietModeManager;
     }
@@ -158,6 +161,10 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
     @Override
     public CharSequence getPageTitle(int position) {
         return null;
+    }
+
+    public UserHandle getCloneUserHandle() {
+        return mCloneUserHandle;
     }
 
     /**
@@ -315,18 +322,6 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
         }
 
         showEmptyState(listAdapter, emptyState, clickListener);
-    }
-
-    /**
-     * Class to get user id of the current process
-     */
-    public static class MyUserIdProvider {
-        /**
-         * @return user id of the current process
-         */
-        public int getMyUserId() {
-            return UserHandle.myUserId();
-        }
     }
 
     /**

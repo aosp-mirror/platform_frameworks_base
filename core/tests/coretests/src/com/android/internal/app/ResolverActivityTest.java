@@ -911,6 +911,172 @@ public class ResolverActivityTest {
         assertThat(activity.getAdapter().getPlaceholderCount(), is(2));
     }
 
+    @Test
+    public void testClonedProfilePresent_personalAdapterIsSetWithPersonalProfile() {
+        List<ResolvedComponentInfo> resolvedComponentInfos =
+                createResolvedComponentsForTest(3);
+        when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
+                Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
+        Intent sendIntent = createSendImageIntent();
+        // enable cloneProfile
+        markCloneProfileUserAvailable();
+
+        final ResolverWrapperActivity activity = mActivityRule.launchActivity(sendIntent);
+        waitForIdle();
+
+        assertThat(activity.getCurrentUserHandle(), is(activity.getPersonalProfileUserHandle()));
+        assertThat(activity.getAdapter().getCount(), is(3));
+    }
+
+    @Test
+    public void testClonedProfilePresent_personalTabUsesExpectedAdapter() {
+        // enable the work tab feature flag
+        ResolverActivity.ENABLE_TABBED_VIEW = true;
+        List<ResolvedComponentInfo> personalResolvedComponentInfos =
+                createResolvedComponentsForTest(3);
+        List<ResolvedComponentInfo> workResolvedComponentInfos = createResolvedComponentsForTest(4);
+        setupResolverControllers(personalResolvedComponentInfos, workResolvedComponentInfos);
+        Intent sendIntent = createSendImageIntent();
+        markWorkProfileUserAvailable();
+        // enable cloneProfile
+        markCloneProfileUserAvailable();
+
+        final ResolverWrapperActivity activity = mActivityRule.launchActivity(sendIntent);
+        waitForIdle();
+
+        assertThat(activity.getCurrentUserHandle(), is(activity.getPersonalProfileUserHandle()));
+        assertThat(activity.getAdapter().getCount(), is(3));
+    }
+
+    @Test
+    public void testClonedProfilePresent_layoutWithDefault_neverShown() throws Exception {
+        // enable cloneProfile
+        markCloneProfileUserAvailable();
+        Intent sendIntent = createSendImageIntent();
+        List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
+
+        when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
+                Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
+        when(sOverrides.resolverListController.getLastChosen())
+                .thenReturn(resolvedComponentInfos.get(0).getResolveInfoAt(0));
+
+        final ResolverWrapperActivity activity = mActivityRule.launchActivity(sendIntent);
+        Espresso.registerIdlingResources(activity.getAdapter().getLabelIdlingResource());
+        waitForIdle();
+
+        assertThat(activity.getAdapter().hasFilteredItem(), is(false));
+        assertThat(activity.getAdapter().getCount(), is(2));
+        assertThat(activity.getAdapter().getPlaceholderCount(), is(2));
+    }
+
+    @Test
+    public void testClonedProfilePresent_alwaysButtonDisabled() throws Exception {
+        // enable cloneProfile
+        markCloneProfileUserAvailable();
+        Intent sendIntent = createSendImageIntent();
+        List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(3);
+
+        when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
+                Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
+        when(sOverrides.resolverListController.getLastChosen())
+                .thenReturn(resolvedComponentInfos.get(0).getResolveInfoAt(0));
+
+        final ResolverWrapperActivity activity = mActivityRule.launchActivity(sendIntent);
+        waitForIdle();
+
+        // Confirm that the button bar is disabled by default
+        onView(withId(R.id.button_once)).check(matches(not(isEnabled())));
+        onView(withId(R.id.button_always)).check(matches(not(isEnabled())));
+
+        // Make a stable copy of the components as the original list may be modified
+        List<ResolvedComponentInfo> stableCopy =
+                createResolvedComponentsForTestWithOtherProfile(2);
+
+        onView(withText(stableCopy.get(1).getResolveInfoAt(0).activityInfo.name))
+                .perform(click());
+
+        onView(withId(R.id.button_once)).check(matches(isEnabled()));
+        onView(withId(R.id.button_always)).check(matches(not(isEnabled())));
+    }
+
+    @Test
+    public void testClonedProfilePresent_personalProfileActivityIsStartedInCorrectUser()
+            throws Exception {
+        // enable the work tab feature flag
+        ResolverActivity.ENABLE_TABBED_VIEW = true;
+        markWorkProfileUserAvailable();
+        // enable cloneProfile
+        markCloneProfileUserAvailable();
+
+        List<ResolvedComponentInfo> personalResolvedComponentInfos =
+                createResolvedComponentsForTest(3);
+        List<ResolvedComponentInfo> workResolvedComponentInfos =
+                createResolvedComponentsForTest(3);
+        sOverrides.hasCrossProfileIntents = false;
+        setupResolverControllers(personalResolvedComponentInfos, workResolvedComponentInfos);
+        Intent sendIntent = createSendImageIntent();
+        sendIntent.setType("TestType");
+        final UserHandle[] selectedActivityUserHandle = new UserHandle[1];
+        sOverrides.onSafelyStartInternalCallback = userHandle -> {
+            selectedActivityUserHandle[0] = userHandle;
+            return true;
+        };
+
+        final ResolverWrapperActivity activity = mActivityRule.launchActivity(sendIntent);
+        waitForIdle();
+        onView(first(allOf(withText(personalResolvedComponentInfos.get(0)
+                .getResolveInfoAt(0).activityInfo.applicationInfo.name), isCompletelyDisplayed())))
+                .perform(click());
+        onView(withId(R.id.button_once))
+                .perform(click());
+        waitForIdle();
+
+        assertThat(selectedActivityUserHandle[0], is(activity.getAdapter().getUserHandle()));
+    }
+
+    @Test
+    public void testClonedProfilePresent_workProfileActivityIsStartedInCorrectUser()
+            throws Exception {
+        // enable the work tab feature flag
+        ResolverActivity.ENABLE_TABBED_VIEW = true;
+        markWorkProfileUserAvailable();
+        // enable cloneProfile
+        markCloneProfileUserAvailable();
+
+        List<ResolvedComponentInfo> personalResolvedComponentInfos =
+                createResolvedComponentsForTest(3);
+        List<ResolvedComponentInfo> workResolvedComponentInfos =
+                createResolvedComponentsForTest(3);
+        setupResolverControllers(personalResolvedComponentInfos, workResolvedComponentInfos);
+        Intent sendIntent = createSendImageIntent();
+        sendIntent.setType("TestType");
+        final UserHandle[] selectedActivityUserHandle = new UserHandle[1];
+        sOverrides.onSafelyStartInternalCallback = userHandle -> {
+            selectedActivityUserHandle[0] = userHandle;
+            return true;
+        };
+
+        final ResolverWrapperActivity activity = mActivityRule.launchActivity(sendIntent);
+        waitForIdle();
+        onView(withText(R.string.resolver_work_tab))
+                .perform(click());
+        waitForIdle();
+        onView(first(allOf(withText(workResolvedComponentInfos.get(0)
+                .getResolveInfoAt(0).activityInfo.applicationInfo.name), isCompletelyDisplayed())))
+                .perform(click());
+        onView(withId(R.id.button_once))
+                .perform(click());
+        waitForIdle();
+
+        assertThat(selectedActivityUserHandle[0], is(activity.getAdapter().getUserHandle()));
+    }
+
     private Intent createSendImageIntent() {
         Intent sendIntent = new Intent();
         sendIntent.setAction(Intent.ACTION_SEND);
@@ -967,6 +1133,10 @@ public class ResolverActivityTest {
 
     private void markWorkProfileUserAvailable() {
         ResolverWrapperActivity.sOverrides.workProfileUserHandle = UserHandle.of(10);
+    }
+
+    private void markCloneProfileUserAvailable() {
+        ResolverWrapperActivity.sOverrides.cloneProfileUserHandle = UserHandle.of(11);
     }
 
     private void setupResolverControllers(

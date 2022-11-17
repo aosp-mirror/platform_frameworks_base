@@ -49,8 +49,8 @@ import androidx.test.espresso.NoMatchingViewException;
 import androidx.test.rule.ActivityTestRule;
 
 import com.android.internal.R;
-import com.android.internal.app.ResolverActivity.ResolvedComponentInfo;
 import com.android.internal.app.ChooserActivityWorkProfileTest.TestCase.Tab;
+import com.android.internal.app.ResolverActivity.ResolvedComponentInfo;
 
 import junit.framework.AssertionFailedError;
 
@@ -93,7 +93,7 @@ public class ChooserActivityWorkProfileTest {
     public void testBlocker() {
         setUpPersonalAndWorkComponentInfos();
         sOverrides.hasCrossProfileIntents = mTestCase.hasCrossProfileIntents();
-        sOverrides.myUserId = mTestCase.getMyUserHandle().getIdentifier();
+        sOverrides.tabOwnerUserHandleForLaunch = mTestCase.getMyUserHandle();
 
         launchActivity(mTestCase.getIsSendAction());
         switchToTab(mTestCase.getTab());

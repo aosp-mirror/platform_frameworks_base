@@ -197,6 +197,8 @@ public class ChooserListAdapter extends ResolverListAdapter {
                     ri.nonLocalizedLabel = li.getNonLocalizedLabel();
                     ri.icon = li.getIconResource();
                     ri.iconResourceId = ri.icon;
+                    // TODO: Uncomment the below line once userHandle is added to ResolveInfo
+                    //ri.userHandle = getUserHandle();
                 }
                 if (userManager.isManagedProfile()) {
                     ri.noResourceId = true;
@@ -351,7 +353,9 @@ public class ChooserListAdapter extends ResolverListAdapter {
                 Map<String, DisplayResolveInfo> consolidated = new HashMap<>();
                 for (DisplayResolveInfo info : allTargets) {
                     String resolvedTarget = info.getResolvedComponentName().getPackageName()
-                            + '#' + info.getDisplayLabel();
+                            + '#' + info.getDisplayLabel()
+                            + '#' + ResolverActivity.getResolveInfoUserHandle(
+                                    info.getResolveInfo(), getUserHandle()).getIdentifier();
                     DisplayResolveInfo multiDri = consolidated.get(resolvedTarget);
                     if (multiDri == null) {
                         consolidated.put(resolvedTarget, info);
@@ -367,7 +371,8 @@ public class ChooserListAdapter extends ResolverListAdapter {
                 }
                 List<DisplayResolveInfo> groupedTargets = new ArrayList<>();
                 groupedTargets.addAll(consolidated.values());
-                Collections.sort(groupedTargets, new ChooserActivity.AzInfoComparator(mContext));
+                Collections.sort(groupedTargets,
+                        new ChooserActivity.AzInfoComparator(mContext));
                 return groupedTargets;
             }
             @Override

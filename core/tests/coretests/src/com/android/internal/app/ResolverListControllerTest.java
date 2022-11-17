@@ -119,7 +119,8 @@ public class ResolverListControllerTest {
                 anyString(), anyInt(), anyString(), any(), anyString());
         when(mMockContext.getOpPackageName()).thenReturn(refererPackage);
         mController = new ResolverListController(mMockContext, mMockPackageManager, sendIntent,
-                refererPackage, UserHandle.USER_CURRENT, /* userHandle */ UserHandle.SYSTEM);
+                refererPackage, UserHandle.USER_CURRENT, /* userHandle */ UserHandle.SYSTEM,
+                UserHandle.SYSTEM);
         mController.sort(new ArrayList<ResolvedComponentInfo>());
         long beforeReport = getCount(mUsm, packageName, action, annotation);
         mController.updateChooserCounts(packageName, UserHandle.USER_CURRENT, action);
@@ -134,7 +135,8 @@ public class ResolverListControllerTest {
         String refererPackage = "test_referer_package";
         List<ResolvedComponentInfo> resolvedComponents = createResolvedComponentsForTest(10);
         mController = new ResolverListController(mMockContext, mMockPackageManager, sendIntent,
-                refererPackage, UserHandle.USER_CURRENT, /* userHandle */ UserHandle.SYSTEM);
+                refererPackage, UserHandle.USER_CURRENT, /* userHandle */ UserHandle.SYSTEM,
+                UserHandle.SYSTEM);
         List<ResolvedComponentInfo> topKList = new ArrayList<>(resolvedComponents);
         mController.topK(topKList, 5);
         List<ResolvedComponentInfo> sortList = new ArrayList<>(topKList);
@@ -162,7 +164,7 @@ public class ResolverListControllerTest {
                 any(UserHandle.class))).thenReturn(infos);
         mController = new ResolverListController(mMockContext, mMockPackageManager,
                 createSendImageIntent("test"), null, UserHandle.USER_CURRENT,
-                /* userHandle= */ UserHandle.SYSTEM);
+                /* userHandle= */ UserHandle.SYSTEM, UserHandle.SYSTEM);
         List<Intent> intents = new ArrayList<>();
         intents.add(createActionMainIntent());
 
@@ -186,7 +188,7 @@ public class ResolverListControllerTest {
                 any(UserHandle.class))).thenReturn(infos);
         mController = new ResolverListController(mMockContext, mMockPackageManager,
                 createSendImageIntent("test"), null, UserHandle.USER_CURRENT,
-                /* userHandle= */ UserHandle.SYSTEM);
+                /* userHandle= */ UserHandle.SYSTEM, UserHandle.SYSTEM);
         List<Intent> intents = new ArrayList<>();
         intents.add(createActionMainIntent());
 
@@ -210,7 +212,7 @@ public class ResolverListControllerTest {
                 any(UserHandle.class))).thenReturn(infos);
         mController = new ResolverListController(mMockContext, mMockPackageManager,
                 createSendImageIntent("test"), null, UserHandle.USER_CURRENT,
-                /* userHandle= */ UserHandle.SYSTEM);
+                /* userHandle= */ UserHandle.SYSTEM, UserHandle.SYSTEM);
         List<Intent> intents = new ArrayList<>();
         intents.add(createActionMainIntent());
 

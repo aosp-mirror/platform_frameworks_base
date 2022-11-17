@@ -737,8 +737,10 @@ public class ResolverListAdapter extends BaseAdapter {
     }
 
     Drawable loadIconForResolveInfo(ResolveInfo ri) {
-        // Load icons based on the current process. If in work profile icons should be badged.
-        return makePresentationGetter(ri).getIcon(getUserHandle());
+        // Load icons based on userHandle from ResolveInfo. If in work profile/clone profile, icons
+        // should be badged.
+        return makePresentationGetter(ri)
+                .getIcon(ResolverActivity.getResolveInfoUserHandle(ri, getUserHandle()));
     }
 
     void loadFilteredItemIconTaskAsync(@NonNull ImageView iconView) {

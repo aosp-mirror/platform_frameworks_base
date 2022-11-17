@@ -21,6 +21,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import android.annotation.Nullable;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.Intent;
@@ -30,7 +31,6 @@ import android.os.Bundle;
 import android.os.UserHandle;
 
 import com.android.internal.app.AbstractMultiProfilePagerAdapter.CrossProfileIntentsChecker;
-import com.android.internal.app.AbstractMultiProfilePagerAdapter.MyUserIdProvider;
 import com.android.internal.app.AbstractMultiProfilePagerAdapter.QuietModeManager;
 import com.android.internal.app.chooser.TargetInfo;
 
@@ -54,14 +54,6 @@ public class ResolverWrapperActivity extends ResolverActivity {
             boolean filterLastUsed, UserHandle userHandle) {
         return new ResolverWrapperAdapter(context, payloadIntents, initialIntents, rList,
                 filterLastUsed, createListController(userHandle), this);
-    }
-
-    @Override
-    protected MyUserIdProvider createMyUserIdProvider() {
-        if (sOverrides.mMyUserIdProvider != null) {
-            return sOverrides.mMyUserIdProvider;
-        }
-        return super.createMyUserIdProvider();
     }
 
     @Override
@@ -103,13 +95,25 @@ public class ResolverWrapperActivity extends ResolverActivity {
         return super.isVoiceInteraction();
     }
 
+    // TODO: Remove this and override safelyStartActivityInternal() instead.
     @Override
-    public void safelyStartActivity(TargetInfo cti) {
+    public void safelyStartActivityAsUser(TargetInfo cti, UserHandle user,
+            @Nullable Bundle options) {
         if (sOverrides.onSafelyStartCallback != null &&
                 sOverrides.onSafelyStartCallback.apply(cti)) {
             return;
         }
-        super.safelyStartActivity(cti);
+        super.safelyStartActivityAsUser(cti, user, options);
+    }
+
+    @Override
+    public void safelyStartActivityInternal(TargetInfo cti, UserHandle user,
+            @Nullable Bundle options) {
+        if (sOverrides.onSafelyStartInternalCallback != null
+                && sOverrides.onSafelyStartInternalCallback.apply(user)) {
+            return;
+        }
+        super.safelyStartActivityInternal(cti, user, options);
     }
 
     @Override
@@ -135,8 +139,26 @@ public class ResolverWrapperActivity extends ResolverActivity {
     }
 
     @Override
+    protected UserHandle getPersonalProfileUserHandle() {
+        return super.getPersonalProfileUserHandle();
+    }
+
+    @Override
     protected UserHandle getWorkProfileUserHandle() {
         return sOverrides.workProfileUserHandle;
+    }
+
+    @Override
+    protected UserHandle getCloneProfileUserHandle() {
+        return sOverrides.cloneProfileUserHandle;
+    }
+
+    @Override
+    protected UserHandle getTabOwnerUserHandleForLaunch() {
+        if (sOverrides.tabOwnerUserHandleForLaunch == null) {
+            return super.getTabOwnerUserHandleForLaunch();
+        }
+        return sOverrides.tabOwnerUserHandleForLaunch;
     }
 
     @Override
@@ -153,24 +175,29 @@ public class ResolverWrapperActivity extends ResolverActivity {
         @SuppressWarnings("Since15")
         public Function<PackageManager, PackageManager> createPackageManager;
         public Function<TargetInfo, Boolean> onSafelyStartCallback;
+        public Function<UserHandle, Boolean> onSafelyStartInternalCallback;
         public ResolverListController resolverListController;
         public ResolverListController workResolverListController;
         public Boolean isVoiceInteraction;
         public UserHandle workProfileUserHandle;
+        public UserHandle cloneProfileUserHandle;
+        public UserHandle tabOwnerUserHandleForLaunch;
         public Integer myUserId;
         public boolean hasCrossProfileIntents;
         public boolean isQuietModeEnabled;
         public QuietModeManager mQuietModeManager;
-        public MyUserIdProvider mMyUserIdProvider;
         public CrossProfileIntentsChecker mCrossProfileIntentsChecker;
 
         public void reset() {
             onSafelyStartCallback = null;
+            onSafelyStartInternalCallback = null;
             isVoiceInteraction = null;
             createPackageManager = null;
             resolverListController = mock(ResolverListController.class);
             workResolverListController = mock(ResolverListController.class);
             workProfileUserHandle = null;
+            cloneProfileUserHandle = null;
+            tabOwnerUserHandleForLaunch = null;
             myUserId = null;
             hasCrossProfileIntents = true;
             isQuietModeEnabled = false;
@@ -194,13 +221,6 @@ public class ResolverWrapperActivity extends ResolverActivity {
                 @Override
                 public boolean isWaitingToEnableWorkProfile() {
                     return false;
-                }
-            };
-
-            mMyUserIdProvider = new MyUserIdProvider() {
-                @Override
-                public int getMyUserId() {
-                    return myUserId != null ? myUserId : UserHandle.myUserId();
                 }
             };
 
