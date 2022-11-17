@@ -44,7 +44,7 @@ public final class SlogfTest {
 
     private MockitoSession mSession;
 
-    private final Exception mException = new Exception("D'OH!");
+    private final Throwable mThrowable = new Throwable("D'OH!");
 
     @Before
     public void setup() {
@@ -78,10 +78,10 @@ public final class SlogfTest {
     }
 
     @Test
-    public void testV_msgAndException() {
-        Slogf.v(TAG, "msg", mException);
+    public void testV_msgAndThrowable() {
+        Slogf.v(TAG, "msg", mThrowable);
 
-        verify(()-> Slog.v(TAG, "msg", mException));
+        verify(()-> Slog.v(TAG, "msg", mThrowable));
     }
 
     @Test
@@ -103,12 +103,12 @@ public final class SlogfTest {
     }
 
     @Test
-    public void testV_msgFormattedWithException_enabled() {
+    public void testV_msgFormattedWithThrowable_enabled() {
         enableLogging(Log.VERBOSE);
 
-        Slogf.v(TAG, mException, "msg in a %s", "bottle");
+        Slogf.v(TAG, mThrowable, "msg in a %s", "bottle");
 
-        verify(()-> Slog.v(TAG, "msg in a bottle", mException));
+        verify(()-> Slog.v(TAG, "msg in a bottle", mThrowable));
     }
 
     @Test
@@ -128,10 +128,10 @@ public final class SlogfTest {
     }
 
     @Test
-    public void testD_msgAndException() {
-        Slogf.d(TAG, "msg", mException);
+    public void testD_msgAndThrowable() {
+        Slogf.d(TAG, "msg", mThrowable);
 
-        verify(()-> Slog.d(TAG, "msg", mException));
+        verify(()-> Slog.d(TAG, "msg", mThrowable));
     }
 
     @Test
@@ -153,19 +153,19 @@ public final class SlogfTest {
     }
 
     @Test
-    public void testD_msgFormattedWithException_enabled() {
+    public void testD_msgFormattedWithThrowable_enabled() {
         enableLogging(Log.DEBUG);
 
-        Slogf.d(TAG, mException, "msg in a %s", "bottle");
+        Slogf.d(TAG, mThrowable, "msg in a %s", "bottle");
 
-        verify(()-> Slog.d(TAG, "msg in a bottle", mException));
+        verify(()-> Slog.d(TAG, "msg in a bottle", mThrowable));
     }
 
     @Test
     public void testD_msgFormattedWithException_disabled() {
         disableLogging(Log.DEBUG);
 
-        Slogf.d(TAG, mException, "msg in a %s", "bottle");
+        Slogf.d(TAG, mThrowable, "msg in a %s", "bottle");
 
         verify(()-> Slog.d(eq(TAG), any(String.class), any(Throwable.class)), never());
     }
@@ -178,10 +178,10 @@ public final class SlogfTest {
     }
 
     @Test
-    public void testI_msgAndException() {
-        Slogf.i(TAG, "msg", mException);
+    public void testI_msgAndThrowable() {
+        Slogf.i(TAG, "msg", mThrowable);
 
-        verify(()-> Slog.i(TAG, "msg", mException));
+        verify(()-> Slog.i(TAG, "msg", mThrowable));
     }
 
     @Test
@@ -203,19 +203,19 @@ public final class SlogfTest {
     }
 
     @Test
-    public void testI_msgFormattedWithException_enabled() {
+    public void testI_msgFormattedWithThrowable_enabled() {
         enableLogging(Log.INFO);
 
-        Slogf.i(TAG, mException, "msg in a %s", "bottle");
+        Slogf.i(TAG, mThrowable, "msg in a %s", "bottle");
 
-        verify(()-> Slog.i(TAG, "msg in a bottle", mException));
+        verify(()-> Slog.i(TAG, "msg in a bottle", mThrowable));
     }
 
     @Test
     public void testI_msgFormattedWithException_disabled() {
         disableLogging(Log.INFO);
 
-        Slogf.i(TAG, mException, "msg in a %s", "bottle");
+        Slogf.i(TAG, mThrowable, "msg in a %s", "bottle");
 
         verify(()-> Slog.i(eq(TAG), any(String.class), any(Throwable.class)), never());
     }
@@ -228,17 +228,17 @@ public final class SlogfTest {
     }
 
     @Test
-    public void testW_msgAndException() {
-        Slogf.w(TAG, "msg", mException);
+    public void testW_msgAndThrowable() {
+        Slogf.w(TAG, "msg", mThrowable);
 
-        verify(()-> Slog.w(TAG, "msg", mException));
+        verify(()-> Slog.w(TAG, "msg", mThrowable));
     }
 
     @Test
-    public void testW_exception() {
-        Slogf.w(TAG, mException);
+    public void testW_Throwable() {
+        Slogf.w(TAG, mThrowable);
 
-        verify(()-> Slog.w(TAG, mException));
+        verify(()-> Slog.w(TAG, mThrowable));
     }
 
     @Test
@@ -260,19 +260,19 @@ public final class SlogfTest {
     }
 
     @Test
-    public void testW_msgFormattedWithException_enabled() {
+    public void testW_msgFormattedWithThrowable_enabled() {
         enableLogging(Log.WARN);
 
-        Slogf.w(TAG, mException, "msg in a %s", "bottle");
+        Slogf.w(TAG, mThrowable, "msg in a %s", "bottle");
 
-        verify(()-> Slog.w(TAG, "msg in a bottle", mException));
+        verify(()-> Slog.w(TAG, "msg in a bottle", mThrowable));
     }
 
     @Test
     public void testW_msgFormattedWithException_disabled() {
         disableLogging(Log.WARN);
 
-        Slogf.w(TAG, mException, "msg in a %s", "bottle");
+        Slogf.w(TAG, mThrowable, "msg in a %s", "bottle");
 
         verify(()-> Slog.w(eq(TAG), any(String.class), any(Throwable.class)), never());
     }
@@ -285,10 +285,10 @@ public final class SlogfTest {
     }
 
     @Test
-    public void testE_msgAndException() {
-        Slogf.e(TAG, "msg", mException);
+    public void testE_msgAndThrowable() {
+        Slogf.e(TAG, "msg", mThrowable);
 
-        verify(()-> Slog.e(TAG, "msg", mException));
+        verify(()-> Slog.e(TAG, "msg", mThrowable));
     }
 
     @Test
@@ -310,19 +310,19 @@ public final class SlogfTest {
     }
 
     @Test
-    public void testE_msgFormattedWithException_enabled() {
+    public void testE_msgFormattedWithThrowable_enabled() {
         enableLogging(Log.ERROR);
 
-        Slogf.e(TAG, mException, "msg in a %s", "bottle");
+        Slogf.e(TAG, mThrowable, "msg in a %s", "bottle");
 
-        verify(()-> Slog.e(TAG, "msg in a bottle", mException));
+        verify(()-> Slog.e(TAG, "msg in a bottle", mThrowable));
     }
 
     @Test
     public void testE_msgFormattedWithException_disabled() {
         disableLogging(Log.ERROR);
 
-        Slogf.e(TAG, mException, "msg in a %s", "bottle");
+        Slogf.e(TAG, mThrowable, "msg in a %s", "bottle");
 
         verify(()-> Slog.e(eq(TAG), any(String.class), any(Throwable.class)), never());
     }
@@ -335,17 +335,17 @@ public final class SlogfTest {
     }
 
     @Test
-    public void testWtf_msgAndException() {
-        Slogf.wtf(TAG, "msg", mException);
+    public void testWtf_msgAndThrowable() {
+        Slogf.wtf(TAG, "msg", mThrowable);
 
-        verify(()-> Slog.wtf(TAG, "msg", mException));
+        verify(()-> Slog.wtf(TAG, "msg", mThrowable));
     }
 
     @Test
-    public void testWtf_exception() {
-        Slogf.wtf(TAG, mException);
+    public void testWtf_Throwable() {
+        Slogf.wtf(TAG, mThrowable);
 
-        verify(()-> Slog.wtf(TAG, mException));
+        verify(()-> Slog.wtf(TAG, mThrowable));
     }
 
     @Test
@@ -377,10 +377,10 @@ public final class SlogfTest {
     }
 
     @Test
-    public void testWtf_msgFormattedWithException() {
-        Slogf.wtf(TAG, mException, "msg in a %s", "bottle");
+    public void testWtf_msgFormattedWithThrowable() {
+        Slogf.wtf(TAG, mThrowable, "msg in a %s", "bottle");
 
-        verify(()-> Slog.wtf(TAG, "msg in a bottle", mException));
+        verify(()-> Slog.wtf(TAG, "msg in a bottle", mThrowable));
     }
 
     private void enableLogging(@Log.Level int level) {
