@@ -41,6 +41,7 @@ open class ClockRegistry(
     val isEnabled: Boolean,
     userHandle: Int,
     defaultClockProvider: ClockProvider,
+    val fallbackClockId: ClockId = DEFAULT_CLOCK_ID,
 ) {
     // Usually this would be a typealias, but a SAM provides better java interop
     fun interface ClockChangeListener {
@@ -69,10 +70,13 @@ open class ClockRegistry(
                     context.contentResolver,
                     Settings.Secure.LOCK_SCREEN_CUSTOM_CLOCK_FACE
                 )
-                ClockSetting.deserialize(json)?.clockId ?: DEFAULT_CLOCK_ID
+                if (json == null || json.isEmpty()) {
+                    return fallbackClockId
+                }
+                ClockSetting.deserialize(json).clockId
             } catch (ex: Exception) {
                 Log.e(TAG, "Failed to parse clock setting", ex)
-                DEFAULT_CLOCK_ID
+                fallbackClockId
             }
         }
         set(value) {
