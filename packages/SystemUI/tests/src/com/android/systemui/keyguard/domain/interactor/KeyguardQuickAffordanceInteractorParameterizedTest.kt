@@ -230,6 +230,7 @@ class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
             FakeKeyguardQuickAffordanceConfig(BuiltInKeyguardQuickAffordanceKeys.QR_CODE_SCANNER)
         val quickAffordanceRepository =
             KeyguardQuickAffordanceRepository(
+                appContext = context,
                 scope = CoroutineScope(IMMEDIATE),
                 backgroundDispatcher = IMMEDIATE,
                 selectionManager = KeyguardQuickAffordanceSelectionManager(),

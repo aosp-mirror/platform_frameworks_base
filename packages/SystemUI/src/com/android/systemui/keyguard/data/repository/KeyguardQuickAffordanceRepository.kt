@@ -17,6 +17,8 @@
 
 package com.android.systemui.keyguard.data.repository
 
+import android.content.Context
+import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
@@ -24,7 +26,6 @@ import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanc
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceSelectionManager
 import com.android.systemui.keyguard.shared.model.KeyguardQuickAffordancePickerRepresentation
 import com.android.systemui.keyguard.shared.model.KeyguardSlotPickerRepresentation
-import com.android.systemui.shared.keyguard.shared.model.KeyguardQuickAffordanceSlots
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -39,6 +40,7 @@ import kotlinx.coroutines.launch
 class KeyguardQuickAffordanceRepository
 @Inject
 constructor(
+    @Application private val appContext: Context,
     @Application private val scope: CoroutineScope,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
     private val selectionManager: KeyguardQuickAffordanceSelectionManager,
@@ -60,6 +62,30 @@ constructor(
                 started = SharingStarted.Eagerly,
                 initialValue = emptyMap(),
             )
+
+    private val _slotPickerRepresentations: List<KeyguardSlotPickerRepresentation> by lazy {
+        fun parseSlot(unparsedSlot: String): Pair<String, Int> {
+            val split = unparsedSlot.split(SLOT_CONFIG_DELIMITER)
+            check(split.size == 2)
+            val slotId = split[0]
+            val slotCapacity = split[1].toInt()
+            return slotId to slotCapacity
+        }
+
+        val unparsedSlots =
+            appContext.resources.getStringArray(R.array.config_keyguardQuickAffordanceSlots)
+
+        val seenSlotIds = mutableSetOf<String>()
+        unparsedSlots.mapNotNull { unparsedSlot ->
+            val (slotId, slotCapacity) = parseSlot(unparsedSlot)
+            check(!seenSlotIds.contains(slotId)) { "Duplicate slot \"$slotId\"!" }
+            seenSlotIds.add(slotId)
+            KeyguardSlotPickerRepresentation(
+                id = slotId,
+                maxSelectedAffordances = slotCapacity,
+            )
+        }
+    }
 
     /**
      * Returns a snapshot of the [KeyguardQuickAffordanceConfig] instances of the affordances at the
@@ -115,14 +141,10 @@ constructor(
      * each slot and select which affordance(s) is/are installed in each slot on the keyguard.
      */
     fun getSlotPickerRepresentations(): List<KeyguardSlotPickerRepresentation> {
-        // TODO(b/256195304): source these from a config XML file.
-        return listOf(
-            KeyguardSlotPickerRepresentation(
-                id = KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START,
-            ),
-            KeyguardSlotPickerRepresentation(
-                id = KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_END,
-            ),
-        )
+        return _slotPickerRepresentations
+    }
+
+    companion object {
+        private const val SLOT_CONFIG_DELIMITER = ":"
     }
 }

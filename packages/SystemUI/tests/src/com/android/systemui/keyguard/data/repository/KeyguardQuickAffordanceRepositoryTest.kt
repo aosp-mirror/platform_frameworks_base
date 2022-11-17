@@ -18,13 +18,13 @@
 package com.android.systemui.keyguard.data.repository
 
 import androidx.test.filters.SmallTest
+import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.keyguard.data.quickaffordance.FakeKeyguardQuickAffordanceConfig
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceConfig
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceSelectionManager
 import com.android.systemui.keyguard.shared.model.KeyguardQuickAffordancePickerRepresentation
 import com.android.systemui.keyguard.shared.model.KeyguardSlotPickerRepresentation
-import com.android.systemui.shared.keyguard.shared.model.KeyguardQuickAffordanceSlots
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -53,6 +53,7 @@ class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
         config2 = FakeKeyguardQuickAffordanceConfig("built_in:2")
         underTest =
             KeyguardQuickAffordanceRepository(
+                appContext = context,
                 scope = CoroutineScope(IMMEDIATE),
                 backgroundDispatcher = IMMEDIATE,
                 selectionManager = KeyguardQuickAffordanceSelectionManager(),
@@ -119,16 +120,32 @@ class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
 
     @Test
     fun getSlotPickerRepresentations() {
+        val slot1 = "slot1"
+        val slot2 = "slot2"
+        val slot3 = "slot3"
+        context.orCreateTestableResources.addOverride(
+            R.array.config_keyguardQuickAffordanceSlots,
+            arrayOf(
+                "$slot1:2",
+                "$slot2:4",
+                "$slot3:5",
+            ),
+        )
+
         assertThat(underTest.getSlotPickerRepresentations())
             .isEqualTo(
                 listOf(
                     KeyguardSlotPickerRepresentation(
-                        id = KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START,
-                        maxSelectedAffordances = 1,
+                        id = slot1,
+                        maxSelectedAffordances = 2,
                     ),
                     KeyguardSlotPickerRepresentation(
-                        id = KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_END,
-                        maxSelectedAffordances = 1,
+                        id = slot2,
+                        maxSelectedAffordances = 4,
+                    ),
+                    KeyguardSlotPickerRepresentation(
+                        id = slot3,
+                        maxSelectedAffordances = 5,
                     ),
                 )
             )

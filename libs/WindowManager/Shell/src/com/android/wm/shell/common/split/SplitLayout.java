@@ -83,8 +83,8 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
 
     private static final int FLING_RESIZE_DURATION = 250;
     private static final int FLING_SWITCH_DURATION = 350;
-    private static final int FLING_ENTER_DURATION = 350;
-    private static final int FLING_EXIT_DURATION = 350;
+    private static final int FLING_ENTER_DURATION = 450;
+    private static final int FLING_EXIT_DURATION = 450;
 
     private int mDividerWindowWidth;
     private int mDividerInsets;

@@ -72,7 +72,10 @@ class UdfpsKeyguardViewControllerWithCoroutinesTest : UdfpsKeyguardViewControlle
                 mock(KeyguardBypassController::class.java),
                 mKeyguardUpdateMonitor
             )
-        return createUdfpsKeyguardViewController(/* useModernBouncer */ true)
+        return createUdfpsKeyguardViewController(
+            /* useModernBouncer */ true, /* useExpandedOverlay */
+            false
+        )
     }
 
     /** After migration, replaces LockIconViewControllerTest version */

@@ -19,9 +19,9 @@ package com.android.systemui.statusbar.phone
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Rect
-import android.test.suitebuilder.annotation.SmallTest
 import android.view.Display
 import android.view.DisplayCutout
+import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.statusbar.policy.ConfigurationController
@@ -463,16 +463,10 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
         val provider = StatusBarContentInsetsProvider(contextMock, configurationController,
             mock(DumpManager::class.java))
 
-        givenDisplay(
-            screenBounds = Rect(0, 0, 1080, 2160),
-            displayUniqueId = "1"
-        )
+        configuration.windowConfiguration.maxBounds = Rect(0, 0, 1080, 2160)
         val firstDisplayInsets = provider.getStatusBarContentAreaForRotation(ROTATION_NONE)
-        givenDisplay(
-            screenBounds = Rect(0, 0, 800, 600),
-            displayUniqueId = "2"
-        )
-        configurationController.onConfigurationChanged(configuration)
+
+        configuration.windowConfiguration.maxBounds = Rect(0, 0, 800, 600)
 
         // WHEN: get insets on the second display
         val secondDisplayInsets = provider.getStatusBarContentAreaForRotation(ROTATION_NONE)
@@ -487,23 +481,15 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
         // get insets and switch back
         val provider = StatusBarContentInsetsProvider(contextMock, configurationController,
             mock(DumpManager::class.java))
-        givenDisplay(
-            screenBounds = Rect(0, 0, 1080, 2160),
-            displayUniqueId = "1"
-        )
+
+        configuration.windowConfiguration.maxBounds = Rect(0, 0, 1080, 2160)
         val firstDisplayInsetsFirstCall = provider
             .getStatusBarContentAreaForRotation(ROTATION_NONE)
-        givenDisplay(
-            screenBounds = Rect(0, 0, 800, 600),
-            displayUniqueId = "2"
-        )
-        configurationController.onConfigurationChanged(configuration)
+
+        configuration.windowConfiguration.maxBounds = Rect(0, 0, 800, 600)
         provider.getStatusBarContentAreaForRotation(ROTATION_NONE)
-        givenDisplay(
-            screenBounds = Rect(0, 0, 1080, 2160),
-            displayUniqueId = "1"
-        )
-        configurationController.onConfigurationChanged(configuration)
+
+        configuration.windowConfiguration.maxBounds = Rect(0, 0, 1080, 2160)
 
         // WHEN: get insets on the first display again
         val firstDisplayInsetsSecondCall = provider
@@ -513,9 +499,70 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
         assertThat(firstDisplayInsetsFirstCall).isEqualTo(firstDisplayInsetsSecondCall)
     }
 
-    private fun givenDisplay(screenBounds: Rect, displayUniqueId: String) {
-        `when`(display.uniqueId).thenReturn(displayUniqueId)
-        configuration.windowConfiguration.maxBounds = screenBounds
+    // Regression test for b/245799099
+    @Test
+    fun onMaxBoundsChanged_listenerNotified() {
+        // Start out with an existing configuration with bounds
+        configuration.windowConfiguration.setMaxBounds(0, 0, 100, 100)
+        configurationController.onConfigurationChanged(configuration)
+        val provider = StatusBarContentInsetsProvider(contextMock, configurationController,
+                mock(DumpManager::class.java))
+        val listener = object : StatusBarContentInsetsChangedListener {
+            var triggered = false
+
+            override fun onStatusBarContentInsetsChanged() {
+                triggered = true
+            }
+        }
+        provider.addCallback(listener)
+
+        // WHEN the config is updated with new bounds
+        configuration.windowConfiguration.setMaxBounds(0, 0, 456, 789)
+        configurationController.onConfigurationChanged(configuration)
+
+        // THEN the listener is notified
+        assertThat(listener.triggered).isTrue()
+    }
+
+    @Test
+    fun onDensityOrFontScaleChanged_listenerNotified() {
+        configuration.densityDpi = 12
+        val provider = StatusBarContentInsetsProvider(contextMock, configurationController,
+                mock(DumpManager::class.java))
+        val listener = object : StatusBarContentInsetsChangedListener {
+            var triggered = false
+
+            override fun onStatusBarContentInsetsChanged() {
+                triggered = true
+            }
+        }
+        provider.addCallback(listener)
+
+        // WHEN the config is updated
+        configuration.densityDpi = 20
+        configurationController.onConfigurationChanged(configuration)
+
+        // THEN the listener is notified
+        assertThat(listener.triggered).isTrue()
+    }
+
+    @Test
+    fun onThemeChanged_listenerNotified() {
+        val provider = StatusBarContentInsetsProvider(contextMock, configurationController,
+                mock(DumpManager::class.java))
+        val listener = object : StatusBarContentInsetsChangedListener {
+            var triggered = false
+
+            override fun onStatusBarContentInsetsChanged() {
+                triggered = true
+            }
+        }
+        provider.addCallback(listener)
+
+        configurationController.notifyThemeChanged()
+
+        // THEN the listener is notified
+        assertThat(listener.triggered).isTrue()
     }
 
     private fun assertRects(
