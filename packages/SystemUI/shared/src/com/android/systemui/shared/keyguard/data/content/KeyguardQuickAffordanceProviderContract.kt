@@ -108,4 +108,30 @@ object KeyguardQuickAffordanceProviderContract {
             const val AFFORDANCE_ID = "affordance_id"
         }
     }
+
+    /**
+     * Table for flags.
+     *
+     * Flags are key-value pairs.
+     *
+     * Supported operations:
+     * - Query - to know the values of flags, query the [FlagsTable.URI] [Uri]. The result set will
+     * contain rows, each of which with the columns from [FlagsTable.Columns].
+     */
+    object FlagsTable {
+        const val TABLE_NAME = "flags"
+        val URI: Uri = BASE_URI.buildUpon().path(TABLE_NAME).build()
+
+        /**
+         * Flag denoting whether the customizable lock screen quick affordances feature is enabled.
+         */
+        const val FLAG_NAME_FEATURE_ENABLED = "is_feature_enabled"
+
+        object Columns {
+            /** String. Unique ID for the flag. */
+            const val NAME = "name"
+            /** Int. Value of the flag. `1` means `true` and `0` means `false`. */
+            const val VALUE = "value"
+        }
+    }
 }
