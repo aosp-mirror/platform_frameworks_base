@@ -224,6 +224,14 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     private TaskFragment mAdjacentTaskFragment;
 
     /**
+     * Unlike the {@link mAdjacentTaskFragment}, the companion TaskFragment is not always visually
+     * adjacent to this one, but this TaskFragment will be removed by the organizer if the
+     * companion TaskFragment is removed.
+     */
+    @Nullable
+    private TaskFragment mCompanionTaskFragment;
+
+    /**
      * Prevents duplicate calls to onTaskAppeared.
      */
     boolean mTaskFragmentAppearedSent;
@@ -394,6 +402,14 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             mAdjacentTaskFragment = taskFragment;
             taskFragment.setAdjacentTaskFragment(this);
         }
+    }
+
+    void setCompanionTaskFragment(@Nullable TaskFragment companionTaskFragment) {
+        mCompanionTaskFragment = companionTaskFragment;
+    }
+
+    TaskFragment getCompanionTaskFragment() {
+        return mCompanionTaskFragment;
     }
 
     void resetAdjacentTaskFragment() {
