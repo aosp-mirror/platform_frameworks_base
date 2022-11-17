@@ -419,6 +419,35 @@ public class VirtualDeviceManagerServiceTest {
     }
 
     @Test
+    public void createVirtualTouchscreen_zeroDisplayDimension_failsIllegalArgumentException() {
+        mDeviceImpl.mVirtualDisplayIds.add(DISPLAY_ID);
+        Point size = new Point(0, 0);
+        assertThrows(IllegalArgumentException.class,
+                () -> mDeviceImpl.createVirtualTouchscreen(DISPLAY_ID, DEVICE_NAME, VENDOR_ID,
+                        PRODUCT_ID, BINDER, size));
+    }
+
+    @Test
+    public void createVirtualTouchscreen_negativeDisplayDimension_failsIllegalArgumentException() {
+        mDeviceImpl.mVirtualDisplayIds.add(DISPLAY_ID);
+        Point size = new Point(-100, -100);
+        assertThrows(IllegalArgumentException.class,
+                () -> mDeviceImpl.createVirtualTouchscreen(DISPLAY_ID, DEVICE_NAME, VENDOR_ID,
+                        PRODUCT_ID, BINDER, size));
+    }
+
+    @Test
+    public void createVirtualTouchscreen_positiveDisplayDimension_successful() {
+        mDeviceImpl.mVirtualDisplayIds.add(DISPLAY_ID);
+        Point size = new Point(600, 800);
+        mDeviceImpl.createVirtualTouchscreen(DISPLAY_ID, DEVICE_NAME, VENDOR_ID, PRODUCT_ID, BINDER,
+                size);
+        assertWithMessage(
+                "Virtual touchscreen should create input device descriptor on successful creation.")
+                .that(mInputController.mInputDeviceDescriptors).isNotEmpty();
+    }
+
+    @Test
     public void onAudioSessionStarting_noDisplay_failsSecurityException() {
         assertThrows(SecurityException.class,
                 () -> mDeviceImpl.onAudioSessionStarting(

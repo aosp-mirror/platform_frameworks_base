@@ -474,6 +474,13 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                                 + "this virtual device");
             }
         }
+
+        if (screenSize.x <= 0 || screenSize.y <= 0) {
+            throw new IllegalArgumentException(
+                    "Cannot create a virtual touchscreen, screen dimensions must be positive. Got: "
+                            + screenSize);
+        }
+
         final long token = Binder.clearCallingIdentity();
         try {
             mInputController.createTouchscreen(deviceName, vendorId, productId,
