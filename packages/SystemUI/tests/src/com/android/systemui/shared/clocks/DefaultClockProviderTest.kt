@@ -43,6 +43,7 @@ import org.mockito.ArgumentMatchers.anyFloat
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.notNull
 import org.mockito.Mock
+import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
@@ -177,5 +178,13 @@ class DefaultClockProviderTest : SysuiTestCase() {
         verify(mockLargeClockView, times(2)).setLineSpacingScale(anyFloat())
         verify(mockSmallClockView, times(2)).refreshFormat()
         verify(mockLargeClockView, times(2)).refreshFormat()
+    }
+
+    @Test
+    fun test_aodClock_always_whiteColor() {
+        val clock = provider.createClock(DEFAULT_CLOCK_ID)
+        clock.animations.doze(0.9f) // set AOD mode to active
+        clock.smallClock.events.onRegionDarknessChanged(true)
+        verify((clock.smallClock.view as AnimatableClockView), never()).animateAppearOnLockscreen()
     }
 }
