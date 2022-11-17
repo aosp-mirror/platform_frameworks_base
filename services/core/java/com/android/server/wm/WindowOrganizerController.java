@@ -997,6 +997,14 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 tf1.setAdjacentTaskFragment(tf2);
                 effects |= TRANSACT_EFFECTS_LIFECYCLE;
 
+                // Clear the focused app if the focused app is no longer visible after reset the
+                // adjacent TaskFragments.
+                if (tf2 == null && tf1.getDisplayContent().mFocusedApp != null
+                        && tf1.hasChild(tf1.getDisplayContent().mFocusedApp)
+                        && !tf1.shouldBeVisible(null /* starting */)) {
+                    tf1.getDisplayContent().setFocusedApp(null);
+                }
+
                 final Bundle bundle = hop.getLaunchOptions();
                 final WindowContainerTransaction.TaskFragmentAdjacentParams adjacentParams =
                         bundle != null ? new WindowContainerTransaction.TaskFragmentAdjacentParams(
