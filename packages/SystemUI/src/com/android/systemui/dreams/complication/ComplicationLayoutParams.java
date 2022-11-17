@@ -38,7 +38,7 @@ public class ComplicationLayoutParams extends ViewGroup.LayoutParams {
             POSITION_START,
     })
 
-    @interface Position {}
+    public @interface Position {}
     /** Align view with the top of parent or bottom of preceding {@link Complication}. */
     public static final int POSITION_TOP = 1 << 0;
     /** Align view with the bottom of parent or top of preceding {@link Complication}. */

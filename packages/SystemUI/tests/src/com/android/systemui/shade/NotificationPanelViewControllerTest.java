@@ -133,6 +133,7 @@ import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.ExpandableView.OnHeightChangedListener;
+import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.notification.stack.NotificationRoundnessManager;
@@ -198,6 +199,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     @Mock private KeyguardBottomAreaView mQsFrame;
     @Mock private HeadsUpManagerPhone mHeadsUpManager;
     @Mock private NotificationShelfController mNotificationShelfController;
+    @Mock private NotificationGutsManager mGutsManager;
     @Mock private KeyguardStatusBarView mKeyguardStatusBar;
     @Mock private KeyguardUserSwitcherView mUserSwitcherView;
     @Mock private ViewStub mUserSwitcherStubView;
@@ -453,6 +455,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 () -> flingAnimationUtilsBuilder, mStatusBarTouchableRegionManager,
                 mConversationNotificationManager, mMediaHierarchyManager,
                 mStatusBarKeyguardViewManager,
+                mGutsManager,
                 mNotificationsQSContainerController,
                 mNotificationStackScrollLayoutController,
                 mKeyguardStatusViewComponentFactory,
@@ -754,6 +757,8 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
 
     @Test
     public void testOnTouchEvent_expansionResumesAfterBriefTouch() {
+        mFalsingManager.setIsClassifierEnabled(true);
+        mFalsingManager.setIsFalseTouch(false);
         // Start shade collapse with swipe up
         onTouchEvent(MotionEvent.obtain(0L /* downTime */,
                 0L /* eventTime */, MotionEvent.ACTION_DOWN, 0f /* x */, 0f /* y */,
@@ -1116,6 +1121,19 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         enableSplitShade(true);
 
         assertThat(mStatusBarStateController.getState()).isEqualTo(SHADE_LOCKED);
+    }
+
+    @Test
+    public void testUnlockedSplitShadeTransitioningToKeyguard_closesQS() {
+        enableSplitShade(true);
+        mStatusBarStateController.setState(SHADE);
+        mNotificationPanelViewController.setQsExpanded(true);
+
+        mStatusBarStateController.setState(KEYGUARD);
+
+
+        assertThat(mNotificationPanelViewController.isQsExpanded()).isEqualTo(false);
+        assertThat(mNotificationPanelViewController.isQsExpandImmediate()).isEqualTo(false);
     }
 
     @Test

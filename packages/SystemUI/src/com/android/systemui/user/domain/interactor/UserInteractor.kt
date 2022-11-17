@@ -43,6 +43,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.qs.user.UserSwitchDialogController
 import com.android.systemui.telephony.domain.interactor.TelephonyInteractor
+import com.android.systemui.user.data.model.UserSwitcherSettingsModel
 import com.android.systemui.user.data.repository.UserRepository
 import com.android.systemui.user.data.source.UserRecord
 import com.android.systemui.user.domain.model.ShowDialogRequestModel
@@ -61,6 +62,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -108,12 +110,16 @@ constructor(
 
     private val callbackMutex = Mutex()
     private val callbacks = mutableSetOf<UserCallback>()
+    private val userInfos =
+        combine(repository.userSwitcherSettings, repository.userInfos) { settings, userInfos ->
+            userInfos.filter { !it.isGuest || canCreateGuestUser(settings) }
+        }
 
     /** List of current on-device users to select from. */
     val users: Flow<List<UserModel>>
         get() =
             combine(
-                repository.userInfos,
+                userInfos,
                 repository.selectedUserInfo,
                 repository.userSwitcherSettings,
             ) { userInfos, selectedUserInfo, settings ->
@@ -147,22 +153,13 @@ constructor(
         get() =
             combine(
                 repository.selectedUserInfo,
-                repository.userInfos,
+                userInfos,
                 repository.userSwitcherSettings,
                 keyguardInteractor.isKeyguardShowing,
             ) { _, userInfos, settings, isDeviceLocked ->
                 buildList {
                     val hasGuestUser = userInfos.any { it.isGuest }
-                    if (
-                        !hasGuestUser &&
-                            (guestUserInteractor.isGuestUserAutoCreated ||
-                                UserActionsUtil.canCreateGuest(
-                                    manager,
-                                    repository,
-                                    settings.isUserSwitcherEnabled,
-                                    settings.isAddUsersFromLockscreen,
-                                ))
-                    ) {
+                    if (!hasGuestUser && canCreateGuestUser(settings)) {
                         add(UserActionModel.ENTER_GUEST_MODE)
                     }
 
@@ -211,7 +208,7 @@ constructor(
 
     val userRecords: StateFlow<ArrayList<UserRecord>> =
         combine(
-                repository.userInfos,
+                userInfos,
                 repository.selectedUserInfo,
                 actions,
                 repository.userSwitcherSettings,
@@ -685,6 +682,16 @@ constructor(
             userId,
             /* light= */ false
         )
+    }
+
+    private fun canCreateGuestUser(settings: UserSwitcherSettingsModel): Boolean {
+        return guestUserInteractor.isGuestUserAutoCreated ||
+            UserActionsUtil.canCreateGuest(
+                manager,
+                repository,
+                settings.isUserSwitcherEnabled,
+                settings.isAddUsersFromLockscreen,
+            )
     }
 
     companion object {

@@ -41,6 +41,7 @@ public abstract class ComplicationHostViewModule {
     public static final String COMPLICATIONS_FADE_OUT_DURATION = "complications_fade_out_duration";
     public static final String COMPLICATIONS_FADE_IN_DURATION = "complications_fade_in_duration";
     public static final String COMPLICATIONS_RESTORE_TIMEOUT = "complication_restore_timeout";
+    public static final String COMPLICATIONS_FADE_OUT_DELAY = "complication_fade_out_delay";
 
     /**
      * Generates a {@link ConstraintLayout}, which can host
@@ -72,6 +73,16 @@ public abstract class ComplicationHostViewModule {
     @DreamOverlayComponent.DreamOverlayScope
     static int providesComplicationsFadeOutDuration(@Main Resources resources) {
         return resources.getInteger(R.integer.complicationFadeOutMs);
+    }
+
+    /**
+     * Provides the delay to wait for before fading out complications.
+     */
+    @Provides
+    @Named(COMPLICATIONS_FADE_OUT_DELAY)
+    @DreamOverlayComponent.DreamOverlayScope
+    static int providesComplicationsFadeOutDelay(@Main Resources resources) {
+        return resources.getInteger(R.integer.complicationFadeOutDelayMs);
     }
 
     /**

@@ -19,6 +19,7 @@ import android.hardware.biometrics.BiometricSourceType;
 import android.telephony.TelephonyManager;
 import android.view.WindowManagerPolicyConstants;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.settingslib.fuelgauge.BatteryStatus;
@@ -175,11 +176,13 @@ public class KeyguardUpdateMonitorCallback {
 
     /**
      * Called after trust was granted.
-     * @param userId of the user that has been granted trust
+     * @param dismissKeyguard whether the keyguard should be dismissed as a result of the
+     *                        trustGranted
      * @param message optional message the trust agent has provided to show that should indicate
      *                why trust was granted.
      */
-    public void onTrustGrantedWithFlags(int flags, int userId, @Nullable String message) { }
+    public void onTrustGrantedForCurrentUser(boolean dismissKeyguard,
+            @NonNull TrustGrantFlags flags, @Nullable String message) { }
 
     /**
      * Called when a biometric has been acquired.

@@ -246,6 +246,18 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final String KEY_MAX_PHANTOM_PROCESSES = "max_phantom_processes";
 
     /**
+     * Enables proactive killing of cached apps
+     */
+    private static final String KEY_PROACTIVE_KILLS_ENABLED = "proactive_kills_enabled";
+
+    /**
+      * Trim LRU cached app when swap falls below this minimum percentage.
+      *
+      * Depends on KEY_PROACTIVE_KILLS_ENABLED
+      */
+    private static final String KEY_LOW_SWAP_THRESHOLD_PERCENT = "low_swap_threshold_percent";
+
+    /**
      * Default value for mFlagBackgroundActivityStartsEnabled if not explicitly set in
      * Settings.Global. This allows it to be set experimentally unless it has been
      * enabled/disabled in developer options. Defaults to false.
@@ -833,6 +845,10 @@ final class ActivityManagerConstants extends ContentObserver {
      */
     private static final long DEFAULT_MIN_ASSOC_LOG_DURATION = 5 * 60 * 1000; // 5 mins
 
+    private static final boolean DEFAULT_PROACTIVE_KILLS_ENABLED = false;
+
+    private static final float DEFAULT_LOW_SWAP_THRESHOLD_PERCENT = 0.10f;
+
     private static final String KEY_MIN_ASSOC_LOG_DURATION = "min_assoc_log_duration";
 
     public static long MIN_ASSOC_LOG_DURATION = DEFAULT_MIN_ASSOC_LOG_DURATION;
@@ -863,6 +879,8 @@ final class ActivityManagerConstants extends ContentObserver {
     public static boolean BINDER_HEAVY_HITTER_AUTO_SAMPLER_ENABLED;
     public static int BINDER_HEAVY_HITTER_AUTO_SAMPLER_BATCHSIZE;
     public static float BINDER_HEAVY_HITTER_AUTO_SAMPLER_THRESHOLD;
+    public static boolean PROACTIVE_KILLS_ENABLED = DEFAULT_PROACTIVE_KILLS_ENABLED;
+    public static float LOW_SWAP_THRESHOLD_PERCENT = DEFAULT_LOW_SWAP_THRESHOLD_PERCENT;
 
     private final OnPropertiesChangedListener mOnDeviceConfigChangedListener =
             new OnPropertiesChangedListener() {
@@ -989,6 +1007,12 @@ final class ActivityManagerConstants extends ContentObserver {
                                 break;
                             case KEY_NETWORK_ACCESS_TIMEOUT_MS:
                                 updateNetworkAccessTimeoutMs();
+                                break;
+                            case KEY_PROACTIVE_KILLS_ENABLED:
+                                updateProactiveKillsEnabled();
+                                break;
+                            case KEY_LOW_SWAP_THRESHOLD_PERCENT:
+                                updateLowSwapThresholdPercent();
                                 break;
                             default:
                                 break;
@@ -1592,6 +1616,20 @@ final class ActivityManagerConstants extends ContentObserver {
         CUR_TRIM_CACHED_PROCESSES = (MAX_CACHED_PROCESSES-rawMaxEmptyProcesses)/3;
     }
 
+    private void updateProactiveKillsEnabled() {
+        PROACTIVE_KILLS_ENABLED = DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_PROACTIVE_KILLS_ENABLED,
+                DEFAULT_PROACTIVE_KILLS_ENABLED);
+    }
+
+    private void updateLowSwapThresholdPercent() {
+        LOW_SWAP_THRESHOLD_PERCENT = DeviceConfig.getFloat(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_LOW_SWAP_THRESHOLD_PERCENT,
+                DEFAULT_LOW_SWAP_THRESHOLD_PERCENT);
+    }
+
     private void updateMinAssocLogDuration() {
         MIN_ASSOC_LOG_DURATION = DeviceConfig.getLong(
                 DeviceConfig.NAMESPACE_ACTIVITY_MANAGER, KEY_MIN_ASSOC_LOG_DURATION,
@@ -1779,6 +1817,10 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.print("="); pw.println(mServiceBindAlmostPerceptibleTimeoutMs);
         pw.print("  "); pw.print(KEY_NETWORK_ACCESS_TIMEOUT_MS);
         pw.print("="); pw.println(mNetworkAccessTimeoutMs);
+        pw.print("  "); pw.print(KEY_PROACTIVE_KILLS_ENABLED);
+        pw.print("="); pw.println(PROACTIVE_KILLS_ENABLED);
+        pw.print("  "); pw.print(KEY_LOW_SWAP_THRESHOLD_PERCENT);
+        pw.print("="); pw.println(LOW_SWAP_THRESHOLD_PERCENT);
 
         pw.println();
         if (mOverrideMaxCachedProcesses >= 0) {

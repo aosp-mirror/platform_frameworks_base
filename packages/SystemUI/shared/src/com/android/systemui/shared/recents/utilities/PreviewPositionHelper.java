@@ -71,14 +71,20 @@ public class PreviewPositionHelper {
         int deltaRotate = getRotationDelta(currentRotation, thumbnailRotation);
         RectF thumbnailClipHint = new RectF();
 
-        float scaledTaskbarSize = 0;
+        float scaledTaskbarSize;
+        float canvasScreenRatio;
         if (mSplitBounds != null) {
             float fullscreenTaskWidth;
             float fullscreenTaskHeight;
-            float canvasScreenRatio;
 
             float taskPercent;
-            if (!mSplitBounds.appsStackedVertically) {
+            if (mSplitBounds.appsStackedVertically) {
+                taskPercent = mDesiredStagePosition != STAGE_POSITION_TOP_OR_LEFT
+                        ? mSplitBounds.topTaskPercent
+                        : (1 - (mSplitBounds.topTaskPercent + mSplitBounds.dividerHeightPercent));
+                fullscreenTaskHeight = screenHeightPx * taskPercent;
+                canvasScreenRatio = canvasHeight / fullscreenTaskHeight;
+            } else {
                 // For landscape, scale the width
                 taskPercent = mDesiredStagePosition == STAGE_POSITION_TOP_OR_LEFT
                         ? mSplitBounds.leftTaskPercent
@@ -86,17 +92,12 @@ public class PreviewPositionHelper {
                 // Scale landscape width to that of actual screen
                 fullscreenTaskWidth = screenWidthPx * taskPercent;
                 canvasScreenRatio = canvasWidth / fullscreenTaskWidth;
-            } else {
-                taskPercent = mDesiredStagePosition != STAGE_POSITION_TOP_OR_LEFT
-                        ? mSplitBounds.leftTaskPercent
-                        : (1 - (mSplitBounds.leftTaskPercent + mSplitBounds.dividerWidthPercent));
-                // Scale landscape width to that of actual screen
-                fullscreenTaskHeight = screenHeightPx * taskPercent;
-                canvasScreenRatio = canvasHeight / fullscreenTaskHeight;
             }
-            scaledTaskbarSize = taskbarSize * canvasScreenRatio;
-            thumbnailClipHint.bottom = isTablet ? scaledTaskbarSize : 0;
+        } else {
+            canvasScreenRatio = (float) canvasWidth / screenWidthPx;
         }
+        scaledTaskbarSize = taskbarSize * canvasScreenRatio;
+        thumbnailClipHint.bottom = isTablet ? scaledTaskbarSize : 0;
 
         float scale = thumbnailData.scale;
         final float thumbnailScale;

@@ -37,6 +37,7 @@ import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.DreamOverlayStatusBarItemsProvider.StatusBarItem;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
+import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.policy.IndividualSensorPrivacyController;
 import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.ZenModeController;
@@ -217,18 +218,29 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
     }
 
     /**
-     * Sets alpha of the dream overlay status bar.
+     * Sets fade of the dream overlay status bar.
      *
      * No-op if the dream overlay status bar should not be shown.
      */
-    protected void setAlpha(float alpha) {
+    protected void setFadeAmount(float fadeAmount, boolean fadingOut) {
         updateVisibility();
 
         if (mView.getVisibility() != View.VISIBLE) {
             return;
         }
 
-        mView.setAlpha(alpha);
+        if (fadingOut) {
+            CrossFadeHelper.fadeOut(mView, 1 - fadeAmount, /* remap= */ false);
+        } else {
+            CrossFadeHelper.fadeIn(mView, fadeAmount, /* remap= */ false);
+        }
+    }
+
+    /**
+     * Sets the y translation of the dream overlay status bar.
+     */
+    public void setTranslationY(float translationY) {
+        mView.setTranslationY(translationY);
     }
 
     private boolean shouldShowStatusBar() {

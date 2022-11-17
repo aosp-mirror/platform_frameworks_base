@@ -91,11 +91,12 @@ class ControlsListingControllerImpl @VisibleForTesting constructor(
     override var currentUserId = userTracker.userId
         private set
 
-    private val serviceListingCallback = ServiceListing.Callback {
+    private val serviceListingCallback = ServiceListing.Callback { list ->
+        Log.d(TAG, "ServiceConfig reloaded, count: ${list.size}")
+        val newServices = list.map { ControlsServiceInfo(userTracker.userContext, it) }
+        // After here, `list` is not captured, so we don't risk modifying it outside of the callback
         backgroundExecutor.execute {
             if (userChangeInProgress.get() > 0) return@execute
-            Log.d(TAG, "ServiceConfig reloaded, count: ${it.size}")
-            val newServices = it.map { ControlsServiceInfo(userTracker.userContext, it) }
             if (featureFlags.isEnabled(Flags.USE_APP_PANELS)) {
                 newServices.forEach(ControlsServiceInfo::resolvePanelActivity)
             }

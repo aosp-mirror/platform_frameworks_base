@@ -163,7 +163,8 @@ public class SplitDecorManager extends WindowlessWindowManager {
 
     /** Showing resizing hint. */
     public void onResizing(ActivityManager.RunningTaskInfo resizingTask, Rect newBounds,
-            Rect sideBounds, SurfaceControl.Transaction t, int offsetX, int offsetY) {
+            Rect sideBounds, SurfaceControl.Transaction t, int offsetX, int offsetY,
+            boolean immediately) {
         if (mResizingIconView == null) {
             return;
         }
@@ -178,8 +179,8 @@ public class SplitDecorManager extends WindowlessWindowManager {
 
         final boolean show =
                 newBounds.width() > mBounds.width() || newBounds.height() > mBounds.height();
-        final boolean animate = show != mShown;
-        if (animate && mFadeAnimator != null && mFadeAnimator.isRunning()) {
+        final boolean update = show != mShown;
+        if (update && mFadeAnimator != null && mFadeAnimator.isRunning()) {
             // If we need to animate and animator still running, cancel it before we ensure both
             // background and icon surfaces are non null for next animation.
             mFadeAnimator.cancel();
@@ -192,7 +193,7 @@ public class SplitDecorManager extends WindowlessWindowManager {
                     .setLayer(mBackgroundLeash, Integer.MAX_VALUE - 1);
         }
 
-        if (mGapBackgroundLeash == null) {
+        if (mGapBackgroundLeash == null && !immediately) {
             final boolean isLandscape = newBounds.height() == sideBounds.height();
             final int left = isLandscape ? mBounds.width() : 0;
             final int top = isLandscape ? 0 : mBounds.height();
@@ -221,8 +222,13 @@ public class SplitDecorManager extends WindowlessWindowManager {
                 newBounds.width() / 2 - mIconSize / 2,
                 newBounds.height() / 2 - mIconSize / 2);
 
-        if (animate) {
-            startFadeAnimation(show, null /* finishedConsumer */);
+        if (update) {
+            if (immediately) {
+                t.setVisibility(mBackgroundLeash, show);
+                t.setVisibility(mIconLeash, show);
+            } else {
+                startFadeAnimation(show, null /* finishedConsumer */);
+            }
             mShown = show;
         }
     }
@@ -319,10 +325,12 @@ public class SplitDecorManager extends WindowlessWindowManager {
             @Override
             public void onAnimationStart(@NonNull Animator animation) {
                 if (show) {
-                    animT.show(mBackgroundLeash).show(mIconLeash).show(mGapBackgroundLeash).apply();
-                } else {
-                    animT.hide(mGapBackgroundLeash).apply();
+                    animT.show(mBackgroundLeash).show(mIconLeash);
                 }
+                if (mGapBackgroundLeash != null) {
+                    animT.setVisibility(mGapBackgroundLeash, show);
+                }
+                animT.apply();
             }
 
             @Override

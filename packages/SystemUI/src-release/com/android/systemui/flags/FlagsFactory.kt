@@ -22,7 +22,11 @@ object FlagsFactory {
     private val flagMap = mutableMapOf<String, Flag<*>>()
 
     val knownFlags: Map<String, Flag<*>>
-        get() = flagMap
+        get() {
+            // We need to access Flags in order to initialize our map.
+            assert(flagMap.contains(Flags.TEAMFOOD.name)) { "Where is teamfood?" }
+            return flagMap
+        }
 
     fun unreleasedFlag(
         id: Int,

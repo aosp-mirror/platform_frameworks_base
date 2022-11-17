@@ -2477,15 +2477,15 @@
     <integer name="config_dreamsBatteryLevelDrainCutoff">5</integer>
     <!-- Limit of how long the device can remain unlocked due to attention checking.  -->
     <integer name="config_attentionMaximumExtension">900000</integer> <!-- 15 minutes.  -->
-    <!-- Is the system user the only user allowed to dream. -->
-    <bool name="config_dreamsOnlyEnabledForSystemUser">false</bool>
+    <!-- Whether there is to be a chosen Dock User who is the only user allowed to dream. -->
+    <bool name="config_dreamsOnlyEnabledForDockUser">false</bool>
     <!-- Whether dreams are disabled when ambient mode is suppressed. -->
     <bool name="config_dreamsDisabledByAmbientModeSuppressionConfig">false</bool>
 
     <!-- The duration in milliseconds of the dream opening animation.  -->
     <integer name="config_dreamOpenAnimationDuration">250</integer>
     <!-- The duration in milliseconds of the dream closing animation.  -->
-    <integer name="config_dreamCloseAnimationDuration">100</integer>
+    <integer name="config_dreamCloseAnimationDuration">300</integer>
 
     <!-- Whether to dismiss the active dream when an activity is started. Doesn't apply to
          assistant activities (ACTIVITY_TYPE_ASSISTANT) -->
@@ -2716,9 +2716,9 @@
          will be locked. -->
     <bool name="config_multiuserDelayUserDataLocking">false</bool>
 
-    <!-- Whether to automatically switch a non-primary user back to the primary user after a
-         timeout when the device is docked.  -->
-    <bool name="config_enableTimeoutToUserZeroWhenDocked">false</bool>
+    <!-- Whether to automatically switch to the designated Dock User (the user chosen for
+         displaying dreams, etc.) after a timeout when the device is docked.  -->
+    <bool name="config_enableTimeoutToDockUserWhenDocked">false</bool>
 
     <!-- Whether to only install system packages on a user if they're allowlisted for that user
          type. These are flags and can be freely combined.
