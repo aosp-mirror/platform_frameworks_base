@@ -41,6 +41,7 @@ import android.util.ArraySet;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.infra.AndroidFuture;
 
 import libcore.io.IoUtils;
 
@@ -202,6 +203,7 @@ public abstract class BackupAgent extends ContextWrapper {
 
     Handler mHandler = null;
 
+    @Nullable private volatile BackupRestoreEventLogger mLogger = null;
     @Nullable private UserHandle mUser;
      // This field is written from the main thread (in onCreate), and read in a Binder thread (in
      // onFullBackup that is called from system_server via Binder).
@@ -234,6 +236,20 @@ public abstract class BackupAgent extends ContextWrapper {
         } catch (InterruptedException e) { /* ignored */ }
     }
 
+    /**
+     * Get a logger to record app-specific backup and restore events that are happening during a
+     * backup or restore operation.
+     *
+     * <p>The logger instance had been created by the system with the correct {@link
+     * BackupRestoreEventLogger.OperationType} that corresponds to the operation the {@code
+     * BackupAgent} is currently handling.
+     *
+     * @hide
+     */
+    @Nullable
+    public BackupRestoreEventLogger getBackupRestoreEventLogger() {
+        return mLogger;
+    }
 
     public BackupAgent() {
         super(null);
@@ -264,6 +280,9 @@ public abstract class BackupAgent extends ContextWrapper {
      * @hide
      */
     public void onCreate(UserHandle user, @OperationType int operationType) {
+        // TODO: Instantiate with the correct type using a parameter.
+        mLogger = new BackupRestoreEventLogger(BackupRestoreEventLogger.OperationType.BACKUP);
+
         onCreate();
 
         mUser = user;
@@ -1303,6 +1322,16 @@ public abstract class BackupAgent extends ContextWrapper {
                 } catch (RemoteException e) {
                     // We will time out anyway.
                 }
+            }
+        }
+
+        @Override
+        public void getLoggerResults(
+                AndroidFuture<List<BackupRestoreEventLogger.DataTypeResult>> in) {
+            if (mLogger != null) {
+                in.complete(mLogger.getLoggingResults());
+            } else {
+                in.complete(Collections.emptyList());
             }
         }
     }
