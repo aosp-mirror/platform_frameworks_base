@@ -372,15 +372,6 @@ public class WallpaperControllerTests extends WindowTestsBase {
         dc.mTransitionController.finishTransition(transit);
         assertFalse(wallpaperWindow.isVisible());
         assertFalse(token.isVisible());
-
-        // Assume wallpaper was visible. When transaction is ready without wallpaper target,
-        // wallpaper should be requested to be invisible.
-        token.setVisibility(true);
-        transit = dc.mTransitionController.createTransition(TRANSIT_CLOSE);
-        dc.mTransitionController.collect(token);
-        transit.onTransactionReady(transit.getSyncId(), t);
-        assertFalse(token.isVisibleRequested());
-        assertTrue(token.isVisible());
     }
 
     private static void prepareSmallerSecondDisplay(DisplayContent dc, int width, int height) {
