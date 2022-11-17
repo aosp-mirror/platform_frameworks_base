@@ -425,7 +425,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER,
                     "Register task fragment organizer=%s uid=%d pid=%d",
                     organizer.asBinder(), uid, pid);
-            if (mTaskFragmentOrganizerState.containsKey(organizer.asBinder())) {
+            if (isOrganizerRegistered(organizer)) {
                 throw new IllegalStateException(
                         "Replacing existing organizer currently unsupported");
             }
@@ -503,10 +503,18 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             @WindowManager.TransitionType int transitionType, boolean shouldApplyIndependently) {
         // Keep the calling identity to avoid unsecure change.
         synchronized (mGlobalLock) {
-            applyTransaction(wct, transitionType, shouldApplyIndependently);
-            final TaskFragmentOrganizerState state = validateAndGetState(
-                    wct.getTaskFragmentOrganizer());
-            state.onTransactionFinished(transactionToken);
+            if (isValidTransaction(wct)) {
+                applyTransaction(wct, transitionType, shouldApplyIndependently);
+            }
+            // Even if the transaction is empty, we still need to invoke #onTransactionFinished
+            // unless the organizer has been unregistered.
+            final ITaskFragmentOrganizer organizer = wct.getTaskFragmentOrganizer();
+            final TaskFragmentOrganizerState state = organizer != null
+                    ? mTaskFragmentOrganizerState.get(organizer.asBinder())
+                    : null;
+            if (state != null) {
+                state.onTransactionFinished(transactionToken);
+            }
         }
     }
 
@@ -515,7 +523,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             @WindowManager.TransitionType int transitionType, boolean shouldApplyIndependently) {
         // Keep the calling identity to avoid unsecure change.
         synchronized (mGlobalLock) {
-            if (wct.isEmpty()) {
+            if (!isValidTransaction(wct)) {
                 return;
             }
             mWindowOrganizerController.applyTaskFragmentTransactionLocked(wct, transitionType,
@@ -656,7 +664,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             }
             organizer = organizedTf[0].getTaskFragmentOrganizer();
         }
-        if (!mTaskFragmentOrganizerState.containsKey(organizer.asBinder())) {
+        if (!isOrganizerRegistered(organizer)) {
             Slog.w(TAG, "The last TaskFragmentOrganizer no longer exists");
             return;
         }
@@ -702,7 +710,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         mPendingTaskFragmentEvents.get(event.mTaskFragmentOrg.asBinder()).remove(event);
     }
 
-    boolean isOrganizerRegistered(@NonNull ITaskFragmentOrganizer organizer) {
+    private boolean isOrganizerRegistered(@NonNull ITaskFragmentOrganizer organizer) {
         return mTaskFragmentOrganizerState.containsKey(organizer.asBinder());
     }
 
@@ -737,6 +745,20 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                     "TaskFragmentOrganizer has not been registered. Organizer=" + organizer);
         }
         return state;
+    }
+
+    boolean isValidTransaction(@NonNull WindowContainerTransaction t) {
+        if (t.isEmpty()) {
+            return false;
+        }
+        final ITaskFragmentOrganizer organizer = t.getTaskFragmentOrganizer();
+        if (t.getTaskFragmentOrganizer() == null || !isOrganizerRegistered(organizer)) {
+            // Transaction from an unregistered organizer should not be applied. This can happen
+            // when the organizer process died before the transaction is applied.
+            Slog.e(TAG, "Caller organizer=" + organizer + " is no longer registered");
+            return false;
+        }
+        return true;
     }
 
     /**
