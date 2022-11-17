@@ -48,8 +48,8 @@ import com.android.credentialmanager.jetpack.developer.PublicKeyCredential.Compa
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreatePasskeyScreen(
-  viewModel: CreatePasskeyViewModel,
+fun CreateCredentialScreen(
+  viewModel: CreateCredentialViewModel,
 ) {
   val state = rememberModalBottomSheetState(
     initialValue = ModalBottomSheetValue.Expanded,
@@ -510,16 +510,26 @@ fun PrimaryCreateOptionRow(
     shape = EntryShape.FullRoundedCorner,
     label = {
       Column() {
-        Text(
-          text = requestDisplayInfo.userName,
-          style = MaterialTheme.typography.titleLarge,
-          modifier = Modifier.padding(top = 16.dp)
-        )
-        Text(
-          text = requestDisplayInfo.displayName,
-          style = MaterialTheme.typography.bodyMedium,
-          modifier = Modifier.padding(bottom = 16.dp)
-        )
+        // TODO: Add the function to hide/view password when the type is create password
+        if (requestDisplayInfo.type == TYPE_PUBLIC_KEY_CREDENTIAL ||
+          requestDisplayInfo.type == TYPE_PASSWORD_CREDENTIAL) {
+          Text(
+            text = requestDisplayInfo.title,
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier.padding(top = 16.dp)
+          )
+          Text(
+            text = requestDisplayInfo.subtitle,
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(bottom = 16.dp)
+          )
+        } else {
+          Text(
+            text = requestDisplayInfo.subtitle,
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier.padding(top = 16.dp, bottom = 16.dp)
+          )
+        }
       }
     }
   )

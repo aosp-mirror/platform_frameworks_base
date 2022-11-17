@@ -62,8 +62,8 @@ class RemoteInfo(
 ) : EntryInfo(entryKey, entrySubkey)
 
 data class RequestDisplayInfo(
-  val userName: String,
-  val displayName: String,
+  val title: String,
+  val subtitle: String,
   val type: String,
   val appDomainName: String,
 )
