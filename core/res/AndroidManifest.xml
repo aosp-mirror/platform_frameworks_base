@@ -6184,6 +6184,116 @@
         android:label="@string/permlab_foregroundService"
         android:protectionLevel="normal|instant" />
 
+    <!-- Allows a regular application to use {@link android.app.Service#startForeground
+         Service.startForeground} with the type "camera".
+         <p>Protection level: normal|instant
+    -->
+    <permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA"
+        android:description="@string/permdesc_foregroundServiceCamera"
+        android:label="@string/permlab_foregroundServiceCamera"
+        android:protectionLevel="normal|instant" />
+
+    <!-- Allows a regular application to use {@link android.app.Service#startForeground
+         Service.startForeground} with the type "connectedDevice".
+         <p>Protection level: normal|instant
+    -->
+    <permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE"
+        android:description="@string/permdesc_foregroundServiceConnectedDevice"
+        android:label="@string/permlab_foregroundServiceConnectedDevice"
+        android:protectionLevel="normal|instant" />
+
+    <!-- Allows a regular application to use {@link android.app.Service#startForeground
+         Service.startForeground} with the type "dataSync".
+         <p>Protection level: normal|instant
+    -->
+    <permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC"
+        android:description="@string/permdesc_foregroundServiceDataSync"
+        android:label="@string/permlab_foregroundServiceDataSync"
+        android:protectionLevel="normal|instant" />
+
+    <!-- Allows a regular application to use {@link android.app.Service#startForeground
+         Service.startForeground} with the type "location".
+         <p>Protection level: normal|instant
+    -->
+    <permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION"
+        android:description="@string/permdesc_foregroundServiceLocation"
+        android:label="@string/permlab_foregroundServiceLocation"
+        android:protectionLevel="normal|instant" />
+
+    <!-- Allows a regular application to use {@link android.app.Service#startForeground
+         Service.startForeground} with the type "mediaPlayback".
+         <p>Protection level: normal|instant
+    -->
+    <permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
+        android:description="@string/permdesc_foregroundServiceMediaPlayback"
+        android:label="@string/permlab_foregroundServiceMediaPlayback"
+        android:protectionLevel="normal|instant" />
+
+    <!-- Allows a regular application to use {@link android.app.Service#startForeground
+         Service.startForeground} with the type "mediaProjection".
+         <p>Protection level: normal|instant
+    -->
+    <permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION"
+        android:description="@string/permdesc_foregroundServiceMediaProjection"
+        android:label="@string/permlab_foregroundServiceMediaProjection"
+        android:protectionLevel="normal|instant" />
+
+    <!-- Allows a regular application to use {@link android.app.Service#startForeground
+         Service.startForeground} with the type "microphone".
+         <p>Protection level: normal|instant
+    -->
+    <permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE"
+        android:description="@string/permdesc_foregroundServiceMicrophone"
+        android:label="@string/permlab_foregroundServiceMicrophone"
+        android:protectionLevel="normal|instant" />
+
+    <!-- Allows a regular application to use {@link android.app.Service#startForeground
+         Service.startForeground} with the type "phoneCall".
+         <p>Protection level: normal|instant
+    -->
+    <permission android:name="android.permission.FOREGROUND_SERVICE_PHONE_CALL"
+        android:description="@string/permdesc_foregroundServicePhoneCall"
+        android:label="@string/permlab_foregroundServicePhoneCall"
+        android:protectionLevel="normal|instant" />
+
+    <!-- Allows a regular application to use {@link android.app.Service#startForeground
+         Service.startForeground} with the type "health".
+         <p>Protection level: normal|instant
+    -->
+    <permission android:name="android.permission.FOREGROUND_SERVICE_HEALTH"
+        android:description="@string/permdesc_foregroundServiceHealth"
+        android:label="@string/permlab_foregroundServiceHealth"
+        android:protectionLevel="normal|instant" />
+
+    <!-- Allows a regular application to use {@link android.app.Service#startForeground
+         Service.startForeground} with the type "remoteMessaging".
+         <p>Protection level: normal|instant
+    -->
+    <permission android:name="android.permission.FOREGROUND_SERVICE_REMOTE_MESSAGING"
+        android:description="@string/permdesc_foregroundServiceRemoteMessaging"
+        android:label="@string/permlab_foregroundServiceRemoteMessaging"
+        android:protectionLevel="normal|instant" />
+
+    <!-- Allows a regular application to use {@link android.app.Service#startForeground
+         Service.startForeground} with the type "systemExempted".
+         Apps are allowed to use this type only in the use cases listed in
+         {@link android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_SYSTEM_EXEMPTED}.
+         <p>Protection level: normal|instant
+    -->
+    <permission android:name="android.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED"
+        android:description="@string/permdesc_foregroundServiceSystemExempted"
+        android:label="@string/permlab_foregroundServiceSystemExempted"
+        android:protectionLevel="normal|instant" />
+
+    <!-- Allows a regular application to use {@link android.app.Service#startForeground
+         Service.startForeground} with the type "specialUse".
+         <p>Protection level: signature|appop|instant
+    -->
+    <permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE"
+        android:description="@string/permdesc_foregroundServiceSpecialUse"
+        android:label="@string/permlab_foregroundServiceSpecialUse"
+        android:protectionLevel="signature|appop|instant" />
+
     <!-- @SystemApi Allows to access all app shortcuts.
          @hide -->
     <permission android:name="android.permission.ACCESS_SHORTCUTS"

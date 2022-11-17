@@ -468,7 +468,7 @@ public class LatencyTracker {
         boolean shouldSample;
         int traceThreshold;
         synchronized (mLock) {
-            shouldSample = ThreadLocalRandom.current().nextInt() % mSamplingInterval == 0;
+            shouldSample = ThreadLocalRandom.current().nextInt(mSamplingInterval) == 0;
             traceThreshold = mTraceThresholdPerAction[action];
         }
 

@@ -133,9 +133,9 @@ public class DozeLog implements Dumpable {
     /**
      * Appends fling event to the logs
      */
-    public void traceFling(boolean expand, boolean aboveThreshold, boolean thresholdNeeded,
+    public void traceFling(boolean expand, boolean aboveThreshold,
             boolean screenOnFromTouch) {
-        mLogger.logFling(expand, aboveThreshold, thresholdNeeded, screenOnFromTouch);
+        mLogger.logFling(expand, aboveThreshold, screenOnFromTouch);
     }
 
     /**

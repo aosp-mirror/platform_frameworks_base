@@ -17,6 +17,7 @@
 package com.android.server.job;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
@@ -34,16 +35,20 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
+import android.app.IActivityManager;
 import android.app.job.JobInfo;
 import android.content.ComponentName;
 import android.content.Context;
@@ -51,6 +56,8 @@ import android.content.pm.IPackageManager;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.os.Looper;
+import android.os.PowerManager;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.util.ArrayMap;
@@ -149,12 +156,14 @@ public final class JobConcurrencyManagerTest {
                 R.bool.config_jobSchedulerRestrictBackgroundUser);
         when(mContext.getResources()).thenReturn(mResources);
         doReturn(mContext).when(jobSchedulerService).getTestableContext();
+        doReturn(jobSchedulerService).when(jobSchedulerService).getLock();
         mConfigBuilder = new DeviceConfig.Properties.Builder(DeviceConfig.NAMESPACE_JOB_SCHEDULER);
         doAnswer((Answer<DeviceConfig.Properties>) invocationOnMock -> mConfigBuilder.build())
                 .when(() -> DeviceConfig.getProperties(eq(DeviceConfig.NAMESPACE_JOB_SCHEDULER)));
         mPendingJobQueue = new PendingJobQueue();
         doReturn(mPendingJobQueue).when(jobSchedulerService).getPendingJobQueue();
         doReturn(mIPackageManager).when(AppGlobals::getPackageManager);
+        doReturn(mock(PowerManager.class)).when(mContext).getSystemService(PowerManager.class);
         mInjector = new InjectorForTest();
         doAnswer((Answer<Long>) invocationOnMock -> {
             Object[] args = invocationOnMock.getArguments();
@@ -171,6 +180,16 @@ public final class JobConcurrencyManagerTest {
         createCurrentUser(true);
         mNextUserId = 10;
         mJobConcurrencyManager.mGracePeriodObserver = mGracePeriodObserver;
+
+        IActivityManager activityManager = ActivityManager.getService();
+        spyOn(activityManager);
+        try {
+            doNothing().when(activityManager).registerUserSwitchObserver(any(), anyString());
+        } catch (RemoteException e) {
+            fail("registerUserSwitchObserver threw exception: " + e.getMessage());
+        }
+
+        mJobConcurrencyManager.onSystemReady();
     }
 
     @After
@@ -188,13 +207,16 @@ public final class JobConcurrencyManagerTest {
         final ArraySet<JobConcurrencyManager.ContextAssignment> idle = new ArraySet<>();
         final List<JobConcurrencyManager.ContextAssignment> preferredUidOnly = new ArrayList<>();
         final List<JobConcurrencyManager.ContextAssignment> stoppable = new ArrayList<>();
-        final long minPreferredUidOnlyWaitingTimeMs = mJobConcurrencyManager
-                .prepareForAssignmentDeterminationLocked(idle, preferredUidOnly, stoppable);
+        final JobConcurrencyManager.AssignmentInfo assignmentInfo =
+                new JobConcurrencyManager.AssignmentInfo();
+        mJobConcurrencyManager.prepareForAssignmentDeterminationLocked(
+                idle, preferredUidOnly, stoppable, assignmentInfo);
 
         assertEquals(JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT, idle.size());
         assertEquals(0, preferredUidOnly.size());
         assertEquals(0, stoppable.size());
-        assertEquals(0, minPreferredUidOnlyWaitingTimeMs);
+        assertEquals(0, assignmentInfo.minPreferredUidOnlyWaitingTimeMs);
+        assertEquals(0, assignmentInfo.numRunningTopEj);
     }
 
     @Test
@@ -207,13 +229,16 @@ public final class JobConcurrencyManagerTest {
         final ArraySet<JobConcurrencyManager.ContextAssignment> idle = new ArraySet<>();
         final List<JobConcurrencyManager.ContextAssignment> preferredUidOnly = new ArrayList<>();
         final List<JobConcurrencyManager.ContextAssignment> stoppable = new ArrayList<>();
-        final long minPreferredUidOnlyWaitingTimeMs = mJobConcurrencyManager
-                .prepareForAssignmentDeterminationLocked(idle, preferredUidOnly, stoppable);
+        final JobConcurrencyManager.AssignmentInfo assignmentInfo =
+                new JobConcurrencyManager.AssignmentInfo();
+        mJobConcurrencyManager.prepareForAssignmentDeterminationLocked(
+                idle, preferredUidOnly, stoppable, assignmentInfo);
 
         assertEquals(JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT, idle.size());
         assertEquals(0, preferredUidOnly.size());
         assertEquals(0, stoppable.size());
-        assertEquals(0, minPreferredUidOnlyWaitingTimeMs);
+        assertEquals(0, assignmentInfo.minPreferredUidOnlyWaitingTimeMs);
+        assertEquals(0, assignmentInfo.numRunningTopEj);
     }
 
     @Test
@@ -230,13 +255,45 @@ public final class JobConcurrencyManagerTest {
         final ArraySet<JobConcurrencyManager.ContextAssignment> idle = new ArraySet<>();
         final List<JobConcurrencyManager.ContextAssignment> preferredUidOnly = new ArrayList<>();
         final List<JobConcurrencyManager.ContextAssignment> stoppable = new ArrayList<>();
-        final long minPreferredUidOnlyWaitingTimeMs = mJobConcurrencyManager
-                .prepareForAssignmentDeterminationLocked(idle, preferredUidOnly, stoppable);
+        final JobConcurrencyManager.AssignmentInfo assignmentInfo =
+                new JobConcurrencyManager.AssignmentInfo();
+        mJobConcurrencyManager.prepareForAssignmentDeterminationLocked(
+                idle, preferredUidOnly, stoppable, assignmentInfo);
 
         assertEquals(0, idle.size());
         assertEquals(JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT, preferredUidOnly.size());
         assertEquals(0, stoppable.size());
-        assertEquals(0, minPreferredUidOnlyWaitingTimeMs);
+        assertEquals(0, assignmentInfo.minPreferredUidOnlyWaitingTimeMs);
+        assertEquals(0, assignmentInfo.numRunningTopEj);
+    }
+
+    @Test
+    public void testPrepareForAssignmentDetermination_onlyRunningTopEjs() {
+        for (int i = 0; i < JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT; ++i) {
+            JobStatus job = createJob(mDefaultUserId * UserHandle.PER_USER_RANGE + i);
+            job.startedAsExpeditedJob = true;
+            job.lastEvaluatedBias = JobInfo.BIAS_TOP_APP;
+            mJobConcurrencyManager.addRunningJobForTesting(job);
+        }
+
+        for (int i = 0; i < mInjector.contexts.size(); ++i) {
+            doReturn(i % 2 == 0).when(mInjector.contexts.keyAt(i)).isWithinExecutionGuaranteeTime();
+        }
+
+        final ArraySet<JobConcurrencyManager.ContextAssignment> idle = new ArraySet<>();
+        final List<JobConcurrencyManager.ContextAssignment> preferredUidOnly = new ArrayList<>();
+        final List<JobConcurrencyManager.ContextAssignment> stoppable = new ArrayList<>();
+        final JobConcurrencyManager.AssignmentInfo assignmentInfo =
+                new JobConcurrencyManager.AssignmentInfo();
+        mJobConcurrencyManager.prepareForAssignmentDeterminationLocked(
+                idle, preferredUidOnly, stoppable, assignmentInfo);
+
+        assertEquals(0, idle.size());
+        assertEquals(JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT / 2, preferredUidOnly.size());
+        assertEquals(JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT / 2, stoppable.size());
+        assertEquals(0, assignmentInfo.minPreferredUidOnlyWaitingTimeMs);
+        assertEquals(JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT,
+                assignmentInfo.numRunningTopEj);
     }
 
     @Test
@@ -257,11 +314,13 @@ public final class JobConcurrencyManagerTest {
         final ArraySet<JobConcurrencyManager.ContextAssignment> idle = new ArraySet<>();
         final List<JobConcurrencyManager.ContextAssignment> preferredUidOnly = new ArrayList<>();
         final List<JobConcurrencyManager.ContextAssignment> stoppable = new ArrayList<>();
-        mJobConcurrencyManager
-                .prepareForAssignmentDeterminationLocked(idle, preferredUidOnly, stoppable);
+        final JobConcurrencyManager.AssignmentInfo assignmentInfo =
+                new JobConcurrencyManager.AssignmentInfo();
+        mJobConcurrencyManager.prepareForAssignmentDeterminationLocked(
+                idle, preferredUidOnly, stoppable, assignmentInfo);
         mJobConcurrencyManager
                 .determineAssignmentsLocked(changed, idle, preferredUidOnly, stoppable,
-                        Long.MAX_VALUE);
+                        assignmentInfo);
 
         assertEquals(JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT, changed.size());
         for (int i = changed.size() - 1; i >= 0; --i) {
@@ -301,15 +360,17 @@ public final class JobConcurrencyManagerTest {
         final ArraySet<JobConcurrencyManager.ContextAssignment> idle = new ArraySet<>();
         final List<JobConcurrencyManager.ContextAssignment> preferredUidOnly = new ArrayList<>();
         final List<JobConcurrencyManager.ContextAssignment> stoppable = new ArrayList<>();
+        final JobConcurrencyManager.AssignmentInfo assignmentInfo =
+                new JobConcurrencyManager.AssignmentInfo();
 
-        long minPreferredUidOnlyWaitingTimeMs = mJobConcurrencyManager
-                .prepareForAssignmentDeterminationLocked(idle, preferredUidOnly, stoppable);
-        assertEquals(remainingTimeMs, minPreferredUidOnlyWaitingTimeMs);
+        mJobConcurrencyManager.prepareForAssignmentDeterminationLocked(
+                idle, preferredUidOnly, stoppable, assignmentInfo);
+        assertEquals(remainingTimeMs, assignmentInfo.minPreferredUidOnlyWaitingTimeMs);
         assertEquals(JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT, preferredUidOnly.size());
 
         mJobConcurrencyManager
                 .determineAssignmentsLocked(changed, idle, preferredUidOnly, stoppable,
-                        minPreferredUidOnlyWaitingTimeMs);
+                        assignmentInfo);
 
         assertEquals(JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT, preferredUidOnly.size());
         assertEquals(0, changed.size());
@@ -350,15 +411,17 @@ public final class JobConcurrencyManagerTest {
         final ArraySet<JobConcurrencyManager.ContextAssignment> idle = new ArraySet<>();
         final List<JobConcurrencyManager.ContextAssignment> preferredUidOnly = new ArrayList<>();
         final List<JobConcurrencyManager.ContextAssignment> stoppable = new ArrayList<>();
+        final JobConcurrencyManager.AssignmentInfo assignmentInfo =
+                new JobConcurrencyManager.AssignmentInfo();
 
-        long minPreferredUidOnlyWaitingTimeMs = mJobConcurrencyManager
-                .prepareForAssignmentDeterminationLocked(idle, preferredUidOnly, stoppable);
-        assertEquals(remainingTimeMs, minPreferredUidOnlyWaitingTimeMs);
+        mJobConcurrencyManager.prepareForAssignmentDeterminationLocked(
+                idle, preferredUidOnly, stoppable, assignmentInfo);
+        assertEquals(remainingTimeMs, assignmentInfo.minPreferredUidOnlyWaitingTimeMs);
         assertEquals(JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT, preferredUidOnly.size());
 
         mJobConcurrencyManager
                 .determineAssignmentsLocked(changed, idle, preferredUidOnly, stoppable,
-                        minPreferredUidOnlyWaitingTimeMs);
+                        assignmentInfo);
 
         assertEquals(JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT, preferredUidOnly.size());
         for (int i = changed.size() - 1; i >= 0; --i) {
@@ -404,15 +467,17 @@ public final class JobConcurrencyManagerTest {
         final ArraySet<JobConcurrencyManager.ContextAssignment> idle = new ArraySet<>();
         final List<JobConcurrencyManager.ContextAssignment> preferredUidOnly = new ArrayList<>();
         final List<JobConcurrencyManager.ContextAssignment> stoppable = new ArrayList<>();
+        final JobConcurrencyManager.AssignmentInfo assignmentInfo =
+                new JobConcurrencyManager.AssignmentInfo();
 
-        long minPreferredUidOnlyWaitingTimeMs = mJobConcurrencyManager
-                .prepareForAssignmentDeterminationLocked(idle, preferredUidOnly, stoppable);
-        assertEquals(remainingTimeMs, minPreferredUidOnlyWaitingTimeMs);
+        mJobConcurrencyManager.prepareForAssignmentDeterminationLocked(
+                idle, preferredUidOnly, stoppable, assignmentInfo);
+        assertEquals(remainingTimeMs, assignmentInfo.minPreferredUidOnlyWaitingTimeMs);
         assertEquals(JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT, preferredUidOnly.size());
 
         mJobConcurrencyManager
                 .determineAssignmentsLocked(changed, idle, preferredUidOnly, stoppable,
-                        minPreferredUidOnlyWaitingTimeMs);
+                        assignmentInfo);
 
         assertEquals(JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT, preferredUidOnly.size());
         // Depending on iteration order, we may create 1 or 2 contexts.

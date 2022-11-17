@@ -375,7 +375,7 @@ public class KeyguardIndicationRotateTextViewController extends
     public static final int INDICATION_TYPE_ALIGNMENT = 4;
     public static final int INDICATION_TYPE_TRANSIENT = 5;
     public static final int INDICATION_TYPE_TRUST = 6;
-    public static final int INDICATION_TYPE_RESTING = 7;
+    public static final int INDICATION_TYPE_PERSISTENT_UNLOCK_MESSAGE = 7;
     public static final int INDICATION_TYPE_USER_LOCKED = 8;
     public static final int INDICATION_TYPE_REVERSE_CHARGING = 10;
     public static final int INDICATION_TYPE_BIOMETRIC_MESSAGE = 11;
@@ -390,7 +390,7 @@ public class KeyguardIndicationRotateTextViewController extends
             INDICATION_TYPE_ALIGNMENT,
             INDICATION_TYPE_TRANSIENT,
             INDICATION_TYPE_TRUST,
-            INDICATION_TYPE_RESTING,
+            INDICATION_TYPE_PERSISTENT_UNLOCK_MESSAGE,
             INDICATION_TYPE_USER_LOCKED,
             INDICATION_TYPE_REVERSE_CHARGING,
             INDICATION_TYPE_BIOMETRIC_MESSAGE,

@@ -327,6 +327,7 @@ class JobConcurrencyManager {
     private final ArraySet<ContextAssignment> mRecycledIdle = new ArraySet<>();
     private final ArrayList<ContextAssignment> mRecycledPreferredUidOnly = new ArrayList<>();
     private final ArrayList<ContextAssignment> mRecycledStoppable = new ArrayList<>();
+    private final AssignmentInfo mRecycledAssignmentInfo = new AssignmentInfo();
 
     private final Pools.Pool<ContextAssignment> mContextAssignmentPool =
             new Pools.SimplePool<>(MAX_RETAINED_OBJECTS);
@@ -414,7 +415,7 @@ class JobConcurrencyManager {
     @VisibleForTesting
     JobConcurrencyManager(JobSchedulerService service, Injector injector) {
         mService = service;
-        mLock = mService.mLock;
+        mLock = mService.getLock();
         mContext = service.getTestableContext();
         mInjector = injector;
 
@@ -693,8 +694,9 @@ class JobConcurrencyManager {
             return;
         }
 
-        final long minPreferredUidOnlyWaitingTimeMs = prepareForAssignmentDeterminationLocked(
-                mRecycledIdle, mRecycledPreferredUidOnly, mRecycledStoppable);
+        prepareForAssignmentDeterminationLocked(
+                mRecycledIdle, mRecycledPreferredUidOnly, mRecycledStoppable,
+                mRecycledAssignmentInfo);
 
         if (DEBUG) {
             Slog.d(TAG, printAssignments("running jobs initial",
@@ -703,7 +705,7 @@ class JobConcurrencyManager {
 
         determineAssignmentsLocked(
                 mRecycledChanged, mRecycledIdle, mRecycledPreferredUidOnly, mRecycledStoppable,
-                minPreferredUidOnlyWaitingTimeMs);
+                mRecycledAssignmentInfo);
 
         if (DEBUG) {
             Slog.d(TAG, printAssignments("running jobs final",
@@ -715,17 +717,18 @@ class JobConcurrencyManager {
         carryOutAssignmentChangesLocked(mRecycledChanged);
 
         cleanUpAfterAssignmentChangesLocked(
-                mRecycledChanged, mRecycledIdle, mRecycledPreferredUidOnly, mRecycledStoppable);
+                mRecycledChanged, mRecycledIdle, mRecycledPreferredUidOnly, mRecycledStoppable,
+                mRecycledAssignmentInfo);
 
         noteConcurrency();
     }
 
-    /** @return the minimum remaining execution time for preferred UID only JobServiceContexts. */
     @VisibleForTesting
     @GuardedBy("mLock")
-    long prepareForAssignmentDeterminationLocked(final ArraySet<ContextAssignment> idle,
+    void prepareForAssignmentDeterminationLocked(final ArraySet<ContextAssignment> idle,
             final List<ContextAssignment> preferredUidOnly,
-            final List<ContextAssignment> stoppable) {
+            final List<ContextAssignment> stoppable,
+            final AssignmentInfo info) {
         final PendingJobQueue pendingJobQueue = mService.getPendingJobQueue();
         final List<JobServiceContext> activeServices = mActiveServices;
 
@@ -755,6 +758,9 @@ class JobConcurrencyManager {
             if (js != null) {
                 mWorkCountTracker.incrementRunningJobCount(jsc.getRunningJobWorkType());
                 assignment.workType = jsc.getRunningJobWorkType();
+                if (js.startedAsExpeditedJob && js.lastEvaluatedBias == JobInfo.BIAS_TOP_APP) {
+                    info.numRunningTopEj++;
+                }
             }
 
             assignment.preferredUid = jsc.getPreferredUid();
@@ -789,10 +795,11 @@ class JobConcurrencyManager {
         }
 
         mWorkCountTracker.onCountDone();
-        // Return 0 if there were no preferred UID only contexts to indicate no waiting time due
+        // Set 0 if there were no preferred UID only contexts to indicate no waiting time due
         // to such jobs.
-        return minPreferredUidOnlyWaitingTimeMs == Long.MAX_VALUE
-                ? 0 : minPreferredUidOnlyWaitingTimeMs;
+        info.minPreferredUidOnlyWaitingTimeMs =
+                minPreferredUidOnlyWaitingTimeMs == Long.MAX_VALUE
+                        ? 0 : minPreferredUidOnlyWaitingTimeMs;
     }
 
     @VisibleForTesting
@@ -801,7 +808,7 @@ class JobConcurrencyManager {
             final ArraySet<ContextAssignment> idle,
             final List<ContextAssignment> preferredUidOnly,
             final List<ContextAssignment> stoppable,
-            long minPreferredUidOnlyWaitingTimeMs) {
+            @NonNull AssignmentInfo info) {
         final PendingJobQueue pendingJobQueue = mService.getPendingJobQueue();
         final List<JobServiceContext> activeServices = mActiveServices;
         pendingJobQueue.resetIterator();
@@ -832,7 +839,7 @@ class JobConcurrencyManager {
             // pending jobs that could be designated as waiting too long, and those other jobs
             // would only have to wait for the new slots to become available.
             final long minWaitingTimeMs =
-                    Math.min(minPreferredUidOnlyWaitingTimeMs, minChangedWaitingTimeMs);
+                    Math.min(info.minPreferredUidOnlyWaitingTimeMs, minChangedWaitingTimeMs);
 
             // Find an available slot for nextPending. The context should be one of the following:
             // 1. Unused
@@ -861,13 +868,6 @@ class JobConcurrencyManager {
                 }
             }
             if (selectedContext == null && stoppable.size() > 0) {
-                int topEjCount = 0;
-                for (int r = mRunningJobs.size() - 1; r >= 0; --r) {
-                    JobStatus js = mRunningJobs.valueAt(r);
-                    if (js.startedAsExpeditedJob && js.lastEvaluatedBias == JobInfo.BIAS_TOP_APP) {
-                        topEjCount++;
-                    }
-                }
                 for (int s = stoppable.size() - 1; s >= 0; --s) {
                     final ContextAssignment assignment = stoppable.get(s);
                     final JobStatus runningJob = assignment.context.getRunningJobLocked();
@@ -888,7 +888,8 @@ class JobConcurrencyManager {
                         final int currentJobBias = mService.evaluateJobBiasLocked(runningJob);
                         canReplace = runningJob.lastEvaluatedBias < JobInfo.BIAS_TOP_APP // Case 2
                                 || currentJobBias < JobInfo.BIAS_TOP_APP // Case 3
-                                || topEjCount > .5 * mWorkTypeConfig.getMaxTotal(); // Case 4
+                                // Case 4
+                                || info.numRunningTopEj > .5 * mWorkTypeConfig.getMaxTotal();
                     }
                     if (!canReplace && mMaxWaitTimeBypassEnabled) { // Case 5
                         if (nextPending.shouldTreatAsExpeditedJob()) {
@@ -955,7 +956,7 @@ class JobConcurrencyManager {
                 if (selectedContext != null) {
                     selectedContext.newJob = nextPending;
                     preferredUidOnly.remove(selectedContext);
-                    minPreferredUidOnlyWaitingTimeMs = newMinPreferredUidOnlyWaitingTimeMs;
+                    info.minPreferredUidOnlyWaitingTimeMs = newMinPreferredUidOnlyWaitingTimeMs;
                 }
             }
             // Make sure to run EJs for the TOP app immediately.
@@ -1072,7 +1073,8 @@ class JobConcurrencyManager {
     private void cleanUpAfterAssignmentChangesLocked(final ArraySet<ContextAssignment> changed,
             final ArraySet<ContextAssignment> idle,
             final List<ContextAssignment> preferredUidOnly,
-            final List<ContextAssignment> stoppable) {
+            final List<ContextAssignment> stoppable,
+            final AssignmentInfo assignmentInfo) {
         for (int s = stoppable.size() - 1; s >= 0; --s) {
             final ContextAssignment assignment = stoppable.get(s);
             assignment.clear();
@@ -1093,6 +1095,7 @@ class JobConcurrencyManager {
         idle.clear();
         stoppable.clear();
         preferredUidOnly.clear();
+        assignmentInfo.clear();
         mWorkCountTracker.resetStagingCount();
         mActivePkgStats.forEach(mPackageStatsStagingCountClearer);
     }
@@ -2537,6 +2540,17 @@ class JobConcurrencyManager {
             shouldStopJobReason = null;
             newJob = null;
             newWorkType = WORK_TYPE_NONE;
+        }
+    }
+
+    @VisibleForTesting
+    static final class AssignmentInfo {
+        public long minPreferredUidOnlyWaitingTimeMs;
+        public int numRunningTopEj;
+
+        void clear() {
+            minPreferredUidOnlyWaitingTimeMs = 0;
+            numRunningTopEj = 0;
         }
     }
 

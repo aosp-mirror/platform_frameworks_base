@@ -569,7 +569,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         public static final long DEFAULT_RUNTIME_MIN_EJ_GUARANTEE_MS = 3 * MINUTE_IN_MILLIS;
         @VisibleForTesting
         static final long DEFAULT_RUNTIME_MIN_HIGH_PRIORITY_GUARANTEE_MS = 5 * MINUTE_IN_MILLIS;
-        static final boolean DEFAULT_PERSIST_IN_SPLIT_FILES = false;
+        static final boolean DEFAULT_PERSIST_IN_SPLIT_FILES = true;
         private static final boolean DEFAULT_USE_TARE_POLICY = false;
 
         /**

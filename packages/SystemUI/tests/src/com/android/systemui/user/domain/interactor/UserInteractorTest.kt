@@ -672,6 +672,49 @@ class UserInteractorTest : SysuiTestCase() {
             )
         }
 
+    @Test
+    fun `users - secondary user - no guest user`() =
+        runBlocking(IMMEDIATE) {
+            val userInfos = createUserInfos(count = 3, includeGuest = true)
+            userRepository.setUserInfos(userInfos)
+            userRepository.setSelectedUserInfo(userInfos[1])
+            userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = true))
+
+            var res: List<UserModel>? = null
+            val job = underTest.users.onEach { res = it }.launchIn(this)
+            assertThat(res?.size == 2).isTrue()
+            assertThat(res?.find { it.isGuest }).isNull()
+            job.cancel()
+        }
+
+    @Test
+    fun `users - secondary user - no guest action`() =
+        runBlocking(IMMEDIATE) {
+            val userInfos = createUserInfos(count = 3, includeGuest = true)
+            userRepository.setUserInfos(userInfos)
+            userRepository.setSelectedUserInfo(userInfos[1])
+            userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = true))
+
+            var res: List<UserActionModel>? = null
+            val job = underTest.actions.onEach { res = it }.launchIn(this)
+            assertThat(res?.find { it == UserActionModel.ENTER_GUEST_MODE }).isNull()
+            job.cancel()
+        }
+
+    @Test
+    fun `users - secondary user - no guest user record`() =
+        runBlocking(IMMEDIATE) {
+            val userInfos = createUserInfos(count = 3, includeGuest = true)
+            userRepository.setUserInfos(userInfos)
+            userRepository.setSelectedUserInfo(userInfos[1])
+            userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = true))
+
+            var res: List<UserRecord>? = null
+            val job = underTest.userRecords.onEach { res = it }.launchIn(this)
+            assertThat(res?.find { it.isGuest }).isNull()
+            job.cancel()
+        }
+
     private fun assertUsers(
         models: List<UserModel>?,
         count: Int,

@@ -51,7 +51,6 @@ import android.content.ContentResolver;
 import android.content.IIntentReceiver;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
@@ -1639,9 +1638,8 @@ public class BroadcastQueueImpl extends BroadcastQueue {
             }
             Slog.w(TAG, "Receiver during timeout of " + r + " : " + curReceiver);
             logBroadcastReceiverDiscardLocked(r);
-            String anrMessage =
-                    "Broadcast of " + r.intent.toString() + ", waited " + timeoutDurationMs + "ms";
-            TimeoutRecord timeoutRecord = TimeoutRecord.forBroadcastReceiver(anrMessage);
+            TimeoutRecord timeoutRecord = TimeoutRecord.forBroadcastReceiver(r.intent,
+                    timeoutDurationMs);
             if (curReceiver != null && curReceiver instanceof BroadcastFilter) {
                 BroadcastFilter bf = (BroadcastFilter) curReceiver;
                 if (bf.receiverList.pid != 0

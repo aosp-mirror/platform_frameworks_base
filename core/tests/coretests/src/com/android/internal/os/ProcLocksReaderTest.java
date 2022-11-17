@@ -20,6 +20,7 @@ import static org.junit.Assert.assertTrue;
 
 import android.content.Context;
 import android.os.FileUtils;
+import android.util.IntArray;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -33,13 +34,15 @@ import org.junit.runner.RunWith;
 import java.io.File;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class ProcLocksReaderTest implements
         ProcLocksReader.ProcLocksReaderCallback {
     private File mProcDirectory;
-    private ArrayList<Integer> mPids = new ArrayList<>();
+
+    private ArrayList<int[]> mPids = new ArrayList<>();
 
     @Before
     public void setUp() {
@@ -54,41 +57,51 @@ public class ProcLocksReaderTest implements
 
     @Test
     public void testRunSimpleLocks() throws Exception {
-        String simpleLocks =
-                "1: POSIX  ADVISORY  READ  18403 fd:09:9070 1073741826 1073742335\n" +
-                "2: POSIX  ADVISORY  WRITE 18292 fd:09:34062 0 EOF\n";
+        String simpleLocks = "1: POSIX  ADVISORY  READ  18403 fd:09:9070 1073741826 1073742335\n"
+                           + "2: POSIX  ADVISORY  WRITE 18292 fd:09:34062 0 EOF\n";
         runHandleBlockingFileLocks(simpleLocks);
         assertTrue(mPids.isEmpty());
     }
 
     @Test
     public void testRunBlockingLocks() throws Exception {
-        String blockedLocks =
-                "1: POSIX  ADVISORY  READ  18403 fd:09:9070 1073741826 1073742335\n" +
-                "2: POSIX  ADVISORY  WRITE 18292 fd:09:34062 0 EOF\n" +
-                "2: -> POSIX  ADVISORY  WRITE 18291 fd:09:34062 0 EOF\n" +
-                "2: -> POSIX  ADVISORY  WRITE 18293 fd:09:34062 0 EOF\n" +
-                "3: POSIX  ADVISORY  READ  3888 fd:09:13992 128 128\n" +
-                "4: POSIX  ADVISORY  READ  3888 fd:09:14230 1073741826 1073742335\n";
+        String blockedLocks = "1: POSIX  ADVISORY  READ  18403 fd:09:9070 1073741826 1073742335\n"
+                            + "2: POSIX  ADVISORY  WRITE 18292 fd:09:34062 0 EOF\n"
+                            + "2: -> POSIX  ADVISORY  WRITE 18291 fd:09:34062 0 EOF\n"
+                            + "2: -> POSIX  ADVISORY  WRITE 18293 fd:09:34062 0 EOF\n"
+                            + "3: POSIX  ADVISORY  READ  3888 fd:09:13992 128 128\n"
+                            + "4: POSIX  ADVISORY  READ  3888 fd:09:14230 1073741826 1073742335\n";
         runHandleBlockingFileLocks(blockedLocks);
-        assertTrue(mPids.remove(0).equals(18292));
+        assertTrue(Arrays.equals(mPids.remove(0), new int[]{18292, 18291, 18293}));
+        assertTrue(mPids.isEmpty());
+    }
+
+    @Test
+    public void testRunLastBlockingLocks() throws Exception {
+        String blockedLocks = "1: POSIX  ADVISORY  READ  18403 fd:09:9070 1073741826 1073742335\n"
+                            + "2: POSIX  ADVISORY  WRITE 18292 fd:09:34062 0 EOF\n"
+                            + "2: -> POSIX  ADVISORY  WRITE 18291 fd:09:34062 0 EOF\n"
+                            + "2: -> POSIX  ADVISORY  WRITE 18293 fd:09:34062 0 EOF\n";
+        runHandleBlockingFileLocks(blockedLocks);
+        assertTrue(Arrays.equals(mPids.remove(0), new int[]{18292, 18291, 18293}));
         assertTrue(mPids.isEmpty());
     }
 
     @Test
     public void testRunMultipleBlockingLocks() throws Exception {
-        String blockedLocks =
-                "1: POSIX  ADVISORY  READ  18403 fd:09:9070 1073741826 1073742335\n" +
-                "2: POSIX  ADVISORY  WRITE 18292 fd:09:34062 0 EOF\n" +
-                "2: -> POSIX  ADVISORY  WRITE 18291 fd:09:34062 0 EOF\n" +
-                "2: -> POSIX  ADVISORY  WRITE 18293 fd:09:34062 0 EOF\n" +
-                "3: POSIX  ADVISORY  READ  3888 fd:09:13992 128 128\n" +
-                "4: FLOCK  ADVISORY  WRITE 3840 fe:01:5111809 0 EOF\n" +
-                "4: -> FLOCK  ADVISORY  WRITE 3841 fe:01:5111809 0 EOF\n" +
-                "5: POSIX  ADVISORY  READ  3888 fd:09:14230 1073741826 1073742335\n";
+        String blockedLocks = "1: POSIX  ADVISORY  READ  18403 fd:09:9070 1073741826 1073742335\n"
+                            + "2: POSIX  ADVISORY  WRITE 18292 fd:09:34062 0 EOF\n"
+                            + "2: -> POSIX  ADVISORY  WRITE 18291 fd:09:34062 0 EOF\n"
+                            + "2: -> POSIX  ADVISORY  WRITE 18293 fd:09:34062 0 EOF\n"
+                            + "3: POSIX  ADVISORY  READ  3888 fd:09:13992 128 128\n"
+                            + "4: FLOCK  ADVISORY  WRITE 3840 fe:01:5111809 0 EOF\n"
+                            + "4: -> FLOCK  ADVISORY  WRITE 3841 fe:01:5111809 0 EOF\n"
+                            + "5: FLOCK  ADVISORY  READ  3888 fd:09:14230 0 EOF\n"
+                            + "5: -> FLOCK  ADVISORY  READ  3887 fd:09:14230 0 EOF\n";
         runHandleBlockingFileLocks(blockedLocks);
-        assertTrue(mPids.remove(0).equals(18292));
-        assertTrue(mPids.remove(0).equals(3840));
+        assertTrue(Arrays.equals(mPids.remove(0), new int[]{18292, 18291, 18293}));
+        assertTrue(Arrays.equals(mPids.remove(0), new int[]{3840, 3841}));
+        assertTrue(Arrays.equals(mPids.remove(0), new int[]{3888, 3887}));
         assertTrue(mPids.isEmpty());
     }
 
@@ -102,11 +115,12 @@ public class ProcLocksReaderTest implements
 
     /**
      * Call the callback function of handleBlockingFileLocks().
-     *
-     * @param pid Each process that hold file locks blocking other processes.
+     * @param pids Each process that hold file locks blocking other processes.
+     *             pids[0] is the process blocking others
+     *             pids[1..n-1] are the processes being blocked
      */
     @Override
-    public void onBlockingFileLock(int pid) {
-        mPids.add(pid);
+    public void onBlockingFileLock(IntArray pids) {
+        mPids.add(pids.toArray());
     }
 }

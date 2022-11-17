@@ -8400,13 +8400,10 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         // On Automotive / Headless System User Mode, at this point the system user has already been
         // started and unlocked, and some of the tasks we do here have already been done. So skip
-        // those in that case.
+        // those in that case. The duplicate system user start is guarded in SystemServiceManager.
         // TODO(b/242195409): this workaround shouldn't be necessary once we move the headless-user
-        // start logic to UserManager-land
-        final boolean bootingSystemUser = currentUserId == UserHandle.USER_SYSTEM;
-        if (bootingSystemUser) {
-            mUserController.onSystemUserStarting();
-        }
+        // start logic to UserManager-land.
+        mUserController.onSystemUserStarting();
 
         synchronized (this) {
             // Only start up encryption-aware persistent apps; once user is
@@ -8436,7 +8433,15 @@ public class ActivityManagerService extends IActivityManager.Stub
                 t.traceEnd();
             }
 
-            if (bootingSystemUser) {
+            // Some systems - like automotive - will explicitly unlock system user then switch
+            // to a secondary user. Hence, we don't want to send duplicate broadcasts for
+            // the system user here.
+            // TODO(b/242195409): this workaround shouldn't be necessary once we move
+            // the headless-user start logic to UserManager-land.
+            final boolean isBootingSystemUser = (currentUserId == UserHandle.USER_SYSTEM)
+                    && !UserManager.isHeadlessSystemUserMode();
+
+            if (isBootingSystemUser) {
                 t.traceBegin("startHomeOnAllDisplays");
                 mAtmInternal.startHomeOnAllDisplays(currentUserId, "systemReady");
                 t.traceEnd();
@@ -8447,7 +8452,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             t.traceEnd();
 
 
-            if (bootingSystemUser) {
+            if (isBootingSystemUser) {
                 t.traceBegin("sendUserStartBroadcast");
                 final int callingUid = Binder.getCallingUid();
                 final int callingPid = Binder.getCallingPid();
@@ -8488,7 +8493,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             mAtmInternal.resumeTopActivities(false /* scheduleIdle */);
             t.traceEnd();
 
-            if (bootingSystemUser) {
+            if (isBootingSystemUser) {
                 t.traceBegin("sendUserSwitchBroadcasts");
                 mUserController.sendUserSwitchBroadcasts(-1, currentUserId);
                 t.traceEnd();
@@ -13504,9 +13509,19 @@ public class ActivityManagerService extends IActivityManager.Stub
             // Don't enforce the flag check if we're EITHER registering for only protected
             // broadcasts, or the receiver is null (a sticky broadcast). Sticky broadcasts should
             // not be used generally, so we will be marking them as exported by default
-            final boolean requireExplicitFlagForDynamicReceivers = CompatChanges.isChangeEnabled(
+            boolean requireExplicitFlagForDynamicReceivers = CompatChanges.isChangeEnabled(
                     DYNAMIC_RECEIVER_EXPLICIT_EXPORT_REQUIRED, callingUid)
                     && mConstants.mEnforceReceiverExportedFlagRequirement;
+            // STOPSHIP(b/259139792): Allow apps that are currently targeting U and in process of
+            // updating their receivers to be exempt from this requirement until their receivers
+            // are flagged.
+            if (requireExplicitFlagForDynamicReceivers) {
+                if ("com.google.android.apps.messaging".equals(callerPackage)) {
+                    // Note, a versionCode check for this package is not performed because it could
+                    // cause breakage with a subsequent update outside the system image.
+                    requireExplicitFlagForDynamicReceivers = false;
+                }
+            }
             if (!onlyProtectedBroadcasts) {
                 if (receiver == null && !explicitExportStateDefined) {
                     // sticky broadcast, no flag specified (flag isn't required)
@@ -18110,6 +18125,30 @@ public class ActivityManagerService extends IActivityManager.Stub
             mUidObserverController.register(observer, which, cutpoint, callingPackage,
                     Binder.getCallingUid());
         }
+
+        @Override
+        public boolean startForegroundServiceDelegate(
+                @NonNull ForegroundServiceDelegationOptions options,
+                @Nullable ServiceConnection connection) {
+            synchronized (ActivityManagerService.this) {
+                return mServices.startForegroundServiceDelegateLocked(options, connection);
+            }
+        }
+
+        @Override
+        public void stopForegroundServiceDelegate(
+                @NonNull ForegroundServiceDelegationOptions options) {
+            synchronized (ActivityManagerService.this) {
+                mServices.stopForegroundServiceDelegateLocked(options);
+            }
+        }
+
+        @Override
+        public void stopForegroundServiceDelegate(@NonNull ServiceConnection connection) {
+            synchronized (ActivityManagerService.this) {
+                mServices.stopForegroundServiceDelegateLocked(connection);
+            }
+        }
     }
 
     long inputDispatchingTimedOut(int pid, final boolean aboveSystem, TimeoutRecord timeoutRecord) {
@@ -18293,6 +18332,59 @@ public class ActivityManagerService extends IActivityManager.Stub
         final long callingId = Binder.clearCallingIdentity();
         try {
             return mInternal.getRestrictionLevel(packageName, userId);
+        } finally {
+            Binder.restoreCallingIdentity(callingId);
+        }
+    }
+
+    /**
+     * Start/stop foreground service delegate on a app's process.
+     * This interface is intended for the shell command to use.
+     */
+    void setForegroundServiceDelegate(String packageName, int uid, boolean isStart,
+            @ForegroundServiceDelegationOptions.DelegationService int delegateService,
+            String clientInstanceName) {
+        final int callingUid = Binder.getCallingUid();
+        if (callingUid != SYSTEM_UID && callingUid != ROOT_UID && callingUid != SHELL_UID) {
+            throw new SecurityException(
+                    "No permission to start/stop foreground service delegate");
+        }
+        final long callingId = Binder.clearCallingIdentity();
+        try {
+            boolean foundPid = false;
+            synchronized (this) {
+                ArrayList<ForegroundServiceDelegationOptions> delegates = new ArrayList<>();
+                synchronized (mPidsSelfLocked) {
+                    for (int i = 0; i < mPidsSelfLocked.size(); i++) {
+                        final ProcessRecord p = mPidsSelfLocked.valueAt(i);
+                        final IApplicationThread thread = p.getThread();
+                        if (p.uid == uid && thread != null) {
+                            foundPid = true;
+                            int pid = mPidsSelfLocked.keyAt(i);
+                            ForegroundServiceDelegationOptions options =
+                                    new ForegroundServiceDelegationOptions(pid, uid, packageName,
+                                            null /* clientAppThread */,
+                                            false /* isSticky */,
+                                            clientInstanceName, 0 /* foregroundServiceType */,
+                                            delegateService);
+                            delegates.add(options);
+                        }
+                    }
+                }
+                for (int i = delegates.size() - 1; i >= 0; i--) {
+                    final ForegroundServiceDelegationOptions options = delegates.get(i);
+                    if (isStart) {
+                        ((ActivityManagerLocal) mInternal).startForegroundServiceDelegate(options,
+                                null /* connection */);
+                    } else {
+                        ((ActivityManagerLocal) mInternal).stopForegroundServiceDelegate(options);
+                    }
+                }
+            }
+            if (!foundPid) {
+                Slog.e(TAG, "setForegroundServiceDelegate can not find process for packageName:"
+                        + packageName + " uid:" + uid);
+            }
         } finally {
             Binder.restoreCallingIdentity(callingId);
         }

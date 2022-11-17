@@ -64,6 +64,7 @@ interface ITvInteractiveAppManager {
     void notifyContentBlocked(in IBinder sessionToken, in String rating, int userId);
     void notifySignalStrength(in IBinder sessionToken, int stength, int userId);
     void notifyRecordingStarted(in IBinder sessionToken, in String recordingId, int userId);
+    void notifyRecordingStopped(in IBinder sessionToken, in String recordingId, int userId);
     void setSurface(in IBinder sessionToken, in Surface surface, int userId);
     void dispatchSurfaceChanged(in IBinder sessionToken, int format, int width, int height,
             int userId);

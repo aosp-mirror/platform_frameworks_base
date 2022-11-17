@@ -37,6 +37,7 @@ import android.provider.DeviceConfig.Properties;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.EventLog;
+import android.util.IntArray;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -845,7 +846,7 @@ public final class CachedAppOptimizer {
     /**
      * Retrieves the free swap percentage.
      */
-    static private native double getFreeSwapPercent();
+    static native double getFreeSwapPercent();
 
     /**
      * Retrieves the total used physical ZRAM
@@ -2110,15 +2111,28 @@ public final class CachedAppOptimizer {
 
         @GuardedBy({"mAm"})
         @Override
-        public void onBlockingFileLock(int pid) {
+        public void onBlockingFileLock(IntArray pids) {
             if (DEBUG_FREEZER) {
-                Slog.d(TAG_AM, "Process (pid=" + pid + ") holds blocking file lock");
+                Slog.d(TAG_AM, "Blocking file lock found: " + pids);
             }
             synchronized (mProcLock) {
+                int pid = pids.get(0);
                 ProcessRecord app = mFrozenProcesses.get(pid);
+                ProcessRecord pr;
                 if (app != null) {
-                    Slog.i(TAG_AM, app.processName + " (" + pid + ") holds blocking file lock");
-                    unfreezeAppLSP(app, OomAdjuster.OOM_ADJ_REASON_NONE);
+                    for (int i = 1; i < pids.size(); i++) {
+                        int blocked = pids.get(i);
+                        synchronized (mAm.mPidsSelfLocked) {
+                            pr = mAm.mPidsSelfLocked.get(blocked);
+                        }
+                        if (pr != null && pr.mState.getCurAdj() < ProcessList.CACHED_APP_MIN_ADJ) {
+                            Slog.d(TAG_AM, app.processName + " (" + pid + ") blocks "
+                                    + pr.processName + " (" + blocked + ")");
+                            // Found at least one blocked non-cached process
+                            unfreezeAppLSP(app, OomAdjuster.OOM_ADJ_REASON_NONE);
+                            break;
+                        }
+                    }
                 }
             }
         }

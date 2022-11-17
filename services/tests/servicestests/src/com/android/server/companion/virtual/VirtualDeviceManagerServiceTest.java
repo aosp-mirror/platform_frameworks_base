@@ -16,6 +16,9 @@
 
 package com.android.server.companion.virtual;
 
+import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_CUSTOM;
+import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_DEFAULT;
+import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_SENSORS;
 import static android.content.pm.ActivityInfo.FLAG_CAN_DISPLAY_ON_REMOTE_DEVICES;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -44,6 +47,7 @@ import android.app.WindowConfiguration;
 import android.app.admin.DevicePolicyManager;
 import android.companion.AssociationInfo;
 import android.companion.virtual.IVirtualDeviceActivityListener;
+import android.companion.virtual.VirtualDeviceManager;
 import android.companion.virtual.VirtualDeviceParams;
 import android.companion.virtual.audio.IAudioConfigChangedCallback;
 import android.companion.virtual.audio.IAudioRoutingCallback;
@@ -240,6 +244,55 @@ public class VirtualDeviceManagerServiceTest {
                 mAssociationInfo, new Binder(), /* ownerUid */ 0, /* uniqueId */ 1,
                 mInputController, (int associationId) -> {}, mPendingTrampolineCallback,
                 mActivityListener, mRunningAppsChangedCallback, params);
+        mVdms.addVirtualDevice(mDeviceImpl);
+    }
+
+    @Test
+    public void getDevicePolicy_invalidDeviceId_returnsDefault() {
+        assertThat(
+                mLocalService.getDevicePolicy(
+                        VirtualDeviceManager.INVALID_DEVICE_ID, POLICY_TYPE_SENSORS))
+                .isEqualTo(DEVICE_POLICY_DEFAULT);
+    }
+
+    @Test
+    public void getDevicePolicy_defaultDeviceId_returnsDefault() {
+        assertThat(
+                mLocalService.getDevicePolicy(
+                        VirtualDeviceManager.DEFAULT_DEVICE_ID, POLICY_TYPE_SENSORS))
+                .isEqualTo(DEVICE_POLICY_DEFAULT);
+    }
+
+    @Test
+    public void getDevicePolicy_nonExistentDeviceId_returnsDefault() {
+        assertThat(
+                mLocalService.getDevicePolicy(mDeviceImpl.getDeviceId() + 1, POLICY_TYPE_SENSORS))
+                .isEqualTo(DEVICE_POLICY_DEFAULT);
+    }
+
+    @Test
+    public void getDevicePolicy_unspecifiedPolicy_returnsDefault() {
+        assertThat(
+                mLocalService.getDevicePolicy(mDeviceImpl.getDeviceId(), POLICY_TYPE_SENSORS))
+                .isEqualTo(DEVICE_POLICY_DEFAULT);
+    }
+
+    @Test
+    public void getDevicePolicy_returnsCustom() {
+        VirtualDeviceParams params = new VirtualDeviceParams
+                .Builder()
+                .setBlockedActivities(getBlockedActivities())
+                .addDevicePolicy(POLICY_TYPE_SENSORS, DEVICE_POLICY_CUSTOM)
+                .build();
+        mDeviceImpl = new VirtualDeviceImpl(mContext,
+                mAssociationInfo, new Binder(), /* ownerUid */ 0, /* uniqueId */ 1,
+                mInputController, (int associationId) -> {}, mPendingTrampolineCallback,
+                mActivityListener, mRunningAppsChangedCallback, params);
+        mVdms.addVirtualDevice(mDeviceImpl);
+
+        assertThat(
+                mLocalService.getDevicePolicy(mDeviceImpl.getDeviceId(), POLICY_TYPE_SENSORS))
+                .isEqualTo(DEVICE_POLICY_CUSTOM);
     }
 
     @Test

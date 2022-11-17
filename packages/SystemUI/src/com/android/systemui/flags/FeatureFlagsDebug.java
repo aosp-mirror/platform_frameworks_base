@@ -337,7 +337,6 @@ public class FeatureFlagsDebug implements FeatureFlags {
             Log.i(TAG, "Android Restart Suppressed");
             return;
         }
-        Log.i(TAG, "Restarting Android");
         mRestarter.restart();
     }
 

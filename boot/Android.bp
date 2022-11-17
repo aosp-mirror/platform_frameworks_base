@@ -136,6 +136,10 @@ platform_bootclasspath {
             apex: "com.android.car.framework",
             module: "com.android.car.framework-bootclasspath-fragment",
         },
+        {
+            apex: "com.android.virt",
+            module: "com.android.virt-bootclasspath-fragment",
+        },
     ],
 
     // Additional information needed by hidden api processing.

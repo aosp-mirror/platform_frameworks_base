@@ -18,6 +18,7 @@ package com.android.internal.os;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.content.Intent;
 import android.os.SystemClock;
 
 import com.android.internal.os.anr.AnrLatencyTracker;
@@ -92,7 +93,17 @@ public class TimeoutRecord {
 
     /** Record for a broadcast receiver timeout. */
     @NonNull
-    public static TimeoutRecord forBroadcastReceiver(@NonNull String reason) {
+    public static TimeoutRecord forBroadcastReceiver(@NonNull Intent intent) {
+        String reason = "Broadcast of " + intent.toString();
+        return TimeoutRecord.endingNow(TimeoutKind.BROADCAST_RECEIVER, reason);
+    }
+
+    /** Record for a broadcast receiver timeout. */
+    @NonNull
+    public static TimeoutRecord forBroadcastReceiver(@NonNull Intent intent,
+            long timeoutDurationMs) {
+        String reason = "Broadcast of " + intent.toString() + ", waited " + timeoutDurationMs
+                + "ms";
         return TimeoutRecord.endingNow(TimeoutKind.BROADCAST_RECEIVER, reason);
     }
 

@@ -28,6 +28,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
 import android.util.ArraySet;
+import android.util.SparseIntArray;
 
 import com.android.internal.util.Preconditions;
 
@@ -103,6 +104,47 @@ public final class VirtualDeviceParams implements Parcelable {
      */
     public static final int NAVIGATION_POLICY_DEFAULT_BLOCKED = 1;
 
+    /** @hide */
+    @IntDef(prefix = "DEVICE_POLICY_",  value = {DEVICE_POLICY_DEFAULT, DEVICE_POLICY_CUSTOM})
+    @Retention(RetentionPolicy.SOURCE)
+    @Target({ElementType.TYPE_PARAMETER, ElementType.TYPE_USE})
+    public @interface DevicePolicy {}
+
+    /**
+     * Indicates that there is no special logic for this virtual device and it should be treated
+     * the same way as the default device, keeping the default behavior unchanged.
+     */
+    public static final int DEVICE_POLICY_DEFAULT = 0;
+
+    /**
+     * Indicates that there is custom logic, specific to this virtual device, which should be
+     * triggered instead of the default behavior.
+     */
+    public static final int DEVICE_POLICY_CUSTOM = 1;
+
+    /**
+     * Any relevant component must be able to interpret the correct meaning of a custom policy for
+     * a given policy type.
+     * @hide
+     */
+    @IntDef(prefix = "POLICY_TYPE_",  value = {POLICY_TYPE_SENSORS})
+    @Retention(RetentionPolicy.SOURCE)
+    @Target({ElementType.TYPE_PARAMETER, ElementType.TYPE_USE})
+    public @interface PolicyType {}
+
+    /**
+     * Tells the sensor framework how to handle sensor requests from contexts associated with this
+     * virtual device, namely the sensors returned by
+     * {@link android.hardware.SensorManager#getSensorList}:
+     *
+     * <ul>
+     *     <li>{@link #DEVICE_POLICY_DEFAULT}: Return the sensors of the default device.
+     *     <li>{@link #DEVICE_POLICY_CUSTOM}: Return the sensors of the virtual device. Note that if
+     *     the virtual device did not create any virtual sensors, then an empty list is returned.
+     * </ul>
+     */
+    public static final int POLICY_TYPE_SENSORS = 0;
+
     private final int mLockState;
     @NonNull private final ArraySet<UserHandle> mUsersWithMatchingAccounts;
     @NonNull private final ArraySet<ComponentName> mAllowedCrossTaskNavigations;
@@ -114,6 +156,8 @@ public final class VirtualDeviceParams implements Parcelable {
     @ActivityPolicy
     private final int mDefaultActivityPolicy;
     @Nullable private final String mName;
+    // Mapping of @PolicyType to @DevicePolicy
+    @NonNull private final SparseIntArray mDevicePolicies;
 
     private VirtualDeviceParams(
             @LockState int lockState,
@@ -124,12 +168,14 @@ public final class VirtualDeviceParams implements Parcelable {
             @NonNull Set<ComponentName> allowedActivities,
             @NonNull Set<ComponentName> blockedActivities,
             @ActivityPolicy int defaultActivityPolicy,
-            @Nullable String name) {
+            @Nullable String name,
+            @NonNull SparseIntArray devicePolicies) {
         Preconditions.checkNotNull(usersWithMatchingAccounts);
         Preconditions.checkNotNull(allowedCrossTaskNavigations);
         Preconditions.checkNotNull(blockedCrossTaskNavigations);
         Preconditions.checkNotNull(allowedActivities);
         Preconditions.checkNotNull(blockedActivities);
+        Preconditions.checkNotNull(devicePolicies);
 
         mLockState = lockState;
         mUsersWithMatchingAccounts = new ArraySet<>(usersWithMatchingAccounts);
@@ -140,6 +186,7 @@ public final class VirtualDeviceParams implements Parcelable {
         mBlockedActivities = new ArraySet<>(blockedActivities);
         mDefaultActivityPolicy = defaultActivityPolicy;
         mName = name;
+        mDevicePolicies = devicePolicies;
     }
 
     @SuppressWarnings("unchecked")
@@ -153,6 +200,7 @@ public final class VirtualDeviceParams implements Parcelable {
         mBlockedActivities = (ArraySet<ComponentName>) parcel.readArraySet(null);
         mDefaultActivityPolicy = parcel.readInt();
         mName = parcel.readString8();
+        mDevicePolicies = parcel.readSparseIntArray();
     }
 
     /**
@@ -258,6 +306,16 @@ public final class VirtualDeviceParams implements Parcelable {
         return mName;
     }
 
+    /**
+     * Returns the policy specified for this policy type, or {@link #DEVICE_POLICY_DEFAULT} if no
+     * policy for this type has been explicitly specified.
+     *
+     * @see Builder#addDevicePolicy
+     */
+    public @DevicePolicy int getDevicePolicy(@PolicyType int policyType) {
+        return mDevicePolicies.get(policyType, DEVICE_POLICY_DEFAULT);
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -274,6 +332,7 @@ public final class VirtualDeviceParams implements Parcelable {
         dest.writeArraySet(mBlockedActivities);
         dest.writeInt(mDefaultActivityPolicy);
         dest.writeString8(mName);
+        dest.writeSparseIntArray(mDevicePolicies);
     }
 
     @Override
@@ -285,6 +344,18 @@ public final class VirtualDeviceParams implements Parcelable {
             return false;
         }
         VirtualDeviceParams that = (VirtualDeviceParams) o;
+        final int devicePoliciesCount = mDevicePolicies.size();
+        if (devicePoliciesCount != that.mDevicePolicies.size()) {
+            return false;
+        }
+        for (int i = 0; i < devicePoliciesCount; i++) {
+            if (mDevicePolicies.keyAt(i) != that.mDevicePolicies.keyAt(i)) {
+                return false;
+            }
+            if (mDevicePolicies.valueAt(i) != that.mDevicePolicies.valueAt(i)) {
+                return false;
+            }
+        }
         return mLockState == that.mLockState
                 && mUsersWithMatchingAccounts.equals(that.mUsersWithMatchingAccounts)
                 && Objects.equals(mAllowedCrossTaskNavigations, that.mAllowedCrossTaskNavigations)
@@ -298,10 +369,15 @@ public final class VirtualDeviceParams implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(
+        int hashCode = Objects.hash(
                 mLockState, mUsersWithMatchingAccounts, mAllowedCrossTaskNavigations,
                 mBlockedCrossTaskNavigations, mDefaultNavigationPolicy,  mAllowedActivities,
-                mBlockedActivities, mDefaultActivityPolicy, mName);
+                mBlockedActivities, mDefaultActivityPolicy, mName, mDevicePolicies);
+        for (int i = 0; i < mDevicePolicies.size(); i++) {
+            hashCode = 31 * hashCode + mDevicePolicies.keyAt(i);
+            hashCode = 31 * hashCode + mDevicePolicies.valueAt(i);
+        }
+        return hashCode;
     }
 
     @Override
@@ -317,6 +393,7 @@ public final class VirtualDeviceParams implements Parcelable {
                 + " mBlockedActivities=" + mBlockedActivities
                 + " mDefaultActivityPolicy=" + mDefaultActivityPolicy
                 + " mName=" + mName
+                + " mDevicePolicies=" + mDevicePolicies
                 + ")";
     }
 
@@ -350,6 +427,7 @@ public final class VirtualDeviceParams implements Parcelable {
         private int mDefaultActivityPolicy = ACTIVITY_POLICY_DEFAULT_ALLOWED;
         private boolean mDefaultActivityPolicyConfigured = false;
         @Nullable private String mName;
+        @NonNull private SparseIntArray mDevicePolicies = new SparseIntArray();
 
         /**
          * Sets the lock state of the device. The permission {@code ADD_ALWAYS_UNLOCKED_DISPLAY}
@@ -528,6 +606,18 @@ public final class VirtualDeviceParams implements Parcelable {
         }
 
         /**
+         * Specifies a policy for this virtual device.
+         *
+         * @param policyType the type of policy, i.e. which behavior to specify a policy for.
+         * @param devicePolicy the value of the policy, i.e. how to interpret the device behavior.
+         */
+        @NonNull
+        public Builder addDevicePolicy(@PolicyType int policyType, @DevicePolicy int devicePolicy) {
+            mDevicePolicies.put(policyType, devicePolicy);
+            return this;
+        }
+
+        /**
          * Builds the {@link VirtualDeviceParams} instance.
          */
         @NonNull
@@ -541,7 +631,8 @@ public final class VirtualDeviceParams implements Parcelable {
                     mAllowedActivities,
                     mBlockedActivities,
                     mDefaultActivityPolicy,
-                    mName);
+                    mName,
+                    mDevicePolicies);
         }
     }
 }

@@ -907,8 +907,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         if (deliveryState == BroadcastRecord.DELIVERY_TIMEOUT) {
             r.anrCount++;
             if (app != null && !app.isDebugging()) {
-                mService.appNotResponding(queue.app, TimeoutRecord
-                        .forBroadcastReceiver("Broadcast of " + r.toShortString()));
+                mService.appNotResponding(queue.app, TimeoutRecord.forBroadcastReceiver(r.intent));
             }
         } else {
             mLocalHandler.removeMessages(MSG_DELIVERY_TIMEOUT_SOFT, queue);

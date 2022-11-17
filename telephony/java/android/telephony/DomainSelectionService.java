@@ -28,7 +28,6 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
-import android.telephony.AccessNetworkConstants.RadioAccessNetworkType;
 import android.telephony.Annotation.DisconnectCauses;
 import android.telephony.Annotation.PreciseDisconnectCauses;
 import android.telephony.ims.ImsReasonInfo;
@@ -703,9 +702,9 @@ public class DomainSelectionService extends Service {
         }
 
         @Override
-        public void onDomainSelected(@RadioAccessNetworkType int accessNetworkType) {
+        public void onDomainSelected(@NetworkRegistrationInfo.Domain int domain) {
             try {
-                mCallback.onDomainSelected(accessNetworkType);
+                mCallback.onDomainSelected(domain);
             } catch (Exception e) {
                 Rlog.e(TAG, "onDomainSelected e=" + e);
             }
@@ -835,7 +834,14 @@ public class DomainSelectionService extends Service {
         return Runnable::run;
     }
 
-    private @NonNull Executor getCachedExecutor() {
+    /**
+     * Gets the {@link Executor} which executes methods of this service.
+     * This method should be private when this service is implemented in a separated process
+     * other than telephony framework.
+     * @return {@link Executor} instance.
+     * @hide
+     */
+    public @NonNull Executor getCachedExecutor() {
         synchronized (mExecutorLock) {
             if (mExecutor == null) {
                 Executor e = getExecutor();

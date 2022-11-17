@@ -21,6 +21,7 @@ import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MANIFEST;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentCallbacks2;
 import android.content.ComponentName;
@@ -726,10 +727,32 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      * for more details.
      * </div>
      *
+     * <div class="caution">
+     * <p><strong>Note:</strong>
+     * Beginning with SDK Version {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+     * apps targeting SDK Version {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}
+     * or higher are not allowed to start foreground services without specifying a valid
+     * foreground service type in the manifest attribute
+     * {@link android.R.attr#foregroundServiceType}.
+     * See
+     * <a href="{@docRoot}/about/versions/14/behavior-changes-14">
+     * Behavior changes: Apps targeting Android 14
+     * </a>
+     * for more details.
+     * </div>
+     *
      * @throws ForegroundServiceStartNotAllowedException
      * If the app targeting API is
      * {@link android.os.Build.VERSION_CODES#S} or later, and the service is restricted from
      * becoming foreground service due to background restriction.
+     * @throws ForegroundServiceTypeNotAllowedException
+     * If the app targeting API is
+     * {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} or later, and the manifest attribute
+     * {@link android.R.attr#foregroundServiceType} is not set.
+     * @throws SecurityException If the app targeting API is
+     * {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} or later and doesn't have the
+     * permission to start the foreground service with the specified type in the manifest attribute
+     * {@link android.R.attr#foregroundServiceType}.
      *
      * @param id The identifier for this notification as per
      * {@link NotificationManager#notify(int, Notification)
@@ -748,51 +771,77 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
         }
     }
 
-  /**
-   * An overloaded version of {@link #startForeground(int, Notification)} with additional
-   * foregroundServiceType parameter.
-   *
-   * <p>Apps built with SDK version {@link android.os.Build.VERSION_CODES#Q} or later can specify
-   * the foreground service types using attribute {@link android.R.attr#foregroundServiceType} in
-   * service element of manifest file. The value of attribute
-   * {@link android.R.attr#foregroundServiceType} can be multiple flags ORed together.</p>
-   *
-   * <p>The foregroundServiceType parameter must be a subset flags of what is specified in manifest
-   * attribute {@link android.R.attr#foregroundServiceType}, if not, an IllegalArgumentException is
-   * thrown. Specify foregroundServiceType parameter as
-   * {@link android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_MANIFEST} to use all flags that
-   * is specified in manifest attribute foregroundServiceType.</p>
-   *
-   * <div class="caution">
-   * <p><strong>Note:</strong>
-   * Beginning with SDK Version {@link android.os.Build.VERSION_CODES#S},
-   * apps targeting SDK Version {@link android.os.Build.VERSION_CODES#S}
-   * or higher are not allowed to start foreground services from the background.
-   * See
-   * <a href="{@docRoot}/about/versions/12/behavior-changes-12">
-   * Behavior changes: Apps targeting Android 12
-   * </a>
-   * for more details.
-   * </div>
-   *
-   * @param id The identifier for this notification as per
-   * {@link NotificationManager#notify(int, Notification)
-   * NotificationManager.notify(int, Notification)}; must not be 0.
-   * @param notification The Notification to be displayed.
-   * @param foregroundServiceType must be a subset flags of manifest attribute
-   * {@link android.R.attr#foregroundServiceType} flags.
-   *
-   * @throws IllegalArgumentException if param foregroundServiceType is not subset of manifest
-   *     attribute {@link android.R.attr#foregroundServiceType}.
-   * @throws ForegroundServiceStartNotAllowedException
-   * If the app targeting API is
-   * {@link android.os.Build.VERSION_CODES#S} or later, and the service is restricted from
-   * becoming foreground service due to background restriction.
-   *
-   * @see android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_MANIFEST
-   */
+    /**
+     * An overloaded version of {@link #startForeground(int, Notification)} with additional
+     * foregroundServiceType parameter.
+     *
+     * <p>Apps built with SDK version {@link android.os.Build.VERSION_CODES#Q} or later can specify
+     * the foreground service types using attribute {@link android.R.attr#foregroundServiceType} in
+     * service element of manifest file. The value of attribute
+     * {@link android.R.attr#foregroundServiceType} can be multiple flags ORed together.</p>
+     *
+     * <p>The foregroundServiceType parameter must be a subset flags of what is specified in
+     * manifest attribute {@link android.R.attr#foregroundServiceType}, if not, an
+     * IllegalArgumentException is thrown. Specify foregroundServiceType parameter as
+     * {@link android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_MANIFEST} to use all flags that
+     * is specified in manifest attribute foregroundServiceType.</p>
+     *
+     * <div class="caution">
+     * <p><strong>Note:</strong>
+     * Beginning with SDK Version {@link android.os.Build.VERSION_CODES#S},
+     * apps targeting SDK Version {@link android.os.Build.VERSION_CODES#S}
+     * or higher are not allowed to start foreground services from the background.
+     * See
+     * <a href="{@docRoot}/about/versions/12/behavior-changes-12">
+     * Behavior changes: Apps targeting Android 12
+     * </a>
+     * for more details.
+     * </div>
+     *
+     * <div class="caution">
+     * <p><strong>Note:</strong>
+     * Beginning with SDK Version {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+     * apps targeting SDK Version {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}
+     * or higher are not allowed to start foreground services without specifying a valid
+     * foreground service type in the manifest attribute
+     * {@link android.R.attr#foregroundServiceType}, and the parameter {@code foregroundServiceType}
+     * here must not be the {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_NONE}.
+     * See
+     * <a href="{@docRoot}/about/versions/14/behavior-changes-14">
+     * Behavior changes: Apps targeting Android 14
+     * </a>
+     * for more details.
+     * </div>
+     *
+     * @param id The identifier for this notification as per
+     * {@link NotificationManager#notify(int, Notification)
+     * NotificationManager.notify(int, Notification)}; must not be 0.
+     * @param notification The Notification to be displayed.
+     * @param foregroundServiceType must be a subset flags of manifest attribute
+     * {@link android.R.attr#foregroundServiceType} flags; must not be
+     * {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_NONE}.
+     *
+     * @throws IllegalArgumentException if param foregroundServiceType is not subset of manifest
+     *     attribute {@link android.R.attr#foregroundServiceType}.
+     * @throws ForegroundServiceStartNotAllowedException
+     * If the app targeting API is
+     * {@link android.os.Build.VERSION_CODES#S} or later, and the service is restricted from
+     * becoming foreground service due to background restriction.
+     * @throws ForegroundServiceTypeNotAllowedException
+     * If the app targeting API is
+     * {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} or later, and the manifest attribute
+     * {@link android.R.attr#foregroundServiceType} is not set, or the param
+     * {@code foregroundServiceType} is {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_NONE}.
+     * @throws SecurityException If the app targeting API is
+     * {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} or later and doesn't have the
+     * permission to start the foreground service with the specified type in
+     * {@code foregroundServiceType}.
+     * {@link android.R.attr#foregroundServiceType}.
+     *
+     * @see android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_MANIFEST
+     */
     public final void startForeground(int id, @NonNull Notification notification,
-            @ForegroundServiceType int foregroundServiceType) {
+            @RequiresPermission @ForegroundServiceType int foregroundServiceType) {
         try {
             mActivityManager.setServiceForeground(
                     new ComponentName(this, mClassName), mToken, id,

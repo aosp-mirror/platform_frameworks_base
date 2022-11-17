@@ -34,6 +34,9 @@ abstract class FlagsModule {
     @Binds
     abstract fun bindsFeatureFlagDebug(impl: FeatureFlagsDebug): FeatureFlags
 
+    @Binds
+    abstract fun bindsRestarter(debugRestarter: FeatureFlagsDebugRestarter): Restarter
+
     @Module
     companion object {
         @JvmStatic

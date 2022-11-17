@@ -27,4 +27,7 @@ import dagger.Module
 abstract class FlagsModule {
     @Binds
     abstract fun bindsFeatureFlagRelease(impl: FeatureFlagsRelease): FeatureFlags
+
+    @Binds
+    abstract fun bindsRestarter(debugRestarter: FeatureFlagsReleaseRestarter): Restarter
 }

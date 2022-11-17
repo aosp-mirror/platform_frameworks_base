@@ -26,16 +26,21 @@ import android.app.job.JobService;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.IBackgroundInstallControlService;
 import android.content.pm.InstallSourceInfo;
 import android.content.pm.ModuleInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ParceledListSlice;
+import android.content.pm.SharedLibraryInfo;
 import android.content.pm.Signature;
 import android.content.pm.SigningDetails;
 import android.content.pm.SigningInfo;
+import android.content.pm.parsing.result.ParseInput;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
@@ -43,6 +48,8 @@ import android.os.ServiceManager;
 import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.os.SystemProperties;
+import android.os.UserHandle;
+import android.text.TextUtils;
 import android.util.PackageUtils;
 import android.util.Slog;
 import android.util.apk.ApkSignatureVerifier;
@@ -54,14 +61,16 @@ import com.android.internal.util.FrameworkStatsLog;
 
 import libcore.util.HexEncoding;
 
+import java.io.File;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
@@ -82,10 +91,36 @@ public class BinaryTransparencyService extends SystemService {
     @VisibleForTesting
     static final String BINARY_HASH_ERROR = "SHA256HashError";
 
+    static final int MEASURE_APEX_AND_MODULES = 1;
+    static final int MEASURE_PRELOADS = 2;
+    static final int MEASURE_NEW_MBAS = 3;
+
+    static final long RECORD_MEASUREMENTS_COOLDOWN_MS = 24 * 60 * 60 * 1000;
+
+    @VisibleForTesting
+    static final String BUNDLE_PACKAGE_INFO = "package-info";
+    @VisibleForTesting
+    static final String BUNDLE_CONTENT_DIGEST_ALGORITHM = "content-digest-algo";
+    @VisibleForTesting
+    static final String BUNDLE_CONTENT_DIGEST = "content-digest";
+
+    // used for indicating any type of error during MBA measurement
+    static final int MBA_STATUS_ERROR = 0;
+    // used for indicating factory condition preloads
+    static final int MBA_STATUS_PRELOADED = 1;
+    // used for indicating preloaded apps that are updated
+    static final int MBA_STATUS_UPDATED_PRELOAD = 2;
+    // used for indicating newly installed MBAs
+    static final int MBA_STATUS_NEW_INSTALL = 3;
+    // used for indicating newly installed MBAs that are updated (but unused currently)
+    static final int MBA_STATUS_UPDATED_NEW_INSTALL = 4;
+
+    private static final boolean DEBUG = true;     // set this to false upon submission
+
     private final Context mContext;
     private String mVbmetaDigest;
-    private HashMap<String, String> mBinaryHashes;
-    private HashMap<String, Long> mBinaryLastUpdateTimes;
+    // the system time (in ms) the last measurement was taken
+    private long mMeasurementsLastRecordedMs;
 
     final class BinaryTransparencyServiceImpl extends IBinaryTransparencyService.Stub {
 
@@ -95,23 +130,296 @@ public class BinaryTransparencyService extends SystemService {
         }
 
         @Override
-        public Map getApexInfo() {
-            HashMap results = new HashMap();
-            if (!updateBinaryMeasurements()) {
-                Slog.e(TAG, "Error refreshing APEX measurements.");
-                return results;
-            }
-            PackageManager pm = mContext.getPackageManager();
-            if (pm == null) {
-                Slog.e(TAG, "Error obtaining an instance of PackageManager.");
-                return results;
-            }
+        public List getApexInfo() {
+            List<Bundle> results = new ArrayList<>();
 
-            for (PackageInfo packageInfo : getInstalledApexs()) {
-                results.put(packageInfo, mBinaryHashes.get(packageInfo.packageName));
+            for (PackageInfo packageInfo : getCurrentInstalledApexs()) {
+                Bundle apexMeasurement = measurePackage(packageInfo);
+                results.add(apexMeasurement);
             }
 
             return results;
+        }
+
+        /**
+         * A helper function to compute the SHA256 digest of APK package signer.
+         * @param signingInfo The signingInfo of a package, usually {@link PackageInfo#signingInfo}.
+         * @return an array of {@code String} representing hex encoded string of the
+         *         SHA256 digest of APK signer(s). The number of signers will be reflected by the
+         *         size of the array.
+         *         However, {@code null} is returned if there is any error.
+         */
+        private String[] computePackageSignerSha256Digests(@Nullable SigningInfo signingInfo) {
+            if (signingInfo == null) {
+                Slog.e(TAG, "signingInfo is null");
+                return null;
+            }
+
+            Signature[] packageSigners = signingInfo.getApkContentsSigners();
+            List<String> resultList = new ArrayList<>();
+            for (Signature packageSigner : packageSigners) {
+                byte[] digest = PackageUtils.computeSha256DigestBytes(packageSigner.toByteArray());
+                String digestHexString = HexEncoding.encodeToString(digest, false);
+                resultList.add(digestHexString);
+            }
+            return resultList.toArray(new String[1]);
+        }
+
+        /**
+         * Perform basic measurement (i.e. content digest) on a given package.
+         * @param packageInfo The package to be measured.
+         * @return a {@link android.os.Bundle} that packs the measurement result with the following
+         *         keys: {@link #BUNDLE_PACKAGE_INFO},
+         *               {@link #BUNDLE_CONTENT_DIGEST_ALGORITHM}
+         *               {@link #BUNDLE_CONTENT_DIGEST}
+         */
+        private @NonNull Bundle measurePackage(PackageInfo packageInfo) {
+            Bundle result = new Bundle();
+
+            // compute content digest
+            if (DEBUG) {
+                Slog.d(TAG, "Computing content digest for " + packageInfo.packageName + " at "
+                        + packageInfo.applicationInfo.sourceDir);
+            }
+            Map<Integer, byte[]> contentDigests = computeApkContentDigest(
+                    packageInfo.applicationInfo.sourceDir);
+            result.putParcelable(BUNDLE_PACKAGE_INFO, packageInfo);
+            if (contentDigests == null) {
+                Slog.d(TAG, "Failed to compute content digest for "
+                        + packageInfo.applicationInfo.sourceDir);
+                result.putInt(BUNDLE_CONTENT_DIGEST_ALGORITHM, 0);
+                result.putByteArray(BUNDLE_CONTENT_DIGEST, null);
+                return result;
+            }
+
+            // in this iteration, we'll be supporting only 2 types of digests:
+            // CHUNKED_SHA256 and CHUNKED_SHA512.
+            // And only one of them will be available per package.
+            if (contentDigests.containsKey(ApkSigningBlockUtils.CONTENT_DIGEST_CHUNKED_SHA256)) {
+                Integer algorithmId = ApkSigningBlockUtils.CONTENT_DIGEST_CHUNKED_SHA256;
+                result.putInt(BUNDLE_CONTENT_DIGEST_ALGORITHM, algorithmId);
+                result.putByteArray(BUNDLE_CONTENT_DIGEST, contentDigests.get(algorithmId));
+            } else if (contentDigests.containsKey(
+                    ApkSigningBlockUtils.CONTENT_DIGEST_CHUNKED_SHA512)) {
+                Integer algorithmId = ApkSigningBlockUtils.CONTENT_DIGEST_CHUNKED_SHA512;
+                result.putInt(BUNDLE_CONTENT_DIGEST_ALGORITHM, algorithmId);
+                result.putByteArray(BUNDLE_CONTENT_DIGEST, contentDigests.get(algorithmId));
+            } else {
+                // TODO(b/259423111): considering putting the raw values for the algorithm & digest
+                //  into the bundle to track potential other digest algorithms that may be in use
+                result.putInt(BUNDLE_CONTENT_DIGEST_ALGORITHM, 0);
+                result.putByteArray(BUNDLE_CONTENT_DIGEST, null);
+            }
+
+            return result;
+        }
+
+
+        /**
+         * Measures and records digests for *all* covered binaries/packages.
+         *
+         * This method will be called in a Job scheduled to take measurements periodically.
+         *
+         * Packages that are covered so far are:
+         * - all APEXs (introduced in Android T)
+         * - all mainline modules (introduced in Android T)
+         * - all preloaded apps and their update(s) (new in Android U)
+         * - dynamically installed mobile bundled apps (MBAs) (new in Android U)
+         *
+         * @return a {@code List<Bundle>}. Each Bundle item contains values as
+         *          defined by the return value of {@link #measurePackage(PackageInfo)}.
+         */
+        public List getMeasurementsForAllPackages() {
+            List<Bundle> results = new ArrayList<>();
+            PackageManager pm = mContext.getPackageManager();
+            Set<String> packagesMeasured = new HashSet<>();
+
+            // check if we should record the resulting measurements
+            long currentTimeMs = System.currentTimeMillis();
+            boolean record = false;
+            if ((currentTimeMs - mMeasurementsLastRecordedMs) >= RECORD_MEASUREMENTS_COOLDOWN_MS) {
+                Slog.d(TAG, "Measurement was last taken at " + mMeasurementsLastRecordedMs
+                        + " and is now updated to: " + currentTimeMs);
+                mMeasurementsLastRecordedMs = currentTimeMs;
+                record = true;
+            }
+
+            // measure all APEXs first
+            if (DEBUG) {
+                Slog.d(TAG, "Measuring APEXs...");
+            }
+            for (PackageInfo packageInfo : getCurrentInstalledApexs()) {
+                packagesMeasured.add(packageInfo.packageName);
+
+                Bundle apexMeasurement = measurePackage(packageInfo);
+                results.add(apexMeasurement);
+
+                if (record) {
+                    // compute digests of signing info
+                    String[] signerDigestHexStrings = computePackageSignerSha256Digests(
+                            packageInfo.signingInfo);
+
+                    // log to Westworld
+                    FrameworkStatsLog.write(FrameworkStatsLog.APEX_INFO_GATHERED,
+                                            packageInfo.packageName,
+                                            packageInfo.getLongVersionCode(),
+                                            HexEncoding.encodeToString(apexMeasurement.getByteArray(
+                                                    BUNDLE_CONTENT_DIGEST), false),
+                                            apexMeasurement.getInt(BUNDLE_CONTENT_DIGEST_ALGORITHM),
+                                            signerDigestHexStrings);
+                }
+            }
+            if (DEBUG) {
+                Slog.d(TAG, "Measured " + packagesMeasured.size()
+                        + " packages after considering APEXs.");
+            }
+
+            // proceed with all preloaded apps
+            for (PackageInfo packageInfo : pm.getInstalledPackages(
+                    PackageManager.PackageInfoFlags.of(PackageManager.MATCH_FACTORY_ONLY
+                            | PackageManager.GET_SIGNING_CERTIFICATES))) {
+                if (packagesMeasured.contains(packageInfo.packageName)) {
+                    continue;
+                }
+                packagesMeasured.add(packageInfo.packageName);
+
+                int mba_status = MBA_STATUS_PRELOADED;
+                if (packageInfo.signingInfo == null) {
+                    Slog.d(TAG, "Preload " + packageInfo.packageName  + " at "
+                            + packageInfo.applicationInfo.sourceDir + " has likely been updated.");
+                    mba_status = MBA_STATUS_UPDATED_PRELOAD;
+
+                    PackageInfo origPackageInfo = packageInfo;
+                    try {
+                        packageInfo = pm.getPackageInfo(packageInfo.packageName,
+                                PackageManager.PackageInfoFlags.of(PackageManager.MATCH_ALL
+                                        | PackageManager.GET_SIGNING_CERTIFICATES));
+                    } catch (PackageManager.NameNotFoundException e) {
+                        Slog.e(TAG, "Failed to obtain an updated PackageInfo of "
+                                + origPackageInfo.packageName, e);
+                        packageInfo = origPackageInfo;
+                        mba_status = MBA_STATUS_ERROR;
+                    }
+                }
+
+
+                Bundle packageMeasurement = measurePackage(packageInfo);
+                results.add(packageMeasurement);
+
+                if (record) {
+                    // compute digests of signing info
+                    String[] signerDigestHexStrings = computePackageSignerSha256Digests(
+                            packageInfo.signingInfo);
+
+                    // now we should have all the bits for the atom
+                    /*  TODO: Uncomment and test after merging new atom definition.
+                    FrameworkStatsLog.write(FrameworkStatsLog.MOBILE_BUNDLED_APP_INFO_GATHERED,
+                            packageInfo.packageName,
+                            packageInfo.getLongVersionCode(),
+                            HexEncoding.encodeToString(packageMeasurement.getByteArray(
+                                    BUNDLE_CONTENT_DIGEST), false),
+                            packageMeasurement.getInt(BUNDLE_CONTENT_DIGEST_ALGORITHM),
+                            signerDigestHexStrings, // signer_cert_digest
+                            mba_status,                 // mba_status
+                            null,                   // initiator
+                            null,                   // initiator_signer_digest
+                            null,                   // installer
+                            null                    // originator
+                    );
+                     */
+                }
+            }
+            if (DEBUG) {
+                Slog.d(TAG, "Measured " + packagesMeasured.size()
+                        + " packages after considering preloads");
+            }
+
+            // lastly measure all newly installed MBAs
+            for (PackageInfo packageInfo : getNewlyInstalledMbas()) {
+                if (packagesMeasured.contains(packageInfo.packageName)) {
+                    continue;
+                }
+                packagesMeasured.add(packageInfo.packageName);
+
+                Bundle packageMeasurement = measurePackage(packageInfo);
+                results.add(packageMeasurement);
+
+                if (record) {
+                    // compute digests of signing info
+                    String[] signerDigestHexStrings = computePackageSignerSha256Digests(
+                            packageInfo.signingInfo);
+
+                    // then extract package's InstallSourceInfo
+                    if (DEBUG) {
+                        Slog.d(TAG, "Extracting InstallSourceInfo for " + packageInfo.packageName);
+                    }
+                    InstallSourceInfo installSourceInfo = getInstallSourceInfo(
+                            packageInfo.packageName);
+                    String initiator = null;
+                    SigningInfo initiatorSignerInfo = null;
+                    String[] initiatorSignerInfoDigest = null;
+                    String installer = null;
+                    String originator = null;
+
+                    if (installSourceInfo != null) {
+                        initiator = installSourceInfo.getInitiatingPackageName();
+                        initiatorSignerInfo = installSourceInfo.getInitiatingPackageSigningInfo();
+                        if (initiatorSignerInfo != null) {
+                            initiatorSignerInfoDigest = computePackageSignerSha256Digests(
+                                    initiatorSignerInfo);
+                        }
+                        installer = installSourceInfo.getInstallingPackageName();
+                        originator = installSourceInfo.getOriginatingPackageName();
+                    }
+
+                    // we should now have all the info needed for the atom
+                    /*  TODO: Uncomment and test after merging new atom definition.
+                    FrameworkStatsLog.write(FrameworkStatsLog.MOBILE_BUNDLED_APP_INFO_GATHERED,
+                            packageInfo.packageName,
+                            packageInfo.getLongVersionCode(),
+                            HexEncoding.encodeToString(packageMeasurement.getByteArray(
+                                    BUNDLE_CONTENT_DIGEST), false),
+                            packageMeasurement.getInt(BUNDLE_CONTENT_DIGEST_ALGORITHM),
+                            signerDigestHexStrings,
+                            MBA_STATUS_NEW_INSTALL,   // mba_status
+                            initiator,
+                            initiatorSignerInfoDigest,
+                            installer,
+                            originator
+                    );
+                     */
+                }
+            }
+            if (DEBUG) {
+                long timeSpentMeasuring = System.currentTimeMillis() - currentTimeMs;
+                Slog.d(TAG, "Measured " + packagesMeasured.size()
+                        + " packages altogether in " + timeSpentMeasuring + "ms");
+            }
+
+            return results;
+        }
+
+        /**
+         * A wrapper around
+         * {@link ApkSignatureVerifier#verifySignaturesInternal(ParseInput, String, int, boolean)}.
+         * @param pathToApk The APK's installation path
+         * @return a {@code Map<Integer, byte[]>} with algorithm type as the key and content
+         *         digest as the value.
+         *         a {@code null} is returned upon encountering any error.
+         */
+        private Map<Integer, byte[]> computeApkContentDigest(String pathToApk) {
+            final ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
+            ParseResult<ApkSignatureVerifier.SigningDetailsWithDigests> parseResult =
+                    ApkSignatureVerifier.verifySignaturesInternal(input,
+                            pathToApk,
+                            SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V2, false);
+            if (parseResult.isError()) {
+                Slog.e(TAG, "Failed to compute content digest for "
+                        + pathToApk + " due to: "
+                        + parseResult.getErrorMessage());
+                return null;
+            }
+            return parseResult.getResult().contentDigests;
         }
 
         @Override
@@ -165,43 +473,36 @@ public class BinaryTransparencyService extends SystemService {
 
                 private void printPackageMeasurements(PackageInfo packageInfo,
                                                       final PrintWriter pw) {
-                    pw.print(mBinaryHashes.get(packageInfo.packageName) + ",");
-                    // TODO: To be moved to somewhere more suitable
-                    final ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
-                    ParseResult<ApkSignatureVerifier.SigningDetailsWithDigests> parseResult =
-                            ApkSignatureVerifier.verifySignaturesInternal(input,
-                                    packageInfo.applicationInfo.sourceDir,
-                                    SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3, false);
-                    if (parseResult.isError()) {
+                    Map<Integer, byte[]> contentDigests = computeApkContentDigest(
+                            packageInfo.applicationInfo.sourceDir);
+                    if (contentDigests == null) {
                         pw.println("ERROR: Failed to compute package content digest for "
-                                + packageInfo.applicationInfo.sourceDir + "due to: "
-                                + parseResult.getErrorMessage());
-                    } else {
-                        ApkSignatureVerifier.SigningDetailsWithDigests signingDetails =
-                                parseResult.getResult();
-                        Map<Integer, byte[]> contentDigests = signingDetails.contentDigests;
-                        for (Map.Entry<Integer, byte[]> entry : contentDigests.entrySet()) {
-                            Integer algorithmId = entry.getKey();
-                            byte[] cDigest = entry.getValue();
-                            //pw.print("Content digest algorithm: ");
-                            switch (algorithmId) {
-                                case ApkSigningBlockUtils.CONTENT_DIGEST_CHUNKED_SHA256:
-                                    pw.print("CHUNKED_SHA256:");
-                                    break;
-                                case ApkSigningBlockUtils.CONTENT_DIGEST_CHUNKED_SHA512:
-                                    pw.print("CHUNKED_SHA512:");
-                                    break;
-                                case ApkSigningBlockUtils.CONTENT_DIGEST_VERITY_CHUNKED_SHA256:
-                                    pw.print("VERITY_CHUNKED_SHA256:");
-                                    break;
-                                case ApkSigningBlockUtils.CONTENT_DIGEST_SHA256:
-                                    pw.print("SHA256:");
-                                    break;
-                                default:
-                                    pw.print("UNKNOWN:");
-                            }
-                            pw.print(HexEncoding.encodeToString(cDigest, false));
+                                + packageInfo.applicationInfo.sourceDir);
+                        return;
+                    }
+
+                    for (Map.Entry<Integer, byte[]> entry : contentDigests.entrySet()) {
+                        Integer algorithmId = entry.getKey();
+                        byte[] contentDigest = entry.getValue();
+
+                        // TODO(b/259348134): consider refactoring the following to a helper method
+                        switch (algorithmId) {
+                            case ApkSigningBlockUtils.CONTENT_DIGEST_CHUNKED_SHA256:
+                                pw.print("CHUNKED_SHA256:");
+                                break;
+                            case ApkSigningBlockUtils.CONTENT_DIGEST_CHUNKED_SHA512:
+                                pw.print("CHUNKED_SHA512:");
+                                break;
+                            case ApkSigningBlockUtils.CONTENT_DIGEST_VERITY_CHUNKED_SHA256:
+                                pw.print("VERITY_CHUNKED_SHA256:");
+                                break;
+                            case ApkSigningBlockUtils.CONTENT_DIGEST_SHA256:
+                                pw.print("SHA256:");
+                                break;
+                            default:
+                                pw.print("UNKNOWN_ALGO_ID(" + algorithmId + "):");
                         }
+                        pw.print(HexEncoding.encodeToString(contentDigest, false));
                     }
                 }
 
@@ -211,14 +512,49 @@ public class BinaryTransparencyService extends SystemService {
                     pw.println("Current install location: "
                             + packageInfo.applicationInfo.sourceDir);
                     if (packageInfo.applicationInfo.sourceDir.startsWith("/data/apex/")) {
-                        String origPackageFilepath = getOriginalPreinstalledLocation(
+                        String origPackageFilepath = getOriginalApexPreinstalledLocation(
                                 packageInfo.packageName, packageInfo.applicationInfo.sourceDir);
-                        pw.println("|--> Package pre-installed location: " + origPackageFilepath);
-                        String digest = mBinaryHashes.get(origPackageFilepath);
-                        if (digest == null) {
-                            pw.println("ERROR finding SHA256-digest from cache...");
+                        pw.println("|--> Pre-installed package install location: "
+                                + origPackageFilepath);
+
+                        // TODO(b/259347186): revive this with the proper cmd options.
+                        /*
+                        String digest = PackageUtils.computeSha256DigestForLargeFile(
+                        origPackageFilepath, PackageUtils.createLargeFileBuffer());
+                         */
+
+                        Map<Integer, byte[]> contentDigests = computeApkContentDigest(
+                                origPackageFilepath);
+                        if (contentDigests == null) {
+                            pw.println("ERROR: Failed to compute package content digest for "
+                                    + origPackageFilepath);
                         } else {
-                            pw.println("|--> Pre-installed package SHA256-digest: " + digest);
+                            // TODO(b/259348134): consider refactoring this to a helper method
+                            for (Map.Entry<Integer, byte[]> entry : contentDigests.entrySet()) {
+                                Integer algorithmId = entry.getKey();
+                                byte[] contentDigest = entry.getValue();
+                                pw.print("|--> Pre-installed package content digest algorithm: ");
+                                switch (algorithmId) {
+                                    case ApkSigningBlockUtils.CONTENT_DIGEST_CHUNKED_SHA256:
+                                        pw.print("CHUNKED_SHA256");
+                                        break;
+                                    case ApkSigningBlockUtils.CONTENT_DIGEST_CHUNKED_SHA512:
+                                        pw.print("CHUNKED_SHA512");
+                                        break;
+                                    case ApkSigningBlockUtils.CONTENT_DIGEST_VERITY_CHUNKED_SHA256:
+                                        pw.print("VERITY_CHUNKED_SHA256");
+                                        break;
+                                    case ApkSigningBlockUtils.CONTENT_DIGEST_SHA256:
+                                        pw.print("SHA256");
+                                        break;
+                                    default:
+                                        pw.print("UNKNOWN");
+                                }
+                                pw.print("\n");
+                                pw.print("|--> Pre-installed package content digest: ");
+                                pw.print(HexEncoding.encodeToString(contentDigest, false));
+                                pw.print("\n");
+                            }
                         }
                     }
                     pw.println("First install time (ms): " + packageInfo.firstInstallTime);
@@ -281,21 +617,90 @@ public class BinaryTransparencyService extends SystemService {
                             + (moduleInfo.isHidden() ? "hidden" : "visible"));
                 }
 
+                private void printAppDetails(PackageInfo packageInfo,
+                                             boolean printLibraries,
+                                             final PrintWriter pw) {
+                    pw.println("--- App Details ---");
+                    pw.println("Name: " + packageInfo.applicationInfo.name);
+                    pw.println("Label: " + mContext.getPackageManager().getApplicationLabel(
+                            packageInfo.applicationInfo));
+                    pw.println("Description: " + packageInfo.applicationInfo.loadDescription(
+                            mContext.getPackageManager()));
+                    pw.println("Has code: " + packageInfo.applicationInfo.hasCode());
+                    pw.println("Is enabled: " + packageInfo.applicationInfo.enabled);
+                    pw.println("Is suspended: " + ((packageInfo.applicationInfo.flags
+                                                    & ApplicationInfo.FLAG_SUSPENDED) != 0));
+
+                    pw.println("Compile SDK version: " + packageInfo.compileSdkVersion);
+                    pw.println("Target SDK version: "
+                            + packageInfo.applicationInfo.targetSdkVersion);
+
+                    pw.println("Is privileged: "
+                            + packageInfo.applicationInfo.isPrivilegedApp());
+                    pw.println("Is a stub: " + packageInfo.isStub);
+                    pw.println("Is a core app: " + packageInfo.coreApp);
+                    pw.println("SEInfo: " + packageInfo.applicationInfo.seInfo);
+                    pw.println("Component factory: "
+                            + packageInfo.applicationInfo.appComponentFactory);
+                    pw.println("Process name: " + packageInfo.applicationInfo.processName);
+                    pw.println("Task affinity : " + packageInfo.applicationInfo.taskAffinity);
+                    pw.println("UID: " + packageInfo.applicationInfo.uid);
+                    pw.println("Shared UID: " + packageInfo.sharedUserId);
+
+                    if (printLibraries) {
+                        pw.println("== App's Shared Libraries ==");
+                        List<SharedLibraryInfo> sharedLibraryInfos =
+                                packageInfo.applicationInfo.getSharedLibraryInfos();
+                        if (sharedLibraryInfos == null || sharedLibraryInfos.isEmpty()) {
+                            pw.println("<none>");
+                        }
+
+                        for (int i = 0; i < sharedLibraryInfos.size(); i++) {
+                            SharedLibraryInfo sharedLibraryInfo = sharedLibraryInfos.get(i);
+                            pw.println("  ++ Library #" + (i + 1) + " ++");
+                            pw.println("  Lib name: " + sharedLibraryInfo.getName());
+                            long libVersion = sharedLibraryInfo.getLongVersion();
+                            pw.print("  Lib version: ");
+                            if (libVersion == SharedLibraryInfo.VERSION_UNDEFINED) {
+                                pw.print("undefined");
+                            } else {
+                                pw.print(libVersion);
+                            }
+                            pw.print("\n");
+
+                            pw.println("  Lib package name (if available): "
+                                    + sharedLibraryInfo.getPackageName());
+                            pw.println("  Lib path: " + sharedLibraryInfo.getPath());
+                            pw.print("  Lib type: ");
+                            switch (sharedLibraryInfo.getType()) {
+                                case SharedLibraryInfo.TYPE_BUILTIN:
+                                    pw.print("built-in");
+                                    break;
+                                case SharedLibraryInfo.TYPE_DYNAMIC:
+                                    pw.print("dynamic");
+                                    break;
+                                case SharedLibraryInfo.TYPE_STATIC:
+                                    pw.print("static");
+                                    break;
+                                case SharedLibraryInfo.TYPE_SDK_PACKAGE:
+                                    pw.print("SDK");
+                                    break;
+                                case SharedLibraryInfo.VERSION_UNDEFINED:
+                                default:
+                                    pw.print("undefined");
+                                    break;
+                            }
+                            pw.print("\n");
+                            pw.println("  Is a native lib: " + sharedLibraryInfo.isNative());
+                        }
+                    }
+
+                }
+
                 private int printAllApexs() {
                     final PrintWriter pw = getOutPrintWriter();
                     boolean verbose = false;
                     String opt;
-
-                    // refresh cache to make sure info is most up-to-date
-                    if (!updateBinaryMeasurements()) {
-                        pw.println("ERROR: Failed to refresh info for APEXs.");
-                        return -1;
-                    }
-                    if (mBinaryHashes == null || (mBinaryHashes.size() == 0)) {
-                        pw.println("ERROR: Unable to obtain apex_info at this time.");
-                        return -1;
-                    }
-
                     while ((opt = getNextOption()) != null) {
                         switch (opt) {
                             case "-v":
@@ -315,13 +720,15 @@ public class BinaryTransparencyService extends SystemService {
 
                     if (!verbose) {
                         pw.println("APEX Info [Format: package_name,package_version,"
-                                + "package_sha256_digest,"
+                                // TODO(b/259347186): revive via special cmd line option
+                                //+ "package_sha256_digest,"
                                 + "content_digest_algorithm:content_digest]:");
                     }
-                    for (PackageInfo packageInfo : getInstalledApexs()) {
+                    for (PackageInfo packageInfo : getCurrentInstalledApexs()) {
                         if (verbose) {
                             pw.println("APEX Info [Format: package_name,package_version,"
-                                    + "package_sha256_digest,"
+                                    // TODO(b/259347186): revive via special cmd line option
+                                    //+ "package_sha256_digest,"
                                     + "content_digest_algorithm:content_digest]:");
                         }
                         String packageName = packageInfo.packageName;
@@ -352,17 +759,6 @@ public class BinaryTransparencyService extends SystemService {
                     final PrintWriter pw = getOutPrintWriter();
                     boolean verbose = false;
                     String opt;
-
-                    // refresh cache to make sure info is most up-to-date
-                    if (!updateBinaryMeasurements()) {
-                        pw.println("ERROR: Failed to refresh info for Modules.");
-                        return -1;
-                    }
-                    if (mBinaryHashes == null || (mBinaryHashes.size() == 0)) {
-                        pw.println("ERROR: Unable to obtain module_info at this time.");
-                        return -1;
-                    }
-
                     while ((opt = getNextOption()) != null) {
                         switch (opt) {
                             case "-v":
@@ -382,14 +778,16 @@ public class BinaryTransparencyService extends SystemService {
 
                     if (!verbose) {
                         pw.println("Module Info [Format: package_name,package_version,"
-                                + "package_sha256_digest,"
+                                // TODO(b/259347186): revive via special cmd line option
+                                //+ "package_sha256_digest,"
                                 + "content_digest_algorithm:content_digest]:");
                     }
                     for (ModuleInfo module : pm.getInstalledModules(PackageManager.MATCH_ALL)) {
                         String packageName = module.getPackageName();
                         if (verbose) {
                             pw.println("Module Info [Format: package_name,package_version,"
-                                    + "package_sha256_digest,"
+                                    // TODO(b/259347186): revive via special cmd line option
+                                    //+ "package_sha256_digest,"
                                     + "content_digest_algorithm:content_digest]:");
                         }
                         try {
@@ -421,6 +819,72 @@ public class BinaryTransparencyService extends SystemService {
                     return 0;
                 }
 
+                private int printAllMbas() {
+                    final PrintWriter pw = getOutPrintWriter();
+                    boolean verbose = false;
+                    boolean printLibraries = false;
+                    String opt;
+                    while ((opt = getNextOption()) != null) {
+                        switch (opt) {
+                            case "-v":
+                                verbose = true;
+                                break;
+                            case "-l":
+                                printLibraries = true;
+                                break;
+                            default:
+                                pw.println("ERROR: Unknown option: " + opt);
+                                return 1;
+                        }
+                    }
+
+                    if (!verbose) {
+                        pw.println("MBA Info [Format: package_name,package_version,"
+                                // TODO(b/259347186): revive via special cmd line option
+                                //+ "package_sha256_digest,"
+                                + "content_digest_algorithm:content_digest]:");
+                    }
+                    for (PackageInfo packageInfo : getNewlyInstalledMbas()) {
+                        if (verbose) {
+                            pw.println("MBA Info [Format: package_name,package_version,"
+                                    // TODO(b/259347186): revive via special cmd line option
+                                    //+ "package_sha256_digest,"
+                                    + "content_digest_algorithm:content_digest]:");
+                        }
+                        pw.print(packageInfo.packageName + ",");
+                        pw.print(packageInfo.getLongVersionCode() + ",");
+                        printPackageMeasurements(packageInfo, pw);
+                        pw.print("\n");
+
+                        if (verbose) {
+                            printAppDetails(packageInfo, printLibraries, pw);
+                            printPackageInstallationInfo(packageInfo, pw);
+                            printPackageSignerDetails(packageInfo.signingInfo, pw);
+                            pw.println("");
+                        }
+                    }
+                    return 0;
+                }
+
+                // TODO(b/259347186): add option handling full file-based SHA256 digest
+                private int printAllPreloads() {
+                    final PrintWriter pw = getOutPrintWriter();
+
+                    PackageManager pm = mContext.getPackageManager();
+                    if (pm == null) {
+                        Slog.e(TAG, "Failed to obtain PackageManager.");
+                        return -1;
+                    }
+                    List<PackageInfo> factoryApps = pm.getInstalledPackages(
+                            PackageManager.PackageInfoFlags.of(PackageManager.MATCH_FACTORY_ONLY));
+
+                    pw.println("Preload Info [Format: package_name]");
+                    for (PackageInfo packageInfo : factoryApps) {
+                        pw.println(packageInfo.packageName);
+                    }
+                    return 0;
+                }
+
                 @Override
                 public int onCommand(String cmd) {
                     if (cmd == null) {
@@ -443,6 +907,10 @@ public class BinaryTransparencyService extends SystemService {
                                     return printAllApexs();
                                 case "module_info":
                                     return printAllModules();
+                                case "mba_info":
+                                    return printAllMbas();
+                                case "preload_info":
+                                    return printAllPreloads();
                                 default:
                                     pw.println(String.format("ERROR: Unknown info type '%s'",
                                             infoType));
@@ -466,11 +934,18 @@ public class BinaryTransparencyService extends SystemService {
                     pw.println("");
                     pw.println("    get apex_info [-v]");
                     pw.println("        Print information about installed APEXs on device.");
-                    pw.println("            -v: lists more verbose information about each APEX");
+                    pw.println("            -v: lists more verbose information about each APEX.");
                     pw.println("");
                     pw.println("    get module_info [-v]");
                     pw.println("        Print information about installed modules on device.");
-                    pw.println("            -v: lists more verbose information about each module");
+                    pw.println("            -v: lists more verbose information about each module.");
+                    pw.println("");
+                    pw.println("    get mba_info [-v] [-l]");
+                    pw.println("        Print information about installed mobile bundle apps "
+                               + "(MBAs on device).");
+                    pw.println("            -v: lists more verbose information about each app.");
+                    pw.println("            -l: lists shared library info. This will only be "
+                               + "listed with -v");
                     pw.println("");
                 }
 
@@ -488,8 +963,7 @@ public class BinaryTransparencyService extends SystemService {
         mContext = context;
         mServiceImpl = new BinaryTransparencyServiceImpl();
         mVbmetaDigest = VBMETA_DIGEST_UNINITIALIZED;
-        mBinaryHashes = new HashMap<>();
-        mBinaryLastUpdateTimes = new HashMap<>();
+        mMeasurementsLastRecordedMs = 0;
     }
 
     /**
@@ -520,44 +994,43 @@ public class BinaryTransparencyService extends SystemService {
             Slog.i(TAG, "Boot completed. Getting VBMeta Digest.");
             getVBMetaDigestInformation();
 
-            // due to potentially long computation that holds up boot time, computations for
-            // SHA256 digests of APEX and Module packages are scheduled here,
-            // but only executed when device is idle.
-            Slog.i(TAG, "Scheduling APEX and Module measurements to be updated.");
+            // to avoid the risk of holding up boot time, computations to measure APEX, Module, and
+            // MBA digests are scheduled here, but only executed when the device is idle and plugged
+            // in.
+            Slog.i(TAG, "Scheduling measurements to be taken.");
             UpdateMeasurementsJobService.scheduleBinaryMeasurements(mContext,
                     BinaryTransparencyService.this);
         }
     }
 
     /**
-     * JobService to update binary measurements and update internal cache.
+     * JobService to measure all covered binaries and record result to Westworld.
      */
     public static class UpdateMeasurementsJobService extends JobService {
-        private static final int COMPUTE_APEX_MODULE_SHA256_JOB_ID =
-                BinaryTransparencyService.UpdateMeasurementsJobService.class.hashCode();
+        private static final int DO_BINARY_MEASUREMENTS_JOB_ID =
+                UpdateMeasurementsJobService.class.hashCode();
 
         @Override
         public boolean onStartJob(JobParameters params) {
             Slog.d(TAG, "Job to update binary measurements started.");
-            if (params.getJobId() != COMPUTE_APEX_MODULE_SHA256_JOB_ID) {
+            if (params.getJobId() != DO_BINARY_MEASUREMENTS_JOB_ID) {
                 return false;
             }
 
-            // we'll still update the measurements via threads to be mindful of low-end devices
+            // we'll perform binary measurements via threads to be mindful of low-end devices
             // where this operation might take longer than expected, and so that we don't block
             // system_server's main thread.
             Executors.defaultThreadFactory().newThread(() -> {
-                // since we can't call updateBinaryMeasurements() directly, calling
-                // getApexInfo() achieves the same effect, and we simply discard the return
-                // value
-
+                // we discard the return value of getMeasurementsForAllPackages() as the
+                // results of the measurements will be recorded, and that is what we're aiming
+                // for with this job.
                 IBinder b = ServiceManager.getService(Context.BINARY_TRANSPARENCY_SERVICE);
                 IBinaryTransparencyService iBtsService =
                         IBinaryTransparencyService.Stub.asInterface(b);
                 try {
-                    iBtsService.getApexInfo();
+                    iBtsService.getMeasurementsForAllPackages();
                 } catch (RemoteException e) {
-                    Slog.e(TAG, "Updating binary measurements was interrupted.", e);
+                    Slog.e(TAG, "Taking binary measurements was interrupted.", e);
                     return;
                 }
                 jobFinished(params, false);
@@ -573,25 +1046,26 @@ public class BinaryTransparencyService extends SystemService {
 
         @SuppressLint("DefaultLocale")
         static void scheduleBinaryMeasurements(Context context, BinaryTransparencyService service) {
-            Slog.i(TAG, "Scheduling APEX & Module SHA256 digest computation job");
+            Slog.i(TAG, "Scheduling binary content-digest computation job");
             final JobScheduler jobScheduler = context.getSystemService(JobScheduler.class);
             if (jobScheduler == null) {
                 Slog.e(TAG, "Failed to obtain an instance of JobScheduler.");
                 return;
             }
 
-            final JobInfo jobInfo = new JobInfo.Builder(COMPUTE_APEX_MODULE_SHA256_JOB_ID,
+            final JobInfo jobInfo = new JobInfo.Builder(DO_BINARY_MEASUREMENTS_JOB_ID,
                     new ComponentName(context, UpdateMeasurementsJobService.class))
                     .setRequiresDeviceIdle(true)
                     .setRequiresCharging(true)
+                    .setPeriodic(RECORD_MEASUREMENTS_COOLDOWN_MS)
                     .build();
             if (jobScheduler.schedule(jobInfo) != JobScheduler.RESULT_SUCCESS) {
-                Slog.e(TAG, "Failed to schedule job to update binary measurements.");
+                Slog.e(TAG, "Failed to schedule job to measure binaries.");
                 return;
             }
-            Slog.d(TAG, String.format(
-                    "Job %d to update binary measurements scheduled successfully.",
-                    COMPUTE_APEX_MODULE_SHA256_JOB_ID));
+            Slog.d(TAG, TextUtils.formatSimple(
+                    "Job %d to measure binaries was scheduled successfully.",
+                    DO_BINARY_MEASUREMENTS_JOB_ID));
         }
     }
 
@@ -602,7 +1076,7 @@ public class BinaryTransparencyService extends SystemService {
     }
 
     @NonNull
-    private List<PackageInfo> getInstalledApexs() {
+    private List<PackageInfo> getCurrentInstalledApexs() {
         List<PackageInfo> results = new ArrayList<>();
         PackageManager pm = mContext.getPackageManager();
         if (pm == null) {
@@ -636,164 +1110,52 @@ public class BinaryTransparencyService extends SystemService {
         }
     }
 
-
-    /**
-     * Updates the internal data structure with the most current APEX measurements.
-     * @return true if update is successful; false otherwise.
-     */
-    private boolean updateBinaryMeasurements() {
-        if (mBinaryHashes.size() == 0) {
-            Slog.d(TAG, "No apex in cache yet.");
-            doFreshBinaryMeasurements();
-            return true;
-        }
-
-        PackageManager pm = mContext.getPackageManager();
-        if (pm == null) {
-            Slog.e(TAG, "Failed to obtain a valid PackageManager instance.");
-            return false;
-        }
-
-        // We're assuming updates to existing modules and APEXs can happen, but not brand new
-        // ones appearing out of the blue. Thus, we're going to only go through our cache to check
-        // for changes, rather than freshly invoking `getInstalledPackages()` and
-        // `getInstalledModules()`
-        byte[] largeFileBuffer = PackageUtils.createLargeFileBuffer();
-        for (Map.Entry<String, Long> entry : mBinaryLastUpdateTimes.entrySet()) {
-            String packageName = entry.getKey();
-            try {
-                PackageInfo packageInfo = pm.getPackageInfo(packageName,
-                        PackageManager.PackageInfoFlags.of(PackageManager.MATCH_APEX));
-                long cachedUpdateTime = entry.getValue();
-
-                if (packageInfo.lastUpdateTime > cachedUpdateTime) {
-                    Slog.d(TAG, packageName + " has been updated!");
-                    entry.setValue(packageInfo.lastUpdateTime);
-
-                    // compute the digest for the updated package
-                    String sha256digest = PackageUtils.computeSha256DigestForLargeFile(
-                            packageInfo.applicationInfo.sourceDir, largeFileBuffer);
-                    if (sha256digest == null) {
-                        Slog.e(TAG, "Failed to compute SHA256sum for file at "
-                                + packageInfo.applicationInfo.sourceDir);
-                        mBinaryHashes.put(packageName, BINARY_HASH_ERROR);
-                    } else {
-                        mBinaryHashes.put(packageName, sha256digest);
-                    }
-
-                    if (packageInfo.isApex) {
-                        FrameworkStatsLog.write(FrameworkStatsLog.APEX_INFO_GATHERED,
-                                packageInfo.packageName,
-                                packageInfo.getLongVersionCode(),
-                                mBinaryHashes.get(packageInfo.packageName),
-                                4,  // indicating that the digest is SHA256
-                                null);  // TODO: This is to comform to the extended schema.
-                    }
-                }
-            } catch (PackageManager.NameNotFoundException e) {
-                Slog.e(TAG, "Could not find package with name " + packageName);
-                continue;
-            }
-        }
-
-        return true;
-    }
-
-    private String getOriginalPreinstalledLocation(String packageName,
+    // TODO(b/259349011): Need to be more robust against package name mismatch in the filename
+    private String getOriginalApexPreinstalledLocation(String packageName,
                                                    String currentInstalledLocation) {
         if (currentInstalledLocation.contains("/decompressed/")) {
-            return "/system/apex/" + packageName + ".capex";
+            String resultPath = "system/apex" + packageName + ".capex";
+            File f = new File(resultPath);
+            if (f.exists()) {
+                return resultPath;
+            }
+            return "/system/apex/" + packageName + ".next.capex";
         }
         return "/system/apex" + packageName + "apex";
     }
 
-    private void doFreshBinaryMeasurements() {
-        PackageManager pm = mContext.getPackageManager();
-        Slog.d(TAG, "Obtained package manager");
-
-        // In general, we care about all APEXs, *and* all Modules, which may include some APKs.
-
-        // First, we deal with all installed APEXs.
-        byte[] largeFileBuffer = PackageUtils.createLargeFileBuffer();
-        for (PackageInfo packageInfo : getInstalledApexs()) {
-            ApplicationInfo appInfo = packageInfo.applicationInfo;
-
-            // compute SHA256 for these APEXs
-            String sha256digest = PackageUtils.computeSha256DigestForLargeFile(appInfo.sourceDir,
-                    largeFileBuffer);
-            if (sha256digest == null) {
-                Slog.e(TAG, String.format("Failed to compute SHA256 digest for %s",
-                        packageInfo.packageName));
-                mBinaryHashes.put(packageInfo.packageName, BINARY_HASH_ERROR);
-            } else {
-                mBinaryHashes.put(packageInfo.packageName, sha256digest);
-            }
-            FrameworkStatsLog.write(FrameworkStatsLog.APEX_INFO_GATHERED, packageInfo.packageName,
-                    packageInfo.getLongVersionCode(), mBinaryHashes.get(packageInfo.packageName));
-            Slog.d(TAG, String.format("Last update time for %s: %d", packageInfo.packageName,
-                    packageInfo.lastUpdateTime));
-            mBinaryLastUpdateTimes.put(packageInfo.packageName, packageInfo.lastUpdateTime);
+    /**
+     * Wrapper method to call into IBICS to get a list of all newly installed MBAs.
+     *
+     * We expect IBICS to maintain an accurate list of installed MBAs, and we merely make use of
+     * the results within this service. This means we do not further check whether the
+     * apps in the returned slice is still installed or not, esp. considering that preloaded apps
+     * could be updated, or post-setup installed apps *might* be deleted in real time.
+     *
+     * Note that we do *not* cache the results from IBICS because of the more dynamic nature of
+     * MBAs v.s. other binaries that we measure.
+     *
+     * @return a list of preloaded apps + dynamically installed apps that fit the definition of MBA.
+     */
+    @NonNull
+    private List<PackageInfo> getNewlyInstalledMbas() {
+        List<PackageInfo> result = new ArrayList<>();
+        IBackgroundInstallControlService iBics = IBackgroundInstallControlService.Stub.asInterface(
+                ServiceManager.getService(Context.BACKGROUND_INSTALL_CONTROL_SERVICE));
+        if (iBics == null) {
+            Slog.e(TAG,
+                    "Failed to obtain an IBinder instance of IBackgroundInstallControlService");
+            return result;
         }
-
-        for (PackageInfo packageInfo : getInstalledApexs()) {
-            ApplicationInfo appInfo = packageInfo.applicationInfo;
-            if (!appInfo.sourceDir.startsWith("/data/")) {
-                continue;
-            }
-            String origInstallPath = getOriginalPreinstalledLocation(packageInfo.packageName,
-                                                                     appInfo.sourceDir);
-
-            // compute SHA256 for the orig /system APEXs
-            String sha256digest = PackageUtils.computeSha256DigestForLargeFile(origInstallPath,
-                                                                               largeFileBuffer);
-            if (sha256digest == null) {
-                Slog.e(TAG, String.format("Failed to compute SHA256 digest for file at %s",
-                                          origInstallPath));
-                mBinaryHashes.put(origInstallPath, BINARY_HASH_ERROR);
-            } else {
-                mBinaryHashes.put(origInstallPath, sha256digest);
-            }
-            // there'd be no entry into mBinaryLastUpdateTimes
+        ParceledListSlice<PackageInfo> slice;
+        try {
+            slice = iBics.getBackgroundInstalledPackages(
+                    PackageManager.MATCH_ALL | PackageManager.GET_SIGNING_CERTIFICATES,
+                    UserHandle.USER_SYSTEM);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Failed to get a list of MBAs.", e);
+            return result;
         }
-
-        // Next, get all installed modules from PackageManager - skip over those APEXs we've
-        // processed above
-        for (ModuleInfo module : pm.getInstalledModules(PackageManager.MATCH_ALL)) {
-            String packageName = module.getPackageName();
-            if (packageName == null) {
-                Slog.e(TAG, "ERROR: Encountered null package name for module "
-                        + module.getApexModuleName());
-                continue;
-            }
-            if (mBinaryHashes.containsKey(module.getPackageName())) {
-                continue;
-            }
-
-            // get PackageInfo for this module
-            try {
-                PackageInfo packageInfo = pm.getPackageInfo(packageName,
-                        PackageManager.PackageInfoFlags.of(PackageManager.MATCH_APEX));
-                ApplicationInfo appInfo = packageInfo.applicationInfo;
-
-                // compute SHA256 digest for these modules
-                String sha256digest = PackageUtils.computeSha256DigestForLargeFile(
-                        appInfo.sourceDir, largeFileBuffer);
-                if (sha256digest == null) {
-                    Slog.e(TAG, String.format("Failed to compute SHA256 digest for %s",
-                            packageName));
-                    mBinaryHashes.put(packageName, BINARY_HASH_ERROR);
-                } else {
-                    mBinaryHashes.put(packageName, sha256digest);
-                }
-                Slog.d(TAG, String.format("Last update time for %s: %d", packageName,
-                        packageInfo.lastUpdateTime));
-                mBinaryLastUpdateTimes.put(packageName, packageInfo.lastUpdateTime);
-            } catch (PackageManager.NameNotFoundException e) {
-                Slog.e(TAG, "ERROR: Could not obtain PackageInfo for package name: "
-                        + packageName);
-                continue;
-            }
-        }
+        return slice.getList();
     }
-
 }

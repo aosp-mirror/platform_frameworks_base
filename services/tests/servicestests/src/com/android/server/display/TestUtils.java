@@ -51,11 +51,27 @@ public final class TestUtils {
         }
     }
 
+    public static void setMaximumRange(Sensor sensor, float maximumRange) throws Exception {
+        Method setter = Sensor.class.getDeclaredMethod("setRange", Float.TYPE, Float.TYPE);
+        setter.setAccessible(true);
+        setter.invoke(sensor, maximumRange, 1);
+    }
+
     public static Sensor createSensor(int type, String strType) throws Exception {
         Constructor<Sensor> constr = Sensor.class.getDeclaredConstructor();
         constr.setAccessible(true);
         Sensor sensor = constr.newInstance();
         setSensorType(sensor, type, strType);
+        return sensor;
+    }
+
+    public static Sensor createSensor(int type, String strType, float maximumRange)
+            throws Exception {
+        Constructor<Sensor> constr = Sensor.class.getDeclaredConstructor();
+        constr.setAccessible(true);
+        Sensor sensor = constr.newInstance();
+        setSensorType(sensor, type, strType);
+        setMaximumRange(sensor, maximumRange);
         return sensor;
     }
 

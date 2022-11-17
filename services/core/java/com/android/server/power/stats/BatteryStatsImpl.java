@@ -11507,6 +11507,9 @@ public class BatteryStatsImpl extends BatteryStats {
 
         mHistory.reset();
 
+        // Store the empty state to disk to ensure consistency
+        writeSyncLocked();
+
         // Flush external data, gathering snapshots, but don't process it since it is pre-reset data
         mIgnoreNextExternalStats = true;
         mExternalSync.scheduleSync("reset", ExternalStatsSync.UPDATE_ON_RESET);

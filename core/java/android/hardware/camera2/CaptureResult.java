@@ -2717,6 +2717,79 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
             new Key<Integer>("android.control.settingsOverride", int.class);
 
     /**
+     * <p>Automatic crop, pan and zoom to keep objects in the center of the frame.</p>
+     * <p>Auto-framing is a special mode provided by the camera device to dynamically crop, zoom
+     * or pan the camera feed to try to ensure that the people in a scene occupy a reasonable
+     * portion of the viewport. It is primarily designed to support video calling in
+     * situations where the user isn't directly in front of the device, especially for
+     * wide-angle cameras.
+     * {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} and {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio} in CaptureResult will be used
+     * to denote the coordinates of the auto-framed region.
+     * Zoom and video stabilization controls are disabled when auto-framing is enabled. The 3A
+     * regions must map the screen coordinates into the scaler crop returned from the capture
+     * result instead of using the active array sensor.</p>
+     * <p><b>Possible values:</b></p>
+     * <ul>
+     *   <li>{@link #CONTROL_AUTOFRAMING_OFF OFF}</li>
+     *   <li>{@link #CONTROL_AUTOFRAMING_ON ON}</li>
+     *   <li>{@link #CONTROL_AUTOFRAMING_AUTO AUTO}</li>
+     * </ul>
+     *
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     * <p><b>Limited capability</b> -
+     * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
+     *
+     * @see CaptureRequest#CONTROL_ZOOM_RATIO
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     * @see CaptureRequest#SCALER_CROP_REGION
+     * @see #CONTROL_AUTOFRAMING_OFF
+     * @see #CONTROL_AUTOFRAMING_ON
+     * @see #CONTROL_AUTOFRAMING_AUTO
+     */
+    @PublicKey
+    @NonNull
+    public static final Key<Integer> CONTROL_AUTOFRAMING =
+            new Key<Integer>("android.control.autoframing", int.class);
+
+    /**
+     * <p>Current state of auto-framing.</p>
+     * <p>When the camera doesn't have auto-framing available (i.e
+     * <code>{@link CameraCharacteristics#CONTROL_AUTOFRAMING_AVAILABLE android.control.autoframingAvailable}</code> == false) or it is not enabled (i.e
+     * <code>{@link CaptureRequest#CONTROL_AUTOFRAMING android.control.autoframing}</code> == OFF), the state will always be INACTIVE.
+     * Other states indicate the current auto-framing state:</p>
+     * <ul>
+     * <li>When <code>{@link CaptureRequest#CONTROL_AUTOFRAMING android.control.autoframing}</code> is set to ON, auto-framing will take
+     * place. While the frame is aligning itself to center the object (doing things like
+     * zooming in, zooming out or pan), the state will be FRAMING.</li>
+     * <li>When field of view is not being adjusted anymore and has reached a stable state, the
+     * state will be CONVERGED.</li>
+     * </ul>
+     * <p><b>Possible values:</b></p>
+     * <ul>
+     *   <li>{@link #CONTROL_AUTOFRAMING_STATE_INACTIVE INACTIVE}</li>
+     *   <li>{@link #CONTROL_AUTOFRAMING_STATE_FRAMING FRAMING}</li>
+     *   <li>{@link #CONTROL_AUTOFRAMING_STATE_CONVERGED CONVERGED}</li>
+     * </ul>
+     *
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     * <p><b>Limited capability</b> -
+     * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
+     *
+     * @see CaptureRequest#CONTROL_AUTOFRAMING
+     * @see CameraCharacteristics#CONTROL_AUTOFRAMING_AVAILABLE
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     * @see #CONTROL_AUTOFRAMING_STATE_INACTIVE
+     * @see #CONTROL_AUTOFRAMING_STATE_FRAMING
+     * @see #CONTROL_AUTOFRAMING_STATE_CONVERGED
+     */
+    @PublicKey
+    @NonNull
+    public static final Key<Integer> CONTROL_AUTOFRAMING_STATE =
+            new Key<Integer>("android.control.autoframingState", int.class);
+
+    /**
      * <p>Operation mode for edge
      * enhancement.</p>
      * <p>Edge enhancement improves sharpness and details in the captured image. OFF means

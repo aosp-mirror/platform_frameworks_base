@@ -369,6 +369,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runResetDropboxRateLimiter();
                 case "list-secondary-displays-for-starting-users":
                     return runListSecondaryDisplaysForStartingUsers(pw);
+                case "set-foreground-service-delegate":
+                    return runSetForegroundServiceDelegate(pw);
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -3592,6 +3594,45 @@ final class ActivityManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    int runSetForegroundServiceDelegate(PrintWriter pw) throws RemoteException {
+        int userId = UserHandle.USER_CURRENT;
+
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            if (opt.equals("--user")) {
+                userId = UserHandle.parseUserArg(getNextArgRequired());
+            } else {
+                getErrPrintWriter().println("Error: Unknown option: " + opt);
+                return -1;
+            }
+        }
+        final String packageName = getNextArgRequired();
+        final String action = getNextArgRequired();
+        boolean isStart = true;
+        if ("start".equals(action)) {
+            isStart = true;
+        } else if ("stop".equals(action)) {
+            isStart = false;
+        } else {
+            pw.println("Error: action is either start or stop");
+            return -1;
+        }
+
+        int uid = INVALID_UID;
+        try {
+            final PackageManager pm = mInternal.mContext.getPackageManager();
+            uid = pm.getPackageUidAsUser(packageName,
+                    PackageManager.PackageInfoFlags.of(MATCH_ANY_USER), userId);
+        } catch (PackageManager.NameNotFoundException e) {
+            pw.println("Error: userId:" + userId + " package:" + packageName + " is not found");
+            return -1;
+        }
+        mInternal.setForegroundServiceDelegate(packageName, uid, isStart,
+                ForegroundServiceDelegationOptions.DELEGATION_SERVICE_SPECIAL_USE,
+                "FgsDelegate");
+        return 0;
+    }
+
     int runResetDropboxRateLimiter() throws RemoteException {
         mInternal.resetDropboxRateLimiter();
         return 0;
@@ -3968,6 +4009,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("  list-secondary-displays-for-starting-users");
             pw.println("         Lists the id of displays that can be used to start users on "
                     + "background.");
+            pw.println("  set-foreground-service-delegate [--user <USER_ID>] <PACKAGE> start|stop");
+            pw.println("         Start/stop an app's foreground service delegate.");
             pw.println();
             Intent.printIntentArgsHelp(pw, "");
         }

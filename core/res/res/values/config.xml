@@ -2434,7 +2434,7 @@
     <!-- The duration in milliseconds of the dream opening animation.  -->
     <integer name="config_dreamOpenAnimationDuration">250</integer>
     <!-- The duration in milliseconds of the dream closing animation.  -->
-    <integer name="config_dreamCloseAnimationDuration">100</integer>
+    <integer name="config_dreamCloseAnimationDuration">300</integer>
 
     <!-- Whether to dismiss the active dream when an activity is started. Doesn't apply to
          assistant activities (ACTIVITY_TYPE_ASSISTANT) -->
@@ -3687,6 +3687,12 @@
     <!-- Allow the gesture to quick tap the power button multiple times to start the emergency sos
          experience while the device is non-interactive. -->
     <bool name="config_emergencyGestureEnabled">true</bool>
+
+    <!-- Default value for Use Emergency SOS in Settings false = disabled, true = enabled -->
+    <bool name="config_defaultEmergencyGestureEnabled">true</bool>
+
+    <!-- Default value for Use Play countdown alarm in Settings false = disabled, true = enabled -->
+    <bool name="config_defaultEmergencyGestureSoundEnabled">false</bool>
 
     <!-- Allow the gesture power + volume up to change the ringer mode while the device
          is interactive. -->

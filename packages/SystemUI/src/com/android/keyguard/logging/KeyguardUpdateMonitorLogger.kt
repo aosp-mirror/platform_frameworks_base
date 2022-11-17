@@ -25,6 +25,7 @@ import com.android.keyguard.ActiveUnlockConfig
 import com.android.keyguard.FaceAuthUiEvent
 import com.android.keyguard.KeyguardListenModel
 import com.android.keyguard.KeyguardUpdateMonitorCallback
+import com.android.keyguard.TrustGrantFlags
 import com.android.systemui.plugins.log.LogBuffer
 import com.android.systemui.plugins.log.LogLevel
 import com.android.systemui.plugins.log.LogLevel.DEBUG
@@ -368,12 +369,16 @@ class KeyguardUpdateMonitorLogger @Inject constructor(
                 }, { "reportUserRequestedUnlock origin=$str1 reason=$str2 dismissKeyguard=$bool1" })
     }
 
-    fun logShowTrustGrantedMessage(
+    fun logTrustGrantedWithFlags(
+            flags: Int,
+            userId: Int,
             message: String?
     ) {
         logBuffer.log(TAG, DEBUG, {
+            int1 = flags
+            int2 = userId
             str1 = message
-        }, { "showTrustGrantedMessage message$str1" })
+        }, { "trustGrantedWithFlags[user=$int2] flags=${TrustGrantFlags(int1)} message=$str1" })
     }
 
     fun logTrustChanged(

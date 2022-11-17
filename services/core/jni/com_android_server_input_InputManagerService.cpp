@@ -1191,8 +1191,9 @@ bool NativeInputManager::filterInputEvent(const InputEvent* inputEvent, uint32_t
                 static_cast<const KeyEvent*>(inputEvent));
         break;
     case AINPUT_EVENT_TYPE_MOTION:
-        inputEventObj = android_view_MotionEvent_obtainAsCopy(env,
-                static_cast<const MotionEvent*>(inputEvent));
+        inputEventObj =
+                android_view_MotionEvent_obtainAsCopy(env,
+                                                      static_cast<const MotionEvent&>(*inputEvent));
         break;
     default:
         return true; // dispatch the event normally

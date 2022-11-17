@@ -117,6 +117,7 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
             .thenReturn(LockPatternUtils.StrongAuthTracker.STRONG_AUTH_NOT_REQUIRED)
         val quickAffordanceRepository =
             KeyguardQuickAffordanceRepository(
+                appContext = context,
                 scope = CoroutineScope(IMMEDIATE),
                 backgroundDispatcher = IMMEDIATE,
                 selectionManager = KeyguardQuickAffordanceSelectionManager(),
