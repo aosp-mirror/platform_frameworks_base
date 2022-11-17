@@ -17,6 +17,9 @@
 package com.android.credentialmanager.createflow
 
 import android.util.Log
+import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.IntentSenderRequest
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -25,6 +28,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.android.credentialmanager.CredentialManagerRepo
 import com.android.credentialmanager.common.DialogResult
+import com.android.credentialmanager.common.ProviderActivityResult
 import com.android.credentialmanager.common.ResultState
 
 data class CreateCredentialUiState(
@@ -59,7 +63,8 @@ class CreateCredentialViewModel(
       uiState = uiState.copy(
         currentScreenState = CreateScreenState.CREATION_OPTION_SELECTION,
         activeEntry = ActiveEntry(uiState.enabledProviders.first(),
-          uiState.enabledProviders.first().createOptions.first())
+          uiState.enabledProviders.first().createOptions.first()
+        )
       )
     } else {
       throw java.lang.IllegalStateException("Empty provider list.")
@@ -70,7 +75,8 @@ class CreateCredentialViewModel(
     uiState = uiState.copy(
       currentScreenState = CreateScreenState.CREATION_OPTION_SELECTION,
       activeEntry = ActiveEntry(getProviderInfoByName(providerName),
-        getProviderInfoByName(providerName).createOptions.first())
+        getProviderInfoByName(providerName).createOptions.first()
+      )
     )
   }
 
@@ -119,22 +125,56 @@ class CreateCredentialViewModel(
     // TODO: implement the if choose as default or not logic later
   }
 
-  fun onPrimaryCreateOptionInfoSelected() {
-    val entryKey = uiState.activeEntry?.activeEntryInfo?.entryKey
-    val entrySubkey = uiState.activeEntry?.activeEntryInfo?.entrySubkey
-    Log.d(
-      "Account Selector",
-      "Option selected for creation: " +
-              "{key = $entryKey, subkey = $entrySubkey}"
-    )
-    if (entryKey != null && entrySubkey != null) {
+  fun onPrimaryCreateOptionInfoSelected(
+    launcher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>
+  ) {
+    val selectedEntry = uiState.activeEntry?.activeEntryInfo
+    if (selectedEntry != null) {
+      val entryKey = selectedEntry.entryKey
+      val entrySubkey = selectedEntry.entrySubkey
+      Log.d(
+        "Account Selector",
+        "Option selected for creation: " +
+                "{key = $entryKey, subkey = $entrySubkey}"
+      )
+      if (selectedEntry.pendingIntent != null) {
+        val intentSenderRequest = IntentSenderRequest.Builder(selectedEntry.pendingIntent)
+          .setFillInIntent(selectedEntry.fillInIntent).build()
+        launcher.launch(intentSenderRequest)
+      } else {
+        CredentialManagerRepo.getInstance().onOptionSelected(
+          uiState.activeEntry?.activeProvider!!.name,
+          entryKey,
+          entrySubkey
+        )
+        dialogResult.value = DialogResult(
+          ResultState.COMPLETE,
+        )
+      }
+    } else {
+      dialogResult.value = DialogResult(
+        ResultState.COMPLETE,
+      )
+      TODO("Gracefully handle illegal state.")
+    }
+  }
+
+  fun onProviderActivityResult(providerActivityResult: ProviderActivityResult) {
+    val entry = uiState.activeEntry?.activeEntryInfo
+    val resultCode = providerActivityResult.resultCode
+    val resultData = providerActivityResult.data
+    val providerId = uiState.activeEntry?.activeProvider!!.name
+    if (entry != null) {
+      Log.d("Account Selector", "Got provider activity result: {provider=" +
+              "$providerId, key=${entry.entryKey}, subkey=${entry.entrySubkey}, " +
+              "resultCode=$resultCode, resultData=$resultData}"
+      )
       CredentialManagerRepo.getInstance().onOptionSelected(
-        uiState.activeEntry?.activeProvider!!.name,
-        entryKey,
-        entrySubkey
+        providerId, entry.entryKey, entry.entrySubkey, resultCode, resultData,
       )
     } else {
-      TODO("Gracefully handle illegal state.")
+      Log.w("Account Selector",
+        "Illegal state: received a provider result but found no matching entry.")
     }
     dialogResult.value = DialogResult(
       ResultState.COMPLETE,

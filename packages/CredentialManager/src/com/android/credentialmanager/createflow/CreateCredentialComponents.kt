@@ -3,6 +3,9 @@
 package com.android.credentialmanager.createflow
 
 import android.credentials.Credential.TYPE_PASSWORD_CREDENTIAL
+import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.IntentSenderRequest
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -50,7 +53,11 @@ import com.android.credentialmanager.jetpack.developer.PublicKeyCredential.Compa
 @Composable
 fun CreateCredentialScreen(
   viewModel: CreateCredentialViewModel,
+  providerActivityLauncher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>
 ) {
+  val primaryEntryCallback: () -> Unit = {
+    viewModel.onPrimaryCreateOptionInfoSelected(providerActivityLauncher)
+  }
   val state = rememberModalBottomSheetState(
     initialValue = ModalBottomSheetValue.Expanded,
     skipHalfExpanded = true
@@ -73,8 +80,8 @@ fun CreateCredentialScreen(
           requestDisplayInfo = uiState.requestDisplayInfo,
           providerInfo = uiState.activeEntry?.activeProvider!!,
           createOptionInfo = uiState.activeEntry.activeEntryInfo as CreateOptionInfo,
-          onOptionSelected = viewModel::onPrimaryCreateOptionInfoSelected,
-          onConfirm = viewModel::onPrimaryCreateOptionInfoSelected,
+          onOptionSelected = primaryEntryCallback,
+          onConfirm = primaryEntryCallback,
           onCancel = viewModel::onCancel,
           multiProvider = uiState.enabledProviders.size > 1,
           onMoreOptionsSelected = viewModel::onMoreOptionsSelected
