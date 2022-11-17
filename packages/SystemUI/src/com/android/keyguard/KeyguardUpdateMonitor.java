@@ -810,9 +810,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         }
         // Don't send cancel if authentication succeeds
         mFingerprintCancelSignal = null;
+        mLogger.logFingerprintSuccess(userId, isStrongBiometric);
         updateBiometricListeningState(BIOMETRIC_ACTION_UPDATE,
                 FACE_AUTH_UPDATED_FP_AUTHENTICATED);
-        mLogger.logFingerprintSuccess(userId, isStrongBiometric);
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
@@ -2726,9 +2726,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         final boolean canBypass = mKeyguardBypassController != null
                 && mKeyguardBypassController.canBypass();
         // There's no reason to ask the HAL for authentication when the user can dismiss the
-        // bouncer, unless we're bypassing and need to auto-dismiss the lock screen even when
-        // TrustAgents or biometrics are keeping the device unlocked.
-        final boolean becauseCannotSkipBouncer = !getUserCanSkipBouncer(user) || canBypass;
+        // bouncer because the user is trusted, unless we're bypassing and need to auto-dismiss
+        // the lock screen even when TrustAgents are keeping the device unlocked.
+        final boolean userNotTrustedOrDetectionIsNeeded = !getUserHasTrust(user) || canBypass;
 
         // Scan even when encrypted or timeout to show a preemptive bouncer when bypassing.
         // Lock-down mode shouldn't scan, since it is more explicit.
@@ -2745,11 +2745,12 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             strongAuthAllowsScanning = false;
         }
 
-        // If the face has recently been authenticated do not attempt to authenticate again.
-        final boolean faceAuthenticated = getIsFaceAuthenticated();
+        // If the face or fp has recently been authenticated do not attempt to authenticate again.
+        final boolean faceAndFpNotAuthenticated = !getUserUnlockedWithBiometric(user);
         final boolean faceDisabledForUser = isFaceDisabled(user);
         final boolean biometricEnabledForUser = mBiometricEnabledForUser.get(user);
         final boolean shouldListenForFaceAssistant = shouldListenForFaceAssistant();
+        final boolean isUdfpsFingerDown = mAuthController.isUdfpsFingerDown();
 
         // Only listen if this KeyguardUpdateMonitor belongs to the primary user. There is an
         // instance of KeyguardUpdateMonitor for each user but KeyguardUpdateMonitor is user-aware.
@@ -2759,13 +2760,13 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                         || mOccludingAppRequestingFace
                         || awakeKeyguard
                         || shouldListenForFaceAssistant
-                        || mAuthController.isUdfpsFingerDown()
+                        || isUdfpsFingerDown
                         || mUdfpsBouncerShowing)
-                && !mSwitchingUser && !faceDisabledForUser && becauseCannotSkipBouncer
+                && !mSwitchingUser && !faceDisabledForUser && userNotTrustedOrDetectionIsNeeded
                 && !mKeyguardGoingAway && biometricEnabledForUser
                 && strongAuthAllowsScanning && mIsPrimaryUser
                 && (!mSecureCameraLaunched || mOccludingAppRequestingFace)
-                && !faceAuthenticated
+                && faceAndFpNotAuthenticated
                 && !mGoingToSleep
                 // We only care about fp locked out state and not face because we still trigger
                 // face auth even when face is locked out to show the user a message that face
@@ -2779,10 +2780,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     user,
                     shouldListen,
                     mAuthInterruptActive,
-                    becauseCannotSkipBouncer,
                     biometricEnabledForUser,
                         mPrimaryBouncerFullyShown,
-                    faceAuthenticated,
+                    faceAndFpNotAuthenticated,
                     faceDisabledForUser,
                     isFaceLockedOut(),
                     fpLockedOut,
@@ -2795,7 +2795,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     strongAuthAllowsScanning,
                     mSecureCameraLaunched,
                     mSwitchingUser,
-                    mUdfpsBouncerShowing));
+                    mUdfpsBouncerShowing,
+                    isUdfpsFingerDown,
+                    userNotTrustedOrDetectionIsNeeded));
 
         return shouldListen;
     }
