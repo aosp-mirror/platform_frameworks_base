@@ -91,7 +91,7 @@ public final class DropBoxManagerService extends SystemService {
     private static final int DEFAULT_MAX_FILES_LOWRAM = 300;
     private static final int DEFAULT_QUOTA_KB = 10 * 1024;
     private static final int DEFAULT_QUOTA_PERCENT = 10;
-    private static final int DEFAULT_RESERVE_PERCENT = 10;
+    private static final int DEFAULT_RESERVE_PERCENT = 0;
     private static final int QUOTA_RESCAN_MILLIS = 5000;
 
     private static final boolean PROFILE_DUMP = false;
