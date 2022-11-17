@@ -20,6 +20,8 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSess
 import static com.android.server.app.GameManagerService.CANCEL_GAME_LOADING_MODE;
 import static com.android.server.app.GameManagerService.LOADING_BOOST_MAX_DURATION;
 import static com.android.server.app.GameManagerService.SET_GAME_STATE;
+import static com.android.server.app.GameManagerService.WRITE_DELAY_MILLIS;
+import static com.android.server.app.GameManagerService.WRITE_GAME_MODE_INTERVENTION_LIST_FILE;
 import static com.android.server.app.GameManagerService.WRITE_SETTINGS;
 
 import static org.junit.Assert.assertArrayEquals;
@@ -1835,9 +1837,7 @@ public class GameManagerServiceTests {
     public void testUpdateCustomGameModeConfiguration_permissionDenied() {
         mockModifyGameModeDenied();
         mockDeviceConfigAll();
-        GameManagerService gameManagerService =
-                new GameManagerService(mMockContext, mTestLooper.getLooper());
-        startUser(gameManagerService, USER_ID_1);
+        GameManagerService gameManagerService = createServiceAndStartUser(USER_ID_1);
         assertThrows(SecurityException.class, () -> {
             gameManagerService.updateCustomGameModeConfiguration(mPackageName,
                     new GameModeConfiguration.Builder().setScalingFactor(0.5f).build(),
@@ -1848,9 +1848,7 @@ public class GameManagerServiceTests {
     @Test
     public void testUpdateCustomGameModeConfiguration_noUserId() {
         mockModifyGameModeGranted();
-        GameManagerService gameManagerService =
-                new GameManagerService(mMockContext, mTestLooper.getLooper());
-        startUser(gameManagerService, USER_ID_2);
+        GameManagerService gameManagerService = createServiceAndStartUser(USER_ID_2);
         assertThrows(IllegalArgumentException.class, () -> {
             gameManagerService.updateCustomGameModeConfiguration(mPackageName,
                     new GameModeConfiguration.Builder().setScalingFactor(0.5f).build(),
@@ -1871,6 +1869,48 @@ public class GameManagerServiceTests {
         GameManagerService.GamePackageConfiguration pkgConfig = gameManagerService.getConfig(
                 mPackageName, USER_ID_1);
         assertNull(pkgConfig);
+    }
+
+    @Test
+    public void testUpdateCustomGameModeConfiguration() throws InterruptedException {
+        mockModifyGameModeGranted();
+        GameManagerService gameManagerService = createServiceAndStartUser(USER_ID_1);
+        gameManagerService.updateCustomGameModeConfiguration(mPackageName,
+                new GameModeConfiguration.Builder().setScalingFactor(0.35f).setFpsOverride(
+                        60).build(),
+                USER_ID_1);
+
+        assertTrue(gameManagerService.mHandler.hasEqualMessages(WRITE_SETTINGS, USER_ID_1));
+        assertTrue(
+                gameManagerService.mHandler.hasEqualMessages(WRITE_GAME_MODE_INTERVENTION_LIST_FILE,
+                        USER_ID_1));
+
+        GameManagerService.GamePackageConfiguration pkgConfig = gameManagerService.getConfig(
+                mPackageName, USER_ID_1);
+        assertNotNull(pkgConfig);
+        GameManagerService.GamePackageConfiguration.GameModeConfiguration modeConfig =
+                pkgConfig.getGameModeConfiguration(GameManager.GAME_MODE_CUSTOM);
+        assertNotNull(modeConfig);
+        assertEquals(modeConfig.getScaling(), 0.35f, 0.01f);
+        assertEquals(modeConfig.getFps(), 60);
+        // creates a new service to check that no data has been stored
+        mTestLooper.dispatchAll();
+        gameManagerService = createServiceAndStartUser(USER_ID_1);
+        pkgConfig = gameManagerService.getConfig(mPackageName, USER_ID_1);
+        assertNull(pkgConfig);
+
+        mTestLooper.moveTimeForward(WRITE_DELAY_MILLIS + 500);
+        mTestLooper.dispatchAll();
+        // creates a new service to check that data is persisted after delay
+        gameManagerService = createServiceAndStartUser(USER_ID_1);
+        assertEquals(GameManager.GAME_MODE_STANDARD,
+                gameManagerService.getGameMode(mPackageName, USER_ID_1));
+        pkgConfig = gameManagerService.getConfig(mPackageName, USER_ID_1);
+        assertNotNull(pkgConfig);
+        modeConfig = pkgConfig.getGameModeConfiguration(GameManager.GAME_MODE_CUSTOM);
+        assertNotNull(modeConfig);
+        assertEquals(modeConfig.getScaling(), 0.35f, 0.01f);
+        assertEquals(modeConfig.getFps(), 60);
     }
 
     @Test
