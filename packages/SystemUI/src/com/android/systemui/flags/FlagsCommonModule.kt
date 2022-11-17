@@ -15,7 +15,6 @@
  */
 package com.android.systemui.flags
 
-import com.android.internal.statusbar.IStatusBarService
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
@@ -31,16 +30,6 @@ interface FlagsCommonModule {
         @Named(ALL_FLAGS)
         fun providesAllFlags(): Map<Int, Flag<*>> {
             return FlagsFactory.knownFlags.map { it.value.id to it.value }.toMap()
-        }
-
-        @JvmStatic
-        @Provides
-        fun providesRestarter(barService: IStatusBarService): Restarter {
-            return object : Restarter {
-                override fun restart() {
-                    barService.restart()
-                }
-            }
         }
     }
 }

@@ -49,6 +49,7 @@ import com.android.systemui.R
 import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.shade.ShadeExpansionStateManager
@@ -103,6 +104,7 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
         private set
 
     private var overlayParams: UdfpsOverlayParams = UdfpsOverlayParams()
+    private var sensorBounds: Rect = Rect()
 
     private var overlayTouchListener: TouchExplorationStateChangeListener? = null
 
@@ -120,6 +122,10 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
         privateFlags = WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY
         // Avoid announcing window title.
         accessibilityTitle = " "
+
+        if (featureFlags.isEnabled(Flags.UDFPS_NEW_TOUCH_DETECTION)) {
+            inputFeatures = WindowManager.LayoutParams.INPUT_FEATURE_SPY
+        }
     }
 
     /** A helper if the [requestReason] was due to enrollment. */
@@ -160,6 +166,7 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
     fun show(controller: UdfpsController, params: UdfpsOverlayParams): Boolean {
         if (overlayView == null) {
             overlayParams = params
+            sensorBounds = Rect(params.sensorBounds)
             try {
                 overlayView = (inflater.inflate(
                     R.layout.udfps_view, null, false
@@ -178,6 +185,7 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
                     }
 
                     windowManager.addView(this, coreLayoutParams.updateDimensions(animation))
+                    sensorRect = sensorBounds
                     touchExplorationEnabled = accessibilityManager.isTouchExplorationEnabled
                     overlayTouchListener = TouchExplorationStateChangeListener {
                         if (accessibilityManager.isTouchExplorationEnabled) {
@@ -194,6 +202,7 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
                         overlayTouchListener!!
                     )
                     overlayTouchListener?.onTouchExplorationStateChanged(true)
+                    useExpandedOverlay = featureFlags.isEnabled(Flags.UDFPS_NEW_TOUCH_DETECTION)
                 }
             } catch (e: RuntimeException) {
                 Log.e(TAG, "showUdfpsOverlay | failed to add window", e)
@@ -225,13 +234,14 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
             REASON_ENROLL_ENROLLING -> {
                 UdfpsEnrollViewController(
                     view.addUdfpsView(R.layout.udfps_enroll_view) {
-                        updateSensorLocation(overlayParams.sensorBounds)
+                        updateSensorLocation(sensorBounds)
                     },
                     enrollHelper ?: throw IllegalStateException("no enrollment helper"),
                     statusBarStateController,
                     shadeExpansionStateManager,
                     dialogManager,
                     dumpManager,
+                    featureFlags,
                     overlayParams.scaleFactor
                 )
             }
@@ -420,7 +430,12 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
         }
 
         // Original sensorBounds assume portrait mode.
-        val rotatedSensorBounds = Rect(overlayParams.sensorBounds)
+        var rotatedBounds =
+            if (featureFlags.isEnabled(Flags.UDFPS_NEW_TOUCH_DETECTION)) {
+                Rect(overlayParams.overlayBounds)
+            } else {
+                Rect(overlayParams.sensorBounds)
+            }
 
         val rot = overlayParams.rotation
         if (rot == Surface.ROTATION_90 || rot == Surface.ROTATION_270) {
@@ -434,18 +449,27 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
             } else {
                 Log.v(TAG, "Rotate UDFPS bounds " + Surface.rotationToString(rot))
                 RotationUtils.rotateBounds(
-                    rotatedSensorBounds,
+                    rotatedBounds,
                     overlayParams.naturalDisplayWidth,
                     overlayParams.naturalDisplayHeight,
                     rot
                 )
+
+                if (featureFlags.isEnabled(Flags.UDFPS_NEW_TOUCH_DETECTION)) {
+                    RotationUtils.rotateBounds(
+                            sensorBounds,
+                            overlayParams.naturalDisplayWidth,
+                            overlayParams.naturalDisplayHeight,
+                            rot
+                    )
+                }
             }
         }
 
-        x = rotatedSensorBounds.left - paddingX
-        y = rotatedSensorBounds.top - paddingY
-        height = rotatedSensorBounds.height() + 2 * paddingX
-        width = rotatedSensorBounds.width() + 2 * paddingY
+        x = rotatedBounds.left - paddingX
+        y = rotatedBounds.top - paddingY
+        height = rotatedBounds.height() + 2 * paddingX
+        width = rotatedBounds.width() + 2 * paddingY
 
         return this
     }

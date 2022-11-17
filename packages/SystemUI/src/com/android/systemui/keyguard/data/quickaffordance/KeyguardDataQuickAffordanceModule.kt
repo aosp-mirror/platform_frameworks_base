@@ -29,8 +29,10 @@ object KeyguardDataQuickAffordanceModule {
         home: HomeControlsKeyguardQuickAffordanceConfig,
         quickAccessWallet: QuickAccessWalletKeyguardQuickAffordanceConfig,
         qrCodeScanner: QrCodeScannerKeyguardQuickAffordanceConfig,
+        camera: CameraQuickAffordanceConfig,
     ): Set<KeyguardQuickAffordanceConfig> {
         return setOf(
+            camera,
             home,
             quickAccessWallet,
             qrCodeScanner,

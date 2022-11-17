@@ -52,7 +52,6 @@ import com.android.systemui.util.time.SystemClock
 import java.io.PrintWriter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 /** Class that coordinates non-HBM animations during keyguard authentication. */
@@ -82,6 +81,8 @@ constructor(
         systemUIDialogManager,
         dumpManager
     ) {
+    private val useExpandedOverlay: Boolean =
+        featureFlags.isEnabled(Flags.UDFPS_NEW_TOUCH_DETECTION)
     private val isModernBouncerEnabled: Boolean = featureFlags.isEnabled(Flags.MODERN_BOUNCER)
     private var showingUdfpsBouncer = false
     private var udfpsRequested = false
@@ -233,7 +234,13 @@ constructor(
                 if (transitionToFullShadeProgress != 0f) {
                     return
                 }
-                udfpsController.onTouch(event)
+
+                // Forwarding touches not needed with expanded overlay
+                if (useExpandedOverlay) {
+                    return
+                } else {
+                    udfpsController.onTouch(event)
+                }
             }
         }
 
@@ -322,6 +329,7 @@ constructor(
         keyguardViewManager.setAlternateBouncer(mAlternateBouncer)
         lockScreenShadeTransitionController.udfpsKeyguardViewController = this
         activityLaunchAnimator.addListener(activityLaunchAnimatorListener)
+        view.mUseExpandedOverlay = useExpandedOverlay
     }
 
     override fun onViewDetached() {
