@@ -52,10 +52,9 @@ class BroadcastSentViaContextDetector : Detector(), SourceCodeScanner {
         val evaluator = context.evaluator
         if (evaluator.isMemberInSubClassOf(method, CLASS_CONTEXT)) {
             context.report(
-                    ISSUE,
-                    method,
-                    context.getNameLocation(node),
-                    "`Context.${method.name}()` should be replaced with " +
+                    issue = ISSUE,
+                    location = context.getNameLocation(node),
+                    message = "`Context.${method.name}()` should be replaced with " +
                     "`BroadcastSender.${method.name}()`"
             )
         }

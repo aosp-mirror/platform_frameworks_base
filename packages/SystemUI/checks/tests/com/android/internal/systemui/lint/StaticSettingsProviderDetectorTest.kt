@@ -28,7 +28,7 @@ class StaticSettingsProviderDetectorTest : SystemUILintDetectorTest() {
     override fun getIssues(): List<Issue> = listOf(StaticSettingsProviderDetector.ISSUE)
 
     @Test
-    fun testGetServiceWithString() {
+    fun testSuppressGetServiceWithString() {
         lint()
             .files(
                 TestFiles.java(
@@ -202,6 +202,35 @@ class StaticSettingsProviderDetectorTest : SystemUILintDetectorTest() {
                 0 errors, 36 warnings
                 """
             )
+    }
+
+    @Test
+    fun testGetServiceWithString() {
+        lint()
+            .files(
+                TestFiles.java(
+                        """
+                        package test.pkg;
+
+                        import android.provider.Settings;
+                        import android.provider.Settings.Global;
+                        import android.provider.Settings.Secure;
+
+                        public class TestClass {
+                            @SuppressWarnings("StaticSettingsProvider")
+                            public void getSystemServiceWithoutDagger(Context context) {
+                                final ContentResolver cr = mContext.getContentResolver();
+                                Global.getFloat(cr, Settings.Global.UNLOCK_SOUND);
+                            }
+                        }
+                        """
+                    )
+                    .indented(),
+                *stubs
+            )
+            .issues(StaticSettingsProviderDetector.ISSUE)
+            .run()
+            .expectClean()
     }
 
     private val stubs = androidStubs

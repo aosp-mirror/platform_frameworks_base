@@ -63,6 +63,34 @@ class RegisterReceiverViaContextDetectorTest : SystemUILintDetectorTest() {
     }
 
     @Test
+    fun testSuppressRegisterReceiver() {
+        lint()
+            .files(
+                TestFiles.java(
+                        """
+                    package test.pkg;
+                    import android.content.BroadcastReceiver;
+                    import android.content.Context;
+                    import android.content.IntentFilter;
+
+                    @SuppressWarnings("RegisterReceiverViaContext")
+                    public class TestClass {
+                        public void bind(Context context, BroadcastReceiver receiver,
+                            IntentFilter filter) {
+                          context.registerReceiver(receiver, filter, 0);
+                        }
+                    }
+                """
+                    )
+                    .indented(),
+                *stubs
+            )
+            .issues(RegisterReceiverViaContextDetector.ISSUE)
+            .run()
+            .expectClean()
+    }
+
+    @Test
     fun testRegisterReceiverAsUser() {
         lint()
             .files(

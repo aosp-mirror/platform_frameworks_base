@@ -46,10 +46,10 @@ class SlowUserQueryDetector : Detector(), SourceCodeScanner {
                 method.containingClass?.qualifiedName == "android.app.ActivityManager"
         ) {
             context.report(
-                ISSUE_SLOW_USER_ID_QUERY,
-                method,
-                context.getNameLocation(node),
-                "Use `UserTracker.getUserId()` instead of `ActivityManager.getCurrentUser()`"
+                issue = ISSUE_SLOW_USER_ID_QUERY,
+                location = context.getNameLocation(node),
+                message =
+                    "Use `UserTracker.getUserId()` instead of `ActivityManager.getCurrentUser()`"
             )
         }
         if (
@@ -58,10 +58,9 @@ class SlowUserQueryDetector : Detector(), SourceCodeScanner {
                 method.containingClass?.qualifiedName == "android.os.UserManager"
         ) {
             context.report(
-                ISSUE_SLOW_USER_INFO_QUERY,
-                method,
-                context.getNameLocation(node),
-                "Use `UserTracker.getUserInfo()` instead of `UserManager.getUserInfo()`"
+                issue = ISSUE_SLOW_USER_INFO_QUERY,
+                location = context.getNameLocation(node),
+                message = "Use `UserTracker.getUserInfo()` instead of `UserManager.getUserInfo()`"
             )
         }
     }
