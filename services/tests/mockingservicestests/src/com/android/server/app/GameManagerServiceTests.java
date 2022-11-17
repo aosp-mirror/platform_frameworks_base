@@ -1522,6 +1522,7 @@ public class GameManagerServiceTests {
         gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_BATTERY, USER_ID_1);
     }
 
+    @Test
     public void testResetInterventions_onDeviceConfigReset() throws Exception {
         mockModifyGameModeGranted();
         String configStringBefore =
