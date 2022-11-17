@@ -1179,7 +1179,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         assertTrue(rootTask2.isOrganized());
 
         // Verify a back pressed does not call the organizer
-        mWm.mAtmService.mActivityClientController.onBackPressedOnTaskRoot(activity.token,
+        mWm.mAtmService.mActivityClientController.onBackPressed(activity.token,
                 new IRequestFinishCallback.Default());
         // Ensure events dispatch to organizer.
         mWm.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
@@ -1190,7 +1190,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
                 rootTask.mRemoteToken.toWindowContainerToken(), true);
 
         // Verify now that the back press does call the organizer
-        mWm.mAtmService.mActivityClientController.onBackPressedOnTaskRoot(activity.token,
+        mWm.mAtmService.mActivityClientController.onBackPressed(activity.token,
                 new IRequestFinishCallback.Default());
         // Ensure events dispatch to organizer.
         mWm.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
@@ -1201,7 +1201,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
                 rootTask.mRemoteToken.toWindowContainerToken(), false);
 
         // Verify now that the back press no longer calls the organizer
-        mWm.mAtmService.mActivityClientController.onBackPressedOnTaskRoot(activity.token,
+        mWm.mAtmService.mActivityClientController.onBackPressed(activity.token,
                 new IRequestFinishCallback.Default());
         // Ensure events dispatch to organizer.
         mWm.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
@@ -1407,7 +1407,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         mWm.mWindowPlacerLocked.deferLayout();
 
         rootTask.removeImmediately();
-        mWm.mAtmService.mActivityClientController.onBackPressedOnTaskRoot(record.token,
+        mWm.mAtmService.mActivityClientController.onBackPressed(record.token,
                 new IRequestFinishCallback.Default());
         waitUntilHandlersIdle();
 

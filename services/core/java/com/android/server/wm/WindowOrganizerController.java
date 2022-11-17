@@ -39,6 +39,7 @@ import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_ADJACENT_ROOTS;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_ADJACENT_TASK_FRAGMENTS;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_ALWAYS_ON_TOP;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_COMPANION_TASK_FRAGMENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_LAUNCH_ADJACENT_FLAG_ROOT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_LAUNCH_ROOT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT;
@@ -1117,6 +1118,22 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 effects |= sanitizeAndApplyHierarchyOp(wc, hop);
                 break;
             }
+            case HIERARCHY_OP_TYPE_SET_COMPANION_TASK_FRAGMENT: {
+                final IBinder fragmentToken = hop.getContainer();
+                final IBinder companionToken = hop.getCompanionContainer();
+                final TaskFragment fragment = mLaunchTaskFragments.get(fragmentToken);
+                final TaskFragment companion = companionToken != null ? mLaunchTaskFragments.get(
+                        companionToken) : null;
+                if (fragment == null || !fragment.isAttached()) {
+                    final Throwable exception = new IllegalArgumentException(
+                            "Not allowed to set companion on invalid fragment tokens");
+                    sendTaskFragmentOperationFailure(organizer, errorCallbackToken, fragment, type,
+                            exception);
+                    break;
+                }
+                fragment.setCompanionTaskFragment(companion);
+                break;
+            }
             default: {
                 // The other operations may change task order so they are skipped while in lock
                 // task mode. The above operations are still allowed because they don't move
@@ -1653,6 +1670,12 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     break;
                 case HIERARCHY_OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT:
                     enforceTaskFragmentOrganized(func, hop.getNewParent(), organizer);
+                    break;
+                case HIERARCHY_OP_TYPE_SET_COMPANION_TASK_FRAGMENT:
+                    enforceTaskFragmentOrganized(func, hop.getContainer(), organizer);
+                    if (hop.getCompanionContainer() != null) {
+                        enforceTaskFragmentOrganized(func, hop.getCompanionContainer(), organizer);
+                    }
                     break;
                 case HIERARCHY_OP_TYPE_SET_ADJACENT_TASK_FRAGMENTS:
                     enforceTaskFragmentOrganized(func, hop.getContainer(), organizer);
