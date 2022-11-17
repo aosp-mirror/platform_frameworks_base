@@ -124,7 +124,8 @@ object Flags {
      * Whether the clock on a wide lock screen should use the new "stepping" animation for moving
      * the digits when the clock moves.
      */
-    @JvmField val STEP_CLOCK_ANIMATION = unreleasedFlag(212, "step_clock_animation")
+    @JvmField
+    val STEP_CLOCK_ANIMATION = unreleasedFlag(212, "step_clock_animation", teamfood = true)
 
     /**
      * Migration from the legacy isDozing/dozeAmount paths to the new KeyguardTransitionRepository
