@@ -16,7 +16,9 @@
 
 package com.android.systemui.flags
 
+import android.content.Intent
 import com.android.systemui.CoreStartable
+import com.android.systemui.broadcast.BroadcastSender
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.statusbar.commandline.CommandRegistry
 import dagger.Binds
@@ -31,7 +33,8 @@ constructor(
     dumpManager: DumpManager,
     private val commandRegistry: CommandRegistry,
     private val flagCommand: FlagCommand,
-    private val featureFlags: FeatureFlagsDebug
+    private val featureFlags: FeatureFlagsDebug,
+    private val broadcastSender: BroadcastSender
 ) : CoreStartable {
 
     init {
@@ -43,6 +46,8 @@ constructor(
     override fun start() {
         featureFlags.init()
         commandRegistry.registerCommand(FlagCommand.FLAG_COMMAND) { flagCommand }
+        val intent = Intent(FlagManager.ACTION_SYSUI_STARTED)
+        broadcastSender.sendBroadcast(intent)
     }
 }
 
