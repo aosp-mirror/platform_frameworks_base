@@ -1401,13 +1401,26 @@ class Task extends TaskFragment {
      * Reorder the history task so that the passed activity is brought to the front.
      * @return whether it was actually moved (vs already being top).
      */
-    final boolean moveActivityToFrontLocked(ActivityRecord newTop) {
+    final boolean moveActivityToFront(ActivityRecord newTop) {
         ProtoLog.i(WM_DEBUG_ADD_REMOVE, "Removing and adding activity %s to root task at top "
                 + "callers=%s", newTop, Debug.getCallers(4));
-        int origDist = getDistanceFromTop(newTop);
-        positionChildAtTop(newTop);
+        final TaskFragment taskFragment = newTop.getTaskFragment();
+        boolean moved;
+        if (taskFragment != this) {
+            if (taskFragment.isEmbedded() && taskFragment.getNonFinishingActivityCount() == 1) {
+                taskFragment.mClearedForReorderActivityToFront = true;
+            }
+            newTop.reparent(this, POSITION_TOP);
+            moved = true;
+            if (taskFragment.isEmbedded()) {
+                mAtmService.mWindowOrganizerController.mTaskFragmentOrganizerController
+                        .onActivityReparentedToTask(newTop);
+            }
+        } else {
+            moved = moveChildToFront(newTop);
+        }
         updateEffectiveIntent();
-        return getDistanceFromTop(newTop) != origDist;
+        return moved;
     }
 
     @Override
@@ -3073,20 +3086,6 @@ class Task extends TaskFragment {
             return r.mHandleExitSplashScreen
                     && r.mTransferringSplashScreenState == TRANSFER_SPLASH_SCREEN_COPYING;
         });
-    }
-
-    void positionChildAtTop(ActivityRecord child) {
-        positionChildAt(child, POSITION_TOP);
-    }
-
-    void positionChildAt(ActivityRecord child, int position) {
-        if (child == null) {
-            Slog.w(TAG_WM,
-                    "Attempted to position of non-existing app");
-            return;
-        }
-
-        positionChildAt(position, child, false /* includeParents */);
     }
 
     void setTaskDescription(TaskDescription taskDescription) {
