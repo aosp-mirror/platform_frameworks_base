@@ -237,6 +237,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         final boolean taskRemoved;
         final int id;
         final int callingId;
+        final String mCallingProcessName;
         final Intent intent;
         final NeededUriGrants neededGrants;
         long deliveredTime;
@@ -246,14 +247,16 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
 
         String stringName;      // caching of toString
 
-        StartItem(ServiceRecord _sr, boolean _taskRemoved, int _id, Intent _intent,
-                NeededUriGrants _neededGrants, int _callingId) {
+        StartItem(ServiceRecord _sr, boolean _taskRemoved, int _id,
+                Intent _intent, NeededUriGrants _neededGrants, int _callingId,
+                String callingProcessName) {
             sr = _sr;
             taskRemoved = _taskRemoved;
             id = _id;
             intent = _intent;
             neededGrants = _neededGrants;
             callingId = _callingId;
+            mCallingProcessName = callingProcessName;
         }
 
         UriPermissionOwner getUriPermissionsLocked() {
