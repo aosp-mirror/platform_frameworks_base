@@ -1798,17 +1798,18 @@ public final class SystemServer implements Dumpable {
             dpms = mSystemServiceManager.startService(DevicePolicyManagerService.Lifecycle.class);
             t.traceEnd();
 
-            if (!isWatch) {
-                t.traceBegin("StartStatusBarManagerService");
-                try {
-                    statusBar = new StatusBarManagerService(context);
-                    ServiceManager.addService(Context.STATUS_BAR_SERVICE, statusBar, false,
-                            DUMP_FLAG_PRIORITY_NORMAL | DUMP_FLAG_PROTO);
-                } catch (Throwable e) {
-                    reportWtf("starting StatusBarManagerService", e);
+            t.traceBegin("StartStatusBarManagerService");
+            try {
+                statusBar = new StatusBarManagerService(context);
+                if (!isWatch) {
+                    statusBar.publishGlobalActionsProvider();
                 }
-                t.traceEnd();
+                ServiceManager.addService(Context.STATUS_BAR_SERVICE, statusBar, false,
+                        DUMP_FLAG_PRIORITY_NORMAL | DUMP_FLAG_PROTO);
+            } catch (Throwable e) {
+                reportWtf("starting StatusBarManagerService", e);
             }
+            t.traceEnd();
 
             if (deviceHasConfigString(context,
                     R.string.config_defaultMusicRecognitionService)) {
