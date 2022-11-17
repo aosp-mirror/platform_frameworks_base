@@ -1845,15 +1845,30 @@ final class InstallPackageHelper {
                     continue;
                 }
 
-                VerityUtils.setUpFsverity(filePath, (byte[]) null);
-
-                // Verify fs-verity signature if exists.
                 final String signaturePath = entry.getValue();
                 if (new File(signaturePath).exists()) {
+                    // If signature is provided, enable fs-verity first so that the file can be
+                    // measured for signature check below.
+                    VerityUtils.setUpFsverity(filePath, (byte[]) null);
+
                     if (!fis.verifyPkcs7DetachedSignature(signaturePath, filePath)) {
                         throw new PrepareFailure(PackageManager.INSTALL_FAILED_BAD_SIGNATURE,
                                 "fs-verity signature does not verify against a known key");
                     }
+                } else {
+                    // Without signature, we don't need to access the digest right away and can
+                    // enable fs-verity in background (since this is a blocking call).
+                    new Thread("fsverity-setup") {
+                        @Override public void run() {
+                            try {
+                                VerityUtils.setUpFsverity(filePath, (byte[]) null);
+                            } catch (IOException e) {
+                                // There's nothing we can do if the setup failed. Since fs-verity is
+                                // optional, just ignore the error for now.
+                                Slog.e(TAG, "Failed to enable fs-verity to " + filePath);
+                            }
+                        }
+                    }.start();
                 }
             } catch (IOException e) {
                 throw new PrepareFailure(PackageManager.INSTALL_FAILED_BAD_SIGNATURE,
