@@ -44040,6 +44040,8 @@ package android.telephony {
     field public static final int APPTYPE_USIM = 2; // 0x2
     field public static final int AUTHTYPE_EAP_AKA = 129; // 0x81
     field public static final int AUTHTYPE_EAP_SIM = 128; // 0x80
+    field public static final int AUTHTYPE_GBA_BOOTSTRAP = 132; // 0x84
+    field public static final int AUTHTYPE_GBA_NAF_KEY_EXTERNAL = 133; // 0x85
     field public static final int CALL_COMPOSER_STATUS_OFF = 0; // 0x0
     field public static final int CALL_COMPOSER_STATUS_ON = 1; // 0x1
     field public static final int CALL_STATE_IDLE = 0; // 0x0

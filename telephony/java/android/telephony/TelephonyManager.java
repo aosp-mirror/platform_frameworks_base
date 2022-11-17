@@ -8298,16 +8298,23 @@ public class TelephonyManager {
     /** Authentication type for UICC challenge is EAP AKA. See RFC 4187 for details. */
     public static final int AUTHTYPE_EAP_AKA = PhoneConstants.AUTH_CONTEXT_EAP_AKA;
     /**
-     * Authentication type for GBA Bootstrap Challenge is GBA_BOOTSTRAP.
-     * See 3GPP 33.220 Section 5.3.2.
-     * @hide
+     * Authentication type for GBA Bootstrap Challenge.
+     * Pass this authentication type into the {@link #getIccAuthentication} API to perform a GBA
+     * Bootstrap challenge (BSF), with {@code data} (generated according to the procedure defined in
+     * 3GPP 33.220 Section 5.3.2 step.4) in base64 encoding.
+     * This method will return the Bootstrapping response in base64 encoding when ICC authentication
+     * is completed.
+     * Ref 3GPP 33.220 Section 5.3.2.
      */
     public static final int AUTHTYPE_GBA_BOOTSTRAP = PhoneConstants.AUTH_CONTEXT_GBA_BOOTSTRAP;
     /**
-     * Authentication type for GBA Network Application Functions (NAF) key
-     * External Challenge is AUTHTYPE_GBA_NAF_KEY_EXTERNAL.
-     * See 3GPP 33.220 Section 5.3.2.
-     * @hide
+     * Authentication type for GBA Network Application Functions (NAF) key External Challenge.
+     * Pass this authentication type into the {@link #getIccAuthentication} API to perform a GBA
+     * Network Applications Functions (NAF) key External challenge using the NAF_ID parameter
+     * as the {@code data} in base64 encoding.
+     * This method will return the Ks_Ext_Naf key in base64 encoding when ICC authentication
+     * is completed.
+     * Ref 3GPP 33.220 Section 5.3.2.
      */
     public static final int AUTHTYPE_GBA_NAF_KEY_EXTERNAL =
             PhoneConstants.AUTHTYPE_GBA_NAF_KEY_EXTERNAL;
@@ -8336,7 +8343,8 @@ public class TelephonyManager {
      *
      * @param appType the icc application type, like {@link #APPTYPE_USIM}
      * @param authType the authentication type, any one of {@link #AUTHTYPE_EAP_AKA} or
-     * {@link #AUTHTYPE_EAP_SIM}
+     * {@link #AUTHTYPE_EAP_SIM} or {@link #AUTHTYPE_GBA_BOOTSTRAP} or
+     * {@link #AUTHTYPE_GBA_NAF_KEY_EXTERNAL}
      * @param data authentication challenge data, base64 encoded.
      * See 3GPP TS 31.102 7.1.2 for more details.
      * @return the response of authentication. This value will be null in the following cases:
@@ -8364,7 +8372,8 @@ public class TelephonyManager {
      * @param subId subscription ID used for authentication
      * @param appType the icc application type, like {@link #APPTYPE_USIM}
      * @param authType the authentication type, any one of {@link #AUTHTYPE_EAP_AKA} or
-     * {@link #AUTHTYPE_EAP_SIM}
+     * {@link #AUTHTYPE_EAP_SIM} or {@link #AUTHTYPE_GBA_BOOTSTRAP} or
+     * {@link #AUTHTYPE_GBA_NAF_KEY_EXTERNAL}
      * @param data authentication challenge data, base64 encoded.
      * See 3GPP TS 31.102 7.1.2 for more details.
      * @return the response of authentication. This value will be null in the following cases only
