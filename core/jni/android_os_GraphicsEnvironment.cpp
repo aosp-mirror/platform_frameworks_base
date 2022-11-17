@@ -122,6 +122,10 @@ void hintActivityLaunch_native(JNIEnv* env, jobject clazz) {
     android::GraphicsEnv::getInstance().hintActivityLaunch();
 }
 
+void setBlobCacheQuotaBytes_native(JNIEnv* env, jobject clazz, jlong cacheBytes) {
+    android::GraphicsEnv::getInstance().setBlobCacheQuotaBytes(cacheBytes);
+}
+
 const JNINativeMethod g_methods[] = {
         {"isDebuggable", "()Z", reinterpret_cast<void*>(isDebuggable_native)},
         {"setDriverPathAndSphalLibraries", "(Ljava/lang/String;Ljava/lang/String;)V",
@@ -143,6 +147,7 @@ const JNINativeMethod g_methods[] = {
         {"setDebugLayersGLES", "(Ljava/lang/String;)V",
          reinterpret_cast<void*>(setDebugLayersGLES_native)},
         {"hintActivityLaunch", "()V", reinterpret_cast<void*>(hintActivityLaunch_native)},
+        {"setBlobCacheQuotaBytes", "(J)V", reinterpret_cast<void*>(setBlobCacheQuotaBytes_native)},
 };
 
 const char* const kGraphicsEnvironmentName = "android/os/GraphicsEnvironment";
