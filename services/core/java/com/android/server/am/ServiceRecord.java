@@ -201,7 +201,9 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     ActivityManagerService.FgsTempAllowListItem mInfoTempFgsAllowListReason;
     // Is the same mInfoAllowStartForeground string has been logged before? Used for dedup.
     boolean mLoggedInfoAllowStartForeground;
-    // The number of times Service.startForeground() is called;
+    // The number of times Service.startForeground() is called, after this service record is
+    // created. (i.e. due to "bound" or "start".) It never decreases, even when stopForeground()
+    // is called.
     int mStartForegroundCount;
     // Last time mAllowWhileInUsePermissionInFgs or mAllowStartForeground is set.
     long mLastSetFgsRestrictionTime;
@@ -769,6 +771,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
      *         has no reason to start again. Note this condition doesn't consider the bindings.
      */
     boolean canStopIfKilled(boolean isStartCanceled) {
+        // TODO(short-service): If it's a "short FGS", we should stop it if killed.
         return startRequested && (stopIfKilled || isStartCanceled) && pendingStarts.isEmpty();
     }
 
@@ -1222,5 +1225,17 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
 
     public ComponentName getComponentName() {
         return name;
+    }
+
+    /**
+     * @return true if it's a foreground service of the "short service" type and don't have
+     * other fgs type bits set.
+     */
+    public boolean isShortFgs() {
+        // Note if the type contains FOREGROUND_SERVICE_TYPE_SHORT_SERVICE but also other bits
+        // set, it's _not_ considered be a short service. (because we shouldn't apply
+        // the short-service restrictions)
+        return isForeground
+                && (foregroundServiceType == ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE);
     }
 }

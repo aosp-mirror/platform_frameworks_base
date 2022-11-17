@@ -1798,28 +1798,53 @@ public class OomAdjuster {
             }
         }
 
+        int capabilityFromFGS = 0; // capability from foreground service.
+
+        // Adjust for FGS or "has-overlay-ui".
         if (adj > PERCEPTIBLE_APP_ADJ
                 || procState > PROCESS_STATE_FOREGROUND_SERVICE) {
-            if (psr.hasForegroundServices()) {
-                // The user is aware of this app, so make it visible.
-                adj = PERCEPTIBLE_APP_ADJ;
-                procState = PROCESS_STATE_FOREGROUND_SERVICE;
-                state.setAdjType("fg-service");
-                state.setCached(false);
-                schedGroup = SCHED_GROUP_DEFAULT;
-                if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
-                    reportOomAdjMessageLocked(TAG_OOM_ADJ, "Raise to " + state.getAdjType() + ": "
-                            + app + " ");
-                }
+            String adjType = null;
+            int newAdj = 0;
+            int newProcState = 0;
+
+            if (psr.hasForegroundServices() && psr.hasNonShortForegroundServices()) {
+                // For regular (non-short) FGS.
+                adjType = "fg-service";
+                newAdj = PERCEPTIBLE_APP_ADJ;
+                newProcState = PROCESS_STATE_FOREGROUND_SERVICE;
+
             } else if (state.hasOverlayUi()) {
-                // The process is display an overlay UI.
-                adj = PERCEPTIBLE_APP_ADJ;
-                procState = PROCESS_STATE_IMPORTANT_FOREGROUND;
+                adjType = "has-overlay-ui";
+                newAdj = PERCEPTIBLE_APP_ADJ;
+                newProcState = PROCESS_STATE_IMPORTANT_FOREGROUND;
+
+            } else if (psr.hasForegroundServices() && !psr.hasNonShortForegroundServices()) {
+                // For short FGS.
+                adjType = "fg-service-short";
+                // We use MEDIUM_APP_ADJ + 1 so we can tell apart EJ (which uses MEDIUM_APP_ADJ + 1)
+                // from short-FGS.
+                // (We use +1 and +2, not +0 and +1, to be consistent with the following
+                // RECENT_FOREGROUND_APP_ADJ tweak)
+                newAdj = PERCEPTIBLE_MEDIUM_APP_ADJ + 1;
+
+                // Short-FGS gets a below-BFGS procstate, so it can't start another FGS from it.
+                newProcState = PROCESS_STATE_IMPORTANT_FOREGROUND;
+
+                // Same as EJ, we explicitly grant network access to short FGS,
+                // even when battery saver or data saver is enabled.
+                capabilityFromFGS |= PROCESS_CAPABILITY_NETWORK;
+            }
+
+            if (adjType != null) {
+                adj = newAdj;
+                procState = newProcState;
+                state.setAdjType(adjType);
                 state.setCached(false);
-                state.setAdjType("has-overlay-ui");
                 schedGroup = SCHED_GROUP_DEFAULT;
+
                 if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
-                    reportOomAdjMessageLocked(TAG_OOM_ADJ, "Raise to overlay ui: " + app);
+                    reportOomAdjMessageLocked(TAG_OOM_ADJ, "Raise to " + adjType + ": "
+                            + app + " ");
                 }
             }
         }
@@ -1830,8 +1855,15 @@ public class OomAdjuster {
         if (psr.hasForegroundServices() && adj > PERCEPTIBLE_RECENT_FOREGROUND_APP_ADJ
                 && (state.getLastTopTime() + mConstants.TOP_TO_FGS_GRACE_DURATION > now
                 || state.getSetProcState() <= PROCESS_STATE_TOP)) {
-            adj = PERCEPTIBLE_RECENT_FOREGROUND_APP_ADJ;
-            state.setAdjType("fg-service-act");
+            if (psr.hasNonShortForegroundServices()) {
+                adj = PERCEPTIBLE_RECENT_FOREGROUND_APP_ADJ;
+                state.setAdjType("fg-service-act");
+            } else {
+                // For short-service FGS, we +1 the value, so we'll be able to detect it in
+                // various dashboards.
+                adj = PERCEPTIBLE_RECENT_FOREGROUND_APP_ADJ + 1;
+                state.setAdjType("fg-service-short-act");
+            }
             if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
                 reportOomAdjMessageLocked(TAG_OOM_ADJ, "Raise to recent fg: " + app);
             }
@@ -1842,11 +1874,13 @@ public class OomAdjuster {
         // foreground services so that it can finish performing any persistence/processing of
         // in-memory state.
         if (psr.hasTopStartedAlmostPerceptibleServices()
-                && adj > PERCEPTIBLE_RECENT_FOREGROUND_APP_ADJ
+                && (adj > PERCEPTIBLE_RECENT_FOREGROUND_APP_ADJ + 2)
                 && (state.getLastTopTime()
                         + mConstants.TOP_TO_ALMOST_PERCEPTIBLE_GRACE_DURATION > now
                 || state.getSetProcState() <= PROCESS_STATE_TOP)) {
-            adj = PERCEPTIBLE_RECENT_FOREGROUND_APP_ADJ;
+            // For EJ, we +2 the value, so we'll be able to detect it in
+            // various dashboards.
+            adj = PERCEPTIBLE_RECENT_FOREGROUND_APP_ADJ + 2;
             // This shall henceforth be called the "EJ" exemption, despite utilizing the
             // ALMOST_PERCEPTIBLE flag to work.
             state.setAdjType("top-ej-act");
@@ -1979,7 +2013,6 @@ public class OomAdjuster {
             }
         }
 
-        int capabilityFromFGS = 0; // capability from foreground service.
         boolean boundByNonBgRestricted = state.isCurBoundByNonBgRestrictedApp();
         boolean scheduleLikeTopApp = false;
         for (int is = psr.numberOfRunningServices() - 1;
@@ -2031,6 +2064,8 @@ public class OomAdjuster {
                 }
             }
 
+            // TODO(short-service): While-in-user permissions. Do we need any change here for
+            // short-FGS? (Likely not)
             if (s.isForeground) {
                 final int fgsType = s.foregroundServiceType;
                 if (s.mAllowWhileInUsePermissionInFgs) {
@@ -2113,6 +2148,7 @@ public class OomAdjuster {
                         // in this case unless they explicitly request it.
                         if ((cstate.getCurCapability() & PROCESS_CAPABILITY_NETWORK) != 0) {
                             if (clientProcState <= PROCESS_STATE_BOUND_FOREGROUND_SERVICE) {
+                                // This is used to grant network access to Expedited Jobs.
                                 if ((cr.flags & Context.BIND_BYPASS_POWER_NETWORK_RESTRICTIONS)
                                         != 0) {
                                     capability |= PROCESS_CAPABILITY_NETWORK;
@@ -2200,8 +2236,11 @@ public class OomAdjuster {
                                     newAdj = PERCEPTIBLE_LOW_APP_ADJ;
                                 } else if ((cr.flags & Context.BIND_ALMOST_PERCEPTIBLE) != 0
                                         && clientAdj < PERCEPTIBLE_APP_ADJ
-                                        && adj >= (lbAdj = PERCEPTIBLE_MEDIUM_APP_ADJ)) {
-                                    newAdj = PERCEPTIBLE_MEDIUM_APP_ADJ;
+                                        && adj >= (lbAdj = (PERCEPTIBLE_MEDIUM_APP_ADJ + 2))) {
+                                    // This is for expedited jobs.
+                                    // We use MEDIUM_APP_ADJ + 2 here, so we can tell apart
+                                    // EJ and short-FGS.
+                                    newAdj = PERCEPTIBLE_MEDIUM_APP_ADJ + 2;
                                 } else if ((cr.flags&Context.BIND_NOT_VISIBLE) != 0
                                         && clientAdj < PERCEPTIBLE_APP_ADJ
                                         && adj >= (lbAdj = PERCEPTIBLE_APP_ADJ)) {

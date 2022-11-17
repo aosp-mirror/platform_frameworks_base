@@ -238,11 +238,13 @@ public final class UidRecord {
         mEphemeral = ephemeral;
     }
 
+    /** Returns whether the UID has any FGS of any type or not (including "short fgs") */
     @GuardedBy(anyOf = {"mService", "mProcLock"})
     boolean hasForegroundServices() {
         return mForegroundServices;
     }
 
+    /** Sets whether the UID has any FGS of any type or not (including "short fgs") */
     @GuardedBy({"mService", "mProcLock"})
     void setForegroundServices(boolean foregroundServices) {
         mForegroundServices = foregroundServices;

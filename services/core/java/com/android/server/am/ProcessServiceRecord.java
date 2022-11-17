@@ -21,6 +21,7 @@ import static com.android.server.am.ProcessProfileRecord.HOSTING_COMPONENT_TYPE_
 
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.pm.ServiceInfo;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.util.ArrayMap;
@@ -78,9 +79,18 @@ final class ProcessServiceRecord {
     private int mConnectionImportance;
 
     /**
-     * Type of foreground service, if there is a foreground service.
+     * The OR'ed foreground service types that are running on this process.
+     * Note, because TYPE_NONE (==0) is also a valid type for pre-U apps, this field doesn't tell
+     * if the process has any TYPE_NONE FGS or not, but {@link #mHasTypeNoneFgs} will be set
+     * in that case.
      */
     private int mFgServiceTypes;
+
+    /**
+     * Whether the process has any foreground services of TYPE_NONE running.
+     * @see #mFgServiceTypes
+     */
+    private boolean mHasTypeNoneFgs;
 
     /**
      * Last reported foreground service types.
@@ -145,9 +155,18 @@ final class ProcessServiceRecord {
         return mHasClientActivities;
     }
 
-    void setHasForegroundServices(boolean hasForegroundServices, int fgServiceTypes) {
+    void setHasForegroundServices(boolean hasForegroundServices, int fgServiceTypes,
+            boolean hasTypeNoneFgs) {
+        // hasForegroundServices should be the same as "either it has any FGS types, or none types".
+        // We still take this as a parameter because it's used in the callsite...
+        if (ActivityManagerDebugConfig.DEBUG_SERVICE
+                && hasForegroundServices != ((fgServiceTypes != 0) || hasTypeNoneFgs)) {
+            throw new IllegalStateException("hasForegroundServices mismatch");
+        }
+
         mHasForegroundServices = hasForegroundServices;
         mFgServiceTypes = fgServiceTypes;
+        mHasTypeNoneFgs = hasTypeNoneFgs;
         mApp.getWindowProcessController().setHasForegroundServices(hasForegroundServices);
         if (hasForegroundServices) {
             mApp.mProfile.addHostingComponentType(HOSTING_COMPONENT_TYPE_FOREGROUND_SERVICE);
@@ -168,8 +187,41 @@ final class ProcessServiceRecord {
         return mRepHasForegroundServices;
     }
 
-    int getForegroundServiceTypes() {
+    /**
+     * Returns the FGS typps, but it doesn't tell if the types include "NONE" or not, so
+     * do not use it outside of this class.
+     */
+    private int getForegroundServiceTypes() {
         return mHasForegroundServices ? mFgServiceTypes : 0;
+    }
+
+    boolean areForegroundServiceTypesSame(@ServiceInfo.ForegroundServiceType int types,
+            boolean hasTypeNoneFgs) {
+        return ((getForegroundServiceTypes() & types) == types)
+                && (mHasTypeNoneFgs == hasTypeNoneFgs);
+    }
+
+    /**
+     * @return true if the fgs types includes any of the given types.
+     * (wouldn't work for TYPE_NONE, which is 0)
+     */
+    boolean containsAnyForegroundServiceTypes(@ServiceInfo.ForegroundServiceType int types) {
+        return (getForegroundServiceTypes() & types) != 0;
+    }
+
+    /**
+     * @return true if the process has any FGS that are _not_ a "short" FGS.
+     */
+    boolean hasNonShortForegroundServices() {
+        if (!mHasForegroundServices) {
+            return false; // Process has no FGS running.
+        }
+        // Does the process has any FGS of TYPE_NONE?
+        if (mHasTypeNoneFgs) {
+            return true;
+        }
+        // If not, we can just check mFgServiceTypes.
+        return mFgServiceTypes != ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE;
     }
 
     int getReportedForegroundServiceTypes() {
