@@ -16,6 +16,7 @@
 
 package com.android.server.pm;
 
+import static android.content.pm.PackageInstaller.SessionParams.USER_ACTION_UNSPECIFIED;
 import static android.content.pm.PackageManager.INSTALL_REASON_UNKNOWN;
 import static android.content.pm.PackageManager.INSTALL_SCENARIO_DEFAULT;
 import static android.content.pm.PackageManager.INSTALL_SUCCEEDED;
@@ -114,6 +115,8 @@ final class InstallRequest {
 
     @Nullable
     private final PackageMetrics mPackageMetrics;
+    private final int mSessionId;
+    private final int mRequireUserAction;
 
     // New install
     InstallRequest(InstallingSession params) {
@@ -128,6 +131,8 @@ final class InstallRequest {
                 params.mDataLoaderType, params.mPackageSource);
         mPackageMetrics = new PackageMetrics(this);
         mIsInstallInherit = params.mIsInherit;
+        mSessionId = params.mSessionId;
+        mRequireUserAction = params.mRequireUserAction;
     }
 
     // Install existing package as user
@@ -141,6 +146,8 @@ final class InstallRequest {
         mPostInstallRunnable = runnable;
         mPackageMetrics = new PackageMetrics(this);
         mIsInstallForUsers = true;
+        mSessionId = -1;
+        mRequireUserAction = USER_ACTION_UNSPECIFIED;
     }
 
     // addForInit
@@ -158,6 +165,8 @@ final class InstallRequest {
         mScanFlags = scanFlags;
         mScanResult = scanResult;
         mPackageMetrics = null; // No logging from this code path
+        mSessionId = -1;
+        mRequireUserAction = USER_ACTION_UNSPECIFIED;
     }
 
     @Nullable
@@ -563,6 +572,14 @@ final class InstallRequest {
                 Slog.e(TAG, "ScanResult is null and it should not happen");
             }
         }
+    }
+
+    public int getSessionId() {
+        return mSessionId;
+    }
+
+    public int getRequireUserAction() {
+        return mRequireUserAction;
     }
 
     public void setScanFlags(int scanFlags) {

@@ -2566,8 +2566,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         synchronized (mLock) {
-            return new InstallingSession(stageDir, localObserver, params, mInstallSource, user,
-                    mSigningDetails, mInstallerUid, mPackageLite, mPm);
+            return new InstallingSession(sessionId, stageDir, localObserver, params, mInstallSource,
+                    user, mSigningDetails, mInstallerUid, mPackageLite, mPm);
         }
     }
 
