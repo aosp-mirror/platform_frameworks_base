@@ -194,7 +194,7 @@ class CredentialManagerRepo(
           )
         )
         .setRemoteEntry(
-          newRemoteEntry("key1", "subkey-1")
+          newRemoteEntry("key2", "subkey-1")
         )
         .setIsDefaultProvider(true)
         .build(),
@@ -252,6 +252,8 @@ class CredentialManagerRepo(
               "Open Google Password Manager", "beckett-family@gmail.com"
             ),
           )
+        ).setRemoteEntry(
+          newRemoteEntry("key4", "subkey-1")
         ).build(),
       GetCredentialProviderData.Builder("com.dashlane")
         .setCredentialEntries(

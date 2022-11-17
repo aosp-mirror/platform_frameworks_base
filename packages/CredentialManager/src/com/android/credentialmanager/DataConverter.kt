@@ -30,6 +30,7 @@ import com.android.credentialmanager.getflow.ActionEntryInfo
 import com.android.credentialmanager.getflow.AuthenticationEntryInfo
 import com.android.credentialmanager.getflow.CredentialEntryInfo
 import com.android.credentialmanager.getflow.ProviderInfo
+import com.android.credentialmanager.getflow.RemoteEntryInfo
 import com.android.credentialmanager.jetpack.provider.ActionUi
 import com.android.credentialmanager.jetpack.provider.CredentialEntryUi
 import com.android.credentialmanager.jetpack.provider.SaveEntryUi
@@ -59,10 +60,11 @@ class GetFlowUtils {
           credentialEntryList = getCredentialOptionInfoList(
             it.providerFlattenedComponentName, it.credentialEntries, context),
           authenticationEntry = getAuthenticationEntry(
-              it.providerFlattenedComponentName,
-              providerDisplayName,
-              providerIcon,
-              it.authenticationEntry),
+            it.providerFlattenedComponentName,
+            providerDisplayName,
+            providerIcon,
+            it.authenticationEntry),
+          remoteEntry = getRemoteEntry(it.providerFlattenedComponentName, it.remoteEntry),
           actionEntryList = getActionEntryList(
             it.providerFlattenedComponentName, it.actionChips, context),
         )
@@ -113,6 +115,18 @@ class GetFlowUtils {
         entrySubkey = authEntry.subkey,
         title = providerDisplayName,
         icon = providerIcon,
+      )
+    }
+
+    private fun getRemoteEntry(providerId: String, remoteEntry: Entry?): RemoteEntryInfo? {
+      // TODO: should also call fromSlice after getting the official jetpack code.
+      if (remoteEntry == null) {
+        return null
+      }
+      return RemoteEntryInfo(
+        providerId = providerId,
+        entryKey = remoteEntry.key,
+        entrySubkey = remoteEntry.subkey,
       )
     }
 
