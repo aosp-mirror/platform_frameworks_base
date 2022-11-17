@@ -3711,7 +3711,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private boolean dispatchPendingAbandonCallback() {
         final Runnable callback;
         synchronized (mLock) {
-            Preconditions.checkState(mStageDirInUse);
+            if (!mStageDirInUse) {
+                return false;
+            }
             mStageDirInUse = false;
             callback = mPendingAbandonCallback;
             mPendingAbandonCallback = null;
