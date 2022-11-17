@@ -22,6 +22,6 @@ package android.window;
  * @param trigger Whether the back gesture has passed the triggering threshold.
  * {@hide}
  */
-oneway interface IBackAnimationFinishedCallback {
+interface IBackAnimationFinishedCallback {
     void onAnimationFinished(in boolean triggerBack);
 }
