@@ -32,8 +32,6 @@ import com.android.systemui.animation.Expandable
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.globalactions.GlobalActionsDialogLite
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.qs.FgsManagerController
@@ -42,10 +40,9 @@ import com.android.systemui.qs.footer.data.model.UserSwitcherStatusModel
 import com.android.systemui.qs.footer.data.repository.ForegroundServicesRepository
 import com.android.systemui.qs.footer.data.repository.UserSwitcherRepository
 import com.android.systemui.qs.footer.domain.model.SecurityButtonConfig
-import com.android.systemui.qs.user.UserSwitchDialogController
 import com.android.systemui.security.data.repository.SecurityRepository
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
-import com.android.systemui.user.UserSwitcherActivity
+import com.android.systemui.user.domain.interactor.UserInteractor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
@@ -100,13 +97,12 @@ class FooterActionsInteractorImpl
 @Inject
 constructor(
     private val activityStarter: ActivityStarter,
-    private val featureFlags: FeatureFlags,
     private val metricsLogger: MetricsLogger,
     private val uiEventLogger: UiEventLogger,
     private val deviceProvisionedController: DeviceProvisionedController,
     private val qsSecurityFooterUtils: QSSecurityFooterUtils,
     private val fgsManagerController: FgsManagerController,
-    private val userSwitchDialogController: UserSwitchDialogController,
+    private val userInteractor: UserInteractor,
     securityRepository: SecurityRepository,
     foregroundServicesRepository: ForegroundServicesRepository,
     userSwitcherRepository: UserSwitcherRepository,
@@ -182,22 +178,6 @@ constructor(
     }
 
     override fun showUserSwitcher(context: Context, expandable: Expandable) {
-        if (!featureFlags.isEnabled(Flags.FULL_SCREEN_USER_SWITCHER)) {
-            userSwitchDialogController.showDialog(context, expandable)
-            return
-        }
-
-        val intent =
-            Intent(context, UserSwitcherActivity::class.java).apply {
-                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
-            }
-
-        activityStarter.startActivity(
-            intent,
-            true /* dismissShade */,
-            expandable.activityLaunchController(),
-            true /* showOverlockscreenwhenlocked */,
-            UserHandle.SYSTEM,
-        )
+        userInteractor.showUserSwitcher(context, expandable)
     }
 }

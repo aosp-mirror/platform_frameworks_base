@@ -20,6 +20,7 @@ package com.android.systemui.user.ui.dialog
 import android.app.Dialog
 import android.content.Context
 import com.android.internal.jank.InteractionJankMonitor
+import com.android.internal.logging.UiEventLogger
 import com.android.settingslib.users.UserCreatingDialog
 import com.android.systemui.CoreStartable
 import com.android.systemui.animation.DialogCuj
@@ -27,11 +28,14 @@ import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.broadcast.BroadcastSender
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.qs.tiles.UserDetailView
 import com.android.systemui.user.domain.interactor.UserInteractor
 import com.android.systemui.user.domain.model.ShowDialogRequestModel
 import dagger.Lazy
 import javax.inject.Inject
+import javax.inject.Provider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
@@ -47,6 +51,9 @@ constructor(
     private val broadcastSender: Lazy<BroadcastSender>,
     private val dialogLaunchAnimator: Lazy<DialogLaunchAnimator>,
     private val interactor: Lazy<UserInteractor>,
+    private val userDetailAdapterProvider: Provider<UserDetailView.Adapter>,
+    private val eventLogger: Lazy<UiEventLogger>,
+    private val activityStarter: Lazy<ActivityStarter>,
 ) : CoreStartable {
 
     private var currentDialog: Dialog? = null
@@ -102,6 +109,21 @@ constructor(
                                     falsingManager = falsingManager.get(),
                                     dialogLaunchAnimator = dialogLaunchAnimator.get(),
                                     onExitGuestUserListener = request.onExitGuestUser,
+                                ),
+                                DialogCuj(
+                                    InteractionJankMonitor.CUJ_USER_DIALOG_OPEN,
+                                    INTERACTION_JANK_EXIT_GUEST_MODE_TAG,
+                                ),
+                            )
+                        is ShowDialogRequestModel.ShowUserSwitcherDialog ->
+                            Pair(
+                                UserSwitchDialog(
+                                    context = context.get(),
+                                    adapter = userDetailAdapterProvider.get(),
+                                    uiEventLogger = eventLogger.get(),
+                                    falsingManager = falsingManager.get(),
+                                    activityStarter = activityStarter.get(),
+                                    dialogLaunchAnimator = dialogLaunchAnimator.get(),
                                 ),
                                 DialogCuj(
                                     InteractionJankMonitor.CUJ_USER_DIALOG_OPEN,

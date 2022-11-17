@@ -29,8 +29,6 @@ import com.android.systemui.statusbar.phone.PhoneStatusBarViewController;
 import com.android.systemui.statusbar.phone.StatusBarBoundsProvider;
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment;
 import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherContainer;
-import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherController;
-import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherControllerImpl;
 import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
 
@@ -39,7 +37,6 @@ import java.util.Set;
 
 import javax.inject.Named;
 
-import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.Multibinds;
@@ -124,12 +121,6 @@ public interface StatusBarFragmentModule {
             @RootView PhoneStatusBarView view) {
         return view.findViewById(R.id.user_switcher_container);
     }
-
-    /** */
-    @Binds
-    @StatusBarFragmentScope
-    StatusBarUserSwitcherController bindStatusBarUserSwitcherController(
-            StatusBarUserSwitcherControllerImpl controller);
 
     /** */
     @Provides

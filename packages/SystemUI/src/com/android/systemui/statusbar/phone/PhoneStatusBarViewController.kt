@@ -23,11 +23,11 @@ import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import com.android.systemui.R
 import com.android.systemui.shared.animation.UnfoldMoveFromCenterAnimator
-import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.unfold.SysUIUnfoldComponent
 import com.android.systemui.unfold.UNFOLD_STATUS_BAR
 import com.android.systemui.unfold.util.ScopedUnfoldTransitionProgressProvider
+import com.android.systemui.user.ui.viewmodel.StatusBarUserChipViewModel
 import com.android.systemui.util.ViewController
 import com.android.systemui.util.kotlin.getOrNull
 import com.android.systemui.util.view.ViewUtil
@@ -40,7 +40,7 @@ class PhoneStatusBarViewController private constructor(
     view: PhoneStatusBarView,
     @Named(UNFOLD_STATUS_BAR) private val progressProvider: ScopedUnfoldTransitionProgressProvider?,
     private val moveFromCenterAnimationController: StatusBarMoveFromCenterAnimationController?,
-    private val userSwitcherController: StatusBarUserSwitcherController,
+    private val userChipViewModel: StatusBarUserChipViewModel,
     private val viewUtil: ViewUtil,
     touchEventHandler: PhoneStatusBarView.TouchEventHandler,
     private val configurationController: ConfigurationController
@@ -91,10 +91,10 @@ class PhoneStatusBarViewController private constructor(
 
     init {
         mView.setTouchEventHandler(touchEventHandler)
+        mView.init(userChipViewModel)
     }
 
     override fun onInit() {
-        userSwitcherController.init()
     }
 
     fun setImportantForAccessibility(mode: Int) {
@@ -156,9 +156,9 @@ class PhoneStatusBarViewController private constructor(
         private val unfoldComponent: Optional<SysUIUnfoldComponent>,
         @Named(UNFOLD_STATUS_BAR)
         private val progressProvider: Optional<ScopedUnfoldTransitionProgressProvider>,
-        private val userSwitcherController: StatusBarUserSwitcherController,
+        private val userChipViewModel: StatusBarUserChipViewModel,
         private val viewUtil: ViewUtil,
-        private val configurationController: ConfigurationController
+        private val configurationController: ConfigurationController,
     ) {
         fun create(
             view: PhoneStatusBarView,
@@ -168,7 +168,7 @@ class PhoneStatusBarViewController private constructor(
                 view,
                 progressProvider.getOrNull(),
                 unfoldComponent.getOrNull()?.getStatusBarMoveFromCenterAnimationController(),
-                userSwitcherController,
+                userChipViewModel,
                 viewUtil,
                 touchEventHandler,
                 configurationController
