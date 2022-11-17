@@ -1407,9 +1407,41 @@ public class AppOpsManager {
     public static final int OP_FOREGROUND_SERVICE_SPECIAL_USE =
             AppProtoEnums.APP_OP_FOREGROUND_SERVICE_SPECIAL_USE;
 
+    /**
+     * Exempt from start foreground service from background restriction.
+     *
+     * Only to be used by the system.
+     *
+     * @hide
+     */
+    public static final int OP_SYSTEM_EXEMPT_FROM_FGS_BG_START_RESTRICTION =
+            AppProtoEnums.APP_OP_SYSTEM_EXEMPT_FROM_FGS_BG_START_RESTRICTION;
+
+    /**
+     * Exempt from start foreground service from background with while in user permission
+     * restriction.
+     *
+     * Only to be used by the system.
+     *
+     * @hide
+     */
+    public static final int OP_SYSTEM_EXEMPT_FROM_FGS_BG_START_WHILE_IN_USE_PERMISSION_RESTRICTION =
+            AppProtoEnums
+                    .APP_OP_SYSTEM_EXEMPT_FROM_FGS_BG_START_WHILE_IN_USE_PERMISSION_RESTRICTION;
+
+    /**
+     * Hide foreground service stop button in quick settings.
+     *
+     * Only to be used by the system.
+     *
+     * @hide
+     */
+    public static final int OP_SYSTEM_EXEMPT_FROM_FGS_STOP_BUTTON =
+            AppProtoEnums.APP_OP_SYSTEM_EXEMPT_FROM_FGS_STOP_BUTTON;
+
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int _NUM_OP = 128;
+    public static final int _NUM_OP = 131;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -1947,6 +1979,38 @@ public class AppOpsManager {
     public static final String OPSTR_FOREGROUND_SERVICE_SPECIAL_USE =
             "android:foreground_service_special_use";
 
+    /**
+     * Exempt from start foreground service from background restriction.
+     *
+     * Only to be used by the system.
+     *
+     * @hide
+     */
+    public static final String OPSTR_SYSTEM_EXEMPT_FROM_FGS_BG_START_RESTRICTION =
+            "android:system_exempt_from_fgs_bg_start_restriction";
+
+    /**
+     * Exempt from start foreground service from background with while in user permission
+     * restriction.
+     *
+     * Only to be used by the system.
+     *
+     * @hide
+     */
+    public static final String
+            OPSTR_SYSTEM_EXEMPT_FROM_FGS_BG_START_WHILE_IN_USE_PERMISSION_RESTRICTION =
+            "android:system_exempt_from_fgs_bg_start_while_in_use_permission_restriction";
+
+    /**
+     * Hide foreground service stop button in quick settings.
+     *
+     * Only to be used by the system.
+     *
+     * @hide
+     */
+    public static final String OPSTR_SYSTEM_EXEMPT_FROM_FGS_STOP_BUTTON =
+            "android:system_exempt_from_fgs_stop_button";
+
     /** {@link #sAppOpsToNote} not initialized yet for this op */
     private static final byte SHOULD_COLLECT_NOTE_OP_NOT_INITIALIZED = 0;
     /** Should not collect noting of this app-op in {@link #sAppOpsToNote} */
@@ -2441,6 +2505,17 @@ public class AppOpsManager {
         new AppOpInfo.Builder(OP_FOREGROUND_SERVICE_SPECIAL_USE,
                 OPSTR_FOREGROUND_SERVICE_SPECIAL_USE, "FOREGROUND_SERVICE_SPECIAL_USE")
                 .setPermission(Manifest.permission.FOREGROUND_SERVICE_SPECIAL_USE).build(),
+        new AppOpInfo.Builder(OP_SYSTEM_EXEMPT_FROM_FGS_BG_START_RESTRICTION,
+                OPSTR_SYSTEM_EXEMPT_FROM_FGS_BG_START_RESTRICTION,
+                "SYSTEM_EXEMPT_FROM_FGS_BG_START_RESTRICTION").build(),
+        new AppOpInfo.Builder(
+                OP_SYSTEM_EXEMPT_FROM_FGS_BG_START_WHILE_IN_USE_PERMISSION_RESTRICTION,
+                OPSTR_SYSTEM_EXEMPT_FROM_FGS_BG_START_WHILE_IN_USE_PERMISSION_RESTRICTION,
+                "SYSTEM_EXEMPT_FROM_FGS_BG_START_WHILE_IN_USE_PERMISSION_RESTRICTION")
+                .build(),
+        new AppOpInfo.Builder(OP_SYSTEM_EXEMPT_FROM_FGS_STOP_BUTTON,
+                OPSTR_SYSTEM_EXEMPT_FROM_FGS_STOP_BUTTON,
+                "SYSTEM_EXEMPT_FROM_FGS_STOP_BUTTON").build()
     };
 
     // The number of longs needed to form a full bitmask of app ops
@@ -2497,12 +2572,6 @@ public class AppOpsManager {
             if (sAppOpInfos[op].permission != null) {
                 sPermToOp.put(sAppOpInfos[op].permission, op);
             }
-        }
-
-        if ((_NUM_OP + Long.SIZE - 1) / Long.SIZE != 2) {
-            // The code currently assumes that the length of sAppOpsNotedInThisBinderTransaction is
-            // two longs
-            throw new IllegalStateException("notedAppOps collection code assumes < 128 appops");
         }
     }
 
