@@ -506,10 +506,14 @@ public class AppProfiler {
             }
             if (profile != null) {
                 long startTime = SystemClock.currentThreadTimeMillis();
-                // skip background PSS calculation of apps that are capturing
-                // camera imagery
-                final boolean usingCamera = mService.isCameraActiveForUid(profile.mApp.uid);
-                long pss = usingCamera ? 0 : Debug.getPss(pid, tmp, null);
+                // skip background PSS calculation under the following situations:
+                //  - app is capturing camera imagery
+                //  - app is frozen and we have already collected PSS once.
+                final boolean skipPSSCollection =
+                        (profile.mApp.mOptRecord != null
+                         && profile.mApp.mOptRecord.skipPSSCollectionBecauseFrozen())
+                        || mService.isCameraActiveForUid(profile.mApp.uid);
+                long pss = skipPSSCollection ? 0 : Debug.getPss(pid, tmp, null);
                 long endTime = SystemClock.currentThreadTimeMillis();
                 synchronized (mProfilerLock) {
                     if (pss != 0 && profile.getThread() != null
@@ -524,7 +528,7 @@ public class AppProfiler {
                         if (DEBUG_PSS) {
                             Slog.d(TAG_PSS, "Skipped pss collection of " + pid
                                     + ": " + (profile.getThread() == null ? "NO_THREAD " : "")
-                                    + (usingCamera ? "CAMERA " : "")
+                                    + (skipPSSCollection ? "SKIP_PSS_COLLECTION " : "")
                                     + (profile.getPid() != pid ? "PID_CHANGED " : "")
                                     + " initState=" + procState + " curState="
                                     + profile.getSetProcState() + " "
