@@ -67,7 +67,9 @@ class PackageFlattener {
  public:
   PackageFlattener(IAaptContext* context, const ResourceTablePackageView& package,
                    const std::map<size_t, std::string>* shared_libs,
-                   SparseEntriesMode sparse_entries, bool collapse_key_stringpool,
+                   SparseEntriesMode sparse_entries,
+                   bool compact_entries,
+                   bool collapse_key_stringpool,
                    const std::set<ResourceName>& name_collapse_exemptions,
                    bool deduplicate_entry_values)
       : context_(context),
@@ -75,6 +77,7 @@ class PackageFlattener {
         package_(package),
         shared_libs_(shared_libs),
         sparse_entries_(sparse_entries),
+        compact_entries_(compact_entries),
         collapse_key_stringpool_(collapse_key_stringpool),
         name_collapse_exemptions_(name_collapse_exemptions),
         deduplicate_entry_values_(deduplicate_entry_values) {
@@ -135,6 +138,33 @@ class PackageFlattener {
  private:
   DISALLOW_COPY_AND_ASSIGN(PackageFlattener);
 
+  // Use compact entries only if
+  // 1) it is enabled, and that
+  // 2) the entries will be accessed on platforms U+, and
+  // 3) all entry keys can be encoded in 16 bits
+  bool UseCompactEntries(const ConfigDescription& config, std::vector<FlatEntry>* entries) const {
+    return compact_entries_ &&
+        (context_->GetMinSdkVersion() > SDK_TIRAMISU || config.sdkVersion > SDK_TIRAMISU) &&
+        std::none_of(entries->cbegin(), entries->cend(),
+          [](const auto& e) { return e.entry_key >= std::numeric_limits<uint16_t>::max(); });
+  }
+
+  std::unique_ptr<ResEntryWriter> GetResEntryWriter(bool dedup, bool compact, BigBuffer* buffer) {
+    if (dedup) {
+      if (compact) {
+        return std::make_unique<DeduplicateItemsResEntryWriter<true>>(buffer);
+      } else {
+        return std::make_unique<DeduplicateItemsResEntryWriter<false>>(buffer);
+      }
+    } else {
+      if (compact) {
+        return std::make_unique<SequentialResEntryWriter<true>>(buffer);
+      } else {
+        return std::make_unique<SequentialResEntryWriter<false>>(buffer);
+      }
+    }
+  }
+
   bool FlattenConfig(const ResourceTableTypeView& type, const ConfigDescription& config,
                      const size_t num_total_entries, std::vector<FlatEntry>* entries,
                      BigBuffer* buffer) {
@@ -150,15 +180,11 @@ class PackageFlattener {
     std::vector<uint32_t> offsets;
     offsets.resize(num_total_entries, 0xffffffffu);
 
+    bool compact_entry = UseCompactEntries(config, entries);
+
     android::BigBuffer values_buffer(512);
-    std::variant<std::monostate, DeduplicateItemsResEntryWriter, SequentialResEntryWriter>
-        writer_variant;
-    ResEntryWriter* res_entry_writer;
-    if (deduplicate_entry_values_) {
-      res_entry_writer = &writer_variant.emplace<DeduplicateItemsResEntryWriter>(&values_buffer);
-    } else {
-      res_entry_writer = &writer_variant.emplace<SequentialResEntryWriter>(&values_buffer);
-    }
+    auto res_entry_writer = GetResEntryWriter(deduplicate_entry_values_,
+                                              compact_entry, &values_buffer);
 
     for (FlatEntry& flat_entry : *entries) {
       CHECK(static_cast<size_t>(flat_entry.entry->id.value()) < num_total_entries);
@@ -512,6 +538,7 @@ class PackageFlattener {
   const ResourceTablePackageView package_;
   const std::map<size_t, std::string>* shared_libs_;
   SparseEntriesMode sparse_entries_;
+  bool compact_entries_;
   android::StringPool type_pool_;
   android::StringPool key_pool_;
   bool collapse_key_stringpool_;
@@ -568,7 +595,9 @@ bool TableFlattener::Consume(IAaptContext* context, ResourceTable* table) {
     }
 
     PackageFlattener flattener(context, package, &table->included_packages_,
-                               options_.sparse_entries, options_.collapse_key_stringpool,
+                               options_.sparse_entries,
+                               options_.use_compact_entries,
+                               options_.collapse_key_stringpool,
                                options_.name_collapse_exemptions,
                                options_.deduplicate_entry_values);
     if (!flattener.FlattenPackage(&package_buffer)) {

@@ -166,14 +166,14 @@ class LoadedPackage {
   base::expected<uint32_t, NullOrIOError> FindEntryByName(const std::u16string& type_name,
                                                           const std::u16string& entry_name) const;
 
-  static base::expected<incfs::map_ptr<ResTable_entry>, NullOrIOError> GetEntry(
-      incfs::verified_map_ptr<ResTable_type> type_chunk, uint16_t entry_index);
+  static base::expected<incfs::verified_map_ptr<ResTable_entry>, NullOrIOError>
+      GetEntry(incfs::verified_map_ptr<ResTable_type> type_chunk, uint16_t entry_index);
 
   static base::expected<uint32_t, NullOrIOError> GetEntryOffset(
       incfs::verified_map_ptr<ResTable_type> type_chunk, uint16_t entry_index);
 
-  static base::expected<incfs::map_ptr<ResTable_entry>, NullOrIOError> GetEntryFromOffset(
-      incfs::verified_map_ptr<ResTable_type> type_chunk, uint32_t offset);
+  static base::expected<incfs::verified_map_ptr<ResTable_entry>, NullOrIOError>
+      GetEntryFromOffset(incfs::verified_map_ptr<ResTable_type> type_chunk, uint32_t offset);
 
   // Returns the string pool where type names are stored.
   const ResStringPool* GetTypeStringPool() const {

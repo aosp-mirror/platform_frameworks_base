@@ -91,11 +91,11 @@ const ResTable_entry* TypeVariant::iterator::operator*() const {
     if (reinterpret_cast<uintptr_t>(entry) > containerEnd - sizeof(*entry)) {
         ALOGE("Entry offset at index %u points outside the Type's boundaries", mIndex);
         return NULL;
-    } else if (reinterpret_cast<uintptr_t>(entry) + dtohs(entry->size) > containerEnd) {
+    } else if (reinterpret_cast<uintptr_t>(entry) + entry->size() > containerEnd) {
         ALOGE("Entry at index %u extends beyond Type's boundaries", mIndex);
         return NULL;
-    } else if (dtohs(entry->size) < sizeof(*entry)) {
-        ALOGE("Entry at index %u is too small (%u)", mIndex, dtohs(entry->size));
+    } else if (entry->size() < sizeof(*entry)) {
+        ALOGE("Entry at index %u is too small (%zu)", mIndex, entry->size());
         return NULL;
     }
     return entry;

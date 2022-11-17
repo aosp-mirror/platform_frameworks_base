@@ -107,8 +107,8 @@ static bool VerifyResTableType(incfs::map_ptr<ResTable_type> header) {
   return true;
 }
 
-static base::expected<std::monostate, NullOrIOError> VerifyResTableEntry(
-    incfs::verified_map_ptr<ResTable_type> type, uint32_t entry_offset) {
+static base::expected<incfs::verified_map_ptr<ResTable_entry>, NullOrIOError>
+VerifyResTableEntry(incfs::verified_map_ptr<ResTable_type> type, uint32_t entry_offset) {
   // Check that the offset is aligned.
   if (UNLIKELY(entry_offset & 0x03U)) {
     LOG(ERROR) << "Entry at offset " << entry_offset << " is not 4-byte aligned.";
@@ -136,7 +136,7 @@ static base::expected<std::monostate, NullOrIOError> VerifyResTableEntry(
     return base::unexpected(IOError::PAGES_MISSING);
   }
 
-  const size_t entry_size = dtohs(entry->size);
+  const size_t entry_size = entry->size();
   if (UNLIKELY(entry_size < sizeof(entry.value()))) {
     LOG(ERROR) << "ResTable_entry size " << entry_size << " at offset " << entry_offset
                << " is too small.";
@@ -148,6 +148,11 @@ static base::expected<std::monostate, NullOrIOError> VerifyResTableEntry(
                << " is too large.";
     return base::unexpected(std::nullopt);
   }
+
+  // If entry is compact, value is already encoded, and a compact entry
+  // cannot be a map_entry, we are done verifying
+  if (entry->is_compact())
+    return entry.verified();
 
   if (entry_size < sizeof(ResTable_map_entry)) {
     // There needs to be room for one Res_value struct.
@@ -192,7 +197,7 @@ static base::expected<std::monostate, NullOrIOError> VerifyResTableEntry(
       return base::unexpected(std::nullopt);
     }
   }
-  return {};
+  return entry.verified();
 }
 
 LoadedPackage::iterator::iterator(const LoadedPackage* lp, size_t ti, size_t ei)
@@ -228,7 +233,7 @@ uint32_t LoadedPackage::iterator::operator*() const {
           entryIndex_);
 }
 
-base::expected<incfs::map_ptr<ResTable_entry>, NullOrIOError> LoadedPackage::GetEntry(
+base::expected<incfs::verified_map_ptr<ResTable_entry>, NullOrIOError> LoadedPackage::GetEntry(
     incfs::verified_map_ptr<ResTable_type> type_chunk, uint16_t entry_index) {
   base::expected<uint32_t, NullOrIOError> entry_offset = GetEntryOffset(type_chunk, entry_index);
   if (UNLIKELY(!entry_offset.has_value())) {
@@ -297,13 +302,14 @@ base::expected<uint32_t, NullOrIOError> LoadedPackage::GetEntryOffset(
   return value;
 }
 
-base::expected<incfs::map_ptr<ResTable_entry>, NullOrIOError> LoadedPackage::GetEntryFromOffset(
-    incfs::verified_map_ptr<ResTable_type> type_chunk, uint32_t offset) {
+base::expected<incfs::verified_map_ptr<ResTable_entry>, NullOrIOError>
+LoadedPackage::GetEntryFromOffset(incfs::verified_map_ptr<ResTable_type> type_chunk,
+                                  uint32_t offset) {
   auto valid = VerifyResTableEntry(type_chunk, offset);
   if (UNLIKELY(!valid.has_value())) {
     return base::unexpected(valid.error());
   }
-  return type_chunk.offset(offset + dtohl(type_chunk->entriesStart)).convert<ResTable_entry>();
+  return valid;
 }
 
 base::expected<std::monostate, IOError> LoadedPackage::CollectConfigurations(
@@ -400,7 +406,7 @@ base::expected<uint32_t, NullOrIOError> LoadedPackage::FindEntryByName(
           return base::unexpected(IOError::PAGES_MISSING);
         }
 
-        if (dtohl(entry->key.index) == static_cast<uint32_t>(*key_idx)) {
+        if (entry->key() == static_cast<uint32_t>(*key_idx)) {
           // The package ID will be overridden by the caller (due to runtime assignment of package
           // IDs for shared libraries).
           return make_resid(0x00, *type_idx + type_id_offset_ + 1, res_idx);

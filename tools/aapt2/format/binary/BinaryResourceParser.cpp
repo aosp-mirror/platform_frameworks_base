@@ -384,21 +384,16 @@ bool BinaryResourceParser::ParseType(const ResourceTablePackage* package,
       continue;
     }
 
-    const ResourceName name(
-        package->name, *parsed_type,
-        android::util::GetString(key_pool_, android::util::DeviceToHost32(entry->key.index)));
+    const ResourceName name(package->name, *parsed_type,
+        android::util::GetString(key_pool_, entry->key()));
     const ResourceId res_id(package_id, type->id, static_cast<uint16_t>(it.index()));
 
     std::unique_ptr<Value> resource_value;
-    if (entry->flags & ResTable_entry::FLAG_COMPLEX) {
-      const ResTable_map_entry* mapEntry = static_cast<const ResTable_map_entry*>(entry);
-
+    if (auto mapEntry = entry->map_entry()) {
       // TODO(adamlesinski): Check that the entry count is valid.
       resource_value = ParseMapEntry(name, config, mapEntry);
     } else {
-      const Res_value* value =
-          (const Res_value*)((const uint8_t*)entry + android::util::DeviceToHost32(entry->size));
-      resource_value = ParseValue(name, config, *value);
+      resource_value = ParseValue(name, config, entry->value());
     }
 
     if (!resource_value) {
@@ -419,7 +414,7 @@ bool BinaryResourceParser::ParseType(const ResourceTablePackage* package,
         .SetId(res_id, OnIdConflict::CREATE_ENTRY)
         .SetAllowMangled(true);
 
-    if (entry->flags & ResTable_entry::FLAG_PUBLIC) {
+    if (entry->flags() & ResTable_entry::FLAG_PUBLIC) {
       Visibility visibility{Visibility::Level::kPublic};
 
       auto spec_flags = entry_type_spec_flags_.find(res_id);

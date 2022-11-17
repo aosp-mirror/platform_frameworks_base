@@ -37,8 +37,8 @@ void* createTypeData() {
     offsets[0] = 0;
     ResTable_entry e1;
     memset(&e1, 0, sizeof(e1));
-    e1.size = sizeof(e1);
-    e1.key.index = 0;
+    e1.full.size = sizeof(e1);
+    e1.full.key.index = 0;
     t.header.size += sizeof(e1);
 
     Res_value v1;
@@ -50,8 +50,8 @@ void* createTypeData() {
     offsets[2] = sizeof(e1) + sizeof(v1);
     ResTable_entry e2;
     memset(&e2, 0, sizeof(e2));
-    e2.size = sizeof(e2);
-    e2.key.index = 1;
+    e2.full.size = sizeof(e2);
+    e2.full.key.index = 1;
     t.header.size += sizeof(e2);
 
     Res_value v2;
@@ -83,7 +83,7 @@ TEST(TypeVariantIteratorTest, shouldIterateOverTypeWithoutErrors) {
     TypeVariant::iterator iter = v.beginEntries();
     ASSERT_EQ(uint32_t(0), iter.index());
     ASSERT_TRUE(NULL != *iter);
-    ASSERT_EQ(uint32_t(0), iter->key.index);
+    ASSERT_EQ(uint32_t(0), iter->full.key.index);
     ASSERT_NE(v.endEntries(), iter);
 
     iter++;
@@ -96,7 +96,7 @@ TEST(TypeVariantIteratorTest, shouldIterateOverTypeWithoutErrors) {
 
     ASSERT_EQ(uint32_t(2), iter.index());
     ASSERT_TRUE(NULL != *iter);
-    ASSERT_EQ(uint32_t(1), iter->key.index);
+    ASSERT_EQ(uint32_t(1), iter->full.key.index);
     ASSERT_NE(v.endEntries(), iter);
 
     iter++;
