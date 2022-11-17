@@ -3087,6 +3087,7 @@ package android.accessibilityservice {
 
   public abstract class AccessibilityService extends android.app.Service {
     ctor public AccessibilityService();
+    method public void attachAccessibilityOverlayToDisplay(int, @NonNull android.view.SurfaceControl);
     method public boolean clearCache();
     method public boolean clearCachedSubtree(@NonNull android.view.accessibility.AccessibilityNodeInfo);
     method public final void disableSelf();
@@ -49980,6 +49981,7 @@ package android.view {
   public static final class SurfaceControlViewHost.SurfacePackage implements android.os.Parcelable {
     ctor public SurfaceControlViewHost.SurfacePackage(@NonNull android.view.SurfaceControlViewHost.SurfacePackage);
     method public int describeContents();
+    method @NonNull public android.view.SurfaceControl getSurfaceControl();
     method public void notifyConfigurationChanged(@NonNull android.content.res.Configuration);
     method public void notifyDetachedFromWindow();
     method public void release();
