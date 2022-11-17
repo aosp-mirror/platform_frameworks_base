@@ -6880,7 +6880,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
             boolean isSystemUser = userId == UserHandle.USER_SYSTEM;
             boolean wipeDevice;
-            if (factoryReset == null || !CompatChanges.isChangeEnabled(EXPLICIT_WIPE_BEHAVIOUR)) {
+            if (factoryReset == null || !mInjector.isChangeEnabled(EXPLICIT_WIPE_BEHAVIOUR,
+                    admin.getPackageName(),
+                    userId)) {
                 // Legacy mode
                 wipeDevice = isSystemUser;
             } else {
