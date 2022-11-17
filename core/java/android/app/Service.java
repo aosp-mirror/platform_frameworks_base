@@ -17,6 +17,8 @@
 package android.app;
 
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MANIFEST;
+import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
+import static android.text.TextUtils.formatSimple;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -34,6 +36,7 @@ import android.content.res.Configuration;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.Trace;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.view.contentcapture.ContentCaptureManager;
@@ -763,10 +766,12 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      */
     public final void startForeground(int id, Notification notification) {
         try {
+            final ComponentName comp = new ComponentName(this, mClassName);
             mActivityManager.setServiceForeground(
-                    new ComponentName(this, mClassName), mToken, id,
+                    comp, mToken, id,
                     notification, 0, FOREGROUND_SERVICE_TYPE_MANIFEST);
             clearStartForegroundServiceStackTrace();
+            logForegroundServiceStart(comp, FOREGROUND_SERVICE_TYPE_MANIFEST);
         } catch (RemoteException ex) {
         }
     }
@@ -843,10 +848,12 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
     public final void startForeground(int id, @NonNull Notification notification,
             @RequiresPermission @ForegroundServiceType int foregroundServiceType) {
         try {
+            final ComponentName comp = new ComponentName(this, mClassName);
             mActivityManager.setServiceForeground(
-                    new ComponentName(this, mClassName), mToken, id,
+                    comp, mToken, id,
                     notification, 0, foregroundServiceType);
             clearStartForegroundServiceStackTrace();
+            logForegroundServiceStart(comp, foregroundServiceType);
         } catch (RemoteException ex) {
         }
     }
@@ -897,6 +904,7 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
             mActivityManager.setServiceForeground(
                     new ComponentName(this, mClassName), mToken, 0, null,
                     notificationBehavior, 0);
+            logForegroundServiceStopIfNecessary();
         } catch (RemoteException ex) {
         }
     }
@@ -992,6 +1000,7 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      */
     public final void detachAndCleanUp() {
         mToken = null;
+        logForegroundServiceStopIfNecessary();
     }
 
     final String getClassName() {
@@ -1023,6 +1032,50 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
     private IActivityManager mActivityManager = null;
     @UnsupportedAppUsage
     private boolean mStartCompatibility = false;
+
+    /**
+     * This will be set to the title of the system trace when this service is started as
+     * a foreground service, and will be set to null when it's no longer in foreground
+     * service state.
+     */
+    @GuardedBy("mForegroundServiceTraceTitleLock")
+    private @Nullable String mForegroundServiceTraceTitle = null;
+
+    private final Object mForegroundServiceTraceTitleLock = new Object();
+
+    private static final String TRACE_TRACK_NAME_FOREGROUND_SERVICE = "FGS";
+
+    private void logForegroundServiceStart(ComponentName comp,
+            @ForegroundServiceType int foregroundServiceType) {
+        synchronized (mForegroundServiceTraceTitleLock) {
+            if (mForegroundServiceTraceTitle == null) {
+                mForegroundServiceTraceTitle = formatSimple("comp=%s type=%s",
+                        comp.toShortString(), Integer.toHexString(foregroundServiceType));
+                // The service is not in foreground state, emit a start event.
+                Trace.asyncTraceForTrackBegin(TRACE_TAG_ACTIVITY_MANAGER,
+                        TRACE_TRACK_NAME_FOREGROUND_SERVICE,
+                        mForegroundServiceTraceTitle,
+                        System.identityHashCode(this));
+            } else {
+                // The service is already in foreground state, emit an one-off event.
+                Trace.instantForTrack(TRACE_TAG_ACTIVITY_MANAGER,
+                        TRACE_TRACK_NAME_FOREGROUND_SERVICE,
+                        mForegroundServiceTraceTitle);
+            }
+        }
+    }
+
+    private void logForegroundServiceStopIfNecessary() {
+        synchronized (mForegroundServiceTraceTitleLock) {
+            if (mForegroundServiceTraceTitle != null) {
+                Trace.asyncTraceForTrackEnd(TRACE_TAG_ACTIVITY_MANAGER,
+                        TRACE_TRACK_NAME_FOREGROUND_SERVICE,
+                        mForegroundServiceTraceTitle,
+                        System.identityHashCode(this));
+                mForegroundServiceTraceTitle = null;
+            }
+        }
+    }
 
     /**
      * This keeps track of the stacktrace where Context.startForegroundService() was called
