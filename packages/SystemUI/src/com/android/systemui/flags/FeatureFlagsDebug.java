@@ -87,7 +87,7 @@ public class FeatureFlagsDebug implements FeatureFlags {
             new ServerFlagReader.ChangeListener() {
                 @Override
                 public void onChange() {
-                    mRestarter.restart();
+                    mRestarter.restartSystemUI();
                 }
             };
 
@@ -327,9 +327,7 @@ public class FeatureFlagsDebug implements FeatureFlags {
             Log.i(TAG, "SystemUI Restart Suppressed");
             return;
         }
-        Log.i(TAG, "Restarting SystemUI");
-        // SysUI starts back when up exited. Is there a better way to do this?
-        System.exit(0);
+        mRestarter.restartSystemUI();
     }
 
     private void restartAndroid(boolean requestSuppress) {
@@ -337,7 +335,7 @@ public class FeatureFlagsDebug implements FeatureFlags {
             Log.i(TAG, "Android Restart Suppressed");
             return;
         }
-        mRestarter.restart();
+        mRestarter.restartAndroid();
     }
 
     void setBooleanFlagInternal(Flag<?> flag, boolean value) {
