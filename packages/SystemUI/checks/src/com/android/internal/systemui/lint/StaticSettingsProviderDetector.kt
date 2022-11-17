@@ -66,10 +66,9 @@ class StaticSettingsProviderDetector : Detector(), SourceCodeScanner {
         val subclassName = className.substring(CLASS_SETTINGS.length + 1)
 
         context.report(
-            ISSUE,
-            method,
-            context.getNameLocation(node),
-            "`@Inject` a ${subclassName}Settings instead"
+            issue = ISSUE,
+            location = context.getNameLocation(node),
+            message = "`@Inject` a ${subclassName}Settings instead"
         )
     }
 

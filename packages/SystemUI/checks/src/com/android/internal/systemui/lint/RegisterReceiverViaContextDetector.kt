@@ -38,10 +38,10 @@ class RegisterReceiverViaContextDetector : Detector(), SourceCodeScanner {
     override fun visitMethodCall(context: JavaContext, node: UCallExpression, method: PsiMethod) {
         if (context.evaluator.isMemberInSubClassOf(method, CLASS_CONTEXT)) {
             context.report(
-                    ISSUE,
-                    method,
-                    context.getNameLocation(node),
-                    "Register `BroadcastReceiver` using `BroadcastDispatcher` instead of `Context`"
+                    issue = ISSUE,
+                    location = context.getNameLocation(node),
+                    message = "Register `BroadcastReceiver` using `BroadcastDispatcher` instead " +
+                    "of `Context`"
             )
         }
     }

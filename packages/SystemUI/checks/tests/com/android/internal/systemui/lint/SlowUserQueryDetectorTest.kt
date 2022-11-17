@@ -76,7 +76,7 @@ class SlowUserQueryDetectorTest : SystemUILintDetectorTest() {
                         import android.os.UserManager;
 
                         public class TestClass {
-                            public void slewlyGetUserInfo(UserManager userManager) {
+                            public void slowlyGetUserInfo(UserManager userManager) {
                                 userManager.getUserInfo();
                             }
                         }
@@ -98,6 +98,34 @@ class SlowUserQueryDetectorTest : SystemUILintDetectorTest() {
                 0 errors, 1 warnings
                 """
             )
+    }
+
+    @Test
+    fun testSuppressGetUserInfo() {
+        lint()
+            .files(
+                TestFiles.java(
+                        """
+                        package test.pkg;
+                        import android.os.UserManager;
+
+                        public class TestClass {
+                            @SuppressWarnings("SlowUserInfoQuery")
+                            public void slowlyGetUserInfo(UserManager userManager) {
+                                userManager.getUserInfo();
+                            }
+                        }
+                        """
+                    )
+                    .indented(),
+                *stubs
+            )
+            .issues(
+                SlowUserQueryDetector.ISSUE_SLOW_USER_ID_QUERY,
+                SlowUserQueryDetector.ISSUE_SLOW_USER_INFO_QUERY
+            )
+            .run()
+            .expectClean()
     }
 
     @Test
