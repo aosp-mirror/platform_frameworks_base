@@ -17,7 +17,6 @@
 package com.android.settingslib.spa.widget.scaffold
 
 import androidx.appcompat.R
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.DropdownMenu
@@ -36,7 +35,7 @@ import androidx.compose.ui.res.stringResource
 /**
  * Scope for the children of [MoreOptionsAction].
  */
-interface MoreOptionsScope : ColumnScope {
+interface MoreOptionsScope {
     fun dismiss()
 
     @Composable
@@ -61,7 +60,7 @@ fun MoreOptionsAction(
     val onDismiss = { expanded = false }
     DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
         val moreOptionsScope = remember(this) {
-            object : MoreOptionsScope, ColumnScope by this {
+            object : MoreOptionsScope {
                 override fun dismiss() {
                     onDismiss()
                 }
