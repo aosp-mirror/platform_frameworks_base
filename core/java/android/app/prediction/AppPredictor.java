@@ -30,6 +30,8 @@ import android.os.ServiceManager;
 import android.util.ArrayMap;
 import android.util.Log;
 
+import com.android.internal.annotations.GuardedBy;
+
 import dalvik.system.CloseGuard;
 
 import java.util.List;
@@ -79,6 +81,7 @@ public final class AppPredictor {
     private final AtomicBoolean mIsClosed = new AtomicBoolean(false);
 
     private final AppPredictionSessionId mSessionId;
+    @GuardedBy("itself")
     private final ArrayMap<Callback, CallbackWrapper> mRegisteredCallbacks = new ArrayMap<>();
 
     /**
@@ -94,7 +97,7 @@ public final class AppPredictor {
         IBinder b = ServiceManager.getService(Context.APP_PREDICTION_SERVICE);
         mPredictionManager = IPredictionManager.Stub.asInterface(b);
         mSessionId = new AppPredictionSessionId(
-                context.getPackageName() + ":" + UUID.randomUUID().toString(), context.getUserId());
+                context.getPackageName() + ":" + UUID.randomUUID(), context.getUserId());
         try {
             mPredictionManager.createPredictionSession(predictionContext, mSessionId, getToken());
         } catch (RemoteException e) {
@@ -155,6 +158,15 @@ public final class AppPredictor {
      */
     public void registerPredictionUpdates(@NonNull @CallbackExecutor Executor callbackExecutor,
             @NonNull AppPredictor.Callback callback) {
+        synchronized (mRegisteredCallbacks) {
+            registerPredictionUpdatesLocked(callbackExecutor, callback);
+        }
+    }
+
+    @GuardedBy("mRegisteredCallbacks")
+    private void registerPredictionUpdatesLocked(
+            @NonNull @CallbackExecutor Executor callbackExecutor,
+            @NonNull AppPredictor.Callback callback) {
         if (mIsClosed.get()) {
             throw new IllegalStateException("This client has already been destroyed.");
         }
@@ -183,6 +195,13 @@ public final class AppPredictor {
      * @param callback The callback to be unregistered.
      */
     public void unregisterPredictionUpdates(@NonNull AppPredictor.Callback callback) {
+        synchronized (mRegisteredCallbacks) {
+            unregisterPredictionUpdatesLocked(callback);
+        }
+    }
+
+    @GuardedBy("mRegisteredCallbacks")
+    private void unregisterPredictionUpdatesLocked(@NonNull AppPredictor.Callback callback) {
         if (mIsClosed.get()) {
             throw new IllegalStateException("This client has already been destroyed.");
         }
@@ -235,7 +254,7 @@ public final class AppPredictor {
         }
 
         try {
-            mPredictionManager.sortAppTargets(mSessionId, new ParceledListSlice(targets),
+            mPredictionManager.sortAppTargets(mSessionId, new ParceledListSlice<>(targets),
                     new CallbackWrapper(callbackExecutor, callback));
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to sort targets", e);
@@ -251,17 +270,23 @@ public final class AppPredictor {
         if (!mIsClosed.getAndSet(true)) {
             mCloseGuard.close();
 
-            // Do destroy;
-            try {
-                mPredictionManager.onDestroyPredictionSession(mSessionId);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Failed to notify app target event", e);
-                e.rethrowAsRuntimeException();
+            synchronized (mRegisteredCallbacks) {
+                destroySessionLocked();
             }
-            mRegisteredCallbacks.clear();
         } else {
             throw new IllegalStateException("This client has already been destroyed.");
         }
+    }
+
+    @GuardedBy("mRegisteredCallbacks")
+    private void destroySessionLocked() {
+        try {
+            mPredictionManager.onDestroyPredictionSession(mSessionId);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to notify app target event", e);
+            e.rethrowAsRuntimeException();
+        }
+        mRegisteredCallbacks.clear();
     }
 
     @Override
