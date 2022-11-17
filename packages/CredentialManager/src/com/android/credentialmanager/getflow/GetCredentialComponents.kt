@@ -45,6 +45,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -220,16 +221,25 @@ fun AllSignInOptionCard(
             )
           }
           // Locked password manager
-          item {
-            if (!authenticationEntryList.isEmpty()) {
+          if (!authenticationEntryList.isEmpty()) {
+            item {
               LockedCredentials(
                 authenticationEntryList = authenticationEntryList,
                 onEntrySelected = onEntrySelected,
               )
             }
           }
-          // TODO: Remote action
-          // Manage sign-ins
+          // From another device
+          val remoteEntry = providerDisplayInfo.remoteEntry
+          if (remoteEntry != null) {
+            item {
+              RemoteEntryCard(
+                remoteEntry = remoteEntry,
+                onEntrySelected = onEntrySelected,
+              )
+            }
+          }
+          // Manage sign-ins (action chips)
           item {
             ActionChips(providerInfoList = providerInfoList, onEntrySelected = onEntrySelected)
           }
@@ -266,6 +276,47 @@ fun ActionChips(
       actionChips.forEach {
         ActionEntryRow(it, onEntrySelected)
       }
+    }
+  }
+}
+
+@Composable
+fun RemoteEntryCard(
+  remoteEntry: RemoteEntryInfo,
+  onEntrySelected: (EntryInfo) -> Unit,
+) {
+  Text(
+    text = stringResource(R.string.get_dialog_heading_from_another_device),
+    style = MaterialTheme.typography.labelLarge,
+    modifier = Modifier.padding(vertical = 8.dp)
+  )
+  Card(
+    modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+    shape = MaterialTheme.shapes.medium,
+  ) {
+    Column(
+      modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+      verticalArrangement = Arrangement.spacedBy(2.dp),
+    ) {
+      Entry(
+        onClick = {onEntrySelected(remoteEntry)},
+        icon = {
+          Icon(
+            painter = painterResource(R.drawable.ic_other_devices),
+            contentDescription = null,
+            tint = Color.Unspecified,
+            modifier = Modifier.padding(start = 18.dp)
+          )
+        },
+        label = {
+          Text(
+            text = stringResource(R.string.get_dialog_option_headline_use_a_different_device),
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier.padding(start = 16.dp, top = 18.dp, bottom = 18.dp)
+              .align(alignment = Alignment.CenterHorizontally)
+          )
+        }
+      )
     }
   }
 }

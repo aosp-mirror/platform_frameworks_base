@@ -27,6 +27,7 @@ import com.android.credentialmanager.CredentialManagerRepo
 import com.android.credentialmanager.common.DialogResult
 import com.android.credentialmanager.common.ResultState
 import com.android.credentialmanager.jetpack.developer.PublicKeyCredential
+import com.android.internal.util.Preconditions
 
 data class GetCredentialUiState(
   val providerInfoList: List<ProviderInfo>,
@@ -86,9 +87,13 @@ private fun toProviderDisplayInfo(
 
   val userNameToCredentialEntryMap = mutableMapOf<String, MutableList<CredentialEntryInfo>>()
   val authenticationEntryList = mutableListOf<AuthenticationEntryInfo>()
+  val remoteEntryList = mutableListOf<RemoteEntryInfo>()
   providerInfoList.forEach { providerInfo ->
     if (providerInfo.authenticationEntry != null) {
       authenticationEntryList.add(providerInfo.authenticationEntry)
+    }
+    if (providerInfo.remoteEntry != null) {
+      remoteEntryList.add(providerInfo.remoteEntry)
     }
 
     providerInfo.credentialEntryList.forEach {
@@ -105,6 +110,9 @@ private fun toProviderDisplayInfo(
       }
     }
   }
+  // There can only be at most one remote entry
+  // TODO: fail elegantly
+  Preconditions.checkState(remoteEntryList.size <= 1)
 
   // Compose sortedUserNameToCredentialEntryList
   val comparator = CredentialEntryInfoComparator()
@@ -122,6 +130,7 @@ private fun toProviderDisplayInfo(
   return ProviderDisplayInfo(
     sortedUserNameToCredentialEntryList = sortedUserNameToCredentialEntryList,
     authenticationEntryList = authenticationEntryList,
+    remoteEntry = remoteEntryList.getOrNull(0),
   )
 }
 
