@@ -18,8 +18,6 @@ package com.android.settingslib.spaprivileged.template.app
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,6 +25,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.android.settingslib.spa.widget.scaffold.MoreOptionsAction
+import com.android.settingslib.spa.widget.scaffold.MoreOptionsScope
 import com.android.settingslib.spa.widget.scaffold.SearchScaffold
 import com.android.settingslib.spa.widget.ui.Spinner
 import com.android.settingslib.spaprivileged.R
@@ -46,6 +45,7 @@ fun <T : AppRecord> AppListPage(
     listModel: AppListModel<T>,
     showInstantApps: Boolean = false,
     primaryUserOnly: Boolean = false,
+    moreOptions: @Composable MoreOptionsScope.() -> Unit = {},
     header: @Composable () -> Unit = {},
     appItem: @Composable (itemState: AppListItemModel<T>) -> Unit,
 ) {
@@ -53,7 +53,10 @@ fun <T : AppRecord> AppListPage(
     SearchScaffold(
         title = title,
         actions = {
-            ShowSystemAction(showSystem.value) { showSystem.value = it }
+            MoreOptionsAction {
+                ShowSystemAction(showSystem.value) { showSystem.value = it }
+                moreOptions()
+            }
         },
     ) { bottomPadding, searchQuery ->
         WorkProfilePager(primaryUserOnly) { userInfo ->
@@ -82,15 +85,12 @@ fun <T : AppRecord> AppListPage(
 }
 
 @Composable
-private fun ShowSystemAction(showSystem: Boolean, setShowSystem: (showSystem: Boolean) -> Unit) {
-    MoreOptionsAction { onDismissRequest ->
-        val menuText = if (showSystem) R.string.menu_hide_system else R.string.menu_show_system
-        DropdownMenuItem(
-            text = { Text(stringResource(menuText)) },
-            onClick = {
-                onDismissRequest()
-                setShowSystem(!showSystem)
-            },
-        )
+private fun MoreOptionsScope.ShowSystemAction(
+    showSystem: Boolean,
+    setShowSystem: (showSystem: Boolean) -> Unit,
+) {
+    val menuText = if (showSystem) R.string.menu_hide_system else R.string.menu_show_system
+    MenuItem(text = stringResource(menuText)) {
+        setShowSystem(!showSystem)
     }
 }
