@@ -246,7 +246,6 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         mLp.token = new Binder();
         mLp.gravity = Gravity.TOP;
         mLp.setFitInsetsTypes(0 /* types */);
-        mLp.softInputMode = LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
         mLp.setTitle("NotificationShade");
         mLp.packageName = mContext.getPackageName();
         mLp.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
@@ -384,8 +383,6 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
             mLpChanged.flags |= LayoutParams.FLAG_NOT_FOCUSABLE;
             mLpChanged.flags &= ~LayoutParams.FLAG_ALT_FOCUSABLE_IM;
         }
-
-        mLpChanged.softInputMode = LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
     }
 
     private void applyForceShowNavigationFlag(State state) {
