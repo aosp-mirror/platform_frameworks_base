@@ -27,17 +27,22 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.quickaffordance.FakeKeyguardQuickAffordanceConfig
+import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceLegacySettingSyncer
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceSelectionManager
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.KeyguardQuickAffordanceRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardQuickAffordanceInteractor
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.shared.keyguard.data.content.KeyguardQuickAffordanceProviderContract as Contract
 import com.android.systemui.shared.keyguard.shared.model.KeyguardQuickAffordanceSlots
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.util.FakeSharedPreferences
 import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.mockito.whenever
+import com.android.systemui.util.settings.FakeSettings
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -46,6 +51,8 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
+import org.mockito.ArgumentMatchers.anyInt
+import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
@@ -66,12 +73,28 @@ class KeyguardQuickAffordanceProviderTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
 
         underTest = KeyguardQuickAffordanceProvider()
+        val scope = CoroutineScope(IMMEDIATE)
+        val selectionManager =
+            KeyguardQuickAffordanceSelectionManager(
+                context = context,
+                userFileManager =
+                    mock<UserFileManager>().apply {
+                        whenever(
+                                getSharedPreferences(
+                                    anyString(),
+                                    anyInt(),
+                                    anyInt(),
+                                )
+                            )
+                            .thenReturn(FakeSharedPreferences())
+                    },
+                userTracker = userTracker,
+            )
         val quickAffordanceRepository =
             KeyguardQuickAffordanceRepository(
                 appContext = context,
-                scope = CoroutineScope(IMMEDIATE),
-                backgroundDispatcher = IMMEDIATE,
-                selectionManager = KeyguardQuickAffordanceSelectionManager(),
+                scope = scope,
+                selectionManager = selectionManager,
                 configs =
                     setOf(
                         FakeKeyguardQuickAffordanceConfig(
@@ -82,6 +105,13 @@ class KeyguardQuickAffordanceProviderTest : SysuiTestCase() {
                             key = AFFORDANCE_2,
                             pickerIconResourceId = 2,
                         ),
+                    ),
+                legacySettingSyncer =
+                    KeyguardQuickAffordanceLegacySettingSyncer(
+                        scope = scope,
+                        backgroundDispatcher = IMMEDIATE,
+                        secureSettings = FakeSettings(),
+                        selectionsManager = selectionManager,
                     ),
             )
         underTest.interactor =
