@@ -307,6 +307,23 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     }
 
     @Test
+    public void onPanelExpansionChanged_neverTranslatesBouncerWhenShowBouncer() {
+        // Since KeyguardBouncer.EXPANSION_VISIBLE = 0 panel expansion, if the unlock is dismissing
+        // the bouncer, there may be an onPanelExpansionChanged(0) call to collapse the panel
+        // which would mistakenly cause the bouncer to show briefly before its visibility
+        // is set to hide. Therefore, we don't want to propagate panelExpansionChanged to the
+        // bouncer if the bouncer is dismissing as a result of a biometric unlock.
+        when(mBiometricUnlockController.getMode())
+                .thenReturn(BiometricUnlockController.MODE_SHOW_BOUNCER);
+        mStatusBarKeyguardViewManager.onPanelExpansionChanged(
+                expansionEvent(
+                        /* fraction= */ KeyguardBouncer.EXPANSION_VISIBLE,
+                        /* expanded= */ true,
+                        /* tracking= */ false));
+        verify(mPrimaryBouncer, never()).setExpansion(anyFloat());
+    }
+
+    @Test
     public void onPanelExpansionChanged_neverTranslatesBouncerWhenShadeLocked() {
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE_LOCKED);
         mStatusBarKeyguardViewManager.onPanelExpansionChanged(
