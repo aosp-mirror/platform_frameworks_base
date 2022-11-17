@@ -16,6 +16,10 @@
 
 package com.android.server.timezonedetector.location;
 
+import static android.app.time.LocationTimeZoneAlgorithmStatus.PROVIDER_STATUS_IS_CERTAIN;
+import static android.app.time.LocationTimeZoneAlgorithmStatus.PROVIDER_STATUS_IS_UNCERTAIN;
+import static android.app.time.LocationTimeZoneAlgorithmStatus.PROVIDER_STATUS_NOT_PRESENT;
+import static android.app.time.LocationTimeZoneAlgorithmStatus.PROVIDER_STATUS_NOT_READY;
 import static android.service.timezone.TimeZoneProviderEvent.EVENT_TYPE_PERMANENT_FAILURE;
 import static android.service.timezone.TimeZoneProviderEvent.EVENT_TYPE_SUGGESTION;
 import static android.service.timezone.TimeZoneProviderEvent.EVENT_TYPE_UNCERTAIN;
@@ -33,6 +37,7 @@ import android.annotation.ElapsedRealtimeLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.time.LocationTimeZoneAlgorithmStatus.ProviderStatus;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.service.timezone.TimeZoneProviderEvent;
@@ -293,6 +298,34 @@ abstract class LocationTimeZoneProvider implements Dumpable {
         boolean isTerminated() {
             return stateEnum == PROVIDER_STATE_PERM_FAILED
                     || stateEnum == PROVIDER_STATE_DESTROYED;
+        }
+
+        /**
+         * Maps the internal state enum value to one of the status values exposed to the layers
+         * above.
+         */
+        public @ProviderStatus int getProviderStatus() {
+            switch (stateEnum) {
+                case PROVIDER_STATE_STARTED_INITIALIZING:
+                    return PROVIDER_STATUS_NOT_READY;
+                case PROVIDER_STATE_STARTED_CERTAIN:
+                    return PROVIDER_STATUS_IS_CERTAIN;
+                case PROVIDER_STATE_STARTED_UNCERTAIN:
+                    return PROVIDER_STATUS_IS_UNCERTAIN;
+                case PROVIDER_STATE_PERM_FAILED:
+                    // Perm failed means the providers wasn't configured, configured properly,
+                    // or has removed itself for other reasons, e.g. turned-down server.
+                    return PROVIDER_STATUS_NOT_PRESENT;
+                case PROVIDER_STATE_STOPPED:
+                case PROVIDER_STATE_DESTROYED:
+                    // This is a "safe" default that best describes a provider that isn't in one of
+                    // the more obviously mapped states.
+                    return PROVIDER_STATUS_NOT_READY;
+                case PROVIDER_STATE_UNKNOWN:
+                default:
+                    throw new IllegalStateException(
+                            "Unknown state enum:" + prettyPrintStateEnum(stateEnum));
+            }
         }
 
         /** Returns the status reported by the provider, if available. */

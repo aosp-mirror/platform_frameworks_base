@@ -22,13 +22,38 @@ import "frameworks/base/core/proto/android/privacy.proto";
 option java_multiple_files = true;
 option java_outer_classname = "TimeZoneDetectorProto";
 
-// Represents a GeolocationTimeZoneSuggestion that can be / has been passed to the time zone
+// Represents a LocationTimeZoneProviderEvent that can be / has been passed to the time zone
 // detector.
+message LocationTimeZoneProviderEventProto {
+  option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+  optional GeolocationTimeZoneSuggestionProto suggestion = 1;
+  repeated string debug_info = 2;
+  optional LocationTimeZoneAlgorithmStatusProto algorithm_status = 3;
+}
+
+// Represents a LocationTimeZoneAlgorithmStatus that can be / has been passed to the time zone
+// detector.
+message LocationTimeZoneAlgorithmStatusProto {
+  option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+  optional DetectionAlgorithmStatusEnum status = 1;
+}
+
+// The state enum for detection algorithms.
+enum DetectionAlgorithmStatusEnum {
+    DETECTION_ALGORITHM_STATUS_UNKNOWN = 0;
+    DETECTION_ALGORITHM_STATUS_NOT_SUPPORTED = 1;
+    DETECTION_ALGORITHM_STATUS_NOT_RUNNING = 2;
+    DETECTION_ALGORITHM_STATUS_RUNNING = 3;
+}
+
+// Represents a GeolocationTimeZoneSuggestion that can be contained in a
+// LocationTimeZoneProviderEvent.
 message GeolocationTimeZoneSuggestionProto {
   option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
   repeated string zone_ids = 1;
-  repeated string debug_info = 2;
 }
 
 /*

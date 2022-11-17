@@ -157,10 +157,9 @@ public interface TimeZoneDetectorStrategy extends Dumpable {
     boolean confirmTimeZone(@NonNull String timeZoneId);
 
     /**
-     * Suggests zero, one or more time zones for the device, or withdraws a previous suggestion if
-     * {@link GeolocationTimeZoneSuggestion#getZoneIds()} is {@code null}.
+     * Handles an event from the location-based time zone detection algorithm.
      */
-    void suggestGeolocationTimeZone(@NonNull GeolocationTimeZoneSuggestion suggestion);
+    void handleLocationAlgorithmEvent(@NonNull LocationAlgorithmEvent event);
 
     /**
      * Suggests a time zone for the device using manually-entered (i.e. user sourced) information.
@@ -183,7 +182,7 @@ public interface TimeZoneDetectorStrategy extends Dumpable {
 
     /**
      * Tells the strategy that it can fall back to telephony detection while geolocation detection
-     * remains uncertain. {@link #suggestGeolocationTimeZone(GeolocationTimeZoneSuggestion)} can
+     * remains uncertain. {@link #handleLocationAlgorithmEvent(LocationAlgorithmEvent)} can
      * disable it again. See {@link TimeZoneDetectorStrategy} for details.
      */
     void enableTelephonyTimeZoneFallback();

@@ -16,14 +16,22 @@
 
 package com.android.server.timezonedetector;
 
+import static android.app.time.DetectorStatusTypes.DETECTION_ALGORITHM_STATUS_RUNNING;
+import static android.app.time.DetectorStatusTypes.DETECTOR_STATUS_RUNNING;
+import static android.app.time.LocationTimeZoneAlgorithmStatus.PROVIDER_STATUS_IS_CERTAIN;
+import static android.app.time.LocationTimeZoneAlgorithmStatus.PROVIDER_STATUS_NOT_PRESENT;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
+import android.app.time.LocationTimeZoneAlgorithmStatus;
+import android.app.time.TelephonyTimeZoneAlgorithmStatus;
 import android.app.time.TimeZoneCapabilitiesAndConfig;
 import android.app.time.TimeZoneConfiguration;
+import android.app.time.TimeZoneDetectorStatus;
 import android.app.timezonedetector.ManualTimeZoneSuggestion;
 import android.content.Context;
 import android.os.HandlerThread;
@@ -40,6 +48,15 @@ import java.util.List;
 
 @RunWith(AndroidJUnit4.class)
 public class TimeZoneDetectorInternalImplTest {
+
+    private static final TelephonyTimeZoneAlgorithmStatus ARBITRARY_TELEPHONY_STATUS =
+            new TelephonyTimeZoneAlgorithmStatus(DETECTION_ALGORITHM_STATUS_RUNNING);
+    private static final LocationTimeZoneAlgorithmStatus ARBITRARY_LOCATION_CERTAIN_STATUS =
+            new LocationTimeZoneAlgorithmStatus(DETECTION_ALGORITHM_STATUS_RUNNING,
+                    PROVIDER_STATUS_IS_CERTAIN, null, PROVIDER_STATUS_NOT_PRESENT, null);
+    private static final TimeZoneDetectorStatus ARBITRARY_DETECTOR_STATUS =
+            new TimeZoneDetectorStatus(DETECTOR_STATUS_RUNNING, ARBITRARY_TELEPHONY_STATUS,
+                    ARBITRARY_LOCATION_CERTAIN_STATUS);
 
     private static final long ARBITRARY_ELAPSED_REALTIME_MILLIS = 1234L;
     private static final String ARBITRARY_ZONE_ID = "TestZoneId";
@@ -81,7 +98,8 @@ public class TimeZoneDetectorInternalImplTest {
     public void testGetCapabilitiesAndConfigForDpm() throws Exception {
         final boolean autoDetectionEnabled = true;
         ConfigurationInternal testConfig = createConfigurationInternal(autoDetectionEnabled);
-        mFakeTimeZoneDetectorStrategySpy.initializeConfiguration(testConfig);
+        TimeZoneDetectorStatus testStatus = ARBITRARY_DETECTOR_STATUS;
+        mFakeTimeZoneDetectorStrategySpy.initializeConfigurationAndStatus(testConfig, testStatus);
 
         TimeZoneCapabilitiesAndConfig actualCapabilitiesAndConfig =
                 mTimeZoneDetectorInternal.getCapabilitiesAndConfigForDpm();
@@ -93,6 +111,7 @@ public class TimeZoneDetectorInternalImplTest {
 
         TimeZoneCapabilitiesAndConfig expectedCapabilitiesAndConfig =
                 new TimeZoneCapabilitiesAndConfig(
+                        testStatus,
                         testConfig.asCapabilities(expectedBypassUserPolicyChecks),
                         testConfig.asConfiguration());
         assertEquals(expectedCapabilitiesAndConfig, actualCapabilitiesAndConfig);
@@ -103,7 +122,9 @@ public class TimeZoneDetectorInternalImplTest {
         final boolean autoDetectionEnabled = false;
         ConfigurationInternal initialConfigurationInternal =
                 createConfigurationInternal(autoDetectionEnabled);
-        mFakeTimeZoneDetectorStrategySpy.initializeConfiguration(initialConfigurationInternal);
+        TimeZoneDetectorStatus testStatus = ARBITRARY_DETECTOR_STATUS;
+        mFakeTimeZoneDetectorStrategySpy.initializeConfigurationAndStatus(
+                initialConfigurationInternal, testStatus);
 
         TimeZoneConfiguration timeConfiguration = new TimeZoneConfiguration.Builder()
                 .setAutoDetectionEnabled(true)
@@ -131,13 +152,15 @@ public class TimeZoneDetectorInternalImplTest {
     }
 
     @Test
-    public void testSuggestGeolocationTimeZone() throws Exception {
+    public void testHandleLocationAlgorithmEvent() throws Exception {
         GeolocationTimeZoneSuggestion timeZoneSuggestion = createGeolocationTimeZoneSuggestion();
-        mTimeZoneDetectorInternal.suggestGeolocationTimeZone(timeZoneSuggestion);
+        LocationAlgorithmEvent suggestionEvent = new LocationAlgorithmEvent(
+                ARBITRARY_LOCATION_CERTAIN_STATUS, timeZoneSuggestion);
+        mTimeZoneDetectorInternal.handleLocationAlgorithmEvent(suggestionEvent);
         mTestHandler.assertTotalMessagesEnqueued(1);
 
         mTestHandler.waitForMessagesToBeProcessed();
-        verify(mFakeTimeZoneDetectorStrategySpy).suggestGeolocationTimeZone(timeZoneSuggestion);
+        verify(mFakeTimeZoneDetectorStrategySpy).handleLocationAlgorithmEvent(suggestionEvent);
     }
     private static ManualTimeZoneSuggestion createManualTimeZoneSuggestion() {
         return new ManualTimeZoneSuggestion(ARBITRARY_ZONE_ID);

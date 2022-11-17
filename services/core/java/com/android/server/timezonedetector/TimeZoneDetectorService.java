@@ -300,12 +300,13 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
     }
 
     /** Provided for command-line access. This is not exposed as a binder API. */
-    void suggestGeolocationTimeZone(@NonNull GeolocationTimeZoneSuggestion timeZoneSuggestion) {
+    void handleLocationAlgorithmEvent(@NonNull LocationAlgorithmEvent locationAlgorithmEvent) {
         enforceSuggestGeolocationTimeZonePermission();
-        Objects.requireNonNull(timeZoneSuggestion);
+        Objects.requireNonNull(locationAlgorithmEvent);
 
         mHandler.post(
-                () -> mTimeZoneDetectorStrategy.suggestGeolocationTimeZone(timeZoneSuggestion));
+                () -> mTimeZoneDetectorStrategy.handleLocationAlgorithmEvent(
+                        locationAlgorithmEvent));
     }
 
     @Override
