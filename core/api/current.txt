@@ -54043,23 +54043,22 @@ package android.view.inputmethod {
   }
 
   public final class TextAppearanceInfo implements android.os.Parcelable {
-    ctor public TextAppearanceInfo(@NonNull android.widget.TextView);
     method public int describeContents();
-    method @Nullable public String getFontFamilyName();
     method @Nullable public String getFontFeatureSettings();
     method @Nullable public String getFontVariationSettings();
+    method @ColorInt public int getHighlightTextColor();
+    method @ColorInt public int getHintTextColor();
     method public float getLetterSpacing();
     method public int getLineBreakStyle();
     method public int getLineBreakWordStyle();
-    method public int getMaxLength();
+    method @ColorInt public int getLinkTextColor();
+    method @ColorInt public int getShadowColor();
     method @Px public float getShadowDx();
     method @Px public float getShadowDy();
     method @Px public float getShadowRadius();
+    method @Nullable public String getSystemFontFamilyName();
     method @ColorInt public int getTextColor();
-    method @ColorInt public int getTextColorHighlight();
-    method @ColorInt public int getTextColorHint();
-    method @Nullable public android.content.res.ColorStateList getTextColorLink();
-    method @IntRange(from=0xffffffff, to=android.graphics.fonts.FontStyle.FONT_WEIGHT_MAX) public int getTextFontWeight();
+    method @IntRange(from=android.graphics.fonts.FontStyle.FONT_WEIGHT_UNSPECIFIED, to=android.graphics.fonts.FontStyle.FONT_WEIGHT_MAX) public int getTextFontWeight();
     method @NonNull public android.os.LocaleList getTextLocales();
     method public float getTextScaleX();
     method @Px public float getTextSize();
@@ -54069,6 +54068,33 @@ package android.view.inputmethod {
     method public boolean isFallbackLineSpacing();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.inputmethod.TextAppearanceInfo> CREATOR;
+  }
+
+  public static final class TextAppearanceInfo.Builder {
+    ctor public TextAppearanceInfo.Builder();
+    method @NonNull public android.view.inputmethod.TextAppearanceInfo build();
+    method @NonNull public android.view.inputmethod.TextAppearanceInfo.Builder setAllCaps(boolean);
+    method @NonNull public android.view.inputmethod.TextAppearanceInfo.Builder setElegantTextHeight(boolean);
+    method @NonNull public android.view.inputmethod.TextAppearanceInfo.Builder setFallbackLineSpacing(boolean);
+    method @NonNull public android.view.inputmethod.TextAppearanceInfo.Builder setFontFeatureSettings(@Nullable String);
+    method @NonNull public android.view.inputmethod.TextAppearanceInfo.Builder setFontVariationSettings(@Nullable String);
+    method @NonNull public android.view.inputmethod.TextAppearanceInfo.Builder setHighlightTextColor(@ColorInt int);
+    method @NonNull public android.view.inputmethod.TextAppearanceInfo.Builder setHintTextColor(@ColorInt int);
+    method @NonNull public android.view.inputmethod.TextAppearanceInfo.Builder setLetterSpacing(float);
+    method @NonNull public android.view.inputmethod.TextAppearanceInfo.Builder setLineBreakStyle(int);
+    method @NonNull public android.view.inputmethod.TextAppearanceInfo.Builder setLineBreakWordStyle(int);
+    method @NonNull public android.view.inputmethod.TextAppearanceInfo.Builder setLinkTextColor(@ColorInt int);
+    method @NonNull public android.view.inputmethod.TextAppearanceInfo.Builder setShadowColor(@ColorInt int);
+    method @NonNull public android.view.inputmethod.TextAppearanceInfo.Builder setShadowDx(@Px float);
+    method @NonNull public android.view.inputmethod.TextAppearanceInfo.Builder setShadowDy(@Px float);
+    method @NonNull public android.view.inputmethod.TextAppearanceInfo.Builder setShadowRadius(@Px float);
+    method @NonNull public android.view.inputmethod.TextAppearanceInfo.Builder setSystemFontFamilyName(@Nullable String);
+    method @NonNull public android.view.inputmethod.TextAppearanceInfo.Builder setTextColor(@ColorInt int);
+    method @NonNull public android.view.inputmethod.TextAppearanceInfo.Builder setTextFontWeight(@IntRange(from=android.graphics.fonts.FontStyle.FONT_WEIGHT_UNSPECIFIED, to=android.graphics.fonts.FontStyle.FONT_WEIGHT_MAX) int);
+    method @NonNull public android.view.inputmethod.TextAppearanceInfo.Builder setTextLocales(@NonNull android.os.LocaleList);
+    method @NonNull public android.view.inputmethod.TextAppearanceInfo.Builder setTextScaleX(float);
+    method @NonNull public android.view.inputmethod.TextAppearanceInfo.Builder setTextSize(@Px float);
+    method @NonNull public android.view.inputmethod.TextAppearanceInfo.Builder setTextStyle(int);
   }
 
   public final class TextAttribute implements android.os.Parcelable {
