@@ -6126,9 +6126,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (mRedrawForSyncReported) {
             return false;
         }
-        if (mInRelayout && mPrepareSyncSeqId > 0) {
-            // The last sync seq id will return to the client, so there is no need to request the
-            // client to redraw.
+        if (mInRelayout && (mPrepareSyncSeqId > 0 || (mViewVisibility == View.VISIBLE
+                && mWinAnimator.mDrawState == DRAW_PENDING))) {
+            // The client will report draw if it gets the sync seq id from relayout or it is
+            // drawing for being visible, then no need to request redraw.
             return false;
         }
         return useBLASTSync();
