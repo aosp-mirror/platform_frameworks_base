@@ -42813,6 +42813,7 @@ package android.telephony {
     method public int getSsRsrp();
     method public int getSsRsrq();
     method public int getSsSinr();
+    method @IntRange(from=0, to=1282) public int getTimingAdvanceMicros();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.CellSignalStrengthNr> CREATOR;
   }
