@@ -584,6 +584,13 @@ public final class SystemUiDeviceConfigFlags {
     public static final String CLIPBOARD_OVERLAY_SHOW_ACTIONS = "clipboard_overlay_show_actions";
 
     /**
+     * (boolean) Whether to ignore the source package for determining whether to use remote copy
+     * behavior in the clipboard UI.
+     */
+    public static final String CLIPBOARD_IGNORE_REMOTE_COPY_SOURCE =
+            "clipboard_ignore_remote_copy_source";
+
+    /**
      * (boolean) Whether to combine the broadcasts APPWIDGET_ENABLED and APPWIDGET_UPDATE
      */
     public static final String COMBINED_BROADCAST_ENABLED = "combined_broadcast_enabled";
