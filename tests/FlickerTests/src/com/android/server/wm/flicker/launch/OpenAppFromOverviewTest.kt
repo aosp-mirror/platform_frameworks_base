@@ -19,13 +19,13 @@ package com.android.server.wm.flicker.launch
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresDevice
-import android.view.Surface
 import com.android.server.wm.flicker.FlickerBuilder
 import com.android.server.wm.flicker.FlickerTest
 import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.annotation.FlickerServiceCompatible
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
+import com.android.server.wm.traces.common.service.PlatformConsts
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -72,9 +72,9 @@ open class OpenAppFromOverviewTest(flicker: FlickerTest) : OpenAppFromLauncherTr
                 wmHelper.StateSyncBuilder().withHomeActivityVisible().waitForAndVerify()
                 // By default, launcher doesn't rotate on phones, but rotates on tablets
                 if (flicker.scenario.isTablet) {
-                    tapl.setExpectedRotation(flicker.scenario.startRotation)
+                    tapl.setExpectedRotation(flicker.scenario.startRotation.value)
                 } else {
-                    tapl.setExpectedRotation(Surface.ROTATION_0)
+                    tapl.setExpectedRotation(PlatformConsts.Rotation.ROTATION_0.value)
                 }
                 tapl.workspace.switchToOverview()
                 wmHelper.StateSyncBuilder().withRecentsActivityVisible().waitForAndVerify()

@@ -17,12 +17,12 @@
 package com.android.wm.shell.flicker.pip
 
 import android.platform.test.annotations.Presubmit
-import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerBuilder
 import com.android.server.wm.flicker.FlickerTest
 import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
+import com.android.server.wm.traces.common.service.PlatformConsts
 import com.android.wm.shell.flicker.Direction
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -84,7 +84,7 @@ open class MovePipUpShelfHeightChangeTest(flicker: FlickerTest) :
         @JvmStatic
         fun getParams(): List<FlickerTest> {
             return FlickerTestFactory.nonRotationTests(
-                supportedRotations = listOf(Surface.ROTATION_0)
+                supportedRotations = listOf(PlatformConsts.Rotation.ROTATION_0)
             )
         }
     }

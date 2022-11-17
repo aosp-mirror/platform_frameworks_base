@@ -18,8 +18,6 @@ package com.android.server.wm.flicker.quickswitch
 
 import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresDevice
-import android.view.Surface
-import android.view.WindowManagerPolicyConstants
 import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.FlickerBuilder
 import com.android.server.wm.flicker.FlickerTest
@@ -30,6 +28,7 @@ import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.traces.common.ComponentNameMatcher
 import com.android.server.wm.traces.common.Rect
+import com.android.server.wm.traces.common.service.PlatformConsts
 import org.junit.Assume
 import org.junit.Before
 import org.junit.FixMethodOrder
@@ -66,7 +65,7 @@ open class QuickSwitchBetweenTwoAppsBackTest(flicker: FlickerTest) : BaseTest(fl
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit = {
         setup {
-            tapl.setExpectedRotation(flicker.scenario.startRotation)
+            tapl.setExpectedRotation(flicker.scenario.startRotation.value)
             tapl.setIgnoreTaskbarVisibility(true)
             testApp1.launchViaIntent(wmHelper)
             testApp2.launchViaIntent(wmHelper)
@@ -238,9 +237,7 @@ open class QuickSwitchBetweenTwoAppsBackTest(flicker: FlickerTest) : BaseTest(fl
         @JvmStatic
         fun getParams(): Collection<FlickerTest> {
             return FlickerTestFactory.nonRotationTests(
-                supportedNavigationModes =
-                    listOf(WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY),
-                supportedRotations = listOf(Surface.ROTATION_0, Surface.ROTATION_90)
+                supportedNavigationModes = listOf(PlatformConsts.NavBar.MODE_GESTURAL)
             )
         }
     }

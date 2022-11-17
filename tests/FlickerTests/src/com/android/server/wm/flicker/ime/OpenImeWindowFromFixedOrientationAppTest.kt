@@ -19,8 +19,6 @@ package com.android.server.wm.flicker.ime
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresDevice
-import android.view.Surface
-import android.view.WindowManagerPolicyConstants
 import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.FlickerBuilder
 import com.android.server.wm.flicker.FlickerTest
@@ -30,6 +28,7 @@ import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.snapshotStartingWindowLayerCoversExactlyOnApp
+import com.android.server.wm.traces.common.service.PlatformConsts
 import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -63,7 +62,7 @@ class OpenImeWindowFromFixedOrientationAppTest(flicker: FlickerTest) : BaseTest(
         }
         transitions {
             // Bring the existing IME activity to the front in landscape mode device rotation.
-            setRotation(Surface.ROTATION_90)
+            setRotation(PlatformConsts.Rotation.ROTATION_90)
             imeTestApp.launchViaIntent(wmHelper)
         }
         teardown { imeTestApp.exit(wmHelper) }
@@ -73,6 +72,10 @@ class OpenImeWindowFromFixedOrientationAppTest(flicker: FlickerTest) : BaseTest(
     @Postsubmit
     @Test
     override fun navBarLayerIsVisibleAtStartAndEnd() = super.navBarLayerIsVisibleAtStartAndEnd()
+
+    @Postsubmit
+    @Test
+    override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
 
     /** {@inheritDoc} */
     @Postsubmit
@@ -108,9 +111,7 @@ class OpenImeWindowFromFixedOrientationAppTest(flicker: FlickerTest) : BaseTest(
         @JvmStatic
         fun getParams(): Collection<FlickerTest> {
             return FlickerTestFactory.nonRotationTests(
-                supportedRotations = listOf(Surface.ROTATION_90),
-                supportedNavigationModes =
-                    listOf(WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY)
+                supportedRotations = listOf(PlatformConsts.Rotation.ROTATION_90)
             )
         }
     }

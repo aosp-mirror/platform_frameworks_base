@@ -18,8 +18,6 @@ package com.android.server.wm.flicker.ime
 
 import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresDevice
-import android.view.Surface
-import android.view.WindowManagerPolicyConstants
 import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.FlickerBuilder
 import com.android.server.wm.flicker.FlickerTest
@@ -234,14 +232,7 @@ class OpenImeWindowToOverViewTest(flicker: FlickerTest) : BaseTest(flicker) {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): Collection<FlickerTest> {
-            return FlickerTestFactory.nonRotationTests(
-                supportedRotations = listOf(Surface.ROTATION_0, Surface.ROTATION_90),
-                supportedNavigationModes =
-                    listOf(
-                        WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY,
-                        WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
-                    )
-            )
+            return FlickerTestFactory.nonRotationTests()
         }
     }
 }

@@ -20,13 +20,14 @@ package com.android.server.wm.flicker.helpers
 
 import com.android.server.wm.flicker.IFlickerTestData
 import com.android.server.wm.flicker.rules.ChangeDisplayOrientationRule
+import com.android.server.wm.traces.common.service.PlatformConsts
 
 /**
  * Changes the device [rotation] and wait for the rotation animation to complete
  *
  * @param rotation New device rotation
  */
-fun IFlickerTestData.setRotation(rotation: Int) =
+fun IFlickerTestData.setRotation(rotation: PlatformConsts.Rotation) =
     ChangeDisplayOrientationRule.setRotation(
         rotation,
         instrumentation,

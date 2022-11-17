@@ -18,13 +18,12 @@ package com.android.server.wm.flicker.launch
 
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.RequiresDevice
-import android.view.Surface
-import android.view.WindowManagerPolicyConstants
 import com.android.server.wm.flicker.FlickerBuilder
 import com.android.server.wm.flicker.FlickerTest
 import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.rules.RemoveAllTasksButHomeRule
+import com.android.server.wm.traces.common.service.PlatformConsts
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -62,9 +61,9 @@ class OpenAppColdFromIcon(flicker: FlickerTest) : OpenAppFromLauncherTransition(
             super.transition(this)
             setup {
                 if (flicker.scenario.isTablet) {
-                    tapl.setExpectedRotation(flicker.scenario.startRotation)
+                    tapl.setExpectedRotation(flicker.scenario.startRotation.value)
                 } else {
-                    tapl.setExpectedRotation(Surface.ROTATION_0)
+                    tapl.setExpectedRotation(PlatformConsts.Rotation.ROTATION_0.value)
                 }
                 RemoveAllTasksButHomeRule.removeAllTasksButHome()
             }
@@ -187,8 +186,7 @@ class OpenAppColdFromIcon(flicker: FlickerTest) : OpenAppFromLauncherTransition(
         fun getParams(): Collection<FlickerTest> {
             // TAPL fails on landscape mode b/240916028
             return FlickerTestFactory.nonRotationTests(
-                supportedNavigationModes =
-                    listOf(WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY)
+                supportedNavigationModes = listOf(PlatformConsts.NavBar.MODE_3BUTTON)
             )
         }
     }

@@ -17,7 +17,6 @@
 package com.android.wm.shell.flicker.pip
 
 import android.platform.test.annotations.Presubmit
-import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerBuilder
 import com.android.server.wm.flicker.FlickerTest
@@ -25,6 +24,7 @@ import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.rules.RemoveAllTasksButHomeRule
+import com.android.server.wm.traces.common.service.PlatformConsts
 import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -68,7 +68,7 @@ class EnterPipOnUserLeaveHintTest(flicker: FlickerTest) : EnterPipTest(flicker) 
                 pipApp.enableEnterPipOnUserLeaveHint()
             }
             teardown {
-                setRotation(Surface.ROTATION_0)
+                setRotation(PlatformConsts.Rotation.ROTATION_0)
                 RemoveAllTasksButHomeRule.removeAllTasksButHome()
                 pipApp.exit(wmHelper)
             }

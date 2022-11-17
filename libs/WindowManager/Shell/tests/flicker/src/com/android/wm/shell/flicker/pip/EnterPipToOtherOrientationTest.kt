@@ -19,7 +19,6 @@ package com.android.wm.shell.flicker.pip
 import android.app.Activity
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
-import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerBuilder
 import com.android.server.wm.flicker.FlickerTest
@@ -35,6 +34,7 @@ import com.android.server.wm.flicker.rules.RemoveAllTasksButHomeRule
 import com.android.server.wm.flicker.testapp.ActivityOptions.Pip.ACTION_ENTER_PIP
 import com.android.server.wm.flicker.testapp.ActivityOptions.PortraitOnlyActivity.EXTRA_FIXED_ORIENTATION
 import com.android.server.wm.traces.common.ComponentNameMatcher
+import com.android.server.wm.traces.common.service.PlatformConsts
 import com.android.wm.shell.flicker.pip.PipTransition.BroadcastActionTrigger.Companion.ORIENTATION_LANDSCAPE
 import com.android.wm.shell.flicker.pip.PipTransition.BroadcastActionTrigger.Companion.ORIENTATION_PORTRAIT
 import org.junit.Assume
@@ -72,8 +72,8 @@ import org.junit.runners.Parameterized
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class EnterPipToOtherOrientationTest(flicker: FlickerTest) : PipTransition(flicker) {
     private val testApp = FixedOrientationAppHelper(instrumentation)
-    private val startingBounds = WindowUtils.getDisplayBounds(Surface.ROTATION_90)
-    private val endingBounds = WindowUtils.getDisplayBounds(Surface.ROTATION_0)
+    private val startingBounds = WindowUtils.getDisplayBounds(PlatformConsts.Rotation.ROTATION_90)
+    private val endingBounds = WindowUtils.getDisplayBounds(PlatformConsts.Rotation.ROTATION_0)
 
     /** Defines the transition used to run the test */
     override val transition: FlickerBuilder.() -> Unit
@@ -95,7 +95,7 @@ class EnterPipToOtherOrientationTest(flicker: FlickerTest) : PipTransition(flick
                 )
             }
             teardown {
-                setRotation(Surface.ROTATION_0)
+                setRotation(PlatformConsts.Rotation.ROTATION_0)
                 RemoveAllTasksButHomeRule.removeAllTasksButHome()
                 pipApp.exit(wmHelper)
                 testApp.exit(wmHelper)
@@ -221,7 +221,7 @@ class EnterPipToOtherOrientationTest(flicker: FlickerTest) : PipTransition(flick
         @JvmStatic
         fun getParams(): Collection<FlickerTest> {
             return FlickerTestFactory.nonRotationTests(
-                supportedRotations = listOf(Surface.ROTATION_0)
+                supportedRotations = listOf(PlatformConsts.Rotation.ROTATION_0)
             )
         }
     }

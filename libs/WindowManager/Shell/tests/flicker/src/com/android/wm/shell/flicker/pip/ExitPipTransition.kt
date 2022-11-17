@@ -17,12 +17,12 @@
 package com.android.wm.shell.flicker.pip
 
 import android.platform.test.annotations.Presubmit
-import android.view.Surface
 import com.android.server.wm.flicker.FlickerBuilder
 import com.android.server.wm.flicker.FlickerTest
 import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.traces.common.ComponentNameMatcher.Companion.LAUNCHER
+import com.android.server.wm.traces.common.service.PlatformConsts
 import org.junit.Test
 
 /** Base class for exiting pip (closing pip window) without returning to the app */
@@ -30,7 +30,7 @@ abstract class ExitPipTransition(flicker: FlickerTest) : PipTransition(flicker) 
     override val transition: FlickerBuilder.() -> Unit
         get() = buildTransition {
             setup { this.setRotation(flicker.scenario.startRotation) }
-            teardown { this.setRotation(Surface.ROTATION_0) }
+            teardown { this.setRotation(PlatformConsts.Rotation.ROTATION_0) }
         }
 
     /**

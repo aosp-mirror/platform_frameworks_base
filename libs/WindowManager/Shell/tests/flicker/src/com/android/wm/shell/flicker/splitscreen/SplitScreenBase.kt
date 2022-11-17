@@ -33,7 +33,7 @@ abstract class SplitScreenBase(flicker: FlickerTest) : BaseTest(flicker) {
             setup {
                 tapl.setEnableRotation(true)
                 setRotation(flicker.scenario.startRotation)
-                tapl.setExpectedRotation(flicker.scenario.startRotation)
+                tapl.setExpectedRotation(flicker.scenario.startRotation.value)
                 tapl.workspace.switchToOverview().dismissAllTasks()
             }
             teardown {

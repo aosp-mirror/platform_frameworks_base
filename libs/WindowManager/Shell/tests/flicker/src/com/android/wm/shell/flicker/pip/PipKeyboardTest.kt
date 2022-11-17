@@ -17,7 +17,6 @@
 package com.android.wm.shell.flicker.pip
 
 import android.platform.test.annotations.Presubmit
-import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerBuilder
 import com.android.server.wm.flicker.FlickerTest
@@ -28,6 +27,7 @@ import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.traces.common.ComponentNameMatcher
+import com.android.server.wm.traces.common.service.PlatformConsts
 import org.junit.Assume.assumeFalse
 import org.junit.Before
 import org.junit.FixMethodOrder
@@ -58,7 +58,7 @@ open class PipKeyboardTest(flicker: FlickerTest) : PipTransition(flicker) {
             }
             teardown {
                 imeApp.exit(wmHelper)
-                setRotation(Surface.ROTATION_0)
+                setRotation(PlatformConsts.Rotation.ROTATION_0)
             }
             transitions {
                 // open the soft keyboard
@@ -94,7 +94,7 @@ open class PipKeyboardTest(flicker: FlickerTest) : PipTransition(flicker) {
         @JvmStatic
         fun getParams(): Collection<FlickerTest> {
             return FlickerTestFactory.nonRotationTests(
-                supportedRotations = listOf(Surface.ROTATION_0)
+                supportedRotations = listOf(PlatformConsts.Rotation.ROTATION_0)
             )
         }
     }

@@ -18,8 +18,6 @@ package com.android.server.wm.flicker.ime
 
 import android.platform.test.annotations.IwTest
 import android.platform.test.annotations.Presubmit
-import android.view.Surface
-import android.view.WindowManagerPolicyConstants
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.FlickerBuilder
@@ -28,6 +26,7 @@ import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.helpers.ImeAppHelper
 import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.traces.common.ComponentNameMatcher
+import com.android.server.wm.traces.common.service.PlatformConsts
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -117,12 +116,7 @@ class CloseImeWindowToHomeTest(flicker: FlickerTest) : BaseTest(flicker) {
         @JvmStatic
         fun getParams(): Collection<FlickerTest> {
             return FlickerTestFactory.nonRotationTests(
-                supportedRotations = listOf(Surface.ROTATION_0),
-                supportedNavigationModes =
-                    listOf(
-                        WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY,
-                        WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
-                    )
+                supportedRotations = listOf(PlatformConsts.Rotation.ROTATION_0)
             )
         }
     }

@@ -19,8 +19,6 @@ package com.android.server.wm.flicker.ime
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
-import android.view.Surface
-import android.view.WindowManagerPolicyConstants
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.FlickerBuilder
@@ -32,6 +30,7 @@ import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.traces.common.ComponentNameMatcher
+import com.android.server.wm.traces.common.service.PlatformConsts
 import org.junit.Assume
 import org.junit.Before
 import org.junit.FixMethodOrder
@@ -175,9 +174,8 @@ open class SwitchImeWindowsFromGestureNavTest(flicker: FlickerTest) : BaseTest(f
         @JvmStatic
         fun getParams(): Collection<FlickerTest> {
             return FlickerTestFactory.nonRotationTests(
-                supportedNavigationModes =
-                    listOf(WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY),
-                supportedRotations = listOf(Surface.ROTATION_0)
+                supportedNavigationModes = listOf(PlatformConsts.NavBar.MODE_GESTURAL),
+                supportedRotations = listOf(PlatformConsts.Rotation.ROTATION_0)
             )
         }
 

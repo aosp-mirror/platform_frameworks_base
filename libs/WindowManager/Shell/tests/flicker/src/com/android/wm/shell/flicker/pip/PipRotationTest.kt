@@ -18,7 +18,6 @@ package com.android.wm.shell.flicker.pip
 
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
-import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerBuilder
 import com.android.server.wm.flicker.FlickerTest
@@ -175,9 +174,7 @@ open class PipRotationTest(flicker: FlickerTest) : PipTransition(flicker) {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): Collection<FlickerTest> {
-            return FlickerTestFactory.rotationTests(
-                supportedRotations = listOf(Surface.ROTATION_0, Surface.ROTATION_90)
-            )
+            return FlickerTestFactory.rotationTests()
         }
     }
 }

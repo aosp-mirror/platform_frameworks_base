@@ -63,7 +63,7 @@ class ActivitiesTransitionTest(flicker: FlickerTest) : BaseTest(flicker) {
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit = {
         setup {
-            tapl.setExpectedRotation(flicker.scenario.startRotation)
+            tapl.setExpectedRotation(flicker.scenario.startRotation.value)
             testApp.launchViaIntent(wmHelper)
         }
         teardown { testApp.exit(wmHelper) }

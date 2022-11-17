@@ -17,7 +17,6 @@
 package com.android.wm.shell.flicker.splitscreen
 
 import android.platform.test.annotations.IwTest
-import android.view.WindowManagerPolicyConstants
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import androidx.test.filters.RequiresDevice
@@ -25,6 +24,7 @@ import com.android.server.wm.flicker.FlickerBuilder
 import com.android.server.wm.flicker.FlickerTest
 import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
+import com.android.server.wm.traces.common.service.PlatformConsts
 import com.android.wm.shell.flicker.appWindowIsVisibleAtEnd
 import com.android.wm.shell.flicker.layerBecomesVisible
 import com.android.wm.shell.flicker.layerIsVisibleAtEnd
@@ -187,8 +187,7 @@ class EnterSplitScreenByDragFromShortcut(flicker: FlickerTest) : SplitScreenBase
         fun getParams(): List<FlickerTest> {
             return FlickerTestFactory.nonRotationTests(
                 // TODO(b/176061063):The 3 buttons of nav bar do not exist in the hierarchy.
-                supportedNavigationModes =
-                    listOf(WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY)
+                supportedNavigationModes = listOf(PlatformConsts.NavBar.MODE_GESTURAL)
             )
         }
     }

@@ -18,13 +18,13 @@
 
 package com.android.wm.shell.flicker
 
-import android.view.Surface
 import com.android.server.wm.flicker.FlickerTest
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.traces.layers.LayerTraceEntrySubject
 import com.android.server.wm.flicker.traces.layers.LayersTraceSubject
 import com.android.server.wm.traces.common.IComponentMatcher
 import com.android.server.wm.traces.common.region.Region
+import com.android.server.wm.traces.common.service.PlatformConsts
 
 fun FlickerTest.appPairsDividerIsVisibleAtEnd() {
     assertLayersEnd { this.isVisible(APP_PAIR_SPLIT_DIVIDER_COMPONENT) }
@@ -247,7 +247,7 @@ fun LayersTraceSubject.splitAppLayerBoundsSnapToDivider(
     component: IComponentMatcher,
     landscapePosLeft: Boolean,
     portraitPosTop: Boolean,
-    rotation: Int
+    rotation: PlatformConsts.Rotation
 ): LayersTraceSubject {
     return invoke("splitAppLayerBoundsSnapToDivider") {
         it.splitAppLayerBoundsSnapToDivider(component, landscapePosLeft, portraitPosTop, rotation)
@@ -258,7 +258,7 @@ fun LayerTraceEntrySubject.splitAppLayerBoundsSnapToDivider(
     component: IComponentMatcher,
     landscapePosLeft: Boolean,
     portraitPosTop: Boolean,
-    rotation: Int
+    rotation: PlatformConsts.Rotation
 ): LayerTraceEntrySubject {
     val displayBounds = WindowUtils.getDisplayBounds(rotation)
     return invoke {
@@ -367,7 +367,7 @@ fun FlickerTest.dockedStackDividerNotExistsAtEnd() {
 }
 
 fun FlickerTest.appPairsPrimaryBoundsIsVisibleAtEnd(
-    rotation: Int,
+    rotation: PlatformConsts.Rotation,
     primaryComponent: IComponentMatcher
 ) {
     assertLayersEnd {
@@ -377,7 +377,7 @@ fun FlickerTest.appPairsPrimaryBoundsIsVisibleAtEnd(
 }
 
 fun FlickerTest.dockedStackPrimaryBoundsIsVisibleAtEnd(
-    rotation: Int,
+    rotation: PlatformConsts.Rotation,
     primaryComponent: IComponentMatcher
 ) {
     assertLayersEnd {
@@ -387,7 +387,7 @@ fun FlickerTest.dockedStackPrimaryBoundsIsVisibleAtEnd(
 }
 
 fun FlickerTest.appPairsSecondaryBoundsIsVisibleAtEnd(
-    rotation: Int,
+    rotation: PlatformConsts.Rotation,
     secondaryComponent: IComponentMatcher
 ) {
     assertLayersEnd {
@@ -397,7 +397,7 @@ fun FlickerTest.appPairsSecondaryBoundsIsVisibleAtEnd(
 }
 
 fun FlickerTest.dockedStackSecondaryBoundsIsVisibleAtEnd(
-    rotation: Int,
+    rotation: PlatformConsts.Rotation,
     secondaryComponent: IComponentMatcher
 ) {
     assertLayersEnd {
@@ -406,38 +406,38 @@ fun FlickerTest.dockedStackSecondaryBoundsIsVisibleAtEnd(
     }
 }
 
-fun getPrimaryRegion(dividerRegion: Region, rotation: Int): Region {
+fun getPrimaryRegion(dividerRegion: Region, rotation: PlatformConsts.Rotation): Region {
     val displayBounds = WindowUtils.getDisplayBounds(rotation)
-    return if (rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_180) {
-        Region.from(
-            0,
-            0,
-            displayBounds.bounds.right,
-            dividerRegion.bounds.top + WindowUtils.dockedStackDividerInset
-        )
-    } else {
+    return if (rotation.isRotated()) {
         Region.from(
             0,
             0,
             dividerRegion.bounds.left + WindowUtils.dockedStackDividerInset,
             displayBounds.bounds.bottom
         )
+    } else {
+        Region.from(
+            0,
+            0,
+            displayBounds.bounds.right,
+            dividerRegion.bounds.top + WindowUtils.dockedStackDividerInset
+        )
     }
 }
 
-fun getSecondaryRegion(dividerRegion: Region, rotation: Int): Region {
+fun getSecondaryRegion(dividerRegion: Region, rotation: PlatformConsts.Rotation): Region {
     val displayBounds = WindowUtils.getDisplayBounds(rotation)
-    return if (rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_180) {
+    return if (rotation.isRotated()) {
         Region.from(
+            dividerRegion.bounds.right - WindowUtils.dockedStackDividerInset,
             0,
-            dividerRegion.bounds.bottom - WindowUtils.dockedStackDividerInset,
             displayBounds.bounds.right,
             displayBounds.bounds.bottom
         )
     } else {
         Region.from(
-            dividerRegion.bounds.right - WindowUtils.dockedStackDividerInset,
             0,
+            dividerRegion.bounds.bottom - WindowUtils.dockedStackDividerInset,
             displayBounds.bounds.right,
             displayBounds.bounds.bottom
         )

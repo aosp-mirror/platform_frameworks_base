@@ -19,8 +19,6 @@ package com.android.server.wm.flicker.quickswitch
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresDevice
-import android.view.Surface
-import android.view.WindowManagerPolicyConstants
 import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.FlickerBuilder
 import com.android.server.wm.flicker.FlickerTest
@@ -31,6 +29,7 @@ import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.navBarWindowIsVisibleAtStartAndEnd
 import com.android.server.wm.traces.common.ComponentNameMatcher
 import com.android.server.wm.traces.common.Rect
+import com.android.server.wm.traces.common.service.PlatformConsts
 import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Ignore
@@ -63,7 +62,7 @@ class QuickSwitchFromLauncherTest(flicker: FlickerTest) : BaseTest(flicker) {
         setup {
             tapl.setExpectedRotationCheckEnabled(false)
 
-            tapl.setExpectedRotation(flicker.scenario.startRotation)
+            tapl.setExpectedRotation(flicker.scenario.startRotation.value)
 
             testApp.launchViaIntent(wmHelper)
             tapl.goHome()
@@ -296,10 +295,9 @@ class QuickSwitchFromLauncherTest(flicker: FlickerTest) : BaseTest(flicker) {
         @JvmStatic
         fun getParams(): Collection<FlickerTest> {
             return FlickerTestFactory.nonRotationTests(
-                supportedNavigationModes =
-                    listOf(WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY),
+                supportedNavigationModes = listOf(PlatformConsts.NavBar.MODE_GESTURAL),
                 // TODO: Test with 90 rotation
-                supportedRotations = listOf(Surface.ROTATION_0)
+                supportedRotations = listOf(PlatformConsts.Rotation.ROTATION_0)
             )
         }
     }

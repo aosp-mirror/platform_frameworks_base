@@ -17,8 +17,6 @@
 package com.android.server.wm.flicker.ime
 
 import android.platform.test.annotations.Presubmit
-import android.view.Surface
-import android.view.WindowManagerPolicyConstants
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.FlickerBuilder
@@ -28,6 +26,7 @@ import com.android.server.wm.flicker.helpers.ImeEditorPopupDialogAppHelper
 import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.traces.region.RegionSubject
 import com.android.server.wm.traces.common.ComponentNameMatcher
+import com.android.server.wm.traces.common.service.PlatformConsts
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -106,12 +105,7 @@ class CloseImeEditorPopupDialogTest(flicker: FlickerTest) : BaseTest(flicker) {
         @JvmStatic
         fun getParams(): Collection<FlickerTest> {
             return FlickerTestFactory.nonRotationTests(
-                supportedNavigationModes =
-                    listOf(
-                        WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY,
-                        WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
-                    ),
-                supportedRotations = listOf(Surface.ROTATION_0)
+                supportedRotations = listOf(PlatformConsts.Rotation.ROTATION_0)
             )
         }
     }

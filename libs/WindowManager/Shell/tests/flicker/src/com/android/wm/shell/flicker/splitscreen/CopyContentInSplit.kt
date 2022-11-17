@@ -161,15 +161,18 @@ class CopyContentInSplit(flicker: FlickerTest) : SplitScreenBase(flicker) {
     @Presubmit
     @Test
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
-        testSpec.assertLayers {
+        flicker.assertLayers {
             this.visibleLayersShownMoreThanOneConsecutiveEntry(
-                ignoreLayers = listOf(
-                    ComponentNameMatcher.SPLASH_SCREEN,
-                    ComponentNameMatcher.SNAPSHOT,
-                    ComponentNameMatcher.IME_SNAPSHOT,
-                    EdgeExtensionComponentMatcher(),
-                    MagnifierLayer,
-                    PopupWindowLayer))
+                ignoreLayers =
+                    listOf(
+                        ComponentNameMatcher.SPLASH_SCREEN,
+                        ComponentNameMatcher.SNAPSHOT,
+                        ComponentNameMatcher.IME_SNAPSHOT,
+                        EdgeExtensionComponentMatcher(),
+                        MagnifierLayer,
+                        PopupWindowLayer
+                    )
+            )
         }
     }
 

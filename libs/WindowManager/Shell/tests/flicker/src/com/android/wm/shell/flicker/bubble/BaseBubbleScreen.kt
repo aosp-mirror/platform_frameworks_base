@@ -21,7 +21,6 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.ServiceManager
-import android.view.Surface
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.Until
@@ -31,6 +30,7 @@ import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.IFlickerTestData
 import com.android.server.wm.flicker.helpers.LaunchBubbleHelper
 import com.android.server.wm.flicker.helpers.SYSTEMUI_PACKAGE
+import com.android.server.wm.traces.common.service.PlatformConsts
 import com.android.wm.shell.flicker.BaseTest
 import org.junit.runners.Parameterized
 
@@ -89,7 +89,7 @@ abstract class BaseBubbleScreen(flicker: FlickerTest) : BaseTest(flicker) {
         @JvmStatic
         fun getParams(): List<FlickerTest> {
             return FlickerTestFactory.nonRotationTests(
-                supportedRotations = listOf(Surface.ROTATION_0)
+                supportedRotations = listOf(PlatformConsts.Rotation.ROTATION_0)
             )
         }
 
