@@ -136,13 +136,22 @@ public class BroadcastConstants {
     private static final boolean DEFAULT_MODERN_QUEUE_ENABLED = true;
 
     /**
-     * For {@link BroadcastQueueModernImpl}: Maximum number of process queues to
-     * dispatch broadcasts to simultaneously.
+     * For {@link BroadcastQueueModernImpl}: Maximum dispatch parallelism
+     * that we'll tolerate for ordinary broadcast dispatch.
      */
     public int MAX_RUNNING_PROCESS_QUEUES = DEFAULT_MAX_RUNNING_PROCESS_QUEUES;
     private static final String KEY_MAX_RUNNING_PROCESS_QUEUES = "bcast_max_running_process_queues";
     private static final int DEFAULT_MAX_RUNNING_PROCESS_QUEUES =
             ActivityManager.isLowRamDeviceStatic() ? 2 : 4;
+
+    /**
+     * For {@link BroadcastQueueModernImpl}: Additional running process queue parallelism beyond
+     * {@link #MAX_RUNNING_PROCESS_QUEUES} for dispatch of "urgent" broadcasts.
+     */
+    public int EXTRA_RUNNING_URGENT_PROCESS_QUEUES = DEFAULT_EXTRA_RUNNING_URGENT_PROCESS_QUEUES;
+    private static final String KEY_EXTRA_RUNNING_URGENT_PROCESS_QUEUES =
+            "bcast_extra_running_urgent_process_queues";
+    private static final int DEFAULT_EXTRA_RUNNING_URGENT_PROCESS_QUEUES = 1;
 
     /**
      * For {@link BroadcastQueueModernImpl}: Maximum number of active broadcasts
@@ -250,6 +259,10 @@ public class BroadcastConstants {
         updateDeviceConfigConstants();
     }
 
+    public int getMaxRunningQueues() {
+        return MAX_RUNNING_PROCESS_QUEUES + EXTRA_RUNNING_URGENT_PROCESS_QUEUES;
+    }
+
     private void updateSettingsConstants() {
         synchronized (this) {
             try {
@@ -317,6 +330,9 @@ public class BroadcastConstants {
                     DEFAULT_MODERN_QUEUE_ENABLED);
             MAX_RUNNING_PROCESS_QUEUES = getDeviceConfigInt(KEY_MAX_RUNNING_PROCESS_QUEUES,
                     DEFAULT_MAX_RUNNING_PROCESS_QUEUES);
+            EXTRA_RUNNING_URGENT_PROCESS_QUEUES = getDeviceConfigInt(
+                    KEY_EXTRA_RUNNING_URGENT_PROCESS_QUEUES,
+                    DEFAULT_EXTRA_RUNNING_URGENT_PROCESS_QUEUES);
             MAX_RUNNING_ACTIVE_BROADCASTS = getDeviceConfigInt(KEY_MAX_RUNNING_ACTIVE_BROADCASTS,
                     DEFAULT_MAX_RUNNING_ACTIVE_BROADCASTS);
             MAX_PENDING_BROADCASTS = getDeviceConfigInt(KEY_MAX_PENDING_BROADCASTS,

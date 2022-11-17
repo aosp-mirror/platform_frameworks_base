@@ -584,6 +584,14 @@ class BroadcastProcessQueue {
     }
 
     /**
+     * Report whether this queue is currently handling an urgent broadcast.
+     */
+    public boolean isPendingUrgent() {
+        BroadcastRecord next = peekNextBroadcastRecord();
+        return (next != null) ? next.isUrgent() : false;
+    }
+
+    /**
      * Quickly determine if this queue has broadcasts that are still waiting to
      * be delivered at some point in the future.
      */
