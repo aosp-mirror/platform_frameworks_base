@@ -13624,6 +13624,40 @@ public class ActivityManagerService extends IActivityManager.Stub
             userId = mUserController.handleIncomingUser(callingPid, callingUid, userId, true,
                     ALLOW_FULL_ONLY, "registerReceiver", callerPackage);
 
+            // Warn if system internals are registering for important broadcasts
+            // without also using a priority to ensure they process the event
+            // before normal apps hear about it
+            if (UserHandle.isCore(callingUid)) {
+                final int priority = filter.getPriority();
+                final boolean systemPriority = (priority >= IntentFilter.SYSTEM_HIGH_PRIORITY)
+                        || (priority <= IntentFilter.SYSTEM_LOW_PRIORITY);
+                if (!systemPriority) {
+                    final int N = filter.countActions();
+                    for (int i = 0; i < N; i++) {
+                        // TODO: expand to additional important broadcasts over time
+                        final String action = filter.getAction(i);
+                        if (action.startsWith("android.intent.action.USER_")
+                                || action.startsWith("android.intent.action.PACKAGE_")
+                                || action.startsWith("android.intent.action.UID_")
+                                || action.startsWith("android.intent.action.EXTERNAL_")) {
+                            if (DEBUG_BROADCAST) {
+                                Slog.wtf(TAG, "System internals registering for " + filter
+                                        + " with app priority; this will race with apps!",
+                                        new Throwable());
+                            }
+
+                            // When undefined, assume that system internals need
+                            // to hear about the event first; they can use
+                            // SYSTEM_LOW_PRIORITY if they need to hear last
+                            if (priority == 0) {
+                                filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+
             Iterator<String> actions = filter.actionsIterator();
             if (actions == null) {
                 ArrayList<String> noAction = new ArrayList<String>(1);
