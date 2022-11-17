@@ -570,4 +570,40 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         mStatusBarKeyguardViewManager.hideBouncer(false);
         verify(mPrimaryBouncerInteractor, never()).hide();
     }
+
+    @Test
+    public void hideAlternateBouncer_beforeCentralSurfacesRegistered() {
+        mStatusBarKeyguardViewManager =
+                new StatusBarKeyguardViewManager(
+                        getContext(),
+                        mViewMediatorCallback,
+                        mLockPatternUtils,
+                        mStatusBarStateController,
+                        mock(ConfigurationController.class),
+                        mKeyguardUpdateMonitor,
+                        mDreamOverlayStateController,
+                        mock(NavigationModeController.class),
+                        mock(DockManager.class),
+                        mock(NotificationShadeWindowController.class),
+                        mKeyguardStateController,
+                        mock(NotificationMediaManager.class),
+                        mKeyguardBouncerFactory,
+                        mKeyguardMessageAreaFactory,
+                        Optional.of(mSysUiUnfoldComponent),
+                        () -> mShadeController,
+                        mLatencyTracker,
+                        mKeyguardSecurityModel,
+                        mFeatureFlags,
+                        mPrimaryBouncerCallbackInteractor,
+                        mPrimaryBouncerInteractor,
+                        mBouncerView) {
+                    @Override
+                    public ViewRootImpl getViewRootImpl() {
+                        return mViewRootImpl;
+                    }
+                };
+
+        // the following call before registering centralSurfaces should NOT throw a NPE:
+        mStatusBarKeyguardViewManager.hideAlternateBouncer(true);
+    }
 }
