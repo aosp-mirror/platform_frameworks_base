@@ -28,11 +28,13 @@ import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanc
 import com.android.systemui.keyguard.data.repository.KeyguardQuickAffordanceRepository
 import com.android.systemui.keyguard.domain.model.KeyguardQuickAffordanceModel
 import com.android.systemui.keyguard.domain.quickaffordance.KeyguardQuickAffordanceRegistry
+import com.android.systemui.keyguard.shared.model.KeyguardPickerFlag
 import com.android.systemui.keyguard.shared.model.KeyguardQuickAffordancePickerRepresentation
 import com.android.systemui.keyguard.shared.model.KeyguardSlotPickerRepresentation
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancePosition
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.shared.keyguard.data.content.KeyguardQuickAffordanceProviderContract
 import com.android.systemui.shared.keyguard.shared.model.KeyguardQuickAffordanceSlots
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import dagger.Lazy
@@ -117,7 +119,7 @@ constructor(
      *
      * @return `true` if the affordance was selected successfully; `false` otherwise.
      */
-    suspend fun select(slotId: String, affordanceId: String): Boolean {
+    fun select(slotId: String, affordanceId: String): Boolean {
         check(isUsingRepository)
 
         val slots = repository.get().getSlotPickerRepresentations()
@@ -152,7 +154,7 @@ constructor(
      * @return `true` if the affordance was successfully removed; `false` otherwise (for example, if
      * the affordance was not on the slot to begin with).
      */
-    suspend fun unselect(slotId: String, affordanceId: String?): Boolean {
+    fun unselect(slotId: String, affordanceId: String?): Boolean {
         check(isUsingRepository)
 
         val slots = repository.get().getSlotPickerRepresentations()
@@ -187,7 +189,7 @@ constructor(
     }
 
     /** Returns affordance IDs indexed by slot ID, for all known slots. */
-    suspend fun getSelections(): Map<String, List<String>> {
+    fun getSelections(): Map<String, List<String>> {
         check(isUsingRepository)
 
         val selections = repository.get().getSelections()
@@ -312,6 +314,15 @@ constructor(
         check(isUsingRepository)
 
         return repository.get().getSlotPickerRepresentations()
+    }
+
+    fun getPickerFlags(): List<KeyguardPickerFlag> {
+        return listOf(
+            KeyguardPickerFlag(
+                name = KeyguardQuickAffordanceProviderContract.FlagsTable.FLAG_NAME_FEATURE_ENABLED,
+                value = featureFlags.isEnabled(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES),
+            )
+        )
     }
 
     companion object {
