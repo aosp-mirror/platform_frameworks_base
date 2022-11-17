@@ -1106,4 +1106,16 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
             return sStartForegroundServiceStackTraces.get(className);
         }
     }
+
+    /**
+     * Callback called on timeout for {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_SHORT_SERVICE}.
+     *
+     * TODO Implement it
+     * TODO Javadoc
+     *
+     * @param startId
+     * @hide
+     */
+    public void onTimeout(int startId) {
+    }
 }
