@@ -1438,6 +1438,10 @@ struct ResTable_type
         // Mark any types that use this with a v26 qualifier to prevent runtime issues on older
         // platforms.
         FLAG_SPARSE = 0x01,
+
+        // If set, the offsets to the entries are encoded in 16-bit, real_offset = offset * 4u
+        // An 16-bit offset of 0xffffu means a NO_ENTRY
+        FLAG_OFFSET16 = 0x02,
     };
     uint8_t flags;
 
@@ -1453,6 +1457,11 @@ struct ResTable_type
     // Configuration this collection of entries is designed for. This must always be last.
     ResTable_config config;
 };
+
+// Convert a 16-bit offset to 32-bit if FLAG_OFFSET16 is set
+static inline uint32_t offset_from16(uint16_t off16) {
+    return dtohs(off16) == 0xffffu ? ResTable_type::NO_ENTRY : dtohs(off16) * 4u;
+}
 
 // The minimum size required to read any version of ResTable_type.
 constexpr size_t kResTableTypeMinSize =

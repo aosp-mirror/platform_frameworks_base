@@ -88,7 +88,9 @@ static bool VerifyResTableType(incfs::map_ptr<ResTable_type> header) {
   // Make sure that there is enough room for the entry offsets.
   const size_t offsets_offset = dtohs(header->header.headerSize);
   const size_t entries_offset = dtohl(header->entriesStart);
-  const size_t offsets_length = sizeof(uint32_t) * entry_count;
+  const size_t offsets_length = header->flags & ResTable_type::FLAG_OFFSET16
+                                    ? sizeof(uint16_t) * entry_count
+                                    : sizeof(uint32_t) * entry_count;
 
   if (offsets_offset > entries_offset || entries_offset - offsets_offset < offsets_length) {
     LOG(ERROR) << "RES_TABLE_TYPE_TYPE entry offsets overlap actual entry data.";
@@ -247,14 +249,13 @@ base::expected<uint32_t, NullOrIOError> LoadedPackage::GetEntryOffset(
   // The configuration matches and is better than the previous selection.
   // Find the entry value if it exists for this configuration.
   const size_t entry_count = dtohl(type_chunk->entryCount);
-  const size_t offsets_offset = dtohs(type_chunk->header.headerSize);
+  const auto offsets = type_chunk.offset(dtohs(type_chunk->header.headerSize));
 
   // Check if there is the desired entry in this type.
   if (type_chunk->flags & ResTable_type::FLAG_SPARSE) {
     // This is encoded as a sparse map, so perform a binary search.
     bool error = false;
-    auto sparse_indices = type_chunk.offset(offsets_offset)
-                                    .convert<ResTable_sparseTypeEntry>().iterator();
+    auto sparse_indices = offsets.convert<ResTable_sparseTypeEntry>().iterator();
     auto sparse_indices_end = sparse_indices + entry_count;
     auto result = std::lower_bound(sparse_indices, sparse_indices_end, entry_index,
                                    [&error](const incfs::map_ptr<ResTable_sparseTypeEntry>& entry,
@@ -289,17 +290,26 @@ base::expected<uint32_t, NullOrIOError> LoadedPackage::GetEntryOffset(
     return base::unexpected(std::nullopt);
   }
 
-  const auto entry_offset_ptr = type_chunk.offset(offsets_offset).convert<uint32_t>() + entry_index;
-  if (UNLIKELY(!entry_offset_ptr)) {
-    return base::unexpected(IOError::PAGES_MISSING);
+  uint32_t result;
+
+  if (type_chunk->flags & ResTable_type::FLAG_OFFSET16) {
+    const auto entry_offset_ptr = offsets.convert<uint16_t>() + entry_index;
+    if (UNLIKELY(!entry_offset_ptr)) {
+      return base::unexpected(IOError::PAGES_MISSING);
+    }
+    result = offset_from16(entry_offset_ptr.value());
+  } else {
+    const auto entry_offset_ptr = offsets.convert<uint32_t>() + entry_index;
+    if (UNLIKELY(!entry_offset_ptr)) {
+      return base::unexpected(IOError::PAGES_MISSING);
+    }
+    result = dtohl(entry_offset_ptr.value());
   }
 
-  const uint32_t value = dtohl(entry_offset_ptr.value());
-  if (value == ResTable_type::NO_ENTRY) {
+  if (result == ResTable_type::NO_ENTRY) {
     return base::unexpected(std::nullopt);
   }
-
-  return value;
+  return result;
 }
 
 base::expected<incfs::verified_map_ptr<ResTable_entry>, NullOrIOError>
@@ -382,24 +392,35 @@ base::expected<uint32_t, NullOrIOError> LoadedPackage::FindEntryByName(
   for (const auto& type_entry : type_spec->type_entries) {
     const incfs::verified_map_ptr<ResTable_type>& type = type_entry.type;
 
-    size_t entry_count = dtohl(type->entryCount);
-    for (size_t entry_idx = 0; entry_idx < entry_count; entry_idx++) {
-      auto entry_offset_ptr = type.offset(dtohs(type->header.headerSize)).convert<uint32_t>() +
-          entry_idx;
-      if (!entry_offset_ptr) {
-        return base::unexpected(IOError::PAGES_MISSING);
-      }
+    const size_t entry_count = dtohl(type->entryCount);
+    const auto entry_offsets = type.offset(dtohs(type->header.headerSize));
 
+    for (size_t entry_idx = 0; entry_idx < entry_count; entry_idx++) {
       uint32_t offset;
       uint16_t res_idx;
       if (type->flags & ResTable_type::FLAG_SPARSE) {
-        auto sparse_entry = entry_offset_ptr.convert<ResTable_sparseTypeEntry>();
+        auto sparse_entry = entry_offsets.convert<ResTable_sparseTypeEntry>() + entry_idx;
+        if (!sparse_entry) {
+          return base::unexpected(IOError::PAGES_MISSING);
+        }
         offset = dtohs(sparse_entry->offset) * 4u;
         res_idx  = dtohs(sparse_entry->idx);
+      } else if (type->flags & ResTable_type::FLAG_OFFSET16) {
+        auto entry = entry_offsets.convert<uint16_t>() + entry_idx;
+        if (!entry) {
+          return base::unexpected(IOError::PAGES_MISSING);
+        }
+        offset = offset_from16(entry.value());
+        res_idx = entry_idx;
       } else {
-        offset = dtohl(entry_offset_ptr.value());
+        auto entry = entry_offsets.convert<uint32_t>() + entry_idx;
+        if (!entry) {
+          return base::unexpected(IOError::PAGES_MISSING);
+        }
+        offset = dtohl(entry.value());
         res_idx = entry_idx;
       }
+
       if (offset != ResTable_type::NO_ENTRY) {
         auto entry = type.offset(dtohl(type->entriesStart) + offset).convert<ResTable_entry>();
         if (!entry) {

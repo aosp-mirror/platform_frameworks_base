@@ -16,6 +16,7 @@
 
 #include "format/binary/TableFlattener.h"
 
+#include <limits>
 #include <sstream>
 #include <type_traits>
 #include <variant>
@@ -191,6 +192,9 @@ class PackageFlattener {
       offsets[flat_entry.entry->id.value()] = res_entry_writer->Write(&flat_entry);
     }
 
+    // whether the offsets can be represented in 2 bytes
+    bool short_offsets = (values_buffer.size() / 4u) < std::numeric_limits<uint16_t>::max();
+
     bool sparse_encode = sparse_entries_ == SparseEntriesMode::Enabled ||
                          sparse_entries_ == SparseEntriesMode::Forced;
 
@@ -203,8 +207,7 @@ class PackageFlattener {
     }
 
     // Only sparse encode if the offsets are representable in 2 bytes.
-    sparse_encode =
-        sparse_encode && (values_buffer.size() / 4u) <= std::numeric_limits<uint16_t>::max();
+    sparse_encode = sparse_encode && short_offsets;
 
     // Only sparse encode if the ratio of populated entries to total entries is below some
     // threshold.
@@ -226,12 +229,22 @@ class PackageFlattener {
       }
     } else {
       type_header->entryCount = android::util::HostToDevice32(num_total_entries);
-      uint32_t* indices = type_writer.NextBlock<uint32_t>(num_total_entries);
-      for (size_t i = 0; i < num_total_entries; i++) {
-        indices[i] = android::util::HostToDevice32(offsets[i]);
+      if (compact_entry && short_offsets) {
+        // use 16-bit offset only when compact_entry is true
+        type_header->flags |= ResTable_type::FLAG_OFFSET16;
+        uint16_t* indices = type_writer.NextBlock<uint16_t>(num_total_entries);
+        for (size_t i = 0; i < num_total_entries; i++) {
+          indices[i] = android::util::HostToDevice16(offsets[i] / 4u);
+        }
+      } else {
+        uint32_t* indices = type_writer.NextBlock<uint32_t>(num_total_entries);
+        for (size_t i = 0; i < num_total_entries; i++) {
+          indices[i] = android::util::HostToDevice32(offsets[i]);
+        }
       }
     }
 
+    type_writer.buffer()->Align4();
     type_header->entriesStart = android::util::HostToDevice32(type_writer.size());
     type_writer.buffer()->AppendBuffer(std::move(values_buffer));
     type_writer.Finish();
