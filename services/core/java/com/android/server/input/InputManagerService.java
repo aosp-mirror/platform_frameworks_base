@@ -18,6 +18,8 @@ package com.android.server.input;
 
 import static android.view.KeyEvent.KEYCODE_UNKNOWN;
 
+import android.Manifest;
+import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManagerInternal;
@@ -2676,6 +2678,13 @@ public class InputManagerService extends IInputManager.Stub
         }
 
         mNative.cancelCurrentTouch();
+    }
+
+    @EnforcePermission(Manifest.permission.MONITOR_INPUT)
+    @Override
+    public void pilferPointers(IBinder inputChannelToken) {
+        Objects.requireNonNull(inputChannelToken);
+        mNative.pilferPointers(inputChannelToken);
     }
 
     @Override

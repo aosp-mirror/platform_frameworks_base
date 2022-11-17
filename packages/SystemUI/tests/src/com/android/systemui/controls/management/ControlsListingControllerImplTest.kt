@@ -46,6 +46,7 @@ import com.android.systemui.util.time.FakeSystemClock
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -478,6 +479,19 @@ class ControlsListingControllerImplTest : SysuiTestCase() {
         executor.runAllReady()
 
         assertNull(controller.getCurrentServices()[0].panelActivity)
+    }
+
+    @Test
+    fun testListingsNotModifiedByCallback() {
+        // This test checks that if the list passed to the callback is modified, it has no effect
+        // in the resulting services
+        val list = mutableListOf<ServiceInfo>()
+        serviceListingCallbackCaptor.value.onServicesReloaded(list)
+
+        list.add(ServiceInfo(ComponentName("a", "b")))
+        executor.runAllReady()
+
+        assertTrue(controller.getCurrentServices().isEmpty())
     }
 
     private fun ServiceInfo(

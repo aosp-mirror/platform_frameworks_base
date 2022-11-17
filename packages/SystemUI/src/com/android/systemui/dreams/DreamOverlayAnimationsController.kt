@@ -17,17 +17,19 @@
 package com.android.systemui.dreams
 
 import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
 import android.animation.AnimatorSet
 import android.animation.ValueAnimator
 import android.view.View
+import android.view.animation.Interpolator
+import androidx.annotation.FloatRange
 import androidx.core.animation.doOnEnd
 import com.android.systemui.animation.Interpolators
 import com.android.systemui.dreams.complication.ComplicationHostViewController
 import com.android.systemui.dreams.complication.ComplicationLayoutParams
+import com.android.systemui.dreams.complication.ComplicationLayoutParams.Position
 import com.android.systemui.dreams.dagger.DreamOverlayModule
 import com.android.systemui.statusbar.BlurUtils
-import java.util.function.Consumer
+import com.android.systemui.statusbar.CrossFadeHelper
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -40,108 +42,239 @@ constructor(
     private val mStatusBarViewController: DreamOverlayStatusBarViewController,
     private val mOverlayStateController: DreamOverlayStateController,
     @Named(DreamOverlayModule.DREAM_IN_BLUR_ANIMATION_DURATION)
-    private val mDreamInBlurAnimDuration: Int,
-    @Named(DreamOverlayModule.DREAM_IN_BLUR_ANIMATION_DELAY) private val mDreamInBlurAnimDelay: Int,
+    private val mDreamInBlurAnimDurationMs: Long,
+    @Named(DreamOverlayModule.DREAM_IN_BLUR_ANIMATION_DELAY)
+    private val mDreamInBlurAnimDelayMs: Long,
     @Named(DreamOverlayModule.DREAM_IN_COMPLICATIONS_ANIMATION_DURATION)
-    private val mDreamInComplicationsAnimDuration: Int,
+    private val mDreamInComplicationsAnimDurationMs: Long,
     @Named(DreamOverlayModule.DREAM_IN_TOP_COMPLICATIONS_ANIMATION_DELAY)
-    private val mDreamInTopComplicationsAnimDelay: Int,
+    private val mDreamInTopComplicationsAnimDelayMs: Long,
     @Named(DreamOverlayModule.DREAM_IN_BOTTOM_COMPLICATIONS_ANIMATION_DELAY)
-    private val mDreamInBottomComplicationsAnimDelay: Int
+    private val mDreamInBottomComplicationsAnimDelayMs: Long,
+    @Named(DreamOverlayModule.DREAM_OUT_TRANSLATION_Y_DISTANCE)
+    private val mDreamOutTranslationYDistance: Int,
+    @Named(DreamOverlayModule.DREAM_OUT_TRANSLATION_Y_DURATION)
+    private val mDreamOutTranslationYDurationMs: Long,
+    @Named(DreamOverlayModule.DREAM_OUT_TRANSLATION_Y_DELAY_BOTTOM)
+    private val mDreamOutTranslationYDelayBottomMs: Long,
+    @Named(DreamOverlayModule.DREAM_OUT_TRANSLATION_Y_DELAY_TOP)
+    private val mDreamOutTranslationYDelayTopMs: Long,
+    @Named(DreamOverlayModule.DREAM_OUT_ALPHA_DURATION) private val mDreamOutAlphaDurationMs: Long,
+    @Named(DreamOverlayModule.DREAM_OUT_ALPHA_DELAY_BOTTOM)
+    private val mDreamOutAlphaDelayBottomMs: Long,
+    @Named(DreamOverlayModule.DREAM_OUT_ALPHA_DELAY_TOP) private val mDreamOutAlphaDelayTopMs: Long,
+    @Named(DreamOverlayModule.DREAM_OUT_BLUR_DURATION) private val mDreamOutBlurDurationMs: Long
 ) {
 
-    var mEntryAnimations: AnimatorSet? = null
+    private var mAnimator: Animator? = null
+
+    /**
+     * Store the current alphas at the various positions. This is so that we may resume an animation
+     * at the current alpha.
+     */
+    private var mCurrentAlphaAtPosition = mutableMapOf<Int, Float>()
+
+    @FloatRange(from = 0.0, to = 1.0) private var mBlurProgress: Float = 0f
 
     /** Starts the dream content and dream overlay entry animations. */
-    fun startEntryAnimations(view: View) {
-        cancelRunningEntryAnimations()
+    @JvmOverloads
+    fun startEntryAnimations(view: View, animatorBuilder: () -> AnimatorSet = { AnimatorSet() }) {
+        cancelAnimations()
 
-        mEntryAnimations = AnimatorSet()
-        mEntryAnimations?.apply {
-            playTogether(
-                buildDreamInBlurAnimator(view),
-                buildDreamInTopComplicationsAnimator(),
-                buildDreamInBottomComplicationsAnimator()
-            )
-            doOnEnd { mOverlayStateController.setEntryAnimationsFinished(true) }
-            start()
-        }
+        mAnimator =
+            animatorBuilder().apply {
+                playTogether(
+                    blurAnimator(
+                        view = view,
+                        from = 1f,
+                        to = 0f,
+                        durationMs = mDreamInBlurAnimDurationMs,
+                        delayMs = mDreamInBlurAnimDelayMs
+                    ),
+                    alphaAnimator(
+                        from = 0f,
+                        to = 1f,
+                        durationMs = mDreamInComplicationsAnimDurationMs,
+                        delayMs = mDreamInTopComplicationsAnimDelayMs,
+                        position = ComplicationLayoutParams.POSITION_TOP
+                    ),
+                    alphaAnimator(
+                        from = 0f,
+                        to = 1f,
+                        durationMs = mDreamInComplicationsAnimDurationMs,
+                        delayMs = mDreamInBottomComplicationsAnimDelayMs,
+                        position = ComplicationLayoutParams.POSITION_BOTTOM
+                    )
+                )
+                doOnEnd {
+                    mAnimator = null
+                    mOverlayStateController.setEntryAnimationsFinished(true)
+                }
+                start()
+            }
+    }
+
+    /** Starts the dream content and dream overlay exit animations. */
+    @JvmOverloads
+    fun startExitAnimations(
+        view: View,
+        doneCallback: () -> Unit,
+        animatorBuilder: () -> AnimatorSet = { AnimatorSet() }
+    ) {
+        cancelAnimations()
+
+        mAnimator =
+            animatorBuilder().apply {
+                playTogether(
+                    blurAnimator(
+                        view = view,
+                        // Start the blurring wherever the entry animation ended, in
+                        // case it was cancelled early.
+                        from = mBlurProgress,
+                        to = 1f,
+                        durationMs = mDreamOutBlurDurationMs
+                    ),
+                    translationYAnimator(
+                        from = 0f,
+                        to = mDreamOutTranslationYDistance.toFloat(),
+                        durationMs = mDreamOutTranslationYDurationMs,
+                        delayMs = mDreamOutTranslationYDelayBottomMs,
+                        position = ComplicationLayoutParams.POSITION_BOTTOM,
+                        animInterpolator = Interpolators.EMPHASIZED_ACCELERATE
+                    ),
+                    translationYAnimator(
+                        from = 0f,
+                        to = mDreamOutTranslationYDistance.toFloat(),
+                        durationMs = mDreamOutTranslationYDurationMs,
+                        delayMs = mDreamOutTranslationYDelayTopMs,
+                        position = ComplicationLayoutParams.POSITION_TOP,
+                        animInterpolator = Interpolators.EMPHASIZED_ACCELERATE
+                    ),
+                    alphaAnimator(
+                        from =
+                            mCurrentAlphaAtPosition.getOrDefault(
+                                key = ComplicationLayoutParams.POSITION_BOTTOM,
+                                defaultValue = 1f
+                            ),
+                        to = 0f,
+                        durationMs = mDreamOutAlphaDurationMs,
+                        delayMs = mDreamOutAlphaDelayBottomMs,
+                        position = ComplicationLayoutParams.POSITION_BOTTOM
+                    ),
+                    alphaAnimator(
+                        from =
+                            mCurrentAlphaAtPosition.getOrDefault(
+                                key = ComplicationLayoutParams.POSITION_TOP,
+                                defaultValue = 1f
+                            ),
+                        to = 0f,
+                        durationMs = mDreamOutAlphaDurationMs,
+                        delayMs = mDreamOutAlphaDelayTopMs,
+                        position = ComplicationLayoutParams.POSITION_TOP
+                    )
+                )
+                doOnEnd {
+                    mAnimator = null
+                    mOverlayStateController.setExitAnimationsRunning(false)
+                    doneCallback()
+                }
+                start()
+            }
+        mOverlayStateController.setExitAnimationsRunning(true)
     }
 
     /** Cancels the dream content and dream overlay animations, if they're currently running. */
-    fun cancelRunningEntryAnimations() {
-        if (mEntryAnimations?.isRunning == true) {
-            mEntryAnimations?.cancel()
-        }
-        mEntryAnimations = null
+    fun cancelAnimations() {
+        mAnimator =
+            mAnimator?.let {
+                it.cancel()
+                null
+            }
     }
 
-    private fun buildDreamInBlurAnimator(view: View): Animator {
-        return ValueAnimator.ofFloat(1f, 0f).apply {
-            duration = mDreamInBlurAnimDuration.toLong()
-            startDelay = mDreamInBlurAnimDelay.toLong()
+    private fun blurAnimator(
+        view: View,
+        from: Float,
+        to: Float,
+        durationMs: Long,
+        delayMs: Long = 0
+    ): Animator {
+        return ValueAnimator.ofFloat(from, to).apply {
+            duration = durationMs
+            startDelay = delayMs
             interpolator = Interpolators.LINEAR
             addUpdateListener { animator: ValueAnimator ->
+                mBlurProgress = animator.animatedValue as Float
                 mBlurUtils.applyBlur(
-                    view.viewRootImpl,
-                    mBlurUtils.blurRadiusOfRatio(animator.animatedValue as Float).toInt(),
-                    false /*opaque*/
+                    viewRootImpl = view.viewRootImpl,
+                    radius = mBlurUtils.blurRadiusOfRatio(mBlurProgress).toInt(),
+                    opaque = false
                 )
             }
         }
     }
 
-    private fun buildDreamInTopComplicationsAnimator(): Animator {
-        return ValueAnimator.ofFloat(0f, 1f).apply {
-            duration = mDreamInComplicationsAnimDuration.toLong()
-            startDelay = mDreamInTopComplicationsAnimDelay.toLong()
+    private fun alphaAnimator(
+        from: Float,
+        to: Float,
+        durationMs: Long,
+        delayMs: Long,
+        @Position position: Int
+    ): Animator {
+        return ValueAnimator.ofFloat(from, to).apply {
+            duration = durationMs
+            startDelay = delayMs
             interpolator = Interpolators.LINEAR
             addUpdateListener { va: ValueAnimator ->
-                setTopElementsAlpha(va.animatedValue as Float)
+                setElementsAlphaAtPosition(
+                    alpha = va.animatedValue as Float,
+                    position = position,
+                    fadingOut = to < from
+                )
             }
         }
     }
 
-    private fun buildDreamInBottomComplicationsAnimator(): Animator {
-        return ValueAnimator.ofFloat(0f, 1f).apply {
-            duration = mDreamInComplicationsAnimDuration.toLong()
-            startDelay = mDreamInBottomComplicationsAnimDelay.toLong()
-            interpolator = Interpolators.LINEAR
+    private fun translationYAnimator(
+        from: Float,
+        to: Float,
+        durationMs: Long,
+        delayMs: Long,
+        @Position position: Int,
+        animInterpolator: Interpolator
+    ): Animator {
+        return ValueAnimator.ofFloat(from, to).apply {
+            duration = durationMs
+            startDelay = delayMs
+            interpolator = animInterpolator
             addUpdateListener { va: ValueAnimator ->
-                setBottomElementsAlpha(va.animatedValue as Float)
+                setElementsTranslationYAtPosition(va.animatedValue as Float, position)
             }
-            addListener(
-                object : AnimatorListenerAdapter() {
-                    override fun onAnimationStart(animation: Animator) {
-                        mComplicationHostViewController
-                            .getViewsAtPosition(ComplicationLayoutParams.POSITION_BOTTOM)
-                            .forEach(Consumer { v: View -> v.visibility = View.VISIBLE })
-                    }
-                }
-            )
         }
     }
 
-    /** Sets alpha of top complications and the status bar. */
-    private fun setTopElementsAlpha(alpha: Float) {
-        mComplicationHostViewController
-            .getViewsAtPosition(ComplicationLayoutParams.POSITION_TOP)
-            .forEach(Consumer { v: View -> setAlphaAndEnsureVisible(v, alpha) })
-        mStatusBarViewController.setAlpha(alpha)
-    }
-
-    /** Sets alpha of bottom complications. */
-    private fun setBottomElementsAlpha(alpha: Float) {
-        mComplicationHostViewController
-            .getViewsAtPosition(ComplicationLayoutParams.POSITION_BOTTOM)
-            .forEach(Consumer { v: View -> setAlphaAndEnsureVisible(v, alpha) })
-    }
-
-    private fun setAlphaAndEnsureVisible(view: View, alpha: Float) {
-        if (alpha > 0 && view.visibility != View.VISIBLE) {
-            view.visibility = View.VISIBLE
+    /** Sets alpha of complications at the specified position. */
+    private fun setElementsAlphaAtPosition(alpha: Float, position: Int, fadingOut: Boolean) {
+        mCurrentAlphaAtPosition[position] = alpha
+        mComplicationHostViewController.getViewsAtPosition(position).forEach { view ->
+            if (fadingOut) {
+                CrossFadeHelper.fadeOut(view, 1 - alpha, /* remap= */ false)
+            } else {
+                CrossFadeHelper.fadeIn(view, alpha, /* remap= */ false)
+            }
         }
+        if (position == ComplicationLayoutParams.POSITION_TOP) {
+            mStatusBarViewController.setFadeAmount(alpha, fadingOut)
+        }
+    }
 
-        view.alpha = alpha
+    /** Sets y translation of complications at the specified position. */
+    private fun setElementsTranslationYAtPosition(translationY: Float, position: Int) {
+        mComplicationHostViewController.getViewsAtPosition(position).forEach { v ->
+            v.translationY = translationY
+        }
+        if (position == ComplicationLayoutParams.POSITION_TOP) {
+            mStatusBarViewController.setTranslationY(translationY)
+        }
     }
 }

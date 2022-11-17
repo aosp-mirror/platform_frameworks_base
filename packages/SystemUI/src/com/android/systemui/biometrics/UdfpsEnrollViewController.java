@@ -21,6 +21,8 @@ import android.graphics.PointF;
 
 import com.android.systemui.R;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.statusbar.phone.SystemUIDialogManager;
@@ -57,6 +59,7 @@ public class UdfpsEnrollViewController extends UdfpsAnimationViewController<Udfp
             @NonNull ShadeExpansionStateManager shadeExpansionStateManager,
             @NonNull SystemUIDialogManager systemUIDialogManager,
             @NonNull DumpManager dumpManager,
+            @NonNull FeatureFlags featureFlags,
             float scaleFactor) {
         super(view, statusBarStateController, shadeExpansionStateManager, systemUIDialogManager,
                 dumpManager);
@@ -64,6 +67,11 @@ public class UdfpsEnrollViewController extends UdfpsAnimationViewController<Udfp
                 R.integer.config_udfpsEnrollProgressBar));
         mEnrollHelper = enrollHelper;
         mView.setEnrollHelper(mEnrollHelper);
+        mView.setProgressBarRadius(mEnrollProgressBarRadius);
+
+        if (featureFlags.isEnabled(Flags.UDFPS_NEW_TOUCH_DETECTION)) {
+            mView.mUseExpandedOverlay = true;
+        }
     }
 
     @Override

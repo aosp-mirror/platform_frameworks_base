@@ -52,6 +52,7 @@ public class DreamOverlayStateController implements
     public static final int STATE_DREAM_OVERLAY_ACTIVE = 1 << 0;
     public static final int STATE_LOW_LIGHT_ACTIVE = 1 << 1;
     public static final int STATE_DREAM_ENTRY_ANIMATIONS_FINISHED = 1 << 2;
+    public static final int STATE_DREAM_EXIT_ANIMATIONS_RUNNING = 1 << 3;
 
     private static final int OP_CLEAR_STATE = 1;
     private static final int OP_SET_STATE = 2;
@@ -211,6 +212,14 @@ public class DreamOverlayStateController implements
         return containsState(STATE_DREAM_ENTRY_ANIMATIONS_FINISHED);
     }
 
+    /**
+     * Returns whether the dream content and dream overlay exit animations are running.
+     * @return {@code true} if animations are running, {@code false} otherwise.
+     */
+    public boolean areExitAnimationsRunning() {
+        return containsState(STATE_DREAM_EXIT_ANIMATIONS_RUNNING);
+    }
+
     private boolean containsState(int state) {
         return (mState & state) != 0;
     }
@@ -254,6 +263,15 @@ public class DreamOverlayStateController implements
     public void setEntryAnimationsFinished(boolean finished) {
         modifyState(finished ? OP_SET_STATE : OP_CLEAR_STATE,
                 STATE_DREAM_ENTRY_ANIMATIONS_FINISHED);
+    }
+
+    /**
+     * Sets whether dream content and dream overlay exit animations are running.
+     * @param running {@code true} if exit animations are running, {@code false} otherwise.
+     */
+    public void setExitAnimationsRunning(boolean running) {
+        modifyState(running ? OP_SET_STATE : OP_CLEAR_STATE,
+                STATE_DREAM_EXIT_ANIMATIONS_RUNNING);
     }
 
     /**

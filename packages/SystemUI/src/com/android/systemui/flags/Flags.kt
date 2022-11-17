@@ -90,7 +90,8 @@ object Flags {
     // TODO(b/257315550): Tracking Bug
     val NO_HUN_FOR_OLD_WHEN = unreleasedFlag(118, "no_hun_for_old_when")
 
-    // next id: 119
+    val FILTER_UNSEEN_NOTIFS_ON_KEYGUARD =
+        unreleasedFlag(254647461, "filter_unseen_notifs_on_keyguard", teamfood = true)
 
     // 200 - keyguard/lockscreen
     // ** Flag retired **
@@ -141,9 +142,9 @@ object Flags {
     /**
      * Whether to enable the code powering customizable lock screen quick affordances.
      *
-     * Note that this flag does not enable individual implementations of quick affordances like the
-     * new camera quick affordance. Look for individual flags for those.
+     * This flag enables any new prebuilt quick affordances as well.
      */
+    // TODO(b/255618149): Tracking Bug
     @JvmField
     val CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES =
         unreleasedFlag(216, "customizable_lock_screen_quick_affordances", teamfood = false)
@@ -388,9 +389,7 @@ object Flags {
         unreleasedFlag(1600, "a11y_floating_menu_fling_spring_animations")
 
     // 1700 - clipboard
-    @JvmField
-    val CLIPBOARD_OVERLAY_REFACTOR =
-        unreleasedFlag(1700, "clipboard_overlay_refactor", teamfood = true)
+    @JvmField val CLIPBOARD_OVERLAY_REFACTOR = releasedFlag(1700, "clipboard_overlay_refactor")
     @JvmField val CLIPBOARD_REMOTE_BEHAVIOR = unreleasedFlag(1701, "clipboard_remote_behavior")
 
     // 1800 - shade container
@@ -406,4 +405,10 @@ object Flags {
 
     // 2100 - Falsing Manager
     @JvmField val FALSING_FOR_LONG_TAPS = releasedFlag(2100, "falsing_for_long_taps")
+
+    // 2200 - udfps
+    // TODO(b/259264861): Tracking Bug
+    @JvmField val UDFPS_NEW_TOUCH_DETECTION = unreleasedFlag(2200, "udfps_new_touch_detection")
+    @JvmField val UDFPS_ELLIPSE_DEBUG_UI = unreleasedFlag(2201, "udfps_ellipse_debug")
+    @JvmField val UDFPS_ELLIPSE_DETECTION = unreleasedFlag(2202, "udfps_ellipse_detection")
 }

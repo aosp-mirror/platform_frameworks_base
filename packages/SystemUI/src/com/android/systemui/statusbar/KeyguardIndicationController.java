@@ -67,6 +67,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityManager;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -74,6 +75,7 @@ import com.android.internal.app.IBatteryStats;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.keyguard.TrustGrantFlags;
 import com.android.keyguard.logging.KeyguardLogger;
 import com.android.settingslib.Utils;
 import com.android.settingslib.fuelgauge.BatteryStatus;
@@ -154,7 +156,8 @@ public class KeyguardIndicationController {
     private final AccessibilityManager mAccessibilityManager;
     private final Handler mHandler;
 
-    protected KeyguardIndicationRotateTextViewController mRotateTextViewController;
+    @VisibleForTesting
+    public KeyguardIndicationRotateTextViewController mRotateTextViewController;
     private BroadcastReceiver mBroadcastReceiver;
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
 
@@ -195,7 +198,9 @@ public class KeyguardIndicationController {
         public void onScreenTurnedOn() {
             mHandler.removeMessages(MSG_RESET_ERROR_MESSAGE_ON_SCREEN_ON);
             if (mBiometricErrorMessageToShowOnScreenOn != null) {
-                showBiometricMessage(mBiometricErrorMessageToShowOnScreenOn);
+                String followUpMessage = mFaceLockedOutThisAuthSession
+                        ? faceLockedOutFollowupMessage() : null;
+                showBiometricMessage(mBiometricErrorMessageToShowOnScreenOn, followUpMessage);
                 // We want to keep this message around in case the screen was off
                 hideBiometricMessageDelayed(DEFAULT_HIDE_DELAY_MS);
                 mBiometricErrorMessageToShowOnScreenOn = null;
@@ -1188,9 +1193,9 @@ public class KeyguardIndicationController {
         }
 
         @Override
-        public void onTrustGrantedWithFlags(int flags, int userId, @Nullable String message) {
-            if (!isCurrentUser(userId)) return;
-            showTrustGrantedMessage(flags, message);
+        public void onTrustGrantedForCurrentUser(boolean dismissKeyguard,
+                @NonNull TrustGrantFlags flags, @Nullable String message) {
+            showTrustGrantedMessage(dismissKeyguard, message);
         }
 
         @Override
@@ -1254,15 +1259,13 @@ public class KeyguardIndicationController {
         return getCurrentUser() == userId;
     }
 
-    void showTrustGrantedMessage(int flags, @Nullable CharSequence message) {
+    protected void showTrustGrantedMessage(boolean dismissKeyguard, @Nullable String message) {
         mTrustGrantedIndication = message;
         updateDeviceEntryIndication(false);
     }
 
     private void handleFaceLockoutError(String errString) {
-        int followupMsgId = canUnlockWithFingerprint() ? R.string.keyguard_suggest_fingerprint
-                : R.string.keyguard_unlock;
-        String followupMessage = mContext.getString(followupMsgId);
+        String followupMessage = faceLockedOutFollowupMessage();
         // Lockout error can happen multiple times in a session because we trigger face auth
         // even when it is locked out so that the user is aware that face unlock would have
         // triggered but didn't because it is locked out.
@@ -1278,6 +1281,12 @@ public class KeyguardIndicationController {
                     mContext.getString(R.string.keyguard_face_unlock_unavailable),
                     followupMessage);
         }
+    }
+
+    private String faceLockedOutFollowupMessage() {
+        int followupMsgId = canUnlockWithFingerprint() ? R.string.keyguard_suggest_fingerprint
+                : R.string.keyguard_unlock;
+        return mContext.getString(followupMsgId);
     }
 
     private static boolean isLockoutError(int msgId) {
