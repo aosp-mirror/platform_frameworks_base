@@ -2672,8 +2672,8 @@ public class AppOpsManager {
         if (boxedOpCode != null) {
             return boxedOpCode;
         }
-        if (HealthConnectManager.isHealthPermission(ActivityThread.currentApplication(),
-                permission)) {
+        if (permission != null && HealthConnectManager.isHealthPermission(
+                ActivityThread.currentApplication(), permission)) {
             return OP_READ_WRITE_HEALTH_DATA;
         }
         return OP_NONE;
