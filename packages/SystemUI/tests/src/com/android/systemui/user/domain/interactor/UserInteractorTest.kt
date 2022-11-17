@@ -19,6 +19,7 @@ package com.android.systemui.user.domain.interactor
 
 import android.app.ActivityManager
 import android.app.admin.DevicePolicyManager
+import android.content.ComponentName
 import android.content.Intent
 import android.content.pm.UserInfo
 import android.graphics.Bitmap
@@ -33,7 +34,10 @@ import com.android.systemui.GuestResetOrExitSessionReceiver
 import com.android.systemui.GuestResumeSessionReceiver
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.Text
+import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.plugins.ActivityStarter
@@ -41,6 +45,7 @@ import com.android.systemui.qs.user.UserSwitchDialogController
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.telephony.data.repository.FakeTelephonyRepository
 import com.android.systemui.telephony.domain.interactor.TelephonyInteractor
+import com.android.systemui.user.UserSwitcherActivity
 import com.android.systemui.user.data.model.UserSwitcherSettingsModel
 import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.user.data.source.UserRecord
@@ -48,9 +53,11 @@ import com.android.systemui.user.domain.model.ShowDialogRequestModel
 import com.android.systemui.user.shared.model.UserActionModel
 import com.android.systemui.user.shared.model.UserModel
 import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.kotlinArgumentCaptor
 import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.Dispatchers
@@ -90,6 +97,7 @@ class UserInteractorTest : SysuiTestCase() {
     private lateinit var userRepository: FakeUserRepository
     private lateinit var keyguardRepository: FakeKeyguardRepository
     private lateinit var telephonyRepository: FakeTelephonyRepository
+    private lateinit var featureFlags: FakeFeatureFlags
 
     @Before
     fun setUp() {
@@ -104,6 +112,7 @@ class UserInteractorTest : SysuiTestCase() {
             SUPERVISED_USER_CREATION_APP_PACKAGE,
         )
 
+        featureFlags = FakeFeatureFlags()
         userRepository = FakeUserRepository()
         keyguardRepository = FakeKeyguardRepository()
         telephonyRepository = FakeTelephonyRepository()
@@ -147,7 +156,8 @@ class UserInteractorTest : SysuiTestCase() {
                         uiEventLogger = uiEventLogger,
                         resumeSessionReceiver = resumeSessionReceiver,
                         resetOrExitSessionReceiver = resetOrExitSessionReceiver,
-                    )
+                    ),
+                featureFlags = featureFlags,
             )
     }
 
@@ -714,6 +724,52 @@ class UserInteractorTest : SysuiTestCase() {
             assertThat(res?.find { it.isGuest }).isNull()
             job.cancel()
         }
+
+    @Test
+    fun `show user switcher - full screen disabled - shows dialog switcher`() =
+        runBlocking(IMMEDIATE) {
+            featureFlags.set(Flags.FULL_SCREEN_USER_SWITCHER, false)
+
+            var dialogRequest: ShowDialogRequestModel? = null
+            val expandable = mock<Expandable>()
+            underTest.showUserSwitcher(context, expandable)
+
+            val job = underTest.dialogShowRequests.onEach { dialogRequest = it }.launchIn(this)
+
+            // Dialog is shown.
+            assertThat(dialogRequest).isEqualTo(ShowDialogRequestModel.ShowUserSwitcherDialog)
+
+            underTest.onDialogShown()
+            assertThat(dialogRequest).isNull()
+
+            job.cancel()
+        }
+
+    @Test
+    fun `show user switcher - full screen enabled - launches activity`() {
+        featureFlags.set(Flags.FULL_SCREEN_USER_SWITCHER, true)
+
+        val expandable = mock<Expandable>()
+        underTest.showUserSwitcher(context, expandable)
+
+        // Dialog is shown.
+        val intentCaptor = argumentCaptor<Intent>()
+        verify(activityStarter)
+            .startActivity(
+                intentCaptor.capture(),
+                /* dismissShade= */ eq(true),
+                /* ActivityLaunchAnimator.Controller= */ nullable(),
+                /* showOverLockscreenWhenLocked= */ eq(true),
+                eq(UserHandle.SYSTEM),
+            )
+        assertThat(intentCaptor.value.component)
+            .isEqualTo(
+                ComponentName(
+                    context,
+                    UserSwitcherActivity::class.java,
+                )
+            )
+    }
 
     private fun assertUsers(
         models: List<UserModel>?,

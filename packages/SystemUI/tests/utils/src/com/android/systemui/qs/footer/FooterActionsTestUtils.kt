@@ -28,8 +28,6 @@ import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.globalactions.GlobalActionsDialogLite
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
@@ -43,7 +41,6 @@ import com.android.systemui.qs.footer.data.repository.UserSwitcherRepositoryImpl
 import com.android.systemui.qs.footer.domain.interactor.FooterActionsInteractor
 import com.android.systemui.qs.footer.domain.interactor.FooterActionsInteractorImpl
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
-import com.android.systemui.qs.user.UserSwitchDialogController
 import com.android.systemui.security.data.repository.SecurityRepository
 import com.android.systemui.security.data.repository.SecurityRepositoryImpl
 import com.android.systemui.settings.FakeUserTracker
@@ -54,6 +51,7 @@ import com.android.systemui.statusbar.policy.FakeUserInfoController
 import com.android.systemui.statusbar.policy.SecurityController
 import com.android.systemui.statusbar.policy.UserInfoController
 import com.android.systemui.statusbar.policy.UserSwitcherController
+import com.android.systemui.user.domain.interactor.UserInteractor
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.settings.FakeSettings
 import com.android.systemui.util.settings.GlobalSettings
@@ -97,13 +95,12 @@ class FooterActionsTestUtils(
     /** Create a [FooterActionsInteractor] to be used in tests. */
     fun footerActionsInteractor(
         activityStarter: ActivityStarter = mock(),
-        featureFlags: FeatureFlags = FakeFeatureFlags(),
         metricsLogger: MetricsLogger = FakeMetricsLogger(),
         uiEventLogger: UiEventLogger = UiEventLoggerFake(),
         deviceProvisionedController: DeviceProvisionedController = mock(),
         qsSecurityFooterUtils: QSSecurityFooterUtils = mock(),
         fgsManagerController: FgsManagerController = mock(),
-        userSwitchDialogController: UserSwitchDialogController = mock(),
+        userInteractor: UserInteractor = mock(),
         securityRepository: SecurityRepository = securityRepository(),
         foregroundServicesRepository: ForegroundServicesRepository = foregroundServicesRepository(),
         userSwitcherRepository: UserSwitcherRepository = userSwitcherRepository(),
@@ -112,13 +109,12 @@ class FooterActionsTestUtils(
     ): FooterActionsInteractor {
         return FooterActionsInteractorImpl(
             activityStarter,
-            featureFlags,
             metricsLogger,
             uiEventLogger,
             deviceProvisionedController,
             qsSecurityFooterUtils,
             fgsManagerController,
-            userSwitchDialogController,
+            userInteractor,
             securityRepository,
             foregroundServicesRepository,
             userSwitcherRepository,
