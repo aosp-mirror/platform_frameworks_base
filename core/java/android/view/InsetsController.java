@@ -888,7 +888,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             for (InsetsSourceControl activeControl : activeControls) {
                 if (activeControl != null) {
                     // TODO(b/122982984): Figure out why it can be null.
-                    mTmpControlArray.put(activeControl.getType(), activeControl);
+                    mTmpControlArray.put(activeControl.getId(), activeControl);
                 }
             }
         }
@@ -910,10 +910,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         // Ensure to create source consumers if not available yet.
         for (int i = mTmpControlArray.size() - 1; i >= 0; i--) {
             final InsetsSourceControl control = mTmpControlArray.valueAt(i);
-            final @InternalInsetsType int type = control.getType();
-            final InsetsSourceConsumer consumer = getSourceConsumer(type);
+            final InsetsSourceConsumer consumer = getSourceConsumer(control.getId());
             consumer.setControl(control, showTypes, hideTypes);
-            controllableTypes |= InsetsState.toPublicType(type);
+            controllableTypes |= control.getType();
         }
 
         if (mTmpControlArray.size() > 0) {
@@ -1265,7 +1264,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             }
             final InsetsSourceControl control = consumer.getControl();
             if (control != null && control.getLeash() != null) {
-                controls.put(control.getType(), new InsetsSourceControl(control));
+                controls.put(control.getId(), new InsetsSourceControl(control));
                 typesReady |= consumer.getType();
             } else if (animationType == ANIMATION_TYPE_SHOW) {
                 if (DEBUG) Log.d(TAG, "collectSourceControls no control for show(). fromIme: "
@@ -1422,14 +1421,14 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     }
 
     @VisibleForTesting
-    public @NonNull InsetsSourceConsumer getSourceConsumer(@InternalInsetsType int type) {
-        InsetsSourceConsumer controller = mSourceConsumers.get(type);
-        if (controller != null) {
-            return controller;
+    public @NonNull InsetsSourceConsumer getSourceConsumer(int id) {
+        InsetsSourceConsumer consumer = mSourceConsumers.get(id);
+        if (consumer != null) {
+            return consumer;
         }
-        controller = mConsumerCreator.apply(this, type);
-        mSourceConsumers.put(type, controller);
-        return controller;
+        consumer = mConsumerCreator.apply(this, id);
+        mSourceConsumers.put(id, consumer);
+        return consumer;
     }
 
     @VisibleForTesting

@@ -217,7 +217,7 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
     public void updateSurfacePosition(SparseArray<InsetsSourceControl> controls) {
         for (int i = controls.size() - 1; i >= 0; i--) {
             final InsetsSourceControl control = controls.valueAt(i);
-            final InsetsSourceControl c = mControls.get(control.getType());
+            final InsetsSourceControl c = mControls.get(control.getId());
             if (c == null) {
                 continue;
             }
@@ -395,7 +395,7 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
                 // control may be null if it got revoked.
                 continue;
             }
-            state.getSource(control.getType()).setVisible(shown);
+            state.getSource(control.getId()).setVisible(shown);
         }
         return getInsetsFromState(state, frame, typeSideMap);
     }
@@ -413,7 +413,7 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
                 // control may be null if it got revoked.
                 continue;
             }
-            if (state == null || state.getSource(control.getType()).isVisible()) {
+            if (state == null || state.getSource(control.getId()).isVisible()) {
                 insets = Insets.max(insets, control.getInsetsHint());
             }
         }
@@ -443,7 +443,7 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
         // TODO: Implement behavior when inset spans over multiple types
         for (int i = controls.size() - 1; i >= 0; i--) {
             final InsetsSourceControl control = controls.valueAt(i);
-            final InsetsSource source = mInitialInsetsState.getSource(control.getType());
+            final InsetsSource source = mInitialInsetsState.getSource(control.getId());
             final SurfaceControl leash = control.getLeash();
 
             mTmpMatrix.setTranslate(control.getSurfacePosition().x, control.getSurfacePosition().y);
@@ -521,7 +521,7 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
                 continue;
             }
             @InternalInsetsSide int side = InsetsState.getInsetSide(control.getInsetsHint());
-            if (side == ISIDE_FLOATING && control.getType() == ITYPE_IME) {
+            if (side == ISIDE_FLOATING && control.getType() == WindowInsets.Type.ime()) {
                 side = ISIDE_BOTTOM;
             }
             sideControlsMap.add(side, control);

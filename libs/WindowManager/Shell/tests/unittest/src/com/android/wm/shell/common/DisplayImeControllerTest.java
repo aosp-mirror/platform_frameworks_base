@@ -127,7 +127,8 @@ public class DisplayImeControllerTest extends ShellTestCase {
     private InsetsSourceControl[] insetsSourceControl() {
         return new InsetsSourceControl[]{
                 new InsetsSourceControl(
-                        ITYPE_IME, mock(SurfaceControl.class), false, new Point(0, 0), Insets.NONE)
+                        ITYPE_IME, ime(), mock(SurfaceControl.class), false, new Point(0, 0),
+                        Insets.NONE)
         };
     }
 

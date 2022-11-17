@@ -132,7 +132,7 @@ public class InsetsSourceConsumer {
         mSourceControl = control;
         if (control != null) {
             if (DEBUG) Log.d(TAG, String.format("setControl -> %s on %s",
-                    InsetsState.typeToString(control.getType()),
+                    WindowInsets.Type.toString(control.getType()),
                     mController.getHost().getRootViewTitle()));
         }
         if (mSourceControl == null) {

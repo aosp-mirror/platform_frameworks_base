@@ -97,8 +97,7 @@ class InsetsPolicy {
                 return;
             }
             for (InsetsSourceControl control : controls) {
-                final @InternalInsetsType int type = control.getType();
-                if (mShowingTransientTypes.indexOf(type) != -1) {
+                if (mShowingTransientTypes.indexOf(control.getId()) != -1) {
                     // The visibilities of transient bars will be handled with animations.
                     continue;
                 }
@@ -108,8 +107,9 @@ class InsetsPolicy {
 
                     // We use alpha to control the visibility here which aligns the logic at
                     // SurfaceAnimator.createAnimationLeash
-                    mDisplayContent.getPendingTransaction().setAlpha(
-                            leash, InsetsState.getDefaultVisibility(type) ? 1f : 0f);
+                    final boolean visible =
+                            (control.getType() & WindowInsets.Type.defaultVisible()) != 0;
+                    mDisplayContent.getPendingTransaction().setAlpha(leash, visible ? 1f : 0f);
                 }
             }
             if (hasLeash) {
@@ -627,14 +627,15 @@ class InsetsPolicy {
         final SparseArray<InsetsSourceControl> controls = new SparseArray<>();
         final IntArray showingTransientTypes = mShowingTransientTypes;
         for (int i = showingTransientTypes.size() - 1; i >= 0; i--) {
-            final @InternalInsetsType int type = showingTransientTypes.get(i);
-            WindowContainerInsetsSourceProvider provider = mStateController.getSourceProvider(type);
-            InsetsSourceControl control = provider.getControl(mDummyControlTarget);
+            final int sourceId = showingTransientTypes.get(i);
+            final WindowContainerInsetsSourceProvider provider =
+                    mStateController.getSourceProvider(sourceId);
+            final InsetsSourceControl control = provider.getControl(mDummyControlTarget);
             if (control == null || control.getLeash() == null) {
                 continue;
             }
-            typesReady |= InsetsState.toPublicType(type);
-            controls.put(control.getType(), new InsetsSourceControl(control));
+            typesReady |= control.getType();
+            controls.put(sourceId, new InsetsSourceControl(control));
         }
         controlAnimationUnchecked(typesReady, controls, show, callback);
     }
