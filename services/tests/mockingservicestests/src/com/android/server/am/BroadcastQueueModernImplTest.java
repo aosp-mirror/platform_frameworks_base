@@ -466,7 +466,7 @@ public class BroadcastQueueModernImplTest {
     @Test
     public void testRunnableAt_Cached_Interactive() {
         final BroadcastOptions options = BroadcastOptions.makeBasic();
-        options.setInteractiveBroadcast(true);
+        options.setInteractive(true);
         doRunnableAt_Cached(makeBroadcastRecord(makeMockIntent(), options,
                 List.of(makeMockRegisteredReceiver()), null, false), REASON_CONTAINS_INTERACTIVE);
     }

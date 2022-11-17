@@ -397,7 +397,7 @@ final class BroadcastRecord extends Binder {
         alarm = options != null && options.isAlarmBroadcast();
         pushMessage = options != null && options.isPushMessagingBroadcast();
         pushMessageOverQuota = options != null && options.isPushMessagingOverQuotaBroadcast();
-        interactive = options != null && options.isInteractiveBroadcast();
+        interactive = options != null && options.isInteractive();
         this.filterExtrasForReceiver = filterExtrasForReceiver;
     }
 
