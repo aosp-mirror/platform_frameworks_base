@@ -16,6 +16,8 @@
 
 package com.android.internal.telephony;
 
+import static com.android.internal.telephony.SmsConstants.ENCODING_UNKNOWN;
+
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.telephony.SmsMessage;
@@ -92,6 +94,15 @@ public abstract class SmsMessageBase {
     /** {@hide} */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     protected boolean mMwiDontStore;
+
+    /**
+     * The encoding type of a received SMS message, which is specified using ENCODING_*
+     * GSM: defined in android.telephony.SmsConstants
+     * CDMA: defined in android.telephony.cdma.UserData
+     *
+     * @hide
+     */
+    protected int mReceivedEncodingType = ENCODING_UNKNOWN;
 
     /**
      * Indicates status for messages stored on the ICC.
@@ -511,5 +522,9 @@ public abstract class SmsMessageBase {
         }
 
         return mRecipientAddress.getAddressString();
+    }
+
+    public int getReceivedEncodingType() {
+        return mReceivedEncodingType;
     }
 }
