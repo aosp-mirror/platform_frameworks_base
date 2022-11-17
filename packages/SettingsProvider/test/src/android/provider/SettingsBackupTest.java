@@ -427,6 +427,7 @@ public class SettingsBackupTest {
                     Settings.Global.RESTRICTED_NETWORKING_MODE,
                     Settings.Global.REQUIRE_PASSWORD_TO_DECRYPT,
                     Settings.Global.SAFE_BOOT_DISALLOWED,
+                    Settings.Global.SECURE_FRP_MODE,
                     Settings.Global.SELINUX_STATUS,
                     Settings.Global.SELINUX_UPDATE_CONTENT_URL,
                     Settings.Global.SELINUX_UPDATE_METADATA_URL,

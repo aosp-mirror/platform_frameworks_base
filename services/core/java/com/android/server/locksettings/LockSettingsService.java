@@ -1024,11 +1024,18 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     private void enforceFrpResolved() {
+        final int mainUserId = mInjector.getUserManagerInternal().getMainUserId();
+        if (mainUserId < 0) {
+            Slog.i(TAG, "No Main user on device; skip enforceFrpResolved");
+            return;
+        }
         final ContentResolver cr = mContext.getContentResolver();
+
         final boolean inSetupWizard = Settings.Secure.getIntForUser(cr,
-                Settings.Secure.USER_SETUP_COMPLETE, 0, UserHandle.USER_SYSTEM) == 0;
-        final boolean secureFrp = Settings.Secure.getIntForUser(cr,
-                Settings.Secure.SECURE_FRP_MODE, 0, UserHandle.USER_SYSTEM) == 1;
+                Settings.Secure.USER_SETUP_COMPLETE, 0, mainUserId) == 0;
+        final boolean secureFrp = Settings.Global.getInt(cr,
+                Settings.Global.SECURE_FRP_MODE, 0) == 1;
+
         if (inSetupWizard && secureFrp) {
             throw new SecurityException("Cannot change credential in SUW while factory reset"
                     + " protection is not resolved yet");
