@@ -15,10 +15,6 @@
  */
 package com.android.server.pm;
 
-import static org.junit.Assert.assertThrows;
-
-import org.junit.Test;
-
 /**
  * Tests for {@link UserVisibilityMediator} tests for devices that DO NOT support concurrent
  * multiple users on multiple displays (A.K.A {@code SUSD} - Single User on Single Device).
@@ -30,34 +26,5 @@ public final class UserVisibilityMediatorSUSDTest extends UserVisibilityMediator
 
     public UserVisibilityMediatorSUSDTest() {
         super(/* usersOnSecondaryDisplaysEnabled= */ false);
-    }
-
-    // TODO(b/244644281): when start & assign are merged, rename tests below and also call
-    // stopUserAndAssertState() at the end of them
-
-    @Test
-    public void testAssignUserToDisplay_otherDisplay_currentUser() {
-        mockCurrentUser(USER_ID);
-
-        assertThrows(UnsupportedOperationException.class,
-                () -> mMediator.assignUserToDisplay(USER_ID, USER_ID, SECONDARY_DISPLAY_ID));
-    }
-
-    @Test
-    public void testAssignUserToDisplay_otherDisplay_startProfileOfcurrentUser() {
-        mockCurrentUser(PARENT_USER_ID);
-        startDefaultProfile();
-
-        assertThrows(UnsupportedOperationException.class, () -> mMediator
-                .assignUserToDisplay(PROFILE_USER_ID, PARENT_USER_ID, SECONDARY_DISPLAY_ID));
-    }
-
-    @Test
-    public void testAssignUserToDisplay_otherDisplay_stoppedProfileOfcurrentUser() {
-        mockCurrentUser(PARENT_USER_ID);
-        stopDefaultProfile();
-
-        assertThrows(UnsupportedOperationException.class, () -> mMediator
-                .assignUserToDisplay(PROFILE_USER_ID, PARENT_USER_ID, SECONDARY_DISPLAY_ID));
     }
 }

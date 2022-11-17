@@ -51,7 +51,7 @@ public abstract class UserManagerInternal {
     public static final int USER_ASSIGNMENT_RESULT_SUCCESS_INVISIBLE = 2;
     public static final int USER_ASSIGNMENT_RESULT_FAILURE = -1;
 
-    private static final String PREFIX_USER_ASSIGNMENT_RESULT = "USER_ASSIGNMENT_RESULT";
+    private static final String PREFIX_USER_ASSIGNMENT_RESULT = "USER_ASSIGNMENT_RESULT_";
     @IntDef(flag = false, prefix = {PREFIX_USER_ASSIGNMENT_RESULT}, value = {
             USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE,
             USER_ASSIGNMENT_RESULT_SUCCESS_INVISIBLE,
