@@ -68,9 +68,15 @@ public final class GetRequestSession extends RequestSession<GetCredentialRequest
 
     @Override
     protected void launchUiWithProviderData(ArrayList<ProviderData> providerDataList) {
-        mHandler.post(() -> mCredentialManagerUi.show(RequestInfo.newGetRequestInfo(
-                mRequestId, null, mIsFirstUiTurn, ""),
-                providerDataList));
+        try {
+            mClientCallback.onPendingIntent(mCredentialManagerUi.createPendingIntent(
+                    RequestInfo.newGetRequestInfo(
+                    mRequestId, null, mIsFirstUiTurn, ""),
+                    providerDataList));
+        } catch (RemoteException e) {
+            Log.i(TAG, "Issue with invoking pending intent: " + e.getMessage());
+            // TODO: Propagate failure
+        }
     }
 
     @Override // from provider session
