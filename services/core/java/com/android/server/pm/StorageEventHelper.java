@@ -208,7 +208,7 @@ public final class StorageEventHelper extends StorageEventListener {
         synchronized (mPm.mLock) {
             final boolean isUpgrade = !PackagePartitions.FINGERPRINT.equals(ver.fingerprint);
             if (isUpgrade) {
-                logCriticalInfo(Log.INFO, "Build fingerprint changed from " + ver.fingerprint
+                logCriticalInfo(Log.INFO, "Partitions fingerprint changed from " + ver.fingerprint
                         + " to " + PackagePartitions.FINGERPRINT + "; regranting permissions for "
                         + volumeUuid);
             }
