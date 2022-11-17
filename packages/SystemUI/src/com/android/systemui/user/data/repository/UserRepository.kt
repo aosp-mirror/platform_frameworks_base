@@ -23,6 +23,7 @@ import android.os.UserHandle
 import android.os.UserManager
 import android.provider.Settings
 import androidx.annotation.VisibleForTesting
+import com.android.systemui.R
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
@@ -79,6 +80,9 @@ interface UserRepository {
     /** Whether we've scheduled the creation of a guest user. */
     val isGuestUserCreationScheduled: AtomicBoolean
 
+    /** Whether to enable the status bar user chip (which launches the user switcher) */
+    val isStatusBarUserChipEnabled: Boolean
+
     /** The user of the secondary service. */
     var secondaryUserId: Int
 
@@ -126,6 +130,9 @@ constructor(
     override var isGuestUserResetting: Boolean = _isGuestUserResetting
 
     override val isGuestUserCreationScheduled = AtomicBoolean()
+
+    override val isStatusBarUserChipEnabled: Boolean =
+        appContext.resources.getBoolean(R.bool.flag_user_switcher_chip)
 
     override var secondaryUserId: Int = UserHandle.USER_NULL
 
