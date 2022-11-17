@@ -2081,9 +2081,11 @@ public class LockSettingsService extends ILockSettings.Stub {
     public VerifyCredentialResponse checkCredential(LockscreenCredential credential, int userId,
             ICheckCredentialProgressCallback progressCallback) {
         checkPasswordReadPermission();
+        final long identity = Binder.clearCallingIdentity();
         try {
             return doVerifyCredential(credential, userId, progressCallback, 0 /* flags */);
         } finally {
+            Binder.restoreCallingIdentity(identity);
             scheduleGc();
         }
     }
