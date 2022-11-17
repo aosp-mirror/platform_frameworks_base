@@ -18,12 +18,15 @@ package com.android.server.credentials;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.ComponentName;
 import android.content.Context;
 import android.credentials.CreateCredentialRequest;
+import android.credentials.CreateCredentialResponse;
 import android.credentials.CredentialManager;
 import android.credentials.ICreateCredentialCallback;
 import android.credentials.ui.ProviderData;
 import android.credentials.ui.RequestInfo;
+import android.os.RemoteException;
 import android.service.credentials.CredentialProviderInfo;
 import android.util.Log;
 
@@ -35,7 +38,8 @@ import java.util.ArrayList;
  * provider(s) state maintained in {@link ProviderCreateSession}.
  */
 public final class CreateRequestSession extends RequestSession<CreateCredentialRequest,
-        ICreateCredentialCallback> {
+        ICreateCredentialCallback>
+        implements ProviderSession.ProviderInternalCallback<CreateCredentialResponse> {
     private static final String TAG = "CreateRequestSession";
 
     CreateRequestSession(@NonNull Context context, int userId,
@@ -71,5 +75,30 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
         mHandler.post(() -> mCredentialManagerUi.show(RequestInfo.newCreateRequestInfo(
                         mRequestId, mClientRequest, mIsFirstUiTurn, mClientCallingPackage),
                 providerDataList));
+    }
+
+    private void respondToClientAndFinish(CreateCredentialResponse response) {
+        Log.i(TAG, "respondToClientAndFinish");
+        try {
+            mClientCallback.onResponse(response);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+        finishSession();
+    }
+
+    @Override
+    public void onProviderStatusChanged(ProviderSession.Status status,
+            ComponentName componentName) {
+        super.onProviderStatusChanged(status, componentName);
+    }
+
+    @Override
+    public void onFinalResponseReceived(ComponentName componentName,
+            CreateCredentialResponse response) {
+        Log.i(TAG, "onFinalCredentialReceived from: " + componentName.flattenToString());
+        if (response != null) {
+            respondToClientAndFinish(response);
+        }
     }
 }

@@ -16,6 +16,7 @@
 
 package com.android.credentialmanager
 
+import android.content.ComponentName
 import android.content.Context
 import android.content.pm.PackageManager
 import android.credentials.ui.Entry
@@ -146,9 +147,17 @@ class CreateFlowUtils {
     ): List<com.android.credentialmanager.createflow.EnabledProviderInfo> {
       // TODO: get from the actual service info
       val packageManager = context.packageManager
+
       return providerDataList.map {
+        val componentName = ComponentName.unflattenFromString(it.providerFlattenedComponentName)
+        var packageName = componentName?.packageName
+        if (componentName == null) {
+          // TODO: Remove once test data is fixed
+          packageName = it.providerFlattenedComponentName
+        }
+
         val pkgInfo = packageManager
-          .getPackageInfo(it.providerFlattenedComponentName,
+          .getPackageInfo(packageName!!,
             PackageManager.PackageInfoFlags.of(0))
         com.android.credentialmanager.createflow.EnabledProviderInfo(
           // TODO: decide what to do when failed to load a provider icon

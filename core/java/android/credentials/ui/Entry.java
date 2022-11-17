@@ -17,7 +17,10 @@
 package android.credentials.ui;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.app.PendingIntent;
 import android.app.slice.Slice;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -85,6 +88,8 @@ public class Entry implements Parcelable {
 
     @NonNull private final String mKey;
     @NonNull private final String mSubkey;
+    @Nullable private PendingIntent mPendingIntent;
+    @Nullable private Intent mFrameworkExtrasIntent;
 
     @NonNull
     private final Slice mSlice;
@@ -100,12 +105,27 @@ public class Entry implements Parcelable {
         AnnotationValidations.validate(NonNull.class, null, mSubkey);
         mSlice = slice;
         AnnotationValidations.validate(NonNull.class, null, mSlice);
+        mPendingIntent = in.readTypedObject(PendingIntent.CREATOR);
+        mFrameworkExtrasIntent = in.readTypedObject(Intent.CREATOR);
     }
 
+    /** Constructor to be used for an entry that does not require further activities
+     * to be invoked when selected.
+     */
     public Entry(@NonNull String key, @NonNull String subkey, @NonNull Slice slice) {
         mKey = key;
         mSubkey = subkey;
         mSlice = slice;
+    }
+
+    /** Constructor to be used for an entry that requires a pending intent to be invoked
+     * when clicked.
+     */
+    public Entry(@NonNull String key, @NonNull String subkey, @NonNull Slice slice,
+            @NonNull PendingIntent pendingIntent, @Nullable Intent intent) {
+        this(key, subkey, slice);
+        mPendingIntent = pendingIntent;
+        mFrameworkExtrasIntent = intent;
     }
 
     /**
@@ -133,11 +153,23 @@ public class Entry implements Parcelable {
         return mSlice;
     }
 
+    @Nullable
+    public PendingIntent getPendingIntent() {
+        return mPendingIntent;
+    }
+
+    @Nullable
+    public Intent getFrameworkExtrasIntent() {
+        return mFrameworkExtrasIntent;
+    }
+
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString8(mKey);
         dest.writeString8(mSubkey);
         mSlice.writeToParcel(dest, flags);
+        mPendingIntent.writeToParcel(dest, flags);
+        mFrameworkExtrasIntent.writeToParcel(dest, flags);
     }
 
     @Override
