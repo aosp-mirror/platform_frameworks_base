@@ -447,28 +447,24 @@ public class LocationTimeZoneManagerService extends Binder {
 
         @NonNull
         LocationTimeZoneProvider createProvider() {
-            LocationTimeZoneProviderProxy proxy = createProxy();
             ProviderMetricsLogger providerMetricsLogger = new RealProviderMetricsLogger(mIndex);
-            return new BinderLocationTimeZoneProvider(
-                    providerMetricsLogger, mThreadingDomain, mName, proxy,
-                    mServiceConfigAccessor.getRecordStateChangesForTests());
+
+            String mode = getMode();
+            if (Objects.equals(mode, PROVIDER_MODE_DISABLED)) {
+                return new DisabledLocationTimeZoneProvider(providerMetricsLogger, mThreadingDomain,
+                        mName, mServiceConfigAccessor.getRecordStateChangesForTests());
+            } else {
+                LocationTimeZoneProviderProxy proxy = createBinderProxy();
+                return new BinderLocationTimeZoneProvider(
+                        providerMetricsLogger, mThreadingDomain, mName, proxy,
+                        mServiceConfigAccessor.getRecordStateChangesForTests());
+            }
         }
 
         @Override
         public void dump(IndentingPrintWriter ipw, String[] args) {
             ipw.printf("getMode()=%s\n", getMode());
             ipw.printf("getPackageName()=%s\n", getPackageName());
-        }
-
-        @NonNull
-        private LocationTimeZoneProviderProxy createProxy() {
-            String mode = getMode();
-            if (Objects.equals(mode, PROVIDER_MODE_DISABLED)) {
-                return new NullLocationTimeZoneProviderProxy(mContext, mThreadingDomain);
-            } else {
-                // mode == PROVIDER_MODE_OVERRIDE_ENABLED (or unknown).
-                return createRealProxy();
-            }
         }
 
         /** Returns the mode of the provider (enabled/disabled). */
@@ -482,7 +478,7 @@ public class LocationTimeZoneManagerService extends Binder {
         }
 
         @NonNull
-        private RealLocationTimeZoneProviderProxy createRealProxy() {
+        private RealLocationTimeZoneProviderProxy createBinderProxy() {
             String providerServiceAction = mServiceAction;
             boolean isTestProvider = isTestProvider();
             String providerPackageName = getPackageName();

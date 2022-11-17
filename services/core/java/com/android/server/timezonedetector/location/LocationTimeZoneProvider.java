@@ -448,13 +448,21 @@ abstract class LocationTimeZoneProvider implements Dumpable {
             currentState = currentState.newState(PROVIDER_STATE_STOPPED, null, null, "initialize");
             setCurrentState(currentState, false);
 
+            boolean initializationSuccess;
+            String initializationFailureReason;
             // Guard against uncaught exceptions due to initialization problems.
             try {
-                onInitialize();
+                initializationSuccess = onInitialize();
+                initializationFailureReason = "onInitialize() returned false";
             } catch (RuntimeException e) {
-                warnLog("Unable to initialize the provider", e);
+                warnLog("Unable to initialize the provider due to exception", e);
+                initializationSuccess = false;
+                initializationFailureReason = "onInitialize() threw exception:" + e.getMessage();
+            }
+
+            if (!initializationSuccess) {
                 currentState = currentState.newState(PROVIDER_STATE_PERM_FAILED, null, null,
-                        "Failed to initialize: " + e.getMessage());
+                        "Failed to initialize: " + initializationFailureReason);
                 setCurrentState(currentState, true);
             }
         }
@@ -462,9 +470,12 @@ abstract class LocationTimeZoneProvider implements Dumpable {
 
     /**
      * Implemented by subclasses to do work during {@link #initialize}.
+     *
+     * @return returns {@code true} on success, {@code false} if the provider should be considered
+     *   "permanently failed" / disabled
      */
     @GuardedBy("mSharedLock")
-    abstract void onInitialize();
+    abstract boolean onInitialize();
 
     /**
      * Destroys the provider. Called after the provider is stopped. This instance will not be called
