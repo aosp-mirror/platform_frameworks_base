@@ -231,6 +231,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
 
 /**
  * The top of a view hierarchy, implementing the needed protocol between View
@@ -851,7 +852,7 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private SurfaceSyncGroup mSyncGroup;
-    private SurfaceSyncGroup.SyncBufferCallback mSyncBufferCallback;
+    private SurfaceSyncGroup.TransactionReadyCallback mTransactionReadyCallback;
     private int mNumSyncsInProgress = 0;
 
     private HashSet<ScrollCaptureCallback> mRootScrollCaptureCallbacks;
@@ -3610,8 +3611,8 @@ public final class ViewRootImpl implements ViewParent,
                 mPendingTransitions.clear();
             }
 
-            if (mSyncBufferCallback != null) {
-                mSyncBufferCallback.onBufferReady(null);
+            if (mTransactionReadyCallback != null) {
+                mTransactionReadyCallback.onTransactionReady(null);
             }
         } else if (cancelAndRedraw) {
             mLastPerformTraversalsSkipDrawReason = cancelDueToPreDrawListener
@@ -3626,8 +3627,8 @@ public final class ViewRootImpl implements ViewParent,
                 }
                 mPendingTransitions.clear();
             }
-            if (!performDraw() && mSyncBufferCallback != null) {
-                mSyncBufferCallback.onBufferReady(null);
+            if (!performDraw() && mTransactionReadyCallback != null) {
+                mTransactionReadyCallback.onTransactionReady(null);
             }
         }
 
@@ -3641,7 +3642,7 @@ public final class ViewRootImpl implements ViewParent,
         if (!cancelAndRedraw) {
             mReportNextDraw = false;
             mLastReportNextDrawReason = null;
-            mSyncBufferCallback = null;
+            mTransactionReadyCallback = null;
             mSyncBuffer = false;
             if (isInLocalSync()) {
                 mSyncGroup.markSyncReady();
@@ -4388,7 +4389,7 @@ public final class ViewRootImpl implements ViewParent,
             return false;
         }
 
-        final boolean fullRedrawNeeded = mFullRedrawNeeded || mSyncBufferCallback != null;
+        final boolean fullRedrawNeeded = mFullRedrawNeeded || mTransactionReadyCallback != null;
         mFullRedrawNeeded = false;
 
         mIsDrawing = true;
@@ -4396,9 +4397,9 @@ public final class ViewRootImpl implements ViewParent,
 
         addFrameCommitCallbackIfNeeded();
 
-        boolean usingAsyncReport = isHardwareEnabled() && mSyncBufferCallback != null;
+        boolean usingAsyncReport = isHardwareEnabled() && mTransactionReadyCallback != null;
         if (usingAsyncReport) {
-            registerCallbacksForSync(mSyncBuffer, mSyncBufferCallback);
+            registerCallbacksForSync(mSyncBuffer, mTransactionReadyCallback);
         } else if (mHasPendingTransactions) {
             // These callbacks are only needed if there's no sync involved and there were calls to
             // applyTransactionOnDraw. These callbacks check if the draw failed for any reason and
@@ -4449,10 +4450,11 @@ public final class ViewRootImpl implements ViewParent,
             }
 
             if (mSurfaceHolder != null && mSurface.isValid()) {
-                final SurfaceSyncGroup.SyncBufferCallback syncBufferCallback = mSyncBufferCallback;
+                final SurfaceSyncGroup.TransactionReadyCallback transactionReadyCallback =
+                        mTransactionReadyCallback;
                 SurfaceCallbackHelper sch = new SurfaceCallbackHelper(() ->
-                        mHandler.post(() -> syncBufferCallback.onBufferReady(null)));
-                mSyncBufferCallback = null;
+                        mHandler.post(() -> transactionReadyCallback.onTransactionReady(null)));
+                mTransactionReadyCallback = null;
 
                 SurfaceHolder.Callback callbacks[] = mSurfaceHolder.getCallbacks();
 
@@ -4463,8 +4465,8 @@ public final class ViewRootImpl implements ViewParent,
                 }
             }
         }
-        if (mSyncBufferCallback != null && !usingAsyncReport) {
-            mSyncBufferCallback.onBufferReady(null);
+        if (mTransactionReadyCallback != null && !usingAsyncReport) {
+            mTransactionReadyCallback.onTransactionReady(null);
         }
         if (mPerformContentCapture) {
             performContentCaptureInitialReport();
@@ -11134,7 +11136,7 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private void registerCallbacksForSync(boolean syncBuffer,
-            final SurfaceSyncGroup.SyncBufferCallback syncBufferCallback) {
+            final SurfaceSyncGroup.TransactionReadyCallback transactionReadyCallback) {
         if (!isHardwareEnabled()) {
             return;
         }
@@ -11161,7 +11163,7 @@ public final class ViewRootImpl implements ViewParent,
                 // pendingDrawFinished.
                 if ((syncResult
                         & (SYNC_LOST_SURFACE_REWARD_IF_FOUND | SYNC_CONTEXT_IS_STOPPED)) != 0) {
-                    syncBufferCallback.onBufferReady(
+                    transactionReadyCallback.onTransactionReady(
                             mBlastBufferQueue.gatherPendingTransactions(frame));
                     return null;
                 }
@@ -11171,7 +11173,8 @@ public final class ViewRootImpl implements ViewParent,
                 }
 
                 if (syncBuffer) {
-                    mBlastBufferQueue.syncNextTransaction(syncBufferCallback::onBufferReady);
+                    mBlastBufferQueue.syncNextTransaction(
+                            transactionReadyCallback::onTransactionReady);
                 }
 
                 return didProduceBuffer -> {
@@ -11191,7 +11194,7 @@ public final class ViewRootImpl implements ViewParent,
                         // since the frame didn't draw on this vsync. It's possible the frame will
                         // draw later, but it's better to not be sync than to block on a frame that
                         // may never come.
-                        syncBufferCallback.onBufferReady(
+                        transactionReadyCallback.onTransactionReady(
                                 mBlastBufferQueue.gatherPendingTransactions(frame));
                         return;
                     }
@@ -11200,22 +11203,49 @@ public final class ViewRootImpl implements ViewParent,
                     // syncNextTransaction callback. Instead, just report back to the Syncer so it
                     // knows that this sync request is complete.
                     if (!syncBuffer) {
-                        syncBufferCallback.onBufferReady(null);
+                        transactionReadyCallback.onTransactionReady(null);
                     }
                 };
             }
         });
     }
 
+    private final Executor mPostAtFrontExecutor = new Executor() {
+        @Override
+        public void execute(Runnable command) {
+            mHandler.postAtFrontOfQueue(command);
+        }
+    };
+
     public final SurfaceSyncGroup.SyncTarget mSyncTarget = new SurfaceSyncGroup.SyncTarget() {
         @Override
-        public void onReadyToSync(SurfaceSyncGroup.SyncBufferCallback syncBufferCallback) {
-            readyToSync(syncBufferCallback);
+        public void onAddedToSyncGroup(SurfaceSyncGroup parentSyncGroup,
+                SurfaceSyncGroup.TransactionReadyCallback transactionReadyCallback) {
+            updateSyncInProgressCount(parentSyncGroup);
+            if (!isInLocalSync()) {
+                // Always sync the buffer if the sync request did not come from VRI.
+                mSyncBuffer = true;
+            }
+            if (mAttachInfo.mThreadedRenderer != null) {
+                HardwareRenderer.setRtAnimationsEnabled(false);
+            }
+
+            if (mTransactionReadyCallback != null) {
+                Log.d(mTag, "Already set sync for the next draw.");
+                mTransactionReadyCallback.onTransactionReady(null);
+            }
+            if (DEBUG_BLAST) {
+                Log.d(mTag, "Setting syncFrameCallback");
+            }
+            mTransactionReadyCallback = transactionReadyCallback;
+            if (!mIsInTraversal && !mTraversalScheduled) {
+                scheduleTraversals();
+            }
         }
 
-        @Override
-        public void onSyncComplete() {
-            mHandler.postAtFrontOfQueue(() -> {
+        private void updateSyncInProgressCount(SurfaceSyncGroup parentSyncGroup) {
+            mNumSyncsInProgress++;
+            parentSyncGroup.addSyncCompleteCallback(mPostAtFrontExecutor, () -> {
                 if (--mNumSyncsInProgress == 0 && mAttachInfo.mThreadedRenderer != null) {
                     HardwareRenderer.setRtAnimationsEnabled(true);
                 }
@@ -11226,29 +11256,6 @@ public final class ViewRootImpl implements ViewParent,
     @Override
     public SurfaceSyncGroup.SyncTarget getSyncTarget() {
         return mSyncTarget;
-    }
-
-    private void readyToSync(SurfaceSyncGroup.SyncBufferCallback syncBufferCallback) {
-        mNumSyncsInProgress++;
-        if (!isInLocalSync()) {
-            // Always sync the buffer if the sync request did not come from VRI.
-            mSyncBuffer = true;
-        }
-        if (mAttachInfo.mThreadedRenderer != null) {
-            HardwareRenderer.setRtAnimationsEnabled(false);
-        }
-
-        if (mSyncBufferCallback != null) {
-            Log.d(mTag, "Already set sync for the next draw.");
-            mSyncBufferCallback.onBufferReady(null);
-        }
-        if (DEBUG_BLAST) {
-            Log.d(mTag, "Setting syncFrameCallback");
-        }
-        mSyncBufferCallback = syncBufferCallback;
-        if (!mIsInTraversal && !mTraversalScheduled) {
-            scheduleTraversals();
-        }
     }
 
     void mergeSync(SurfaceSyncGroup otherSyncGroup) {

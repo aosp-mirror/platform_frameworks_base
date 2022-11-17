@@ -17,7 +17,6 @@ import com.android.systemui.biometrics.ui.viewmodel.CredentialViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -40,6 +39,7 @@ object CredentialViewBinder {
         panelViewController: AuthPanelController,
         animatePanel: Boolean,
         maxErrorDuration: Long = 3_000L,
+        requestFocusForInput: Boolean = true,
     ) {
         val titleView: TextView = view.requireViewById(R.id.title)
         val subtitleView: TextView = view.requireViewById(R.id.subtitle)
@@ -110,7 +110,8 @@ object CredentialViewBinder {
 
         // bind the auth widget
         when (view) {
-            is CredentialPasswordView -> CredentialPasswordViewBinder.bind(view, host, viewModel)
+            is CredentialPasswordView ->
+                CredentialPasswordViewBinder.bind(view, host, viewModel, requestFocusForInput)
             is CredentialPatternView -> CredentialPatternViewBinder.bind(view, host, viewModel)
             else -> throw IllegalStateException("unexpected view type: ${view.javaClass.name}")
         }

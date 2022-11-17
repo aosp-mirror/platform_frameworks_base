@@ -1814,12 +1814,6 @@ class ContextImpl extends Context {
             }
         }
         try {
-            ActivityThread thread = ActivityThread.currentActivityThread();
-            Instrumentation instrumentation = thread.getInstrumentation();
-            if (instrumentation.isInstrumenting()
-                    && ((flags & Context.RECEIVER_NOT_EXPORTED) == 0)) {
-                flags = flags | Context.RECEIVER_EXPORTED;
-            }
             final Intent intent = ActivityManager.getService().registerReceiverWithFeature(
                     mMainThread.getApplicationThread(), mBasePackageName, getAttributionTag(),
                     AppOpsManager.toReceiverId(receiver), rd, filter, broadcastPermission, userId,

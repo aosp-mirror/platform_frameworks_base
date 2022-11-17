@@ -3799,7 +3799,7 @@ public class UserManagerService extends IUserManager.Stub {
         long earliestCreationTime = earliestUser.creationTime;
         for (int i = 0; i < users.size(); i++) {
             final UserInfo info = users.get(i);
-            if (info.isFull() && info.creationTime > 0
+            if (info.isFull() && info.isAdmin() && info.creationTime > 0
                     && info.creationTime < earliestCreationTime) {
                 earliestCreationTime = info.creationTime;
                 earliestUser = info;
@@ -6892,6 +6892,24 @@ public class UserManagerService extends IUserManager.Stub {
                     listener.onUserVisibilityChanged(userId, visible);
                 }
             });
+        }
+
+        @Override
+        public int[] getUserTypesForStatsd(@UserIdInt int[] userIds) {
+            if (userIds == null) {
+                return null;
+            }
+            final int[] userTypes = new int[userIds.length];
+            for (int i = 0; i < userTypes.length; i++) {
+                final UserInfo userInfo = getUserInfo(userIds[i]);
+                if (userInfo == null) {
+                    // Not possible because the input user ids should all be valid
+                    userTypes[i] = UserManager.getUserTypeForStatsd("");
+                } else {
+                    userTypes[i] = UserManager.getUserTypeForStatsd(userInfo.userType);
+                }
+            }
+            return userTypes;
         }
     } // class LocalService
 

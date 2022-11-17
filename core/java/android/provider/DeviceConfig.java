@@ -131,6 +131,13 @@ public final class DeviceConfig {
     public static final String NAMESPACE_APP_STANDBY = "app_standby";
 
     /**
+     * Namespace for all App Cloning related features.
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final String NAMESPACE_APP_CLONING = "app_cloning";
+
+    /**
      * Namespace for AttentionManagerService related features.
      *
      * @hide

@@ -28,6 +28,7 @@ import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.webkit.URLUtil;
 import android.webkit.WebView;
 
 import com.android.phone.slice.SlicePurchaseController;
@@ -60,36 +61,38 @@ public class SlicePurchaseActivity extends Activity {
 
     @NonNull private WebView mWebView;
     @NonNull private Context mApplicationContext;
+    @NonNull private Intent mIntent;
+    @Nullable private URL mUrl;
     private int mSubId;
     @TelephonyManager.PremiumCapability protected int mCapability;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Intent intent = getIntent();
-        mSubId = intent.getIntExtra(SlicePurchaseController.EXTRA_SUB_ID,
+        mIntent = getIntent();
+        mSubId = mIntent.getIntExtra(SlicePurchaseController.EXTRA_SUB_ID,
                 SubscriptionManager.INVALID_SUBSCRIPTION_ID);
-        mCapability = intent.getIntExtra(SlicePurchaseController.EXTRA_PREMIUM_CAPABILITY,
+        mCapability = mIntent.getIntExtra(SlicePurchaseController.EXTRA_PREMIUM_CAPABILITY,
                 SlicePurchaseController.PREMIUM_CAPABILITY_INVALID);
         mApplicationContext = getApplicationContext();
-        URL url = getUrl();
+        mUrl = getUrl();
         logd("onCreate: subId=" + mSubId + ", capability="
                 + TelephonyManager.convertPremiumCapabilityToString(mCapability)
-                + ", url=" + url);
+                + ", url=" + mUrl);
 
         // Cancel network boost notification
         mApplicationContext.getSystemService(NotificationManager.class)
                 .cancel(SlicePurchaseBroadcastReceiver.NETWORK_BOOST_NOTIFICATION_TAG, mCapability);
 
         // Verify intent and values are valid
-        if (!SlicePurchaseBroadcastReceiver.isIntentValid(intent)) {
-            loge("Not starting SlicePurchaseActivity with an invalid Intent: " + intent);
+        if (!SlicePurchaseBroadcastReceiver.isIntentValid(mIntent)) {
+            loge("Not starting SlicePurchaseActivity with an invalid Intent: " + mIntent);
             SlicePurchaseBroadcastReceiver.sendSlicePurchaseAppResponse(
-                    intent, SlicePurchaseController.EXTRA_INTENT_REQUEST_FAILED);
+                    mIntent, SlicePurchaseController.EXTRA_INTENT_REQUEST_FAILED);
             finishAndRemoveTask();
             return;
         }
-        if (url == null) {
+        if (mUrl == null) {
             String error = "Unable to create a URL from carrier configs.";
             loge(error);
             Intent data = new Intent();
@@ -97,7 +100,7 @@ public class SlicePurchaseActivity extends Activity {
                     SlicePurchaseController.FAILURE_CODE_CARRIER_URL_UNAVAILABLE);
             data.putExtra(SlicePurchaseController.EXTRA_FAILURE_REASON, error);
             SlicePurchaseBroadcastReceiver.sendSlicePurchaseAppResponseWithData(mApplicationContext,
-                    getIntent(), SlicePurchaseController.EXTRA_INTENT_CARRIER_ERROR, data);
+                    mIntent, SlicePurchaseController.EXTRA_INTENT_CARRIER_ERROR, data);
             finishAndRemoveTask();
             return;
         }
@@ -105,7 +108,7 @@ public class SlicePurchaseActivity extends Activity {
             loge("Unable to start the slice purchase application on the non-default data "
                     + "subscription: " + mSubId);
             SlicePurchaseBroadcastReceiver.sendSlicePurchaseAppResponse(
-                    intent, SlicePurchaseController.EXTRA_INTENT_NOT_DEFAULT_DATA_SUBSCRIPTION);
+                    mIntent, SlicePurchaseController.EXTRA_INTENT_NOT_DEFAULT_DATA_SUBSCRIPTION);
             finishAndRemoveTask();
             return;
         }
@@ -114,16 +117,7 @@ public class SlicePurchaseActivity extends Activity {
         SlicePurchaseBroadcastReceiver.updateSlicePurchaseActivity(mCapability, this);
 
         // Create and configure WebView
-        mWebView = new WebView(this);
-        // Enable JavaScript for the carrier purchase website to send results back to
-        //  the slice purchase application.
-        mWebView.getSettings().setJavaScriptEnabled(true);
-        mWebView.addJavascriptInterface(
-                new SlicePurchaseWebInterface(this), "SlicePurchaseWebInterface");
-
-        // Display WebView
-        setContentView(mWebView);
-        mWebView.loadUrl(url.toString());
+        setupWebView();
     }
 
     protected void onPurchaseSuccessful(long duration) {
@@ -134,7 +128,7 @@ public class SlicePurchaseActivity extends Activity {
         Intent intent = new Intent();
         intent.putExtra(SlicePurchaseController.EXTRA_PURCHASE_DURATION, duration);
         SlicePurchaseBroadcastReceiver.sendSlicePurchaseAppResponseWithData(mApplicationContext,
-                getIntent(), SlicePurchaseController.EXTRA_INTENT_SUCCESS, intent);
+                mIntent, SlicePurchaseController.EXTRA_INTENT_SUCCESS, intent);
         finishAndRemoveTask();
     }
 
@@ -147,7 +141,7 @@ public class SlicePurchaseActivity extends Activity {
         data.putExtra(SlicePurchaseController.EXTRA_FAILURE_CODE, failureCode);
         data.putExtra(SlicePurchaseController.EXTRA_FAILURE_REASON, failureReason);
         SlicePurchaseBroadcastReceiver.sendSlicePurchaseAppResponseWithData(mApplicationContext,
-                getIntent(), SlicePurchaseController.EXTRA_INTENT_CARRIER_ERROR, data);
+                mIntent, SlicePurchaseController.EXTRA_INTENT_CARRIER_ERROR, data);
         finishAndRemoveTask();
     }
 
@@ -166,7 +160,7 @@ public class SlicePurchaseActivity extends Activity {
     protected void onDestroy() {
         logd("onDestroy: User canceled the purchase by closing the application.");
         SlicePurchaseBroadcastReceiver.sendSlicePurchaseAppResponse(
-                getIntent(), SlicePurchaseController.EXTRA_INTENT_CANCELED);
+                mIntent, SlicePurchaseController.EXTRA_INTENT_CANCELED);
         SlicePurchaseBroadcastReceiver.removeSlicePurchaseActivity(mCapability);
         super.onDestroy();
     }
@@ -175,12 +169,35 @@ public class SlicePurchaseActivity extends Activity {
         String url = mApplicationContext.getSystemService(CarrierConfigManager.class)
                 .getConfigForSubId(mSubId).getString(
                         CarrierConfigManager.KEY_PREMIUM_CAPABILITY_PURCHASE_URL_STRING);
-        try {
-            return new URL(url);
-        } catch (MalformedURLException e) {
-            loge("Invalid URL: " + url);
+        boolean isUrlValid = URLUtil.isValidUrl(url);
+        if (URLUtil.isAssetUrl(url)) {
+            isUrlValid = url.equals(SlicePurchaseController.SLICE_PURCHASE_TEST_FILE);
         }
+        if (isUrlValid) {
+            try {
+                return new URL(url);
+            } catch (MalformedURLException ignored) {
+            }
+        }
+        loge("Invalid URL: " + url);
         return null;
+    }
+
+    private void setupWebView() {
+        // Create WebView
+        mWebView = new WebView(this);
+
+        // Enable JavaScript for the carrier purchase website to send results back to
+        //  the slice purchase application.
+        mWebView.getSettings().setJavaScriptEnabled(true);
+        mWebView.addJavascriptInterface(
+                new SlicePurchaseWebInterface(this), "SlicePurchaseWebInterface");
+
+        // Display WebView
+        setContentView(mWebView);
+
+        // Load the URL
+        mWebView.loadUrl(mUrl.toString());
     }
 
     private static void logd(@NonNull String s) {

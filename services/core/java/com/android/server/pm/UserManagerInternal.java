@@ -437,4 +437,8 @@ public abstract class UserManagerInternal {
 
     /** TODO(b/244333150): temporary method until UserVisibilityMediator handles that logic */
     public abstract void onUserVisibilityChanged(@UserIdInt int userId, boolean visible);
+
+    /** Return the integer types of the given user IDs. Only used for reporting metrics to statsd.
+     */
+    public abstract int[] getUserTypesForStatsd(@UserIdInt int[] userIds);
 }

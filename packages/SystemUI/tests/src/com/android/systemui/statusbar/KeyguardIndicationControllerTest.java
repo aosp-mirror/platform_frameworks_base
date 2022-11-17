@@ -32,12 +32,12 @@ import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewCont
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_DISCLOSURE;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_LOGOUT;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_OWNER_INFO;
-import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_RESTING;
+import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_PERSISTENT_UNLOCK_MESSAGE;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_TRANSIENT;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_TRUST;
-import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_USER_LOCKED;
 import static com.android.systemui.keyguard.ScreenLifecycle.SCREEN_OFF;
 import static com.android.systemui.keyguard.ScreenLifecycle.SCREEN_ON;
+import static com.android.systemui.keyguard.ScreenLifecycle.SCREEN_TURNING_ON;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -87,6 +87,7 @@ import com.android.internal.app.IBatteryStats;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.keyguard.TrustGrantFlags;
 import com.android.keyguard.logging.KeyguardLogger;
 import com.android.settingslib.fuelgauge.BatteryStatus;
 import com.android.systemui.R;
@@ -829,31 +830,6 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void updateMonitor_listenerUpdatesIndication() {
-        createController();
-        String restingIndication = "Resting indication";
-        reset(mKeyguardUpdateMonitor);
-
-        mController.setVisible(true);
-        verifyIndicationMessage(INDICATION_TYPE_USER_LOCKED,
-                mContext.getString(com.android.internal.R.string.lockscreen_storage_locked));
-
-        reset(mRotateTextViewController);
-        when(mKeyguardUpdateMonitor.getUserHasTrust(anyInt())).thenReturn(true);
-        when(mKeyguardUpdateMonitor.isUserUnlocked(anyInt())).thenReturn(true);
-        mController.setRestingIndication(restingIndication);
-        verifyHideIndication(INDICATION_TYPE_USER_LOCKED);
-        verifyIndicationMessage(INDICATION_TYPE_RESTING, restingIndication);
-
-        reset(mRotateTextViewController);
-        reset(mKeyguardUpdateMonitor);
-        when(mKeyguardUpdateMonitor.isUserUnlocked(anyInt())).thenReturn(true);
-        when(mKeyguardUpdateMonitor.getUserHasTrust(anyInt())).thenReturn(false);
-        mKeyguardStateControllerCallback.onUnlockedChanged();
-        verifyIndicationMessage(INDICATION_TYPE_RESTING, restingIndication);
-    }
-
-    @Test
     public void onRefreshBatteryInfo_computesChargingTime() throws RemoteException {
         createController();
         BatteryStatus status = new BatteryStatus(BatteryManager.BATTERY_STATUS_CHARGING,
@@ -1068,7 +1044,8 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
         // GIVEN a trust granted message but trust isn't granted
         final String trustGrantedMsg = "testing trust granted message";
-        mController.getKeyguardCallback().onTrustGrantedWithFlags(0, 0, trustGrantedMsg);
+        mController.getKeyguardCallback().onTrustGrantedForCurrentUser(
+                false, new TrustGrantFlags(0), trustGrantedMsg);
 
         verifyHideIndication(INDICATION_TYPE_TRUST);
 
@@ -1092,7 +1069,8 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
         // WHEN the showTrustGranted method is called
         final String trustGrantedMsg = "testing trust granted message";
-        mController.getKeyguardCallback().onTrustGrantedWithFlags(0, 0, trustGrantedMsg);
+        mController.getKeyguardCallback().onTrustGrantedForCurrentUser(
+                false, new TrustGrantFlags(0), trustGrantedMsg);
 
         // THEN verify the trust granted message shows
         verifyIndicationMessage(
@@ -1109,7 +1087,8 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         when(mKeyguardUpdateMonitor.getUserHasTrust(anyInt())).thenReturn(true);
 
         // WHEN the showTrustGranted method is called with a null message
-        mController.getKeyguardCallback().onTrustGrantedWithFlags(0, 0, null);
+        mController.getKeyguardCallback().onTrustGrantedForCurrentUser(
+                false, new TrustGrantFlags(0), null);
 
         // THEN verify the default trust granted message shows
         verifyIndicationMessage(
@@ -1126,7 +1105,8 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         when(mKeyguardUpdateMonitor.getUserHasTrust(anyInt())).thenReturn(true);
 
         // WHEN the showTrustGranted method is called with an EMPTY string
-        mController.getKeyguardCallback().onTrustGrantedWithFlags(0, 0, "");
+        mController.getKeyguardCallback().onTrustGrantedForCurrentUser(
+                false, new TrustGrantFlags(0), "");
 
         // THEN verify NO trust message is shown
         verifyNoMessage(INDICATION_TYPE_TRUST);
@@ -1488,6 +1468,44 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void onFpLockoutStateChanged_whenFpIsLockedOut_showsPersistentMessage() {
+        createController();
+        mController.setVisible(true);
+        when(mKeyguardUpdateMonitor.isFingerprintLockedOut()).thenReturn(true);
+
+        mKeyguardUpdateMonitorCallback.onLockedOutStateChanged(BiometricSourceType.FINGERPRINT);
+
+        verifyIndicationShown(INDICATION_TYPE_PERSISTENT_UNLOCK_MESSAGE,
+                mContext.getString(R.string.keyguard_unlock));
+    }
+
+    @Test
+    public void onFpLockoutStateChanged_whenFpIsNotLockedOut_showsPersistentMessage() {
+        createController();
+        mController.setVisible(true);
+        clearInvocations(mRotateTextViewController);
+        when(mKeyguardUpdateMonitor.isFingerprintLockedOut()).thenReturn(false);
+
+        mKeyguardUpdateMonitorCallback.onLockedOutStateChanged(BiometricSourceType.FINGERPRINT);
+
+        verifyHideIndication(INDICATION_TYPE_PERSISTENT_UNLOCK_MESSAGE);
+    }
+
+    @Test
+    public void onVisibilityChange_showsPersistentMessage_ifFpIsLockedOut() {
+        createController();
+        mController.setVisible(false);
+        when(mKeyguardUpdateMonitor.isFingerprintLockedOut()).thenReturn(true);
+        mKeyguardUpdateMonitorCallback.onLockedOutStateChanged(BiometricSourceType.FINGERPRINT);
+        clearInvocations(mRotateTextViewController);
+
+        mController.setVisible(true);
+
+        verifyIndicationShown(INDICATION_TYPE_PERSISTENT_UNLOCK_MESSAGE,
+                mContext.getString(R.string.keyguard_unlock));
+    }
+
+    @Test
     public void onBiometricError_whenFaceIsLocked_onMultipleLockOutErrors_showUnavailableMessage() {
         createController();
         onFaceLockoutError("first lockout");
@@ -1499,6 +1517,44 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
         verifyIndicationShown(INDICATION_TYPE_BIOMETRIC_MESSAGE,
                 mContext.getString(R.string.keyguard_face_unlock_unavailable));
+    }
+
+    @Test
+    public void onBiometricError_screenIsTurningOn_faceLockedOutFpIsNotAvailable_showsMessage() {
+        createController();
+        screenIsTurningOn();
+        fingerprintUnlockIsNotPossible();
+
+        onFaceLockoutError("lockout error");
+        verifyNoMoreInteractions(mRotateTextViewController);
+
+        mScreenObserver.onScreenTurnedOn();
+
+        verifyIndicationShown(INDICATION_TYPE_BIOMETRIC_MESSAGE,
+                "lockout error");
+        verifyIndicationShown(INDICATION_TYPE_BIOMETRIC_MESSAGE_FOLLOW_UP,
+                mContext.getString(R.string.keyguard_unlock));
+    }
+
+    @Test
+    public void onBiometricError_screenIsTurningOn_faceLockedOutFpIsAvailable_showsMessage() {
+        createController();
+        screenIsTurningOn();
+        fingerprintUnlockIsPossible();
+
+        onFaceLockoutError("lockout error");
+        verifyNoMoreInteractions(mRotateTextViewController);
+
+        mScreenObserver.onScreenTurnedOn();
+
+        verifyIndicationShown(INDICATION_TYPE_BIOMETRIC_MESSAGE,
+                "lockout error");
+        verifyIndicationShown(INDICATION_TYPE_BIOMETRIC_MESSAGE_FOLLOW_UP,
+                mContext.getString(R.string.keyguard_suggest_fingerprint));
+    }
+
+    private void screenIsTurningOn() {
+        when(mScreenLifecycle.getScreenState()).thenReturn(SCREEN_TURNING_ON);
     }
 
     private void sendUpdateDisclosureBroadcast() {

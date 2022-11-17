@@ -18,11 +18,11 @@ package android.os;
 
 import android.content.Context;
 import android.hardware.display.DisplayManager;
+import android.perftests.utils.BenchmarkState;
+import android.perftests.utils.PerfStatusReporter;
 import android.provider.Settings;
 import android.view.Display;
 
-import androidx.benchmark.BenchmarkState;
-import androidx.benchmark.junit4.BenchmarkRule;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -38,7 +38,7 @@ public final class DisplayPerfTest {
     private static final float DELTA = 0.001f;
 
     @Rule
-    public final BenchmarkRule mBenchmarkRule = new BenchmarkRule();
+    public final PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
     private DisplayManager mDisplayManager;
     private Context mContext;
@@ -51,7 +51,7 @@ public final class DisplayPerfTest {
 
     @Test
     public void testBrightnessChanges() throws Exception {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         Settings.System.putInt(mContext.getContentResolver(),
                 Settings.System.SCREEN_BRIGHTNESS_MODE,
                 Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL);

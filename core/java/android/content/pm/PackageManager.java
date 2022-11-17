@@ -165,6 +165,21 @@ public abstract class PackageManager {
             "android.internal.PROPERTY_NO_APP_DATA_STORAGE";
 
     /**
+     * &lt;service&gt; level {@link android.content.pm.PackageManager.Property} tag specifying
+     * the actual use case of the service if it's foreground service with the type
+     * {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_SPECIAL_USE}.
+     *
+     * <p>
+     * For example:
+     * &lt;service&gt;
+     *   &lt;property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+     *     android:value="foo"/&gt;
+     * &lt;/service&gt;
+     */
+    public static final String PROPERTY_SPECIAL_USE_FGS_SUBTYPE =
+            "android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE";
+
+    /**
      * A property value set within the manifest.
      * <p>
      * The value of a property will only have a single type, as defined by
@@ -189,12 +204,12 @@ public abstract class PackageManager {
         @VisibleForTesting
         public Property(@NonNull String name, int type,
                 @NonNull String packageName, @Nullable String className) {
-            assert name != null;
-            assert type >= TYPE_BOOLEAN && type <= TYPE_STRING;
-            assert packageName != null;
-            this.mName = name;
+            if (type < TYPE_BOOLEAN || type > TYPE_STRING) {
+                throw new IllegalArgumentException("Invalid type");
+            }
+            this.mName = Objects.requireNonNull(name);
             this.mType = type;
-            this.mPackageName = packageName;
+            this.mPackageName = Objects.requireNonNull(packageName);
             this.mClassName = className;
         }
         /** @hide */
@@ -442,9 +457,8 @@ public abstract class PackageManager {
          */
         public ComponentEnabledSetting(@NonNull ComponentName componentName,
                 @EnabledState int newState, @EnabledFlags int flags) {
-            Objects.nonNull(componentName);
             mPackageName = null;
-            mComponentName = componentName;
+            mComponentName = Objects.requireNonNull(componentName);
             mEnabledState = newState;
             mEnabledFlags = flags;
         }
@@ -460,8 +474,7 @@ public abstract class PackageManager {
          */
         public ComponentEnabledSetting(@NonNull String packageName,
                 @EnabledState int newState, @EnabledFlags int flags) {
-            Objects.nonNull(packageName);
-            mPackageName = packageName;
+            mPackageName = Objects.requireNonNull(packageName);
             mComponentName = null;
             mEnabledState = newState;
             mEnabledFlags = flags;
@@ -2946,6 +2959,18 @@ public abstract class PackageManager {
     public static final String FEATURE_OPENGLES_EXTENSION_PACK = "android.hardware.opengles.aep";
 
     /**
+     * Feature for {@link #getSystemAvailableFeatures()} and {@link #hasSystemFeature(String)}.
+     * This feature indicates whether device supports
+     * <a href="https://source.android.com/docs/core/virtualization">Android Virtualization Framework</a>.
+     *
+     * @hide
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_VIRTUALIZATION_FRAMEWORK =
+            "android.software.virtualization_framework";
+
+    /**
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature(String, int)}: If this feature is supported, the Vulkan
      * implementation on this device is hardware accelerated, and the Vulkan native API will
@@ -3407,7 +3432,6 @@ public abstract class PackageManager {
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device is capable of communicating with
      * other devices via ultra wideband.
-     * @hide
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_UWB = "android.hardware.uwb";

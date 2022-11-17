@@ -439,16 +439,16 @@
     <string name="accessibility_battery_level">Battery <xliff:g id="number">%d</xliff:g> percent.</string>
 
     <!-- Content description of the battery level icon for accessibility, including the estimated time remaining before the phone runs out of battery (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_battery_level_with_estimate">Battery <xliff:g id="percentage" example="95%">%1$d</xliff:g> percent, about <xliff:g id="time" example="Until 3:15pm">%2$s</xliff:g> left based on your usage</string>
+    <string name="accessibility_battery_level_with_estimate">Battery <xliff:g id="percentage" example="95%">%1$d</xliff:g> percent, <xliff:g id="time" example="Until 3:15pm">%2$s</xliff:g></string>
 
     <!-- Content description of the battery level icon for accessibility while the device is charging (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_battery_level_charging">Battery charging, <xliff:g id="battery_percentage">%d</xliff:g> percent.</string>
 
     <!-- Content description of the battery level icon for accessibility, with information that the device charging is paused in order to protect the lifetime of the battery (not shown on screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_battery_level_charging_paused">Battery <xliff:g id="percentage" example="90%">%d</xliff:g> percent. Charging paused for battery protection.</string>
+    <string name="accessibility_battery_level_charging_paused">Battery <xliff:g id="percentage" example="90%">%d</xliff:g> percent, charging paused for battery protection.</string>
 
     <!-- Content description of the battery level icon for accessibility, including the estimated time remaining before the phone runs out of battery *and* information that the device charging is paused in order to protect the lifetime of the battery (not shown on screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_battery_level_charging_paused_with_estimate">Battery <xliff:g id="percentage" example="90%">%1$d</xliff:g> percent, about <xliff:g id="time" example="Until 3:15pm">%2$s</xliff:g> left based on your usage. Charging paused for battery protection.</string>
+    <string name="accessibility_battery_level_charging_paused_with_estimate">Battery <xliff:g id="percentage" example="90%">%1$d</xliff:g> percent, <xliff:g id="time" example="Until 3:15pm">%2$s</xliff:g>, charging paused for battery protection.</string>
 
     <!-- Content description of overflow icon container of the notifications for accessibility (not shown on the screen)[CHAR LIMIT=NONE] -->
     <string name="accessibility_overflow_action">See all notifications</string>

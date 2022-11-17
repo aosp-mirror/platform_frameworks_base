@@ -8,7 +8,6 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -20,8 +19,6 @@ import android.content.Context;
 import android.content.pm.PackageManagerInternal;
 import android.net.NetworkRequest;
 import android.os.Build;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.os.SystemClock;
 import android.test.RenamingDelegatingContext;
@@ -32,7 +29,6 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.internal.util.HexDump;
 import com.android.server.LocalServices;
 import com.android.server.job.JobStore.JobSet;
 import com.android.server.job.controllers.JobStatus;
@@ -44,7 +40,6 @@ import org.junit.runner.RunWith;
 
 import java.time.Clock;
 import java.time.ZoneOffset;
-import java.util.Arrays;
 import java.util.Iterator;
 
 /**
@@ -143,15 +138,8 @@ public class JobStoreTest {
 
         assertEquals("Didn't get expected number of persisted tasks.", 1, jobStatusSet.size());
         final JobStatus loadedTaskStatus = jobStatusSet.getAllJobs().get(0);
-        assertTasksEqual(task, loadedTaskStatus.getJob());
+        assertJobsEqual(ts, loadedTaskStatus);
         assertTrue("JobStore#contains invalid.", mTaskStoreUnderTest.containsJob(ts));
-        assertEquals("Different uids.", SOME_UID, loadedTaskStatus.getUid());
-        assertEquals(JobStatus.INTERNAL_FLAG_HAS_FOREGROUND_EXEMPTION,
-                loadedTaskStatus.getInternalFlags());
-        compareTimestampsSubjectToIoLatency("Early run-times not the same after read.",
-                ts.getEarliestRunTime(), loadedTaskStatus.getEarliestRunTime());
-        compareTimestampsSubjectToIoLatency("Late run-times not the same after read.",
-                ts.getLatestRunTimeElapsed(), loadedTaskStatus.getLatestRunTimeElapsed());
     }
 
     @Test
@@ -202,19 +190,10 @@ public class JobStoreTest {
             loaded2 = tmp;
         }
 
-        assertTasksEqual(task1, loaded1.getJob());
-        assertTasksEqual(task2, loaded2.getJob());
+        assertJobsEqual(taskStatus1, loaded1);
+        assertJobsEqual(taskStatus2, loaded2);
         assertTrue("JobStore#contains invalid.", mTaskStoreUnderTest.containsJob(taskStatus1));
         assertTrue("JobStore#contains invalid.", mTaskStoreUnderTest.containsJob(taskStatus2));
-        // Check that the loaded task has the correct runtimes.
-        compareTimestampsSubjectToIoLatency("Early run-times not the same after read.",
-                taskStatus1.getEarliestRunTime(), loaded1.getEarliestRunTime());
-        compareTimestampsSubjectToIoLatency("Late run-times not the same after read.",
-                taskStatus1.getLatestRunTimeElapsed(), loaded1.getLatestRunTimeElapsed());
-        compareTimestampsSubjectToIoLatency("Early run-times not the same after read.",
-                taskStatus2.getEarliestRunTime(), loaded2.getEarliestRunTime());
-        compareTimestampsSubjectToIoLatency("Late run-times not the same after read.",
-                taskStatus2.getLatestRunTimeElapsed(), loaded2.getLatestRunTimeElapsed());
     }
 
     @Test
@@ -240,7 +219,7 @@ public class JobStoreTest {
         mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
         assertEquals("Incorrect # of persisted tasks.", 1, jobStatusSet.size());
         JobStatus loaded = jobStatusSet.getAllJobs().iterator().next();
-        assertTasksEqual(task, loaded.getJob());
+        assertJobsEqual(taskStatus, loaded);
     }
 
     @Test
@@ -544,71 +523,30 @@ public class JobStoreTest {
         final JobSet jobStatusSet = new JobSet();
         mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
         final JobStatus second = jobStatusSet.getAllJobs().iterator().next();
-        assertTasksEqual(first.getJob(), second.getJob());
+        assertJobsEqual(first, second);
     }
 
     /**
-     * Helper function to throw an error if the provided task and TaskStatus objects are not equal.
+     * Helper function to throw an error if the provided JobStatus objects are not equal.
      */
-    private void assertTasksEqual(JobInfo first, JobInfo second) {
-        assertEquals("Different task ids.", first.getId(), second.getId());
-        assertEquals("Different components.", first.getService(), second.getService());
-        assertEquals("Different periodic status.", first.isPeriodic(), second.isPeriodic());
-        assertEquals("Different period.", first.getIntervalMillis(), second.getIntervalMillis());
-        assertEquals("Different inital backoff.", first.getInitialBackoffMillis(),
-                second.getInitialBackoffMillis());
-        assertEquals("Different backoff policy.", first.getBackoffPolicy(),
-                second.getBackoffPolicy());
+    private void assertJobsEqual(JobStatus expected, JobStatus actual) {
+        assertEquals(expected.getJob(), actual.getJob());
 
-        assertEquals("Invalid charging constraint.", first.isRequireCharging(),
-                second.isRequireCharging());
-        assertEquals("Invalid battery not low constraint.", first.isRequireBatteryNotLow(),
-                second.isRequireBatteryNotLow());
-        assertEquals("Invalid idle constraint.", first.isRequireDeviceIdle(),
-                second.isRequireDeviceIdle());
-        assertEquals("Invalid network type.",
-                first.getNetworkType(), second.getNetworkType());
-        assertEquals("Invalid network.",
-                first.getRequiredNetwork(), second.getRequiredNetwork());
-        assertEquals("Download bytes don't match",
-                first.getEstimatedNetworkDownloadBytes(),
-                second.getEstimatedNetworkDownloadBytes());
-        assertEquals("Upload bytes don't match",
-                first.getEstimatedNetworkUploadBytes(),
-                second.getEstimatedNetworkUploadBytes());
-        assertEquals("Minimum chunk bytes don't match",
-                first.getMinimumNetworkChunkBytes(),
-                second.getMinimumNetworkChunkBytes());
-        assertEquals("Invalid deadline constraint.",
-                first.hasLateConstraint(),
-                second.hasLateConstraint());
-        assertEquals("Invalid delay constraint.",
-                first.hasEarlyConstraint(),
-                second.hasEarlyConstraint());
-        assertEquals("Extras don't match",
-                first.getExtras().toString(), second.getExtras().toString());
-        assertEquals("Transient xtras don't match",
-                first.getTransientExtras().toString(), second.getTransientExtras().toString());
+        // Source UID isn't persisted, but the rest of the app info is.
+        assertEquals("Source package not equal",
+                expected.getSourcePackageName(), actual.getSourcePackageName());
+        assertEquals("Source user not equal", expected.getSourceUserId(), actual.getSourceUserId());
+        assertEquals("Calling UID not equal", expected.getUid(), actual.getUid());
+        assertEquals("Calling user not equal", expected.getUserId(), actual.getUserId());
 
-        // Since people can forget to add tests here for new fields, do one last
-        // validity check based on bits-on-wire equality.
-        final byte[] firstBytes = marshall(first);
-        final byte[] secondBytes = marshall(second);
-        if (!Arrays.equals(firstBytes, secondBytes)) {
-            Log.w(TAG, "First: " + HexDump.dumpHexString(firstBytes));
-            Log.w(TAG, "Second: " + HexDump.dumpHexString(secondBytes));
-            fail("Raw JobInfo aren't equal; see logs for details");
-        }
-    }
+        assertEquals("Internal flags not equal",
+                expected.getInternalFlags(), actual.getInternalFlags());
 
-    private static byte[] marshall(Parcelable p) {
-        final Parcel parcel = Parcel.obtain();
-        try {
-            p.writeToParcel(parcel, 0);
-            return parcel.marshall();
-        } finally {
-            parcel.recycle();
-        }
+        // Check that the loaded task has the correct runtimes.
+        compareTimestampsSubjectToIoLatency("Early run-times not the same after read.",
+                expected.getEarliestRunTime(), actual.getEarliestRunTime());
+        compareTimestampsSubjectToIoLatency("Late run-times not the same after read.",
+                expected.getLatestRunTimeElapsed(), actual.getLatestRunTimeElapsed());
     }
 
     /**
@@ -623,5 +561,4 @@ public class JobStoreTest {
     }
 
     private static class StubClass {}
-
 }

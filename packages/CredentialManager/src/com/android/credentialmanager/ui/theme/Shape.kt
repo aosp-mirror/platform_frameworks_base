@@ -9,3 +9,8 @@ val Shapes = Shapes(
   medium = RoundedCornerShape(20.dp),
   large = RoundedCornerShape(0.dp)
 )
+
+object EntryShape {
+  val TopRoundedCorner = RoundedCornerShape(28.dp, 28.dp, 0.dp, 0.dp)
+  val FullRoundedCorner = RoundedCornerShape(28.dp, 28.dp, 28.dp, 28.dp)
+}

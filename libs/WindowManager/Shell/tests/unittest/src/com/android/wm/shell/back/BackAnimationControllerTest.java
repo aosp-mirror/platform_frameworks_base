@@ -38,6 +38,7 @@ import android.app.WindowConfiguration;
 import android.content.pm.ApplicationInfo;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteCallback;
@@ -56,6 +57,7 @@ import android.window.BackNavigationInfo;
 import android.window.IBackAnimationFinishedCallback;
 import android.window.IOnBackInvokedCallback;
 
+import androidx.annotation.Nullable;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
@@ -189,30 +191,22 @@ public class BackAnimationControllerTest extends ShellTestCase {
         }
 
         for (int type: testTypes) {
-            boolean[] backNavigationDone = new boolean[]{false};
-            boolean[] triggerBack = new boolean[]{false};
-
+            final ResultListener result  = new ResultListener();
             createNavigationInfo(new BackNavigationInfo.Builder()
                     .setType(type)
                     .setOnBackInvokedCallback(mAppCallback)
                     .setPrepareRemoteAnimation(true)
-                    .setOnBackNavigationDone(
-                            new RemoteCallback(result -> {
-                                backNavigationDone[0] = true;
-                                triggerBack[0] = result.getBoolean(KEY_TRIGGER_BACK);
-                            })));
+                    .setOnBackNavigationDone(new RemoteCallback(result)));
             triggerBackGesture();
             simulateRemoteAnimationStart(type);
             simulateRemoteAnimationFinished();
             mShellExecutor.flushAll();
 
             assertTrue("Navigation Done callback not called for "
-                    + BackNavigationInfo.typeToString(type), backNavigationDone[0]);
-            assertTrue("TriggerBack should have been true", triggerBack[0]);
+                    + BackNavigationInfo.typeToString(type), result.mBackNavigationDone);
+            assertTrue("TriggerBack should have been true", result.mTriggerBack);
         }
     }
-
-
 
     @Test
     public void backToHome_dispatchesEvents() throws RemoteException {
@@ -351,6 +345,65 @@ public class BackAnimationControllerTest extends ShellTestCase {
         verify(mAnimatorCallback, never()).onBackInvoked();
     }
 
+    @Test
+    public void animationNotDefined() throws RemoteException {
+        final int[] testTypes = new int[] {
+                BackNavigationInfo.TYPE_RETURN_TO_HOME,
+                BackNavigationInfo.TYPE_CROSS_TASK,
+                BackNavigationInfo.TYPE_CROSS_ACTIVITY,
+                BackNavigationInfo.TYPE_DIALOG_CLOSE};
+
+        for (int type: testTypes) {
+            final ResultListener result = new ResultListener();
+            createNavigationInfo(new BackNavigationInfo.Builder()
+                    .setType(type)
+                    .setOnBackInvokedCallback(mAppCallback)
+                    .setPrepareRemoteAnimation(true)
+                    .setOnBackNavigationDone(new RemoteCallback(result)));
+            triggerBackGesture();
+            simulateRemoteAnimationStart(type);
+            mShellExecutor.flushAll();
+
+            assertTrue("Navigation Done callback not called for "
+                    + BackNavigationInfo.typeToString(type), result.mBackNavigationDone);
+            assertTrue("TriggerBack should have been true", result.mTriggerBack);
+        }
+
+        verify(mAppCallback, never()).onBackStarted(any());
+        verify(mAppCallback, never()).onBackProgressed(any());
+        verify(mAppCallback, times(testTypes.length)).onBackInvoked();
+
+        verify(mAnimatorCallback, never()).onBackStarted(any());
+        verify(mAnimatorCallback, never()).onBackProgressed(any());
+        verify(mAnimatorCallback, never()).onBackInvoked();
+    }
+
+    @Test
+    public void callbackShouldDeliverProgress() throws RemoteException {
+        registerAnimation(BackNavigationInfo.TYPE_RETURN_TO_HOME);
+
+        final int type = BackNavigationInfo.TYPE_CALLBACK;
+        final ResultListener result = new ResultListener();
+        createNavigationInfo(new BackNavigationInfo.Builder()
+                .setType(type)
+                .setOnBackInvokedCallback(mAppCallback)
+                .setOnBackNavigationDone(new RemoteCallback(result)));
+        triggerBackGesture();
+        mShellExecutor.flushAll();
+
+        assertTrue("Navigation Done callback not called for "
+                + BackNavigationInfo.typeToString(type), result.mBackNavigationDone);
+        assertTrue("TriggerBack should have been true", result.mTriggerBack);
+
+        verify(mAppCallback, times(1)).onBackStarted(any());
+        verify(mAppCallback, times(1)).onBackProgressed(any());
+        verify(mAppCallback, times(1)).onBackInvoked();
+
+        verify(mAnimatorCallback, never()).onBackStarted(any());
+        verify(mAnimatorCallback, never()).onBackProgressed(any());
+        verify(mAnimatorCallback, never()).onBackInvoked();
+    }
+
     private void doMotionEvent(int actionDown, int coordinate) {
         mController.onMotionEvent(
                 coordinate, coordinate,
@@ -377,4 +430,14 @@ public class BackAnimationControllerTest extends ShellTestCase {
         mController.registerAnimation(type,
                 new BackAnimationRunner(mAnimatorCallback, mBackAnimationRunner));
     }
+
+    private static class ResultListener implements RemoteCallback.OnResultListener {
+        boolean mBackNavigationDone = false;
+        boolean mTriggerBack = false;
+        @Override
+        public void onResult(@Nullable Bundle result) {
+            mBackNavigationDone = true;
+            mTriggerBack = result.getBoolean(KEY_TRIGGER_BACK);
+        }
+    };
 }

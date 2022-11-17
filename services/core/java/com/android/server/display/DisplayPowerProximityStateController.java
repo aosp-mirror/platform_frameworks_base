@@ -30,6 +30,7 @@ import android.util.TimeUtils;
 import android.view.Display;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.display.utils.SensorUtils;
 
 import java.io.PrintWriter;
@@ -40,16 +41,22 @@ import java.io.PrintWriter;
  * state changes.
  */
 public final class DisplayPowerProximityStateController {
-    private static final int MSG_PROXIMITY_SENSOR_DEBOUNCED = 1;
+    @VisibleForTesting
+    static final int MSG_PROXIMITY_SENSOR_DEBOUNCED = 1;
+    @VisibleForTesting
+    static final int PROXIMITY_UNKNOWN = -1;
+    @VisibleForTesting
+    static final int PROXIMITY_POSITIVE = 1;
+    @VisibleForTesting
+    static final int PROXIMITY_SENSOR_POSITIVE_DEBOUNCE_DELAY = 0;
+
     private static final int MSG_IGNORE_PROXIMITY = 2;
 
-    private static final int PROXIMITY_UNKNOWN = -1;
     private static final int PROXIMITY_NEGATIVE = 0;
-    private static final int PROXIMITY_POSITIVE = 1;
 
     private static final boolean DEBUG_PRETEND_PROXIMITY_SENSOR_ABSENT = false;
     // Proximity sensor debounce delay in milliseconds for positive transitions.
-    private static final int PROXIMITY_SENSOR_POSITIVE_DEBOUNCE_DELAY = 0;
+
     // Proximity sensor debounce delay in milliseconds for negative transitions.
     private static final int PROXIMITY_SENSOR_NEGATIVE_DEBOUNCE_DELAY = 250;
     // Trigger proximity if distance is less than 5 cm.
@@ -66,12 +73,13 @@ public final class DisplayPowerProximityStateController {
     private final DisplayPowerProximityStateHandler mHandler;
     // A runnable to execute the utility to update the power state.
     private final Runnable mNudgeUpdatePowerState;
+    private Clock mClock;
     // A listener which listen's to the events emitted by the proximity sensor.
     private final SensorEventListener mProximitySensorListener = new SensorEventListener() {
         @Override
         public void onSensorChanged(SensorEvent event) {
             if (mProximitySensorEnabled) {
-                final long time = SystemClock.uptimeMillis();
+                final long time = mClock.uptimeMillis();
                 final float distance = event.values[0];
                 boolean positive = distance >= 0.0f && distance < mProximityThreshold;
                 handleProximitySensorEvent(time, positive);
@@ -147,7 +155,12 @@ public final class DisplayPowerProximityStateController {
     public DisplayPowerProximityStateController(
             WakelockController wakeLockController, DisplayDeviceConfig displayDeviceConfig,
             Looper looper,
-            Runnable nudgeUpdatePowerState, int displayId, SensorManager sensorManager) {
+            Runnable nudgeUpdatePowerState, int displayId, SensorManager sensorManager,
+            Injector injector) {
+        if (injector == null) {
+            injector = new Injector();
+        }
+        mClock = injector.createClock();
         mWakelockController = wakeLockController;
         mHandler = new DisplayPowerProximityStateHandler(looper);
         mNudgeUpdatePowerState = nudgeUpdatePowerState;
@@ -239,7 +252,6 @@ public final class DisplayPowerProximityStateController {
                 setProximitySensorEnabled(false);
                 mWaitingForNegativeProximity = false;
             }
-
             if (mScreenOffBecauseOfProximity
                     && (mProximity != PROXIMITY_POSITIVE || mIgnoreProximityUntilChanged)) {
                 // The screen *was* off due to prox being near, but now it's "far" so lets turn
@@ -313,7 +325,7 @@ public final class DisplayPowerProximityStateController {
                 + mSkipRampBecauseOfProximityChangeToNegative);
     }
 
-    private void ignoreProximitySensorUntilChangedInternal() {
+    void ignoreProximitySensorUntilChangedInternal() {
         if (!mIgnoreProximityUntilChanged
                 && mProximity == PROXIMITY_POSITIVE) {
             // Only ignore if it is still reporting positive (near)
@@ -414,7 +426,7 @@ public final class DisplayPowerProximityStateController {
         if (mProximitySensorEnabled
                 && mPendingProximity != PROXIMITY_UNKNOWN
                 && mPendingProximityDebounceTime >= 0) {
-            final long now = SystemClock.uptimeMillis();
+            final long now = mClock.uptimeMillis();
             if (mPendingProximityDebounceTime <= now) {
                 if (mProximity != mPendingProximity) {
                     // if the status of the sensor changed, stop ignoring.
@@ -473,4 +485,66 @@ public final class DisplayPowerProximityStateController {
         }
     }
 
+    @VisibleForTesting
+    boolean getPendingWaitForNegativeProximityLocked() {
+        synchronized (mLock) {
+            return mPendingWaitForNegativeProximityLocked;
+        }
+    }
+
+    @VisibleForTesting
+    boolean getWaitingForNegativeProximity() {
+        return mWaitingForNegativeProximity;
+    }
+
+    @VisibleForTesting
+    boolean shouldIgnoreProximityUntilChanged() {
+        return mIgnoreProximityUntilChanged;
+    }
+
+    boolean isProximitySensorEnabled() {
+        return mProximitySensorEnabled;
+    }
+
+    @VisibleForTesting
+    Handler getHandler() {
+        return mHandler;
+    }
+
+    @VisibleForTesting
+    int getPendingProximity() {
+        return mPendingProximity;
+    }
+
+    @VisibleForTesting
+    int getProximity() {
+        return mProximity;
+    }
+
+
+    @VisibleForTesting
+    long getPendingProximityDebounceTime() {
+        return mPendingProximityDebounceTime;
+    }
+
+    @VisibleForTesting
+    SensorEventListener getProximitySensorListener() {
+        return mProximitySensorListener;
+    }
+
+    /** Functional interface for providing time. */
+    @VisibleForTesting
+    interface Clock {
+        /**
+         * Returns current time in milliseconds since boot, not counting time spent in deep sleep.
+         */
+        long uptimeMillis();
+    }
+
+    @VisibleForTesting
+    static class Injector {
+        Clock createClock() {
+            return () -> SystemClock.uptimeMillis();
+        }
+    }
 }

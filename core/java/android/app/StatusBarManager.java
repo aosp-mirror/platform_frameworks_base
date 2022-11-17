@@ -229,6 +229,8 @@ public class StatusBarManager {
     public static final int CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP = 1;
     /** @hide */
     public static final int CAMERA_LAUNCH_SOURCE_LIFT_TRIGGER = 2;
+    /** @hide */
+    public static final int CAMERA_LAUNCH_SOURCE_QUICK_AFFORDANCE = 3;
 
     /**
      * Session flag for {@link #registerSessionListener} indicating the listener

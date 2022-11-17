@@ -120,7 +120,7 @@ final class ALSProbe implements Probe {
 
         // if a final consumer is set it will call destroy/disable on the next value if requested
         if (!mDestroyed && mNextConsumer == null) {
-            disableLightSensorLoggingLocked();
+            disableLightSensorLoggingLocked(false /* destroying */);
         }
     }
 
@@ -130,7 +130,7 @@ final class ALSProbe implements Probe {
 
         // if a final consumer is set it will call destroy/disable on the next value if requested
         if (!mDestroyed && mNextConsumer == null) {
-            disableLightSensorLoggingLocked();
+            disableLightSensorLoggingLocked(true /* destroying */);
             mDestroyed = true;
         }
     }
@@ -177,11 +177,10 @@ final class ALSProbe implements Probe {
         final float current = mLastAmbientLux;
         if (current > -1f) {
             nextConsumer.consume(current);
-        } else if (mDestroyed) {
-            nextConsumer.consume(-1f);
         } else if (mNextConsumer != null) {
             mNextConsumer.add(nextConsumer);
         } else {
+            mDestroyed = false;
             mNextConsumer = nextConsumer;
             enableLightSensorLoggingLocked();
         }
@@ -199,12 +198,14 @@ final class ALSProbe implements Probe {
         resetTimerLocked(true /* start */);
     }
 
-    private void disableLightSensorLoggingLocked() {
+    private void disableLightSensorLoggingLocked(boolean destroying) {
         resetTimerLocked(false /* start */);
 
         if (mEnabled) {
             mEnabled = false;
-            mLastAmbientLux = -1;
+            if (!destroying) {
+                mLastAmbientLux = -1;
+            }
             mSensorManager.unregisterListener(mLightSensorListener);
             Slog.v(TAG, "Disable ALS: " + mLightSensorListener.hashCode());
         }

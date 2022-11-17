@@ -26,6 +26,7 @@ object CredentialPasswordViewBinder {
         view: CredentialPasswordView,
         host: CredentialView.Host,
         viewModel: CredentialViewModel,
+        requestFocusForInput: Boolean,
     ) {
         val imeManager = view.context.getSystemService(InputMethodManager::class.java)!!
 
@@ -34,8 +35,10 @@ object CredentialPasswordViewBinder {
         val onBackInvokedCallback = OnBackInvokedCallback { host.onCredentialAborted() }
 
         view.repeatWhenAttached {
-            passwordField.requestFocus()
-            passwordField.scheduleShowSoftInput()
+            if (requestFocusForInput) {
+                passwordField.requestFocus()
+                passwordField.scheduleShowSoftInput()
+            }
 
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 // observe credential validation attempts and submit/cancel buttons
