@@ -18,6 +18,7 @@ package com.android.systemui.controls.management
 
 import android.app.ActivityOptions
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -33,21 +34,23 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.android.systemui.R
-import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.controls.CustomIconCache
 import com.android.systemui.controls.controller.ControlsControllerImpl
 import com.android.systemui.controls.controller.StructureInfo
 import com.android.systemui.controls.ui.ControlsActivity
 import com.android.systemui.controls.ui.ControlsUiController
-import com.android.systemui.settings.CurrentUserTracker
+import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.settings.UserTracker
+import java.util.concurrent.Executor
 import javax.inject.Inject
 
 /**
  * Activity for rearranging and removing controls for a given structure
  */
 open class ControlsEditingActivity @Inject constructor(
+    @Main private val mainExecutor: Executor,
     private val controller: ControlsControllerImpl,
-    private val broadcastDispatcher: BroadcastDispatcher,
+    private val userTracker: UserTracker,
     private val customIconCache: CustomIconCache,
     private val uiController: ControlsUiController
 ) : ComponentActivity() {
@@ -66,12 +69,12 @@ open class ControlsEditingActivity @Inject constructor(
     private lateinit var subtitle: TextView
     private lateinit var saveButton: View
 
-    private val currentUserTracker = object : CurrentUserTracker(broadcastDispatcher) {
+    private val userTrackerCallback: UserTracker.Callback = object : UserTracker.Callback {
         private val startingUser = controller.currentUserId
 
-        override fun onUserSwitched(newUserId: Int) {
-            if (newUserId != startingUser) {
-                stopTracking()
+        override fun onUserChanged(newUser: Int, userContext: Context) {
+            if (newUser != startingUser) {
+                userTracker.removeCallback(this)
                 finish()
             }
         }
@@ -104,7 +107,7 @@ open class ControlsEditingActivity @Inject constructor(
         super.onStart()
         setUpList()
 
-        currentUserTracker.startTracking()
+        userTracker.addCallback(userTrackerCallback, mainExecutor)
 
         if (DEBUG) {
             Log.d(TAG, "Registered onBackInvokedCallback")
@@ -115,7 +118,7 @@ open class ControlsEditingActivity @Inject constructor(
 
     override fun onStop() {
         super.onStop()
-        currentUserTracker.stopTracking()
+        userTracker.removeCallback(userTrackerCallback)
 
         if (DEBUG) {
             Log.d(TAG, "Unregistered onBackInvokedCallback")
@@ -248,7 +251,7 @@ open class ControlsEditingActivity @Inject constructor(
     }
 
     override fun onDestroy() {
-        currentUserTracker.stopTracking()
+        userTracker.removeCallback(userTrackerCallback)
         super.onDestroy()
     }
 }

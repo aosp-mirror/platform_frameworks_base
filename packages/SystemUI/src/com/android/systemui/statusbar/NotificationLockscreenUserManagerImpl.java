@@ -19,7 +19,6 @@ import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER
 
 import static com.android.systemui.DejankUtils.whitelistIpcs;
 
-import android.app.ActivityManager;
 import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.admin.DevicePolicyManager;
@@ -50,6 +49,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.recents.OverviewProxyService;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
@@ -93,6 +93,7 @@ public class NotificationLockscreenUserManagerImpl implements
     private final SparseBooleanArray mUsersInLockdownLatestResult = new SparseBooleanArray();
     private final SparseBooleanArray mShouldHideNotifsLatestResult = new SparseBooleanArray();
     private final UserManager mUserManager;
+    private final UserTracker mUserTracker;
     private final List<UserChangedListener> mListeners = new ArrayList<>();
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final NotificationClickNotifier mClickNotifier;
@@ -195,6 +196,7 @@ public class NotificationLockscreenUserManagerImpl implements
             BroadcastDispatcher broadcastDispatcher,
             DevicePolicyManager devicePolicyManager,
             UserManager userManager,
+            UserTracker userTracker,
             Lazy<NotificationVisibilityProvider> visibilityProviderLazy,
             Lazy<CommonNotifCollection> commonNotifCollectionLazy,
             NotificationClickNotifier clickNotifier,
@@ -210,7 +212,8 @@ public class NotificationLockscreenUserManagerImpl implements
         mMainHandler = mainHandler;
         mDevicePolicyManager = devicePolicyManager;
         mUserManager = userManager;
-        mCurrentUserId = ActivityManager.getCurrentUser();
+        mUserTracker = userTracker;
+        mCurrentUserId = mUserTracker.getUserId();
         mVisibilityProviderLazy = visibilityProviderLazy;
         mCommonNotifCollectionLazy = commonNotifCollectionLazy;
         mClickNotifier = clickNotifier;
@@ -295,7 +298,7 @@ public class NotificationLockscreenUserManagerImpl implements
         mContext.registerReceiver(mBaseBroadcastReceiver, internalFilter, PERMISSION_SELF, null,
                 Context.RECEIVER_EXPORTED_UNAUDITED);
 
-        mCurrentUserId = ActivityManager.getCurrentUser(); // in case we reg'd receiver too late
+        mCurrentUserId = mUserTracker.getUserId(); // in case we reg'd receiver too late
         updateCurrentProfilesCache();
 
         mSettingsObserver.onChange(false);  // set up

@@ -91,6 +91,32 @@ class NonInjectedServiceDetectorTest : SystemUILintDetectorTest() {
     }
 
     @Test
+    fun testSuppressGetServiceWithClass() {
+        lint()
+            .files(
+                TestFiles.java(
+                        """
+                        package test.pkg;
+                        import android.content.Context;
+                        import android.os.UserManager;
+
+                        public class TestClass {
+                            @SuppressLint("NonInjectedService")
+                            public void getSystemServiceWithoutDagger(Context context) {
+                                context.getSystemService(UserManager.class);
+                            }
+                        }
+                        """
+                    )
+                    .indented(),
+                *stubs
+            )
+            .issues(NonInjectedServiceDetector.ISSUE)
+            .run()
+            .expectClean()
+    }
+
+    @Test
     fun testGetAccountManager() {
         lint()
             .files(

@@ -548,6 +548,24 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                 options2, splitPosition, splitRatio, remoteTransition, instanceId);
     }
 
+    private void startIntentsWithLegacyTransition(PendingIntent pendingIntent1,
+            @Nullable Bundle options1, PendingIntent pendingIntent2,
+            @Nullable Bundle options2, @SplitPosition int splitPosition,
+            float splitRatio, RemoteAnimationAdapter adapter, InstanceId instanceId) {
+        Intent fillInIntent1 = null;
+        Intent fillInIntent2 = null;
+        if (launchSameComponentAdjacently(pendingIntent1, pendingIntent2)
+                && supportMultiInstancesSplit(pendingIntent1.getIntent().getComponent())) {
+            fillInIntent1 = new Intent();
+            fillInIntent1.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
+            fillInIntent2 = new Intent();
+            fillInIntent2.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
+        }
+        mStageCoordinator.startIntentsWithLegacyTransition(pendingIntent1, fillInIntent1, options1,
+                pendingIntent2, fillInIntent2, options2, splitPosition, splitRatio, adapter,
+                instanceId);
+    }
+
     @Override
     public void startIntent(PendingIntent intent, @Nullable Intent fillInIntent,
             @SplitPosition int position, @Nullable Bundle options) {
@@ -619,6 +637,12 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         final ComponentName pairedActivity = pairedTaskInfo != null
                 ? pairedTaskInfo.baseIntent.getComponent() : null;
         return Objects.equals(launchingActivity, pairedActivity);
+    }
+
+    private boolean launchSameComponentAdjacently(PendingIntent pendingIntent1,
+            PendingIntent pendingIntent2) {
+        return Objects.equals(pendingIntent1.getIntent().getComponent(),
+                pendingIntent2.getIntent().getComponent());
     }
 
     @VisibleForTesting
@@ -983,6 +1007,27 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                     (controller) -> controller.mStageCoordinator.startShortcutAndTask(shortcutInfo,
                             options1, taskId, options2, splitPosition, splitRatio, remoteTransition,
                             instanceId));
+        }
+
+        @Override
+        public void startIntentsWithLegacyTransition(PendingIntent pendingIntent1,
+                @Nullable Bundle options1, PendingIntent pendingIntent2, @Nullable Bundle options2,
+                @SplitPosition int splitPosition, float splitRatio, RemoteAnimationAdapter adapter,
+                InstanceId instanceId) {
+            executeRemoteCallWithTaskPermission(mController, "startIntentsWithLegacyTransition",
+                    (controller) ->
+                        controller.startIntentsWithLegacyTransition(
+                                pendingIntent1, options1, pendingIntent2, options2, splitPosition,
+                                splitRatio, adapter, instanceId)
+                    );
+        }
+
+        @Override
+        public void startIntents(PendingIntent pendingIntent1, @Nullable Bundle options1,
+                PendingIntent pendingIntent2, @Nullable Bundle options2,
+                @SplitPosition int splitPosition, float splitRatio,
+                @Nullable RemoteTransition remoteTransition, InstanceId instanceId) {
+            // TODO(b/259368992): To be implemented.
         }
 
         @Override

@@ -111,7 +111,7 @@ open class RippleView(context: Context?, attrs: AttributeSet?) : View(context, a
     /**
      * Set the color to be used for the ripple.
      *
-     * The alpha value of the color will be applied to the ripple. The alpha range is [0-100].
+     * The alpha value of the color will be applied to the ripple. The alpha range is [0-255].
      */
     fun setColor(color: Int, alpha: Int = RippleAnimationConfig.RIPPLE_DEFAULT_ALPHA) {
         rippleShader.color = ColorUtils.setAlphaComponent(color, alpha)

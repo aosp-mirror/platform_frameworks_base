@@ -62,7 +62,6 @@ import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -806,7 +805,6 @@ class MediaDataManagerTest : SysuiTestCase() {
             .onSmartspaceMediaDataLoaded(anyObject(), anyObject(), anyBoolean())
     }
 
-    @Ignore("b/229838140")
     @Test
     fun testMediaRecommendationDisabled_removesSmartspaceData() {
         // GIVEN a media recommendation card is present
@@ -823,7 +821,9 @@ class MediaDataManagerTest : SysuiTestCase() {
         tunableCaptor.value.onTuningChanged(Settings.Secure.MEDIA_CONTROLS_RECOMMENDATION, "0")
 
         // THEN listeners are notified
+        uiExecutor.advanceClockToLast()
         foregroundExecutor.advanceClockToLast()
+        uiExecutor.runAllReady()
         foregroundExecutor.runAllReady()
         verify(listener).onSmartspaceMediaDataRemoved(eq(KEY_MEDIA_SMARTSPACE), eq(true))
     }

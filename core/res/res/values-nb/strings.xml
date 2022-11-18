@@ -1156,7 +1156,7 @@
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Bytt inndatametode"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Lite ledig lagringsplass"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Enkelte systemfunksjoner fungerer muligens ikke slik de skal"</string>
-    <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Det er ikke nok lagringsplass for systemet. Kontrollér at du har 250 MB ledig plass, og start på nytt."</string>
+    <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Det er ikke nok lagringsplass for systemet. Kontroller at du har 250 MB ledig plass, og start på nytt."</string>
     <string name="app_running_notification_title" msgid="8985999749231486569">"<xliff:g id="APP_NAME">%1$s</xliff:g> kjører"</string>
     <string name="app_running_notification_text" msgid="5120815883400228566">"Trykk for å få mer informasjon eller for å stoppe appen."</string>
     <string name="ok" msgid="2646370155170753815">"OK"</string>
@@ -1688,7 +1688,7 @@
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"AV"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Vil du gi <xliff:g id="SERVICE">%1$s</xliff:g> full kontroll over enheten din?"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Full kontroll er passende for apper som hjelper deg med tilgjengelighetsbehov, men ikke for de fleste apper."</string>
-    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Se og kontrollér skjermen"</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Se og kontroller skjermen"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Den kan lese alt innhold på skjermen og vise innhold over andre apper."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Se og utfør handlinger"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Den kan spore kommunikasjonen din med en app eller maskinvaresensor og kommunisere med apper på dine vegne."</string>

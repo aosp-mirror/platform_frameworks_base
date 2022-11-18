@@ -27,11 +27,11 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.shade.NotificationPanelViewController
-import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.unfold.SysUIUnfoldComponent
 import com.android.systemui.unfold.config.UnfoldTransitionConfig
 import com.android.systemui.unfold.util.ScopedUnfoldTransitionProgressProvider
+import com.android.systemui.user.ui.viewmodel.StatusBarUserChipViewModel
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.view.ViewUtil
 import com.google.common.truth.Truth.assertThat
@@ -64,7 +64,7 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var configurationController: ConfigurationController
     @Mock
-    private lateinit var userSwitcherController: StatusBarUserSwitcherController
+    private lateinit var userChipViewModel: StatusBarUserChipViewModel
     @Mock
     private lateinit var viewUtil: ViewUtil
 
@@ -79,14 +79,13 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
         `when`(notificationPanelViewController.view).thenReturn(panelView)
         `when`(sysuiUnfoldComponent.getStatusBarMoveFromCenterAnimationController())
             .thenReturn(moveFromCenterAnimation)
-        // create the view on main thread as it requires main looper
+        // create the view and controller on main thread as it requires main looper
         InstrumentationRegistry.getInstrumentation().runOnMainSync {
             val parent = FrameLayout(mContext) // add parent to keep layout params
             view = LayoutInflater.from(mContext)
                 .inflate(R.layout.status_bar, parent, false) as PhoneStatusBarView
+            controller = createAndInitController(view)
         }
-
-        controller = createAndInitController(view)
     }
 
     @Test
@@ -106,7 +105,10 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
         val view = createViewMock()
         val argumentCaptor = ArgumentCaptor.forClass(OnPreDrawListener::class.java)
         unfoldConfig.isEnabled = true
-        controller = createAndInitController(view)
+        // create the controller on main thread as it requires main looper
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            controller = createAndInitController(view)
+        }
 
         verify(view.viewTreeObserver).addOnPreDrawListener(argumentCaptor.capture())
         argumentCaptor.value.onPreDraw()
@@ -126,7 +128,7 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
         return PhoneStatusBarViewController.Factory(
             Optional.of(sysuiUnfoldComponent),
             Optional.of(progressProvider),
-            userSwitcherController,
+            userChipViewModel,
             viewUtil,
             configurationController
         ).create(view, touchEventHandler).also {

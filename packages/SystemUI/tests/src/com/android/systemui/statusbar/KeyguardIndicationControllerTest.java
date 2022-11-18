@@ -32,10 +32,9 @@ import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewCont
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_DISCLOSURE;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_LOGOUT;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_OWNER_INFO;
-import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_RESTING;
+import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_PERSISTENT_UNLOCK_MESSAGE;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_TRANSIENT;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_TRUST;
-import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_USER_LOCKED;
 import static com.android.systemui.keyguard.ScreenLifecycle.SCREEN_OFF;
 import static com.android.systemui.keyguard.ScreenLifecycle.SCREEN_ON;
 import static com.android.systemui.keyguard.ScreenLifecycle.SCREEN_TURNING_ON;
@@ -831,31 +830,6 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void updateMonitor_listenerUpdatesIndication() {
-        createController();
-        String restingIndication = "Resting indication";
-        reset(mKeyguardUpdateMonitor);
-
-        mController.setVisible(true);
-        verifyIndicationMessage(INDICATION_TYPE_USER_LOCKED,
-                mContext.getString(com.android.internal.R.string.lockscreen_storage_locked));
-
-        reset(mRotateTextViewController);
-        when(mKeyguardUpdateMonitor.getUserHasTrust(anyInt())).thenReturn(true);
-        when(mKeyguardUpdateMonitor.isUserUnlocked(anyInt())).thenReturn(true);
-        mController.setRestingIndication(restingIndication);
-        verifyHideIndication(INDICATION_TYPE_USER_LOCKED);
-        verifyIndicationMessage(INDICATION_TYPE_RESTING, restingIndication);
-
-        reset(mRotateTextViewController);
-        reset(mKeyguardUpdateMonitor);
-        when(mKeyguardUpdateMonitor.isUserUnlocked(anyInt())).thenReturn(true);
-        when(mKeyguardUpdateMonitor.getUserHasTrust(anyInt())).thenReturn(false);
-        mKeyguardStateControllerCallback.onUnlockedChanged();
-        verifyIndicationMessage(INDICATION_TYPE_RESTING, restingIndication);
-    }
-
-    @Test
     public void onRefreshBatteryInfo_computesChargingTime() throws RemoteException {
         createController();
         BatteryStatus status = new BatteryStatus(BatteryManager.BATTERY_STATUS_CHARGING,
@@ -1488,6 +1462,44 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         onFaceLockoutError("second lockout");
 
         verifyIndicationShown(INDICATION_TYPE_BIOMETRIC_MESSAGE, "second lockout");
+    }
+
+    @Test
+    public void onFpLockoutStateChanged_whenFpIsLockedOut_showsPersistentMessage() {
+        createController();
+        mController.setVisible(true);
+        when(mKeyguardUpdateMonitor.isFingerprintLockedOut()).thenReturn(true);
+
+        mKeyguardUpdateMonitorCallback.onLockedOutStateChanged(BiometricSourceType.FINGERPRINT);
+
+        verifyIndicationShown(INDICATION_TYPE_PERSISTENT_UNLOCK_MESSAGE,
+                mContext.getString(R.string.keyguard_unlock));
+    }
+
+    @Test
+    public void onFpLockoutStateChanged_whenFpIsNotLockedOut_showsPersistentMessage() {
+        createController();
+        mController.setVisible(true);
+        clearInvocations(mRotateTextViewController);
+        when(mKeyguardUpdateMonitor.isFingerprintLockedOut()).thenReturn(false);
+
+        mKeyguardUpdateMonitorCallback.onLockedOutStateChanged(BiometricSourceType.FINGERPRINT);
+
+        verifyHideIndication(INDICATION_TYPE_PERSISTENT_UNLOCK_MESSAGE);
+    }
+
+    @Test
+    public void onVisibilityChange_showsPersistentMessage_ifFpIsLockedOut() {
+        createController();
+        mController.setVisible(false);
+        when(mKeyguardUpdateMonitor.isFingerprintLockedOut()).thenReturn(true);
+        mKeyguardUpdateMonitorCallback.onLockedOutStateChanged(BiometricSourceType.FINGERPRINT);
+        clearInvocations(mRotateTextViewController);
+
+        mController.setVisible(true);
+
+        verifyIndicationShown(INDICATION_TYPE_PERSISTENT_UNLOCK_MESSAGE,
+                mContext.getString(R.string.keyguard_unlock));
     }
 
     @Test

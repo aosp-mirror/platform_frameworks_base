@@ -16,10 +16,8 @@
 
 package com.android.systemui.qs.footer.domain.interactor
 
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.os.UserHandle
 import android.provider.Settings
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
@@ -30,17 +28,13 @@ import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.animation.Expandable
-import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.globalactions.GlobalActionsDialogLite
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.qs.QSSecurityFooterUtils
 import com.android.systemui.qs.footer.FooterActionsTestUtils
-import com.android.systemui.qs.user.UserSwitchDialogController
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.truth.correspondence.FakeUiEvent
 import com.android.systemui.truth.correspondence.LogMaker
-import com.android.systemui.user.UserSwitcherActivity
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.eq
@@ -155,55 +149,5 @@ class FooterActionsInteractorTest : SysuiTestCase() {
 
         // We only unlock the device.
         verify(activityStarter).postQSRunnableDismissingKeyguard(any())
-    }
-
-    @Test
-    fun showUserSwitcher_fullScreenDisabled() {
-        val featureFlags = FakeFeatureFlags().apply { set(Flags.FULL_SCREEN_USER_SWITCHER, false) }
-        val userSwitchDialogController = mock<UserSwitchDialogController>()
-        val underTest =
-            utils.footerActionsInteractor(
-                featureFlags = featureFlags,
-                userSwitchDialogController = userSwitchDialogController,
-            )
-
-        val expandable = mock<Expandable>()
-        underTest.showUserSwitcher(context, expandable)
-
-        // Dialog is shown.
-        verify(userSwitchDialogController).showDialog(context, expandable)
-    }
-
-    @Test
-    fun showUserSwitcher_fullScreenEnabled() {
-        val featureFlags = FakeFeatureFlags().apply { set(Flags.FULL_SCREEN_USER_SWITCHER, true) }
-        val activityStarter = mock<ActivityStarter>()
-        val underTest =
-            utils.footerActionsInteractor(
-                featureFlags = featureFlags,
-                activityStarter = activityStarter,
-            )
-
-        // The clicked expandable.
-        val expandable = mock<Expandable>()
-        underTest.showUserSwitcher(context, expandable)
-
-        // Dialog is shown.
-        val intentCaptor = argumentCaptor<Intent>()
-        verify(activityStarter)
-            .startActivity(
-                intentCaptor.capture(),
-                /* dismissShade= */ eq(true),
-                /* ActivityLaunchAnimator.Controller= */ nullable(),
-                /* showOverLockscreenWhenLocked= */ eq(true),
-                eq(UserHandle.SYSTEM),
-            )
-        assertThat(intentCaptor.value.component)
-            .isEqualTo(
-                ComponentName(
-                    context,
-                    UserSwitcherActivity::class.java,
-                )
-            )
     }
 }
