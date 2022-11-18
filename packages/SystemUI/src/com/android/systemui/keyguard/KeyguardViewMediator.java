@@ -895,25 +895,32 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                 @NonNull
                 @Override
                 public LaunchAnimator.State createAnimatorState() {
-                    final int width = getLaunchContainer().getWidth();
-                    final int height = getLaunchContainer().getHeight();
-
-                    final float initialHeight = height / 3f;
-                    final float initialWidth = width / 3f;
+                    final int fullWidth = getLaunchContainer().getWidth();
+                    final int fullHeight = getLaunchContainer().getHeight();
 
                     if (mUpdateMonitor.isSecureCameraLaunchedOverKeyguard()) {
+                        final float initialHeight = fullHeight / 3f;
+                        final float initialWidth = fullWidth / 3f;
+
                         // Start the animation near the power button, at one-third size, since the
                         // camera was launched from the power button.
                         return new LaunchAnimator.State(
                                 (int) (mPowerButtonY - initialHeight / 2f) /* top */,
                                 (int) (mPowerButtonY + initialHeight / 2f) /* bottom */,
-                                (int) (width - initialWidth) /* left */,
-                                width /* right */,
+                                (int) (fullWidth - initialWidth) /* left */,
+                                fullWidth /* right */,
                                 mWindowCornerRadius, mWindowCornerRadius);
                     } else {
-                        // Start the animation in the center of the screen, scaled down.
+                        final float initialHeight = fullHeight / 2f;
+                        final float initialWidth = fullWidth / 2f;
+
+                        // Start the animation in the center of the screen, scaled down to half
+                        // size.
                         return new LaunchAnimator.State(
-                                height / 2, height / 2, width / 2, width / 2,
+                                (int) (fullHeight - initialHeight) / 2,
+                                (int) (initialHeight + (fullHeight - initialHeight) / 2),
+                                (int) (fullWidth - initialWidth) / 2,
+                                (int) (initialWidth + (fullWidth - initialWidth) / 2),
                                 mWindowCornerRadius, mWindowCornerRadius);
                     }
                 }
