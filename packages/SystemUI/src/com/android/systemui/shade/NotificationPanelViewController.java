@@ -680,7 +680,7 @@ public final class NotificationPanelViewController implements Dumpable {
     };
     private final Runnable mMaybeHideExpandedRunnable = () -> {
         if (getExpansionFraction() == 0.0f) {
-            getView().post(mHideExpandedRunnable);
+            postToView(mHideExpandedRunnable);
         }
     };
 
@@ -2815,7 +2815,7 @@ public final class NotificationPanelViewController implements Dumpable {
             return top + mNotificationStackScrollLayoutController.getHeight()
                     + mSplitShadeNotificationsScrimMarginBottom;
         } else {
-            return getView().getBottom();
+            return mView.getBottom();
         }
     }
 
@@ -2830,7 +2830,7 @@ public final class NotificationPanelViewController implements Dumpable {
 
     private int calculateRightQsClippingBound() {
         if (mIsFullWidth) {
-            return getView().getRight() + mDisplayRightInset;
+            return mView.getRight() + mDisplayRightInset;
         } else {
             return mNotificationStackScrollLayoutController.getRight();
         }
@@ -5193,6 +5193,26 @@ public final class NotificationPanelViewController implements Dumpable {
     public ViewGroup getView() {
         // TODO(b/254878364): remove this method, or at least reduce references to it.
         return mView;
+    }
+
+    /** */
+    public boolean postToView(Runnable action) {
+        return mView.post(action);
+    }
+
+    /** */
+    public boolean sendInterceptTouchEventToView(MotionEvent event) {
+        return mView.onInterceptTouchEvent(event);
+    }
+
+    /** */
+    public void requestLayoutOnView() {
+        mView.requestLayout();
+    }
+
+    /** */
+    public void resetViewAlphas() {
+        ViewGroupFadeHelper.reset(mView);
     }
 
     private void beginJankMonitoring() {

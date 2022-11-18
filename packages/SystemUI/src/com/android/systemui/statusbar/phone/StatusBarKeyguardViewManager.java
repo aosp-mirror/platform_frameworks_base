@@ -78,7 +78,6 @@ import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
-import com.android.systemui.statusbar.notification.ViewGroupFadeHelper;
 import com.android.systemui.statusbar.phone.KeyguardBouncer.PrimaryBouncerExpansionCallback;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -1017,7 +1016,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     public void onKeyguardFadedAway() {
         mNotificationContainer.postDelayed(() -> mNotificationShadeWindowController
                         .setKeyguardFadingAway(false), 100);
-        ViewGroupFadeHelper.reset(mNotificationPanelViewController.getView());
+        mNotificationPanelViewController.resetViewAlphas();
         mCentralSurfaces.finishKeyguardFadingAway();
         mBiometricUnlockController.finishKeyguardFadingAway();
         WindowManagerGlobal.getInstance().trimMemory(
