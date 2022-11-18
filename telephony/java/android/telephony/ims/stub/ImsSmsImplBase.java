@@ -28,6 +28,7 @@ import android.util.Log;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.concurrent.Executor;
 
 /**
  * Base implementation for SMS over IMS.
@@ -129,6 +130,22 @@ public class ImsSmsImplBase {
     // Lock for feature synchronization
     private final Object mLock = new Object();
     private IImsSmsListener mListener;
+    private Executor mExecutor;
+
+    /**
+     * Create a new ImsSmsImplBase using the Executor set in MmTelFeature
+     */
+    public ImsSmsImplBase() {
+    }
+
+    /**
+     * Create a new ImsSmsImplBase with specified executor.
+     * <p>
+     * @param executor Default executor for ImsSmsImplBase
+     */
+    public ImsSmsImplBase(@NonNull Executor executor) {
+        mExecutor = executor;
+    }
 
     /**
      * Registers a listener responsible for handling tasks like delivering messages.
@@ -481,5 +498,30 @@ public class ImsSmsImplBase {
      */
     public void onReady() {
         // Base Implementation - Should be overridden
+    }
+
+    /**
+     * Set default Executor for ImsSmsImplBase.
+     *
+     * @param executor The default executor for the framework to use when executing the methods
+     * overridden by the implementation of ImsSms.
+     * @hide
+     */
+    public final void setDefaultExecutor(@NonNull Executor executor) {
+        if (mExecutor == null) {
+            mExecutor = executor;
+        }
+    }
+
+    /**
+     * Get Executor from ImsSmsImplBase.
+     * If there is no settings for the executor, all ImsSmsImplBase method calls will use
+     * Runnable::run as default
+     *
+     * @return an Executor used to execute methods in ImsSms called remotely by the framework.
+     * @hide
+     */
+    public @NonNull Executor getExecutor() {
+        return mExecutor != null ? mExecutor : Runnable::run;
     }
 }

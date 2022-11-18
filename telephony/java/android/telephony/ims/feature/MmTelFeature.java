@@ -75,8 +75,10 @@ public class MmTelFeature extends ImsFeature {
 
     private static final String LOG_TAG = "MmTelFeature";
     private Executor mExecutor;
+    private ImsSmsImplBase mSmsImpl;
 
     /**
+     * Creates a new MmTelFeature using the Executor set in {@link ImsService#getExecutor}
      * @hide
      */
     @SystemApi
@@ -258,50 +260,54 @@ public class MmTelFeature extends ImsFeature {
         @Override
         public void setSmsListener(IImsSmsListener l) {
             executeMethodAsyncNoException(() -> MmTelFeature.this.setSmsListener(l),
-                    "setSmsListener");
+                    "setSmsListener", getImsSmsImpl().getExecutor());
         }
 
         @Override
         public void sendSms(int token, int messageRef, String format, String smsc, boolean retry,
                 byte[] pdu) {
             executeMethodAsyncNoException(() -> MmTelFeature.this
-                    .sendSms(token, messageRef, format, smsc, retry, pdu), "sendSms");
+                    .sendSms(token, messageRef, format, smsc, retry, pdu), "sendSms",
+                    getImsSmsImpl().getExecutor());
         }
 
         @Override
         public void onMemoryAvailable(int token) {
             executeMethodAsyncNoException(() -> MmTelFeature.this
-                    .onMemoryAvailable(token), "onMemoryAvailable");
+                    .onMemoryAvailable(token), "onMemoryAvailable", getImsSmsImpl().getExecutor());
         }
 
         @Override
         public void acknowledgeSms(int token, int messageRef, int result) {
             executeMethodAsyncNoException(() -> MmTelFeature.this
-                    .acknowledgeSms(token, messageRef, result), "acknowledgeSms");
+                    .acknowledgeSms(token, messageRef, result), "acknowledgeSms",
+                    getImsSmsImpl().getExecutor());
         }
 
         @Override
         public void acknowledgeSmsWithPdu(int token, int messageRef, int result, byte[] pdu) {
             executeMethodAsyncNoException(() -> MmTelFeature.this
-                    .acknowledgeSms(token, messageRef, result, pdu), "acknowledgeSms");
+                    .acknowledgeSms(token, messageRef, result, pdu), "acknowledgeSms",
+                    getImsSmsImpl().getExecutor());
         }
 
         @Override
         public void acknowledgeSmsReport(int token, int messageRef, int result) {
             executeMethodAsyncNoException(() -> MmTelFeature.this
-                    .acknowledgeSmsReport(token, messageRef, result), "acknowledgeSmsReport");
+                    .acknowledgeSmsReport(token, messageRef, result), "acknowledgeSmsReport",
+                    getImsSmsImpl().getExecutor());
         }
 
         @Override
         public String getSmsFormat() {
             return executeMethodAsyncForResultNoException(() -> MmTelFeature.this
-                    .getSmsFormat(), "getSmsFormat");
+                    .getSmsFormat(), "getSmsFormat", getImsSmsImpl().getExecutor());
         }
 
         @Override
         public void onSmsReady() {
             executeMethodAsyncNoException(() -> MmTelFeature.this.onSmsReady(),
-                    "onSmsReady");
+                    "onSmsReady", getImsSmsImpl().getExecutor());
         }
 
         @Override
@@ -336,6 +342,19 @@ public class MmTelFeature extends ImsFeature {
                     () -> MmTelFeature.this.notifySrvccCanceled(), "notifySrvccCanceled");
         }
 
+        @Override
+        public void setTerminalBasedCallWaitingStatus(boolean enabled) throws RemoteException {
+            synchronized (mLock) {
+                try {
+                    MmTelFeature.this.setTerminalBasedCallWaitingStatus(enabled);
+                } catch (ServiceSpecificException se) {
+                    throw new ServiceSpecificException(se.errorCode, se.getMessage());
+                } catch (Exception e) {
+                    throw new RemoteException(e.getMessage());
+                }
+            }
+        }
+
         // Call the methods with a clean calling identity on the executor and wait indefinitely for
         // the future to return.
         private void executeMethodAsync(Runnable r, String errorLogName) throws RemoteException {
@@ -353,6 +372,17 @@ public class MmTelFeature extends ImsFeature {
             try {
                 CompletableFuture.runAsync(
                         () -> TelephonyUtils.runWithCleanCallingIdentity(r), mExecutor).join();
+            } catch (CancellationException | CompletionException e) {
+                Log.w(LOG_TAG, "MmTelFeature Binder - " + errorLogName + " exception: "
+                        + e.getMessage());
+            }
+        }
+
+        private void executeMethodAsyncNoException(Runnable r, String errorLogName,
+                Executor executor) {
+            try {
+                CompletableFuture.runAsync(
+                        () -> TelephonyUtils.runWithCleanCallingIdentity(r), executor).join();
             } catch (CancellationException | CompletionException e) {
                 Log.w(LOG_TAG, "MmTelFeature Binder - " + errorLogName + " exception: "
                         + e.getMessage());
@@ -385,16 +415,16 @@ public class MmTelFeature extends ImsFeature {
             }
         }
 
-        @Override
-        public void setTerminalBasedCallWaitingStatus(boolean enabled) throws RemoteException {
-            synchronized (mLock) {
-                try {
-                    MmTelFeature.this.setTerminalBasedCallWaitingStatus(enabled);
-                } catch (ServiceSpecificException se) {
-                    throw new ServiceSpecificException(se.errorCode, se.getMessage());
-                } catch (Exception e) {
-                    throw new RemoteException(e.getMessage());
-                }
+        private <T> T executeMethodAsyncForResultNoException(Supplier<T> r,
+                String errorLogName, Executor executor) {
+            CompletableFuture<T> future = CompletableFuture.supplyAsync(
+                    () -> TelephonyUtils.runWithCleanCallingIdentity(r), executor);
+            try {
+                return future.get();
+            } catch (ExecutionException | InterruptedException e) {
+                Log.w(LOG_TAG, "MmTelFeature Binder - " + errorLogName + " exception: "
+                        + e.getMessage());
+                return null;
             }
         }
     };
@@ -996,6 +1026,19 @@ public class MmTelFeature extends ImsFeature {
     }
 
     /**
+     * @hide
+     */
+    public @NonNull ImsSmsImplBase getImsSmsImpl() {
+        synchronized (mLock) {
+            if (mSmsImpl == null) {
+                mSmsImpl = getSmsImplementation();
+                mSmsImpl.setDefaultExecutor(mExecutor);
+            }
+            return mSmsImpl;
+        }
+    }
+
+    /**
      * @return The {@link ImsUtImplBase} Ut interface implementation for the supplementary service
      * configuration.
      * @hide
@@ -1143,35 +1186,35 @@ public class MmTelFeature extends ImsFeature {
     }
 
     private void setSmsListener(IImsSmsListener listener) {
-        getSmsImplementation().registerSmsListener(listener);
+        getImsSmsImpl().registerSmsListener(listener);
     }
 
     private void sendSms(int token, int messageRef, String format, String smsc, boolean isRetry,
             byte[] pdu) {
-        getSmsImplementation().sendSms(token, messageRef, format, smsc, isRetry, pdu);
+        getImsSmsImpl().sendSms(token, messageRef, format, smsc, isRetry, pdu);
     }
 
     private void onMemoryAvailable(int token) {
-        getSmsImplementation().onMemoryAvailable(token);
+        getImsSmsImpl().onMemoryAvailable(token);
     }
 
     private void acknowledgeSms(int token, int messageRef,
             @ImsSmsImplBase.DeliverStatusResult int result) {
-        getSmsImplementation().acknowledgeSms(token, messageRef, result);
+        getImsSmsImpl().acknowledgeSms(token, messageRef, result);
     }
 
     private void acknowledgeSms(int token, int messageRef,
             @ImsSmsImplBase.DeliverStatusResult int result, byte[] pdu) {
-        getSmsImplementation().acknowledgeSms(token, messageRef, result, pdu);
+        getImsSmsImpl().acknowledgeSms(token, messageRef, result, pdu);
     }
 
     private void acknowledgeSmsReport(int token, int messageRef,
             @ImsSmsImplBase.StatusReportResult int result) {
-        getSmsImplementation().acknowledgeSmsReport(token, messageRef, result);
+        getImsSmsImpl().acknowledgeSmsReport(token, messageRef, result);
     }
 
     private void onSmsReady() {
-        getSmsImplementation().onReady();
+        getImsSmsImpl().onReady();
     }
 
     /**
@@ -1188,7 +1231,7 @@ public class MmTelFeature extends ImsFeature {
     }
 
     private String getSmsFormat() {
-        return getSmsImplementation().getSmsFormat();
+        return getImsSmsImpl().getSmsFormat();
     }
 
     /**
