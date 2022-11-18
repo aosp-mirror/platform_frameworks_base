@@ -24,12 +24,10 @@ import com.android.systemui.dagger.qualifiers.Main;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.Executor;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -57,21 +55,10 @@ public class Monitor {
         }
 
         public void update() {
-            // Only consider set conditions.
-            final Collection<Condition> setConditions = mSubscription.mConditions.stream()
-                    .filter(Condition::isConditionSet).collect(Collectors.toSet());
-
-            // Overriding conditions do not override each other
-            final Collection<Condition> overridingConditions = setConditions.stream()
-                    .filter(Condition::isOverridingCondition).collect(Collectors.toSet());
-
-            final Collection<Condition> targetCollection = overridingConditions.isEmpty()
-                    ? setConditions : overridingConditions;
-
-            final boolean newAllConditionsMet = targetCollection.isEmpty() ? true : targetCollection
-                    .stream()
-                    .map(Condition::isConditionMet)
-                    .allMatch(conditionMet -> conditionMet);
+            final Boolean result = Evaluator.INSTANCE.evaluate(mSubscription.mConditions,
+                    Evaluator.OP_AND);
+            // Consider unknown (null) as true
+            final boolean newAllConditionsMet = result == null || result;
 
             if (mAllConditionsMet != null && newAllConditionsMet == mAllConditionsMet) {
                 return;
@@ -109,6 +96,7 @@ public class Monitor {
 
     /**
      * Registers a callback and the set of conditions to trigger it.
+     *
      * @param subscription A {@link Subscription} detailing the desired conditions and callback.
      * @return A {@link Subscription.Token} that can be used to remove the subscription.
      */
@@ -139,6 +127,7 @@ public class Monitor {
 
     /**
      * Removes a subscription from participating in future callbacks.
+     *
      * @param token The {@link Subscription.Token} returned when the {@link Subscription} was
      *              originally added.
      */
@@ -179,7 +168,9 @@ public class Monitor {
         private final Set<Condition> mConditions;
         private final Callback mCallback;
 
-        /** */
+        /**
+         *
+         */
         public Subscription(Set<Condition> conditions, Callback callback) {
             this.mConditions = Collections.unmodifiableSet(conditions);
             this.mCallback = callback;
@@ -209,7 +200,6 @@ public class Monitor {
 
             /**
              * Default constructor specifying the {@link Callback} for the {@link Subscription}.
-             * @param callback
              */
             public Builder(Callback callback) {
                 mCallback = callback;
@@ -218,7 +208,7 @@ public class Monitor {
 
             /**
              * Adds a {@link Condition} to be associated with the {@link Subscription}.
-             * @param condition
+             *
              * @return The updated {@link Builder}.
              */
             public Builder addCondition(Condition condition) {
@@ -228,7 +218,7 @@ public class Monitor {
 
             /**
              * Adds a set of {@link Condition} to be associated with the {@link Subscription}.
-             * @param condition
+             *
              * @return The updated {@link Builder}.
              */
             public Builder addConditions(Set<Condition> condition) {
@@ -238,6 +228,7 @@ public class Monitor {
 
             /**
              * Builds the {@link Subscription}.
+             *
              * @return The resulting {@link Subscription}.
              */
             public Subscription build() {
