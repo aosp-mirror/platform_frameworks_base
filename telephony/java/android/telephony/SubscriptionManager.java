@@ -2141,7 +2141,7 @@ public class SubscriptionManager {
         try {
             ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
-                subId = iSub.getSubId(slotIndex);
+                subId = iSub.getSubIds(slotIndex);
             }
         } catch (RemoteException ex) {
             // ignore it
