@@ -1324,7 +1324,7 @@ public class WallpaperManager {
      * wallpaper component. Otherwise, if the wallpaper is a static image, this returns null.
      */
     public WallpaperInfo getWallpaperInfo() {
-        return getWallpaperInfo(mContext.getUserId());
+        return getWallpaperInfoForUser(mContext.getUserId());
     }
 
     /**
@@ -1334,7 +1334,7 @@ public class WallpaperManager {
      * @param userId Owner of the wallpaper.
      * @hide
      */
-    public WallpaperInfo getWallpaperInfo(int userId) {
+    public WallpaperInfo getWallpaperInfoForUser(int userId) {
         try {
             if (sGlobals.mService == null) {
                 Log.w(TAG, "WallpaperService not running");
@@ -1349,25 +1349,31 @@ public class WallpaperManager {
 
     /**
      * Returns the information about the home screen wallpaper if its current wallpaper is a live
-     * wallpaper component. Otherwise, if the wallpaper is a static image, this returns null.
+     * wallpaper component. Otherwise, if the wallpaper is a static image or is not set, this
+     * returns null.
      *
-     * @param which Specifies wallpaper destination (home or lock).
+     * @param which Specifies wallpaper to request (home or lock).
+     * @throws IllegalArgumentException if {@code which} is not exactly one of
+     * {{@link #FLAG_SYSTEM},{@link #FLAG_LOCK}}.
      * @hide
      */
-    public WallpaperInfo getWallpaperInfoWithFlags(@SetWallpaperFlags int which) {
+    public WallpaperInfo getWallpaperInfo(@SetWallpaperFlags int which) {
         return getWallpaperInfo();
     }
 
     /**
      * Returns the information about the designated wallpaper if its current wallpaper is a live
-     * wallpaper component. Otherwise, if the wallpaper is a static image, this returns null.
+     * wallpaper component. Otherwise, if the wallpaper is a static image or is not set, this
+     * returns null.
      *
-     * @param which Specifies wallpaper destination (home or lock).
+     * @param which Specifies wallpaper to request (home or lock).
      * @param userId Owner of the wallpaper.
+     * @throws IllegalArgumentException if {@code which} is not exactly one of
+     * {{@link #FLAG_SYSTEM},{@link #FLAG_LOCK}}.
      * @hide
      */
-    public WallpaperInfo getWallpaperInfoWithFlags(@SetWallpaperFlags int which, int userId) {
-        return getWallpaperInfo(userId);
+    public WallpaperInfo getWallpaperInfo(@SetWallpaperFlags int which, int userId) {
+        return getWallpaperInfoForUser(userId);
     }
 
     /**
