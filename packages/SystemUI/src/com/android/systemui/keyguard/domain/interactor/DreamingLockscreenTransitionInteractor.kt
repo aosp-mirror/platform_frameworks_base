@@ -21,12 +21,14 @@ import com.android.systemui.animation.Interpolators
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
+import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionInfo
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 @SysUISingleton
@@ -37,32 +39,43 @@ constructor(
     private val keyguardInteractor: KeyguardInteractor,
     private val keyguardTransitionRepository: KeyguardTransitionRepository,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
-) : TransitionInteractor("DREAMING<->LOCKSCREEN") {
+) : TransitionInteractor(DreamingLockscreenTransitionInteractor::class.simpleName!!) {
 
     override fun start() {
         scope.launch {
             keyguardInteractor.isDreaming
-                .sample(keyguardTransitionInteractor.finishedKeyguardState, { a, b -> Pair(a, b) })
-                .collect { pair ->
-                    val (isDreaming, keyguardState) = pair
-                    if (isDreaming && keyguardState == KeyguardState.LOCKSCREEN) {
-                        keyguardTransitionRepository.startTransition(
-                            TransitionInfo(
-                                name,
-                                KeyguardState.LOCKSCREEN,
-                                KeyguardState.DREAMING,
-                                getAnimator(),
+                .sample(
+                    combine(
+                        keyguardInteractor.dozeTransitionModel,
+                        keyguardTransitionInteractor.finishedKeyguardState
+                    ) { a, b -> Pair(a, b) },
+                    { a, bc -> Triple(a, bc.first, bc.second) }
+                )
+                .collect { triple ->
+                    val (isDreaming, dozeTransitionModel, keyguardState) = triple
+                    // Dozing/AOD and dreaming have overlapping events. If the state remains in
+                    // FINISH, it means that doze mode is not running and DREAMING is ok to
+                    // commence.
+                    if (dozeTransitionModel.to == DozeStateModel.FINISH) {
+                        if (isDreaming && keyguardState == KeyguardState.LOCKSCREEN) {
+                            keyguardTransitionRepository.startTransition(
+                                TransitionInfo(
+                                    name,
+                                    KeyguardState.LOCKSCREEN,
+                                    KeyguardState.DREAMING,
+                                    getAnimator(),
+                                )
                             )
-                        )
-                    } else if (!isDreaming && keyguardState == KeyguardState.DREAMING) {
-                        keyguardTransitionRepository.startTransition(
-                            TransitionInfo(
-                                name,
-                                KeyguardState.DREAMING,
-                                KeyguardState.LOCKSCREEN,
-                                getAnimator(),
+                        } else if (!isDreaming && keyguardState == KeyguardState.DREAMING) {
+                            keyguardTransitionRepository.startTransition(
+                                TransitionInfo(
+                                    name,
+                                    KeyguardState.DREAMING,
+                                    KeyguardState.LOCKSCREEN,
+                                    getAnimator(),
+                                )
                             )
-                        )
+                        }
                     }
                 }
         }
