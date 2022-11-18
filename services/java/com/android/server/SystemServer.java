@@ -466,6 +466,7 @@ public final class SystemServer implements Dumpable {
     private final long mRuntimeStartUptime;
 
     private static final String START_HIDL_SERVICES = "StartHidlServices";
+    private static final String START_SENSOR_MANAGER_SERVICE = "StartISensorManagerService";
     private static final String START_BLOB_STORE_SERVICE = "startBlobStoreManagerService";
 
     private static final String SYSPROP_START_COUNT = "sys.system_server.start_count";
@@ -483,6 +484,9 @@ public final class SystemServer implements Dumpable {
 
     /** Start the IStats services. This is a blocking call and can take time. */
     private static native void startIStatsService();
+
+    /** Start the ISensorManager service. This is a blocking call and can take time. */
+    private static native void startISensorManagerService();
 
     /**
      * Start the memtrack proxy service.
@@ -1597,9 +1601,16 @@ public final class SystemServer implements Dumpable {
             wm.onInitReady();
             t.traceEnd();
 
-            // Start receiving calls from HIDL services. Start in in a separate thread
+            // Start receiving calls from SensorManager services. Start in a separate thread
             // because it need to connect to SensorManager. This has to start
             // after PHASE_WAIT_FOR_SENSOR_SERVICE is done.
+            SystemServerInitThreadPool.submit(() -> {
+                TimingsTraceAndSlog traceLog = TimingsTraceAndSlog.newAsyncLog();
+                traceLog.traceBegin(START_SENSOR_MANAGER_SERVICE);
+                startISensorManagerService();
+                traceLog.traceEnd();
+            }, START_SENSOR_MANAGER_SERVICE);
+
             SystemServerInitThreadPool.submit(() -> {
                 TimingsTraceAndSlog traceLog = TimingsTraceAndSlog.newAsyncLog();
                 traceLog.traceBegin(START_HIDL_SERVICES);
