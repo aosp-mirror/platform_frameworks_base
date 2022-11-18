@@ -463,7 +463,11 @@ public final class NotificationPanelViewController implements Dumpable {
     private boolean mQsTouchAboveFalsingThreshold;
     private int mQsFalsingThreshold;
 
-    /** Indicates drag starting height when swiping down or up on heads-up notifications */
+    /**
+     * Indicates drag starting height when swiping down or up on heads-up notifications.
+     * This usually serves as a threshold from when shade expansion should really start. Otherwise
+     * this value would be height of shade and it will be immediately expanded to some extent.
+     */
     private int mHeadsUpStartHeight;
     private HeadsUpTouchHelper mHeadsUpTouchHelper;
     private boolean mListenForHeadsUp;
@@ -3386,9 +3390,12 @@ public final class NotificationPanelViewController implements Dumpable {
                 && mQsExpansionAnimator == null && !mQsExpansionFromOverscroll;
         boolean goingBetweenClosedShadeAndExpandedQs =
                 mQsExpandImmediate || collapsingShadeFromExpandedQs;
-        // we don't want to update QS expansion when HUN is visible because then the whole shade is
-        // initially hidden, even though it has non-zero height
-        if (goingBetweenClosedShadeAndExpandedQs && !mHeadsUpManager.isTrackingHeadsUp()) {
+        // in split shade we react when HUN is visible only if shade height is over HUN start
+        // height - which means user is swiping down. Otherwise shade QS will either not show at all
+        // with HUN movement or it will blink when touching HUN initially
+        boolean qsShouldExpandWithHeadsUp = !mSplitShadeEnabled
+                || (!mHeadsUpManager.isTrackingHeadsUp() || expandedHeight > mHeadsUpStartHeight);
+        if (goingBetweenClosedShadeAndExpandedQs && qsShouldExpandWithHeadsUp) {
             float qsExpansionFraction;
             if (mSplitShadeEnabled) {
                 qsExpansionFraction = 1;
