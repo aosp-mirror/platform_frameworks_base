@@ -3514,13 +3514,17 @@ public final class NotificationPanelViewController implements Dumpable {
     }
 
     private float getHeaderTranslation() {
+        if (mSplitShadeEnabled) {
+            // in split shade QS don't translate, just (un)squish and overshoot
+            return 0;
+        }
         if (mBarState == KEYGUARD && !mKeyguardBypassController.getBypassEnabled()) {
             return -mQs.getQsMinExpansionHeight();
         }
         float appearAmount = mNotificationStackScrollLayoutController
                 .calculateAppearFraction(mExpandedHeight);
         float startHeight = -mQsExpansionHeight;
-        if (!mSplitShadeEnabled && mBarState == StatusBarState.SHADE) {
+        if (mBarState == StatusBarState.SHADE) {
             // Small parallax as we pull down and clip QS
             startHeight = -mQsExpansionHeight * QS_PARALLAX_AMOUNT;
         }
