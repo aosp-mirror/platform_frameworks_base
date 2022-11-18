@@ -279,6 +279,11 @@ public final class NotificationPanelViewController implements Dumpable {
     private static final String COUNTER_PANEL_OPEN_PEEK = "panel_open_peek";
     private static final Rect M_DUMMY_DIRTY_RECT = new Rect(0, 0, 1, 1);
     private static final Rect EMPTY_RECT = new Rect();
+    /**
+     * Duration to use for the animator when the keyguard status view alignment changes, and a
+     * custom clock animation is in use.
+     */
+    private static final int KEYGUARD_STATUS_VIEW_CUSTOM_CLOCK_MOVE_DURATION = 1000;
 
     private final StatusBarTouchableRegionManager mStatusBarTouchableRegionManager;
     private final Resources mResources;
@@ -1592,7 +1597,7 @@ public final class NotificationPanelViewController implements Dumpable {
 
                         // Use linear here, so the actual clock can pick its own interpolator.
                         adapter.setInterpolator(Interpolators.LINEAR);
-                        adapter.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
+                        adapter.setDuration(KEYGUARD_STATUS_VIEW_CUSTOM_CLOCK_MOVE_DURATION);
                         adapter.addTarget(clockView);
                         set.addTransition(adapter);
 
