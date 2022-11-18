@@ -27,7 +27,7 @@ import com.android.credentialmanager.CredentialManagerRepo
 import com.android.credentialmanager.common.DialogResult
 import com.android.credentialmanager.common.ResultState
 
-data class CreatePasskeyUiState(
+data class CreateCredentialUiState(
   val enabledProviders: List<EnabledProviderInfo>,
   val disabledProviders: List<DisabledProviderInfo>? = null,
   val currentScreenState: CreateScreenState,
@@ -35,11 +35,11 @@ data class CreatePasskeyUiState(
   val activeEntry: ActiveEntry? = null,
 )
 
-class CreatePasskeyViewModel(
+class CreateCredentialViewModel(
   credManRepo: CredentialManagerRepo = CredentialManagerRepo.getInstance()
 ) : ViewModel() {
 
-  var uiState by mutableStateOf(credManRepo.createPasskeyInitialUiState())
+  var uiState by mutableStateOf(credManRepo.createCredentialInitialUiState())
     private set
 
   val dialogResult: MutableLiveData<DialogResult> by lazy {

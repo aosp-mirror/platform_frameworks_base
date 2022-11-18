@@ -43,8 +43,13 @@ import java.util.Objects;
 public abstract class CredentialProviderService extends Service {
     /** Extra to be used by provider to populate the credential when ending the activity started
      * through the {@code pendingIntent} on the selected {@link SaveEntry}. **/
-    public static final String EXTRA_SAVE_CREDENTIAL =
-            "android.service.credentials.extra.SAVE_CREDENTIAL";
+    public static final String EXTRA_CREATE_CREDENTIAL_RESPONSE =
+            "android.service.credentials.extra.CREATE_CREDENTIAL_RESPONSE";
+
+    /** Extra to be used by provider to populate the {@link CredentialsDisplayContent} when
+     * an authentication action entry is selected. **/
+    public static final String EXTRA_GET_CREDENTIALS_DISPLAY_CONTENT =
+            "android.service.credentials.extra.GET_CREDENTIALS_DISPLAY_CONTENT";
 
     /**
      * Provider must read the value against this extra to receive the complete create credential
@@ -52,6 +57,10 @@ public abstract class CredentialProviderService extends Service {
      */
     public static final String EXTRA_CREATE_CREDENTIAL_REQUEST_PARAMS =
             "android.service.credentials.extra.CREATE_CREDENTIAL_REQUEST_PARAMS";
+
+    /** Extra to be used by the provider when setting the credential result. */
+    public static final String EXTRA_GET_CREDENTIAL =
+            "android.service.credentials.extra.GET_CREDENTIAL";
 
     private static final String TAG = "CredProviderService";
 

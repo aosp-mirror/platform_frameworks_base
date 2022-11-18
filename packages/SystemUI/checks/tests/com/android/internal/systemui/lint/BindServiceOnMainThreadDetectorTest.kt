@@ -126,6 +126,32 @@ class BindServiceOnMainThreadDetectorTest : SystemUILintDetectorTest() {
     }
 
     @Test
+    fun testSuppressUnbindService() {
+        lint()
+            .files(
+                TestFiles.java(
+                        """
+                    package test.pkg;
+                    import android.content.Context;
+                    import android.content.ServiceConnection;
+
+                    @SuppressLint("BindServiceOnMainThread")
+                    public class TestClass {
+                        public void unbind(Context context, ServiceConnection connection) {
+                          context.unbindService(connection);
+                        }
+                    }
+                """
+                    )
+                    .indented(),
+                *stubs
+            )
+            .issues(BindServiceOnMainThreadDetector.ISSUE)
+            .run()
+            .expectClean()
+    }
+
+    @Test
     fun testWorkerMethod() {
         lint()
             .files(

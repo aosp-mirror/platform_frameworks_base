@@ -67,8 +67,8 @@ public final class PreciseCallState implements Parcelable {
     /** Call state: Disconnecting. */
     public static final int PRECISE_CALL_STATE_DISCONNECTING =  8;
     /**
-     * Call state: Incoming in pre-alerting state.
-     * A call will be in this state prior to entering {@link #PRECISE_CALL_STATE_ALERTING}.
+     * Call state: Incoming in pre-alerting state i.e. prior to entering
+     * {@link #PRECISE_CALL_STATE_INCOMING}.
      */
     public static final int PRECISE_CALL_STATE_INCOMING_SETUP = 9;
 

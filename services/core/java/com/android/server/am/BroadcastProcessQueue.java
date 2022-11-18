@@ -584,6 +584,14 @@ class BroadcastProcessQueue {
     }
 
     /**
+     * Report whether this queue is currently handling an urgent broadcast.
+     */
+    public boolean isPendingUrgent() {
+        BroadcastRecord next = peekNextBroadcastRecord();
+        return (next != null) ? next.isUrgent() : false;
+    }
+
+    /**
      * Quickly determine if this queue has broadcasts that are still waiting to
      * be delivered at some point in the future.
      */
@@ -596,20 +604,21 @@ class BroadcastProcessQueue {
      * barrier timestamp that are still waiting to be delivered.
      */
     public boolean isBeyondBarrierLocked(@UptimeMillisLong long barrierTime) {
-        if (mActive != null) {
-            return mActive.enqueueTime > barrierTime;
-        }
         final SomeArgs next = mPending.peekFirst();
         final SomeArgs nextUrgent = mPendingUrgent.peekFirst();
         final SomeArgs nextOffload = mPendingOffload.peekFirst();
-        // Empty queue is past any barrier
-        final boolean nextLater = (next == null)
+
+        // Empty records are always past any barrier
+        final boolean activeBeyond = (mActive == null)
+                || mActive.enqueueTime > barrierTime;
+        final boolean nextBeyond = (next == null)
                 || ((BroadcastRecord) next.arg1).enqueueTime > barrierTime;
-        final boolean nextUrgentLater = (nextUrgent == null)
+        final boolean nextUrgentBeyond = (nextUrgent == null)
                 || ((BroadcastRecord) nextUrgent.arg1).enqueueTime > barrierTime;
-        final boolean nextOffloadLater = (nextOffload == null)
+        final boolean nextOffloadBeyond = (nextOffload == null)
                 || ((BroadcastRecord) nextOffload.arg1).enqueueTime > barrierTime;
-        return nextLater && nextUrgentLater && nextOffloadLater;
+
+        return activeBeyond && nextBeyond && nextUrgentBeyond && nextOffloadBeyond;
     }
 
     public boolean isRunnable() {

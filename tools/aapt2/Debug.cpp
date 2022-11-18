@@ -687,32 +687,32 @@ class ChunkPrinter {
         continue;
       }
 
-      printer_->Print((entry->flags & ResTable_entry::FLAG_COMPLEX) ? "[ResTable_map_entry]"
-                                                                    : "[ResTable_entry]");
+      if (entry->is_complex()) {
+        printer_->Print("[ResTable_map_entry]");
+      } else if (entry->is_compact()) {
+        printer_->Print("[ResTable_entry_compact]");
+      } else {
+        printer_->Print("[ResTable_entry]");
+      }
+
       printer_->Print(StringPrintf(" id: 0x%04x", it.index()));
       printer_->Print(StringPrintf(
-          " name: %s",
-          android::util::GetString(key_pool_, android::util::DeviceToHost32(entry->key.index))
-              .c_str()));
-      printer_->Print(
-          StringPrintf(" keyIndex: %u", android::util::DeviceToHost32(entry->key.index)));
-      printer_->Print(StringPrintf(" size: %u", android::util::DeviceToHost32(entry->size)));
-      printer_->Print(StringPrintf(" flags: 0x%04x", android::util::DeviceToHost32(entry->flags)));
+          " name: %s", android::util::GetString(key_pool_, entry->key()).c_str()));
+      printer_->Print(StringPrintf(" keyIndex: %u", entry->key()));
+      printer_->Print(StringPrintf(" size: %zu", entry->size()));
+      printer_->Print(StringPrintf(" flags: 0x%04x", entry->flags()));
 
       printer_->Indent();
 
-      if (entry->flags & ResTable_entry::FLAG_COMPLEX) {
-        auto map_entry = (const ResTable_map_entry*)entry;
-        printer_->Print(
-            StringPrintf(" count: 0x%04x", android::util::DeviceToHost32(map_entry->count)));
+      if (auto map_entry = entry->map_entry()) {
+        uint32_t map_entry_count = android::util::DeviceToHost32(map_entry->count);
+        printer_->Print(StringPrintf(" count: 0x%04x", map_entry_count));
         printer_->Print(StringPrintf(" parent: 0x%08x\n",
                                      android::util::DeviceToHost32(map_entry->parent.ident)));
 
         // Print the name and value mappings
-        auto maps = (const ResTable_map*)((const uint8_t*)entry +
-                                          android::util::DeviceToHost32(entry->size));
-        for (size_t i = 0, count = android::util::DeviceToHost32(map_entry->count); i < count;
-             i++) {
+        auto maps = (const ResTable_map*)((const uint8_t*)entry + entry->size());
+        for (size_t i = 0; i < map_entry_count; i++) {
           PrintResValue(&(maps[i].value), config, type);
 
           printer_->Print(StringPrintf(
@@ -725,9 +725,8 @@ class ChunkPrinter {
         printer_->Print("\n");
 
         // Print the value of the entry
-        auto value =
-            (const Res_value*)((const uint8_t*)entry + android::util::DeviceToHost32(entry->size));
-        PrintResValue(value, config, type);
+        Res_value value = entry->value();
+        PrintResValue(&value, config, type);
       }
 
       printer_->Undent();

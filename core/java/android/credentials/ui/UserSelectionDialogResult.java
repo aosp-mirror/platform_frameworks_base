@@ -57,6 +57,7 @@ public class UserSelectionDialogResult extends BaseDialogResult implements Parce
     @NonNull private final String mProviderId;
     @NonNull private final String mEntryKey;
     @NonNull private final String mEntrySubkey;
+    @Nullable private ProviderPendingIntentResponse mProviderPendingIntentResponse;
 
     public UserSelectionDialogResult(
             @NonNull IBinder requestToken, @NonNull String providerId,
@@ -65,6 +66,17 @@ public class UserSelectionDialogResult extends BaseDialogResult implements Parce
         mProviderId = providerId;
         mEntryKey = entryKey;
         mEntrySubkey = entrySubkey;
+    }
+
+    public UserSelectionDialogResult(
+            @NonNull IBinder requestToken, @NonNull String providerId,
+            @NonNull String entryKey, @NonNull String entrySubkey,
+            @Nullable ProviderPendingIntentResponse providerPendingIntentResponse) {
+        super(requestToken);
+        mProviderId = providerId;
+        mEntryKey = entryKey;
+        mEntrySubkey = entrySubkey;
+        mProviderPendingIntentResponse = providerPendingIntentResponse;
     }
 
     /** Returns provider package name whose entry was selected by the user. */
@@ -85,6 +97,12 @@ public class UserSelectionDialogResult extends BaseDialogResult implements Parce
         return mEntrySubkey;
     }
 
+    /** Returns the pending intent response from the provider. */
+    @Nullable
+    public ProviderPendingIntentResponse getPendingIntentProviderResponse() {
+        return mProviderPendingIntentResponse;
+    }
+
     protected UserSelectionDialogResult(@NonNull Parcel in) {
         super(in);
         String providerId = in.readString8();
@@ -97,6 +115,7 @@ public class UserSelectionDialogResult extends BaseDialogResult implements Parce
         AnnotationValidations.validate(NonNull.class, null, mEntryKey);
         mEntrySubkey = entrySubkey;
         AnnotationValidations.validate(NonNull.class, null, mEntrySubkey);
+        mProviderPendingIntentResponse = in.readTypedObject(ProviderPendingIntentResponse.CREATOR);
     }
 
     @Override
@@ -105,6 +124,7 @@ public class UserSelectionDialogResult extends BaseDialogResult implements Parce
         dest.writeString8(mProviderId);
         dest.writeString8(mEntryKey);
         dest.writeString8(mEntrySubkey);
+        dest.writeTypedObject(mProviderPendingIntentResponse, flags);
     }
 
     @Override

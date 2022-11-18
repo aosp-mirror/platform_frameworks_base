@@ -61,6 +61,9 @@ object Flags {
     // TODO(b/254512517): Tracking Bug
     val FSI_REQUIRES_KEYGUARD = unreleasedFlag(110, "fsi_requires_keyguard", teamfood = true)
 
+    // TODO(b/259130119): Tracking Bug
+    val FSI_ON_DND_UPDATE = unreleasedFlag(259130119, "fsi_on_dnd_update", teamfood = true)
+
     // TODO(b/254512538): Tracking Bug
     val INSTANT_VOICE_REPLY = unreleasedFlag(111, "instant_voice_reply", teamfood = true)
 
@@ -364,9 +367,7 @@ object Flags {
 
     // 1300 - screenshots
     // TODO(b/254512719): Tracking Bug
-    @JvmField
-    val SCREENSHOT_REQUEST_PROCESSOR =
-        unreleasedFlag(1300, "screenshot_request_processor", teamfood = true)
+    @JvmField val SCREENSHOT_REQUEST_PROCESSOR = releasedFlag(1300, "screenshot_request_processor")
 
     // TODO(b/254513155): Tracking Bug
     @JvmField

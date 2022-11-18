@@ -44,6 +44,9 @@ struct TableFlattenerOptions {
   // as a sparse map of entry ID and offset to actual data.
   SparseEntriesMode sparse_entries = SparseEntriesMode::Disabled;
 
+  // When true, use compact entries for simple data
+  bool use_compact_entries = false;
+
   // When true, the key string pool in the final ResTable
   // is collapsed to a single entry. All resource entries
   // have name indices that point to this single value

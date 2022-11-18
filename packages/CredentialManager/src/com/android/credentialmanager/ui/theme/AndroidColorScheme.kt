@@ -39,7 +39,32 @@ val LocalAndroidColorScheme =
  */
 class AndroidColorScheme internal constructor(context: Context) {
 
+    val colorPrimary = getColor(context, R.attr.colorPrimary)
+    val colorPrimaryDark = getColor(context, R.attr.colorPrimaryDark)
+    val colorAccent = getColor(context, R.attr.colorAccent)
+    val colorAccentPrimary = getColor(context, R.attr.colorAccentPrimary)
+    val colorAccentSecondary = getColor(context, R.attr.colorAccentSecondary)
+    val colorAccentTertiary = getColor(context, R.attr.colorAccentTertiary)
+    val colorAccentPrimaryVariant = getColor(context, R.attr.colorAccentPrimaryVariant)
+    val colorAccentSecondaryVariant = getColor(context, R.attr.colorAccentSecondaryVariant)
+    val colorAccentTertiaryVariant = getColor(context, R.attr.colorAccentTertiaryVariant)
+    val colorSurface = getColor(context, R.attr.colorSurface)
     val colorSurfaceHighlight = getColor(context, R.attr.colorSurfaceHighlight)
+    val colorSurfaceVariant = getColor(context, R.attr.colorSurfaceVariant)
+    val colorSurfaceHeader = getColor(context, R.attr.colorSurfaceHeader)
+    val colorError = getColor(context, R.attr.colorError)
+    val colorBackground = getColor(context, R.attr.colorBackground)
+    val colorBackgroundFloating = getColor(context, R.attr.colorBackgroundFloating)
+    val panelColorBackground = getColor(context, R.attr.panelColorBackground)
+    val textColorPrimary = getColor(context, R.attr.textColorPrimary)
+    val textColorSecondary = getColor(context, R.attr.textColorSecondary)
+    val textColorTertiary = getColor(context, R.attr.textColorTertiary)
+    val textColorPrimaryInverse = getColor(context, R.attr.textColorPrimaryInverse)
+    val textColorSecondaryInverse = getColor(context, R.attr.textColorSecondaryInverse)
+    val textColorTertiaryInverse = getColor(context, R.attr.textColorTertiaryInverse)
+    val textColorOnAccent = getColor(context, R.attr.textColorOnAccent)
+    val colorForeground = getColor(context, R.attr.colorForeground)
+    val colorForegroundInverse = getColor(context, R.attr.colorForegroundInverse)
 
     private fun getColor(context: Context, attr: Int): Color {
         val ta = context.obtainStyledAttributes(intArrayOf(attr))

@@ -63,6 +63,31 @@ class SoftwareBitmapDetectorTest : SystemUILintDetectorTest() {
     }
 
     @Test
+    fun testSuppressSoftwareBitmap() {
+        lint()
+            .files(
+                TestFiles.java(
+                        """
+                    import android.graphics.Bitmap;
+
+                    @SuppressWarnings("SoftwareBitmap")
+                    public class TestClass {
+                        public void test() {
+                          Bitmap.createBitmap(300, 300, Bitmap.Config.RGB_565);
+                          Bitmap.createBitmap(300, 300, Bitmap.Config.ARGB_8888);
+                        }
+                    }
+                """
+                    )
+                    .indented(),
+                *stubs
+            )
+            .issues(SoftwareBitmapDetector.ISSUE)
+            .run()
+            .expectClean()
+    }
+
+    @Test
     fun testHardwareBitmap() {
         lint()
             .files(

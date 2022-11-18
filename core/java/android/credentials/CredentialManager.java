@@ -22,7 +22,9 @@ import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemService;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.IntentSender;
 import android.os.CancellationSignal;
 import android.os.ICancellationSignal;
 import android.os.OutcomeReceiver;
@@ -84,8 +86,11 @@ public final class CredentialManager {
 
         ICancellationSignal cancelRemote = null;
         try {
-            cancelRemote = mService.executeGetCredential(request,
-                    new GetCredentialTransport(executor, callback), mContext.getOpPackageName());
+            cancelRemote = mService.executeGetCredential(
+                    request,
+                    // TODO: use a real activity instead of context.
+                    new GetCredentialTransport(mContext, executor, callback),
+                    mContext.getOpPackageName());
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
@@ -124,7 +129,8 @@ public final class CredentialManager {
         ICancellationSignal cancelRemote = null;
         try {
             cancelRemote = mService.executeCreateCredential(request,
-                    new CreateCredentialTransport(executor, callback),
+                    // TODO: use a real activity instead of context.
+                    new CreateCredentialTransport(mContext, executor, callback),
                     mContext.getOpPackageName());
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
@@ -176,14 +182,27 @@ public final class CredentialManager {
     private static class GetCredentialTransport extends IGetCredentialCallback.Stub {
         // TODO: listen for cancellation to release callback.
 
+        private final Context mActivityContext;
         private final Executor mExecutor;
         private final OutcomeReceiver<
                 GetCredentialResponse, CredentialManagerException> mCallback;
 
-        private GetCredentialTransport(Executor executor,
+        private GetCredentialTransport(Context activityContext, Executor executor,
                 OutcomeReceiver<GetCredentialResponse, CredentialManagerException> callback) {
+            mActivityContext = activityContext;
             mExecutor = executor;
             mCallback = callback;
+        }
+
+        @Override
+        public void onPendingIntent(PendingIntent pendingIntent) {
+            try {
+                mActivityContext.startIntentSender(pendingIntent.getIntentSender(), null, 0, 0, 0);
+            } catch (IntentSender.SendIntentException e) {
+                Log.e(TAG, "startIntentSender() failed for intent:"
+                        + pendingIntent.getIntentSender(), e);
+                // TODO: propagate the error.
+            }
         }
 
         @Override
@@ -201,14 +220,27 @@ public final class CredentialManager {
     private static class CreateCredentialTransport extends ICreateCredentialCallback.Stub {
         // TODO: listen for cancellation to release callback.
 
+        private final Context mActivityContext;
         private final Executor mExecutor;
         private final OutcomeReceiver<
                 CreateCredentialResponse, CredentialManagerException> mCallback;
 
-        private CreateCredentialTransport(Executor executor,
+        private CreateCredentialTransport(Context activityContext, Executor executor,
                 OutcomeReceiver<CreateCredentialResponse, CredentialManagerException> callback) {
+            mActivityContext = activityContext;
             mExecutor = executor;
             mCallback = callback;
+        }
+
+        @Override
+        public void onPendingIntent(PendingIntent pendingIntent) {
+            try {
+                mActivityContext.startIntentSender(pendingIntent.getIntentSender(), null, 0, 0, 0);
+            } catch (IntentSender.SendIntentException e) {
+                Log.e(TAG, "startIntentSender() failed for intent:"
+                        + pendingIntent.getIntentSender(), e);
+                // TODO: propagate the error.
+            }
         }
 
         @Override

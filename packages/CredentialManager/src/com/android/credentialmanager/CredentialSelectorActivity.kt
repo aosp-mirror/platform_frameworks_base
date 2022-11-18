@@ -28,8 +28,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.credentialmanager.common.DialogType
 import com.android.credentialmanager.common.DialogResult
 import com.android.credentialmanager.common.ResultState
-import com.android.credentialmanager.createflow.CreatePasskeyScreen
-import com.android.credentialmanager.createflow.CreatePasskeyViewModel
+import com.android.credentialmanager.createflow.CreateCredentialScreen
+import com.android.credentialmanager.createflow.CreateCredentialViewModel
 import com.android.credentialmanager.getflow.GetCredentialScreen
 import com.android.credentialmanager.getflow.GetCredentialViewModel
 import com.android.credentialmanager.ui.theme.CredentialSelectorTheme
@@ -63,12 +63,12 @@ class CredentialSelectorActivity : ComponentActivity() {
     val dialogType = DialogType.toDialogType(operationType)
     when (dialogType) {
       DialogType.CREATE_PASSKEY -> {
-        val viewModel: CreatePasskeyViewModel = viewModel()
+        val viewModel: CreateCredentialViewModel = viewModel()
         viewModel.observeDialogResult().observe(
           this@CredentialSelectorActivity,
           onCancel
         )
-        CreatePasskeyScreen(viewModel = viewModel)
+        CreateCredentialScreen(viewModel = viewModel)
       }
       DialogType.GET_CREDENTIALS -> {
         val viewModel: GetCredentialViewModel = viewModel()

@@ -38,12 +38,15 @@ import android.os.Binder
 import android.os.Bundle
 import android.os.ResultReceiver
 import com.android.credentialmanager.createflow.ActiveEntry
-import com.android.credentialmanager.createflow.CreatePasskeyUiState
+import com.android.credentialmanager.createflow.CreateCredentialUiState
 import com.android.credentialmanager.createflow.CreateScreenState
 import com.android.credentialmanager.createflow.EnabledProviderInfo
 import com.android.credentialmanager.createflow.RequestDisplayInfo
 import com.android.credentialmanager.getflow.GetCredentialUiState
 import com.android.credentialmanager.getflow.GetScreenState
+import com.android.credentialmanager.jetpack.developer.CreateCredentialRequest.Companion.createFrom
+import com.android.credentialmanager.jetpack.developer.CreatePasswordRequest
+import com.android.credentialmanager.jetpack.developer.CreatePasswordRequest.Companion.toBundle
 import com.android.credentialmanager.jetpack.developer.PublicKeyCredential.Companion.TYPE_PUBLIC_KEY_CREDENTIAL
 
 // Consider repo per screen, similar to view model?
@@ -123,7 +126,7 @@ class CredentialManagerRepo(
     )
   }
 
-  fun createPasskeyInitialUiState(): CreatePasskeyUiState {
+  fun createCredentialInitialUiState(): CreateCredentialUiState {
     val providerEnabledList = CreateFlowUtils.toEnabledProviderList(
       // Handle runtime cast error
       providerEnabledList as List<CreateCredentialProviderData>, context)
@@ -135,13 +138,22 @@ class CredentialManagerRepo(
     providerEnabledList.forEach{providerInfo -> providerInfo.createOptions =
       providerInfo.createOptions.sortedWith(compareBy { it.lastUsedTimeMillis }).reversed()
       if (providerInfo.isDefault) {hasDefault = true; defaultProvider = providerInfo} }
-    // TODO: covert from real requestInfo
-    val requestDisplayInfo = RequestDisplayInfo(
+    // TODO: covert from real requestInfo for create passkey
+    var requestDisplayInfo = RequestDisplayInfo(
       "Elisa Beckett",
       "beckett-bakert@gmail.com",
       TYPE_PUBLIC_KEY_CREDENTIAL,
       "tribank")
-    return CreatePasskeyUiState(
+    val createCredentialRequest = requestInfo.createCredentialRequest
+    val createCredentialRequestJetpack = createCredentialRequest?.let { createFrom(it) }
+    if (createCredentialRequestJetpack is CreatePasswordRequest) {
+      requestDisplayInfo = RequestDisplayInfo(
+        createCredentialRequestJetpack.id,
+        createCredentialRequestJetpack.password,
+        TYPE_PASSWORD_CREDENTIAL,
+        "tribank")
+    }
+    return CreateCredentialUiState(
       enabledProviders = providerEnabledList,
       disabledProviders = providerDisabledList,
       if (hasDefault)
@@ -182,7 +194,7 @@ class CredentialManagerRepo(
           )
         )
         .setRemoteEntry(
-          newRemoteEntry("key1", "subkey-1")
+          newRemoteEntry("key2", "subkey-1")
         )
         .setIsDefaultProvider(true)
         .build(),
@@ -240,6 +252,8 @@ class CredentialManagerRepo(
               "Open Google Password Manager", "beckett-family@gmail.com"
             ),
           )
+        ).setRemoteEntry(
+          newRemoteEntry("key4", "subkey-1")
         ).build(),
       GetCredentialProviderData.Builder("com.dashlane")
         .setCredentialEntries(
@@ -388,15 +402,15 @@ class CredentialManagerRepo(
   }
 
   private fun testCreateRequestInfo(): RequestInfo {
-    val data = Bundle()
+    val data = toBundle("beckett-bakert@gmail.com", "password123")
     return RequestInfo.newCreateRequestInfo(
       Binder(),
       CreateCredentialRequest(
-        TYPE_PUBLIC_KEY_CREDENTIAL,
+        TYPE_PASSWORD_CREDENTIAL,
         data
       ),
       /*isFirstUsage=*/false,
-      "tribank.us"
+      "tribank"
     )
   }
 

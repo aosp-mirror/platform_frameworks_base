@@ -18,6 +18,7 @@ package com.android.server.pm;
 
 import static android.app.AppOpsManager.MODE_DEFAULT;
 import static android.content.pm.PackageInstaller.SessionParams.MODE_INHERIT_EXISTING;
+import static android.content.pm.PackageInstaller.SessionParams.USER_ACTION_UNSPECIFIED;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
 import static android.content.pm.PackageManager.INSTALL_STAGED;
 import static android.content.pm.PackageManager.INSTALL_SUCCEEDED;
@@ -95,7 +96,10 @@ class InstallingSession {
     final InstallPackageHelper mInstallPackageHelper;
     final RemovePackageHelper mRemovePackageHelper;
     final boolean mIsInherit;
+    final int mSessionId;
+    final int mRequireUserAction;
 
+    // For move install
     InstallingSession(OriginInfo originInfo, MoveInfo moveInfo, IPackageInstallObserver2 observer,
             int installFlags, InstallSource installSource, String volumeUuid,
             UserHandle user, String packageAbiOverride, int packageSource,
@@ -124,9 +128,11 @@ class InstallingSession {
         mPackageSource = packageSource;
         mPackageLite = packageLite;
         mIsInherit = false;
+        mSessionId = -1;
+        mRequireUserAction = USER_ACTION_UNSPECIFIED;
     }
 
-    InstallingSession(File stagedDir, IPackageInstallObserver2 observer,
+    InstallingSession(int sessionId, File stagedDir, IPackageInstallObserver2 observer,
             PackageInstaller.SessionParams sessionParams, InstallSource installSource,
             UserHandle user, SigningDetails signingDetails, int installerUid,
             PackageLite packageLite, PackageManagerService pm) {
@@ -155,6 +161,8 @@ class InstallingSession {
         mPackageSource = sessionParams.packageSource;
         mPackageLite = packageLite;
         mIsInherit = sessionParams.mode == MODE_INHERIT_EXISTING;
+        mSessionId = sessionId;
+        mRequireUserAction = sessionParams.requireUserAction;
     }
 
     @Override

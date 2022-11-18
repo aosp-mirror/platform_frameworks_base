@@ -2566,8 +2566,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         synchronized (mLock) {
-            return new InstallingSession(stageDir, localObserver, params, mInstallSource, user,
-                    mSigningDetails, mInstallerUid, mPackageLite, mPm);
+            return new InstallingSession(sessionId, stageDir, localObserver, params, mInstallSource,
+                    user, mSigningDetails, mInstallerUid, mPackageLite, mPm);
         }
     }
 
@@ -3711,7 +3711,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private boolean dispatchPendingAbandonCallback() {
         final Runnable callback;
         synchronized (mLock) {
-            Preconditions.checkState(mStageDirInUse);
+            if (!mStageDirInUse) {
+                return false;
+            }
             mStageDirInUse = false;
             callback = mPendingAbandonCallback;
             mPendingAbandonCallback = null;

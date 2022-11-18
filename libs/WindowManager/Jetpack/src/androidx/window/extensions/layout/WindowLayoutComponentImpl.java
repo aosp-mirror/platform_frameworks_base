@@ -36,6 +36,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.ArrayMap;
 import android.window.WindowContext;
+import android.window.WindowProvider;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -71,7 +72,7 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
 
     private final List<CommonFoldingFeature> mLastReportedFoldingFeatures = new ArrayList<>();
 
-    private final Map<IBinder, WindowContextConfigListener> mWindowContextConfigListeners =
+    private final Map<IBinder, ConfigurationChangeListener> mConfigurationChangeListeners =
             new ArrayMap<>();
 
     public WindowLayoutComponentImpl(@NonNull Context context) {
@@ -121,21 +122,21 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
         }
         if (!context.isUiContext()) {
             throw new IllegalArgumentException("Context must be a UI Context, which should be"
-                    + " an Activity or a WindowContext");
+                    + " an Activity, WindowContext or InputMethodService");
         }
         mFoldingFeatureProducer.getData((features) -> {
-            // Get the WindowLayoutInfo from the activity and pass the value to the layoutConsumer.
             WindowLayoutInfo newWindowLayout = getWindowLayoutInfo(context, features);
             consumer.accept(newWindowLayout);
         });
         mWindowLayoutChangeListeners.put(context, consumer);
 
-        if (context instanceof WindowContext) {
+        // TODO(b/258065175) Further extend this to ContextWrappers.
+        if (context instanceof WindowProvider) {
             final IBinder windowContextToken = context.getWindowContextToken();
-            final WindowContextConfigListener listener =
-                    new WindowContextConfigListener(windowContextToken);
+            final ConfigurationChangeListener listener =
+                    new ConfigurationChangeListener(windowContextToken);
             context.registerComponentCallbacks(listener);
-            mWindowContextConfigListeners.put(windowContextToken, listener);
+            mConfigurationChangeListeners.put(windowContextToken, listener);
         }
     }
 
@@ -150,10 +151,10 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
             if (!mWindowLayoutChangeListeners.get(context).equals(consumer)) {
                 continue;
             }
-            if (context instanceof WindowContext) {
+            if (context instanceof WindowProvider) {
                 final IBinder token = context.getWindowContextToken();
-                context.unregisterComponentCallbacks(mWindowContextConfigListeners.get(token));
-                mWindowContextConfigListeners.remove(token);
+                context.unregisterComponentCallbacks(mConfigurationChangeListeners.get(token));
+                mConfigurationChangeListeners.remove(token);
             }
             break;
         }
@@ -349,10 +350,10 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
         }
     }
 
-    private final class WindowContextConfigListener implements ComponentCallbacks {
+    private final class ConfigurationChangeListener implements ComponentCallbacks {
         final IBinder mToken;
 
-        WindowContextConfigListener(IBinder token) {
+        ConfigurationChangeListener(IBinder token) {
             mToken = token;
         }
 

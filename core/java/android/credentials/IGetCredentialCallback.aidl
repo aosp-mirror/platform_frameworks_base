@@ -16,6 +16,7 @@
 
 package android.credentials;
 
+import android.app.PendingIntent;
 import android.credentials.GetCredentialResponse;
 
 /**
@@ -24,6 +25,7 @@ import android.credentials.GetCredentialResponse;
  * @hide
  */
 interface IGetCredentialCallback {
+    oneway void onPendingIntent(in PendingIntent pendingIntent);
     oneway void onResponse(in GetCredentialResponse response);
     oneway void onError(int errorCode, String message);
 }

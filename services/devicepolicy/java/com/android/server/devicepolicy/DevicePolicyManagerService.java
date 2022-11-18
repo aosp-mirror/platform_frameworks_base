@@ -23,6 +23,7 @@ import static android.accessibilityservice.AccessibilityServiceInfo.FEEDBACK_ALL
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_DEFAULT;
+import static android.app.AppOpsManager.OPSTR_SYSTEM_EXEMPT_FROM_APP_STANDBY;
 import static android.app.admin.DeviceAdminReceiver.ACTION_COMPLIANCE_ACKNOWLEDGEMENT_REQUIRED;
 import static android.app.admin.DeviceAdminReceiver.EXTRA_TRANSFER_OWNERSHIP_ADMIN_EXTRAS_BUNDLE;
 import static android.app.admin.DevicePolicyManager.ACTION_CHECK_POLICY_COMPLIANCE;
@@ -46,6 +47,7 @@ import static android.app.admin.DevicePolicyManager.DELEGATION_SECURITY_LOGGING;
 import static android.app.admin.DevicePolicyManager.DEVICE_OWNER_TYPE_DEFAULT;
 import static android.app.admin.DevicePolicyManager.DEVICE_OWNER_TYPE_FINANCED;
 import static android.app.admin.DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE_PER_USER;
+import static android.app.admin.DevicePolicyManager.EXEMPT_FROM_APP_STANDBY;
 import static android.app.admin.DevicePolicyManager.EXTRA_PROVISIONING_ACCOUNT_TO_MIGRATE;
 import static android.app.admin.DevicePolicyManager.EXTRA_RESOURCE_IDS;
 import static android.app.admin.DevicePolicyManager.EXTRA_RESOURCE_TYPE;
@@ -330,6 +332,7 @@ import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.DebugUtils;
 import android.util.IndentingPrintWriter;
+import android.util.IntArray;
 import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
@@ -669,6 +672,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             COPY_ACCOUNT_TIMED_OUT,
             COPY_ACCOUNT_EXCEPTION})
     private @interface CopyAccountStatus {}
+
+    /**
+     * Mapping of {@link android.app.admin.DevicePolicyManager.ApplicationExemptionConstants} to
+     * corresponding app-ops.
+     */
+    private static final Map<Integer, String> APPLICATION_EXEMPTION_CONSTANTS_TO_APP_OPS =
+            new ArrayMap<>();
+    static {
+        APPLICATION_EXEMPTION_CONSTANTS_TO_APP_OPS.put(
+                EXEMPT_FROM_APP_STANDBY, OPSTR_SYSTEM_EXEMPT_FROM_APP_STANDBY);
+    }
 
     /**
      * Admin apps targeting Android S+ may not use
@@ -17014,6 +17028,88 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
             return true;
         });
+    }
+
+    @Override
+    public void setApplicationExemptions(String packageName, int[] exemptions) {
+        if (!mHasFeature) {
+            return;
+        }
+        Preconditions.checkStringNotEmpty(packageName, "Package name cannot be empty.");
+        Objects.requireNonNull(exemptions, "Application exemptions must not be null.");
+        Preconditions.checkArgument(areApplicationExemptionsValid(exemptions),
+                "Invalid application exemption constant found in application exemptions set.");
+        Preconditions.checkCallAuthorization(
+                hasCallingOrSelfPermission(permission.MANAGE_DEVICE_POLICY_APP_EXEMPTIONS));
+
+        final CallerIdentity caller = getCallerIdentity();
+        final ApplicationInfo packageInfo;
+        packageInfo = getPackageInfoWithNullCheck(packageName, caller);
+
+        for (Map.Entry<Integer, String> entry :
+                APPLICATION_EXEMPTION_CONSTANTS_TO_APP_OPS.entrySet()) {
+            int currentMode = mInjector.getAppOpsManager().unsafeCheckOpNoThrow(
+                    entry.getValue(), packageInfo.uid, packageInfo.packageName);
+            int newMode = ArrayUtils.contains(exemptions, entry.getKey())
+                    ? MODE_ALLOWED : MODE_DEFAULT;
+            mInjector.binderWithCleanCallingIdentity(() -> {
+                if (currentMode != newMode) {
+                    mInjector.getAppOpsManager()
+                            .setMode(entry.getValue(),
+                                    packageInfo.uid,
+                                    packageName,
+                                    newMode);
+                }
+            });
+        }
+    }
+
+    @Override
+    public int[] getApplicationExemptions(String packageName) {
+        if (!mHasFeature) {
+            return new int[0];
+        }
+        Preconditions.checkStringNotEmpty(packageName, "Package name cannot be empty.");
+        Preconditions.checkCallAuthorization(
+                hasCallingOrSelfPermission(permission.MANAGE_DEVICE_POLICY_APP_EXEMPTIONS));
+
+        final CallerIdentity caller = getCallerIdentity();
+        final ApplicationInfo packageInfo;
+        packageInfo = getPackageInfoWithNullCheck(packageName, caller);
+
+        IntArray appliedExemptions = new IntArray(0);
+        for (Map.Entry<Integer, String> entry :
+                APPLICATION_EXEMPTION_CONSTANTS_TO_APP_OPS.entrySet()) {
+            if (mInjector.getAppOpsManager().unsafeCheckOpNoThrow(
+                    entry.getValue(), packageInfo.uid, packageInfo.packageName) == MODE_ALLOWED) {
+                appliedExemptions.add(entry.getKey());
+            }
+        }
+        return appliedExemptions.toArray();
+    }
+
+    private ApplicationInfo getPackageInfoWithNullCheck(String packageName, CallerIdentity caller) {
+        final ApplicationInfo packageInfo =
+                mInjector.getPackageManagerInternal().getApplicationInfo(
+                        packageName,
+                        /* flags= */ 0,
+                        caller.getUid(),
+                        caller.getUserId());
+        if (packageInfo == null) {
+            throw new ServiceSpecificException(
+                    DevicePolicyManager.ERROR_PACKAGE_NAME_NOT_FOUND,
+                    "Package name not found.");
+        }
+        return packageInfo;
+    }
+
+    private boolean areApplicationExemptionsValid(int[] exemptions) {
+        for (int exemption : exemptions) {
+            if (!APPLICATION_EXEMPTION_CONSTANTS_TO_APP_OPS.containsKey(exemption)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private boolean isCallingFromPackage(String packageName, int callingUid) {

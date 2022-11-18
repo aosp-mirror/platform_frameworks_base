@@ -371,13 +371,16 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
             @NonNull SplitAttributes splitAttributes) {
         // Clear adjacent TaskFragments if the container is shown in fullscreen, or the
         // secondaryContainer could not be finished.
-        if (!shouldShowSplit(splitAttributes)) {
+        boolean isStacked = !shouldShowSplit(splitAttributes);
+        if (isStacked) {
             setAdjacentTaskFragments(wct, primaryContainer.getTaskFragmentToken(),
                     null /* secondary */, null /* splitRule */);
         } else {
             setAdjacentTaskFragments(wct, primaryContainer.getTaskFragmentToken(),
                     secondaryContainer.getTaskFragmentToken(), splitRule);
         }
+        setCompanionTaskFragment(wct, primaryContainer.getTaskFragmentToken(),
+                secondaryContainer.getTaskFragmentToken(), splitRule, isStacked);
     }
 
     /**
@@ -489,8 +492,15 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
                     || splitContainer.getSecondaryContainer().getInfo() == null) {
                 return RESULT_EXPAND_FAILED_NO_TF_INFO;
             }
-            expandTaskFragment(wct, splitContainer.getPrimaryContainer().getTaskFragmentToken());
-            expandTaskFragment(wct, splitContainer.getSecondaryContainer().getTaskFragmentToken());
+            final IBinder primaryToken =
+                    splitContainer.getPrimaryContainer().getTaskFragmentToken();
+            final IBinder secondaryToken =
+                    splitContainer.getSecondaryContainer().getTaskFragmentToken();
+            expandTaskFragment(wct, primaryToken);
+            expandTaskFragment(wct, secondaryToken);
+            // Set the companion TaskFragment when the two containers stacked.
+            setCompanionTaskFragment(wct, primaryToken, secondaryToken,
+                    splitContainer.getSplitRule(), true /* isStacked */);
             return RESULT_EXPANDED;
         }
         return RESULT_NOT_EXPANDED;

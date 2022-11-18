@@ -81,11 +81,11 @@ public interface TimeZoneDetector {
     String SHELL_COMMAND_SET_GEO_DETECTION_ENABLED = "set_geo_detection_enabled";
 
     /**
-     * A shell command that injects a geolocation time zone suggestion (as if from the
+     * A shell command that injects a location algorithm event (as if from the
      * location_time_zone_manager).
      * @hide
      */
-    String SHELL_COMMAND_SUGGEST_GEO_LOCATION_TIME_ZONE = "suggest_geo_location_time_zone";
+    String SHELL_COMMAND_HANDLE_LOCATION_ALGORITHM_EVENT = "handle_location_algorithm_event";
 
     /**
      * A shell command that injects a manual time zone suggestion (as if from the SettingsUI or

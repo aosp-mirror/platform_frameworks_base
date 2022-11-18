@@ -88,7 +88,9 @@ static bool VerifyResTableType(incfs::map_ptr<ResTable_type> header) {
   // Make sure that there is enough room for the entry offsets.
   const size_t offsets_offset = dtohs(header->header.headerSize);
   const size_t entries_offset = dtohl(header->entriesStart);
-  const size_t offsets_length = sizeof(uint32_t) * entry_count;
+  const size_t offsets_length = header->flags & ResTable_type::FLAG_OFFSET16
+                                    ? sizeof(uint16_t) * entry_count
+                                    : sizeof(uint32_t) * entry_count;
 
   if (offsets_offset > entries_offset || entries_offset - offsets_offset < offsets_length) {
     LOG(ERROR) << "RES_TABLE_TYPE_TYPE entry offsets overlap actual entry data.";
@@ -107,8 +109,8 @@ static bool VerifyResTableType(incfs::map_ptr<ResTable_type> header) {
   return true;
 }
 
-static base::expected<std::monostate, NullOrIOError> VerifyResTableEntry(
-    incfs::verified_map_ptr<ResTable_type> type, uint32_t entry_offset) {
+static base::expected<incfs::verified_map_ptr<ResTable_entry>, NullOrIOError>
+VerifyResTableEntry(incfs::verified_map_ptr<ResTable_type> type, uint32_t entry_offset) {
   // Check that the offset is aligned.
   if (UNLIKELY(entry_offset & 0x03U)) {
     LOG(ERROR) << "Entry at offset " << entry_offset << " is not 4-byte aligned.";
@@ -136,7 +138,7 @@ static base::expected<std::monostate, NullOrIOError> VerifyResTableEntry(
     return base::unexpected(IOError::PAGES_MISSING);
   }
 
-  const size_t entry_size = dtohs(entry->size);
+  const size_t entry_size = entry->size();
   if (UNLIKELY(entry_size < sizeof(entry.value()))) {
     LOG(ERROR) << "ResTable_entry size " << entry_size << " at offset " << entry_offset
                << " is too small.";
@@ -148,6 +150,11 @@ static base::expected<std::monostate, NullOrIOError> VerifyResTableEntry(
                << " is too large.";
     return base::unexpected(std::nullopt);
   }
+
+  // If entry is compact, value is already encoded, and a compact entry
+  // cannot be a map_entry, we are done verifying
+  if (entry->is_compact())
+    return entry.verified();
 
   if (entry_size < sizeof(ResTable_map_entry)) {
     // There needs to be room for one Res_value struct.
@@ -192,7 +199,7 @@ static base::expected<std::monostate, NullOrIOError> VerifyResTableEntry(
       return base::unexpected(std::nullopt);
     }
   }
-  return {};
+  return entry.verified();
 }
 
 LoadedPackage::iterator::iterator(const LoadedPackage* lp, size_t ti, size_t ei)
@@ -228,7 +235,7 @@ uint32_t LoadedPackage::iterator::operator*() const {
           entryIndex_);
 }
 
-base::expected<incfs::map_ptr<ResTable_entry>, NullOrIOError> LoadedPackage::GetEntry(
+base::expected<incfs::verified_map_ptr<ResTable_entry>, NullOrIOError> LoadedPackage::GetEntry(
     incfs::verified_map_ptr<ResTable_type> type_chunk, uint16_t entry_index) {
   base::expected<uint32_t, NullOrIOError> entry_offset = GetEntryOffset(type_chunk, entry_index);
   if (UNLIKELY(!entry_offset.has_value())) {
@@ -242,14 +249,13 @@ base::expected<uint32_t, NullOrIOError> LoadedPackage::GetEntryOffset(
   // The configuration matches and is better than the previous selection.
   // Find the entry value if it exists for this configuration.
   const size_t entry_count = dtohl(type_chunk->entryCount);
-  const size_t offsets_offset = dtohs(type_chunk->header.headerSize);
+  const auto offsets = type_chunk.offset(dtohs(type_chunk->header.headerSize));
 
   // Check if there is the desired entry in this type.
   if (type_chunk->flags & ResTable_type::FLAG_SPARSE) {
     // This is encoded as a sparse map, so perform a binary search.
     bool error = false;
-    auto sparse_indices = type_chunk.offset(offsets_offset)
-                                    .convert<ResTable_sparseTypeEntry>().iterator();
+    auto sparse_indices = offsets.convert<ResTable_sparseTypeEntry>().iterator();
     auto sparse_indices_end = sparse_indices + entry_count;
     auto result = std::lower_bound(sparse_indices, sparse_indices_end, entry_index,
                                    [&error](const incfs::map_ptr<ResTable_sparseTypeEntry>& entry,
@@ -284,26 +290,36 @@ base::expected<uint32_t, NullOrIOError> LoadedPackage::GetEntryOffset(
     return base::unexpected(std::nullopt);
   }
 
-  const auto entry_offset_ptr = type_chunk.offset(offsets_offset).convert<uint32_t>() + entry_index;
-  if (UNLIKELY(!entry_offset_ptr)) {
-    return base::unexpected(IOError::PAGES_MISSING);
+  uint32_t result;
+
+  if (type_chunk->flags & ResTable_type::FLAG_OFFSET16) {
+    const auto entry_offset_ptr = offsets.convert<uint16_t>() + entry_index;
+    if (UNLIKELY(!entry_offset_ptr)) {
+      return base::unexpected(IOError::PAGES_MISSING);
+    }
+    result = offset_from16(entry_offset_ptr.value());
+  } else {
+    const auto entry_offset_ptr = offsets.convert<uint32_t>() + entry_index;
+    if (UNLIKELY(!entry_offset_ptr)) {
+      return base::unexpected(IOError::PAGES_MISSING);
+    }
+    result = dtohl(entry_offset_ptr.value());
   }
 
-  const uint32_t value = dtohl(entry_offset_ptr.value());
-  if (value == ResTable_type::NO_ENTRY) {
+  if (result == ResTable_type::NO_ENTRY) {
     return base::unexpected(std::nullopt);
   }
-
-  return value;
+  return result;
 }
 
-base::expected<incfs::map_ptr<ResTable_entry>, NullOrIOError> LoadedPackage::GetEntryFromOffset(
-    incfs::verified_map_ptr<ResTable_type> type_chunk, uint32_t offset) {
+base::expected<incfs::verified_map_ptr<ResTable_entry>, NullOrIOError>
+LoadedPackage::GetEntryFromOffset(incfs::verified_map_ptr<ResTable_type> type_chunk,
+                                  uint32_t offset) {
   auto valid = VerifyResTableEntry(type_chunk, offset);
   if (UNLIKELY(!valid.has_value())) {
     return base::unexpected(valid.error());
   }
-  return type_chunk.offset(offset + dtohl(type_chunk->entriesStart)).convert<ResTable_entry>();
+  return valid;
 }
 
 base::expected<std::monostate, IOError> LoadedPackage::CollectConfigurations(
@@ -376,31 +392,42 @@ base::expected<uint32_t, NullOrIOError> LoadedPackage::FindEntryByName(
   for (const auto& type_entry : type_spec->type_entries) {
     const incfs::verified_map_ptr<ResTable_type>& type = type_entry.type;
 
-    size_t entry_count = dtohl(type->entryCount);
-    for (size_t entry_idx = 0; entry_idx < entry_count; entry_idx++) {
-      auto entry_offset_ptr = type.offset(dtohs(type->header.headerSize)).convert<uint32_t>() +
-          entry_idx;
-      if (!entry_offset_ptr) {
-        return base::unexpected(IOError::PAGES_MISSING);
-      }
+    const size_t entry_count = dtohl(type->entryCount);
+    const auto entry_offsets = type.offset(dtohs(type->header.headerSize));
 
+    for (size_t entry_idx = 0; entry_idx < entry_count; entry_idx++) {
       uint32_t offset;
       uint16_t res_idx;
       if (type->flags & ResTable_type::FLAG_SPARSE) {
-        auto sparse_entry = entry_offset_ptr.convert<ResTable_sparseTypeEntry>();
+        auto sparse_entry = entry_offsets.convert<ResTable_sparseTypeEntry>() + entry_idx;
+        if (!sparse_entry) {
+          return base::unexpected(IOError::PAGES_MISSING);
+        }
         offset = dtohs(sparse_entry->offset) * 4u;
         res_idx  = dtohs(sparse_entry->idx);
+      } else if (type->flags & ResTable_type::FLAG_OFFSET16) {
+        auto entry = entry_offsets.convert<uint16_t>() + entry_idx;
+        if (!entry) {
+          return base::unexpected(IOError::PAGES_MISSING);
+        }
+        offset = offset_from16(entry.value());
+        res_idx = entry_idx;
       } else {
-        offset = dtohl(entry_offset_ptr.value());
+        auto entry = entry_offsets.convert<uint32_t>() + entry_idx;
+        if (!entry) {
+          return base::unexpected(IOError::PAGES_MISSING);
+        }
+        offset = dtohl(entry.value());
         res_idx = entry_idx;
       }
+
       if (offset != ResTable_type::NO_ENTRY) {
         auto entry = type.offset(dtohl(type->entriesStart) + offset).convert<ResTable_entry>();
         if (!entry) {
           return base::unexpected(IOError::PAGES_MISSING);
         }
 
-        if (dtohl(entry->key.index) == static_cast<uint32_t>(*key_idx)) {
+        if (entry->key() == static_cast<uint32_t>(*key_idx)) {
           // The package ID will be overridden by the caller (due to runtime assignment of package
           // IDs for shared libraries).
           return make_resid(0x00, *type_idx + type_id_offset_ + 1, res_idx);

@@ -56,14 +56,28 @@ TEST_F(SequentialResEntryWriterTest, WriteEntriesOneByOne) {
           .AddSimple("com.app.test:id/id3", ResourceId(0x7f010002))
           .Build();
 
-  BigBuffer out(512);
-  SequentialResEntryWriter writer(&out);
-  auto offsets = WriteAllEntries(table->GetPartitionedView(), writer);
+  {
+    BigBuffer out(512);
+    SequentialResEntryWriter<false> writer(&out);
+    auto offsets = WriteAllEntries(table->GetPartitionedView(), writer);
 
-  std::vector<int32_t> expected_offsets{0, sizeof(ResEntryValuePair),
-                                        2 * sizeof(ResEntryValuePair)};
-  EXPECT_EQ(out.size(), 3 * sizeof(ResEntryValuePair));
-  EXPECT_EQ(offsets, expected_offsets);
+    std::vector<int32_t> expected_offsets{0, sizeof(ResEntryValuePair),
+                                          2 * sizeof(ResEntryValuePair)};
+    EXPECT_EQ(out.size(), 3 * sizeof(ResEntryValuePair));
+    EXPECT_EQ(offsets, expected_offsets);
+  }
+
+  {
+    /* expect a compact entry to only take sizeof(ResTable_entry) */
+    BigBuffer out(512);
+    SequentialResEntryWriter<true> writer(&out);
+    auto offsets = WriteAllEntries(table->GetPartitionedView(), writer);
+
+    std::vector<int32_t> expected_offsets{0, sizeof(ResTable_entry),
+                                          2 * sizeof(ResTable_entry)};
+    EXPECT_EQ(out.size(), 3 * sizeof(ResTable_entry));
+    EXPECT_EQ(offsets, expected_offsets);
+  }
 };
 
 TEST_F(SequentialResEntryWriterTest, WriteMapEntriesOneByOne) {
@@ -83,13 +97,26 @@ TEST_F(SequentialResEntryWriterTest, WriteMapEntriesOneByOne) {
                                              .AddValue("com.app.test:array/arr2", std::move(array2))
                                              .Build();
 
-  BigBuffer out(512);
-  SequentialResEntryWriter writer(&out);
-  auto offsets = WriteAllEntries(table->GetPartitionedView(), writer);
+  {
+    BigBuffer out(512);
+    SequentialResEntryWriter<false> writer(&out);
+    auto offsets = WriteAllEntries(table->GetPartitionedView(), writer);
 
-  std::vector<int32_t> expected_offsets{0, sizeof(ResTable_entry_ext) + 2 * sizeof(ResTable_map)};
-  EXPECT_EQ(out.size(), 2 * (sizeof(ResTable_entry_ext) + 2 * sizeof(ResTable_map)));
-  EXPECT_EQ(offsets, expected_offsets);
+    std::vector<int32_t> expected_offsets{0, sizeof(ResTable_entry_ext) + 2 * sizeof(ResTable_map)};
+    EXPECT_EQ(out.size(), 2 * (sizeof(ResTable_entry_ext) + 2 * sizeof(ResTable_map)));
+    EXPECT_EQ(offsets, expected_offsets);
+  }
+
+  {
+    /* compact_entry should have no impact to map items */
+    BigBuffer out(512);
+    SequentialResEntryWriter<true> writer(&out);
+    auto offsets = WriteAllEntries(table->GetPartitionedView(), writer);
+
+    std::vector<int32_t> expected_offsets{0, sizeof(ResTable_entry_ext) + 2 * sizeof(ResTable_map)};
+    EXPECT_EQ(out.size(), 2 * (sizeof(ResTable_entry_ext) + 2 * sizeof(ResTable_map)));
+    EXPECT_EQ(offsets, expected_offsets);
+  }
 };
 
 TEST_F(DeduplicateItemsResEntryWriterTest, DeduplicateItemEntries) {
@@ -100,13 +127,26 @@ TEST_F(DeduplicateItemsResEntryWriterTest, DeduplicateItemEntries) {
           .AddSimple("com.app.test:id/id3", ResourceId(0x7f010002))
           .Build();
 
-  BigBuffer out(512);
-  DeduplicateItemsResEntryWriter writer(&out);
-  auto offsets = WriteAllEntries(table->GetPartitionedView(), writer);
+  {
+    BigBuffer out(512);
+    DeduplicateItemsResEntryWriter<false> writer(&out);
+    auto offsets = WriteAllEntries(table->GetPartitionedView(), writer);
 
-  std::vector<int32_t> expected_offsets{0, 0, 0};
-  EXPECT_EQ(out.size(), sizeof(ResEntryValuePair));
-  EXPECT_EQ(offsets, expected_offsets);
+    std::vector<int32_t> expected_offsets{0, 0, 0};
+    EXPECT_EQ(out.size(), sizeof(ResEntryValuePair));
+    EXPECT_EQ(offsets, expected_offsets);
+  }
+
+  {
+    /* expect a compact entry to only take sizeof(ResTable_entry) */
+    BigBuffer out(512);
+    DeduplicateItemsResEntryWriter<true> writer(&out);
+    auto offsets = WriteAllEntries(table->GetPartitionedView(), writer);
+
+    std::vector<int32_t> expected_offsets{0, 0, 0};
+    EXPECT_EQ(out.size(), sizeof(ResTable_entry));
+    EXPECT_EQ(offsets, expected_offsets);
+  }
 };
 
 TEST_F(DeduplicateItemsResEntryWriterTest, WriteMapEntriesOneByOne) {
@@ -126,13 +166,26 @@ TEST_F(DeduplicateItemsResEntryWriterTest, WriteMapEntriesOneByOne) {
                                              .AddValue("com.app.test:array/arr2", std::move(array2))
                                              .Build();
 
-  BigBuffer out(512);
-  DeduplicateItemsResEntryWriter writer(&out);
-  auto offsets = WriteAllEntries(table->GetPartitionedView(), writer);
+  {
+    BigBuffer out(512);
+    DeduplicateItemsResEntryWriter<false> writer(&out);
+    auto offsets = WriteAllEntries(table->GetPartitionedView(), writer);
 
-  std::vector<int32_t> expected_offsets{0, sizeof(ResTable_entry_ext) + 2 * sizeof(ResTable_map)};
-  EXPECT_EQ(out.size(), 2 * (sizeof(ResTable_entry_ext) + 2 * sizeof(ResTable_map)));
-  EXPECT_EQ(offsets, expected_offsets);
-};
+    std::vector<int32_t> expected_offsets{0, sizeof(ResTable_entry_ext) + 2 * sizeof(ResTable_map)};
+    EXPECT_EQ(out.size(), 2 * (sizeof(ResTable_entry_ext) + 2 * sizeof(ResTable_map)));
+    EXPECT_EQ(offsets, expected_offsets);
+  }
+
+  {
+    /* compact_entry should have no impact to map items */
+    BigBuffer out(512);
+    DeduplicateItemsResEntryWriter<true> writer(&out);
+    auto offsets = WriteAllEntries(table->GetPartitionedView(), writer);
+
+    std::vector<int32_t> expected_offsets{0, sizeof(ResTable_entry_ext) + 2 * sizeof(ResTable_map)};
+    EXPECT_EQ(out.size(), 2 * (sizeof(ResTable_entry_ext) + 2 * sizeof(ResTable_map)));
+    EXPECT_EQ(offsets, expected_offsets);
+  }
+ };
 
 }  // namespace aapt

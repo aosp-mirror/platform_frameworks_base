@@ -59,11 +59,11 @@ class BindServiceOnMainThreadDetector : Detector(), SourceCodeScanner {
                     !hasWorkerThreadAnnotation(context, node.getParentOfType(UClass::class.java))
             ) {
                 context.report(
-                    ISSUE,
-                    method,
-                    context.getLocation(node),
-                    "This method should be annotated with `@WorkerThread` because " +
-                        "it calls ${method.name}",
+                    issue = ISSUE,
+                    location = context.getLocation(node),
+                    message =
+                        "This method should be annotated with `@WorkerThread` because " +
+                            "it calls ${method.name}",
                 )
             }
         }

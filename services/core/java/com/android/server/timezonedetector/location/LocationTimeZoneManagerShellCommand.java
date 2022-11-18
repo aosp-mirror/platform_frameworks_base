@@ -15,6 +15,10 @@
  */
 package com.android.server.timezonedetector.location;
 
+import static android.app.time.DetectorStatusTypes.DETECTION_ALGORITHM_STATUS_NOT_RUNNING;
+import static android.app.time.DetectorStatusTypes.DETECTION_ALGORITHM_STATUS_NOT_SUPPORTED;
+import static android.app.time.DetectorStatusTypes.DETECTION_ALGORITHM_STATUS_RUNNING;
+import static android.app.time.DetectorStatusTypes.DETECTION_ALGORITHM_STATUS_UNKNOWN;
 import static android.app.time.LocationTimeZoneManager.DUMP_STATE_OPTION_PROTO;
 import static android.app.time.LocationTimeZoneManager.NULL_PACKAGE_NAME_TOKEN;
 import static android.app.time.LocationTimeZoneManager.SERVICE_NAME;
@@ -51,9 +55,14 @@ import static com.android.server.timezonedetector.location.LocationTimeZoneProvi
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.time.DetectorStatusTypes.DetectionAlgorithmStatus;
 import android.app.time.GeolocationTimeZoneSuggestionProto;
+import android.app.time.LocationTimeZoneAlgorithmStatus;
+import android.app.time.LocationTimeZoneAlgorithmStatusProto;
 import android.app.time.LocationTimeZoneManagerProto;
 import android.app.time.LocationTimeZoneManagerServiceStateProto;
+import android.app.time.LocationTimeZoneProviderEventProto;
+import android.app.time.TimeZoneDetectorProto;
 import android.app.time.TimeZoneProviderStateProto;
 import android.app.timezonedetector.TimeZoneDetector;
 import android.os.ShellCommand;
@@ -62,6 +71,7 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.dump.DualDumpOutputStream;
 import com.android.server.timezonedetector.GeolocationTimeZoneSuggestion;
+import com.android.server.timezonedetector.LocationAlgorithmEvent;
 import com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.ProviderStateEnum;
 import com.android.server.timezonedetector.location.LocationTimeZoneProviderController.State;
 
@@ -239,19 +249,39 @@ class LocationTimeZoneManagerShellCommand extends ShellCommand {
             outputStream = new DualDumpOutputStream(
                     new IndentingPrintWriter(getOutPrintWriter(), "  "));
         }
-        if (state.getLastSuggestion() != null) {
-            GeolocationTimeZoneSuggestion lastSuggestion = state.getLastSuggestion();
-            long lastSuggestionToken = outputStream.start(
-                    "last_suggestion", LocationTimeZoneManagerServiceStateProto.LAST_SUGGESTION);
-            for (String zoneId : lastSuggestion.getZoneIds()) {
-                outputStream.write(
-                        "zone_ids" , GeolocationTimeZoneSuggestionProto.ZONE_IDS, zoneId);
+
+        if (state.getLastEvent() != null) {
+            LocationAlgorithmEvent lastEvent = state.getLastEvent();
+            long lastEventToken = outputStream.start(
+                    "last_event", LocationTimeZoneManagerServiceStateProto.LAST_EVENT);
+
+            // lastEvent.algorithmStatus
+            LocationTimeZoneAlgorithmStatus algorithmStatus = lastEvent.getAlgorithmStatus();
+            long algorithmStatusToken = outputStream.start(
+                    "algorithm_status", LocationTimeZoneProviderEventProto.ALGORITHM_STATUS);
+            outputStream.write("status", LocationTimeZoneAlgorithmStatusProto.STATUS,
+                    convertDetectionAlgorithmStatusToEnumToProtoEnum(algorithmStatus.getStatus()));
+            outputStream.end(algorithmStatusToken);
+
+            // lastEvent.suggestion
+            if (lastEvent.getSuggestion() != null) {
+                long suggestionToken = outputStream.start(
+                        "suggestion", LocationTimeZoneProviderEventProto.SUGGESTION);
+                GeolocationTimeZoneSuggestion lastSuggestion = lastEvent.getSuggestion();
+                for (String zoneId : lastSuggestion.getZoneIds()) {
+                    outputStream.write(
+                            "zone_ids", GeolocationTimeZoneSuggestionProto.ZONE_IDS, zoneId);
+                }
+                outputStream.end(suggestionToken);
             }
-            for (String debugInfo : lastSuggestion.getDebugInfo()) {
+
+            // lastEvent.debugInfo
+            for (String debugInfo : lastEvent.getDebugInfo()) {
                 outputStream.write(
-                        "debug_info", GeolocationTimeZoneSuggestionProto.DEBUG_INFO, debugInfo);
+                        "debug_info", LocationTimeZoneProviderEventProto.DEBUG_INFO, debugInfo);
             }
-            outputStream.end(lastSuggestionToken);
+
+            outputStream.end(lastEventToken);
         }
 
         writeControllerStates(outputStream, state.getControllerStates());
@@ -327,6 +357,22 @@ class LocationTimeZoneManagerShellCommand extends ShellCommand {
             default: {
                 throw new IllegalArgumentException("Unknown stateEnum=" + stateEnum);
             }
+        }
+    }
+
+    private static int convertDetectionAlgorithmStatusToEnumToProtoEnum(
+            @DetectionAlgorithmStatus int statusEnum) {
+        switch (statusEnum) {
+            case DETECTION_ALGORITHM_STATUS_UNKNOWN:
+                return TimeZoneDetectorProto.DETECTION_ALGORITHM_STATUS_UNKNOWN;
+            case DETECTION_ALGORITHM_STATUS_NOT_SUPPORTED:
+                return TimeZoneDetectorProto.DETECTION_ALGORITHM_STATUS_NOT_SUPPORTED;
+            case DETECTION_ALGORITHM_STATUS_NOT_RUNNING:
+                return TimeZoneDetectorProto.DETECTION_ALGORITHM_STATUS_NOT_RUNNING;
+            case DETECTION_ALGORITHM_STATUS_RUNNING:
+                return TimeZoneDetectorProto.DETECTION_ALGORITHM_STATUS_RUNNING;
+            default:
+                throw new IllegalArgumentException("Unknown statusEnum=" + statusEnum);
         }
     }
 

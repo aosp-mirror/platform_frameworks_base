@@ -427,7 +427,7 @@
     <string name="transcode_notification" msgid="5560515979793436168">"Vis omkodingsvarsler"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"Slå av omkodingsbuffer"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Aktive tjenester"</string>
-    <string name="runningservices_settings_summary" msgid="1046080643262665743">"Se og kontrollér tjenester som kjører"</string>
+    <string name="runningservices_settings_summary" msgid="1046080643262665743">"Se og kontroller tjenester som kjører"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView-implementering"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"Angi WebView-implementering"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"Dette valget er ikke gyldig lenger. Prøv på nytt."</string>

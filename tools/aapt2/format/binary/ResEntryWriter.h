@@ -27,6 +27,11 @@
 
 namespace aapt {
 
+using android::BigBuffer;
+using android::Res_value;
+using android::ResTable_entry;
+using android::ResTable_map;
+
 struct FlatEntry {
   const ResourceTableEntryView* entry;
   const Value* value;
@@ -39,28 +44,42 @@ struct FlatEntry {
 // We introduce this structure for ResEntryWriter to a have single allocation using
 // BigBuffer::NextBlock which allows to return it back with BigBuffer::Backup.
 struct ResEntryValuePair {
-  android::ResTable_entry entry;
-  android::Res_value value;
+  ResTable_entry entry;
+  Res_value value;
 };
 
-// References ResEntryValuePair object stored in BigBuffer used as a key in std::unordered_map.
-// Allows access to memory address where ResEntryValuePair is stored.
-union ResEntryValuePairRef {
-  const std::reference_wrapper<const ResEntryValuePair> pair;
+static_assert(sizeof(ResEntryValuePair) == sizeof(ResTable_entry) + sizeof(Res_value),
+              "ResEntryValuePair must not have padding between entry and value.");
+
+template <bool compact>
+using ResEntryValue = std::conditional_t<compact, ResTable_entry, ResEntryValuePair>;
+
+// References ResEntryValue object stored in BigBuffer used as a key in std::unordered_map.
+// Allows access to memory address where ResEntryValue is stored.
+template <bool compact>
+union ResEntryValueRef {
+  using T = ResEntryValue<compact>;
+  const std::reference_wrapper<const T> ref;
   const u_char* ptr;
 
-  explicit ResEntryValuePairRef(const ResEntryValuePair& ref) : pair(ref) {
+  explicit ResEntryValueRef(const T& rev) : ref(rev) {
   }
 };
 
-// Hasher which computes hash of ResEntryValuePair using its bytes representation in memory.
-struct ResEntryValuePairContentHasher {
-  std::size_t operator()(const ResEntryValuePairRef& ref) const;
+// Hasher which computes hash of ResEntryValue using its bytes representation in memory.
+struct ResEntryValueContentHasher {
+  template <typename R>
+  std::size_t operator()(const R& ref) const {
+    return android::JenkinsHashMixBytes(0, ref.ptr, sizeof(typename R::T));
+  }
 };
 
 // Equaler which compares ResEntryValuePairs using theirs bytes representation in memory.
-struct ResEntryValuePairContentEqualTo {
-  bool operator()(const ResEntryValuePairRef& a, const ResEntryValuePairRef& b) const;
+struct ResEntryValueContentEqualTo {
+  template <typename R>
+  bool operator()(const R& a, const R& b) const {
+    return std::memcmp(a.ptr, b.ptr, sizeof(typename R::T)) == 0;
+  }
 };
 
 // Base class that allows to write FlatEntries into entries_buffer.
@@ -79,9 +98,9 @@ class ResEntryWriter {
   }
 
  protected:
-  ResEntryWriter(android::BigBuffer* entries_buffer) : entries_buffer_(entries_buffer) {
+  ResEntryWriter(BigBuffer* entries_buffer) : entries_buffer_(entries_buffer) {
   }
-  android::BigBuffer* entries_buffer_;
+  BigBuffer* entries_buffer_;
 
   virtual int32_t WriteItem(const FlatEntry* entry) = 0;
 
@@ -91,18 +110,29 @@ class ResEntryWriter {
   DISALLOW_COPY_AND_ASSIGN(ResEntryWriter);
 };
 
+int32_t WriteMapToBuffer(const FlatEntry* map_entry, BigBuffer* buffer);
+
+template <bool compact_entry, typename T=ResEntryValue<compact_entry>>
+std::pair<int32_t, T*> WriteItemToBuffer(const FlatEntry* item_entry, BigBuffer* buffer);
+
 // ResEntryWriter which writes FlatEntries sequentially into entries_buffer.
 // Next entry is always written right after previous one in the buffer.
+template <bool compact_entry = false>
 class SequentialResEntryWriter : public ResEntryWriter {
  public:
-  explicit SequentialResEntryWriter(android::BigBuffer* entries_buffer)
+  explicit SequentialResEntryWriter(BigBuffer* entries_buffer)
       : ResEntryWriter(entries_buffer) {
   }
   ~SequentialResEntryWriter() override = default;
 
-  int32_t WriteItem(const FlatEntry* entry) override;
+  int32_t WriteItem(const FlatEntry* entry) override {
+      auto result = WriteItemToBuffer<compact_entry>(entry, entries_buffer_);
+      return result.first;
+  }
 
-  int32_t WriteMap(const FlatEntry* entry) override;
+  int32_t WriteMap(const FlatEntry* entry) override {
+      return WriteMapToBuffer(entry, entries_buffer_);
+  }
 
  private:
   DISALLOW_COPY_AND_ASSIGN(SequentialResEntryWriter);
@@ -111,23 +141,42 @@ class SequentialResEntryWriter : public ResEntryWriter {
 // ResEntryWriter that writes only unique entry and value pairs into entries_buffer.
 // Next entry is written into buffer only if there is no entry with the same bytes representation
 // in memory written before. Otherwise returns offset of already written entry.
+template <bool compact_entry = false>
 class DeduplicateItemsResEntryWriter : public ResEntryWriter {
  public:
-  explicit DeduplicateItemsResEntryWriter(android::BigBuffer* entries_buffer)
+  explicit DeduplicateItemsResEntryWriter(BigBuffer* entries_buffer)
       : ResEntryWriter(entries_buffer) {
   }
   ~DeduplicateItemsResEntryWriter() override = default;
 
-  int32_t WriteItem(const FlatEntry* entry) override;
+  int32_t WriteItem(const FlatEntry* entry) override {
+    const auto& [offset, out_entry] = WriteItemToBuffer<compact_entry>(entry, entries_buffer_);
 
-  int32_t WriteMap(const FlatEntry* entry) override;
+    auto [it, inserted] = entry_offsets.insert({Ref{*out_entry}, offset});
+    if (inserted) {
+      // If inserted just return a new offset as this is a first time we store
+      // this entry
+      return offset;
+    }
+
+    // If not inserted this means that this is a duplicate, backup allocated block to the buffer
+    // and return offset of previously stored entry
+    entries_buffer_->BackUp(sizeof(*out_entry));
+    return it->second;
+  }
+
+  int32_t WriteMap(const FlatEntry* entry) override {
+      return WriteMapToBuffer(entry, entries_buffer_);
+  }
 
  private:
   DISALLOW_COPY_AND_ASSIGN(DeduplicateItemsResEntryWriter);
 
-  std::unordered_map<ResEntryValuePairRef, int32_t, ResEntryValuePairContentHasher,
-                     ResEntryValuePairContentEqualTo>
-      entry_offsets;
+  using Ref = ResEntryValueRef<compact_entry>;
+  using Map = std::unordered_map<Ref, int32_t,
+                        ResEntryValueContentHasher,
+                        ResEntryValueContentEqualTo>;
+  Map entry_offsets;
 };
 
 }  // namespace aapt

@@ -16,7 +16,6 @@
 
 package com.android.systemui.util;
 
-import android.content.Context;
 import android.provider.DeviceConfig;
 import android.provider.DeviceConfig.OnPropertiesChangedListener;
 import android.provider.DeviceConfig.Properties;
@@ -83,7 +82,7 @@ public class DeviceConfigProxyFake extends DeviceConfigProxy {
     }
 
     @Override
-    public void enforceReadPermission(Context context, String namespace) {
+    public void enforceReadPermission(String namespace) {
         // no-op
     }
 

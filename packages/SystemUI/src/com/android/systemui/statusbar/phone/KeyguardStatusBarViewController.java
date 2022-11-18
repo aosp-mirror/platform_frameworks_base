@@ -59,13 +59,11 @@ import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.fragment.StatusBarIconBlocklistKt;
 import com.android.systemui.statusbar.phone.fragment.StatusBarSystemEventAnimator;
-import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserInfoTracker;
-import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherController;
-import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherFeatureController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserInfoController;
+import com.android.systemui.user.ui.viewmodel.StatusBarUserChipViewModel;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.settings.SecureSettings;
 
@@ -110,9 +108,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
     private final SysuiStatusBarStateController mStatusBarStateController;
     private final StatusBarContentInsetsProvider mInsetsProvider;
     private final UserManager mUserManager;
-    private final StatusBarUserSwitcherFeatureController mFeatureController;
-    private final StatusBarUserSwitcherController mUserSwitcherController;
-    private final StatusBarUserInfoTracker mStatusBarUserInfoTracker;
+    private final StatusBarUserChipViewModel mStatusBarUserChipViewModel;
     private final SecureSettings mSecureSettings;
     private final CommandQueue mCommandQueue;
     private final Executor mMainExecutor;
@@ -276,9 +272,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
             SysuiStatusBarStateController statusBarStateController,
             StatusBarContentInsetsProvider statusBarContentInsetsProvider,
             UserManager userManager,
-            StatusBarUserSwitcherFeatureController featureController,
-            StatusBarUserSwitcherController userSwitcherController,
-            StatusBarUserInfoTracker statusBarUserInfoTracker,
+            StatusBarUserChipViewModel userChipViewModel,
             SecureSettings secureSettings,
             CommandQueue commandQueue,
             @Main Executor mainExecutor,
@@ -301,9 +295,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
         mStatusBarStateController = statusBarStateController;
         mInsetsProvider = statusBarContentInsetsProvider;
         mUserManager = userManager;
-        mFeatureController = featureController;
-        mUserSwitcherController = userSwitcherController;
-        mStatusBarUserInfoTracker = statusBarUserInfoTracker;
+        mStatusBarUserChipViewModel = userChipViewModel;
         mSecureSettings = secureSettings;
         mCommandQueue = commandQueue;
         mMainExecutor = mainExecutor;
@@ -328,8 +320,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
                 R.dimen.header_notifications_collide_distance);
 
         mView.setKeyguardUserAvatarEnabled(
-                !mFeatureController.isStatusBarUserSwitcherFeatureEnabled());
-        mFeatureController.addCallback(enabled -> mView.setKeyguardUserAvatarEnabled(!enabled));
+                !mStatusBarUserChipViewModel.getChipEnabled());
         mSystemEventAnimator = new StatusBarSystemEventAnimator(mView, r);
 
         mDisableStateTracker = new DisableStateTracker(
@@ -344,11 +335,11 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
         super.onInit();
         mCarrierTextController.init();
         mBatteryMeterViewController.init();
-        mUserSwitcherController.init();
     }
 
     @Override
     protected void onViewAttached() {
+        mView.init(mStatusBarUserChipViewModel);
         mConfigurationController.addCallback(mConfigurationListener);
         mAnimationScheduler.addCallback(mAnimationCallback);
         mUserInfoController.addCallback(mOnUserInfoChangedListener);
@@ -394,9 +385,6 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
     /** Sets whether user switcher is enabled. */
     public void setKeyguardUserSwitcherEnabled(boolean enabled) {
         mView.setKeyguardUserSwitcherEnabled(enabled);
-        // We don't have a listener for when the user switcher setting changes, so this is
-        // where we re-check the state
-        mStatusBarUserInfoTracker.checkEnabled();
     }
 
     /** Sets whether this controller should listen to battery updates. */

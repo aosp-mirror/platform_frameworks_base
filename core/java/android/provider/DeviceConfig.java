@@ -25,9 +25,6 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
-import android.app.ActivityThread;
-import android.content.ContentResolver;
-import android.content.Context;
 import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.net.Uri;
@@ -882,9 +879,8 @@ public final class DeviceConfig {
     @NonNull
     @RequiresPermission(READ_DEVICE_CONFIG)
     public static Properties getProperties(@NonNull String namespace, @NonNull String ... names) {
-        ContentResolver contentResolver = ActivityThread.currentApplication().getContentResolver();
         return new Properties(namespace,
-                Settings.Config.getStrings(contentResolver, namespace, Arrays.asList(names)));
+                Settings.Config.getStrings(namespace, Arrays.asList(names)));
     }
 
     /**
@@ -1023,8 +1019,7 @@ public final class DeviceConfig {
     @RequiresPermission(WRITE_DEVICE_CONFIG)
     public static boolean setProperty(@NonNull String namespace, @NonNull String name,
             @Nullable String value, boolean makeDefault) {
-        ContentResolver contentResolver = ActivityThread.currentApplication().getContentResolver();
-        return Settings.Config.putString(contentResolver, namespace, name, value, makeDefault);
+        return Settings.Config.putString(namespace, name, value, makeDefault);
     }
 
     /**
@@ -1045,8 +1040,7 @@ public final class DeviceConfig {
     @SystemApi
     @RequiresPermission(WRITE_DEVICE_CONFIG)
     public static boolean setProperties(@NonNull Properties properties) throws BadConfigException {
-        ContentResolver contentResolver = ActivityThread.currentApplication().getContentResolver();
-        return Settings.Config.setStrings(contentResolver, properties.getNamespace(),
+        return Settings.Config.setStrings(properties.getNamespace(),
                 properties.mMap);
     }
 
@@ -1062,8 +1056,7 @@ public final class DeviceConfig {
     @SystemApi
     @RequiresPermission(WRITE_DEVICE_CONFIG)
     public static boolean deleteProperty(@NonNull String namespace, @NonNull String name) {
-        ContentResolver contentResolver = ActivityThread.currentApplication().getContentResolver();
-        return Settings.Config.deleteString(contentResolver, namespace, name);
+        return Settings.Config.deleteString(namespace, name);
     }
 
     /**
@@ -1094,8 +1087,7 @@ public final class DeviceConfig {
     @SystemApi
     @RequiresPermission(WRITE_DEVICE_CONFIG)
     public static void resetToDefaults(@ResetMode int resetMode, @Nullable String namespace) {
-        ContentResolver contentResolver = ActivityThread.currentApplication().getContentResolver();
-        Settings.Config.resetToDefaults(contentResolver, resetMode, namespace);
+        Settings.Config.resetToDefaults(resetMode, namespace);
     }
 
     /**
@@ -1112,8 +1104,7 @@ public final class DeviceConfig {
      */
     @RequiresPermission(WRITE_DEVICE_CONFIG)
     public static void setSyncDisabledMode(@SyncDisabledMode int syncDisabledMode) {
-        ContentResolver contentResolver = ActivityThread.currentApplication().getContentResolver();
-        Settings.Config.setSyncDisabledMode(contentResolver, syncDisabledMode);
+        Settings.Config.setSyncDisabledMode(syncDisabledMode);
     }
 
     /**
@@ -1124,8 +1115,7 @@ public final class DeviceConfig {
      */
     @RequiresPermission(WRITE_DEVICE_CONFIG)
     public static @SyncDisabledMode int getSyncDisabledMode() {
-        ContentResolver contentResolver = ActivityThread.currentApplication().getContentResolver();
-        return Settings.Config.getSyncDisabledMode(contentResolver);
+        return Settings.Config.getSyncDisabledMode();
     }
 
     /**
@@ -1148,8 +1138,7 @@ public final class DeviceConfig {
             @NonNull String namespace,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull OnPropertiesChangedListener onPropertiesChangedListener) {
-        enforceReadPermission(ActivityThread.currentApplication().getApplicationContext(),
-                namespace);
+        enforceReadPermission(namespace);
         synchronized (sLock) {
             Pair<String, Executor> oldNamespace = sListeners.get(onPropertiesChangedListener);
             if (oldNamespace == null) {
@@ -1216,7 +1205,7 @@ public final class DeviceConfig {
                     }
                 }
             };
-            ActivityThread.currentApplication().getContentResolver()
+            Settings.Config
                     .registerContentObserver(createNamespaceUri(namespace), true, contentObserver);
             sNamespaces.put(namespace, new Pair<>(contentObserver, 1));
         }
@@ -1240,8 +1229,7 @@ public final class DeviceConfig {
             sNamespaces.put(namespace, new Pair<>(namespaceCount.first, namespaceCount.second - 1));
         } else {
             // Decrementing a namespace to zero means we no longer need its ContentObserver.
-            ActivityThread.currentApplication().getContentResolver()
-                    .unregisterContentObserver(namespaceCount.first);
+            Settings.Config.unregisterContentObserver(namespaceCount.first);
             sNamespaces.remove(namespace);
         }
     }
@@ -1281,8 +1269,8 @@ public final class DeviceConfig {
      * Enforces READ_DEVICE_CONFIG permission if namespace is not one of public namespaces.
      * @hide
      */
-    public static void enforceReadPermission(Context context, String namespace) {
-        if (context.checkCallingOrSelfPermission(READ_DEVICE_CONFIG)
+    public static void enforceReadPermission(String namespace) {
+        if (Settings.Config.checkCallingOrSelfPermission(READ_DEVICE_CONFIG)
                 != PackageManager.PERMISSION_GRANTED) {
             if (!PUBLIC_NAMESPACES.contains(namespace)) {
                 throw new SecurityException("Permission denial: reading from settings requires:"

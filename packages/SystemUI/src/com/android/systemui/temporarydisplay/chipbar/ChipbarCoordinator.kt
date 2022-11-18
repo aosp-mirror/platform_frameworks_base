@@ -174,7 +174,7 @@ open class ChipbarCoordinator @Inject constructor(
             chipInnerView,
             ViewHierarchyAnimator.Hotspot.TOP,
             Interpolators.EMPHASIZED_DECELERATE,
-            duration = ANIMATION_DURATION,
+            duration = ANIMATION_IN_DURATION,
             includeMargins = true,
             includeFadeIn = true,
             // We can only request focus once the animation finishes.
@@ -187,7 +187,7 @@ open class ChipbarCoordinator @Inject constructor(
             view.requireViewById<ViewGroup>(R.id.chipbar_inner),
             ViewHierarchyAnimator.Hotspot.TOP,
             Interpolators.EMPHASIZED_ACCELERATE,
-            ANIMATION_DURATION,
+            ANIMATION_OUT_DURATION,
             includeMargins = true,
             onAnimationEnd,
         )
@@ -208,4 +208,5 @@ open class ChipbarCoordinator @Inject constructor(
     }
 }
 
-private const val ANIMATION_DURATION = 500L
+private const val ANIMATION_IN_DURATION = 500L
+private const val ANIMATION_OUT_DURATION = 250L

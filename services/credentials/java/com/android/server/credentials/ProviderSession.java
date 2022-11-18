@@ -22,9 +22,11 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.credentials.Credential;
 import android.credentials.ui.ProviderData;
-import android.os.Bundle;
+import android.credentials.ui.ProviderPendingIntentResponse;
+import android.service.credentials.Action;
 import android.service.credentials.CredentialProviderException;
 import android.service.credentials.CredentialProviderInfo;
+import android.util.Pair;
 
 import java.util.UUID;
 
@@ -33,10 +35,10 @@ import java.util.UUID;
  * @param <T> The request to be sent to the provider
  * @param <R> The response to be expected from the provider
  */
-public abstract class ProviderSession<T, R> implements RemoteCredentialService.ProviderCallbacks<R>,
-        ProviderIntentController.ProviderIntentControllerCallback {
-    // Key to be used as the entry key for an action entry
-    protected static final String ACTION_ENTRY_KEY = "action_key";
+public abstract class ProviderSession<T, R>
+        implements RemoteCredentialService.ProviderCallbacks<R> {
+    // Key to be used as an entry key for a remote entry
+    protected static final String REMOTE_ENTRY_KEY = "remote_entry_key";
 
     @NonNull protected final Context mContext;
     @NonNull protected final ComponentName mComponentName;
@@ -45,17 +47,18 @@ public abstract class ProviderSession<T, R> implements RemoteCredentialService.P
     @NonNull protected final int mUserId;
     @NonNull protected Status mStatus = Status.NOT_STARTED;
     @NonNull protected final ProviderInternalCallback mCallbacks;
-    @NonNull protected final ProviderIntentController mProviderIntentController;
     @Nullable protected Credential mFinalCredentialResponse;
     @NonNull protected final T mProviderRequest;
     @Nullable protected R mProviderResponse;
+    @Nullable protected Pair<String, Action> mUiRemoteEntry;
 
     /**
      * Returns true if the given status reflects that the provider state is ready to be shown
      * on the credMan UI.
      */
     public static boolean isUiInvokingStatus(Status status) {
-        return status == Status.CREDENTIALS_RECEIVED || status == Status.SAVE_ENTRIES_RECEIVED;
+        return status == Status.CREDENTIALS_RECEIVED || status == Status.SAVE_ENTRIES_RECEIVED
+                || status == Status.REQUIRES_AUTHENTICATION;
     }
 
     /**
@@ -86,12 +89,14 @@ public abstract class ProviderSession<T, R> implements RemoteCredentialService.P
      * Interface to be implemented by any class that wishes to get a callback when a particular
      * provider session's status changes. Typically, implemented by the {@link RequestSession}
      * class.
+     * @param <V> the type of the final response expected
      */
-    public interface ProviderInternalCallback {
-        /**
-         * Called when status changes.
-         */
+    public interface ProviderInternalCallback<V> {
+        /** Called when status changes. */
         void onProviderStatusChanged(Status status, ComponentName componentName);
+
+        /** Called when the final credential to be returned to the client has been received. */
+        void onFinalResponseReceived(ComponentName componentName, V response);
     }
 
     protected ProviderSession(@NonNull Context context, @NonNull CredentialProviderInfo info,
@@ -106,7 +111,6 @@ public abstract class ProviderSession<T, R> implements RemoteCredentialService.P
         mUserId = userId;
         mComponentName = info.getServiceInfo().getComponentName();
         mRemoteCredentialService = remoteCredentialService;
-        mProviderIntentController = new ProviderIntentController(userId, context, this);
     }
 
     /** Provider status at various states of the request session. */
@@ -164,6 +168,11 @@ public abstract class ProviderSession<T, R> implements RemoteCredentialService.P
         mCallbacks.onProviderStatusChanged(status, mComponentName);
     }
 
+    protected void onRemoteEntrySelected(
+            ProviderPendingIntentResponse providerPendingIntentResponse) {
+        //TODO: Implement
+    }
+
     /** Get the request to be sent to the provider. */
     protected T getProviderRequest() {
         return mProviderRequest;
@@ -179,12 +188,6 @@ public abstract class ProviderSession<T, R> implements RemoteCredentialService.P
     @Nullable protected abstract ProviderData prepareUiData();
 
     /** Should be overridden to handle the selected entry from the UI. */
-    protected abstract void onUiEntrySelected(String entryType, String entryId);
-
-    @Override
-    public abstract void onProviderIntentResult(Bundle resultData);
-
-    @Override
-    public abstract void onProviderIntentCancelled();
-
+    protected abstract void onUiEntrySelected(String entryType, String entryId,
+            ProviderPendingIntentResponse providerPendingIntentResponse);
 }

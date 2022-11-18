@@ -144,6 +144,6 @@ public class JetpackTaskFragmentOrganizerTest {
                 mock(WindowContainerToken.class), new Configuration(), 0 /* runningActivityCount */,
                 false /* isVisible */, new ArrayList<>(), new Point(),
                 false /* isTaskClearedForReuse */, false /* isTaskFragmentClearedForPip */,
-                new Point());
+                false /* isClearedForReorderActivityToFront */, new Point());
     }
 }
