@@ -19,6 +19,7 @@ package com.android.providers.settings;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 
 import android.content.Context;
 import android.content.pm.UserInfo;
@@ -116,6 +117,8 @@ public class InstallNonMarketAppsDeprecationTest extends BaseSettingsProviderTes
 
     @Test
     public void testValueForNewUser() throws Exception {
+        assumeTrue(mUm.supportsMultipleUsers());
+
         UserInfo newUser = mUm.createUser("TEST_USER", 0);
         mUsersAddedByTest.add(newUser.id);
         String value = getSecureSettingForUserViaShell(newUser.id);
