@@ -33,6 +33,7 @@ import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.KeyguardQuickAffordanceRepository
 import com.android.systemui.keyguard.domain.model.KeyguardQuickAffordanceModel
 import com.android.systemui.keyguard.domain.quickaffordance.FakeKeyguardQuickAffordanceRegistry
+import com.android.systemui.keyguard.shared.model.KeyguardQuickAffordancePickerRepresentation
 import com.android.systemui.keyguard.shared.quickaffordance.ActivationState
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancePosition
 import com.android.systemui.plugins.ActivityStarter
@@ -314,7 +315,13 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
                 .isEqualTo(
                     mapOf(
                         KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START to
-                            listOf(homeControls.key),
+                            listOf(
+                                KeyguardQuickAffordancePickerRepresentation(
+                                    id = homeControls.key,
+                                    name = homeControls.pickerName,
+                                    iconResourceId = homeControls.pickerIconResourceId,
+                                ),
+                            ),
                         KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_END to emptyList(),
                     )
                 )
@@ -343,7 +350,13 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
                 .isEqualTo(
                     mapOf(
                         KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START to
-                            listOf(quickAccessWallet.key),
+                            listOf(
+                                KeyguardQuickAffordancePickerRepresentation(
+                                    id = quickAccessWallet.key,
+                                    name = quickAccessWallet.pickerName,
+                                    iconResourceId = quickAccessWallet.pickerIconResourceId,
+                                ),
+                            ),
                         KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_END to emptyList(),
                     )
                 )
@@ -375,9 +388,21 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
                 .isEqualTo(
                     mapOf(
                         KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START to
-                            listOf(quickAccessWallet.key),
+                            listOf(
+                                KeyguardQuickAffordancePickerRepresentation(
+                                    id = quickAccessWallet.key,
+                                    name = quickAccessWallet.pickerName,
+                                    iconResourceId = quickAccessWallet.pickerIconResourceId,
+                                ),
+                            ),
                         KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_END to
-                            listOf(qrCodeScanner.key),
+                            listOf(
+                                KeyguardQuickAffordancePickerRepresentation(
+                                    id = qrCodeScanner.key,
+                                    name = qrCodeScanner.pickerName,
+                                    iconResourceId = qrCodeScanner.pickerIconResourceId,
+                                ),
+                            ),
                     )
                 )
 
@@ -441,7 +466,13 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
                     mapOf(
                         KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START to emptyList(),
                         KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_END to
-                            listOf(quickAccessWallet.key),
+                            listOf(
+                                KeyguardQuickAffordancePickerRepresentation(
+                                    id = quickAccessWallet.key,
+                                    name = quickAccessWallet.pickerName,
+                                    iconResourceId = quickAccessWallet.pickerIconResourceId,
+                                ),
+                            ),
                     )
                 )
 
@@ -502,7 +533,13 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
                     mapOf(
                         KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START to emptyList(),
                         KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_END to
-                            listOf(quickAccessWallet.key),
+                            listOf(
+                                KeyguardQuickAffordancePickerRepresentation(
+                                    id = quickAccessWallet.key,
+                                    name = quickAccessWallet.pickerName,
+                                    iconResourceId = quickAccessWallet.pickerIconResourceId,
+                                ),
+                            ),
                     )
                 )
 

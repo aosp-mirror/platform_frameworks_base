@@ -199,16 +199,19 @@ class KeyguardQuickAffordanceProvider :
                 arrayOf(
                     Contract.SelectionTable.Columns.SLOT_ID,
                     Contract.SelectionTable.Columns.AFFORDANCE_ID,
+                    Contract.SelectionTable.Columns.AFFORDANCE_NAME,
                 )
             )
             .apply {
-                val affordanceIdsBySlotId = interactor.getSelections()
-                affordanceIdsBySlotId.entries.forEach { (slotId, affordanceIds) ->
-                    affordanceIds.forEach { affordanceId ->
+                val affordanceRepresentationsBySlotId = interactor.getSelections()
+                affordanceRepresentationsBySlotId.entries.forEach {
+                    (slotId, affordanceRepresentations) ->
+                    affordanceRepresentations.forEach { affordanceRepresentation ->
                         addRow(
                             arrayOf(
                                 slotId,
-                                affordanceId,
+                                affordanceRepresentation.id,
+                                affordanceRepresentation.name,
                             )
                         )
                     }
