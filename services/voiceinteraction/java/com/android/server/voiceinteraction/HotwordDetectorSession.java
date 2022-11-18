@@ -105,7 +105,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * A class that provides trusted hotword detector to communicate with the {@link
  * HotwordDetectionService}.
  */
-final class HotwordDetectorSession {
+class HotwordDetectorSession {
     private static final String TAG = "HotwordDetectorSession";
     static final boolean DEBUG = false;
 
@@ -163,7 +163,6 @@ final class HotwordDetectorSession {
     private final HotwordAudioStreamCopier mHotwordAudioStreamCopier;
     private final AtomicBoolean mUpdateStateAfterStartFinished = new AtomicBoolean(false);
     private final IHotwordRecognitionStatusCallback mCallback;
-    private final int mDetectorType;
 
     final Object mLock;
     final int mVoiceInteractionServiceUid;
@@ -200,18 +199,17 @@ final class HotwordDetectorSession {
     HotwordDetectorSession(
             @NonNull HotwordDetectionConnection.ServiceConnection remoteHotwordDetectionService,
             @NonNull Object lock, @NonNull Context context,
-            @NonNull IHotwordRecognitionStatusCallback callback, int detectorType,
-            int voiceInteractionServiceUid, Identity voiceInteractorIdentity,
+            @NonNull IHotwordRecognitionStatusCallback callback, int voiceInteractionServiceUid,
+            Identity voiceInteractorIdentity,
             @NonNull ScheduledExecutorService scheduledExecutorService, boolean logging) {
         mRemoteHotwordDetectionService = remoteHotwordDetectionService;
         mLock = lock;
         mContext = context;
         mCallback = callback;
-        mDetectorType = detectorType;
         mVoiceInteractionServiceUid = voiceInteractionServiceUid;
         mVoiceInteractorIdentity = voiceInteractorIdentity;
         mAppOpsManager = mContext.getSystemService(AppOpsManager.class);
-        mHotwordAudioStreamCopier = new HotwordAudioStreamCopier(mAppOpsManager, detectorType,
+        mHotwordAudioStreamCopier = new HotwordAudioStreamCopier(mAppOpsManager, getDetectorType(),
                 mVoiceInteractorIdentity.uid, mVoiceInteractorIdentity.packageName,
                 mVoiceInteractorIdentity.attributionTag);
         mScheduledExecutorService = scheduledExecutorService;
@@ -241,7 +239,7 @@ final class HotwordDetectorSession {
                     future.complete(null);
                     if (mUpdateStateAfterStartFinished.getAndSet(true)) {
                         Slog.w(TAG, "call callback after timeout");
-                        HotwordMetricsLogger.writeDetectorEvent(mDetectorType,
+                        HotwordMetricsLogger.writeDetectorEvent(getDetectorType(),
                                 HOTWORD_DETECTOR_EVENTS__EVENT__CALLBACK_UPDATE_STATE_AFTER_TIMEOUT,
                                 mVoiceInteractionServiceUid);
                         return;
@@ -251,11 +249,11 @@ final class HotwordDetectorSession {
                     int initResultMetricsResult = statusResultPair.second;
                     try {
                         mCallback.onStatusReported(status);
-                        HotwordMetricsLogger.writeServiceInitResultEvent(mDetectorType,
+                        HotwordMetricsLogger.writeServiceInitResultEvent(getDetectorType(),
                                 initResultMetricsResult);
                     } catch (RemoteException e) {
                         Slog.w(TAG, "Failed to report initialization status: " + e);
-                        HotwordMetricsLogger.writeDetectorEvent(mDetectorType,
+                        HotwordMetricsLogger.writeDetectorEvent(getDetectorType(),
                                 METRICS_CALLBACK_ON_STATUS_REPORTED_EXCEPTION,
                                 mVoiceInteractionServiceUid);
                     }
@@ -263,13 +261,13 @@ final class HotwordDetectorSession {
             };
             try {
                 service.updateState(options, sharedMemory, statusCallback);
-                HotwordMetricsLogger.writeDetectorEvent(mDetectorType,
+                HotwordMetricsLogger.writeDetectorEvent(getDetectorType(),
                         HOTWORD_DETECTOR_EVENTS__EVENT__REQUEST_UPDATE_STATE,
                         mVoiceInteractionServiceUid);
             } catch (RemoteException e) {
                 // TODO: (b/181842909) Report an error to voice interactor
                 Slog.w(TAG, "Failed to updateState for HotwordDetectionService", e);
-                HotwordMetricsLogger.writeDetectorEvent(mDetectorType,
+                HotwordMetricsLogger.writeDetectorEvent(getDetectorType(),
                         HOTWORD_DETECTOR_EVENTS__EVENT__CALL_UPDATE_STATE_EXCEPTION,
                         mVoiceInteractionServiceUid);
             }
@@ -282,11 +280,11 @@ final class HotwordDetectorSession {
                 }
                 try {
                     mCallback.onStatusReported(INITIALIZATION_STATUS_UNKNOWN);
-                    HotwordMetricsLogger.writeServiceInitResultEvent(mDetectorType,
+                    HotwordMetricsLogger.writeServiceInitResultEvent(getDetectorType(),
                             METRICS_INIT_UNKNOWN_TIMEOUT);
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Failed to report initialization status UNKNOWN", e);
-                    HotwordMetricsLogger.writeDetectorEvent(mDetectorType,
+                    HotwordMetricsLogger.writeDetectorEvent(getDetectorType(),
                             METRICS_CALLBACK_ON_STATUS_REPORTED_EXCEPTION,
                             mVoiceInteractionServiceUid);
                 }
@@ -319,7 +317,7 @@ final class HotwordDetectorSession {
 
     void updateStateLocked(PersistableBundle options, SharedMemory sharedMemory,
             Instant lastRestartInstant) {
-        HotwordMetricsLogger.writeDetectorEvent(mDetectorType,
+        HotwordMetricsLogger.writeDetectorEvent(getDetectorType(),
                 HOTWORD_DETECTOR_EVENTS__EVENT__APP_REQUEST_UPDATE_STATE,
                 mVoiceInteractionServiceUid);
         // Prevent doing the init late, so restart is handled equally to a clean process start.
@@ -368,12 +366,12 @@ final class HotwordDetectorSession {
                 }
                 synchronized (mLock) {
                     HotwordMetricsLogger.writeKeyphraseTriggerEvent(
-                            mDetectorType,
+                            getDetectorType(),
                             HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__DETECTED);
                     if (!mPerformingSoftwareHotwordDetection) {
                         Slog.i(TAG, "Hotword detection has already completed");
                         HotwordMetricsLogger.writeKeyphraseTriggerEvent(
-                                mDetectorType,
+                                getDetectorType(),
                                 METRICS_KEYPHRASE_TRIGGERED_DETECT_UNEXPECTED_CALLBACK);
                         return;
                     }
@@ -382,7 +380,7 @@ final class HotwordDetectorSession {
                         enforcePermissionsForDataDelivery();
                     } catch (SecurityException e) {
                         HotwordMetricsLogger.writeKeyphraseTriggerEvent(
-                                mDetectorType,
+                                getDetectorType(),
                                 METRICS_KEYPHRASE_TRIGGERED_DETECT_SECURITY_EXCEPTION);
                         mSoftwareCallback.onError();
                         return;
@@ -411,7 +409,7 @@ final class HotwordDetectorSession {
                     Slog.wtf(TAG, "onRejected");
                 }
                 HotwordMetricsLogger.writeKeyphraseTriggerEvent(
-                        mDetectorType,
+                        getDetectorType(),
                         HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__REJECTED);
                 // onRejected isn't allowed here, and we are not expecting it.
             }
@@ -424,7 +422,7 @@ final class HotwordDetectorSession {
                         null,
                         null,
                         internalCallback));
-        HotwordMetricsLogger.writeDetectorEvent(mDetectorType,
+        HotwordMetricsLogger.writeDetectorEvent(getDetectorType(),
                 HOTWORD_DETECTOR_EVENTS__EVENT__START_SOFTWARE_DETECTION,
                 mVoiceInteractionServiceUid);
     }
@@ -491,12 +489,12 @@ final class HotwordDetectorSession {
                         return;
                     }
                     HotwordMetricsLogger.writeKeyphraseTriggerEvent(
-                            mDetectorType,
+                            getDetectorType(),
                             HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__DETECTED);
                     if (!mValidatingDspTrigger) {
                         Slog.i(TAG, "Ignoring #onDetected due to a process restart");
                         HotwordMetricsLogger.writeKeyphraseTriggerEvent(
-                                mDetectorType,
+                                getDetectorType(),
                                 METRICS_KEYPHRASE_TRIGGERED_DETECT_UNEXPECTED_CALLBACK);
                         return;
                     }
@@ -507,7 +505,7 @@ final class HotwordDetectorSession {
                     } catch (SecurityException e) {
                         Slog.i(TAG, "Ignoring #onDetected due to a SecurityException", e);
                         HotwordMetricsLogger.writeKeyphraseTriggerEvent(
-                                mDetectorType,
+                                getDetectorType(),
                                 METRICS_KEYPHRASE_TRIGGERED_DETECT_SECURITY_EXCEPTION);
                         externalCallback.onError(CALLBACK_ONDETECTED_GOT_SECURITY_EXCEPTION);
                         return;
@@ -543,12 +541,12 @@ final class HotwordDetectorSession {
                         return;
                     }
                     HotwordMetricsLogger.writeKeyphraseTriggerEvent(
-                            mDetectorType,
+                            getDetectorType(),
                             HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__REJECTED);
                     if (!mValidatingDspTrigger) {
                         Slog.i(TAG, "Ignoring #onRejected due to a process restart");
                         HotwordMetricsLogger.writeKeyphraseTriggerEvent(
-                                mDetectorType,
+                                getDetectorType(),
                                 METRICS_KEYPHRASE_TRIGGERED_REJECT_UNEXPECTED_CALLBACK);
                         return;
                     }
@@ -573,13 +571,13 @@ final class HotwordDetectorSession {
                         timeoutDetected.set(true);
                         Slog.w(TAG, "Timed out on #detectFromDspSource");
                         HotwordMetricsLogger.writeKeyphraseTriggerEvent(
-                                mDetectorType,
+                                getDetectorType(),
                                 HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__DETECT_TIMEOUT);
                         try {
                             externalCallback.onError(CALLBACK_DETECT_TIMEOUT);
                         } catch (RemoteException e) {
                             Slog.w(TAG, "Failed to report onError status: ", e);
-                            HotwordMetricsLogger.writeDetectorEvent(mDetectorType,
+                            HotwordMetricsLogger.writeDetectorEvent(getDetectorType(),
                                     HOTWORD_DETECTOR_EVENTS__EVENT__CALLBACK_ON_ERROR_EXCEPTION,
                                     mVoiceInteractionServiceUid);
                         }
@@ -604,8 +602,8 @@ final class HotwordDetectorSession {
         pw.print(prefix); pw.print("mValidatingDspTrigger="); pw.println(mValidatingDspTrigger);
         pw.print(prefix); pw.print("mPerformingSoftwareHotwordDetection=");
         pw.println(mPerformingSoftwareHotwordDetection);
-        pw.print(prefix); pw.print("mDetectorType=");
-        pw.println(HotwordDetector.detectorTypeToString(mDetectorType));
+        pw.print(prefix); pw.print("DetectorType=");
+        pw.println(HotwordDetector.detectorTypeToString(getDetectorType()));
     }
 
     @SuppressWarnings("GuardedBy")
@@ -655,7 +653,7 @@ final class HotwordDetectorSession {
                     callback.onError();
                 } catch (RemoteException ex) {
                     Slog.w(TAG, "Failed to report onError status: " + ex);
-                    HotwordMetricsLogger.writeDetectorEvent(mDetectorType,
+                    HotwordMetricsLogger.writeDetectorEvent(getDetectorType(),
                             HOTWORD_DETECTOR_EVENTS__EVENT__CALLBACK_ON_ERROR_EXCEPTION,
                             mVoiceInteractionServiceUid);
                 }
@@ -680,7 +678,7 @@ final class HotwordDetectorSession {
                                 @Override
                                 public void onRejected(HotwordRejectedResult result)
                                         throws RemoteException {
-                                    HotwordMetricsLogger.writeDetectorEvent(mDetectorType,
+                                    HotwordMetricsLogger.writeDetectorEvent(getDetectorType(),
                                             METRICS_EXTERNAL_SOURCE_REJECTED,
                                             mVoiceInteractionServiceUid);
                                     mScheduledExecutorService.schedule(
@@ -704,7 +702,7 @@ final class HotwordDetectorSession {
                                 @Override
                                 public void onDetected(HotwordDetectedResult triggerResult)
                                         throws RemoteException {
-                                    HotwordMetricsLogger.writeDetectorEvent(mDetectorType,
+                                    HotwordMetricsLogger.writeDetectorEvent(getDetectorType(),
                                             METRICS_EXTERNAL_SOURCE_DETECTED,
                                             mVoiceInteractionServiceUid);
                                     mScheduledExecutorService.schedule(
@@ -717,7 +715,7 @@ final class HotwordDetectorSession {
                                     try {
                                         enforcePermissionsForDataDelivery();
                                     } catch (SecurityException e) {
-                                        HotwordMetricsLogger.writeDetectorEvent(mDetectorType,
+                                        HotwordMetricsLogger.writeDetectorEvent(getDetectorType(),
                                                 METRICS_EXTERNAL_SOURCE_DETECT_SECURITY_EXCEPTION,
                                                 mVoiceInteractionServiceUid);
                                         callback.onError();
@@ -748,7 +746,7 @@ final class HotwordDetectorSession {
                     // A copy of this has been created and passed to the hotword validator
                     bestEffortClose(serviceAudioSource);
                 });
-        HotwordMetricsLogger.writeDetectorEvent(mDetectorType,
+        HotwordMetricsLogger.writeDetectorEvent(getDetectorType(),
                 HOTWORD_DETECTOR_EVENTS__EVENT__START_EXTERNAL_SOURCE_DETECTION,
                 mVoiceInteractionServiceUid);
     }
@@ -793,11 +791,11 @@ final class HotwordDetectorSession {
             try {
                 mCallback.onRejected(new HotwordRejectedResult.Builder().build());
                 HotwordMetricsLogger.writeKeyphraseTriggerEvent(
-                        mDetectorType,
+                        getDetectorType(),
                         HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__REJECTED_FROM_RESTART);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Failed to call #rejected");
-                HotwordMetricsLogger.writeDetectorEvent(mDetectorType,
+                HotwordMetricsLogger.writeDetectorEvent(getDetectorType(),
                         HOTWORD_DETECTOR_EVENTS__EVENT__CALLBACK_ON_REJECTED_EXCEPTION,
                         mVoiceInteractionServiceUid);
             }
@@ -810,7 +808,7 @@ final class HotwordDetectorSession {
             mCallback.onProcessRestarted();
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed to communicate #onProcessRestarted", e);
-            HotwordMetricsLogger.writeDetectorEvent(mDetectorType,
+            HotwordMetricsLogger.writeDetectorEvent(getDetectorType(),
                     HOTWORD_DETECTOR_EVENTS__EVENT__CALLBACK_ON_PROCESS_RESTARTED_EXCEPTION,
                     mVoiceInteractionServiceUid);
         }
@@ -833,7 +831,7 @@ final class HotwordDetectorSession {
             mCallback.onError(status);
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed to report onError status: " + e);
-            HotwordMetricsLogger.writeDetectorEvent(mDetectorType,
+            HotwordMetricsLogger.writeDetectorEvent(getDetectorType(),
                     HOTWORD_DETECTOR_EVENTS__EVENT__CALLBACK_ON_ERROR_EXCEPTION,
                     mVoiceInteractionServiceUid);
         }
@@ -927,5 +925,15 @@ final class HotwordDetectorSession {
         }
         throw new SecurityException("Ignoring #onDetected due to trusted service "
                 + "sharing a keyphrase ID which the DSP did not detect");
+    }
+
+    private int getDetectorType() {
+        if (this instanceof DspTrustedHotwordDetectorSession) {
+            return HotwordDetector.DETECTOR_TYPE_TRUSTED_HOTWORD_DSP;
+        } else if (this instanceof SoftwareTrustedHotwordDetectorSession) {
+            return HotwordDetector.DETECTOR_TYPE_TRUSTED_HOTWORD_SOFTWARE;
+        }
+        Slog.v(TAG, "Unexpected detector type");
+        return -1;
     }
 }

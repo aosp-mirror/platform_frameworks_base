@@ -142,9 +142,17 @@ final class HotwordDetectionConnection {
         mRemoteHotwordDetectionService = mServiceConnectionFactory.createLocked();
         mLastRestartInstant = Instant.now();
 
-        mHotwordDetectorSession = new HotwordDetectorSession(mRemoteHotwordDetectionService,
-                mLock, mContext, callback, mDetectorType, mVoiceInteractionServiceUid,
-                mVoiceInteractorIdentity, mScheduledExecutorService, mDebugHotwordLogging);
+        if (detectorType == HotwordDetector.DETECTOR_TYPE_TRUSTED_HOTWORD_DSP) {
+            mHotwordDetectorSession = new DspTrustedHotwordDetectorSession(
+                    mRemoteHotwordDetectionService, mLock, mContext, callback,
+                    mVoiceInteractionServiceUid, mVoiceInteractorIdentity,
+                    mScheduledExecutorService, mDebugHotwordLogging);
+        } else {
+            mHotwordDetectorSession = new SoftwareTrustedHotwordDetectorSession(
+                    mRemoteHotwordDetectionService, mLock, mContext, callback,
+                    mVoiceInteractionServiceUid, mVoiceInteractorIdentity,
+                    mScheduledExecutorService, mDebugHotwordLogging);
+        }
         mHotwordDetectorSession.initialize(options, sharedMemory);
 
         if (mReStartPeriodSeconds <= 0) {
@@ -232,6 +240,10 @@ final class HotwordDetectionConnection {
             Slog.d(TAG, "startListeningFromMic");
         }
         synchronized (mLock) {
+            if (!(mHotwordDetectorSession instanceof SoftwareTrustedHotwordDetectorSession)) {
+                Slog.d(TAG, "It is not a software detector");
+                return;
+            }
             mHotwordDetectorSession.startListeningFromMicLocked(audioFormat, callback);
         }
     }
@@ -258,6 +270,10 @@ final class HotwordDetectionConnection {
             Slog.d(TAG, "stopListening");
         }
         synchronized (mLock) {
+            if (!(mHotwordDetectorSession instanceof SoftwareTrustedHotwordDetectorSession)) {
+                Slog.d(TAG, "It is not a software detector");
+                return;
+            }
             mHotwordDetectorSession.stopListeningLocked();
         }
     }
@@ -277,6 +293,10 @@ final class HotwordDetectionConnection {
             Slog.d(TAG, "detectFromDspSource");
         }
         synchronized (mLock) {
+            if (!(mHotwordDetectorSession instanceof DspTrustedHotwordDetectorSession)) {
+                Slog.d(TAG, "It is not a Dsp detector");
+                return;
+            }
             mHotwordDetectorSession.detectFromDspSourceLocked(recognitionEvent, externalCallback);
         }
     }
