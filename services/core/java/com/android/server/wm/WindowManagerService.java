@@ -694,6 +694,7 @@ public class WindowManagerService extends IWindowManager.Stub
     // changes the orientation.
     private final PowerManager.WakeLock mScreenFrozenLock;
 
+    final SnapshotPersistQueue mSnapshotPersistQueue;
     final TaskSnapshotController mTaskSnapshotController;
 
     final BlurController mBlurController;
@@ -1200,7 +1201,8 @@ public class WindowManagerService extends IWindowManager.Stub
         mSyncEngine = new BLASTSyncEngine(this);
 
         mWindowPlacerLocked = new WindowSurfacePlacer(this);
-        mTaskSnapshotController = new TaskSnapshotController(this);
+        mSnapshotPersistQueue = new SnapshotPersistQueue();
+        mTaskSnapshotController = new TaskSnapshotController(this, mSnapshotPersistQueue);
 
         mWindowTracing = WindowTracing.createDefaultAndStartLooper(this,
                 Choreographer.getInstance());
@@ -5158,7 +5160,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mSystemReady = true;
         mPolicy.systemReady();
         mRoot.forAllDisplayPolicies(DisplayPolicy::systemReady);
-        mTaskSnapshotController.systemReady();
+        mSnapshotPersistQueue.systemReady();
         mHasWideColorGamutSupport = queryWideColorGamutSupport();
         mHasHdrSupport = queryHdrSupport();
         UiThread.getHandler().post(mSettingsObserver::loadSettings);

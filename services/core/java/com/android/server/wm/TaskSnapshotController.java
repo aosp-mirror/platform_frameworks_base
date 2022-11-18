@@ -50,6 +50,7 @@ import android.window.TaskSnapshot;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
 import com.android.server.policy.WindowManagerPolicy.ScreenOffListener;
+import com.android.server.wm.TaskSnapshotPersister.PersistInfoProvider;
 import com.android.server.wm.utils.InsetUtils;
 
 import com.google.android.collect.Sets;
@@ -93,6 +94,8 @@ class TaskSnapshotController {
     @VisibleForTesting
     static final int SNAPSHOT_MODE_NONE = 2;
 
+    static final String SNAPSHOTS_DIRNAME = "snapshots";
+
     private final WindowManagerService mService;
 
     private final TaskSnapshotCache mCache;
@@ -119,11 +122,14 @@ class TaskSnapshotController {
      * Flag indicating if task snapshot is enabled on this device.
      */
     private boolean mTaskSnapshotEnabled;
+    private final PersistInfoProvider mPersistInfoProvider;
 
-    TaskSnapshotController(WindowManagerService service) {
+    TaskSnapshotController(WindowManagerService service, SnapshotPersistQueue persistQueue) {
         mService = service;
-        mPersister = new TaskSnapshotPersister(mService, Environment::getDataSystemCeDirectory);
-        mLoader = new TaskSnapshotLoader(mPersister);
+        mPersistInfoProvider = createPersistInfoProvider(service,
+                Environment::getDataSystemCeDirectory);
+        mPersister = new TaskSnapshotPersister(persistQueue, mPersistInfoProvider);
+        mLoader = new TaskSnapshotLoader(mPersistInfoProvider);
         mCache = new TaskSnapshotCache(mService, mLoader);
         mIsRunningOnTv = mService.mContext.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_LEANBACK);
@@ -137,8 +143,36 @@ class TaskSnapshotController {
                         .getBoolean(com.android.internal.R.bool.config_disableTaskSnapshots);
     }
 
-    void systemReady() {
-        mPersister.start();
+    static PersistInfoProvider createPersistInfoProvider(WindowManagerService service,
+            TaskSnapshotPersister.DirectoryResolver resolver) {
+        final float highResTaskSnapshotScale = service.mContext.getResources().getFloat(
+                com.android.internal.R.dimen.config_highResTaskSnapshotScale);
+        final float lowResTaskSnapshotScale = service.mContext.getResources().getFloat(
+                com.android.internal.R.dimen.config_lowResTaskSnapshotScale);
+
+        if (lowResTaskSnapshotScale < 0 || 1 <= lowResTaskSnapshotScale) {
+            throw new RuntimeException("Low-res scale must be between 0 and 1");
+        }
+        if (highResTaskSnapshotScale <= 0 || 1 < highResTaskSnapshotScale) {
+            throw new RuntimeException("High-res scale must be between 0 and 1");
+        }
+        if (highResTaskSnapshotScale <= lowResTaskSnapshotScale) {
+            throw new RuntimeException("High-res scale must be greater than low-res scale");
+        }
+
+        final float lowResScaleFactor;
+        final boolean enableLowResSnapshots;
+        if (lowResTaskSnapshotScale > 0) {
+            lowResScaleFactor = lowResTaskSnapshotScale / highResTaskSnapshotScale;
+            enableLowResSnapshots = true;
+        } else {
+            lowResScaleFactor = 0;
+            enableLowResSnapshots = false;
+        }
+        final boolean use16BitFormat = service.mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_use16BitTaskSnapshotPixelFormat);
+        return new PersistInfoProvider(resolver, SNAPSHOTS_DIRNAME,
+                enableLowResSnapshots, lowResScaleFactor, use16BitFormat);
     }
 
     void onTransitionStarting(DisplayContent displayContent) {
@@ -247,7 +281,7 @@ class TaskSnapshotController {
     TaskSnapshot getSnapshot(int taskId, int userId, boolean restoreFromDisk,
             boolean isLowResolution) {
         return mCache.getSnapshot(taskId, userId, restoreFromDisk, isLowResolution
-                && mPersister.enableLowResSnapshots());
+                && mPersistInfoProvider.enableLowResSnapshots());
     }
 
     /**
@@ -310,7 +344,7 @@ class TaskSnapshotController {
         final boolean isShowWallpaper = mainWindow.hasWallpaper();
 
         if (pixelFormat == PixelFormat.UNKNOWN) {
-            pixelFormat = mPersister.use16BitFormat() && activity.fillsParent()
+            pixelFormat = mPersistInfoProvider.use16BitFormat() && activity.fillsParent()
                     && !(isWindowTranslucent && isShowWallpaper)
                     ? PixelFormat.RGB_565
                     : PixelFormat.RGBA_8888;
@@ -416,7 +450,7 @@ class TaskSnapshotController {
         if (checkIfReadyToSnapshot(task) == null) {
             return null;
         }
-        final int pixelFormat = mPersister.use16BitFormat()
+        final int pixelFormat = mPersistInfoProvider.use16BitFormat()
                     ? PixelFormat.RGB_565
                     : PixelFormat.RGBA_8888;
         return createImeSnapshot(task, pixelFormat);
@@ -634,15 +668,6 @@ class TaskSnapshotController {
      */
     void removeObsoleteTaskFiles(ArraySet<Integer> persistentTaskIds, int[] runningUserIds) {
         mPersister.removeObsoleteFiles(persistentTaskIds, runningUserIds);
-    }
-
-    /**
-     * Temporarily pauses/unpauses persisting of task snapshots.
-     *
-     * @param paused Whether task snapshot persisting should be paused.
-     */
-    void setPersisterPaused(boolean paused) {
-        mPersister.setPaused(paused);
     }
 
     /**

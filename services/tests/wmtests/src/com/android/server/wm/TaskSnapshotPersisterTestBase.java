@@ -45,6 +45,7 @@ import android.window.TaskSnapshot;
 
 import com.android.server.LocalServices;
 import com.android.server.pm.UserManagerInternal;
+import com.android.server.wm.TaskSnapshotPersister.PersistInfoProvider;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -66,6 +67,7 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
 
     private ContextWrapper mContextSpy;
     private Resources mResourcesSpy;
+    SnapshotPersistQueue mSnapshotPersistQueue;
     TaskSnapshotPersister mPersister;
     TaskSnapshotLoader mLoader;
     int mTestUserId;
@@ -108,9 +110,12 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
                 com.android.internal.R.dimen.config_lowResTaskSnapshotScale))
                 .thenReturn(mLowResScale);
 
-        mPersister = new TaskSnapshotPersister(mWm, userId -> FILES_DIR);
-        mLoader = new TaskSnapshotLoader(mPersister);
-        mPersister.start();
+        mSnapshotPersistQueue = new SnapshotPersistQueue();
+        PersistInfoProvider provider =
+                TaskSnapshotController.createPersistInfoProvider(mWm, userId -> FILES_DIR);
+        mPersister = new TaskSnapshotPersister(mSnapshotPersistQueue, provider);
+        mLoader = new TaskSnapshotLoader(provider);
+        mSnapshotPersistQueue.start();
     }
 
     @After

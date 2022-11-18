@@ -31,6 +31,7 @@ import android.hardware.HardwareBuffer;
 import android.util.Slog;
 import android.window.TaskSnapshot;
 
+import com.android.server.wm.TaskSnapshotPersister.PersistInfoProvider;
 import com.android.server.wm.nano.WindowManagerProtos.TaskSnapshotProto;
 
 import java.io.File;
@@ -48,10 +49,10 @@ class TaskSnapshotLoader {
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "TaskSnapshotLoader" : TAG_WM;
 
-    private final TaskSnapshotPersister mPersister;
+    private final PersistInfoProvider mPersistInfoProvider;
 
-    TaskSnapshotLoader(TaskSnapshotPersister persister) {
-        mPersister = persister;
+    TaskSnapshotLoader(PersistInfoProvider persistInfoProvider) {
+        mPersistInfoProvider = persistInfoProvider;
     }
 
     static class PreRLegacySnapshotConfig {
@@ -137,14 +138,15 @@ class TaskSnapshotLoader {
      * @return The loaded {@link TaskSnapshot} or {@code null} if it couldn't be loaded.
      */
     TaskSnapshot loadTask(int taskId, int userId, boolean loadLowResolutionBitmap) {
-        final File protoFile = mPersister.getProtoFile(taskId, userId);
+        final File protoFile = mPersistInfoProvider.getProtoFile(taskId, userId);
         if (!protoFile.exists()) {
             return null;
         }
         try {
             final byte[] bytes = Files.readAllBytes(protoFile.toPath());
             final TaskSnapshotProto proto = TaskSnapshotProto.parseFrom(bytes);
-            final File highResBitmap = mPersister.getHighResolutionBitmapFile(taskId, userId);
+            final File highResBitmap = mPersistInfoProvider
+                    .getHighResolutionBitmapFile(taskId, userId);
 
             PreRLegacySnapshotConfig legacyConfig = getLegacySnapshotConfig(proto.taskWidth,
                     proto.legacyScale, highResBitmap.exists(), loadLowResolutionBitmap);
@@ -152,16 +154,16 @@ class TaskSnapshotLoader {
             boolean forceLoadReducedJpeg =
                     legacyConfig != null && legacyConfig.mForceLoadReducedJpeg;
             File bitmapFile = (loadLowResolutionBitmap || forceLoadReducedJpeg)
-                    ? mPersister.getLowResolutionBitmapFile(taskId, userId) : highResBitmap;
+                    ? mPersistInfoProvider.getLowResolutionBitmapFile(taskId, userId)
+                    : highResBitmap;
 
             if (!bitmapFile.exists()) {
                 return null;
             }
 
             final Options options = new Options();
-            options.inPreferredConfig = mPersister.use16BitFormat() && !proto.isTranslucent
-                    ? Config.RGB_565
-                    : Config.ARGB_8888;
+            options.inPreferredConfig = mPersistInfoProvider.use16BitFormat()
+                    && !proto.isTranslucent ? Config.RGB_565 : Config.ARGB_8888;
             final Bitmap bitmap = BitmapFactory.decodeFile(bitmapFile.getPath(), options);
             if (bitmap == null) {
                 Slog.w(TAG, "Failed to load bitmap: " + bitmapFile.getPath());
