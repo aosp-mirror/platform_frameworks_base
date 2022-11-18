@@ -385,7 +385,7 @@ object Flags {
     // 1600 - accessibility
     @JvmField
     val A11Y_FLOATING_MENU_FLING_SPRING_ANIMATIONS =
-        unreleasedFlag(1600, "a11y_floating_menu_fling_spring_animations")
+        unreleasedFlag(1600, "a11y_floating_menu_fling_spring_animations", teamfood = true)
 
     // 1700 - clipboard
     @JvmField val CLIPBOARD_OVERLAY_REFACTOR = releasedFlag(1700, "clipboard_overlay_refactor")
