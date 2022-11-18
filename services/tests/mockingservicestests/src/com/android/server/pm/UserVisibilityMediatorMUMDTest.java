@@ -15,15 +15,12 @@
  */
 package com.android.server.pm;
 
-import static android.os.UserHandle.USER_SYSTEM;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.server.pm.UserManagerInternal.USER_ASSIGNMENT_RESULT_FAILURE;
 import static com.android.server.pm.UserManagerInternal.USER_ASSIGNMENT_RESULT_SUCCESS_INVISIBLE;
 import static com.android.server.pm.UserManagerInternal.USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE;
-
-import static com.google.common.truth.Truth.assertWithMessage;
 
 import org.junit.Test;
 
@@ -41,196 +38,93 @@ public final class UserVisibilityMediatorMUMDTest extends UserVisibilityMediator
     }
 
     @Test
-    public void testStartUser_systemUser() {
-        int result = mMediator.startUser(USER_SYSTEM, USER_SYSTEM, FG, SECONDARY_DISPLAY_ID);
+    public void testStartFgUser_onInvalidDisplay() {
+        int result = mMediator.assignUserToDisplayOnStart(USER_ID, USER_ID, FG, INVALID_DISPLAY);
 
         assertStartUserResult(result, USER_ASSIGNMENT_RESULT_FAILURE);
     }
 
     @Test
-    public void testStartUser_invalidDisplay() {
-        int result = mMediator.startUser(USER_ID, USER_ID, FG, INVALID_DISPLAY);
+    public void testStartBgUser_onInvalidDisplay() {
+        int result = mMediator.assignUserToDisplayOnStart(USER_ID, USER_ID, BG, INVALID_DISPLAY);
 
         assertStartUserResult(result, USER_ASSIGNMENT_RESULT_FAILURE);
+
+        expectUserIsNotVisibleAtAll(USER_ID);
     }
 
     @Test
-    public void testStartUser_displayAvailable() {
-        int result = mMediator.startUser(USER_ID, USER_ID, BG, SECONDARY_DISPLAY_ID);
-
+    public void testStartBgUser_onSecondaryDisplay_displayAvailable() {
+        int result = mMediator.assignUserToDisplayOnStart(USER_ID, USER_ID, BG,
+                SECONDARY_DISPLAY_ID);
         assertStartUserResult(result, USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE);
 
-        assertIsNotCurrentUserOrRunningProfileOfCurrentUser(USER_ID);
-        assertStartedProfileGroupIdOf(USER_ID, USER_ID);
+        expectUserIsVisible(USER_ID);
+        expectUserIsVisibleOnDisplay(USER_ID, SECONDARY_DISPLAY_ID);
+        expectUserIsNotVisibleOnDisplay(USER_ID, INVALID_DISPLAY);
+        expectUserIsNotVisibleOnDisplay(USER_ID, DEFAULT_DISPLAY);
 
-        stopUserAndAssertState(USER_ID);
+        expectDisplayAssignedToUser(USER_ID, SECONDARY_DISPLAY_ID);
+        expectUserAssignedToDisplay(SECONDARY_DISPLAY_ID, USER_ID);
     }
 
     @Test
-    public void testStartUser_displayAlreadyAssigned() {
+    public void testVisibilityOfCurrentUserAndProfilesOnDisplayAssignedToAnotherUser() {
+        startDefaultProfile();
+
+        // Make sure they were visible before
+        expectUserIsVisibleOnDisplay(PARENT_USER_ID, SECONDARY_DISPLAY_ID);
+        expectUserIsVisibleOnDisplay(PROFILE_USER_ID, SECONDARY_DISPLAY_ID);
+
+        int result = mMediator.assignUserToDisplayOnStart(USER_ID, USER_ID, BG,
+                SECONDARY_DISPLAY_ID);
+        assertStartUserResult(result, USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE);
+
+        expectUserIsNotVisibleOnDisplay(PARENT_USER_ID, SECONDARY_DISPLAY_ID);
+        expectUserIsNotVisibleOnDisplay(PROFILE_USER_ID, SECONDARY_DISPLAY_ID);
+    }
+
+    @Test
+    public void testStartBgUser_onSecondaryDisplay_displayAlreadyAssigned() {
         startUserInSecondaryDisplay(OTHER_USER_ID, SECONDARY_DISPLAY_ID);
 
-        int result = mMediator.startUser(USER_ID, USER_ID, BG, SECONDARY_DISPLAY_ID);
-
+        int result = mMediator.assignUserToDisplayOnStart(USER_ID, USER_ID, BG,
+                SECONDARY_DISPLAY_ID);
         assertStartUserResult(result, USER_ASSIGNMENT_RESULT_FAILURE);
 
-        stopUserAndAssertState(PROFILE_USER_ID);
+        expectUserIsNotVisibleAtAll(USER_ID);
+        expectNoDisplayAssignedToUser(USER_ID);
+        expectUserAssignedToDisplay(SECONDARY_DISPLAY_ID, OTHER_USER_ID);
     }
 
     @Test
-    public void testStartUser_userAlreadyAssigned() {
+    public void testStartBgUser_onSecondaryDisplay_userAlreadyAssigned() {
         startUserInSecondaryDisplay(USER_ID, OTHER_SECONDARY_DISPLAY_ID);
 
-        int result = mMediator.startUser(USER_ID, USER_ID, BG, SECONDARY_DISPLAY_ID);
-
+        int result = mMediator.assignUserToDisplayOnStart(USER_ID, USER_ID, BG,
+                SECONDARY_DISPLAY_ID);
         assertStartUserResult(result, USER_ASSIGNMENT_RESULT_FAILURE);
+
+        expectUserIsVisible(USER_ID);
+        expectUserIsVisibleOnDisplay(USER_ID, OTHER_SECONDARY_DISPLAY_ID);
+        expectUserIsNotVisibleOnDisplay(USER_ID, SECONDARY_DISPLAY_ID);
+        expectUserIsNotVisibleOnDisplay(USER_ID, INVALID_DISPLAY);
+        expectUserIsNotVisibleOnDisplay(USER_ID, DEFAULT_DISPLAY);
+
+        expectDisplayAssignedToUser(USER_ID, OTHER_SECONDARY_DISPLAY_ID);
+        expectUserAssignedToDisplay(OTHER_SECONDARY_DISPLAY_ID, USER_ID);
     }
 
     @Test
-    public void testStartUser_profileOnSameDisplayAsParent() {
+    public void testStartBgProfile_onDefaultDisplay_whenParentVisibleOnSecondaryDisplay() {
         startUserInSecondaryDisplay(PARENT_USER_ID, OTHER_SECONDARY_DISPLAY_ID);
 
-        int result = mMediator.startUser(PROFILE_USER_ID, PARENT_USER_ID, BG, SECONDARY_DISPLAY_ID);
-
-        assertStartUserResult(result, USER_ASSIGNMENT_RESULT_FAILURE);
-
-        stopUserAndAssertState(PROFILE_USER_ID);
-    }
-
-    @Test
-    public void testStartUser_profileOnDifferentDisplayAsParent() {
-        startUserInSecondaryDisplay(PARENT_USER_ID, OTHER_SECONDARY_DISPLAY_ID);
-
-        int result = mMediator.startUser(PROFILE_USER_ID, PARENT_USER_ID, BG,
-                OTHER_SECONDARY_DISPLAY_ID);
-
-        assertStartUserResult(result, USER_ASSIGNMENT_RESULT_FAILURE);
-
-        stopUserAndAssertState(PROFILE_USER_ID);
-    }
-
-    @Test
-    public void testStartUser_profileDefaultDisplayParentOnSecondaryDisplay() {
-        startUserInSecondaryDisplay(PARENT_USER_ID, OTHER_SECONDARY_DISPLAY_ID);
-
-        int result = mMediator.startUser(PROFILE_USER_ID, PARENT_USER_ID, BG, DEFAULT_DISPLAY);
-
+        int result = mMediator.assignUserToDisplayOnStart(PROFILE_USER_ID, PARENT_USER_ID, BG,
+                DEFAULT_DISPLAY);
         assertStartUserResult(result, USER_ASSIGNMENT_RESULT_SUCCESS_INVISIBLE);
 
-        stopUserAndAssertState(PROFILE_USER_ID);
+        expectUserIsNotVisibleAtAll(PROFILE_USER_ID);
+        expectNoDisplayAssignedToUser(PROFILE_USER_ID);
+        expectUserAssignedToDisplay(OTHER_SECONDARY_DISPLAY_ID, PARENT_USER_ID);
     }
-
-    @Test
-    public void testIsUserVisible_bgUserOnSecondaryDisplay() {
-        startForegroundUser(OTHER_USER_ID);
-        startUserInSecondaryDisplay(USER_ID, SECONDARY_DISPLAY_ID);
-
-        assertWithMessage("isUserVisible(%s)", USER_ID)
-                .that(mMediator.isUserVisible(USER_ID)).isTrue();
-    }
-
-    // NOTE: we don't need to add tests for profiles (started / stopped profiles of bg user), as
-    // isUserVisible() for bg users relies only on the user / display assignments
-
-    @Test
-    public void testIsUserVisibleOnDisplay_currentUserUnassignedSecondaryDisplay() {
-        startForegroundUser(USER_ID);
-
-        assertWithMessage("isUserVisible(%s, %s)", USER_ID, SECONDARY_DISPLAY_ID)
-                .that(mMediator.isUserVisible(USER_ID, SECONDARY_DISPLAY_ID)).isTrue();
-    }
-
-    @Test
-    public void testIsUserVisibleOnDisplay_currentUserSecondaryDisplayAssignedToAnotherUser() {
-        startForegroundUser(USER_ID);
-        startUserInSecondaryDisplay(OTHER_USER_ID, SECONDARY_DISPLAY_ID);
-
-        assertWithMessage("isUserVisible(%s, %s)", USER_ID, SECONDARY_DISPLAY_ID)
-                .that(mMediator.isUserVisible(USER_ID, SECONDARY_DISPLAY_ID)).isFalse();
-    }
-
-    @Test
-    public void testIsUserVisibleOnDisplay_startedProfileOfCurrentUserSecondaryDisplayAssignedToAnotherUser() {
-        startDefaultProfile();
-        startForegroundUser(PARENT_USER_ID);
-        startUserInSecondaryDisplay(OTHER_USER_ID, SECONDARY_DISPLAY_ID);
-
-        assertWithMessage("isUserVisible(%s, %s)", PROFILE_USER_ID, SECONDARY_DISPLAY_ID)
-                .that(mMediator.isUserVisible(PROFILE_USER_ID, SECONDARY_DISPLAY_ID)).isFalse();
-    }
-
-    @Test
-    public void testIsUserVisibleOnDisplay_stoppedProfileOfCurrentUserSecondaryDisplayAssignedToAnotherUser() {
-        startForegroundUser(PARENT_USER_ID);
-        startUserInSecondaryDisplay(OTHER_USER_ID, SECONDARY_DISPLAY_ID);
-
-        assertWithMessage("isUserVisible(%s, %s)", PROFILE_USER_ID, SECONDARY_DISPLAY_ID)
-                .that(mMediator.isUserVisible(PROFILE_USER_ID, SECONDARY_DISPLAY_ID)).isFalse();
-    }
-
-    @Test
-    public void testIsUserVisibleOnDisplay_startedProfileOfCurrentUserOnUnassignedSecondaryDisplay() {
-        startDefaultProfile();
-        startForegroundUser(PARENT_USER_ID);
-
-        // TODO(b/244644281): change it to isFalse() once isUserVisible() is fixed (see note there)
-        assertWithMessage("isUserVisible(%s, %s)", PROFILE_USER_ID, SECONDARY_DISPLAY_ID)
-                .that(mMediator.isUserVisible(PROFILE_USER_ID, SECONDARY_DISPLAY_ID)).isTrue();
-    }
-
-    @Test
-    public void testIsUserVisibleOnDisplay_bgUserOnSecondaryDisplay() {
-        startForegroundUser(OTHER_USER_ID);
-        startUserInSecondaryDisplay(USER_ID, SECONDARY_DISPLAY_ID);
-
-        assertWithMessage("isUserVisible(%s, %s)", USER_ID, SECONDARY_DISPLAY_ID)
-                .that(mMediator.isUserVisible(USER_ID, SECONDARY_DISPLAY_ID)).isTrue();
-    }
-
-    @Test
-    public void testIsUserVisibleOnDisplay_bgUserOnAnotherSecondaryDisplay() {
-        startForegroundUser(OTHER_USER_ID);
-        startUserInSecondaryDisplay(USER_ID, SECONDARY_DISPLAY_ID);
-
-        assertWithMessage("isUserVisible(%s, %s)", USER_ID, SECONDARY_DISPLAY_ID)
-                .that(mMediator.isUserVisible(USER_ID, OTHER_SECONDARY_DISPLAY_ID)).isFalse();
-    }
-
-    // NOTE: we don't need to add tests for profiles (started / stopped profiles of bg user), as
-    // the tests for isUserVisible(userId, display) for non-current users relies on the explicit
-    // user / display assignments
-    // TODO(b/244644281): add such tests if the logic change
-
-    @Test
-    public void testGetDisplayAssignedToUser_bgUserOnSecondaryDisplay() {
-        startForegroundUser(OTHER_USER_ID);
-        startUserInSecondaryDisplay(USER_ID, SECONDARY_DISPLAY_ID);
-
-        assertWithMessage("getDisplayAssignedToUser(%s)", USER_ID)
-                .that(mMediator.getDisplayAssignedToUser(USER_ID))
-                .isEqualTo(SECONDARY_DISPLAY_ID);
-    }
-
-    // NOTE: we don't need to add tests for profiles (started / stopped profiles of bg user), as
-    // getDisplayAssignedToUser() for bg users relies only on the user / display assignments
-
-    @Test
-    public void testGetUserAssignedToDisplay_bgUserOnSecondaryDisplay() {
-        startForegroundUser(OTHER_USER_ID);
-        startUserInSecondaryDisplay(USER_ID, SECONDARY_DISPLAY_ID);
-
-        assertWithMessage("getUserAssignedToDisplay(%s)", SECONDARY_DISPLAY_ID)
-                .that(mMediator.getUserAssignedToDisplay(SECONDARY_DISPLAY_ID)).isEqualTo(USER_ID);
-    }
-
-    @Test
-    public void testGetUserAssignedToDisplay_noUserOnSecondaryDisplay() {
-        startForegroundUser(USER_ID);
-
-        assertWithMessage("getUserAssignedToDisplay(%s)", SECONDARY_DISPLAY_ID)
-                .that(mMediator.getUserAssignedToDisplay(SECONDARY_DISPLAY_ID)).isEqualTo(USER_ID);
-    }
-
-    // NOTE: we don't need to add tests for profiles (started / stopped profiles of bg user), as
-    // getUserAssignedToDisplay() for bg users relies only on the user / display assignments
 }

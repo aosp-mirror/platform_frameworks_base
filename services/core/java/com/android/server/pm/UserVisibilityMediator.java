@@ -37,6 +37,7 @@ import android.view.Display;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.Preconditions;
 import com.android.server.pm.UserManagerInternal.UserAssignmentResult;
 import com.android.server.utils.Slogf;
 
@@ -121,8 +122,10 @@ public final class UserVisibilityMediator implements Dumpable {
     /**
      * See {@link UserManagerInternal#assignUserToDisplayOnStart(int, int, boolean, int)}.
      */
-    public @UserAssignmentResult int startUser(@UserIdInt int userId,
+    public @UserAssignmentResult int assignUserToDisplayOnStart(@UserIdInt int userId,
             @UserIdInt int unResolvedProfileGroupId, boolean foreground, int displayId) {
+        Preconditions.checkArgument(!isSpecialUserId(userId), "user id cannot be generic: %d",
+                userId);
         // This method needs to perform 4 actions:
         //
         // 1. Check if the user can be started given the provided arguments
@@ -139,7 +142,7 @@ public final class UserVisibilityMediator implements Dumpable {
                 ? userId
                 : unResolvedProfileGroupId;
         if (DBG) {
-            Slogf.d(TAG, "startUser(%d, %d, %b, %d): actualProfileGroupId=%d",
+            Slogf.d(TAG, "assignUserToDisplayOnStart(%d, %d, %b, %d): actualProfileGroupId=%d",
                     userId, unResolvedProfileGroupId, foreground, displayId, profileGroupId);
         }
 
@@ -181,11 +184,11 @@ public final class UserVisibilityMediator implements Dumpable {
                         // Don't need to do set state because methods (such as isUserVisible())
                         // already know that the current user (and their profiles) is assigned to
                         // the default display.
-                        Slogf.d(TAG, "Don't need to update mUsersOnSecondaryDisplays");
+                        Slogf.d(TAG, "don't need to update mUsersOnSecondaryDisplays");
                     }
                     break;
                 default:
-                    Slogf.wtf(TAG,  "Invalid resut from canAssignUserToDisplayLocked: %d",
+                    Slogf.wtf(TAG,  "invalid resut from canAssignUserToDisplayLocked: %d",
                             mappingResult);
             }
         }
@@ -313,9 +316,9 @@ public final class UserVisibilityMediator implements Dumpable {
     /**
      * See {@link UserManagerInternal#unassignUserFromDisplayOnStop(int)}.
      */
-    public void stopUser(int userId) {
+    public void unassignUserFromDisplayOnStop(int userId) {
         if (DBG) {
-            Slogf.d(TAG, "stopUser(%d)", userId);
+            Slogf.d(TAG, "unassignUserFromDisplayOnStop(%d)", userId);
         }
         synchronized (mLock) {
             if (DBG) {
@@ -341,7 +344,7 @@ public final class UserVisibilityMediator implements Dumpable {
     /**
      * See {@link UserManagerInternal#isUserVisible(int)}.
      */
-    public boolean isUserVisible(int userId) {
+    public boolean isUserVisible(@UserIdInt int userId) {
         // First check current foreground user and their profiles (on main display)
         if (isCurrentUserOrRunningProfileOfCurrentUser(userId)) {
             return true;
@@ -361,7 +364,7 @@ public final class UserVisibilityMediator implements Dumpable {
     /**
      * See {@link UserManagerInternal#isUserVisible(int, int)}.
      */
-    public boolean isUserVisible(int userId, int displayId) {
+    public boolean isUserVisible(@UserIdInt int userId, int displayId) {
         if (displayId == Display.INVALID_DISPLAY) {
             return false;
         }
@@ -410,7 +413,7 @@ public final class UserVisibilityMediator implements Dumpable {
     /**
      * See {@link UserManagerInternal#getDisplayAssignedToUser(int)}.
      */
-    public int getDisplayAssignedToUser(int userId) {
+    public int getDisplayAssignedToUser(@UserIdInt int userId) {
         if (isCurrentUserOrRunningProfileOfCurrentUser(userId)) {
             return Display.DEFAULT_DISPLAY;
         }
@@ -427,7 +430,7 @@ public final class UserVisibilityMediator implements Dumpable {
     /**
      * See {@link UserManagerInternal#getUserAssignedToDisplay(int)}.
      */
-    public int getUserAssignedToDisplay(int displayId) {
+    public int getUserAssignedToDisplay(@UserIdInt int displayId) {
         if (displayId == Display.DEFAULT_DISPLAY || !mUsersOnSecondaryDisplaysEnabled) {
             return getCurrentUserId();
         }
@@ -506,6 +509,18 @@ public final class UserVisibilityMediator implements Dumpable {
         dump(new IndentingPrintWriter(pw));
     }
 
+    private static boolean isSpecialUserId(@UserIdInt int userId) {
+        switch (userId) {
+            case UserHandle.USER_ALL:
+            case UserHandle.USER_CURRENT:
+            case UserHandle.USER_CURRENT_OR_SELF:
+            case UserHandle.USER_NULL:
+                return true;
+            default:
+                return false;
+        }
+    }
+
     private static boolean isProfile(@UserIdInt int userId, @UserIdInt int profileGroupId) {
         return profileGroupId != NO_PROFILE_GROUP_ID && profileGroupId != userId;
     }
@@ -514,15 +529,13 @@ public final class UserVisibilityMediator implements Dumpable {
     // state to decide whether a user is visible or not. If we decide to always store that info into
     // mUsersOnSecondaryDisplays, we should remove them.
 
-    @VisibleForTesting
-    @UserIdInt int getCurrentUserId() {
+    private @UserIdInt int getCurrentUserId() {
         synchronized (mLock) {
             return mCurrentUserId;
         }
     }
 
-    @VisibleForTesting
-    boolean isCurrentUserOrRunningProfileOfCurrentUser(@UserIdInt int userId) {
+    private boolean isCurrentUserOrRunningProfileOfCurrentUser(@UserIdInt int userId) {
         synchronized (mLock) {
             // Special case as NO_PROFILE_GROUP_ID == USER_NULL
             if (userId == USER_NULL || mCurrentUserId == USER_NULL) {
@@ -535,16 +548,7 @@ public final class UserVisibilityMediator implements Dumpable {
         }
     }
 
-    @VisibleForTesting
-    boolean isStartedUser(@UserIdInt int userId) {
-        synchronized (mLock) {
-            return mStartedProfileGroupIds.get(userId,
-                    INITIAL_CURRENT_USER_ID) != INITIAL_CURRENT_USER_ID;
-        }
-    }
-
-    @VisibleForTesting
-    boolean isStartedProfile(@UserIdInt int userId) {
+    private boolean isStartedProfile(@UserIdInt int userId) {
         int profileGroupId;
         synchronized (mLock) {
             profileGroupId = mStartedProfileGroupIds.get(userId, NO_PROFILE_GROUP_ID);
@@ -552,8 +556,7 @@ public final class UserVisibilityMediator implements Dumpable {
         return isProfile(userId, profileGroupId);
     }
 
-    @VisibleForTesting
-    @UserIdInt int getStartedProfileGroupId(@UserIdInt int userId) {
+    private @UserIdInt int getStartedProfileGroupId(@UserIdInt int userId) {
         synchronized (mLock) {
             return mStartedProfileGroupIds.get(userId, NO_PROFILE_GROUP_ID);
         }

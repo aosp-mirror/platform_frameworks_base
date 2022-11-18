@@ -6835,13 +6835,13 @@ public class UserManagerService extends IUserManager.Stub {
         @Override
         public int assignUserToDisplayOnStart(@UserIdInt int userId, @UserIdInt int profileGroupId,
                 boolean foreground, int displayId) {
-            return mUserVisibilityMediator.startUser(userId, profileGroupId, foreground,
-                    displayId);
+            return mUserVisibilityMediator.assignUserToDisplayOnStart(userId, profileGroupId,
+                    foreground, displayId);
         }
 
         @Override
         public void unassignUserFromDisplayOnStop(@UserIdInt int userId) {
-            mUserVisibilityMediator.stopUser(userId);
+            mUserVisibilityMediator.unassignUserFromDisplayOnStop(userId);
         }
 
         @Override
