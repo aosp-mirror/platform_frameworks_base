@@ -1818,7 +1818,14 @@ public class OomAdjuster {
                 newAdj = PERCEPTIBLE_APP_ADJ;
                 newProcState = PROCESS_STATE_IMPORTANT_FOREGROUND;
 
-            } else if (psr.hasForegroundServices() && !psr.hasNonShortForegroundServices()) {
+            } else if (psr.hasForegroundServices()) {
+                // If we get here, hasNonShortForegroundServices() must be false.
+
+                // TODO(short-service): If all the short-fgs (there may be multiple) within the
+                // process is post proc-state-demote time, then we need to skip this part.
+                // ... Or, should we just ANR take care of timed-out short-FGS and shouldn't bother
+                // lowering the procstate / oom-adj...?? (likely not.)
+
                 // For short FGS.
                 adjType = "fg-service-short";
                 // We use MEDIUM_APP_ADJ + 1 so we can tell apart EJ (which uses MEDIUM_APP_ADJ + 1)

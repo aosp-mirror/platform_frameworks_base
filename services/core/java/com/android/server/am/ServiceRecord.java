@@ -315,6 +315,87 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     final ArrayList<StartItem> pendingStarts = new ArrayList<StartItem>();
                             // start() arguments that haven't yet been delivered.
 
+    /**
+     * Information specific to "SHORT_SERVICE" FGS.
+     */
+    class ShortFgsInfo {
+        /** Time FGS started */
+        private final long mStartTime;
+
+        /**
+         * Copied from {@link #mStartForegroundCount}. If this is different from the parent's,
+         * that means this instance is stale.
+         */
+        private int mStartForegroundCount;
+
+        /** Service's "start ID" when this short-service started. */
+        private int mStartId;
+
+        ShortFgsInfo(long startTime) {
+            mStartTime = startTime;
+            update();
+        }
+
+        /**
+         * Update {@link #mStartForegroundCount} and {@link #mStartId}.
+         * (but not {@link #mStartTime})
+         */
+        public void update() {
+            this.mStartForegroundCount = ServiceRecord.this.mStartForegroundCount;
+            this.mStartId = getLastStartId();
+        }
+
+        long getStartTime() {
+            return mStartTime;
+        }
+
+        int getStartForegroundCount() {
+            return mStartForegroundCount;
+        }
+
+        int getStartId() {
+            return mStartId;
+        }
+
+        /**
+         * @return whether this {@link ShortFgsInfo} is still "current" or not -- i.e.
+         * it's "start foreground count" is the same as that of the ServiceRecord's.
+         *
+         * Note, we do _not_ check the "start id" here, because the start id increments if the
+         * app calls startService() or startForegroundService() on the same service,
+         * but that will _not_ update the ShortFgsInfo, and will not extend the timeout.
+         *
+         * TODO(short-service): Make sure, calling startService will not extend or remove the
+         * timeout, in CTS.
+         */
+        boolean isCurrent() {
+            return this.mStartForegroundCount == ServiceRecord.this.mStartForegroundCount;
+        }
+
+        /** Time when Service.onTimeout() should be called */
+        long getTimeoutTime() {
+            return mStartTime + ams.mConstants.mShortFgsTimeoutDuration;
+        }
+
+        /** Time when the procstate should be lowered. */
+        long getProcStateDemoteTime() {
+            return mStartTime + ams.mConstants.mShortFgsTimeoutDuration
+                    + ams.mConstants.mShortFgsProcStateExtraWaitDuration;
+        }
+
+        /** Time when the app should be declared ANR. */
+        long getAnrTime() {
+            return mStartTime + ams.mConstants.mShortFgsTimeoutDuration
+                    + ams.mConstants.mShortFgsAnrExtraWaitDuration;
+        }
+    }
+
+    /**
+     * Keep track of short-fgs specific information. This field gets cleared when the timeout
+     * stops.
+     */
+    private ShortFgsInfo mShortFgsInfo;
+
     void dumpStartList(PrintWriter pw, String prefix, List<StartItem> list, long now) {
         final int N = list.size();
         for (int i=0; i<N; i++) {
@@ -456,6 +537,8 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
             }
         }
         proto.end(token);
+
+        // TODO(short-service) Add FGS info
     }
 
     void dump(PrintWriter pw, String prefix) {
@@ -508,8 +591,25 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         }
         if (isForeground || foregroundId != 0) {
             pw.print(prefix); pw.print("isForeground="); pw.print(isForeground);
-                    pw.print(" foregroundId="); pw.print(foregroundId);
-                    pw.print(" foregroundNoti="); pw.println(foregroundNoti);
+            pw.print(" foregroundId="); pw.print(foregroundId);
+            pw.printf(" types=%08X", foregroundServiceType);
+            pw.print(" foregroundNoti="); pw.println(foregroundNoti);
+
+            if (isShortFgs() && mShortFgsInfo != null) {
+                pw.print(prefix); pw.print("isShortFgs=true");
+                pw.print(" startId="); pw.print(mShortFgsInfo.getStartId());
+                pw.print(" startForegroundCount=");
+                pw.print(mShortFgsInfo.getStartForegroundCount());
+                pw.print(" startTime=");
+                TimeUtils.formatDuration(mShortFgsInfo.getStartTime(), now, pw);
+                pw.print(" timeout=");
+                TimeUtils.formatDuration(mShortFgsInfo.getTimeoutTime(), now, pw);
+                pw.print(" demoteTime=");
+                TimeUtils.formatDuration(mShortFgsInfo.getProcStateDemoteTime(), now, pw);
+                pw.print(" anrTime=");
+                TimeUtils.formatDuration(mShortFgsInfo.getAnrTime(), now, pw);
+                pw.println();
+            }
         }
         if (mIsFgsDelegate) {
             pw.print(prefix); pw.print("isFgsDelegate="); pw.println(mIsFgsDelegate);
@@ -1237,5 +1337,67 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         // the short-service restrictions)
         return isForeground
                 && (foregroundServiceType == ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE);
+    }
+
+    public ShortFgsInfo getShortFgsInfo() {
+        return isShortFgs() ? mShortFgsInfo : null;
+    }
+
+    /**
+     * Call it when a short FGS starts.
+     */
+    public void setShortFgsInfo(long uptimeNow) {
+        this.mShortFgsInfo = new ShortFgsInfo(uptimeNow);
+    }
+
+    /** @return whether {@link #mShortFgsInfo} is set or not. */
+    public boolean hasShortFgsInfo() {
+        return mShortFgsInfo != null;
+    }
+
+    /**
+     * Call it when a short FGS stops.
+     */
+    public void clearShortFgsInfo() {
+        this.mShortFgsInfo = null;
+    }
+
+    /**
+     * @return true if it's a short FGS that's still up and running, and should be timed out.
+     */
+    public boolean shouldTriggerShortFgsTimeout() {
+        if (!isAppAlive()) {
+            return false;
+        }
+        if (!this.startRequested || !isShortFgs() || mShortFgsInfo == null
+                || !mShortFgsInfo.isCurrent()) {
+            return false;
+        }
+        return mShortFgsInfo.getTimeoutTime() < SystemClock.uptimeMillis();
+    }
+
+    /**
+     * @return true if it's a short FGS that's still up and running, and should be declared
+     * an ANR.
+     */
+    public boolean shouldTriggerShortFgsAnr() {
+        if (!isAppAlive()) {
+            return false;
+        }
+        if (!this.startRequested || !isShortFgs() || mShortFgsInfo == null
+                || !mShortFgsInfo.isCurrent()) {
+            return false;
+        }
+        return mShortFgsInfo.getAnrTime() < SystemClock.uptimeMillis();
+    }
+
+    private boolean isAppAlive() {
+        if (app == null) {
+            return false;
+        }
+        if (app.getThread() == null || app.isKilled() || app.isKilledByAm()) {
+            return false;
+        }
+        return true;
     }
 }
