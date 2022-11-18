@@ -92,6 +92,7 @@ constructor(
         deviceStateManager.registerCallback(executor, FoldListener())
         wakefulnessLifecycle.addObserver(this)
 
+        // TODO(b/254878364): remove this call to NPVC.getView()
         centralSurfaces.notificationPanelViewController.view.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) { listenForDozing(this) }
         }
@@ -157,6 +158,7 @@ constructor(
             // We don't need to wait for the scrim as it is already displayed
             // but we should wait for the initial animation preparations to be drawn
             // (setting initial alpha/translation)
+            // TODO(b/254878364): remove this call to NPVC.getView()
             OneShotPreDrawListener.add(
                 centralSurfaces.notificationPanelViewController.view,
                 onReady

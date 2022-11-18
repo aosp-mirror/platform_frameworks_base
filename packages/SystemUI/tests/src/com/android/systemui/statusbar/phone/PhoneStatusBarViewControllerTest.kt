@@ -76,7 +76,6 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        `when`(notificationPanelViewController.view).thenReturn(panelView)
         `when`(sysuiUnfoldComponent.getStatusBarMoveFromCenterAnimationController())
             .thenReturn(moveFromCenterAnimation)
         // create the view and controller on main thread as it requires main looper
