@@ -412,7 +412,7 @@ public abstract class DisplayManagerInternal {
      * the PowerManagerService to focus on the global power state and not
      * have to micro-manage screen off animations, auto-brightness and other effects.
      */
-    public static final class DisplayPowerRequest {
+    public static class DisplayPowerRequest {
         // Policy: Turn screen off as if the user pressed the power button
         // including playing a screen off animation if applicable.
         public static final int POLICY_OFF = 0;
