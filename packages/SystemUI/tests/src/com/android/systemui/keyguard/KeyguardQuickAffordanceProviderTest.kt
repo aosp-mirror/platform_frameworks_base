@@ -99,10 +99,12 @@ class KeyguardQuickAffordanceProviderTest : SysuiTestCase() {
                     setOf(
                         FakeKeyguardQuickAffordanceConfig(
                             key = AFFORDANCE_1,
+                            pickerName = AFFORDANCE_1_NAME,
                             pickerIconResourceId = 1,
                         ),
                         FakeKeyguardQuickAffordanceConfig(
                             key = AFFORDANCE_2,
+                            pickerName = AFFORDANCE_2_NAME,
                             pickerIconResourceId = 2,
                         ),
                     ),
@@ -176,6 +178,7 @@ class KeyguardQuickAffordanceProviderTest : SysuiTestCase() {
         runBlocking(IMMEDIATE) {
             val slotId = KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START
             val affordanceId = AFFORDANCE_2
+            val affordanceName = AFFORDANCE_2_NAME
 
             insertSelection(
                 slotId = slotId,
@@ -188,6 +191,7 @@ class KeyguardQuickAffordanceProviderTest : SysuiTestCase() {
                         Selection(
                             slotId = slotId,
                             affordanceId = affordanceId,
+                            affordanceName = affordanceName,
                         )
                     )
                 )
@@ -219,12 +223,12 @@ class KeyguardQuickAffordanceProviderTest : SysuiTestCase() {
                     listOf(
                         Affordance(
                             id = AFFORDANCE_1,
-                            name = AFFORDANCE_1,
+                            name = AFFORDANCE_1_NAME,
                             iconResourceId = 1,
                         ),
                         Affordance(
                             id = AFFORDANCE_2,
-                            name = AFFORDANCE_2,
+                            name = AFFORDANCE_2_NAME,
                             iconResourceId = 2,
                         ),
                     )
@@ -259,6 +263,7 @@ class KeyguardQuickAffordanceProviderTest : SysuiTestCase() {
                         Selection(
                             slotId = KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START,
                             affordanceId = AFFORDANCE_1,
+                            affordanceName = AFFORDANCE_1_NAME,
                         )
                     )
                 )
@@ -290,6 +295,7 @@ class KeyguardQuickAffordanceProviderTest : SysuiTestCase() {
                         Selection(
                             slotId = KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START,
                             affordanceId = AFFORDANCE_1,
+                            affordanceName = AFFORDANCE_1_NAME,
                         )
                     )
                 )
@@ -323,7 +329,13 @@ class KeyguardQuickAffordanceProviderTest : SysuiTestCase() {
                         cursor.getColumnIndex(Contract.SelectionTable.Columns.SLOT_ID)
                     val affordanceIdColumnIndex =
                         cursor.getColumnIndex(Contract.SelectionTable.Columns.AFFORDANCE_ID)
-                    if (slotIdColumnIndex == -1 || affordanceIdColumnIndex == -1) {
+                    val affordanceNameColumnIndex =
+                        cursor.getColumnIndex(Contract.SelectionTable.Columns.AFFORDANCE_NAME)
+                    if (
+                        slotIdColumnIndex == -1 ||
+                            affordanceIdColumnIndex == -1 ||
+                            affordanceNameColumnIndex == -1
+                    ) {
                         return@buildList
                     }
 
@@ -332,6 +344,7 @@ class KeyguardQuickAffordanceProviderTest : SysuiTestCase() {
                             Selection(
                                 slotId = cursor.getString(slotIdColumnIndex),
                                 affordanceId = cursor.getString(affordanceIdColumnIndex),
+                                affordanceName = cursor.getString(affordanceNameColumnIndex),
                             )
                         )
                     }
@@ -419,11 +432,14 @@ class KeyguardQuickAffordanceProviderTest : SysuiTestCase() {
     data class Selection(
         val slotId: String,
         val affordanceId: String,
+        val affordanceName: String,
     )
 
     companion object {
         private val IMMEDIATE = Dispatchers.Main.immediate
         private const val AFFORDANCE_1 = "affordance_1"
         private const val AFFORDANCE_2 = "affordance_2"
+        private const val AFFORDANCE_1_NAME = "affordance_1_name"
+        private const val AFFORDANCE_2_NAME = "affordance_2_name"
     }
 }
