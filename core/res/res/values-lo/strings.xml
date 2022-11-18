@@ -395,6 +395,54 @@
     <string name="permdesc_persistentActivity" product="default" msgid="1914841924366562051">"ອະນຸຍາດໃຫ້ແອັບຯເຮັດໃຫ້ສ່ວນນຶ່ງຂອງຕົນເອງ ຄົງຢູ່ຖາວອນໃນໜ່ວຍຄວາມຈຳ ເຊິ່ງອາດສາມາດ ເຮັດໃຫ້ການນຳໃຊ້ໜ່ວຍຄວາມຈຳຂອງແອັບຯ ອື່ນຖືກຈຳກັດ ສົ່ງຜົນເຮັດໃຫ້ມືຖືຂອງທ່ານເຮັດວຽກຊ້າລົງໄດ້."</string>
     <string name="permlab_foregroundService" msgid="1768855976818467491">"ໃຊ້ບໍລິການພື້ນໜ້າ"</string>
     <string name="permdesc_foregroundService" msgid="8720071450020922795">"ອະນຸຍາດໃຫ້ແອັບໃຊ້ບໍລິການພື້ນໜ້າ."</string>
+    <!-- no translation found for permlab_foregroundServiceCamera (7814751737955715297) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceCamera (6973701931250595727) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceConnectedDevice (3019650546176872501) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceConnectedDevice (1067457315741352963) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceDataSync (5847463514326881076) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceDataSync (2267140263423973050) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceLocation (3745428302378535690) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceLocation (118894034365177183) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceMediaPlayback (4002687983891935514) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceMediaPlayback (3638032446063968043) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceMediaProjection (2630868915733312527) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceMediaProjection (4805677128082002298) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceMicrophone (7390033424890545399) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceMicrophone (1206041516173483201) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServicePhoneCall (627937743867697892) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServicePhoneCall (5941660252587015147) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceHealth (3675776442080928184) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceHealth (2024586220562667185) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceRemoteMessaging (105670277002780950) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceRemoteMessaging (8767598075877576277) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceSystemExempted (1597663713590612685) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceSystemExempted (947381760834649622) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceSpecialUse (7973536745876645082) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceSpecialUse (646713654541885919) -->
+    <skip />
     <string name="permlab_getPackageSize" msgid="375391550792886641">"ກວດສອບພື້ນທີ່ຈັດເກັບຂໍ້ມູນແອັບຯ"</string>
     <string name="permdesc_getPackageSize" msgid="742743530909966782">"ອະນຸຍາດໃຫ້ແອັບຯດຶງໂຄດ, ຂໍ້ມູນ ແລະຂະໜາດ cache ຂອງມັນໄດ້."</string>
     <string name="permlab_writeSettings" msgid="8057285063719277394">"ແກ້ໄຂການຕັ້ງຄ່າລະບົບ"</string>
@@ -447,6 +495,10 @@
     <string name="permdesc_recordAudio" msgid="5857246765327514062">"ແອັບນີ້ສາມາດບັນທຶກສຽງດ້ວຍໄມໂຄຣໂຟນໃນຂະນະທີ່ກຳລັງໃຊ້ແອັບຢູ່ໄດ້."</string>
     <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"ບັນທຶກສຽງໃນພື້ນຫຼັງ"</string>
     <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"ແອັບນີ້ສາມາດບັນທຶກສຽງດ້ວຍໄມໂຄຣໂຟນຕອນໃດກໍໄດ້."</string>
+    <!-- no translation found for permlab_detectScreenCapture (4447042362828799433) -->
+    <skip />
+    <!-- no translation found for permdesc_detectScreenCapture (3485784917960342284) -->
+    <skip />
     <string name="permlab_sim_communication" msgid="176788115994050692">"ສົ່ງ​ຄຳ​ສັ່ງ​ຫາ SIM"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"ອະນຸຍາດໃຫ້ແອັບຯສົ່ງຄຳສັ່ງຫາ SIM. ສິ່ງນີ້ອັນຕະລາຍຫຼາຍ."</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"ຈຳແນກກິດຈະກຳທາງກາຍ"</string>
@@ -2050,12 +2102,6 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"ຖອນການຕິດຕັ້ງ"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"ຢືນຢັນການເປີດ"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"ກວດສອບແອັບທີ່ເປັນອັນຕະລາຍ"</string>
-    <string name="log_access_confirmation_title" msgid="2343578467290592708">"ອະນຸຍາດໃຫ້ <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> ເຂົ້າເຖິງບັນທຶກອຸປະກອນທັງໝົດບໍ?"</string>
-    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"ອະນຸຍາດການເຂົ້າເຖິງແບບເທື່ອດຽວ"</string>
-    <string name="log_access_confirmation_deny" msgid="7685790957455099845">"ບໍ່ອະນຸຍາດ"</string>
-    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"ບັນທຶກອຸປະກອນຈະບັນທຶກສິ່ງທີ່ເກີດຂຶ້ນຢູ່ອຸປະກອນຂອງທ່ານ. ແອັບສາມາດໃຊ້ບັນທຶກເຫຼົ່ານີ້ເພື່ອຊອກຫາ ແລະ ແກ້ໄຂບັນຫາໄດ້.\n\nບັນທຶກບາງຢ່າງອາດມີຂໍ້ມູນລະອຽດອ່ອນ, ດັ່ງນັ້ນໃຫ້ອະນຸຍາດສະເພາະແອັບທີ່ທ່ານເຊື່ອຖືໃຫ້ເຂົ້າເຖິງບັນທຶກອຸປະກອນທັງໝົດເທົ່ານັ້ນ. \n\nຫາກທ່ານບໍ່ອະນຸຍາດແອັບນີ້ໃຫ້ເຂົ້າເຖິງບັນທຶກອຸປະກອນທັງໝົດ, ມັນຈະຍັງຄົງສາມາດເຂົ້າເຖິງບັນທຶກຂອງຕົວມັນເອງໄດ້ຢູ່. ຜູ້ຜະລິດອຸປະກອນຂອງທ່ານອາດຍັງຄົງສາມາດເຂົ້າເຖິງບັນທຶກ ຫຼື ຂໍ້ມູນບາງຢ່າງຢູ່ອຸປະກອນຂອງທ່ານໄດ້."</string>
-    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"ບັນທຶກອຸປະກອນຈະບັນທຶກສິ່ງທີ່ເກີດຂຶ້ນຢູ່ອຸປະກອນຂອງທ່ານ. ແອັບສາມາດໃຊ້ບັນທຶກເຫຼົ່ານີ້ເພື່ອຊອກຫາ ແລະ ແກ້ໄຂບັນຫາໄດ້.\n\nບັນທຶກບາງຢ່າງອາດມີຂໍ້ມູນລະອຽດອ່ອນ, ດັ່ງນັ້ນໃຫ້ອະນຸຍາດສະເພາະແອັບທີ່ທ່ານເຊື່ອຖືໃຫ້ເຂົ້າເຖິງບັນທຶກອຸປະກອນທັງໝົດເທົ່ານັ້ນ. \n\nຫາກທ່ານບໍ່ອະນຸຍາດແອັບນີ້ໃຫ້ເຂົ້າເຖິງບັນທຶກອຸປະກອນທັງໝົດ, ມັນຈະຍັງຄົງສາມາດເຂົ້າເຖິງບັນທຶກຂອງຕົວມັນເອງໄດ້ຢູ່. ຜູ້ຜະລິດອຸປະກອນຂອງທ່ານອາດຍັງຄົງສາມາດເຂົ້າເຖິງບັນທຶກ ຫຼື ຂໍ້ມູນບາງຢ່າງຢູ່ອຸປະກອນຂອງທ່ານໄດ້.\n\nສຶກສາເພີ່ມເຕີມໄດ້ຢູ່ g.co/android/devicelogs."</string>
-    <string name="log_access_do_not_show_again" msgid="1058690599083091552">"ບໍ່ຕ້ອງສະແດງອີກ"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> ຕ້ອງການສະແດງ <xliff:g id="APP_2">%2$s</xliff:g> ສະໄລ້"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"ແກ້ໄຂ"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"ການໂທ ແລະ ການແຈ້ງເຕືອນຈະສັ່ນ"</string>
@@ -2296,6 +2342,8 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"ບໍ່ສາມາດເຂົ້າເຖິງກ້ອງຖ່າຍຮູບຂອງໂທລະສັບຈາກ <xliff:g id="DEVICE">%1$s</xliff:g> ຂອງທ່ານໄດ້"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"ບໍ່ສາມາດເຂົ້າເຖິງກ້ອງຖ່າຍຮູບຂອງແທັບເລັດຈາກ <xliff:g id="DEVICE">%1$s</xliff:g> ຂອງທ່ານໄດ້"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"ບໍ່ສາມາດເຂົ້າເຖິງເນື້ອຫານີ້ໄດ້ໃນຂະນະທີ່ຍັງສະຕຣີມຢູ່. ກະລຸນາລອງຢູ່ໂທລະສັບຂອງທ່ານແທນ."</string>
+    <!-- no translation found for vdm_pip_blocked (4036107522497281397) -->
+    <skip />
     <string name="system_locale_title" msgid="711882686834677268">"ຄ່າເລີ່ມຕົ້ນຂອງລະບົບ"</string>
     <string name="default_card_name" msgid="9198284935962911468">"ບັດ <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

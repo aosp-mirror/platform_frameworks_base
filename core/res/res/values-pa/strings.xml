@@ -395,6 +395,54 @@
     <string name="permdesc_persistentActivity" product="default" msgid="1914841924366562051">"ਐਪ ਨੂੰ ਮੈਮਰੀ ਵਿੱਚ ਖੁਦ ਦੇ ਭਾਗਾਂ ਨੂੰ ਸਥਾਈ ਬਣਾਉਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਫ਼ੋਨ ਨੂੰ ਹੌਲੀ ਕਰਦੇ ਹੋਏ ਹੋਰਾਂ ਐਪਾਂ ਤੇ ਉਪਲਬਧ ਮੈਮਰੀ ਨੂੰ ਸੀਮਿਤ ਕਰ ਸਕਦਾ ਹੈ।"</string>
     <string name="permlab_foregroundService" msgid="1768855976818467491">"ਫੋਰਗ੍ਰਾਉਂਡ ਸੇਵਾਵਾਂ ਚਲਾਓ"</string>
     <string name="permdesc_foregroundService" msgid="8720071450020922795">"ਐਪ ਨੂੰ ਫੋਰਗ੍ਰਾਉਂਡ ਸੇਵਾਵਾਂ ਦੀ ਵਰਤੋਂ ਕਰਨ ਦਿਓ।"</string>
+    <!-- no translation found for permlab_foregroundServiceCamera (7814751737955715297) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceCamera (6973701931250595727) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceConnectedDevice (3019650546176872501) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceConnectedDevice (1067457315741352963) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceDataSync (5847463514326881076) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceDataSync (2267140263423973050) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceLocation (3745428302378535690) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceLocation (118894034365177183) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceMediaPlayback (4002687983891935514) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceMediaPlayback (3638032446063968043) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceMediaProjection (2630868915733312527) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceMediaProjection (4805677128082002298) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceMicrophone (7390033424890545399) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceMicrophone (1206041516173483201) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServicePhoneCall (627937743867697892) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServicePhoneCall (5941660252587015147) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceHealth (3675776442080928184) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceHealth (2024586220562667185) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceRemoteMessaging (105670277002780950) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceRemoteMessaging (8767598075877576277) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceSystemExempted (1597663713590612685) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceSystemExempted (947381760834649622) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceSpecialUse (7973536745876645082) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceSpecialUse (646713654541885919) -->
+    <skip />
     <string name="permlab_getPackageSize" msgid="375391550792886641">"ਐਪ ਸਟੋਰੇਜ ਜਗ੍ਹਾ ਮਾਪੋ"</string>
     <string name="permdesc_getPackageSize" msgid="742743530909966782">"ਐਪ ਨੂੰ ਇਸਦਾ ਕੋਡ, ਡਾਟਾ ਅਤੇ ਕੈਸ਼ੇ ਆਕਾਰ ਮੁੜ ਪ੍ਰਾਪਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_writeSettings" msgid="8057285063719277394">"ਸਿਸਟਮ ਸੈਟਿੰਗਾਂ  ਸੰਸ਼ੋਧਿਤ ਕਰੋ"</string>
@@ -447,6 +495,10 @@
     <string name="permdesc_recordAudio" msgid="5857246765327514062">"ਇਹ ਐਪ ਵਰਤੋਂ ਵਿੱਚ ਹੋਣ ਵੇਲੇ ਮਾਈਕ੍ਰੋਫ਼ੋਨ ਨੂੰ ਵਰਤ ਕੇ ਆਡੀਓ ਰਿਕਾਰਡ ਕਰ ਸਕਦੀ ਹੈ।"</string>
     <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਆਡੀਓ ਰਿਕਾਰਡ ਕਰੋ"</string>
     <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"ਇਹ ਐਪ ਕਿਸੇ ਵੇਲੇ ਵੀ ਮਾਈਕ੍ਰੋਫ਼ੋਨ ਨੂੰ ਵਰਤ ਕੇ ਆਡੀਓ ਰਿਕਾਰਡ ਕਰ ਸਕਦੀ ਹੈ।"</string>
+    <!-- no translation found for permlab_detectScreenCapture (4447042362828799433) -->
+    <skip />
+    <!-- no translation found for permdesc_detectScreenCapture (3485784917960342284) -->
+    <skip />
     <string name="permlab_sim_communication" msgid="176788115994050692">"SIM ਨੂੰ ਕਮਾਂਡਾਂ ਭੇਜੋ"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"ਐਪ ਨੂੰ SIM ਨੂੰ ਕਮਾਂਡਾਂ ਭੇਜਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਬਹੁਤ ਘਾਤਕ ਹੈ।"</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"ਸਰੀਰਕ ਸਰਗਰਮੀ ਨੂੰ ਪਛਾਣਨਾ"</string>
@@ -698,10 +750,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"ਐਪ ਨੂੰ ਤੁਹਾਡੀ ਸਾਂਝੀ ਕੀਤੀ ਸਟੋਰੇਜ ਤੋਂ ਵੀਡੀਓ ਫ਼ਾਈਲਾਂ ਪੜ੍ਹਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"ਸਾਂਝੀ ਕੀਤੀ ਸਟੋਰੇਜ ਤੋਂ ਚਿੱਤਰ ਫ਼ਾਈਲਾਂ ਪੜ੍ਹੋ"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"ਐਪ ਨੂੰ ਤੁਹਾਡੀ ਸਾਂਝੀ ਕੀਤੀ ਸਟੋਰੇਜ ਤੋਂ ਚਿੱਤਰ ਫ਼ਾਈਲਾਂ ਪੜ੍ਹਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
-    <!-- no translation found for permlab_readVisualUserSelect (5516204215354667586) -->
-    <skip />
-    <!-- no translation found for permdesc_readVisualUserSelect (8027174717714968217) -->
-    <skip />
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"ਸਾਂਝੀ ਕੀਤੀ ਸਟੋਰੇਜ ਤੋਂ ਵਰਤੋਂਕਾਰ ਵੱਲੋਂ ਚੁਣੀਆਂ ਚਿੱਤਰ ਅਤੇ ਵੀਡੀਓ ਫ਼ਾਈਲਾਂ ਪੜ੍ਹਨ ਦੀ ਆਗਿਆ ਦਿਓ"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"ਇਹ ਐਪ ਨੂੰ ਉਨ੍ਹਾਂ ਚਿੱਤਰ ਅਤੇ ਵੀਡੀਓ ਫ਼ਾਈਲਾਂ ਨੂੰ ਪੜ੍ਹਨ ਦੀ ਆਗਿਆ ਦਿੰਦੀ ਹੈ ਜਿਨ੍ਹਾਂ ਨੂੰ ਤੁਸੀਂ ਆਪਣੀ ਸਾਂਝੀ ਸਟੋਰੇਜ ਤੋਂ ਚੁਣਦੇ ਹੋ।"</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"ਸਮੱਗਰੀਆਂ ਦਾ ਸੰਸ਼ੋਧਨ ਕਰੋ ਜਾਂ ਮਿਟਾਓ"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"ਐਪ ਨੂੰ ਸਮੱਗਰੀਆਂ ਲਿਖਣ ਦਿੰਦੀ ਹੈ।"</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP ਕਾਲਾਂ ਕਰੋ/ਪ੍ਰਾਪਤ ਕਰੋ"</string>
@@ -1290,7 +1340,7 @@
     <string name="volume_icon_description_media" msgid="4997633254078171233">"ਮੀਡੀਆ ਦੀ ਅਵਾਜ਼"</string>
     <string name="volume_icon_description_notification" msgid="579091344110747279">"ਸੂਚਨਾ ਵੌਲਿਊਮ"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"ਪੂਰਵ-ਨਿਰਧਾਰਤ ਰਿੰਗਟੋਨ"</string>
-    <string name="ringtone_default_with_actual" msgid="2709686194556159773">"ਪੂਰਵ-ਨਿਰਧਾਰਤ (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
+    <string name="ringtone_default_with_actual" msgid="2709686194556159773">"ਪੂਰਵ-ਨਿਰਧਾਰਿਤ (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="397111123930141876">"ਕੋਈ ਨਹੀਂ"</string>
     <string name="ringtone_picker_title" msgid="667342618626068253">"ਰਿੰਗਟੋਨਾਂ"</string>
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"ਅਲਾਰਮ ਧੁਨੀਆਂ"</string>
@@ -2052,12 +2102,6 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"ਅਣਸਥਾਪਤ ਕਰੋ"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"ਫਿਰ ਵੀ ਖੋਲ੍ਹੋ"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"ਹਾਨੀਕਾਰਕ ਐਪ ਦਾ ਪਤਾ ਲੱਗਿਆ"</string>
-    <string name="log_access_confirmation_title" msgid="2343578467290592708">"ਕੀ <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> ਨੂੰ ਸਾਰੇ ਡੀਵਾਈਸ ਲੌਗਾਂ ਤੱਕ ਪਹੁੰਚ ਕਰਨ ਦੀ ਆਗਿਆ ਦੇਣੀ ਹੈ?"</string>
-    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"ਇੱਕ-ਵਾਰ ਲਈ ਪਹੁੰਚ ਦੀ ਆਗਿਆ ਦਿਓ"</string>
-    <string name="log_access_confirmation_deny" msgid="7685790957455099845">"ਆਗਿਆ ਨਾ ਦਿਓ"</string>
-    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"ਡੀਵਾਈਸ ਲੌਗਾਂ ਵਿੱਚ ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਦੀਆਂ ਕਾਰਵਾਈਆਂ ਰਿਕਾਰਡ ਹੁੰਦੀਆਂ ਹਨ। ਐਪਾਂ ਸਮੱਸਿਆਵਾਂ ਨੂੰ ਲੱਭਣ ਅਤੇ ਉਨ੍ਹਾਂ ਦਾ ਹੱਲ ਕਰਨ ਲਈ ਇਨ੍ਹਾਂ ਲੌਗਾਂ ਦੀ ਵਰਤੋਂ ਕਰ ਸਕਦੀਆਂ ਹਨ।\n\nਕੁਝ ਲੌਗਾਂ ਵਿੱਚ ਸੰਵੇਦਨਸ਼ੀਲ ਜਾਣਕਾਰੀ ਸ਼ਾਮਲ ਹੋ ਸਕਦੀ ਹੈ, ਇਸ ਲਈ ਸਿਰਫ਼ ਆਪਣੀਆਂ ਭਰੋਸੇਯੋਗ ਐਪਾਂ ਨੂੰ ਹੀ ਸਾਰੇ ਡੀਵਾਈਸ ਲੌਗਾਂ ਤੱਕ ਪਹੁੰਚ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿਓ। \n\nਜੇ ਤੁਸੀਂ ਇਸ ਐਪ ਨੂੰ ਸਾਰੇ ਡੀਵਾਈਸ ਲੌਗਾਂ ਤੱਕ ਪਹੁੰਚ ਕਰਨ ਦੀ ਆਗਿਆ ਨਹੀਂ ਦਿੰਦੇ ਹੋ, ਤਾਂ ਇਹ ਹਾਲੇ ਵੀ ਆਪਣੇ ਲੌਗਾਂ ਤੱਕ ਪਹੁੰਚ ਕਰ ਸਕਦੀ ਹੈ। ਤੁਹਾਡਾ ਡੀਵਾਈਸ ਨਿਰਮਾਤਾ ਹਾਲੇ ਵੀ ਤੁਹਾਡੇ ਡੀਵਾਈਸ \'ਤੇ ਮੌਜੂਦ ਕੁਝ ਲੌਗਾਂ ਜਾਂ ਜਾਣਕਾਰੀ ਤੱਕ ਪਹੁੰਚ ਕਰ ਸਕਦਾ ਹੈ।"</string>
-    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"ਡੀਵਾਈਸ ਲੌਗਾਂ ਵਿੱਚ ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਦੀਆਂ ਕਾਰਵਾਈਆਂ ਰਿਕਾਰਡ ਹੁੰਦੀਆਂ ਹਨ। ਐਪਾਂ ਸਮੱਸਿਆਵਾਂ ਨੂੰ ਲੱਭਣ ਅਤੇ ਉਨ੍ਹਾਂ ਦਾ ਹੱਲ ਕਰਨ ਲਈ ਇਨ੍ਹਾਂ ਲੌਗਾਂ ਦੀ ਵਰਤੋਂ ਕਰ ਸਕਦੀਆਂ ਹਨ।\n\nਕੁਝ ਲੌਗਾਂ ਵਿੱਚ ਸੰਵੇਦਨਸ਼ੀਲ ਜਾਣਕਾਰੀ ਸ਼ਾਮਲ ਹੋ ਸਕਦੀ ਹੈ, ਇਸ ਲਈ ਸਿਰਫ਼ ਆਪਣੀਆਂ ਭਰੋਸੇਯੋਗ ਐਪਾਂ ਨੂੰ ਹੀ ਸਾਰੇ ਡੀਵਾਈਸ ਲੌਗਾਂ ਤੱਕ ਪਹੁੰਚ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿਓ। \n\nਜੇ ਤੁਸੀਂ ਇਸ ਐਪ ਨੂੰ ਸਾਰੇ ਡੀਵਾਈਸ ਲੌਗਾਂ ਤੱਕ ਪਹੁੰਚ ਕਰਨ ਦੀ ਆਗਿਆ ਨਹੀਂ ਦਿੰਦੇ ਹੋ, ਤਾਂ ਇਹ ਹਾਲੇ ਵੀ ਆਪਣੇ ਲੌਗਾਂ ਤੱਕ ਪਹੁੰਚ ਕਰ ਸਕਦੀ ਹੈ। ਤੁਹਾਡਾ ਡੀਵਾਈਸ ਨਿਰਮਾਤਾ ਹਾਲੇ ਵੀ ਤੁਹਾਡੇ ਡੀਵਾਈਸ \'ਤੇ ਮੌਜੂਦ ਕੁਝ ਲੌਗਾਂ ਜਾਂ ਜਾਣਕਾਰੀ ਤੱਕ ਪਹੁੰਚ ਕਰ ਸਕਦਾ ਹੈ।\n\ng.co/android/devicelogs \'ਤੇ ਹੋਰ ਜਾਣੋ।"</string>
-    <string name="log_access_do_not_show_again" msgid="1058690599083091552">"ਦੁਬਾਰਾ ਨਾ ਦਿਖਾਓ"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> ਦੀ <xliff:g id="APP_2">%2$s</xliff:g> ਦੇ ਹਿੱਸੇ ਦਿਖਾਉਣ ਦੀ ਇੱਛਾ ਹੈ"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"ਸੰਪਾਦਨ ਕਰੋ"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"ਕਾਲਾਂ ਅਤੇ ਸੂਚਨਾਵਾਂ ਦੀ ਥਰਥਰਾਹਟ ਹੋਵੇਗੀ"</string>
@@ -2298,6 +2342,8 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"ਤੁਹਾਡੇ <xliff:g id="DEVICE">%1$s</xliff:g> ਤੋਂ ਫ਼ੋਨ ਦੇ ਕੈਮਰੇ ਤੱਕ ਪਹੁੰਚ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"ਤੁਹਾਡੇ <xliff:g id="DEVICE">%1$s</xliff:g> ਤੋਂ ਟੈਬਲੈੱਟ ਦੇ ਕੈਮਰੇ ਤੱਕ ਪਹੁੰਚ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"ਸਟ੍ਰੀਮਿੰਗ ਦੌਰਾਨ ਇਸ ਤੱਕ ਪਹੁੰਚ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ। ਇਸਦੀ ਬਜਾਏ ਆਪਣੇ ਫ਼ੋਨ \'ਤੇ ਵਰਤ ਕੇ ਦੇਖੋ।"</string>
+    <!-- no translation found for vdm_pip_blocked (4036107522497281397) -->
+    <skip />
     <string name="system_locale_title" msgid="711882686834677268">"ਸਿਸਟਮ ਪੂਰਵ-ਨਿਰਧਾਰਿਤ"</string>
     <string name="default_card_name" msgid="9198284935962911468">"ਕਾਰਡ <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

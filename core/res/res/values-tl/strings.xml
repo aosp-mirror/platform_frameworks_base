@@ -395,6 +395,54 @@
     <string name="permdesc_persistentActivity" product="default" msgid="1914841924366562051">"Pinapayagan ang app na panatilihin ang ilang bahagi nito sa memory. Maaari nitong limitahan ang memory na available sa iba pang apps na nagpapabagal sa telepono."</string>
     <string name="permlab_foregroundService" msgid="1768855976818467491">"paganahin ang foreground na serbisyo"</string>
     <string name="permdesc_foregroundService" msgid="8720071450020922795">"Payagan ang app na gamitin ang mga foreground na serbisyo."</string>
+    <!-- no translation found for permlab_foregroundServiceCamera (7814751737955715297) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceCamera (6973701931250595727) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceConnectedDevice (3019650546176872501) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceConnectedDevice (1067457315741352963) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceDataSync (5847463514326881076) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceDataSync (2267140263423973050) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceLocation (3745428302378535690) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceLocation (118894034365177183) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceMediaPlayback (4002687983891935514) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceMediaPlayback (3638032446063968043) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceMediaProjection (2630868915733312527) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceMediaProjection (4805677128082002298) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceMicrophone (7390033424890545399) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceMicrophone (1206041516173483201) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServicePhoneCall (627937743867697892) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServicePhoneCall (5941660252587015147) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceHealth (3675776442080928184) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceHealth (2024586220562667185) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceRemoteMessaging (105670277002780950) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceRemoteMessaging (8767598075877576277) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceSystemExempted (1597663713590612685) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceSystemExempted (947381760834649622) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceSpecialUse (7973536745876645082) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceSpecialUse (646713654541885919) -->
+    <skip />
     <string name="permlab_getPackageSize" msgid="375391550792886641">"sukatin ang espasyo ng storage ng app"</string>
     <string name="permdesc_getPackageSize" msgid="742743530909966782">"Pinapayagan ang app na bawiin ang code, data, at mga laki ng cache nito"</string>
     <string name="permlab_writeSettings" msgid="8057285063719277394">"baguhin ang mga setting ng system"</string>
@@ -447,6 +495,8 @@
     <string name="permdesc_recordAudio" msgid="5857246765327514062">"Makakapag-record ng audio ang app na ito gamit ang mikropono habang ginagamit ang app."</string>
     <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"mag-record ng audio sa background"</string>
     <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"Makakapag-record ng audio ang app na ito gamit ang mikropono anumang oras."</string>
+    <string name="permlab_detectScreenCapture" msgid="4447042362828799433">"i-detect ang mga pag-screen capture ng mga window ng app"</string>
+    <string name="permdesc_detectScreenCapture" msgid="3485784917960342284">"Maaabisuhan ang app na ito kapag may kinuhang screenshot habang ginagamit ang app."</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"magpadala ng mga command sa SIM"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"Pinapahintulutang magpadala ang app ng mga command sa SIM. Napakapanganib nito."</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"tukuyin ang pisikal na aktibidad"</string>
@@ -698,10 +748,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Nagbibigay-daan sa app na magbasa ng mga video file mula sa iyong nakabahaging storage."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"magbasa ng mga image file mula sa nakabahaging storage"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Nagbibigay-daan sa app na magbasa ng mga image file mula sa iyong nakabahaging storage."</string>
-    <!-- no translation found for permlab_readVisualUserSelect (5516204215354667586) -->
-    <skip />
-    <!-- no translation found for permdesc_readVisualUserSelect (8027174717714968217) -->
-    <skip />
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"magbasa ng mga image at video file na pinili ng user mula sa nakabahaging storage"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"Nagbibigay-daan sa app na magbasa ng mga image at video file na pipiliin mo mula sa iyong nakabahaging storage."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"baguhin o i-delete ang content ng nakabahagi mong storage"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Pinapayagan ang app na mag-write sa content ng nakabahagi mong storage."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"magsagawa/tumanggap ng mga tawag sa SIP"</string>
@@ -2052,12 +2100,6 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"I-UNINSTALL"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"BUKSAN PA RIN"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"May na-detect na mapaminsalang app"</string>
-    <string name="log_access_confirmation_title" msgid="2343578467290592708">"Payagan ang <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> na i-access ang lahat ng log ng device?"</string>
-    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Payagan ang isang beses na pag-access"</string>
-    <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Huwag payagan"</string>
-    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"Nire-record ng mga log ng device kung ano ang nangyayari sa iyong device. Magagamit ng mga app ang mga log na ito para maghanap at mag-ayos ng mga isyu.\n\nPosibleng maglaman ang ilang log ng sensitibong impormasyon, kaya ang mga app lang na pinagkakatiwalaan mo ang payagang maka-access sa lahat ng log ng device. \n\nKung hindi mo papayagan ang app na ito na i-access ang lahat ng log ng device, maa-access pa rin nito ang mga sarili nitong log. Posible pa ring ma-access ng manufacturer ng iyong device ang ilang log o impormasyon sa device mo."</string>
-    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"Nire-record ng mga log ng device kung ano ang nangyayari sa iyong device. Magagamit ng mga app ang mga log na ito para maghanap at mag-ayos ng mga isyu.\n\nPosibleng maglaman ang ilang log ng sensitibong impormasyon, kaya ang mga app lang na pinagkakatiwalaan mo ang payagang maka-access sa lahat ng log ng device. \n\nKung hindi mo papayagan ang app na ito na i-access ang lahat ng log ng device, maa-access pa rin nito ang mga sarili nitong log. Posible pa ring ma-access ng manufacturer ng iyong device ang ilang log o impormasyon sa device mo.\n\nMatuto pa sa g.co/android/devicelogs."</string>
-    <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Huwag ipakita ulit"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"Gustong ipakita ng <xliff:g id="APP_0">%1$s</xliff:g> ang mga slice ng <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"I-edit"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Magva-vibrate ang mga tawag at notification"</string>
@@ -2298,6 +2340,8 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Hindi ma-access ang camera ng telepono mula sa iyong <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Hindi ma-access ang camera ng tablet mula sa iyong <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Hindi ito puwedeng i-access habang nagsi-stream. Subukan na lang sa iyong telepono."</string>
+    <!-- no translation found for vdm_pip_blocked (4036107522497281397) -->
+    <skip />
     <string name="system_locale_title" msgid="711882686834677268">"Default ng system"</string>
     <string name="default_card_name" msgid="9198284935962911468">"CARD <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>
