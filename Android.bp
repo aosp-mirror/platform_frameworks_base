@@ -95,8 +95,11 @@ filegroup {
         ":platform-compat-native-aidl",
 
         // AIDL sources from external directories
+        ":android.hardware.biometrics.common-V3-java-source",
+        ":android.hardware.biometrics.fingerprint-V3-java-source",
         ":android.hardware.gnss-V2-java-source",
         ":android.hardware.graphics.common-V3-java-source",
+        ":android.hardware.keymaster-V4-java-source",
         ":android.hardware.security.keymint-V2-java-source",
         ":android.hardware.security.secureclock-V1-java-source",
         ":android.hardware.tv.tuner-V1-java-source",
@@ -332,7 +335,10 @@ java_defaults {
             "packages/modules/Bluetooth/framework/aidl-export",
             "packages/modules/Connectivity/framework/aidl-export",
             "packages/modules/Media/apex/aidl/stable",
+            "hardware/interfaces/biometrics/common/aidl",
+            "hardware/interfaces/biometrics/fingerprint/aidl",
             "hardware/interfaces/graphics/common/aidl",
+            "hardware/interfaces/keymaster/aidl",
         ],
     },
     dxflags: [
@@ -617,7 +623,10 @@ stubs_defaults {
             "packages/modules/Bluetooth/framework/aidl-export",
             "packages/modules/Connectivity/framework/aidl-export",
             "packages/modules/Media/apex/aidl/stable",
+            "hardware/interfaces/biometrics/common/aidl",
+            "hardware/interfaces/biometrics/fingerprint/aidl",
             "hardware/interfaces/graphics/common/aidl",
+            "hardware/interfaces/keymaster/aidl",
         ],
     },
     // These are libs from framework-internal-utils that are required (i.e. being referenced)

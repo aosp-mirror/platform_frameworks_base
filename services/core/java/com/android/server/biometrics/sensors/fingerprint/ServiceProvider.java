@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.ITestSessionCallback;
+import android.hardware.biometrics.fingerprint.PointerContext;
 import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
@@ -122,9 +123,9 @@ public interface ServiceProvider extends
             @NonNull IInvalidationCallback callback);
 
 
-    void onPointerDown(long requestId, int sensorId, int x, int y, float minor, float major);
+    void onPointerDown(long requestId, int sensorId, PointerContext pc);
 
-    void onPointerUp(long requestId, int sensorId);
+    void onPointerUp(long requestId, int sensorId, PointerContext pc);
 
     void onUiReady(long requestId, int sensorId);
 

@@ -24,6 +24,7 @@ import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricFingerprintConstants;
 import android.hardware.biometrics.BiometricManager.Authenticators;
+import android.hardware.biometrics.fingerprint.PointerContext;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.ISidefpsController;
@@ -234,11 +235,11 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
     }
 
     @Override
-    public void onPointerDown(int x, int y, float minor, float major) {
+    public void onPointerDown(PointerContext pc) {
         mIsPointerDown = true;
         mState = STATE_STARTED;
         mALSProbeCallback.getProbe().enable();
-        UdfpsHelper.onFingerDown(getFreshDaemon(), x, y, minor, major);
+        UdfpsHelper.onFingerDown(getFreshDaemon(), (int) pc.x, (int) pc.y, pc.minor, pc.major);
 
         if (getListener() != null) {
             try {
@@ -250,7 +251,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
     }
 
     @Override
-    public void onPointerUp() {
+    public void onPointerUp(PointerContext pc) {
         mIsPointerDown = false;
         mState = STATE_STARTED_PAUSED_ATTEMPTED;
         mALSProbeCallback.getProbe().disable();

@@ -219,22 +219,16 @@ class FingerprintEnrollClient extends EnrollClient<AidlSession> implements Udfps
     }
 
     @Override
-    public void onPointerDown(int x, int y, float minor, float major) {
+    public void onPointerDown(PointerContext pc) {
         try {
             mIsPointerDown = true;
 
             final AidlSession session = getFreshDaemon();
             if (session.hasContextMethods()) {
-                final PointerContext context = new PointerContext();
-                context.pointerId = 0;
-                context.x = x;
-                context.y = y;
-                context.minor = minor;
-                context.major = major;
-                context.isAod = getBiometricContext().isAod();
-                session.getSession().onPointerDownWithContext(context);
+                session.getSession().onPointerDownWithContext(pc);
             } else {
-                session.getSession().onPointerDown(0 /* pointerId */, x, y, minor, major);
+                session.getSession().onPointerDown(pc.pointerId, (int) pc.x, (int) pc.y, pc.minor,
+                        pc.major);
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "Unable to send pointer down", e);
@@ -242,17 +236,15 @@ class FingerprintEnrollClient extends EnrollClient<AidlSession> implements Udfps
     }
 
     @Override
-    public void onPointerUp() {
+    public void onPointerUp(PointerContext pc) {
         try {
             mIsPointerDown = false;
 
             final AidlSession session = getFreshDaemon();
             if (session.hasContextMethods()) {
-                final PointerContext context = new PointerContext();
-                context.pointerId = 0;
-                session.getSession().onPointerUpWithContext(context);
+                session.getSession().onPointerUpWithContext(pc);
             } else {
-                session.getSession().onPointerUp(0 /* pointerId */);
+                session.getSession().onPointerUp(pc.pointerId);
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "Unable to send pointer up", e);

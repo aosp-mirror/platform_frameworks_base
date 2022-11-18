@@ -49,6 +49,7 @@ import android.hardware.biometrics.BiometricStateListener;
 import android.hardware.biometrics.BiometricTestSession;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.hardware.biometrics.SensorProperties;
+import android.hardware.biometrics.fingerprint.PointerContext;
 import android.os.Binder;
 import android.os.Build;
 import android.os.CancellationSignal;
@@ -959,8 +960,14 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
             return;
         }
 
+        final PointerContext pc = new PointerContext();
+        pc.x = (int) x;
+        pc.y = (int) y;
+        pc.minor = minor;
+        pc.major = major;
+
         try {
-            mService.onPointerDown(requestId, sensorId, x, y, minor, major);
+            mService.onPointerDown(requestId, sensorId, pc);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -976,8 +983,10 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
             return;
         }
 
+        final PointerContext pc = new PointerContext();
+
         try {
-            mService.onPointerUp(requestId, sensorId);
+            mService.onPointerUp(requestId, sensorId, pc);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
