@@ -1553,7 +1553,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             final int pinnedHeight = firstVisibleSection != null
                     ? firstVisibleSection.getFirstVisibleChild().getPinnedHeadsUpHeight()
                     : 0;
-            return mHeadsUpInset + pinnedHeight;
+            return mHeadsUpInset - mAmbientState.getStackTopMargin() + pinnedHeight;
         }
         return getMinExpansionHeight();
     }
