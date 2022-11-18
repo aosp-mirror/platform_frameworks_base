@@ -43,13 +43,13 @@ struct MemoryPolicy {
     float backgroundRetentionPercent = 0.5f;
     // How long after the last renderer goes away before the GPU context is released. A value
     // of 0 means only drop the context on background TRIM signals
-    nsecs_t contextTimeout = 0_ms;
+    nsecs_t contextTimeout = 10_s;
     // The minimum amount of time to hold onto items in the resource cache
     // The actual time used will be the max of this & when frames were actually rendered
     nsecs_t minimumResourceRetention = 10_s;
     // If false, use only TRIM_UI_HIDDEN to drive background cache limits;
     // If true, use all signals (such as all contexts are stopped) to drive the limits
-    bool useAlternativeUiHidden = false;
+    bool useAlternativeUiHidden = true;
     // Whether or not to only purge scratch resources when triggering UI Hidden or background
     // collection
     bool purgeScratchOnly = true;
