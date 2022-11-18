@@ -19,6 +19,7 @@ package android.view;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.graphics.HardwareRenderer;
 import android.graphics.Rect;
@@ -355,33 +356,101 @@ public final class PixelCopy {
      * PixelCopy.Request.ofSurface factories to create a {@link Request.Builder} for the
      * given source content. After setting any optional parameters, such as
      * {@link Builder#setSourceRect(Rect)}, build the request with {@link Builder#build()} and
-     * then execute it with {@link PixelCopy#request(Request)}
+     * then execute it with {@link PixelCopy#request(Request, Executor, Consumer)}
      */
     public static final class Request {
         private final Surface mSource;
-        private final Consumer<Result> mListener;
-        private final Executor mListenerThread;
         private final Rect mSourceInsets;
         private Rect mSrcRect;
         private Bitmap mDest;
 
-        private Request(Surface source, Rect sourceInsets, Executor listenerThread,
-                        Consumer<Result> listener) {
+        private Request(Surface source, Rect sourceInsets) {
             this.mSource = source;
             this.mSourceInsets = sourceInsets;
-            this.mListenerThread = listenerThread;
-            this.mListener = listener;
         }
 
         /**
          * A builder to create the complete PixelCopy request, which is then executed by calling
-         * {@link #request(Request)} with the built request returned from {@link #build()}
+         * {@link #request(Request, Executor, Consumer)} with the built request returned from
+         * {@link #build()}
          */
         public static final class Builder {
             private Request mRequest;
 
             private Builder(Request request) {
                 mRequest = request;
+            }
+
+            /**
+             * Creates a PixelCopy request for the given {@link Window}
+             * @param source The Window to copy from
+             * @return A {@link Builder} builder to set the optional params & execute the request
+             */
+            @SuppressLint("BuilderSetStyle")
+            public static @NonNull Builder ofWindow(@NonNull Window source) {
+                final Rect insets = new Rect();
+                final Surface surface = sourceForWindow(source, insets);
+                return new Builder(new Request(surface, insets));
+            }
+
+            /**
+             * Creates a PixelCopy request for the {@link Window} that the given {@link View} is
+             * attached to.
+             *
+             * Note that this copy request is not cropped to the area the View occupies by default.
+             * If that behavior is desired, use {@link View#getLocationInWindow(int[])} combined
+             * with {@link Builder#setSourceRect(Rect)} to set a crop area to restrict the copy
+             * operation.
+             *
+             * @param source A View that {@link View#isAttachedToWindow() is attached} to a window
+             *               that will be used to retrieve the window to copy from.
+             * @return A {@link Builder} builder to set the optional params & execute the request
+             */
+            @SuppressLint("BuilderSetStyle")
+            public static @NonNull Builder ofWindow(@NonNull View source) {
+                if (source == null || !source.isAttachedToWindow()) {
+                    throw new IllegalArgumentException(
+                            "View must not be null & must be attached to window");
+                }
+                final Rect insets = new Rect();
+                Surface surface = null;
+                final ViewRootImpl root = source.getViewRootImpl();
+                if (root != null) {
+                    surface = root.mSurface;
+                    insets.set(root.mWindowAttributes.surfaceInsets);
+                }
+                if (surface == null || !surface.isValid()) {
+                    throw new IllegalArgumentException(
+                            "Window doesn't have a backing surface!");
+                }
+                return new Builder(new Request(surface, insets));
+            }
+
+            /**
+             * Creates a PixelCopy request for the given {@link Surface}
+             *
+             * @param source The Surface to copy from. Must be {@link Surface#isValid() valid}.
+             * @return A {@link Builder} builder to set the optional params & execute the request
+             */
+            @SuppressLint("BuilderSetStyle")
+            public static @NonNull Builder ofSurface(@NonNull Surface source) {
+                if (source == null || !source.isValid()) {
+                    throw new IllegalArgumentException("Source must not be null & must be valid");
+                }
+                return new Builder(new Request(source, null));
+            }
+
+            /**
+             * Creates a PixelCopy request for the {@link Surface} belonging to the
+             * given {@link SurfaceView}
+             *
+             * @param source The SurfaceView to copy from. The backing surface must be
+             *               {@link Surface#isValid() valid}
+             * @return A {@link Builder} builder to set the optional params & execute the request
+             */
+            @SuppressLint("BuilderSetStyle")
+            public static @NonNull Builder ofSurface(@NonNull SurfaceView source) {
+                return ofSurface(source.getHolder().getSurface());
             }
 
             private void requireNotBuilt() {
@@ -439,89 +508,6 @@ public final class PixelCopy {
         }
 
         /**
-         * Creates a PixelCopy request for the given {@link Window}
-         * @param source The Window to copy from
-         * @param callbackExecutor The executor to run the callback on
-         * @param listener The callback for when the copy request is completed
-         * @return A {@link Builder} builder to set the optional params & execute the request
-         */
-        public static @NonNull Builder ofWindow(@NonNull Window source,
-                                                @NonNull Executor callbackExecutor,
-                                                @NonNull Consumer<Result> listener) {
-            final Rect insets = new Rect();
-            final Surface surface = sourceForWindow(source, insets);
-            return new Builder(new Request(surface, insets, callbackExecutor, listener));
-        }
-
-        /**
-         * Creates a PixelCopy request for the {@link Window} that the given {@link View} is
-         * attached to.
-         *
-         * Note that this copy request is not cropped to the area the View occupies by default. If
-         * that behavior is desired, use {@link View#getLocationInWindow(int[])} combined with
-         * {@link Builder#setSourceRect(Rect)} to set a crop area to restrict the copy operation.
-         *
-         * @param source A View that {@link View#isAttachedToWindow() is attached} to a window that
-         *               will be used to retrieve the window to copy from.
-         * @param callbackExecutor The executor to run the callback on
-         * @param listener The callback for when the copy request is completed
-         * @return A {@link Builder} builder to set the optional params & execute the request
-         */
-        public static @NonNull Builder ofWindow(@NonNull View source,
-                                                @NonNull Executor callbackExecutor,
-                                                @NonNull Consumer<Result> listener) {
-            if (source == null || !source.isAttachedToWindow()) {
-                throw new IllegalArgumentException(
-                        "View must not be null & must be attached to window");
-            }
-            final Rect insets = new Rect();
-            Surface surface = null;
-            final ViewRootImpl root = source.getViewRootImpl();
-            if (root != null) {
-                surface = root.mSurface;
-                insets.set(root.mWindowAttributes.surfaceInsets);
-            }
-            if (surface == null || !surface.isValid()) {
-                throw new IllegalArgumentException(
-                        "Window doesn't have a backing surface!");
-            }
-            return new Builder(new Request(surface, insets, callbackExecutor, listener));
-        }
-
-        /**
-         * Creates a PixelCopy request for the given {@link Surface}
-         *
-         * @param source The Surface to copy from. Must be {@link Surface#isValid() valid}.
-         * @param callbackExecutor The executor to run the callback on
-         * @param listener The callback for when the copy request is completed
-         * @return A {@link Builder} builder to set the optional params & execute the request
-         */
-        public static @NonNull Builder ofSurface(@NonNull Surface source,
-                                                 @NonNull Executor callbackExecutor,
-                                                 @NonNull Consumer<Result> listener) {
-            if (source == null || !source.isValid()) {
-                throw new IllegalArgumentException("Source must not be null & must be valid");
-            }
-            return new Builder(new Request(source, null, callbackExecutor, listener));
-        }
-
-        /**
-         * Creates a PixelCopy request for the {@link Surface} belonging to the
-         * given {@link SurfaceView}
-         *
-         * @param source The SurfaceView to copy from. The backing surface must be
-         *               {@link Surface#isValid() valid}
-         * @param callbackExecutor The executor to run the callback on
-         * @param listener The callback for when the copy request is completed
-         * @return A {@link Builder} builder to set the optional params & execute the request
-         */
-        public static @NonNull Builder ofSurface(@NonNull SurfaceView source,
-                                                 @NonNull Executor callbackExecutor,
-                                                 @NonNull Consumer<Result> listener) {
-            return ofSurface(source.getHolder().getSurface(), callbackExecutor, listener);
-        }
-
-        /**
          * @return The destination bitmap as set by {@link Builder#setDestinationBitmap(Bitmap)}
          */
         public @Nullable Bitmap getDestinationBitmap() {
@@ -538,9 +524,10 @@ public final class PixelCopy {
         /**
          * @hide
          */
-        public void request() {
+        public void request(@NonNull Executor callbackExecutor,
+                            @NonNull Consumer<Result> listener) {
             if (!mSource.isValid()) {
-                mListenerThread.execute(() -> mListener.accept(
+                callbackExecutor.execute(() -> listener.accept(
                         new Result(ERROR_SOURCE_INVALID, null)));
                 return;
             }
@@ -548,7 +535,7 @@ public final class PixelCopy {
                     adjustSourceRectForInsets(mSourceInsets, mSrcRect), mDest) {
                 @Override
                 public void onCopyFinished(int result) {
-                    mListenerThread.execute(() -> mListener.accept(
+                    callbackExecutor.execute(() -> listener.accept(
                             new Result(result, mDestinationBitmap)));
                 }
             });
@@ -558,9 +545,12 @@ public final class PixelCopy {
     /**
      * Executes the pixel copy request
      * @param request The request to execute
+     * @param callbackExecutor The executor to run the callback on
+     * @param listener The callback for when the copy request is completed
      */
-    public static void request(@NonNull Request request) {
-        request.request();
+    public static void request(@NonNull Request request, @NonNull Executor callbackExecutor,
+                               @NonNull Consumer<Result> listener) {
+        request.request(callbackExecutor, listener);
     }
 
     private PixelCopy() {}
