@@ -48,22 +48,22 @@ class FeatureFlagsDebugRestarterTest : SysuiTestCase() {
     @Test
     fun testRestart_ImmediateWhenAsleep() {
         whenever(wakefulnessLifecycle.wakefulness).thenReturn(WAKEFULNESS_ASLEEP)
-        restarter.restartSystemUI()
-        verify(systemExitRestarter).restartSystemUI()
+        restarter.restart()
+        verify(systemExitRestarter).restart()
     }
 
     @Test
     fun testRestart_WaitsForSceenOff() {
         whenever(wakefulnessLifecycle.wakefulness).thenReturn(WAKEFULNESS_AWAKE)
 
-        restarter.restartSystemUI()
-        verify(systemExitRestarter, never()).restartSystemUI()
+        restarter.restart()
+        verify(systemExitRestarter, never()).restart()
 
         val captor = ArgumentCaptor.forClass(WakefulnessLifecycle.Observer::class.java)
         verify(wakefulnessLifecycle).addObserver(captor.capture())
 
         captor.value.onFinishedGoingToSleep()
 
-        verify(systemExitRestarter).restartSystemUI()
+        verify(systemExitRestarter).restart()
     }
 }
