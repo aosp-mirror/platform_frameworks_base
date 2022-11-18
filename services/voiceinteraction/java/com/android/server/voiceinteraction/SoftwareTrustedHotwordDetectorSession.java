@@ -16,20 +16,50 @@
 
 package com.android.server.voiceinteraction;
 
+import static android.service.voice.HotwordDetectionService.AUDIO_SOURCE_MICROPHONE;
+
+import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_EVENTS__EVENT__CALLBACK_ON_PROCESS_RESTARTED_EXCEPTION;
+import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_EVENTS__EVENT__START_SOFTWARE_DETECTION;
+import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__DETECTED;
+import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__REJECTED;
+
 import android.annotation.NonNull;
 import android.content.Context;
+import android.media.AudioFormat;
 import android.media.permission.Identity;
+import android.os.PersistableBundle;
+import android.os.RemoteException;
+import android.os.SharedMemory;
+import android.service.voice.HotwordDetectedResult;
 import android.service.voice.HotwordDetectionService;
+import android.service.voice.HotwordDetector;
+import android.service.voice.HotwordRejectedResult;
+import android.service.voice.IDspHotwordDetectionCallback;
+import android.service.voice.IHotwordDetectionService;
+import android.service.voice.IMicrophoneHotwordDetectionVoiceInteractionCallback;
+import android.util.Slog;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IHotwordRecognitionStatusCallback;
 
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * A class that provides software trusted hotword detector to communicate with the {@link
  * HotwordDetectionService}.
+ *
+ * This class can handle the hotword detection which detector is created by using
+ * {@link android.service.voice.VoiceInteractionService#createHotwordDetector(PersistableBundle,
+ * SharedMemory, HotwordDetector.Callback)}.
  */
 final class SoftwareTrustedHotwordDetectorSession extends HotwordDetectorSession {
+    private static final String TAG = "SoftwareTrustedHotwordDetectorSession";
+
+    private IMicrophoneHotwordDetectionVoiceInteractionCallback mSoftwareCallback;
+    @GuardedBy("mLock")
+    private boolean mPerformingSoftwareHotwordDetection;
 
     SoftwareTrustedHotwordDetectorSession(
             @NonNull HotwordDetectionConnection.ServiceConnection remoteHotwordDetectionService,
@@ -39,5 +69,146 @@ final class SoftwareTrustedHotwordDetectorSession extends HotwordDetectorSession
             @NonNull ScheduledExecutorService scheduledExecutorService, boolean logging) {
         super(remoteHotwordDetectionService, lock, context, callback, voiceInteractionServiceUid,
                 voiceInteractorIdentity, scheduledExecutorService, logging);
+    }
+
+    @SuppressWarnings("GuardedBy")
+    void startListeningFromMicLocked(
+            AudioFormat audioFormat,
+            IMicrophoneHotwordDetectionVoiceInteractionCallback callback) {
+        if (DEBUG) {
+            Slog.d(TAG, "startListeningFromMicLocked");
+        }
+        mSoftwareCallback = callback;
+
+        if (mPerformingSoftwareHotwordDetection) {
+            Slog.i(TAG, "Hotword validation is already in progress, ignoring.");
+            return;
+        }
+        mPerformingSoftwareHotwordDetection = true;
+
+        startListeningFromMicLocked();
+    }
+
+    @SuppressWarnings("GuardedBy")
+    private void startListeningFromMicLocked() {
+        // TODO: consider making this a non-anonymous class.
+        IDspHotwordDetectionCallback internalCallback = new IDspHotwordDetectionCallback.Stub() {
+            @Override
+            public void onDetected(HotwordDetectedResult result) throws RemoteException {
+                if (DEBUG) {
+                    Slog.d(TAG, "onDetected");
+                }
+                synchronized (mLock) {
+                    HotwordMetricsLogger.writeKeyphraseTriggerEvent(
+                            HotwordDetector.DETECTOR_TYPE_TRUSTED_HOTWORD_SOFTWARE,
+                            HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__DETECTED);
+                    if (!mPerformingSoftwareHotwordDetection) {
+                        Slog.i(TAG, "Hotword detection has already completed");
+                        HotwordMetricsLogger.writeKeyphraseTriggerEvent(
+                                HotwordDetector.DETECTOR_TYPE_TRUSTED_HOTWORD_SOFTWARE,
+                                METRICS_KEYPHRASE_TRIGGERED_DETECT_UNEXPECTED_CALLBACK);
+                        return;
+                    }
+                    mPerformingSoftwareHotwordDetection = false;
+                    try {
+                        enforcePermissionsForDataDelivery();
+                    } catch (SecurityException e) {
+                        HotwordMetricsLogger.writeKeyphraseTriggerEvent(
+                                HotwordDetector.DETECTOR_TYPE_TRUSTED_HOTWORD_SOFTWARE,
+                                METRICS_KEYPHRASE_TRIGGERED_DETECT_SECURITY_EXCEPTION);
+                        mSoftwareCallback.onError();
+                        return;
+                    }
+                    saveProximityValueToBundle(result);
+                    HotwordDetectedResult newResult;
+                    try {
+                        newResult = mHotwordAudioStreamCopier.startCopyingAudioStreams(result);
+                    } catch (IOException e) {
+                        // TODO: Write event
+                        mSoftwareCallback.onError();
+                        return;
+                    }
+                    mSoftwareCallback.onDetected(newResult, null, null);
+                    Slog.i(TAG, "Egressed " + HotwordDetectedResult.getUsageSize(newResult)
+                            + " bits from hotword trusted process");
+                    if (mDebugHotwordLogging) {
+                        Slog.i(TAG, "Egressed detected result: " + newResult);
+                    }
+                }
+            }
+
+            @Override
+            public void onRejected(HotwordRejectedResult result) throws RemoteException {
+                if (DEBUG) {
+                    Slog.wtf(TAG, "onRejected");
+                }
+                HotwordMetricsLogger.writeKeyphraseTriggerEvent(
+                        HotwordDetector.DETECTOR_TYPE_TRUSTED_HOTWORD_SOFTWARE,
+                        HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__REJECTED);
+                // onRejected isn't allowed here, and we are not expecting it.
+            }
+        };
+
+        mRemoteHotwordDetectionService.run(
+                service -> service.detectFromMicrophoneSource(
+                        null,
+                        AUDIO_SOURCE_MICROPHONE,
+                        null,
+                        null,
+                        internalCallback));
+        HotwordMetricsLogger.writeDetectorEvent(
+                HotwordDetector.DETECTOR_TYPE_TRUSTED_HOTWORD_SOFTWARE,
+                HOTWORD_DETECTOR_EVENTS__EVENT__START_SOFTWARE_DETECTION,
+                mVoiceInteractionServiceUid);
+    }
+
+    @SuppressWarnings("GuardedBy")
+    void stopListeningLocked() {
+        if (DEBUG) {
+            Slog.d(TAG, "stopListeningLocked");
+        }
+        if (!mPerformingSoftwareHotwordDetection) {
+            Slog.i(TAG, "Hotword detection is not running");
+            return;
+        }
+        mPerformingSoftwareHotwordDetection = false;
+
+        mRemoteHotwordDetectionService.run(IHotwordDetectionService::stopDetection);
+
+        closeExternalAudioStreamLocked("stopping requested");
+    }
+
+    @Override
+    @SuppressWarnings("GuardedBy")
+    void informRestartProcessLocked() {
+        // TODO(b/244598068): Check HotwordAudioStreamManager first
+        Slog.v(TAG, "informRestartProcessLocked");
+        mUpdateStateAfterStartFinished.set(false);
+
+        try {
+            mCallback.onProcessRestarted();
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Failed to communicate #onProcessRestarted", e);
+            HotwordMetricsLogger.writeDetectorEvent(
+                    HotwordDetector.DETECTOR_TYPE_TRUSTED_HOTWORD_SOFTWARE,
+                    HOTWORD_DETECTOR_EVENTS__EVENT__CALLBACK_ON_PROCESS_RESTARTED_EXCEPTION,
+                    mVoiceInteractionServiceUid);
+        }
+
+        // Restart listening from microphone if the hotword process has been restarted.
+        if (mPerformingSoftwareHotwordDetection) {
+            Slog.i(TAG, "Process restarted: calling startRecognition() again");
+            startListeningFromMicLocked();
+        }
+
+        mPerformingExternalSourceHotwordDetection = false;
+        closeExternalAudioStreamLocked("process restarted");
+    }
+
+    @SuppressWarnings("GuardedBy")
+    public void dumpLocked(String prefix, PrintWriter pw) {
+        super.dumpLocked(prefix, pw);
+        pw.print(prefix); pw.print("mPerformingSoftwareHotwordDetection=");
+        pw.println(mPerformingSoftwareHotwordDetection);
     }
 }
