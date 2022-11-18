@@ -20,7 +20,7 @@ android:id="@+id/handle_menu"
 android:layout_width="wrap_content"
 android:layout_height="wrap_content"
 android:gravity="center_horizontal"
-android:background="@drawable/decor_caption_title">
+android:background="@drawable/decor_caption_menu_background">
     <Button
         style="@style/CaptionButtonStyle"
         android:id="@+id/fullscreen_button"
