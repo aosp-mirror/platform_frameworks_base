@@ -8014,6 +8014,9 @@ package android.app.admin {
     field public static final int TAG_MEDIA_UNMOUNT = 210014; // 0x3345e
     field public static final int TAG_OS_SHUTDOWN = 210010; // 0x3345a
     field public static final int TAG_OS_STARTUP = 210009; // 0x33459
+    field public static final int TAG_PACKAGE_INSTALLED = 210041; // 0x33479
+    field public static final int TAG_PACKAGE_UNINSTALLED = 210043; // 0x3347b
+    field public static final int TAG_PACKAGE_UPDATED = 210042; // 0x3347a
     field public static final int TAG_PASSWORD_CHANGED = 210036; // 0x33474
     field public static final int TAG_PASSWORD_COMPLEXITY_REQUIRED = 210035; // 0x33473
     field public static final int TAG_PASSWORD_COMPLEXITY_SET = 210017; // 0x33461
