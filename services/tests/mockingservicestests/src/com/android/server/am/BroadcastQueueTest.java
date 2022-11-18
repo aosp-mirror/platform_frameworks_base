@@ -50,7 +50,6 @@ import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.BroadcastOptions;
 import android.app.IApplicationThread;
-import android.app.RemoteServiceException.CannotDeliverBroadcastException;
 import android.app.usage.UsageEvents.Event;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ComponentName;
@@ -964,8 +963,8 @@ public class BroadcastQueueTest {
 
         // First broadcast should have already been dead
         verifyScheduleRegisteredReceiver(receiverApp, airplane);
-        verify(receiverApp).scheduleCrashLocked(any(),
-                eq(CannotDeliverBroadcastException.TYPE_ID), any());
+        // The old receiverApp should be killed gently
+        assertTrue(receiverApp.isKilled());
 
         // Second broadcast in new process should work fine
         final ProcessRecord restartedReceiverApp = mAms.getProcessRecordLocked(PACKAGE_GREEN,
@@ -995,8 +994,8 @@ public class BroadcastQueueTest {
 
         // First broadcast should have already been dead
         verifyScheduleReceiver(receiverApp, airplane);
-        verify(receiverApp).scheduleCrashLocked(any(),
-                eq(CannotDeliverBroadcastException.TYPE_ID), any());
+        // The old receiverApp should be killed gently
+        assertTrue(receiverApp.isKilled());
 
         // Second broadcast in new process should work fine
         final ProcessRecord restartedReceiverApp = mAms.getProcessRecordLocked(PACKAGE_GREEN,
