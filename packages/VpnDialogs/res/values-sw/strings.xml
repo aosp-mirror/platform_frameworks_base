@@ -34,4 +34,8 @@
     <string name="disconnect" msgid="971412338304200056">"Tenganisha"</string>
     <string name="open_app" msgid="3717639178595958667">"Fungua programu"</string>
     <string name="dismiss" msgid="6192859333764711227">"Ondoa"</string>
+    <!-- no translation found for sanitized_vpn_label_with_ellipsis (7014327474633422235) -->
+    <skip />
+    <!-- no translation found for sanitized_vpn_label (1877415015009794766) -->
+    <skip />
 </resources>
