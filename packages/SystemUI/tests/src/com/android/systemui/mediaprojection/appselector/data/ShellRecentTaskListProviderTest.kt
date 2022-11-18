@@ -4,6 +4,7 @@ import android.app.ActivityManager.RecentTaskInfo
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
@@ -11,11 +12,11 @@ import com.android.wm.shell.recents.RecentTasks
 import com.android.wm.shell.util.GroupedRecentTaskInfo
 import com.google.common.truth.Truth.assertThat
 import java.util.*
+import java.util.function.Consumer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.util.function.Consumer
 
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
@@ -23,8 +24,14 @@ class ShellRecentTaskListProviderTest : SysuiTestCase() {
 
     private val dispatcher = Dispatchers.Unconfined
     private val recentTasks: RecentTasks = mock()
+    private val userTracker: UserTracker = mock()
     private val recentTaskListProvider =
-        ShellRecentTaskListProvider(dispatcher, Runnable::run, Optional.of(recentTasks))
+        ShellRecentTaskListProvider(
+            dispatcher,
+            Runnable::run,
+            Optional.of(recentTasks),
+            userTracker
+        )
 
     @Test
     fun loadRecentTasks_oneTask_returnsTheSameTask() {

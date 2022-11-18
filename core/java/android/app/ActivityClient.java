@@ -525,9 +525,9 @@ public class ActivityClient {
         }
     }
 
-    void onBackPressedOnTaskRoot(IBinder token, IRequestFinishCallback callback) {
+    void onBackPressed(IBinder token, IRequestFinishCallback callback) {
         try {
-            getActivityClientController().onBackPressedOnTaskRoot(token, callback);
+            getActivityClientController().onBackPressed(token, callback);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }

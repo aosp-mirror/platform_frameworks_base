@@ -129,6 +129,34 @@ class BroadcastSentViaContextDetectorTest : SystemUILintDetectorTest() {
     }
 
     @Test
+    fun testSuppressSendBroadcastInActivity() {
+        lint()
+            .files(
+                TestFiles.java(
+                        """
+                    package test.pkg;
+                    import android.app.Activity;
+                    import android.os.UserHandle;
+
+                    public class TestClass {
+                        @SuppressWarnings("BroadcastSentViaContext")
+                        public void send(Activity activity) {
+                          Intent intent = new Intent(Intent.ACTION_VIEW);
+                          activity.sendBroadcastAsUser(intent, UserHandle.ALL, "permission");
+                        }
+
+                    }
+                """
+                    )
+                    .indented(),
+                *stubs
+            )
+            .issues(BroadcastSentViaContextDetector.ISSUE)
+            .run()
+            .expectClean()
+    }
+
+    @Test
     fun testSendBroadcastInBroadcastSender() {
         lint()
             .files(

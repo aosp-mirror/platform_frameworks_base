@@ -27,6 +27,7 @@ import com.android.systemui.GuestResetOrExitSessionReceiver
 import com.android.systemui.GuestResumeSessionReceiver
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.Text
+import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.plugins.ActivityStarter
@@ -147,6 +148,7 @@ class UserSwitcherViewModelTest : SysuiTestCase() {
                                 KeyguardInteractor(
                                     repository = keyguardRepository,
                                 ),
+                            featureFlags = FakeFeatureFlags(),
                             manager = manager,
                             applicationScope = injectedScope,
                             telephonyInteractor =

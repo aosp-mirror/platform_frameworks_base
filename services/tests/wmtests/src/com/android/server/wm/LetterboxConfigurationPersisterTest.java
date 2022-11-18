@@ -35,6 +35,7 @@ import com.android.internal.annotations.VisibleForTesting;
 
 import junit.framework.Assert;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -72,6 +73,7 @@ public class LetterboxConfigurationPersisterTest {
         mLetterboxConfigurationPersister.start();
     }
 
+    @After
     public void tearDown() throws InterruptedException {
         deleteConfiguration(mLetterboxConfigurationPersister, mPersisterQueue);
         waitForCompletion(mPersisterQueue);

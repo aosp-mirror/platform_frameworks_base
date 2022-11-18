@@ -19,6 +19,7 @@ package com.android.systemui.controls.management
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.ComponentName
+import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
@@ -32,18 +33,20 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.ComponentActivity
 import com.android.systemui.R
-import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.controller.ControlInfo
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.ui.RenderInfo
-import com.android.systemui.settings.CurrentUserTracker
+import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.phone.SystemUIDialog
+import java.util.concurrent.Executor
 import javax.inject.Inject
 
 open class ControlsRequestDialog @Inject constructor(
+    @Main private val mainExecutor: Executor,
     private val controller: ControlsController,
-    private val broadcastDispatcher: BroadcastDispatcher,
+    private val userTracker: UserTracker,
     private val controlsListingController: ControlsListingController
 ) : ComponentActivity(), DialogInterface.OnClickListener, DialogInterface.OnCancelListener {
 
@@ -58,12 +61,12 @@ open class ControlsRequestDialog @Inject constructor(
         override fun onServicesUpdated(serviceInfos: List<ControlsServiceInfo>) {}
     }
 
-    private val currentUserTracker = object : CurrentUserTracker(broadcastDispatcher) {
+    private val userTrackerCallback: UserTracker.Callback = object : UserTracker.Callback {
         private val startingUser = controller.currentUserId
 
-        override fun onUserSwitched(newUserId: Int) {
-            if (newUserId != startingUser) {
-                stopTracking()
+        override fun onUserChanged(newUser: Int, userContext: Context) {
+            if (newUser != startingUser) {
+                userTracker.removeCallback(this)
                 finish()
             }
         }
@@ -72,7 +75,7 @@ open class ControlsRequestDialog @Inject constructor(
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        currentUserTracker.startTracking()
+        userTracker.addCallback(userTrackerCallback, mainExecutor)
         controlsListingController.addCallback(callback)
 
         val requestUser = intent.getIntExtra(Intent.EXTRA_USER_ID, UserHandle.USER_NULL)
@@ -118,7 +121,7 @@ open class ControlsRequestDialog @Inject constructor(
 
     override fun onDestroy() {
         dialog?.dismiss()
-        currentUserTracker.stopTracking()
+        userTracker.removeCallback(userTrackerCallback)
         controlsListingController.removeCallback(callback)
         super.onDestroy()
     }

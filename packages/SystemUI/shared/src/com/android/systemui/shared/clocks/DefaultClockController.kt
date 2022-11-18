@@ -142,7 +142,9 @@ class DefaultClockController(
 
             currentColor = color
             view.setColors(DOZE_COLOR, color)
-            view.animateAppearOnLockscreen()
+            if (!animations.dozeState.isActive) {
+                view.animateAppearOnLockscreen()
+            }
         }
     }
 
@@ -197,7 +199,7 @@ class DefaultClockController(
         dozeFraction: Float,
         foldFraction: Float,
     ) : ClockAnimations {
-        private val dozeState = AnimationState(dozeFraction)
+        internal val dozeState = AnimationState(dozeFraction)
         private val foldState = AnimationState(foldFraction)
 
         init {
@@ -238,7 +240,7 @@ class DefaultClockController(
             get() = true
     }
 
-    private class AnimationState(
+    class AnimationState(
         var fraction: Float,
     ) {
         var isActive: Boolean = fraction > 0.5f

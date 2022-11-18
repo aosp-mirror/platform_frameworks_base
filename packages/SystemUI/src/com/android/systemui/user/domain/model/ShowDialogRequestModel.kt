@@ -43,4 +43,7 @@ sealed class ShowDialogRequestModel(
         val onExitGuestUser: (guestId: Int, targetId: Int, forceRemoveGuest: Boolean) -> Unit,
         override val dialogShower: UserSwitchDialogController.DialogShower?,
     ) : ShowDialogRequestModel(dialogShower)
+
+    /** Show the user switcher dialog */
+    object ShowUserSwitcherDialog : ShowDialogRequestModel()
 }

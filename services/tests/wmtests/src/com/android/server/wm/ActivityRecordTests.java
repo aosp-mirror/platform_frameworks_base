@@ -2809,7 +2809,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         final Task task = activity.getTask();
         final ActivityRecord topActivity = new ActivityBuilder(mAtm).setTask(task).build();
         topActivity.setVisible(false);
-        task.positionChildAt(topActivity, POSITION_TOP);
+        task.positionChildAt(POSITION_TOP, topActivity, false /* includeParents */);
         activity.addStartingWindow(mPackageName, android.R.style.Theme, null, true, true, false,
                 true, false, false, false);
         waitUntilHandlersIdle();

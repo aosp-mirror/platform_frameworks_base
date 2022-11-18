@@ -34,35 +34,48 @@ constructor(
     @Background private val bgExecutor: DelayableExecutor,
     private val systemExitRestarter: SystemExitRestarter
 ) : Restarter {
-    var shouldRestart = false
+    var listenersAdded = false
     var pendingRestart: Runnable? = null
+    var androidRestartRequested = false
 
     val observer =
         object : WakefulnessLifecycle.Observer {
             override fun onFinishedGoingToSleep() {
-                maybeScheduleRestart()
+                scheduleRestart()
             }
         }
 
     val batteryCallback =
         object : BatteryController.BatteryStateChangeCallback {
             override fun onBatteryLevelChanged(level: Int, pluggedIn: Boolean, charging: Boolean) {
-                maybeScheduleRestart()
+                scheduleRestart()
             }
         }
 
-    override fun restart() {
-        Log.d(FeatureFlagsDebug.TAG, "Restart requested. Restarting when plugged in and idle.")
-        if (!shouldRestart) {
-            // Don't bother scheduling twice.
-            shouldRestart = true
-            wakefulnessLifecycle.addObserver(observer)
-            batteryController.addCallback(batteryCallback)
-            maybeScheduleRestart()
-        }
+    override fun restartSystemUI() {
+        Log.d(
+            FeatureFlagsDebug.TAG,
+            "SystemUI Restart requested. Restarting when plugged in and idle."
+        )
+        scheduleRestart()
     }
 
-    private fun maybeScheduleRestart() {
+    override fun restartAndroid() {
+        Log.d(
+            FeatureFlagsDebug.TAG,
+            "Android Restart requested. Restarting when plugged in and idle."
+        )
+        androidRestartRequested = true
+        scheduleRestart()
+    }
+
+    private fun scheduleRestart() {
+        // Don't bother adding listeners twice.
+        if (!listenersAdded) {
+            listenersAdded = true
+            wakefulnessLifecycle.addObserver(observer)
+            batteryController.addCallback(batteryCallback)
+        }
         if (
             wakefulnessLifecycle.wakefulness == WAKEFULNESS_ASLEEP && batteryController.isPluggedIn
         ) {
@@ -77,6 +90,10 @@ constructor(
 
     private fun restartNow() {
         Log.d(FeatureFlagsRelease.TAG, "Restarting due to systemui flag change")
-        systemExitRestarter.restart()
+        if (androidRestartRequested) {
+            systemExitRestarter.restartAndroid()
+        } else {
+            systemExitRestarter.restartSystemUI()
+        }
     }
 }

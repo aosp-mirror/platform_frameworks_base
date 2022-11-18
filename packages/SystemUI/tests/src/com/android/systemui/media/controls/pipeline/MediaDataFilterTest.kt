@@ -22,13 +22,13 @@ import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.InstanceId
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.broadcast.BroadcastSender
 import com.android.systemui.media.controls.MediaTestUtils
 import com.android.systemui.media.controls.models.player.MediaData
 import com.android.systemui.media.controls.models.recommendation.SmartspaceMediaData
 import com.android.systemui.media.controls.ui.MediaPlayerData
 import com.android.systemui.media.controls.util.MediaUiEventLogger
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
@@ -64,7 +64,7 @@ private val SMARTSPACE_INSTANCE_ID = InstanceId.fakeInstanceId(456)!!
 class MediaDataFilterTest : SysuiTestCase() {
 
     @Mock private lateinit var listener: MediaDataManager.Listener
-    @Mock private lateinit var broadcastDispatcher: BroadcastDispatcher
+    @Mock private lateinit var userTracker: UserTracker
     @Mock private lateinit var broadcastSender: BroadcastSender
     @Mock private lateinit var mediaDataManager: MediaDataManager
     @Mock private lateinit var lockscreenUserManager: NotificationLockscreenUserManager
@@ -85,7 +85,7 @@ class MediaDataFilterTest : SysuiTestCase() {
         mediaDataFilter =
             MediaDataFilter(
                 context,
-                broadcastDispatcher,
+                userTracker,
                 broadcastSender,
                 lockscreenUserManager,
                 executor,

@@ -1940,6 +1940,9 @@
     <!-- SysUI Tuner: Summary of no shortcut being selected [CHAR LIMIT=60] -->
     <string name="lockscreen_none">None</string>
 
+    <!-- ClockId to use when none is set by user -->
+    <string name="lockscreen_clock_id_fallback" translatable="false">DEFAULT</string>
+
     <!-- SysUI Tuner: Format string for describing launching an app [CHAR LIMIT=60] -->
     <string name="tuner_launch_app">Launch <xliff:g id="app" example="Settings">%1$s</xliff:g></string>
 
