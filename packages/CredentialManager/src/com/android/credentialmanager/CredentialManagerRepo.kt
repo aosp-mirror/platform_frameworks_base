@@ -75,7 +75,7 @@ class CredentialManagerRepo(
       RequestInfo.TYPE_GET ->
         intent.extras?.getParcelableArrayList(
           ProviderData.EXTRA_ENABLED_PROVIDER_DATA_LIST,
-          DisabledProviderData::class.java
+          GetCredentialProviderData::class.java
         ) ?: testGetCredentialProviderList()
       else -> {
         // TODO: fail gracefully
