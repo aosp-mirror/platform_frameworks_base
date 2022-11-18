@@ -18,6 +18,8 @@ package com.android.systemui.statusbar.pipeline.dagger
 
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.AirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.AirplaneModeRepositoryImpl
+import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneModeViewModel
+import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneModeViewModelImpl
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepositoryImpl
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.UserSetupRepository
@@ -30,6 +32,8 @@ import com.android.systemui.statusbar.pipeline.shared.data.repository.Connectivi
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepositoryImpl
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepositoryImpl
+import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiInteractor
+import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiInteractorImpl
 import dagger.Binds
 import dagger.Module
 
@@ -39,10 +43,16 @@ abstract class StatusBarPipelineModule {
     abstract fun airplaneModeRepository(impl: AirplaneModeRepositoryImpl): AirplaneModeRepository
 
     @Binds
+    abstract fun airplaneModeViewModel(impl: AirplaneModeViewModelImpl): AirplaneModeViewModel
+
+    @Binds
     abstract fun connectivityRepository(impl: ConnectivityRepositoryImpl): ConnectivityRepository
 
     @Binds
     abstract fun wifiRepository(impl: WifiRepositoryImpl): WifiRepository
+
+    @Binds
+    abstract fun wifiInteractor(impl: WifiInteractorImpl): WifiInteractor
 
     @Binds
     abstract fun mobileConnectionsRepository(
