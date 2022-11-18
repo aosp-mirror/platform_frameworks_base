@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import android.annotation.NonNull;
 import android.util.ArraySet;
 import android.window.TaskSnapshot;
 
@@ -31,14 +30,7 @@ import java.util.Arrays;
  * <p>
  * Test class: {@link TaskSnapshotPersisterLoaderTest}
  */
-class TaskSnapshotPersister {
-
-    private static final String LOW_RES_FILE_POSTFIX = "_reduced";
-    private static final String PROTO_EXTENSION = ".proto";
-    private static final String BITMAP_EXTENSION = ".jpg";
-
-    // Shared with SnapshotPersistQueue
-    private final Object mLock;
+class TaskSnapshotPersister extends BaseAppSnapshotPersister {
 
     /**
      * The list of ids of the tasks that have been persisted since {@link #removeObsoleteFiles} was
@@ -47,76 +39,9 @@ class TaskSnapshotPersister {
     @GuardedBy("mLock")
     private final ArraySet<Integer> mPersistedTaskIdsSinceLastRemoveObsolete = new ArraySet<>();
 
-    private final SnapshotPersistQueue mSnapshotPersistQueue;
-    private final PersistInfoProvider mPersistInfoProvider;
     TaskSnapshotPersister(SnapshotPersistQueue persistQueue,
             PersistInfoProvider persistInfoProvider) {
-        mSnapshotPersistQueue = persistQueue;
-        mPersistInfoProvider = persistInfoProvider;
-        mLock = persistQueue.getLock();
-    }
-
-    interface DirectoryResolver {
-        File getSystemDirectoryForUser(int userId);
-    }
-    /**
-     * Persist information provider, the snapshot persister and loader can know where the file is,
-     * and the scale of a snapshot, etc.
-     */
-    static class PersistInfoProvider {
-        protected final DirectoryResolver mDirectoryResolver;
-        private final String mDirName;
-        private final boolean mEnableLowResSnapshots;
-        private final float mLowResScaleFactor;
-        private final boolean mUse16BitFormat;
-
-        PersistInfoProvider(DirectoryResolver directoryResolver, String dirName,
-                boolean enableLowResSnapshots, float lowResScaleFactor, boolean use16BitFormat) {
-            mDirectoryResolver = directoryResolver;
-            mDirName = dirName;
-            mEnableLowResSnapshots = enableLowResSnapshots;
-            mLowResScaleFactor = lowResScaleFactor;
-            mUse16BitFormat = use16BitFormat;
-        }
-
-        @NonNull
-        File getDirectory(int userId) {
-            return new File(mDirectoryResolver.getSystemDirectoryForUser(userId), mDirName);
-        }
-
-        /**
-         * Return if task snapshots are stored in 16 bit pixel format.
-         *
-         * @return true if task snapshots are stored in 16 bit pixel format.
-         */
-        boolean use16BitFormat() {
-            return mUse16BitFormat;
-        }
-
-        boolean createDirectory(int userId) {
-            final File dir = getDirectory(userId);
-            return dir.exists() || dir.mkdir();
-        }
-
-        File getProtoFile(int index, int userId) {
-            return new File(getDirectory(userId), index + PROTO_EXTENSION);
-        }
-
-        File getLowResolutionBitmapFile(int index, int userId) {
-            return new File(getDirectory(userId), index + LOW_RES_FILE_POSTFIX + BITMAP_EXTENSION);
-        }
-
-        File getHighResolutionBitmapFile(int index, int userId) {
-            return new File(getDirectory(userId), index + BITMAP_EXTENSION);
-        }
-
-        boolean enableLowResSnapshots() {
-            return mEnableLowResSnapshots;
-        }
-
-        float lowResScaleFactor() {
-            return mLowResScaleFactor;
-        }
+        super(persistQueue, persistInfoProvider);
     }
 
     /**
@@ -129,8 +54,7 @@ class TaskSnapshotPersister {
     void persistSnapshot(int taskId, int userId, TaskSnapshot snapshot) {
         synchronized (mLock) {
             mPersistedTaskIdsSinceLastRemoveObsolete.add(taskId);
-            mSnapshotPersistQueue.sendToQueueLocked(mSnapshotPersistQueue
-                    .createStoreWriteQueueItem(taskId, userId, snapshot, mPersistInfoProvider));
+            super.persistSnapshot(taskId, userId, snapshot);
         }
     }
 
@@ -143,8 +67,7 @@ class TaskSnapshotPersister {
     void onTaskRemovedFromRecents(int taskId, int userId) {
         synchronized (mLock) {
             mPersistedTaskIdsSinceLastRemoveObsolete.remove(taskId);
-            mSnapshotPersistQueue.sendToQueueLocked(mSnapshotPersistQueue
-                    .createDeleteWriteQueueItem(taskId, userId, mPersistInfoProvider));
+            super.removeSnap(taskId, userId);
         }
     }
 

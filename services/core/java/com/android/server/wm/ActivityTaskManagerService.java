@@ -3729,7 +3729,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     Slog.w(TAG, "takeTaskSnapshot: taskId=" + taskId + " not found or not visible");
                     return null;
                 }
-                return mWindowManager.mTaskSnapshotController.captureTaskSnapshot(
+                return mWindowManager.mTaskSnapshotController.captureSnapshot(
                         task, false /* snapshotHome */);
             }
         } finally {

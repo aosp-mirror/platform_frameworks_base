@@ -2109,7 +2109,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 // Record the snapshot now, it will be later fetched for content-pip animation.
                 // We do this early in the process to make sure the right snapshot is used for
                 // entering content-pip animation.
-                mWindowManager.mTaskSnapshotController.recordTaskSnapshot(
+                mWindowManager.mTaskSnapshotController.recordSnapshot(
                         task, false /* allowSnapshotHome */);
                 rootTask.setBounds(r.pictureInPictureArgs.getSourceRectHint());
             }

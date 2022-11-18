@@ -33,7 +33,7 @@ import android.window.TaskSnapshot;
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.LocalServices;
 import com.android.server.pm.UserManagerInternal;
-import com.android.server.wm.TaskSnapshotPersister.PersistInfoProvider;
+import com.android.server.wm.BaseAppSnapshotPersister.PersistInfoProvider;
 import com.android.server.wm.nano.WindowManagerProtos.TaskSnapshotProto;
 
 import java.io.File;
@@ -302,7 +302,7 @@ class SnapshotPersistQueue {
         }
 
         boolean writeBuffer() {
-            if (TaskSnapshotController.isInvalidHardwareBuffer(mSnapshot.getHardwareBuffer())) {
+            if (AbsAppSnapshotController.isInvalidHardwareBuffer(mSnapshot.getHardwareBuffer())) {
                 Slog.e(TAG, "Invalid task snapshot hw buffer, taskId=" + mId);
                 return false;
             }

@@ -42,8 +42,8 @@ import android.window.TaskSnapshot;
 
 import androidx.test.filters.MediumTest;
 
-import com.android.server.wm.TaskSnapshotLoader.PreRLegacySnapshotConfig;
-import com.android.server.wm.TaskSnapshotPersister.PersistInfoProvider;
+import com.android.server.wm.AppSnapshotLoader.PreRLegacySnapshotConfig;
+import com.android.server.wm.BaseAppSnapshotPersister.PersistInfoProvider;
 import com.android.server.wm.TaskSnapshotPersister.RemoveObsoleteFilesQueueItem;
 
 import org.junit.Test;
@@ -53,7 +53,7 @@ import org.mockito.MockitoSession;
 import java.io.File;
 
 /**
- * Test class for {@link TaskSnapshotPersister} and {@link TaskSnapshotLoader}
+ * Test class for {@link TaskSnapshotPersister} and {@link AppSnapshotLoader}
  *
  * Build/Install/Run:
  * atest TaskSnapshotPersisterLoaderTest

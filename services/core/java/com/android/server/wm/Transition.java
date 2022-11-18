@@ -785,7 +785,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                                 && mTransientLaunches != null) {
                             // If transition is transient, then snapshots are taken at end of
                             // transition.
-                            mController.mTaskSnapshotController.recordTaskSnapshot(
+                            mController.mTaskSnapshotController.recordSnapshot(
                                     task, false /* allowSnapshotHome */);
                         }
                         ar.commitVisibility(false /* visible */, false /* performLayout */,
@@ -1035,7 +1035,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 final ActivityRecord ar = mParticipants.valueAt(i).asActivityRecord();
                 if (ar == null || ar.isVisibleRequested() || ar.getTask() == null
                         || ar.getTask().isVisibleRequested()) continue;
-                mController.mTaskSnapshotController.recordTaskSnapshot(
+                mController.mTaskSnapshotController.recordSnapshot(
                         ar.getTask(), false /* allowSnapshotHome */);
             }
         }

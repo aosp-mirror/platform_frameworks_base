@@ -9162,7 +9162,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void setTaskSnapshotEnabled(boolean enabled) {
-        mTaskSnapshotController.setTaskSnapshotEnabled(enabled);
+        mTaskSnapshotController.setSnapshotEnabled(enabled);
     }
 
     @Override
@@ -9229,7 +9229,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     throw new IllegalArgumentException(
                             "Failed to find matching task for taskId=" + taskId);
                 }
-                taskSnapshot = mTaskSnapshotController.captureTaskSnapshot(task, false);
+                taskSnapshot = mTaskSnapshotController.captureSnapshot(task, false);
             }
         } finally {
             Binder.restoreCallingIdentity(token);

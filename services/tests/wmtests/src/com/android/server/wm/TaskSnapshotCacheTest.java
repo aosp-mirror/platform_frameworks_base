@@ -89,7 +89,7 @@ public class TaskSnapshotCacheTest extends TaskSnapshotPersisterTestBase {
         mCache.putSnapshot(window.getTask(), createSnapshot());
         assertNotNull(mCache.getSnapshot(window.getTask().mTaskId, 0 /* userId */,
                 false /* restoreFromDisk */, false /* isLowResolution */));
-        mCache.onTaskRemoved(window.getTask().mTaskId);
+        mCache.onIdRemoved(window.getTask().mTaskId);
         assertNull(mCache.getSnapshot(window.getTask().mTaskId, 0 /* userId */,
                 false /* restoreFromDisk */, false /* isLowResolution */));
     }

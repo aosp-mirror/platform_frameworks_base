@@ -38,7 +38,7 @@ import org.mockito.MockitoAnnotations;
 import java.io.File;
 
 /**
- * Test class for {@link TaskSnapshotPersister} and {@link TaskSnapshotLoader}
+ * Test class for {@link TaskSnapshotPersister} and {@link AppSnapshotLoader}
  *
  * Build/Install/Run:
  * atest TaskSnapshotPersisterLoaderTest
