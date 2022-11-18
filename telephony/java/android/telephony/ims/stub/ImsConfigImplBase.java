@@ -22,6 +22,7 @@ import android.annotation.SystemApi;
 import android.content.Context;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
+import android.telephony.ims.ImsService;
 import android.telephony.ims.ProvisioningManager;
 import android.telephony.ims.RcsClientConfiguration;
 import android.telephony.ims.RcsConfig;
@@ -553,7 +554,7 @@ public class ImsConfigImplBase {
     ImsConfigStub mImsConfigStub;
 
     /**
-     * Create a ImsConfig using the Executor specified for methods being called by the
+     * Create an ImsConfig using the Executor specified for methods being called by the
      * framework.
      * @param executor The executor for the framework to use when executing the methods overridden
      * by the implementation of ImsConfig.
@@ -569,6 +570,9 @@ public class ImsConfigImplBase {
         mImsConfigStub = new ImsConfigStub(this, null);
     }
 
+    /**
+     * Create an ImsConfig using the Executor defined in {@link ImsService#getExecutor}
+     */
     public ImsConfigImplBase() {
         mImsConfigStub = new ImsConfigStub(this, null);
     }
