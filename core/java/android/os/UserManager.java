@@ -2377,14 +2377,16 @@ public class UserManager {
     }
 
     /**
-     * Returns true if the context user is the designated "main user" of the device. This user may
-     * have access to certain features which are limited to at most one user.
+     * Returns {@code true} if the context user is the designated "main user" of the device. This
+     * user may have access to certain features which are limited to at most one user. There will
+     * never be more than one main user on a device.
      *
-     * <p>Currently, the first human user on the device will be the main user; in the future, the
-     * concept may be transferable, so a different user (or even no user at all) may be designated
-     * the main user instead.
+     * <p>Currently, on most form factors the first human user on the device will be the main user;
+     * in the future, the concept may be transferable, so a different user (or even no user at all)
+     * may be designated the main user instead. On other form factors there might not be a main
+     * user.
      *
-     * <p>Note that this will be the not be the system user on devices for which
+     * <p>Note that this will not be the system user on devices for which
      * {@link #isHeadlessSystemUserMode()} returns true.
      * @hide
      */
@@ -2397,6 +2399,29 @@ public class UserManager {
     public boolean isMainUser() {
         final UserInfo user = getUserInfo(mUserId);
         return user != null && user.isMain();
+    }
+
+    /**
+     * Returns the designated "main user" of the device, or {@code null} if there is no main user.
+     *
+     * @see #isMainUser()
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(anyOf = {
+            Manifest.permission.MANAGE_USERS,
+            Manifest.permission.CREATE_USERS,
+            Manifest.permission.QUERY_USERS})
+    public @Nullable UserHandle getMainUser() {
+        try {
+            final int mainUserId = mService.getMainUserId();
+            if (mainUserId == UserHandle.USER_NULL) {
+                return null;
+            }
+            return UserHandle.of(mainUserId);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
     }
 
     /**
