@@ -49,30 +49,30 @@ class BouncerKeyguardMessageAreaTest : SysuiTestCase() {
     @Test
     fun testSetSameMessage() {
         val underTestSpy = spy(underTest)
-        underTestSpy.setMessage("abc")
-        underTestSpy.setMessage("abc")
+        underTestSpy.setMessage("abc", animate = true)
+        underTestSpy.setMessage("abc", animate = true)
         verify(underTestSpy, times(1)).text = "abc"
     }
 
     @Test
     fun testSetDifferentMessage() {
-        underTest.setMessage("abc")
-        underTest.setMessage("def")
+        underTest.setMessage("abc", animate = true)
+        underTest.setMessage("def", animate = true)
         assertThat(underTest.text).isEqualTo("def")
     }
 
     @Test
     fun testSetNullMessage() {
-        underTest.setMessage(null)
+        underTest.setMessage(null, animate = true)
         assertThat(underTest.text).isEqualTo("")
     }
 
     @Test
     fun testSetNullClearsPreviousMessage() {
-        underTest.setMessage("something not null")
+        underTest.setMessage("something not null", animate = true)
         assertThat(underTest.text).isEqualTo("something not null")
 
-        underTest.setMessage(null)
+        underTest.setMessage(null, animate = true)
         assertThat(underTest.text).isEqualTo("")
     }
 }
