@@ -1381,6 +1381,29 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     @Test
+    public void testShouldListenForFace_whenFpIsAlreadyAuthenticated_returnsFalse()
+            throws RemoteException {
+        // Face auth should run when the following is true.
+        bouncerFullyVisibleAndNotGoingToSleep();
+        keyguardNotGoingAway();
+        currentUserIsPrimary();
+        strongAuthNotRequired();
+        biometricsEnabledForCurrentUser();
+        currentUserDoesNotHaveTrust();
+        biometricsNotDisabledThroughDevicePolicyManager();
+        userNotCurrentlySwitching();
+
+        mTestableLooper.processAllMessages();
+
+        assertThat(mKeyguardUpdateMonitor.shouldListenForFace()).isTrue();
+
+        successfulFingerprintAuth();
+        mTestableLooper.processAllMessages();
+
+        assertThat(mKeyguardUpdateMonitor.shouldListenForFace()).isFalse();
+    }
+
+    @Test
     public void testShouldListenForFace_whenUserIsNotPrimary_returnsFalse() throws RemoteException {
         cleanupKeyguardUpdateMonitor();
         // This disables face auth
@@ -1932,6 +1955,15 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     private void fingerprintAcquireStart() {
         mKeyguardUpdateMonitor.mFingerprintAuthenticationCallback
                 .onAuthenticationAcquired(FINGERPRINT_ACQUIRED_START);
+    }
+
+    private void successfulFingerprintAuth() {
+        mKeyguardUpdateMonitor.mFingerprintAuthenticationCallback
+                .onAuthenticationSucceeded(
+                        new FingerprintManager.AuthenticationResult(null,
+                                null,
+                                mCurrentUserId,
+                                true));
     }
 
     private void triggerSuccessfulFaceAuth() {

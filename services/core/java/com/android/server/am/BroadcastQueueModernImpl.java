@@ -138,7 +138,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
         // We configure runnable size only once at boot; it'd be too complex to
         // try resizing dynamically at runtime
-        mRunning = new BroadcastProcessQueue[mConstants.MAX_RUNNING_PROCESS_QUEUES];
+        mRunning = new BroadcastProcessQueue[mConstants.getMaxRunningQueues()];
     }
 
     /**
@@ -293,6 +293,19 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     }
 
     /**
+     * Return the number of active queues that are delivering "urgent" broadcasts
+     */
+    private int getRunningUrgentCount() {
+        int count = 0;
+        for (int i = 0; i < mRunning.length; i++) {
+            if (mRunning[i] != null && mRunning[i].getActive().isUrgent()) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    /**
      * Return the first index of the given value contained inside
      * {@link #mRunning}, otherwise {@code -1}.
      */
@@ -356,7 +369,15 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
      */
     @GuardedBy("mService")
     private void updateRunningListLocked() {
-        int avail = mRunning.length - getRunningSize();
+        // Allocated size here implicitly includes the extra reservation for urgent
+        // dispatches beyond the MAX_RUNNING_QUEUES soft limit for normal
+        // parallelism.  If we're already dispatching some urgent broadcasts,
+        // count that against the extra first - its role is to permit progress of
+        // urgent broadcast traffic when the normal reservation is fully occupied
+        // with less-urgent dispatches, not to generally expand parallelism.
+        final int usedExtra = Math.min(getRunningUrgentCount(),
+                mConstants.EXTRA_RUNNING_URGENT_PROCESS_QUEUES);
+        int avail = mRunning.length - getRunningSize() - usedExtra;
         if (avail == 0) return;
 
         final int cookie = traceBegin("updateRunningList");
@@ -380,6 +401,15 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             if (!queue.isRunnable()) {
                 queue = nextQueue;
                 continue;
+            }
+
+            // If we've hit the soft limit for non-urgent dispatch parallelism,
+            // only consider delivering from queues whose ready broadcast is urgent
+            if (getRunningSize() >= mConstants.MAX_RUNNING_PROCESS_QUEUES) {
+                if (!queue.isPendingUrgent()) {
+                    queue = nextQueue;
+                    continue;
+                }
             }
 
             // If queues beyond this point aren't ready to run yet, schedule

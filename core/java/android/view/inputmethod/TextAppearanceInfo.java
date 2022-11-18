@@ -16,12 +16,13 @@
 
 package android.view.inputmethod;
 
+import static android.graphics.Typeface.NORMAL;
+
 import android.annotation.ColorInt;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Px;
-import android.content.res.ColorStateList;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.graphics.fonts.FontStyle;
@@ -30,7 +31,7 @@ import android.inputmethodservice.InputMethodService;
 import android.os.LocaleList;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.text.InputFilter;
+import android.text.method.TransformationMethod;
 import android.widget.TextView;
 
 import java.util.Objects;
@@ -38,7 +39,6 @@ import java.util.Objects;
 /**
  * Information about text appearance in an editor, passed through
  * {@link CursorAnchorInfo} for use by {@link InputMethodService}.
- *
  * @see TextView
  * @see Paint
  * @see CursorAnchorInfo.Builder#setTextAppearanceInfo(TextAppearanceInfo)
@@ -46,12 +46,12 @@ import java.util.Objects;
  */
 public final class TextAppearanceInfo implements Parcelable {
     /**
-     * The text size (in pixels) for current {@link TextView}.
+     * The text size (in pixels) for current editor.
      */
     private final @Px float mTextSize;
 
     /**
-     * The LocaleList of the text.
+     * The {@link LocaleList} of the text.
      */
     @NonNull private final LocaleList mTextLocales;
 
@@ -64,7 +64,8 @@ public final class TextAppearanceInfo implements Parcelable {
     /**
      * The weight of the text.
      */
-    private final @IntRange(from = -1, to = FontStyle.FONT_WEIGHT_MAX) int mTextFontWeight;
+    @IntRange(from = FontStyle.FONT_WEIGHT_UNSPECIFIED, to = FontStyle.FONT_WEIGHT_MAX)
+    private final int mTextFontWeight;
 
     /**
      * The style (normal, bold, italic, bold|italic) of the text, see {@link Typeface}.
@@ -72,8 +73,7 @@ public final class TextAppearanceInfo implements Parcelable {
     private final @Typeface.Style int mTextStyle;
 
     /**
-     * Whether the transformation method applied to the current {@link TextView} is set to
-     * ALL CAPS.
+     * Whether the transformation method applied to the current editor is set to all caps.
      */
     private final boolean mAllCaps;
 
@@ -91,6 +91,11 @@ public final class TextAppearanceInfo implements Parcelable {
      * The blur radius (in pixels) of the text shadow.
      */
     private final @Px float mShadowRadius;
+
+    /**
+     * The shadow color of the text shadow.
+     */
+    private final @ColorInt int mShadowColor;
 
     /**
      * The elegant text height, especially for less compacted complex script text.
@@ -135,67 +140,46 @@ public final class TextAppearanceInfo implements Parcelable {
     /**
      * The color of the text selection highlight.
      */
-    private final @ColorInt int mTextColorHighlight;
+    private final @ColorInt int mHighlightTextColor;
 
     /**
-     * The current text color.
+     * The current text color of the editor.
      */
     private final @ColorInt int mTextColor;
 
     /**
-     * The current color of the hint text.
+     *  The current color of the hint text.
      */
-    private final @ColorInt int mTextColorHint;
+    private final @ColorInt int mHintTextColor;
 
     /**
-     * The text color for links.
+     * The text color used to paint the links in the editor.
      */
-    @Nullable private final ColorStateList mTextColorLink;
+    private final @ColorInt int mLinkTextColor;
 
-    /**
-     * The max length of text.
-     */
-    private final int mMaxLength;
-
-
-    public TextAppearanceInfo(@NonNull TextView textView) {
-        mTextSize = textView.getTextSize();
-        mTextLocales = textView.getTextLocales();
-        Typeface typeface = textView.getPaint().getTypeface();
-        String systemFontFamilyName = null;
-        int textFontWeight = -1;
-        if (typeface != null) {
-            systemFontFamilyName = typeface.getSystemFontFamilyName();
-            textFontWeight = typeface.getWeight();
-        }
-        mSystemFontFamilyName = systemFontFamilyName;
-        mTextFontWeight = textFontWeight;
-        mTextStyle = textView.getTypefaceStyle();
-        mAllCaps = textView.isAllCaps();
-        mShadowRadius = textView.getShadowRadius();
-        mShadowDx = textView.getShadowDx();
-        mShadowDy = textView.getShadowDy();
-        mElegantTextHeight = textView.isElegantTextHeight();
-        mFallbackLineSpacing = textView.isFallbackLineSpacing();
-        mLetterSpacing = textView.getLetterSpacing();
-        mFontFeatureSettings = textView.getFontFeatureSettings();
-        mFontVariationSettings = textView.getFontVariationSettings();
-        mLineBreakStyle = textView.getLineBreakStyle();
-        mLineBreakWordStyle = textView.getLineBreakWordStyle();
-        mTextScaleX = textView.getTextScaleX();
-        mTextColorHighlight = textView.getHighlightColor();
-        mTextColor = textView.getCurrentTextColor();
-        mTextColorHint = textView.getCurrentHintTextColor();
-        mTextColorLink = textView.getLinkTextColors();
-        int maxLength = -1;
-        for (InputFilter filter: textView.getFilters()) {
-            if (filter instanceof InputFilter.LengthFilter) {
-                maxLength = ((InputFilter.LengthFilter) filter).getMax();
-                // There is at most one LengthFilter.
-                break;
-            }
-        }
-        mMaxLength = maxLength;
+    private TextAppearanceInfo(@NonNull final TextAppearanceInfo.Builder builder) {
+        mTextSize = builder.mTextSize;
+        mTextLocales = builder.mTextLocales;
+        mSystemFontFamilyName = builder.mSystemFontFamilyName;
+        mTextFontWeight = builder.mTextFontWeight;
+        mTextStyle = builder.mTextStyle;
+        mAllCaps = builder.mAllCaps;
+        mShadowDx = builder.mShadowDx;
+        mShadowDy = builder.mShadowDy;
+        mShadowRadius = builder.mShadowRadius;
+        mShadowColor = builder.mShadowColor;
+        mElegantTextHeight = builder.mElegantTextHeight;
+        mFallbackLineSpacing = builder.mFallbackLineSpacing;
+        mLetterSpacing = builder.mLetterSpacing;
+        mFontFeatureSettings = builder.mFontFeatureSettings;
+        mFontVariationSettings = builder.mFontVariationSettings;
+        mLineBreakStyle = builder.mLineBreakStyle;
+        mLineBreakWordStyle = builder.mLineBreakWordStyle;
+        mTextScaleX = builder.mTextScaleX;
+        mHighlightTextColor = builder.mHighlightTextColor;
+        mTextColor = builder.mTextColor;
+        mHintTextColor = builder.mHintTextColor;
+        mLinkTextColor = builder.mLinkTextColor;
     }
 
     @Override
@@ -214,6 +198,7 @@ public final class TextAppearanceInfo implements Parcelable {
         dest.writeFloat(mShadowDx);
         dest.writeFloat(mShadowDy);
         dest.writeFloat(mShadowRadius);
+        dest.writeInt(mShadowColor);
         dest.writeBoolean(mElegantTextHeight);
         dest.writeBoolean(mFallbackLineSpacing);
         dest.writeFloat(mLetterSpacing);
@@ -222,14 +207,13 @@ public final class TextAppearanceInfo implements Parcelable {
         dest.writeInt(mLineBreakStyle);
         dest.writeInt(mLineBreakWordStyle);
         dest.writeFloat(mTextScaleX);
-        dest.writeInt(mTextColorHighlight);
+        dest.writeInt(mHighlightTextColor);
         dest.writeInt(mTextColor);
-        dest.writeInt(mTextColorHint);
-        dest.writeTypedObject(mTextColorLink, flags);
-        dest.writeInt(mMaxLength);
+        dest.writeInt(mHintTextColor);
+        dest.writeInt(mLinkTextColor);
     }
 
-    private TextAppearanceInfo(@NonNull Parcel in) {
+    TextAppearanceInfo(@NonNull Parcel in) {
         mTextSize = in.readFloat();
         mTextLocales = LocaleList.CREATOR.createFromParcel(in);
         mAllCaps = in.readBoolean();
@@ -239,6 +223,7 @@ public final class TextAppearanceInfo implements Parcelable {
         mShadowDx = in.readFloat();
         mShadowDy = in.readFloat();
         mShadowRadius = in.readFloat();
+        mShadowColor = in.readInt();
         mElegantTextHeight = in.readBoolean();
         mFallbackLineSpacing = in.readBoolean();
         mLetterSpacing = in.readFloat();
@@ -247,11 +232,10 @@ public final class TextAppearanceInfo implements Parcelable {
         mLineBreakStyle = in.readInt();
         mLineBreakWordStyle = in.readInt();
         mTextScaleX = in.readFloat();
-        mTextColorHighlight = in.readInt();
+        mHighlightTextColor = in.readInt();
         mTextColor = in.readInt();
-        mTextColorHint = in.readInt();
-        mTextColorLink = in.readTypedObject(ColorStateList.CREATOR);
-        mMaxLength = in.readInt();
+        mHintTextColor = in.readInt();
+        mLinkTextColor = in.readInt();
     }
 
     @NonNull
@@ -268,14 +252,14 @@ public final class TextAppearanceInfo implements Parcelable {
     };
 
     /**
-     * Returns the text size (in pixels) for current {@link TextView}.
+     * Returns the text size (in pixels) for current editor.
      */
     public @Px float getTextSize() {
         return mTextSize;
     }
 
     /**
-     * Returns the LocaleList of the text.
+     * Returns the {@link LocaleList} of the text.
      */
     @NonNull
     public LocaleList getTextLocales() {
@@ -286,31 +270,38 @@ public final class TextAppearanceInfo implements Parcelable {
      * Returns the font family name if the {@link Typeface} of the text is created from a
      * system font family. Returns null if no {@link Typeface} is specified, or it is not created
      * from a system font family.
+     *
+     * @see Typeface#getSystemFontFamilyName()
      */
     @Nullable
-    public String getFontFamilyName() {
+    public String getSystemFontFamilyName() {
         return mSystemFontFamilyName;
     }
 
     /**
-     * Returns the weight of the text. Returns -1 when no {@link Typeface} is specified.
+     * Returns the weight of the text, or {@code FontStyle#FONT_WEIGHT_UNSPECIFIED}
+     * when no {@link Typeface} is specified.
      */
-    public @IntRange(from = -1, to = FontStyle.FONT_WEIGHT_MAX) int getTextFontWeight() {
+    @IntRange(from = FontStyle.FONT_WEIGHT_UNSPECIFIED, to = FontStyle.FONT_WEIGHT_MAX)
+    public int getTextFontWeight() {
         return mTextFontWeight;
     }
 
     /**
      * Returns the style (normal, bold, italic, bold|italic) of the text. Returns
-     * {@link Typeface#NORMAL} when no {@link Typeface} is specified. See {@link Typeface} for
-     * more information.
+     * {@link Typeface#NORMAL} when no {@link Typeface} is specified.
+     *
+     * @see Typeface
      */
     public @Typeface.Style int getTextStyle() {
         return mTextStyle;
     }
 
     /**
-     * Returns whether the transformation method applied to the current {@link TextView} is set to
-     * ALL CAPS.
+     * Returns whether the transformation method applied to the current editor is set to all caps.
+     *
+     * @see TextView#setAllCaps(boolean)
+     * @see TextView#setTransformationMethod(TransformationMethod)
      */
     public boolean isAllCaps() {
         return mAllCaps;
@@ -318,6 +309,8 @@ public final class TextAppearanceInfo implements Parcelable {
 
     /**
      * Returns the horizontal offset (in pixels) of the text shadow.
+     *
+     * @see Paint#setShadowLayer(float, float, float, int)
      */
     public @Px float getShadowDx() {
         return mShadowDx;
@@ -325,6 +318,8 @@ public final class TextAppearanceInfo implements Parcelable {
 
     /**
      * Returns the vertical offset (in pixels) of the text shadow.
+     *
+     * @see Paint#setShadowLayer(float, float, float, int)
      */
     public @Px float getShadowDy() {
         return mShadowDy;
@@ -332,15 +327,28 @@ public final class TextAppearanceInfo implements Parcelable {
 
     /**
      * Returns the blur radius (in pixels) of the text shadow.
+     *
+     * @see Paint#setShadowLayer(float, float, float, int)
      */
     public @Px float getShadowRadius() {
         return mShadowRadius;
     }
 
     /**
+     * Returns the color of the text shadow.
+     *
+     * @see Paint#setShadowLayer(float, float, float, int)
+     */
+    public @ColorInt int getShadowColor() {
+        return mShadowColor;
+    }
+
+    /**
      * Returns {@code true} if the elegant height metrics flag is set. This setting selects font
      * variants that have not been compacted to fit Latin-based vertical metrics, and also increases
      * top and bottom bounds to provide more space.
+     *
+     * @see Paint#isElegantTextHeight()
      */
     public boolean isElegantTextHeight() {
         return mElegantTextHeight;
@@ -411,13 +419,17 @@ public final class TextAppearanceInfo implements Parcelable {
 
     /**
      * Returns the color of the text selection highlight.
+     *
+     * @see TextView#getHighlightColor()
      */
-    public @ColorInt int getTextColorHighlight() {
-        return mTextColorHighlight;
+    public @ColorInt int getHighlightTextColor() {
+        return mHighlightTextColor;
     }
 
     /**
-     * Returns the current text color.
+     * Returns the current text color of the editor.
+     *
+     * @see TextView#getCurrentTextColor()
      */
     public @ColorInt int getTextColor() {
         return mTextColor;
@@ -425,27 +437,22 @@ public final class TextAppearanceInfo implements Parcelable {
 
     /**
      * Returns the current color of the hint text.
+     *
+     * @see TextView#getCurrentHintTextColor()
      */
-    public @ColorInt int getTextColorHint() {
-        return mTextColorHint;
+    public @ColorInt int getHintTextColor() {
+        return mHintTextColor;
     }
 
     /**
-     * Returns the text color for links.
+     * Returns the text color used to paint the links in the editor.
+     *
+     * @see TextView#getLinkTextColors()
      */
-    @Nullable
-    public ColorStateList getTextColorLink() {
-        return mTextColorLink;
+    public @ColorInt int getLinkTextColor() {
+        return mLinkTextColor;
     }
 
-    /**
-     * Returns the max length of text, which is used to set an input filter to constrain the text
-     * length to the specified number. Returns -1 when there is no {@link InputFilter.LengthFilter}
-     * in the Editor.
-     */
-    public int getMaxLength() {
-        return mMaxLength;
-    }
 
     @Override
     public boolean equals(Object o) {
@@ -456,27 +463,29 @@ public final class TextAppearanceInfo implements Parcelable {
                 && mTextFontWeight == that.mTextFontWeight && mTextStyle == that.mTextStyle
                 && mAllCaps == that.mAllCaps && Float.compare(that.mShadowDx, mShadowDx) == 0
                 && Float.compare(that.mShadowDy, mShadowDy) == 0 && Float.compare(
-                that.mShadowRadius, mShadowRadius) == 0 && mMaxLength == that.mMaxLength
+                that.mShadowRadius, mShadowRadius) == 0 && that.mShadowColor == mShadowColor
                 && mElegantTextHeight == that.mElegantTextHeight
                 && mFallbackLineSpacing == that.mFallbackLineSpacing && Float.compare(
                 that.mLetterSpacing, mLetterSpacing) == 0 && mLineBreakStyle == that.mLineBreakStyle
                 && mLineBreakWordStyle == that.mLineBreakWordStyle
-                && mTextColorHighlight == that.mTextColorHighlight && mTextColor == that.mTextColor
-                && mTextColorLink.getDefaultColor() == that.mTextColorLink.getDefaultColor()
-                && mTextColorHint == that.mTextColorHint && Objects.equals(
-                mTextLocales, that.mTextLocales) && Objects.equals(mSystemFontFamilyName,
-                that.mSystemFontFamilyName) && Objects.equals(mFontFeatureSettings,
-                that.mFontFeatureSettings) && Objects.equals(mFontVariationSettings,
-                that.mFontVariationSettings) && Float.compare(that.mTextScaleX, mTextScaleX) == 0;
+                && mHighlightTextColor == that.mHighlightTextColor
+                && mTextColor == that.mTextColor
+                && mLinkTextColor == that.mLinkTextColor
+                && mHintTextColor == that.mHintTextColor
+                && Objects.equals(mTextLocales, that.mTextLocales)
+                && Objects.equals(mSystemFontFamilyName, that.mSystemFontFamilyName)
+                && Objects.equals(mFontFeatureSettings, that.mFontFeatureSettings)
+                && Objects.equals(mFontVariationSettings, that.mFontVariationSettings)
+                && Float.compare(that.mTextScaleX, mTextScaleX) == 0;
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(mTextSize, mTextLocales, mSystemFontFamilyName, mTextFontWeight,
-                mTextStyle, mAllCaps, mShadowDx, mShadowDy, mShadowRadius, mElegantTextHeight,
-                mFallbackLineSpacing, mLetterSpacing, mFontFeatureSettings, mFontVariationSettings,
-                mLineBreakStyle, mLineBreakWordStyle, mTextScaleX, mTextColorHighlight, mTextColor,
-                mTextColorHint, mTextColorLink, mMaxLength);
+                mTextStyle, mAllCaps, mShadowDx, mShadowDy, mShadowRadius, mShadowColor,
+                mElegantTextHeight, mFallbackLineSpacing, mLetterSpacing, mFontFeatureSettings,
+                mFontVariationSettings, mLineBreakStyle, mLineBreakWordStyle, mTextScaleX,
+                mHighlightTextColor, mTextColor, mHintTextColor, mLinkTextColor);
     }
 
     @Override
@@ -491,6 +500,7 @@ public final class TextAppearanceInfo implements Parcelable {
                 + ", mShadowDx=" + mShadowDx
                 + ", mShadowDy=" + mShadowDy
                 + ", mShadowRadius=" + mShadowRadius
+                + ", mShadowColor=" + mShadowColor
                 + ", mElegantTextHeight=" + mElegantTextHeight
                 + ", mFallbackLineSpacing=" + mFallbackLineSpacing
                 + ", mLetterSpacing=" + mLetterSpacing
@@ -499,11 +509,290 @@ public final class TextAppearanceInfo implements Parcelable {
                 + ", mLineBreakStyle=" + mLineBreakStyle
                 + ", mLineBreakWordStyle=" + mLineBreakWordStyle
                 + ", mTextScaleX=" + mTextScaleX
-                + ", mTextColorHighlight=" + mTextColorHighlight
+                + ", mHighlightTextColor=" + mHighlightTextColor
                 + ", mTextColor=" + mTextColor
-                + ", mTextColorHint=" + mTextColorHint
-                + ", mTextColorLink=" + mTextColorLink
-                + ", mMaxLength=" + mMaxLength
+                + ", mHintTextColor=" + mHintTextColor
+                + ", mLinkTextColor=" + mLinkTextColor
                 + '}';
+    }
+
+    /**
+     * Builder for {@link TextAppearanceInfo}.
+     */
+    public static final class Builder {
+        private @Px float mTextSize = -1;
+        private @NonNull LocaleList mTextLocales = LocaleList.getAdjustedDefault();
+        @Nullable private String mSystemFontFamilyName = null;
+        @IntRange(from = FontStyle.FONT_WEIGHT_UNSPECIFIED, to = FontStyle.FONT_WEIGHT_MAX)
+        private int mTextFontWeight = FontStyle.FONT_WEIGHT_UNSPECIFIED;
+        private @Typeface.Style int mTextStyle = NORMAL;
+        private boolean mAllCaps = false;
+        private @Px float mShadowDx = 0;
+        private @Px float mShadowDy = 0;
+        private @Px float mShadowRadius = 0;
+        private @ColorInt int mShadowColor = 0;
+        private boolean mElegantTextHeight = false;
+        private boolean mFallbackLineSpacing = false;
+        private float mLetterSpacing = 0;
+        @Nullable private String mFontFeatureSettings = null;
+        @Nullable private String mFontVariationSettings = null;
+        @LineBreakConfig.LineBreakStyle
+        private int mLineBreakStyle = LineBreakConfig.LINE_BREAK_STYLE_NONE;
+        @LineBreakConfig.LineBreakWordStyle
+        private int mLineBreakWordStyle = LineBreakConfig.LINE_BREAK_WORD_STYLE_NONE;
+        private float mTextScaleX = 1;
+        private @ColorInt int mHighlightTextColor = 0;
+        private @ColorInt int mTextColor = 0;
+        private @ColorInt int mHintTextColor = 0;
+        private @ColorInt int mLinkTextColor = 0;
+
+        /**
+         * Set the text size (in pixels) obtained from the current editor.
+         */
+        @NonNull
+        public Builder setTextSize(@Px float textSize) {
+            mTextSize = textSize;
+            return this;
+        }
+
+        /**
+         * Set the {@link LocaleList} of the text.
+         */
+        @NonNull
+        public Builder setTextLocales(@NonNull LocaleList textLocales) {
+            mTextLocales = textLocales;
+            return this;
+        }
+
+        /**
+         * Set the system font family name if the {@link Typeface} of the text is created from a
+         * system font family.
+         *
+         * @see Typeface#getSystemFontFamilyName()
+         */
+        @NonNull
+        public Builder setSystemFontFamilyName(@Nullable String systemFontFamilyName) {
+            mSystemFontFamilyName = systemFontFamilyName;
+            return this;
+        }
+
+        /**
+         * Set the weight of the text.
+         */
+        @NonNull
+        public Builder setTextFontWeight(
+                @IntRange(from = FontStyle.FONT_WEIGHT_UNSPECIFIED,
+                        to = FontStyle.FONT_WEIGHT_MAX) int textFontWeight) {
+            mTextFontWeight = textFontWeight;
+            return this;
+        }
+
+        /**
+         * Set the style (normal, bold, italic, bold|italic) of the text.
+         *
+         * @see Typeface
+         */
+        @NonNull
+        public Builder setTextStyle(@Typeface.Style int textStyle) {
+            mTextStyle = textStyle;
+            return this;
+        }
+
+        /**
+         * Set whether the transformation method applied to the current editor  is set to all caps.
+         *
+         * @see TextView#setAllCaps(boolean)
+         * @see TextView#setTransformationMethod(TransformationMethod)
+         */
+        @NonNull
+        public Builder setAllCaps(boolean allCaps) {
+            mAllCaps = allCaps;
+            return this;
+        }
+
+        /**
+         * Set the horizontal offset (in pixels) of the text shadow.
+         *
+         * @see Paint#setShadowLayer(float, float, float, int)
+         */
+        @NonNull
+        public Builder setShadowDx(@Px float shadowDx) {
+            mShadowDx = shadowDx;
+            return this;
+        }
+
+        /**
+         * Set the vertical offset (in pixels) of the text shadow.
+         *
+         * @see Paint#setShadowLayer(float, float, float, int)
+         */
+        @NonNull
+        public Builder setShadowDy(@Px float shadowDy) {
+            mShadowDy = shadowDy;
+            return this;
+        }
+
+        /**
+         * Set the blur radius (in pixels) of the text shadow.
+         *
+         * @see Paint#setShadowLayer(float, float, float, int)
+         */
+        @NonNull
+        public Builder setShadowRadius(@Px float shadowRadius) {
+            mShadowRadius = shadowRadius;
+            return this;
+        }
+
+        /**
+         * Set the color of the text shadow.
+         *
+         * @see Paint#setShadowLayer(float, float, float, int)
+         */
+        @NonNull
+        public Builder setShadowColor(@ColorInt int shadowColor) {
+            mShadowColor = shadowColor;
+            return this;
+        }
+
+        /**
+         * Set the elegant height metrics flag. This setting selects font variants that
+         * have not been compacted to fit Latin-based vertical metrics, and also increases
+         * top and bottom bounds to provide more space.
+         *
+         * @see Paint#isElegantTextHeight()
+         */
+        @NonNull
+        public Builder setElegantTextHeight(boolean elegantTextHeight) {
+            mElegantTextHeight = elegantTextHeight;
+            return this;
+        }
+
+        /**
+         * Set whether to expand linespacing based on fallback fonts.
+         *
+         * @see TextView#setFallbackLineSpacing(boolean)
+         */
+        @NonNull
+        public Builder setFallbackLineSpacing(boolean fallbackLineSpacing) {
+            mFallbackLineSpacing = fallbackLineSpacing;
+            return this;
+        }
+
+        /**
+         * Set the text letter-spacing, which determines the spacing between characters.
+         * The value is in 'EM' units. Normally, this value is 0.0.
+         */
+        @NonNull
+        public Builder setLetterSpacing(float letterSpacing) {
+            mLetterSpacing = letterSpacing;
+            return this;
+        }
+
+        /**
+         * Set the font feature settings.
+         *
+         * @see Paint#getFontFeatureSettings()
+         */
+        @NonNull
+        public Builder setFontFeatureSettings(@Nullable String fontFeatureSettings) {
+            mFontFeatureSettings = fontFeatureSettings;
+            return this;
+        }
+
+        /**
+         * Set the font variation settings. Returns null if no variation is specified.
+         *
+         * @see Paint#getFontVariationSettings()
+         */
+        @NonNull
+        public Builder setFontVariationSettings(@Nullable String fontVariationSettings) {
+            mFontVariationSettings = fontVariationSettings;
+            return this;
+        }
+
+        /**
+         * Set the line-break strategies for text wrapping.
+         *
+         * @see TextView#setLineBreakStyle(int)
+         */
+        @NonNull
+        public Builder setLineBreakStyle(@LineBreakConfig.LineBreakStyle int lineBreakStyle) {
+            mLineBreakStyle = lineBreakStyle;
+            return this;
+        }
+
+        /**
+         * Set the line-break word strategies for text wrapping.
+         *
+         * @see TextView#setLineBreakWordStyle(int)
+         */
+        @NonNull
+        public Builder setLineBreakWordStyle(
+                @LineBreakConfig.LineBreakWordStyle int lineBreakWordStyle) {
+            mLineBreakWordStyle = lineBreakWordStyle;
+            return this;
+        }
+
+        /**
+         * Set the extent by which text should be stretched horizontally.
+         */
+        @NonNull
+        public Builder setTextScaleX(float textScaleX) {
+            mTextScaleX = textScaleX;
+            return this;
+        }
+
+        /**
+         * Set the color of the text selection highlight.
+         *
+         * @see TextView#getHighlightColor()
+         */
+        @NonNull
+        public Builder setHighlightTextColor(@ColorInt int highlightTextColor) {
+            mHighlightTextColor = highlightTextColor;
+            return this;
+        }
+
+        /**
+         * Set the current text color of the editor.
+         *
+         * @see TextView#getCurrentTextColor()
+         */
+        @NonNull
+        public Builder setTextColor(@ColorInt int textColor) {
+            mTextColor = textColor;
+            return this;
+        }
+
+        /**
+         * Set the current color of the hint text.
+         *
+         * @see TextView#getCurrentHintTextColor()
+         */
+        @NonNull
+        public Builder setHintTextColor(@ColorInt int hintTextColor) {
+            mHintTextColor = hintTextColor;
+            return this;
+        }
+
+        /**
+         * Set the text color used to paint the links in the editor.
+         *
+         * @see TextView#getLinkTextColors()
+         */
+        @NonNull
+        public Builder setLinkTextColor(@ColorInt int linkTextColor) {
+            mLinkTextColor = linkTextColor;
+            return this;
+        }
+
+        /**
+         * Returns {@link TextAppearanceInfo} using parameters in this
+         * {@link TextAppearanceInfo.Builder}.
+         */
+        @NonNull
+        public TextAppearanceInfo build() {
+            return new TextAppearanceInfo(this);
+        }
     }
 }

@@ -7095,6 +7095,274 @@ public class CarrierConfigManager {
         public static final String KEY_REFRESH_GEOLOCATION_TIMEOUT_MILLIS_INT =
                 KEY_PREFIX + "refresh_geolocation_timeout_millis_int";
 
+        /**
+         * List of 3GPP access network technologies where e911 over IMS is supported
+         * in the home network and domestic 3rd-party networks. The order in the list represents
+         * the preference. The domain selection service shall scan the network type in the order
+         * of the preference.
+         *
+         * <p>Possible values are,
+         * {@link AccessNetworkConstants.AccessNetworkType#NGRAN}
+         * {@link AccessNetworkConstants.AccessNetworkType#EUTRAN}
+         *
+         * The default value for this key is
+         * {{@link AccessNetworkConstants.AccessNetworkType#EUTRAN},
+         * @hide
+         */
+        public static final String
+                KEY_EMERGENCY_OVER_IMS_SUPPORTED_3GPP_NETWORK_TYPES_INT_ARRAY = KEY_PREFIX
+                        + "emergency_over_ims_supported_3gpp_network_types_int_array";
+
+        /**
+         * List of 3GPP access network technologies where e911 over IMS is supported
+         * in the roaming network and non-domestic 3rd-party networks. The order in the list
+         * represents the preference. The domain selection service shall scan the network type
+         * in the order of the preference.
+         *
+         * <p>Possible values are,
+         * {@link AccessNetworkConstants.AccessNetworkType#NGRAN}
+         * {@link AccessNetworkConstants.AccessNetworkType#EUTRAN}
+         *
+         * The default value for this key is
+         * {{@link AccessNetworkConstants.AccessNetworkType#EUTRAN},
+         * @hide
+         */
+        public static final String
+                KEY_EMERGENCY_OVER_IMS_ROAMING_SUPPORTED_3GPP_NETWORK_TYPES_INT_ARRAY = KEY_PREFIX
+                        + "emergency_over_ims_roaming_supported_3gpp_network_types_int_array";
+
+        /**
+         * List of CS access network technologies where circuit-switched emergency calls are
+         * supported in the home network and domestic 3rd-party networks. The order in the list
+         * represents the preference. The domain selection service shall scan the network type
+         * in the order of the preference.
+         *
+         * <p>Possible values are,
+         * {@link AccessNetworkConstants.AccessNetworkType#GERAN}
+         * {@link AccessNetworkConstants.AccessNetworkType#UTRAN}
+         * {@link AccessNetworkConstants.AccessNetworkType#CDMA2000}
+         *
+         * The default value for this key is
+         * {{@link AccessNetworkConstants.AccessNetworkType#UTRAN},
+         * {@link AccessNetworkConstants.AccessNetworkType#GERAN}}.
+         * @hide
+         */
+        public static final String KEY_EMERGENCY_OVER_CS_SUPPORTED_ACCESS_NETWORK_TYPES_INT_ARRAY =
+                KEY_PREFIX + "emergency_over_cs_supported_access_network_types_int_array";
+
+        /**
+         * List of CS access network technologies where circuit-switched emergency calls are
+         * supported in the roaming network and non-domestic 3rd-party networks. The order
+         * in the list represents the preference. The domain selection service shall scan
+         * the network type in the order of the preference.
+         *
+         * <p>Possible values are,
+         * {@link AccessNetworkConstants.AccessNetworkType#GERAN}
+         * {@link AccessNetworkConstants.AccessNetworkType#UTRAN}
+         * {@link AccessNetworkConstants.AccessNetworkType#CDMA2000}
+         *
+         * The default value for this key is
+         * {{@link AccessNetworkConstants.AccessNetworkType#UTRAN},
+         * {@link AccessNetworkConstants.AccessNetworkType#GERAN}}.
+         * @hide
+         */
+        public static final String
+                KEY_EMERGENCY_OVER_CS_ROAMING_SUPPORTED_ACCESS_NETWORK_TYPES_INT_ARRAY = KEY_PREFIX
+                        + "emergency_over_cs_roaming_supported_access_network_types_int_array";
+
+        /** @hide */
+        @IntDef({
+            DOMAIN_CS,
+            DOMAIN_PS_3GPP,
+            DOMAIN_PS_NON_3GPP
+        })
+        public @interface EmergencyDomain {}
+
+        /**
+         * Circuit switched domain.
+         * @hide
+         */
+        public static final int DOMAIN_CS = 1;
+
+        /**
+         * Packet switched domain over 3GPP networks.
+         * @hide
+         */
+        public static final int DOMAIN_PS_3GPP = 2;
+
+        /**
+         * Packet switched domain over non-3GPP networks such as Wi-Fi.
+         * @hide
+         */
+        public static final int DOMAIN_PS_NON_3GPP = 3;
+
+        /**
+         * Specifies the emergency call domain preference for the home network.
+         * The domain selection service shall choose the domain in the order
+         * for attempting the emergency call
+         *
+         * <p>Possible values are,
+         * {@link #DOMAIN_CS}
+         * {@link #DOMAIN_PS_3GPP}
+         * {@link #DOMAIN_PS_NON_3GPP}.
+         *
+         * The default value for this key is
+         * {{@link #DOMAIN_PS_3GPP},
+         * {@link #DOMAIN_CS},
+         * {@link #DOMAIN_PS_NON_3GPP}}.
+         * @hide
+         */
+        public static final String KEY_EMERGENCY_DOMAIN_PREFERENCE_INT_ARRAY =
+                KEY_PREFIX + "emergency_domain_preference_int_array";
+
+        /**
+         * Specifies the emergency call domain preference for the roaming network.
+         * The domain selection service shall choose the domain in the order
+         * for attempting the emergency call.
+         *
+         * <p>Possible values are,
+         * {@link #DOMAIN_CS}
+         * {@link #DOMAIN_PS_3GPP}
+         * {@link #DOMAIN_PS_NON_3GPP}.
+         *
+         * The default value for this key is
+         * {{@link #DOMAIN_PS_3GPP},
+         * {@link #DOMAIN_CS},
+         * {@link #DOMAIN_PS_NON_3GPP}}.
+         * @hide
+         */
+        public static final String KEY_EMERGENCY_DOMAIN_PREFERENCE_ROAMING_INT_ARRAY =
+                KEY_PREFIX + "emergency_domain_preference_roaming_int_array";
+
+        /**
+         * Specifies if emergency call shall be attempted on IMS, if PS is attached even though IMS
+         * is not registered and normal calls fallback to the CS networks.
+         *
+         * The default value for this key is {@code false}.
+         * @hide
+         */
+        public static final String KEY_PREFER_IMS_EMERGENCY_WHEN_VOICE_CALLS_ON_CS_BOOL =
+                KEY_PREFIX + "prefer_ims_emergency_when_voice_calls_on_cs_bool";
+
+        /**
+         * Specifies maximum number of emergency call retries over Wi-Fi.
+         * This is valid only when {@link #DOMAIN_PS_NON_3GPP} is included in
+         * {@link #KEY_EMERGENCY_DOMAIN_PREFERENCE_INT_ARRAY} or
+         * {@link #KEY_EMERGENCY_DOMAIN_PREFERENCE_ROAMING_INT_ARRAY}.
+         *
+         * The default value for this key is 1.
+         * @hide
+         */
+        public static final String KEY_MAXIMUM_NUMBER_OF_EMERGENCY_TRIES_OVER_VOWIFI_INT =
+                KEY_PREFIX + "maximum_number_of_emergency_tries_over_vowifi_int";
+
+        /**
+         * Emergency scan timer to wait for scan results from radio before attempting the call
+         * over Wi-Fi. On timer expiry, if emergency call on Wi-Fi is allowed and possible,
+         * telephony shall cancel the scan and place the call on Wi-Fi. If emergency call on Wi-Fi
+         * is not possible, then domain seleciton continues to wait for the scan result from the
+         * radio. If an emergency scan result is received before the timer expires, the timer shall
+         * be stopped and no dialing over Wi-Fi will be tried. If this value is set to 0, then
+         * the timer is never started and domain selection waits for the scan result from the radio.
+         *
+         * The default value for the timer is 10 seconds.
+         * @hide
+         */
+        public static final String KEY_EMERGENCY_SCAN_TIMER_SEC_INT =
+                KEY_PREFIX + "emergency_scan_timer_sec_int";
+
+        /** @hide */
+        @IntDef(prefix = "SCAN_TYPE_",
+            value = {
+                SCAN_TYPE_NO_PREFERENCE,
+                SCAN_TYPE_FULL_SERVICE,
+                SCAN_TYPE_FULL_SERVICE_FOLLOWED_BY_LIMITED_SERVICE})
+        public @interface EmergencyScanType {}
+
+        /**
+         * No specific preference given to the modem. Modem can return an emergency
+         * capable network either with limited service or full service.
+         * @hide
+         */
+        public static final int SCAN_TYPE_NO_PREFERENCE = 0;
+
+        /**
+         * Modem will attempt to camp on a network with full service only.
+         * @hide
+         */
+        public static final int SCAN_TYPE_FULL_SERVICE = 1;
+
+        /**
+         * Telephony shall attempt full service scan first.
+         * If a full service network is not found, telephony shall attempt a limited service scan.
+         * @hide
+         */
+        public static final int SCAN_TYPE_FULL_SERVICE_FOLLOWED_BY_LIMITED_SERVICE = 2;
+
+        /**
+         * Specifies the preferred emergency network scanning type.
+         *
+         * <p>Possible values are,
+         * {@link #SCAN_TYPE_NO_PREFERENCE}
+         * {@link #SCAN_TYPE_FULL_SERVICE}
+         * {@link #SCAN_TYPE_FULL_SERVICE_FOLLOWED_BY_LIMITED_SERVICE}
+         *
+         * The default value for this key is {@link #SCAN_TYPE_NO_PREFERENCE}.
+         * @hide
+         */
+        public static final String KEY_EMERGENCY_NETWORK_SCAN_TYPE_INT =
+                KEY_PREFIX + "emergency_network_scan_type_int";
+
+        /**
+         * Specifies the time by which a call should be set up on the current network
+         * once the call is routed on the network. If the call cannot be set up by timer expiry,
+         * call shall be re-dialed on the next available network.
+         * If this value is set to 0, the timer shall be disabled.
+         *
+         * The default value for this key is 0.
+         * @hide
+         */
+        public static final String KEY_EMERGENCY_CALL_SETUP_TIMER_ON_CURRENT_NETWORK_SEC_INT =
+                KEY_PREFIX + "emergency_call_setup_timer_on_current_network_sec_int";
+
+        /**
+         * Specifies if emergency call shall be attempted on IMS only when IMS is registered.
+         * This is applicable only for the case PS is in service.
+         *
+         * The default value for this key is {@code false}.
+         * @hide
+         */
+        public static final String KEY_EMERGENCY_REQUIRES_IMS_REGISTRATION_BOOL =
+                KEY_PREFIX + "emergency_requires_ims_registration_bool";
+
+        /**
+         * Specifies if LTE is preferred when re-scanning networks after the failure of dialing
+         * over NR. If not, CS will be preferred.
+         *
+         * The default value for this key is {@code false}.
+         * @hide
+         */
+        public static final String KEY_EMERGENCY_LTE_PREFERRED_AFTER_NR_FAILED_BOOL =
+                KEY_PREFIX + "emergency_lte_preferred_after_nr_failed_bool";
+
+        /**
+         * Specifies the numbers to be dialed over CDMA network in case of dialing over CS network.
+         *
+         * The default value for this key is an empty string array.
+         * @hide
+         */
+        public static final String KEY_EMERGENCY_CDMA_PREFERRED_NUMBERS_STRING_ARRAY =
+                KEY_PREFIX + "emergency_cdma_preferred_numbers_string_array";
+
+        /**
+         * Specifies if emergency call shall be attempted on IMS only when VoLTE is enabled.
+         *
+         * The default value for this key is {@code false}.
+         * @hide
+         */
+        public static final String KEY_EMERGENCY_REQUIRES_VOLTE_ENABLED_BOOL =
+                KEY_PREFIX + "emergency_requires_volte_enabled_bool";
+
         private static PersistableBundle getDefaults() {
             PersistableBundle defaults = new PersistableBundle();
             defaults.putBoolean(KEY_RETRY_EMERGENCY_ON_IMS_PDN_BOOL, false);
@@ -7110,6 +7378,56 @@ public class CarrierConfigManager {
 
             defaults.putInt(KEY_EMERGENCY_REGISTRATION_TIMER_MILLIS_INT, 10000);
             defaults.putInt(KEY_REFRESH_GEOLOCATION_TIMEOUT_MILLIS_INT, 5000);
+
+            defaults.putIntArray(
+                    KEY_EMERGENCY_OVER_IMS_SUPPORTED_3GPP_NETWORK_TYPES_INT_ARRAY,
+                    new int[] {
+                        AccessNetworkType.EUTRAN,
+                    });
+
+            defaults.putIntArray(
+                    KEY_EMERGENCY_OVER_IMS_ROAMING_SUPPORTED_3GPP_NETWORK_TYPES_INT_ARRAY,
+                    new int[] {
+                        AccessNetworkType.EUTRAN,
+                    });
+
+            defaults.putIntArray(
+                    KEY_EMERGENCY_OVER_CS_SUPPORTED_ACCESS_NETWORK_TYPES_INT_ARRAY,
+                    new int[] {
+                        AccessNetworkType.UTRAN,
+                        AccessNetworkType.GERAN,
+                    });
+
+            defaults.putIntArray(
+                    KEY_EMERGENCY_OVER_CS_ROAMING_SUPPORTED_ACCESS_NETWORK_TYPES_INT_ARRAY,
+                    new int[] {
+                        AccessNetworkType.UTRAN,
+                        AccessNetworkType.GERAN,
+                    });
+
+            defaults.putIntArray(KEY_EMERGENCY_DOMAIN_PREFERENCE_INT_ARRAY,
+                    new int[] {
+                        DOMAIN_PS_3GPP,
+                        DOMAIN_CS,
+                        DOMAIN_PS_NON_3GPP
+                    });
+            defaults.putIntArray(KEY_EMERGENCY_DOMAIN_PREFERENCE_ROAMING_INT_ARRAY,
+                    new int[] {
+                        DOMAIN_PS_3GPP,
+                        DOMAIN_CS,
+                        DOMAIN_PS_NON_3GPP
+                    });
+
+            defaults.putBoolean(KEY_PREFER_IMS_EMERGENCY_WHEN_VOICE_CALLS_ON_CS_BOOL, false);
+            defaults.putInt(KEY_MAXIMUM_NUMBER_OF_EMERGENCY_TRIES_OVER_VOWIFI_INT, 1);
+            defaults.putInt(KEY_EMERGENCY_SCAN_TIMER_SEC_INT, 10);
+            defaults.putInt(KEY_EMERGENCY_NETWORK_SCAN_TYPE_INT, SCAN_TYPE_NO_PREFERENCE);
+            defaults.putInt(KEY_EMERGENCY_CALL_SETUP_TIMER_ON_CURRENT_NETWORK_SEC_INT, 0);
+            defaults.putBoolean(KEY_EMERGENCY_REQUIRES_IMS_REGISTRATION_BOOL, false);
+            defaults.putBoolean(KEY_EMERGENCY_LTE_PREFERRED_AFTER_NR_FAILED_BOOL, false);
+            defaults.putBoolean(KEY_EMERGENCY_REQUIRES_VOLTE_ENABLED_BOOL, false);
+            defaults.putStringArray(KEY_EMERGENCY_CDMA_PREFERRED_NUMBERS_STRING_ARRAY,
+                    new String[] {});
 
             return defaults;
         }

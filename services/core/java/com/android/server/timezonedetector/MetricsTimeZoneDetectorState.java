@@ -89,7 +89,7 @@ public final class MetricsTimeZoneDetectorState {
             @NonNull String deviceTimeZoneId,
             @Nullable ManualTimeZoneSuggestion latestManualSuggestion,
             @Nullable TelephonyTimeZoneSuggestion latestTelephonySuggestion,
-            @Nullable GeolocationTimeZoneSuggestion latestGeolocationSuggestion) {
+            @Nullable LocationAlgorithmEvent latestLocationAlgorithmEvent) {
 
         boolean includeZoneIds = configurationInternal.isEnhancedMetricsCollectionEnabled();
         String metricDeviceTimeZoneId = includeZoneIds ? deviceTimeZoneId : null;
@@ -101,9 +101,13 @@ public final class MetricsTimeZoneDetectorState {
         MetricsTimeZoneSuggestion latestCanonicalTelephonySuggestion =
                 createMetricsTimeZoneSuggestion(
                         tzIdOrdinalGenerator, latestTelephonySuggestion, includeZoneIds);
-        MetricsTimeZoneSuggestion latestCanonicalGeolocationSuggestion =
-                createMetricsTimeZoneSuggestion(
-                        tzIdOrdinalGenerator, latestGeolocationSuggestion, includeZoneIds);
+
+        MetricsTimeZoneSuggestion latestCanonicalGeolocationSuggestion = null;
+        if (latestLocationAlgorithmEvent != null) {
+            GeolocationTimeZoneSuggestion suggestion = latestLocationAlgorithmEvent.getSuggestion();
+            latestCanonicalGeolocationSuggestion = createMetricsTimeZoneSuggestion(
+                    tzIdOrdinalGenerator, suggestion, includeZoneIds);
+        }
 
         return new MetricsTimeZoneDetectorState(
                 configurationInternal, deviceTimeZoneIdOrdinal, metricDeviceTimeZoneId,

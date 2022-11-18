@@ -62,7 +62,8 @@ public class StackScrollAlgorithm {
     private StackScrollAlgorithmState mTempAlgorithmState = new StackScrollAlgorithmState();
     private boolean mIsExpanded;
     private boolean mClipNotificationScrollToTop;
-    @VisibleForTesting float mHeadsUpInset;
+    @VisibleForTesting
+    float mHeadsUpInset;
     private int mPinnedZTranslationExtra;
     private float mNotificationScrimPadding;
     private int mMarginBottom;
@@ -456,7 +457,7 @@ public class StackScrollAlgorithm {
 
     /**
      * @return Fraction to apply to view height and gap between views.
-     *         Does not include shelf height even if shelf is showing.
+     * Does not include shelf height even if shelf is showing.
      */
     protected float getExpansionFractionWithoutShelf(
             StackScrollAlgorithmState algorithmState,
@@ -470,7 +471,7 @@ public class StackScrollAlgorithm {
                 && (!ambientState.isBypassEnabled() || !ambientState.isPulseExpanding())
                 ? 0 : mNotificationScrimPadding;
 
-        final float stackHeight = ambientState.getStackHeight()  - shelfHeight - scrimPadding;
+        final float stackHeight = ambientState.getStackHeight() - shelfHeight - scrimPadding;
         final float stackEndHeight = ambientState.getStackEndHeight() - shelfHeight - scrimPadding;
         if (stackEndHeight == 0f) {
             // This should not happen, since even when the shade is empty we show EmptyShadeView
@@ -504,13 +505,14 @@ public class StackScrollAlgorithm {
     }
 
     // TODO(b/172289889) polish shade open from HUN
+
     /**
      * Populates the {@link ExpandableViewState} for a single child.
      *
-     * @param i                The index of the child in
-     * {@link StackScrollAlgorithmState#visibleChildren}.
-     * @param algorithmState   The overall output state of the algorithm.
-     * @param ambientState     The input state provided to the algorithm.
+     * @param i              The index of the child in
+     *                       {@link StackScrollAlgorithmState#visibleChildren}.
+     * @param algorithmState The overall output state of the algorithm.
+     * @param ambientState   The input state provided to the algorithm.
      */
     protected void updateChild(
             int i,
@@ -584,8 +586,8 @@ public class StackScrollAlgorithm {
                     final float stackBottom = !ambientState.isShadeExpanded()
                             || ambientState.getDozeAmount() == 1f
                             || bypassPulseNotExpanding
-                                    ? ambientState.getInnerHeight()
-                                    : ambientState.getStackHeight();
+                            ? ambientState.getInnerHeight()
+                            : ambientState.getStackHeight();
                     final float shelfStart = stackBottom
                             - ambientState.getShelf().getIntrinsicHeight()
                             - mPaddingBetweenElements;
@@ -621,9 +623,9 @@ public class StackScrollAlgorithm {
      * Get the gap height needed for before a view
      *
      * @param sectionProvider the sectionProvider used to understand the sections
-     * @param visibleIndex the visible index of this view in the list
-     * @param child the child asked about
-     * @param previousChild the child right before it or null if none
+     * @param visibleIndex    the visible index of this view in the list
+     * @param child           the child asked about
+     * @param previousChild   the child right before it or null if none
      * @return the size of the gap needed or 0 if none is needed
      */
     public float getGapHeightForChild(
@@ -657,9 +659,9 @@ public class StackScrollAlgorithm {
      * Does a given child need a gap, i.e spacing before a view?
      *
      * @param sectionProvider the sectionProvider used to understand the sections
-     * @param visibleIndex the visible index of this view in the list
-     * @param child the child asked about
-     * @param previousChild the child right before it or null if none
+     * @param visibleIndex    the visible index of this view in the list
+     * @param child           the child asked about
+     * @param previousChild   the child right before it or null if none
      * @return if the child needs a gap height
      */
     private boolean childNeedsGapHeight(
@@ -862,30 +864,53 @@ public class StackScrollAlgorithm {
         }
     }
 
+    /**
+     * Calculate and update the Z positions for a given child. We currently only give shadows to
+     * HUNs to distinguish a HUN from its surroundings.
+     *
+     * @param isTopHun      Whether the child is a top HUN. A top HUN means a HUN that shows on the
+     *                      vertically top of screen. Top HUNs should have drop shadows
+     * @param childrenOnTop It is greater than 0 when there's an existing HUN that is elevated
+     * @return childrenOnTop The decimal part represents the fraction of the elevated HUN's height
+     *                      that overlaps with QQS Panel. The integer part represents the count of
+     *                      previous HUNs whose Z positions are greater than 0.
+     */
     protected float updateChildZValue(int i, float childrenOnTop,
             StackScrollAlgorithmState algorithmState,
             AmbientState ambientState,
-            boolean shouldElevateHun) {
+            boolean isTopHun) {
         ExpandableView child = algorithmState.visibleChildren.get(i);
         ExpandableViewState childViewState = child.getViewState();
-        int zDistanceBetweenElements = ambientState.getZDistanceBetweenElements();
         float baseZ = ambientState.getBaseZHeight();
+
+        // Handles HUN shadow when Shade is opened
+
         if (child.mustStayOnScreen() && !childViewState.headsUpIsVisible
                 && !ambientState.isDozingAndNotPulsing(child)
                 && childViewState.getYTranslation() < ambientState.getTopPadding()
                 + ambientState.getStackTranslation()) {
+            // Handles HUN shadow when Shade is opened, and AmbientState.mScrollY > 0
+            // Calculate the HUN's z-value based on its overlapping fraction with QQS Panel.
+            // When scrolling down shade to make HUN back to in-position in Notification Panel,
+            // The over-lapping fraction goes to 0, and shadows hides gradually.
             if (childrenOnTop != 0.0f) {
+                // To elevate the later HUN over previous HUN
                 childrenOnTop++;
             } else {
                 float overlap = ambientState.getTopPadding()
                         + ambientState.getStackTranslation() - childViewState.getYTranslation();
-                childrenOnTop += Math.min(1.0f, overlap / childViewState.height);
+                // To prevent over-shadow during HUN entry
+                childrenOnTop += Math.min(
+                        1.0f,
+                        overlap / childViewState.height
+                );
+                MathUtils.saturate(childrenOnTop);
             }
             childViewState.setZTranslation(baseZ
-                    + childrenOnTop * zDistanceBetweenElements);
-        } else if (shouldElevateHun) {
+                    + childrenOnTop * mPinnedZTranslationExtra);
+        } else if (isTopHun) {
             // In case this is a new view that has never been measured before, we don't want to
-            // elevate if we are currently expanded more then the notification
+            // elevate if we are currently expanded more than the notification
             int shelfHeight = ambientState.getShelf() == null ? 0 :
                     ambientState.getShelf().getIntrinsicHeight();
             float shelfStart = ambientState.getInnerHeight()
@@ -894,23 +919,28 @@ public class StackScrollAlgorithm {
             float notificationEnd = childViewState.getYTranslation() + child.getIntrinsicHeight()
                     + mPaddingBetweenElements;
             if (shelfStart > notificationEnd) {
+                // When the notification doesn't overlap with Notification Shelf, there's no shadow
                 childViewState.setZTranslation(baseZ);
             } else {
+                // Give shadow to the notification if it overlaps with Notification Shelf
                 float factor = (notificationEnd - shelfStart) / shelfHeight;
                 if (Float.isNaN(factor)) { // Avoid problems when the above is 0/0.
                     factor = 1.0f;
                 }
                 factor = Math.min(factor, 1.0f);
-                childViewState.setZTranslation(baseZ + factor * zDistanceBetweenElements);
+                childViewState.setZTranslation(baseZ + factor * mPinnedZTranslationExtra);
             }
         } else {
             childViewState.setZTranslation(baseZ);
         }
 
-        // We need to scrim the notification more from its surrounding content when we are pinned,
-        // and we therefore elevate it higher.
-        // We can use the headerVisibleAmount for this, since the value nicely goes from 0 to 1 when
-        // expanding after which we have a normal elevation again.
+        // Handles HUN shadow when shade is closed.
+        // While HUN is showing and Shade is closed: headerVisibleAmount stays 0, shadow stays.
+        // During HUN-to-Shade (eg. dragging down HUN to open Shade): headerVisibleAmount goes
+        // gradually from 0 to 1, shadow hides gradually.
+        // Header visibility is a deprecated concept, we are using headerVisibleAmount only because
+        // this value nicely goes from 0 to 1 during the HUN-to-Shade process.
+
         childViewState.setZTranslation(childViewState.getZTranslation()
                 + (1.0f - child.getHeaderVisibleAmount()) * mPinnedZTranslationExtra);
         return childrenOnTop;

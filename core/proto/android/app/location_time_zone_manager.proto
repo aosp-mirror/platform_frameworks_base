@@ -40,7 +40,7 @@ enum ControllerStateEnum {
 message LocationTimeZoneManagerServiceStateProto {
   option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional GeolocationTimeZoneSuggestionProto last_suggestion = 1;
+  optional LocationTimeZoneProviderEventProto last_event = 1;
   repeated TimeZoneProviderStateProto primary_provider_states = 2;
   repeated TimeZoneProviderStateProto secondary_provider_states = 3;
   repeated ControllerStateEnum controller_states = 4;

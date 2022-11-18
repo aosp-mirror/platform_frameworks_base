@@ -5499,8 +5499,11 @@ public final class NotificationPanelViewController implements Dumpable {
                 if (!animatingUnlockedShadeToKeyguard) {
                     // Only make the status bar visible if we're not animating the screen off, since
                     // we only want to be showing the clock/notifications during the animation.
-                    mShadeLog.v("Updating keyguard status bar state to "
-                            + (keyguardShowing ? "visible" : "invisible"));
+                    if (keyguardShowing) {
+                        mShadeLog.v("Updating keyguard status bar state to visible");
+                    } else {
+                        mShadeLog.v("Updating keyguard status bar state to invisible");
+                    }
                     mKeyguardStatusBarViewController.updateViewState(
                             /* alpha= */ 1f,
                             keyguardShowing ? View.VISIBLE : View.INVISIBLE);

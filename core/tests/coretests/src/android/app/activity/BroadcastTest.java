@@ -541,35 +541,35 @@ public class BroadcastTest extends ActivityTestsBase {
 
     public void testBroadcastOption_interactive() throws Exception {
         final BroadcastOptions options = BroadcastOptions.makeBasic();
-        options.setInteractiveBroadcast(true);
+        options.setInteractive(true);
         final Intent intent = makeBroadcastIntent(BROADCAST_REGISTERED);
 
         try {
             getContext().sendBroadcast(intent, null, options.toBundle());
-            fail("No exception thrown with BroadcastOptions.setInteractiveBroadcast(true)");
+            fail("No exception thrown with BroadcastOptions.setInteractive(true)");
         } catch (SecurityException se) {
             // Expected, correct behavior - this case intentionally empty
         } catch (Exception e) {
             fail("Unexpected exception " + e.getMessage()
-                    + " thrown with BroadcastOptions.setInteractiveBroadcast(true)");
+                    + " thrown with BroadcastOptions.setInteractive(true)");
         }
     }
 
     public void testBroadcastOption_interactive_PendingIntent() throws Exception {
         final BroadcastOptions options = BroadcastOptions.makeBasic();
-        options.setInteractiveBroadcast(true);
+        options.setInteractive(true);
         final Intent intent = makeBroadcastIntent(BROADCAST_REGISTERED);
         PendingIntent brPending = PendingIntent.getBroadcast(getContext(),
                 1, intent, PendingIntent.FLAG_IMMUTABLE);
 
         try {
             brPending.send(getContext(), 1, null, null, null, null, options.toBundle());
-            fail("No exception thrown with BroadcastOptions.setInteractiveBroadcast(true)");
+            fail("No exception thrown with BroadcastOptions.setInteractive(true)");
         } catch (SecurityException se) {
             // Expected, correct behavior - this case intentionally empty
         } catch (Exception e) {
             fail("Unexpected exception " + e.getMessage()
-                    + " thrown with BroadcastOptions.setInteractiveBroadcast(true)");
+                    + " thrown with BroadcastOptions.setInteractive(true)");
         } finally {
             brPending.cancel();
         }

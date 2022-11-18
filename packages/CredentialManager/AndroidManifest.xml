@@ -36,8 +36,6 @@
         android:name=".CredentialSelectorActivity"
         android:exported="true"
         android:label="@string/app_name"
-        android:launchMode="singleInstance"
-        android:noHistory="true"
         android:excludeFromRecents="true"
         android:theme="@style/Theme.CredentialSelector">
     </activity>

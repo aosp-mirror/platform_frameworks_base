@@ -16,6 +16,7 @@
 
 package com.android.credentialmanager
 
+import android.content.ComponentName
 import android.content.Context
 import android.content.pm.PackageManager
 import android.credentials.ui.Entry
@@ -29,6 +30,7 @@ import com.android.credentialmanager.getflow.ActionEntryInfo
 import com.android.credentialmanager.getflow.AuthenticationEntryInfo
 import com.android.credentialmanager.getflow.CredentialEntryInfo
 import com.android.credentialmanager.getflow.ProviderInfo
+import com.android.credentialmanager.getflow.RemoteEntryInfo
 import com.android.credentialmanager.jetpack.provider.ActionUi
 import com.android.credentialmanager.jetpack.provider.CredentialEntryUi
 import com.android.credentialmanager.jetpack.provider.SaveEntryUi
@@ -58,10 +60,11 @@ class GetFlowUtils {
           credentialEntryList = getCredentialOptionInfoList(
             it.providerFlattenedComponentName, it.credentialEntries, context),
           authenticationEntry = getAuthenticationEntry(
-              it.providerFlattenedComponentName,
-              providerDisplayName,
-              providerIcon,
-              it.authenticationEntry),
+            it.providerFlattenedComponentName,
+            providerDisplayName,
+            providerIcon,
+            it.authenticationEntry),
+          remoteEntry = getRemoteEntry(it.providerFlattenedComponentName, it.remoteEntry),
           actionEntryList = getActionEntryList(
             it.providerFlattenedComponentName, it.actionChips, context),
         )
@@ -115,6 +118,18 @@ class GetFlowUtils {
       )
     }
 
+    private fun getRemoteEntry(providerId: String, remoteEntry: Entry?): RemoteEntryInfo? {
+      // TODO: should also call fromSlice after getting the official jetpack code.
+      if (remoteEntry == null) {
+        return null
+      }
+      return RemoteEntryInfo(
+        providerId = providerId,
+        entryKey = remoteEntry.key,
+        entrySubkey = remoteEntry.subkey,
+      )
+    }
+
     private fun getActionEntryList(
       providerId: String,
       actionEntries: List<Entry>,
@@ -146,9 +161,17 @@ class CreateFlowUtils {
     ): List<com.android.credentialmanager.createflow.EnabledProviderInfo> {
       // TODO: get from the actual service info
       val packageManager = context.packageManager
+
       return providerDataList.map {
+        val componentName = ComponentName.unflattenFromString(it.providerFlattenedComponentName)
+        var packageName = componentName?.packageName
+        if (componentName == null) {
+          // TODO: Remove once test data is fixed
+          packageName = it.providerFlattenedComponentName
+        }
+
         val pkgInfo = packageManager
-          .getPackageInfo(it.providerFlattenedComponentName,
+          .getPackageInfo(packageName!!,
             PackageManager.PackageInfoFlags.of(0))
         com.android.credentialmanager.createflow.EnabledProviderInfo(
           // TODO: decide what to do when failed to load a provider icon

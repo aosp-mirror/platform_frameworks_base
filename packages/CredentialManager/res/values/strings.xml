@@ -62,4 +62,8 @@
   <string name="locked_credential_entry_label_subtext">Tap to unlock</string>
   <!-- Column heading for displaying action chips for managing sign-ins from each credential provider. [CHAR LIMIT=80] -->
   <string name="get_dialog_heading_manage_sign_ins">Manage sign-ins</string>
+  <!-- Column heading for displaying option to use sign-ins saved on a different device. [CHAR LIMIT=80] -->
+  <string name="get_dialog_heading_from_another_device">From another device</string>
+  <!-- Headline text for an option to use sign-ins saved on a different device. [CHAR LIMIT=120] -->
+  <string name="get_dialog_option_headline_use_a_different_device">Use a different device</string>
 </resources>

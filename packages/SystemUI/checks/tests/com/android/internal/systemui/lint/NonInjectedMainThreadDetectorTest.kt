@@ -61,6 +61,32 @@ class NonInjectedMainThreadDetectorTest : SystemUILintDetectorTest() {
     }
 
     @Test
+    fun testSuppressGetMainThreadHandler() {
+        lint()
+            .files(
+                TestFiles.java(
+                        """
+                    package test.pkg;
+                    import android.content.Context;
+                    import android.os.Handler;
+
+                    @SuppressWarnings("NonInjectedMainThread")
+                    public class TestClass {
+                        public void test(Context context) {
+                          Handler mainThreadHandler = context.getMainThreadHandler();
+                        }
+                    }
+                """
+                    )
+                    .indented(),
+                *stubs
+            )
+            .issues(NonInjectedMainThreadDetector.ISSUE)
+            .run()
+            .expectClean()
+    }
+
+    @Test
     fun testGetMainLooper() {
         lint()
             .files(

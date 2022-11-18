@@ -26,6 +26,7 @@
 #include <androidfw/Errors.h>
 #include <androidfw/LocaleData.h>
 #include <androidfw/StringPiece.h>
+#include <utils/ByteOrder.h>
 #include <utils/Errors.h>
 #include <utils/String16.h>
 #include <utils/Vector.h>
@@ -1437,6 +1438,10 @@ struct ResTable_type
         // Mark any types that use this with a v26 qualifier to prevent runtime issues on older
         // platforms.
         FLAG_SPARSE = 0x01,
+
+        // If set, the offsets to the entries are encoded in 16-bit, real_offset = offset * 4u
+        // An 16-bit offset of 0xffffu means a NO_ENTRY
+        FLAG_OFFSET16 = 0x02,
     };
     uint8_t flags;
 
@@ -1452,6 +1457,11 @@ struct ResTable_type
     // Configuration this collection of entries is designed for. This must always be last.
     ResTable_config config;
 };
+
+// Convert a 16-bit offset to 32-bit if FLAG_OFFSET16 is set
+static inline uint32_t offset_from16(uint16_t off16) {
+    return dtohs(off16) == 0xffffu ? ResTable_type::NO_ENTRY : dtohs(off16) * 4u;
+}
 
 // The minimum size required to read any version of ResTable_type.
 constexpr size_t kResTableTypeMinSize =
@@ -1480,6 +1490,8 @@ union ResTable_sparseTypeEntry {
 static_assert(sizeof(ResTable_sparseTypeEntry) == sizeof(uint32_t),
         "ResTable_sparseTypeEntry must be 4 bytes in size");
 
+struct ResTable_map_entry;
+
 /**
  * This is the beginning of information about an entry in the resource
  * table.  It holds the reference to the name of this entry, and is
@@ -1487,12 +1499,11 @@ static_assert(sizeof(ResTable_sparseTypeEntry) == sizeof(uint32_t),
  *   * A Res_value structure, if FLAG_COMPLEX is -not- set.
  *   * An array of ResTable_map structures, if FLAG_COMPLEX is set.
  *     These supply a set of name/value mappings of data.
+ *   * If FLAG_COMPACT is set, this entry is a compact entry for
+ *     simple values only
  */
-struct ResTable_entry
+union ResTable_entry
 {
-    // Number of bytes in this structure.
-    uint16_t size;
-
     enum {
         // If set, this is a complex entry, holding a set of name/value
         // mappings.  It is followed by an array of ResTable_map structures.
@@ -1504,18 +1515,91 @@ struct ResTable_entry
         // resources of the same name/type. This is only useful during
         // linking with other resource tables.
         FLAG_WEAK = 0x0004,
+        // If set, this is a compact entry with data type and value directly
+        // encoded in the this entry, see ResTable_entry::compact
+        FLAG_COMPACT = 0x0008,
     };
-    uint16_t flags;
-    
-    // Reference into ResTable_package::keyStrings identifying this entry.
-    struct ResStringPool_ref key;
+
+    struct Full {
+        // Number of bytes in this structure.
+        uint16_t size;
+
+        uint16_t flags;
+
+        // Reference into ResTable_package::keyStrings identifying this entry.
+        struct ResStringPool_ref key;
+    } full;
+
+    /* A compact entry is indicated by FLAG_COMPACT, with flags at the same
+     * offset as a normal entry. This is only for simple data values where
+     *
+     * - size for entry or value can be inferred (both being 8 bytes).
+     * - key index is encoded in 16-bit
+     * - dataType is encoded as the higher 8-bit of flags
+     * - data is encoded directly in this entry
+     */
+    struct Compact {
+        uint16_t key;
+        uint16_t flags;
+        uint32_t data;
+    } compact;
+
+    uint16_t flags()  const { return dtohs(full.flags); };
+    bool is_compact() const { return flags() & FLAG_COMPACT; }
+    bool is_complex() const { return flags() & FLAG_COMPLEX; }
+
+    size_t size() const {
+        return is_compact() ? sizeof(ResTable_entry) : dtohs(this->full.size);
+    }
+
+    uint32_t key() const {
+        return is_compact() ? dtohs(this->compact.key) : dtohl(this->full.key.index);
+    }
+
+    /* Always verify the memory associated with this entry and its value
+     * before calling value() or map_entry()
+     */
+    Res_value value() const {
+        Res_value v;
+        if (is_compact()) {
+            v.size = sizeof(Res_value);
+            v.res0 = 0;
+            v.data = dtohl(this->compact.data);
+            v.dataType = dtohs(compact.flags) >> 8;
+        } else {
+            auto vaddr = reinterpret_cast<const uint8_t*>(this) + dtohs(this->full.size);
+            auto value = reinterpret_cast<const Res_value*>(vaddr);
+            v.size = dtohs(value->size);
+            v.res0 = value->res0;
+            v.data = dtohl(value->data);
+            v.dataType = value->dataType;
+        }
+        return v;
+    }
+
+    const ResTable_map_entry* map_entry() const {
+        return is_complex() && !is_compact() ?
+            reinterpret_cast<const ResTable_map_entry*>(this) : nullptr;
+    }
 };
+
+/* Make sure size of ResTable_entry::Full and ResTable_entry::Compact
+ * be the same as ResTable_entry. This is to allow iteration of entries
+ * to work in either cases.
+ *
+ * The offset of flags must be at the same place for both structures,
+ * to ensure the correct reading to decide whether this is a full entry
+ * or a compact entry.
+ */
+static_assert(sizeof(ResTable_entry) == sizeof(ResTable_entry::Full));
+static_assert(sizeof(ResTable_entry) == sizeof(ResTable_entry::Compact));
+static_assert(offsetof(ResTable_entry, full.flags) == offsetof(ResTable_entry, compact.flags));
 
 /**
  * Extended form of a ResTable_entry for map entries, defining a parent map
  * resource from which to inherit values.
  */
-struct ResTable_map_entry : public ResTable_entry
+struct ResTable_map_entry : public ResTable_entry::Full
 {
     // Resource identifier of the parent mapping, or 0 if there is none.
     // This is always treated as a TYPE_DYNAMIC_REFERENCE.

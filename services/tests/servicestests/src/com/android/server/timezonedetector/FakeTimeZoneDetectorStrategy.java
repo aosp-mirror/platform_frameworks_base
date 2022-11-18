@@ -21,12 +21,14 @@ import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.time.TimeZoneCapabilitiesAndConfig;
 import android.app.time.TimeZoneConfiguration;
+import android.app.time.TimeZoneDetectorStatus;
 import android.app.time.TimeZoneState;
 import android.app.timezonedetector.ManualTimeZoneSuggestion;
 import android.app.timezonedetector.TelephonyTimeZoneSuggestion;
 import android.util.IndentingPrintWriter;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class FakeTimeZoneDetectorStrategy implements TimeZoneDetectorStrategy {
 
@@ -34,14 +36,17 @@ public class FakeTimeZoneDetectorStrategy implements TimeZoneDetectorStrategy {
             new FakeServiceConfigAccessor();
     private final ArrayList<StateChangeListener> mListeners = new ArrayList<>();
     private TimeZoneState mTimeZoneState;
+    private TimeZoneDetectorStatus mStatus;
 
     public FakeTimeZoneDetectorStrategy() {
         mFakeServiceConfigAccessor.addConfigurationInternalChangeListener(
                 this::notifyChangeListeners);
     }
 
-    public void initializeConfiguration(ConfigurationInternal configuration) {
+    public void initializeConfigurationAndStatus(
+            ConfigurationInternal configuration, TimeZoneDetectorStatus status) {
         mFakeServiceConfigAccessor.initializeCurrentUserConfiguration(configuration);
+        mStatus = Objects.requireNonNull(status);
     }
 
     @Override
@@ -57,6 +62,7 @@ public class FakeTimeZoneDetectorStrategy implements TimeZoneDetectorStrategy {
         assertEquals("Multi-user testing not supported",
                 configurationInternal.getUserId(), userId);
         return new TimeZoneCapabilitiesAndConfig(
+                mStatus,
                 configurationInternal.asCapabilities(bypassUserPolicyChecks),
                 configurationInternal.asConfiguration());
     }
@@ -90,7 +96,7 @@ public class FakeTimeZoneDetectorStrategy implements TimeZoneDetectorStrategy {
     }
 
     @Override
-    public void suggestGeolocationTimeZone(GeolocationTimeZoneSuggestion timeZoneSuggestion) {
+    public void handleLocationAlgorithmEvent(LocationAlgorithmEvent locationAlgorithmEvent) {
     }
 
     @Override

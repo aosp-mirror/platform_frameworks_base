@@ -568,4 +568,7 @@ interface IDevicePolicyManager {
     boolean shouldAllowBypassingDevicePolicyManagementRoleQualification();
 
     List<UserHandle> getPolicyManagedProfiles(in UserHandle userHandle);
+
+    void setApplicationExemptions(String packageName, in int[]exemptions);
+    int[] getApplicationExemptions(String packageName);
 }

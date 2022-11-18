@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
@@ -33,7 +34,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -45,7 +45,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import com.android.credentialmanager.R
@@ -53,6 +55,8 @@ import com.android.credentialmanager.common.material.ModalBottomSheetLayout
 import com.android.credentialmanager.common.material.ModalBottomSheetValue
 import com.android.credentialmanager.common.material.rememberModalBottomSheetState
 import com.android.credentialmanager.common.ui.CancelButton
+import com.android.credentialmanager.common.ui.Entry
+import com.android.credentialmanager.common.ui.TransparentBackgroundEntry
 import com.android.credentialmanager.jetpack.developer.PublicKeyCredential
 
 @Composable
@@ -107,6 +111,9 @@ fun PrimarySelectionCard(
   Card() {
     Column() {
       Text(
+        modifier = Modifier.padding(all = 24.dp),
+        textAlign = TextAlign.Center,
+        style = MaterialTheme.typography.headlineSmall,
         text = stringResource(
           if (sortedUserNameToCredentialEntryList.size == 1) {
             if (sortedUserNameToCredentialEntryList.first().sortedCredentialEntryList
@@ -117,12 +124,10 @@ fun PrimarySelectionCard(
           } else R.string.get_dialog_title_choose_sign_in_for,
           requestDisplayInfo.appDomainName
         ),
-        style = MaterialTheme.typography.titleMedium,
-        modifier = Modifier.padding(all = 24.dp).align(alignment = Alignment.CenterHorizontally)
       )
 
       Card(
-        shape = MaterialTheme.shapes.large,
+        shape = MaterialTheme.shapes.medium,
         modifier = Modifier
           .padding(horizontal = 24.dp)
           .align(alignment = Alignment.CenterHorizontally)
@@ -216,16 +221,25 @@ fun AllSignInOptionCard(
             )
           }
           // Locked password manager
-          item {
-            if (!authenticationEntryList.isEmpty()) {
+          if (!authenticationEntryList.isEmpty()) {
+            item {
               LockedCredentials(
                 authenticationEntryList = authenticationEntryList,
                 onEntrySelected = onEntrySelected,
               )
             }
           }
-          // TODO: Remote action
-          // Manage sign-ins
+          // From another device
+          val remoteEntry = providerDisplayInfo.remoteEntry
+          if (remoteEntry != null) {
+            item {
+              RemoteEntryCard(
+                remoteEntry = remoteEntry,
+                onEntrySelected = onEntrySelected,
+              )
+            }
+          }
+          // Manage sign-ins (action chips)
           item {
             ActionChips(providerInfoList = providerInfoList, onEntrySelected = onEntrySelected)
           }
@@ -254,9 +268,55 @@ fun ActionChips(
     modifier = Modifier.padding(vertical = 8.dp)
   )
   // TODO: tweak padding.
-  Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-    actionChips.forEach {
-      ActionEntryRow(it, onEntrySelected)
+  Card(
+    modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+    shape = MaterialTheme.shapes.medium,
+  ) {
+    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+      actionChips.forEach {
+        ActionEntryRow(it, onEntrySelected)
+      }
+    }
+  }
+}
+
+@Composable
+fun RemoteEntryCard(
+  remoteEntry: RemoteEntryInfo,
+  onEntrySelected: (EntryInfo) -> Unit,
+) {
+  Text(
+    text = stringResource(R.string.get_dialog_heading_from_another_device),
+    style = MaterialTheme.typography.labelLarge,
+    modifier = Modifier.padding(vertical = 8.dp)
+  )
+  Card(
+    modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+    shape = MaterialTheme.shapes.medium,
+  ) {
+    Column(
+      modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+      verticalArrangement = Arrangement.spacedBy(2.dp),
+    ) {
+      Entry(
+        onClick = {onEntrySelected(remoteEntry)},
+        icon = {
+          Icon(
+            painter = painterResource(R.drawable.ic_other_devices),
+            contentDescription = null,
+            tint = Color.Unspecified,
+            modifier = Modifier.padding(start = 18.dp)
+          )
+        },
+        label = {
+          Text(
+            text = stringResource(R.string.get_dialog_option_headline_use_a_different_device),
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier.padding(start = 16.dp, top = 18.dp, bottom = 18.dp)
+              .align(alignment = Alignment.CenterHorizontally)
+          )
+        }
+      )
     }
   }
 }
@@ -271,8 +331,18 @@ fun LockedCredentials(
     style = MaterialTheme.typography.labelLarge,
     modifier = Modifier.padding(vertical = 8.dp)
   )
-  authenticationEntryList.forEach {
-    AuthenticationEntryRow(it, onEntrySelected)
+  Card(
+    modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+    shape = MaterialTheme.shapes.medium,
+  ) {
+    Column(
+      modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+      verticalArrangement = Arrangement.spacedBy(2.dp),
+    ) {
+      authenticationEntryList.forEach {
+        AuthenticationEntryRow(it, onEntrySelected)
+      }
+    }
   }
 }
 
@@ -287,8 +357,18 @@ fun PerUserNameCredentials(
     style = MaterialTheme.typography.labelLarge,
     modifier = Modifier.padding(vertical = 8.dp)
   )
-  perUserNameCredentialEntryList.sortedCredentialEntryList.forEach {
-    CredentialEntryRow(it, onEntrySelected)
+  Card(
+    modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+    shape = MaterialTheme.shapes.medium,
+  ) {
+    Column(
+      modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+      verticalArrangement = Arrangement.spacedBy(2.dp),
+    ) {
+      perUserNameCredentialEntryList.sortedCredentialEntryList.forEach {
+        CredentialEntryRow(it, onEntrySelected)
+      }
+    }
   }
 }
 
@@ -298,16 +378,14 @@ fun CredentialEntryRow(
   credentialEntryInfo: CredentialEntryInfo,
   onEntrySelected: (EntryInfo) -> Unit,
 ) {
-  SuggestionChip(
-    modifier = Modifier.fillMaxWidth(),
+  Entry(
     onClick = {onEntrySelected(credentialEntryInfo)},
     icon = {
-      Image(modifier = Modifier.size(24.dp, 24.dp).padding(start = 10.dp),
+      Image(modifier = Modifier.padding(start = 10.dp).size(32.dp),
         bitmap = credentialEntryInfo.icon.toBitmap().asImageBitmap(),
         // TODO: add description.
         contentDescription = "")
     },
-    shape = MaterialTheme.shapes.large,
     label = {
       Column() {
         // TODO: fix the text values.
@@ -338,16 +416,14 @@ fun AuthenticationEntryRow(
   authenticationEntryInfo: AuthenticationEntryInfo,
   onEntrySelected: (EntryInfo) -> Unit,
 ) {
-  SuggestionChip(
-    modifier = Modifier.fillMaxWidth(),
+  Entry(
     onClick = {onEntrySelected(authenticationEntryInfo)},
     icon = {
-      Image(modifier = Modifier.size(24.dp, 24.dp).padding(start = 10.dp),
+      Image(modifier = Modifier.padding(start = 10.dp).size(32.dp),
         bitmap = authenticationEntryInfo.icon.toBitmap().asImageBitmap(),
         // TODO: add description.
         contentDescription = "")
     },
-    shape = MaterialTheme.shapes.large,
     label = {
       Column() {
         // TODO: fix the text values.
@@ -372,16 +448,13 @@ fun ActionEntryRow(
   actionEntryInfo: ActionEntryInfo,
   onEntrySelected: (EntryInfo) -> Unit,
 ) {
-  SuggestionChip(
-    modifier = Modifier.fillMaxWidth(),
-    onClick = { onEntrySelected(actionEntryInfo) },
+  TransparentBackgroundEntry(
     icon = {
-      Image(modifier = Modifier.size(24.dp, 24.dp).padding(start = 10.dp),
+      Image(modifier = Modifier.padding(start = 10.dp).size(32.dp),
         bitmap = actionEntryInfo.icon.toBitmap().asImageBitmap(),
         // TODO: add description.
         contentDescription = "")
     },
-    shape = MaterialTheme.shapes.large,
     label = {
       Column() {
         Text(
@@ -395,17 +468,16 @@ fun ActionEntryRow(
           )
         }
       }
-    }
+    },
+    onClick = { onEntrySelected(actionEntryInfo) },
   )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignInAnotherWayRow(onSelect: () -> Unit) {
-  SuggestionChip(
-    modifier = Modifier.fillMaxWidth(),
+  Entry(
     onClick = onSelect,
-    shape = MaterialTheme.shapes.large,
     label = {
       Text(
         text = stringResource(R.string.get_dialog_use_saved_passkey_for),

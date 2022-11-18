@@ -112,9 +112,9 @@ import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.providers.settings.SettingsState.Setting;
 
-import libcore.util.HexEncoding;
-
 import com.google.android.collect.Sets;
+
+import libcore.util.HexEncoding;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -1144,7 +1144,7 @@ public class SettingsProvider extends ContentProvider {
             Slog.v(LOG_TAG, "getConfigSetting(" + name + ")");
         }
 
-        DeviceConfig.enforceReadPermission(getContext(), /*namespace=*/name.split("/")[0]);
+        DeviceConfig.enforceReadPermission(/*namespace=*/name.split("/")[0]);
 
         // Get the value.
         synchronized (mLock) {
@@ -1317,7 +1317,7 @@ public class SettingsProvider extends ContentProvider {
             Slog.v(LOG_TAG, "getAllConfigFlags() for " + prefix);
         }
 
-        DeviceConfig.enforceReadPermission(getContext(),
+        DeviceConfig.enforceReadPermission(
                 prefix != null ? prefix.split("/")[0] : null);
 
         synchronized (mLock) {

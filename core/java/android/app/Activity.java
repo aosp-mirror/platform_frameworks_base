@@ -1685,7 +1685,7 @@ public class Activity extends ContextThemeWrapper
                 .isOnBackInvokedCallbackEnabled(this);
         if (aheadOfTimeBack) {
             // Add onBackPressed as default back behavior.
-            mDefaultBackCallback = this::navigateBack;
+            mDefaultBackCallback = this::onBackInvoked;
             getOnBackInvokedDispatcher().registerSystemOnBackInvokedCallback(mDefaultBackCallback);
         }
     }
@@ -4003,22 +4003,19 @@ public class Activity extends ContextThemeWrapper
         if (!fragmentManager.isStateSaved() && fragmentManager.popBackStackImmediate()) {
             return;
         }
-        navigateBack();
+        onBackInvoked();
     }
 
-    private void navigateBack() {
-        if (!isTaskRoot()) {
-            // If the activity is not the root of the task, allow finish to proceed normally.
-            finishAfterTransition();
-            return;
-        }
-        // Inform activity task manager that the activity received a back press while at the
-        // root of the task. This call allows ActivityTaskManager to intercept or move the task
-        // to the back.
-        ActivityClient.getInstance().onBackPressedOnTaskRoot(mToken,
+    private void onBackInvoked() {
+        // Inform activity task manager that the activity received a back press.
+        // This call allows ActivityTaskManager to intercept or move the task
+        // to the back when needed.
+        ActivityClient.getInstance().onBackPressed(mToken,
                 new RequestFinishCallback(new WeakReference<>(this)));
 
-        getAutofillClientController().onActivityBackPressed(mIntent);
+        if (isTaskRoot()) {
+            getAutofillClientController().onActivityBackPressed(mIntent);
+        }
     }
 
     /**

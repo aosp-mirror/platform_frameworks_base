@@ -28,8 +28,8 @@ data class ProviderInfo(
   val displayName: String,
   val credentialEntryList: List<CredentialEntryInfo>,
   val authenticationEntry: AuthenticationEntryInfo?,
+  val remoteEntry: RemoteEntryInfo?,
   val actionEntryList: List<ActionEntryInfo>,
-  // TODO: add remote entry
 )
 
 /** Display-centric data structure derived from the [ProviderInfo]. This abstraction is not grouping
@@ -41,6 +41,7 @@ data class ProviderDisplayInfo(
    */
   val sortedUserNameToCredentialEntryList: List<PerUserNameCredentialEntryList>,
   val authenticationEntryList: List<AuthenticationEntryInfo>,
+  val remoteEntry: RemoteEntryInfo?
 )
 
 abstract class EntryInfo (
@@ -64,14 +65,18 @@ class CredentialEntryInfo(
   val lastUsedTimeMillis: Long?,
 ) : EntryInfo(providerId, entryKey, entrySubkey)
 
-// TODO: handle sub credential type values like password obfuscation.
-
 class AuthenticationEntryInfo(
   providerId: String,
   entryKey: String,
   entrySubkey: String,
   val title: String,
   val icon: Drawable,
+) : EntryInfo(providerId, entryKey, entrySubkey)
+
+class RemoteEntryInfo(
+  providerId: String,
+  entryKey: String,
+  entrySubkey: String,
 ) : EntryInfo(providerId, entryKey, entrySubkey)
 
 class ActionEntryInfo(

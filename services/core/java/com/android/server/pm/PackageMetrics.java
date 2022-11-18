@@ -92,7 +92,7 @@ final class PackageMetrics {
         final long apksSize = getApksSize(ps.getPath());
 
         FrameworkStatsLog.write(FrameworkStatsLog.PACKAGE_INSTALLATION_SESSION_REPORTED,
-                0 /* session_id */,
+                mInstallRequest.getSessionId() /* session_id */,
                 success ? null : packageName /* not report package_name on success */,
                 mInstallRequest.getUid() /* uid */,
                 newUsers /* user_ids */,
@@ -110,7 +110,7 @@ final class PackageMetrics {
                 installerUid /* installer_package_uid */,
                 -1 /* original_installer_package_uid */,
                 mInstallRequest.getDataLoaderType() /* data_loader_type */,
-                0 /* user_action_required_type */,
+                mInstallRequest.getRequireUserAction() /* user_action_required_type */,
                 mInstallRequest.isInstantInstall() /* is_instant */,
                 mInstallRequest.isInstallReplace() /* is_replace */,
                 mInstallRequest.isInstallSystem() /* is_system */,

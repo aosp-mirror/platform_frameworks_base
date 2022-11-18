@@ -4487,20 +4487,14 @@ ssize_t ResTable::getResource(uint32_t resID, Res_value* outValue, bool mayBeBag
         return err;
     }
 
-    if ((dtohs(entry.entry->flags) & ResTable_entry::FLAG_COMPLEX) != 0) {
+    if (entry.entry->map_entry()) {
         if (!mayBeBag) {
             ALOGW("Requesting resource 0x%08x failed because it is complex\n", resID);
         }
         return BAD_VALUE;
     }
 
-    const Res_value* value = reinterpret_cast<const Res_value*>(
-            reinterpret_cast<const uint8_t*>(entry.entry) + entry.entry->size);
-
-    outValue->size = dtohs(value->size);
-    outValue->res0 = value->res0;
-    outValue->dataType = value->dataType;
-    outValue->data = dtohl(value->data);
+    *outValue = entry.entry->value();
 
     // The reference may be pointing to a resource in a shared library. These
     // references have build-time generated package IDs. These ids may not match
@@ -4691,11 +4685,10 @@ ssize_t ResTable::getBagLocked(uint32_t resID, const bag_entry** outBag,
         return err;
     }
 
-    const uint16_t entrySize = dtohs(entry.entry->size);
-    const uint32_t parent = entrySize >= sizeof(ResTable_map_entry)
-        ? dtohl(((const ResTable_map_entry*)entry.entry)->parent.ident) : 0;
-    const uint32_t count = entrySize >= sizeof(ResTable_map_entry)
-        ? dtohl(((const ResTable_map_entry*)entry.entry)->count) : 0;
+    const uint16_t entrySize = entry.entry->size();
+    const ResTable_map_entry* map_entry = entry.entry->map_entry();
+    const uint32_t parent = map_entry ? dtohl(map_entry->parent.ident) : 0;
+    const uint32_t count = map_entry ? dtohl(map_entry->count) : 0;
 
     size_t N = count;
 
@@ -4759,7 +4752,7 @@ ssize_t ResTable::getBagLocked(uint32_t resID, const bag_entry** outBag,
 
     // Now merge in the new attributes...
     size_t curOff = (reinterpret_cast<uintptr_t>(entry.entry) - reinterpret_cast<uintptr_t>(entry.type))
-        + dtohs(entry.entry->size);
+        + entrySize;
     const ResTable_map* map;
     bag_entry* entries = (bag_entry*)(set+1);
     size_t curEntry = 0;
@@ -5137,7 +5130,7 @@ uint32_t ResTable::findEntry(const PackageGroup* group, ssize_t typeIndex, const
                     continue;
                 }
 
-                if (dtohl(entry->key.index) == (size_t) *ei) {
+                if (entry->key() == (size_t) *ei) {
                     uint32_t resId = Res_MAKEID(group->id - 1, typeIndex, iter.index());
                     if (outTypeSpecFlags) {
                         Entry result;
@@ -6600,8 +6593,12 @@ status_t ResTable::getEntry(
                     // Entry does not exist.
                     continue;
                 }
-
-                thisOffset = dtohl(eindex[realEntryIndex]);
+                if (thisType->flags & ResTable_type::FLAG_OFFSET16) {
+                    auto eindex16 = reinterpret_cast<const uint16_t*>(eindex);
+                    thisOffset = offset_from16(eindex16[realEntryIndex]);
+                } else {
+                    thisOffset = dtohl(eindex[realEntryIndex]);
+                }
             }
 
             if (thisOffset == ResTable_type::NO_ENTRY) {
@@ -6651,8 +6648,8 @@ status_t ResTable::getEntry(
 
     const ResTable_entry* const entry = reinterpret_cast<const ResTable_entry*>(
             reinterpret_cast<const uint8_t*>(bestType) + bestOffset);
-    if (dtohs(entry->size) < sizeof(*entry)) {
-        ALOGW("ResTable_entry size 0x%x is too small", dtohs(entry->size));
+    if (entry->size() < sizeof(*entry)) {
+        ALOGW("ResTable_entry size 0x%zx is too small", entry->size());
         return BAD_TYPE;
     }
 
@@ -6663,7 +6660,7 @@ status_t ResTable::getEntry(
         outEntry->specFlags = specFlags;
         outEntry->package = bestPackage;
         outEntry->typeStr = StringPoolRef(&bestPackage->typeStrings, actualTypeIndex - bestPackage->typeIdOffset);
-        outEntry->keyStr = StringPoolRef(&bestPackage->keyStrings, dtohl(entry->key.index));
+        outEntry->keyStr = StringPoolRef(&bestPackage->keyStrings, entry->key());
     }
     return NO_ERROR;
 }
@@ -7653,6 +7650,9 @@ void ResTable::print(bool inclValues) const
                         if (type->flags & ResTable_type::FLAG_SPARSE) {
                             printf(" [sparse]");
                         }
+                        if (type->flags & ResTable_type::FLAG_OFFSET16) {
+                            printf(" [offset16]");
+                        }
                     }
 
                     printf(":\n");
@@ -7684,7 +7684,13 @@ void ResTable::print(bool inclValues) const
                             thisOffset = static_cast<uint32_t>(dtohs(entry->offset)) * 4u;
                         } else {
                             entryId = entryIndex;
-                            thisOffset = dtohl(eindex[entryIndex]);
+                            if (type->flags & ResTable_type::FLAG_OFFSET16) {
+                                const auto eindex16 =
+                                    reinterpret_cast<const uint16_t*>(eindex);
+                                thisOffset = offset_from16(eindex16[entryIndex]);
+                            } else {
+                                thisOffset = dtohl(eindex[entryIndex]);
+                            }
                             if (thisOffset == ResTable_type::NO_ENTRY) {
                                 continue;
                             }
@@ -7734,7 +7740,7 @@ void ResTable::print(bool inclValues) const
                             continue;
                         }
 
-                        uintptr_t esize = dtohs(ent->size);
+                        uintptr_t esize = ent->size();
                         if ((esize&0x3) != 0) {
                             printf("NON-INTEGER ResTable_entry SIZE: %p\n", (void *)esize);
                             continue;
@@ -7746,30 +7752,27 @@ void ResTable::print(bool inclValues) const
                         }
 
                         const Res_value* valuePtr = NULL;
-                        const ResTable_map_entry* bagPtr = NULL;
+                        const ResTable_map_entry* bagPtr = ent->map_entry();
                         Res_value value;
-                        if ((dtohs(ent->flags)&ResTable_entry::FLAG_COMPLEX) != 0) {
+                        if (bagPtr) {
                             printf("<bag>");
-                            bagPtr = (const ResTable_map_entry*)ent;
                         } else {
-                            valuePtr = (const Res_value*)
-                                (((const uint8_t*)ent) + esize);
-                            value.copyFrom_dtoh(*valuePtr);
+                            value = ent->value();
                             printf("t=0x%02x d=0x%08x (s=0x%04x r=0x%02x)",
                                    (int)value.dataType, (int)value.data,
                                    (int)value.size, (int)value.res0);
                         }
 
-                        if ((dtohs(ent->flags)&ResTable_entry::FLAG_PUBLIC) != 0) {
+                        if (ent->flags() & ResTable_entry::FLAG_PUBLIC) {
                             printf(" (PUBLIC)");
                         }
                         printf("\n");
 
                         if (inclValues) {
-                            if (valuePtr != NULL) {
+                            if (bagPtr == NULL) {
                                 printf("          ");
                                 print_value(typeConfigs->package, value);
-                            } else if (bagPtr != NULL) {
+                            } else {
                                 const int N = dtohl(bagPtr->count);
                                 const uint8_t* baseMapPtr = (const uint8_t*)ent;
                                 size_t mapOffset = esize;

@@ -364,6 +364,28 @@ public class ServiceInfo extends ComponentInfo
     public static final int FOREGROUND_SERVICE_TYPE_SYSTEM_EXEMPTED = 1 << 10;
 
     /**
+     * Foreground service type corresponding to {@code shortService} in
+     * the {@link android.R.attr#foregroundServiceType} attribute.
+     *
+     * TODO Implement it
+     *
+     * TODO Expand the javadoc
+     *
+     * This type is not associated with specific use cases unlike other types, but this has
+     * unique restrictions.
+     * <ul>
+     *     <li>Has a timeout
+     *     <li>Cannot start other foreground services from this
+     *     <li>
+     * </ul>
+     *
+     * @see Service#onTimeout
+     *
+     * @hide
+     */
+    public static final int FOREGROUND_SERVICE_TYPE_SHORT_SERVICE = 1 << 11;
+
+    /**
      * Constant corresponding to {@code specialUse} in
      * the {@link android.R.attr#foregroundServiceType} attribute.
      * Use cases that can't be categorized into any other foreground service types, but also
@@ -446,6 +468,7 @@ public class ServiceInfo extends ComponentInfo
             FOREGROUND_SERVICE_TYPE_HEALTH,
             FOREGROUND_SERVICE_TYPE_REMOTE_MESSAGING,
             FOREGROUND_SERVICE_TYPE_SYSTEM_EXEMPTED,
+            FOREGROUND_SERVICE_TYPE_SHORT_SERVICE,
             FOREGROUND_SERVICE_TYPE_SPECIAL_USE
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -528,6 +551,8 @@ public class ServiceInfo extends ComponentInfo
                 return "remoteMessaging";
             case FOREGROUND_SERVICE_TYPE_SYSTEM_EXEMPTED:
                 return "systemExempted";
+            case FOREGROUND_SERVICE_TYPE_SHORT_SERVICE:
+                return "shortService";
             case FOREGROUND_SERVICE_TYPE_SPECIAL_USE:
                 return "specialUse";
             default:

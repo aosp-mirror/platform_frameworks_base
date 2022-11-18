@@ -21,6 +21,7 @@ import static android.widget.TextView.ACCESSIBILITY_ACTION_SMART_START_ID;
 
 import android.R;
 import android.animation.ValueAnimator;
+import android.annotation.ColorInt;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -37,6 +38,7 @@ import android.content.UndoOperation;
 import android.content.UndoOwner;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -49,8 +51,10 @@ import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.RenderNode;
+import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.fonts.FontStyle;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.LocaleList;
@@ -4762,8 +4766,41 @@ public class Editor {
             }
 
             if (includeTextAppearance) {
-                TextAppearanceInfo textAppearanceInfo = new TextAppearanceInfo(mTextView);
-                builder.setTextAppearanceInfo(textAppearanceInfo);
+                Typeface typeface = mTextView.getPaint().getTypeface();
+                String systemFontFamilyName = null;
+                int textFontWeight = FontStyle.FONT_WEIGHT_UNSPECIFIED;
+                if (typeface != null) {
+                    systemFontFamilyName = typeface.getSystemFontFamilyName();
+                    textFontWeight = typeface.getWeight();
+                }
+                ColorStateList linkTextColors = mTextView.getLinkTextColors();
+                @ColorInt int linkTextColor = linkTextColors != null
+                        ? linkTextColors.getDefaultColor() : 0;
+
+                TextAppearanceInfo.Builder appearanceBuilder = new TextAppearanceInfo.Builder();
+                appearanceBuilder.setTextSize(mTextView.getTextSize())
+                        .setTextLocales(mTextView.getTextLocales())
+                        .setSystemFontFamilyName(systemFontFamilyName)
+                        .setTextFontWeight(textFontWeight)
+                        .setTextStyle(mTextView.getTypefaceStyle())
+                        .setAllCaps(mTextView.isAllCaps())
+                        .setShadowDx(mTextView.getShadowDx())
+                        .setShadowDy(mTextView.getShadowDy())
+                        .setShadowRadius(mTextView.getShadowRadius())
+                        .setShadowColor(mTextView.getShadowColor())
+                        .setElegantTextHeight(mTextView.isElegantTextHeight())
+                        .setFallbackLineSpacing(mTextView.isFallbackLineSpacing())
+                        .setLetterSpacing(mTextView.getLetterSpacing())
+                        .setFontFeatureSettings(mTextView.getFontFeatureSettings())
+                        .setFontVariationSettings(mTextView.getFontVariationSettings())
+                        .setLineBreakStyle(mTextView.getLineBreakStyle())
+                        .setLineBreakWordStyle(mTextView.getLineBreakWordStyle())
+                        .setTextScaleX(mTextView.getTextScaleX())
+                        .setHighlightTextColor(mTextView.getHighlightColor())
+                        .setTextColor(mTextView.getCurrentTextColor())
+                        .setHintTextColor(mTextView.getCurrentHintTextColor())
+                        .setLinkTextColor(linkTextColor);
+                builder.setTextAppearanceInfo(appearanceBuilder.build());
             }
             imm.updateCursorAnchorInfo(mTextView, builder.build());
 

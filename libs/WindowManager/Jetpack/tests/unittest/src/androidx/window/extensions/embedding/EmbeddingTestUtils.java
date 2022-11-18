@@ -169,6 +169,7 @@ public class EmbeddingTestUtils {
                 new Point(),
                 false /* isTaskClearedForReuse */,
                 false /* isTaskFragmentClearedForPip */,
+                false /* isClearedForReorderActivityToFront */,
                 new Point());
     }
 

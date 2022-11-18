@@ -34,15 +34,19 @@ import android.util.Log
 import com.android.internal.util.UserIcons
 import com.android.systemui.R
 import com.android.systemui.SystemUISecondaryUserService
+import com.android.systemui.animation.Expandable
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.qs.user.UserSwitchDialogController
 import com.android.systemui.telephony.domain.interactor.TelephonyInteractor
+import com.android.systemui.user.UserSwitcherActivity
 import com.android.systemui.user.data.model.UserSwitcherSettingsModel
 import com.android.systemui.user.data.repository.UserRepository
 import com.android.systemui.user.data.source.UserRecord
@@ -81,6 +85,7 @@ constructor(
     private val repository: UserRepository,
     private val activityStarter: ActivityStarter,
     private val keyguardInteractor: KeyguardInteractor,
+    private val featureFlags: FeatureFlags,
     private val manager: UserManager,
     @Application private val applicationScope: CoroutineScope,
     telephonyInteractor: TelephonyInteractor,
@@ -255,6 +260,9 @@ constructor(
 
     /** Whether the guest user is currently being reset. */
     val isGuestUserResetting: Boolean = guestUserInteractor.isGuestUserResetting
+
+    /** Whether to enable the user chip in the status bar */
+    val isStatusBarUserChipEnabled: Boolean = repository.isStatusBarUserChipEnabled
 
     private val _dialogShowRequests = MutableStateFlow<ShowDialogRequestModel?>(null)
     val dialogShowRequests: Flow<ShowDialogRequestModel?> = _dialogShowRequests.asStateFlow()
@@ -466,6 +474,26 @@ constructor(
                 ::selectUser,
             )
         }
+    }
+
+    fun showUserSwitcher(context: Context, expandable: Expandable) {
+        if (!featureFlags.isEnabled(Flags.FULL_SCREEN_USER_SWITCHER)) {
+            showDialog(ShowDialogRequestModel.ShowUserSwitcherDialog)
+            return
+        }
+
+        val intent =
+            Intent(context, UserSwitcherActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+
+        activityStarter.startActivity(
+            intent,
+            true /* dismissShade */,
+            expandable.activityLaunchController(),
+            true /* showOverlockscreenwhenlocked */,
+            UserHandle.SYSTEM,
+        )
     }
 
     private fun showDialog(request: ShowDialogRequestModel) {

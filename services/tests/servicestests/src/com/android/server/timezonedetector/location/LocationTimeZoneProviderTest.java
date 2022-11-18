@@ -330,8 +330,9 @@ public class LocationTimeZoneProviderTest {
         }
 
         @Override
-        void onInitialize() {
+        boolean onInitialize() {
             mOnInitializeCalled = true;
+            return true;
         }
 
         @Override
