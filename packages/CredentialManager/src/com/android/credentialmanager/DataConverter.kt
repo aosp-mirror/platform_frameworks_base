@@ -193,9 +193,10 @@ class CreateFlowUtils {
           icon = pkgInfo.applicationInfo.loadIcon(packageManager)!!,
           name = it.providerFlattenedComponentName,
           displayName = pkgInfo.applicationInfo.loadLabel(packageManager).toString(),
-          createOptions = toCreationOptionInfoList(it.saveEntries, context),
+          createOptions = toCreationOptionInfoList(
+            it.providerFlattenedComponentName, it.saveEntries, context),
           isDefault = it.isDefaultProvider,
-          remoteEntry = toRemoteInfo(it.remoteEntry),
+          remoteEntry = toRemoteInfo(it.providerFlattenedComponentName, it.remoteEntry),
         )
       }
     }
@@ -219,6 +220,7 @@ class CreateFlowUtils {
     }
 
     private fun toCreationOptionInfoList(
+      providerId: String,
       creationEntries: List<Entry>,
       context: Context,
     ): List<CreateOptionInfo> {
@@ -227,6 +229,7 @@ class CreateFlowUtils {
 
         return@map CreateOptionInfo(
           // TODO: remove fallbacks
+          providerId = providerId,
           entryKey = it.key,
           entrySubkey = it.subkey,
           pendingIntent = it.pendingIntent,
@@ -245,11 +248,13 @@ class CreateFlowUtils {
     }
 
     private fun toRemoteInfo(
+      providerId: String,
       remoteEntry: Entry?,
     ): RemoteInfo? {
       // TODO: should also call fromSlice after getting the official jetpack code.
       return if (remoteEntry != null) {
         RemoteInfo(
+          providerId = providerId,
           entryKey = remoteEntry.key,
           entrySubkey = remoteEntry.subkey,
           pendingIntent = remoteEntry.pendingIntent,

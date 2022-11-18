@@ -55,8 +55,11 @@ fun CreateCredentialScreen(
   viewModel: CreateCredentialViewModel,
   providerActivityLauncher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>
 ) {
-  val primaryEntryCallback: () -> Unit = {
-    viewModel.onPrimaryCreateOptionInfoSelected(providerActivityLauncher)
+  val selectEntryCallback: (EntryInfo) -> Unit = {
+    viewModel.onEntrySelected(it, providerActivityLauncher)
+  }
+  val confirmEntryCallback: () -> Unit = {
+    viewModel.onConfirmCreationSelected(providerActivityLauncher)
   }
   val state = rememberModalBottomSheetState(
     initialValue = ModalBottomSheetValue.Expanded,
@@ -78,23 +81,23 @@ fun CreateCredentialScreen(
         )
         CreateScreenState.CREATION_OPTION_SELECTION -> CreationSelectionCard(
           requestDisplayInfo = uiState.requestDisplayInfo,
+          enabledProviderList = uiState.enabledProviders,
           providerInfo = uiState.activeEntry?.activeProvider!!,
           createOptionInfo = uiState.activeEntry.activeEntryInfo as CreateOptionInfo,
-          onOptionSelected = primaryEntryCallback,
-          onConfirm = primaryEntryCallback,
+          onOptionSelected = selectEntryCallback,
+          onConfirm = confirmEntryCallback,
           onCancel = viewModel::onCancel,
-          multiProvider = uiState.enabledProviders.size > 1,
-          onMoreOptionsSelected = viewModel::onMoreOptionsSelected
+          onMoreOptionsSelected = viewModel::onMoreOptionsSelected,
         )
         CreateScreenState.MORE_OPTIONS_SELECTION -> MoreOptionsSelectionCard(
-            requestDisplayInfo = uiState.requestDisplayInfo,
-            enabledProviderList = uiState.enabledProviders,
-            disabledProviderList = uiState.disabledProviders,
-            onBackButtonSelected = viewModel::onBackButtonSelected,
-            onOptionSelected = viewModel::onMoreOptionsRowSelected,
-            onDisabledPasswordManagerSelected = viewModel::onDisabledPasswordManagerSelected,
-            onRemoteEntrySelected = viewModel::onRemoteEntrySelected
-          )
+          requestDisplayInfo = uiState.requestDisplayInfo,
+          enabledProviderList = uiState.enabledProviders,
+          disabledProviderList = uiState.disabledProviders,
+          onBackButtonSelected = viewModel::onBackButtonSelected,
+          onOptionSelected = viewModel::onMoreOptionsRowSelected,
+          onDisabledPasswordManagerSelected = viewModel::onDisabledPasswordManagerSelected,
+          onRemoteEntrySelected = selectEntryCallback,
+        )
         CreateScreenState.MORE_OPTIONS_ROW_INTRO -> MoreOptionsRowIntroCard(
           providerInfo = uiState.activeEntry?.activeProvider!!,
           onDefaultOrNotSelected = viewModel::onDefaultOrNotSelected
@@ -234,7 +237,7 @@ fun MoreOptionsSelectionCard(
   onBackButtonSelected: () -> Unit,
   onOptionSelected: (ActiveEntry) -> Unit,
   onDisabledPasswordManagerSelected: () -> Unit,
-  onRemoteEntrySelected: () -> Unit,
+  onRemoteEntrySelected: (EntryInfo) -> Unit,
 ) {
   Card() {
     Column() {
@@ -292,17 +295,15 @@ fun MoreOptionsSelectionCard(
               )
             }
           }
-          var hasRemoteInfo = false
+          // TODO: handle the error situation that if multiple remoteInfos exists
           enabledProviderList.forEach {
             if (it.remoteEntry != null) {
-              hasRemoteInfo = true
-            }
-          }
-          if (hasRemoteInfo) {
-            item {
-              RemoteEntryRow(
-                onRemoteEntrySelected = onRemoteEntrySelected,
-              )
+              item {
+                RemoteEntryRow(
+                  remoteInfo = it.remoteEntry!!,
+                  onRemoteEntrySelected = onRemoteEntrySelected,
+                )
+              }
             }
           }
         }
@@ -388,12 +389,12 @@ fun ProviderRow(providerInfo: ProviderInfo, onProviderSelected: (String) -> Unit
 @Composable
 fun CreationSelectionCard(
   requestDisplayInfo: RequestDisplayInfo,
-  providerInfo: ProviderInfo,
+  enabledProviderList: List<EnabledProviderInfo>,
+  providerInfo: EnabledProviderInfo,
   createOptionInfo: CreateOptionInfo,
-  onOptionSelected: () -> Unit,
+  onOptionSelected: (EntryInfo) -> Unit,
   onConfirm: () -> Unit,
   onCancel: () -> Unit,
-  multiProvider: Boolean,
   onMoreOptionsSelected: () -> Unit,
 ) {
   Card() {
@@ -442,19 +443,16 @@ fun CreationSelectionCard(
           .padding(horizontal = 24.dp)
           .align(alignment = Alignment.CenterHorizontally),
       ) {
-        LazyColumn(
-          verticalArrangement = Arrangement.spacedBy(2.dp)
-        ) {
-            item {
-              PrimaryCreateOptionRow(
-                requestDisplayInfo = requestDisplayInfo,
-                createOptionInfo = createOptionInfo,
-                onOptionSelected = onOptionSelected
-              )
-            }
-        }
+        PrimaryCreateOptionRow(
+          requestDisplayInfo = requestDisplayInfo,
+          createOptionInfo = createOptionInfo,
+          onOptionSelected = onOptionSelected
+        )
       }
-      if (multiProvider) {
+      var createOptionsSize = 0
+      enabledProviderList.forEach{
+        enabledProvider -> createOptionsSize += enabledProvider.createOptions.size}
+      if (createOptionsSize > 1) {
         TextButton(
           onClick = onMoreOptionsSelected,
           modifier = Modifier
@@ -468,6 +466,26 @@ fun CreationSelectionCard(
                   else -> stringResource(R.string.string_save_to_another_place)},
             textAlign = TextAlign.Center,
           )
+        }
+      } else if (
+        requestDisplayInfo.type == TYPE_PUBLIC_KEY_CREDENTIAL
+      ) {
+        // TODO: handle the error situation that if multiple remoteInfos exists
+        enabledProviderList.forEach { enabledProvider ->
+          if (enabledProvider.remoteEntry != null) {
+            TextButton(
+              onClick = {
+                onOptionSelected(enabledProvider.remoteEntry!!) },
+              modifier = Modifier
+                .padding(horizontal = 24.dp)
+                .align(alignment = Alignment.CenterHorizontally)
+            ) {
+              Text(
+                text = stringResource(R.string.string_use_another_device),
+                textAlign = TextAlign.Center,
+              )
+            }
+          }
         }
       }
       Divider(
@@ -501,10 +519,10 @@ fun CreationSelectionCard(
 fun PrimaryCreateOptionRow(
   requestDisplayInfo: RequestDisplayInfo,
   createOptionInfo: CreateOptionInfo,
-  onOptionSelected: () -> Unit
+  onOptionSelected: (EntryInfo) -> Unit
 ) {
   Entry(
-    onClick = onOptionSelected,
+    onClick = {onOptionSelected(createOptionInfo)},
     icon = {
       Image(modifier = Modifier.size(32.dp).padding(start = 10.dp),
         bitmap = createOptionInfo.credentialTypeIcon.toBitmap().asImageBitmap(),
@@ -527,7 +545,7 @@ fun PrimaryCreateOptionRow(
           )
         } else {
           Text(
-            text = requestDisplayInfo.subtitle,
+            text = requestDisplayInfo.title,
             style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.padding(top = 16.dp, bottom = 16.dp)
           )
@@ -640,10 +658,11 @@ fun MoreOptionsDisabledProvidersRow(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RemoteEntryRow(
-  onRemoteEntrySelected: () -> Unit,
+  remoteInfo: RemoteInfo,
+  onRemoteEntrySelected: (RemoteInfo) -> Unit,
 ) {
   Entry(
-    onClick = onRemoteEntrySelected,
+    onClick = {onRemoteEntrySelected(remoteInfo)},
     icon = {
       Icon(
         painter = painterResource(R.drawable.ic_other_devices),
