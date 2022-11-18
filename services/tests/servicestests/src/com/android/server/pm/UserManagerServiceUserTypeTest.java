@@ -85,7 +85,8 @@ public class UserManagerServiceUserTypeTest {
         final UserProperties.Builder userProps = new UserProperties.Builder()
                 .setShowInLauncher(17)
                 .setUseParentsContacts(true)
-                .setCrossProfileIntentFilterAccessControl(10);
+                .setCrossProfileIntentFilterAccessControl(10)
+                .setCrossProfileIntentResolutionStrategy(1);
         final UserTypeDetails type = new UserTypeDetails.Builder()
                 .setName("a.name")
                 .setEnabled(1)
@@ -145,6 +146,8 @@ public class UserManagerServiceUserTypeTest {
         assertTrue(type.getDefaultUserPropertiesReference().getUseParentsContacts());
         assertEquals(10, type.getDefaultUserPropertiesReference()
                 .getCrossProfileIntentFilterAccessControl());
+        assertEquals(1, type.getDefaultUserPropertiesReference()
+                .getCrossProfileIntentResolutionStrategy());
 
         assertEquals(23, type.getBadgeLabel(0));
         assertEquals(24, type.getBadgeLabel(1));
@@ -191,6 +194,8 @@ public class UserManagerServiceUserTypeTest {
         assertEquals(UserProperties.CROSS_PROFILE_INTENT_FILTER_ACCESS_LEVEL_ALL,
                 props.getCrossProfileIntentFilterAccessControl());
         assertEquals(UserProperties.SHOW_IN_LAUNCHER_WITH_PARENT, props.getShowInLauncher());
+        assertEquals(UserProperties.CROSS_PROFILE_INTENT_RESOLUTION_STRATEGY_DEFAULT,
+                props.getCrossProfileIntentResolutionStrategy());
 
         assertFalse(type.hasBadge());
     }
@@ -273,7 +278,8 @@ public class UserManagerServiceUserTypeTest {
                 .setShowInLauncher(19)
                 .setStartWithParent(true)
                 .setUseParentsContacts(true)
-                .setCrossProfileIntentFilterAccessControl(10);
+                .setCrossProfileIntentFilterAccessControl(10)
+                .setCrossProfileIntentResolutionStrategy(1);
         final ArrayMap<String, UserTypeDetails.Builder> builders = new ArrayMap<>();
         builders.put(userTypeAosp1, new UserTypeDetails.Builder()
                 .setName(userTypeAosp1)
@@ -301,6 +307,8 @@ public class UserManagerServiceUserTypeTest {
         assertEquals(19, aospType.getDefaultUserPropertiesReference().getShowInLauncher());
         assertEquals(10, aospType.getDefaultUserPropertiesReference()
                 .getCrossProfileIntentFilterAccessControl());
+        assertEquals(1, aospType.getDefaultUserPropertiesReference()
+                .getCrossProfileIntentResolutionStrategy());
         assertTrue(aospType.getDefaultUserPropertiesReference().getStartWithParent());
         assertTrue(aospType.getDefaultUserPropertiesReference()
                 .getUseParentsContacts());
@@ -335,6 +343,8 @@ public class UserManagerServiceUserTypeTest {
         assertEquals(2020, aospType.getDefaultUserPropertiesReference().getShowInLauncher());
         assertEquals(20, aospType.getDefaultUserPropertiesReference()
                 .getCrossProfileIntentFilterAccessControl());
+        assertEquals(0, aospType.getDefaultUserPropertiesReference()
+                .getCrossProfileIntentResolutionStrategy());
         assertFalse(aospType.getDefaultUserPropertiesReference().getStartWithParent());
         assertFalse(aospType.getDefaultUserPropertiesReference()
                 .getUseParentsContacts());

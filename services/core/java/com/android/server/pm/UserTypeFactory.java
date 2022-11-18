@@ -133,7 +133,9 @@ public final class UserTypeFactory {
                         .setUseParentsContacts(true)
                         .setUpdateCrossProfileIntentFiltersOnOTA(true)
                         .setCrossProfileIntentFilterAccessControl(
-                                UserProperties.CROSS_PROFILE_INTENT_FILTER_ACCESS_LEVEL_SYSTEM));
+                                UserProperties.CROSS_PROFILE_INTENT_FILTER_ACCESS_LEVEL_SYSTEM)
+                        .setCrossProfileIntentResolutionStrategy(UserProperties
+                                .CROSS_PROFILE_INTENT_RESOLUTION_STRATEGY_NO_FILTERING));
     }
 
     /**
