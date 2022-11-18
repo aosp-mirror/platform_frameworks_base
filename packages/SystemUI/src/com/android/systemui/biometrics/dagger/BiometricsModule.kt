@@ -20,6 +20,8 @@ import com.android.systemui.biometrics.data.repository.PromptRepository
 import com.android.systemui.biometrics.data.repository.PromptRepositoryImpl
 import com.android.systemui.biometrics.domain.interactor.CredentialInteractor
 import com.android.systemui.biometrics.domain.interactor.CredentialInteractorImpl
+import com.android.systemui.biometrics.domain.interactor.LogContextInteractor
+import com.android.systemui.biometrics.domain.interactor.LogContextInteractorImpl
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.util.concurrency.ThreadFactory
 import dagger.Binds
@@ -39,6 +41,10 @@ interface BiometricsModule {
     @Binds
     @SysUISingleton
     fun providesCredentialInteractor(impl: CredentialInteractorImpl): CredentialInteractor
+
+    @Binds
+    @SysUISingleton
+    fun bindsLogContextInteractor(impl: LogContextInteractorImpl): LogContextInteractor
 
     companion object {
         /** Background [Executor] for HAL related operations. */

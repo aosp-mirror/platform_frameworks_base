@@ -20,9 +20,6 @@ import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
 import static android.hardware.fingerprint.FingerprintSensorProperties.TYPE_REAR;
 
-import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_AWAKE;
-import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_GOING_TO_SLEEP;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -74,6 +71,7 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.biometrics.domain.interactor.BiometricPromptCredentialInteractor;
+import com.android.systemui.biometrics.domain.interactor.LogContextInteractor;
 import com.android.systemui.biometrics.ui.viewmodel.CredentialViewModel;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
@@ -81,7 +79,6 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.DozeReceiver;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.keyguard.data.repository.BiometricType;
-import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.util.concurrency.DelayableExecutor;
@@ -121,7 +118,6 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
     private final Context mContext;
     private final Execution mExecution;
     private final CommandQueue mCommandQueue;
-    private final StatusBarStateController mStatusBarStateController;
     private final ActivityTaskManager mActivityTaskManager;
     @Nullable private final FingerprintManager mFingerprintManager;
     @Nullable private final FaceManager mFaceManager;
@@ -131,6 +127,7 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
     // TODO: these should be migrated out once ready
     @NonNull private final Provider<BiometricPromptCredentialInteractor> mBiometricPromptInteractor;
     @NonNull private final Provider<CredentialViewModel> mCredentialViewModelProvider;
+    @NonNull private final LogContextInteractor mLogContextInteractor;
 
     private final Display mDisplay;
     private float mScaleFactor = 1f;
@@ -153,7 +150,6 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
     @Nullable private UdfpsController mUdfpsController;
     @Nullable private IUdfpsRefreshRateRequestCallback mUdfpsRefreshRateRequestCallback;
     @Nullable private SideFpsController mSideFpsController;
-    @Nullable private IBiometricContextListener mBiometricContextListener;
     @Nullable private UdfpsLogger mUdfpsLogger;
     @VisibleForTesting IBiometricSysuiReceiver mReceiver;
     @VisibleForTesting @NonNull final BiometricDisplayListener mOrientationListener;
@@ -728,7 +724,7 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
             @NonNull UserManager userManager,
             @NonNull LockPatternUtils lockPatternUtils,
             @NonNull UdfpsLogger udfpsLogger,
-            @NonNull StatusBarStateController statusBarStateController,
+            @NonNull LogContextInteractor logContextInteractor,
             @NonNull Provider<BiometricPromptCredentialInteractor> biometricPromptInteractor,
             @NonNull Provider<CredentialViewModel> credentialViewModelProvider,
             @NonNull InteractionJankMonitor jankMonitor,
@@ -756,6 +752,7 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
         mFaceEnrolledForUser = new SparseBooleanArray();
         mVibratorHelper = vibrator;
 
+        mLogContextInteractor = logContextInteractor;
         mBiometricPromptInteractor = biometricPromptInteractor;
         mCredentialViewModelProvider = credentialViewModelProvider;
 
@@ -770,25 +767,6 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
                 });
 
         mWakefulnessLifecycle = wakefulnessLifecycle;
-        mWakefulnessLifecycle.addObserver(new WakefulnessLifecycle.Observer() {
-            @Override
-            public void onFinishedWakingUp() {
-                notifyDozeChanged(mStatusBarStateController.isDozing(), WAKEFULNESS_AWAKE);
-            }
-
-            @Override
-            public void onStartedGoingToSleep() {
-                notifyDozeChanged(mStatusBarStateController.isDozing(), WAKEFULNESS_GOING_TO_SLEEP);
-            }
-        });
-
-        mStatusBarStateController = statusBarStateController;
-        mStatusBarStateController.addCallback(new StatusBarStateController.StateListener() {
-            @Override
-            public void onDozingChanged(boolean isDozing) {
-                notifyDozeChanged(isDozing, wakefulnessLifecycle.getWakefulness());
-            }
-        });
 
         mFaceProps = mFaceManager != null ? mFaceManager.getSensorPropertiesInternal() : null;
         int[] faceAuthLocation = context.getResources().getIntArray(
@@ -894,21 +872,7 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
 
     @Override
     public void setBiometricContextListener(IBiometricContextListener listener) {
-        mBiometricContextListener = listener;
-        notifyDozeChanged(mStatusBarStateController.isDozing(),
-                mWakefulnessLifecycle.getWakefulness());
-    }
-
-    private void notifyDozeChanged(boolean isDozing,
-            @WakefulnessLifecycle.Wakefulness int wakefullness) {
-        if (mBiometricContextListener != null) {
-            try {
-                final boolean isAwake = wakefullness == WAKEFULNESS_AWAKE;
-                mBiometricContextListener.onDozeChanged(isDozing, isAwake);
-            } catch (RemoteException e) {
-                Log.w(TAG, "failed to notify initial doze state");
-            }
-        }
+        mLogContextInteractor.addBiometricContextListener(listener);
     }
 
     /**
@@ -1274,7 +1238,6 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
             PromptInfo promptInfo, boolean requireConfirmation, int userId, int[] sensorIds,
             String opPackageName, boolean skipIntro, long operationId, long requestId,
             @BiometricMultiSensorMode int multiSensorConfig,
-
             @NonNull WakefulnessLifecycle wakefulnessLifecycle,
             @NonNull UserManager userManager,
             @NonNull LockPatternUtils lockPatternUtils) {

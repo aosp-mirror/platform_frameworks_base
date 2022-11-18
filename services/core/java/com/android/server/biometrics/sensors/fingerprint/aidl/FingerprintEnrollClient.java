@@ -24,7 +24,6 @@ import android.hardware.biometrics.BiometricFingerprintConstants;
 import android.hardware.biometrics.BiometricFingerprintConstants.FingerprintAcquired;
 import android.hardware.biometrics.BiometricStateListener;
 import android.hardware.biometrics.common.ICancellationSignal;
-import android.hardware.biometrics.common.OperationContext;
 import android.hardware.biometrics.fingerprint.PointerContext;
 import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintManager;
@@ -42,6 +41,7 @@ import com.android.server.biometrics.HardwareAuthTokenUtils;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.log.CallbackWithProbe;
+import com.android.server.biometrics.log.OperationContextExt;
 import com.android.server.biometrics.log.Probe;
 import com.android.server.biometrics.sensors.BiometricNotificationUtils;
 import com.android.server.biometrics.sensors.BiometricUtils;
@@ -185,9 +185,9 @@ class FingerprintEnrollClient extends EnrollClient<AidlSession> implements Udfps
                 HardwareAuthTokenUtils.toHardwareAuthToken(mHardwareAuthToken);
 
         if (session.hasContextMethods()) {
-            final OperationContext opContext = getOperationContext();
+            final OperationContextExt opContext = getOperationContext();
             final ICancellationSignal cancel = session.getSession().enrollWithContext(
-                    hat, opContext);
+                    hat, opContext.toAidlContext());
             getBiometricContext().subscribe(opContext, ctx -> {
                 try {
                     session.getSession().onContextChanged(ctx);

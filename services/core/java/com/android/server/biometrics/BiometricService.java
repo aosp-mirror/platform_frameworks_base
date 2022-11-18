@@ -1314,7 +1314,7 @@ public class BiometricService extends SystemService {
         }
 
         final boolean debugEnabled = mInjector.isDebugEnabled(getContext(), userId);
-        mAuthSession = new AuthSession(getContext(), mStatusBarService,
+        mAuthSession = new AuthSession(getContext(), mBiometricContext, mStatusBarService,
                 createSysuiReceiver(requestId), mKeyStore, mRandom,
                 createClientDeathReceiver(requestId), preAuthInfo, token, requestId,
                 operationId, userId, createBiometricSensorReceiver(requestId), receiver,
