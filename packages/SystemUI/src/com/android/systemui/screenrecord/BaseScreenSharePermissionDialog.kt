@@ -23,8 +23,11 @@ import android.view.ViewStub
 import android.view.WindowManager
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.ImageView
 import android.widget.Spinner
 import android.widget.TextView
+import androidx.annotation.ColorRes
+import androidx.annotation.DrawableRes
 import androidx.annotation.LayoutRes
 import androidx.annotation.StringRes
 import com.android.systemui.R
@@ -34,7 +37,9 @@ import com.android.systemui.statusbar.phone.SystemUIDialog
 open class BaseScreenSharePermissionDialog(
     context: Context?,
     private val screenShareOptions: List<ScreenShareOption>,
-    private val appName: String?
+    private val appName: String?,
+    @DrawableRes private val dialogIconDrawable: Int? = null,
+    @ColorRes private val dialogIconTint: Int? = null
 ) : SystemUIDialog(context), AdapterView.OnItemSelectedListener {
     private lateinit var dialogTitle: TextView
     private lateinit var startButton: TextView
@@ -53,8 +58,19 @@ open class BaseScreenSharePermissionDialog(
         warning = findViewById(R.id.text_warning)
         startButton = findViewById(R.id.button_start)
         findViewById<TextView>(R.id.button_cancel).setOnClickListener { dismiss() }
+        updateIcon()
         initScreenShareOptions()
         createOptionsView(getOptionsViewLayoutId())
+    }
+
+    private fun updateIcon() {
+        val icon = findViewById<ImageView>(R.id.screen_share_dialog_icon)
+        if (dialogIconTint != null) {
+            icon.setColorFilter(context.getColor(dialogIconTint))
+        }
+        if (dialogIconDrawable != null) {
+            icon.setImageDrawable(context.getDrawable(dialogIconDrawable))
+        }
     }
 
     protected fun initScreenShareOptions() {
@@ -69,8 +85,12 @@ open class BaseScreenSharePermissionDialog(
     private fun initScreenShareSpinner() {
         val options = screenShareOptions.map { context.getString(it.spinnerText) }.toTypedArray()
         val adapter =
-            ArrayAdapter(context.applicationContext, android.R.layout.simple_spinner_item, options)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            ArrayAdapter(
+                context.applicationContext,
+                R.layout.screen_share_dialog_spinner_text,
+                options
+            )
+        adapter.setDropDownViewResource(R.layout.screen_share_dialog_spinner_item_text)
         screenShareModeSpinner = findViewById(R.id.screen_share_mode_spinner)
         screenShareModeSpinner.adapter = adapter
         screenShareModeSpinner.onItemSelectedListener = this
