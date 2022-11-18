@@ -72,9 +72,9 @@ public class StatusBarHeadsUpChangeListener implements OnHeadsUpChangedListener 
                 //resize the layout. Let's
                 // make sure that the window stays small for one frame until the
                 //touchableRegion is set.
-                mNotificationPanelViewController.getView().requestLayout();
+                mNotificationPanelViewController.requestLayoutOnView();
                 mNotificationShadeWindowController.setForceWindowCollapsed(true);
-                mNotificationPanelViewController.getView().post(() -> {
+                mNotificationPanelViewController.postToView(() -> {
                     mNotificationShadeWindowController.setForceWindowCollapsed(false);
                 });
             }

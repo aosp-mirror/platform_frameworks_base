@@ -355,7 +355,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
         when(mStackScrollerController.getView()).thenReturn(mStackScroller);
         when(mStackScroller.generateLayoutParams(any())).thenReturn(new LayoutParams(0, 0));
-        when(mNotificationPanelViewController.getView()).thenReturn(mNotificationPanelView);
         when(mNotificationPanelView.getLayoutParams()).thenReturn(new LayoutParams(0, 0));
         when(powerManagerService.isInteractive()).thenReturn(true);
         when(mStackScroller.getActivatedChild()).thenReturn(null);
