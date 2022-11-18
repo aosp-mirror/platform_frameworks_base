@@ -219,7 +219,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     protected LockPatternUtils mLockPatternUtils;
     protected ViewMediatorCallback mViewMediatorCallback;
-    protected CentralSurfaces mCentralSurfaces;
+    @Nullable protected CentralSurfaces mCentralSurfaces;
     private NotificationPanelViewController mNotificationPanelViewController;
     private BiometricUnlockController mBiometricUnlockController;
     private boolean mCentralSurfacesRegistered;
@@ -267,7 +267,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private final KeyguardUpdateMonitor mKeyguardUpdateManager;
     private final LatencyTracker mLatencyTracker;
     private final KeyguardSecurityModel mKeyguardSecurityModel;
-    private KeyguardBypassController mBypassController;
+    @Nullable private KeyguardBypassController mBypassController;
     @Nullable private AlternateBouncer mAlternateBouncer;
 
     private final KeyguardUpdateMonitorCallback mUpdateMonitorCallback =
@@ -744,6 +744,12 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     private void updateAlternateBouncerShowing(boolean updateScrim) {
+        if (!mCentralSurfacesRegistered) {
+            // if CentralSurfaces hasn't been registered yet, then the controllers below haven't
+            // been initialized yet so there's no need to attempt to forward them events.
+            return;
+        }
+
         final boolean isShowingAlternateBouncer = isShowingAlternateBouncer();
         if (mKeyguardMessageAreaController != null) {
             mKeyguardMessageAreaController.setIsVisible(isShowingAlternateBouncer);
