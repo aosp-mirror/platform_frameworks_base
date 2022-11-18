@@ -745,6 +745,15 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
     }
 
     @Override
+    public void onKeyguardBouncerStateChanged(boolean bouncerIsOrWillBeShowing) {
+        // When the bouncer is dismissed, treat this as a reset of the unlock mode. The user
+        // may have gone back instead of successfully unlocking
+        if (!bouncerIsOrWillBeShowing) {
+            resetMode();
+        }
+    }
+
+    @Override
     public void dump(PrintWriter pw, String[] args) {
         pw.println(" BiometricUnlockController:");
         pw.print("   mMode="); pw.println(mMode);
