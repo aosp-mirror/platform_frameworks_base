@@ -1789,20 +1789,7 @@ public class UserManagerService extends IUserManager.Stub {
         }
         final long ident = Binder.clearCallingIdentity();
         try {
-            // TODO(b/2399825580): refactor into UserDisplayAssigner
-            IntArray visibleUsers;
-            synchronized (mUsersLock) {
-                int usersSize = mUsers.size();
-                visibleUsers = new IntArray();
-                for (int i = 0; i < usersSize; i++) {
-                    UserInfo ui = mUsers.valueAt(i).info;
-                    if (!ui.partial && !ui.preCreated && !mRemovingUserIds.get(ui.id)
-                            && mUserVisibilityMediator.isUserVisible(ui.id)) {
-                        visibleUsers.add(ui.id);
-                    }
-                }
-            }
-            return visibleUsers.toArray();
+            return mUserVisibilityMediator.getVisibleUsers().toArray();
         } finally {
             Binder.restoreCallingIdentity(ident);
         }

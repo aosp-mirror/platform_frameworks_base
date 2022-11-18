@@ -21,6 +21,7 @@ import static android.view.Display.INVALID_DISPLAY;
 import static com.android.server.pm.UserManagerInternal.USER_ASSIGNMENT_RESULT_FAILURE;
 import static com.android.server.pm.UserManagerInternal.USER_ASSIGNMENT_RESULT_SUCCESS_INVISIBLE;
 import static com.android.server.pm.UserManagerInternal.USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE;
+import static com.android.server.pm.UserVisibilityMediator.INITIAL_CURRENT_USER_ID;
 
 import org.junit.Test;
 
@@ -63,6 +64,7 @@ public final class UserVisibilityMediatorMUMDTest extends UserVisibilityMediator
         expectUserIsVisibleOnDisplay(USER_ID, SECONDARY_DISPLAY_ID);
         expectUserIsNotVisibleOnDisplay(USER_ID, INVALID_DISPLAY);
         expectUserIsNotVisibleOnDisplay(USER_ID, DEFAULT_DISPLAY);
+        expectVisibleUsers(INITIAL_CURRENT_USER_ID, USER_ID);
 
         expectDisplayAssignedToUser(USER_ID, SECONDARY_DISPLAY_ID);
         expectUserAssignedToDisplay(SECONDARY_DISPLAY_ID, USER_ID);
@@ -110,6 +112,7 @@ public final class UserVisibilityMediatorMUMDTest extends UserVisibilityMediator
         expectUserIsNotVisibleOnDisplay(USER_ID, SECONDARY_DISPLAY_ID);
         expectUserIsNotVisibleOnDisplay(USER_ID, INVALID_DISPLAY);
         expectUserIsNotVisibleOnDisplay(USER_ID, DEFAULT_DISPLAY);
+        expectVisibleUsers(INITIAL_CURRENT_USER_ID, USER_ID);
 
         expectDisplayAssignedToUser(USER_ID, OTHER_SECONDARY_DISPLAY_ID);
         expectUserAssignedToDisplay(OTHER_SECONDARY_DISPLAY_ID, USER_ID);

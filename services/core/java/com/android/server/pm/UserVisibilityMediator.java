@@ -32,6 +32,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Dumpable;
 import android.util.IndentingPrintWriter;
+import android.util.IntArray;
 import android.util.SparseIntArray;
 import android.view.Display;
 
@@ -117,6 +118,9 @@ public final class UserVisibilityMediator implements Dumpable {
     UserVisibilityMediator(boolean usersOnSecondaryDisplaysEnabled) {
         mUsersOnSecondaryDisplaysEnabled = usersOnSecondaryDisplaysEnabled;
         mUsersOnSecondaryDisplays = mUsersOnSecondaryDisplaysEnabled ? new SparseIntArray() : null;
+
+        // TODO(b/242195409): might need to change this if boot logic is refactored for HSUM devices
+        mStartedProfileGroupIds.put(INITIAL_CURRENT_USER_ID, INITIAL_CURRENT_USER_ID);
     }
 
     /**
@@ -458,6 +462,25 @@ public final class UserVisibilityMediator implements Dumpable {
         return currentUserId;
     }
 
+    /**
+     * Gets the ids of the visible users.
+     */
+    public IntArray getVisibleUsers() {
+        // TODO(b/258054362): this method's performance is O(n2), as it interacts through all users
+        // here, then again on isUserVisible(). We could "fix" it to be O(n), but given that the
+        // number of users is too small, the gain is probably not worth the increase on complexity.
+        IntArray visibleUsers = new IntArray();
+        synchronized (mLock) {
+            for (int i = 0; i < mStartedProfileGroupIds.size(); i++) {
+                int userId = mStartedProfileGroupIds.keyAt(i);
+                if (isUserVisible(userId)) {
+                    visibleUsers.add(userId);
+                }
+            }
+        }
+        return visibleUsers;
+    }
+
     private void dump(IndentingPrintWriter ipw) {
         ipw.println("UserVisibilityMediator");
         ipw.increaseIndent();
@@ -466,21 +489,27 @@ public final class UserVisibilityMediator implements Dumpable {
             ipw.print("Current user id: ");
             ipw.println(mCurrentUserId);
 
-            dumpIntArray(ipw, mStartedProfileGroupIds, "started user / profile group", "u", "pg");
+            ipw.print("Visible users: ");
+            // TODO: merge 2 lines below if/when IntArray implements toString()...
+            IntArray visibleUsers = getVisibleUsers();
+            ipw.println(java.util.Arrays.toString(visibleUsers.toArray()));
+
+            dumpSparseIntArray(ipw, mStartedProfileGroupIds, "started user / profile group",
+                    "u", "pg");
 
             ipw.print("Supports background users on secondary displays: ");
             ipw.println(mUsersOnSecondaryDisplaysEnabled);
 
             if (mUsersOnSecondaryDisplays != null) {
-                dumpIntArray(ipw, mUsersOnSecondaryDisplays, "background user / secondary display",
-                        "u", "d");
+                dumpSparseIntArray(ipw, mUsersOnSecondaryDisplays,
+                        "background user / secondary display", "u", "d");
             }
         }
 
         ipw.decreaseIndent();
     }
 
-    private static void dumpIntArray(IndentingPrintWriter ipw, SparseIntArray array,
+    private static void dumpSparseIntArray(IndentingPrintWriter ipw, SparseIntArray array,
             String arrayDescription, String keyName, String valueName) {
         ipw.print("Number of ");
         ipw.print(arrayDescription);
