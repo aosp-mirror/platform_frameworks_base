@@ -1341,6 +1341,7 @@
     <dimen name="accessibility_floating_menu_large_width_height">56dp</dimen>
     <dimen name="accessibility_floating_menu_large_single_radius">35dp</dimen>
     <dimen name="accessibility_floating_menu_large_multiple_radius">35dp</dimen>
+    <dimen name="accessibility_floating_menu_ime_shifting_space">48dp</dimen>
 
     <dimen name="accessibility_floating_menu_message_container_horizontal_padding">15dp</dimen>
     <dimen name="accessibility_floating_menu_message_text_vertical_padding">8dp</dimen>

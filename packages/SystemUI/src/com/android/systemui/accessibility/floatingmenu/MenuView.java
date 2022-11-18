@@ -58,11 +58,14 @@ class MenuView extends FrameLayout implements
             this::updateSystemGestureExcludeRects;
     private final Observer<MenuFadeEffectInfo> mFadeEffectInfoObserver =
             this::onMenuFadeEffectInfoChanged;
+    private final Observer<Boolean> mMoveToTuckedObserver = this::onMoveToTucked;
     private final Observer<Position> mPercentagePositionObserver = this::onPercentagePosition;
     private final Observer<Integer> mSizeTypeObserver = this::onSizeTypeChanged;
     private final Observer<List<AccessibilityTarget>> mTargetFeaturesObserver =
             this::onTargetFeaturesChanged;
     private final MenuViewAppearance mMenuViewAppearance;
+
+    private boolean mIsMoveToTucked;
 
     private OnTargetFeaturesChangeListener mFeaturesChangeListener;
 
@@ -161,6 +164,12 @@ class MenuView extends FrameLayout implements
                 mMenuViewAppearance.getMenuStrokeColor());
     }
 
+    private void onMoveToTucked(boolean isMoveToTucked) {
+        mIsMoveToTucked = isMoveToTucked;
+
+        onPositionChanged();
+    }
+
     private void onPercentagePosition(Position percentagePosition) {
         mMenuViewAppearance.setPercentagePosition(percentagePosition);
 
@@ -171,6 +180,10 @@ class MenuView extends FrameLayout implements
         final PointF position = mMenuViewAppearance.getMenuPosition();
         mMenuAnimationController.moveToPosition(position);
         onBoundsInParentChanged((int) position.x, (int) position.y);
+
+        if (isMoveToTucked()) {
+            mMenuAnimationController.moveToEdgeAndHide();
+        }
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -219,12 +232,38 @@ class MenuView extends FrameLayout implements
         return mMenuViewAppearance.getMenuDraggableBounds();
     }
 
+    Rect getMenuDraggableBoundsExcludeIme() {
+        return mMenuViewAppearance.getMenuDraggableBoundsExcludeIme();
+    }
+
+    int getMenuHeight() {
+        return mMenuViewAppearance.getMenuHeight();
+    }
+
+    int getMenuWidth() {
+        return mMenuViewAppearance.getMenuWidth();
+    }
+
+    PointF getMenuPosition() {
+        return mMenuViewAppearance.getMenuPosition();
+    }
+
     void persistPositionAndUpdateEdge(Position percentagePosition) {
         mMenuViewModel.updateMenuSavingPosition(percentagePosition);
         mMenuViewAppearance.setPercentagePosition(percentagePosition);
 
         onEdgeChangedIfNeeded();
     }
+
+    boolean isMoveToTucked() {
+        return mIsMoveToTucked;
+    }
+
+    void updateMenuMoveToTucked(boolean isMoveToTucked) {
+        mIsMoveToTucked = isMoveToTucked;
+        mMenuViewModel.updateMenuMoveToTucked(isMoveToTucked);
+    }
+
 
     /**
      * Uses the touch events from the parent view to identify if users clicked the extra
@@ -241,7 +280,7 @@ class MenuView extends FrameLayout implements
     boolean maybeMoveOutEdgeAndShow(int x, int y) {
         // Utilizes the touch region of the parent view to implement that users could tap extra
         // the space region to show the menu from the edge.
-        if (!mMenuAnimationController.isMovedToEdge() || !mBoundsInParent.contains(x, y)) {
+        if (!isMoveToTucked() || !mBoundsInParent.contains(x, y)) {
             return false;
         }
 
@@ -258,6 +297,7 @@ class MenuView extends FrameLayout implements
         mMenuViewModel.getFadeEffectInfoData().observeForever(mFadeEffectInfoObserver);
         mMenuViewModel.getTargetFeaturesData().observeForever(mTargetFeaturesObserver);
         mMenuViewModel.getSizeTypeData().observeForever(mSizeTypeObserver);
+        mMenuViewModel.getMoveToTuckedData().observeForever(mMoveToTuckedObserver);
         setVisibility(VISIBLE);
         mMenuViewModel.registerContentObservers();
         getViewTreeObserver().addOnComputeInternalInsetsListener(this);
@@ -271,6 +311,7 @@ class MenuView extends FrameLayout implements
         mMenuViewModel.getFadeEffectInfoData().removeObserver(mFadeEffectInfoObserver);
         mMenuViewModel.getTargetFeaturesData().removeObserver(mTargetFeaturesObserver);
         mMenuViewModel.getSizeTypeData().removeObserver(mSizeTypeObserver);
+        mMenuViewModel.getMoveToTuckedData().removeObserver(mMoveToTuckedObserver);
         mMenuViewModel.unregisterContentObservers();
         getViewTreeObserver().removeOnComputeInternalInsetsListener(this);
         getViewTreeObserver().removeOnDrawListener(mSystemGestureExcludeUpdater);

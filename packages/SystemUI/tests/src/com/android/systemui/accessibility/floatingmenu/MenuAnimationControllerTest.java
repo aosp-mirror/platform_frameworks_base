@@ -32,8 +32,10 @@ import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.systemui.Prefs;
 import com.android.systemui.SysuiTestCase;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,6 +46,7 @@ import org.junit.runner.RunWith;
 @SmallTest
 public class MenuAnimationControllerTest extends SysuiTestCase {
 
+    private boolean mLastIsMoveToTucked;
     private ViewPropertyAnimator mViewPropertyAnimator;
     private MenuView mMenuView;
     private MenuAnimationController mMenuAnimationController;
@@ -60,6 +63,14 @@ public class MenuAnimationControllerTest extends SysuiTestCase {
         doReturn(mViewPropertyAnimator).when(mMenuView).animate();
 
         mMenuAnimationController = new MenuAnimationController(mMenuView);
+        mLastIsMoveToTucked = Prefs.getBoolean(mContext,
+                Prefs.Key.HAS_ACCESSIBILITY_FLOATING_MENU_TUCKED, /* defaultValue= */ false);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        Prefs.putBoolean(mContext, Prefs.Key.HAS_ACCESSIBILITY_FLOATING_MENU_TUCKED,
+                mLastIsMoveToTucked);
     }
 
     @Test
@@ -81,10 +92,34 @@ public class MenuAnimationControllerTest extends SysuiTestCase {
 
     @Test
     public void startGrowAnimation_menuCompletelyOpaque() {
-        mMenuAnimationController.startShrinkAnimation(null);
+        mMenuAnimationController.startShrinkAnimation(/* endAction= */ null);
 
         mMenuAnimationController.startGrowAnimation();
 
         assertThat(mMenuView.getAlpha()).isEqualTo(/* completelyOpaque */ 1.0f);
+    }
+
+    @Test
+    public void moveToEdgeAndHide_untucked_expectedSharedPreferenceValue() {
+        Prefs.putBoolean(mContext, Prefs.Key.HAS_ACCESSIBILITY_FLOATING_MENU_TUCKED, /* value= */
+                false);
+
+        mMenuAnimationController.moveToEdgeAndHide();
+        final boolean isMoveToTucked = Prefs.getBoolean(mContext,
+                Prefs.Key.HAS_ACCESSIBILITY_FLOATING_MENU_TUCKED, /* defaultValue= */ false);
+
+        assertThat(isMoveToTucked).isTrue();
+    }
+
+    @Test
+    public void moveOutEdgeAndShow_tucked_expectedSharedPreferenceValue() {
+        Prefs.putBoolean(mContext, Prefs.Key.HAS_ACCESSIBILITY_FLOATING_MENU_TUCKED, /* value= */
+                true);
+
+        mMenuAnimationController.moveOutEdgeAndShow();
+        final boolean isMoveToTucked = Prefs.getBoolean(mContext,
+                Prefs.Key.HAS_ACCESSIBILITY_FLOATING_MENU_TUCKED, /* defaultValue= */ true);
+
+        assertThat(isMoveToTucked).isFalse();
     }
 }
