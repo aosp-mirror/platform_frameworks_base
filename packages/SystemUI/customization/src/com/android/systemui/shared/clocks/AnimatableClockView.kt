@@ -33,9 +33,9 @@ import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.animation.GlyphCallback
 import com.android.systemui.animation.Interpolators
 import com.android.systemui.animation.TextAnimator
+import com.android.systemui.customization.R
 import com.android.systemui.plugins.log.LogBuffer
 import com.android.systemui.plugins.log.LogLevel.DEBUG
-import com.android.systemui.shared.R
 import java.io.PrintWriter
 import java.util.Calendar
 import java.util.Locale
