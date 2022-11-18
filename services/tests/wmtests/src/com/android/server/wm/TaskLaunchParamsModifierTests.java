@@ -639,6 +639,29 @@ public class TaskLaunchParamsModifierTests extends WindowTestsBase {
     }
 
     @Test
+    public void testBoundsInOptionsInfersFullscreenWithBoundsOnFreeformSupportFullscreenDisplay() {
+        final TestDisplayContent fullscreenDisplay = createNewDisplayContent(
+                WINDOWING_MODE_FULLSCREEN);
+        mAtm.mTaskSupervisor.mService.mSupportsFreeformWindowManagement = true;
+
+        final ActivityOptions options = ActivityOptions.makeBasic();
+        final Rect expectedBounds = new Rect(0, 0, 100, 100);
+        options.setLaunchBounds(expectedBounds);
+
+        mCurrent.mPreferredTaskDisplayArea = fullscreenDisplay.getDefaultTaskDisplayArea();
+
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setOptions(options).calculate());
+
+        // Setting bounds shouldn't lead to freeform windowing mode on fullscreen display by
+        // default (even with freeform support), but we need to check here if the bounds is set even
+        // with fullscreen windowing mode in case it's restored later.
+        assertEquivalentWindowingMode(WINDOWING_MODE_FULLSCREEN, mResult.mWindowingMode,
+                WINDOWING_MODE_FULLSCREEN);
+        assertEquals(expectedBounds, mResult.mBounds);
+    }
+
+    @Test
     public void testInheritsFreeformModeFromSourceOnFullscreenDisplay() {
         final TestDisplayContent fullscreenDisplay = createNewDisplayContent(
                 WINDOWING_MODE_FULLSCREEN);
@@ -1020,6 +1043,8 @@ public class TaskLaunchParamsModifierTests extends WindowTestsBase {
                 WINDOWING_MODE_FULLSCREEN);
         final ActivityRecord source = createSourceActivity(fullscreenDisplay);
         source.getTask().setWindowingMode(WINDOWING_MODE_FREEFORM);
+        // Set some bounds to avoid conflict with the other activity.
+        source.setBounds(100, 100, 200, 200);
 
         final ActivityOptions options = ActivityOptions.makeBasic();
         final Rect expected = new Rect(0, 0, 150, 150);
