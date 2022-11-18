@@ -109,6 +109,7 @@ public:
     static int maxTextureSize();
     void stopDrawing();
     void notifyFramePending();
+    void notifyCallbackPending();
 
     void dumpProfileInfo(int fd, int dumpFlags);
     // Not exported, only used for testing

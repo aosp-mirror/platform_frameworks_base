@@ -28,6 +28,7 @@
 #include "../Rect.h"
 #include "../TreeInfo.h"
 #include "RenderTask.h"
+#include "utils/TimeUtils.h"
 
 namespace android {
 namespace uirenderer {
@@ -90,6 +91,8 @@ public:
 
     void forceDrawNextFrame() { mForceDrawFrame = true; }
 
+    void sendLoadResetHint();
+
 private:
     class HintSessionWrapper {
     public:
@@ -98,6 +101,7 @@ private:
 
         void updateTargetWorkDuration(long targetDurationNanos);
         void reportActualWorkDuration(long actualDurationNanos);
+        void sendHint(SessionHint hint);
 
     private:
         APerformanceHintSession* mHintSession = nullptr;
@@ -134,6 +138,9 @@ private:
     nsecs_t mLastDequeueBufferDuration = 0;
     nsecs_t mLastTargetWorkDuration = 0;
     std::optional<HintSessionWrapper> mHintSessionWrapper;
+
+    nsecs_t mLastFrameNotification = 0;
+    nsecs_t kResetHintTimeout = 100_ms;
 
     bool mForceDrawFrame = false;
 };

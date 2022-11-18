@@ -2309,6 +2309,7 @@ public final class ViewRootImpl implements ViewParent,
      */
     void notifyRendererOfFramePending() {
         if (mAttachInfo.mThreadedRenderer != null) {
+            mAttachInfo.mThreadedRenderer.notifyCallbackPending();
             mAttachInfo.mThreadedRenderer.notifyFramePending();
         }
     }
@@ -9127,6 +9128,9 @@ public final class ViewRootImpl implements ViewParent,
             mConsumeBatchedInputScheduled = true;
             mChoreographer.postCallback(Choreographer.CALLBACK_INPUT,
                     mConsumedBatchedInputRunnable, null);
+            if (mAttachInfo.mThreadedRenderer != null) {
+                mAttachInfo.mThreadedRenderer.notifyCallbackPending();
+            }
         }
     }
 
@@ -9320,12 +9324,18 @@ public final class ViewRootImpl implements ViewParent,
                 mViews.add(view);
                 postIfNeededLocked();
             }
+            if (mAttachInfo.mThreadedRenderer != null) {
+                mAttachInfo.mThreadedRenderer.notifyCallbackPending();
+            }
         }
 
         public void addViewRect(AttachInfo.InvalidateInfo info) {
             synchronized (this) {
                 mViewRects.add(info);
                 postIfNeededLocked();
+            }
+            if (mAttachInfo.mThreadedRenderer != null) {
+                mAttachInfo.mThreadedRenderer.notifyCallbackPending();
             }
         }
 
