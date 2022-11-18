@@ -20,6 +20,7 @@ import static android.view.WindowInsets.Type.navigationBars;
 
 import static com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import static com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_DISMISS_BOUNCER;
+import static com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_SHOW_BOUNCER;
 import static com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_UNLOCK_COLLAPSING;
 import static com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_AND_UNLOCK;
 import static com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_AND_UNLOCK_PULSING;
@@ -478,6 +479,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         } else if (mKeyguardStateController.isShowing()  && !hideBouncerOverDream) {
             if (!isWakeAndUnlocking()
                     && !(mBiometricUnlockController.getMode() == MODE_DISMISS_BOUNCER)
+                    && !(mBiometricUnlockController.getMode() == MODE_SHOW_BOUNCER)
                     && !isUnlockCollapsing()) {
                 if (mPrimaryBouncer != null) {
                     mPrimaryBouncer.setExpansion(fraction);
