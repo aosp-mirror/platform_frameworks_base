@@ -7663,8 +7663,10 @@ public class AudioManager {
      * or video calls. This method can be used by voice or video chat applications to select a
      * different audio device than the one selected by default by the platform.
      * <p>The device selection is expressed as an {@link AudioDeviceInfo} among devices returned by
-     * {@link #getAvailableCommunicationDevices()}.
-     * The selection is active as long as the requesting application process lives, until
+     * {@link #getAvailableCommunicationDevices()}. Note that only devices in a sink role
+     * (AKA output devices, see {@link AudioDeviceInfo#isSink()}) can be specified. The matching
+     * source device is selected automatically by the platform.
+     * <p>The selection is active as long as the requesting application process lives, until
      * {@link #clearCommunicationDevice} is called or until the device is disconnected.
      * It is therefore important for applications to clear the request when a call ends or the
      * the requesting activity or service is stopped or destroyed.

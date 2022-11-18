@@ -5804,6 +5804,9 @@ public class AudioService extends IAudioService.Stub
     };
 
     private boolean isValidCommunicationDevice(AudioDeviceInfo device) {
+        if (!device.isSink()) {
+            return false;
+        }
         for (int type : VALID_COMMUNICATION_DEVICE_TYPES) {
             if (device.getType() == type) {
                 return true;
@@ -5838,7 +5841,11 @@ public class AudioService extends IAudioService.Stub
                 throw new IllegalArgumentException("invalid portID " + portId);
             }
             if (!isValidCommunicationDevice(device)) {
-                throw new IllegalArgumentException("invalid device type " + device.getType());
+                if (!device.isSink()) {
+                    throw new IllegalArgumentException("device must have sink role");
+                } else {
+                    throw new IllegalArgumentException("invalid device type: " + device.getType());
+                }
             }
         }
         final String eventSource = new StringBuilder()
