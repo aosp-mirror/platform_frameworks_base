@@ -244,7 +244,7 @@ interface ISub {
 
     int getSlotIndex(int subId);
 
-    int[] getSubId(int slotIndex);
+    int[] getSubIds(int slotIndex);
 
     int getDefaultSubId();
 
