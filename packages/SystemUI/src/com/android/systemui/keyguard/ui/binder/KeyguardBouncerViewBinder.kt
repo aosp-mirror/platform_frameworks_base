@@ -88,7 +88,7 @@ object KeyguardBouncerViewBinder {
                 }
             }
         view.repeatWhenAttached {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
+            repeatOnLifecycle(Lifecycle.State.CREATED) {
                 try {
                     viewModel.setBouncerViewDelegate(delegate)
                     launch {
