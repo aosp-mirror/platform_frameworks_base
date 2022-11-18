@@ -271,6 +271,11 @@ constructor(
         repository.setKeyguardAuthenticated(null)
     }
 
+    /** Notifies that the message was shown. */
+    fun onMessageShown() {
+        repository.setShowMessage(null)
+    }
+
     /** Notify that view visibility has changed. */
     fun notifyBouncerVisibilityHasChanged(visibility: Int) {
         primaryBouncerCallbackInteractor.dispatchVisibilityChanged(visibility)
