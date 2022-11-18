@@ -31,7 +31,6 @@ import com.android.systemui.SystemUIAppComponentFactoryBase.ContextAvailableCall
 import com.android.systemui.keyguard.domain.interactor.KeyguardQuickAffordanceInteractor
 import com.android.systemui.shared.keyguard.data.content.KeyguardQuickAffordanceProviderContract as Contract
 import javax.inject.Inject
-import kotlinx.coroutines.runBlocking
 
 class KeyguardQuickAffordanceProvider :
     ContentProvider(), SystemUIAppComponentFactoryBase.ContextInitializer {
@@ -57,6 +56,11 @@ class KeyguardQuickAffordanceProvider :
                 Contract.SelectionTable.TABLE_NAME,
                 MATCH_CODE_ALL_SELECTIONS,
             )
+            addURI(
+                Contract.AUTHORITY,
+                Contract.FlagsTable.TABLE_NAME,
+                MATCH_CODE_ALL_FLAGS,
+            )
         }
 
     override fun onCreate(): Boolean {
@@ -77,6 +81,7 @@ class KeyguardQuickAffordanceProvider :
             when (uriMatcher.match(uri)) {
                 MATCH_CODE_ALL_SLOTS,
                 MATCH_CODE_ALL_AFFORDANCES,
+                MATCH_CODE_ALL_FLAGS,
                 MATCH_CODE_ALL_SELECTIONS -> "vnd.android.cursor.dir/vnd."
                 else -> null
             }
@@ -86,6 +91,7 @@ class KeyguardQuickAffordanceProvider :
                 MATCH_CODE_ALL_SLOTS -> Contract.SlotTable.TABLE_NAME
                 MATCH_CODE_ALL_AFFORDANCES -> Contract.AffordanceTable.TABLE_NAME
                 MATCH_CODE_ALL_SELECTIONS -> Contract.SelectionTable.TABLE_NAME
+                MATCH_CODE_ALL_FLAGS -> Contract.FlagsTable.TABLE_NAME
                 else -> null
             }
 
@@ -115,6 +121,7 @@ class KeyguardQuickAffordanceProvider :
             MATCH_CODE_ALL_AFFORDANCES -> queryAffordances()
             MATCH_CODE_ALL_SLOTS -> querySlots()
             MATCH_CODE_ALL_SELECTIONS -> querySelections()
+            MATCH_CODE_ALL_FLAGS -> queryFlags()
             else -> null
         }
     }
@@ -171,12 +178,11 @@ class KeyguardQuickAffordanceProvider :
             throw IllegalArgumentException("Cannot insert selection, affordance ID was empty!")
         }
 
-        val success = runBlocking {
+        val success =
             interactor.select(
                 slotId = slotId,
                 affordanceId = affordanceId,
             )
-        }
 
         return if (success) {
             Log.d(TAG, "Successfully selected $affordanceId for slot $slotId")
@@ -196,7 +202,7 @@ class KeyguardQuickAffordanceProvider :
                 )
             )
             .apply {
-                val affordanceIdsBySlotId = runBlocking { interactor.getSelections() }
+                val affordanceIdsBySlotId = interactor.getSelections()
                 affordanceIdsBySlotId.entries.forEach { (slotId, affordanceIds) ->
                     affordanceIds.forEach { affordanceId ->
                         addRow(
@@ -250,6 +256,29 @@ class KeyguardQuickAffordanceProvider :
             }
     }
 
+    private fun queryFlags(): Cursor {
+        return MatrixCursor(
+                arrayOf(
+                    Contract.FlagsTable.Columns.NAME,
+                    Contract.FlagsTable.Columns.VALUE,
+                )
+            )
+            .apply {
+                interactor.getPickerFlags().forEach { flag ->
+                    addRow(
+                        arrayOf(
+                            flag.name,
+                            if (flag.value) {
+                                1
+                            } else {
+                                0
+                            },
+                        )
+                    )
+                }
+            }
+    }
+
     private fun deleteSelection(
         uri: Uri,
         selectionArgs: Array<out String>?,
@@ -271,12 +300,11 @@ class KeyguardQuickAffordanceProvider :
                     )
             }
 
-        val deleted = runBlocking {
+        val deleted =
             interactor.unselect(
                 slotId = slotId,
                 affordanceId = affordanceId,
             )
-        }
 
         return if (deleted) {
             Log.d(TAG, "Successfully unselected $affordanceId for slot $slotId")
@@ -293,5 +321,6 @@ class KeyguardQuickAffordanceProvider :
         private const val MATCH_CODE_ALL_SLOTS = 1
         private const val MATCH_CODE_ALL_AFFORDANCES = 2
         private const val MATCH_CODE_ALL_SELECTIONS = 3
+        private const val MATCH_CODE_ALL_FLAGS = 4
     }
 }

@@ -39,6 +39,7 @@ import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.Looper;
 import android.provider.Settings;
 import android.telephony.CarrierConfigManager;
@@ -76,7 +77,7 @@ import com.android.systemui.log.dagger.StatusBarNetworkControllerLog;
 import com.android.systemui.plugins.log.LogBuffer;
 import com.android.systemui.plugins.log.LogLevel;
 import com.android.systemui.qs.tiles.dialog.InternetDialogFactory;
-import com.android.systemui.settings.CurrentUserTracker;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DataSaverController;
 import com.android.systemui.statusbar.policy.DataSaverControllerImpl;
@@ -129,7 +130,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
     private final boolean mHasMobileDataFeature;
     private final SubscriptionDefaults mSubDefaults;
     private final DataSaverController mDataSaverController;
-    private final CurrentUserTracker mUserTracker;
+    private final UserTracker mUserTracker;
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final DemoModeController mDemoModeController;
     private final Object mLock = new Object();
@@ -213,6 +214,14 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 }
             };
 
+    private final UserTracker.Callback mUserChangedCallback =
+            new UserTracker.Callback() {
+                @Override
+                public void onUserChanged(int newUser, @NonNull Context userContext) {
+                    NetworkControllerImpl.this.onUserSwitched(newUser);
+                }
+            };
+
     /**
      * Construct this controller object and register for updates.
      */
@@ -225,6 +234,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
             CallbackHandler callbackHandler,
             DeviceProvisionedController deviceProvisionedController,
             BroadcastDispatcher broadcastDispatcher,
+            UserTracker userTracker,
             ConnectivityManager connectivityManager,
             TelephonyManager telephonyManager,
             TelephonyListenerManager telephonyListenerManager,
@@ -252,6 +262,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 new SubscriptionDefaults(),
                 deviceProvisionedController,
                 broadcastDispatcher,
+                userTracker,
                 demoModeController,
                 carrierConfigTracker,
                 trackerFactory,
@@ -278,6 +289,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
             SubscriptionDefaults defaultsHandler,
             DeviceProvisionedController deviceProvisionedController,
             BroadcastDispatcher broadcastDispatcher,
+            UserTracker userTracker,
             DemoModeController demoModeController,
             CarrierConfigTracker carrierConfigTracker,
             WifiStatusTrackerFactory trackerFactory,
@@ -334,13 +346,9 @@ public class NetworkControllerImpl extends BroadcastReceiver
 
         // AIRPLANE_MODE_CHANGED is sent at boot; we've probably already missed it
         updateAirplaneMode(true /* force callback */);
-        mUserTracker = new CurrentUserTracker(broadcastDispatcher) {
-            @Override
-            public void onUserSwitched(int newUserId) {
-                NetworkControllerImpl.this.onUserSwitched(newUserId);
-            }
-        };
-        mUserTracker.startTracking();
+        mUserTracker = userTracker;
+        mUserTracker.addCallback(mUserChangedCallback, new HandlerExecutor(mMainHandler));
+
         deviceProvisionedController.addCallback(new DeviceProvisionedListener() {
             @Override
             public void onUserSetupChanged() {

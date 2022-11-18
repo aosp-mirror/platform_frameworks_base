@@ -125,7 +125,8 @@
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Ovozli yordam"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"Wallet"</string>
     <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"QR kod skaneri"</string>
-    <string name="accessibility_unlock_button" msgid="122785427241471085">"Qulfdan chiqarish"</string>
+    <!-- no translation found for accessibility_unlock_button (3613812140816244310) -->
+    <skip />
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Qurilma qulflandi"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Yuzni skanerlash"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"Yuborish"</string>
@@ -168,7 +169,7 @@
     <skip />
     <string name="keyguard_face_failed" msgid="9044619102286917151">"Yuz aniqlanmadi"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"Barmoq izi orqali urining"</string>
-    <!-- no translation found for keyguard_face_unlock_unavailable (8145547300240405980) -->
+    <!-- no translation found for keyguard_face_unlock_unavailable (1581949044193418736) -->
     <skip />
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth ulandi."</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Batareya quvvati foizi nomaʼlum."</string>
@@ -180,8 +181,13 @@
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"Parvoz rejimi"</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN yoniq."</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"Batareya <xliff:g id="NUMBER">%d</xliff:g> foiz."</string>
-    <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"Batareya quvvati <xliff:g id="PERCENTAGE">%1$s</xliff:g> foiz, joriy holatda yana <xliff:g id="TIME">%2$s</xliff:g> qoldi"</string>
+    <!-- no translation found for accessibility_battery_level_with_estimate (6548654589315074529) -->
+    <skip />
     <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"Batareya quvvat olmoqda, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> foiz."</string>
+    <!-- no translation found for accessibility_battery_level_charging_paused (3560711496775146763) -->
+    <skip />
+    <!-- no translation found for accessibility_battery_level_charging_paused_with_estimate (2223541217743647858) -->
+    <skip />
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"Barcha bildirishnomalarni ko‘rish"</string>
     <string name="accessibility_tty_enabled" msgid="1123180388823381118">"TeleTypewriter yoqildi."</string>
     <string name="accessibility_ringer_vibrate" msgid="6261841170896561364">"Vibratsiyali qo‘ng‘iroq"</string>
@@ -375,16 +381,11 @@
     <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"Ulashish, yozib olish va translatsiya qilish vaqtida <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ilovasi ekranda chiqadigan yoki qurilmada ijro qilinadigan kontentni koʻra oladi. Shu sababli parollar, toʻlov tafsilotlari, xabarlar yoki boshqa maxfiy axborot chiqmasligi uchun ehtiyot boʻling."</string>
     <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"Davom etish"</string>
     <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"Ilovada ulashish yoki yozib olish"</string>
-    <!-- no translation found for media_projection_permission_dialog_system_service_title (6827129613741303726) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_system_service_warning_entire_screen (8801616203805837575) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_system_service_warning_single_app (543310680568419338) -->
-    <skip />
-    <!-- no translation found for screen_capturing_disabled_by_policy_dialog_title (2113331792064527203) -->
-    <skip />
-    <!-- no translation found for screen_capturing_disabled_by_policy_dialog_description (6015975736747696431) -->
-    <skip />
+    <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"Bu ilovaga ulashish yoki yozib olish uchun ruxsat berilsinmi?"</string>
+    <string name="media_projection_permission_dialog_system_service_warning_entire_screen" msgid="8801616203805837575">"Ulashish, yozib olish va translatsiya qilish vaqtida bu ilova ekranda chiqadigan yoki qurilmada ijro qilinadigan kontentni koʻra oladi. Shu sababli parollar, toʻlov tafsilotlari, xabarlar yoki boshqa maxfiy axborot chiqmasligi uchun ehtiyot boʻling."</string>
+    <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"Ulashish, yozib olish va translatsiya qilish vaqtida bu ilova ekranda chiqadigan yoki qurilmada ijro qilinadigan kontentni koʻra oladi. Shu sababli parollar, toʻlov tafsilotlari, xabarlar yoki boshqa maxfiy axborot chiqmasligi uchun ehtiyot boʻling."</string>
+    <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"AT administratoringiz tomonidan bloklangan"</string>
+    <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"Ekranni tasvirga olish qurilmadan foydalanish tartibi tomonidan faolsizlantirilgan"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Hammasini tozalash"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Boshqarish"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Tarix"</string>
@@ -500,7 +501,7 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Foydalanish uchun qulfdan chiqarish"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Bildirgilarni yuklashda xatolik yuz berdi, keyinroq qaytadan urining"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Qulflangan ekran sozlamalari"</string>
-    <string name="qr_code_scanner_title" msgid="5290201053875420785">"QR kodni skanerlash"</string>
+    <string name="qr_code_scanner_title" msgid="1938155688725760702">"QR kod skaneri"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Ish profili"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Parvoz rejimi"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Keyingi signal (<xliff:g id="WHEN">%1$s</xliff:g>) chalinmaydi"</string>
@@ -739,6 +740,10 @@
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Mobil internet uzilsinmi?"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"<xliff:g id="CARRIER">%s</xliff:g> orqali internetdan foydalana olmaysiz. Internet faqat Wi-Fi orqali ishlaydi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"aloqa operatoringiz"</string>
+    <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"<xliff:g id="CARRIER">%s</xliff:g> xizmati qaytarilsinmi?"</string>
+    <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"Mobil internet mavjudligi asosida avtomatik almashtirilmaydi"</string>
+    <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"Kerak emas"</string>
+    <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"Ha, almashtirilsin"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Ilova ruxsatnoma so‘roviga xalaqit qilayotgani tufayli, “Sozlamalar” ilovasi javobingizni tekshira olmaydi."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"<xliff:g id="APP_0">%1$s</xliff:g> ilovasiga <xliff:g id="APP_2">%2$s</xliff:g> ilovasidan fragmentlar ko‘rsatishga ruxsat berilsinmi?"</string>
     <string name="slice_permission_text_1" msgid="6675965177075443714">"– <xliff:g id="APP">%1$s</xliff:g> ma’lumotlarini o‘qiy oladi"</string>
@@ -929,6 +934,8 @@
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Mobil internet"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Ulandi"</string>
+    <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Vaqtincha ulangan"</string>
+    <string name="mobile_data_poor_connection" msgid="819617772268371434">"Aloqa beqaror"</string>
     <string name="mobile_data_off_summary" msgid="3663995422004150567">"Mobil internetga avtomatik ulanmaydi"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"Internetga ulanmagansiz"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Boshqa tarmoqlar mavjud emas"</string>

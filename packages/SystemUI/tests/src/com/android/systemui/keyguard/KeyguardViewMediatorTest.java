@@ -57,6 +57,7 @@ import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.navigationbar.NavigationModeController;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
@@ -86,6 +87,7 @@ import dagger.Lazy;
 public class KeyguardViewMediatorTest extends SysuiTestCase {
     private KeyguardViewMediator mViewMediator;
 
+    private @Mock UserTracker mUserTracker;
     private @Mock DevicePolicyManager mDevicePolicyManager;
     private @Mock LockPatternUtils mLockPatternUtils;
     private @Mock KeyguardUpdateMonitor mUpdateMonitor;
@@ -286,6 +288,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private void createAndStartViewMediator() {
         mViewMediator = new KeyguardViewMediator(
                 mContext,
+                mUserTracker,
                 mFalsingCollector,
                 mLockPatternUtils,
                 mBroadcastDispatcher,

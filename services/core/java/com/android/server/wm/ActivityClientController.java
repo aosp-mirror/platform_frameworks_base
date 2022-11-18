@@ -1347,8 +1347,38 @@ class ActivityClientController extends IActivityClientController.Stub {
         }
     }
 
+    /**
+     * Return {@code true} when the given Activity is a relative Task root. That is, the rest of
+     * the Activities in the Task should be finished when it finishes. Otherwise, return {@code
+     * false}.
+     */
+    private boolean isRelativeTaskRootActivity(ActivityRecord r, ActivityRecord taskRoot) {
+        // Not a relative root if the given Activity is not the root Activity of its TaskFragment.
+        final TaskFragment taskFragment = r.getTaskFragment();
+        if (r != taskFragment.getActivity(ar -> !ar.finishing || ar == r,
+                false /* traverseTopToBottom */)) {
+            return false;
+        }
+
+        // The given Activity is the relative Task root if its TaskFragment is a companion
+        // TaskFragment to the taskRoot (i.e. the taskRoot TF will be finished together).
+        return taskRoot.getTaskFragment().getCompanionTaskFragment() == taskFragment;
+    }
+
+    private boolean isTopActivityInTaskFragment(ActivityRecord activity) {
+        return activity.getTaskFragment().topRunningActivity() == activity;
+    }
+
+    private void requestCallbackFinish(IRequestFinishCallback callback) {
+        try {
+            callback.requestFinish();
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Failed to invoke request finish callback", e);
+        }
+    }
+
     @Override
-    public void onBackPressedOnTaskRoot(IBinder token, IRequestFinishCallback callback) {
+    public void onBackPressed(IBinder token, IRequestFinishCallback callback) {
         final long origId = Binder.clearCallingIdentity();
         try {
             final Intent baseActivityIntent;
@@ -1358,20 +1388,29 @@ class ActivityClientController extends IActivityClientController.Stub {
                 final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
                 if (r == null) return;
 
-                if (mService.mWindowOrganizerController.mTaskOrganizerController
+                final Task task = r.getTask();
+                final ActivityRecord root = task.getRootActivity(false /*ignoreRelinquishIdentity*/,
+                        true /*setToBottomIfNone*/);
+                final boolean isTaskRoot = r == root;
+                if (isTaskRoot) {
+                    if (mService.mWindowOrganizerController.mTaskOrganizerController
                         .handleInterceptBackPressedOnTaskRoot(r.getRootTask())) {
-                    // This task is handled by a task organizer that has requested the back pressed
-                    // callback.
+                        // This task is handled by a task organizer that has requested the back
+                        // pressed callback.
+                        return;
+                    }
+                } else if (!isRelativeTaskRootActivity(r, root)) {
+                    // Finish the Activity if the activity is not the task root or relative root.
+                    requestCallbackFinish(callback);
                     return;
                 }
 
-                final Task task = r.getTask();
-                isLastRunningActivity = task.topRunningActivity() == r;
+                isLastRunningActivity = isTopActivityInTaskFragment(isTaskRoot ? root : r);
 
-                final boolean isBaseActivity = r.mActivityComponent.equals(task.realActivity);
-                baseActivityIntent = isBaseActivity ? r.intent : null;
+                final boolean isBaseActivity = root.mActivityComponent.equals(task.realActivity);
+                baseActivityIntent = isBaseActivity ? root.intent : null;
 
-                launchedFromHome = r.isLaunchSourceType(ActivityRecord.LAUNCH_SOURCE_TYPE_HOME);
+                launchedFromHome = root.isLaunchSourceType(ActivityRecord.LAUNCH_SOURCE_TYPE_HOME);
             }
 
             // If the activity is one of the main entry points for the application, then we should
@@ -1386,16 +1425,12 @@ class ActivityClientController extends IActivityClientController.Stub {
             if (baseActivityIntent != null && isLastRunningActivity
                     && ((launchedFromHome && ActivityRecord.isMainIntent(baseActivityIntent))
                         || isLauncherActivity(baseActivityIntent.getComponent()))) {
-                moveActivityTaskToBack(token, false /* nonRoot */);
+                moveActivityTaskToBack(token, true /* nonRoot */);
                 return;
             }
 
             // The default option for handling the back button is to finish the Activity.
-            try {
-                callback.requestFinish();
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to invoke request finish callback", e);
-            }
+            requestCallbackFinish(callback);
         } finally {
             Binder.restoreCallingIdentity(origId);
         }

@@ -115,6 +115,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.telephony.TelephonyListenerManager;
@@ -158,6 +159,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     private static final int FACE_SENSOR_ID = 0;
     private static final int FINGERPRINT_SENSOR_ID = 1;
 
+    @Mock
+    private UserTracker mUserTracker;
     @Mock
     private DumpManager mDumpManager;
     @Mock
@@ -309,8 +312,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         ExtendedMockito.doReturn(SubscriptionManager.INVALID_SUBSCRIPTION_ID)
                 .when(SubscriptionManager::getDefaultSubscriptionId);
         KeyguardUpdateMonitor.setCurrentUser(mCurrentUserId);
-        ExtendedMockito.doReturn(KeyguardUpdateMonitor.getCurrentUser())
-                .when(ActivityManager::getCurrentUser);
+        when(mUserTracker.getUserId()).thenReturn(mCurrentUserId);
         ExtendedMockito.doReturn(mActivityService).when(ActivityManager::getService);
 
         mFaceWakeUpTriggersConfig = new FaceWakeUpTriggersConfig(
@@ -1037,6 +1039,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     @Test
     public void testSecondaryLockscreenRequirement() {
         KeyguardUpdateMonitor.setCurrentUser(UserHandle.myUserId());
+        when(mUserTracker.getUserId()).thenReturn(UserHandle.myUserId());
         int user = KeyguardUpdateMonitor.getCurrentUser();
         String packageName = "fake.test.package";
         String cls = "FakeService";
@@ -1373,6 +1376,29 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         assertThat(mKeyguardUpdateMonitor.shouldListenForFace()).isTrue();
 
         triggerSuccessfulFaceAuth();
+        mTestableLooper.processAllMessages();
+
+        assertThat(mKeyguardUpdateMonitor.shouldListenForFace()).isFalse();
+    }
+
+    @Test
+    public void testShouldListenForFace_whenFpIsAlreadyAuthenticated_returnsFalse()
+            throws RemoteException {
+        // Face auth should run when the following is true.
+        bouncerFullyVisibleAndNotGoingToSleep();
+        keyguardNotGoingAway();
+        currentUserIsPrimary();
+        strongAuthNotRequired();
+        biometricsEnabledForCurrentUser();
+        currentUserDoesNotHaveTrust();
+        biometricsNotDisabledThroughDevicePolicyManager();
+        userNotCurrentlySwitching();
+
+        mTestableLooper.processAllMessages();
+
+        assertThat(mKeyguardUpdateMonitor.shouldListenForFace()).isTrue();
+
+        successfulFingerprintAuth();
         mTestableLooper.processAllMessages();
 
         assertThat(mKeyguardUpdateMonitor.shouldListenForFace()).isFalse();
@@ -1932,6 +1958,15 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                 .onAuthenticationAcquired(FINGERPRINT_ACQUIRED_START);
     }
 
+    private void successfulFingerprintAuth() {
+        mKeyguardUpdateMonitor.mFingerprintAuthenticationCallback
+                .onAuthenticationSucceeded(
+                        new FingerprintManager.AuthenticationResult(null,
+                                null,
+                                mCurrentUserId,
+                                true));
+    }
+
     private void triggerSuccessfulFaceAuth() {
         mKeyguardUpdateMonitor.requestFaceAuth(FaceAuthApiRequestReason.UDFPS_POINTER_DOWN);
         verify(mFaceManager).authenticate(any(),
@@ -2041,7 +2076,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         AtomicBoolean mSimStateChanged = new AtomicBoolean(false);
 
         protected TestableKeyguardUpdateMonitor(Context context) {
-            super(context,
+            super(context, mUserTracker,
                     TestableLooper.get(KeyguardUpdateMonitorTest.this).getLooper(),
                     mBroadcastDispatcher, mSecureSettings, mDumpManager,
                     mBackgroundExecutor, mMainExecutor,

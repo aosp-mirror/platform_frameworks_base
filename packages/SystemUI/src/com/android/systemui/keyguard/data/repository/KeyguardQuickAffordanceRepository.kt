@@ -21,19 +21,17 @@ import android.content.Context
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceConfig
+import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceLegacySettingSyncer
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceSelectionManager
 import com.android.systemui.keyguard.shared.model.KeyguardQuickAffordancePickerRepresentation
 import com.android.systemui.keyguard.shared.model.KeyguardSlotPickerRepresentation
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 
 /** Abstracts access to application state related to keyguard quick affordances. */
 @SysUISingleton
@@ -42,8 +40,8 @@ class KeyguardQuickAffordanceRepository
 constructor(
     @Application private val appContext: Context,
     @Application private val scope: CoroutineScope,
-    @Background private val backgroundDispatcher: CoroutineDispatcher,
     private val selectionManager: KeyguardQuickAffordanceSelectionManager,
+    legacySettingSyncer: KeyguardQuickAffordanceLegacySettingSyncer,
     private val configs: Set<@JvmSuppressWildcards KeyguardQuickAffordanceConfig>,
 ) {
     /**
@@ -87,11 +85,15 @@ constructor(
         }
     }
 
+    init {
+        legacySettingSyncer.startSyncing()
+    }
+
     /**
      * Returns a snapshot of the [KeyguardQuickAffordanceConfig] instances of the affordances at the
      * slot with the given ID. The configs are sorted in descending priority order.
      */
-    suspend fun getSelections(slotId: String): List<KeyguardQuickAffordanceConfig> {
+    fun getSelections(slotId: String): List<KeyguardQuickAffordanceConfig> {
         val selections = selectionManager.getSelections().getOrDefault(slotId, emptyList())
         return configs.filter { selections.contains(it.key) }
     }
@@ -100,7 +102,7 @@ constructor(
      * Returns a snapshot of the IDs of the selected affordances, indexed by slot ID. The configs
      * are sorted in descending priority order.
      */
-    suspend fun getSelections(): Map<String, List<String>> {
+    fun getSelections(): Map<String, List<String>> {
         return selectionManager.getSelections()
     }
 
@@ -112,12 +114,10 @@ constructor(
         slotId: String,
         affordanceIds: List<String>,
     ) {
-        scope.launch(backgroundDispatcher) {
-            selectionManager.setSelections(
-                slotId = slotId,
-                affordanceIds = affordanceIds,
-            )
-        }
+        selectionManager.setSelections(
+            slotId = slotId,
+            affordanceIds = affordanceIds,
+        )
     }
 
     /**

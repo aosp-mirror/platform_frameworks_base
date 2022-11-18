@@ -36,6 +36,7 @@ import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_90;
 import static android.window.DisplayAreaOrganizer.FEATURE_VENDOR_FIRST;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
@@ -82,6 +83,7 @@ import android.util.TypedXmlSerializer;
 import android.util.Xml;
 import android.view.Display;
 import android.view.DisplayInfo;
+import android.window.TaskFragmentOrganizer;
 
 import androidx.test.filters.MediumTest;
 
@@ -1467,6 +1469,26 @@ public class TaskTests extends WindowTestsBase {
 
         assertEquals("tf0 must be return because it's the organized TaskFragment.",
                 tf0, parentTask.getTaskFragment(TaskFragment::isOrganizedTaskFragment));
+    }
+
+    @Test
+    public void testReorderActivityToFront() {
+        final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
+        final Task task =  new TaskBuilder(mSupervisor).setCreateActivity(true).build();
+        doNothing().when(task).onActivityVisibleRequestedChanged();
+        final ActivityRecord activity = task.getTopMostActivity();
+
+        final TaskFragment fragment = createTaskFragmentWithEmbeddedActivity(task, organizer);
+        final ActivityRecord embeddedActivity = fragment.getTopMostActivity();
+        task.moveActivityToFront(activity);
+        assertEquals("Activity must be moved to front", activity, task.getTopMostActivity());
+
+        doNothing().when(fragment).sendTaskFragmentInfoChanged();
+        task.moveActivityToFront(embeddedActivity);
+        assertEquals("Activity must be moved to front", embeddedActivity,
+                task.getTopMostActivity());
+        assertEquals("Activity must not be embedded", embeddedActivity,
+                task.getTopChild());
     }
 
     private Task getTestTask() {

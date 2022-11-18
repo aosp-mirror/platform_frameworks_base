@@ -44,11 +44,11 @@ class NonInjectedServiceDetector : Detector(), SourceCodeScanner {
                 method.containingClass?.qualifiedName == CLASS_CONTEXT
         ) {
             context.report(
-                ISSUE,
-                method,
-                context.getNameLocation(node),
-                "Use `@Inject` to get system-level service handles instead of " +
-                    "`Context.getSystemService()`"
+                issue = ISSUE,
+                location = context.getNameLocation(node),
+                message =
+                    "Use `@Inject` to get system-level service handles instead of " +
+                        "`Context.getSystemService()`"
             )
         } else if (
             evaluator.isStatic(method) &&
@@ -56,10 +56,10 @@ class NonInjectedServiceDetector : Detector(), SourceCodeScanner {
                 method.containingClass?.qualifiedName == "android.accounts.AccountManager"
         ) {
             context.report(
-                ISSUE,
-                method,
-                context.getNameLocation(node),
-                "Replace `AccountManager.get()` with an injected instance of `AccountManager`"
+                issue = ISSUE,
+                location = context.getNameLocation(node),
+                message =
+                    "Replace `AccountManager.get()` with an injected instance of `AccountManager`"
             )
         }
     }

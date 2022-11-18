@@ -3733,7 +3733,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    private void debugLog(@CompileTimeConstant String s) {
+    private void debugLog(@CompileTimeConstant final String s) {
         if (mLogger == null) {
             return;
         }

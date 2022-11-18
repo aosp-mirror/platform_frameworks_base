@@ -492,6 +492,12 @@ public class ResolverActivity extends Activity implements
                 /* workProfileUserHandle= */ null);
     }
 
+    private UserHandle getIntentUser() {
+        return getIntent().hasExtra(EXTRA_CALLING_USER)
+                ? getIntent().getParcelableExtra(EXTRA_CALLING_USER)
+                : getUser();
+    }
+
     private ResolverMultiProfilePagerAdapter createResolverMultiProfilePagerAdapterForTwoProfiles(
             Intent[] initialIntents,
             List<ResolveInfo> rList,
@@ -500,9 +506,7 @@ public class ResolverActivity extends Activity implements
         // the intent resolver is started in the other profile. Since this is the only case when
         // this happens, we check for it here and set the current profile's tab.
         int selectedProfile = getCurrentProfile();
-        UserHandle intentUser = getIntent().hasExtra(EXTRA_CALLING_USER)
-                ? getIntent().getParcelableExtra(EXTRA_CALLING_USER)
-                : getUser();
+        UserHandle intentUser = getIntentUser();
         if (!getUser().equals(intentUser)) {
             if (getPersonalProfileUserHandle().equals(intentUser)) {
                 selectedProfile = PROFILE_PERSONAL;

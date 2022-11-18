@@ -589,8 +589,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     /** Starts a pair of tasks using legacy transition. */
     void startTasksWithLegacyTransition(int taskId1, @Nullable Bundle options1,
             int taskId2, @Nullable Bundle options2, @SplitPosition int splitPosition,
-            float splitRatio, RemoteAnimationAdapter adapter,
-            InstanceId instanceId) {
+            float splitRatio, RemoteAnimationAdapter adapter, InstanceId instanceId) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         if (options1 == null) options1 = new Bundle();
         addActivityOptions(options1, mSideStage);
@@ -600,7 +599,20 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 instanceId);
     }
 
-    /** Starts a pair of intent and task using legacy transition. */
+    /** Starts a pair of intents using legacy transition. */
+    void startIntentsWithLegacyTransition(PendingIntent pendingIntent1, Intent fillInIntent1,
+            @Nullable Bundle options1, PendingIntent pendingIntent2, Intent fillInIntent2,
+            @Nullable Bundle options2, @SplitPosition int splitPosition, float splitRatio,
+            RemoteAnimationAdapter adapter, InstanceId instanceId) {
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        if (options1 == null) options1 = new Bundle();
+        addActivityOptions(options1, mSideStage);
+        wct.sendPendingIntent(pendingIntent1, fillInIntent1, options1);
+
+        startWithLegacyTransition(wct, pendingIntent2, fillInIntent2, options2, splitPosition,
+                splitRatio, adapter, instanceId);
+    }
+
     void startIntentAndTaskWithLegacyTransition(PendingIntent pendingIntent, Intent fillInIntent,
             @Nullable Bundle options1, int taskId, @Nullable Bundle options2,
             @SplitPosition int splitPosition, float splitRatio, RemoteAnimationAdapter adapter,
@@ -628,12 +640,29 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 instanceId);
     }
 
+    private void startWithLegacyTransition(WindowContainerTransaction wct,
+            @Nullable PendingIntent mainPendingIntent, @Nullable Intent mainFillInIntent,
+            @Nullable Bundle mainOptions, @SplitPosition int sidePosition, float splitRatio,
+            RemoteAnimationAdapter adapter, InstanceId instanceId) {
+        startWithLegacyTransition(wct, INVALID_TASK_ID, mainPendingIntent, mainFillInIntent,
+                mainOptions, sidePosition, splitRatio, adapter, instanceId);
+    }
+
+    private void startWithLegacyTransition(WindowContainerTransaction wct, int mainTaskId,
+            @Nullable Bundle mainOptions, @SplitPosition int sidePosition, float splitRatio,
+            RemoteAnimationAdapter adapter, InstanceId instanceId) {
+        startWithLegacyTransition(wct, mainTaskId, null /* mainPendingIntent */,
+                null /* mainFillInIntent */, mainOptions, sidePosition, splitRatio, adapter,
+                instanceId);
+    }
+
     /**
      * @param wct        transaction to start the first task
      * @param instanceId if {@code null}, will not log. Otherwise it will be used in
      *                   {@link SplitscreenEventLogger#logEnter(float, int, int, int, int, boolean)}
      */
     private void startWithLegacyTransition(WindowContainerTransaction wct, int mainTaskId,
+            @Nullable PendingIntent mainPendingIntent, @Nullable Intent mainFillInIntent,
             @Nullable Bundle mainOptions, @SplitPosition int sidePosition, float splitRatio,
             RemoteAnimationAdapter adapter, InstanceId instanceId) {
         // Init divider first to make divider leash for remote animation target.
@@ -702,7 +731,11 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         if (mainOptions == null) mainOptions = new Bundle();
         addActivityOptions(mainOptions, mMainStage);
         updateWindowBounds(mSplitLayout, wct);
-        wct.startTask(mainTaskId, mainOptions);
+        if (mainTaskId == INVALID_TASK_ID) {
+            wct.sendPendingIntent(mainPendingIntent, mainFillInIntent, mainOptions);
+        } else {
+            wct.startTask(mainTaskId, mainOptions);
+        }
         wct.reorder(mRootTaskInfo.token, true);
         wct.setForceTranslucent(mRootTaskInfo.token, false);
 

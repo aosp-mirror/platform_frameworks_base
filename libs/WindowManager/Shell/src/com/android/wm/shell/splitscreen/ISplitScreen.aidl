@@ -95,7 +95,7 @@ interface ISplitScreen {
      */
     oneway void startShortcutAndTask(in ShortcutInfo shortcutInfo, in Bundle options1, int taskId,
             in Bundle options2, int splitPosition, float splitRatio,
-             in RemoteTransition remoteTransition, in InstanceId instanceId) = 17;
+            in RemoteTransition remoteTransition, in InstanceId instanceId) = 17;
 
     /**
      * Version of startTasks using legacy transition system.
@@ -119,6 +119,21 @@ interface ISplitScreen {
             in RemoteAnimationAdapter adapter, in InstanceId instanceId) = 15;
 
     /**
+     * Start a pair of intents using legacy transition system.
+     */
+    oneway void startIntentsWithLegacyTransition(in PendingIntent pendingIntent1,
+            in Bundle options1, in PendingIntent pendingIntent2, in Bundle options2,
+            int splitPosition, float splitRatio, in RemoteAnimationAdapter adapter,
+            in InstanceId instanceId) = 18;
+
+    /**
+     * Start a pair of intents in one transition.
+     */
+    oneway void startIntents(in PendingIntent pendingIntent1, in Bundle options1,
+            in PendingIntent pendingIntent2, in Bundle options2, int splitPosition,
+            float splitRatio, in RemoteTransition remoteTransition, in InstanceId instanceId) = 19;
+
+    /**
      * Blocking call that notifies and gets additional split-screen targets when entering
      * recents (for example: the dividerBar).
      * @param appTargets apps that will be re-parented to display area
@@ -132,4 +147,4 @@ interface ISplitScreen {
      */
     RemoteAnimationTarget[] onStartingSplitLegacy(in RemoteAnimationTarget[] appTargets) = 14;
 }
-// Last id = 17
+// Last id = 19

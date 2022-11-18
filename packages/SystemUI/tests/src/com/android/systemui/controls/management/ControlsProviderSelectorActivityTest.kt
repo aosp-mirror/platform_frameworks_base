@@ -25,11 +25,11 @@ import androidx.test.filters.SmallTest
 import androidx.test.rule.ActivityTestRule
 import androidx.test.runner.intercepting.SingleActivityFactory
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.settings.UserTracker
 import com.google.common.util.concurrent.MoreExecutors
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executor
@@ -56,7 +56,7 @@ class ControlsProviderSelectorActivityTest : SysuiTestCase() {
 
     @Mock lateinit var controlsController: ControlsController
 
-    @Mock lateinit var broadcastDispatcher: BroadcastDispatcher
+    @Mock lateinit var userTracker: UserTracker
 
     @Mock lateinit var uiController: ControlsUiController
 
@@ -80,7 +80,7 @@ class ControlsProviderSelectorActivityTest : SysuiTestCase() {
                         backExecutor,
                         listingController,
                         controlsController,
-                        broadcastDispatcher,
+                        userTracker,
                         uiController,
                         mockDispatcher,
                         latch
@@ -118,7 +118,7 @@ class ControlsProviderSelectorActivityTest : SysuiTestCase() {
         backExecutor: Executor,
         listingController: ControlsListingController,
         controlsController: ControlsController,
-        broadcastDispatcher: BroadcastDispatcher,
+        userTracker: UserTracker,
         uiController: ControlsUiController,
         private val mockDispatcher: OnBackInvokedDispatcher,
         private val latch: CountDownLatch
@@ -128,7 +128,7 @@ class ControlsProviderSelectorActivityTest : SysuiTestCase() {
             backExecutor,
             listingController,
             controlsController,
-            broadcastDispatcher,
+            userTracker,
             uiController
         ) {
         override fun getOnBackInvokedDispatcher(): OnBackInvokedDispatcher {

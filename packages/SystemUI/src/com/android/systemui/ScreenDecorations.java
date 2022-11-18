@@ -26,7 +26,6 @@ import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_M
 import android.annotation.IdRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -901,7 +900,7 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
     private final BroadcastReceiver mUserSwitchIntentReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            int newUserId = ActivityManager.getCurrentUser();
+            int newUserId = mUserTracker.getUserId();
             if (DEBUG) {
                 Log.d(TAG, "UserSwitched newUserId=" + newUserId);
             }
