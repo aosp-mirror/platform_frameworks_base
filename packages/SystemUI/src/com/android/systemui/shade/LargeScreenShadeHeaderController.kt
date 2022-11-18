@@ -331,13 +331,8 @@ class LargeScreenShadeHeaderController @Inject constructor(
             // Use resources.getXml instead of passing the resource id due to bug b/205018300
             header.getConstraintSet(QQS_HEADER_CONSTRAINT)
                 .load(context, resources.getXml(R.xml.qqs_header))
-            val qsConstraints = if (featureFlags.isEnabled(Flags.NEW_HEADER)) {
-                R.xml.qs_header_new
-            } else {
-                R.xml.qs_header
-            }
             header.getConstraintSet(QS_HEADER_CONSTRAINT)
-                .load(context, resources.getXml(qsConstraints))
+                .load(context, resources.getXml(R.xml.qs_header))
             header.getConstraintSet(LARGE_SCREEN_HEADER_CONSTRAINT)
                 .load(context, resources.getXml(R.xml.large_screen_shade_header))
         }
