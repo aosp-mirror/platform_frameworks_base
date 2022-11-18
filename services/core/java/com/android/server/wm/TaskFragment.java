@@ -222,6 +222,14 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     private TaskFragment mAdjacentTaskFragment;
 
     /**
+     * Unlike the {@link mAdjacentTaskFragment}, the companion TaskFragment is not always visually
+     * adjacent to this one, but this TaskFragment will be removed by the organizer if the
+     * companion TaskFragment is removed.
+     */
+    @Nullable
+    private TaskFragment mCompanionTaskFragment;
+
+    /**
      * Prevents duplicate calls to onTaskAppeared.
      */
     boolean mTaskFragmentAppearedSent;
@@ -237,6 +245,12 @@ class TaskFragment extends WindowContainer<WindowContainer> {
      * is entering PiP.
      */
     boolean mClearedTaskFragmentForPip;
+
+    /**
+     * The last running activity of the TaskFragment was removed and added to the top-most of the
+     * Task because it was launched with FLAG_ACTIVITY_REORDER_TO_FRONT.
+     */
+    boolean mClearedForReorderActivityToFront;
 
     /**
      * When we are in the process of pausing an activity, before starting the
@@ -392,6 +406,14 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             mAdjacentTaskFragment = taskFragment;
             taskFragment.setAdjacentTaskFragment(this);
         }
+    }
+
+    void setCompanionTaskFragment(@Nullable TaskFragment companionTaskFragment) {
+        mCompanionTaskFragment = companionTaskFragment;
+    }
+
+    TaskFragment getCompanionTaskFragment() {
+        return mCompanionTaskFragment;
     }
 
     void resetAdjacentTaskFragment() {
@@ -1850,6 +1872,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         ActivityRecord r = topRunningActivity();
         mClearedTaskForReuse = false;
         mClearedTaskFragmentForPip = false;
+        mClearedForReorderActivityToFront = false;
 
         final ActivityRecord addingActivity = child.asActivityRecord();
         final boolean isAddingActivity = addingActivity != null;
@@ -2449,6 +2472,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 positionInParent,
                 mClearedTaskForReuse,
                 mClearedTaskFragmentForPip,
+                mClearedForReorderActivityToFront,
                 calculateMinDimension());
     }
 
@@ -2725,6 +2749,16 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             return taskFragment;
         }
         return callback.test(this) ? this : null;
+    }
+
+    /**
+     * Moves the passed child to front
+     * @return whether it was actually moved (vs already being top).
+     */
+    boolean moveChildToFront(WindowContainer newTop) {
+        int origDist = getDistanceFromTop(newTop);
+        positionChildAt(POSITION_TOP, newTop, false /* includeParents */);
+        return getDistanceFromTop(newTop) != origDist;
     }
 
     String toFullString() {

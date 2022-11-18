@@ -145,6 +145,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.TaskStackChangeListeners;
 import com.android.systemui.statusbar.StatusBarState;
@@ -279,6 +280,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     }
 
     private final Context mContext;
+    private final UserTracker mUserTracker;
     private final KeyguardUpdateMonitorLogger mLogger;
     private final boolean mIsPrimaryUser;
     private final AuthController mAuthController;
@@ -808,9 +810,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         }
         // Don't send cancel if authentication succeeds
         mFingerprintCancelSignal = null;
+        mLogger.logFingerprintSuccess(userId, isStrongBiometric);
         updateBiometricListeningState(BIOMETRIC_ACTION_UPDATE,
                 FACE_AUTH_UPDATED_FP_AUTHENTICATED);
-        mLogger.logFingerprintSuccess(userId, isStrongBiometric);
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
@@ -884,13 +886,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             mHandler.removeCallbacks(mFpCancelNotReceived);
         }
         try {
-            final int userId;
-            try {
-                userId = ActivityManager.getService().getCurrentUser().id;
-            } catch (RemoteException e) {
-                mLogger.logException(e, "Failed to get current user id");
-                return;
-            }
+            final int userId = mUserTracker.getUserId();
             if (userId != authUserId) {
                 mLogger.logFingerprintAuthForWrongUser(authUserId);
                 return;
@@ -1108,13 +1104,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 mLogger.d("Aborted successful auth because device is going to sleep.");
                 return;
             }
-            final int userId;
-            try {
-                userId = ActivityManager.getService().getCurrentUser().id;
-            } catch (RemoteException e) {
-                mLogger.logException(e, "Failed to get current user id");
-                return;
-            }
+            final int userId = mUserTracker.getUserId();
             if (userId != authUserId) {
                 mLogger.logFaceAuthForWrongUser(authUserId);
                 return;
@@ -1964,6 +1954,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     @Inject
     protected KeyguardUpdateMonitor(
             Context context,
+            UserTracker userTracker,
             @Main Looper mainLooper,
             BroadcastDispatcher broadcastDispatcher,
             SecureSettings secureSettings,
@@ -1996,6 +1987,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             FaceWakeUpTriggersConfig faceWakeUpTriggersConfig) {
         mContext = context;
         mSubscriptionManager = subscriptionManager;
+        mUserTracker = userTracker;
         mTelephonyListenerManager = telephonyListenerManager;
         mDeviceProvisioned = isDeviceProvisionedInSettingsDb();
         mStrongAuthTracker = new StrongAuthTracker(context, this::notifyStrongAuthStateChanged,
@@ -2227,7 +2219,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
         TaskStackChangeListeners.getInstance().registerTaskStackListener(mTaskStackListener);
         mIsPrimaryUser = mUserManager.isPrimaryUser();
-        int user = ActivityManager.getCurrentUser();
+        int user = mUserTracker.getUserId();
         mUserIsUnlocked.put(user, mUserManager.isUserUnlocked(user));
         mLogoutEnabled = mDevicePolicyManager.isLogoutEnabled();
         updateSecondaryLockscreenRequirement(user);
@@ -2734,9 +2726,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         final boolean canBypass = mKeyguardBypassController != null
                 && mKeyguardBypassController.canBypass();
         // There's no reason to ask the HAL for authentication when the user can dismiss the
-        // bouncer, unless we're bypassing and need to auto-dismiss the lock screen even when
-        // TrustAgents or biometrics are keeping the device unlocked.
-        final boolean becauseCannotSkipBouncer = !getUserCanSkipBouncer(user) || canBypass;
+        // bouncer because the user is trusted, unless we're bypassing and need to auto-dismiss
+        // the lock screen even when TrustAgents are keeping the device unlocked.
+        final boolean userNotTrustedOrDetectionIsNeeded = !getUserHasTrust(user) || canBypass;
 
         // Scan even when encrypted or timeout to show a preemptive bouncer when bypassing.
         // Lock-down mode shouldn't scan, since it is more explicit.
@@ -2753,11 +2745,12 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             strongAuthAllowsScanning = false;
         }
 
-        // If the face has recently been authenticated do not attempt to authenticate again.
-        final boolean faceAuthenticated = getIsFaceAuthenticated();
+        // If the face or fp has recently been authenticated do not attempt to authenticate again.
+        final boolean faceAndFpNotAuthenticated = !getUserUnlockedWithBiometric(user);
         final boolean faceDisabledForUser = isFaceDisabled(user);
         final boolean biometricEnabledForUser = mBiometricEnabledForUser.get(user);
         final boolean shouldListenForFaceAssistant = shouldListenForFaceAssistant();
+        final boolean isUdfpsFingerDown = mAuthController.isUdfpsFingerDown();
 
         // Only listen if this KeyguardUpdateMonitor belongs to the primary user. There is an
         // instance of KeyguardUpdateMonitor for each user but KeyguardUpdateMonitor is user-aware.
@@ -2767,13 +2760,13 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                         || mOccludingAppRequestingFace
                         || awakeKeyguard
                         || shouldListenForFaceAssistant
-                        || mAuthController.isUdfpsFingerDown()
+                        || isUdfpsFingerDown
                         || mUdfpsBouncerShowing)
-                && !mSwitchingUser && !faceDisabledForUser && becauseCannotSkipBouncer
+                && !mSwitchingUser && !faceDisabledForUser && userNotTrustedOrDetectionIsNeeded
                 && !mKeyguardGoingAway && biometricEnabledForUser
                 && strongAuthAllowsScanning && mIsPrimaryUser
                 && (!mSecureCameraLaunched || mOccludingAppRequestingFace)
-                && !faceAuthenticated
+                && faceAndFpNotAuthenticated
                 && !mGoingToSleep
                 // We only care about fp locked out state and not face because we still trigger
                 // face auth even when face is locked out to show the user a message that face
@@ -2787,10 +2780,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     user,
                     shouldListen,
                     mAuthInterruptActive,
-                    becauseCannotSkipBouncer,
                     biometricEnabledForUser,
                         mPrimaryBouncerFullyShown,
-                    faceAuthenticated,
+                    faceAndFpNotAuthenticated,
                     faceDisabledForUser,
                     isFaceLockedOut(),
                     fpLockedOut,
@@ -2803,7 +2795,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     strongAuthAllowsScanning,
                     mSecureCameraLaunched,
                     mSwitchingUser,
-                    mUdfpsBouncerShowing));
+                    mUdfpsBouncerShowing,
+                    isUdfpsFingerDown,
+                    userNotTrustedOrDetectionIsNeeded));
 
         return shouldListen;
     }
@@ -3853,7 +3847,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             pw.println("    " + subId + "=" + mServiceStates.get(subId));
         }
         if (mFpm != null && mFpm.isHardwareDetected()) {
-            final int userId = ActivityManager.getCurrentUser();
+            final int userId = mUserTracker.getUserId();
             final int strongAuthFlags = mStrongAuthTracker.getStrongAuthForUser(userId);
             BiometricAuthenticated fingerprint = mUserFingerprintAuthenticated.get(userId);
             pw.println("  Fingerprint state (user=" + userId + ")");
@@ -3891,7 +3885,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             }
         }
         if (mFaceManager != null && mFaceManager.isHardwareDetected()) {
-            final int userId = ActivityManager.getCurrentUser();
+            final int userId = mUserTracker.getUserId();
             final int strongAuthFlags = mStrongAuthTracker.getStrongAuthForUser(userId);
             BiometricAuthenticated face = mUserFaceAuthenticated.get(userId);
             pw.println("  Face authentication state (user=" + userId + ")");

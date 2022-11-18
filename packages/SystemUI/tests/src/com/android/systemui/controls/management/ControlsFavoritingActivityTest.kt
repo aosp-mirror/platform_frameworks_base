@@ -9,10 +9,10 @@ import androidx.test.filters.SmallTest
 import androidx.test.rule.ActivityTestRule
 import androidx.test.runner.intercepting.SingleActivityFactory
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.controls.controller.ControlsControllerImpl
 import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.settings.UserTracker
 import com.google.common.util.concurrent.MoreExecutors
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executor
@@ -37,7 +37,7 @@ class ControlsFavoritingActivityTest : SysuiTestCase() {
 
     @Mock lateinit var listingController: ControlsListingController
 
-    @Mock lateinit var broadcastDispatcher: BroadcastDispatcher
+    @Mock lateinit var userTracker: UserTracker
 
     @Mock lateinit var uiController: ControlsUiController
 
@@ -60,7 +60,7 @@ class ControlsFavoritingActivityTest : SysuiTestCase() {
                         executor,
                         controller,
                         listingController,
-                        broadcastDispatcher,
+                        userTracker,
                         uiController,
                         mockDispatcher,
                         latch
@@ -97,7 +97,7 @@ class ControlsFavoritingActivityTest : SysuiTestCase() {
         executor: Executor,
         controller: ControlsControllerImpl,
         listingController: ControlsListingController,
-        broadcastDispatcher: BroadcastDispatcher,
+        userTracker: UserTracker,
         uiController: ControlsUiController,
         private val mockDispatcher: OnBackInvokedDispatcher,
         private val latch: CountDownLatch
@@ -106,7 +106,7 @@ class ControlsFavoritingActivityTest : SysuiTestCase() {
             executor,
             controller,
             listingController,
-            broadcastDispatcher,
+            userTracker,
             uiController
         ) {
         override fun getOnBackInvokedDispatcher(): OnBackInvokedDispatcher {

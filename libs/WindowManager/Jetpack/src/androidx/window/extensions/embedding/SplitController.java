@@ -389,6 +389,10 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
                 // launching activity in the Task.
                 mTransactionManager.getCurrentTransactionRecord().setOriginType(TRANSIT_CLOSE);
                 mPresenter.cleanupContainer(wct, container, false /* shouldFinishDependent */);
+            } else if (taskFragmentInfo.isClearedForReorderActivityToFront()) {
+                // Do not finish the dependents if this TaskFragment was cleared to reorder
+                // the launching Activity to front of the Task.
+                mPresenter.cleanupContainer(wct, container, false /* shouldFinishDependent */);
             } else if (!container.isWaitingActivityAppear()) {
                 // Do not finish the container before the expected activity appear until
                 // timeout.

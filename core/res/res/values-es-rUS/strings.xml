@@ -447,7 +447,7 @@
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"acceder a la ubicación en segundo plano"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Esta aplicación puede acceder a la ubicación en cualquier momento, aunque no la estés usando."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"cambiar tu configuración de audio"</string>
-    <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Permite que la aplicación modifique la configuración de audio global, por ejemplo, el volumen y el altavoz de salida."</string>
+    <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Permite que la aplicación modifique la configuración de audio global, por ejemplo, el volumen y la bocina de salida."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"grabar audio"</string>
     <string name="permdesc_recordAudio" msgid="5857246765327514062">"Esta app puede grabar audio con el micrófono mientras está en uso."</string>
     <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"grabar audio en segundo plano"</string>
