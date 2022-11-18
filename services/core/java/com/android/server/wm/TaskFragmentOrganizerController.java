@@ -34,6 +34,7 @@ import static java.util.Objects.requireNonNull;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Binder;
@@ -322,9 +323,10 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                         + " is not in a task belong to the organizer app.");
                 return null;
             }
-            if (task.isAllowedToEmbedActivity(activity, mOrganizerUid) != EMBEDDING_ALLOWED) {
+            if (task.isAllowedToEmbedActivity(activity, mOrganizerUid) != EMBEDDING_ALLOWED
+                    || !task.isAllowedToEmbedActivityInTrustedMode(activity, mOrganizerUid)) {
                 Slog.d(TAG, "Reparent activity=" + activity.token
-                        + " is not allowed to be embedded.");
+                        + " is not allowed to be embedded in trusted mode.");
                 return null;
             }
 
@@ -350,7 +352,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                     activity.token, task.mTaskId);
             return new TaskFragmentTransaction.Change(TYPE_ACTIVITY_REPARENTED_TO_TASK)
                     .setTaskId(task.mTaskId)
-                    .setActivityIntent(activity.intent)
+                    .setActivityIntent(trimIntent(activity.intent))
                     .setActivityToken(activityToken);
         }
 
@@ -1094,5 +1096,16 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             }
             return false;
         }
+    }
+
+    /**
+     * Trims the given Intent to only those that are needed to for embedding rules. This helps to
+     * make it safer for cross-uid embedding even if we only send the Intent for trusted embedding.
+     */
+    private static Intent trimIntent(@NonNull Intent intent) {
+        return new Intent()
+                .setComponent(intent.getComponent())
+                .setPackage(intent.getPackage())
+                .setAction(intent.getAction());
     }
 }
