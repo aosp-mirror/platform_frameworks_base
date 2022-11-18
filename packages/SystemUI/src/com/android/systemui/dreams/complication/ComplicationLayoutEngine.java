@@ -192,9 +192,7 @@ public class ComplicationLayoutEngine implements Complication.VisibilityControll
                         break;
                 }
 
-                // Add margin if specified by the complication. Otherwise add default margin
-                // between complications.
-                if (mLayoutParams.isMarginSpecified() || !isRoot) {
+                if (!isRoot) {
                     final int margin = mLayoutParams.getMargin(mDefaultMargin);
                     switch(direction) {
                         case ComplicationLayoutParams.DIRECTION_DOWN:

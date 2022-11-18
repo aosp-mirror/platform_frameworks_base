@@ -261,13 +261,6 @@ public class ComplicationLayoutParams extends ViewGroup.LayoutParams {
     }
 
     /**
-     * Returns whether margin has been specified by the complication.
-     */
-    public boolean isMarginSpecified() {
-        return mMargin != MARGIN_UNSPECIFIED;
-    }
-
-    /**
      * Returns the margin to apply between complications, or the given default if no margin is
      * specified.
      */
