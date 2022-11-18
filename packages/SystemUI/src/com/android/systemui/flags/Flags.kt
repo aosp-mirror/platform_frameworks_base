@@ -153,8 +153,8 @@ object Flags {
         unreleasedFlag(216, "customizable_lock_screen_quick_affordances", teamfood = false)
 
     /** Shows chipbar UI whenever the device is unlocked by ActiveUnlock (watch). */
-    // TODO(b/240196500): Tracking Bug
-    @JvmField val ACTIVE_UNLOCK_CHIPBAR = unreleasedFlag(217, "active_unlock_chipbar")
+    // TODO(b/256513609): Tracking Bug
+    @JvmField val ACTIVE_UNLOCK_CHIPBAR = releasedFlag(217, "active_unlock_chipbar")
 
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
