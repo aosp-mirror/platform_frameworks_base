@@ -117,7 +117,7 @@ constructor(
     private val callbacks = mutableSetOf<UserCallback>()
     private val userInfos =
         combine(repository.userSwitcherSettings, repository.userInfos) { settings, userInfos ->
-            userInfos.filter { !it.isGuest || canCreateGuestUser(settings) }
+            userInfos.filter { !it.isGuest || canCreateGuestUser(settings) }.filter { it.isFull }
         }
 
     /** List of current on-device users to select from. */
