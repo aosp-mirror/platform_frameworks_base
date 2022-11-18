@@ -28,8 +28,6 @@ constructor(
     private val systemExitRestarter: SystemExitRestarter,
 ) : Restarter {
 
-    private var androidRestartRequested = false
-
     val observer =
         object : WakefulnessLifecycle.Observer {
             override fun onFinishedGoingToSleep() {
@@ -38,18 +36,8 @@ constructor(
             }
         }
 
-    override fun restartSystemUI() {
-        Log.d(FeatureFlagsDebug.TAG, "SystemUI Restart requested. Restarting on next screen off.")
-        scheduleRestart()
-    }
-
-    override fun restartAndroid() {
-        Log.d(FeatureFlagsDebug.TAG, "Android Restart requested. Restarting on next screen off.")
-        androidRestartRequested = true
-        scheduleRestart()
-    }
-
-    fun scheduleRestart() {
+    override fun restart() {
+        Log.d(FeatureFlagsDebug.TAG, "Restart requested. Restarting on next screen off.")
         if (wakefulnessLifecycle.wakefulness == WakefulnessLifecycle.WAKEFULNESS_ASLEEP) {
             restartNow()
         } else {
@@ -58,10 +46,6 @@ constructor(
     }
 
     private fun restartNow() {
-        if (androidRestartRequested) {
-            systemExitRestarter.restartAndroid()
-        } else {
-            systemExitRestarter.restartSystemUI()
-        }
+        systemExitRestarter.restart()
     }
 }
