@@ -145,7 +145,6 @@ import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.ServiceInfo.ForegroundServiceType;
-import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -186,7 +185,6 @@ import android.webkit.WebViewZygote;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.procstats.ServiceState;
-import com.android.internal.messages.nano.SystemMessageProto;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.os.TimeoutRecord;
@@ -228,8 +226,6 @@ public final class ActiveServices {
     private static final boolean DEBUG_DELAYED_STARTS = DEBUG_DELAYED_SERVICE;
 
     private static final boolean LOG_SERVICE_START_STOP = false;
-
-    private static final boolean SHOW_DUNGEON_NOTIFICATION = false;
 
     // How long we wait for a service to finish executing.
     static final int SERVICE_TIMEOUT = 20 * 1000 * Build.HW_TIMEOUT_MULTIPLIER;
@@ -658,25 +654,6 @@ public final class ActiveServices {
             }
         }
         return false;
-    }
-
-    void stopForegroundServicesForChannelLocked(String pkg, int userId, String channelId) {
-        final ServiceMap smap = mServiceMap.get(userId);
-        if (smap != null) {
-            for (int i = 0; i < smap.mServicesByInstanceName.size(); i++) {
-                final ServiceRecord sr = smap.mServicesByInstanceName.valueAt(i);
-                if (sr.appInfo.packageName.equals(pkg) && sr.isForeground) {
-                    if (Objects.equals(sr.foregroundNoti.getChannelId(), channelId)) {
-                        if (DEBUG_FOREGROUND_SERVICE) {
-                            Slog.d(TAG_SERVICE, "Stopping FGS u" + userId + "/pkg=" + pkg
-                                    + "/channelId=" + channelId
-                                    + " for conversation channel clear");
-                        }
-                        stopServiceLocked(sr, false);
-                    }
-                }
-            }
-        }
     }
 
     private ServiceMap getServiceMapLocked(int callingUser) {
@@ -1589,9 +1566,11 @@ public final class ActiveServices {
         return canRemove;
     }
 
+    /**
+     * Stop FGSs owned by non-top, BG-restricted apps.
+     */
     void updateForegroundApps(ServiceMap smap) {
         // This is called from the handler without the lock held.
-        ArrayList<ActiveForegroundApp> active = null;
         synchronized (mAm) {
             final long now = SystemClock.elapsedRealtime();
             long nextUpdateTime = Long.MAX_VALUE;
@@ -1617,12 +1596,8 @@ public final class ActiveServices {
                         // it loses the fg service state now.
                         if (isForegroundServiceAllowedInBackgroundRestricted(
                                 aa.mUid, aa.mPackageName)) {
-                            if (active == null) {
-                                active = new ArrayList<>();
-                            }
                             if (DEBUG_FOREGROUND_SERVICE) Slog.d(TAG, "Adding active: pkg="
                                     + aa.mPackageName + ", uid=" + aa.mUid);
-                            active.add(aa);
                         } else {
                             if (DEBUG_FOREGROUND_SERVICE) {
                                 Slog.d(TAG, "bg-restricted app "
@@ -1642,88 +1617,7 @@ public final class ActiveServices {
                             + SystemClock.uptimeMillis() - SystemClock.elapsedRealtime());
                 }
             }
-            if (!smap.mActiveForegroundAppsChanged) {
-                return;
-            }
             smap.mActiveForegroundAppsChanged = false;
-        }
-
-        if (!SHOW_DUNGEON_NOTIFICATION) {
-            return;
-        }
-
-        final NotificationManager nm = (NotificationManager) mAm.mContext.getSystemService(
-                Context.NOTIFICATION_SERVICE);
-        final Context context = mAm.mContext;
-
-        if (active != null) {
-            for (int i = 0; i < active.size(); i++) {
-                ActiveForegroundApp aa = active.get(i);
-                if (aa.mLabel == null) {
-                    PackageManager pm = context.getPackageManager();
-                    try {
-                        ApplicationInfo ai = pm.getApplicationInfoAsUser(aa.mPackageName,
-                                PackageManager.MATCH_KNOWN_PACKAGES, smap.mUserId);
-                        aa.mLabel = ai.loadLabel(pm);
-                    } catch (PackageManager.NameNotFoundException e) {
-                        aa.mLabel = aa.mPackageName;
-                    }
-                }
-            }
-
-            Intent intent;
-            String title;
-            String msg;
-            String[] pkgs;
-            final long nowElapsed = SystemClock.elapsedRealtime();
-            long oldestStartTime = nowElapsed;
-            if (active.size() == 1) {
-                intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                intent.setData(Uri.fromParts("package", active.get(0).mPackageName, null));
-                title = context.getString(
-                        R.string.foreground_service_app_in_background, active.get(0).mLabel);
-                msg = context.getString(R.string.foreground_service_tap_for_details);
-                pkgs = new String[] { active.get(0).mPackageName };
-                oldestStartTime = active.get(0).mStartTime;
-            } else {
-                intent = new Intent(Settings.ACTION_FOREGROUND_SERVICES_SETTINGS);
-                pkgs = new String[active.size()];
-                for (int i = 0; i < active.size(); i++) {
-                    pkgs[i] = active.get(i).mPackageName;
-                    oldestStartTime = Math.min(oldestStartTime, active.get(i).mStartTime);
-                }
-                intent.putExtra("packages", pkgs);
-                title = context.getString(
-                        R.string.foreground_service_apps_in_background, active.size());
-                msg = active.get(0).mLabel.toString();
-                for (int i = 1; i < active.size(); i++) {
-                    msg = context.getString(R.string.foreground_service_multiple_separator,
-                            msg, active.get(i).mLabel);
-                }
-            }
-            Bundle notificationBundle = new Bundle();
-            notificationBundle.putStringArray(Notification.EXTRA_FOREGROUND_APPS, pkgs);
-            Notification.Builder n =
-                    new Notification.Builder(context,
-                            SystemNotificationChannels.FOREGROUND_SERVICE)
-                            .addExtras(notificationBundle)
-                            .setSmallIcon(R.drawable.stat_sys_vitals)
-                            .setOngoing(true)
-                            .setShowWhen(oldestStartTime < nowElapsed)
-                            .setWhen(System.currentTimeMillis() - (nowElapsed - oldestStartTime))
-                            .setColor(context.getColor(
-                                    com.android.internal.R.color.system_notification_accent_color))
-                            .setContentTitle(title)
-                            .setContentText(msg)
-                            .setContentIntent(
-                                    PendingIntent.getActivityAsUser(context, 0, intent,
-                                            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE_UNAUDITED,
-                                            null, new UserHandle(smap.mUserId)));
-            nm.notifyAsUser(null, SystemMessageProto.SystemMessage.NOTE_FOREGROUND_SERVICES,
-                    n.build(), new UserHandle(smap.mUserId));
-        } else {
-            nm.cancelAsUser(null, SystemMessageProto.SystemMessage.NOTE_FOREGROUND_SERVICES,
-                    new UserHandle(smap.mUserId));
         }
     }
 

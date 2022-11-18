@@ -577,13 +577,6 @@ public abstract class ActivityManagerInternal {
     public abstract void stopAppForUser(String pkg, @UserIdInt int userId);
 
     /**
-     * If the given app has any FGSs whose notifications are in the given channel,
-     * stop them.
-     */
-    public abstract void stopForegroundServicesForChannel(String pkg, @UserIdInt int userId,
-            String channelId);
-
-    /**
      * Registers the specified {@code processObserver} to be notified of future changes to
      * process state.
      */
