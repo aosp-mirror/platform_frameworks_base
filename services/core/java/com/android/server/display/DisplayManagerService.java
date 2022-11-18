@@ -2644,7 +2644,7 @@ public final class DisplayManagerService extends SystemService {
         final DisplayPowerControllerInterface displayPowerController;
 
         if (DeviceConfig.getBoolean("display_manager",
-                "use_newly_structured_display_power_controller", false)) {
+                "use_newly_structured_display_power_controller", true)) {
             displayPowerController = new DisplayPowerController2(
                     mContext, /* injector= */ null, mDisplayPowerCallbacks, mPowerHandler,
                     mSensorManager, mDisplayBlanker, display, mBrightnessTracker, brightnessSetting,
