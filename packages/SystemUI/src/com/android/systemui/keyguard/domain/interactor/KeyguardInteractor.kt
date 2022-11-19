@@ -20,10 +20,13 @@ package com.android.systemui.keyguard.domain.interactor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
+import com.android.systemui.keyguard.shared.model.DozeStateModel
+import com.android.systemui.keyguard.shared.model.DozeTransitionModel
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.WakefulnessModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filter
 
 /**
  * Encapsulates business-logic related to the keyguard but not to a more specific part within it.
@@ -41,6 +44,8 @@ constructor(
     val dozeAmount: Flow<Float> = repository.dozeAmount
     /** Whether the system is in doze mode. */
     val isDozing: Flow<Boolean> = repository.isDozing
+    /** Doze transition information. */
+    val dozeTransitionModel: Flow<DozeTransitionModel> = repository.dozeTransitionModel
     /**
      * Whether the system is dreaming. [isDreaming] will be always be true when [isDozing] is true,
      * but not vice-versa.
@@ -61,6 +66,10 @@ constructor(
      * side, under display) is used to unlock the device.
      */
     val biometricUnlockState: Flow<BiometricUnlockModel> = repository.biometricUnlockState
+
+    fun dozeTransitionTo(state: DozeStateModel): Flow<DozeTransitionModel> {
+        return dozeTransitionModel.filter { it.to == state }
+    }
 
     fun isKeyguardShowing(): Boolean {
         return repository.isKeyguardShowing()

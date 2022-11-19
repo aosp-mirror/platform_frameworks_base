@@ -109,6 +109,7 @@ import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.plugins.PluginDependencyProvider;
+import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.settings.brightness.BrightnessSliderController;
@@ -120,7 +121,6 @@ import com.android.systemui.shade.NotificationShadeWindowViewController;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeControllerImpl;
 import com.android.systemui.shade.ShadeExpansionStateManager;
-import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
@@ -355,7 +355,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
         when(mStackScrollerController.getView()).thenReturn(mStackScroller);
         when(mStackScroller.generateLayoutParams(any())).thenReturn(new LayoutParams(0, 0));
-        when(mNotificationPanelViewController.getView()).thenReturn(mNotificationPanelView);
         when(mNotificationPanelView.getLayoutParams()).thenReturn(new LayoutParams(0, 0));
         when(powerManagerService.isInteractive()).thenReturn(true);
         when(mStackScroller.getActivatedChild()).thenReturn(null);

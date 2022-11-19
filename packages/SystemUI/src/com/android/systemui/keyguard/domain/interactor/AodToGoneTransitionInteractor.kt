@@ -40,7 +40,7 @@ constructor(
     private val keyguardInteractor: KeyguardInteractor,
     private val keyguardTransitionRepository: KeyguardTransitionRepository,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
-) : TransitionInteractor("AOD->GONE") {
+) : TransitionInteractor(AodToGoneTransitionInteractor::class.simpleName!!) {
 
     private val wakeAndUnlockModes =
         setOf(WAKE_AND_UNLOCK, WAKE_AND_UNLOCK_FROM_DREAM, WAKE_AND_UNLOCK_PULSING)

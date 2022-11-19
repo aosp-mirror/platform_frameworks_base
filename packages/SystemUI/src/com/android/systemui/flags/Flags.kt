@@ -90,6 +90,10 @@ object Flags {
     // TODO(b/257506350): Tracking Bug
     val FSI_CHROME = unreleasedFlag(117, "fsi_chrome")
 
+    @JvmField
+    val SIMPLIFIED_APPEAR_FRACTION =
+        unreleasedFlag(259395680, "simplified_appear_fraction", teamfood = true)
+
     // TODO(b/257315550): Tracking Bug
     val NO_HUN_FOR_OLD_WHEN = unreleasedFlag(118, "no_hun_for_old_when")
 
@@ -153,8 +157,8 @@ object Flags {
         unreleasedFlag(216, "customizable_lock_screen_quick_affordances", teamfood = false)
 
     /** Shows chipbar UI whenever the device is unlocked by ActiveUnlock (watch). */
-    // TODO(b/240196500): Tracking Bug
-    @JvmField val ACTIVE_UNLOCK_CHIPBAR = unreleasedFlag(217, "active_unlock_chipbar")
+    // TODO(b/256513609): Tracking Bug
+    @JvmField val ACTIVE_UNLOCK_CHIPBAR = releasedFlag(217, "active_unlock_chipbar")
 
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
@@ -180,9 +184,6 @@ object Flags {
             R.bool.flag_lockscreen_qs_user_detail_shortcut,
             "qs_user_detail_shortcut"
         )
-
-    // TODO(b/254512747): Tracking Bug
-    val NEW_HEADER = releasedFlag(505, "new_header")
 
     // TODO(b/254512383): Tracking Bug
     @JvmField
@@ -414,4 +415,7 @@ object Flags {
     @JvmField val UDFPS_NEW_TOUCH_DETECTION = unreleasedFlag(2200, "udfps_new_touch_detection")
     @JvmField val UDFPS_ELLIPSE_DEBUG_UI = unreleasedFlag(2201, "udfps_ellipse_debug")
     @JvmField val UDFPS_ELLIPSE_DETECTION = unreleasedFlag(2202, "udfps_ellipse_detection")
+
+    // TODO(b259590361): Tracking bug
+    val EXPERIMENTAL_FLAG = unreleasedFlag(2, "exp_flag_release")
 }

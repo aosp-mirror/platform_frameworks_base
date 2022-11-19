@@ -159,10 +159,12 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
                 int secondsRemaining = (int) Math.round(millisUntilFinished / 1000.0);
                 Map<String, Object> arguments = new HashMap<>();
                 arguments.put("count", secondsRemaining);
-                mMessageAreaController.setMessage(PluralsMessageFormatter.format(
-                        mView.getResources(),
-                        arguments,
-                        R.string.kg_too_many_failed_attempts_countdown));
+                mMessageAreaController.setMessage(
+                        PluralsMessageFormatter.format(
+                            mView.getResources(),
+                            arguments,
+                            R.string.kg_too_many_failed_attempts_countdown),
+                        /* animate= */ false);
             }
 
             @Override

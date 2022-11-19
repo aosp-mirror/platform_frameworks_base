@@ -12,12 +12,10 @@
  * permissions and limitations under the License.
  */
 
-package com.android.systemui.shared.plugins;
+package com.android.systemui.plugins;
 
 import android.text.TextUtils;
 
-import com.android.systemui.plugins.Plugin;
-import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.annotations.ProvidesInterface;
 
 public interface PluginManager {

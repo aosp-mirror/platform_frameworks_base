@@ -16,6 +16,8 @@
 
 package com.android.systemui.media.taptotransfer.receiver
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.content.Context
 import android.util.AttributeSet
 import com.android.systemui.surfaceeffects.ripple.RippleShader
@@ -25,10 +27,36 @@ import com.android.systemui.surfaceeffects.ripple.RippleView
  * An expanding ripple effect for the media tap-to-transfer receiver chip.
  */
 class ReceiverChipRippleView(context: Context?, attrs: AttributeSet?) : RippleView(context, attrs) {
+
+    // Indicates whether the ripple started expanding.
+    private var isStarted: Boolean
+
     init {
         setupShader(RippleShader.RippleShape.ELLIPSE)
         setRippleFill(true)
         setSparkleStrength(0f)
         duration = 3000L
+        isStarted = false
+    }
+
+    fun expandRipple(onAnimationEnd: Runnable? = null) {
+        isStarted = true
+        super.startRipple(onAnimationEnd)
+    }
+
+    /** Used to animate out the ripple. No-op if the ripple was never started via [startRipple]. */
+    fun collapseRipple(onAnimationEnd: Runnable? = null) {
+        if (!isStarted) {
+            return // Ignore if ripple is not started yet.
+        }
+        // Reset all listeners to animator.
+        animator.removeAllListeners()
+        animator.addListener(object : AnimatorListenerAdapter() {
+            override fun onAnimationEnd(animation: Animator?) {
+                onAnimationEnd?.run()
+                isStarted = false
+            }
+        })
+        animator.reverse()
     }
 }

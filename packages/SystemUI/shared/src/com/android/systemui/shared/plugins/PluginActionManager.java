@@ -38,6 +38,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.plugins.Plugin;
 import com.android.systemui.plugins.PluginListener;
+import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.shared.plugins.VersionInfo.InvalidVersionException;
 
 import java.util.ArrayList;

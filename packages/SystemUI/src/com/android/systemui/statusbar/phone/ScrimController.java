@@ -110,6 +110,12 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     private boolean mClipsQsScrim;
 
     /**
+     * Whether an activity is launching over the lockscreen. During the launch animation, we want to
+     * delay certain scrim changes until after the animation ends.
+     */
+    private boolean mOccludeAnimationPlaying = false;
+
+    /**
      * The amount of progress we are currently in if we're transitioning to the full shade.
      * 0.0f means we're not transitioning yet, while 1 means we're all the way in the full
      * shade.
@@ -733,6 +739,11 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         return mClipsQsScrim;
     }
 
+    public void setOccludeAnimationPlaying(boolean occludeAnimationPlaying) {
+        mOccludeAnimationPlaying = occludeAnimationPlaying;
+        applyAndDispatchState();
+    }
+
     private void setOrAdaptCurrentAnimation(@Nullable View scrim) {
         if (scrim == null) {
             return;
@@ -772,11 +783,15 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         }
 
         if (mState == ScrimState.UNLOCKED || mState == ScrimState.DREAMING) {
-            // Darken scrim as you pull down the shade when unlocked, unless the shade is expanding
-            // because we're doing the screen off animation OR the shade is collapsing because
-            // we're playing the unlock animation
+            final boolean occluding =
+                    mOccludeAnimationPlaying || mState.mLaunchingAffordanceWithPreview;
+
+            // Darken scrim as it's pulled down while unlocked. If we're unlocked but playing the
+            // screen off/occlusion animations, ignore expansion changes while those animations
+            // play.
             if (!mScreenOffAnimationController.shouldExpandNotifications()
-                    && !mAnimatingPanelExpansionOnUnlock) {
+                    && !mAnimatingPanelExpansionOnUnlock
+                    && !occluding) {
                 float behindFraction = getInterpolatedFraction();
                 behindFraction = (float) Math.pow(behindFraction, 0.8f);
                 if (mClipsQsScrim) {

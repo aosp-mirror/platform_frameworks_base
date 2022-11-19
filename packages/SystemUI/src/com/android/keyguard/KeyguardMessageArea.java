@@ -59,6 +59,7 @@ public abstract class KeyguardMessageArea extends TextView implements SecurityMe
     @Nullable
     private ViewGroup mContainer;
     private int mTopMargin;
+    protected boolean mAnimate;
 
     public KeyguardMessageArea(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -106,7 +107,7 @@ public abstract class KeyguardMessageArea extends TextView implements SecurityMe
     }
 
     @Override
-    public void setMessage(CharSequence msg) {
+    public void setMessage(CharSequence msg, boolean animate) {
         if (!TextUtils.isEmpty(msg)) {
             securityMessageChanged(msg);
         } else {
@@ -115,21 +116,12 @@ public abstract class KeyguardMessageArea extends TextView implements SecurityMe
     }
 
     @Override
-    public void setMessage(int resId) {
-        CharSequence message = null;
-        if (resId != 0) {
-            message = getContext().getResources().getText(resId);
-        }
-        setMessage(message);
-    }
-
-    @Override
     public void formatMessage(int resId, Object... formatArgs) {
         CharSequence message = null;
         if (resId != 0) {
             message = getContext().getString(resId, formatArgs);
         }
-        setMessage(message);
+        setMessage(message, true);
     }
 
     private void securityMessageChanged(CharSequence message) {

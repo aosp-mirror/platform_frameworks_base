@@ -86,6 +86,11 @@ constructor(
         interactor.notifyKeyguardAuthenticatedHandled()
     }
 
+    /** Notifies that the message was shown. */
+    fun onMessageShown() {
+        interactor.onMessageShown()
+    }
+
     /** Observe whether back button is enabled. */
     fun observeOnIsBackButtonEnabled(systemUiVisibility: () -> Int): Flow<Int> {
         return interactor.isBackButtonEnabled.map { enabled ->

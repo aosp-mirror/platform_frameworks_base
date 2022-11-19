@@ -129,6 +129,7 @@ public class AuthContainerView extends LinearLayout
     private final float mTranslationY;
     @VisibleForTesting @ContainerState int mContainerState = STATE_UNKNOWN;
     private final Set<Integer> mFailedModalities = new HashSet<Integer>();
+    private OnBackInvokedDispatcher mOnBackInvokedDispatcher;
     private final OnBackInvokedCallback mBackCallback = this::onBackInvoked;
 
     private final @Background DelayableExecutor mBackgroundExecutor;
@@ -497,9 +498,9 @@ public class AuthContainerView extends LinearLayout
                         .start();
             });
         }
-        OnBackInvokedDispatcher dispatcher = findOnBackInvokedDispatcher();
-        if (dispatcher != null) {
-            dispatcher.registerOnBackInvokedCallback(
+        mOnBackInvokedDispatcher = findOnBackInvokedDispatcher();
+        if (mOnBackInvokedDispatcher != null) {
+            mOnBackInvokedDispatcher.registerOnBackInvokedCallback(
                     OnBackInvokedDispatcher.PRIORITY_DEFAULT, mBackCallback);
         }
     }
@@ -600,11 +601,11 @@ public class AuthContainerView extends LinearLayout
 
     @Override
     public void onDetachedFromWindow() {
-        OnBackInvokedDispatcher dispatcher = findOnBackInvokedDispatcher();
-        if (dispatcher != null) {
-            findOnBackInvokedDispatcher().unregisterOnBackInvokedCallback(mBackCallback);
-        }
         super.onDetachedFromWindow();
+        if (mOnBackInvokedDispatcher != null) {
+            mOnBackInvokedDispatcher.unregisterOnBackInvokedCallback(mBackCallback);
+            mOnBackInvokedDispatcher = null;
+        }
         mWakefulnessLifecycle.removeObserver(this);
     }
 
