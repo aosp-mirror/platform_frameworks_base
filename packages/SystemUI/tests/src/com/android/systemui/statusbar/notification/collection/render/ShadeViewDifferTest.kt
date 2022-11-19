@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.collection.render
 import android.content.Context
 import android.testing.AndroidTestingRunner
 import android.view.View
+import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -26,6 +27,10 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.isNull
+import org.mockito.Mockito.anyBoolean
+import org.mockito.Mockito.matches
+import org.mockito.Mockito.verify
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -124,6 +129,64 @@ class ShadeViewDifferTest : SysuiTestCase() {
         Assert.assertNull(controller3.view.parent)
         Assert.assertNull(controller4.view.parent)
         Assert.assertNull(controller5.view.parent)
+        verifyDetachingChildLogged(controller3, oldParent = controller2)
+        verifyDetachingChildLogged(controller4, oldParent = controller2)
+        verifyDetachingChildLogged(controller5, oldParent = controller2)
+    }
+
+    @Test
+    fun testRemovedGroupsWithKeepInParentAreKeptTogether() {
+        // GIVEN a preexisting tree with a group
+        // AND the group children supports keepInParent
+        applySpecAndCheck(
+            node(controller1),
+            node(controller2, node(controller3), node(controller4), node(controller5))
+        )
+        controller3.supportsKeepInParent = true
+        controller4.supportsKeepInParent = true
+        controller5.supportsKeepInParent = true
+
+        // WHEN the new spec removes the entire group
+        applySpecAndCheck(node(controller1))
+
+        // THEN the group children are still attached to their parent
+        Assert.assertEquals(controller2.view, controller3.view.parent)
+        Assert.assertEquals(controller2.view, controller4.view.parent)
+        Assert.assertEquals(controller2.view, controller5.view.parent)
+        verifySkipDetachingChildLogged(controller3, parent = controller2)
+        verifySkipDetachingChildLogged(controller4, parent = controller2)
+        verifySkipDetachingChildLogged(controller5, parent = controller2)
+    }
+
+    @Test
+    fun testReuseRemovedGroupsWithKeepInParent() {
+        // GIVEN a preexisting tree with a dismissed group
+        // AND the group children supports keepInParent
+        controller3.supportsKeepInParent = true
+        controller4.supportsKeepInParent = true
+        controller5.supportsKeepInParent = true
+        applySpecAndCheck(
+            node(controller1),
+            node(controller2, node(controller3), node(controller4), node(controller5))
+        )
+        applySpecAndCheck(node(controller1))
+
+        // WHEN a new spec is applied which reuses the dismissed views
+        applySpecAndCheck(
+            node(controller1),
+            node(controller2),
+            node(controller3),
+            node(controller4),
+            node(controller5)
+        )
+
+        // THEN the dismissed views can be reused
+        Assert.assertEquals(rootController.view, controller3.view.parent)
+        Assert.assertEquals(rootController.view, controller4.view.parent)
+        Assert.assertEquals(rootController.view, controller5.view.parent)
+        verifyDetachingChildLogged(controller3, oldParent = null)
+        verifyDetachingChildLogged(controller4, oldParent = null)
+        verifyDetachingChildLogged(controller5, oldParent = null)
     }
 
     @Test
@@ -184,7 +247,30 @@ class ShadeViewDifferTest : SysuiTestCase() {
         }
     }
 
+    private fun verifySkipDetachingChildLogged(child: NodeController, parent: NodeController) {
+        verify(logger)
+            .logSkipDetachingChild(
+                key = matches(child.nodeLabel),
+                parentKey = matches(parent.nodeLabel),
+                anyBoolean(),
+                anyBoolean()
+            )
+    }
+
+    private fun verifyDetachingChildLogged(child: NodeController, oldParent: NodeController?) {
+        verify(logger)
+            .logDetachingChild(
+                key = matches(child.nodeLabel),
+                isTransfer = anyBoolean(),
+                isParentRemoved = anyBoolean(),
+                oldParent = oldParent?.let { matches(it.nodeLabel) } ?: isNull(),
+                newParent = isNull()
+            )
+    }
+
     private class FakeController(context: Context, label: String) : NodeController {
+        var supportsKeepInParent: Boolean = false
+
         override val view: FrameLayout = FrameLayout(context)
         override val nodeLabel: String = label
         override fun getChildCount(): Int = view.childCount
@@ -209,6 +295,22 @@ class ShadeViewDifferTest : SysuiTestCase() {
         override fun onViewAdded() {}
         override fun onViewMoved() {}
         override fun onViewRemoved() {}
+        override fun offerToKeepInParentForAnimation(): Boolean {
+            return supportsKeepInParent
+        }
+
+        override fun removeFromParentIfKeptForAnimation(): Boolean {
+            if (supportsKeepInParent) {
+                (view.parent as? ViewGroup)?.removeView(view)
+                return true
+            }
+
+            return false
+        }
+
+        override fun resetKeepInParentForAnimation() {
+            supportsKeepInParent = false
+        }
     }
 
     private class SpecBuilder(

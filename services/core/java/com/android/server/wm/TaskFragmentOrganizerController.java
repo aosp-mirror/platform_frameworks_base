@@ -36,7 +36,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.graphics.Rect;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -133,12 +132,11 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                 new WeakHashMap<>();
 
         /**
-         * Map from Task Id to {@link RemoteAnimationDefinition}.
-         * @see android.window.TaskFragmentOrganizer#registerRemoteAnimations(int,
-         * RemoteAnimationDefinition) )
+         * {@link RemoteAnimationDefinition} for embedded activities transition animation that is
+         * organized by this organizer.
          */
-        private final SparseArray<RemoteAnimationDefinition> mRemoteAnimationDefinitions =
-                new SparseArray<>();
+        @Nullable
+        private RemoteAnimationDefinition mRemoteAnimationDefinition;
 
         /**
          * Map from {@link TaskFragmentTransaction#getTransactionToken()} to the
@@ -427,7 +425,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER,
                     "Register task fragment organizer=%s uid=%d pid=%d",
                     organizer.asBinder(), uid, pid);
-            if (mTaskFragmentOrganizerState.containsKey(organizer.asBinder())) {
+            if (isOrganizerRegistered(organizer)) {
                 throw new IllegalStateException(
                         "Replacing existing organizer currently unsupported");
             }
@@ -455,7 +453,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
     }
 
     @Override
-    public void registerRemoteAnimations(@NonNull ITaskFragmentOrganizer organizer, int taskId,
+    public void registerRemoteAnimations(@NonNull ITaskFragmentOrganizer organizer,
             @NonNull RemoteAnimationDefinition definition) {
         final int pid = Binder.getCallingPid();
         final int uid = Binder.getCallingUid();
@@ -468,20 +466,19 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             if (organizerState == null) {
                 throw new IllegalStateException("The organizer hasn't been registered.");
             }
-            if (organizerState.mRemoteAnimationDefinitions.contains(taskId)) {
+            if (organizerState.mRemoteAnimationDefinition != null) {
                 throw new IllegalStateException(
                         "The organizer has already registered remote animations="
-                                + organizerState.mRemoteAnimationDefinitions.get(taskId)
-                                + " for TaskId=" + taskId);
+                                + organizerState.mRemoteAnimationDefinition);
             }
 
             definition.setCallingPidUid(pid, uid);
-            organizerState.mRemoteAnimationDefinitions.put(taskId, definition);
+            organizerState.mRemoteAnimationDefinition = definition;
         }
     }
 
     @Override
-    public void unregisterRemoteAnimations(@NonNull ITaskFragmentOrganizer organizer, int taskId) {
+    public void unregisterRemoteAnimations(@NonNull ITaskFragmentOrganizer organizer) {
         final int pid = Binder.getCallingPid();
         final long uid = Binder.getCallingUid();
         synchronized (mGlobalLock) {
@@ -495,7 +492,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                 return;
             }
 
-            organizerState.mRemoteAnimationDefinitions.remove(taskId);
+            organizerState.mRemoteAnimationDefinition = null;
         }
     }
 
@@ -505,10 +502,18 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             @WindowManager.TransitionType int transitionType, boolean shouldApplyIndependently) {
         // Keep the calling identity to avoid unsecure change.
         synchronized (mGlobalLock) {
-            applyTransaction(wct, transitionType, shouldApplyIndependently);
-            final TaskFragmentOrganizerState state = validateAndGetState(
-                    wct.getTaskFragmentOrganizer());
-            state.onTransactionFinished(transactionToken);
+            if (isValidTransaction(wct)) {
+                applyTransaction(wct, transitionType, shouldApplyIndependently);
+            }
+            // Even if the transaction is empty, we still need to invoke #onTransactionFinished
+            // unless the organizer has been unregistered.
+            final ITaskFragmentOrganizer organizer = wct.getTaskFragmentOrganizer();
+            final TaskFragmentOrganizerState state = organizer != null
+                    ? mTaskFragmentOrganizerState.get(organizer.asBinder())
+                    : null;
+            if (state != null) {
+                state.onTransactionFinished(transactionToken);
+            }
         }
     }
 
@@ -517,7 +522,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             @WindowManager.TransitionType int transitionType, boolean shouldApplyIndependently) {
         // Keep the calling identity to avoid unsecure change.
         synchronized (mGlobalLock) {
-            if (wct.isEmpty()) {
+            if (!isValidTransaction(wct)) {
                 return;
             }
             mWindowOrganizerController.applyTaskFragmentTransactionLocked(wct, transitionType,
@@ -527,16 +532,16 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
 
     /**
      * Gets the {@link RemoteAnimationDefinition} set on the given organizer if exists. Returns
-     * {@code null} if it doesn't, or if the organizer has activity(ies) embedded in untrusted mode.
+     * {@code null} if it doesn't.
      */
     @Nullable
     public RemoteAnimationDefinition getRemoteAnimationDefinition(
-            @NonNull ITaskFragmentOrganizer organizer, int taskId) {
+            @NonNull ITaskFragmentOrganizer organizer) {
         synchronized (mGlobalLock) {
             final TaskFragmentOrganizerState organizerState =
                     mTaskFragmentOrganizerState.get(organizer.asBinder());
             return organizerState != null
-                    ? organizerState.mRemoteAnimationDefinitions.get(taskId)
+                    ? organizerState.mRemoteAnimationDefinition
                     : null;
         }
     }
@@ -658,7 +663,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             }
             organizer = organizedTf[0].getTaskFragmentOrganizer();
         }
-        if (!mTaskFragmentOrganizerState.containsKey(organizer.asBinder())) {
+        if (!isOrganizerRegistered(organizer)) {
             Slog.w(TAG, "The last TaskFragmentOrganizer no longer exists");
             return;
         }
@@ -704,7 +709,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         mPendingTaskFragmentEvents.get(event.mTaskFragmentOrg.asBinder()).remove(event);
     }
 
-    boolean isOrganizerRegistered(@NonNull ITaskFragmentOrganizer organizer) {
+    private boolean isOrganizerRegistered(@NonNull ITaskFragmentOrganizer organizer) {
         return mTaskFragmentOrganizerState.containsKey(organizer.asBinder());
     }
 
@@ -739,6 +744,20 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                     "TaskFragmentOrganizer has not been registered. Organizer=" + organizer);
         }
         return state;
+    }
+
+    boolean isValidTransaction(@NonNull WindowContainerTransaction t) {
+        if (t.isEmpty()) {
+            return false;
+        }
+        final ITaskFragmentOrganizer organizer = t.getTaskFragmentOrganizer();
+        if (t.getTaskFragmentOrganizer() == null || !isOrganizerRegistered(organizer)) {
+            // Transaction from an unregistered organizer should not be applied. This can happen
+            // when the organizer process died before the transaction is applied.
+            Slog.e(TAG, "Caller organizer=" + organizer + " is no longer registered");
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -1085,16 +1104,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                 return false;
             }
             final TaskFragment taskFragment = activity.getOrganizedTaskFragment();
-            if (taskFragment == null) {
-                return false;
-            }
-            final Task parentTask = taskFragment.getTask();
-            if (parentTask != null) {
-                final Rect taskBounds = parentTask.getBounds();
-                final Rect taskFragBounds = taskFragment.getBounds();
-                return !taskBounds.equals(taskFragBounds) && taskBounds.contains(taskFragBounds);
-            }
-            return false;
+            return taskFragment != null && taskFragment.isEmbeddedWithBoundsOverride();
         }
     }
 

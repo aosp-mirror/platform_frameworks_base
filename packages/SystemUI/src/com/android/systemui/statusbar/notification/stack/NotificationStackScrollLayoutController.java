@@ -443,7 +443,11 @@ public class NotificationStackScrollLayoutController {
                     if (!row.isDismissed()) {
                         handleChildViewDismissed(view);
                     }
+
                     row.removeFromTransientContainer();
+                    if (row instanceof ExpandableNotificationRow) {
+                        ((ExpandableNotificationRow) row).removeChildrenWithKeepInParent();
+                    }
                 }
 
                 /**
