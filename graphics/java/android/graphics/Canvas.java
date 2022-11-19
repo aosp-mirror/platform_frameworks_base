@@ -1667,6 +1667,9 @@ public class Canvas extends BaseCanvas {
      * effectively treating them as zeros. In API level {@value Build.VERSION_CODES#P} and above
      * these parameters will be respected.
      *
+     * <p>Note: antialiasing is not supported, therefore {@link Paint#ANTI_ALIAS_FLAG} is
+     * ignored.</p>
+     *
      * @param bitmap The bitmap to draw using the mesh
      * @param meshWidth The number of columns in the mesh. Nothing is drawn if this is 0
      * @param meshHeight The number of rows in the mesh. Nothing is drawn if this is 0
@@ -1678,7 +1681,7 @@ public class Canvas extends BaseCanvas {
      *            null, there must be at least (meshWidth+1) * (meshHeight+1) + colorOffset values
      *            in the array.
      * @param colorOffset Number of color elements to skip before drawing
-     * @param paint May be null. The paint used to draw the bitmap
+     * @param paint May be null. The paint used to draw the bitmap. Antialiasing is not supported.
      */
     public void drawBitmapMesh(@NonNull Bitmap bitmap, int meshWidth, int meshHeight,
             @NonNull float[] verts, int vertOffset, @Nullable int[] colors, int colorOffset,
@@ -1832,9 +1835,12 @@ public class Canvas extends BaseCanvas {
     /**
      * Draws the specified bitmap as an N-patch (most often, a 9-patch.)
      *
+     * <p>Note: antialiasing is not supported, therefore {@link Paint#ANTI_ALIAS_FLAG} is
+     * ignored.</p>
+     *
      * @param patch The ninepatch object to render
      * @param dst The destination rectangle.
-     * @param paint The paint to draw the bitmap with. may be null
+     * @param paint The paint to draw the bitmap with. May be null. Antialiasing is not supported.
      */
     public void drawPatch(@NonNull NinePatch patch, @NonNull Rect dst, @Nullable Paint paint) {
         super.drawPatch(patch, dst, paint);
@@ -1843,9 +1849,12 @@ public class Canvas extends BaseCanvas {
     /**
      * Draws the specified bitmap as an N-patch (most often, a 9-patch.)
      *
+     * <p>Note: antialiasing is not supported, therefore {@link Paint#ANTI_ALIAS_FLAG} is
+     * ignored.</p>
+     *
      * @param patch The ninepatch object to render
      * @param dst The destination rectangle.
-     * @param paint The paint to draw the bitmap with. may be null
+     * @param paint The paint to draw the bitmap with. May be null. Antialiasing is not supported.
      */
     public void drawPatch(@NonNull NinePatch patch, @NonNull RectF dst, @Nullable Paint paint) {
         super.drawPatch(patch, dst, paint);
@@ -2278,6 +2287,9 @@ public class Canvas extends BaseCanvas {
      * array is optional, but if it is present, then it is used to specify the index of each
      * triangle, rather than just walking through the arrays in order.
      *
+     * <p>Note: antialiasing is not supported, therefore {@link Paint#ANTI_ALIAS_FLAG} is
+     * ignored.</p>
+     *
      * @param mode How to interpret the array of vertices
      * @param vertexCount The number of values in the vertices array (and corresponding texs and
      *            colors arrays if non-null). Each logical vertex is two values (x, y), vertexCount
@@ -2292,8 +2304,9 @@ public class Canvas extends BaseCanvas {
      * @param colorOffset Number of values in colors to skip before drawing.
      * @param indices If not null, array of indices to reference into the vertex (texs, colors)
      *            array.
-     * @param indexCount number of entries in the indices array (if not null).
-     * @param paint Specifies the shader to use if the texs array is non-null.
+     * @param indexCount Number of entries in the indices array (if not null).
+     * @param paint Specifies the shader to use if the texs array is non-null. Antialiasing is not
+     *            supported.
      */
     public void drawVertices(@NonNull VertexMode mode, int vertexCount, @NonNull float[] verts,
             int vertOffset, @Nullable float[] texs, int texOffset, @Nullable int[] colors,
