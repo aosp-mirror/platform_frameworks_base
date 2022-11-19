@@ -375,6 +375,18 @@ public class PowerManagerServiceTest {
         mBatteryReceiver.onReceive(mContextSpy, new Intent(Intent.ACTION_BATTERY_CHANGED));
     }
 
+    private void setBatteryLevel(int batteryLevel) {
+        when(mBatteryManagerInternalMock.getBatteryLevel())
+                .thenReturn(batteryLevel);
+        mBatteryReceiver.onReceive(mContextSpy, new Intent(Intent.ACTION_BATTERY_CHANGED));
+    }
+
+    private void setBatteryHealth(int batteryHealth) {
+        when(mBatteryManagerInternalMock.getBatteryHealth())
+                .thenReturn(batteryHealth);
+        mBatteryReceiver.onReceive(mContextSpy, new Intent(Intent.ACTION_BATTERY_CHANGED));
+    }
+
     private void setAttentiveTimeout(int attentiveTimeoutMillis) {
         Settings.Secure.putInt(
                 mContextSpy.getContentResolver(), Settings.Secure.ATTENTIVE_TIMEOUT,
@@ -397,6 +409,12 @@ public class PowerManagerServiceTest {
         when(mResourcesSpy.getBoolean(
                 com.android.internal.R.bool.config_dreamsDisabledByAmbientModeSuppressionConfig))
                 .thenReturn(disable);
+    }
+
+    private void setDreamsBatteryLevelDrainConfig(int threshold) {
+        when(mResourcesSpy.getInteger(
+                com.android.internal.R.integer.config_dreamsBatteryLevelDrainCutoff)).thenReturn(
+                threshold);
     }
 
     private void advanceTime(long timeMs) {
@@ -935,6 +953,41 @@ public class PowerManagerServiceTest {
         // Verify that forcing dream still works even though ambient display is suppressed
         forceDream();
         assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_DREAMING);
+    }
+
+    @Test
+    public void testBatteryDrainDuringDream() {
+        Settings.Secure.putInt(mContextSpy.getContentResolver(),
+                Settings.Secure.SCREENSAVER_ACTIVATE_ON_SLEEP, 1);
+        Settings.Secure.putInt(mContextSpy.getContentResolver(),
+                Settings.Secure.SCREENSAVER_ENABLED, 1);
+
+        setMinimumScreenOffTimeoutConfig(100);
+        setDreamsBatteryLevelDrainConfig(5);
+        createService();
+        startSystem();
+
+        doAnswer(inv -> {
+            when(mDreamManagerInternalMock.isDreaming()).thenReturn(true);
+            return null;
+        }).when(mDreamManagerInternalMock).startDream(anyBoolean(), anyString());
+
+        setBatteryLevel(100);
+        setPluggedIn(true);
+
+        forceAwake();  // Needs to be awake first before it can dream.
+        forceDream();
+        advanceTime(10); // Allow async calls to happen
+        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_DREAMING);
+        setBatteryLevel(90);
+        advanceTime(10); // Allow async calls to happen
+        assertThat(mService.getDreamsBatteryLevelDrain()).isEqualTo(10);
+
+        // If battery overheat protection is enabled, we shouldn't count battery drain
+        setBatteryHealth(BatteryManager.BATTERY_HEALTH_OVERHEAT);
+        setBatteryLevel(70);
+        advanceTime(10); // Allow async calls to happen
+        assertThat(mService.getDreamsBatteryLevelDrain()).isEqualTo(10);
     }
 
     @Test
