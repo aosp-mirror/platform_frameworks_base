@@ -372,10 +372,13 @@ public class KeyguardPatternViewController
                 Map<String, Object> arguments = new HashMap<>();
                 arguments.put("count", secondsRemaining);
 
-                mMessageAreaController.setMessage(PluralsMessageFormatter.format(
-                        mView.getResources(),
-                        arguments,
-                        R.string.kg_too_many_failed_attempts_countdown));
+                mMessageAreaController.setMessage(
+                        PluralsMessageFormatter.format(
+                            mView.getResources(),
+                            arguments,
+                            R.string.kg_too_many_failed_attempts_countdown),
+                        /* animate= */ false
+                );
             }
 
             @Override

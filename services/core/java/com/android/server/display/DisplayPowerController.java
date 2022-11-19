@@ -1677,7 +1677,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mTempBrightnessEvent.rbcStrength = mCdsi != null
                 ? mCdsi.getReduceBrightColorsStrength() : -1;
         mTempBrightnessEvent.powerFactor = mPowerRequest.screenLowPowerBrightnessFactor;
-
+        mTempBrightnessEvent.wasShortTermModelActive = hadUserBrightnessPoint;
         // Temporary is what we use during slider interactions. We avoid logging those so that
         // we don't spam logcat when the slider is being used.
         boolean tempToTempTransition =
@@ -1687,12 +1687,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 || brightnessAdjustmentFlags != 0) {
             float lastBrightness = mLastBrightnessEvent.brightness;
             mTempBrightnessEvent.initialBrightness = lastBrightness;
-            mTempBrightnessEvent.fastAmbientLux =
-                    mAutomaticBrightnessController == null
-                        ? -1f : mAutomaticBrightnessController.getFastAmbientLux();
-            mTempBrightnessEvent.slowAmbientLux =
-                    mAutomaticBrightnessController == null
-                        ? -1f : mAutomaticBrightnessController.getSlowAmbientLux();
             mTempBrightnessEvent.automaticBrightnessEnabled = mPowerRequest.useAutoBrightness;
             mLastBrightnessEvent.copyFrom(mTempBrightnessEvent);
             BrightnessEvent newEvent = new BrightnessEvent(mTempBrightnessEvent);
@@ -2579,7 +2573,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             pw.println("  mCachedBrightnessInfo.hbmTransitionPoint=" +
                     mCachedBrightnessInfo.hbmTransitionPoint.value);
             pw.println("  mCachedBrightnessInfo.brightnessMaxReason =" +
-                    mCachedBrightnessInfo.brightnessMaxReason .value);
+                    mCachedBrightnessInfo.brightnessMaxReason.value);
         }
         pw.println("  mDisplayBlanksAfterDozeConfig=" + mDisplayBlanksAfterDozeConfig);
         pw.println("  mBrightnessBucketsInDozeConfig=" + mBrightnessBucketsInDozeConfig);
@@ -2816,9 +2810,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             FrameworkStatsLog.write(FrameworkStatsLog.DISPLAY_BRIGHTNESS_CHANGED,
                     convertToNits(event.initialBrightness),
                     convertToNits(event.brightness),
-                    event.slowAmbientLux,
+                    event.lux,
                     event.physicalDisplayId,
-                    event.isShortTermModelActive(),
+                    event.wasShortTermModelActive,
                     appliedPowerFactor,
                     appliedRbcStrength,
                     appliedHbmMaxNits,
@@ -2841,8 +2835,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         public int displayId;
         public String physicalDisplayId;
         public float lux;
-        public float fastAmbientLux;
-        public float slowAmbientLux;
         public float preThresholdLux;
         public long time;
         public float brightness;
@@ -2854,6 +2846,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         public float thermalMax;
         public float powerFactor;
         public int hbmMode;
+        public boolean wasShortTermModelActive;
         public int flags;
         public int adjustmentFlags;
         public boolean automaticBrightnessEnabled;
@@ -2872,8 +2865,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             physicalDisplayId = that.physicalDisplayId;
             time = that.time;
             lux = that.lux;
-            fastAmbientLux = that.fastAmbientLux;
-            slowAmbientLux = that.slowAmbientLux;
             preThresholdLux = that.preThresholdLux;
             brightness = that.brightness;
             initialBrightness = that.initialBrightness;
@@ -2885,6 +2876,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             powerFactor = that.powerFactor;
             flags = that.flags;
             hbmMode = that.hbmMode;
+            wasShortTermModelActive = that.wasShortTermModelActive;
             reason.set(that.reason);
             adjustmentFlags = that.adjustmentFlags;
             automaticBrightnessEnabled = that.automaticBrightnessEnabled;
@@ -2897,13 +2889,12 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             initialBrightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
             recommendedBrightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
             lux = 0f;
-            fastAmbientLux = 0f;
-            slowAmbientLux = 0f;
             preThresholdLux = 0f;
             preThresholdBrightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
             hbmMax = PowerManager.BRIGHTNESS_MAX;
             rbcStrength = 0;
             powerFactor = 1f;
+            wasShortTermModelActive = false;
             thermalMax = PowerManager.BRIGHTNESS_MAX;
             flags = 0;
             hbmMode = BrightnessInfo.HIGH_BRIGHTNESS_MODE_OFF;
@@ -2938,10 +2929,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     && Float.floatToRawIntBits(preThresholdBrightness)
                         == Float.floatToRawIntBits(that.preThresholdBrightness)
                     && Float.floatToRawIntBits(lux) == Float.floatToRawIntBits(that.lux)
-                    && Float.floatToRawIntBits(fastAmbientLux)
-                        == Float.floatToRawIntBits(that.fastAmbientLux)
-                    && Float.floatToRawIntBits(slowAmbientLux)
-                        == Float.floatToRawIntBits(that.slowAmbientLux)
                     && Float.floatToRawIntBits(preThresholdLux)
                         == Float.floatToRawIntBits(that.preThresholdLux)
                     && rbcStrength == that.rbcStrength
@@ -2951,6 +2938,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                         == Float.floatToRawIntBits(that.thermalMax)
                     && Float.floatToRawIntBits(powerFactor)
                         == Float.floatToRawIntBits(that.powerFactor)
+                    && wasShortTermModelActive == that.wasShortTermModelActive
                     && flags == that.flags
                     && adjustmentFlags == that.adjustmentFlags
                     && reason.equals(that.reason)
@@ -2967,14 +2955,13 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     + ", rcmdBrt=" + recommendedBrightness
                     + ", preBrt=" + preThresholdBrightness
                     + ", lux=" + lux
-                    + ", fastAmbientLux=" + fastAmbientLux
-                    + ", slowAmbientLux=" + slowAmbientLux
                     + ", preLux=" + preThresholdLux
                     + ", hbmMax=" + hbmMax
                     + ", hbmMode=" + BrightnessInfo.hbmToString(hbmMode)
                     + ", rbcStrength=" + rbcStrength
                     + ", powerFactor=" + powerFactor
                     + ", thrmMax=" + thermalMax
+                    + ", wasShortTermModelActive=" + wasShortTermModelActive
                     + ", flags=" + flagsToString()
                     + ", reason=" + reason.toString(adjustmentFlags)
                     + ", autoBrightness=" + automaticBrightnessEnabled;

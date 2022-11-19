@@ -41,7 +41,7 @@ open class RippleView(context: Context?, attrs: AttributeSet?) : View(context, a
         private set
 
     private val ripplePaint = Paint()
-    private val animator = ValueAnimator.ofFloat(0f, 1f)
+    protected val animator: ValueAnimator = ValueAnimator.ofFloat(0f, 1f)
 
     var duration: Long = 1750
 

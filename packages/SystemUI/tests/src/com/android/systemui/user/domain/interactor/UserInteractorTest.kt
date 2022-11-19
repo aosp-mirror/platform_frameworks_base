@@ -771,6 +771,28 @@ class UserInteractorTest : SysuiTestCase() {
             )
     }
 
+    @Test
+    fun `users - secondary user - managed profile is not included`() =
+        runBlocking(IMMEDIATE) {
+            var userInfos = createUserInfos(count = 3, includeGuest = false).toMutableList()
+            userInfos.add(
+                UserInfo(
+                    50,
+                    "Work Profile",
+                    /* iconPath= */ "",
+                    /* flags= */ UserInfo.FLAG_MANAGED_PROFILE
+                )
+            )
+            userRepository.setUserInfos(userInfos)
+            userRepository.setSelectedUserInfo(userInfos[1])
+            userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = true))
+
+            var res: List<UserModel>? = null
+            val job = underTest.users.onEach { res = it }.launchIn(this)
+            assertThat(res?.size == 3).isTrue()
+            job.cancel()
+        }
+
     private fun assertUsers(
         models: List<UserModel>?,
         count: Int,
@@ -893,9 +915,9 @@ class UserInteractorTest : SysuiTestCase() {
             name,
             /* iconPath= */ "",
             /* flags= */ if (isPrimary) {
-                UserInfo.FLAG_PRIMARY or UserInfo.FLAG_ADMIN
+                UserInfo.FLAG_PRIMARY or UserInfo.FLAG_ADMIN or UserInfo.FLAG_FULL
             } else {
-                0
+                UserInfo.FLAG_FULL
             },
             if (isGuest) {
                 UserManager.USER_TYPE_FULL_GUEST

@@ -58,4 +58,39 @@ public abstract class DreamManagerInternal {
      * @param isScreenOn True if the screen is currently on.
      */
     public abstract boolean canStartDreaming(boolean isScreenOn);
+
+    /**
+     * Return whether dreams can continue when undocking by default. Even if the default is true,
+     * it can be overridden temporarily, in which case {@link DreamManagerStateListener} will be
+     * informed of any changes.
+     */
+    public abstract boolean keepDreamingWhenUndockedDefault();
+
+    /**
+     * Register a {@link DreamManagerStateListener}, which will be called when there are changes to
+     * dream state.
+     *
+     * @param listener The listener to register.
+     */
+    public abstract void registerDreamManagerStateListener(DreamManagerStateListener listener);
+
+    /**
+     * Unregister a {@link DreamManagerStateListener}, which will be called when there are changes
+     * to dream state.
+     *
+     * @param listener The listener to unregister.
+     */
+    public abstract void unregisterDreamManagerStateListener(DreamManagerStateListener listener);
+
+    /**
+     * Called when there are changes to dream state.
+     */
+    public interface DreamManagerStateListener {
+        /**
+         * Called when keep dreaming when undocked has changed.
+         *
+         * @param keepDreaming True if the current dream should continue when undocking.
+         */
+        void onKeepDreamingWhenUndockedChanged(boolean keepDreaming);
+    }
 }

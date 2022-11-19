@@ -16,19 +16,10 @@
 
 package com.android.systemui.flags
 
-import com.android.internal.statusbar.IStatusBarService
 import javax.inject.Inject
 
-class SystemExitRestarter
-@Inject
-constructor(
-    private val barService: IStatusBarService,
-) : Restarter {
-    override fun restartAndroid() {
-        barService.restart()
-    }
-
-    override fun restartSystemUI() {
+class SystemExitRestarter @Inject constructor() : Restarter {
+    override fun restart() {
         System.exit(0)
     }
 }

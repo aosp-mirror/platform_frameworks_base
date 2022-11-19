@@ -23,10 +23,7 @@ import com.android.systemui.keyguard.shared.model.BouncerShowMessageModel
 import com.android.systemui.keyguard.shared.model.KeyguardBouncerModel
 import com.android.systemui.statusbar.phone.KeyguardBouncer
 import javax.inject.Inject
-import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /** Encapsulates app state for the lock screen primary and alternate bouncer. */
@@ -71,12 +68,8 @@ constructor(
     private val _keyguardAuthenticated = MutableStateFlow<Boolean?>(null)
     /** Determines if user is already unlocked */
     val keyguardAuthenticated = _keyguardAuthenticated.asStateFlow()
-    private val _showMessage =
-        MutableSharedFlow<BouncerShowMessageModel?>(
-            replay = 1,
-            onBufferOverflow = BufferOverflow.DROP_OLDEST
-        )
-    val showMessage = _showMessage.asSharedFlow()
+    private val _showMessage = MutableStateFlow<BouncerShowMessageModel?>(null)
+    val showMessage = _showMessage.asStateFlow()
     private val _resourceUpdateRequests = MutableStateFlow(false)
     val resourceUpdateRequests = _resourceUpdateRequests.asStateFlow()
     val bouncerPromptReason: Int
@@ -125,7 +118,7 @@ constructor(
     }
 
     fun setShowMessage(bouncerShowMessageModel: BouncerShowMessageModel?) {
-        _showMessage.tryEmit(bouncerShowMessageModel)
+        _showMessage.value = bouncerShowMessageModel
     }
 
     fun setKeyguardAuthenticated(keyguardAuthenticated: Boolean?) {

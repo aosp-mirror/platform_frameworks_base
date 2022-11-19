@@ -115,7 +115,8 @@ public class SystemUIApplication extends Application implements
         setTheme(R.style.Theme_SystemUI);
 
         if (Process.myUserHandle().equals(UserHandle.SYSTEM)) {
-            IntentFilter bootCompletedFilter = new IntentFilter(Intent.ACTION_BOOT_COMPLETED);
+            IntentFilter bootCompletedFilter = new
+                    IntentFilter(Intent.ACTION_LOCKED_BOOT_COMPLETED);
             bootCompletedFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
 
             // If SF GPU context priority is set to realtime, then SysUI should run at high.

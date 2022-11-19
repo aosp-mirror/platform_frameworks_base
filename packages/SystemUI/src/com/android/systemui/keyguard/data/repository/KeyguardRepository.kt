@@ -23,9 +23,14 @@ import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCall
 import com.android.systemui.common.shared.model.Position
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.doze.DozeHost
+import com.android.systemui.doze.DozeMachine
+import com.android.systemui.doze.DozeTransitionCallback
+import com.android.systemui.doze.DozeTransitionListener
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.keyguard.WakefulnessLifecycle.Wakefulness
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
+import com.android.systemui.keyguard.shared.model.DozeStateModel
+import com.android.systemui.keyguard.shared.model.DozeTransitionModel
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.WakefulnessModel
 import com.android.systemui.plugins.statusbar.StatusBarStateController
@@ -108,6 +113,9 @@ interface KeyguardRepository {
      */
     val dozeAmount: Flow<Float>
 
+    /** Doze state information, as it transitions */
+    val dozeTransitionModel: Flow<DozeTransitionModel>
+
     /** Observable for the [StatusBarState] */
     val statusBarState: Flow<StatusBarState>
 
@@ -154,6 +162,7 @@ constructor(
     biometricUnlockController: BiometricUnlockController,
     private val keyguardStateController: KeyguardStateController,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
+    private val dozeTransitionListener: DozeTransitionListener,
 ) : KeyguardRepository {
     private val _animateBottomAreaDozingTransitions = MutableStateFlow(false)
     override val animateBottomAreaDozingTransitions =
@@ -286,6 +295,37 @@ constructor(
         awaitClose { statusBarStateController.removeCallback(callback) }
     }
 
+    override val dozeTransitionModel: Flow<DozeTransitionModel> = conflatedCallbackFlow {
+        val callback =
+            object : DozeTransitionCallback {
+                override fun onDozeTransition(
+                    oldState: DozeMachine.State,
+                    newState: DozeMachine.State
+                ) {
+                    trySendWithFailureLogging(
+                        DozeTransitionModel(
+                            from = dozeMachineStateToModel(oldState),
+                            to = dozeMachineStateToModel(newState),
+                        ),
+                        TAG,
+                        "doze transition model"
+                    )
+                }
+            }
+
+        dozeTransitionListener.addCallback(callback)
+        trySendWithFailureLogging(
+            DozeTransitionModel(
+                from = dozeMachineStateToModel(dozeTransitionListener.oldState),
+                to = dozeMachineStateToModel(dozeTransitionListener.newState),
+            ),
+            TAG,
+            "initial doze transition model"
+        )
+
+        awaitClose { dozeTransitionListener.removeCallback(callback) }
+    }
+
     override fun isKeyguardShowing(): Boolean {
         return keyguardStateController.isShowing
     }
@@ -404,6 +444,25 @@ constructor(
             6 -> BiometricUnlockModel.WAKE_AND_UNLOCK_FROM_DREAM
             7 -> BiometricUnlockModel.DISMISS_BOUNCER
             else -> throw IllegalArgumentException("Invalid BiometricUnlockModel value: $value")
+        }
+    }
+
+    private fun dozeMachineStateToModel(state: DozeMachine.State): DozeStateModel {
+        return when (state) {
+            DozeMachine.State.UNINITIALIZED -> DozeStateModel.UNINITIALIZED
+            DozeMachine.State.INITIALIZED -> DozeStateModel.INITIALIZED
+            DozeMachine.State.DOZE -> DozeStateModel.DOZE
+            DozeMachine.State.DOZE_SUSPEND_TRIGGERS -> DozeStateModel.DOZE_SUSPEND_TRIGGERS
+            DozeMachine.State.DOZE_AOD -> DozeStateModel.DOZE_AOD
+            DozeMachine.State.DOZE_REQUEST_PULSE -> DozeStateModel.DOZE_REQUEST_PULSE
+            DozeMachine.State.DOZE_PULSING -> DozeStateModel.DOZE_PULSING
+            DozeMachine.State.DOZE_PULSING_BRIGHT -> DozeStateModel.DOZE_PULSING_BRIGHT
+            DozeMachine.State.DOZE_PULSE_DONE -> DozeStateModel.DOZE_PULSE_DONE
+            DozeMachine.State.FINISH -> DozeStateModel.FINISH
+            DozeMachine.State.DOZE_AOD_PAUSED -> DozeStateModel.DOZE_AOD_PAUSED
+            DozeMachine.State.DOZE_AOD_PAUSING -> DozeStateModel.DOZE_AOD_PAUSING
+            DozeMachine.State.DOZE_AOD_DOCKED -> DozeStateModel.DOZE_AOD_DOCKED
+            else -> throw IllegalArgumentException("Invalid DozeMachine.State: state")
         }
     }
 

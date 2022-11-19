@@ -23,9 +23,9 @@
 -packages/SystemUI/shared/src/com/android/systemui/flags/FlagSerializer.kt
 -packages/SystemUI/shared/src/com/android/systemui/flags/FlagSettingsHelper.kt
 -packages/SystemUI/shared/src/com/android/systemui/shared/animation/UnfoldMoveFromCenterAnimator.kt
--packages/SystemUI/shared/src/com/android/systemui/shared/clocks/AnimatableClockView.kt
--packages/SystemUI/shared/src/com/android/systemui/shared/clocks/ClockRegistry.kt
--packages/SystemUI/shared/src/com/android/systemui/shared/clocks/DefaultClockProvider.kt
+-packages/SystemUI/customization/src/com/android/systemui/shared/clocks/AnimatableClockView.kt
+-packages/SystemUI/customization/src/com/android/systemui/shared/clocks/ClockRegistry.kt
+-packages/SystemUI/customization/src/com/android/systemui/shared/clocks/DefaultClockProvider.kt
 -packages/SystemUI/shared/src/com/android/systemui/shared/rotation/FloatingRotationButtonPositionCalculator.kt
 -packages/SystemUI/shared/src/com/android/systemui/shared/system/UncaughtExceptionPreHandlerManager.kt
 -packages/SystemUI/shared/src/com/android/systemui/shared/system/smartspace/SmartspaceState.kt
