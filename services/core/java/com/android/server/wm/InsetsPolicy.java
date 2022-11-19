@@ -454,8 +454,7 @@ class InsetsPolicy {
             final InsetsSource originalImeSource = originalState.peekSource(ITYPE_IME);
 
             if (originalImeSource != null) {
-                final boolean imeVisibility =
-                        w.mActivityRecord.mLastImeShown || w.isRequestedVisible(Type.ime());
+                final boolean imeVisibility = w.isRequestedVisible(Type.ime());
                 final InsetsState state = copyState ? new InsetsState(originalState)
                         : originalState;
                 final InsetsSource imeSource = new InsetsSource(originalImeSource);
