@@ -363,6 +363,7 @@ key 405   LAST_CHANNEL
 # key 413 "KEY_DIGITS"
 # key 414 "KEY_TEEN"
 # key 415 "KEY_TWEN"
+key 528 FOCUS
 
 key 429   CONTACTS
 
