@@ -26,6 +26,7 @@ import android.annotation.NonNull;
 import android.content.pm.ActivityInfo;
 import android.graphics.Rect;
 import android.util.Size;
+import android.view.View;
 
 /**
  * The static class that defines some utility constants and functions that are shared among launch
@@ -42,6 +43,8 @@ class LaunchParamsUtil {
     // One of the most common tablet sizes that are small enough to fit in most large screens.
     private static final int DEFAULT_LANDSCAPE_FREEFORM_WIDTH_DP = 1064;
     private static final int DEFAULT_LANDSCAPE_FREEFORM_HEIGHT_DP = 600;
+
+    private static final int DISPLAY_EDGE_OFFSET_DP = 27;
 
     private LaunchParamsUtil() {}
 
@@ -125,5 +128,45 @@ class LaunchParamsUtil {
         }
 
         return new Size(adjWidth, adjHeight);
+    }
+
+    static void adjustBoundsToFitInDisplayArea(@NonNull Rect stableBounds, int layoutDirection,
+                                               @NonNull ActivityInfo.WindowLayout layout,
+                                               @NonNull Rect inOutBounds) {
+        if (stableBounds.width() < inOutBounds.width()
+                || stableBounds.height() < inOutBounds.height()) {
+            // There is no way for us to fit the bounds in the displayArea without changing width
+            // or height. Just move the start to align with the displayArea.
+            final int left = layoutDirection == View.LAYOUT_DIRECTION_RTL
+                    ? stableBounds.right - inOutBounds.right + inOutBounds.left
+                    : stableBounds.left;
+            inOutBounds.offsetTo(left, stableBounds.top);
+            return;
+        }
+
+        final int dx;
+        if (inOutBounds.right > stableBounds.right) {
+            // Right edge is out of displayArea.
+            dx = stableBounds.right - inOutBounds.right;
+        } else if (inOutBounds.left < stableBounds.left) {
+            // Left edge is out of displayArea.
+            dx = stableBounds.left - inOutBounds.left;
+        } else {
+            // Vertical edges are all in displayArea.
+            dx = 0;
+        }
+
+        final int dy;
+        if (inOutBounds.top < stableBounds.top) {
+            // Top edge is out of displayArea.
+            dy = stableBounds.top - inOutBounds.top;
+        } else if (inOutBounds.bottom > stableBounds.bottom) {
+            // Bottom edge is out of displayArea.
+            dy = stableBounds.bottom - inOutBounds.bottom;
+        } else {
+            // Horizontal edges are all in displayArea.
+            dy = 0;
+        }
+        inOutBounds.offset(dx, dy);
     }
 }

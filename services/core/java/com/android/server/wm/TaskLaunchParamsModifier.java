@@ -51,7 +51,6 @@ import android.graphics.Rect;
 import android.util.Size;
 import android.util.Slog;
 import android.view.Gravity;
-import android.view.View;
 import android.window.WindowContainerToken;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -372,7 +371,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
             if (resolvedMode == WINDOWING_MODE_FREEFORM) {
                 // Make sure bounds are in the displayArea.
                 if (currentParams.mPreferredTaskDisplayArea != taskDisplayArea) {
-                    adjustBoundsToFitInDisplayArea(taskDisplayArea, outParams.mBounds);
+                    adjustBoundsToFitInDisplayArea(taskDisplayArea, layout, outParams.mBounds);
                 }
                 // Even though we want to keep original bounds, we still don't want it to stomp on
                 // an existing task.
@@ -788,7 +787,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
             // we may need to move it back to the displayArea.
             LaunchParamsUtil.centerBounds(displayArea, mTmpBounds.width(), mTmpBounds.height(),
                     inOutBounds);
-            adjustBoundsToFitInDisplayArea(displayArea, inOutBounds);
+            adjustBoundsToFitInDisplayArea(displayArea, layout, inOutBounds);
             if (DEBUG) appendLog("freeform-size-mismatch=" + inOutBounds);
         }
 
@@ -835,47 +834,13 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
     }
 
     private void adjustBoundsToFitInDisplayArea(@NonNull TaskDisplayArea displayArea,
-            @NonNull Rect inOutBounds) {
-        final Rect stableBounds = mTmpStableBounds;
-        displayArea.getStableRect(stableBounds);
-
-        if (stableBounds.width() < inOutBounds.width()
-                || stableBounds.height() < inOutBounds.height()) {
-            // There is no way for us to fit the bounds in the displayArea without changing width
-            // or height. Just move the start to align with the displayArea.
-            final int layoutDirection =
-                    mSupervisor.mRootWindowContainer.getConfiguration().getLayoutDirection();
-            final int left = layoutDirection == View.LAYOUT_DIRECTION_RTL
-                    ? stableBounds.right - inOutBounds.right + inOutBounds.left
-                    : stableBounds.left;
-            inOutBounds.offsetTo(left, stableBounds.top);
-            return;
-        }
-
-        final int dx;
-        if (inOutBounds.right > stableBounds.right) {
-            // Right edge is out of displayArea.
-            dx = stableBounds.right - inOutBounds.right;
-        } else if (inOutBounds.left < stableBounds.left) {
-            // Left edge is out of displayArea.
-            dx = stableBounds.left - inOutBounds.left;
-        } else {
-            // Vertical edges are all in displayArea.
-            dx = 0;
-        }
-
-        final int dy;
-        if (inOutBounds.top < stableBounds.top) {
-            // Top edge is out of displayArea.
-            dy = stableBounds.top - inOutBounds.top;
-        } else if (inOutBounds.bottom > stableBounds.bottom) {
-            // Bottom edge is out of displayArea.
-            dy = stableBounds.bottom - inOutBounds.bottom;
-        } else {
-            // Horizontal edges are all in displayArea.
-            dy = 0;
-        }
-        inOutBounds.offset(dx, dy);
+                                                @NonNull ActivityInfo.WindowLayout layout,
+                                                @NonNull Rect inOutBounds) {
+        final int layoutDirection = mSupervisor.mRootWindowContainer.getConfiguration()
+                .getLayoutDirection();
+        displayArea.getStableRect(mTmpStableBounds);
+        LaunchParamsUtil.adjustBoundsToFitInDisplayArea(mTmpStableBounds, layoutDirection, layout,
+                inOutBounds);
     }
 
     /**
