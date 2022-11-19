@@ -25,6 +25,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
+import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_OPEN;
 import static android.view.WindowManager.TRANSIT_OLD_DREAM_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_DREAM_ACTIVITY_OPEN;
@@ -56,6 +57,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import android.annotation.Nullable;
+import android.graphics.Rect;
 import android.gui.DropInputMode;
 import android.os.Binder;
 import android.os.IBinder;
@@ -918,7 +920,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         final Task task = createTask(mDisplayContent);
         final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
         final TestRemoteAnimationRunner remoteAnimationRunner = new TestRemoteAnimationRunner();
-        setupTaskFragmentRemoteAnimation(organizer, task.mTaskId, remoteAnimationRunner);
+        setupTaskFragmentRemoteAnimation(organizer, remoteAnimationRunner);
 
         // Create a TaskFragment with embedded activity.
         final TaskFragment taskFragment = createTaskFragmentWithEmbeddedActivity(task, organizer);
@@ -935,11 +937,77 @@ public class AppTransitionControllerTest extends WindowTestsBase {
     }
 
     @Test
+    public void testOverrideTaskFragmentAdapter_noOverrideWithOnlyTaskFragmentFillingTask() {
+        final Task task = createTask(mDisplayContent);
+        final ActivityRecord closingActivity = createActivityRecord(task);
+        final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
+        final TestRemoteAnimationRunner remoteAnimationRunner = new TestRemoteAnimationRunner();
+        setupTaskFragmentRemoteAnimation(organizer, remoteAnimationRunner);
+
+        // Create a TaskFragment with embedded activity.
+        final TaskFragment taskFragment = createTaskFragmentWithEmbeddedActivity(task, organizer);
+
+        // Make sure the TaskFragment is not embedded.
+        assertFalse(taskFragment.isEmbeddedWithBoundsOverride());
+        final ActivityRecord openingActivity = taskFragment.getTopMostActivity();
+        prepareActivityForAppTransition(closingActivity);
+        prepareActivityForAppTransition(openingActivity);
+        final int uid = 12345;
+        closingActivity.info.applicationInfo.uid = uid;
+        openingActivity.info.applicationInfo.uid = uid;
+        task.effectiveUid = uid;
+        spyOn(mDisplayContent.mAppTransition);
+
+        // Prepare and start transition.
+        prepareAndTriggerAppTransition(openingActivity, closingActivity,
+                null /* changingTaskFragment */);
+        mWm.mAnimator.executeAfterPrepareSurfacesRunnables();
+
+        // Animation is not run by the remote handler because the activity is filling the Task.
+        assertFalse(remoteAnimationRunner.isAnimationStarted());
+    }
+
+    @Test
+    public void testOverrideTaskFragmentAdapter_overrideWithTaskFragmentNotFillingTask() {
+        final Task task = createTask(mDisplayContent);
+        final ActivityRecord closingActivity = createActivityRecord(task);
+        final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
+        final TestRemoteAnimationRunner remoteAnimationRunner = new TestRemoteAnimationRunner();
+        setupTaskFragmentRemoteAnimation(organizer, remoteAnimationRunner);
+
+        // Create a TaskFragment with embedded activity.
+        final TaskFragment taskFragment = createTaskFragmentWithEmbeddedActivity(task, organizer);
+
+        // Make sure the TaskFragment is embedded.
+        taskFragment.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        final Rect embeddedBounds = new Rect(task.getBounds());
+        embeddedBounds.right = embeddedBounds.left + embeddedBounds.width() / 2;
+        taskFragment.setBounds(embeddedBounds);
+        assertTrue(taskFragment.isEmbeddedWithBoundsOverride());
+        final ActivityRecord openingActivity = taskFragment.getTopMostActivity();
+        prepareActivityForAppTransition(closingActivity);
+        prepareActivityForAppTransition(openingActivity);
+        final int uid = 12345;
+        closingActivity.info.applicationInfo.uid = uid;
+        openingActivity.info.applicationInfo.uid = uid;
+        task.effectiveUid = uid;
+        spyOn(mDisplayContent.mAppTransition);
+
+        // Prepare and start transition.
+        prepareAndTriggerAppTransition(openingActivity, closingActivity,
+                null /* changingTaskFragment */);
+        mWm.mAnimator.executeAfterPrepareSurfacesRunnables();
+
+        // Animation run by the remote handler.
+        assertTrue(remoteAnimationRunner.isAnimationStarted());
+    }
+
+    @Test
     public void testOverrideTaskFragmentAdapter_overrideWithNonEmbeddedActivity() {
         final Task task = createTask(mDisplayContent);
         final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
         final TestRemoteAnimationRunner remoteAnimationRunner = new TestRemoteAnimationRunner();
-        setupTaskFragmentRemoteAnimation(organizer, task.mTaskId, remoteAnimationRunner);
+        setupTaskFragmentRemoteAnimation(organizer, remoteAnimationRunner);
 
         // Closing non-embedded activity.
         final ActivityRecord closingActivity = createActivityRecord(task);
@@ -964,7 +1032,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         final Task task = createTask(mDisplayContent);
         final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
         final TestRemoteAnimationRunner remoteAnimationRunner = new TestRemoteAnimationRunner();
-        setupTaskFragmentRemoteAnimation(organizer, task.mTaskId, remoteAnimationRunner);
+        setupTaskFragmentRemoteAnimation(organizer, remoteAnimationRunner);
 
         // Closing TaskFragment with embedded activity.
         final TaskFragment taskFragment1 = createTaskFragmentWithEmbeddedActivity(task, organizer);
@@ -991,7 +1059,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         final Task task = createTask(mDisplayContent);
         final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
         final TestRemoteAnimationRunner remoteAnimationRunner = new TestRemoteAnimationRunner();
-        setupTaskFragmentRemoteAnimation(organizer, task.mTaskId, remoteAnimationRunner);
+        setupTaskFragmentRemoteAnimation(organizer, remoteAnimationRunner);
 
         // Closing activity in Task1.
         final ActivityRecord closingActivity = createActivityRecord(mDisplayContent);
@@ -1015,7 +1083,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         final Task task = createTask(mDisplayContent);
         final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
         final TestRemoteAnimationRunner remoteAnimationRunner = new TestRemoteAnimationRunner();
-        setupTaskFragmentRemoteAnimation(organizer, task.mTaskId, remoteAnimationRunner);
+        setupTaskFragmentRemoteAnimation(organizer, remoteAnimationRunner);
 
         // Closing TaskFragment with embedded activity.
         final TaskFragment taskFragment = createTaskFragmentWithEmbeddedActivity(task, organizer);
@@ -1043,7 +1111,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         final Task task = createTask(mDisplayContent);
         final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
         final TestRemoteAnimationRunner remoteAnimationRunner = new TestRemoteAnimationRunner();
-        setupTaskFragmentRemoteAnimation(organizer, task.mTaskId, remoteAnimationRunner);
+        setupTaskFragmentRemoteAnimation(organizer, remoteAnimationRunner);
 
         // Create a TaskFragment with embedded activity.
         final TaskFragment taskFragment = createTaskFragmentWithEmbeddedActivity(task, organizer);
@@ -1069,7 +1137,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         final Task task = createTask(mDisplayContent);
         final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
         final TestRemoteAnimationRunner remoteAnimationRunner = new TestRemoteAnimationRunner();
-        setupTaskFragmentRemoteAnimation(organizer, task.mTaskId, remoteAnimationRunner);
+        setupTaskFragmentRemoteAnimation(organizer, remoteAnimationRunner);
 
         // Create a TaskFragment with embedded activities, one is trusted embedded, and the other
         // one is untrusted embedded.
@@ -1128,7 +1196,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         final Task task = createTask(mDisplayContent);
         final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
         final TestRemoteAnimationRunner remoteAnimationRunner = new TestRemoteAnimationRunner();
-        setupTaskFragmentRemoteAnimation(organizer, task.mTaskId, remoteAnimationRunner);
+        setupTaskFragmentRemoteAnimation(organizer, remoteAnimationRunner);
 
         // Create a TaskFragment with only trusted embedded activity
         final TaskFragment taskFragment = new TaskFragmentBuilder(mAtm)
@@ -1168,7 +1236,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         final Task task = createTask(mDisplayContent);
         final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
         final TestRemoteAnimationRunner remoteAnimationRunner = new TestRemoteAnimationRunner();
-        setupTaskFragmentRemoteAnimation(organizer, task.mTaskId, remoteAnimationRunner);
+        setupTaskFragmentRemoteAnimation(organizer, remoteAnimationRunner);
 
         // Create a TaskFragment with only trusted embedded activity
         final TaskFragment taskFragment = new TaskFragmentBuilder(mAtm)
@@ -1259,7 +1327,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
     }
 
     /** Registers remote animation for the organizer. */
-    private void setupTaskFragmentRemoteAnimation(TaskFragmentOrganizer organizer, int taskId,
+    private void setupTaskFragmentRemoteAnimation(TaskFragmentOrganizer organizer,
             TestRemoteAnimationRunner remoteAnimationRunner) {
         final RemoteAnimationAdapter adapter = new RemoteAnimationAdapter(
                 remoteAnimationRunner, 10, 1);
@@ -1268,9 +1336,10 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         definition.addRemoteAnimation(TRANSIT_OLD_TASK_FRAGMENT_CHANGE, adapter);
         definition.addRemoteAnimation(TRANSIT_OLD_TASK_FRAGMENT_OPEN, adapter);
         definition.addRemoteAnimation(TRANSIT_OLD_TASK_FRAGMENT_CLOSE, adapter);
+        definition.addRemoteAnimation(TRANSIT_OLD_ACTIVITY_OPEN, adapter);
+        definition.addRemoteAnimation(TRANSIT_OLD_ACTIVITY_CLOSE, adapter);
         mAtm.mTaskFragmentOrganizerController.registerOrganizer(iOrganizer);
-        mAtm.mTaskFragmentOrganizerController.registerRemoteAnimations(iOrganizer, taskId,
-                definition);
+        mAtm.mTaskFragmentOrganizerController.registerRemoteAnimations(iOrganizer, definition);
     }
 
     private static ITaskFragmentOrganizer getITaskFragmentOrganizer(

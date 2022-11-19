@@ -474,13 +474,13 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
 
     @Test
     public void testRegisterRemoteAnimations() {
-        mController.registerRemoteAnimations(mIOrganizer, TASK_ID, mDefinition);
+        mController.registerRemoteAnimations(mIOrganizer, mDefinition);
 
-        assertEquals(mDefinition, mController.getRemoteAnimationDefinition(mIOrganizer, TASK_ID));
+        assertEquals(mDefinition, mController.getRemoteAnimationDefinition(mIOrganizer));
 
-        mController.unregisterRemoteAnimations(mIOrganizer, TASK_ID);
+        mController.unregisterRemoteAnimations(mIOrganizer);
 
-        assertNull(mController.getRemoteAnimationDefinition(mIOrganizer, TASK_ID));
+        assertNull(mController.getRemoteAnimationDefinition(mIOrganizer));
     }
 
     @Test
