@@ -3009,10 +3009,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                     // screen empty. Show background color to cover that.
                     showBackdrop = getDisplayContent().mChangingContainers.size() > 1;
                 } else {
-                    // Check whether or not to show backdrop for open/close transition.
-                    final int animAttr = AppTransition.mapOpenCloseTransitTypes(transit, enter);
-                    final Animation a = animAttr != 0
-                            ? appTransition.loadAnimationAttr(lp, animAttr, transit) : null;
+                    // Check whether the app has requested to show backdrop for open/close
+                    // transition.
+                    final Animation a = appTransition.getNextAppRequestedAnimation(enter);
                     showBackdrop = a != null && a.getShowBackdrop();
                 }
                 backdropColor = appTransition.getNextAppTransitionBackgroundColor();
