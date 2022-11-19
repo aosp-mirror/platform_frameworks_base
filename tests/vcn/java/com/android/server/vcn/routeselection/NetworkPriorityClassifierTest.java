@@ -16,6 +16,7 @@
 
 package com.android.server.vcn.routeselection;
 
+import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
 import static android.net.vcn.VcnUnderlyingNetworkTemplate.MATCH_FORBIDDEN;
 import static android.net.vcn.VcnUnderlyingNetworkTemplate.MATCH_REQUIRED;
 import static android.net.vcn.VcnUnderlyingNetworkTemplateTestBase.TEST_MIN_ENTRY_DOWNSTREAM_BANDWIDTH_KBPS;
@@ -24,7 +25,8 @@ import static android.net.vcn.VcnUnderlyingNetworkTemplateTestBase.TEST_MIN_EXIT
 import static android.net.vcn.VcnUnderlyingNetworkTemplateTestBase.TEST_MIN_EXIT_UPSTREAM_BANDWIDTH_KBPS;
 
 import static com.android.server.vcn.VcnTestUtils.setupSystemService;
-import static com.android.server.vcn.routeselection.NetworkPriorityClassifier.PRIORITY_ANY;
+import static com.android.server.vcn.routeselection.NetworkPriorityClassifier.PRIORITY_FALLBACK;
+import static com.android.server.vcn.routeselection.NetworkPriorityClassifier.PRIORITY_INVALID;
 import static com.android.server.vcn.routeselection.NetworkPriorityClassifier.checkMatchesCellPriorityRule;
 import static com.android.server.vcn.routeselection.NetworkPriorityClassifier.checkMatchesPriorityRule;
 import static com.android.server.vcn.routeselection.NetworkPriorityClassifier.checkMatchesWifiPriorityRule;
@@ -64,6 +66,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -103,6 +106,7 @@ public class NetworkPriorityClassifierTest {
     private static final NetworkCapabilities CELL_NETWORK_CAPABILITIES =
             new NetworkCapabilities.Builder()
                     .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                    .addCapability(NetworkCapabilities.NET_CAPABILITY_DUN)
                     .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
                     .setSubscriptionIds(Set.of(SUB_ID))
                     .setNetworkSpecifier(TEL_NETWORK_SPECIFIER)
@@ -501,24 +505,72 @@ public class NetworkPriorityClassifierTest {
                         mSubscriptionSnapshot));
     }
 
+    private void verifyMatchCellWithRequiredCapabilities(
+            VcnCellUnderlyingNetworkTemplate template, boolean expectMatch) {
+        assertEquals(
+                expectMatch,
+                checkMatchesCellPriorityRule(
+                        mVcnContext,
+                        template,
+                        mCellNetworkRecord,
+                        SUB_GROUP,
+                        mSubscriptionSnapshot));
+    }
+
+    @Test
+    public void testMatchCell() {
+        final VcnCellUnderlyingNetworkTemplate template =
+                getCellNetworkPriorityBuilder().setInternet(MATCH_REQUIRED).build();
+        verifyMatchCellWithRequiredCapabilities(template, true /* expectMatch */);
+    }
+
+    @Test
+    public void testMatchCellFail_RequiredCapabilitiesMissing() {
+        final VcnCellUnderlyingNetworkTemplate template =
+                getCellNetworkPriorityBuilder().setCbs(MATCH_REQUIRED).build();
+        verifyMatchCellWithRequiredCapabilities(template, false /* expectMatch */);
+    }
+
+    @Test
+    public void testMatchCellFail_ForbiddenCapabilitiesFound() {
+        final VcnCellUnderlyingNetworkTemplate template =
+                getCellNetworkPriorityBuilder().setDun(MATCH_FORBIDDEN).build();
+        verifyMatchCellWithRequiredCapabilities(template, false /* expectMatch */);
+    }
+
     @Test
     public void testCalculatePriorityClass() throws Exception {
         assertEquals(2, mCellNetworkRecord.priorityClass);
     }
 
-    @Test
-    public void testCalculatePriorityClassFailToMatchAny() throws Exception {
-        final NetworkCapabilities nc =
+    private void checkCalculatePriorityClassFailToMatchAny(
+            boolean hasInternet, int expectedPriorityClass) throws Exception {
+        final List<VcnUnderlyingNetworkTemplate> templatesRequireDun =
+                Collections.singletonList(
+                        new VcnCellUnderlyingNetworkTemplate.Builder()
+                                .setDun(MATCH_REQUIRED)
+                                .build());
+
+        final NetworkCapabilities.Builder ncBuilder =
                 new NetworkCapabilities.Builder()
-                        .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-                        .setSignalStrength(WIFI_RSSI_LOW)
-                        .setSsid(SSID)
-                        .build();
+                        .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR);
+        if (hasInternet) {
+            ncBuilder.addCapability(NET_CAPABILITY_INTERNET);
+        }
 
-        final UnderlyingNetworkRecord wifiNetworkRecord =
-                getTestNetworkRecord(
-                        nc, VcnGatewayConnectionConfig.DEFAULT_UNDERLYING_NETWORK_TEMPLATES);
+        final UnderlyingNetworkRecord nonDunNetworkRecord =
+                getTestNetworkRecord(ncBuilder.build(), templatesRequireDun);
 
-        assertEquals(PRIORITY_ANY, wifiNetworkRecord.priorityClass);
+        assertEquals(expectedPriorityClass, nonDunNetworkRecord.priorityClass);
+    }
+
+    @Test
+    public void testCalculatePriorityClassFailToMatchAny_InternetNetwork() throws Exception {
+        checkCalculatePriorityClassFailToMatchAny(true /* hasInternet */, PRIORITY_FALLBACK);
+    }
+
+    @Test
+    public void testCalculatePriorityClassFailToMatchAny_NonInternetNetwork() throws Exception {
+        checkCalculatePriorityClassFailToMatchAny(false /* hasInternet */, PRIORITY_INVALID);
     }
 }
