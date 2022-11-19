@@ -477,6 +477,7 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
   manifest_action["compatible-screens"]["screen"];
   manifest_action["supports-gl-texture"];
   manifest_action["restrict-update"];
+  manifest_action["install-constraints"]["fingerprint-prefix"];
   manifest_action["package-verifier"];
   manifest_action["meta-data"] = meta_data_action;
   manifest_action["uses-split"].Action(RequiredNameIsJavaPackage);
