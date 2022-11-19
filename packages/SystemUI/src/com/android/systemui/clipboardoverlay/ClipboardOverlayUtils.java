@@ -20,7 +20,10 @@ import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.ComponentName;
 import android.content.Context;
+import android.os.Build;
+import android.provider.DeviceConfig;
 
+import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.systemui.R;
 
 import javax.inject.Inject;
@@ -35,6 +38,12 @@ class ClipboardOverlayUtils {
         if (clipData != null && clipData.getDescription().getExtras() != null
                 && clipData.getDescription().getExtras().getBoolean(
                 ClipDescription.EXTRA_IS_REMOTE_DEVICE)) {
+            if (Build.isDebuggable() && DeviceConfig.getBoolean(
+                    DeviceConfig.NAMESPACE_SYSTEMUI,
+                    SystemUiDeviceConfigFlags.CLIPBOARD_IGNORE_REMOTE_COPY_SOURCE,
+                    false)) {
+                return true;
+            }
             ComponentName remoteComponent = ComponentName.unflattenFromString(
                     context.getResources().getString(R.string.config_remoteCopyPackage));
             if (remoteComponent != null) {

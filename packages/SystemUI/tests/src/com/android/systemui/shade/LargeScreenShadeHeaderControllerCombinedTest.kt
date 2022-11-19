@@ -179,7 +179,6 @@ class LargeScreenShadeHeaderControllerCombinedTest : SysuiTestCase() {
         whenever(iconManagerFactory.create(any(), any())).thenReturn(iconManager)
 
         whenever(featureFlags.isEnabled(Flags.COMBINED_QS_HEADERS)).thenReturn(true)
-        whenever(featureFlags.isEnabled(Flags.NEW_HEADER)).thenReturn(true)
 
         setUpDefaultInsets()
         setUpMotionLayout(view)
@@ -212,7 +211,7 @@ class LargeScreenShadeHeaderControllerCombinedTest : SysuiTestCase() {
         assertThat(captor.value.getResId()).isEqualTo(R.xml.qqs_header)
 
         verify(qsConstraints).load(eq(context), capture(captor))
-        assertThat(captor.value.getResId()).isEqualTo(R.xml.qs_header_new)
+        assertThat(captor.value.getResId()).isEqualTo(R.xml.qs_header)
 
         verify(largeScreenConstraints).load(eq(context), capture(captor))
         assertThat(captor.value.getResId()).isEqualTo(R.xml.large_screen_shade_header)

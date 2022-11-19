@@ -178,21 +178,21 @@ class UserSwitcherViewModelTest : SysuiTestCase() {
                     /* id= */ 0,
                     /* name= */ "zero",
                     /* iconPath= */ "",
-                    /* flags= */ UserInfo.FLAG_PRIMARY or UserInfo.FLAG_ADMIN,
+                    /* flags= */ UserInfo.FLAG_PRIMARY or UserInfo.FLAG_ADMIN or UserInfo.FLAG_FULL,
                     UserManager.USER_TYPE_FULL_SYSTEM,
                 ),
                 UserInfo(
                     /* id= */ 1,
                     /* name= */ "one",
                     /* iconPath= */ "",
-                    /* flags= */ 0,
+                    /* flags= */ UserInfo.FLAG_FULL,
                     UserManager.USER_TYPE_FULL_SYSTEM,
                 ),
                 UserInfo(
                     /* id= */ 2,
                     /* name= */ "two",
                     /* iconPath= */ "",
-                    /* flags= */ 0,
+                    /* flags= */ UserInfo.FLAG_FULL,
                     UserManager.USER_TYPE_FULL_SYSTEM,
                 ),
             )
@@ -361,10 +361,10 @@ class UserSwitcherViewModelTest : SysuiTestCase() {
                     /* iconPath= */ "",
                     /* flags= */ if (index == 0) {
                         // This is the primary user.
-                        UserInfo.FLAG_PRIMARY or UserInfo.FLAG_ADMIN
+                        UserInfo.FLAG_PRIMARY or UserInfo.FLAG_ADMIN or UserInfo.FLAG_FULL
                     } else {
                         // This isn't the primary user.
-                        0
+                        UserInfo.FLAG_FULL
                     },
                     UserManager.USER_TYPE_FULL_SYSTEM,
                 )

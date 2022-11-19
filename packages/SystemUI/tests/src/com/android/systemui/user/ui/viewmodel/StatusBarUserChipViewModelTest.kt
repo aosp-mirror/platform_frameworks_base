@@ -281,7 +281,7 @@ class StatusBarUserChipViewModelTest : SysuiTestCase() {
                 USER_ID_0,
                 USER_NAME_0.text!!,
                 /* iconPath */ "",
-                /* flags */ 0,
+                /* flags */ UserInfo.FLAG_FULL,
                 /* userType */ UserManager.USER_TYPE_FULL_SYSTEM
             )
 
@@ -290,7 +290,7 @@ class StatusBarUserChipViewModelTest : SysuiTestCase() {
                 USER_ID_1,
                 USER_NAME_1.text!!,
                 /* iconPath */ "",
-                /* flags */ 0,
+                /* flags */ UserInfo.FLAG_FULL,
                 /* userType */ UserManager.USER_TYPE_FULL_SYSTEM
             )
 
@@ -299,7 +299,7 @@ class StatusBarUserChipViewModelTest : SysuiTestCase() {
                 USER_ID_2,
                 USER_NAME_2.text!!,
                 /* iconPath */ "",
-                /* flags */ 0,
+                /* flags */ UserInfo.FLAG_FULL,
                 /* userType */ UserManager.USER_TYPE_FULL_SYSTEM
             )
     }

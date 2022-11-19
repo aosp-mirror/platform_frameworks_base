@@ -32,7 +32,6 @@ import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.phone.KeyguardBouncer.EXPANSION_VISIBLE
 import kotlinx.coroutines.awaitCancellation
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
@@ -182,6 +181,7 @@ object KeyguardBouncerViewBinder {
                     launch {
                         viewModel.bouncerShowMessage.collect {
                             hostViewController.showMessage(it.message, it.colorStateList)
+                            viewModel.onMessageShown()
                         }
                     }
 

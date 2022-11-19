@@ -25,15 +25,21 @@ public class FakeCondition extends Condition {
         super();
     }
 
-    FakeCondition(Boolean initialValue, Boolean overriding) {
+    FakeCondition(Boolean initialValue) {
+        super(initialValue, false);
+    }
+
+    FakeCondition(Boolean initialValue, boolean overriding) {
         super(initialValue, overriding);
     }
 
     @Override
-    public void start() {}
+    public void start() {
+    }
 
     @Override
-    public void stop() {}
+    public void stop() {
+    }
 
     public void fakeUpdateCondition(boolean isConditionMet) {
         updateCondition(isConditionMet);

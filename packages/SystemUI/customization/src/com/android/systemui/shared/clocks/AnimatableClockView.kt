@@ -33,9 +33,9 @@ import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.animation.GlyphCallback
 import com.android.systemui.animation.Interpolators
 import com.android.systemui.animation.TextAnimator
+import com.android.systemui.customization.R
 import com.android.systemui.plugins.log.LogBuffer
 import com.android.systemui.plugins.log.LogLevel.DEBUG
-import com.android.systemui.shared.R
 import java.io.PrintWriter
 import java.util.Calendar
 import java.util.Locale
@@ -613,7 +613,7 @@ class AnimatableClockView @JvmOverloads constructor(
         private const val CHARGE_ANIM_DURATION_PHASE_1: Long = 1000
 
         // Constants for the animation
-        private val MOVE_INTERPOLATOR = Interpolators.STANDARD
+        private val MOVE_INTERPOLATOR = Interpolators.EMPHASIZED
 
         // Calculate the positions of all of the digits...
         // Offset each digit by, say, 0.1
@@ -637,7 +637,10 @@ class AnimatableClockView @JvmOverloads constructor(
         // How much delay to apply to each subsequent digit. This is measured in terms of "fraction"
         // (i.e. a value of 0.1 would cause a digit to wait until fraction had hit 0.1, or 0.2 etc
         // before moving).
-        private const val MOVE_DIGIT_STEP = 0.1f
+        //
+        // The current specs dictate that each digit should have a 33ms gap between them. The
+        // overall time is 1s right now.
+        private const val MOVE_DIGIT_STEP = 0.033f
 
         // Total available transition time for each digit, taking into account the step. If step is
         // 0.1, then digit 0 would animate over 0.0 - 0.7, making availableTime 0.7.

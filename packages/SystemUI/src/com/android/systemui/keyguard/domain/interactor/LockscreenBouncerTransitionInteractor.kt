@@ -44,7 +44,7 @@ constructor(
     private val shadeRepository: ShadeRepository,
     private val keyguardTransitionRepository: KeyguardTransitionRepository,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor
-) : TransitionInteractor("LOCKSCREEN<->BOUNCER") {
+) : TransitionInteractor(LockscreenBouncerTransitionInteractor::class.simpleName!!) {
 
     private var transitionId: UUID? = null
 
