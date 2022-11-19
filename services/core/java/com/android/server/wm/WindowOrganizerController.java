@@ -401,9 +401,6 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
      */
     void applyTaskFragmentTransactionLocked(@NonNull WindowContainerTransaction wct,
             @WindowManager.TransitionType int type, boolean shouldApplyIndependently) {
-        if (!isValidTransaction(wct)) {
-            return;
-        }
         enforceTaskFragmentOrganizerPermission("applyTaskFragmentTransaction()",
                 Objects.requireNonNull(wct.getTaskFragmentOrganizer()),
                 Objects.requireNonNull(wct));
@@ -457,7 +454,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     // calls startSyncSet.
                     () -> mTransitionController.moveToCollecting(nextTransition),
                     () -> {
-                        if (isValidTransaction(wct)) {
+                        if (mTaskFragmentOrganizerController.isValidTransaction(wct)) {
                             applyTransaction(wct, -1 /*syncId*/, nextTransition, caller);
                             mTransitionController.requestStartTransition(nextTransition,
                                     null /* startTask */, null /* remoteTransition */,
@@ -1616,18 +1613,6 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             cfgChanges &= ~ActivityInfo.CONFIG_WINDOW_CONFIGURATION;
         }
         return (cfgChanges & CONTROLLABLE_CONFIGS) == 0;
-    }
-
-    private boolean isValidTransaction(@NonNull WindowContainerTransaction t) {
-        if (t.getTaskFragmentOrganizer() != null && !mTaskFragmentOrganizerController
-                .isOrganizerRegistered(t.getTaskFragmentOrganizer())) {
-            // Transaction from an unregistered organizer should not be applied. This can happen
-            // when the organizer process died before the transaction is applied.
-            Slog.e(TAG, "Caller organizer=" + t.getTaskFragmentOrganizer()
-                    + " is no longer registered");
-            return false;
-        }
-        return true;
     }
 
     /**
