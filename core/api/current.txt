@@ -8460,6 +8460,7 @@ package android.app.job {
 
   public abstract class JobScheduler {
     ctor public JobScheduler();
+    method public boolean canRunLongJobs();
     method public abstract void cancel(int);
     method public abstract void cancelAll();
     method public abstract int enqueue(@NonNull android.app.job.JobInfo, @NonNull android.app.job.JobWorkItem);
