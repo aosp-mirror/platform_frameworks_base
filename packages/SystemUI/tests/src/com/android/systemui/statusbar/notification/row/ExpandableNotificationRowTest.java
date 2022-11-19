@@ -38,6 +38,7 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.app.Notification;
@@ -457,5 +458,80 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         row.performDismiss(false);
         verify(mNotificationTestHelper.mOnUserInteractionCallback, never())
                 .registerFutureDismissal(any(), anyInt());
+    }
+
+    @Test
+    public void testAddChildNotification() throws Exception {
+        ExpandableNotificationRow group = mNotificationTestHelper.createGroup(0);
+        ExpandableNotificationRow child = mNotificationTestHelper.createRow();
+
+        group.addChildNotification(child);
+
+        Assert.assertEquals(child, group.getChildNotificationAt(0));
+        Assert.assertEquals(group, child.getNotificationParent());
+        Assert.assertTrue(child.isChildInGroup());
+    }
+
+    @Test
+    public void testAddChildNotification_childSkipped() throws Exception {
+        ExpandableNotificationRow group = mNotificationTestHelper.createGroup(0);
+        ExpandableNotificationRow child = mNotificationTestHelper.createRow();
+        child.setKeepInParentForDismissAnimation(true);
+
+        group.addChildNotification(child);
+
+        Assert.assertTrue(group.getAttachedChildren().isEmpty());
+        Assert.assertNotEquals(group, child.getNotificationParent());
+        verify(mNotificationTestHelper.getMockLogger()).logSkipAttachingKeepInParentChild(
+                /*child=*/ child.getEntry(),
+                /*newParent=*/ group.getEntry()
+        );
+    }
+
+    @Test
+    public void testRemoveChildNotification() throws Exception {
+        ExpandableNotificationRow group = mNotificationTestHelper.createGroup(1);
+        ExpandableNotificationRow child = group.getAttachedChildren().get(0);
+        child.setKeepInParentForDismissAnimation(true);
+
+        group.removeChildNotification(child);
+
+        Assert.assertNull(child.getParent());
+        Assert.assertNull(child.getNotificationParent());
+        Assert.assertFalse(child.keepInParentForDismissAnimation());
+        verifyNoMoreInteractions(mNotificationTestHelper.getMockLogger());
+    }
+
+    @Test
+    public void testRemoveChildrenWithKeepInParent_removesChildWithKeepInParent() throws Exception {
+        ExpandableNotificationRow group = mNotificationTestHelper.createGroup(1);
+        ExpandableNotificationRow child = group.getAttachedChildren().get(0);
+        child.setKeepInParentForDismissAnimation(true);
+
+        group.removeChildrenWithKeepInParent();
+
+        Assert.assertNull(child.getParent());
+        Assert.assertNull(child.getNotificationParent());
+        Assert.assertFalse(child.keepInParentForDismissAnimation());
+        verify(mNotificationTestHelper.getMockLogger()).logKeepInParentChildDetached(
+                /*child=*/ child.getEntry(),
+                /*oldParent=*/ group.getEntry()
+        );
+    }
+
+    @Test
+    public void testRemoveChildrenWithKeepInParent_skipsChildrenWithoutKeepInParent()
+            throws Exception {
+        ExpandableNotificationRow group = mNotificationTestHelper.createGroup(1);
+        ExpandableNotificationRow child = group.getAttachedChildren().get(0);
+
+        group.removeChildrenWithKeepInParent();
+
+        Assert.assertEquals(group, child.getNotificationParent());
+        Assert.assertFalse(child.keepInParentForDismissAnimation());
+        verify(mNotificationTestHelper.getMockLogger(), never()).logKeepInParentChildDetached(
+                /*child=*/ any(),
+                /*oldParent=*/ any()
+        );
     }
 }

@@ -793,6 +793,19 @@ class UserInteractorTest : SysuiTestCase() {
             job.cancel()
         }
 
+    @Test
+    fun `current user is not primary and user switcher is disabled`() =
+        runBlocking(IMMEDIATE) {
+            val userInfos = createUserInfos(count = 2, includeGuest = false)
+            userRepository.setUserInfos(userInfos)
+            userRepository.setSelectedUserInfo(userInfos[1])
+            userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = false))
+            var selectedUser: UserModel? = null
+            val job = underTest.selectedUser.onEach { selectedUser = it }.launchIn(this)
+            assertThat(selectedUser).isNotNull()
+            job.cancel()
+        }
+
     private fun assertUsers(
         models: List<UserModel>?,
         count: Int,

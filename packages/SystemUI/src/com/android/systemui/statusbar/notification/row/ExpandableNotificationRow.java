@@ -240,7 +240,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private NotificationContentView mPrivateLayout;
     private NotificationContentView[] mLayouts;
     private int mNotificationColor;
-    private ExpansionLogger mLogger;
+    private ExpandableNotificationRowLogger mLogger;
     private String mLoggingKey;
     private NotificationGuts mGuts;
     private NotificationEntry mEntry;
@@ -339,7 +339,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             }
         }
     };
-    private boolean mKeepInParent;
+    private boolean mKeepInParentForDismissAnimation;
     private boolean mRemoved;
     private static final Property<ExpandableNotificationRow, Float> TRANSLATE_CONTENT =
             new FloatProperty<ExpandableNotificationRow>("translate") {
@@ -825,6 +825,12 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         if (mChildrenContainer == null) {
             mChildrenContainerStub.inflate();
         }
+
+        if (row.keepInParentForDismissAnimation()) {
+            logSkipAttachingKeepInParentChild(row);
+            return;
+        }
+
         mChildrenContainer.addNotification(row, childIndex);
         onAttachedChildrenCountChanged();
         row.setIsChildInGroup(true, this);
@@ -833,10 +839,36 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     public void removeChildNotification(ExpandableNotificationRow row) {
         if (mChildrenContainer != null) {
             mChildrenContainer.removeNotification(row);
+            row.setKeepInParentForDismissAnimation(false);
         }
         onAttachedChildrenCountChanged();
         row.setIsChildInGroup(false, null);
         row.requestBottomRoundness(0.0f, /* animate = */ false, SourceType.DefaultValue);
+    }
+
+    /**
+     * Removes the children notifications which were marked to keep for the dismissal animation.
+     */
+    public void removeChildrenWithKeepInParent() {
+        if (mChildrenContainer == null) return;
+
+        List<ExpandableNotificationRow> clonedList = new ArrayList<>(
+                mChildrenContainer.getAttachedChildren());
+        boolean childCountChanged = false;
+        for (ExpandableNotificationRow child : clonedList) {
+            if (child.keepInParentForDismissAnimation()) {
+                mChildrenContainer.removeNotification(child);
+                child.setIsChildInGroup(false, null);
+                child.requestBottomRoundness(0.0f, /* animate = */ false, SourceType.DefaultValue);
+                child.setKeepInParentForDismissAnimation(false);
+                logKeepInParentChildDetached(child);
+                childCountChanged = true;
+            }
+        }
+
+        if (childCountChanged) {
+            onAttachedChildrenCountChanged();
+        }
     }
 
     /**
@@ -1361,12 +1393,15 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
     }
 
-    public boolean keepInParent() {
-        return mKeepInParent;
+    /**
+     * @return  if this entry should be kept in its parent during removal.
+     */
+    public boolean keepInParentForDismissAnimation() {
+        return mKeepInParentForDismissAnimation;
     }
 
-    public void setKeepInParent(boolean keepInParent) {
-        mKeepInParent = keepInParent;
+    public void setKeepInParentForDismissAnimation(boolean keepInParent) {
+        mKeepInParentForDismissAnimation = keepInParent;
     }
 
     @Override
@@ -1537,8 +1572,29 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mUseIncreasedHeadsUpHeight = use;
     }
 
-    public interface ExpansionLogger {
+    /**
+     * Interface for logging {{@link ExpandableNotificationRow} events.}
+     */
+    public interface ExpandableNotificationRowLogger {
+        /**
+         * Called when the notification is expanded / collapsed.
+         */
         void logNotificationExpansion(String key, boolean userAction, boolean expanded);
+
+        /**
+         * Called when a notification which was previously kept in its parent for the
+         * dismiss animation is finally detached from its parent.
+         */
+        void logKeepInParentChildDetached(NotificationEntry child, NotificationEntry oldParent);
+
+        /**
+         * Called when we want to attach a notification to a new parent,
+         * but it still has the keepInParent flag set, so we skip it.
+         */
+        void logSkipAttachingKeepInParentChild(
+                NotificationEntry child,
+                NotificationEntry newParent
+        );
     }
 
     public ExpandableNotificationRow(Context context, AttributeSet attrs) {
@@ -1556,7 +1612,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             RemoteInputViewSubcomponent.Factory rivSubcomponentFactory,
             String appName,
             String notificationKey,
-            ExpansionLogger logger,
+            ExpandableNotificationRowLogger logger,
             KeyguardBypassController bypassController,
             GroupMembershipManager groupMembershipManager,
             GroupExpansionManager groupExpansionManager,
@@ -3565,6 +3621,18 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 mPrivateLayout.dumpSmartReplies(pw);
             }
         });
+    }
+
+    private void logKeepInParentChildDetached(ExpandableNotificationRow child) {
+        if (mLogger != null) {
+            mLogger.logKeepInParentChildDetached(child.getEntry(), getEntry());
+        }
+    }
+
+    private void logSkipAttachingKeepInParentChild(ExpandableNotificationRow child) {
+        if (mLogger != null) {
+            mLogger.logSkipAttachingKeepInParentChild(child.getEntry(), getEntry());
+        }
     }
 
     private void setTargetPoint(Point p) {
