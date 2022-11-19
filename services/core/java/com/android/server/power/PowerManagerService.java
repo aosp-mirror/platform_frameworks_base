@@ -468,9 +468,6 @@ public final class PowerManagerService extends SystemService
     // True if the device should wake up when plugged or unplugged.
     private boolean mWakeUpWhenPluggedOrUnpluggedConfig;
 
-    // True if the device should keep dreaming when undocked.
-    private boolean mKeepDreamingWhenUndockingConfig;
-
     // True if the device should wake up when plugged or unplugged in theater mode.
     private boolean mWakeUpWhenPluggedOrUnpluggedInTheaterModeConfig;
 
@@ -676,6 +673,19 @@ public final class PowerManagerService extends SystemService
     // Transition to Doze is in progress.  We have transitioned to WAKEFULNESS_DOZING,
     // but the DreamService has not yet been told to start (it's an async process).
     private boolean mDozeStartInProgress;
+
+    // Whether to keep dreaming when the device is undocked.
+    private boolean mKeepDreamingWhenUndocked;
+
+    private final class DreamManagerStateListener implements
+            DreamManagerInternal.DreamManagerStateListener {
+        @Override
+        public void onKeepDreamingWhenUndockedChanged(boolean keepDreaming) {
+            synchronized (mLock) {
+                mKeepDreamingWhenUndocked = keepDreaming;
+            }
+        }
+    }
 
     private final class PowerGroupWakefulnessChangeListener implements
             PowerGroup.PowerGroupListener {
@@ -1265,6 +1275,12 @@ public final class PowerManagerService extends SystemService
                     new DisplayGroupPowerChangeListener();
             mDisplayManagerInternal.registerDisplayGroupListener(displayGroupPowerChangeListener);
 
+            // These DreamManager methods do not acquire locks, so they should be safe to call.
+            mKeepDreamingWhenUndocked = mDreamManager.keepDreamingWhenUndockedDefault();
+            if (mKeepDreamingWhenUndocked) {
+                mDreamManager.registerDreamManagerStateListener(new DreamManagerStateListener());
+            }
+
             mWirelessChargerDetector = mInjector.createWirelessChargerDetector(sensorManager,
                     mInjector.createSuspendBlocker(
                             this, "PowerManagerService.WirelessChargerDetector"),
@@ -1382,8 +1398,6 @@ public final class PowerManagerService extends SystemService
                 com.android.internal.R.bool.config_powerDecoupleInteractiveModeFromDisplay);
         mWakeUpWhenPluggedOrUnpluggedConfig = resources.getBoolean(
                 com.android.internal.R.bool.config_unplugTurnsOnScreen);
-        mKeepDreamingWhenUndockingConfig = resources.getBoolean(
-                com.android.internal.R.bool.config_keepDreamingWhenUndocking);
         mWakeUpWhenPluggedOrUnpluggedInTheaterModeConfig = resources.getBoolean(
                 com.android.internal.R.bool.config_allowTheaterModeWakeFromUnplug);
         mSuspendWhenScreenOffDueToProximityConfig = resources.getBoolean(
@@ -2508,7 +2522,7 @@ public final class PowerManagerService extends SystemService
         }
 
         // Don't wake when undocking while dreaming if configured not to.
-        if (mKeepDreamingWhenUndockingConfig
+        if (mKeepDreamingWhenUndocked
                 && getGlobalWakefulnessLocked() == WAKEFULNESS_DREAMING
                 && wasPowered && !mIsPowered
                 && oldPlugType == BatteryManager.BATTERY_PLUGGED_DOCK) {
@@ -4457,8 +4471,7 @@ public final class PowerManagerService extends SystemService
                     + mWakeUpWhenPluggedOrUnpluggedInTheaterModeConfig);
             pw.println("  mTheaterModeEnabled="
                     + mTheaterModeEnabled);
-            pw.println("  mKeepDreamingWhenUndockingConfig="
-                    + mKeepDreamingWhenUndockingConfig);
+            pw.println("  mKeepDreamingWhenUndocked=" + mKeepDreamingWhenUndocked);
             pw.println("  mSuspendWhenScreenOffDueToProximityConfig="
                     + mSuspendWhenScreenOffDueToProximityConfig);
             pw.println("  mDreamsSupportedConfig=" + mDreamsSupportedConfig);
