@@ -2774,6 +2774,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             }
         } else {
             mSwipedOutViews.remove(child);
+
+            if (child instanceof ExpandableNotificationRow) {
+                ((ExpandableNotificationRow) child).removeChildrenWithKeepInParent();
+            }
         }
         updateAnimationState(false, child);
 
