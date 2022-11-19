@@ -28,6 +28,7 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.soundtrigger.SoundTrigger;
 import android.media.permission.Identity;
+import android.os.IBinder;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SharedMemory;
@@ -74,12 +75,13 @@ final class DspTrustedHotwordDetectorSession extends HotwordDetectorSession {
 
     DspTrustedHotwordDetectorSession(
             @NonNull HotwordDetectionConnection.ServiceConnection remoteHotwordDetectionService,
-            @NonNull Object lock, @NonNull Context context,
+            @NonNull Object lock, @NonNull Context context, @NonNull IBinder token,
             @NonNull IHotwordRecognitionStatusCallback callback, int voiceInteractionServiceUid,
             Identity voiceInteractorIdentity,
             @NonNull ScheduledExecutorService scheduledExecutorService, boolean logging) {
-        super(remoteHotwordDetectionService, lock, context, callback, voiceInteractionServiceUid,
-                voiceInteractorIdentity, scheduledExecutorService, logging);
+        super(remoteHotwordDetectionService, lock, context, token, callback,
+                voiceInteractionServiceUid, voiceInteractorIdentity, scheduledExecutorService,
+                logging);
     }
 
     @SuppressWarnings("GuardedBy")

@@ -27,6 +27,7 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.media.AudioFormat;
 import android.media.permission.Identity;
+import android.os.IBinder;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SharedMemory;
@@ -63,12 +64,13 @@ final class SoftwareTrustedHotwordDetectorSession extends HotwordDetectorSession
 
     SoftwareTrustedHotwordDetectorSession(
             @NonNull HotwordDetectionConnection.ServiceConnection remoteHotwordDetectionService,
-            @NonNull Object lock, @NonNull Context context,
+            @NonNull Object lock, @NonNull Context context, @NonNull IBinder token,
             @NonNull IHotwordRecognitionStatusCallback callback, int voiceInteractionServiceUid,
             Identity voiceInteractorIdentity,
             @NonNull ScheduledExecutorService scheduledExecutorService, boolean logging) {
-        super(remoteHotwordDetectionService, lock, context, callback, voiceInteractionServiceUid,
-                voiceInteractorIdentity, scheduledExecutorService, logging);
+        super(remoteHotwordDetectionService, lock, context, token, callback,
+                voiceInteractionServiceUid, voiceInteractorIdentity, scheduledExecutorService,
+                logging);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -163,9 +165,9 @@ final class SoftwareTrustedHotwordDetectorSession extends HotwordDetectorSession
     }
 
     @SuppressWarnings("GuardedBy")
-    void stopListeningLocked() {
+    void stopListeningFromMicLocked() {
         if (DEBUG) {
-            Slog.d(TAG, "stopListeningLocked");
+            Slog.d(TAG, "stopListeningFromMicLocked");
         }
         if (!mPerformingSoftwareHotwordDetection) {
             Slog.i(TAG, "Hotword detection is not running");

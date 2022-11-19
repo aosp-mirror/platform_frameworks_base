@@ -765,9 +765,7 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
             KeyphraseEnrollmentInfo keyphraseEnrollmentInfo,
             IVoiceInteractionManagerService modelManagementService, int targetSdkVersion,
             boolean supportHotwordDetectionService) {
-        super(modelManagementService, callback,
-                supportHotwordDetectionService ? DETECTOR_TYPE_TRUSTED_HOTWORD_DSP
-                        : DETECTOR_TYPE_NORMAL);
+        super(modelManagementService, callback);
 
         mHandler = new MyHandler();
         mText = text;
