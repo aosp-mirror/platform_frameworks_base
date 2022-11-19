@@ -570,6 +570,34 @@ public class AppTransitionController {
     }
 
     /**
+     * Whether the transition contains any embedded {@link TaskFragment} that does not fill the
+     * parent {@link Task} before or after the transition.
+     */
+    private boolean transitionContainsTaskFragmentWithBoundsOverride() {
+        for (int i = mDisplayContent.mChangingContainers.size() - 1; i >= 0; i--) {
+            final WindowContainer wc = mDisplayContent.mChangingContainers.valueAt(i);
+            if (wc.isEmbedded()) {
+                // Contains embedded TaskFragment with bounds changed.
+                return true;
+            }
+        }
+        mTempTransitionWindows.clear();
+        mTempTransitionWindows.addAll(mDisplayContent.mClosingApps);
+        mTempTransitionWindows.addAll(mDisplayContent.mOpeningApps);
+        boolean containsTaskFragmentWithBoundsOverride = false;
+        for (int i = mTempTransitionWindows.size() - 1; i >= 0; i--) {
+            final ActivityRecord r = mTempTransitionWindows.get(i).asActivityRecord();
+            final TaskFragment tf = r.getTaskFragment();
+            if (tf != null && tf.isEmbeddedWithBoundsOverride()) {
+                containsTaskFragmentWithBoundsOverride = true;
+                break;
+            }
+        }
+        mTempTransitionWindows.clear();
+        return containsTaskFragmentWithBoundsOverride;
+    }
+
+    /**
      * Finds the common parent {@link Task} that is parent of all embedded app windows in the
      * current transition.
      * @return {@code null} if app windows in the transition are not children of the same Task, or
@@ -672,12 +700,17 @@ public class AppTransitionController {
         if (transitionMayContainNonAppWindows(transit)) {
             return false;
         }
+        if (!transitionContainsTaskFragmentWithBoundsOverride()) {
+            // No need to play TaskFragment remote animation if all embedded TaskFragment in the
+            // transition fill the Task.
+            return false;
+        }
 
         final Task task = findParentTaskForAllEmbeddedWindows();
         final ITaskFragmentOrganizer organizer = findTaskFragmentOrganizer(task);
         final RemoteAnimationDefinition definition = organizer != null
                 ? mDisplayContent.mAtmService.mTaskFragmentOrganizerController
-                    .getRemoteAnimationDefinition(organizer, task.mTaskId)
+                    .getRemoteAnimationDefinition(organizer)
                 : null;
         final RemoteAnimationAdapter adapter = definition != null
                 ? definition.getAdapter(transit, activityTypes)

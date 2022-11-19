@@ -583,15 +583,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
     @Override
     boolean isEmbedded() {
-        if (mIsEmbedded) {
-            return true;
-        }
-        final WindowContainer<?> parent = getParent();
-        if (parent != null) {
-            final TaskFragment taskFragment = parent.asTaskFragment();
-            return taskFragment != null && taskFragment.isEmbedded();
-        }
-        return false;
+        return mIsEmbedded;
     }
 
     @EmbeddingCheckResult
@@ -2508,6 +2500,22 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     /** Whether this is an organized {@link TaskFragment} and not a {@link Task}. */
     final boolean isOrganizedTaskFragment() {
         return mTaskFragmentOrganizer != null;
+    }
+
+    /**
+     * Whether this is an embedded {@link TaskFragment} that does not fill the parent {@link Task}.
+     */
+    boolean isEmbeddedWithBoundsOverride() {
+        if (!mIsEmbedded) {
+            return false;
+        }
+        final Task task = getTask();
+        if (task == null) {
+            return false;
+        }
+        final Rect taskBounds = task.getBounds();
+        final Rect taskFragBounds = getBounds();
+        return !taskBounds.equals(taskFragBounds) && taskBounds.contains(taskFragBounds);
     }
 
     /** Whether the Task should be visible. */

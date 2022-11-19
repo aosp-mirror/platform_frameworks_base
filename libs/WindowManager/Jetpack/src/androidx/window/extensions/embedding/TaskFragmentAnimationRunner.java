@@ -20,11 +20,9 @@ import static android.os.Process.THREAD_PRIORITY_DISPLAY;
 import static android.view.RemoteAnimationTarget.MODE_CLOSING;
 import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_OPEN;
-import static android.view.WindowManager.TRANSIT_OLD_TASK_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_FRAGMENT_CHANGE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_FRAGMENT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_FRAGMENT_OPEN;
-import static android.view.WindowManager.TRANSIT_OLD_TASK_OPEN;
 import static android.view.WindowManagerPolicyConstants.TYPE_LAYER_OFFSET;
 
 import android.animation.Animator;
@@ -169,11 +167,9 @@ class TaskFragmentAnimationRunner extends IRemoteAnimationRunner.Stub {
         switch (transit) {
             case TRANSIT_OLD_ACTIVITY_OPEN:
             case TRANSIT_OLD_TASK_FRAGMENT_OPEN:
-            case TRANSIT_OLD_TASK_OPEN:
                 return createOpenAnimationAdapters(targets);
             case TRANSIT_OLD_ACTIVITY_CLOSE:
             case TRANSIT_OLD_TASK_FRAGMENT_CLOSE:
-            case TRANSIT_OLD_TASK_CLOSE:
                 return createCloseAnimationAdapters(targets);
             case TRANSIT_OLD_TASK_FRAGMENT_CHANGE:
                 return createChangeAnimationAdapters(targets);
