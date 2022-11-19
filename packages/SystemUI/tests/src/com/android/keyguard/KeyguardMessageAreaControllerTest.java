@@ -85,7 +85,7 @@ public class KeyguardMessageAreaControllerTest extends SysuiTestCase {
     @Test
     public void testClearsTextField() {
         mMessageAreaController.setMessage("");
-        verify(mKeyguardMessageArea).setMessage("");
+        verify(mKeyguardMessageArea).setMessage("", /* animate= */ true);
     }
 
     @Test

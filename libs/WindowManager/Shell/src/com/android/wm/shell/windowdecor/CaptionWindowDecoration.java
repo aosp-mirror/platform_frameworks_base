@@ -23,6 +23,7 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Point;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.drawable.VectorDrawable;
 import android.os.Handler;
@@ -243,7 +244,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
      * Sets the visibility of buttons and color of caption based on desktop mode status
      *
      */
-    public void setButtonVisibility() {
+    void setButtonVisibility() {
         mDesktopActive = DesktopModeStatus.isActive(mContext);
         int v = mDesktopActive ? View.VISIBLE : View.GONE;
         View caption = mResult.mRootView.findViewById(R.id.caption);
@@ -262,7 +263,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         caption.getBackground().setTint(v == View.VISIBLE ? Color.WHITE : Color.TRANSPARENT);
     }
 
-    public boolean isHandleMenuActive() {
+    boolean isHandleMenuActive() {
         return mHandleMenu != null;
     }
 
@@ -277,7 +278,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
     /**
      * Create and display handle menu window
      */
-    public void createHandleMenu() {
+    void createHandleMenu() {
         SurfaceControl.Transaction t = new SurfaceControl.Transaction();
         final Resources resources = mDecorWindowContext.getResources();
         int x = mRelayoutParams.mCaptionX;
@@ -298,7 +299,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
     /**
      * Close the handle menu window
      */
-    public void closeHandleMenu() {
+    void closeHandleMenu() {
         if (!isHandleMenuActive()) return;
         mHandleMenu.releaseView();
         mHandleMenu = null;
@@ -313,22 +314,83 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
     /**
      * Close an open handle menu if input is outside of menu coordinates
      * @param ev the tapped point to compare against
-     * @return
      */
-    public void closeHandleMenuIfNeeded(MotionEvent ev) {
-        if (mHandleMenu != null) {
-            Point positionInParent = mTaskOrganizer.getRunningTaskInfo(mTaskInfo.taskId)
-                    .positionInParent;
-            final Resources resources = mDecorWindowContext.getResources();
-            ev.offsetLocation(-mRelayoutParams.mCaptionX, -mRelayoutParams.mCaptionY);
-            ev.offsetLocation(-positionInParent.x, -positionInParent.y);
-            int width = loadDimensionPixelSize(resources, mRelayoutParams.mCaptionWidthId);
-            int height = loadDimensionPixelSize(resources, mRelayoutParams.mCaptionHeightId);
-            if (!(ev.getX() >= 0 && ev.getY()  >= 0
-                    && ev.getX()  <= width && ev.getY()  <= height)) {
+    void closeHandleMenuIfNeeded(MotionEvent ev) {
+        if (isHandleMenuActive()) {
+            if (!checkEventInCaptionView(ev, R.id.caption)) {
                 closeHandleMenu();
             }
         }
+    }
+
+    boolean isFocused() {
+        return mTaskInfo.isFocused;
+    }
+
+    /**
+     * Offset the coordinates of a {@link MotionEvent} to be in the same coordinate space as caption
+     * @param ev the {@link MotionEvent} to offset
+     * @return the point of the input in local space
+     */
+    private PointF offsetCaptionLocation(MotionEvent ev) {
+        PointF result = new PointF(ev.getX(), ev.getY());
+        Point positionInParent = mTaskOrganizer.getRunningTaskInfo(mTaskInfo.taskId)
+                .positionInParent;
+        result.offset(-mRelayoutParams.mCaptionX, -mRelayoutParams.mCaptionY);
+        result.offset(-positionInParent.x, -positionInParent.y);
+        return result;
+    }
+
+    /**
+     * Determine if a passed MotionEvent is in a view in caption
+     * @param ev the {@link MotionEvent} to check
+     * @param layoutId the id of the view
+     * @return {@code true} if event is inside the specified view, {@code false} if not
+     */
+    private boolean checkEventInCaptionView(MotionEvent ev, int layoutId) {
+        if (mResult.mRootView == null) return false;
+        PointF inputPoint = offsetCaptionLocation(ev);
+        View view = mResult.mRootView.findViewById(layoutId);
+        return view != null && view.pointInView(inputPoint.x, inputPoint.y, 0);
+    }
+
+    boolean checkTouchEventInHandle(MotionEvent ev) {
+        if (isHandleMenuActive()) return false;
+        return checkEventInCaptionView(ev, R.id.caption_handle);
+    }
+
+    /**
+     * Check a passed MotionEvent if a click has occurred on any button on this caption
+     * Note this should only be called when a regular onClick is not possible
+     * (i.e. the button was clicked through status bar layer)
+     * @param ev the MotionEvent to compare
+     */
+    void checkClickEvent(MotionEvent ev) {
+        if (mResult.mRootView == null) return;
+        View caption = mResult.mRootView.findViewById(R.id.caption);
+        PointF inputPoint = offsetCaptionLocation(ev);
+        if (!isHandleMenuActive()) {
+            View handle = caption.findViewById(R.id.caption_handle);
+            clickIfPointInView(inputPoint, handle);
+        } else {
+            View menu = mHandleMenu.mWindowViewHost.getView();
+            View fullscreen = menu.findViewById(R.id.fullscreen_button);
+            if (clickIfPointInView(inputPoint, fullscreen)) return;
+            View desktop = menu.findViewById(R.id.desktop_button);
+            if (clickIfPointInView(inputPoint, desktop)) return;
+            View split = menu.findViewById(R.id.split_screen_button);
+            if (clickIfPointInView(inputPoint, split)) return;
+            View more = menu.findViewById(R.id.more_button);
+            clickIfPointInView(inputPoint, more);
+        }
+    }
+
+    private boolean clickIfPointInView(PointF inputPoint, View v) {
+        if (v.pointInView(inputPoint.x - v.getLeft(), inputPoint.y, 0)) {
+            mOnCaptionButtonClickListener.onClick(v);
+            return true;
+        }
+        return false;
     }
 
     @Override

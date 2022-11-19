@@ -35,6 +35,8 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImeAwareEditText;
 import android.widget.TextView;
+import android.window.OnBackInvokedCallback;
+import android.window.OnBackInvokedDispatcher;
 
 import com.android.internal.widget.LockPatternChecker;
 import com.android.internal.widget.LockPatternUtils;
@@ -58,6 +60,8 @@ public class AuthCredentialPasswordView extends AuthCredentialView
     private ViewGroup mAuthCredentialHeader;
     private ViewGroup mAuthCredentialInput;
     private int mBottomInset = 0;
+    private OnBackInvokedDispatcher mOnBackInvokedDispatcher;
+    private final OnBackInvokedCallback mBackCallback = this::onBackInvoked;
 
     public AuthCredentialPasswordView(Context context,
             AttributeSet attrs) {
@@ -79,13 +83,17 @@ public class AuthCredentialPasswordView extends AuthCredentialView
                 return false;
             }
             if (event.getAction() == KeyEvent.ACTION_UP) {
-                mContainerView.sendEarlyUserCanceled();
-                mContainerView.animateAway(AuthDialogCallback.DISMISSED_USER_CANCELED);
+                onBackInvoked();
             }
             return true;
         });
 
         setOnApplyWindowInsetsListener(this);
+    }
+
+    private void onBackInvoked() {
+        mContainerView.sendEarlyUserCanceled();
+        mContainerView.animateAway(AuthDialogCallback.DISMISSED_USER_CANCELED);
     }
 
     @Override
@@ -100,6 +108,12 @@ public class AuthCredentialPasswordView extends AuthCredentialView
 
         mPasswordField.requestFocus();
         mPasswordField.scheduleShowSoftInput();
+
+        mOnBackInvokedDispatcher = findOnBackInvokedDispatcher();
+        if (mOnBackInvokedDispatcher != null) {
+            mOnBackInvokedDispatcher.registerOnBackInvokedCallback(
+                    OnBackInvokedDispatcher.PRIORITY_DEFAULT, mBackCallback);
+        }
     }
 
     @Override
@@ -133,6 +147,15 @@ public class AuthCredentialPasswordView extends AuthCredentialView
             mPendingLockCheck = LockPatternChecker.verifyCredential(mLockPatternUtils,
                     password, mEffectiveUserId, LockPatternUtils.VERIFY_FLAG_REQUEST_GK_PW_HANDLE,
                     this::onCredentialVerified);
+        }
+    }
+
+    @Override
+    public void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        if (mOnBackInvokedDispatcher != null) {
+            mOnBackInvokedDispatcher.unregisterOnBackInvokedCallback(mBackCallback);
+            mOnBackInvokedDispatcher = null;
         }
     }
 

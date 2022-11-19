@@ -266,6 +266,7 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
             mExitAnimator.cancel();
         }
         reset();
+        mClipboardLogger.setClipSource(clipSource);
         String accessibilityAnnouncement = mContext.getString(R.string.clipboard_content_copied);
 
         boolean isSensitive = clipData != null && clipData.getDescription().getExtras() != null
@@ -525,21 +526,27 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
 
     static class ClipboardLogger {
         private final UiEventLogger mUiEventLogger;
+        private String mClipSource;
         private boolean mGuarded = false;
 
         ClipboardLogger(UiEventLogger uiEventLogger) {
             mUiEventLogger = uiEventLogger;
         }
 
+        void setClipSource(String clipSource) {
+            mClipSource = clipSource;
+        }
+
         void logSessionComplete(@NonNull UiEventLogger.UiEventEnum event) {
             if (!mGuarded) {
                 mGuarded = true;
-                mUiEventLogger.log(event);
+                mUiEventLogger.log(event, 0, mClipSource);
             }
         }
 
         void reset() {
             mGuarded = false;
+            mClipSource = null;
         }
     }
 }

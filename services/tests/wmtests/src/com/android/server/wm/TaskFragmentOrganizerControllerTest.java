@@ -62,10 +62,12 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import android.annotation.NonNull;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -403,7 +405,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         final TaskFragmentTransaction.Change change = changes.get(0);
         assertEquals(TYPE_ACTIVITY_REPARENTED_TO_TASK, change.getType());
         assertEquals(task.mTaskId, change.getTaskId());
-        assertEquals(activity.intent, change.getActivityIntent());
+        assertIntentsEqualForOrganizer(activity.intent, change.getActivityIntent());
         assertNotEquals(activity.token, change.getActivityToken());
         mTransaction.reparentActivityToTaskFragment(mFragmentToken, change.getActivityToken());
         assertApplyTransactionAllowed(mTransaction);
@@ -412,6 +414,62 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         // The temporary token can only be used once.
         assertNull(mController.getReparentActivityFromTemporaryToken(mIOrganizer,
                 change.getActivityToken()));
+    }
+
+    @Test
+    public void testOnActivityReparentedToTask_untrustedEmbed_notReported() {
+        final int pid = Binder.getCallingPid();
+        final int uid = Binder.getCallingUid();
+        mTaskFragment.setTaskFragmentOrganizer(mOrganizer.getOrganizerToken(), uid,
+                DEFAULT_TASK_FRAGMENT_ORGANIZER_PROCESS_NAME);
+        mWindowOrganizerController.mLaunchTaskFragments.put(mFragmentToken, mTaskFragment);
+        final Task task = createTask(mDisplayContent);
+        task.addChild(mTaskFragment, POSITION_TOP);
+        final ActivityRecord activity = createActivityRecord(task);
+
+        // Make sure the activity is embedded in untrusted mode.
+        activity.info.applicationInfo.uid = uid + 1;
+        doReturn(pid + 1).when(activity).getPid();
+        task.effectiveUid = uid;
+        doReturn(EMBEDDING_ALLOWED).when(task).isAllowedToEmbedActivity(activity, uid);
+        doReturn(false).when(task).isAllowedToEmbedActivityInTrustedMode(activity, uid);
+        doReturn(true).when(task).isAllowedToEmbedActivityInUntrustedMode(activity);
+
+        // Notify organizer if it was embedded before entered Pip.
+        // Create a temporary token since the activity doesn't belong to the same process.
+        clearInvocations(mOrganizer);
+        activity.mLastTaskFragmentOrganizerBeforePip = mIOrganizer;
+        mController.onActivityReparentedToTask(activity);
+        mController.dispatchPendingEvents();
+
+        // Disallow organizer to reparent activity that is untrusted embedded.
+        verify(mOrganizer, never()).onTransactionReady(mTransactionCaptor.capture());
+    }
+
+    @Test
+    public void testOnActivityReparentedToTask_trimReportedIntent() {
+        // Make sure the activity pid/uid is the same as the organizer caller.
+        final int pid = Binder.getCallingPid();
+        final int uid = Binder.getCallingUid();
+        final ActivityRecord activity = createActivityRecord(mDisplayContent);
+        final Task task = activity.getTask();
+        activity.info.applicationInfo.uid = uid;
+        doReturn(pid).when(activity).getPid();
+        task.effectiveUid = uid;
+        activity.mLastTaskFragmentOrganizerBeforePip = mIOrganizer;
+
+        // Test the Intent trim in #assertIntentTrimmed
+        activity.intent.setComponent(new ComponentName("TestPackage", "TestClass"))
+                .setPackage("TestPackage")
+                .setAction("TestAction")
+                .setData(mock(Uri.class))
+                .putExtra("Test", 123)
+                .setFlags(10);
+
+        mController.onActivityReparentedToTask(activity);
+        mController.dispatchPendingEvents();
+
+        assertActivityReparentedToTaskTransaction(task.mTaskId, activity.intent, activity.token);
     }
 
     @Test
@@ -1425,7 +1483,8 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         final TaskFragmentTransaction.Change change = changes.remove(0);
         assertEquals(TYPE_ACTIVITY_REPARENTED_TO_TASK, change.getType());
         assertEquals(taskId, change.getTaskId());
-        assertEquals(intent, change.getActivityIntent());
+        assertIntentsEqualForOrganizer(intent, change.getActivityIntent());
+        assertIntentTrimmed(change.getActivityIntent());
         assertEquals(activityToken, change.getActivityToken());
     }
 
@@ -1451,5 +1510,18 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         // Task needs to be visible
         mockParent.lastActiveTime = 100;
         doReturn(true).when(mockParent).shouldBeVisible(any());
+    }
+
+    private static void assertIntentsEqualForOrganizer(@NonNull Intent expected,
+            @NonNull Intent actual) {
+        assertEquals(expected.getComponent(), actual.getComponent());
+        assertEquals(expected.getPackage(), actual.getPackage());
+        assertEquals(expected.getAction(), actual.getAction());
+    }
+
+    private static void assertIntentTrimmed(@NonNull Intent intent) {
+        assertNull(intent.getData());
+        assertNull(intent.getExtras());
+        assertEquals(0, intent.getFlags());
     }
 }

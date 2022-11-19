@@ -114,7 +114,7 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
         fakeWakeLockBuilder = WakeLockFake.Builder(context)
         fakeWakeLockBuilder.setWakeLock(fakeWakeLock)
 
-        controllerReceiver = MediaTttChipControllerReceiver(
+        controllerReceiver = FakeMediaTttChipControllerReceiver(
             commandQueue,
             context,
             logger,

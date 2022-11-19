@@ -88,6 +88,7 @@ class FoldAodAnimationControllerTest : SysuiTestCase() {
 
         deviceStates = FoldableTestUtils.findDeviceStates(context)
 
+        // TODO(b/254878364): remove this call to NPVC.getView()
         whenever(notificationPanelViewController.view).thenReturn(viewGroup)
         whenever(viewGroup.viewTreeObserver).thenReturn(viewTreeObserver)
         whenever(wakefulnessLifecycle.lastSleepReason)
