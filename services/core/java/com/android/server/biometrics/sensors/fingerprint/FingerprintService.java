@@ -43,6 +43,7 @@ import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.ITestSessionCallback;
 import android.hardware.biometrics.fingerprint.IFingerprint;
+import android.hardware.biometrics.fingerprint.PointerContext;
 import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
@@ -881,29 +882,27 @@ public class FingerprintService extends SystemService {
 
         @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
         @Override
-        public void onPointerDown(long requestId, int sensorId, int x, int y,
-                float minor, float major) {
+        public void onPointerDown(long requestId, int sensorId, PointerContext pc) {
             super.onPointerDown_enforcePermission();
-
             final ServiceProvider provider = mRegistry.getProviderForSensor(sensorId);
             if (provider == null) {
                 Slog.w(TAG, "No matching provider for onFingerDown, sensorId: " + sensorId);
                 return;
             }
-            provider.onPointerDown(requestId, sensorId, x, y, minor, major);
+            provider.onPointerDown(requestId, sensorId, pc);
         }
 
         @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
         @Override
-        public void onPointerUp(long requestId, int sensorId) {
-            super.onPointerUp_enforcePermission();
 
+        public void onPointerUp(long requestId, int sensorId, PointerContext pc) {
+            super.onPointerUp_enforcePermission();
             final ServiceProvider provider = mRegistry.getProviderForSensor(sensorId);
             if (provider == null) {
                 Slog.w(TAG, "No matching provider for onFingerUp, sensorId: " + sensorId);
                 return;
             }
-            provider.onPointerUp(requestId, sensorId);
+            provider.onPointerUp(requestId, sensorId, pc);
         }
 
         @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)

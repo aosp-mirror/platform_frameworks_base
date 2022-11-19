@@ -762,7 +762,6 @@ public final class JobStatus {
                 executingWork.add(work);
                 work.bumpDeliveryCount();
             }
-            updateNetworkBytesLocked();
             return work;
         }
         return null;
@@ -790,6 +789,7 @@ public final class JobStatus {
                 if (work.getWorkId() == workId) {
                     executingWork.remove(i);
                     ungrantWorkItem(work);
+                    updateNetworkBytesLocked();
                     return true;
                 }
             }

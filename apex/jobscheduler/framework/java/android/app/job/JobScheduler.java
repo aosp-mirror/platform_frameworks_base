@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.UserIdInt;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
 import android.content.ClipData;
@@ -247,6 +248,15 @@ public abstract class JobScheduler {
      *     if the supplied job ID does not correspond to any job.
      */
     public abstract @Nullable JobInfo getPendingJob(int jobId);
+
+    /**
+     * Returns {@code true} if the app currently holds the
+     * {@link android.Manifest.permission#RUN_LONG_JOBS} permission, allowing it to run long jobs.
+     * @hide
+     */
+    public boolean hasRunLongJobsPermission(@NonNull String packageName, @UserIdInt int userId) {
+        return false;
+    }
 
     /**
      * <b>For internal system callers only!</b>

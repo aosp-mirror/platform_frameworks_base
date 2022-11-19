@@ -47,6 +47,9 @@ class MenuViewAppearance {
     private final Resources mRes;
     private final Position mPercentagePosition = new Position(/* percentageX= */
             0f, /* percentageY= */ 0f);
+    private boolean mIsImeShowing;
+    // Avoid the menu view overlapping on the primary action button under the bottom as possible.
+    private int mImeShiftingSpace;
     private int mTargetFeaturesSize;
     private int mSizeType;
     private int mMargin;
@@ -62,6 +65,7 @@ class MenuViewAppearance {
     private int mStrokeColor;
     private int mInset;
     private int mElevation;
+    private float mImeTop;
     private float[] mRadii;
     private Drawable mBackgroundDrawable;
     private String mContentDescription;
@@ -106,6 +110,8 @@ class MenuViewAppearance {
         mStrokeColor = mRes.getColor(R.color.accessibility_floating_menu_stroke_dark);
         mInset = mRes.getDimensionPixelSize(R.dimen.accessibility_floating_menu_stroke_inset);
         mElevation = mRes.getDimensionPixelSize(R.dimen.accessibility_floating_menu_elevation);
+        mImeShiftingSpace = mRes.getDimensionPixelSize(
+                R.dimen.accessibility_floating_menu_ime_shifting_space);
         final Drawable drawable =
                 mRes.getDrawable(R.drawable.accessibility_floating_menu_background);
         mBackgroundDrawable = new InstantInsetLayerDrawable(new Drawable[]{drawable});
@@ -131,29 +137,56 @@ class MenuViewAppearance {
         mRadii = createRadii(isMenuOnLeftSide(), getMenuRadius(mTargetFeaturesSize));
     }
 
+    void onImeVisibilityChanged(boolean imeShowing, float imeTop) {
+        mIsImeShowing = imeShowing;
+        mImeTop = imeTop;
+    }
+
     Rect getMenuDraggableBounds() {
+        return getMenuDraggableBoundsWith(/* includeIme= */ true);
+    }
+
+    Rect getMenuDraggableBoundsExcludeIme() {
+        return getMenuDraggableBoundsWith(/* includeIme= */ false);
+    }
+
+    private Rect getMenuDraggableBoundsWith(boolean includeIme) {
         final int margin = getMenuMargin();
-        final Rect draggableBounds = getWindowAvailableBounds();
+        final Rect draggableBounds = new Rect(getWindowAvailableBounds());
 
         // Initializes start position for mapping the translation of the menu view.
         draggableBounds.offsetTo(/* newLeft= */ 0, /* newTop= */ 0);
 
         draggableBounds.top += margin;
         draggableBounds.right -= getMenuWidth();
-        draggableBounds.bottom -= Math.min(
-                getWindowAvailableBounds().height() - draggableBounds.top,
-                calculateActualMenuHeight() + margin);
+
+        if (includeIme && mIsImeShowing) {
+            final int imeHeight = (int) (draggableBounds.bottom - mImeTop);
+            draggableBounds.bottom -= (imeHeight + mImeShiftingSpace);
+        }
+        draggableBounds.bottom -= (calculateActualMenuHeight() + margin);
+        draggableBounds.bottom = Math.max(draggableBounds.top, draggableBounds.bottom);
+
         return draggableBounds;
     }
 
     PointF getMenuPosition() {
-        final Rect draggableBounds = getMenuDraggableBounds();
+        final Rect draggableBounds = getMenuDraggableBoundsExcludeIme();
+        final float x = draggableBounds.left
+                + draggableBounds.width() * mPercentagePosition.getPercentageX();
 
-        return new PointF(
-                draggableBounds.left
-                        + draggableBounds.width() * mPercentagePosition.getPercentageX(),
-                draggableBounds.top
-                        + draggableBounds.height() * mPercentagePosition.getPercentageY());
+        float y = draggableBounds.top
+                + draggableBounds.height() * mPercentagePosition.getPercentageY();
+
+        // If the bottom of the menu view and overlap on the ime, its position y will be
+        // overridden with new y.
+        final float menuBottom = y + getMenuHeight() + mMargin;
+        if (mIsImeShowing && (menuBottom >= mImeTop)) {
+            y = Math.max(draggableBounds.top,
+                    mImeTop - getMenuHeight() - mMargin - mImeShiftingSpace);
+        }
+
+        return new PointF(x, y);
     }
 
     String getContentDescription() {

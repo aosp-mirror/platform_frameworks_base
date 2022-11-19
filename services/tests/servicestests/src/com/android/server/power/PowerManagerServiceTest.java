@@ -658,17 +658,52 @@ public class PowerManagerServiceTest {
     }
 
     /**
-     * Tests that dreaming continues when undocking and configured to do so.
+     * Tests that dreaming stops when undocking and not configured to keep dreaming.
      */
     @Test
-    public void testWakefulnessDream_shouldKeepDreamingWhenUndocked() {
+    public void testWakefulnessDream_shouldStopDreamingWhenUndocked_whenNotConfigured() {
+        // Make sure "unplug turns on screen" is configured to true.
+        when(mResourcesSpy.getBoolean(com.android.internal.R.bool.config_unplugTurnsOnScreen))
+                .thenReturn(true);
+
         createService();
         startSystem();
 
-        when(mResourcesSpy.getBoolean(
-                com.android.internal.R.bool.config_keepDreamingWhenUndocking))
+        ArgumentCaptor<DreamManagerInternal.DreamManagerStateListener> dreamManagerStateListener =
+                ArgumentCaptor.forClass(DreamManagerInternal.DreamManagerStateListener.class);
+        verify(mDreamManagerInternalMock).registerDreamManagerStateListener(
+                dreamManagerStateListener.capture());
+        dreamManagerStateListener.getValue().onKeepDreamingWhenUndockedChanged(false);
+
+        when(mBatteryManagerInternalMock.getPlugType())
+                .thenReturn(BatteryManager.BATTERY_PLUGGED_DOCK);
+        setPluggedIn(true);
+
+        forceAwake();  // Needs to be awake first before it can dream.
+        forceDream();
+        when(mBatteryManagerInternalMock.getPlugType()).thenReturn(0);
+        setPluggedIn(false);
+
+        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
+    }
+
+    /**
+     * Tests that dreaming continues when undocking and configured to do so.
+     */
+    @Test
+    public void testWakefulnessDream_shouldKeepDreamingWhenUndocked_whenConfigured() {
+        // Make sure "unplug turns on screen" is configured to true.
+        when(mResourcesSpy.getBoolean(com.android.internal.R.bool.config_unplugTurnsOnScreen))
                 .thenReturn(true);
-        mService.readConfigurationLocked();
+
+        createService();
+        startSystem();
+
+        ArgumentCaptor<DreamManagerInternal.DreamManagerStateListener> dreamManagerStateListener =
+                ArgumentCaptor.forClass(DreamManagerInternal.DreamManagerStateListener.class);
+        verify(mDreamManagerInternalMock).registerDreamManagerStateListener(
+                dreamManagerStateListener.capture());
+        dreamManagerStateListener.getValue().onKeepDreamingWhenUndockedChanged(true);
 
         when(mBatteryManagerInternalMock.getPlugType())
                 .thenReturn(BatteryManager.BATTERY_PLUGGED_DOCK);
@@ -680,6 +715,37 @@ public class PowerManagerServiceTest {
         setPluggedIn(false);
 
         assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_DREAMING);
+    }
+
+    /**
+     * Tests that dreaming stops when undocking while showing a dream that prevents it.
+     */
+    @Test
+    public void testWakefulnessDream_shouldStopDreamingWhenUndocked_whenDreamPrevents() {
+        // Make sure "unplug turns on screen" is configured to true.
+        when(mResourcesSpy.getBoolean(com.android.internal.R.bool.config_unplugTurnsOnScreen))
+                .thenReturn(true);
+
+        createService();
+        startSystem();
+
+        ArgumentCaptor<DreamManagerInternal.DreamManagerStateListener> dreamManagerStateListener =
+                ArgumentCaptor.forClass(DreamManagerInternal.DreamManagerStateListener.class);
+        verify(mDreamManagerInternalMock).registerDreamManagerStateListener(
+                dreamManagerStateListener.capture());
+        dreamManagerStateListener.getValue().onKeepDreamingWhenUndockedChanged(true);
+
+        when(mBatteryManagerInternalMock.getPlugType())
+                .thenReturn(BatteryManager.BATTERY_PLUGGED_DOCK);
+        setPluggedIn(true);
+
+        forceAwake();  // Needs to be awake first before it can dream.
+        forceDream();
+        dreamManagerStateListener.getValue().onKeepDreamingWhenUndockedChanged(false);
+        when(mBatteryManagerInternalMock.getPlugType()).thenReturn(0);
+        setPluggedIn(false);
+
+        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
     }
 
     @Test

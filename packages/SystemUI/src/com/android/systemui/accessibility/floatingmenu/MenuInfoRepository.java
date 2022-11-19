@@ -51,6 +51,7 @@ class MenuInfoRepository {
 
     @FloatRange(from = 0.0, to = 1.0)
     private static final float DEFAULT_MENU_POSITION_Y_PERCENT = 0.77f;
+    private static final boolean DEFAULT_MOVE_TO_TUCKED_VALUE = false;
 
     private final Context mContext;
     private final Handler mHandler = new Handler(Looper.getMainLooper());
@@ -92,6 +93,12 @@ class MenuInfoRepository {
         mPercentagePosition = getStartPosition();
     }
 
+    void loadMenuMoveToTucked(OnInfoReady<Boolean> callback) {
+        callback.onReady(
+                Prefs.getBoolean(mContext, Prefs.Key.HAS_ACCESSIBILITY_FLOATING_MENU_TUCKED,
+                        DEFAULT_MOVE_TO_TUCKED_VALUE));
+    }
+
     void loadMenuPosition(OnInfoReady<Position> callback) {
         callback.onReady(mPercentagePosition);
     }
@@ -111,6 +118,11 @@ class MenuInfoRepository {
     private MenuFadeEffectInfo getMenuFadeEffectInfo() {
         return new MenuFadeEffectInfo(isMenuFadeEffectEnabledFromSettings(mContext),
                 getMenuOpacityFromSettings(mContext));
+    }
+
+    void updateMoveToTucked(boolean isMoveToTucked) {
+        Prefs.putBoolean(mContext, Prefs.Key.HAS_ACCESSIBILITY_FLOATING_MENU_TUCKED,
+                isMoveToTucked);
     }
 
     void updateMenuSavingPosition(Position percentagePosition) {

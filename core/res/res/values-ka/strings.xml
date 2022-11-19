@@ -395,6 +395,54 @@
     <string name="permdesc_persistentActivity" product="default" msgid="1914841924366562051">"აპს შეეძლება, საკუთარი ნაწილები მუდმივად ჩაწეროს მეხსიერებაში. ეს შეზღუდავს მეხსიერების ხელმისაწვდომობას სხვა აპებისთვის და შეანელებს ტელეფონს."</string>
     <string name="permlab_foregroundService" msgid="1768855976818467491">"წინა პლანის სერვისის გაშვება"</string>
     <string name="permdesc_foregroundService" msgid="8720071450020922795">"აპს შეეძლება, გამოიყენოს წინა პლანის სერვისები."</string>
+    <!-- no translation found for permlab_foregroundServiceCamera (7814751737955715297) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceCamera (6973701931250595727) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceConnectedDevice (3019650546176872501) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceConnectedDevice (1067457315741352963) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceDataSync (5847463514326881076) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceDataSync (2267140263423973050) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceLocation (3745428302378535690) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceLocation (118894034365177183) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceMediaPlayback (4002687983891935514) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceMediaPlayback (3638032446063968043) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceMediaProjection (2630868915733312527) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceMediaProjection (4805677128082002298) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceMicrophone (7390033424890545399) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceMicrophone (1206041516173483201) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServicePhoneCall (627937743867697892) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServicePhoneCall (5941660252587015147) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceHealth (3675776442080928184) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceHealth (2024586220562667185) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceRemoteMessaging (105670277002780950) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceRemoteMessaging (8767598075877576277) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceSystemExempted (1597663713590612685) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceSystemExempted (947381760834649622) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceSpecialUse (7973536745876645082) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceSpecialUse (646713654541885919) -->
+    <skip />
     <string name="permlab_getPackageSize" msgid="375391550792886641">"აპის მეხსიერების სივრცის გაზომვა"</string>
     <string name="permdesc_getPackageSize" msgid="742743530909966782">"აპს შეეძლება, მოიპოვოს თავისი კოდი, მონაცემები და ქეშის ზომები."</string>
     <string name="permlab_writeSettings" msgid="8057285063719277394">"სისტემის პარამეტრების შეცვლა"</string>
@@ -447,6 +495,8 @@
     <string name="permdesc_recordAudio" msgid="5857246765327514062">"ამ აპს გამოყენების დროს შეუძლია მიკროფონით აუდიოს ჩაწერა."</string>
     <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"ფონურად ჩაწერს აუდიოს"</string>
     <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"ამ აპს ნებისმიერ დროს შეუძლია მიკროფონით აუდიოს ჩაწერა."</string>
+    <string name="permlab_detectScreenCapture" msgid="4447042362828799433">"აპის ფანჯრების ეკრანის აღბეჭდვის გამოვლენა"</string>
+    <string name="permdesc_detectScreenCapture" msgid="3485784917960342284">"ეს აპი მიიღებს შეტყობინებას, როდესაც ეკრანის ანაბეჭდის გადაღება აპის გამოყენების პროცესში მოხდება."</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"ბრძანებების SIM-ზე გაგზავნა"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"აპისთვის ნების დართვა გაუგზავნოს ბრძანებები SIM-ბარათს. ეს ძალიან საშიშია."</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"ფიზიკური აქტივობის ამოცნობა"</string>
@@ -698,10 +748,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"საშუალებას აძლევს აპს, წაიკითხოს ვიდეო ფაილები თქვენი ზიარი მეხსიერებიდან."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"სურათების ფაილების წაკითხვა ზიარი მეხსიერებიდან"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"საშუალებას აძლევს აპს, წაიკითხოს სურათის ფაილები თქვენი ზიარი მეხსიერებიდან."</string>
-    <!-- no translation found for permlab_readVisualUserSelect (5516204215354667586) -->
-    <skip />
-    <!-- no translation found for permdesc_readVisualUserSelect (8027174717714968217) -->
-    <skip />
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"წაიკითხეთ მომხმარებლის მიერ არჩეული სურათი და ვიდეო ფაილები საზიარო მეხსიერებიდან"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"აპს შეეძლება წაიკითხოს სურათი და ვიდეო ფაილები, რომლებიც არჩეულია თქვენი საზიარო მეხსიერებიდან."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"თქვენი ზიარი მეხსიერების შიგთავსის შეცვლა ან წაშლა"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"საშუალებას აძლევს აპს, ჩაწეროს თქვენი ზიარი მეხსიერების შიგთავსი."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP ზარების წამოწყება/მიღება"</string>
@@ -2052,12 +2100,6 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"დეინსტალაცია"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"მაინც გახსნა"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"აღმოჩენილია საზიანო აპი"</string>
-    <string name="log_access_confirmation_title" msgid="2343578467290592708">"გსურთ <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>-ს მიანიჭოთ მოწყობილობის ყველა ჟურნალზე წვდომა?"</string>
-    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"ერთჯერადი წვდომის დაშვება"</string>
-    <string name="log_access_confirmation_deny" msgid="7685790957455099845">"არ დაიშვას"</string>
-    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"მოწყობილობის ჟურნალში იწერება, რა ხდება ამ მოწყობილობაზე. აპებს შეუძლია ამ ჟურნალების გამოყენება პრობლემების აღმოსაჩენად და მოსაგვარებლად.\n\nზოგი ჟურნალი შეიძლება სენსიტიური ინფორმაციის მატარებელი იყოს, ამიტომაც მოწყობილობის ყველა ჟურნალზე წვდომა მხოლოდ სანდო აპებს მიანიჭეთ. \n\nთუ ამ აპს მოწყობილობის ყველა ჟურნალზე წვდომას არ მიანიჭებთ, მას მაინც ექნება წვდომა თქვენს ჟურნალებზე. თქვენი მოწყობილობის მწარმოებელს მაინც შეეძლება თქვენი მოწყობილობის ზოგიერთ ჟურნალსა თუ ინფორმაციაზე წვდომა."</string>
-    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"მოწყობილობის ჟურნალში იწერება, რა ხდება ამ მოწყობილობაზე. აპებს შეუძლია ამ ჟურნალების გამოყენება პრობლემების აღმოსაჩენად და მოსაგვარებლად.\n\nზოგი ჟურნალი შეიძლება სენსიტიური ინფორმაციის მატარებელი იყოს, ამიტომაც მოწყობილობის ყველა ჟურნალზე წვდომა მხოლოდ სანდო აპებს მიანიჭეთ. \n\nთუ ამ აპს მოწყობილობის ყველა ჟურნალზე წვდომას არ მიანიჭებთ, მას მაინც ექნება წვდომა საკუთარ ჟურნალებზე. თქვენი მოწყობილობის მწარმოებელს მაინც შეეძლება თქვენი მოწყობილობის ზოგიერთ ჟურნალსა თუ ინფორმაციაზე წვდომა.\n\n შეიტყვეთ მეტი g.co/android/devicelogs."</string>
-    <string name="log_access_do_not_show_again" msgid="1058690599083091552">"აღარ გამოჩნდეს"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g>-ს სურს, გაჩვენოთ <xliff:g id="APP_2">%2$s</xliff:g>-ის ფრაგმენტები"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"რედაქტირება"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"ზარების და შეტყობინებების მიღებისას ვიბრაცია ჩაირთვება"</string>
@@ -2298,6 +2340,8 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"ტელეფონის კამერაზე წვდომა ვერ მოხერხდა თქვენი <xliff:g id="DEVICE">%1$s</xliff:g>-დან"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"ტაბლეტის კამერაზე წვდომა ვერ მოხერხდა თქვენი <xliff:g id="DEVICE">%1$s</xliff:g>-დან"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"მასზე წვდომის მიᲦება შეუძლებელია სტრიმინგის დროს. ცადეთ ტელეფონიდან."</string>
+    <!-- no translation found for vdm_pip_blocked (4036107522497281397) -->
+    <skip />
     <string name="system_locale_title" msgid="711882686834677268">"სისტემის ნაგულისხმევი"</string>
     <string name="default_card_name" msgid="9198284935962911468">"ბარათი <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

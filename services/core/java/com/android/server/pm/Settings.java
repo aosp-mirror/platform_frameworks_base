@@ -353,6 +353,7 @@ public final class Settings implements Watchable, Snappable {
     private static final String ATTR_SPLASH_SCREEN_THEME = "splash-screen-theme";
 
     private static final String ATTR_PACKAGE_NAME = "packageName";
+    private static final String ATTR_BUILD_FINGERPRINT = "buildFingerprint";
     private static final String ATTR_FINGERPRINT = "fingerprint";
     private static final String ATTR_VOLUME_UUID = "volumeUuid";
     private static final String ATTR_SDK_VERSION = "sdkVersion";
@@ -432,7 +433,12 @@ public final class Settings implements Watchable, Snappable {
         int databaseVersion;
 
         /**
-         * Last known value of {@link Build#FINGERPRINT}. Used to determine when
+         * Last known value of {@link Build#FINGERPRINT}. Stored for debug purposes.
+         */
+        String buildFingerprint;
+
+        /**
+         * Last known value of {@link PackagePartitions#FINGERPRINT}. Used to determine when
          * an system update has occurred, meaning we need to clear code caches.
          */
         String fingerprint;
@@ -444,6 +450,7 @@ public final class Settings implements Watchable, Snappable {
         public void forceCurrent() {
             sdkVersion = Build.VERSION.SDK_INT;
             databaseVersion = CURRENT_DATABASE_VERSION;
+            buildFingerprint = Build.FINGERPRINT;
             fingerprint = PackagePartitions.FINGERPRINT;
         }
     }
@@ -2495,6 +2502,8 @@ public final class Settings implements Watchable, Snappable {
                 XmlUtils.writeStringAttribute(serializer, ATTR_VOLUME_UUID, volumeUuid);
                 serializer.attributeInt(null, ATTR_SDK_VERSION, ver.sdkVersion);
                 serializer.attributeInt(null, ATTR_DATABASE_VERSION, ver.databaseVersion);
+                XmlUtils.writeStringAttribute(serializer, ATTR_BUILD_FINGERPRINT,
+                        ver.buildFingerprint);
                 XmlUtils.writeStringAttribute(serializer, ATTR_FINGERPRINT, ver.fingerprint);
                 serializer.endTag(null, TAG_VERSION);
             }
@@ -3105,6 +3114,8 @@ public final class Settings implements Watchable, Snappable {
 
                     internal.sdkVersion = parser.getAttributeInt(null, "internal", 0);
                     external.sdkVersion = parser.getAttributeInt(null, "external", 0);
+                    internal.buildFingerprint = external.buildFingerprint =
+                            XmlUtils.readStringAttribute(parser, "buildFingerprint");
                     internal.fingerprint = external.fingerprint =
                             XmlUtils.readStringAttribute(parser, "fingerprint");
 
@@ -3136,6 +3147,8 @@ public final class Settings implements Watchable, Snappable {
                     final VersionInfo ver = findOrCreateVersion(volumeUuid);
                     ver.sdkVersion = parser.getAttributeInt(null, ATTR_SDK_VERSION);
                     ver.databaseVersion = parser.getAttributeInt(null, ATTR_DATABASE_VERSION);
+                    ver.buildFingerprint = XmlUtils.readStringAttribute(parser,
+                            ATTR_BUILD_FINGERPRINT);
                     ver.fingerprint = XmlUtils.readStringAttribute(parser, ATTR_FINGERPRINT);
                 } else if (tagName.equals(DomainVerificationPersistence.TAG_DOMAIN_VERIFICATIONS)) {
                     mDomainVerificationManager.readSettings(computer, parser);
@@ -4514,6 +4527,7 @@ public final class Settings implements Watchable, Snappable {
             pw.printPair("sdkVersion", ver.sdkVersion);
             pw.printPair("databaseVersion", ver.databaseVersion);
             pw.println();
+            pw.printPair("buildFingerprint", ver.buildFingerprint);
             pw.printPair("fingerprint", ver.fingerprint);
             pw.println();
             pw.decreaseIndent();

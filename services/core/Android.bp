@@ -100,7 +100,7 @@ java_library_static {
     name: "services.core.unboosted",
     defaults: ["platform_service_defaults"],
     srcs: [
-        ":android.hardware.biometrics.face-V2-java-source",
+        ":android.hardware.biometrics.face-V3-java-source",
         ":statslog-art-java-gen",
         ":statslog-contexthub-java-gen",
         ":services.core-sources",
@@ -161,7 +161,6 @@ java_library_static {
         "android.hardware.weaver-V1.0-java",
         "android.hardware.biometrics.face-V1.0-java",
         "android.hardware.biometrics.fingerprint-V2.3-java",
-        "android.hardware.biometrics.fingerprint-V2-java",
         "android.hardware.oemlock-V1.0-java",
         "android.hardware.configstore-V1.1-java",
         "android.hardware.ir-V1-java",

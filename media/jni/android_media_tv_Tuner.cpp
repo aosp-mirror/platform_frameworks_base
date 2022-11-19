@@ -380,6 +380,7 @@ void LnbClientCallbackImpl::onDiseqcMessage(const vector<uint8_t> &diseqcMessage
                 gFields.onLnbDiseqcMessageID,
                 array);
         env->DeleteLocalRef(lnb);
+        env->DeleteLocalRef(array);
     } else {
         ALOGE("LnbClientCallbackImpl::onDiseqcMessage:"
                 "Lnb object has been freed. Ignoring callback.");
@@ -848,6 +849,7 @@ void FilterClientCallbackImpl::getRestartEvent(jobjectArray &arr, const int size
     const int32_t &startId = event.get<DemuxFilterEvent::Tag::startId>();
     jobject obj = env->NewObject(eventClazz, eventInit, startId);
     env->SetObjectArrayElement(arr, size, obj);
+    env->DeleteLocalRef(obj);
 }
 
 void FilterClientCallbackImpl::onFilterEvent(const vector<DemuxFilterEvent> &events) {
@@ -2181,7 +2183,6 @@ jobject JTuner::getFrontendStatus(jintArray types) {
                         env->NewObject(longClazz, initLong,
                                        static_cast<long>(s.get<FrontendStatus::Tag::innerFec>()));
                 env->SetObjectField(statusObj, field, newLongObj);
-                env->DeleteLocalRef(longClazz);
                 env->DeleteLocalRef(newLongObj);
                 break;
             }
@@ -2347,7 +2348,6 @@ jobject JTuner::getFrontendStatus(jintArray types) {
                 }
 
                 env->SetObjectField(statusObj, field, valObj);
-                env->DeleteLocalRef(plpClazz);
                 env->DeleteLocalRef(valObj);
                 break;
             }
@@ -2758,7 +2758,6 @@ jobject JTuner::getFrontendStatus(jintArray types) {
                 }
 
                 env->SetObjectField(statusObj, field, valObj);
-                env->DeleteLocalRef(plpClazz);
                 env->DeleteLocalRef(valObj);
                 break;
             }

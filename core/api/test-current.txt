@@ -859,10 +859,6 @@ package android.content.pm {
     field public static final String SYSTEM_SHARED_LIBRARY_SHARED = "android.ext.shared";
   }
 
-  public class PermissionInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {
-    field public static final int PROTECTION_FLAG_VENDOR_PRIVILEGED = 32768; // 0x8000
-  }
-
   public final class ProviderInfoList implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public static android.content.pm.ProviderInfoList fromList(@NonNull java.util.List<android.content.pm.ProviderInfo>);

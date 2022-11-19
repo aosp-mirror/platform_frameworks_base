@@ -1409,7 +1409,11 @@ public final class ViewRootImpl implements ViewParent,
                 mFirstPostImeInputStage = earlyPostImeStage;
                 mPendingInputEventQueueLengthCounterName = "aq:pending:" + counterSuffix;
 
-                AnimationHandler.requestAnimatorsEnabled(mAppVisible, this);
+                if (!mRemoved || !mAppVisible) {
+                    AnimationHandler.requestAnimatorsEnabled(mAppVisible, this);
+                } else if (LOCAL_LOGV) {
+                    Log.v(mTag, "setView() enabling visibility when removed");
+                }
             }
         }
     }
@@ -1760,7 +1764,12 @@ public final class ViewRootImpl implements ViewParent,
                 mAppVisibilityChanged = true;
                 scheduleTraversals();
             }
-            AnimationHandler.requestAnimatorsEnabled(mAppVisible, this);
+            // Only enable if the window is not already removed (via earlier call to doDie())
+            if (!mRemoved || !mAppVisible) {
+                AnimationHandler.requestAnimatorsEnabled(mAppVisible, this);
+            } else if (LOCAL_LOGV) {
+                Log.v(mTag, "handleAppVisibility() enabling visibility when removed");
+            }
         }
     }
 
@@ -2309,6 +2318,7 @@ public final class ViewRootImpl implements ViewParent,
      */
     void notifyRendererOfFramePending() {
         if (mAttachInfo.mThreadedRenderer != null) {
+            mAttachInfo.mThreadedRenderer.notifyCallbackPending();
             mAttachInfo.mThreadedRenderer.notifyFramePending();
         }
     }
@@ -9127,6 +9137,9 @@ public final class ViewRootImpl implements ViewParent,
             mConsumeBatchedInputScheduled = true;
             mChoreographer.postCallback(Choreographer.CALLBACK_INPUT,
                     mConsumedBatchedInputRunnable, null);
+            if (mAttachInfo.mThreadedRenderer != null) {
+                mAttachInfo.mThreadedRenderer.notifyCallbackPending();
+            }
         }
     }
 
@@ -9320,12 +9333,18 @@ public final class ViewRootImpl implements ViewParent,
                 mViews.add(view);
                 postIfNeededLocked();
             }
+            if (mAttachInfo.mThreadedRenderer != null) {
+                mAttachInfo.mThreadedRenderer.notifyCallbackPending();
+            }
         }
 
         public void addViewRect(AttachInfo.InvalidateInfo info) {
             synchronized (this) {
                 mViewRects.add(info);
                 postIfNeededLocked();
+            }
+            if (mAttachInfo.mThreadedRenderer != null) {
+                mAttachInfo.mThreadedRenderer.notifyCallbackPending();
             }
         }
 

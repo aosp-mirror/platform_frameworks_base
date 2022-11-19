@@ -395,6 +395,54 @@
     <string name="permdesc_persistentActivity" product="default" msgid="1914841924366562051">"Memungkinkan aplikasi membuat bagian dari dirinya sendiri terus-menerus berada dalam memori. Izin ini dapat membatasi memori yang tersedia untuk aplikasi lain sehingga menjadikan ponsel lambat."</string>
     <string name="permlab_foregroundService" msgid="1768855976818467491">"jalankan layanan di latar depan"</string>
     <string name="permdesc_foregroundService" msgid="8720071450020922795">"Mengizinkan aplikasi menggunakan layanan di latar depan."</string>
+    <!-- no translation found for permlab_foregroundServiceCamera (7814751737955715297) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceCamera (6973701931250595727) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceConnectedDevice (3019650546176872501) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceConnectedDevice (1067457315741352963) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceDataSync (5847463514326881076) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceDataSync (2267140263423973050) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceLocation (3745428302378535690) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceLocation (118894034365177183) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceMediaPlayback (4002687983891935514) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceMediaPlayback (3638032446063968043) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceMediaProjection (2630868915733312527) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceMediaProjection (4805677128082002298) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceMicrophone (7390033424890545399) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceMicrophone (1206041516173483201) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServicePhoneCall (627937743867697892) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServicePhoneCall (5941660252587015147) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceHealth (3675776442080928184) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceHealth (2024586220562667185) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceRemoteMessaging (105670277002780950) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceRemoteMessaging (8767598075877576277) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceSystemExempted (1597663713590612685) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceSystemExempted (947381760834649622) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceSpecialUse (7973536745876645082) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceSpecialUse (646713654541885919) -->
+    <skip />
     <string name="permlab_getPackageSize" msgid="375391550792886641">"mengukur ruang penyimpanan aplikasi"</string>
     <string name="permdesc_getPackageSize" msgid="742743530909966782">"Mengizinkan apl mengambil kode, data, dan ukuran temboloknya"</string>
     <string name="permlab_writeSettings" msgid="8057285063719277394">"ubah setelan sistem"</string>
@@ -447,6 +495,10 @@
     <string name="permdesc_recordAudio" msgid="5857246765327514062">"Aplikasi ini dapat merekam audio menggunakan mikrofon saat aplikasi sedang digunakan."</string>
     <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"merekam audio di latar belakang"</string>
     <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"Aplikasi ini dapat merekam audio menggunakan mikrofon kapan saja."</string>
+    <!-- no translation found for permlab_detectScreenCapture (4447042362828799433) -->
+    <skip />
+    <!-- no translation found for permdesc_detectScreenCapture (3485784917960342284) -->
+    <skip />
     <string name="permlab_sim_communication" msgid="176788115994050692">"kirimkan perintah ke SIM"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"Mengizinkan aplikasi mengirim perintah ke SIM. Ini sangat berbahaya."</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"kenali aktivitas fisik"</string>
@@ -698,10 +750,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Mengizinkan aplikasi membaca file video dari penyimpanan bersama."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"membaca file gambar dari penyimpanan bersama"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Mengizinkan aplikasi membaca file gambar dari penyimpanan bersama."</string>
-    <!-- no translation found for permlab_readVisualUserSelect (5516204215354667586) -->
-    <skip />
-    <!-- no translation found for permdesc_readVisualUserSelect (8027174717714968217) -->
-    <skip />
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"membaca file gambar dan video yang dipilih dari penyimpanan bersama"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"Mengizinkan aplikasi membaca file gambar dan video yang Anda pilih dari penyimpanan bersama."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"memodifikasi atau menghapus konten penyimpanan bersama Anda"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Mengizinkan aplikasi menulis konten penyimpanan bersama Anda."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"lakukan/terima panggilan SIP"</string>
@@ -2052,12 +2102,6 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"UNINSTAL"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"TETAP BUKA"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Aplikasi berbahaya terdeteksi"</string>
-    <string name="log_access_confirmation_title" msgid="2343578467290592708">"Izinkan <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> mengakses semua log perangkat?"</string>
-    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Izinkan akses satu kali"</string>
-    <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Jangan izinkan"</string>
-    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"Log perangkat merekam hal-hal yang terjadi di perangkat Anda. Aplikasi dapat menggunakan log ini untuk menemukan dan memperbaiki masalah.\n\nBeberapa log mungkin berisi info sensitif, jadi hanya izinkan aplikasi yang Anda percayai untuk mengakses semua log perangkat. \n\nJika Anda tidak mengizinkan aplikasi ini mengakses semua log perangkat, aplikasi masih dapat mengakses log-nya sendiri. Produsen perangkat masih dapat mengakses beberapa log atau info di perangkat Anda."</string>
-    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"Log perangkat merekam hal-hal yang terjadi di perangkat Anda. Aplikasi dapat menggunakan log ini untuk menemukan dan memperbaiki masalah.\n\nBeberapa log mungkin berisi info sensitif, jadi hanya izinkan aplikasi yang Anda percayai untuk mengakses semua log perangkat. \n\nJika Anda tidak mengizinkan aplikasi ini mengakses semua log perangkat, aplikasi masih dapat mengakses log-nya sendiri. Produsen perangkat masih dapat mengakses beberapa log atau info di perangkat Anda.\n\nPelajari lebih lanjut di g.co/android/devicelogs."</string>
-    <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Jangan tampilkan lagi"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> ingin menampilkan potongan <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Edit"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Panggilan dan notifikasi akan bergetar"</string>
@@ -2298,6 +2342,8 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Tidak dapat mengakses kamera ponsel dari <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Tidak dapat mengakses kamera tablet dari <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Konten ini tidak dapat diakses saat melakukan streaming. Coba di ponsel."</string>
+    <!-- no translation found for vdm_pip_blocked (4036107522497281397) -->
+    <skip />
     <string name="system_locale_title" msgid="711882686834677268">"Default sistem"</string>
     <string name="default_card_name" msgid="9198284935962911468">"KARTU <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

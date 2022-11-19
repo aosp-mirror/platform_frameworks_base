@@ -22,6 +22,7 @@ import static android.companion.AssociationRequest.DEVICE_PROFILE_COMPUTER;
 import static android.companion.AssociationRequest.DEVICE_PROFILE_WATCH;
 import static android.companion.CompanionDeviceManager.REASON_CANCELED;
 import static android.companion.CompanionDeviceManager.REASON_DISCOVERY_TIMEOUT;
+import static android.companion.CompanionDeviceManager.REASON_INTERNAL_ERROR;
 import static android.companion.CompanionDeviceManager.REASON_USER_REJECTED;
 import static android.companion.CompanionDeviceManager.RESULT_DISCOVERY_TIMEOUT;
 import static android.companion.CompanionDeviceManager.RESULT_INTERNAL_ERROR;
@@ -214,7 +215,8 @@ public class CompanionDeviceActivity extends FragmentActivity implements
 
             Log.i(TAG, "Cancelling the user confirmation");
 
-            cancel(false, false);
+            cancel(/* discoveryTimeOut */ false,
+                    /* userRejected */ false, /* internalError */ false);
             return;
         }
 
@@ -241,7 +243,8 @@ public class CompanionDeviceActivity extends FragmentActivity implements
 
         // TODO: handle config changes without cancelling.
         if (!isDone()) {
-            cancel(/* discoveryTimeOut */ false, /* userRejected */ false); // will finish()
+            cancel(/* discoveryTimeOut */ false,
+                    /* userRejected */ false, /* internalError */ false); // will finish()
         }
     }
 
@@ -326,7 +329,8 @@ public class CompanionDeviceActivity extends FragmentActivity implements
     private void onDiscoveryStateChanged(DiscoveryState newState) {
         if (newState == FINISHED_TIMEOUT
                 && CompanionDeviceDiscoveryService.getScanResult().getValue().isEmpty()) {
-            cancel(/* discoveryTimeOut */ true, /* userRejected */ false);
+            cancel(/* discoveryTimeOut */ true,
+                    /* userRejected */ false, /* internalError */ false);
         }
     }
 
@@ -364,12 +368,14 @@ public class CompanionDeviceActivity extends FragmentActivity implements
         mCdmServiceReceiver.send(RESULT_CODE_ASSOCIATION_APPROVED, data);
     }
 
-    private void cancel(boolean discoveryTimeout, boolean userRejected) {
+    private void cancel(boolean discoveryTimeout, boolean userRejected, boolean internalError) {
         if (DEBUG) {
             Log.i(TAG, "cancel(), discoveryTimeout="
                     + discoveryTimeout
                     + ", userRejected="
-                    + userRejected, new Exception("Stack Trace Dump"));
+                    + userRejected
+                    + ", internalError="
+                    + internalError, new Exception("Stack Trace Dump"));
         }
 
         if (isDone()) {
@@ -391,9 +397,12 @@ public class CompanionDeviceActivity extends FragmentActivity implements
         } else if (discoveryTimeout) {
             cancelReason = REASON_DISCOVERY_TIMEOUT;
             resultCode = RESULT_DISCOVERY_TIMEOUT;
+        } else if (internalError) {
+            cancelReason = REASON_INTERNAL_ERROR;
+            resultCode = RESULT_INTERNAL_ERROR;
         } else {
             cancelReason = REASON_CANCELED;
-            resultCode = RESULT_CANCELED;
+            resultCode = CompanionDeviceManager.RESULT_CANCELED;
         }
 
         // First send callback to the app directly...
@@ -449,7 +458,8 @@ public class CompanionDeviceActivity extends FragmentActivity implements
             }
         } catch (PackageManager.NameNotFoundException e) {
             Log.e(TAG, "Package u" + userId + "/" + packageName + " not found.");
-            setResultAndFinish(null, RESULT_INTERNAL_ERROR);
+            cancel(/* discoveryTimeout */ false,
+                    /* userRejected */ false, /* internalError */ true);
             return;
         }
 
@@ -627,7 +637,7 @@ public class CompanionDeviceActivity extends FragmentActivity implements
         // Disable the button, to prevent more clicks.
         v.setEnabled(false);
 
-        cancel(/* discoveryTimeout */ false, /* userRejected */ true);
+        cancel(/* discoveryTimeout */ false, /* userRejected */ true, /* internalError */ false);
     }
 
     private void onShowHelperDialog(View view) {
@@ -652,7 +662,7 @@ public class CompanionDeviceActivity extends FragmentActivity implements
                         final AssociationInfo association = data.getParcelable(
                                 EXTRA_ASSOCIATION, AssociationInfo.class);
                         requireNonNull(association);
-                        setResultAndFinish(association, RESULT_OK);
+                        setResultAndFinish(association, CompanionDeviceManager.RESULT_OK);
                     } else {
                         setResultAndFinish(null, resultCode);
                     }
@@ -661,7 +671,7 @@ public class CompanionDeviceActivity extends FragmentActivity implements
 
     @Override
     public void onShowHelperDialogFailed() {
-        setResultAndFinish(null, RESULT_INTERNAL_ERROR);
+        cancel(/* discoveryTimeout */ false, /* userRejected */ false, /* internalError */ true);
     }
 
     @Override

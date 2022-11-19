@@ -56,7 +56,7 @@ import javax.inject.Inject
  * TODO(b/245610654): Re-name this to be MediaTttReceiverCoordinator.
  */
 @SysUISingleton
-class MediaTttChipControllerReceiver @Inject constructor(
+open class MediaTttChipControllerReceiver @Inject constructor(
         private val commandQueue: CommandQueue,
         context: Context,
         @MediaTttReceiverLogger logger: MediaTttLogger,
@@ -183,15 +183,28 @@ class MediaTttChipControllerReceiver @Inject constructor(
         val appIconView = view.getAppIconView()
         appIconView.animate()
                 .translationYBy(-1 * getTranslationAmount().toFloat())
-                .setDuration(30.frames)
+                .setDuration(ICON_TRANSLATION_ANIM_DURATION)
                 .start()
         appIconView.animate()
                 .alpha(1f)
-                .setDuration(5.frames)
+                .setDuration(ICON_ALPHA_ANIM_DURATION)
                 .start()
         // Using withEndAction{} doesn't apply a11y focus when screen is unlocked.
         appIconView.postOnAnimation { view.requestAccessibilityFocus() }
-        startRipple(view.requireViewById(R.id.ripple))
+        expandRipple(view.requireViewById(R.id.ripple))
+    }
+
+    override fun animateViewOut(view: ViewGroup, onAnimationEnd: Runnable) {
+        val appIconView = view.getAppIconView()
+        appIconView.animate()
+                .translationYBy(getTranslationAmount().toFloat())
+                .setDuration(ICON_TRANSLATION_ANIM_DURATION)
+                .start()
+        appIconView.animate()
+                .alpha(0f)
+                .setDuration(ICON_ALPHA_ANIM_DURATION)
+                .start()
+        (view.requireViewById(R.id.ripple) as ReceiverChipRippleView).collapseRipple(onAnimationEnd)
     }
 
     override fun getTouchableRegion(view: View, outRect: Rect) {
@@ -205,11 +218,22 @@ class MediaTttChipControllerReceiver @Inject constructor(
         return context.resources.getDimensionPixelSize(R.dimen.media_ttt_receiver_vert_translation)
     }
 
-    private fun startRipple(rippleView: ReceiverChipRippleView) {
+    private fun expandRipple(rippleView: ReceiverChipRippleView) {
         if (rippleView.rippleInProgress()) {
             // Skip if ripple is still playing
             return
         }
+
+        // In case the device orientation changes, we need to reset the layout.
+        rippleView.addOnLayoutChangeListener (
+            View.OnLayoutChangeListener { v, _, _, _, _, _, _, _, _ ->
+                if (v == null) return@OnLayoutChangeListener
+
+                val layoutChangedRippleView = v as ReceiverChipRippleView
+                layoutRipple(layoutChangedRippleView)
+                layoutChangedRippleView.invalidate()
+            }
+        )
         rippleView.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
             override fun onViewDetachedFromWindow(view: View?) {}
 
@@ -219,7 +243,7 @@ class MediaTttChipControllerReceiver @Inject constructor(
                 }
                 val attachedRippleView = view as ReceiverChipRippleView
                 layoutRipple(attachedRippleView)
-                attachedRippleView.startRipple()
+                attachedRippleView.expandRipple()
                 attachedRippleView.removeOnAttachStateChangeListener(this)
             }
         })
@@ -241,6 +265,9 @@ class MediaTttChipControllerReceiver @Inject constructor(
         return this.requireViewById(R.id.app_icon)
     }
 }
+
+val ICON_TRANSLATION_ANIM_DURATION = 30.frames
+val ICON_ALPHA_ANIM_DURATION = 5.frames
 
 data class ChipReceiverInfo(
     val routeInfo: MediaRoute2Info,

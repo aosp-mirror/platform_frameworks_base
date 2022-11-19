@@ -21,9 +21,13 @@ import android.util.Log;
 
 import com.android.dx.mockito.inline.extended.StaticMockitoSessionBuilder;
 
+import com.google.common.truth.Expect;
+import com.google.common.truth.StandardSubjectBuilder;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
+import org.junit.rules.RuleChain;
 import org.mockito.MockitoSession;
 import org.mockito.quality.Strictness;
 
@@ -39,8 +43,13 @@ public abstract class ExtendedMockitoTestCase {
 
     private MockitoSession mSession;
 
+    private final Expect mExpect = Expect.create();
+    protected final DumpableDumperRule mDumpableDumperRule = new DumpableDumperRule();
+
     @Rule
-    public final DumpableDumperRule mDumpableDumperRule = new DumpableDumperRule();
+    public final RuleChain mTwoRingsOfPowerAndOneChainToRuleThemAll = RuleChain
+            .outerRule(mDumpableDumperRule)
+            .around(mExpect);
 
     @Before
     public void startSession() {
@@ -81,5 +90,13 @@ public abstract class ExtendedMockitoTestCase {
             // cannot start a session when a previous one is not finished
             mSession.finishMocking();
         }
+    }
+
+    protected final StandardSubjectBuilder expectWithMessage(String msg) {
+        return mExpect.withMessage(msg);
+    }
+
+    protected final StandardSubjectBuilder expectWithMessage(String format, Object...args) {
+        return mExpect.withMessage(format, args);
     }
 }

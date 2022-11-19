@@ -395,6 +395,54 @@
     <string name="permdesc_persistentActivity" product="default" msgid="1914841924366562051">"アプリにその一部をメモリに常駐させることを許可します。これにより他のアプリが使用できるメモリが制限されるため、モバイル デバイスの動作が遅くなることがあります。"</string>
     <string name="permlab_foregroundService" msgid="1768855976818467491">"フォアグラウンド サービスの実行"</string>
     <string name="permdesc_foregroundService" msgid="8720071450020922795">"フォアグラウンド サービスの使用をアプリに許可します。"</string>
+    <!-- no translation found for permlab_foregroundServiceCamera (7814751737955715297) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceCamera (6973701931250595727) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceConnectedDevice (3019650546176872501) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceConnectedDevice (1067457315741352963) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceDataSync (5847463514326881076) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceDataSync (2267140263423973050) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceLocation (3745428302378535690) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceLocation (118894034365177183) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceMediaPlayback (4002687983891935514) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceMediaPlayback (3638032446063968043) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceMediaProjection (2630868915733312527) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceMediaProjection (4805677128082002298) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceMicrophone (7390033424890545399) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceMicrophone (1206041516173483201) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServicePhoneCall (627937743867697892) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServicePhoneCall (5941660252587015147) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceHealth (3675776442080928184) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceHealth (2024586220562667185) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceRemoteMessaging (105670277002780950) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceRemoteMessaging (8767598075877576277) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceSystemExempted (1597663713590612685) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceSystemExempted (947381760834649622) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceSpecialUse (7973536745876645082) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceSpecialUse (646713654541885919) -->
+    <skip />
     <string name="permlab_getPackageSize" msgid="375391550792886641">"アプリのストレージ容量の計測"</string>
     <string name="permdesc_getPackageSize" msgid="742743530909966782">"アプリのコード、データ、キャッシュサイズを取得することをアプリに許可します"</string>
     <string name="permlab_writeSettings" msgid="8057285063719277394">"システム設定の変更"</string>
@@ -447,6 +495,8 @@
     <string name="permdesc_recordAudio" msgid="5857246765327514062">"このアプリは、ユーザーがアプリを使用している場合にマイクを使用して音声を録音できます。"</string>
     <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"バックグラウンドでの音声の録音"</string>
     <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"このアプリは、いつでもマイクを使用して音声を録音できます。"</string>
+    <string name="permlab_detectScreenCapture" msgid="4447042362828799433">"アプリ ウィンドウのスクリーン キャプチャの検出"</string>
+    <string name="permdesc_detectScreenCapture" msgid="3485784917960342284">"アプリの使用中にスクリーンショットが撮影されると、このアプリに通知が届きます。"</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"SIMへのコマンド送信"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"SIMにコマンドを送信することをアプリに許可します｡この許可は非常に危険です。"</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"身体活動の認識"</string>
@@ -698,10 +748,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"共有ストレージからの動画ファイルの読み取りをアプリに許可します。"</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"共有ストレージからの画像ファイルの読み取り"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"共有ストレージからの画像ファイルの読み取りをアプリに許可します。"</string>
-    <!-- no translation found for permlab_readVisualUserSelect (5516204215354667586) -->
-    <skip />
-    <!-- no translation found for permdesc_readVisualUserSelect (8027174717714968217) -->
-    <skip />
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"ユーザーが選択した画像と動画ファイルの共有ストレージからの読み取り"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"選択した画像と動画ファイルを共有ストレージから読み取ることをアプリに許可します。"</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"共有ストレージのコンテンツの変更または削除"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"共有ストレージのコンテンツの書き込みをアプリに許可します。"</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP通話の発着信"</string>
@@ -2052,12 +2100,6 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"アンインストール"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"開く"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"有害なアプリが検出されました"</string>
-    <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> にすべてのデバイスログへのアクセスを許可しますか？"</string>
-    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"1 回限りのアクセスを許可"</string>
-    <string name="log_access_confirmation_deny" msgid="7685790957455099845">"許可しない"</string>
-    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"デバイスのログに、このデバイスで発生したことが記録されます。アプリは問題を検出、修正するためにこれらのログを使用することができます。\n\nログによっては機密性の高い情報が含まれている可能性があるため、すべてのデバイスログへのアクセスは信頼できるアプリにのみ許可してください。\n\nすべてのデバイスログへのアクセスを許可しなかった場合も、このアプリはアプリ独自のログにアクセスできます。また、デバイスのメーカーもデバイスの一部のログや情報にアクセスできる可能性があります。"</string>
-    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"デバイスのログに、このデバイスで発生したことが記録されます。アプリは問題を検出、修正するためにこれらのログを使用することができます。\n\nログによっては機密性の高い情報が含まれている可能性があるため、すべてのデバイスログへのアクセスは信頼できるアプリにのみ許可してください。\n\nすべてのデバイスログへのアクセスを許可しなかった場合でも、このアプリはアプリ独自のログにアクセスできます。また、デバイスの製造メーカーもデバイスの一部のログや情報にアクセスできる可能性があります。\n\n詳しくは、g.co/android/devicelogs をご覧ください。"</string>
-    <string name="log_access_do_not_show_again" msgid="1058690599083091552">"次回から表示しない"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"「<xliff:g id="APP_0">%1$s</xliff:g>」が「<xliff:g id="APP_2">%2$s</xliff:g>」のスライスの表示をリクエストしています"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"編集"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"着信や通知をバイブレーションで知らせます"</string>
@@ -2298,6 +2340,7 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"<xliff:g id="DEVICE">%1$s</xliff:g> からスマートフォンのカメラにアクセスできません"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"<xliff:g id="DEVICE">%1$s</xliff:g> からタブレットのカメラにアクセスできません"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"ストリーミング中はアクセスできません。スマートフォンでのアクセスをお試しください。"</string>
+    <string name="vdm_pip_blocked" msgid="4036107522497281397">"ストリーミング中はピクチャー イン ピクチャーを表示できません"</string>
     <string name="system_locale_title" msgid="711882686834677268">"システムのデフォルト"</string>
     <string name="default_card_name" msgid="9198284935962911468">"カード <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

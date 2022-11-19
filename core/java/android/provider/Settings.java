@@ -587,6 +587,22 @@ public final class Settings {
             "android.settings.REQUEST_MANAGE_MEDIA";
 
     /**
+     * Activity Action: Show settings to allow configuration of
+     * {@link Manifest.permission#RUN_LONG_JOBS} permission
+     *
+     * Input: Optionally, the Intent's data URI can specify the application package name to
+     * directly invoke the management GUI specific to the package name. For example
+     * "package:com.my.app".
+     * <p>
+     * Output: When a package data uri is passed as input, the activity result is set to
+     * {@link android.app.Activity#RESULT_OK} if the permission was granted to the app. Otherwise,
+     * the result is set to {@link android.app.Activity#RESULT_CANCELED}.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_MANAGE_APP_LONG_JOBS =
+            "android.settings.MANAGE_APP_LONG_JOBS";
+
+    /**
      * Activity Action: Show settings to allow configuration of cross-profile access for apps
      *
      * Input: Optionally, the Intent's data URI can specify the application package name to

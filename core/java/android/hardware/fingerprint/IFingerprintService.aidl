@@ -21,6 +21,7 @@ import android.hardware.biometrics.IBiometricStateListener;
 import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.ITestSessionCallback;
+import android.hardware.biometrics.fingerprint.PointerContext;
 import android.hardware.fingerprint.IFingerprintClientActiveCallback;
 import android.hardware.fingerprint.IFingerprintAuthenticatorsRegisteredCallback;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
@@ -184,11 +185,11 @@ interface IFingerprintService {
 
     // Notifies about a finger touching the sensor area.
     @EnforcePermission("USE_BIOMETRIC_INTERNAL")
-    void onPointerDown(long requestId, int sensorId, int x, int y, float minor, float major);
+    void onPointerDown(long requestId, int sensorId, in PointerContext pc);
 
     // Notifies about a finger leaving the sensor area.
     @EnforcePermission("USE_BIOMETRIC_INTERNAL")
-    void onPointerUp(long requestId, int sensorId);
+    void onPointerUp(long requestId, int sensorId, in PointerContext pc);
 
     // Notifies about the fingerprint UI being ready (e.g. HBM illumination is enabled).
     @EnforcePermission("USE_BIOMETRIC_INTERNAL")

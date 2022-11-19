@@ -103,4 +103,15 @@ interface IDeviceStateManager {
     @JavaPassthrough(annotation=
         "@android.annotation.RequiresPermission(android.Manifest.permission.CONTROL_DEVICE_STATE)")
     void cancelBaseStateOverride();
+
+    /**
+    * Notifies the system service that the educational overlay that was launched
+    * before entering a requested state was dismissed or closed, and provides
+    * the system information on if the pairing mode should be canceled or not.
+    *
+    * This should only be called from the overlay itself.
+    */
+    @JavaPassthrough(annotation=
+        "@android.annotation.RequiresPermission(android.Manifest.permission.CONTROL_DEVICE_STATE)")
+    void onStateRequestOverlayDismissed(boolean shouldCancelRequest);
 }

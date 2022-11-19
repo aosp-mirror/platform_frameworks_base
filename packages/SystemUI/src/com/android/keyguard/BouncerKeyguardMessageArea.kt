@@ -69,10 +69,16 @@ open class BouncerKeyguardMessageArea(context: Context?, attrs: AttributeSet?) :
         super.reloadColor()
     }
 
-    override fun setMessage(msg: CharSequence?) {
+    override fun setMessage(msg: CharSequence?, animate: Boolean) {
         if ((msg == textAboutToShow && msg != null) || msg == text) {
             return
         }
+
+        if (!animate) {
+            super.setMessage(msg, animate)
+            return
+        }
+
         textAboutToShow = msg
 
         if (animatorSet.isRunning) {
@@ -89,7 +95,7 @@ open class BouncerKeyguardMessageArea(context: Context?, attrs: AttributeSet?) :
         hideAnimator.addListener(
             object : AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: Animator?) {
-                    super@BouncerKeyguardMessageArea.setMessage(msg)
+                    super@BouncerKeyguardMessageArea.setMessage(msg, animate)
                 }
             }
         )

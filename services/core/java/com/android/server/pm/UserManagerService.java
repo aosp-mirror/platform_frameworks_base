@@ -1645,8 +1645,7 @@ public class UserManagerService extends IUserManager.Stub {
         return isProfileUnchecked(userId);
     }
 
-    // TODO(b/244644281): make it private once UserVisibilityMediator don't use it anymore
-    boolean isProfileUnchecked(@UserIdInt int userId) {
+    private boolean isProfileUnchecked(@UserIdInt int userId) {
         synchronized (mUsersLock) {
             UserInfo userInfo = getUserInfoLU(userId);
             return userInfo != null && userInfo.isProfile();
@@ -1790,20 +1789,7 @@ public class UserManagerService extends IUserManager.Stub {
         }
         final long ident = Binder.clearCallingIdentity();
         try {
-            // TODO(b/2399825580): refactor into UserDisplayAssigner
-            IntArray visibleUsers;
-            synchronized (mUsersLock) {
-                int usersSize = mUsers.size();
-                visibleUsers = new IntArray();
-                for (int i = 0; i < usersSize; i++) {
-                    UserInfo ui = mUsers.valueAt(i).info;
-                    if (!ui.partial && !ui.preCreated && !mRemovingUserIds.get(ui.id)
-                            && mUserVisibilityMediator.isUserVisible(ui.id)) {
-                        visibleUsers.add(ui.id);
-                    }
-                }
-            }
-            return visibleUsers.toArray();
+            return mUserVisibilityMediator.getVisibleUsers().toArray();
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -6836,13 +6822,13 @@ public class UserManagerService extends IUserManager.Stub {
         @Override
         public int assignUserToDisplayOnStart(@UserIdInt int userId, @UserIdInt int profileGroupId,
                 boolean foreground, int displayId) {
-            return mUserVisibilityMediator.startUser(userId, profileGroupId, foreground,
-                    displayId);
+            return mUserVisibilityMediator.assignUserToDisplayOnStart(userId, profileGroupId,
+                    foreground, displayId);
         }
 
         @Override
         public void unassignUserFromDisplayOnStop(@UserIdInt int userId) {
-            mUserVisibilityMediator.stopUser(userId);
+            mUserVisibilityMediator.unassignUserFromDisplayOnStop(userId);
         }
 
         @Override

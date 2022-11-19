@@ -3087,6 +3087,7 @@ package android.accessibilityservice {
 
   public abstract class AccessibilityService extends android.app.Service {
     ctor public AccessibilityService();
+    method public void attachAccessibilityOverlayToDisplay(int, @NonNull android.view.SurfaceControl);
     method public boolean clearCache();
     method public boolean clearCachedSubtree(@NonNull android.view.accessibility.AccessibilityNodeInfo);
     method public final void disableSelf();
@@ -9084,6 +9085,11 @@ package android.companion {
     method @RequiresPermission(android.Manifest.permission.REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE) public void stopObservingDevicePresence(@NonNull String) throws android.companion.DeviceNotAssociatedException;
     field public static final String EXTRA_ASSOCIATION = "android.companion.extra.ASSOCIATION";
     field @Deprecated public static final String EXTRA_DEVICE = "android.companion.extra.DEVICE";
+    field public static final int RESULT_CANCELED = 0; // 0x0
+    field public static final int RESULT_DISCOVERY_TIMEOUT = 2; // 0x2
+    field public static final int RESULT_INTERNAL_ERROR = 3; // 0x3
+    field public static final int RESULT_OK = -1; // 0xffffffff
+    field public static final int RESULT_USER_REJECTED = 1; // 0x1
   }
 
   public abstract static class CompanionDeviceManager.Callback {
@@ -35854,6 +35860,7 @@ package android.provider {
     field public static final String ACTION_MANAGE_ALL_SIM_PROFILES_SETTINGS = "android.settings.MANAGE_ALL_SIM_PROFILES_SETTINGS";
     field public static final String ACTION_MANAGE_APPLICATIONS_SETTINGS = "android.settings.MANAGE_APPLICATIONS_SETTINGS";
     field public static final String ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION = "android.settings.MANAGE_APP_ALL_FILES_ACCESS_PERMISSION";
+    field public static final String ACTION_MANAGE_APP_LONG_JOBS = "android.settings.MANAGE_APP_LONG_JOBS";
     field public static final String ACTION_MANAGE_DEFAULT_APPS_SETTINGS = "android.settings.MANAGE_DEFAULT_APPS_SETTINGS";
     field public static final String ACTION_MANAGE_OVERLAY_PERMISSION = "android.settings.action.MANAGE_OVERLAY_PERMISSION";
     field public static final String ACTION_MANAGE_SUPERVISOR_RESTRICTED_SETTING = "android.settings.MANAGE_SUPERVISOR_RESTRICTED_SETTING";
@@ -49980,6 +49987,7 @@ package android.view {
   public static final class SurfaceControlViewHost.SurfacePackage implements android.os.Parcelable {
     ctor public SurfaceControlViewHost.SurfacePackage(@NonNull android.view.SurfaceControlViewHost.SurfacePackage);
     method public int describeContents();
+    method @NonNull public android.view.SurfaceControl getSurfaceControl();
     method public void notifyConfigurationChanged(@NonNull android.content.res.Configuration);
     method public void notifyDetachedFromWindow();
     method public void release();

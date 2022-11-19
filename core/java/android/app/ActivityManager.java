@@ -4398,8 +4398,6 @@ public class ActivityManager {
      *
      * @throws UnsupportedOperationException if the device does not support background users on
      * secondary displays.
-     * @throws IllegalArgumentException if the display doesn't exist or is not a valid display to
-     * start secondary users on.
      *
      * @hide
      */

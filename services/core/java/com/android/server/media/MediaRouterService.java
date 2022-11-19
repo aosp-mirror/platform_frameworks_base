@@ -189,10 +189,6 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     // Binder call
     @Override
     public void registerClientAsUser(IMediaRouterClient client, String packageName, int userId) {
-        if (client == null) {
-            throw new IllegalArgumentException("client must not be null");
-        }
-
         final int uid = Binder.getCallingUid();
         if (!validatePackageName(uid, packageName)) {
             throw new SecurityException("packageName must match the calling uid");
@@ -217,9 +213,6 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     // Binder call
     @Override
     public void registerClientGroupId(IMediaRouterClient client, String groupId) {
-        if (client == null) {
-            throw new NullPointerException("client must not be null");
-        }
         if (mContext.checkCallingOrSelfPermission(
                 android.Manifest.permission.CONFIGURE_WIFI_DISPLAY)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -240,10 +233,6 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     // Binder call
     @Override
     public void unregisterClient(IMediaRouterClient client) {
-        if (client == null) {
-            throw new IllegalArgumentException("client must not be null");
-        }
-
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
@@ -257,10 +246,6 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     // Binder call
     @Override
     public MediaRouterClientState getState(IMediaRouterClient client) {
-        if (client == null) {
-            throw new IllegalArgumentException("client must not be null");
-        }
-
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
@@ -274,10 +259,6 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     // Binder call
     @Override
     public boolean isPlaybackActive(IMediaRouterClient client) {
-        if (client == null) {
-            throw new IllegalArgumentException("client must not be null");
-        }
-
         final long token = Binder.clearCallingIdentity();
         try {
             ClientRecord clientRecord;
@@ -314,10 +295,6 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     @Override
     public void setDiscoveryRequest(IMediaRouterClient client,
             int routeTypes, boolean activeScan) {
-        if (client == null) {
-            throw new IllegalArgumentException("client must not be null");
-        }
-
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
@@ -336,10 +313,6 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     // selected route or a default selection.
     @Override
     public void setSelectedRoute(IMediaRouterClient client, String routeId, boolean explicit) {
-        if (client == null) {
-            throw new IllegalArgumentException("client must not be null");
-        }
-
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
@@ -353,12 +326,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     // Binder call
     @Override
     public void requestSetVolume(IMediaRouterClient client, String routeId, int volume) {
-        if (client == null) {
-            throw new IllegalArgumentException("client must not be null");
-        }
-        if (routeId == null) {
-            throw new IllegalArgumentException("routeId must not be null");
-        }
+        Objects.requireNonNull(routeId, "routeId must not be null");
 
         final long token = Binder.clearCallingIdentity();
         try {
@@ -373,12 +341,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     // Binder call
     @Override
     public void requestUpdateVolume(IMediaRouterClient client, String routeId, int direction) {
-        if (client == null) {
-            throw new IllegalArgumentException("client must not be null");
-        }
-        if (routeId == null) {
-            throw new IllegalArgumentException("routeId must not be null");
-        }
+        Objects.requireNonNull(routeId, "routeId must not be null");
 
         final long token = Binder.clearCallingIdentity();
         try {

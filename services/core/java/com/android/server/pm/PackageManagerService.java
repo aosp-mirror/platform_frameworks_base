@@ -1724,8 +1724,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     }
 
     public PackageManagerService(PackageManagerServiceInjector injector, boolean factoryTest,
-            final String buildFingerprint, final boolean isEngBuild, final boolean isUserDebugBuild,
-            final int sdkVersion, final String incrementalVersion) {
+            final String partitionsFingerprint, final boolean isEngBuild,
+            final boolean isUserDebugBuild, final int sdkVersion, final String incrementalVersion) {
         mIsEngBuild = isEngBuild;
         mIsUserDebugBuild = isUserDebugBuild;
         mSdkVersion = sdkVersion;
@@ -1971,10 +1971,11 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
             final VersionInfo ver = mSettings.getInternalVersion();
             mIsUpgrade =
-                    !buildFingerprint.equals(ver.fingerprint);
+                    !partitionsFingerprint.equals(ver.fingerprint);
             if (mIsUpgrade) {
-                PackageManagerServiceUtils.logCriticalInfo(Log.INFO, "Upgrading from "
-                        + ver.fingerprint + " to " + PackagePartitions.FINGERPRINT);
+                PackageManagerServiceUtils.logCriticalInfo(Log.INFO,
+                        "Upgrading from " + ver.fingerprint + " (" + ver.buildFingerprint + ") to "
+                                + PackagePartitions.FINGERPRINT + " (" + Build.FINGERPRINT + ")");
             }
 
             mInitAppsHelper = new InitAppsHelper(this, mApexManager, mInstallPackageHelper,
@@ -2081,14 +2082,14 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     + ((SystemClock.uptimeMillis() - startTime) / 1000f)
                     + " seconds");
 
-            // If the build fingerprint has changed since the last time we booted,
+            // If the partitions fingerprint has changed since the last time we booted,
             // we need to re-grant app permission to catch any new ones that
             // appear.  This is really a hack, and means that apps can in some
             // cases get permissions that the user didn't initially explicitly
             // allow...  it would be nice to have some better way to handle
             // this situation.
             if (mIsUpgrade) {
-                Slog.i(TAG, "Build fingerprint changed from " + ver.fingerprint + " to "
+                Slog.i(TAG, "Partitions fingerprint changed from " + ver.fingerprint + " to "
                         + PackagePartitions.FINGERPRINT
                         + "; regranting permissions for internal storage");
             }
@@ -2120,6 +2121,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                                         | Installer.FLAG_CLEAR_APP_DATA_KEEP_ART_PROFILES);
                     }
                 }
+                ver.buildFingerprint = Build.FINGERPRINT;
                 ver.fingerprint = PackagePartitions.FINGERPRINT;
             }
 

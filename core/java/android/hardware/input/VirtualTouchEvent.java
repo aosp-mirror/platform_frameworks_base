@@ -262,6 +262,16 @@ public final class VirtualTouchEvent implements Parcelable {
         /**
          * Sets the pressure of the event. This field is optional and can be omitted.
          *
+         * @param pressure The pressure of the touch.
+         *                 Note: The VirtualTouchscreen, consuming VirtualTouchEvents, is
+         *                 configured with a pressure axis range from 0.0 to 255.0. Only the
+         *                 lower end of the range is enforced. You can pass values larger than
+         *                 255.0. With physical input devices this could happen if the
+         *                 calibration is off. Values larger than 255.0 will not be trimmed and
+         *                 passed on as is.
+         *
+         * @throws IllegalArgumentException if the pressure is smaller than 0.
+         *
          * @return this builder, to allow for chaining of calls
          */
         public @NonNull Builder setPressure(@FloatRange(from = 0f) float pressure) {

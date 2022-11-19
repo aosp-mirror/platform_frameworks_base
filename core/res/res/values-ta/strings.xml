@@ -395,6 +395,54 @@
     <string name="permdesc_persistentActivity" product="default" msgid="1914841924366562051">"நினைவகத்தில் நிலையாக இருக்கும் தன்னுடைய பகுதிகளை உருவாக்கப் ஆப்ஸை அனுமதிக்கிறது. இதனால பிற பயன்பாடுகளுக்குக் கிடைக்கும் நினைவகம் வரையறுக்கப்பட்டு, மொபைலின் வேகத்தைக் குறைக்கலாம்"</string>
     <string name="permlab_foregroundService" msgid="1768855976818467491">"முன்புலத்தில் இயங்கும் சேவையை இயக்குதல்"</string>
     <string name="permdesc_foregroundService" msgid="8720071450020922795">"முன்புலத்தில் இயங்கும் சேவைகளை உபயோகிக்க, ஆப்ஸை அனுமதிக்கிறது."</string>
+    <!-- no translation found for permlab_foregroundServiceCamera (7814751737955715297) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceCamera (6973701931250595727) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceConnectedDevice (3019650546176872501) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceConnectedDevice (1067457315741352963) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceDataSync (5847463514326881076) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceDataSync (2267140263423973050) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceLocation (3745428302378535690) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceLocation (118894034365177183) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceMediaPlayback (4002687983891935514) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceMediaPlayback (3638032446063968043) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceMediaProjection (2630868915733312527) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceMediaProjection (4805677128082002298) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceMicrophone (7390033424890545399) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceMicrophone (1206041516173483201) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServicePhoneCall (627937743867697892) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServicePhoneCall (5941660252587015147) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceHealth (3675776442080928184) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceHealth (2024586220562667185) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceRemoteMessaging (105670277002780950) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceRemoteMessaging (8767598075877576277) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceSystemExempted (1597663713590612685) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceSystemExempted (947381760834649622) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceSpecialUse (7973536745876645082) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceSpecialUse (646713654541885919) -->
+    <skip />
     <string name="permlab_getPackageSize" msgid="375391550792886641">"ஆப்ஸ் சேமிப்பு இடத்தை அளவிடல்"</string>
     <string name="permdesc_getPackageSize" msgid="742743530909966782">"ஆப்ஸ், அதன் குறியீடு, தரவு, மற்றும் தற்காலிகச் சேமிப்பு அளவுகளை மீட்டெடுக்க அனுமதிக்கிறது"</string>
     <string name="permlab_writeSettings" msgid="8057285063719277394">"சாதன அமைப்புகளை மாற்றுதல்"</string>
@@ -447,6 +495,10 @@
     <string name="permdesc_recordAudio" msgid="5857246765327514062">"இந்த ஆப்ஸ் உபயோகத்தில் இருக்கும்போதே இதனால் மைக்ரோஃபோனைப் பயன்படுத்தி ஆடியோவை ரெக்கார்டு செய்ய முடியும்."</string>
     <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"பின்புலத்தில் ஆடியோ ரெக்கார்டு செய்தல்"</string>
     <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"இந்த ஆப்ஸால் எப்போது வேண்டுமானாலும் மைக்ரோஃபோனைப் பயன்படுத்தி ஆடியோவை ரெக்கார்டு செய்ய முடியும்."</string>
+    <!-- no translation found for permlab_detectScreenCapture (4447042362828799433) -->
+    <skip />
+    <!-- no translation found for permdesc_detectScreenCapture (3485784917960342284) -->
+    <skip />
     <string name="permlab_sim_communication" msgid="176788115994050692">"கட்டளைகளை சிம்மிற்கு அனுப்புதல்"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"சிம் க்குக் கட்டளைகளை அனுப்ப ஆப்ஸை அனுமதிக்கிறது. இது மிகவும் ஆபத்தானதாகும்."</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"உடல் செயல்பாட்டைக் கண்டறிதல்"</string>
@@ -698,10 +750,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"உங்கள் பகிர்ந்த சேமிப்பகத்திலுள்ள வீடியோ ஃபைல்களைப் படிக்க ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"பகிர்ந்த சேமிப்பகத்திலுள்ள பட ஃபைல்களைப் படித்தல்"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"உங்கள் பகிர்ந்த சேமிப்பகத்திலுள்ள பட ஃபைல்களைப் படிக்க ஆப்ஸை அனுமதிக்கும்."</string>
-    <!-- no translation found for permlab_readVisualUserSelect (5516204215354667586) -->
-    <skip />
-    <!-- no translation found for permdesc_readVisualUserSelect (8027174717714968217) -->
-    <skip />
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"பகிர்ந்த சேமிப்பகத்தில் இருந்து பயனர் தேர்ந்தெடுக்கும் பட/வீடியோ ஃபைல்களைப் படித்தல்"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"உங்கள் பகிர்ந்த சேமிப்பகத்தில் இருந்து நீங்கள் தேர்ந்தெடுக்கும் பட/வீடியோ ஃபைல்களைப் படிக்க ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"பகிர்ந்த சேமிப்பகத்தின் உள்ளடக்கங்களை மாற்றும் அல்லது நீக்கும்"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"பகிர்ந்த சேமிப்பகத்தின் உள்ளடக்கத்தில் மாற்றங்களைச் செய்ய அனுமதிக்கும்."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP அழைப்புகளைச் செய்தல்/பெறுதல்"</string>
@@ -2052,12 +2102,6 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"நிறுவல் நீக்கு"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"பரவாயில்லை, திற"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"தீங்கிழைக்கும் ஆப்ஸ் உள்ளது"</string>
-    <string name="log_access_confirmation_title" msgid="2343578467290592708">"சாதனப் பதிவுகள் அனைத்தையும் <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> அணுக அனுமதிக்கவா?"</string>
-    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"ஒருமுறை அணுகலை அனுமதி"</string>
-    <string name="log_access_confirmation_deny" msgid="7685790957455099845">"அனுமதிக்க வேண்டாம்"</string>
-    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"உங்கள் சாதனத்தில் நடப்பவற்றைச் சாதனப் பதிவுகள் ரெக்கார்டு செய்யும். சிக்கல்களைக் கண்டறிந்து சரிசெய்ய ஆப்ஸ் இந்தப் பதிவுகளைப் பயன்படுத்தலாம்.\n\nபாதுகாக்கப்பட வேண்டிய தகவல்கள் சில பதிவுகளில் இருக்கக்கூடும் என்பதால் சாதனப் பதிவுகள் அனைத்தையும் அணுக நீங்கள் நம்பும் ஆப்ஸை மட்டும் அனுமதிக்கவும். \n\nசாதனப் பதிவுகள் அனைத்தையும் அணுக இந்த ஆப்ஸை அனுமதிக்கவில்லை என்றாலும் அதற்குச் சொந்தமான பதிவுகளை அதனால் அணுக முடியும். உங்கள் சாதனத்திலுள்ள சில பதிவுகளையோ தகவல்களையோ சாதன உற்பத்தியாளரால் தொடர்ந்து அணுக முடியும்."</string>
-    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"உங்கள் சாதனத்தில் நடப்பவற்றைச் சாதனப் பதிவுகள் ரெக்கார்டு செய்யும். சிக்கல்களைக் கண்டறிந்து சரிசெய்ய ஆப்ஸால் இந்தப் பதிவுகளைப் பயன்படுத்த முடியும்.\n\nபாதுகாக்கப்பட வேண்டிய தகவல்கள், சில பதிவுகளில் இருக்கக்கூடும் என்பதால் சாதனப் பதிவுகள் அனைத்தையும் அணுக உங்களுக்கு நம்பகமான ஆப்ஸை மட்டும் அனுமதிக்கவும். \n\nசாதனப் பதிவுகள் அனைத்தையும் அணுக இந்த ஆப்ஸை நீங்கள் அனுமதிக்கவில்லை என்றாலும் அதற்குச் சொந்தமான பதிவுகளை அதனால் அணுக முடியும். உங்கள் சாதனத்திலுள்ள சில பதிவுகளையோ தகவல்களையோ சாதன உற்பத்தியாளரால் தொடர்ந்து அணுக முடியும்.\n\n மேலும் அறிந்துகொள்ள g.co/android/devicelogs இணைப்பிற்குச் செல்லுங்கள்."</string>
-    <string name="log_access_do_not_show_again" msgid="1058690599083091552">"மீண்டும் காட்டாதே"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_2">%2$s</xliff:g> ஆப்ஸின் விழிப்பூட்டல்களைக் காண்பிக்க, <xliff:g id="APP_0">%1$s</xliff:g> அனுமதி கேட்கிறது"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"திருத்து"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"அழைப்புகள் மற்றும் அறிவிப்புகளுக்கு அதிரும்"</string>
@@ -2298,6 +2342,8 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"உங்கள் <xliff:g id="DEVICE">%1$s</xliff:g> சாதனத்திலிருந்து மொபைலின் கேமராவை அணுக முடியாது"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"உங்கள் <xliff:g id="DEVICE">%1$s</xliff:g> சாதனத்திலிருந்து டேப்லெட்டின் கேமராவை அணுக முடியாது"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"ஸ்ட்ரீமின்போது இதை அணுக முடியாது. அதற்குப் பதிலாக உங்கள் மொபைலில் பயன்படுத்திப் பார்க்கவும்."</string>
+    <!-- no translation found for vdm_pip_blocked (4036107522497281397) -->
+    <skip />
     <string name="system_locale_title" msgid="711882686834677268">"சிஸ்டத்தின் இயல்பு"</string>
     <string name="default_card_name" msgid="9198284935962911468">"கார்டு <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

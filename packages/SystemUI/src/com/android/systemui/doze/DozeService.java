@@ -27,7 +27,7 @@ import com.android.systemui.doze.dagger.DozeComponent;
 import com.android.systemui.plugins.DozeServicePlugin;
 import com.android.systemui.plugins.DozeServicePlugin.RequestDoze;
 import com.android.systemui.plugins.PluginListener;
-import com.android.systemui.shared.plugins.PluginManager;
+import com.android.systemui.plugins.PluginManager;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;

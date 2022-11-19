@@ -103,6 +103,15 @@ public class JobSchedulerImpl extends JobScheduler {
     }
 
     @Override
+    public boolean hasRunLongJobsPermission(String packageName, int userId) {
+        try {
+            return mBinder.hasRunLongJobsPermission(packageName, userId);
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    @Override
     public List<JobInfo> getStartedJobs() {
         try {
             return mBinder.getStartedJobs();

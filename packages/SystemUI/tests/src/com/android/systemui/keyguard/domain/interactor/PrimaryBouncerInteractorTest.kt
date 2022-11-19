@@ -43,6 +43,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Answers
+import org.mockito.ArgumentCaptor
 import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
@@ -170,8 +171,10 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
 
     @Test
     fun testShowMessage() {
+        val argCaptor = ArgumentCaptor.forClass(BouncerShowMessageModel::class.java)
         mPrimaryBouncerInteractor.showMessage("abc", null)
-        verify(repository).setShowMessage(BouncerShowMessageModel("abc", null))
+        verify(repository).setShowMessage(argCaptor.capture())
+        assertThat(argCaptor.value.message).isEqualTo("abc")
     }
 
     @Test
@@ -192,6 +195,12 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
     fun testNotifyKeyguardAuthenticated() {
         mPrimaryBouncerInteractor.notifyKeyguardAuthenticated(true)
         verify(repository).setKeyguardAuthenticated(true)
+    }
+
+    @Test
+    fun testNotifyShowedMessage() {
+        mPrimaryBouncerInteractor.onMessageShown()
+        verify(repository).setShowMessage(null)
     }
 
     @Test

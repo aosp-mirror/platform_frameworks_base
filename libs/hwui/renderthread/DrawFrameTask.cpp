@@ -42,6 +42,7 @@ typedef APerformanceHintSession* (*APH_createSession)(APerformanceHintManager*, 
                                                       size_t, int64_t);
 typedef void (*APH_updateTargetWorkDuration)(APerformanceHintSession*, int64_t);
 typedef void (*APH_reportActualWorkDuration)(APerformanceHintSession*, int64_t);
+typedef void (*APH_sendHint)(APerformanceHintSession* session, int32_t);
 typedef void (*APH_closeSession)(APerformanceHintSession* session);
 
 bool gAPerformanceHintBindingInitialized = false;
@@ -49,6 +50,7 @@ APH_getManager gAPH_getManagerFn = nullptr;
 APH_createSession gAPH_createSessionFn = nullptr;
 APH_updateTargetWorkDuration gAPH_updateTargetWorkDurationFn = nullptr;
 APH_reportActualWorkDuration gAPH_reportActualWorkDurationFn = nullptr;
+APH_sendHint gAPH_sendHintFn = nullptr;
 APH_closeSession gAPH_closeSessionFn = nullptr;
 
 void ensureAPerformanceHintBindingInitialized() {
@@ -76,6 +78,10 @@ void ensureAPerformanceHintBindingInitialized() {
     LOG_ALWAYS_FATAL_IF(
             gAPH_reportActualWorkDurationFn == nullptr,
             "Failed to find required symbol APerformanceHint_reportActualWorkDuration!");
+
+    gAPH_sendHintFn = (APH_sendHint)dlsym(handle_, "APerformanceHint_sendHint");
+    LOG_ALWAYS_FATAL_IF(gAPH_sendHintFn == nullptr,
+                        "Failed to find required symbol APerformanceHint_sendHint!");
 
     gAPH_closeSessionFn = (APH_closeSession)dlsym(handle_, "APerformanceHint_closeSession");
     LOG_ALWAYS_FATAL_IF(gAPH_closeSessionFn == nullptr,
@@ -239,6 +245,16 @@ void DrawFrameTask::run() {
     mLastDequeueBufferDuration = dequeueBufferDuration;
 }
 
+void DrawFrameTask::sendLoadResetHint() {
+    if (!(Properties::useHintManager && Properties::isDrawingEnabled())) return;
+    if (!mHintSessionWrapper) mHintSessionWrapper.emplace(mUiThreadId, mRenderThreadId);
+    nsecs_t now = systemTime();
+    if (now - mLastFrameNotification > kResetHintTimeout) {
+        mHintSessionWrapper->sendHint(SessionHint::CPU_LOAD_RESET);
+    }
+    mLastFrameNotification = now;
+}
+
 bool DrawFrameTask::syncFrameState(TreeInfo& info) {
     ATRACE_CALL();
     int64_t vsync = mFrameInfo[static_cast<int>(FrameInfoIndex::Vsync)];
@@ -324,6 +340,12 @@ void DrawFrameTask::HintSessionWrapper::updateTargetWorkDuration(long targetDura
 void DrawFrameTask::HintSessionWrapper::reportActualWorkDuration(long actualDurationNanos) {
     if (mHintSession) {
         gAPH_reportActualWorkDurationFn(mHintSession, actualDurationNanos);
+    }
+}
+
+void DrawFrameTask::HintSessionWrapper::sendHint(SessionHint hint) {
+    if (mHintSession && Properties::isDrawingEnabled()) {
+        gAPH_sendHintFn(mHintSession, static_cast<int>(hint));
     }
 }
 

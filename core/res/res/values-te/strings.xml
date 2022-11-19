@@ -395,6 +395,54 @@
     <string name="permdesc_persistentActivity" product="default" msgid="1914841924366562051">"యాప్‌, దాని భాగాలు మెమరీలో ఉండేలా చేయడానికి దానిని అనుమతిస్తుంది. ఇది ఇతర యాప్‌లకు అందుబాటులో ఉన్న మెమరీని ఆక్రమిస్తుంది, ఫోన్ నెమ్మదిగా పని చేస్తుంది."</string>
     <string name="permlab_foregroundService" msgid="1768855976818467491">"సేవని ముందు భాగంలో అమలు చేయడం"</string>
     <string name="permdesc_foregroundService" msgid="8720071450020922795">"ముందు భాగంలో సేవలను ఉపయోగించడానికి యాప్‌ని అనుమతిస్తుంది."</string>
+    <!-- no translation found for permlab_foregroundServiceCamera (7814751737955715297) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceCamera (6973701931250595727) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceConnectedDevice (3019650546176872501) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceConnectedDevice (1067457315741352963) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceDataSync (5847463514326881076) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceDataSync (2267140263423973050) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceLocation (3745428302378535690) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceLocation (118894034365177183) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceMediaPlayback (4002687983891935514) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceMediaPlayback (3638032446063968043) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceMediaProjection (2630868915733312527) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceMediaProjection (4805677128082002298) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceMicrophone (7390033424890545399) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceMicrophone (1206041516173483201) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServicePhoneCall (627937743867697892) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServicePhoneCall (5941660252587015147) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceHealth (3675776442080928184) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceHealth (2024586220562667185) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceRemoteMessaging (105670277002780950) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceRemoteMessaging (8767598075877576277) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceSystemExempted (1597663713590612685) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceSystemExempted (947381760834649622) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceSpecialUse (7973536745876645082) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceSpecialUse (646713654541885919) -->
+    <skip />
     <string name="permlab_getPackageSize" msgid="375391550792886641">"యాప్ నిల్వ స్థలాన్ని అంచనా వేయడం"</string>
     <string name="permdesc_getPackageSize" msgid="742743530909966782">"యాప్‌ కోడ్, డేటా మరియు కాష్ పరిమాణాలను తిరిగి పొందడానికి దాన్ని అనుమతిస్తుంది"</string>
     <string name="permlab_writeSettings" msgid="8057285063719277394">"సిస్టమ్ సెట్టింగ్‌లను మార్చడం"</string>
@@ -447,6 +495,10 @@
     <string name="permdesc_recordAudio" msgid="5857246765327514062">"యాప్ ఉపయోగంలో ఉన్నపుడు మైక్రోఫోన్‌ను ఉపయోగించి ఈ యాప్, ఆడియోను రికార్డ్ చేయగలదు."</string>
     <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"బ్యాక్‌గ్రౌండ్‌లో ఆడియోను రికార్డ్ చేయగలదు"</string>
     <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"మైక్రోఫోన్‌ను ఉపయోగించి ఈ యాప్ ఎప్పుడైనా ఆడియోను రికార్డ్ చేయగలదు."</string>
+    <!-- no translation found for permlab_detectScreenCapture (4447042362828799433) -->
+    <skip />
+    <!-- no translation found for permdesc_detectScreenCapture (3485784917960342284) -->
+    <skip />
     <string name="permlab_sim_communication" msgid="176788115994050692">"SIMకి ఆదేశాలను పంపడం"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"సిమ్‌కు ఆదేశాలను పంపడానికి యాప్‌ను అనుమతిస్తుంది. ఇది చాలా ప్రమాదకరం."</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"భౌతిక కార్యాకలాపాన్ని గుర్తించండి"</string>
@@ -698,10 +750,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"మీ షేర్ చేయబడిన స్టోరేజ్ నుండి వీడియో ఫైల్‌లను చదవడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"షేర్ చేయబడిన స్టోరేజ్ నుండి ఇమేజ్ ఫైల్‌లను చదవండి"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"మీ షేర్ చేయబడిన స్టోరేజ్ నుండి ఇమేజ్ ఫైల్‌లను చదవడానికి యాప్‌ను అనుమతిస్తుంది."</string>
-    <!-- no translation found for permlab_readVisualUserSelect (5516204215354667586) -->
-    <skip />
-    <!-- no translation found for permdesc_readVisualUserSelect (8027174717714968217) -->
-    <skip />
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"షేర్ చేయబడిన స్టోరేజ్ నుండి యూజర్ ఎంచుకున్న ఇమేజ్ ఫైల్స్‌ను, వీడియో ఫైల్స్‌ను చదువుతుంది"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"మీరు మీ షేర్ చేయబడిన స్టోరేజ్ నుండి ఎంచుకున్న ఇమేజ్, వీడియో ఫైల్స్‌ను చదవడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"మీ షేర్ చేసిన నిల్వ యొక్క కంటెంట్‌లను ఎడిట్ చేయండి లేదా తొలగించండి"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"మీ షేర్ చేసిన నిల్వ యొక్క కంటెంట్‌లను రాయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP కాల్స్‌ను చేయడానికి/స్వీకరించడానికి"</string>
@@ -2052,12 +2102,6 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"అన్ఇన్‌స్టాల్ చేయండి"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"ఏదేమైనా తెరువు"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"హానికరమైన యాప్ గుర్తించబడింది"</string>
-    <string name="log_access_confirmation_title" msgid="2343578467290592708">"అన్ని పరికర లాగ్‌లను యాక్సెస్ చేయడానికి <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>‌ను అనుమతించాలా?"</string>
-    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"వన్-టైమ్ యాక్సెస్‌ను అనుమతించండి"</string>
-    <string name="log_access_confirmation_deny" msgid="7685790957455099845">"అనుమతించవద్దు"</string>
-    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"మీ పరికరంలో జరిగే దాన్ని పరికర లాగ్‌లు రికార్డ్ చేస్తాయి. సమస్యలను కనుగొని, పరిష్కరించడానికి యాప్‌లు ఈ లాగ్‌లను ఉపయోగిస్తాయి.\n\nకొన్ని లాగ్‌లలో గోప్యమైన సమాచారం ఉండవచ్చు, కాబట్టి మీరు విశ్వసించే యాప్‌లను మాత్రమే అన్ని పరికర లాగ్‌లను యాక్సెస్ చేయడానికి అనుమతించండి. \n\nఅన్ని పరికర లాగ్‌లను యాక్సెస్ చేయడానికి మీరు ఈ యాప్‌ను అనుమతించకపోతే, అది తన స్వంత లాగ్‌లను ఇప్పటికి యాక్సెస్ చేయగలదు. మీ పరికర తయారీదారు ఇప్పటికీ మీ పరికరంలో కొన్ని లాగ్‌లు లేదా సమాచారాన్ని యాక్సెస్ చేయగలరు."</string>
-    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"మీ పరికరంలో జరిగే దాన్ని పరికర లాగ్‌లు రికార్డ్ చేస్తాయి. సమస్యలను కనుగొని, పరిష్కరించడానికి యాప్‌లు ఈ లాగ్‌లను ఉపయోగిస్తాయి.\n\nకొన్ని లాగ్‌లలో గోప్యమైన సమాచారం ఉండవచ్చు, కాబట్టి మీరు విశ్వసించే యాప్‌లను మాత్రమే అన్ని పరికర లాగ్‌లను యాక్సెస్ చేయడానికి అనుమతించండి. \n\nఅన్ని పరికర లాగ్‌లను యాక్సెస్ చేయడానికి మీరు ఈ యాప్‌ను అనుమతించకపోతే, అది తన స్వంత లాగ్‌లను ఇప్పటికి యాక్సెస్ చేయగలదు. మీ పరికర తయారీదారు ఇప్పటికీ మీ పరికరంలో కొన్ని లాగ్‌లు లేదా సమాచారాన్ని యాక్సెస్ చేయగలరు.\n\ng.co/android/devicelogsలో దీని గురించి మరింత తెలుసుకోండి."</string>
-    <string name="log_access_do_not_show_again" msgid="1058690599083091552">"మళ్లీ చూపవద్దు"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> <xliff:g id="APP_2">%2$s</xliff:g> స్లైస్‌లను చూపించాలనుకుంటోంది"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"ఎడిట్ చేయండి"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"కాల్స్‌ మరియు నోటిఫికేషన్‌లు వైబ్రేట్ అవుతాయి"</string>
@@ -2298,6 +2342,8 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"మీ <xliff:g id="DEVICE">%1$s</xliff:g> నుండి ఫోన్ కెమెరాను యాక్సెస్ చేయడం సాధ్యపడదు"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"మీ <xliff:g id="DEVICE">%1$s</xliff:g> నుండి టాబ్లెట్ కెమెరాను యాక్సెస్ చేయడం సాధ్యపడదు"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"స్ట్రీమింగ్ చేస్తున్నప్పుడు దీన్ని యాక్సెస్ చేయడం సాధ్యపడదు. బదులుగా మీ ఫోన్‌లో ట్రై చేయండి."</string>
+    <!-- no translation found for vdm_pip_blocked (4036107522497281397) -->
+    <skip />
     <string name="system_locale_title" msgid="711882686834677268">"సిస్టమ్ ఆటోమేటిక్ సెట్టింగ్"</string>
     <string name="default_card_name" msgid="9198284935962911468">"కార్డ్ <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

@@ -819,25 +819,36 @@ public interface WindowManager extends ViewManager {
     public static final String PARCEL_KEY_SHORTCUTS_ARRAY = "shortcuts_array";
 
     /**
-     * Application level {@link android.content.pm.PackageManager.Property} tag for developers to
-     * provide consent for their app to allow OEMs to manually provide ActivityEmbedding split
-     * rule configuration on behalf of the app.
+     * Application-level
+     * {@link android.content.pm.PackageManager.Property PackageManager.Property}
+     * tag that specifies whether OEMs are permitted to provide activity
+     * embedding split-rule configurations on behalf of the app.
      *
-     * <p>If {@code true}, the system can override the windowing behaviors for the app, such as
-     * showing some activities side-by-side. In this case, it will report that ActivityEmbedding
-     * APIs are disabled for the app to avoid conflict.
+     * <p>If {@code true}, the system is permitted to override the app's
+     * windowing behavior and implement activity embedding split rules, such as
+     * displaying activities side by side. A system override informs the app
+     * that the activity embedding APIs are disabled so the app will not provide
+     * its own activity embedding rules, which would conflict with the system's
+     * rules.
      *
-     * <p>If {@code false}, the system can't override the window behavior for the app. It should
-     * be used if the app wants to provide their own ActivityEmbedding split rules, or if the app
-     * wants to opt-out of system overrides for any other reason.
+     * <p>If {@code false}, the system is not permitted to override the
+     * windowing behavior of the app. Set the property to {@code false} if the
+     * app provides its own activity embedding split rules, or if you want to
+     * prevent the system override for any other reason.
      *
-     * <p>Default is {@code false}.
+     * <p>The default value is {@code false}.
      *
-     * <p>The system enforcement is added in Android 14, but some devices may start following the
-     * requirement before that. The best practice for apps is to always explicitly set this
-     * property in AndroidManifest instead of relying on the default value.
+     * <p class="note"><b>Note:</b> Refusal to permit the system override is not
+     * enforceable. OEMs can override the app's activity embedding
+     * implementation whether or not this property is specified and set to
+     * <code>false</code>. The property is, in effect, a hint to OEMs.
      *
-     * <p>Example usage:
+     * <p>OEMs can implement activity embedding on any API level. The best
+     * practice for apps is to always explicitly set this property in the app
+     * manifest file regardless of targeted API level rather than rely on the
+     * default value.
+     *
+     * <p><b>Syntax:</b>
      * <pre>
      * &lt;application&gt;
      *   &lt;property

@@ -15,7 +15,7 @@
  */
 package com.android.systemui.unfold
 
-import android.animation.ValueAnimator
+import android.content.ContentResolver
 import android.content.Context
 import android.graphics.PixelFormat
 import android.hardware.devicestate.DeviceStateManager
@@ -39,6 +39,7 @@ import com.android.systemui.statusbar.LightRevealScrim
 import com.android.systemui.statusbar.LinearLightRevealEffect
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider.TransitionProgressListener
 import com.android.systemui.unfold.updates.RotationChangeProvider
+import com.android.systemui.unfold.util.ScaleAwareTransitionProgressProvider.Companion.areAnimationsEnabled
 import com.android.systemui.util.traceSection
 import com.android.wm.shell.displayareahelper.DisplayAreaHelper
 import java.util.Optional
@@ -52,6 +53,7 @@ class UnfoldLightRevealOverlayAnimation
 constructor(
     private val context: Context,
     private val deviceStateManager: DeviceStateManager,
+    private val contentResolver: ContentResolver,
     private val displayManager: DisplayManager,
     private val unfoldTransitionProgressProvider: UnfoldTransitionProgressProvider,
     private val displayAreaHelper: Optional<DisplayAreaHelper>,
@@ -117,7 +119,7 @@ constructor(
         Trace.beginSection("UnfoldLightRevealOverlayAnimation#onScreenTurningOn")
         try {
             // Add the view only if we are unfolding and this is the first screen on
-            if (!isFolded && !isUnfoldHandled && ValueAnimator.areAnimatorsEnabled()) {
+            if (!isFolded && !isUnfoldHandled && contentResolver.areAnimationsEnabled()) {
                 addView(onOverlayReady)
                 isUnfoldHandled = true
             } else {
@@ -162,11 +164,10 @@ constructor(
                 // blocker (turn on the brightness) only when the content is actually visible as it
                 // might be presented only in the next frame.
                 // See b/197538198
-                transaction
-                    .setFrameTimelineVsync(vsyncId)
-                    .apply()
+                transaction.setFrameTimelineVsync(vsyncId).apply()
 
-                transaction.setFrameTimelineVsync(vsyncId + 1)
+                transaction
+                    .setFrameTimelineVsync(vsyncId + 1)
                     .addTransactionCommittedListener(backgroundExecutor) {
                         Trace.endAsyncSection("UnfoldLightRevealOverlayAnimation#relayout", 0)
                         callback.run()
@@ -218,8 +219,7 @@ constructor(
     }
 
     private fun getUnfoldedDisplayInfo(): DisplayInfo =
-        displayManager
-            .displays
+        displayManager.displays
             .asSequence()
             .map { DisplayInfo().apply { it.getDisplayInfo(this) } }
             .filter { it.type == Display.TYPE_INTERNAL }
@@ -266,5 +266,6 @@ constructor(
                     isUnfoldHandled = false
                 }
                 this.isFolded = isFolded
-            })
+            }
+        )
 }
