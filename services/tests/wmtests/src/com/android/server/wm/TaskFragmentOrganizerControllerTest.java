@@ -822,6 +822,21 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     }
 
     @Test
+    public void testOnTransactionHandled_skipTransactionForUnregisterOrganizer() {
+        mController.unregisterOrganizer(mIOrganizer);
+        final ActivityRecord ownerActivity = createActivityRecord(mDisplayContent);
+        final IBinder fragmentToken = new Binder();
+
+        // Allow organizer to create TaskFragment and start/reparent activity to TaskFragment.
+        createTaskFragmentFromOrganizer(mTransaction, ownerActivity, fragmentToken);
+        mController.onTransactionHandled(new Binder(), mTransaction,
+                getTransitionType(mTransaction), false /* shouldApplyIndependently */);
+
+        // Nothing should happen as the organizer is not registered.
+        assertNull(mWindowOrganizerController.getTaskFragment(fragmentToken));
+    }
+
+    @Test
     public void testOrganizerRemovedWithPendingEvents() {
         final TaskFragment tf0 = new TaskFragmentBuilder(mAtm)
                 .setCreateParentTask()
