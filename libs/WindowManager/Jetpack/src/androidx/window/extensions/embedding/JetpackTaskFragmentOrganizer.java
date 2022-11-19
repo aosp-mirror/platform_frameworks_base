@@ -37,7 +37,6 @@ import android.window.TaskFragmentOrganizer;
 import android.window.TaskFragmentTransaction;
 import android.window.WindowContainerTransaction;
 
-import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -85,26 +84,20 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
     @Override
     public void unregisterOrganizer() {
         if (mAnimationController != null) {
-            mAnimationController.unregisterAllRemoteAnimations();
+            mAnimationController.unregisterRemoteAnimations();
             mAnimationController = null;
         }
         super.unregisterOrganizer();
     }
 
-    /** Overrides the animation if the transition is on the given Task. */
-    void startOverrideSplitAnimation(int taskId) {
+    /**
+     * Overrides the animation for transitions of embedded activities organized by this organizer.
+     */
+    void overrideSplitAnimation() {
         if (mAnimationController == null) {
             mAnimationController = new TaskFragmentAnimationController(this);
         }
-        mAnimationController.registerRemoteAnimations(taskId);
-    }
-
-    /** No longer overrides the animation if the transition is on the given Task. */
-    @GuardedBy("mLock")
-    void stopOverrideSplitAnimation(int taskId) {
-        if (mAnimationController != null) {
-            mAnimationController.unregisterRemoteAnimations(taskId);
-        }
+        mAnimationController.registerRemoteAnimations();
     }
 
     /**
