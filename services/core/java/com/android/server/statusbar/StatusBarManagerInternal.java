@@ -172,4 +172,11 @@ public interface StatusBarManagerInternal {
      * @see com.android.internal.statusbar.IStatusBar#setUdfpsHbmListener(IUdfpsHbmListener)
      */
     void setUdfpsHbmListener(IUdfpsHbmListener listener);
+
+    /**
+     * Shows the rear display educational dialog
+     *
+     * @see com.android.internal.statusbar.IStatusBar#showRearDisplayDialog
+     */
+    void showRearDisplayDialog(int currentBaseState);
 }

@@ -165,6 +165,7 @@ public class CommandQueue extends IStatusBar.Stub implements
     private static final int MSG_REGISTER_NEARBY_MEDIA_DEVICE_PROVIDER = 66 << MSG_SHIFT;
     private static final int MSG_UNREGISTER_NEARBY_MEDIA_DEVICE_PROVIDER = 67 << MSG_SHIFT;
     private static final int MSG_TILE_SERVICE_REQUEST_LISTENING_STATE = 68 << MSG_SHIFT;
+    private static final int MSG_SHOW_REAR_DISPLAY_DIALOG = 69 << MSG_SHIFT;
 
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
@@ -474,6 +475,11 @@ public class CommandQueue extends IStatusBar.Stub implements
          */
         default void unregisterNearbyMediaDevicesProvider(
                 @NonNull INearbyMediaDevicesProvider provider) {}
+
+        /**
+         * @see IStatusBar#showRearDisplayDialog
+         */
+        default void showRearDisplayDialog(int currentBaseState) {}
     }
 
     public CommandQueue(Context context) {
@@ -1229,6 +1235,13 @@ public class CommandQueue extends IStatusBar.Stub implements
     }
 
     @Override
+    public void showRearDisplayDialog(int currentBaseState) {
+        synchronized (mLock) {
+            mHandler.obtainMessage(MSG_SHOW_REAR_DISPLAY_DIALOG, currentBaseState).sendToTarget();
+        }
+    }
+
+    @Override
     public void requestAddTile(
             @NonNull ComponentName componentName,
             @NonNull CharSequence appName,
@@ -1724,6 +1737,10 @@ public class CommandQueue extends IStatusBar.Stub implements
                         mCallbacks.get(i).requestTileServiceListeningState(component);
                     }
                     break;
+                case MSG_SHOW_REAR_DISPLAY_DIALOG:
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).showRearDisplayDialog((Integer) msg.obj);
+                    }
             }
         }
     }

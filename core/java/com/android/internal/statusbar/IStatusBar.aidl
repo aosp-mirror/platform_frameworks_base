@@ -325,4 +325,7 @@ oneway interface IStatusBar
 
     /** Dump protos from SystemUI. The proto definition is defined there */
     void dumpProto(in String[] args, in ParcelFileDescriptor pfd);
+
+    /** Shows rear display educational dialog */
+    void showRearDisplayDialog(int currentBaseState);
 }
