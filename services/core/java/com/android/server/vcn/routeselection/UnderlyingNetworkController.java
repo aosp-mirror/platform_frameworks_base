@@ -356,7 +356,7 @@ public class UnderlyingNetworkController {
             if (!allNetworkPriorities.isEmpty()) {
                 allNetworkPriorities += ", ";
             }
-            allNetworkPriorities += record.network + ": " + record.getPriorityClass();
+            allNetworkPriorities += record.network + ": " + record.priorityClass;
         }
         logInfo(
                 "Selected network changed to "
@@ -393,19 +393,20 @@ public class UnderlyingNetworkController {
 
         private TreeSet<UnderlyingNetworkRecord> getSortedUnderlyingNetworks() {
             TreeSet<UnderlyingNetworkRecord> sorted =
-                    new TreeSet<>(
-                            UnderlyingNetworkRecord.getComparator(
+                    new TreeSet<>(UnderlyingNetworkRecord.getComparator());
+
+            for (UnderlyingNetworkRecord.Builder builder :
+                    mUnderlyingNetworkRecordBuilders.values()) {
+                if (builder.isValid()) {
+                    final UnderlyingNetworkRecord record =
+                            builder.build(
                                     mVcnContext,
                                     mConnectionConfig.getVcnUnderlyingNetworkPriorities(),
                                     mSubscriptionGroup,
                                     mLastSnapshot,
                                     mCurrentRecord,
-                                    mCarrierConfig));
-
-            for (UnderlyingNetworkRecord.Builder builder :
-                    mUnderlyingNetworkRecordBuilders.values()) {
-                if (builder.isValid()) {
-                    sorted.add(builder.build());
+                                    mCarrierConfig);
+                    sorted.add(record);
                 }
             }
 
