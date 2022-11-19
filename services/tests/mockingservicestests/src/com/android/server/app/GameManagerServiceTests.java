@@ -17,6 +17,7 @@
 package com.android.server.app;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
+import static com.android.server.app.GameManagerService.CANCEL_GAME_LOADING_MODE;
 import static com.android.server.app.GameManagerService.WRITE_SETTINGS;
 
 import static org.junit.Assert.assertArrayEquals;
@@ -1454,7 +1455,58 @@ public class GameManagerServiceTests {
         verify(mMockPowerManager, never()).setPowerMode(anyInt(), anyBoolean());
     }
 
-    private void setGameState(boolean isLoading) {
+    @Test
+    public void testSetGameStateLoading_withNoDeviceConfig() {
+        mockDeviceConfigNone();
+        mockModifyGameModeGranted();
+        GameManagerService gameManagerService = createServiceAndStartUser(USER_ID_1);
+        gameManagerService.setGameMode(
+                mPackageName, GameManager.GAME_MODE_PERFORMANCE, USER_ID_1);
+        assertEquals(gameManagerService.getGameMode(mPackageName, USER_ID_1),
+                GameManager.GAME_MODE_PERFORMANCE);
+        int testMode = GameState.MODE_GAMEPLAY_INTERRUPTIBLE;
+        int testLabel = 99;
+        int testQuality = 123;
+        GameState gameState = new GameState(true, testMode, testLabel, testQuality);
+        assertEquals(testMode, gameState.getMode());
+        assertEquals(testLabel, gameState.getLabel());
+        assertEquals(testQuality, gameState.getQuality());
+        gameManagerService.setGameState(mPackageName, gameState, USER_ID_1);
+        mTestLooper.dispatchAll();
+        verify(mMockPowerManager, times(1)).setPowerMode(Mode.GAME_LOADING, true);
+        reset(mMockPowerManager);
+        assertTrue(
+                gameManagerService.mHandler.hasMessages(CANCEL_GAME_LOADING_MODE));
+        verify(mMockPowerManager, never()).setPowerMode(Mode.GAME_LOADING, false);
+        mTestLooper.moveTimeForward(GameManagerService.LOADING_BOOST_MAX_DURATION);
+        mTestLooper.dispatchAll();
+        verify(mMockPowerManager, times(1)).setPowerMode(Mode.GAME_LOADING, false);
+    }
+
+    @Test
+    public void testSetGameStateLoading_withDeviceConfig() {
+        String configString = "mode=2,loadingBoost=2000";
+        when(DeviceConfig.getProperty(anyString(), anyString()))
+                .thenReturn(configString);
+        mockModifyGameModeGranted();
+        GameManagerService gameManagerService = createServiceAndStartUser(USER_ID_1);
+        gameManagerService.setGameMode(
+                mPackageName, GameManager.GAME_MODE_PERFORMANCE, USER_ID_1);
+        GameState gameState = new GameState(true, GameState.MODE_GAMEPLAY_INTERRUPTIBLE, 99, 123);
+        gameManagerService.setGameState(mPackageName, gameState, USER_ID_1);
+        mTestLooper.dispatchAll();
+        verify(mMockPowerManager, times(1)).setPowerMode(Mode.GAME_LOADING, true);
+        verify(mMockPowerManager, never()).setPowerMode(Mode.GAME_LOADING, false);
+        reset(mMockPowerManager);
+        assertTrue(
+                gameManagerService.mHandler.hasMessages(CANCEL_GAME_LOADING_MODE));
+        mTestLooper.moveTimeForward(2000);
+        mTestLooper.dispatchAll();
+        verify(mMockPowerManager, times(1)).setPowerMode(Mode.GAME_LOADING, false);
+    }
+
+    @Test
+    public void testSetGameStateNotLoading() {
         mockDeviceConfigNone();
         mockModifyGameModeGranted();
         GameManagerService gameManagerService =
@@ -1462,27 +1514,19 @@ public class GameManagerServiceTests {
         startUser(gameManagerService, USER_ID_1);
         gameManagerService.setGameMode(
                 mPackageName, GameManager.GAME_MODE_PERFORMANCE, USER_ID_1);
-        int testMode = GameState.MODE_NONE;
+        int testMode = GameState.MODE_GAMEPLAY_UNINTERRUPTIBLE;
         int testLabel = 99;
         int testQuality = 123;
-        GameState gameState = new GameState(isLoading, testMode, testLabel, testQuality);
-        assertEquals(isLoading, gameState.isLoading());
+        GameState gameState = new GameState(false, testMode, testLabel, testQuality);
+        assertFalse(gameState.isLoading());
         assertEquals(testMode, gameState.getMode());
         assertEquals(testLabel, gameState.getLabel());
         assertEquals(testQuality, gameState.getQuality());
         gameManagerService.setGameState(mPackageName, gameState, USER_ID_1);
         mTestLooper.dispatchAll();
-        verify(mMockPowerManager, times(1)).setPowerMode(Mode.GAME_LOADING, isLoading);
-    }
-
-    @Test
-    public void testSetGameStateLoading() {
-        setGameState(true);
-    }
-
-    @Test
-    public void testSetGameStateNotLoading() {
-        setGameState(false);
+        verify(mMockPowerManager, times(1)).setPowerMode(Mode.GAME_LOADING, false);
+        assertFalse(
+                gameManagerService.mHandler.hasMessages(CANCEL_GAME_LOADING_MODE));
     }
 
     private List<String> readGameModeInterventionList() throws Exception {

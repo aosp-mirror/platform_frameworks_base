@@ -338,7 +338,18 @@ public final class GameManagerService extends IGameManagerService.Stub {
                                     + " and userId " + userId);
                             break;
                         }
+                        if (mHandler.hasMessages(CANCEL_GAME_LOADING_MODE)) {
+                            mHandler.removeMessages(CANCEL_GAME_LOADING_MODE);
+                        }
                         mPowerManagerInternal.setPowerMode(Mode.GAME_LOADING, isLoading);
+                        if (isLoading) {
+                            int loadingBoostDuration = getLoadingBoostDuration(packageName, userId);
+                            loadingBoostDuration = loadingBoostDuration > 0 ? loadingBoostDuration
+                                    : LOADING_BOOST_MAX_DURATION;
+                            mHandler.sendMessageDelayed(
+                                    mHandler.obtainMessage(CANCEL_GAME_LOADING_MODE),
+                                    loadingBoostDuration);
+                        }
                     }
                     break;
                 }
