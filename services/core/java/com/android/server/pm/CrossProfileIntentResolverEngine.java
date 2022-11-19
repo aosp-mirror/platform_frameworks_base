@@ -36,18 +36,15 @@ import android.util.FeatureFlagUtils;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.SparseBooleanArray;
 
 import com.android.server.LocalServices;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 import com.android.server.pm.verify.domain.DomainVerificationUtils;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Queue;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -62,6 +59,7 @@ public class CrossProfileIntentResolverEngine {
     private final DomainVerificationManagerInternal mDomainVerificationManager;
     private final DefaultAppProvider mDefaultAppProvider;
     private final Context mContext;
+    private final UserManagerInternal mUserManagerInternal;
 
     public CrossProfileIntentResolverEngine(UserManagerService userManager,
             DomainVerificationManagerInternal domainVerificationManager,
@@ -70,6 +68,7 @@ public class CrossProfileIntentResolverEngine {
         mDomainVerificationManager = domainVerificationManager;
         mDefaultAppProvider = defaultAppProvider;
         mContext = context;
+        mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
     }
 
     /**
@@ -92,14 +91,14 @@ public class CrossProfileIntentResolverEngine {
             String resolvedType, int userId, long flags, String pkgName,
             boolean hasNonNegativePriorityResult,
             Function<String, PackageStateInternal> pkgSettingFunction) {
-        return resolveIntentInternal(computer, intent, resolvedType, userId, flags, pkgName,
-                hasNonNegativePriorityResult, pkgSettingFunction);
+        return resolveIntentInternal(computer, intent, resolvedType, userId, userId, flags, pkgName,
+                hasNonNegativePriorityResult, pkgSettingFunction, null);
     }
 
     /**
      * Resolves intent in directly linked profiles and return list of {@link CrossProfileDomainInfo}
-     * which contains {@link ResolveInfo}. This would also iteratively call profiles not directly
-     * linked using Breadth First Search.
+     * which contains {@link ResolveInfo}. This would also recursively call profiles not directly
+     * linked using Depth First Search.
      *
      * It first finds {@link CrossProfileIntentFilter} configured in current profile to find list of
      * target user profiles that can serve current intent request. It uses corresponding strategy
@@ -108,123 +107,124 @@ public class CrossProfileIntentResolverEngine {
      * @param computer {@link Computer} instance used for resolution by {@link ComponentResolverApi}
      * @param intent request
      * @param resolvedType the MIME data type of intent request
-     * @param userId source user for which intent request is called
+     * @param sourceUserId source user for which intent request is called
+     * @param userId current user for cross profile resolution
      * @param flags used for intent resolution
      * @param pkgName the application package name this Intent is limited to.
      * @param hasNonNegativePriorityResult signifies if current profile have any non-negative(active
      *                                     and valid) ResolveInfo in current profile.
      * @param pkgSettingFunction function to find PackageStateInternal for given package
+     * @param visitedUserIds users for which we have already performed resolution
      * @return list of {@link CrossProfileDomainInfo} from linked profiles.
      */
     private List<CrossProfileDomainInfo> resolveIntentInternal(@NonNull Computer computer,
-            Intent intent, String resolvedType, int userId, long flags, String pkgName,
-            boolean hasNonNegativePriorityResult,
-            Function<String, PackageStateInternal> pkgSettingFunction) {
-        Queue<Integer> pendingUsers = new ArrayDeque<>();
-        Set<Integer> visitedUserIds = new HashSet<>();
-        SparseBooleanArray hasNonNegativePriorityResultFromParent = new SparseBooleanArray();
-        visitedUserIds.add(userId);
-        pendingUsers.add(userId);
-        hasNonNegativePriorityResultFromParent.put(userId, hasNonNegativePriorityResult);
-        UserManagerInternal umInternal = LocalServices.getService(UserManagerInternal.class);
-        List<CrossProfileDomainInfo> crossProfileDomainInfos = new ArrayList<>();
-        while (!pendingUsers.isEmpty()) {
-            int currentUserId = pendingUsers.poll();
-            List<CrossProfileIntentFilter> matchingFilters =
-                    computer.getMatchingCrossProfileIntentFilters(intent, resolvedType,
-                            currentUserId);
+            Intent intent, String resolvedType, int sourceUserId, int userId, long flags,
+            String pkgName, boolean hasNonNegativePriorityResult,
+            Function<String, PackageStateInternal> pkgSettingFunction,
+            Set<Integer> visitedUserIds) {
 
-            if (matchingFilters == null || matchingFilters.isEmpty()) {
-                /** if intent is web intent, checking if parent profile should handle the intent
-                 * even if there is no matching filter. The configuration is based on user profile
-                 * restriction android.os.UserManager#ALLOW_PARENT_PROFILE_APP_LINKING **/
-                if (currentUserId == userId && intent.hasWebURI()) {
-                    UserInfo parent = computer.getProfileParent(currentUserId);
-                    if (parent != null) {
-                        CrossProfileDomainInfo generalizedCrossProfileDomainInfo = computer
-                                .getCrossProfileDomainPreferredLpr(intent, resolvedType, flags,
-                                        currentUserId, parent.id);
-                        if (generalizedCrossProfileDomainInfo != null) {
-                            crossProfileDomainInfos.add(generalizedCrossProfileDomainInfo);
-                        }
+        if (visitedUserIds != null) visitedUserIds.add(userId);
+        List<CrossProfileDomainInfo> crossProfileDomainInfos = new ArrayList<>();
+
+        List<CrossProfileIntentFilter> matchingFilters =
+                computer.getMatchingCrossProfileIntentFilters(intent, resolvedType,
+                        userId);
+
+        if (matchingFilters == null || matchingFilters.isEmpty()) {
+            /** if intent is web intent, checking if parent profile should handle the intent
+             * even if there is no matching filter. The configuration is based on user profile
+             * restriction android.os.UserManager#ALLOW_PARENT_PROFILE_APP_LINKING **/
+            if (sourceUserId == userId && intent.hasWebURI()) {
+                UserInfo parent = computer.getProfileParent(userId);
+                if (parent != null) {
+                    CrossProfileDomainInfo generalizedCrossProfileDomainInfo = computer
+                            .getCrossProfileDomainPreferredLpr(intent, resolvedType, flags,
+                                    userId, parent.id);
+                    if (generalizedCrossProfileDomainInfo != null) {
+                        crossProfileDomainInfos.add(generalizedCrossProfileDomainInfo);
                     }
                 }
+            }
+            return crossProfileDomainInfos;
+        }
+
+        UserInfo userInfo = mUserManagerInternal.getUserInfo(userId);
+
+        // Grouping the CrossProfileIntentFilters based on targerId
+        SparseArray<List<CrossProfileIntentFilter>> crossProfileIntentFiltersByUser =
+                new SparseArray<>();
+
+        for (int index = 0; index < matchingFilters.size(); index++) {
+            CrossProfileIntentFilter crossProfileIntentFilter = matchingFilters.get(index);
+
+            if (!crossProfileIntentFiltersByUser
+                    .contains(crossProfileIntentFilter.mTargetUserId)) {
+                crossProfileIntentFiltersByUser.put(crossProfileIntentFilter.mTargetUserId,
+                        new ArrayList<>());
+            }
+            crossProfileIntentFiltersByUser.get(crossProfileIntentFilter.mTargetUserId)
+                    .add(crossProfileIntentFilter);
+        }
+
+        if (visitedUserIds == null) {
+            visitedUserIds = new HashSet<>();
+            visitedUserIds.add(userId);
+        }
+
+        /*
+         For each target user, we would call their corresponding strategy
+         {@link CrossProfileResolver} to resolve intent in corresponding user
+         */
+        for (int index = 0; index < crossProfileIntentFiltersByUser.size(); index++) {
+
+            int targetUserId = crossProfileIntentFiltersByUser.keyAt(index);
+
+            //if user is already visited then skip resolution for particular user.
+            if (visitedUserIds.contains(targetUserId)) {
                 continue;
             }
 
-            UserInfo sourceUserInfo = umInternal.getUserInfo(currentUserId);
+            UserInfo targetUserInfo = mUserManagerInternal.getUserInfo(targetUserId);
 
-            // Grouping the CrossProfileIntentFilters based on targerId
-            SparseArray<List<CrossProfileIntentFilter>> crossProfileIntentFiltersByUser =
-                    new SparseArray<>();
+            // Choosing strategy based on source and target user
+            CrossProfileResolver crossProfileResolver =
+                    chooseCrossProfileResolver(computer, userInfo, targetUserInfo);
 
-            for (int index = 0; index < matchingFilters.size(); index++) {
-                CrossProfileIntentFilter crossProfileIntentFilter = matchingFilters.get(index);
+        /*
+        If {@link CrossProfileResolver} is available for source,target pair we will call it to
+        get {@link CrossProfileDomainInfo}s from that user.
+         */
+            if (crossProfileResolver != null) {
+                List<CrossProfileDomainInfo> crossProfileInfos = crossProfileResolver
+                        .resolveIntent(computer, intent, resolvedType, userId,
+                                targetUserId, flags, pkgName,
+                                crossProfileIntentFiltersByUser.valueAt(index),
+                                hasNonNegativePriorityResult, pkgSettingFunction);
+                crossProfileDomainInfos.addAll(crossProfileInfos);
+                visitedUserIds.add(targetUserId);
 
-                if (!crossProfileIntentFiltersByUser
-                        .contains(crossProfileIntentFilter.mTargetUserId)) {
-                    crossProfileIntentFiltersByUser.put(crossProfileIntentFilter.mTargetUserId,
-                            new ArrayList<>());
-                }
-                crossProfileIntentFiltersByUser.get(crossProfileIntentFilter.mTargetUserId)
-                        .add(crossProfileIntentFilter);
-            }
-
-            /*
-             For each target user, we would call their corresponding strategy
-             {@link CrossProfileResolver} to resolve intent in corresponding user
-             */
-            for (int index = 0; index < crossProfileIntentFiltersByUser.size(); index++) {
-
-                int targetUserId = crossProfileIntentFiltersByUser.keyAt(index);
-
-                //if user is already visited then skip resolution for particular user.
-                if (visitedUserIds.contains(targetUserId)) {
-                    continue;
-                }
-
-                UserInfo targetUserInfo = umInternal.getUserInfo(targetUserId);
-
-                // Choosing strategy based on source and target user
-                CrossProfileResolver crossProfileResolver =
-                        chooseCrossProfileResolver(computer, sourceUserInfo, targetUserInfo);
-
-            /*
-            If {@link CrossProfileResolver} is available for source,target pair we will call it to
-            get {@link CrossProfileDomainInfo}s from that user.
-             */
-                if (crossProfileResolver != null) {
-                    List<CrossProfileDomainInfo> crossProfileInfos = crossProfileResolver
-                            .resolveIntent(computer, intent, resolvedType, currentUserId,
-                                    targetUserId, flags, pkgName,
-                                    crossProfileIntentFiltersByUser.valueAt(index),
-                                    hasNonNegativePriorityResultFromParent.get(currentUserId),
-                                    pkgSettingFunction);
-                    crossProfileDomainInfos.addAll(crossProfileInfos);
-
-                    hasNonNegativePriorityResultFromParent.put(targetUserId,
-                            hasNonNegativePriority(crossProfileInfos));
-
-                    /*
-                    Adding target user to queue if flag
-                    {@link CrossProfileIntentFilter#FLAG_ALLOW_CHAINED_RESOLUTION} is set for any
-                    {@link CrossProfileIntentFilter}
-                     */
-                    boolean allowChainedResolution = false;
-                    for (int filterIndex = 0; filterIndex < crossProfileIntentFiltersByUser
-                            .valueAt(index).size(); filterIndex++) {
-                        if ((CrossProfileIntentFilter
-                                .FLAG_ALLOW_CHAINED_RESOLUTION & crossProfileIntentFiltersByUser
-                                .valueAt(index).get(filterIndex).mFlags) != 0) {
-                            allowChainedResolution = true;
-                            break;
-                        }
+                /*
+                Adding target user to queue if flag
+                {@link CrossProfileIntentFilter#FLAG_ALLOW_CHAINED_RESOLUTION} is set for any
+                {@link CrossProfileIntentFilter}
+                 */
+                boolean allowChainedResolution = false;
+                for (int filterIndex = 0; filterIndex < crossProfileIntentFiltersByUser
+                        .valueAt(index).size(); filterIndex++) {
+                    if ((CrossProfileIntentFilter
+                            .FLAG_ALLOW_CHAINED_RESOLUTION & crossProfileIntentFiltersByUser
+                            .valueAt(index).get(filterIndex).mFlags) != 0) {
+                        allowChainedResolution = true;
+                        break;
                     }
-                    if (allowChainedResolution) {
-                        pendingUsers.add(targetUserId);
-                    }
-                    visitedUserIds.add(targetUserId);
                 }
+                if (allowChainedResolution) {
+                    crossProfileDomainInfos.addAll(resolveIntentInternal(computer, intent,
+                            resolvedType, sourceUserId, targetUserId, flags, pkgName,
+                            hasNonNegativePriority(crossProfileInfos), pkgSettingFunction,
+                            visitedUserIds));
+                }
+
             }
         }
 
@@ -275,56 +275,54 @@ public class CrossProfileIntentResolverEngine {
     public boolean canReachTo(@NonNull Computer computer, @NonNull Intent intent,
             @Nullable String resolvedType, @UserIdInt int sourceUserId,
             @UserIdInt int targetUserId) {
-        return canReachToInternal(computer, intent, resolvedType, sourceUserId, targetUserId);
+        Set<Integer> visitedUserIds = new HashSet<>();
+        return canReachToInternal(computer, intent, resolvedType, sourceUserId, targetUserId,
+                visitedUserIds);
     }
 
     /**
      * Returns true if we source user can reach target user for given intent. The source can
-     * directly or indirectly reach to target. This will perform breadth first search to check if
+     * directly or indirectly reach to target. This will perform depth first search to check if
      * source can reach target.
      * @param computer {@link Computer} instance used for resolution by {@link ComponentResolverApi}
      * @param intent request
      * @param resolvedType the MIME data type of intent request
      * @param sourceUserId source user
      * @param targetUserId target user
+     * @param visitedUserIds users for which resolution is checked
      * @return true if we source user can reach target user for given intent
      */
     private boolean canReachToInternal(@NonNull Computer computer, @NonNull Intent intent,
             @Nullable String resolvedType, @UserIdInt int sourceUserId,
-            @UserIdInt int targetUserId) {
+            @UserIdInt int targetUserId, Set<Integer> visitedUserIds) {
         if (sourceUserId == targetUserId) return true;
-
-        Queue<Integer> pendingUsers = new ArrayDeque<>();
-        Set<Integer> visitedUserIds = new HashSet<>();
         visitedUserIds.add(sourceUserId);
-        pendingUsers.add(sourceUserId);
 
-        while (!pendingUsers.isEmpty()) {
-            int currentUserId = pendingUsers.poll();
+        List<CrossProfileIntentFilter> matches =
+                computer.getMatchingCrossProfileIntentFilters(intent, resolvedType, sourceUserId);
 
-            List<CrossProfileIntentFilter> matches =
-                    computer.getMatchingCrossProfileIntentFilters(intent, resolvedType,
-                            currentUserId);
-            if (matches != null) {
-                for (int index = 0; index < matches.size(); index++) {
-                    CrossProfileIntentFilter crossProfileIntentFilter = matches.get(index);
-                    if (crossProfileIntentFilter.mTargetUserId == targetUserId) {
+        if (matches != null) {
+            for (int index = 0; index < matches.size(); index++) {
+                CrossProfileIntentFilter crossProfileIntentFilter = matches.get(index);
+                if (crossProfileIntentFilter.mTargetUserId == targetUserId) {
+                    return true;
+                }
+                if (visitedUserIds.contains(crossProfileIntentFilter.mTargetUserId)) {
+                    continue;
+                }
+
+                /*
+                 If source cannot directly reach to target, we will add
+                 CrossProfileIntentFilter.mTargetUserId user to queue to check if target user
+                 can be reached via CrossProfileIntentFilter.mTargetUserId i.e. it can be
+                 indirectly reached through chained/linked profiles.
+                 */
+                if ((CrossProfileIntentFilter.FLAG_ALLOW_CHAINED_RESOLUTION
+                        & crossProfileIntentFilter.mFlags) != 0) {
+                    visitedUserIds.add(crossProfileIntentFilter.mTargetUserId);
+                    if (canReachToInternal(computer, intent, resolvedType,
+                            crossProfileIntentFilter.mTargetUserId, targetUserId, visitedUserIds)) {
                         return true;
-                    }
-                    if (visitedUserIds.contains(crossProfileIntentFilter.mTargetUserId)) {
-                        continue;
-                    }
-
-                    /*
-                     If source cannot directly reach to target, we will add
-                     CrossProfileIntentFilter.mTargetUserId user to queue to check if target user
-                     can be reached via CrossProfileIntentFilter.mTargetUserId i.e. it can be
-                     indirectly reached through chained/linked profiles.
-                     */
-                    if ((CrossProfileIntentFilter.FLAG_ALLOW_CHAINED_RESOLUTION
-                            & crossProfileIntentFilter.mFlags) != 0) {
-                        pendingUsers.add(crossProfileIntentFilter.mTargetUserId);
-                        visitedUserIds.add(crossProfileIntentFilter.mTargetUserId);
                     }
                 }
             }
@@ -628,8 +626,7 @@ public class CrossProfileIntentResolverEngine {
             categorizeResolveInfoByTargetUser, int sourceUserId, int highestApprovalLevel) {
 
         List<CrossProfileDomainInfo> crossProfileDomainInfos = new ArrayList<>();
-        UserManagerInternal umInternal = LocalServices.getService(UserManagerInternal.class);
-        UserInfo sourceUserInfo = umInternal.getUserInfo(sourceUserId);
+        UserInfo sourceUserInfo = mUserManagerInternal.getUserInfo(sourceUserId);
 
         for (int index = 0; index < categorizeResolveInfoByTargetUser.size(); index++) {
 
@@ -639,7 +636,7 @@ public class CrossProfileIntentResolverEngine {
             } else {
                 // finding cross profile strategy based on source and target user
                 CrossProfileResolver crossProfileIntentResolver =
-                        chooseCrossProfileResolver(computer, sourceUserInfo, umInternal
+                        chooseCrossProfileResolver(computer, sourceUserInfo, mUserManagerInternal
                                 .getUserInfo(categorizeResolveInfoByTargetUser.keyAt(index)));
                 // if strategy is available call it and add its filtered results
                 if (crossProfileIntentResolver != null) {
