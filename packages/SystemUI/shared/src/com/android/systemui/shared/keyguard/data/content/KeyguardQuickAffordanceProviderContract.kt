@@ -106,6 +106,8 @@ object KeyguardQuickAffordanceProviderContract {
             const val SLOT_ID = "slot_id"
             /** String. Unique ID for the selected affordance. */
             const val AFFORDANCE_ID = "affordance_id"
+            /** String. Human-readable name for the affordance. */
+            const val AFFORDANCE_NAME = "affordance_name"
         }
     }
 

@@ -903,4 +903,7 @@ public abstract class WindowManagerInternal {
      * could not be prepared and the session needs to be torn down.
      */
     public abstract boolean setContentRecordingSession(ContentRecordingSession incomingSession);
+
+    /** Returns the SurfaceControl accessibility services should use for accessibility overlays. */
+    public abstract SurfaceControl getA11yOverlayLayer(int displayId);
 }

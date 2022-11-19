@@ -395,6 +395,54 @@
     <string name="permdesc_persistentActivity" product="default" msgid="1914841924366562051">"अ‍ॅप ला मेमरीमध्ये कायम असलेले त्याचे स्वतःचे भाग बनविण्यास अनुमती देते. हे फोन धीमा करून अन्य अ‍ॅप्सवर उपलब्ध असलेल्या मेमरीवर मर्यादा घालू शकते."</string>
     <string name="permlab_foregroundService" msgid="1768855976818467491">"पृष्‍ठभाग सेवा रन करा"</string>
     <string name="permdesc_foregroundService" msgid="8720071450020922795">"अ‍ॅपला पृष्‍ठभाग सेवा वापरण्याची अनुमती देते."</string>
+    <!-- no translation found for permlab_foregroundServiceCamera (7814751737955715297) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceCamera (6973701931250595727) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceConnectedDevice (3019650546176872501) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceConnectedDevice (1067457315741352963) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceDataSync (5847463514326881076) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceDataSync (2267140263423973050) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceLocation (3745428302378535690) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceLocation (118894034365177183) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceMediaPlayback (4002687983891935514) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceMediaPlayback (3638032446063968043) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceMediaProjection (2630868915733312527) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceMediaProjection (4805677128082002298) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceMicrophone (7390033424890545399) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceMicrophone (1206041516173483201) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServicePhoneCall (627937743867697892) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServicePhoneCall (5941660252587015147) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceHealth (3675776442080928184) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceHealth (2024586220562667185) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceRemoteMessaging (105670277002780950) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceRemoteMessaging (8767598075877576277) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceSystemExempted (1597663713590612685) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceSystemExempted (947381760834649622) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceSpecialUse (7973536745876645082) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceSpecialUse (646713654541885919) -->
+    <skip />
     <string name="permlab_getPackageSize" msgid="375391550792886641">"अ‍ॅप संचयन स्थान मोजा"</string>
     <string name="permdesc_getPackageSize" msgid="742743530909966782">"अ‍ॅप ला त्याचा कोड, डेटा आणि कॅशे    आकार पुनर्प्राप्त करण्यासाठी अनुमती देते"</string>
     <string name="permlab_writeSettings" msgid="8057285063719277394">"सिस्टीम सेटिंग्ज सुधारित करा"</string>
@@ -447,6 +495,10 @@
     <string name="permdesc_recordAudio" msgid="5857246765327514062">"ॲप वापरात असताना, हे ॲप मायक्रोफोन वापरून ऑडिओ रेकॉर्ड करू शकते."</string>
     <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"बॅकग्राउंडमध्ये ऑडिओ रेकॉर्ड करा"</string>
     <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"हे ॲप मायक्रोफोन वापरून ऑडिओ कधीही रेकॉर्ड करू शकते."</string>
+    <!-- no translation found for permlab_detectScreenCapture (4447042362828799433) -->
+    <skip />
+    <!-- no translation found for permdesc_detectScreenCapture (3485784917960342284) -->
+    <skip />
     <string name="permlab_sim_communication" msgid="176788115994050692">"सिम वर कमांड पाठवा"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"अ‍ॅप ला सिम वर कमांड पाठविण्‍याची अनुमती देते. हे खूप धोकादायक असते."</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"शारीरिक ॲक्टिव्हिटी ओळखा"</string>
@@ -698,10 +750,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"ॲपला तुमच्या शेअर केलेल्या स्टोरेजमधून व्हिडिओ फाइल वाचण्याची अनुमती देते."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"शेअर केलेल्या स्टोरेजमधून इमेज फाइल वाचा"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"ॲपला तुमच्या शेअर केलेल्या स्टोरेजमधून इमेज फाइल वाचण्याची अनुमती देते."</string>
-    <!-- no translation found for permlab_readVisualUserSelect (5516204215354667586) -->
-    <skip />
-    <!-- no translation found for permdesc_readVisualUserSelect (8027174717714968217) -->
-    <skip />
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"शेअर केलेल्या स्टोरेजमधून वापरकर्त्याने निवडलेल्या इमेज आणि व्हिडिओ फाइल वाचा"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"तुमच्या शेअर केलेले स्टोरेजमधून तुम्ही निवडलेल्या इमेज आणि व्हिडिओ फाइल वाचण्याची अ‍ॅपना अनुमती देते."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"तुमच्या शेअर केलेल्या स्टोरेजच्या आशयांमध्ये सुधारणा करा किंवा हटवा"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"ॲपला तुमच्या शेअर केलेल्या स्टोरेजचे आशय लिहिण्याची अनमती देते."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP कॉल करा/मिळवा"</string>
@@ -2052,12 +2102,6 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"अनइंस्टॉल करा"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"तरीही उघडा"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"हानिकारक अ‍ॅप आढळला"</string>
-    <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> ला सर्व डिव्हाइस लॉग अ‍ॅक्सेस करण्याची अनुमती द्यायची आहे का?"</string>
-    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"एक वेळ अ‍ॅक्सेसची अनुमती द्या"</string>
-    <string name="log_access_confirmation_deny" msgid="7685790957455099845">"अनुमती देऊ नका"</string>
-    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"तुमच्या डिव्हाइसवर काय होते ते डिव्हाइस लॉग रेकॉर्ड करते. समस्या शोधण्यासाठी आणि त्यांचे निराकरण करण्याकरिता ॲप्स हे लॉग वापरू शकतात.\n\nकाही लॉगमध्ये संवेदनशील माहिती असू शकते, त्यामुळे फक्त तुमचा विश्वास असलेल्या ॲप्सना सर्व डिव्हाइस लॉग अ‍ॅक्सेस करण्याची अनुमती द्या. \n\nतुम्ही या ॲपला सर्व डिव्हाइस लॉग अ‍ॅक्सेस करण्याची अनुमती न दिल्यास, ते तरीही त्याचा स्वतःचा लॉग अ‍ॅक्सेस करू शकते. तुमच्या डिव्हाइसचा उत्पादक तरीही काही लॉग किंवा तुमच्या डिव्हाइसवरील माहिती अ‍ॅक्सेस करू शकतो."</string>
-    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"तुमच्या डिव्हाइसवर काय होते ते डिव्हाइस लॉग रेकॉर्ड करते. समस्या शोधण्यासाठी आणि त्यांचे निराकरण करण्याकरिता ॲप्स हे लॉग वापरू शकतात.\n\nकाही लॉगमध्ये संवेदनशील माहिती असू शकते, त्यामुळे फक्त तुमचा विश्वास असलेल्या ॲप्सना सर्व डिव्हाइस लॉग अ‍ॅक्सेस करण्याची अनुमती द्या. \n\nतुम्ही या ॲपला सर्व डिव्हाइस लॉग अ‍ॅक्सेस करण्याची अनुमती न दिल्यास, ते तरीही त्याचा स्वतःचा लॉग अ‍ॅक्सेस करू शकते. तुमच्या डिव्हाइसचा उत्पादक तरीही काही लॉग किंवा तुमच्या डिव्हाइसवरील माहिती अ‍ॅक्सेस करू शकतो.\n\ng.co/android/devicelogs येथे अधिक जाणून घ्या."</string>
-    <string name="log_access_do_not_show_again" msgid="1058690599083091552">"पुन्हा दाखवू नका"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> ला <xliff:g id="APP_2">%2$s</xliff:g> चे तुकडे दाखवायचे आहेत"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"संपादित करा"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"कॉल आणि सूचनांवर व्हायब्रेट होईल"</string>
@@ -2298,6 +2342,8 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"तुमच्या <xliff:g id="DEVICE">%1$s</xliff:g> वरून फोनचा कॅमेरा अ‍ॅक्सेस करू शकत नाही"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"तुमच्या <xliff:g id="DEVICE">%1$s</xliff:g> वरून टॅबलेटचा कॅमेरा अ‍ॅक्सेस करू शकत नाही"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"स्ट्रीम करताना हे अ‍ॅक्सेस केले जाऊ शकत नाही. त्याऐवजी तुमच्या फोनवर अ‍ॅक्सेस करून पहा."</string>
+    <!-- no translation found for vdm_pip_blocked (4036107522497281397) -->
+    <skip />
     <string name="system_locale_title" msgid="711882686834677268">"सिस्टीम डीफॉल्ट"</string>
     <string name="default_card_name" msgid="9198284935962911468">"कार्ड <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

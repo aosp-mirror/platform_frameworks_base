@@ -24,7 +24,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * Base class for a condition that needs to be fulfilled in order for {@link Monitor} to inform
@@ -178,6 +181,42 @@ public abstract class Condition implements CallbackController<Condition.Callback
 
     protected final String getTag() {
         return mTag;
+    }
+
+    /**
+     * Creates a new condition which will only be true when both this condition and all the provided
+     * conditions are true.
+     */
+    public Condition and(Collection<Condition> others) {
+        final List<Condition> conditions = new ArrayList<>(others);
+        conditions.add(this);
+        return new CombinedCondition(conditions, Evaluator.OP_AND);
+    }
+
+    /**
+     * Creates a new condition which will only be true when both this condition and the provided
+     * condition is true.
+     */
+    public Condition and(Condition other) {
+        return new CombinedCondition(Arrays.asList(this, other), Evaluator.OP_AND);
+    }
+
+    /**
+     * Creates a new condition which will only be true when either this condition or any of the
+     * provided conditions are true.
+     */
+    public Condition or(Collection<Condition> others) {
+        final List<Condition> conditions = new ArrayList<>(others);
+        conditions.add(this);
+        return new CombinedCondition(conditions, Evaluator.OP_OR);
+    }
+
+    /**
+     * Creates a new condition which will only be true when either this condition or the provided
+     * condition is true.
+     */
+    public Condition or(Condition other) {
+        return new CombinedCondition(Arrays.asList(this, other), Evaluator.OP_OR);
     }
 
     /**

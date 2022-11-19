@@ -606,7 +606,10 @@ public final class VirtualDeviceParams implements Parcelable {
         }
 
         /**
-         * Specifies a policy for this virtual device.
+         * Add a policy for this virtual device.
+         *
+         * Policies define the system behavior that may be specific for this virtual device. A
+         * policy can be defined for each {@code PolicyType}, but they are all optional.
          *
          * @param policyType the type of policy, i.e. which behavior to specify a policy for.
          * @param devicePolicy the value of the policy, i.e. how to interpret the device behavior.

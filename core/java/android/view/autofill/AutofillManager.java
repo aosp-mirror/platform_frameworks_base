@@ -1197,6 +1197,9 @@ public final class AutofillManager {
      * @hide
      */
     public void notifyViewEnteredForFillDialog(View v) {
+        if (!hasAutofillFeature()) {
+            return;
+        }
         synchronized (mLock) {
             if (mTrackedViews != null) {
                 // To support the fill dialog can show for the autofillable Views in
@@ -1218,13 +1221,18 @@ public final class AutofillManager {
                 Log.d(TAG, "Trigger fill request at view entered");
             }
 
-            // Note: No need for atomic getAndSet as this method is called on the UI thread.
-            mIsFillRequested.set(true);
-
             int flags = FLAG_SUPPORTS_FILL_DIALOG;
             flags |= FLAG_VIEW_NOT_FOCUSED;
-            // use root view, so autofill UI does not trigger immediately.
-            notifyViewEntered(v.getRootView(), flags);
+
+            synchronized (mLock) {
+                // To match the id of the IME served view, used AutofillId.NO_AUTOFILL_ID on prefill
+                // request, because IME will reset the id of IME served view to 0 when activity
+                // start and does not focus on any view. If the id of the prefill request is
+                // not match to the IME served view's, Autofill will be blocking to wait inline
+                // request from the IME.
+                notifyViewEnteredLocked(/* view= */ null, AutofillId.NO_AUTOFILL_ID,
+                        /* bounds= */ null,  /* value= */ null, flags);
+            }
         }
     }
 
@@ -1233,6 +1241,8 @@ public final class AutofillManager {
     }
 
     private int getImeStateFlag(View v) {
+        if (v == null) return 0;
+
         final WindowInsets rootWindowInsets = v.getRootWindowInsets();
         if (rootWindowInsets != null && rootWindowInsets.isVisible(WindowInsets.Type.ime())) {
             return FLAG_IME_SHOWING;
@@ -1280,69 +1290,13 @@ public final class AutofillManager {
         }
         AutofillCallback callback;
         synchronized (mLock) {
-            mIsFillRequested.set(true);
-            callback = notifyViewEnteredLocked(view, flags);
+            callback = notifyViewEnteredLocked(
+                    view, view.getAutofillId(), /* bounds= */ null, view.getAutofillValue(), flags);
         }
 
         if (callback != null) {
             mCallback.onAutofillEvent(view, AutofillCallback.EVENT_INPUT_UNAVAILABLE);
         }
-    }
-
-    /** Returns AutofillCallback if need fire EVENT_INPUT_UNAVAILABLE */
-    @GuardedBy("mLock")
-    private AutofillCallback notifyViewEnteredLocked(@NonNull View view, int flags) {
-        final AutofillId id = view.getAutofillId();
-        if (shouldIgnoreViewEnteredLocked(id, flags)) return null;
-
-        AutofillCallback callback = null;
-
-        final boolean clientAdded = tryAddServiceClientIfNeededLocked();
-
-        if (!clientAdded) {
-            if (sVerbose) Log.v(TAG, "ignoring notifyViewEntered(" + id + "): no service client");
-            return callback;
-        }
-
-        if (!mEnabled && !mEnabledForAugmentedAutofillOnly) {
-            if (sVerbose) Log.v(TAG, "ignoring notifyViewEntered(" + id + "): disabled");
-
-            if (mCallback != null) {
-                callback = mCallback;
-            }
-        } else {
-            // don't notify entered when Activity is already in background
-            if (!isClientDisablingEnterExitEvent()) {
-                final AutofillValue value = view.getAutofillValue();
-
-                if (view instanceof TextView && ((TextView) view).isAnyPasswordInputType()) {
-                    flags |= FLAG_PASSWORD_INPUT_TYPE;
-                }
-
-                flags |= getImeStateFlag(view);
-
-                if (!isActiveLocked()) {
-                    // Starts new session.
-                    startSessionLocked(id, null, value, flags);
-                } else {
-                    // Update focus on existing session.
-                    if (mForAugmentedAutofillOnly && (flags & FLAG_MANUAL_REQUEST) != 0) {
-                        if (sDebug) {
-                            Log.d(TAG, "notifyViewEntered(" + id + "): resetting "
-                                    + "mForAugmentedAutofillOnly on manual request");
-                        }
-                        mForAugmentedAutofillOnly = false;
-                    }
-
-                    if ((flags & FLAG_SUPPORTS_FILL_DIALOG) != 0) {
-                        flags |= FLAG_RESET_FILL_DIALOG_STATE;
-                    }
-                    updateSessionLocked(id, null, value, ACTION_VIEW_ENTERED, flags);
-                }
-                addEnteredIdLocked(id);
-            }
-        }
-        return callback;
     }
 
     /**
@@ -1461,9 +1415,11 @@ public final class AutofillManager {
         if (!hasAutofillFeature()) {
             return;
         }
+
         AutofillCallback callback;
         synchronized (mLock) {
-            callback = notifyViewEnteredLocked(view, virtualId, bounds, flags);
+            callback = notifyViewEnteredLocked(
+                    view, getAutofillId(view, virtualId), bounds, /* value= */ null, flags);
         }
 
         if (callback != null) {
@@ -1474,53 +1430,55 @@ public final class AutofillManager {
 
     /** Returns AutofillCallback if need fire EVENT_INPUT_UNAVAILABLE */
     @GuardedBy("mLock")
-    private AutofillCallback notifyViewEnteredLocked(View view, int virtualId, Rect bounds,
-                                                     int flags) {
-        final AutofillId id = getAutofillId(view, virtualId);
-        AutofillCallback callback = null;
-        if (shouldIgnoreViewEnteredLocked(id, flags)) return callback;
+    private AutofillCallback notifyViewEnteredLocked(@Nullable View view, AutofillId id,
+            Rect bounds, AutofillValue value, int flags) {
+        if (shouldIgnoreViewEnteredLocked(id, flags)) return null;
 
         final boolean clientAdded = tryAddServiceClientIfNeededLocked();
-
         if (!clientAdded) {
             if (sVerbose) Log.v(TAG, "ignoring notifyViewEntered(" + id + "): no service client");
-            return callback;
+            return null;
         }
 
         if (!mEnabled && !mEnabledForAugmentedAutofillOnly) {
             if (sVerbose) {
                 Log.v(TAG, "ignoring notifyViewEntered(" + id + "): disabled");
             }
-            if (mCallback != null) {
-                callback = mCallback;
-            }
-        } else {
-            // don't notify entered when Activity is already in background
-            if (!isClientDisablingEnterExitEvent()) {
-                if (view instanceof TextView && ((TextView) view).isAnyPasswordInputType()) {
-                    flags |= FLAG_PASSWORD_INPUT_TYPE;
-                }
-
-                flags |= getImeStateFlag(view);
-
-                if (!isActiveLocked()) {
-                    // Starts new session.
-                    startSessionLocked(id, bounds, null, flags);
-                } else {
-                    // Update focus on existing session.
-                    if (mForAugmentedAutofillOnly && (flags & FLAG_MANUAL_REQUEST) != 0) {
-                        if (sDebug) {
-                            Log.d(TAG, "notifyViewEntered(" + id + "): resetting "
-                                    + "mForAugmentedAutofillOnly on manual request");
-                        }
-                        mForAugmentedAutofillOnly = false;
-                    }
-                    updateSessionLocked(id, bounds, null, ACTION_VIEW_ENTERED, flags);
-                }
-                addEnteredIdLocked(id);
-            }
+            return mCallback;
         }
-        return callback;
+
+        mIsFillRequested.set(true);
+
+        // don't notify entered when Activity is already in background
+        if (!isClientDisablingEnterExitEvent()) {
+            if (view instanceof TextView && ((TextView) view).isAnyPasswordInputType()) {
+                flags |= FLAG_PASSWORD_INPUT_TYPE;
+            }
+
+            flags |= getImeStateFlag(view);
+
+            if (!isActiveLocked()) {
+                // Starts new session.
+                startSessionLocked(id, bounds, value, flags);
+            } else {
+                // Update focus on existing session.
+                if (mForAugmentedAutofillOnly && (flags & FLAG_MANUAL_REQUEST) != 0) {
+                    if (sDebug) {
+                        Log.d(TAG, "notifyViewEntered(" + id + "): resetting "
+                                + "mForAugmentedAutofillOnly on manual request");
+                    }
+                    mForAugmentedAutofillOnly = false;
+                }
+
+                if ((flags & FLAG_SUPPORTS_FILL_DIALOG) != 0) {
+                    flags |= FLAG_RESET_FILL_DIALOG_STATE;
+                }
+
+                updateSessionLocked(id, bounds, value, ACTION_VIEW_ENTERED, flags);
+            }
+            addEnteredIdLocked(id);
+        }
+        return null;
     }
 
     @GuardedBy("mLock")
@@ -2025,7 +1983,8 @@ public final class AutofillManager {
             if (!mOnInvisibleCalled && focusView != null
                     && focusView.canNotifyAutofillEnterExitEvent()) {
                 notifyViewExitedLocked(focusView);
-                notifyViewEnteredLocked(focusView, 0);
+                notifyViewEnteredLocked(focusView, focusView.getAutofillId(),
+                        /* bounds= */ null, focusView.getAutofillValue(), /* flags= */ 0);
             }
             if (data == null) {
                 // data is set to null when result is not RESULT_OK

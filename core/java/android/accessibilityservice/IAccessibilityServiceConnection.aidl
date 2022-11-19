@@ -25,6 +25,7 @@ import android.os.Bundle;
 import android.os.RemoteCallback;
 import android.view.MagnificationSpec;
 import android.view.MotionEvent;
+import android.view.SurfaceControl;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
@@ -155,4 +156,5 @@ interface IAccessibilityServiceConnection {
     void setInstalledAndEnabledServices(in List<AccessibilityServiceInfo> infos);
 
     List<AccessibilityServiceInfo> getInstalledAndEnabledServices();
+    void attachAccessibilityOverlayToDisplay(int displayId, in SurfaceControl sc);
 }

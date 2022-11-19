@@ -42,9 +42,9 @@ import android.annotation.Nullable;
 import android.annotation.UptimeMillisLong;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.ApplicationExitInfo;
 import android.app.BroadcastOptions;
 import android.app.IApplicationThread;
-import android.app.RemoteServiceException.CannotDeliverBroadcastException;
 import android.app.UidObserver;
 import android.app.usage.UsageEvents.Event;
 import android.content.ComponentName;
@@ -831,8 +831,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 final String msg = "Failed to schedule " + r + " to " + receiver
                         + " via " + app + ": " + e;
                 logw(msg);
-                app.scheduleCrashLocked(msg, CannotDeliverBroadcastException.TYPE_ID, null);
-                app.setKilled(true);
+                app.killLocked("Can't deliver broadcast", ApplicationExitInfo.REASON_OTHER, true);
                 enqueueFinishReceiver(queue, BroadcastRecord.DELIVERY_FAILURE, "remote app");
             }
         } else {
@@ -859,7 +858,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             } catch (RemoteException e) {
                 final String msg = "Failed to schedule result of " + r + " via " + app + ": " + e;
                 logw(msg);
-                app.scheduleCrashLocked(msg, CannotDeliverBroadcastException.TYPE_ID, null);
+                app.killLocked("Can't deliver broadcast", ApplicationExitInfo.REASON_OTHER, true);
             }
         }
         // Clear so both local and remote references can be GC'ed

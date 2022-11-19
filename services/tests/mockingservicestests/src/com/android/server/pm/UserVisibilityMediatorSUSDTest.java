@@ -15,7 +15,9 @@
  */
 package com.android.server.pm;
 
-import static org.junit.Assert.assertThrows;
+import static com.android.server.pm.UserManagerInternal.USER_ASSIGNMENT_RESULT_FAILURE;
+
+import android.annotation.UserIdInt;
 
 import org.junit.Test;
 
@@ -32,32 +34,27 @@ public final class UserVisibilityMediatorSUSDTest extends UserVisibilityMediator
         super(/* usersOnSecondaryDisplaysEnabled= */ false);
     }
 
-    // TODO(b/244644281): when start & assign are merged, rename tests below and also call
-    // stopUserAndAssertState() at the end of them
-
     @Test
-    public void testAssignUserToDisplay_otherDisplay_currentUser() {
-        mockCurrentUser(USER_ID);
+    public void testStartBgUser_onSecondaryDisplay() {
+        startUserInBackgroundOnSecondaryDisplayAndAssertFailure(USER_ID, USER_ID);
 
-        assertThrows(UnsupportedOperationException.class,
-                () -> mMediator.assignUserToDisplay(USER_ID, USER_ID, SECONDARY_DISPLAY_ID));
+        expectNoUserAssignedToDisplay(SECONDARY_DISPLAY_ID);
     }
 
     @Test
-    public void testAssignUserToDisplay_otherDisplay_startProfileOfcurrentUser() {
-        mockCurrentUser(PARENT_USER_ID);
-        startDefaultProfile();
+    public void testStartBgProfileUser_onSecondaryDisplay() {
+        startForegroundUser(PARENT_USER_ID);
 
-        assertThrows(UnsupportedOperationException.class, () -> mMediator
-                .assignUserToDisplay(PROFILE_USER_ID, PARENT_USER_ID, SECONDARY_DISPLAY_ID));
+        startUserInBackgroundOnSecondaryDisplayAndAssertFailure(PROFILE_USER_ID, PARENT_USER_ID);
     }
 
-    @Test
-    public void testAssignUserToDisplay_otherDisplay_stoppedProfileOfcurrentUser() {
-        mockCurrentUser(PARENT_USER_ID);
-        stopDefaultProfile();
+    private void startUserInBackgroundOnSecondaryDisplayAndAssertFailure(@UserIdInt int userId,
+            @UserIdInt int profileGroupId) {
+        int result = mMediator.assignUserToDisplayOnStart(userId, profileGroupId, BG,
+                SECONDARY_DISPLAY_ID);
+        assertStartUserResult(result, USER_ASSIGNMENT_RESULT_FAILURE);
 
-        assertThrows(UnsupportedOperationException.class, () -> mMediator
-                .assignUserToDisplay(PROFILE_USER_ID, PARENT_USER_ID, SECONDARY_DISPLAY_ID));
+        expectUserIsNotVisibleAtAll(userId);
+        expectNoDisplayAssignedToUser(userId);
     }
 }

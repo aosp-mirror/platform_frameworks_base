@@ -22,6 +22,7 @@ import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricFingerprintConstants;
 import android.hardware.biometrics.BiometricOverlayConstants;
+import android.hardware.biometrics.fingerprint.PointerContext;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
 import android.hardware.fingerprint.IUdfpsOverlay;
 import android.hardware.fingerprint.IUdfpsOverlayController;
@@ -110,13 +111,13 @@ class FingerprintDetectClient extends AcquisitionClient<IBiometricsFingerprint>
     }
 
     @Override
-    public void onPointerDown(int x, int y, float minor, float major) {
+    public void onPointerDown(PointerContext pc) {
         mIsPointerDown = true;
-        UdfpsHelper.onFingerDown(getFreshDaemon(), x, y, minor, major);
+        UdfpsHelper.onFingerDown(getFreshDaemon(), (int) pc.x, (int) pc.y, pc.minor, pc.major);
     }
 
     @Override
-    public void onPointerUp() {
+    public void onPointerUp(PointerContext pc) {
         mIsPointerDown = false;
         UdfpsHelper.onFingerUp(getFreshDaemon());
     }

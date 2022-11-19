@@ -81,7 +81,8 @@ public interface RegisteredComplicationsModule {
                 ComplicationLayoutParams.DIRECTION_UP,
                 DREAM_HOME_CONTROLS_CHIP_COMPLICATION_WEIGHT,
                 // Add margin to the bottom of home controls to horizontally align with smartspace.
-                res.getDimensionPixelSize(R.dimen.dream_overlay_complication_clock_time_padding));
+                res.getDimensionPixelSize(
+                        R.dimen.dream_overlay_complication_home_controls_padding));
     }
 
     /**

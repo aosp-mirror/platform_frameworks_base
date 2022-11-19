@@ -25,6 +25,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.animation.Animator;
@@ -171,7 +172,7 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
 
         mCallbacks.onShareButtonTapped();
 
-        verify(mUiEventLogger, times(1)).log(CLIPBOARD_OVERLAY_SHARE_TAPPED);
+        verify(mUiEventLogger, times(1)).log(CLIPBOARD_OVERLAY_SHARE_TAPPED, 0, "");
         verify(mClipboardOverlayView, times(1)).getExitAnimation();
     }
 
@@ -181,7 +182,7 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
 
         mCallbacks.onDismissButtonTapped();
 
-        verify(mUiEventLogger, times(1)).log(CLIPBOARD_OVERLAY_DISMISS_TAPPED);
+        verify(mUiEventLogger, times(1)).log(CLIPBOARD_OVERLAY_DISMISS_TAPPED, 0, "");
         verify(mClipboardOverlayView, times(1)).getExitAnimation();
     }
 
@@ -192,7 +193,7 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
         mCallbacks.onSwipeDismissInitiated(mAnimator);
         mCallbacks.onDismissButtonTapped();
 
-        verify(mUiEventLogger, times(1)).log(CLIPBOARD_OVERLAY_SWIPE_DISMISSED);
+        verify(mUiEventLogger, times(1)).log(CLIPBOARD_OVERLAY_SWIPE_DISMISSED, 0, null);
         verify(mUiEventLogger, never()).log(CLIPBOARD_OVERLAY_DISMISS_TAPPED);
     }
 
@@ -223,5 +224,17 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
         mOverlayController.setClipData(mSampleClipData, "");
 
         verify(mTimeoutHandler).resetTimeout();
+    }
+
+    @Test
+    public void test_logsUseLastClipSource() {
+        mOverlayController.setClipData(mSampleClipData, "first.package");
+        mCallbacks.onDismissButtonTapped();
+        mOverlayController.setClipData(mSampleClipData, "second.package");
+        mCallbacks.onDismissButtonTapped();
+
+        verify(mUiEventLogger).log(CLIPBOARD_OVERLAY_DISMISS_TAPPED, 0, "first.package");
+        verify(mUiEventLogger).log(CLIPBOARD_OVERLAY_DISMISS_TAPPED, 0, "second.package");
+        verifyNoMoreInteractions(mUiEventLogger);
     }
 }

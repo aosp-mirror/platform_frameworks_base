@@ -39,8 +39,8 @@ import com.android.systemui.dock.DockManager;
 import com.android.systemui.dock.DockManager.DockEventListener;
 import com.android.systemui.plugins.ClockPlugin;
 import com.android.systemui.plugins.PluginListener;
+import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.settings.UserTracker;
-import com.android.systemui.shared.plugins.PluginManager;
 
 import java.util.ArrayList;
 import java.util.Collection;

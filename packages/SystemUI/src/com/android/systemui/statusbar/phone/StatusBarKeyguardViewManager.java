@@ -20,6 +20,7 @@ import static android.view.WindowInsets.Type.navigationBars;
 
 import static com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import static com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_DISMISS_BOUNCER;
+import static com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_SHOW_BOUNCER;
 import static com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_UNLOCK_COLLAPSING;
 import static com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_AND_UNLOCK;
 import static com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_AND_UNLOCK_PULSING;
@@ -77,7 +78,6 @@ import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
-import com.android.systemui.statusbar.notification.ViewGroupFadeHelper;
 import com.android.systemui.statusbar.phone.KeyguardBouncer.PrimaryBouncerExpansionCallback;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -218,7 +218,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     protected LockPatternUtils mLockPatternUtils;
     protected ViewMediatorCallback mViewMediatorCallback;
-    protected CentralSurfaces mCentralSurfaces;
+    @Nullable protected CentralSurfaces mCentralSurfaces;
     private NotificationPanelViewController mNotificationPanelViewController;
     private BiometricUnlockController mBiometricUnlockController;
     private boolean mCentralSurfacesRegistered;
@@ -266,7 +266,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private final KeyguardUpdateMonitor mKeyguardUpdateManager;
     private final LatencyTracker mLatencyTracker;
     private final KeyguardSecurityModel mKeyguardSecurityModel;
-    private KeyguardBypassController mBypassController;
+    @Nullable private KeyguardBypassController mBypassController;
     @Nullable private AlternateBouncer mAlternateBouncer;
 
     private final KeyguardUpdateMonitorCallback mUpdateMonitorCallback =
@@ -478,6 +478,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         } else if (mKeyguardStateController.isShowing()  && !hideBouncerOverDream) {
             if (!isWakeAndUnlocking()
                     && !(mBiometricUnlockController.getMode() == MODE_DISMISS_BOUNCER)
+                    && !(mBiometricUnlockController.getMode() == MODE_SHOW_BOUNCER)
                     && !isUnlockCollapsing()) {
                 if (mPrimaryBouncer != null) {
                     mPrimaryBouncer.setExpansion(fraction);
@@ -742,6 +743,12 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     private void updateAlternateBouncerShowing(boolean updateScrim) {
+        if (!mCentralSurfacesRegistered) {
+            // if CentralSurfaces hasn't been registered yet, then the controllers below haven't
+            // been initialized yet so there's no need to attempt to forward them events.
+            return;
+        }
+
         final boolean isShowingAlternateBouncer = isShowingAlternateBouncer();
         if (mKeyguardMessageAreaController != null) {
             mKeyguardMessageAreaController.setIsVisible(isShowingAlternateBouncer);
@@ -1009,7 +1016,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     public void onKeyguardFadedAway() {
         mNotificationContainer.postDelayed(() -> mNotificationShadeWindowController
                         .setKeyguardFadingAway(false), 100);
-        ViewGroupFadeHelper.reset(mNotificationPanelViewController.getView());
+        mNotificationPanelViewController.resetViewAlphas();
         mCentralSurfaces.finishKeyguardFadingAway();
         mBiometricUnlockController.finishKeyguardFadingAway();
         WindowManagerGlobal.getInstance().trimMemory(

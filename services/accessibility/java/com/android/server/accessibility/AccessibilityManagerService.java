@@ -109,6 +109,7 @@ import android.view.IWindow;
 import android.view.KeyEvent;
 import android.view.MagnificationSpec;
 import android.view.MotionEvent;
+import android.view.SurfaceControl;
 import android.view.WindowInfo;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
@@ -291,12 +292,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     private Point mTempPoint = new Point();
     private boolean mIsAccessibilityButtonShown;
-
     private boolean mInputBound;
     IRemoteAccessibilityInputConnection mRemoteInputConnection;
     EditorInfo mEditorInfo;
     boolean mRestarting;
     boolean mInputSessionRequested;
+    private SparseArray<SurfaceControl> mA11yOverlayLayers = new SparseArray<>();
 
     private AccessibilityUserState getCurrentUserStateLocked() {
         return getUserStateLocked(mCurrentUserId);
@@ -3967,6 +3968,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
             synchronized (mLock) {
                 mDisplaysList.add(display);
+                mA11yOverlayLayers.put(
+                        displayId, mWindowManagerService.getA11yOverlayLayer(displayId));
                 if (mInputFilter != null) {
                     mInputFilter.onDisplayAdded(display);
                 }
@@ -3990,6 +3993,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 if (!removeDisplayFromList(displayId)) {
                     return;
                 }
+                mA11yOverlayLayers.remove(displayId);
                 if (mInputFilter != null) {
                     mInputFilter.onDisplayRemoved(displayId);
                 }
@@ -4690,5 +4694,31 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             mSendWindowStateChangedEventRunnables.add(pendingRunnable);
             return true;
         }
+    }
+
+    @Override
+    public void attachAccessibilityOverlayToDisplay(int displayId, SurfaceControl sc) {
+        mMainHandler.sendMessage(
+                obtainMessage(
+                        AccessibilityManagerService::attachAccessibilityOverlayToDisplayInternal,
+                        this,
+                        displayId,
+                        sc));
+    }
+
+    void attachAccessibilityOverlayToDisplayInternal(int displayId, SurfaceControl sc) {
+        if (!mA11yOverlayLayers.contains(displayId)) {
+            mA11yOverlayLayers.put(displayId, mWindowManagerService.getA11yOverlayLayer(displayId));
+        }
+        SurfaceControl parent = mA11yOverlayLayers.get(displayId);
+        if (parent == null) {
+            Slog.e(LOG_TAG, "Unable to get accessibility overlay SurfaceControl.");
+            mA11yOverlayLayers.remove(displayId);
+            return;
+        }
+        SurfaceControl.Transaction transaction = new SurfaceControl.Transaction();
+        transaction.reparent(sc, parent);
+        transaction.apply();
+        transaction.close();
     }
 }

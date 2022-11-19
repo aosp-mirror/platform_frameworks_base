@@ -30,6 +30,7 @@ import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.ITestSessionCallback;
+import android.hardware.biometrics.fingerprint.PointerContext;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
 import android.hardware.biometrics.fingerprint.V2_2.IBiometricsFingerprintClientCallback;
 import android.hardware.fingerprint.Fingerprint;
@@ -807,25 +808,24 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
     }
 
     @Override
-    public void onPointerDown(long requestId, int sensorId, int x, int y,
-            float minor, float major) {
+    public void onPointerDown(long requestId, int sensorId, PointerContext pc) {
         mScheduler.getCurrentClientIfMatches(requestId, (client) -> {
             if (!(client instanceof Udfps)) {
                 Slog.w(TAG, "onFingerDown received during client: " + client);
                 return;
             }
-            ((Udfps) client).onPointerDown(x, y, minor, major);
+            ((Udfps) client).onPointerDown(pc);
         });
     }
 
     @Override
-    public void onPointerUp(long requestId, int sensorId) {
+    public void onPointerUp(long requestId, int sensorId, PointerContext pc) {
         mScheduler.getCurrentClientIfMatches(requestId, (client) -> {
             if (!(client instanceof Udfps)) {
                 Slog.w(TAG, "onFingerDown received during client: " + client);
                 return;
             }
-            ((Udfps) client).onPointerUp();
+            ((Udfps) client).onPointerUp(pc);
         });
     }
 

@@ -96,6 +96,7 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
     private static final String CONFIG_FILE_NAME = "device_state_configuration.xml";
     private static final String FLAG_CANCEL_OVERRIDE_REQUESTS = "FLAG_CANCEL_OVERRIDE_REQUESTS";
     private static final String FLAG_APP_INACCESSIBLE = "FLAG_APP_INACCESSIBLE";
+    private static final String FLAG_EMULATED_ONLY = "FLAG_EMULATED_ONLY";
 
     /** Interface that allows reading the device state configuration. */
     interface ReadableConfig {
@@ -149,6 +150,8 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
                                 case FLAG_APP_INACCESSIBLE:
                                     flags |= DeviceState.FLAG_APP_INACCESSIBLE;
                                     break;
+                                case FLAG_EMULATED_ONLY:
+                                    flags |= DeviceState.FLAG_EMULATED_ONLY;
                                 default:
                                     Slog.w(TAG, "Parsed unknown flag with name: "
                                             + configFlagString);
@@ -225,7 +228,13 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
             }
             final Conditions conditions = stateConditions.get(i);
             if (conditions == null) {
-                mStateConditions.put(state, TRUE_BOOLEAN_SUPPLIER);
+                // If this state has the FLAG_EMULATED_ONLY flag on it, it should never be triggered
+                // by a physical hardware change, and should always return false for it's conditions
+                if (deviceStates.get(i).hasFlag(DeviceState.FLAG_EMULATED_ONLY)) {
+                    mStateConditions.put(state, FALSE_BOOLEAN_SUPPLIER);
+                } else {
+                    mStateConditions.put(state, TRUE_BOOLEAN_SUPPLIER);
+                }
                 continue;
             }
 

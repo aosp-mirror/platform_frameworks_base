@@ -982,6 +982,15 @@ public class HardwareRenderer {
     }
 
     /**
+     * Notifies the hardware renderer about pending choreographer callbacks.
+     *
+     * @hide
+     */
+    public void notifyCallbackPending() {
+        nNotifyCallbackPending(mNativeProxy);
+    }
+
+    /**
      * b/68769804, b/66945974: For low FPS experiments.
      *
      * @hide
@@ -1536,4 +1545,6 @@ public class HardwareRenderer {
     private static native boolean nIsDrawingEnabled();
 
     private static native void nSetRtAnimationsEnabled(boolean rtAnimationsEnabled);
+
+    private static native void nNotifyCallbackPending(long nativeProxy);
 }

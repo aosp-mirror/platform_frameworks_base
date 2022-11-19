@@ -21,6 +21,7 @@ import static android.hardware.display.DisplayManager.DeviceConfig.KEY_FIXED_REF
 import static android.hardware.display.DisplayManager.DeviceConfig.KEY_FIXED_REFRESH_RATE_HIGH_DISPLAY_BRIGHTNESS_THRESHOLDS;
 import static android.hardware.display.DisplayManager.DeviceConfig.KEY_FIXED_REFRESH_RATE_LOW_AMBIENT_BRIGHTNESS_THRESHOLDS;
 import static android.hardware.display.DisplayManager.DeviceConfig.KEY_FIXED_REFRESH_RATE_LOW_DISPLAY_BRIGHTNESS_THRESHOLDS;
+import static android.hardware.display.DisplayManager.DeviceConfig.KEY_PEAK_REFRESH_RATE_DEFAULT;
 import static android.hardware.display.DisplayManager.DeviceConfig.KEY_REFRESH_RATE_IN_HBM_HDR;
 import static android.hardware.display.DisplayManager.DeviceConfig.KEY_REFRESH_RATE_IN_HBM_SUNLIGHT;
 import static android.hardware.display.DisplayManager.DeviceConfig.KEY_REFRESH_RATE_IN_HIGH_ZONE;
@@ -31,6 +32,8 @@ import static com.android.server.display.HighBrightnessModeController.HBM_TRANSI
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -48,6 +51,7 @@ import android.annotation.NonNull;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.hardware.Sensor;
 import android.hardware.SensorEventListener;
@@ -76,6 +80,7 @@ import android.view.SurfaceControl.RefreshRateRanges;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.R;
 import com.android.internal.display.BrightnessSynchronizer;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.test.FakeSettingsProvider;
@@ -2385,16 +2390,83 @@ public class DisplayModeDirectorTest {
 
     @Test
     public void testNotifyDefaultDisplayDeviceUpdated() {
-        DisplayDeviceConfig displayDeviceConfig = mock(DisplayDeviceConfig.class);
-        when(displayDeviceConfig.getLowDisplayBrightnessThresholds()).thenReturn(new int[]{});
-        when(displayDeviceConfig.getLowAmbientBrightnessThresholds()).thenReturn(new int[]{});
-        when(displayDeviceConfig.getHighDisplayBrightnessThresholds()).thenReturn(new int[]{});
-        when(displayDeviceConfig.getHighAmbientBrightnessThresholds()).thenReturn(new int[]{});
+        Resources resources = mock(Resources.class);
+        when(mContext.getResources()).thenReturn(resources);
+        when(resources.getInteger(com.android.internal.R.integer.config_defaultPeakRefreshRate))
+            .thenReturn(75);
+        when(resources.getInteger(R.integer.config_defaultRefreshRate))
+            .thenReturn(45);
+        when(resources.getIntArray(R.array.config_brightnessThresholdsOfPeakRefreshRate))
+            .thenReturn(new int[]{5});
+        when(resources.getIntArray(R.array.config_ambientThresholdsOfPeakRefreshRate))
+            .thenReturn(new int[]{10});
+        when(
+            resources.getIntArray(R.array.config_highDisplayBrightnessThresholdsOfFixedRefreshRate))
+            .thenReturn(new int[]{250});
+        when(
+            resources.getIntArray(R.array.config_highAmbientBrightnessThresholdsOfFixedRefreshRate))
+            .thenReturn(new int[]{7000});
         DisplayModeDirector director =
                 createDirectorFromRefreshRateArray(new float[]{60.0f, 90.0f}, 0);
+        // We don't expect any interaction with DeviceConfig when the director is initialized
+        // because we explicitly avoid doing this as this can lead to a latency spike in the
+        // startup of DisplayManagerService
+        // Verify all the loaded values are from DisplayDeviceConfig
+        assertEquals(director.getSettingsObserver().getDefaultRefreshRate(), 45, 0.0);
+        assertEquals(director.getSettingsObserver().getDefaultPeakRefreshRate(), 75,
+                0.0);
+        assertArrayEquals(director.getBrightnessObserver().getHighDisplayBrightnessThreshold(),
+                new int[]{250});
+        assertArrayEquals(director.getBrightnessObserver().getHighAmbientBrightnessThreshold(),
+                new int[]{7000});
+        assertArrayEquals(director.getBrightnessObserver().getLowDisplayBrightnessThreshold(),
+                new int[]{5});
+        assertArrayEquals(director.getBrightnessObserver().getLowAmbientBrightnessThreshold(),
+                new int[]{10});
+
+        // Notify that the default display is updated, such that DisplayDeviceConfig has new values
+        DisplayDeviceConfig displayDeviceConfig = mock(DisplayDeviceConfig.class);
+        when(displayDeviceConfig.getDefaultRefreshRate()).thenReturn(50);
+        when(displayDeviceConfig.getDefaultPeakRefreshRate()).thenReturn(55);
+        when(displayDeviceConfig.getLowDisplayBrightnessThresholds()).thenReturn(new int[]{25});
+        when(displayDeviceConfig.getLowAmbientBrightnessThresholds()).thenReturn(new int[]{30});
+        when(displayDeviceConfig.getHighDisplayBrightnessThresholds()).thenReturn(new int[]{210});
+        when(displayDeviceConfig.getHighAmbientBrightnessThresholds()).thenReturn(new int[]{2100});
         director.defaultDisplayDeviceUpdated(displayDeviceConfig);
-        verify(displayDeviceConfig).getDefaultRefreshRate();
-        verify(displayDeviceConfig).getDefaultPeakRefreshRate();
+
+        assertEquals(director.getSettingsObserver().getDefaultRefreshRate(), 50, 0.0);
+        assertEquals(director.getSettingsObserver().getDefaultPeakRefreshRate(), 55,
+                0.0);
+        assertArrayEquals(director.getBrightnessObserver().getHighDisplayBrightnessThreshold(),
+                new int[]{210});
+        assertArrayEquals(director.getBrightnessObserver().getHighAmbientBrightnessThreshold(),
+                new int[]{2100});
+        assertArrayEquals(director.getBrightnessObserver().getLowDisplayBrightnessThreshold(),
+                new int[]{25});
+        assertArrayEquals(director.getBrightnessObserver().getLowAmbientBrightnessThreshold(),
+                new int[]{30});
+
+        // Notify that the default display is updated, such that DeviceConfig has new values
+        FakeDeviceConfig config = mInjector.getDeviceConfig();
+        config.setDefaultPeakRefreshRate(60);
+        config.setLowAmbientBrightnessThresholds(new int[]{20});
+        config.setLowDisplayBrightnessThresholds(new int[]{10});
+        config.setHighDisplayBrightnessThresholds(new int[]{255});
+        config.setHighAmbientBrightnessThresholds(new int[]{8000});
+
+        director.defaultDisplayDeviceUpdated(displayDeviceConfig);
+
+        assertEquals(director.getSettingsObserver().getDefaultRefreshRate(), 50, 0.0);
+        assertEquals(director.getSettingsObserver().getDefaultPeakRefreshRate(), 60,
+                0.0);
+        assertArrayEquals(director.getBrightnessObserver().getHighDisplayBrightnessThreshold(),
+                new int[]{255});
+        assertArrayEquals(director.getBrightnessObserver().getHighAmbientBrightnessThreshold(),
+                new int[]{8000});
+        assertArrayEquals(director.getBrightnessObserver().getLowDisplayBrightnessThreshold(),
+                new int[]{10});
+        assertArrayEquals(director.getBrightnessObserver().getLowAmbientBrightnessThreshold(),
+                new int[]{20});
     }
 
     private Temperature getSkinTemp(@Temperature.ThrottlingStatus int status) {
@@ -2481,6 +2553,12 @@ public class DisplayModeDirectorTest {
         void setRefreshRateInHighZone(int fps) {
             putPropertyAndNotify(
                     DeviceConfig.NAMESPACE_DISPLAY_MANAGER, KEY_REFRESH_RATE_IN_HIGH_ZONE,
+                    String.valueOf(fps));
+        }
+
+        void setDefaultPeakRefreshRate(int fps) {
+            putPropertyAndNotify(
+                    DeviceConfig.NAMESPACE_DISPLAY_MANAGER, KEY_PEAK_REFRESH_RATE_DEFAULT,
                     String.valueOf(fps));
         }
 

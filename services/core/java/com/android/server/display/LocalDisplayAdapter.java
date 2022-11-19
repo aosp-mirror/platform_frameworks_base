@@ -209,7 +209,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         private int mUserPreferredModeId = INVALID_MODE_ID;
         // This is used only for the purpose of testing, to verify if the mode was correct when the
         // device started or booted.
-        private int mActiveDisplayModeAtStartId = INVALID_MODE_ID;
+        private int mActiveSfDisplayModeAtStartId = INVALID_MODE_ID;
         private Display.Mode mUserPreferredMode;
         private int mActiveModeId = INVALID_MODE_ID;
         private boolean mDisplayModeSpecsInvalid;
@@ -241,7 +241,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             mSidekickInternal = LocalServices.getService(SidekickInternal.class);
             mBacklightAdapter = new BacklightAdapter(displayToken, isFirstDisplay,
                     mSurfaceControlProxy);
-            mActiveDisplayModeAtStartId = dynamicInfo.activeDisplayModeId;
+            mActiveSfDisplayModeAtStartId = dynamicInfo.activeDisplayModeId;
         }
 
         @Override
@@ -255,7 +255,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
          */
         @Override
         public Display.Mode getActiveDisplayModeAtStartLocked() {
-            return findMode(mActiveDisplayModeAtStartId);
+            return findMode(findMatchingModeIdLocked(mActiveSfDisplayModeAtStartId));
         }
 
         /**

@@ -2498,12 +2498,8 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * <p><b>Available values for this device:</b><br>
      * {@link CameraCharacteristics#CONTROL_AVAILABLE_SETTINGS_OVERRIDES android.control.availableSettingsOverrides}</p>
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
-     * <p><b>Limited capability</b> -
-     * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
-     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
      *
      * @see CameraCharacteristics#CONTROL_AVAILABLE_SETTINGS_OVERRIDES
-     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @see #CONTROL_SETTINGS_OVERRIDE_OFF
      * @see #CONTROL_SETTINGS_OVERRIDE_ZOOM
      */

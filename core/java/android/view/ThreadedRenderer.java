@@ -587,6 +587,13 @@ public final class ThreadedRenderer extends HardwareRenderer {
         updateWebViewOverlayCallbacks();
     }
 
+    @Override
+    public void notifyCallbackPending() {
+        if (isEnabled()) {
+            super.notifyCallbackPending();
+        }
+    }
+
     /**
      * Updates the light position based on the position of the window.
      *

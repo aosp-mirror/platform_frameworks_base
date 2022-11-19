@@ -21,10 +21,9 @@ import com.android.systemui.animation.Interpolators
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
+import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionInfo
-import com.android.systemui.keyguard.shared.model.WakefulnessModel.Companion.isSleepingOrStartingToSleep
-import com.android.systemui.keyguard.shared.model.WakefulnessModel.Companion.isWakingOrStartingToWake
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -39,27 +38,24 @@ constructor(
     private val keyguardInteractor: KeyguardInteractor,
     private val keyguardTransitionRepository: KeyguardTransitionRepository,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
-) : TransitionInteractor("AOD<->LOCKSCREEN") {
+) : TransitionInteractor(AodLockscreenTransitionInteractor::class.simpleName!!) {
 
     override fun start() {
+        listenForTransitionToAodFromLockscreen()
+        listenForTransitionToLockscreenFromAod()
+    }
+
+    private fun listenForTransitionToAodFromLockscreen() {
         scope.launch {
-            /*
-             * Listening to the startedKeyguardTransitionStep (last started step) allows this code
-             * to interrupt an active transition, as long as they were either going to LOCKSCREEN or
-             * AOD state. One example is when the user presses the power button in the middle of an
-             * active transition.
-             */
-            keyguardInteractor.wakefulnessState
+            keyguardInteractor
+                .dozeTransitionTo(DozeStateModel.DOZE_AOD)
                 .sample(
                     keyguardTransitionInteractor.startedKeyguardTransitionStep,
                     { a, b -> Pair(a, b) }
                 )
                 .collect { pair ->
-                    val (wakefulnessState, lastStartedStep) = pair
-                    if (
-                        isSleepingOrStartingToSleep(wakefulnessState) &&
-                            lastStartedStep.to == KeyguardState.LOCKSCREEN
-                    ) {
+                    val (dozeToAod, lastStartedStep) = pair
+                    if (lastStartedStep.to == KeyguardState.LOCKSCREEN) {
                         keyguardTransitionRepository.startTransition(
                             TransitionInfo(
                                 name,
@@ -68,10 +64,22 @@ constructor(
                                 getAnimator(),
                             )
                         )
-                    } else if (
-                        isWakingOrStartingToWake(wakefulnessState) &&
-                            lastStartedStep.to == KeyguardState.AOD
-                    ) {
+                    }
+                }
+        }
+    }
+
+    private fun listenForTransitionToLockscreenFromAod() {
+        scope.launch {
+            keyguardInteractor
+                .dozeTransitionTo(DozeStateModel.FINISH)
+                .sample(
+                    keyguardTransitionInteractor.startedKeyguardTransitionStep,
+                    { a, b -> Pair(a, b) }
+                )
+                .collect { pair ->
+                    val (dozeToAod, lastStartedStep) = pair
+                    if (lastStartedStep.to == KeyguardState.AOD) {
                         keyguardTransitionRepository.startTransition(
                             TransitionInfo(
                                 name,

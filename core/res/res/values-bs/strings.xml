@@ -232,7 +232,7 @@
     <string name="shutdown_confirm" product="default" msgid="136816458966692315">"Telefon će se isključiti."</string>
     <string name="shutdown_confirm_question" msgid="796151167261608447">"Želite li ugasiti telefon?"</string>
     <string name="reboot_safemode_title" msgid="5853949122655346734">"Ponovo pokreni uređaj u sigurnom načinu rada"</string>
-    <string name="reboot_safemode_confirm" msgid="1658357874737219624">"Želite li pokrenuti uređaj u sigurnom načinu rada? To će onemogućiti sve aplikacije trećih strana koje ste instalirali. One će biti obnovljene kada ponovo pokrenete uređaj."</string>
+    <string name="reboot_safemode_confirm" msgid="1658357874737219624">"Želite li ponovo pokrenuti uređaj u sigurnom načinu rada? To će onemogućiti sve aplikacije trećih strana koje ste instalirali. Obnovit će se kada još jednom ponovo pokrenete uređaj."</string>
     <string name="recent_tasks_title" msgid="8183172372995396653">"Nedavni zadaci"</string>
     <string name="no_recent_tasks" msgid="9063946524312275906">"Nema nedavno pokrenutih aplikacija."</string>
     <string name="global_actions" product="tablet" msgid="4412132498517933867">"Opcije tableta"</string>
@@ -396,6 +396,54 @@
     <string name="permdesc_persistentActivity" product="default" msgid="1914841924366562051">"Omogućava aplikaciji da neke svoje dijelove pohrani trajno u memoriji. Ovo može ograničiti veličinu raspoložive memorije za druge aplikacije i tako usporiti telefon."</string>
     <string name="permlab_foregroundService" msgid="1768855976818467491">"pokretanje usluge u prvom planu"</string>
     <string name="permdesc_foregroundService" msgid="8720071450020922795">"Dopušta aplikaciji korištenje usluga u prvom planu."</string>
+    <!-- no translation found for permlab_foregroundServiceCamera (7814751737955715297) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceCamera (6973701931250595727) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceConnectedDevice (3019650546176872501) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceConnectedDevice (1067457315741352963) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceDataSync (5847463514326881076) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceDataSync (2267140263423973050) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceLocation (3745428302378535690) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceLocation (118894034365177183) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceMediaPlayback (4002687983891935514) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceMediaPlayback (3638032446063968043) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceMediaProjection (2630868915733312527) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceMediaProjection (4805677128082002298) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceMicrophone (7390033424890545399) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceMicrophone (1206041516173483201) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServicePhoneCall (627937743867697892) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServicePhoneCall (5941660252587015147) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceHealth (3675776442080928184) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceHealth (2024586220562667185) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceRemoteMessaging (105670277002780950) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceRemoteMessaging (8767598075877576277) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceSystemExempted (1597663713590612685) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceSystemExempted (947381760834649622) -->
+    <skip />
+    <!-- no translation found for permlab_foregroundServiceSpecialUse (7973536745876645082) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceSpecialUse (646713654541885919) -->
+    <skip />
     <string name="permlab_getPackageSize" msgid="375391550792886641">"mjerenje prostora kojeg aplikacije zauzimaju u pohrani"</string>
     <string name="permdesc_getPackageSize" msgid="742743530909966782">"Dozvoljava aplikaciji preuzimanje svog koda, podataka i veličine keš memorije"</string>
     <string name="permlab_writeSettings" msgid="8057285063719277394">"izmjena postavki sistema"</string>
@@ -448,6 +496,8 @@
     <string name="permdesc_recordAudio" msgid="5857246765327514062">"Za vrijeme korištenja, ova aplikacija može snimati zvuk koristeći mikrofon."</string>
     <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"snimanje zvuka u pozadini"</string>
     <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"Ova aplikacija može u svakom trenutku snimati zvuk koristeći mikrofon."</string>
+    <string name="permlab_detectScreenCapture" msgid="4447042362828799433">"detektirati snimanja zaslona prozora aplikacije"</string>
+    <string name="permdesc_detectScreenCapture" msgid="3485784917960342284">"Ako se tijekom upotrebe ove aplikacije izradi snimka zaslona, aplikacija će dobiti obavijest."</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"slanje komandi SIM kartici"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"Omogućava aplikaciji slanje naredbi na SIM. Ovo je vrlo opasno."</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"prepoznavanje fizičke aktivnosti"</string>
@@ -699,8 +749,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Omogućava aplikaciji da čita fajlove videozapisa iz vaše dijeljene pohrane."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"čitanje fajlova slika iz dijeljene pohrane"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Omogućava aplikaciji da čita fajlove slika iz vaše dijeljene pohrane."</string>
-    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"čitati slikovne i videodatoteke koje je korisnik odabrao iz dijeljene pohrane"</string>
-    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"Aplikaciji omogućuje čitanje slikovnih i videodatoteka koje odaberete iz dijeljene pohrane."</string>
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"čitanje fajlova slika i videozapisa iz dijeljene pohrane koje je odabrao korisnik"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"Omogućava aplikaciji da čita fajlove slika i videozapisa koje odaberete iz vaše dijeljene pohrane."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"mijenja ili briše sadržaj vaše dijeljene pohrane"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Omogućava aplikaciji da piše sadržaj vaše dijeljene pohrane."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"Uputi/primi SIP pozive"</string>
@@ -1015,7 +1065,7 @@
     <string name="factorytest_failed" msgid="3190979160945298006">"Fabrički test nije uspio"</string>
     <string name="factorytest_not_system" msgid="5658160199925519869">"Akcija FACTORY_TEST podržana je samo za pakete instalirane u facsikli /system/app."</string>
     <string name="factorytest_no_action" msgid="339252838115675515">"Nije pronađen paket koji omogućava akciju FACTORY_TEST."</string>
-    <string name="factorytest_reboot" msgid="2050147445567257365">"Ponovno pokretanje"</string>
+    <string name="factorytest_reboot" msgid="2050147445567257365">"Ponovo pokreni"</string>
     <string name="js_dialog_title" msgid="7464775045615023241">"Stranica na \"<xliff:g id="TITLE">%s</xliff:g>\" kaže:"</string>
     <string name="js_dialog_title_default" msgid="3769524569903332476">"JavaScript"</string>
     <string name="js_dialog_before_unload_title" msgid="7012587995876771246">"Potvrdite navigaciju"</string>
@@ -1376,7 +1426,7 @@
     <string name="console_running_notification_title" msgid="6087888939261635904">"Serijska konzola omogućena"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"Performanse su smanjene. Da onemogućite, provjerite program za učitavanje operativnog sistema."</string>
     <string name="mte_override_notification_title" msgid="4731115381962792944">"Eksperimentalni MTE je omogućen"</string>
-    <string name="mte_override_notification_message" msgid="2441170442725738942">"Moguće da će to uticati na performanse i stabilnost. Ponovo pokrenite da onemogućite. Ako je omogućeno pomoću arm64.memtag.bootctl, unaprijed ga postavite na \"Ništa\"."</string>
+    <string name="mte_override_notification_message" msgid="2441170442725738942">"To može uticati na performanse i stabilnost. Ponovo pokrenite da onemogućite. Ako je omogućeno pomoću arm64.memtag.bootctl, prvo postavite na \"Ništa\"."</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"Tečnost ili nečistoće u USB priključku"</string>
     <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"USB priključak je automatski onemogućen. Dodirnite da saznate više."</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"USB priključak je sada sigurno koristiti"</string>
@@ -2051,12 +2101,6 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"DEINSTALIRAJ"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"IPAK OTVORI"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Otkrivena je štetna aplikacija"</string>
-    <string name="log_access_confirmation_title" msgid="2343578467290592708">"Dozvoliti aplikaciji <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> da pristupa svim zapisnicima uređaja?"</string>
-    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Dozvoli jednokratan pristup"</string>
-    <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Nemoj dozvoliti"</string>
-    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"Zapisnici uređaja bilježe šta se dešava na uređaju. Aplikacije mogu koristiti te zapisnike da pronađu i isprave probleme.\n\nNeki zapisnici mogu sadržavati osjetljive podatke, zato pristup svim zapisnicima uređaja dozvolite samo aplikacijama kojima vjerujete. \n\nAko ne dozvolite ovoj aplikaciji da pristupa svim zapisnicima uređaja, ona i dalje može pristupati svojim zapisnicima. Proizvođač uređaja će možda i dalje biti u stanju pristupiti nekim zapisnicima ili podacima na uređaju."</string>
-    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"Zapisnici uređaja bilježe šta se dešava na uređaju. Aplikacije mogu koristiti te zapisnike da pronađu i riješe probleme.\n\nNeki zapisnici mogu sadržavati osjetljive podatke. Zbog toga pristup svim zapisnicima uređaja dozvolite samo aplikacijama koje smatrate pouzdanima. \n\nAko ne dozvolite ovoj aplikaciji da pristupa svim zapisnicima uređaja, ona i dalje može pristupati svojim zapisnicima. Proizvođač uređaja će možda i dalje moći pristupiti nekim zapisnicima ili podacima na uređaju.\n\nSaznajte više na g.co/android/devicelogs."</string>
-    <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Ne prikazuj ponovo"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"Aplikacija <xliff:g id="APP_0">%1$s</xliff:g> želi prikazati isječke aplikacije <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Uredi"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Pozivi i obavještenja će vibrirati"</string>
@@ -2297,6 +2341,8 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Nije moguće pristupiti kameri telefona s uređaja <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Nije moguće pristupiti kameri tableta s uređaja <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Ovom ne možete pristupiti tokom prijenosa. Umjesto toga pokušajte na telefonu."</string>
+    <!-- no translation found for vdm_pip_blocked (4036107522497281397) -->
+    <skip />
     <string name="system_locale_title" msgid="711882686834677268">"Sistemski zadano"</string>
     <string name="default_card_name" msgid="9198284935962911468">"KARTICA <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

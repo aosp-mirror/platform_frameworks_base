@@ -736,7 +736,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @VisibleForTesting
     final ContentRecordingController mContentRecordingController = new ContentRecordingController();
-
     @VisibleForTesting
     final class SettingsObserver extends ContentObserver {
         private final Uri mDisplayInversionEnabledUri =
@@ -8300,6 +8299,17 @@ public class WindowManagerService extends IWindowManager.Stub
                         WindowManagerService.this);
                 return true;
             }
+        }
+
+        @Override
+        public SurfaceControl getA11yOverlayLayer(int displayId) {
+            synchronized (mGlobalLock) {
+                DisplayContent dc = mRoot.getDisplayContent(displayId);
+                if (dc != null) {
+                    return dc.getA11yOverlayLayer();
+                }
+            }
+            return null;
         }
     }
 

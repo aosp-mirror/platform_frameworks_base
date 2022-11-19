@@ -73,3 +73,6 @@ per-file Trace.java = file:/TRACE_OWNERS
 
 # PermissionEnforcer
 per-file PermissionEnforcer.java = tweek@google.com, brufino@google.com
+
+# ART
+per-file ArtModuleServiceManager.java = file:platform/art:/OWNERS

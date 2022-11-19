@@ -311,6 +311,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     private SurfaceControl mOverlayLayer;
 
+    /** A surfaceControl specifically for accessibility overlays. */
+    private SurfaceControl mA11yOverlayLayer;
+
     /**
      * The direct child layer of the display to put all non-overlay windows. This is also used for
      * screen rotation animation so that there is a parent layer to put the animation leash.
@@ -1269,12 +1272,21 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             transaction.reparent(mOverlayLayer, mSurfaceControl);
         }
 
+        if (mA11yOverlayLayer == null) {
+            mA11yOverlayLayer =
+                    b.setName("Accessibility Overlays").setParent(mSurfaceControl).build();
+        } else {
+            transaction.reparent(mA11yOverlayLayer, mSurfaceControl);
+        }
+
         transaction
                 .setLayer(mSurfaceControl, 0)
                 .setLayerStack(mSurfaceControl, mDisplayId)
                 .show(mSurfaceControl)
                 .setLayer(mOverlayLayer, Integer.MAX_VALUE)
-                .show(mOverlayLayer);
+                .show(mOverlayLayer)
+                .setLayer(mA11yOverlayLayer, Integer.MAX_VALUE - 1)
+                .show(mA11yOverlayLayer);
     }
 
     boolean isReady() {
@@ -3250,6 +3262,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             setRemoteInsetsController(null);
             mWmService.mAnimator.removeDisplayLocked(mDisplayId);
             mOverlayLayer.release();
+            mA11yOverlayLayer.release();
             mWindowingLayer.release();
             mInputMonitor.onDisplayRemoved();
             mWmService.mDisplayNotificationController.dispatchDisplayRemoved(this);
@@ -5500,6 +5513,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     SurfaceControl getOverlayLayer() {
         return mOverlayLayer;
+    }
+
+    SurfaceControl getA11yOverlayLayer() {
+        return mA11yOverlayLayer;
     }
 
     SurfaceControl[] findRoundedCornerOverlays() {

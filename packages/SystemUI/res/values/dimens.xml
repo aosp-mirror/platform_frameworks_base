@@ -1341,6 +1341,7 @@
     <dimen name="accessibility_floating_menu_large_width_height">56dp</dimen>
     <dimen name="accessibility_floating_menu_large_single_radius">35dp</dimen>
     <dimen name="accessibility_floating_menu_large_multiple_radius">35dp</dimen>
+    <dimen name="accessibility_floating_menu_ime_shifting_space">48dp</dimen>
 
     <dimen name="accessibility_floating_menu_message_container_horizontal_padding">15dp</dimen>
     <dimen name="accessibility_floating_menu_message_text_vertical_padding">8dp</dimen>
@@ -1507,7 +1508,7 @@
 
     <!-- Dream overlay complications related dimensions -->
     <dimen name="dream_overlay_complication_clock_time_text_size">86sp</dimen>
-    <dimen name="dream_overlay_complication_clock_time_padding">20dp</dimen>
+    <dimen name="dream_overlay_complication_home_controls_padding">28dp</dimen>
     <dimen name="dream_overlay_complication_clock_subtitle_text_size">24sp</dimen>
     <dimen name="dream_overlay_complication_preview_text_size">36sp</dimen>
     <dimen name="dream_overlay_complication_preview_icon_padding">28dp</dimen>
