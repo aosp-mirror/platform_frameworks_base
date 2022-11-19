@@ -140,16 +140,13 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
     /**
      * Registers remote animations per transition type for the organizer. It will override the
      * animations if the transition only contains windows that belong to the organized
-     * TaskFragments in the given Task.
-     *
-     * @param taskId overrides if the transition only contains windows belonging to this Task.
+     * TaskFragments, and at least one of the transition window is embedded (not filling the Task).
      * @hide
      */
     @CallSuper
-    public void registerRemoteAnimations(int taskId,
-            @NonNull RemoteAnimationDefinition definition) {
+    public void registerRemoteAnimations(@NonNull RemoteAnimationDefinition definition) {
         try {
-            getController().registerRemoteAnimations(mInterface, taskId, definition);
+            getController().registerRemoteAnimations(mInterface, definition);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -160,9 +157,9 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
      * @hide
      */
     @CallSuper
-    public void unregisterRemoteAnimations(int taskId) {
+    public void unregisterRemoteAnimations() {
         try {
-            getController().unregisterRemoteAnimations(mInterface, taskId);
+            getController().unregisterRemoteAnimations(mInterface);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
