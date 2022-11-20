@@ -72,10 +72,6 @@ constructor(
     /** Observe whether screen is turned off. */
     val screenTurnedOff: Flow<Unit> = interactor.screenTurnedOff
 
-    /** Notify that view visibility has changed. */
-    fun notifyBouncerVisibilityHasChanged(visibility: Int) {
-        return interactor.notifyBouncerVisibilityHasChanged(visibility)
-    }
     /** Observe whether we want to update resources. */
     fun notifyUpdateResources() {
         interactor.notifyUpdatedResources()

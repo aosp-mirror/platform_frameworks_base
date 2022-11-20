@@ -476,7 +476,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             } else {
                 mPrimaryBouncerInteractor.setPanelExpansion(KeyguardBouncer.EXPANSION_VISIBLE);
             }
-        } else if (mKeyguardStateController.isShowing()  && !hideBouncerOverDream) {
+        } else if (mKeyguardStateController.isShowing() && !hideBouncerOverDream) {
             if (!isWakeAndUnlocking()
                     && !(mBiometricUnlockController.getMode() == MODE_DISMISS_BOUNCER)
                     && !(mBiometricUnlockController.getMode() == MODE_SHOW_BOUNCER)
