@@ -43,7 +43,7 @@ public abstract class ExtendedMockitoTestCase {
 
     private MockitoSession mSession;
 
-    private final Expect mExpect = Expect.create();
+    protected final Expect mExpect = Expect.create();
     protected final DumpableDumperRule mDumpableDumperRule = new DumpableDumperRule();
 
     @Rule

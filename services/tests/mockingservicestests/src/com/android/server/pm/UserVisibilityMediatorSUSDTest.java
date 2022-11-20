@@ -17,8 +17,6 @@ package com.android.server.pm;
 
 import static com.android.server.pm.UserManagerInternal.USER_ASSIGNMENT_RESULT_FAILURE;
 
-import android.annotation.UserIdInt;
-
 import org.junit.Test;
 
 /**
@@ -35,26 +33,18 @@ public final class UserVisibilityMediatorSUSDTest extends UserVisibilityMediator
     }
 
     @Test
-    public void testStartBgUser_onSecondaryDisplay() {
-        startUserInBackgroundOnSecondaryDisplayAndAssertFailure(USER_ID, USER_ID);
+    public void testStartBgUser_onSecondaryDisplay() throws Exception {
+        AsyncUserVisibilityListener listener = addListenerForNoEvents();
 
-        expectNoUserAssignedToDisplay(SECONDARY_DISPLAY_ID);
-    }
-
-    @Test
-    public void testStartBgProfileUser_onSecondaryDisplay() {
-        startForegroundUser(PARENT_USER_ID);
-
-        startUserInBackgroundOnSecondaryDisplayAndAssertFailure(PROFILE_USER_ID, PARENT_USER_ID);
-    }
-
-    private void startUserInBackgroundOnSecondaryDisplayAndAssertFailure(@UserIdInt int userId,
-            @UserIdInt int profileGroupId) {
-        int result = mMediator.assignUserToDisplayOnStart(userId, profileGroupId, BG,
+        int result = mMediator.assignUserToDisplayOnStart(USER_ID, USER_ID, BG,
                 SECONDARY_DISPLAY_ID);
         assertStartUserResult(result, USER_ASSIGNMENT_RESULT_FAILURE);
 
-        expectUserIsNotVisibleAtAll(userId);
-        expectNoDisplayAssignedToUser(userId);
+        expectUserIsNotVisibleAtAll(USER_ID);
+        expectNoDisplayAssignedToUser(USER_ID);
+
+        expectNoUserAssignedToDisplay(SECONDARY_DISPLAY_ID);
+
+        listener.verify();
     }
 }
