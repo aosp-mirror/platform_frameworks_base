@@ -250,6 +250,14 @@ public abstract class JobScheduler {
     public abstract @Nullable JobInfo getPendingJob(int jobId);
 
     /**
+     * Returns {@code true} if the calling app currently holds the
+     * {@link android.Manifest.permission#RUN_LONG_JOBS} permission, allowing it to run long jobs.
+     */
+    public boolean canRunLongJobs() {
+        return false;
+    }
+
+    /**
      * Returns {@code true} if the app currently holds the
      * {@link android.Manifest.permission#RUN_LONG_JOBS} permission, allowing it to run long jobs.
      * @hide

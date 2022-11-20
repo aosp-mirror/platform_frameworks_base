@@ -17,7 +17,7 @@
 package com.android.wm.shell.flicker.splitscreen
 
 import android.platform.test.annotations.FlakyTest
-import android.platform.test.annotations.Postsubmit
+import android.platform.test.annotations.IwTest
 import android.platform.test.annotations.Presubmit
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
@@ -73,7 +73,8 @@ class SwitchBetweenSplitPairs(testSpec: FlickerTestParameter) : SplitScreenBase(
             }
         }
 
-    @Postsubmit
+    @IwTest(focusArea = "sysui")
+    @Presubmit
     @Test
     fun cujCompleted() {
         testSpec.appWindowIsVisibleAtStart(thirdApp)
@@ -87,7 +88,7 @@ class SwitchBetweenSplitPairs(testSpec: FlickerTestParameter) : SplitScreenBase(
         testSpec.splitScreenDividerIsVisibleAtEnd()
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun splitScreenDividerInvisibleAtMiddle() =
         testSpec.assertLayers {
@@ -114,7 +115,7 @@ class SwitchBetweenSplitPairs(testSpec: FlickerTestParameter) : SplitScreenBase(
     @Test
     fun fourthAppLayerBecomesInvisible() = testSpec.layerBecomesInvisible(fourthApp)
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun primaryAppBoundsIsVisibleAtEnd() =
         testSpec.splitAppLayerBoundsIsVisibleAtEnd(
@@ -123,7 +124,7 @@ class SwitchBetweenSplitPairs(testSpec: FlickerTestParameter) : SplitScreenBase(
             portraitPosTop = false
         )
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun secondaryAppBoundsIsVisibleAtEnd() =
         testSpec.splitAppLayerBoundsIsVisibleAtEnd(
@@ -132,7 +133,7 @@ class SwitchBetweenSplitPairs(testSpec: FlickerTestParameter) : SplitScreenBase(
             portraitPosTop = true
         )
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun thirdAppBoundsIsVisibleAtBegin() =
         testSpec.assertLayersStart {
@@ -144,7 +145,7 @@ class SwitchBetweenSplitPairs(testSpec: FlickerTestParameter) : SplitScreenBase(
             )
         }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun fourthAppBoundsIsVisibleAtBegin() =
         testSpec.assertLayersStart {
@@ -156,19 +157,19 @@ class SwitchBetweenSplitPairs(testSpec: FlickerTestParameter) : SplitScreenBase(
             )
         }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun primaryAppWindowBecomesVisible() = testSpec.appWindowBecomesVisible(primaryApp)
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun secondaryAppWindowBecomesVisible() = testSpec.appWindowBecomesVisible(secondaryApp)
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun thirdAppWindowBecomesVisible() = testSpec.appWindowBecomesInvisible(thirdApp)
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun fourthAppWindowBecomesVisible() = testSpec.appWindowBecomesInvisible(fourthApp)
 

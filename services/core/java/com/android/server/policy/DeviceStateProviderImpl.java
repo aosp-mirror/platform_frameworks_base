@@ -367,7 +367,7 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
                 return;
             }
 
-            int newState = mOrderedStates[0].getIdentifier();
+            int newState = INVALID_DEVICE_STATE;
             for (int i = 0; i < mOrderedStates.length; i++) {
                 int state = mOrderedStates[i].getIdentifier();
                 if (DEBUG) {
@@ -396,7 +396,7 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
                 }
             }
 
-            if (newState != mLastReportedState) {
+            if (newState != INVALID_DEVICE_STATE && newState != mLastReportedState) {
                 mLastReportedState = newState;
                 stateToReport = newState;
             }

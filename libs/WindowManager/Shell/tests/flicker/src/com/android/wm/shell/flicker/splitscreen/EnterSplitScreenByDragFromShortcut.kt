@@ -16,8 +16,10 @@
 
 package com.android.wm.shell.flicker.splitscreen
 
+import android.platform.test.annotations.IwTest
 import android.view.WindowManagerPolicyConstants
 import android.platform.test.annotations.Postsubmit
+import android.platform.test.annotations.Presubmit
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -75,38 +77,39 @@ class EnterSplitScreenByDragFromShortcut(
             }
         }
 
-    @Postsubmit
+    @IwTest(focusArea = "sysui")
+    @Presubmit
     @Test
     fun cujCompleted() = testSpec.splitScreenEntered(primaryApp, secondaryApp,
         fromOtherApp = false, appExistAtStart = false)
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun splitScreenDividerBecomesVisible() = testSpec.splitScreenDividerBecomesVisible()
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun primaryAppLayerIsVisibleAtEnd() = testSpec.layerIsVisibleAtEnd(primaryApp)
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun secondaryAppLayerBecomesVisible() = testSpec.layerBecomesVisible(secondaryApp)
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun primaryAppBoundsIsVisibleAtEnd() = testSpec.splitAppLayerBoundsIsVisibleAtEnd(
         primaryApp, landscapePosLeft = false, portraitPosTop = false)
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun secondaryAppBoundsBecomesVisible() = testSpec.splitAppLayerBoundsBecomesVisibleByDrag(
         secondaryApp)
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun primaryAppWindowIsVisibleAtEnd() = testSpec.appWindowIsVisibleAtEnd(primaryApp)
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun secondaryAppWindowBecomesVisible() {
         testSpec.assertWm {

@@ -474,13 +474,13 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
 
     @Test
     public void testRegisterRemoteAnimations() {
-        mController.registerRemoteAnimations(mIOrganizer, TASK_ID, mDefinition);
+        mController.registerRemoteAnimations(mIOrganizer, mDefinition);
 
-        assertEquals(mDefinition, mController.getRemoteAnimationDefinition(mIOrganizer, TASK_ID));
+        assertEquals(mDefinition, mController.getRemoteAnimationDefinition(mIOrganizer));
 
-        mController.unregisterRemoteAnimations(mIOrganizer, TASK_ID);
+        mController.unregisterRemoteAnimations(mIOrganizer);
 
-        assertNull(mController.getRemoteAnimationDefinition(mIOrganizer, TASK_ID));
+        assertNull(mController.getRemoteAnimationDefinition(mIOrganizer));
     }
 
     @Test
@@ -819,6 +819,21 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
 
         // Successfully created when the organizer is registered.
         assertNotNull(mWindowOrganizerController.getTaskFragment(fragmentToken));
+    }
+
+    @Test
+    public void testOnTransactionHandled_skipTransactionForUnregisterOrganizer() {
+        mController.unregisterOrganizer(mIOrganizer);
+        final ActivityRecord ownerActivity = createActivityRecord(mDisplayContent);
+        final IBinder fragmentToken = new Binder();
+
+        // Allow organizer to create TaskFragment and start/reparent activity to TaskFragment.
+        createTaskFragmentFromOrganizer(mTransaction, ownerActivity, fragmentToken);
+        mController.onTransactionHandled(new Binder(), mTransaction,
+                getTransitionType(mTransaction), false /* shouldApplyIndependently */);
+
+        // Nothing should happen as the organizer is not registered.
+        assertNull(mWindowOrganizerController.getTaskFragment(fragmentToken));
     }
 
     @Test
