@@ -2425,47 +2425,6 @@ public class TelephonyManager {
         return getNaiBySubscriberId(getSubId());
     }
 
-    /**
-     * Returns the NAI. Return null if NAI is not available.
-     *
-     * <p>Starting with API level 29, persistent device identifiers are guarded behind additional
-     * restrictions, and apps are recommended to use resettable identifiers (see <a
-     * href="/training/articles/user-data-ids">Best practices for unique identifiers</a>). This
-     * method can be invoked if one of the following requirements is met:
-     * <ul>
-     *     <li>If the calling app has been granted the READ_PRIVILEGED_PHONE_STATE permission; this
-     *     is a privileged permission that can only be granted to apps preloaded on the device.
-     *     <li>If the calling app is the device owner of a fully-managed device, a profile
-     *     owner of an organization-owned device, or their delegates (see {@link
-     *     android.app.admin.DevicePolicyManager#getEnrollmentSpecificId()}).
-     *     <li>If the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
-     *     <li>If the calling app is the default SMS role holder (see {@link
-     *     RoleManager#isRoleHeld(String)}).
-     * </ul>
-     *
-     * <p>If the calling app does not meet one of these requirements then this method will behave
-     * as follows:
-     *
-     * <ul>
-     *     <li>If the calling app's target SDK is API level 28 or lower and the app has the
-     *     READ_PHONE_STATE permission then null is returned.</li>
-     *     <li>If the calling app's target SDK is API level 28 or lower and the app does not have
-     *     the READ_PHONE_STATE permission, or if the calling app is targeting API level 29 or
-     *     higher, then a SecurityException is thrown.</li>
-     * </ul>
-     *
-     *  @param slotIndex of which Nai is returned
-     */
-    /** {@hide}*/
-    @UnsupportedAppUsage
-    public String getNai(int slotIndex) {
-        int[] subId = SubscriptionManager.getSubId(slotIndex);
-        if (subId == null) {
-            return null;
-        }
-        return getNaiBySubscriberId(subId[0]);
-    }
-
     private String getNaiBySubscriberId(int subId) {
         try {
             IPhoneSubInfo info = getSubscriberInfoService();
@@ -6182,46 +6141,6 @@ public class TelephonyManager {
             return CALL_STATE_IDLE;
         }
     }
-
-    /**
-    * @hide
-    */
-    @UnsupportedAppUsage
-    private IPhoneSubInfo getSubscriberInfo() {
-        return getSubscriberInfoService();
-    }
-
-    /**
-     * Returns the Telephony call state for calls on a specific SIM slot.
-     * <p>
-     * Note: This method considers ONLY telephony/mobile calls, where {@link #getCallState()}
-     * considers the state of calls from other {@link android.telecom.ConnectionService}
-     * implementations.
-     * <p>
-     * Requires Permission:
-     * {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE} for applications
-     * targeting API level 31+ or that the calling application has carrier privileges
-     * (see {@link #hasCarrierPrivileges()}).
-     *
-     * @param slotIndex the SIM slot index to check call state for.
-     * @hide
-     */
-    @RequiresPermission(value = android.Manifest.permission.READ_PHONE_STATE, conditional = true)
-    public @CallState int getCallStateForSlot(int slotIndex) {
-        try {
-            int[] subId = SubscriptionManager.getSubId(slotIndex);
-            ITelephony telephony = getITelephony();
-            if (telephony == null || subId == null || subId.length  == 0) {
-                return CALL_STATE_IDLE;
-            }
-            return telephony.getCallStateForSubscription(subId[0], mContext.getPackageName(),
-                    mContext.getAttributionTag());
-        } catch (RemoteException | NullPointerException ex) {
-            // the phone process is restarting.
-            return CALL_STATE_IDLE;
-        }
-    }
-
 
     /** Data connection activity: No traffic. */
     public static final int DATA_ACTIVITY_NONE = 0x00000000;
