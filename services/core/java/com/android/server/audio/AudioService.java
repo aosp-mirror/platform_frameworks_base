@@ -3750,6 +3750,9 @@ public class AudioService extends IAudioService.Stub
             throw new IllegalArgumentException("changing device volume requires a volume index");
         }
 
+        AudioService.sVolumeLogger.enqueueAndLog("setDeviceVolume" + " from:" + callingPackage
+                + " " + vi + " " + ada, EventLogger.Event.ALOGI, TAG);
+
         if (vi.getMinVolumeIndex() == VolumeInfo.INDEX_NOT_SET
                 || vi.getMaxVolumeIndex() == VolumeInfo.INDEX_NOT_SET) {
             // assume index meant to be in stream type range, validate
@@ -7882,6 +7885,7 @@ public class AudioService extends IAudioService.Stub
                 boolean hasModifyAudioSettings) {
             boolean changed;
             int oldIndex;
+            final boolean isCurrentDevice;
             synchronized (mSettingsLock) {
                 synchronized (VolumeStreamState.class) {
                     oldIndex = getIndex(device);
@@ -7897,7 +7901,7 @@ public class AudioService extends IAudioService.Stub
                     // - there is no volume index stored for this device on alias stream.
                     // If changing volume of current device, also change volume of current
                     // device on aliased stream
-                    final boolean isCurrentDevice = (device == getDeviceForStream(mStreamType));
+                    isCurrentDevice = (device == getDeviceForStream(mStreamType));
                     final int numStreamTypes = AudioSystem.getNumStreamTypes();
                     for (int streamType = numStreamTypes - 1; streamType >= 0; streamType--) {
                         final VolumeStreamState aliasStreamState = mStreamStates[streamType];
@@ -7937,8 +7941,9 @@ public class AudioService extends IAudioService.Stub
                     EventLogTags.writeVolumeChanged(mStreamType, oldIndex, index, mIndexMax / 10,
                             caller);
                 }
-                // fire changed intents for all streams
-                if (index != oldIndex) {
+                // fire changed intents for all streams, but only when the device it changed on
+                //  is the current device
+                if ((index != oldIndex) && isCurrentDevice) {
                     mVolumeChanged.putExtra(AudioManager.EXTRA_VOLUME_STREAM_VALUE, index);
                     mVolumeChanged.putExtra(AudioManager.EXTRA_PREV_VOLUME_STREAM_VALUE, oldIndex);
                     mVolumeChanged.putExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE_ALIAS,
