@@ -66,7 +66,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -138,18 +137,12 @@ constructor(
     /** The currently-selected user. */
     val selectedUser: Flow<UserModel>
         get() =
-            combine(
-                repository.selectedUserInfo,
-                repository.userSwitcherSettings,
-            ) { selectedUserInfo, settings ->
+            repository.selectedUserInfo.map { selectedUserInfo ->
                 val selectedUserId = selectedUserInfo.id
-                checkNotNull(
-                    toUserModel(
-                        userInfo = selectedUserInfo,
-                        selectedUserId = selectedUserId,
-                        canSwitchUsers = canSwitchUsers(selectedUserId),
-                        isUserSwitcherEnabled = settings.isUserSwitcherEnabled,
-                    )
+                toUserModel(
+                    userInfo = selectedUserInfo,
+                    selectedUserId = selectedUserId,
+                    canSwitchUsers = canSwitchUsers(selectedUserId)
                 )
             }
 
@@ -629,7 +622,7 @@ constructor(
             // The guest user should go in the last position.
             .sortedBy { it.isGuest }
             .mapNotNull { userInfo ->
-                toUserModel(
+                filterAndMapToUserModel(
                     userInfo = userInfo,
                     selectedUserId = selectedUserId,
                     canSwitchUsers = canSwitchUsers,
@@ -638,48 +631,62 @@ constructor(
             }
     }
 
-    private suspend fun toUserModel(
+    /**
+     * Maps UserInfo to UserModel based on some parameters and return null under certain conditions
+     * to be filtered out.
+     */
+    private suspend fun filterAndMapToUserModel(
         userInfo: UserInfo,
         selectedUserId: Int,
         canSwitchUsers: Boolean,
         isUserSwitcherEnabled: Boolean,
     ): UserModel? {
-        val userId = userInfo.id
-        val isSelected = userId == selectedUserId
-
         return when {
             // When the user switcher is not enabled in settings, we only show the primary user.
             !isUserSwitcherEnabled && !userInfo.isPrimary -> null
-
             // We avoid showing disabled users.
             !userInfo.isEnabled -> null
-            userInfo.isGuest ->
-                UserModel(
-                    id = userId,
-                    name = Text.Loaded(userInfo.name),
-                    image =
-                        getUserImage(
-                            isGuest = true,
-                            userId = userId,
-                        ),
-                    isSelected = isSelected,
-                    isSelectable = canSwitchUsers,
-                    isGuest = true,
-                )
-            userInfo.supportsSwitchToByUser() ->
-                UserModel(
-                    id = userId,
-                    name = Text.Loaded(userInfo.name),
-                    image =
-                        getUserImage(
-                            isGuest = false,
-                            userId = userId,
-                        ),
-                    isSelected = isSelected,
-                    isSelectable = canSwitchUsers || isSelected,
-                    isGuest = false,
-                )
+            // We meet the conditions to return the UserModel.
+            userInfo.isGuest || userInfo.supportsSwitchToByUser() ->
+                toUserModel(userInfo, selectedUserId, canSwitchUsers)
             else -> null
+        }
+    }
+
+    /** Maps UserInfo to UserModel based on some parameters. */
+    private suspend fun toUserModel(
+        userInfo: UserInfo,
+        selectedUserId: Int,
+        canSwitchUsers: Boolean
+    ): UserModel {
+        val userId = userInfo.id
+        val isSelected = userId == selectedUserId
+        return if (userInfo.isGuest) {
+            UserModel(
+                id = userId,
+                name = Text.Loaded(userInfo.name),
+                image =
+                    getUserImage(
+                        isGuest = true,
+                        userId = userId,
+                    ),
+                isSelected = isSelected,
+                isSelectable = canSwitchUsers,
+                isGuest = true,
+            )
+        } else {
+            UserModel(
+                id = userId,
+                name = Text.Loaded(userInfo.name),
+                image =
+                    getUserImage(
+                        isGuest = false,
+                        userId = userId,
+                    ),
+                isSelected = isSelected,
+                isSelectable = canSwitchUsers || isSelected,
+                isGuest = false,
+            )
         }
     }
 

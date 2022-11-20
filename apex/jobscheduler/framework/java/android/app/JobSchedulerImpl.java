@@ -16,11 +16,13 @@
 
 package android.app;
 
+import android.annotation.NonNull;
 import android.app.job.IJobScheduler;
 import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
 import android.app.job.JobSnapshot;
 import android.app.job.JobWorkItem;
+import android.content.Context;
 import android.os.RemoteException;
 
 import java.util.List;
@@ -36,8 +38,10 @@ import java.util.List;
  */
 public class JobSchedulerImpl extends JobScheduler {
     IJobScheduler mBinder;
+    private final Context mContext;
 
-    public JobSchedulerImpl(IJobScheduler binder) {
+    public JobSchedulerImpl(@NonNull Context context, IJobScheduler binder) {
+        mContext = context;
         mBinder = binder;
     }
 
@@ -99,6 +103,15 @@ public class JobSchedulerImpl extends JobScheduler {
             return mBinder.getPendingJob(jobId);
         } catch (RemoteException e) {
             return null;
+        }
+    }
+
+    @Override
+    public boolean canRunLongJobs() {
+        try {
+            return mBinder.canRunLongJobs(mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            return false;
         }
     }
 
