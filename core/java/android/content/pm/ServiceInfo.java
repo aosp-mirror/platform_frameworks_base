@@ -308,7 +308,9 @@ public class ServiceInfo extends ComponentInfo
      * permissions:
      * {@link android.Manifest.permission#ACTIVITY_RECOGNITION},
      * {@link android.Manifest.permission#BODY_SENSORS},
-     * {@link android.Manifest.permission#HIGH_SAMPLING_RATE_SENSORS}.
+     * {@link android.Manifest.permission#HIGH_SAMPLING_RATE_SENSORS},
+     * or one of the {@code "android.permission.health.*"} permissions defined in the
+     * {@link android.healthconnect.HealthPermissions}.
      */
     @RequiresPermission(
             allOf = {
@@ -424,7 +426,7 @@ public class ServiceInfo extends ComponentInfo
      *      android:name=".MySpecialForegroundService"
      *      android:foregroundServiceType="specialUse|foo"&gt;
      *      &lt;property
-     *          android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE""
+     *          android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
      *          android:value="foo"
      *      /&gt;
      * &lt;/service&gt;
