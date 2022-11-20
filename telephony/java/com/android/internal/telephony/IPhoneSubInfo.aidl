@@ -193,6 +193,14 @@ interface IPhoneSubInfo {
     String[] getIsimImpu(int subId);
 
     /**
+     * Fetches the ISIM public user identities (EF_IMPU) from UICC based on subId
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(" +
+    "anyOf={android.Manifest.permission.READ_PHONE_NUMBERS, android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE})")
+     List<Uri> getImsPublicUserIdentities(int subId, String callingPackage,
+                                           String callingFeatureId);
+
+    /**
      * Returns the IMS Service Table (IST) that was loaded from the ISIM.
      * @return IMS Service Table or null if not present or not loaded
      */
