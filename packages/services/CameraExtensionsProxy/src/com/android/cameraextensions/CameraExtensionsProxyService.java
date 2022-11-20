@@ -104,6 +104,7 @@ import androidx.camera.extensions.impl.advanced.ImageProcessorImpl;
 import androidx.camera.extensions.impl.advanced.ImageReaderOutputConfigImpl;
 import androidx.camera.extensions.impl.advanced.MultiResolutionImageReaderOutputConfigImpl;
 import androidx.camera.extensions.impl.advanced.NightAdvancedExtenderImpl;
+import androidx.camera.extensions.impl.advanced.OutputSurfaceConfigurationImpl;
 import androidx.camera.extensions.impl.advanced.OutputSurfaceImpl;
 import androidx.camera.extensions.impl.advanced.RequestProcessorImpl;
 import androidx.camera.extensions.impl.advanced.SessionProcessorImpl;
@@ -1165,15 +1166,27 @@ public class CameraExtensionsProxyService extends Service {
 
         @Override
         public CameraSessionConfig initSession(String cameraId, OutputSurface previewSurface,
-                OutputSurface burstSurface) {
+                OutputSurface imageCaptureSurface) {
             OutputSurfaceImplStub outputPreviewSurfaceImpl =
                     new OutputSurfaceImplStub(previewSurface);
-            OutputSurfaceImplStub outputBurstSurfaceImpl =
-                    new OutputSurfaceImplStub(burstSurface);
+            OutputSurfaceImplStub outputImageCaptureSurfaceImpl =
+                    new OutputSurfaceImplStub(imageCaptureSurface);
 
-            Camera2SessionConfigImpl sessionConfig = mSessionProcessor.initSession(cameraId,
-                    mCharacteristicsHashMap, getApplicationContext(), outputPreviewSurfaceImpl,
-                    outputBurstSurfaceImpl, null /*imageAnalysisSurfaceConfig*/);
+            Camera2SessionConfigImpl sessionConfig;
+
+            if (LATENCY_IMPROVEMENTS_SUPPORTED) {
+                OutputSurfaceConfigurationImplStub outputSurfaceConfigs =
+                        new OutputSurfaceConfigurationImplStub(outputPreviewSurfaceImpl,
+                        // Image Analysis Output is currently only supported in CameraX
+                        outputImageCaptureSurfaceImpl, null /*imageAnalysisSurfaceConfig*/);
+
+                sessionConfig = mSessionProcessor.initSession(cameraId,
+                        mCharacteristicsHashMap, getApplicationContext(), outputSurfaceConfigs);
+            } else {
+                sessionConfig = mSessionProcessor.initSession(cameraId,
+                        mCharacteristicsHashMap, getApplicationContext(), outputPreviewSurfaceImpl,
+                        outputImageCaptureSurfaceImpl, null /*imageAnalysisSurfaceConfig*/);
+            }
 
             List<Camera2OutputConfigImpl> outputConfigs = sessionConfig.getOutputConfigs();
             CameraSessionConfig ret = new CameraSessionConfig();
@@ -1252,6 +1265,34 @@ public class CameraExtensionsProxyService extends Service {
         @Override
         public int startCapture(ICaptureCallback callback) {
             return mSessionProcessor.startCapture(new CaptureCallbackStub(callback, mCameraId));
+        }
+    }
+
+    private class OutputSurfaceConfigurationImplStub implements OutputSurfaceConfigurationImpl {
+        private OutputSurfaceImpl mOutputPreviewSurfaceImpl;
+        private OutputSurfaceImpl mOutputImageCaptureSurfaceImpl;
+        private OutputSurfaceImpl mOutputImageAnalysisSurfaceImpl;
+
+        public OutputSurfaceConfigurationImplStub(OutputSurfaceImpl previewOutput,
+                OutputSurfaceImpl imageCaptureOutput, OutputSurfaceImpl imageAnalysisOutput) {
+            mOutputPreviewSurfaceImpl = previewOutput;
+            mOutputImageCaptureSurfaceImpl = imageCaptureOutput;
+            mOutputImageAnalysisSurfaceImpl = imageAnalysisOutput;
+        }
+
+        @Override
+        public OutputSurfaceImpl getPreviewOutputSurface() {
+            return mOutputPreviewSurfaceImpl;
+        }
+
+        @Override
+        public OutputSurfaceImpl getImageCaptureOutputSurface() {
+            return mOutputImageCaptureSurfaceImpl;
+        }
+
+        @Override
+        public OutputSurfaceImpl getImageAnalysisOutputSurface() {
+            return mOutputImageAnalysisSurfaceImpl;
         }
     }
 
