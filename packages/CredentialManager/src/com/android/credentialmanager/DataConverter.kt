@@ -235,8 +235,6 @@ class CreateFlowUtils {
           pendingIntent = it.pendingIntent,
           fillInIntent = it.frameworkExtrasIntent,
           userProviderDisplayName = saveEntryUi.userProviderAccountName as String,
-          credentialTypeIcon = saveEntryUi.credentialTypeIcon?.loadDrawable(context)
-            ?: context.getDrawable(R.drawable.ic_passkey)!!,
           profileIcon = saveEntryUi.profileIcon?.loadDrawable(context)
             ?: context.getDrawable(R.drawable.ic_profile)!!,
           passwordCount = saveEntryUi.passwordCount ?: 0,

@@ -10,12 +10,16 @@
   <string name="string_no_thanks">No thanks</string>
   <string name="passkey_creation_intro_title">A simple way to sign in safely</string>
   <string name="passkey_creation_intro_body">Use your fingerprint, face or screen lock to sign in with a unique passkey that can’t be forgotten or stolen. Learn more</string>
-  <string name="choose_provider_title">Choose your default provider</string>
-  <string name="choose_provider_body">This provider will store passkeys and passwords for you and help you easily autofill and sign in. Learn more</string>
+  <string name="choose_provider_title">Choose where to <xliff:g id="createTypes">%1$s</xliff:g></string>
+  <!-- TODO: Change the wording after design is completed. -->
+  <string name="choose_provider_body">This password manager will store your passwords, passkeys, and other sign-in info to help you easily sign in. You can change where to save your sign-in info at any time.</string>
   <string name="choose_create_option_passkey_title">Create a passkey in <xliff:g id="providerInfoDisplayName">%1$s</xliff:g>?</string>
   <string name="choose_create_option_password_title">Save your password to <xliff:g id="providerInfoDisplayName">%1$s</xliff:g>?</string>
   <string name="choose_create_option_sign_in_title">Save your sign-in info to <xliff:g id="providerInfoDisplayName">%1$s</xliff:g>?</string>
   <string name="choose_sign_in_title">Use saved sign in</string>
+  <string name="create_your_passkey">create your passkey</string>
+  <string name="save_your_password">save your password</string>
+  <string name="save_your_sign_in_info">save your sign-in info</string>
   <string name="create_passkey_in">Create passkey in</string>
   <string name="save_password_to">Save password to</string>
   <string name="save_sign_in_to">Save sign-in to</string>
@@ -30,7 +34,7 @@
   <string name="password">password</string>
   <string name="sign_ins">sign-ins</string>
   <string name="another_device">Another device</string>
-  <string name="other_password_manager">Other password manager</string>
+  <string name="other_password_manager">Other password managers</string>
   <!-- TODO: Check the wording here. -->
   <string name="confirm_default_or_use_once_description">This password manager will store your passwords and passkeys to help you easily sign in.</string>
   <!-- Spoken content description of an element which will close the sheet when clicked. -->

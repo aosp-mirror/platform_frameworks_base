@@ -47,6 +47,7 @@ import com.android.credentialmanager.common.ui.CancelButton
 import com.android.credentialmanager.common.ui.ConfirmButton
 import com.android.credentialmanager.common.ui.Entry
 import com.android.credentialmanager.ui.theme.EntryShape
+import com.android.credentialmanager.ui.theme.LocalAndroidColorScheme
 import com.android.credentialmanager.jetpack.developer.PublicKeyCredential.Companion.TYPE_PUBLIC_KEY_CREDENTIAL
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -75,9 +76,12 @@ fun CreateCredentialScreen(
           onCancel = viewModel::onCancel,
         )
         CreateScreenState.PROVIDER_SELECTION -> ProviderSelectionCard(
+          requestDisplayInfo = uiState.requestDisplayInfo,
           enabledProviderList = uiState.enabledProviders,
+          disabledProviderList = uiState.disabledProviders,
           onCancel = viewModel::onCancel,
-          onProviderSelected = viewModel::onProviderSelected
+          onOptionSelected = viewModel::onMoreOptionsRowSelectedForFirstUse,
+          onDisabledPasswordManagerSelected = viewModel::onDisabledPasswordManagerSelected,
         )
         CreateScreenState.CREATION_OPTION_SELECTION -> CreationSelectionCard(
           requestDisplayInfo = uiState.requestDisplayInfo,
@@ -125,18 +129,20 @@ fun ConfirmationCard(
       Icon(
         painter = painterResource(R.drawable.ic_passkey),
         contentDescription = null,
-        tint = Color.Unspecified,
-        modifier = Modifier.align(alignment = Alignment.CenterHorizontally).padding(top = 24.dp)
+        tint = LocalAndroidColorScheme.current.colorAccentPrimaryVariant,
+        modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
+          .padding(top = 24.dp, bottom = 12.dp)
       )
       Text(
         text = stringResource(R.string.passkey_creation_intro_title),
         style = MaterialTheme.typography.titleMedium,
         modifier = Modifier
           .padding(horizontal = 24.dp)
-          .align(alignment = Alignment.CenterHorizontally)
+          .align(alignment = Alignment.CenterHorizontally),
+        textAlign = TextAlign.Center
       )
       Divider(
-        thickness = 24.dp,
+        thickness = 16.dp,
         color = Color.Transparent
       )
       Text(
@@ -145,7 +151,7 @@ fun ConfirmationCard(
         modifier = Modifier.padding(horizontal = 28.dp)
       )
       Divider(
-        thickness = 48.dp,
+        thickness = 32.dp,
         color = Color.Transparent
       )
       Row(
@@ -164,7 +170,7 @@ fun ConfirmationCard(
       Divider(
         thickness = 18.dp,
         color = Color.Transparent,
-        modifier = Modifier.padding(bottom = 16.dp)
+        modifier = Modifier.padding(bottom = 18.dp)
       )
     }
   }
@@ -173,16 +179,40 @@ fun ConfirmationCard(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProviderSelectionCard(
+  requestDisplayInfo: RequestDisplayInfo,
   enabledProviderList: List<EnabledProviderInfo>,
-  onProviderSelected: (String) -> Unit,
+  disabledProviderList: List<DisabledProviderInfo>?,
+  onOptionSelected: (ActiveEntry) -> Unit,
+  onDisabledPasswordManagerSelected: () -> Unit,
   onCancel: () -> Unit
 ) {
   Card() {
     Column() {
+      // TODO: Change the icon for create passwords and sign-ins
+      Icon(
+        painter = painterResource(R.drawable.ic_passkey),
+        contentDescription = null,
+        tint = LocalAndroidColorScheme.current.colorAccentPrimaryVariant,
+        modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
+          .padding(top = 24.dp, bottom = 16.dp)
+      )
       Text(
-        text = stringResource(R.string.choose_provider_title),
+        text = stringResource(
+          R.string.choose_provider_title,
+          when (requestDisplayInfo.type) {
+            TYPE_PUBLIC_KEY_CREDENTIAL -> stringResource(R.string.create_your_passkey)
+            TYPE_PASSWORD_CREDENTIAL -> stringResource(R.string.save_your_password)
+            else -> stringResource(R.string.save_your_sign_in_info)
+          },
+        ),
         style = MaterialTheme.typography.titleMedium,
-        modifier = Modifier.padding(all = 24.dp).align(alignment = Alignment.CenterHorizontally)
+        modifier = Modifier.padding(horizontal = 24.dp)
+          .align(alignment = Alignment.CenterHorizontally),
+        textAlign = TextAlign.Center
+      )
+      Divider(
+        thickness = 16.dp,
+        color = Color.Transparent
       )
       Text(
         text = stringResource(R.string.choose_provider_body),
@@ -190,7 +220,7 @@ fun ProviderSelectionCard(
         modifier = Modifier.padding(horizontal = 28.dp)
       )
       Divider(
-        thickness = 24.dp,
+        thickness = 18.dp,
         color = Color.Transparent
       )
       Card(
@@ -202,9 +232,24 @@ fun ProviderSelectionCard(
         LazyColumn(
           verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
-          enabledProviderList.forEach {
+          enabledProviderList.forEach { enabledProviderInfo ->
+            enabledProviderInfo.createOptions.forEach { createOptionInfo ->
+              item {
+                MoreOptionsInfoRow(
+                  providerInfo = enabledProviderInfo,
+                  createOptionInfo = createOptionInfo,
+                  onOptionSelected = {
+                    onOptionSelected(ActiveEntry(enabledProviderInfo, createOptionInfo))
+                  })
+              }
+            }
+          }
+          if (disabledProviderList != null) {
             item {
-              ProviderRow(providerInfo = it, onProviderSelected = onProviderSelected)
+              MoreOptionsDisabledProvidersRow(
+                disabledProviders = disabledProviderList,
+                onDisabledPasswordManagerSelected = onDisabledPasswordManagerSelected,
+              )
             }
           }
         }
@@ -364,27 +409,6 @@ fun MoreOptionsRowIntroCard(
   }
 }
 
-@Composable
-fun ProviderRow(providerInfo: ProviderInfo, onProviderSelected: (String) -> Unit) {
-  Entry(
-    onClick = {onProviderSelected(providerInfo.name)},
-    icon = {
-      Image(modifier = Modifier.size(32.dp).padding(start = 10.dp),
-            bitmap = providerInfo.icon.toBitmap().asImageBitmap(),
-            // painter = painterResource(R.drawable.ic_passkey),
-            // TODO: add description.
-            contentDescription = "")
-    },
-    label = {
-      Text(
-        text = providerInfo.displayName,
-        style = MaterialTheme.typography.labelLarge,
-        modifier = Modifier.padding(vertical = 18.dp)
-      )
-    }
-  )
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreationSelectionCard(
@@ -524,9 +548,13 @@ fun PrimaryCreateOptionRow(
   Entry(
     onClick = {onOptionSelected(createOptionInfo)},
     icon = {
-      Image(modifier = Modifier.size(32.dp).padding(start = 10.dp),
-        bitmap = createOptionInfo.credentialTypeIcon.toBitmap().asImageBitmap(),
-        contentDescription = null)
+      // TODO: Upload the other two types icons and change it according to request types
+      Icon(
+        painter = painterResource(R.drawable.ic_passkey),
+        contentDescription = null,
+        tint = LocalAndroidColorScheme.current.colorAccentPrimaryVariant,
+        modifier = Modifier.padding(start = 18.dp)
+      )
     },
     label = {
       Column() {
@@ -645,6 +673,7 @@ fun MoreOptionsDisabledProvidersRow(
           style = MaterialTheme.typography.titleLarge,
           modifier = Modifier.padding(top = 16.dp, start = 16.dp)
         )
+        // TODO: Update the subtitle once design is confirmed
         Text(
           text = disabledProviders.joinToString(separator = ", "){ it.displayName },
           style = MaterialTheme.typography.bodyMedium,

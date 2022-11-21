@@ -72,15 +72,6 @@ class CreateCredentialViewModel(
     }
   }
 
-  fun onProviderSelected(providerName: String) {
-    uiState = uiState.copy(
-      currentScreenState = CreateScreenState.CREATION_OPTION_SELECTION,
-      activeEntry = ActiveEntry(getProviderInfoByName(providerName),
-        getProviderInfoByName(providerName).createOptions.first()
-      )
-    )
-  }
-
   fun getProviderInfoByName(providerName: String): EnabledProviderInfo {
     return uiState.enabledProviders.single {
       it.name.equals(providerName)
@@ -102,6 +93,13 @@ class CreateCredentialViewModel(
   fun onMoreOptionsRowSelected(activeEntry: ActiveEntry) {
     uiState = uiState.copy(
       currentScreenState = CreateScreenState.MORE_OPTIONS_ROW_INTRO,
+      activeEntry = activeEntry
+    )
+  }
+
+  fun onMoreOptionsRowSelectedForFirstUse(activeEntry: ActiveEntry) {
+    uiState = uiState.copy(
+      currentScreenState = CreateScreenState.CREATION_OPTION_SELECTION,
       activeEntry = activeEntry
     )
   }
