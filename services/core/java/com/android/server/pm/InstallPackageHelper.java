@@ -20,6 +20,7 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
 import static android.content.pm.PackageManager.INSTALL_FAILED_ALREADY_EXISTS;
 import static android.content.pm.PackageManager.INSTALL_FAILED_BAD_PERMISSION_GROUP;
+import static android.content.pm.PackageManager.INSTALL_FAILED_DEPRECATED_SDK_VERSION;
 import static android.content.pm.PackageManager.INSTALL_FAILED_DUPLICATE_PACKAGE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_DUPLICATE_PERMISSION;
 import static android.content.pm.PackageManager.INSTALL_FAILED_DUPLICATE_PERMISSION_GROUP;
@@ -136,6 +137,7 @@ import android.os.incremental.IncrementalManager;
 import android.os.incremental.IncrementalStorage;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
+import android.provider.DeviceConfig;
 import android.stats.storage.StorageEnums;
 import android.system.ErrnoException;
 import android.system.Os;
@@ -1015,6 +1017,28 @@ final class InstallPackageHelper {
             throw new PrepareFailure("Failed parse during installPackageLI", e);
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+        }
+
+        // If the minimum installable SDK version enforcement is enabled, block the install
+        // of apps using a lower target SDK version than required. This helps improve security
+        // and privacy as malware can target older SDK versions to avoid enforcement of new API
+        // behavior.
+        if (DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE,
+                "MinInstallableTargetSdk__install_block_enabled",
+                false)) {
+            int minInstallableTargetSdk =
+                    DeviceConfig.getInt(DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE,
+                            "MinInstallableTargetSdk__min_installable_target_sdk",
+                            0);
+            if (parsedPackage.getTargetSdkVersion() < minInstallableTargetSdk) {
+                Slog.w(TAG, "App " + parsedPackage.getPackageName()
+                        + " targets deprecated sdk version");
+                throw new PrepareFailure(INSTALL_FAILED_DEPRECATED_SDK_VERSION,
+                        "App package must target at least version "
+                                + minInstallableTargetSdk);
+            }
+        } else {
+            Slog.i(TAG, "Minimum installable target sdk enforcement not enabled");
         }
 
         // Instant apps have several additional install-time checks.
