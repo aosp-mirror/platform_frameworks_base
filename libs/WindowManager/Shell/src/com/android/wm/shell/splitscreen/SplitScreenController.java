@@ -58,6 +58,7 @@ import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.WindowManager;
+import android.widget.Toast;
 import android.window.RemoteTransition;
 import android.window.WindowContainerTransaction;
 
@@ -596,6 +597,10 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN, "Adding MULTIPLE_TASK");
             } else if (isSplitScreenVisible()) {
                 mStageCoordinator.switchSplitPosition("startIntent");
+                return;
+            } else {
+                Toast.makeText(mContext, R.string.dock_multi_instances_not_supported_text,
+                        Toast.LENGTH_SHORT).show();
                 return;
             }
         }
