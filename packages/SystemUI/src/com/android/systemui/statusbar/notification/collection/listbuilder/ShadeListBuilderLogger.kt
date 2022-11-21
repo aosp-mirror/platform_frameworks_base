@@ -193,7 +193,7 @@ class ShadeListBuilderLogger @Inject constructor(
         })
     }
 
-    fun logParentChangeSuppressed(
+    fun logParentChangeSuppressedStarted(
         buildId: Int,
         suppressedParent: GroupEntry?,
         keepingParent: GroupEntry?
@@ -204,6 +204,21 @@ class ShadeListBuilderLogger @Inject constructor(
             str2 = keepingParent?.logKey
         }, {
             "(Build $long1)     Change of parent to '$str1' suppressed; keeping parent '$str2'"
+        })
+    }
+
+    fun logParentChangeSuppressedStopped(
+            buildId: Int,
+            previouslySuppressedParent: GroupEntry?,
+            previouslyKeptParent: GroupEntry?
+    ) {
+        buffer.log(TAG, INFO, {
+            long1 = buildId.toLong()
+            str1 = previouslySuppressedParent?.logKey
+            str2 = previouslyKeptParent?.logKey
+        }, {
+            "(Build $long1)     Change of parent to '$str1' no longer suppressed; " +
+                    "replaced parent '$str2'"
         })
     }
 
