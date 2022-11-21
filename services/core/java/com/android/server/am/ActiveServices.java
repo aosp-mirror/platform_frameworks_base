@@ -6028,7 +6028,7 @@ public final class ActiveServices {
             TimeoutRecord timeoutRecord = TimeoutRecord.forServiceStartWithEndTime(annotation,
                     SystemClock.uptimeMillis());
 
-            timeoutRecord.mLatencyTracker.waitingOnAMSLockEnded();
+            timeoutRecord.mLatencyTracker.waitingOnAMSLockStarted();
             synchronized (mAm) {
                 timeoutRecord.mLatencyTracker.waitingOnAMSLockEnded();
                 if (!r.fgRequired || !r.fgWaiting || r.destroying) {
