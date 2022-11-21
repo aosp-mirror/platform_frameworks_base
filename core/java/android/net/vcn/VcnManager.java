@@ -104,12 +104,23 @@ public class VcnManager {
 
     // TODO: Add separate signal strength thresholds for 2.4 GHz and 5GHz
 
+    /**
+     * Key for transports that need to be marked as restricted by the VCN
+     *
+     * <p>Defaults to TRANSPORT_WIFI if the config does not exist
+     *
+     * @hide
+     */
+    public static final String VCN_RESTRICTED_TRANSPORTS_INT_ARRAY_KEY =
+            "vcn_restricted_transports";
+
     /** List of Carrier Config options to extract from Carrier Config bundles. @hide */
     @NonNull
     public static final String[] VCN_RELATED_CARRIER_CONFIG_KEYS =
             new String[] {
                 VCN_NETWORK_SELECTION_WIFI_ENTRY_RSSI_THRESHOLD_KEY,
-                VCN_NETWORK_SELECTION_WIFI_EXIT_RSSI_THRESHOLD_KEY
+                VCN_NETWORK_SELECTION_WIFI_EXIT_RSSI_THRESHOLD_KEY,
+                VCN_RESTRICTED_TRANSPORTS_INT_ARRAY_KEY
             };
 
     private static final Map<
