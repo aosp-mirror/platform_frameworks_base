@@ -21,6 +21,7 @@ import android.os.Handler
 import android.os.Trace
 import android.os.UserHandle
 import android.os.UserManager
+import android.view.View
 import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.DejankUtils
@@ -84,6 +85,7 @@ constructor(
             )
         )
         repository.setPrimaryShowingSoon(false)
+        primaryBouncerCallbackInteractor.dispatchVisibilityChanged(View.VISIBLE)
     }
 
     val keyguardAuthenticated: Flow<Boolean> = repository.keyguardAuthenticated.filterNotNull()
@@ -182,6 +184,7 @@ constructor(
         repository.setPrimaryVisible(false)
         repository.setPrimaryHide(true)
         repository.setPrimaryShow(null)
+        primaryBouncerCallbackInteractor.dispatchVisibilityChanged(View.INVISIBLE)
         Trace.endSection()
     }
 
@@ -274,11 +277,6 @@ constructor(
     /** Notifies that the message was shown. */
     fun onMessageShown() {
         repository.setShowMessage(null)
-    }
-
-    /** Notify that view visibility has changed. */
-    fun notifyBouncerVisibilityHasChanged(visibility: Int) {
-        primaryBouncerCallbackInteractor.dispatchVisibilityChanged(visibility)
     }
 
     /** Notify that the resources have been updated */
