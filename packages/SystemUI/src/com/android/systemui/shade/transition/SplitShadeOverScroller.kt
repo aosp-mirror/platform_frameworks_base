@@ -70,7 +70,7 @@ constructor(
                     updateResources()
                 }
             })
-        dumpManager.registerDumpable("SplitShadeOverScroller") { printWriter, _ ->
+        dumpManager.registerCriticalDumpable("SplitShadeOverScroller") { printWriter, _ ->
             dump(printWriter)
         }
     }

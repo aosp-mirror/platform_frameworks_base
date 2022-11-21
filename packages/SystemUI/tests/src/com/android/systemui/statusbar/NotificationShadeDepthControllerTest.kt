@@ -131,7 +131,9 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
 
     @Test
     fun setupListeners() {
-        verify(dumpManager).registerDumpable(anyString(), eq(notificationShadeDepthController))
+        verify(dumpManager).registerCriticalDumpable(
+            anyString(), eq(notificationShadeDepthController)
+        )
     }
 
     @Test

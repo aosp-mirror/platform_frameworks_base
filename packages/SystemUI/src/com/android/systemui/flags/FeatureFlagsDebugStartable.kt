@@ -35,7 +35,7 @@ constructor(
 ) : CoreStartable {
 
     init {
-        dumpManager.registerDumpable(FeatureFlagsDebug.TAG) { pw, args ->
+        dumpManager.registerCriticalDumpable(FeatureFlagsDebug.TAG) { pw, args ->
             featureFlags.dump(pw, args)
         }
     }

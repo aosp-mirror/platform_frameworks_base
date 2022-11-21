@@ -62,7 +62,7 @@ constructor(
     private var statusBarBoundsProvider: StatusBarBoundsProvider? = null
 
     override fun start() {
-        dumpManager.registerDumpable(javaClass.simpleName) { printWriter, _ -> dump(printWriter) }
+        dumpManager.registerCriticalDumpable(javaClass.simpleName) { pw, _ -> dump(pw) }
     }
 
     override fun stop() {
