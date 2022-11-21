@@ -225,7 +225,9 @@ public final class ActiveServices {
     private static final boolean DEBUG_DELAYED_SERVICE = DEBUG_SERVICE;
     private static final boolean DEBUG_DELAYED_STARTS = DEBUG_DELAYED_SERVICE;
 
-    private static final boolean LOG_SERVICE_START_STOP = false;
+    private static final boolean DEBUG_SHORT_SERVICE = DEBUG_SERVICE;
+
+    private static final boolean LOG_SERVICE_START_STOP = DEBUG_SERVICE;
 
     // How long we wait for a service to finish executing.
     static final int SERVICE_TIMEOUT = 20 * 1000 * Build.HW_TIMEOUT_MULTIPLIER;
@@ -729,6 +731,12 @@ public final class ActiveServices {
                     ? res.permission : "private to package");
         }
 
+
+        // TODO(short-service): This is inside startService() / startForegroundService().
+        // Consider if there's anything special we have to do if these are called on an already-
+        // running short-FGS... But given these APIs shouldn't change the FGS type, we likely
+        // don't need to do anything. (If they would change the FGS type, we'd have to stop
+        // the timeout)
         ServiceRecord r = res.record;
         setFgsRestrictionLocked(callingPackage, callingPid, callingUid, service, r, userId,
                 allowBackgroundActivityStarts, false /* isBindService */);
@@ -1291,7 +1299,8 @@ public final class ActiveServices {
             }
             service.callStart = false;
 
-            bringDownServiceIfNeededLocked(service, false, false, enqueueOomAdj);
+            bringDownServiceIfNeededLocked(service, false, false, enqueueOomAdj,
+                    "stopService");
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
         }
@@ -1473,7 +1482,7 @@ public final class ActiveServices {
             }
             r.callStart = false;
             final long origId = Binder.clearCallingIdentity();
-            bringDownServiceIfNeededLocked(r, false, false, false);
+            bringDownServiceIfNeededLocked(r, false, false, false, "stopServiceToken");
             Binder.restoreCallingIdentity(origId);
             return true;
         }
@@ -1801,15 +1810,23 @@ public final class ActiveServices {
                             r.app.getPid(), r.appInfo.uid, "startForeground");
                 }
 
+                // TODO(short-service): This part really should be above the if block,
+                // so we'll apply the same check for instant apps too.
                 int manifestType = r.serviceInfo.getForegroundServiceType();
                 // If passed in foreground service type is FOREGROUND_SERVICE_TYPE_MANIFEST,
                 // consider it is the same as manifest foreground service type.
                 if (foregroundServiceType == FOREGROUND_SERVICE_TYPE_MANIFEST) {
                     foregroundServiceType = manifestType;
                 }
+
                 // Check the passed in foreground service type flags is a subset of manifest
                 // foreground service type flags.
-                if ((foregroundServiceType & manifestType) != foregroundServiceType) {
+                final String prop = "debug.skip_fgs_manifest_type_check";
+                if (((foregroundServiceType & manifestType) != foregroundServiceType)
+                        // When building a test app on Studio, the SDK may not have all the
+                        // FGS types yet. This debug flag will allow using FGS types that are
+                        // not set in the manifest.
+                        && !SystemProperties.getBoolean(prop, false)) {
                     throw new IllegalArgumentException("foregroundServiceType "
                         + String.format("0x%08X", foregroundServiceType)
                         + " is not a subset of foregroundServiceType attribute "
@@ -1866,6 +1883,16 @@ public final class ActiveServices {
 
                 int fgsTypeCheckCode = FGS_TYPE_POLICY_CHECK_UNKNOWN;
                 if (!ignoreForeground) {
+                    // TODO(short-service): There's a known long-standing bug that allows
+                    // a abound service to become "foreground" if setForeground() is called
+                    // (without actually "starting" it).
+                    // Unfortunately we can't just "fix" it because some apps are relying on it,
+                    // but this will cause a problem to short-fgs, so we should disallow it if
+                    // this happens and the type is SHORT_SERVICE.
+                    //
+                    // OTOH, if a valid short-service (which has to be "started"), happens to
+                    // also be bound, then we still _will_ apply a timeout, because it still has
+                    // to be stopped.
                     if (r.mStartForegroundCount == 0) {
                         /*
                         If the service was started with startService(), not
@@ -1898,6 +1925,28 @@ public final class ActiveServices {
                             }
                         }
                     } else if (r.mStartForegroundCount >= 1) {
+                        // We get here if startForeground() is called multiple times
+                        // on the same sarvice after it's created, regardless of whether
+                        // stopForeground() has been called or not.
+
+                        // TODO(short-service): Consider transitions:
+                        //   A. Short -> other types:
+                        //     Apply the BG restriction again. Don't just allow it.
+                        //     i.e. unless the app is in a situation where it's allowed to start
+                        //     a FGS, this transition shouldn't be allowed.
+                        //     ... But think about it more, there may be a case this should be
+                        //     allowed.
+                        //
+                        //     If the transition is allowed, stop the timeout.
+                        //     If the transition is _not_ allowed... keep the timeout?
+                        //
+                        //   B. Short -> Short:
+                        //     This should be the same as case A
+                        //     If this is allowed, the new timeout should start.
+                        //   C. Other -> short:
+                        //     This should always be allowed.
+                        //     A timeout should start.
+
                         // The second or later time startForeground() is called after service is
                         // started. Check for app state again.
                         setFgsRestrictionLocked(r.serviceInfo.packageName, r.app.getPid(),
@@ -1977,6 +2026,10 @@ public final class ActiveServices {
                         cancelForegroundNotificationLocked(r);
                         r.foregroundId = id;
                     }
+
+                    // TODO(short-service): Stop the short service timeout, if the type is changing
+                    // from short to non-short. (should we do it earlier?)
+
                     notification.flags |= Notification.FLAG_FOREGROUND_SERVICE;
                     r.foregroundNoti = notification;
                     r.foregroundServiceType = foregroundServiceType;
@@ -2048,6 +2101,9 @@ public final class ActiveServices {
                     getServiceMapLocked(r.userId).ensureNotStartingBackgroundLocked(r);
                     mAm.notifyPackageUse(r.serviceInfo.packageName,
                             PackageManager.NOTIFY_PACKAGE_USE_FOREGROUND_SERVICE);
+
+                    // TODO(short-service): Start counting a timeout.
+
                 } else {
                     if (DEBUG_FOREGROUND_SERVICE) {
                         Slog.d(TAG, "Suppressing startForeground() for FAS " + r);
@@ -2080,6 +2136,8 @@ public final class ActiveServices {
                 if (smap != null) {
                     decActiveForegroundAppLocked(smap, r);
                 }
+
+                // TODO(short-service): Stop the timeout. (any better place to do it?)
 
                 // Adjust notification handling before setting isForeground to false, because
                 // that state is relevant to the notification policy side.
@@ -2121,6 +2179,10 @@ public final class ActiveServices {
                                 ? (int) (r.mFgsExitTime - r.mFgsEnterTime) : 0,
                         FGS_STOP_REASON_STOP_FOREGROUND,
                         FGS_TYPE_POLICY_CHECK_UNKNOWN);
+
+                // foregroundServiceType is used in logFGSStateChangeLocked(), so we can't clear it
+                // earlier.
+                r.foregroundServiceType = 0;
                 r.mFgsNotificationWasDeferred = false;
                 signalForegroundServiceObserversLocked(r);
                 resetFgsRestrictionLocked(r);
@@ -2408,7 +2470,9 @@ public final class ActiveServices {
         final int uid = r.appInfo.uid;
 
         // schedule the actual notification post
-        long when = now + mAm.mConstants.mFgsNotificationDeferralInterval;
+        long when = now
+                + (r.isShortFgs() ? mAm.mConstants.mFgsNotificationDeferralIntervalForShort
+                : mAm.mConstants.mFgsNotificationDeferralInterval);
         // If there are already deferred FGS notifications for this app,
         // inherit that deferred-show timestamp
         for (int i = 0; i < mPendingFgsNotifications.size(); i++) {
@@ -2427,7 +2491,9 @@ public final class ActiveServices {
         }
 
         if (mFgsDeferralRateLimited) {
-            final long nextEligible = when + mAm.mConstants.mFgsNotificationDeferralExclusionTime;
+            final long nextEligible = when
+                    + (r.isShortFgs() ? mAm.mConstants.mFgsNotificationDeferralExclusionTimeForShort
+                    : mAm.mConstants.mFgsNotificationDeferralExclusionTime);
             mFgsDeferralEligible.put(uid, nextEligible);
         }
         r.fgDisplayTime = when;
@@ -2791,14 +2857,19 @@ public final class ActiveServices {
     private void updateServiceForegroundLocked(ProcessServiceRecord psr, boolean oomAdj) {
         boolean anyForeground = false;
         int fgServiceTypes = 0;
+        boolean hasTypeNone = false;
         for (int i = psr.numberOfRunningServices() - 1; i >= 0; i--) {
             ServiceRecord sr = psr.getRunningServiceAt(i);
             if (sr.isForeground || sr.fgRequired) {
                 anyForeground = true;
                 fgServiceTypes |= sr.foregroundServiceType;
+                if (sr.foregroundServiceType == ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE) {
+                    hasTypeNone = true;
+                }
             }
         }
-        mAm.updateProcessForegroundLocked(psr.mApp, anyForeground, fgServiceTypes, oomAdj);
+        mAm.updateProcessForegroundLocked(psr.mApp, anyForeground,
+                fgServiceTypes, hasTypeNone, oomAdj);
         psr.setHasReportedForegroundServices(anyForeground);
     }
 
@@ -4773,10 +4844,18 @@ public final class ActiveServices {
         return false;
     }
 
-    private final void bringDownServiceIfNeededLocked(ServiceRecord r, boolean knowConn,
-            boolean hasConn, boolean enqueueOomAdj) {
-        //Slog.i(TAG, "Bring down service:");
-        //r.dump("  ");
+    private void bringDownServiceIfNeededLocked(ServiceRecord r, boolean knowConn,
+            boolean hasConn, boolean enqueueOomAdj, String debugReason) {
+        if (DEBUG_SERVICE) {
+            Slog.i(TAG, "Bring down service for " + debugReason + " :" + r.toString());
+        }
+
+        // TODO(short-service): Hmm, when the app stops a short-fgs, we should stop the timeout
+        // here.
+        // However we have a couple if's here and if these conditions are met, we stop here
+        // without bringing down the service.
+        // We need to make sure this can't be used (somehow) to keep having a short-FGS running
+        // while having the timeout stopped.
 
         if (isServiceNeededLocked(r, knowConn, hasConn)) {
             return;
@@ -4844,6 +4923,8 @@ public final class ActiveServices {
 
         // Check to see if the service had been started as foreground, but being
         // brought down before actually showing a notification.  That is not allowed.
+        // TODO(short-service): This is unlikely related to short-FGS, but I'm curious why it's
+        // not allowed. Look into it.
         if (r.fgRequired) {
             Slog.w(TAG_SERVICE, "Bringing down service while still waiting for start foreground: "
                     + r);
@@ -4934,6 +5015,8 @@ public final class ActiveServices {
                     FGS_STOP_REASON_STOP_SERVICE,
                     FGS_TYPE_POLICY_CHECK_UNKNOWN);
             mAm.updateForegroundServiceUsageStats(r.name, r.userId, false);
+
+            // TODO(short-service): Make sure we stop the timeout by here.
         }
 
         r.isForeground = false;
@@ -5161,7 +5244,8 @@ public final class ActiveServices {
                         }
                     }
                 }
-                bringDownServiceIfNeededLocked(s, true, hasAutoCreate, enqueueOomAdj);
+                bringDownServiceIfNeededLocked(s, true, hasAutoCreate, enqueueOomAdj,
+                        "removeConnection");
             }
         }
     }
@@ -6988,7 +7072,7 @@ public final class ActiveServices {
             final Integer allowedType = mAm.mProcessList.searchEachLruProcessesLOSP(false, app -> {
                 if (app.uid == callingUid) {
                     final ProcessStateRecord state = app.mState;
-                    if (state.isAllowedStartFgs()) {
+                    if (state.isAllowedStartFgs()) { // Procstate <= BFGS?
                         return getReasonCodeFromProcState(state.getCurProcState());
                     } else {
                         final ActiveInstrumentation instr = app.getActiveInstrumentation();
