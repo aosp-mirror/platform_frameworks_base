@@ -299,7 +299,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
     private boolean mAppliedAutoBrightness;
     private boolean mAppliedDimming;
     private boolean mAppliedLowPower;
-    private boolean mAppliedTemporaryBrightness;
     private boolean mAppliedTemporaryAutoBrightnessAdjustment;
     private boolean mAppliedBrightnessBoost;
     private boolean mAppliedThrottling;
@@ -394,11 +393,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
     // The last observed screen brightness setting, either set by us or by the settings app on
     // behalf of the user.
     private float mCurrentScreenBrightnessSetting;
-
-    // The temporary screen brightness. Typically set when a user is interacting with the
-    // brightness slider but hasn't settled on a choice yet. Set to
-    // PowerManager.BRIGHTNESS_INVALID_FLOAT when there's no temporary brightness set.
-    private float mTemporaryScreenBrightness;
 
     // The current screen brightness while in VR mode.
     private float mScreenBrightnessForVr;
@@ -566,7 +560,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         mCurrentScreenBrightnessSetting = getScreenBrightnessSetting();
         mScreenBrightnessForVr = getScreenBrightnessForVrSetting();
         mAutoBrightnessAdjustment = getAutoBrightnessAdjustmentSetting();
-        mTemporaryScreenBrightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
         mPendingScreenBrightnessSetting = PowerManager.BRIGHTNESS_INVALID_FLOAT;
         mTemporaryAutoBrightnessAdjustment = PowerManager.BRIGHTNESS_INVALID_FLOAT;
         mPendingAutoBrightnessAdjustment = PowerManager.BRIGHTNESS_INVALID_FLOAT;
@@ -1218,16 +1211,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
 
         final boolean userSetBrightnessChanged = updateUserSetScreenBrightness();
 
-        // Use the temporary screen brightness if there isn't an override, either from
-        // WindowManager or based on the display state.
-        if (isValidBrightnessValue(mTemporaryScreenBrightness)) {
-            brightnessState = mTemporaryScreenBrightness;
-            mAppliedTemporaryBrightness = true;
-            mBrightnessReasonTemp.setReason(BrightnessReason.REASON_TEMPORARY);
-        } else {
-            mAppliedTemporaryBrightness = false;
-        }
-
         final boolean autoBrightnessAdjustmentChanged = updateAutoBrightnessAdjustment();
 
         // Use the autobrightness adjustment override if set.
@@ -1414,7 +1397,8 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         // Skip the animation when the screen is off or suspended or transition to/from VR.
         boolean brightnessAdjusted = false;
         final boolean brightnessIsTemporary =
-                mAppliedTemporaryBrightness || mAppliedTemporaryAutoBrightnessAdjustment;
+                (mBrightnessReason.getReason() == BrightnessReason.REASON_TEMPORARY)
+                        || mAppliedTemporaryAutoBrightnessAdjustment;
         if (!mPendingScreenOff) {
             if (mSkipScreenOnBrightnessRamp) {
                 if (state == Display.STATE_ON) {
@@ -2202,13 +2186,15 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         }
         if (mCurrentScreenBrightnessSetting == mPendingScreenBrightnessSetting) {
             mPendingScreenBrightnessSetting = PowerManager.BRIGHTNESS_INVALID_FLOAT;
-            mTemporaryScreenBrightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
+            mDisplayBrightnessController
+                    .setTemporaryBrightness(PowerManager.BRIGHTNESS_INVALID_FLOAT);
             return false;
         }
         setCurrentScreenBrightness(mPendingScreenBrightnessSetting);
         mLastUserSetScreenBrightness = mPendingScreenBrightnessSetting;
         mPendingScreenBrightnessSetting = PowerManager.BRIGHTNESS_INVALID_FLOAT;
-        mTemporaryScreenBrightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
+        mDisplayBrightnessController
+                .setTemporaryBrightness(PowerManager.BRIGHTNESS_INVALID_FLOAT);
         return true;
     }
 
@@ -2291,7 +2277,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         pw.println("  mLastUserSetScreenBrightness=" + mLastUserSetScreenBrightness);
         pw.println("  mPendingScreenBrightnessSetting="
                 + mPendingScreenBrightnessSetting);
-        pw.println("  mTemporaryScreenBrightness=" + mTemporaryScreenBrightness);
         pw.println("  mAutoBrightnessAdjustment=" + mAutoBrightnessAdjustment);
         pw.println("  mBrightnessReason=" + mBrightnessReason);
         pw.println("  mTemporaryAutoBrightnessAdjustment=" + mTemporaryAutoBrightnessAdjustment);
@@ -2301,7 +2286,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         pw.println("  mAppliedDimming=" + mAppliedDimming);
         pw.println("  mAppliedLowPower=" + mAppliedLowPower);
         pw.println("  mAppliedThrottling=" + mAppliedThrottling);
-        pw.println("  mAppliedTemporaryBrightness=" + mAppliedTemporaryBrightness);
         pw.println("  mAppliedTemporaryAutoBrightnessAdjustment="
                 + mAppliedTemporaryAutoBrightnessAdjustment);
         pw.println("  mAppliedBrightnessBoost=" + mAppliedBrightnessBoost);
@@ -2541,7 +2525,8 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
 
                 case MSG_SET_TEMPORARY_BRIGHTNESS:
                     // TODO: Should we have a a timeout for the temporary brightness?
-                    mTemporaryScreenBrightness = Float.intBitsToFloat(msg.arg1);
+                    mDisplayBrightnessController
+                            .setTemporaryBrightness(Float.intBitsToFloat(msg.arg1));
                     updatePowerState();
                     break;
 

@@ -28,7 +28,7 @@ public final class BrightnessUtils {
      * Checks whether the brightness is within the valid brightness range, not including off.
      */
     public static boolean isValidBrightnessValue(float brightness) {
-        return brightness >= PowerManager.BRIGHTNESS_MIN
+        return !Float.isNaN(brightness) && brightness >= PowerManager.BRIGHTNESS_MIN
                 && brightness <= PowerManager.BRIGHTNESS_MAX;
     }
 
