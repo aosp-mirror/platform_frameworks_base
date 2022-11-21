@@ -825,12 +825,23 @@ public class ScreenshotView extends FrameLayout implements
             }
         });
         if (mQuickShareChip != null) {
-            mQuickShareChip.setPendingIntent(imageData.quickShareAction.actionIntent,
-                    () -> {
-                        mUiEventLogger.log(
-                                ScreenshotEvent.SCREENSHOT_SMART_ACTION_TAPPED, 0, mPackageName);
-                        animateDismissal();
-                    });
+            if (imageData.quickShareAction != null) {
+                mQuickShareChip.setPendingIntent(imageData.quickShareAction.actionIntent,
+                        () -> {
+                            mUiEventLogger.log(
+                                    ScreenshotEvent.SCREENSHOT_SMART_ACTION_TAPPED, 0,
+                                    mPackageName);
+                            animateDismissal();
+                        });
+            } else {
+                // hide chip and unset pending interaction if necessary, since we don't actually
+                // have a useable quick share intent
+                Log.wtf(TAG, "Showed quick share chip, but quick share intent was null");
+                if (mPendingInteraction == PendingInteraction.QUICK_SHARE) {
+                    mPendingInteraction = null;
+                }
+                mQuickShareChip.setVisibility(GONE);
+            }
         }
 
         if (mPendingInteraction != null) {
