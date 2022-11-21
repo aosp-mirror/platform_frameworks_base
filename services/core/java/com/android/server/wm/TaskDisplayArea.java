@@ -27,7 +27,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
@@ -647,17 +646,6 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
                 }
                 return taskDisplayArea.getOrientation(candidate);
             }, SCREEN_ORIENTATION_UNSET);
-        }
-
-        // Apps and their containers are not allowed to specify an orientation of non floating
-        // visible tasks created by organizer and that has an adjacent task.
-        final Task nonFloatingTopTask =
-                getTask(t -> !t.getWindowConfiguration().tasksAreFloating());
-        if (nonFloatingTopTask != null) {
-            final Task task = nonFloatingTopTask.getCreatedByOrganizerTask();
-            if (task != null && task.getAdjacentTaskFragment() != null && task.isVisible()) {
-                return SCREEN_ORIENTATION_UNSPECIFIED;
-            }
         }
 
         final int orientation = super.getOrientation(candidate);
