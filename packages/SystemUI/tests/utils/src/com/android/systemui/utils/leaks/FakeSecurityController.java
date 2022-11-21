@@ -84,6 +84,11 @@ public class FakeSecurityController extends BaseLeakChecker<SecurityControllerCa
     }
 
     @Override
+    public boolean isFinancedDevice() {
+        return false;
+    }
+
+    @Override
     public boolean isNetworkLoggingEnabled() {
         return false;
     }
