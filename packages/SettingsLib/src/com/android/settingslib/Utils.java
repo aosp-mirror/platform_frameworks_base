@@ -376,27 +376,19 @@ public class Utils {
     /**
      * Determine whether a package is a "system package", in which case certain things (like
      * disabling notifications or disabling the package altogether) should be disallowed.
+     * <p>
+     * Note: This function is just for UI treatment, and should not be used for security purposes.
+     *
+     * @deprecated Use {@link ApplicationInfo#isSignedWithPlatformKey()} and
+     * {@link #isEssentialPackage} instead.
      */
+    @Deprecated
     public static boolean isSystemPackage(Resources resources, PackageManager pm, PackageInfo pkg) {
         if (sSystemSignature == null) {
             sSystemSignature = new Signature[]{getSystemSignature(pm)};
         }
-        if (sPermissionControllerPackageName == null) {
-            sPermissionControllerPackageName = pm.getPermissionControllerPackageName();
-        }
-        if (sServicesSystemSharedLibPackageName == null) {
-            sServicesSystemSharedLibPackageName = pm.getServicesSystemSharedLibraryPackageName();
-        }
-        if (sSharedSystemSharedLibPackageName == null) {
-            sSharedSystemSharedLibPackageName = pm.getSharedSystemSharedLibraryPackageName();
-        }
-        return (sSystemSignature[0] != null
-                && sSystemSignature[0].equals(getFirstSignature(pkg)))
-                || pkg.packageName.equals(sPermissionControllerPackageName)
-                || pkg.packageName.equals(sServicesSystemSharedLibPackageName)
-                || pkg.packageName.equals(sSharedSystemSharedLibPackageName)
-                || pkg.packageName.equals(PrintManager.PRINT_SPOOLER_PACKAGE_NAME)
-                || isDeviceProvisioningPackage(resources, pkg.packageName);
+        return (sSystemSignature[0] != null && sSystemSignature[0].equals(getFirstSignature(pkg)))
+                || isEssentialPackage(resources, pm, pkg.packageName);
     }
 
     private static Signature getFirstSignature(PackageInfo pkg) {
@@ -413,6 +405,29 @@ public class Utils {
         } catch (NameNotFoundException e) {
         }
         return null;
+    }
+
+    /**
+     * Determine whether a package is a "essential package".
+     * <p>
+     * In which case certain things (like disabling the package) should be disallowed.
+     */
+    public static boolean isEssentialPackage(
+            Resources resources, PackageManager pm, String packageName) {
+        if (sPermissionControllerPackageName == null) {
+            sPermissionControllerPackageName = pm.getPermissionControllerPackageName();
+        }
+        if (sServicesSystemSharedLibPackageName == null) {
+            sServicesSystemSharedLibPackageName = pm.getServicesSystemSharedLibraryPackageName();
+        }
+        if (sSharedSystemSharedLibPackageName == null) {
+            sSharedSystemSharedLibPackageName = pm.getSharedSystemSharedLibraryPackageName();
+        }
+        return packageName.equals(sPermissionControllerPackageName)
+                || packageName.equals(sServicesSystemSharedLibPackageName)
+                || packageName.equals(sSharedSystemSharedLibPackageName)
+                || packageName.equals(PrintManager.PRINT_SPOOLER_PACKAGE_NAME)
+                || isDeviceProvisioningPackage(resources, packageName);
     }
 
     /**
