@@ -16,11 +16,16 @@
 
 package com.android.server.pm;
 
+import static android.media.AudioAttributes.USAGE_VOICE_COMMUNICATION;
+import static android.media.AudioAttributes.USAGE_VOICE_COMMUNICATION_SIGNALLING;
+
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningAppProcessInfo;
 import android.content.Context;
+import android.media.AudioManager;
 import android.media.IAudioService;
 import android.os.ServiceManager;
+import android.telecom.TelecomManager;
 import android.text.TextUtils;
 import android.util.ArraySet;
 
@@ -72,6 +77,43 @@ public class AppStateHelper {
     }
 
     /**
+     * True if any app is using voice communication.
+     */
+    private boolean hasVoiceCall() {
+        var am = mContext.getSystemService(AudioManager.class);
+        try {
+            for (var apc : am.getActivePlaybackConfigurations()) {
+                if (!apc.isActive()) {
+                    continue;
+                }
+                var usage = apc.getAudioAttributes().getUsage();
+                if (usage == USAGE_VOICE_COMMUNICATION
+                        || usage == USAGE_VOICE_COMMUNICATION_SIGNALLING) {
+                    return true;
+                }
+            }
+        } catch (Exception ignore) {
+        }
+        return false;
+    }
+
+    /**
+     * True if the app is recording audio.
+     */
+    private boolean isRecordingAudio(String packageName) {
+        var am = mContext.getSystemService(AudioManager.class);
+        try {
+            for (var arc : am.getActiveRecordingConfigurations()) {
+                if (TextUtils.equals(arc.getClientPackageName(), packageName)) {
+                    return true;
+                }
+            }
+        } catch (Exception ignore) {
+        }
+        return false;
+    }
+
+    /**
      * True if the app is in the foreground.
      */
     private boolean isAppForeground(String packageName) {
@@ -89,8 +131,7 @@ public class AppStateHelper {
      * True if the app is playing/recording audio.
      */
     private boolean hasActiveAudio(String packageName) {
-        // TODO(b/235306967): also check recording
-        return hasAudioFocus(packageName);
+        return hasAudioFocus(packageName) || isRecordingAudio(packageName);
     }
 
     /**
@@ -143,8 +184,10 @@ public class AppStateHelper {
      * True if there is an ongoing phone call.
      */
     public boolean isInCall() {
-        // To be implemented
-        return false;
+        // TelecomManager doesn't handle the case where some apps don't implement ConnectionService.
+        // We check apps using voice communication to detect if the device is in call.
+        var tm = mContext.getSystemService(TelecomManager.class);
+        return tm.isInCall() || hasVoiceCall();
     }
 
     /**
