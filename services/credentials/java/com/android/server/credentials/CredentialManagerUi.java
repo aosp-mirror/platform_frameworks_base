@@ -31,6 +31,7 @@ import android.util.Log;
 import android.util.Slog;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 /** Initiates the Credential Manager UI and receives results. */
 public class CredentialManagerUi {
@@ -89,7 +90,8 @@ public class CredentialManagerUi {
             RequestInfo requestInfo, ArrayList<ProviderData> providerDataList) {
         Log.i(TAG, "In createPendingIntent");
         Intent intent = IntentFactory.newIntent(requestInfo, providerDataList, new ArrayList<>(),
-                mResultReceiver).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                mResultReceiver)
+                .setAction(UUID.randomUUID().toString());
         //TODO: Determine if a specific request code is needed
         return PendingIntent.getActivity(
                 mContext, /*requestCode=*/0, intent, PendingIntent.FLAG_IMMUTABLE);
