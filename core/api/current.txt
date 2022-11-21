@@ -49563,6 +49563,7 @@ package android.view {
     method public float getY(int);
     method public float getYPrecision();
     method public boolean isButtonPressed(int);
+    method @Nullable public static android.view.MotionEvent obtain(long, long, int, int, @NonNull android.view.MotionEvent.PointerProperties[], @NonNull android.view.MotionEvent.PointerCoords[], int, int, float, float, int, int, int, int, int, int);
     method public static android.view.MotionEvent obtain(long, long, int, int, android.view.MotionEvent.PointerProperties[], android.view.MotionEvent.PointerCoords[], int, int, float, float, int, int, int, int);
     method @Deprecated public static android.view.MotionEvent obtain(long, long, int, int, int[], android.view.MotionEvent.PointerCoords[], int, float, float, int, int, int, int);
     method public static android.view.MotionEvent obtain(long, long, int, float, float, float, float, int, float, float, int, int);
