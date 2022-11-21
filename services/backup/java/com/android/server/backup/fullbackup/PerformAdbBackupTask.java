@@ -420,7 +420,8 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
                                 Long.MAX_VALUE,
                                 mCurrentOpToken,
                                 /*transportFlags=*/ 0,
-                                mBackupEligibilityRules);
+                                mBackupEligibilityRules,
+                                /* monitor= */ null);
                 sendOnBackupPackage(isSharedStorage ? "Shared storage" : pkg.packageName);
 
                 // Don't need to check preflight result as there is no preflight hook.
