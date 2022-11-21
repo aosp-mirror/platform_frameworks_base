@@ -344,26 +344,6 @@ class CombinedShadeHeaderConstraintsTest : SysuiTestCase() {
     }
 
     @Test
-    fun testCheckViewsDontChangeSizeBetweenAnimationConstraints() {
-        val views = mapOf(
-                R.id.clock to "clock",
-                R.id.date to "date",
-                R.id.statusIcons to "icons",
-                R.id.privacy_container to "privacy",
-                R.id.carrier_group to "carriers",
-                R.id.batteryRemainingIcon to "battery",
-        )
-        views.forEach { (id, name) ->
-            assertWithMessage("$name changes height")
-                    .that(qqsConstraint.getConstraint(id).layout.mHeight)
-                    .isEqualTo(qsConstraint.getConstraint(id).layout.mHeight)
-            assertWithMessage("$name changes width")
-                    .that(qqsConstraint.getConstraint(id).layout.mWidth)
-                    .isEqualTo(qsConstraint.getConstraint(id).layout.mWidth)
-        }
-    }
-
-    @Test
     fun testEmptyCutoutDateIconsAreConstrainedWidth() {
         CombinedShadeHeadersConstraintManagerImpl.emptyCutoutConstraints()()
 
