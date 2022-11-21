@@ -24,7 +24,10 @@ android_library {
     srcs: ["src/**/*.kt"],
 
     static_libs: [
-        "mockito-target-minus-junit4",
+        "androidx.compose.ui_ui-test-junit4",
+        "androidx.compose.ui_ui-test-manifest",
+        "mockito",
+        "truth-prebuilt",
     ],
     kotlincflags: [
         "-Xjvm-default=all",
