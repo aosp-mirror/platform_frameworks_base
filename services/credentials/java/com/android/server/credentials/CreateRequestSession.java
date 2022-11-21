@@ -72,9 +72,15 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
 
     @Override
     protected void launchUiWithProviderData(ArrayList<ProviderData> providerDataList) {
-        mHandler.post(() -> mCredentialManagerUi.show(RequestInfo.newCreateRequestInfo(
-                        mRequestId, mClientRequest, mIsFirstUiTurn, mClientCallingPackage),
-                providerDataList));
+        try {
+            mClientCallback.onPendingIntent(mCredentialManagerUi.createPendingIntent(
+                    RequestInfo.newCreateRequestInfo(
+                            mRequestId, mClientRequest, mIsFirstUiTurn, mClientCallingPackage),
+                    providerDataList));
+        } catch (RemoteException e) {
+            Log.i(TAG, "Issue with invoking pending intent: " + e.getMessage());
+            // TODO: Propagate failure
+        }
     }
 
     private void respondToClientAndFinish(CreateCredentialResponse response) {
