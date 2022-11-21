@@ -94,7 +94,6 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArrayMap;
-import android.util.ArraySet;
 import android.util.SparseArray;
 
 import com.android.server.LocalServices;
@@ -1652,6 +1651,46 @@ public class MockingOomAdjusterTests {
 
         sService.mOomAdjuster.updateOomAdjLocked(app2, OomAdjuster.OOM_ADJ_REASON_NONE);
         assertProcStates(app2, PROCESS_STATE_BOUND_TOP, VISIBLE_APP_ADJ,
+                SCHED_GROUP_DEFAULT);
+    }
+
+    @SuppressWarnings("GuardedBy")
+    @Test
+    public void testUpdateOomAdj_DoOne_BindNotPerceptibleFGS() {
+        final ProcessRecord app1 = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
+                MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, false));
+        final ProcessRecord client1 = spy(makeDefaultProcessRecord(MOCKAPP3_PID, MOCKAPP3_UID,
+                MOCKAPP3_PROCESSNAME, MOCKAPP3_PACKAGENAME, false));
+        client1.mState.setMaxAdj(PERSISTENT_PROC_ADJ);
+
+        app1.mServices.setHasForegroundServices(true, 0);
+        sService.mWakefulness.set(PowerManagerInternal.WAKEFULNESS_AWAKE);
+
+        bindService(app1, client1, null, Context.BIND_NOT_PERCEPTIBLE, mock(IBinder.class));
+
+        sService.mOomAdjuster.updateOomAdjLocked(app1, OomAdjuster.OOM_ADJ_REASON_NONE);
+
+        assertProcStates(app1, PROCESS_STATE_FOREGROUND_SERVICE, PERCEPTIBLE_APP_ADJ,
+                SCHED_GROUP_DEFAULT);
+    }
+
+    @SuppressWarnings("GuardedBy")
+    @Test
+    public void testUpdateOomAdj_DoOne_BindAlmostPerceptibleFGS() {
+        final ProcessRecord app1 = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
+                MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, false));
+        final ProcessRecord client1 = spy(makeDefaultProcessRecord(MOCKAPP3_PID, MOCKAPP3_UID,
+                MOCKAPP3_PROCESSNAME, MOCKAPP3_PACKAGENAME, false));
+        client1.mState.setMaxAdj(PERSISTENT_PROC_ADJ);
+
+        app1.mServices.setHasForegroundServices(true, 0);
+        sService.mWakefulness.set(PowerManagerInternal.WAKEFULNESS_AWAKE);
+
+        bindService(app1, client1, null, Context.BIND_ALMOST_PERCEPTIBLE, mock(IBinder.class));
+
+        sService.mOomAdjuster.updateOomAdjLocked(app1, OomAdjuster.OOM_ADJ_REASON_NONE);
+
+        assertProcStates(app1, PROCESS_STATE_FOREGROUND_SERVICE, PERCEPTIBLE_APP_ADJ,
                 SCHED_GROUP_DEFAULT);
     }
 
