@@ -205,8 +205,14 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
         }
     }
 
-    private synchronized void handleConfigurationInternalChangeOnMainThread() {
-        for (StateChangeListener changeListener : mConfigurationInternalListeners) {
+    private void handleConfigurationInternalChangeOnMainThread() {
+        // Copy the listeners holding the "this" lock but don't hold the lock while delivering the
+        // notifications to avoid deadlocks.
+        List<StateChangeListener> configurationInternalListeners;
+        synchronized (this) {
+            configurationInternalListeners = new ArrayList<>(this.mConfigurationInternalListeners);
+        }
+        for (StateChangeListener changeListener : configurationInternalListeners) {
             changeListener.onChange();
         }
     }
