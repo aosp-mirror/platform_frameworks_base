@@ -31,6 +31,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpHandler;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.media.controls.pipeline.MediaDataManager;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -61,7 +62,6 @@ import com.android.systemui.statusbar.phone.ManagedProfileControllerImpl;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarIconControllerImpl;
 import com.android.systemui.statusbar.phone.StatusBarIconList;
-import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.StatusBarRemoteInputCallback;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallFlags;
@@ -280,7 +280,7 @@ public interface CentralSurfacesDependenciesModule {
     @SysUISingleton
     static DialogLaunchAnimator provideDialogLaunchAnimator(IDreamManager dreamManager,
             KeyguardStateController keyguardStateController,
-            Lazy<StatusBarKeyguardViewManager> statusBarKeyguardViewManager,
+            Lazy<AlternateBouncerInteractor> alternateBouncerInteractor,
             InteractionJankMonitor interactionJankMonitor) {
         DialogLaunchAnimator.Callback callback = new DialogLaunchAnimator.Callback() {
             @Override
@@ -300,7 +300,7 @@ public interface CentralSurfacesDependenciesModule {
 
             @Override
             public boolean isShowingAlternateAuthOnUnlock() {
-                return statusBarKeyguardViewManager.get().canShowAlternateBouncer();
+                return alternateBouncerInteractor.get().canShowAlternateBouncerForFingerprint();
             }
         };
         return new DialogLaunchAnimator(callback, interactionJankMonitor);
