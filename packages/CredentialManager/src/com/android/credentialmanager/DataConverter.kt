@@ -100,7 +100,7 @@ class GetFlowUtils {
           userName = credentialEntryUi.userName.toString(),
           displayName = credentialEntryUi.userDisplayName?.toString(),
           // TODO: proper fallback
-          icon = credentialEntryUi.entryIcon.loadDrawable(context)
+          icon = credentialEntryUi.entryIcon?.loadDrawable(context)
             ?: context.getDrawable(R.drawable.ic_passkey)!!,
           lastUsedTimeMillis = credentialEntryUi.lastUsedTimeMillis,
         )

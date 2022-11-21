@@ -30,7 +30,7 @@ class CredentialEntryUi(
   val credentialTypeDisplayName: CharSequence,
   val userName: CharSequence,
   val userDisplayName: CharSequence?,
-  val entryIcon: Icon,
+  val entryIcon: Icon?,
   val lastUsedTimeMillis: Long?,
   val note: CharSequence?,
 ) {
@@ -62,7 +62,7 @@ class CredentialEntryUi(
       }
 
       return CredentialEntryUi(
-        credentialType, credentialTypeDisplayName!!, userName!!, userDisplayName, entryIcon!!,
+        credentialType, credentialTypeDisplayName!!, userName!!, userDisplayName, entryIcon,
         lastUsedTimeMillis, note,
       )
     }
