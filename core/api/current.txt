@@ -5612,6 +5612,7 @@ package android.app {
     method public int getGameMode();
     method public void setGameState(@NonNull android.app.GameState);
     field public static final int GAME_MODE_BATTERY = 3; // 0x3
+    field public static final int GAME_MODE_CUSTOM = 4; // 0x4
     field public static final int GAME_MODE_PERFORMANCE = 2; // 0x2
     field public static final int GAME_MODE_STANDARD = 1; // 0x1
     field public static final int GAME_MODE_UNSUPPORTED = 0; // 0x0
