@@ -18,10 +18,12 @@
 package com.android.systemui.keyguard.data.quickaffordance
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.service.quickaccesswallet.GetWalletCardsError
 import android.service.quickaccesswallet.GetWalletCardsResponse
 import android.service.quickaccesswallet.QuickAccessWalletClient
+import android.service.quickaccesswallet.WalletCard
 import android.util.Log
 import com.android.systemui.R
 import com.android.systemui.animation.Expandable
@@ -31,25 +33,27 @@ import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceConfig.Companion.componentName
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.wallet.controller.QuickAccessWalletController
 import javax.inject.Inject
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.suspendCancellableCoroutine
 
 /** Quick access wallet quick affordance data source. */
 @SysUISingleton
 class QuickAccessWalletKeyguardQuickAffordanceConfig
 @Inject
 constructor(
-    @Application context: Context,
+    @Application private val context: Context,
     private val walletController: QuickAccessWalletController,
     private val activityStarter: ActivityStarter,
 ) : KeyguardQuickAffordanceConfig {
 
     override val key: String = BuiltInKeyguardQuickAffordanceKeys.QUICK_ACCESS_WALLET
 
-    override val pickerName = context.getString(R.string.accessibility_wallet_button)
+    override val pickerName: String = context.getString(R.string.accessibility_wallet_button)
 
     override val pickerIconResourceId = R.drawable.ic_wallet_lockscreen
 
@@ -58,10 +62,11 @@ constructor(
             val callback =
                 object : QuickAccessWalletClient.OnWalletCardsRetrievedCallback {
                     override fun onWalletCardsRetrieved(response: GetWalletCardsResponse?) {
+                        val hasCards = response?.walletCards?.isNotEmpty() == true
                         trySendWithFailureLogging(
                             state(
                                 isFeatureEnabled = walletController.isWalletEnabled,
-                                hasCard = response?.walletCards?.isNotEmpty() == true,
+                                hasCard = hasCards,
                                 tileIcon = walletController.walletClient.tileIcon,
                             ),
                             TAG,
@@ -93,6 +98,44 @@ constructor(
             }
         }
 
+    override suspend fun getPickerScreenState(): KeyguardQuickAffordanceConfig.PickerScreenState {
+        return when {
+            !walletController.isWalletEnabled ->
+                KeyguardQuickAffordanceConfig.PickerScreenState.UnavailableOnDevice
+            walletController.walletClient.tileIcon == null || queryCards().isEmpty() -> {
+                val componentName =
+                    walletController.walletClient.createWalletSettingsIntent().toComponentName()
+                val actionText =
+                    if (componentName != null) {
+                        context.getString(
+                            R.string.keyguard_affordance_enablement_dialog_action_template,
+                            pickerName,
+                        )
+                    } else {
+                        null
+                    }
+                KeyguardQuickAffordanceConfig.PickerScreenState.Disabled(
+                    instructions =
+                        listOf(
+                            context.getString(
+                                R.string.keyguard_affordance_enablement_dialog_message,
+                                pickerName,
+                            ),
+                            context.getString(
+                                R.string.keyguard_affordance_enablement_dialog_wallet_instruction_1
+                            ),
+                            context.getString(
+                                R.string.keyguard_affordance_enablement_dialog_wallet_instruction_2
+                            ),
+                        ),
+                    actionText = actionText,
+                    actionComponentName = componentName,
+                )
+            }
+            else -> KeyguardQuickAffordanceConfig.PickerScreenState.Default
+        }
+    }
+
     override fun onTriggered(
         expandable: Expandable?,
     ): KeyguardQuickAffordanceConfig.OnTriggeredResult {
@@ -102,6 +145,24 @@ constructor(
             /* hasCard= */ true,
         )
         return KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled
+    }
+
+    private suspend fun queryCards(): List<WalletCard> {
+        return suspendCancellableCoroutine { continuation ->
+            val callback =
+                object : QuickAccessWalletClient.OnWalletCardsRetrievedCallback {
+                    override fun onWalletCardsRetrieved(response: GetWalletCardsResponse?) {
+                        continuation.resumeWith(
+                            Result.success(response?.walletCards ?: emptyList())
+                        )
+                    }
+
+                    override fun onWalletCardRetrievalError(error: GetWalletCardsError?) {
+                        continuation.resumeWith(Result.success(emptyList()))
+                    }
+                }
+            walletController.queryWalletCards(callback)
+        }
     }
 
     private fun state(
@@ -123,6 +184,14 @@ constructor(
         } else {
             KeyguardQuickAffordanceConfig.LockScreenState.Hidden
         }
+    }
+
+    private fun Intent?.toComponentName(): String? {
+        if (this == null) {
+            return null
+        }
+
+        return componentName(packageName = `package`, action = action)
     }
 
     companion object {

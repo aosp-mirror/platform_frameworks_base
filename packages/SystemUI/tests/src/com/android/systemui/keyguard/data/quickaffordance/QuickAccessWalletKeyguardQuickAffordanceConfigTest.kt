@@ -33,9 +33,11 @@ import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.wallet.controller.QuickAccessWalletController
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -44,6 +46,7 @@ import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(JUnit4::class)
 class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
@@ -59,7 +62,7 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
 
         underTest =
             QuickAccessWalletKeyguardQuickAffordanceConfig(
-                mock(),
+                context,
                 walletController,
                 activityStarter,
             )
@@ -149,6 +152,44 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
                 animationController,
                 /* hasCard= */ true,
             )
+    }
+
+    @Test
+    fun `getPickerScreenState - default`() = runTest {
+        setUpState()
+
+        assertThat(underTest.getPickerScreenState())
+            .isEqualTo(KeyguardQuickAffordanceConfig.PickerScreenState.Default)
+    }
+
+    @Test
+    fun `getPickerScreenState - unavailable`() = runTest {
+        setUpState(
+            isWalletEnabled = false,
+        )
+
+        assertThat(underTest.getPickerScreenState())
+            .isEqualTo(KeyguardQuickAffordanceConfig.PickerScreenState.UnavailableOnDevice)
+    }
+
+    @Test
+    fun `getPickerScreenState - disabled when there is no icon`() = runTest {
+        setUpState(
+            hasWalletIcon = false,
+        )
+
+        assertThat(underTest.getPickerScreenState())
+            .isInstanceOf(KeyguardQuickAffordanceConfig.PickerScreenState.Disabled::class.java)
+    }
+
+    @Test
+    fun `getPickerScreenState - disabled when there is no card`() = runTest {
+        setUpState(
+            hasSelectedCard = false,
+        )
+
+        assertThat(underTest.getPickerScreenState())
+            .isInstanceOf(KeyguardQuickAffordanceConfig.PickerScreenState.Disabled::class.java)
     }
 
     private fun setUpState(
