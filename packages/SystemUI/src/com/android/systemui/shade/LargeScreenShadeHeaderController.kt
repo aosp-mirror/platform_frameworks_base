@@ -43,7 +43,6 @@ import com.android.systemui.qs.carrier.QSCarrierGroup
 import com.android.systemui.qs.carrier.QSCarrierGroupController
 import com.android.systemui.shade.LargeScreenShadeHeaderController.Companion.HEADER_TRANSITION_ID
 import com.android.systemui.shade.LargeScreenShadeHeaderController.Companion.LARGE_SCREEN_HEADER_CONSTRAINT
-import com.android.systemui.shade.LargeScreenShadeHeaderController.Companion.LARGE_SCREEN_HEADER_TRANSITION_ID
 import com.android.systemui.shade.LargeScreenShadeHeaderController.Companion.QQS_HEADER_CONSTRAINT
 import com.android.systemui.shade.LargeScreenShadeHeaderController.Companion.QS_HEADER_CONSTRAINT
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
@@ -69,11 +68,9 @@ import javax.inject.Named
  * expansion of the headers in small screen portrait.
  *
  * [header] will be a [MotionLayout] if [Flags.COMBINED_QS_HEADERS] is enabled. In this case, the
- * [MotionLayout] has 2 transitions:
+ * [MotionLayout] has one transitions:
  * * [HEADER_TRANSITION_ID]: [QQS_HEADER_CONSTRAINT] <-> [QS_HEADER_CONSTRAINT] for portrait
  *   handheld device configuration.
- * * [LARGE_SCREEN_HEADER_TRANSITION_ID]: [LARGE_SCREEN_HEADER_CONSTRAINT] (to itself) for all
- *   other configurations
  */
 @CentralSurfacesScope
 class LargeScreenShadeHeaderController @Inject constructor(
@@ -99,8 +96,6 @@ class LargeScreenShadeHeaderController @Inject constructor(
         @VisibleForTesting
         internal val HEADER_TRANSITION_ID = R.id.header_transition
         @VisibleForTesting
-        internal val LARGE_SCREEN_HEADER_TRANSITION_ID = R.id.large_screen_header_transition
-        @VisibleForTesting
         internal val QQS_HEADER_CONSTRAINT = R.id.qqs_header_constraint
         @VisibleForTesting
         internal val QS_HEADER_CONSTRAINT = R.id.qs_header_constraint
@@ -113,10 +108,6 @@ class LargeScreenShadeHeaderController @Inject constructor(
             LARGE_SCREEN_HEADER_CONSTRAINT -> "Large Screen Header"
             else -> "Unknown state"
         }
-    }
-
-    init {
-        loadConstraints()
     }
 
     private val combinedHeaders = featureFlags.isEnabled(Flags.COMBINED_QS_HEADERS)
@@ -330,11 +321,11 @@ class LargeScreenShadeHeaderController @Inject constructor(
         if (header is MotionLayout) {
             // Use resources.getXml instead of passing the resource id due to bug b/205018300
             header.getConstraintSet(QQS_HEADER_CONSTRAINT)
-                .load(context, resources.getXml(R.xml.qqs_header))
+                    .load(context, resources.getXml(R.xml.qqs_header))
             header.getConstraintSet(QS_HEADER_CONSTRAINT)
-                .load(context, resources.getXml(R.xml.qs_header))
+                    .load(context, resources.getXml(R.xml.qs_header))
             header.getConstraintSet(LARGE_SCREEN_HEADER_CONSTRAINT)
-                .load(context, resources.getXml(R.xml.large_screen_shade_header))
+                    .load(context, resources.getXml(R.xml.large_screen_shade_header))
         }
     }
 
@@ -423,7 +414,6 @@ class LargeScreenShadeHeaderController @Inject constructor(
         }
         header as MotionLayout
         if (largeScreenActive) {
-            header.setTransition(LARGE_SCREEN_HEADER_TRANSITION_ID)
             header.getConstraintSet(LARGE_SCREEN_HEADER_CONSTRAINT).applyTo(header)
         } else {
             header.setTransition(HEADER_TRANSITION_ID)
