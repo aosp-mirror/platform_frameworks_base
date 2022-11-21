@@ -1821,25 +1821,28 @@ public class OomAdjuster {
             } else if (psr.hasForegroundServices()) {
                 // If we get here, hasNonShortForegroundServices() must be false.
 
-                // TODO(short-service): If all the short-fgs (there may be multiple) within the
-                // process is post proc-state-demote time, then we need to skip this part.
-                // ... Or, should we just ANR take care of timed-out short-FGS and shouldn't bother
-                // lowering the procstate / oom-adj...?? (likely not.)
+                // TODO(short-service): Proactively run OomAjudster when the grace period finish.
+                if (psr.areAllShortForegroundServicesProcstateTimedOut(now)) {
+                    // All the short-FGSes within this process are timed out. Don't promote to FGS.
+                    // TODO(short-service): Should we set some unique oom-adj to make it detectable,
+                    // in a long trace?
+                } else {
+                    // For short FGS.
+                    adjType = "fg-service-short";
+                    // We use MEDIUM_APP_ADJ + 1 so we can tell apart EJ
+                    // (which uses MEDIUM_APP_ADJ + 1)
+                    // from short-FGS.
+                    // (We use +1 and +2, not +0 and +1, to be consistent with the following
+                    // RECENT_FOREGROUND_APP_ADJ tweak)
+                    newAdj = PERCEPTIBLE_MEDIUM_APP_ADJ + 1;
 
-                // For short FGS.
-                adjType = "fg-service-short";
-                // We use MEDIUM_APP_ADJ + 1 so we can tell apart EJ (which uses MEDIUM_APP_ADJ + 1)
-                // from short-FGS.
-                // (We use +1 and +2, not +0 and +1, to be consistent with the following
-                // RECENT_FOREGROUND_APP_ADJ tweak)
-                newAdj = PERCEPTIBLE_MEDIUM_APP_ADJ + 1;
+                    // Short-FGS gets a below-BFGS procstate, so it can't start another FGS from it.
+                    newProcState = PROCESS_STATE_IMPORTANT_FOREGROUND;
 
-                // Short-FGS gets a below-BFGS procstate, so it can't start another FGS from it.
-                newProcState = PROCESS_STATE_IMPORTANT_FOREGROUND;
-
-                // Same as EJ, we explicitly grant network access to short FGS,
-                // even when battery saver or data saver is enabled.
-                capabilityFromFGS |= PROCESS_CAPABILITY_NETWORK;
+                    // Same as EJ, we explicitly grant network access to short FGS,
+                    // even when battery saver or data saver is enabled.
+                    capabilityFromFGS |= PROCESS_CAPABILITY_NETWORK;
+                }
             }
 
             if (adjType != null) {

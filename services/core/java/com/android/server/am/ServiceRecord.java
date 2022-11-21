@@ -690,6 +690,32 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         }
     }
 
+    /** Used only for tests */
+    private ServiceRecord(ActivityManagerService ams) {
+        this.ams = ams;
+        name = null;
+        instanceName = null;
+        shortInstanceName = null;
+        definingPackageName = null;
+        definingUid = 0;
+        intent = null;
+        serviceInfo = null;
+        userId = 0;
+        packageName = null;
+        processName = null;
+        permission = null;
+        exported = false;
+        restarter = null;
+        createRealTime = 0;
+        isSdkSandbox = false;
+        sdkSandboxClientAppUid = 0;
+        sdkSandboxClientAppPackage = null;
+    }
+
+    public static ServiceRecord newEmptyInstanceForTest(ActivityManagerService ams) {
+        return new ServiceRecord(ams);
+    }
+
     ServiceRecord(ActivityManagerService ams, ComponentName name,
             ComponentName instanceName, String definingPackageName, int definingUid,
             Intent.FilterComparison intent, ServiceInfo sInfo, boolean callerIsFg,
