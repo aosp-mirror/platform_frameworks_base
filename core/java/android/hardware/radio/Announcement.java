@@ -86,7 +86,7 @@ public final class Announcement implements Parcelable {
     public Announcement(@NonNull ProgramSelector selector, @Type int type,
             @NonNull Map<String, String> vendorInfo) {
         mSelector = Objects.requireNonNull(selector);
-        mType = Objects.requireNonNull(type);
+        mType = type;
         mVendorInfo = Objects.requireNonNull(vendorInfo);
     }
 
