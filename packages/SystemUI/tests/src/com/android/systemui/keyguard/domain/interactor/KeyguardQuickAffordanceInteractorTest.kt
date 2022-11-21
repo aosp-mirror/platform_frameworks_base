@@ -127,6 +127,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
                         selectionsManager = selectionManager,
                     ),
                 configs = setOf(homeControls, quickAccessWallet, qrCodeScanner),
+                dumpManager = mock(),
             )
         featureFlags =
             FakeFeatureFlags().apply {
