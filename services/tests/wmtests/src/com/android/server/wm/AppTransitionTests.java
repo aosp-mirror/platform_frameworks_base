@@ -228,8 +228,7 @@ public class AppTransitionTests extends WindowTestsBase {
 
     @Test
     public void testTaskFragmentOpeningTransition() {
-        final ActivityRecord activity = createHierarchyForTaskFragmentTest(
-                false /* createEmbeddedTask */);
+        final ActivityRecord activity = createHierarchyForTaskFragmentTest();
         activity.setVisible(false);
 
         mDisplayContent.prepareAppTransition(TRANSIT_OPEN);
@@ -243,8 +242,7 @@ public class AppTransitionTests extends WindowTestsBase {
 
     @Test
     public void testEmbeddedTaskOpeningTransition() {
-        final ActivityRecord activity = createHierarchyForTaskFragmentTest(
-                true /* createEmbeddedTask */);
+        final ActivityRecord activity = createHierarchyForTaskFragmentTest();
         activity.setVisible(false);
 
         mDisplayContent.prepareAppTransition(TRANSIT_OPEN);
@@ -258,8 +256,7 @@ public class AppTransitionTests extends WindowTestsBase {
 
     @Test
     public void testTaskFragmentClosingTransition() {
-        final ActivityRecord activity = createHierarchyForTaskFragmentTest(
-                false /* createEmbeddedTask */);
+        final ActivityRecord activity = createHierarchyForTaskFragmentTest();
         activity.setVisible(true);
 
         mDisplayContent.prepareAppTransition(TRANSIT_CLOSE);
@@ -273,8 +270,7 @@ public class AppTransitionTests extends WindowTestsBase {
 
     @Test
     public void testEmbeddedTaskClosingTransition() {
-        final ActivityRecord activity = createHierarchyForTaskFragmentTest(
-                true /* createEmbeddedTask */);
+        final ActivityRecord activity = createHierarchyForTaskFragmentTest();
         activity.setVisible(true);
 
         mDisplayContent.prepareAppTransition(TRANSIT_CLOSE);
@@ -292,19 +288,16 @@ public class AppTransitionTests extends WindowTestsBase {
      * {@link AppTransitionController#getAnimationTargets(ArraySet, ArraySet, boolean) the animation
      * target} to promote to Task or above.
      *
-     * @param createEmbeddedTask {@code true} to create embedded Task for verified TaskFragment
      * @return The Activity to be put in either opening or closing Activity
      */
-    private ActivityRecord createHierarchyForTaskFragmentTest(boolean createEmbeddedTask) {
+    private ActivityRecord createHierarchyForTaskFragmentTest() {
         final Task parentTask = createTask(mDisplayContent);
-        final TaskFragment bottomTaskFragment = createTaskFragmentWithParentTask(parentTask,
-                false /* createEmbeddedTask */);
+        final TaskFragment bottomTaskFragment = createTaskFragmentWithActivity(parentTask);
         final ActivityRecord bottomActivity = bottomTaskFragment.getTopMostActivity();
         bottomActivity.setOccludesParent(true);
         bottomActivity.setVisible(true);
 
-        final TaskFragment verifiedTaskFragment = createTaskFragmentWithParentTask(parentTask,
-                createEmbeddedTask);
+        final TaskFragment verifiedTaskFragment = createTaskFragmentWithActivity(parentTask);
         final ActivityRecord activity = verifiedTaskFragment.getTopMostActivity();
         activity.setOccludesParent(true);
 

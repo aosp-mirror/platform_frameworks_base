@@ -422,7 +422,7 @@ public class RootTaskTests extends WindowTestsBase {
         final ComponentName alias = new ComponentName(DEFAULT_COMPONENT_PACKAGE_NAME,
                 aliasActivity);
         final Task parentTask = new TaskBuilder(mSupervisor).build();
-        final Task task = new TaskBuilder(mSupervisor).setParentTaskFragment(parentTask).build();
+        final Task task = new TaskBuilder(mSupervisor).setParentTask(parentTask).build();
         task.origActivity = alias;
         task.realActivity = target;
         new ActivityBuilder(mAtm).setComponent(target).setTask(task).setTargetActivity(
