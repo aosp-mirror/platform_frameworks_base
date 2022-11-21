@@ -1101,10 +1101,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 new NotificationChannel("id", "name", IMPORTANCE_HIGH);
         mBinderService.updateNotificationChannelForPackage(PKG, mUid, updatedChannel);
 
-        // pretend only this following part is called by the app (system permissions are required to
-        // update the notification channel on behalf of the user above)
-        mService.isSystemUid = false;
-
         // Recreating with a lower importance leaves channel unchanged.
         final NotificationChannel dupeChannel =
                 new NotificationChannel("id", "name", NotificationManager.IMPORTANCE_LOW);
@@ -1127,46 +1123,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         final NotificationChannel createdChannel =
                 mBinderService.getNotificationChannel(PKG, mContext.getUserId(), PKG, "id");
         assertEquals(IMPORTANCE_DEFAULT, createdChannel.getImportance());
-    }
-
-    @Test
-    public void testCreateNotificationChannels_fromAppCannotSetFields() throws Exception {
-        // Confirm that when createNotificationChannels is called from the relevant app and not
-        // system, then it cannot set fields that can't be set by apps
-        mService.isSystemUid = false;
-
-        final NotificationChannel channel =
-                new NotificationChannel("id", "name", IMPORTANCE_DEFAULT);
-        channel.setBypassDnd(true);
-        channel.setAllowBubbles(true);
-
-        mBinderService.createNotificationChannels(PKG,
-                new ParceledListSlice(Arrays.asList(channel)));
-
-        final NotificationChannel createdChannel =
-                mBinderService.getNotificationChannel(PKG, mContext.getUserId(), PKG, "id");
-        assertFalse(createdChannel.canBypassDnd());
-        assertFalse(createdChannel.canBubble());
-    }
-
-    @Test
-    public void testCreateNotificationChannels_fromSystemCanSetFields() throws Exception {
-        // Confirm that when createNotificationChannels is called from system,
-        // then it can set fields that can't be set by apps
-        mService.isSystemUid = true;
-
-        final NotificationChannel channel =
-                new NotificationChannel("id", "name", IMPORTANCE_DEFAULT);
-        channel.setBypassDnd(true);
-        channel.setAllowBubbles(true);
-
-        mBinderService.createNotificationChannels(PKG,
-                new ParceledListSlice(Arrays.asList(channel)));
-
-        final NotificationChannel createdChannel =
-                mBinderService.getNotificationChannel(PKG, mContext.getUserId(), PKG, "id");
-        assertTrue(createdChannel.canBypassDnd());
-        assertTrue(createdChannel.canBubble());
     }
 
     @Test
@@ -3132,8 +3088,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testDeleteChannelGroupChecksForFgses() throws Exception {
-        // the setup for this test requires it to seem like it's coming from the app
-        mService.isSystemUid = false;
         when(mCompanionMgr.getAssociations(PKG, UserHandle.getUserId(mUid)))
                 .thenReturn(singletonList(mock(AssociationInfo.class)));
         CountDownLatch latch = new CountDownLatch(2);
@@ -3146,7 +3100,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
             ParceledListSlice<NotificationChannel> pls =
                     new ParceledListSlice(ImmutableList.of(notificationChannel));
             try {
-                mBinderService.createNotificationChannels(PKG, pls);
+                mBinderService.createNotificationChannelsForPackage(PKG, mUid, pls);
             } catch (RemoteException e) {
                 throw new RuntimeException(e);
             }
@@ -3165,10 +3119,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 ParceledListSlice<NotificationChannel> pls =
                         new ParceledListSlice(ImmutableList.of(notificationChannel));
                 try {
-                    // Because existing channels won't have their groups overwritten when the call
-                    // is from the app, this call won't take the channel out of the group
-                    mBinderService.createNotificationChannels(PKG, pls);
-                    mBinderService.deleteNotificationChannelGroup(PKG, "group");
+                mBinderService.createNotificationChannelsForPackage(PKG, mUid, pls);
+                mBinderService.deleteNotificationChannelGroup(PKG, "group");
                 } catch (RemoteException e) {
                     throw new RuntimeException(e);
                 }
@@ -8614,7 +8566,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertEquals("friend", friendChannel.getConversationId());
         assertEquals(null, original.getConversationId());
         assertEquals(original.canShowBadge(), friendChannel.canShowBadge());
-        assertEquals(original.canBubble(), friendChannel.canBubble()); // called by system
+        assertFalse(friendChannel.canBubble()); // can't be modified by app
         assertFalse(original.getId().equals(friendChannel.getId()));
         assertNotNull(friendChannel.getId());
     }
