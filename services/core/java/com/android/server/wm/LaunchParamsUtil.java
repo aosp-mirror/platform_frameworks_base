@@ -46,6 +46,8 @@ class LaunchParamsUtil {
 
     private static final int DISPLAY_EDGE_OFFSET_DP = 27;
 
+    private static final Rect TMP_STABLE_BOUNDS = new Rect();
+
     private LaunchParamsUtil() {}
 
     /**
@@ -130,18 +132,42 @@ class LaunchParamsUtil {
         return new Size(adjWidth, adjHeight);
     }
 
-    static void adjustBoundsToFitInDisplayArea(@NonNull Rect stableBounds, int layoutDirection,
+    static void adjustBoundsToFitInDisplayArea(@NonNull TaskDisplayArea displayArea,
+                                               int layoutDirection,
                                                @NonNull ActivityInfo.WindowLayout layout,
                                                @NonNull Rect inOutBounds) {
+        // Give a small margin between the window bounds and the display bounds.
+        final Rect stableBounds = TMP_STABLE_BOUNDS;
+        displayArea.getStableRect(stableBounds);
+        final float density = (float) displayArea.getConfiguration().densityDpi / DENSITY_DEFAULT;
+        final int displayEdgeOffset = (int) (DISPLAY_EDGE_OFFSET_DP * density + 0.5f);
+        stableBounds.inset(displayEdgeOffset, displayEdgeOffset);
+
         if (stableBounds.width() < inOutBounds.width()
                 || stableBounds.height() < inOutBounds.height()) {
-            // There is no way for us to fit the bounds in the displayArea without changing width
-            // or height. Just move the start to align with the displayArea.
-            final int left = layoutDirection == View.LAYOUT_DIRECTION_RTL
-                    ? stableBounds.right - inOutBounds.right + inOutBounds.left
-                    : stableBounds.left;
-            inOutBounds.offsetTo(left, stableBounds.top);
-            return;
+            final float heightShrinkRatio = stableBounds.width() / (float) inOutBounds.width();
+            final float widthShrinkRatio =
+                    stableBounds.height() / (float) inOutBounds.height();
+            final float shrinkRatio = Math.min(heightShrinkRatio, widthShrinkRatio);
+            // Minimum layout requirements.
+            final int layoutMinWidth = (layout == null) ? -1 : layout.minWidth;
+            final int layoutMinHeight = (layout == null) ? -1 : layout.minHeight;
+            int adjustedWidth = Math.max(layoutMinWidth, (int) (inOutBounds.width() * shrinkRatio));
+            int adjustedHeight = Math.max(layoutMinHeight,
+                    (int) (inOutBounds.height() * shrinkRatio));
+            if (stableBounds.width() < adjustedWidth
+                    || stableBounds.height() < adjustedHeight) {
+                // There is no way for us to fit the bounds in the displayArea without breaking min
+                // size constraints. Set the min size to make visible as much content as possible.
+                final int left = layoutDirection == View.LAYOUT_DIRECTION_RTL
+                        ? stableBounds.right - adjustedWidth
+                        : stableBounds.left;
+                inOutBounds.set(left, stableBounds.top, left + adjustedWidth,
+                        stableBounds.top + adjustedHeight);
+                return;
+            }
+            inOutBounds.set(inOutBounds.left, inOutBounds.top,
+                    inOutBounds.left + adjustedWidth, inOutBounds.top + adjustedHeight);
         }
 
         final int dx;
