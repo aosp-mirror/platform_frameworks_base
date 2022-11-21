@@ -99,6 +99,7 @@ public class SetAudioVolumeLevelDiscoveryActionTest {
         mHdmiControlServiceSpy.setHdmiMhlController(
                 HdmiMhlControllerStub.create(mHdmiControlServiceSpy));
         mHdmiControlServiceSpy.initService();
+        mHdmiControlServiceSpy.enableAllFeatureFlags();
         mHdmiControlServiceSpy.onBootPhase(PHASE_SYSTEM_SERVICES_READY);
         mPowerManager = new FakePowerManagerWrapper(mContextSpy);
         mHdmiControlServiceSpy.setPowerManager(mPowerManager);

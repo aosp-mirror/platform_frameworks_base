@@ -165,6 +165,7 @@ public abstract class BaseAbsoluteVolumeControlTest {
         mHdmiControlService.setHdmiMhlController(
                 HdmiMhlControllerStub.create(mHdmiControlService));
         mHdmiControlService.initService();
+        mHdmiControlService.enableAllFeatureFlags();
         mPowerManager = new FakePowerManagerWrapper(mContextSpy);
         mHdmiControlService.setPowerManager(mPowerManager);
 

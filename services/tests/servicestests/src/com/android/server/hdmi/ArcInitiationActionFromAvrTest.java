@@ -111,6 +111,7 @@ public class ArcInitiationActionFromAvrTest {
         hdmiControlService.setCecController(hdmiCecController);
         hdmiControlService.setHdmiMhlController(HdmiMhlControllerStub.create(hdmiControlService));
         hdmiControlService.initService();
+        hdmiControlService.enableAllFeatureFlags();
         mPowerManager = new FakePowerManagerWrapper(mContextSpy);
         hdmiControlService.setPowerManager(mPowerManager);
         mAction = new ArcInitiationActionFromAvr(mHdmiCecLocalDeviceAudioSystem);
