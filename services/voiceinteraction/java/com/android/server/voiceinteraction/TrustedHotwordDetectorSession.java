@@ -127,8 +127,8 @@ import java.util.function.Function;
 /**
  * A class that provides the communication with the HotwordDetectionService.
  */
-final class HotwordDetectionConnection {
-    private static final String TAG = "HotwordDetectionConnection";
+final class TrustedHotwordDetectorSession {
+    private static final String TAG = "TrustedHotwordDetectorSession";
     static final boolean DEBUG = false;
 
     private static final String KEY_RESTART_PERIOD_IN_SECONDS = "restart_period_in_seconds";
@@ -231,7 +231,7 @@ final class HotwordDetectionConnection {
     @GuardedBy("mLock")
     private double mProximityMeters = PROXIMITY_UNKNOWN;
 
-    HotwordDetectionConnection(Object lock, Context context, int voiceInteractionServiceUid,
+    TrustedHotwordDetectorSession(Object lock, Context context, int voiceInteractionServiceUid,
             Identity voiceInteractorIdentity, ComponentName serviceName, int userId,
             boolean bindInstantServiceAllowed, @Nullable PersistableBundle options,
             @Nullable SharedMemory sharedMemory,
@@ -595,7 +595,7 @@ final class HotwordDetectionConnection {
         detectFromDspSource(event, callback);
     }
 
-    void detectFromDspSource(SoundTrigger.KeyphraseRecognitionEvent recognitionEvent,
+    private void detectFromDspSource(SoundTrigger.KeyphraseRecognitionEvent recognitionEvent,
             IHotwordRecognitionStatusCallback externalCallback) {
         if (DEBUG) {
             Slog.d(TAG, "detectFromDspSource");
