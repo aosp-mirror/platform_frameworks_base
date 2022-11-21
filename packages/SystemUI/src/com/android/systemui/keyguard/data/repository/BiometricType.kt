@@ -12,24 +12,22 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
 package com.android.systemui.keyguard.data.repository
 
-import dagger.Binds
-import dagger.Module
+enum class BiometricType(val isFingerprint: Boolean) {
+    // An unsupported biometric type
+    UNKNOWN(false),
 
-@Module
-interface KeyguardRepositoryModule {
-    @Binds fun keyguardRepository(impl: KeyguardRepositoryImpl): KeyguardRepository
+    // Fingerprint sensor that is located on the back (opposite side of the display) of the device
+    REAR_FINGERPRINT(true),
 
-    @Binds
-    fun keyguardTransitionRepository(
-        impl: KeyguardTransitionRepositoryImpl
-    ): KeyguardTransitionRepository
+    // Fingerprint sensor that is located under the display
+    UNDER_DISPLAY_FINGERPRINT(true),
 
-    @Binds
-    fun lightRevealScrimRepository(impl: LightRevealScrimRepositoryImpl): LightRevealScrimRepository
-
-    @Binds fun biometricRepository(impl: BiometricRepositoryImpl): BiometricRepository
+    // Fingerprint sensor that is located on the side of the device, typically on the power button
+    SIDE_FINGERPRINT(true),
+    FACE(false),
 }
