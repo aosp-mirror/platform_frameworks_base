@@ -16,6 +16,9 @@
 
 package com.android.server.vcn;
 
+import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
+import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
+import static android.net.vcn.VcnManager.VCN_RESTRICTED_TRANSPORTS_INT_ARRAY_KEY;
 import static android.telephony.CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED;
 import static android.telephony.CarrierConfigManager.EXTRA_SLOT_INDEX;
 import static android.telephony.CarrierConfigManager.EXTRA_SUBSCRIPTION_INDEX;
@@ -39,6 +42,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -491,6 +495,37 @@ public class TelephonySubscriptionTrackerTest {
         mTelephonySubscriptionTracker.onReceive(mContext, buildTestBroadcastIntent(true));
         mTestLooper.dispatchAll();
         verify(mCallback).onNewSnapshot(eq(buildExpectedSnapshot(emptyMap(), emptyMap())));
+    }
+
+    @Test
+    public void testCarrierConfigUpdatedAfterValidTriggersCallbacks() throws Exception {
+        mTelephonySubscriptionTracker.onReceive(mContext, buildTestBroadcastIntent(true));
+        mTestLooper.dispatchAll();
+        verify(mCallback).onNewSnapshot(eq(buildExpectedSnapshot(TEST_PRIVILEGED_PACKAGES)));
+        reset(mCallback);
+
+        final PersistableBundle updatedConfig = new PersistableBundle();
+        updatedConfig.putIntArray(
+                VCN_RESTRICTED_TRANSPORTS_INT_ARRAY_KEY,
+                new int[] {TRANSPORT_WIFI, TRANSPORT_CELLULAR});
+        doReturn(updatedConfig)
+                .when(mCarrierConfigManager)
+                .getConfigForSubId(eq(TEST_SUBSCRIPTION_ID_1));
+
+        Map<Integer, PersistableBundleWrapper> subIdToCarrierConfigMap = new HashMap<>();
+        subIdToCarrierConfigMap.put(
+                TEST_SUBSCRIPTION_ID_1, new PersistableBundleWrapper(updatedConfig));
+        mTelephonySubscriptionTracker.onReceive(mContext, buildTestBroadcastIntent(true));
+        mTestLooper.dispatchAll();
+
+        verify(mCallback)
+                .onNewSnapshot(
+                        eq(
+                                buildExpectedSnapshot(
+                                        0,
+                                        TEST_SUBID_TO_INFO_MAP,
+                                        subIdToCarrierConfigMap,
+                                        TEST_PRIVILEGED_PACKAGES)));
     }
 
     @Test
