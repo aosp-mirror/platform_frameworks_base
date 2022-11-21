@@ -97,6 +97,7 @@ import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.HandlerThread;
 import android.provider.DeviceConfig;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
@@ -415,7 +416,7 @@ public class InteractionJankMonitor {
     @VisibleForTesting
     public InteractionJankMonitor(@NonNull HandlerThread worker) {
         // Check permission early.
-        DeviceConfig.enforceReadPermission(
+        Settings.Config.enforceReadPermission(
             DeviceConfig.NAMESPACE_INTERACTION_JANK_MONITOR);
 
         mRunningTrackers = new SparseArray<>();
