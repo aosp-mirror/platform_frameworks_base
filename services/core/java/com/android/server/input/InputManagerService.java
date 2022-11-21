@@ -273,9 +273,9 @@ public class InputManagerService extends IInputManager.Stub
     // to display id (int). Currently only accessed by InputReader.
     private final Map<String, Integer> mStaticAssociations;
     private final Object mAssociationsLock = new Object();
-    @GuardedBy("mAssociationLock")
+    @GuardedBy("mAssociationsLock")
     private final Map<String, Integer> mRuntimeAssociations = new ArrayMap<>();
-    @GuardedBy("mAssociationLock")
+    @GuardedBy("mAssociationsLock")
     private final Map<String, String> mUniqueIdAssociations = new ArrayMap<>();
 
     // Guards per-display input properties and properties relating to the mouse pointer.
