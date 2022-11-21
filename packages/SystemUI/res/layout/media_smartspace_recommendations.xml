@@ -41,7 +41,7 @@
         android:layout_width="@dimen/qs_media_app_icon_size"
         android:layout_height="@dimen/qs_media_app_icon_size"
         android:layout_marginStart="@dimen/qs_media_padding"
-        android:layout_marginTop="@dimen/qs_media_padding"
+        android:layout_marginTop="@dimen/qs_media_rec_icon_top_margin"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
