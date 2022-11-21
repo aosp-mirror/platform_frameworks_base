@@ -34,6 +34,7 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.server.broadcastradio.RadioServiceUserController;
 import com.android.server.utils.Slogf;
 
 import java.util.ArrayList;
@@ -149,8 +150,7 @@ public final class BroadcastRadioServiceImpl {
     public BroadcastRadioServiceImpl(ArrayList<String> serviceNameList) {
         mNextModuleId = 0;
         if (DEBUG) {
-            Slogf.d(TAG, "Initializing BroadcastRadioServiceImpl %s",
-                    IBroadcastRadio.DESCRIPTOR);
+            Slogf.d(TAG, "Initializing BroadcastRadioServiceImpl %s", IBroadcastRadio.DESCRIPTOR);
         }
         for (int i = 0; i < serviceNameList.size(); i++) {
             try {
@@ -202,6 +202,10 @@ public final class BroadcastRadioServiceImpl {
             boolean withAudio, ITunerCallback callback) throws RemoteException {
         if (DEBUG) {
             Slogf.d(TAG, "Open AIDL radio session");
+        }
+        if (!RadioServiceUserController.isCurrentOrSystemUser()) {
+            Slogf.e(TAG, "Cannot open tuner on AIDL HAL client for non-current user");
+            throw new IllegalStateException("Cannot open session for non-current user");
         }
         Objects.requireNonNull(callback);
 
