@@ -129,7 +129,7 @@ class SnapshotPersistQueue {
         }
     }
 
-    private void deleteSnapshot(int index, int userId, PersistInfoProvider provider) {
+    void deleteSnapshot(int index, int userId, PersistInfoProvider provider) {
         final File protoFile = provider.getProtoFile(index, userId);
         final File bitmapLowResFile = provider.getLowResolutionBitmapFile(index, userId);
         protoFile.delete();

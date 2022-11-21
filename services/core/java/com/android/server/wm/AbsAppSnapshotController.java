@@ -55,8 +55,8 @@ import java.io.PrintWriter;
  * @param <CACHE> The basic cache for either Task or ActivityRecord
  */
 abstract class AbsAppSnapshotController<TYPE extends WindowContainer,
-        CACHE extends AbsAppSnapshotCache<TYPE>> {
-    private static final String TAG = TAG_WITH_CLASS_NAME ? "SnapshotController" : TAG_WM;
+        CACHE extends SnapshotCache<TYPE>> {
+    static final String TAG = TAG_WITH_CLASS_NAME ? "SnapshotController" : TAG_WM;
     /**
      * Return value for {@link #getSnapshotMode}: We are allowed to take a real screenshot to be
      * used as the snapshot.
@@ -76,7 +76,7 @@ abstract class AbsAppSnapshotController<TYPE extends WindowContainer,
     static final int SNAPSHOT_MODE_NONE = 2;
 
     protected final WindowManagerService mService;
-    protected final float mHighResTaskSnapshotScale;
+    protected final float mHighResSnapshotScale;
     private final Rect mTmpRect = new Rect();
     /**
      * Flag indicating whether we are running on an Android TV device.
@@ -99,12 +99,13 @@ abstract class AbsAppSnapshotController<TYPE extends WindowContainer,
                 PackageManager.FEATURE_LEANBACK);
         mIsRunningOnIoT = mService.mContext.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_EMBEDDED);
-        mHighResTaskSnapshotScale = initSnapshotScale();
+        mHighResSnapshotScale = initSnapshotScale();
     }
 
     protected float initSnapshotScale() {
-        return mService.mContext.getResources().getFloat(
+        final float config = mService.mContext.getResources().getFloat(
                 com.android.internal.R.dimen.config_highResTaskSnapshotScale);
+        return Math.max(Math.min(config, 1f), 0.1f);
     }
 
     /**
@@ -173,7 +174,7 @@ abstract class AbsAppSnapshotController<TYPE extends WindowContainer,
         final HardwareBuffer buffer = snapshot.getHardwareBuffer();
         if (buffer.getWidth() == 0 || buffer.getHeight() == 0) {
             buffer.close();
-            Slog.e(TAG, "Invalid task snapshot dimensions " + buffer.getWidth() + "x"
+            Slog.e(TAG, "Invalid snapshot dimensions " + buffer.getWidth() + "x"
                     + buffer.getHeight());
             return null;
         } else {
@@ -223,7 +224,7 @@ abstract class AbsAppSnapshotController<TYPE extends WindowContainer,
         Point taskSize = new Point();
         Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "createSnapshot");
         final ScreenCapture.ScreenshotHardwareBuffer taskSnapshot = createSnapshot(source,
-                mHighResTaskSnapshotScale, builder.getPixelFormat(), taskSize, builder);
+                mHighResSnapshotScale, builder.getPixelFormat(), taskSize, builder);
         Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
         builder.setTaskSize(taskSize);
         return taskSnapshot;
@@ -397,11 +398,11 @@ abstract class AbsAppSnapshotController<TYPE extends WindowContainer,
         final SnapshotDrawerUtils.SystemBarBackgroundPainter
                 decorPainter = new SnapshotDrawerUtils.SystemBarBackgroundPainter(attrs.flags,
                 attrs.privateFlags, attrs.insetsFlags.appearance, taskDescription,
-                mHighResTaskSnapshotScale, mainWindow.getRequestedVisibleTypes());
+                mHighResSnapshotScale, mainWindow.getRequestedVisibleTypes());
         final int taskWidth = taskBounds.width();
         final int taskHeight = taskBounds.height();
-        final int width = (int) (taskWidth * mHighResTaskSnapshotScale);
-        final int height = (int) (taskHeight * mHighResTaskSnapshotScale);
+        final int width = (int) (taskWidth * mHighResSnapshotScale);
+        final int height = (int) (taskHeight * mHighResSnapshotScale);
         final RenderNode node = RenderNode.create("SnapshotController", null);
         node.setLeftTopRightBottom(0, 0, width, height);
         node.setClipToBounds(false);
@@ -450,9 +451,28 @@ abstract class AbsAppSnapshotController<TYPE extends WindowContainer,
         return 0;
     }
 
+    /**
+     * Called when an {@link ActivityRecord} has been removed.
+     */
+    void onAppRemoved(ActivityRecord activity) {
+        mCache.onAppRemoved(activity);
+    }
+
+    /**
+     * Called when the process of an {@link ActivityRecord} has died.
+     */
+    void onAppDied(ActivityRecord activity) {
+        mCache.onAppDied(activity);
+    }
+
+    boolean isAnimatingByRecents(@NonNull Task task) {
+        return task.isAnimatingByRecents()
+                || mService.mAtmService.getTransitionController().inRecentsTransition(task);
+    }
+
     void dump(PrintWriter pw, String prefix) {
-        pw.println(prefix + "mHighResTaskSnapshotScale=" + mHighResTaskSnapshotScale);
-        pw.println(prefix + "mTaskSnapshotEnabled=" + mSnapshotEnabled);
+        pw.println(prefix + "mHighResSnapshotScale=" + mHighResSnapshotScale);
+        pw.println(prefix + "mSnapshotEnabled=" + mSnapshotEnabled);
         mCache.dump(pw, prefix);
     }
 }

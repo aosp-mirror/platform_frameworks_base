@@ -88,8 +88,9 @@ class TransitionController {
 
     private WindowProcessController mTransitionPlayerProc;
     final ActivityTaskManagerService mAtm;
+
     final RemotePlayer mRemotePlayer;
-    TaskSnapshotController mTaskSnapshotController;
+    SnapshotController mSnapshotController;
     TransitionTracer mTransitionTracer;
 
     private final ArrayList<WindowManagerInternal.AppTransitionListener> mLegacyListeners =
@@ -153,7 +154,7 @@ class TransitionController {
     }
 
     void setWindowManager(WindowManagerService wms) {
-        mTaskSnapshotController = wms.mTaskSnapshotController;
+        mSnapshotController = wms.mSnapshotController;
         mTransitionTracer = wms.mTransitionTracer;
         mIsWaitingForDisplayEnabled = !wms.mDisplayEnabled;
         registerLegacyListener(wms.mActivityManagerAppTransitionNotifier);
@@ -739,12 +740,12 @@ class TransitionController {
             t.setEarlyWakeupStart();
             // Usually transitions put quite a load onto the system already (with all the things
             // happening in app), so pause task snapshot persisting to not increase the load.
-            mAtm.mWindowManager.mSnapshotPersistQueue.setPaused(true);
+            mAtm.mWindowManager.mSnapshotController.setPause(true);
             mAnimatingState = true;
             Trace.asyncTraceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "transitAnim", 0);
         } else if (!animatingState && mAnimatingState) {
             t.setEarlyWakeupEnd();
-            mAtm.mWindowManager.mSnapshotPersistQueue.setPaused(false);
+            mAtm.mWindowManager.mSnapshotController.setPause(false);
             mAnimatingState = false;
             Trace.asyncTraceEnd(Trace.TRACE_TAG_WINDOW_MANAGER, "transitAnim", 0);
         }

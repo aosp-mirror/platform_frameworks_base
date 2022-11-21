@@ -43,6 +43,7 @@ import static android.window.TransitionInfo.isIndependent;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.server.wm.SnapshotController.TASK_CLOSE;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
 import static org.junit.Assert.assertEquals;
@@ -1349,6 +1350,9 @@ public class TransitionTests extends WindowTestsBase {
 
     @Test
     public void testTransientLaunch() {
+        spyOn(mWm.mSnapshotController.mTaskSnapshotController);
+        mWm.mSnapshotController.registerTransitionStateConsumer(TASK_CLOSE,
+                mWm.mSnapshotController.mTaskSnapshotController::handleTaskClose);
         final ArrayList<ActivityRecord> enteringAnimReports = new ArrayList<>();
         final TransitionController controller = new TestTransitionController(mAtm) {
             @Override
@@ -1359,7 +1363,9 @@ public class TransitionTests extends WindowTestsBase {
                 super.dispatchLegacyAppTransitionFinished(ar);
             }
         };
-        final TaskSnapshotController snapshotController = controller.mTaskSnapshotController;
+        controller.mSnapshotController = mWm.mSnapshotController;
+        final TaskSnapshotController taskSnapshotController = controller.mSnapshotController
+                .mTaskSnapshotController;
         final ITransitionPlayer player = new ITransitionPlayer.Default();
         controller.registerTransitionPlayer(player, null /* playerProc */);
         final Transition openTransition = controller.createTransition(TRANSIT_OPEN);
@@ -1389,7 +1395,7 @@ public class TransitionTests extends WindowTestsBase {
         // normally.
         mWm.mSyncEngine.abort(openTransition.getSyncId());
 
-        verify(snapshotController, times(1)).recordSnapshot(eq(task2), eq(false));
+        verify(taskSnapshotController, times(1)).recordSnapshot(eq(task2), eq(false));
 
         controller.finishTransition(openTransition);
 
@@ -1413,7 +1419,7 @@ public class TransitionTests extends WindowTestsBase {
 
         // Make sure we haven't called recordSnapshot (since we are transient, it shouldn't be
         // called until finish).
-        verify(snapshotController, times(0)).recordSnapshot(eq(task1), eq(false));
+        verify(taskSnapshotController, times(0)).recordSnapshot(eq(task1), eq(false));
 
         enteringAnimReports.clear();
         final boolean[] wasInFinishingTransition = { false };
@@ -1433,7 +1439,7 @@ public class TransitionTests extends WindowTestsBase {
         assertEquals(ActivityTaskManagerService.APP_SWITCH_DISALLOW, mAtm.getBalAppSwitchesState());
         assertFalse(activity1.app.hasActivityInVisibleTask());
 
-        verify(snapshotController, times(1)).recordSnapshot(eq(task1), eq(false));
+        verify(taskSnapshotController, times(1)).recordSnapshot(eq(task1), eq(false));
         assertTrue(enteringAnimReports.contains(activity2));
     }
 
