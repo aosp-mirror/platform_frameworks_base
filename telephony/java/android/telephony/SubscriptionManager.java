@@ -289,6 +289,11 @@ public class SubscriptionManager {
                     CACHE_KEY_SLOT_INDEX_PROPERTY,
                     INVALID_SIM_SLOT_INDEX);
 
+    private static IntegerPropertyInvalidatedCache<Integer> sSubIdCache =
+            new IntegerPropertyInvalidatedCache<>(ISub::getSubId,
+                    CACHE_KEY_SLOT_INDEX_PROPERTY,
+                    INVALID_SUBSCRIPTION_ID);
+
     /** Cache depends on getDefaultSubId, so we use the defaultSubId cache key */
     private static IntegerPropertyInvalidatedCache<Integer> sPhoneIdCache =
             new IntegerPropertyInvalidatedCache<>(ISub::getPhoneId,
@@ -2148,7 +2153,7 @@ public class SubscriptionManager {
      */
     @Nullable
     public int[] getSubscriptionIds(int slotIndex) {
-        return getSubId(slotIndex);
+        return new int[]{getSubscriptionId(slotIndex)};
     }
 
     /** @hide */
@@ -2171,6 +2176,22 @@ public class SubscriptionManager {
         }
 
         return subId;
+    }
+
+    /**
+     * Get the subscription id for specified slot index.
+     *
+     * @param slotIndex Logical SIM slot index.
+     * @return The subscription id. {@link #INVALID_SUBSCRIPTION_ID} if SIM is absent.
+     *
+     * @hide
+     */
+    public static int getSubscriptionId(int slotIndex) {
+        if (!isValidSlotIndex(slotIndex)) {
+            return SubscriptionManager.INVALID_SUBSCRIPTION_ID;
+        }
+
+        return sSubIdCache.query(slotIndex);
     }
 
     /** @hide */
@@ -2427,9 +2448,9 @@ public class SubscriptionManager {
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public static void putPhoneIdAndSubIdExtra(Intent intent, int phoneId) {
-        int[] subIds = SubscriptionManager.getSubId(phoneId);
-        if (subIds != null && subIds.length > 0) {
-            putPhoneIdAndSubIdExtra(intent, phoneId, subIds[0]);
+        int subId = SubscriptionManager.getSubscriptionId(phoneId);
+        if (isValidSubscriptionId(subId)) {
+            putPhoneIdAndSubIdExtra(intent, phoneId, subId);
         } else {
             logd("putPhoneIdAndSubIdExtra: no valid subs");
             intent.putExtra(PhoneConstants.PHONE_KEY, phoneId);
