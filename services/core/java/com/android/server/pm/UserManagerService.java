@@ -634,7 +634,7 @@ public class UserManagerService extends IUserManager.Stub {
     @GuardedBy("mUserStates")
     private final WatchedUserStates mUserStates = new WatchedUserStates();
 
-    private final UserVisibilityMediator mUserVisibilityMediator = new UserVisibilityMediator();
+    private final UserVisibilityMediator mUserVisibilityMediator;
 
     private static UserManagerService sInstance;
 
@@ -733,6 +733,7 @@ public class UserManagerService extends IUserManager.Stub {
         mPackagesLock = packagesLock;
         mUsers = users != null ? users : new SparseArray<>();
         mHandler = new MainHandler();
+        mUserVisibilityMediator = new UserVisibilityMediator(mHandler);
         mUserDataPreparer = userDataPreparer;
         mUserTypes = UserTypeFactory.getUserTypes();
         invalidateOwnerNameIfNecessary(context.getResources(), true /* forceUpdate */);

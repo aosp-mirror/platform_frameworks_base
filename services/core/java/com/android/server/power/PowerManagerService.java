@@ -423,6 +423,9 @@ public final class PowerManagerService extends SystemService
     // The current battery level percentage.
     private int mBatteryLevel;
 
+    // The amount of battery drained while the device has been in a dream state.
+    private int mDreamsBatteryLevelDrain;
+
     // True if updatePowerStateLocked() is already in progress.
     // TODO(b/215518989): Remove this once transactions are in place
     private boolean mUpdatePowerStateInProgress;
@@ -454,11 +457,6 @@ public final class PowerManagerService extends SystemService
      */
     @GuardedBy("mEnhancedDischargeTimeLock")
     private boolean mEnhancedDischargePredictionIsPersonalized;
-
-    // The battery level percentage at the time the dream started.
-    // This is used to terminate a dream and go to sleep if the battery is
-    // draining faster than it is charging and the user activity timeout has expired.
-    private int mBatteryLevelWhenDreamStarted;
 
     // The current dock state.
     private int mDockState = Intent.EXTRA_DOCK_STATE_UNDOCKED;
@@ -2469,15 +2467,25 @@ public final class PowerManagerService extends SystemService
             final int oldPlugType = mPlugType;
             mIsPowered = mBatteryManagerInternal.isPowered(BatteryManager.BATTERY_PLUGGED_ANY);
             mPlugType = mBatteryManagerInternal.getPlugType();
+            final int oldBatteryLevel = mBatteryLevel;
             mBatteryLevel = mBatteryManagerInternal.getBatteryLevel();
             mBatteryLevelLow = mBatteryManagerInternal.getBatteryLevelLow();
+            final boolean isOverheat = mBatteryManagerInternal.getBatteryHealth()
+                    == BatteryManager.BATTERY_HEALTH_OVERHEAT;
 
             if (DEBUG_SPEW) {
                 Slog.d(TAG, "updateIsPoweredLocked: wasPowered=" + wasPowered
                         + ", mIsPowered=" + mIsPowered
                         + ", oldPlugType=" + oldPlugType
                         + ", mPlugType=" + mPlugType
-                        + ", mBatteryLevel=" + mBatteryLevel);
+                        + ", oldBatteryLevel=" + oldBatteryLevel
+                        + ", mBatteryLevel=" + mBatteryLevel
+                        + ", isOverheat=" + isOverheat);
+            }
+
+            if (!isOverheat && oldBatteryLevel > 0
+                    && getGlobalWakefulnessLocked() == WAKEFULNESS_DREAMING) {
+                mDreamsBatteryLevelDrain += (oldBatteryLevel - mBatteryLevel);
             }
 
             if (wasPowered != mIsPowered || oldPlugType != mPlugType) {
@@ -3300,7 +3308,7 @@ public final class PowerManagerService extends SystemService
 
             // Remember the initial battery level when the dream started.
             if (startDreaming && isDreaming) {
-                mBatteryLevelWhenDreamStarted = mBatteryLevel;
+                mDreamsBatteryLevelDrain = 0;
                 if (wakefulness == WAKEFULNESS_DOZING) {
                     Slog.i(TAG, "Dozing...");
                 } else {
@@ -3321,16 +3329,15 @@ public final class PowerManagerService extends SystemService
             if (wakefulness == WAKEFULNESS_DREAMING) {
                 if (isDreaming && canDreamLocked(powerGroup)) {
                     if (mDreamsBatteryLevelDrainCutoffConfig >= 0
-                            && mBatteryLevel < mBatteryLevelWhenDreamStarted
-                                    - mDreamsBatteryLevelDrainCutoffConfig
+                            && mDreamsBatteryLevelDrain > mDreamsBatteryLevelDrainCutoffConfig
                             && !isBeingKeptAwakeLocked(powerGroup)) {
                         // If the user activity timeout expired and the battery appears
                         // to be draining faster than it is charging then stop dreaming
                         // and go to sleep.
                         Slog.i(TAG, "Stopping dream because the battery appears to "
                                 + "be draining faster than it is charging.  "
-                                + "Battery level when dream started: "
-                                + mBatteryLevelWhenDreamStarted + "%.  "
+                                + "Battery level drained while dreaming: "
+                                + mDreamsBatteryLevelDrain + "%.  "
                                 + "Battery level now: " + mBatteryLevel + "%.");
                     } else {
                         return; // continue dreaming
@@ -3559,6 +3566,11 @@ public final class PowerManagerService extends SystemService
         return mPowerGroups.get(groupId).getDesiredScreenPolicyLocked(sQuiescent,
                 mDozeAfterScreenOff, mIsVrModeEnabled, mBootCompleted,
                 mScreenBrightnessBoostInProgress);
+    }
+
+    @VisibleForTesting
+    int getDreamsBatteryLevelDrain() {
+        return mDreamsBatteryLevelDrain;
     }
 
     private final DisplayManagerInternal.DisplayPowerCallbacks mDisplayPowerCallbacks =
@@ -4405,7 +4417,7 @@ public final class PowerManagerService extends SystemService
             pw.println("  mIsPowered=" + mIsPowered);
             pw.println("  mPlugType=" + mPlugType);
             pw.println("  mBatteryLevel=" + mBatteryLevel);
-            pw.println("  mBatteryLevelWhenDreamStarted=" + mBatteryLevelWhenDreamStarted);
+            pw.println("  mDreamsBatteryLevelDrain=" + mDreamsBatteryLevelDrain);
             pw.println("  mDockState=" + mDockState);
             pw.println("  mStayOn=" + mStayOn);
             pw.println("  mProximityPositive=" + mProximityPositive);
@@ -4650,8 +4662,8 @@ public final class PowerManagerService extends SystemService
             proto.write(PowerManagerServiceDumpProto.PLUG_TYPE, mPlugType);
             proto.write(PowerManagerServiceDumpProto.BATTERY_LEVEL, mBatteryLevel);
             proto.write(
-                    PowerManagerServiceDumpProto.BATTERY_LEVEL_WHEN_DREAM_STARTED,
-                    mBatteryLevelWhenDreamStarted);
+                    PowerManagerServiceDumpProto.BATTERY_LEVEL_DRAINED_WHILE_DREAMING,
+                    mDreamsBatteryLevelDrain);
             proto.write(PowerManagerServiceDumpProto.DOCK_STATE, mDockState);
             proto.write(PowerManagerServiceDumpProto.IS_STAY_ON, mStayOn);
             proto.write(PowerManagerServiceDumpProto.IS_PROXIMITY_POSITIVE, mProximityPositive);
