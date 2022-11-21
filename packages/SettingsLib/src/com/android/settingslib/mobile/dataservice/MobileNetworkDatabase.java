@@ -120,7 +120,7 @@ public abstract class MobileNetworkDatabase extends RoomDatabase {
      * Query the mobileNetwork info by the subscription ID from the MobileNetworkInfoEntity
      * table.
      */
-    public LiveData<MobileNetworkInfoEntity> queryMobileNetworkInfoById(String id) {
+    public MobileNetworkInfoEntity queryMobileNetworkInfoById(String id) {
         return mMobileNetworkInfoDao().queryMobileNetworkInfoBySubId(id);
     }
 
