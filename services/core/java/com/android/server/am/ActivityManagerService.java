@@ -3492,9 +3492,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             final File tracesDir = new File(ANR_TRACE_DIR);
-            // Each set of ANR traces is written to a separate file and dumpstate will process
-            // all such files and add them to a captured bug report if they're recent enough.
-            maybePruneOldTraces(tracesDir);
 
             // NOTE: We should consider creating the file in native code atomically once we've
             // gotten rid of the old scheme of dumping and lot of the code that deals with paths
@@ -3527,6 +3524,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (firstPidEndOffset != null) {
                 firstPidEndOffset.set(firstPidEndPos);
             }
+            // Each set of ANR traces is written to a separate file and dumpstate will process
+            // all such files and add them to a captured bug report if they're recent enough.
+            maybePruneOldTraces(tracesDir);
 
             return tracesFile;
         } finally {
