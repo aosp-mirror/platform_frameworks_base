@@ -18,6 +18,7 @@ package android.nfc;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
@@ -1850,6 +1851,36 @@ public final class NfcAdapter {
                 Log.e(TAG, "Failed to recover NFC Service.");
             }
             return false;
+        }
+    }
+
+    /**
+     * Returns information regarding Nfc antennas on the device
+     * such as their relative positioning on the device.
+     *
+     * @return Information on the nfc antenna(s) on the device.
+     * @throws UnsupportedOperationException if FEATURE_NFC is unavailable.
+     */
+    @Nullable
+    public NfcAntennaInfo getNfcAntennaInfo() {
+        if (!sHasNfcFeature) {
+            throw new UnsupportedOperationException();
+        }
+        try {
+            return sService.getNfcAntennaInfo();
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+            // Try one more time
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+                return null;
+            }
+            try {
+                return sService.getNfcAntennaInfo();
+            } catch (RemoteException ee) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+            }
+            return null;
         }
     }
 
