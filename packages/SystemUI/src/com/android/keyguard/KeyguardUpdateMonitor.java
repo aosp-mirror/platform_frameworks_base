@@ -829,6 +829,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     + " triggered while waiting for cancellation, removing watchdog");
             mHandler.removeCallbacks(mFpCancelNotReceived);
         }
+        mLogger.d("handleFingerprintAuthFailed");
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
@@ -958,6 +959,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             stopListeningForFace(FACE_AUTH_STOPPED_FP_LOCKED_OUT);
         }
 
+        mLogger.logFingerprintError(msgId, errString);
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
@@ -3887,6 +3889,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             pw.println("    listening: actual=" + mFaceRunningState
                     + " expected=(" + (shouldListenForFace() ? 1 : 0));
             pw.println("    strongAuthFlags=" + Integer.toHexString(strongAuthFlags));
+            pw.println("    isNonStrongBiometricAllowedAfterIdleTimeout="
+                    + mStrongAuthTracker.isNonStrongBiometricAllowedAfterIdleTimeout(userId));
             pw.println("    trustManaged=" + getUserTrustIsManaged(userId));
             pw.println("    mFaceLockedOutPermanent=" + mFaceLockedOutPermanent);
             pw.println("    enabledByUser=" + mBiometricEnabledForUser.get(userId));
