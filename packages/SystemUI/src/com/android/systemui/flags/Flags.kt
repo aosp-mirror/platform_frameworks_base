@@ -372,6 +372,11 @@ object Flags {
     @JvmField
     val NEW_BACK_AFFORDANCE = unreleasedFlag(1203, "new_back_affordance", teamfood = false)
 
+    // TODO(b/255854141): Tracking Bug
+    @JvmField
+    val WM_ENABLE_PREDICTIVE_BACK_SYSUI =
+        unreleasedFlag(1204, "persist.wm.debug.predictive_back_sysui_enable", teamfood = false)
+
     // 1300 - screenshots
     // TODO(b/254512719): Tracking Bug
     @JvmField val SCREENSHOT_REQUEST_PROCESSOR = releasedFlag(1300, "screenshot_request_processor")
