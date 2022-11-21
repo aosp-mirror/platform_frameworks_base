@@ -129,9 +129,18 @@ public final class AppInstallMetadata {
     @Override
     public String toString() {
         return String.format(
-                "AppInstallMetadata { PackageName = %s, AppCerts = %s, InstallerName = %s,"
-                    + " InstallerCerts = %s, VersionCode = %d, PreInstalled = %b, StampPresent ="
-                    + " %b, StampVerified = %b, StampTrusted = %b, StampCert = %s }",
+                "AppInstallMetadata {"
+                    + " PackageName = %s,"
+                    + " AppCerts = %s,"
+                    + " AppCertsLineage = %s,"
+                    + " InstallerName = %s,"
+                    + " InstallerCerts = %s,"
+                    + " VersionCode = %d,"
+                    + " PreInstalled = %b,"
+                    + " StampPresent = %b,"
+                    + " StampVerified = %b,"
+                    + " StampTrusted = %b,"
+                    + " StampCert = %s }",
                 mPackageName,
                 mAppCertificates,
                 mAppCertificateLineage,
