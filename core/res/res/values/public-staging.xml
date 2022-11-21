@@ -124,6 +124,7 @@
     <public name="bold" />
     <public name="italic" />
     <public name="underline" />
+    <public name="accessibilityActionScrollInDirection" />
   </staging-public-group>
 
   <staging-public-group type="style" first-id="0x01cc0000">
