@@ -84,6 +84,8 @@ import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.Toast;
+import android.window.OnBackInvokedCallback;
+import android.window.OnBackInvokedDispatcher;
 import android.window.WindowContext;
 
 import androidx.concurrent.futures.CallbackToFutureAdapter;
@@ -279,6 +281,13 @@ public class ScreenshotController {
     private final ActionIntentExecutor mActionExecutor;
     private final UserManager mUserManager;
 
+    private final OnBackInvokedCallback mOnBackInvokedCallback = () -> {
+        if (DEBUG_INPUT) {
+            Log.d(TAG, "Predictive Back callback dispatched");
+        }
+        respondToBack();
+    };
+
     private ScreenshotView mScreenshotView;
     private Bitmap mScreenBitmap;
     private SaveImageInBackgroundTask mSaveInBgTask;
@@ -465,6 +474,10 @@ public class ScreenshotController {
         }
     }
 
+    private void respondToBack() {
+        dismissScreenshot(SCREENSHOT_DISMISSED_OTHER);
+    }
+
     /**
      * Update resources on configuration change. Reinflate for theme/color changes.
      */
@@ -476,6 +489,26 @@ public class ScreenshotController {
         // Inflate the screenshot layout
         mScreenshotView = (ScreenshotView)
                 LayoutInflater.from(mContext).inflate(R.layout.screenshot, null);
+        mScreenshotView.addOnAttachStateChangeListener(
+                new View.OnAttachStateChangeListener() {
+                    @Override
+                    public void onViewAttachedToWindow(@NonNull View v) {
+                        if (DEBUG_INPUT) {
+                            Log.d(TAG, "Registering Predictive Back callback");
+                        }
+                        mScreenshotView.findOnBackInvokedDispatcher().registerOnBackInvokedCallback(
+                                OnBackInvokedDispatcher.PRIORITY_DEFAULT, mOnBackInvokedCallback);
+                    }
+
+                    @Override
+                    public void onViewDetachedFromWindow(@NonNull View v) {
+                        if (DEBUG_INPUT) {
+                            Log.d(TAG, "Unregistering Predictive Back callback");
+                        }
+                        mScreenshotView.findOnBackInvokedDispatcher()
+                                .unregisterOnBackInvokedCallback(mOnBackInvokedCallback);
+                    }
+                });
         mScreenshotView.init(mUiEventLogger, new ScreenshotView.ScreenshotViewCallback() {
             @Override
             public void onUserInteraction() {
@@ -503,7 +536,7 @@ public class ScreenshotController {
                 if (DEBUG_INPUT) {
                     Log.d(TAG, "onKeyEvent: KeyEvent.KEYCODE_BACK");
                 }
-                dismissScreenshot(SCREENSHOT_DISMISSED_OTHER);
+                respondToBack();
                 return true;
             }
             return false;
