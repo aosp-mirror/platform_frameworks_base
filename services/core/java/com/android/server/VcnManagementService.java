@@ -18,8 +18,11 @@ package com.android.server;
 
 import static android.Manifest.permission.DUMP;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED;
+import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_TEST;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
+import static android.net.vcn.VcnGatewayConnectionConfig.ALLOWED_CAPABILITIES;
+import static android.net.vcn.VcnManager.VCN_RESTRICTED_TRANSPORTS_INT_ARRAY_KEY;
 import static android.net.vcn.VcnManager.VCN_STATUS_CODE_ACTIVE;
 import static android.net.vcn.VcnManager.VCN_STATUS_CODE_INACTIVE;
 import static android.net.vcn.VcnManager.VCN_STATUS_CODE_NOT_CONFIGURED;
@@ -53,6 +56,7 @@ import android.net.vcn.VcnManager.VcnStatusCode;
 import android.net.vcn.VcnUnderlyingNetworkPolicy;
 import android.net.wifi.WifiInfo;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -68,6 +72,7 @@ import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.LocalLog;
 import android.util.Log;
 import android.util.Slog;
@@ -83,6 +88,7 @@ import com.android.server.vcn.Vcn;
 import com.android.server.vcn.VcnContext;
 import com.android.server.vcn.VcnNetworkProvider;
 import com.android.server.vcn.util.PersistableBundleUtils;
+import com.android.server.vcn.util.PersistableBundleUtils.PersistableBundleWrapper;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -158,6 +164,9 @@ public class VcnManagementService extends IVcnManagementService.Stub {
     @NonNull private static final String TAG = VcnManagementService.class.getSimpleName();
     private static final long DUMP_TIMEOUT_MILLIS = TimeUnit.SECONDS.toMillis(5);
     private static final int LOCAL_LOG_LINE_COUNT = 512;
+
+    private static final Set<Integer> RESTRICTED_TRANSPORTS_DEFAULT =
+            Collections.singleton(TRANSPORT_WIFI);
 
     // Public for use in all other VCN classes
     @NonNull public static final LocalLog LOCAL_LOG = new LocalLog(LOCAL_LOG_LINE_COUNT);
@@ -361,6 +370,34 @@ public class VcnManagementService extends IVcnManagementService.Stub {
         public LocationPermissionChecker newLocationPermissionChecker(@NonNull Context context) {
             return new LocationPermissionChecker(context);
         }
+
+        /** Gets the transports that need to be marked as restricted by the VCN */
+        public Set<Integer> getRestrictedTransports(
+                ParcelUuid subGrp, TelephonySubscriptionSnapshot lastSnapshot) {
+            if (!Build.IS_ENG && !Build.IS_USERDEBUG) {
+                return RESTRICTED_TRANSPORTS_DEFAULT;
+            }
+
+            final PersistableBundleWrapper carrierConfig =
+                    lastSnapshot.getCarrierConfigForSubGrp(subGrp);
+            if (carrierConfig == null) {
+                return RESTRICTED_TRANSPORTS_DEFAULT;
+            }
+
+            final int[] defaultValue =
+                    RESTRICTED_TRANSPORTS_DEFAULT.stream().mapToInt(i -> i).toArray();
+            final int[] restrictedTransportsArray =
+                    carrierConfig.getIntArray(
+                            VCN_RESTRICTED_TRANSPORTS_INT_ARRAY_KEY,
+                            defaultValue);
+
+            // Convert to a boxed set
+            final Set<Integer> restrictedTransports = new ArraySet<>();
+            for (int transport : restrictedTransportsArray) {
+                restrictedTransports.add(transport);
+            }
+            return restrictedTransports;
+        }
     }
 
     /** Notifies the VcnManagementService that external dependencies can be set up. */
@@ -517,6 +554,7 @@ public class VcnManagementService extends IVcnManagementService.Stub {
                     }
                 }
 
+                boolean needNotifyAllPolicyListeners = false;
                 // Schedule teardown of any VCN instances that have lost carrier privileges (after a
                 // delay)
                 for (Entry<ParcelUuid, Vcn> entry : mVcns.entrySet()) {
@@ -564,6 +602,10 @@ public class VcnManagementService extends IVcnManagementService.Stub {
                     } else {
                         // If this VCN's status has not changed, update it with the new snapshot
                         entry.getValue().updateSubscriptionSnapshot(mLastSnapshot);
+                        needNotifyAllPolicyListeners |=
+                                !Objects.equals(
+                                        oldSnapshot.getCarrierConfigForSubGrp(subGrp),
+                                        mLastSnapshot.getCarrierConfigForSubGrp(subGrp));
                     }
                 }
 
@@ -573,6 +615,10 @@ public class VcnManagementService extends IVcnManagementService.Stub {
                         getSubGroupToSubIdMappings(mLastSnapshot);
                 if (!currSubGrpMappings.equals(oldSubGrpMappings)) {
                     garbageCollectAndWriteVcnConfigsLocked();
+                    needNotifyAllPolicyListeners = true;
+                }
+
+                if (needNotifyAllPolicyListeners) {
                     notifyAllPolicyListenersLocked();
                 }
             }
@@ -917,6 +963,14 @@ public class VcnManagementService extends IVcnManagementService.Stub {
         });
     }
 
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    void addVcnUnderlyingNetworkPolicyListenerForTest(
+            @NonNull IVcnUnderlyingNetworkPolicyListener listener) {
+        synchronized (mLock) {
+            addVcnUnderlyingNetworkPolicyListener(listener);
+        }
+    }
+
     /** Removes the provided listener from receiving VcnUnderlyingNetworkPolicy updates. */
     @GuardedBy("mLock")
     @Override
@@ -1000,7 +1054,7 @@ public class VcnManagementService extends IVcnManagementService.Stub {
 
             final ParcelUuid subGrp = getSubGroupForNetworkCapabilities(ncCopy);
             boolean isVcnManagedNetwork = false;
-            boolean isRestrictedCarrierWifi = false;
+            boolean isRestricted = false;
             synchronized (mLock) {
                 final Vcn vcn = mVcns.get(subGrp);
                 if (vcn != null) {
@@ -1008,9 +1062,19 @@ public class VcnManagementService extends IVcnManagementService.Stub {
                         isVcnManagedNetwork = true;
                     }
 
-                    if (ncCopy.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
-                        // Carrier WiFi always restricted if VCN exists (even in safe mode).
-                        isRestrictedCarrierWifi = true;
+                    final Set<Integer> restrictedTransports =
+                            mDeps.getRestrictedTransports(subGrp, mLastSnapshot);
+                    for (int restrictedTransport : restrictedTransports) {
+                        if (ncCopy.hasTransport(restrictedTransport)) {
+                            if (restrictedTransport == TRANSPORT_CELLULAR) {
+                                // Only make a cell network as restricted when the VCN is in
+                                // active mode.
+                                isRestricted |= (vcn.getStatus() == VCN_STATUS_CODE_ACTIVE);
+                            } else {
+                                isRestricted = true;
+                                break;
+                            }
+                        }
                     }
                 }
             }
@@ -1024,14 +1088,16 @@ public class VcnManagementService extends IVcnManagementService.Stub {
                 ncBuilder.addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED);
             }
 
-            if (isRestrictedCarrierWifi) {
+            if (isRestricted) {
                 ncBuilder.removeCapability(
                         NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED);
             }
 
             final NetworkCapabilities result = ncBuilder.build();
             final VcnUnderlyingNetworkPolicy policy = new VcnUnderlyingNetworkPolicy(
-                    mTrackingNetworkCallback.requiresRestartForCarrierWifi(result), result);
+                    mTrackingNetworkCallback
+                            .requiresRestartForImmutableCapabilityChanges(result),
+                    result);
 
             logVdbg("getUnderlyingNetworkPolicy() called for caps: " + networkCapabilities
                         + "; and lp: " + linkProperties + "; result = " + policy);
@@ -1296,15 +1362,38 @@ public class VcnManagementService extends IVcnManagementService.Stub {
             }
         }
 
-        private boolean requiresRestartForCarrierWifi(NetworkCapabilities caps) {
-            if (!caps.hasTransport(TRANSPORT_WIFI) || caps.getSubscriptionIds() == null) {
+        private Set<Integer> getNonTestTransportTypes(NetworkCapabilities caps) {
+            final Set<Integer> transportTypes = new ArraySet<>();
+            for (int t : caps.getTransportTypes()) {
+                transportTypes.add(t);
+            }
+            return transportTypes;
+        }
+
+        private boolean hasSameTransportsAndCapabilities(
+                NetworkCapabilities caps, NetworkCapabilities capsOther) {
+            if (!Objects.equals(
+                    getNonTestTransportTypes(caps), getNonTestTransportTypes(capsOther))) {
+                return false;
+            }
+
+            for (int capability : ALLOWED_CAPABILITIES) {
+                if (caps.hasCapability(capability) != capsOther.hasCapability(capability)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private boolean requiresRestartForImmutableCapabilityChanges(NetworkCapabilities caps) {
+            if (caps.getSubscriptionIds() == null) {
                 return false;
             }
 
             synchronized (mCaps) {
                 for (NetworkCapabilities existing : mCaps.values()) {
-                    if (existing.hasTransport(TRANSPORT_WIFI)
-                            && caps.getSubscriptionIds().equals(existing.getSubscriptionIds())) {
+                    if (caps.getSubscriptionIds().equals(existing.getSubscriptionIds())
+                            && hasSameTransportsAndCapabilities(caps, existing)) {
                         // Restart if any immutable capabilities have changed
                         return existing.hasCapability(NET_CAPABILITY_NOT_RESTRICTED)
                                 != caps.hasCapability(NET_CAPABILITY_NOT_RESTRICTED);
