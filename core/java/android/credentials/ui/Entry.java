@@ -97,7 +97,7 @@ public class Entry implements Parcelable {
     protected Entry(@NonNull Parcel in) {
         String key = in.readString8();
         String subkey = in.readString8();
-        Slice slice = Slice.CREATOR.createFromParcel(in);
+        Slice slice = in.readTypedObject(Slice.CREATOR);
 
         mKey = key;
         AnnotationValidations.validate(NonNull.class, null, mKey);
@@ -167,9 +167,9 @@ public class Entry implements Parcelable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString8(mKey);
         dest.writeString8(mSubkey);
-        mSlice.writeToParcel(dest, flags);
-        mPendingIntent.writeToParcel(dest, flags);
-        mFrameworkExtrasIntent.writeToParcel(dest, flags);
+        dest.writeTypedObject(mSlice, flags);
+        dest.writeTypedObject(mPendingIntent, flags);
+        dest.writeTypedObject(mFrameworkExtrasIntent, flags);
     }
 
     @Override
