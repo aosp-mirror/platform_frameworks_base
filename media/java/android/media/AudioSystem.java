@@ -443,6 +443,10 @@ public class AudioSystem
                 return "AUDIO_FORMAT_APTX_ADAPTIVE_QLEA";
             case /* AUDIO_FORMAT_APTX_ADAPTIVE_R4   */ 0x31000000:
                 return "AUDIO_FORMAT_APTX_ADAPTIVE_R4";
+            case /* AUDIO_FORMAT_DTS_HD_MA       */ 0x32000000:
+                return "AUDIO_FORMAT_DTS_HD_MA";
+            case /* AUDIO_FORMAT_DTS_UHD_P2      */ 0x33000000:
+                return "AUDIO_FORMAT_DTS_UHD_P2";
 
             /* Aliases */
             case /* AUDIO_FORMAT_PCM_16_BIT        */ 0x1:
