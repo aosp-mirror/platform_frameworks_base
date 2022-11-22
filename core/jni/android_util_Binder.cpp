@@ -983,6 +983,10 @@ static void android_os_Binder_restoreCallingIdentity(jlong token)
     IPCThreadState::self()->restoreCallingIdentity(token);
 }
 
+static jboolean android_os_Binder_hasExplicitIdentity() {
+    return IPCThreadState::self()->hasExplicitIdentity();
+}
+
 static void android_os_Binder_setThreadStrictModePolicy(jint policyMask)
 {
     IPCThreadState::self()->setStrictModePolicy(policyMask);
@@ -1078,6 +1082,8 @@ static const JNINativeMethod gBinderMethods[] = {
     { "clearCallingIdentity", "()J", (void*)android_os_Binder_clearCallingIdentity },
     // @CriticalNative
     { "restoreCallingIdentity", "(J)V", (void*)android_os_Binder_restoreCallingIdentity },
+    // @CriticalNative
+    { "hasExplicitIdentity", "()Z", (void*)android_os_Binder_hasExplicitIdentity },
     // @CriticalNative
     { "setThreadStrictModePolicy", "(I)V", (void*)android_os_Binder_setThreadStrictModePolicy },
     // @CriticalNative
