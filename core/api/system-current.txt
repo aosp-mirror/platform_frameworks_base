@@ -9715,6 +9715,10 @@ package android.os {
     field public static final int STATUS_WAITING_REBOOT = 5; // 0x5
   }
 
+  public final class Trace {
+    field public static final long TRACE_TAG_AIDL = 16777216L; // 0x1000000L
+  }
+
   public class UpdateEngine {
     ctor public UpdateEngine();
     method @NonNull @WorkerThread public android.os.UpdateEngine.AllocateSpaceResult allocateSpace(@NonNull String, @NonNull String[]);
