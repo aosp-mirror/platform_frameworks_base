@@ -52,7 +52,7 @@
     <string name="usb_debugging_always" msgid="4003121804294739548">"Permitir sempre desde este ordenador"</string>
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Permitir"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Non se permite a depuración por USB"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"O usuario coa sesión iniciada actualmente neste dispositivo non pode activar a depuración por USB. Para utilizar esta función, cambia ao usuario principal."</string>
+    <string name="usb_debugging_secondary_user_message" msgid="1888835696965417845">"O usuario coa sesión iniciada actualmente neste dispositivo non pode activar a depuración por USB. Para utilizar esta función, cambia ao usuario administrador."</string>
     <string name="hdmi_cec_set_menu_language_title" msgid="1259765420091503742">"Queres cambiar o idioma do sistema ao <xliff:g id="LANGUAGE">%1$s</xliff:g>?"</string>
     <string name="hdmi_cec_set_menu_language_description" msgid="8176716678074126619">"Outro dispositivo solicitou un cambio do idioma do sistema"</string>
     <string name="hdmi_cec_set_menu_language_accept" msgid="2513689457281009578">"Cambiar idioma"</string>
@@ -62,7 +62,7 @@
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Permitir sempre nesta rede"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"Permitir"</string>
     <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"Non se permite a depuración sen fíos"</string>
-    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"O usuario coa sesión iniciada actualmente neste dispositivo non pode activar a depuración sen fíos. Para utilizar esta función, cambia ao usuario principal."</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="9085779370142222881">"O usuario coa sesión iniciada actualmente neste dispositivo non pode activar a depuración sen fíos. Para utilizar esta función, cambia ao usuario administrador."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"O porto USB está desactivado"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"Para protexer o dispositivo de líquidos ou residuos, desactivouse o porto USB e non detectará ningún accesorio.\n\nRecibirás unha notificación cando o poidas utilizar de novo."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"Activouse o porto USB para detectar cargadores e accesorios"</string>
@@ -125,7 +125,8 @@
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Asistente de voz"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"Wallet"</string>
     <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"Escáner de código QR"</string>
-    <string name="accessibility_unlock_button" msgid="122785427241471085">"Desbloquear"</string>
+    <!-- no translation found for accessibility_unlock_button (3613812140816244310) -->
+    <skip />
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Dispositivo bloqueado"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Analizando cara"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"Enviar"</string>
@@ -168,7 +169,7 @@
     <skip />
     <string name="keyguard_face_failed" msgid="9044619102286917151">"Non se recoñeceu a cara"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"Usa a impresión dixital"</string>
-    <!-- no translation found for keyguard_face_unlock_unavailable (8145547300240405980) -->
+    <!-- no translation found for keyguard_face_unlock_unavailable (1581949044193418736) -->
     <skip />
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth conectado"</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Descoñécese a porcentaxe da batería."</string>
@@ -180,8 +181,12 @@
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"Modo avión"</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"A VPN está activada."</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"Carga da batería: <xliff:g id="NUMBER">%d</xliff:g> por cento."</string>
-    <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"Batería: <xliff:g id="PERCENTAGE">%1$s</xliff:g> por cento, durará <xliff:g id="TIME">%2$s</xliff:g> co uso que adoitas darlle"</string>
+    <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"Batería: <xliff:g id="PERCENTAGE">%1$d</xliff:g> por cento, durará <xliff:g id="TIME">%2$s</xliff:g> co uso que adoitas darlle"</string>
     <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"Batería cargando. Nivel: <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> por cento."</string>
+    <!-- no translation found for accessibility_battery_level_charging_paused (1716051308782906917) -->
+    <skip />
+    <!-- no translation found for accessibility_battery_level_charging_paused_with_estimate (4006089349465741762) -->
+    <skip />
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"Ver todas as notificacións"</string>
     <string name="accessibility_tty_enabled" msgid="1123180388823381118">"Teletipo activado"</string>
     <string name="accessibility_ringer_vibrate" msgid="6261841170896561364">"Timbre en vibración"</string>
@@ -386,16 +391,11 @@
     <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"Cando compartes, gravas ou emites unha aplicación, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ten acceso a todo o que se vexa ou se reproduza nela. Polo tanto, debes ter coidado cos contrasinais, os detalles de pago, as mensaxes ou outra información confidencial."</string>
     <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"Continuar"</string>
     <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"Compartir ou gravar unha aplicación"</string>
-    <!-- no translation found for media_projection_permission_dialog_system_service_title (6827129613741303726) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_system_service_warning_entire_screen (8801616203805837575) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_system_service_warning_single_app (543310680568419338) -->
-    <skip />
-    <!-- no translation found for screen_capturing_disabled_by_policy_dialog_title (2113331792064527203) -->
-    <skip />
-    <!-- no translation found for screen_capturing_disabled_by_policy_dialog_description (6015975736747696431) -->
-    <skip />
+    <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"Queres permitir que esta aplicación comparta ou grave contido?"</string>
+    <string name="media_projection_permission_dialog_system_service_warning_entire_screen" msgid="8801616203805837575">"Cando compartes, gravas ou emites contido, esta aplicación ten acceso a todo o que se vexa na pantalla ou se reproduza no teu dispositivo. Polo tanto, debes ter coidado cos contrasinais, os detalles de pago, as mensaxes ou outra información confidencial."</string>
+    <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"Cando compartes, gravas ou emites aplicacións, esta aplicación ten acceso a todo o que se vexa ou se reproduza nelas. Polo tanto, debes ter coidado cos contrasinais, os detalles de pago, as mensaxes ou outra información confidencial."</string>
+    <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"O teu administrador de TI bloqueou esta aplicación"</string>
+    <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"A política do dispositivo desactivou a opción de capturar a pantalla"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Eliminar todas"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Xestionar"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Historial"</string>
@@ -511,7 +511,8 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Desbloquear para usar"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Produciuse un problema ao obter as tarxetas. Téntao de novo máis tarde"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Configuración da pantalla de bloqueo"</string>
-    <string name="qr_code_scanner_title" msgid="5290201053875420785">"Escanear código QR"</string>
+    <!-- no translation found for qr_code_scanner_title (1938155688725760702) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"Perfil de traballo"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Modo avión"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Non escoitarás a alarma seguinte <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -750,14 +751,10 @@
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Queres desactivar os datos móbiles?"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"Non terás acceso aos datos nin a Internet a través de <xliff:g id="CARRIER">%s</xliff:g>. Internet só estará dispoñible mediante a wifi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"o teu operador"</string>
-    <!-- no translation found for auto_data_switch_disable_title (5146527155665190652) -->
-    <skip />
-    <!-- no translation found for auto_data_switch_disable_message (5885533647399535852) -->
-    <skip />
-    <!-- no translation found for auto_data_switch_dialog_negative_button (2370876875999891444) -->
-    <skip />
-    <!-- no translation found for auto_data_switch_dialog_positive_button (8531782041263087564) -->
-    <skip />
+    <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"Seguro que queres cambiar de novo a <xliff:g id="CARRIER">%s</xliff:g>?"</string>
+    <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"O uso de datos móbiles non cambiará automaticamente en función da dispoñibilidade"</string>
+    <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"Non, grazas"</string>
+    <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"Si, cambiar"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Dado que unha aplicación se superpón sobre unha solicitude de permiso, a configuración non pode verificar a túa resposta."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"Queres permitir que <xliff:g id="APP_0">%1$s</xliff:g> mostre fragmentos de aplicación de <xliff:g id="APP_2">%2$s</xliff:g>?"</string>
     <string name="slice_permission_text_1" msgid="6675965177075443714">"- Pode ler información da aplicación <xliff:g id="APP">%1$s</xliff:g>"</string>
@@ -798,6 +795,8 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Ampliar pantalla completa"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Amplía parte da pantalla"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Cambiar"</string>
+    <!-- no translation found for magnification_drag_corner_to_resize (1249766311052418130) -->
+    <skip />
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Permitir desprazamento diagonal"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"Cambiar tamaño"</string>
     <string name="accessibility_change_magnification_type" msgid="666000085077432421">"Cambiar tipo de ampliación"</string>
@@ -816,18 +815,15 @@
     <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"Configuración da ventá da lupa"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Toca para abrir as funcións de accesibilidade. Cambia este botón en Configuración.\n\n"<annotation id="link">"Ver configuración"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Para ocultar temporalmente o botón, móveo ata o bordo"</string>
-    <!-- no translation found for accessibility_floating_button_undo (511112888715708241) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_undo_message_text (3044079592757099698) -->
-    <skip />
+    <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Desfacer"</string>
+    <string name="accessibility_floating_button_undo_message_text" msgid="3044079592757099698">"{count,plural, =1{Quitouse {label} atallo}other{Quitáronse # atallos}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Mover á parte super. esquerda"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Mover á parte superior dereita"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"Mover á parte infer. esquerda"</string>
     <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"Mover á parte inferior dereita"</string>
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Mover ao bordo e ocultar"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Mover fóra do bordo e mostrar"</string>
-    <!-- no translation found for accessibility_floating_button_action_remove_menu (6730432848162552135) -->
-    <skip />
+    <string name="accessibility_floating_button_action_remove_menu" msgid="6730432848162552135">"Quitar"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"activar/desactivar"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Control de dispositivos"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Escolle unha aplicación para engadir controis"</string>
@@ -970,10 +966,8 @@
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Datos móbiles"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Conectada"</string>
-    <!-- no translation found for mobile_data_temp_connection_active (4590222725908806824) -->
-    <skip />
-    <!-- no translation found for mobile_data_poor_connection (819617772268371434) -->
-    <skip />
+    <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Conectada temporalmente"</string>
+    <string name="mobile_data_poor_connection" msgid="819617772268371434">"Conexión deficiente"</string>
     <string name="mobile_data_off_summary" msgid="3663995422004150567">"Os datos móbiles non se conectarán automaticamente"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"Sen conexión"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Non hai outras redes dispoñibles"</string>
@@ -1033,4 +1027,8 @@
     <string name="dream_date_complication_date_format" msgid="8191225366513860104">"EEE, d MMM"</string>
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
+    <string name="log_access_confirmation_title" msgid="4843557604739943395">"Queres permitir que a aplicación <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> acceda a todos os rexistros do dispositivo?"</string>
+    <string name="log_access_confirmation_allow" msgid="752147861593202968">"Permitir acceso unha soa vez"</string>
+    <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Non permitir"</string>
+    <string name="log_access_confirmation_body" msgid="6883031912003112634">"Os rexistros do dispositivo dan conta do que ocorre neste. As aplicacións poden usalos para buscar problemas e solucionalos.\n\nAlgúns poden conter información confidencial, polo que che recomendamos que só permitas que accedan a todos os rexistros do dispositivo as aplicacións nas que confíes. \n\nEsta aplicación pode acceder aos seus propios rexistros aínda que non lle permitas acceder a todos. É posible que o fabricante do dispositivo teña acceso a algúns rexistros ou á información do teu dispositivo."</string>
 </resources>

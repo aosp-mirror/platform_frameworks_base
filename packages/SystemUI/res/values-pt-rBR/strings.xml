@@ -52,7 +52,7 @@
     <string name="usb_debugging_always" msgid="4003121804294739548">"Sempre permitir a partir deste computador"</string>
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Permitir"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Depuração USB não permitida"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"O usuário conectado a este dispositivo não pode ativar a depuração USB. Para usar esse recurso, mude para o usuário principal \"NAME\"."</string>
+    <string name="usb_debugging_secondary_user_message" msgid="1888835696965417845">"O usuário conectado a este dispositivo não pode ativar a depuração USB. Para usar esse recurso, entre em uma conta de usuário administrador."</string>
     <string name="hdmi_cec_set_menu_language_title" msgid="1259765420091503742">"Quer mudar o idioma do sistema para <xliff:g id="LANGUAGE">%1$s</xliff:g>?"</string>
     <string name="hdmi_cec_set_menu_language_description" msgid="8176716678074126619">"Mudança do idioma do sistema solicitada por outro dispositivo"</string>
     <string name="hdmi_cec_set_menu_language_accept" msgid="2513689457281009578">"Alterar idioma"</string>
@@ -62,7 +62,7 @@
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Sempre permitir nesta rede"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"Permitir"</string>
     <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"Depuração por Wi-Fi não permitida"</string>
-    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"O usuário conectado a este dispositivo não pode ativar a depuração por Wi-Fi. Para usar esse recurso, conecte-se como o usuário principal."</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="9085779370142222881">"O usuário conectado a este dispositivo não pode ativar a depuração por Wi-Fi. Para usar esse recurso, entre em uma conta de usuário administrador."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"Porta USB desativada"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"Para proteger seu dispositivo de líquidos e detritos, a porta USB está desativada e não detectará nenhum acessório.\n\nVocê receberá uma notificação quando for seguro usar a porta USB novamente."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"Porta USB ativada para detectar carregadores e acessórios"</string>
@@ -125,7 +125,8 @@
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Assistência de voz"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"Carteira"</string>
     <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"Leitor de código QR"</string>
-    <string name="accessibility_unlock_button" msgid="122785427241471085">"Desbloquear"</string>
+    <!-- no translation found for accessibility_unlock_button (3613812140816244310) -->
+    <skip />
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Dispositivo bloqueado"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Verificando rosto"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"Enviar"</string>
@@ -168,7 +169,7 @@
     <skip />
     <string name="keyguard_face_failed" msgid="9044619102286917151">"Rosto não reconhecido"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"Use a impressão digital"</string>
-    <!-- no translation found for keyguard_face_unlock_unavailable (8145547300240405980) -->
+    <!-- no translation found for keyguard_face_unlock_unavailable (1581949044193418736) -->
     <skip />
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth conectado."</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Porcentagem da bateria desconhecida."</string>
@@ -180,8 +181,12 @@
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"Modo avião."</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN ativada."</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"Bateria em <xliff:g id="NUMBER">%d</xliff:g> por cento."</string>
-    <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"Bateria com <xliff:g id="PERCENTAGE">%1$s</xliff:g> de carga, tempo restante aproximado, com base no seu uso: <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"Bateria com <xliff:g id="PERCENTAGE">%1$d</xliff:g> de carga, tempo restante aproximado, com base no seu uso: <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"Bateria carregando: <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%."</string>
+    <!-- no translation found for accessibility_battery_level_charging_paused (1716051308782906917) -->
+    <skip />
+    <!-- no translation found for accessibility_battery_level_charging_paused_with_estimate (4006089349465741762) -->
+    <skip />
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"Ver todas as notificações"</string>
     <string name="accessibility_tty_enabled" msgid="1123180388823381118">"TeleTYpewriter ativado."</string>
     <string name="accessibility_ringer_vibrate" msgid="6261841170896561364">"Vibração da campainha."</string>
@@ -386,16 +391,11 @@
     <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"Quando você compartilha, grava ou transmite um app, o <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> tem acesso a todas as informações visíveis na tela ou reproduzidas no dispositivo. Tenha cuidado com senhas, detalhes de pagamento, mensagens ou outras informações sensíveis."</string>
     <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"Continuar"</string>
     <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"Compartilhar ou gravar um app"</string>
-    <!-- no translation found for media_projection_permission_dialog_system_service_title (6827129613741303726) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_system_service_warning_entire_screen (8801616203805837575) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_system_service_warning_single_app (543310680568419338) -->
-    <skip />
-    <!-- no translation found for screen_capturing_disabled_by_policy_dialog_title (2113331792064527203) -->
-    <skip />
-    <!-- no translation found for screen_capturing_disabled_by_policy_dialog_description (6015975736747696431) -->
-    <skip />
+    <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"Permitir que este app compartilhe ou grave a tela?"</string>
+    <string name="media_projection_permission_dialog_system_service_warning_entire_screen" msgid="8801616203805837575">"Quando você compartilha, grava ou transmite a tela, este app tem acesso a todas as informações visíveis nela ou reproduzidas no dispositivo. Tenha cuidado com senhas, detalhes de pagamento, mensagens e outras informações sensíveis."</string>
+    <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"Quando você compartilha, grava ou transmite a tela, este app tem acesso a todas as informações visíveis nela ou reproduzidas no dispositivo. Tenha cuidado com senhas, detalhes de pagamento, mensagens e outras informações sensíveis."</string>
+    <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"Ação bloqueada pelo administrador de TI"</string>
+    <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"A captura de tela foi desativada pela política do dispositivo"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Limpar tudo"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Gerenciar"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Histórico"</string>
@@ -511,7 +511,8 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Desbloquear para usar"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Ocorreu um problema ao carregar os cards. Tente novamente mais tarde"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Configurações de tela de bloqueio"</string>
-    <string name="qr_code_scanner_title" msgid="5290201053875420785">"Ler código QR"</string>
+    <!-- no translation found for qr_code_scanner_title (1938155688725760702) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"Perfil de trabalho"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Modo avião"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Você não ouvirá o próximo alarme às <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -794,6 +795,8 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Ampliar toda a tela"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Ampliar parte da tela"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Trocar"</string>
+    <!-- no translation found for magnification_drag_corner_to_resize (1249766311052418130) -->
+    <skip />
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Permitir rolagem diagonal"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"Redimensionar"</string>
     <string name="accessibility_change_magnification_type" msgid="666000085077432421">"Mudar tipo de ampliação"</string>
@@ -1024,4 +1027,8 @@
     <string name="dream_date_complication_date_format" msgid="8191225366513860104">"EEE, d de MMM"</string>
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
+    <string name="log_access_confirmation_title" msgid="4843557604739943395">"Permitir que o app <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> acesse todos os registros do dispositivo?"</string>
+    <string name="log_access_confirmation_allow" msgid="752147861593202968">"Permitir o acesso único"</string>
+    <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Não permitir"</string>
+    <string name="log_access_confirmation_body" msgid="6883031912003112634">"Os registros do dispositivo gravam o que acontece nele. Os apps podem usar esses registros para encontrar e corrigir problemas.\n\nAlguns registros podem conter informações sensíveis, então autorize o acesso a eles apenas para os apps em que você confia. \n\nSe você não permitir que esse app acesse todos os registros do dispositivo, ele ainda vai poder acessar os próprios. O fabricante do dispositivo também pode ter acesso a alguns registros ou informações."</string>
 </resources>

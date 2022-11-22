@@ -52,7 +52,7 @@
     <string name="usb_debugging_always" msgid="4003121804294739548">"Энэ компьютерээс орохыг байнга зөвшөөрөх"</string>
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Зөвшөөрөх"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"USB алдаа засалт хийх боломжгүй"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"Энэ төхөөрөмжид нэвтэрсэн хэрэглэгч USB дебаг хийх онцлогийг асаах боломжгүй байна. Энэ онцлогийг ашиглахын тулд үндсэн хэрэглэгч рүү сэлгэнэ үү."</string>
+    <string name="usb_debugging_secondary_user_message" msgid="1888835696965417845">"Энэ төхөөрөмжид одоогоор нэвтэрсэн хэрэглэгч USB дебагийг асаах боломжгүй. Энэ онцлогийг ашиглахын тулд админ хэрэглэгч рүү сэлгэнэ үү."</string>
     <string name="hdmi_cec_set_menu_language_title" msgid="1259765420091503742">"Та системийн хэлийг <xliff:g id="LANGUAGE">%1$s</xliff:g> хэл болгож өөрчлөхийг хүсэж байна уу?"</string>
     <string name="hdmi_cec_set_menu_language_description" msgid="8176716678074126619">"Өөр төхөөрөмжөөс системийн хэлийг өөрчлөх хүсэлт тавьсан"</string>
     <string name="hdmi_cec_set_menu_language_accept" msgid="2513689457281009578">"Хэл солих"</string>
@@ -62,7 +62,7 @@
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Энэ сүлжээн дээр үргэлж зөвшөөрөх"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"Зөвшөөрөх"</string>
     <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"Wireless debugging-г зөвшөөрөөгүй байна"</string>
-    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"Энэ төхөөрөмжид одоогоор нэвтэрсэн байгаа хэрэглэгч wireless debugging-г асаах боломжгүй. Энэ онцлогийг ашиглахын тулд үндсэн хэрэглэгч рүү сэлгэнэ үү."</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="9085779370142222881">"Энэ төхөөрөмжид одоогоор нэвтэрсэн хэрэглэгч wireless debugging-г асаах боломжгүй. Энэ онцлогийг ашиглахын тулд админ хэрэглэгч рүү сэлгэнэ үү."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"USB портыг идэвхгүй болгосон"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"Таны төхөөрөмжийг шингэн зүйл эсвэл бохирдлоос хамгаалахын тулд USB портыг идэвхгүй болгосон бөгөөд энэ нь ямар ч дагалдах хэрэгслийг илрүүлэхгүй.\n\nТанд USB портыг дахин ашиглахад аюулгүй болох үед мэдэгдэх болно."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"Цэнэглэгч болон нэмэлт хэрэгслийг илрүүлэхийн тулд USB портыг идэвхжүүлсэн"</string>
@@ -125,7 +125,8 @@
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Дуут туслах"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"Wallet"</string>
     <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"QR код сканнер"</string>
-    <string name="accessibility_unlock_button" msgid="122785427241471085">"Тайлах"</string>
+    <!-- no translation found for accessibility_unlock_button (3613812140816244310) -->
+    <skip />
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Төхөөрөмжийг түгжсэн"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Скан хийх нүүр царай"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"Илгээх"</string>
@@ -168,7 +169,7 @@
     <skip />
     <string name="keyguard_face_failed" msgid="9044619102286917151">"Царайг танихгүй байна"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"Оронд нь хурууны хээ ашиглах"</string>
-    <!-- no translation found for keyguard_face_unlock_unavailable (8145547300240405980) -->
+    <!-- no translation found for keyguard_face_unlock_unavailable (1581949044193418736) -->
     <skip />
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth холбогдсон."</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Батарейн хувь тодорхойгүй байна."</string>
@@ -180,8 +181,12 @@
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"Нислэгийн горим"</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN асаалттай байна."</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"Батарей <xliff:g id="NUMBER">%d</xliff:g> хувьтай."</string>
-    <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"Батарей <xliff:g id="PERCENTAGE">%1$s</xliff:g> хувьтай байна. Таны хэрэглээнд тулгуурлан ойролцоогоор <xliff:g id="TIME">%2$s</xliff:g> үлдсэн"</string>
+    <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"Батарей <xliff:g id="PERCENTAGE">%1$d</xliff:g> хувьтай байна. Таны хэрэглээнд тулгуурлан ойролцоогоор <xliff:g id="TIME">%2$s</xliff:g> үлдсэн"</string>
     <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"Батарейг цэнэглэж байна, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%."</string>
+    <!-- no translation found for accessibility_battery_level_charging_paused (1716051308782906917) -->
+    <skip />
+    <!-- no translation found for accessibility_battery_level_charging_paused_with_estimate (4006089349465741762) -->
+    <skip />
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"Бүх мэдэгдлийг харах"</string>
     <string name="accessibility_tty_enabled" msgid="1123180388823381118">"TeleTypewriter идэвхтэй болов."</string>
     <string name="accessibility_ringer_vibrate" msgid="6261841170896561364">"Хонхны чичиргээ."</string>
@@ -386,16 +391,11 @@
     <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"Таныг хуваалцаж, бичиж эсвэл дамжуулж байх үед <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> нь тухайн апп дээр харуулсан эсвэл тоглуулсан аливаа зүйлд хандах эрхтэй. Тиймээс нууц үг, төлбөрийн дэлгэрэнгүй, мессеж эсвэл бусад эмзэг мэдээлэлд болгоомжтой хандаарай."</string>
     <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"Үргэлжлүүлэх"</string>
     <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"Хуваалцах эсвэл бичих апп"</string>
-    <!-- no translation found for media_projection_permission_dialog_system_service_title (6827129613741303726) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_system_service_warning_entire_screen (8801616203805837575) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_system_service_warning_single_app (543310680568419338) -->
-    <skip />
-    <!-- no translation found for screen_capturing_disabled_by_policy_dialog_title (2113331792064527203) -->
-    <skip />
-    <!-- no translation found for screen_capturing_disabled_by_policy_dialog_description (6015975736747696431) -->
-    <skip />
+    <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"Энэ аппад хуваалцах эсвэл бичихийг зөвшөөрөх үү?"</string>
+    <string name="media_projection_permission_dialog_system_service_warning_entire_screen" msgid="8801616203805837575">"Таныг хуваалцаж, бичиж эсвэл дамжуулж байх үед энэ апп нь таны дэлгэц дээр харагдаж буй аливаа зүйл эсвэл төхөөрөмж дээр тань тоглуулж буй зүйлд хандах эрхтэй. Тиймээс нууц үг, төлбөрийн дэлгэрэнгүй, мессеж эсвэл бусад эмзэг мэдээлэлд болгоомжтой хандаарай."</string>
+    <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"Таныг хуваалцаж, бичиж эсвэл дамжуулж байх үед энэ апп нь тухайн апп дээр харуулж эсвэл тоглуулж буй аливаа зүйлд хандах эрхтэй. Тиймээс нууц үг, төлбөрийн дэлгэрэнгүй, мессеж эсвэл бусад эмзэг мэдээлэлд болгоомжтой хандаарай."</string>
+    <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"Таны IT админ блоклосон"</string>
+    <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"Төхөөрөмжийн бодлогоор дэлгэцийн зураг авахыг идэвхгүй болгосон"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Бүгдийг арилгах"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Удирдах"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Түүх"</string>
@@ -511,7 +511,7 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Ашиглахын тулд түгжээг тайлах"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Таны картыг авахад асуудал гарлаа. Дараа дахин оролдоно уу"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Түгжигдсэн дэлгэцийн тохиргоо"</string>
-    <string name="qr_code_scanner_title" msgid="5290201053875420785">"QR код скан хийх"</string>
+    <string name="qr_code_scanner_title" msgid="1938155688725760702">"QR код сканнер"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Ажлын профайл"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Нислэгийн горим"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"<xliff:g id="WHEN">%1$s</xliff:g>-т та дараагийн сэрүүлгээ сонсохгүй"</string>
@@ -794,6 +794,8 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Бүтэн дэлгэцийг томруулах"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Дэлгэцийн нэг хэсгийг томруулах"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Сэлгэх"</string>
+    <!-- no translation found for magnification_drag_corner_to_resize (1249766311052418130) -->
+    <skip />
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Хөндлөн гүйлгэхийг зөвшөөрнө үү"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"Хэмжээг өөрчлөх"</string>
     <string name="accessibility_change_magnification_type" msgid="666000085077432421">"Томруулах төрлийг өөрчлөх"</string>
@@ -1024,4 +1026,8 @@
     <string name="dream_date_complication_date_format" msgid="8191225366513860104">"MMM d EEE"</string>
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
+    <string name="log_access_confirmation_title" msgid="4843557604739943395">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>-д төхөөрөмжийн бүх логт хандахыг зөвшөөрөх үү?"</string>
+    <string name="log_access_confirmation_allow" msgid="752147861593202968">"Нэг удаагийн хандалтыг зөвшөөрөх"</string>
+    <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Бүү зөвшөөр"</string>
+    <string name="log_access_confirmation_body" msgid="6883031912003112634">"Төхөөрөмжийн лог нь таны төхөөрөмж дээр юу болж байгааг бичдэг. Аппууд эдгээр логийг асуудлыг олох болон засахад ашиглах боломжтой.\n\nЗарим лог эмзэг мэдээлэл агуулж байж магадгүй тул та зөвхөн итгэдэг аппууддаа төхөөрөмжийн бүх логт хандахыг зөвшөөрнө үү. \n\nХэрэв та энэ аппад төхөөрөмжийн бүх логт хандахыг зөвшөөрөхгүй бол энэ нь өөрийн логт хандах боломжтой хэвээр байх болно. Tаны төхөөрөмжийн үйлдвэрлэгч таны төхөөрөмж дээрх зарим лог эсвэл мэдээлэлд хандах боломжтой хэвээр байж магадгүй."</string>
 </resources>

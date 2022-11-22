@@ -52,7 +52,7 @@
     <string name="usb_debugging_always" msgid="4003121804294739548">"Dona sempre permís des d\'aquest equip"</string>
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Permet"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"No es permet la depuració per USB"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"L\'usuari que té iniciada la sessió al dispositiu en aquest moment no pot activar la depuració per USB. Per utilitzar aquesta funció, cal canviar a l\'usuari principal."</string>
+    <string name="usb_debugging_secondary_user_message" msgid="1888835696965417845">"L\'usuari que té iniciada la sessió al dispositiu en aquest moment no pot activar la depuració per USB. Per utilitzar aquesta funció, cal canviar a l\'usuari principal."</string>
     <string name="hdmi_cec_set_menu_language_title" msgid="1259765420091503742">"Vols canviar l\'idioma del sistema a <xliff:g id="LANGUAGE">%1$s</xliff:g>?"</string>
     <string name="hdmi_cec_set_menu_language_description" msgid="8176716678074126619">"Un altre dispositiu ha sol·licitat canviar l\'idioma del sistema"</string>
     <string name="hdmi_cec_set_menu_language_accept" msgid="2513689457281009578">"Canvia l\'idioma"</string>
@@ -62,7 +62,7 @@
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Permet sempre en aquesta xarxa"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"Permet"</string>
     <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"No es permet la depuració sense fil"</string>
-    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"L\'usuari que té iniciada la sessió al dispositiu en aquest moment no pot activar la depuració sense fil. Per utilitzar aquesta funció, cal canviar a l\'usuari principal."</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="9085779370142222881">"L\'usuari que té iniciada la sessió al dispositiu en aquest moment no pot activar la depuració sense fil. Per utilitzar aquesta funció, cal canviar a l\'usuari principal."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"El port USB està desactivat"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"Per protegir el teu dispositiu dels líquids o de la pols, el port USB s\'ha desactivat i no detectarà cap accessori.\n\nRebràs una notificació quan puguis tornar a utilitzar-lo."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"S\'ha activat el port USB per detectar carregadors i accessoris"</string>
@@ -125,7 +125,8 @@
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Assistència per veu"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"Wallet"</string>
     <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"Escàner de codis QR"</string>
-    <string name="accessibility_unlock_button" msgid="122785427241471085">"Desbloqueja"</string>
+    <!-- no translation found for accessibility_unlock_button (3613812140816244310) -->
+    <skip />
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Dispositiu bloquejat"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"S\'està escanejant la cara"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"Envia"</string>
@@ -168,7 +169,7 @@
     <skip />
     <string name="keyguard_face_failed" msgid="9044619102286917151">"No es reconeix la cara"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"Utilitza l\'empremta digital"</string>
-    <!-- no translation found for keyguard_face_unlock_unavailable (8145547300240405980) -->
+    <!-- no translation found for keyguard_face_unlock_unavailable (1581949044193418736) -->
     <skip />
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth connectat."</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Es desconeix el percentatge de bateria."</string>
@@ -180,8 +181,12 @@
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"Mode d\'avió."</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN activada"</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"<xliff:g id="NUMBER">%d</xliff:g> per cent de bateria."</string>
-    <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> per cent de bateria amb aproximadament <xliff:g id="TIME">%2$s</xliff:g> de temps restant segons l\'ús que en fas"</string>
+    <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> per cent de bateria amb aproximadament <xliff:g id="TIME">%2$s</xliff:g> de temps restant segons l\'ús que en fas"</string>
     <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"La bateria s\'està carregant (<xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%)."</string>
+    <!-- no translation found for accessibility_battery_level_charging_paused (1716051308782906917) -->
+    <skip />
+    <!-- no translation found for accessibility_battery_level_charging_paused_with_estimate (4006089349465741762) -->
+    <skip />
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"Mostra totes les notificacions"</string>
     <string name="accessibility_tty_enabled" msgid="1123180388823381118">"Teletip activat."</string>
     <string name="accessibility_ringer_vibrate" msgid="6261841170896561364">"Mode vibració."</string>
@@ -305,28 +310,17 @@
     <string name="sensor_privacy_mic_unblocked_toast_content" msgid="306555320557065068">"Micròfon disponible"</string>
     <string name="sensor_privacy_camera_unblocked_toast_content" msgid="7843105715964332311">"Càmera disponible"</string>
     <string name="sensor_privacy_mic_camera_unblocked_toast_content" msgid="7339355093282661115">"Càmera i micròfon disponibles"</string>
-    <!-- no translation found for sensor_privacy_mic_turned_on_dialog_title (6348853159838376513) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_mic_turned_off_dialog_title (5760464281790732849) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_mic_unblocked_dialog_content (4889961886199270224) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_mic_blocked_no_exception_dialog_content (5864898470772965394) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_mic_blocked_with_exception_dialog_content (810289713700437896) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_camera_turned_on_dialog_title (8039095295100075952) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_camera_turned_off_dialog_title (1936603903120742696) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_camera_unblocked_dialog_content (7847190103011782278) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_camera_blocked_dialog_content (3182428709314874616) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_htt_blocked_dialog_content (3333321592997666441) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_dialog_open_settings (1503088305279285048) -->
-    <skip />
+    <string name="sensor_privacy_mic_turned_on_dialog_title" msgid="6348853159838376513">"El micròfon s\'ha activat"</string>
+    <string name="sensor_privacy_mic_turned_off_dialog_title" msgid="5760464281790732849">"El micròfon s\'ha desactivat"</string>
+    <string name="sensor_privacy_mic_unblocked_dialog_content" msgid="4889961886199270224">"El micròfon està activat per a totes les aplicacions i serveis."</string>
+    <string name="sensor_privacy_mic_blocked_no_exception_dialog_content" msgid="5864898470772965394">"L\'accés al micròfon està desactivat per a totes les aplicacions i serveis. Pots activar l\'accés al micròfon a Configuració &gt; Privadesa &gt; Micròfon."</string>
+    <string name="sensor_privacy_mic_blocked_with_exception_dialog_content" msgid="810289713700437896">"L\'accés al micròfon està desactivat per a totes les aplicacions i serveis. Pots canviar-ho a Configuració &gt; Privadesa &gt; Micròfon."</string>
+    <string name="sensor_privacy_camera_turned_on_dialog_title" msgid="8039095295100075952">"La càmera s\'ha activat"</string>
+    <string name="sensor_privacy_camera_turned_off_dialog_title" msgid="1936603903120742696">"La càmera s\'ha desactivat"</string>
+    <string name="sensor_privacy_camera_unblocked_dialog_content" msgid="7847190103011782278">"La càmera està activada per a totes les aplicacions i serveis."</string>
+    <string name="sensor_privacy_camera_blocked_dialog_content" msgid="3182428709314874616">"L\'accés a la càmera està desactivat per a totes les aplicacions i serveis."</string>
+    <string name="sensor_privacy_htt_blocked_dialog_content" msgid="3333321592997666441">"Per utilitzar el botó de micròfon, activa l\'accés al micròfon a Configuració."</string>
+    <string name="sensor_privacy_dialog_open_settings" msgid="1503088305279285048">"Obre la configuració."</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Un altre dispositiu"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Activa o desactiva Aplicacions recents"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"No t\'interromprà cap so ni cap vibració, tret dels de les alarmes, recordatoris, esdeveniments i trucades de les persones que especifiquis. Continuaràs sentint tot allò que decideixis reproduir, com ara música, vídeos i jocs."</string>
@@ -397,16 +391,11 @@
     <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"Quan estàs compartint, gravant o emetent, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> té accés a qualsevol cosa que es vegi a la pantalla o que es reprodueixi a l\'aplicació. Per aquest motiu, ves amb compte amb les contrasenyes, les dades de pagament, els missatges o altra informació sensible."</string>
     <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"Continua"</string>
     <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"Comparteix o grava una aplicació"</string>
-    <!-- no translation found for media_projection_permission_dialog_system_service_title (6827129613741303726) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_system_service_warning_entire_screen (8801616203805837575) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_system_service_warning_single_app (543310680568419338) -->
-    <skip />
-    <!-- no translation found for screen_capturing_disabled_by_policy_dialog_title (2113331792064527203) -->
-    <skip />
-    <!-- no translation found for screen_capturing_disabled_by_policy_dialog_description (6015975736747696431) -->
-    <skip />
+    <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"Vols permetre que aquesta aplicació comparteixi o gravi contingut?"</string>
+    <string name="media_projection_permission_dialog_system_service_warning_entire_screen" msgid="8801616203805837575">"Quan estàs compartint, gravant o emetent, aquesta aplicació té accés a qualsevol cosa que es vegi a la pantalla o que es reprodueixi al dispositiu. Per aquest motiu, ves amb compte amb les contrasenyes, les dades de pagament, els missatges o altra informació sensible."</string>
+    <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"Quan estàs compartint, gravant o emetent, aquesta aplicació té accés a qualsevol cosa que es vegi a la pantalla o que es reprodueixi a l\'aplicació. Per aquest motiu, ves amb compte amb les contrasenyes, les dades de pagament, els missatges o altra informació sensible."</string>
+    <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"Bloquejat per l\'administrador de TI"</string>
+    <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"Les captures de pantalla estan desactivades per la política de dispositius"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Esborra-ho tot"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Gestiona"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Historial"</string>
@@ -452,8 +441,8 @@
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"L\'administrador ha activat el registre de xarxa, que supervisa el trànsit del teu dispositiu."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"L\'administrador ha activat el registre de xarxa, que monitora el trànsit al teu perfil de treball, però no al personal."</string>
     <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Aquest dispositiu es connecta a Internet a través de <xliff:g id="VPN_APP">%1$s</xliff:g>. El teu administrador de TI pot veure l\'activitat de la teva xarxa, inclosos els correus electrònics i les dades de navegació."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Aquest dispositiu es connecta a Internet a través de <xliff:g id="VPN_APP_0">%1$s</xliff:g> i <xliff:g id="VPN_APP_1">%2$s</xliff:g>. El teu administrador de TI pot veure la teva activitat a la xarxa, inclosos els correus electrònics i les dades de navegació."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Les aplicacions de treball es connecten a Internet a través de <xliff:g id="VPN_APP">%1$s</xliff:g>. El teu administrador de TI i el teu proveïdor de VPN poden veure la teva activitat a la xarxa en aplicacions de treball, inclosos els correus electrònics i les dades de navegació."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Aquest dispositiu es connecta a Internet a través de <xliff:g id="VPN_APP_0">%1$s</xliff:g> i <xliff:g id="VPN_APP_1">%2$s</xliff:g>. El teu administrador de TI pot veure la teva activitat de xarxa, inclosos els correus electrònics i les dades de navegació."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Les aplicacions de treball es connecten a Internet a través de <xliff:g id="VPN_APP">%1$s</xliff:g>. El teu administrador de TI i el teu proveïdor de VPN poden veure la teva activitat de xarxa en aplicacions de treball, inclosos els correus electrònics i les dades de navegació."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Les aplicacions personals es connecten a Internet a través de <xliff:g id="VPN_APP">%1$s</xliff:g>. El teu proveïdor de VPN pot veure l\'activitat de la teva xarxa, inclosos els correus electrònics i les dades de navegació."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Obre la configuració de la VPN"</string>
@@ -522,7 +511,8 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Desbloqueja per utilitzar"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Hi ha hagut un problema en obtenir les teves targetes; torna-ho a provar més tard"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Configuració de la pantalla de bloqueig"</string>
-    <string name="qr_code_scanner_title" msgid="5290201053875420785">"Escaneja un codi QR"</string>
+    <!-- no translation found for qr_code_scanner_title (1938155688725760702) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"Perfil de treball"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Mode d\'avió"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"<xliff:g id="WHEN">%1$s</xliff:g> no sentiràs la pròxima alarma"</string>
@@ -805,6 +795,8 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Amplia la pantalla completa"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Amplia una part de la pantalla"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Canvia"</string>
+    <!-- no translation found for magnification_drag_corner_to_resize (1249766311052418130) -->
+    <skip />
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Permet el desplaçament en diagonal"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"Canvia la mida"</string>
     <string name="accessibility_change_magnification_type" msgid="666000085077432421">"Canvia el tipus d\'ampliació"</string>
@@ -1035,4 +1027,8 @@
     <string name="dream_date_complication_date_format" msgid="8191225366513860104">"EEE, d MMM"</string>
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"hh:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
+    <string name="log_access_confirmation_title" msgid="4843557604739943395">"Vols permetre que <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> accedeixi a tots els registres del dispositiu?"</string>
+    <string name="log_access_confirmation_allow" msgid="752147861593202968">"Permet l\'accés únic"</string>
+    <string name="log_access_confirmation_deny" msgid="2389461495803585795">"No permetis"</string>
+    <string name="log_access_confirmation_body" msgid="6883031912003112634">"Els registres del dispositiu inclouen informació sobre tot allò que passa al teu dispositiu. Les aplicacions poden utilitzar aquests registres per detectar i corregir problemes.\n\nÉs possible que alguns registres continguin informació sensible; per això només has de donar-hi accés a les aplicacions de confiança. \n\nEncara que no permetis que aquesta aplicació pugui accedir a tots els registres del dispositiu, podrà accedir als seus propis registres. És possible que el fabricant del dispositiu també tingui accés a alguns registres o a informació del teu dispositiu."</string>
 </resources>
