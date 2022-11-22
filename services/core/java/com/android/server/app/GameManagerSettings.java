@@ -90,9 +90,14 @@ public class GameManagerSettings {
      */
     int getGameModeLocked(String packageName) {
         if (mGameModes.containsKey(packageName)) {
-            return mGameModes.get(packageName);
+            final int gameMode = mGameModes.get(packageName);
+            if (gameMode == GameManager.GAME_MODE_UNSUPPORTED) {
+                // force replace cached UNSUPPORTED mode with STANDARD starting in U
+                return GameManager.GAME_MODE_STANDARD;
+            }
+            return gameMode;
         }
-        return GameManager.GAME_MODE_UNSUPPORTED;
+        return GameManager.GAME_MODE_STANDARD;
     }
 
     /**
@@ -255,7 +260,7 @@ public class GameManagerSettings {
             XmlUtils.skipCurrentTag(parser);
             return;
         }
-        int gameMode = GameManager.GAME_MODE_UNSUPPORTED;
+        int gameMode;
         try {
             gameMode = parser.getAttributeInt(null, ATTR_GAME_MODE);
         } catch (XmlPullParserException e) {
@@ -282,7 +287,7 @@ public class GameManagerSettings {
                         + type);
             }
         }
-        if (config.getAvailableGameModes().length > 1) {
+        if (config.hasActiveGameModeConfig()) {
             mConfigOverrides.put(name, config);
         }
     }

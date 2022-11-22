@@ -50,15 +50,11 @@ public final class GameManagerTests {
         mPackageName = mContext.getPackageName();
 
         // Reset the Game Mode for the test app, since it persists across invocations.
-        mGameManager.setGameMode(mPackageName, GameManager.GAME_MODE_UNSUPPORTED);
+        mGameManager.setGameMode(mPackageName, GameManager.GAME_MODE_STANDARD);
     }
 
     @Test
     public void testPublicApiGameModeGetterSetter() {
-        assertEquals(GameManager.GAME_MODE_UNSUPPORTED,
-                mGameManager.getGameMode());
-
-        mGameManager.setGameMode(mPackageName, GameManager.GAME_MODE_STANDARD);
         assertEquals(GameManager.GAME_MODE_STANDARD,
                 mGameManager.getGameMode());
 
@@ -73,10 +69,6 @@ public final class GameManagerTests {
 
     @Test
     public void testPrivilegedGameModeGetterSetter() {
-        assertEquals(GameManager.GAME_MODE_UNSUPPORTED,
-                mGameManager.getGameMode(mPackageName));
-
-        mGameManager.setGameMode(mPackageName, GameManager.GAME_MODE_STANDARD);
         assertEquals(GameManager.GAME_MODE_STANDARD,
                 mGameManager.getGameMode(mPackageName));
 

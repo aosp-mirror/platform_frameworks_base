@@ -187,7 +187,9 @@ public final class GameManager {
      * Sets the game mode for the given package.
      * <p>
      * The caller must have {@link android.Manifest.permission#MANAGE_GAME_MODE}.
-     *
+     * <p>
+     * Setting the game mode on a non-game application or setting a game to
+     * {@link #GAME_MODE_UNSUPPORTED} will have no effect.
      * @hide
      */
     @SystemApi
