@@ -12219,6 +12219,7 @@ package android.service.voice {
     method @Nullable public android.media.AudioTimestamp getTimestamp();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.service.voice.HotwordAudioStream> CREATOR;
+    field public static final String KEY_AUDIO_STREAM_COPY_BUFFER_LENGTH_BYTES = "android.service.voice.key.AUDIO_STREAM_COPY_BUFFER_LENGTH_BYTES";
   }
 
   public static final class HotwordAudioStream.Builder {

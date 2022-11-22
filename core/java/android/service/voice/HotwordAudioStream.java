@@ -47,6 +47,21 @@ import java.util.Objects;
 public final class HotwordAudioStream implements Parcelable {
 
     /**
+     * Key for int value to be read from {@link #getMetadata()}. The value is read by the system and
+     * is the length (in bytes) of the byte buffers created to copy bytes in the
+     * {@link #getAudioStreamParcelFileDescriptor()} written by the {@link HotwordDetectionService}.
+     * The buffer length should be chosen such that no additional latency is introduced. Typically,
+     * this should be <em>at least</em> the size of byte chunks written by the
+     * {@link HotwordDetectionService}.
+     *
+     * <p>If no value specified in the metadata for the buffer length, or if the value is less than
+     * 1, or if it is greater than 65,536, or if it is not an int, the default value of 2,560 will
+     * be used.</p>
+     */
+    public static final String KEY_AUDIO_STREAM_COPY_BUFFER_LENGTH_BYTES =
+            "android.service.voice.key.AUDIO_STREAM_COPY_BUFFER_LENGTH_BYTES";
+
+    /**
      * The {@link AudioFormat} of the audio stream.
      */
     @NonNull
@@ -414,10 +429,10 @@ public final class HotwordAudioStream implements Parcelable {
     }
 
     @DataClass.Generated(
-            time = 1669184301563L,
+            time = 1669916341034L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/service/voice/HotwordAudioStream.java",
-            inputSignatures = "private final @android.annotation.NonNull android.media.AudioFormat mAudioFormat\nprivate final @android.annotation.NonNull android.os.ParcelFileDescriptor mAudioStreamParcelFileDescriptor\nprivate final @android.annotation.Nullable android.media.AudioTimestamp mTimestamp\nprivate final @android.annotation.NonNull android.os.PersistableBundle mMetadata\nprivate static  android.media.AudioTimestamp defaultTimestamp()\nprivate static  android.os.PersistableBundle defaultMetadata()\npublic  android.service.voice.HotwordAudioStream.Builder buildUpon()\nclass HotwordAudioStream extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genConstructor=false, genBuilder=true, genEqualsHashCode=true, genParcelable=true, genToString=true)")
+            inputSignatures = "public static final  java.lang.String KEY_AUDIO_STREAM_COPY_BUFFER_LENGTH_BYTES\nprivate final @android.annotation.NonNull android.media.AudioFormat mAudioFormat\nprivate final @android.annotation.NonNull android.os.ParcelFileDescriptor mAudioStreamParcelFileDescriptor\nprivate final @android.annotation.Nullable android.media.AudioTimestamp mTimestamp\nprivate final @android.annotation.NonNull android.os.PersistableBundle mMetadata\nprivate static  android.media.AudioTimestamp defaultTimestamp()\nprivate static  android.os.PersistableBundle defaultMetadata()\npublic  android.service.voice.HotwordAudioStream.Builder buildUpon()\nclass HotwordAudioStream extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genConstructor=false, genBuilder=true, genEqualsHashCode=true, genParcelable=true, genToString=true)")
     @Deprecated
     private void __metadata() {}
 
