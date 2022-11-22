@@ -1649,7 +1649,7 @@ public class AccountManagerService
 
         final long identityToken = clearCallingIdentity();
         try {
-            return getAuthenticatorTypesInternal(userId);
+            return getAuthenticatorTypesInternal(userId, callingUid);
 
         } finally {
             restoreCallingIdentity(identityToken);
@@ -1659,19 +1659,19 @@ public class AccountManagerService
     /**
      * Should only be called inside of a clearCallingIdentity block.
      */
-    private AuthenticatorDescription[] getAuthenticatorTypesInternal(int userId) {
+    private AuthenticatorDescription[] getAuthenticatorTypesInternal(int userId, int callingUid) {
         mAuthenticatorCache.updateServices(userId);
         Collection<AccountAuthenticatorCache.ServiceInfo<AuthenticatorDescription>>
                 authenticatorCollection = mAuthenticatorCache.getAllServices(userId);
-        AuthenticatorDescription[] types =
-                new AuthenticatorDescription[authenticatorCollection.size()];
-        int i = 0;
+        final List<AuthenticatorDescription> types =
+                new ArrayList<>(authenticatorCollection.size());
         for (AccountAuthenticatorCache.ServiceInfo<AuthenticatorDescription> authenticator
                 : authenticatorCollection) {
-            types[i] = authenticator.type;
-            i++;
+            if (canCallerAccessPackage(authenticator.type.packageName, callingUid, userId)) {
+                types.add(authenticator.type);
+            }
         }
-        return types;
+        return types.toArray(new AuthenticatorDescription[types.size()]);
     }
 
     private boolean isCrossUser(int callingUid, int userId) {
