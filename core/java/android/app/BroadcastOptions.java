@@ -767,11 +767,11 @@ public class BroadcastOptions extends ComponentOptions {
      */
     @SystemApi
     public void setDeliveryGroupMatchingKey(@NonNull String namespace, @NonNull String key) {
-        Preconditions.checkArgument(!namespace.contains("/"),
-                "namespace should not contain '/'");
-        Preconditions.checkArgument(!key.contains("/"),
-                "key should not contain '/'");
-        mDeliveryGroupMatchingKey = namespace + "/" + key;
+        Preconditions.checkArgument(!namespace.contains(":"),
+                "namespace should not contain ':'");
+        Preconditions.checkArgument(!key.contains(":"),
+                "key should not contain ':'");
+        mDeliveryGroupMatchingKey = namespace + ":" + key;
     }
 
     /**
@@ -779,7 +779,7 @@ public class BroadcastOptions extends ComponentOptions {
      * broadcast belongs to.
      *
      * @return the delivery group namespace and key that was previously set using
-     *         {@link #setDeliveryGroupMatchingKey(String, String)}, concatenated with a {@code /}.
+     *         {@link #setDeliveryGroupMatchingKey(String, String)}, concatenated with a {@code :}.
      * @hide
      */
     @SystemApi
