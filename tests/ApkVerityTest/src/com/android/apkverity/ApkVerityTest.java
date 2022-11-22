@@ -25,7 +25,6 @@ import static org.junit.Assert.fail;
 import android.platform.test.annotations.RootPermissionTest;
 
 import com.android.blockdevicewriter.BlockDeviceWriter;
-import com.android.fsverity.AddFsVerityCertRule;
 import com.android.tradefed.device.DeviceNotAvailableException;
 import com.android.tradefed.device.ITestDevice;
 import com.android.tradefed.log.LogUtil.CLog;
@@ -36,7 +35,6 @@ import com.android.tradefed.util.CommandStatus;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -90,10 +88,6 @@ public class ApkVerityTest extends BaseHostJUnit4Test {
     /** Only 4K page is supported by fs-verity currently. */
     private static final int FSVERITY_PAGE_SIZE = 4096;
 
-    @Rule
-    public final AddFsVerityCertRule mAddFsVerityCertRule =
-            new AddFsVerityCertRule(this, CERT_PATH);
-
     private ITestDevice mDevice;
     private boolean mDmRequireFsVerity;
 
@@ -103,11 +97,13 @@ public class ApkVerityTest extends BaseHostJUnit4Test {
         mDmRequireFsVerity = "true".equals(
                 mDevice.getProperty("pm.dexopt.dm.require_fsverity"));
 
+        expectRemoteCommandToSucceed("cmd file_integrity append-cert " + CERT_PATH);
         uninstallPackage(TARGET_PACKAGE);
     }
 
     @After
     public void tearDown() throws DeviceNotAvailableException {
+        expectRemoteCommandToSucceed("cmd file_integrity remove-last-cert");
         uninstallPackage(TARGET_PACKAGE);
     }
 
