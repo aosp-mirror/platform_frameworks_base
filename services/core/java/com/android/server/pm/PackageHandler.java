@@ -36,7 +36,6 @@ import static com.android.server.pm.PackageManagerService.PRUNE_UNUSED_STATIC_SH
 import static com.android.server.pm.PackageManagerService.SEND_PENDING_BROADCAST;
 import static com.android.server.pm.PackageManagerService.TAG;
 import static com.android.server.pm.PackageManagerService.WRITE_PACKAGE_LIST;
-import static com.android.server.pm.PackageManagerService.WRITE_PACKAGE_RESTRICTIONS;
 import static com.android.server.pm.PackageManagerService.WRITE_SETTINGS;
 
 import android.content.Intent;
@@ -119,10 +118,7 @@ final class PackageHandler extends Handler {
                 }
             } break;
             case WRITE_SETTINGS: {
-                mPm.writeSettings();
-            } break;
-            case WRITE_PACKAGE_RESTRICTIONS: {
-                mPm.writePendingRestrictions();
+                mPm.writeSettings(/*sync=*/false);
             } break;
             case WRITE_PACKAGE_LIST: {
                 mPm.writePackageList(msg.arg1);

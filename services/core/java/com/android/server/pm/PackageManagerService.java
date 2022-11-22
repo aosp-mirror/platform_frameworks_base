@@ -558,6 +558,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     static final char RANDOM_CODEPATH_PREFIX = '-';
 
     final Handler mHandler;
+    final Handler mBackgroundHandler;
 
     final ProcessLoggingHandler mProcessLoggingHandler;
 
@@ -873,7 +874,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     // public static final int UNUSED = 5;
     static final int POST_INSTALL = 9;
     static final int WRITE_SETTINGS = 13;
-    static final int WRITE_PACKAGE_RESTRICTIONS = 14;
+    static final int WRITE_DIRTY_PACKAGE_RESTRICTIONS = 14;
     static final int PACKAGE_VERIFIED = 15;
     static final int CHECK_PENDING_VERIFICATION = 16;
     // public static final int UNUSED = 17;
@@ -889,6 +890,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     static final int DOMAIN_VERIFICATION = 27;
     static final int PRUNE_UNUSED_STATIC_SHARED_LIBRARIES = 28;
     static final int DEFERRED_PENDING_KILL_INSTALL_OBSERVER = 29;
+
+    static final int WRITE_USER_PACKAGE_RESTRICTIONS = 30;
 
     static final int DEFERRED_NO_KILL_POST_DELETE_DELAY_MS = 3 * 1000;
     private static final int DEFERRED_NO_KILL_INSTALL_OBSERVER_DELAY_MS = 500;
@@ -1397,28 +1400,33 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 mDirtyUsers.add(userId);
             }
         }
-        if (!mHandler.hasMessages(WRITE_PACKAGE_RESTRICTIONS)) {
-            mHandler.sendEmptyMessageDelayed(WRITE_PACKAGE_RESTRICTIONS, WRITE_SETTINGS_DELAY);
+        if (!mBackgroundHandler.hasMessages(WRITE_DIRTY_PACKAGE_RESTRICTIONS)) {
+            mBackgroundHandler.sendMessageDelayed(
+                    mBackgroundHandler.obtainMessage(WRITE_DIRTY_PACKAGE_RESTRICTIONS, this),
+                    WRITE_SETTINGS_DELAY);
         }
     }
 
     void writePendingRestrictions() {
+        final Integer[] dirtyUsers;
         synchronized (mLock) {
-            mHandler.removeMessages(WRITE_PACKAGE_RESTRICTIONS);
+            mBackgroundHandler.removeMessages(WRITE_DIRTY_PACKAGE_RESTRICTIONS);
             synchronized (mDirtyUsers) {
-                for (int userId : mDirtyUsers) {
-                    mSettings.writePackageRestrictionsLPr(userId);
+                if (mDirtyUsers.isEmpty()) {
+                    return;
                 }
+                dirtyUsers = mDirtyUsers.toArray(Integer[]::new);
                 mDirtyUsers.clear();
             }
         }
+        mSettings.writePackageRestrictions(dirtyUsers);
     }
 
-    void writeSettings() {
+    void writeSettings(boolean sync) {
         synchronized (mLock) {
             mHandler.removeMessages(WRITE_SETTINGS);
-            mHandler.removeMessages(WRITE_PACKAGE_RESTRICTIONS);
-            writeSettingsLPrTEMP();
+            mBackgroundHandler.removeMessages(WRITE_DIRTY_PACKAGE_RESTRICTIONS);
+            writeSettingsLPrTEMP(sync);
             synchronized (mDirtyUsers) {
                 mDirtyUsers.clear();
             }
@@ -1431,6 +1439,25 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             mSettings.writePackageListLPr(userId);
         }
     }
+
+    private static final Handler.Callback BACKGROUND_HANDLER_CALLBACK = new Handler.Callback() {
+        @Override
+        public boolean handleMessage(@NonNull Message msg) {
+            switch (msg.what) {
+                case WRITE_DIRTY_PACKAGE_RESTRICTIONS: {
+                    PackageManagerService pm = (PackageManagerService) msg.obj;
+                    pm.writePendingRestrictions();
+                    return true;
+                }
+                case WRITE_USER_PACKAGE_RESTRICTIONS: {
+                    final Runnable r = (Runnable) msg.obj;
+                    r.run();
+                    return true;
+                }
+            }
+            return false;
+        }
+    };
 
     public static Pair<PackageManagerService, IPackageManager> main(Context context,
             Installer installer, @NonNull DomainVerificationService domainVerificationService,
@@ -1446,7 +1473,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         HandlerThread backgroundThread = new ServiceThread("PackageManagerBg",
                 Process.THREAD_PRIORITY_BACKGROUND, true /*allowIo*/);
         backgroundThread.start();
-        Handler backgroundHandler = new Handler(backgroundThread.getLooper());
+        Handler backgroundHandler = new Handler(backgroundThread.getLooper(),
+                BACKGROUND_HANDLER_CALLBACK);
 
         PackageManagerServiceInjector injector = new PackageManagerServiceInjector(
                 context, lock, installer, installLock, new PackageAbiHelperImpl(),
@@ -1460,7 +1488,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 (i, pm) -> new Settings(Environment.getDataDirectory(),
                         RuntimePermissionsPersistence.createInstance(),
                         i.getPermissionManagerServiceInternal(),
-                        domainVerificationService, backgroundHandler, lock),
+                        domainVerificationService, backgroundHandler,
+                        lock),
                 (i, pm) -> AppsFilterImpl.create(i,
                         i.getLocalService(PackageManagerInternal.class)),
                 (i, pm) -> (PlatformCompat) ServiceManager.getService("platform_compat"),
@@ -1638,6 +1667,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mUserNeedsBadging = new UserNeedsBadgingCache(mUserManager);
         mDomainVerificationManager = injector.getDomainVerificationManagerInternal();
         mHandler = injector.getHandler();
+        mBackgroundHandler = injector.getBackgroundHandler();
         mSharedLibraries = injector.getSharedLibrariesImpl();
 
         mApexManager = testParams.apexManager;
@@ -1828,6 +1858,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mMoveCallbacks = new MovePackageHelper.MoveCallbacks(FgThread.get().getLooper());
         mViewCompiler = injector.getViewCompiler();
         mSharedLibraries = mInjector.getSharedLibrariesImpl();
+        mBackgroundHandler = injector.getBackgroundHandler();
 
         mContext.getSystemService(DisplayManager.class)
                 .getDisplay(Display.DEFAULT_DISPLAY).getMetrics(mMetrics);
@@ -2902,9 +2933,9 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             mPackageUsage.writeNow(mSettings.getPackagesLocked());
 
             if (mHandler.hasMessages(WRITE_SETTINGS)
-                    || mHandler.hasMessages(WRITE_PACKAGE_RESTRICTIONS)
+                    || mBackgroundHandler.hasMessages(WRITE_DIRTY_PACKAGE_RESTRICTIONS)
                     || mHandler.hasMessages(WRITE_PACKAGE_LIST)) {
-                writeSettings();
+                writeSettings(/*sync=*/true);
             }
         }
     }
@@ -3968,7 +3999,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         synchronized (mDirtyUsers) {
             mDirtyUsers.remove(userId);
             if (mDirtyUsers.isEmpty()) {
-                mHandler.removeMessages(WRITE_PACKAGE_RESTRICTIONS);
+                mBackgroundHandler.removeMessages(WRITE_DIRTY_PACKAGE_RESTRICTIONS);
             }
         }
     }
@@ -6867,9 +6898,14 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
      * TODO: In the meantime, can this be moved to a schedule call?
      * TODO(b/182523293): This should be removed once we finish migration of permission storage.
      */
-    void writeSettingsLPrTEMP() {
+    void writeSettingsLPrTEMP(boolean sync) {
         mPermissionManager.writeLegacyPermissionsTEMP(mSettings.mPermissions);
-        mSettings.writeLPr(mLiveComputer);
+        mSettings.writeLPr(mLiveComputer, sync);
+    }
+
+    // Default async version.
+    void writeSettingsLPrTEMP() {
+        writeSettingsLPrTEMP(/*sync=*/false);
     }
 
     @Override
