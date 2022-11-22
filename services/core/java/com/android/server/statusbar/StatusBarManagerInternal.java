@@ -198,4 +198,11 @@ public interface StatusBarManagerInternal {
      * (IUdfpsRefreshRateRequestCallback)
      */
     void setUdfpsRefreshRateCallback(IUdfpsRefreshRateRequestCallback callback);
+
+    /**
+     * Shows the rear display educational dialog
+     *
+     * @see com.android.internal.statusbar.IStatusBar#showRearDisplayDialog
+     */
+    void showRearDisplayDialog(int currentBaseState);
 }
