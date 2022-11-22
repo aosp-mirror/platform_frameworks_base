@@ -3754,6 +3754,11 @@ public class ExifInterface {
                 // Skip input stream to the end of the EXIF chunk
                 totalInputStream.skipBytes(WEBP_CHUNK_TYPE_BYTE_LENGTH);
                 int exifChunkLength = totalInputStream.readInt();
+                // RIFF chunks have a single padding byte at the end if the declared chunk size is
+                // odd.
+                if (exifChunkLength % 2 != 0) {
+                    exifChunkLength++;
+                }
                 totalInputStream.skipBytes(exifChunkLength);
 
                 // Write new EXIF chunk to output stream
