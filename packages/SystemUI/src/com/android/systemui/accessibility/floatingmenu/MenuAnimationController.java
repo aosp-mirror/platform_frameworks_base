@@ -25,6 +25,9 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.OvershootInterpolator;
+import android.view.animation.TranslateAnimation;
 
 import androidx.dynamicanimation.animation.DynamicAnimation;
 import androidx.dynamicanimation.animation.FlingAnimation;
@@ -33,6 +36,7 @@ import androidx.dynamicanimation.animation.SpringAnimation;
 import androidx.dynamicanimation.animation.SpringForce;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 
 import java.util.HashMap;
@@ -55,7 +59,11 @@ class MenuAnimationController {
     private static final float SPRING_AFTER_FLING_DAMPING_RATIO = 0.85f;
     private static final float SPRING_STIFFNESS = 700f;
     private static final float ESCAPE_VELOCITY = 750f;
+    // Make tucked animation by using translation X relative to the view itself.
+    private static final float ANIMATION_TO_X_VALUE = 0.5f;
 
+    private static final int ANIMATION_START_OFFSET_MS = 600;
+    private static final int ANIMATION_DURATION_MS = 600;
     private static final int FADE_OUT_DURATION_MS = 1000;
     private static final int FADE_EFFECT_DURATION_MS = 3000;
 
@@ -64,10 +72,12 @@ class MenuAnimationController {
     private final Handler mHandler;
     private boolean mIsFadeEffectEnabled;
     private DismissAnimationController.DismissCallback mDismissCallback;
+    private Runnable mSpringAnimationsEndAction;
 
     // Cache the animations state of {@link DynamicAnimation.TRANSLATION_X} and {@link
     // DynamicAnimation.TRANSLATION_Y} to be well controlled by the touch handler
-    private final HashMap<DynamicAnimation.ViewProperty, DynamicAnimation> mPositionAnimations =
+    @VisibleForTesting
+    final HashMap<DynamicAnimation.ViewProperty, DynamicAnimation> mPositionAnimations =
             new HashMap<>();
 
     MenuAnimationController(MenuView menuView) {
@@ -100,6 +110,13 @@ class MenuAnimationController {
         if (listView.getOverScrollMode() == View.OVER_SCROLL_NEVER) {
             moveToPositionY(positionY);
         }
+    }
+
+    /**
+     * Sets the action to be called when the all dynamic animations are completed.
+     */
+    void setSpringAnimationsEndAction(Runnable runnable) {
+        mSpringAnimationsEndAction = runnable;
     }
 
     void setDismissCallback(
@@ -192,7 +209,7 @@ class MenuAnimationController {
                         ? bounds.right
                         : bounds.bottom;
 
-        final FlingAnimation flingAnimation = new FlingAnimation(mMenuView, menuPositionProperty);
+        final FlingAnimation flingAnimation = createFlingAnimation(mMenuView, menuPositionProperty);
         flingAnimation.setFriction(friction)
                 .setStartVelocity(velocity)
                 .setMinValue(Math.min(currentValue, min))
@@ -217,7 +234,14 @@ class MenuAnimationController {
         flingAnimation.start();
     }
 
-    private void springMenuWith(DynamicAnimation.ViewProperty property, SpringForce spring,
+    @VisibleForTesting
+    FlingAnimation createFlingAnimation(MenuView menuView,
+            MenuPositionProperty menuPositionProperty) {
+        return new FlingAnimation(menuView, menuPositionProperty);
+    }
+
+    @VisibleForTesting
+    void springMenuWith(DynamicAnimation.ViewProperty property, SpringForce spring,
             float velocity, float finalPosition) {
         final MenuPositionProperty menuPositionProperty = new MenuPositionProperty(property);
         final SpringAnimation springAnimation =
@@ -228,8 +252,13 @@ class MenuAnimationController {
                                 return;
                             }
 
-                            onSpringAnimationEnd(new PointF(mMenuView.getTranslationX(),
-                                    mMenuView.getTranslationY()));
+                            final boolean areAnimationsRunning =
+                                    mPositionAnimations.values().stream().anyMatch(
+                                            DynamicAnimation::isRunning);
+                            if (!areAnimationsRunning) {
+                                onSpringAnimationsEnd(new PointF(mMenuView.getTranslationX(),
+                                        mMenuView.getTranslationY()));
+                            }
                         })
                         .setStartVelocity(velocity);
 
@@ -332,11 +361,15 @@ class MenuAnimationController {
                 .start();
     }
 
-    private void onSpringAnimationEnd(PointF position) {
+    private void onSpringAnimationsEnd(PointF position) {
         mMenuView.onBoundsInParentChanged((int) position.x, (int) position.y);
         constrainPositionAndUpdate(position);
 
         fadeOutIfEnabled();
+
+        if (mSpringAnimationsEndAction != null) {
+            mSpringAnimationsEndAction.run();
+        }
     }
 
     private void constrainPositionAndUpdate(PointF position) {
@@ -385,6 +418,26 @@ class MenuAnimationController {
     private void cancelAndRemoveCallbacksAndMessages() {
         mFadeOutAnimator.cancel();
         mHandler.removeCallbacksAndMessages(/* token= */ null);
+    }
+
+    void startTuckedAnimationPreview() {
+        fadeInNowIfEnabled();
+
+        final float toXValue = isOnLeftSide()
+                ? -ANIMATION_TO_X_VALUE
+                : ANIMATION_TO_X_VALUE;
+        final TranslateAnimation animation =
+                new TranslateAnimation(Animation.RELATIVE_TO_SELF, 0,
+                        Animation.RELATIVE_TO_SELF, toXValue,
+                        Animation.RELATIVE_TO_SELF, 0,
+                        Animation.RELATIVE_TO_SELF, 0);
+        animation.setDuration(ANIMATION_DURATION_MS);
+        animation.setRepeatMode(Animation.REVERSE);
+        animation.setInterpolator(new OvershootInterpolator());
+        animation.setRepeatCount(Animation.INFINITE);
+        animation.setStartOffset(ANIMATION_START_OFFSET_MS);
+
+        mMenuView.startAnimation(animation);
     }
 
     private Handler createUiHandler() {

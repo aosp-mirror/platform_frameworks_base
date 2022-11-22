@@ -56,6 +56,7 @@ class MenuInfoRepository {
     @FloatRange(from = 0.0, to = 1.0)
     private static final float DEFAULT_MENU_POSITION_Y_PERCENT = 0.77f;
     private static final boolean DEFAULT_MOVE_TO_TUCKED_VALUE = false;
+    private static final boolean DEFAULT_HAS_SEEN_DOCK_TOOLTIP_VALUE = false;
     private static final int DEFAULT_MIGRATION_TOOLTIP_VALUE_PROMPT = MigrationPrompt.DISABLED;
 
     private final Context mContext;
@@ -114,6 +115,12 @@ class MenuInfoRepository {
                         DEFAULT_MOVE_TO_TUCKED_VALUE));
     }
 
+    void loadDockTooltipVisibility(OnInfoReady<Boolean> callback) {
+        callback.onReady(Prefs.getBoolean(mContext,
+                Prefs.Key.HAS_SEEN_ACCESSIBILITY_FLOATING_MENU_DOCK_TOOLTIP,
+                DEFAULT_HAS_SEEN_DOCK_TOOLTIP_VALUE));
+    }
+
     void loadMigrationTooltipVisibility(OnInfoReady<Boolean> callback) {
         callback.onReady(Settings.Secure.getIntForUser(mContext.getContentResolver(),
                 ACCESSIBILITY_FLOATING_MENU_MIGRATION_TOOLTIP_PROMPT,
@@ -151,6 +158,11 @@ class MenuInfoRepository {
         mPercentagePosition = percentagePosition;
         Prefs.putString(mContext, Prefs.Key.ACCESSIBILITY_FLOATING_MENU_POSITION,
                 percentagePosition.toString());
+    }
+
+    void updateDockTooltipVisibility(boolean hasSeen) {
+        Prefs.putBoolean(mContext, Prefs.Key.HAS_SEEN_ACCESSIBILITY_FLOATING_MENU_DOCK_TOOLTIP,
+                hasSeen);
     }
 
     void updateMigrationTooltipVisibility(boolean visible) {

@@ -89,10 +89,13 @@ class MenuViewLayer extends FrameLayout implements
     private final IAccessibilityFloatingMenu mFloatingMenu;
     private final DismissAnimationController mDismissAnimationController;
     private final MenuViewModel mMenuViewModel;
+    private final Observer<Boolean> mDockTooltipObserver =
+            this::onDockTooltipVisibilityChanged;
     private final Observer<Boolean> mMigrationTooltipObserver =
             this::onMigrationTooltipVisibilityChanged;
     private final Rect mImeInsetsRect = new Rect();
     private boolean mIsMigrationTooltipShowing;
+    private boolean mShouldShowDockTooltip;
     private Optional<MenuEduTooltipView> mEduTooltipView = Optional.empty();
 
     @IntDef({
@@ -111,10 +114,12 @@ class MenuViewLayer extends FrameLayout implements
 
     @StringDef({
             TooltipType.MIGRATION,
+            TooltipType.DOCK,
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface TooltipType {
         String MIGRATION = "migration";
+        String DOCK = "dock";
     }
 
     @VisibleForTesting
@@ -154,6 +159,7 @@ class MenuViewLayer extends FrameLayout implements
         mMenuView = new MenuView(context, mMenuViewModel, mMenuViewAppearance);
         mMenuAnimationController = mMenuView.getMenuAnimationController();
         mMenuAnimationController.setDismissCallback(this::hideMenuAndShowMessage);
+        mMenuAnimationController.setSpringAnimationsEndAction(this::onSpringAnimationsEndAction);
         mDismissView = new DismissView(context);
         mDismissAnimationController = new DismissAnimationController(mDismissView, mMenuView);
         mDismissAnimationController.setMagnetListener(new MagnetizedObject.MagnetListener() {
@@ -236,6 +242,7 @@ class MenuViewLayer extends FrameLayout implements
         setOnClickListener(this);
         setOnApplyWindowInsetsListener((view, insets) -> onWindowInsetsApplied(insets));
         getViewTreeObserver().addOnComputeInternalInsetsListener(this);
+        mMenuViewModel.getDockTooltipVisibilityData().observeForever(mDockTooltipObserver);
         mMenuViewModel.getMigrationTooltipVisibilityData().observeForever(
                 mMigrationTooltipObserver);
         mMessageView.setUndoListener(view -> undo());
@@ -250,6 +257,7 @@ class MenuViewLayer extends FrameLayout implements
         setOnClickListener(null);
         setOnApplyWindowInsetsListener(null);
         getViewTreeObserver().removeOnComputeInternalInsetsListener(this);
+        mMenuViewModel.getDockTooltipVisibilityData().removeObserver(mDockTooltipObserver);
         mMenuViewModel.getMigrationTooltipVisibilityData().removeObserver(
                 mMigrationTooltipObserver);
         mHandler.removeCallbacksAndMessages(/* token= */ null);
@@ -306,6 +314,21 @@ class MenuViewLayer extends FrameLayout implements
         }
     }
 
+    private void onDockTooltipVisibilityChanged(boolean hasSeenTooltip) {
+        mShouldShowDockTooltip = !hasSeenTooltip;
+    }
+
+    private void onSpringAnimationsEndAction() {
+        if (mShouldShowDockTooltip) {
+            mEduTooltipView = Optional.of(new MenuEduTooltipView(mContext, mMenuViewAppearance));
+            mEduTooltipView.ifPresent(view -> addTooltipView(view,
+                    getContext().getText(R.string.accessibility_floating_button_docking_tooltip),
+                    TooltipType.DOCK));
+
+            mMenuAnimationController.startTuckedAnimationPreview();
+        }
+    }
+
     private CharSequence getMigrationMessage() {
         final Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_DETAILS_SETTINGS);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -339,6 +362,12 @@ class MenuViewLayer extends FrameLayout implements
         if (tooltipView.getTag().equals(TooltipType.MIGRATION)) {
             mMenuViewModel.updateMigrationTooltipVisibility(/* visible= */ false);
             mIsMigrationTooltipShowing = false;
+        }
+
+        if (tooltipView.getTag().equals(TooltipType.DOCK)) {
+            mMenuViewModel.updateDockTooltipVisibility(/* hasSeen= */ true);
+            mMenuView.clearAnimation();
+            mShouldShowDockTooltip = false;
         }
 
         removeView(tooltipView);
