@@ -281,7 +281,7 @@ public class PathIterator implements Iterator<PathIterator.Segment> {
             return mConicWeight;
         }
 
-        public Segment(@NonNull @Verb int verb, @NonNull float[] points, float conicWeight) {
+        Segment(@NonNull @Verb int verb, @NonNull float[] points, float conicWeight) {
             mVerb = verb;
             mPoints = points;
             mConicWeight = conicWeight;
