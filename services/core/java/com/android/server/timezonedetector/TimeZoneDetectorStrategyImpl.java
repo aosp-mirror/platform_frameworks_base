@@ -351,6 +351,7 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
     @GuardedBy("this")
     private void notifyStateChangeListenersAsynchronously() {
         for (StateChangeListener listener : mStateChangeListeners) {
+            // This is queuing asynchronous notification, so no need to surrender the "this" lock.
             mStateChangeHandler.post(listener::onChange);
         }
     }

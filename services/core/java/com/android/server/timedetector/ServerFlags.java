@@ -35,7 +35,9 @@ import java.lang.annotation.Target;
 import java.time.DateTimeException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -211,7 +213,11 @@ public final class ServerFlags {
     }
 
     private void handlePropertiesChanged(@NonNull DeviceConfig.Properties properties) {
+        // Copy the listeners to notify under the "mListeners" lock but don't hold the lock while
+        // delivering the notifications to avoid deadlocks.
+        List<StateChangeListener> listenersToNotify;
         synchronized (mListeners) {
+            listenersToNotify = new ArrayList<>(mListeners.size());
             for (Map.Entry<StateChangeListener, HashSet<String>> listenerEntry
                     : mListeners.entrySet()) {
                 // It's unclear which set of the following two Sets is going to be larger in the
@@ -225,9 +231,13 @@ public final class ServerFlags {
                 HashSet<String> monitoredKeys = listenerEntry.getValue();
                 Iterable<String> modifiedKeys = properties.getKeyset();
                 if (containsAny(monitoredKeys, modifiedKeys)) {
-                    listenerEntry.getKey().onChange();
+                    listenersToNotify.add(listenerEntry.getKey());
                 }
             }
+        }
+
+        for (StateChangeListener listener : listenersToNotify) {
+            listener.onChange();
         }
     }
 
