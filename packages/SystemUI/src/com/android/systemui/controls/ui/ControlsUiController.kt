@@ -35,7 +35,7 @@ interface ControlsUiController {
 
     /**
      * Returns the preferred activity to start, depending on if the user has favorited any
-     * controls.
+     * controls or whether there are any app providing panels.
      */
     fun resolveActivity(): Class<*>
 
