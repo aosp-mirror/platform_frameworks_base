@@ -7535,6 +7535,7 @@ package android.app.admin {
     method @Nullable public android.app.admin.PackagePolicy getManagedProfileCallerIdAccessPolicy();
     method @Nullable public android.app.admin.PackagePolicy getManagedProfileContactsAccessPolicy();
     method public long getManagedProfileMaximumTimeOff(@NonNull android.content.ComponentName);
+    method @NonNull public android.app.admin.ManagedSubscriptionsPolicy getManagedSubscriptionsPolicy();
     method public int getMaximumFailedPasswordsForWipe(@Nullable android.content.ComponentName);
     method public long getMaximumTimeToLock(@Nullable android.content.ComponentName);
     method @NonNull public java.util.List<java.lang.String> getMeteredDataDisabledPackages(@NonNull android.content.ComponentName);
@@ -7685,6 +7686,7 @@ package android.app.admin {
     method public void setManagedProfileCallerIdAccessPolicy(@Nullable android.app.admin.PackagePolicy);
     method public void setManagedProfileContactsAccessPolicy(@Nullable android.app.admin.PackagePolicy);
     method public void setManagedProfileMaximumTimeOff(@NonNull android.content.ComponentName, long);
+    method public void setManagedSubscriptionsPolicy(@Nullable android.app.admin.ManagedSubscriptionsPolicy);
     method public void setMasterVolumeMuted(@NonNull android.content.ComponentName, boolean);
     method public void setMaximumFailedPasswordsForWipe(@NonNull android.content.ComponentName, int);
     method public void setMaximumTimeToLock(@NonNull android.content.ComponentName, long);
@@ -7985,6 +7987,16 @@ package android.app.admin {
     ctor public FreezePeriod(java.time.MonthDay, java.time.MonthDay);
     method public java.time.MonthDay getEnd();
     method public java.time.MonthDay getStart();
+  }
+
+  public final class ManagedSubscriptionsPolicy implements android.os.Parcelable {
+    ctor public ManagedSubscriptionsPolicy(int);
+    method public int describeContents();
+    method public int getPolicyType();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.ManagedSubscriptionsPolicy> CREATOR;
+    field public static final int TYPE_ALL_MANAGED_SUBSCRIPTIONS = 1; // 0x1
+    field public static final int TYPE_ALL_PERSONAL_SUBSCRIPTIONS = 0; // 0x0
   }
 
   public abstract class NetworkEvent implements android.os.Parcelable {

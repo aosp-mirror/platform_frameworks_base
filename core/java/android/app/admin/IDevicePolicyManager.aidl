@@ -34,6 +34,7 @@ import android.app.admin.PasswordMetrics;
 import android.app.admin.FactoryResetProtectionPolicy;
 import android.app.admin.ManagedProfileProvisioningParams;
 import android.app.admin.FullyManagedDeviceProvisioningParams;
+import android.app.admin.ManagedSubscriptionsPolicy;
 import android.app.admin.WifiSsidPolicy;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -583,4 +584,7 @@ interface IDevicePolicyManager {
 
     void setMtePolicy(int flag);
     int getMtePolicy();
+
+    void setManagedSubscriptionsPolicy(in ManagedSubscriptionsPolicy policy);
+    ManagedSubscriptionsPolicy getManagedSubscriptionsPolicy();
 }
