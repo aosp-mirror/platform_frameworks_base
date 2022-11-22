@@ -156,42 +156,64 @@ constructor(
                 keyguardInteractor.isKeyguardShowing,
             ) { _, userInfos, settings, isDeviceLocked ->
                 buildList {
-                    val hasGuestUser = userInfos.any { it.isGuest }
-                    if (!hasGuestUser && canCreateGuestUser(settings)) {
-                        add(UserActionModel.ENTER_GUEST_MODE)
-                    }
-
                     if (!isDeviceLocked || settings.isAddUsersFromLockscreen) {
                         // The device is locked and our setting to allow actions that add users
-                        // from the lock-screen is not enabled. The guest action from above is
-                        // always allowed, even when the device is locked, but the various "add
-                        // user" actions below are not. We can finish building the list here.
+                        // from the lock-screen is not enabled. We can finish building the list
+                        // here.
+                        val isFullScreen = featureFlags.isEnabled(Flags.FULL_SCREEN_USER_SWITCHER)
 
-                        val canCreateUsers =
-                            UserActionsUtil.canCreateUser(
-                                manager,
-                                repository,
-                                settings.isUserSwitcherEnabled,
-                                settings.isAddUsersFromLockscreen,
-                            )
+                        val actionList: List<UserActionModel> =
+                            if (isFullScreen) {
+                                listOf(
+                                    UserActionModel.ADD_USER,
+                                    UserActionModel.ADD_SUPERVISED_USER,
+                                    UserActionModel.ENTER_GUEST_MODE,
+                                )
+                            } else {
+                                listOf(
+                                    UserActionModel.ENTER_GUEST_MODE,
+                                    UserActionModel.ADD_USER,
+                                    UserActionModel.ADD_SUPERVISED_USER,
+                                )
+                            }
+                        actionList.map {
+                            when (it) {
+                                UserActionModel.ENTER_GUEST_MODE -> {
+                                    val hasGuestUser = userInfos.any { it.isGuest }
+                                    if (!hasGuestUser && canCreateGuestUser(settings)) {
+                                        add(UserActionModel.ENTER_GUEST_MODE)
+                                    }
+                                }
+                                UserActionModel.ADD_USER -> {
+                                    val canCreateUsers =
+                                        UserActionsUtil.canCreateUser(
+                                            manager,
+                                            repository,
+                                            settings.isUserSwitcherEnabled,
+                                            settings.isAddUsersFromLockscreen,
+                                        )
 
-                        if (canCreateUsers) {
-                            add(UserActionModel.ADD_USER)
-                        }
-
-                        if (
-                            UserActionsUtil.canCreateSupervisedUser(
-                                manager,
-                                repository,
-                                settings.isUserSwitcherEnabled,
-                                settings.isAddUsersFromLockscreen,
-                                supervisedUserPackageName,
-                            )
-                        ) {
-                            add(UserActionModel.ADD_SUPERVISED_USER)
+                                    if (canCreateUsers) {
+                                        add(UserActionModel.ADD_USER)
+                                    }
+                                }
+                                UserActionModel.ADD_SUPERVISED_USER -> {
+                                    if (
+                                        UserActionsUtil.canCreateSupervisedUser(
+                                            manager,
+                                            repository,
+                                            settings.isUserSwitcherEnabled,
+                                            settings.isAddUsersFromLockscreen,
+                                            supervisedUserPackageName,
+                                        )
+                                    ) {
+                                        add(UserActionModel.ADD_SUPERVISED_USER)
+                                    }
+                                }
+                                else -> Unit
+                            }
                         }
                     }
-
                     if (
                         UserActionsUtil.canManageUsers(
                             repository,
