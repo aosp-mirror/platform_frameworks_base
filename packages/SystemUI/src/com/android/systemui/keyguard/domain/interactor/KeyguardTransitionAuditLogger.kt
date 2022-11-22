@@ -46,6 +46,8 @@ constructor(
 
         scope.launch { keyguardInteractor.isDozing.collect { logger.v("isDozing", it) } }
 
+        scope.launch { keyguardInteractor.isDreaming.collect { logger.v("isDreaming", it) } }
+
         scope.launch {
             interactor.finishedKeyguardTransitionStep.collect {
                 logger.i("Finished transition", it)
@@ -60,6 +62,10 @@ constructor(
 
         scope.launch {
             interactor.startedKeyguardTransitionStep.collect { logger.i("Started transition", it) }
+        }
+
+        scope.launch {
+            keyguardInteractor.dozeTransitionModel.collect { logger.i("Doze transition", it) }
         }
     }
 }
