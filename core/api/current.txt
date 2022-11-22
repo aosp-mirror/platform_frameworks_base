@@ -19556,6 +19556,7 @@ package android.location {
   public final class GnssCapabilities implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public java.util.List<android.location.GnssSignalType> getGnssSignalTypes();
+    method public boolean hasAccumulatedDeltaRange();
     method public boolean hasAntennaInfo();
     method public boolean hasGeofencing();
     method @Deprecated public boolean hasGnssAntennaInfo();
@@ -19590,6 +19591,7 @@ package android.location {
     ctor public GnssCapabilities.Builder(@NonNull android.location.GnssCapabilities);
     method @NonNull public android.location.GnssCapabilities build();
     method @NonNull public android.location.GnssCapabilities.Builder setGnssSignalTypes(@NonNull java.util.List<android.location.GnssSignalType>);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasAccumulatedDeltaRange(boolean);
     method @NonNull public android.location.GnssCapabilities.Builder setHasAntennaInfo(boolean);
     method @NonNull public android.location.GnssCapabilities.Builder setHasGeofencing(boolean);
     method @NonNull public android.location.GnssCapabilities.Builder setHasLowPowerMode(boolean);
