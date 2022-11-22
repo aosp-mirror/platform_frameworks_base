@@ -45,6 +45,9 @@ import android.app.PendingIntent;
 import android.app.admin.DevicePolicyEventLogger;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.content.BroadcastReceiver;
 import android.content.ClipData;
 import android.content.ComponentName;
@@ -70,6 +73,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteFullException;
 import android.database.sqlite.SQLiteStatement;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -195,6 +199,14 @@ public class AccountManagerService
     private static final int SIGNATURE_CHECK_MISMATCH = 0;
     private static final int SIGNATURE_CHECK_MATCH = 1;
     private static final int SIGNATURE_CHECK_UID_MATCH = 2;
+
+    /**
+     * Apps targeting Android U and above need to declare the package visibility needs in the
+     * manifest to access the AccountManager APIs.
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    private static final long ENFORCE_PACKAGE_VISIBILITY_FILTERING = 154726397;
 
     static {
         ACCOUNTS_CHANGED_INTENT = new Intent(AccountManager.LOGIN_ACCOUNTS_CHANGED_ACTION);
@@ -527,7 +539,7 @@ public class AccountManagerService
      */
     private Map<Account, Integer> getAccountsAndVisibilityForPackage(String packageName,
             List<String> accountTypes, Integer callingUid, UserAccounts accounts) {
-        if (!packageExistsForUser(packageName, accounts.userId)) {
+        if (!canCallerAccessPackage(packageName, callingUid, accounts.userId)) {
             Log.w(TAG, "getAccountsAndVisibilityForPackage#Package not found " + packageName);
             return new LinkedHashMap<>();
         }
@@ -628,6 +640,9 @@ public class AccountManagerService
                 } else {
                    return AccountManager.VISIBILITY_USER_MANAGED_NOT_VISIBLE;
                 }
+            }
+            if (!canCallerAccessPackage(packageName, callingUid, accounts.userId)) {
+                return AccountManager.VISIBILITY_NOT_VISIBLE;
             }
             return resolveAccountVisibility(account, packageName, accounts);
         } finally {
@@ -779,7 +794,7 @@ public class AccountManagerService
         try {
             UserAccounts accounts = getUserAccounts(userId);
             return setAccountVisibility(account, packageName, newVisibility, true /* notify */,
-                accounts);
+                    accounts, callingUid);
         } finally {
             restoreCallingIdentity(identityToken);
         }
@@ -798,11 +813,12 @@ public class AccountManagerService
      * @param newVisibility New visibility calue
      * @param notify if the flag is set applications will get notification about visibility change
      * @param accounts UserAccount that currently hosts the account and application
+     * @param callingUid The caller's uid.
      *
      * @return True if account visibility was changed.
      */
     private boolean setAccountVisibility(Account account, String packageName, int newVisibility,
-            boolean notify, UserAccounts accounts) {
+            boolean notify, UserAccounts accounts, int callingUid) {
         synchronized (accounts.dbLock) {
             synchronized (accounts.cacheLock) {
                 Map<String, Integer> packagesToVisibility;
@@ -813,8 +829,8 @@ public class AccountManagerService
                                 getRequestingPackages(account, accounts);
                         accountRemovedReceivers = getAccountRemovedReceivers(account, accounts);
                     } else {
-                        if (!packageExistsForUser(packageName, accounts.userId)) {
-                            return false; // package is not installed.
+                        if (!canCallerAccessPackage(packageName, callingUid, accounts.userId)) {
+                            return false; // package is not installed or not visible.
                         }
                         packagesToVisibility = new HashMap<>();
                         packagesToVisibility.put(packageName,
@@ -826,8 +842,8 @@ public class AccountManagerService
                     }
                 } else {
                     // Notifications will not be send - only used during add account.
-                    if (!isSpecialPackageKey(packageName) &&
-                            !packageExistsForUser(packageName, accounts.userId)) {
+                    if (!isSpecialPackageKey(packageName)
+                            && !canCallerAccessPackage(packageName, callingUid, accounts.userId)) {
                         // package is not installed and not meta value.
                         return false;
                     }
@@ -1043,20 +1059,6 @@ public class AccountManagerService
         List<ResolveInfo> receivers =
             mPackageManager.queryBroadcastReceiversAsUser(intent, 0, accounts.userId);
         return (receivers != null && receivers.size() > 0);
-    }
-
-    private boolean packageExistsForUser(String packageName, int userId) {
-        try {
-            final long identityToken = clearCallingIdentity();
-            try {
-                mPackageManager.getPackageUidAsUser(packageName, userId);
-                return true;
-            } finally {
-                restoreCallingIdentity(identityToken);
-            }
-        } catch (NameNotFoundException e) {
-            return false;
-        }
     }
 
     /**
@@ -1903,7 +1905,7 @@ public class AccountManagerService
                         for (Entry<String, Integer> entry : packageToVisibility.entrySet()) {
                             setAccountVisibility(account, entry.getKey() /* package */,
                                     entry.getValue() /* visibility */, false /* notify */,
-                                    accounts);
+                                    accounts, callingUid);
                         }
                     }
                     accounts.accountsDb.setTransactionSuccessful();
@@ -5913,6 +5915,32 @@ public class AccountManagerService
                 LocalServices.getService(DevicePolicyManagerInternal.class);
         //TODO(b/169395065) Figure out if this flow makes sense in Device Owner mode.
         return (dpmi != null) && (dpmi.isActiveProfileOwner(uid) || dpmi.isActiveDeviceOwner(uid));
+    }
+
+    /**
+     * Filter the access to the target package by rules of the package visibility if the caller
+     * targeting API level U and above. Otherwise, returns true if the package is installed on
+     * the device.
+     *
+     * @param targetPkgName The package name to check.
+     * @param callingUid The caller that is going to access the package.
+     * @param userId The user ID where the target package resides.
+     * @return true if the caller is able to access the package.
+     */
+    private boolean canCallerAccessPackage(@NonNull String targetPkgName, int callingUid,
+            int userId) {
+        final PackageManagerInternal pmInternal =
+                LocalServices.getService(PackageManagerInternal.class);
+        if (!CompatChanges.isChangeEnabled(ENFORCE_PACKAGE_VISIBILITY_FILTERING, callingUid)) {
+            return pmInternal.getPackageUid(
+                    targetPkgName, 0 /* flags */, userId) != Process.INVALID_UID;
+        }
+        final boolean canAccess = !pmInternal.filterAppAccess(targetPkgName, callingUid, userId);
+        if (!canAccess && Log.isLoggable(TAG, Log.DEBUG)) {
+            Log.d(TAG, "Package " + targetPkgName + " is not visible to caller " + callingUid
+                    + " for user " + userId);
+        }
+        return canAccess;
     }
 
     @Override

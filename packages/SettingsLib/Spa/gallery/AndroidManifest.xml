@@ -17,16 +17,17 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.android.settingslib.spa.gallery">
 
-    <uses-sdk android:minSdkVersion="21"/>
+    <uses-sdk android:minSdkVersion="21" />
 
     <application
         android:name=".GalleryApplication"
+        android:enableOnBackInvokedCallback="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_label"
-        android:supportsRtl="true"
-        android:enableOnBackInvokedCallback="true">
+        android:supportsRtl="true">
         <activity
             android:name=".GalleryMainActivity"
+            android:configChanges="orientation|screenLayout|screenSize|smallestScreenSize"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

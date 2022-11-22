@@ -20,6 +20,7 @@ import android.hardware.display.DisplayManagerInternal;
 
 import com.android.server.display.DisplayBrightnessState;
 import com.android.server.display.brightness.BrightnessReason;
+import com.android.server.display.brightness.BrightnessUtils;
 
 /**
  * Manages the brightness of the display when the system is in the doze state.
@@ -30,13 +31,8 @@ public class DozeBrightnessStrategy implements DisplayBrightnessStrategy {
     public DisplayBrightnessState updateBrightness(
             DisplayManagerInternal.DisplayPowerRequest displayPowerRequest) {
         // Todo(brup): Introduce a validator class and add validations before setting the brightness
-        BrightnessReason brightnessReason = new BrightnessReason();
-        brightnessReason.setReason(BrightnessReason.REASON_DOZE);
-        return new DisplayBrightnessState.Builder()
-                .setBrightness(displayPowerRequest.dozeScreenBrightness)
-                .setSdrBrightness(displayPowerRequest.dozeScreenBrightness)
-                .setBrightnessReason(brightnessReason)
-                .build();
+        return BrightnessUtils.constructDisplayBrightnessState(BrightnessReason.REASON_DOZE,
+                displayPowerRequest.dozeScreenBrightness, displayPowerRequest.dozeScreenBrightness);
     }
 
     @Override

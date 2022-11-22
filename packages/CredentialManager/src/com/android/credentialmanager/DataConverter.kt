@@ -46,8 +46,15 @@ class GetFlowUtils {
       val packageManager = context.packageManager
       return providerDataList.map {
         // TODO: get from the actual service info
+        val componentName = ComponentName.unflattenFromString(it.providerFlattenedComponentName)
+        var packageName = componentName?.packageName
+        if (componentName == null) {
+          // TODO: Remove once test data is fixed
+          packageName = it.providerFlattenedComponentName
+        }
+
         val pkgInfo = packageManager
-          .getPackageInfo(it.providerFlattenedComponentName,
+          .getPackageInfo(packageName!!,
             PackageManager.PackageInfoFlags.of(0))
         val providerDisplayName = pkgInfo.applicationInfo.loadLabel(packageManager).toString()
         // TODO: decide what to do when failed to load a provider icon
@@ -86,6 +93,8 @@ class GetFlowUtils {
           providerId = providerId,
           entryKey = it.key,
           entrySubkey = it.subkey,
+          pendingIntent = it.pendingIntent,
+          fillInIntent = it.frameworkExtrasIntent,
           credentialType = credentialEntryUi.credentialType.toString(),
           credentialTypeDisplayName = credentialEntryUi.credentialTypeDisplayName.toString(),
           userName = credentialEntryUi.userName.toString(),
@@ -113,6 +122,8 @@ class GetFlowUtils {
         providerId = providerId,
         entryKey = authEntry.key,
         entrySubkey = authEntry.subkey,
+        pendingIntent = authEntry.pendingIntent,
+        fillInIntent = authEntry.frameworkExtrasIntent,
         title = providerDisplayName,
         icon = providerIcon,
       )
@@ -127,6 +138,8 @@ class GetFlowUtils {
         providerId = providerId,
         entryKey = remoteEntry.key,
         entrySubkey = remoteEntry.subkey,
+        pendingIntent = remoteEntry.pendingIntent,
+        fillInIntent = remoteEntry.frameworkExtrasIntent,
       )
     }
 
@@ -142,6 +155,8 @@ class GetFlowUtils {
           providerId = providerId,
           entryKey = it.key,
           entrySubkey = it.subkey,
+          pendingIntent = it.pendingIntent,
+          fillInIntent = it.frameworkExtrasIntent,
           title = actionEntryUi.text.toString(),
           // TODO: gracefully fail
           icon = actionEntryUi.icon.loadDrawable(context)!!,
@@ -214,6 +229,8 @@ class CreateFlowUtils {
           // TODO: remove fallbacks
           entryKey = it.key,
           entrySubkey = it.subkey,
+          pendingIntent = it.pendingIntent,
+          fillInIntent = it.frameworkExtrasIntent,
           userProviderDisplayName = saveEntryUi.userProviderAccountName as String,
           credentialTypeIcon = saveEntryUi.credentialTypeIcon?.loadDrawable(context)
             ?: context.getDrawable(R.drawable.ic_passkey)!!,
@@ -235,6 +252,8 @@ class CreateFlowUtils {
         RemoteInfo(
           entryKey = remoteEntry.key,
           entrySubkey = remoteEntry.subkey,
+          pendingIntent = remoteEntry.pendingIntent,
+          fillInIntent = remoteEntry.frameworkExtrasIntent,
         )
       } else null
     }

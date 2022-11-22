@@ -1105,6 +1105,11 @@ public final class ActivityThread extends ClientTransactionHandler
         }
 
         @Override
+        public final void scheduleTimeoutService(IBinder token, int startId) {
+            sendMessage(H.TIMEOUT_SERVICE, token, startId);
+        }
+
+        @Override
         public final void bindApplication(String processName, ApplicationInfo appInfo,
                 String sdkSandboxClientAppVolumeUuid, String sdkSandboxClientAppPackage,
                 ProviderInfoList providerList, ComponentName instrumentationName,
@@ -2081,6 +2086,7 @@ public final class ActivityThread extends ClientTransactionHandler
         public static final int SET_CONTENT_CAPTURE_OPTIONS_CALLBACK = 164;
         public static final int DUMP_GFXINFO = 165;
         public static final int DUMP_RESOURCES = 166;
+        public static final int TIMEOUT_SERVICE = 167;
 
         public static final int INSTRUMENT_WITHOUT_RESTART = 170;
         public static final int FINISH_INSTRUMENTATION_WITHOUT_RESTART = 171;
@@ -2135,6 +2141,7 @@ public final class ActivityThread extends ClientTransactionHandler
                     case FINISH_INSTRUMENTATION_WITHOUT_RESTART:
                         return "FINISH_INSTRUMENTATION_WITHOUT_RESTART";
                     case DUMP_RESOURCES: return "DUMP_RESOURCES";
+                    case TIMEOUT_SERVICE: return "TIMEOUT_SERVICE";
                 }
             }
             return Integer.toString(code);
@@ -2199,6 +2206,11 @@ public final class ActivityThread extends ClientTransactionHandler
                     Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "serviceStop");
                     handleStopService((IBinder)msg.obj);
                     schedulePurgeIdler();
+                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+                    break;
+                case TIMEOUT_SERVICE:
+                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "serviceTimeout");
+                    handleTimeoutService((IBinder) msg.obj, msg.arg1);
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                     break;
                 case CONFIGURATION_CHANGED:
@@ -4726,6 +4738,27 @@ public final class ActivityThread extends ClientTransactionHandler
         //Slog.i(TAG, "Running services: " + mServices);
     }
 
+    private void handleTimeoutService(IBinder token, int startId) {
+        Service s = mServices.get(token);
+        if (s != null) {
+            try {
+                if (localLOGV) Slog.v(TAG, "Timeout short service " + s);
+                s.callOnTimeout(startId);
+
+                // TODO(short-service): Do we need "service executing" for timeout?
+                // (see handleStopService())
+            } catch (Exception e) {
+                if (!mInstrumentation.onException(s, e)) {
+                    throw new RuntimeException(
+                            "Unable to timeout service " + s
+                                    + ": " + e.toString(), e);
+                }
+                Slog.i(TAG, "handleTimeoutService: exception for " + token, e);
+            }
+        } else {
+            Slog.wtf(TAG, "handleTimeoutService: token=" + token + " not found.");
+        }
+    }
     /**
      * Resume the activity.
      * @param r Target activity record.

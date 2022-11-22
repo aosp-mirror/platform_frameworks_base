@@ -3088,6 +3088,17 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertTrue(activity.mVisibleRequested);
         assertTrue(activity.mDisplayContent.mOpeningApps.contains(activity));
         assertFalse(activity.mDisplayContent.mClosingApps.contains(activity));
+
+        // There should still be animation (add to opening) if keyguard is going away while the
+        // screen is off because it will be visible after screen is turned on by unlocking.
+        mDisplayContent.mOpeningApps.remove(activity);
+        mDisplayContent.mClosingApps.remove(activity);
+        activity.commitVisibility(false /* visible */, false /* performLayout */);
+        mDisplayContent.getDisplayPolicy().screenTurnedOff();
+        final KeyguardController controller = mSupervisor.getKeyguardController();
+        doReturn(true).when(controller).isKeyguardGoingAway(anyInt());
+        activity.setVisibility(true);
+        assertTrue(mDisplayContent.mOpeningApps.contains(activity));
     }
 
     @Test

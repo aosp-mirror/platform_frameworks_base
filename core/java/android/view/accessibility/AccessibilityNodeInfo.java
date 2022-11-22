@@ -820,6 +820,8 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     private static final int BOOLEAN_PROPERTY_IS_TEXT_SELECTABLE = 0x0800000;
 
+    private static final int BOOLEAN_PROPERTY_REQUEST_INITIAL_ACCESSIBILITY_FOCUS = 1 << 24;
+
     /**
      * Bits that provide the id of a virtual descendant of a view.
      */
@@ -2488,6 +2490,38 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public void setTextSelectable(boolean selectableText) {
         setBooleanProperty(BOOLEAN_PROPERTY_IS_TEXT_SELECTABLE, selectableText);
+    }
+
+    /**
+     * Gets whether the node has {@link #setRequestInitialAccessibilityFocus}.
+     *
+     * @return True if the node has requested initial accessibility focus.
+     */
+    public boolean hasRequestInitialAccessibilityFocus() {
+        return getBooleanProperty(BOOLEAN_PROPERTY_REQUEST_INITIAL_ACCESSIBILITY_FOCUS);
+    }
+
+    /**
+     * Sets whether the node has requested initial accessibility focus.
+     *
+     * <p>
+     * If the node {@link #hasRequestInitialAccessibilityFocus}, this node would be one of
+     * candidates to be accessibility focused when the window appears.
+     * </p>
+     *
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @param requestInitialAccessibilityFocus True if the node requests to receive initial
+     *                                         accessibility focus.
+     * @throws IllegalStateException If called from an AccessibilityService.
+     */
+    public void setRequestInitialAccessibilityFocus(boolean requestInitialAccessibilityFocus) {
+        setBooleanProperty(BOOLEAN_PROPERTY_REQUEST_INITIAL_ACCESSIBILITY_FOCUS,
+                requestInitialAccessibilityFocus);
     }
 
     /**

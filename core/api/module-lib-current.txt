@@ -360,7 +360,6 @@ package android.os {
     method @NonNull public static String[] getDeclaredInstances(@NonNull String);
     method public static boolean isDeclared(@NonNull String);
     method @Nullable public static android.os.IBinder waitForDeclaredService(@NonNull String);
-    method @Nullable public static android.os.IBinder waitForService(@NonNull String);
   }
 
   public class StatsServiceManager {

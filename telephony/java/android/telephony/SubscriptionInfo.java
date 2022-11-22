@@ -1527,7 +1527,7 @@ public class SubscriptionInfo implements Parcelable {
          */
         @NonNull
         public Builder setGroupUuid(@Nullable String groupUuid) {
-            mGroupUuid = groupUuid == null ? null : ParcelUuid.fromString(groupUuid);
+            mGroupUuid = TextUtils.isEmpty(groupUuid) ? null : ParcelUuid.fromString(groupUuid);
             return this;
         }
 

@@ -831,7 +831,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 final String msg = "Failed to schedule " + r + " to " + receiver
                         + " via " + app + ": " + e;
                 logw(msg);
-                app.killLocked("Can't deliver broadcast", ApplicationExitInfo.REASON_OTHER, true);
+                app.killLocked("Can't deliver broadcast", ApplicationExitInfo.REASON_OTHER,
+                        ApplicationExitInfo.SUBREASON_UNDELIVERED_BROADCAST, true);
                 enqueueFinishReceiver(queue, BroadcastRecord.DELIVERY_FAILURE, "remote app");
             }
         } else {
@@ -858,7 +859,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             } catch (RemoteException e) {
                 final String msg = "Failed to schedule result of " + r + " via " + app + ": " + e;
                 logw(msg);
-                app.killLocked("Can't deliver broadcast", ApplicationExitInfo.REASON_OTHER, true);
+                app.killLocked("Can't deliver broadcast", ApplicationExitInfo.REASON_OTHER,
+                        ApplicationExitInfo.SUBREASON_UNDELIVERED_BROADCAST, true);
             }
         }
         // Clear so both local and remote references can be GC'ed

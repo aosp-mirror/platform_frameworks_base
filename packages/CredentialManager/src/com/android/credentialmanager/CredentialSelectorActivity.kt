@@ -16,17 +16,21 @@
 
 package com.android.credentialmanager
 
-import android.credentials.ui.RequestInfo
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.lifecycle.Observer
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.credentialmanager.common.DialogType
 import com.android.credentialmanager.common.DialogResult
+import com.android.credentialmanager.common.ProviderActivityResult
 import com.android.credentialmanager.common.ResultState
 import com.android.credentialmanager.createflow.CreateCredentialScreen
 import com.android.credentialmanager.createflow.CreateCredentialViewModel
@@ -39,28 +43,23 @@ class CredentialSelectorActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     CredentialManagerRepo.setup(this, intent)
-    val requestInfo = intent.extras?.getParcelable<RequestInfo>(RequestInfo.EXTRA_REQUEST_INFO)
-    if (requestInfo != null) {
-      val requestType = requestInfo.type
-      setContent {
-        CredentialSelectorTheme {
-          CredentialManagerBottomSheet(requestType)
-        }
-      }
-    } else {
-      // TODO: prototype only code to be removed. In production should exit.
-      setContent {
-        CredentialSelectorTheme {
-          CredentialManagerBottomSheet(RequestInfo.TYPE_CREATE)
-        }
+    val requestInfo = CredentialManagerRepo.getInstance().requestInfo
+    setContent {
+      CredentialSelectorTheme {
+        CredentialManagerBottomSheet(DialogType.toDialogType(requestInfo.type))
       }
     }
   }
 
   @ExperimentalMaterialApi
   @Composable
-  fun CredentialManagerBottomSheet(operationType: String) {
-    val dialogType = DialogType.toDialogType(operationType)
+  fun CredentialManagerBottomSheet(dialogType: DialogType) {
+    val providerActivityResult = remember { mutableStateOf<ProviderActivityResult?>(null) }
+    val launcher = rememberLauncherForActivityResult(
+      ActivityResultContracts.StartIntentSenderForResult()
+    ) {
+      providerActivityResult.value = ProviderActivityResult(it.resultCode, it.data)
+    }
     when (dialogType) {
       DialogType.CREATE_PASSKEY -> {
         val viewModel: CreateCredentialViewModel = viewModel()
@@ -68,7 +67,10 @@ class CredentialSelectorActivity : ComponentActivity() {
           this@CredentialSelectorActivity,
           onCancel
         )
-        CreateCredentialScreen(viewModel = viewModel)
+        providerActivityResult.value?.let {
+          viewModel.onProviderActivityResult(it)
+        }
+        CreateCredentialScreen(viewModel = viewModel, providerActivityLauncher = launcher)
       }
       DialogType.GET_CREDENTIALS -> {
         val viewModel: GetCredentialViewModel = viewModel()
@@ -76,7 +78,10 @@ class CredentialSelectorActivity : ComponentActivity() {
           this@CredentialSelectorActivity,
           onCancel
         )
-        GetCredentialScreen(viewModel = viewModel)
+        providerActivityResult.value?.let {
+          viewModel.onProviderActivityResult(it)
+        }
+        GetCredentialScreen(viewModel = viewModel, providerActivityLauncher = launcher)
       }
       else -> {
         Log.w("AccountSelector", "Unknown type, not rendering any UI")

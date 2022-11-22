@@ -1160,11 +1160,20 @@ public class ShadeListBuilder implements Dumpable, PipelineDumpable {
                 mLogger.logParentChanged(mIterationCount, prev.getParent(), curr.getParent());
             }
 
-            if (curr.getSuppressedChanges().getParent() != null) {
-                mLogger.logParentChangeSuppressed(
+            GroupEntry currSuppressedParent = curr.getSuppressedChanges().getParent();
+            GroupEntry prevSuppressedParent = prev.getSuppressedChanges().getParent();
+            if (currSuppressedParent != null && (prevSuppressedParent == null
+                    || !prevSuppressedParent.getKey().equals(currSuppressedParent.getKey()))) {
+                mLogger.logParentChangeSuppressedStarted(
                         mIterationCount,
-                        curr.getSuppressedChanges().getParent(),
+                        currSuppressedParent,
                         curr.getParent());
+            }
+            if (prevSuppressedParent != null && currSuppressedParent == null) {
+                mLogger.logParentChangeSuppressedStopped(
+                        mIterationCount,
+                        prevSuppressedParent,
+                        prev.getParent());
             }
 
             if (curr.getSuppressedChanges().getSection() != null) {

@@ -21,6 +21,7 @@ import android.content.Intent
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.keyguard.shared.quickaffordance.ActivationState
+import com.android.systemui.shared.keyguard.data.content.KeyguardQuickAffordanceProviderContract as Contract
 import kotlinx.coroutines.flow.Flow
 
 /** Defines interface that can act as data source for a single quick affordance model. */
@@ -41,12 +42,70 @@ interface KeyguardQuickAffordanceConfig {
     val lockScreenState: Flow<LockScreenState>
 
     /**
+     * Returns the [PickerScreenState] representing the affordance in the settings or selector
+     * experience.
+     */
+    suspend fun getPickerScreenState(): PickerScreenState = PickerScreenState.Default
+
+    /**
      * Notifies that the affordance was clicked by the user.
      *
      * @param expandable An [Expandable] to use when animating dialogs or activities
      * @return An [OnTriggeredResult] telling the caller what to do next
      */
     fun onTriggered(expandable: Expandable?): OnTriggeredResult
+
+    /**
+     * Encapsulates the state of a quick affordance within the context of the settings or selector
+     * experience.
+     */
+    sealed class PickerScreenState {
+
+        /** The picker shows the item for selecting this affordance as it normally would. */
+        object Default : PickerScreenState()
+
+        /**
+         * The picker does not show an item for selecting this affordance as it is not supported on
+         * the device at all. For example, missing hardware requirements.
+         */
+        object UnavailableOnDevice : PickerScreenState()
+
+        /**
+         * The picker shows the item for selecting this affordance as disabled. Clicking on it will
+         * show the given instructions to the user. If [actionText] and [actionComponentName] are
+         * provided (optional) a button will be shown to open an activity to help the user complete
+         * the steps described in the instructions.
+         */
+        data class Disabled(
+            /** List of human-readable instructions for setting up the quick affordance. */
+            val instructions: List<String>,
+            /**
+             * Optional text to display on a button that the user can click to start a flow to go
+             * and set up the quick affordance and make it enabled.
+             */
+            val actionText: String? = null,
+            /**
+             * Optional component name to be able to build an `Intent` that opens an `Activity` for
+             * the user to be able to set up the quick affordance and make it enabled.
+             *
+             * This is either just an action for the `Intent` or a package name and action,
+             * separated by [Contract.AffordanceTable.COMPONENT_NAME_SEPARATOR] for convenience, you
+             * can use the [componentName] function.
+             */
+            val actionComponentName: String? = null,
+        ) : PickerScreenState() {
+            init {
+                check(instructions.isNotEmpty()) { "Instructions must not be empty!" }
+                check(
+                    (actionText.isNullOrEmpty() && actionComponentName.isNullOrEmpty()) ||
+                        (!actionText.isNullOrEmpty() && !actionComponentName.isNullOrEmpty())
+                ) {
+                    "actionText and actionComponentName must either both be null/empty or both be" +
+                        " non-empty!"
+                }
+            }
+        }
+    }
 
     /**
      * Encapsulates the state of a "quick affordance" in the keyguard bottom area (for example, a
@@ -82,5 +141,19 @@ interface KeyguardQuickAffordanceConfig {
             val intent: Intent,
             val canShowWhileLocked: Boolean,
         ) : OnTriggeredResult()
+    }
+
+    companion object {
+        fun componentName(
+            packageName: String? = null,
+            action: String?,
+        ): String? {
+            return when {
+                action.isNullOrEmpty() -> null
+                !packageName.isNullOrEmpty() ->
+                    "$packageName${Contract.AffordanceTable.COMPONENT_NAME_SEPARATOR}$action"
+                else -> action
+            }
+        }
     }
 }

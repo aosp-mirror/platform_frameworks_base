@@ -23,7 +23,18 @@ import android.telephony.UiccPortInfo;
 import android.telephony.UiccSlotInfo;
 import android.telephony.UiccSlotMapping;
 
+import java.util.List;
+
 public class DataServiceUtils {
+
+    public static <T> boolean shouldUpdateEntityList(List<T> oldList, List<T> newList) {
+        if ((oldList != null &&
+                (newList.isEmpty() || !newList.equals(oldList)))
+                || (!newList.isEmpty() && oldList == null)) {
+            return true;
+        }
+        return false;
+    }
 
     /**
      * Represents columns of the MobileNetworkInfoData table, define these columns from
@@ -103,6 +114,11 @@ public class DataServiceUtils {
          */
         public static final String COLUMN_SHOW_TOGGLE_FOR_PHYSICAL_SIM = "showToggleForPhysicalSim";
 
+        /**
+         * The name of the subscription's data roaming state column,
+         * {@see TelephonyManager#isDataRoamingEnabled()}.
+         */
+        public static final String COLUMN_IS_DATA_ROAMING_ENABLED = "isDataRoamingEnabled";
     }
 
     /**

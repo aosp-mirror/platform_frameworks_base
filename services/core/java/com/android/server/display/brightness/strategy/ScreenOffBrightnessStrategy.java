@@ -21,6 +21,7 @@ import android.os.PowerManager;
 
 import com.android.server.display.DisplayBrightnessState;
 import com.android.server.display.brightness.BrightnessReason;
+import com.android.server.display.brightness.BrightnessUtils;
 
 /**
  * Manages the brightness of the display when the system is in the ScreenOff state.
@@ -30,13 +31,9 @@ public class ScreenOffBrightnessStrategy implements DisplayBrightnessStrategy {
     public DisplayBrightnessState updateBrightness(
             DisplayManagerInternal.DisplayPowerRequest displayPowerRequest) {
         // Todo(brup): Introduce a validator class and add validations before setting the brightness
-        BrightnessReason brightnessReason = new BrightnessReason();
-        brightnessReason.setReason(BrightnessReason.REASON_SCREEN_OFF);
-        return new DisplayBrightnessState.Builder()
-                .setBrightness(PowerManager.BRIGHTNESS_OFF_FLOAT)
-                .setSdrBrightness(PowerManager.BRIGHTNESS_OFF_FLOAT)
-                .setBrightnessReason(brightnessReason)
-                .build();
+        return BrightnessUtils.constructDisplayBrightnessState(BrightnessReason.REASON_SCREEN_OFF,
+                PowerManager.BRIGHTNESS_OFF_FLOAT,
+                PowerManager.BRIGHTNESS_OFF_FLOAT);
     }
 
     @Override
