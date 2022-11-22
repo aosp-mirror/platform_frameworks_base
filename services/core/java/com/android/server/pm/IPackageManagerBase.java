@@ -57,6 +57,7 @@ import android.os.RemoteException;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.permission.PermissionManager;
+import android.util.Log;
 
 import com.android.internal.R;
 import com.android.internal.content.InstallLocationUtils;
@@ -964,8 +965,12 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
             boolean checkProfiles, String targetCompilerFilter, boolean force,
             boolean bootComplete, String splitName) {
         final Computer snapshot = snapshot();
-        return mDexOptHelper.performDexOptMode(snapshot, packageName, checkProfiles,
-                targetCompilerFilter, force, bootComplete, splitName);
+        if (!checkProfiles) {
+            // There is no longer a flag to skip profile checking.
+            Log.w(PackageManagerService.TAG, "Ignored checkProfiles=false flag");
+        }
+        return mDexOptHelper.performDexOptMode(
+                snapshot, packageName, targetCompilerFilter, force, bootComplete, splitName);
     }
 
     /**

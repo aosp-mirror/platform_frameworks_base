@@ -88,7 +88,6 @@ import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
 import android.os.ShellCommand;
 import android.os.SystemClock;
-import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -1787,13 +1786,11 @@ class PackageManagerShellCommand extends ShellCommand {
 
     private int runCompile() throws RemoteException {
         final PrintWriter pw = getOutPrintWriter();
-        boolean checkProfiles = SystemProperties.getBoolean("dalvik.vm.usejitprofiles", false);
         boolean forceCompilation = false;
         boolean allPackages = false;
         boolean clearProfileData = false;
         String compilerFilter = null;
         String compilationReason = null;
-        String checkProfilesRaw = null;
         boolean secondaryDex = false;
         String split = null;
 
@@ -1816,7 +1813,9 @@ class PackageManagerShellCommand extends ShellCommand {
                     compilationReason = getNextArgRequired();
                     break;
                 case "--check-prof":
-                    checkProfilesRaw = getNextArgRequired();
+                    getNextArgRequired();
+                    pw.println("Warning: Ignoring obsolete flag --check-prof "
+                            + "- it is unconditionally enabled now");
                     break;
                 case "--reset":
                     forceCompilation = true;
@@ -1832,17 +1831,6 @@ class PackageManagerShellCommand extends ShellCommand {
                 default:
                     pw.println("Error: Unknown option: " + opt);
                     return 1;
-            }
-        }
-
-        if (checkProfilesRaw != null) {
-            if ("true".equals(checkProfilesRaw)) {
-                checkProfiles = true;
-            } else if ("false".equals(checkProfilesRaw)) {
-                checkProfiles = false;
-            } else {
-                pw.println("Invalid value for \"--check-prof\". Expected \"true\" or \"false\".");
-                return 1;
             }
         }
 
@@ -1922,11 +1910,10 @@ class PackageManagerShellCommand extends ShellCommand {
             }
 
             final boolean result = secondaryDex
-                    ? mInterface.performDexOptSecondary(packageName,
-                            targetCompilerFilter, forceCompilation)
-                    : mInterface.performDexOptMode(packageName,
-                            checkProfiles, targetCompilerFilter, forceCompilation,
-                            true /* bootComplete */, split);
+                    ? mInterface.performDexOptSecondary(
+                            packageName, targetCompilerFilter, forceCompilation)
+                    : mInterface.performDexOptMode(packageName, true /* checkProfiles */,
+                            targetCompilerFilter, forceCompilation, true /* bootComplete */, split);
             if (!result) {
                 failedPackages.add(packageName);
             }
