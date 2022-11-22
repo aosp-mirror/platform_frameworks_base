@@ -1809,7 +1809,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     @Override
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     public WindowInsets onApplyWindowInsets(WindowInsets insets) {
-        mBottomInset = insets.getSystemWindowInsetBottom();
+        mBottomInset = insets.getSystemWindowInsetBottom()
+                + insets.getInsets(WindowInsets.Type.ime()).bottom;
 
         mWaterfallTopInset = 0;
         final DisplayCutout cutout = insets.getDisplayCutout();
