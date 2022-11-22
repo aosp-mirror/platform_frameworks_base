@@ -65,7 +65,7 @@ class NativeDisplayEventReceiver : public DisplayEventDispatcher {
 public:
     NativeDisplayEventReceiver(JNIEnv* env, jobject receiverWeak,
                                const sp<MessageQueue>& messageQueue, jint vsyncSource,
-                               jint eventRegistration);
+                               jint eventRegistration, jlong layerHandle);
 
     void dispose();
 
@@ -88,11 +88,15 @@ private:
 
 NativeDisplayEventReceiver::NativeDisplayEventReceiver(JNIEnv* env, jobject receiverWeak,
                                                        const sp<MessageQueue>& messageQueue,
-                                                       jint vsyncSource, jint eventRegistration)
+                                                       jint vsyncSource, jint eventRegistration,
+                                                       jlong layerHandle)
       : DisplayEventDispatcher(messageQueue->getLooper(),
                                static_cast<gui::ISurfaceComposer::VsyncSource>(vsyncSource),
                                static_cast<gui::ISurfaceComposer::EventRegistration>(
-                                       eventRegistration)),
+                                       eventRegistration),
+                               layerHandle != 0 ? sp<IBinder>::fromExisting(
+                                                          reinterpret_cast<IBinder*>(layerHandle))
+                                                : nullptr),
         mReceiverWeakGlobal(env->NewGlobalRef(receiverWeak)),
         mMessageQueue(messageQueue) {
     ALOGV("receiver %p ~ Initializing display event receiver.", this);
@@ -214,7 +218,7 @@ void NativeDisplayEventReceiver::dispatchFrameRateOverrides(
 }
 
 static jlong nativeInit(JNIEnv* env, jclass clazz, jobject receiverWeak, jobject messageQueueObj,
-                        jint vsyncSource, jint eventRegistration) {
+                        jint vsyncSource, jint eventRegistration, jlong layerHandle) {
     sp<MessageQueue> messageQueue = android_os_MessageQueue_getMessageQueue(env, messageQueueObj);
     if (messageQueue == NULL) {
         jniThrowRuntimeException(env, "MessageQueue is not initialized.");
@@ -223,7 +227,7 @@ static jlong nativeInit(JNIEnv* env, jclass clazz, jobject receiverWeak, jobject
 
     sp<NativeDisplayEventReceiver> receiver =
             new NativeDisplayEventReceiver(env, receiverWeak, messageQueue, vsyncSource,
-                                           eventRegistration);
+                                           eventRegistration, layerHandle);
     status_t status = receiver->initialize();
     if (status) {
         String8 message;
@@ -268,7 +272,7 @@ static jobject nativeGetLatestVsyncEventData(JNIEnv* env, jclass clazz, jlong re
 
 static const JNINativeMethod gMethods[] = {
         /* name, signature, funcPtr */
-        {"nativeInit", "(Ljava/lang/ref/WeakReference;Landroid/os/MessageQueue;II)J",
+        {"nativeInit", "(Ljava/lang/ref/WeakReference;Landroid/os/MessageQueue;IIJ)J",
          (void*)nativeInit},
         {"nativeDispose", "(J)V", (void*)nativeDispose},
         // @FastNative
