@@ -2958,7 +2958,8 @@ public class ActivityRecordTests extends WindowTestsBase {
         removeGlobalMinSizeRestriction();
         final Task task = new TaskBuilder(mSupervisor).setCreateParentTask(true).build();
         final Task rootTask = task.getRootTask();
-        final TaskFragment taskFragment = createTaskFragmentWithActivity(task);
+        final TaskFragment taskFragment = createTaskFragmentWithParentTask(task,
+                false /* createEmbeddedTask */);
         final ActivityRecord activity = taskFragment.getTopNonFinishingActivity();
         final Rect stackBounds = new Rect(0, 0, 1000, 600);
         final Rect taskBounds = new Rect(100, 400, 600, 800);

@@ -505,12 +505,12 @@ public class ActivityStarterTests extends WindowTestsBase {
         // The fullscreen windowing mode activity will be moved to split-secondary by
         // TestSplitOrganizer when a split-primary task appears.
         final ActivityRecord splitPrimaryActivity = new TaskBuilder(mSupervisor)
-                .setParentTask(splitOrg.mPrimary)
+                .setParentTaskFragment(splitOrg.mPrimary)
                 .setCreateActivity(true)
                 .build()
                 .getTopMostActivity();
         final ActivityRecord splitSecondActivity = new TaskBuilder(mSupervisor)
-                .setParentTask(splitOrg.mSecondary)
+                .setParentTaskFragment(splitOrg.mSecondary)
                 .setCreateActivity(true)
                 .build()
                 .getTopMostActivity();
@@ -1055,7 +1055,7 @@ public class ActivityStarterTests extends WindowTestsBase {
         // Create another activity on top of the secondary display.
         final Task topStack = secondaryTaskContainer.createRootTask(WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_STANDARD, true /* onTop */);
-        final Task topTask = new TaskBuilder(mSupervisor).setParentTask(topStack).build();
+        final Task topTask = new TaskBuilder(mSupervisor).setParentTaskFragment(topStack).build();
         new ActivityBuilder(mAtm).setTask(topTask).build();
 
         doReturn(mActivityMetricsLogger).when(mSupervisor).getActivityMetricsLogger();
@@ -1251,7 +1251,7 @@ public class ActivityStarterTests extends WindowTestsBase {
         final ActivityStarter starter = prepareStarter(0 /* flags */);
         starter.mStartActivity = new ActivityBuilder(mAtm).build();
         final Task task = new TaskBuilder(mAtm.mTaskSupervisor)
-                .setParentTask(createTask(mDisplayContent, WINDOWING_MODE_FULLSCREEN,
+                .setParentTaskFragment(createTask(mDisplayContent, WINDOWING_MODE_FULLSCREEN,
                         ACTIVITY_TYPE_STANDARD))
                 .setUserId(10)
                 .build();
