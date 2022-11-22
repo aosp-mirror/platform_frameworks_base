@@ -1404,7 +1404,7 @@ public class VolumeDialogImpl implements VolumeDialog,
 
     private void showH(int reason, boolean keyguardLocked, int lockTaskModeState) {
         Trace.beginSection("VolumeDialogImpl#showH");
-        if (D.BUG) Log.d(TAG, "showH r=" + Events.SHOW_REASONS[reason]);
+        Log.i(TAG, "showH r=" + Events.SHOW_REASONS[reason]);
         mHandler.removeMessages(H.SHOW);
         mHandler.removeMessages(H.DISMISS);
         rescheduleTimeoutH();
@@ -1432,7 +1432,7 @@ public class VolumeDialogImpl implements VolumeDialog,
         final int timeout = computeTimeoutH();
         mHandler.sendMessageDelayed(mHandler
                 .obtainMessage(H.DISMISS, Events.DISMISS_REASON_TIMEOUT, 0), timeout);
-        if (D.BUG) Log.d(TAG, "rescheduleTimeout " + timeout + " " + Debug.getCaller());
+        Log.i(TAG, "rescheduleTimeout " + timeout + " " + Debug.getCaller());
         mController.userActivity();
     }
 
@@ -1459,10 +1459,10 @@ public class VolumeDialogImpl implements VolumeDialog,
 
     protected void dismissH(int reason) {
         Trace.beginSection("VolumeDialogImpl#dismissH");
-        if (D.BUG) {
-            Log.d(TAG, "mDialog.dismiss() reason: " + Events.DISMISS_REASONS[reason]
-                    + " from: " + Debug.getCaller());
-        }
+
+        Log.i(TAG, "mDialog.dismiss() reason: " + Events.DISMISS_REASONS[reason]
+                + " from: " + Debug.getCaller());
+
         mHandler.removeMessages(H.DISMISS);
         mHandler.removeMessages(H.SHOW);
         if (mIsAnimatingDismiss) {
