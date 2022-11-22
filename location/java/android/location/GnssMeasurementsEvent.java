@@ -163,8 +163,8 @@ public final class GnssMeasurementsEvent implements Parcelable {
      * True indicates that this event was produced while the chipset was in full tracking mode, ie,
      * the GNSS chipset switched off duty cycling. In this mode, no clock discontinuities are
      * expected and, when supported, carrier phase should be continuous in good signal conditions.
-     * All non-blocklisted, healthy constellations, satellites and frequency bands must be tracked
-     * and reported in this mode.
+     * All non-blocklisted, healthy constellations, satellites and frequency bands that are
+     * meaningful to positioning accuracy must be tracked and reported in this mode.
      *
      * False indicates that the GNSS chipset may optimize power via duty cycling, constellations and
      * frequency limits, etc.
@@ -307,7 +307,8 @@ public final class GnssMeasurementsEvent implements Parcelable {
          * mode, ie, the GNSS chipset switched off duty cycling. In this mode, no clock
          * discontinuities are expected and, when supported, carrier phase should be continuous in
          * good signal conditions. All non-blocklisted, healthy constellations, satellites and
-         * frequency bands must be tracked and reported in this mode.
+         * frequency bands that are meaningful to positioning accuracy must be tracked and reported
+         * in this mode.
          *
          * False indicates that the GNSS chipset may optimize power via duty cycling, constellations
          * and frequency limits, etc.
