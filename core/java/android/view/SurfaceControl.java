@@ -47,6 +47,7 @@ import android.graphics.Region;
 import android.gui.DropInputMode;
 import android.hardware.DataSpace;
 import android.hardware.HardwareBuffer;
+import android.hardware.OverlayProperties;
 import android.hardware.SyncFence;
 import android.hardware.display.DeviceProductInfo;
 import android.hardware.display.DisplayManager;
@@ -201,6 +202,7 @@ public final class SurfaceControl implements Parcelable {
     private static native DisplayPrimaries nativeGetDisplayNativePrimaries(
             IBinder displayToken);
     private static native int[] nativeGetCompositionDataspaces();
+    private static native OverlayProperties nativeGetOverlaySupport();
     private static native boolean nativeSetActiveColorMode(IBinder displayToken,
             int colorMode);
     private static native boolean nativeGetBootDisplayModeSupport();
@@ -2041,6 +2043,14 @@ public final class SurfaceControl implements Parcelable {
             }
         }
         return colorSpaces;
+    }
+
+    /**
+     * @return the overlay properties of the device
+     * @hide
+     */
+    public static OverlayProperties getOverlaySupport() {
+        return nativeGetOverlaySupport();
     }
 
     /**

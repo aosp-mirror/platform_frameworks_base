@@ -27,6 +27,7 @@
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/android_graphics_GraphicBuffer.h>
 #include <android_runtime/android_hardware_HardwareBuffer.h>
+#include <android_runtime/android_hardware_OverlayProperties.h>
 #include <android_runtime/android_view_Surface.h>
 #include <android_runtime/android_view_SurfaceControl.h>
 #include <android_runtime/android_view_SurfaceSession.h>
@@ -1346,6 +1347,15 @@ static jintArray nativeGetCompositionDataspaces(JNIEnv* env, jclass) {
     return array;
 }
 
+static jobject nativeGetOverlaySupport(JNIEnv* env, jclass) {
+    gui::OverlayProperties* overlayProperties = new gui::OverlayProperties;
+    if (SurfaceComposerClient::getOverlaySupport(overlayProperties) != NO_ERROR) {
+        delete overlayProperties;
+        return nullptr;
+    }
+    return android_hardware_OverlayProperties_convertToJavaObject(env, overlayProperties);
+}
+
 static jboolean nativeSetActiveColorMode(JNIEnv* env, jclass,
         jobject tokenObj, jint colorMode) {
     sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
@@ -2025,6 +2035,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetGameContentType },
     {"nativeGetCompositionDataspaces", "()[I",
             (void*)nativeGetCompositionDataspaces},
+    {"nativeGetOverlaySupport", "()Landroid/hardware/OverlayProperties;",
+            (void*) nativeGetOverlaySupport},
     {"nativeClearContentFrameStats", "(J)Z",
             (void*)nativeClearContentFrameStats },
     {"nativeGetContentFrameStats", "(JLandroid/view/WindowContentFrameStats;)Z",
