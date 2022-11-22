@@ -64,7 +64,7 @@ data class ActionButton(
 fun ActionButtons(actionButtons: List<ActionButton>) {
     Row(
         Modifier
-            .padding(SettingsDimension.itemPaddingVertical)
+            .padding(SettingsDimension.buttonPadding)
             .clip(SettingsShape.CornerLarge)
             .height(IntrinsicSize.Min)
     ) {
@@ -94,9 +94,7 @@ private fun RowScope.ActionButton(actionButton: ActionButton) {
         ),
         contentPadding = PaddingValues(horizontal = 4.dp, vertical = 20.dp),
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Icon(
                 imageVector = actionButton.imageVector,
                 contentDescription = null,
@@ -105,7 +103,7 @@ private fun RowScope.ActionButton(actionButton: ActionButton) {
             Spacer(Modifier.height(4.dp))
             Text(
                 text = actionButton.text,
-                style = MaterialTheme.typography.labelLarge,
+                style = MaterialTheme.typography.labelMedium,
             )
         }
     }
