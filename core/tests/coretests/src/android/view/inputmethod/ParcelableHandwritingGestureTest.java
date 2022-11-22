@@ -22,6 +22,7 @@ import static org.junit.Assert.assertThrows;
 import android.annotation.NonNull;
 import android.graphics.PointF;
 import android.graphics.RectF;
+import android.os.CancellationSignal;
 import android.os.Parcel;
 import android.platform.test.annotations.Presubmit;
 
@@ -82,6 +83,14 @@ public class ParcelableHandwritingGestureTest {
         verifyEqualityAfterUnparcel(new InsertGesture.Builder()
                 .setTextToInsert("text")
                 .setInsertionPoint(new PointF(1, 1)).setFallbackText("")
+                .build());
+    }
+
+    @Test
+    public void testInsertModeGesture() {
+        verifyEqualityAfterUnparcel(new InsertModeGesture.Builder()
+                .setInsertionPoint(new PointF(1, 1)).setFallbackText("")
+                .setCancellationSignal(new CancellationSignal())
                 .build());
     }
 
