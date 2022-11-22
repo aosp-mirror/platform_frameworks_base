@@ -67,6 +67,8 @@ object KeyguardQuickAffordanceProviderContract {
     object AffordanceTable {
         const val TABLE_NAME = "affordances"
         val URI: Uri = BASE_URI.buildUpon().path(TABLE_NAME).build()
+        const val ENABLEMENT_INSTRUCTIONS_DELIMITER = "]["
+        const val COMPONENT_NAME_SEPARATOR = "/"
 
         object Columns {
             /** String. Unique ID for this affordance. */
@@ -78,6 +80,25 @@ object KeyguardQuickAffordanceProviderContract {
              * ID from the system UI package.
              */
             const val ICON = "icon"
+            /** Integer. `1` if the affordance is enabled or `0` if it disabled. */
+            const val IS_ENABLED = "is_enabled"
+            /**
+             * String. List of strings, delimited by [ENABLEMENT_INSTRUCTIONS_DELIMITER] to be shown
+             * to the user if the affordance is disabled and the user selects the affordance. The
+             * first one is a title while the rest are the steps needed to re-enable the affordance.
+             */
+            const val ENABLEMENT_INSTRUCTIONS = "enablement_instructions"
+            /**
+             * String. Optional label for a button that, when clicked, opens a destination activity
+             * where the user can re-enable the disabled affordance.
+             */
+            const val ENABLEMENT_ACTION_TEXT = "enablement_action_text"
+            /**
+             * String. Optional package name and activity action string, delimited by
+             * [COMPONENT_NAME_SEPARATOR] to use with an `Intent` to start an activity that opens a
+             * destination where the user can re-enable the disabled affordance.
+             */
+            const val ENABLEMENT_COMPONENT_NAME = "enablement_action_intent"
         }
     }
 

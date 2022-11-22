@@ -768,9 +768,10 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
             // to the center of suggested bounds (or the displayArea if no suggested bounds). The
             // default size might be too big to center to source activity bounds in displayArea, so
             // we may need to move it back to the displayArea.
+            adjustBoundsToFitInDisplayArea(displayArea, layout, mTmpBounds);
+            inOutBounds.setEmpty();
             LaunchParamsUtil.centerBounds(displayArea, mTmpBounds.width(), mTmpBounds.height(),
                     inOutBounds);
-            adjustBoundsToFitInDisplayArea(displayArea, layout, inOutBounds);
             if (DEBUG) appendLog("freeform-size-mismatch=" + inOutBounds);
         }
 
@@ -821,8 +822,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
                                                 @NonNull Rect inOutBounds) {
         final int layoutDirection = mSupervisor.mRootWindowContainer.getConfiguration()
                 .getLayoutDirection();
-        displayArea.getStableRect(mTmpStableBounds);
-        LaunchParamsUtil.adjustBoundsToFitInDisplayArea(mTmpStableBounds, layoutDirection, layout,
+        LaunchParamsUtil.adjustBoundsToFitInDisplayArea(displayArea, layoutDirection, layout,
                 inOutBounds);
     }
 
