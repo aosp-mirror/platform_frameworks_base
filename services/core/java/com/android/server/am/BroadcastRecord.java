@@ -37,6 +37,7 @@ import android.app.compat.CompatChanges;
 import android.content.ComponentName;
 import android.content.IIntentReceiver;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ResolveInfo;
 import android.os.Binder;
@@ -870,14 +871,34 @@ final class BroadcastRecord extends Binder {
         }
     }
 
-    public boolean matchesDeliveryGroup(@NonNull BroadcastRecord other) {
-        final String key = (options != null) ? options.getDeliveryGroupKey() : null;
-        final String otherKey = (other.options != null)
-                ? other.options.getDeliveryGroupKey() : null;
-        if (key == null && otherKey == null) {
-            return intent.filterEquals(other.intent);
+    boolean matchesDeliveryGroup(@NonNull BroadcastRecord other) {
+        return matchesDeliveryGroup(this, other);
+    }
+
+    private static boolean matchesDeliveryGroup(@NonNull BroadcastRecord newRecord,
+            @NonNull BroadcastRecord oldRecord) {
+        final String newMatchingKey = getDeliveryGroupMatchingKey(newRecord);
+        final String oldMatchingKey = getDeliveryGroupMatchingKey(oldRecord);
+        final IntentFilter newMatchingFilter = getDeliveryGroupMatchingFilter(newRecord);
+        // If neither delivery group key nor matching filter is specified, then use
+        // Intent.filterEquals() to identify the delivery group.
+        if (newMatchingKey == null && oldMatchingKey == null && newMatchingFilter == null) {
+            return newRecord.intent.filterEquals(oldRecord.intent);
         }
-        return Objects.equals(key, otherKey);
+        if (newMatchingFilter != null && !newMatchingFilter.asPredicate().test(oldRecord.intent)) {
+            return false;
+        }
+        return Objects.equals(newMatchingKey, oldMatchingKey);
+    }
+
+    @Nullable
+    private static String getDeliveryGroupMatchingKey(@NonNull BroadcastRecord record) {
+        return record.options == null ? null : record.options.getDeliveryGroupMatchingKey();
+    }
+
+    @Nullable
+    private static IntentFilter getDeliveryGroupMatchingFilter(@NonNull BroadcastRecord record) {
+        return record.options == null ? null : record.options.getDeliveryGroupMatchingFilter();
     }
 
     @Override
