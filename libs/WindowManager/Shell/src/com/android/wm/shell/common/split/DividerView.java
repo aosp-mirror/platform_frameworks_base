@@ -76,6 +76,7 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
     private GestureDetector mDoubleTapDetector;
     private boolean mInteractive;
     private boolean mSetTouchRegion = true;
+    private int mLastDraggingPosition;
 
     /**
      * Tracks divider bar visible bounds in screen-based coordination. Used to calculate with
@@ -298,6 +299,7 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
                 }
                 if (mMoving) {
                     final int position = mSplitLayout.getDividePosition() + touchPos - mStartPos;
+                    mLastDraggingPosition = position;
                     mSplitLayout.updateDivideBounds(position);
                 }
                 break;
@@ -372,6 +374,15 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
                 "Set divider bar %s from %s", interactive ? "interactive" : "non-interactive",
                 from);
         mInteractive = interactive;
+        if (!mInteractive && mMoving) {
+            final int position = mSplitLayout.getDividePosition();
+            mSplitLayout.flingDividePosition(
+                    mLastDraggingPosition,
+                    position,
+                    mSplitLayout.FLING_RESIZE_DURATION,
+                    () -> mSplitLayout.setDividePosition(position, true /* applyLayoutChange */));
+            mMoving = false;
+        }
         releaseTouching();
         mHandle.setVisibility(mInteractive ? View.VISIBLE : View.INVISIBLE);
     }

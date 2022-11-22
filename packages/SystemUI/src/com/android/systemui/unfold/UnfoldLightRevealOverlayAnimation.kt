@@ -94,7 +94,7 @@ constructor(
                 overlayContainer = builder.build()
 
                 SurfaceControl.Transaction()
-                    .setLayer(overlayContainer, Integer.MAX_VALUE)
+                    .setLayer(overlayContainer, UNFOLD_OVERLAY_LAYER_Z_INDEX)
                     .show(overlayContainer)
                     .apply()
 
@@ -268,4 +268,12 @@ constructor(
                 this.isFolded = isFolded
             }
         )
+
+    private companion object {
+        private const val ROTATION_ANIMATION_OVERLAY_Z_INDEX = Integer.MAX_VALUE
+
+        // Put the unfold overlay below the rotation animation screenshot to hide the moment
+        // when it is rotated but the rotation of the other windows hasn't happen yet
+        private const val UNFOLD_OVERLAY_LAYER_Z_INDEX = ROTATION_ANIMATION_OVERLAY_Z_INDEX - 1
+    }
 }
