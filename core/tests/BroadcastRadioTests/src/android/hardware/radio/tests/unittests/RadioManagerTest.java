@@ -187,6 +187,20 @@ public final class RadioManagerTest {
     }
 
     @Test
+    public void writeToParcel_forBandDescriptor() {
+        Parcel parcel = Parcel.obtain();
+        RadioManager.BandDescriptor bandDescriptor = createFmBandDescriptor();
+
+        bandDescriptor.writeToParcel(parcel, /* flags= */ 0);
+        parcel.setDataPosition(0);
+
+        RadioManager.BandDescriptor bandDescriptorFromParcel =
+                RadioManager.BandDescriptor.CREATOR.createFromParcel(parcel);
+        assertWithMessage("Band Descriptor created from parcel")
+                .that(bandDescriptorFromParcel).isEqualTo(bandDescriptor);
+    }
+
+    @Test
     public void newArray_forBandDescriptorCreator() {
         RadioManager.BandDescriptor[] bandDescriptors =
                 RadioManager.BandDescriptor.CREATOR.newArray(CREATOR_ARRAY_SIZE);
@@ -421,6 +435,20 @@ public final class RadioManagerTest {
     }
 
     @Test
+    public void writeToParcel_forBandConfig() {
+        Parcel parcel = Parcel.obtain();
+        RadioManager.BandConfig bandConfig = createAmBandConfig();
+
+        bandConfig.writeToParcel(parcel, /* flags= */ 0);
+        parcel.setDataPosition(0);
+
+        RadioManager.BandConfig bandConfigFromParcel =
+                RadioManager.BandConfig.CREATOR.createFromParcel(parcel);
+        assertWithMessage("Band Config created from parcel")
+                .that(bandConfigFromParcel).isEqualTo(bandConfig);
+    }
+
+    @Test
     public void newArray_forBandConfigCreator() {
         RadioManager.BandConfig[] bandConfigs =
                 RadioManager.BandConfig.CREATOR.newArray(CREATOR_ARRAY_SIZE);
@@ -520,7 +548,9 @@ public final class RadioManagerTest {
 
     @Test
     public void equals_withSameFmBandConfigs_returnsTrue() {
-        RadioManager.FmBandConfig fmBandConfigCompared = createFmBandConfig();
+        RadioManager.FmBandConfig.Builder builder =
+                new RadioManager.FmBandConfig.Builder(FM_BAND_CONFIG);
+        RadioManager.FmBandConfig fmBandConfigCompared = builder.build();
 
         assertWithMessage("The same FM Band Config")
                 .that(FM_BAND_CONFIG).isEqualTo(fmBandConfigCompared);
@@ -545,7 +575,9 @@ public final class RadioManagerTest {
 
     @Test
     public void equals_withSameAmBandConfigs_returnsTrue() {
-        RadioManager.AmBandConfig amBandConfigCompared = createAmBandConfig();
+        RadioManager.AmBandConfig.Builder builder =
+                new RadioManager.AmBandConfig.Builder(AM_BAND_CONFIG);
+        RadioManager.AmBandConfig amBandConfigCompared = builder.build();
 
         assertWithMessage("The same AM Band Config")
                 .that(AM_BAND_CONFIG).isEqualTo(amBandConfigCompared);

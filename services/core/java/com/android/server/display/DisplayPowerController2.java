@@ -299,7 +299,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
     private boolean mAppliedAutoBrightness;
     private boolean mAppliedDimming;
     private boolean mAppliedLowPower;
-    private boolean mAppliedScreenBrightnessOverride;
     private boolean mAppliedTemporaryBrightness;
     private boolean mAppliedTemporaryAutoBrightnessAdjustment;
     private boolean mAppliedBrightnessBoost;
@@ -1200,15 +1199,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         if (state == Display.STATE_VR) {
             brightnessState = mScreenBrightnessForVr;
             mBrightnessReasonTemp.setReason(BrightnessReason.REASON_VR);
-        }
-
-        if ((Float.isNaN(brightnessState))
-                && isValidBrightnessValue(mPowerRequest.screenBrightnessOverride)) {
-            brightnessState = mPowerRequest.screenBrightnessOverride;
-            mBrightnessReasonTemp.setReason(BrightnessReason.REASON_OVERRIDE);
-            mAppliedScreenBrightnessOverride = true;
-        } else {
-            mAppliedScreenBrightnessOverride = false;
         }
 
         final boolean autoBrightnessEnabledInDoze =
@@ -2311,7 +2301,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         pw.println("  mAppliedDimming=" + mAppliedDimming);
         pw.println("  mAppliedLowPower=" + mAppliedLowPower);
         pw.println("  mAppliedThrottling=" + mAppliedThrottling);
-        pw.println("  mAppliedScreenBrightnessOverride=" + mAppliedScreenBrightnessOverride);
         pw.println("  mAppliedTemporaryBrightness=" + mAppliedTemporaryBrightness);
         pw.println("  mAppliedTemporaryAutoBrightnessAdjustment="
                 + mAppliedTemporaryAutoBrightnessAdjustment);

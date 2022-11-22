@@ -55,6 +55,7 @@ import android.hardware.display.DisplayManagerInternal;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityModuleConnector;
 import android.net.NetworkStackClient;
+import android.os.ArtModuleServiceManager;
 import android.os.BaseBundle;
 import android.os.Binder;
 import android.os.Build;
@@ -108,6 +109,7 @@ import com.android.server.am.ActivityManagerService;
 import com.android.server.ambientcontext.AmbientContextManagerService;
 import com.android.server.appbinding.AppBindingService;
 import com.android.server.art.ArtManagerLocal;
+import com.android.server.art.ArtModuleServiceInitializer;
 import com.android.server.attention.AttentionManagerService;
 import com.android.server.audio.AudioService;
 import com.android.server.biometrics.AuthService;
@@ -2723,6 +2725,7 @@ public final class SystemServer implements Dumpable {
         t.traceEnd();
 
         t.traceBegin("ArtManagerLocal");
+        ArtModuleServiceInitializer.setArtModuleServiceManager(new ArtModuleServiceManager());
         LocalManagerRegistry.addManager(ArtManagerLocal.class, new ArtManagerLocal(context));
         t.traceEnd();
 

@@ -34,6 +34,7 @@ public final class DisplayBrightnessController {
     private final int mDisplayId;
     // Selects an appropriate strategy based on the request provided by the clients.
     private DisplayBrightnessStrategySelector mDisplayBrightnessStrategySelector;
+    private DisplayBrightnessStrategy mDisplayBrightnessStrategy;
 
     /**
      * The constructor of DisplayBrightnessController.
@@ -60,10 +61,10 @@ public final class DisplayBrightnessController {
     public DisplayBrightnessState updateBrightness(
             DisplayManagerInternal.DisplayPowerRequest displayPowerRequest,
             int targetDisplayState) {
-        DisplayBrightnessStrategy displayBrightnessStrategy =
+        mDisplayBrightnessStrategy =
                 mDisplayBrightnessStrategySelector.selectStrategy(displayPowerRequest,
                         targetDisplayState);
-        return displayBrightnessStrategy.updateBrightness(displayPowerRequest);
+        return mDisplayBrightnessStrategy.updateBrightness(displayPowerRequest);
     }
 
     /**
@@ -82,6 +83,11 @@ public final class DisplayBrightnessController {
     public void dump(PrintWriter writer) {
         writer.println();
         writer.println("DisplayBrightnessController:");
+        writer.println("  mDisplayId=: " + mDisplayId);
+        if (mDisplayBrightnessStrategy != null) {
+            writer.println("  Last selected DisplayBrightnessStrategy= "
+                    + mDisplayBrightnessStrategy.getName());
+        }
         IndentingPrintWriter ipw = new IndentingPrintWriter(writer, " ");
         mDisplayBrightnessStrategySelector.dump(ipw);
     }

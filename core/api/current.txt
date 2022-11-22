@@ -5612,6 +5612,7 @@ package android.app {
     method public int getGameMode();
     method public void setGameState(@NonNull android.app.GameState);
     field public static final int GAME_MODE_BATTERY = 3; // 0x3
+    field public static final int GAME_MODE_CUSTOM = 4; // 0x4
     field public static final int GAME_MODE_PERFORMANCE = 2; // 0x2
     field public static final int GAME_MODE_STANDARD = 1; // 0x1
     field public static final int GAME_MODE_UNSUPPORTED = 0; // 0x0
@@ -19737,6 +19738,7 @@ package android.location {
     method public int describeContents();
     method @NonNull public android.location.GnssClock getClock();
     method @NonNull public java.util.Collection<android.location.GnssAutomaticGainControl> getGnssAutomaticGainControls();
+    method public boolean getIsFullTracking();
     method @NonNull public java.util.Collection<android.location.GnssMeasurement> getMeasurements();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.location.GnssMeasurementsEvent> CREATOR;
@@ -19748,6 +19750,7 @@ package android.location {
     method @NonNull public android.location.GnssMeasurementsEvent build();
     method @NonNull public android.location.GnssMeasurementsEvent.Builder setClock(@NonNull android.location.GnssClock);
     method @NonNull public android.location.GnssMeasurementsEvent.Builder setGnssAutomaticGainControls(@NonNull java.util.Collection<android.location.GnssAutomaticGainControl>);
+    method @NonNull public android.location.GnssMeasurementsEvent.Builder setIsFullTracking(boolean);
     method @NonNull public android.location.GnssMeasurementsEvent.Builder setMeasurements(@NonNull java.util.Collection<android.location.GnssMeasurement>);
   }
 
@@ -27748,6 +27751,15 @@ package android.net.vcn {
 
 package android.nfc {
 
+  public final class AvailableNfcAntenna implements android.os.Parcelable {
+    ctor public AvailableNfcAntenna(int, int);
+    method public int describeContents();
+    method public int getLocationX();
+    method public int getLocationY();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.nfc.AvailableNfcAntenna> CREATOR;
+  }
+
   public class FormatException extends java.lang.Exception {
     ctor public FormatException();
     ctor public FormatException(String);
@@ -27809,6 +27821,7 @@ package android.nfc {
     method @Deprecated public void enableForegroundNdefPush(android.app.Activity, android.nfc.NdefMessage);
     method public void enableReaderMode(android.app.Activity, android.nfc.NfcAdapter.ReaderCallback, int, android.os.Bundle);
     method public static android.nfc.NfcAdapter getDefaultAdapter(android.content.Context);
+    method @Nullable public android.nfc.NfcAntennaInfo getNfcAntennaInfo();
     method public boolean ignore(android.nfc.Tag, int, android.nfc.NfcAdapter.OnTagRemovedListener, android.os.Handler);
     method @Deprecated public boolean invokeBeam(android.app.Activity);
     method public boolean isEnabled();
@@ -27869,6 +27882,17 @@ package android.nfc {
 
   public static interface NfcAdapter.ReaderCallback {
     method public void onTagDiscovered(android.nfc.Tag);
+  }
+
+  public final class NfcAntennaInfo implements android.os.Parcelable {
+    ctor public NfcAntennaInfo(int, int, boolean, @NonNull java.util.List<android.nfc.AvailableNfcAntenna>);
+    method public int describeContents();
+    method @NonNull public java.util.List<android.nfc.AvailableNfcAntenna> getAvailableNfcAntennas();
+    method public int getDeviceHeight();
+    method public int getDeviceWidth();
+    method public boolean isDeviceFoldable();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.nfc.NfcAntennaInfo> CREATOR;
   }
 
   public final class NfcEvent {
@@ -49542,6 +49566,7 @@ package android.view {
     method public float getY(int);
     method public float getYPrecision();
     method public boolean isButtonPressed(int);
+    method @Nullable public static android.view.MotionEvent obtain(long, long, int, int, @NonNull android.view.MotionEvent.PointerProperties[], @NonNull android.view.MotionEvent.PointerCoords[], int, int, float, float, int, int, int, int, int, int);
     method public static android.view.MotionEvent obtain(long, long, int, int, android.view.MotionEvent.PointerProperties[], android.view.MotionEvent.PointerCoords[], int, int, float, float, int, int, int, int);
     method @Deprecated public static android.view.MotionEvent obtain(long, long, int, int, int[], android.view.MotionEvent.PointerCoords[], int, float, float, int, int, int, int);
     method public static android.view.MotionEvent obtain(long, long, int, float, float, float, float, int, float, float, int, int);
@@ -52447,6 +52472,7 @@ package android.view.accessibility {
     method public String getViewIdResourceName();
     method public android.view.accessibility.AccessibilityWindowInfo getWindow();
     method public int getWindowId();
+    method public boolean hasRequestInitialAccessibilityFocus();
     method public boolean isAccessibilityFocused();
     method public boolean isCheckable();
     method public boolean isChecked();
@@ -52526,6 +52552,7 @@ package android.view.accessibility {
     method public void setPassword(boolean);
     method public void setQueryFromAppProcessEnabled(@NonNull android.view.View, boolean);
     method public void setRangeInfo(android.view.accessibility.AccessibilityNodeInfo.RangeInfo);
+    method public void setRequestInitialAccessibilityFocus(boolean);
     method public void setScreenReaderFocusable(boolean);
     method public void setScrollable(boolean);
     method public void setSelected(boolean);

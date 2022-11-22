@@ -16,6 +16,7 @@
 package com.android.server.credentials;
 
 import android.annotation.NonNull;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.credentials.ui.IntentFactory;
@@ -79,14 +80,18 @@ public class CredentialManagerUi {
     }
 
     /**
-     * Surfaces the Credential Manager bottom sheet UI.
+     * Creates a {@link PendingIntent} to be used to invoke the credential manager selector UI,
+     * by the calling app process.
+     * @param requestInfo the information about the request
      * @param providerDataList the list of provider data from remote providers
      */
-    public void show(RequestInfo requestInfo, ArrayList<ProviderData> providerDataList) {
-        Log.i(TAG, "In show");
+    public PendingIntent createPendingIntent(
+            RequestInfo requestInfo, ArrayList<ProviderData> providerDataList) {
+        Log.i(TAG, "In createPendingIntent");
         Intent intent = IntentFactory.newIntent(requestInfo, providerDataList, new ArrayList<>(),
-                mResultReceiver);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        mContext.startActivity(intent);
+                mResultReceiver).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        //TODO: Determine if a specific request code is needed
+        return PendingIntent.getActivity(
+                mContext, /*requestCode=*/0, intent, PendingIntent.FLAG_IMMUTABLE);
     }
 }

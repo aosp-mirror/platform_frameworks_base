@@ -21,13 +21,20 @@ import static android.app.backup.BackupManagerMonitor.EXTRA_LOG_EVENT_ID;
 import static android.app.backup.BackupManagerMonitor.EXTRA_LOG_EVENT_PACKAGE_LONG_VERSION;
 import static android.app.backup.BackupManagerMonitor.EXTRA_LOG_EVENT_PACKAGE_NAME;
 import static android.app.backup.BackupManagerMonitor.EXTRA_LOG_EVENT_PACKAGE_VERSION;
+import static android.app.backup.BackupManagerMonitor.LOG_EVENT_CATEGORY_AGENT;
+import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_AGENT_LOGGING_RESULTS;
 
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
+import android.app.IBackupAgent;
+import android.app.backup.BackupManagerMonitor;
+import android.app.backup.BackupRestoreEventLogger;
 import android.app.backup.IBackupManagerMonitor;
 import android.content.pm.PackageInfo;
 import android.os.Bundle;
@@ -37,12 +44,17 @@ import android.platform.test.annotations.Presubmit;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.infra.AndroidFuture;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @SmallTest
 @Presubmit
@@ -143,6 +155,44 @@ public class BackupManagerMonitorUtilsTest {
     }
 
     @Test
+    public void monitorAgentLoggingResults_fillsBundleCorrectly() throws Exception {
+        PackageInfo packageInfo = new PackageInfo();
+        packageInfo.packageName = "test.package";
+        // Mock an agent that returns a logging result.
+        IBackupAgent agent = spy(IBackupAgent.class);
+        List<BackupRestoreEventLogger.DataTypeResult> loggingResults = new ArrayList<>();
+        loggingResults.add(new BackupRestoreEventLogger.DataTypeResult("testLoggingResult"));
+        doAnswer(
+                        invocation -> {
+                            AndroidFuture<List<BackupRestoreEventLogger.DataTypeResult>> in =
+                                    invocation.getArgument(0);
+                            in.complete(loggingResults);
+                            return null;
+                        })
+                .when(agent)
+                .getLoggerResults(any());
+
+        IBackupManagerMonitor result =
+                BackupManagerMonitorUtils.monitorAgentLoggingResults(
+                        mMonitorMock, packageInfo, agent);
+
+        assertThat(result).isEqualTo(mMonitorMock);
+        ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
+        verify(mMonitorMock).onEvent(bundleCaptor.capture());
+        Bundle eventBundle = bundleCaptor.getValue();
+        assertThat(eventBundle.getInt(EXTRA_LOG_EVENT_ID))
+                .isEqualTo(LOG_EVENT_ID_AGENT_LOGGING_RESULTS);
+        assertThat(eventBundle.getInt(EXTRA_LOG_EVENT_CATEGORY))
+                .isEqualTo(LOG_EVENT_CATEGORY_AGENT);
+        assertThat(eventBundle.getString(EXTRA_LOG_EVENT_PACKAGE_NAME)).isEqualTo("test.package");
+        List<BackupRestoreEventLogger.DataTypeResult> filledLoggingResults =
+                eventBundle.getParcelableArrayList(
+                        BackupManagerMonitor.EXTRA_LOG_AGENT_LOGGING_RESULTS,
+                        BackupRestoreEventLogger.DataTypeResult.class);
+        assertThat(filledLoggingResults.get(0).getDataType()).isEqualTo("testLoggingResult");
+    }
+
+    @Test
     public void putMonitoringExtraString_bundleExists_fillsBundleCorrectly() throws Exception {
         Bundle bundle = new Bundle();
 
@@ -204,5 +254,4 @@ public class BackupManagerMonitorUtilsTest {
         assertThat(result.size()).isEqualTo(1);
         assertThat(result.getBoolean("key")).isTrue();
     }
-
 }

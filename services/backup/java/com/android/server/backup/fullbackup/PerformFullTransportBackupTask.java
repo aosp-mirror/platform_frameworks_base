@@ -882,7 +882,8 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                             mQuota,
                             mCurrentOpToken,
                             mTransportFlags,
-                            mBackupEligibilityRules);
+                            mBackupEligibilityRules,
+                            mMonitor);
             try {
                 try {
                     if (!mIsCancelled) {

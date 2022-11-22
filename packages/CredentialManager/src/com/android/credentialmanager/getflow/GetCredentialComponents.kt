@@ -17,6 +17,9 @@
 package com.android.credentialmanager.getflow
 
 import android.text.TextUtils
+import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.IntentSenderRequest
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -62,7 +65,11 @@ import com.android.credentialmanager.jetpack.developer.PublicKeyCredential
 @Composable
 fun GetCredentialScreen(
   viewModel: GetCredentialViewModel,
+  providerActivityLauncher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>
 ) {
+  val entrySelectionCallback: (EntryInfo) -> Unit = {
+    viewModel.onEntrySelected(it, providerActivityLauncher)
+  }
   val state = rememberModalBottomSheetState(
     initialValue = ModalBottomSheetValue.Expanded,
     skipHalfExpanded = true
@@ -75,14 +82,14 @@ fun GetCredentialScreen(
         GetScreenState.PRIMARY_SELECTION -> PrimarySelectionCard(
           requestDisplayInfo = uiState.requestDisplayInfo,
           providerDisplayInfo = uiState.providerDisplayInfo,
-          onEntrySelected = viewModel::onEntrySelected,
+          onEntrySelected = entrySelectionCallback,
           onCancel = viewModel::onCancel,
           onMoreOptionSelected = viewModel::onMoreOptionSelected,
         )
         GetScreenState.ALL_SIGN_IN_OPTIONS -> AllSignInOptionCard(
           providerInfoList = uiState.providerInfoList,
           providerDisplayInfo = uiState.providerDisplayInfo,
-          onEntrySelected = viewModel::onEntrySelected,
+          onEntrySelected = entrySelectionCallback,
           onBackButtonClicked = viewModel::onBackToPrimarySelectionScreen,
         )
       }

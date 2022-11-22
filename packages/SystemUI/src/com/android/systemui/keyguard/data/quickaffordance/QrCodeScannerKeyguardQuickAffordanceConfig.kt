@@ -36,7 +36,7 @@ import kotlinx.coroutines.flow.Flow
 class QrCodeScannerKeyguardQuickAffordanceConfig
 @Inject
 constructor(
-    @Application context: Context,
+    @Application private val context: Context,
     private val controller: QRCodeScannerController,
 ) : KeyguardQuickAffordanceConfig {
 
@@ -74,6 +74,28 @@ constructor(
                 controller.removeCallback(callback)
             }
         }
+
+    override suspend fun getPickerScreenState(): KeyguardQuickAffordanceConfig.PickerScreenState {
+        return when {
+            !controller.isAvailableOnDevice ->
+                KeyguardQuickAffordanceConfig.PickerScreenState.UnavailableOnDevice
+            !controller.isAbleToOpenCameraApp ->
+                KeyguardQuickAffordanceConfig.PickerScreenState.Disabled(
+                    instructions =
+                        listOf(
+                            context.getString(
+                                R.string.keyguard_affordance_enablement_dialog_message,
+                                pickerName,
+                            ),
+                            context.getString(
+                                R.string
+                                    .keyguard_affordance_enablement_dialog_qr_scanner_instruction
+                            ),
+                        ),
+                )
+            else -> KeyguardQuickAffordanceConfig.PickerScreenState.Default
+        }
+    }
 
     override fun onTriggered(
         expandable: Expandable?,

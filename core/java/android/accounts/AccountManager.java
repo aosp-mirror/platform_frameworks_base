@@ -1029,7 +1029,9 @@ public class AccountManager {
      * @param password The password to associate with the account, null for none
      * @param extras String values to use for the account's userdata, null for none
      * @param visibility Map from packageName to visibility values which will be set before account
-     *        is added. See {@link #getAccountVisibility} for possible values.
+     *        is added. See {@link #getAccountVisibility} for possible values. Declaring
+     *        <a href="/training/basics/intents/package-visibility">package visibility</a> needs for
+     *        package names in the map is needed, if the caller is targeting API level 34 and above.
      *
      * @return True if the account was successfully added, false if the account already exists, the
      *         account is null, or another error occurs.
@@ -1113,7 +1115,9 @@ public class AccountManager {
      * the specified account.
      *
      * @param account {@link Account} to update visibility
-     * @param packageName Package name of the application to modify account visibility
+     * @param packageName Package name of the application to modify account visibility. Declaring
+     *        <a href="/training/basics/intents/package-visibility">package visibility</a> needs
+     *        for it is needed, if the caller is targeting API level 34 and above.
      * @param visibility New visibility value
      *
      * @return True, if visibility value was successfully updated.
@@ -1145,7 +1149,9 @@ public class AccountManager {
      * @param account {@link Account} to get visibility
      * @param packageName Package name of the application to get account visibility
      *
-     * @return int Visibility of given account.
+     * @return int Visibility of given account. For the caller targeting API level 34 and above,
+     * {@link #VISIBILITY_NOT_VISIBLE} is returned if the given package is filtered by the rules of
+     * <a href="/training/basics/intents/package-visibility">package visibility</a>.
      */
     public @AccountVisibility int getAccountVisibility(Account account, String packageName) {
         if (account == null)

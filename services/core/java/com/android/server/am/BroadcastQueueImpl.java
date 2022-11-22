@@ -735,7 +735,7 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                                 + " via " + app + ": " + ex;
                         Slog.w(TAG, msg);
                         app.killLocked("Can't deliver broadcast", ApplicationExitInfo.REASON_OTHER,
-                                true);
+                                ApplicationExitInfo.SUBREASON_UNDELIVERED_BROADCAST, true);
                     }
                     throw ex;
                 }
@@ -1388,7 +1388,8 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                 final String msg = "Failed to schedule " + r.intent + " to " + info
                         + " via " + app + ": " + e;
                 Slog.w(TAG, msg);
-                app.killLocked("Can't deliver broadcast", ApplicationExitInfo.REASON_OTHER, true);
+                app.killLocked("Can't deliver broadcast", ApplicationExitInfo.REASON_OTHER,
+                        ApplicationExitInfo.SUBREASON_UNDELIVERED_BROADCAST, true);
             } catch (RuntimeException e) {
                 Slog.wtf(TAG, "Failed sending broadcast to "
                         + r.curComponent + " with " + r.intent, e);

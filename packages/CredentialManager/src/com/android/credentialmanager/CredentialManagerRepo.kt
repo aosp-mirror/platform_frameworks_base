@@ -17,6 +17,7 @@
 package com.android.credentialmanager
 
 import android.credentials.Credential.TYPE_PASSWORD_CREDENTIAL
+import android.app.PendingIntent
 import android.app.slice.Slice
 import android.app.slice.SliceSpec
 import android.content.Context
@@ -32,6 +33,7 @@ import android.credentials.ui.DisabledProviderData
 import android.credentials.ui.ProviderData
 import android.credentials.ui.RequestInfo
 import android.credentials.ui.BaseDialogResult
+import android.credentials.ui.ProviderPendingIntentResponse
 import android.credentials.ui.UserSelectionDialogResult
 import android.graphics.drawable.Icon
 import android.os.Binder
@@ -54,7 +56,7 @@ class CredentialManagerRepo(
   private val context: Context,
   intent: Intent,
 ) {
-  private val requestInfo: RequestInfo
+  val requestInfo: RequestInfo
   private val providerEnabledList: List<ProviderData>
   private val providerDisabledList: List<DisabledProviderData>
   // TODO: require non-null.
@@ -75,7 +77,7 @@ class CredentialManagerRepo(
       RequestInfo.TYPE_GET ->
         intent.extras?.getParcelableArrayList(
           ProviderData.EXTRA_ENABLED_PROVIDER_DATA_LIST,
-          DisabledProviderData::class.java
+          GetCredentialProviderData::class.java
         ) ?: testGetCredentialProviderList()
       else -> {
         // TODO: fail gracefully
@@ -101,12 +103,19 @@ class CredentialManagerRepo(
     resultReceiver?.send(BaseDialogResult.RESULT_CODE_DIALOG_CANCELED, resultData)
   }
 
-  fun onOptionSelected(providerPackageName: String, entryKey: String, entrySubkey: String) {
+  fun onOptionSelected(
+    providerPackageName: String,
+    entryKey: String,
+    entrySubkey: String,
+    resultCode: Int? = null,
+    resultData: Intent? = null,
+  ) {
     val userSelectionDialogResult = UserSelectionDialogResult(
       requestInfo.token,
       providerPackageName,
       entryKey,
-      entrySubkey
+      entrySubkey,
+      if (resultCode != null) ProviderPendingIntentResponse(resultCode, resultData) else null
     )
     val resultData = Bundle()
     UserSelectionDialogResult.addToBundle(userSelectionDialogResult, resultData)
@@ -328,6 +337,14 @@ class CredentialManagerRepo(
     userDisplayName: String?,
     lastUsedTimeMillis: Long?,
   ): Entry {
+    val intent = Intent("com.androidauth.androidvault.CONFIRM_PASSWORD")
+      .setPackage("com.androidauth.androidvault")
+    intent.putExtra("provider_extra_sample", "testprovider")
+
+    val pendingIntent = PendingIntent.getActivity(context, 1,
+      intent, (PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+              or PendingIntent.FLAG_ONE_SHOT))
+
     val slice = Slice.Builder(
       Entry.CREDENTIAL_MANAGER_ENTRY_URI, SliceSpec(credentialType, 1)
     ).addText(
@@ -347,7 +364,9 @@ class CredentialManagerRepo(
     return Entry(
       key,
       subkey,
-      slice.build()
+      slice.build(),
+      pendingIntent,
+      null
     )
   }
 
@@ -360,10 +379,22 @@ class CredentialManagerRepo(
     totalCredentialCount: Int,
     lastUsedTimeMillis: Long,
   ): Entry {
+    val intent = Intent("com.androidauth.androidvault.CONFIRM_PASSWORD")
+      .setPackage("com.androidauth.androidvault")
+    intent.putExtra("provider_extra_sample", "testprovider")
+    val pendingIntent = PendingIntent.getActivity(context, 1,
+      intent, (PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+              or PendingIntent.FLAG_ONE_SHOT))
+    val createPasswordRequest = android.service.credentials.CreateCredentialRequest(
+      context.applicationInfo.packageName,
+      "PASSWORD",
+      toBundle("beckett-bakert@gmail.com", "password123")
+    )
+    val fillInIntent = Intent().putExtra("create_request_params", createPasswordRequest)
+
     val slice = Slice.Builder(
       Entry.CREDENTIAL_MANAGER_ENTRY_URI, SliceSpec(Entry.VERSION, 1)
-    )
-      .addText(
+    ).addText(
         providerDisplayName, null, listOf(Entry.HINT_USER_PROVIDER_ACCOUNT_NAME))
       .addIcon(
         Icon.createWithResource(context, R.drawable.ic_passkey),
@@ -384,7 +415,9 @@ class CredentialManagerRepo(
     return Entry(
       key,
       subkey,
-      slice
+      slice,
+      pendingIntent,
+      fillInIntent,
     )
   }
 
@@ -415,7 +448,6 @@ class CredentialManagerRepo(
   }
 
   private fun testGetRequestInfo(): RequestInfo {
-    val data = Bundle()
     return RequestInfo.newGetRequestInfo(
       Binder(),
       GetCredentialRequest.Builder()

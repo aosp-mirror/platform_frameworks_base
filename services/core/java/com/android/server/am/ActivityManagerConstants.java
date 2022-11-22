@@ -958,6 +958,20 @@ final class ActivityManagerConstants extends ContentObserver {
 
     /**
      * If a "short service" doesn't finish within this after the timeout (
+     * {@link #KEY_SHORT_FGS_TIMEOUT_DURATION}), then we'll lower the procstate.
+     */
+    private static final String KEY_SHORT_FGS_PROC_STATE_EXTRA_WAIT_DURATION =
+            "short_fgs_proc_state_extra_wait_duration";
+
+    /** @see #KEY_SHORT_FGS_PROC_STATE_EXTRA_WAIT_DURATION */
+    static final long DEFAULT_SHORT_FGS_PROC_STATE_EXTRA_WAIT_DURATION = 5_000;
+
+    /** @see #KEY_SHORT_FGS_PROC_STATE_EXTRA_WAIT_DURATION */
+    public static volatile long mShortFgsProcStateExtraWaitDuration =
+            DEFAULT_SHORT_FGS_PROC_STATE_EXTRA_WAIT_DURATION;
+
+    /**
+     * If a "short service" doesn't finish within this after the timeout (
      * {@link #KEY_SHORT_FGS_TIMEOUT_DURATION}), then we'll declare an ANR.
      * i.e. if the timeout is 60 seconds, and this ANR extra duration is 5 seconds, then
      * the app will be ANR'ed in 65 seconds after a short service starts and it's not stopped.
@@ -966,7 +980,7 @@ final class ActivityManagerConstants extends ContentObserver {
             "short_fgs_anr_extra_wait_duration";
 
     /** @see #KEY_SHORT_FGS_ANR_EXTRA_WAIT_DURATION */
-    static final long DEFAULT_SHORT_FGS_ANR_EXTRA_WAIT_DURATION = 5_000;
+    static final long DEFAULT_SHORT_FGS_ANR_EXTRA_WAIT_DURATION = 10_000;
 
     /** @see #KEY_SHORT_FGS_ANR_EXTRA_WAIT_DURATION */
     public static volatile long mShortFgsAnrExtraWaitDuration =
@@ -1115,6 +1129,9 @@ final class ActivityManagerConstants extends ContentObserver {
                                 break;
                             case KEY_SHORT_FGS_TIMEOUT_DURATION:
                                 updateShortFgsTimeoutDuration();
+                                break;
+                            case KEY_SHORT_FGS_PROC_STATE_EXTRA_WAIT_DURATION:
+                                updateShortFgsProcStateExtraWaitDuration();
                                 break;
                             case KEY_SHORT_FGS_ANR_EXTRA_WAIT_DURATION:
                                 updateShortFgsAnrExtraWaitDuration();
@@ -1828,6 +1845,13 @@ final class ActivityManagerConstants extends ContentObserver {
                 DEFAULT_SHORT_FGS_TIMEOUT_DURATION);
     }
 
+    private void updateShortFgsProcStateExtraWaitDuration() {
+        mShortFgsProcStateExtraWaitDuration = DeviceConfig.getLong(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_SHORT_FGS_PROC_STATE_EXTRA_WAIT_DURATION,
+                DEFAULT_SHORT_FGS_PROC_STATE_EXTRA_WAIT_DURATION);
+    }
+
     private void updateShortFgsAnrExtraWaitDuration() {
         mShortFgsAnrExtraWaitDuration = DeviceConfig.getLong(
                 DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
@@ -2009,6 +2033,8 @@ final class ActivityManagerConstants extends ContentObserver {
 
         pw.print("  "); pw.print(KEY_SHORT_FGS_TIMEOUT_DURATION);
         pw.print("="); pw.println(mShortFgsTimeoutDuration);
+        pw.print("  "); pw.print(KEY_SHORT_FGS_PROC_STATE_EXTRA_WAIT_DURATION);
+        pw.print("="); pw.println(mShortFgsProcStateExtraWaitDuration);
         pw.print("  "); pw.print(KEY_SHORT_FGS_ANR_EXTRA_WAIT_DURATION);
         pw.print("="); pw.println(mShortFgsAnrExtraWaitDuration);
 

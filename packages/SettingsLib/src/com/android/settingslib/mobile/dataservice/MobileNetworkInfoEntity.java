@@ -16,6 +16,8 @@
 
 package com.android.settingslib.mobile.dataservice;
 
+import android.text.TextUtils;
+
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
@@ -28,7 +30,7 @@ public class MobileNetworkInfoEntity {
             boolean isContactDiscoveryVisible, boolean isMobileDataEnabled, boolean isCdmaOptions,
             boolean isGsmOptions, boolean isWorldMode, boolean shouldDisplayNetworkSelectOptions,
             boolean isTdscdmaSupported, boolean activeNetworkIsCellular,
-            boolean showToggleForPhysicalSim) {
+            boolean showToggleForPhysicalSim, boolean isDataRoamingEnabled) {
         this.subId = subId;
         this.isContactDiscoveryEnabled = isContactDiscoveryEnabled;
         this.isContactDiscoveryVisible = isContactDiscoveryVisible;
@@ -40,6 +42,7 @@ public class MobileNetworkInfoEntity {
         this.isTdscdmaSupported = isTdscdmaSupported;
         this.activeNetworkIsCellular = activeNetworkIsCellular;
         this.showToggleForPhysicalSim = showToggleForPhysicalSim;
+        this.isDataRoamingEnabled = isDataRoamingEnabled;
     }
 
     @PrimaryKey
@@ -78,6 +81,51 @@ public class MobileNetworkInfoEntity {
     @ColumnInfo(name = DataServiceUtils.MobileNetworkInfoData.COLUMN_SHOW_TOGGLE_FOR_PHYSICAL_SIM)
     public boolean showToggleForPhysicalSim;
 
+    @ColumnInfo(name = DataServiceUtils.MobileNetworkInfoData.COLUMN_IS_DATA_ROAMING_ENABLED)
+    public boolean isDataRoamingEnabled;
+
+    @Override
+    public int hashCode() {
+        int result = 17;
+        result = 31 * result + subId.hashCode();
+        result = 31 * result + Boolean.hashCode(isContactDiscoveryEnabled);
+        result = 31 * result + Boolean.hashCode(isContactDiscoveryVisible);
+        result = 31 * result + Boolean.hashCode(isMobileDataEnabled);
+        result = 31 * result + Boolean.hashCode(isCdmaOptions);
+        result = 31 * result + Boolean.hashCode(isGsmOptions);
+        result = 31 * result + Boolean.hashCode(isWorldMode);
+        result = 31 * result + Boolean.hashCode(shouldDisplayNetworkSelectOptions);
+        result = 31 * result + Boolean.hashCode(isTdscdmaSupported);
+        result = 31 * result + Boolean.hashCode(activeNetworkIsCellular);
+        result = 31 * result + Boolean.hashCode(showToggleForPhysicalSim);
+        result = 31 * result + Boolean.hashCode(isDataRoamingEnabled);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof MobileNetworkInfoEntity)) {
+            return false;
+        }
+
+        MobileNetworkInfoEntity info = (MobileNetworkInfoEntity) obj;
+        return  TextUtils.equals(subId, info.subId)
+                && isContactDiscoveryEnabled == info.isContactDiscoveryEnabled
+                && isContactDiscoveryVisible == info.isContactDiscoveryVisible
+                && isMobileDataEnabled == info.isMobileDataEnabled
+                && isCdmaOptions == info.isCdmaOptions
+                && isGsmOptions == info.isGsmOptions
+                && isWorldMode == info.isWorldMode
+                && shouldDisplayNetworkSelectOptions == info.shouldDisplayNetworkSelectOptions
+                && isTdscdmaSupported == info.isTdscdmaSupported
+                && activeNetworkIsCellular == info.activeNetworkIsCellular
+                && showToggleForPhysicalSim == info.showToggleForPhysicalSim
+                && isDataRoamingEnabled == info.isDataRoamingEnabled;
+    }
+
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append(" {MobileNetworkInfoEntity(subId = ")
@@ -102,6 +150,8 @@ public class MobileNetworkInfoEntity {
                 .append(activeNetworkIsCellular)
                 .append(", showToggleForPhysicalSim = ")
                 .append(showToggleForPhysicalSim)
+                .append(", isDataRoamingEnabled = ")
+                .append(isDataRoamingEnabled)
                 .append(")}");
         return builder.toString();
     }

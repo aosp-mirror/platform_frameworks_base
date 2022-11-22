@@ -1107,6 +1107,15 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
         }
     }
 
+    /** @hide */
+    public final void callOnTimeout(int startId) {
+        // TODO(short-service): Do we need any check here, to avoid races?
+        // e.g. if the service is already stopped, but ActivityThread.handleTimeoutService() is
+        // already scheduled, then we'll call this method anyway. It should be doable to prevent
+        // that if we keep track of startForeground, stopForeground, and onDestroy.
+        onTimeout(startId);
+    }
+
     /**
      * Callback called on timeout for {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_SHORT_SERVICE}.
      *
