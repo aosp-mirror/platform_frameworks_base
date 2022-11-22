@@ -31,6 +31,7 @@ import com.android.systemui.SystemUIAppComponentFactoryBase.ContextAvailableCall
 import com.android.systemui.keyguard.domain.interactor.KeyguardQuickAffordanceInteractor
 import com.android.systemui.shared.keyguard.data.content.KeyguardQuickAffordanceProviderContract as Contract
 import javax.inject.Inject
+import kotlinx.coroutines.runBlocking
 
 class KeyguardQuickAffordanceProvider :
     ContentProvider(), SystemUIAppComponentFactoryBase.ContextInitializer {
@@ -118,9 +119,9 @@ class KeyguardQuickAffordanceProvider :
         sortOrder: String?,
     ): Cursor? {
         return when (uriMatcher.match(uri)) {
-            MATCH_CODE_ALL_AFFORDANCES -> queryAffordances()
+            MATCH_CODE_ALL_AFFORDANCES -> runBlocking { queryAffordances() }
             MATCH_CODE_ALL_SLOTS -> querySlots()
-            MATCH_CODE_ALL_SELECTIONS -> querySelections()
+            MATCH_CODE_ALL_SELECTIONS -> runBlocking { querySelections() }
             MATCH_CODE_ALL_FLAGS -> queryFlags()
             else -> null
         }
@@ -194,7 +195,7 @@ class KeyguardQuickAffordanceProvider :
         }
     }
 
-    private fun querySelections(): Cursor {
+    private suspend fun querySelections(): Cursor {
         return MatrixCursor(
                 arrayOf(
                     Contract.SelectionTable.Columns.SLOT_ID,
@@ -219,12 +220,16 @@ class KeyguardQuickAffordanceProvider :
             }
     }
 
-    private fun queryAffordances(): Cursor {
+    private suspend fun queryAffordances(): Cursor {
         return MatrixCursor(
                 arrayOf(
                     Contract.AffordanceTable.Columns.ID,
                     Contract.AffordanceTable.Columns.NAME,
                     Contract.AffordanceTable.Columns.ICON,
+                    Contract.AffordanceTable.Columns.IS_ENABLED,
+                    Contract.AffordanceTable.Columns.ENABLEMENT_INSTRUCTIONS,
+                    Contract.AffordanceTable.Columns.ENABLEMENT_ACTION_TEXT,
+                    Contract.AffordanceTable.Columns.ENABLEMENT_COMPONENT_NAME,
                 )
             )
             .apply {
@@ -234,6 +239,12 @@ class KeyguardQuickAffordanceProvider :
                             representation.id,
                             representation.name,
                             representation.iconResourceId,
+                            if (representation.isEnabled) 1 else 0,
+                            representation.instructions?.joinToString(
+                                Contract.AffordanceTable.ENABLEMENT_INSTRUCTIONS_DELIMITER
+                            ),
+                            representation.actionText,
+                            representation.actionComponentName,
                         )
                     )
                 }

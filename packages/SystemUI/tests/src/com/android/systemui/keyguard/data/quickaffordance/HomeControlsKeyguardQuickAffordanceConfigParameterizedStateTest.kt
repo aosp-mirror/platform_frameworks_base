@@ -24,8 +24,9 @@ import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.dagger.ControlsComponent
 import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
-import java.util.Optional
+import java.util.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -40,7 +41,6 @@ import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
 @SmallTest
@@ -93,6 +93,14 @@ class HomeControlsKeyguardQuickAffordanceConfigParameterizedStateTest : SysuiTes
         whenever(component.getControlsController()).thenReturn(Optional.of(controlsController))
         whenever(component.getControlsListingController())
             .thenReturn(Optional.of(controlsListingController))
+        whenever(controlsListingController.getCurrentServices())
+            .thenReturn(
+                if (hasServiceInfos) {
+                    listOf(mock(), mock())
+                } else {
+                    emptyList()
+                }
+            )
         whenever(component.canShowWhileLockedSetting)
             .thenReturn(MutableStateFlow(canShowWhileLocked))
         whenever(component.getVisibility())
@@ -142,6 +150,17 @@ class HomeControlsKeyguardQuickAffordanceConfigParameterizedStateTest : SysuiTes
                     KeyguardQuickAffordanceConfig.LockScreenState.Visible::class.java
                 } else {
                     KeyguardQuickAffordanceConfig.LockScreenState.Hidden::class.java
+                }
+            )
+        assertThat(underTest.getPickerScreenState())
+            .isInstanceOf(
+                when {
+                    !isFeatureEnabled ->
+                        KeyguardQuickAffordanceConfig.PickerScreenState.UnavailableOnDevice::class
+                            .java
+                    hasServiceInfos && hasFavorites ->
+                        KeyguardQuickAffordanceConfig.PickerScreenState.Default::class.java
+                    else -> KeyguardQuickAffordanceConfig.PickerScreenState.Disabled::class.java
                 }
             )
         job.cancel()

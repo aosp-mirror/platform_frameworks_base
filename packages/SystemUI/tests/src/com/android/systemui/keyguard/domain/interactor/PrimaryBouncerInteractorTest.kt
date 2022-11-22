@@ -19,6 +19,7 @@ package com.android.systemui.keyguard.domain.interactor
 import android.os.Looper
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
+import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardUpdateMonitor
@@ -106,6 +107,7 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
         verify(repository).setPrimaryVisible(true)
         verify(repository).setPrimaryShow(any(KeyguardBouncerModel::class.java))
         verify(repository).setPrimaryShowingSoon(false)
+        verify(mPrimaryBouncerCallbackInteractor).dispatchVisibilityChanged(View.VISIBLE)
     }
 
     @Test
@@ -129,6 +131,7 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
         verify(repository).setPrimaryVisible(false)
         verify(repository).setPrimaryHide(true)
         verify(repository).setPrimaryShow(null)
+        verify(mPrimaryBouncerCallbackInteractor).dispatchVisibilityChanged(View.INVISIBLE)
     }
 
     @Test

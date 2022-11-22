@@ -152,7 +152,6 @@ object KeyguardBouncerViewBinder {
                             val visibility = if (isVisible) View.VISIBLE else View.INVISIBLE
                             view.visibility = visibility
                             hostViewController.onBouncerVisibilityChanged(visibility)
-                            viewModel.notifyBouncerVisibilityHasChanged(visibility)
                         }
                     }
 
