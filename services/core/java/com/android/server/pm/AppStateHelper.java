@@ -21,6 +21,7 @@ import static android.media.AudioAttributes.USAGE_VOICE_COMMUNICATION_SIGNALLING
 
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningAppProcessInfo;
+import android.app.ActivityManagerInternal;
 import android.content.Context;
 import android.media.AudioManager;
 import android.media.IAudioService;
@@ -30,6 +31,7 @@ import android.text.TextUtils;
 import android.util.ArraySet;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.server.LocalServices;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -194,8 +196,6 @@ public class AppStateHelper {
      * Returns a list of packages which depend on {@code packageNames}. These are the packages
      * that will be affected when updating {@code packageNames} and should participate in
      * the evaluation of install constraints.
-     *
-     * TODO(b/235306967): Also include bounded services as dependency.
      */
     public List<String> getDependencyPackages(List<String> packageNames) {
         var results = new ArraySet<String>();
@@ -209,6 +209,10 @@ public class AppStateHelper {
                     results.add(pkg);
                 }
             }
+        }
+        var amInternal = LocalServices.getService(ActivityManagerInternal.class);
+        for (var packageName : packageNames) {
+            results.addAll(amInternal.getClientPackages(packageName));
         }
         return new ArrayList<>(results);
     }

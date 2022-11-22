@@ -18158,6 +18158,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mServices.stopForegroundServiceDelegateLocked(connection);
             }
         }
+
+        @Override
+        public ArraySet<String> getClientPackages(String servicePackageName) {
+            synchronized (ActivityManagerService.this) {
+                return mServices.getClientPackagesLocked(servicePackageName);
+            }
+        }
     }
 
     long inputDispatchingTimedOut(int pid, final boolean aboveSystem, TimeoutRecord timeoutRecord) {

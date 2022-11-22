@@ -7673,4 +7673,35 @@ public final class ActiveServices {
             Slog.e(TAG, "stopForegroundServiceDelegateLocked delegate does not exist");
         }
     }
+
+    private static void getClientPackages(ServiceRecord sr, ArraySet<String> output) {
+        var connections = sr.getConnections();
+        for (int conni = connections.size() - 1; conni >= 0; conni--) {
+            var connl = connections.valueAt(conni);
+            for (int i = 0, size = connl.size(); i < size; i++) {
+                var conn = connl.get(i);
+                if (conn.binding.client != null) {
+                    output.add(conn.binding.client.info.packageName);
+                }
+            }
+        }
+    }
+
+    /**
+     * Return all client package names of a service.
+     */
+    ArraySet<String> getClientPackagesLocked(@NonNull String servicePackageName) {
+        var results = new ArraySet<String>();
+        int[] users = mAm.mUserController.getUsers();
+        for (int ui = 0; ui < users.length; ui++) {
+            ArrayMap<ComponentName, ServiceRecord> alls = getServicesLocked(users[ui]);
+            for (int i = 0, size = alls.size(); i < size; i++) {
+                ServiceRecord sr = alls.valueAt(i);
+                if (sr.name.getPackageName().equals(servicePackageName)) {
+                    getClientPackages(sr, results);
+                }
+            }
+        }
+        return results;
+    }
 }
