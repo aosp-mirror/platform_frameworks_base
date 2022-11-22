@@ -29,6 +29,7 @@ import static android.content.pm.PackageManager.MATCH_DISABLED_COMPONENTS;
 import static android.content.pm.PackageManager.MATCH_FACTORY_ONLY;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.os.Process.INVALID_UID;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static android.os.storage.StorageManager.FLAG_STORAGE_CE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_DE;
@@ -3068,7 +3069,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             int userId) {
         final PackageRemovedInfo info = new PackageRemovedInfo(this);
         info.mRemovedPackage = packageName;
-        info.mInstallerPackageName = packageState.getInstallSource().installerPackageName;
+        info.mInstallerPackageName = packageState.getInstallSource().mInstallerPackageName;
         info.mRemovedUsers = new int[] {userId};
         info.mBroadcastUsers = new int[] {userId};
         info.mUid = UserHandle.getUid(userId, packageState.getAppId());
@@ -4492,7 +4493,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
                 if (wasNotLaunched) {
                     final String installerPackageName =
-                            packageState.getInstallSource().installerPackageName;
+                            packageState.getInstallSource().mInstallerPackageName;
                     if (installerPackageName != null) {
                         notifyFirstLaunch(packageName, installerPackageName, userId);
                     }
@@ -5476,7 +5477,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 }
 
                 if (!Objects.equals(callerPackageName,
-                        packageState.getInstallSource().installerPackageName)) {
+                        packageState.getInstallSource().mInstallerPackageName)) {
                     throw new IllegalArgumentException("Calling package " + callerPackageName
                             + " is not installer for " + packageName);
                 }
@@ -5709,7 +5710,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
 
         @Override
-        public void setInstallerPackageName(String targetPackage, String installerPackageName) {
+        public void setInstallerPackageName(String targetPackage,
+                @Nullable String installerPackageName) {
             final int callingUid = Binder.getCallingUid();
             final int callingUserId = UserHandle.getUserId(callingUid);
             final FunctionalUtils.ThrowingCheckedFunction<Computer, Boolean, RuntimeException>
@@ -5764,7 +5766,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 // Verify: if target already has an installer package, it must
                 // be signed with the same cert as the caller.
                 String targetInstallerPackageName =
-                        targetPackageState.getInstallSource().installerPackageName;
+                        targetPackageState.getInstallSource().mInstallerPackageName;
                 PackageStateInternal targetInstallerPkgSetting = targetInstallerPackageName == null
                         ? null : snapshot.getPackageStateInternal(targetInstallerPackageName);
 
@@ -5807,16 +5809,21 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             if (allowed) {
                 // TODO: Need to lock around here to handle mSettings.addInstallerPackageNames,
                 //  should find an alternative which avoids any race conditions
+                final int installerPackageUid = installerPackageName == null
+                        ? INVALID_UID : snapshotComputer().getPackageUid(installerPackageName,
+                        0 /* flags */, callingUserId);
                 PackageStateInternal targetPackageState;
                 synchronized (mLock) {
                     PackageStateMutator.Result result = commitPackageStateMutation(initialState,
-                            targetPackage, state -> state.setInstaller(installerPackageName));
+                            targetPackage, state -> state.setInstaller(installerPackageName,
+                                    installerPackageUid));
                     if (result.isPackagesChanged() || result.isStateChanged()) {
                         synchronized (mPackageStateWriteLock) {
                             allowed = implementation.apply(snapshotComputer());
                             if (allowed) {
                                 commitPackageStateMutation(null, targetPackage,
-                                        state -> state.setInstaller(installerPackageName));
+                                        state -> state.setInstaller(installerPackageName,
+                                                installerPackageUid));
                             } else {
                                 return;
                             }

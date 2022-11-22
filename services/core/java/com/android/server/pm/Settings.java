@@ -2923,9 +2923,9 @@ public final class Settings implements Watchable, Snappable {
                     sb.append("@system");
                 } else if (pkg.isProduct()) {
                     sb.append("@product");
-                } else if (pkg.getInstallSource().installerPackageName != null
-                           && !pkg.getInstallSource().installerPackageName.isEmpty()) {
-                    sb.append(pkg.getInstallSource().installerPackageName);
+                } else if (pkg.getInstallSource().mInstallerPackageName != null
+                           && !pkg.getInstallSource().mInstallerPackageName.isEmpty()) {
+                    sb.append(pkg.getInstallSource().mInstallerPackageName);
                 } else {
                     sb.append("@null");
                 }
@@ -3016,26 +3016,29 @@ public final class Settings implements Watchable, Snappable {
             serializer.attributeInt(null, "sharedUserId", pkg.getAppId());
         }
         InstallSource installSource = pkg.getInstallSource();
-        if (installSource.installerPackageName != null) {
-            serializer.attribute(null, "installer", installSource.installerPackageName);
+        if (installSource.mInstallerPackageName != null) {
+            serializer.attribute(null, "installer", installSource.mInstallerPackageName);
         }
-        if (installSource.installerAttributionTag != null) {
+        if (installSource.mInstallerPackageUid != INVALID_UID) {
+            serializer.attributeInt(null, "installerUid", installSource.mInstallerPackageUid);
+        }
+        if (installSource.mInstallerAttributionTag != null) {
             serializer.attribute(null, "installerAttributionTag",
-                    installSource.installerAttributionTag);
+                    installSource.mInstallerAttributionTag);
         }
         serializer.attributeInt(null, "packageSource",
-                installSource.packageSource);
-        if (installSource.isOrphaned) {
+                installSource.mPackageSource);
+        if (installSource.mIsOrphaned) {
             serializer.attributeBoolean(null, "isOrphaned", true);
         }
-        if (installSource.initiatingPackageName != null) {
-            serializer.attribute(null, "installInitiator", installSource.initiatingPackageName);
+        if (installSource.mInitiatingPackageName != null) {
+            serializer.attribute(null, "installInitiator", installSource.mInitiatingPackageName);
         }
-        if (installSource.isInitiatingPackageUninstalled) {
+        if (installSource.mIsInitiatingPackageUninstalled) {
             serializer.attributeBoolean(null, "installInitiatorUninstalled", true);
         }
-        if (installSource.originatingPackageName != null) {
-            serializer.attribute(null, "installOriginator", installSource.originatingPackageName);
+        if (installSource.mOriginatingPackageName != null) {
+            serializer.attribute(null, "installOriginator", installSource.mOriginatingPackageName);
         }
         if (pkg.getVolumeUuid() != null) {
             serializer.attribute(null, "volumeUuid", pkg.getVolumeUuid());
@@ -3064,8 +3067,8 @@ public final class Settings implements Watchable, Snappable {
 
         pkg.getSignatures().writeXml(serializer, "sigs", mPastSignatures.untrackedStorage());
 
-        if (installSource.initiatingPackageSignatures != null) {
-            installSource.initiatingPackageSignatures.writeXml(
+        if (installSource.mInitiatingPackageSignatures != null) {
+            installSource.mInitiatingPackageSignatures.writeXml(
                     serializer, "install-initiator-sigs", mPastSignatures.untrackedStorage());
         }
 
@@ -3809,6 +3812,7 @@ public final class Settings implements Watchable, Snappable {
         String cpuAbiOverrideString = null;
         String systemStr = null;
         String installerPackageName = null;
+        int installerPackageUid = INVALID_UID;
         String installerAttributionTag = null;
         int packageSource = PackageInstaller.PACKAGE_SOURCE_UNSPECIFIED;
         boolean isOrphaned = false;
@@ -3851,6 +3855,7 @@ public final class Settings implements Watchable, Snappable {
 
             versionCode = parser.getAttributeLong(null, "version", 0);
             installerPackageName = parser.getAttributeValue(null, "installer");
+            installerPackageUid = parser.getAttributeInt(null, "installerUid", INVALID_UID);
             installerAttributionTag = parser.getAttributeValue(null, "installerAttributionTag");
             packageSource = parser.getAttributeInt(null, "packageSource",
                     PackageInstaller.PACKAGE_SOURCE_UNSPECIFIED);
@@ -3993,8 +3998,8 @@ public final class Settings implements Watchable, Snappable {
         if (packageSetting != null) {
             InstallSource installSource = InstallSource.create(
                     installInitiatingPackageName, installOriginatingPackageName,
-                    installerPackageName, installerAttributionTag, packageSource, isOrphaned,
-                    installInitiatorUninstalled);
+                    installerPackageName, installerPackageUid, installerAttributionTag,
+                    packageSource, isOrphaned, installInitiatorUninstalled);
             packageSetting.setInstallSource(installSource)
                     .setVolumeUuid(volumeUuid)
                     .setCategoryOverride(categoryHint)
@@ -4138,14 +4143,14 @@ public final class Settings implements Watchable, Snappable {
     }
 
     void addInstallerPackageNames(InstallSource installSource) {
-        if (installSource.installerPackageName != null) {
-            mInstallerPackages.add(installSource.installerPackageName);
+        if (installSource.mInstallerPackageName != null) {
+            mInstallerPackages.add(installSource.mInstallerPackageName);
         }
-        if (installSource.initiatingPackageName != null) {
-            mInstallerPackages.add(installSource.initiatingPackageName);
+        if (installSource.mInitiatingPackageName != null) {
+            mInstallerPackages.add(installSource.mInitiatingPackageName);
         }
-        if (installSource.originatingPackageName != null) {
-            mInstallerPackages.add(installSource.originatingPackageName);
+        if (installSource.mOriginatingPackageName != null) {
+            mInstallerPackages.add(installSource.mOriginatingPackageName);
         }
     }
 
@@ -4659,12 +4664,13 @@ public final class Settings implements Watchable, Snappable {
             pw.print(",");
             pw.print(ps.getLastUpdateTime());
             pw.print(",");
-            pw.print(ps.getInstallSource().installerPackageName != null
-                    ? ps.getInstallSource().installerPackageName : "?");
-            pw.print(ps.getInstallSource().installerAttributionTag != null
-                    ? "(" + ps.getInstallSource().installerAttributionTag + ")" : "");
+            pw.print(ps.getInstallSource().mInstallerPackageName != null
+                    ? ps.getInstallSource().mInstallerPackageName : "?");
+            pw.print(ps.getInstallSource().mInstallerPackageUid);
+            pw.print(ps.getInstallSource().mInstallerAttributionTag != null
+                    ? "(" + ps.getInstallSource().mInstallerAttributionTag + ")" : "");
             pw.print(",");
-            pw.print(ps.getInstallSource().packageSource);
+            pw.print(ps.getInstallSource().mPackageSource);
             pw.println();
             if (pkg != null) {
                 pw.print(checkinTag); pw.print("-"); pw.print("splt,");
@@ -4936,16 +4942,20 @@ public final class Settings implements Watchable, Snappable {
         pw.print(prefix); pw.print("  lastUpdateTime=");
             date.setTime(ps.getLastUpdateTime());
             pw.println(sdf.format(date));
-        if (ps.getInstallSource().installerPackageName != null) {
+        if (ps.getInstallSource().mInstallerPackageName != null) {
             pw.print(prefix); pw.print("  installerPackageName=");
-            pw.println(ps.getInstallSource().installerPackageName);
+            pw.println(ps.getInstallSource().mInstallerPackageName);
         }
-        if (ps.getInstallSource().installerAttributionTag != null) {
+        if (ps.getInstallSource().mInstallerPackageUid != INVALID_UID) {
+            pw.print(prefix); pw.print("  installerPackageUid=");
+            pw.println(ps.getInstallSource().mInstallerPackageUid);
+        }
+        if (ps.getInstallSource().mInstallerAttributionTag != null) {
             pw.print(prefix); pw.print("  installerAttributionTag=");
-            pw.println(ps.getInstallSource().installerAttributionTag);
+            pw.println(ps.getInstallSource().mInstallerAttributionTag);
         }
         pw.print(prefix); pw.print("  packageSource=");
-        pw.println(ps.getInstallSource().packageSource);
+        pw.println(ps.getInstallSource().mPackageSource);
         if (ps.isLoading()) {
             pw.print(prefix); pw.println("  loadingProgress=" +
                     (int) (ps.getLoadingProgress() * 100) + "%");

@@ -44,6 +44,7 @@ import static android.content.pm.PackageManager.TYPE_PROVIDER;
 import static android.content.pm.PackageManager.TYPE_RECEIVER;
 import static android.content.pm.PackageManager.TYPE_SERVICE;
 import static android.content.pm.PackageManager.TYPE_UNKNOWN;
+import static android.os.Process.INVALID_UID;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 
 import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_MANAGED_PROFILE;
@@ -2576,7 +2577,7 @@ public class ComputerEngine implements Computer {
             }
         }
 
-        return -1;
+        return INVALID_UID;
     }
 
     /**
@@ -4325,18 +4326,18 @@ public class ComputerEngine implements Computer {
     @Override
     public int getUidForSharedUser(@NonNull String sharedUserName) {
         if (sharedUserName == null) {
-            return Process.INVALID_UID;
+            return INVALID_UID;
         }
         final int callingUid = Binder.getCallingUid();
         if (getInstantAppPackageName(callingUid) != null) {
-            return Process.INVALID_UID;
+            return INVALID_UID;
         }
         final SharedUserSetting suid = mSettings.getSharedUserFromId(sharedUserName);
         if (suid != null && !shouldFilterApplicationIncludingUninstalled(suid, callingUid,
                 UserHandle.getUserId(callingUid))) {
             return suid.mAppId;
         }
-        return Process.INVALID_UID;
+        return INVALID_UID;
     }
 
     @Override
@@ -4918,7 +4919,7 @@ public class ComputerEngine implements Computer {
         if (installSource == null) {
             throw new IllegalArgumentException("Unknown package: " + packageName);
         }
-        String installerPackageName = installSource.installerPackageName;
+        String installerPackageName = installSource.mInstallerPackageName;
         if (installerPackageName != null) {
             final PackageStateInternal ps = mSettings.getPackage(installerPackageName);
             if (ps == null || shouldFilterApplicationIncludingUninstalled(ps, callingUid,
@@ -4961,7 +4962,7 @@ public class ComputerEngine implements Computer {
             return null;
         }
 
-        installerPackageName = installSource.installerPackageName;
+        installerPackageName = installSource.mInstallerPackageName;
         if (installerPackageName != null) {
             final PackageStateInternal ps = mSettings.getPackage(installerPackageName);
             if (ps == null
@@ -4970,25 +4971,25 @@ public class ComputerEngine implements Computer {
             }
         }
 
-        if (installSource.isInitiatingPackageUninstalled) {
+        if (installSource.mIsInitiatingPackageUninstalled) {
             // We can't check visibility in the usual way, since the initiating package is no
             // longer present. So we apply simpler rules to whether to expose the info:
             // 1. Instant apps can't see it.
             // 2. Otherwise only the installed app itself can see it.
             final boolean isInstantApp = getInstantAppPackageName(callingUid) != null;
             if (!isInstantApp && isCallerSameApp(packageName, callingUid)) {
-                initiatingPackageName = installSource.initiatingPackageName;
+                initiatingPackageName = installSource.mInitiatingPackageName;
             } else {
                 initiatingPackageName = null;
             }
         } else {
-            if (Objects.equals(installSource.initiatingPackageName,
-                    installSource.installerPackageName)) {
+            if (Objects.equals(installSource.mInitiatingPackageName,
+                    installSource.mInstallerPackageName)) {
                 // The installer and initiator will often be the same, and when they are
                 // we can skip doing the same check again.
                 initiatingPackageName = installerPackageName;
             } else {
-                initiatingPackageName = installSource.initiatingPackageName;
+                initiatingPackageName = installSource.mInitiatingPackageName;
                 final PackageStateInternal ps = mSettings.getPackage(initiatingPackageName);
                 if (ps == null
                         || shouldFilterApplicationIncludingUninstalled(ps, callingUid, userId)) {
@@ -4997,7 +4998,7 @@ public class ComputerEngine implements Computer {
             }
         }
 
-        originatingPackageName = installSource.originatingPackageName;
+        originatingPackageName = installSource.mOriginatingPackageName;
         if (originatingPackageName != null) {
             final PackageStateInternal ps = mSettings.getPackage(originatingPackageName);
             if (ps == null
@@ -5017,7 +5018,7 @@ public class ComputerEngine implements Computer {
         // If you can see the initiatingPackageName, and we have valid signing info for it,
         // then we let you see that too.
         final SigningInfo initiatingPackageSigningInfo;
-        final PackageSignatures signatures = installSource.initiatingPackageSignatures;
+        final PackageSignatures signatures = installSource.mInitiatingPackageSignatures;
         if (initiatingPackageName != null && signatures != null
                 && signatures.mSigningDetails != SigningDetails.UNKNOWN) {
             initiatingPackageSigningInfo = new SigningInfo(signatures.mSigningDetails);
@@ -5026,7 +5027,7 @@ public class ComputerEngine implements Computer {
         }
 
         return new InstallSourceInfo(initiatingPackageName, initiatingPackageSigningInfo,
-                originatingPackageName, installerPackageName, installSource.packageSource);
+                originatingPackageName, installerPackageName, installSource.mPackageSource);
     }
 
     @PackageManager.EnabledState
@@ -5246,7 +5247,7 @@ public class ComputerEngine implements Computer {
         final int targetAppId = UserHandle.getAppId(
                 getPackageUid(targetPackageName, 0 /* flags */, userId));
         // For update or already installed case, leverage the existing visibility rule.
-        if (targetAppId != Process.INVALID_UID) {
+        if (targetAppId != INVALID_UID) {
             final Object targetSetting = mSettings.getSettingBase(targetAppId);
             if (targetSetting instanceof PackageSetting) {
                 return !shouldFilterApplication(
@@ -5307,7 +5308,7 @@ public class ComputerEngine implements Computer {
         }
 
         final PackageStateInternal installerPackageState = getPackageStateInternal(
-                packageState.getInstallSource().installerPackageName);
+                packageState.getInstallSource().mInstallerPackageName);
         return installerPackageState != null
                 && UserHandle.isSameApp(installerPackageState.getAppId(), callingUid);
     }

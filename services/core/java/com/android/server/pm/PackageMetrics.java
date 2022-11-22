@@ -16,8 +16,6 @@
 
 package com.android.server.pm;
 
-import static android.os.Process.INVALID_UID;
-
 import android.annotation.IntDef;
 import android.content.pm.PackageManager;
 import android.content.pm.parsing.ApkLiteParseUtils;
@@ -26,7 +24,6 @@ import android.util.SparseArray;
 
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
-import com.android.server.pm.pkg.PackageStateInternal;
 
 import java.io.File;
 import java.io.IOException;
@@ -68,32 +65,46 @@ final class PackageMetrics {
         mInstallRequest = installRequest;
     }
 
-    public void onInstallSucceed(Computer snapshot) {
+    public void onInstallSucceed() {
         // TODO(b/239722919): report to SecurityLog if on work profile or managed device
-        reportInstallationStats(snapshot, true /* success */);
+        reportInstallationStats(true /* success */);
     }
 
-    private void reportInstallationStats(Computer snapshot, boolean success) {
+    public void onInstallFailed() {
+        reportInstallationStats(false /* success */);
+    }
+
+    private void reportInstallationStats(boolean success) {
         UserManagerInternal userManagerInternal =
                 LocalServices.getService(UserManagerInternal.class);
-        // TODO(b/249294752): do not log if adb
         final long installDurationMillis =
                 System.currentTimeMillis() - mInstallStartTimestampMillis;
         // write to stats
         final Pair<int[], long[]> stepDurations = getInstallStepDurations();
         final int[] newUsers = mInstallRequest.getNewUsers();
         final int[] originalUsers = mInstallRequest.getOriginUsers();
-        final String packageName = mInstallRequest.getName();
-        final String installerPackageName = mInstallRequest.getInstallerPackageName();
-        final int installerUid = installerPackageName == null ? INVALID_UID
-                : snapshot.getPackageUid(installerPackageName, 0, 0);
-        final PackageStateInternal ps = snapshot.getPackageStateInternal(packageName);
-        final long versionCode = success ? 0 : ps.getVersionCode();
-        final long apksSize = getApksSize(ps.getPath());
+        final String packageName;
+        // only reporting package name for failed non-adb installations
+        if (success || mInstallRequest.isInstallFromAdb()) {
+            packageName = null;
+        } else {
+            packageName = mInstallRequest.getName();
+        }
+
+        final int installerPackageUid = mInstallRequest.getInstallerPackageUid();
+
+        long versionCode = 0, apksSize = 0;
+        if (success) {
+            final PackageSetting ps = mInstallRequest.getScannedPackageSetting();
+            if (ps != null) {
+                versionCode = ps.getVersionCode();
+                apksSize = getApksSize(ps.getPath());
+            }
+        }
 
         FrameworkStatsLog.write(FrameworkStatsLog.PACKAGE_INSTALLATION_SESSION_REPORTED,
                 mInstallRequest.getSessionId() /* session_id */,
-                success ? null : packageName /* not report package_name on success */,
+                packageName /* package_name */,
                 mInstallRequest.getUid() /* uid */,
                 newUsers /* user_ids */,
                 userManagerInternal.getUserTypesForStatsd(newUsers) /* user_types */,
@@ -107,7 +118,7 @@ final class PackageMetrics {
                 stepDurations.second /* step_duration_millis */,
                 installDurationMillis /* total_duration_millis */,
                 mInstallRequest.getInstallFlags() /* install_flags */,
-                installerUid /* installer_package_uid */,
+                installerPackageUid /* installer_package_uid */,
                 -1 /* original_installer_package_uid */,
                 mInstallRequest.getDataLoaderType() /* data_loader_type */,
                 mInstallRequest.getRequireUserAction() /* user_action_required_type */,

@@ -269,7 +269,7 @@ final class RemovePackageHelper {
         final AndroidPackage deletedPkg = deletedPs.getPkg();
         if (outInfo != null) {
             outInfo.mRemovedPackage = packageName;
-            outInfo.mInstallerPackageName = deletedPs.getInstallSource().installerPackageName;
+            outInfo.mInstallerPackageName = deletedPs.getInstallSource().mInstallerPackageName;
             outInfo.mIsStaticSharedLib = deletedPkg != null
                     && deletedPkg.getStaticSharedLibraryName() != null;
             outInfo.populateUsers(deletedPs.queryInstalledUsers(

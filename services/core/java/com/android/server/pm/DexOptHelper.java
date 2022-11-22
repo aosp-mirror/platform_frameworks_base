@@ -661,7 +661,7 @@ public final class DexOptHelper {
         final InstallSource installSource = packageState.getInstallSource();
 
         final PackageStateInternal installerPackageState =
-                snapshot.getPackageStateInternal(installSource.installerPackageName);
+                snapshot.getPackageStateInternal(installSource.mInstallerPackageName);
         if (installerPackageState == null) {
             return false;
         }
