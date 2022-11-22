@@ -84,7 +84,7 @@ public abstract class ExpandableOutlineView extends ExpandableView {
         int right;
         int bottom;
         int height;
-        float topRoundness = mAlwaysRoundBothCorners ? getMaxRadius() : getTopCornerRadius();
+        float topRadius = mAlwaysRoundBothCorners ? getMaxRadius() : getTopCornerRadius();
         if (!mCustomOutline) {
             // The outline just needs to be shifted if we're translating the contents. Otherwise
             // it's already in the right place.
@@ -97,7 +97,7 @@ public abstract class ExpandableOutlineView extends ExpandableView {
             // If the top is rounded we want the bottom to be at most at the top roundness, in order
             // to avoid the shadow changing when scrolling up.
             bottom = Math.max(mMinimumHeightForClipping,
-                    Math.max(getActualHeight() - mClipBottomAmount, (int) (top + topRoundness)));
+                    Math.max(getActualHeight() - mClipBottomAmount, (int) (top + topRadius)));
         } else {
             left = mOutlineRect.left;
             top = mOutlineRect.top;
@@ -108,17 +108,17 @@ public abstract class ExpandableOutlineView extends ExpandableView {
         if (height == 0) {
             return EMPTY_PATH;
         }
-        float bottomRoundness = mAlwaysRoundBothCorners ? getMaxRadius() : getBottomCornerRadius();
-        if (topRoundness + bottomRoundness > height) {
-            float overShoot = topRoundness + bottomRoundness - height;
+        float bottomRadius = mAlwaysRoundBothCorners ? getMaxRadius() : getBottomCornerRadius();
+        if (topRadius + bottomRadius > height) {
+            float overShoot = topRadius + bottomRadius - height;
             float currentTopRoundness = getTopRoundness();
             float currentBottomRoundness = getBottomRoundness();
-            topRoundness -= overShoot * currentTopRoundness
+            topRadius -= overShoot * currentTopRoundness
                     / (currentTopRoundness + currentBottomRoundness);
-            bottomRoundness -= overShoot * currentBottomRoundness
+            bottomRadius -= overShoot * currentBottomRoundness
                     / (currentTopRoundness + currentBottomRoundness);
         }
-        getRoundedRectPath(left, top, right, bottom, topRoundness, bottomRoundness, mTmpPath);
+        getRoundedRectPath(left, top, right, bottom, topRadius, bottomRadius, mTmpPath);
         return mTmpPath;
     }
 
