@@ -74,13 +74,10 @@ public class LogDataType {
                         types.add(LogDataType.BOOLEAN);
                         break;
                     case 'd':
-                    case 'o':
                     case 'x':
                         types.add(LogDataType.LONG);
                         break;
                     case 'f':
-                    case 'e':
-                    case 'g':
                         types.add(LogDataType.DOUBLE);
                         break;
                     case 's':
