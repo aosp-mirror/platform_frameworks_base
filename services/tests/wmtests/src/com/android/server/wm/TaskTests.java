@@ -149,8 +149,8 @@ public class TaskTests extends WindowTestsBase {
     public void testRemoveContainer_multipleNestedTasks() {
         final Task rootTask = createTask(mDisplayContent);
         rootTask.mCreatedByOrganizer = true;
-        final Task task1 = new TaskBuilder(mSupervisor).setParentTaskFragment(rootTask).build();
-        final Task task2 = new TaskBuilder(mSupervisor).setParentTaskFragment(rootTask).build();
+        final Task task1 = new TaskBuilder(mSupervisor).setParentTask(rootTask).build();
+        final Task task2 = new TaskBuilder(mSupervisor).setParentTask(rootTask).build();
         final ActivityRecord activity1 = createActivityRecord(task1);
         final ActivityRecord activity2 = createActivityRecord(task2);
         activity1.setVisible(false);
@@ -498,7 +498,7 @@ public class TaskTests extends WindowTestsBase {
         TaskDisplayArea taskDisplayArea = mAtm.mRootWindowContainer.getDefaultTaskDisplayArea();
         Task rootTask = taskDisplayArea.createRootTask(WINDOWING_MODE_FREEFORM,
                 ACTIVITY_TYPE_STANDARD, true /* onTop */);
-        Task task = new TaskBuilder(mSupervisor).setParentTaskFragment(rootTask).build();
+        Task task = new TaskBuilder(mSupervisor).setParentTask(rootTask).build();
         final Configuration parentConfig = rootTask.getConfiguration();
         parentConfig.windowConfiguration.setBounds(parentBounds);
         parentConfig.densityDpi = DisplayMetrics.DENSITY_DEFAULT;
@@ -800,7 +800,7 @@ public class TaskTests extends WindowTestsBase {
         DisplayInfo displayInfo = new DisplayInfo();
         mAtm.mContext.getDisplay().getDisplayInfo(displayInfo);
         final int displayHeight = displayInfo.logicalHeight;
-        final Task task = new TaskBuilder(mSupervisor).setParentTaskFragment(rootTask).build();
+        final Task task = new TaskBuilder(mSupervisor).setParentTask(rootTask).build();
         final Configuration inOutConfig = new Configuration();
         final Configuration parentConfig = new Configuration();
         final int longSide = 1200;
@@ -1456,10 +1456,8 @@ public class TaskTests extends WindowTestsBase {
     @Test
     public void testResumeTask_doNotResumeTaskFragmentBehindTranslucent() {
         final Task task = createTask(mDisplayContent);
-        final TaskFragment tfBehind = createTaskFragmentWithParentTask(
-                task, false /* createEmbeddedTask */);
-        final TaskFragment tfFront = createTaskFragmentWithParentTask(
-                task, false /* createEmbeddedTask */);
+        final TaskFragment tfBehind = createTaskFragmentWithActivity(task);
+        final TaskFragment tfFront = createTaskFragmentWithActivity(task);
         spyOn(tfFront);
         doReturn(true).when(tfFront).isTranslucent(any());
 
@@ -1479,8 +1477,8 @@ public class TaskTests extends WindowTestsBase {
     @Test
     public void testGetTaskFragment() {
         final Task parentTask = createTask(mDisplayContent);
-        final TaskFragment tf0 = createTaskFragmentWithParentTask(parentTask);
-        final TaskFragment tf1 = createTaskFragmentWithParentTask(parentTask);
+        final TaskFragment tf0 = createTaskFragmentWithActivity(parentTask);
+        final TaskFragment tf1 = createTaskFragmentWithActivity(parentTask);
 
         assertNull("Could not find it because there's no organized TaskFragment",
                 parentTask.getTaskFragment(TaskFragment::isOrganizedTaskFragment));
@@ -1522,7 +1520,7 @@ public class TaskTests extends WindowTestsBase {
         TaskDisplayArea taskDisplayArea = mAtm.mRootWindowContainer.getDefaultTaskDisplayArea();
         Task rootTask = taskDisplayArea.createRootTask(windowingMode, ACTIVITY_TYPE_STANDARD,
                 true /* onTop */);
-        Task task = new TaskBuilder(mSupervisor).setParentTaskFragment(rootTask).build();
+        Task task = new TaskBuilder(mSupervisor).setParentTask(rootTask).build();
 
         final Configuration parentConfig = rootTask.getConfiguration();
         parentConfig.windowConfiguration.setAppBounds(parentBounds);
