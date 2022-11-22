@@ -101,6 +101,15 @@ public abstract class LocationProviderBase {
     public static final String ACTION_FUSED_PROVIDER =
             "com.android.location.service.FusedLocationProvider";
 
+    /**
+     * The action the wrapping service should have in its intent filter to implement the
+     * {@link android.location.LocationManager#GPS_PROVIDER}.
+     *
+     * @hide
+     */
+    public static final String ACTION_GNSS_PROVIDER =
+            "android.location.provider.action.GNSS_PROVIDER";
+
     final String mTag;
     final @Nullable String mAttributionTag;
     final IBinder mBinder;
