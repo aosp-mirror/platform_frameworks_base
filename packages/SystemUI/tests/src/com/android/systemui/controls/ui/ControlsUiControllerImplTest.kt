@@ -17,8 +17,10 @@
 package com.android.systemui.controls.ui
 
 import android.content.ComponentName
+import android.content.Context
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.controls.ControlsMetricsLogger
@@ -26,6 +28,7 @@ import com.android.systemui.controls.CustomIconCache
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.controller.StructureInfo
 import com.android.systemui.controls.management.ControlsListingController
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
@@ -34,9 +37,12 @@ import com.android.systemui.statusbar.policy.DeviceControlsControllerImpl
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.FakeSharedPreferences
 import com.android.systemui.util.concurrency.FakeExecutor
+import com.android.systemui.util.mockito.any
 import com.android.systemui.util.time.FakeSystemClock
+import com.android.wm.shell.TaskViewFactory
 import com.google.common.truth.Truth.assertThat
 import dagger.Lazy
+import java.util.Optional
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -44,7 +50,7 @@ import org.mockito.Mock
 import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.anyString
 import org.mockito.Mockito.mock
-import org.mockito.Mockito.times
+import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
@@ -63,15 +69,21 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
     @Mock lateinit var keyguardStateController: KeyguardStateController
     @Mock lateinit var userFileManager: UserFileManager
     @Mock lateinit var userTracker: UserTracker
+    @Mock lateinit var taskViewFactory: TaskViewFactory
+    @Mock lateinit var activityContext: Context
+    @Mock lateinit var dumpManager: DumpManager
     val sharedPreferences = FakeSharedPreferences()
 
     var uiExecutor = FakeExecutor(FakeSystemClock())
     var bgExecutor = FakeExecutor(FakeSystemClock())
     lateinit var underTest: ControlsUiControllerImpl
+    lateinit var parent: FrameLayout
 
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
+
+        parent = FrameLayout(mContext)
 
         underTest =
             ControlsUiControllerImpl(
@@ -82,12 +94,13 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
                 Lazy { controlsListingController },
                 controlActionCoordinator,
                 activityStarter,
-                shadeController,
                 iconCache,
                 controlsMetricsLogger,
                 keyguardStateController,
                 userFileManager,
-                userTracker
+                userTracker,
+                Optional.of(taskViewFactory),
+                dumpManager
             )
         `when`(
                 userFileManager.getSharedPreferences(
@@ -105,8 +118,8 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
     @Test
     fun testGetPreferredStructure() {
         val structureInfo = mock(StructureInfo::class.java)
-        underTest.getPreferredStructure(listOf(structureInfo))
-        verify(userFileManager, times(2))
+        underTest.getPreferredSelectedItem(listOf(structureInfo))
+        verify(userFileManager)
             .getSharedPreferences(
                 fileName = DeviceControlsControllerImpl.PREFS_CONTROLS_FILE,
                 mode = 0,
@@ -116,25 +129,30 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
 
     @Test
     fun testGetPreferredStructure_differentUserId() {
-        val structureInfo =
+        val selectedItems =
             listOf(
-                StructureInfo(ComponentName.unflattenFromString("pkg/.cls1"), "a", ArrayList()),
-                StructureInfo(ComponentName.unflattenFromString("pkg/.cls2"), "b", ArrayList()),
+                SelectedItem.StructureItem(
+                    StructureInfo(ComponentName.unflattenFromString("pkg/.cls1"), "a", ArrayList())
+                ),
+                SelectedItem.StructureItem(
+                    StructureInfo(ComponentName.unflattenFromString("pkg/.cls2"), "b", ArrayList())
+                ),
             )
+        val structures = selectedItems.map { it.structure }
         sharedPreferences
             .edit()
-            .putString("controls_component", structureInfo[0].componentName.flattenToString())
-            .putString("controls_structure", structureInfo[0].structure.toString())
+            .putString("controls_component", selectedItems[0].componentName.flattenToString())
+            .putString("controls_structure", selectedItems[0].name.toString())
             .commit()
 
         val differentSharedPreferences = FakeSharedPreferences()
         differentSharedPreferences
             .edit()
-            .putString("controls_component", structureInfo[1].componentName.flattenToString())
-            .putString("controls_structure", structureInfo[1].structure.toString())
+            .putString("controls_component", selectedItems[1].componentName.flattenToString())
+            .putString("controls_structure", selectedItems[1].name.toString())
             .commit()
 
-        val previousPreferredStructure = underTest.getPreferredStructure(structureInfo)
+        val previousPreferredStructure = underTest.getPreferredSelectedItem(structures)
 
         `when`(
                 userFileManager.getSharedPreferences(
@@ -146,10 +164,39 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
             .thenReturn(differentSharedPreferences)
         `when`(userTracker.userId).thenReturn(1)
 
-        val currentPreferredStructure = underTest.getPreferredStructure(structureInfo)
+        val currentPreferredStructure = underTest.getPreferredSelectedItem(structures)
 
-        assertThat(previousPreferredStructure).isEqualTo(structureInfo[0])
-        assertThat(currentPreferredStructure).isEqualTo(structureInfo[1])
+        assertThat(previousPreferredStructure).isEqualTo(selectedItems[0])
+        assertThat(currentPreferredStructure).isEqualTo(selectedItems[1])
         assertThat(currentPreferredStructure).isNotEqualTo(previousPreferredStructure)
+    }
+
+    @Test
+    fun testGetPreferredPanel() {
+        val panel = SelectedItem.PanelItem("App name", ComponentName("pkg", "cls"))
+        sharedPreferences
+            .edit()
+            .putString("controls_component", panel.componentName.flattenToString())
+            .putString("controls_structure", panel.appName.toString())
+            .putBoolean("controls_is_panel", true)
+            .commit()
+
+        val selected = underTest.getPreferredSelectedItem(emptyList())
+
+        assertThat(selected).isEqualTo(panel)
+    }
+
+    @Test
+    fun testPanelDoesNotRefreshControls() {
+        val panel = SelectedItem.PanelItem("App name", ComponentName("pkg", "cls"))
+        sharedPreferences
+            .edit()
+            .putString("controls_component", panel.componentName.flattenToString())
+            .putString("controls_structure", panel.appName.toString())
+            .putBoolean("controls_is_panel", true)
+            .commit()
+
+        underTest.show(parent, {}, activityContext)
+        verify(controlsController, never()).refreshStatus(any(), any())
     }
 }
