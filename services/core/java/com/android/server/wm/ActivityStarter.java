@@ -2745,12 +2745,6 @@ class ActivityStarter {
                 newParent = candidateTf;
             }
         }
-        if (newParent.asTask() == null) {
-            // only collect task-fragments.
-            // TODO(b/258095975): we probably shouldn't ever collect the parent here since it isn't
-            //                    changing. The logic that changes it should collect it.
-            newParent.mTransitionController.collect(newParent);
-        }
         if (mStartActivity.getTaskFragment() == null
                 || mStartActivity.getTaskFragment() == newParent) {
             newParent.addChild(mStartActivity, POSITION_TOP);
