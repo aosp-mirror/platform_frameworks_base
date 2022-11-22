@@ -293,7 +293,7 @@ class MenuViewAppearance {
         return bounds;
     }
 
-    private boolean isMenuOnLeftSide() {
+    boolean isMenuOnLeftSide() {
         return mPercentagePosition.getPercentageX() < 0.5f;
     }
 

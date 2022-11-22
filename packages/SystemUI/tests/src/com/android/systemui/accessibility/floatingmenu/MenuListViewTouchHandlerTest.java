@@ -181,6 +181,20 @@ public class MenuListViewTouchHandlerTest extends SysuiTestCase {
         verify(mMenuAnimationController).moveToEdgeAndHide();
     }
 
+    @Test
+    public void receiveActionDownMotionEvent_verifyOnActionDownEnd() {
+        final Runnable onActionDownEnd = mock(Runnable.class);
+        mTouchHandler.setOnActionDownEndListener(onActionDownEnd);
+
+        final MotionEvent stubDownEvent =
+                mMotionEventHelper.obtainMotionEvent(/* downTime= */ 0, /* eventTime= */ 1,
+                        MotionEvent.ACTION_DOWN, mStubMenuView.getTranslationX(),
+                        mStubMenuView.getTranslationY());
+        mTouchHandler.onInterceptTouchEvent(mStubListView, stubDownEvent);
+
+        verify(onActionDownEnd).run();
+    }
+
     @After
     public void tearDown() {
         mMotionEventHelper.recycleEvents();
