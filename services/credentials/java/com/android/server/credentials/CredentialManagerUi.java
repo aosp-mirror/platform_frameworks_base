@@ -92,7 +92,8 @@ public class CredentialManagerUi {
         Intent intent = IntentFactory.newIntent(requestInfo, providerDataList, new ArrayList<>(),
                 mResultReceiver)
                 .setAction(UUID.randomUUID().toString());
-        //TODO: Determine if a specific request code is needed
+        //TODO: Create unique pending intent using request code and cancel any pre-existing pending
+        // intents
         return PendingIntent.getActivity(
                 mContext, /*requestCode=*/0, intent, PendingIntent.FLAG_IMMUTABLE);
     }
