@@ -20,6 +20,7 @@ package com.android.systemui.keyguard.data.quickaffordance
 import android.content.Context
 import android.content.Intent
 import androidx.annotation.DrawableRes
+import com.android.systemui.R
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
@@ -45,7 +46,7 @@ import kotlinx.coroutines.flow.flowOf
 class HomeControlsKeyguardQuickAffordanceConfig
 @Inject
 constructor(
-    @Application context: Context,
+    @Application private val context: Context,
     private val component: ControlsComponent,
 ) : KeyguardQuickAffordanceConfig {
 
@@ -65,6 +66,36 @@ constructor(
                 flowOf(KeyguardQuickAffordanceConfig.LockScreenState.Hidden)
             }
         }
+
+    override suspend fun getPickerScreenState(): KeyguardQuickAffordanceConfig.PickerScreenState {
+        if (!component.isEnabled()) {
+            return KeyguardQuickAffordanceConfig.PickerScreenState.UnavailableOnDevice
+        }
+
+        val currentServices =
+            component.getControlsListingController().getOrNull()?.getCurrentServices()
+        val hasFavorites =
+            component.getControlsController().getOrNull()?.getFavorites()?.isNotEmpty() == true
+        if (currentServices.isNullOrEmpty() || !hasFavorites) {
+            return KeyguardQuickAffordanceConfig.PickerScreenState.Disabled(
+                instructions =
+                    listOf(
+                        context.getString(
+                            R.string.keyguard_affordance_enablement_dialog_message,
+                            pickerName,
+                        ),
+                        context.getString(
+                            R.string.keyguard_affordance_enablement_dialog_home_instruction_1
+                        ),
+                        context.getString(
+                            R.string.keyguard_affordance_enablement_dialog_home_instruction_2
+                        ),
+                    ),
+            )
+        }
+
+        return KeyguardQuickAffordanceConfig.PickerScreenState.Default
+    }
 
     override fun onTriggered(
         expandable: Expandable?,

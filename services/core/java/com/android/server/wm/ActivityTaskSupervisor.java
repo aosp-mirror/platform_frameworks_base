@@ -2593,7 +2593,8 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                         // Apply options to prevent pendingOptions be taken when scheduling
                         // activity lifecycle transaction to make sure the override pending app
                         // transition will be applied immediately.
-                        if (activityOptions.getAnimationType() == ANIM_REMOTE_ANIMATION) {
+                        if (activityOptions != null
+                                && activityOptions.getAnimationType() == ANIM_REMOTE_ANIMATION) {
                             targetActivity.mPendingRemoteAnimation =
                                     activityOptions.getRemoteAnimationAdapter();
                         }
