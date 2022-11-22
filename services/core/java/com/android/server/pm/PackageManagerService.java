@@ -84,7 +84,6 @@ import android.content.pm.IOnChecksumsReadyListener;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageDeleteObserver2;
 import android.content.pm.IPackageLoadingProgressCallback;
-import android.content.pm.IPackageManager;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.IncrementalStatesInfo;
 import android.content.pm.InstallSourceInfo;
@@ -1460,7 +1459,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
     };
 
-    public static Pair<PackageManagerService, IPackageManager> main(Context context,
+    /** Starts PackageManagerService. */
+    public static PackageManagerService main(Context context,
             Installer installer, @NonNull DomainVerificationService domainVerificationService,
             boolean factoryTest) {
         // Self-check for initial settings.
@@ -1590,7 +1590,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         ServiceManager.addService("package_native", pmn);
         LocalManagerRegistry.addManager(PackageManagerLocal.class,
                 new PackageManagerLocalImpl(m));
-        return Pair.create(m, iPackageManager);
+        return m;
     }
 
     /** Install/uninstall system packages for all users based on their user-type, as applicable. */
@@ -5287,10 +5287,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 Map<String, String> classLoaderContextMap,
                 String loaderIsa) {
             int callingUid = Binder.getCallingUid();
-
-            // TODO(b/254043366): System server should not report its own dex load because there's
-            // nothing ART can do with it.
-
             Computer snapshot = snapshot();
 
             // System server should be able to report dex load on behalf of other apps. E.g., it
