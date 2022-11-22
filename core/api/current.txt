@@ -40523,6 +40523,7 @@ package android.telecom {
     method public int getCallerNumberVerificationStatus();
     method public final long getConnectTimeMillis();
     method @Nullable public String getContactDisplayName();
+    method @Nullable public android.net.Uri getContactPhotoUri();
     method public long getCreationTimeMillis();
     method public android.telecom.DisconnectCause getDisconnectCause();
     method public android.os.Bundle getExtras();

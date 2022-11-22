@@ -738,6 +738,7 @@ public final class Call {
         private final String mContactDisplayName;
         private final @CallDirection int mCallDirection;
         private final @Connection.VerificationStatus int mCallerNumberVerificationStatus;
+        private final Uri mContactPhotoUri;
 
         /**
          * Whether the supplied capabilities  supports the specified capability.
@@ -945,6 +946,17 @@ public final class Call {
         }
 
         /**
+         * @return The contact photo URI which corresponds to
+         * {@link android.provider.ContactsContract.PhoneLookup#PHOTO_URI}, or {@code null} if the
+         * lookup is not yet complete, if there's no contacts entry for the caller,
+         * or if the {@link InCallService} does not hold the
+         * {@link android.Manifest.permission#READ_CONTACTS} permission.
+         */
+        public @Nullable Uri getContactPhotoUri() {
+            return mContactPhotoUri;
+        }
+
+        /**
          * The display name for the caller.
          * <p>
          * This is the name as reported by the {@link ConnectionService} associated with this call.
@@ -1143,7 +1155,8 @@ public final class Call {
                         Objects.equals(mContactDisplayName, d.mContactDisplayName) &&
                         Objects.equals(mCallDirection, d.mCallDirection) &&
                         Objects.equals(mCallerNumberVerificationStatus,
-                                d.mCallerNumberVerificationStatus);
+                                d.mCallerNumberVerificationStatus) &&
+                        Objects.equals(mContactPhotoUri, d.mContactPhotoUri);
             }
             return false;
         }
@@ -1168,7 +1181,8 @@ public final class Call {
                             mCreationTimeMillis,
                             mContactDisplayName,
                             mCallDirection,
-                            mCallerNumberVerificationStatus);
+                            mCallerNumberVerificationStatus,
+                    mContactPhotoUri);
         }
 
         /** {@hide} */
@@ -1192,7 +1206,8 @@ public final class Call {
                 long creationTimeMillis,
                 String contactDisplayName,
                 int callDirection,
-                int callerNumberVerificationStatus) {
+                int callerNumberVerificationStatus,
+                Uri contactPhotoUri) {
             mState = state;
             mTelecomCallId = telecomCallId;
             mHandle = handle;
@@ -1213,6 +1228,7 @@ public final class Call {
             mContactDisplayName = contactDisplayName;
             mCallDirection = callDirection;
             mCallerNumberVerificationStatus = callerNumberVerificationStatus;
+            mContactPhotoUri = contactPhotoUri;
         }
 
         /** {@hide} */
@@ -1237,7 +1253,9 @@ public final class Call {
                     parcelableCall.getCreationTimeMillis(),
                     parcelableCall.getContactDisplayName(),
                     parcelableCall.getCallDirection(),
-                    parcelableCall.getCallerNumberVerificationStatus());
+                    parcelableCall.getCallerNumberVerificationStatus(),
+                    parcelableCall.getContactPhotoUri()
+            );
         }
 
         @Override
@@ -2644,7 +2662,8 @@ public final class Call {
                         mDetails.getCreationTimeMillis(),
                         mDetails.getContactDisplayName(),
                         mDetails.getCallDirection(),
-                        mDetails.getCallerNumberVerificationStatus()
+                        mDetails.getCallerNumberVerificationStatus(),
+                        mDetails.getContactPhotoUri()
                         );
                 fireDetailsChanged(mDetails);
             }
