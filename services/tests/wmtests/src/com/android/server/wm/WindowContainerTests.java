@@ -1150,8 +1150,8 @@ public class WindowContainerTests extends WindowTestsBase {
 
     @Test
     public void testStartChangeTransitionWhenPreviousIsNotFinished() {
-        final WindowContainer container = createTaskFragmentWithParentTask(
-                createTask(mDisplayContent), false);
+        final WindowContainer container = createTaskFragmentWithActivity(
+                createTask(mDisplayContent));
         container.mSurfaceControl = mock(SurfaceControl.class);
         final SurfaceAnimator surfaceAnimator = container.mSurfaceAnimator;
         final SurfaceFreezer surfaceFreezer = container.mSurfaceFreezer;
@@ -1214,8 +1214,8 @@ public class WindowContainerTests extends WindowTestsBase {
 
     @Test
     public void testUnfreezeWindow_removeWindowFromChanging() {
-        final WindowContainer container = createTaskFragmentWithParentTask(
-                createTask(mDisplayContent), false);
+        final WindowContainer container = createTaskFragmentWithActivity(
+                createTask(mDisplayContent));
         mockSurfaceFreezerSnapshot(container.mSurfaceFreezer);
         final SurfaceControl.Transaction t = mock(SurfaceControl.Transaction.class);
 
@@ -1230,8 +1230,8 @@ public class WindowContainerTests extends WindowTestsBase {
 
     @Test
     public void testFailToTaskSnapshot_unfreezeWindow() {
-        final WindowContainer container = createTaskFragmentWithParentTask(
-                createTask(mDisplayContent), false);
+        final WindowContainer container = createTaskFragmentWithActivity(
+                createTask(mDisplayContent));
         final SurfaceControl.Transaction t = mock(SurfaceControl.Transaction.class);
         spyOn(container.mSurfaceFreezer);
 
@@ -1244,8 +1244,8 @@ public class WindowContainerTests extends WindowTestsBase {
 
     @Test
     public void testRemoveUnstartedFreezeSurfaceWhenFreezeAgain() {
-        final WindowContainer container = createTaskFragmentWithParentTask(
-                createTask(mDisplayContent), false);
+        final WindowContainer container = createTaskFragmentWithActivity(
+                createTask(mDisplayContent));
         container.mSurfaceControl = mock(SurfaceControl.class);
         final SurfaceFreezer surfaceFreezer = container.mSurfaceFreezer;
         mockSurfaceFreezerSnapshot(surfaceFreezer);
