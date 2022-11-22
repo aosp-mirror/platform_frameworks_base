@@ -348,6 +348,9 @@ class MediaRouter2ServiceImpl {
             @NonNull String uniqueSessionId, int volume) {
         Objects.requireNonNull(router, "router must not be null");
         Objects.requireNonNull(uniqueSessionId, "uniqueSessionId must not be null");
+        if (TextUtils.isEmpty(uniqueSessionId)) {
+            throw new IllegalArgumentException("uniqueSessionId must not be empty");
+        }
 
         final long token = Binder.clearCallingIdentity();
         try {

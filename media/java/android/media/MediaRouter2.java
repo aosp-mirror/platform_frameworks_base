@@ -305,7 +305,7 @@ public final class MediaRouter2 {
             currentSystemRoutes = mMediaRouterService.getSystemRoutes();
             currentSystemSessionInfo = mMediaRouterService.getSystemSessionInfo();
         } catch (RemoteException ex) {
-            Log.e(TAG, "Unable to get current system's routes / session info", ex);
+            ex.rethrowFromSystemServer();
         }
 
         if (currentSystemRoutes == null || currentSystemRoutes.isEmpty()) {
@@ -407,14 +407,14 @@ public final class MediaRouter2 {
                     mMediaRouterService.registerRouter2(stub, mPackageName);
                     mStub = stub;
                 } catch (RemoteException ex) {
-                    Log.e(TAG, "registerRouteCallback: Unable to register MediaRouter2.", ex);
+                    ex.rethrowFromSystemServer();
                 }
             }
             if (mStub != null && updateDiscoveryPreferenceIfNeededLocked()) {
                 try {
                     mMediaRouterService.setDiscoveryRequestWithRouter2(mStub, mDiscoveryPreference);
                 } catch (RemoteException ex) {
-                    Log.e(TAG, "registerRouteCallback: Unable to set discovery request.", ex);
+                    ex.rethrowFromSystemServer();
                 }
             }
         }
@@ -454,7 +454,7 @@ public final class MediaRouter2 {
                 try {
                     mMediaRouterService.unregisterRouter2(mStub);
                 } catch (RemoteException ex) {
-                    Log.e(TAG, "Unable to unregister media router.", ex);
+                    ex.rethrowFromSystemServer();
                 }
                 mStub = null;
             }
@@ -1769,7 +1769,7 @@ public final class MediaRouter2 {
                     try {
                         mMediaRouterService.releaseSessionWithRouter2(mStub, getId());
                     } catch (RemoteException ex) {
-                        Log.e(TAG, "Unable to release session", ex);
+                        ex.rethrowFromSystemServer();
                     }
                 }
 
@@ -1787,7 +1787,7 @@ public final class MediaRouter2 {
                     try {
                         mMediaRouterService.unregisterRouter2(mStub);
                     } catch (RemoteException ex) {
-                        Log.e(TAG, "releaseInternal: Unable to unregister media router.", ex);
+                        ex.rethrowFromSystemServer();
                     }
                     mStub = null;
                 }
