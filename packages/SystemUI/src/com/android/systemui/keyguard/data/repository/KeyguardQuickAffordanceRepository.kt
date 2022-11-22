@@ -18,14 +18,17 @@
 package com.android.systemui.keyguard.data.repository
 
 import android.content.Context
+import com.android.systemui.Dumpable
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceConfig
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceLegacySettingSyncer
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceSelectionManager
 import com.android.systemui.keyguard.shared.model.KeyguardQuickAffordancePickerRepresentation
 import com.android.systemui.keyguard.shared.model.KeyguardSlotPickerRepresentation
+import java.io.PrintWriter
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
@@ -43,6 +46,7 @@ constructor(
     private val selectionManager: KeyguardQuickAffordanceSelectionManager,
     legacySettingSyncer: KeyguardQuickAffordanceLegacySettingSyncer,
     private val configs: Set<@JvmSuppressWildcards KeyguardQuickAffordanceConfig>,
+    dumpManager: DumpManager,
 ) {
     /**
      * List of [KeyguardQuickAffordanceConfig] instances of the affordances at the slot with the
@@ -87,6 +91,7 @@ constructor(
 
     init {
         legacySettingSyncer.startSyncing()
+        dumpManager.registerDumpable("KeyguardQuickAffordances", Dumpster())
     }
 
     /**
@@ -156,6 +161,30 @@ constructor(
      */
     fun getSlotPickerRepresentations(): List<KeyguardSlotPickerRepresentation> {
         return _slotPickerRepresentations
+    }
+
+    private inner class Dumpster : Dumpable {
+        override fun dump(pw: PrintWriter, args: Array<out String>) {
+            val slotPickerRepresentations = getSlotPickerRepresentations()
+            val selectionsBySlotId = getSelections()
+            pw.println("Slots & selections:")
+            slotPickerRepresentations.forEach { slotPickerRepresentation ->
+                val slotId = slotPickerRepresentation.id
+                val capacity = slotPickerRepresentation.maxSelectedAffordances
+                val affordanceIds = selectionsBySlotId[slotId]
+
+                val selectionText =
+                    if (!affordanceIds.isNullOrEmpty()) {
+                        ": ${affordanceIds.joinToString(", ")}"
+                    } else {
+                        " is empty"
+                    }
+
+                pw.println("    $slotId$selectionText (capacity = $capacity)")
+            }
+            pw.println("Available affordances on device:")
+            configs.forEach { config -> pw.println("    ${config.key} (\"${config.pickerName}\")") }
+        }
     }
 
     companion object {

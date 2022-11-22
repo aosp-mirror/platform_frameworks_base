@@ -155,6 +155,7 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
                         quickAccessWalletAffordanceConfig,
                         qrCodeScannerAffordanceConfig,
                     ),
+                dumpManager = mock(),
             )
         underTest =
             KeyguardBottomAreaViewModel(

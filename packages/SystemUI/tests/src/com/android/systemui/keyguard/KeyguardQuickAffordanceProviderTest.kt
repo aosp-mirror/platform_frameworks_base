@@ -115,6 +115,7 @@ class KeyguardQuickAffordanceProviderTest : SysuiTestCase() {
                         secureSettings = FakeSettings(),
                         selectionsManager = selectionManager,
                     ),
+                dumpManager = mock(),
             )
         underTest.interactor =
             KeyguardQuickAffordanceInteractor(
