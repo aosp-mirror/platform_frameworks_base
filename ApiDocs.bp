@@ -183,6 +183,7 @@ droidstubs {
 /////////////////////////////////////////////////////////////////////
 
 framework_docs_only_args = " -android -manifest $(location core/res/AndroidManifest.xml) " +
+    "-metalavaApiSince " +
     "-werror -lerror -hide 111 -hide 113 -hide 125 -hide 126 -hide 127 -hide 128 " +
     "-overview $(location core/java/overview.html) " +
     // Federate Support Library references against local API file.
@@ -374,7 +375,7 @@ droiddoc {
     ],
     proofread_file: "ds-docs-proofread.txt",
     args: framework_docs_only_args +
-        " -toroot / -yamlV2 -metalavaApiSince -samplegroup Admin " +
+        " -toroot / -yamlV2 -samplegroup Admin " +
         " -samplegroup Background " +
         " -samplegroup Connectivity " +
         " -samplegroup Content " +
