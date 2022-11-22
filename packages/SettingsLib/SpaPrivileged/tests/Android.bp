@@ -32,11 +32,8 @@ android_test {
 
     static_libs: [
         "SpaLibTestUtils",
-        "androidx.compose.ui_ui-test-junit4",
-        "androidx.compose.ui_ui-test-manifest",
         "androidx.test.ext.junit",
         "androidx.test.runner",
         "mockito-target-minus-junit4",
-        "truth-prebuilt",
     ],
 }
