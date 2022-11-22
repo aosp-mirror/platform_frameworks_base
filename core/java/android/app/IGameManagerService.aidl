@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.app.GameModeConfiguration;
 import android.app.GameModeInfo;
 import android.app.GameState;
 
@@ -33,4 +34,5 @@ interface IGameManagerService {
     void setGameServiceProvider(String packageName);
     void updateResolutionScalingFactor(String packageName, int gameMode, float scalingFactor, int userId);
     float getResolutionScalingFactor(String packageName, int gameMode, int userId);
+    void updateCustomGameModeConfiguration(String packageName, in GameModeConfiguration gameModeConfig, int userId);
 }

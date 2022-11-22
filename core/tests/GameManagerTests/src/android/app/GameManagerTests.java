@@ -19,6 +19,8 @@ package android.app;
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertNull;
 
 import android.content.Context;
 import android.platform.test.annotations.Presubmit;
@@ -85,5 +87,31 @@ public final class GameManagerTests {
         mGameManager.setGameMode(mPackageName, GameManager.GAME_MODE_CUSTOM);
         assertEquals(GameManager.GAME_MODE_CUSTOM,
                 mGameManager.getGameMode(mPackageName));
+    }
+
+    @Test
+    public void testUpdateCustomGameModeConfiguration() {
+        GameModeInfo gameModeInfo = mGameManager.getGameModeInfo(mPackageName);
+        assertNotNull(gameModeInfo);
+        assertNull(gameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_CUSTOM));
+        GameModeConfiguration unsupportedFpsConfig =
+                new GameModeConfiguration.Builder().setFpsOverride(
+                        70).setScalingFactor(0.5f).build();
+        mGameManager.updateCustomGameModeConfiguration(mPackageName, unsupportedFpsConfig);
+        gameModeInfo = mGameManager.getGameModeInfo(mPackageName);
+        assertNotNull(gameModeInfo);
+        // TODO(b/243448953): update to non-zero FPS when matching is implemented
+        assertEquals(new GameModeConfiguration.Builder().setFpsOverride(
+                        GameModeConfiguration.FPS_OVERRIDE_NONE).setScalingFactor(0.5f).build(),
+                gameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_CUSTOM));
+
+        GameModeConfiguration supportedFpsConfig =
+                new GameModeConfiguration.Builder().setFpsOverride(
+                        60).setScalingFactor(0.5f).build();
+        mGameManager.updateCustomGameModeConfiguration(mPackageName, supportedFpsConfig);
+        gameModeInfo = mGameManager.getGameModeInfo(mPackageName);
+        assertNotNull(gameModeInfo);
+        assertEquals(supportedFpsConfig,
+                gameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_CUSTOM));
     }
 }

@@ -35,6 +35,7 @@ import android.app.ActivityManager;
 import android.app.GameManager;
 import android.app.GameManager.GameMode;
 import android.app.GameManagerInternal;
+import android.app.GameModeConfiguration;
 import android.app.GameModeInfo;
 import android.app.GameState;
 import android.app.IGameManagerService;
@@ -399,6 +400,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
     // Turn the raw string to the corresponding fps int.
     // Return 0 when disabling, -1 for invalid fps.
     static int getFpsInt(String raw) {
+        // TODO(b/243448953): make sure this translates to proper values based on current display
         switch (raw) {
             case "30":
                 return FrameRate.FPS_30.fps;
@@ -695,6 +697,22 @@ public final class GameManagerService extends IGameManagerService.Stub {
                         && !willGamePerformOptimizations(mGameMode);
             }
 
+            android.app.GameModeConfiguration toPublicGameModeConfig() {
+                int fpsOverride = getFpsInt(mFps);
+                // TODO(b/243448953): match to proper value in case of display change?
+                fpsOverride = fpsOverride > 0 ? fpsOverride
+                        : android.app.GameModeConfiguration.FPS_OVERRIDE_NONE;
+                final float scaling = mScaling == DEFAULT_SCALING ? 1.0f : mScaling;
+                return new android.app.GameModeConfiguration.Builder()
+                        .setScalingFactor(scaling)
+                        .setFpsOverride(fpsOverride).build();
+            }
+
+            void updateFromPublicGameModeConfig(android.app.GameModeConfiguration config) {
+                mScaling = config.getScalingFactor();
+                mFps = String.valueOf(config.getFpsOverride());
+            }
+
             /**
              * @hide
              */
@@ -760,6 +778,21 @@ public final class GameManagerService extends IGameManagerService.Stub {
                 }
             }
             return modes;
+        }
+
+        /**
+         * Get an array of a package's opted-in game modes.
+         */
+        public @GameMode int[] getOptedInGameModes() {
+            if (mBatteryModeOptedIn && mPerfModeOptedIn) {
+                return new int[]{GameManager.GAME_MODE_BATTERY, GameManager.GAME_MODE_PERFORMANCE};
+            } else if (mBatteryModeOptedIn) {
+                return new int[]{GameManager.GAME_MODE_BATTERY};
+            } else if (mPerfModeOptedIn) {
+                return new int[]{GameManager.GAME_MODE_PERFORMANCE};
+            } else {
+                return new int[]{};
+            }
         }
 
         /**
@@ -1022,9 +1055,30 @@ public final class GameManagerService extends IGameManagerService.Stub {
         }
 
         final @GameMode int activeGameMode = getGameModeFromSettings(packageName, userId);
-        final @GameMode int[] availableGameModes = getAvailableGameModesUnchecked(packageName);
-
-        return new GameModeInfo(activeGameMode, availableGameModes);
+        final GamePackageConfiguration config = getConfig(packageName, userId);
+        if (config != null) {
+            final @GameMode int[] optedInGameModes = config.getOptedInGameModes();
+            final @GameMode int[] availableGameModes = config.getAvailableGameModes();
+            GameModeInfo.Builder gameModeInfoBuilder = new GameModeInfo.Builder()
+                    .setActiveGameMode(activeGameMode)
+                    .setAvailableGameModes(availableGameModes)
+                    .setOptedInGameModes(optedInGameModes)
+                    .setDownscalingAllowed(config.mAllowDownscale)
+                    .setFpsOverrideAllowed(config.mAllowFpsOverride);
+            for (int gameMode : availableGameModes) {
+                if (!config.willGamePerformOptimizations(gameMode)) {
+                    GamePackageConfiguration.GameModeConfiguration gameModeConfig =
+                            config.getGameModeConfiguration(gameMode);
+                    if (gameModeConfig != null) {
+                        gameModeInfoBuilder.setGameModeConfiguration(gameMode,
+                                gameModeConfig.toPublicGameModeConfig());
+                    }
+                }
+            }
+            return gameModeInfoBuilder.build();
+        } else {
+            return new GameModeInfo.Builder().setActiveGameMode(activeGameMode).build();
+        }
     }
 
     /**
@@ -1234,6 +1288,50 @@ public final class GameManagerService extends IGameManagerService.Stub {
             return modeConfig.getScaling();
         }
         return GamePackageConfiguration.GameModeConfiguration.DEFAULT_SCALING;
+    }
+
+    /**
+     * Updates the config for the game's {@link GameManager#GAME_MODE_CUSTOM} mode.
+     *
+     * @throws SecurityException        if caller doesn't have
+     *                                  {@link android.Manifest.permission#MANAGE_GAME_MODE}
+     *                                  permission.
+     * @throws IllegalArgumentException if the user ID provided doesn't exist.
+     */
+    @Override
+    @RequiresPermission(Manifest.permission.MANAGE_GAME_MODE)
+    public void updateCustomGameModeConfiguration(String packageName,
+            GameModeConfiguration gameModeConfig, int userId)
+            throws SecurityException, IllegalArgumentException {
+        checkPermission(Manifest.permission.MANAGE_GAME_MODE);
+        synchronized (mLock) {
+            if (!mSettings.containsKey(userId)) {
+                throw new IllegalArgumentException("User " + userId + " wasn't started");
+            }
+        }
+        // TODO(b/243448953): add validation on gameModeConfig provided
+        // Adding game mode config override of the given package name
+        GamePackageConfiguration configOverride;
+        synchronized (mLock) {
+            if (!mSettings.containsKey(userId)) {
+                return;
+            }
+            final GameManagerSettings settings = mSettings.get(userId);
+            // look for the existing GamePackageConfiguration override
+            configOverride = settings.getConfigOverride(packageName);
+            if (configOverride == null) {
+                configOverride = new GamePackageConfiguration(packageName);
+                settings.setConfigOverride(packageName, configOverride);
+            }
+
+        }
+        GamePackageConfiguration.GameModeConfiguration internalConfig =
+                configOverride.getOrAddDefaultGameModeConfiguration(GameManager.GAME_MODE_CUSTOM);
+        internalConfig.updateFromPublicGameModeConfig(gameModeConfig);
+
+        Slog.i(TAG, "Updated custom game mode config for package: " + packageName
+                + " with FPS=" + internalConfig.getFps() + ";Scaling="
+                + internalConfig.getScaling());
     }
 
     /**
