@@ -5730,7 +5730,8 @@ public class ComputerEngine implements Computer {
             return PackageInfoUtils.generateProcessInfo(sus.processes, 0);
         } else if (settingBase instanceof PackageSetting) {
             final PackageSetting ps = (PackageSetting) settingBase;
-            return PackageInfoUtils.generateProcessInfo(ps.getPkg().getProcesses(), 0);
+            final AndroidPackage pkg = ps.getPkg();
+            return pkg == null ? null : PackageInfoUtils.generateProcessInfo(pkg.getProcesses(), 0);
         }
         return null;
     }
