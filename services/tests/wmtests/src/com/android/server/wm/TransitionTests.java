@@ -476,6 +476,8 @@ public class TransitionTests extends WindowTestsBase {
         wallpaperWindow.mHasSurface = true;
         doReturn(true).when(mDisplayContent).isAttached();
         transition.collect(mDisplayContent);
+        assertFalse("The change of non-interesting window container should be skipped",
+                transition.mChanges.containsKey(mDisplayContent.getParent()));
         mDisplayContent.getWindowConfiguration().setRotation(
                 (mDisplayContent.getWindowConfiguration().getRotation() + 1) % 4);
 
