@@ -44,7 +44,6 @@ import org.mockito.Mock
 import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.anyString
 import org.mockito.Mockito.mock
-import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
@@ -105,8 +104,8 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
     @Test
     fun testGetPreferredStructure() {
         val structureInfo = mock(StructureInfo::class.java)
-        underTest.getPreferredStructure(listOf(structureInfo))
-        verify(userFileManager, times(2))
+        underTest.getPreferredSelectedItem(listOf(structureInfo))
+        verify(userFileManager)
             .getSharedPreferences(
                 fileName = DeviceControlsControllerImpl.PREFS_CONTROLS_FILE,
                 mode = 0,
@@ -116,25 +115,30 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
 
     @Test
     fun testGetPreferredStructure_differentUserId() {
-        val structureInfo =
+        val selectedItems =
             listOf(
-                StructureInfo(ComponentName.unflattenFromString("pkg/.cls1"), "a", ArrayList()),
-                StructureInfo(ComponentName.unflattenFromString("pkg/.cls2"), "b", ArrayList()),
+                SelectedItem.StructureItem(
+                    StructureInfo(ComponentName.unflattenFromString("pkg/.cls1"), "a", ArrayList())
+                ),
+                SelectedItem.StructureItem(
+                    StructureInfo(ComponentName.unflattenFromString("pkg/.cls2"), "b", ArrayList())
+                ),
             )
+        val structures = selectedItems.map { it.structure }
         sharedPreferences
             .edit()
-            .putString("controls_component", structureInfo[0].componentName.flattenToString())
-            .putString("controls_structure", structureInfo[0].structure.toString())
+            .putString("controls_component", selectedItems[0].componentName.flattenToString())
+            .putString("controls_structure", selectedItems[0].name.toString())
             .commit()
 
         val differentSharedPreferences = FakeSharedPreferences()
         differentSharedPreferences
             .edit()
-            .putString("controls_component", structureInfo[1].componentName.flattenToString())
-            .putString("controls_structure", structureInfo[1].structure.toString())
+            .putString("controls_component", selectedItems[1].componentName.flattenToString())
+            .putString("controls_structure", selectedItems[1].name.toString())
             .commit()
 
-        val previousPreferredStructure = underTest.getPreferredStructure(structureInfo)
+        val previousPreferredStructure = underTest.getPreferredSelectedItem(structures)
 
         `when`(
                 userFileManager.getSharedPreferences(
@@ -146,10 +150,25 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
             .thenReturn(differentSharedPreferences)
         `when`(userTracker.userId).thenReturn(1)
 
-        val currentPreferredStructure = underTest.getPreferredStructure(structureInfo)
+        val currentPreferredStructure = underTest.getPreferredSelectedItem(structures)
 
-        assertThat(previousPreferredStructure).isEqualTo(structureInfo[0])
-        assertThat(currentPreferredStructure).isEqualTo(structureInfo[1])
+        assertThat(previousPreferredStructure).isEqualTo(selectedItems[0])
+        assertThat(currentPreferredStructure).isEqualTo(selectedItems[1])
         assertThat(currentPreferredStructure).isNotEqualTo(previousPreferredStructure)
+    }
+
+    @Test
+    fun testGetPreferredPanel() {
+        val panel = SelectedItem.PanelItem("App name", ComponentName("pkg", "cls"))
+        sharedPreferences
+            .edit()
+            .putString("controls_component", panel.componentName.flattenToString())
+            .putString("controls_structure", panel.appName.toString())
+            .putBoolean("controls_is_panel", true)
+            .commit()
+
+        val selected = underTest.getPreferredSelectedItem(emptyList())
+
+        assertThat(selected).isEqualTo(panel)
     }
 }
