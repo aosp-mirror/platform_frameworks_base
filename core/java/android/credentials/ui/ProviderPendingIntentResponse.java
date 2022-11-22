@@ -63,7 +63,7 @@ public final class ProviderPendingIntentResponse implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeSerializable(mResultCode);
+        dest.writeInt(mResultCode);
         dest.writeTypedObject(mResultData, flags);
     }
 
