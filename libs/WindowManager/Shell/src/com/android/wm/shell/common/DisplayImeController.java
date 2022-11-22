@@ -295,8 +295,8 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                         mImeSourceControl.release(SurfaceControl::release);
                     }
                 }
-                mImeSourceControl = imeSourceControl;
             }
+            mImeSourceControl = imeSourceControl;
         }
 
         private void applyVisibilityToLeash(InsetsSourceControl imeSourceControl) {
