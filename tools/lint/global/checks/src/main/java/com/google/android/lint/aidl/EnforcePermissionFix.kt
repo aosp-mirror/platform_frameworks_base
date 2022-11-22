@@ -19,6 +19,8 @@ package com.google.android.lint.aidl
 import com.android.tools.lint.detector.api.JavaContext
 import com.android.tools.lint.detector.api.Location
 import com.android.tools.lint.detector.api.getUMethod
+import com.google.android.lint.hasPermissionNameAnnotation
+import com.google.android.lint.isPermissionMethodCall
 import org.jetbrains.kotlin.psi.psiUtil.parameterIndex
 import org.jetbrains.uast.UCallExpression
 import org.jetbrains.uast.evaluateString

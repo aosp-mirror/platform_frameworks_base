@@ -1,4 +1,4 @@
-// Copyright (C) 2021 The Android Open Source Project
+// Copyright (C) 2022 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,18 +22,22 @@ package {
 }
 
 java_library_host {
-    name: "AndroidFrameworkLintChecker",
+    name: "AndroidGlobalLintChecker",
     srcs: ["checks/src/main/java/**/*.kt"],
     plugins: ["auto_service_plugin"],
     libs: [
         "auto_service_annotations",
         "lint_api",
     ],
+    static_libs: ["AndroidCommonLint"],
     kotlincflags: ["-Xjvm-default=all"],
+    dist: {
+        targets: ["droid"],
+    },
 }
 
 java_test_host {
-    name: "AndroidFrameworkLintCheckerTest",
+    name: "AndroidGlobalLintCheckerTest",
     // TODO(b/239881504): Since this test was written, Android
     // Lint was updated, and now includes classes that were
     // compiled for java 15. The soong build doesn't support
@@ -42,7 +46,7 @@ java_test_host {
     enabled: false,
     srcs: ["checks/src/test/java/**/*.kt"],
     static_libs: [
-        "AndroidFrameworkLintChecker",
+        "AndroidGlobalLintChecker",
         "junit",
         "lint",
         "lint_tests",
@@ -50,10 +54,4 @@ java_test_host {
     test_options: {
         unit_test: true,
     },
-}
-
-python_binary_host {
-    name: "lint_fix",
-    main: "fix/lint_fix.py",
-    srcs: ["fix/lint_fix.py"],
 }
