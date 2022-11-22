@@ -328,16 +328,28 @@ public class Binder implements IBinder {
     public static final native boolean isDirectlyHandlingTransaction();
 
     /**
+    * Returns {@code true} if the current thread has had its identity
+    * set explicitly via {@link #clearCallingIdentity()}
+    *
+    * @hide
+    */
+    @CriticalNative
+    private static native boolean hasExplicitIdentity();
+
+    /**
      * Return the Linux UID assigned to the process that sent the transaction
      * currently being processed.
      *
      * @throws IllegalStateException if the current thread is not currently
-     * executing an incoming transaction.
+     * executing an incoming transaction and the calling identity has not been
+     * explicitly set with {@link #clearCallingIdentity()}
      */
     public static final int getCallingUidOrThrow() {
-        if (!isDirectlyHandlingTransaction()) {
+        if (!isDirectlyHandlingTransaction() && !hasExplicitIdentity()) {
             throw new IllegalStateException(
-                  "Thread is not in a binder transcation");
+                  "Thread is not in a binder transaction, "
+                  + "and the calling identity has not been "
+                  + "explicitly set with clearCallingIdentity");
         }
         return getCallingUid();
     }
