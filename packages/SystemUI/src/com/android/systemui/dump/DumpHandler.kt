@@ -22,7 +22,6 @@ import android.os.Trace
 import com.android.systemui.CoreStartable
 import com.android.systemui.R
 import com.android.systemui.dump.DumpHandler.Companion.PRIORITY_ARG_CRITICAL
-import com.android.systemui.dump.DumpHandler.Companion.PRIORITY_ARG_HIGH
 import com.android.systemui.dump.DumpHandler.Companion.PRIORITY_ARG_NORMAL
 import com.android.systemui.dump.nano.SystemUIProtoDump
 import com.android.systemui.plugins.log.LogBuffer
@@ -148,12 +147,12 @@ class DumpHandler @Inject constructor(
     }
 
     private fun dumpCritical(pw: PrintWriter, args: ParsedArgs) {
-        dumpManager.dumpDumpables(pw, args.rawArgs)
+        dumpManager.dumpCritical(pw, args.rawArgs)
         dumpConfig(pw)
     }
 
     private fun dumpNormal(pw: PrintWriter, args: ParsedArgs) {
-        dumpManager.dumpBuffers(pw, args.tailLength)
+        dumpManager.dumpNormal(pw, args.rawArgs, args.tailLength)
         logBufferEulogizer.readEulogyIfPresent(pw)
     }
 
@@ -349,14 +348,12 @@ class DumpHandler @Inject constructor(
     companion object {
         const val PRIORITY_ARG = "--dump-priority"
         const val PRIORITY_ARG_CRITICAL = "CRITICAL"
-        const val PRIORITY_ARG_HIGH = "HIGH"
         const val PRIORITY_ARG_NORMAL = "NORMAL"
         const val PROTO = "--proto"
     }
 }
 
-private val PRIORITY_OPTIONS =
-        arrayOf(PRIORITY_ARG_CRITICAL, PRIORITY_ARG_HIGH, PRIORITY_ARG_NORMAL)
+private val PRIORITY_OPTIONS = arrayOf(PRIORITY_ARG_CRITICAL, PRIORITY_ARG_NORMAL)
 
 private val COMMANDS = arrayOf(
         "bugreport-critical",

@@ -91,6 +91,7 @@ class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
                         selectionsManager = selectionManager,
                     ),
                 configs = setOf(config1, config2),
+                dumpManager = mock(),
             )
     }
 
