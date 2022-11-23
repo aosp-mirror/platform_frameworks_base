@@ -39,9 +39,17 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-final class HotwordAudioStreamManager {
+/**
+ * Copies the audio streams in {@link HotwordDetectedResult}s. This allows the system to manage the
+ * lifetime of the {@link ParcelFileDescriptor}s and ensures that the flow of data is in the right
+ * direction from the {@link android.service.voice.HotwordDetectionService} to the client (i.e., the
+ * voice interactor).
+ *
+ * @hide
+ */
+final class HotwordAudioStreamCopier {
 
-    private static final String TAG = "HotwordAudioStreamManager";
+    private static final String TAG = "HotwordAudioStreamCopier";
     private static final String OP_MESSAGE = "Streaming hotword audio to VoiceInteractionService";
     private static final String TASK_ID_PREFIX = "HotwordDetectedResult@";
     private static final String THREAD_NAME_PREFIX = "Copy-";
@@ -56,7 +64,7 @@ final class HotwordAudioStreamManager {
     private final String mVoiceInteractorAttributionTag;
     private final ExecutorService mExecutorService = Executors.newCachedThreadPool();
 
-    HotwordAudioStreamManager(@NonNull AppOpsManager appOpsManager,
+    HotwordAudioStreamCopier(@NonNull AppOpsManager appOpsManager,
             int voiceInteractorUid, @NonNull String voiceInteractorPackageName,
             @NonNull String voiceInteractorAttributionTag) {
         mAppOpsManager = appOpsManager;
@@ -70,7 +78,7 @@ final class HotwordAudioStreamManager {
      * <p>
      * The returned {@link HotwordDetectedResult} is identical the one that was passed in, except
      * that the {@link ParcelFileDescriptor}s within {@link HotwordDetectedResult#getAudioStreams()}
-     * are replaced with descriptors from pipes managed by {@link HotwordAudioStreamManager}. The
+     * are replaced with descriptors from pipes managed by {@link HotwordAudioStreamCopier}. The
      * returned value should be passed on to the client (i.e., the voice interactor).
      * </p>
      *
