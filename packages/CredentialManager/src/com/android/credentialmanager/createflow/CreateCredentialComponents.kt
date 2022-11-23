@@ -576,24 +576,42 @@ fun PrimaryCreateOptionRow(
     label = {
       Column() {
         // TODO: Add the function to hide/view password when the type is create password
-        if (requestDisplayInfo.type == TYPE_PUBLIC_KEY_CREDENTIAL ||
-          requestDisplayInfo.type == TYPE_PASSWORD_CREDENTIAL) {
-          Text(
-            text = requestDisplayInfo.title,
-            style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.padding(top = 16.dp)
-          )
-          Text(
-            text = requestDisplayInfo.subtitle,
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(bottom = 16.dp)
-          )
-        } else {
-          Text(
-            text = requestDisplayInfo.title,
-            style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.padding(top = 16.dp, bottom = 16.dp)
-          )
+        when (requestDisplayInfo.type) {
+            TYPE_PUBLIC_KEY_CREDENTIAL -> {
+              Text(
+                text = requestDisplayInfo.title,
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(top = 16.dp)
+              )
+              Text(
+                text = if (requestDisplayInfo.subtitle != null) {
+                  stringResource(
+                    R.string.passkey_before_subtitle) + " - " + requestDisplayInfo.subtitle
+                } else {stringResource(R.string.passkey_before_subtitle)},
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(bottom = 16.dp)
+              )
+            }
+            TYPE_PASSWORD_CREDENTIAL -> {
+              Text(
+                text = requestDisplayInfo.title,
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(top = 16.dp)
+              )
+              Text(
+                // This subtitle would never be null for create password
+                text = requestDisplayInfo.subtitle ?: "",
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(bottom = 16.dp)
+              )
+            }
+            else -> {
+              Text(
+                text = requestDisplayInfo.title,
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(top = 16.dp, bottom = 16.dp)
+              )
+            }
         }
       }
     }
