@@ -42,7 +42,6 @@ import android.app.smartspace.SmartspaceManager;
 import android.app.time.TimeManager;
 import android.app.timedetector.TimeDetector;
 import android.app.timedetector.TimeDetectorImpl;
-import android.app.timezone.RulesManager;
 import android.app.timezonedetector.TimeZoneDetector;
 import android.app.timezonedetector.TimeZoneDetectorImpl;
 import android.app.trust.TrustManager;
@@ -1253,13 +1252,6 @@ public final class SystemServiceRegistry {
                 return new VrManager(IVrManager.Stub.asInterface(b));
             }
         });
-
-        registerService(Context.TIME_ZONE_RULES_MANAGER_SERVICE, RulesManager.class,
-                new CachedServiceFetcher<RulesManager>() {
-            @Override
-            public RulesManager createService(ContextImpl ctx) {
-                return new RulesManager(ctx.getOuterContext());
-            }});
 
         registerService(Context.CROSS_PROFILE_APPS_SERVICE, CrossProfileApps.class,
                 new CachedServiceFetcher<CrossProfileApps>() {
