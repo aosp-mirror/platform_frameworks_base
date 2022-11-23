@@ -316,9 +316,6 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
     final Point mLastSurfaceSize = new Point();
 
-    /** The latest updated value when there's a child {@link #onActivityVisibleRequestedChanged} */
-    boolean mVisibleRequested;
-
     private final Rect mTmpBounds = new Rect();
     private final Rect mTmpFullBounds = new Rect();
     /** For calculating screenWidthDp and screenWidthDp, i.e. the area without the system bars. */
@@ -2785,22 +2782,6 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         // in fullscreen windowing mode even it doesn't match parent bounds because there will be
         // letterbox around its real content.
         return getWindowingMode() == WINDOWING_MODE_FULLSCREEN || matchParentBounds();
-    }
-
-    void onActivityVisibleRequestedChanged() {
-        final boolean isVisibleRequested = isVisibleRequested();
-        if (mVisibleRequested == isVisibleRequested) {
-            return;
-        }
-        mVisibleRequested = isVisibleRequested;
-        final WindowContainer<?> parent = getParent();
-        if (parent == null) {
-            return;
-        }
-        final TaskFragment parentTf = parent.asTaskFragment();
-        if (parentTf != null) {
-            parentTf.onActivityVisibleRequestedChanged();
-        }
     }
 
     @Nullable

@@ -3529,13 +3529,10 @@ class Task extends TaskFragment {
     }
 
     @Override
-    void onActivityVisibleRequestedChanged() {
-        final boolean prevVisibleRequested = mVisibleRequested;
-        // mVisibleRequested is updated in super method.
-        super.onActivityVisibleRequestedChanged();
-        if (prevVisibleRequested != mVisibleRequested) {
-            sendTaskFragmentParentInfoChangedIfNeeded();
-        }
+    protected boolean onChildVisibleRequestedChanged(@Nullable WindowContainer child) {
+        if (!super.onChildVisibleRequestedChanged(child)) return false;
+        sendTaskFragmentParentInfoChangedIfNeeded();
+        return true;
     }
 
     void sendTaskFragmentParentInfoChangedIfNeeded() {
