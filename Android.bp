@@ -106,6 +106,7 @@ filegroup {
         ":android.security.maintenance-java-source",
         ":android.security.metrics-java-source",
         ":android.system.keystore2-V3-java-source",
+        ":android.hardware.cas-V1-java-source",
         ":credstore_aidl",
         ":dumpstate_aidl",
         ":framework_native_aidl",
@@ -196,6 +197,7 @@ java_library {
         "updatable-driver-protos",
         "ota_metadata_proto_java",
         "android.hidl.base-V1.0-java",
+        "android.hardware.cas-V1-java", // AIDL
         "android.hardware.cas-V1.0-java",
         "android.hardware.cas-V1.1-java",
         "android.hardware.cas-V1.2-java",
