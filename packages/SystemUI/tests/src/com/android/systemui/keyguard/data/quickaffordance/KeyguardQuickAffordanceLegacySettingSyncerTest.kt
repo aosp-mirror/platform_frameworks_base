@@ -89,6 +89,7 @@ class KeyguardQuickAffordanceLegacySettingSyncerTest : SysuiTestCase() {
                             .thenReturn(FakeSharedPreferences())
                     },
                 userTracker = FakeUserTracker(),
+                broadcastDispatcher = fakeBroadcastDispatcher,
             )
         settings = FakeSettings()
         settings.putInt(Settings.Secure.LOCKSCREEN_SHOW_CONTROLS, 0)
