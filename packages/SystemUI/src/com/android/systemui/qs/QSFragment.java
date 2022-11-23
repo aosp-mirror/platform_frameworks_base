@@ -757,7 +757,8 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         return ShadeInterpolation.getContentAlpha(progress);
     }
 
-    private void updateQsBounds() {
+    @VisibleForTesting
+    void updateQsBounds() {
         if (mLastQSExpansion == 1.0f) {
             // Fully expanded, let's set the layout bounds as clip bounds. This is necessary because
             // it's a scrollview and otherwise wouldn't be clipped. However, we set the horizontal
@@ -773,9 +774,10 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         mQSPanelScrollView.getLocationOnScreen(mLocationTemp);
         int left = mLocationTemp[0];
         int top = mLocationTemp[1];
-        mQsMediaHost.getCurrentClipping().set(left, top, left + getView().getMeasuredWidth(),
+        mQsMediaHost.getCurrentClipping().set(left, top,
+                left + getView().getMeasuredWidth(),
                 top + mQSPanelScrollView.getMeasuredHeight()
-                        - mQSPanelScrollView.getPaddingBottom());
+                        - mQSPanelController.getPaddingBottom());
     }
 
     private boolean headerWillBeAnimating() {
