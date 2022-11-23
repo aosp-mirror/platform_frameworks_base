@@ -2766,12 +2766,12 @@ public class InputMethodService extends AbstractInputMethodService {
             return false;
         }
         if ((flags&InputMethod.SHOW_EXPLICIT) == 0) {
-            if (!configChange && onEvaluateFullscreenMode()) {
+            if (!configChange && onEvaluateFullscreenMode() && !isInputViewShown()) {
                 // Don't show if this is not explicitly requested by the user and
-                // the input method is fullscreen.  That would be too disruptive.
-                // However, we skip this change for a config change, since if
-                // the IME is already shown we do want to go into fullscreen
-                // mode at this point.
+                // the input method is fullscreen unless it is already shown. That
+                // would be too disruptive. However, we skip this change for a
+                // config change, since if the IME is already shown we do want to
+                // go into fullscreen mode at this point.
                 return false;
             }
             if (!mSettingsObserver.shouldShowImeWithHardKeyboard() &&
