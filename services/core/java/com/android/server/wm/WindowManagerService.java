@@ -140,6 +140,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.SHOW_STACK_CRAWLS;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_VERBOSE_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+import static com.android.server.wm.WindowManagerServiceDumpProto.BACK_NAVIGATION;
 import static com.android.server.wm.WindowManagerServiceDumpProto.DISPLAY_FROZEN;
 import static com.android.server.wm.WindowManagerServiceDumpProto.FOCUSED_APP;
 import static com.android.server.wm.WindowManagerServiceDumpProto.FOCUSED_DISPLAY_ID;
@@ -6554,6 +6555,9 @@ public class WindowManagerService extends IWindowManager.Stub
         // Once we move the window layout to the client side, this can be false when we are waiting
         // for the frames.
         proto.write(WINDOW_FRAMES_VALID, true);
+
+        // Write the BackNavigationController's state into the protocol buffer
+        mAtmService.mBackNavigationController.dumpDebug(proto, BACK_NAVIGATION);
     }
 
     private void dumpWindowsLocked(PrintWriter pw, boolean dumpAll,
