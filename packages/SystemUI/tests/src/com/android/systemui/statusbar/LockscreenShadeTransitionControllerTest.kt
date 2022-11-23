@@ -244,6 +244,14 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     }
 
     @Test
+    fun testGoToLockedShadeAlwaysCreatesQSAnimationInSplitShade() {
+        enableSplitShade()
+        transitionController.goToLockedShade(null, needsQSAnimation = true)
+        verify(notificationPanelController).animateToFullShade(anyLong())
+        assertNotNull(transitionController.dragDownAnimator)
+    }
+
+    @Test
     fun testDragDownAmountDoesntCallOutInLockedDownShade() {
         whenever(nsslController.isInLockedDownShade).thenReturn(true)
         transitionController.dragDownAmount = 10f
