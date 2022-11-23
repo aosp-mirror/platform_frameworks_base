@@ -16,7 +16,6 @@
 
 #include "DrawFrameTask.h"
 
-#include <dlfcn.h>
 #include <gui/TraceUtils.h>
 #include <utils/Log.h>
 
@@ -28,69 +27,10 @@
 #include "../RenderNode.h"
 #include "CanvasContext.h"
 #include "RenderThread.h"
-#include "thread/CommonPool.h"
-#include "utils/TimeUtils.h"
 
 namespace android {
 namespace uirenderer {
 namespace renderthread {
-
-namespace {
-
-typedef APerformanceHintManager* (*APH_getManager)();
-typedef APerformanceHintSession* (*APH_createSession)(APerformanceHintManager*, const int32_t*,
-                                                      size_t, int64_t);
-typedef void (*APH_updateTargetWorkDuration)(APerformanceHintSession*, int64_t);
-typedef void (*APH_reportActualWorkDuration)(APerformanceHintSession*, int64_t);
-typedef void (*APH_sendHint)(APerformanceHintSession* session, int32_t);
-typedef void (*APH_closeSession)(APerformanceHintSession* session);
-
-bool gAPerformanceHintBindingInitialized = false;
-APH_getManager gAPH_getManagerFn = nullptr;
-APH_createSession gAPH_createSessionFn = nullptr;
-APH_updateTargetWorkDuration gAPH_updateTargetWorkDurationFn = nullptr;
-APH_reportActualWorkDuration gAPH_reportActualWorkDurationFn = nullptr;
-APH_sendHint gAPH_sendHintFn = nullptr;
-APH_closeSession gAPH_closeSessionFn = nullptr;
-
-void ensureAPerformanceHintBindingInitialized() {
-    if (gAPerformanceHintBindingInitialized) return;
-
-    void* handle_ = dlopen("libandroid.so", RTLD_NOW | RTLD_NODELETE);
-    LOG_ALWAYS_FATAL_IF(handle_ == nullptr, "Failed to dlopen libandroid.so!");
-
-    gAPH_getManagerFn = (APH_getManager)dlsym(handle_, "APerformanceHint_getManager");
-    LOG_ALWAYS_FATAL_IF(gAPH_getManagerFn == nullptr,
-                        "Failed to find required symbol APerformanceHint_getManager!");
-
-    gAPH_createSessionFn = (APH_createSession)dlsym(handle_, "APerformanceHint_createSession");
-    LOG_ALWAYS_FATAL_IF(gAPH_createSessionFn == nullptr,
-                        "Failed to find required symbol APerformanceHint_createSession!");
-
-    gAPH_updateTargetWorkDurationFn = (APH_updateTargetWorkDuration)dlsym(
-            handle_, "APerformanceHint_updateTargetWorkDuration");
-    LOG_ALWAYS_FATAL_IF(
-            gAPH_updateTargetWorkDurationFn == nullptr,
-            "Failed to find required symbol APerformanceHint_updateTargetWorkDuration!");
-
-    gAPH_reportActualWorkDurationFn = (APH_reportActualWorkDuration)dlsym(
-            handle_, "APerformanceHint_reportActualWorkDuration");
-    LOG_ALWAYS_FATAL_IF(
-            gAPH_reportActualWorkDurationFn == nullptr,
-            "Failed to find required symbol APerformanceHint_reportActualWorkDuration!");
-
-    gAPH_sendHintFn = (APH_sendHint)dlsym(handle_, "APerformanceHint_sendHint");
-    LOG_ALWAYS_FATAL_IF(gAPH_sendHintFn == nullptr,
-                        "Failed to find required symbol APerformanceHint_sendHint!");
-
-    gAPH_closeSessionFn = (APH_closeSession)dlsym(handle_, "APerformanceHint_closeSession");
-    LOG_ALWAYS_FATAL_IF(gAPH_closeSessionFn == nullptr,
-                        "Failed to find required symbol APerformanceHint_closeSession!");
-
-    gAPerformanceHintBindingInitialized = true;
-}
-
-}  // namespace
 
 DrawFrameTask::DrawFrameTask()
         : mRenderThread(nullptr)
@@ -100,13 +40,11 @@ DrawFrameTask::DrawFrameTask()
 
 DrawFrameTask::~DrawFrameTask() {}
 
-void DrawFrameTask::setContext(RenderThread* thread, CanvasContext* context, RenderNode* targetNode,
-                               int32_t uiThreadId, int32_t renderThreadId) {
+void DrawFrameTask::setContext(RenderThread* thread, CanvasContext* context,
+                               RenderNode* targetNode) {
     mRenderThread = thread;
     mContext = context;
     mTargetNode = targetNode;
-    mUiThreadId = uiThreadId;
-    mRenderThreadId = renderThreadId;
 }
 
 void DrawFrameTask::pushLayerUpdate(DeferredLayerUpdater* layer) {
@@ -150,11 +88,11 @@ void DrawFrameTask::postAndWait() {
 void DrawFrameTask::run() {
     const int64_t vsyncId = mFrameInfo[static_cast<int>(FrameInfoIndex::FrameTimelineVsyncId)];
     ATRACE_FORMAT("DrawFrames %" PRId64, vsyncId);
-    nsecs_t syncDelayDuration = systemTime(SYSTEM_TIME_MONOTONIC) - mSyncQueued;
+
+    mContext->setSyncDelayDuration(systemTime(SYSTEM_TIME_MONOTONIC) - mSyncQueued);
 
     bool canUnblockUiThread;
     bool canDrawThisFrame;
-    bool didDraw = false;
     {
         TreeInfo info(TreeInfo::MODE_FULL, *mContext);
         info.forceDrawFrame = mForceDrawFrame;
@@ -175,9 +113,6 @@ void DrawFrameTask::run() {
     std::function<void()> frameCompleteCallback = std::move(mFrameCompleteCallback);
     mFrameCallback = nullptr;
     mFrameCompleteCallback = nullptr;
-    int64_t intendedVsync = mFrameInfo[static_cast<int>(FrameInfoIndex::IntendedVsync)];
-    int64_t frameDeadline = mFrameInfo[static_cast<int>(FrameInfoIndex::FrameDeadline)];
-    int64_t frameStartTime = mFrameInfo[static_cast<int>(FrameInfoIndex::FrameStartTime)];
 
     // From this point on anything in "this" is *UNSAFE TO ACCESS*
     if (canUnblockUiThread) {
@@ -188,18 +123,15 @@ void DrawFrameTask::run() {
     if (CC_UNLIKELY(frameCallback)) {
         context->enqueueFrameWork([frameCallback, context, syncResult = mSyncResult,
                                    frameNr = context->getFrameNumber()]() {
-            auto frameCommitCallback = std::move(frameCallback(syncResult, frameNr));
+            auto frameCommitCallback = frameCallback(syncResult, frameNr);
             if (frameCommitCallback) {
                 context->addFrameCommitListener(std::move(frameCommitCallback));
             }
         });
     }
 
-    nsecs_t dequeueBufferDuration = 0;
     if (CC_LIKELY(canDrawThisFrame)) {
-        std::optional<nsecs_t> drawResult = context->draw();
-        didDraw = drawResult.has_value();
-        dequeueBufferDuration = drawResult.value_or(0);
+        context->draw();
     } else {
         // Do a flush in case syncFrameState performed any texture uploads. Since we skipped
         // the draw() call, those uploads (or deletes) will end up sitting in the queue.
@@ -218,41 +150,6 @@ void DrawFrameTask::run() {
     if (!canUnblockUiThread) {
         unblockUiThread();
     }
-
-    if (!mHintSessionWrapper) mHintSessionWrapper.emplace(mUiThreadId, mRenderThreadId);
-
-    constexpr int64_t kSanityCheckLowerBound = 100_us;
-    constexpr int64_t kSanityCheckUpperBound = 10_s;
-    int64_t targetWorkDuration = frameDeadline - intendedVsync;
-    targetWorkDuration = targetWorkDuration * Properties::targetCpuTimePercentage / 100;
-    if (targetWorkDuration > kSanityCheckLowerBound &&
-        targetWorkDuration < kSanityCheckUpperBound &&
-        targetWorkDuration != mLastTargetWorkDuration) {
-        mLastTargetWorkDuration = targetWorkDuration;
-        mHintSessionWrapper->updateTargetWorkDuration(targetWorkDuration);
-    }
-
-    if (didDraw) {
-        int64_t frameDuration = systemTime(SYSTEM_TIME_MONOTONIC) - frameStartTime;
-        int64_t actualDuration = frameDuration -
-                                 (std::min(syncDelayDuration, mLastDequeueBufferDuration)) -
-                                 dequeueBufferDuration;
-        if (actualDuration > kSanityCheckLowerBound && actualDuration < kSanityCheckUpperBound) {
-            mHintSessionWrapper->reportActualWorkDuration(actualDuration);
-        }
-    }
-
-    mLastDequeueBufferDuration = dequeueBufferDuration;
-}
-
-void DrawFrameTask::sendLoadResetHint() {
-    if (!(Properties::useHintManager && Properties::isDrawingEnabled())) return;
-    if (!mHintSessionWrapper) mHintSessionWrapper.emplace(mUiThreadId, mRenderThreadId);
-    nsecs_t now = systemTime();
-    if (now - mLastFrameNotification > kResetHintTimeout) {
-        mHintSessionWrapper->sendHint(SessionHint::CPU_LOAD_RESET);
-    }
-    mLastFrameNotification = now;
 }
 
 bool DrawFrameTask::syncFrameState(TreeInfo& info) {
@@ -303,50 +200,6 @@ bool DrawFrameTask::syncFrameState(TreeInfo& info) {
 void DrawFrameTask::unblockUiThread() {
     AutoMutex _lock(mLock);
     mSignal.signal();
-}
-
-DrawFrameTask::HintSessionWrapper::HintSessionWrapper(int32_t uiThreadId, int32_t renderThreadId) {
-    if (!Properties::useHintManager) return;
-    if (uiThreadId < 0 || renderThreadId < 0) return;
-
-    ensureAPerformanceHintBindingInitialized();
-
-    APerformanceHintManager* manager = gAPH_getManagerFn();
-    if (!manager) return;
-
-    std::vector<int32_t> tids = CommonPool::getThreadIds();
-    tids.push_back(uiThreadId);
-    tids.push_back(renderThreadId);
-
-    // DrawFrameTask code will always set a target duration before reporting actual durations.
-    // So this is just a placeholder value that's never used.
-    int64_t dummyTargetDurationNanos = 16666667;
-    mHintSession =
-            gAPH_createSessionFn(manager, tids.data(), tids.size(), dummyTargetDurationNanos);
-}
-
-DrawFrameTask::HintSessionWrapper::~HintSessionWrapper() {
-    if (mHintSession) {
-        gAPH_closeSessionFn(mHintSession);
-    }
-}
-
-void DrawFrameTask::HintSessionWrapper::updateTargetWorkDuration(long targetDurationNanos) {
-    if (mHintSession) {
-        gAPH_updateTargetWorkDurationFn(mHintSession, targetDurationNanos);
-    }
-}
-
-void DrawFrameTask::HintSessionWrapper::reportActualWorkDuration(long actualDurationNanos) {
-    if (mHintSession) {
-        gAPH_reportActualWorkDurationFn(mHintSession, actualDurationNanos);
-    }
-}
-
-void DrawFrameTask::HintSessionWrapper::sendHint(SessionHint hint) {
-    if (mHintSession && Properties::isDrawingEnabled()) {
-        gAPH_sendHintFn(mHintSession, static_cast<int>(hint));
-    }
 }
 
 } /* namespace renderthread */
