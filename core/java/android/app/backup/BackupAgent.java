@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.app.IBackupAgent;
 import android.app.QueuedWork;
 import android.app.backup.BackupAnnotations.BackupDestination;
+import android.app.backup.BackupAnnotations.OperationType;
 import android.app.backup.FullBackup.BackupScheme.PathWithRequiredFlags;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -265,13 +266,6 @@ public abstract class BackupAgent extends ContextWrapper {
     }
 
     /**
-     * @hide
-     */
-    public void onCreate(UserHandle user) {
-        onCreate(user, DEFAULT_BACKUP_DESTINATION);
-    }
-
-    /**
      * Provided as a convenience for agent implementations that need an opportunity
      * to do one-time initialization before the actual backup or restore operation
      * is begun with information about the calling user.
@@ -279,13 +273,33 @@ public abstract class BackupAgent extends ContextWrapper {
      *
      * @hide
      */
-    public void onCreate(UserHandle user, @BackupDestination int backupDestination) {
-        // TODO: Instantiate with the correct type using a parameter.
-        mLogger = new BackupRestoreEventLogger(BackupRestoreEventLogger.OperationType.BACKUP);
+    public void onCreate(UserHandle user) {
         onCreate();
+    }
 
+    /**
+     * @deprecated Use {@link BackupAgent#onCreate(UserHandle, int, int)} instead.
+     *
+     * @hide
+     */
+    @Deprecated
+    public void onCreate(UserHandle user, @BackupDestination int backupDestination) {
         mUser = user;
         mBackupDestination = backupDestination;
+
+        onCreate(user);
+    }
+
+    /**
+    * @hide
+    */
+    public void onCreate(UserHandle user, @BackupDestination int backupDestination,
+            @OperationType int operationType) {
+        mUser = user;
+        mBackupDestination = backupDestination;
+        mLogger = new BackupRestoreEventLogger(operationType);
+
+        onCreate(user, backupDestination);
     }
 
     /**
