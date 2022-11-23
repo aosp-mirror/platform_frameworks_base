@@ -81,6 +81,7 @@ import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_NUMERIC;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_SOMETHING;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
+import static android.app.admin.DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED;
 import static android.app.admin.DevicePolicyManager.PERSONAL_APPS_NOT_SUSPENDED;
 import static android.app.admin.DevicePolicyManager.PERSONAL_APPS_SUSPENDED_EXPLICITLY;
 import static android.app.admin.DevicePolicyManager.PERSONAL_APPS_SUSPENDED_PROFILE_TIMEOUT;
@@ -140,6 +141,7 @@ import static android.net.ConnectivityManager.PROFILE_NETWORK_PREFERENCE_DEFAULT
 import static android.net.ConnectivityManager.PROFILE_NETWORK_PREFERENCE_ENTERPRISE;
 import static android.net.ConnectivityManager.PROFILE_NETWORK_PREFERENCE_ENTERPRISE_NO_FALLBACK;
 import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
+import static android.provider.DeviceConfig.NAMESPACE_DEVICE_POLICY_MANAGER;
 import static android.provider.Settings.Global.PRIVATE_DNS_SPECIFIER;
 import static android.provider.Settings.Secure.MANAGED_PROVISIONING_DPC_DOWNLOADED;
 import static android.provider.Settings.Secure.USER_SETUP_COMPLETE;
@@ -309,6 +311,7 @@ import android.permission.PermissionControllerManager;
 import android.provider.CalendarContract;
 import android.provider.ContactsContract.QuickContact;
 import android.provider.ContactsInternal;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.provider.Telephony;
@@ -712,6 +715,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     + "management app's authentication policy";
     private static final String NOT_SYSTEM_CALLER_MSG = "Only the system can %s";
 
+    private static final String ENABLE_COEXISTENCE_FLAG = "enable_coexistence";
+    private static final boolean DEFAULT_ENABLE_COEXISTENCE_FLAG = false;
+
+    /**
+     * For apps targeting U+
+     * Enable multiple admins to coexist on the same device.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    static final long ENABLE_COEXISTENCE_CHANGE = 260560985L;
+
     final Context mContext;
     final Injector mInjector;
     final PolicyPathProvider mPathProvider;
@@ -794,6 +808,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private final DeviceManagementResourcesProvider mDeviceManagementResourcesProvider;
     private final DevicePolicyManagementRoleObserver mDevicePolicyManagementRoleObserver;
+
+    private final DevicePolicyEngine mDevicePolicyEngine;
 
     private static final boolean ENABLE_LOCK_GUARD = true;
 
@@ -1864,6 +1880,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         mUserData = new SparseArray<>();
         mOwners = makeOwners(injector, pathProvider);
 
+        mDevicePolicyEngine = new DevicePolicyEngine(mContext);
+
         if (!mHasFeature) {
             // Skip the rest of the initialization
             mSetupContentObserver = null;
@@ -1908,6 +1926,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         mUserManagerInternal.addUserLifecycleListener(new UserLifecycleListener());
 
         mDeviceManagementResourcesProvider.load();
+        if (isCoexistenceFlagEnabled()) {
+            mDevicePolicyEngine.load();
+        }
 
         // The binder caches are not enabled until the first invalidation.
         invalidateBinderCaches();
@@ -7951,8 +7972,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkCallAuthorization(isProfileOwnerOnUser0(caller)
                 || isProfileOwnerOfOrganizationOwnedDevice(caller) || isDefaultDeviceOwner(caller));
 
-        mInjector.binderWithCleanCallingIdentity(() ->
-                mInjector.settingsGlobalPutInt(Global.AUTO_TIME_ZONE, enabled ? 1 : 0));
+        if (isCoexistenceEnabled(caller)) {
+            mDevicePolicyEngine.setGlobalPolicy(
+                    PolicyDefinition.AUTO_TIMEZONE,
+                    // TODO(b/260573124): add correct enforcing admin when permission changes are
+                    //  merged.
+                    EnforcingAdmin.createEnterpriseEnforcingAdmin(caller.getComponentName()),
+                    enabled);
+        } else {
+            mInjector.binderWithCleanCallingIdentity(() ->
+                    mInjector.settingsGlobalPutInt(Global.AUTO_TIME_ZONE, enabled ? 1 : 0));
+        }
 
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_AUTO_TIME_ZONE)
@@ -13905,6 +13935,20 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             if (isFinancedDeviceOwner(caller)) {
                 enforcePermissionGrantStateOnFinancedDevice(packageName, permission);
             }
+        }
+        if (isCoexistenceEnabled(caller)) {
+            mDevicePolicyEngine.setLocalPolicy(
+                    PolicyDefinition.PERMISSION_GRANT(packageName, permission),
+                    // TODO(b/260573124): Add correct enforcing admin when permission changes are
+                    //  merged, and don't forget to handle delegates! Enterprise admins assume
+                    //  component name isn't null.
+                    EnforcingAdmin.createEnterpriseEnforcingAdmin(caller.getComponentName()),
+                    grantState,
+                    caller.getUserId());
+            // TODO: update javadoc to reflect that callback no longer return success/failure
+            callback.sendResult(Bundle.EMPTY);
+        } else {
+            synchronized (getLockObject()) {
             long ident = mInjector.binderClearCallingIdentity();
             try {
                 boolean isPostQAdmin = getTargetSdk(caller.getPackageName(), caller.getUserId())
@@ -13921,14 +13965,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     callback.sendResult(null);
                     return;
                 }
-                if (grantState == DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED
+                if (grantState == PERMISSION_GRANT_STATE_GRANTED
                         || grantState == DevicePolicyManager.PERMISSION_GRANT_STATE_DENIED
                         || grantState == DevicePolicyManager.PERMISSION_GRANT_STATE_DEFAULT) {
                     AdminPermissionControlParams permissionParams =
-                            new AdminPermissionControlParams(packageName, permission, grantState,
+                            new AdminPermissionControlParams(packageName, permission,
+                                    grantState,
                                     canAdminGrantSensorsPermissionsForUser(caller.getUserId()));
                     mInjector.getPermissionControllerManager(caller.getUserHandle())
-                            .setRuntimePermissionGrantStateByDeviceAdmin(caller.getPackageName(),
+                            .setRuntimePermissionGrantStateByDeviceAdmin(
+                                    caller.getPackageName(),
                                     permissionParams, mContext.getMainExecutor(),
                                     (permissionWasSet) -> {
                                         if (isPostQAdmin && !permissionWasSet) {
@@ -13947,13 +13993,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
                                         callback.sendResult(Bundle.EMPTY);
                                     });
-                }
-            } catch (SecurityException e) {
-                Slogf.e(LOG_TAG, "Could not set permission grant state", e);
+                    }
+                } catch (SecurityException e) {
+                    Slogf.e(LOG_TAG, "Could not set permission grant state", e);
 
-                callback.sendResult(null);
-            } finally {
-                mInjector.binderRestoreCallingIdentity(ident);
+                    callback.sendResult(null);
+                } finally {
+                    mInjector.binderRestoreCallingIdentity(ident);
+                }
             }
         }
     }
@@ -19016,5 +19063,19 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
             return result;
         });
+    }
+
+    // TODO(b/260560985): properly gate coexistence changes
+    private boolean isCoexistenceEnabled(CallerIdentity caller) {
+        return isCoexistenceFlagEnabled()
+                && mInjector.isChangeEnabled(
+                        ENABLE_COEXISTENCE_CHANGE, caller.getPackageName(), caller.getUserId());
+    }
+
+    private boolean isCoexistenceFlagEnabled() {
+        return DeviceConfig.getBoolean(
+                NAMESPACE_DEVICE_POLICY_MANAGER,
+                ENABLE_COEXISTENCE_FLAG,
+                DEFAULT_ENABLE_COEXISTENCE_FLAG);
     }
 }

@@ -53,7 +53,7 @@ final class PolicyEnforcerCallbacks {
     static boolean setPermissionGrantState(
             @Nullable Integer grantState, @NonNull Context context, int userId,
             @NonNull String[] args) {
-        Binder.withCleanCallingIdentity(() -> {
+        return Boolean.TRUE.equals(Binder.withCleanCallingIdentity(() -> {
             if (args == null || args.length < 2) {
                 throw new IllegalArgumentException("Package name and permission name must be "
                         + "provided as arguments");
@@ -84,8 +84,7 @@ final class PolicyEnforcerCallbacks {
                 // TODO: add logging
                 return false;
             }
-        });
-        return true;
+        }));
     }
 
     @NonNull
