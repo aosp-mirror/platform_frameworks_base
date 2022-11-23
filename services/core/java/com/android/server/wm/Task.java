@@ -5184,7 +5184,16 @@ class Task extends TaskFragment {
         final Task task = taskTop.getTask();
 
         // If ActivityOptions are moved out and need to be aborted or moved to taskTop.
-        final ActivityOptions topOptions = sResetTargetTaskHelper.process(task, forceReset);
+        final ActivityOptions topOptions;
+
+        // Set the task to be reused, so the TaskFragment#mClearedTaskForReuse can be set if the
+        // embedded activities are finished while reset task.
+        mReuseTask = true;
+        try {
+            topOptions = sResetTargetTaskHelper.process(task, forceReset);
+        } finally {
+            mReuseTask = false;
+        }
 
         if (mChildren.contains(task)) {
             final ActivityRecord newTop = task.getTopNonFinishingActivity();
