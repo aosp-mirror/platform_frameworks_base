@@ -8474,31 +8474,19 @@ package android.app.job {
 
   public abstract class JobService extends android.app.Service {
     ctor public JobService();
-    method public long getTransferredDownloadBytes();
-    method public long getTransferredDownloadBytes(@NonNull android.app.job.JobWorkItem);
-    method public long getTransferredUploadBytes();
-    method public long getTransferredUploadBytes(@NonNull android.app.job.JobWorkItem);
     method public final void jobFinished(android.app.job.JobParameters, boolean);
     method public final android.os.IBinder onBind(android.content.Intent);
     method public abstract boolean onStartJob(android.app.job.JobParameters);
     method public abstract boolean onStopJob(android.app.job.JobParameters);
-    method public final void updateEstimatedNetworkBytes(@NonNull android.app.job.JobParameters, long, long);
-    method public final void updateEstimatedNetworkBytes(@NonNull android.app.job.JobParameters, @NonNull android.app.job.JobWorkItem, long, long);
-    method public final void updateTransferredNetworkBytes(@NonNull android.app.job.JobParameters, long, long);
-    method public final void updateTransferredNetworkBytes(@NonNull android.app.job.JobParameters, @NonNull android.app.job.JobWorkItem, long, long);
     field public static final String PERMISSION_BIND = "android.permission.BIND_JOB_SERVICE";
   }
 
   public abstract class JobServiceEngine {
     ctor public JobServiceEngine(android.app.Service);
     method public final android.os.IBinder getBinder();
-    method public long getTransferredDownloadBytes(@NonNull android.app.job.JobParameters, @Nullable android.app.job.JobWorkItem);
-    method public long getTransferredUploadBytes(@NonNull android.app.job.JobParameters, @Nullable android.app.job.JobWorkItem);
     method public void jobFinished(android.app.job.JobParameters, boolean);
     method public abstract boolean onStartJob(android.app.job.JobParameters);
     method public abstract boolean onStopJob(android.app.job.JobParameters);
-    method public void updateEstimatedNetworkBytes(@NonNull android.app.job.JobParameters, @NonNull android.app.job.JobWorkItem, long, long);
-    method public void updateTransferredNetworkBytes(@NonNull android.app.job.JobParameters, @Nullable android.app.job.JobWorkItem, long, long);
   }
 
   public final class JobWorkItem implements android.os.Parcelable {
