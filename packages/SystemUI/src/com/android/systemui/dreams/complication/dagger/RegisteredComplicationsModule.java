@@ -103,12 +103,14 @@ public interface RegisteredComplicationsModule {
     @Provides
     @Named(DREAM_SMARTSPACE_LAYOUT_PARAMS)
     static ComplicationLayoutParams provideSmartspaceLayoutParams(@Main Resources res) {
-        return new ComplicationLayoutParams(0,
+        return new ComplicationLayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 ComplicationLayoutParams.POSITION_BOTTOM
                         | ComplicationLayoutParams.POSITION_START,
                 ComplicationLayoutParams.DIRECTION_END,
                 DREAM_SMARTSPACE_COMPLICATION_WEIGHT,
-                res.getDimensionPixelSize(R.dimen.dream_overlay_complication_smartspace_padding));
+                res.getDimensionPixelSize(R.dimen.dream_overlay_complication_smartspace_padding),
+                res.getDimensionPixelSize(R.dimen.dream_overlay_complication_smartspace_max_width));
     }
 }

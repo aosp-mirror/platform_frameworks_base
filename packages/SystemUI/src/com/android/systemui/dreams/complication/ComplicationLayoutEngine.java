@@ -211,6 +211,19 @@ public class ComplicationLayoutEngine implements Complication.VisibilityControll
                 }
             });
 
+            if (mLayoutParams.constraintSpecified()) {
+                switch (direction) {
+                    case ComplicationLayoutParams.DIRECTION_START:
+                    case ComplicationLayoutParams.DIRECTION_END:
+                        params.matchConstraintMaxWidth = mLayoutParams.getConstraint();
+                        break;
+                    case ComplicationLayoutParams.DIRECTION_UP:
+                    case ComplicationLayoutParams.DIRECTION_DOWN:
+                        params.matchConstraintMaxHeight = mLayoutParams.getConstraint();
+                        break;
+                }
+            }
+
             mView.setLayoutParams(params);
         }
 

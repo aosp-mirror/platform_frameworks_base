@@ -136,13 +136,15 @@ public class ComplicationLayoutParamsTest extends SysuiTestCase {
                 ComplicationLayoutParams.POSITION_TOP,
                 ComplicationLayoutParams.DIRECTION_DOWN,
                 3,
-                10);
+                10,
+                20);
         final ComplicationLayoutParams copy = new ComplicationLayoutParams(params);
 
         assertThat(copy.getDirection() == params.getDirection()).isTrue();
         assertThat(copy.getPosition() == params.getPosition()).isTrue();
         assertThat(copy.getWeight() == params.getWeight()).isTrue();
         assertThat(copy.getMargin(0) == params.getMargin(1)).isTrue();
+        assertThat(copy.getConstraint() == params.getConstraint()).isTrue();
         assertThat(copy.height == params.height).isTrue();
         assertThat(copy.width == params.width).isTrue();
     }
@@ -167,5 +169,32 @@ public class ComplicationLayoutParamsTest extends SysuiTestCase {
         assertThat(copy.getMargin(1) == params.getMargin(1)).isTrue();
         assertThat(copy.height == params.height).isTrue();
         assertThat(copy.width == params.width).isTrue();
+    }
+
+    /**
+     * Ensures that constraint is set correctly.
+     */
+    @Test
+    public void testConstraint() {
+        final ComplicationLayoutParams paramsWithoutConstraint = new ComplicationLayoutParams(
+                100,
+                100,
+                ComplicationLayoutParams.POSITION_TOP,
+                ComplicationLayoutParams.DIRECTION_DOWN,
+                3,
+                10);
+        assertThat(paramsWithoutConstraint.constraintSpecified()).isFalse();
+
+        final int constraint = 10;
+        final ComplicationLayoutParams paramsWithConstraint = new ComplicationLayoutParams(
+                100,
+                100,
+                ComplicationLayoutParams.POSITION_TOP,
+                ComplicationLayoutParams.DIRECTION_DOWN,
+                3,
+                10,
+                constraint);
+        assertThat(paramsWithConstraint.constraintSpecified()).isTrue();
+        assertThat(paramsWithConstraint.getConstraint()).isEqualTo(constraint);
     }
 }
