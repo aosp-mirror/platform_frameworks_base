@@ -172,7 +172,7 @@ public class RunningTasksTest extends WindowTestsBase {
         final Task task = new TaskBuilder(mAtm.mTaskSupervisor)
                 .setComponent(new ComponentName(mContext.getPackageName(), className))
                 .setTaskId(taskId)
-                .setParentTaskFragment(stack)
+                .setParentTask(stack)
                 .build();
         final ActivityRecord activity = new ActivityBuilder(mAtm)
                 .setTask(task)
