@@ -1663,17 +1663,33 @@ public class SubscriptionManager {
     }
 
     /**
-     * @return List of all SubscriptionInfo records in database,
-     * include those that were inserted before, maybe empty but not null.
+     * Get all subscription info records from SIMs that are inserted now or were inserted before.
+     *
+     * <p>
+     * If the caller does not have {@link Manifest.permission#READ_PHONE_NUMBERS} permission,
+     * {@link SubscriptionInfo#getNumber()} will return empty string.
+     * If the caller does not have {@link Manifest.permission#USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER},
+     * {@link SubscriptionInfo#getIccId()} and {@link SubscriptionInfo#getCardString()} will return
+     * empty string, and {@link SubscriptionInfo#getGroupUuid()} will return {@code null}.
+     *
+     * <p>
+     * The carrier app will always have full {@link SubscriptionInfo} for the subscriptions
+     * that it has carrier privilege.
+     *
+     * @return List of all {@link SubscriptionInfo} records from SIMs that are inserted or
+     * inserted before. Sorted by {@link SubscriptionInfo#getSimSlotIndex()}, then
+     * {@link SubscriptionInfo#getSubscriptionId()}.
+     *
      * @hide
      */
+    @RequiresPermission(anyOf = {
+            Manifest.permission.READ_PHONE_STATE,
+            Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+            "carrier privileges",
+    })
     @NonNull
-    @UnsupportedAppUsage
     public List<SubscriptionInfo> getAllSubscriptionInfoList() {
-        if (VDBG) logd("[getAllSubscriptionInfoList]+");
-
         List<SubscriptionInfo> result = null;
-
         try {
             ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
@@ -3424,7 +3440,6 @@ public class SubscriptionManager {
 
     /**
      * Get subscriptionInfo list of subscriptions that are in the same group of given subId.
-     * See {@link #createSubscriptionGroup(List)} for more details.
      *
      * Caller must have {@link android.Manifest.permission#READ_PHONE_STATE}
      * or carrier privilege permission on the subscription.
@@ -4122,6 +4137,26 @@ public class SubscriptionManager {
         setSubscriptionPropertyHelper(subscriptionId, "setUsageSetting",
                 (iSub)-> iSub.setUsageSetting(
                         usageSetting, subscriptionId, mContext.getOpPackageName()));
+    }
+
+    /**
+     * Convert phone number source to string.
+     *
+     * @param source The phone name source.
+     *
+     * @return The phone name source in string format.
+     *
+     * @hide
+     */
+    @NonNull
+    public static String phoneNumberSourceToString(@PhoneNumberSource int source) {
+        switch (source) {
+            case SubscriptionManager.PHONE_NUMBER_SOURCE_UICC: return "UICC";
+            case SubscriptionManager.PHONE_NUMBER_SOURCE_CARRIER: return "CARRIER";
+            case SubscriptionManager.PHONE_NUMBER_SOURCE_IMS: return "IMS";
+            default:
+                return "UNKNOWN(" + source + ")";
+        }
     }
 
     /**
