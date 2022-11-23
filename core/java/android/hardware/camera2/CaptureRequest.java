@@ -3086,9 +3086,9 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * <p>Output streams use this rectangle to produce their output, cropping to a smaller region
      * if necessary to maintain the stream's aspect ratio, then scaling the sensor input to
      * match the output's configured resolution.</p>
-     * <p>The crop region is applied after the RAW to other color space (e.g. YUV)
-     * conversion. Since raw streams (e.g. RAW16) don't have the conversion stage, they are not
-     * croppable. The crop region will be ignored by raw streams.</p>
+     * <p>The crop region is usually applied after the RAW to other color space (e.g. YUV)
+     * conversion. As a result RAW streams are not croppable unless supported by the
+     * camera device. See {@link CameraCharacteristics#SCALER_AVAILABLE_STREAM_USE_CASES android.scaler.availableStreamUseCases}#CROPPED_RAW for details.</p>
      * <p>For non-raw streams, any additional per-stream cropping will be done to maximize the
      * final pixel area of the stream.</p>
      * <p>For example, if the crop region is set to a 4:3 aspect ratio, then 4:3 streams will use
@@ -3183,6 +3183,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * @see CaptureRequest#CONTROL_ZOOM_RATIO
      * @see CaptureRequest#DISTORTION_CORRECTION_MODE
      * @see CameraCharacteristics#SCALER_AVAILABLE_MAX_DIGITAL_ZOOM
+     * @see CameraCharacteristics#SCALER_AVAILABLE_STREAM_USE_CASES
      * @see CameraCharacteristics#SCALER_CROPPING_TYPE
      * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
      * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE_MAXIMUM_RESOLUTION

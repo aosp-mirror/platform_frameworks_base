@@ -1489,6 +1489,31 @@ public abstract class CameraMetadata<TKey> {
     public static final int SCALER_AVAILABLE_STREAM_USE_CASES_VIDEO_CALL = 0x5;
 
     /**
+     * <p>Cropped RAW stream when the client chooses to crop the field of view.</p>
+     * <p>Certain types of image sensors can run in binned modes in order to improve signal to
+     * noise ratio while capturing frames. However, at certain zoom levels and / or when
+     * other scene conditions are deemed fit, the camera sub-system may choose to un-bin and
+     * remosaic the sensor's output. This results in a RAW frame which is cropped in field
+     * of view and yet has the same number of pixels as full field of view RAW, thereby
+     * improving image detail.</p>
+     * <p>The resultant field of view of the RAW stream will be greater than or equal to
+     * croppable non-RAW streams. The effective crop region for this RAW stream will be
+     * reflected in the CaptureResult key {@link CaptureResult#SCALER_RAW_CROP_REGION android.scaler.rawCropRegion}.</p>
+     * <p>If this stream use case is set on a non-RAW stream, i.e. not one of :</p>
+     * <ul>
+     * <li>{@link android.graphics.ImageFormat#RAW_SENSOR RAW_SENSOR}</li>
+     * <li>{@link android.graphics.ImageFormat#RAW10 RAW10}</li>
+     * <li>{@link android.graphics.ImageFormat#RAW12 RAW12}</li>
+     * </ul>
+     * <p>session configuration is not guaranteed to succeed.</p>
+     * <p>This stream use case may not be supported on some devices.</p>
+     *
+     * @see CaptureResult#SCALER_RAW_CROP_REGION
+     * @see CameraCharacteristics#SCALER_AVAILABLE_STREAM_USE_CASES
+     */
+    public static final int SCALER_AVAILABLE_STREAM_USE_CASES_CROPPED_RAW = 0x6;
+
+    /**
      * <p>Vendor defined use cases. These depend on the vendor implementation.</p>
      * @see CameraCharacteristics#SCALER_AVAILABLE_STREAM_USE_CASES
      * @hide
