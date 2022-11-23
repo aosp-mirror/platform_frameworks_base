@@ -785,7 +785,9 @@ public class PackageDexOptimizer {
     private String getRealCompilerFilter(ApplicationInfo info, String targetCompilerFilter,
             boolean isUsedByOtherApps) {
         if (info.isEmbeddedDexUsed()) {
-            return "verify";
+            // Downgrade optimizing filters to "verify", but don't upgrade lower filters.
+            return DexFile.isOptimizedCompilerFilter(targetCompilerFilter) ? "verify"
+                                                                           : targetCompilerFilter;
         }
 
         // We force vmSafeMode on debuggable apps as well:
@@ -822,7 +824,9 @@ public class PackageDexOptimizer {
      */
     private String getRealCompilerFilter(AndroidPackage pkg, String targetCompilerFilter) {
         if (pkg.isUseEmbeddedDex()) {
-            return "verify";
+            // Downgrade optimizing filters to "verify", but don't upgrade lower filters.
+            return DexFile.isOptimizedCompilerFilter(targetCompilerFilter) ? "verify"
+                                                                           : targetCompilerFilter;
         }
 
         // We force vmSafeMode on debuggable apps as well:
