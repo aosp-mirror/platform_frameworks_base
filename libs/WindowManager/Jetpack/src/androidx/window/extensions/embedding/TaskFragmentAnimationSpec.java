@@ -114,8 +114,8 @@ class TaskFragmentAnimationSpec {
     @NonNull
     Animation createChangeBoundsCloseAnimation(@NonNull RemoteAnimationTarget target) {
         final Rect parentBounds = target.taskInfo.configuration.windowConfiguration.getBounds();
-        // TODO(b/258126915): we want to keep track of the closing start bounds
-        final Rect bounds = target.screenSpaceBounds;
+        // Use startBounds if the window is closing in case it may also resize.
+        final Rect bounds = target.startBounds;
         final int endTop;
         final int endLeft;
         if (parentBounds.top == bounds.top && parentBounds.bottom == bounds.bottom) {

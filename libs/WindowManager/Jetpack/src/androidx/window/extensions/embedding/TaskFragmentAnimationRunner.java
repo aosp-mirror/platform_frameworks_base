@@ -17,6 +17,7 @@
 package androidx.window.extensions.embedding;
 
 import static android.os.Process.THREAD_PRIORITY_DISPLAY;
+import static android.view.RemoteAnimationTarget.MODE_CHANGING;
 import static android.view.RemoteAnimationTarget.MODE_CLOSING;
 import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_OPEN;
@@ -254,7 +255,7 @@ class TaskFragmentAnimationRunner extends IRemoteAnimationRunner.Stub {
             @NonNull RemoteAnimationTarget[] targets) {
         final List<TaskFragmentAnimationAdapter> adapters = new ArrayList<>();
         for (RemoteAnimationTarget target : targets) {
-            if (target.startBounds != null) {
+            if (target.mode == MODE_CHANGING) {
                 // This is the target with bounds change.
                 final Animation[] animations =
                         mAnimationSpec.createChangeBoundsChangeAnimations(target);
