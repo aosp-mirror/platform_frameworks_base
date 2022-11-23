@@ -28,7 +28,6 @@ import android.net.Uri
 import android.os.Handler
 import android.os.UserHandle
 import android.provider.Settings
-import android.util.Log
 import android.util.MathUtils
 import android.view.View
 import android.view.ViewGroup
@@ -1055,17 +1054,6 @@ constructor(
                     // This will either do a full layout pass and remeasure, or it will bypass
                     // that and directly set the mediaFrame's bounds within the premeasured host.
                     targetHost.addView(mediaFrame)
-
-                    if (mediaFrame.childCount > 0) {
-                        val child = mediaFrame.getChildAt(0)
-                        if (mediaFrame.height < child.height) {
-                            Log.wtf(
-                                TAG,
-                                "mediaFrame height is too small for child: " +
-                                    "${mediaFrame.height} vs ${child.height}"
-                            )
-                        }
-                    }
                 }
                 if (isCrossFadeAnimatorRunning) {
                     // When cross-fading with an animation, we only notify the media carousel of the
