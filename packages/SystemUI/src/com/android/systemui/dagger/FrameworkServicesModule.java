@@ -55,6 +55,7 @@ import android.hardware.display.ColorDisplayManager;
 import android.hardware.display.DisplayManager;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
+import android.hardware.input.InputManager;
 import android.media.AudioManager;
 import android.media.IAudioService;
 import android.media.MediaRouter2Manager;
@@ -280,6 +281,12 @@ public class FrameworkServicesModule {
     @Singleton
     static InteractionJankMonitor provideInteractionJankMonitor() {
         return InteractionJankMonitor.getInstance();
+    }
+
+    @Provides
+    @Singleton
+    static InputManager provideInputManager(Context context) {
+        return context.getSystemService(InputManager.class);
     }
 
     @Provides
