@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.server.permission
+package com.android.server.permission.access.external
 
-import com.android.internal.annotations.Keep
-import com.android.server.pm.permission.PermissionManagerServiceInterface
+import android.content.pm.PermissionGroupInfo
+import android.content.pm.PermissionInfo
 
-/**
- * Modern implementation of [PermissionManagerServiceInterface].
- */
-@Keep
-class ModernPermissionManagerServiceImpl
+object PackageInfoUtils {
+    fun generatePermissionInfo(parsedPermission: ParsedPermission, flags: Long): PermissionInfo {
+        throw NotImplementedError()
+    }
+
+    fun generatePermissionGroupInfo(
+        parsedPermissionGroup: ParsedPermissionGroup,
+        flags: Long
+    ): PermissionGroupInfo {
+        throw NotImplementedError()
+    }
+}
