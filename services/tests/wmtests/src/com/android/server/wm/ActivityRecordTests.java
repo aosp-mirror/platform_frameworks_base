@@ -2314,7 +2314,7 @@ public class ActivityRecordTests extends WindowTestsBase {
                 .build();
         final ActivityOptions opts = ActivityOptions.makeLaunchIntoPip(params);
         final ActivityRecord activity = new ActivityBuilder(mAtm)
-                .setLaunchIntoPipActivityOptions(opts)
+                .setActivityOptions(opts)
                 .build();
 
         // Verify the pictureInPictureArgs is set on the new Activity

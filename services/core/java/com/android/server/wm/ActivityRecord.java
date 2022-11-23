@@ -931,6 +931,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // task and directly above this ActivityRecord. This field is updated whenever a new activity
     // is launched from this ActivityRecord. Touches are always allowed within the same uid.
     int mAllowedTouchUid;
+    // Whether client has requested a scene transition when exiting.
+    final boolean mHasSceneTransition;
 
     // Whether the ActivityEmbedding is enabled on the app.
     private final boolean mAppActivityEmbeddingSplitsEnabled;
@@ -2091,6 +2093,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         if (options != null) {
             setOptions(options);
+            // The result receiver is the transition receiver, which will handle the shared element
+            // exit transition.
+            mHasSceneTransition = options.getAnimationType() == ANIM_SCENE_TRANSITION
+                    && options.getResultReceiver() != null;
             final PendingIntent usageReport = options.getUsageTimeReport();
             if (usageReport != null) {
                 appTimeTracker = new AppTimeTracker(usageReport);
@@ -2103,6 +2109,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             mHandoverLaunchDisplayId = options.getLaunchDisplayId();
             mLaunchCookie = options.getLaunchCookie();
             mLaunchRootTask = options.getLaunchRootTask();
+        } else {
+            mHasSceneTransition = false;
         }
 
         mPersistentState = persistentState;

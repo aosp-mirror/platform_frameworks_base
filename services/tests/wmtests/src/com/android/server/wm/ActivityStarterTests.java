@@ -1505,7 +1505,7 @@ public class ActivityStarterTests extends WindowTestsBase {
                 .build();
         final ActivityOptions opts = ActivityOptions.makeLaunchIntoPip(params);
         ActivityRecord targetRecord = new ActivityBuilder(mAtm)
-                .setLaunchIntoPipActivityOptions(opts)
+                .setActivityOptions(opts)
                 .build();
 
         // Start the target launch-into-pip activity from a source

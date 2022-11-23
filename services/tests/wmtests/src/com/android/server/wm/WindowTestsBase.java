@@ -1016,8 +1016,8 @@ class WindowTestsBase extends SystemServiceTestsBase {
         private boolean mOnTop = false;
         private ActivityInfo.WindowLayout mWindowLayout;
         private boolean mVisible = true;
-        private ActivityOptions mLaunchIntoPipOpts;
         private String mRequiredDisplayCategory;
+        private ActivityOptions mActivityOpts;
 
         ActivityBuilder(ActivityTaskManagerService service) {
             mService = service;
@@ -1153,8 +1153,8 @@ class WindowTestsBase extends SystemServiceTestsBase {
             return this;
         }
 
-        ActivityBuilder setLaunchIntoPipActivityOptions(ActivityOptions opts) {
-            mLaunchIntoPipOpts = opts;
+        ActivityBuilder setActivityOptions(ActivityOptions opts) {
+            mActivityOpts = opts;
             return this;
         }
 
@@ -1225,8 +1225,8 @@ class WindowTestsBase extends SystemServiceTestsBase {
             }
 
             ActivityOptions options = null;
-            if (mLaunchIntoPipOpts != null) {
-                options = mLaunchIntoPipOpts;
+            if (mActivityOpts != null) {
+                options = mActivityOpts;
             } else if (mLaunchTaskBehind) {
                 options = ActivityOptions.makeTaskLaunchBehind();
             }
