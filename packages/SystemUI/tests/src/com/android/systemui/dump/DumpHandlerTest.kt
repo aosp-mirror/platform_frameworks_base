@@ -103,8 +103,8 @@ class DumpHandlerTest : SysuiTestCase() {
         // THEN only the requested ones have their dump() method called
         verify(dumpable1).dump(pw, args)
         verify(dumpable2, never()).dump(
-                any(PrintWriter::class.java),
-                any(Array<String>::class.java))
+            any(PrintWriter::class.java),
+            any(Array<String>::class.java))
         verify(dumpable3).dump(pw, args)
         verify(buffer1, never()).dump(any(PrintWriter::class.java), anyInt())
         verify(buffer2).dump(pw, 0)
@@ -126,9 +126,9 @@ class DumpHandlerTest : SysuiTestCase() {
     @Test
     fun testCriticalDump() {
         // GIVEN a variety of registered dumpables and buffers
-        dumpManager.registerDumpable("dumpable1", dumpable1)
-        dumpManager.registerDumpable("dumpable2", dumpable2)
-        dumpManager.registerDumpable("dumpable3", dumpable3)
+        dumpManager.registerCriticalDumpable("dumpable1", dumpable1)
+        dumpManager.registerCriticalDumpable("dumpable2", dumpable2)
+        dumpManager.registerNormalDumpable("dumpable3", dumpable3)
         dumpManager.registerBuffer("buffer1", buffer1)
         dumpManager.registerBuffer("buffer2", buffer2)
 
@@ -136,10 +136,12 @@ class DumpHandlerTest : SysuiTestCase() {
         val args = arrayOf("--dump-priority", "CRITICAL")
         dumpHandler.dump(fd, pw, args)
 
-        // THEN all modules are dumped (but no buffers)
+        // THEN only critical modules are dumped (and no buffers)
         verify(dumpable1).dump(pw, args)
         verify(dumpable2).dump(pw, args)
-        verify(dumpable3).dump(pw, args)
+        verify(dumpable3, never()).dump(
+            any(PrintWriter::class.java),
+            any(Array<String>::class.java))
         verify(buffer1, never()).dump(any(PrintWriter::class.java), anyInt())
         verify(buffer2, never()).dump(any(PrintWriter::class.java), anyInt())
     }
@@ -147,9 +149,9 @@ class DumpHandlerTest : SysuiTestCase() {
     @Test
     fun testNormalDump() {
         // GIVEN a variety of registered dumpables and buffers
-        dumpManager.registerDumpable("dumpable1", dumpable1)
-        dumpManager.registerDumpable("dumpable2", dumpable2)
-        dumpManager.registerDumpable("dumpable3", dumpable3)
+        dumpManager.registerCriticalDumpable("dumpable1", dumpable1)
+        dumpManager.registerCriticalDumpable("dumpable2", dumpable2)
+        dumpManager.registerNormalDumpable("dumpable3", dumpable3)
         dumpManager.registerBuffer("buffer1", buffer1)
         dumpManager.registerBuffer("buffer2", buffer2)
 
@@ -157,16 +159,14 @@ class DumpHandlerTest : SysuiTestCase() {
         val args = arrayOf("--dump-priority", "NORMAL")
         dumpHandler.dump(fd, pw, args)
 
-        // THEN all buffers are dumped (but no modules)
+        // THEN the normal module and all buffers are dumped
         verify(dumpable1, never()).dump(
                 any(PrintWriter::class.java),
                 any(Array<String>::class.java))
         verify(dumpable2, never()).dump(
                 any(PrintWriter::class.java),
                 any(Array<String>::class.java))
-        verify(dumpable3, never()).dump(
-                any(PrintWriter::class.java),
-                any(Array<String>::class.java))
+        verify(dumpable3).dump(pw, args)
         verify(buffer1).dump(pw, 0)
         verify(buffer2).dump(pw, 0)
     }

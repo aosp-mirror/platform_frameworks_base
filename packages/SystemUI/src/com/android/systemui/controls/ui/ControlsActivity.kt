@@ -27,10 +27,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowInsets
 import android.view.WindowInsets.Type
+import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import com.android.systemui.R
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.controls.management.ControlsAnimations
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import javax.inject.Inject
 
 /**
@@ -44,6 +47,7 @@ class ControlsActivity @Inject constructor(
     private val uiController: ControlsUiController,
     private val broadcastDispatcher: BroadcastDispatcher,
     private val dreamManager: IDreamManager,
+    private val featureFlags: FeatureFlags
 ) : ComponentActivity() {
 
     private lateinit var parent: ViewGroup
@@ -52,6 +56,9 @@ class ControlsActivity @Inject constructor(
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (featureFlags.isEnabled(Flags.USE_APP_PANELS)) {
+            window.addPrivateFlags(WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY)
+        }
 
         setContentView(R.layout.controls_fullscreen)
 

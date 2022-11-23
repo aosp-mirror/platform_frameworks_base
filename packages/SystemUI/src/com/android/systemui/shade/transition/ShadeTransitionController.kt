@@ -78,7 +78,7 @@ constructor(
             })
         shadeExpansionStateManager.addExpansionListener(this::onPanelExpansionChanged)
         shadeExpansionStateManager.addStateListener(this::onPanelStateChanged)
-        dumpManager.registerDumpable("ShadeTransitionController") { printWriter, _ ->
+        dumpManager.registerCriticalDumpable("ShadeTransitionController") { printWriter, _ ->
             dump(printWriter)
         }
     }
