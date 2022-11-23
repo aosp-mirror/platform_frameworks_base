@@ -22,10 +22,11 @@ import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.credentials.ClearCredentialStateRequest;
 import android.credentials.CreateCredentialRequest;
 import android.credentials.GetCredentialOption;
 import android.credentials.GetCredentialRequest;
-import android.credentials.IClearCredentialSessionCallback;
+import android.credentials.IClearCredentialStateCallback;
 import android.credentials.ICreateCredentialCallback;
 import android.credentials.ICredentialManager;
 import android.credentials.IGetCredentialCallback;
@@ -206,8 +207,8 @@ public final class CredentialManagerService extends
         }
 
         @Override
-        public ICancellationSignal clearCredentialSession(
-                IClearCredentialSessionCallback callback, String callingPackage) {
+        public ICancellationSignal clearCredentialState(ClearCredentialStateRequest request,
+                IClearCredentialStateCallback callback, String callingPackage) {
             // TODO: implement.
             Log.i(TAG, "clearCredentialSession");
             ICancellationSignal cancelTransport = CancellationSignal.createTransport();

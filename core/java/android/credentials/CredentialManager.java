@@ -142,18 +142,24 @@ public final class CredentialManager {
     }
 
     /**
-     * Clears the current user credential session from all credential providers.
+     * Clears the current user credential state from all credential providers.
      *
-     * <p>Usually invoked after your user signs out of your app so that they will not be
-     * automatically signed in the next time.
+     * You should invoked this api after your user signs out of your app to notify all credential
+     * providers that any stored credential session for the given app should be cleared.
      *
+     * A credential provider may have stored an active credential session and use it to limit
+     * sign-in options for future get-credential calls. For example, it may prioritize the active
+     * credential over any other available credential. When your user explicitly signs out of your
+     * app and in order to get the holistic sign-in options the next time, you should call this API
+     * to let the provider clear any stored credential session.
+     *
+     * @param request the request data
      * @param cancellationSignal an optional signal that allows for cancelling this call
      * @param executor the callback will take place on this {@link Executor}
      * @param callback the callback invoked when the request succeeds or fails
-     *
-     * @hide
      */
-    public void clearCredentialSession(
+    public void clearCredentialState(
+            @NonNull ClearCredentialStateRequest request,
             @Nullable CancellationSignal cancellationSignal,
             @CallbackExecutor @NonNull Executor executor,
             @NonNull OutcomeReceiver<Void, CredentialManagerException> callback) {
@@ -167,8 +173,8 @@ public final class CredentialManager {
 
         ICancellationSignal cancelRemote = null;
         try {
-            cancelRemote = mService.clearCredentialSession(
-                    new ClearCredentialSessionTransport(executor, callback),
+            cancelRemote = mService.clearCredentialState(request,
+                    new ClearCredentialStateTransport(executor, callback),
                     mContext.getOpPackageName());
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
@@ -255,14 +261,14 @@ public final class CredentialManager {
         }
     }
 
-    private static class ClearCredentialSessionTransport
-            extends IClearCredentialSessionCallback.Stub {
+    private static class ClearCredentialStateTransport
+            extends IClearCredentialStateCallback.Stub {
         // TODO: listen for cancellation to release callback.
 
         private final Executor mExecutor;
         private final OutcomeReceiver<Void, CredentialManagerException> mCallback;
 
-        private ClearCredentialSessionTransport(Executor executor,
+        private ClearCredentialStateTransport(Executor executor,
                 OutcomeReceiver<Void, CredentialManagerException> callback) {
             mExecutor = executor;
             mCallback = callback;

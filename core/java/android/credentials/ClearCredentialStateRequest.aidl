@@ -16,12 +16,4 @@
 
 package android.credentials;
 
-/**
- * Listener for clearCredentialSession request.
- *
- * @hide
- */
-interface IClearCredentialSessionCallback {
-    oneway void onSuccess();
-    oneway void onError(int errorCode, String message);
-}
+parcelable ClearCredentialStateRequest;

@@ -12982,6 +12982,14 @@ package android.content.res.loader {
 
 package android.credentials {
 
+  public final class ClearCredentialStateRequest implements android.os.Parcelable {
+    ctor public ClearCredentialStateRequest(@NonNull android.os.Bundle);
+    method public int describeContents();
+    method @NonNull public android.os.Bundle getData();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.credentials.ClearCredentialStateRequest> CREATOR;
+  }
+
   public final class CreateCredentialRequest implements android.os.Parcelable {
     ctor public CreateCredentialRequest(@NonNull String, @NonNull android.os.Bundle);
     method public int describeContents();
@@ -13009,6 +13017,7 @@ package android.credentials {
   }
 
   public final class CredentialManager {
+    method public void clearCredentialState(@NonNull android.credentials.ClearCredentialStateRequest, @Nullable android.os.CancellationSignal, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<java.lang.Void,android.credentials.CredentialManagerException>);
     method public void executeCreateCredential(@NonNull android.credentials.CreateCredentialRequest, @Nullable android.os.CancellationSignal, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.credentials.CreateCredentialResponse,android.credentials.CredentialManagerException>);
     method public void executeGetCredential(@NonNull android.credentials.GetCredentialRequest, @Nullable android.os.CancellationSignal, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.credentials.GetCredentialResponse,android.credentials.CredentialManagerException>);
   }
