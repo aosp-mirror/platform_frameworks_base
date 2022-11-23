@@ -172,6 +172,7 @@ class CredentialManagerRepo(
         {CreateScreenState.PASSKEY_INTRO} else {CreateScreenState.PROVIDER_SELECTION}
       } else {CreateScreenState.CREATION_OPTION_SELECTION},
       requestDisplayInfo,
+      false,
       if (hasDefault) {
         ActiveEntry(defaultProvider, defaultProvider.createOptions.first())
       } else null

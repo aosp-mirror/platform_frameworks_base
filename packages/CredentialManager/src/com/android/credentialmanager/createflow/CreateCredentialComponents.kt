@@ -80,14 +80,16 @@ fun CreateCredentialScreen(
           enabledProviderList = uiState.enabledProviders,
           disabledProviderList = uiState.disabledProviders,
           onCancel = viewModel::onCancel,
-          onOptionSelected = viewModel::onMoreOptionsRowSelectedForFirstUse,
+          onOptionSelected = viewModel::onEntrySelectedFromFirstUseScreen,
           onDisabledPasswordManagerSelected = viewModel::onDisabledPasswordManagerSelected,
+          onRemoteEntrySelected = selectEntryCallback,
         )
         CreateScreenState.CREATION_OPTION_SELECTION -> CreationSelectionCard(
           requestDisplayInfo = uiState.requestDisplayInfo,
           enabledProviderList = uiState.enabledProviders,
           providerInfo = uiState.activeEntry?.activeProvider!!,
           createOptionInfo = uiState.activeEntry.activeEntryInfo as CreateOptionInfo,
+          showActiveEntryOnly = uiState.showActiveEntryOnly,
           onOptionSelected = selectEntryCallback,
           onConfirm = confirmEntryCallback,
           onCancel = viewModel::onCancel,
@@ -98,7 +100,7 @@ fun CreateCredentialScreen(
           enabledProviderList = uiState.enabledProviders,
           disabledProviderList = uiState.disabledProviders,
           onBackButtonSelected = viewModel::onBackButtonSelected,
-          onOptionSelected = viewModel::onMoreOptionsRowSelected,
+          onOptionSelected = viewModel::onEntrySelectedFromMoreOptionScreen,
           onDisabledPasswordManagerSelected = viewModel::onDisabledPasswordManagerSelected,
           onRemoteEntrySelected = selectEntryCallback,
         )
@@ -184,7 +186,8 @@ fun ProviderSelectionCard(
   disabledProviderList: List<DisabledProviderInfo>?,
   onOptionSelected: (ActiveEntry) -> Unit,
   onDisabledPasswordManagerSelected: () -> Unit,
-  onCancel: () -> Unit
+  onCancel: () -> Unit,
+  onRemoteEntrySelected: (EntryInfo) -> Unit,
 ) {
   Card() {
     Column() {
@@ -254,10 +257,23 @@ fun ProviderSelectionCard(
           }
         }
       }
-      Divider(
-        thickness = 24.dp,
-        color = Color.Transparent
-      )
+      // TODO: handle the error situation that if multiple remoteInfos exists
+      enabledProviderList.forEach { enabledProvider ->
+        if (enabledProvider.remoteEntry != null) {
+          TextButton(
+            onClick = {
+              onRemoteEntrySelected(enabledProvider.remoteEntry!!) },
+            modifier = Modifier
+              .padding(horizontal = 24.dp)
+              .align(alignment = Alignment.CenterHorizontally)
+          ) {
+            Text(
+              text = stringResource(R.string.string_save_to_another_device),
+              textAlign = TextAlign.Center,
+            )
+          }
+        }
+      }
       Row(
         horizontalArrangement = Arrangement.Start,
         modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
@@ -416,6 +432,7 @@ fun CreationSelectionCard(
   enabledProviderList: List<EnabledProviderInfo>,
   providerInfo: EnabledProviderInfo,
   createOptionInfo: CreateOptionInfo,
+  showActiveEntryOnly: Boolean,
   onOptionSelected: (EntryInfo) -> Unit,
   onConfirm: () -> Unit,
   onCancel: () -> Unit,
@@ -473,41 +490,43 @@ fun CreationSelectionCard(
           onOptionSelected = onOptionSelected
         )
       }
-      var createOptionsSize = 0
-      enabledProviderList.forEach{
-        enabledProvider -> createOptionsSize += enabledProvider.createOptions.size}
-      if (createOptionsSize > 1) {
-        TextButton(
-          onClick = onMoreOptionsSelected,
-          modifier = Modifier
-          .padding(horizontal = 24.dp)
-          .align(alignment = Alignment.CenterHorizontally)){
-          Text(
-              text =
-                when (requestDisplayInfo.type) {
-                  TYPE_PUBLIC_KEY_CREDENTIAL ->
-                    stringResource(R.string.string_create_in_another_place)
-                  else -> stringResource(R.string.string_save_to_another_place)},
-            textAlign = TextAlign.Center,
-          )
-        }
-      } else if (
-        requestDisplayInfo.type == TYPE_PUBLIC_KEY_CREDENTIAL
-      ) {
-        // TODO: handle the error situation that if multiple remoteInfos exists
-        enabledProviderList.forEach { enabledProvider ->
-          if (enabledProvider.remoteEntry != null) {
-            TextButton(
-              onClick = {
-                onOptionSelected(enabledProvider.remoteEntry!!) },
-              modifier = Modifier
-                .padding(horizontal = 24.dp)
-                .align(alignment = Alignment.CenterHorizontally)
-            ) {
-              Text(
-                text = stringResource(R.string.string_use_another_device),
-                textAlign = TextAlign.Center,
-              )
+      if (!showActiveEntryOnly) {
+        var createOptionsSize = 0
+        enabledProviderList.forEach{
+          enabledProvider -> createOptionsSize += enabledProvider.createOptions.size}
+        if (createOptionsSize > 1) {
+          TextButton(
+            onClick = onMoreOptionsSelected,
+            modifier = Modifier
+            .padding(horizontal = 24.dp)
+            .align(alignment = Alignment.CenterHorizontally)){
+            Text(
+                text =
+                  when (requestDisplayInfo.type) {
+                    TYPE_PUBLIC_KEY_CREDENTIAL ->
+                      stringResource(R.string.string_create_in_another_place)
+                    else -> stringResource(R.string.string_save_to_another_place)},
+              textAlign = TextAlign.Center,
+            )
+          }
+        } else if (
+          requestDisplayInfo.type == TYPE_PUBLIC_KEY_CREDENTIAL
+        ) {
+          // TODO: handle the error situation that if multiple remoteInfos exists
+          enabledProviderList.forEach { enabledProvider ->
+            if (enabledProvider.remoteEntry != null) {
+              TextButton(
+                onClick = {
+                  onOptionSelected(enabledProvider.remoteEntry!!) },
+                modifier = Modifier
+                  .padding(horizontal = 24.dp)
+                  .align(alignment = Alignment.CenterHorizontally)
+              ) {
+                Text(
+                  text = stringResource(R.string.string_use_another_device),
+                  textAlign = TextAlign.Center,
+                )
+              }
             }
           }
         }
