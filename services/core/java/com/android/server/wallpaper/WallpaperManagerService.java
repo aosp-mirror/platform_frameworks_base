@@ -1549,9 +1549,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     try {
                         mReply.sendResult(null);
                     } catch (RemoteException e) {
-                        Slog.d(TAG, "failed to send callback!", e);
-                    } finally {
                         Binder.restoreCallingIdentity(ident);
+                        Slog.d(TAG, "failed to send callback!", e);
                     }
                     mReply = null;
                 }
