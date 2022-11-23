@@ -183,7 +183,7 @@ final class TrustedHotwordDetectorSession {
     private final ScheduledExecutorService mScheduledExecutorService =
             Executors.newSingleThreadScheduledExecutor();
     private final AppOpsManager mAppOpsManager;
-    private final HotwordAudioStreamManager mHotwordAudioStreamManager;
+    private final HotwordAudioStreamCopier mHotwordAudioStreamCopier;
     @Nullable private final ScheduledFuture<?> mCancellationTaskFuture;
     private final AtomicBoolean mUpdateStateAfterStartFinished = new AtomicBoolean(false);
     private final IBinder.DeathRecipient mAudioServerDeathRecipient = this::audioServerDied;
@@ -245,7 +245,7 @@ final class TrustedHotwordDetectorSession {
         mVoiceInteractionServiceUid = voiceInteractionServiceUid;
         mVoiceInteractorIdentity = voiceInteractorIdentity;
         mAppOpsManager = mContext.getSystemService(AppOpsManager.class);
-        mHotwordAudioStreamManager = new HotwordAudioStreamManager(mAppOpsManager,
+        mHotwordAudioStreamCopier = new HotwordAudioStreamCopier(mAppOpsManager,
                 mVoiceInteractorIdentity.uid, mVoiceInteractorIdentity.packageName,
                 mVoiceInteractorIdentity.attributionTag);
         mDetectionComponentName = serviceName;
@@ -507,7 +507,7 @@ final class TrustedHotwordDetectorSession {
                     saveProximityValueToBundle(result);
                     HotwordDetectedResult newResult;
                     try {
-                        newResult = mHotwordAudioStreamManager.startCopyingAudioStreams(result);
+                        newResult = mHotwordAudioStreamCopier.startCopyingAudioStreams(result);
                     } catch (IOException e) {
                         // TODO: Write event
                         mSoftwareCallback.onError();
@@ -642,7 +642,7 @@ final class TrustedHotwordDetectorSession {
                     saveProximityValueToBundle(result);
                     HotwordDetectedResult newResult;
                     try {
-                        newResult = mHotwordAudioStreamManager.startCopyingAudioStreams(result);
+                        newResult = mHotwordAudioStreamCopier.startCopyingAudioStreams(result);
                     } catch (IOException e) {
                         // TODO: Write event
                         externalCallback.onError(CALLBACK_ONDETECTED_STREAM_COPY_ERROR);
@@ -1001,7 +1001,7 @@ final class TrustedHotwordDetectorSession {
                                     HotwordDetectedResult newResult;
                                     try {
                                         newResult =
-                                                mHotwordAudioStreamManager.startCopyingAudioStreams(
+                                                mHotwordAudioStreamCopier.startCopyingAudioStreams(
                                                         triggerResult);
                                     } catch (IOException e) {
                                         // TODO: Write event
