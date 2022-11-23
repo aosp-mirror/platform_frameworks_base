@@ -30,18 +30,24 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.android.settingslib.spa.framework.theme.SettingsTheme
+import com.android.settingslib.spa.framework.theme.toMediumWeight
 
 @Composable
-fun SettingsTitle(title: State<String>) {
-    SettingsTitle(title.value)
+fun SettingsTitle(title: State<String>, useMediumWeight: Boolean = false) {
+    SettingsTitle(title.value, useMediumWeight)
 }
 
 @Composable
-fun SettingsTitle(title: String) {
+fun SettingsTitle(title: String, useMediumWeight: Boolean = false) {
     Text(
         text = title,
         color = MaterialTheme.colorScheme.onSurface,
-        style = MaterialTheme.typography.titleMedium,
+        style = MaterialTheme.typography.titleMedium.let {
+            when (useMediumWeight) {
+                true -> it.toMediumWeight()
+                else -> it
+            }
+        },
     )
 }
 

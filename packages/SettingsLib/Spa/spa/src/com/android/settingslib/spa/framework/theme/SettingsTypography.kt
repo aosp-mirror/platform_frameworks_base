@@ -142,3 +142,7 @@ internal fun rememberSettingsTypography(): Typography {
     val settingsFontFamily = rememberSettingsFontFamily()
     return remember { SettingsTypography(settingsFontFamily).typography }
 }
+
+/** Creates a new [TextStyle] which font weight set to medium. */
+internal fun TextStyle.toMediumWeight() =
+    copy(fontWeight = FontWeight.Medium, letterSpacing = 0.01.em)
