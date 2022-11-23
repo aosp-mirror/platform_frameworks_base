@@ -509,7 +509,7 @@ public class AidlConversion {
                     } else if (MediaFormat.MIMETYPE_AUDIO_MPEGH_LC_L4.equals(aidl.encoding)) {
                         return AudioFormat.ENCODING_MPEGH_LC_L4;
                     } else if (MediaFormat.MIMETYPE_AUDIO_DTS_UHD.equals(aidl.encoding)) {
-                        return AudioFormat.ENCODING_DTS_UHD;
+                        return AudioFormat.ENCODING_DTS_UHD_P1;
                     } else if (MediaFormat.MIMETYPE_AUDIO_DRA.equals(aidl.encoding)) {
                         return AudioFormat.ENCODING_DRA;
                     } else {
