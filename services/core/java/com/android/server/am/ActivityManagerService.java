@@ -8163,15 +8163,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_USER_FOREGROUND_START,
                 Integer.toString(currentUserId), currentUserId);
 
-        // On Automotive, at this point the system user has already been started and unlocked,
-        // and some of the tasks we do here have already been done. So skip those in that case.
-        // TODO(b/132262830, b/203885241): this workdound shouldn't be necessary once we move the
-        // headless-user start logic to UserManager-land
-        final boolean bootingSystemUser = currentUserId == UserHandle.USER_SYSTEM;
-
-        if (bootingSystemUser) {
-            mSystemServiceManager.onUserStarting(t, currentUserId);
-        }
+        // On Automotive / Headless System User Mode, at this point the system user has already been
+        // started and unlocked, and some of the tasks we do here have already been done. So skip
+        // those in that case. The duplicate system user start is guarded in SystemServiceManager.
+        // TODO(b/242195409): this workaround shouldn't be necessary once we move the headless-user
+        // start logic to UserManager-land.
+        mSystemServiceManager.onUserStarting(t, currentUserId);
 
         synchronized (this) {
             // Only start up encryption-aware persistent apps; once user is
@@ -8201,7 +8198,15 @@ public class ActivityManagerService extends IActivityManager.Stub
                 t.traceEnd();
             }
 
-            if (bootingSystemUser) {
+            // Some systems - like automotive - will explicitly unlock system user then switch
+            // to a secondary user. Hence, we don't want to send duplicate broadcasts for
+            // the system user here.
+            // TODO(b/242195409): this workaround shouldn't be necessary once we move
+            // the headless-user start logic to UserManager-land.
+            final boolean isBootingSystemUser = (currentUserId == UserHandle.USER_SYSTEM)
+                    && !UserManager.isHeadlessSystemUserMode();
+
+            if (isBootingSystemUser) {
                 t.traceBegin("startHomeOnAllDisplays");
                 mAtmInternal.startHomeOnAllDisplays(currentUserId, "systemReady");
                 t.traceEnd();
@@ -8212,7 +8217,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             t.traceEnd();
 
 
-            if (bootingSystemUser) {
+            if (isBootingSystemUser) {
                 t.traceBegin("sendUserStartBroadcast");
                 final int callingUid = Binder.getCallingUid();
                 final int callingPid = Binder.getCallingPid();
@@ -8253,7 +8258,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             mAtmInternal.resumeTopActivities(false /* scheduleIdle */);
             t.traceEnd();
 
-            if (bootingSystemUser) {
+            if (isBootingSystemUser) {
                 t.traceBegin("sendUserSwitchBroadcasts");
                 mUserController.sendUserSwitchBroadcasts(-1, currentUserId);
                 t.traceEnd();
