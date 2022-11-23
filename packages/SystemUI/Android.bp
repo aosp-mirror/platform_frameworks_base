@@ -66,6 +66,24 @@ filegroup {
     ],
 }
 
+//Create a library to expose SystemUI's resources to other modules.
+android_library {
+    name: "SystemUI-res",
+    resource_dirs: [
+        "res-product",
+        "res-keyguard",
+        "res",
+    ],
+    static_libs: [
+        "SystemUISharedLib",
+        "SettingsLib",
+        "androidx.leanback_leanback",
+        "androidx.slice_slice-core",
+        "androidx.slice_slice-view",
+    ],
+    manifest: "AndroidManifest-res.xml",
+}
+
 android_library {
     name: "SystemUI-core",
     srcs: [
