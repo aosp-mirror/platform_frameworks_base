@@ -3475,6 +3475,8 @@ public class Vpn {
                 return;
             } else {
                 mActiveNetwork = null;
+                mUnderlyingNetworkCapabilities = null;
+                mUnderlyingLinkProperties = null;
             }
 
             if (mScheduledHandleNetworkLostFuture != null) {
@@ -3663,9 +3665,6 @@ public class Vpn {
             } else {
                 scheduleRetryNewIkeSession();
             }
-
-            mUnderlyingNetworkCapabilities = null;
-            mUnderlyingLinkProperties = null;
 
             // Close all obsolete state, but keep VPN alive incase a usable network comes up.
             // (Mirrors VpnService behavior)
