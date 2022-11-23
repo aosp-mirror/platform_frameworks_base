@@ -29,7 +29,7 @@ class FeatureFlagsReleaseStartable
 constructor(dumpManager: DumpManager, featureFlags: FeatureFlags) : CoreStartable {
 
     init {
-        dumpManager.registerDumpable(FeatureFlagsRelease.TAG) { pw, args ->
+        dumpManager.registerCriticalDumpable(FeatureFlagsRelease.TAG) { pw, args ->
             featureFlags.dump(pw, args)
         }
     }

@@ -304,7 +304,7 @@ class NotificationShadeDepthController @Inject constructor(
     }
 
     init {
-        dumpManager.registerDumpable(javaClass.name, this)
+        dumpManager.registerCriticalDumpable(javaClass.name, this)
         if (WAKE_UP_ANIMATION_ENABLED) {
             keyguardStateController.addCallback(keyguardStateCallback)
         }

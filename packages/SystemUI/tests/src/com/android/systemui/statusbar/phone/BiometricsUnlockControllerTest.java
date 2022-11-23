@@ -42,6 +42,7 @@ import android.testing.TestableResources;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.util.LatencyTracker;
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.keyguard.logging.BiometricUnlockLogger;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.dump.DumpManager;
@@ -77,6 +78,8 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
     private PowerManager mPowerManager;
     @Mock
     private KeyguardUpdateMonitor mUpdateMonitor;
+    @Mock
+    private KeyguardUpdateMonitor.StrongAuthTracker mStrongAuthTracker;
     @Mock
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     @Mock
@@ -119,6 +122,8 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
     private ScreenOffAnimationController mScreenOffAnimationController;
     @Mock
     private VibratorHelper mVibratorHelper;
+    @Mock
+    private BiometricUnlockLogger mLogger;
     private BiometricUnlockController mBiometricUnlockController;
 
     @Before
@@ -138,12 +143,13 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
                 mKeyguardViewMediator, mScrimController, mShadeController,
                 mNotificationShadeWindowController, mKeyguardStateController, mHandler,
                 mUpdateMonitor, res.getResources(), mKeyguardBypassController,
-                mMetricsLogger, mDumpManager, mPowerManager,
+                mMetricsLogger, mDumpManager, mPowerManager, mLogger,
                 mNotificationMediaManager, mWakefulnessLifecycle, mScreenLifecycle,
                 mAuthController, mStatusBarStateController, mKeyguardUnlockAnimationController,
                 mSessionTracker, mLatencyTracker, mScreenOffAnimationController, mVibratorHelper);
         mBiometricUnlockController.setKeyguardViewController(mStatusBarKeyguardViewManager);
         mBiometricUnlockController.addBiometricModeListener(mBiometricModeListener);
+        when(mUpdateMonitor.getStrongAuthTracker()).thenReturn(mStrongAuthTracker);
     }
 
     @Test
@@ -285,6 +291,7 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
     @Test
     public void onBiometricAuthenticated_whenFace_andBypass_encrypted_showPrimaryBouncer() {
         reset(mUpdateMonitor);
+        when(mUpdateMonitor.getStrongAuthTracker()).thenReturn(mStrongAuthTracker);
         when(mKeyguardBypassController.getBypassEnabled()).thenReturn(true);
         mBiometricUnlockController.setKeyguardViewController(mStatusBarKeyguardViewManager);
 
@@ -322,6 +329,7 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
     @Test
     public void onBiometricAuthenticated_whenFace_noBypass_encrypted_doNothing() {
         reset(mUpdateMonitor);
+        when(mUpdateMonitor.getStrongAuthTracker()).thenReturn(mStrongAuthTracker);
         mBiometricUnlockController.setKeyguardViewController(mStatusBarKeyguardViewManager);
 
         when(mUpdateMonitor.isUnlockingWithBiometricAllowed(anyBoolean())).thenReturn(false);

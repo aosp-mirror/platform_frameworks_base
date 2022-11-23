@@ -140,6 +140,9 @@ public class DeviceControlsControllerImpl @Inject constructor(
                         // is out of sync, perhaps through a device restore, and update the
                         // preference
                         addPackageToSeededSet(prefs, pkg)
+                    } else if (it.panelActivity != null) {
+                        // Do not seed for packages with panels
+                        addPackageToSeededSet(prefs, pkg)
                     } else {
                         componentsToSeed.add(it.componentName)
                     }

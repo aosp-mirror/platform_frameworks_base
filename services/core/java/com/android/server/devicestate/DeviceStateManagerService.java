@@ -17,10 +17,7 @@
 package com.android.server.devicestate;
 
 import static android.Manifest.permission.CONTROL_DEVICE_STATE;
-import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-import static android.hardware.devicestate.DeviceStateManager.ACTION_SHOW_REAR_DISPLAY_OVERLAY;
-import static android.hardware.devicestate.DeviceStateManager.EXTRA_ORIGINAL_DEVICE_BASE_STATE;
 import static android.hardware.devicestate.DeviceStateManager.INVALID_DEVICE_STATE;
 import static android.hardware.devicestate.DeviceStateManager.MAXIMUM_DEVICE_STATE;
 import static android.hardware.devicestate.DeviceStateManager.MINIMUM_DEVICE_STATE;
@@ -36,10 +33,7 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.ActivityOptions;
-import android.app.WindowConfiguration;
 import android.content.Context;
-import android.content.Intent;
 import android.hardware.devicestate.DeviceStateInfo;
 import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.devicestate.DeviceStateManagerInternal;
@@ -64,6 +58,7 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.DisplayThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowProcessController;
 
@@ -731,19 +726,18 @@ public final class DeviceStateManagerService extends SystemService {
 
     /**
      * If we get a request to enter rear display  mode, we need to display an educational
-     * overlay to let the user know what will happen. This creates the pending request and then
-     * launches the {@link RearDisplayEducationActivity}
+     * overlay to let the user know what will happen. This calls into the
+     * {@link StatusBarManagerInternal} to notify SystemUI to display the educational dialog.
      */
     @GuardedBy("mLock")
     private void showRearDisplayEducationalOverlayLocked(OverrideRequest request) {
         mRearDisplayPendingOverrideRequest = request;
 
-        Intent intent = new Intent(ACTION_SHOW_REAR_DISPLAY_OVERLAY);
-        intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra(EXTRA_ORIGINAL_DEVICE_BASE_STATE, mBaseState.get().getIdentifier());
-        final ActivityOptions options = ActivityOptions.makeBasic();
-        options.setLaunchWindowingMode(WindowConfiguration.WINDOWING_MODE_FULLSCREEN);
-        getUiContext().startActivity(intent, options.toBundle());
+        StatusBarManagerInternal statusBar =
+                LocalServices.getService(StatusBarManagerInternal.class);
+        if (statusBar != null) {
+            statusBar.showRearDisplayDialog(mBaseState.get().getIdentifier());
+        }
     }
 
     private void cancelStateRequestInternal(int callingPid) {

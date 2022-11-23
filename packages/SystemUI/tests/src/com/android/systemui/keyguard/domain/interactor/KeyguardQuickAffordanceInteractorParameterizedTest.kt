@@ -266,6 +266,7 @@ class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
                         selectionsManager = selectionManager,
                     ),
                 configs = setOf(homeControls, quickAccessWallet, qrCodeScanner),
+                dumpManager = mock(),
             )
         underTest =
             KeyguardQuickAffordanceInteractor(

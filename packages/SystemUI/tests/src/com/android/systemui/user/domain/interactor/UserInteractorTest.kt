@@ -113,6 +113,7 @@ class UserInteractorTest : SysuiTestCase() {
         )
 
         featureFlags = FakeFeatureFlags()
+        featureFlags.set(Flags.FULL_SCREEN_USER_SWITCHER, false)
         userRepository = FakeUserRepository()
         keyguardRepository = FakeKeyguardRepository()
         telephonyRepository = FakeTelephonyRepository()
@@ -311,6 +312,32 @@ class UserInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    fun `actions - device unlocked - full screen`() =
+        runBlocking(IMMEDIATE) {
+            featureFlags.set(Flags.FULL_SCREEN_USER_SWITCHER, true)
+            val userInfos = createUserInfos(count = 2, includeGuest = false)
+
+            userRepository.setUserInfos(userInfos)
+            userRepository.setSelectedUserInfo(userInfos[0])
+            userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = true))
+            keyguardRepository.setKeyguardShowing(false)
+            var value: List<UserActionModel>? = null
+            val job = underTest.actions.onEach { value = it }.launchIn(this)
+
+            assertThat(value)
+                .isEqualTo(
+                    listOf(
+                        UserActionModel.ADD_USER,
+                        UserActionModel.ADD_SUPERVISED_USER,
+                        UserActionModel.ENTER_GUEST_MODE,
+                        UserActionModel.NAVIGATE_TO_USER_MANAGEMENT,
+                    )
+                )
+
+            job.cancel()
+        }
+
+    @Test
     fun `actions - device unlocked user not primary - empty list`() =
         runBlocking(IMMEDIATE) {
             val userInfos = createUserInfos(count = 2, includeGuest = false)
@@ -373,7 +400,37 @@ class UserInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun `actions - device locked - only guest action and manage user is shown`() =
+    fun `actions - device locked add from lockscreen set - full list - full screen`() =
+        runBlocking(IMMEDIATE) {
+            featureFlags.set(Flags.FULL_SCREEN_USER_SWITCHER, true)
+            val userInfos = createUserInfos(count = 2, includeGuest = false)
+            userRepository.setUserInfos(userInfos)
+            userRepository.setSelectedUserInfo(userInfos[0])
+            userRepository.setSettings(
+                UserSwitcherSettingsModel(
+                    isUserSwitcherEnabled = true,
+                    isAddUsersFromLockscreen = true,
+                )
+            )
+            keyguardRepository.setKeyguardShowing(false)
+            var value: List<UserActionModel>? = null
+            val job = underTest.actions.onEach { value = it }.launchIn(this)
+
+            assertThat(value)
+                .isEqualTo(
+                    listOf(
+                        UserActionModel.ADD_USER,
+                        UserActionModel.ADD_SUPERVISED_USER,
+                        UserActionModel.ENTER_GUEST_MODE,
+                        UserActionModel.NAVIGATE_TO_USER_MANAGEMENT,
+                    )
+                )
+
+            job.cancel()
+        }
+
+    @Test
+    fun `actions - device locked - only  manage user is shown`() =
         runBlocking(IMMEDIATE) {
             val userInfos = createUserInfos(count = 2, includeGuest = false)
             userRepository.setUserInfos(userInfos)
@@ -383,13 +440,7 @@ class UserInteractorTest : SysuiTestCase() {
             var value: List<UserActionModel>? = null
             val job = underTest.actions.onEach { value = it }.launchIn(this)
 
-            assertThat(value)
-                .isEqualTo(
-                    listOf(
-                        UserActionModel.ENTER_GUEST_MODE,
-                        UserActionModel.NAVIGATE_TO_USER_MANAGEMENT
-                    )
-                )
+            assertThat(value).isEqualTo(listOf(UserActionModel.NAVIGATE_TO_USER_MANAGEMENT))
 
             job.cancel()
         }
@@ -665,6 +716,33 @@ class UserInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    fun userRecordsFullScreen() =
+        runBlocking(IMMEDIATE) {
+            featureFlags.set(Flags.FULL_SCREEN_USER_SWITCHER, true)
+            val userInfos = createUserInfos(count = 3, includeGuest = false)
+            userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = true))
+            userRepository.setUserInfos(userInfos)
+            userRepository.setSelectedUserInfo(userInfos[0])
+            keyguardRepository.setKeyguardShowing(false)
+
+            testCoroutineScope.advanceUntilIdle()
+
+            assertRecords(
+                records = underTest.userRecords.value,
+                userIds = listOf(0, 1, 2),
+                selectedUserIndex = 0,
+                includeGuest = false,
+                expectedActions =
+                    listOf(
+                        UserActionModel.ADD_USER,
+                        UserActionModel.ADD_SUPERVISED_USER,
+                        UserActionModel.ENTER_GUEST_MODE,
+                        UserActionModel.NAVIGATE_TO_USER_MANAGEMENT,
+                    ),
+            )
+        }
+
+    @Test
     fun selectedUserRecord() =
         runBlocking(IMMEDIATE) {
             val userInfos = createUserInfos(count = 3, includeGuest = true)
@@ -728,8 +806,6 @@ class UserInteractorTest : SysuiTestCase() {
     @Test
     fun `show user switcher - full screen disabled - shows dialog switcher`() =
         runBlocking(IMMEDIATE) {
-            featureFlags.set(Flags.FULL_SCREEN_USER_SWITCHER, false)
-
             var dialogRequest: ShowDialogRequestModel? = null
             val expandable = mock<Expandable>()
             underTest.showUserSwitcher(context, expandable)
