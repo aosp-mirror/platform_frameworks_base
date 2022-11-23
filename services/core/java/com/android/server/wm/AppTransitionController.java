@@ -1212,13 +1212,23 @@ public class AppTransitionController {
                     "Delaying app transition for screen rotation animation to finish");
             return false;
         }
+        final boolean isRecentsInOpening = mDisplayContent.mOpeningApps.stream().anyMatch(
+                ConfigurationContainer::isActivityTypeRecents);
         for (int i = 0; i < apps.size(); i++) {
             WindowContainer wc = apps.valueAt(i);
             final ActivityRecord activity = getAppFromContainer(wc);
             if (activity == null) {
                 continue;
             }
-            if (activity.isAnimating(PARENTS, ANIMATION_TYPE_RECENTS)) {
+            // In order to avoid visual clutter caused by a conflict between app transition
+            // animation and recents animation, app transition is delayed until recents finishes.
+            // One exceptional case. When 3P launcher is used and a user taps a task screenshot in
+            // task switcher (isRecentsInOpening=true), app transition must start even though
+            // recents is running. Otherwise app transition is blocked until timeout (b/232984498).
+            // When 1P launcher is used, this animation is controlled by the launcher outside of
+            // the app transition, so delaying app transition doesn't cause visible delay. After
+            // recents finishes, app transition is handled just to commit visibility on apps.
+            if (!isRecentsInOpening && activity.isAnimating(PARENTS, ANIMATION_TYPE_RECENTS)) {
                 ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
                         "Delaying app transition for recents animation to finish");
                 return false;
