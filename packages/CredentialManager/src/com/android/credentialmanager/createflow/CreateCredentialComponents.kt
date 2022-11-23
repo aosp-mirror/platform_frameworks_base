@@ -191,13 +191,12 @@ fun ProviderSelectionCard(
 ) {
   Card() {
     Column() {
-      // TODO: Change the icon for create passwords and sign-ins
       Icon(
-        painter = painterResource(R.drawable.ic_passkey),
+        bitmap = requestDisplayInfo.typeIcon.toBitmap().asImageBitmap(),
         contentDescription = null,
         tint = LocalAndroidColorScheme.current.colorAccentPrimaryVariant,
         modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
-          .padding(top = 24.dp, bottom = 16.dp)
+          .padding(top = 24.dp, bottom = 16.dp).size(32.dp)
       )
       Text(
         text = stringResource(
@@ -567,12 +566,11 @@ fun PrimaryCreateOptionRow(
   Entry(
     onClick = {onOptionSelected(createOptionInfo)},
     icon = {
-      // TODO: Upload the other two types icons and change it according to request types
       Icon(
-        painter = painterResource(R.drawable.ic_passkey),
+        bitmap = createOptionInfo.profileIcon.toBitmap().asImageBitmap(),
         contentDescription = null,
         tint = LocalAndroidColorScheme.current.colorAccentPrimaryVariant,
-        modifier = Modifier.padding(start = 18.dp)
+        modifier = Modifier.padding(start = 18.dp).size(32.dp)
       )
     },
     label = {
