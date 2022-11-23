@@ -104,6 +104,7 @@ public class SettingsToPropertiesMapper {
         DeviceConfig.NAMESPACE_VIRTUALIZATION_FRAMEWORK_NATIVE,
         DeviceConfig.NAMESPACE_WINDOW_MANAGER_NATIVE_BOOT,
         DeviceConfig.NAMESPACE_MEMORY_SAFETY_NATIVE,
+        DeviceConfig.NAMESPACE_HDMI_CONTROL
     };
 
     private final String[] mGlobalSettings;
