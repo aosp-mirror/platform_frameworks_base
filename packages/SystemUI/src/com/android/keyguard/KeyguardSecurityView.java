@@ -61,6 +61,12 @@ public interface KeyguardSecurityView {
     int PROMPT_REASON_NON_STRONG_BIOMETRIC_TIMEOUT = 7;
 
     /**
+     * Some auth is required because the trustagent expired either from timeout or manually by the
+     * user
+     */
+    int PROMPT_REASON_TRUSTAGENT_EXPIRED = 8;
+
+    /**
      * Reset the view and prepare to take input. This should do things like clearing the
      * password or pattern and clear error messages.
      */

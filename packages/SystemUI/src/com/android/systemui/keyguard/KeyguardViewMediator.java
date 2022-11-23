@@ -25,6 +25,7 @@ import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.NAV_BA
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_OCCLUSION;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_TRANSITION_FROM_AOD;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_UNLOCK_ANIMATION;
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_TRUSTAGENT_EXPIRED;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_USER_REQUEST;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT;
@@ -142,11 +143,11 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.util.DeviceConfigProxy;
 
+import dagger.Lazy;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.concurrent.Executor;
-
-import dagger.Lazy;
 
 /**
  * Mediates requests related to the keyguard.  This includes queries about the
@@ -821,6 +822,9 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             } else if (trustAgentsEnabled
                     && (strongAuth & SOME_AUTH_REQUIRED_AFTER_USER_REQUEST) != 0) {
                 return KeyguardSecurityView.PROMPT_REASON_USER_REQUEST;
+            } else if (trustAgentsEnabled
+                    && (strongAuth & SOME_AUTH_REQUIRED_AFTER_TRUSTAGENT_EXPIRED) != 0) {
+                return KeyguardSecurityView.PROMPT_REASON_TRUSTAGENT_EXPIRED;
             } else if (any && ((strongAuth & STRONG_AUTH_REQUIRED_AFTER_LOCKOUT) != 0
                     || mUpdateMonitor.isFingerprintLockedOut())) {
                 return KeyguardSecurityView.PROMPT_REASON_AFTER_LOCKOUT;
