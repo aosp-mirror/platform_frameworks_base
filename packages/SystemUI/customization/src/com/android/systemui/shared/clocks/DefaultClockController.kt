@@ -143,7 +143,7 @@ class DefaultClockController(
             currentColor = color
             view.setColors(DOZE_COLOR, color)
             if (!animations.dozeState.isActive) {
-                view.animateAppearOnLockscreen()
+                view.animateColorChange()
             }
         }
     }
