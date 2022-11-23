@@ -143,6 +143,7 @@ import android.app.WindowConfiguration;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ActivityInfo.ScreenOrientation;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
@@ -2686,8 +2687,8 @@ class Task extends TaskFragment {
     }
 
     @Override
-    boolean handlesOrientationChangeFromDescendant() {
-        if (!super.handlesOrientationChangeFromDescendant()) {
+    boolean handlesOrientationChangeFromDescendant(@ScreenOrientation int orientation) {
+        if (!super.handlesOrientationChangeFromDescendant(orientation)) {
             return false;
         }
 
@@ -2702,7 +2703,7 @@ class Task extends TaskFragment {
         // Check for leaf Task.
         // Display won't rotate for the orientation request if the Task/TaskDisplayArea
         // can't specify orientation.
-        return canSpecifyOrientation() && getDisplayArea().canSpecifyOrientation();
+        return canSpecifyOrientation() && getDisplayArea().canSpecifyOrientation(orientation);
     }
 
     void resize(boolean relayout, boolean forced) {
