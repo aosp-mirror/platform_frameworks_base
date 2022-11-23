@@ -246,7 +246,8 @@ final class TrustedHotwordDetectorSession {
         mVoiceInteractorIdentity = voiceInteractorIdentity;
         mAppOpsManager = mContext.getSystemService(AppOpsManager.class);
         mHotwordAudioStreamManager = new HotwordAudioStreamManager(mAppOpsManager,
-                mVoiceInteractorIdentity);
+                mVoiceInteractorIdentity.uid, mVoiceInteractorIdentity.packageName,
+                mVoiceInteractorIdentity.attributionTag);
         mDetectionComponentName = serviceName;
         mUser = userId;
         mCallback = callback;
