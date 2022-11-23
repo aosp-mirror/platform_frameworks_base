@@ -210,7 +210,7 @@ public final class ProviderCreateSession extends ProviderSession<
     private Intent setUpFillInIntent(PendingIntent pendingIntent) {
         Intent intent = pendingIntent.getIntent();
         intent.putExtra(CredentialProviderService.EXTRA_CREATE_CREDENTIAL_REQUEST_PARAMS,
-                mCompleteRequest.getData());
+                mCompleteRequest);
         return intent;
     }
 

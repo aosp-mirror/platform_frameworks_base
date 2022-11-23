@@ -277,7 +277,7 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
         proto.write(PackageProto.UID, mAppId);
         proto.write(PackageProto.VERSION_CODE, versionCode);
         proto.write(PackageProto.UPDATE_TIME_MS, lastUpdateTime);
-        proto.write(PackageProto.INSTALLER_NAME, installSource.installerPackageName);
+        proto.write(PackageProto.INSTALLER_NAME, installSource.mInstallerPackageName);
 
         if (pkg != null) {
             proto.write(PackageProto.VERSION_STRING, pkg.getVersionName());
@@ -297,9 +297,9 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
 
             long sourceToken = proto.start(PackageProto.INSTALL_SOURCE);
             proto.write(PackageProto.InstallSourceProto.INITIATING_PACKAGE_NAME,
-                    installSource.initiatingPackageName);
+                    installSource.mInitiatingPackageName);
             proto.write(PackageProto.InstallSourceProto.ORIGINATING_PACKAGE_NAME,
-                    installSource.originatingPackageName);
+                    installSource.mOriginatingPackageName);
             proto.end(sourceToken);
         }
         proto.write(PackageProto.StatesProto.IS_LOADING, isLoading());
@@ -360,8 +360,10 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
         return this;
     }
 
-    public PackageSetting setInstallerPackageName(String packageName) {
-        installSource = installSource.setInstallerPackage(packageName);
+    public PackageSetting setInstallerPackage(@Nullable String installerPackageName,
+            int installerPackageUid) {
+        installSource = installSource.setInstallerPackage(installerPackageName,
+                installerPackageUid);
         onChanged();
         return this;
     }
@@ -372,7 +374,7 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
         return this;
     }
 
-    PackageSetting removeInstallerPackage(String packageName) {
+    PackageSetting removeInstallerPackage(@Nullable String packageName) {
         installSource = installSource.removeInstallerPackage(packageName);
         onChanged();
         return this;

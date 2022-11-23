@@ -33,6 +33,7 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_PRE_APPROVAL_NOT_
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_NO_CERTIFICATES;
 import static android.content.pm.PackageManager.INSTALL_STAGED;
 import static android.content.pm.PackageManager.INSTALL_SUCCEEDED;
+import static android.os.Process.INVALID_UID;
 import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_RDONLY;
 import static android.system.OsConstants.O_WRONLY;
@@ -217,6 +218,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final String ATTR_SESSION_ID = "sessionId";
     private static final String ATTR_USER_ID = "userId";
     private static final String ATTR_INSTALLER_PACKAGE_NAME = "installerPackageName";
+    private static final String ATTR_INSTALLER_PACKAGE_UID = "installerPackageUid";
     private static final String ATTR_INSTALLER_ATTRIBUTION_TAG = "installerAttributionTag";
     private static final String ATTR_INSTALLER_UID = "installerUid";
     private static final String ATTR_INITIATING_PACKAGE_NAME =
@@ -812,7 +814,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         // It may wait for a long time to finish {@code dpmi.canSilentlyInstallPackage}.
         // Please don't acquire mLock before calling {@code dpmi.canSilentlyInstallPackage}.
         return dpmi != null && dpmi.canSilentlyInstallPackage(
-                getInstallSource().installerPackageName, mInstallerUid);
+                getInstallSource().mInstallerPackageName, mInstallerUid);
     }
 
     private static final int USER_ACTION_NOT_NEEDED = 0;
@@ -936,7 +938,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         mOriginalInstallerUid = installerUid;
         mInstallerUid = installerUid;
         mInstallSource = Objects.requireNonNull(installSource);
-        mOriginalInstallerPackageName = mInstallSource.installerPackageName;
+        mOriginalInstallerPackageName = mInstallSource.mInstallerPackageName;
         this.params = params;
         this.createdMillis = createdMillis;
         this.updatedMillis = createdMillis;
@@ -1047,8 +1049,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         synchronized (mLock) {
             info.sessionId = sessionId;
             info.userId = userId;
-            info.installerPackageName = mInstallSource.installerPackageName;
-            info.installerAttributionTag = mInstallSource.installerAttributionTag;
+            info.installerPackageName = mInstallSource.mInstallerPackageName;
+            info.installerAttributionTag = mInstallSource.mInstallerAttributionTag;
             info.resolvedBaseCodePath = (mResolvedBaseFile != null) ?
                     mResolvedBaseFile.getAbsolutePath() : null;
             info.progress = progress;
@@ -1310,10 +1312,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         final String installerPackageName;
-        if (!TextUtils.isEmpty(getInstallSource().initiatingPackageName)) {
-            installerPackageName = getInstallSource().initiatingPackageName;
+        if (!TextUtils.isEmpty(getInstallSource().mInitiatingPackageName)) {
+            installerPackageName = getInstallSource().mInitiatingPackageName;
         } else {
-            installerPackageName = getInstallSource().installerPackageName;
+            installerPackageName = getInstallSource().mInstallerPackageName;
         }
         if (TextUtils.isEmpty(installerPackageName)) {
             throw new IllegalStateException("Installer package is empty.");
@@ -1354,7 +1356,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             @NonNull IOnChecksumsReadyListener onChecksumsReadyListener) {
         assertCallerIsOwnerRootOrVerifier();
         final File file = new File(stageDir, name);
-        final String installerPackageName = getInstallSource().initiatingPackageName;
+        final String installerPackageName = getInstallSource().mInitiatingPackageName;
         try {
             mPm.requestFileChecksums(file, installerPackageName, optional, required,
                     trustedInstallers, onChecksumsReadyListener);
@@ -2109,8 +2111,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
 
             mInstallerUid = newOwnerAppInfo.uid;
-            mInstallSource = InstallSource.create(packageName, null, packageName, null,
-                    params.packageSource);
+            mInstallSource = InstallSource.create(packageName, null, packageName,
+                    mInstallerUid, null, params.packageSource);
         }
     }
 
@@ -2179,7 +2181,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         if (isInstallerDeviceOwnerOrAffiliatedProfileOwner()) {
             DevicePolicyEventLogger
                     .createEvent(DevicePolicyEnums.INSTALL_PACKAGE)
-                    .setAdmin(getInstallSource().installerPackageName)
+                    .setAdmin(getInstallSource().mInstallerPackageName)
                     .write();
         }
 
@@ -2606,7 +2608,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final int packageUid;
         if (returnCode != INSTALL_SUCCEEDED) {
             // Package didn't install; no valid uid
-            packageUid = Process.INVALID_UID;
+            packageUid = INVALID_UID;
         } else {
             packageUid = mPm.snapshotComputer().getPackageUid(packageName, 0, userId);
         }
@@ -3459,11 +3461,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     String getInstallerPackageName() {
-        return getInstallSource().installerPackageName;
+        return getInstallSource().mInstallerPackageName;
     }
 
     String getInstallerAttributionTag() {
-        return getInstallSource().installerAttributionTag;
+        return getInstallSource().mInstallerAttributionTag;
     }
 
     InstallSource getInstallSource() {
@@ -4451,9 +4453,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         pw.printPair("userId", userId);
         pw.printPair("mOriginalInstallerUid", mOriginalInstallerUid);
         pw.printPair("mOriginalInstallerPackageName", mOriginalInstallerPackageName);
-        pw.printPair("installerPackageName", mInstallSource.installerPackageName);
-        pw.printPair("installInitiatingPackageName", mInstallSource.initiatingPackageName);
-        pw.printPair("installOriginatingPackageName", mInstallSource.originatingPackageName);
+        pw.printPair("installerPackageName", mInstallSource.mInstallerPackageName);
+        pw.printPair("installInitiatingPackageName", mInstallSource.mInitiatingPackageName);
+        pw.printPair("installOriginatingPackageName", mInstallSource.mOriginatingPackageName);
         pw.printPair("mInstallerUid", mInstallerUid);
         pw.printPair("createdMillis", createdMillis);
         pw.printPair("updatedMillis", updatedMillis);
@@ -4642,14 +4644,15 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             out.attributeInt(null, ATTR_SESSION_ID, sessionId);
             out.attributeInt(null, ATTR_USER_ID, userId);
             writeStringAttribute(out, ATTR_INSTALLER_PACKAGE_NAME,
-                    mInstallSource.installerPackageName);
+                    mInstallSource.mInstallerPackageName);
+            out.attributeInt(null, ATTR_INSTALLER_PACKAGE_UID, mInstallSource.mInstallerPackageUid);
             writeStringAttribute(out, ATTR_INSTALLER_ATTRIBUTION_TAG,
-                    mInstallSource.installerAttributionTag);
+                    mInstallSource.mInstallerAttributionTag);
             out.attributeInt(null, ATTR_INSTALLER_UID, mInstallerUid);
             writeStringAttribute(out, ATTR_INITIATING_PACKAGE_NAME,
-                    mInstallSource.initiatingPackageName);
+                    mInstallSource.mInitiatingPackageName);
             writeStringAttribute(out, ATTR_ORIGINATING_PACKAGE_NAME,
-                    mInstallSource.originatingPackageName);
+                    mInstallSource.mOriginatingPackageName);
             out.attributeLong(null, ATTR_CREATED_MILLIS, createdMillis);
             out.attributeLong(null, ATTR_UPDATED_MILLIS, updatedMillis);
             out.attributeLong(null, ATTR_COMMITTED_MILLIS, committedMillis);
@@ -4806,6 +4809,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final int sessionId = in.getAttributeInt(null, ATTR_SESSION_ID);
         final int userId = in.getAttributeInt(null, ATTR_USER_ID);
         final String installerPackageName = readStringAttribute(in, ATTR_INSTALLER_PACKAGE_NAME);
+        final int installPackageUid = in.getAttributeInt(null, ATTR_INSTALLER_PACKAGE_UID,
+                INVALID_UID);
         final String installerAttributionTag = readStringAttribute(in,
                 ATTR_INSTALLER_ATTRIBUTION_TAG);
         final int installerUid = in.getAttributeInt(null, ATTR_INSTALLER_UID, pm.snapshotComputer()
@@ -4975,8 +4980,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         InstallSource installSource = InstallSource.create(installInitiatingPackageName,
-                installOriginatingPackageName, installerPackageName, installerAttributionTag,
-                params.packageSource);
+                installOriginatingPackageName, installerPackageName, installPackageUid,
+                installerAttributionTag, params.packageSource);
         return new PackageInstallerSession(callback, context, pm, sessionProvider,
                 silentUpdatePolicy, installerThread, stagingManager, sessionId, userId,
                 installerUid, installSource, params, createdMillis, committedMillis, stageDir,

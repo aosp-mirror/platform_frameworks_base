@@ -16,6 +16,8 @@
 
 package com.android.server.broadcastradio.hal2;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.junit.Assert.assertThrows;
@@ -45,6 +47,10 @@ import android.hardware.radio.RadioTuner;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
+import com.android.dx.mockito.inline.extended.StaticMockitoSessionBuilder;
+import com.android.server.broadcastradio.ExtendedRadioMockitoTestCase;
+import com.android.server.broadcastradio.RadioServiceUserController;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -61,7 +67,7 @@ import java.util.Map;
  * Tests for HIDL HAL TunerSession.
  */
 @RunWith(MockitoJUnitRunner.class)
-public final class TunerSessionHidlTest {
+public final class TunerSessionHidlTest extends ExtendedRadioMockitoTestCase {
 
     private static final VerificationWithTimeout CALLBACK_TIMEOUT =
             timeout(/* millis= */ 200);
@@ -88,8 +94,15 @@ public final class TunerSessionHidlTest {
     @Mock ITunerSession mHalTunerSessionMock;
     private android.hardware.radio.ITunerCallback[] mAidlTunerCallbackMocks;
 
+    @Override
+    protected void initializeSession(StaticMockitoSessionBuilder builder) {
+        builder.spyStatic(RadioServiceUserController.class);
+    }
+
     @Before
     public void setup() throws Exception {
+        doReturn(true).when(() -> RadioServiceUserController.isCurrentOrSystemUser());
+
         mRadioModule = new RadioModule(mBroadcastRadioMock,
                 TestUtils.makeDefaultModuleProperties(), mLock);
 

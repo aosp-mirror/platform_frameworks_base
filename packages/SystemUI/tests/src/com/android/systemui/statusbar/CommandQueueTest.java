@@ -523,4 +523,12 @@ public class CommandQueueTest extends SysuiTestCase {
         waitForIdleSync();
         verify(mCallbacks).setNavigationBarLumaSamplingEnabled(eq(1), eq(true));
     }
+
+    @Test
+    public void testShowRearDisplayDialog() {
+        final int currentBaseState = 1;
+        mCommandQueue.showRearDisplayDialog(currentBaseState);
+        waitForIdleSync();
+        verify(mCallbacks).showRearDisplayDialog(eq(currentBaseState));
+    }
 }

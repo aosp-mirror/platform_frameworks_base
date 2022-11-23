@@ -36,13 +36,17 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 
 import android.app.ActivityManagerInternal;
+import android.app.BroadcastOptions;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.UserHandle;
+import android.telephony.SubscriptionManager;
 import android.util.SparseArray;
 
 import androidx.test.filters.SmallTest;
@@ -176,9 +180,8 @@ public class BroadcastRecordTest {
         intent.putExtra(Intent.EXTRA_INDEX, 42);
         final BroadcastRecord r = createBroadcastRecord(
                 List.of(createResolveInfo(PACKAGE1, getAppId(1))), UserHandle.USER_ALL, intent,
-                (uid, extras) -> {
-                    return Bundle.EMPTY;
-                });
+                (uid, extras) -> Bundle.EMPTY,
+                null /* options */);
         final Intent actual = r.getReceiverIntent(r.receivers.get(0));
         assertEquals(PACKAGE1, actual.getComponent().getPackageName());
         assertEquals(-1, actual.getIntExtra(Intent.EXTRA_INDEX, -1));
@@ -192,9 +195,8 @@ public class BroadcastRecordTest {
         intent.putExtra(Intent.EXTRA_INDEX, 42);
         final BroadcastRecord r = createBroadcastRecord(
                 List.of(createResolveInfo(PACKAGE1, getAppId(1))), UserHandle.USER_ALL, intent,
-                (uid, extras) -> {
-                    return null;
-                });
+                (uid, extras) -> null,
+                null /* options */);
         final Intent actual = r.getReceiverIntent(r.receivers.get(0));
         assertNull(actual);
         assertNull(r.intent.getComponent());
@@ -288,6 +290,122 @@ public class BroadcastRecordTest {
         // No receivers get deferred.
         assertEquals(0, deferred.size());
         assertEquals(origReceiversSize, br.receivers.size());
+    }
+
+    @Test
+    public void testMatchesDeliveryGroup() {
+        final List<ResolveInfo> receivers = List.of(createResolveInfo(PACKAGE1, getAppId(1)));
+
+        final Intent intent1 = new Intent(Intent.ACTION_SERVICE_STATE);
+        intent1.putExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, 0);
+        intent1.putExtra(SubscriptionManager.EXTRA_SLOT_INDEX, 1);
+        final BroadcastOptions options1 = BroadcastOptions.makeBasic();
+        final BroadcastRecord record1 = createBroadcastRecord(receivers, UserHandle.USER_ALL,
+                intent1, options1);
+
+        final Intent intent2 = new Intent(Intent.ACTION_SERVICE_STATE);
+        intent2.putExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, 0);
+        intent2.putExtra(SubscriptionManager.EXTRA_SLOT_INDEX, 2);
+        final BroadcastOptions options2 = BroadcastOptions.makeBasic();
+        final BroadcastRecord record2 = createBroadcastRecord(receivers, UserHandle.USER_ALL,
+                intent2, options2);
+
+        assertTrue(record2.matchesDeliveryGroup(record1));
+    }
+
+    @Test
+    public void testMatchesDeliveryGroup_withMatchingKey() {
+        final List<ResolveInfo> receivers = List.of(createResolveInfo(PACKAGE1, getAppId(1)));
+
+        final Intent intent1 = new Intent(Intent.ACTION_SERVICE_STATE);
+        intent1.putExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, 0);
+        intent1.putExtra(SubscriptionManager.EXTRA_SLOT_INDEX, 1);
+        final BroadcastOptions options1 = BroadcastOptions.makeBasic();
+        options1.setDeliveryGroupMatchingKey(Intent.ACTION_SERVICE_STATE, "key1");
+        final BroadcastRecord record1 = createBroadcastRecord(receivers, UserHandle.USER_ALL,
+                intent1, options1);
+
+        final Intent intent2 = new Intent(Intent.ACTION_SERVICE_STATE);
+        intent2.putExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, 0);
+        intent2.putExtra(SubscriptionManager.EXTRA_SLOT_INDEX, 2);
+        final BroadcastOptions options2 = BroadcastOptions.makeBasic();
+        options2.setDeliveryGroupMatchingKey(Intent.ACTION_SERVICE_STATE, "key2");
+        final BroadcastRecord record2 = createBroadcastRecord(receivers, UserHandle.USER_ALL,
+                intent2, options2);
+
+        final Intent intent3 = new Intent(Intent.ACTION_SERVICE_STATE);
+        intent3.putExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, 1);
+        intent3.putExtra(SubscriptionManager.EXTRA_SLOT_INDEX, 3);
+        final BroadcastOptions options3 = BroadcastOptions.makeBasic();
+        options3.setDeliveryGroupMatchingKey(Intent.ACTION_SERVICE_STATE, "key1");
+        final BroadcastRecord record3 = createBroadcastRecord(receivers, UserHandle.USER_ALL,
+                intent3, options3);
+
+        // record2 and record1 have different matching keys, so their delivery groups
+        // shouldn't match
+        assertFalse(record2.matchesDeliveryGroup(record1));
+        // record3 and record2 have different matching keys, so their delivery groups
+        // shouldn't match
+        assertFalse(record3.matchesDeliveryGroup(record2));
+        // record3 and record1 have same matching keys, so their delivery groups should match even
+        // if the intent has different extras.
+        assertTrue(record3.matchesDeliveryGroup(record1));
+    }
+
+    @Test
+    public void testMatchesDeliveryGroup_withMatchingFilter() {
+        final List<ResolveInfo> receivers = List.of(createResolveInfo(PACKAGE1, getAppId(1)));
+
+        final Intent intent1 = new Intent(Intent.ACTION_SERVICE_STATE);
+        intent1.putExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, 0);
+        intent1.putExtra(SubscriptionManager.EXTRA_SLOT_INDEX, 1);
+        intent1.putExtra(Intent.EXTRA_REASON, "reason1");
+        final IntentFilter filter1 = new IntentFilter(Intent.ACTION_SERVICE_STATE);
+        final PersistableBundle bundle1 = new PersistableBundle();
+        bundle1.putInt(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, 0);
+        bundle1.putInt(SubscriptionManager.EXTRA_SLOT_INDEX, 1);
+        filter1.setExtras(bundle1);
+        final BroadcastOptions options1 = BroadcastOptions.makeBasic();
+        options1.setDeliveryGroupMatchingFilter(filter1);
+        final BroadcastRecord record1 = createBroadcastRecord(receivers, UserHandle.USER_ALL,
+                intent1, options1);
+
+        final Intent intent2 = new Intent(Intent.ACTION_SERVICE_STATE);
+        intent2.putExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, 0);
+        intent2.putExtra(SubscriptionManager.EXTRA_SLOT_INDEX, 2);
+        intent2.putExtra(Intent.EXTRA_REASON, "reason2");
+        final IntentFilter filter2 = new IntentFilter(Intent.ACTION_SERVICE_STATE);
+        final PersistableBundle bundle2 = new PersistableBundle();
+        bundle2.putInt(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, 0);
+        bundle2.putInt(SubscriptionManager.EXTRA_SLOT_INDEX, 2);
+        filter2.setExtras(bundle2);
+        final BroadcastOptions options2 = BroadcastOptions.makeBasic();
+        options2.setDeliveryGroupMatchingFilter(filter2);
+        final BroadcastRecord record2 = createBroadcastRecord(receivers, UserHandle.USER_ALL,
+                intent2, options2);
+
+        final Intent intent3 = new Intent(Intent.ACTION_SERVICE_STATE);
+        intent3.putExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, 1);
+        intent3.putExtra(SubscriptionManager.EXTRA_SLOT_INDEX, 3);
+        intent3.putExtra(Intent.EXTRA_REASON, "reason3");
+        final IntentFilter filter3 = new IntentFilter(Intent.ACTION_SERVICE_STATE);
+        final PersistableBundle bundle3 = new PersistableBundle();
+        bundle3.putInt(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, 0);
+        bundle3.putInt(SubscriptionManager.EXTRA_SLOT_INDEX, 1);
+        filter3.setExtras(bundle3);
+        final BroadcastOptions options3 = BroadcastOptions.makeBasic();
+        options3.setDeliveryGroupMatchingFilter(filter3);
+        final BroadcastRecord record3 = createBroadcastRecord(receivers, UserHandle.USER_ALL,
+                intent3, options3);
+
+        // record2's matchingFilter doesn't match record1's intent, so their delivery groups
+        // shouldn't match
+        assertFalse(record2.matchesDeliveryGroup(record1));
+        // record3's matchingFilter doesn't match record2's intent, so their delivery groups
+        // shouldn't match
+        assertFalse(record3.matchesDeliveryGroup(record2));
+        // record3's matchingFilter matches record1's intent, so their delivery groups should match.
+        assertTrue(record3.matchesDeliveryGroup(record1));
     }
 
     private BroadcastRecord createBootCompletedBroadcastRecord(String action) {
@@ -539,11 +657,19 @@ public class BroadcastRecordTest {
 
     private BroadcastRecord createBroadcastRecord(List<ResolveInfo> receivers, int userId,
             Intent intent) {
-        return createBroadcastRecord(receivers, userId, intent, null);
+        return createBroadcastRecord(receivers, userId, intent, null /* filterExtrasForReceiver */,
+                null /* options */);
     }
 
     private BroadcastRecord createBroadcastRecord(List<ResolveInfo> receivers, int userId,
-            Intent intent, BiFunction<Integer, Bundle, Bundle> filterExtrasForReceiver) {
+            Intent intent, BroadcastOptions options) {
+        return createBroadcastRecord(receivers, userId, intent, null /* filterExtrasForReceiver */,
+                options);
+    }
+
+    private BroadcastRecord createBroadcastRecord(List<ResolveInfo> receivers, int userId,
+            Intent intent, BiFunction<Integer, Bundle, Bundle> filterExtrasForReceiver,
+            BroadcastOptions options) {
         return new BroadcastRecord(
                 mQueue /* queue */,
                 intent,
@@ -558,7 +684,7 @@ public class BroadcastRecordTest {
                 null /* excludedPermissions */,
                 null /* excludedPackages */,
                 0 /* appOp */,
-                null /* options */,
+                options,
                 new ArrayList<>(receivers), // Make a copy to not affect the original list.
                 null /* resultToApp */,
                 null /* resultTo */,

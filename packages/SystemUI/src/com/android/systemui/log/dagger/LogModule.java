@@ -300,9 +300,9 @@ public class LogModule {
      */
     @Provides
     @SysUISingleton
-    @BiometricMessagesLog
-    public static LogBuffer provideBiometricMessagesLogBuffer(LogBufferFactory factory) {
-        return factory.create("BiometricMessagesLog", 150);
+    @BiometricLog
+    public static LogBuffer provideBiometricLogBuffer(LogBufferFactory factory) {
+        return factory.create("BiometricLog", 200);
     }
 
     /**

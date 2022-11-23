@@ -783,13 +783,19 @@ package android.app {
   }
 
   public class BroadcastOptions {
+    method public void clearDeliveryGroupMatchingFilter();
+    method public void clearDeliveryGroupMatchingKey();
     method public void clearDeliveryGroupPolicy();
     method public void clearRequireCompatChange();
+    method @Nullable public android.content.IntentFilter getDeliveryGroupMatchingFilter();
+    method @Nullable public String getDeliveryGroupMatchingKey();
     method public int getDeliveryGroupPolicy();
     method public boolean isPendingIntentBackgroundActivityLaunchAllowed();
     method public static android.app.BroadcastOptions makeBasic();
     method @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RESPONSE_STATS) public void recordResponseEventWhileInBackground(@IntRange(from=0) long);
     method @RequiresPermission(android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND) public void setBackgroundActivityStartsAllowed(boolean);
+    method public void setDeliveryGroupMatchingFilter(@NonNull android.content.IntentFilter);
+    method public void setDeliveryGroupMatchingKey(@NonNull String, @NonNull String);
     method public void setDeliveryGroupPolicy(int);
     method public void setDontSendToRestrictedApps(boolean);
     method public void setPendingIntentBackgroundActivityLaunchAllowed(boolean);
@@ -811,15 +817,48 @@ package android.app {
   public final class GameManager {
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_GAME_MODE) public android.app.GameModeInfo getGameModeInfo(@NonNull String);
     method @RequiresPermission(android.Manifest.permission.MANAGE_GAME_MODE) public void setGameMode(@NonNull String, int);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_GAME_MODE) public void updateCustomGameModeConfiguration(@NonNull String, @NonNull android.app.GameModeConfiguration);
+  }
+
+  public final class GameModeConfiguration implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getFpsOverride();
+    method public float getScalingFactor();
+    method @NonNull public android.app.GameModeConfiguration.Builder toBuilder();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.GameModeConfiguration> CREATOR;
+    field public static final int FPS_OVERRIDE_NONE = 0; // 0x0
+  }
+
+  public static final class GameModeConfiguration.Builder {
+    ctor public GameModeConfiguration.Builder();
+    method @NonNull public android.app.GameModeConfiguration build();
+    method @NonNull public android.app.GameModeConfiguration.Builder setFpsOverride(int);
+    method @NonNull public android.app.GameModeConfiguration.Builder setScalingFactor(float);
   }
 
   public final class GameModeInfo implements android.os.Parcelable {
-    ctor public GameModeInfo(int, @NonNull int[]);
+    ctor @Deprecated public GameModeInfo(int, @NonNull int[]);
     method public int describeContents();
     method public int getActiveGameMode();
     method @NonNull public int[] getAvailableGameModes();
+    method @Nullable public android.app.GameModeConfiguration getGameModeConfiguration(int);
+    method @NonNull public int[] getOptedInGameModes();
+    method public boolean isDownscalingAllowed();
+    method public boolean isFpsOverrideAllowed();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.GameModeInfo> CREATOR;
+  }
+
+  public static final class GameModeInfo.Builder {
+    ctor public GameModeInfo.Builder();
+    method @NonNull public android.app.GameModeInfo build();
+    method @NonNull public android.app.GameModeInfo.Builder setActiveGameMode(@NonNull int);
+    method @NonNull public android.app.GameModeInfo.Builder setAvailableGameModes(@NonNull int[]);
+    method @NonNull public android.app.GameModeInfo.Builder setDownscalingAllowed(boolean);
+    method @NonNull public android.app.GameModeInfo.Builder setFpsOverrideAllowed(boolean);
+    method @NonNull public android.app.GameModeInfo.Builder setGameModeConfiguration(int, @NonNull android.app.GameModeConfiguration);
+    method @NonNull public android.app.GameModeInfo.Builder setOptedInGameModes(@NonNull int[]);
   }
 
   public abstract class InstantAppResolverService extends android.app.Service {
@@ -1082,6 +1121,7 @@ package android.app {
     method @FloatRange(from=0.0f, to=1.0f) @RequiresPermission(android.Manifest.permission.SET_WALLPAPER_DIM_AMOUNT) public float getWallpaperDimAmount();
     method public void setDisplayOffset(android.os.IBinder, int, int);
     method @RequiresPermission(android.Manifest.permission.SET_WALLPAPER_COMPONENT) public boolean setWallpaperComponent(android.content.ComponentName);
+    method @RequiresPermission(android.Manifest.permission.SET_WALLPAPER_COMPONENT) public boolean setWallpaperComponentWithFlags(@NonNull android.content.ComponentName, int);
     method @RequiresPermission(android.Manifest.permission.SET_WALLPAPER_DIM_AMOUNT) public void setWallpaperDimAmount(@FloatRange(from=0.0f, to=1.0f) float);
   }
 
@@ -3185,7 +3225,9 @@ package android.content {
   }
 
   public class IntentFilter implements android.os.Parcelable {
+    method @NonNull public final android.os.PersistableBundle getExtras();
     method public final int getOrder();
+    method public final void setExtras(@NonNull android.os.PersistableBundle);
     method public final void setOrder(int);
   }
 

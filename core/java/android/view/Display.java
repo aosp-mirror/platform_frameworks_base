@@ -1291,7 +1291,10 @@ public final class Display {
         }
     }
 
-    /** @hide */
+    /**
+     * Returns null if it's virtual display.
+     * @hide
+     */
     @Nullable
     public OverlayProperties getOverlaySupport() {
         synchronized (mLock) {
@@ -1299,7 +1302,7 @@ public final class Display {
             if (mDisplayInfo.type != TYPE_VIRTUAL) {
                 return mGlobal.getOverlaySupport();
             }
-            return new OverlayProperties();
+            return null;
         }
     }
 

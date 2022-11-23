@@ -42,6 +42,7 @@ class DisabledProviderInfo(
 ) : ProviderInfo(icon, name, displayName)
 
 open class EntryInfo (
+  val providerId: String,
   val entryKey: String,
   val entrySubkey: String,
   val pendingIntent: PendingIntent?,
@@ -49,6 +50,7 @@ open class EntryInfo (
 )
 
 class CreateOptionInfo(
+  providerId: String,
   entryKey: String,
   entrySubkey: String,
   pendingIntent: PendingIntent?,
@@ -60,14 +62,15 @@ class CreateOptionInfo(
   val passkeyCount: Int?,
   val totalCredentialCount: Int?,
   val lastUsedTimeMillis: Long?,
-) : EntryInfo(entryKey, entrySubkey, pendingIntent, fillInIntent)
+) : EntryInfo(providerId, entryKey, entrySubkey, pendingIntent, fillInIntent)
 
 class RemoteInfo(
+  providerId: String,
   entryKey: String,
   entrySubkey: String,
   pendingIntent: PendingIntent?,
   fillInIntent: Intent?,
-) : EntryInfo(entryKey, entrySubkey, pendingIntent, fillInIntent)
+) : EntryInfo(providerId, entryKey, entrySubkey, pendingIntent, fillInIntent)
 
 data class RequestDisplayInfo(
   val title: String,

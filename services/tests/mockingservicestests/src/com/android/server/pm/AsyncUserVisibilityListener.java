@@ -40,7 +40,8 @@ public final class AsyncUserVisibilityListener implements UserVisibilityListener
     private static final String TAG = AsyncUserVisibilityListener.class.getSimpleName();
 
     private static final long WAIT_TIMEOUT_MS = 2_000;
-    private static final long WAIT_NO_EVENTS_TIMEOUT_MS = 1_000;
+
+    private static final long WAIT_NO_EVENTS_TIMEOUT_MS = 100;
 
     private static int sNextId;
 

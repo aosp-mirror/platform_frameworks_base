@@ -175,7 +175,7 @@ final class RadioModule {
     }
 
     @Nullable
-    public static RadioModule tryLoadingModule(int moduleId, String moduleName,
+    static RadioModule tryLoadingModule(int moduleId, String moduleName,
             IBinder serviceBinder, Object lock) {
         try {
             Slogf.i(TAG, "Try loading module for module id = %d, module name = %s",
@@ -213,11 +213,11 @@ final class RadioModule {
         }
     }
 
-    public IBroadcastRadio getService() {
+    IBroadcastRadio getService() {
         return mService;
     }
 
-    public RadioManager.ModuleProperties getProperties() {
+    RadioManager.ModuleProperties getProperties() {
         return mProperties;
     }
 
@@ -227,7 +227,7 @@ final class RadioModule {
         }
     }
 
-    public TunerSession openSession(android.hardware.radio.ITunerCallback userCb)
+    TunerSession openSession(android.hardware.radio.ITunerCallback userCb)
             throws RemoteException {
         mLogger.logRadioEvent("Open TunerSession");
         TunerSession tunerSession;
@@ -252,7 +252,7 @@ final class RadioModule {
         return tunerSession;
     }
 
-    public void closeSessions(int error) {
+    void closeSessions(int error) {
         mLogger.logRadioEvent("Close TunerSessions %d", error);
         // TunerSession.close() must be called without mAidlTunerSessions locked because
         // it can call onTunerSessionClosed(). Therefore, the contents of mAidlTunerSessions
@@ -275,8 +275,7 @@ final class RadioModule {
 
     @GuardedBy("mLock")
     @Nullable
-    private android.hardware.radio.ProgramList.Filter
-            buildUnionOfTunerSessionFiltersLocked() {
+    private android.hardware.radio.ProgramList.Filter buildUnionOfTunerSessionFiltersLocked() {
         Set<Integer> idTypes = null;
         Set<android.hardware.radio.ProgramSelector.Identifier> ids = null;
         boolean includeCategories = false;
@@ -423,7 +422,7 @@ final class RadioModule {
         }
     }
 
-    public android.hardware.radio.ICloseHandle addAnnouncementListener(
+    android.hardware.radio.ICloseHandle addAnnouncementListener(
             android.hardware.radio.IAnnouncementListener listener,
             int[] enabledTypes) throws RemoteException {
         mLogger.logRadioEvent("Add AnnouncementListener");

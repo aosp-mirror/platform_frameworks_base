@@ -17,7 +17,9 @@
 package com.android.server.wm;
 
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
@@ -27,6 +29,8 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.pm.ActivityInfo.FLAG_ALLOW_UNTRUSTED_ACTIVITY_EMBEDDING;
 import static android.content.pm.ActivityInfo.FLAG_RESUME_WHILE_PAUSING;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
@@ -76,6 +80,7 @@ import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.NewIntentItem;
 import android.app.servertransaction.PauseActivityItem;
 import android.app.servertransaction.ResumeActivityItem;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -1807,6 +1812,51 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             mAtmService.getTaskChangeNotificationController().notifyTaskStackChanged();
             mTaskSupervisor.mAppVisibilitiesChangedSinceLastPause = false;
         }
+    }
+
+    @ActivityInfo.ScreenOrientation
+    @Override
+    int getOrientation(@ActivityInfo.ScreenOrientation int candidate) {
+        if (shouldReportOrientationUnspecified()) {
+            return SCREEN_ORIENTATION_UNSPECIFIED;
+        }
+        if (canSpecifyOrientation()) {
+            return super.getOrientation(candidate);
+        }
+        return SCREEN_ORIENTATION_UNSET;
+    }
+
+    /**
+     * Whether or not to allow this container to specify an app requested orientation.
+     *
+     * This is different from {@link #providesOrientation()} that
+     * 1. The container may still provide an orientation even if it can't specify the app requested
+     *    one, such as {@link #shouldReportOrientationUnspecified()}
+     * 2. Even if the container can specify an app requested orientation, it may not be used by the
+     *    parent container if it is {@link ActivityInfo#SCREEN_ORIENTATION_UNSPECIFIED}.
+     */
+    boolean canSpecifyOrientation() {
+        final int windowingMode = getWindowingMode();
+        final int activityType = getActivityType();
+        return windowingMode == WINDOWING_MODE_FULLSCREEN
+                || activityType == ACTIVITY_TYPE_HOME
+                || activityType == ACTIVITY_TYPE_RECENTS
+                || activityType == ACTIVITY_TYPE_ASSISTANT;
+    }
+
+    /**
+     * Whether or not the parent container should use the orientation provided by this container
+     * even if it is {@link ActivityInfo#SCREEN_ORIENTATION_UNSPECIFIED}.
+     */
+    @Override
+    boolean providesOrientation() {
+        return super.providesOrientation() || shouldReportOrientationUnspecified();
+    }
+
+    private boolean shouldReportOrientationUnspecified() {
+        // Apps and their containers are not allowed to specify orientation from adjacent
+        // TaskFragment.
+        return getAdjacentTaskFragment() != null && isVisibleRequested();
     }
 
     @Override

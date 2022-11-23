@@ -21,7 +21,6 @@ import static com.android.internal.policy.TransitionAnimation.WALLPAPER_TRANSITI
 import static com.android.wm.shell.transition.TransitionAnimationHelper.loadAttributeAnimation;
 
 import android.content.Context;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
@@ -80,15 +79,25 @@ class ActivityEmbeddingAnimationSpec {
 
     /** Animation for window that is opening in a change transition. */
     @NonNull
-    Animation createChangeBoundsOpenAnimation(@NonNull TransitionInfo.Change change) {
+    Animation createChangeBoundsOpenAnimation(@NonNull TransitionInfo.Change change,
+            @NonNull Rect parentBounds) {
+        // Use end bounds for opening.
         final Rect bounds = change.getEndAbsBounds();
-        final Point offset = change.getEndRelOffset();
-        // The window will be animated in from left or right depends on its position.
-        final int startLeft = offset.x == 0 ? -bounds.width() : bounds.width();
+        final int startLeft;
+        final int startTop;
+        if (parentBounds.top == bounds.top && parentBounds.bottom == bounds.bottom) {
+            // The window will be animated in from left or right depends on its position.
+            startTop = 0;
+            startLeft = parentBounds.left == bounds.left ? -bounds.width() : bounds.width();
+        } else {
+            // The window will be animated in from top or bottom depends on its position.
+            startTop = parentBounds.top == bounds.top ? -bounds.height() : bounds.height();
+            startLeft = 0;
+        }
 
         // The position should be 0-based as we will post translate in
         // ActivityEmbeddingAnimationAdapter#onAnimationUpdate
-        final Animation animation = new TranslateAnimation(startLeft, 0, 0, 0);
+        final Animation animation = new TranslateAnimation(startLeft, 0, startTop, 0);
         animation.setInterpolator(mFastOutExtraSlowInInterpolator);
         animation.setDuration(CHANGE_ANIMATION_DURATION);
         animation.initialize(bounds.width(), bounds.height(), bounds.width(), bounds.height());
@@ -98,15 +107,25 @@ class ActivityEmbeddingAnimationSpec {
 
     /** Animation for window that is closing in a change transition. */
     @NonNull
-    Animation createChangeBoundsCloseAnimation(@NonNull TransitionInfo.Change change) {
-        final Rect bounds = change.getEndAbsBounds();
-        final Point offset = change.getEndRelOffset();
-        // The window will be animated out to left or right depends on its position.
-        final int endLeft = offset.x == 0 ? -bounds.width() : bounds.width();
+    Animation createChangeBoundsCloseAnimation(@NonNull TransitionInfo.Change change,
+            @NonNull Rect parentBounds) {
+        // Use start bounds for closing.
+        final Rect bounds = change.getStartAbsBounds();
+        final int endTop;
+        final int endLeft;
+        if (parentBounds.top == bounds.top && parentBounds.bottom == bounds.bottom) {
+            // The window will be animated out to left or right depends on its position.
+            endTop = 0;
+            endLeft = parentBounds.left == bounds.left ? -bounds.width() : bounds.width();
+        } else {
+            // The window will be animated out to top or bottom depends on its position.
+            endTop = parentBounds.top == bounds.top ? -bounds.height() : bounds.height();
+            endLeft = 0;
+        }
 
         // The position should be 0-based as we will post translate in
         // ActivityEmbeddingAnimationAdapter#onAnimationUpdate
-        final Animation animation = new TranslateAnimation(0, endLeft, 0, 0);
+        final Animation animation = new TranslateAnimation(0, endLeft, 0, endTop);
         animation.setInterpolator(mFastOutExtraSlowInInterpolator);
         animation.setDuration(CHANGE_ANIMATION_DURATION);
         animation.initialize(bounds.width(), bounds.height(), bounds.width(), bounds.height());

@@ -37,6 +37,7 @@ data class CreateCredentialUiState(
   val currentScreenState: CreateScreenState,
   val requestDisplayInfo: RequestDisplayInfo,
   val activeEntry: ActiveEntry? = null,
+  val selectedEntry: EntryInfo? = null,
 )
 
 class CreateCredentialViewModel(
@@ -109,10 +110,6 @@ class CreateCredentialViewModel(
     // TODO: Complete this function
   }
 
-  fun onRemoteEntrySelected() {
-    // TODO: Complete this function
-  }
-
   fun onCancel() {
     CredentialManagerRepo.getInstance().onCancel()
     dialogResult.value = DialogResult(ResultState.CANCELED)
@@ -125,46 +122,54 @@ class CreateCredentialViewModel(
     // TODO: implement the if choose as default or not logic later
   }
 
-  fun onPrimaryCreateOptionInfoSelected(
+  fun onEntrySelected(
+    selectedEntry: EntryInfo,
+    launcher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>
+  ) {
+    val providerId = selectedEntry.providerId
+    val entryKey = selectedEntry.entryKey
+    val entrySubkey = selectedEntry.entrySubkey
+    Log.d(
+      "Account Selector", "Option selected for entry: " +
+              " {provider=$providerId, key=$entryKey, subkey=$entrySubkey")
+    if (selectedEntry.pendingIntent != null) {
+      uiState = uiState.copy(selectedEntry = selectedEntry)
+      val intentSenderRequest = IntentSenderRequest.Builder(selectedEntry.pendingIntent)
+        .setFillInIntent(selectedEntry.fillInIntent).build()
+      launcher.launch(intentSenderRequest)
+    } else {
+      CredentialManagerRepo.getInstance().onOptionSelected(
+        providerId,
+        entryKey,
+        entrySubkey
+      )
+      dialogResult.value = DialogResult(
+        ResultState.COMPLETE,
+      )
+    }
+  }
+
+  fun onConfirmCreationSelected(
     launcher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>
   ) {
     val selectedEntry = uiState.activeEntry?.activeEntryInfo
     if (selectedEntry != null) {
-      val entryKey = selectedEntry.entryKey
-      val entrySubkey = selectedEntry.entrySubkey
-      Log.d(
-        "Account Selector",
-        "Option selected for creation: " +
-                "{key = $entryKey, subkey = $entrySubkey}"
-      )
-      if (selectedEntry.pendingIntent != null) {
-        val intentSenderRequest = IntentSenderRequest.Builder(selectedEntry.pendingIntent)
-          .setFillInIntent(selectedEntry.fillInIntent).build()
-        launcher.launch(intentSenderRequest)
-      } else {
-        CredentialManagerRepo.getInstance().onOptionSelected(
-          uiState.activeEntry?.activeProvider!!.name,
-          entryKey,
-          entrySubkey
-        )
-        dialogResult.value = DialogResult(
-          ResultState.COMPLETE,
-        )
-      }
+      onEntrySelected(selectedEntry, launcher)
     } else {
+      Log.w("Account Selector",
+        "Illegal state: confirm is pressed but activeEntry isn't set.")
       dialogResult.value = DialogResult(
         ResultState.COMPLETE,
       )
-      TODO("Gracefully handle illegal state.")
     }
   }
 
   fun onProviderActivityResult(providerActivityResult: ProviderActivityResult) {
-    val entry = uiState.activeEntry?.activeEntryInfo
+    val entry = uiState.selectedEntry
     val resultCode = providerActivityResult.resultCode
     val resultData = providerActivityResult.data
-    val providerId = uiState.activeEntry?.activeProvider!!.name
     if (entry != null) {
+      val providerId = entry.providerId
       Log.d("Account Selector", "Got provider activity result: {provider=" +
               "$providerId, key=${entry.entryKey}, subkey=${entry.entrySubkey}, " +
               "resultCode=$resultCode, resultData=$resultData}"

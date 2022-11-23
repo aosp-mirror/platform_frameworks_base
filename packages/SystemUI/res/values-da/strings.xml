@@ -52,7 +52,7 @@
     <string name="usb_debugging_always" msgid="4003121804294739548">"Tillad altid fra denne computer"</string>
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Tillad"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"USB-fejlretning er ikke tilladt"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"Den bruger, der i øjeblikket er logget ind på denne enhed, kan ikke aktivere USB-fejlretning. Skift til den primære bruger for at bruge denne funktion."</string>
+    <string name="usb_debugging_secondary_user_message" msgid="1888835696965417845">"Den bruger, der i øjeblikket er logget ind på denne enhed, kan ikke aktivere USB-fejlretning. Skift til en administrator for at bruge denne funktion."</string>
     <string name="hdmi_cec_set_menu_language_title" msgid="1259765420091503742">"Vil du ændre systemsproget til <xliff:g id="LANGUAGE">%1$s</xliff:g>?"</string>
     <string name="hdmi_cec_set_menu_language_description" msgid="8176716678074126619">"En anden enhed har anmodet om en ændring af systemsproget"</string>
     <string name="hdmi_cec_set_menu_language_accept" msgid="2513689457281009578">"Skift sprog"</string>
@@ -62,7 +62,7 @@
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Tillad altid på dette netværk"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"Tillad"</string>
     <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"Trådløs fejlretning er ikke tilladt"</string>
-    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"Den bruger, der i øjeblikket er logget ind på denne enhed, kan ikke aktivere trådløs fejlretning. Skift til den primære bruger for at bruge denne funktion."</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="9085779370142222881">"Den bruger, der i øjeblikket er logget ind på denne enhed, kan ikke aktivere trådløs fejlretning. Skift til en administrator for at bruge denne funktion."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"USB-porten er deaktiveret"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"USB-porten er blevet deaktiveret for at beskytte din enhed mod væske og snavs. Den kan derfor ikke registrere noget tilbehør.\n\nDu får besked, når du kan bruge USB-porten igen."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"USB-porten er aktiveret for at registrere opladere og tilbehør"</string>
@@ -125,7 +125,8 @@
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Taleassistent"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"Wallet"</string>
     <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"QR-kodescanner"</string>
-    <string name="accessibility_unlock_button" msgid="122785427241471085">"Lås op"</string>
+    <!-- no translation found for accessibility_unlock_button (3613812140816244310) -->
+    <skip />
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Enheden er låst"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Scanner ansigt"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"Send"</string>
@@ -168,7 +169,7 @@
     <skip />
     <string name="keyguard_face_failed" msgid="9044619102286917151">"Ansigt kan ikke genkendes"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"Brug fingeraftryk i stedet"</string>
-    <!-- no translation found for keyguard_face_unlock_unavailable (8145547300240405980) -->
+    <!-- no translation found for keyguard_face_unlock_unavailable (1581949044193418736) -->
     <skip />
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth tilsluttet."</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Batteriniveauet er ukendt."</string>
@@ -180,8 +181,12 @@
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"Flytilstand."</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN er slået til."</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"Batteri <xliff:g id="NUMBER">%d</xliff:g> procent."</string>
-    <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"Batteriniveauet er på <xliff:g id="PERCENTAGE">%1$s</xliff:g> procent, så du har ca. <xliff:g id="TIME">%2$s</xliff:g> tilbage, alt efter hvordan du bruger enheden"</string>
+    <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"Batteriniveauet er på <xliff:g id="PERCENTAGE">%1$d</xliff:g> procent, så du har ca. <xliff:g id="TIME">%2$s</xliff:g> tilbage, alt efter hvordan du bruger enheden"</string>
     <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"Batteriet oplades. <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> %%."</string>
+    <!-- no translation found for accessibility_battery_level_charging_paused (1716051308782906917) -->
+    <skip />
+    <!-- no translation found for accessibility_battery_level_charging_paused_with_estimate (4006089349465741762) -->
+    <skip />
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"Se alle notifikationer"</string>
     <string name="accessibility_tty_enabled" msgid="1123180388823381118">"TeleTypewriter aktiveret."</string>
     <string name="accessibility_ringer_vibrate" msgid="6261841170896561364">"Ringervibration."</string>
@@ -386,16 +391,11 @@
     <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"Når du deler, optager eller caster en app, har <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> adgang til alt, der vises eller afspilles i den pågældende app. Vær derfor forsigtig med adgangskoder, betalingsoplysninger, beskeder og andre følsomme oplysninger."</string>
     <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"Fortsæt"</string>
     <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"Del eller optag en app"</string>
-    <!-- no translation found for media_projection_permission_dialog_system_service_title (6827129613741303726) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_system_service_warning_entire_screen (8801616203805837575) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_system_service_warning_single_app (543310680568419338) -->
-    <skip />
-    <!-- no translation found for screen_capturing_disabled_by_policy_dialog_title (2113331792064527203) -->
-    <skip />
-    <!-- no translation found for screen_capturing_disabled_by_policy_dialog_description (6015975736747696431) -->
-    <skip />
+    <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"Vil du tillade, at denne app deler eller optager?"</string>
+    <string name="media_projection_permission_dialog_system_service_warning_entire_screen" msgid="8801616203805837575">"Når du deler, optager eller caster, har denne app adgang til alt, der vises på din skærm eller afspilles på din enhed. Vær derfor forsigtig med adgangskoder, betalingsoplysninger, beskeder og andre følsomme oplysninger."</string>
+    <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"Når du deler, optager eller caster en app, har denne app adgang til alt, der vises eller afspilles i den pågældende app. Vær derfor forsigtig med adgangskoder, betalingsoplysninger, beskeder og andre følsomme oplysninger."</string>
+    <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"Blokeret af din it-administrator"</string>
+    <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"Screenshots er deaktiveret af enhedspolitikken"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Ryd alle"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Administrer"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Historik"</string>
@@ -511,7 +511,8 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Lås op for at bruge"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Dine kort kunne ikke hentes. Prøv igen senere."</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Lås skærmindstillinger"</string>
-    <string name="qr_code_scanner_title" msgid="5290201053875420785">"Scan QR-kode"</string>
+    <!-- no translation found for qr_code_scanner_title (1938155688725760702) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"Arbejdsprofil"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Flytilstand"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Du vil ikke kunne høre din næste alarm <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -794,6 +795,8 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Forstør hele skærmen"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Forstør en del af skærmen"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Skift"</string>
+    <!-- no translation found for magnification_drag_corner_to_resize (1249766311052418130) -->
+    <skip />
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Tillad diagonal rulning"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"Juster"</string>
     <string name="accessibility_change_magnification_type" msgid="666000085077432421">"Skift forstørrelsestype"</string>
@@ -1024,4 +1027,8 @@
     <string name="dream_date_complication_date_format" msgid="8191225366513860104">"EEE d. MMM"</string>
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"tt.mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk.mm"</string>
+    <string name="log_access_confirmation_title" msgid="4843557604739943395">"Vil du give <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> adgang til alle enhedslogs?"</string>
+    <string name="log_access_confirmation_allow" msgid="752147861593202968">"Tillad engangsadgang"</string>
+    <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Tillad ikke"</string>
+    <string name="log_access_confirmation_body" msgid="6883031912003112634">"Enhedslogs registrerer, hvad der sker på din enhed. Apps kan bruge disse logs til at finde og løse problemer.\n\nNogle logs kan indeholde følsomme oplysninger, så giv kun apps, du har tillid til, adgang til alle enhedslogs. \n\nSelvom du ikke giver denne app adgang til alle enhedslogs, kan den stadig tilgå sine egne logs. Producenten af din enhed kan muligvis fortsat tilgå visse logs eller oplysninger på din enhed."</string>
 </resources>

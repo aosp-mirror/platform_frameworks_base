@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,20 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.systemui.log.dagger;
+#ifndef _ANDROID_HARDWARE_OVERLAYPROPERTIES_H
+#define _ANDROID_HARDWARE_OVERLAYPROPERTIES_H
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+#include <android/gui/OverlayProperties.h>
 
-import javax.inject.Qualifier;
+#include "jni.h"
 
-/**
- * A {@link com.android.systemui.plugins.log.LogBuffer} for BiometricMessages processing such as
- * {@link com.android.systemui.biometrics.FaceHelpMessageDeferral}
- */
-@Qualifier
-@Documented
-@Retention(RetentionPolicy.RUNTIME)
-public @interface BiometricMessagesLog {
-}
+namespace android {
+
+extern jobject android_hardware_OverlayProperties_convertToJavaObject(
+        JNIEnv* env, gui::OverlayProperties* overlayProperties);
+
+}; // namespace android
+
+#endif // _ANDROID_HARDWARE_OVERLAYPROPERTIES_H

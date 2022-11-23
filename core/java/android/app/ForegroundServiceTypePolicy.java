@@ -31,6 +31,7 @@ import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_REMOTE_MESSAGING;
+import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SYSTEM_EXEMPTED;
 
@@ -375,6 +376,19 @@ public abstract class ForegroundServiceTypePolicy {
                 new AppOpPermission(AppOpsManager.OP_ACTIVATE_VPN),
                 new AppOpPermission(AppOpsManager.OP_ACTIVATE_PLATFORM_VPN),
             }, false)
+    );
+
+    /**
+     * The policy for the {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_SHORT_SERVICE}.
+     *
+     * @hide
+     */
+    public static final @NonNull ForegroundServiceTypePolicyInfo FGS_TYPE_POLICY_SHORT_SERVICE =
+            new ForegroundServiceTypePolicyInfo(
+            FOREGROUND_SERVICE_TYPE_SHORT_SERVICE,
+            ForegroundServiceTypePolicyInfo.INVALID_CHANGE_ID,
+            ForegroundServiceTypePolicyInfo.INVALID_CHANGE_ID,
+            null /* no type specific permissions */, null /* no type specific permissions */
     );
 
     /**
@@ -964,6 +978,8 @@ public abstract class ForegroundServiceTypePolicy {
                     FGS_TYPE_POLICY_REMOTE_MESSAGING);
             mForegroundServiceTypePolicies.put(FOREGROUND_SERVICE_TYPE_SYSTEM_EXEMPTED,
                     FGS_TYPE_POLICY_SYSTEM_EXEMPTED);
+            mForegroundServiceTypePolicies.put(FOREGROUND_SERVICE_TYPE_SHORT_SERVICE,
+                    FGS_TYPE_POLICY_SHORT_SERVICE);
             mForegroundServiceTypePolicies.put(FOREGROUND_SERVICE_TYPE_SPECIAL_USE,
                     FGS_TYPE_POLICY_SPECIAL_USE);
         }

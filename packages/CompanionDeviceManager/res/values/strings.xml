@@ -31,15 +31,12 @@
     <string name="chooser_title">Choose a <xliff:g id="profile_name" example="watch">%1$s</xliff:g> to be managed by &lt;strong&gt;<xliff:g id="app_name" example="Android Wear">%2$s</xliff:g>&lt;/strong&gt;</string>
 
     <!-- Description of the privileges the application will get if associated with the companion device of WATCH profile (type) [CHAR LIMIT=NONE] -->
-    <string name="summary_watch">This app is needed to manage your <xliff:g id="device_name" example="My Watch">%1$s</xliff:g>. <xliff:g id="app_name" example="Android Wear">%2$s</xliff:g> will be allowed to interact with your notifications and access your Phone, SMS, Contacts, Calendar, Call logs and Nearby devices permissions.</string>
+    <string name="summary_watch">The app is needed to manage your <xliff:g id="device_name" example="My Watch">%1$s</xliff:g>. <xliff:g id="app_name" example="Android Wear">%2$s</xliff:g> will be allowed to interact with your notifications and access your Phone, SMS, Contacts, Calendar, Call logs and Nearby devices permissions.</string>
+
+    <!-- Description of the privileges the application will get if associated with the companion device of WATCH profile for singleDevice(type) [CHAR LIMIT=NONE] -->
+    <string name="summary_watch_single_device">The app is needed to manage your <xliff:g id="device_name" example="My Watch">%1$s</xliff:g>. <xliff:g id="app_name" example="Android Wear">%2$s</xliff:g> will be allowed to interact with these permissions:</string>
 
     <!-- ================= DEVICE_PROFILE_APP_STREAMING ================= -->
-
-    <!-- Apps permission will be granted of APP_STREAMING profile [CHAR LIMIT=30] -->
-    <string name="permission_apps">Apps</string>
-
-    <!-- Description of apps permission of APP_STREAMING profile [CHAR LIMIT=NONE] -->
-    <string name="permission_apps_summary">Stream your phone\u2019s apps</string>
 
     <!-- Confirmation for associating an application with a companion device of APP_STREAMING profile (type) [CHAR LIMIT=NONE] -->
     <string name="title_app_streaming">Allow &lt;strong&gt;<xliff:g id="app_name" example="Exo">%1$s</xliff:g>&lt;/strong&gt; to access this information from your phone</string>
@@ -65,18 +62,6 @@
 
     <!-- Description of the privileges the application will get if associated with the companion device of COMPUTER profile (type) [CHAR LIMIT=NONE] -->
     <string name="summary_computer"></string>
-
-    <!-- Notification permission will be granted of COMPUTER profile [CHAR LIMIT=30] -->
-    <string name="permission_notification">Notifications</string>
-
-    <!-- Description of notification permission of COMPUTER profile [CHAR LIMIT=NONE] -->
-    <string name="permission_notification_summary">Can read all notifications, including information like contacts, messages, and photos</string>
-
-    <!-- Storage permission will be granted of COMPUTER profile [CHAR LIMIT=30] -->
-    <string name="permission_storage">Photos and media</string>
-
-    <!-- Description of storage permission of COMPUTER profile [CHAR LIMIT=NONE] -->
-    <string name="permission_storage_summary"></string>
 
     <!-- Title of the helper dialog for COMPUTER profile [CHAR LIMIT=30]. -->
     <string name="helper_title_computer">Google Play services</string>
@@ -116,5 +101,58 @@
 
     <!--Description for information icon [CHAR LIMIT=30]-->
     <string name="vendor_header_button_description">More Information Button</string>
+
+    <!-- ================= Permissions ================= -->
+
+    <!-- Phone permission will be granted of corresponding profile [CHAR LIMIT=30] -->
+    <string name="permission_phone">Phone</string>
+
+    <!-- SMS permission will be granted of corresponding profile [CHAR LIMIT=30] -->
+    <string name="permission_sms">SMS</string>
+
+    <!-- Contacts permission will be granted of corresponding profile [CHAR LIMIT=30] -->
+    <string name="permission_contacts">Contacts</string>
+
+    <!-- Calendar permission will be granted of corresponding profile [CHAR LIMIT=30] -->
+    <string name="permission_calendar">Calendar</string>
+
+    <!-- Calendar permission will be granted of corresponding profile [CHAR LIMIT=30] -->
+    <string name="permission_nearby_devices">Nearby devices</string>
+
+    <!-- Storage permission will be granted of corresponding profile [CHAR LIMIT=30] -->
+    <string name="permission_storage">Photos and media</string>
+
+    <!-- Notification permission will be granted of corresponding profile [CHAR LIMIT=30] -->
+    <string name="permission_notification">Notifications</string>
+
+    <!-- Apps permission will be granted of corresponding profile [CHAR LIMIT=30] -->
+    <string name="permission_app_streaming">Apps</string>
+
+    <!-- Description of phone permission of corresponding profile [CHAR LIMIT=NONE] -->
+    <string name="permission_phone_summary">Can access your phone number and network info. Required for making calls and VoIP, voicemail, call redirect, and editing call logs</string>
+
+    <!-- Description of SMS permission of corresponding profile [CHAR LIMIT=NONE] -->
+    <!-- TODO(b/253644212) Need the description for sms permission  -->
+    <string name="permission_sms_summary"></string>
+
+    <!-- Description of contacts permission of corresponding profile [CHAR LIMIT=NONE] -->
+    <string name="permission_contacts_summary">Can read, create, or edit our contact list, as well as access the list of all accounts used on your device</string>
+
+    <!-- Description of calendar permission of corresponding profile [CHAR LIMIT=NONE] -->
+    <!-- TODO(b/253644212) Need the description for calendar permission  -->
+    <string name="permission_calendar_summary"></string>
+
+    <!-- Description of nearby devices' permission of corresponding profile [CHAR LIMIT=NONE] -->
+    <!-- TODO(b/253644212) Need the description for nearby devices' permission  -->
+    <string name="permission_nearby_devices_summary"></string>
+
+    <!-- Description of notification permission of corresponding profile [CHAR LIMIT=NONE] -->
+    <string name="permission_notification_summary">Can read all notifications, including information like contacts, messages, and photos</string>
+
+    <!-- Description of app streaming permission of corresponding profile [CHAR LIMIT=NONE] -->
+    <string name="permission_app_streaming_summary">Stream your phone\u2019s apps</string>
+
+    <!-- Description of storage permission of corresponding profile [CHAR LIMIT=NONE] -->
+    <string name="permission_storage_summary"></string>
 
 </resources>

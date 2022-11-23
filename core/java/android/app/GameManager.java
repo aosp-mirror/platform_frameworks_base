@@ -187,7 +187,9 @@ public final class GameManager {
      * Sets the game mode for the given package.
      * <p>
      * The caller must have {@link android.Manifest.permission#MANAGE_GAME_MODE}.
-     *
+     * <p>
+     * Setting the game mode on a non-game application or setting a game to
+     * {@link #GAME_MODE_UNSUPPORTED} will have no effect.
      * @hide
      */
     @SystemApi
@@ -275,6 +277,27 @@ public final class GameManager {
     public void setGameServiceProvider(@Nullable String packageName) {
         try {
             mService.setGameServiceProvider(packageName);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Updates the config for the game's {@link #GAME_MODE_CUSTOM} mode.
+     * <p>
+     * The caller must have {@link android.Manifest.permission#MANAGE_GAME_MODE}.
+     *
+     * @param gameModeConfig The configuration to use for game mode interventions
+     * @hide
+     */
+    @SystemApi
+    @UserHandleAware
+    @RequiresPermission(Manifest.permission.MANAGE_GAME_MODE)
+    public void updateCustomGameModeConfiguration(@NonNull String packageName,
+            @NonNull GameModeConfiguration gameModeConfig) {
+        try {
+            mService.updateCustomGameModeConfiguration(packageName, gameModeConfig,
+                    mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

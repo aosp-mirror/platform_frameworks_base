@@ -52,7 +52,7 @@
     <string name="usb_debugging_always" msgid="4003121804294739548">"සැම විටම මෙම පරිගණකයෙන් ඉඩ ලබා දෙන්න"</string>
     <string name="usb_debugging_allow" msgid="1722643858015321328">"ඉඩ දෙන්න"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"USB නිදොස්කරණය වෙත අවසර නැහැ"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"දැනට මෙම උපාංගයට පුරා ඇති පරිශීලකයාට USB නිදොස්කරණය ක්‍රියාත්මක කළ නොහැක. මෙම විශේෂාංගය භාවිතා කිරීම සඳහා, මූලික පරිශීලකයා වෙත මාරු වෙන්න."</string>
+    <string name="usb_debugging_secondary_user_message" msgid="1888835696965417845">"දැනට මෙම උපාංගයට පුරා ඇති පරිශීලකයාට USB නිදොස්කරණය ක්‍රියාත්මක කළ නොහැක. මෙම විශේෂාංගය භාවිතා කිරීම සඳහා, පරිපාලක පරිශීලකයෙකු වෙත මාරු වෙන්න."</string>
     <string name="hdmi_cec_set_menu_language_title" msgid="1259765420091503742">"ඔබට පද්ධති භාෂාව <xliff:g id="LANGUAGE">%1$s</xliff:g> භාෂාවට වෙනස් කිරීමට අවශ්‍යද?"</string>
     <string name="hdmi_cec_set_menu_language_description" msgid="8176716678074126619">"වෙනත් උපාංගයකින් පද්ධති භාෂාව වෙනස් කිරීම ඉල්ලා ඇත"</string>
     <string name="hdmi_cec_set_menu_language_accept" msgid="2513689457281009578">"භාෂාව වෙනස් කරන්න"</string>
@@ -62,7 +62,7 @@
     <string name="wifi_debugging_always" msgid="2968383799517975155">"මෙම ජාලයේ සැමවිට ඉඩ දෙන්න"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"ඉඩ දෙන්න"</string>
     <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"නොරැහැන් නිදොස්කරණය ඉඩ දී නැත"</string>
-    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"මෙම උපාංගයට දැනට පුරා ඇති පරිශීලකට නොරැහැන් නිදොස්කරණය ක්‍රියාත්මක කළ නොහැකිය. මෙම විශේෂාංගය භාවිතට, මූලික පරිශීලක වෙත මාරු වෙන්න."</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="9085779370142222881">"මෙම උපාංගයට දැනට පුරා ඇති පරිශීලකට නොරැහැන් නිදොස්කරණය ක්‍රියාත්මක කළ නොහැකිය. මෙම විශේෂාංගය භාවිතට, පරිපාලක පරිශීලකයෙකු වෙත මාරු වෙන්න."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"USB තොට අබලයි"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"ඔබේ උපාංගය ද්‍රවවලින් හෝ කුණුවලින් ආරක්‍ෂා කිරීමට, USB තොට අබල කර තිබෙන අතර, එය කිසිම අමතරාංගයක් අනාවරණ නොකරයි.\n\nනැවතත් USB තොට භාවිත කිරීම හරි නම් ඔබව දැනුම් දෙනු ලැබේ."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"ආරෝපක සහ උපකාරක අංග අනාවරණ කිරීමට USB තොට සබල කර ඇත"</string>
@@ -125,7 +125,8 @@
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"හඬ සහාය"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"Wallet"</string>
     <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"QR කේත ස්කෑනරය"</string>
-    <string name="accessibility_unlock_button" msgid="122785427241471085">"අඟුල අරින්න"</string>
+    <!-- no translation found for accessibility_unlock_button (3613812140816244310) -->
+    <skip />
     <string name="accessibility_lock_icon" msgid="661492842417875775">"උපාංගය අගුලු දමා ඇත"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"මුහුණ ස්කෑන් කිරීම"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"යවන්න"</string>
@@ -168,7 +169,7 @@
     <skip />
     <string name="keyguard_face_failed" msgid="9044619102286917151">"මුහුණ හඳුනා ගත නොහැක"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"ඒ වෙනුවට ඇඟිලි සලකුණ භාවිත කරන්න"</string>
-    <!-- no translation found for keyguard_face_unlock_unavailable (8145547300240405980) -->
+    <!-- no translation found for keyguard_face_unlock_unavailable (1581949044193418736) -->
     <skip />
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"බ්ලූටූත් සම්බන්ධිතයි."</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"බැටරි ප්‍රතිශතය නොදනී."</string>
@@ -180,8 +181,12 @@
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"අහස්යානා ආකාරය."</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN ක්‍රියාත්මකයි."</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"බැටරි ප්‍රතිශතය <xliff:g id="NUMBER">%d</xliff:g>"</string>
-    <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"බැටරි ප්‍රතිශතය <xliff:g id="PERCENTAGE">%1$s</xliff:g>, ඔබේ භාවිතයට අනුව <xliff:g id="TIME">%2$s</xliff:g> ක් පමණ ඉතුරුයි"</string>
+    <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"බැටරි ප්‍රතිශතය <xliff:g id="PERCENTAGE">%1$d</xliff:g>, ඔබේ භාවිතයට අනුව <xliff:g id="TIME">%2$s</xliff:g> ක් පමණ ඉතුරුයි"</string>
     <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"බැටරිය ආරෝපණය කරමින්, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%."</string>
+    <!-- no translation found for accessibility_battery_level_charging_paused (1716051308782906917) -->
+    <skip />
+    <!-- no translation found for accessibility_battery_level_charging_paused_with_estimate (4006089349465741762) -->
+    <skip />
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"සියලු දැනුම්දීම් බලන්න"</string>
     <string name="accessibility_tty_enabled" msgid="1123180388823381118">"TeleTypewriter ක්‍රියාත්මකයි."</string>
     <string name="accessibility_ringer_vibrate" msgid="6261841170896561364">"හඬ නඟනය කම්පනය වේ."</string>
@@ -305,28 +310,17 @@
     <string name="sensor_privacy_mic_unblocked_toast_content" msgid="306555320557065068">"මයික්‍රෆෝනය ලබා ගත හැකිය"</string>
     <string name="sensor_privacy_camera_unblocked_toast_content" msgid="7843105715964332311">"කැමරාව ලබා ගත හැකිය"</string>
     <string name="sensor_privacy_mic_camera_unblocked_toast_content" msgid="7339355093282661115">"මයික්‍රෆෝනය සහ කැමරාව ලබා ගත හැකිය"</string>
-    <!-- no translation found for sensor_privacy_mic_turned_on_dialog_title (6348853159838376513) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_mic_turned_off_dialog_title (5760464281790732849) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_mic_unblocked_dialog_content (4889961886199270224) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_mic_blocked_no_exception_dialog_content (5864898470772965394) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_mic_blocked_with_exception_dialog_content (810289713700437896) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_camera_turned_on_dialog_title (8039095295100075952) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_camera_turned_off_dialog_title (1936603903120742696) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_camera_unblocked_dialog_content (7847190103011782278) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_camera_blocked_dialog_content (3182428709314874616) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_htt_blocked_dialog_content (3333321592997666441) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_dialog_open_settings (1503088305279285048) -->
-    <skip />
+    <string name="sensor_privacy_mic_turned_on_dialog_title" msgid="6348853159838376513">"මයික්‍රෆෝනය ක්‍රියාත්මකයි"</string>
+    <string name="sensor_privacy_mic_turned_off_dialog_title" msgid="5760464281790732849">"මයික්‍රෆෝනය ක්‍රියාවිරහිතයි"</string>
+    <string name="sensor_privacy_mic_unblocked_dialog_content" msgid="4889961886199270224">"සියලු යෙදුම් සහ සේවා සඳහා මයික්‍රෆෝනය සබල කර ඇත."</string>
+    <string name="sensor_privacy_mic_blocked_no_exception_dialog_content" msgid="5864898470772965394">"සියලු යෙදුම් සහ සේවා සඳහා මයික්‍රෆෝන ප්‍රවේශය අබල කර ඇත. ඔබට සැකසීම් &gt; පෞද්ගලිකත්වය &gt; මයික්‍රෆෝනය තුළ මයික්‍රෆෝන ප්‍රවේශය සබල කළ හැක."</string>
+    <string name="sensor_privacy_mic_blocked_with_exception_dialog_content" msgid="810289713700437896">"සියලු යෙදුම් සහ සේවා සඳහා මයික්‍රෆෝන ප්‍රවේශය අබල කර ඇත. ඔබට මෙය සැකසීම් &gt; පෞද්ගලිකත්වය &gt; මයික්‍රෆෝනය තුළ වෙනස් කළ හැක."</string>
+    <string name="sensor_privacy_camera_turned_on_dialog_title" msgid="8039095295100075952">"කැමරාව ක්‍රියාත්මක කර ඇත"</string>
+    <string name="sensor_privacy_camera_turned_off_dialog_title" msgid="1936603903120742696">"කැමරාව ක්‍රියාවිරහිතයි"</string>
+    <string name="sensor_privacy_camera_unblocked_dialog_content" msgid="7847190103011782278">"සියලු යෙදුම් සහ සේවා සඳහා කැමරාව සබල කර ඇත."</string>
+    <string name="sensor_privacy_camera_blocked_dialog_content" msgid="3182428709314874616">"සියලු යෙදුම් සහ සේවා සඳහා කැමරා ප්‍රවේශය අබල කර ඇත."</string>
+    <string name="sensor_privacy_htt_blocked_dialog_content" msgid="3333321592997666441">"මයික්‍රෆෝන බොත්තම භාවිතය සඳහා, සැකසීම් තුළ මයික්‍රෆෝන ප්‍රවේශය සබල කරන්න."</string>
+    <string name="sensor_privacy_dialog_open_settings" msgid="1503088305279285048">"සැකසීම් විවෘත කරන්න."</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"වෙනත් උපාංගය"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"දළ විශ්ලේෂණය ටොගල කරන්න"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"එලාම සිහිකැඳවීම්, සිදුවීම්, සහ ඔබ සඳහන් කළ අමතන්නන් හැර, ශබ්ද සහ කම්පනවලින් ඔබට බාධා නොවනු ඇත. සංගීතය, වීඩියෝ, සහ ක්‍රීඩා ඇතුළු ඔබ වාදනය කිරීමට තෝරන ලද සියලු දේ ඔබට තවම ඇසෙනු ඇත."</string>
@@ -397,16 +391,11 @@
     <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"ඔබ යෙදුමක් බෙදා ගන්නා විට, පටිගත කරන විට හෝ විකාශය කරන විට, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> හට එම යෙදුමේ පෙන්වන හෝ වාදනය කරන ඕනෑම දෙයකට ප්‍රවේශය ඇත. එබැවින් මුරපද, ගෙවීම් විස්තර, පණිවිඩ හෝ වෙනත් සංවේදී තොරතුරු සමග ප්‍රවේශම් වන්න."</string>
     <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"ඉදිරියට යන්න"</string>
     <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"යෙදුමක් බෙදා ගන්න හෝ පටිගත කරන්න"</string>
-    <!-- no translation found for media_projection_permission_dialog_system_service_title (6827129613741303726) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_system_service_warning_entire_screen (8801616203805837575) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_system_service_warning_single_app (543310680568419338) -->
-    <skip />
-    <!-- no translation found for screen_capturing_disabled_by_policy_dialog_title (2113331792064527203) -->
-    <skip />
-    <!-- no translation found for screen_capturing_disabled_by_policy_dialog_description (6015975736747696431) -->
-    <skip />
+    <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"මෙම යෙදුම බෙදා ගැනීමට හෝ පටිගත කිරීමට ඉඩ දෙන්න ද?"</string>
+    <string name="media_projection_permission_dialog_system_service_warning_entire_screen" msgid="8801616203805837575">"ඔබ බෙදා ගන්නා විට, පටිගත කරන විට, හෝ විකාශය කරන විට, හට ඔබේ තිරයේ පෙනෙන හෝ ඔබේ උපාංගයේ වාදනය වන ඕනෑම දෙයකට ප්‍රවේශය ඇත. එබැවින් මුරපද, ගෙවීම් විස්තර, පණිවිඩ හෝ වෙනත් සංවේදී තොරතුරු සමග ප්‍රවේශම් වන්න."</string>
+    <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"ඔබ යෙදුමක් බෙදා ගන්නා විට, පටිගත කරන විට හෝ විකාශය කරන විට, හට එම යෙදුමේ පෙන්වන හෝ වාදනය කරන ඕනෑම දෙයකට ප්‍රවේශය ඇත. එබැවින් මුරපද, ගෙවීම් විස්තර, පණිවිඩ හෝ වෙනත් සංවේදී තොරතුරු සමග ප්‍රවේශම් වන්න."</string>
+    <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"ඔබේ IT පරිපාලක විසින් අවහිර කර ඇත"</string>
+    <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"උපාංග ප්‍රතිපත්තිය මගින් තිර ග්‍රහණය කිරීම අබල කර ඇත"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"සියල්ල හිස් කරන්න"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"කළමනාකරණය කරන්න"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"ඉතිහාසය"</string>
@@ -522,7 +511,8 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"භාවිත කිරීමට අගුලු හරින්න"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"ඔබගේ කාඩ්පත ලබා ගැනීමේ ගැටලුවක් විය, කරුණාකර පසුව නැවත උත්සාහ කරන්න"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"අගුලු තිර සැකසීම්"</string>
-    <string name="qr_code_scanner_title" msgid="5290201053875420785">"QR කේතය ස්කෑන් කරන්න"</string>
+    <!-- no translation found for qr_code_scanner_title (1938155688725760702) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"කාර්යාල පැතිකඩ"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"ගුවන්යානා ප්‍රකාරය"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"ඔබට ඔබේ ඊළඟ එලාමය <xliff:g id="WHEN">%1$s</xliff:g> නොඇසෙනු ඇත"</string>
@@ -805,6 +795,8 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"පූර්ණ තිරය විශාලනය කරන්න"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"තිරයේ කොටසක් විශාලනය කරන්න"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"ස්විචය"</string>
+    <!-- no translation found for magnification_drag_corner_to_resize (1249766311052418130) -->
+    <skip />
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"විකර්ණ අනුචලනයට ඉඩ දෙන්න"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"ප්‍රතිප්‍රමාණය කරන්න"</string>
     <string name="accessibility_change_magnification_type" msgid="666000085077432421">"විශාලන වර්ගය වෙනස් කරන්න"</string>
@@ -1035,4 +1027,8 @@
     <string name="dream_date_complication_date_format" msgid="8191225366513860104">"EEE, MMM d"</string>
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
+    <string name="log_access_confirmation_title" msgid="4843557604739943395">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> හට සියලු උපාංග ලොග ප්‍රවේශ වීමට ඉඩ දෙන්න ද?"</string>
+    <string name="log_access_confirmation_allow" msgid="752147861593202968">"එක් වරක් ප්‍රවේශය ඉඩ දෙන්න"</string>
+    <string name="log_access_confirmation_deny" msgid="2389461495803585795">"ඉඩ නොදෙන්න"</string>
+    <string name="log_access_confirmation_body" msgid="6883031912003112634">"උපාංග ලොග ඔබේ උපාංගයෙහි සිදු වන දේ වාර්තා කරයි. ගැටලු සොයා ගැනීමට සහ නිරාකරණයට යෙදුම්වලට මෙම ලොග භාවිතා කළ හැක.\n\nසමහර ලොගවල සංවේදී තතු අඩංගු විය හැකි බැවින්, ඔබ විශ්වාස කරන යෙදුම්වලට පමණක් සියලු උපාංග ලොග වෙත ප්‍රවේශ වීමට ඉඩ දෙන්න. \n\nඔබ මෙම යෙදුමට සියලු උපාංග ලොග වෙත ප්‍රවේශ වීමට ඉඩ නොදෙන්නේ නම්, එයට තවමත් එහිම ලොග වෙත ප්‍රවේශ විය හැක. ඔබේ උපාංග නිෂ්පාදකයාට තවමත් ඔබේ උපාංගයෙහි සමහර ලොග හෝ තතු වෙත ප්‍රවේශ විය හැක."</string>
 </resources>

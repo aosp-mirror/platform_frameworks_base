@@ -18,6 +18,8 @@ package com.android.server.pm.dex;
 
 import static com.android.server.pm.PackageManagerServiceCompilerMapping.getCompilerFilterForReason;
 
+import static dalvik.system.DexFile.isProfileGuidedCompilerFilter;
+
 import android.annotation.Nullable;
 
 import com.android.server.art.ReasonMapping;
@@ -25,8 +27,6 @@ import com.android.server.art.model.ArtFlags;
 import com.android.server.art.model.OptimizeParams;
 import com.android.server.pm.DexOptHelper;
 import com.android.server.pm.PackageManagerService;
-
-import dalvik.system.DexFile;
 
 /**
  * Options used for dexopt invocations.
@@ -218,12 +218,11 @@ public final class DexoptOptions {
 
         /*@OptimizeFlags*/ int flags = extraFlags;
         if ((mFlags & DEXOPT_CHECK_FOR_PROFILES_UPDATES) == 0
-                && DexFile.isProfileGuidedCompilerFilter(mCompilerFilter)) {
-            // ART Service doesn't support bypassing this, so not setting this flag is not
-            // supported.
-            DexOptHelper.reportArtManagerFallback(mPackageName,
-                    "DEXOPT_CHECK_FOR_PROFILES_UPDATES not set with profile compiler filter");
-            return null;
+                && isProfileGuidedCompilerFilter(mCompilerFilter)) {
+            // ART Service doesn't support bypassing the profile update check when profiles are
+            // used, so not setting this flag is not supported.
+            throw new IllegalArgumentException(
+                    "DEXOPT_CHECK_FOR_PROFILES_UPDATES must be set with profile guided filter");
         }
         if ((mFlags & DEXOPT_FORCE) != 0) {
             flags |= ArtFlags.FLAG_FORCE;

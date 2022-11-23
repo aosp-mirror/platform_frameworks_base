@@ -113,7 +113,7 @@ public final class DisplayManagerGlobal {
 
     private final SparseArray<DisplayInfo> mDisplayInfoCache = new SparseArray<>();
     private final ColorSpace mWideColorSpace;
-    private final OverlayProperties mOverlayProperties = new OverlayProperties();
+    private final OverlayProperties mOverlayProperties;
     private int[] mDisplayIdCache;
 
     private int mWifiDisplayScanNestCount;
@@ -125,6 +125,7 @@ public final class DisplayManagerGlobal {
             mWideColorSpace =
                     ColorSpace.get(
                             ColorSpace.Named.values()[mDm.getPreferredWideGamutColorSpaceId()]);
+            mOverlayProperties = mDm.getOverlaySupport();
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
@@ -728,7 +729,11 @@ public final class DisplayManagerGlobal {
         return mWideColorSpace;
     }
 
-    /** @hide */
+    /**
+     * Gets the overlay properties for all displays.
+     *
+     * @hide
+     */
     public OverlayProperties getOverlaySupport() {
         return mOverlayProperties;
     }

@@ -304,6 +304,7 @@ class ActivityEmbeddingAnimationRunner {
         // This is because the TaskFragment surface/change won't contain the Activity's before its
         // reparent.
         Animation changeAnimation = null;
+        Rect parentBounds = new Rect();
         for (TransitionInfo.Change change : info.getChanges()) {
             if (change.getMode() != TRANSIT_CHANGE
                     || change.getStartAbsBounds().equals(change.getEndAbsBounds())) {
@@ -326,10 +327,15 @@ class ActivityEmbeddingAnimationRunner {
                 }
             }
 
+            // The TaskFragment may be enter/exit split, so we take the union of both as the parent
+            // size.
+            parentBounds.union(boundsAnimationChange.getStartAbsBounds());
+            parentBounds.union(boundsAnimationChange.getEndAbsBounds());
+
             // There are two animations in the array. The first one is for the start leash
             // (snapshot), and the second one is for the end leash (TaskFragment).
             final Animation[] animations = mAnimationSpec.createChangeBoundsChangeAnimations(change,
-                    boundsAnimationChange.getEndAbsBounds());
+                    parentBounds);
             // Keep track as we might need to add background color for the animation.
             // Although there may be multiple change animation, record one of them is sufficient
             // because the background color will be added to the root leash for the whole animation.
@@ -352,6 +358,11 @@ class ActivityEmbeddingAnimationRunner {
                     animations[1], boundsAnimationChange));
         }
 
+        if (parentBounds.isEmpty()) {
+            throw new IllegalStateException(
+                    "There should be at least one changing window to play the change animation");
+        }
+
         // If there is no corresponding open/close window with the change, we should show background
         // color to cover the empty part of the screen.
         boolean shouldShouldBackgroundColor = true;
@@ -368,10 +379,10 @@ class ActivityEmbeddingAnimationRunner {
                 // No-op if it will be covered by the changing parent window.
                 animation = ActivityEmbeddingAnimationSpec.createNoopAnimation(change);
             } else if (Transitions.isClosingType(change.getMode())) {
-                animation = mAnimationSpec.createChangeBoundsCloseAnimation(change);
+                animation = mAnimationSpec.createChangeBoundsCloseAnimation(change, parentBounds);
                 shouldShouldBackgroundColor = false;
             } else {
-                animation = mAnimationSpec.createChangeBoundsOpenAnimation(change);
+                animation = mAnimationSpec.createChangeBoundsOpenAnimation(change, parentBounds);
                 shouldShouldBackgroundColor = false;
             }
             adapters.add(new ActivityEmbeddingAnimationAdapter(animation, change));
