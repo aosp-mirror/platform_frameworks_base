@@ -968,13 +968,8 @@ public class ScreenshotController {
 
         if (imageData.uri != null) {
             if (!imageData.owner.equals(Process.myUserHandle())) {
-                // TODO: Handle non-primary user ownership (e.g. Work Profile)
-                // This image is owned by another user. Special treatment will be
-                // required in the UI (badging) as well as sending intents which can
-                // correctly forward those URIs on to be read (actions).
-
-                Log.d(TAG, "*** Screenshot saved to a non-primary user ("
-                        + imageData.owner + ") as " + imageData.uri);
+                Log.d(TAG, "Screenshot saved to user " + imageData.owner + " as "
+                        + imageData.uri);
             }
             mScreenshotHandler.post(() -> {
                 if (mScreenshotAnimation != null && mScreenshotAnimation.isRunning()) {
@@ -1055,6 +1050,11 @@ public class ScreenshotController {
                     R.string.screenshot_failed_to_save_text);
         } else {
             mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SAVED, 0, mPackageName);
+            if (mFlags.isEnabled(SCREENSHOT_WORK_PROFILE_POLICY)
+                    && mUserManager.isManagedProfile(imageData.owner.getIdentifier())) {
+                mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SAVED_TO_WORK_PROFILE, 0,
+                        mPackageName);
+            }
         }
     }
 
