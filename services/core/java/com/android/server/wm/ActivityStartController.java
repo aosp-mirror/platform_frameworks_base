@@ -556,47 +556,52 @@ public class ActivityStartController {
         final Task rootTask = mService.mRootWindowContainer.getDefaultTaskDisplayArea()
                 .getRootTask(WINDOWING_MODE_UNDEFINED, activityType);
         if (rootTask == null) return false;
+        final RemoteTransition remote = options.getRemoteTransition();
         final ActivityRecord r = rootTask.topRunningActivity();
-        if (r == null || r.mVisibleRequested || !r.attachedToProcess()
+        if (r == null || r.mVisibleRequested || !r.attachedToProcess() || remote == null
                 || !r.mActivityComponent.equals(intent.getComponent())
                 // Recents keeps invisible while device is locked.
                 || r.mDisplayContent.isKeyguardLocked()) {
             return false;
         }
         mService.mRootWindowContainer.startPowerModeLaunchIfNeeded(true /* forceSend */, r);
-        final RemoteTransition remote = options.getRemoteTransition();
-        if (remote != null && rootTask.mTransitionController.isCollecting()) {
-            final Transition transition = new Transition(WindowManager.TRANSIT_TO_FRONT,
-                    0 /* flags */, rootTask.mTransitionController,
-                    mService.mWindowManager.mSyncEngine);
+        final ActivityMetricsLogger.LaunchingState launchingState =
+                mSupervisor.getActivityMetricsLogger().notifyActivityLaunching(intent);
+        final Transition transition = new Transition(WindowManager.TRANSIT_TO_FRONT,
+                0 /* flags */, r.mTransitionController, mService.mWindowManager.mSyncEngine);
+        if (r.mTransitionController.isCollecting()) {
             // Special case: we are entering recents while an existing transition is running. In
             // this case, we know it's safe to "defer" the activity launch, so lets do so now so
             // that it can get its own transition and thus update launcher correctly.
             mService.mWindowManager.mSyncEngine.queueSyncSet(
-                    () -> rootTask.mTransitionController.moveToCollecting(transition),
                     () -> {
-                        final Task task = r.getTask();
-                        task.mTransitionController.requestStartTransition(transition,
-                                task, remote, null /* displayChange */);
-                        task.mTransitionController.collect(task);
-                        startExistingRecentsIfPossibleInner(intent, options, r, task, rootTask);
+                        if (r.isAttached()) {
+                            r.mTransitionController.moveToCollecting(transition);
+                        }
+                    },
+                    () -> {
+                        if (r.isAttached() && transition.isCollecting()) {
+                            startExistingRecentsIfPossibleInner(options, r, rootTask,
+                                    launchingState, remote, transition);
+                        }
                     });
         } else {
-            final Task task = r.getTask();
-            task.mTransitionController.requestTransitionIfNeeded(WindowManager.TRANSIT_TO_FRONT,
-                    0 /* flags */, task, task /* readyGroupRef */,
-                    options.getRemoteTransition(), null /* displayChange */);
-            startExistingRecentsIfPossibleInner(intent, options, r, task, rootTask);
+            r.mTransitionController.moveToCollecting(transition);
+            startExistingRecentsIfPossibleInner(options, r, rootTask, launchingState, remote,
+                    transition);
         }
         return true;
     }
 
-    void startExistingRecentsIfPossibleInner(Intent intent, ActivityOptions options,
-            ActivityRecord r, Task task, Task rootTask) {
-        final ActivityMetricsLogger.LaunchingState launchingState =
-                mSupervisor.getActivityMetricsLogger().notifyActivityLaunching(intent);
+    private void startExistingRecentsIfPossibleInner(ActivityOptions options, ActivityRecord r,
+            Task rootTask, ActivityMetricsLogger.LaunchingState launchingState,
+            RemoteTransition remoteTransition, Transition transition) {
+        final Task task = r.getTask();
         mService.deferWindowLayout();
         try {
+            r.mTransitionController.requestStartTransition(transition,
+                    task, remoteTransition, null /* displayChange */);
+            r.mTransitionController.collect(task);
             r.mTransitionController.setTransientLaunch(r,
                     TaskDisplayArea.getRootTaskAbove(rootTask));
             task.moveToFront("startExistingRecents");

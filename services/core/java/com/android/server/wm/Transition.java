@@ -345,7 +345,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         return mFinishTransaction;
     }
 
-    private boolean isCollecting() {
+    boolean isCollecting() {
         return mState == STATE_COLLECTING || mState == STATE_STARTED;
     }
 
