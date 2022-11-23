@@ -17,6 +17,7 @@
 package com.android.server.pm;
 
 import static android.app.admin.DevicePolicyResources.Strings.Core.PACKAGE_DELETED_BY_DO;
+import static android.os.Process.INVALID_UID;
 
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
@@ -847,8 +848,18 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 params.forceQueryableOverride = false;
             }
         }
+        int requestedInstallerPackageUid = INVALID_UID;
+        if (requestedInstallerPackageName != null) {
+            requestedInstallerPackageUid = snapshot.getPackageUid(requestedInstallerPackageName,
+                    0 /* flags */, userId);
+        }
+        if (requestedInstallerPackageUid == INVALID_UID) {
+            // Requested installer package is invalid, reset it
+            requestedInstallerPackageName = null;
+        }
+
         InstallSource installSource = InstallSource.create(installerPackageName,
-                originatingPackageName, requestedInstallerPackageName,
+                originatingPackageName, requestedInstallerPackageName, requestedInstallerPackageUid,
                 installerAttributionTag, params.packageSource);
         session = new PackageInstallerSession(mInternalCallback, mContext, mPm, this,
                 mSilentUpdatePolicy, mInstallThread.getLooper(), mStagingManager, sessionId,

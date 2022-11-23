@@ -149,8 +149,8 @@ class CredentialManagerRepo(
       if (providerInfo.isDefault) {hasDefault = true; defaultProvider = providerInfo} }
     // TODO: covert from real requestInfo for create passkey
     var requestDisplayInfo = RequestDisplayInfo(
-      "Elisa Beckett",
       "beckett-bakert@gmail.com",
+      "Elisa Beckett",
       TYPE_PUBLIC_KEY_CREDENTIAL,
       "tribank")
     val createCredentialRequest = requestInfo.createCredentialRequest
@@ -165,8 +165,12 @@ class CredentialManagerRepo(
     return CreateCredentialUiState(
       enabledProviders = providerEnabledList,
       disabledProviders = providerDisabledList,
-      if (hasDefault)
-      {CreateScreenState.CREATION_OPTION_SELECTION} else {CreateScreenState.PASSKEY_INTRO},
+      // TODO: Add the screen when defaultProvider has no createOption but
+      //  there's remoteInfo under other providers
+      if (!hasDefault || defaultProvider.createOptions.isEmpty()) {
+        if (requestDisplayInfo.type == TYPE_PUBLIC_KEY_CREDENTIAL)
+        {CreateScreenState.PASSKEY_INTRO} else {CreateScreenState.PROVIDER_SELECTION}
+      } else {CreateScreenState.CREATION_OPTION_SELECTION},
       requestDisplayInfo,
       if (hasDefault) {
         ActiveEntry(defaultProvider, defaultProvider.createOptions.first())
@@ -439,7 +443,7 @@ class CredentialManagerRepo(
     return RequestInfo.newCreateRequestInfo(
       Binder(),
       CreateCredentialRequest(
-        TYPE_PASSWORD_CREDENTIAL,
+        TYPE_PUBLIC_KEY_CREDENTIAL,
         data
       ),
       /*isFirstUsage=*/false,

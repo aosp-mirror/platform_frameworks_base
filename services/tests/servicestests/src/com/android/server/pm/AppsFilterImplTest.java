@@ -17,6 +17,8 @@
 package com.android.server.pm;
 
 
+import static android.os.Process.INVALID_UID;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.junit.Assert.assertFalse;
@@ -1014,7 +1016,7 @@ public class AppsFilterImplTest {
                 DUMMY_TARGET_APPID);
         PackageSetting calling = simulateAddPackage(appsFilter, pkg("com.some.other.package"),
                 DUMMY_CALLING_APPID,
-                withInstallSource(target.getPackageName(), null, null, null, false));
+                withInstallSource(target.getPackageName(), null, null, INVALID_UID, null, false));
 
         assertFalse(
                 appsFilter.shouldFilterApplication(mSnapshot, DUMMY_CALLING_APPID, calling, target,
@@ -1033,7 +1035,7 @@ public class AppsFilterImplTest {
                 DUMMY_TARGET_APPID);
         PackageSetting calling = simulateAddPackage(appsFilter, pkg("com.some.other.package"),
                 DUMMY_CALLING_APPID,
-                withInstallSource(target.getPackageName(), null, null, null, true));
+                withInstallSource(target.getPackageName(), null, null, INVALID_UID, null, true));
 
         assertTrue(
                 appsFilter.shouldFilterApplication(mSnapshot, DUMMY_CALLING_APPID, calling, target,
@@ -1056,8 +1058,8 @@ public class AppsFilterImplTest {
                 DUMMY_TARGET_APPID);
         watcher.verifyChangeReported("add package");
         PackageSetting calling = simulateAddPackage(appsFilter, pkg("com.some.other.package"),
-                DUMMY_CALLING_APPID, withInstallSource(null, target.getPackageName(), null, null,
-                        false));
+                DUMMY_CALLING_APPID, withInstallSource(null, target.getPackageName(), null,
+                        INVALID_UID, null, false));
         watcher.verifyChangeReported("add package");
 
         assertTrue(
@@ -1082,8 +1084,8 @@ public class AppsFilterImplTest {
                 DUMMY_TARGET_APPID);
         watcher.verifyChangeReported("add package");
         PackageSetting calling = simulateAddPackage(appsFilter, pkg("com.some.other.package"),
-                DUMMY_CALLING_APPID, withInstallSource(null, null, target.getPackageName(), null,
-                        false));
+                DUMMY_CALLING_APPID, withInstallSource(null, null, target.getPackageName(),
+                        DUMMY_TARGET_APPID, null, false));
         watcher.verifyChangeReported("add package");
 
         assertFalse(
@@ -1668,11 +1670,11 @@ public class AppsFilterImplTest {
     }
 
     private WithSettingBuilder withInstallSource(String initiatingPackageName,
-            String originatingPackageName, String installerPackageName,
+            String originatingPackageName, String installerPackageName, int installerPackageUid,
             String installerAttributionTag, boolean isInitiatingPackageUninstalled) {
         final InstallSource installSource = InstallSource.create(initiatingPackageName,
-                originatingPackageName, installerPackageName, installerAttributionTag,
-                /* isOrphaned= */ false, isInitiatingPackageUninstalled);
+                originatingPackageName, installerPackageName, installerPackageUid,
+                installerAttributionTag, /* isOrphaned= */ false, isInitiatingPackageUninstalled);
         return setting -> setting.setInstallSource(installSource);
     }
 }

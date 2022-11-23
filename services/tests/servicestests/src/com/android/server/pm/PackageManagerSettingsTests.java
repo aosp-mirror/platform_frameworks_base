@@ -25,6 +25,8 @@ import static android.content.pm.SuspendDialogInfo.BUTTON_ACTION_UNSUSPEND;
 import static android.content.pm.parsing.FrameworkParsingPackageUtils.parsePublicKey;
 import static android.content.res.Resources.ID_NULL;
 
+import static com.android.server.pm.PackageManagerService.WRITE_USER_PACKAGE_RESTRICTIONS;
+
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
@@ -32,6 +34,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
@@ -45,6 +48,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.SuspendDialogInfo;
 import android.content.pm.UserInfo;
 import android.os.BaseBundle;
+import android.os.Message;
 import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.UserHandle;
@@ -69,6 +73,7 @@ import com.android.server.pm.pkg.PackageUserState;
 import com.android.server.pm.pkg.PackageUserStateInternal;
 import com.android.server.pm.pkg.SuspendParams;
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
+import com.android.server.testutils.TestHandler;
 import com.android.server.utils.Watchable;
 import com.android.server.utils.WatchableTester;
 import com.android.server.utils.WatchedArrayMap;
@@ -91,6 +96,7 @@ import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
@@ -115,6 +121,10 @@ public class PackageManagerSettingsTests {
     Computer computer;
 
     final ArrayMap<String, Long> mOrigFirstInstallTimes = new ArrayMap<>();
+
+    final TestHandler mHandler = new TestHandler((@NonNull Message msg) -> {
+        return true;
+    });
 
     @Before
     public void initializeMocks() {
@@ -150,7 +160,7 @@ public class PackageManagerSettingsTests {
         assertThat(settings.readLPw(computer, createFakeUsers()), is(true));
 
         // write out, read back in and verify the same
-        settings.writeLPr(computer);
+        settings.writeLPr(computer, /*sync=*/true);
         assertThat(settings.readLPw(computer, createFakeUsers()), is(true));
         verifyKeySetMetaData(settings);
     }
@@ -180,7 +190,7 @@ public class PackageManagerSettingsTests {
         writeOldFiles();
         Settings settings = makeSettings();
         assertThat(settings.readLPw(computer, createFakeUsers()), is(true));
-        settings.writeLPr(computer);
+        settings.writeLPr(computer, /*sync=*/true);
 
         // Create Settings again to make it read from the new files
         settings = makeSettings();
@@ -326,14 +336,14 @@ public class PackageManagerSettingsTests {
                 .setNeutralButtonAction(BUTTON_ACTION_UNSUSPEND)
                 .build();
 
-        ps1.modifyUserState(0).putSuspendParams( "suspendingPackage1",
+        ps1.modifyUserState(0).putSuspendParams("suspendingPackage1",
                 new SuspendParams(dialogInfo1, appExtras1, launcherExtras1));
-        ps1.modifyUserState(0).putSuspendParams( "suspendingPackage2",
+        ps1.modifyUserState(0).putSuspendParams("suspendingPackage2",
                 new SuspendParams(dialogInfo2, appExtras2, launcherExtras2));
         settingsUnderTest.mPackages.put(PACKAGE_NAME_1, ps1);
         watcher.verifyChangeReported("put package 1");
 
-        ps2.modifyUserState(0).putSuspendParams( "suspendingPackage3",
+        ps2.modifyUserState(0).putSuspendParams("suspendingPackage3",
                 new SuspendParams(null, appExtras1, null));
         settingsUnderTest.mPackages.put(PACKAGE_NAME_2, ps2);
         watcher.verifyChangeReported("put package 2");
@@ -342,7 +352,7 @@ public class PackageManagerSettingsTests {
         settingsUnderTest.mPackages.put(PACKAGE_NAME_3, ps3);
         watcher.verifyChangeReported("put package 3");
 
-        settingsUnderTest.writePackageRestrictionsLPr(0);
+        settingsUnderTest.writePackageRestrictionsLPr(0, /*sync=*/true);
         watcher.verifyChangeReported("writePackageRestrictions");
 
         settingsUnderTest.mPackages.clear();
@@ -407,45 +417,229 @@ public class PackageManagerSettingsTests {
         assertThat(defaultSetting.getUserStateOrDefault(0).isSuspended(), is(false));
     }
 
-    @Test
-    public void testReadWritePackageRestrictions_distractionFlags() {
-        final Settings settingsUnderTest = makeSettings();
+    private void populateDefaultSettings(Settings settings) {
+        settings.mPackages.clear();
+        settings.mPackages.put(PACKAGE_NAME_1, createPackageSetting(PACKAGE_NAME_1));
+        settings.mPackages.put(PACKAGE_NAME_2, createPackageSetting(PACKAGE_NAME_2));
+        settings.mPackages.put(PACKAGE_NAME_3, createPackageSetting(PACKAGE_NAME_3));
+    }
+
+    private void verifyDefaultDistractionFlags(Settings settings) {
+        final PackageUserState readPus1 = settings.mPackages.get(PACKAGE_NAME_1)
+                .readUserState(0);
+        assertThat(readPus1.getDistractionFlags(), is(0));
+
+        final PackageUserState readPus2 = settings.mPackages.get(PACKAGE_NAME_2)
+                .readUserState(0);
+        assertThat(readPus2.getDistractionFlags(), is(0));
+
+        final PackageUserState readPus3 = settings.mPackages.get(PACKAGE_NAME_3)
+                .readUserState(0);
+        assertThat(readPus3.getDistractionFlags(), is(0));
+    }
+
+    private void populateDistractionFlags(Settings settings) {
+        settings.mPackages.clear();
         final PackageSetting ps1 = createPackageSetting(PACKAGE_NAME_1);
         final PackageSetting ps2 = createPackageSetting(PACKAGE_NAME_2);
         final PackageSetting ps3 = createPackageSetting(PACKAGE_NAME_3);
 
         final int distractionFlags1 = PackageManager.RESTRICTION_HIDE_FROM_SUGGESTIONS;
         ps1.setDistractionFlags(distractionFlags1, 0);
-        settingsUnderTest.mPackages.put(PACKAGE_NAME_1, ps1);
+        settings.mPackages.put(PACKAGE_NAME_1, ps1);
 
         final int distractionFlags2 = PackageManager.RESTRICTION_HIDE_NOTIFICATIONS
                 | PackageManager.RESTRICTION_HIDE_FROM_SUGGESTIONS;
         ps2.setDistractionFlags(distractionFlags2, 0);
-        settingsUnderTest.mPackages.put(PACKAGE_NAME_2, ps2);
+        settings.mPackages.put(PACKAGE_NAME_2, ps2);
 
         final int distractionFlags3 = PackageManager.RESTRICTION_NONE;
         ps3.setDistractionFlags(distractionFlags3, 0);
-        settingsUnderTest.mPackages.put(PACKAGE_NAME_3, ps3);
+        settings.mPackages.put(PACKAGE_NAME_3, ps3);
+    }
 
-        settingsUnderTest.writePackageRestrictionsLPr(0);
+    private void verifyDistractionFlags(Settings settings) {
+        final int distractionFlags1 = PackageManager.RESTRICTION_HIDE_FROM_SUGGESTIONS;
+        final int distractionFlags2 = PackageManager.RESTRICTION_HIDE_NOTIFICATIONS
+                | PackageManager.RESTRICTION_HIDE_FROM_SUGGESTIONS;
+        final int distractionFlags3 = PackageManager.RESTRICTION_NONE;
 
-        settingsUnderTest.mPackages.clear();
-        settingsUnderTest.mPackages.put(PACKAGE_NAME_1, createPackageSetting(PACKAGE_NAME_1));
-        settingsUnderTest.mPackages.put(PACKAGE_NAME_2, createPackageSetting(PACKAGE_NAME_2));
-        settingsUnderTest.mPackages.put(PACKAGE_NAME_3, createPackageSetting(PACKAGE_NAME_3));
-        // now read and verify
-        settingsUnderTest.readPackageRestrictionsLPr(0, mOrigFirstInstallTimes);
-        final PackageUserState readPus1 = settingsUnderTest.mPackages.get(PACKAGE_NAME_1)
+        final PackageUserState readPus1 = settings.mPackages.get(PACKAGE_NAME_1)
                 .readUserState(0);
         assertThat(readPus1.getDistractionFlags(), is(distractionFlags1));
 
-        final PackageUserState readPus2 = settingsUnderTest.mPackages.get(PACKAGE_NAME_2)
+        final PackageUserState readPus2 = settings.mPackages.get(PACKAGE_NAME_2)
                 .readUserState(0);
         assertThat(readPus2.getDistractionFlags(), is(distractionFlags2));
 
-        final PackageUserState readPus3 = settingsUnderTest.mPackages.get(PACKAGE_NAME_3)
+        final PackageUserState readPus3 = settings.mPackages.get(PACKAGE_NAME_3)
                 .readUserState(0);
         assertThat(readPus3.getDistractionFlags(), is(distractionFlags3));
+    }
+
+    @Test
+    public void testReadWritePackageRestrictions_distractionFlags() {
+        final Settings settingsUnderTest = makeSettings();
+
+        populateDistractionFlags(settingsUnderTest);
+        settingsUnderTest.writePackageRestrictionsLPr(0, /*sync=*/true);
+
+        // now read and verify
+        populateDefaultSettings(settingsUnderTest);
+        settingsUnderTest.readPackageRestrictionsLPr(0, mOrigFirstInstallTimes);
+        verifyDistractionFlags(settingsUnderTest);
+    }
+
+    @Test
+    public void testReadWritePackageRestrictionsAsync() {
+        final Settings settingsWrite = makeSettings();
+        final Settings settingsRead = makeSettings();
+        mHandler.clear();
+
+        // Initial empty state.
+        settingsWrite.removeUserLPw(0);
+
+        // Schedule 3 async writes.
+        settingsWrite.writePackageRestrictionsLPr(0, /*sync=*/false);
+        settingsWrite.writePackageRestrictionsLPr(0, /*sync=*/false);
+        settingsWrite.writePackageRestrictionsLPr(0, /*sync=*/false);
+
+        PriorityQueue<TestHandler.MsgInfo> messages = mHandler.getPendingMessages();
+        assertEquals(3, messages.size());
+        final Runnable asyncWrite1 = (Runnable) messages.poll().message.obj;
+        final Runnable asyncWrite2 = (Runnable) messages.poll().message.obj;
+        final Runnable asyncWrite3 = (Runnable) messages.poll().message.obj;
+        mHandler.clear();
+
+        // First read should read old data.
+        populateDefaultSettings(settingsRead);
+        settingsRead.readPackageRestrictionsLPr(0, mOrigFirstInstallTimes);
+        verifyDefaultDistractionFlags(settingsRead);
+
+        // 1st write: with flags.
+        populateDistractionFlags(settingsWrite);
+        asyncWrite1.run();
+
+        // New data.
+        populateDefaultSettings(settingsRead);
+        settingsRead.readPackageRestrictionsLPr(0, mOrigFirstInstallTimes);
+        verifyDistractionFlags(settingsRead);
+
+        // 2nd write: without.
+        populateDefaultSettings(settingsWrite);
+        asyncWrite2.run();
+
+        // Default data.
+        populateDefaultSettings(settingsRead);
+        settingsRead.readPackageRestrictionsLPr(0, mOrigFirstInstallTimes);
+        verifyDefaultDistractionFlags(settingsRead);
+
+        // 3rd write: with flags.
+        populateDistractionFlags(settingsWrite);
+        asyncWrite3.run();
+
+        // New data.
+        populateDefaultSettings(settingsRead);
+        settingsRead.readPackageRestrictionsLPr(0, mOrigFirstInstallTimes);
+        verifyDistractionFlags(settingsRead);
+    }
+
+    @Test
+    public void testReadWritePackageRestrictionsAsyncUserRemoval() {
+        final Settings settingsWrite = makeSettings();
+        final Settings settingsRead = makeSettings();
+        mHandler.clear();
+
+        // Initial empty state.
+        settingsWrite.removeUserLPw(0);
+
+        // 2 async writes.
+        populateDistractionFlags(settingsWrite);
+        settingsWrite.writePackageRestrictionsLPr(0, /*sync=*/false);
+        settingsWrite.writePackageRestrictionsLPr(0, /*sync=*/false);
+
+        PriorityQueue<TestHandler.MsgInfo> messages = mHandler.getPendingMessages();
+        assertEquals(2, messages.size());
+        final Runnable asyncWrite1 = (Runnable) messages.poll().message.obj;
+        final Runnable asyncWrite2 = (Runnable) messages.poll().message.obj;
+        mHandler.clear();
+
+        // First read should not read anything.
+        populateDefaultSettings(settingsRead);
+        settingsRead.readPackageRestrictionsLPr(0, mOrigFirstInstallTimes);
+        verifyDefaultDistractionFlags(settingsRead);
+
+        // 1st write.
+        asyncWrite1.run();
+
+        // Second read should read new data.
+        populateDefaultSettings(settingsRead);
+        settingsRead.readPackageRestrictionsLPr(0, mOrigFirstInstallTimes);
+        verifyDistractionFlags(settingsRead);
+
+        // Now remove the user.
+        settingsWrite.removeUserLPw(0);
+
+        // 2nd write.
+        asyncWrite2.run();
+
+        // Re-read and verify that nothing was read.
+        populateDefaultSettings(settingsRead);
+        settingsRead.readPackageRestrictionsLPr(0, mOrigFirstInstallTimes);
+        verifyDefaultDistractionFlags(settingsRead);
+    }
+
+    @Test
+    public void testReadWritePackageRestrictionsSyncAfterAsync() {
+        final Settings settingsWrite = makeSettings();
+        final Settings settingsRead = makeSettings();
+        mHandler.clear();
+
+        // Initial state, distraction flags populated.
+        populateDistractionFlags(settingsWrite);
+        settingsWrite.writePackageRestrictionsLPr(0, /*sync=*/true);
+
+        // 2 async writes of empty distraction flags.
+        populateDefaultSettings(settingsWrite);
+        settingsWrite.writePackageRestrictionsLPr(0, /*sync=*/false);
+        settingsWrite.writePackageRestrictionsLPr(0, /*sync=*/false);
+
+        PriorityQueue<TestHandler.MsgInfo> messages = mHandler.getPendingMessages();
+        assertEquals(2, messages.size());
+        final Runnable asyncWrite1 = (Runnable) messages.poll().message.obj;
+        final Runnable asyncWrite2 = (Runnable) messages.poll().message.obj;
+
+        // First read should use read initial data (with flags).
+        populateDefaultSettings(settingsRead);
+        settingsRead.readPackageRestrictionsLPr(0, mOrigFirstInstallTimes);
+        verifyDistractionFlags(settingsRead);
+
+        // 1st write.
+        asyncWrite1.run();
+
+        // Second read should read updated data.
+        populateDefaultSettings(settingsRead);
+        settingsRead.readPackageRestrictionsLPr(0, mOrigFirstInstallTimes);
+        verifyDefaultDistractionFlags(settingsRead);
+
+        // Sync write with flags - overrides all async writes.
+        populateDistractionFlags(settingsWrite);
+        settingsWrite.writeAllUsersPackageRestrictionsLPr(/*sync=*/true);
+
+        // Expect removeMessages call.
+        assertFalse(mHandler.hasMessages(WRITE_USER_PACKAGE_RESTRICTIONS));
+
+        populateDefaultSettings(settingsRead);
+        settingsRead.readPackageRestrictionsLPr(0, mOrigFirstInstallTimes);
+        verifyDistractionFlags(settingsRead);
+
+        // 2nd write.
+        asyncWrite2.run();
+
+        // Re-read and verify.
+        populateDefaultSettings(settingsRead);
+        settingsRead.readPackageRestrictionsLPr(0, mOrigFirstInstallTimes);
+        verifyDistractionFlags(settingsRead);
     }
 
     @Test
@@ -473,7 +667,7 @@ public class PackageManagerSettingsTests {
         ps2.setUsesStaticLibrariesVersions(new long[] { 34 });
         settingsUnderTest.mPackages.put(PACKAGE_NAME_2, ps2);
 
-        settingsUnderTest.writeLPr(computer);
+        settingsUnderTest.writeLPr(computer, /*sync=*/true);
 
         settingsUnderTest.mPackages.clear();
         settingsUnderTest.mDisabledSysPackages.clear();
@@ -538,7 +732,7 @@ public class PackageManagerSettingsTests {
         ps2.setUsesSdkLibrariesVersionsMajor(new long[] { 34 });
         settingsUnderTest.mPackages.put(PACKAGE_NAME_2, ps2);
 
-        settingsUnderTest.writeLPr(computer);
+        settingsUnderTest.writeLPr(computer, /*sync=*/true);
 
         settingsUnderTest.mPackages.clear();
         settingsUnderTest.mDisabledSysPackages.clear();
@@ -1548,7 +1742,8 @@ public class PackageManagerSettingsTests {
     private Settings makeSettings() {
         return new Settings(InstrumentationRegistry.getContext().getFilesDir(),
                 mRuntimePermissionsPersistence, mPermissionDataProvider,
-                mDomainVerificationManager, null, new PackageManagerTracedLock());
+                mDomainVerificationManager, mHandler,
+                new PackageManagerTracedLock());
     }
 
     private void verifyKeySetMetaData(Settings settings)
@@ -1610,4 +1805,5 @@ public class PackageManagerSettingsTests {
     private AndroidPackage mockAndroidPackage(PackageSetting pkgSetting) {
         return PackageImpl.forTesting(pkgSetting.getPackageName()).hideAsParsed().hideAsFinal();
     }
+
 }

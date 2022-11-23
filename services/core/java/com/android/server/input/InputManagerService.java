@@ -369,7 +369,7 @@ public class InputManagerService extends IInputManager.Stub
     /** Switch code: Camera lens cover. When set the lens is covered. */
     public static final int SW_CAMERA_LENS_COVER = 0x09;
 
-    /** Switch code: Microphone. When set it is off. */
+    /** Switch code: Microphone. When set, the mic is muted. */
     public static final int SW_MUTE_DEVICE = 0x0e;
 
     public static final int SW_LID_BIT = 1 << SW_LID;
@@ -536,14 +536,14 @@ public class InputManagerService extends IInputManager.Stub
         // Set the HW mic toggle switch state
         final int micMuteState = getSwitchState(-1 /* deviceId */, InputDevice.SOURCE_ANY,
                 SW_MUTE_DEVICE);
-        if (micMuteState != InputManager.SWITCH_STATE_UNKNOWN) {
-            setSensorPrivacy(Sensors.MICROPHONE, micMuteState != InputManager.SWITCH_STATE_OFF);
+        if (micMuteState == InputManager.SWITCH_STATE_ON) {
+            setSensorPrivacy(Sensors.MICROPHONE, true);
         }
         // Set the HW camera toggle switch state
         final int cameraMuteState = getSwitchState(-1 /* deviceId */, InputDevice.SOURCE_ANY,
                 SW_CAMERA_LENS_COVER);
-        if (cameraMuteState != InputManager.SWITCH_STATE_UNKNOWN) {
-            setSensorPrivacy(Sensors.CAMERA, cameraMuteState != InputManager.SWITCH_STATE_OFF);
+        if (cameraMuteState == InputManager.SWITCH_STATE_ON) {
+            setSensorPrivacy(Sensors.CAMERA, true);
         }
 
         IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED);

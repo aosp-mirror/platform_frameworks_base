@@ -33,7 +33,6 @@
         <option name="test-file-name" value="SimpleServiceTestApp1.apk" />
         <option name="test-file-name" value="SimpleServiceTestApp2.apk" />
         <option name="test-file-name" value="SimpleServiceTestApp3.apk" />
-        <option name="test-file-name" value="FakeMediaApp.apk" />
     </target_preparer>
 
     <!-- Create place to store apks -->

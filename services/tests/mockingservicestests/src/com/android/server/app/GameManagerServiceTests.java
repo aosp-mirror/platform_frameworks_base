@@ -19,6 +19,7 @@ package com.android.server.app;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.server.app.GameManagerService.WRITE_SETTINGS;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -32,6 +33,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -39,8 +41,10 @@ import static org.mockito.Mockito.when;
 import android.Manifest;
 import android.annotation.Nullable;
 import android.app.GameManager;
+import android.app.GameModeConfiguration;
 import android.app.GameModeInfo;
 import android.app.GameState;
+import android.app.IGameModeListener;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -55,12 +59,13 @@ import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.hardware.power.Mode;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.PowerManagerInternal;
+import android.os.RemoteException;
 import android.os.UserManager;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
 import android.provider.DeviceConfig;
-import android.util.ArraySet;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -73,7 +78,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoSession;
@@ -82,6 +89,7 @@ import org.mockito.quality.Strictness;
 import java.io.File;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.function.Supplier;
@@ -107,6 +115,9 @@ public class GameManagerServiceTests {
     @Mock
     private UserManager mMockUserManager;
     private BroadcastReceiver mShutDownActionReceiver;
+
+    @Captor
+    ArgumentCaptor<IBinder.DeathRecipient> mDeathRecipientCaptor;
 
     // Stolen from ConnectivityServiceTest.MockContext
     class MockContext extends ContextWrapper {
@@ -178,7 +189,7 @@ public class GameManagerServiceTests {
 
         @Override
         public Intent registerReceiver(@Nullable BroadcastReceiver receiver, IntentFilter filter) {
-            mShutDownActionReceiver =  receiver;
+            mShutDownActionReceiver = receiver;
             return null;
         }
     }
@@ -387,6 +398,17 @@ public class GameManagerServiceTests {
                 .thenReturn(applicationInfo);
     }
 
+    private void mockInterventionsEnabledBatteryOptInFromXml() throws Exception {
+        seedGameManagerServiceMetaDataFromFile(mPackageName, 123, "res/xml/"
+                + "game_manager_service_metadata_config_interventions_enabled_battery_opt_in.xml");
+    }
+
+    private void mockInterventionsEnabledPerformanceOptInFromXml() throws Exception {
+        seedGameManagerServiceMetaDataFromFile(mPackageName, 123, "res/xml/"
+                + "game_manager_service_metadata_config_interventions_enabled_performance_opt_in"
+                + ".xml");
+    }
+
     private void mockInterventionsEnabledNoOptInFromXml() throws Exception {
         seedGameManagerServiceMetaDataFromFile(mPackageName, 123,
                 "res/xml/game_manager_service_metadata_config_interventions_enabled_no_opt_in.xml");
@@ -431,7 +453,7 @@ public class GameManagerServiceTests {
     }
 
     /**
-     * By default game mode is not supported.
+     * By default game mode is set to STANDARD
      */
     @Test
     public void testGameModeDefaultValue() {
@@ -441,7 +463,7 @@ public class GameManagerServiceTests {
         startUser(gameManagerService, USER_ID_1);
         mockModifyGameModeGranted();
 
-        assertEquals(GameManager.GAME_MODE_UNSUPPORTED,
+        assertEquals(GameManager.GAME_MODE_STANDARD,
                 gameManagerService.getGameMode(mPackageName, USER_ID_1));
     }
 
@@ -457,7 +479,7 @@ public class GameManagerServiceTests {
         mockModifyGameModeGranted();
 
         gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_STANDARD, USER_ID_2);
-        assertEquals(GameManager.GAME_MODE_UNSUPPORTED,
+        assertEquals(GameManager.GAME_MODE_STANDARD,
                 gameManagerService.getGameMode(mPackageName, USER_ID_2));
     }
 
@@ -473,7 +495,7 @@ public class GameManagerServiceTests {
         startUser(gameManagerService, USER_ID_1);
         gameManagerService.updateConfigsForUser(USER_ID_1, true, mPackageName);
         mockModifyGameModeGranted();
-        assertEquals(GameManager.GAME_MODE_UNSUPPORTED,
+        assertEquals(GameManager.GAME_MODE_STANDARD,
                 gameManagerService.getGameMode(mPackageName, USER_ID_1));
         // We need to make sure the mode is supported before setting it.
         mockDeviceConfigAll();
@@ -580,31 +602,42 @@ public class GameManagerServiceTests {
                 gameManagerService.getGameMode(mPackageName, USER_ID_2));
     }
 
-    private void checkReportedModes(GameManagerService gameManagerService, int ...requiredModes) {
-        if (gameManagerService == null) {
-            gameManagerService = new GameManagerService(mMockContext, mTestLooper.getLooper());
-            startUser(gameManagerService, USER_ID_1);
-            gameManagerService.updateConfigsForUser(USER_ID_1, true, mPackageName);
-        }
-        ArraySet<Integer> reportedModes = new ArraySet<>();
-        int[] modes = gameManagerService.getAvailableGameModes(mPackageName);
-        for (int mode : modes) {
-            reportedModes.add(mode);
-        }
-        assertEquals(requiredModes.length, reportedModes.size());
-        for (int requiredMode : requiredModes) {
-            assertTrue("Required game mode not supported: " + requiredMode,
-                    reportedModes.contains(requiredMode));
-        }
+    private GameManagerService createServiceAndStartUser(int userId) {
+        GameManagerService gameManagerService = new GameManagerService(mMockContext,
+                mTestLooper.getLooper());
+        startUser(gameManagerService, userId);
+        return gameManagerService;
+    }
+
+    private void checkReportedAvailableGameModes(GameManagerService gameManagerService,
+            int... requiredAvailableModes) {
+        Arrays.sort(requiredAvailableModes);
+        // check getAvailableGameModes
+        int[] reportedAvailableModes = gameManagerService.getAvailableGameModes(mPackageName);
+        Arrays.sort(reportedAvailableModes);
+        assertArrayEquals(requiredAvailableModes, reportedAvailableModes);
+
+        // check GetModeInfo.getAvailableGameModes
+        GameModeInfo info = gameManagerService.getGameModeInfo(mPackageName, USER_ID_1);
+        assertNotNull(info);
+        reportedAvailableModes = info.getAvailableGameModes();
+        Arrays.sort(reportedAvailableModes);
+        assertArrayEquals(requiredAvailableModes, reportedAvailableModes);
+    }
+
+    private void checkReportedOptedInGameModes(GameManagerService gameManagerService,
+            int... requiredOptedInModes) {
+        Arrays.sort(requiredOptedInModes);
+        // check GetModeInfo.getOptedInGameModes
+        GameModeInfo info = gameManagerService.getGameModeInfo(mPackageName, USER_ID_1);
+        assertNotNull(info);
+        int[] optedInModes = info.getOptedInGameModes();
+        Arrays.sort(optedInModes);
+        assertArrayEquals(requiredOptedInModes, optedInModes);
     }
 
     private void checkDownscaling(GameManagerService gameManagerService,
-                int gameMode, float scaling) {
-        if (gameManagerService == null) {
-            gameManagerService = new GameManagerService(mMockContext, mTestLooper.getLooper());
-            startUser(gameManagerService, USER_ID_1);
-            gameManagerService.updateConfigsForUser(USER_ID_1, true, mPackageName);
-        }
+            int gameMode, float scaling) {
         GameManagerService.GamePackageConfiguration config =
                 gameManagerService.getConfig(mPackageName, USER_ID_1);
         assertEquals(scaling, config.getGameModeConfiguration(gameMode).getScaling(), 0.01f);
@@ -625,8 +658,6 @@ public class GameManagerServiceTests {
 
     private void checkLoadingBoost(GameManagerService gameManagerService, int gameMode,
             int loadingBoost) {
-        gameManagerService.updateConfigsForUser(USER_ID_1, true, mPackageName);
-
         // Validate GamePackageConfiguration returns the correct value.
         GameManagerService.GamePackageConfiguration config =
                 gameManagerService.getConfig(mPackageName, USER_ID_1);
@@ -639,11 +670,6 @@ public class GameManagerServiceTests {
     }
 
     private void checkFps(GameManagerService gameManagerService, int gameMode, int fps) {
-        if (gameManagerService == null) {
-            gameManagerService = new GameManagerService(mMockContext, mTestLooper.getLooper());
-            startUser(gameManagerService, USER_ID_1);
-            gameManagerService.updateConfigsForUser(USER_ID_1, true, mPackageName);
-        }
         GameManagerService.GamePackageConfiguration config =
                 gameManagerService.getConfig(mPackageName, USER_ID_1);
         assertEquals(fps, config.getGameModeConfiguration(gameMode).getFps());
@@ -662,7 +688,8 @@ public class GameManagerServiceTests {
     public void testDeviceConfigDefault() {
         mockDeviceConfigDefault();
         mockModifyGameModeGranted();
-        checkReportedModes(null);
+        checkReportedAvailableGameModes(createServiceAndStartUser(USER_ID_1),
+                GameManager.GAME_MODE_STANDARD, GameManager.GAME_MODE_CUSTOM);
     }
 
     /**
@@ -672,38 +699,8 @@ public class GameManagerServiceTests {
     public void testDeviceConfigNone() {
         mockDeviceConfigNone();
         mockModifyGameModeGranted();
-        checkReportedModes(null);
-    }
-
-    /**
-     * Phenotype device config for performance mode exists and is valid.
-     */
-    @Test
-    public void testDeviceConfigPerformance() {
-        mockDeviceConfigPerformance();
-        mockModifyGameModeGranted();
-        checkReportedModes(null, GameManager.GAME_MODE_PERFORMANCE, GameManager.GAME_MODE_STANDARD);
-    }
-
-    /**
-     * Phenotype device config for battery mode exists and is valid.
-     */
-    @Test
-    public void testDeviceConfigBattery() {
-        mockDeviceConfigBattery();
-        mockModifyGameModeGranted();
-        checkReportedModes(null, GameManager.GAME_MODE_BATTERY, GameManager.GAME_MODE_STANDARD);
-    }
-
-    /**
-     * Phenotype device configs for both battery and performance modes exists and are valid.
-     */
-    @Test
-    public void testDeviceConfigAll() {
-        mockDeviceConfigAll();
-        mockModifyGameModeGranted();
-        checkReportedModes(null, GameManager.GAME_MODE_PERFORMANCE, GameManager.GAME_MODE_BATTERY,
-                GameManager.GAME_MODE_STANDARD);
+        checkReportedAvailableGameModes(createServiceAndStartUser(USER_ID_1),
+                GameManager.GAME_MODE_STANDARD, GameManager.GAME_MODE_CUSTOM);
     }
 
     /**
@@ -713,7 +710,8 @@ public class GameManagerServiceTests {
     public void testDeviceConfigInvalid() {
         mockDeviceConfigInvalid();
         mockModifyGameModeGranted();
-        checkReportedModes(null);
+        checkReportedAvailableGameModes(createServiceAndStartUser(USER_ID_1),
+                GameManager.GAME_MODE_STANDARD, GameManager.GAME_MODE_CUSTOM);
     }
 
     /**
@@ -723,7 +721,8 @@ public class GameManagerServiceTests {
     public void testDeviceConfigMalformed() {
         mockDeviceConfigMalformed();
         mockModifyGameModeGranted();
-        checkReportedModes(null);
+        checkReportedAvailableGameModes(createServiceAndStartUser(USER_ID_1),
+                GameManager.GAME_MODE_STANDARD, GameManager.GAME_MODE_CUSTOM);
     }
 
     /**
@@ -740,8 +739,8 @@ public class GameManagerServiceTests {
         gameManagerService.setGameModeConfigOverride(mPackageName, USER_ID_1,
                 GameManager.GAME_MODE_PERFORMANCE, "120", "0.3");
 
-        checkReportedModes(gameManagerService, GameManager.GAME_MODE_PERFORMANCE,
-                GameManager.GAME_MODE_STANDARD);
+        checkReportedAvailableGameModes(gameManagerService, GameManager.GAME_MODE_PERFORMANCE,
+                GameManager.GAME_MODE_STANDARD, GameManager.GAME_MODE_CUSTOM);
         checkDownscaling(gameManagerService, GameManager.GAME_MODE_PERFORMANCE, 0.3f);
         checkFps(gameManagerService, GameManager.GAME_MODE_PERFORMANCE, 120);
     }
@@ -760,8 +759,8 @@ public class GameManagerServiceTests {
         gameManagerService.setGameModeConfigOverride(mPackageName, USER_ID_1,
                 GameManager.GAME_MODE_BATTERY, "60", "0.5");
 
-        checkReportedModes(gameManagerService, GameManager.GAME_MODE_BATTERY,
-                GameManager.GAME_MODE_STANDARD);
+        checkReportedAvailableGameModes(gameManagerService, GameManager.GAME_MODE_BATTERY,
+                GameManager.GAME_MODE_STANDARD, GameManager.GAME_MODE_CUSTOM);
         checkDownscaling(gameManagerService, GameManager.GAME_MODE_BATTERY, 0.5f);
         checkFps(gameManagerService, GameManager.GAME_MODE_BATTERY, 60);
     }
@@ -782,8 +781,9 @@ public class GameManagerServiceTests {
         gameManagerService.setGameModeConfigOverride(mPackageName, USER_ID_1,
                 GameManager.GAME_MODE_BATTERY, "60", "0.5");
 
-        checkReportedModes(gameManagerService, GameManager.GAME_MODE_PERFORMANCE,
-                GameManager.GAME_MODE_BATTERY, GameManager.GAME_MODE_STANDARD);
+        checkReportedAvailableGameModes(gameManagerService, GameManager.GAME_MODE_PERFORMANCE,
+                GameManager.GAME_MODE_BATTERY, GameManager.GAME_MODE_STANDARD,
+                GameManager.GAME_MODE_CUSTOM);
         checkDownscaling(gameManagerService, GameManager.GAME_MODE_PERFORMANCE, 0.3f);
         checkFps(gameManagerService, GameManager.GAME_MODE_PERFORMANCE, 120);
         checkDownscaling(gameManagerService, GameManager.GAME_MODE_BATTERY, 0.5f);
@@ -876,8 +876,8 @@ public class GameManagerServiceTests {
         gameManagerService.resetGameModeConfigOverride(mPackageName, USER_ID_1,
                 GameManager.GAME_MODE_PERFORMANCE);
 
-        checkReportedModes(gameManagerService, GameManager.GAME_MODE_PERFORMANCE,
-                GameManager.GAME_MODE_STANDARD);
+        checkReportedAvailableGameModes(gameManagerService, GameManager.GAME_MODE_PERFORMANCE,
+                GameManager.GAME_MODE_STANDARD, GameManager.GAME_MODE_CUSTOM);
         checkDownscaling(gameManagerService, GameManager.GAME_MODE_PERFORMANCE, 0.5f);
         checkFps(gameManagerService, GameManager.GAME_MODE_PERFORMANCE, 90);
     }
@@ -899,8 +899,8 @@ public class GameManagerServiceTests {
         gameManagerService.resetGameModeConfigOverride(mPackageName, USER_ID_1,
                 GameManager.GAME_MODE_BATTERY);
 
-        checkReportedModes(gameManagerService, GameManager.GAME_MODE_BATTERY,
-                GameManager.GAME_MODE_STANDARD);
+        checkReportedAvailableGameModes(gameManagerService, GameManager.GAME_MODE_BATTERY,
+                GameManager.GAME_MODE_STANDARD, GameManager.GAME_MODE_CUSTOM);
         checkDownscaling(gameManagerService, GameManager.GAME_MODE_BATTERY, 0.7f);
         checkFps(gameManagerService, GameManager.GAME_MODE_BATTERY, 30);
     }
@@ -923,8 +923,9 @@ public class GameManagerServiceTests {
 
         gameManagerService.resetGameModeConfigOverride(mPackageName, USER_ID_1, -1);
 
-        checkReportedModes(gameManagerService, GameManager.GAME_MODE_PERFORMANCE,
-                GameManager.GAME_MODE_BATTERY, GameManager.GAME_MODE_STANDARD);
+        checkReportedAvailableGameModes(gameManagerService, GameManager.GAME_MODE_PERFORMANCE,
+                GameManager.GAME_MODE_BATTERY, GameManager.GAME_MODE_STANDARD,
+                GameManager.GAME_MODE_CUSTOM);
         checkDownscaling(gameManagerService, GameManager.GAME_MODE_PERFORMANCE, 0.5f);
         checkFps(gameManagerService, GameManager.GAME_MODE_PERFORMANCE, 90);
         checkDownscaling(gameManagerService, GameManager.GAME_MODE_BATTERY, 0.7f);
@@ -952,8 +953,9 @@ public class GameManagerServiceTests {
         gameManagerService.resetGameModeConfigOverride(mPackageName, USER_ID_1,
                 GameManager.GAME_MODE_BATTERY);
 
-        checkReportedModes(gameManagerService, GameManager.GAME_MODE_PERFORMANCE,
-                GameManager.GAME_MODE_BATTERY, GameManager.GAME_MODE_STANDARD);
+        checkReportedAvailableGameModes(gameManagerService, GameManager.GAME_MODE_PERFORMANCE,
+                GameManager.GAME_MODE_BATTERY, GameManager.GAME_MODE_STANDARD,
+                GameManager.GAME_MODE_CUSTOM);
         checkDownscaling(gameManagerService, GameManager.GAME_MODE_PERFORMANCE, 0.3f);
         checkFps(gameManagerService, GameManager.GAME_MODE_PERFORMANCE, 120);
         checkDownscaling(gameManagerService, GameManager.GAME_MODE_BATTERY, 0.7f);
@@ -968,10 +970,10 @@ public class GameManagerServiceTests {
         mockGameModeOptInAll();
         mockDeviceConfigNone();
         mockModifyGameModeGranted();
-        checkReportedModes(null, GameManager.GAME_MODE_PERFORMANCE, GameManager.GAME_MODE_BATTERY,
-                GameManager.GAME_MODE_STANDARD);
+        checkReportedAvailableGameModes(createServiceAndStartUser(USER_ID_1),
+                GameManager.GAME_MODE_PERFORMANCE, GameManager.GAME_MODE_BATTERY,
+                GameManager.GAME_MODE_STANDARD, GameManager.GAME_MODE_CUSTOM);
     }
-
 
 
     /**
@@ -982,7 +984,9 @@ public class GameManagerServiceTests {
         mockGameModeOptInBattery();
         mockDeviceConfigNone();
         mockModifyGameModeGranted();
-        checkReportedModes(null, GameManager.GAME_MODE_BATTERY, GameManager.GAME_MODE_STANDARD);
+        checkReportedAvailableGameModes(createServiceAndStartUser(USER_ID_1),
+                GameManager.GAME_MODE_BATTERY, GameManager.GAME_MODE_STANDARD,
+                GameManager.GAME_MODE_CUSTOM);
     }
 
     /**
@@ -993,7 +997,9 @@ public class GameManagerServiceTests {
         mockGameModeOptInPerformance();
         mockDeviceConfigNone();
         mockModifyGameModeGranted();
-        checkReportedModes(null, GameManager.GAME_MODE_PERFORMANCE, GameManager.GAME_MODE_STANDARD);
+        checkReportedAvailableGameModes(createServiceAndStartUser(USER_ID_1),
+                GameManager.GAME_MODE_PERFORMANCE, GameManager.GAME_MODE_STANDARD,
+                GameManager.GAME_MODE_CUSTOM);
     }
 
     /**
@@ -1005,8 +1011,9 @@ public class GameManagerServiceTests {
         mockGameModeOptInBattery();
         mockDeviceConfigPerformance();
         mockModifyGameModeGranted();
-        checkReportedModes(null, GameManager.GAME_MODE_PERFORMANCE, GameManager.GAME_MODE_BATTERY,
-                GameManager.GAME_MODE_STANDARD);
+        checkReportedAvailableGameModes(createServiceAndStartUser(USER_ID_1),
+                GameManager.GAME_MODE_PERFORMANCE, GameManager.GAME_MODE_BATTERY,
+                GameManager.GAME_MODE_STANDARD, GameManager.GAME_MODE_CUSTOM);
     }
 
     /**
@@ -1018,8 +1025,9 @@ public class GameManagerServiceTests {
         mockGameModeOptInPerformance();
         mockDeviceConfigBattery();
         mockModifyGameModeGranted();
-        checkReportedModes(null, GameManager.GAME_MODE_PERFORMANCE, GameManager.GAME_MODE_BATTERY,
-                GameManager.GAME_MODE_STANDARD);
+        checkReportedAvailableGameModes(createServiceAndStartUser(USER_ID_1),
+                GameManager.GAME_MODE_PERFORMANCE, GameManager.GAME_MODE_BATTERY,
+                GameManager.GAME_MODE_STANDARD, GameManager.GAME_MODE_CUSTOM);
     }
 
     /**
@@ -1029,7 +1037,8 @@ public class GameManagerServiceTests {
     public void testInterventionAllowScalingDefault() throws Exception {
         mockDeviceConfigPerformance();
         mockModifyGameModeGranted();
-        checkDownscaling(null, GameManager.GAME_MODE_PERFORMANCE, 0.5f);
+        checkDownscaling(createServiceAndStartUser(USER_ID_1), GameManager.GAME_MODE_PERFORMANCE,
+                0.5f);
     }
 
     /**
@@ -1040,7 +1049,8 @@ public class GameManagerServiceTests {
         mockDeviceConfigPerformance();
         mockInterventionAllowDownscaleFalse();
         mockModifyGameModeGranted();
-        checkDownscaling(null, GameManager.GAME_MODE_PERFORMANCE, -1.0f);
+        checkDownscaling(createServiceAndStartUser(USER_ID_1), GameManager.GAME_MODE_PERFORMANCE,
+                -1.0f);
     }
 
     /**
@@ -1052,7 +1062,8 @@ public class GameManagerServiceTests {
         mockDeviceConfigPerformance();
         mockInterventionAllowDownscaleTrue();
         mockModifyGameModeGranted();
-        checkDownscaling(null, GameManager.GAME_MODE_PERFORMANCE, 0.5f);
+        checkDownscaling(createServiceAndStartUser(USER_ID_1), GameManager.GAME_MODE_PERFORMANCE,
+                0.5f);
     }
 
     /**
@@ -1060,12 +1071,9 @@ public class GameManagerServiceTests {
      */
     @Test
     public void testInterventionAllowAngleDefault() throws Exception {
-        GameManagerService gameManagerService = new GameManagerService(
-                mMockContext, mTestLooper.getLooper());
-
-        startUser(gameManagerService, USER_ID_1);
         mockDeviceConfigPerformance();
         mockModifyGameModeGranted();
+        GameManagerService gameManagerService = createServiceAndStartUser(USER_ID_1);
         checkAngleEnabled(gameManagerService, GameManager.GAME_MODE_PERFORMANCE, false);
     }
 
@@ -1075,12 +1083,9 @@ public class GameManagerServiceTests {
      */
     @Test
     public void testInterventionAllowLoadingBoostDefault() throws Exception {
-        GameManagerService gameManagerService = new GameManagerService(
-                mMockContext, mTestLooper.getLooper());
-
-        startUser(gameManagerService, USER_ID_1);
         mockDeviceConfigPerformance();
         mockModifyGameModeGranted();
+        GameManagerService gameManagerService = createServiceAndStartUser(USER_ID_1);
         checkLoadingBoost(gameManagerService, GameManager.GAME_MODE_PERFORMANCE, -1);
     }
 
@@ -1089,12 +1094,10 @@ public class GameManagerServiceTests {
      */
     @Test
     public void testInterventionAllowAngleFalse() throws Exception {
-        GameManagerService gameManagerService =
-                new GameManagerService(mMockContext, mTestLooper.getLooper());
-        startUser(gameManagerService, USER_ID_1);
         mockDeviceConfigPerformanceEnableAngle();
         mockInterventionAllowAngleFalse();
         mockModifyGameModeGranted();
+        GameManagerService gameManagerService = createServiceAndStartUser(USER_ID_1);
         checkAngleEnabled(gameManagerService, GameManager.GAME_MODE_PERFORMANCE, false);
     }
 
@@ -1171,8 +1174,9 @@ public class GameManagerServiceTests {
     public void testInterventionFps() throws Exception {
         mockDeviceConfigAll();
         mockModifyGameModeGranted();
-        checkFps(null, GameManager.GAME_MODE_PERFORMANCE, 90);
-        checkFps(null, GameManager.GAME_MODE_BATTERY, 30);
+        GameManagerService service = createServiceAndStartUser(USER_ID_1);
+        checkFps(service, GameManager.GAME_MODE_PERFORMANCE, 90);
+        checkFps(service, GameManager.GAME_MODE_BATTERY, 30);
     }
 
     /**
@@ -1195,7 +1199,7 @@ public class GameManagerServiceTests {
 
     /**
      * Ensure that, if a game no longer supports any game modes, we set the game mode to
-     * UNSUPPORTED
+     * STANDARD
      */
     @Test
     public void testUnsetInvalidGameMode() throws Exception {
@@ -1206,7 +1210,7 @@ public class GameManagerServiceTests {
         startUser(gameManagerService, USER_ID_1);
         gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_PERFORMANCE, USER_ID_1);
         gameManagerService.updateConfigsForUser(USER_ID_1, true, mPackageName);
-        assertEquals(GameManager.GAME_MODE_UNSUPPORTED,
+        assertEquals(GameManager.GAME_MODE_STANDARD,
                 gameManagerService.getGameMode(mPackageName, USER_ID_1));
     }
 
@@ -1247,6 +1251,7 @@ public class GameManagerServiceTests {
     static {
         System.loadLibrary("mockingservicestestjni");
     }
+
     @Test
     public void testGetGameModeInfoPermissionDenied() {
         mockDeviceConfigAll();
@@ -1261,30 +1266,30 @@ public class GameManagerServiceTests {
     }
 
     @Test
-    public void testGetGameModeInfoWithAllGameModesDefault() {
-        mockDeviceConfigAll();
-        mockModifyGameModeGranted();
-        GameManagerService gameManagerService =
-                new GameManagerService(mMockContext, mTestLooper.getLooper());
-        startUser(gameManagerService, USER_ID_1);
-        GameModeInfo gameModeInfo = gameManagerService.getGameModeInfo(mPackageName, USER_ID_1);
-
-        assertEquals(GameManager.GAME_MODE_STANDARD, gameModeInfo.getActiveGameMode());
-        assertEquals(3, gameModeInfo.getAvailableGameModes().length);
-    }
-
-    @Test
     public void testGetGameModeInfoWithAllGameModes() {
         mockDeviceConfigAll();
         mockModifyGameModeGranted();
         GameManagerService gameManagerService =
                 new GameManagerService(mMockContext, mTestLooper.getLooper());
         startUser(gameManagerService, USER_ID_1);
-        gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_PERFORMANCE, USER_ID_1);
         GameModeInfo gameModeInfo = gameManagerService.getGameModeInfo(mPackageName, USER_ID_1);
+        assertEquals(GameManager.GAME_MODE_STANDARD, gameModeInfo.getActiveGameMode());
+        assertTrue(gameModeInfo.isDownscalingAllowed());
+        assertTrue(gameModeInfo.isFpsOverrideAllowed());
 
-        assertEquals(GameManager.GAME_MODE_PERFORMANCE, gameModeInfo.getActiveGameMode());
-        assertEquals(3, gameModeInfo.getAvailableGameModes().length);
+        checkReportedAvailableGameModes(gameManagerService, GameManager.GAME_MODE_PERFORMANCE,
+                GameManager.GAME_MODE_BATTERY, GameManager.GAME_MODE_STANDARD,
+                GameManager.GAME_MODE_CUSTOM);
+        checkReportedOptedInGameModes(gameManagerService);
+
+        assertEquals(new GameModeConfiguration.Builder()
+                .setFpsOverride(30)
+                .setScalingFactor(0.7f)
+                .build(), gameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_BATTERY));
+        assertEquals(new GameModeConfiguration.Builder()
+                .setFpsOverride(90)
+                .setScalingFactor(0.5f)
+                .build(), gameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_PERFORMANCE));
     }
 
     @Test
@@ -1298,7 +1303,14 @@ public class GameManagerServiceTests {
         GameModeInfo gameModeInfo = gameManagerService.getGameModeInfo(mPackageName, USER_ID_1);
 
         assertEquals(GameManager.GAME_MODE_BATTERY, gameModeInfo.getActiveGameMode());
-        assertEquals(2, gameModeInfo.getAvailableGameModes().length);
+
+        checkReportedAvailableGameModes(gameManagerService,
+                GameManager.GAME_MODE_BATTERY, GameManager.GAME_MODE_STANDARD,
+                GameManager.GAME_MODE_CUSTOM);
+        checkReportedOptedInGameModes(gameManagerService);
+
+        assertNotNull(gameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_BATTERY));
+        assertNull(gameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_PERFORMANCE));
     }
 
     @Test
@@ -1312,11 +1324,17 @@ public class GameManagerServiceTests {
         GameModeInfo gameModeInfo = gameManagerService.getGameModeInfo(mPackageName, USER_ID_1);
 
         assertEquals(GameManager.GAME_MODE_PERFORMANCE, gameModeInfo.getActiveGameMode());
-        assertEquals(2, gameModeInfo.getAvailableGameModes().length);
+        checkReportedAvailableGameModes(gameManagerService,
+                GameManager.GAME_MODE_PERFORMANCE, GameManager.GAME_MODE_STANDARD,
+                GameManager.GAME_MODE_CUSTOM);
+        checkReportedOptedInGameModes(gameManagerService);
+
+        assertNotNull(gameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_PERFORMANCE));
+        assertNull(gameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_BATTERY));
     }
 
     @Test
-    public void testGetGameModeInfoWithUnsupportedGameMode() {
+    public void testGetGameModeInfoWithDefaultGameModes() {
         mockDeviceConfigNone();
         mockModifyGameModeGranted();
         GameManagerService gameManagerService =
@@ -1324,8 +1342,103 @@ public class GameManagerServiceTests {
         startUser(gameManagerService, USER_ID_1);
         GameModeInfo gameModeInfo = gameManagerService.getGameModeInfo(mPackageName, USER_ID_1);
 
-        assertEquals(GameManager.GAME_MODE_UNSUPPORTED, gameModeInfo.getActiveGameMode());
-        assertEquals(0, gameModeInfo.getAvailableGameModes().length);
+        assertEquals(GameManager.GAME_MODE_STANDARD, gameModeInfo.getActiveGameMode());
+        checkReportedAvailableGameModes(gameManagerService, GameManager.GAME_MODE_STANDARD,
+                GameManager.GAME_MODE_CUSTOM);
+        assertNull(gameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_CUSTOM));
+        assertNull(gameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_STANDARD));
+        assertNull(gameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_BATTERY));
+        assertNull(gameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_PERFORMANCE));
+    }
+
+    @Test
+    public void testGetGameModeInfoWithAllGameModesOptedIn_noDeviceConfig()
+            throws Exception {
+        mockModifyGameModeGranted();
+        mockInterventionsEnabledAllOptInFromXml();
+        mockDeviceConfigNone();
+        GameManagerService gameManagerService = createServiceAndStartUser(USER_ID_1);
+        GameModeInfo gameModeInfo = gameManagerService.getGameModeInfo(mPackageName, USER_ID_1);
+        assertEquals(GameManager.GAME_MODE_STANDARD, gameModeInfo.getActiveGameMode());
+        verifyAllModesOptedInAndInterventionsAvailable(gameManagerService, gameModeInfo);
+
+        assertNull(gameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_BATTERY));
+        assertNull(gameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_PERFORMANCE));
+    }
+
+    @Test
+    public void testGetGameModeInfoWithAllGameModesOptedIn_allDeviceConfig()
+            throws Exception {
+        mockModifyGameModeGranted();
+        mockInterventionsEnabledAllOptInFromXml();
+        mockDeviceConfigAll();
+        GameManagerService gameManagerService = createServiceAndStartUser(USER_ID_1);
+        GameModeInfo gameModeInfo = gameManagerService.getGameModeInfo(mPackageName, USER_ID_1);
+        assertEquals(GameManager.GAME_MODE_STANDARD, gameModeInfo.getActiveGameMode());
+        verifyAllModesOptedInAndInterventionsAvailable(gameManagerService, gameModeInfo);
+
+        assertNull(gameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_BATTERY));
+        assertNull(gameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_PERFORMANCE));
+    }
+
+    private void verifyAllModesOptedInAndInterventionsAvailable(
+            GameManagerService gameManagerService,
+            GameModeInfo gameModeInfo) {
+        checkReportedAvailableGameModes(gameManagerService,
+                GameManager.GAME_MODE_PERFORMANCE, GameManager.GAME_MODE_BATTERY,
+                GameManager.GAME_MODE_STANDARD, GameManager.GAME_MODE_CUSTOM);
+        checkReportedOptedInGameModes(gameManagerService,
+                GameManager.GAME_MODE_PERFORMANCE, GameManager.GAME_MODE_BATTERY);
+        assertTrue(gameModeInfo.isFpsOverrideAllowed());
+        assertTrue(gameModeInfo.isDownscalingAllowed());
+    }
+
+    @Test
+    public void testGetGameModeInfoWithBatteryModeOptedIn_withBatteryDeviceConfig()
+            throws Exception {
+        mockModifyGameModeGranted();
+        mockInterventionsEnabledBatteryOptInFromXml();
+        mockDeviceConfigBattery();
+        GameManagerService gameManagerService = createServiceAndStartUser(USER_ID_1);
+        GameModeInfo gameModeInfo = gameManagerService.getGameModeInfo(mPackageName, USER_ID_1);
+        assertEquals(GameManager.GAME_MODE_STANDARD, gameModeInfo.getActiveGameMode());
+
+        checkReportedAvailableGameModes(gameManagerService, GameManager.GAME_MODE_BATTERY,
+                GameManager.GAME_MODE_STANDARD, GameManager.GAME_MODE_CUSTOM);
+        checkReportedOptedInGameModes(gameManagerService, GameManager.GAME_MODE_BATTERY);
+
+        assertNull(gameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_BATTERY));
+        assertNull(gameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_PERFORMANCE));
+    }
+
+    @Test
+    public void testGetGameModeInfoWithPerformanceModeOptedIn_withAllDeviceConfig()
+            throws Exception {
+        mockModifyGameModeGranted();
+        mockInterventionsEnabledPerformanceOptInFromXml();
+        mockDeviceConfigAll();
+        GameManagerService gameManagerService = createServiceAndStartUser(USER_ID_1);
+        GameModeInfo gameModeInfo = gameManagerService.getGameModeInfo(mPackageName, USER_ID_1);
+        assertEquals(GameManager.GAME_MODE_STANDARD, gameModeInfo.getActiveGameMode());
+
+        checkReportedAvailableGameModes(gameManagerService, GameManager.GAME_MODE_PERFORMANCE,
+                GameManager.GAME_MODE_BATTERY, GameManager.GAME_MODE_STANDARD,
+                GameManager.GAME_MODE_CUSTOM);
+        checkReportedOptedInGameModes(gameManagerService, GameManager.GAME_MODE_PERFORMANCE);
+
+        assertNotNull(gameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_BATTERY));
+        assertNull(gameModeInfo.getGameModeConfiguration(GameManager.GAME_MODE_PERFORMANCE));
+    }
+
+    @Test
+    public void testGetGameModeInfoWithInterventionsDisabled() throws Exception {
+        mockModifyGameModeGranted();
+        mockInterventionsDisabledAllOptInFromXml();
+        mockDeviceConfigAll();
+        GameManagerService gameManagerService = createServiceAndStartUser(USER_ID_1);
+        GameModeInfo gameModeInfo = gameManagerService.getGameModeInfo(mPackageName, USER_ID_1);
+        assertFalse(gameModeInfo.isFpsOverrideAllowed());
+        assertFalse(gameModeInfo.isDownscalingAllowed());
     }
 
     @Test
@@ -1381,7 +1494,7 @@ public class GameManagerServiceTests {
     }
 
     private void mockInterventionListForMultipleUsers() {
-        final String[] packageNames = new String[] {"com.android.app0",
+        final String[] packageNames = new String[]{"com.android.app0",
                 "com.android.app1", "com.android.app2"};
 
         final ApplicationInfo[] applicationInfos = new ApplicationInfo[3];
@@ -1424,8 +1537,8 @@ public class GameManagerServiceTests {
         final Context context = InstrumentationRegistry.getContext();
         GameManagerService gameManagerService =
                 new GameManagerService(mMockContext,
-                                       mTestLooper.getLooper(),
-                                       context.getFilesDir());
+                        mTestLooper.getLooper(),
+                        context.getFilesDir());
         startUser(gameManagerService, USER_ID_1);
         startUser(gameManagerService, USER_ID_2);
 
@@ -1437,14 +1550,14 @@ public class GameManagerServiceTests {
 
         /* Expected fileOutput (order may vary)
          # user 1001:
-         com.android.app2 <UID>   0   2   angle=0,scaling=0.5,fps=90  3   angle=0,scaling=0.5,fps=60
+         com.android.app2 <UID>   1   2   angle=0,scaling=0.5,fps=90  3   angle=0,scaling=0.5,fps=60
          com.android.app1 <UID>   1   2   angle=0,scaling=0.5,fps=90  3   angle=0,scaling=0.7,fps=30
-         com.android.app0 <UID>   0   2   angle=0,scaling=0.6,fps=120 3   angle=0,scaling=0.7,fps=30
+         com.android.app0 <UID>   1   2   angle=0,scaling=0.6,fps=120 3   angle=0,scaling=0.7,fps=30
 
          # user 1002:
-         com.android.app2 <UID>   0   2   angle=0,scaling=0.5,fps=90  3   angle=0,scaling=0.7,fps=30
+         com.android.app2 <UID>   1   2   angle=0,scaling=0.5,fps=90  3   angle=0,scaling=0.7,fps=30
          com.android.app1 <UID>   1   2   angle=0,scaling=0.5,fps=90  3   angle=0,scaling=0.7,fps=30
-         com.android.app0 <UID>   0   2   angle=0,scaling=0.5,fps=90  3   angle=0,scaling=0.7,fps=30
+         com.android.app0 <UID>   1   2   angle=0,scaling=0.5,fps=90  3   angle=0,scaling=0.7,fps=30
          The current game mode would only be set to non-zero if the current user have that game
          installed.
         */
@@ -1461,7 +1574,7 @@ public class GameManagerServiceTests {
         assertEquals(splitLine[6], "angle=0,scaling=0.5,fps=60");
         splitLine = fileOutput.get(1).split("\\s+");
         assertEquals(splitLine[0], "com.android.app1");
-        assertEquals(splitLine[2], "0");
+        assertEquals(splitLine[2], "1");
         assertEquals(splitLine[3], "2");
         assertEquals(splitLine[4], "angle=0,scaling=0.5,fps=90");
         assertEquals(splitLine[5], "3");
@@ -1484,7 +1597,7 @@ public class GameManagerServiceTests {
 
         splitLine = fileOutput.get(0).split("\\s+");
         assertEquals(splitLine[0], "com.android.app2");
-        assertEquals(splitLine[2], "0");
+        assertEquals(splitLine[2], "1");
         assertEquals(splitLine[3], "2");
         assertEquals(splitLine[4], "angle=0,scaling=0.5,fps=90");
         assertEquals(splitLine[5], "3");
@@ -1498,7 +1611,7 @@ public class GameManagerServiceTests {
         assertEquals(splitLine[6], "angle=0,scaling=0.7,fps=30");
         splitLine = fileOutput.get(2).split("\\s+");
         assertEquals(splitLine[0], "com.android.app0");
-        assertEquals(splitLine[2], "0");
+        assertEquals(splitLine[2], "1");
         assertEquals(splitLine[3], "2");
         assertEquals(splitLine[4], "angle=0,scaling=0.5,fps=90");
         assertEquals(splitLine[5], "3");
@@ -1518,8 +1631,8 @@ public class GameManagerServiceTests {
         startUser(gameManagerService, USER_ID_1);
         startUser(gameManagerService, USER_ID_2);
         gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_BATTERY, USER_ID_1);
-        checkReportedModes(gameManagerService, GameManager.GAME_MODE_STANDARD,
-                GameManager.GAME_MODE_BATTERY);
+        checkReportedAvailableGameModes(gameManagerService, GameManager.GAME_MODE_STANDARD,
+                GameManager.GAME_MODE_BATTERY, GameManager.GAME_MODE_CUSTOM);
         assertEquals(gameManagerService.getGameMode(mPackageName, USER_ID_1),
                 GameManager.GAME_MODE_BATTERY);
 
@@ -1527,16 +1640,16 @@ public class GameManagerServiceTests {
         switchUser(gameManagerService, USER_ID_1, USER_ID_2);
         assertEquals(gameManagerService.getGameMode(mPackageName, USER_ID_2),
                 GameManager.GAME_MODE_STANDARD);
-        checkReportedModes(gameManagerService, GameManager.GAME_MODE_STANDARD,
-                GameManager.GAME_MODE_BATTERY, GameManager.GAME_MODE_PERFORMANCE);
-        gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_PERFORMANCE, USER_ID_2);
-        gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_BATTERY, USER_ID_1);
+        checkReportedAvailableGameModes(gameManagerService, GameManager.GAME_MODE_STANDARD,
+                GameManager.GAME_MODE_BATTERY, GameManager.GAME_MODE_PERFORMANCE,
+                GameManager.GAME_MODE_CUSTOM);
 
         switchUser(gameManagerService, USER_ID_2, USER_ID_1);
-        checkReportedModes(gameManagerService, GameManager.GAME_MODE_STANDARD,
-                GameManager.GAME_MODE_BATTERY, GameManager.GAME_MODE_PERFORMANCE);
-        gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_PERFORMANCE, USER_ID_2);
-        gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_BATTERY, USER_ID_1);
+        assertEquals(gameManagerService.getGameMode(mPackageName, USER_ID_1),
+                GameManager.GAME_MODE_BATTERY);
+        checkReportedAvailableGameModes(gameManagerService, GameManager.GAME_MODE_STANDARD,
+                GameManager.GAME_MODE_BATTERY, GameManager.GAME_MODE_PERFORMANCE,
+                GameManager.GAME_MODE_CUSTOM);
     }
 
     @Test
@@ -1636,6 +1749,33 @@ public class GameManagerServiceTests {
         assertThrows(IllegalArgumentException.class, () -> {
             gameManagerService.getResolutionScalingFactor(mPackageName,
                     GameManager.GAME_MODE_BATTERY, USER_ID_1);
+        });
+    }
+
+    @Test
+    public void testUpdateCustomGameModeConfiguration_permissionDenied() {
+        mockModifyGameModeDenied();
+        mockDeviceConfigAll();
+        GameManagerService gameManagerService =
+                new GameManagerService(mMockContext, mTestLooper.getLooper());
+        startUser(gameManagerService, USER_ID_1);
+        assertThrows(SecurityException.class, () -> {
+            gameManagerService.updateCustomGameModeConfiguration(mPackageName,
+                    new GameModeConfiguration.Builder().setScalingFactor(0.5f).build(),
+                    USER_ID_1);
+        });
+    }
+
+    @Test
+    public void testUpdateCustomGameModeConfiguration_noUserId() {
+        mockModifyGameModeGranted();
+        GameManagerService gameManagerService =
+                new GameManagerService(mMockContext, mTestLooper.getLooper());
+        startUser(gameManagerService, USER_ID_2);
+        assertThrows(IllegalArgumentException.class, () -> {
+            gameManagerService.updateCustomGameModeConfiguration(mPackageName,
+                    new GameModeConfiguration.Builder().setScalingFactor(0.5f).build(),
+                    USER_ID_1);
         });
     }
 
@@ -1741,6 +1881,53 @@ public class GameManagerServiceTests {
         Mockito.verify(gameManagerService).setOverrideFrameRate(
                 ArgumentMatchers.eq(DEFAULT_PACKAGE_UID),
                 ArgumentMatchers.eq(0.0f));
+    }
+
+    @Test
+    public void testAddGameModeListener() throws RemoteException {
+        GameManagerService gameManagerService =
+                new GameManagerService(mMockContext, mTestLooper.getLooper());
+        mockDeviceConfigAll();
+        startUser(gameManagerService, USER_ID_1);
+        mockModifyGameModeGranted();
+
+        IGameModeListener mockListener = Mockito.mock(IGameModeListener.class);
+        IBinder binder = Mockito.mock(IBinder.class);
+        when(mockListener.asBinder()).thenReturn(binder);
+        gameManagerService.addGameModeListener(mockListener);
+        verify(binder).linkToDeath(mDeathRecipientCaptor.capture(), anyInt());
+
+        gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_PERFORMANCE, USER_ID_1);
+        verify(mockListener).onGameModeChanged(mPackageName, GameManager.GAME_MODE_STANDARD,
+                GameManager.GAME_MODE_PERFORMANCE, USER_ID_1);
+        reset(mockListener);
+        gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_BATTERY, USER_ID_1);
+        verify(mockListener).onGameModeChanged(mPackageName, GameManager.GAME_MODE_PERFORMANCE,
+                GameManager.GAME_MODE_BATTERY, USER_ID_1);
+        reset(mockListener);
+
+        mDeathRecipientCaptor.getValue().binderDied();
+        verify(binder).unlinkToDeath(eq(mDeathRecipientCaptor.getValue()), anyInt());
+        gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_CUSTOM, USER_ID_1);
+        verify(mockListener, never()).onGameModeChanged(anyString(), anyInt(), anyInt(), anyInt());
+    }
+
+    @Test
+    public void testRemoveGameModeListener() throws RemoteException {
+        GameManagerService gameManagerService =
+                new GameManagerService(mMockContext, mTestLooper.getLooper());
+        mockDeviceConfigAll();
+        startUser(gameManagerService, USER_ID_1);
+        mockModifyGameModeGranted();
+
+        IGameModeListener mockListener = Mockito.mock(IGameModeListener.class);
+        IBinder binder = Mockito.mock(IBinder.class);
+        when(mockListener.asBinder()).thenReturn(binder);
+
+        gameManagerService.addGameModeListener(mockListener);
+        gameManagerService.removeGameModeListener(mockListener);
+        gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_PERFORMANCE, USER_ID_1);
+        verify(mockListener, never()).onGameModeChanged(anyString(), anyInt(), anyInt(), anyInt());
     }
 
     private static void deleteFolder(File folder) {

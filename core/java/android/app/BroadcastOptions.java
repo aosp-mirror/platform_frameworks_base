@@ -66,8 +66,9 @@ public class BroadcastOptions extends ComponentOptions {
     private long mIdForResponseEvent;
     private @Nullable IntentFilter mRemoveMatchingFilter;
     private @DeliveryGroupPolicy int mDeliveryGroupPolicy;
-    private @Nullable String mDeliveryGroupKey;
+    private @Nullable String mDeliveryGroupMatchingKey;
     private @Nullable BundleMerger mDeliveryGroupExtrasMerger;
+    private @Nullable IntentFilter mDeliveryGroupMatchingFilter;
 
     /**
      * Change ID which is invalid.
@@ -206,16 +207,22 @@ public class BroadcastOptions extends ComponentOptions {
             "android:broadcast.deliveryGroupPolicy";
 
     /**
-     * Corresponds to {@link #setDeliveryGroupKey(String, String)}.
+     * Corresponds to {@link #setDeliveryGroupMatchingKey(String, String)}.
      */
     private static final String KEY_DELIVERY_GROUP_KEY =
-            "android:broadcast.deliveryGroupKey";
+            "android:broadcast.deliveryGroupMatchingKey";
 
     /**
      * Corresponds to {@link #setDeliveryGroupExtrasMerger(BundleMerger)}.
      */
     private static final String KEY_DELIVERY_GROUP_EXTRAS_MERGER =
             "android:broadcast.deliveryGroupExtrasMerger";
+
+    /**
+     * Corresponds to {@link #setDeliveryGroupMatchingFilter(IntentFilter)}.
+     */
+    private static final String KEY_DELIVERY_GROUP_MATCHING_FILTER =
+            "android:broadcast.deliveryGroupMatchingFilter";
 
     /**
      * The list of delivery group policies which specify how multiple broadcasts belonging to
@@ -304,9 +311,11 @@ public class BroadcastOptions extends ComponentOptions {
                 IntentFilter.class);
         mDeliveryGroupPolicy = opts.getInt(KEY_DELIVERY_GROUP_POLICY,
                 DELIVERY_GROUP_POLICY_ALL);
-        mDeliveryGroupKey = opts.getString(KEY_DELIVERY_GROUP_KEY);
+        mDeliveryGroupMatchingKey = opts.getString(KEY_DELIVERY_GROUP_KEY);
         mDeliveryGroupExtrasMerger = opts.getParcelable(KEY_DELIVERY_GROUP_EXTRAS_MERGER,
                 BundleMerger.class);
+        mDeliveryGroupMatchingFilter = opts.getParcelable(KEY_DELIVERY_GROUP_MATCHING_FILTER,
+                IntentFilter.class);
     }
 
     /**
@@ -733,7 +742,7 @@ public class BroadcastOptions extends ComponentOptions {
 
     /**
      * Clears any previously set delivery group policies using
-     * {@link #setDeliveryGroupKey(String, String)} and resets the delivery group policy to
+     * {@link #setDeliveryGroupMatchingKey(String, String)} and resets the delivery group policy to
      * the default value ({@link #DELIVERY_GROUP_POLICY_ALL}).
      *
      * @hide
@@ -745,22 +754,92 @@ public class BroadcastOptions extends ComponentOptions {
 
     /**
      * Set namespace and key to identify the delivery group that this broadcast belongs to.
-     * If no namespace and key is set, then by default {@link Intent#filterEquals(Intent)} will be
-     * used to identify the delivery group.
+     *
+     * <p> If {@code namespace} and {@code key} are specified, then another broadcast will be
+     * considered to be in the same delivery group as this iff it has the same {@code namespace}
+     * and {@code key}.
+     *
+     * <p> If neither matching key using this API nor matching filter using
+     * {@link #setDeliveryGroupMatchingFilter(IntentFilter)} is specified, then by default
+     * {@link Intent#filterEquals(Intent)} will be used to identify the delivery group.
      *
      * @hide
      */
-    public void setDeliveryGroupKey(@NonNull String namespace, @NonNull String key) {
+    @SystemApi
+    public void setDeliveryGroupMatchingKey(@NonNull String namespace, @NonNull String key) {
         Preconditions.checkArgument(!namespace.contains("/"),
                 "namespace should not contain '/'");
         Preconditions.checkArgument(!key.contains("/"),
                 "key should not contain '/'");
-        mDeliveryGroupKey = namespace + "/" + key;
+        mDeliveryGroupMatchingKey = namespace + "/" + key;
     }
 
-    /** @hide */
-    public String getDeliveryGroupKey() {
-        return mDeliveryGroupKey;
+    /**
+     * Return the namespace and key that is used to identify the delivery group that this
+     * broadcast belongs to.
+     *
+     * @return the delivery group namespace and key that was previously set using
+     *         {@link #setDeliveryGroupMatchingKey(String, String)}, concatenated with a {@code /}.
+     * @hide
+     */
+    @SystemApi
+    @Nullable
+    public String getDeliveryGroupMatchingKey() {
+        return mDeliveryGroupMatchingKey;
+    }
+
+    /**
+     * Clears the namespace and key that was previously set using
+     * {@link #setDeliveryGroupMatchingKey(String, String)}.
+     *
+     * @hide
+     */
+    @SystemApi
+    public void clearDeliveryGroupMatchingKey() {
+        mDeliveryGroupMatchingKey = null;
+    }
+
+    /**
+     * Set the {@link IntentFilter} object to identify the delivery group that this broadcast
+     * belongs to.
+     *
+     * <p> If a {@code matchingFilter} is specified, then another broadcast will be considered
+     * to be in the same delivery group as this iff the {@code matchingFilter} matches it's intent.
+     *
+     * <p> If neither matching key using {@link #setDeliveryGroupMatchingKey(String, String)} nor
+     * matching filter using this API is specified, then by default
+     * {@link Intent#filterEquals(Intent)} will be used to identify the delivery group.
+     *
+     * @hide
+     */
+    @SystemApi
+    public void setDeliveryGroupMatchingFilter(@NonNull IntentFilter matchingFilter) {
+        mDeliveryGroupMatchingFilter = Objects.requireNonNull(matchingFilter);
+    }
+
+    /**
+     * Return the {@link IntentFilter} object that is used to identify the delivery group
+     * that this broadcast belongs to.
+     *
+     * @return the {@link IntentFilter} object that was previously set using
+     *         {@link #setDeliveryGroupMatchingFilter(IntentFilter)}.
+     * @hide
+     */
+    @SystemApi
+    @Nullable
+    public IntentFilter getDeliveryGroupMatchingFilter() {
+        return mDeliveryGroupMatchingFilter;
+    }
+
+    /**
+     * Clears the {@link IntentFilter} object that was previously set using
+     * {@link #setDeliveryGroupMatchingFilter(IntentFilter)}.
+     *
+     * @hide
+     */
+    @SystemApi
+    public void clearDeliveryGroupMatchingFilter() {
+        mDeliveryGroupMatchingFilter = null;
     }
 
     /**
@@ -773,13 +852,30 @@ public class BroadcastOptions extends ComponentOptions {
      * @hide
      */
     public void setDeliveryGroupExtrasMerger(@NonNull BundleMerger extrasMerger) {
-        Preconditions.checkNotNull(extrasMerger);
-        mDeliveryGroupExtrasMerger = extrasMerger;
+        mDeliveryGroupExtrasMerger = Objects.requireNonNull(extrasMerger);
     }
 
-    /** @hide */
-    public @Nullable BundleMerger getDeliveryGroupExtrasMerger() {
+    /**
+     * Return the {@link BundleMerger} that specifies how to merge the extras data from
+     * broadcasts in a delivery group.
+     *
+     * @return the {@link BundleMerger} object that was previously set using
+     *         {@link #setDeliveryGroupExtrasMerger(BundleMerger)}.
+     * @hide
+     */
+    @Nullable
+    public BundleMerger getDeliveryGroupExtrasMerger() {
         return mDeliveryGroupExtrasMerger;
+    }
+
+    /**
+     * Clear the {@link BundleMerger} object that was previously set using
+     * {@link #setDeliveryGroupExtrasMerger(BundleMerger)}.
+     *
+     * @hide
+     */
+    public void clearDeliveryGroupExtrasMerger() {
+        mDeliveryGroupExtrasMerger = null;
     }
 
     /**
@@ -837,8 +933,8 @@ public class BroadcastOptions extends ComponentOptions {
         if (mDeliveryGroupPolicy != DELIVERY_GROUP_POLICY_ALL) {
             b.putInt(KEY_DELIVERY_GROUP_POLICY, mDeliveryGroupPolicy);
         }
-        if (mDeliveryGroupKey != null) {
-            b.putString(KEY_DELIVERY_GROUP_KEY, mDeliveryGroupKey);
+        if (mDeliveryGroupMatchingKey != null) {
+            b.putString(KEY_DELIVERY_GROUP_KEY, mDeliveryGroupMatchingKey);
         }
         if (mDeliveryGroupPolicy == DELIVERY_GROUP_POLICY_MERGED) {
             if (mDeliveryGroupExtrasMerger != null) {
@@ -848,6 +944,9 @@ public class BroadcastOptions extends ComponentOptions {
                 throw new IllegalStateException("Extras merger cannot be empty "
                         + "when delivery group policy is 'MERGED'");
             }
+        }
+        if (mDeliveryGroupMatchingFilter != null) {
+            b.putParcelable(KEY_DELIVERY_GROUP_MATCHING_FILTER, mDeliveryGroupMatchingFilter);
         }
         return b.isEmpty() ? null : b;
     }

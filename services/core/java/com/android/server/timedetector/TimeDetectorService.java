@@ -266,6 +266,8 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub
             for (int listenerIndex = 0; listenerIndex < listenerCount; listenerIndex++) {
                 ITimeDetectorListener listener = mListeners.valueAt(listenerIndex);
                 try {
+                    // No need to surrender the mListeners lock while doing this:
+                    // ITimeDetectorListener is declared "oneway".
                     listener.onChange();
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Unable to notify listener=" + listener, e);

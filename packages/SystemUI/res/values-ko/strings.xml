@@ -52,7 +52,7 @@
     <string name="usb_debugging_always" msgid="4003121804294739548">"이 컴퓨터에서 항상 허용"</string>
     <string name="usb_debugging_allow" msgid="1722643858015321328">"허용"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"USB 디버깅이 허용되지 않음"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"현재 이 기기에 로그인한 사용자는 USB 디버깅을 사용 설정할 수 없습니다. 이 기능을 사용하려면 기본 사용자로 전환하세요."</string>
+    <string name="usb_debugging_secondary_user_message" msgid="1888835696965417845">"현재 이 기기에 로그인한 사용자는 USB 디버깅을 사용 설정할 수 없습니다. 이 기능을 사용하려면 관리자로 전환하세요."</string>
     <string name="hdmi_cec_set_menu_language_title" msgid="1259765420091503742">"시스템 언어를 <xliff:g id="LANGUAGE">%1$s</xliff:g>로 변경하시겠습니까?"</string>
     <string name="hdmi_cec_set_menu_language_description" msgid="8176716678074126619">"다른 기기에서 시스템 언어 변경을 요청함"</string>
     <string name="hdmi_cec_set_menu_language_accept" msgid="2513689457281009578">"언어 변경"</string>
@@ -62,7 +62,7 @@
     <string name="wifi_debugging_always" msgid="2968383799517975155">"이 네트워크에서 항상 허용"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"허용"</string>
     <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"무선 디버깅이 허용되지 않음"</string>
-    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"현재 이 기기에 로그인한 사용자는 무선 디버깅을 사용 설정할 수 없습니다. 이 기능을 사용하려면 기본 사용자로 전환하세요."</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="9085779370142222881">"현재 이 기기에 로그인한 사용자는 무선 디버깅을 사용 설정할 수 없습니다. 이 기능을 사용하려면 관리자로 전환하세요."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"USB 포트 비활성화됨"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"기기를 액체나 이물질로부터 보호하기 위해 USB 포트가 사용 중지되었으며 액세서리를 연결할 수 없습니다.\n\nUSB 포트를 다시 안전하게 사용할 수 있게 되면 알려 드리겠습니다."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"충전기와 액세서리를 감지할 수 있도록 USB 포트가 사용 설정됨"</string>
@@ -125,7 +125,8 @@
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"음성 지원"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"월렛"</string>
     <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"QR 코드 스캐너"</string>
-    <string name="accessibility_unlock_button" msgid="122785427241471085">"잠금 해제"</string>
+    <!-- no translation found for accessibility_unlock_button (3613812140816244310) -->
+    <skip />
     <string name="accessibility_lock_icon" msgid="661492842417875775">"기기 잠김"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"얼굴 스캔 중"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"보내기"</string>
@@ -168,7 +169,7 @@
     <skip />
     <string name="keyguard_face_failed" msgid="9044619102286917151">"얼굴을 인식할 수 없습니다."</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"대신 지문을 사용하세요."</string>
-    <!-- no translation found for keyguard_face_unlock_unavailable (8145547300240405980) -->
+    <!-- no translation found for keyguard_face_unlock_unavailable (1581949044193418736) -->
     <skip />
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"블루투스가 연결되었습니다."</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"배터리 잔량을 알 수 없습니다."</string>
@@ -180,8 +181,12 @@
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"비행기 모드입니다."</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN 켜짐"</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"배터리 <xliff:g id="NUMBER">%d</xliff:g>퍼센트"</string>
-    <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"배터리 <xliff:g id="PERCENTAGE">%1$s</xliff:g>퍼센트, 평소 사용량 기준 약 <xliff:g id="TIME">%2$s</xliff:g> 남음"</string>
+    <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"배터리 <xliff:g id="PERCENTAGE">%1$d</xliff:g>퍼센트, 평소 사용량 기준 약 <xliff:g id="TIME">%2$s</xliff:g> 남음"</string>
     <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"배터리 충전 중, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%입니다."</string>
+    <!-- no translation found for accessibility_battery_level_charging_paused (1716051308782906917) -->
+    <skip />
+    <!-- no translation found for accessibility_battery_level_charging_paused_with_estimate (4006089349465741762) -->
+    <skip />
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"모든 알림 보기"</string>
     <string name="accessibility_tty_enabled" msgid="1123180388823381118">"전신 타자기(TTY)가 사용 설정되었습니다."</string>
     <string name="accessibility_ringer_vibrate" msgid="6261841170896561364">"벨소리가 진동입니다."</string>
@@ -386,16 +391,11 @@
     <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"앱을 공유하거나 녹화하거나 전송할 때는 <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>에서 해당 앱에 표시되거나 재생되는 모든 항목에 액세스할 수 있으므로 비밀번호, 결제 세부정보, 메시지 등 민감한 정보가 노출되지 않도록 주의하세요."</string>
     <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"계속"</string>
     <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"앱 공유 또는 녹화"</string>
-    <!-- no translation found for media_projection_permission_dialog_system_service_title (6827129613741303726) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_system_service_warning_entire_screen (8801616203805837575) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_system_service_warning_single_app (543310680568419338) -->
-    <skip />
-    <!-- no translation found for screen_capturing_disabled_by_policy_dialog_title (2113331792064527203) -->
-    <skip />
-    <!-- no translation found for screen_capturing_disabled_by_policy_dialog_description (6015975736747696431) -->
-    <skip />
+    <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"앱에서 공유하거나 기록하도록 허용하시겠습니까?"</string>
+    <string name="media_projection_permission_dialog_system_service_warning_entire_screen" msgid="8801616203805837575">"공유하거나 녹화하거나 전송할 때 이 앱에서 화면에 표시되거나 기기에서 재생되는 모든 항목에 액세스할 수 있습니다. 따라서 비밀번호, 결제 세부정보, 메시지 등 민감한 정보가 노출되지 않도록 주의하세요."</string>
+    <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"앱을 공유하거나 녹화하거나 전송할 때는 이 앱에서 해당 앱에 표시되거나 재생되는 모든 항목에 액세스할 수 있으므로 비밀번호, 결제 세부정보, 메시지 등 민감한 정보가 노출되지 않도록 주의하세요."</string>
+    <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"IT 관리자에 의해 차단됨"</string>
+    <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"기기 정책에 의해 화면 캡처가 사용 중지되었습니다."</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"모두 지우기"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"관리"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"기록"</string>
@@ -511,7 +511,8 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"잠금 해제하여 사용"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"카드를 가져오는 중에 문제가 발생했습니다. 나중에 다시 시도해 보세요."</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"잠금 화면 설정"</string>
-    <string name="qr_code_scanner_title" msgid="5290201053875420785">"QR 코드 스캔"</string>
+    <!-- no translation found for qr_code_scanner_title (1938155688725760702) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"직장 프로필"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"비행기 모드"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"<xliff:g id="WHEN">%1$s</xliff:g>에 다음 알람을 들을 수 없습니다."</string>
@@ -794,6 +795,8 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"전체 화면 확대"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"화면 일부 확대"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"전환"</string>
+    <!-- no translation found for magnification_drag_corner_to_resize (1249766311052418130) -->
+    <skip />
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"대각선 스크롤 허용"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"크기 조절"</string>
     <string name="accessibility_change_magnification_type" msgid="666000085077432421">"확대 유형 변경"</string>
@@ -1024,4 +1027,8 @@
     <string name="dream_date_complication_date_format" msgid="8191225366513860104">"MMM d일 EEE"</string>
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
+    <string name="log_access_confirmation_title" msgid="4843557604739943395">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>에서 모든 기기 로그에 액세스하도록 허용하시겠습니까?"</string>
+    <string name="log_access_confirmation_allow" msgid="752147861593202968">"일회성 액세스 허용"</string>
+    <string name="log_access_confirmation_deny" msgid="2389461495803585795">"허용 안함"</string>
+    <string name="log_access_confirmation_body" msgid="6883031912003112634">"기기 로그에 기기에서 발생한 상황이 기록됩니다. 앱은 문제를 찾고 해결하는 데 이 로그를 사용할 수 있습니다.\n\n일부 로그는 민감한 정보를 포함할 수 있으므로 신뢰할 수 있는 앱만 모든 기기 로그에 액세스하도록 허용하세요. \n\n앱에 전체 기기 로그에 대한 액세스 권한을 부여하지 않아도 앱이 자체 로그에는 액세스할 수 있습니다. 기기 제조업체에서 일부 로그 또는 기기 내 정보에 액세스할 수도 있습니다."</string>
 </resources>

@@ -544,7 +544,7 @@ final class DeletePackageHelper {
                 outInfo.mDataRemoved = true;
             }
             outInfo.mRemovedPackage = ps.getPackageName();
-            outInfo.mInstallerPackageName = ps.getInstallSource().installerPackageName;
+            outInfo.mInstallerPackageName = ps.getInstallSource().mInstallerPackageName;
             outInfo.mIsStaticSharedLib = pkg != null && pkg.getStaticSharedLibraryName() != null;
             outInfo.mRemovedAppId = ps.getAppId();
             outInfo.mRemovedUsers = userIds;
@@ -814,7 +814,7 @@ final class DeletePackageHelper {
 
     private boolean isOrphaned(@NonNull Computer snapshot, String packageName) {
         final PackageStateInternal packageState = snapshot.getPackageStateInternal(packageName);
-        return packageState != null && packageState.getInstallSource().isOrphaned;
+        return packageState != null && packageState.getInstallSource().mIsOrphaned;
     }
 
     private boolean isCallerAllowedToSilentlyUninstall(@NonNull Computer snapshot, int callingUid,

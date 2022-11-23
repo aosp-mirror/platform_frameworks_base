@@ -36,16 +36,14 @@ import static com.google.common.truth.Truth.assertWithMessage;
 import static org.junit.Assert.assertThrows;
 
 import android.annotation.UserIdInt;
-import android.os.HandlerThread;
+import android.os.Handler;
 import android.util.IntArray;
 import android.util.Log;
 
 import com.android.internal.util.Preconditions;
 import com.android.server.ExtendedMockitoTestCase;
 
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -103,10 +101,8 @@ abstract class UserVisibilityMediatorTestCase extends ExtendedMockitoTestCase {
     protected static final boolean FG = true;
     protected static final boolean BG = false;
 
-    private static final HandlerThread sHandlerThread = new HandlerThread(TAG);
-
-    protected final AsyncUserVisibilityListener.Factory mListenerFactory =
-            new AsyncUserVisibilityListener.Factory(mExpect, sHandlerThread);
+    private Handler mHandler;
+    protected AsyncUserVisibilityListener.Factory mListenerFactory;
 
     private final boolean mUsersOnSecondaryDisplaysEnabled;
 
@@ -116,24 +112,13 @@ abstract class UserVisibilityMediatorTestCase extends ExtendedMockitoTestCase {
         mUsersOnSecondaryDisplaysEnabled = usersOnSecondaryDisplaysEnabled;
     }
 
-    @BeforeClass
-    public static final void startHandlerThread() {
-        Log.d(TAG, "Starting handler thread " + sHandlerThread);
-        sHandlerThread.start();
-    }
-
-    @AfterClass
-    public static final void quitHandlerThread() {
-        Log.d(TAG, "Quitting handler thread " + sHandlerThread);
-        if (!sHandlerThread.quit()) {
-            Log.w(TAG, "sHandlerThread(" + sHandlerThread + ").quit() returned false");
-        }
-    }
-
     @Before
     public final void setFixtures() {
-        mMediator = new UserVisibilityMediator(mUsersOnSecondaryDisplaysEnabled,
-                sHandlerThread.getThreadHandler());
+        mHandler = Handler.getMain();
+        Thread thread = mHandler.getLooper().getThread();
+        Log.i(TAG, "setFixtures(): using thread " + thread + " (from handler " + mHandler + ")");
+        mListenerFactory = new AsyncUserVisibilityListener.Factory(mExpect, thread);
+        mMediator = new UserVisibilityMediator(mUsersOnSecondaryDisplaysEnabled, mHandler);
         mDumpableDumperRule.addDumpable(mMediator);
     }
 

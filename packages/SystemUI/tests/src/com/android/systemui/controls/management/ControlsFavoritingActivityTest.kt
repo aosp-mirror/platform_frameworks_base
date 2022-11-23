@@ -5,6 +5,7 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.window.OnBackInvokedCallback
 import android.window.OnBackInvokedDispatcher
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.SmallTest
 import androidx.test.rule.ActivityTestRule
 import androidx.test.runner.intercepting.SingleActivityFactory
@@ -79,6 +80,8 @@ class ControlsFavoritingActivityTest : SysuiTestCase() {
         activityRule.launchActivity(intent)
     }
 
+    // b/259549854 to root-cause and fix
+    @FlakyTest
     @Test
     fun testBackCallbackRegistrationAndUnregistration() {
         // 1. ensure that launching the activity results in it registering a callback

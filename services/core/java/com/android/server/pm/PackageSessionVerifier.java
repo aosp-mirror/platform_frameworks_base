@@ -483,7 +483,7 @@ final class PackageSessionVerifier {
             return;
         }
         final String packageName = session.getPackageName();
-        final String installerPackageName = session.getInstallSource().installerPackageName;
+        final String installerPackageName = session.getInstallSource().mInstallerPackageName;
         if (!isApexUpdateAllowed(packageName, installerPackageName)) {
             throw new PackageManagerException(
                     PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE,

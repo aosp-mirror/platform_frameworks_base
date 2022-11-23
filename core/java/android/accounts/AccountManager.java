@@ -623,6 +623,9 @@ public class AccountManager {
      *
      * <p>No permission is required to call this method.
      *
+     * <p>Caller targeting API level 34 and above, the results are filtered
+     * by the rules of <a href="/training/basics/intents/package-visibility">package visibility</a>.
+     *
      * @return An array of {@link AuthenticatorDescription} for every
      *     authenticator known to the AccountManager service.  Empty (never
      *     null) if no authenticators are known.

@@ -33,6 +33,8 @@ import static com.android.server.pm.PackageManagerServiceCompilerMapping.getDefa
 import static com.android.server.pm.PackageManagerServiceUtils.REMOVE_IF_APEX_PKG;
 import static com.android.server.pm.PackageManagerServiceUtils.REMOVE_IF_NULL_PKG;
 
+import static dalvik.system.DexFile.isProfileGuidedCompilerFilter;
+
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -69,8 +71,6 @@ import com.android.server.pm.dex.DexoptOptions;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateInternal;
-
-import dalvik.system.DexFile;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -236,20 +236,24 @@ public final class DexOptHelper {
                 mPm.mArtManagerService.compileLayouts(pkg);
             }
 
-            // checkProfiles is false to avoid merging profiles during boot which
-            // might interfere with background compilation (b/28612421).
-            // Unfortunately this will also means that "pm.dexopt.boot=speed-profile" will
-            // behave differently than "pm.dexopt.bg-dexopt=speed-profile" but that's a
-            // trade-off worth doing to save boot time work.
             int dexoptFlags = bootComplete ? DexoptOptions.DEXOPT_BOOT_COMPLETE : 0;
+
+            String filter = getCompilerFilterForReason(pkgCompilationReason);
+            if (isProfileGuidedCompilerFilter(filter)) {
+                // DEXOPT_CHECK_FOR_PROFILES_UPDATES used to be false to avoid merging profiles
+                // during boot which might interfere with background compilation (b/28612421).
+                // However those problems were related to the verify-profile compiler filter which
+                // doesn't exist any more, so enable it again.
+                dexoptFlags |= DexoptOptions.DEXOPT_CHECK_FOR_PROFILES_UPDATES;
+            }
+
             if (compilationReason == REASON_FIRST_BOOT) {
                 // TODO: This doesn't cover the upgrade case, we should check for this too.
                 dexoptFlags |= DexoptOptions.DEXOPT_INSTALL_WITH_DEX_METADATA_FILE;
             }
-            int primaryDexOptStatus = performDexOptTraced(new DexoptOptions(
-                    pkg.getPackageName(),
-                    pkgCompilationReason,
-                    dexoptFlags));
+            int primaryDexOptStatus = performDexOptTraced(
+                    new DexoptOptions(pkg.getPackageName(), pkgCompilationReason, filter,
+                            /*splitName*/ null, dexoptFlags));
 
             switch (primaryDexOptStatus) {
                 case PackageDexOptimizer.DEX_OPT_PERFORMED:
@@ -297,7 +301,7 @@ public final class DexOptHelper {
                 SystemProperties.get("dalvik.vm.systemuicompilerfilter", defaultCompilerFilter);
         String compilerFilter;
 
-        if (DexFile.isProfileGuidedCompilerFilter(targetCompilerFilter)) {
+        if (isProfileGuidedCompilerFilter(targetCompilerFilter)) {
             compilerFilter = defaultCompilerFilter;
             File profileFile = new File(getPrebuildProfilePath(pkg));
 
@@ -322,8 +326,16 @@ public final class DexOptHelper {
             compilerFilter = targetCompilerFilter;
         }
 
+        // We don't expect updates in current profiles to be significant here, but
+        // DEXOPT_CHECK_FOR_PROFILES_UPDATES is set to replicate behaviour that will be
+        // unconditionally enabled for profile guided filters when ART Service is called instead of
+        // the legacy PackageDexOptimizer implementation.
+        int dexoptFlags = isProfileGuidedCompilerFilter(compilerFilter)
+                ? DexoptOptions.DEXOPT_CHECK_FOR_PROFILES_UPDATES
+                : 0;
+
         performDexOptTraced(new DexoptOptions(pkg.getPackageName(), REASON_BOOT_AFTER_OTA,
-                compilerFilter, null /* splitName */, 0 /* dexoptFlags */));
+                compilerFilter, null /* splitName */, dexoptFlags));
     }
 
     @RequiresPermission(Manifest.permission.READ_DEVICE_CONFIG)
@@ -622,16 +634,21 @@ public final class DexOptHelper {
     }
 
     public boolean performDexOptMode(@NonNull Computer snapshot, String packageName,
-            boolean checkProfiles, String targetCompilerFilter, boolean force,
-            boolean bootComplete, String splitName) {
+            String targetCompilerFilter, boolean force, boolean bootComplete, String splitName) {
         if (!PackageManagerServiceUtils.isSystemOrRootOrShell()
                 && !isCallerInstallerForPackage(snapshot, packageName)) {
             throw new SecurityException("performDexOptMode");
         }
 
-        int flags = (checkProfiles ? DexoptOptions.DEXOPT_CHECK_FOR_PROFILES_UPDATES : 0)
-                | (force ? DexoptOptions.DEXOPT_FORCE : 0)
+        int flags = (force ? DexoptOptions.DEXOPT_FORCE : 0)
                 | (bootComplete ? DexoptOptions.DEXOPT_BOOT_COMPLETE : 0);
+
+        if (isProfileGuidedCompilerFilter(targetCompilerFilter)) {
+            // Set this flag whenever the filter is profile guided, to align with ART Service
+            // behavior.
+            flags |= DexoptOptions.DEXOPT_CHECK_FOR_PROFILES_UPDATES;
+        }
+
         return performDexOpt(new DexoptOptions(packageName, REASON_CMDLINE,
                 targetCompilerFilter, splitName, flags));
     }
@@ -644,7 +661,7 @@ public final class DexOptHelper {
         final InstallSource installSource = packageState.getInstallSource();
 
         final PackageStateInternal installerPackageState =
-                snapshot.getPackageStateInternal(installSource.installerPackageName);
+                snapshot.getPackageStateInternal(installSource.mInstallerPackageName);
         if (installerPackageState == null) {
             return false;
         }

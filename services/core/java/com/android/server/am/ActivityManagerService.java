@@ -3491,9 +3491,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             final File tracesDir = new File(ANR_TRACE_DIR);
-            // Each set of ANR traces is written to a separate file and dumpstate will process
-            // all such files and add them to a captured bug report if they're recent enough.
-            maybePruneOldTraces(tracesDir);
 
             // NOTE: We should consider creating the file in native code atomically once we've
             // gotten rid of the old scheme of dumping and lot of the code that deals with paths
@@ -3526,6 +3523,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (firstPidEndOffset != null) {
                 firstPidEndOffset.set(firstPidEndPos);
             }
+            // Each set of ANR traces is written to a separate file and dumpstate will process
+            // all such files and add them to a captured bug report if they're recent enough.
+            maybePruneOldTraces(tracesDir);
 
             return tracesFile;
         } finally {
@@ -4945,7 +4945,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             app.mState.setVerifiedAdj(ProcessList.INVALID_ADJ);
             mOomAdjuster.setAttachingSchedGroupLSP(app);
             app.mState.setForcingToImportant(null);
-            updateProcessForegroundLocked(app, false, 0, false);
+            clearProcessForegroundLocked(app);
             app.mState.setHasShownUi(false);
             app.mState.setCached(false);
             app.setDebugging(false);
@@ -5805,7 +5805,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     return;
                 }
                 pr.mState.setForcingToImportant(null);
-                updateProcessForegroundLocked(pr, false, 0, false);
+                clearProcessForegroundLocked(pr);
             }
             updateOomAdjLocked(pr, OomAdjuster.OOM_ADJ_REASON_UI_VISIBILITY);
         }
@@ -12706,7 +12706,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         for (BroadcastQueue queue : mBroadcastQueues) {
             queue.onApplicationCleanupLocked(app);
         }
-        updateProcessForegroundLocked(app, false, 0, false);
+        clearProcessForegroundLocked(app);
         mServices.killServicesLocked(app, allowRestart);
         mPhantomProcessList.onAppDied(pid);
 
@@ -15830,12 +15830,18 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @GuardedBy("this")
+    final void clearProcessForegroundLocked(ProcessRecord proc) {
+        updateProcessForegroundLocked(proc, /* isForeground =*/ false,
+                /* fgsTypes =*/0, /* hasTypeNoneFgs =*/false, /* oomAdj= */ false);
+    }
+
+    @GuardedBy("this")
     final void updateProcessForegroundLocked(ProcessRecord proc, boolean isForeground,
-            int fgServiceTypes, boolean oomAdj) {
+            int fgServiceTypes, boolean hasTypeNoneFgs, boolean oomAdj) {
         final ProcessServiceRecord psr = proc.mServices;
         final boolean foregroundStateChanged = isForeground != psr.hasForegroundServices();
         if (foregroundStateChanged
-                || psr.getForegroundServiceTypes() != fgServiceTypes) {
+                || !psr.areForegroundServiceTypesSame(fgServiceTypes, hasTypeNoneFgs)) {
             if (foregroundStateChanged) {
                 // Notify internal listeners.
                 for (int i = mForegroundServiceStateListeners.size() - 1; i >= 0; i--) {
@@ -15843,7 +15849,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                             proc.info.packageName, proc.info.uid, proc.getPid(), isForeground);
                 }
             }
-            psr.setHasForegroundServices(isForeground, fgServiceTypes);
+            psr.setHasForegroundServices(isForeground, fgServiceTypes, hasTypeNoneFgs);
             ArrayList<ProcessRecord> curProcs = mForegroundPackages.get(proc.info.packageName,
                     proc.info.uid);
             if (isForeground) {
@@ -17762,7 +17768,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         return null;
                     }
 
-                    if ((app.mServices.getForegroundServiceTypes() & foregroundServicetype) != 0) {
+                    if ((app.mServices.containsAnyForegroundServiceTypes(foregroundServicetype))) {
                         return Boolean.TRUE;
                     }
                     return null;

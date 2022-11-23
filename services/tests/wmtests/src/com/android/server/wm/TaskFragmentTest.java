@@ -23,6 +23,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.os.Process.FIRST_APPLICATION_UID;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
@@ -546,5 +547,32 @@ public class TaskFragmentTest extends WindowTestsBase {
         // Making the activity0 be the focused activity and ensure the focused app is updated.
         activity0.moveFocusableActivityToTop("test");
         assertEquals(activity0, mDisplayContent.mFocusedApp);
+    }
+
+    @Test
+    public void testIsVisibleWithAdjacent_reportOrientationUnspecified() {
+        final Task task = createTask(mDisplayContent);
+        final TaskFragment tf0 = createTaskFragmentWithParentTask(task);
+        final TaskFragment tf1 = createTaskFragmentWithParentTask(task);
+        tf0.setAdjacentTaskFragment(tf1);
+        tf0.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        tf1.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        task.setBounds(0, 0, 1200, 1000);
+        tf0.setBounds(0, 0, 600, 1000);
+        tf1.setBounds(600, 0, 1200, 1000);
+        final ActivityRecord activity0 = tf0.getTopMostActivity();
+        final ActivityRecord activity1 = tf1.getTopMostActivity();
+        doReturn(true).when(activity0).isVisibleRequested();
+        doReturn(true).when(activity1).isVisibleRequested();
+
+        assertEquals(SCREEN_ORIENTATION_UNSPECIFIED, tf0.getOrientation(SCREEN_ORIENTATION_UNSET));
+        assertEquals(SCREEN_ORIENTATION_UNSPECIFIED, tf1.getOrientation(SCREEN_ORIENTATION_UNSET));
+        assertEquals(SCREEN_ORIENTATION_UNSPECIFIED, task.getOrientation(SCREEN_ORIENTATION_UNSET));
+
+        activity0.setRequestedOrientation(SCREEN_ORIENTATION_LANDSCAPE);
+
+        assertEquals(SCREEN_ORIENTATION_UNSPECIFIED, tf0.getOrientation(SCREEN_ORIENTATION_UNSET));
+        assertEquals(SCREEN_ORIENTATION_UNSPECIFIED, tf1.getOrientation(SCREEN_ORIENTATION_UNSET));
+        assertEquals(SCREEN_ORIENTATION_UNSPECIFIED, task.getOrientation(SCREEN_ORIENTATION_UNSET));
     }
 }

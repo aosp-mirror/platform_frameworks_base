@@ -52,7 +52,8 @@
     <string name="usb_debugging_always" msgid="4003121804294739548">"ሁልጊዜ ከዚህ ኮምፒውተር ፍቀድ"</string>
     <string name="usb_debugging_allow" msgid="1722643858015321328">"ፍቀድ"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"የዩኤስቢ እርማት አይፈቀድም"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"አሁን ወደዚህ መሣሪያ የገባው ተጠቃሚ የዩኤስቢ እርማትን ማብራት አይችልም። ይህን ባህሪ ለመጠቀም ወደ ዋና ተጠቃሚ ይቀይሩ።"</string>
+    <!-- no translation found for usb_debugging_secondary_user_message (1888835696965417845) -->
+    <skip />
     <string name="hdmi_cec_set_menu_language_title" msgid="1259765420091503742">"የስርዓት ቋንቋውን ወደ <xliff:g id="LANGUAGE">%1$s</xliff:g> መቀየር ይፈልጋሉ?"</string>
     <string name="hdmi_cec_set_menu_language_description" msgid="8176716678074126619">"በሌላ መሳሪያ የተጠየቀ የስርዓት ቋንቋ ለውጥ"</string>
     <string name="hdmi_cec_set_menu_language_accept" msgid="2513689457281009578">"ቋንቋ ቀይር"</string>
@@ -62,7 +63,8 @@
     <string name="wifi_debugging_always" msgid="2968383799517975155">"ሁልጊዜ በዚህ አውታረ መረብ ላይ ፍቀድ"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"ፍቀድ"</string>
     <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"ገመድ-አልባ debugging አይፈቀድም"</string>
-    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"በአሁኑ ጊዜ በመለያ ወደዚህ መሣሪያ የገባው ተጠቃሚ የገመድ-አልባ ማረምን ማብራት አይችልም። ይህን ባህሪ ለመጠቀም ወደ ዋና ተጠቃሚ ይቀይሩ።"</string>
+    <!-- no translation found for wifi_debugging_secondary_user_message (9085779370142222881) -->
+    <skip />
     <string name="usb_contaminant_title" msgid="894052515034594113">"የዩኤስቢ ወደብ ተሰናክሏል"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"መሣሪያዎን ከፈሳሽ ወይም ፍርስራሽ ለመጠበቅ ሲባል የዩኤስቢ ወደቡ ተሰናክሏል፣ እና ማናቸውም ተቀጥላዎችን አያገኝም።\n\nየዩኤስቢ ወደቡን እንደገና መጠቀም ችግር በማይኖረው ጊዜ ማሳወቂያ ይደርሰዎታል።"</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"ኃይል መሙያዎችን እና ተጨማሪ መሣሪያዎችን ፈልጎ ለማግኘት የነቃ የዩኤስቢ ወደብ"</string>
@@ -125,7 +127,8 @@
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"የድምጽ እርዳታ"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"Wallet"</string>
     <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"የQR ኮድ መቃኛ"</string>
-    <string name="accessibility_unlock_button" msgid="122785427241471085">"ክፈት"</string>
+    <!-- no translation found for accessibility_unlock_button (3613812140816244310) -->
+    <skip />
     <string name="accessibility_lock_icon" msgid="661492842417875775">"መሣሪያ ተቆልፏል"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"የቅኝት ፊት"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"ላክ"</string>
@@ -168,7 +171,7 @@
     <skip />
     <string name="keyguard_face_failed" msgid="9044619102286917151">"መልክን መለየት አልተቻለም"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"በምትኩ የጣት አሻራን ይጠቀሙ"</string>
-    <!-- no translation found for keyguard_face_unlock_unavailable (8145547300240405980) -->
+    <!-- no translation found for keyguard_face_unlock_unavailable (1581949044193418736) -->
     <skip />
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"ብሉቱዝ ተያይዟል።"</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"የባትሪ መቶኛ አይታወቅም።"</string>
@@ -180,8 +183,12 @@
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"የአውሮፕላን ሁነታ።"</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"ቪፒኤን በርቷል።"</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"የባትሪ <xliff:g id="NUMBER">%d</xliff:g> መቶኛ።"</string>
-    <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"ባትሪ <xliff:g id="PERCENTAGE">%1$s</xliff:g> በመቶ፣ በአጠቃቀምዎ ላይ በመመስረት <xliff:g id="TIME">%2$s</xliff:g> ገደማ ይቀራል"</string>
+    <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"ባትሪ <xliff:g id="PERCENTAGE">%1$d</xliff:g> በመቶ፣ በአጠቃቀምዎ ላይ በመመስረት <xliff:g id="TIME">%2$s</xliff:g> ገደማ ይቀራል"</string>
     <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"ባትሪ ኃይል በመሙላት ላይ፣ <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> %%."</string>
+    <!-- no translation found for accessibility_battery_level_charging_paused (1716051308782906917) -->
+    <skip />
+    <!-- no translation found for accessibility_battery_level_charging_paused_with_estimate (4006089349465741762) -->
+    <skip />
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"ሁሉንም ማሳወቂያዎች ይመልከቱ"</string>
     <string name="accessibility_tty_enabled" msgid="1123180388823381118">"TeleTypewriter ነቅቷል።"</string>
     <string name="accessibility_ringer_vibrate" msgid="6261841170896561364">"የስልክ ጥሪ ይንዘር።"</string>
@@ -386,16 +393,11 @@
     <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"አንድን መተግበሪያ ሲያጋሩ፣ ሲቀርጹ ወይም cast ሲያደርጉ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> በዚያ መተግበሪያ ላይ ለሚታይ ወይም ለሚጫወት ማንኛውም ነገር መዳረሻ አለው። ስለዚህ በይለፍ ቃላት፣ በክፍያ ዝርዝሮች፣ በመልዕክቶች ወይም በሌሎች ልዩ ጥንቃቄ የሚያስፈልጋቸው መረጃዎች ላይ ጥንቃቄ ያድርጉ።"</string>
     <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"ቀጥል"</string>
     <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"መተግበሪያ ያጋሩ ወይም ይቅረጹ"</string>
-    <!-- no translation found for media_projection_permission_dialog_system_service_title (6827129613741303726) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_system_service_warning_entire_screen (8801616203805837575) -->
-    <skip />
-    <!-- no translation found for media_projection_permission_dialog_system_service_warning_single_app (543310680568419338) -->
-    <skip />
-    <!-- no translation found for screen_capturing_disabled_by_policy_dialog_title (2113331792064527203) -->
-    <skip />
-    <!-- no translation found for screen_capturing_disabled_by_policy_dialog_description (6015975736747696431) -->
-    <skip />
+    <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"ይህ መተግበሪያ እንዲያጋራ ወይም እንዲቀርጽ ይፈቀድለት?"</string>
+    <string name="media_projection_permission_dialog_system_service_warning_entire_screen" msgid="8801616203805837575">"ሲያጋሩ፣ ሲቀርጹ ወይም cast ሲያደርጉ ይህ መተግበሪያ በማያ ገጽዎ ላይ ለሚታይ ወይም በመሣሪያዎ ላይ ለሚጫወት ማንኛውም ነገር መዳረሻ አለው። ስለዚህ በይለፍ ቃላት፣ በክፍያ ዝርዝሮች፣ በመልዕክቶች ወይም በሌሎች ልዩ ጥንቃቄ የሚያስፈልጋቸው መረጃዎች ላይ ጥንቃቄ ያድርጉ።"</string>
+    <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"አንድን መተግበሪያ ሲያጋሩ፣ ሲቀርጹ ወይም cast ሲያደርጉ ይህ መተግበሪያ በዚያ መተግበሪያ ላይ ለሚታይ ወይም ለሚጫወት ማንኛውም ነገር መዳረሻ አለው። ስለዚህ በይለፍ ቃላት፣ በክፍያ ዝርዝሮች፣ በመልዕክቶች ወይም በሌሎች ልዩ ጥንቃቄ የሚያስፈልጋቸው መረጃዎች ላይ ጥንቃቄ ያድርጉ።"</string>
+    <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"በእርስዎ የአይቲ አስተዳዳሪ ታግዷል"</string>
+    <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"የማያ ገጽ ቀረጻ በመሣሪያ መመሪያ ተሰናክሏል"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"ሁሉንም አጽዳ"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"ያቀናብሩ"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"ታሪክ"</string>
@@ -511,7 +513,8 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ለማየት ይክፈቱ"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"የእርስዎን ካርዶች ማግኘት ላይ ችግር ነበር፣ እባክዎ ቆይተው እንደገና ይሞክሩ"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"የገጽ መቆለፊያ ቅንብሮች"</string>
-    <string name="qr_code_scanner_title" msgid="5290201053875420785">"QR ኮድ ቃኝ"</string>
+    <!-- no translation found for qr_code_scanner_title (1938155688725760702) -->
+    <skip />
     <string name="status_bar_work" msgid="5238641949837091056">"የስራ መገለጫ"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"የአውሮፕላን ሁነታ"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"የእርስዎን ቀጣይ ማንቂያ <xliff:g id="WHEN">%1$s</xliff:g> አይሰሙም"</string>
@@ -794,6 +797,8 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"ሙሉ ገጽ እይታን ያጉሉ"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"የማያ ገጹን ክፍል አጉላ"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"ማብሪያ/ማጥፊያ"</string>
+    <!-- no translation found for magnification_drag_corner_to_resize (1249766311052418130) -->
+    <skip />
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"ሰያፍ ሽብለላን ፍቀድ"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"መጠን ቀይር"</string>
     <string name="accessibility_change_magnification_type" msgid="666000085077432421">"የማጉላት አይነትን ለውጥ"</string>
@@ -1024,4 +1029,12 @@
     <string name="dream_date_complication_date_format" msgid="8191225366513860104">"EEE፣ MMM d"</string>
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
+    <!-- no translation found for log_access_confirmation_title (4843557604739943395) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_allow (752147861593202968) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_deny (2389461495803585795) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_body (6883031912003112634) -->
+    <skip />
 </resources>
