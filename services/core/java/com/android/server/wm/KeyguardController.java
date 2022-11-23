@@ -176,7 +176,7 @@ class KeyguardController {
         final boolean keyguardChanged = (keyguardShowing != state.mKeyguardShowing)
                 || (state.mKeyguardGoingAway && keyguardShowing && !aodRemoved);
         if (aodRemoved) {
-            updateDeferWakeTransition(false /* waiting */);
+            updateDeferTransitionForAod(false /* waiting */);
         }
         if (!keyguardChanged && !aodChanged) {
             setWakeTransitionReady();
@@ -535,24 +535,25 @@ class KeyguardController {
 
     private final Runnable mResetWaitTransition = () -> {
         synchronized (mWindowManager.mGlobalLock) {
-            updateDeferWakeTransition(false /* waiting */);
+            updateDeferTransitionForAod(false /* waiting */);
         }
     };
 
-    void updateDeferWakeTransition(boolean waiting) {
+    // Defer transition until AOD dismissed.
+    void updateDeferTransitionForAod(boolean waiting) {
         if (waiting == mWaitingForWakeTransition) {
             return;
         }
-        if (!mWindowManager.mAtmService.getTransitionController().isShellTransitionsEnabled()) {
+        if (!mService.getTransitionController().isCollecting()) {
             return;
         }
-        // if aod is showing, defer the wake transition until aod state changed.
+        // if AOD is showing, defer the wake transition until AOD state changed.
         if (waiting && isAodShowing(DEFAULT_DISPLAY)) {
             mWaitingForWakeTransition = true;
             mWindowManager.mAtmService.getTransitionController().deferTransitionReady();
             mWindowManager.mH.postDelayed(mResetWaitTransition, DEFER_WAKE_TRANSITION_TIMEOUT_MS);
         } else if (!waiting) {
-            // dismiss the deferring if the aod state change or cancel awake.
+            // dismiss the deferring if the AOD state change or cancel awake.
             mWaitingForWakeTransition = false;
             mWindowManager.mAtmService.getTransitionController().continueTransitionReady();
             mWindowManager.mH.removeCallbacks(mResetWaitTransition);
@@ -659,10 +660,18 @@ class KeyguardController {
                 mTopTurnScreenOnActivity.setCurrentLaunchCanTurnScreenOn(false);
             }
 
+            boolean hasChange = false;
             if (lastOccluded != mOccluded) {
                 controller.handleOccludedChanged(mDisplayId, mTopOccludesActivity);
+                hasChange = true;
             } else if (!lastKeyguardGoingAway && mKeyguardGoingAway) {
                 controller.handleKeyguardGoingAwayChanged(display);
+                hasChange = true;
+            }
+            // Collect the participates for shell transition, so that transition won't happen too
+            // early since the transition was set ready.
+            if (hasChange && top != null && (mOccluded || mKeyguardGoingAway)) {
+                display.mTransitionController.collect(top);
             }
         }
 
