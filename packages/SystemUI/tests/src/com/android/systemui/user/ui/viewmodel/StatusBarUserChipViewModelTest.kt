@@ -30,6 +30,7 @@ import com.android.systemui.GuestResumeSessionReceiver
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.plugins.ActivityStarter
@@ -241,7 +242,8 @@ class StatusBarUserChipViewModelTest : SysuiTestCase() {
                         KeyguardInteractor(
                             repository = keyguardRepository,
                         ),
-                    featureFlags = featureFlags,
+                    featureFlags =
+                        FakeFeatureFlags().apply { set(Flags.FULL_SCREEN_USER_SWITCHER, false) },
                     manager = manager,
                     applicationScope = testScope.backgroundScope,
                     telephonyInteractor =
