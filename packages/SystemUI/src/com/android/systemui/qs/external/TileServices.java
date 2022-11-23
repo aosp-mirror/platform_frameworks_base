@@ -15,6 +15,7 @@
  */
 package com.android.systemui.qs.external;
 
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageInfo;
@@ -32,6 +33,7 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -276,6 +278,19 @@ public class TileServices extends IQSService.Stub {
     }
 
     @Override
+    public void startActivity(IBinder token, PendingIntent pendingIntent) {
+        startActivity(getTileForToken(token), pendingIntent);
+    }
+
+    @VisibleForTesting
+    protected void startActivity(CustomTile customTile, PendingIntent pendingIntent) {
+        if (customTile != null) {
+            verifyCaller(customTile);
+            customTile.startActivityAndCollapse(pendingIntent);
+        }
+    }
+
+    @Override
     public void updateStatusIcon(IBinder token, Icon icon, String contentDescription) {
         CustomTile customTile = getTileForToken(token);
         if (customTile != null) {
@@ -336,7 +351,7 @@ public class TileServices extends IQSService.Stub {
     }
 
     @Nullable
-    private CustomTile getTileForToken(IBinder token) {
+    public CustomTile getTileForToken(IBinder token) {
         synchronized (mServices) {
             return mTokenMap.get(token);
         }
