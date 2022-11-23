@@ -395,54 +395,30 @@
     <string name="permdesc_persistentActivity" product="default" msgid="1914841924366562051">"ಸ್ಮರಣೆಯಲ್ಲಿ ನಿರಂತರವಾಗಿ ತನ್ನದೇ ಭಾಗಗಳನ್ನು ಮಾಡಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ. ಇದು ಫೋನ್ ಕಾರ್ಯವನ್ನು ನಿಧಾನಗೊಳಿಸುವುದರ ಮೂಲಕ ಇತರ ಅಪ್ಲಿಕೇಶನ್‍‍ಗಳಿಗೆ ಲಭ್ಯವಿರುವ ಸ್ಮರಣೆಯನ್ನು ಮಿತಿಗೊಳಿಸುತ್ತದೆ."</string>
     <string name="permlab_foregroundService" msgid="1768855976818467491">"ಮುನ್ನೆಲೆ ಸೇವೆಯನ್ನು ರನ್‌ ಮಾಡಿ"</string>
     <string name="permdesc_foregroundService" msgid="8720071450020922795">"ಮುನ್ನೆಲೆ ಸೇವೆಗಳನ್ನು ಬಳಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡಿ."</string>
-    <!-- no translation found for permlab_foregroundServiceCamera (7814751737955715297) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceCamera (6973701931250595727) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceConnectedDevice (3019650546176872501) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceConnectedDevice (1067457315741352963) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceDataSync (5847463514326881076) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceDataSync (2267140263423973050) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceLocation (3745428302378535690) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceLocation (118894034365177183) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceMediaPlayback (4002687983891935514) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceMediaPlayback (3638032446063968043) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceMediaProjection (2630868915733312527) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceMediaProjection (4805677128082002298) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceMicrophone (7390033424890545399) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceMicrophone (1206041516173483201) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServicePhoneCall (627937743867697892) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServicePhoneCall (5941660252587015147) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceHealth (3675776442080928184) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceHealth (2024586220562667185) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceRemoteMessaging (105670277002780950) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceRemoteMessaging (8767598075877576277) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceSystemExempted (1597663713590612685) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceSystemExempted (947381760834649622) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceSpecialUse (7973536745876645082) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceSpecialUse (646713654541885919) -->
-    <skip />
+    <string name="permlab_foregroundServiceCamera" msgid="7814751737955715297">"\"ಕ್ಯಾಮರಾ\" ಪ್ರಕಾರದೊಂದಿಗೆ ಮುನ್ನೆಲೆ ಸೇವೆಯನ್ನು ರನ್ ಮಾಡಿ"</string>
+    <string name="permdesc_foregroundServiceCamera" msgid="6973701931250595727">"\"ಕ್ಯಾಮರಾ\" ಪ್ರಕಾರದೊಂದಿಗೆ ಮುನ್ನೆಲೆ ಸೇವೆಗಳನ್ನು ಬಳಸಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ"</string>
+    <string name="permlab_foregroundServiceConnectedDevice" msgid="3019650546176872501">"\"connectedDevice\" ಪ್ರಕಾರದೊಂದಿಗೆ ಮುನ್ನೆಲೆ ಸೇವೆಯನ್ನು ರನ್ ಮಾಡಿ"</string>
+    <string name="permdesc_foregroundServiceConnectedDevice" msgid="1067457315741352963">"\"connectedDevice\" ಪ್ರಕಾರದೊಂದಿಗೆ ಮುನ್ನೆಲೆ ಸೇವೆಗಳನ್ನು ಬಳಸಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ"</string>
+    <string name="permlab_foregroundServiceDataSync" msgid="5847463514326881076">"\"dataSync\" ಪ್ರಕಾರದೊಂದಿಗೆ ಮುನ್ನೆಲೆ ಸೇವೆಯನ್ನು ರನ್ ಮಾಡಿ"</string>
+    <string name="permdesc_foregroundServiceDataSync" msgid="2267140263423973050">"\"dataSync\" ಪ್ರಕಾರದೊಂದಿಗೆ ಮುನ್ನೆಲೆ ಸೇವೆಗಳನ್ನು ಬಳಸಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ"</string>
+    <string name="permlab_foregroundServiceLocation" msgid="3745428302378535690">"\"ಸ್ಥಳ\" ಪ್ರಕಾರದೊಂದಿಗೆ ಮುನ್ನೆಲೆ ಸೇವೆಯನ್ನು ರನ್ ಮಾಡಿ"</string>
+    <string name="permdesc_foregroundServiceLocation" msgid="118894034365177183">"\"ಸ್ಥಳ\" ಪ್ರಕಾರದೊಂದಿಗೆ ಮುನ್ನೆಲೆ ಸೇವೆಗಳನ್ನು ಬಳಸಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ"</string>
+    <string name="permlab_foregroundServiceMediaPlayback" msgid="4002687983891935514">"\"mediaPlayback\" ಪ್ರಕಾರದೊಂದಿಗೆ ಮುನ್ನೆಲೆ ಸೇವೆಯನ್ನು ರನ್ ಮಾಡಿ"</string>
+    <string name="permdesc_foregroundServiceMediaPlayback" msgid="3638032446063968043">"\"mediaPlayback\" ಪ್ರಕಾರದೊಂದಿಗೆ ಮುನ್ನೆಲೆ ಸೇವೆಗಳನ್ನು ಬಳಸಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ"</string>
+    <string name="permlab_foregroundServiceMediaProjection" msgid="2630868915733312527">"\"mediaProjection\" ಪ್ರಕಾರದೊಂದಿಗೆ ಮುನ್ನೆಲೆ ಸೇವೆಯನ್ನು ರನ್ ಮಾಡಿ"</string>
+    <string name="permdesc_foregroundServiceMediaProjection" msgid="4805677128082002298">"\"mediaProjection\" ಪ್ರಕಾರದೊಂದಿಗೆ ಮುನ್ನೆಲೆ ಸೇವೆಗಳನ್ನು ಬಳಸಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ"</string>
+    <string name="permlab_foregroundServiceMicrophone" msgid="7390033424890545399">"\"ಮೈಕ್ರೊಫೋನ್‌\" ಪ್ರಕಾರದೊಂದಿಗೆ ಮುನ್ನೆಲೆ ಸೇವೆಯನ್ನು ರನ್ ಮಾಡಿ"</string>
+    <string name="permdesc_foregroundServiceMicrophone" msgid="1206041516173483201">"\"ಮೈಕ್ರೊಫೋನ್‌\" ಪ್ರಕಾರದೊಂದಿಗೆ ಮುನ್ನೆಲೆ ಸೇವೆಗಳನ್ನು ಬಳಸಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ"</string>
+    <string name="permlab_foregroundServicePhoneCall" msgid="627937743867697892">"\"phoneCall\" ಪ್ರಕಾರದೊಂದಿಗೆ ಮುನ್ನೆಲೆ ಸೇವೆಯನ್ನು ರನ್ ಮಾಡಿ"</string>
+    <string name="permdesc_foregroundServicePhoneCall" msgid="5941660252587015147">"\"phoneCall\" ಪ್ರಕಾರದೊಂದಿಗೆ ಮುನ್ನೆಲೆ ಸೇವೆಗಳನ್ನು ಬಳಸಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ"</string>
+    <string name="permlab_foregroundServiceHealth" msgid="3675776442080928184">"\"ಅರೋಗ್ಯ\" ಪ್ರಕಾರದೊಂದಿಗೆ ಮುನ್ನೆಲೆ ಸೇವೆಯನ್ನು ರನ್ ಮಾಡಿ"</string>
+    <string name="permdesc_foregroundServiceHealth" msgid="2024586220562667185">"\"ಅರೋಗ್ಯ\" ಪ್ರಕಾರದೊಂದಿಗೆ ಮುನ್ನೆಲೆ ಸೇವೆಗಳನ್ನು ಬಳಸಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ"</string>
+    <string name="permlab_foregroundServiceRemoteMessaging" msgid="105670277002780950">"\"remoteMessaging\" ಪ್ರಕಾರದೊಂದಿಗೆ ಮುನ್ನೆಲೆ ಸೇವೆಯನ್ನು ರನ್ ಮಾಡಿ"</string>
+    <string name="permdesc_foregroundServiceRemoteMessaging" msgid="8767598075877576277">"\"remoteMessaging\" ಪ್ರಕಾರದೊಂದಿಗೆ ಮುನ್ನೆಲೆ ಸೇವೆಗಳನ್ನು ಬಳಸಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ"</string>
+    <string name="permlab_foregroundServiceSystemExempted" msgid="1597663713590612685">"\"systemExempted\" ಪ್ರಕಾರದೊಂದಿಗೆ ಮುನ್ನೆಲೆ ಸೇವೆಯನ್ನು ರನ್ ಮಾಡಿ"</string>
+    <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"\"systemExempted\" ಪ್ರಕಾರದೊಂದಿಗೆ ಮುನ್ನೆಲೆ ಸೇವೆಗಳನ್ನು ಬಳಸಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ"</string>
+    <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"\"specialUse\" ಪ್ರಕಾರದೊಂದಿಗೆ ಮುನ್ನೆಲೆ ಸೇವೆಯನ್ನು ರನ್ ಮಾಡಿ"</string>
+    <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"\"specialUse\" ಪ್ರಕಾರದೊಂದಿಗೆ ಮುನ್ನೆಲೆ ಸೇವೆಗಳನ್ನು ಬಳಸಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ"</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"ಅಪ್ಲಿಕೇಶನ್‌ ಸಂಗ್ರಹ ಸ್ಥಳವನ್ನು ಅಳೆಯಿರಿ"</string>
     <string name="permdesc_getPackageSize" msgid="742743530909966782">"ಅದರ ಕೋಡ್‌‌, ಡೇಟಾ, ಮತ್ತು ಕ್ಯಾಷ್‌ ಗಾತ್ರಗಳನ್ನು ಹಿಂಪಡೆಯಲು ಅಪ್ಲಿಕೇಶನ್‌‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ"</string>
     <string name="permlab_writeSettings" msgid="8057285063719277394">"ಸಿಸ್ಟಂ ಸೆಟ್ಟಿಂಗ್‍ಗಳನ್ನು ಮಾರ್ಪಡಿಸಿ"</string>
@@ -495,10 +471,8 @@
     <string name="permdesc_recordAudio" msgid="5857246765327514062">"ಆ್ಯಪ್ ಬಳಕೆಯಲ್ಲಿರುವಾಗ ಈ ಆ್ಯಪ್ ಮೈಕ್ರೊಫೋನ್ ಬಳಸಿ ಆಡಿಯೊವನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಬಹುದು."</string>
     <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"ಹಿನ್ನೆಲೆಯಲ್ಲಿ ಆಡಿಯೊವನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಿ"</string>
     <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"ಈ ಆ್ಯಪ್ ಮೈಕ್ರೋಫೋನ್ ಬಳಸುವ ಮೂಲಕ ಯಾವುದೇ ಸಮಯದಲ್ಲಾದರೂ ಆಡಿಯೋ ರೆಕಾರ್ಡ್ ಮಾಡಬಹುದು."</string>
-    <!-- no translation found for permlab_detectScreenCapture (4447042362828799433) -->
-    <skip />
-    <!-- no translation found for permdesc_detectScreenCapture (3485784917960342284) -->
-    <skip />
+    <string name="permlab_detectScreenCapture" msgid="4447042362828799433">"ಆ್ಯಪ್ ವಿಂಡೋಗಳ ಸ್ಕ್ರೀನ್ ಕ್ಯಾಪ್ಚರ್‌ಗಳನ್ನು ಪತ್ತೆ ಮಾಡಿ"</string>
+    <string name="permdesc_detectScreenCapture" msgid="3485784917960342284">"ಆ್ಯಪ್ ಬಳಕೆಯಲ್ಲಿರುವಾಗ ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಒಂದನ್ನು ತೆಗೆದುಕೊಂಡಾಗ ಈ ಆ್ಯಪ್ ಸೂಚನೆಯನ್ನು ಪಡೆಯುತ್ತದೆ."</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"ಸಿಮ್‌ಗೆ ಆಜ್ಞೆಗಳನ್ನು ಕಳುಹಿಸಿ"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"ಸಿಮ್‌ ಗೆ ಆದೇಶಗಳನ್ನು ಕಳುಹಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ. ಇದು ತುಂಬಾ ಅಪಾಯಕಾರಿ."</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"ದೈಹಿಕ ಚಟುವಟಿಕೆಯನ್ನು ಗುರುತಿಸಿ"</string>
@@ -2342,8 +2316,7 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"ನಿಮ್ಮ <xliff:g id="DEVICE">%1$s</xliff:g> ಮೂಲಕ ಫೋನ್‌ನ ಕ್ಯಾಮರಾವನ್ನು ಪ್ರವೇಶಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"ನಿಮ್ಮ <xliff:g id="DEVICE">%1$s</xliff:g> ಮೂಲಕ ಟ್ಯಾಬ್ಲೆಟ್‌ನ ಕ್ಯಾಮರಾವನ್ನು ಪ್ರವೇಶಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"ಸ್ಟ್ರೀಮ್ ಮಾಡುವಾಗ ಇದನ್ನು ಆ್ಯಕ್ಸೆಸ್ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ. ಅದರ ಬದಲು ನಿಮ್ಮ ಫೋನ್‌ನಲ್ಲಿ ಪ್ರಯತ್ನಿಸಿ."</string>
-    <!-- no translation found for vdm_pip_blocked (4036107522497281397) -->
-    <skip />
+    <string name="vdm_pip_blocked" msgid="4036107522497281397">"ಸ್ಟ್ರೀಮ್ ಮಾಡುವಾಗ ಚಿತ್ರದಲ್ಲಿ ಚಿತ್ರವನ್ನು ವೀಕ್ಷಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="system_locale_title" msgid="711882686834677268">"ಸಿಸ್ಟಂ ಡೀಫಾಲ್ಟ್"</string>
     <string name="default_card_name" msgid="9198284935962911468">"ಕಾರ್ಡ್ <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

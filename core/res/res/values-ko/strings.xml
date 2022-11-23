@@ -395,54 +395,30 @@
     <string name="permdesc_persistentActivity" product="default" msgid="1914841924366562051">"앱이 그 일부분을 영구적인 메모리로 만들 수 있도록 허용합니다. 이렇게 하면 다른 앱이 사용할 수 있는 메모리를 제한하여 휴대전화의 속도를 저하시킬 수 있습니다."</string>
     <string name="permlab_foregroundService" msgid="1768855976818467491">"포그라운드 서비스 실행"</string>
     <string name="permdesc_foregroundService" msgid="8720071450020922795">"앱에서 포그라운드 서비스를 사용하도록 허용합니다."</string>
-    <!-- no translation found for permlab_foregroundServiceCamera (7814751737955715297) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceCamera (6973701931250595727) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceConnectedDevice (3019650546176872501) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceConnectedDevice (1067457315741352963) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceDataSync (5847463514326881076) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceDataSync (2267140263423973050) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceLocation (3745428302378535690) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceLocation (118894034365177183) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceMediaPlayback (4002687983891935514) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceMediaPlayback (3638032446063968043) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceMediaProjection (2630868915733312527) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceMediaProjection (4805677128082002298) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceMicrophone (7390033424890545399) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceMicrophone (1206041516173483201) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServicePhoneCall (627937743867697892) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServicePhoneCall (5941660252587015147) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceHealth (3675776442080928184) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceHealth (2024586220562667185) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceRemoteMessaging (105670277002780950) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceRemoteMessaging (8767598075877576277) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceSystemExempted (1597663713590612685) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceSystemExempted (947381760834649622) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceSpecialUse (7973536745876645082) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceSpecialUse (646713654541885919) -->
-    <skip />
+    <string name="permlab_foregroundServiceCamera" msgid="7814751737955715297">"\'camera\' 유형의 포그라운드 서비스 실행"</string>
+    <string name="permdesc_foregroundServiceCamera" msgid="6973701931250595727">"앱에서 \'camera\' 유형의 포그라운드 서비스를 사용하도록 허용합니다."</string>
+    <string name="permlab_foregroundServiceConnectedDevice" msgid="3019650546176872501">"\'connectedDevice\' 유형의 포그라운드 서비스 실행"</string>
+    <string name="permdesc_foregroundServiceConnectedDevice" msgid="1067457315741352963">"앱에서 \'connectedDevice\' 유형의 포그라운드 서비스를 사용하도록 허용합니다."</string>
+    <string name="permlab_foregroundServiceDataSync" msgid="5847463514326881076">"\'dataSync\' 유형의 포그라운드 서비스 실행"</string>
+    <string name="permdesc_foregroundServiceDataSync" msgid="2267140263423973050">"앱에서 \'dataSync\' 유형의 포그라운드 서비스를 사용하도록 허용합니다."</string>
+    <string name="permlab_foregroundServiceLocation" msgid="3745428302378535690">"\'location\' 유형의 포그라운드 서비스 실행"</string>
+    <string name="permdesc_foregroundServiceLocation" msgid="118894034365177183">"앱에서 \'location\' 유형의 포그라운드 서비스를 사용하도록 허용합니다."</string>
+    <string name="permlab_foregroundServiceMediaPlayback" msgid="4002687983891935514">"\'mediaPlayback\' 유형의 포그라운드 서비스 실행"</string>
+    <string name="permdesc_foregroundServiceMediaPlayback" msgid="3638032446063968043">"앱에서 \'mediaPlayback\' 유형의 포그라운드 서비스를 사용하도록 허용합니다."</string>
+    <string name="permlab_foregroundServiceMediaProjection" msgid="2630868915733312527">"\'mediaProjection\' 유형의 포그라운드 서비스 실행"</string>
+    <string name="permdesc_foregroundServiceMediaProjection" msgid="4805677128082002298">"앱에서 \'mediaProjection\' 유형의 포그라운드 서비스를 사용하도록 허용합니다."</string>
+    <string name="permlab_foregroundServiceMicrophone" msgid="7390033424890545399">"\'microphone\' 유형의 포그라운드 서비스 실행"</string>
+    <string name="permdesc_foregroundServiceMicrophone" msgid="1206041516173483201">"앱에서 \'microphone\' 유형의 포그라운드 서비스를 사용하도록 허용합니다."</string>
+    <string name="permlab_foregroundServicePhoneCall" msgid="627937743867697892">"\'phoneCall\' 유형의 포그라운드 서비스 실행"</string>
+    <string name="permdesc_foregroundServicePhoneCall" msgid="5941660252587015147">"앱에서 \'phoneCall\' 유형의 포그라운드 서비스를 사용하도록 허용합니다."</string>
+    <string name="permlab_foregroundServiceHealth" msgid="3675776442080928184">"\'health\' 유형의 포그라운드 서비스 실행"</string>
+    <string name="permdesc_foregroundServiceHealth" msgid="2024586220562667185">"앱에서 \'health\' 유형의 포그라운드 서비스를 사용하도록 허용합니다."</string>
+    <string name="permlab_foregroundServiceRemoteMessaging" msgid="105670277002780950">"\'remoteMessaging\' 유형의 포그라운드 서비스 실행"</string>
+    <string name="permdesc_foregroundServiceRemoteMessaging" msgid="8767598075877576277">"앱에서 \'remoteMessaging\' 유형의 포그라운드 서비스를 사용하도록 허용합니다."</string>
+    <string name="permlab_foregroundServiceSystemExempted" msgid="1597663713590612685">"\'systemExempted\' 유형의 포그라운드 서비스 실행"</string>
+    <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"앱에서 \'systemExempted\' 유형의 포그라운드 서비스를 사용하도록 허용합니다."</string>
+    <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"\'specialUse\' 유형의 포그라운드 서비스 실행"</string>
+    <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"앱에서 \'specialUse\' 유형의 포그라운드 서비스를 사용하도록 허용합니다."</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"앱 저장공간 계산"</string>
     <string name="permdesc_getPackageSize" msgid="742743530909966782">"앱이 해당 코드, 데이터 및 캐시 크기를 검색할 수 있도록 허용합니다."</string>
     <string name="permlab_writeSettings" msgid="8057285063719277394">"시스템 설정 수정"</string>
@@ -495,10 +471,8 @@
     <string name="permdesc_recordAudio" msgid="5857246765327514062">"앱을 사용하는 동안 앱에서 마이크를 사용하여 오디오를 녹음할 수 있습니다."</string>
     <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"백그라운드에서 오디오 녹음"</string>
     <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"언제든지 앱에서 마이크를 사용하여 오디오를 녹음할 수 있습니다."</string>
-    <!-- no translation found for permlab_detectScreenCapture (4447042362828799433) -->
-    <skip />
-    <!-- no translation found for permdesc_detectScreenCapture (3485784917960342284) -->
-    <skip />
+    <string name="permlab_detectScreenCapture" msgid="4447042362828799433">"앱 창 화면 캡처 감지"</string>
+    <string name="permdesc_detectScreenCapture" msgid="3485784917960342284">"앱이 사용 중일 때 스크린샷을 찍으면 알림이 전송됩니다."</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"SIM 카드로 명령 전송"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"앱이 SIM에 명령어를 전송할 수 있도록 허용합니다. 이 기능은 매우 신중히 허용해야 합니다."</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"신체 활동 확인"</string>
@@ -2342,8 +2316,7 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"사용자의 <xliff:g id="DEVICE">%1$s</xliff:g>에서 휴대전화 카메라에 액세스할 수 없습니다."</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"사용자의 <xliff:g id="DEVICE">%1$s</xliff:g>에서 태블릿 카메라에 액세스할 수 없습니다."</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"스트리밍 중에는 액세스할 수 없습니다. 대신 휴대전화에서 시도해 보세요."</string>
-    <!-- no translation found for vdm_pip_blocked (4036107522497281397) -->
-    <skip />
+    <string name="vdm_pip_blocked" msgid="4036107522497281397">"스트리밍 중에는 PIP 모드를 볼 수 없습니다."</string>
     <string name="system_locale_title" msgid="711882686834677268">"시스템 기본값"</string>
     <string name="default_card_name" msgid="9198284935962911468">"<xliff:g id="CARDNUMBER">%d</xliff:g> 카드"</string>
 </resources>

@@ -395,54 +395,30 @@
     <string name="permdesc_persistentActivity" product="default" msgid="1914841924366562051">"एपलाई मेमोरीमा आफैंको निरन्तरको अंश बनाउन अनुमति दिन्छ। यसले फोनलाई ढिला बनाएर अन्य एपहरूमा मेमोरी SIMित गर्न सक्दछन्।"</string>
     <string name="permlab_foregroundService" msgid="1768855976818467491">"अग्रभूमिको सेवा सञ्चालन गर्नुहोस्"</string>
     <string name="permdesc_foregroundService" msgid="8720071450020922795">"एपलाई अग्रभूमिका सेवाहरू प्रयोग गर्ने अनुमति दिन्छ।"</string>
-    <!-- no translation found for permlab_foregroundServiceCamera (7814751737955715297) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceCamera (6973701931250595727) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceConnectedDevice (3019650546176872501) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceConnectedDevice (1067457315741352963) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceDataSync (5847463514326881076) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceDataSync (2267140263423973050) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceLocation (3745428302378535690) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceLocation (118894034365177183) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceMediaPlayback (4002687983891935514) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceMediaPlayback (3638032446063968043) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceMediaProjection (2630868915733312527) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceMediaProjection (4805677128082002298) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceMicrophone (7390033424890545399) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceMicrophone (1206041516173483201) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServicePhoneCall (627937743867697892) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServicePhoneCall (5941660252587015147) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceHealth (3675776442080928184) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceHealth (2024586220562667185) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceRemoteMessaging (105670277002780950) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceRemoteMessaging (8767598075877576277) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceSystemExempted (1597663713590612685) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceSystemExempted (947381760834649622) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceSpecialUse (7973536745876645082) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceSpecialUse (646713654541885919) -->
-    <skip />
+    <string name="permlab_foregroundServiceCamera" msgid="7814751737955715297">"\"camera\" सँग सम्बन्धित फोरग्राउन्ड सेवाहरू प्रयोग गर्ने अनुमति दिनुहोस्"</string>
+    <string name="permdesc_foregroundServiceCamera" msgid="6973701931250595727">"यसले एपलाई \"camera\" सँग सम्बन्धित फोरग्राउन्ड सेवाहरू प्रयोग गर्ने अनुमति दिन्छ"</string>
+    <string name="permlab_foregroundServiceConnectedDevice" msgid="3019650546176872501">"\"connectedDevice\" सँग सम्बन्धित फोरग्राउन्ड सेवाहरू प्रयोग गर्ने अनुमति दिनुहोस्"</string>
+    <string name="permdesc_foregroundServiceConnectedDevice" msgid="1067457315741352963">"यसले एपलाई \"connectedDevice\" सँग सम्बन्धित फोरग्राउन्ड सेवाहरू प्रयोग गर्ने अनुमति दिन्छ"</string>
+    <string name="permlab_foregroundServiceDataSync" msgid="5847463514326881076">"\"dataSync\" सँग सम्बन्धित फोरग्राउन्ड सेवाहरू प्रयोग गर्ने अनुमति दिनुहोस्"</string>
+    <string name="permdesc_foregroundServiceDataSync" msgid="2267140263423973050">"यसले एपलाई \"dataSync\" सँग सम्बन्धित फोरग्राउन्ड सेवाहरू प्रयोग गर्ने अनुमति दिन्छ"</string>
+    <string name="permlab_foregroundServiceLocation" msgid="3745428302378535690">"\"location\" सँग सम्बन्धित फोरग्राउन्ड सेवाहरू प्रयोग गर्ने अनुमति दिनुहोस्"</string>
+    <string name="permdesc_foregroundServiceLocation" msgid="118894034365177183">"यसले एपलाई \"location\" सँग सम्बन्धित फोरग्राउन्ड सेवाहरू प्रयोग गर्ने अनुमति दिन्छ"</string>
+    <string name="permlab_foregroundServiceMediaPlayback" msgid="4002687983891935514">"\"mediaPlayback\" सँग सम्बन्धित फोरग्राउन्ड सेवाहरू प्रयोग गर्ने अनुमति दिनुहोस्"</string>
+    <string name="permdesc_foregroundServiceMediaPlayback" msgid="3638032446063968043">"यसले एपलाई \"mediaPlayback\" सँग सम्बन्धित फोरग्राउन्ड सेवाहरू प्रयोग गर्ने अनुमति दिन्छ"</string>
+    <string name="permlab_foregroundServiceMediaProjection" msgid="2630868915733312527">"\"mediaProjection\" सँग सम्बन्धित फोरग्राउन्ड सेवाहरू प्रयोग गर्ने अनुमति दिनुहोस्"</string>
+    <string name="permdesc_foregroundServiceMediaProjection" msgid="4805677128082002298">"यसले एपलाई \"mediaProjection\" सँग सम्बन्धित फोरग्राउन्ड सेवाहरू प्रयोग गर्ने अनुमति दिन्छ"</string>
+    <string name="permlab_foregroundServiceMicrophone" msgid="7390033424890545399">"\"microphone\" सँग सम्बन्धित फोरग्राउन्ड सेवाहरू प्रयोग गर्ने अनुमति दिनुहोस्"</string>
+    <string name="permdesc_foregroundServiceMicrophone" msgid="1206041516173483201">"यसले एपलाई \"microphone\" सँग सम्बन्धित फोरग्राउन्ड सेवाहरू प्रयोग गर्ने अनुमति दिन्छ"</string>
+    <string name="permlab_foregroundServicePhoneCall" msgid="627937743867697892">"\"phoneCall\" सँग सम्बन्धित फोरग्राउन्ड सेवाहरू प्रयोग गर्ने अनुमति दिनुहोस्"</string>
+    <string name="permdesc_foregroundServicePhoneCall" msgid="5941660252587015147">"यसले एपलाई \"phoneCall\" सँग सम्बन्धित फोरग्राउन्ड सेवाहरू प्रयोग गर्ने अनुमति दिन्छ"</string>
+    <string name="permlab_foregroundServiceHealth" msgid="3675776442080928184">"\"health\" सँग सम्बन्धित फोरग्राउन्ड सेवाहरू प्रयोग गर्ने अनुमति दिनुहोस्"</string>
+    <string name="permdesc_foregroundServiceHealth" msgid="2024586220562667185">"यसले एपलाई \"health\" सँग सम्बन्धित फोरग्राउन्ड सेवाहरू प्रयोग गर्ने अनुमति दिन्छ"</string>
+    <string name="permlab_foregroundServiceRemoteMessaging" msgid="105670277002780950">"\"remoteMessaging\" सँग सम्बन्धित फोरग्राउन्ड सेवाहरू प्रयोग गर्ने अनुमति दिनुहोस्"</string>
+    <string name="permdesc_foregroundServiceRemoteMessaging" msgid="8767598075877576277">"यसले एपलाई \"remoteMessaging\" सँग सम्बन्धित फोरग्राउन्ड सेवाहरू प्रयोग गर्ने अनुमति दिन्छ"</string>
+    <string name="permlab_foregroundServiceSystemExempted" msgid="1597663713590612685">"\"systemExempted\" सँग सम्बन्धित फोरग्राउन्ड सेवाहरू प्रयोग गर्ने अनुमति दिनुहोस्"</string>
+    <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"यसले एपलाई \"systemExempted\" सँग सम्बन्धित फोरग्राउन्ड सेवाहरू प्रयोग गर्ने अनुमति दिन्छ"</string>
+    <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"\"specialUse\" सँग सम्बन्धित फोरग्राउन्ड सेवाहरू प्रयोग गर्ने अनुमति दिनुहोस्"</string>
+    <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"यसले एपलाई \"specialUse\" सँग सम्बन्धित फोरग्राउन्ड सेवाहरू प्रयोग गर्ने अनुमति दिन्छ"</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"एप भण्डारण ठाउँको मापन गर्नुहोस्"</string>
     <string name="permdesc_getPackageSize" msgid="742743530909966782">"एपलाई यसको कोड, डेटा, र क्यास आकारहरू पुनःप्राप्त गर्न अनुमति दिन्छ।"</string>
     <string name="permlab_writeSettings" msgid="8057285063719277394">"प्रणाली सेटिङहरू परिमार्जन गर्नुहोस्"</string>
@@ -495,10 +471,8 @@
     <string name="permdesc_recordAudio" msgid="5857246765327514062">"यो एप प्रयोग भइरहेका बेला यसले माइक्रोफोन प्रयोग गरेर अडियो रेकर्ड गर्न सक्छ।"</string>
     <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"ब्याकग्राउन्डमा अडियो रेकर्ड गर्नुहोस्"</string>
     <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"यो एपले जुनसुकै बेला माइक्रोफोन प्रयोग गरी अडियो रेकर्ड गर्न सक्छ।"</string>
-    <!-- no translation found for permlab_detectScreenCapture (4447042362828799433) -->
-    <skip />
-    <!-- no translation found for permdesc_detectScreenCapture (3485784917960342284) -->
-    <skip />
+    <string name="permlab_detectScreenCapture" msgid="4447042362828799433">"एपको विन्डोको स्क्रिन क्याप्चर गरेको कुरा पत्ता लगाउनुहोस्"</string>
+    <string name="permdesc_detectScreenCapture" msgid="3485784917960342284">"एप प्रयोग भइरहेको बेला स्क्रिनसट लिइयो भने यो एपलाई सूचना दिइने छ।"</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"SIM मा आदेशहरू पठाउन दिनुहोस्"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"SIM लाई आदेश पठाउन एपलाई अनुमति दिन्छ। यो निकै खतरनाक हुन्छ।"</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"शारीरिक गतिविधि पहिचान गर्नुहोस्‌"</string>
@@ -2342,8 +2316,7 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"तपाईंको <xliff:g id="DEVICE">%1$s</xliff:g> मार्फत फोनको क्यामेरा प्रयोग गर्न मिल्दैन"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"तपाईंको <xliff:g id="DEVICE">%1$s</xliff:g> मार्फत ट्याब्लेटको क्यामेरा प्रयोग गर्न मिल्दैन"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"स्ट्रिम गरिरहेका बेला यो सामग्री हेर्न तथा प्रयोग गर्न मिल्दैन। बरु आफ्नो फोनमार्फत सो सामग्री हेर्ने तथा प्रयोग गर्ने प्रयास गर्नुहोस्।"</string>
-    <!-- no translation found for vdm_pip_blocked (4036107522497281397) -->
-    <skip />
+    <string name="vdm_pip_blocked" msgid="4036107522497281397">"स्ट्रिम गरिरहेका बेला picture-in-picture मोड प्रयोग गर्न मिल्दैन"</string>
     <string name="system_locale_title" msgid="711882686834677268">"सिस्टम डिफल्ट"</string>
     <string name="default_card_name" msgid="9198284935962911468">"कार्ड <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

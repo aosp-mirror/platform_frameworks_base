@@ -395,54 +395,30 @@
     <string name="permdesc_persistentActivity" product="default" msgid="1914841924366562051">"Lejon aplikacionin të zaptojë një pjesë të qëndrueshme në kujtesë. Kjo mund të kufizojë kujtesën e disponueshme për aplikacionet e tjera duke e ngadalësuar telefonin."</string>
     <string name="permlab_foregroundService" msgid="1768855976818467491">"ekzekuto shërbimin në plan të parë"</string>
     <string name="permdesc_foregroundService" msgid="8720071450020922795">"Lejon aplikacionin të përdorë shërbimet në plan të parë."</string>
-    <!-- no translation found for permlab_foregroundServiceCamera (7814751737955715297) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceCamera (6973701931250595727) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceConnectedDevice (3019650546176872501) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceConnectedDevice (1067457315741352963) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceDataSync (5847463514326881076) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceDataSync (2267140263423973050) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceLocation (3745428302378535690) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceLocation (118894034365177183) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceMediaPlayback (4002687983891935514) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceMediaPlayback (3638032446063968043) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceMediaProjection (2630868915733312527) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceMediaProjection (4805677128082002298) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceMicrophone (7390033424890545399) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceMicrophone (1206041516173483201) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServicePhoneCall (627937743867697892) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServicePhoneCall (5941660252587015147) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceHealth (3675776442080928184) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceHealth (2024586220562667185) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceRemoteMessaging (105670277002780950) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceRemoteMessaging (8767598075877576277) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceSystemExempted (1597663713590612685) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceSystemExempted (947381760834649622) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceSpecialUse (7973536745876645082) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceSpecialUse (646713654541885919) -->
-    <skip />
+    <string name="permlab_foregroundServiceCamera" msgid="7814751737955715297">"të ekzekutojë shërbimin në plan të parë me llojin \"camera\""</string>
+    <string name="permdesc_foregroundServiceCamera" msgid="6973701931250595727">"Lejon që aplikacioni të përdorë shërbimet në plan të parë me llojin \"camera\""</string>
+    <string name="permlab_foregroundServiceConnectedDevice" msgid="3019650546176872501">"të ekzekutojë shërbimin në plan të parë me llojin \"connectedDevice\""</string>
+    <string name="permdesc_foregroundServiceConnectedDevice" msgid="1067457315741352963">"Lejon që aplikacioni të përdorë shërbimet në plan të parë me llojin \"connectedDevice\""</string>
+    <string name="permlab_foregroundServiceDataSync" msgid="5847463514326881076">"të ekzekutojë shërbimin në plan të parë me llojin \"dataSync\""</string>
+    <string name="permdesc_foregroundServiceDataSync" msgid="2267140263423973050">"Lejon që aplikacioni të përdorë shërbimet në plan të parë me llojin \"dataSync\""</string>
+    <string name="permlab_foregroundServiceLocation" msgid="3745428302378535690">"të ekzekutojë shërbimin në plan të parë me llojin \"location\""</string>
+    <string name="permdesc_foregroundServiceLocation" msgid="118894034365177183">"Lejon që aplikacioni të përdorë shërbimet në plan të parë me llojin \"location\""</string>
+    <string name="permlab_foregroundServiceMediaPlayback" msgid="4002687983891935514">"të ekzekutojë shërbimin në plan të parë me llojin \"mediaPlayback\""</string>
+    <string name="permdesc_foregroundServiceMediaPlayback" msgid="3638032446063968043">"Lejon që aplikacioni të përdorë shërbimet në plan të parë me llojin \"mediaPlayback\""</string>
+    <string name="permlab_foregroundServiceMediaProjection" msgid="2630868915733312527">"të ekzekutojë shërbimin në plan të parë me llojin \"mediaProjection\""</string>
+    <string name="permdesc_foregroundServiceMediaProjection" msgid="4805677128082002298">"Lejon që aplikacioni të përdorë shërbimet në plan të parë me llojin \"mediaProjection\""</string>
+    <string name="permlab_foregroundServiceMicrophone" msgid="7390033424890545399">"të ekzekutojë shërbimin në plan të parë me llojin \"microphone\""</string>
+    <string name="permdesc_foregroundServiceMicrophone" msgid="1206041516173483201">"Lejon që aplikacioni të përdorë shërbimet në plan të parë me llojin \"microphone\""</string>
+    <string name="permlab_foregroundServicePhoneCall" msgid="627937743867697892">"të ekzekutojë shërbimin në plan të parë me llojin \"phoneCall\""</string>
+    <string name="permdesc_foregroundServicePhoneCall" msgid="5941660252587015147">"Lejon që aplikacioni të përdorë shërbimet në plan të parë me llojin \"phoneCall\""</string>
+    <string name="permlab_foregroundServiceHealth" msgid="3675776442080928184">"të ekzekutojë shërbimin në plan të parë me llojin \"health\""</string>
+    <string name="permdesc_foregroundServiceHealth" msgid="2024586220562667185">"Lejon që aplikacioni të përdorë shërbimet në plan të parë me llojin \"health\""</string>
+    <string name="permlab_foregroundServiceRemoteMessaging" msgid="105670277002780950">"të ekzekutojë shërbimin në plan të parë me llojin \"remoteMessaging\""</string>
+    <string name="permdesc_foregroundServiceRemoteMessaging" msgid="8767598075877576277">"Lejon që aplikacioni të përdorë shërbimet në plan të parë me llojin \"remoteMessaging\""</string>
+    <string name="permlab_foregroundServiceSystemExempted" msgid="1597663713590612685">"të ekzekutojë shërbimin në plan të parë me llojin \"systemExempted\""</string>
+    <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"Lejon që aplikacioni të përdorë shërbimet në plan të parë me llojin \"systemExempted\""</string>
+    <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"të ekzekutojë shërbimin në plan të parë me llojin \"specialUse\""</string>
+    <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"Lejon që aplikacioni të përdorë shërbimet në plan të parë me llojin \"specialUse\""</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"mat hapësirën ruajtëse të aplikacionit"</string>
     <string name="permdesc_getPackageSize" msgid="742743530909966782">"Lejon aplikacionin të gjejë kodin e tij, të dhënat dhe madhësitë e memorieve të përkohshme."</string>
     <string name="permlab_writeSettings" msgid="8057285063719277394">"modifiko cilësimet e sistemit"</string>
@@ -495,10 +471,8 @@
     <string name="permdesc_recordAudio" msgid="5857246765327514062">"Ky aplikacion mund të regjistrojë audion duke përdorur mikrofonin kur aplikacioni është në përdorim."</string>
     <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"të regjistrojë audion në sfond"</string>
     <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"Ky aplikacion mund të regjistrojë audion me mikrofonin në çdo kohë."</string>
-    <!-- no translation found for permlab_detectScreenCapture (4447042362828799433) -->
-    <skip />
-    <!-- no translation found for permdesc_detectScreenCapture (3485784917960342284) -->
-    <skip />
+    <string name="permlab_detectScreenCapture" msgid="4447042362828799433">"të zbulojë regjistrimet e ekranit të dritareve të aplikacionit"</string>
+    <string name="permdesc_detectScreenCapture" msgid="3485784917960342284">"Ky aplikacion do të njoftohet kur nxirret një pamje ekrani ndërkohë që aplikacioni është në përdorim."</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"dërgo komanda te karta SIM"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"Lejon aplikacionin t\'i dërgojë komanda kartës SIM. Kjo është shumë e rrezikshme."</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"njih aktivitetin fizik"</string>
@@ -2342,8 +2316,7 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Nuk mund të qasesh në kamerën e telefonit tënd nga <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Nuk mund të qasesh në kamerën e tabletit tënd nga <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Nuk mund të kesh qasje në të gjatë transmetimit. Provoje në telefon më mirë."</string>
-    <!-- no translation found for vdm_pip_blocked (4036107522497281397) -->
-    <skip />
+    <string name="vdm_pip_blocked" msgid="4036107522497281397">"Figura brenda figurës nuk mund të shikohet gjatë transmetimit"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Parazgjedhja e sistemit"</string>
     <string name="default_card_name" msgid="9198284935962911468">"KARTA <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>
