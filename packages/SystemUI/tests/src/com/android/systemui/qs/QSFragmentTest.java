@@ -19,6 +19,7 @@ import static com.android.systemui.statusbar.StatusBarState.SHADE;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -448,6 +449,23 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
 
         fragment.setExpanded(true);
         verify(mQSPanelController).setListening(true, true);
+    }
+
+    @Test
+    public void testUpdateQSBounds_setMediaClipCorrectly() {
+        QSFragment fragment = resumeAndGetFragment();
+        disableSplitShade();
+
+        Rect mediaHostClip = new Rect();
+        when(mQSPanelController.getPaddingBottom()).thenReturn(50);
+        setLocationOnScreen(mQSPanelScrollView, 25);
+        when(mQSPanelScrollView.getMeasuredHeight()).thenReturn(200);
+        when(mQSMediaHost.getCurrentClipping()).thenReturn(mediaHostClip);
+
+        fragment.updateQsBounds();
+
+        assertEquals(25, mediaHostClip.top);
+        assertEquals(175, mediaHostClip.bottom);
     }
 
     @Override

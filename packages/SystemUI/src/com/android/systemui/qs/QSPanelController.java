@@ -239,5 +239,9 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
     public boolean isBouncerInTransit() {
         return mStatusBarKeyguardViewManager.isPrimaryBouncerInTransit();
     }
+
+    public int getPaddingBottom() {
+        return mView.getPaddingBottom();
+    }
 }
 
