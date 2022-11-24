@@ -330,6 +330,20 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
     }
 
     @Test
+    public void tune_forCurrentUser_doesNotTune() throws Exception {
+        openAidlClients(/* numClients= */ 1);
+        doReturn(false).when(() -> RadioServiceUserController.isCurrentOrSystemUser());
+        ProgramSelector initialSel = AidlTestUtils.makeFmSelector(AM_FM_FREQUENCY_LIST[1]);
+        RadioManager.ProgramInfo tuneInfo =
+                AidlTestUtils.makeProgramInfo(initialSel, SIGNAL_QUALITY);
+
+        mTunerSessions[0].tune(initialSel);
+
+        verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT.times(0))
+                .onCurrentProgramInfoChanged(tuneInfo);
+    }
+
+    @Test
     public void step_withDirectionUp() throws Exception {
         long initFreq = AM_FM_FREQUENCY_LIST[1];
         ProgramSelector initialSel = AidlTestUtils.makeFmSelector(initFreq);
