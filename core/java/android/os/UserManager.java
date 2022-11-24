@@ -4102,6 +4102,26 @@ public class UserManager {
     }
 
     /**
+     * Revokes admin privileges from the user, if such a user exists.
+     *
+     * <p>Note that this does not alter the user's pre-existing user restrictions.
+     *
+     * @param userId the id of the user to revoke admin rights from
+     * @hide
+     */
+    @RequiresPermission(allOf = {
+            Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+            Manifest.permission.MANAGE_USERS
+    })
+    public void revokeUserAdmin(@UserIdInt int userId) {
+        try {
+            mService.revokeUserAdmin(userId);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Evicts the user's credential encryption key from memory by stopping and restarting the user.
      *
      * @hide

@@ -619,6 +619,30 @@ public final class UserManagerTest {
 
     @MediumTest
     @Test
+    public void testRevokeUserAdmin() throws Exception {
+        UserInfo userInfo = createUser("Admin", /*flags=*/ UserInfo.FLAG_ADMIN);
+        assertThat(userInfo.isAdmin()).isTrue();
+
+        mUserManager.revokeUserAdmin(userInfo.id);
+
+        userInfo = mUserManager.getUserInfo(userInfo.id);
+        assertThat(userInfo.isAdmin()).isFalse();
+    }
+
+    @MediumTest
+    @Test
+    public void testRevokeUserAdminFromNonAdmin() throws Exception {
+        UserInfo userInfo = createUser("NonAdmin", /*flags=*/ 0);
+        assertThat(userInfo.isAdmin()).isFalse();
+
+        mUserManager.revokeUserAdmin(userInfo.id);
+
+        userInfo = mUserManager.getUserInfo(userInfo.id);
+        assertThat(userInfo.isAdmin()).isFalse();
+    }
+
+    @MediumTest
+    @Test
     public void testGetProfileParent() throws Exception {
         assumeManagedUsersSupported();
         final int primaryUserId = mUserManager.getPrimaryUser().id;
