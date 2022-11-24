@@ -1623,4 +1623,10 @@
     <dimen name="config_rounded_mask_size">0px</dimen>
     <dimen name="config_rounded_mask_size_top">0px</dimen>
     <dimen name="config_rounded_mask_size_bottom">0px</dimen>
+
+    <!-- Rear Display Education dimens -->
+    <dimen name="rear_display_animation_width">273dp</dimen>
+    <dimen name="rear_display_animation_height">200dp</dimen>
+    <dimen name="rear_display_title_top_padding">24dp</dimen>
+    <dimen name="rear_display_title_bottom_padding">16dp</dimen>
 </resources>
