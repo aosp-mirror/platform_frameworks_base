@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spa.framework.debug
+package com.android.settingslib.spa.debug
 
 import android.net.Uri
 import android.os.Bundle
