@@ -4160,6 +4160,7 @@ package android.hardware.hdmi {
     method @NonNull @RequiresPermission(android.Manifest.permission.HDMI_CEC) public java.util.List<java.lang.String> getAllowedCecSettingStringValues(@NonNull String);
     method @Nullable public android.hardware.hdmi.HdmiClient getClient(int);
     method @NonNull public java.util.List<android.hardware.hdmi.HdmiDeviceInfo> getConnectedDevices();
+    method @NonNull @RequiresPermission(android.Manifest.permission.HDMI_CEC) public int getEarcEnabled();
     method @NonNull @RequiresPermission(android.Manifest.permission.HDMI_CEC) public int getHdmiCecEnabled();
     method @NonNull @RequiresPermission(android.Manifest.permission.HDMI_CEC) public int getHdmiCecVersion();
     method @RequiresPermission(android.Manifest.permission.HDMI_CEC) public int getHdmiCecVolumeControlEnabled();
@@ -4182,6 +4183,7 @@ package android.hardware.hdmi {
     method @RequiresPermission(android.Manifest.permission.HDMI_CEC) public void removeHdmiCecEnabledChangeListener(@NonNull android.hardware.hdmi.HdmiControlManager.CecSettingChangeListener);
     method @RequiresPermission(android.Manifest.permission.HDMI_CEC) public void removeHotplugEventListener(android.hardware.hdmi.HdmiControlManager.HotplugEventListener);
     method public void setActiveSource(@NonNull android.hardware.hdmi.HdmiDeviceInfo);
+    method @RequiresPermission(android.Manifest.permission.HDMI_CEC) public void setEarcEnabled(@NonNull int);
     method @RequiresPermission(android.Manifest.permission.HDMI_CEC) public void setHdmiCecEnabled(@NonNull int);
     method @RequiresPermission(android.Manifest.permission.HDMI_CEC) public void setHdmiCecVersion(@NonNull int);
     method @RequiresPermission(android.Manifest.permission.HDMI_CEC) public void setHdmiCecVolumeControlEnabled(int);
@@ -4236,6 +4238,8 @@ package android.hardware.hdmi {
     field public static final int DEVICE_EVENT_ADD_DEVICE = 1; // 0x1
     field public static final int DEVICE_EVENT_REMOVE_DEVICE = 2; // 0x2
     field public static final int DEVICE_EVENT_UPDATE_DEVICE = 3; // 0x3
+    field public static final int EARC_FEATURE_DISABLED = 0; // 0x0
+    field public static final int EARC_FEATURE_ENABLED = 1; // 0x1
     field public static final String EXTRA_MESSAGE_EXTRA_PARAM1 = "android.hardware.hdmi.extra.MESSAGE_EXTRA_PARAM1";
     field public static final String EXTRA_MESSAGE_ID = "android.hardware.hdmi.extra.MESSAGE_ID";
     field public static final int HDMI_CEC_CONTROL_DISABLED = 0; // 0x0
@@ -4295,6 +4299,7 @@ package android.hardware.hdmi {
     field public static final int RESULT_TIMEOUT = 1; // 0x1
     field public static final int ROUTING_CONTROL_DISABLED = 0; // 0x0
     field public static final int ROUTING_CONTROL_ENABLED = 1; // 0x1
+    field public static final String SETTING_NAME_EARC_ENABLED = "earc_enabled";
     field public static final int SYSTEM_AUDIO_CONTROL_DISABLED = 0; // 0x0
     field public static final int SYSTEM_AUDIO_CONTROL_ENABLED = 1; // 0x1
     field public static final int SYSTEM_AUDIO_MODE_MUTING_DISABLED = 0; // 0x0

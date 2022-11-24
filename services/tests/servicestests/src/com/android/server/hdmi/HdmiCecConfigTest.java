@@ -105,7 +105,8 @@ public final class HdmiCecConfigTest {
                     HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_TRUEHD,
                     HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_DST,
                     HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_WMAPRO,
-                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_MAX);
+                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_MAX,
+                    HdmiControlManager.SETTING_NAME_EARC_ENABLED);
     }
 
     @Test
@@ -144,7 +145,8 @@ public final class HdmiCecConfigTest {
                     HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_TRUEHD,
                     HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_DST,
                     HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_WMAPRO,
-                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_MAX);
+                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_MAX,
+                    HdmiControlManager.SETTING_NAME_EARC_ENABLED);
     }
 
     @Test
@@ -183,7 +185,8 @@ public final class HdmiCecConfigTest {
                     HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_TRUEHD,
                     HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_DST,
                     HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_WMAPRO,
-                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_MAX);
+                    HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_MAX,
+                    HdmiControlManager.SETTING_NAME_EARC_ENABLED);
     }
 
     @Test
