@@ -219,10 +219,8 @@ public class TaskFragmentTest extends WindowTestsBase {
         final ActivityRecord bottomActivity = createActivityRecord(bottomTask);
         final Task topTask = createTask(mDisplayContent);
         // First create primary TF, and then secondary TF, so that the secondary will be on the top.
-        final TaskFragment primaryTf = createTaskFragmentWithParentTask(
-                topTask, false /* createEmbeddedTask */);
-        final TaskFragment secondaryTf = createTaskFragmentWithParentTask(
-                topTask, false /* createEmbeddedTask */);
+        final TaskFragment primaryTf = createTaskFragmentWithActivity(topTask);
+        final TaskFragment secondaryTf = createTaskFragmentWithActivity(topTask);
         final ActivityRecord primaryActivity = primaryTf.getTopMostActivity();
         final ActivityRecord secondaryActivity = secondaryTf.getTopMostActivity();
         doReturn(true).when(primaryActivity).supportsPictureInPicture();
@@ -386,7 +384,7 @@ public class TaskFragmentTest extends WindowTestsBase {
         final Task rootTask = createTask(mDisplayContent, WINDOWING_MODE_MULTI_WINDOW,
                 ACTIVITY_TYPE_STANDARD);
         final Task leafTask0 = new TaskBuilder(mSupervisor)
-                .setParentTaskFragment(rootTask)
+                .setParentTask(rootTask)
                 .build();
         final TaskFragment organizedTf = new TaskFragmentBuilder(mAtm)
                 .createActivityCount(2)
@@ -422,7 +420,7 @@ public class TaskFragmentTest extends WindowTestsBase {
         // There is an activity in a different leaf task on top of activity0 and activity1.
         // None of the two has overlay over untrusted mode embedded because it is not the same Task.
         final Task leafTask1 = new TaskBuilder(mSupervisor)
-                .setParentTaskFragment(rootTask)
+                .setParentTask(rootTask)
                 .setOnTop(true)
                 .setCreateActivity(true)
                 .build();
@@ -552,8 +550,8 @@ public class TaskFragmentTest extends WindowTestsBase {
     @Test
     public void testIsVisibleWithAdjacent_reportOrientationUnspecified() {
         final Task task = createTask(mDisplayContent);
-        final TaskFragment tf0 = createTaskFragmentWithParentTask(task);
-        final TaskFragment tf1 = createTaskFragmentWithParentTask(task);
+        final TaskFragment tf0 = createTaskFragmentWithActivity(task);
+        final TaskFragment tf1 = createTaskFragmentWithActivity(task);
         tf0.setAdjacentTaskFragment(tf1);
         tf0.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
         tf1.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);

@@ -15999,6 +15999,15 @@ public final class Settings {
         public static final String STYLUS_HANDWRITING_ENABLED = "stylus_handwriting_enabled";
 
         /**
+         * Indicates whether a stylus has ever been used on the device.
+         *
+         * @hide
+         */
+        @Readable
+        @SuppressLint("NoSettingsProvider")
+        public static final String STYLUS_EVER_USED = "stylus_ever_used";
+
+        /**
          * Exemptions to the hidden API blacklist.
          *
          * @hide

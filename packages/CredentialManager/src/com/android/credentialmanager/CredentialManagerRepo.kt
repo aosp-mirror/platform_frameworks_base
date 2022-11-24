@@ -209,7 +209,6 @@ class CredentialManagerRepo(
         .setRemoteEntry(
           newRemoteEntry("key2", "subkey-1")
         )
-        .setIsDefaultProvider(true)
         .build(),
       CreateCredentialProviderData
         .Builder("com.dashlane")

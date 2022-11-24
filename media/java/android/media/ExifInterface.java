@@ -3754,6 +3754,11 @@ public class ExifInterface {
                 // Skip input stream to the end of the EXIF chunk
                 totalInputStream.skipBytes(WEBP_CHUNK_TYPE_BYTE_LENGTH);
                 int exifChunkLength = totalInputStream.readInt();
+                // RIFF chunks have a single padding byte at the end if the declared chunk size is
+                // odd.
+                if (exifChunkLength % 2 != 0) {
+                    exifChunkLength++;
+                }
                 totalInputStream.skipBytes(exifChunkLength);
 
                 // Write new EXIF chunk to output stream
@@ -3824,7 +3829,7 @@ public class ExifInterface {
                     int widthAndHeight = 0;
                     int width = 0;
                     int height = 0;
-                    int alpha = 0;
+                    boolean alpha = false;
                     // Save VP8 frame data for later
                     byte[] vp8Frame = new byte[3];
 
@@ -3859,7 +3864,7 @@ public class ExifInterface {
                         width = ((widthAndHeight << 18) >> 18) + 1;
                         height = ((widthAndHeight << 4) >> 18) + 1;
                         // Retrieve alpha bit
-                        alpha = widthAndHeight & (1 << 3);
+                        alpha = (widthAndHeight & (1 << 28)) != 0;
                         bytesToRead -= (1 /* VP8L signature */ + 4);
                     }
 
@@ -3867,10 +3872,12 @@ public class ExifInterface {
                     nonHeaderOutputStream.write(WEBP_CHUNK_TYPE_VP8X);
                     nonHeaderOutputStream.writeInt(WEBP_CHUNK_TYPE_VP8X_DEFAULT_LENGTH);
                     byte[] data = new byte[WEBP_CHUNK_TYPE_VP8X_DEFAULT_LENGTH];
+                    // ALPHA flag
+                    if (alpha) {
+                        data[0] = (byte) (data[0] | (1 << 4));
+                    }
                     // EXIF flag
                     data[0] = (byte) (data[0] | (1 << 3));
-                    // ALPHA flag
-                    data[0] = (byte) (data[0] | (alpha << 4));
                     // VP8X stores Width - 1 and Height - 1 values
                     width -= 1;
                     height -= 1;

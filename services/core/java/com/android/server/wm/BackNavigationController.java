@@ -24,6 +24,9 @@ import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_BACK_PREVIEW;
+import static com.android.server.wm.BackNavigationProto.ANIMATION_IN_PROGRESS;
+import static com.android.server.wm.BackNavigationProto.LAST_BACK_TYPE;
+import static com.android.server.wm.BackNavigationProto.SHOW_WALLPAPER;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -37,6 +40,7 @@ import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.util.ArraySet;
 import android.util.Slog;
+import android.util.proto.ProtoOutputStream;
 import android.view.IWindowFocusObserver;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
@@ -60,6 +64,7 @@ class BackNavigationController {
     private WindowManagerService mWindowManagerService;
     private IWindowFocusObserver mFocusObserver;
     private boolean mBackAnimationInProgress;
+    private @BackNavigationInfo.BackTargetType int mLastBackType;
     private boolean mShowWallpaper;
     private Runnable mPendingAnimation;
 
@@ -215,7 +220,7 @@ class BackNavigationController {
                 infoBuilder.setOnBackNavigationDone(new RemoteCallback(result ->
                         onBackNavigationDone(result, finalFocusedWindow,
                                 BackNavigationInfo.TYPE_CALLBACK)));
-
+                mLastBackType = backType;
                 return infoBuilder.setType(backType).build();
             }
 
@@ -301,7 +306,7 @@ class BackNavigationController {
                     result, finalFocusedWindow, finalBackType));
             infoBuilder.setOnBackNavigationDone(onBackNavigationDone);
         }
-
+        mLastBackType = backType;
         return infoBuilder.build();
     }
 
@@ -835,5 +840,14 @@ class BackNavigationController {
         return mAnimationTargets.mComposed && mShowWallpaper
                 && w.mAttrs.type == TYPE_BASE_APPLICATION && w.mActivityRecord != null
                 && mAnimationTargets.isTarget(w.mActivityRecord, true /* open */);
+    }
+
+    // Called from WindowManagerService to write to a protocol buffer output stream.
+    void dumpDebug(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        proto.write(ANIMATION_IN_PROGRESS, mBackAnimationInProgress);
+        proto.write(LAST_BACK_TYPE, mLastBackType);
+        proto.write(SHOW_WALLPAPER, mShowWallpaper);
+        proto.end(token);
     }
 }
