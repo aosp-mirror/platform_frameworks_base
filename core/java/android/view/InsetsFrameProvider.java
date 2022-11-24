@@ -31,6 +31,10 @@ import java.util.Objects;
  *
  * The insets frame will by default as the window frame size. If the providers are set, the
  * calculation result based on the source size will be used as the insets frame.
+ *
+ * The InsetsFrameProvider should be self-contained. Nothing describing the window itself, such as
+ * contentInsets, visibleInsets, etc. won't affect the insets providing to other windows when this
+ * is set.
  * @hide
  */
 public class InsetsFrameProvider implements Parcelable {
