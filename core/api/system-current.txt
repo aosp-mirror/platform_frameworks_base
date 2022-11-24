@@ -3112,6 +3112,7 @@ package android.content {
     field public static final String APP_HIBERNATION_SERVICE = "app_hibernation";
     field public static final String APP_INTEGRITY_SERVICE = "app_integrity";
     field public static final String APP_PREDICTION_SERVICE = "app_prediction";
+    field public static final String AUDIO_DEVICE_VOLUME_SERVICE = "audio_device_volume";
     field public static final String BACKUP_SERVICE = "backup";
     field public static final String BATTERY_STATS_SERVICE = "batterystats";
     field public static final int BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS = 1048576; // 0x100000
@@ -6311,7 +6312,7 @@ package android.media {
   }
 
   public class AudioDeviceVolumeManager {
-    ctor public AudioDeviceVolumeManager(@NonNull android.content.Context);
+    method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public android.media.VolumeInfo getDeviceVolume(@NonNull android.media.VolumeInfo, @NonNull android.media.AudioDeviceAttributes);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void setDeviceVolume(@NonNull android.media.VolumeInfo, @NonNull android.media.AudioDeviceAttributes);
   }
 
@@ -6649,8 +6650,9 @@ package android.media {
     method public int getMaxVolumeIndex();
     method public int getMinVolumeIndex();
     method public int getStreamType();
-    method @Nullable public android.media.audiopolicy.AudioVolumeGroup getVolumeGroup();
+    method @NonNull public android.media.audiopolicy.AudioVolumeGroup getVolumeGroup();
     method public int getVolumeIndex();
+    method public boolean hasMuteCommand();
     method public boolean hasStreamType();
     method public boolean hasVolumeGroup();
     method public boolean isMuted();
