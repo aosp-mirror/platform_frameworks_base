@@ -71,6 +71,7 @@ import com.android.server.display.brightness.BrightnessReason;
 import com.android.server.display.brightness.DisplayBrightnessController;
 import com.android.server.display.color.ColorDisplayService.ColorDisplayServiceInternal;
 import com.android.server.display.color.ColorDisplayService.ReduceBrightColorsListener;
+import com.android.server.display.state.DisplayStateController;
 import com.android.server.display.utils.SensorUtils;
 import com.android.server.display.whitebalance.DisplayWhiteBalanceController;
 import com.android.server.display.whitebalance.DisplayWhiteBalanceFactory;
@@ -346,6 +347,9 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
     // Tracks and manages the proximity state of the associated display.
     private final DisplayPowerProximityStateController mDisplayPowerProximityStateController;
 
+    // Tracks and manages the display state of the associated display.
+    private final DisplayStateController mDisplayStateController;
+
     // A record of state for skipping brightness ramps.
     private int mSkipRampState = RAMP_STATE_SKIP_NONE;
 
@@ -434,6 +438,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         mDisplayPowerProximityStateController = mInjector.getDisplayPowerProximityStateController(
                 mWakelockController, mDisplayDeviceConfig, mHandler.getLooper(),
                 () -> updatePowerState(), mDisplayId, mSensorManager);
+        mDisplayStateController = new DisplayStateController(mDisplayPowerProximityStateController);
         mTag = "DisplayPowerController2[" + mDisplayId + "]";
 
         mDisplayDevice = mLogicalDisplay.getPrimaryDisplayDeviceLocked();
@@ -1121,39 +1126,8 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
             mustNotify = !mDisplayReadyLocked;
         }
 
-        // Compute the basic display state using the policy.
-        // We might override this below based on other factors.
-        // Initialise brightness as invalid.
-        int state;
-        boolean performScreenOffTransition = false;
-        switch (mPowerRequest.policy) {
-            case DisplayPowerRequest.POLICY_OFF:
-                state = Display.STATE_OFF;
-                performScreenOffTransition = true;
-                break;
-            case DisplayPowerRequest.POLICY_DOZE:
-                if (mPowerRequest.dozeScreenState != Display.STATE_UNKNOWN) {
-                    state = mPowerRequest.dozeScreenState;
-                } else {
-                    state = Display.STATE_DOZE;
-                }
-                break;
-            case DisplayPowerRequest.POLICY_DIM:
-            case DisplayPowerRequest.POLICY_BRIGHT:
-            default:
-                state = Display.STATE_ON;
-                break;
-        }
-        assert (state != Display.STATE_UNKNOWN);
-
-        mDisplayPowerProximityStateController.updateProximityState(mPowerRequest, state);
-
-        if (!mIsEnabled
-                || mIsInTransition
-                || mDisplayPowerProximityStateController.isScreenOffBecauseOfProximity()) {
-            state = Display.STATE_OFF;
-        }
-
+        int state = mDisplayStateController
+                .updateDisplayState(mPowerRequest, mIsEnabled, mIsInTransition);
         // Initialize things the first time the power state is changed.
         if (mustInitialize) {
             initialize(state);
@@ -1163,7 +1137,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         // The transition may be deferred, so after this point we will use the
         // actual state instead of the desired one.
         final int oldState = mPowerState.getScreenState();
-        animateScreenStateChange(state, performScreenOffTransition);
+        animateScreenStateChange(state, mDisplayStateController.shouldPerformScreenOffTransition());
         state = mPowerState.getScreenState();
 
         DisplayBrightnessState displayBrightnessState = mDisplayBrightnessController
@@ -2273,10 +2247,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         pw.println();
         if (mDisplayBrightnessController != null) {
             mDisplayBrightnessController.dump(pw);
-        }
-
-        if (mDisplayPowerProximityStateController != null) {
-            mDisplayPowerProximityStateController.dumpLocal(pw);
         }
     }
 

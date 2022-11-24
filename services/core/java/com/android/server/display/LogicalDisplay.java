@@ -66,7 +66,6 @@ import java.util.Objects;
  */
 final class LogicalDisplay {
     private static final String TAG = "LogicalDisplay";
-
     // The layer stack we use when the display has been blanked to prevent any
     // of its content from appearing.
     private static final int BLANK_LAYER_STACK = -1;
