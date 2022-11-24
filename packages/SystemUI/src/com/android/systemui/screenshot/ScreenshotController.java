@@ -739,10 +739,14 @@ public class ScreenshotController {
 
             mLongScreenshotHolder.setLongScreenshot(longScreenshot);
             mLongScreenshotHolder.setTransitionDestinationCallback(
-                    (transitionDestination, onTransitionEnd) ->
+                    (transitionDestination, onTransitionEnd) -> {
                             mScreenshotView.startLongScreenshotTransition(
                                     transitionDestination, onTransitionEnd,
-                                    longScreenshot));
+                                    longScreenshot);
+                        // TODO: Do this via ActionIntentExecutor instead.
+                        mContext.sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
+                    }
+            );
 
             final Intent intent = new Intent(mContext, LongScreenshotActivity.class);
             intent.putExtra(LongScreenshotActivity.EXTRA_SCREENSHOT_USER_HANDLE,
