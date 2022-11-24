@@ -17,7 +17,6 @@
 package android.app.job;
 
 import android.app.job.JobParameters;
-import android.app.job.JobWorkItem;
 
 /**
  * Interface that the framework uses to communicate with application code that implements a
@@ -32,8 +31,4 @@ oneway interface IJobService {
     /** Stop execution of application's job. */
     @UnsupportedAppUsage
     void stopJob(in JobParameters jobParams);
-    /** Update JS of how much data has been downloaded. */
-    void getTransferredDownloadBytes(in JobParameters jobParams, in JobWorkItem jobWorkItem);
-    /** Update JS of how much data has been uploaded. */
-    void getTransferredUploadBytes(in JobParameters jobParams, in JobWorkItem jobWorkItem);
 }
