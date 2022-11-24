@@ -153,6 +153,7 @@
   <java-symbol type="id" name="progress_horizontal" />
   <java-symbol type="id" name="progress_number" />
   <java-symbol type="id" name="progress_percent" />
+  <java-symbol type="id" name="progress_dialog_message" />
   <java-symbol type="id" name="progressContainer" />
   <java-symbol type="id" name="rew" />
   <java-symbol type="id" name="rightSpacer" />
