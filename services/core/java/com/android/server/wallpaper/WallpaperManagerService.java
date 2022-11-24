@@ -34,6 +34,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
 import android.annotation.NonNull;
 import android.app.ActivityManager;
+import android.app.ActivityOptions;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.ILocalWallpaperColorConsumer;
@@ -3166,6 +3167,15 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 }
             }
 
+            final ActivityOptions clientOptions = ActivityOptions.makeBasic();
+            clientOptions.setIgnorePendingIntentCreatorForegroundState(true);
+            PendingIntent clientIntent = PendingIntent.getActivityAsUser(
+                    mContext, 0, Intent.createChooser(
+                            new Intent(Intent.ACTION_SET_WALLPAPER),
+                            mContext.getText(com.android.internal.R.string.chooser_wallpaper)),
+                    PendingIntent.FLAG_IMMUTABLE, clientOptions.toBundle(),
+                    UserHandle.of(serviceUserId));
+
             // Bind the service!
             if (DEBUG) Slog.v(TAG, "Binding to:" + componentName);
             final int componentUid = mIPackageManager.getPackageUid(componentName.getPackageName(),
@@ -3174,11 +3184,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             intent.setComponent(componentName);
             intent.putExtra(Intent.EXTRA_CLIENT_LABEL,
                     com.android.internal.R.string.wallpaper_binding_label);
-            intent.putExtra(Intent.EXTRA_CLIENT_INTENT, PendingIntent.getActivityAsUser(
-                    mContext, 0,
-                    Intent.createChooser(new Intent(Intent.ACTION_SET_WALLPAPER),
-                            mContext.getText(com.android.internal.R.string.chooser_wallpaper)),
-                    PendingIntent.FLAG_IMMUTABLE, null, new UserHandle(serviceUserId)));
+            intent.putExtra(Intent.EXTRA_CLIENT_INTENT, clientIntent);
             if (!mContext.bindServiceAsUser(intent, newConn,
                     Context.BIND_AUTO_CREATE | Context.BIND_SHOWING_UI
                             | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE
