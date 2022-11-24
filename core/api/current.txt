@@ -20899,8 +20899,11 @@ package android.media {
     method public void onRoutingChanged(android.media.AudioRouting);
   }
 
-  public final class AudioTimestamp {
+  public final class AudioTimestamp implements android.os.Parcelable {
     ctor public AudioTimestamp();
+    method public int describeContents();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.AudioTimestamp> CREATOR;
     field public static final int TIMEBASE_BOOTTIME = 1; // 0x1
     field public static final int TIMEBASE_MONOTONIC = 0; // 0x0
     field public long framePosition;
