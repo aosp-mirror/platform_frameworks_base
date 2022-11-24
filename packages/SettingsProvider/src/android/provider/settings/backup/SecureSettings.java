@@ -53,6 +53,7 @@ public class SecureSettings {
         Settings.Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN,
         Settings.Secure.ACCESSIBILITY_SHORTCUT_ON_LOCK_SCREEN,
         Settings.Secure.ACCESSIBILITY_HIGH_TEXT_CONTRAST_ENABLED,
+        Settings.Secure.CONTRAST_LEVEL,
         Settings.Secure.ACCESSIBILITY_CAPTIONING_PRESET,
         Settings.Secure.ACCESSIBILITY_CAPTIONING_ENABLED,
         Settings.Secure.ACCESSIBILITY_CAPTIONING_LOCALE,
