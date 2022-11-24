@@ -666,6 +666,9 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         mDisplayId = mContext.getDisplayId();
         mIsOnDefaultDisplay = mDisplayId == DEFAULT_DISPLAY;
 
+        // Ensure we try to get currentSysuiState from navBarHelper before command queue callbacks
+        // start firing, since the latter is source of truth
+        parseCurrentSysuiState();
         mCommandQueue.addCallback(this);
         mLongPressHomeEnabled = mNavBarHelper.getLongPressHomeEnabled();
         mNavBarHelper.init();
@@ -950,6 +953,13 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         }
         mView.setVisibility(View.VISIBLE);
         setOrientedHandleSamplingRegion(null);
+    }
+
+    private void parseCurrentSysuiState() {
+        NavBarHelper.CurrentSysuiState state = mNavBarHelper.getCurrentSysuiState();
+        if (state.mWindowStateDisplayId == mDisplayId) {
+            mNavigationBarWindowState = state.mWindowState;
+        }
     }
 
     private void reconfigureHomeLongClick() {
