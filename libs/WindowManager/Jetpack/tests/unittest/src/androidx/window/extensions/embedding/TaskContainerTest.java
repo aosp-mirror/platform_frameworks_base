@@ -23,7 +23,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.Display.DEFAULT_DISPLAY;
 
-import static androidx.window.extensions.embedding.EmbeddingTestUtils.TASK_BOUNDS;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.createTestTaskContainer;
 
 import static org.junit.Assert.assertEquals;
@@ -65,28 +64,6 @@ public class TaskContainerTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-    }
-
-    @Test
-    public void testIsTaskBoundsInitialized() {
-        final TaskContainer taskContainer = createTestTaskContainer();
-
-        assertFalse(taskContainer.isTaskBoundsInitialized());
-
-        taskContainer.setTaskBounds(TASK_BOUNDS);
-
-        assertTrue(taskContainer.isTaskBoundsInitialized());
-    }
-
-    @Test
-    public void testSetTaskBounds() {
-        final TaskContainer taskContainer = createTestTaskContainer();
-
-        assertFalse(taskContainer.setTaskBounds(new Rect()));
-
-        assertTrue(taskContainer.setTaskBounds(TASK_BOUNDS));
-
-        assertFalse(taskContainer.setTaskBounds(TASK_BOUNDS));
     }
 
     @Test
