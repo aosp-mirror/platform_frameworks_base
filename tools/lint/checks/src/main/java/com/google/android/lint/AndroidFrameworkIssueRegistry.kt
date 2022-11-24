@@ -21,7 +21,7 @@ import com.android.tools.lint.client.api.Vendor
 import com.android.tools.lint.detector.api.CURRENT_API
 import com.google.android.lint.aidl.EnforcePermissionDetector
 import com.google.android.lint.aidl.EnforcePermissionHelperDetector
-import com.google.android.lint.aidl.ManualPermissionCheckDetector
+import com.google.android.lint.aidl.SimpleManualPermissionEnforcementDetector
 import com.google.android.lint.parcel.SaferParcelChecker
 import com.google.auto.service.AutoService
 
@@ -40,7 +40,7 @@ class AndroidFrameworkIssueRegistry : IssueRegistry() {
         EnforcePermissionDetector.ISSUE_MISSING_ENFORCE_PERMISSION,
         EnforcePermissionDetector.ISSUE_MISMATCHING_ENFORCE_PERMISSION,
         EnforcePermissionHelperDetector.ISSUE_ENFORCE_PERMISSION_HELPER,
-        ManualPermissionCheckDetector.ISSUE_USE_ENFORCE_PERMISSION_ANNOTATION,
+        SimpleManualPermissionEnforcementDetector.ISSUE_USE_ENFORCE_PERMISSION_ANNOTATION,
         SaferParcelChecker.ISSUE_UNSAFE_API_USAGE,
         PackageVisibilityDetector.ISSUE_PACKAGE_NAME_NO_PACKAGE_VISIBILITY_FILTERS,
         RegisterReceiverFlagDetector.ISSUE_RECEIVER_EXPORTED_FLAG,

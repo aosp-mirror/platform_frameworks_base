@@ -23,10 +23,10 @@ import com.android.tools.lint.detector.api.Detector
 import com.android.tools.lint.detector.api.Issue
 
 @Suppress("UnstableApiUsage")
-class ManualPermissionCheckDetectorTest : LintDetectorTest() {
-    override fun getDetector(): Detector = ManualPermissionCheckDetector()
+class SimpleManualPermissionEnforcementDetectorTest : LintDetectorTest() {
+    override fun getDetector(): Detector = SimpleManualPermissionEnforcementDetector()
     override fun getIssues(): List<Issue> = listOf(
-        ManualPermissionCheckDetector
+            SimpleManualPermissionEnforcementDetector
             .ISSUE_USE_ENFORCE_PERMISSION_ANNOTATION
     )
 
@@ -52,7 +52,7 @@ class ManualPermissionCheckDetectorTest : LintDetectorTest() {
             .run()
             .expect(
                 """
-                src/Foo.java:7: Warning: ITest permission check can be converted to @EnforcePermission annotation [UseEnforcePermissionAnnotation]
+                src/Foo.java:7: Warning: ITest permission check can be converted to @EnforcePermission annotation [SimpleManualPermissionEnforcement]
                         mContext.enforceCallingOrSelfPermission("android.permission.READ_CONTACTS", "foo");
                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                 0 errors, 1 warnings
@@ -92,7 +92,7 @@ class ManualPermissionCheckDetectorTest : LintDetectorTest() {
             .run()
             .expect(
                 """
-                src/Foo.java:8: Warning: ITest permission check can be converted to @EnforcePermission annotation [UseEnforcePermissionAnnotation]
+                src/Foo.java:8: Warning: ITest permission check can be converted to @EnforcePermission annotation [SimpleManualPermissionEnforcement]
                             mContext.enforceCallingOrSelfPermission(
                             ^
                 0 errors, 1 warnings
@@ -132,7 +132,7 @@ class ManualPermissionCheckDetectorTest : LintDetectorTest() {
             .run()
             .expect(
                 """
-                src/Foo.java:8: Warning: ITest permission check can be converted to @EnforcePermission annotation [UseEnforcePermissionAnnotation]
+                src/Foo.java:8: Warning: ITest permission check can be converted to @EnforcePermission annotation [SimpleManualPermissionEnforcement]
                         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.READ_CONTACTS, "foo");
                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                 0 errors, 1 warnings
@@ -174,7 +174,7 @@ class ManualPermissionCheckDetectorTest : LintDetectorTest() {
             .run()
             .expect(
                 """
-                src/Foo.java:10: Warning: ITest permission check can be converted to @EnforcePermission annotation [UseEnforcePermissionAnnotation]
+                src/Foo.java:10: Warning: ITest permission check can be converted to @EnforcePermission annotation [SimpleManualPermissionEnforcement]
                             mContext.enforceCallingOrSelfPermission(
                             ^
                 0 errors, 1 warnings
@@ -243,7 +243,7 @@ class ManualPermissionCheckDetectorTest : LintDetectorTest() {
             .run()
             .expect(
                 """
-                src/Foo.java:14: Warning: ITest permission check can be converted to @EnforcePermission annotation [UseEnforcePermissionAnnotation]
+                src/Foo.java:14: Warning: ITest permission check can be converted to @EnforcePermission annotation [SimpleManualPermissionEnforcement]
                         helper();
                         ~~~~~~~~~
                 0 errors, 1 warnings
@@ -289,7 +289,7 @@ class ManualPermissionCheckDetectorTest : LintDetectorTest() {
             .run()
             .expect(
                 """
-                src/Foo.java:16: Warning: ITest permission check can be converted to @EnforcePermission annotation [UseEnforcePermissionAnnotation]
+                src/Foo.java:16: Warning: ITest permission check can be converted to @EnforcePermission annotation [SimpleManualPermissionEnforcement]
                         mContext.enforceCallingOrSelfPermission("FOO", "foo");
                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                 0 errors, 1 warnings
@@ -340,7 +340,7 @@ class ManualPermissionCheckDetectorTest : LintDetectorTest() {
             .run()
             .expect(
                 """
-                src/Foo.java:19: Warning: ITest permission check can be converted to @EnforcePermission annotation [UseEnforcePermissionAnnotation]
+                src/Foo.java:19: Warning: ITest permission check can be converted to @EnforcePermission annotation [SimpleManualPermissionEnforcement]
                         helperHelper();
                         ~~~~~~~~~~~~~~~
                 0 errors, 1 warnings
