@@ -443,6 +443,44 @@ public class InsetsStateControllerTest extends WindowTestsBase {
     }
 
     @Test
+    public void testUpdateAboveInsetsState_imeTargetOnScreenBehavior() {
+        final WindowToken imeToken = createTestWindowToken(TYPE_INPUT_METHOD, mDisplayContent);
+        final WindowState ime = createWindow(null,  TYPE_INPUT_METHOD, imeToken, "ime");
+        final WindowState app = createTestWindow("app");
+
+        getController().getSourceProvider(ITYPE_IME).setWindowContainer(ime, null, null);
+        ime.getControllableInsetProvider().setServerVisible(true);
+
+        app.mActivityRecord.setVisibility(true);
+        mDisplayContent.setImeLayeringTarget(app);
+        mDisplayContent.updateImeInputAndControlTarget(app);
+
+        app.setRequestedVisibleTypes(ime(), ime());
+        getController().onInsetsModified(app);
+        assertTrue(ime.getControllableInsetProvider().getSource().isVisible());
+
+        getController().updateAboveInsetsState(true /* notifyInsetsChange */);
+        assertNotNull(app.getInsetsState().peekSource(ITYPE_IME));
+        verify(app, atLeastOnce()).notifyInsetsChanged();
+
+        // Expect the app will still get IME insets even when the app was invisible.
+        // (i.e. app invisible after locking the device)
+        app.mActivityRecord.setVisible(false);
+        app.setHasSurface(false);
+        getController().updateAboveInsetsState(true /* notifyInsetsChange */);
+        assertNotNull(app.getInsetsState().peekSource(ITYPE_IME));
+        verify(app, atLeastOnce()).notifyInsetsChanged();
+
+        // Expect the app will get IME insets when the app is requesting visible.
+        // (i.e. app is going to visible when unlocking the device)
+        app.mActivityRecord.setVisibility(true);
+        assertTrue(app.isVisibleRequested());
+        getController().updateAboveInsetsState(true /* notifyInsetsChange */);
+        assertNotNull(app.getInsetsState().peekSource(ITYPE_IME));
+        verify(app, atLeastOnce()).notifyInsetsChanged();
+    }
+
+    @Test
     public void testDispatchGlobalInsets() {
         final WindowState navBar = createWindow(null, TYPE_APPLICATION, "navBar");
         getController().getSourceProvider(ITYPE_NAVIGATION_BAR).setWindowContainer(navBar, null,
