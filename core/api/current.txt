@@ -40978,6 +40978,36 @@ package android.telecom {
     field public static final int ROUTE_WIRED_OR_EARPIECE = 5; // 0x5
   }
 
+  public final class CallEndpoint implements android.os.Parcelable {
+    ctor public CallEndpoint(@NonNull CharSequence, int, @NonNull android.os.ParcelUuid);
+    method public int describeContents();
+    method @NonNull public CharSequence getEndpointName();
+    method public int getEndpointType();
+    method @NonNull public android.os.ParcelUuid getIdentifier();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telecom.CallEndpoint> CREATOR;
+    field public static final int TYPE_BLUETOOTH = 2; // 0x2
+    field public static final int TYPE_EARPIECE = 1; // 0x1
+    field public static final int TYPE_SPEAKER = 4; // 0x4
+    field public static final int TYPE_STREAMING = 5; // 0x5
+    field public static final int TYPE_UNKNOWN = -1; // 0xffffffff
+    field public static final int TYPE_WIRED_HEADSET = 3; // 0x3
+  }
+
+  public final class CallEndpointException extends java.lang.RuntimeException implements android.os.Parcelable {
+    ctor public CallEndpointException(@Nullable String);
+    ctor public CallEndpointException(@Nullable String, int);
+    ctor public CallEndpointException(@Nullable String, int, @Nullable Throwable);
+    method public int describeContents();
+    method public int getCode();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telecom.CallEndpointException> CREATOR;
+    field public static final int ERROR_ANOTHER_REQUEST = 3; // 0x3
+    field public static final int ERROR_ENDPOINT_DOES_NOT_EXIST = 1; // 0x1
+    field public static final int ERROR_REQUEST_TIME_OUT = 2; // 0x2
+    field public static final int ERROR_UNSPECIFIED = 4; // 0x4
+  }
+
   public abstract class CallRedirectionService extends android.app.Service {
     ctor public CallRedirectionService();
     method public final void cancelCall();
@@ -41027,13 +41057,14 @@ package android.telecom {
     method public final boolean addConnection(android.telecom.Connection);
     method @NonNull public static android.telecom.Conference createFailedConference(@NonNull android.telecom.DisconnectCause, @NonNull android.telecom.PhoneAccountHandle);
     method public final void destroy();
-    method public final android.telecom.CallAudioState getCallAudioState();
+    method @Deprecated public final android.telecom.CallAudioState getCallAudioState();
     method public final java.util.List<android.telecom.Connection> getConferenceableConnections();
     method public final int getConnectionCapabilities();
     method public final int getConnectionProperties();
     method public final long getConnectionStartElapsedRealtimeMillis();
     method @IntRange(from=0) public final long getConnectionTime();
     method public final java.util.List<android.telecom.Connection> getConnections();
+    method @NonNull public final android.telecom.CallEndpoint getCurrentCallEndpoint();
     method public final android.telecom.DisconnectCause getDisconnectCause();
     method public final android.os.Bundle getExtras();
     method public final android.telecom.PhoneAccountHandle getPhoneAccountHandle();
@@ -41044,13 +41075,16 @@ package android.telecom {
     method public final boolean isRingbackRequested();
     method public void onAddConferenceParticipants(@NonNull java.util.List<android.net.Uri>);
     method public void onAnswer(int);
-    method public void onCallAudioStateChanged(android.telecom.CallAudioState);
+    method public void onAvailableCallEndpointsChanged(@NonNull java.util.List<android.telecom.CallEndpoint>);
+    method @Deprecated public void onCallAudioStateChanged(android.telecom.CallAudioState);
+    method public void onCallEndpointChanged(@NonNull android.telecom.CallEndpoint);
     method public void onConnectionAdded(android.telecom.Connection);
     method public void onDisconnect();
     method public void onExtrasChanged(android.os.Bundle);
     method public void onHold();
     method public void onMerge(android.telecom.Connection);
     method public void onMerge();
+    method public void onMuteStateChanged(boolean);
     method public void onPlayDtmfTone(char);
     method public void onReject();
     method public void onSeparate(android.telecom.Connection);
@@ -41093,7 +41127,7 @@ package android.telecom {
     method public final android.net.Uri getAddress();
     method public final int getAddressPresentation();
     method public final boolean getAudioModeIsVoip();
-    method public final android.telecom.CallAudioState getCallAudioState();
+    method @Deprecated public final android.telecom.CallAudioState getCallAudioState();
     method public final String getCallerDisplayName();
     method public final int getCallerDisplayNamePresentation();
     method public final int getCallerNumberVerificationStatus();
@@ -41101,6 +41135,7 @@ package android.telecom {
     method public final java.util.List<android.telecom.Conferenceable> getConferenceables();
     method public final int getConnectionCapabilities();
     method public final int getConnectionProperties();
+    method @NonNull public final android.telecom.CallEndpoint getCurrentCallEndpoint();
     method public final android.telecom.DisconnectCause getDisconnectCause();
     method public final android.os.Bundle getExtras();
     method public final int getState();
@@ -41114,13 +41149,16 @@ package android.telecom {
     method public void onAddConferenceParticipants(@NonNull java.util.List<android.net.Uri>);
     method public void onAnswer(int);
     method public void onAnswer();
-    method public void onCallAudioStateChanged(android.telecom.CallAudioState);
+    method public void onAvailableCallEndpointsChanged(@NonNull java.util.List<android.telecom.CallEndpoint>);
+    method @Deprecated public void onCallAudioStateChanged(android.telecom.CallAudioState);
+    method public void onCallEndpointChanged(@NonNull android.telecom.CallEndpoint);
     method public void onCallEvent(String, android.os.Bundle);
     method public void onDeflect(android.net.Uri);
     method public void onDisconnect();
     method public void onExtrasChanged(android.os.Bundle);
     method public void onHandoverComplete();
     method public void onHold();
+    method public void onMuteStateChanged(boolean);
     method public void onPlayDtmfTone(char);
     method public void onPostDialContinue(boolean);
     method public void onPullExternalCall();
@@ -41141,7 +41179,8 @@ package android.telecom {
     method public final void putExtras(@NonNull android.os.Bundle);
     method public final void removeExtras(java.util.List<java.lang.String>);
     method public final void removeExtras(java.lang.String...);
-    method public void requestBluetoothAudio(@NonNull android.bluetooth.BluetoothDevice);
+    method @Deprecated public void requestBluetoothAudio(@NonNull android.bluetooth.BluetoothDevice);
+    method public final void requestCallEndpointChange(@NonNull android.telecom.CallEndpoint, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<java.lang.Void,android.telecom.CallEndpointException>);
     method public void sendConnectionEvent(String, android.os.Bundle);
     method public final void sendRemoteRttRequest();
     method public final void sendRttInitiationFailure(int);
@@ -41150,7 +41189,7 @@ package android.telecom {
     method public final void setActive();
     method public final void setAddress(android.net.Uri, int);
     method public final void setAudioModeIsVoip(boolean);
-    method public final void setAudioRoute(int);
+    method @Deprecated public final void setAudioRoute(int);
     method public final void setCallerDisplayName(String, int);
     method public final void setCallerNumberVerificationStatus(int);
     method public final void setConferenceableConnections(java.util.List<android.telecom.Connection>);
@@ -41402,18 +41441,23 @@ package android.telecom {
   public abstract class InCallService extends android.app.Service {
     ctor public InCallService();
     method public final boolean canAddCall();
-    method public final android.telecom.CallAudioState getCallAudioState();
+    method @Deprecated public final android.telecom.CallAudioState getCallAudioState();
     method public final java.util.List<android.telecom.Call> getCalls();
+    method @NonNull public final android.telecom.CallEndpoint getCurrentCallEndpoint();
+    method public void onAvailableCallEndpointsChanged(@NonNull java.util.List<android.telecom.CallEndpoint>);
     method public android.os.IBinder onBind(android.content.Intent);
     method public void onBringToForeground(boolean);
     method public void onCallAdded(android.telecom.Call);
-    method public void onCallAudioStateChanged(android.telecom.CallAudioState);
+    method @Deprecated public void onCallAudioStateChanged(android.telecom.CallAudioState);
+    method public void onCallEndpointChanged(@NonNull android.telecom.CallEndpoint);
     method public void onCallRemoved(android.telecom.Call);
     method public void onCanAddCallChanged(boolean);
     method public void onConnectionEvent(android.telecom.Call, String, android.os.Bundle);
+    method public void onMuteStateChanged(boolean);
     method public void onSilenceRinger();
-    method public final void requestBluetoothAudio(@NonNull android.bluetooth.BluetoothDevice);
-    method public final void setAudioRoute(int);
+    method @Deprecated public final void requestBluetoothAudio(@NonNull android.bluetooth.BluetoothDevice);
+    method public final void requestCallEndpointChange(@NonNull android.telecom.CallEndpoint, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<java.lang.Void,android.telecom.CallEndpointException>);
+    method @Deprecated public final void setAudioRoute(int);
     method public final void setMuted(boolean);
     field public static final String SERVICE_INTERFACE = "android.telecom.InCallService";
   }
