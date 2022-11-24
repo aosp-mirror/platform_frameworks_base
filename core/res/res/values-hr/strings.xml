@@ -396,54 +396,30 @@
     <string name="permdesc_persistentActivity" product="default" msgid="1914841924366562051">"Aplikaciji omogućuje trajnu prisutnost nekih njenih dijelova u memoriji. To može ograničiti dostupnost memorije drugim aplikacijama i usporiti telefon."</string>
     <string name="permlab_foregroundService" msgid="1768855976818467491">"pokrenuti uslugu u prednjem planu"</string>
     <string name="permdesc_foregroundService" msgid="8720071450020922795">"Omogućuje aplikaciji da upotrebljava usluge koje su u prednjem planu."</string>
-    <!-- no translation found for permlab_foregroundServiceCamera (7814751737955715297) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceCamera (6973701931250595727) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceConnectedDevice (3019650546176872501) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceConnectedDevice (1067457315741352963) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceDataSync (5847463514326881076) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceDataSync (2267140263423973050) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceLocation (3745428302378535690) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceLocation (118894034365177183) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceMediaPlayback (4002687983891935514) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceMediaPlayback (3638032446063968043) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceMediaProjection (2630868915733312527) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceMediaProjection (4805677128082002298) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceMicrophone (7390033424890545399) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceMicrophone (1206041516173483201) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServicePhoneCall (627937743867697892) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServicePhoneCall (5941660252587015147) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceHealth (3675776442080928184) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceHealth (2024586220562667185) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceRemoteMessaging (105670277002780950) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceRemoteMessaging (8767598075877576277) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceSystemExempted (1597663713590612685) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceSystemExempted (947381760834649622) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceSpecialUse (7973536745876645082) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceSpecialUse (646713654541885919) -->
-    <skip />
+    <string name="permlab_foregroundServiceCamera" msgid="7814751737955715297">"pokretanje usluge u prednjem planu s vrstom \"kamera\""</string>
+    <string name="permdesc_foregroundServiceCamera" msgid="6973701931250595727">"Omogućuje aplikaciji da iskoristi usluge u prednjem planu s vrstom \"fotoaparat\""</string>
+    <string name="permlab_foregroundServiceConnectedDevice" msgid="3019650546176872501">"pokretanje usluge u prednjem planu s vrstom \"povezani uređaj\""</string>
+    <string name="permdesc_foregroundServiceConnectedDevice" msgid="1067457315741352963">"Omogućuje aplikaciji da iskoristi usluge u prednjem planu s vrstom \"povezani uređaj\""</string>
+    <string name="permlab_foregroundServiceDataSync" msgid="5847463514326881076">"pokretanje usluge u prednjem planu s vrstom \"sinkroniziranje podataka\""</string>
+    <string name="permdesc_foregroundServiceDataSync" msgid="2267140263423973050">"Omogućuje aplikaciji da iskoristi usluge u prednjem planu s vrstom \"sinkroniziranje podataka\""</string>
+    <string name="permlab_foregroundServiceLocation" msgid="3745428302378535690">"pokretanje usluge u prednjem planu s vrstom \"lokacija\""</string>
+    <string name="permdesc_foregroundServiceLocation" msgid="118894034365177183">"Omogućuje aplikaciji da iskoristi usluge u prednjem planu s vrstom \"lokacija\""</string>
+    <string name="permlab_foregroundServiceMediaPlayback" msgid="4002687983891935514">"pokretanje usluge u prednjem planu s vrstom \"reprodukcija medijskih sadržaja\""</string>
+    <string name="permdesc_foregroundServiceMediaPlayback" msgid="3638032446063968043">"Omogućuje aplikaciji da iskoristi usluge u prednjem planu s vrstom \"reprodukcija medijskih sadržaja\""</string>
+    <string name="permlab_foregroundServiceMediaProjection" msgid="2630868915733312527">"pokretanje usluge u prednjem planu s vrstom \"projekcija multimedija\""</string>
+    <string name="permdesc_foregroundServiceMediaProjection" msgid="4805677128082002298">"Omogućuje aplikaciji da iskoristi usluge u prednjem planu s vrstom \"projekcija multimedija\""</string>
+    <string name="permlab_foregroundServiceMicrophone" msgid="7390033424890545399">"pokretanje usluge u prednjem planu s vrstom \"mikrofon\""</string>
+    <string name="permdesc_foregroundServiceMicrophone" msgid="1206041516173483201">"Omogućuje aplikaciji da iskoristi usluge u prednjem planu s vrstom \"mikrofon\""</string>
+    <string name="permlab_foregroundServicePhoneCall" msgid="627937743867697892">"pokretanje usluge u prednjem planu s vrstom \"telefonski poziv\""</string>
+    <string name="permdesc_foregroundServicePhoneCall" msgid="5941660252587015147">"Omogućuje aplikaciji da iskoristi usluge u prednjem planu s vrstom \"telefonski poziv\""</string>
+    <string name="permlab_foregroundServiceHealth" msgid="3675776442080928184">"pokretanje usluge u prednjem planu s vrstom \"zdravlje\""</string>
+    <string name="permdesc_foregroundServiceHealth" msgid="2024586220562667185">"Omogućuje aplikaciji da iskoristi usluge u prednjem planu s vrstom \"zdravlje\""</string>
+    <string name="permlab_foregroundServiceRemoteMessaging" msgid="105670277002780950">"pokretanje usluge u prednjem planu s vrstom \"udaljena razmjena poruka\""</string>
+    <string name="permdesc_foregroundServiceRemoteMessaging" msgid="8767598075877576277">"Omogućuje aplikaciji da iskoristi usluge u prednjem planu s vrstom \"udaljena razmjena poruka\""</string>
+    <string name="permlab_foregroundServiceSystemExempted" msgid="1597663713590612685">"pokretanje usluge u prednjem planu s vrstom \"sustav je izuzeo\""</string>
+    <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"Omogućuje aplikaciji da iskoristi usluge u prednjem planu s vrstom \"izuzeo sustav\""</string>
+    <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"pokretanje usluge u prednjem planu s vrstom \"posebna upotreba\""</string>
+    <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"Omogućuje aplikaciji da iskoristi usluge u prednjem planu s vrstom \"posebna upotreba\""</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"mjerenje prostora za pohranu aplikacije"</string>
     <string name="permdesc_getPackageSize" msgid="742743530909966782">"Aplikaciji omogućuje dohvaćanje koda, podataka i veličine predmemorije"</string>
     <string name="permlab_writeSettings" msgid="8057285063719277394">"izmjena postavki sustava"</string>
@@ -2341,8 +2317,7 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"S vašeg uređaja <xliff:g id="DEVICE">%1$s</xliff:g> nije moguće pristupiti fotoaparatu telefona"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"S vašeg uređaja <xliff:g id="DEVICE">%1$s</xliff:g> nije moguće pristupiti fotoaparatu tableta"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Sadržaju nije moguće pristupiti tijekom streaminga. Pokušajte mu pristupiti na telefonu."</string>
-    <!-- no translation found for vdm_pip_blocked (4036107522497281397) -->
-    <skip />
+    <string name="vdm_pip_blocked" msgid="4036107522497281397">"Slika u slici ne može se prikazivati tijekom streaminga"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Zadane postavke sustava"</string>
     <string name="default_card_name" msgid="9198284935962911468">"KARTICA <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

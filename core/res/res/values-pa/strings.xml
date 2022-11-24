@@ -395,54 +395,30 @@
     <string name="permdesc_persistentActivity" product="default" msgid="1914841924366562051">"ਐਪ ਨੂੰ ਮੈਮਰੀ ਵਿੱਚ ਖੁਦ ਦੇ ਭਾਗਾਂ ਨੂੰ ਸਥਾਈ ਬਣਾਉਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਫ਼ੋਨ ਨੂੰ ਹੌਲੀ ਕਰਦੇ ਹੋਏ ਹੋਰਾਂ ਐਪਾਂ ਤੇ ਉਪਲਬਧ ਮੈਮਰੀ ਨੂੰ ਸੀਮਿਤ ਕਰ ਸਕਦਾ ਹੈ।"</string>
     <string name="permlab_foregroundService" msgid="1768855976818467491">"ਫੋਰਗ੍ਰਾਉਂਡ ਸੇਵਾਵਾਂ ਚਲਾਓ"</string>
     <string name="permdesc_foregroundService" msgid="8720071450020922795">"ਐਪ ਨੂੰ ਫੋਰਗ੍ਰਾਉਂਡ ਸੇਵਾਵਾਂ ਦੀ ਵਰਤੋਂ ਕਰਨ ਦਿਓ।"</string>
-    <!-- no translation found for permlab_foregroundServiceCamera (7814751737955715297) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceCamera (6973701931250595727) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceConnectedDevice (3019650546176872501) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceConnectedDevice (1067457315741352963) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceDataSync (5847463514326881076) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceDataSync (2267140263423973050) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceLocation (3745428302378535690) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceLocation (118894034365177183) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceMediaPlayback (4002687983891935514) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceMediaPlayback (3638032446063968043) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceMediaProjection (2630868915733312527) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceMediaProjection (4805677128082002298) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceMicrophone (7390033424890545399) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceMicrophone (1206041516173483201) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServicePhoneCall (627937743867697892) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServicePhoneCall (5941660252587015147) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceHealth (3675776442080928184) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceHealth (2024586220562667185) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceRemoteMessaging (105670277002780950) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceRemoteMessaging (8767598075877576277) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceSystemExempted (1597663713590612685) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceSystemExempted (947381760834649622) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceSpecialUse (7973536745876645082) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceSpecialUse (646713654541885919) -->
-    <skip />
+    <string name="permlab_foregroundServiceCamera" msgid="7814751737955715297">"\"camera\" ਕਿਸਮ ਨਾਲ ਫੋਰਗ੍ਰਾਊਂਡ ਸੇਵਾ ਨੂੰ ਚਲਾਉਂਦੀ ਹੈ"</string>
+    <string name="permdesc_foregroundServiceCamera" msgid="6973701931250595727">"ਐਪ ਨੂੰ \"camera\" ਕਿਸਮ ਨਾਲ ਫੋਰਗ੍ਰਾਊਂਡ ਸੇਵਾਵਾਂ ਦੀ ਵਰਤੋਂ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦੀ ਹੈ"</string>
+    <string name="permlab_foregroundServiceConnectedDevice" msgid="3019650546176872501">"\"connectedDevice\" ਕਿਸਮ ਨਾਲ ਫੋਰਗ੍ਰਾਊਂਡ ਸੇਵਾ ਨੂੰ ਚਲਾਉਂਦੀ ਹੈ"</string>
+    <string name="permdesc_foregroundServiceConnectedDevice" msgid="1067457315741352963">"ਐਪ ਨੂੰ \"connectedDevice\" ਕਿਸਮ ਨਾਲ ਫੋਰਗ੍ਰਾਊਂਡ ਸੇਵਾਵਾਂ ਦੀ ਵਰਤੋਂ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦੀ ਹੈ"</string>
+    <string name="permlab_foregroundServiceDataSync" msgid="5847463514326881076">"\"dataSync\" ਕਿਸਮ ਨਾਲ ਫੋਰਗ੍ਰਾਊਂਡ ਸੇਵਾ ਨੂੰ ਚਲਾਉਂਦੀ ਹੈ"</string>
+    <string name="permdesc_foregroundServiceDataSync" msgid="2267140263423973050">"ਐਪ ਨੂੰ \"dataSync\" ਕਿਸਮ ਨਾਲ ਫੋਰਗ੍ਰਾਊਂਡ ਸੇਵਾਵਾਂ ਦੀ ਵਰਤੋਂ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦੀ ਹੈ"</string>
+    <string name="permlab_foregroundServiceLocation" msgid="3745428302378535690">"\"location\" ਕਿਸਮ ਨਾਲ ਫੋਰਗ੍ਰਾਊਂਡ ਸੇਵਾ ਨੂੰ ਚਲਾਉਂਦੀ ਹੈ"</string>
+    <string name="permdesc_foregroundServiceLocation" msgid="118894034365177183">"ਐਪ ਨੂੰ \"location\" ਕਿਸਮ ਨਾਲ ਫੋਰਗ੍ਰਾਊਂਡ ਸੇਵਾਵਾਂ ਦੀ ਵਰਤੋਂ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦੀ ਹੈ"</string>
+    <string name="permlab_foregroundServiceMediaPlayback" msgid="4002687983891935514">"\"mediaPlayback\" ਕਿਸਮ ਨਾਲ ਫੋਰਗ੍ਰਾਊਂਡ ਸੇਵਾ ਨੂੰ ਚਲਾਉਂਦੀ ਹੈ"</string>
+    <string name="permdesc_foregroundServiceMediaPlayback" msgid="3638032446063968043">"ਐਪ ਨੂੰ \"mediaPlayback\" ਕਿਸਮ ਨਾਲ ਫੋਰਗ੍ਰਾਊਂਡ ਸੇਵਾਵਾਂ ਦੀ ਵਰਤੋਂ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦੀ ਹੈ"</string>
+    <string name="permlab_foregroundServiceMediaProjection" msgid="2630868915733312527">"\"mediaProjection\" ਕਿਸਮ ਨਾਲ ਫੋਰਗ੍ਰਾਊਂਡ ਸੇਵਾ ਨੂੰ ਚਲਾਉਂਦੀ ਹੈ"</string>
+    <string name="permdesc_foregroundServiceMediaProjection" msgid="4805677128082002298">"ਐਪ ਨੂੰ \"mediaProjection\" ਕਿਸਮ ਨਾਲ ਫੋਰਗ੍ਰਾਊਂਡ ਸੇਵਾਵਾਂ ਦੀ ਵਰਤੋਂ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦੀ ਹੈ"</string>
+    <string name="permlab_foregroundServiceMicrophone" msgid="7390033424890545399">"\"microphone\" ਕਿਸਮ ਨਾਲ ਫੋਰਗ੍ਰਾਊਂਡ ਸੇਵਾ ਨੂੰ ਚਲਾਉਂਦੀ ਹੈ"</string>
+    <string name="permdesc_foregroundServiceMicrophone" msgid="1206041516173483201">"ਐਪ ਨੂੰ \"microphone\" ਕਿਸਮ ਨਾਲ ਫੋਰਗ੍ਰਾਊਂਡ ਸੇਵਾਵਾਂ ਦੀ ਵਰਤੋਂ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦੀ ਹੈ"</string>
+    <string name="permlab_foregroundServicePhoneCall" msgid="627937743867697892">"\"phoneCall\" ਕਿਸਮ ਨਾਲ ਫੋਰਗ੍ਰਾਊਂਡ ਸੇਵਾ ਨੂੰ ਚਲਾਉਂਦੀ ਹੈ"</string>
+    <string name="permdesc_foregroundServicePhoneCall" msgid="5941660252587015147">"ਐਪ ਨੂੰ \"phoneCall\" ਕਿਸਮ ਨਾਲ ਫੋਰਗ੍ਰਾਊਂਡ ਸੇਵਾਵਾਂ ਦੀ ਵਰਤੋਂ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦੀ ਹੈ"</string>
+    <string name="permlab_foregroundServiceHealth" msgid="3675776442080928184">"\"health\" ਕਿਸਮ ਨਾਲ ਫੋਰਗ੍ਰਾਊਂਡ ਸੇਵਾ ਨੂੰ ਚਲਾਉਂਦੀ ਹੈ"</string>
+    <string name="permdesc_foregroundServiceHealth" msgid="2024586220562667185">"ਐਪ ਨੂੰ \"health\" ਕਿਸਮ ਨਾਲ ਫੋਰਗ੍ਰਾਊਂਡ ਸੇਵਾਵਾਂ ਦੀ ਵਰਤੋਂ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦੀ ਹੈ"</string>
+    <string name="permlab_foregroundServiceRemoteMessaging" msgid="105670277002780950">"\"remoteMessaging\" ਕਿਸਮ ਨਾਲ ਫੋਰਗ੍ਰਾਊਂਡ ਸੇਵਾ ਨੂੰ ਚਲਾਉਂਦੀ ਹੈ"</string>
+    <string name="permdesc_foregroundServiceRemoteMessaging" msgid="8767598075877576277">"ਐਪ ਨੂੰ \"remoteMessaging\" ਕਿਸਮ ਨਾਲ ਫੋਰਗ੍ਰਾਊਂਡ ਸੇਵਾਵਾਂ ਦੀ ਵਰਤੋਂ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦੀ ਹੈ"</string>
+    <string name="permlab_foregroundServiceSystemExempted" msgid="1597663713590612685">"\"systemExempted\" ਕਿਸਮ ਨਾਲ ਫੋਰਗ੍ਰਾਊਂਡ ਸੇਵਾ ਨੂੰ ਚਲਾਉਂਦੀ ਹੈ"</string>
+    <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"ਐਪ ਨੂੰ \"systemExempted\" ਕਿਸਮ ਨਾਲ ਫੋਰਗ੍ਰਾਊਂਡ ਸੇਵਾਵਾਂ ਦੀ ਵਰਤੋਂ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦੀ ਹੈ"</string>
+    <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"\"specialUse\" ਕਿਸਮ ਨਾਲ ਫੋਰਗ੍ਰਾਊਂਡ ਸੇਵਾ ਨੂੰ ਚਲਾਉਂਦੀ ਹੈ"</string>
+    <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"ਐਪ ਨੂੰ \"specialUse\" ਕਿਸਮ ਨਾਲ ਫੋਰਗ੍ਰਾਊਂਡ ਸੇਵਾਵਾਂ ਦੀ ਵਰਤੋਂ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦੀ ਹੈ"</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"ਐਪ ਸਟੋਰੇਜ ਜਗ੍ਹਾ ਮਾਪੋ"</string>
     <string name="permdesc_getPackageSize" msgid="742743530909966782">"ਐਪ ਨੂੰ ਇਸਦਾ ਕੋਡ, ਡਾਟਾ ਅਤੇ ਕੈਸ਼ੇ ਆਕਾਰ ਮੁੜ ਪ੍ਰਾਪਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_writeSettings" msgid="8057285063719277394">"ਸਿਸਟਮ ਸੈਟਿੰਗਾਂ  ਸੰਸ਼ੋਧਿਤ ਕਰੋ"</string>
@@ -495,10 +471,8 @@
     <string name="permdesc_recordAudio" msgid="5857246765327514062">"ਇਹ ਐਪ ਵਰਤੋਂ ਵਿੱਚ ਹੋਣ ਵੇਲੇ ਮਾਈਕ੍ਰੋਫ਼ੋਨ ਨੂੰ ਵਰਤ ਕੇ ਆਡੀਓ ਰਿਕਾਰਡ ਕਰ ਸਕਦੀ ਹੈ।"</string>
     <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਆਡੀਓ ਰਿਕਾਰਡ ਕਰੋ"</string>
     <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"ਇਹ ਐਪ ਕਿਸੇ ਵੇਲੇ ਵੀ ਮਾਈਕ੍ਰੋਫ਼ੋਨ ਨੂੰ ਵਰਤ ਕੇ ਆਡੀਓ ਰਿਕਾਰਡ ਕਰ ਸਕਦੀ ਹੈ।"</string>
-    <!-- no translation found for permlab_detectScreenCapture (4447042362828799433) -->
-    <skip />
-    <!-- no translation found for permdesc_detectScreenCapture (3485784917960342284) -->
-    <skip />
+    <string name="permlab_detectScreenCapture" msgid="4447042362828799433">"ਐਪ ਵਿੰਡੋਆਂ ਦੇ ਸਕ੍ਰੀਨ ਕੈਪਚਰਾਂ ਦਾ ਪਤਾ ਲਗਾਓ"</string>
+    <string name="permdesc_detectScreenCapture" msgid="3485784917960342284">"ਐਪ ਦੇ ਵਰਤੋਂ ਵਿੱਚ ਹੋਣ ਦੌਰਾਨ ਸਕ੍ਰੀਨਸ਼ਾਟ ਲੈਣ \'ਤੇ ਇਸ ਐਪ ਨੂੰ ਸੂਚਨਾ ਪ੍ਰਾਪਤ ਹੋਵੇਗੀ।"</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"SIM ਨੂੰ ਕਮਾਂਡਾਂ ਭੇਜੋ"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"ਐਪ ਨੂੰ SIM ਨੂੰ ਕਮਾਂਡਾਂ ਭੇਜਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਬਹੁਤ ਘਾਤਕ ਹੈ।"</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"ਸਰੀਰਕ ਸਰਗਰਮੀ ਨੂੰ ਪਛਾਣਨਾ"</string>
@@ -2342,8 +2316,7 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"ਤੁਹਾਡੇ <xliff:g id="DEVICE">%1$s</xliff:g> ਤੋਂ ਫ਼ੋਨ ਦੇ ਕੈਮਰੇ ਤੱਕ ਪਹੁੰਚ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"ਤੁਹਾਡੇ <xliff:g id="DEVICE">%1$s</xliff:g> ਤੋਂ ਟੈਬਲੈੱਟ ਦੇ ਕੈਮਰੇ ਤੱਕ ਪਹੁੰਚ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"ਸਟ੍ਰੀਮਿੰਗ ਦੌਰਾਨ ਇਸ ਤੱਕ ਪਹੁੰਚ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ। ਇਸਦੀ ਬਜਾਏ ਆਪਣੇ ਫ਼ੋਨ \'ਤੇ ਵਰਤ ਕੇ ਦੇਖੋ।"</string>
-    <!-- no translation found for vdm_pip_blocked (4036107522497281397) -->
-    <skip />
+    <string name="vdm_pip_blocked" msgid="4036107522497281397">"ਸਟ੍ਰੀਮਿੰਗ ਦੌਰਾਨ ਤਸਵੀਰ-ਵਿੱਚ-ਤਸਵੀਰ ਨਹੀਂ ਦੇਖੀ ਜਾ ਸਕਦੀ"</string>
     <string name="system_locale_title" msgid="711882686834677268">"ਸਿਸਟਮ ਪੂਰਵ-ਨਿਰਧਾਰਿਤ"</string>
     <string name="default_card_name" msgid="9198284935962911468">"ਕਾਰਡ <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

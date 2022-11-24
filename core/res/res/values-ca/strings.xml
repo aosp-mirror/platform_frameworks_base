@@ -495,10 +495,8 @@
     <string name="permdesc_recordAudio" msgid="5857246765327514062">"Aquesta aplicació pot gravar àudio amb el micròfon mentre s\'està utilitzant."</string>
     <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"gravar àudio en segon pla"</string>
     <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"Aquesta aplicació pot gravar àudio amb el micròfon en qualsevol moment."</string>
-    <!-- no translation found for permlab_detectScreenCapture (4447042362828799433) -->
-    <skip />
-    <!-- no translation found for permdesc_detectScreenCapture (3485784917960342284) -->
-    <skip />
+    <string name="permlab_detectScreenCapture" msgid="4447042362828799433">"detecta les captures de pantalla de les finestres d\'aplicacions"</string>
+    <string name="permdesc_detectScreenCapture" msgid="3485784917960342284">"Aquesta aplicació rebrà una notificació quan es faci una captura de pantalla mentre s\'utilitza l\'aplicació."</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"enviar ordres a la SIM"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"Permet que l\'aplicació enviï ordres a la SIM. Això és molt perillós."</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"reconèixer l\'activitat física"</string>
@@ -2342,8 +2340,7 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"No es pot accedir a la càmera del telèfon des del teu <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"No es pot accedir a la càmera de la tauleta des del teu <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"No s\'hi pot accedir mentre s\'està reproduint en continu. Prova-ho al telèfon."</string>
-    <!-- no translation found for vdm_pip_blocked (4036107522497281397) -->
-    <skip />
+    <string name="vdm_pip_blocked" msgid="4036107522497281397">"No es pot veure el mode de pantalla en pantalla durant la reproducció en continu"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Valor predeterminat del sistema"</string>
     <string name="default_card_name" msgid="9198284935962911468">"TARGETA <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

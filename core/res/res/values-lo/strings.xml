@@ -395,54 +395,30 @@
     <string name="permdesc_persistentActivity" product="default" msgid="1914841924366562051">"ອະນຸຍາດໃຫ້ແອັບຯເຮັດໃຫ້ສ່ວນນຶ່ງຂອງຕົນເອງ ຄົງຢູ່ຖາວອນໃນໜ່ວຍຄວາມຈຳ ເຊິ່ງອາດສາມາດ ເຮັດໃຫ້ການນຳໃຊ້ໜ່ວຍຄວາມຈຳຂອງແອັບຯ ອື່ນຖືກຈຳກັດ ສົ່ງຜົນເຮັດໃຫ້ມືຖືຂອງທ່ານເຮັດວຽກຊ້າລົງໄດ້."</string>
     <string name="permlab_foregroundService" msgid="1768855976818467491">"ໃຊ້ບໍລິການພື້ນໜ້າ"</string>
     <string name="permdesc_foregroundService" msgid="8720071450020922795">"ອະນຸຍາດໃຫ້ແອັບໃຊ້ບໍລິການພື້ນໜ້າ."</string>
-    <!-- no translation found for permlab_foregroundServiceCamera (7814751737955715297) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceCamera (6973701931250595727) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceConnectedDevice (3019650546176872501) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceConnectedDevice (1067457315741352963) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceDataSync (5847463514326881076) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceDataSync (2267140263423973050) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceLocation (3745428302378535690) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceLocation (118894034365177183) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceMediaPlayback (4002687983891935514) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceMediaPlayback (3638032446063968043) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceMediaProjection (2630868915733312527) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceMediaProjection (4805677128082002298) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceMicrophone (7390033424890545399) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceMicrophone (1206041516173483201) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServicePhoneCall (627937743867697892) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServicePhoneCall (5941660252587015147) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceHealth (3675776442080928184) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceHealth (2024586220562667185) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceRemoteMessaging (105670277002780950) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceRemoteMessaging (8767598075877576277) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceSystemExempted (1597663713590612685) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceSystemExempted (947381760834649622) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceSpecialUse (7973536745876645082) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceSpecialUse (646713654541885919) -->
-    <skip />
+    <string name="permlab_foregroundServiceCamera" msgid="7814751737955715297">"ເອີ້ນໃຊ້ບໍລິການທີ່ເຮັດວຽກຢູ່ເບື້ອງໜ້າໂດຍມີປະເພດເປັນ \"ກ້ອງຖ່າຍຮູບ\""</string>
+    <string name="permdesc_foregroundServiceCamera" msgid="6973701931250595727">"ອະນຸຍາດໃຫ້ແອັບໃຊ້ປະໂຫຍດຈາກບໍລິການທີ່ເຮັດວຽກຢູ່ເບື້ອງໜ້າໂດຍມີປະເພດເປັນ \"ກ້ອງຖ່າຍຮູບ\""</string>
+    <string name="permlab_foregroundServiceConnectedDevice" msgid="3019650546176872501">"ເອີ້ນໃຊ້ບໍລິການທີ່ເຮັດວຽກຢູ່ເບື້ອງໜ້າໂດຍມີປະເພດເປັນ \"ອຸປະກອນທີ່ເຊື່ອມຕໍ່\""</string>
+    <string name="permdesc_foregroundServiceConnectedDevice" msgid="1067457315741352963">"ອະນຸຍາດໃຫ້ແອັບໃຊ້ປະໂຫຍດຈາກບໍລິການທີ່ເຮັດວຽກຢູ່ເບື້ອງໜ້າໂດຍມີປະເພດເປັນ \"ອຸປະກອນທີ່ເຊື່ອມຕໍ່\""</string>
+    <string name="permlab_foregroundServiceDataSync" msgid="5847463514326881076">"ເອີ້ນໃຊ້ບໍລິການທີ່ເຮັດວຽກຢູ່ເບື້ອງໜ້າໂດຍມີປະເພດເປັນ \"ການຊິ້ງຂໍ້ມູນ\""</string>
+    <string name="permdesc_foregroundServiceDataSync" msgid="2267140263423973050">"ອະນຸຍາດໃຫ້ແອັບໃຊ້ປະໂຫຍດຈາກບໍລິການທີ່ເຮັດວຽກຢູ່ເບື້ອງໜ້າໂດຍມີປະເພດເປັນ \"ການຊິ້ງຂໍ້ມູນ\""</string>
+    <string name="permlab_foregroundServiceLocation" msgid="3745428302378535690">"ເອີ້ນໃຊ້ບໍລິການທີ່ເຮັດວຽກຢູ່ເບື້ອງໜ້າໂດຍມີປະເພດເປັນ \"ສະຖານທີ່\""</string>
+    <string name="permdesc_foregroundServiceLocation" msgid="118894034365177183">"ອະນຸຍາດໃຫ້ແອັບໃຊ້ປະໂຫຍດຈາກບໍລິການທີ່ເຮັດວຽກຢູ່ເບື້ອງໜ້າໂດຍມີປະເພດເປັນ \"ສະຖານທີ່\""</string>
+    <string name="permlab_foregroundServiceMediaPlayback" msgid="4002687983891935514">"ເອີ້ນໃຊ້ບໍລິການທີ່ເຮັດວຽກຢູ່ເບື້ອງໜ້າໂດຍມີປະເພດເປັນ \"ການຫຼິ້ນມີເດຍ\""</string>
+    <string name="permdesc_foregroundServiceMediaPlayback" msgid="3638032446063968043">"ອະນຸຍາດໃຫ້ແອັບໃຊ້ປະໂຫຍດຈາກບໍລິການທີ່ເຮັດວຽກຢູ່ເບື້ອງໜ້າໂດຍມີປະເພດເປັນ \"ການຫຼິ້ນມີເດຍ\""</string>
+    <string name="permlab_foregroundServiceMediaProjection" msgid="2630868915733312527">"ເອີ້ນໃຊ້ບໍລິການທີ່ເຮັດວຽກຢູ່ເບື້ອງໜ້າໂດຍມີປະເພດເປັນ \"ການສາຍພາບມີເດຍ\""</string>
+    <string name="permdesc_foregroundServiceMediaProjection" msgid="4805677128082002298">"ອະນຸຍາດໃຫ້ແອັບໃຊ້ປະໂຫຍດຈາກບໍລິການທີ່ເຮັດວຽກຢູ່ເບື້ອງໜ້າໂດຍມີປະເພດເປັນ \"ການສາຍພາບມີເດຍ\""</string>
+    <string name="permlab_foregroundServiceMicrophone" msgid="7390033424890545399">"ເອີ້ນໃຊ້ບໍລິການທີ່ເຮັດວຽກຢູ່ເບື້ອງໜ້າໂດຍມີປະເພດເປັນ \"ໄມໂຄຣໂຟນ\""</string>
+    <string name="permdesc_foregroundServiceMicrophone" msgid="1206041516173483201">"ອະນຸຍາດໃຫ້ແອັບໃຊ້ປະໂຫຍດຈາກບໍລິການທີ່ເຮັດວຽກຢູ່ເບື້ອງໜ້າໂດຍມີປະເພດເປັນ \"ໄມໂຄຣໂຟນ\""</string>
+    <string name="permlab_foregroundServicePhoneCall" msgid="627937743867697892">"ເອີ້ນໃຊ້ບໍລິການທີ່ເຮັດວຽກຢູ່ເບື້ອງໜ້າໂດຍມີປະເພດເປັນ \"ສາຍໂທ\""</string>
+    <string name="permdesc_foregroundServicePhoneCall" msgid="5941660252587015147">"ອະນຸຍາດໃຫ້ແອັບໃຊ້ປະໂຫຍດຈາກບໍລິການທີ່ເຮັດວຽກຢູ່ເບື້ອງໜ້າໂດຍມີປະເພດເປັນ \"ສາຍໂທ\""</string>
+    <string name="permlab_foregroundServiceHealth" msgid="3675776442080928184">"ເອີ້ນໃຊ້ບໍລິການທີ່ເຮັດວຽກຢູ່ເບື້ອງໜ້າໂດຍມີປະເພດເປັນ \"ສຸຂະພາບ\""</string>
+    <string name="permdesc_foregroundServiceHealth" msgid="2024586220562667185">"ອະນຸຍາດໃຫ້ແອັບໃຊ້ປະໂຫຍດຈາກບໍລິການທີ່ເຮັດວຽກຢູ່ເບື້ອງໜ້າໂດຍມີປະເພດເປັນ \"ສຸຂະພາບ\""</string>
+    <string name="permlab_foregroundServiceRemoteMessaging" msgid="105670277002780950">"ເອີ້ນໃຊ້ບໍລິການທີ່ເຮັດວຽກຢູ່ເບື້ອງໜ້າໂດຍມີປະເພດເປັນ \"ການຮັບສົ່ງຂໍ້ຄວາມຈາກໄລຍະໄກ\""</string>
+    <string name="permdesc_foregroundServiceRemoteMessaging" msgid="8767598075877576277">"ອະນຸຍາດໃຫ້ແອັບໃຊ້ປະໂຫຍດຈາກບໍລິການທີ່ເຮັດວຽກຢູ່ເບື້ອງໜ້າໂດຍມີປະເພດເປັນ \"ການຮັບສົ່ງຂໍ້ຄວາມຈາກໄລຍະໄກ\""</string>
+    <string name="permlab_foregroundServiceSystemExempted" msgid="1597663713590612685">"ເອີ້ນໃຊ້ບໍລິການທີ່ເຮັດວຽກຢູ່ເບື້ອງໜ້າໂດຍມີປະເພດເປັນ \"ໄດ້ຮັບການຍົກເວັ້ນຈາກລະບົບ\""</string>
+    <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"ອະນຸຍາດໃຫ້ແອັບໃຊ້ປະໂຫຍດຈາກບໍລິການທີ່ເຮັດວຽກຢູ່ເບື້ອງໜ້າໂດຍມີປະເພດເປັນ \"ໄດ້ຮັບການຍົກເວັ້ນຈາກລະບົບ\""</string>
+    <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"ເອີ້ນໃຊ້ບໍລິການທີ່ເຮັດວຽກຢູ່ເບື້ອງໜ້າໂດຍມີປະເພດເປັນ \"ການນຳໃຊ້ພິເສດ\""</string>
+    <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"ອະນຸຍາດໃຫ້ແອັບໃຊ້ປະໂຫຍດຈາກບໍລິການທີ່ເຮັດວຽກຢູ່ເບື້ອງໜ້າໂດຍມີປະເພດເປັນ \"ການນຳໃຊ້ພິເສດ\""</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"ກວດສອບພື້ນທີ່ຈັດເກັບຂໍ້ມູນແອັບຯ"</string>
     <string name="permdesc_getPackageSize" msgid="742743530909966782">"ອະນຸຍາດໃຫ້ແອັບຯດຶງໂຄດ, ຂໍ້ມູນ ແລະຂະໜາດ cache ຂອງມັນໄດ້."</string>
     <string name="permlab_writeSettings" msgid="8057285063719277394">"ແກ້ໄຂການຕັ້ງຄ່າລະບົບ"</string>
@@ -495,10 +471,8 @@
     <string name="permdesc_recordAudio" msgid="5857246765327514062">"ແອັບນີ້ສາມາດບັນທຶກສຽງດ້ວຍໄມໂຄຣໂຟນໃນຂະນະທີ່ກຳລັງໃຊ້ແອັບຢູ່ໄດ້."</string>
     <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"ບັນທຶກສຽງໃນພື້ນຫຼັງ"</string>
     <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"ແອັບນີ້ສາມາດບັນທຶກສຽງດ້ວຍໄມໂຄຣໂຟນຕອນໃດກໍໄດ້."</string>
-    <!-- no translation found for permlab_detectScreenCapture (4447042362828799433) -->
-    <skip />
-    <!-- no translation found for permdesc_detectScreenCapture (3485784917960342284) -->
-    <skip />
+    <string name="permlab_detectScreenCapture" msgid="4447042362828799433">"ກວດຫາການຖ່າຍຮູບໜ້າຈໍຂອງໜ້າຈໍແອັບ"</string>
+    <string name="permdesc_detectScreenCapture" msgid="3485784917960342284">"ແອັບນີ້ຈະໄດ້ຮັບການແຈ້ງເຕືອນເມື່ອມີການຖ່າຍຮູບໜ້າຈໍໃນຂະນະທີ່ກຳລັງໃຊ້ແອັບຢູ່."</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"ສົ່ງ​ຄຳ​ສັ່ງ​ຫາ SIM"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"ອະນຸຍາດໃຫ້ແອັບຯສົ່ງຄຳສັ່ງຫາ SIM. ສິ່ງນີ້ອັນຕະລາຍຫຼາຍ."</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"ຈຳແນກກິດຈະກຳທາງກາຍ"</string>
@@ -2342,8 +2316,7 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"ບໍ່ສາມາດເຂົ້າເຖິງກ້ອງຖ່າຍຮູບຂອງໂທລະສັບຈາກ <xliff:g id="DEVICE">%1$s</xliff:g> ຂອງທ່ານໄດ້"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"ບໍ່ສາມາດເຂົ້າເຖິງກ້ອງຖ່າຍຮູບຂອງແທັບເລັດຈາກ <xliff:g id="DEVICE">%1$s</xliff:g> ຂອງທ່ານໄດ້"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"ບໍ່ສາມາດເຂົ້າເຖິງເນື້ອຫານີ້ໄດ້ໃນຂະນະທີ່ຍັງສະຕຣີມຢູ່. ກະລຸນາລອງຢູ່ໂທລະສັບຂອງທ່ານແທນ."</string>
-    <!-- no translation found for vdm_pip_blocked (4036107522497281397) -->
-    <skip />
+    <string name="vdm_pip_blocked" msgid="4036107522497281397">"ບໍ່ສາມາດເບິ່ງການສະແດງຜົນຊ້ອນກັນໃນຂະນະທີ່ສະຕຣີມໄດ້"</string>
     <string name="system_locale_title" msgid="711882686834677268">"ຄ່າເລີ່ມຕົ້ນຂອງລະບົບ"</string>
     <string name="default_card_name" msgid="9198284935962911468">"ບັດ <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

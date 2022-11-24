@@ -396,54 +396,30 @@
     <string name="permdesc_persistentActivity" product="default" msgid="1914841924366562051">"Permet à l\'application de rendre certains de ces composants persistants dans la mémoire. Cette autorisation peut limiter la mémoire disponible pour d\'autres applications et ralentir le téléphone."</string>
     <string name="permlab_foregroundService" msgid="1768855976818467491">"exécuter le service en premier plan"</string>
     <string name="permdesc_foregroundService" msgid="8720071450020922795">"Permet à l\'application d\'utiliser les services en premier plan."</string>
-    <!-- no translation found for permlab_foregroundServiceCamera (7814751737955715297) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceCamera (6973701931250595727) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceConnectedDevice (3019650546176872501) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceConnectedDevice (1067457315741352963) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceDataSync (5847463514326881076) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceDataSync (2267140263423973050) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceLocation (3745428302378535690) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceLocation (118894034365177183) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceMediaPlayback (4002687983891935514) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceMediaPlayback (3638032446063968043) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceMediaProjection (2630868915733312527) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceMediaProjection (4805677128082002298) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceMicrophone (7390033424890545399) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceMicrophone (1206041516173483201) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServicePhoneCall (627937743867697892) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServicePhoneCall (5941660252587015147) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceHealth (3675776442080928184) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceHealth (2024586220562667185) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceRemoteMessaging (105670277002780950) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceRemoteMessaging (8767598075877576277) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceSystemExempted (1597663713590612685) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceSystemExempted (947381760834649622) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceSpecialUse (7973536745876645082) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceSpecialUse (646713654541885919) -->
-    <skip />
+    <string name="permlab_foregroundServiceCamera" msgid="7814751737955715297">"exécuter le service d\'avant-plan avec le type « appareil photo »"</string>
+    <string name="permdesc_foregroundServiceCamera" msgid="6973701931250595727">"Autoriser l\'application à utiliser les services d\'avant-plan avec le type « appareil photo »"</string>
+    <string name="permlab_foregroundServiceConnectedDevice" msgid="3019650546176872501">"exécuter le service d\'avant-plan avec le type « appareil connecté »"</string>
+    <string name="permdesc_foregroundServiceConnectedDevice" msgid="1067457315741352963">"Autoriser l\'application à utiliser les services d\'avant-plan avec le type « appareil connecté »"</string>
+    <string name="permlab_foregroundServiceDataSync" msgid="5847463514326881076">"exécuter le service d\'avant-plan avec le type « synchronisation des données »"</string>
+    <string name="permdesc_foregroundServiceDataSync" msgid="2267140263423973050">"Autoriser l\'application à utiliser les services d\'avant-plan avec le type « synchronisation des données »"</string>
+    <string name="permlab_foregroundServiceLocation" msgid="3745428302378535690">"exécuter le service d\'avant-plan avec le type « emplacement »"</string>
+    <string name="permdesc_foregroundServiceLocation" msgid="118894034365177183">"Autoriser l\'application à utiliser les services d\'avant-plan avec le type « emplacement »"</string>
+    <string name="permlab_foregroundServiceMediaPlayback" msgid="4002687983891935514">"exécuter le service d\'avant-plan avec le type « lecture multimédia »"</string>
+    <string name="permdesc_foregroundServiceMediaPlayback" msgid="3638032446063968043">"Autoriser l\'application à utiliser les services d\'avant-plan avec le type « lecture multimédia »"</string>
+    <string name="permlab_foregroundServiceMediaProjection" msgid="2630868915733312527">"exécuter le service d\'avant-plan avec le type « projection de contenus multimédias »"</string>
+    <string name="permdesc_foregroundServiceMediaProjection" msgid="4805677128082002298">"Autoriser l\'application à utiliser les services d\'avant-plan avec le type « projection de contenus multimédias »"</string>
+    <string name="permlab_foregroundServiceMicrophone" msgid="7390033424890545399">"exécuter le service d\'avant-plan avec le type « microphone »"</string>
+    <string name="permdesc_foregroundServiceMicrophone" msgid="1206041516173483201">"Autoriser l\'application à utiliser les services d\'avant-plan avec le type « microphone »"</string>
+    <string name="permlab_foregroundServicePhoneCall" msgid="627937743867697892">"exécuter le service d\'avant-plan avec le type « appel téléphonique »"</string>
+    <string name="permdesc_foregroundServicePhoneCall" msgid="5941660252587015147">"Autoriser l\'application à utiliser les services d\'avant-plan avec le type « appel téléphonique »"</string>
+    <string name="permlab_foregroundServiceHealth" msgid="3675776442080928184">"exécuter le service d\'avant-plan avec le type « santé »"</string>
+    <string name="permdesc_foregroundServiceHealth" msgid="2024586220562667185">"Autoriser l\'application à utiliser les services d\'avant-plan avec le type « santé »"</string>
+    <string name="permlab_foregroundServiceRemoteMessaging" msgid="105670277002780950">"exécuter le service d\'avant-plan avec le type « messagerie à distance »"</string>
+    <string name="permdesc_foregroundServiceRemoteMessaging" msgid="8767598075877576277">"Autoriser l\'application à utiliser les services d\'avant-plan avec le type « messagerie à distance »"</string>
+    <string name="permlab_foregroundServiceSystemExempted" msgid="1597663713590612685">"exécuter le service d\'avant-plan avec le type « système exempté »"</string>
+    <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"Autoriser l\'application à utiliser les services d\'avant-plan avec le type « système exempté »"</string>
+    <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"exécuter le service d\'avant-plan avec le type « usage spécial »"</string>
+    <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"Autoriser l\'application à utiliser les services d\'avant-plan avec le type « usage spécial »"</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"évaluer l\'espace de stockage de l\'application"</string>
     <string name="permdesc_getPackageSize" msgid="742743530909966782">"Permet à l\'application de récupérer la taille de son code, de ses données et de sa mémoire cache."</string>
     <string name="permlab_writeSettings" msgid="8057285063719277394">"modifier les paramètres du système"</string>
@@ -2169,7 +2145,7 @@
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"Notifications"</string>
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"Paramètres rapides"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Boîte de dialogue sur l\'alimentation"</string>
-    <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Écran de verrouillage"</string>
+    <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Verrouiller l\'écran"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Capture d\'écran"</string>
     <string name="accessibility_system_action_headset_hook_label" msgid="8524691721287425468">"Crochet de casque d\'écoute"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Raccourci d\'accessibilité à l\'écran"</string>
@@ -2341,8 +2317,7 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Impossible d\'accéder à l\'appareil photo du téléphone à partir de votre <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Impossible d\'accéder à l\'appareil photo de la tablette à partir de votre <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Vous ne pouvez pas y accéder lorsque vous utilisez la diffusion en continu. Essayez sur votre téléphone à la place."</string>
-    <!-- no translation found for vdm_pip_blocked (4036107522497281397) -->
-    <skip />
+    <string name="vdm_pip_blocked" msgid="4036107522497281397">"Impossible d\'afficher des incrustations d\'image pendant une diffusion en continu"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Paramètre système par défaut"</string>
     <string name="default_card_name" msgid="9198284935962911468">"CARTE <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

@@ -495,10 +495,8 @@
     <string name="permdesc_recordAudio" msgid="5857246765327514062">"Diese App darf mit dem Mikrofon Audioaufnahmen machen, solange sie verwendet wird."</string>
     <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"Audioaufnahmen im Hintergrund machen"</string>
     <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"Diese App darf mit dem Mikrofon jederzeit Audioaufnahmen machen."</string>
-    <!-- no translation found for permlab_detectScreenCapture (4447042362828799433) -->
-    <skip />
-    <!-- no translation found for permdesc_detectScreenCapture (3485784917960342284) -->
-    <skip />
+    <string name="permlab_detectScreenCapture" msgid="4447042362828799433">"Bildschirmaufnahmen von App-Fenstern erkennen"</string>
+    <string name="permdesc_detectScreenCapture" msgid="3485784917960342284">"Diese App wird benachrichtigt, wenn ein Screenshot aufgenommen wird, während du sie verwendest."</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"Befehle an die SIM senden"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"Ermöglicht der App das Senden von Befehlen an die SIM-Karte. Dies ist äußerst risikoreich."</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"Körperliche Aktivitäten erkennen"</string>
@@ -2342,8 +2340,7 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Zugriff auf die Kamera des Smartphones über dein Gerät (<xliff:g id="DEVICE">%1$s</xliff:g>) nicht möglich"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Zugriff auf die Kamera des Tablets über dein Gerät (<xliff:g id="DEVICE">%1$s</xliff:g>) nicht möglich"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Während des Streamings ist kein Zugriff möglich. Versuch es stattdessen auf deinem Smartphone."</string>
-    <!-- no translation found for vdm_pip_blocked (4036107522497281397) -->
-    <skip />
+    <string name="vdm_pip_blocked" msgid="4036107522497281397">"Funktion „Bild im Bild“ kann beim Streamen nicht verwendet werden"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Standardeinstellung des Systems"</string>
     <string name="default_card_name" msgid="9198284935962911468">"KARTE <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

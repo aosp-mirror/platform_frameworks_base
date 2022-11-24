@@ -395,54 +395,30 @@
     <string name="permdesc_persistentActivity" product="default" msgid="1914841924366562051">"Allows the app to make parts of itself persistent in memory. This can limit memory available to other apps slowing down the phone."</string>
     <string name="permlab_foregroundService" msgid="1768855976818467491">"run foreground service"</string>
     <string name="permdesc_foregroundService" msgid="8720071450020922795">"Allows the app to make use of foreground services."</string>
-    <!-- no translation found for permlab_foregroundServiceCamera (7814751737955715297) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceCamera (6973701931250595727) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceConnectedDevice (3019650546176872501) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceConnectedDevice (1067457315741352963) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceDataSync (5847463514326881076) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceDataSync (2267140263423973050) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceLocation (3745428302378535690) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceLocation (118894034365177183) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceMediaPlayback (4002687983891935514) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceMediaPlayback (3638032446063968043) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceMediaProjection (2630868915733312527) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceMediaProjection (4805677128082002298) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceMicrophone (7390033424890545399) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceMicrophone (1206041516173483201) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServicePhoneCall (627937743867697892) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServicePhoneCall (5941660252587015147) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceHealth (3675776442080928184) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceHealth (2024586220562667185) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceRemoteMessaging (105670277002780950) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceRemoteMessaging (8767598075877576277) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceSystemExempted (1597663713590612685) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceSystemExempted (947381760834649622) -->
-    <skip />
-    <!-- no translation found for permlab_foregroundServiceSpecialUse (7973536745876645082) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceSpecialUse (646713654541885919) -->
-    <skip />
+    <string name="permlab_foregroundServiceCamera" msgid="7814751737955715297">"run foreground service with the type \"camera\""</string>
+    <string name="permdesc_foregroundServiceCamera" msgid="6973701931250595727">"Allows the app to make use of foreground services with the type \"camera\""</string>
+    <string name="permlab_foregroundServiceConnectedDevice" msgid="3019650546176872501">"run foreground service with the type \"connectedDevice\""</string>
+    <string name="permdesc_foregroundServiceConnectedDevice" msgid="1067457315741352963">"Allows the app to make use of foreground services with the type \"connectedDevice\""</string>
+    <string name="permlab_foregroundServiceDataSync" msgid="5847463514326881076">"run foreground service with the type \"dataSync\""</string>
+    <string name="permdesc_foregroundServiceDataSync" msgid="2267140263423973050">"Allows the app to make use of foreground services with the type \"dataSync\""</string>
+    <string name="permlab_foregroundServiceLocation" msgid="3745428302378535690">"run foreground service with the type \"location\""</string>
+    <string name="permdesc_foregroundServiceLocation" msgid="118894034365177183">"Allows the app to make use of foreground services with the type \"location\""</string>
+    <string name="permlab_foregroundServiceMediaPlayback" msgid="4002687983891935514">"run foreground service with the type \"mediaPlayback\""</string>
+    <string name="permdesc_foregroundServiceMediaPlayback" msgid="3638032446063968043">"Allows the app to make use of foreground services with the type \"mediaPlayback\""</string>
+    <string name="permlab_foregroundServiceMediaProjection" msgid="2630868915733312527">"run foreground service with the type \"mediaProjection\""</string>
+    <string name="permdesc_foregroundServiceMediaProjection" msgid="4805677128082002298">"Allows the app to make use of foreground services with the type \"mediaProjection\""</string>
+    <string name="permlab_foregroundServiceMicrophone" msgid="7390033424890545399">"run foreground service with the type \"microphone\""</string>
+    <string name="permdesc_foregroundServiceMicrophone" msgid="1206041516173483201">"Allows the app to make use of foreground services with the type \"microphone\""</string>
+    <string name="permlab_foregroundServicePhoneCall" msgid="627937743867697892">"run foreground service with the type \"phoneCall\""</string>
+    <string name="permdesc_foregroundServicePhoneCall" msgid="5941660252587015147">"Allows the app to make use of foreground services with the type \"phoneCall\""</string>
+    <string name="permlab_foregroundServiceHealth" msgid="3675776442080928184">"run foreground service with the type \"health\""</string>
+    <string name="permdesc_foregroundServiceHealth" msgid="2024586220562667185">"Allows the app to make use of foreground services with the type \"health\""</string>
+    <string name="permlab_foregroundServiceRemoteMessaging" msgid="105670277002780950">"run foreground service with the type \"remoteMessaging\""</string>
+    <string name="permdesc_foregroundServiceRemoteMessaging" msgid="8767598075877576277">"Allows the app to make use of foreground services with the type \"remoteMessaging\""</string>
+    <string name="permlab_foregroundServiceSystemExempted" msgid="1597663713590612685">"run foreground service with the type \"systemExempted\""</string>
+    <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"Allows the app to make use of foreground services with the type \"systemExempted\""</string>
+    <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"run foreground service with the type \"specialUse\""</string>
+    <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"Allows the app to make use of foreground services with the type \"specialUse\""</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"measure app storage space"</string>
     <string name="permdesc_getPackageSize" msgid="742743530909966782">"Allows the app to retrieve its code, data, and cache sizes"</string>
     <string name="permlab_writeSettings" msgid="8057285063719277394">"modify system settings"</string>
