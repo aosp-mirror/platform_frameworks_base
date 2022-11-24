@@ -411,6 +411,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         }
     }
 
+    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     @Override // Binder call
     public void createVirtualKeyboard(
             int displayId,
@@ -437,6 +438,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         }
     }
 
+    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     @Override // Binder call
     public void createVirtualMouse(
             int displayId,
@@ -462,6 +464,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         }
     }
 
+    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     @Override // Binder call
     public void createVirtualTouchscreen(
             int displayId,
