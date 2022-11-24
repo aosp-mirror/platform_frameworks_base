@@ -1587,9 +1587,9 @@ class Task extends TaskFragment {
         } else {
             // Finish or destroy apps from the bottom to ensure that all the other activity have
             // been finished and the top task in another task gets resumed when a top activity is
-            // removed. Otherwise, shell transitions wouldn't run because there would be no event
-            // that sets the transition ready.
-            final boolean traverseTopToBottom = !mTransitionController.isShellTransitionsEnabled();
+            // removed. Otherwise, the next top activity could be started while the top activity
+            // is removed, which is not necessary since the next top activity is on the same Task
+            // and should also be removed.
             forAllActivities((r) -> {
                 if (r.finishing || (excludingTaskOverlay && r.isTaskOverlay())) {
                     return;
@@ -1603,7 +1603,7 @@ class Task extends TaskFragment {
                 } else {
                     r.destroyIfPossible(reason);
                 }
-            }, traverseTopToBottom);
+            }, false /* traverseTopToBottom */);
         }
     }
 
