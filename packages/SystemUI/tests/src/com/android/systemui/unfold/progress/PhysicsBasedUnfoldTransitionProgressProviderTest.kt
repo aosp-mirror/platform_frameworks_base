@@ -124,8 +124,11 @@ class PhysicsBasedUnfoldTransitionProgressProviderTest : SysuiTestCase() {
             { foldStateProvider.sendFoldUpdate(FOLD_UPDATE_UNFOLDED_SCREEN_AVAILABLE) },
             { foldStateProvider.sendHingeAngleUpdate(10f) },
             { foldStateProvider.sendHingeAngleUpdate(90f) },
-            { foldStateProvider.sendFoldUpdate(FOLD_UPDATE_FINISH_FULL_OPEN) },
-            { foldStateProvider.sendFoldUpdate(FOLD_UPDATE_START_CLOSING) },
+            {
+                foldStateProvider.sendFoldUpdate(FOLD_UPDATE_FINISH_FULL_OPEN)
+                // Start closing immediately after we opened, before the animation ended
+                foldStateProvider.sendFoldUpdate(FOLD_UPDATE_START_CLOSING)
+            },
             { foldStateProvider.sendHingeAngleUpdate(60f) },
             { foldStateProvider.sendHingeAngleUpdate(10f) },
             { foldStateProvider.sendFoldUpdate(FOLD_UPDATE_FINISH_CLOSED) },
