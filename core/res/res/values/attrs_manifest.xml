@@ -1594,7 +1594,7 @@
             {@link android.app.Service#startForeground(int, android.app.Notification, int)} with
             this type on devices running {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}
             is still allowed, but calling it with this type on devices running future platform
-            releases may get a {@link android.app.ForegroundServiceTypeNotAllowedException}.
+            releases may get a {@link android.app.InvalidForegroundServiceTypeException}.
         -->
         <flag name="dataSync" value="0x01" />
         <!-- Music, video, news or other media play.

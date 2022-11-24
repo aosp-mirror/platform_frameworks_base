@@ -25,6 +25,7 @@ import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_D
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_HEALTH;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION;
+import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MANIFEST;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE;
@@ -151,6 +152,20 @@ public abstract class ForegroundServiceTypePolicy {
     @Disabled
     @Overridable
     public static final long FGS_TYPE_PERMISSION_CHANGE_ID = 254662522L;
+
+    /**
+     * The policy for the {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_MANIFEST}.
+     *
+     * @hide
+     */
+    public static final @NonNull ForegroundServiceTypePolicyInfo FGS_TYPE_POLICY_MANIFEST =
+            new ForegroundServiceTypePolicyInfo(
+            FOREGROUND_SERVICE_TYPE_MANIFEST,
+            FGS_TYPE_NONE_DEPRECATION_CHANGE_ID,
+            FGS_TYPE_NONE_DISABLED_CHANGE_ID,
+            null,
+            null
+    );
 
     /**
      * The policy for the {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_NONE}.
@@ -954,6 +969,8 @@ public abstract class ForegroundServiceTypePolicy {
          * Constructor
          */
         public DefaultForegroundServiceTypePolicy() {
+            mForegroundServiceTypePolicies.put(FOREGROUND_SERVICE_TYPE_MANIFEST,
+                    FGS_TYPE_POLICY_MANIFEST);
             mForegroundServiceTypePolicies.put(FOREGROUND_SERVICE_TYPE_NONE,
                     FGS_TYPE_POLICY_NONE);
             mForegroundServiceTypePolicies.put(FOREGROUND_SERVICE_TYPE_DATA_SYNC,

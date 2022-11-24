@@ -32,6 +32,7 @@ import static android.app.ForegroundServiceTypePolicy.FGS_TYPE_POLICY_CHECK_UNKN
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MANIFEST;
+import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE;
 import static android.os.PowerExemptionManager.REASON_ACTIVE_DEVICE_ADMIN;
 import static android.os.PowerExemptionManager.REASON_ACTIVITY_STARTER;
 import static android.os.PowerExemptionManager.REASON_ACTIVITY_VISIBILITY_GRACE_PERIOD;
@@ -110,7 +111,6 @@ import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.ForegroundServiceStartNotAllowedException;
-import android.app.ForegroundServiceTypeNotAllowedException;
 import android.app.ForegroundServiceTypePolicy;
 import android.app.ForegroundServiceTypePolicy.ForegroundServicePolicyCheckCode;
 import android.app.ForegroundServiceTypePolicy.ForegroundServiceTypePermission;
@@ -118,6 +118,8 @@ import android.app.ForegroundServiceTypePolicy.ForegroundServiceTypePolicyInfo;
 import android.app.IApplicationThread;
 import android.app.IForegroundServiceObserver;
 import android.app.IServiceConnection;
+import android.app.InvalidForegroundServiceTypeException;
+import android.app.MissingForegroundServiceTypeException;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -1781,6 +1783,7 @@ public final class ActiveServices {
             if (notification == null) {
                 throw new IllegalArgumentException("null notification");
             }
+            final int foregroundServiceStartType = foregroundServiceType;
             // Instant apps need permission to create foreground services.
             if (r.appInfo.isInstantApp()) {
                 final int mode = mAm.getAppOpsManager().checkOpNoThrow(
@@ -1985,7 +1988,8 @@ public final class ActiveServices {
                         if (foregroundServiceType == ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE) {
                             fgsTypeResult = validateForegroundServiceType(r,
                                     foregroundServiceType,
-                                    ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE);
+                                    ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE,
+                                    foregroundServiceStartType);
                         } else {
                             int fgsTypes = foregroundServiceType;
                             // If the service has declared some unknown types which might be coming
@@ -2000,7 +2004,7 @@ public final class ActiveServices {
                                     serviceType != 0;
                                     serviceType = Integer.highestOneBit(fgsTypes)) {
                                 fgsTypeResult = validateForegroundServiceType(r,
-                                        serviceType, defaultFgsTypes);
+                                        serviceType, defaultFgsTypes, foregroundServiceStartType);
                                 fgsTypes &= ~serviceType;
                                 if (fgsTypeResult.first != FGS_TYPE_POLICY_CHECK_OK) {
                                     break;
@@ -2227,7 +2231,8 @@ public final class ActiveServices {
     @NonNull
     private Pair<Integer, RuntimeException> validateForegroundServiceType(ServiceRecord r,
             @ForegroundServiceType int type,
-            @ForegroundServiceType int defaultToType) {
+            @ForegroundServiceType int defaultToType,
+            @ForegroundServiceType int startType) {
         final ForegroundServiceTypePolicy policy = ForegroundServiceTypePolicy.getDefaultPolicy();
         final ForegroundServiceTypePolicyInfo policyInfo =
                 policy.getForegroundServiceTypePolicyInfo(type, defaultToType);
@@ -2246,12 +2251,20 @@ public final class ActiveServices {
                 Slog.w(TAG, msg);
             } break;
             case FGS_TYPE_POLICY_CHECK_DISABLED: {
-                exception = new ForegroundServiceTypeNotAllowedException(
-                        "Starting FGS with type "
-                        + ServiceInfo.foregroundServiceTypeToLabel(type)
-                        + " callerApp=" + r.app
-                        + " targetSDK=" + r.app.info.targetSdkVersion
-                        + " has been prohibited");
+                if (startType == FOREGROUND_SERVICE_TYPE_MANIFEST
+                        && type == FOREGROUND_SERVICE_TYPE_NONE) {
+                    exception = new MissingForegroundServiceTypeException(
+                            "Starting FGS without a type "
+                            + " callerApp=" + r.app
+                            + " targetSDK=" + r.app.info.targetSdkVersion);
+                } else {
+                    exception = new InvalidForegroundServiceTypeException(
+                            "Starting FGS with type "
+                            + ServiceInfo.foregroundServiceTypeToLabel(type)
+                            + " callerApp=" + r.app
+                            + " targetSDK=" + r.app.info.targetSdkVersion
+                            + " has been prohibited");
+                }
             } break;
             case FGS_TYPE_POLICY_CHECK_PERMISSION_DENIED_PERMISSIVE: {
                 final String msg = "Starting FGS with type "
