@@ -47,6 +47,7 @@ public final class KnownPackages {
             PACKAGE_RETAIL_DEMO,
             PACKAGE_RECENTS,
             PACKAGE_AMBIENT_CONTEXT_DETECTION,
+            PACKAGE_WEARABLE_SENSING,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface KnownPackage {
@@ -71,9 +72,10 @@ public final class KnownPackages {
     public static final int PACKAGE_RETAIL_DEMO = 16;
     public static final int PACKAGE_RECENTS = 17;
     public static final int PACKAGE_AMBIENT_CONTEXT_DETECTION = 18;
+    public static final int PACKAGE_WEARABLE_SENSING = 19;
     // Integer value of the last known package ID. Increases as new ID is added to KnownPackage.
     // Please note the numbers should be continuous.
-    public static final int LAST_KNOWN_PACKAGE = PACKAGE_AMBIENT_CONTEXT_DETECTION;
+    public static final int LAST_KNOWN_PACKAGE = PACKAGE_WEARABLE_SENSING;
 
     private final DefaultAppProvider mDefaultAppProvider;
     private final String mRequiredInstallerPackage;
@@ -86,6 +88,7 @@ public final class KnownPackages {
     private final String mConfiguratorPackage;
     private final String mIncidentReportApproverPackage;
     private final String mAmbientContextDetectionPackage;
+    private final String mWearableSensingPackage;
     private final String mAppPredictionServicePackage;
     private final String mCompanionPackage;
     private final String mRetailDemoPackage;
@@ -97,9 +100,9 @@ public final class KnownPackages {
             String[] requiredVerifierPackages, String defaultTextClassifierPackage,
             String systemTextClassifierPackageName, String requiredPermissionControllerPackage,
             String configuratorPackage, String incidentReportApproverPackage,
-            String ambientContextDetectionPackage, String appPredictionServicePackage,
-            String companionPackageName, String retailDemoPackage,
-            String overlayConfigSignaturePackage, String recentsPackage) {
+            String ambientContextDetectionPackage, String wearableSensingPackage,
+            String appPredictionServicePackage, String companionPackageName,
+            String retailDemoPackage, String overlayConfigSignaturePackage, String recentsPackage) {
         mDefaultAppProvider = defaultAppProvider;
         mRequiredInstallerPackage = requiredInstallerPackage;
         mRequiredUninstallerPackage = requiredUninstallerPackage;
@@ -111,6 +114,7 @@ public final class KnownPackages {
         mConfiguratorPackage = configuratorPackage;
         mIncidentReportApproverPackage = incidentReportApproverPackage;
         mAmbientContextDetectionPackage = ambientContextDetectionPackage;
+        mWearableSensingPackage = wearableSensingPackage;
         mAppPredictionServicePackage = appPredictionServicePackage;
         mCompanionPackage = companionPackageName;
         mRetailDemoPackage = retailDemoPackage;
@@ -165,6 +169,8 @@ public final class KnownPackages {
                 return "Recents";
             case PACKAGE_AMBIENT_CONTEXT_DETECTION:
                 return "Ambient Context Detection";
+            case PACKAGE_WEARABLE_SENSING:
+                return "Wearable sensing";
         }
         return "Unknown";
     }
@@ -194,6 +200,8 @@ public final class KnownPackages {
                 return snapshot.filterOnlySystemPackages(mIncidentReportApproverPackage);
             case PACKAGE_AMBIENT_CONTEXT_DETECTION:
                 return snapshot.filterOnlySystemPackages(mAmbientContextDetectionPackage);
+            case PACKAGE_WEARABLE_SENSING:
+                return snapshot.filterOnlySystemPackages(mWearableSensingPackage);
             case PACKAGE_APP_PREDICTOR:
                 return snapshot.filterOnlySystemPackages(mAppPredictionServicePackage);
             case PACKAGE_COMPANION:

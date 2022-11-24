@@ -769,6 +769,15 @@ public final class DeviceConfig {
             "ambient_context_manager_service";
 
     /**
+     * Namespace for WearableSensingManagerService related features.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_WEARABLE_SENSING =
+            "wearable_sensing";
+
+    /**
      * Namespace for Vendor System Native related features.
      *
      * @hide
