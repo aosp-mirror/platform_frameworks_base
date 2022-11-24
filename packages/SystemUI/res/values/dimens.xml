@@ -1167,7 +1167,7 @@
 
     <!-- Screen record dialog -->
     <dimen name="screenrecord_option_padding">18dp</dimen>
-    <dimen name="screenrecord_logo_size">26dp</dimen>
+    <dimen name="screenrecord_logo_size">30dp</dimen>
     <dimen name="screenrecord_option_icon_size">24dp</dimen>
     <!-- Screen record status bar icon -->
     <dimen name="screenrecord_status_text_size">14sp</dimen>
@@ -1175,6 +1175,18 @@
     <dimen name="screenrecord_status_icon_width">21dp</dimen>
     <dimen name="screenrecord_status_icon_height">17.5dp</dimen>
     <dimen name="screenrecord_status_icon_bg_radius">8dp</dimen>
+    <!-- Screen record spinner -->
+    <dimen name="screenrecord_spinner_height">72dp</dimen>
+    <dimen name="screenrecord_spinner_margin">24dp</dimen>
+    <dimen name="screenrecord_spinner_text_padding_start">20dp</dimen>
+    <dimen name="screenrecord_spinner_text_padding_end">80dp</dimen>
+    <dimen name="screenrecord_spinner_arrow_size">24dp</dimen>
+    <dimen name="screenrecord_spinner_background_radius">28dp</dimen>
+
+    <dimen name="screenrecord_title_margin_top">20dp</dimen>
+    <dimen name="screenrecord_warning_line_height">20dp</dimen>
+    <dimen name="screenrecord_options_padding_bottom">16dp</dimen>
+    <dimen name="screenrecord_buttons_margin_top">20dp</dimen>
 
     <!-- Keyguard user switcher -->
     <dimen name="kg_user_switcher_text_size">16sp</dimen>

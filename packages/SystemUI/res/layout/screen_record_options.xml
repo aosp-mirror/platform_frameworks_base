@@ -16,7 +16,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/screenrecord_options_padding_bottom">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -72,7 +73,7 @@
             android:gravity="center_vertical"
             android:text="@string/screenrecord_taps_label"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:fontFamily="@*android:string/config_headlineFontFamily"
+            android:fontFamily="@*android:string/config_bodyFontFamily"
             android:textColor="?android:attr/textColorPrimary"
             android:contentDescription="@string/screenrecord_taps_label"/>
         <Switch
