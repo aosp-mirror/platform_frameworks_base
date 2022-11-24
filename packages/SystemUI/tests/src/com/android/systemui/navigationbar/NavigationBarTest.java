@@ -247,7 +247,7 @@ public class NavigationBarTest extends SysuiTestCase {
                     mSystemActions, mOverviewProxyService,
                     () -> mock(AssistManager.class), () -> Optional.of(mCentralSurfaces),
                     mKeyguardStateController, mock(NavigationModeController.class),
-                    mock(UserTracker.class), mock(DumpManager.class)));
+                    mock(UserTracker.class), mock(DumpManager.class), mock(CommandQueue.class)));
             mNavigationBar = createNavBar(mContext);
             mExternalDisplayNavigationBar = createNavBar(mSysuiTestableContextExternal);
         });
@@ -436,6 +436,12 @@ public class NavigationBarTest extends SysuiTestCase {
         mNavigationBar.onViewAttached();
 
         verify(mNavigationBarView).setVisibility(View.INVISIBLE);
+    }
+
+    @Test
+    public void testOnInit_readCurrentSysuiState() {
+        mNavigationBar.init();
+        verify(mNavBarHelper, times(1)).getCurrentSysuiState();
     }
 
     private NavigationBar createNavBar(Context context) {
