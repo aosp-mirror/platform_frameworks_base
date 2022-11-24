@@ -46,7 +46,14 @@ class ScreenRecordPermissionDialog(
     private val dialogLaunchAnimator: DialogLaunchAnimator,
     private val userContextProvider: UserContextProvider,
     private val onStartRecordingClicked: Runnable?
-) : BaseScreenSharePermissionDialog(context, createOptionList(), null) {
+) :
+    BaseScreenSharePermissionDialog(
+        context,
+        createOptionList(),
+        null,
+        R.drawable.ic_screenrecord,
+        R.color.screenrecord_icon_color
+    ) {
     private lateinit var tapsSwitch: Switch
     private lateinit var tapsView: View
     private lateinit var audioSwitch: Switch
@@ -169,14 +176,14 @@ class ScreenRecordPermissionDialog(
         private fun createOptionList(): List<ScreenShareOption> {
             return listOf(
                 ScreenShareOption(
-                    SINGLE_APP,
-                    R.string.screenrecord_option_single_app,
-                    R.string.screenrecord_warning_single_app
-                ),
-                ScreenShareOption(
                     ENTIRE_SCREEN,
                     R.string.screenrecord_option_entire_screen,
                     R.string.screenrecord_warning_entire_screen
+                ),
+                ScreenShareOption(
+                    SINGLE_APP,
+                    R.string.screenrecord_option_single_app,
+                    R.string.screenrecord_warning_single_app
                 )
             )
         }
