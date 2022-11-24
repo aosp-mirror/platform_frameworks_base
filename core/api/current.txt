@@ -49747,7 +49747,7 @@ package android.view {
     method public static void request(@NonNull android.view.Surface, @Nullable android.graphics.Rect, @NonNull android.graphics.Bitmap, @NonNull android.view.PixelCopy.OnPixelCopyFinishedListener, @NonNull android.os.Handler);
     method public static void request(@NonNull android.view.Window, @NonNull android.graphics.Bitmap, @NonNull android.view.PixelCopy.OnPixelCopyFinishedListener, @NonNull android.os.Handler);
     method public static void request(@NonNull android.view.Window, @Nullable android.graphics.Rect, @NonNull android.graphics.Bitmap, @NonNull android.view.PixelCopy.OnPixelCopyFinishedListener, @NonNull android.os.Handler);
-    method public static void request(@NonNull android.view.PixelCopy.Request);
+    method public static void request(@NonNull android.view.PixelCopy.Request, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.view.PixelCopy.Result>);
     field public static final int ERROR_DESTINATION_INVALID = 5; // 0x5
     field public static final int ERROR_SOURCE_INVALID = 4; // 0x4
     field public static final int ERROR_SOURCE_NO_DATA = 3; // 0x3
@@ -49763,14 +49763,14 @@ package android.view {
   public static final class PixelCopy.Request {
     method @Nullable public android.graphics.Bitmap getDestinationBitmap();
     method @Nullable public android.graphics.Rect getSourceRect();
-    method @NonNull public static android.view.PixelCopy.Request.Builder ofSurface(@NonNull android.view.Surface, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.view.PixelCopy.Result>);
-    method @NonNull public static android.view.PixelCopy.Request.Builder ofSurface(@NonNull android.view.SurfaceView, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.view.PixelCopy.Result>);
-    method @NonNull public static android.view.PixelCopy.Request.Builder ofWindow(@NonNull android.view.Window, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.view.PixelCopy.Result>);
-    method @NonNull public static android.view.PixelCopy.Request.Builder ofWindow(@NonNull android.view.View, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.view.PixelCopy.Result>);
   }
 
   public static final class PixelCopy.Request.Builder {
     method @NonNull public android.view.PixelCopy.Request build();
+    method @NonNull public static android.view.PixelCopy.Request.Builder ofSurface(@NonNull android.view.Surface);
+    method @NonNull public static android.view.PixelCopy.Request.Builder ofSurface(@NonNull android.view.SurfaceView);
+    method @NonNull public static android.view.PixelCopy.Request.Builder ofWindow(@NonNull android.view.Window);
+    method @NonNull public static android.view.PixelCopy.Request.Builder ofWindow(@NonNull android.view.View);
     method @NonNull public android.view.PixelCopy.Request.Builder setDestinationBitmap(@Nullable android.graphics.Bitmap);
     method @NonNull public android.view.PixelCopy.Request.Builder setSourceRect(@Nullable android.graphics.Rect);
   }
