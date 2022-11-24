@@ -4165,6 +4165,7 @@ package android.hardware.hdmi {
     method @RequiresPermission(android.Manifest.permission.HDMI_CEC) public int getHdmiCecVolumeControlEnabled();
     method public int getPhysicalAddress();
     method @Nullable public android.hardware.hdmi.HdmiPlaybackClient getPlaybackClient();
+    method @NonNull public java.util.List<android.hardware.hdmi.HdmiPortInfo> getPortInfo();
     method @NonNull @RequiresPermission(android.Manifest.permission.HDMI_CEC) public String getPowerControlMode();
     method @NonNull @RequiresPermission(android.Manifest.permission.HDMI_CEC) public String getPowerStateChangeOnActiveSourceLost();
     method @NonNull @RequiresPermission(android.Manifest.permission.HDMI_CEC) public int getRoutingControl();
@@ -4468,7 +4469,7 @@ package android.hardware.hdmi {
 
   public class HdmiSwitchClient extends android.hardware.hdmi.HdmiClient {
     method public int getDeviceType();
-    method @NonNull public java.util.List<android.hardware.hdmi.HdmiPortInfo> getPortInfo();
+    method @Deprecated @NonNull public java.util.List<android.hardware.hdmi.HdmiPortInfo> getPortInfo();
     method public void selectPort(int, @NonNull android.hardware.hdmi.HdmiSwitchClient.OnSelectListener);
     method public void selectPort(int, @NonNull java.util.concurrent.Executor, @NonNull android.hardware.hdmi.HdmiSwitchClient.OnSelectListener);
   }
